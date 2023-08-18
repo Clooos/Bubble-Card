@@ -1,2 +1,2 @@
-# bubble-card
+# Bubble Card
 WIP
