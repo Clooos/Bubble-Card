@@ -1,0 +1,8 @@
+{
+  "name": "Bubble Card",
+  "content_in_root": true,
+  "render_readme": true,
+  "filename": "bubble-card.js",
+  "homeassistant": "2021.12.0b0",
+  "country": "BE"
+}
