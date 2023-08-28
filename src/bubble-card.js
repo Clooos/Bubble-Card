@@ -256,7 +256,7 @@ class BubbleCard extends HTMLElement {
                     line-height: 0px;
                     z-index: 100;
                     font-size: 20px;
-
+                    flex-shrink: 0;
                 }
                 #header-container p {
                     display: inline-flex;
@@ -319,6 +319,7 @@ class BubbleCard extends HTMLElement {
                     background-color: var(--background-color,var(--secondary-background-color));
                     border-radius: 25px;
                     margin-right: 14px;
+                    flex-shrink: 0;
                 }
                 .header-icon {
                     display: inline-flex;
@@ -335,6 +336,7 @@ class BubbleCard extends HTMLElement {
                     line-height: 0px;
                     z-index: 100;
                     font-size: 20px;
+                    flex-shrink: 0;
                 }
                 #header-container p {
                     display: inline-flex;
