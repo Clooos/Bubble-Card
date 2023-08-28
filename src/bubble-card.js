@@ -239,6 +239,7 @@ class BubbleCard extends HTMLElement {
                     background-color: var(--background-color,var(--secondary-background-color));
                     border-radius: 25px;
                     margin-right: 14px;
+                    flex-shrink: 0;
                 }
                 .header-icon {
                     display: inline-flex;
@@ -255,6 +256,7 @@ class BubbleCard extends HTMLElement {
                     line-height: 0px;
                     z-index: 100;
                     font-size: 20px;
+
                 }
                 #header-container p {
                     display: inline-flex;
@@ -877,6 +879,12 @@ class BubbleCard extends HTMLElement {
                 z-index: 2;
                 font-weight: 600;
             }
+
+            .nameContainer p{
+              overflow: hidden;
+              white-space: nowrap;
+              animation: scrollText 10s linear infinite;
+          }
             
             .feedback-element {
                 position: absolute;
@@ -893,6 +901,14 @@ class BubbleCard extends HTMLElement {
                 64% {transform: translateX(0); opacity: 0.1;}
                 100% {transform: translateX(100%); opacity: 0;}
             }
+
+            @keyframes scrollText {
+              0% {
+                transform: translateX(0); /* Start from the initial position */
+              }
+              100% {
+                transform: translateX(-100%); /* Scroll to the left by the full width of the content */
+              }
             `;
             
             styleElement.innerHTML = styles;
