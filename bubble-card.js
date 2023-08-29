@@ -239,11 +239,6 @@ class BubbleCard extends HTMLElement {
                       background-color: var(--background-color,var(--secondary-background-color));
                       border-radius: 25px;
                       margin-right: 14px;
-                      h2 {
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                      }
                   }
                   .header-icon {
                       display: inline-flex;
@@ -257,7 +252,7 @@ class BubbleCard extends HTMLElement {
                   #header-container h2 {
                       display: inline-flex;
                       margin: 0 18px 0 0;
-                      line-height: 0px;
+                      /*line-height: 0px;*/
                       z-index: 100;
                       font-size: 20px;
                   }
@@ -285,6 +280,7 @@ class BubbleCard extends HTMLElement {
                       z-index: 2;
                       background: var(--background-color,var(--secondary-background-color));
                       color: var(--primary-text-color);
+                      flex-shrink: 0;
                   }
               `;
               
@@ -322,11 +318,6 @@ class BubbleCard extends HTMLElement {
                       background-color: var(--background-color,var(--secondary-background-color));
                       border-radius: 25px;
                       margin-right: 14px;
-                      h2 {
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                      }
                   }
                   .header-icon {
                       display: inline-flex;
@@ -340,7 +331,7 @@ class BubbleCard extends HTMLElement {
                   #header-container h2 {
                       display: inline-flex;
                       margin: 0 18px 0 0;
-                      line-height: 0px;
+                      /*line-height: 0px;*/
                       z-index: 100;
                       font-size: 20px;
                   }
@@ -368,6 +359,7 @@ class BubbleCard extends HTMLElement {
                       z-index: 2;
                       background-color: var(--background-color,var(--secondary-background-color));
                       color: var(--primary-text-color);
+                      flex-shrink: 0;
                   }
               `;
               
