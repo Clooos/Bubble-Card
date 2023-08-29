@@ -4,7 +4,7 @@ class BubbleCard extends HTMLElement {
     if (!this.content) {
       this.attachShadow({ mode: 'open' });  
       this.shadowRoot.innerHTML = `
-        <ha-card style="background: none; border: none;">
+        <ha-card style="background: none; border: none; box-shadow: none;">
           <div class="card-content" style="padding: 0;">
           </div>
         </ha-card>
@@ -47,7 +47,8 @@ class BubbleCard extends HTMLElement {
         const name = this.config.name || '';
         const stateUnit = this.config.state_unit || '';
         const state = this.config.state ? hass.states[this.config.state].state + stateUnit : '';
-        const marginTop = this.config.margin_top || '0px';
+        const marginTopMobile = this.config.margin_top_mobile || '0px';
+        const marginTopDesktop = this.config.margin_top_desktop || '0px';
         const widthDesktop = this.config.width_desktop || '600px';
         const widthDesktopDivided = widthDesktop.match(/(\d+)(\D+)/);
         const displayPowerButton = this.config.entity ? 'flex' : 'none';
@@ -162,7 +163,7 @@ class BubbleCard extends HTMLElement {
                     width: calc(100% - 38px);
                     background-color: var(--ha-card-background,var(--card-background-color));
                     border-radius: 42px;
-                    top: calc(100% + ${marginTop} - 2px); /*136px*/
+                    top: calc(100% + ${marginTopMobile} + 54px); /*136px*/
                     display: grid !important;
                     grid-gap: 12px !important;
                     gap: 12px !important;
@@ -206,7 +207,7 @@ class BubbleCard extends HTMLElement {
                 }
                 @media only screen and (min-width: 768px) {
                     #root {
-                        top: calc(100% + ${marginTop} + 54px);
+                        top: calc(100% + ${marginTopDesktop} + 54px);
                         width: calc(${widthDesktop} - 36px) !important;
                         left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]});
                         margin: 0 !important;
@@ -214,7 +215,7 @@ class BubbleCard extends HTMLElement {
                 }  
                 @media only screen and (min-width: 870px) {
                     #root {
-                        top: calc(100% + ${marginTop} + 54px);
+                        top: calc(100% + ${marginTopDesktop} + 54px);
                         width: calc(${widthDesktop} - 92px) !important; 
                         left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + 56px);
                         margin: 0 !important;
@@ -624,7 +625,7 @@ class BubbleCard extends HTMLElement {
         }
         
         const entityId = this.config.entity;
-        const icon = !this.config.icon ? hass.states[entityId].attributes.icon || '' : this.config.icon;//this.config.icon || !entityId ? this.config.icon || '' : (!this.config.icon ? hass.states[entityId].attributes.icon : '');
+        const icon = !this.config.icon ? hass.states[entityId].attributes.icon || '' : this.config.icon;
         const name =  !this.config.name ? hass.states[entityId].attributes.friendly_name || '' : this.config.name;
         const buttonType = this.config.button_type || 'switch';
         const state = !entityId ? '' : hass.states[entityId].state;
@@ -653,7 +654,7 @@ class BubbleCard extends HTMLElement {
             rangeFill.style.transform = `translateX(${currentVolume * 100}%)`;
         }
         
-        if (!this.buttonAdded) {
+        if (!this.buttonContainer) {
             this.buttonContainer = this.content.querySelector(".button-container");
 
             if (buttonType === 'slider' && !this.buttonAdded) {
@@ -868,7 +869,7 @@ class BubbleCard extends HTMLElement {
                 display: flex;
                 position: absolute;
                 margin: inherit;
-                padding: 2px;
+                padding: 1px 2px;
                 width: 22px; 
                 height: 22px;
                 cursor: pointer !important;
@@ -908,16 +909,6 @@ class BubbleCard extends HTMLElement {
             this.content.appendChild(styleElement);
             this.styleAdded = true;
         } 
-        if (this.editor === 'true') {
-          if (!this.editorStyleAdded) {
-            this.content.style.border = '2px solid white !important';
-            this.editorStyleAdded = true;
-          }
-        }
-        // } else {
-        //     this.content.style.border = 'none !important';
-        //     //this.editorStyleAdded = false;
-        // }
     }
     
     // Initialize separator
@@ -1108,6 +1099,10 @@ class BubbleCard extends HTMLElement {
         if (!config.name) {
           throw new Error("You need to define a name");
         }
+    } else if (config.card_type === 'button' || config.card_type === 'cover') {
+        if (!config.entity) {
+         throw new Error("You need to define an entity");
+        }
     }
     this.config = config;
   }
@@ -1203,8 +1198,12 @@ class BubbleCardEditor extends LitElement {
     return this._config.hash || '#pop-up-name';
   }
   
-  get _margin_top() {
-    return this._config.margin_top || '0px';
+  get _margin_top_mobile() {
+    return this._config.margin_top_mobile || '0px';
+  }
+  
+  get _margin_top_desktop() {
+    return this._config.margin_top_desktop || '0px';
   }
   
   get _width_desktop() {
@@ -1300,9 +1299,16 @@ class BubbleCardEditor extends LitElement {
                 style="width: 100%;"
               ></ha-textfield>
               <ha-textfield
-                label="Margin top (e.g. 50% for an half sized pop-up)"
-                .value="${this._margin_top}"
-                .configValue="${"margin_top"}"
+                label="Top margin on mobile (e.g. -56px if your header is hidden)"
+                .value="${this._margin_top_mobile}"
+                .configValue="${"margin_top_mobile"}"
+                @input="${this._valueChanged}"
+                style="width: 100%;"
+              ></ha-textfield>
+              <ha-textfield
+                label="Top margin on desktop (e.g. 50% for an half sized pop-up)"
+                .value="${this._margin_top_desktop}"
+                .configValue="${"margin_top_desktop"}"
                 @input="${this._valueChanged}"
                 style="width: 100%;"
               ></ha-textfield>
@@ -1314,6 +1320,7 @@ class BubbleCardEditor extends LitElement {
           <div class="card-config">
               ${this.makeDropdown("Card type", "card_type", cardTypeList)}
               <ha-alert alert-type="info">This card can be a slider or a button, allowing you to toggle your entities, control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.</ha-alert>
+              ${this.makeDropdown(this._button_type !== 'slider' ? "Entity (toggle)" : "Entity (light or media_player)", "entity", allEntitiesList)}
               ${this.makeDropdown("Button type", "button_type", buttonTypeList)}
               <ha-textfield
                 label="Name"
@@ -1323,7 +1330,6 @@ class BubbleCardEditor extends LitElement {
                 style="width: 100%;"
               ></ha-textfield>
               ${this.makeDropdown("Icon", "icon")}
-              ${this.makeDropdown(this._button_type !== 'slider' ? "Entity (toggle)" : "Entity (light or media_player)", "entity", allEntitiesList)}
               ${this.makeVersion()}
           </div>
         `;
@@ -1601,9 +1607,9 @@ class BubbleCardEditor extends LitElement {
         return;
       }
       const target = ev.target;
-    //   if (this[`_${target.configValue}`] === target.value) {
-    //     return;
-    //   }
+      if (this[`_${target.configValue}`] === ev.detail.value) {
+        return;
+      }
       if (target.configValue) {
         // Affiche la valeur de this._config avant la mise à jour
         console.log("Before update:", this._config);
@@ -1692,4 +1698,5 @@ window.customCards.push({
     description: "A cards collection for Home Assistant with a nice pop-up touch.",
 });
 
-// FINAL BETA
+// BETA 2 
+// Thank you to samuel9554 for his CSS fix for smaller screens.
