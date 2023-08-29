@@ -826,6 +826,7 @@ class BubbleCard extends HTMLElement {
               
               .switch-button,
               .range-slider {
+                  display: inline-flex;
                   position: absolute;
                   height: 100%;
                   width: 100%;
@@ -875,9 +876,15 @@ class BubbleCard extends HTMLElement {
               
               .nameContainer {
                   position: relative;
+                  display: inline-flex;
                   margin-left: 58px;
                   z-index: 2;
                   font-weight: 600;
+                  align-content: center;
+              }
+              
+              .nameContainer p {
+                  display: inline-flex;
               }
               
               .feedback-element {
