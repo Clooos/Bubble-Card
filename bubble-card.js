@@ -880,7 +880,7 @@ class BubbleCard extends HTMLElement {
                   margin-left: 58px;
                   z-index: 2;
                   font-weight: 600;
-                  align-content: center;
+                  align-items: center;
               }
               
               .nameContainer p {
