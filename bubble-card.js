@@ -239,6 +239,11 @@ class BubbleCard extends HTMLElement {
                       background-color: var(--background-color,var(--secondary-background-color));
                       border-radius: 25px;
                       margin-right: 14px;
+                      h2 {
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                      }
                   }
                   .header-icon {
                       display: inline-flex;
