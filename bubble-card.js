@@ -239,7 +239,6 @@ class BubbleCard extends HTMLElement {
                       background-color: var(--background-color,var(--secondary-background-color));
                       border-radius: 25px;
                       margin-right: 14px;
-                      flex-shrink: 0;
                   }
                   .header-icon {
                       display: inline-flex;
@@ -256,7 +255,6 @@ class BubbleCard extends HTMLElement {
                       line-height: 0px;
                       z-index: 100;
                       font-size: 20px;
-                      flex-shrink: 0;
                   }
                   #header-container p {
                       display: inline-flex;
@@ -319,7 +317,6 @@ class BubbleCard extends HTMLElement {
                       background-color: var(--background-color,var(--secondary-background-color));
                       border-radius: 25px;
                       margin-right: 14px;
-                      flex-shrink: 0;
                   }
                   .header-icon {
                       display: inline-flex;
@@ -336,7 +333,6 @@ class BubbleCard extends HTMLElement {
                       line-height: 0px;
                       z-index: 100;
                       font-size: 20px;
-                      flex-shrink: 0;
                   }
                   #header-container p {
                       display: inline-flex;
@@ -674,9 +670,6 @@ class BubbleCard extends HTMLElement {
               
               iconContainer.innerHTML = `<ha-icon icon="${icon}" class="icon"></ha-icon>`;
               nameContainer.innerHTML = `<p>${name}</p>`;
-              if (nameContainer.scrollWidth > nameContainer.clientWidth) {
-                nameContainer.classList.add('scrolling-text');
-              }
               
               this.buttonAdded = true;
           }
@@ -884,11 +877,6 @@ class BubbleCard extends HTMLElement {
                   z-index: 2;
                   font-weight: 600;
               }
-  
-              .nameContainer p{
-                overflow: hidden;
-                white-space: nowrap;
-            }
               
               .feedback-element {
                   position: absolute;
@@ -898,10 +886,6 @@ class BubbleCard extends HTMLElement {
                   width: 100%;
                   height: 100%;
                   background-color: rgb(0,0,0);
-              }
-
-              .scrolling-text {
-                animation: scrollText 10s linear infinite;
               }
               
               @keyframes tap-feedback {
