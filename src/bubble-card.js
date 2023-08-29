@@ -252,7 +252,7 @@ class BubbleCard extends HTMLElement {
                 #header-container h2 {
                     display: inline-flex;
                     margin: 0 18px 0 0;
-                    line-height: 0px;
+                    /*line-height: 0px;*/
                     z-index: 100;
                     font-size: 20px;
                 }
@@ -280,6 +280,7 @@ class BubbleCard extends HTMLElement {
                     z-index: 2;
                     background: var(--background-color,var(--secondary-background-color));
                     color: var(--primary-text-color);
+                    flex-shrink: 0;
                 }
             `;
             
@@ -330,7 +331,7 @@ class BubbleCard extends HTMLElement {
                 #header-container h2 {
                     display: inline-flex;
                     margin: 0 18px 0 0;
-                    line-height: 0px;
+                    /*line-height: 0px;*/
                     z-index: 100;
                     font-size: 20px;
                 }
@@ -358,6 +359,7 @@ class BubbleCard extends HTMLElement {
                     z-index: 2;
                     background-color: var(--background-color,var(--secondary-background-color));
                     color: var(--primary-text-color);
+                    flex-shrink: 0;
                 }
             `;
             
@@ -824,6 +826,7 @@ class BubbleCard extends HTMLElement {
             
             .switch-button,
             .range-slider {
+                display: inline-flex;
                 position: absolute;
                 height: 100%;
                 width: 100%;
@@ -873,9 +876,15 @@ class BubbleCard extends HTMLElement {
             
             .nameContainer {
                 position: relative;
+                display: inline-flex;
                 margin-left: 58px;
                 z-index: 2;
                 font-weight: 600;
+                align-items: center;
+            }
+            
+            .nameContainer p {
+                display: inline-flex;
             }
             
             .feedback-element {
