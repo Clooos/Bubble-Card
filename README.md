@@ -229,3 +229,16 @@ This card has no options.
 type: custom:bubble-card
 card_type: empty-column
 ```
+
+## Styling
+
+There is no styling options (for now) but it fully support [card-mod](https://github.com/thomasloven/lovelace-card-mod).
+
+Here is an example on how you can change the font size:
+```yaml
+card_mod:
+  style: |
+    ha-card { 
+      font-size: 12px;
+    }
+```
