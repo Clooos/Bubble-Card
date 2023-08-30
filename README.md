@@ -85,7 +85,6 @@ icon: mdi:fridge
 entity: light.kitchen
 state: sensor.kitchen_temperature
 state_unit: °C
-margin_top: 74px
 width_desktop: 600px
 margin_top_mobile: 18px
 margin_top_desktop: 74px
