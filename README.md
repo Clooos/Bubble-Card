@@ -108,7 +108,7 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 
 ### Options
 
-The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).
+**The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
