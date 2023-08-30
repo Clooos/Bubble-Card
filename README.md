@@ -44,6 +44,8 @@ Coming soon in the HACS default repo (still waiting for validation).
 
 ## Configuration
 
+All cards and all options can fully be configured in the GUI editor, but it seems that there is still some issues in the editor 👀 But give it a try, most of it is functional.
+
 ### Main options
 
 | Name | Type | Requirement | Supported options | Description |
@@ -195,10 +197,35 @@ icon_closed: mdi:roller-shade-closed
 
 ## Separator
 
-WIP
+This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...
+
+### Options
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `name` | string | Optional but recommended | Any string | A name for your separator |
+| `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your separator |
+
+### Example
+
+```yaml
+type: custom:bubble-card
+card_type: separator
+name: Covers
+icon: mdi:window-shutter
+```
 
 ## Empty column
 
-WIP
+This card is here to fill an empty column. This is useful if you have an `horizontal-stack` in your pop-up with only one card. Take a look at the bottom right corner of the second screenshot to (don't) see it.
 
+### Options
 
+This card has no options.
+
+### Example
+
+```yaml
+type: custom:bubble-card
+card_type: empty-column
+```
