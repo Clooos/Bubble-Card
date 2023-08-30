@@ -150,8 +150,8 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
+| `entity` | string | **Required** | Any switchable entity, any media player or any light | An entity to control |
 | `button_type` | string | Optional | `switch` (default) or `slider` | The behavior of your button |
-| `entity` | string | Optional | Any switchable entity, any media player or any light | An entity to control |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon |
 
@@ -168,7 +168,30 @@ icon: mdi:led-strip-variant
 
 ## Cover
 
-WIP
+This card allows you to control your covers.
+
+### Options
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Required** | Any cover | A cover to control |
+| `name` | string | Optional | Any string | A name for your cover, if not defined it will display the entity name |
+| `icon_open` | string | Optional | Any `mdi:` icon | An icon for your open cover, if not defined it will display the default open cover icon |
+| `icon_closed` | string | Optional | Any `mdi:` icon | An icon for your closed cover, if not defined it will display the default closed cover icon |
+| `open_service` | string | Optional | Any service or script | A service to open your cover, default to `cover.open_cover` |
+| `stop_service` | string | Optional | Any service or script | A service to stop your cover, default to `cover.stop_cover` |
+| `close_service` | string | Optional | Any service or script | A service to close your cover, default to `cover.close_cover` |
+
+### Example
+
+```yaml
+type: custom:bubble-card
+card_type: cover
+entity: cover.kitchen
+name: Kitchen
+icon_open: mdi:roller-shade
+icon_closed: mdi:roller-shade-closed
+```
 
 ## Separator
 
