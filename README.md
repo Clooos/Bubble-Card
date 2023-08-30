@@ -108,8 +108,6 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 
 ### Options
 
-**The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).**
-
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `auto_order` | boolean | **Required** | `true` or `false` | Change the order of the buttons according to the room you just entered |
@@ -118,6 +116,8 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 | `1_icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your button |
 | `1_entity` | string | Optional | Any light or light group | Display the color of that light in background |
 | `1_pir_sensor` | string | **Required** if `auto_order` is set to true | Any binary sensor | A pir sensor for `auto_order` |
+
+**The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).**
 
 ### Example
 
@@ -144,7 +144,27 @@ auto_order: true
 
 ## Button
 
-WIP
+This card can be a slider or a button, allowing you to toggle your entities or automations, control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.
+
+### Options
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `button_type` | string | Optional | `switch` (default) or `slider` | The behavior of your button |
+| `entity` | string | Optional | Any switchable entity, any media player or any light | An entity to control |
+| `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon |
+
+### Example
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+entity: light.kitchen_led
+name: Kitchen LED
+icon: mdi:led-strip-variant
+```
 
 ## Cover
 
