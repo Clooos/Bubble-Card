@@ -51,7 +51,7 @@ Coming soon in the HACS default repo (still waiting for validation).
 | `type` | string | **Required** | `custom:bubble-card` | Type of the card |
 | `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `pop-up` or `separator` | Type of the Bubble Card |
 
-### Pop-up
+## Pop-up
 
 This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have an unique hash (e.g. `#kitchen`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card come with an header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
 
@@ -60,7 +60,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 3. Now add a `Bubble Card` with the type `pop-up` in it
 4. Just fill in the required inputs and the ones you need
 
-#### Pop-up options
+### Pop-up options
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -74,39 +74,41 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
 
-#### Example
+### Example
 
 ```yaml
-type: custom:bubble-card
-card_type: pop-up
-hash: '#kitchen'
-name: Kitchen
-icon: mdi:fridge
-entity: light.kitchen
-state: sensor.kitchen_temperature
-state_unit: °C
-width_desktop: 600px
-margin_top_mobile: 18px
-margin_top_desktop: 74px
+type: vertical-stack
+cards:
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#kitchen'
+    name: Kitchen
+    icon: mdi:fridge
+    entity: light.kitchen
+    state: sensor.kitchen_temperature
+    state_unit: °C
+    width_desktop: 600px
+    margin_top_mobile: 18px
+    margin_top_desktop: 74px
 ```
 
-### Horizontal buttons stack
+## Horizontal buttons stack
 
 WIP
 
-### Button
+## Button
 
 WIP
 
-### Cover
+## Cover
 
 WIP
 
-### Separator
+## Separator
 
 WIP
 
-### Empty column
+## Empty column
 
 WIP
 
