@@ -46,7 +46,7 @@ Coming soon in the HACS default repo (still waiting for validation).
 
 ### Main options
 
-| Name | Type | Default | Supported options | Description |
+| Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `type` | string | **Required** | `custom:bubble-card` | Type of the card |
 | `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `pop-up` or `separator` | Type of the Bubble Card |
@@ -62,18 +62,34 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 
 #### Pop-up options
 
-| Name | Type | Default | Supported options | Description |
+| Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
-| `hash` | string | **Required** | Any unique hash (e.g. `#kitchen`) | This is how you will open your pop-up |
+| `hash` | string | **Required** | Any unique hash (e.g. `'#kitchen'`) with ' ' | This is how you will open your pop-up |
+| `name` | string | Optional but recommended | Any string | A name for your pop-up header |
+| `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your pop-up header |
 | `entity` | string | Optional | Any switchable entity | It display a button to toggle this entity |
-| `name` | string | Optional | Any string | A name for your pop-up header |
-| `icon` | string | Optional | Any `mdi:` icon | An icon for your pop-up header |
 | `state` | string | Optional | Any entity | Display its state in your pop-up header |
 | `state_unit` | string | Optional | Any unit of measurement | An unit of measurement for the displayed state (e.g. `°F`, `°C`, `%`) |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
 
+#### Example
+
+```yaml
+type: custom:bubble-card
+card_type: pop-up
+hash: '#kitchen'
+name: Kitchen
+icon: mdi:fridge
+entity: light.kitchen
+state: sensor.kitchen_temperature
+state_unit: °C
+margin_top: 74px
+width_desktop: 600px
+margin_top_mobile: 18px
+margin_top_desktop: 74px
+```
 
 ### Horizontal buttons stack
 
