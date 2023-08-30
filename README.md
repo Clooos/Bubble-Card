@@ -49,7 +49,7 @@ Coming soon in the HACS default repo (still waiting for validation).
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `type` | string | **Required** | `custom:bubble-card` | Type of the card |
-| `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `pop-up` or `separator` | Type of the Bubble Card |
+| `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `pop-up` or `separator` | Type of the Bubble Card, see below |
 
 ## Pop-up
 
@@ -60,22 +60,23 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 3. Now add a `Bubble Card` with the type `pop-up` in it
 4. Just fill in the required inputs and the ones you need
 
-### Pop-up options
+### Options
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Required** | Any unique hash (e.g. `'#kitchen'`) with ' ' | This is how you will open your pop-up |
 | `name` | string | Optional but recommended | Any string | A name for your pop-up header |
 | `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your pop-up header |
-| `entity` | string | Optional | Any switchable entity | It display a button to toggle this entity |
+| `entity` | string | Optional | Any switchable entity | Display a button to toggle this entity |
 | `state` | string | Optional | Any entity | Display its state in your pop-up header |
 | `state_unit` | string | Optional | Any unit of measurement | An unit of measurement for the displayed state (e.g. `°F`, `°C`, `%`) |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
 
-### Pop-up example
+### Example
 
+A pop-up
 ```yaml
 type: vertical-stack
 cards:
@@ -103,7 +104,43 @@ icon: mdi:fridge
 
 ## Horizontal buttons stack
 
-WIP
+This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer. This card will have more features in the future.
+
+### Options
+
+The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `auto_order` | boolean | **Required** | `true` or `false` | Change the order of the buttons according to the room you just entered |
+| `1_link` | string | **Required** | The pop-up hash (e.g. `'#kitchen'`) with ' ' or any link | A link to open |
+| `1_name` | string | Optional but recommended | Any string | A name for your button |
+| `1_icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your button |
+| `1_entity` | string | Optional | Any light or light group | Display the color of that light in background |
+| `1_pir_sensor` | string | **Required** if `auto_order` is set to true | Any binary sensor | A pir sensor for `auto_order` |
+
+### Example
+
+```yaml
+type: custom:bubble-card
+card_type: horizontal-buttons-stack
+auto_order: true
+1_name: Living room
+1_icon: mdi:sofa
+1_link: '#living-room'
+1_entity: light.living_room
+1_pir_sensor: binary_sensor.living_room_motion
+2_name: Kitchen
+2_icon: mdi:fridge
+2_link: '#kitchen'
+2_entity: light.kitchen
+2_pir_sensor: binary_sensor.kitchen_motion
+3_name: Dining room
+3_icon: mdi:silverware-fork-knife
+3_link: '#dining-room'
+3_entity: light.dining_room
+3_pir_sensor: binary_sensor.dining_room_motion
+```
 
 ## Button
 
