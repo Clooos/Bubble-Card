@@ -74,7 +74,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
 
-### Example
+### Pop-up example
 
 ```yaml
 type: vertical-stack
@@ -90,6 +90,15 @@ cards:
     width_desktop: 600px
     margin_top_mobile: 18px
     margin_top_desktop: 74px
+```
+A button to open the pop-up
+```yaml
+type: button
+tap_action:
+  action: navigate
+  navigation_path: '#kitchen'
+name: Kitchen
+icon: mdi:fridge
 ```
 
 ## Horizontal buttons stack
