@@ -200,6 +200,11 @@ class BubbleCard extends HTMLElement {
                     transform: translateY(-100%);
                     transition: transform .4s !important;
                 }
+                #root.open-pop-up > * {
+                  /* Block child items to overflow and if they do clip them */
+                  max-width: calc(100vw - 38px);
+                  overflow-x: clip;
+                }
                 #root.close-pop-up { 
                     transform: translateY(0%);
                     transition: transform .4s !important;
@@ -919,16 +924,57 @@ class BubbleCard extends HTMLElement {
         if (!this.separatorAdded) {
             const separatorContainer = document.createElement("div");
             separatorContainer.setAttribute("class", "separator-container");
-            separatorContainer.style.display = 'flex';
             separatorContainer.innerHTML = `
               <div>
-                <ha-icon icon="${icon}" style="display: inline-block; height: 24px; width: 24px; margin: 0 20px 0 8px; transform: translateY(-2px);"></ha-icon>
-                <h4 style="display: inline-block; margin: 3px 20px 0 0; font-size: 17px;">${name}</h4>
+                <ha-icon icon="${icon}"></ha-icon>
+                <h4>${name}</h4>
               </div>
-              <div style="display: flex; border-radius: 6px; opacity: 0.3; margin-left: 10px; flex-grow: 1; height: 6px; align-self: center; background-color: var(--background-color,var(--secondary-background-color));"></div>
+              <div></div>
               `
             this.content.appendChild(separatorContainer);
             this.separatorAdded = true;
+
+            if (!this.styleAdded) {
+              const styleElement = document.createElement('style');
+              const styles = `
+              .separator-container {
+                  display: inline-flex;
+                  width: 100%;
+              }
+              .separator-container div:first-child {
+                  display: inline-flex;
+                  max-width: calc(100vw - 38px);
+              }
+              .separator-container div ha-icon{
+                  display: inline-flex;
+                  height: 24px;
+                  width: 24px;
+                  margin: 0 20px 0 8px;
+                  transform: translateY(-2px);
+              }
+              .separator-container div h4{
+                  display: inline-flex;
+                  margin: 0 20px 0 0;
+                  font-size: 17px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+              }
+              .separator-container div:last-child{
+                  display: inline-flex; 
+                  border-radius: 6px; 
+                  opacity: 0.3; 
+                  margin-left: 10px; 
+                  flex-grow: 1; 
+                  height: 6px; 
+                  align-self: center; 
+                  background-color: var(--background-color,var(--secondary-background-color));
+              `;
+
+              styleElement.innerHTML = styles;
+              this.content.appendChild(styleElement);
+              this.styleAdded = true;
+            }
         }
     }
     
