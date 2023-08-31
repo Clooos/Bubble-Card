@@ -112,7 +112,7 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
-| `auto_order` | boolean | **Required** | `true` or `false` | Change the order of the buttons according to the room you just entered |
+| `auto_order` | boolean | **Required** | `true` or `false` | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code (important)** |
 | `1_link` | string | **Required** | The pop-up hash (e.g. `'#kitchen'`) with ' ' or any link | A link to open |
 | `1_name` | string | Optional but recommended | Any string | A name for your button |
 | `1_icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your button |
