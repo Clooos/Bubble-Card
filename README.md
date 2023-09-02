@@ -30,6 +30,8 @@ Bubble Card is a minimalist card collection for Home Assistant with a nice pop-u
 
 ### With HACS
 
+This method allows you to get updates directly in the HACS main page
+
 1. Download HACS following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
 2. Proceed to the initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
 3. On your sidebar go to `HACS` > `Integrations`
