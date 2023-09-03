@@ -202,7 +202,7 @@ class BubbleCard extends HTMLElement {
                 }
                 #root.open-pop-up > * {
                   /* Block child items to overflow and if they do clip them */
-                  max-width: calc(100vw - 38px);
+                  max-width: calc(100% - 38px);
                   overflow-x: clip;
                 }
                 #root.close-pop-up { 
@@ -943,7 +943,7 @@ class BubbleCard extends HTMLElement {
               }
               .separator-container div:first-child {
                   display: inline-flex;
-                  max-width: calc(100vw - 38px);
+                  max-width: calc(100% - 38px);
               }
               .separator-container div ha-icon{
                   display: inline-flex;
