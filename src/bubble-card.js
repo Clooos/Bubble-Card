@@ -160,7 +160,7 @@ class BubbleCard extends HTMLElement {
                 #root {
                     position: fixed !important;
                     margin: 0 -7px;
-                    width: calc(100% - 38px);
+                    width: calc(100vw - 38px);
                     background-color: var(--ha-card-background,var(--card-background-color));
                     border-radius: 42px;
                     top: calc(100% + ${marginTopMobile} + 54px); /*136px*/
@@ -199,10 +199,11 @@ class BubbleCard extends HTMLElement {
                 #root.open-pop-up {
                     transform: translateY(-100%);
                     transition: transform .4s !important;
+                    z-index: 9999 !important;
                 }
                 #root.open-pop-up > * {
                   /* Block child items to overflow and if they do clip them */
-                  max-width: calc(100% - 38px);
+                  max-width: calc(100vw - 38px);
                   overflow-x: clip;
                 }
                 #root.close-pop-up { 
@@ -502,6 +503,7 @@ class BubbleCard extends HTMLElement {
                   bottom: 16px;
                   /* transform: translateY(200px); */
                   /* animation: from-bottom 1.3s forwards; */
+                  z-index: 9999 !important;
                 }
                 @keyframes from-bottom {
                   0% {transform: translateY(200px);}
@@ -551,10 +553,11 @@ class BubbleCard extends HTMLElement {
                   content: '';
                   position: absolute;
                   top: -32px;
-                  left: -100%;
+                  /*left: -100%;*/
                   display: block;
                   background: linear-gradient(0deg, var(--background-color, var(--primary-background-color)) 50%, rgba(79, 69, 87, 0));
-                  width: 200%;
+                  /*width: 200%;*/
+                  width: 100%;
                   height: 100px;
                 }
                 .card-content::-webkit-scrollbar {
