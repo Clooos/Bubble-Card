@@ -609,6 +609,7 @@ class BubbleCard extends HTMLElement {
                 }
                 .card-content {
                   width: 100% !important;
+                  position: relative;
                 }
             `;
             styleElement.innerHTML = styles;
@@ -1273,40 +1274,46 @@ class BubbleCardEditor extends LitElement {
       return html``;
     }
     
-    const editorEvent = new CustomEvent("editor-event", { bubbles: true });
-    document.dispatchEvent(editorEvent);
-   
-    const cardTypeList = [
-        'button', 
-        'cover',
-        'empty-column',
-        'horizontal-buttons-stack',
-        'pop-up',
-        'separator'
-    ];
+    if (!this.listsUpdated) {
+      const formateList = item => ({label: item, value: item});
+      
+      this.allEntitiesList = Object.keys(this.hass.states).map(formateList);
+      
+      this.lightList = Object.keys(this.hass.states).filter(
+        (eid) => eid.substr(0, eid.indexOf(".")) === "light"
+      ).map(formateList);
+      
+      this.sensorList = Object.keys(this.hass.states).filter(
+        (eid) => eid.substr(0, eid.indexOf(".")) === "sensor"
+      ).map(formateList);
+      
+      this.coverList = Object.keys(this.hass.states).filter(
+        (eid) => eid.substr(0, eid.indexOf(".")) === "cover"
+      ).map(formateList);
+      
+      this.cardTypeList = [
+        { 'label':'Button', 'value':'button' }, 
+        { 'label':'Cover', 'value':'cover' }, 
+        { 'label':'Empty column', 'value':'empty-column' }, 
+        { 'label':'Horizontal buttons stack', 'value':'horizontal-buttons-stack' }, 
+        { 'label':'Pop-up', 'value':'pop-up' }, 
+        { 'label':'Separator', 'value':'separator' }
+      ];
+      
+      this.buttonTypeList = [
+        { 'label':'Switch', 'value':'switch' }, 
+        { 'label':'Slider', 'value':'slider' }
+      ];
+      
+      this.listsUpdated = true;
+    }
     
-    const buttonTypeList = [
-        'switch', 
-        'slider'
-    ];
-    
-    const allEntitiesList = Object.keys(this.hass.states);
-
-    const lightList = Object.keys(this.hass.states).filter(
-      (eid) => eid.substr(0, eid.indexOf(".")) === "light"
-    );
-    
-    const sensorList = Object.keys(this.hass.states).filter(
-      (eid) => eid.substr(0, eid.indexOf(".")) === "sensor"
-    );
-    
-    const coverList = Object.keys(this.hass.states).filter(
-      (eid) => eid.substr(0, eid.indexOf(".")) === "cover"
-    );
-    
-    // console.log(document.querySelector("body > home-assistant").shadowRoot.querySelector("hui-dialog-edit-card").shadowRoot.querySelector("ha-dialog > div.content > div.element-preview > hui-card-preview"));
-    
-    // this.shadowRoot.querySelector("ha-card").style.border = '1px solid white !important';
+    const allEntitiesList = this.allEntitiesList;
+    const lightList = this.lightList;
+    const sensorList = this.sensorList;
+    const coverList = this.coverList;
+    const cardTypeList = this.cardTypeList;
+    const buttonTypeList = this.buttonTypeList;
     
     if (this._config.card_type === 'pop-up') {
         return html`
@@ -1496,7 +1503,7 @@ class BubbleCardEditor extends LitElement {
   }
 
     makeDropdown(label, configValue, items) {
-      const formateList = item => ({icon: item, label: item, value: item}) ;
+      const formateList = item => ({label: item, value: item});
       const hass = this.hass;
 
       if (label === 'Icon' || label === 'Open icon' || label === 'Closed icon') {
@@ -1513,21 +1520,6 @@ class BubbleCardEditor extends LitElement {
               </ha-icon-picker>
             </div>
           `;   
-      } else if (label === 'Entity' || label === 'Temperature sensor' || label === 'Light') { 
-          return html`
-            <div>
-              <ha-combo-box
-                label="${label}"
-                .value="${this['_' + configValue]}"
-                .configValue="${configValue}"
-                .items="${items.map(formateList)}"
-                item-label-path="label"
-                item-value-path="value"
-                @value-changed="${this._valueChanged}"
-              >
-              </ha-combo-box>
-            </div>
-          `;      
       } else {
           return html`
             <div>
@@ -1535,9 +1527,7 @@ class BubbleCardEditor extends LitElement {
                 label="${label}"
                 .value="${this['_' + configValue]}"
                 .configValue="${configValue}"
-                .items="${items.map(formateList)}"
-                item-label-path="label"
-                item-value-path="value"
+                .items="${items}"
                 @value-changed="${this._valueChanged}"
               >
               </ha-combo-box>
@@ -1587,7 +1577,7 @@ class BubbleCardEditor extends LitElement {
                         label="Light / Light group (For background color)"
                         .value="${this._config[i + '_entity']}"
                         .configValue="${i}_entity"
-                        .items="${allEntitiesList.map(formateList)}"
+                        .items="${allEntitiesList}"
                         item-label-path="label"
                         item-value-path="value"
                         @value-changed="${this._valueChanged}"
@@ -1598,7 +1588,7 @@ class BubbleCardEditor extends LitElement {
                         .value="${this._config[i + '_pir_sensor']}"
                         .configValue="${i}_pir_sensor"
                         .disabled=${!this._config.auto_order}
-                        .items="${binarySensorList.map(formateList)}"
+                        .items="${binarySensorList}"
                         item-label-path="label"
                         item-value-path="value"
                         @value-changed="${this._valueChanged}"
@@ -1653,9 +1643,9 @@ class BubbleCardEditor extends LitElement {
         return;
       }
       const target = ev.target;
-      if (this[`_${target.configValue}`] === ev.detail.value) {
-        return;
-      }
+    //   if (this[`_${target.configValue}`] === ev.detail.value) {
+    //     return;
+    //   }
       if (target.configValue) {
         // Affiche la valeur de this._config avant la mise à jour
         console.log("Before update:", this._config);
@@ -1744,5 +1734,4 @@ window.customCards.push({
     description: "A cards collection for Home Assistant with a nice pop-up touch.",
 });
 
-// BETA 2 
-// Thank you to samuel9554 for his CSS fix for smaller screens.
+// BETA 4

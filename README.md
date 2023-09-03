@@ -2,7 +2,7 @@
 
 Bubble Card is a minimalist card collection for Home Assistant with a nice pop-up touch.
 
-[![Stars](https://img.shields.io/github/stars/clooos/Bubble-Card)](#) [![Last commit](https://img.shields.io/github/last-commit/clooos/Bubble-Card)](#) [![Reddit Profile](https://img.shields.io/badge/Reddit-My%20stuff-orange?logo=reddit)](https://www.reddit.com/user/Clooooos/submitted/) [![Buy me a beer](https://img.shields.io/badge/Buy%20me%20a-beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos)
+[![Stars](https://img.shields.io/github/stars/clooos/Bubble-Card)](#) [![Last commit](https://img.shields.io/github/last-commit/clooos/Bubble-Card)](#) [![Reddit Profile](https://img.shields.io/badge/Reddit-My%20stuff-orange?logo=reddit)](https://www.reddit.com/user/Clooooos/submitted/) [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Buy me a beer](https://img.shields.io/badge/Buy%20me%20a-beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos)
 
 ## Screenshots and features
 
@@ -30,6 +30,8 @@ Bubble Card is a minimalist card collection for Home Assistant with a nice pop-u
 
 ### With HACS
 
+This method allows you to get updates directly in the HACS main page
+
 1. Download HACS following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
 2. Proceed to the initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
 3. On your sidebar go to `HACS` > `Integrations`
@@ -55,7 +57,7 @@ All cards and all options can fully be configured in the GUI editor, but it seem
 
 ## Pop-up
 
-This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have an unique hash (e.g. `#kitchen`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card come with an header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
+This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have an unique hash (e.g. `'#kitchen'`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card come with an header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
 
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
 2. This `vertical-stack` must be after all your other cards (this is important)
@@ -112,7 +114,7 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
-| `auto_order` | boolean | **Required** | `true` or `false` | Change the order of the buttons according to the room you just entered |
+| `auto_order` | boolean | **Required** | `true` or `false` | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code (important)** |
 | `1_link` | string | **Required** | The pop-up hash (e.g. `'#kitchen'`) with ' ' or any link | A link to open |
 | `1_name` | string | Optional but recommended | Any string | A name for your button |
 | `1_icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your button |
@@ -242,3 +244,14 @@ card_mod:
       font-size: 12px;
     }
 ```
+
+The Bubble theme (like on screeshots) can be found here: 
+https://github.com/Clooos/Bubble
+
+## Help
+
+[![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) 
+
+## Donate
+
+[![Buy me a beer](https://img.shields.io/badge/Buy%20me%20a-beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos)
