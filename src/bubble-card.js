@@ -50,6 +50,7 @@ class BubbleCard extends HTMLElement {
         const marginTopMobile = this.config.margin_top_mobile || '0px';
         const marginTopDesktop = this.config.margin_top_desktop || '0px';
         const widthDesktop = this.config.width_desktop || '600px';
+        const isSidebarHidden = this.config.is_sidebar_hidden || 'false';
         const widthDesktopDivided = widthDesktop.match(/(\d+)(\D+)/);
         const displayPowerButton = this.config.entity ? 'flex' : 'none';
         
@@ -96,6 +97,9 @@ class BubbleCard extends HTMLElement {
         if (this.headerAdded) {
             const haIcon1 = this.content.querySelector("#header-container .header-icon");
             haIcon1.setAttribute("icon", icon);
+            haIcon1.addEventListener('click', event => {
+                fireEvent(this, "hass-more-info", { entityId: entityId });
+            });
             
             const h2 = this.content.querySelector("#header-container h2");
             h2.textContent = name;
@@ -168,7 +172,7 @@ class BubbleCard extends HTMLElement {
                     grid-gap: 12px !important;
                     gap: 12px !important;
                     grid-auto-rows: min-content;
-                    padding: 18px 18px 200px 18px !important;
+                    padding: 18px 18px 220px 18px !important;
                     height: calc(100% - 220px) !important;
                     -ms-overflow-style: none; /* for Internet Explorer, Edge */
                     scrollbar-width: none; /* for Firefox */
@@ -199,6 +203,12 @@ class BubbleCard extends HTMLElement {
                 #root.open-pop-up {
                     transform: translateY(-100%);
                     transition: transform .4s !important;
+                    z-index: 1 !important; /* Higher value hide the more-info panel */
+                }
+                #root.open-pop-up > * {
+                  /* Block child items to overflow and if they do clip them */
+                  max-width: calc(100vw - 38px);
+                  overflow-x: clip;
                 }
                 #root.close-pop-up { 
                     transform: translateY(0%);
@@ -216,8 +226,8 @@ class BubbleCard extends HTMLElement {
                 @media only screen and (min-width: 870px) {
                     #root {
                         top: calc(100% + ${marginTopDesktop} + 54px);
-                        width: calc(${widthDesktop} - 92px) !important; 
-                        left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + 56px);
+                        width: calc(${widthDesktop} - ${isSidebarHidden === true ? '0px' : '92px'}) !important; 
+                        left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + ${isSidebarHidden === true ? '0px' : '56px'});
                         margin: 0 !important;
                     }
                 }    
@@ -249,6 +259,7 @@ class BubbleCard extends HTMLElement {
                     background-color: var(--card-background-color,var(--ha-card-background));
                     border-radius: 100%;
                     margin: 0 10px 0 0;
+                    cursor: pointer; 
                 }
                 #header-container h2 {
                     display: inline-flex;
@@ -497,6 +508,7 @@ class BubbleCard extends HTMLElement {
                   bottom: 16px;
                   /* transform: translateY(200px); */
                   /* animation: from-bottom 1.3s forwards; */
+                  z-index: 1 !important; /* Higher value hide the more-info panel */
                 }
                 @keyframes from-bottom {
                   0% {transform: translateY(200px);}
@@ -544,13 +556,14 @@ class BubbleCard extends HTMLElement {
                 }
                 .horizontal-buttons-stack::before {
                   content: '';
-                  position: absolute;
-                  top: -32px;
-                  left: -100%;
+                  position: fixed;
+                  left: 60px; /* 0px if no sidebar */
                   display: block;
-                  background: linear-gradient(0deg, var(--background-color, var(--primary-background-color)) 50%, rgba(79, 69, 87, 0));
-                  width: 200%;
-                  height: 100px;
+                  /*background: linear-gradient(0deg, var(--background-color, var(--primary-background-color)) 50%, rgba(79, 69, 87, 0));*/
+                  background: radial-gradient(ellipse at bottom center, var(--background-color, var(--primary-background-color)) 30%, 50%, rgba(79, 69, 87, 0) 68%);
+                  width: 100%;
+                  height: 70px;
+                  pointer-events: none;
                 }
                 .card-content::-webkit-scrollbar {
                   display: none;
@@ -699,7 +712,7 @@ class BubbleCard extends HTMLElement {
         
         function handleStart(e) {
             if (e.target === iconContainer.querySelector('ha-icon')) {
-                iconContainer.addEventListener('mouseup', event => {
+                iconContainer.addEventListener('click', event => {
                     fireEvent(this, "hass-more-info", { entityId: entityId });
                 });
             } else {
@@ -774,7 +787,7 @@ class BubbleCard extends HTMLElement {
         function updateButtonStyle(state, content) {
             content.buttonContainer.style.opacity = state !== 'unavailable' ? '1' : '0.5';
             if (buttonType === 'switch') {
-                const backgroundColor = state === 'on' ? 'var(--accent-color)' : 'rgba(0,0,0,0)';
+                const backgroundColor = state === 'on' || state === 'open' || state === 'cleaning' ? 'var(--accent-color)' : 'rgba(0,0,0,0)';
                 content.switchButton.style.backgroundColor = backgroundColor;
             }
         }
@@ -920,16 +933,56 @@ class BubbleCard extends HTMLElement {
         if (!this.separatorAdded) {
             const separatorContainer = document.createElement("div");
             separatorContainer.setAttribute("class", "separator-container");
-            separatorContainer.style.display = 'flex';
             separatorContainer.innerHTML = `
               <div>
-                <ha-icon icon="${icon}" style="display: inline-block; height: 24px; width: 24px; margin: 0 20px 0 8px; transform: translateY(-2px);"></ha-icon>
-                <h4 style="display: inline-block; margin: 3px 20px 0 0; font-size: 17px;">${name}</h4>
+                <ha-icon icon="${icon}"></ha-icon>
+                <h4>${name}</h4>
               </div>
-              <div style="display: flex; border-radius: 6px; opacity: 0.3; margin-left: 10px; flex-grow: 1; height: 6px; align-self: center; background-color: var(--background-color,var(--secondary-background-color));"></div>
-              `
+              <div></div>              `
             this.content.appendChild(separatorContainer);
             this.separatorAdded = true;
+
+            if (!this.styleAdded) {
+              const styleElement = document.createElement('style');
+              const styles = `
+              .separator-container {
+                  display: inline-flex;
+                  width: 100%;
+              }
+              .separator-container div:first-child {
+                  display: inline-flex;
+                  max-width: calc(100% - 38px);
+              }
+              .separator-container div ha-icon{
+                  display: inline-flex;
+                  height: 24px;
+                  width: 24px;
+                  margin: 0 20px 0 8px;
+                  transform: translateY(-2px);
+              }
+              .separator-container div h4{
+                  display: inline-flex;
+                  margin: 0 20px 0 0;
+                  font-size: 17px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+              }
+              .separator-container div:last-child{
+                  display: inline-flex; 
+                  border-radius: 6px; 
+                  opacity: 0.3; 
+                  margin-left: 10px; 
+                  flex-grow: 1; 
+                  height: 6px; 
+                  align-self: center; 
+                  background-color: var(--background-color,var(--secondary-background-color));
+              `;
+
+              styleElement.innerHTML = styles;
+              this.content.appendChild(styleElement);
+              this.styleAdded = true;
+            }
         }
     }
     
@@ -1211,6 +1264,18 @@ class BubbleCardEditor extends LitElement {
     return this._config.width_desktop || '600px';
   }
   
+  get _is_sidebar_hidden() {
+    return this._config.is_sidebar_hidden || false;
+  }
+  
+  get _icon_open() {
+    return this._config.icon_open || '';
+  }
+  
+  get _icon_close() {
+    return this._config.icon_close || '';
+  }
+  
   get _open_service() {
     return this._config.open_service || 'cover.open_cover';
   }
@@ -1222,6 +1287,10 @@ class BubbleCardEditor extends LitElement {
   get _stop_service() {
     return this._config.open_service || 'cover.stop_cover';
   }
+  
+   get _auto_order() {
+    return this._config.auto_order || false;
+  } 
 
   render() {
     if (!this.hass) {
@@ -1305,6 +1374,17 @@ class BubbleCardEditor extends LitElement {
                 @input="${this._valueChanged}"
                 style="width: 100%;"
               ></ha-textfield>
+              <ha-formfield .label="Is the sidebar hidden on desktop?">
+                <ha-switch
+                  aria-label="Is the sidebar hidden on desktop?"
+                  .checked=${this._is_sidebar_hidden}
+                  .configValue="${"is_sidebar_hidden"}"
+                  @change=${this._valueChanged}
+                ></ha-switch>
+                <div class="mdc-form-field">
+                    <label class="mdc-label">Is the sidebar hidden on desktop?</label> 
+                </div>
+              </ha-formfield>
               <ha-textfield
                 label="Top margin on mobile (e.g. -56px if your header is hidden)"
                 .value="${this._margin_top_mobile}"
@@ -1382,8 +1462,8 @@ class BubbleCardEditor extends LitElement {
                 <ha-formfield .label="Auto order">
                     <ha-switch
                       aria-label="Toggle auto order"
-                      .checked=${this._config.auto_order}
-                      .value=${this._config.auto_order}"
+                      .checked=${this._auto_order}
+                      .value=${this._auto_order}"
                       .configValue="${"auto_order"}"
                       @change=${this._valueChanged}
                     ></ha-switch>
@@ -1402,7 +1482,7 @@ class BubbleCardEditor extends LitElement {
         return html`
           <div class="card-config">
               ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-              <ha-alert alert-type="info">This card allows you to...</ha-alert>
+              <ha-alert alert-type="info">This card allows you to control your covers.</ha-alert>
               ${this.makeDropdown("Entity", "entity", coverList)}
               <ha-textfield
                 label="Name"
@@ -1433,7 +1513,7 @@ class BubbleCardEditor extends LitElement {
                 style="width: 100%;"
               ></ha-textfield>
               ${this.makeDropdown("Open icon", "icon_open")}
-              ${this.makeDropdown("Closed icon", "icon_closed")}
+              ${this.makeDropdown("Closed icon", "icon_close")}
               ${this.makeVersion()}
           </div>
         `;
@@ -1597,20 +1677,18 @@ class BubbleCardEditor extends LitElement {
         return;
       }
       const target = ev.target;
+      const detail = ev.detail;
     //   if (this[`_${target.configValue}`] === ev.detail.value) {
     //     return;
     //   }
       if (target.configValue) {
         // Affiche la valeur de this._config avant la mise à jour
         console.log("Before update:", this._config);
-        // if (target.value === "") {
-        //   delete this._config[target.configValue];
-        // } else {
           this._config = {
             ...this._config,
             [target.configValue]:
-              target.checked !== undefined || ev.detail.value ? target.checked || ev.detail.value : target.value || ev.detail.value,
-        //   };
+                target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value,
+            //   target.checked !== undefined || ev.detail.value ? target.checked || ev.detail.value : target.value || ev.detail.value,
         }
         // Affiche la valeur de this._config après la mise à jour
         console.log("After update:", this._config);
@@ -1685,7 +1763,7 @@ window.customCards.push({
     type: "bubble-card",
     name: "Bubble Card",
     preview: false,
-    description: "A cards collection for Home Assistant with a nice pop-up touch.",
+    description: "A minimalist card collection with a nice pop-up touch.",
 });
 
-// BETA 4
+// BETA 5
