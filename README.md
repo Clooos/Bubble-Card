@@ -181,7 +181,7 @@ This card allows you to control your covers.
 | `entity` | string | **Required** | Any cover | A cover to control |
 | `name` | string | Optional | Any string | A name for your cover, if not defined it will display the entity name |
 | `icon_open` | string | Optional | Any `mdi:` icon | An icon for your open cover, if not defined it will display the default open cover icon |
-| `icon_closed` | string | Optional | Any `mdi:` icon | An icon for your closed cover, if not defined it will display the default closed cover icon |
+| `icon_close` | string | Optional | Any `mdi:` icon | An icon for your closed cover, if not defined it will display the default closed cover icon |
 | `open_service` | string | Optional | Any service or script | A service to open your cover, default to `cover.open_cover` |
 | `stop_service` | string | Optional | Any service or script | A service to stop your cover, default to `cover.stop_cover` |
 | `close_service` | string | Optional | Any service or script | A service to close your cover, default to `cover.close_cover` |
@@ -194,7 +194,7 @@ card_type: cover
 entity: cover.kitchen
 name: Kitchen
 icon_open: mdi:roller-shade
-icon_closed: mdi:roller-shade-closed
+icon_close: mdi:roller-shade-closed
 ```
 
 ## Separator
