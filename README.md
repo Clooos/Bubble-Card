@@ -115,12 +115,12 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
-| `auto_order` | boolean | **Required** | `true` or `false` | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code (important)** |
+| `auto_order` | boolean | **Required** | `true` or `false` | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code** |
 | `1_link` | string | **Required** | The pop-up hash (e.g. `'#kitchen'`) with ' ' or any link | A link to open |
 | `1_name` | string | Optional but recommended | Any string | A name for your button |
 | `1_icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your button |
 | `1_entity` | string | Optional | Any light or light group | Display the color of that light in background |
-| `1_pir_sensor` | string | **Required** if `auto_order` is set to true | Any binary sensor | A pir sensor for `auto_order` |
+| `1_pir_sensor` | string | Optional | Any binary sensor | At least one pir sensor or more for `auto_order` |
 
 **The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).**
 
