@@ -97,7 +97,7 @@ cards:
     margin_top_mobile: 18px
     margin_top_desktop: 74px
 ```
-A button to open the pop-up
+A button to open the pop-up (not a Bubble Card one)
 ```yaml
 type: button
 tap_action:
