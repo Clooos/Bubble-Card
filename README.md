@@ -249,6 +249,12 @@ card_mod:
 The Bubble theme (like on screeshots) can be found here: 
 https://github.com/Clooos/Bubble
 
+## Custom components conflict
+
+⚠️ For now there are some features that are not working with:
+
+- Home Assistant Swipe Navigation
+
 ## Help
 
 [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) 
