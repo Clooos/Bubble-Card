@@ -38,7 +38,7 @@ This method allows you to get updates directly in the HACS main page
 4. click on the icon at the right top corner then on `Custom repositories`
 5. For the repository add this: `https://github.com/Clooos/Bubble-Card`
 6. For the category select `Lovelace` then click `Add`
-7. Now click on `Bubble Card` then on the `Dowload` button
+7. Now click on `Bubble Card` then on the `Download` button
 8. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
 9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
 
