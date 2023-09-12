@@ -6,7 +6,7 @@ Bubble Card is a minimalist card collection for Home Assistant with a nice pop-u
 
 ## Table of contents
 
-**[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Styling`](#styling)** | **[`Conflict`](#custom-components-conflict)**
+**[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Styling`](#styling)** | **[`Conflicts`](#custom-components-conflict)**
 
 ## Screenshots and features
 
@@ -365,7 +365,7 @@ styles: |
 The Bubble theme (like on screeshots) can be found here: 
 https://github.com/Clooos/Bubble
 
-## Custom components conflict
+## Custom components conflicts
 
 ⚠️ For now there are some features that are not working with:
 
