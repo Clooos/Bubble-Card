@@ -374,8 +374,16 @@ https://github.com/Clooos/Bubble
 
 ## Help
 
+Feel free to open an [issue](https://github.com/Clooos/Bubble-Card/issues) if something is not working as expected. 
+
+And for your questions you can go ask here on the forum to get some help from me or the community :
+
 [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) 
 
 ## Donate
 
+If you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated.
+
 [![Buy me a beer](https://img.shields.io/badge/Buy%20me%20a-beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos)
+
+Thank you everyone for your support, you all are my greatest motivation!
