@@ -46,7 +46,7 @@ Coming soon in the HACS default repo (still waiting for validation).
 
 ## Configuration
 
-All cards and all options can fully be configured in the GUI editor, please note that some of the cards don't have a preview in real time (for now).
+Most options can be configured in the GUI editor, please note that some cards don't have a preview in real time (for now).
 
 ### Main options
 
@@ -54,6 +54,7 @@ All cards and all options can fully be configured in the GUI editor, please note
 | --- | --- | --- | --- | --- |
 | `type` | string | **Required** | `custom:bubble-card` | Type of the card |
 | `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `pop-up` or `separator` | Type of the Bubble Card, see below |
+| `styles` | object list | Optional | Any CSS stylesheets | Allows you to customize your cards, see [styling](#styling) |
 
 ## Pop-up
 
@@ -78,6 +79,9 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `is_sidebar_hidden` | boolean | Optional | `true` or `false` | Fix the pop-up position if the sidebar is hidden on desktop |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
 ### Example
 
@@ -159,6 +163,9 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 | `button_type` | string | Optional | `switch` (default) or `slider` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
 ### Example
 
@@ -169,6 +176,45 @@ button_type: slider
 entity: light.kitchen_led
 name: Kitchen LED
 icon: mdi:led-strip-variant
+```
+
+## Custom button
+
+This is a customizable button (similar to the switch button) that allows you to use all actions directly on the whole button allowing you to use it for almost everything. 
+
+This is still experimental and more customizations are coming.
+
+### Options
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Required** (and soon optional) | Any entity that can be on/off or true/false, any media player, cover or light | An entity for the state of the button |
+| `button_type` | string | **Required** | `custom` | The behavior of your button |
+| `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button hold, if undefined, `more-info` will be used. |
+
+### Example
+
+Here is an example of a button that toggle all the lights of a room and if you double tap or hold it, it will open a pop-up with all your other lights:
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: custom
+entity: light.kitchen
+name: Kitchen
+icon: mdi:fridge
+tap_action:
+  action: toggle
+double_tap_action:
+  action: navigate
+  navigation_path: '#kitchen'
+hold_action:
+  action: navigate
+  navigation_path: '#kitchen'
 ```
 
 ## Cover
@@ -186,6 +232,9 @@ This card allows you to control your covers.
 | `open_service` | string | Optional | Any service or script | A service to open your cover, default to `cover.open_cover` |
 | `stop_service` | string | Optional | Any service or script | A service to stop your cover, default to `cover.stop_cover` |
 | `close_service` | string | Optional | Any service or script | A service to close your cover, default to `cover.close_cover` |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
 ### Example
 
@@ -233,17 +282,80 @@ type: custom:bubble-card
 card_type: empty-column
 ```
 
+## Tap, double tap and hold actions
+
+You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example. 
+
+This is still experimental and only available in YAML for now.
+
+### Options
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `action` | string | `more-info`, `toggle`, `call-service`, `navigate`, `url`, `fire-dom-event`, `none` | Action to perform |
+| `target` | object |  | Only works with `call-service`. Follows the [home-assistant syntax](https://www.home-assistant.io/docs/scripts/service-calls/#targeting-areas-and-devices) |
+| `navigation_path` | string | Any path of your dashboard | Path to navigate to (e.g. `'#kitchen'` for opening a pop-up) when action defined as navigate |
+| `url_path` | string | Any link | URL to open on click (e.g. `https://www.google.com`) when action is `url` |
+| `service` | string | Any service | Service to call (e.g. `media_player.media_play_pause`) when `action` defined as `call-service` |
+| `data` or `service_data` | object | Any service data | Service data to include (e.g. `entity_id: media_player.kitchen`) when `action` defined as `call-service` |
+| `confirmation` | object | none | See [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Display a confirmation popup, overrides the default `confirmation` object |
+
+### Example
+
+```yaml
+tap_action: 
+  action: toggle 
+double_tap_action: 
+  action: call-service 
+  service: script.dark_scene 
+hold_action: 
+  action: more-info
+```
+
 ## Styling
 
-There is no styling options (for now) but it fully support [card-mod](https://github.com/thomasloven/lovelace-card-mod).
+You can directly use `styles: |` without card-mod which allows you to modify the CSS style of the pop-ups and all the other cards.
 
-Here is an example on how you can change the font size:
+Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
+
+Some cards needs a page refresh to display your CSS modifications (like the pop-ups).
+
+### Example
+
+Here is how to change the pop-ups opacity:
+
 ```yaml
-card_mod:
-  style: |
-    ha-card { 
-      font-size: 12px;
-    }
+styles: | 
+  #root { 
+    opacity: 0.95; 
+  }
+```
+
+To change the font size of all Bubble Cards:
+
+```yaml
+styles: |
+  ha-card { 
+    font-size: 12px;
+  }
+```
+
+To change the background color of a button:
+
+```yaml
+styles: | 
+  ha-card > div > div > div { 
+    background: blue !important; 
+  }
+```
+
+Or the color of a slider:
+
+```yaml
+styles: |
+  ha-card > div > div > div > div.range-fill { 
+    background: blue !important; 
+  }
 ```
 
 The Bubble theme (like on screeshots) can be found here: 
@@ -253,7 +365,8 @@ https://github.com/Clooos/Bubble
 
 ⚠️ For now there are some features that are not working with:
 
-- Home Assistant Swipe Navigation
+- Home Assistant Swipe Navigation (see https://github.com/Clooos/Bubble-Card/issues/35)
+- UI Lovelace Minimalist (see https://github.com/Clooos/Bubble-Card/issues/41)
 
 ## Help
 
