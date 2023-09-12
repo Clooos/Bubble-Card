@@ -46,7 +46,7 @@ Coming soon in the HACS default repo (still waiting for validation).
 
 ## Configuration
 
-All cards and all options can fully be configured in the GUI editor, please not that some of the cards don't have a preview in real time (for now).
+All cards and all options can fully be configured in the GUI editor, please note that some of the cards don't have a preview in real time (for now).
 
 ### Main options
 
