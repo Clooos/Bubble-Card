@@ -295,15 +295,15 @@ This is still experimental and only available in YAML for now.
 
 ### Options
 
-| Name | Type | Requirement | Supported options | Description |
-| --- | --- | --- | --- | --- |
+| Name | Type | Supported options | Description |
+| --- | --- | --- | --- |
 | `action` | string | `more-info`, `toggle`, `call-service`, `navigate`, `url`, `fire-dom-event`, `none` | Action to perform |
 | `target` | object |  | Only works with `call-service`. Follows the [home-assistant syntax](https://www.home-assistant.io/docs/scripts/service-calls/#targeting-areas-and-devices) |
 | `navigation_path` | string | Any path of your dashboard | Path to navigate to (e.g. `'#kitchen'` for opening a pop-up) when action defined as navigate |
 | `url_path` | string | Any link | URL to open on click (e.g. `https://www.google.com`) when action is `url` |
 | `service` | string | Any service | Service to call (e.g. `media_player.media_play_pause`) when `action` defined as `call-service` |
 | `data` or `service_data` | object | Any service data | Service data to include (e.g. `entity_id: media_player.kitchen`) when `action` defined as `call-service` |
-| `confirmation` | object | none | See [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Display a confirmation popup, overrides the default `confirmation` object |
+| `confirmation` | object | See [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Display a confirmation popup, overrides the default `confirmation` object |
 
 ### Example
 
