@@ -325,7 +325,7 @@ Please note that you will have to add `!important;` to some CSS styles that are 
 
 Some cards needs a page refresh to display your CSS modifications (like the pop-ups).
 
-### Example
+### Examples
 
 Here is how to change the pop-ups opacity:
 
