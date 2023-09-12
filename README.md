@@ -4,6 +4,8 @@ Bubble Card is a minimalist card collection for Home Assistant with a nice pop-u
 
 [![Stars](https://img.shields.io/github/stars/clooos/Bubble-Card)](#) [![Last commit](https://img.shields.io/github/last-commit/clooos/Bubble-Card)](#) [![Reddit Profile](https://img.shields.io/badge/Reddit-My%20stuff-orange?logo=reddit)](https://www.reddit.com/user/Clooooos/submitted/) [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Buy me a beer](https://img.shields.io/badge/Buy%20me%20a-beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos)
 
+| **[Installation](#installation)** | **[Configuration](#configuration)** | **[Pop-up](#pop-up)** | **[Horizontal buttons stack](#horizontal-buttons-stack)** | **[Button](#button)** | **[Custom button](#custom-button)** | **[Cover](#cover)** | **[Separator](#separator)** | **[Empty column](#empty-column)** | **[Actions](#tap-double-tap-and-hold-actions)** | **[Styling](#styling)** | **[Conflict](#custom-components-conflict)** | 
+
 ## Screenshots and features
 
 <img width="2048" alt="Bubble Card Cover" src="https://github.com/Clooos/Bubble-Card/assets/36499953/681e99e0-17ce-471d-a71b-9ef8158af6d5">
