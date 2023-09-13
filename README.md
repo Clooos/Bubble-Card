@@ -336,7 +336,7 @@ styles: |
   }
 ```
 
-To change the font size of all Bubble Cards:
+To change the font size of any Bubble Card:
 
 ```yaml
 styles: |
@@ -363,7 +363,7 @@ styles: |
   }
 ```
 
-The Bubble theme (like on screeshots) can be found here: 
+The Bubble theme (like on the screenshots) can be found here: 
 https://github.com/Clooos/Bubble
 
 ## Custom components conflicts
