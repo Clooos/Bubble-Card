@@ -319,7 +319,7 @@ hold_action:
 
 ## Styling
 
-You can directly use `styles: |` without card-mod which allows you to modify the CSS style of the pop-ups and all the other cards.
+You can directly use `styles: |` in YAML without card-mod which allows you to modify the CSS style of the pop-ups and all the other cards.
 
 Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
 
