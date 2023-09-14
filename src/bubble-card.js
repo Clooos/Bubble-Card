@@ -686,6 +686,7 @@ class BubbleCard extends HTMLElement {
                         padding: 16px;
                         transition: background-color 1s, border 1s, transform 1s;
                         color: var(--primary-text-color);
+                        background-color: rgba(0, 0, 0, 0);
                     }
                     .icon {
                         height: 24px;
