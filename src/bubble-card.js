@@ -556,9 +556,9 @@ class BubbleCard extends HTMLElement {
             const updateButtonsOrder = () => {
                 let buttonsList = [];
                 let i = 1;
-                while (this.config[i + '_name']) {
+                while (this.config[i + '_link']) {
                     const prefix = i + '_';
-                    const button = this.config[prefix + 'name'];
+                    const button = this.config[prefix + 'name'] || '';
                     const pirSensor = this.config[prefix + 'pir_sensor'];
                     const icon = this.config[prefix + 'icon'];
                     const link = this.config[prefix + 'link'];
@@ -611,6 +611,7 @@ class BubbleCard extends HTMLElement {
                     const buttonsContainer = this.content.querySelector(".horizontal-buttons-stack-container");
                     const buttons = {};
                     buttonsList.forEach(button => {
+                        console.log(button.button);
                         const buttonElement = createButton(button.button, button.link, button.icon);
                         // Store the button element using its link as key
                         buttons[button.link] = buttonElement;
@@ -686,6 +687,7 @@ class BubbleCard extends HTMLElement {
                         padding: 16px;
                         transition: background-color 1s, border 1s, transform 1s;
                         color: var(--primary-text-color);
+                        background-color: rgba(0, 0, 0, 0)
                     }
                     .icon {
                         height: 24px;
