@@ -611,7 +611,6 @@ class BubbleCard extends HTMLElement {
                     const buttonsContainer = this.content.querySelector(".horizontal-buttons-stack-container");
                     const buttons = {};
                     buttonsList.forEach(button => {
-                        console.log(button.button);
                         const buttonElement = createButton(button.button, button.link, button.icon);
                         // Store the button element using its link as key
                         buttons[button.link] = buttonElement;
