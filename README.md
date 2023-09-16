@@ -320,7 +320,7 @@ hold_action:
 
 ## Styling
 
-You can directly use `styles: |` in YAML without card-mod which allows you to modify the CSS style of the pop-ups and all the other cards.
+You can directly use `styles: |` in YAML **without card-mod** which allows you to modify the CSS style of the pop-ups and all the other cards.
 
 Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
 
@@ -371,7 +371,6 @@ https://github.com/Clooos/Bubble
 
 ⚠️ For now there are some features that are not working with:
 
-- Home Assistant Swipe Navigation (see https://github.com/Clooos/Bubble-Card/issues/35)
 - UI Lovelace Minimalist (see https://github.com/Clooos/Bubble-Card/issues/41)
 
 ## Help
