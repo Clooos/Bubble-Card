@@ -67,7 +67,7 @@ Most options can be configured in the GUI editor, please note that some cards do
 This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have an unique hash (e.g. `'#kitchen'`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card come with an header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
 
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
-2. This `vertical-stack` must be after all your other cards (this is important)
+2. This `vertical-stack` must be after all your other cards and before your `horizontal-buttons-stack` if you have one
 3. Now add a `Bubble Card` with the type `pop-up` in it
 4. Just fill in the required inputs and the ones you need
 
