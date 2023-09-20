@@ -1,4 +1,4 @@
-const version = 'v0.0.1-beta.7';
+const version = 'v0.0.1-beta.8';
 
 class BubbleCard extends HTMLElement {
     set hass(hass) {
@@ -325,23 +325,49 @@ class BubbleCard extends HTMLElement {
             } 
             
             function checkHash(event) {
-                // Open on hash change
-                if (location.hash === popUpHash) {
-                    openPopUp();
-                // Close on back button from browser
-                } else if (popUp.classList.contains('open-pop-up')) {
-                    closePopUp();
-                }
+                return new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    const intervalId = setInterval(() => {
+                        attempts += 1;
+            
+                        // Open on hash change
+                        let hash = location.hash.split('?')[0];
+
+                        if (hash === popUpHash) {
+                            clearInterval(intervalId);
+                            resolve(openPopUp());
+                        // Close on back button from browser
+                        } else if (popUp.classList.contains('open-pop-up')) {
+                            clearInterval(intervalId);
+                            resolve(closePopUp());
+                        }
+            
+                        // Stop checking after 0.5 seconds
+                        if (attempts >= 10) {
+                            clearInterval(intervalId);
+                        }
+                    }, 50); // Check every 50ms for a total of 0.5 seconds
+                });
             };
-
+            
+            checkHash();
+            
             function openPopUp() {
-                popUp.classList.remove('close-pop-up');
-                popUp.classList.add('open-pop-up');
+                return new Promise((resolve, reject) => {
+                    popUp.classList.remove('close-pop-up');
+                    popUp.classList.add('open-pop-up');
+            
+                    resolve();
+                });
             }
-
+            
             function closePopUp() {
-                popUp.classList.remove('open-pop-up');
-                popUp.classList.add('close-pop-up');
+                return new Promise((resolve, reject) => {
+                    popUp.classList.remove('open-pop-up');
+                    popUp.classList.add('close-pop-up');
+            
+                    resolve();
+                });
             }
             
             const headerStyles = `
@@ -472,7 +498,8 @@ class BubbleCard extends HTMLElement {
                     }
                     #root.open-pop-up > * {
                       /* Block child items to overflow and if they do clip them */
-                      max-width: calc(100vw - 38px);
+                      /*max-width: calc(100vw - 38px);*/
+                      max-width: 100% !important;
                       overflow-x: clip;
                     }
                     #root.close-pop-up { 
@@ -524,10 +551,11 @@ class BubbleCard extends HTMLElement {
         if (this.config.card_type === 'horizontal-buttons-stack') {
             const createButton = (button, link, icon) => {
                 const buttonElement = document.createElement("button");
-                buttonElement.setAttribute("onclick", `window.location.href='${link}';`);
+                buttonElement.onclick = function() { navigate('', link); }; 
                 buttonElement.setAttribute("class", "button");
                 buttonElement.innerHTML = `
-                    <ha-icon icon="${icon}" class="icon"></ha-icon><p>${button}</p>
+                    ${icon !== '' ? `<ha-icon icon="${icon}" class="icon" style="${button !== '' ? `margin-right: 8px;` : ''}"></ha-icon>` : ''}
+                    ${button !== '' ? `<p class="name">${button}</p>` : ''}
                 `;
                 return buttonElement;
             };
@@ -556,11 +584,11 @@ class BubbleCard extends HTMLElement {
             const updateButtonsOrder = () => {
                 let buttonsList = [];
                 let i = 1;
-                while (this.config[i + '_name']) {
+                while (this.config[i + '_link']) {
                     const prefix = i + '_';
-                    const button = this.config[prefix + 'name'];
+                    const button = this.config[prefix + 'name'] || '';
                     const pirSensor = this.config[prefix + 'pir_sensor'];
-                    const icon = this.config[prefix + 'icon'];
+                    const icon = this.config[prefix + 'icon'] || '';
                     const link = this.config[prefix + 'link'];
                     const lightEntity = this.config[prefix + 'entity'];
                     buttonsList.push({
@@ -684,12 +712,12 @@ class BubbleCard extends HTMLElement {
                         border-radius: 25px;
                         z-index: 2;
                         padding: 16px;
+                        background: none;
                         transition: background-color 1s, border 1s, transform 1s;
                         color: var(--primary-text-color);
                     }
                     .icon {
                         height: 24px;
-                        margin-right: 8px;
                     }
                     .card-content {
                         width: 100%;
@@ -787,12 +815,20 @@ class BubbleCard extends HTMLElement {
             }
 
             const entityId = this.config.entity;
-            const icon = !this.config.icon ? hass.states[entityId].attributes.icon || '' : this.config.icon;
+            const icon = !this.config.icon ? hass.states[entityId].attributes.icon || hass.states[entityId].attributes.entity_picture || '' : this.config.icon;
             const name = !this.config.name ? hass.states[entityId].attributes.friendly_name || '' : this.config.name;
             const buttonType = this.config.button_type || 'switch';
             const state = !entityId ? '' : hass.states[entityId].state;
             let currentBrightness = !entityId ? '' : hass.states[entityId].attributes.brightness || 0;
             let currentVolume = !entityId ? '' : hass.states[entityId].attributes.volume_level || 0;
+            let isDragging = false;
+            let brightness = currentBrightness;
+            let volume = currentVolume;
+            let startX = 0;
+            let startY = 0;
+            let startValue = 0;
+            let movingVertically = false;
+            let timeoutId = null;
 
             const iconContainer = document.createElement('div');
             iconContainer.setAttribute('class', 'icon-container');
@@ -831,16 +867,16 @@ class BubbleCard extends HTMLElement {
                     switchButton.appendChild(nameContainer);
                     this.switchButton = this.content.querySelector(".switch-button");
                 }
-
-                iconContainer.innerHTML = `<ha-icon icon="${icon}" class="icon"></ha-icon>`;
+                
+                if (hass.states[entityId].attributes.entity_picture || icon.startsWith("/api/image/")) {
+                    iconContainer.innerHTML = `<img class="entity-picture" src="${icon}" alt="Icon" />`;
+                } else {
+                    iconContainer.innerHTML = `<ha-icon icon="${icon}" class="icon"></ha-icon>`;
+                }
                 nameContainer.innerHTML = `<p>${name}</p>`;
 
                 this.buttonAdded = true;
             }
-
-            let isDragging = false;
-            let brightness = currentBrightness;
-            let volume = currentVolume;
 
             function tapFeedback(content) {
                 let feedbackElement = content.querySelector('.feedback-element');
@@ -856,13 +892,36 @@ class BubbleCard extends HTMLElement {
                     content.removeChild(feedbackElement);
                 }, 500);
             }
-
+            
             function handleStart(e) {
+                startX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+                startY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
+                startValue = rangeSlider.value;
                 if (e.target !== iconContainer.querySelector('ha-icon')) {
                     isDragging = true;
-                    updateRange(e.pageX || e.touches[0].pageX);
                     document.addEventListener('mouseup', handleEnd);
                     document.addEventListener('touchend', handleEnd);
+                    document.addEventListener('mousemove', checkVerticalScroll);
+                    document.addEventListener('touchmove', checkVerticalScroll);
+            
+                    // Add a delay before activating the slider
+                    timeoutId = setTimeout(() => {
+                        updateRange(e.pageX || e.touches[0].pageX);
+                        updateEntity();
+                        timeoutId = null; // Reset timeoutId once the delay has elapsed
+                    }, 200);
+                }
+            }
+            
+            function checkVerticalScroll(e) {
+                const x = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+                const y = e.pageY || (e.touches ? e.touches[0].pageY : 0);
+                if (Math.abs(y - startY) > Math.abs(x - startX)) {
+                    clearTimeout(timeoutId); // Cancel the activation of the slider if vertical scrolling is detected
+                    handleEnd();
+                } else {
+                    document.removeEventListener('mousemove', checkVerticalScroll);
+                    document.removeEventListener('touchmove', checkVerticalScroll);
                     document.addEventListener('mousemove', handleMove);
                     document.addEventListener('touchmove', handleMove);
                 }
@@ -870,6 +929,15 @@ class BubbleCard extends HTMLElement {
 
             function handleEnd() {
                 isDragging = false;
+                movingVertically = false;
+                updateEntity();
+                document.removeEventListener('mouseup', handleEnd);
+                document.removeEventListener('touchend', handleEnd);
+                document.removeEventListener('mousemove', handleMove);
+                document.removeEventListener('touchmove', handleMove);
+            }
+            
+            function updateEntity() {
                 if (entityId.startsWith("light.")) {
                     currentBrightness = brightness;
                     hass.callService('light', 'turn_on', {
@@ -883,16 +951,17 @@ class BubbleCard extends HTMLElement {
                         volume_level: currentVolume
                     });
                 }
-                
-                document.removeEventListener('mouseup', handleEnd);
-                document.removeEventListener('touchend', handleEnd);
-                document.removeEventListener('mousemove', handleMove);
-                document.removeEventListener('touchmove', handleMove);
             }
-
+            
             function handleMove(e) {
-                if (isDragging) {
-                    updateRange(e.pageX || e.touches[0].pageX);
+                const x = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+                const y = e.pageY || (e.touches ? e.touches[0].pageY : 0);
+                // Check if the movement is large enough to be considered a slide
+                if (isDragging && Math.abs(x - startX) > 10) {
+                    updateRange(x);
+                } else if (isDragging && Math.abs(y - startY) > 10) { // If the movement is primarily vertical
+                    isDragging = false; // Stop the slide
+                    rangeSlider.value = startValue; // Reset to initial value
                 }
             }
 
@@ -927,8 +996,8 @@ class BubbleCard extends HTMLElement {
 
             function updateButtonStyle(state, content) {
                 content.buttonContainer.style.opacity = state !== 'unavailable' ? '1' : '0.5';
-                if (buttonType === 'switch' || buttonType === 'custom') {
-                    const backgroundColor = state === ('on' || 'open' || 'cleaning' || 'true') ? 'var(--accent-color)' : 'rgba(0,0,0,0)';
+                if (['switch', 'custom'].includes(buttonType)) {
+                    const backgroundColor = ['on', 'open', 'cleaning', 'true', 'home', 'playing'].includes(state) ? 'var(--accent-color)' : 'rgba(0,0,0,0)';
                     content.switchButton.style.backgroundColor = backgroundColor;
                 }
             }
@@ -1018,6 +1087,7 @@ class BubbleCard extends HTMLElement {
                         margin: 6px;
                         border-radius: 50%;
                         background-color: var(--card-background-color,var(--ha-card-background));
+                        cursor: pointer !important;
                     }
                     
                     ha-icon {
@@ -1027,7 +1097,11 @@ class BubbleCard extends HTMLElement {
                         padding: 1px 2px;
                         width: 22px; 
                         height: 22px;
-                        cursor: pointer !important;
+                    }
+                    
+                    .entity-picture {
+                        height: inherit;
+                        border-radius: 100%;
                     }
                     
                     .nameContainer {
@@ -1186,12 +1260,6 @@ class BubbleCard extends HTMLElement {
                 const iconContainer = this.content.querySelector('.icon-container');
                 addActions(this, iconContainer);
 
-                // this.content.querySelector('.icon-container').addEventListener('mouseup', event => {
-                //     fireEvent(this, "hass-more-info", {
-                //         entityId: entity
-                //     });
-                // });
-
                 this.coverAdded = true;
             }
 
@@ -1290,21 +1358,33 @@ class BubbleCard extends HTMLElement {
         //   throw new Error("You need to define a card type (card_type: pop-up)");
         // }
         if (config.card_type === 'pop-up') {
-            //if (!config.entity) {
-            //  throw new Error("You need to define an entity");
-            //}
             if (!config.hash) {
                 throw new Error("You need to define an hash");
             }
             if (!config.icon) {
                 throw new Error("You need to define an icon");
             }
-            // Need to put a condition
-            //if (!config.room_temperature_sensor) {
-            //  throw new Error("You need to define a temperature sensor");
-            //}
             if (!config.name) {
                 throw new Error("You need to define a name");
+            }
+        } else if (config.card_type === 'horizontal-buttons-stack') {
+            var definedLinks = {};
+            
+            for (var key in config) {
+              if (key.match(/^\d+_icon$/)) {
+                var iconKey = key;
+                var linkKey = key.replace('_icon', '_link');
+            
+                if (config[linkKey] === undefined) {
+                    throw new Error("You need to define " + linkKey);
+                }
+            
+                if (definedLinks[config[linkKey]]) {
+                    throw new Error("You can't use " + config[linkKey] + " twice" );
+                }
+            
+                definedLinks[config[linkKey]] = true;
+              }
             }
         } else if (config.card_type === 'button' || config.card_type === 'cover') {
             if (!config.entity) {
@@ -1333,12 +1413,6 @@ class BubbleCard extends HTMLElement {
         return document.createElement("bubble-card-editor");
     }
 }
-
-// console.info(
-//     '%c Bubble Card %c ${version} ',
-//     'background-color: #555;color: #fff;padding: 3px 2px 3px 3px;border-radius: 14px 0 0 14px;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)',
-//     'background-color: #506eac;color: #fff;padding: 3px 3px 3px 2px;border-radius: 0 14px 14px 0;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)'
-// );
 
 console.info(
     `%c Bubble Card %c ${version} `,
@@ -1635,7 +1709,7 @@ class BubbleCardEditor extends LitElement {
 
                 this.buttonIndex = 0;
 
-                while (this._config[(this.buttonIndex + 1) + '_name']) {
+                while (this._config[(this.buttonIndex + 1) + '_link']) {
                     this.buttonIndex++;
                 }
 
@@ -1863,7 +1937,6 @@ class BubbleCardEditor extends LitElement {
     }
 
     _valueChanged(ev) {
-        console.log("Value changed");
         if (!this._config || !this.hass) {
             return;
         }
