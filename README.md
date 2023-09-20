@@ -82,7 +82,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `state` | string | Optional | Any entity | Display its state in your pop-up header |
 | `state_unit` | string | Optional | Any unit of measurement | An unit of measurement for the displayed state (e.g. `°F`, `°C`, `%`) |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
-| `is_sidebar_hidden` | boolean | Optional | `true` or `false` | Fix the pop-up position if the sidebar is hidden on desktop |
+| `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the pop-up position if the sidebar is hidden on desktop |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
