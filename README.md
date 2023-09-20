@@ -125,12 +125,12 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
-| `auto_order` | boolean | **Required** | `true` or `false` | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code** |
 | `1_link` | string | **Required** | The pop-up hash (e.g. `'#kitchen'`) with ' ' or any link | A link to open |
-| `1_name` | string | Optional but recommended | Any string | A name for your button |
-| `1_icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your button |
+| `1_name` | string | Optional | Any string | A name for your button |
+| `1_icon` | string | Optional | Any `mdi:` icon | An icon for your button |
 | `1_entity` | string | Optional | Any light or light group | Display the color of that light in background |
 | `1_pir_sensor` | string | Optional | Any binary sensor | At least one pir sensor or more for `auto_order` |
+| `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code** |
 
 **The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).**
 
@@ -168,7 +168,7 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 | `entity` | string | **Required** | Any switchable entity, any media player or any light | An entity to control |
 | `button_type` | string | Optional | `switch` (default) or `slider` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
-| `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon |
+| `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
