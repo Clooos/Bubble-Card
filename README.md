@@ -459,6 +459,7 @@ https://github.com/Clooos/Bubble
 ⚠️ For now there are some features that are not working with:
 
 - UI Lovelace Minimalist (see https://github.com/Clooos/Bubble-Card/issues/41)
+- Lovelace state switch (see https://github.com/Clooos/Bubble-Card/issues/47)
 
 ## Help
 
