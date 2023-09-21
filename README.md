@@ -6,7 +6,7 @@ Bubble Card is a minimalist card collection for Home Assistant with a nice pop-u
 
 ## Table of contents
 
-**[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Styling`](#styling)** | **[`Conflicts`](#custom-components-conflict)** | **[`Help`](#help)** 
+**[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Full example`](#full-example)** | **[`Styling`](#styling)** | **[`Conflicts`](#custom-components-conflicts)** | **[`Help`](#help)** 
 
 
 ## Screenshots and features
@@ -316,6 +316,93 @@ double_tap_action:
   service: script.dark_scene 
 hold_action: 
   action: more-info
+```
+
+## Full example
+
+Here is the raw code of my "Cuisine" pop-up (Kitchen in english) as seen in some screenshots :
+
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:bubble-card
+    card_type: pop-up
+    entity: light.cuisine
+    icon: mdi:fridge-outline
+    name: Cuisine
+    hash: '#cuisine'
+    state: sensor.cuisine_temperature
+    state_unit: °C
+    margin_top: 74px
+    width_desktop: 600px
+    margin_top_mobile: 18px
+    margin_top_desktop: 74px
+    styles: |
+      #root {
+        /* This is a fix for older Safari (for my wall mounted iPad) but it won't work on Firefox, this is optional */
+        display: grid !important;
+      }
+  - type: custom:bubble-card
+    card_type: separator
+    name: Lampes
+    icon: mdi:lightbulb
+  - type: horizontal-stack
+    cards:
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: light.led_cuisine
+        name: LED
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: light.bar_cuisine
+        name: Bar
+        icon: mdi:light-recessed
+  - type: horizontal-stack
+    cards:
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: light.spots_cuisine
+        name: Plan de travail
+      - type: custom:bubble-card
+        card_type: button
+        button_type: switch
+        entity: light.hotte_cuisine
+        name: Hotte
+  - type: custom:bubble-card
+    card_type: separator
+    name: Appareils
+    icon: mdi:connection
+  - type: horizontal-stack
+    cards:
+      - type: custom:bubble-card
+        card_type: button
+        button_type: slider
+        entity: media_player.google_nest_cuisine
+        name: Google Mini
+        icon: mdi:speaker
+      - type: custom:bubble-card
+        card_type: button
+        button_type: switch
+        entity: fan.hotte_cuisine
+        name: Hotte
+        icon: mdi:fan
+  - type: custom:bubble-card
+    card_type: separator
+    name: Volets
+    icon: mdi:window-shutter
+  - type: horizontal-stack
+    cards:
+      - type: custom:bubble-card
+        card_type: cover
+        entity: cover.cuisine
+        name: Cuisine
+        icon_open: mdi:blinds-horizontal
+        icon_closed: mdi:blinds-horizontal-closed
+      - type: custom:bubble-card
+        card_type: empty-column
 ```
 
 ## Styling
