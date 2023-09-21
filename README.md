@@ -471,7 +471,7 @@ And for your questions you can go ask here on the forum to get some help from me
 
 ## Donate
 
-If you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated.
+If you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated 🍻
 
 [![Buy me a beer](https://img.shields.io/badge/Buy%20me%20a-beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos)
 
