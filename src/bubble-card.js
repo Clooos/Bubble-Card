@@ -1783,7 +1783,7 @@ class BubbleCardEditor extends LitElement {
                         style="width: 100%;"
                     ></ha-textfield>
                     <h3>Pop-up trigger</h3>
-                    <ha-alert alert-type="info">This allows you to apen this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
+                    <ha-alert alert-type="info">This allows you to open this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
                     ${this.makeDropdown("Optional - Entity to open the pop-up based on its state", "trigger_entity", allEntitiesList)}
                     <ha-textfield
                         label="Optional - State to open the pop-up"
