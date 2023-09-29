@@ -121,6 +121,8 @@ icon: mdi:fridge
 
 This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer. This card will have more features in the future.
 
+**⚠️ Important: This card have to be the last one in your view (after every cards and pop-ups).**
+
 ### Options
 
 | Name | Type | Requirement | Supported options | Description |
