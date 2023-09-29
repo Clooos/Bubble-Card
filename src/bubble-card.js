@@ -1,4 +1,4 @@
-var version = 'v0.0.1-beta.9';
+var version = 'v0.0.1-beta.10';
 
 class BubbleCard extends HTMLElement {
     constructor() {
@@ -238,7 +238,7 @@ class BubbleCard extends HTMLElement {
         let widthDesktop = this.config.width_desktop || '540px';
         let widthDesktopDivided = widthDesktop ? widthDesktop.match(/(\d+)(\D+)/) : '';
         let isSidebarHidden = this.config.is_sidebar_hidden || false;
-        let state = this.config.state ? hass.states[this.config.state].state : '';
+        let state = entityId ? hass.states[entityId].state : '';
         let formatedState;
 
         switch (this.config.card_type) {
@@ -271,6 +271,7 @@ class BubbleCard extends HTMLElement {
                         ? (this.config.margin_top_desktop !== '0' ? this.config.margin_top_desktop : '0px')
                         : '0px';
                     const displayPowerButton = this.config.entity ? 'flex' : 'none';
+                    state = this.config.state ? hass.states[this.config.state].state : '';
         
                     if (!this.headerAdded) {
                         const headerContainer = document.createElement("div");
@@ -937,7 +938,6 @@ class BubbleCard extends HTMLElement {
                     this.content.appendChild(buttonContainer);
                 }
     
-                //const name = !this.config.name ? hass.states[entityId].attributes.friendly_name || '' : this.config.name;
                 const buttonType = this.config.button_type || 'switch';
                 formatedState = hass.formatEntityState(hass.states[entityId]);
                 const showState = !this.config.show_state ? false : this.config.show_state;
@@ -1161,7 +1161,6 @@ class BubbleCard extends HTMLElement {
                     if (entityId.startsWith("light.")) {
                         const rgbColor = hass.states[entityId].attributes.rgb_color;
                         const rgbColorOpacity = rgbColor ? `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, 0.5)` : `rgba(255, 255, 255, 0.5)`;
-                        //rangeFill.style.backgroundColor = rgbColorOpacity;
                         this.rangeFill.style.backgroundColor = rgbColorOpacity;
                     } else {
                         this.rangeFill.style.backgroundColor = `var(--accent-color)`;
@@ -1783,7 +1782,7 @@ class BubbleCardEditor extends LitElement {
                         style="width: 100%;"
                     ></ha-textfield>
                     <h3>Pop-up trigger</h3>
-                    <ha-alert alert-type="info">This allows you to open this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
+                    <ha-alert alert-type="info">This allows you to apen this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
                     ${this.makeDropdown("Optional - Entity to open the pop-up based on its state", "trigger_entity", allEntitiesList)}
                     <ha-textfield
                         label="Optional - State to open the pop-up"
