@@ -76,15 +76,18 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Required** | Any unique hash (e.g. `'#kitchen'`) with ' ' | This is how you will open your pop-up |
-| `name` | string | Optional but recommended | Any string | A name for your pop-up header |
-| `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your pop-up header |
+| `name` | string | Optional | Any string | A name for your pop-up header |
+| `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your pop-up header, if not defined it will display the entity icon or the `entity-picture` |
 | `entity` | string | Optional | Any switchable entity | Display a button to toggle this entity |
 | `state` | string | Optional | Any entity | Display its state in your pop-up header |
-| `state_unit` | string | Optional | Any unit of measurement | An unit of measurement for the displayed state (e.g. `°F`, `°C`, `%`) |
+| `text` | string | Optional | Any string | An additional text to show next to your `name` |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
-| `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the pop-up position if the sidebar is hidden on desktop |
+| `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the pop-up position if the sidebar is hidden on desktop (only if you have made a modification to hide it yourself) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
+| `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
+| `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
+| `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
@@ -117,6 +120,23 @@ name: Kitchen
 icon: mdi:fridge
 ```
 
+ ### Pop-ups trigger
+ 
+This feature allows you to open a pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
+
+#### Example
+ 
+ ```yaml
+type: custom:bubble-card
+card_type: pop-up
+hash: '#kitchen'
+name: Security
+icon: mdi:video
+trigger_entity: binary_sensor.front_door_motion
+trigger_state: 'on'
+trigger_close: true
+```
+
 ## Horizontal buttons stack
 
 This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer. This card will have more features in the future.
@@ -133,6 +153,7 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 | `1_entity` | string | Optional | Any light or light group | Display the color of that light in background |
 | `1_pir_sensor` | string | Optional | Any binary sensor | At least one pir sensor or more for `auto_order` |
 | `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code** |
+| `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 
 **The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).**
 
@@ -171,6 +192,7 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 | `button_type` | string | Optional | `switch` (default) or `slider` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
+| `entity_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
@@ -200,6 +222,7 @@ This is still experimental and more customizations are coming.
 | `button_type` | string | **Required** | `custom` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
+| `entity_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button hold, if undefined, `more-info` will be used. |
@@ -334,9 +357,7 @@ cards:
     name: Cuisine
     hash: '#cuisine'
     state: sensor.cuisine_temperature
-    state_unit: °C
-    margin_top: 74px
-    width_desktop: 600px
+    width_desktop: 540px
     margin_top_mobile: 18px
     margin_top_desktop: 74px
     styles: |
@@ -455,6 +476,26 @@ styles: |
 
 The Bubble theme (like on the screenshots) can be found here: 
 https://github.com/Clooos/Bubble
+
+### Styles template
+
+Advanced users can add templates in JS in their custom styles, here is an example of a button that is red when it's off and blue when it's on.
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: switch.test
+name: Test
+styles: |
+  .switch-button {
+    background-color: ${state === 'on' ? 'blue' : 'red'} !important;
+  }
+```
+
+For now you have access to these variables :
+
+ `state` will return the state of your `entity`.  
+ `entity` will return your entity like `switch.test` in this example.
 
 ## Custom components conflicts
 
