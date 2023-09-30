@@ -492,6 +492,9 @@ styles: |
   }
 ```
 
+More informations here :
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator
+
 For now you have access to these variables :
 
  `state` will return the state of your `entity`.  
