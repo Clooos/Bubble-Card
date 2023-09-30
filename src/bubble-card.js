@@ -1,44 +1,48 @@
-var version = 'v0.0.1-beta.10';
+var version = 'v0.0.1-beta.11';
 
 class BubbleCard extends HTMLElement {
     constructor() {
         super();
-        // 'urlChanged' custom event
-        const pushState = history.pushState;
-        history.pushState = function () {
-            pushState.apply(history, arguments);
-            window.dispatchEvent(new Event('pushstate'));
-        };
-
-        const replaceState = history.replaceState;
-        history.replaceState = function () {
-            replaceState.apply(history, arguments);
-            window.dispatchEvent(new Event('replacestate'));
-        };
-
-        ['popstate', 'pushstate', 'replacestate', 'mousedown', 'touchstart'].forEach((eventType) => {
-            window.addEventListener(eventType, urlChanged);
-        });
-
-        const event = new Event('urlChanged');
-
-        function urlChanged() {
-        const newUrl = window.location.href;
-            if (newUrl !== this.currentUrl) {
-                window.dispatchEvent(event);
-                this.currentUrl = newUrl;
+        if (!window.eventAdded) {
+            // 'urlChanged' custom event
+            const pushState = history.pushState;
+            history.pushState = function () {
+                pushState.apply(history, arguments);
+                window.dispatchEvent(new Event('pushstate'));
+            };
+    
+            const replaceState = history.replaceState;
+            history.replaceState = function () {
+                replaceState.apply(history, arguments);
+                window.dispatchEvent(new Event('replacestate'));
+            };
+    
+            ['popstate', 'pushstate', 'replacestate', 'mousedown', 'touchstart'].forEach((eventType) => {
+                window.addEventListener(eventType, urlChanged);
+            });
+    
+            const event = new Event('urlChanged');
+    
+            function urlChanged() {
+            const newUrl = window.location.href;
+                if (newUrl !== this.currentUrl) {
+                    window.dispatchEvent(event);
+                    this.currentUrl = newUrl;
+                }
             }
+            
+            // Check url when pop-ups are initialized
+            const popUpInitialized = () => {
+                window.dispatchEvent(event);
+                setTimeout(() => {
+                    window.removeEventListener('popUpInitialized', popUpInitialized);
+                }, 1000);
+            };
+            
+            window.addEventListener('popUpInitialized', popUpInitialized);
+            
+            window.eventAdded = true;
         }
-        
-        // Check url when pop-ups are initialized
-        const popUpInitialized = () => {
-            window.dispatchEvent(event);
-            setTimeout(() => {
-                window.removeEventListener('popUpInitialized', popUpInitialized);
-            }, 1000);
-        };
-        
-        window.addEventListener('popUpInitialized', popUpInitialized);
     }
     
     set hass(hass) {
@@ -409,7 +413,7 @@ class BubbleCard extends HTMLElement {
                         let isManuallyClosed = localStorage.getItem('isManuallyClosed_' + popUpHash) === 'true';
                         let isTriggered = localStorage.getItem('isTriggered_' + popUpHash) === 'true';
                     
-                        if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null || !isTriggered) {
+                        if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null && !isTriggered) {
                             navigate('', popUpHash);
                             isTriggered = true;
                             localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
@@ -425,7 +429,7 @@ class BubbleCard extends HTMLElement {
                             navigate('', popUpHash);
                             isTriggered = true;
                             localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-                        } else if (triggerClose && popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
+                        } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
                             history.replaceState(null, null, location.href.split('#')[0]);
                             isTriggered = false;
                             isManuallyClosed = true;
@@ -545,8 +549,8 @@ class BubbleCard extends HTMLElement {
                         @media only screen and (min-width: 870px) {
                             #root {
                                 top: calc(100% + ${marginTopDesktop} + var(--header-height));
-                                width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' ? ' - var(--mdc-drawer-width)' : ''}) !important;
-                                left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + ${isSidebarHidden === true ? '0px' : `var(--mdc-drawer-width) ${widthDesktopDivided[2] === '%' ? '' : '/ 2'}`});
+                                width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' && !isSidebarHidden ? ' - var(--mdc-drawer-width)' : ''}) !important;
+                                left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + ${isSidebarHidden ? '0px' : `var(--mdc-drawer-width) ${widthDesktopDivided[2] === '%' ? '' : '/ 2'}`});
                                 margin: 0 !important;
                             }
                         }  
@@ -880,7 +884,7 @@ class BubbleCard extends HTMLElement {
                     @media only screen and (min-width: 870px) {
                         .card-content {
                             position: fixed;
-                            width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' ? ' - var(--mdc-drawer-width)' : ''}) !important;
+                            width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' && !isSidebarHidden ? ' - var(--mdc-drawer-width)' : ''}) !important;
                             left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + ${isSidebarHidden === true ? '0px' : `var(--mdc-drawer-width) ${widthDesktopDivided[2] === '%' ? '' : '/ 2'}`});
                             margin-left: -13px !important;
                             padding: 0 26px !important;
@@ -1631,6 +1635,10 @@ class BubbleCardEditor extends LitElement {
     get _trigger_state() {
         return this._config.trigger_state || '';
     }
+    
+    get _trigger_close() {
+        return this._config.trigger_close || false;
+    }
 
     get _margin_top_mobile() {
         return this._config.margin_top_mobile || '0px';
@@ -1782,7 +1790,7 @@ class BubbleCardEditor extends LitElement {
                         style="width: 100%;"
                     ></ha-textfield>
                     <h3>Pop-up trigger</h3>
-                    <ha-alert alert-type="info">This allows you to apen this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
+                    <ha-alert alert-type="info">This allows you to open this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
                     ${this.makeDropdown("Optional - Entity to open the pop-up based on its state", "trigger_entity", allEntitiesList)}
                     <ha-textfield
                         label="Optional - State to open the pop-up"
