@@ -244,6 +244,7 @@ class BubbleCard extends HTMLElement {
         let isSidebarHidden = this.config.is_sidebar_hidden || false;
         let state = entityId ? hass.states[entityId].state : '';
         let formatedState;
+        let autoClose = this.config.autoclose || false;
 
         switch (this.config.card_type) {
             // Initialize pop-up card
@@ -260,7 +261,7 @@ class BubbleCard extends HTMLElement {
                         const event = new Event('popUpInitialized');
                         window.dispatchEvent(event);
                     }
-
+                    
                     const popUpHash = this.config.hash;
                     const popUp = this.popUp;
                     const text = this.config.text || '';
@@ -276,6 +277,8 @@ class BubbleCard extends HTMLElement {
                         : '0px';
                     const displayPowerButton = this.config.entity ? 'flex' : 'none';
                     state = this.config.state ? hass.states[this.config.state].state : '';
+                    
+                    let closeTimeout;
         
                     if (!this.headerAdded) {
                         const headerContainer = document.createElement("div");
@@ -365,6 +368,9 @@ class BubbleCard extends HTMLElement {
                         });
                         
                         window.addEventListener('mousedown', function(e) {
+                            //reset auto close
+                            location.hash === popUpHash && resetAutoClose();
+                            
                             if (location.hash === popUpHash && 
                                 !e.composedPath().some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') && 
                                 !e.composedPath().some(el => el.id === 'root' && !el.classList.contains('close-pop-up'))) {
@@ -389,6 +395,9 @@ class BubbleCard extends HTMLElement {
                             // Record the Y position of the finger at the start of the touch
                             startTouchY = event.touches[0].clientY;
                             lastTouchY = startTouchY;
+                            
+                            //reset auto close
+                            location.hash === popUpHash && resetAutoClose();
                         });
                         
                         popUp.addEventListener('touchmove', function(event) {
@@ -465,11 +474,25 @@ class BubbleCard extends HTMLElement {
                     function openPopUp() {
                         popUp.classList.remove('close-pop-up');
                         popUp.classList.add('open-pop-up');
+                        resetAutoClose();
                     }
                     
                     function closePopUp() {
                         popUp.classList.remove('open-pop-up');
                         popUp.classList.add('close-pop-up');
+                        clearTimeout(closeTimeout);
+                    }
+                    function resetAutoClose() {
+                        //Clear any existing timeout
+                        clearTimeout(closeTimeout);
+                        //start autoclose if enabled
+                        if(autoClose > 0) {
+                            closeTimeout = setTimeout(autoClosePopUp, autoClose);
+                        }
+                    }
+                    
+                    function autoClosePopUp(){
+                        history.replaceState(null, null, location.href.split('#')[0]);
                     }
                     
                     const popUpStyles = `
@@ -1671,7 +1694,11 @@ class BubbleCardEditor extends LitElement {
     get _close_service() {
         return this._config.open_service || 'cover.close_cover';
     }
-
+    
+    get _autoclose() {
+        return this._config.autoclose || '';
+    }
+    
     get _stop_service() {
         return this._config.open_service || 'cover.stop_cover';
     }
@@ -1786,6 +1813,13 @@ class BubbleCardEditor extends LitElement {
                         label="Optional - Additional text"
                         .value="${this._text}"
                         .configValue="${"text"}"
+                        @input="${this._valueChanged}"
+                        style="width: 100%;"
+                    ></ha-textfield>
+                    <ha-textfield
+                        label="Optional - AutoClose in Milliseconds (e.g. 15000) "
+                        .value="${this._autoclose}"
+                        .configValue="${"autoclose"}"
                         @input="${this._valueChanged}"
                         style="width: 100%;"
                     ></ha-textfield>
