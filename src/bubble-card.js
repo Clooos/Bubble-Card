@@ -59,7 +59,6 @@ class BubbleCard extends HTMLElement {
             `;
             this.card = this.shadowRoot.querySelector("ha-card");
             this.content = this.shadowRoot.querySelector("div");
-            
         }
 
         if (window.location.search !== "?edit=1") {
@@ -245,9 +244,7 @@ class BubbleCard extends HTMLElement {
         let isSidebarHidden = this.config.is_sidebar_hidden || false;
         let state = entityId ? hass.states[entityId].state : '';
         let formatedState;
-        
         let autoClose = this.config.autoclose || false;
-        let closeTimeout;
 
         switch (this.config.card_type) {
             // Initialize pop-up card
@@ -261,12 +258,10 @@ class BubbleCard extends HTMLElement {
                     if (!this.popUp) {
                         this.card.style.marginTop = '0';
                         this.popUp = this.getRootNode().querySelector('#root');
-                        
-        
                         const event = new Event('popUpInitialized');
                         window.dispatchEvent(event);
                     }
-
+                    
                     const popUpHash = this.config.hash;
                     const popUp = this.popUp;
                     const text = this.config.text || '';
@@ -282,6 +277,8 @@ class BubbleCard extends HTMLElement {
                         : '0px';
                     const displayPowerButton = this.config.entity ? 'flex' : 'none';
                     state = this.config.state ? hass.states[this.config.state].state : '';
+                    
+                    let closeTimeout;
         
                     if (!this.headerAdded) {
                         const headerContainer = document.createElement("div");
@@ -371,15 +368,12 @@ class BubbleCard extends HTMLElement {
                         });
                         
                         window.addEventListener('mousedown', function(e) {
-
-                            if (location.hash === popUpHash) {
-                                resetAutoClose();        
-                            }
+                            //reset auto close
+                            location.hash === popUpHash && resetAutoClose();
                             
                             if (location.hash === popUpHash && 
                                 !e.composedPath().some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') && 
                                 !e.composedPath().some(el => el.id === 'root' && !el.classList.contains('close-pop-up'))) {
-                     
                                     history.replaceState(null, null, location.href.split('#')[0]);
                                     localStorage.setItem('isManuallyClosed_' + popUpHash, true)
                             }
@@ -402,14 +396,11 @@ class BubbleCard extends HTMLElement {
                             startTouchY = event.touches[0].clientY;
                             lastTouchY = startTouchY;
                             
-                            if (location.hash === popUpHash) {
-                                resetAutoClose();        
-                            }
-                            
+                            //reset auto close
+                            location.hash === popUpHash && resetAutoClose();
                         });
                         
                         popUp.addEventListener('touchmove', function(event) {
-                            
                             // Calculate the distance the finger has traveled
                             let touchMoveDistance = event.touches[0].clientY - startTouchY;
                         
@@ -480,11 +471,20 @@ class BubbleCard extends HTMLElement {
                         }
                     };
                     
-                    function resetAutoClose() {
-                        console.log('reset auto close, movement');
-                        // Clear any existing timeout
+                    function openPopUp() {
+                        popUp.classList.remove('close-pop-up');
+                        popUp.classList.add('open-pop-up');
+                        resetAutoClose();
+                    }
+                    
+                    function closePopUp() {
+                        popUp.classList.remove('open-pop-up');
+                        popUp.classList.add('close-pop-up');
                         clearTimeout(closeTimeout);
-                        
+                    }
+                    function resetAutoClose() {
+                        //Clear any existing timeout
+                        clearTimeout(closeTimeout);
                         //start autoclose if enabled
                         if(autoClose > 0) {
                             closeTimeout = setTimeout(autoClosePopUp, autoClose);
@@ -493,22 +493,6 @@ class BubbleCard extends HTMLElement {
                     
                     function autoClosePopUp(){
                         history.replaceState(null, null, location.href.split('#')[0]);
-                    }
-                    
-                    function openPopUp() {
-
-                        popUp.classList.remove('close-pop-up');
-                        popUp.classList.add('open-pop-up');
-                        
-                        resetAutoClose();
-                    }
-                    
-                    function closePopUp() {
-                        // Clear any existing timeout
-                        clearTimeout(closeTimeout);
-                        
-                        popUp.classList.remove('open-pop-up');
-                        popUp.classList.add('close-pop-up');
                     }
                     
                     const popUpStyles = `
@@ -1687,10 +1671,6 @@ class BubbleCardEditor extends LitElement {
         return this._config.margin_top_desktop || '0px';
     }
 
-    get _autoclose() {
-        return this._config.autoclose || '';
-    }
-
     get _width_desktop() {
         return this._config.width_desktop || '540px';
     }
@@ -1714,7 +1694,11 @@ class BubbleCardEditor extends LitElement {
     get _close_service() {
         return this._config.open_service || 'cover.close_cover';
     }
-
+    
+    get _autoclose() {
+        return this._config.autoclose || '';
+    }
+    
     get _stop_service() {
         return this._config.open_service || 'cover.stop_cover';
     }
@@ -1839,7 +1823,6 @@ class BubbleCardEditor extends LitElement {
                         @input="${this._valueChanged}"
                         style="width: 100%;"
                     ></ha-textfield>
-                    
                     <h3>Pop-up trigger</h3>
                     <ha-alert alert-type="info">This allows you to open this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
                     ${this.makeDropdown("Optional - Entity to open the pop-up based on its state", "trigger_entity", allEntitiesList)}
