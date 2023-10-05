@@ -1,4 +1,4 @@
-var version = 'v1.0.0';
+var version = 'v1.0.1';
 
 let editor;
 
@@ -1879,8 +1879,8 @@ class BubbleCardEditor extends LitElement {
                     ></ha-textfield>
                     <ha-textfield
                         label="Optional - Auto close in Milliseconds (e.g. 15000)"
-                        .value="${this._autoclose}"
-                        .configValue="${"autoclose"}"
+                        .value="${this._auto_close}"
+                        .configValue="${"auto_close"}"
                         @input="${this._valueChanged}"
                         style="width: 100%;"
                     ></ha-textfield>
