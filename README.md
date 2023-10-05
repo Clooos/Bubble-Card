@@ -193,7 +193,7 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 | `button_type` | string | Optional | `switch` (default) or `slider` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
-| `entity_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
@@ -223,7 +223,7 @@ This is still experimental and more customizations are coming.
 | `button_type` | string | **Required** | `custom` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
-| `entity_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button hold, if undefined, `more-info` will be used. |
