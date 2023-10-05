@@ -52,7 +52,7 @@ Coming soon in the HACS default repo (still waiting for validation).
 
 ## Configuration
 
-Most options can be configured in the GUI editor, please note that some cards don't have a preview in real time (for now).
+Most options can be configured in the GUI editor, except for custom styles, custom buttons and tap actions.
 
 ### Main options
 
