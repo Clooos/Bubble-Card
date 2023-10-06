@@ -1,4 +1,4 @@
-var version = 'v1.0.1';
+var version = 'v1.0.2';
 
 let editor;
 
@@ -346,7 +346,7 @@ class BubbleCard extends HTMLElement {
         
                         const button = document.createElement("button");
                         button.setAttribute("class", "close-pop-up");
-                        button.onclick = function() { closePopUp(); localStorage.setItem('isManuallyClosed_' + popUpHash, true); }; 
+                        button.onclick = function() { history.replaceState(null, null, location.href.split('#')[0]); localStorage.setItem('isManuallyClosed_' + popUpHash, true); }; 
                         headerContainer.appendChild(button);
         
                         const haIcon3 = document.createElement("ha-icon");
@@ -535,7 +535,7 @@ class BubbleCard extends HTMLElement {
                     }
 
                     function autoClosePopUp(){
-                        closePopUp();
+                        history.replaceState(null, null, location.href.split('#')[0]);
                     }
                     
                     const popUpStyles = `
