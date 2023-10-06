@@ -80,9 +80,12 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your pop-up header, if not defined it will display the entity icon or the `entity-picture` |
 | `entity` | string | Optional | Any switchable entity | Display a button to toggle this entity |
 | `state` | string | Optional | Any entity | Display its state in your pop-up header |
+| `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |
+| `back_open` | boolean | Optional | `true` or `false` (default) | Enable the back button/event, this allows you to navigate through your pop-ups when you press the back button of your browser (`true` was the initial behavior in the beta) |
 | `text` | string | Optional | Any string | An additional text to show next to your `name` |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the pop-up position if the sidebar is hidden on desktop (only if you have made a modification to hide it yourself) |
+| `margin` | string | Optional | Any CSS value | Use this **only** if your pop-up is not well centered on mobile (e.g. `13px`) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
