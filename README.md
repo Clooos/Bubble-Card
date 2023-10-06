@@ -438,16 +438,33 @@ You can directly use `styles: |` in YAML **without card-mod** which allows you t
 
 Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
 
-Some cards needs a page refresh to display your CSS modifications (like the pop-ups).
+**Some cards needs a page refresh to display your CSS modifications (like the pop-ups).**
 
 ### Examples
 
-Here is how to change the pop-ups opacity:
+Here is how to change the whole `pop-up` opacity:
 
 ```yaml
 styles: | 
   #root { 
     opacity: 0.95; 
+  }
+```
+
+To change the `pop-up` background:
+
+```yaml
+styles: | 
+  #root {
+    /* You can edit the last value (0.8) to change the opacity, 0 is transparent and 1 is the max value */
+    background-color: rgba(79, 69, 87, 0.8) !important;
+
+    /* Add blur on your background.
+    backdrop-filter: blur(10px);
+  }
+  bubble-card::after {
+    /* Hide the gradient in the top of the pop-up */
+    display: none !important;
   }
 ```
 
@@ -460,7 +477,17 @@ styles: |
   }
 ```
 
-To change the background color of a button:
+To change the background color of a single button in an `horizontal-buttons-stack`:
+
+```yaml
+styles: >
+  /* Selector for the '#kitchen' button */
+  .kitchen {
+    background: darkblue !important;
+  }
+```
+
+To change the background color of a `button`:
 
 ```yaml
 styles: | 
@@ -469,12 +496,12 @@ styles: |
   }
 ```
 
-Or the color of a slider:
+Or the color of a `slider`:
 
 ```yaml
 styles: |
-  ha-card > div > div > div > div.range-fill { 
-    background: blue !important; 
+  .range-fill { 
+    background: rgba(79, 69, 87, 1) !important; 
   }
 ```
 
