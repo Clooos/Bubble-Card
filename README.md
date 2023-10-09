@@ -159,6 +159,7 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 | `1_entity` | string | Optional | Any light or light group | Display the color of that light in background |
 | `1_pir_sensor` | string | Optional | Any binary sensor | At least one pir sensor or more for `auto_order` |
 | `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code** |
+| `margin` | string | Optional | Any CSS value | Use this **only** if your `horizontal-buttons-stack` is not well centered on mobile (e.g. `13px`) |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 
 **The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).**
