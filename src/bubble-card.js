@@ -1,4 +1,4 @@
-var version = 'v1.0.2';
+var version = 'v1.0.3';
 
 let editor;
 
@@ -21,7 +21,7 @@ class BubbleCard extends HTMLElement {
                 window.dispatchEvent(new Event('replacestate'));
             };
     
-            ['pushstate', 'replacestate', 'mousedown', 'touchstart'].forEach((eventType) => {
+            ['pushstate', 'replacestate', 'click', 'popstate', 'mousedown', 'touchstart'].forEach((eventType) => {
                 window.addEventListener(eventType, urlChanged);
             });
     
@@ -65,15 +65,15 @@ class BubbleCard extends HTMLElement {
             `;
             this.card = this.shadowRoot.querySelector("ha-card");
             this.content = this.shadowRoot.querySelector("div");
+            
+            this.editorElement = document.querySelector("body > home-assistant")
+              .shadowRoot.querySelector("home-assistant-main")
+              .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
+              .shadowRoot.querySelector("hui-root")
+              .shadowRoot.querySelector("div");
         }
         
-        let editorElement = document.querySelector("body > home-assistant")
-          .shadowRoot.querySelector("home-assistant-main")
-          .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
-          .shadowRoot.querySelector("hui-root")
-          .shadowRoot.querySelector("div");
-        
-        editor = editorElement.classList.contains('edit-mode');
+        editor = this.editorElement.classList.contains('edit-mode');
 
         function toggleEntity(entityId) {
             hass.callService('homeassistant', 'toggle', {
@@ -270,25 +270,26 @@ class BubbleCard extends HTMLElement {
                     const popUpHash = this.config.hash;
                     if (!this.popUp) {
                         this.card.style.marginTop = '0';
-                        this.popUp = this.getRootNode().querySelector('#root');
+                        this.verticalStack = this.getRootNode();
+                        this.popUp = this.verticalStack.querySelector('#root');
                         
                         if (!window.popUpIntialized) {
-                            console.log("Back open : ", backOpen);
-
                             if (backOpen) {
                                 window.backOpen = true;
                                 const event = new Event('popUpInitialized');
                                 setTimeout(() => {
                                     window.dispatchEvent(event);
                                 }, 10);
-                            } else { // 
+                            } else {
                                 window.backOpen = false;
                                 popUpOpen = popUpHash + false;
                                 history.replaceState(null, null, location.href.split('#')[0]);
+                                console.log("Delete hash");
                             }   
                             window.popUpIntialized = true;
                         }
                     }
+
                     const popUp = this.popUp;
                     const text = this.config.text || '';
                     const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
@@ -392,9 +393,16 @@ class BubbleCard extends HTMLElement {
                             toggleEntity(entityId);
                         });
                         
+                        let previousHash = location.hash;
+                        
                         window.addEventListener('click', function(e) {
                             //reset auto close
                             location.hash === popUpHash && resetAutoClose();
+                            
+                            if (location.hash !== previousHash) {
+                                previousHash = location.hash;
+                                return;
+                            }
                             
                             if (location.hash === popUpHash && 
                                 !e.composedPath().some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') && 
