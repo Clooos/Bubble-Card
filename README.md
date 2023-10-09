@@ -21,6 +21,8 @@ Bubble Card is a minimalist card collection for Home Assistant with a nice pop-u
 
 ## Installation
 
+**Home Assistant lowest supported version:** 2023.9.0
+
 ### Without HACS
 
 1. Download this file: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/bubble-card.js)
