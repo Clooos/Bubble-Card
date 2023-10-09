@@ -529,10 +529,15 @@ styles: |
 More informations here :
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator
 
-For now you have access to these variables :
+For now you have access to these variables in some cards (not all):
 
- `state` will return the state of your `entity`.  
- `entity` will return your entity like `switch.test` in this example.
+ `state` will return the state of your defined `entity`.  
+ `entity` will return your entity you defined like `switch.test` in this example.
+
+But in all cards you can also use this:
+
+ `hass.states['light.kitchen'].state` will return the state of `light.kitchen`.
+ `hass.states['light.kitchen'].attributes.brightness` will return the brightness attribute of `light.kitchen`.
 
 ## Custom components conflicts
 
