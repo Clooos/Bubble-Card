@@ -536,7 +536,7 @@ For now you have access to these variables in some cards (not all):
 
 But in all cards you can also use this:
 
- `hass.states['light.kitchen'].state` will return the state of `light.kitchen`.
+ `hass.states['light.kitchen'].state` will return the state of `light.kitchen`.  
  `hass.states['light.kitchen'].attributes.brightness` will return the brightness attribute of `light.kitchen`.
 
 ## Custom components conflicts
