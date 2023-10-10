@@ -90,6 +90,10 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `margin` | string | Optional | Any CSS value | Use this **only** if your pop-up is not well centered on mobile (e.g. `13px`) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
+| `bg_color` | string | Optional | Any hex, rgb or rgba value | The background color of your pop-up (e.g. `#ffffff` for a white background) |
+| `bg_opacity` | string | Optional | Any value between 0 and 100 | The background opacity of your pop-up (e.g. `100` for no transparency) |
+| `bg_blur` | string | Optional | Any value between 0 and 100 | The background blur effect of your pop-up (e.g. `0` for no blur)|
+| `shadow_opacity` | string | Optional | Any value between 0 and 100 | The shadow opacity of your pop-up (e.g. `0` to hide it) |
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
@@ -161,6 +165,7 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 | `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code** |
 | `margin` | string | Optional | Any CSS value | Use this **only** if your `horizontal-buttons-stack` is not well centered on mobile (e.g. `13px`) |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
+| `rise_animation` | boolean | Optional | `true` (default) or `false` | Set this to `false` to disable the animation that activates once the page has loaded |
 
 **The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).**
 
