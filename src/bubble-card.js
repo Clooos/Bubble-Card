@@ -1,4 +1,4 @@
-var version = 'v1.1.0';
+var version = 'v1.1.1';
 
 let editor;
 
@@ -589,6 +589,7 @@ class BubbleCard extends HTMLElement {
                             background-color: ${rgbaColor};
                             box-shadow: 0px 0px 50px rgba(0,0,0,${shadowOpacity / 100});
                             backdrop-filter: blur(${bgBlur}px);
+                            -webkit-backdrop-filter: blur(${bgBlur}px);
                             border-radius: 42px;
                             box-sizing: border-box;
                             top: calc(100% + ${marginTopMobile} + var(--header-height));
@@ -685,6 +686,7 @@ class BubbleCard extends HTMLElement {
                             border-radius: 25px;
                             margin-right: 14px;
                             backdrop-filter: blur(14px);
+                            -webkit-backdrop-filter: blur(14px);
                         }
                         .header-icon {
                             display: inline-flex;
