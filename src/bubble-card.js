@@ -1,4 +1,4 @@
-var version = 'v1.0.3';
+var version = 'v1.1.0';
 
 let editor;
 
@@ -39,7 +39,6 @@ class BubbleCard extends HTMLElement {
             const popUpInitialized = () => {
                 window.dispatchEvent(event);
                 window.addEventListener('popstate', urlChanged);
-                console.log(event);
                 setTimeout(() => {
                     window.removeEventListener('popUpInitialized', popUpInitialized);
                 }, 1000);
@@ -242,22 +241,49 @@ class BubbleCard extends HTMLElement {
             addAction('contextmenu', 'hold', element, self);
         }
         
+        // Get CSS variable value or YAML variable and add opacity
+        let haStyle = getComputedStyle(document.body);
+        let color = this.config.bg_color ? this.config.bg_color : haStyle.getPropertyValue('--ha-card-background') || haStyle.getPropertyValue('--card-background-color');
+        let bgOpacity = this.config.bg_opacity !== undefined ? this.config.bg_opacity : '88';
+        
+        function convertToRGBA(color, opacity) {
+            let rgbaColor = '';
+            if (color.startsWith('#')) {
+                let r = parseInt(color.slice(1, 3), 16),
+                    g = parseInt(color.slice(3, 5), 16),
+                    b = parseInt(color.slice(5, 7), 16);
+                rgbaColor = "rgba(" + r + ", " + g + ", " + b + ", " + opacity + ")";
+            } else if (color.startsWith('rgb')) {
+                let rgbValues = color.match(/\d+/g);
+                rgbaColor = "rgba(" + rgbValues[0] + ", " + rgbValues[1] + ", " + rgbValues[2] + ", " + opacity + ")";
+            }
+            return rgbaColor;
+        }
+        
+        let rgbaColor;
+        if (!rgbaColor || editor) {
+            rgbaColor = convertToRGBA(color, (bgOpacity / 100));
+            window.color = color;
+        }
         let customStyles = !this.config.styles ? '' : this.config.styles;
         let entityId = this.config.entity ? this.config.entity : '';
         let icon = !this.config.icon && this.config.entity ? hass.states[entityId].attributes.icon || hass.states[entityId].attributes.entity_picture || '' : this.config.icon || '';
         let name = this.config.name ? this.config.name : this.config.entity ? hass.states[entityId].attributes.friendly_name : '';
         let widthDesktop = this.config.width_desktop || '540px';
         let widthDesktopDivided = widthDesktop ? widthDesktop.match(/(\d+)(\D+)/) : '';
+        let shadowOpacity = this.config.shadow_opacity !== undefined ? this.config.shadow_opacity : '10';
+        let bgBlur = this.config.bg_blur !== undefined ? this.config.bg_blur : '14';
         let isSidebarHidden = this.config.is_sidebar_hidden || false;
         let state = entityId ? hass.states[entityId].state : '';
         let formatedState;
         let autoClose = this.config.auto_close || false;
+        let riseAnimation = this.config.rise_animation !== undefined ? this.config.rise_animation : true;
         let marginCenter = this.config.margin 
             ? (this.config.margin !== '0' ? this.config.margin : '0px')
             : '7px';
         let backOpen = this.config.back_open; 
         let popUpOpen;
-
+        
         switch (this.config.card_type) {
             // Initialize pop-up card
             case 'pop-up':
@@ -279,7 +305,7 @@ class BubbleCard extends HTMLElement {
                                 const event = new Event('popUpInitialized');
                                 setTimeout(() => {
                                     window.dispatchEvent(event);
-                                }, 10);
+                                }, 1);
                             } else {
                                 window.backOpen = false;
                                 popUpOpen = popUpHash + false;
@@ -385,7 +411,7 @@ class BubbleCard extends HTMLElement {
                         haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
                     }
         
-                    if (!this.eventAdded) {
+                    if (!this.eventAdded && !editor) {
                         window['checkHashRef_' + popUpHash] = checkHash;
                         window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash]);
         
@@ -560,7 +586,9 @@ class BubbleCard extends HTMLElement {
                             position: fixed !important;
                             margin: 0 -${marginCenter}; /* 7px */
                             width: 100%;
-                            background-color: var(--ha-card-background,var(--card-background-color));
+                            background-color: ${rgbaColor};
+                            box-shadow: 0px 0px 50px rgba(0,0,0,${shadowOpacity / 100});
+                            backdrop-filter: blur(${bgBlur}px);
                             border-radius: 42px;
                             box-sizing: border-box;
                             top: calc(100% + ${marginTopMobile} + var(--header-height));
@@ -577,6 +605,7 @@ class BubbleCard extends HTMLElement {
                             /* For older Safari but not working with Firefox */
                             /* display: grid !important; */  
                         }
+                        /* 
                         #root > bubble-card:first-child::after {
                             content: '';
                             display: block;
@@ -586,9 +615,10 @@ class BubbleCard extends HTMLElement {
                             margin: -70px 0 -35px 0;
                             width: 200%;
                             height: 100px;
-                            background: linear-gradient(0deg, rgba(79, 69, 87, 0) 0%, var(--ha-card-background,var(--card-background-color)) 80%);
+                            background: linear-gradient(0deg, rgba(79, 69, 87, 0) 0%, ${rgbaColor} 80%);
                             z-index: 0;
-                        }
+                        } 
+                        */
                         #root::-webkit-scrollbar {
                             display: none; /* for Chrome, Safari, and Opera */
                         }
@@ -654,6 +684,7 @@ class BubbleCard extends HTMLElement {
                             transition: background 1s;
                             border-radius: 25px;
                             margin-right: 14px;
+                            backdrop-filter: blur(14px);
                         }
                         .header-icon {
                             display: inline-flex;
@@ -893,8 +924,7 @@ class BubbleCard extends HTMLElement {
                         height: 51px;
                         bottom: 16px;
                         left: ${marginCenter};
-                        /* transform: translateY(200px); */
-                        /* animation: from-bottom 1.3s forwards; */
+                        animation: ${riseAnimation === true ? 'from-bottom 1.3s forwards' : 'none'};
                         z-index: 1 !important; /* Higher value hide the more-info panel */
                     }
                     @keyframes from-bottom {
@@ -969,7 +999,7 @@ class BubbleCard extends HTMLElement {
                             position: fixed;
                             width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' && !isSidebarHidden ? ' - var(--mdc-drawer-width)' : ''}) !important;
                             left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + ${isSidebarHidden === true ? '0px' : `var(--mdc-drawer-width) ${widthDesktopDivided[2] === '%' ? '' : '/ 2'}`});
-                            margin-left: -13px !important;
+                            margin-left: -18px !important;
                             padding: 0 26px !important;
                         }
                     }
@@ -1739,9 +1769,29 @@ class BubbleCardEditor extends LitElement {
     get _width_desktop() {
         return this._config.width_desktop || '540px';
     }
+    
+    get _bg_color() {
+        return this._config.bg_color ||  window.color;
+    }
+    
+    get _bg_opacity() {
+        return this._config.bg_opacity !== undefined ? this._config.bg_opacity : '88';
+    }
+    
+    get _bg_blur() {
+        return this._config.bg_blur !== undefined ? this._config.bg_blur : '14';
+    }
+    
+    get _shadow_opacity() {
+        return this._config.shadow_opacity !== undefined ? this._config.shadow_opacity : '10';
+    }
 
     get _is_sidebar_hidden() {
         return this._config.is_sidebar_hidden || false;
+    }
+    
+    get _rise_animation() {
+        return this._config.rise_animation !== undefined ? this._config.rise_animation : true;
     }
     
     get _auto_close() {
@@ -1886,7 +1936,7 @@ class BubbleCardEditor extends LitElement {
                         style="width: 100%;"
                     ></ha-textfield>
                     <ha-textfield
-                        label="Optional - Auto close in Milliseconds (e.g. 15000)"
+                        label="Optional - Auto close in milliseconds (e.g. 15000)"
                         .value="${this._auto_close}"
                         .configValue="${"auto_close"}"
                         @input="${this._valueChanged}"
@@ -1953,6 +2003,64 @@ class BubbleCardEditor extends LitElement {
                             <label class="mdc-label">Optional - Fix when the sidebar is hidden on desktop (turn this to false if your sidebar is unmodified)</label> 
                         </div>
                     </ha-formfield>
+                    <ha-textfield
+                        label="Optional - Background color (any hex, rgb or rgba value)"
+                        .value="${this._bg_color}"
+                        .configValue="${"bg_color"}"
+                        @input="${this._valueChanged}"
+                        style="width: 100%;"
+                    ></ha-textfield>
+                    <div style="display: inline-flex;">
+                        <ha-textfield
+                            label="Optional - Background opacity"
+                            .value="${this._bg_opacity}"
+                            .configValue="${"bg_opacity"}"
+                            @input="${this._valueChanged}"
+                            style="width: 50%;"
+                        ></ha-textfield>
+                        <ha-slider
+                          .value="${this._bg_opacity}"
+                          .configValue="${"bg_opacity"}"
+                          .min='0'
+                          .max='100'
+                          @change=${this._valueChanged}
+                          style="width: 50%;"
+                        ></ha-slider>
+                    </div>
+                    <div style="display: inline-flex;">
+                        <ha-textfield
+                            label="Optional - Background blur"
+                            .value="${this._bg_blur}"
+                            .configValue="${"bg_blur"}"
+                            @input="${this._valueChanged}"
+                            style="width: 50%;"
+                        ></ha-textfield>
+                        <ha-slider
+                          .value="${this._bg_blur}"
+                          .configValue="${"bg_blur"}"
+                          .min='0'
+                          .max='100'
+                          @change=${this._valueChanged}
+                          style="width: 50%;"
+                        ></ha-slider>
+                    </div>
+                    <div style="display: inline-flex;">
+                        <ha-textfield
+                            label="Optional - Shadow opacity"
+                            .value="${this._shadow_opacity}"
+                            .configValue="${"shadow_opacity"}"
+                            @input="${this._valueChanged}"
+                            style="width: 50%;"
+                        ></ha-textfield>
+                        <ha-slider
+                          .value="${this._shadow_opacity}"
+                          .configValue="${"shadow_opacity"}"
+                          .min='0'
+                          .max='100'
+                          @change=${this._valueChanged}
+                          style="width: 50%;"
+                        ></ha-slider>
+                    </div>
                     <h3>Advanced settings</h3>
                     <ha-formfield .label="Optional - Back button/event support">
                         <ha-switch
@@ -2089,6 +2197,17 @@ class BubbleCardEditor extends LitElement {
                         ></ha-switch>
                         <div class="mdc-form-field">
                             <label class="mdc-label">Optional - Fix when the sidebar is hidden on desktop</label> 
+                        </div>
+                    </ha-formfield>
+                    <ha-formfield .label="Optional - Rise animation (Displays an animation once the page has loaded)">
+                        <ha-switch
+                            aria-label="Optional - Rise animation (Displays an animation once the page has loaded)"
+                            .checked=${this._rise_animation}
+                            .configValue="${"rise_animation"}"
+                            @change=${this._valueChanged}
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Rise animation (Displays an animation once the page has loaded)</label> 
                         </div>
                     </ha-formfield>
                     ${this.makeVersion()}
@@ -2283,7 +2402,7 @@ class BubbleCardEditor extends LitElement {
             config: this._config
         });
     }
-
+    
     _valueChanged(ev) {
         if (!this._config || !this.hass) {
             return;
@@ -2293,8 +2412,7 @@ class BubbleCardEditor extends LitElement {
         if (target.configValue) {
             this._config = {
                 ...this._config,
-                [target.configValue]: target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value,
-                //   target.checked !== undefined || ev.detail.value ? target.checked || ev.detail.value : target.value || ev.detail.value,
+                [target.configValue]: target.value !== undefined ? target.value : (target.checked !== undefined ? target.checked : detail.value),
             }
         }
         fireEvent(this, "config-changed", {
