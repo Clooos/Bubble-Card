@@ -1,4 +1,4 @@
-var version = 'v1.1.1';
+var version = 'v1.1.2';
 
 let editor;
 
@@ -2063,6 +2063,7 @@ class BubbleCardEditor extends LitElement {
                           style="width: 50%;"
                         ></ha-slider>
                     </div>
+                    <ha-alert alert-type="info">You can't set a value to 0 with the sliders for now, just change it to 0 in the text field if you need to.</ha-alert>
                     <h3>Advanced settings</h3>
                     <ha-formfield .label="Optional - Back button/event support">
                         <ha-switch
@@ -2405,6 +2406,24 @@ class BubbleCardEditor extends LitElement {
         });
     }
     
+    // Working for sliders but add more issues, to be fixed
+    // _valueChanged(ev) {
+    //     if (!this._config || !this.hass) {
+    //         return;
+    //     }
+    //     const target = ev.target;
+    //     const detail = ev.detail;
+    //     if (target.configValue) {
+    //         this._config = {
+    //             ...this._config,
+    //             [target.configValue]: target.value !== undefined ? target.value : (target.checked !== undefined ? target.checked : detail.value),
+    //         }
+    //     }
+    //     fireEvent(this, "config-changed", {
+    //         config: this._config
+    //     });
+    // }
+    
     _valueChanged(ev) {
         if (!this._config || !this.hass) {
             return;
@@ -2414,7 +2433,7 @@ class BubbleCardEditor extends LitElement {
         if (target.configValue) {
             this._config = {
                 ...this._config,
-                [target.configValue]: target.value !== undefined ? target.value : (target.checked !== undefined ? target.checked : detail.value),
+                [target.configValue]: target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value,
             }
         }
         fireEvent(this, "config-changed", {
