@@ -550,6 +550,7 @@ But in all cards you can also use this:
 
 - UI Lovelace Minimalist (see https://github.com/Clooos/Bubble-Card/issues/41)
 - Lovelace state switch (see https://github.com/Clooos/Bubble-Card/issues/47)
+- Kiosk mode, but here is a [workaround](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678/121?u=cloos)
 
 ## Help
 
