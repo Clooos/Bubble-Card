@@ -92,7 +92,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
 | `bg_color` | string | Optional | Any hex, rgb or rgba value | The background color of your pop-up (e.g. `#ffffff` for a white background) |
 | `bg_opacity` | string | Optional | Any value from 0 to 100 | The background opacity of your pop-up (e.g. `100` for no transparency) |
-| `bg_blur` | string | Optional | Any value from 0 to 100 | The background blur effect of your pop-up (e.g. `0` for no blur)|
+| `bg_blur` | string | Optional | Any value from 0 to 100 | The background blur effect of your pop-up, **this only work if `bg_opacity` is not set to `100`** (e.g. `0` for no blur)|
 | `shadow_opacity` | string | Optional | Any value from 0 to 100 | The shadow opacity of your pop-up (e.g. `0` to hide it) |
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
