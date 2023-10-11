@@ -450,16 +450,7 @@ Please note that you will have to add `!important;` to some CSS styles that are 
 
 ### Examples
 
-Here is how to change the whole `pop-up` opacity:
-
-```yaml
-styles: | 
-  #root { 
-    opacity: 0.95; 
-  }
-```
-
-To change the `pop-up` background:
+Here is how to change the `pop-up` background (you can do it with `bg_color`, `bg_opacity` and `bg_blur` now).
 
 ```yaml
 styles: | 
