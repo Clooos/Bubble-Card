@@ -1,4 +1,4 @@
-var version = 'v1.1.2';
+var version = 'v1.2.0';
 
 let editor;
 
@@ -23,7 +23,7 @@ class BubbleCard extends HTMLElement {
     
             ['pushstate', 'replacestate', 'click', 'popstate', 'mousedown', 'touchstart'].forEach((eventType) => {
                 window.addEventListener(eventType, urlChanged);
-            });
+            }, { passive: true });
     
             const event = new Event('urlChanged');
     
@@ -38,13 +38,13 @@ class BubbleCard extends HTMLElement {
             // Check url when pop-ups are initialized
             const popUpInitialized = () => {
                 window.dispatchEvent(event);
-                window.addEventListener('popstate', urlChanged);
+                window.addEventListener('popstate', urlChanged, { passive: true });
                 setTimeout(() => {
                     window.removeEventListener('popUpInitialized', popUpInitialized);
                 }, 1000);
             };
             
-            window.addEventListener('popUpInitialized', popUpInitialized);
+            window.addEventListener('popUpInitialized', popUpInitialized, { passive: true });
             
             window.eventAdded = true;
         }
@@ -232,7 +232,7 @@ class BubbleCard extends HTMLElement {
                     }
         
                     lastClickTime = currentTime;
-                });
+                }, { passive: true });
             };
         })();
         
@@ -287,472 +287,477 @@ class BubbleCard extends HTMLElement {
         switch (this.config.card_type) {
             // Initialize pop-up card
             case 'pop-up':
-                if (!this.getRootNode().host) {
+                if (!this.getRootNode().host && !editor) {
                     // Hide vertical stack content before initialization
-                    if (editor !== true) {
-                        this.card.style.marginTop = '2000px';
-                    }
-                } else {
-                    const popUpHash = this.config.hash;
-                    if (!this.popUp) {
-                        this.card.style.marginTop = '0';
-                        this.verticalStack = this.getRootNode();
-                        this.popUp = this.verticalStack.querySelector('#root');
-                        
-                        if (!window.popUpIntialized) {
-                            if (backOpen) {
-                                window.backOpen = true;
-                                const event = new Event('popUpInitialized');
-                                setTimeout(() => {
-                                    window.dispatchEvent(event);
-                                }, 1);
-                            } else {
-                                window.backOpen = false;
-                                popUpOpen = popUpHash + false;
-                                history.replaceState(null, null, location.href.split('#')[0]);
-                                console.log("Delete hash");
-                            }   
-                            window.popUpIntialized = true;
-                        }
-                    }
-
-                    const popUp = this.popUp;
-                    const text = this.config.text || '';
-                    const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
-                    const triggerState = this.config.trigger_state ? this.config.trigger_state : '';
-                    const triggerClose = this.config.trigger_close ? this.config.trigger_close : false;
-                    formatedState = this.config.state ? hass.formatEntityState(hass.states[this.config.state]) + ' ' + text : text;
-                    const marginTopMobile = this.config.margin_top_mobile 
-                        ? (this.config.margin_top_mobile !== '0' ? this.config.margin_top_mobile : '0px')
-                        : '0px';
-                    const marginTopDesktop = this.config.margin_top_desktop 
-                        ? (this.config.margin_top_desktop !== '0' ? this.config.margin_top_desktop : '0px')
-                        : '0px';
-                    const displayPowerButton = this.config.entity ? 'flex' : 'none';
-                    state = this.config.state ? hass.states[this.config.state].state : '';
-                    let closeTimeout;
-        
-                    if (!this.headerAdded) {
-                        const headerContainer = document.createElement("div");
-                        headerContainer.setAttribute("id", "header-container");
-                    
-                        const div = document.createElement("div");
-                        headerContainer.appendChild(div);
-                    
-                        const iconContainer = document.createElement("div");
-                        iconContainer.setAttribute("class", "header-icon");
-                        div.appendChild(iconContainer);
-                    
-                        if (hass && hass.states && hass.states[entityId] && hass.states[entityId].attributes.entity_picture && !this.config.icon) {
-                            const img = document.createElement("img");
-                            img.setAttribute("src", hass.states[entityId].attributes.entity_picture);
-                            img.setAttribute("class", "entity-picture");
-                            img.setAttribute("alt", "Icon");
-                            iconContainer.appendChild(img);
-                        } else {
-                            const haIcon = document.createElement("ha-icon");
-                            haIcon.setAttribute("icon", icon);
-                            haIcon.setAttribute("class", "icon");
-                            iconContainer.appendChild(haIcon);
-                        }
-                        addActions(this, iconContainer);
-        
-                        const h2 = document.createElement("h2");
-                        h2.textContent = name;
-                        div.appendChild(h2);
-        
-                        const p = document.createElement("p");
-                        p.textContent = formatedState;
-                        div.appendChild(p);
-        
-                        const haIcon2 = document.createElement("ha-icon");
-                        haIcon2.setAttribute("class", "power-button");
-                        haIcon2.setAttribute("icon", "mdi:power");
-                        haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
-                        div.appendChild(haIcon2);
-        
-                        const button = document.createElement("button");
-                        button.setAttribute("class", "close-pop-up");
-                        button.onclick = function() { history.replaceState(null, null, location.href.split('#')[0]); localStorage.setItem('isManuallyClosed_' + popUpHash, true); }; 
-                        headerContainer.appendChild(button);
-        
-                        const haIcon3 = document.createElement("ha-icon");
-                        haIcon3.setAttribute("icon", "mdi:close");
-                        button.appendChild(haIcon3);
-        
-                        this.content.appendChild(headerContainer);
-                        this.header = div;
-        
-                        this.headerAdded = true;
-                    } else if (this.headerAdded) {
-                        const iconContainer = this.content.querySelector("#header-container .header-icon");
-                        iconContainer.innerHTML = ''; // Clear the container
-                    
-                        if (hass && hass.states && hass.states[entityId] && hass.states[entityId].attributes.entity_picture && !this.config.icon) {
-                            const img = document.createElement("img");
-                            img.setAttribute("src", hass.states[entityId].attributes.entity_picture);
-                            img.setAttribute("class", "entity-picture");
-                            img.setAttribute("alt", "Icon");
-                            iconContainer.appendChild(img);
-                        } else {
-                            const haIcon = document.createElement("ha-icon");
-                            haIcon.setAttribute("icon", icon);
-                            haIcon.setAttribute("class", "icon");
-                            iconContainer.appendChild(haIcon);
-                        }
-        
-                        const h2 = this.content.querySelector("#header-container h2");
-                        h2.textContent = name;
-        
-                        const p = this.content.querySelector("#header-container p");
-                        p.textContent = formatedState;
-        
-                        const haIcon2 = this.content.querySelector("#header-container .power-button");
-                        haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
-                    }
-        
-                    if (!this.eventAdded && !editor) {
-                        window['checkHashRef_' + popUpHash] = checkHash;
-                        window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash]);
-        
-                        this.content.querySelector('.power-button').addEventListener('click', () => {
-                            toggleEntity(entityId);
-                        });
-                        
-                        let previousHash = location.hash;
-                        
-                        window.addEventListener('click', function(e) {
-                            //reset auto close
-                            location.hash === popUpHash && resetAutoClose();
+                    this.card.style.marginTop = '2000px';
+                }
+                
+                let intervalId = setInterval(() => {
+                    if (this.getRootNode().host) {
+                        // Stop checking once this.getRootNode().host is defined
+                        clearInterval(intervalId);
+                
+                        const popUpHash = this.config.hash;
+                        if (!this.popUp) {
+                            this.card.style.marginTop = '0';
+                            this.verticalStack = this.getRootNode();
+                            this.popUp = this.verticalStack.querySelector('#root');
                             
-                            if (location.hash !== previousHash) {
-                                previousHash = location.hash;
-                                return;
+                            if (!window.popUpIntialized) {
+                                if (backOpen) {
+                                    window.backOpen = true;
+                                    const event = new Event('popUpInitialized');
+                                    setTimeout(() => {
+                                        window.dispatchEvent(event);
+                                    }, 1);
+                                } else {
+                                    window.backOpen = false;
+                                    popUpOpen = popUpHash + false;
+                                    history.replaceState(null, null, location.href.split('#')[0]);
+                                    console.log("Delete hash");
+                                }   
+                                window.popUpIntialized = true;
                             }
+                        }
+            
+                        const popUp = this.popUp;
+                        const text = this.config.text || '';
+                        const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
+                        const triggerState = this.config.trigger_state ? this.config.trigger_state : '';
+                        const triggerClose = this.config.trigger_close ? this.config.trigger_close : false;
+                        formatedState = this.config.state ? hass.formatEntityState(hass.states[this.config.state]) + ' ' + text : text;
+                        const marginTopMobile = this.config.margin_top_mobile 
+                            ? (this.config.margin_top_mobile !== '0' ? this.config.margin_top_mobile : '0px')
+                            : '0px';
+                        const marginTopDesktop = this.config.margin_top_desktop 
+                            ? (this.config.margin_top_desktop !== '0' ? this.config.margin_top_desktop : '0px')
+                            : '0px';
+                        const displayPowerButton = this.config.entity ? 'flex' : 'none';
+                        state = this.config.state ? hass.states[this.config.state].state : '';
+                        let previousState;
+                        let closeTimeout;
+            
+                        if (!this.headerAdded) {
+                            const headerContainer = document.createElement("div");
+                            headerContainer.setAttribute("id", "header-container");
+                        
+                            const div = document.createElement("div");
+                            headerContainer.appendChild(div);
+                        
+                            const iconContainer = document.createElement("div");
+                            iconContainer.setAttribute("class", "header-icon");
+                            div.appendChild(iconContainer);
+                        
+                            if (hass && hass.states && hass.states[entityId] && hass.states[entityId].attributes.entity_picture && !this.config.icon) {
+                                const img = document.createElement("img");
+                                img.setAttribute("src", hass.states[entityId].attributes.entity_picture);
+                                img.setAttribute("class", "entity-picture");
+                                img.setAttribute("alt", "Icon");
+                                iconContainer.appendChild(img);
+                            } else {
+                                const haIcon = document.createElement("ha-icon");
+                                haIcon.setAttribute("icon", icon);
+                                haIcon.setAttribute("class", "icon");
+                                iconContainer.appendChild(haIcon);
+                            }
+                            addActions(this, iconContainer);
+            
+                            const h2 = document.createElement("h2");
+                            h2.textContent = name;
+                            div.appendChild(h2);
+            
+                            const p = document.createElement("p");
+                            p.textContent = formatedState;
+                            div.appendChild(p);
+            
+                            const haIcon2 = document.createElement("ha-icon");
+                            haIcon2.setAttribute("class", "power-button");
+                            haIcon2.setAttribute("icon", "mdi:power");
+                            haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
+                            div.appendChild(haIcon2);
+            
+                            const button = document.createElement("button");
+                            button.setAttribute("class", "close-pop-up");
+                            button.onclick = function() { history.replaceState(null, null, location.href.split('#')[0]); localStorage.setItem('isManuallyClosed_' + popUpHash, true); }; 
+                            headerContainer.appendChild(button);
+            
+                            const haIcon3 = document.createElement("ha-icon");
+                            haIcon3.setAttribute("icon", "mdi:close");
+                            button.appendChild(haIcon3);
+            
+                            this.content.appendChild(headerContainer);
+                            this.header = div;
+            
+                            this.headerAdded = true;
+                        } else if ((this.headerAdded && hass.states[this.config.state] !== previousState) || editor) {
+                            const iconContainer = this.content.querySelector("#header-container .header-icon");
+                            const h2 = this.content.querySelector("#header-container h2");
+                            const p = this.content.querySelector("#header-container p");
+                            const haIcon2 = this.content.querySelector("#header-container .power-button");
                             
-                            if (location.hash === popUpHash && 
-                                !e.composedPath().some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') && 
-                                !e.composedPath().some(el => el.id === 'root' && !el.classList.contains('close-pop-up'))) {
+                            iconContainer.innerHTML = ''; // Clear the container
+                        
+                            if (hass && hass.states && hass.states[entityId] && hass.states[entityId].attributes.entity_picture && !this.config.icon) {
+                                const img = document.createElement("img");
+                                img.setAttribute("src", hass.states[entityId].attributes.entity_picture);
+                                img.setAttribute("class", "entity-picture");
+                                img.setAttribute("alt", "Icon");
+                                iconContainer.appendChild(img);
+                            } else {
+                                const haIcon = document.createElement("ha-icon");
+                                haIcon.setAttribute("icon", icon);
+                                haIcon.setAttribute("class", "icon");
+                                iconContainer.appendChild(haIcon);
+                            }
+            
+                            h2.textContent = name;
+                            p.textContent = formatedState;
+                            haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
+                            
+                            previousState = hass.states[this.config.state];
+                        }
+            
+                        if (!this.eventAdded && !editor) {
+                            window['checkHashRef_' + popUpHash] = checkHash;
+                            window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash], { passive: true });
+            
+                            this.content.querySelector('.power-button').addEventListener('click', () => {
+                                toggleEntity(entityId);
+                            }, { passive: true });
+                            
+                            let previousHash = location.hash;
+                            
+                            window.addEventListener('click', function(e) {
+                                //reset auto close
+                                location.hash === popUpHash && resetAutoClose();
+                                
+                                if (location.hash !== previousHash) {
+                                    previousHash = location.hash;
+                                    return;
+                                }
+                                
+                                if (location.hash === popUpHash && 
+                                    !e.composedPath().some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') && 
+                                    !e.composedPath().some(el => el.id === 'root' && !el.classList.contains('close-pop-up'))) {
+                                        popUpOpen = popUpHash + false;
+                                        history.replaceState(null, null, location.href.split('#')[0]);
+                                        localStorage.setItem('isManuallyClosed_' + popUpHash, true)
+                                }
+                            }, { passive: true });
+                            
+                            window.addEventListener('keydown', function(event) {
+                                if (event.key === 'Escape') {
                                     popUpOpen = popUpHash + false;
                                     history.replaceState(null, null, location.href.split('#')[0]);
                                     localStorage.setItem('isManuallyClosed_' + popUpHash, true)
-                            }
-                        });
-                        
-                        window.addEventListener('keydown', function(event) {
-                            if (event.key === 'Escape') {
-                                popUpOpen = popUpHash + false;
-                                history.replaceState(null, null, location.href.split('#')[0]);
-                                localStorage.setItem('isManuallyClosed_' + popUpHash, true)
-                            }
-                        });
-                        
-                        // Slide down to close pop-up
-                        
-                        let startTouchY;
-                        let lastTouchY;
-                        
-                        popUp.addEventListener('touchstart', function(event) {
-                            //reset auto close
-                            location.hash === popUpHash && resetAutoClose();
+                                }
+                            }, { passive: true });
                             
-                            // Record the Y position of the finger at the start of the touch
-                            startTouchY = event.touches[0].clientY;
-                            lastTouchY = startTouchY;
-                        });
+                            // Slide down to close pop-up
+                            
+                            let startTouchY;
+                            let lastTouchY;
+                            
+                            popUp.addEventListener('touchstart', function(event) {
+                                //reset auto close
+                                location.hash === popUpHash && resetAutoClose();
+                                
+                                // Record the Y position of the finger at the start of the touch
+                                startTouchY = event.touches[0].clientY;
+                                lastTouchY = startTouchY;
+                            }, { passive: true });
+                            
+                            popUp.addEventListener('touchmove', function(event) {
+                                // Calculate the distance the finger has traveled
+                                let touchMoveDistance = event.touches[0].clientY - startTouchY;
+                            
+                                // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
+                                if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
+                                    popUpOpen = popUpHash + false;
+                                    history.replaceState(null, null, location.href.split('#')[0]);
+                                    popUpOpen = popUpHash + false;
+                                    localStorage.setItem('isManuallyClosed_' + popUpHash, true)
+                                }
+                            
+                                // Update the Y position of the last touch
+                                lastTouchY = event.touches[0].clientY;
+                            }, { passive: true });
+            
+                            this.eventAdded = true;
+                        }
                         
-                        popUp.addEventListener('touchmove', function(event) {
-                            // Calculate the distance the finger has traveled
-                            let touchMoveDistance = event.touches[0].clientY - startTouchY;
+                        if (triggerEntity) {
+                            if (localStorage.getItem('previousTriggerState_' + popUpHash) === null) {
+                                localStorage.setItem('previousTriggerState_' + popUpHash, '');
+                            }
+                            if (localStorage.getItem('isManuallyClosed_' + popUpHash) === null) {
+                                localStorage.setItem('isManuallyClosed_' + popUpHash, 'false');
+                            }
+                            if (localStorage.getItem('isTriggered_' + popUpHash) === null) {
+                                localStorage.setItem('isTriggered_' + popUpHash, 'false');
+                            }                        
+            
+                            let previousTriggerState = localStorage.getItem('previousTriggerState_' + popUpHash);
+                            let isManuallyClosed = localStorage.getItem('isManuallyClosed_' + popUpHash) === 'true';
+                            let isTriggered = localStorage.getItem('isTriggered_' + popUpHash) === 'true';
                         
-                            // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
-                            if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
-                                popUpOpen = popUpHash + false;
+                            if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null && !isTriggered) {
+                                navigate('', popUpHash);
+                                isTriggered = true;
+                                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
+                            }
+                        
+                            if (hass.states[triggerEntity].state !== previousTriggerState) {
+                                isManuallyClosed = false;
+                                localStorage.setItem('previousTriggerState_' + popUpHash, hass.states[triggerEntity].state);
+                                localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
+                            }
+                            
+                            if (hass.states[triggerEntity].state === triggerState && !isManuallyClosed) {
+                                navigate('', popUpHash);
+                                isTriggered = true;
+                                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
+                            } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
                                 history.replaceState(null, null, location.href.split('#')[0]);
                                 popUpOpen = popUpHash + false;
-                                localStorage.setItem('isManuallyClosed_' + popUpHash, true)
-                            }
-                        
-                            // Update the Y position of the last touch
-                            lastTouchY = event.touches[0].clientY;
-                        });
-        
-                        this.eventAdded = true;
-                    }
-                    
-                    if (triggerEntity) {
-                        if (localStorage.getItem('previousTriggerState_' + popUpHash) === null) {
-                            localStorage.setItem('previousTriggerState_' + popUpHash, '');
-                        }
-                        if (localStorage.getItem('isManuallyClosed_' + popUpHash) === null) {
-                            localStorage.setItem('isManuallyClosed_' + popUpHash, 'false');
-                        }
-                        if (localStorage.getItem('isTriggered_' + popUpHash) === null) {
-                            localStorage.setItem('isTriggered_' + popUpHash, 'false');
-                        }                        
-
-                        let previousTriggerState = localStorage.getItem('previousTriggerState_' + popUpHash);
-                        let isManuallyClosed = localStorage.getItem('isManuallyClosed_' + popUpHash) === 'true';
-                        let isTriggered = localStorage.getItem('isTriggered_' + popUpHash) === 'true';
-                    
-                        if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null && !isTriggered) {
-                            navigate('', popUpHash);
-                            isTriggered = true;
-                            localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-                        }
-                    
-                        if (hass.states[triggerEntity].state !== previousTriggerState) {
-                            isManuallyClosed = false;
-                            localStorage.setItem('previousTriggerState_' + popUpHash, hass.states[triggerEntity].state);
-                            localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
-                        }
-                        
-                        if (hass.states[triggerEntity].state === triggerState && !isManuallyClosed) {
-                            navigate('', popUpHash);
-                            isTriggered = true;
-                            localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-                        } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
-                            history.replaceState(null, null, location.href.split('#')[0]);
-                            popUpOpen = popUpHash + false;
-                            isTriggered = false;
-                            isManuallyClosed = true;
-                            localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
-                            localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-                        }
-                    }
-                    
-                    if (entityId !== '') {
-                        const rgbColor = hass.states[entityId].attributes.rgb_color;
-                        const rgbColorOpacity = rgbColor  
-                            ? `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, 0.5)` 
-                            : hass.states[entityId].state !== ('off' || 'closed' || 'paused' || 'false')
-                            ? `var(--accent-color)`
-                            : `var(--background-color,var(--secondary-background-color))`;
-                        this.header.style.backgroundColor = rgbColorOpacity;
-                    } 
-                    
-                    function checkHash() {
-                        if (!editor) {
-                            let hash = location.hash.split('?')[0];
-            
-                            // Open on hash change
-                            if (hash === popUpHash) {
-                                openPopUp();
-                            // Close on back button from browser
-                            } else if (popUp.classList.contains('open-pop-up')) {
-                                closePopUp();
+                                isTriggered = false;
+                                isManuallyClosed = true;
+                                localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
+                                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
                             }
                         }
-                    };
-                    
-                    function openPopUp() {
-                        popUp.classList.remove('close-pop-up');
-                        popUp.classList.add('open-pop-up');
-                        popUpOpen = popUpHash + true;
-                        resetAutoClose();
-                    }
-                    
-                    function closePopUp() {
-                        popUp.classList.remove('open-pop-up');
-                        popUp.classList.add('close-pop-up');
-                        popUpOpen = popUpHash + false;
-                        clearTimeout(closeTimeout);
-                    }
-                    
-                    function resetAutoClose() {
-                        //Clear any existing timeout
-                        clearTimeout(closeTimeout);
-                        //start autoclose if enabled
-                        if(autoClose > 0) {
-                            closeTimeout = setTimeout(autoClosePopUp, autoClose);
-                        }
-                    }
-
-                    function autoClosePopUp(){
-                        history.replaceState(null, null, location.href.split('#')[0]);
-                    }
-                    
-                    const popUpStyles = `
-                        ha-card {
-                            margin-top: 0 !important;
-                            background: none !important;
-                            border: none !important;
-                        }
-                        .card-content {
-                            width: 100% !important;
-                            padding: 0 !important;
-                        }
-                        #root {
-                            position: fixed !important;
-                            margin: 0 -${marginCenter}; /* 7px */
-                            width: 100%;
-                            background-color: ${rgbaColor};
-                            box-shadow: 0px 0px 50px rgba(0,0,0,${shadowOpacity / 100});
-                            backdrop-filter: blur(${bgBlur}px);
-                            -webkit-backdrop-filter: blur(${bgBlur}px);
-                            border-radius: 42px;
-                            box-sizing: border-box;
-                            top: calc(100% + ${marginTopMobile} + var(--header-height));
-                            grid-gap: 12px !important;
-                            gap: 12px !important;
-                            grid-auto-rows: min-content;
-                            padding: 18px 18px 220px 18px !important;
-                            height: 100% !important;
-                            -ms-overflow-style: none; /* for Internet Explorer, Edge */
-                            scrollbar-width: none; /* for Firefox */
-                            overflow-y: auto; 
-                            overflow-x: hidden; 
-                            z-index: 1 !important; /* Higher value hide the more-info panel */
-                            /* For older Safari but not working with Firefox */
-                            /* display: grid !important; */  
-                        }
-                        /* 
-                        #root > bubble-card:first-child::after {
-                            content: '';
-                            display: block;
-                            position: sticky;
-                            top: 0;
-                            left: -50px;
-                            margin: -70px 0 -35px 0;
-                            width: 200%;
-                            height: 100px;
-                            background: linear-gradient(0deg, rgba(79, 69, 87, 0) 0%, ${rgbaColor} 80%);
-                            z-index: 0;
+                        
+                        if (entityId !== '') {
+                            const rgbColor = hass.states[entityId].attributes.rgb_color;
+                            const rgbColorOpacity = rgbColor  
+                                ? `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, 0.5)` 
+                                : hass.states[entityId].state !== ('off' || 'closed' || 'paused' || 'false')
+                                ? `var(--accent-color)`
+                                : `var(--background-color,var(--secondary-background-color))`;
+                            this.header.style.backgroundColor = rgbColorOpacity;
                         } 
-                        */
-                        #root::-webkit-scrollbar {
-                            display: none; /* for Chrome, Safari, and Opera */
-                        }
-                        #root > bubble-card:first-child {
-                            position: sticky;
-                            top: 0;
-                            z-index: 1;
-                            background: none !important;
-                        }
-                        #root.open-pop-up {
-                            transform: translateY(-100%);
-                            transition: transform .4s !important;
-                        }
-                        #root.open-pop-up > * {
-                          /* Block child items to overflow and if they do clip them */
-                          /*max-width: calc(100vw - 38px);*/
-                          max-width: 100% !important;
-                          overflow-x: clip;
-                        }
-                        #root.close-pop-up { 
-                            transform: translateY(0%);
-                            transition: transform .4s !important;
-                            /* animation: hide 1s forwards; */
-                        }
-                        @media only screen and (min-width: 768px) {
-                            #root {
-                                top: calc(100% + ${marginTopDesktop} + var(--header-height));
-                                left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]});
-                                margin: 0 !important;
+                        
+                        function checkHash() {
+                            if (!editor) {
+                                let hash = location.hash.split('?')[0];
+                
+                                // Open on hash change
+                                if (hash === popUpHash) {
+                                    openPopUp();
+                                // Close on back button from browser
+                                } else if (popUp.classList.contains('open-pop-up')) {
+                                    closePopUp();
+                                }
                             }
-                        }  
-                        @media only screen and (min-width: 870px) {
-                            #root {
-                                top: calc(100% + ${marginTopDesktop} + var(--header-height));
-                                width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' && !isSidebarHidden ? ' - var(--mdc-drawer-width)' : ''}) !important;
-                                left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + ${isSidebarHidden ? '0px' : `var(--mdc-drawer-width) ${widthDesktopDivided[2] === '%' ? '' : '/ 2'}`});
-                                margin: 0 !important;
+                        };
+                        
+                        function openPopUp() {
+                            popUp.classList.remove('close-pop-up');
+                            popUp.classList.add('open-pop-up');
+                            popUpOpen = popUpHash + true;
+                            resetAutoClose();
+                        }
+                        
+                        function closePopUp() {
+                            popUp.classList.remove('open-pop-up');
+                            popUp.classList.add('close-pop-up');
+                            popUpOpen = popUpHash + false;
+                            clearTimeout(closeTimeout);
+                        }
+                        
+                        function resetAutoClose() {
+                            //Clear any existing timeout
+                            clearTimeout(closeTimeout);
+                            //start autoclose if enabled
+                            if(autoClose > 0) {
+                                closeTimeout = setTimeout(autoClosePopUp, autoClose);
                             }
-                        }  
-                        #root.editor {
-                            position: inherit !important;
-                            width: 100% !important;
-                            padding: 18px !important;
                         }
-                    `;
-                    
-                    const headerStyles = `
-                        #header-container {
-                            display: inline-flex;
-                            ${!icon && !name && !entityId && !state && !text ? 'flex-direction: row-reverse;' : ''}
-                            width: 100%;
-                            margin: 0;
-                            padding: 0;
+            
+                        function autoClosePopUp(){
+                            history.replaceState(null, null, location.href.split('#')[0]);
                         }
-                        #header-container > div {
-                            display: ${!icon && !name && !entityId && !state && !text ? 'none' : 'inline-flex'};
-                            align-items: center;
-                            position: relative;
-                            padding: 6px;
-                            z-index: 1;
-                            flex-grow: 1;
-                            background-color: var(--background-color,var(--secondary-background-color));
-                            transition: background 1s;
-                            border-radius: 25px;
-                            margin-right: 14px;
-                            backdrop-filter: blur(14px);
-                            -webkit-backdrop-filter: blur(14px);
+                        
+                        const popUpStyles = `
+                            ha-card {
+                                margin-top: 0 !important;
+                                background: none !important;
+                                border: none !important;
+                            }
+                            .card-content {
+                                width: 100% !important;
+                                padding: 0 !important;
+                            }
+                            #root {
+                                position: fixed !important;
+                                margin: 0 -${marginCenter}; /* 7px */
+                                width: 100%;
+                                background-color: ${rgbaColor};
+                                box-shadow: 0px 0px 50px rgba(0,0,0,${shadowOpacity / 100});
+                                backdrop-filter: blur(${bgBlur}px);
+                                -webkit-backdrop-filter: blur(${bgBlur}px);
+                                border-radius: 42px;
+                                box-sizing: border-box;
+                                top: calc(100% + ${marginTopMobile} + var(--header-height));
+                                grid-gap: 12px !important;
+                                gap: 12px !important;
+                                grid-auto-rows: min-content;
+                                padding: 18px 18px 220px 18px !important;
+                                height: 100% !important;
+                                -ms-overflow-style: none; /* for Internet Explorer, Edge */
+                                scrollbar-width: none; /* for Firefox */
+                                overflow-y: auto; 
+                                overflow-x: hidden; 
+                                z-index: 1 !important; /* Higher value hide the more-info panel */
+                                /* For older Safari but not working with Firefox */
+                                /* display: grid !important; */  
+                            }
+                            /* 
+                            #root > bubble-card:first-child::after {
+                                content: '';
+                                display: block;
+                                position: sticky;
+                                top: 0;
+                                left: -50px;
+                                margin: -70px 0 -35px 0;
+                                width: 200%;
+                                height: 100px;
+                                background: linear-gradient(0deg, rgba(79, 69, 87, 0) 0%, ${rgbaColor} 80%);
+                                z-index: 0;
+                            } 
+                            */
+                            #root::-webkit-scrollbar {
+                                display: none; /* for Chrome, Safari, and Opera */
+                            }
+                            #root > bubble-card:first-child {
+                                position: sticky;
+                                top: 0;
+                                z-index: 1;
+                                background: none !important;
+                            }
+                            #root.open-pop-up {
+                                transform: translateY(-100%);
+                                transition: transform .4s !important;
+                            }
+                            #root.open-pop-up > * {
+                              /* Block child items to overflow and if they do clip them */
+                              /*max-width: calc(100vw - 38px);*/
+                              max-width: 100% !important;
+                              overflow-x: clip;
+                            }
+                            #root.close-pop-up { 
+                                transform: translateY(0%);
+                                transition: transform .4s !important;
+                                /* animation: hide 1s forwards; */
+                            }
+                            @media only screen and (min-width: 768px) {
+                                #root {
+                                    top: calc(100% + ${marginTopDesktop} + var(--header-height));
+                                    width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' && !isSidebarHidden ? ' - var(--mdc-drawer-width)' : ''}) !important;
+                                    left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]});
+                                    margin: 0 !important;
+                                }
+                            }  
+                            @media only screen and (min-width: 870px) {
+                                #root {
+                                    left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + ${isSidebarHidden ? '0px' : `var(--mdc-drawer-width) ${widthDesktopDivided[2] === '%' ? '' : '/ 2'}`});
+                                }
+                            }  
+                            #root.editor {
+                                position: inherit !important;
+                                width: 100% !important;
+                                padding: 18px !important;
+                            }
+                        `;
+                        
+                        const headerStyles = `
+                            #header-container {
+                                display: inline-flex;
+                                ${!icon && !name && !entityId && !state && !text ? 'flex-direction: row-reverse;' : ''}
+                                width: 100%;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            #header-container > div {
+                                display: ${!icon && !name && !entityId && !state && !text ? 'none' : 'inline-flex'};
+                                align-items: center;
+                                position: relative;
+                                padding: 6px;
+                                z-index: 1;
+                                flex-grow: 1;
+                                background-color: var(--background-color,var(--secondary-background-color));
+                                transition: background 1s;
+                                border-radius: 25px;
+                                margin-right: 14px;
+                                backdrop-filter: blur(14px);
+                                -webkit-backdrop-filter: blur(14px);
+                            }
+                            .header-icon {
+                                display: inline-flex;
+                                width: 22px;
+                                height: 22px;
+                                padding: 8px;
+                                background-color: var(--card-background-color,var(--ha-card-background));
+                                border-radius: 100%;
+                                margin: 0 10px 0 0;
+                                cursor: ${!this.config.entity && !this.config.double_tap_action && !this.config.tap_action && !this.config.hold_action ? 'default' : 'pointer'}; 
+                                flex-wrap: wrap;
+                                align-content: center;
+                                justify-content: center;
+                                overflow: hidden;
+                            }
+                            .entity-picture {
+                                height: calc(100% + 16px);
+                                width: calc(100% + 16px);
+                            }
+                            #header-container h2 {
+                                display: inline-flex;
+                                margin: 0 18px 0 0;
+                                /*line-height: 0px;*/
+                                z-index: 1;
+                                font-size: 20px;
+                            }
+                            #header-container p {
+                                display: inline-flex;
+                                line-height: 0px;
+                                font-size: 16px;
+                            }
+                            .power-button {
+                                cursor: pointer; 
+                                flex-grow: inherit; 
+                                width: 24px;
+                                height: 24px;
+                                border-radius: 12px;
+                                margin: 0 10px;
+                                background: none !important;
+                                justify-content: flex-end;
+                                background-color: var(--background-color,var(--secondary-background-color));
+                            }
+                            .close-pop-up {
+                                height: 50px;
+                                width: 50px;
+                                border: none;
+                                border-radius: 50%;
+                                z-index: 1;
+                                background: var(--background-color,var(--secondary-background-color));
+                                color: var(--primary-text-color);
+                                flex-shrink: 0;
+                                cursor: pointer;
+                            }
+                        `;
+                        
+                        addStyles(this, popUpStyles, customStyles, state, entityId, '', popUp);
+                        addStyles(this, headerStyles, customStyles, state, entityId);
+                        
+                        if (editor === true) {
+                            popUp.classList.add('editor');
+                            popUp.classList.remove('open-pop-up');
+                            popUp.classList.remove('close-pop-up');
+                        } else {
+                            popUp.classList.remove('editor');
                         }
-                        .header-icon {
-                            display: inline-flex;
-                            width: 22px;
-                            height: 22px;
-                            padding: 8px;
-                            background-color: var(--card-background-color,var(--ha-card-background));
-                            border-radius: 100%;
-                            margin: 0 10px 0 0;
-                            cursor: ${!this.config.entity && !this.config.double_tap_action && !this.config.tap_action && !this.config.hold_action ? 'default' : 'pointer'}; 
-                            flex-wrap: wrap;
-                            align-content: center;
-                            justify-content: center;
-                            overflow: hidden;
-                        }
-                        .entity-picture {
-                            height: calc(100% + 16px);
-                            width: calc(100% + 16px);
-                        }
-                        #header-container h2 {
-                            display: inline-flex;
-                            margin: 0 18px 0 0;
-                            /*line-height: 0px;*/
-                            z-index: 1;
-                            font-size: 20px;
-                        }
-                        #header-container p {
-                            display: inline-flex;
-                            line-height: 0px;
-                            font-size: 16px;
-                        }
-                        .power-button {
-                            cursor: pointer; 
-                            flex-grow: inherit; 
-                            width: 24px;
-                            height: 24px;
-                            border-radius: 12px;
-                            margin: 0 10px;
-                            background: none !important;
-                            justify-content: flex-end;
-                            background-color: var(--background-color,var(--secondary-background-color));
-                        }
-                        .close-pop-up {
-                            height: 50px;
-                            width: 50px;
-                            border: none;
-                            border-radius: 50%;
-                            z-index: 1;
-                            background: var(--background-color,var(--secondary-background-color));
-                            color: var(--primary-text-color);
-                            flex-shrink: 0;
-                            cursor: pointer;
-                        }
-                    `;
-                    
-                    addStyles(this, popUpStyles, customStyles, state, entityId, '', popUp);
-                    addStyles(this, headerStyles, customStyles, state, entityId);
-                    
-                    if (editor === true) {
-                        popUp.classList.add('editor');
-                        popUp.classList.remove('open-pop-up');
-                        popUp.classList.remove('close-pop-up');
-                    } else {
-                        popUp.classList.remove('editor');
                     }
-                }
+                }, 10);
                 break;
 
             // Initialize horizontal buttons stack
@@ -776,7 +781,7 @@ class BubbleCard extends HTMLElement {
                             history.replaceState(null, null, location.href.split('#')[0]);
                             popUpOpen = link + false;
                         }
-                    });
+                    }, { passive: true });
 
                     return buttonElement;
                 };
@@ -1158,10 +1163,10 @@ class BubbleCard extends HTMLElement {
                     startValue = rangeSlider.value;
                     if (e.target !== iconContainer.querySelector('ha-icon')) {
                         isDragging = true;
-                        document.addEventListener('mouseup', handleEnd);
-                        document.addEventListener('touchend', handleEnd);
-                        document.addEventListener('mousemove', checkVerticalScroll);
-                        document.addEventListener('touchmove', checkVerticalScroll);
+                        document.addEventListener('mouseup', handleEnd, { passive: true });
+                        document.addEventListener('touchend', handleEnd, { passive: true });
+                        document.addEventListener('mousemove', checkVerticalScroll, { passive: true });
+                        document.addEventListener('touchmove', checkVerticalScroll, { passive: true });
                 
                         // Add a delay before activating the slider
                         timeoutId = setTimeout(() => {
@@ -1181,8 +1186,8 @@ class BubbleCard extends HTMLElement {
                     } else {
                         document.removeEventListener('mousemove', checkVerticalScroll);
                         document.removeEventListener('touchmove', checkVerticalScroll);
-                        document.addEventListener('mousemove', handleMove);
-                        document.addEventListener('touchmove', handleMove);
+                        document.addEventListener('mousemove', handleMove, { passive: true });
+                        document.addEventListener('touchmove', handleMove, { passive: true });
                     }
                 }
     
@@ -1225,21 +1230,21 @@ class BubbleCard extends HTMLElement {
                 }
     
                 if (!this.eventAdded && buttonType === 'switch') {
-                    switchButton.addEventListener('click', () => tapFeedback(this.switchButton));
+                    switchButton.addEventListener('click', () => tapFeedback(this.switchButton), { passive: true });
                     switchButton.addEventListener('click', function(e) {
                         if (!e.target.closest('ha-icon')) {
                             toggleEntity(entityId);
                         }
-                    });
+                    }, { passive: true });
                     addActions(this, this.iconContainer);
                     this.eventAdded = true;
                 } else if (!this.eventAdded && buttonType === 'slider') {
-                    rangeSlider.addEventListener('mousedown', handleStart);
-                    rangeSlider.addEventListener('touchstart', handleStart);
+                    rangeSlider.addEventListener('mousedown', handleStart, { passive: true });
+                    rangeSlider.addEventListener('touchstart', handleStart, { passive: true });
                     addActions(this, this.iconContainer);
                     this.eventAdded = true;
                 } else if (!this.eventAdded && buttonType === 'custom') {
-                    switchButton.addEventListener('click', () => tapFeedback(this.switchButton));
+                    switchButton.addEventListener('click', () => tapFeedback(this.switchButton), { passive: true });
                     addActions(this, this.switchButton);
                     this.eventAdded = true;
                 }
@@ -1516,17 +1521,17 @@ class BubbleCard extends HTMLElement {
                         hass.callService(openCover.split('.')[0], openCover.split('.')[1], {
                             entity_id: entityId
                         });
-                    });
+                    }, { passive: true });
                     stopButton.addEventListener('click', () => {
                         hass.callService(stopCover.split('.')[0], stopCover.split('.')[1], {
                             entity_id: entityId
                         });
-                    });
+                    }, { passive: true });
                     closeButton.addEventListener('click', () => {
                         hass.callService(closeCover.split('.')[0], closeCover.split('.')[1], {
                             entity_id: entityId
                         });
-                    });
+                    }, { passive: true });
                     
                     this.iconContainer = this.content.querySelector('.icon-container');
                     addActions(this, this.iconContainer);
@@ -1617,11 +1622,21 @@ class BubbleCard extends HTMLElement {
                     const separatorContainer = document.createElement("div");
                     separatorContainer.setAttribute("class", "empty-column");
                     separatorContainer.innerHTML = `
-                  <div style="display: flex; width: 100%;">
-                  </div>
-                  `
+                        <div style="display: flex; width: 100%;"></div>
+                    `
                     this.content.appendChild(separatorContainer);
                     this.emptyColumnAdded = true;
+                }
+                break;
+                
+            case 'test':
+                if (!this.entityCardAdded) {
+                  const card = document.createElement('hui-entity-card');
+                  card.setConfig({
+                    entity: 'light.cuisine',
+                  });
+                  this.appendChild(card);
+                  this.entityCardAdded = true;
                 }
                 break;
         }
@@ -2151,7 +2166,7 @@ class BubbleCardEditor extends LitElement {
                         addButton.style.opacity = originalOpacity;
                         addButton.innerText = originalText;
                     }, 5000);
-                });
+                }, { passive: true });
 
                 this.buttonAdded = true;
             }
