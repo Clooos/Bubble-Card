@@ -118,7 +118,7 @@ cards:
     width_desktop: 600px
     margin_top_mobile: 18px
     margin_top_desktop: 74px
-    autoclose: 15000
+    auto_close: 15000
 ```
 A button to open the pop-up (not a Bubble Card one)
 ```yaml
