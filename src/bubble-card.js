@@ -1,4 +1,4 @@
-var version = 'v1.2.0';
+var version = 'v1.2.1';
 
 let editor;
 
@@ -8,7 +8,7 @@ class BubbleCard extends HTMLElement {
         if (!window.eventAdded) {
             // 'urlChanged' custom event
             const pushState = history.pushState;
-            window.popUpIntialized = false;
+            window.popUpInitialized = false;
             
             history.pushState = function () {
                 pushState.apply(history, arguments);
@@ -287,23 +287,23 @@ class BubbleCard extends HTMLElement {
         switch (this.config.card_type) {
             // Initialize pop-up card
             case 'pop-up':
-                if (!this.getRootNode().host && !editor) {
+                if (!this.initStyleAdded && !this.host && !editor) {
                     // Hide vertical stack content before initialization
                     this.card.style.marginTop = '2000px';
+                    this.initStyleAdded = true;
                 }
                 
-                let intervalId = setInterval(() => {
-                    if (this.getRootNode().host) {
-                        // Stop checking once this.getRootNode().host is defined
-                        clearInterval(intervalId);
-                
+                const createPopUp = () => {
+                    if (!this.host) {
+                        this.host = this.getRootNode().host;
+                    } else {
                         const popUpHash = this.config.hash;
                         if (!this.popUp) {
                             this.card.style.marginTop = '0';
                             this.verticalStack = this.getRootNode();
                             this.popUp = this.verticalStack.querySelector('#root');
                             
-                            if (!window.popUpIntialized) {
+                            if (!window.popUpInitialized) {
                                 if (backOpen) {
                                     window.backOpen = true;
                                     const event = new Event('popUpInitialized');
@@ -314,12 +314,11 @@ class BubbleCard extends HTMLElement {
                                     window.backOpen = false;
                                     popUpOpen = popUpHash + false;
                                     history.replaceState(null, null, location.href.split('#')[0]);
-                                    console.log("Delete hash");
                                 }   
-                                window.popUpIntialized = true;
+                                window.popUpInitialized = true;
                             }
                         }
-            
+                    
                         const popUp = this.popUp;
                         const text = this.config.text || '';
                         const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
@@ -551,6 +550,8 @@ class BubbleCard extends HTMLElement {
                             }
                         };
                         
+                        let inputBoolean = 'input_boolean.' + popUpHash.substring(1) + '_pop_up';
+                        
                         function openPopUp() {
                             popUp.classList.remove('close-pop-up');
                             popUp.classList.add('open-pop-up');
@@ -757,7 +758,16 @@ class BubbleCard extends HTMLElement {
                             popUp.classList.remove('editor');
                         }
                     }
-                }, 10);
+                }
+                
+                let initPopUp;
+                
+                if (!this.popUp) {
+                    initPopUp = setTimeout(createPopUp, 0);
+                } else {
+                    clearInterval(initPopUp);
+                    createPopUp();
+                }
                 break;
 
             // Initialize horizontal buttons stack
@@ -792,7 +802,7 @@ class BubbleCard extends HTMLElement {
                     this.content.appendChild(buttonsContainer);
                     this.buttonsContainer = buttonsContainer;
                 }
-    
+                
                 const updateButtonStyle = (buttonElement, lightEntity) => {
                     if (hass.states[lightEntity].attributes.rgb_color) {
                         const rgbColor = hass.states[lightEntity].attributes.rgb_color;
@@ -886,39 +896,31 @@ class BubbleCard extends HTMLElement {
                     this.buttons = buttons;
                 }
                 
-                if (editor) {
-                    localStorage.setItem('justExitedEditor', false);
-                } else if (localStorage.getItem('justExitedEditor') === 'false') {
-                    localStorage.setItem('justExitedEditor', true);
-                }
-                
                 let currentPosition = 0;
-                let margin = 12;
-                const justExitedEditor = localStorage.getItem('editorMode') === 'true' && !editor;
+                let buttonMargin = 12;
                 
-                buttonsList.forEach((button, index) => {
+                async function updateButtons() {
+                  for (let button of buttonsList) {
                     let buttonElement = this.buttons[button.link];
                     if (buttonElement) {
-                        let buttonWidth = localStorage.getItem(`buttonWidth-${button.link}`);
-                        let buttonContent = localStorage.getItem(`buttonContent-${button.link}`);
-                        if (!buttonWidth || buttonWidth === '0' || buttonContent !== buttonElement.innerHTML || editor || justExitedEditor) {
-                            buttonWidth = buttonElement.offsetWidth;
-                            localStorage.setItem(`buttonWidth-${button.link}`, buttonWidth);
-                            localStorage.setItem(`buttonContent-${button.link}`, buttonElement.innerHTML);
-                            if (editor) {
-                                margin = 36; // Recalculate margin for editor mode
-                            } else if (justExitedEditor) {
-                                margin = 12; // Recalculate margin for regular mode
-                            }
-                        }
-                        buttonElement.style.transform = `translateX(${currentPosition}px)`;
-                        currentPosition += parseInt(buttonWidth) + margin;
+                      let buttonWidth = await localStorage.getItem(`buttonWidth-${button.link}`);
+                      let buttonContent = await localStorage.getItem(`buttonContent-${button.link}`);
+                      if (!buttonWidth || buttonWidth === '0' || buttonContent !== buttonElement.innerHTML || editor) {
+                        buttonWidth = buttonElement.offsetWidth;
+                        await localStorage.setItem(`buttonWidth-${button.link}`, buttonWidth);
+                        await localStorage.setItem(`buttonContent-${button.link}`, buttonElement.innerHTML);
+                      }
+                      buttonElement.style.transform = `translateX(${currentPosition}px)`;
+                      currentPosition += parseInt(buttonWidth) + buttonMargin;
                     } 
                     if (button.lightEntity) {
-                        updateButtonStyle(buttonElement, button.lightEntity);
+                      updateButtonStyle(buttonElement, button.lightEntity);
                     }
-                });
-                
+                  }
+                }
+
+                updateButtons.call(this);
+
                 const horizontalButtonsStackStyles = `
                     ha-card {
                         border-radius: 0;
@@ -1010,7 +1012,6 @@ class BubbleCard extends HTMLElement {
                             padding: 0 26px !important;
                         }
                     }
-                    
                     .horizontal-buttons-stack.editor {
                         position: relative;
                         bottom: 0;
@@ -1629,14 +1630,18 @@ class BubbleCard extends HTMLElement {
                 }
                 break;
                 
-            case 'test':
-                if (!this.entityCardAdded) {
-                  const card = document.createElement('hui-entity-card');
-                  card.setConfig({
-                    entity: 'light.cuisine',
-                  });
-                  this.appendChild(card);
-                  this.entityCardAdded = true;
+            case 'loader':
+                if (!this.loaderAdded) {
+                    const loaderContainer = document.createElement("div");
+                    loaderContainer.setAttribute("class", "loader");
+                    loaderContainer.innerHTML = `
+                        <div style="display: flex; width: 100%; height: 4000px;"></div>
+                    `
+                    // Ajouter un délai de 0 millisecondes pour rendre le code asynchrone
+                    setTimeout(() => {
+                        this.content.appendChild(loaderContainer);
+                        this.loaderAdded = true;
+                    }, 0);
                 }
                 break;
         }
