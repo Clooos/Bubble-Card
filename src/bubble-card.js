@@ -1,4 +1,4 @@
-var version = 'v1.2.1';
+var version = 'v1.2.2';
 
 let editor;
 
@@ -763,7 +763,7 @@ class BubbleCard extends HTMLElement {
                 let initPopUp;
                 
                 if (!this.popUp) {
-                    initPopUp = setTimeout(createPopUp, 0);
+                    initPopUp = setInterval(createPopUp, 0);
                 } else {
                     clearInterval(initPopUp);
                     createPopUp();
