@@ -1,4 +1,4 @@
-var version = 'v1.2.2';
+var version = 'v1.2.3';
 
 let editor;
 
@@ -271,8 +271,8 @@ class BubbleCard extends HTMLElement {
         let name = this.config.name ? this.config.name : this.config.entity ? hass.states[entityId].attributes.friendly_name : '';
         let widthDesktop = this.config.width_desktop || '540px';
         let widthDesktopDivided = widthDesktop ? widthDesktop.match(/(\d+)(\D+)/) : '';
-        let shadowOpacity = this.config.shadow_opacity !== undefined ? this.config.shadow_opacity : '10';
-        let bgBlur = this.config.bg_blur !== undefined ? this.config.bg_blur : '14';
+        let shadowOpacity = this.config.shadow_opacity !== undefined ? this.config.shadow_opacity : '0';
+        let bgBlur = this.config.bg_blur !== undefined ? this.config.bg_blur : '10';
         let isSidebarHidden = this.config.is_sidebar_hidden || false;
         let state = entityId ? hass.states[entityId].state : '';
         let formatedState;
@@ -763,10 +763,13 @@ class BubbleCard extends HTMLElement {
                 let initPopUp;
                 
                 if (!this.popUp) {
-                    initPopUp = setInterval(createPopUp, 0);
-                } else {
-                    clearInterval(initPopUp);
-                    createPopUp();
+                    initPopUp = setInterval(() => {
+                        if (this.popUp) {
+                            clearInterval(initPopUp);
+                        } else {
+                            createPopUp();
+                        }
+                    }, 0);
                 }
                 break;
 
