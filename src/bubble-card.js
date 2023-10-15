@@ -1,4 +1,4 @@
-var version = 'v1.2.3';
+var version = 'v1.2.4';
 
 let editor;
 
@@ -526,7 +526,7 @@ class BubbleCard extends HTMLElement {
                             }
                         }
                         
-                        if (entityId !== '') {
+                        if (entityId && hass.states[entityId].attributes.rgb_color) {
                             const rgbColor = hass.states[entityId].attributes.rgb_color;
                             const rgbColorOpacity = rgbColor  
                                 ? `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, 0.5)` 
@@ -759,6 +759,8 @@ class BubbleCard extends HTMLElement {
                         }
                     }
                 }
+                
+                createPopUp();
                 
                 let initPopUp;
                 
@@ -1011,7 +1013,7 @@ class BubbleCard extends HTMLElement {
                             position: fixed;
                             width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' && !isSidebarHidden ? ' - var(--mdc-drawer-width)' : ''}) !important;
                             left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + ${isSidebarHidden === true ? '0px' : `var(--mdc-drawer-width) ${widthDesktopDivided[2] === '%' ? '' : '/ 2'}`});
-                            margin-left: -18px !important;
+                            margin-left: -13px !important;
                             padding: 0 26px !important;
                         }
                     }
