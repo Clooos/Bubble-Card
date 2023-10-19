@@ -119,11 +119,7 @@ cards:
     icon: mdi:fridge
     entity: light.kitchen
     state: sensor.kitchen_temperature
-    state_unit: °C
-    width_desktop: 600px
-    margin_top_mobile: 18px
-    margin_top_desktop: 74px
-    auto_close: 15000
+    back_open: true
 ```
 A button to open the pop-up (not a Bubble Card one)
 ```yaml
