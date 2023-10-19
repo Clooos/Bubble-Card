@@ -52,6 +52,11 @@ This method allows you to get updates directly in the HACS main page
 
 Coming soon in the HACS default repo (still waiting for validation).
 
+### With HACS - Video
+
+There is also a detailed setup video from **BeardedTinker**, thanks a lot to him!  
+▶ [YouTube - Pop-up cards with Bubble Card in Home Assistant](https://www.youtube.com/watch?v=oCpxhNk5JkE)
+
 ## Configuration
 
 Most options can be configured in the GUI editor, except for custom styles, custom buttons and tap actions.
