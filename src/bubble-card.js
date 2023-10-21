@@ -315,8 +315,7 @@ class BubbleCard extends HTMLElement {
                                 const backOpen = this.config.back_open || false;
                                 backOpen ? localStorage.setItem('backOpen', true) : localStorage.setItem('backOpen', false);
                                 const backOpenState = localStorage.getItem('backOpen') === 'true';
-                                console.log("BackOpenState : " + backOpenState);
-                                
+
                                 if (backOpenState) {
                                     window.backOpen = true;
                                     const event = new Event('popUpInitialized');
@@ -441,9 +440,9 @@ class BubbleCard extends HTMLElement {
                             
                             window.addEventListener('click', function(e) {
                                 // Reset auto close
-                                loacation.hash === popUpHash && resetAutoClose();
+                                location.hash === popUpHash && resetAutoClose();
                                 
-                                if (loaction.hash !== previousHash) {
+                                if (location.hash !== previousHash) {
                                     previousHash = location.hash;
                                     if (popUpHash !== location.hash) {
                                         return;
@@ -619,7 +618,7 @@ class BubbleCard extends HTMLElement {
                                 margin: 0 -${marginCenter}; /* 7px */
                                 width: 100%;
                                 background-color: ${rgbaColor};
-                                box-shadow: 0px 0px 50px rgba(0,0,0,${popUp === shadowOpacity / 100});
+                                box-shadow: 0px 0px 50px rgba(0,0,0,${shadowOpacity / 100});
                                 backdrop-filter: blur(${bgBlur}px);
                                 -webkit-backdrop-filter: blur(${bgBlur}px);
                                 border-radius: 42px;
@@ -674,7 +673,7 @@ class BubbleCard extends HTMLElement {
                             #root.close-pop-up { 
                                 transform: translateY(0%);
                                 transition: transform .4s !important;
-                                /* animation: hide 1s forwards; */
+                                box-shadow: none;
                             }
                             @media only screen and (min-width: 768px) {
                                 #root {
