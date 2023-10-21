@@ -1,4 +1,4 @@
-var version = 'v1.3.0';
+var version = 'v1.3.1';
 
 let editor;
 
@@ -72,7 +72,7 @@ class BubbleCard extends HTMLElement {
               .shadowRoot.querySelector("div");
         }
         
-        editor = this.editorElement.classList.contains('edit-mode');
+        this.editorElement ? editor = this.editorElement.classList.contains('edit-mode') : '';
 
         function toggleEntity(entityId) {
             hass.callService('homeassistant', 'toggle', {
@@ -1735,7 +1735,7 @@ class BubbleCard extends HTMLElement {
     }
 
     getCardSize() {
-        return 1;
+        return 0;
     }
 
     static getConfigElement() {
