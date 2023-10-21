@@ -1,4 +1,4 @@
-var version = 'v1.2.4';
+var version = 'v1.3.0';
 
 let editor;
 
@@ -41,7 +41,7 @@ class BubbleCard extends HTMLElement {
                 window.addEventListener('popstate', urlChanged, { passive: true });
                 setTimeout(() => {
                     window.removeEventListener('popUpInitialized', popUpInitialized);
-                }, 1000);
+                }, 5000);
             };
             
             window.addEventListener('popUpInitialized', popUpInitialized, { passive: true });
@@ -82,24 +82,32 @@ class BubbleCard extends HTMLElement {
         
         const addStyles = function(context, styles, customStyles, state, entityId, path = '', element = context.content) {
             const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
+            let parentElementCache = null;
+            let styleElementCache = null;
             let styleAddedKey = styles + 'Added'; // Add 'Added' at the end of the styles value
+            let previousState;
             
             // Check if the style has changed
-            if (!context[styleAddedKey] || context.previousStyle !== customStylesEval) {
+            if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || previousState !== state) {
                 if (!context[styleAddedKey]) {
                     // Check if the style element already exists
-                    context.styleElement = context.content.querySelector('style');
+                    context.styleElement = styleElementCache || context.content.querySelector('style');
                     if (!context.styleElement) {
                         // If not, create a new style element
                         context.styleElement = document.createElement('style');
-                        const parentElement = path ? context.content.querySelector(path) : element;
-                        parentElement.appendChild(context.styleElement);
+                        const parentElement = parentElementCache || (path ? context.content.querySelector(path) : element);
+                        parentElement?.appendChild(context.styleElement);
                     }
                     context[styleAddedKey] = true;
                 }
-                // Update the content of the existing style element
-                context.styleElement.innerHTML = customStylesEval + styles;
+                
+                // Update the content of the existing style element only if styles have changed
+                if (context.styleElement.innerHTML !== customStylesEval + styles) {
+                    context.styleElement.innerHTML = customStylesEval + styles;
+                }
+                
                 context.previousStyle = customStylesEval; // Store the current style
+                previousState = state;
             }      
         }
 
@@ -275,13 +283,13 @@ class BubbleCard extends HTMLElement {
         let bgBlur = this.config.bg_blur !== undefined ? this.config.bg_blur : '10';
         let isSidebarHidden = this.config.is_sidebar_hidden || false;
         let state = entityId ? hass.states[entityId].state : '';
+        let stateOn = ['on', 'open', 'cleaning', 'true', 'home', 'playing'].includes(state) || (Number(state) !== 0 && !isNaN(Number(state)));
         let formatedState;
         let autoClose = this.config.auto_close || false;
         let riseAnimation = this.config.rise_animation !== undefined ? this.config.rise_animation : true;
         let marginCenter = this.config.margin 
             ? (this.config.margin !== '0' ? this.config.margin : '0px')
             : '7px';
-        let backOpen = this.config.back_open; 
         let popUpOpen;
         
         switch (this.config.card_type) {
@@ -303,22 +311,27 @@ class BubbleCard extends HTMLElement {
                             this.verticalStack = this.getRootNode();
                             this.popUp = this.verticalStack.querySelector('#root');
                             
-                            if (!window.popUpInitialized) {
-                                if (backOpen) {
+                            if (!window.popUpInitialized && this.popUp) {
+                                const backOpen = this.config.back_open || false;
+                                backOpen ? localStorage.setItem('backOpen', true) : localStorage.setItem('backOpen', false);
+                                const backOpenState = localStorage.getItem('backOpen') === 'true';
+                                console.log("BackOpenState : " + backOpenState);
+                                
+                                if (backOpenState) {
                                     window.backOpen = true;
                                     const event = new Event('popUpInitialized');
                                     setTimeout(() => {
                                         window.dispatchEvent(event);
-                                    }, 1);
+                                    }, 10);
                                 } else {
                                     window.backOpen = false;
                                     popUpOpen = popUpHash + false;
                                     history.replaceState(null, null, location.href.split('#')[0]);
-                                }   
+                                }
                                 window.popUpInitialized = true;
                             }
                         }
-                    
+                        
                         const popUp = this.popUp;
                         const text = this.config.text || '';
                         const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
@@ -424,28 +437,32 @@ class BubbleCard extends HTMLElement {
                                 toggleEntity(entityId);
                             }, { passive: true });
                             
-                            let previousHash = location.hash;
+                            let previousHash = location.hash; 
                             
                             window.addEventListener('click', function(e) {
-                                //reset auto close
-                                location.hash === popUpHash && resetAutoClose();
+                                // Reset auto close
+                                loacation.hash === popUpHash && resetAutoClose();
                                 
-                                if (location.hash !== previousHash) {
+                                if (loaction.hash !== previousHash) {
                                     previousHash = location.hash;
-                                    return;
+                                    if (popUpHash !== location.hash) {
+                                        return;
+                                    }
                                 }
                                 
-                                if (location.hash === popUpHash && 
-                                    !e.composedPath().some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') && 
-                                    !e.composedPath().some(el => el.id === 'root' && !el.classList.contains('close-pop-up'))) {
+                                const target = e.composedPath();
+                                
+                                if (target && location.hash === popUpHash && 
+                                    !target.some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') && 
+                                    !target.some(el => el.id === 'root' && !el.classList.contains('close-pop-up'))) {
                                         popUpOpen = popUpHash + false;
                                         history.replaceState(null, null, location.href.split('#')[0]);
                                         localStorage.setItem('isManuallyClosed_' + popUpHash, true)
                                 }
                             }, { passive: true });
                             
-                            window.addEventListener('keydown', function(event) {
-                                if (event.key === 'Escape') {
+                            window.addEventListener('keydown', function(e) {
+                                if (e.key === 'Escape') {
                                     popUpOpen = popUpHash + false;
                                     history.replaceState(null, null, location.href.split('#')[0]);
                                     localStorage.setItem('isManuallyClosed_' + popUpHash, true)
@@ -458,7 +475,7 @@ class BubbleCard extends HTMLElement {
                             let lastTouchY;
                             
                             popUp.addEventListener('touchstart', function(event) {
-                                //reset auto close
+                                // Reset auto close
                                 location.hash === popUpHash && resetAutoClose();
                                 
                                 // Record the Y position of the finger at the start of the touch
@@ -526,20 +543,27 @@ class BubbleCard extends HTMLElement {
                             }
                         }
                         
-                        if (entityId && hass.states[entityId].attributes.rgb_color) {
+                        let lastColor;
+                        let lastState;
+
+                        if (entityId) {
                             const rgbColor = hass.states[entityId].attributes.rgb_color;
-                            const rgbColorOpacity = rgbColor  
-                                ? `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, 0.5)` 
-                                : hass.states[entityId].state !== ('off' || 'closed' || 'paused' || 'false')
-                                ? `var(--accent-color)`
-                                : `var(--background-color,var(--secondary-background-color))`;
-                            this.header.style.backgroundColor = rgbColorOpacity;
-                        } 
+                            this.rgbColor = rgbColor ? `rgb(${rgbColor})` : 'var(--background-color,var(--secondary-background-color))'; 
+                            const state = hass.states[entityId].state;
+                            if (lastColor !== rgbColor || lastState !== state) {
+                                lastColor = rgbColor;
+                                lastState = state;
+                                const rgbColorOpacity = rgbColor && stateOn 
+                                    ? `rgba(${rgbColor}, 0.5)` 
+                                    : (stateOn ? 'var(--accent-color)' : 'var(--background-color,var(--secondary-background-color))');
+                                this.header.style.backgroundColor = rgbColorOpacity;
+                            }
+                        }
                         
                         function checkHash() {
                             if (!editor) {
-                                let hash = location.hash.split('?')[0];
-                
+                                const hash = location.hash.split('?')[0];
+
                                 // Open on hash change
                                 if (hash === popUpHash) {
                                     openPopUp();
@@ -549,8 +573,6 @@ class BubbleCard extends HTMLElement {
                                 }
                             }
                         };
-                        
-                        let inputBoolean = 'input_boolean.' + popUpHash.substring(1) + '_pop_up';
                         
                         function openPopUp() {
                             popUp.classList.remove('close-pop-up');
@@ -567,9 +589,9 @@ class BubbleCard extends HTMLElement {
                         }
                         
                         function resetAutoClose() {
-                            //Clear any existing timeout
+                            // Clear any existing timeout
                             clearTimeout(closeTimeout);
-                            //start autoclose if enabled
+                            // Start autoclose if enabled
                             if(autoClose > 0) {
                                 closeTimeout = setTimeout(autoClosePopUp, autoClose);
                             }
@@ -578,6 +600,8 @@ class BubbleCard extends HTMLElement {
                         function autoClosePopUp(){
                             history.replaceState(null, null, location.href.split('#')[0]);
                         }
+                        
+                        const rgbaBgColor = convertToRGBA(color, 0);
                         
                         const popUpStyles = `
                             ha-card {
@@ -590,11 +614,12 @@ class BubbleCard extends HTMLElement {
                                 padding: 0 !important;
                             }
                             #root {
+                                transition: all 1s;
                                 position: fixed !important;
                                 margin: 0 -${marginCenter}; /* 7px */
                                 width: 100%;
                                 background-color: ${rgbaColor};
-                                box-shadow: 0px 0px 50px rgba(0,0,0,${shadowOpacity / 100});
+                                box-shadow: 0px 0px 50px rgba(0,0,0,${popUp === shadowOpacity / 100});
                                 backdrop-filter: blur(${bgBlur}px);
                                 -webkit-backdrop-filter: blur(${bgBlur}px);
                                 border-radius: 42px;
@@ -613,20 +638,19 @@ class BubbleCard extends HTMLElement {
                                 /* For older Safari but not working with Firefox */
                                 /* display: grid !important; */  
                             }
-                            /* 
                             #root > bubble-card:first-child::after {
                                 content: '';
                                 display: block;
                                 position: sticky;
                                 top: 0;
                                 left: -50px;
-                                margin: -70px 0 -35px 0;
+                                margin: -70px 0 -36px -36px;
+                                overflow: visible;
                                 width: 200%;
                                 height: 100px;
-                                background: linear-gradient(0deg, rgba(79, 69, 87, 0) 0%, ${rgbaColor} 80%);
+                                background: linear-gradient(0deg, ${rgbaBgColor} 0%, ${rgbaColor} 80%);
                                 z-index: 0;
                             } 
-                            */
                             #root::-webkit-scrollbar {
                                 display: none; /* for Chrome, Safari, and Opera */
                             }
@@ -635,6 +659,7 @@ class BubbleCard extends HTMLElement {
                                 top: 0;
                                 z-index: 1;
                                 background: none !important;
+                                overflow: visible;
                             }
                             #root.open-pop-up {
                                 transform: translateY(-100%);
@@ -695,9 +720,8 @@ class BubbleCard extends HTMLElement {
                             }
                             .header-icon {
                                 display: inline-flex;
-                                width: 22px;
-                                height: 22px;
-                                padding: 8px;
+                                width: 38px;
+                                height: 38px;
                                 background-color: var(--card-background-color,var(--ha-card-background));
                                 border-radius: 100%;
                                 margin: 0 10px 0 0;
@@ -706,6 +730,17 @@ class BubbleCard extends HTMLElement {
                                 align-content: center;
                                 justify-content: center;
                                 overflow: hidden;
+                            }
+                            .header-icon::before {
+                                content: '';
+                                position: absolute;
+                                width: 38px;
+                                height: 38px;
+                                display: block;
+                                opacity: 0.2;
+                                transition: background-color 1s;
+                                border-radius: 50%;
+                                background-color: ${stateOn ? (this.rgbColor ? this.rgbColor : 'var(--accent-color)') : 'var(--card-background-color,var(--ha-card-background))'};
                             }
                             .entity-picture {
                                 height: calc(100% + 16px);
@@ -750,7 +785,7 @@ class BubbleCard extends HTMLElement {
                         addStyles(this, popUpStyles, customStyles, state, entityId, '', popUp);
                         addStyles(this, headerStyles, customStyles, state, entityId);
                         
-                        if (editor === true) {
+                        if (editor) {
                             popUp.classList.add('editor');
                             popUp.classList.remove('open-pop-up');
                             popUp.classList.remove('close-pop-up');
@@ -760,19 +795,19 @@ class BubbleCard extends HTMLElement {
                     }
                 }
                 
-                createPopUp();
-                
                 let initPopUp;
                 
                 if (!this.popUp) {
                     initPopUp = setInterval(() => {
+                        createPopUp();
                         if (this.popUp) {
                             clearInterval(initPopUp);
-                        } else {
-                            createPopUp();
                         }
                     }, 0);
+                } else {
+                    createPopUp();
                 }
+
                 break;
 
             // Initialize horizontal buttons stack
@@ -1059,7 +1094,7 @@ class BubbleCard extends HTMLElement {
                     this.card.classList.remove('editor');
                 }
             
-            break;
+                break;
 
             // Initialize button
             case 'button' :
@@ -1097,8 +1132,8 @@ class BubbleCard extends HTMLElement {
                 rangeSlider.setAttribute('class', 'range-slider');
     
                 const rangeFill = document.createElement('div');
-    
                 rangeFill.setAttribute('class', 'range-fill');
+                
                 if (entityId && entityId.startsWith("light.") && buttonType === 'slider') {
                     rangeFill.style.transform = `translateX(${(currentBrightness / 255) * 100}%)`;
                 } else if (entityId && entityId.startsWith("media_player.") && buttonType === 'slider') {
@@ -1167,7 +1202,7 @@ class BubbleCard extends HTMLElement {
                     startX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
                     startY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
                     startValue = rangeSlider.value;
-                    if (e.target !== iconContainer.querySelector('ha-icon')) {
+                    if (e.target !== iconContainer && e.target !== iconContainer.querySelector('ha-icon')) {
                         isDragging = true;
                         document.addEventListener('mouseup', handleEnd, { passive: true });
                         document.addEventListener('touchend', handleEnd, { passive: true });
@@ -1238,7 +1273,8 @@ class BubbleCard extends HTMLElement {
                 if (!this.eventAdded && buttonType === 'switch') {
                     switchButton.addEventListener('click', () => tapFeedback(this.switchButton), { passive: true });
                     switchButton.addEventListener('click', function(e) {
-                        if (!e.target.closest('ha-icon')) {
+                        console.log(e.target);
+                        if (e.target !== iconContainer && e.target !== iconContainer.querySelector('ha-icon')) {
                             toggleEntity(entityId);
                         }
                     }, { passive: true });
@@ -1256,23 +1292,13 @@ class BubbleCard extends HTMLElement {
                 }
     
                 if (!this.isDragging && buttonType === 'slider') {
-                    this.rangeFill.style.transition = 'all .2s';
+                    this.rangeFill.style.transition = 'all .3s';
                     if (entityId.startsWith("light.")) {
                         this.rangeFill.style.transform = `translateX(${(currentBrightness / 255) * 100}%)`;
                     } else if (entityId.startsWith("media_player.")) {
                         this.rangeFill.style.transform = `translateX(${currentVolume * 100}%)`;
                     }
                 }
-    
-                function updateStyle(state, content) {
-                    content.buttonContainer.style.opacity = state !== 'unavailable' ? '1' : '0.5';
-                    if (['switch', 'custom'].includes(buttonType)) {
-                        const backgroundColor = ['on', 'open', 'cleaning', 'true', 'home', 'playing'].includes(state) ? 'var(--accent-color)' : 'rgba(0,0,0,0)';
-                        content.switchButton.style.backgroundColor = backgroundColor;
-                    }
-                }
-    
-                updateStyle(state, this);
     
                 function updateRange(x) {
                     const rect = rangeSlider.getBoundingClientRect();
@@ -1291,13 +1317,24 @@ class BubbleCard extends HTMLElement {
                 if (buttonType === 'slider') {
                     if (entityId.startsWith("light.")) {
                         const rgbColor = hass.states[entityId].attributes.rgb_color;
-                        const rgbColorOpacity = rgbColor ? `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, 0.5)` : `rgba(255, 255, 255, 0.5)`;
+                        const rgbColorOpacity = rgbColor ? `rgba(${rgbColor}, 0.5)` : `rgba(255, 255, 255, 0.5)`;
+                        this.rgbColor = rgbColor ? `rgb(${rgbColor})` : `rgba(255, 255, 255, 1)`;
                         this.rangeFill.style.backgroundColor = rgbColorOpacity;
                     } else {
                         this.rangeFill.style.backgroundColor = `var(--accent-color)`;
                     }
                 }
+                
+                function updateStyle(state, content) {
+                    content.buttonContainer.style.opacity = state !== 'unavailable' ? '1' : '0.5';
+                    if (['switch', 'custom'].includes(buttonType)) {
+                        const backgroundColor = stateOn ? 'var(--accent-color)' : 'rgba(0,0,0,0)';
+                        switchButton.style.backgroundColor = backgroundColor;
+                    }
+                }
     
+                updateStyle(state, this);
+                
                 const buttonStyles = `
                     ha-card {
                         margin-top: 0 !important;
@@ -1356,8 +1393,20 @@ class BubbleCard extends HTMLElement {
                         height: 38px;
                         margin: 6px;
                         border-radius: 50%;
-                        background-color: var(--card-background-color,var(--ha-card-background));
                         cursor: pointer !important;
+                        background-color: var(--card-background-color,var(--ha-card-background));
+                    }
+                    
+                    .icon-container::before {
+                        content: '';
+                        position: absolute;
+                        display: block;
+                        opacity: 0.2;
+                        width: 100%;
+                        height: 100%;
+                        transition: all 1s;
+                        border-radius: 50%;
+                        background-color: ${stateOn ? (this.rgbColor ? this.rgbColor : 'var(--accent-color)') : 'var(--card-background-color,var(--ha-card-background))'};
                     }
                     
                     ha-icon {
@@ -1382,6 +1431,7 @@ class BubbleCard extends HTMLElement {
                         font-weight: 600;
                         align-items: center;
                         line-height: ${!showState ? '16px' : '4px'};
+                        padding-right: 16px;
                     }
                     
                     .state {
@@ -1439,6 +1489,7 @@ class BubbleCard extends HTMLElement {
                     .separator-container {
                         display: inline-flex;
                         width: 100%;
+                        margin-top: 12px;
                     }
                     .separator-container div:first-child {
                         display: inline-flex;
@@ -1810,7 +1861,7 @@ class BubbleCardEditor extends LitElement {
     }
     
     get _shadow_opacity() {
-        return this._config.shadow_opacity !== undefined ? this._config.shadow_opacity : '10';
+        return this._config.shadow_opacity !== undefined ? this._config.shadow_opacity : '0';
     }
 
     get _is_sidebar_hidden() {
@@ -2101,7 +2152,7 @@ class BubbleCardEditor extends LitElement {
                             <label class="mdc-label">Optional - Back button/event support</label> 
                         </div>
                     </ha-formfield>
-                    <ha-alert alert-type="info"><b>Back button/event support</b> : This allow you to navigate through your pop-ups when you press the back button of your browser. <b>This setting can be applied only once, you don't need to change it in all pop-ups.</b> Beta users: This was the previous default behavior, set it to true to keep everything like before the update.</ha-alert>
+                    <ha-alert alert-type="info"><b>Back button/event support</b> : This allow you to navigate through your pop-ups history when you press the back button of your browser. <b>This setting can be applied only once, you don't need to change it in all pop-ups. If it's not working just turn it on for each pop-ups.</b></ha-alert>
                     ${this.makeVersion()}
               </div>
             `;
