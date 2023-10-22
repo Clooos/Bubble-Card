@@ -523,7 +523,7 @@ styles: |
   }
 ```
 
-More informations here :
+More information here :
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator
 
 For now you have access to these variables in some cards (not all):
