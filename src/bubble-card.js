@@ -1,4 +1,4 @@
-var version = 'v1.3.2';
+var version = 'v1.3.3';
 
 let editor;
 
@@ -306,6 +306,10 @@ class BubbleCard extends HTMLElement {
                     this.initStyleAdded = true;
                 }
                 
+                const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
+                const triggerState = this.config.trigger_state ? this.config.trigger_state : '';
+                const triggerClose = this.config.trigger_close ? this.config.trigger_close : false;
+                
                 const createPopUp = () => {
                     if (!this.host) {
                         this.host = this.getRootNode().host;
@@ -337,9 +341,6 @@ class BubbleCard extends HTMLElement {
                         
                         const popUp = this.popUp;
                         const text = this.config.text || '';
-                        const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
-                        const triggerState = this.config.trigger_state ? this.config.trigger_state : '';
-                        const triggerClose = this.config.trigger_close ? this.config.trigger_close : false;
                         formatedState = this.config.state ? hass.formatEntityState(hass.states[this.config.state]) + ' ' + text : text;
                         const marginTopMobile = this.config.margin_top_mobile 
                             ? (this.config.margin_top_mobile !== '0' ? this.config.margin_top_mobile : '0px')
@@ -503,47 +504,6 @@ class BubbleCard extends HTMLElement {
                             }, { passive: true });
             
                             this.eventAdded = true;
-                        }
-                        
-                        if (triggerEntity) {
-                            if (localStorage.getItem('previousTriggerState_' + popUpHash) === null) {
-                                localStorage.setItem('previousTriggerState_' + popUpHash, '');
-                            }
-                            if (localStorage.getItem('isManuallyClosed_' + popUpHash) === null) {
-                                localStorage.setItem('isManuallyClosed_' + popUpHash, 'false');
-                            }
-                            if (localStorage.getItem('isTriggered_' + popUpHash) === null) {
-                                localStorage.setItem('isTriggered_' + popUpHash, 'false');
-                            }                        
-            
-                            let previousTriggerState = localStorage.getItem('previousTriggerState_' + popUpHash);
-                            let isManuallyClosed = localStorage.getItem('isManuallyClosed_' + popUpHash) === 'true';
-                            let isTriggered = localStorage.getItem('isTriggered_' + popUpHash) === 'true';
-                        
-                            if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null && !isTriggered) {
-                                navigate('', popUpHash);
-                                isTriggered = true;
-                                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-                            }
-                        
-                            if (hass.states[triggerEntity].state !== previousTriggerState) {
-                                isManuallyClosed = false;
-                                localStorage.setItem('previousTriggerState_' + popUpHash, hass.states[triggerEntity].state);
-                                localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
-                            }
-                            
-                            if (hass.states[triggerEntity].state === triggerState && !isManuallyClosed) {
-                                navigate('', popUpHash);
-                                isTriggered = true;
-                                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-                            } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
-                                history.replaceState(null, null, location.href.split('#')[0]);
-                                popUpOpen = popUpHash + false;
-                                isTriggered = false;
-                                isManuallyClosed = true;
-                                localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
-                                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-                            }
                         }
                         
                         let lastColor;
@@ -814,6 +774,47 @@ class BubbleCard extends HTMLElement {
                     createPopUp();
                     if (editor) { 
                         this.wasEditing = true;
+                    }
+                }
+                
+                if (triggerEntity && this.popUp) {
+                    if (localStorage.getItem('previousTriggerState_' + popUpHash) === null) {
+                        localStorage.setItem('previousTriggerState_' + popUpHash, '');
+                    }
+                    if (localStorage.getItem('isManuallyClosed_' + popUpHash) === null) {
+                        localStorage.setItem('isManuallyClosed_' + popUpHash, 'false');
+                    }
+                    if (localStorage.getItem('isTriggered_' + popUpHash) === null) {
+                        localStorage.setItem('isTriggered_' + popUpHash, 'false');
+                    }                        
+    
+                    let previousTriggerState = localStorage.getItem('previousTriggerState_' + popUpHash);
+                    let isManuallyClosed = localStorage.getItem('isManuallyClosed_' + popUpHash) === 'true';
+                    let isTriggered = localStorage.getItem('isTriggered_' + popUpHash) === 'true';
+                
+                    if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null && !isTriggered) {
+                        navigate('', popUpHash);
+                        isTriggered = true;
+                        localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
+                    }
+                
+                    if (hass.states[triggerEntity].state !== previousTriggerState) {
+                        isManuallyClosed = false;
+                        localStorage.setItem('previousTriggerState_' + popUpHash, hass.states[triggerEntity].state);
+                        localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
+                    }
+                    
+                    if (hass.states[triggerEntity].state === triggerState && !isManuallyClosed) {
+                        navigate('', popUpHash);
+                        isTriggered = true;
+                        localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
+                    } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
+                        history.replaceState(null, null, location.href.split('#')[0]);
+                        popUpOpen = popUpHash + false;
+                        isTriggered = false;
+                        isManuallyClosed = true;
+                        localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
+                        localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
                     }
                 }
                 
