@@ -6,7 +6,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ## Table of contents
 
-**[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Full example`](#full-example)** | **[`Styling`](#styling)** | **[`Conflicts`](#custom-components-conflicts)** | **[`Help`](#help)** 
+**[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Full example`](#full-example)** | **[`Styling`](#styling)** | **[`Conflicts`](#custom-components-conflicts)** | **[`Help`](#help)** | **[`Contribution`](#contribution)** 
 
 
 ## Screenshots and features
@@ -552,6 +552,37 @@ And for your questions you can go ask here on the forum to get some help from me
 
 [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) 
 
+## Contribution
+
+As the project continues to expand, I've realized that any help would be greatly appreciated. Your contribution can make a real difference. 
+
+### Where to start?
+
+First, fork the [repository](https://github.com/Clooos/Bubble-Card) to your own GitHub account. This will create a copy of the project under your account.
+
+Clone the Repository:
+```
+git clone https://github.com/yourusername/Bubble-Card
+```
+Navigate to the project directory:
+```
+cd Bubble-Card
+```
+Create a new branch for your feature or bug fix:
+```
+git checkout -b feature-branch
+```
+Make your changes and commit them:
+```
+git add .
+git commit -m "Description of your changes"
+```
+Push your changes to your fork:
+```
+git push origin feature-branch
+```
+Finally Click on Create Pull request to contribute on this repository.
+
 ## Donate
 
 If you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated 🍻
@@ -561,43 +592,5 @@ If you like my project and want to support me, please consider making a donation
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR)
 
 Thank you everyone for your support, you all are my greatest motivation!
-
- - # Contribution guidelines 
-
-Welcome to [Bubble-Card]! We're thrilled that you'd like to contribute. Your help is essential for making it better.
-
-## Getting Started
-
-Before you start contributing, please make sure you have read and understood our [Code of Conduct](CODE_OF_CONDUCT.md).
-
-### Fork the Repository
-
-First, fork the [repository](https://github.com/Clooos/Bubble-Card) to your own GitHub account. This will create a copy of the project under your account.
-
-
-### Clone the Repository
-```
-git clone https://github.com/yourusername/Bubble-Card
-```
-### Navigate to the project directory 📁
-```
-cd Bubble-Card
-```
-Create a new branch for your feature or bug fix:
-```
- git checkout -b feature-branch
- ```
-
-Make your changes and commit them:
-```
-git add .
-git commit -m "Description of your changes"
-```
-Push your changes to your fork:
-```
-git push origin feature-branch
-
-```
-Finally Click on Create Pull request to contribute on this repository.
 
 
