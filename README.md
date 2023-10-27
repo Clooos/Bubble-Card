@@ -26,7 +26,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 ### Without HACS
 
 1. Download this file: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/bubble-card.js)
-2. Add this file into your `<config>/www` folder
+2. Add this file to your `<config>/www` folder
 3. On your dashboard click on the icon at the right top corner then on `Edit dashboard`
 4. Click again on that icon and then on `Manage resources`
 5. Click on `Add resource`
@@ -38,7 +38,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ### With HACS
 
-This method allows you to get updates directly in the HACS main page
+This method allows you to get updates directly on the HACS main page
 
 1. Download HACS following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
 2. Proceed to the initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
@@ -46,7 +46,7 @@ This method allows you to get updates directly in the HACS main page
 4. click on the icon at the right top corner then on `Custom repositories`
 5. For the repository add this: `https://github.com/Clooos/Bubble-Card`
 6. For the category select `Lovelace` then click `Add`
-7. Now click on `Bubble Card` then on the `Download` button
+7. Now click on `Bubble Card` and then on the `Download` button
 8. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
 9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
 
@@ -91,10 +91,10 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `back_open` | boolean | Optional | `true` or `false` (default) | Enable the back button/event, this allows you to navigate through your pop-ups when you press the back button of your browser (`true` was the initial behavior in the beta) |
 | `text` | string | Optional | Any string | An additional text to show next to your `name` |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
-| `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the pop-up position if the sidebar is hidden on desktop (only if you have made a modification to hide it yourself) |
+| `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the pop-up position if the sidebar is hidden on the desktop (only if you have made a modification to hide it yourself) |
 | `margin` | string | Optional | Any CSS value | Use this **only** if your pop-up is not well centered on mobile (e.g. `13px`) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
-| `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for an half sized pop-up) |
+| `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for a half-sized pop-up) |
 | `bg_color` | string | Optional | Any hex, rgb or rgba value | The background color of your pop-up (e.g. `#ffffff` for a white background) |
 | `bg_opacity` | string | Optional | Any value from 0 to 100 | The background opacity of your pop-up (e.g. `100` for no transparency) |
 | `bg_blur` | string | Optional | Any value from 0 to 100 | The background blur effect of your pop-up, **this only work if `bg_opacity` is not set to `100`** (e.g. `0` for no blur)|
@@ -103,7 +103,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
-| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on the icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
 ### Example
@@ -133,7 +133,7 @@ icon: mdi:fridge
 
  ### Pop-ups trigger
  
-This feature allows you to open a pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
+This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
 
 #### Example
  
@@ -150,9 +150,9 @@ trigger_close: true
 
 ## Horizontal buttons stack
 
-This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer. This card will have more features in the future.
+This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer. This card will have more features in the future.
 
-**⚠️ Important: This card have to be the last one in your view (after every cards and pop-ups). It can't be inside any stack.**
+**⚠️ Important: This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.**
 
 ### Options
 
@@ -163,12 +163,12 @@ This card is the companion to the pop-up card, allowing you to open the correspo
 | `1_icon` | string | Optional | Any `mdi:` icon | An icon for your button |
 | `1_entity` | string | Optional | Any light or light group | Display the color of that light in background |
 | `1_pir_sensor` | string | Optional | Any binary sensor | At least one pir sensor or more for `auto_order` |
-| `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the room you just entered, **it need to be `false` if you don't have any `_pir_sensor` in your code** |
+| `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the room you just entered, **it needs to be `false` if you don't have any `_pir_sensor` in your code** |
 | `margin` | string | Optional | Any CSS value | Use this **only** if your `horizontal-buttons-stack` is not well centered on mobile (e.g. `13px`) |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `rise_animation` | boolean | Optional | `true` (default) or `false` | Set this to `false` to disable the animation that activates once the page has loaded |
 
-**The variables starting with a number defines your buttons, just change this number to add more buttons (see example below).**
+**The variables starting with a number define your buttons, just change this number to add more buttons (see example below).**
 
 ### Example
 
@@ -195,7 +195,7 @@ auto_order: true
 
 ## Button
 
-This card can be a slider or a button, allowing you to toggle your entities or automations, control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.
+This card can be a slider or a button, allowing you to toggle your entities or automation, and control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.
 
 ### Options
 
@@ -237,12 +237,12 @@ This is still experimental and more customizations are coming.
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
 | `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button click, if undefined, `more-info` will be used. |
-| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button double click, if undefined, `toggle` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on the button double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button hold, if undefined, `more-info` will be used. |
 
 ### Example
 
-Here is an example of a button that toggle all the lights of a room and if you double tap or hold it, it will open a pop-up with all your other lights:
+Here is an example of a button that toggles all the lights of a room and if you double tap or hold it, it will open a pop-up with all your other lights:
 
 ```yaml
 type: custom:bubble-card
@@ -375,7 +375,7 @@ cards:
     margin_top_desktop: 74px
     styles: |
       #root {
-        /* This is a fix for older Safari (for my wall mounted iPad) but it won't work on Firefox, this is optional */
+        /* This is a fix for older Safari (for my wall-mounted iPad) but it won't work on Firefox, this is optional */
         display: grid !important;
       }
   - type: custom:bubble-card
@@ -538,7 +538,7 @@ But in all cards you can also use this:
 
 ## Custom components conflicts
 
-⚠️ For now there are some features that are not working with:
+⚠️ For now there are some features that are not working:
 
 - UI Lovelace Minimalist (see https://github.com/Clooos/Bubble-Card/issues/41)
 - Lovelace state switch (see https://github.com/Clooos/Bubble-Card/issues/47)
@@ -548,7 +548,7 @@ But in all cards you can also use this:
 
 Feel free to open an [issue](https://github.com/Clooos/Bubble-Card/issues) if something is not working as expected. 
 
-And for your questions you can go ask here on the forum to get some help from me or the community :
+And for your questions, you can go ask here on the forum to get some help from me or the community :
 
 [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) 
 
@@ -591,6 +591,6 @@ If you like my project and want to support me, please consider making a donation
 
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR)
 
-Thank you everyone for your support, you all are my greatest motivation!
+Thank you, everyone, for your support, you all are my greatest motivation!
 
 
