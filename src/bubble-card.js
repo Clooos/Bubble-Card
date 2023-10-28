@@ -1,4 +1,4 @@
-var version = 'v1.4.0';
+var version = 'v1.4.1';
 
 let editor;
 let entityStates = {};
@@ -114,12 +114,39 @@ class BubbleCard extends HTMLElement {
             return hasStateChanged;
         }
         
+        // const addStyles = function(context, styles, customStyles, state, entityId, stateChangedVar, path = '', element = context.content) {
+        //     const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
+        //     let styleAddedKey = styles + 'Added'; // Add 'Added' at the end of the styles value
+
+        //     // Check if the style has changed
+        //     if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || stateChangedVar) {
+        //         if (!context[styleAddedKey]) {
+        //             // Check if the style element already exists
+        //             context.styleElement = element.querySelector('style'); //context.content
+        //             if (!context.styleElement) {
+        //                 // If not, create a new style element
+        //                 context.styleElement = document.createElement('style');
+        //                 const parentElement = (path ? element.querySelector(path) : element);
+        //                 parentElement?.appendChild(context.styleElement);
+        //             }
+        //             context[styleAddedKey] = true;
+        //         }
+                
+        //         // Update the content of the existing style element only if styles have changed
+        //         if (context.styleElement.innerHTML !== customStylesEval + styles) {
+        //             context.styleElement.innerHTML = customStylesEval + styles;
+        //         }
+                
+        //         context.previousStyle = customStylesEval; // Store the current style
+        //     }      
+        // }
+        
         const addStyles = function(context, styles, customStyles, state, entityId, stateChangedVar, path = '', element = context.content) {
             const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
             let styleAddedKey = styles + 'Added'; // Add 'Added' at the end of the styles value
-
+        
             // Check if the style has changed
-            if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || stateChangedVar) {
+            if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || stateChangedVar || context.previousConfig !== context.config) {
                 if (!context[styleAddedKey]) {
                     // Check if the style element already exists
                     context.styleElement = element.querySelector('style'); //context.content
@@ -138,6 +165,7 @@ class BubbleCard extends HTMLElement {
                 }
                 
                 context.previousStyle = customStylesEval; // Store the current style
+                context.previousConfig = context.config; // Store the current config
             }      
         }
 
@@ -1372,8 +1400,9 @@ class BubbleCard extends HTMLElement {
                     }
                 }
                 
-                if (buttonStateChanged) {
+                if (buttonStateChanged || this.wasEditing) {
                     updateStyle(state, this);
+                    this.wasEditing = false;
                 }
                 
                 const buttonStyles = `
@@ -2527,7 +2556,7 @@ class BubbleCardEditor extends LitElement {
         });
     }
     
-    // Working for sliders but add more issues, to be fixed
+    // Working for sliders (setting to 0) but add more issues, to be fixed
     // _valueChanged(ev) {
     //     if (!this._config || !this.hass) {
     //         return;
@@ -2552,9 +2581,11 @@ class BubbleCardEditor extends LitElement {
         const target = ev.target;
         const detail = ev.detail;
         if (target.configValue) {
-            if (target.value === "" || target.checked === false) {
-                const { [target.configValue]: _, ...rest } = this._config;
-                this._config = rest;
+            if (target.type === 'ha-switch') {
+                this._config = {
+                    ...this._config,
+                    [target.configValue]: target.checked,
+                }
             } else {
                 this._config = {
                     ...this._config,
