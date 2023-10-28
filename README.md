@@ -28,7 +28,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 1. Download this file: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/bubble-card.js)
 2. Add this file to your `<config>/www` folder
 3. On your dashboard click on the icon at the right top corner then on `Edit dashboard`
-4. Click again on that icon and then on `Manage resources`
+4. Click again on that icon and then click on `Manage resources`
 5. Click on `Add resource`
 6. Copy and paste this: `/local/bubble-card.js?v=1`
 7. Click on `JavaScript Module` then `Create`
@@ -71,7 +71,7 @@ Most options can be configured in the GUI editor, except for custom styles, cust
 
 ## Pop-up
 
-This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have an unique hash (e.g. `'#kitchen'`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card come with an header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
+This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have a unique hash (e.g. `'#kitchen'`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card comes with a header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
 
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
 2. This `vertical-stack` must be after all your other cards and before your `horizontal-buttons-stack` if you have one
@@ -150,7 +150,7 @@ trigger_close: true
 
 ## Horizontal buttons stack
 
-This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer. This card will have more features in the future.
+This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer. This card will have more features in the future.
 
 **⚠️ Important: This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.**
 
@@ -223,7 +223,7 @@ icon: mdi:led-strip-variant
 
 ## Custom button
 
-This is a customizable button (similar to the switch button) that allows you to use all actions directly on the whole button allowing you to use it for almost everything. 
+This is a customizable button (similar to the switch button) that allows you to use all the actions directly on the whole button allowing you to use it for almost everything. 
 
 This is still experimental and more customizations are coming.
 
