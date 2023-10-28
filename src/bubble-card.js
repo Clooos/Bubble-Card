@@ -1668,15 +1668,15 @@ class BubbleCard extends HTMLElement {
                         align-items: center;
                         justify-content: center;
                         cursor: pointer;
-                        /*z-index: 1;*/
                         width: 48px;
                         height: 48px;
                         margin: 6px;
                         border-radius: 50%;
-                        background-color: var(--card-background-color,var(--ha-card-background));
-                        border: 6px solid var(--background-color-2,var(--secondary-background-color));
+                        background-color: var(--card-background-color, var(--ha-card-background));
+                        border: 6px solid var(--background-color-2, var(--secondary-background-color));
                         box-sizing: border-box;
                     }
+                    
                     
                     .name-container {
                         font-weight: 600;
@@ -1705,14 +1705,15 @@ class BubbleCard extends HTMLElement {
                     
                     .button {
                         display: flex;
-                        background: var(--background-color-2,var(--secondary-background-color));
+                        background: var(--background-color-2, var(--secondary-background-color));
                         height: 42px;
-                        border-radius: 32px;
+                        border-radius: 50%; /* You can set this to 32px if it doesn't affect the design */
                         align-items: center;
                         justify-content: center;
                         cursor: pointer;
                         border: none;
                     }
+                    
                 `;
     
                 addStyles(this, coverStyles, customStyles, state, entityId);
