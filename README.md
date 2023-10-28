@@ -12,20 +12,38 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 ## Screenshots and features
 
 <div style="display: flex;">
-    <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/681e99e0-17ce-471d-a71b-9ef8158af6d5" style="width: 50%; float: left;">
-    <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/286d3c0d-677f-4bd7-8d7e-667754af9019" style="width: 50%; float: right;">
+    <div style="width: 48%; margin-right: 2%;">
+        <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/681e99e0-17ce-471d-a71b-9ef8158af6d5" style="width: 100%;">
+        <p style="text-align: center;">1</p>
+    </div>
+    <div style="width: 48%;">
+        <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/286d3c0d-677f-4bd7-8d7e-667754af9019" style="width: 100%;">
+        <p style="text-align: center;">2</p>
+    </div>
 </div>
-<div style="display: flex;">
-    <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/dd182185-a092-43f2-8b5e-b194da85bcb9" style="width: 50%; float: left;">
-    <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/c348db22-f3c7-46e2-b3ff-3978fcb4eb42" style="width: 50%; float: right;">
+<div style="display: flex; margin-top: 20px;">
+    <div style="width: 48%; margin-right: 2%;">
+        <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/dd182185-a092-43f2-8b5e-b194da85bcb9" style="width: 100%;">
+        <p style="text-align: center;">3</p>
+    </div>
+    <div style="width: 48%;">
+        <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/c348db22-f3c7-46e2-b3ff-3978fcb4eb42" style="width: 100%;">
+        <p style="text-align: center;">4</p>
+    </div>
 </div>
-<div style="display: flex;">
-    <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/ca92ad56-4e59-49e3-b050-39544ad523e2" style="width: 50%; float: left;">
-    <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/252a61c6-dc93-40e4-991a-28979a02eafc" style="width: 50%; float: right;">
+<div style="display: flex; margin-top: 20px;">
+    <div style="width: 48%; margin-right: 2%;">
+        <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/ca92ad56-4e59-49e3-b050-39544ad523e2" style="width: 100%;">
+        <p style="text-align: center;">5</p>
+    </div>
+    <div style="width: 48%;">
+        <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/6dd13476-42c5-427c-a4d8-ad4981fc2db7" style="width: 100%;">
+        <p style="text-align: center;">6</p>
+    </div>
 </div>
-<div style="display: flex;">
-    <img src="https://github.com/Clooos/Bubble-Card/assets/36499953/6dd13476-42c5-427c-a4d8-ad4981fc2db7" style="width: 100%;">
-</div>
+
+
+
 
 
 
@@ -602,5 +620,4 @@ If you like my project and want to support me, please consider making a donation
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR)
 
 Thank you, everyone, for your support, you all are my greatest motivation!
-
 
