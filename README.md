@@ -581,7 +581,7 @@ Push your changes to your fork:
 ```
 git push origin feature-branch
 ```
-Finally Click on Create Pull request to contribute on this repository.
+Finally Click on Create Pull request to contribute to this repository.
 
 ## Donate
 
@@ -593,4 +593,4 @@ If you like my project and want to support me, please consider making a donation
 
 Thank you, everyone, for your support, you all are my greatest motivation!
 
-
+<p align="right"><a href="#top"><img src="https://cdn-icons-png.flaticon.com/512/892/892692.png" height="50px"></a></p>
