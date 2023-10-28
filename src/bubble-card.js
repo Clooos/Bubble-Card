@@ -1,6 +1,8 @@
-var version = 'v1.3.3';
+var version = 'v1.4.0';
 
 let editor;
+let entityStates = {};
+let lastCall = { entityId: null, stateChanged: null, timestamp: null };
 
 class BubbleCard extends HTMLElement {
     constructor() {
@@ -39,9 +41,6 @@ class BubbleCard extends HTMLElement {
             const popUpInitialized = () => {
                 window.dispatchEvent(event);
                 window.addEventListener('popstate', urlChanged, { passive: true });
-                setTimeout(() => {
-                    window.removeEventListener('popUpInitialized', popUpInitialized);
-                }, 5000);
             };
             
             window.addEventListener('popUpInitialized', popUpInitialized, { passive: true });
@@ -49,7 +48,7 @@ class BubbleCard extends HTMLElement {
             window.eventAdded = true;
         }
     }
-    
+
     set hass(hass) {
         // Initialize the content if it's not there yet.
         if (!this.content) {
@@ -64,38 +63,70 @@ class BubbleCard extends HTMLElement {
             `;
             this.card = this.shadowRoot.querySelector("ha-card");
             this.content = this.shadowRoot.querySelector("div");
-            
-            this.editorElement = document.querySelector("body > home-assistant")
-              .shadowRoot.querySelector("home-assistant-main")
-              .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
-              .shadowRoot.querySelector("hui-root")
-              .shadowRoot.querySelector("div");
+
+            const editorElementPromise = new Promise((resolve) => {
+                resolve(document.querySelector("body > home-assistant")
+                  .shadowRoot.querySelector("home-assistant-main")
+                  .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
+                  .shadowRoot.querySelector("hui-root")
+                  .shadowRoot.querySelector("div"));
+            });
+    
+            editorElementPromise.then((editorElement) => {
+                this.editorElement = editorElement;
+            });
         }
-        
-        this.editorElement ? editor = this.editorElement.classList.contains('edit-mode') : '';
+    
+        // Check for edit mode
+        this.editorElement ? editor = this.editorElement.classList.contains('edit-mode') : false;
 
         function toggleEntity(entityId) {
             hass.callService('homeassistant', 'toggle', {
                 entity_id: entityId
             });
         }
+
+        function stateChanged(entityId) {
+            let now = Date.now();
         
-        const addStyles = function(context, styles, customStyles, state, entityId, path = '', element = context.content) {
-            const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
-            let parentElementCache = null;
-            let styleElementCache = null;
-            let styleAddedKey = styles + 'Added'; // Add 'Added' at the end of the styles value
-            let previousState;
+            if (lastCall.entityId === entityId && now - lastCall.timestamp < 100) {
+                return lastCall.stateChanged;
+            }
+        
+            if (!hass.states[entityId] || !hass.states[entityId].state) {
+                return false;
+            }
             
+            let currentState = hass.states[entityId].state;
+            let currentColor = hass.states[entityId].attributes.rgb_color;
+        
+            if (!entityStates[entityId]) {
+                entityStates[entityId] = { prevState: null, prevColor: null };
+            }
+        
+            let hasStateChanged = entityStates[entityId].prevState !== currentState || entityStates[entityId].prevColor !== currentColor;
+        
+            entityStates[entityId].prevState = currentState;
+            entityStates[entityId].prevColor = currentColor;
+        
+            lastCall = { entityId: entityId, stateChanged: hasStateChanged, timestamp: now };
+        
+            return hasStateChanged;
+        }
+        
+        const addStyles = function(context, styles, customStyles, state, entityId, stateChangedVar, path = '', element = context.content) {
+            const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
+            let styleAddedKey = styles + 'Added'; // Add 'Added' at the end of the styles value
+
             // Check if the style has changed
-            if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || previousState !== state) {
+            if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || stateChangedVar) {
                 if (!context[styleAddedKey]) {
                     // Check if the style element already exists
-                    context.styleElement = styleElementCache || context.content.querySelector('style');
+                    context.styleElement = element.querySelector('style'); //context.content
                     if (!context.styleElement) {
                         // If not, create a new style element
                         context.styleElement = document.createElement('style');
-                        const parentElement = parentElementCache || (path ? context.content.querySelector(path) : element);
+                        const parentElement = (path ? element.querySelector(path) : element);
                         parentElement?.appendChild(context.styleElement);
                     }
                     context[styleAddedKey] = true;
@@ -107,7 +138,6 @@ class BubbleCard extends HTMLElement {
                 }
                 
                 context.previousStyle = customStylesEval; // Store the current style
-                previousState = state;
             }      
         }
 
@@ -249,9 +279,27 @@ class BubbleCard extends HTMLElement {
             addAction('contextmenu', 'hold', element, self);
         }
         
+        function createIcon(hass, entityId, icon, iconContainer) {
+            if (hass && hass.states && hass.states[entityId] && hass.states[entityId].attributes.entity_picture && !this.config.icon) {
+                const img = document.createElement("img");
+                img.setAttribute("src", hass.states[entityId].attributes.entity_picture);
+                img.setAttribute("class", "entity-picture");
+                img.setAttribute("alt", "Icon");
+                iconContainer.appendChild(img);
+            } else {
+                const haIcon = document.createElement("ha-icon");
+                haIcon.setAttribute("icon", icon);
+                haIcon.setAttribute("class", "icon");
+                iconContainer.appendChild(haIcon);
+            }
+        }
+        
         // Get CSS variable value or YAML variable and add opacity
-        let haStyle = getComputedStyle(document.body);
-        let color = this.config.bg_color ? this.config.bg_color : haStyle.getPropertyValue('--ha-card-background') || haStyle.getPropertyValue('--card-background-color');
+        let haStyle;
+        let themeBgColor;
+        haStyle = haStyle || getComputedStyle(document.body);
+        themeBgColor = themeBgColor || haStyle.getPropertyValue('--ha-card-background') || haStyle.getPropertyValue('--card-background-color');
+        let color = this.config.bg_color ? this.config.bg_color : themeBgColor;
         let bgOpacity = this.config.bg_opacity !== undefined ? this.config.bg_opacity : '88';
         
         function convertToRGBA(color, opacity) {
@@ -293,10 +341,6 @@ class BubbleCard extends HTMLElement {
         let popUpHash = this.config.hash;
         let popUpOpen;
 
-        // let previousStateChange; // Défini en dehors de tout bloc de code
-        // let stateChange = (previousStateChange !== state);
-        // stateChange ? previousStateChange = state : '';
-        
         switch (this.config.card_type) {
             // Initialize pop-up card
             case 'pop-up':
@@ -306,16 +350,11 @@ class BubbleCard extends HTMLElement {
                     this.initStyleAdded = true;
                 }
                 
-                const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
-                const triggerState = this.config.trigger_state ? this.config.trigger_state : '';
-                const triggerClose = this.config.trigger_close ? this.config.trigger_close : false;
-                
                 const createPopUp = () => {
                     if (!this.host) {
                         this.host = this.getRootNode().host;
                     } else {
                         if (!this.popUp) {
-                            this.card.style.marginTop = '0';
                             this.verticalStack = this.getRootNode();
                             this.popUp = this.verticalStack.querySelector('#root');
                             
@@ -337,11 +376,13 @@ class BubbleCard extends HTMLElement {
                                 }
                                 window.popUpInitialized = true;
                             }
+                            this.card.style.marginTop = '0';
                         }
                         
                         const popUp = this.popUp;
                         const text = this.config.text || '';
-                        formatedState = this.config.state ? hass.formatEntityState(hass.states[this.config.state]) + ' ' + text : text;
+                        const stateEntityId = this.config.state;
+                        formatedState = stateEntityId ? hass.formatEntityState(hass.states[stateEntityId]) + ' ' + text : text;
                         const marginTopMobile = this.config.margin_top_mobile 
                             ? (this.config.margin_top_mobile !== '0' ? this.config.margin_top_mobile : '0px')
                             : '0px';
@@ -349,10 +390,10 @@ class BubbleCard extends HTMLElement {
                             ? (this.config.margin_top_desktop !== '0' ? this.config.margin_top_desktop : '0px')
                             : '0px';
                         const displayPowerButton = this.config.entity ? 'flex' : 'none';
-                        state = this.config.state ? hass.states[this.config.state].state : '';
-                        let previousState;
+                        state = stateEntityId ? hass.states[stateEntityId].state : '';
                         let closeTimeout;
-            
+                        let rgbaBgColor;
+
                         if (!this.headerAdded) {
                             const headerContainer = document.createElement("div");
                             headerContainer.setAttribute("id", "header-container");
@@ -363,19 +404,8 @@ class BubbleCard extends HTMLElement {
                             const iconContainer = document.createElement("div");
                             iconContainer.setAttribute("class", "header-icon");
                             div.appendChild(iconContainer);
-                        
-                            if (hass && hass.states && hass.states[entityId] && hass.states[entityId].attributes.entity_picture && !this.config.icon) {
-                                const img = document.createElement("img");
-                                img.setAttribute("src", hass.states[entityId].attributes.entity_picture);
-                                img.setAttribute("class", "entity-picture");
-                                img.setAttribute("alt", "Icon");
-                                iconContainer.appendChild(img);
-                            } else {
-                                const haIcon = document.createElement("ha-icon");
-                                haIcon.setAttribute("icon", icon);
-                                haIcon.setAttribute("class", "icon");
-                                iconContainer.appendChild(haIcon);
-                            }
+
+                            createIcon(hass, entityId, icon, iconContainer);
                             addActions(this, iconContainer);
             
                             const h2 = document.createElement("h2");
@@ -405,34 +435,20 @@ class BubbleCard extends HTMLElement {
                             this.header = div;
             
                             this.headerAdded = true;
-                        } else if ((this.headerAdded && hass.states[this.config.state] !== previousState) || editor) {
+                        } else if (entityId || editor) {
                             const iconContainer = this.content.querySelector("#header-container .header-icon");
                             const h2 = this.content.querySelector("#header-container h2");
                             const p = this.content.querySelector("#header-container p");
                             const haIcon2 = this.content.querySelector("#header-container .power-button");
                             
                             iconContainer.innerHTML = ''; // Clear the container
-                        
-                            if (hass && hass.states && hass.states[entityId] && hass.states[entityId].attributes.entity_picture && !this.config.icon) {
-                                const img = document.createElement("img");
-                                img.setAttribute("src", hass.states[entityId].attributes.entity_picture);
-                                img.setAttribute("class", "entity-picture");
-                                img.setAttribute("alt", "Icon");
-                                iconContainer.appendChild(img);
-                            } else {
-                                const haIcon = document.createElement("ha-icon");
-                                haIcon.setAttribute("icon", icon);
-                                haIcon.setAttribute("class", "icon");
-                                iconContainer.appendChild(haIcon);
-                            }
+                            createIcon(hass, entityId, icon, iconContainer);
             
                             h2.textContent = name;
                             p.textContent = formatedState;
                             haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
-                            
-                            previousState = hass.states[this.config.state];
                         }
-            
+
                         if (!this.eventAdded && !editor) {
                             window['checkHashRef_' + popUpHash] = checkHash;
                             window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash], { passive: true });
@@ -441,24 +457,20 @@ class BubbleCard extends HTMLElement {
                                 toggleEntity(entityId);
                             }, { passive: true });
                             
-                            let previousHash = location.hash; 
-                            
                             window.addEventListener('click', function(e) {
                                 // Reset auto close
                                 location.hash === popUpHash && resetAutoClose();
                                 
-                                if (location.hash !== previousHash) {
-                                    previousHash = location.hash;
-                                    if (popUpHash !== location.hash) {
-                                        return;
-                                    }
+                                if (!window.justOpened) {
+                                    return;
                                 }
                                 
                                 const target = e.composedPath();
                                 
-                                if (target && location.hash === popUpHash && 
+                                if (target && 
                                     !target.some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') && 
-                                    !target.some(el => el.id === 'root' && !el.classList.contains('close-pop-up'))) {
+                                    !target.some(el => el.id === 'root' && !el.classList.contains('close-pop-up')) &&
+                                    popUpOpen === popUpHash + true) {
                                         popUpOpen = popUpHash + false;
                                         history.replaceState(null, null, location.href.split('#')[0]);
                                         localStorage.setItem('isManuallyClosed_' + popUpHash, true)
@@ -506,23 +518,15 @@ class BubbleCard extends HTMLElement {
                             this.eventAdded = true;
                         }
                         
-                        let lastColor;
-                        let lastState;
-                        let rgbaBgColor;
-
                         if (entityId) {
                             const rgbColor = hass.states[entityId].attributes.rgb_color;
-                            this.rgbColor = rgbColor ? `rgb(${rgbColor})` : 'var(--background-color,var(--secondary-background-color))'; 
-                            const state = hass.states[entityId].state;
-                            if (lastColor !== rgbColor || lastState !== state) {
-                                lastColor = rgbColor;
-                                lastState = state;
-                                const rgbColorOpacity = rgbColor && stateOn 
-                                    ? `rgba(${rgbColor}, 0.5)` 
-                                    : (stateOn ? 'var(--accent-color)' : 'var(--background-color,var(--secondary-background-color))');
-                                this.header.style.backgroundColor = rgbColorOpacity;
-                                rgbaBgColor = convertToRGBA(color, 0);
-                            }
+                            this.rgbColor = rgbColor ? `rgb(${rgbColor})` : 'var(--accent-color)';
+                            const rgbColorOpacity = rgbColor && stateOn 
+                                ? `rgba(${rgbColor}, 0.5)` 
+                                : (stateOn ? 'var(--accent-color)' : 'var(--background-color,var(--secondary-background-color))');
+                            this.header.style.backgroundColor = rgbColorOpacity;
+                            rgbaBgColor = convertToRGBA(color, 0);
+                            this.colorAdded = true;
                         }
                         
                         function checkHash() {
@@ -543,6 +547,7 @@ class BubbleCard extends HTMLElement {
                             popUp.classList.remove('close-pop-up');
                             popUp.classList.add('open-pop-up');
                             popUpOpen = popUpHash + true;
+                            setTimeout(() => { window.justOpened = true; }, 10);
                             resetAutoClose();
                         }
                         
@@ -550,6 +555,7 @@ class BubbleCard extends HTMLElement {
                             popUp.classList.remove('open-pop-up');
                             popUp.classList.add('close-pop-up');
                             popUpOpen = popUpHash + false;
+                            window.justOpened = false;
                             clearTimeout(closeTimeout);
                         }
                         
@@ -625,6 +631,7 @@ class BubbleCard extends HTMLElement {
                                 overflow: visible;
                             }
                             #root.open-pop-up {
+                                /*will-change: transform;*/
                                 transform: translateY(-100%);
                                 transition: transform .4s !important;
                             }
@@ -694,6 +701,11 @@ class BubbleCard extends HTMLElement {
                                 justify-content: center;
                                 overflow: hidden;
                             }
+                            .header-icon > ha-icon {
+                                color: ${stateOn ? (this.rgbColor ? this.rgbColor : 'var(--accent-color)') : 'inherit'};
+                                opacity: ${stateOn ? '1' : '0.6'};
+                                filter: brightness(1.4);
+                            }
                             .header-icon::before {
                                 content: '';
                                 position: absolute;
@@ -744,9 +756,9 @@ class BubbleCard extends HTMLElement {
                                 cursor: pointer;
                             }
                         `;
-                        
-                        addStyles(this, popUpStyles, customStyles, state, entityId, '', popUp);
-                        addStyles(this, headerStyles, customStyles, state, entityId);
+                                                
+                        addStyles(this, popUpStyles, customStyles, state, entityId, '', '', popUp);
+                        addStyles(this, headerStyles, customStyles, state, entityId, stateChanged(entityId));
                         
                         if (editor) {
                             popUp.classList.add('editor');
@@ -758,7 +770,10 @@ class BubbleCard extends HTMLElement {
                     }
                 }
                 
-                let initPopUp;
+                const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
+                const triggerState = this.config.trigger_state ? this.config.trigger_state : '';
+                const triggerClose = this.config.trigger_close ? this.config.trigger_close : false;
+                const stateEntity = this.config.state;
 
                 if (!this.popUp) {
                     let initPopUp = setInterval(() => {
@@ -770,14 +785,14 @@ class BubbleCard extends HTMLElement {
                 } else if (!editor && this.wasEditing) {
                     createPopUp();
                     this.wasEditing = false;
-                } else if (popUpHash === location.hash || editor) {
+                } else if (((popUpHash === location.hash && (stateChanged(entityId) || stateChanged(stateEntity)))) || editor) {
                     createPopUp();
                     if (editor) { 
                         this.wasEditing = true;
                     }
                 }
-                
-                if (triggerEntity && this.popUp) {
+
+                if (this.popUp && stateChanged(triggerEntity) && hass.states[triggerEntity]) {
                     if (localStorage.getItem('previousTriggerState_' + popUpHash) === null) {
                         localStorage.setItem('previousTriggerState_' + popUpHash, '');
                     }
@@ -808,7 +823,7 @@ class BubbleCard extends HTMLElement {
                         navigate('', popUpHash);
                         isTriggered = true;
                         localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-                    } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
+                    } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && this.popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
                         history.replaceState(null, null, location.href.split('#')[0]);
                         popUpOpen = popUpHash + false;
                         isTriggered = false;
@@ -987,7 +1002,6 @@ class BubbleCard extends HTMLElement {
                         height: 51px;
                         bottom: 16px;
                         left: ${marginCenter};
-                        animation: ${riseAnimation === true ? 'from-bottom 1.3s forwards' : 'none'};
                         z-index: 1 !important; /* Higher value hide the more-info panel */
                     }
                     @keyframes from-bottom {
@@ -1097,7 +1111,15 @@ class BubbleCard extends HTMLElement {
                         padding: 0;
                     }
                 `;
-    
+                
+                if (!window.hasAnimated && riseAnimation) {
+                    this.content.style.animation = 'from-bottom 1.3s forwards';
+                    window.hasAnimated = true;
+                    setTimeout(() => {
+                        this.content.style.animation = 'none';
+                    }, 1500);
+                }
+
                 addStyles(this, horizontalButtonsStackStyles, customStyles);
                 
                 if (editor) {
@@ -1131,6 +1153,7 @@ class BubbleCard extends HTMLElement {
                 let startValue = 0;
                 let movingVertically = false;
                 let timeoutId = null;
+                const buttonStateChanged = stateChanged(entityId);
     
                 const iconContainer = document.createElement('div');
                 iconContainer.setAttribute('class', 'icon-container');
@@ -1161,6 +1184,7 @@ class BubbleCard extends HTMLElement {
                             this.buttonContainer.removeChild(this.buttonContainer.firstChild);
                         }
                         this.eventAdded = false;
+                        this.wasEditing = true;
                     }
                     // End of fix
                 
@@ -1327,7 +1351,7 @@ class BubbleCard extends HTMLElement {
                     rangeFill.style.transform = `translateX(${percentage * 100}%)`;
                 }
     
-                if (buttonType === 'slider') {
+                if (buttonType === 'slider' && (!this.colorAdded || buttonStateChanged || this.wasEditing)) {
                     if (entityId.startsWith("light.")) {
                         const rgbColor = hass.states[entityId].attributes.rgb_color;
                         const rgbColorOpacity = rgbColor ? `rgba(${rgbColor}, 0.5)` : `rgba(255, 255, 255, 0.5)`;
@@ -1336,6 +1360,8 @@ class BubbleCard extends HTMLElement {
                     } else {
                         this.rangeFill.style.backgroundColor = `var(--accent-color)`;
                     }
+                    this.colorAdded = true;
+                    this.wasEditing = false;
                 }
                 
                 function updateStyle(state, content) {
@@ -1345,8 +1371,10 @@ class BubbleCard extends HTMLElement {
                         switchButton.style.backgroundColor = backgroundColor;
                     }
                 }
-    
-                updateStyle(state, this);
+                
+                if (buttonStateChanged) {
+                    updateStyle(state, this);
+                }
                 
                 const buttonStyles = `
                     ha-card {
@@ -1410,7 +1438,7 @@ class BubbleCard extends HTMLElement {
                         background-color: var(--card-background-color,var(--ha-card-background));
                     }
                     
-                    .icon-container::before {
+                    .icon-container::after {
                         content: '';
                         position: absolute;
                         display: block;
@@ -1429,10 +1457,14 @@ class BubbleCard extends HTMLElement {
                         padding: 1px 2px;
                         width: 22px; 
                         height: 22px;
+                        color: ${stateOn ? (this.rgbColor ? this.rgbColor : 'var(--accent-color)') : 'inherit'};
+                        opacity: ${stateOn ? '1' : '0.6'};
+                        filter: brightness(1.4);
                     }
                     
                     .entity-picture {
                         height: inherit;
+                        width: 38px;
                         border-radius: 100%;
                     }
                     
@@ -1469,7 +1501,7 @@ class BubbleCard extends HTMLElement {
                     }
                 `;
                 
-                addStyles(this, buttonStyles, customStyles, state, entityId);
+                addStyles(this, buttonStyles, customStyles, state, entityId, buttonStateChanged);
                 break;
     
             // Initialize separator
@@ -2520,9 +2552,14 @@ class BubbleCardEditor extends LitElement {
         const target = ev.target;
         const detail = ev.detail;
         if (target.configValue) {
-            this._config = {
-                ...this._config,
-                [target.configValue]: target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value,
+            if (target.value === "" || target.checked === false) {
+                const { [target.configValue]: _, ...rest } = this._config;
+                this._config = rest;
+            } else {
+                this._config = {
+                    ...this._config,
+                    [target.configValue]: target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value,
+                }
             }
         }
         fireEvent(this, "config-changed", {
