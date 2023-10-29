@@ -526,7 +526,7 @@ styles: |
 More information here :
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator
 
-For now you have access to these variables in some cards (not all):
+For now, you have access to these variables in some cards (not all):
 
  `state` will return the state of your defined `entity`.  
  `entity` will return your entity you defined like `switch.test` in this example.
