@@ -538,7 +538,7 @@ But in all cards you can also use this:
 
 ## Custom components conflicts
 
-⚠️ For now there are some features that are not working:
+⚠️ For now there are some features that are not working with:
 
 - UI Lovelace Minimalist (see https://github.com/Clooos/Bubble-Card/issues/41)
 - Lovelace state switch (see https://github.com/Clooos/Bubble-Card/issues/47)
