@@ -1,8 +1,9 @@
-var version = 'v1.4.1';
+var version = 'v1.4.2';
 
 let editor;
 let entityStates = {};
 let lastCall = { entityId: null, stateChanged: null, timestamp: null };
+let globalHosts = {};
 
 class BubbleCard extends HTMLElement {
     constructor() {
@@ -113,34 +114,7 @@ class BubbleCard extends HTMLElement {
         
             return hasStateChanged;
         }
-        
-        // const addStyles = function(context, styles, customStyles, state, entityId, stateChangedVar, path = '', element = context.content) {
-        //     const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
-        //     let styleAddedKey = styles + 'Added'; // Add 'Added' at the end of the styles value
 
-        //     // Check if the style has changed
-        //     if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || stateChangedVar) {
-        //         if (!context[styleAddedKey]) {
-        //             // Check if the style element already exists
-        //             context.styleElement = element.querySelector('style'); //context.content
-        //             if (!context.styleElement) {
-        //                 // If not, create a new style element
-        //                 context.styleElement = document.createElement('style');
-        //                 const parentElement = (path ? element.querySelector(path) : element);
-        //                 parentElement?.appendChild(context.styleElement);
-        //             }
-        //             context[styleAddedKey] = true;
-        //         }
-                
-        //         // Update the content of the existing style element only if styles have changed
-        //         if (context.styleElement.innerHTML !== customStylesEval + styles) {
-        //             context.styleElement.innerHTML = customStylesEval + styles;
-        //         }
-                
-        //         context.previousStyle = customStylesEval; // Store the current style
-        //     }      
-        // }
-        
         const addStyles = function(context, styles, customStyles, state, entityId, stateChangedVar, path = '', element = context.content) {
             const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
             let styleAddedKey = styles + 'Added'; // Add 'Added' at the end of the styles value
@@ -322,6 +296,16 @@ class BubbleCard extends HTMLElement {
             }
         }
         
+        function isColorCloseToWhite(rgbColor) {
+            let whiteThreshold = [220, 220, 190];
+            for(let i = 0; i < 3; i++) {
+                if(rgbColor[i] < whiteThreshold[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
         // Get CSS variable value or YAML variable and add opacity
         let haStyle;
         let themeBgColor;
@@ -372,14 +356,18 @@ class BubbleCard extends HTMLElement {
         switch (this.config.card_type) {
             // Initialize pop-up card
             case 'pop-up':
+                if (this.errorTriggered) {
+                    return;
+                }
+                
                 if (!this.initStyleAdded && !this.host && !editor) {
                     // Hide vertical stack content before initialization
-                    this.card.style.marginTop = '2000px';
+                    this.card.style.marginTop = '4000px';
                     this.initStyleAdded = true;
                 }
                 
                 const createPopUp = () => {
-                    if (!this.host) {
+                    if (!this.host || this.host !== this.getRootNode().host) {
                         this.host = this.getRootNode().host;
                     } else {
                         if (!this.popUp) {
@@ -404,7 +392,6 @@ class BubbleCard extends HTMLElement {
                                 }
                                 window.popUpInitialized = true;
                             }
-                            this.card.style.marginTop = '0';
                         }
                         
                         const popUp = this.popUp;
@@ -463,7 +450,7 @@ class BubbleCard extends HTMLElement {
                             this.header = div;
             
                             this.headerAdded = true;
-                        } else if (entityId || editor) {
+                        } else if (entityId) {
                             const iconContainer = this.content.querySelector("#header-container .header-icon");
                             const h2 = this.content.querySelector("#header-container h2");
                             const p = this.content.querySelector("#header-container p");
@@ -548,13 +535,20 @@ class BubbleCard extends HTMLElement {
                         
                         if (entityId) {
                             const rgbColor = hass.states[entityId].attributes.rgb_color;
-                            this.rgbColor = rgbColor ? `rgb(${rgbColor})` : 'var(--accent-color)';
-                            const rgbColorOpacity = rgbColor && stateOn 
-                                ? `rgba(${rgbColor}, 0.5)` 
-                                : (stateOn ? 'var(--accent-color)' : 'var(--background-color,var(--secondary-background-color))');
-                            this.header.style.backgroundColor = rgbColorOpacity;
+                            this.rgbColor = rgbColor 
+                                ? (!isColorCloseToWhite(rgbColor) ? `rgb(${rgbColor})` : 'rgb(255,220,200)')
+                                : (stateOn 
+                                ? (entityId.startsWith("light.") ? 'rgba(255,220,200, 0.5)' : 'var(--accent-color)') 
+                                : 'rgba(255, 255, 255, 1');
+                            this.rgbColorOpacity = rgbColor
+                                ? (!isColorCloseToWhite(rgbColor) ? `rgba(${rgbColor}, 0.5)` : 'rgba(255,220,200, 0.5)')
+                                : (stateOn 
+                                ? (entityId.startsWith("light.") ? 'rgba(255,220,200, 0.5)' : 'var(--accent-color)') 
+                                : 'var(--background-color,var(--secondary-background-color))');
                             rgbaBgColor = convertToRGBA(color, 0);
-                            this.colorAdded = true;
+                            this.iconFilter = rgbColor ? 
+                                (!isColorCloseToWhite(rgbColor) ? 'brightness(1.1)' : 'none') :
+                                'none';
                         }
                         
                         function checkHash() {
@@ -611,7 +605,7 @@ class BubbleCard extends HTMLElement {
                                 padding: 0 !important;
                             }
                             #root {
-                                transition: all 1s;
+                                transition: all 1s !important;
                                 position: fixed !important;
                                 margin: 0 -${marginCenter}; /* 7px */
                                 width: 100%;
@@ -695,6 +689,9 @@ class BubbleCard extends HTMLElement {
                         `;
                         
                         const headerStyles = `
+                            ha-card {
+                                margin-top: 0 !important;
+                            }
                             #header-container {
                                 display: inline-flex;
                                 ${!icon && !name && !entityId && !state && !text ? 'flex-direction: row-reverse;' : ''}
@@ -709,7 +706,7 @@ class BubbleCard extends HTMLElement {
                                 padding: 6px;
                                 z-index: 1;
                                 flex-grow: 1;
-                                background-color: var(--background-color,var(--secondary-background-color));
+                                background-color: ${this.rgbColorOpacity};
                                 transition: background 1s;
                                 border-radius: 25px;
                                 margin-right: 14px;
@@ -732,9 +729,9 @@ class BubbleCard extends HTMLElement {
                             .header-icon > ha-icon {
                                 color: ${stateOn ? (this.rgbColor ? this.rgbColor : 'var(--accent-color)') : 'inherit'};
                                 opacity: ${stateOn ? '1' : '0.6'};
-                                filter: brightness(1.4);
+                                filter: ${this.iconFilter};
                             }
-                            .header-icon::before {
+                            .header-icon::after {
                                 content: '';
                                 position: absolute;
                                 width: 38px;
@@ -797,12 +794,12 @@ class BubbleCard extends HTMLElement {
                         }
                     }
                 }
-                
+
                 const triggerEntity = this.config.trigger_entity ? this.config.trigger_entity : '';
                 const triggerState = this.config.trigger_state ? this.config.trigger_state : '';
                 const triggerClose = this.config.trigger_close ? this.config.trigger_close : false;
                 const stateEntity = this.config.state;
-
+                
                 if (!this.popUp) {
                     let initPopUp = setInterval(() => {
                         createPopUp();
@@ -810,6 +807,14 @@ class BubbleCard extends HTMLElement {
                             clearInterval(initPopUp);
                         }
                     }, 0);
+                
+                    setTimeout(() => {
+                        if (!this.popUp) {
+                            this.errorTriggered = true;
+                            clearInterval(initPopUp);
+                            throw new Error("You are doing it wrong! Pop-up card must be placed inside a vertical_stack!");
+                        }
+                    }, 2000);
                 } else if (!editor && this.wasEditing) {
                     createPopUp();
                     this.wasEditing = false;
@@ -903,7 +908,7 @@ class BubbleCard extends HTMLElement {
                 const updateButtonStyle = (buttonElement, lightEntity) => {
                     if (hass.states[lightEntity].attributes.rgb_color) {
                         const rgbColor = hass.states[lightEntity].attributes.rgb_color;
-                        const rgbColorOpacity = `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, 0.5)`;
+                        const rgbColorOpacity = (!isColorCloseToWhite(rgbColor) ? `rgba(${rgbColor}, 0.5)` : 'rgba(255,220,200, 0.5)')
                         buttonElement.style.backgroundColor = rgbColorOpacity;
                         buttonElement.style.border = '1px solid rgba(0,0,0,0)';
                     } else if (!hass.states[lightEntity].attributes.rgb_color && hass.states[lightEntity].state == 'on') {
@@ -997,15 +1002,27 @@ class BubbleCard extends HTMLElement {
                 let buttonMargin = 12;
                 
                 async function updateButtons() {
+                  let promises = [];
                   for (let button of buttonsList) {
                     let buttonElement = this.buttons[button.link];
                     if (buttonElement) {
-                      let buttonWidth = await localStorage.getItem(`buttonWidth-${button.link}`);
-                      let buttonContent = await localStorage.getItem(`buttonContent-${button.link}`);
-                      if (!buttonWidth || buttonWidth === '0' || buttonContent !== buttonElement.innerHTML || editor) {
+                      promises.push(localStorage.getItem(`buttonWidth-${button.link}`));
+                      promises.push(localStorage.getItem(`buttonContent-${button.link}`));
+                    }
+                  }
+                  let results = await Promise.all(promises);
+                  let index = 0;
+                  for (let button of buttonsList) {
+                    let buttonElement = this.buttons[button.link];
+                    if (buttonElement) {
+                      let buttonWidth = results[index];
+                      let buttonContent = results[index + 1];
+                      index += 2;
+                      if (!buttonWidth || buttonWidth === '0' || buttonContent !== buttonElement.innerHTML || this.previousConfig !== this.config) {
                         buttonWidth = buttonElement.offsetWidth;
                         await localStorage.setItem(`buttonWidth-${button.link}`, buttonWidth);
                         await localStorage.setItem(`buttonContent-${button.link}`, buttonElement.innerHTML);
+                        this.previousConfig = this.config;
                       }
                       buttonElement.style.transform = `translateX(${currentPosition}px)`;
                       currentPosition += parseInt(buttonWidth) + buttonMargin;
@@ -1015,7 +1032,7 @@ class BubbleCard extends HTMLElement {
                     }
                   }
                 }
-
+                
                 updateButtons.call(this);
 
                 const horizontalButtonsStackStyles = `
@@ -1182,7 +1199,7 @@ class BubbleCard extends HTMLElement {
                 let movingVertically = false;
                 let timeoutId = null;
                 const buttonStateChanged = stateChanged(entityId);
-    
+
                 const iconContainer = document.createElement('div');
                 iconContainer.setAttribute('class', 'icon-container');
                 this.iconContainer = iconContainer;
@@ -1382,26 +1399,20 @@ class BubbleCard extends HTMLElement {
                 if (buttonType === 'slider' && (!this.colorAdded || buttonStateChanged || this.wasEditing)) {
                     if (entityId.startsWith("light.")) {
                         const rgbColor = hass.states[entityId].attributes.rgb_color;
-                        const rgbColorOpacity = rgbColor ? `rgba(${rgbColor}, 0.5)` : `rgba(255, 255, 255, 0.5)`;
-                        this.rgbColor = rgbColor ? `rgb(${rgbColor})` : `rgba(255, 255, 255, 1)`;
-                        this.rangeFill.style.backgroundColor = rgbColorOpacity;
+                        this.rgbColorOpacity = rgbColor 
+                            ? (!isColorCloseToWhite(rgbColor) ? `rgba(${rgbColor}, 0.5)` : 'rgba(255,220,200,0.5)')
+                            : (stateOn ? 'rgba(255,220,200, 0.5)' : `rgba(255, 255, 255, 0.5)`);
+                        this.rgbColor = rgbColor 
+                            ? (!isColorCloseToWhite(rgbColor) ? `rgb(${rgbColor})` : 'rgb(255,220,200)')
+                            : (stateOn ? 'rgba(255,220,200, 1)' : 'rgba(255, 255, 255, 1)');
+                        this.iconFilter = rgbColor ? 
+                            (!isColorCloseToWhite(rgbColor) ? 'brightness(1.1)' : 'none') :
+                            'none';
                     } else {
-                        this.rangeFill.style.backgroundColor = `var(--accent-color)`;
+                        this.rgbColorOpacity = `var(--accent-color)`;
+                        this.iconFilter = 'brightness(1.1)';
                     }
                     this.colorAdded = true;
-                    this.wasEditing = false;
-                }
-                
-                function updateStyle(state, content) {
-                    content.buttonContainer.style.opacity = state !== 'unavailable' ? '1' : '0.5';
-                    if (['switch', 'custom'].includes(buttonType)) {
-                        const backgroundColor = stateOn ? 'var(--accent-color)' : 'rgba(0,0,0,0)';
-                        switchButton.style.backgroundColor = backgroundColor;
-                    }
-                }
-                
-                if (buttonStateChanged || this.wasEditing) {
-                    updateStyle(state, this);
                     this.wasEditing = false;
                 }
                 
@@ -1409,6 +1420,7 @@ class BubbleCard extends HTMLElement {
                     ha-card {
                         margin-top: 0 !important;
                         background: none !important;
+                        opacity: ${state !== 'unavailable' ? '1' : '0.5'};
                     }
                     
                     .button-container {
@@ -1433,6 +1445,7 @@ class BubbleCard extends HTMLElement {
                         height: 100%;
                         width: 100%;
                         transition: background-color 1.5s;
+                        background-color: ${stateOn && ['switch', 'custom'].includes(buttonType) ? 'var(--accent-color)' : 'rgba(0,0,0,0)'};
                     }
             
                     .range-fill {
@@ -1440,6 +1453,7 @@ class BubbleCard extends HTMLElement {
                         top: 0;
                         bottom: 0;
                         left: 0;
+                        background-color: ${this.rgbColorOpacity};
                     }
                     
                     .switch-button {
@@ -1472,6 +1486,7 @@ class BubbleCard extends HTMLElement {
                         position: absolute;
                         display: block;
                         opacity: 0.2;
+                        /* filter: brightness(0.9); */
                         width: 100%;
                         height: 100%;
                         transition: all 1s;
@@ -1488,7 +1503,7 @@ class BubbleCard extends HTMLElement {
                         height: 22px;
                         color: ${stateOn ? (this.rgbColor ? this.rgbColor : 'var(--accent-color)') : 'inherit'};
                         opacity: ${stateOn ? '1' : '0.6'};
-                        filter: brightness(1.4);
+                        filter: ${stateOn ? (this.rgbColor ? this.iconFilter : 'brightness(1.1)') : 'inherit'};
                     }
                     
                     .entity-picture {
@@ -1759,21 +1774,6 @@ class BubbleCard extends HTMLElement {
                     this.emptyColumnAdded = true;
                 }
                 break;
-                
-            case 'loader':
-                if (!this.loaderAdded) {
-                    const loaderContainer = document.createElement("div");
-                    loaderContainer.setAttribute("class", "loader");
-                    loaderContainer.innerHTML = `
-                        <div style="display: flex; width: 100%; height: 4000px;"></div>
-                    `
-                    // Ajouter un délai de 0 millisecondes pour rendre le code asynchrone
-                    setTimeout(() => {
-                        this.content.appendChild(loaderContainer);
-                        this.loaderAdded = true;
-                    }, 0);
-                }
-                break;
         }
     }
 
@@ -1846,7 +1846,6 @@ customElements.get("ha-switch");
 const LitElement = Object.getPrototypeOf(customElements.get("ha-panel-lovelace"));
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
-//const render = LitElement.prototype.render;
 
 class BubbleCardEditor extends LitElement {
     setConfig(config) {
