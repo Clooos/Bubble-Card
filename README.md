@@ -225,7 +225,7 @@ icon: mdi:led-strip-variant
 
 This is a customizable button (similar to the switch button) that allows you to use all the actions directly on the whole button allowing you to use it for almost everything. 
 
-This is still experimental and more customizations are coming.
+This is only available in YAML for now.
 
 ### Options
 
