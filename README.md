@@ -27,14 +27,14 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 1. Download this file: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/bubble-card.js)
 2. Add this file to your `<config>/www` folder
-3. On your dashboard click on the icon at the right top corner then on `Edit dashboard`
+3. On your dashboard click on the icon at the top right corner then on `Edit dashboard`
 4. Click again on that icon and then click on `Manage resources`
 5. Click on `Add resource`
 6. Copy and paste this: `/local/bubble-card.js?v=1`
-7. Click on `JavaScript Module` then `Create`
+7. Click on `JavaScript Module`, then `Create`
 8. Go back and refresh your page
 9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
-10. After any update of the file you will have to edit `/local/bubble-card.js?v=1` and change the version to any higher number
+10. After any update of the file, you will have to edit `/local/bubble-card.js?v=1` and change the version to any higher number.
 
 ### With HACS
 
@@ -42,13 +42,13 @@ This method allows you to get updates directly on the HACS main page
 
 1. Download HACS following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
 2. Proceed to the initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
-3. On your sidebar go to `HACS` > `Integrations`
-4. click on the icon at the right top corner then on `Custom repositories`
-5. For the repository add this: `https://github.com/Clooos/Bubble-Card`
-6. For the category select `Lovelace` then click `Add`
-7. Now click on `Bubble Card` and then on the `Download` button
-8. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
-9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
+3. On your sidebar go to `HACS` > `Integrations`.
+4. Click on the icon in the top right corner then on `Custom repositories`.
+5. For the repository add this: `https://github.com/Clooos/Bubble-Card`.
+6. For the category, select `Lovelace`, then click `Add`.
+7. Now click on `Bubble Card` and then on the `Download` button.
+8. Go back to your dashboard and click on the icon in the top right corner then on `Edit dashboard`.
+9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`.
 
 Coming soon in the HACS default repo (still waiting for validation).
 
@@ -71,9 +71,9 @@ Most options can be configured in the GUI editor, except for custom styles, cust
 
 ## Pop-up
 
-This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have a unique hash (e.g. `'#kitchen'`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card comes with a header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
+This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have a unique hash (e.g. `'#kitchen'`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card comes with a header for your pop-up. If you add an entity to this card, you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
 
-1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
+1. To add a pop-up, you first need to add a `vertical-stack` card to your dashboard
 2. This `vertical-stack` must be after all your other cards and before your `horizontal-buttons-stack` if you have one
 3. Now add a `Bubble Card` with the type `pop-up` in it
 4. Just fill in the required inputs and the ones you need
@@ -150,7 +150,7 @@ trigger_close: true
 
 ## Horizontal buttons stack
 
-This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer. This card will have more features in the future.
+This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page on your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer. This card will have more features in the future.
 
 **⚠️ Important: This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.**
 
@@ -328,7 +328,7 @@ card_type: empty-column
 
 ## Tap, double tap and hold actions
 
-You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example. 
+You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap, for example. 
 
 This is still experimental and only available in YAML for now.
 
