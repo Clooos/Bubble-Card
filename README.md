@@ -59,7 +59,7 @@ There is also a detailed setup video from **BeardedTinker**, thanks a lot to him
 
 ## Configuration
 
-Most options can be configured in the GUI editor, except for custom styles, custom buttons and tap actions.
+Most options can be configured in the GUI editor, except for custom styles, custom buttons, and tap actions.
 
 ### Main options
 
@@ -71,7 +71,7 @@ Most options can be configured in the GUI editor, except for custom styles, cust
 
 ## Pop-up
 
-This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have a unique hash (e.g. `'#kitchen'`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card comes with a header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
+This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have a unique hash (e.g. `'#kitchen'`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card comes with a header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, and you can also display the state of an entity (e.g. the temperature of a room).
 
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
 2. This `vertical-stack` must be after all your other cards and before your `horizontal-buttons-stack` if you have one
@@ -168,7 +168,7 @@ This card is a companion to the pop-up card, allowing you to open the correspond
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `rise_animation` | boolean | Optional | `true` (default) or `false` | Set this to `false` to disable the animation that activates once the page has loaded |
 
-**The variables starting with a number define your buttons, just change this number to add more buttons (see example below).**
+**The variables starting with a number define your buttons, just change this number to add more buttons (see the example below).**
 
 ### Example
 
@@ -195,7 +195,7 @@ auto_order: true
 
 ## Button
 
-This card can be a slider or a button, allowing you to toggle your entities or automation, and control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.
+This card can be a slider or a button, allowing you to toggle your entities or automation, and control the brightness of your lights and the volume of your media players. To access color/control of an entity, simply tap on the icon.
 
 ### Options
 
@@ -207,7 +207,7 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
 | `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
-| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on the icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
 ### Example
@@ -277,7 +277,7 @@ This card allows you to control your covers.
 | `stop_service` | string | Optional | Any service or script | A service to stop your cover, default to `cover.stop_cover` |
 | `close_service` | string | Optional | Any service or script | A service to close your cover, default to `cover.close_cover` |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
-| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on the icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
 ### Example
@@ -293,7 +293,7 @@ icon_close: mdi:roller-shade-closed
 
 ## Separator
 
-This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...
+This card is a simple separator for dividing your pop-up into categories/sections. e.g. Lights, Devices, Covers, Settings, Automations...
 
 ### Options
 
@@ -328,7 +328,7 @@ card_type: empty-column
 
 ## Tap, double tap and hold actions
 
-You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example. 
+You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups, and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example. 
 
 This is still experimental and only available in YAML for now.
 
@@ -341,7 +341,7 @@ This is still experimental and only available in YAML for now.
 | `navigation_path` | string | Any path of your dashboard | Path to navigate to (e.g. `'#kitchen'` for opening a pop-up) when action defined as navigate |
 | `url_path` | string | Any link | URL to open on click (e.g. `https://www.google.com`) when action is `url` |
 | `service` | string | Any service | Service to call (e.g. `media_player.media_play_pause`) when `action` defined as `call-service` |
-| `data` or `service_data` | object | Any service data | Service data to include (e.g. `entity_id: media_player.kitchen`) when `action` defined as `call-service` |
+| `data` or `service_data` | object | Any service data | Service data to include (e.g. `entity_id: media_player.kitchen`) when `action` is defined as `call-service` |
 | `confirmation` | object | See [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Display a confirmation popup, overrides the default `confirmation` object |
 
 ### Example
@@ -358,7 +358,7 @@ hold_action:
 
 ## Full example
 
-Here is the raw code of my "Cuisine" pop-up (Kitchen in english) as seen in some screenshots :
+Here is the raw code of my "Cuisine" pop-up (Kitchen in English) as seen in some screenshots :
 
 ```yaml
 type: vertical-stack
@@ -447,7 +447,7 @@ You can directly use `styles: |` in YAML **without card-mod** which allows you t
 
 Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
 
-**Some cards needs a page refresh to display your CSS modifications (like the pop-ups).**
+**Some cards need a page refresh to display your CSS modifications (like the pop-ups).**
 
 ### Examples
 
@@ -529,7 +529,7 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Cond
 For now, you have access to these variables in some cards (not all):
 
  `state` will return the state of your defined `entity`.  
- `entity` will return your entity you defined like `switch.test` in this example.
+ `entity` will return the entity you defined like `switch.test` in this example.
 
 But in all cards you can also use this:
 
@@ -538,7 +538,7 @@ But in all cards you can also use this:
 
 ## Custom components conflicts
 
-⚠️ For now there are some features that are not working with:
+⚠️ For now some features are not working:
 
 - UI Lovelace Minimalist (see https://github.com/Clooos/Bubble-Card/issues/41)
 - Lovelace state switch (see https://github.com/Clooos/Bubble-Card/issues/47)
