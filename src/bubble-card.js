@@ -1620,7 +1620,7 @@ class BubbleCard extends HTMLElement {
                 const openCover = !this.config.open_service ? 'cover.open_cover' : this.config.open_service;
                 const closeCover = !this.config.close_service ? 'cover.close_cover' : this.config.close_service;
                 const stopCover = !this.config.stop_service ? 'cover.stop_cover' : this.config.stop_service;
-                const iconUp = this.config.icon_up ? this.config.icon_up : "mdi:arrow-up",
+                const iconUp = this.config.icon_up ? this.config.icon_up : "mdi:arrow-up";
                 const iconDown = this.config.icon_down ? this.config.icon_down : "mdi:arrow-down";
                 icon = hass.states[this.config.entity].state === 'open' ? iconOpen : iconClosed;
                 formatedState = this.config.entity ? hass.formatEntityState(hass.states[this.config.entity]) : '';
