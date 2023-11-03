@@ -1649,13 +1649,13 @@ class BubbleCard extends HTMLElement {
                         </div>
                         <div class="buttons-container">
                             <button class="button open">
-                                <ha-icon icon="mdi:arrow-up"></ha-icon>
+                                <ha-icon icon="${iconUp}"></ha-icon>
                             </button>
                             <button class="button stop">
                                 <ha-icon icon="mdi:stop"></ha-icon>
                             </button>
                             <button class="button close">
-                                <ha-icon icon="mdi:arrow-down"></ha-icon>
+                                <ha-icon icon="${iconDown}"></ha-icon>
                             </button>
                         </div>
                     `
