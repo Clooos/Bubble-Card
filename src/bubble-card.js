@@ -1,4 +1,4 @@
-var version = 'v1.4.2';
+var version = 'v1.4.3';
 
 let editor;
 let entityStates = {};
@@ -542,9 +542,9 @@ class BubbleCard extends HTMLElement {
                                 : 'rgba(255, 255, 255, 1');
                             this.rgbColorOpacity = rgbColor
                                 ? (!isColorCloseToWhite(rgbColor) ? `rgba(${rgbColor}, 0.5)` : 'rgba(255,220,200, 0.5)')
-                                : (stateOn 
-                                ? (entityId.startsWith("light.") ? 'rgba(255,220,200, 0.5)' : 'var(--accent-color)') 
-                                : 'var(--background-color,var(--secondary-background-color))');
+                                : (entityId && stateOn 
+                                    ? (entityId.startsWith("light.") ? 'rgba(255,220,200, 0.5)' : 'var(--accent-color)') 
+                                    : 'var(--background-color,var(--secondary-background-color))');
                             rgbaBgColor = convertToRGBA(color, 0);
                             this.iconFilter = rgbColor ? 
                                 (!isColorCloseToWhite(rgbColor) ? 'brightness(1.1)' : 'none') :
@@ -706,7 +706,7 @@ class BubbleCard extends HTMLElement {
                                 padding: 6px;
                                 z-index: 1;
                                 flex-grow: 1;
-                                background-color: ${this.rgbColorOpacity};
+                                background-color: ${entityId ? this.rgbColorOpacity : 'var(--background-color,var(--secondary-background-color))'};
                                 transition: background 1s;
                                 border-radius: 25px;
                                 margin-right: 14px;
@@ -800,7 +800,7 @@ class BubbleCard extends HTMLElement {
                 const triggerClose = this.config.trigger_close ? this.config.trigger_close : false;
                 const stateEntity = this.config.state;
                 
-                if (!this.popUp) {
+                if (this.popUp !== this.getRootNode().querySelector('#root')) {
                     let initPopUp = setInterval(() => {
                         createPopUp();
                         if (this.popUp) {
