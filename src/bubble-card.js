@@ -1,4 +1,4 @@
-var version = 'v1.4.3';
+var version = 'v1.4.4';
 
 let editor;
 let entityStates = {};
@@ -334,7 +334,7 @@ class BubbleCard extends HTMLElement {
             window.color = color;
         }
         let customStyles = !this.config.styles ? '' : this.config.styles;
-        let entityId = this.config.entity ? this.config.entity : '';
+        let entityId = this.config.entity && hass.states[this.config.entity] ? this.config.entity : '';
         let icon = !this.config.icon && this.config.entity ? hass.states[entityId].attributes.icon || hass.states[entityId].attributes.entity_picture || '' : this.config.icon || '';
         let name = this.config.name ? this.config.name : this.config.entity ? hass.states[entityId].attributes.friendly_name : '';
         let widthDesktop = this.config.width_desktop || '540px';
@@ -352,6 +352,8 @@ class BubbleCard extends HTMLElement {
             : '7px';
         let popUpHash = this.config.hash;
         let popUpOpen;
+        let startTouchY;
+        let lastTouchY;
 
         switch (this.config.card_type) {
             // Initialize pop-up card
@@ -365,7 +367,7 @@ class BubbleCard extends HTMLElement {
                     this.card.style.marginTop = '4000px';
                     this.initStyleAdded = true;
                 }
-                
+
                 const createPopUp = () => {
                     if (!this.host || this.host !== this.getRootNode().host) {
                         this.host = this.getRootNode().host;
@@ -384,7 +386,7 @@ class BubbleCard extends HTMLElement {
                                     const event = new Event('popUpInitialized');
                                     setTimeout(() => {
                                         window.dispatchEvent(event);
-                                    }, 10);
+                                    }, 0);
                                 } else {
                                     window.backOpen = false;
                                     popUpOpen = popUpHash + false;
@@ -463,15 +465,10 @@ class BubbleCard extends HTMLElement {
                             p.textContent = formatedState;
                             haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
                         }
-
+                        
                         if (!this.eventAdded && !editor) {
                             window['checkHashRef_' + popUpHash] = checkHash;
                             window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash], { passive: true });
-            
-                            this.content.querySelector('.power-button').addEventListener('click', () => {
-                                toggleEntity(entityId);
-                            }, { passive: true });
-                            
                             window.addEventListener('click', function(e) {
                                 // Reset auto close
                                 location.hash === popUpHash && resetAutoClose();
@@ -491,46 +488,73 @@ class BubbleCard extends HTMLElement {
                                         localStorage.setItem('isManuallyClosed_' + popUpHash, true)
                                 }
                             }, { passive: true });
-                            
-                            window.addEventListener('keydown', function(e) {
-                                if (e.key === 'Escape') {
-                                    popUpOpen = popUpHash + false;
-                                    history.replaceState(null, null, location.href.split('#')[0]);
-                                    localStorage.setItem('isManuallyClosed_' + popUpHash, true)
-                                }
-                            }, { passive: true });
-                            
-                            // Slide down to close pop-up
-                            
-                            let startTouchY;
-                            let lastTouchY;
-                            
-                            popUp.addEventListener('touchstart', function(event) {
-                                // Reset auto close
-                                location.hash === popUpHash && resetAutoClose();
-                                
-                                // Record the Y position of the finger at the start of the touch
-                                startTouchY = event.touches[0].clientY;
-                                lastTouchY = startTouchY;
-                            }, { passive: true });
-                            
-                            popUp.addEventListener('touchmove', function(event) {
-                                // Calculate the distance the finger has traveled
-                                let touchMoveDistance = event.touches[0].clientY - startTouchY;
-                            
-                                // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
-                                if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
-                                    popUpOpen = popUpHash + false;
-                                    history.replaceState(null, null, location.href.split('#')[0]);
-                                    popUpOpen = popUpHash + false;
-                                    localStorage.setItem('isManuallyClosed_' + popUpHash, true)
-                                }
-                            
-                                // Update the Y position of the last touch
-                                lastTouchY = event.touches[0].clientY;
-                            }, { passive: true });
             
                             this.eventAdded = true;
+                        }
+                
+                        function urlChangedHandler() {
+                          window['checkHashRef_' + popUpHash];
+                        }
+                        
+                        function powerButtonClickHandler() {
+                            toggleEntity(entityId);
+                        }
+                        
+                        function windowClickHandler(e) {
+                            // Reset auto close
+                            if (window.hash === popUpHash) {
+                                resetAutoClose();
+                            }
+                        
+                            if (!window.justOpened) {
+                                return;
+                            }
+                        
+                            const target = e.composedPath();
+                        
+                            if (target && 
+                                !target.some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') && 
+                                !target.some(el => el.id === 'root' && !el.classList.contains('close-pop-up')) &&
+                                popUpOpen === popUpHash + true) {
+                                    popUpOpen = popUpHash + false;
+                                    history.replaceState(null, null, location.href.split('#')[0]);
+                                    localStorage.setItem('isManuallyClosed_' + popUpHash, true)
+                            }
+                        }
+                        
+                        function windowKeydownHandler(e) {
+                            if (e.key === 'Escape') {
+                                popUpOpen = popUpHash + false;
+                                history.replaceState(null, null, location.href.split('#')[0]);
+                                localStorage.setItem('isManuallyClosed_' + popUpHash, true)
+                            }
+                        }
+                        
+                        function popUpTouchstartHandler(event) {
+                            // Reset auto close
+                            if (window.hash === popUpHash) {
+                                resetAutoClose();
+                            }
+                        
+                            // Record the Y position of the finger at the start of the touch
+                            startTouchY = event.touches[0].clientY;
+                            lastTouchY = startTouchY;
+                        }
+                        
+                        function popUpTouchmoveHandler(event) {
+                            // Calculate the distance the finger has traveled
+                            let touchMoveDistance = event.touches[0].clientY - startTouchY;
+                        
+                            // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
+                            if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
+                                popUpOpen = popUpHash + false;
+                                history.replaceState(null, null, location.href.split('#')[0]);
+                                popUpOpen = popUpHash + false;
+                                localStorage.setItem('isManuallyClosed_' + popUpHash, true)
+                            }
+                            
+                            // Update the Y position of the last touch
+                            lastTouchY = event.touches[0].clientY;
                         }
                         
                         if (entityId) {
@@ -553,10 +577,10 @@ class BubbleCard extends HTMLElement {
                         
                         function checkHash() {
                             if (!editor) {
-                                const hash = location.hash.split('?')[0];
+                                window.hash = location.hash.split('?')[0];
 
                                 // Open on hash change
-                                if (hash === popUpHash) {
+                                if (window.hash === popUpHash) {
                                     openPopUp();
                                 // Close on back button from browser
                                 } else if (popUp.classList.contains('open-pop-up')) {
@@ -565,9 +589,15 @@ class BubbleCard extends HTMLElement {
                             }
                         };
                         
+                        const content = this.content;
+                        
                         function openPopUp() {
                             popUp.classList.remove('close-pop-up');
                             popUp.classList.add('open-pop-up');
+                            content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
+                            window.addEventListener('keydown', windowKeydownHandler, { passive: true });
+                            popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
+                            popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
                             popUpOpen = popUpHash + true;
                             setTimeout(() => { window.justOpened = true; }, 10);
                             resetAutoClose();
@@ -576,6 +606,10 @@ class BubbleCard extends HTMLElement {
                         function closePopUp() {
                             popUp.classList.remove('open-pop-up');
                             popUp.classList.add('close-pop-up');
+                            content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler);
+                            window.removeEventListener('keydown', windowKeydownHandler);
+                            popUp.removeEventListener('touchstart', popUpTouchstartHandler);
+                            popUp.removeEventListener('touchmove', popUpTouchmoveHandler);
                             popUpOpen = popUpHash + false;
                             window.justOpened = false;
                             clearTimeout(closeTimeout);
@@ -615,7 +649,7 @@ class BubbleCard extends HTMLElement {
                                 -webkit-backdrop-filter: blur(${bgBlur}px);
                                 border-radius: 42px;
                                 box-sizing: border-box;
-                                top: calc(100% + ${marginTopMobile} + var(--header-height));
+                                top: calc(120% + ${marginTopMobile} + var(--header-height));
                                 grid-gap: 12px !important;
                                 gap: 12px !important;
                                 grid-auto-rows: min-content;
@@ -654,7 +688,7 @@ class BubbleCard extends HTMLElement {
                             }
                             #root.open-pop-up {
                                 /*will-change: transform;*/
-                                transform: translateY(-100%);
+                                transform: translateY(-120%);
                                 transition: transform .4s !important;
                             }
                             #root.open-pop-up > * {
@@ -664,13 +698,13 @@ class BubbleCard extends HTMLElement {
                               overflow-x: clip;
                             }
                             #root.close-pop-up { 
-                                transform: translateY(0%);
+                                transform: translateY(-20%);
                                 transition: transform .4s !important;
                                 box-shadow: none;
                             }
                             @media only screen and (min-width: 768px) {
                                 #root {
-                                    top: calc(100% + ${marginTopDesktop} + var(--header-height));
+                                    top: calc(120% + ${marginTopDesktop} + var(--header-height));
                                     width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' && !isSidebarHidden ? ' - var(--mdc-drawer-width)' : ''}) !important;
                                     left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]});
                                     margin: 0 !important;
@@ -806,19 +840,19 @@ class BubbleCard extends HTMLElement {
                         if (this.popUp) {
                             clearInterval(initPopUp);
                         }
-                    }, 0);
+                    }, 20);
                 
                     setTimeout(() => {
                         if (!this.popUp) {
                             this.errorTriggered = true;
                             clearInterval(initPopUp);
-                            throw new Error("You are doing it wrong! Pop-up card must be placed inside a vertical_stack!");
+                            throw new Error("Pop-up card must be placed inside a vertical_stack! If it's already the case, please ignore this error 🍻");
                         }
-                    }, 2000);
+                    }, 4000);
                 } else if (!editor && this.wasEditing) {
                     createPopUp();
                     this.wasEditing = false;
-                } else if (((popUpHash === location.hash && (stateChanged(entityId) || stateChanged(stateEntity)))) || editor) {
+                } else if (((popUpHash === window.hash && (stateChanged(entityId) || stateChanged(stateEntity)))) || editor) {
                     createPopUp();
                     if (editor) { 
                         this.wasEditing = true;
@@ -1215,12 +1249,6 @@ class BubbleCard extends HTMLElement {
     
                 const rangeFill = document.createElement('div');
                 rangeFill.setAttribute('class', 'range-fill');
-                
-                if (entityId && entityId.startsWith("light.") && buttonType === 'slider') {
-                    rangeFill.style.transform = `translateX(${(currentBrightness / 255) * 100}%)`;
-                } else if (entityId && entityId.startsWith("media_player.") && buttonType === 'slider') {
-                    rangeFill.style.transform = `translateX(${currentVolume * 100}%)`;
-                }
                 
                 if (!this.buttonContainer || editor) {
                     // Fix for editor mode
