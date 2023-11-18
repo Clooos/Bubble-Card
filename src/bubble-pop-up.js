@@ -1,4 +1,4 @@
-var version = 'v1.5.0-beta.3';
+var version = 'v1.5.0';
 
 let editor;
 let entityStates = {};
