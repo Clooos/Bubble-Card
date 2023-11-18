@@ -1083,6 +1083,8 @@ class BubbleCard extends HTMLElement {
                 const openCover = !this.config.open_service ? 'cover.open_cover' : this.config.open_service;
                 const closeCover = !this.config.close_service ? 'cover.close_cover' : this.config.close_service;
                 const stopCover = !this.config.stop_service ? 'cover.stop_cover' : this.config.stop_service;
+                const iconUp = this.config.icon_up ? this.config.icon_up : "mdi:arrow-up";
+                const iconDown = this.config.icon_down ? this.config.icon_down : "mdi:arrow-down";
                 icon = hass.states[this.config.entity].state === 'open' ? iconOpen : iconClosed;
                 formatedState = this.config.entity ? hass.formatEntityState(hass.states[this.config.entity]) : '';
 
@@ -1110,13 +1112,13 @@ class BubbleCard extends HTMLElement {
                         </div>
                         <div class="buttons-container">
                             <button class="button open">
-                                <ha-icon icon="mdi:arrow-up"></ha-icon>
+                                <ha-icon icon="${iconUp}"></ha-icon>
                             </button>
                             <button class="button stop">
                                 <ha-icon icon="mdi:stop"></ha-icon>
                             </button>
                             <button class="button close">
-                                <ha-icon icon="mdi:arrow-down"></ha-icon>
+                                <ha-icon icon="${iconDown}"></ha-icon>
                             </button>
                         </div>
                     `
@@ -1364,6 +1366,14 @@ class BubbleCardEditor extends LitElement {
 
     get _icon_close() {
         return this._config.icon_close || '';
+    }
+
+    get _icon_down() {
+        return this._config.icon_down || '';
+    }
+
+    get _icon_up() {
+        return this._config.icon_up || '';
     }
 
     get _open_service() {
@@ -1656,6 +1666,8 @@ class BubbleCardEditor extends LitElement {
                     ></ha-textfield>
                     ${this.makeDropdown("Optional - Open icon", "icon_open")}
                     ${this.makeDropdown("Optional - Closed icon", "icon_close")}
+                    ${this.makeDropdown("Optional - Arrow down icon", "icon_down")}
+                    ${this.makeDropdown("Optional - Arrow up icon", "icon_up")}
                     ${this.makeVersion()}
                 </div>
             `;

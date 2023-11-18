@@ -273,6 +273,8 @@ This card allows you to control your covers.
 | `name` | string | Optional | Any string | A name for your cover, if not defined it will display the entity name |
 | `icon_open` | string | Optional | Any `mdi:` icon | An icon for your open cover, if not defined it will display the default open cover icon |
 | `icon_close` | string | Optional | Any `mdi:` icon | An icon for your closed cover, if not defined it will display the default closed cover icon |
+| `icon_up` | string | Optional | Any `mdi:` icon | An icon for your open cover button, if not defined it will display the default open cover icon |
+| `icon_down` | string | Optional | Any `mdi:` icon | An icon for your close cover button, if not defined it will display the default close cover icon |
 | `open_service` | string | Optional | Any service or script | A service to open your cover, default to `cover.open_cover` |
 | `stop_service` | string | Optional | Any service or script | A service to stop your cover, default to `cover.stop_cover` |
 | `close_service` | string | Optional | Any service or script | A service to close your cover, default to `cover.close_cover` |
