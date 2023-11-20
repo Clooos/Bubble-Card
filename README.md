@@ -25,30 +25,50 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ### Without HACS
 
-1. Download this file: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/bubble-card.js)
-2. Add this file to your `<config>/www` folder
-3. On your dashboard click on the icon at the right top corner then on `Edit dashboard`
-4. Click again on that icon and then click on `Manage resources`
-5. Click on `Add resource`
-6. Copy and paste this: `/local/bubble-card.js?v=1`
-7. Click on `JavaScript Module` then `Create`
-8. Go back and refresh your page
-9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
-10. After any update of the file you will have to edit `/local/bubble-card.js?v=1` and change the version to any higher number
+1. Download these files: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/bubble-card.js) and [bubble-pop-up.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/bubble-pop-up.js)
+2. Add these files to your `<config>/www` folder
+3. Add the following lines under `frontend` in your `configuration.yaml`:
+```yaml
+frontend:
+  extra_module_url:
+    - /hacsfiles/Bubble-Card/bubble-pop-up.js
+```
+4. Restart Home Assistant
+5. On your dashboard click on the icon at the right top corner then on `Edit dashboard`
+6. Click again on that icon and then click on `Manage resources`
+7. Click on `Add resource`
+8. Copy and paste this: `/local/bubble-card.js?v=1`
+9. Click on `JavaScript Module` then `Create`
+10. Go back and refresh your page
+11. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
+12. After any update of the file you will have to edit `/local/bubble-card.js?v=1` and change the version to any higher number
+
+If it's not working, just try to clear your browser cache.
 
 ### With HACS
 
 This method allows you to get updates directly on the HACS main page
 
-1. Download HACS following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
-2. Proceed to the initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
-3. On your sidebar go to `HACS` > `Integrations`
-4. click on the icon at the right top corner then on `Custom repositories`
-5. For the repository add this: `https://github.com/Clooos/Bubble-Card`
-6. For the category select `Lovelace` then click `Add`
-7. Now click on `Bubble Card` and then on the `Download` button
-8. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
-9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
+
+
+1. First add the following lines under `frontend` in your `configuration.yaml`:
+```yaml
+frontend:
+  extra_module_url:
+    - /hacsfiles/Bubble-Card/bubble-pop-up.js
+```
+2. If HACS is not installed yet, download it following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
+3. Proceed to the HACS initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
+4. On your sidebar go to `HACS` > `Integrations`
+5. click on the icon at the right top corner then on `Custom repositories`
+6. For the repository add this: `https://github.com/Clooos/Bubble-Card`
+7. For the category select `Lovelace` then click `Add`
+8. Now click on `Bubble Card` and then on the `Download` button
+9. Restart Home Assistant
+10. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
+11. You can now click on `Add card` in the bottom right corner and search for `Bubble Card` or `Bubble Pop-up`
+
+If it's not working, just try to clear your browser cache.
 
 Coming soon in the HACS default repo (still waiting for validation).
 
