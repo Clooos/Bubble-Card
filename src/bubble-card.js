@@ -502,6 +502,13 @@ class BubbleCard extends HTMLElement {
                     if (button.lightEntity) {
                       updateButtonStyle(buttonElement, button.lightEntity);
                     }
+
+                    if (this.config.highlightCurrentview) {
+                        const color= "white";
+                        if (button.link + true === popUpOpen) {
+                            buttonElement.style.backgroundColor = color;
+                        }
+                    }
                   }
                 }
                 
@@ -1390,6 +1397,10 @@ class BubbleCardEditor extends LitElement {
 
     get _auto_order() {
         return this._config.auto_order || false;
+    }
+
+    get _highlightCurrentview() {
+        return this._config.highlightCurrentview || true;
     }
     
     get _show_state() {
