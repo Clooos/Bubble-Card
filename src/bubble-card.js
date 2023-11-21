@@ -366,6 +366,17 @@ class BubbleCard extends HTMLElement {
                 
                         buttonElement.hasListener = true;
                     }
+
+                    if (this.config.highlightCurrentview) {
+                        const color = "gray";
+                        const isShown = location.pathname.includes(link);
+                        console.log(link)
+                        if (isShown) {
+                            buttonElement.style.backgroundColor = color;
+                        } else {
+                            buttonElement.style.backgroundColor = "none";
+                        }
+                    }
                 
                     return buttonElement;
                 };
@@ -501,13 +512,6 @@ class BubbleCard extends HTMLElement {
                     } 
                     if (button.lightEntity) {
                       updateButtonStyle(buttonElement, button.lightEntity);
-                    }
-
-                    if (this.config.highlightCurrentview) {
-                        const color= "white";
-                        if (button.link + true === popUpOpen) {
-                            buttonElement.style.backgroundColor = color;
-                        }
                     }
                   }
                 }
@@ -1605,8 +1609,8 @@ class BubbleCardEditor extends LitElement {
                     ></ha-switch>
                     <div class="mdc-form-field">
                         <label class="mdc-label">Optional - Highlight Current view</label> 
-                        </div>
-                    </ha-formfield>
+                    </div>
+                </ha-formfield>
                     <div id="buttons-container">
                         ${this.makeButton()}
                     </div>
