@@ -368,13 +368,9 @@ class BubbleCard extends HTMLElement {
                     }
 
                     if (this.config.highlightCurrentview) {
-                        const color = "gray";
                         const isShown = location.pathname.includes(link);
-                        console.log(link)
                         if (isShown) {
-                            buttonElement.style.backgroundColor = color;
-                        } else {
-                            buttonElement.style.backgroundColor = "none";
+                            buttonElement.classList.add("highlight");
                         }
                     }
                 
@@ -560,6 +556,10 @@ class BubbleCard extends HTMLElement {
                         padding: 16px;
                         background: none;
                         transition: background-color 1s, border 1s, transform 1s;
+                        color: var(--primary-text-color);
+                    }
+                    .button.highlight {
+                        background: var(--card-background-color);
                         color: var(--primary-text-color);
                     }
                     .icon {
