@@ -95,7 +95,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
 2. This `vertical-stack` must be after all your other cards and before your `horizontal-buttons-stack` if you have one
-3. Now add a `Bubble Card` with the type `pop-up` in it
+3. Now add a `Bubble Pop-Up`
 4. Just fill in the required inputs and the ones you need
 
 ### Options
@@ -132,8 +132,7 @@ A pop-up
 ```yaml
 type: vertical-stack
 cards:
-  - type: custom:bubble-card
-    card_type: pop-up
+  - type: custom:bubble-pop-up
     hash: '#kitchen'
     name: Kitchen
     icon: mdi:fridge
@@ -158,8 +157,7 @@ This feature allows you to open a pop-up based on the state of any entity, for e
 #### Example
  
  ```yaml
-type: custom:bubble-card
-card_type: pop-up
+type: custom:bubble-pop-up
 hash: '#kitchen'
 name: Security
 icon: mdi:video
@@ -385,8 +383,7 @@ Here is the raw code of my "Cuisine" pop-up (Kitchen in english) as seen in some
 ```yaml
 type: vertical-stack
 cards:
-  - type: custom:bubble-card
-    card_type: pop-up
+  - type: custom:bubble-pop-up
     entity: light.cuisine
     icon: mdi:fridge-outline
     name: Cuisine
