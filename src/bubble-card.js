@@ -1404,7 +1404,7 @@ class BubbleCardEditor extends LitElement {
     }
 
     get _highlightCurrentview() {
-        return this._config.highlightCurrentview || true;
+        return this._config.highlightCurrentview || false;
     }
     
     get _show_state() {
@@ -1602,7 +1602,7 @@ class BubbleCardEditor extends LitElement {
                     </ha-formfield>
                     <ha-formfield .label="Highlight Current view">
                     <ha-switch
-                        aria-label="Toggle auto order"
+                        aria-label="Toggle Highlight Current view"
                         .checked=${this._highlightCurrentview}
                         .configValue="${"highlightCurrentview"}"
                         @change=${this._valueChanged}
