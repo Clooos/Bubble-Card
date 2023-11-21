@@ -1596,6 +1596,17 @@ class BubbleCardEditor extends LitElement {
                             <label class="mdc-label">Optional - Auto order (Presence/occupancy sensors needed)</label> 
                         </div>
                     </ha-formfield>
+                    <ha-formfield .label="Highlight Current view">
+                    <ha-switch
+                        aria-label="Toggle auto order"
+                        .checked=${this._highlightCurrentview}
+                        .configValue="${"highlightCurrentview"}"
+                        @change=${this._valueChanged}
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Optional - Highlight Current view</label> 
+                        </div>
+                    </ha-formfield>
                     <div id="buttons-container">
                         ${this.makeButton()}
                     </div>
