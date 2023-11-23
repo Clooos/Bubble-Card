@@ -1,12 +1,64 @@
-var version = 'v1.5.0';
+var version = 'v1.5.1';
 
 let editor;
 let entityStates = {};
 let lastCall = { entityId: null, stateChanged: null, timestamp: null };
-let globalHosts = {};
+let resourceAdded = localStorage.getItem('resourceAdded') === 'true';
+let moduleAdded = localStorage.getItem('moduleAdded') === 'true';
+let browserCacheCleared = localStorage.getItem('browserCacheCleared') === 'true';
+
+// Check if bubble-pop-up.js is installed as a module or as a resource
+async function addResource(hass, url, moduleInstalled) {
+    let resources = await hass.callWS({ type: "lovelace/resources" });
+    let resource = resources.find(r => r.url.includes("bubble-pop-up.js"));
+
+    if (!moduleInstalled && !resource) {
+        await hass.callWS({
+            type: "lovelace/resources/create",
+            url: url + '?v=' + version,
+            res_type: "module"
+        });
+        
+        localStorage.setItem('resourceAdded', true);
+        localStorage.setItem('moduleAdded', false);
+        localStorage.setItem('browserCacheCleared', false);
+        moduleAdded = false;
+        browserCacheCleared = false;
+        
+    } else if (moduleInstalled && resource) {
+        await hass.callWS({
+            type: "lovelace/resources/delete",
+            resource_id: resource.id
+        });
+
+        localStorage.setItem('moduleAdded', true);
+        localStorage.setItem('resourceAdded', false);
+        localStorage.setItem('browserCacheCleared', false);
+        moduleAdded = true;
+        browserCacheCleared = false;
+    } else if (moduleInstalled && !resource) {
+        localStorage.setItem('moduleAdded', true);
+    }
+    
+    if (!browserCacheCleared) {
+        localStorage.setItem('browserCacheCleared', true);
+        location.reload(true);
+    }
+}
 
 class BubbleCard extends HTMLElement {
     set hass(hass) {
+        // Initialize bubble-pop-up.js if it's not installed yet.
+        let moduleInstalled = this.config.module_installed;
+
+        if ((!window.resourcesChecked && !resourceAdded && !moduleInstalled) || (!window.resourcesChecked && moduleInstalled && !moduleAdded)) {
+            console.log ("Resources checked");
+            let url = "/hacsfiles/Bubble-Card/bubble-pop-up.js";
+            addResource(hass, url, moduleInstalled);
+            resourceAdded = true;
+            window.resourcesChecked = true;
+        }
+        
         // Initialize the content if it's not there yet.
         if (!this.content) {
             this.attachShadow({
@@ -33,7 +85,7 @@ class BubbleCard extends HTMLElement {
                 this.editorElement = editorElement;
             });
         }
-        
+
         let customStyles = !this.config.styles ? '' : this.config.styles;
         let entityId = this.config.entity ? this.config.entity : ''; // && hass.states[this.config.entity]
         let icon = !this.config.icon && this.config.entity ? hass.states[entityId].attributes.icon || hass.states[entityId].attributes.entity_picture || '' : this.config.icon || '';
@@ -1244,7 +1296,7 @@ class BubbleCard extends HTMLElement {
 
     setConfig(config) {
         if (config.card_type === 'pop-up') {
-            throw new Error('Since v1.5.0 you need to manually add a new frontend extra module into your configuration.yaml. Then replace "custom:bubble-card" with "custom:bubble-pop-up" in all your pop-ups.');
+            throw new Error('Breaking change: Since v1.5.0 you need to replace "custom:bubble-card" with "custom:bubble-pop-up" in all your pop-ups.');
         } else if (config.card_type === 'horizontal-buttons-stack') {
             var definedLinks = {};
             
@@ -1477,19 +1529,7 @@ class BubbleCardEditor extends LitElement {
                     ${this.makeDropdown("Card type", "card_type", cardTypeList)}
                     <h3>Pop-up</h3>
                     <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.</ha-alert>
-                    <ha-alert alert-type="warning">Since v1.5.0 you need to manually add a new frontend extra module into your configuration.yaml.</ha-alert>
-                    <h3 style="margin-bottom: 0;">Installation</h3>
-                    <ul style="padding: 0 0 0 20px; margin: 0; width: calc(100% - 40px); box-sizing: border-box;">
-                        <li>In your <b>configuration.yaml</b>, add the following under frontend :</li>
-                        <span style="display: inline-block; font-family: monospace; width: 100%; background: rgba(0,0,0,0.2); padding: 20px; margin: 10px 0 20px; border-radius: 4px;">
-                            frontend:<br>&nbsp;&nbsp;&nbsp;&nbsp;extra_module_url:</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/hacsfiles/Bubble-Card/bubble-pop-up.js
-                        </span>
-                        <li>Restart Home Assistant.</li>
-                        <li>Now in edit mode, from the card list create a <b>vertical stack</b> then create a <b>Bubble Pop-up</b> in it.</li>
-                        <li style="margin-top: 20px;">For YAML users :</li>
-                        <span style="display: inline-block; font-family: monospace; width: 100%; background: rgba(0,0,0,0.2); padding: 20px; margin: 10px 0 20px; border-radius: 4px;">
-                            type: vertical-stack<br>cards:</br>&nbsp;&nbsp;- type: custom:bubble-pop-up<br>&nbsp;&nbsp;&nbsp;&nbsp;hash: '#pop-up-name'
-                        </span>
+                    <ha-alert alert-type="warning">Please note that the location of pop-ups has changed. They are now available as "Bubble Pop-Up" in the card selector on your dashboard.</ha-alert>
                     ${this.makeVersion()}
                 </div>
             `;
@@ -1666,6 +1706,7 @@ class BubbleCardEditor extends LitElement {
                     ></ha-textfield>
                     ${this.makeDropdown("Optional - Open icon", "icon_open")}
                     ${this.makeDropdown("Optional - Closed icon", "icon_close")}
+                    <h3>Styling options</h3>
                     ${this.makeDropdown("Optional - Arrow down icon", "icon_down")}
                     ${this.makeDropdown("Optional - Arrow up icon", "icon_up")}
                     ${this.makeVersion()}
