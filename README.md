@@ -71,7 +71,7 @@ frontend:
     - /hacsfiles/lovelace-card-mod/bubble-pop-up.js
 ```
 
-After restarting Home Assistant, you can then add `module_installed: true` into any Bubble Card YAML of your choice (it is sufficient to add it to just one card):
+After restarting Home Assistant, you can then add `module_installed: true` into any Bubble Card YAML of your choice (it is sufficient to add it to just one card), this will automatically remove `bubble-pop-up.js` from the frontend resources, and the cache will be refreshed on all browsers at the first use of this version:
 
 ```yaml
 type: custom:bubble-card
