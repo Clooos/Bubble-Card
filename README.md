@@ -82,7 +82,7 @@ module_installed: true
 
 You can now refresh your page or restart your HA Companion App, and the cache will automatically update on all your devices (in http only). If everthing is running you can remove this line.
 
-Try to clear your browser cache if it's not working.
+Try to clear your browser cache if it's not working or take look at this [post](https://github.com/Clooos/Bubble-Card/issues/203#issuecomment-1824618113).
 
 ## Configuration
 
