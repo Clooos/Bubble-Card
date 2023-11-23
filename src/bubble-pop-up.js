@@ -1,10 +1,10 @@
-var version = 'v1.5.0';
+var version = 'v1.5.1';
 
 let editor;
 let entityStates = {};
 let stateChanged = true;
 let lastCall = { entityId: null, stateChanged: null, timestamp: null };
-let globalHosts = {};
+let moduleAdded = localStorage.getItem('moduleAdded') === 'true';
 
 class BubblePopUp extends HTMLElement {
     constructor() {
@@ -1169,6 +1169,8 @@ const waitForElement = async () => {
                 <div class="card-config">
                     <h3>Pop-up</h3>
                     <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b></ha-alert>
+                    <ha-alert alert-type="${!moduleAdded ? 'warning' : 'info'}">${!moduleAdded ? html`It is now possible to install Bubble Pop-Up as a frontend module to greatly optimize the initialization of pop-ups. More information can be found <a href="https://github.com/Clooos/Bubble-Card#pop-up-optimization" style="color: white;">here</a>.` : 'Bubble Pop-up installed as a frontend module, nice!'}</ha-alert>
+
                     <ha-textfield
                         label="Hash (e.g. #kitchen)"
                         .value="${this._hash}"
