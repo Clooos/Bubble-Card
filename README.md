@@ -97,6 +97,8 @@ module_installed: true
 
 You can now refresh your page or restart your HA Companion App, and the cache will automatically update on all your devices.
 
+Try to clear your cache if it's not working.
+
 ## Configuration
 
 Most options can be configured in the GUI editor, except for custom styles, custom buttons and tap actions.
