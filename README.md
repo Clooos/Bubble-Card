@@ -53,7 +53,7 @@ This method allows you to get updates directly on the HACS main page
 8. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
 9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card` or `Bubble Pop-up`
 
-If it's not working, just try to clear your browser cache.
+If it's not working, try to clear your browser cache.
 
 Coming soon in the HACS default repo (still waiting for validation).
 
@@ -80,9 +80,9 @@ entity: your.entity
 module_installed: true
 ```
 
-You can now refresh your page or restart your HA Companion App, and the cache will automatically update on all your devices.
+You can now refresh your page or restart your HA Companion App, and the cache will automatically update on all your devices (in http only). If everthing is running you can remove this line.
 
-Try to clear your cache if it's not working.
+Try to clear your browser cache if it's not working.
 
 ## Configuration
 
