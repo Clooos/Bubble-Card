@@ -77,6 +77,26 @@ Coming soon in the HACS default repo (still waiting for validation).
 There is also a detailed setup video from **BeardedTinker**, thanks a lot to him!  
 ▶ [YouTube - Pop-up cards with Bubble Card in Home Assistant](https://www.youtube.com/watch?v=oCpxhNk5JkE)
 
+### Pop-up optimization
+
+Adding `bubble-pop-up.js` as an extra module significantly improves the initialization of the pop-up when the page is loading. You can proceed by adding `bubble-pop-up.js` to your `configuration.yaml`, like this:
+```yaml
+frontend:
+  extra_module_url:
+    - /hacsfiles/lovelace-card-mod/bubble-pop-up.js
+```
+
+After restarting Home Assistant, you can then add `module_installed: true` into any Bubble Card YAML of your choice (it is sufficient to add it to just one card):
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: your.entity
+module_installed: true
+```
+
+You can now refresh your page or restart your HA Companion App, and the cache will automatically update on all your devices.
+
 ## Configuration
 
 Most options can be configured in the GUI editor, except for custom styles, custom buttons and tap actions.
