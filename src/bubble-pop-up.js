@@ -1,10 +1,9 @@
-var version = 'v1.5.1';
+var version = 'v1.5.2';
 
 let editor;
 let entityStates = {};
 let stateChanged = true;
 let lastCall = { entityId: null, stateChanged: null, timestamp: null };
-let moduleAdded = localStorage.getItem('moduleAdded') === 'true';
 
 class BubblePopUp extends HTMLElement {
     constructor() {
@@ -780,8 +779,8 @@ class BubblePopUp extends HTMLElement {
                     }
                     .header-icon {
                         display: inline-flex;
-                        width: 38px;
-                        height: 38px;
+                        min-width: 38px;
+                        min-height: 38px;
                         background-color: var(--card-background-color,var(--ha-card-background));
                         border-radius: 100%;
                         margin: 0 10px 0 0;
@@ -822,6 +821,7 @@ class BubblePopUp extends HTMLElement {
                         display: inline-flex;
                         line-height: 0px;
                         font-size: 16px;
+                        min-width: fit-content ;
                     }
                     .power-button {
                         cursor: pointer; 
@@ -1167,10 +1167,17 @@ const waitForElement = async () => {
     
             return html`
                 <div class="card-config">
-                    <h3>Pop-up</h3>
-                    <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b></ha-alert>
-                    <ha-alert alert-type="${!moduleAdded ? 'warning' : 'info'}">${!moduleAdded ? html`It is now possible to install Bubble Pop-Up as a frontend module to greatly optimize the initialization of pop-ups. More information can be found <a href="https://github.com/Clooos/Bubble-Card#pop-up-optimization" style="color: white;">here</a>.` : 'Bubble Pop-up installed as a frontend module, nice!'}</ha-alert>
-
+                    <h3>Pop-up 
+                        <span style="
+                            font-size: 10px !important;
+                            background: rgb(0,140,90);
+                            padding: 2px 6px;
+                            border-radius: 8px;
+                        ">
+                            👍 Optimized mode
+                        </span>
+                    </h3>
+                    <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b></ha-alert>
                     <ha-textfield
                         label="Hash (e.g. #kitchen)"
                         .value="${this._hash}"
@@ -1426,7 +1433,24 @@ const waitForElement = async () => {
         
         makeVersion() {
             return html`
-                <h4>Bubble Card - Pop-up <span style="font-size: 10px;">${version}</span></h4>
+                <h4 style="
+                    font-size: 12px !important;
+                    background: rgba(0,0,0,0.1);
+                    padding: 8px 16px;
+                    border-radius: 32px;
+                ">
+                    Bubble Card - Pop-up 
+                    <span style="
+                        font-size: 10px;
+                        background: rgba(0,120,180,1);
+                        padding: 0px 8px;
+                        border-radius: 12px;
+                        margin-right: -6px;
+                        float: right;
+                    ">
+                        ${version}
+                    </span>
+                </h4>
             `;
         }
     
