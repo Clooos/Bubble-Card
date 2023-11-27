@@ -60,25 +60,13 @@ There is also a detailed setup video from **BeardedTinker**, thanks a lot to him
 
 ### Pop-up optimization
 
-Adding `bubble-pop-up.js` as an extra module significantly improves the initialization of the pop-up when the page is loading. You can proceed by adding `bubble-pop-up.js` to your `configuration.yaml`, copy this and change the version number:
+Adding `bubble-pop-up.js` as an extra module significantly improves the initialization of the pop-up when the page is loading. You can proceed by adding `bubble-pop-up.js` to your `configuration.yaml`, just change the version number:
 ```yaml
 frontend:
   extra_module_url:
     - /hacsfiles/Bubble-Card/bubble-pop-up.js?v=0.0.0
 ```
-
-After restarting Home Assistant, you can then add `module_installed: true` into any Bubble Card YAML of your choice (it is sufficient to add it to just one card), this will automatically remove `bubble-pop-up.js` from the frontend resources, and the cache will be refreshed on all browsers at the first use of this version:
-
-```yaml
-type: custom:bubble-card
-card_type: button
-entity: your.entity
-module_installed: true
-```
-
-You can now refresh your page or restart your HA Companion App, and the cache will automatically update on all your devices (in http only). If everthing is running you can remove this line.
-
-Try to clear your browser cache if it's not working, you can also take look at this [post](https://github.com/Clooos/Bubble-Card/issues/203#issuecomment-1824618113) for more help.
+Restart Home Assistant and clear the cache if needed, you should now see Bubble Pop-up appear in the card picker, which corresponds to the **Optimized mode** in the GUI editor.
 
 ## Configuration
 
@@ -98,7 +86,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
 2. This `vertical-stack` must be after all your other cards and before your `horizontal-buttons-stack` if you have one
-3. Now add a `Bubble Pop-Up`
+3. Now add a `Bubble Card` (Regular mode) or a `Bubble Pop-Up` (Optimized mode)
 4. Just fill in the required inputs and the ones you need
 
 ### Options
@@ -131,7 +119,21 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 
 ### Example
 
-A pop-up
+A pop-up in Regular mode
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#kitchen'
+    name: Kitchen
+    icon: mdi:fridge
+    entity: light.kitchen
+    state: sensor.kitchen_temperature
+    back_open: true
+```
+
+A pop-up in Optimized mode
 ```yaml
 type: vertical-stack
 cards:
@@ -143,6 +145,7 @@ cards:
     state: sensor.kitchen_temperature
     back_open: true
 ```
+
 A button to open the pop-up (not a Bubble Card one)
 ```yaml
 type: button
