@@ -60,11 +60,11 @@ There is also a detailed setup video from **BeardedTinker**, thanks a lot to him
 
 ### Pop-up optimization
 
-Adding `bubble-pop-up.js` as an extra module significantly improves the initialization of the pop-up when the page is loading. You can proceed by adding `bubble-pop-up.js` to your `configuration.yaml`, like this:
+Adding `bubble-pop-up.js` as an extra module significantly improves the initialization of the pop-up when the page is loading. You can proceed by adding `bubble-pop-up.js` to your `configuration.yaml`, copy this and change the version number:
 ```yaml
 frontend:
   extra_module_url:
-    - /hacsfiles/Bubble-Card/bubble-pop-up.js?v=1.5.1
+    - /hacsfiles/Bubble-Card/bubble-pop-up.js?v=0.0.0
 ```
 
 After restarting Home Assistant, you can then add `module_installed: true` into any Bubble Card YAML of your choice (it is sufficient to add it to just one card), this will automatically remove `bubble-pop-up.js` from the frontend resources, and the cache will be refreshed on all browsers at the first use of this version:
