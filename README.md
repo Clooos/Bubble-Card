@@ -46,16 +46,12 @@ This method allows you to get updates directly on the HACS main page
 1. If HACS is not installed yet, download it following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
 2. Proceed to the HACS initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
 3. On your sidebar go to `HACS` > `Integrations`
-4. click on the icon at the right top corner then on `Custom repositories`
-5. For the repository add this: `https://github.com/Clooos/Bubble-Card`
-6. For the category select `Lovelace` then click `Add`
-7. Now click on `Bubble Card` and then on the `Download` button
-8. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
-9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card` or `Bubble Pop-up`
+4. Click on the `+` icon at the bottom right corner
+5. Now search for `Bubble Card` and then click on the `Download` button
+6. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
+7. You can now click on `Add card` in the bottom right corner and search for `Bubble Card` or `Bubble Pop-up`
 
 If it's not working, try to clear your browser cache.
-
-Coming soon in the HACS default repo (still waiting for validation).
 
 ### With HACS - Video
 
