@@ -1,8 +1,21 @@
-var version = 'v1.5.2';
+var version = 'v1.5.3';
 
 let editor;
 let entityStates = {};
 let lastCall = { entityId: null, stateChanged: null, timestamp: null };
+
+// Check if bubble-pop-up.js is installed as a resource and remove it (fix for the previous 1.5.0/1 users)
+async function addResource(hass) {
+    let resources = await hass.callWS({ type: "lovelace/resources" });
+    let resource = resources.find(r => r.url.includes("bubble-pop-up.js"));
+
+    if (resource) {
+        await hass.callWS({
+            type: "lovelace/resources/delete",
+            resource_id: resource.id
+        });
+    }
+}
 
 class BubbleCard extends HTMLElement {
     constructor() {
@@ -50,6 +63,13 @@ class BubbleCard extends HTMLElement {
     }
     
     set hass(hass) {
+        // Check if bubble-pop-up.js is installed as a resource and remove it (fix for the previous 1.5.0/1 users)
+        if (!window.resourceCleared) {
+            //let url = "/hacsfiles/Bubble-Card/bubble-pop-up.js";
+            addResource(hass);
+            window.resourceCleared = true;
+        }
+        
         // Initialize the content if it's not there yet.
         if (!this.content) {
             this.attachShadow({
