@@ -45,7 +45,7 @@ This method allows you to get updates directly on the HACS main page
 
 1. If HACS is not installed yet, download it following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
 2. Proceed to the HACS initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
-3. On your sidebar go to `HACS` > `Integrations`
+3. On your sidebar go to `HACS` > `Frontend`
 4. Click on the `+` button at the bottom right corner
 5. Now search for `Bubble Card` and then click on the button at the bottom right corner to download it
 6. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
