@@ -55,8 +55,11 @@ If it's not working, try to clear your browser cache.
 
 ### With HACS - Video
 
-There is also a detailed setup video from **BeardedTinker**, thanks a lot to him!  
+There is also a detailed setup video from **BeardedTinker**, thank you so much to you!  
 ▶ [YouTube - Pop-up cards with Bubble Card in Home Assistant](https://www.youtube.com/watch?v=oCpxhNk5JkE)
+
+And also a video for the German users from **smart-live.net**, thanks a lot to you too!  
+▶ [YouTube - Home Assistant Dashboard Bubble Card - Eine der Besten Karten 2023?](https://youtu.be/6ju6mTntvMI?si=EGvKm4qwjhcZdTyl)
 
 ### Pop-up optimization
 
