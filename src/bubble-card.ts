@@ -1,0 +1,123 @@
+import { version } from './var/version.ts';
+import { addUrlListener } from './tools/url-listener.ts';
+import { initializeContent, checkEditor } from './tools/init.ts';
+import { handlePopUp } from './cards/pop-up.ts';
+import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack.ts';
+import { handleButton } from './cards/button.ts';
+import { handleSeparator } from './cards/separator.ts';
+import { handleCover } from './cards/cover.ts';
+import { handleEmptyColumn } from './cards/empty-column.ts';
+import BubbleCardEditor from './editor/bubble-card-editor.ts';
+
+let editor;
+addUrlListener();
+
+class BubbleCard extends HTMLElement {
+    
+    set hass(hass) {
+
+        this._hass = hass;
+        this.editor = editor;
+
+        initializeContent(this);
+
+        checkEditor(editor).then((value) => {
+          editor = value;
+        });
+
+        switch (this.config.card_type) {
+            // Initialize pop-up card
+            case 'pop-up':
+                handlePopUp(this);
+                break;
+                
+            // Initialize horizontal buttons stack
+            case 'horizontal-buttons-stack' : 
+                handleHorizontalButtonsStack(this);
+                break;
+
+            // Initialize button
+            case 'button' :
+                handleButton(this);
+                break;
+    
+            // Initialize separator
+            case 'separator' :
+                handleSeparator(this);
+                break;
+    
+            // Initialize cover card
+            case 'cover' :
+                handleCover(this);
+                break;
+    
+            // Intitalize empty card
+            case 'empty-column' :
+                handleEmptyColumn(this);
+                break;
+        }
+    }
+
+    setConfig(config) {
+        if (config.card_type === 'pop-up') {
+            if (!config.hash) {
+                throw new Error("You need to define an hash. Please note that this card must be placed inside a vertical_stack to work as a pop-up.");
+            }
+        } else if (config.card_type === 'horizontal-buttons-stack') {
+            var definedLinks = {};
+            
+            for (var key in config) {
+              if (key.match(/^\d+_icon$/)) {
+                var iconKey = key;
+                var linkKey = key.replace('_icon', '_link');
+            
+                if (config[linkKey] === undefined) {
+                    throw new Error("You need to define " + linkKey);
+                }
+            
+                if (definedLinks[config[linkKey]]) {
+                    throw new Error("You can't use " + config[linkKey] + " twice" );
+                }
+            
+                definedLinks[config[linkKey]] = true;
+              }
+            }
+        } else if (config.card_type === 'button' || config.card_type === 'cover') {
+            if (!config.entity) {
+                throw new Error("You need to define an entity");
+            }
+        }
+        
+        if (window.entityError) {
+            throw new Error("You need to define a valid entity");
+        }
+        
+        this.config = config;
+    }
+
+    getCardSize() {
+        // Fix the empty columns caused by the pop-ups on the dashboard
+        return -10000;
+    }
+
+    static getConfigElement() {
+        return document.createElement("bubble-card-editor");
+    }
+}
+
+customElements.define("bubble-card", BubbleCard);
+customElements.define('bubble-card-editor', BubbleCardEditor);
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+    type: "bubble-card",
+    name: "Bubble Card",
+    preview: false,
+    description: "A minimalist card collection with a nice pop-up touch."
+});
+
+console.info(
+    `%c Bubble Card %c ${version} `,
+    'background-color: #555;color: #fff;padding: 3px 2px 3px 3px;border-radius: 14px 0 0 14px;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)',
+    'background-color: #506eac;color: #fff;padding: 3px 3px 3px 2px;border-radius: 0 14px 14px 0;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)'
+);
