@@ -18,21 +18,32 @@ export function initializeContent(context) { // Ajout du mot-clé async
 
 // Check for edit mode
 
-export async function checkEditor(editor) {
-    if (!window.editorElement) {
-        const editorElementPromise = new Promise((resolve) => {
-          resolve(document.querySelector("body > home-assistant")
-            .shadowRoot.querySelector("home-assistant-main")
-            .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
-            .shadowRoot.querySelector("hui-root")
-            .shadowRoot.querySelector("div"));
-        });
+// export async function checkEditor(editor) {
+//     if (!window.editorElement) {
+//         const editorElementPromise = new Promise((resolve) => {
+//           resolve(document.querySelector("body > home-assistant")
+//             .shadowRoot.querySelector("home-assistant-main")
+//             .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
+//             .shadowRoot.querySelector("hui-root")
+//             .shadowRoot.querySelector("div"));
+//         });
 
-        window.editorElement = await editorElementPromise;
-    } else {
-        editor = window.editorElement.classList.contains('edit-mode');
-    }
-    return editor;
+//         window.editorElement = await editorElementPromise;
+//     } else {
+//         editor = window.editorElement.classList.contains('edit-mode');
+//     }
+//     return editor;
+// }
+
+export function checkEditor() {
+    const editorElement = 
+        document.querySelector("body > home-assistant")
+        .shadowRoot.querySelector("home-assistant-main")
+        .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
+        .shadowRoot.querySelector("hui-root")
+        .shadowRoot.querySelector("div");
+
+    return editorElement.classList.contains('edit-mode');
 }
 
 // Check if bubble-pop-up.js is installed as a resource and remove it (fix for the previous 1.5.0/1 users)

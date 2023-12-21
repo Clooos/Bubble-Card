@@ -12,15 +12,13 @@ class BubblePopUp extends HTMLElement {
     set hass(hass) {
 
         this._hass = hass;
+        
+        editor = checkEditor();
         this.editor = editor;
 
         checkResources(hass);
 
         initializeContent(this);
-
-        checkEditor(editor).then((value) => {
-          editor = value;
-        });
 
         // Initialize pop-up card
         handlePopUp(this);

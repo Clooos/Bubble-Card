@@ -183,6 +183,7 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
                         <h3>Pop-up 
                             <span style="
                                 font-size: 10px !important;
+                                color: #fff;
                                 background: rgb(0,140,90);
                                 padding: 2px 6px;
                                 border-radius: 8px;
@@ -448,6 +449,7 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
                 return html`
                     <h4 style="
                         font-size: 12px !important;
+                        color: #fff;
                         background: rgba(0,0,0,0.1);
                         padding: 8px 16px;
                         border-radius: 32px;

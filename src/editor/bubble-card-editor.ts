@@ -226,6 +226,7 @@ export default class BubbleCardEditor extends LitElement {
                     <h3>Pop-up 
                         <span style="
                             font-size: 10px !important;
+                            color: #fff;
                             background: rgb(0,90,140);
                             padding: 2px 6px;
                             border-radius: 8px;
@@ -718,6 +719,7 @@ export default class BubbleCardEditor extends LitElement {
         return html`
             <h4 style="
                 font-size: 12px !important;
+                color: #fff;
                 background: rgba(0,0,0,0.1);
                 padding: 8px 16px;
                 border-radius: 32px;

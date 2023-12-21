@@ -26,7 +26,9 @@ export const addStyles = function(hass, context, styles, customStyles, state, en
     }      
 }
 
-export function createIcon(context, hass, entityId, icon, iconContainer, editor) {
+export function createIcon(context, entityId, icon, iconContainer, editor) {
+    let hass = context._hass;
+
     let entityAttributes = !entityId || !hass.states[entityId].attributes ? false : hass.states[entityId].attributes;
     context.imageUrl = !entityAttributes.entity_picture ? false : entityAttributes.entity_picture;
     updateIcon(context, hass, entityId, icon, iconContainer);
@@ -35,14 +37,17 @@ export function createIcon(context, hass, entityId, icon, iconContainer, editor)
         return;
     }
 
-    hass.connection.subscribeEvents((event) => {
-        if (event.data.entity_id === entityId) {
-            if (event.data.old_state && event.data.old_state.attributes.entity_picture !== event.data.new_state.attributes.entity_picture) {
-                context.imageUrl = event.data.new_state.attributes.entity_picture;
+    setInterval(() => {
+        hass = context._hass;
+        if (entityId && hass.states[entityId]) {
+            context.currentEntityPicture = hass.states[entityId].attributes.entity_picture;
+            if (context.currentEntityPicture !== context.previousEntityPicture) {
+                context.imageUrl = context.currentEntityPicture;
                 updateIcon(context, hass, entityId, icon, iconContainer);
+                context.previousEntityPicture = context.currentEntityPicture;
             }
         }
-    }, 'state_changed');
+    }, 1000); // Check every second if the entity picture changed
 }
 
 export function updateIcon(context, hass, entityId, icon, iconContainer) {

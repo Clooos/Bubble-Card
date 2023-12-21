@@ -52,6 +52,7 @@ export function getVariables(context, config, hass, editor) {
     if (color && (!context.color || color !== context.color)) {
         const lighten = 1.02;
         rgbaColor = convertToRGBA(color, (bgOpacity / 100), lighten);
+        document.body.style.setProperty('--bubble-pop-up-background', rgbaColor);
         context.color = color;
         window.color = color;
     }

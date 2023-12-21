@@ -118,7 +118,7 @@ export function handleButton(context) {
             context.switchButton = context.content.querySelector(".switch-button");
         }
         
-        createIcon(context, hass, entityId, icon, iconContainer, editor);
+        createIcon(context, entityId, icon, iconContainer, editor);
         nameContainer.innerHTML = `
             <p class="name">${name}</p>
             ${!showState ? '' : `<p class="state">${formatedState}</p>`}

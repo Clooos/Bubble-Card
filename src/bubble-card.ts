@@ -17,13 +17,11 @@ class BubbleCard extends HTMLElement {
     set hass(hass) {
 
         this._hass = hass;
+        
+        editor = checkEditor();
         this.editor = editor;
 
         initializeContent(this);
-
-        checkEditor(editor).then((value) => {
-          editor = value;
-        });
 
         switch (this.config.card_type) {
             // Initialize pop-up card

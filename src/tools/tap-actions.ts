@@ -50,7 +50,7 @@ export function addActions(element, config, hass, forwardHaptic) {
       // Envoyer l'événement de type hold
       sendActionEvent(element, config, 'hold');
     }, 300);
-  });
+  }, { passive: true });
 
   element.addEventListener('mouseup', () => {
     // Annuler le timeout de l'action de maintien
@@ -79,7 +79,7 @@ export function addActions(element, config, hass, forwardHaptic) {
     // Réinitialiser les temps de départ et de fin
     startTime = 0;
     endTime = 0;
-  });
+  }, { passive: true });
 
   // Ajouter un écouteur d'événement pour le toucher sur l'élément
   element.addEventListener('touchstart', (e) => {
@@ -93,7 +93,7 @@ export function addActions(element, config, hass, forwardHaptic) {
     }, 300);
     // Empêcher le comportement par défaut pour éviter un double événement
     e.preventDefault();
-  });
+  }, { passive: true });
 
   element.addEventListener('touchend', (e) => {
     // Annuler le timeout de l'action de maintien
@@ -123,13 +123,13 @@ export function addActions(element, config, hass, forwardHaptic) {
     endTime = 0;
     // Empêcher le comportement par défaut pour éviter un double événement
     e.preventDefault();
-  });
+  }, { passive: true });
 
   // Ajouter des écouteurs d'événements pour annuler l'action de maintien si l'utilisateur arrête de toucher ou de cliquer sur l'élément
   element.addEventListener('mouseout', () => {
     clearTimeout(holdTimeout);
-  });
+  }, { passive: true });
   element.addEventListener('touchcancel', () => {
     clearTimeout(holdTimeout);
-  });
+  }, { passive: true });
 }
