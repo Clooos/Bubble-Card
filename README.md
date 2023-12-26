@@ -71,7 +71,13 @@ frontend:
   extra_module_url:
     - /hacsfiles/Bubble-Card/bubble-pop-up.js?v=0.0.0
 ```
-Restart Home Assistant and clear the cache if needed, you should now see Bubble Pop-up appear in the card picker, which corresponds to the **Optimized mode** in the GUI editor.
+Clear the cache if needed:
+
+On Android you can close the app then clear the app cache, then if it's still not working you can close then restart the app again.
+
+On iOS you can go to your HA settings, then on the Companion app > Debug > Clear frontend cache (or something like that), then refresh the page or restart the app.
+
+You should now see Bubble Pop-up appear in the card picker, which corresponds to the **Optimized mode** in the GUI editor.
 
 ## Configuration
 
