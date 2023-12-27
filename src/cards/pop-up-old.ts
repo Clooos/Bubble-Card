@@ -1,3 +1,17 @@
+                    // <h3>Advanced settings</h3>
+                    // <ha-formfield .label="Optional - Back button/event support">
+                    //     <ha-switch
+                    //         aria-label="Optional - Back button/event support"
+                    //         .checked=${this._back_open ? this._back_open : window.backOpen}
+                    //         .configValue="${"back_open"}"
+                    //         @change=${this._valueChanged}
+                    //     ></ha-switch>
+                    //     <div class="mdc-form-field">
+                    //         <label class="mdc-label">Optional - Back button/event support</label> 
+                    //     </div>
+                    // </ha-formfield>
+                    // <ha-alert alert-type="info"><b>Back button/event support</b> : This allow you to navigate through your pop-ups history when you press the back button of your browser. <b>This setting can be applied only once, you don't need to change it in all pop-ups. If it's not working just turn it on for each pop-ups.</b></ha-alert>
+
 import { 
     addStyles, 
     createIcon, 

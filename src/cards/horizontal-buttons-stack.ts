@@ -3,21 +3,12 @@ import {
     createIcon, 
     updateIcon, 
     isColorCloseToWhite,
-    convertToRGBA,
-    getIconColor,
-    getIconStyles
+    convertToRGBA
 } from '../tools/style.ts';
+import { checkEditor } from '../tools/init.ts';
 import { 
-    initializeContent,
-    checkEditor,
-    checkResources
-} from '../tools/init.ts';
-import { 
-    fireEvent,
     forwardHaptic,
-    navigate,
-    toggleEntity,
-    hasStateChanged
+    navigate
 } from '../tools/utils.ts';
 import { addActions } from '../tools/tap-actions.ts';
 import { getVariables } from '../var/cards.ts';
@@ -25,7 +16,7 @@ import { getVariables } from '../var/cards.ts';
 export function handleHorizontalButtonsStack(context) {
 
     const hass = context._hass;
-    const editor = context.editor;
+    let editor;
 
     let {
 		customStyles,
@@ -55,6 +46,20 @@ export function handleHorizontalButtonsStack(context) {
 		color,
     } = getVariables(context, context.config, hass, editor);
 
+    let editorMode = setInterval(() => {
+        editor = checkEditor();
+
+        if (editor && !context.editorModeAdded) {
+            context.buttonsContainer.classList.add('editor');
+            context.card.classList.add('editor');
+            context.editorModeAdded = true;
+        } else if (!editor && context.editorModeAdded) {
+            context.buttonsContainer.classList.remove('editor');
+            context.card.classList.remove('editor');
+            context.editorModeAdded = false;
+        }
+    }, 100);
+
     const createButton = (button, link, icon) => {
         const buttonElement = document.createElement("button");
         buttonElement.setAttribute("class", `button ${link.substring(1)}`);
@@ -65,8 +70,6 @@ export function handleHorizontalButtonsStack(context) {
         
         if (!buttonElement.hasListener) {
             buttonElement.addEventListener('click', (event) => {
-                event.stopPropagation();
-                forwardHaptic("light");
                 popUpOpen = location.hash + true;
                 const manuallyClosed = localStorage.getItem('isManuallyClosed_' + link) === 'true';
                 if (popUpOpen !== link + true) {
@@ -76,6 +79,8 @@ export function handleHorizontalButtonsStack(context) {
                     history.replaceState(null, null, location.href.split('#')[0]);
                     popUpOpen = link + false;
                 }
+                event.stopPropagation();
+                forwardHaptic("light");
             }, { passive: true });
 
             window.addEventListener('urlChanged', highlightButton, { passive: true });
@@ -180,9 +185,6 @@ export function handleHorizontalButtonsStack(context) {
             while (context.buttonsContainer.firstChild) {
                 context.buttonsContainer.removeChild(context.buttonsContainer.firstChild);
             }
-            localStorage.setItem('editorMode', true);
-        } else {
-            localStorage.setItem('editorMode', false);
         }
         // End of fix
     
@@ -199,8 +201,8 @@ export function handleHorizontalButtonsStack(context) {
     
     let currentPosition = 0;
     let buttonMargin = 12;
-    
-    async function updateButtons(context) {
+
+    function updateButtons(context) {
         if (context.buttonsUpdated) {
             return;
         }
@@ -213,29 +215,31 @@ export function handleHorizontalButtonsStack(context) {
                 promises.push(localStorage.getItem(`buttonContent-${button.link}`));
             }
         }
-        let results = await Promise.all(promises);
-        let index = 0;
-        for (let button of buttonsList) {
-            let buttonElement = context.buttons[button.link];
-            if (buttonElement) {
-                let buttonWidth = results[index];
-                let buttonContent = results[index + 1];
-                index += 2;
-                if (!buttonWidth || buttonWidth === '0' || buttonContent !== buttonElement.innerHTML || editor) {
-                    buttonWidth = buttonElement.offsetWidth;
-                    await localStorage.setItem(`buttonWidth-${button.link}`, buttonWidth);
-                    await localStorage.setItem(`buttonContent-${button.link}`, buttonElement.innerHTML);
-                    context.previousConfig = context.config;
-                }
-                buttonElement.style.transform = `translateX(${currentPosition}px)`;
-                currentPosition += parseInt(buttonWidth) + buttonMargin;
-            } 
-            if (button.lightEntity) {
-                updateButtonStyle(buttonElement, button.lightEntity, button.link);
-            }
-        }
 
-        context.buttonsAdded = true;
+        Promise.all(promises).then(results => {
+            let index = 0;
+            for (let button of buttonsList) {
+                let buttonElement = context.buttons[button.link];
+                if (buttonElement) {
+                    let buttonWidth = results[index];
+                    let buttonContent = results[index + 1];
+                    index += 2;
+                    if (!buttonWidth || buttonWidth === '0' || buttonContent !== buttonElement.innerHTML || editor) {
+                        buttonWidth = buttonElement.offsetWidth;
+                        localStorage.setItem(`buttonWidth-${button.link}`, buttonWidth);
+                        localStorage.setItem(`buttonContent-${button.link}`, buttonElement.innerHTML);
+                        context.previousConfig = context.config;
+                    }
+                    buttonElement.style.transform = `translateX(${currentPosition}px)`;
+                    currentPosition += parseInt(buttonWidth) + buttonMargin;
+                } 
+                if (button.lightEntity) {
+                    updateButtonStyle(buttonElement, button.lightEntity, button.link);
+                }
+            }
+
+            context.buttonsAdded = true;
+        });
     }
     
     updateButtons(context);
@@ -379,12 +383,4 @@ export function handleHorizontalButtonsStack(context) {
     }
 
     addStyles(hass, context, horizontalButtonsStackStyles, customStyles);
-    
-    if (editor) {
-        context.buttonsContainer.classList.add('editor');
-        context.card.classList.add('editor');
-    } else {
-        context.buttonsContainer.classList.remove('editor');
-        context.card.classList.remove('editor');
-    }
 }

@@ -6,7 +6,7 @@ export function addUrlListener() {
         const event = new Event('urlChanged');
         window.popUpInitialized = false;
 
-        ['click', 'mousedown', 'touchstart', 'focus', 'location-changed', 'connection-status'].forEach((eventType) => {
+        ['location-changed', 'connection-status'].forEach((eventType) => {
             window.addEventListener(eventType, urlChanged);
         }, { passive: true });
 

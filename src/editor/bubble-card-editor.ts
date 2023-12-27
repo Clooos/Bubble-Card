@@ -234,7 +234,7 @@ export default class BubbleCardEditor extends LitElement {
                             Regular mode
                         </span>
                     </h3>
-                    <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b><br><br><a href="https://github.com/Clooos/Bubble-Card#pop-up-optimization" style="color: var(--primary-text-color)">How to get the optimized mode?</a></ha-alert>
+                    <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b><br><br><a href="https://github.com/Clooos/Bubble-Card#pop-up-optimization">How to get the optimized mode?</a></ha-alert>
                     <ha-textfield
                         label="Hash (e.g. #kitchen)"
                         .value="${this._hash}"
@@ -385,20 +385,8 @@ export default class BubbleCardEditor extends LitElement {
                           style="width: 50%;"
                         ></ha-slider>
                     </div>
+                    <ha-alert alert-type="info">Set ‘Background blur’ to 0 if your pop-up animations are rendering at low FPS.</ha-alert>
                     <ha-alert alert-type="info">You can't set a value to 0 with the sliders for now, just change it to 0 in the text field if you need to.</ha-alert>
-                    <h3>Advanced settings</h3>
-                    <ha-formfield .label="Optional - Back button/event support">
-                        <ha-switch
-                            aria-label="Optional - Back button/event support"
-                            .checked=${this._back_open ? this._back_open : window.backOpen}
-                            .configValue="${"back_open"}"
-                            @change=${this._valueChanged}
-                        ></ha-switch>
-                        <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Back button/event support</label> 
-                        </div>
-                    </ha-formfield>
-                    <ha-alert alert-type="info"><b>Back button/event support</b> : This allow you to navigate through your pop-ups history when you press the back button of your browser. <b>This setting can be applied only once, you don't need to change it in all pop-ups. If it's not working just turn it on for each pop-ups.</b></ha-alert>
                     ${this.makeVersion()}
               </div>
             `;
@@ -451,8 +439,8 @@ export default class BubbleCardEditor extends LitElement {
             `;
         } else if (this._config.card_type === 'horizontal-buttons-stack') {
             if (!this.buttonAdded && this.shadowRoot.querySelector("#add-button")) {
+                this.buttonAdded = true;
                 const addButton = this.shadowRoot.querySelector("#add-button");
-
                 this.buttonIndex = 0;
 
                 while (this._config[(this.buttonIndex + 1) + '_link']) {
@@ -474,8 +462,6 @@ export default class BubbleCardEditor extends LitElement {
                         addButton.innerText = originalText;
                     }, 5000);
                 }, { passive: true });
-
-                this.buttonAdded = true;
             }
 
             return html`
@@ -618,8 +604,11 @@ export default class BubbleCardEditor extends LitElement {
                     ${this.makeDropdown("Card type", "card_type", cardTypeList)}
                     <ha-alert alert-type="info">You need to add a card type first.</ha-alert>
                     <img style="width: 100%" src="https://user-images.githubusercontent.com/36499953/268039672-6dd13476-42c5-427c-a4d8-ad4981fc2db7.gif">
+                    <p>The <b>Bubble Card ${version}</b> changelog is available <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}"><b>here</b></a>.
+                    <hr />
                     <p>Almost everything is available in the GUI editor, but in the YAML editor you can add your own <b>custom styles</b>, create <b>custom buttons</b> or modify the <b>tap actions</b> of all cards. You can find more details on my GitHub page.</p>
                     <a href="https://github.com/Clooos/Bubble-Card"><img src="https://img.shields.io/badge/GitHub-Documentation-blue?logo=github"></a>
+                    <hr />
                     <p>And if you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated! 🍻</p>
                     <div style="display: inline-block;">
                         <a href="https://www.buymeacoffee.com/clooos"><img src="https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee"></a> 
@@ -815,37 +804,53 @@ export default class BubbleCardEditor extends LitElement {
 
     static get styles() {
         return css`
-      div {
-        display: grid;
-        grid-gap: 12px;
-      }
-      #add-button {
-        height: 32px;
-        border-radius: 16px;
-        border: none;
-        background-color: var(--accent-color);
-      }
-      .button-header {
-        height: auto;
-        width: 100%;
-        display: inline-flex;
-        align-items: center;
+          div {
+            display: grid;
+            grid-gap: 12px;
+          }
+          #add-button, #clear-cache {
+            margin-top: 12px;
+            width: 100%;
+            height: 32px;
+            border-radius: 16px;
+            border: none;
+            background-color: var(--accent-color);
+            cursor: pointer;
+          }
+          a {
+            color: var(--primary-text-color);
+          }
+          p {
+            margin-bottom: 4px;
+          }
+          hr {
+            display: inline-block;
+            width: 100%;
+            background-color: var(--text-primary-color);
+            opacity: .15;
+            margin: 8px 0 0 0;
+          }
+          .button-header {
+            height: auto;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
 
-      }
-      .button-number {
-        display: inline-flex;
-        width: auto;
-      }
-      .remove-button {
-        display: inline-flex;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        text-align: center;
-        line-height: 24px;
-        vertical-align: middle;
-        cursor: pointer;
-      }
-    `;
+          }
+          .button-number {
+            display: inline-flex;
+            width: auto;
+          }
+          .remove-button {
+            display: inline-flex;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            vertical-align: middle;
+            cursor: pointer;
+          }
+        `;
     }
 }

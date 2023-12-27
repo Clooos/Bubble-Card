@@ -115,66 +115,11 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
                     });
 
                     this.allEntitiesList = Object.keys(this.hass.states).map(formateList);
-
-                    this.lightList = Object.keys(this.hass.states).filter(
-                        (eid) => eid.substr(0, eid.indexOf(".")) === "light"
-                    ).map(formateList);
-
-                    this.sensorList = Object.keys(this.hass.states).filter(
-                        (eid) => eid.substr(0, eid.indexOf(".")) === "sensor"
-                    ).map(formateList);
-                    
-                    this.binarySensorList = Object.keys(this.hass.states).filter(
-                        (eid) => eid.substr(0, eid.indexOf(".")) === "binary_sensor"
-                    ).map(formateList);
-
-                    this.coverList = Object.keys(this.hass.states).filter(
-                        (eid) => eid.substr(0, eid.indexOf(".")) === "cover"
-                    ).map(formateList);
-
-                    this.cardTypeList = [{
-                            'label': 'Button',
-                            'value': 'button'
-                        },
-                        {
-                            'label': 'Cover',
-                            'value': 'cover'
-                        },
-                        {
-                            'label': 'Empty column',
-                            'value': 'empty-column'
-                        },
-                        {
-                            'label': 'Horizontal buttons stack',
-                            'value': 'horizontal-buttons-stack'
-                        },
-                        {
-                            'label': 'Pop-up',
-                            'value': 'pop-up'
-                        },
-                        {
-                            'label': 'Separator',
-                            'value': 'separator'
-                        }
-                    ];
-
-                    this.buttonTypeList = [{
-                            'label': 'Switch',
-                            'value': 'switch'
-                        },
-                        {
-                            'label': 'Slider',
-                            'value': 'slider'
-                        }
-                    ];
-
                     this.listsUpdated = true;
                 }
 
                 const allEntitiesList = this.allEntitiesList;
                 const lightList = this.lightList;
-                const sensorList = this.sensorList;
-                const coverList = this.coverList;
                 const cardTypeList = this.cardTypeList;
                 const buttonTypeList = this.buttonTypeList;
 
@@ -343,19 +288,6 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
                             ></ha-slider>
                         </div>
                         <ha-alert alert-type="info">You can't set a value to 0 with the sliders for now, just change it to 0 in the text field if you need to.</ha-alert>
-                        <h3>Advanced settings</h3>
-                        <ha-formfield .label="Optional - Back button/event support">
-                            <ha-switch
-                                aria-label="Optional - Back button/event support"
-                                .checked=${this._back_open ? this._back_open : window.backOpen}
-                                .configValue="${"back_open"}"
-                                @change=${this._valueChanged}
-                            ></ha-switch>
-                            <div class="mdc-form-field">
-                                <label class="mdc-label">Optional - Back button/event support</label> 
-                            </div>
-                        </ha-formfield>
-                        <ha-alert alert-type="info"><b>Back button/event support</b> : This allow you to navigate through your pop-ups history when you press the back button of your browser. <b>This setting can be applied only once, you don't need to change it in all pop-ups. If it's not working just turn it on for each pop-ups.</b></ha-alert>
                         ${this.makeVersion()}
                   </div>
                 `;
@@ -391,59 +323,6 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
                   `;
                 }
             }
-
-            makeButton() {
-                let buttons = [];
-
-                for (let i = 1; i <= this.buttonIndex; i++) {
-                    buttons.push(html`
-                        <div class="${i}_button">
-                            <div class="button-header">
-                                <ha-icon class="remove-button" icon="mdi:close" @click=${() => this.removeButton(i)}></ha-icon>
-                                <span class="button-number">Button ${i}</span>
-                            </div>
-                            <ha-textfield
-                                label="Link / Hash to pop-up (e.g. #kitchen)"
-                                .value="${this._config[i + '_link'] || ''}"
-                                .configValue="${i}_link"
-                                @input="${this._valueChanged}"
-                                style="width: 100%;"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Optional - Name"
-                                .value="${this._config[i + '_name'] || ''}"
-                                .configValue="${i}_name"
-                                @input="${this._valueChanged}"
-                                style="width: 100%;"
-                            ></ha-textfield>
-                            <ha-icon-picker
-                                label="Optional - Icon"
-                                .value="${this._config[i + '_icon'] || ''}"
-                                .configValue="${i}_icon"
-                                item-label-path="label"
-                                item-value-path="value"
-                                @value-changed="${this._valueChanged}"
-                            ></ha-icon-picker>
-                            <ha-combo-box
-                                label="Optional - Light / Light group (For background color)"
-                                .value="${this._config[i + '_entity'] || ''}"
-                                .configValue="${i}_entity"
-                                .items="${this.allEntitiesList}"
-                                @value-changed="${this._valueChanged}"
-                            ></ha-combo-box>
-                            <ha-combo-box
-                                label="Optional - Presence / Occupancy sensor (For button auto order)"
-                                .value="${this._config[i + '_pir_sensor'] || ''}"
-                                .configValue="${i}_pir_sensor"
-                                .disabled=${!this._config.auto_order}
-                                .items="${this.binarySensorList}"
-                                @value-changed="${this._valueChanged}"
-                            ></ha-combo-box>
-                        </div>
-                    `);
-                }
-                return buttons;
-            }
             
             makeVersion() {
                 return html`
@@ -467,38 +346,6 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
                         </span>
                     </h4>
                 `;
-            }
-
-            removeButton(index) {
-                // Removing button fields
-                delete this._config[index + '_name'];
-                delete this._config[index + '_icon'];
-                delete this._config[index + '_link'];
-                delete this._config[index + '_entity'];
-                delete this._config[index + '_pir_sensor'];
-            
-                // Updating indexes of following buttons
-                for (let i = index; i < this.buttonIndex; i++) {
-                    this._config[i + '_name'] = this._config[(i + 1) + '_name'];
-                    this._config[i + '_icon'] = this._config[(i + 1) + '_icon'];
-                    this._config[i + '_link'] = this._config[(i + 1) + '_link'];
-                    this._config[i + '_entity'] = this._config[(i + 1) + '_entity'];
-                    this._config[i + '_pir_sensor'] = this._config[(i + 1) + '_pir_sensor'];
-                }
-            
-                // Removing fields of the last button
-                delete this._config[this.buttonIndex + '_name'];
-                delete this._config[this.buttonIndex + '_icon'];
-                delete this._config[this.buttonIndex + '_link'];
-                delete this._config[this.buttonIndex + '_entity'];
-                delete this._config[this.buttonIndex + '_pir_sensor'];
-            
-                // Updating index of the last button
-                this.buttonIndex--;
-            
-                fireEvent(this, "config-changed", {
-                    config: this._config
-                });
             }
             
             // Working for sliders (setting to 0) but add more issues, to be fixed
@@ -548,33 +395,6 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
               div {
                 display: grid;
                 grid-gap: 12px;
-              }
-              #add-button {
-                height: 32px;
-                border-radius: 16px;
-                border: none;
-                background-color: var(--accent-color);
-              }
-              .button-header {
-                height: auto;
-                width: 100%;
-                display: inline-flex;
-                align-items: center;
-
-              }
-              .button-number {
-                display: inline-flex;
-                width: auto;
-              }
-              .remove-button {
-                display: inline-flex;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                text-align: center;
-                line-height: 24px;
-                vertical-align: middle;
-                cursor: pointer;
               }
             `;
             }

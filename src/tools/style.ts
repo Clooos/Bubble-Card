@@ -1,12 +1,13 @@
 export const addStyles = function(hass, context, styles, customStyles, state, entityId, stateChanged, path = '', element = context.content) {
+    // Evaluate customStyles if it exists, else assign an empty string
     const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
-    let styleAddedKey = styles + 'Added'; // Add 'Added' at the end of the styles value
+    let styleAddedKey = styles + 'Added'; // Append 'Added' to the styles value
 
     // Check if the style has changed
     if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || stateChanged || context.previousConfig !== context.config) {
         if (!context[styleAddedKey]) {
             // Check if the style element already exists
-            context.styleElement = element.querySelector('style'); //context.content
+            context.styleElement = element.querySelector('style');
             if (!context.styleElement) {
                 // If not, create a new style element
                 context.styleElement = document.createElement('style');

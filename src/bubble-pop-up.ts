@@ -1,6 +1,6 @@
 import { version } from './var/version.ts';
 import { addUrlListener } from './tools/url-listener.ts';
-import { initializeContent, checkEditor, checkResources } from './tools/init.ts';
+import { initializeContent, checkEditor } from './tools/init.ts';
 import { handlePopUp } from './cards/pop-up.ts';
 import { bubblePopUpEditor } from './editor/bubble-pop-up-editor.ts';
 
@@ -12,11 +12,9 @@ class BubblePopUp extends HTMLElement {
     set hass(hass) {
 
         this._hass = hass;
-        
+
         editor = checkEditor();
         this.editor = editor;
-
-        checkResources(hass);
 
         initializeContent(this);
 

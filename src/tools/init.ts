@@ -1,12 +1,14 @@
+import { version } from '../var/version.ts';
+
 // Initialize the content if it's not there yet.
 
-export function initializeContent(context) { // Ajout du mot-clé async
+export function initializeContent(context) {
     if (!context.content) {
         context.attachShadow({
             mode: 'open'
         });
         context.shadowRoot.innerHTML = `
-            <ha-card style="background: none; border: none; box-shadow: none;">
+            <ha-card style="background: none; border: none; box-shadow: none; border-radius: 16px;">
                 <div class="card-content" style="padding: 0;">
                 </div>
             </ha-card>
@@ -18,39 +20,45 @@ export function initializeContent(context) { // Ajout du mot-clé async
 
 // Check for edit mode
 
-// export async function checkEditor(editor) {
-//     if (!window.editorElement) {
-//         const editorElementPromise = new Promise((resolve) => {
-//           resolve(document.querySelector("body > home-assistant")
-//             .shadowRoot.querySelector("home-assistant-main")
-//             .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
-//             .shadowRoot.querySelector("hui-root")
-//             .shadowRoot.querySelector("div"));
-//         });
+function selectElement() {
+  try {
+    return document.querySelector("body > home-assistant")
+      .shadowRoot.querySelector("home-assistant-main")
+      .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
+      .shadowRoot.querySelector("hui-root")
+      .shadowRoot.querySelector("div");
+  } catch (error) {
+    return undefined;
+  }
+}
 
-//         window.editorElement = await editorElementPromise;
-//     } else {
-//         editor = window.editorElement.classList.contains('edit-mode');
-//     }
-//     return editor;
-// }
+const editorElement = selectElement();
 
 export function checkEditor() {
-    const editorElement = 
-        document.querySelector("body > home-assistant")
-        .shadowRoot.querySelector("home-assistant-main")
-        .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
-        .shadowRoot.querySelector("hui-root")
-        .shadowRoot.querySelector("div");
-
+    if (!editorElement) {
+        return;
+    }
     return editorElement.classList.contains('edit-mode');
 }
 
-// Check if bubble-pop-up.js is installed as a resource and remove it (fix for the previous 1.5.0/1 users)
-
 export async function checkResources(hass) {
     if (!window.resourcesChecked) {
+
         window.resourcesChecked = true;
+
+        // Check if bubble-pop-up.js is installed as a module and reload the cache after every updates
+
+        let currentVersion = version;
+        const storedVersion = localStorage.getItem('version');
+        const component = customElements.get("bubble-pop-up");
+
+        if (storedVersion !== currentVersion) {
+            localStorage.setItem('version', currentVersion);
+            location.reload();
+        }
+
+        // Check if bubble-pop-up.js is installed as a resource and remove it (fix for the previous 1.5.0/1 users)
+
         let resources = await hass.callWS({ type: "lovelace/resources" });
         let resource = resources.find(r => r.url.includes("bubble-pop-up.js"));
         if (resource) {
@@ -61,4 +69,3 @@ export async function checkResources(hass) {
         }
     }
 }
-

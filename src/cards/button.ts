@@ -8,14 +8,7 @@ import {
     getIconStyles
 } from '../tools/style.ts';
 import { 
-    initializeContent,
-    checkEditor,
-    checkResources
-} from '../tools/init.ts';
-import { 
-    fireEvent,
     forwardHaptic,
-    navigate,
     toggleEntity,
     hasStateChanged
 } from '../tools/utils.ts';
@@ -56,7 +49,7 @@ export function handleButton(context) {
 		color,
     } = getVariables(context, context.config, hass, editor);
 
-    formatedState = stateChanged || editor ? hass.formatEntityState(hass.states[entityId]) : formatedState || '';
+    formatedState = entityId && (stateChanged || editor) ? hass.formatEntityState(hass.states[entityId]) : '';
     const buttonType = context.config.button_type || 'switch';
     const showState = !context.config.show_state ? false : context.config.show_state;
     let currentBrightness = !entityId ? '' : hass.states[entityId].attributes.brightness || 0;

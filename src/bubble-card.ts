@@ -1,6 +1,6 @@
 import { version } from './var/version.ts';
 import { addUrlListener } from './tools/url-listener.ts';
-import { initializeContent, checkEditor } from './tools/init.ts';
+import { initializeContent, checkEditor, checkResources } from './tools/init.ts';
 import { handlePopUp } from './cards/pop-up.ts';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack.ts';
 import { handleButton } from './cards/button.ts';
@@ -17,9 +17,11 @@ class BubbleCard extends HTMLElement {
     set hass(hass) {
 
         this._hass = hass;
-        
+
         editor = checkEditor();
         this.editor = editor;
+
+        checkResources(hass);
 
         initializeContent(this);
 

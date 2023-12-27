@@ -18,12 +18,12 @@ export function getVariables(context, config, hass, editor) {
     let entityId = config.entity && hass.states[config.entity] 
         ? config.entity 
         : '';
-    let icon = !config.icon && config.entity 
+    let icon = !config.icon && entityId
         ? hass.states[entityId].attributes.icon || hass.states[entityId].attributes.entity_picture || ''
         : config.icon || '';
     let name = config.name 
         ? config.name 
-        : config.entity 
+        : entityId 
             ? hass.states[entityId].attributes.friendly_name 
             : '';
     let widthDesktop = config.width_desktop || '540px';
