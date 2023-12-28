@@ -468,7 +468,7 @@ export default class BubbleCardEditor extends LitElement {
                 <div class="card-config">
                     ${this.makeDropdown("Card type", "card_type", cardTypeList)}
                     <h3>Horizontal buttons stack</h3>
-                    <ha-alert alert-type="info">This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer.<br><br>Please note that this card may take some time to load in edit mode.</ha-alert>
+                    <ha-alert alert-type="info">This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer.<br><br><b>Please note that this card may take some time to load in edit mode.</b></ha-alert>
                     <ha-formfield .label="Auto order">
                         <ha-switch
                             aria-label="Toggle auto order"
@@ -808,8 +808,9 @@ export default class BubbleCardEditor extends LitElement {
             display: grid;
             grid-gap: 12px;
           }
-          #add-button, #clear-cache {
+          #add-button {
             margin-top: 12px;
+            color: var(--text-primary-color);
             width: 100%;
             height: 32px;
             border-radius: 16px;

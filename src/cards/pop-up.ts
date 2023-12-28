@@ -291,10 +291,11 @@ export function handlePopUp(context) {
 		    }
 		}
         
-        function openPopUp() {	            
-            popUp.classList.remove('close-pop-up');
-            popUp.classList.add('open-pop-up');
+        function openPopUp() {	          
+            popUp.classList.remove('close-pop-up', 'hide-pop-up');
+
             setTimeout(function() {
+            	popUp.classList.add('open-pop-up');
 	            content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
 	            window.addEventListener('keydown', windowKeydownHandler, { passive: true });
 	            popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
@@ -322,6 +323,7 @@ export function handlePopUp(context) {
             }, 0);
             
             setTimeout(function() {
+            	popUp.classList.add('hide-pop-up');
             	pauseVideos(popUp, true);
             }, 320);
         }
@@ -415,6 +417,9 @@ export function handlePopUp(context) {
             #root.close-pop-up { 
                 transform: translateY(-20%);
                 box-shadow: none;
+            }
+            #root.hide-pop-up { 
+            	display: none !important;
                 backdrop-filter: none !important;
             }
             @media only screen and (min-width: 600px) {
@@ -526,7 +531,7 @@ export function handlePopUp(context) {
 
             if (editor && context.popUp && !context.editorModeAdded) {
             	context.popUp.classList.add('editor');
-            	context.popUp.classList.remove('close-pop-up', 'open-pop-up');
+            	context.popUp.classList.remove('close-pop-up', 'open-pop-up', 'hide-pop-up');
             	context.editorModeAdded = true;
             }
 	    } else if (!editor && context.popUp && context.editorModeAdded) {

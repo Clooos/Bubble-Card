@@ -32,9 +32,9 @@ function selectElement() {
   }
 }
 
-const editorElement = selectElement();
-
 export function checkEditor() {
+    const editorElement = selectElement();
+
     if (!editorElement) {
         return;
     }
@@ -46,11 +46,10 @@ export async function checkResources(hass) {
 
         window.resourcesChecked = true;
 
-        // Check if bubble-pop-up.js is installed as a module and reload the cache after every updates
+        // Reload the cache after every updates
 
         let currentVersion = version;
         const storedVersion = localStorage.getItem('version');
-        const component = customElements.get("bubble-pop-up");
 
         if (storedVersion !== currentVersion) {
             localStorage.setItem('version', currentVersion);
@@ -67,5 +66,52 @@ export async function checkResources(hass) {
                 resource_id: resource.id
             });
         }
+
+        // Reorder the frontend resources to put bubble-card.js at the first position
+        // This should improve the pop-ups optimizations in regular mode for people with a lot of custom cards
+
+        async function reorderResources(hass) {
+          // Retrieve all resources
+          let allResources = await hass.callWS({type: 'lovelace/resources'});
+
+          // Find the resource bubble-card.js
+          let bubbleCardIndex = allResources.findIndex(res => res.url.includes('bubble-card.js'));
+          let bubbleCardRes = null;
+
+          // If bubble-card.js exists and is not at index 0, execute the rest of the code
+          if (bubbleCardIndex !== -1 && bubbleCardIndex !== 0) {
+            // Remove bubble-card.js from the list
+            bubbleCardRes = allResources.splice(bubbleCardIndex, 1)[0];
+
+            // Delete all resources
+            for (let res of allResources) {
+              await hass.callWS({type: 'lovelace/resources/delete', resource_id: res.id});
+            }
+
+            // If bubble-card.js existed, check if it already exists before recreating it
+            if (bubbleCardRes) {
+              let newAllResources = await hass.callWS({type: 'lovelace/resources'});
+              let newBubbleCardIndex = newAllResources.findIndex(res => res.url.includes('bubble-card.js'));
+              if (newBubbleCardIndex === -1) {
+                await hass.callWS({
+                  type: 'lovelace/resources/create',
+                  res_type: bubbleCardRes.type,
+                  url: bubbleCardRes.url
+                });
+              }
+            }
+
+            // Recreate the other resources
+            for (let res of allResources) {
+              await hass.callWS({
+                type: 'lovelace/resources/create',
+                res_type: res.type,
+                url: res.url
+              });
+            }
+          }
+        }
+
+        reorderResources(hass);
     }
 }

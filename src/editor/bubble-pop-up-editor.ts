@@ -287,6 +287,7 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
                               style="width: 50%;"
                             ></ha-slider>
                         </div>
+                        <ha-alert alert-type="info">Set ‘Background blur’ to 0 if your pop-up animations are rendering at low FPS.</ha-alert>
                         <ha-alert alert-type="info">You can't set a value to 0 with the sliders for now, just change it to 0 in the text field if you need to.</ha-alert>
                         ${this.makeVersion()}
                   </div>
