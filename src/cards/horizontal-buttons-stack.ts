@@ -7,16 +7,18 @@ import {
 } from '../tools/style.ts';
 import { checkEditor } from '../tools/init.ts';
 import { 
+    fireEvent,
     forwardHaptic,
     navigate
 } from '../tools/utils.ts';
 import { addActions } from '../tools/tap-actions.ts';
 import { getVariables } from '../var/cards.ts';
 
+let editor;
+
 export function handleHorizontalButtonsStack(context) {
 
     const hass = context._hass;
-    let editor;
 
     let {
 		customStyles,
@@ -67,24 +69,27 @@ export function handleHorizontalButtonsStack(context) {
             ${icon !== '' ? `<ha-icon icon="${icon}" class="icon" style="${button !== '' ? `margin-right: 8px;` : ''}"></ha-icon>` : ''}
             ${button !== '' ? `<p class="name">${button}</p>` : ''}
         `;
-        
+
+        const handleClick = (event) => {
+            popUpOpen = location.hash + true;
+            if (popUpOpen !== link + true) {
+                navigate('', link);
+                popUpOpen = link + true;
+            } else {
+                history.replaceState(null, null, location.href.split('#')[0]);
+                fireEvent(window, "location-changed", true);
+                popUpOpen = link + false;
+            }
+            forwardHaptic("light");
+        };
+
+        const handleUrlChange = () => {
+            highlightButton();
+        };
+
         if (!buttonElement.hasListener) {
-            buttonElement.addEventListener('click', (event) => {
-                popUpOpen = location.hash + true;
-                const manuallyClosed = localStorage.getItem('isManuallyClosed_' + link) === 'true';
-                if (popUpOpen !== link + true) {
-                    navigate('', link);
-                    popUpOpen = link + true;
-                } else {
-                    history.replaceState(null, null, location.href.split('#')[0]);
-                    popUpOpen = link + false;
-                }
-                event.stopPropagation();
-                forwardHaptic("light");
-            }, { passive: true });
-
-            window.addEventListener('urlChanged', highlightButton, { passive: true });
-
+            buttonElement.addEventListener('click', handleClick, { passive: true });
+            window.addEventListener('urlChanged', handleUrlChange, { passive: true });
             buttonElement.hasListener = true;
         }
 
@@ -203,7 +208,7 @@ export function handleHorizontalButtonsStack(context) {
     let buttonMargin = 12;
 
     function updateButtons(context) {
-        if (context.buttonsUpdated) {
+        if (context.buttonsUpdated && !editor) {
             return;
         }
 

@@ -1,26 +1,56 @@
+const holdDuration = 300;
+let lastAction = null;
+let lastActionTime = 0;
+let lastDoubleTapTime = 0;
+
 export function sendActionEvent(element, config, action) {
-  const actionConfig = {
+  const currentTime = Date.now();
+
+  // If a single tap occurs too soon after a double tap, ignore it
+  if (action === 'tap' && currentTime - lastDoubleTapTime < holdDuration) {
+    return;
+  }
+
+  // If the same action was sent within the holdDuration, ignore this one
+  if (lastAction === action && currentTime - lastActionTime < holdDuration) {
+    return;
+  }
+
+  let actionConfig = {
     entity: config.entity,
-    tap_action: {
+    tap_action: config.tap_action || {
       action: "more-info"
     },
-    double_tap_action: {
+    double_tap_action: config.double_tap_action || {
       action: "toggle"
     },
-    hold_action: {
+    hold_action: config.hold_action || {
       action: "toggle"
     }
   };
 
-  const event = new Event('hass-action', {
-    bubbles: true,
-    composed: true,
-  });
-  event.detail = {
-    config: actionConfig,
-    action: action,
-  };
-  element.dispatchEvent(event);
+  console.log("Action =", action, "Action config =", actionConfig);
+
+  setTimeout(() => {
+    const event = new Event('hass-action', {
+      bubbles: true,
+      composed: true,
+    });
+    event.detail = {
+      config: actionConfig,
+      action: action,
+    };
+    element.dispatchEvent(event);
+  }, 1);
+
+    // Update the last action and its time
+    lastAction = action;
+    lastActionTime = currentTime;
+
+    // If the action was a double tap, update the last double tap time
+    if (action === 'double_tap') {
+      lastDoubleTapTime = currentTime;
+    }
 }
 
 export function addActions(element, config, hass, forwardHaptic) {
@@ -39,14 +69,14 @@ export function addActions(element, config, hass, forwardHaptic) {
     startTime = Date.now();
     holdTimeout = setTimeout(() => {
       sendActionEvent(element, config, 'hold');
-    }, 300);
+    }, holdDuration);
   }, { passive: true });
 
   element.addEventListener('mouseup', () => {
     clearTimeout(holdTimeout);
     endTime = Date.now();
 
-    if (endTime - startTime < 300) {
+    if (endTime - startTime < holdDuration) {
       clickCount++;
       if (clickCount === 1) {
         setTimeout(() => {
@@ -57,7 +87,7 @@ export function addActions(element, config, hass, forwardHaptic) {
             forwardHaptic("success");
           }
           clickCount = 0;
-        }, 300);
+        }, holdDuration);
       }
     }
     startTime = 0;
@@ -72,10 +102,7 @@ export function addActions(element, config, hass, forwardHaptic) {
     startTime = Date.now();
     holdTimeout = setTimeout(() => {
       sendActionEvent(element, config, 'hold');
-    }, 300);
-    if (e.type !== 'touchstart') {
-      e.preventDefault();
-    }
+    }, holdDuration);
   }, { passive: true });
 
   element.addEventListener('touchend', function(e) {
@@ -83,13 +110,14 @@ export function addActions(element, config, hass, forwardHaptic) {
       let tapLength = currentTime - lastTap;
       clearTimeout(holdTimeout);
       
-      if (tapLength < 500 && tapLength > 0) {
-          clearTimeout(tapTimeout);
+      if (tapLength < holdDuration && tapLength > 0) {
+          clearTimeout(tapTimeout); // Clear the tapTimeout if a double_tap is detected
           sendActionEvent(element, config, 'double_tap');
       } else {
+          // Set a new tapTimeout to send a 'tap' event after the holdDuration
           tapTimeout = setTimeout(function() {
               sendActionEvent(element, config, 'tap');
-          }, 300);
+          }, holdDuration);
       }
       lastTap = currentTime;
   }, { passive: true });

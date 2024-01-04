@@ -1,30 +1,54 @@
-export const addStyles = function(hass, context, styles, customStyles, state, entityId, stateChanged, path = '', element = context.content) {
-    // Evaluate customStyles if it exists, else assign an empty string
-    const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
-    let styleAddedKey = styles + 'Added'; // Append 'Added' to the styles value
+let timeouts = {};
+let idCounter = 0;
 
-    // Check if the style has changed
-    if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || stateChanged || context.previousConfig !== context.config) {
-        if (!context[styleAddedKey]) {
-            // Check if the style element already exists
-            context.styleElement = element.querySelector('style');
-            if (!context.styleElement) {
-                // If not, create a new style element
-                context.styleElement = document.createElement('style');
-                const parentElement = (path ? element.querySelector(path) : element);
-                parentElement?.appendChild(context.styleElement);
+export const addStyles = function(hass, context, styles, customStyles, state, entityId, stateChanged, path = '', element = context.content) {
+    const id = idCounter++; // Generate a unique id for each function call
+    const key = id + styles; // Create a unique key for each id and style combination
+
+    const executeStyles = () => {
+        // Evaluate customStyles if it exists, else assign an empty string
+        const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
+        let styleAddedKey = styles + 'Added'; // Append 'Added' to the styles value
+
+        // Check if the style has changed
+        if (!context[styleAddedKey] || context.previousStyle !== customStylesEval || stateChanged || context.previousConfig !== context.config) {
+            if (!context[styleAddedKey]) {
+                // Check if the style element already exists
+                context.styleElement = element.querySelector('style');
+                if (!context.styleElement) {
+                    // If not, create a new style element
+                    context.styleElement = document.createElement('style');
+                    const parentElement = (path ? element.querySelector(path) : element);
+                    parentElement?.appendChild(context.styleElement);
+                }
+                context[styleAddedKey] = true;
             }
-            context[styleAddedKey] = true;
+            
+            // Create a new style element and update its content
+            const newStyleElement = document.createElement('style');
+            newStyleElement.innerHTML = customStylesEval + styles;
+
+            // Add the new style element to the DOM before removing the old one
+            context.styleElement.parentNode.insertBefore(newStyleElement, context.styleElement.nextSibling);
+
+            // Remove the old style element
+            context.styleElement.parentNode.removeChild(context.styleElement);
+
+            // Update the reference to the style element
+            context.styleElement = newStyleElement;
+            
+            context.previousStyle = customStylesEval; // Store the current style
+            context.previousConfig = context.config; // Store the current config
         }
-        
-        // Update the content of the existing style element only if styles have changed
-        if (context.styleElement.innerHTML !== customStylesEval + styles) {
-            context.styleElement.innerHTML = customStylesEval + styles;
-        }
-        
-        context.previousStyle = customStylesEval; // Store the current style
-        context.previousConfig = context.config; // Store the current config
-    }      
+    }
+
+    if (timeouts[key]) {
+        clearTimeout(timeouts[key]); // Clear the timeout for the specific key if it exists
+    } else {
+        executeStyles(); // Execute instantly for the first call
+    }
+
+    timeouts[key] = setTimeout(executeStyles, 500); // 500ms delay
 }
 
 export function createIcon(context, entityId, icon, iconContainer, editor) {

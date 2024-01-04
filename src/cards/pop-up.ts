@@ -28,37 +28,37 @@ export function handlePopUp(context) {
     const editor = context.editor;
     const config = context.config;
 
-	if (!hass) { 
-		return;
-	}
+    if (!hass) { 
+        return;
+    }
 
     let {
-		customStyles,
-		entityId,
-		icon,
-		name,
-		widthDesktop,
-		widthDesktopDivided,
-		isSidebarHidden,
-		state,
-		stateChanged,
-		stateOn,
-		formatedState,
-		riseAnimation,
-		marginCenter,
-		popUpOpen,
-		rgbaColor,
-		rgbColor,
-		bgOpacity,
-		shadowOpacity,
-		bgBlur,
-		iconColorOpacity,
-		iconColor,
-		iconFilter,
-		iconStyles,
-		haStyle,
-		themeBgColor,
-		color,
+        customStyles,
+        entityId,
+        icon,
+        name,
+        widthDesktop,
+        widthDesktopDivided,
+        isSidebarHidden,
+        state,
+        stateChanged,
+        stateOn,
+        formatedState,
+        riseAnimation,
+        marginCenter,
+        popUpOpen,
+        rgbaColor,
+        rgbColor,
+        bgOpacity,
+        shadowOpacity,
+        bgBlur,
+        iconColorOpacity,
+        iconColor,
+        iconFilter,
+        iconStyles,
+        haStyle,
+        themeBgColor,
+        color,
     } = getVariables(context, config, hass, editor);
 
     let autoClose = config.auto_close || false;
@@ -66,170 +66,207 @@ export function handlePopUp(context) {
     let triggerEntity = config.trigger_entity ? config.trigger_entity : '';
     let triggerState = config.trigger_state ? config.trigger_state : '';
     let triggerClose = config.trigger_close ? config.trigger_close : false;
+    let displayPowerButton = config.entity ? 'flex' : 'none';
+    let text = config.text || '';
+    let stateEntityId = config.state;
+    let marginTopMobile = config.margin_top_mobile 
+        ? (config.margin_top_mobile !== '0' ? config.margin_top_mobile : '0px')
+        : '0px';
+    let marginTopDesktop = config.margin_top_desktop 
+        ? (config.margin_top_desktop !== '0' ? config.margin_top_desktop : '0px')
+        : '0px';
+    state = stateEntityId && hass.states[stateEntityId] ? hass.states[stateEntityId].state : '';
     let startTouchY;
     let lastTouchY;
+    let closeTimeout;
+    let rgbaBgColor;
 
-	if (context.errorTriggered) {
-	    return;
+    if (context.errorTriggered) {
+        return;
+    }
+
+    if (!context.initStyleAdded && !context.popUp && !editor) {
+        // Hide vertical stack content before initialization
+        context.card.style.marginTop = '4000px';
+        context.initStyleAdded = true;
+    }
+
+    // // Check for the the vertical-stack then create pop-up
+
+    // function updatePopUp() {
+	// 	let element = context.getRootNode().querySelector('#root');
+	// 	if (element && (
+	// 		!context.popUp 
+	// 		|| stateChanged 
+	// 		|| (editor && !context.editorModeAdded)
+	// 	)){
+	// 		context.popUp = element;
+	// 		createPopUp();
+
+	// 		if (!window.initEventSent) {
+	// 			const initEvent = new Event('popUpInitialized');
+	// 			window.dispatchEvent(initEvent);
+	// 			window.initEventSent = true;
+	// 		}
+
+	// 		if (editor && context.popUp && !context.editorModeAdded) {
+	// 			context.popUp.classList.add('editor');
+	// 			context.popUp.classList.remove('close-pop-up', 'open-pop-up');
+	// 			context.editorModeAdded = true;
+	// 		}
+	// 	} else if (!editor && context.popUp && context.editorModeAdded) {
+	// 		context.popUp.classList.remove('editor');
+	// 		context.editorModeAdded = false;
+	// 	}
+	// }
+
+	// let initPopUp = setTimeout(() => {
+	// 	updatePopUp();
+	// 	clearTimeout(initPopUp);
+	// }, 0);
+
+	function createHeader() {
+	    if (!context.headerAdded) {
+	        context.headerContainer = document.createElement("div");
+	        context.headerContainer.setAttribute("id", "header-container");
+
+	        context.div = document.createElement("div");
+	        context.headerContainer.appendChild(context.div);
+
+	        context.iconContainer = document.createElement("div");
+	        context.iconContainer.setAttribute("class", "icon-container");
+	        context.div.appendChild(context.iconContainer);
+
+	        createIcon(context, entityId, icon, context.iconContainer, editor);
+	        addActions(context.iconContainer, config, hass, forwardHaptic);
+
+	        context.h2 = document.createElement("h2");
+	        context.h2.textContent = name;
+	        context.div.appendChild(context.h2);
+
+	        context.p = document.createElement("p");
+	        context.p.textContent = formatedState;
+	        context.div.appendChild(context.p);
+
+	        context.haIcon2 = document.createElement("ha-icon");
+	        context.haIcon2.setAttribute("class", "power-button");
+	        context.haIcon2.setAttribute("icon", "mdi:power");
+	        context.haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
+	        context.div.appendChild(context.haIcon2);
+
+	        context.button = document.createElement("button");
+	        context.button.setAttribute("class", "close-pop-up");
+	        context.button.onclick = function() { 
+	            history.replaceState(null, null, location.href.split('#')[0]);
+	            fireEvent(window, "location-changed", true);
+	            localStorage.setItem('isManuallyClosed_' + popUpHash, true);
+	        }; 
+	        context.headerContainer.appendChild(context.button);
+
+	        context.haIcon3 = document.createElement("ha-icon");
+	        context.haIcon3.setAttribute("icon", "mdi:close");
+	        context.button.appendChild(context.haIcon3);
+
+	        context.content.appendChild(context.headerContainer);
+	        context.header = context.div;
+
+	        context.headerAdded = true;
+	    } else if (entityId) {
+	        context.iconContainer.innerHTML = ''; // Clear the container
+	        createIcon(context, entityId, icon, context.iconContainer, editor);
+
+	        context.h2.textContent = name;
+	        context.p.textContent = formatedState;
+	        context.haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
+	    }
 	}
 
-	if (!context.initStyleAdded && !context.popUp && !editor) {
-	    // Hide vertical stack content before initialization
-	    context.card.style.marginTop = '4000px';
-	    context.initStyleAdded = true;
+	function closePopUpByClickingOutside(e) {
+	    // Reset auto close
+	    window.hash === popUpHash && resetAutoClose();
+
+	    if (!window.justOpened) {
+	        return;
+	    }
+
+	    const target = e.composedPath();
+
+	    if (
+	        target 
+	        && !target.some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') 
+	        && !target.some(el => el.id === 'root' 
+	        && !el.classList.contains('close-pop-up')) 
+	        && popUpOpen === popUpHash + true
+	    ){
+	        const close = setTimeout(function() {
+	            if (window.hash === popUpHash) {
+	                // Vérifiez si le clic a été effectué sur le corps de la page
+	                if (document.body.contains(e.target)) {
+	                    popUpOpen = popUpHash + false;
+	                    history.replaceState(null, null, location.href.split('#')[0]);
+	                    fireEvent(window, "location-changed", true);
+	                    localStorage.setItem('isManuallyClosed_' + popUpHash, true);
+	                }
+	            } 
+	        }, 0);
+	    }
 	}
 
-	const createPopUp = () => {   
-        let popUp = context.popUp;
-        let text = config.text || '';
-        let stateEntityId = config.state;
-        let marginTopMobile = config.margin_top_mobile 
-            ? (config.margin_top_mobile !== '0' ? config.margin_top_mobile : '0px')
-            : '0px';
-        let marginTopDesktop = config.margin_top_desktop 
-            ? (config.margin_top_desktop !== '0' ? config.margin_top_desktop : '0px')
-            : '0px';
-        let displayPowerButton = config.entity ? 'flex' : 'none';
-        state = stateEntityId && hass.states[stateEntityId] ? hass.states[stateEntityId].state : '';
-       	formatedState = stateEntityId ? hass.formatEntityState(hass.states[stateEntityId]) : '';
-        let closeTimeout;
-        let rgbaBgColor;
+    function resetAutoClose() {
+        // Clear any existing timeout
+        clearTimeout(closeTimeout);
+        // Start autoclose if enabled
+        if (autoClose > 0) {
+            closeTimeout = setTimeout(autoClosePopUp, autoClose);
+        }
+    }
 
-        if (!context.headerAdded) {
-            const headerContainer = document.createElement("div");
-            headerContainer.setAttribute("id", "header-container");
-        
-            const div = document.createElement("div");
-            headerContainer.appendChild(div);
-        
-            const iconContainer = document.createElement("div");
-            iconContainer.setAttribute("class", "icon-container");
-            div.appendChild(iconContainer);
+    function autoClosePopUp(){
+        history.replaceState(null, null, location.href.split('#')[0]);
+        fireEvent(window, "location-changed", true);
+    }
 
-            createIcon(context, entityId, icon, iconContainer, editor);
-            addActions(iconContainer, config, hass, forwardHaptic);
+    function powerButtonClickHandler() {
+        toggleEntity(hass, entityId);
+    }
 
-            const h2 = document.createElement("h2");
-            h2.textContent = name;
-            div.appendChild(h2);
+    function windowKeydownHandler(e) {
+        if (e.key === 'Escape') {
+            popUpOpen = popUpHash + false;
+            history.replaceState(null, null, location.href.split('#')[0]);
+            fireEvent(window, "location-changed", true);
+            localStorage.setItem('isManuallyClosed_' + popUpHash, true)
+        }
+    }
 
-            const p = document.createElement("p");
-            p.textContent = formatedState;
-            div.appendChild(p);
-
-            const haIcon2 = document.createElement("ha-icon");
-            haIcon2.setAttribute("class", "power-button");
-            haIcon2.setAttribute("icon", "mdi:power");
-            haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
-            div.appendChild(haIcon2);
-
-            const button = document.createElement("button");
-            button.setAttribute("class", "close-pop-up");
-            button.onclick = function() { 
-            	history.replaceState(null, null, location.href.split('#')[0]);
-            	fireEvent(window, "location-changed", true);
-            	localStorage.setItem('isManuallyClosed_' + popUpHash, true);
-            }; 
-            headerContainer.appendChild(button);
-
-            const haIcon3 = document.createElement("ha-icon");
-            haIcon3.setAttribute("icon", "mdi:close");
-            button.appendChild(haIcon3);
-
-            context.content.appendChild(headerContainer);
-            context.header = div;
-
-            context.headerAdded = true;
-        } else if (entityId) {
-            const iconContainer = context.content.querySelector("#header-container .icon-container");
-            const h2 = context.content.querySelector("#header-container h2");
-            const p = context.content.querySelector("#header-container p");
-            const haIcon2 = context.content.querySelector("#header-container .power-button");
-            
-            iconContainer.innerHTML = ''; // Clear the container
-            createIcon(context, entityId, icon, iconContainer, editor);
-
-            h2.textContent = name;
-            p.textContent = formatedState;
-            haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
+    function popUpTouchstartHandler(event) {
+        // Reset auto close
+        if (window.hash === popUpHash) {
+            resetAutoClose();
         }
 
-        function closePopUpByClickingOutside(e) {
-    		// Reset auto close
-		    window.hash === popUpHash && resetAutoClose();
-		    
-		    if (!window.justOpened) {
-		        return;
-		    }
-		    
-		    const target = e.composedPath();
-			    
-		    if (
-		    	target 
-		    	&& !target.some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') 
-		    	&& !target.some(el => el.id === 'root' 
-		    	&& !el.classList.contains('close-pop-up')) 
-		    	&& popUpOpen === popUpHash + true
-		    ){
-	            setTimeout(function() {
-	            	if (window.hash === popUpHash) {
-		                popUpOpen = popUpHash + false;
-		                history.replaceState(null, null, location.href.split('#')[0]);
-		                fireEvent(window, "location-changed", true);
-		                localStorage.setItem('isManuallyClosed_' + popUpHash, true);
-		            }
-	            }, 10);
-		    }
-        }
-        
-        if (!context.eventAdded && !editor) {
-            window['checkHashRef_' + popUpHash] = checkHash;
-            window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash], { passive: true });
-			window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
+        // Record the Y position of the finger at the start of the touch
+        startTouchY = event.touches[0].clientY;
+        lastTouchY = startTouchY;
+    }
 
-            context.eventAdded = true;
+    function popUpTouchmoveHandler(event) {
+        // Calculate the distance the finger has traveled
+        let touchMoveDistance = event.touches[0].clientY - startTouchY;
+
+        // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
+        if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
+            popUpOpen = popUpHash + false;
+            history.replaceState(null, null, location.href.split('#')[0]);
+            fireEvent(window, "location-changed", true);
+            localStorage.setItem('isManuallyClosed_' + popUpHash, true)
         }
-        
-        function powerButtonClickHandler() {
-            toggleEntity(hass, entityId);
-        }
-        
-        function windowKeydownHandler(e) {
-            if (e.key === 'Escape') {
-                popUpOpen = popUpHash + false;
-                history.replaceState(null, null, location.href.split('#')[0]);
-            	fireEvent(window, "location-changed", true);
-                localStorage.setItem('isManuallyClosed_' + popUpHash, true)
-            }
-        }
-        
-        function popUpTouchstartHandler(event) {
-            // Reset auto close
-            if (window.hash === popUpHash) {
-                resetAutoClose();
-            }
-        
-            // Record the Y position of the finger at the start of the touch
-            startTouchY = event.touches[0].clientY;
-            lastTouchY = startTouchY;
-        }
-        
-        function popUpTouchmoveHandler(event) {
-            // Calculate the distance the finger has traveled
-            let touchMoveDistance = event.touches[0].clientY - startTouchY;
-        
-            // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
-            if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
-                popUpOpen = popUpHash + false;
-                history.replaceState(null, null, location.href.split('#')[0]);
-                fireEvent(window, "location-changed", true);
-                localStorage.setItem('isManuallyClosed_' + popUpHash, true)
-            }
-            
-            // Update the Y position of the last touch
-            lastTouchY = event.touches[0].clientY;
-        }
-        
+
+        // Update the Y position of the last touch
+        lastTouchY = event.touches[0].clientY;
+    }
+
+    function updateColor() {
         if (entityId) {
             const rgbColor = hass.states[entityId].attributes.rgb_color;
             context.rgbColor = rgbColor 
@@ -250,96 +287,95 @@ export function handlePopUp(context) {
                 (!isColorCloseToWhite(rgbColor) ? 'brightness(1.1)' : 'none') :
                 'none';
         } else {
-        	rgbaBgColor = convertToRGBA(color, 0);
+            rgbaBgColor = convertToRGBA(color, 0);
         }
-        
-        function checkHash() {
-            if (!editor) {
-                window.hash = location.hash.split('?')[0];
+    }
 
-                // Open on hash change
-                if (window.hash === popUpHash) {
-                    openPopUp();
-                // Close on back button from browser
-                } else if (popUp.classList.contains('open-pop-up')) {
-                    closePopUp();
+    function checkHash() {
+        if (!editor) {
+            window.hash = location.hash.split('?')[0];
+
+            // Open on hash change
+            if (window.hash === popUpHash) {
+                openPopUp();
+            // Close on back button from browser
+            } else if (context.popUp.classList.contains('open-pop-up')) {
+                closePopUp();
+            }
+        }
+    };
+
+    function pauseVideos(root, pause) {
+        var videos = root.querySelectorAll('video');
+        for (var i=0; i<videos.length; i++){
+            var isPlaying = videos[i] && videos[i].currentTime > 0 && !videos[i].paused && !videos[i].ended && videos[i].readyState > videos[i].HAVE_CURRENT_DATA;
+            if (pause && isPlaying) {
+                videos[i].pause();
+            } else if (!pause && !isPlaying) {
+                videos[i].play();
+                if (videos[i].currentTime > 0) {
+                    videos[i].currentTime = 10000;
                 }
             }
-        };
-        
-        let content = context.content;
-
-		function pauseVideos(root, pause) {
-		    var videos = root.querySelectorAll('video');
-		    for (var i=0; i<videos.length; i++){
-		    	var isPlaying = videos[i] && videos[i].currentTime > 0 && !videos[i].paused && !videos[i].ended && videos[i].readyState > videos[i].HAVE_CURRENT_DATA;
-		        if (pause && isPlaying) {
-		            videos[i].pause();
-		        } else if (!pause && !isPlaying) {
-		            videos[i].play();
-		            if (videos[i].currentTime > 0) {
-		                videos[i].currentTime = 10000;
-		            }
-		        }
-		    }
-
-		    var nodes = root.querySelectorAll('*');
-		    for(var i=0; i<nodes.length; i++){
-		        if(nodes[i].shadowRoot){
-		            pauseVideos(nodes[i].shadowRoot, pause);
-		        }
-		    }
-		}
-        
-        function openPopUp() {	          
-            popUp.classList.remove('close-pop-up', 'hide-pop-up');
-
-            setTimeout(function() {
-            	popUp.classList.add('open-pop-up');
-	            content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
-	            window.addEventListener('keydown', windowKeydownHandler, { passive: true });
-	            popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
-	            popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
-	            popUpOpen = popUpHash + true;
-	            document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
-	            setTimeout(() => { window.justOpened = true; }, 10);
-	            pauseVideos(popUp, false);
-	            resetAutoClose();
-            }, 0);
         }
-        
-        function closePopUp() {
-            popUp.classList.remove('open-pop-up');
-            popUp.classList.add('close-pop-up');
-            setTimeout(function() {
-	            content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler);
-	            window.removeEventListener('keydown', windowKeydownHandler);
-	            popUp.removeEventListener('touchstart', popUpTouchstartHandler);
-	            popUp.removeEventListener('touchmove', popUpTouchmoveHandler);
-	            popUpOpen = popUpHash + false;
-	            document.body.style.overflow = '';
-	            window.justOpened = false;
-	            clearTimeout(closeTimeout);
-            }, 0);
-            
-            setTimeout(function() {
-            	popUp.classList.add('hide-pop-up');
-            	pauseVideos(popUp, true);
-            }, 320);
-        }
-        
-        function resetAutoClose() {
-            // Clear any existing timeout
-            clearTimeout(closeTimeout);
-            // Start autoclose if enabled
-            if (autoClose > 0) {
-                closeTimeout = setTimeout(autoClosePopUp, autoClose);
+
+        var nodes = root.querySelectorAll('*');
+        for(var i=0; i<nodes.length; i++){
+            if(nodes[i].shadowRoot){
+                pauseVideos(nodes[i].shadowRoot, pause);
             }
         }
+    }
 
-        function autoClosePopUp(){
-            history.replaceState(null, null, location.href.split('#')[0]);
-            fireEvent(window, "location-changed", true);
+    function openPopUp() {    
+	    window.removeEventListener('click', closePopUpByClickingOutside);
+        context.popUp.classList.remove('close-pop-up');
+        context.popUp.classList.add('open-pop-up');
+        context.content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
+        window.addEventListener('keydown', windowKeydownHandler, { passive: true });
+        context.popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
+        context.popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
+        popUpOpen = popUpHash + true;
+        document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
+        setTimeout(() => { window.justOpened = true; }, 10);
+        pauseVideos(context.popUp, false);
+        resetAutoClose();
+	    setTimeout(function() {
+	        window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
+	    }, 10);  
+    }
+
+    function closePopUp() {
+        context.popUp.classList.remove('open-pop-up');
+        context.popUp.classList.add('close-pop-up');
+        context.content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler);
+        window.removeEventListener('keydown', windowKeydownHandler);
+        context.popUp.removeEventListener('touchstart', popUpTouchstartHandler);
+        context.popUp.removeEventListener('touchmove', popUpTouchmoveHandler);
+        popUpOpen = popUpHash + false;
+        document.body.style.overflow = '';
+        window.justOpened = false;
+        clearTimeout(closeTimeout);
+        setTimeout(function() {
+            pauseVideos(context.popUp, true);
+        }, 320);
+    }
+
+    // This function can be optimized by 
+
+    function createPopUp() {   
+        let popUp = context.popUp;
+        formatedState = stateEntityId ? hass.formatEntityState(hass.states[stateEntityId]) : '';
+
+        createHeader();
+        updateColor();
+
+        if (!context.eventAdded && !editor) {
+            window['checkHashRef_' + popUpHash] = checkHash;
+            window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash], { passive: true });
+            window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
+
+            context.eventAdded = true;
         }
 
         const popUpStyles = `                    
@@ -507,82 +543,86 @@ export function handlePopUp(context) {
             }
         `;
 
-        if (!context.popUpStyleAdded) {
-            addStyles(hass, context, popUpStyles, customStyles, state, entityId, '', '', popUp);
-            context.popUpStyleAdded = true;
-        }
-
+        addStyles(hass, context, popUpStyles, customStyles, state, entityId, '', '', popUp);
         addStyles(hass, context, headerStyles, customStyles, state, entityId, stateChanged); 
-	}
+    }
 
 	// Initialize pop-up
 
-	let initPopUp = setTimeout(() => {
-	    let element = context.getRootNode().querySelector('#root');
-	    if (element && (
+	const initPopUp = setTimeout(() => {
+	    if (!context.element) {
+	    	context.element = context.getRootNode().querySelector('#root');
+	    }
+
+	    if (context.element && (
     		!context.popUp 
     		|| stateChanged 
     		|| (editor && !context.editorModeAdded)
 		)){
-	        context.popUp = element;
-	        createPopUp();
-            const initEvent = new Event('popUpInitialized');
-            window.dispatchEvent(initEvent);
+	        context.popUp = context.element;
 
             if (editor && context.popUp && !context.editorModeAdded) {
             	context.popUp.classList.add('editor');
             	context.popUp.classList.remove('close-pop-up', 'open-pop-up', 'hide-pop-up');
             	context.editorModeAdded = true;
+            	createPopUp();
+            	return;
             }
+
+	        createPopUp();
+	        clearTimeout(initPopUp);
+            const initEvent = new Event('popUpInitialized');
+            window.dispatchEvent(initEvent);
+
 	    } else if (!editor && context.popUp && context.editorModeAdded) {
 	    	context.popUp.classList.remove('editor');
 	    	context.editorModeAdded = false;
 	    }
 	}, 0);
 
-	// Pop-up triggers
+    // Pop-up triggers
 
-	let popUpTriggers = setTimeout(() => {
-		if (context.popUp && triggerEntity && stateChanged) {
-		    if (localStorage.getItem('previousTriggerState_' + popUpHash) === null) {
-		        localStorage.setItem('previousTriggerState_' + popUpHash, '');
-		    }
-		    if (localStorage.getItem('isManuallyClosed_' + popUpHash) === null) {
-		        localStorage.setItem('isManuallyClosed_' + popUpHash, 'false');
-		    }
-		    if (localStorage.getItem('isTriggered_' + popUpHash) === null) {
-		        localStorage.setItem('isTriggered_' + popUpHash, 'false');
-		    }                        
+    const popUpTriggers = () => {
+        if (context.popUp && triggerEntity && stateChanged) {
+            if (localStorage.getItem('previousTriggerState_' + popUpHash) === null) {
+                localStorage.setItem('previousTriggerState_' + popUpHash, '');
+            }
+            if (localStorage.getItem('isManuallyClosed_' + popUpHash) === null) {
+                localStorage.setItem('isManuallyClosed_' + popUpHash, 'false');
+            }
+            if (localStorage.getItem('isTriggered_' + popUpHash) === null) {
+                localStorage.setItem('isTriggered_' + popUpHash, 'false');
+            }                        
 
-		    let previousTriggerState = localStorage.getItem('previousTriggerState_' + popUpHash);
-		    let isManuallyClosed = localStorage.getItem('isManuallyClosed_' + popUpHash) === 'true';
-		    let isTriggered = localStorage.getItem('isTriggered_' + popUpHash) === 'true';
+            let previousTriggerState = localStorage.getItem('previousTriggerState_' + popUpHash);
+            let isManuallyClosed = localStorage.getItem('isManuallyClosed_' + popUpHash) === 'true';
+            let isTriggered = localStorage.getItem('isTriggered_' + popUpHash) === 'true';
 
-		    if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null && !isTriggered) {
-		        navigate('', popUpHash);
-		        isTriggered = true;
-		        localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-		    }
+            if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null && !isTriggered) {
+                navigate('', popUpHash);
+                isTriggered = true;
+                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
+            }
 
-		    if (hass.states[triggerEntity].state !== previousTriggerState) {
-		        isManuallyClosed = false;
-		        localStorage.setItem('previousTriggerState_' + popUpHash, hass.states[triggerEntity].state);
-		        localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
-		    }
-		    
-		    if (hass.states[triggerEntity].state === triggerState && !isManuallyClosed) {
-		        navigate('', popUpHash);
-		        isTriggered = true;
-		        localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-		    } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && context.popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
-		        history.replaceState(null, null, location.href.split('#')[0]);
-		        fireEvent(window, "location-changed", true);
-		        popUpOpen = popUpHash + false;
-		        isTriggered = false;
-		        isManuallyClosed = true;
-		        localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
-		        localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-		    }
-		}
-	}, 0);
+            if (hass.states[triggerEntity].state !== previousTriggerState) {
+                isManuallyClosed = false;
+                localStorage.setItem('previousTriggerState_' + popUpHash, hass.states[triggerEntity].state);
+                localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
+            }
+
+            if (hass.states[triggerEntity].state === triggerState && !isManuallyClosed) {
+                navigate('', popUpHash);
+                isTriggered = true;
+                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
+            } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && context.popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
+                history.replaceState(null, null, location.href.split('#')[0]);
+                fireEvent(window, "location-changed", true);
+                popUpOpen = popUpHash + false;
+                isTriggered = false;
+                isManuallyClosed = true;
+                localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
+                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
+            }
+        }
+    }
 }

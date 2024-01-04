@@ -234,7 +234,7 @@ export default class BubbleCardEditor extends LitElement {
                             Regular mode
                         </span>
                     </h3>
-                    <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b><br><br><a href="https://github.com/Clooos/Bubble-Card#pop-up-optimization">How to get the optimized mode?</a></ha-alert>
+                    <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b><br><br><a style="color: #fff" href="https://github.com/Clooos/Bubble-Card#pop-up-optimization">How to get the optimized mode?</a></ha-alert>
                     <ha-textfield
                         label="Hash (e.g. #kitchen)"
                         .value="${this._hash}"
@@ -261,6 +261,10 @@ export default class BubbleCardEditor extends LitElement {
                     ></ha-textfield>
                     <ha-textfield
                         label="Optional - Auto close in milliseconds (e.g. 15000)"
+                        type="number"
+                        inputMode="numeric"
+                        min="0"
+                        step="1000"
                         .value="${this._auto_close}"
                         .configValue="${"auto_close"}"
                         @input="${this._valueChanged}"
@@ -334,59 +338,40 @@ export default class BubbleCardEditor extends LitElement {
                         @input="${this._valueChanged}"
                         style="width: 100%;"
                     ></ha-textfield>
-                    <div style="display: inline-flex;">
-                        <ha-textfield
-                            label="Optional - Background opacity"
-                            .value="${this._bg_opacity}"
-                            .configValue="${"bg_opacity"}"
-                            @input="${this._valueChanged}"
-                            style="width: 50%;"
-                        ></ha-textfield>
-                        <ha-slider
-                          .value="${this._bg_opacity}"
-                          .configValue="${"bg_opacity"}"
-                          .min='0'
-                          .max='100'
-                          @change=${this._valueChanged}
-                          style="width: 50%;"
-                        ></ha-slider>
-                    </div>
-                    <div style="display: inline-flex;">
-                        <ha-textfield
-                            label="Optional - Background blur"
-                            .value="${this._bg_blur}"
-                            .configValue="${"bg_blur"}"
-                            @input="${this._valueChanged}"
-                            style="width: 50%;"
-                        ></ha-textfield>
-                        <ha-slider
-                          .value="${this._bg_blur}"
-                          .configValue="${"bg_blur"}"
-                          .min='0'
-                          .max='100'
-                          @change=${this._valueChanged}
-                          style="width: 50%;"
-                        ></ha-slider>
-                    </div>
-                    <div style="display: inline-flex;">
-                        <ha-textfield
-                            label="Optional - Shadow opacity"
-                            .value="${this._shadow_opacity}"
-                            .configValue="${"shadow_opacity"}"
-                            @input="${this._valueChanged}"
-                            style="width: 50%;"
-                        ></ha-textfield>
-                        <ha-slider
-                          .value="${this._shadow_opacity}"
-                          .configValue="${"shadow_opacity"}"
-                          .min='0'
-                          .max='100'
-                          @change=${this._valueChanged}
-                          style="width: 50%;"
-                        ></ha-slider>
-                    </div>
+                    <ha-textfield
+                        label="Optional - Background opacity (0-100 range)"
+                        type="number"
+                        inputMode="numeric"
+                        min="0"
+                        max="100"
+                        .value="${this._bg_opacity}"
+                        .configValue="${"bg_opacity"}"
+                        @input="${this._valueChanged}"
+                        style="width: 100%;"
+                    ></ha-textfield>
+                    <ha-textfield
+                        label="Optional - Background blur (0-100 range)"
+                        type="number"
+                        inputMode="numeric"
+                        min="0"
+                        max="100"
+                        .value="${this._bg_blur}"
+                        .configValue="${"bg_blur"}"
+                        @input="${this._valueChanged}"
+                        style="width: 100%;"
+                    ></ha-textfield>
+                    <ha-textfield
+                        label="Optional - Shadow opacity (0-100 range)"
+                        type="number"
+                        inputMode="numeric"
+                        min="0"
+                        max="100"
+                        .configValue="${"shadow_opacity"}"
+                        .value="${this._shadow_opacity}""
+                        @input="${this._valueChanged}"
+                        style="width: 100%;"
+                    ></ha-textfield>
                     <ha-alert alert-type="info">Set ‘Background blur’ to 0 if your pop-up animations are rendering at low FPS.</ha-alert>
-                    <ha-alert alert-type="info">You can't set a value to 0 with the sliders for now, just change it to 0 in the text field if you need to.</ha-alert>
                     ${this.makeVersion()}
               </div>
             `;
@@ -759,47 +744,61 @@ export default class BubbleCardEditor extends LitElement {
             config: this._config
         });
     }
-    
-    // Working for sliders (setting to 0) but add more issues, to be fixed
-    // _valueChanged(ev) {
-    //     if (!this._config || !this.hass) {
-    //         return;
-    //     }
-    //     const target = ev.target;
-    //     const detail = ev.detail;
-    //     if (target.configValue) {
-    //         this._config = {
-    //             ...this._config,
-    //             [target.configValue]: target.value !== undefined ? target.value : (target.checked !== undefined ? target.checked : detail.value),
-    //         }
-    //     }
-    //     fireEvent(this, "config-changed", {
-    //         config: this._config
-    //     });
-    // }
-    
+
     _valueChanged(ev) {
         if (!this._config || !this.hass) {
             return;
         }
         const target = ev.target;
         const detail = ev.detail;
+        let rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
+        let value;
+
+        if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
+            return;
+        }
+
         if (target.configValue) {
             if (target.type === 'ha-switch') {
-                this._config = {
-                    ...this._config,
-                    [target.configValue]: target.checked,
-                }
+                value = target.checked;
             } else {
+                if (rawValue !== "") {
+                    if (!isNaN(parseFloat(rawValue)) && isFinite(rawValue)) {
+                        value = parseFloat(rawValue);
+                        if (isNaN(value)) {
+                            value = undefined;
+                        }
+                    } else {
+                        value = rawValue;
+                    }
+                }
+                value = value !== undefined ? value : (target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value);
+            }
+
+            // Check if the value has changed
+            if (this._config[target.configValue] !== value) {
                 this._config = {
                     ...this._config,
-                    [target.configValue]: target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value,
-                }
+                    [target.configValue]: value,
+                };
+
+                fireEvent(this, "config-changed", {
+                    config: this._config
+                });
             }
         }
-        fireEvent(this, "config-changed", {
-            config: this._config
-        });
+
+        // Handle ha-combo-box value changes
+        if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
+            this._config = {
+                ...this._config,
+                [target.configValue]: detail.value,
+            };
+
+            fireEvent(this, "config-changed", {
+                config: this._config
+            });
+        }
     }
 
     static get styles() {

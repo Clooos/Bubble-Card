@@ -68,7 +68,7 @@ export async function checkResources(hass) {
         }
 
         // Reorder the frontend resources to put bubble-card.js at the first position
-        // This should improve the pop-ups optimizations in regular mode for people with a lot of custom cards
+        // This should improve the pop-ups initilalization in regular mode for people with a lot of custom cards
 
         async function reorderResources(hass) {
           // Retrieve all resources
