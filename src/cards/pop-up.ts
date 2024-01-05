@@ -91,40 +91,6 @@ export function handlePopUp(context) {
         context.initStyleAdded = true;
     }
 
-    // // Check for the the vertical-stack then create pop-up
-
-    // function updatePopUp() {
-	// 	let element = context.getRootNode().querySelector('#root');
-	// 	if (element && (
-	// 		!context.popUp 
-	// 		|| stateChanged 
-	// 		|| (editor && !context.editorModeAdded)
-	// 	)){
-	// 		context.popUp = element;
-	// 		createPopUp();
-
-	// 		if (!window.initEventSent) {
-	// 			const initEvent = new Event('popUpInitialized');
-	// 			window.dispatchEvent(initEvent);
-	// 			window.initEventSent = true;
-	// 		}
-
-	// 		if (editor && context.popUp && !context.editorModeAdded) {
-	// 			context.popUp.classList.add('editor');
-	// 			context.popUp.classList.remove('close-pop-up', 'open-pop-up');
-	// 			context.editorModeAdded = true;
-	// 		}
-	// 	} else if (!editor && context.popUp && context.editorModeAdded) {
-	// 		context.popUp.classList.remove('editor');
-	// 		context.editorModeAdded = false;
-	// 	}
-	// }
-
-	// let initPopUp = setTimeout(() => {
-	// 	updatePopUp();
-	// 	clearTimeout(initPopUp);
-	// }, 0);
-
 	function createHeader() {
 	    if (!context.headerAdded) {
 	        context.headerContainer = document.createElement("div");
@@ -441,7 +407,6 @@ export function handlePopUp(context) {
                 overflow: visible;
             }
             #root.open-pop-up {
-                will-change: transform, backdrop-filter;
                 transform: translateY(-120%);
             }
             #root.open-pop-up > * {
@@ -453,10 +418,6 @@ export function handlePopUp(context) {
             #root.close-pop-up { 
                 transform: translateY(-20%);
                 box-shadow: none;
-            }
-            #root.hide-pop-up { 
-            	display: none !important;
-                backdrop-filter: none !important;
             }
             @media only screen and (min-width: 600px) {
                 #root {
@@ -580,49 +541,54 @@ export function handlePopUp(context) {
 	    }
 	}, 0);
 
+	console.log(context.popUp, triggerEntity, stateChanged);
+
+
     // Pop-up triggers
 
     const popUpTriggers = () => {
-        if (context.popUp && triggerEntity && stateChanged) {
-            if (localStorage.getItem('previousTriggerState_' + popUpHash) === null) {
-                localStorage.setItem('previousTriggerState_' + popUpHash, '');
-            }
-            if (localStorage.getItem('isManuallyClosed_' + popUpHash) === null) {
-                localStorage.setItem('isManuallyClosed_' + popUpHash, 'false');
-            }
-            if (localStorage.getItem('isTriggered_' + popUpHash) === null) {
-                localStorage.setItem('isTriggered_' + popUpHash, 'false');
-            }                        
+        if (localStorage.getItem('previousTriggerState_' + popUpHash) === null) {
+            localStorage.setItem('previousTriggerState_' + popUpHash, '');
+        }
+        if (localStorage.getItem('isManuallyClosed_' + popUpHash) === null) {
+            localStorage.setItem('isManuallyClosed_' + popUpHash, 'false');
+        }
+        if (localStorage.getItem('isTriggered_' + popUpHash) === null) {
+            localStorage.setItem('isTriggered_' + popUpHash, 'false');
+        }                        
 
-            let previousTriggerState = localStorage.getItem('previousTriggerState_' + popUpHash);
-            let isManuallyClosed = localStorage.getItem('isManuallyClosed_' + popUpHash) === 'true';
-            let isTriggered = localStorage.getItem('isTriggered_' + popUpHash) === 'true';
+        let previousTriggerState = localStorage.getItem('previousTriggerState_' + popUpHash);
+        let isManuallyClosed = localStorage.getItem('isManuallyClosed_' + popUpHash) === 'true';
+        let isTriggered = localStorage.getItem('isTriggered_' + popUpHash) === 'true';
 
-            if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null && !isTriggered) {
-                navigate('', popUpHash);
-                isTriggered = true;
-                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-            }
+        if (hass.states[triggerEntity].state === triggerState && previousTriggerState === null && !isTriggered) {
+            navigate('', popUpHash);
+            isTriggered = true;
+            localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
+        }
 
-            if (hass.states[triggerEntity].state !== previousTriggerState) {
-                isManuallyClosed = false;
-                localStorage.setItem('previousTriggerState_' + popUpHash, hass.states[triggerEntity].state);
-                localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
-            }
+        if (hass.states[triggerEntity].state !== previousTriggerState) {
+            isManuallyClosed = false;
+            localStorage.setItem('previousTriggerState_' + popUpHash, hass.states[triggerEntity].state);
+            localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
+        }
 
-            if (hass.states[triggerEntity].state === triggerState && !isManuallyClosed) {
-                navigate('', popUpHash);
-                isTriggered = true;
-                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-            } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && context.popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
-                history.replaceState(null, null, location.href.split('#')[0]);
-                fireEvent(window, "location-changed", true);
-                popUpOpen = popUpHash + false;
-                isTriggered = false;
-                isManuallyClosed = true;
-                localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
-                localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
-            }
+        if (hass.states[triggerEntity].state === triggerState && !isManuallyClosed) {
+            navigate('', popUpHash);
+            isTriggered = true;
+            localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
+        } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && context.popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
+            history.replaceState(null, null, location.href.split('#')[0]);
+            fireEvent(window, "location-changed", true);
+            popUpOpen = popUpHash + false;
+            isTriggered = false;
+            isManuallyClosed = true;
+            localStorage.setItem('isManuallyClosed_' + popUpHash, isManuallyClosed);
+            localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
         }
     }
+
+    if (context.popUp && triggerEntity && stateChanged) {
+		popUpTriggers();
+	}
 }
