@@ -541,9 +541,6 @@ export function handlePopUp(context) {
 	    }
 	}, 0);
 
-	console.log(context.popUp, triggerEntity, stateChanged);
-
-
     // Pop-up triggers
 
     const popUpTriggers = () => {
