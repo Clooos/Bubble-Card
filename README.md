@@ -63,6 +63,8 @@ And also a video for the German users from **smart-live.net**, thanks a lot to y
 
 ### Pop-up optimization
 
+**⚠️ Important: Since the latest updates of Home Assistant this optimization is obsolete and the regular mode is working the same.**
+
 If you notice that the content of pop-ups appears upon page load, consider installing the pop-ups in **Optimized mode** by adding `bubble-pop-up.js` as an extra module. This significantly improves the initialization of the pop-up when the page is loading. 
 
 You can proceed by adding `bubble-pop-up.js` to your `configuration.yaml`, just **remember to change the version number `?v=0.0.0` after each updates then reboot**, this is important to get the last version:
