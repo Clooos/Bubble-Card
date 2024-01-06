@@ -25,7 +25,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ### Without HACS
 
-1. Download these files: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/bubble-card.js) and [bubble-pop-up.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/bubble-pop-up.js)
+1. Download these files: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js) and [bubble-pop-up.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up.js)
 2. Add these files to your `<config>/www` folder
 3. On your dashboard click on the icon at the right top corner then on `Edit dashboard`
 4. Click again on that icon and then click on `Manage resources`
@@ -306,6 +306,7 @@ This card allows you to control your covers.
 | --- | --- | --- | --- | --- |
 | `entity` | string | **Required** | Any cover | A cover to control |
 | `name` | string | Optional | Any string | A name for your cover, if not defined it will display the entity name |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
 | `icon_open` | string | Optional | Any `mdi:` icon | An icon for your open cover, if not defined it will display the default open cover icon |
 | `icon_close` | string | Optional | Any `mdi:` icon | An icon for your closed cover, if not defined it will display the default closed cover icon |
 | `icon_up` | string | Optional | Any `mdi:` icon | An icon for your open cover button, if not defined it will display the default open cover icon |
