@@ -304,33 +304,39 @@ export function handlePopUp(context) {
 	    pauseVideos(context.popUp, false);
 	    resetAutoClose();
         if (closeOnClick) {
-            window.addEventListener('mouseup', removeHash, { passive: true });
-            window.addEventListener('touchend', removeHash, { passive: true });
+            context.popUp.addEventListener('mouseup', removeHash, { passive: true });
+            context.popUp.addEventListener('touchend', removeHash, { passive: true });
         } else {
         	window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
         }
+        context.popUpOpen = popUpHash + true;
+
 	    setTimeout(function() {
 	        window.justOpened = true;
 	    }, 10); 
-	    popUpOpen = popUpHash + true;
 	}
 
 	function closePopUp() {
 		window.justOpened = false;
 	    context.popUp.classList.remove('open-pop-up');
 	    context.popUp.classList.add('close-pop-up');
-	    context.content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler);
-	    window.removeEventListener('keydown', windowKeydownHandler);	    
-        window.removeEventListener('mouseup', removeHash);
-        window.removeEventListener('touchend', removeHash);
+	    context.content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler); 
+	    window.removeEventListener('keydown', windowKeydownHandler);
 	    context.popUp.removeEventListener('touchstart', popUpTouchstartHandler);
 	    context.popUp.removeEventListener('touchmove', popUpTouchmoveHandler);
 	    document.body.style.overflow = '';
 	    clearTimeout(closeTimeout);
+	   	if (closeOnClick) {
+	        context.popUp.removeEventListener('mouseup', removeHash);
+	        context.popUp.removeEventListener('touchend', removeHash);	
+	    } else {
+        	window.removeEventListener('click', closePopUpByClickingOutside);
+        }
+	   	context.popUpOpen = popUpHash + false;
+
 	    setTimeout(function() {
 	        pauseVideos(context.popUp, true);
 	    }, 320);
-	    popUpOpen = popUpHash + false;
 	}
 
     function createPopUp() {   
