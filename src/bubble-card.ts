@@ -10,7 +10,6 @@ import { handleEmptyColumn } from './cards/empty-column.ts';
 import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
 let editor;
-let cardSize;
 
 addUrlListener();
 

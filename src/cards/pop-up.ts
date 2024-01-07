@@ -22,6 +22,9 @@ import {
 import { addActions } from '../tools/tap-actions.ts';
 import { getVariables } from '../var/cards.ts';
 
+let mouseUpListenerAdded = false;
+let touchEndListenerAdded = false;
+
 export function handlePopUp(context) {
 
     const hass = context._hass;
@@ -259,10 +262,10 @@ export function handlePopUp(context) {
             window.hash = location.hash.split('?')[0];
 
             // Open on hash change
-            if (window.hash === popUpHash) {
+            if (window.hash === popUpHash && popUpOpen !== popUpHash + true) {
                 openPopUp();
             // Close on back button from browser
-            } else if (context.popUp.classList.contains('open-pop-up')) {
+            } else if (window.hash !== popUpHash && popUpOpen !== popUpHash + false) {
                 closePopUp();
             }
         }
@@ -290,44 +293,44 @@ export function handlePopUp(context) {
         }
     }
 
-	function openPopUp() {    
+	function openPopUp() {
 	    context.popUp.classList.remove('close-pop-up');
 	    context.popUp.classList.add('open-pop-up');
 	    context.content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
 	    window.addEventListener('keydown', windowKeydownHandler, { passive: true });
 	    context.popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
 	    context.popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
-	    popUpOpen = popUpHash + true;
 	    document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
-	    setTimeout(() => { window.justOpened = true; }, 10);
 	    pauseVideos(context.popUp, false);
 	    resetAutoClose();
+        if (closeOnClick) {
+            window.addEventListener('mouseup', removeHash, { passive: true });
+            window.addEventListener('touchend', removeHash, { passive: true });
+        } else {
+        	window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
+        }
 	    setTimeout(function() {
-	        if (closeOnClick) {
-	            window.addEventListener('mouseup', removeHash, { passive: true });
-	            window.addEventListener('touchend', removeHash, { passive: true });
-	        } else {
-	        	window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
-	        }
-	    }, 10);  
+	        window.justOpened = true;
+	    }, 10); 
+	    popUpOpen = popUpHash + true;
 	}
 
 	function closePopUp() {
+		window.justOpened = false;
 	    context.popUp.classList.remove('open-pop-up');
 	    context.popUp.classList.add('close-pop-up');
 	    context.content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler);
-	    window.removeEventListener('keydown', windowKeydownHandler);
+	    window.removeEventListener('keydown', windowKeydownHandler);	    
+        window.removeEventListener('mouseup', removeHash);
+        window.removeEventListener('touchend', removeHash);
 	    context.popUp.removeEventListener('touchstart', popUpTouchstartHandler);
 	    context.popUp.removeEventListener('touchmove', popUpTouchmoveHandler);
-	    popUpOpen = popUpHash + false;
 	    document.body.style.overflow = '';
-	    window.justOpened = false;
 	    clearTimeout(closeTimeout);
 	    setTimeout(function() {
-	        window.removeEventListener('mouseup', removeHash);
-	        window.removeEventListener('touchend', removeHash);
 	        pauseVideos(context.popUp, true);
 	    }, 320);
+	    popUpOpen = popUpHash + false;
 	}
 
     function createPopUp() {   
