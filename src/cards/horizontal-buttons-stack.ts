@@ -94,7 +94,7 @@ export function handleHorizontalButtonsStack(context) {
         }
 
         function highlightButton() {
-            if (context.config.highlightCurrentview) {
+            if (context.config.highlight_current_view) {
                 const isShown = location.pathname === link || location.hash === link;
                 if (isShown) {
                     buttonElement.classList.add("highlight");

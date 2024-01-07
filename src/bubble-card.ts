@@ -10,6 +10,8 @@ import { handleEmptyColumn } from './cards/empty-column.ts';
 import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
 let editor;
+let cardSize;
+
 addUrlListener();
 
 class BubbleCard extends HTMLElement {
@@ -56,6 +58,10 @@ class BubbleCard extends HTMLElement {
                 handleEmptyColumn(this);
                 break;
         }
+
+        if (!window.columnFix) {
+            window.columnFix = this.config.column_fix
+        }
     }
 
     setConfig(config) {
@@ -97,7 +103,7 @@ class BubbleCard extends HTMLElement {
 
     getCardSize() {
         // Fix the empty columns caused by the pop-ups on the dashboard
-        return -10000;
+        return window.columnFix ? 0 : -1;
     }
 
     static getConfigElement() {

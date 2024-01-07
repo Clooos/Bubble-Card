@@ -47,16 +47,6 @@ export async function checkResources(hass) {
         window.resourcesChecked = true;
 
         try {
-            // Reload the cache after every updates
-
-            let currentVersion = version;
-            const storedVersion = localStorage.getItem('version');
-
-            if (storedVersion !== currentVersion) {
-                localStorage.setItem('version', currentVersion);
-                location.reload();
-            }
-
             // Check if bubble-pop-up.js is installed as a resource and remove it (fix for the previous 1.5.0/1 users)
 
             let resources = await hass.callWS({ type: "lovelace/resources" });

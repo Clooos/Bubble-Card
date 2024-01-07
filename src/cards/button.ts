@@ -50,8 +50,8 @@ export function handleButton(context) {
     } = getVariables(context, context.config, hass, editor);
 
     formatedState = entityId && (stateChanged || editor) ? hass.formatEntityState(hass.states[entityId]) : '';
-    const buttonType = context.config.button_type || 'switch';
-    const showState = !context.config.show_state ? false : context.config.show_state;
+    let buttonType = context.config.button_type || 'switch';
+    let showState = !context.config.show_state ? false : context.config.show_state;
     let currentBrightness = !entityId ? '' : hass.states[entityId].attributes.brightness || 0;
     let currentVolume = !entityId ? '' : hass.states[entityId].attributes.volume_level || 0;
     let isDragging = false;
@@ -62,6 +62,8 @@ export function handleButton(context) {
     let startValue = 0;
     let movingVertically = false;
     let timeoutId = null;
+    let serviceOn = context.config.service_on || 'homeassistant.toggle';
+    let serviceOff = context.config.service_off || 'homeassistant.toggle';
 
     if (!context.buttonAdded) {
         const buttonContainer = document.createElement("div");

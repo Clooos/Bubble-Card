@@ -20,6 +20,10 @@ class BubblePopUp extends HTMLElement {
 
         // Initialize pop-up card
         handlePopUp(this);
+
+        if (!window.columnFix) {
+            window.columnFix = this.config.column_fix
+        }
     }
 
     setConfig(config) {
@@ -31,7 +35,7 @@ class BubblePopUp extends HTMLElement {
 
     getCardSize() {
         // Fix the empty columns caused by the pop-ups on the dashboard
-        return -10000;
+        return window.columnFix ? 0 : -1;
     }
 
     static getConfigElement() {

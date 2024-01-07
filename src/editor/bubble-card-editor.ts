@@ -108,8 +108,8 @@ export default class BubbleCardEditor extends LitElement {
         return this._config.auto_close || '';
     }
     
-    get _back_open() {
-        return this._config.back_open || false;
+    get _close_on_click() {
+        return this._config.close_on_click || false;
     }
 
     get _icon_open() {
@@ -137,7 +137,7 @@ export default class BubbleCardEditor extends LitElement {
     }
 
     get _highlightCurrentview() {
-        return this._config.highlightCurrentview || false;
+        return this._config.highlight_current_view || false;
     }
     
     get _show_state() {
@@ -270,6 +270,17 @@ export default class BubbleCardEditor extends LitElement {
                         @input="${this._valueChanged}"
                         style="width: 100%;"
                     ></ha-textfield>
+                    <ha-formfield .label="Optional - Close the pop-up after any click or tap">
+                        <ha-switch
+                            aria-label="Optional - Close the pop-up after any click or tap"
+                            .checked=${this._close_on_click}
+                            .configValue="${"close_on_click"}"
+                            @change=${this._valueChanged}
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Close the pop-up after any click or tap</label> 
+                        </div>
+                    </ha-formfield>
                     <h3>Pop-up trigger</h3>
                     <ha-alert alert-type="info">This allows you to open this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
                     ${this.makeDropdown("Optional - Entity to open the pop-up based on its state", "trigger_entity", allEntitiesList)}
@@ -510,7 +521,7 @@ export default class BubbleCardEditor extends LitElement {
                         <ha-switch
                             aria-label="Toggle "Highlight current view"
                             .checked=${this._highlightCurrentview}
-                            .configValue="${"highlightCurrentview"}"
+                            .configValue="${"highlight_current_view"}"
                             @change=${this._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">

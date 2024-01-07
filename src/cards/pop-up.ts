@@ -69,6 +69,7 @@ export function handlePopUp(context) {
     let displayPowerButton = config.entity ? 'flex' : 'none';
     let text = config.text || '';
     let stateEntityId = config.state;
+    let closeOnClick = config.close_on_click || false;
     let marginTopMobile = config.margin_top_mobile 
         ? (config.margin_top_mobile !== '0' ? config.margin_top_mobile : '0px')
         : '0px';
@@ -123,8 +124,7 @@ export function handlePopUp(context) {
 	        context.button = document.createElement("button");
 	        context.button.setAttribute("class", "close-pop-up");
 	        context.button.onclick = function() { 
-	            history.replaceState(null, null, location.href.split('#')[0]);
-	            fireEvent(window, "location-changed", true);
+	        	removeHash();
 	            localStorage.setItem('isManuallyClosed_' + popUpHash, true);
 	        }; 
 	        context.headerContainer.appendChild(context.button);
@@ -169,8 +169,7 @@ export function handlePopUp(context) {
 	                // Vérifiez si le clic a été effectué sur le corps de la page
 	                if (document.body.contains(e.target)) {
 	                    popUpOpen = popUpHash + false;
-	                    history.replaceState(null, null, location.href.split('#')[0]);
-	                    fireEvent(window, "location-changed", true);
+						removeHash();
 	                    localStorage.setItem('isManuallyClosed_' + popUpHash, true);
 	                }
 	            } 
@@ -178,18 +177,18 @@ export function handlePopUp(context) {
 	    }
 	}
 
+	function removeHash() {
+	    history.replaceState(null, null, location.href.split('#')[0]);
+        fireEvent(window, "location-changed", true);
+	}
+
     function resetAutoClose() {
         // Clear any existing timeout
         clearTimeout(closeTimeout);
         // Start autoclose if enabled
         if (autoClose > 0) {
-            closeTimeout = setTimeout(autoClosePopUp, autoClose);
+            closeTimeout = setTimeout(removeHash, autoClose);
         }
-    }
-
-    function autoClosePopUp(){
-        history.replaceState(null, null, location.href.split('#')[0]);
-        fireEvent(window, "location-changed", true);
     }
 
     function powerButtonClickHandler() {
@@ -199,8 +198,7 @@ export function handlePopUp(context) {
     function windowKeydownHandler(e) {
         if (e.key === 'Escape') {
             popUpOpen = popUpHash + false;
-            history.replaceState(null, null, location.href.split('#')[0]);
-            fireEvent(window, "location-changed", true);
+			removeHash();
             localStorage.setItem('isManuallyClosed_' + popUpHash, true)
         }
     }
@@ -223,8 +221,7 @@ export function handlePopUp(context) {
         // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
         if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
             popUpOpen = popUpHash + false;
-            history.replaceState(null, null, location.href.split('#')[0]);
-            fireEvent(window, "location-changed", true);
+            removeHash();
             localStorage.setItem('isManuallyClosed_' + popUpHash, true)
         }
 
@@ -293,41 +290,45 @@ export function handlePopUp(context) {
         }
     }
 
-    function openPopUp() {    
-	    window.removeEventListener('click', closePopUpByClickingOutside);
-        context.popUp.classList.remove('close-pop-up');
-        context.popUp.classList.add('open-pop-up');
-        context.content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
-        window.addEventListener('keydown', windowKeydownHandler, { passive: true });
-        context.popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
-        context.popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
-        popUpOpen = popUpHash + true;
-        document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
-        setTimeout(() => { window.justOpened = true; }, 10);
-        pauseVideos(context.popUp, false);
-        resetAutoClose();
+	function openPopUp() {    
+	    context.popUp.classList.remove('close-pop-up');
+	    context.popUp.classList.add('open-pop-up');
+	    context.content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
+	    window.addEventListener('keydown', windowKeydownHandler, { passive: true });
+	    context.popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
+	    context.popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
+	    popUpOpen = popUpHash + true;
+	    document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
+	    setTimeout(() => { window.justOpened = true; }, 10);
+	    pauseVideos(context.popUp, false);
+	    resetAutoClose();
 	    setTimeout(function() {
-	        window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
+	        if (closeOnClick) {
+	            window.addEventListener('mouseup', removeHash, { passive: true });
+	            window.addEventListener('touchend', removeHash, { passive: true });
+	        } else {
+	        	window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
+	        }
 	    }, 10);  
-    }
+	}
 
-    function closePopUp() {
-        context.popUp.classList.remove('open-pop-up');
-        context.popUp.classList.add('close-pop-up');
-        context.content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler);
-        window.removeEventListener('keydown', windowKeydownHandler);
-        context.popUp.removeEventListener('touchstart', popUpTouchstartHandler);
-        context.popUp.removeEventListener('touchmove', popUpTouchmoveHandler);
-        popUpOpen = popUpHash + false;
-        document.body.style.overflow = '';
-        window.justOpened = false;
-        clearTimeout(closeTimeout);
-        setTimeout(function() {
-            pauseVideos(context.popUp, true);
-        }, 320);
-    }
-
-    // This function can be optimized by 
+	function closePopUp() {
+	    context.popUp.classList.remove('open-pop-up');
+	    context.popUp.classList.add('close-pop-up');
+	    context.content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler);
+	    window.removeEventListener('keydown', windowKeydownHandler);
+	    context.popUp.removeEventListener('touchstart', popUpTouchstartHandler);
+	    context.popUp.removeEventListener('touchmove', popUpTouchmoveHandler);
+	    popUpOpen = popUpHash + false;
+	    document.body.style.overflow = '';
+	    window.justOpened = false;
+	    clearTimeout(closeTimeout);
+	    setTimeout(function() {
+	        window.removeEventListener('mouseup', removeHash);
+	        window.removeEventListener('touchend', removeHash);
+	        pauseVideos(context.popUp, true);
+	    }, 320);
+	}
 
     function createPopUp() {   
         let popUp = context.popUp;
@@ -339,8 +340,6 @@ export function handlePopUp(context) {
         if (!context.eventAdded && !editor) {
             window['checkHashRef_' + popUpHash] = checkHash;
             window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash], { passive: true });
-            window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
-
             context.eventAdded = true;
         }
 
@@ -575,8 +574,7 @@ export function handlePopUp(context) {
             isTriggered = true;
             localStorage.setItem('isTriggered_' + popUpHash, isTriggered);
         } else if (hass.states[triggerEntity].state !== triggerState && triggerClose && context.popUp.classList.contains('open-pop-up') && isTriggered && !isManuallyClosed) {
-            history.replaceState(null, null, location.href.split('#')[0]);
-            fireEvent(window, "location-changed", true);
+        	removeHash();
             popUpOpen = popUpHash + false;
             isTriggered = false;
             isManuallyClosed = true;
