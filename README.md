@@ -92,7 +92,7 @@ Most options can be configured in the GUI editor, except for custom styles, cust
 | `type` | string | **Required** | `custom:bubble-card` | Type of the card |
 | `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `pop-up` or `separator` | Type of the Bubble Card, see below |
 | `styles` | object list | Optional | Any CSS stylesheets | Allows you to customize your cards, see [styling](#styling) |
-| `column_fix` | boolean | Optional | `true` or `false` (default) | This feature is for those who experience some issues with the dashboard layout, such as empty columns or misaligned cards. You can apply a fix that restores the behavior of the previous versions by adding `column_fix: true` in YAML to the first Bubble Card on your dashboard. Then refresh the page. |
+| `column_fix` | boolean | Optional | `true` or `false` (default) | Fix some issues with the dashboard layout, such as empty columns or misaligned cards. Add it in YAML to the **first** Bubble Card on your dashboard. Then refresh the page. |
 
 
 ## Pop-up
@@ -114,7 +114,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `entity` | string | Optional | Any switchable entity | Display a button to toggle this entity |
 | `state` | string | Optional | Any entity | Display its state in your pop-up header |
 | `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |
-| `close_on_click` | boolean | Optional | `true` or `false` (default) | Close the pop-up automatically after any interaction (default: `false`) |
+| `close_on_click` | boolean | Optional | `true` or `false` (default) | Automatically close the pop-up after any interaction |
 | `text` | string | Optional | Any string | An additional text to show next to your `name` |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the pop-up position if the sidebar is hidden on the desktop (only if you have made a modification to hide it yourself) |
