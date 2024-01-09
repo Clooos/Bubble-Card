@@ -231,7 +231,7 @@ export function handleButton(context) {
         context.eventAdded = true;
     } else if (!context.eventAdded && buttonType === 'custom') {
         switchButton.addEventListener('click', () => tapFeedback(context.switchButton), { passive: true });
-        addActions(iconContainer, context.config, hass, forwardHaptic);
+        addActions(switchButton, context.config, hass, forwardHaptic);
         context.eventAdded = true;
     }
 

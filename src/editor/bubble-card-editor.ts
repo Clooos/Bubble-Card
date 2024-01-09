@@ -601,6 +601,7 @@ export default class BubbleCardEditor extends LitElement {
                     <ha-alert alert-type="info">You need to add a card type first.</ha-alert>
                     <img style="width: 100%" src="https://user-images.githubusercontent.com/36499953/268039672-6dd13476-42c5-427c-a4d8-ad4981fc2db7.gif">
                     <p>The <b>Bubble Card ${version}</b> changelog is available <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}"><b>here</b></a>.
+                    <br/><br/><ha-alert alert-type="info"><b>Column fix</b>: If you experience some issues with your dashboard layout, such as empty columns or misaligned cards. You can apply a fix that restores the behavior of the previous versions by adding <code>column_fix: true</code> in YAML to the <b>first</b> Bubble Card on your dashboard. Then refresh the page.</ha-alert>
                     <hr />
                     <p>Almost everything is available in the GUI editor, but in the YAML editor you can add your own <b>custom styles</b>, create <b>custom buttons</b> or modify the <b>tap actions</b> of all cards. You can find more details on my GitHub page.</p>
                     <a href="https://github.com/Clooos/Bubble-Card"><img src="https://img.shields.io/badge/GitHub-Documentation-blue?logo=github"></a>
@@ -840,6 +841,12 @@ export default class BubbleCardEditor extends LitElement {
             background-color: var(--text-primary-color);
             opacity: .15;
             margin: 8px 0 0 0;
+          }
+          code {
+            background: var(--accent-color);
+            background-blend-mode: darken;
+            padding: 2px 4px;
+            border-radius: 6px;
           }
           .button-header {
             height: auto;

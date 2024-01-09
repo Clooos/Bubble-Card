@@ -133,10 +133,10 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
                                 padding: 2px 6px;
                                 border-radius: 8px;
                             ">
-                                👍 Optimized mode
+                                Optimized mode
                             </span>
                         </h3>
-                        <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b></ha-alert>
+                        <ha-alert alert-type="warning">Since the recent updates of Home Assistant, the optimized mode has become obsolete. The regular mode is now exactly as efficient, which greatly simplifies things for both new and current users. So if you are on the latest Home Assistant release you can remove it from your extra modules and in your pop-ups in YAML just replace <code>custom:bubble-pop-up</code> with <code>custom:bubble-card</code> then add <code>card_type: pop-up</code>. This mode will be removed around the v2.0.0.</b></ha-alert>
                         <ha-textfield
                             label="Hash (e.g. #kitchen)"
                             .value="${this._hash}"
@@ -400,11 +400,17 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
 
             static get styles() {
                 return css`
-              div {
-                display: grid;
-                grid-gap: 12px;
-              }
-            `;
+                  div {
+                    display: grid;
+                    grid-gap: 12px;
+                  }
+                  code {
+                    background: var(--accent-color);
+                    background-blend-mode: darken;
+                    padding: 2px 4px;
+                    border-radius: 6px;
+                  }
+                `;
             }
         }
 
