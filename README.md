@@ -101,7 +101,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
 2. This `vertical-stack` must be after all your other cards and before your `horizontal-buttons-stack` if you have one
-3. Now add a `Bubble Card` (Regular mode) or a `Bubble Pop-Up` (Optimized mode)
+3. Now add a `Bubble Card` (Regular mode) or a `Bubble Pop-Up` ([Optimized mode](#pop-up-optimization))
 4. Just fill in the required inputs and the ones you need
 
 ### Options
