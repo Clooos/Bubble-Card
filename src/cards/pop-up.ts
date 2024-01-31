@@ -34,6 +34,16 @@ export function handlePopUp(context) {
         return;
     }
 
+    if (context.errorTriggered) {
+        return;
+    }
+
+    if (!context.initStyleAdded && !context.popUp && !editor) {
+        // Hide vertical stack content before initialization
+        context.card.style.marginTop = '4000px';
+        context.initStyleAdded = true;
+    }
+
     let {
         customStyles,
         entityId,
@@ -83,16 +93,6 @@ export function handlePopUp(context) {
     let lastTouchY;
     let closeTimeout;
     let rgbaBgColor;
-
-    if (context.errorTriggered) {
-        return;
-    }
-
-    if (!context.initStyleAdded && !context.popUp && !editor) {
-        // Hide vertical stack content before initialization
-        context.card.style.marginTop = '4000px';
-        context.initStyleAdded = true;
-    }
 
     function removeHash() {
 	    history.replaceState(null, null, location.href.split('#')[0]);
