@@ -3,7 +3,7 @@ import { addUrlListener } from './tools/url-listener.ts';
 import { initializeContent } from './tools/init.ts';
 import { handlePopUp } from './cards/pop-up.ts';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack.ts';
-import { handleButton } from './cards/button.ts';
+import { handleButton } from './cards/button/index.ts';
 import { handleSeparator } from './cards/separator.ts';
 import { handleCover } from './cards/cover.ts';
 import { handleEmptyColumn } from './cards/empty-column.ts';
@@ -108,17 +108,33 @@ class BubbleCard extends HTMLElement {
                 definedLinks[config[linkKey]] = true;
               }
             }
-        } else if (config.card_type === 'button' || config.card_type === 'cover' || config.card_type === 'state') {
+        } else if (config.card_type === 'button' || config.card_type === 'cover') {
             if (!config.entity) {
                 throw new Error("You need to define an entity");
             }
         }
-        
+
         if (window.entityError) {
             throw new Error("You need to define a valid entity");
         }
-        
-        this.config = config;
+        if (config.card_type === 'button') {
+            const enhancedConfig = {...config};
+            const buttonType = enhancedConfig.button_type || 'switch';
+
+            enhancedConfig.tap_action = enhancedConfig.tap_action ?? {
+                action: "more-info"
+            };
+            enhancedConfig.double_tap_action = enhancedConfig.double_tap_action ?? {
+                action: buttonType === "state" ? "more-info" : "toggle"
+            }
+            enhancedConfig.hold_action = enhancedConfig.hold_action ?? {
+                action: buttonType === "state" ? "more-info" : "toggle"
+            }
+
+            this.config = enhancedConfig;
+        } else {
+            this.config = config;
+        }
     }
 
     getCardSize() {
