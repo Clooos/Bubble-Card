@@ -1,5 +1,15 @@
+import { tapFeedback } from "./utils.ts";
+
 const maxHoldDuration = 300;
 const doubleTapTimeout = 300;
+
+export function callAction(element, config, action) {
+  setTimeout(() => {
+    const event = new Event('hass-action', { bubbles: true, composed: true });
+    event.detail = { config, action };
+    element.dispatchEvent(event);
+  }, 1);
+}
 
 class ActionHandler {
   constructor(element, config, sendActionEvent) {
@@ -11,7 +21,10 @@ class ActionHandler {
     this.startTime = null;
   }
 
-  handleStart() {
+  handleStart(e) {
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
     this.startTime = Date.now();
 
     // Another action has started, we should clean the tap timeout
@@ -45,32 +58,24 @@ class ActionHandler {
 }
 
 export function sendActionEvent(element, config, action) {
-  const tapAction = config.tap_action ?? { action: "more-info" };
-  const doubleTapAction = config.double_tap_action || {
-    action: config.card_type === "state" ? "more-info" : "toggle"
-  }
-  const holdAction = config.hold_action || {
-    action: config.card_type === "state" ? "more-info" : "toggle"
-  }
+  const tapAction = config.tap_action ?? {  action: "more-info" };
+  const doubleTapAction = config.double_tap_action || { action: "toggle"}
+  const holdAction = config.hold_action || { action: "toggle"}
 
-  const actionConfig = {
-    entity: config.entity,
-    tap_action: tapAction,
-    double_tap_action: doubleTapAction,
-    hold_action: holdAction
-  };
-
-  setTimeout(() => {
-    const event = new Event('hass-action', { bubbles: true, composed: true });
-    event.detail = { config: actionConfig, action: action };
-    element.dispatchEvent(event);
-  }, 1);
+  callAction(
+    element,
+    { entity: config.entity, tap_action: tapAction, double_tap_action: doubleTapAction, hold_action: holdAction },
+    action
+  );
 }
 
 export function addActions(element, config) {
   const handler = new ActionHandler(element, config, sendActionEvent);
 
-  element.addEventListener('pointerdown', handler.handleStart.bind(handler), { passive: true });
-  element.addEventListener('pointerup', handler.handleEnd.bind(handler), { passive: true });
+  element.addEventListener('pointerdown', handler.handleStart.bind(handler));
+  element.addEventListener('pointerup', handler.handleEnd.bind(handler));
   element.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+export function addFeedback(element, feedbackElement) {
+  element.addEventListener('click', () => tapFeedback(feedbackElement));
 }
