@@ -63,23 +63,34 @@ And also a video for the German users from **smart-live.net**, thanks a lot to y
 
 ### Pop-up optimization
 
-**⚠️ Important: Since the latest updates of Home Assistant this optimization is obsolete and the regular mode is working the same.**
+**⚠️ Important: Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, you can take a look at this similar fix below.**
 
-If you notice that the content of pop-ups appears upon page load, consider installing the pop-ups in **Optimized mode** by adding `bubble-pop-up.js` as an extra module. This significantly improves the initialization of the pop-up when the page is loading. 
+### Pop-up initialization fix
 
-You can proceed by adding `bubble-pop-up.js` to your `configuration.yaml`, just **remember to change the version number `?v=0.0.0` after each updates then reboot**, this is important to get the last version:
+This is only for users of v1.7.0 and up.
+
+If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
+
+You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
 ```yaml
 frontend:
   extra_module_url:
-    - /hacsfiles/Bubble-Card/bubble-pop-up.js?v=0.0.0
+    - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
 ```
-Clear the cache if needed:
+If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
 
-On Android you can close the app then clear the app cache, then if it's still not working you can close then restart the app again.
+For Android HA Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
 
-On iOS you can go to your HA settings, then on the Companion app > Debug > Clear frontend cache (or something like that), then refresh the page or restart the app.
+For iOS HA Companion App users, you can go to your HA settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
 
-You should now see Bubble Pop-up appear in the card picker, which corresponds to the **Optimized mode** in the GUI editor.
+For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
+
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:bubble-card
+    card_type: pop-up
+```
 
 ## Configuration
 
@@ -92,7 +103,7 @@ Most options can be configured in the GUI editor, except for custom styles, cust
 | `type` | string | **Required** | `custom:bubble-card` | Type of the card |
 | `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `pop-up` or `separator` | Type of the Bubble Card, see below |
 | `styles` | object list | Optional | Any CSS stylesheets | Allows you to customize your cards, see [styling](#styling) |
-| `column_fix` | boolean | Optional | `true` or `false` (default) | Fix some issues with the dashboard layout, such as empty columns or misaligned cards. Add it in YAML to the **first** Bubble Card on your dashboard. Then refresh the page. |
+| `column_fix` | boolean or string | Optional | `true`, `false` (default) or a negative value like `-10` | Fix some issues with the dashboard layout, such as empty columns or misaligned cards. Add it in YAML to the **first** Bubble Card on your dashboard. You can also try to add a negative value to find the one that fit your dashboard. Then refresh the page. |
 
 
 ## Pop-up
@@ -125,6 +136,8 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `bg_opacity` | string | Optional | Any value from `0` to `100` | The background opacity of your pop-up (e.g. `100` for no transparency) |
 | `bg_blur` | string | Optional | Any value from `0` to `100` | The background blur effect of your pop-up, **this only work if `bg_opacity` is not set to `100`** (e.g. `0` for no blur)|
 | `shadow_opacity` | string | Optional | Any value from `0` to `100` | The shadow opacity of your pop-up (e.g. `0` to hide it) |
+| `hide_backdrop` | boolean | Optional | `true` or `false` (default) | Set this to true on the first pop-up of your main dashboard to disable the backdrop on all pop-ups. |
+| `background_camera` | boolean | Optional | `true` or `false` (default) | Play camera in background (not recommended) |
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
@@ -134,25 +147,12 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 
 ### Example
 
-A pop-up in Regular mode
+A pop-up
 ```yaml
 type: vertical-stack
 cards:
   - type: custom:bubble-card
     card_type: pop-up
-    hash: '#kitchen'
-    name: Kitchen
-    icon: mdi:fridge
-    entity: light.kitchen
-    state: sensor.kitchen_temperature
-    back_open: true
-```
-
-A pop-up in Optimized mode
-```yaml
-type: vertical-stack
-cards:
-  - type: custom:bubble-pop-up
     hash: '#kitchen'
     name: Kitchen
     icon: mdi:fridge
@@ -205,7 +205,10 @@ This card is a companion to the pop-up card, allowing you to open the correspond
 | `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the room you just entered, **it needs to be `false` if you don't have any `_pir_sensor` in your code** |
 | `margin` | string | Optional | Any CSS value | Use this **only** if your `horizontal-buttons-stack` is not well centered on mobile (e.g. `13px`) |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
+| `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the horizontal buttons stack position if the sidebar is hidden on the desktop (only if you have made a modification to hide it yourself) |
 | `rise_animation` | boolean | Optional | `true` (default) or `false` | Set this to `false` to disable the animation that activates once the page has loaded |
+| `highlight_current_view` | boolean | Optional | `true` or `false` (default) | Highlight current hash / view with a smooth animation |
+| `hide_gradient` | boolean | Optional | `true` or `false` (default) | Set this to `false` to hide the gradient |
 
 **The variables starting with a number define your buttons, just change this number to add more buttons (see example below).**
 
@@ -405,7 +408,8 @@ Here is the raw code of my "Cuisine" pop-up (Kitchen in english) as seen in some
 ```yaml
 type: vertical-stack
 cards:
-  - type: custom:bubble-pop-up
+  - type: custom:bubble-card
+    type: pop-up
     entity: light.cuisine
     icon: mdi:fridge-outline
     name: Cuisine
