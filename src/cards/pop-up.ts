@@ -368,6 +368,7 @@ export function handlePopUp(context) {
 				opacity: 1;
 				backdrop-filter: blur(16px);
 				-webkit-backdrop-filter: blur(16px);
+                                pointer-events: all;
 		    }
 
 		    .backdrop.hidden {
