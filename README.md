@@ -500,7 +500,7 @@ Here is how to change the `pop-up` background (you can do it with `bg_color`, `b
 
 ```yaml
 styles: | 
-  #root {
+  .pop-up {
     /* You can edit the last value (0.8) to change the opacity, 0 is transparent and 1 is the max value */
     background-color: rgba(79, 69, 87, 0.8) !important;
 
