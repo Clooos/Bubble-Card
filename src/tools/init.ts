@@ -4,17 +4,18 @@ import { version } from '../var/version.ts';
 
 export function initializeContent(context) {
     if (!context.content) {
-        context.attachShadow({
-            mode: 'open'
-        });
-        context.shadowRoot.innerHTML = `
-            <ha-card style="background: none; border: none; box-shadow: none; border-radius: 16px;">
-                <div class="card-content" style="padding: 0;">
-                </div>
-            </ha-card>
-        `;
-        context.card = context.shadowRoot.querySelector("ha-card");
-        context.content = context.shadowRoot.querySelector("div");
+        let shadow = context.shadowRoot || context.attachShadow({ mode: 'open' });
+        let fragment = document.createDocumentFragment();
+        let card = document.createElement("ha-card");
+        card.style.cssText = "background: none; border: none; box-shadow: none; border-radius: 16px;";
+        let content = document.createElement("div");
+        content.className = "card-content";
+        content.style.padding = "0";
+        card.appendChild(content);
+        fragment.appendChild(card);
+        shadow.appendChild(fragment);
+        context.card = card;
+        context.content = content;
     }
 }
 

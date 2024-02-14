@@ -12,12 +12,18 @@ let popUpOpen;
 let rgbaColor;
 let rgbColor;
 let formatedState;
+let haStyle;
+let themeBgColor;
 
 export function getVariables(context, config, hass, editor) {
     let customStyles = !config.styles ? '' : config.styles;
     let entityId = config.entity && hass.states[config.entity] 
         ? config.entity 
         : '';
+    let state = entityId ? hass.states[entityId].state : '';
+    hasStateChanged(context, hass, entityId);
+    let stateChanged = context.stateChanged;
+
     let icon = !config.icon && entityId
         ? hass.states[entityId].attributes.icon || hass.states[entityId].attributes.entity_picture || ''
         : config.icon || '';
@@ -29,9 +35,6 @@ export function getVariables(context, config, hass, editor) {
     let widthDesktop = config.width_desktop || '540px';
     let widthDesktopDivided = widthDesktop ? widthDesktop.match(/(\d+)(\D+)/) : '';
     let isSidebarHidden = config.is_sidebar_hidden || false;
-    let state = entityId ? hass.states[entityId].state : '';
-    hasStateChanged(context, hass, entityId);
-    let stateChanged = context.stateChanged;
     let stateOn = ['on', 'open', 'cleaning', 'true', 'home', 'playing'].includes(state) || (Number(state) !== 0 && !isNaN(Number(state)));
     let riseAnimation = config.rise_animation !== undefined ? config.rise_animation : true;
     let marginCenter = config.margin 
@@ -46,14 +49,13 @@ export function getVariables(context, config, hass, editor) {
         iconFilter 
     } = getIconColor(hass, entityId, stateOn, isColorCloseToWhite);
     let iconStyles = getIconStyles(entityId, stateOn, iconColor, iconFilter);
-    let haStyle = getComputedStyle(document.body);
-    let themeBgColor = haStyle.getPropertyValue('--ha-card-background') || haStyle.getPropertyValue('--card-background-color');
+    haStyle = !haStyle ? getComputedStyle(document.body) : '';
+    themeBgColor = !themeBgColor ? haStyle.getPropertyValue('--ha-card-background') || haStyle.getPropertyValue('--card-background-color') : '';
     let color = config.bg_color ? config.bg_color : themeBgColor;
-    if (color && (!context.color || color !== context.color)) {
+    if (color && (!rgbaColor || rgbaColor !== context.color)) {
         const lighten = 1.02;
         rgbaColor = convertToRGBA(color, (bgOpacity / 100), lighten);
-        document.body.style.setProperty('--bubble-pop-up-background', rgbaColor);
-        context.color = color;
+        context.color = rgbaColor;
         window.color = color;
     }
 

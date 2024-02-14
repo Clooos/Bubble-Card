@@ -1,25 +1,4 @@
-import { 
-    addStyles, 
-    createIcon, 
-    updateIcon, 
-    isColorCloseToWhite,
-    convertToRGBA,
-    getIconColor,
-    getIconStyles
-} from '../tools/style.ts';
-import { 
-    initializeContent,
-    checkEditor,
-    checkResources
-} from '../tools/init.ts';
-import { 
-    fireEvent,
-    forwardHaptic,
-    navigate,
-    toggleEntity,
-    hasStateChanged
-} from '../tools/utils.ts';
-import { addActions } from '../tools/tap-actions.ts';
+import { addStyles } from '../tools/style.ts';
 import { getVariables } from '../var/cards.ts';
 
 export function handleSeparator(context) {
@@ -30,31 +9,8 @@ export function handleSeparator(context) {
 
     let {
 		customStyles,
-		entityId,
 		icon,
-		name,
-		widthDesktop,
-		widthDesktopDivided,
-		isSidebarHidden,
-		state,
-		stateChanged,
-		stateOn,
-		formatedState,
-		riseAnimation,
-		marginCenter,
-		popUpOpen,
-		rgbaColor,
-		rgbColor,
-		bgOpacity,
-		shadowOpacity,
-		bgBlur,
-		iconColorOpacity,
-		iconColor,
-		iconFilter,
-		iconStyles,
-		haStyle,
-		themeBgColor,
-		color,
+		name
     } = getVariables(context, config, hass, editor);
 
     if (!context.separatorAdded || editor) {

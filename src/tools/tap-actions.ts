@@ -72,8 +72,6 @@ export function sendActionEvent(element, config, action) {
     }
   };
 
-  console.log("Action =", action, "Action config =", actionConfig);
-
   setTimeout(() => {
     const event = new Event('hass-action', {
       bubbles: true,

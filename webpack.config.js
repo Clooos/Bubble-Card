@@ -6,22 +6,25 @@ module.exports = [
     mode: 'production',
     entry: {
       'bubble-card': './src/bubble-card.ts',
-      'bubble-pop-up': './src/bubble-pop-up.ts',
+      'bubble-pop-up-fix': './src/bubble-pop-up-fix.ts'
     },
     output: {
       path: path.resolve(__dirname, 'dist'),
-      filename: '[name].js',
-    },
+      filename: '[name].js'
+    }
   },    
+  
+  // My Home Assistant test server
+
   {
     mode: 'production',
     entry: {
       'bubble-card': './src/bubble-card.ts',
-      'bubble-pop-up': './src/bubble-pop-up.ts',
+      'bubble-pop-up-fix': './src/bubble-pop-up-fix.ts'
     },
     output: {
       path: path.resolve('/Volumes/config/www'),
-      filename: '[name].js',
-    },
+      filename: '[name].js'
+    }
   }
 ];

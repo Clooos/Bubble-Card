@@ -10,31 +10,24 @@ import { handleEmptyColumn } from './cards/empty-column.ts';
 import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
 let editor;
-
 addUrlListener();
 
 class BubbleCard extends HTMLElement {
     
     set hass(hass) {
 
+        initializeContent(this);
+
         this._hass = hass;
 
         editor = checkEditor();
         this.editor = editor;
 
-        checkResources(hass);
-
-        initializeContent(this);
-
         switch (this.config.card_type) {
+
             // Initialize pop-up card
             case 'pop-up':
                 handlePopUp(this);
-                break;
-                
-            // Initialize horizontal buttons stack
-            case 'horizontal-buttons-stack' : 
-                handleHorizontalButtonsStack(this);
                 break;
 
             // Initialize button
@@ -56,7 +49,14 @@ class BubbleCard extends HTMLElement {
             case 'empty-column' :
                 handleEmptyColumn(this);
                 break;
+
+            // Initialize horizontal buttons stack
+            case 'horizontal-buttons-stack' : 
+                handleHorizontalButtonsStack(this);
+                break;
         }
+
+        checkResources(hass);
 
         if (!window.columnFix) {
             window.columnFix = this.config.column_fix
@@ -87,7 +87,7 @@ class BubbleCard extends HTMLElement {
                 definedLinks[config[linkKey]] = true;
               }
             }
-        } else if (config.card_type === 'button' || config.card_type === 'cover') {
+        } else if (config.card_type === 'button' || config.card_type === 'cover' || config.card_type === 'state') {
             if (!config.entity) {
                 throw new Error("You need to define an entity");
             }
@@ -101,8 +101,18 @@ class BubbleCard extends HTMLElement {
     }
 
     getCardSize() {
-        // Fix the empty columns caused by the pop-ups on the dashboard
-        return window.columnFix ? 0 : -1;
+      // Fix the empty columns caused by the pop-ups on the dashboard
+      // Check the value of window.columnFix
+      if (window.columnFix === "true") {
+        // Return 0 if it is "true"
+        return 0;
+      } else if (typeof window.columnFix === "number") {
+        // Return the number if it is a number
+        return window.columnFix;
+      } else {
+        // Return -10 otherwise
+        return -10;
+      }
     }
 
     static getConfigElement() {

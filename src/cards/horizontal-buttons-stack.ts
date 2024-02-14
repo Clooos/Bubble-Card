@@ -21,31 +21,15 @@ export function handleHorizontalButtonsStack(context) {
     const hass = context._hass;
 
     let {
-		customStyles,
-		entityId,
-		icon,
-		name,
-		widthDesktop,
-		widthDesktopDivided,
-		isSidebarHidden,
-		state,
-		stateChanged,
-		stateOn,
-		riseAnimation,
-		marginCenter,
-		popUpOpen,
-		rgbaColor,
-		rgbColor,
-		bgOpacity,
-		shadowOpacity,
-		bgBlur,
-		iconColorOpacity,
-		iconColor,
-		iconFilter,
-		iconStyles,
-		haStyle,
-		themeBgColor,
-		color,
+        customStyles,
+        icon,
+        name,
+        widthDesktop,
+        widthDesktopDivided,
+        isSidebarHidden,
+        riseAnimation,
+        marginCenter,
+        popUpOpen
     } = getVariables(context, context.config, hass, editor);
 
     let editorMode = setInterval(() => {
@@ -62,13 +46,21 @@ export function handleHorizontalButtonsStack(context) {
         }
     }, 100);
 
+    let hideGradient = context.config.hide_gradient ? true : false;
+
     const createButton = (button, link, icon) => {
-        const buttonElement = document.createElement("button");
+        const buttonElement = document.createElement("div");
         buttonElement.setAttribute("class", `button ${link.substring(1)}`);
         buttonElement.innerHTML = `
             ${icon !== '' ? `<ha-icon icon="${icon}" class="icon" style="${button !== '' ? `margin-right: 8px;` : ''}"></ha-icon>` : ''}
             ${button !== '' ? `<p class="name">${button}</p>` : ''}
+            <div class="background"></div>
         `;
+
+        const backgroundElement = document.createElement("div");
+        backgroundElement.setAttribute("class", "color-background");
+        buttonElement.appendChild(backgroundElement);
+        buttonElement.background = backgroundElement;
 
         const handleClick = (event) => {
             popUpOpen = location.hash + true;
@@ -114,18 +106,19 @@ export function handleHorizontalButtonsStack(context) {
         context.buttonsContainer = buttonsContainer;
     }
     
-    const updateButtonStyle = (buttonElement, lightEntity, buttonLink) => {
+    const updateButtonStyle = (buttonElement, lightEntity) => {
+        const backgroundElement = buttonElement.background;
         if (hass.states[lightEntity].attributes.rgb_color) {
             const rgbColor = hass.states[lightEntity].attributes.rgb_color;
             const rgbColorOpacity = (!isColorCloseToWhite(rgbColor) ? `rgba(${rgbColor}, 0.5)` : 'rgba(255,220,200, 0.5)')
-            buttonElement.style.backgroundColor = rgbColorOpacity;
-            buttonElement.style.border = '1px solid rgba(0,0,0,0)';
+            backgroundElement.style.backgroundColor = rgbColorOpacity;
+            backgroundElement.style.border = '1px solid rgba(0,0,0,0)';
         } else if (!hass.states[lightEntity].attributes.rgb_color && hass.states[lightEntity].state == 'on') {
-            buttonElement.style.backgroundColor = 'rgba(255,255,255,0.5)';
-            buttonElement.style.border = '1px solid rgba(0,0,0,0)';
+            backgroundElement.style.backgroundColor = 'rgba(255,255,255,0.5)';
+            backgroundElement.style.border = '1px solid rgba(0,0,0,0)';          
         } else {
-            buttonElement.style.backgroundColor = 'rgba(0,0,0,0)';
-            buttonElement.style.border = '1px solid var(--primary-text-color)';
+            backgroundElement.style.backgroundColor = 'rgba(0,0,0,0)';
+            backgroundElement.style.border = '1px solid var(--primary-text-color)';
         }
     };
 
@@ -203,15 +196,11 @@ export function handleHorizontalButtonsStack(context) {
         context.buttonsAdded = true;
         context.buttons = buttons;
     }
-    
+
     let currentPosition = 0;
     let buttonMargin = 12;
 
     function updateButtons(context) {
-        if (context.buttonsUpdated && !editor) {
-            return;
-        }
-
         let promises = [];
         for (let button of buttonsList) {
             let buttonElement = context.buttons[button.link];
@@ -219,6 +208,10 @@ export function handleHorizontalButtonsStack(context) {
                 promises.push(localStorage.getItem(`buttonWidth-${button.link}`));
                 promises.push(localStorage.getItem(`buttonContent-${button.link}`));
             }
+        }
+
+        if (!context.previousConfig) {
+            context.previousConfig = context.config;
         }
 
         Promise.all(promises).then(results => {
@@ -229,25 +222,32 @@ export function handleHorizontalButtonsStack(context) {
                     let buttonWidth = results[index];
                     let buttonContent = results[index + 1];
                     index += 2;
-                    if (!buttonWidth || buttonWidth === '0' || buttonContent !== buttonElement.innerHTML || editor) {
+                    if (!buttonWidth || buttonWidth === '0' || editor) {
                         buttonWidth = buttonElement.offsetWidth;
                         localStorage.setItem(`buttonWidth-${button.link}`, buttonWidth);
                         localStorage.setItem(`buttonContent-${button.link}`, buttonElement.innerHTML);
                         context.previousConfig = context.config;
                     }
-                    buttonElement.style.transform = `translateX(${currentPosition}px)`;
+
+                    if (currentPosition !== buttonElement.previousPosition) {
+                        buttonElement.style.transform = `translateX(${currentPosition}px)`;
+                        buttonElement.previousPosition = currentPosition;
+                    }
                     currentPosition += parseInt(buttonWidth) + buttonMargin;
+                    
                 } 
                 if (button.lightEntity) {
                     updateButtonStyle(buttonElement, button.lightEntity, button.link);
                 }
             }
-
-            context.buttonsAdded = true;
         });
     }
+
     
-    updateButtons(context);
+    if (!context.buttonsUpdated || editor) {
+        updateButtons(context);
+        context.buttonsAdded = true;
+    }
 
     const horizontalButtonsStackStyles = `
         ha-card {
@@ -256,7 +256,7 @@ export function handleHorizontalButtonsStack(context) {
         .horizontal-buttons-stack {
             width: 100%;
             margin-top: 0 !important;
-            background: none !important;
+            /*background: none !important;*/
             position: fixed;
             height: 51px;
             bottom: 16px;
@@ -264,10 +264,9 @@ export function handleHorizontalButtonsStack(context) {
             z-index: 1 !important; /* Higher value hide the more-info panel */
         }
         @keyframes from-bottom {
-            0% {transform: translateY(200px);}
-            20% {transform: translateY(200px);}
-            46% {transform: translateY(-8px);}
-            56% {transform: translateY(1px);}
+            0% {transform: translateY(100px);}
+            26% {transform: translateY(-8px);}
+            46% {transform: translateY(1px);}
             62% {transform: translateY(-2px);}
             70% {transform: translateY(0);}
             100% {transform: translateY(0);}
@@ -281,7 +280,7 @@ export function handleHorizontalButtonsStack(context) {
             display: inline-flex;
             position: absolute;
             box-sizing: border-box !important;
-            border: 1px solid var(--primary-text-color);
+            /*border: 1px solid var(--primary-text-color);*/
             align-items: center;
             height: 50px;
             line-height: 16px;
@@ -290,9 +289,31 @@ export function handleHorizontalButtonsStack(context) {
             border-radius: 25px;
             z-index: 1;
             padding: 0 16px;
-            background: none;
-            transition: background-color 1s, border 1s, transform 1s;
             color: var(--primary-text-color);
+            transition: background-color 1s, border 1s, transform 1s;
+        }
+        .color-background {
+            border-radius: 24px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: -1;
+            border: 1px solid var(--primary-text-color);
+            transition: background-color 1s, border 1s, transform 1s;
+        }
+        .background {
+            opacity: 0.8;
+            border-radius: 24px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box !important;
+            position: absolute;
+            left: 0;
+            z-index: -2;
+            background-color: var(--background-color,var(--primary-background-color));
         }
         .highlight {
             animation: pulse 1.4s infinite alternate;
@@ -317,15 +338,13 @@ export function handleHorizontalButtonsStack(context) {
             -ms-overflow-style: none;
             scrollbar-width: none;
             -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 1) calc(0% + 28px), rgba(0, 0, 0, 1) calc(100% - 28px), transparent 100%);
-            /* mask-image: linear-gradient(90deg, transparent 2%, rgba(0, 0, 0, 1) 6%, rgba(0, 0, 0, 1) 96%, transparent 100%); */
-            /* -webkit-mask-image: linear-gradient(90deg, transparent 2%, rgba(0, 0, 0, 1) 6%, rgba(0, 0, 0, 1) 96%, transparent 100%); */
         }
         .horizontal-buttons-stack::before {
             content: '';
             position: absolute;
             top: -32px;
             left: -100%;
-            display: block;
+            display: ${hideGradient ? 'none' : 'block'};
             background: linear-gradient(0deg, var(--background-color, var(--primary-background-color)) 50%, rgba(79, 69, 87, 0));
             width: 200%;
             height: 100px;
@@ -358,14 +377,11 @@ export function handleHorizontalButtonsStack(context) {
             overflow: hidden;
         }
         .horizontal-buttons-stack.editor::before {
-            top: -32px;
-            left: -100%;
             background: none;
-            width: 100%;
-            height: 0;
         }
-        .horizontal-buttons-stack-container.editor > .button {
-            transition: background-color 0s, border 0s, transform 0s;
+        .horizontal-buttons-stack-container.editor > .button,
+        .horizontal-buttons-stack-container.editor > .button > .color-background {
+            transition: background-color 0s, border 0s, transform 0s !important;
         }
         .horizontal-buttons-stack-container.editor {
             margin-left: 1px;
@@ -380,7 +396,7 @@ export function handleHorizontalButtonsStack(context) {
     `;
     
     if (!window.hasAnimated && riseAnimation) {
-        context.content.style.animation = 'from-bottom 1.3s forwards';
+        context.content.style.animation = 'from-bottom .6s forwards';
         window.hasAnimated = true;
         setTimeout(() => {
             context.content.style.animation = 'none';

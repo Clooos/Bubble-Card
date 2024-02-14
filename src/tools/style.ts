@@ -7,7 +7,7 @@ export const addStyles = function(hass, context, styles, customStyles, state, en
 
     const executeStyles = () => {
         // Evaluate customStyles if it exists, else assign an empty string
-        const customStylesEval = customStyles ? eval('`' + customStyles + '`') : '';
+        const customStylesEval = customStyles ? Function('hass', 'entityId', 'state', 'return `' + customStyles + '`;')(hass, entityId, state) : '';
         let styleAddedKey = styles + 'Added'; // Append 'Added' to the styles value
 
         // Check if the style has changed
@@ -64,6 +64,11 @@ export function createIcon(context, entityId, icon, iconContainer, editor) {
 
     setInterval(() => {
         hass = context._hass;
+
+        if (!entityId.startsWith('media_player.')) {
+            return;
+        }
+
         if (entityId && hass.states[entityId]) {
             context.currentEntityPicture = hass.states[entityId].attributes.entity_picture;
             if (context.currentEntityPicture !== context.previousEntityPicture) {
@@ -123,8 +128,9 @@ export function isColorCloseToWhite(rgbColor) {
     return true;
 }
 
+let rgbaColor;
+
 export function convertToRGBA(color, opacity, lighten = 1) {
-    let rgbaColor = '';
     if (color.startsWith('#')) {
         if (color.length === 4) {  // Short hexadecimal color
             let r = Math.min(255, parseInt(color.charAt(1).repeat(2), 16) * lighten),
@@ -139,11 +145,7 @@ export function convertToRGBA(color, opacity, lighten = 1) {
         }
     } else if (color.startsWith('rgb')) {
         let rgbValues = color.match(/\d+/g);
-        if (color.includes('rgba')) {  // Color is already in RGBA
-            rgbaColor = "rgba(" + Math.min(255, rgbValues[0] * lighten) + ", " + Math.min(255, rgbValues[1] * lighten) + ", " + Math.min(255, rgbValues[2] * lighten) + ", " + opacity + ")";
-        } else {  // Color is in RGB
-            rgbaColor = "rgba(" + Math.min(255, rgbValues[0] * lighten) + ", " + Math.min(255, rgbValues[1] * lighten) + ", " + Math.min(255, rgbValues[2] * lighten) + ", " + opacity + ")";
-        }
+        rgbaColor = "rgba(" + Math.min(255, rgbValues[0] * lighten) + ", " + Math.min(255, rgbValues[1] * lighten) + ", " + Math.min(255, rgbValues[2] * lighten) + ", " + opacity + ")";
     }
     return rgbaColor;
 }

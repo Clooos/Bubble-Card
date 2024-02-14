@@ -8,11 +8,6 @@ import {
     getIconStyles
 } from '../tools/style.ts';
 import { 
-    initializeContent,
-    checkEditor,
-    checkResources
-} from '../tools/init.ts';
-import { 
     fireEvent,
     forwardHaptic,
     navigate,
@@ -23,26 +18,64 @@ import { addActions } from '../tools/tap-actions.ts';
 import { getVariables } from '../var/cards.ts';
 
 let oldTriggerEntityState;
+let storedElements = [];
+let rgbaBgColor;
+window.openPopups = 0;
 
 export function handlePopUp(context) {
 
-    const hass = context._hass;
     const editor = context.editor;
-    const config = context.config;
 
-    if (!hass) { 
-        return;
+    // Hide vertical stack content before initialization
+
+    if (!context.initStyleAdded && !context.popUp && !editor) {
+        context.card.style.marginTop = '4000px';
+        context.initStyleAdded = true;
     }
 
     if (context.errorTriggered) {
         return;
     }
 
-    if (!context.initStyleAdded && !context.popUp && !editor) {
-        // Hide vertical stack content before initialization
-        context.card.style.marginTop = '4000px';
-        context.initStyleAdded = true;
-    }
+	// Initialize/refresh pop-up
+
+    const hass = context._hass;
+    const config = context.config;
+
+	const initPopUp = setTimeout(() => {
+		const initEvent = new Event('popUpInitialized');
+
+	    if (!context.verticalStack) {
+	    	context.verticalStack = context.getRootNode();
+	    } else {
+	    	clearTimeout(initPopUp);
+	    }
+
+	    if (context.verticalStack && (
+	    	!context.popUp
+			|| stateChanged 
+    		|| context.stateEntityChanged
+    		|| (editor && !context.editorModeAdded)
+		)){
+			if (!context.popUp) {
+				context.popUp = context.verticalStack.querySelector('#root');
+	    		context.popUp.setAttribute("class", "pop-up");
+			}
+
+            if (editor && !context.editorModeAdded) {
+            	context.popUp.classList.add('editor');
+            	context.popUp.classList.remove('close-pop-up', 'open-pop-up');
+            	context.editorModeAdded = true;
+            }
+
+            createPopUp();
+           	window.dispatchEvent(initEvent);
+	    } else if (!editor && context.popUp && context.editorModeAdded) {
+	    	context.popUp.classList.remove('editor');
+	    	createPopUp();
+	    	context.editorModeAdded = false;
+	    }
+	}, 0);
 
     let {
         customStyles,
@@ -52,11 +85,9 @@ export function handlePopUp(context) {
         widthDesktop,
         widthDesktopDivided,
         isSidebarHidden,
-        state,
         stateChanged,
         stateOn,
         formatedState,
-        riseAnimation,
         marginCenter,
         popUpOpen,
         rgbaColor,
@@ -68,31 +99,42 @@ export function handlePopUp(context) {
         iconColor,
         iconFilter,
         iconStyles,
-        haStyle,
         themeBgColor,
         color,
     } = getVariables(context, config, hass, editor);
 
     let autoClose = config.auto_close || false;
     let popUpHash = config.hash;
-    let triggerEntity = config.trigger_entity ? config.trigger_entity : '';
-    let triggerState = config.trigger_state ? config.trigger_state : '';
-    let triggerClose = config.trigger_close ? config.trigger_close : false;
     let displayPowerButton = config.entity ? 'flex' : 'none';
     let text = config.text || '';
     let stateEntityId = config.state;
     let closeOnClick = config.close_on_click || false;
+    let hideBackdrop = config.hide_backdrop || false;
+    let hideCard = config.hide_card || '';
+    if (!window.hideBackdrop && hideBackdrop) {
+    	window.hideBackdrop = true;
+    }
+    let backgroundCamera = context.config.background_camera || false;
     let marginTopMobile = config.margin_top_mobile 
         ? (config.margin_top_mobile !== '0' ? config.margin_top_mobile : '0px')
         : '0px';
     let marginTopDesktop = config.margin_top_desktop 
         ? (config.margin_top_desktop !== '0' ? config.margin_top_desktop : '0px')
         : '0px';
-    state = stateEntityId && hass.states[stateEntityId] ? hass.states[stateEntityId].state : '';
+    let state = stateEntityId && hass.states[stateEntityId] ? hass.states[stateEntityId].state : '';
+
+    if (state) {
+    	if (!context.stateEntityOld || context.stateEntityOld !== state) {
+    		context.stateEntityOld = state;
+    		context.stateEntityChanged = true;
+    	} else {
+    		context.stateEntityChanged = false;
+    	}
+    }
+
     let startTouchY;
     let lastTouchY;
     let closeTimeout;
-    let rgbaBgColor;
 
     function removeHash() {
 	    history.replaceState(null, null, location.href.split('#')[0]);
@@ -119,7 +161,7 @@ export function handlePopUp(context) {
 	        context.div.appendChild(context.h2);
 
 	        context.p = document.createElement("p");
-	        context.p.textContent = formatedState;
+	        context.p.textContent = formatedState + ' ' + text;
 	        context.div.appendChild(context.p);
 
 	        context.haIcon2 = document.createElement("ha-icon");
@@ -144,30 +186,30 @@ export function handlePopUp(context) {
 	        context.header = context.div;
 
 	        context.headerAdded = true;
-	    } else if (entityId) {
+	    } else if (stateChanged || context.stateEntityChanged) {
 	        context.iconContainer.innerHTML = ''; // Clear the container
 	        createIcon(context, entityId, icon, context.iconContainer, editor);
-
 	        context.h2.textContent = name;
-	        context.p.textContent = formatedState;
+	        context.p.textContent = formatedState + ' ' + text;
 	        context.haIcon2.setAttribute("style", `display: ${displayPowerButton};`);
 	    }
 	}
 
-	function closePopUpByClickingOutside(e) {
+	function closePopUpByClickingOutside(element) {
 	    // Reset auto close
 	    window.hash === popUpHash && resetAutoClose();
 
-	    const target = e.composedPath();
+	    const target = element.composedPath();
 
 	    if (
 	        target 
 	        && !target.some(el => el.nodeName === 'HA-MORE-INFO-DIALOG') 
+	        && !target.some(el => el.nodeName === 'HA-DIALOG-DATE-PICKER') 
 	        && !target.some(el => el.id === 'root' 
 	        && !el.classList.contains('close-pop-up'))
 	    ){
 	        const close = setTimeout(function() {
-	            if (window.hash === popUpHash) { //&& !closeOnClick
+	            if (window.hash === popUpHash) {
 					removeHash();
                     localStorage.setItem('isManuallyClosed_' + popUpHash, true);
 	            } 
@@ -188,8 +230,8 @@ export function handlePopUp(context) {
         toggleEntity(hass, entityId);
     }
 
-    function windowKeydownHandler(e) {
-        if (e.key === 'Escape') {
+    function windowKeydownHandler(event) {
+        if (event.key === 'Escape') {
 			removeHash();
             localStorage.setItem('isManuallyClosed_' + popUpHash, true)
         }
@@ -235,78 +277,161 @@ export function handlePopUp(context) {
                     ? (entityId.startsWith("light.") ? 'rgba(255,220,200, 0.5)' : 'var(--accent-color)') 
                     : 'var(--background-color,var(--secondary-background-color))');
 
-            rgbaBgColor = convertToRGBA(color, 0);
+            if (!rgbaBgColor) {
+            	rgbaBgColor = convertToRGBA(color, 0);
+            }
 
             context.iconFilter = rgbColor ? 
                 (!isColorCloseToWhite(rgbColor) ? 'brightness(1.1)' : 'none') :
                 'none';
-        } else {
+        } else if (!rgbaBgColor) {
             rgbaBgColor = convertToRGBA(color, 0);
         }
     }
 
     function checkHash() {
-        if (!editor) {
+        if (!editor && context.popUp) {
             window.hash = location.hash.split('?')[0];
 
             // Open on hash change
-            if (window.hash === popUpHash && popUpOpen !== popUpHash + true) {
+            if (
+            	window.hash === popUpHash && 
+            	popUpOpen !== popUpHash + true &&
+            	!context.popUp.classList.contains('open-pop-up')
+            ){
+            	popUpOpen = popUpHash + true;
                 openPopUp();
             // Close on back button from browser
-            } else if (window.hash !== popUpHash && popUpOpen !== popUpHash + false) {
+            } else if (
+            	window.hash !== popUpHash && 
+            	popUpOpen !== popUpHash + false &&
+            	context.popUp.classList.contains('open-pop-up')
+            ){
+            	popUpOpen = popUpHash + false;
                 closePopUp();
+            }
+
+            if (window.hash !== popUpHash) {
+                pauseVideos(context, context.popUp, true);
             }
         }
     };
 
-    function pauseVideos(root, pause) {
-        var videos = root.querySelectorAll('video');
-        for (var i=0; i<videos.length; i++){
-            var isPlaying = videos[i] && videos[i].currentTime > 0 && !videos[i].paused && !videos[i].ended && videos[i].readyState > videos[i].HAVE_CURRENT_DATA;
-            if (pause && isPlaying) {
-                videos[i].pause();
-            } else if (!pause && !isPlaying) {
-                videos[i].play();
-                if (videos[i].currentTime > 0) {
-                    videos[i].currentTime = 10000;
-                }
-            }
-        }
+	function pauseVideos(context, root, pause) {
+	    if (backgroundCamera && !hideCard) {
+	        return;
+	    }
 
-        var nodes = root.querySelectorAll('*');
-        for(var i=0; i<nodes.length; i++){
-            if(nodes[i].shadowRoot){
-                pauseVideos(nodes[i].shadowRoot, pause);
-            }
-        }
-    }
+	    if ((pause || (hideCard && popUpOpen !== popUpHash + true)) && !editor) {
+	    	const videos = root.querySelectorAll('frigate-card, hui-picture-glance-card, hui-picture-entity-card, hui-picture-elements-card, hui-picture-card, hui-camera-card, webrtc-camera' + hideCard);
+	        for (let i=0; i<videos.length; i++) {
+	        	context.videoPaused = true;
+	            storedElements.push({element: videos[i], nextSibling: videos[i].nextSibling, parent: videos[i].parentNode});
+	            videos[i].parentNode.removeChild(videos[i]);
+	        }
+	    } else if (context.videoPaused && ((!pause || (hideCard && popUpOpen !== popUpHash + false)) || editor)) {
+	        while (storedElements.length > 0) {
+	        	context.videoPaused = false;
+	            var storedElement = storedElements.shift();
+	            storedElement.parent.insertBefore(storedElement.element, storedElement.nextSibling);
+	        }
+	    }
+	}
+
+	function createBackdrop() {
+		if (window.backdrop) {
+			return window.backdrop;
+		}
+
+		const backdrop = document.createElement('div');
+		backdrop.classList.add('backdrop');
+
+		document.body.appendChild(backdrop);
+
+		const style = document.createElement('style');
+		style.innerHTML = `
+		    .backdrop {
+				background-color: ${convertToRGBA(themeBgColor, 0.7, 0.7)};
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 0;
+				opacity: 0;
+				transition: opacity 0.3s;
+				display: flex;
+				pointer-events: none;
+		    }
+
+		    .backdrop.visible {
+				opacity: 1;
+				backdrop-filter: blur(16px);
+				-webkit-backdrop-filter: blur(16px);
+		    }
+
+		    .backdrop.hidden {
+				opacity: 0;
+				backdrop-filter: none;
+				-webkit-backdrop-filter: none;
+		    }
+		  `;
+
+	  	document.head.appendChild(style);
+
+		function toggleBackdrop() {
+			if (hideBackdrop) {
+				return;
+			}
+
+			if (window.openPopups === 1) {
+				backdrop.classList.add('visible');
+				backdrop.classList.remove('hidden');
+			}
+
+			if (window.openPopups === 0) {
+				backdrop.classList.add('hidden');
+				backdrop.classList.remove('visible');
+			}
+		}
+
+		window.backdrop = {
+			backdrop,
+			toggleBackdrop,
+		};
+
+	  	return window.backdrop;
+	}	
+
+	const { backdrop, toggleBackdrop } = createBackdrop();
 
 	function openPopUp() {
-	    context.popUp.classList.remove('close-pop-up');
-	    context.popUp.classList.add('open-pop-up');
+		window.openPopups++;
+		context.popUp.classList.remove('close-pop-up');
+		context.popUp.classList.add('open-pop-up');
+		toggleBackdrop();
 	    context.content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
 	    window.addEventListener('keydown', windowKeydownHandler, { passive: true });
 	    context.popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
 	    context.popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
 	    document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
-	    pauseVideos(context.popUp, false);
+	    pauseVideos(context, context.popUp, false);
 	    resetAutoClose();
 
-        if (closeOnClick) {
-            context.popUp.addEventListener('mouseup', removeHash, { passive: true });
-            context.popUp.addEventListener('touchend', removeHash, { passive: true });
-        }
-
-        popUpOpen = popUpHash + true;
-
 	    setTimeout(function() {
+	        if (closeOnClick) {
+	            context.popUp.addEventListener('mouseup', removeHash, { passive: true });
+	            context.popUp.addEventListener('touchend', removeHash, { passive: true });
+	        }
 	    	window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
 	    }, 10); 
 	}
 
 	function closePopUp() {
+		window.openPopups--;
 	    context.popUp.classList.remove('open-pop-up');
 	    context.popUp.classList.add('close-pop-up');
+		toggleBackdrop();
 	    context.content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler); 
 	    window.removeEventListener('keydown', windowKeydownHandler);
 	    window.removeEventListener('click', closePopUpByClickingOutside);
@@ -320,14 +445,12 @@ export function handlePopUp(context) {
 	        context.popUp.removeEventListener('touchend', removeHash);	
 	    }
 
-	   	popUpOpen = popUpHash + false;
-
 	    setTimeout(function() {
-	        pauseVideos(context.popUp, true);
+	        pauseVideos(context, context.popUp, true);
 	    }, 320);
 	}
 
-    function createPopUp() {   
+    function createPopUp() {
         let popUp = context.popUp;
         formatedState = stateEntityId ? hass.formatEntityState(hass.states[stateEntityId]) : '';
 
@@ -335,11 +458,14 @@ export function handlePopUp(context) {
         updateColor();
 
         if (!context.eventAdded && !editor) {
+        	pauseVideos(context, context.popUp, true);
             window['checkHashRef_' + popUpHash] = checkHash;
             window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash], { passive: true });
             context.eventAdded = true;
         } else if (context.eventAdded && editor) {
+        	pauseVideos(context, context.popUp, false);
         	window.removeEventListener('urlChanged', window['checkHashRef_' + popUpHash]);
+        	toggleBackdrop();
         	context.eventAdded = false;
         }
 
@@ -349,28 +475,27 @@ export function handlePopUp(context) {
                 background: none !important;
                 border: none !important;
             }
-            .card-content {
+            .pop-up.card-content {
                 width: 100% !important;
                 padding: 0 !important;
             }
-            #root {
-            	transition: transform .36s !important;
-                position: fixed !important;
+            .pop-up {
+            	transition: transform .36s;
+                position: fixed;
                 margin: 0 -${marginCenter}; /* 7px */
                 width: 100%;
-                ${config.bg_color || config.bg_opacity ? "--bubble-pop-up-background-custom: " + rgbaColor : ''};
-                background-color: var(--bubble-pop-up-background-custom, var(--bubble-pop-up-background));
+                background-color: ${rgbaColor};
                 box-shadow: 0px 0px 50px rgba(0,0,0,${shadowOpacity / 100});
-                backdrop-filter: blur(${bgBlur}px);
-                -webkit-backdrop-filter: blur(${bgBlur}px);
+                backdrop-filter: ${hideBackdrop || window.hideBackdrop ? 'blur(' + bgBlur + 'px)' : 'none'};
+                -webkit-backdrop-filter: ${hideBackdrop || window.hideBackdrop ? 'blur(' + bgBlur + 'px)' : 'none'};
                 border-radius: 42px;
                 box-sizing: border-box;
                 top: calc(120% + ${marginTopMobile} + var(--header-height));
-                grid-gap: 12px !important;
-                gap: 12px !important;
+                grid-gap: 12px;
+                gap: 12px;
                 grid-auto-rows: min-content;
-                padding: 18px 18px 220px 18px !important;
-                height: 100% !important;
+                padding: 18px 18px 220px 18px;
+                height: 100%;
                 -ms-overflow-style: none; /* for Internet Explorer, Edge */
                 scrollbar-width: none; /* for Firefox */
                 overflow-y: auto; 
@@ -379,10 +504,7 @@ export function handlePopUp(context) {
                 /* For older Safari but not working with Firefox */
                 /* display: grid !important; */  
             }
-            #root.hidden {
-            	display: none !important;
-            }
-            #root > :first-child::after {
+            .pop-up > :first-child::after {
                 content: '';
                 display: block;
                 position: sticky;
@@ -395,31 +517,25 @@ export function handlePopUp(context) {
                 background: linear-gradient(0deg, ${rgbaBgColor} 0%, ${rgbaColor} 80%);
                 z-index: 0;
             } 
-            #root::-webkit-scrollbar {
+            .pop-up::-webkit-scrollbar {
                 display: none; /* for Chrome, Safari, and Opera */
             }
-            #root > :first-child {
+            .pop-up > :first-child {
                 position: sticky;
                 top: 0;
                 z-index: 1;
                 background: none !important;
                 overflow: visible;
             }
-            #root.open-pop-up {
+            .pop-up.open-pop-up {
                 transform: translateY(-120%);
             }
-            #root.open-pop-up > * {
-              /* Block child items to overflow and if they do clip them */
-              /*max-width: calc(100vw - 38px);*/
-              max-width: 100% !important;
-              /*overflow-x: clip;*/
-            }
-            #root.close-pop-up { 
+            .pop-up.close-pop-up { 
                 transform: translateY(-20%);
-                box-shadow: none;
+                box-shadow: none !important;
             }
             @media only screen and (min-width: 600px) {
-                #root {
+                .pop-up {
                     top: calc(120% + ${marginTopDesktop} + var(--header-height));
                     width: calc(${widthDesktop}${widthDesktopDivided[2] === '%' && !isSidebarHidden ? ' - var(--mdc-drawer-width)' : ''}) !important;
                     left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]});
@@ -427,11 +543,11 @@ export function handlePopUp(context) {
                 }
             }  
             @media only screen and (min-width: 870px) {
-                #root {
+                .pop-up {
                     left: calc(50% - ${widthDesktopDivided[1] / 2}${widthDesktopDivided[2]} + ${isSidebarHidden ? '0px' : `var(--mdc-drawer-width) ${widthDesktopDivided[2] === '%' ? '' : '/ 2'}`});
                 }
             }  
-            #root.editor {
+            .pop-up.editor {
                 position: inherit !important;
                 width: 100% !important;
                 padding: 18px !important;
@@ -507,44 +623,13 @@ export function handlePopUp(context) {
         addStyles(hass, context, headerStyles, customStyles, state, entityId, stateChanged); 
     }
 
-	// Initialize pop-up
-
-	const initPopUp = setTimeout(() => {
-		const initEvent = new Event('popUpInitialized');
-
-	    if (!context.element) {
-	    	context.element = context.getRootNode().querySelector('#root');
-	    }
-
-	    if (context.element && (
-    		!context.popUp 
-    		|| stateChanged 
-    		|| (editor && !context.editorModeAdded)
-		)){
-	        context.popUp = context.element;
-
-            if (editor && context.popUp && !context.editorModeAdded) {
-            	context.popUp.classList.add('editor');
-            	context.popUp.classList.remove('close-pop-up', 'open-pop-up');
-            	createPopUp();
-            	context.editorModeAdded = true;
-            } else {
-            	createPopUp();
-            }
-
-            clearTimeout(initPopUp);
-           	window.dispatchEvent(initEvent);
-
-	    } else if (!editor && context.popUp && context.editorModeAdded) {
-	    	context.popUp.classList.remove('editor');
-	    	createPopUp();
-	    	context.editorModeAdded = false;
-	    }
-	}, 0);
-
     // Pop-up triggers
 
-    function popUpTriggers(triggerEntityState) {
+    let triggerEntity = config.trigger_entity ? config.trigger_entity : '';
+    let triggerState = config.trigger_state ? config.trigger_state : '';
+    let triggerClose = config.trigger_close ? config.trigger_close : false;
+
+    function popUpTriggers(oldTriggerEntityState, triggerEntityState) {
     	if (!triggerEntityState || triggerEntityState === oldTriggerEntityState) {
     		return;
     	}
@@ -592,6 +677,6 @@ export function handlePopUp(context) {
 
     if (context.popUp && triggerEntity) {
     	const triggerEntityState = hass.states[triggerEntity].state;
-		popUpTriggers(triggerEntityState);
+		popUpTriggers(oldTriggerEntityState, triggerEntityState);
 	}
 }

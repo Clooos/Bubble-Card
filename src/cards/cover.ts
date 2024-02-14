@@ -8,16 +8,8 @@ import {
     getIconStyles
 } from '../tools/style.ts';
 import { 
-    initializeContent,
-    checkEditor,
-    checkResources
-} from '../tools/init.ts';
-import { 
-    fireEvent,
     forwardHaptic,
-    navigate,
-    toggleEntity,
-    hasStateChanged
+    toggleEntity
 } from '../tools/utils.ts';
 import { addActions } from '../tools/tap-actions.ts';
 import { getVariables } from '../var/cards.ts';
@@ -33,28 +25,11 @@ export function handleCover(context) {
 		entityId,
 		icon,
 		name,
-		widthDesktop,
-		widthDesktopDivided,
-		isSidebarHidden,
 		state,
 		stateChanged,
 		stateOn,
 		formatedState,
-		riseAnimation,
-		marginCenter,
-		popUpOpen,
-		rgbaColor,
-		rgbColor,
-		bgOpacity,
-		shadowOpacity,
-		bgBlur,
-		iconColorOpacity,
-		iconColor,
-		iconFilter,
 		iconStyles,
-		haStyle,
-		themeBgColor,
-		color,
     } = getVariables(context, config, hass, editor);
 
     const iconOpen = config.icon_open ? config.icon_open : 'mdi:window-shutter-open';

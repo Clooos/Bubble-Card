@@ -112,6 +112,10 @@ export default class BubbleCardEditor extends LitElement {
         return this._config.close_on_click || false;
     }
 
+    get _background_camera() {
+        return this._config.background_camera || false;
+    }
+
     get _icon_open() {
         return this._config.icon_open || '';
     }
@@ -136,12 +140,20 @@ export default class BubbleCardEditor extends LitElement {
         return this._config.auto_order || false;
     }
 
-    get _highlightCurrentview() {
+    get _highlight_current_view() {
         return this._config.highlight_current_view || false;
     }
     
     get _show_state() {
         return this._config.show_state || false;
+    }
+
+    get _hide_backdrop() {
+        return this._config.hide_backdrop || false;
+    }
+
+    get _hide_gradient() {
+        return this._config.hide_gradient || false;
     }
 
     render() {
@@ -223,18 +235,9 @@ export default class BubbleCardEditor extends LitElement {
             return html`
                 <div class="card-config">
                     ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                    <h3>Pop-up 
-                        <span style="
-                            font-size: 10px !important;
-                            color: #fff;
-                            background: rgb(0,90,140);
-                            padding: 2px 6px;
-                            border-radius: 8px;
-                        ">
-                            Regular mode
-                        </span>
-                    </h3>
-                    <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b><br><br><a style="color: #fff" href="https://github.com/Clooos/Bubble-Card#pop-up-optimization">How to get the optimized mode?</a></ha-alert>
+                    <h3>Pop-up</h3>
+                    <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b></ha-alert>
+                    <ha-alert alert-type="warning">Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, <a style="color: #fff" href="https://github.com/Clooos/Bubble-Card#pop-up-initialization-fix">you can install this similar fix.</a></ha-alert>
                     <ha-textfield
                         label="Hash (e.g. #kitchen)"
                         .value="${this._hash}"
@@ -279,6 +282,17 @@ export default class BubbleCardEditor extends LitElement {
                         ></ha-switch>
                         <div class="mdc-form-field">
                             <label class="mdc-label">Optional - Close the pop-up after any click or tap</label> 
+                        </div>
+                    </ha-formfield>
+                    <ha-formfield .label="Optional - Play camera in background (not recommended)">
+                        <ha-switch
+                            aria-label="Optional - Play camera in background (not recommended)"
+                            .checked=${this._background_camera}
+                            .configValue="${"background_camera"}"
+                            @change=${this._valueChanged}
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Play camera in background (not recommended)</label> 
                         </div>
                     </ha-formfield>
                     <h3>Pop-up trigger</h3>
@@ -361,7 +375,7 @@ export default class BubbleCardEditor extends LitElement {
                         style="width: 100%;"
                     ></ha-textfield>
                     <ha-textfield
-                        label="Optional - Background blur (0-100 range)"
+                        label="Optional - Background/Backdrop blur (0-100 range)"
                         type="number"
                         inputMode="numeric"
                         min="0"
@@ -382,7 +396,18 @@ export default class BubbleCardEditor extends LitElement {
                         @input="${this._valueChanged}"
                         style="width: 100%;"
                     ></ha-textfield>
-                    <ha-alert alert-type="info">Set ‘Background blur’ to 0 if your pop-up animations are rendering at low FPS.</ha-alert>
+                    <ha-formfield .label="Optional - Hide pop-up backdrop">
+                        <ha-switch
+                            aria-label="Optional - Hide pop-up backdrop"
+                            .checked=${this._hide_backdrop}
+                            .configValue="${"hide_backdrop"}"
+                            @change=${this._valueChanged}
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Hide pop-up backdrop</label> 
+                        </div>
+                    </ha-formfield>
+                    <ha-alert alert-type="info">Set this toggle to true on the first pop-up of your main dashboard to disable the backdrop on all pop-ups.</ha-alert>
                     ${this.makeVersion()}
               </div>
             `;
@@ -519,13 +544,24 @@ export default class BubbleCardEditor extends LitElement {
                     </ha-formfield>
                     <ha-formfield .label="Optional - Highlight current hash / view">
                         <ha-switch
-                            aria-label="Toggle "Highlight current view"
-                            .checked=${this._highlightCurrentview}
+                            aria-label="Optional - Highlight current hash / view"
+                            .checked=${this._highlight_current_view}
                             .configValue="${"highlight_current_view"}"
                             @change=${this._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
                             <label class="mdc-label">Optional - Highlight current hash / view</label> 
+                        </div>
+                    </ha-formfield>
+                    <ha-formfield .label="Optional - Hide gradient">
+                        <ha-switch
+                            aria-label="Optional - Hide gradient"
+                            .checked=${this._hide_gradient}
+                            .configValue="${"hide_gradient"}"
+                            @change=${this._valueChanged}
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Hide gradient</label> 
                         </div>
                     </ha-formfield>
                     ${this.makeVersion()}
@@ -601,7 +637,7 @@ export default class BubbleCardEditor extends LitElement {
                     <ha-alert alert-type="info">You need to add a card type first.</ha-alert>
                     <img style="width: 100%" src="https://user-images.githubusercontent.com/36499953/268039672-6dd13476-42c5-427c-a4d8-ad4981fc2db7.gif">
                     <p>The <b>Bubble Card ${version}</b> changelog is available <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}"><b>here</b></a>.
-                    <br/><br/><ha-alert alert-type="info"><b>Column fix</b>: If you experience some issues with your dashboard layout, such as empty columns or misaligned cards. You can apply a fix that restores the behavior of the previous versions by adding <code>column_fix: true</code> in YAML to the <b>first</b> Bubble Card on your dashboard. Then refresh the page.</ha-alert>
+                    <br/><br/><ha-alert alert-type="info"><b>Column fix</b>: If you experience some issues with your dashboard layout, such as empty columns or misaligned cards. You can apply a fix that restores the behavior of the previous versions by adding <code>column_fix: true</code> in YAML to the <b>first</b> Bubble Card on your dashboard. You can also try to add a negative value to find the one that fit your dashboard like <code>column_fix: -10</code>. Then refresh the page.</ha-alert>
                     <hr />
                     <p>Almost everything is available in the GUI editor, but in the YAML editor you can add your own <b>custom styles</b>, create <b>custom buttons</b> or modify the <b>tap actions</b> of all cards. You can find more details on my GitHub page.</p>
                     <a href="https://github.com/Clooos/Bubble-Card"><img src="https://img.shields.io/badge/GitHub-Documentation-blue?logo=github"></a>
