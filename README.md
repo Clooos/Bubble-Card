@@ -527,8 +527,8 @@ To change the background color of a single button in an `horizontal-buttons-stac
 ```yaml
 styles: >
   /* Selector for the '#kitchen' button */
-  .kitchen {
-    background: darkblue !important;
+  .kitchen > .color-background {
+    background-color: blue !important;
   }
 ```
 
@@ -581,6 +581,15 @@ But in all cards you can also use this:
 
  `hass.states['light.kitchen'].state` will return the state of `light.kitchen`.  
  `hass.states['light.kitchen'].attributes.brightness` will return the brightness attribute of `light.kitchen`.
+
+Here is an example on how you can change the background color of a button based on an entity for the horizontal buttons stack:
+
+```yaml
+styles: |
+  .kitchen > .color-background {
+    background-color: ${hass.states['light.kitchen'].state === 'on' ? 'blue' : 'red'} !important;
+  }
+```
 
 ## Custom components conflicts
 
