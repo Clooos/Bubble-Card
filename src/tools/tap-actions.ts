@@ -1,106 +1,76 @@
-const holdDuration = 300;
-let lastAction = null;
-let lastActionTime = 0;
-let lastDoubleTapTime = 0;
+const MAX_HOLD_DURATION = 300;
+const DOUBLE_TAP_TIMEOUT = 300;
 
 class ActionHandler {
   constructor(element, config, sendActionEvent) {
     this.element = element;
     this.config = config;
     this.sendActionEvent = sendActionEvent;
-    this.holdDuration = 300;
-    this.holdTimeout = null;
     this.tapTimeout = null;
     this.lastTap = 0;
-    this.holdTriggered = false;
+    this.startTime = null;
   }
 
   handleStart() {
-    this.holdTriggered = false; // Réinitialisez holdTriggered à false ici
-    this.holdTimeout = setTimeout(() => {
-      this.sendActionEvent(this.element, this.config, 'hold');
-      this.holdTriggered = true;
-    }, this.holdDuration);
+    this.startTime = Date.now();
+
+    // Another action has started, we should clean the tap timeout
+    clearTimeout(this.tapTimeout);
   }
 
-  handleEnd(event) {
-    clearTimeout(this.holdTimeout);
-    let currentTime = new Date().getTime();
-    let tapLength = currentTime - this.lastTap;
+  handleEnd() {
+    // There is no ongoing action
+    if (this.startTime === null) return;
 
-    if (tapLength < this.holdDuration && tapLength > 0) {
-      clearTimeout(this.tapTimeout);
+    const currentTime = Date.now();
+    const holdDuration = currentTime - this.startTime;
+    const doubleTapDuration = currentTime - this.lastTap;
+
+    this.lastTap = currentTime;
+    this.startTime = null;
+
+    if (holdDuration > MAX_HOLD_DURATION) {
+      // First scenario: the user was holding the button for MAX_HOLD_DURATION
+      this.sendActionEvent(this.element, this.config, 'hold');
+    } else if (doubleTapDuration < DOUBLE_TAP_TIMEOUT) {
+      // Second scenario: the user is not holding and the previous tap was a short time ago
       this.sendActionEvent(this.element, this.config, 'double_tap');
     } else {
-      if (!this.holdTriggered) {
-        this.tapTimeout = setTimeout(() => {
-          this.sendActionEvent(this.element, this.config, 'tap');
-        }, this.holdDuration);
-      }
+      // Third scenario: we wait for the double tap amount of time and if nothing happens, send a tap
+      this.tapTimeout = setTimeout(() => {
+        this.sendActionEvent(this.element, this.config, 'tap');
+      }, DOUBLE_TAP_TIMEOUT);
     }
-    this.lastTap = currentTime;
-    this.holdTriggered = false;
-  }
-
-  handleCancel() {
-    clearTimeout(this.holdTimeout);
-    this.holdTriggered = false;
   }
 }
 
 export function sendActionEvent(element, config, action) {
-  const currentTime = Date.now();
-
-  if (action === 'tap' && currentTime - lastDoubleTapTime < holdDuration) {
-    return;
+  const tapAction = config.tap_action ?? { action: "more-info" };
+  const doubleTapAction = config.double_tap_action || {
+    action: config.card_type === "state" ? "more-info" : "toggle"
+  }
+  const holdAction = config.hold_action || {
+    action: config.card_type === "state" ? "more-info" : "toggle"
   }
 
-  if (lastAction === action && currentTime - lastActionTime < holdDuration) {
-    return;
-  }
-
-  let actionConfig = {
+  const actionConfig = {
     entity: config.entity,
-    tap_action: config.tap_action || {
-      action: "more-info"
-    },
-    double_tap_action: config.double_tap_action || {
-      action: "toggle"
-    },
-    hold_action: config.hold_action || {
-      action: "toggle"
-    }
+    tap_action: tapAction,
+    double_tap_action: doubleTapAction,
+    hold_action: holdAction
   };
 
   setTimeout(() => {
-    const event = new Event('hass-action', {
-      bubbles: true,
-      composed: true,
-    });
-    event.detail = {
-      config: actionConfig,
-      action: action,
-    };
+    const event = new Event('hass-action', { bubbles: true, composed: true });
+    event.detail = { config: actionConfig, action: action };
     element.dispatchEvent(event);
   }, 1);
-
-  lastAction = action;
-  lastActionTime = currentTime;
-
-  if (action === 'double_tap') {
-    lastDoubleTapTime = currentTime;
-  }
 }
 
-export function addActions(element, config, hass, forwardHaptic) {
-  let handler = new ActionHandler(element, config, sendActionEvent);
-  if ('ontouchstart' in window) {
-    element.addEventListener('touchstart', handler.handleStart.bind(handler), { passive: true });
-    element.addEventListener('touchend', (event) => handler.handleEnd(event), { passive: true });
-    element.addEventListener('touchcancel', handler.handleCancel.bind(handler), { passive: true });
-  } else {
-    element.addEventListener('mousedown', handler.handleStart.bind(handler), { passive: true });
-    element.addEventListener('mouseup', (event) => handler.handleEnd(event), { passive: true });
-    element.addEventListener('mouseout', handler.handleCancel.bind(handler), { passive: true });
-  }
+export function addActions(element, config) {
+  const handler = new ActionHandler(element, config, sendActionEvent);
+
+  element.addEventListener('pointerdown', handler.handleStart.bind(handler), { passive: true });
+  element.addEventListener('pointerup', handler.handleEnd.bind(handler), { passive: true });
+  element.addEventListener('contextmenu', (e) => e.preventDefault());
 }

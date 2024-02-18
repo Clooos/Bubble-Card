@@ -210,16 +210,16 @@ export function handleButton(context) {
                 toggleEntity(hass, entityId);
             }
         }, { passive: true });
-        addActions(iconContainer, context.config, hass, forwardHaptic);
+        addActions(iconContainer, context.config);
         context.eventAdded = true;
     } else if (!context.eventAdded && buttonType === 'slider') {
         rangeSlider.addEventListener('mousedown', handleStart, { passive: true });
         rangeSlider.addEventListener('touchstart', handleStart, { passive: true });
-        addActions(iconContainer, context.config, hass, forwardHaptic);
+        addActions(iconContainer, context.config);
         context.eventAdded = true;
     } else if (!context.eventAdded && buttonType === 'custom') {
         switchButton.addEventListener('click', () => tapFeedback(context.switchButton), { passive: true });
-        addActions(switchButton, context.config, hass, forwardHaptic);
+        addActions(switchButton, context.config);
         context.eventAdded = true;
     }
 
