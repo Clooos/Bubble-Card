@@ -154,7 +154,7 @@ export function handlePopUp(context) {
 	        context.div.appendChild(context.iconContainer);
 
 	        createIcon(context, entityId, icon, context.iconContainer, editor);
-	        addActions(context.iconContainer, config, hass, forwardHaptic);
+	        addActions(context.iconContainer, config);
 
 	        context.h2 = document.createElement("h2");
 	        context.h2.textContent = name;

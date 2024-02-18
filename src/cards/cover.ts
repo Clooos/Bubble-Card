@@ -99,7 +99,7 @@ export function handleCover(context) {
         }, { passive: true });
         
         context.iconContainer = context.content.querySelector('.icon-container');
-        addActions(context.iconContainer, config, hass, forwardHaptic);
+        addActions(context.iconContainer, config);
 
         context.coverAdded = true;
     }

@@ -11,7 +11,6 @@ import {
     forwardHaptic,
     navigate
 } from '../tools/utils.ts';
-import { addActions } from '../tools/tap-actions.ts';
 import { getVariables } from '../var/cards.ts';
 
 let editor;
