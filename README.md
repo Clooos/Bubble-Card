@@ -25,7 +25,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ### Without HACS
 
-1. Download these files: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js) and [bubble-pop-up.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up.js)
+1. Download these files: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js) and [bubble-pop-up-fix.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up-fix.js)
 2. Add these files to your `<config>/www` folder
 3. On your dashboard click on the icon at the right top corner then on `Edit dashboard`
 4. Click again on that icon and then click on `Manage resources`
