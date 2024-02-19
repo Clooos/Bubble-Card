@@ -20,6 +20,10 @@ import { getVariables } from '../var/cards.ts';
 let oldTriggerEntityState;
 let storedElements = [];
 let rgbaBgColor;
+let startTouchY;
+let lastTouchY;
+let closeTimeout;
+let rgbColorOpacity;
 window.openPopups = 0;
 
 export function handlePopUp(context) {
@@ -43,10 +47,9 @@ export function handlePopUp(context) {
     const config = context.config;
 
 	const initPopUp = setTimeout(() => {
-		const initEvent = new Event('popUpInitialized');
-
 	    if (!context.verticalStack) {
 	    	context.verticalStack = context.getRootNode();
+	    	clearTimeout(initPopUp);
 	    } else {
 	    	clearTimeout(initPopUp);
 	    }
@@ -59,7 +62,7 @@ export function handlePopUp(context) {
 		)){
 			if (!context.popUp) {
 				context.popUp = context.verticalStack.querySelector('#root');
-	    		context.popUp.setAttribute("class", "pop-up");
+	    		context.popUp.classList.add('pop-up', 'close-pop-up');
 			}
 
             if (editor && !context.editorModeAdded) {
@@ -69,6 +72,8 @@ export function handlePopUp(context) {
             }
 
             createPopUp();
+
+            const initEvent = new Event('popUpInitialized');
            	window.dispatchEvent(initEvent);
 	    } else if (!editor && context.popUp && context.editorModeAdded) {
 	    	context.popUp.classList.remove('editor');
@@ -131,10 +136,6 @@ export function handlePopUp(context) {
     		context.stateEntityChanged = false;
     	}
     }
-
-    let startTouchY;
-    let lastTouchY;
-    let closeTimeout;
 
     function removeHash() {
 	    history.replaceState(null, null, location.href.split('#')[0]);
@@ -264,28 +265,12 @@ export function handlePopUp(context) {
 
     function updateColor() {
         if (entityId) {
-            const rgbColor = hass.states[entityId].attributes.rgb_color;
-            context.rgbColor = rgbColor 
-                ? (!isColorCloseToWhite(rgbColor) ? `rgb(${rgbColor})` : 'rgb(255,220,200)')
-                : (stateOn 
-                ? (entityId.startsWith("light.") ? 'rgba(255,220,200, 0.5)' : 'var(--accent-color)') 
-                : 'rgba(255, 255, 255, 1');
-
-            context.rgbColorOpacity = rgbColor
+        	const rgbColor = hass.states[entityId].attributes.rgb_color;
+            rgbColorOpacity = rgbColor
                 ? (!isColorCloseToWhite(rgbColor) ? `rgba(${rgbColor}, 0.5)` : 'rgba(255,220,200, 0.5)')
                 : (entityId && stateOn 
                     ? (entityId.startsWith("light.") ? 'rgba(255,220,200, 0.5)' : 'var(--accent-color)') 
                     : 'var(--background-color,var(--secondary-background-color))');
-
-            if (!rgbaBgColor) {
-            	rgbaBgColor = convertToRGBA(color, 0);
-            }
-
-            context.iconFilter = rgbColor ? 
-                (!isColorCloseToWhite(rgbColor) ? 'brightness(1.1)' : 'none') :
-                'none';
-        } else if (!rgbaBgColor) {
-            rgbaBgColor = convertToRGBA(color, 0);
         }
     }
 
@@ -301,7 +286,7 @@ export function handlePopUp(context) {
             ){
             	popUpOpen = popUpHash + true;
                 openPopUp();
-            // Close on back button from browser
+            // Close on hash change
             } else if (
             	window.hash !== popUpHash && 
             	popUpOpen !== popUpHash + false &&
@@ -309,10 +294,6 @@ export function handlePopUp(context) {
             ){
             	popUpOpen = popUpHash + false;
                 closePopUp();
-            }
-
-            if (window.hash !== popUpHash) {
-                pauseVideos(context, context.popUp, true);
             }
         }
     };
@@ -344,12 +325,13 @@ export function handlePopUp(context) {
 		}
 
 		const backdrop = document.createElement('div');
-		backdrop.classList.add('backdrop');
+		backdrop.classList.add('backdrop','hidden');
 
 		document.body.appendChild(backdrop);
 
 		const style = document.createElement('style');
 		style.innerHTML = `
+			${customStyles}
 		    .backdrop {
 				background-color: ${convertToRGBA(themeBgColor, 0.7, 0.7)};
 				position: fixed;
@@ -361,7 +343,6 @@ export function handlePopUp(context) {
 				opacity: 0;
 				transition: opacity 0.3s;
 				display: flex;
-				pointer-events: none;
 		    }
 
 		    .backdrop.visible {
@@ -374,6 +355,7 @@ export function handlePopUp(context) {
 				opacity: 0;
 				backdrop-filter: none;
 				-webkit-backdrop-filter: none;
+				pointer-events: none;
 		    }
 		  `;
 
@@ -381,6 +363,11 @@ export function handlePopUp(context) {
 
 		function toggleBackdrop() {
 			if (hideBackdrop) {
+				if (!window.backdrop.hidden) {
+					backdrop.style.pointerEvents = 'none';
+					window.backdrop.hidden = true;
+				}
+
 				return;
 			}
 
@@ -414,7 +401,6 @@ export function handlePopUp(context) {
 	    window.addEventListener('keydown', windowKeydownHandler, { passive: true });
 	    context.popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
 	    context.popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
-	    document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
 	    pauseVideos(context, context.popUp, false);
 	    resetAutoClose();
 
@@ -423,6 +409,7 @@ export function handlePopUp(context) {
 	            context.popUp.addEventListener('mouseup', removeHash, { passive: true });
 	            context.popUp.addEventListener('touchend', removeHash, { passive: true });
 	        }
+	       	document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
 	    	window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
 	    }, 10); 
 	}
@@ -485,9 +472,6 @@ export function handlePopUp(context) {
                 margin: 0 -${marginCenter}; /* 7px */
                 width: 100%;
                 background-color: ${rgbaColor};
-                box-shadow: 0px 0px 50px rgba(0,0,0,${shadowOpacity / 100});
-                backdrop-filter: ${hideBackdrop || window.hideBackdrop ? 'blur(' + bgBlur + 'px)' : 'none'};
-                -webkit-backdrop-filter: ${hideBackdrop || window.hideBackdrop ? 'blur(' + bgBlur + 'px)' : 'none'};
                 border-radius: 42px;
                 box-sizing: border-box;
                 top: calc(120% + ${marginTopMobile} + var(--header-height));
@@ -504,19 +488,21 @@ export function handlePopUp(context) {
                 /* For older Safari but not working with Firefox */
                 /* display: grid !important; */  
             }
-            .pop-up > :first-child::after {
-                content: '';
-                display: block;
-                position: sticky;
-                top: 0;
-                left: -50px;
-                margin: -70px 0 -36px -36px;
-                overflow: visible;
-                width: 200%;
-                height: 100px;
-                background: linear-gradient(0deg, ${rgbaBgColor} 0%, ${rgbaColor} 80%);
-                z-index: 0;
-            } 
+			.pop-up > :first-child::after {
+			    content: '';
+			    display: block;
+			    position: sticky;
+			    top: 0;
+			    left: -50px;
+			    margin: -70px 0 -36px -36px;
+			    overflow: visible;
+			    width: 200%;
+			    height: 100px;
+			    background: ${rgbaColor};
+			    -webkit-mask-image: linear-gradient(0deg, transparent 0%, black 80%);
+			    mask-image: linear-gradient(0deg, transparent 0%, black 80%);
+			    z-index: 0;
+			}
             .pop-up::-webkit-scrollbar {
                 display: none; /* for Chrome, Safari, and Opera */
             }
@@ -529,10 +515,15 @@ export function handlePopUp(context) {
             }
             .pop-up.open-pop-up {
                 transform: translateY(-120%);
+                box-shadow: 0px 0px 50px rgba(0,0,0,${shadowOpacity / 100});
+                backdrop-filter: ${hideBackdrop || window.hideBackdrop ? 'blur(' + bgBlur + 'px)' : 'none'};
+                -webkit-backdrop-filter: ${hideBackdrop || window.hideBackdrop ? 'blur(' + bgBlur + 'px)' : 'none'};
             }
             .pop-up.close-pop-up { 
                 transform: translateY(-20%);
                 box-shadow: none !important;
+				backdrop-filter: none !important;
+				-webkit-backdrop-filter: none !important;
             }
             @media only screen and (min-width: 600px) {
                 .pop-up {
@@ -576,7 +567,7 @@ export function handlePopUp(context) {
                 padding-right: 6px;
                 z-index: 1;
                 flex-grow: 1;
-                background-color: ${entityId ? context.rgbColorOpacity : 'var(--background-color,var(--secondary-background-color))'};
+                background-color: ${entityId ? rgbColorOpacity : 'var(--background-color,var(--secondary-background-color))'};
                 transition: background 1s;
                 border-radius: 25px;
                 margin-right: 14px;
@@ -676,7 +667,12 @@ export function handlePopUp(context) {
     }
 
     if (context.popUp && triggerEntity) {
-    	const triggerEntityState = hass.states[triggerEntity].state;
-		popUpTriggers(oldTriggerEntityState, triggerEntityState);
+    	const triggerEntityState = hass.states[triggerEntity] ? hass.states[triggerEntity].state : undefined;
+
+    	if (triggerEntityState) {
+    		popUpTriggers(oldTriggerEntityState, triggerEntityState);
+    	} else {
+    		return;
+    	}
 	}
 }

@@ -109,7 +109,7 @@ export function handleHorizontalButtonsStack(context) {
         const backgroundElement = buttonElement.background;
         if (hass.states[lightEntity].attributes.rgb_color) {
             const rgbColor = hass.states[lightEntity].attributes.rgb_color;
-            const rgbColorOpacity = (!isColorCloseToWhite(rgbColor) ? `rgba(${rgbColor}, 0.5)` : 'rgba(255,220,200, 0.5)')
+            const rgbColorOpacity = (!isColorCloseToWhite(rgbColor) ? `rgba(${rgbColor}, 0.5)` : 'rgba(255,220,200, 0.5)');
             backgroundElement.style.backgroundColor = rgbColorOpacity;
             backgroundElement.style.border = '1px solid rgba(0,0,0,0)';
         } else if (!hass.states[lightEntity].attributes.rgb_color && hass.states[lightEntity].state == 'on') {

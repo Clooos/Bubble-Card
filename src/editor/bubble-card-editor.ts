@@ -1,6 +1,8 @@
 import { version } from '../var/version.ts';
 import { fireEvent } from '../tools/utils.ts';
 
+customElements.get("ha-switch");
+
 const LitElement = Object.getPrototypeOf(customElements.get("ha-panel-lovelace"));
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
@@ -396,15 +398,15 @@ export default class BubbleCardEditor extends LitElement {
                         @input="${this._valueChanged}"
                         style="width: 100%;"
                     ></ha-textfield>
-                    <ha-formfield .label="Optional - Hide pop-up backdrop">
+                    <ha-formfield .label="Optional - Hide pop-up backdrop (a refresh is needed)">
                         <ha-switch
-                            aria-label="Optional - Hide pop-up backdrop"
+                            aria-label="Optional - Hide pop-up backdrop (a refresh is needed)"
                             .checked=${this._hide_backdrop}
                             .configValue="${"hide_backdrop"}"
                             @change=${this._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Hide pop-up backdrop</label> 
+                            <label class="mdc-label">Optional - Hide pop-up backdrop (a refresh is needed)</label> 
                         </div>
                     </ha-formfield>
                     <ha-alert alert-type="info">Set this toggle to true on the first pop-up of your main dashboard to disable the backdrop on all pop-ups.</ha-alert>
@@ -908,3 +910,5 @@ export default class BubbleCardEditor extends LitElement {
         `;
     }
 }
+
+customElements.define('bubble-card-editor', BubbleCardEditor);

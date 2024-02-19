@@ -56,8 +56,6 @@ class BubbleCard extends HTMLElement {
                 break;
         }
 
-        checkResources(hass);
-
         if (!window.columnFix) {
             window.columnFix = this.config.column_fix
         }
@@ -121,7 +119,6 @@ class BubbleCard extends HTMLElement {
 }
 
 customElements.define("bubble-card", BubbleCard);
-customElements.define('bubble-card-editor', BubbleCardEditor);
 
 window.customCards = window.customCards || [];
 window.customCards.push({

@@ -1,8 +1,10 @@
 function hideElementsUntilBubbleCard() {
+    const selector = "body";
+    const root = document.querySelector(selector);
+    let bubbleCard = customElements.get("bubble-card");
+
     const intervalId = setInterval(function() {
-        const selector = "body";
-        const root = document.querySelector(selector);
-        const bubbleCard = customElements.get("bubble-card");
+        bubbleCard = customElements.get("bubble-card");
 
         if (bubbleCard) {
             clearInterval(intervalId);
@@ -12,6 +14,12 @@ function hideElementsUntilBubbleCard() {
             root.style.opacity = "0";
         }
     }, 0);
+
+    setTimeout(function() {
+        clearInterval(intervalId);
+        root.style.transition = "opacity 0.5s";
+        root.style.opacity = "1";
+    }, 5000);
 }
 
 hideElementsUntilBubbleCard();

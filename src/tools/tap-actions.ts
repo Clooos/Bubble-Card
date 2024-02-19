@@ -1,5 +1,5 @@
-const MAX_HOLD_DURATION = 300;
-const DOUBLE_TAP_TIMEOUT = 300;
+const maxHoldDuration = 300;
+const doubleTapTimeout = 300;
 
 class ActionHandler {
   constructor(element, config, sendActionEvent) {
@@ -29,17 +29,17 @@ class ActionHandler {
     this.lastTap = currentTime;
     this.startTime = null;
 
-    if (holdDuration > MAX_HOLD_DURATION) {
-      // First scenario: the user was holding the button for MAX_HOLD_DURATION
+    if (holdDuration > maxHoldDuration) {
+      // First scenario: the user was holding the button for maxHoldDuration
       this.sendActionEvent(this.element, this.config, 'hold');
-    } else if (doubleTapDuration < DOUBLE_TAP_TIMEOUT) {
+    } else if (doubleTapDuration < doubleTapTimeout) {
       // Second scenario: the user is not holding and the previous tap was a short time ago
       this.sendActionEvent(this.element, this.config, 'double_tap');
     } else {
       // Third scenario: we wait for the double tap amount of time and if nothing happens, send a tap
       this.tapTimeout = setTimeout(() => {
         this.sendActionEvent(this.element, this.config, 'tap');
-      }, DOUBLE_TAP_TIMEOUT);
+      }, doubleTapTimeout);
     }
   }
 }
