@@ -74,7 +74,9 @@ export function handlePopUp(context) {
             createPopUp();
 
             const initEvent = new Event('popUpInitialized');
-           	window.dispatchEvent(initEvent);
+            setTimeout(() => {
+           		window.dispatchEvent(initEvent);
+           	}, 10);
 	    } else if (!editor && context.popUp && context.editorModeAdded) {
 	    	context.popUp.classList.remove('editor');
 	    	createPopUp();
@@ -119,7 +121,7 @@ export function handlePopUp(context) {
     if (!window.hideBackdrop && hideBackdrop) {
     	window.hideBackdrop = true;
     }
-    let backgroundCamera = context.config.background_camera || false;
+    let backgroundUpdate = context.config.background_update || false;
     let marginTopMobile = config.margin_top_mobile 
         ? (config.margin_top_mobile !== '0' ? config.margin_top_mobile : '0px')
         : '0px';
@@ -298,26 +300,40 @@ export function handlePopUp(context) {
         }
     };
 
-	function pauseVideos(context, root, pause) {
-	    if (backgroundCamera && !hideCard) {
+	function getDepth(element) {
+	    let depth = 0;
+	    while (element.parentNode) {
+	        depth++;
+	        element = element.parentNode;
+	    }
+	    return depth;
+	}
+
+	function removePopUpContent(context, root, remove) {
+	    if (backgroundUpdate) {
 	        return;
 	    }
 
-	    if ((pause || (hideCard && popUpOpen !== popUpHash + true)) && !editor) {
-	    	const videos = root.querySelectorAll('frigate-card, hui-picture-glance-card, hui-picture-entity-card, hui-picture-elements-card, hui-picture-card, hui-camera-card, webrtc-camera' + hideCard);
-	        for (let i=0; i<videos.length; i++) {
-	        	context.videoPaused = true;
-	            storedElements.push({element: videos[i], nextSibling: videos[i].nextSibling, parent: videos[i].parentNode});
-	            videos[i].parentNode.removeChild(videos[i]);
-	        }
-	    } else if (context.videoPaused && ((!pause || (hideCard && popUpOpen !== popUpHash + false)) || editor)) {
-	        while (storedElements.length > 0) {
-	        	context.videoPaused = false;
-	            var storedElement = storedElements.shift();
-	            storedElement.parent.insertBefore(storedElement.element, storedElement.nextSibling);
-	        }
+	    if (remove && !editor) {
+	        const popUpContent = root.querySelectorAll('*');
+	        popUpContent.forEach((element) => {
+	            context.contentRemoved = true;
+	            storedElements.push({element: element, nextSibling: element.nextSibling, parent: element.parentNode});
+	            element.parentNode.removeChild(element);
+	        });
+	    } else if (context.contentRemoved && !remove) {
+	        storedElements.sort((a, b) => getDepth(b.element) - getDepth(a.element)).forEach((storedElement) => {
+	            context.contentRemoved = false;
+	            if (storedElement.parent.contains(storedElement.nextSibling)) {
+	                storedElement.parent.insertBefore(storedElement.element, storedElement.nextSibling);
+	            } else {
+	                storedElement.parent.appendChild(storedElement.element);
+	            }
+	        });
+	        storedElements = [];
 	    }
 	}
+
 
 	function createBackdrop() {
 		if (window.backdrop) {
@@ -392,16 +408,64 @@ export function handlePopUp(context) {
 
 	const { backdrop, toggleBackdrop } = createBackdrop();
 
+	// function openPopUp() {
+	//     removePopUpContent(context, context.popUp, false);
+	// 	window.openPopups++;
+	// 	toggleBackdrop();
+	// 	context.popUp.classList.remove('close-pop-up');
+	// 	context.popUp.classList.add('open-pop-up');
+	//     context.content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
+	//     window.addEventListener('keydown', windowKeydownHandler, { passive: true });
+	//     context.popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
+	//     context.popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
+	//     resetAutoClose();
+
+	//     setTimeout(function() {
+	//         if (closeOnClick) {
+	//             context.popUp.addEventListener('mouseup', removeHash, { passive: true });
+	//             context.popUp.addEventListener('touchend', removeHash, { passive: true });
+	//         }
+	//        	document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
+	//     	window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
+	//     }, 10); 
+	// }
+
+	// function closePopUp() {
+	// 	window.openPopups--;
+	//     context.popUp.classList.remove('open-pop-up');
+	//     context.popUp.classList.add('close-pop-up');
+	// 	toggleBackdrop();
+	//     context.content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler); 
+	//     window.removeEventListener('keydown', windowKeydownHandler);
+	//     window.removeEventListener('click', closePopUpByClickingOutside);
+	//     context.popUp.removeEventListener('touchstart', popUpTouchstartHandler);
+	//     context.popUp.removeEventListener('touchmove', popUpTouchmoveHandler);
+	//     document.body.style.overflow = '';
+	//     clearTimeout(closeTimeout);
+
+	//    	if (closeOnClick) {
+	//         context.popUp.removeEventListener('mouseup', removeHash);
+	//         context.popUp.removeEventListener('touchend', removeHash);	
+	//     }
+
+	//     setTimeout(function() {
+	//         removePopUpContent(context, context.popUp, true);
+	//     }, 320);
+	// }
+
+	let removeContentTimeout;
+
 	function openPopUp() {
-		window.openPopups++;
-		context.popUp.classList.remove('close-pop-up');
-		context.popUp.classList.add('open-pop-up');
-		toggleBackdrop();
+	    clearTimeout(removeContentTimeout); // Annule le timeout précédent
+	    removePopUpContent(context, context.popUp, false);
+	    window.openPopups++;
+	    toggleBackdrop();
+	    context.popUp.classList.remove('close-pop-up');
+	    context.popUp.classList.add('open-pop-up');
 	    context.content.querySelector('.power-button').addEventListener('click', powerButtonClickHandler, { passive: true });
 	    window.addEventListener('keydown', windowKeydownHandler, { passive: true });
 	    context.popUp.addEventListener('touchstart', popUpTouchstartHandler, { passive: true });
 	    context.popUp.addEventListener('touchmove', popUpTouchmoveHandler, { passive: true });
-	    pauseVideos(context, context.popUp, false);
 	    resetAutoClose();
 
 	    setTimeout(function() {
@@ -409,16 +473,16 @@ export function handlePopUp(context) {
 	            context.popUp.addEventListener('mouseup', removeHash, { passive: true });
 	            context.popUp.addEventListener('touchend', removeHash, { passive: true });
 	        }
-	       	document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
-	    	window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
+	        document.body.style.overflow = 'hidden'; // Fix scroll inside pop-ups only
+	        window.addEventListener('click', closePopUpByClickingOutside, { passive: true });
 	    }, 10); 
 	}
 
 	function closePopUp() {
-		window.openPopups--;
+	    window.openPopups--;
 	    context.popUp.classList.remove('open-pop-up');
 	    context.popUp.classList.add('close-pop-up');
-		toggleBackdrop();
+	    toggleBackdrop();
 	    context.content.querySelector('.power-button').removeEventListener('click', powerButtonClickHandler); 
 	    window.removeEventListener('keydown', windowKeydownHandler);
 	    window.removeEventListener('click', closePopUpByClickingOutside);
@@ -427,13 +491,13 @@ export function handlePopUp(context) {
 	    document.body.style.overflow = '';
 	    clearTimeout(closeTimeout);
 
-	   	if (closeOnClick) {
+	    if (closeOnClick) {
 	        context.popUp.removeEventListener('mouseup', removeHash);
-	        context.popUp.removeEventListener('touchend', removeHash);	
+	        context.popUp.removeEventListener('touchend', removeHash);  
 	    }
 
-	    setTimeout(function() {
-	        pauseVideos(context, context.popUp, true);
+	    removeContentTimeout = setTimeout(function() {
+	        removePopUpContent(context, context.popUp, true);
 	    }, 320);
 	}
 
@@ -445,23 +509,18 @@ export function handlePopUp(context) {
         updateColor();
 
         if (!context.eventAdded && !editor) {
-        	pauseVideos(context, context.popUp, true);
+        	removePopUpContent(context, context.popUp, true);
             window['checkHashRef_' + popUpHash] = checkHash;
             window.addEventListener('urlChanged', window['checkHashRef_' + popUpHash], { passive: true });
             context.eventAdded = true;
         } else if (context.eventAdded && editor) {
-        	pauseVideos(context, context.popUp, false);
+        	removePopUpContent(context, context.popUp, false);
         	window.removeEventListener('urlChanged', window['checkHashRef_' + popUpHash]);
         	toggleBackdrop();
         	context.eventAdded = false;
         }
 
         const popUpStyles = `                    
-            ha-card {
-                margin-top: 0 !important;
-                background: none !important;
-                border: none !important;
-            }
             .pop-up.card-content {
                 width: 100% !important;
                 padding: 0 !important;

@@ -114,8 +114,8 @@ export default class BubbleCardEditor extends LitElement {
         return this._config.close_on_click || false;
     }
 
-    get _background_camera() {
-        return this._config.background_camera || false;
+    get _background_update() {
+        return this._config.background_update || false;
     }
 
     get _icon_open() {
@@ -286,15 +286,15 @@ export default class BubbleCardEditor extends LitElement {
                             <label class="mdc-label">Optional - Close the pop-up after any click or tap</label> 
                         </div>
                     </ha-formfield>
-                    <ha-formfield .label="Optional - Play camera in background (not recommended)">
+                    <ha-formfield .label="Optional - Update cards in background (not recommended)">
                         <ha-switch
-                            aria-label="Optional - Play camera in background (not recommended)"
-                            .checked=${this._background_camera}
-                            .configValue="${"background_camera"}"
+                            aria-label="Optional - Update cards in background (not recommended)"
+                            .checked=${this._background_update}
+                            .configValue="${"background_update"}"
                             @change=${this._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Play camera in background (not recommended)</label> 
+                            <label class="mdc-label">Optional - Update cards in background (not recommended)</label> 
                         </div>
                     </ha-formfield>
                     <h3>Pop-up trigger</h3>

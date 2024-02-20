@@ -22,6 +22,6 @@ export function addUrlListener() {
             window.dispatchEvent(event);
         };
         
-        window.addEventListener('popUpInitialized', popUpInitialized, { passive: true });        
+        window.addEventListener('popUpInitialized', popUpInitialized, { passive: true, once: true });        
     }
 }

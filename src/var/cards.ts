@@ -9,8 +9,8 @@ import {
 import { hasStateChanged } from '../tools/utils.ts';
 
 let popUpOpen;
-let rgbaColor;
 let rgbColor;
+let rgbaColor;
 let formatedState;
 let haStyle;
 let themeBgColor;
@@ -52,10 +52,11 @@ export function getVariables(context, config, hass, editor) {
     haStyle = !haStyle ? getComputedStyle(document.body) : '';
     themeBgColor = !themeBgColor ? haStyle.getPropertyValue('--ha-card-background') || haStyle.getPropertyValue('--card-background-color') : '';
     let color = config.bg_color ? config.bg_color : themeBgColor;
-    if (color && (!rgbaColor || rgbaColor !== context.color)) {
+    if (color && (!context.rgbaColor || context.rgbaColor !== context.color || editor)) {
         const lighten = 1.02;
-        rgbaColor = convertToRGBA(color, (bgOpacity / 100), lighten);
-        context.color = rgbaColor;
+        context.rgbaColor = convertToRGBA(color, (bgOpacity / 100), lighten);
+        context.color = context.rgbaColor;
+        rgbaColor = context.rgbaColor;
         window.color = color;
     }
 

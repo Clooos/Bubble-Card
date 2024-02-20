@@ -10,10 +10,23 @@ import { handleEmptyColumn } from './cards/empty-column.ts';
 import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
 let editor;
-addUrlListener();
 
 class BubbleCard extends HTMLElement {
-    
+
+    connectedCallback() {
+        window.addEventListener('focus', this.updateOnFocus);
+        addUrlListener();
+    }
+
+    disconnectedCallback() {
+        window.removeEventListener('focus', this.updateOnFocus);
+    }
+
+    updateOnFocus = () => {
+        // Fix entities not updating after coming back to the HA Companion app
+        this.hass = this._hass;
+    }
+
     set hass(hass) {
 
         initializeContent(this);
