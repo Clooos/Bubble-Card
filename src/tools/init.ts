@@ -18,27 +18,3 @@ export function initializeContent(context) {
         context.content = content;
     }
 }
-
-// Check for edit mode
-
-function selectElement() {
-  try {
-    return document.querySelector("body > home-assistant")
-      .shadowRoot.querySelector("home-assistant-main")
-      .shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace")
-      .shadowRoot.querySelector("hui-root")
-      .shadowRoot.querySelector("div");
-  } catch (error) {
-    return undefined;
-  }
-}
-
-export function checkEditor() {
-    const editorElement = selectElement();
-
-    if (!editorElement) {
-        return;
-    }
-    return editorElement.classList.contains('edit-mode');
-}
-

@@ -5,19 +5,17 @@ import {
     isColorCloseToWhite,
     convertToRGBA
 } from '../tools/style.ts';
-import { checkEditor } from '../tools/init.ts';
-import { 
+import {
     fireEvent,
     forwardHaptic,
     navigate
 } from '../tools/utils.ts';
 import { getVariables } from '../var/cards.ts';
 
-let editor;
-
 export function handleHorizontalButtonsStack(context) {
 
     const hass = context._hass;
+    const editor = context.editor;
 
     let {
         customStyles,
@@ -31,19 +29,15 @@ export function handleHorizontalButtonsStack(context) {
         popUpOpen
     } = getVariables(context, context.config, hass, editor);
 
-    let editorMode = setInterval(() => {
-        editor = checkEditor();
-
-        if (editor && !context.editorModeAdded) {
-            context.buttonsContainer.classList.add('editor');
-            context.card.classList.add('editor');
-            context.editorModeAdded = true;
-        } else if (!editor && context.editorModeAdded) {
-            context.buttonsContainer.classList.remove('editor');
-            context.card.classList.remove('editor');
-            context.editorModeAdded = false;
-        }
-    }, 100);
+    if (editor && !context.editorModeAdded) {
+        context.buttonsContainer.classList.add('editor');
+        context.card.classList.add('editor');
+        context.editorModeAdded = true;
+    } else if (!editor && context.editorModeAdded) {
+        context.buttonsContainer.classList.remove('editor');
+        context.card.classList.remove('editor');
+        context.editorModeAdded = false;
+    }
 
     let hideGradient = context.config.hide_gradient ? true : false;
 
