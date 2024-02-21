@@ -94,22 +94,18 @@ export function handlePopUp(context) {
         isSidebarHidden,
         stateChanged,
         stateOn,
-        formatedState,
         marginCenter,
         popUpOpen,
         rgbaColor,
         rgbColor,
-        bgOpacity,
         shadowOpacity,
         bgBlur,
-        iconColorOpacity,
-        iconColor,
-        iconFilter,
         iconStyles,
         themeBgColor,
-        color,
+        color
     } = getVariables(context, config, hass, editor);
 
+    let formatedState;
     let autoClose = config.auto_close || false;
     let popUpHash = config.hash;
     let displayPowerButton = config.entity ? 'flex' : 'none';
@@ -305,7 +301,7 @@ export function handlePopUp(context) {
 	        return;
 	    }
 
-	    if (remove && !editor) {
+	    if (!context.contentRemoved && remove && !editor) {
 	        const popUpContent = root.querySelectorAll('*');
 	        popUpContent.forEach((element) => {
 	            context.contentRemoved = true;
