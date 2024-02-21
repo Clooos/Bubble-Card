@@ -18,3 +18,4 @@ export function initializeContent(context) {
         context.content = content;
     }
 }
+

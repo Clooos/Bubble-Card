@@ -300,15 +300,6 @@ export function handlePopUp(context) {
         }
     };
 
-	function getDepth(element) {
-	    let depth = 0;
-	    while (element.parentNode) {
-	        depth++;
-	        element = element.parentNode;
-	    }
-	    return depth;
-	}
-
 	function removePopUpContent(context, root, remove) {
 	    if (backgroundUpdate) {
 	        return;
@@ -318,11 +309,11 @@ export function handlePopUp(context) {
 	        const popUpContent = root.querySelectorAll('*');
 	        popUpContent.forEach((element) => {
 	            context.contentRemoved = true;
-	            storedElements.push({element: element, nextSibling: element.nextSibling, parent: element.parentNode});
+	            storedElements.unshift({element: element, nextSibling: element.nextSibling, parent: element.parentNode});
 	            element.parentNode.removeChild(element);
 	        });
 	    } else if (context.contentRemoved && !remove) {
-	        storedElements.sort((a, b) => getDepth(b.element) - getDepth(a.element)).forEach((storedElement) => {
+	        storedElements.forEach((storedElement) => {
 	            context.contentRemoved = false;
 	            if (storedElement.parent.contains(storedElement.nextSibling)) {
 	                storedElement.parent.insertBefore(storedElement.element, storedElement.nextSibling);
@@ -333,7 +324,6 @@ export function handlePopUp(context) {
 	        storedElements = [];
 	    }
 	}
-
 
 	function createBackdrop() {
 		if (window.backdrop) {

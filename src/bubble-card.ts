@@ -29,8 +29,9 @@ class BubbleCard extends HTMLElement {
     set editMode(editMode) {
         this.editor = editMode;
 
-        if (this._hass)
+        if (this._hass) {
             this.updateBubbleCard();
+        }
     }
 
     set hass(hass) {
@@ -47,6 +48,7 @@ class BubbleCard extends HTMLElement {
     }
 
     updateBubbleCard() {
+
         switch (this.config.card_type) {
 
             // Initialize pop-up card
@@ -82,6 +84,7 @@ class BubbleCard extends HTMLElement {
     }
 
     setConfig(config) {
+
         if (config.card_type === 'pop-up') {
             if (!config.hash) {
                 throw new Error("You need to define an hash. Please note that this card must be placed inside a vertical_stack to work as a pop-up.");
@@ -119,6 +122,7 @@ class BubbleCard extends HTMLElement {
     }
 
     getCardSize() {
+        
       // Fix the empty columns caused by the pop-ups on the dashboard
       // Check the value of window.columnFix
       if (window.columnFix === "true") {

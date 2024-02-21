@@ -29,6 +29,23 @@ export function handleHorizontalButtonsStack(context) {
         popUpOpen
     } = getVariables(context, context.config, hass, editor);
 
+    if (!context.buttonsAdded) {
+        const buttonsContainer = document.createElement("div");
+        buttonsContainer.classList.add("horizontal-buttons-stack-container");
+        context.content.appendChild(buttonsContainer);
+        context.buttonsContainer = buttonsContainer;
+
+        context.buttonsContainer.addEventListener('click', function(event) {
+            // Use closest to get the button element, even if an inner element was clicked
+            const buttonElement = event.target.closest('.button');
+            if (buttonElement) {
+                // Retrieve the link from the data-link attribute
+                const link = buttonElement.getAttribute('data-link');
+                handleClick(event, link);
+            }
+        }, { passive: true });
+    }
+
     if (editor && !context.editorModeAdded) {
         context.buttonsContainer.classList.add('editor');
         context.card.classList.add('editor');
@@ -43,6 +60,8 @@ export function handleHorizontalButtonsStack(context) {
 
     const createButton = (button, link, icon) => {
         const buttonElement = document.createElement("div");
+        // Add a data-link attribute to store the link
+        buttonElement.setAttribute("data-link", link);
         buttonElement.setAttribute("class", `button ${link.substring(1)}`);
         buttonElement.innerHTML = `
             ${icon !== '' ? `<ha-icon icon="${icon}" class="icon" style="${button !== '' ? `margin-right: 8px;` : ''}"></ha-icon>` : ''}
@@ -55,25 +74,11 @@ export function handleHorizontalButtonsStack(context) {
         buttonElement.appendChild(backgroundElement);
         buttonElement.background = backgroundElement;
 
-        const handleClick = (event) => {
-            popUpOpen = location.hash + true;
-            if (popUpOpen !== link + true) {
-                navigate('', link);
-                popUpOpen = link + true;
-            } else {
-                history.replaceState(null, null, location.href.split('#')[0]);
-                fireEvent(window, "location-changed", true);
-                popUpOpen = link + false;
-            }
-            forwardHaptic("light");
-        };
-
         const handleUrlChange = () => {
             highlightButton();
         };
 
         if (!buttonElement.hasListener) {
-            buttonElement.addEventListener('click', handleClick, { passive: true });
             window.addEventListener('urlChanged', handleUrlChange, { passive: true });
             buttonElement.hasListener = true;
         }
@@ -88,16 +93,22 @@ export function handleHorizontalButtonsStack(context) {
                 }
             }
         }
-    
+
         return buttonElement;
     };
-    
-    if (!context.buttonsAdded) {
-        const buttonsContainer = document.createElement("div");
-        buttonsContainer.classList.add("horizontal-buttons-stack-container");
-        context.content.appendChild(buttonsContainer);
-        context.buttonsContainer = buttonsContainer;
-    }
+
+    const handleClick = (event, link) => {
+        popUpOpen = location.hash + true;
+        if (popUpOpen !== link + true) {
+            navigate('', link);
+            popUpOpen = link + true;
+        } else {
+            history.replaceState(null, null, location.href.split('#')[0]);
+            fireEvent(window, "location-changed", true);
+            popUpOpen = link + false;
+        }
+        forwardHaptic("light");
+    };
     
     const updateButtonStyle = (buttonElement, lightEntity) => {
         const backgroundElement = buttonElement.background;
@@ -235,7 +246,6 @@ export function handleHorizontalButtonsStack(context) {
             }
         });
     }
-
     
     if (!context.buttonsUpdated || editor) {
         updateButtons(context);
@@ -284,6 +294,7 @@ export function handleHorizontalButtonsStack(context) {
             padding: 0 16px;
             color: var(--primary-text-color);
             transition: background-color 1s, border 1s, transform 1s;
+            cursor: pointer;
         }
         .color-background {
             border-radius: 24px;
