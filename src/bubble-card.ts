@@ -1,6 +1,6 @@
 import { version } from './var/version.ts';
 import { addUrlListener } from './tools/url-listener.ts';
-import { initializeContent, checkEditor, checkResources } from './tools/init.ts';
+import { initializeContent } from './tools/init.ts';
 import { handlePopUp } from './cards/pop-up.ts';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack.ts';
 import { handleButton } from './cards/button.ts';
@@ -9,9 +9,8 @@ import { handleCover } from './cards/cover.ts';
 import { handleEmptyColumn } from './cards/empty-column.ts';
 import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
-let editor;
-
 class BubbleCard extends HTMLElement {
+    editor = false;
 
     connectedCallback() {
         window.addEventListener('focus', this.updateOnFocus);
@@ -27,15 +26,27 @@ class BubbleCard extends HTMLElement {
         this.hass = this._hass;
     }
 
+    set editMode(editMode) {
+        this.editor = editMode;
+
+        if (this._hass)
+            this.updateBubbleCard();
+    }
+
     set hass(hass) {
 
         initializeContent(this);
 
         this._hass = hass;
 
-        editor = checkEditor();
-        this.editor = editor;
+        this.updateBubbleCard();
 
+        if (!window.columnFix) {
+            window.columnFix = this.config.column_fix
+        }
+    }
+
+    updateBubbleCard() {
         switch (this.config.card_type) {
 
             // Initialize pop-up card
@@ -47,30 +58,26 @@ class BubbleCard extends HTMLElement {
             case 'button' :
                 handleButton(this);
                 break;
-    
+
             // Initialize separator
             case 'separator' :
                 handleSeparator(this);
                 break;
-    
+
             // Initialize cover card
             case 'cover' :
                 handleCover(this);
                 break;
-    
+
             // Intitalize empty card
             case 'empty-column' :
                 handleEmptyColumn(this);
                 break;
 
             // Initialize horizontal buttons stack
-            case 'horizontal-buttons-stack' : 
+            case 'horizontal-buttons-stack' :
                 handleHorizontalButtonsStack(this);
                 break;
-        }
-
-        if (!window.columnFix) {
-            window.columnFix = this.config.column_fix
         }
     }
 
