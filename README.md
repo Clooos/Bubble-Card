@@ -42,14 +42,13 @@ If it's not working, just try to clear your browser cache.
 
 This method allows you to get updates directly on the HACS main page
 
-
 1. If HACS is not installed yet, download it following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
 2. Proceed to the HACS initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
 3. On your sidebar go to `HACS` > `Frontend`
 4. Click on the `+` button at the bottom right corner
 5. Now search for `Bubble Card` and then click on the button at the bottom right corner to download it
 6. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
-7. You can now click on `Add card` in the bottom right corner and search for `Bubble Card` or `Bubble Pop-up`
+7. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
 
 If it's not working, try to clear your browser cache.
 
@@ -112,7 +111,7 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
 2. This `vertical-stack` must be after all your other cards and before your `horizontal-buttons-stack` if you have one
-3. Now add a `Bubble Card` (Regular mode) or a `Bubble Pop-Up` ([Optimized mode](#pop-up-optimization))
+3. Now add a `Bubble Card` with the `Pop-up` type
 4. Just fill in the required inputs and the ones you need
 
 ### Options
@@ -178,7 +177,8 @@ This feature allows you to open a pop-up based on the state of any entity, for e
 #### Example
  
  ```yaml
-type: custom:bubble-pop-up
+type: custom:bubble-card
+card_type: pop-up
 hash: '#kitchen'
 name: Security
 icon: mdi:video
@@ -189,7 +189,7 @@ trigger_close: true
 
 ## Horizontal buttons stack
 
-This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer. This card will have more features in the future.
+This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer.
 
 **⚠️ Important: This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.**
 
