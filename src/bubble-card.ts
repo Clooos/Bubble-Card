@@ -5,7 +5,7 @@ import { handlePopUp } from './cards/pop-up.ts';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack.ts';
 import { handleButton } from './cards/button/index.ts';
 import { handleSeparator } from './cards/separator/index.ts';
-import { handleCover } from './cards/cover.ts';
+import { handleCover } from './cards/cover/index.ts';
 import { handleEmptyColumn } from './cards/empty-column/index.ts';
 import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
