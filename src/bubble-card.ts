@@ -6,7 +6,7 @@ import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack.t
 import { handleButton } from './cards/button/index.ts';
 import { handleSeparator } from './cards/separator/index.ts';
 import { handleCover } from './cards/cover.ts';
-import { handleEmptyColumn } from './cards/empty-column.ts';
+import { handleEmptyColumn } from './cards/empty-column/index.ts';
 import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {
