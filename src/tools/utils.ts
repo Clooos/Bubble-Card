@@ -15,6 +15,18 @@ export function hasStateChanged(context, hass, entityId) {
     }
 }
 
+export function configChanged(context, card) {
+    if (  
+        card.classList.contains('editor') &&
+        context.config !== context.previousConfig
+    ){
+        context.previousConfig = context.config;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 export const fireEvent = (node, type, detail, options) => {
     options = options || {};
     detail = detail === null || detail === undefined ? {} : detail;
