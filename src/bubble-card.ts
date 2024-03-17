@@ -1,7 +1,7 @@
 import { version } from './var/version.ts';
 import { addUrlListener } from './tools/url-listener.ts';
 import { initializeContent } from './tools/init.ts';
-import { handlePopUp } from './cards/pop-up.ts';
+import { handlePopUp } from './cards/pop-up/index.ts';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack/index.ts';
 import { handleButton } from './cards/button/index.ts';
 import { handleSeparator } from './cards/separator/index.ts';
@@ -14,7 +14,6 @@ class BubbleCard extends HTMLElement {
 
     connectedCallback() {
         window.addEventListener('focus', this.updateOnFocus);
-        addUrlListener();
     }
 
     disconnectedCallback() {
@@ -27,6 +26,10 @@ class BubbleCard extends HTMLElement {
     }
 
     set editMode(editMode) {
+        if (this.editor === editMode) {
+            return;
+        }
+
         this.editor = editMode;
 
         if (this._hass) {
