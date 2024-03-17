@@ -1,6 +1,5 @@
 import { version } from './var/version.ts';
-import { addUrlListener } from './tools/url-listener.ts';
-import { initializeContent } from './tools/init.ts';
+import { initializeContent, resetContent } from './tools/init.ts';
 import { handlePopUp } from './cards/pop-up/index.ts';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack/index.ts';
 import { handleButton } from './cards/button/index.ts';
@@ -11,13 +10,20 @@ import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {
     editor = false;
+    isConnected = false;
 
     connectedCallback() {
         window.addEventListener('focus', this.updateOnFocus);
+        this.isConnected = true;
+
+        if (this._hass) {
+            this.updateBubbleCard();
+        }
     }
 
     disconnectedCallback() {
         window.removeEventListener('focus', this.updateOnFocus);
+        this.isConnected = false;
     }
 
     updateOnFocus = () => {
@@ -38,12 +44,13 @@ class BubbleCard extends HTMLElement {
     }
 
     set hass(hass) {
-
         initializeContent(this);
 
         this._hass = hass;
 
-        this.updateBubbleCard();
+        if (this.isConnected) {
+            this.updateBubbleCard();
+        }
 
         if (!window.columnFix) {
             window.columnFix = this.config.column_fix
@@ -87,6 +94,9 @@ class BubbleCard extends HTMLElement {
     }
 
     setConfig(config) {
+        if (this.config && config.card_type !== 'pop-up') {
+            resetContent(this);
+        }
 
         if (config.card_type === 'pop-up') {
             if (!config.hash) {
@@ -137,6 +147,10 @@ class BubbleCard extends HTMLElement {
             this.config = enhancedConfig;
         } else {
             this.config = config;
+        }
+
+        if (this._hass && config.card_type !== 'pop-up') {
+            this.updateBubbleCard();
         }
     }
 
