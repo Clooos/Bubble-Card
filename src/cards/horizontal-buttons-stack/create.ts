@@ -1,4 +1,5 @@
 import { createElement, forwardHaptic } from "../../tools/utils.ts";
+import { addHash, removeHash } from "../pop-up/helpers.ts";
 import styles from "./styles.ts";
 
 let isOpen = false;
@@ -31,12 +32,10 @@ function createButton(context, index) {
         }
 
         if (isOpen) {
-          history.replaceState(null, "", location.href.split('#')[0]);
+          removeHash()
         } else {
-          history.pushState(null, "", link);
+          addHash(link);
         }
-        const event = new Event("location-changed");
-        window.dispatchEvent(event); 
         isOpen = !isOpen;
 
         forwardHaptic("light");
@@ -52,7 +51,6 @@ function createButton(context, index) {
     button.index = index;
 
     function handleUrlChange() {
-
         if (!context.config.highlight_current_view) return;
 
         const isShown = location.pathname === link || location.hash === link;
