@@ -147,7 +147,8 @@ export default class BubbleCardEditor extends LitElement {
     }
     
     get _show_state() {
-        return this._config.show_state || false;
+        const defaultState = this._config.card_type === 'state' ? true : false;
+        return this._config.show_state || defaultState;
     }
 
     get _hide_backdrop() {
@@ -210,6 +211,10 @@ export default class BubbleCardEditor extends LitElement {
                 {
                     'label': 'Separator',
                     'value': 'separator'
+                },
+                {
+                    'label': 'State',
+                    'value': 'state'
                 }
             ];
 
@@ -220,6 +225,10 @@ export default class BubbleCardEditor extends LitElement {
                 {
                     'label': 'Slider',
                     'value': 'slider'
+                },
+                {
+                    'label': 'State',
+                    'value': 'state'
                 }
             ];
 
