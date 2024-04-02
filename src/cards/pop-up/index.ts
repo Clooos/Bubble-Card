@@ -21,7 +21,6 @@ export async function handlePopUp(context) {
       changeIcon(context);
       changeLight(context);
       changeName(context);
-      changeState(context);
       changeStatus(context);
       changeStyle(context);
   }

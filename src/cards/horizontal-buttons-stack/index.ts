@@ -7,7 +7,7 @@ export function handleHorizontalButtonsStack(context) {
         createStructure(context);
     }
 
-    if (context.editor && !configChanged(context, context.elements.cardContainer)) return;
+    //if (context.editor && !configChanged(context, context.elements.cardContainer)) return;
 
     sortButtons(context);
     changeConfig(context);

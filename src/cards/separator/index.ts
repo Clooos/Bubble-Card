@@ -1,4 +1,9 @@
-import { changeIcon, changeName, changeStyle } from './changes.ts'
+import { changeState } from "../../tools/global-changes.ts";
+import { 
+    changeIcon, 
+    changeName, 
+    changeStyle 
+} from './changes.ts'
 import { createStructure } from './create.ts';
 
 export function handleSeparator(context) {

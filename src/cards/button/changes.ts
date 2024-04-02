@@ -1,13 +1,14 @@
-import { getButtonType, isLight, isMediaPlayer } from "./helpers.ts";
+import { getButtonType } from "./helpers.ts";
 import { 
-  getBrightness,
+  applyScrollingEffect,
   getIcon,
   getIconColor,
   getImage,
   getName,
   getState,
-  getVolume,
+  getAttribute,
   isStateOn,
+  isEntityType
 } from '../../tools/utils.ts';
 
 export function changeButton(context) {
@@ -21,12 +22,11 @@ export function changeButton(context) {
   }
 }
 export function changeIcon(context) {
-  const buttonType = getButtonType(context);
   const isOn = isStateOn(context);
   const icon = getIcon(context);
   const image = getImage(context);
 
-  if (isLight(context) && isOn && buttonType !== 'state') {
+  if (isEntityType(context, "light") && isOn) {
       context.elements.iconContainer.style.color = getIconColor(context);
   } else {
       context.elements.iconContainer.style.color = '';
@@ -38,7 +38,7 @@ export function changeIcon(context) {
       context.elements.image.style.display = '';
   } else if (icon !== '') {
       context.elements.icon.icon = icon;
-      context.elements.icon.style.color = isOn && buttonType !== 'state' ? getIconColor(context) : 'inherit';
+      context.elements.icon.style.color = isOn ? getIconColor(context) : 'inherit';
       context.elements.icon.style.display = '';
       context.elements.image.style.display = 'none';
   } else {
@@ -48,41 +48,39 @@ export function changeIcon(context) {
 }
 export function changeName(context) {
   const name = getName(context);
-  if (name !== context.elements.name.innerText) {
+  if (name !== context.elements.previousName) {
       context.elements.name.innerText = name;
+      applyScrollingEffect(context.elements.name, name);
+      context.elements.previousName = name;
   }
 }
 export function changeSlider(context) {
   const buttonType = getButtonType(context);
 
   if (buttonType === 'slider') {
-      context.elements.rangeFill.style.backgroundColor = getIconColor(context);
+    context.elements.rangeFill.style.backgroundColor = getIconColor(context);
 
-      if (isLight(context) && context.dragging === false) {
-          const percentage = 100 * getBrightness(context) / 255;
-          context.elements.rangeFill.style.transform =`translateX(${percentage}%)`;
-      } else if (isMediaPlayer(context) && context.dragging === false) {
-          const percentage = 100 * getVolume(context);
-          context.elements.rangeFill.style.transform =`translateX(${percentage}%)`;
-      }
+    if (context.dragging) return;
+
+    let percentage = 0;
+
+    if (isEntityType(context, "light")) {
+      percentage = 100 * getAttribute(context, "brightness") / 255;
+    } else if (isEntityType(context, "media_player")) {
+      percentage = 100 * getAttribute(context, "volume_level");
+    } else if (isEntityType(context, "cover")) {
+      percentage = getAttribute(context, "current_position");
+    } else if (isEntityType(context, "input_number")) {
+      const minValue = getAttribute(context, "min");
+      const maxValue = getAttribute(context, "max");
+      const value = getState(context);
+      percentage = 100 * (value - minValue) / (maxValue - minValue);
+    }
+
+    context.elements.rangeFill.style.transform = `translateX(${percentage}%)`;
   }
 }
-export function changeState(context) {
-  const buttonType = getButtonType(context);
-  const defaultShowState = buttonType === 'state' ? true : false;
-  const showState = context.config.show_state ?? defaultShowState;
 
-  const state = context._hass.states[context.config.entity];
-  const formattedState = state ? context._hass.formatEntityState(state) : '';
-  if (showState === false) {
-      context.elements.state.style.display = 'none';
-  } else {
-      context.elements.state.style.display = '';
-      if (formattedState !== context.elements.state.innerText) {
-        context.elements.state.innerText = formattedState;
-      }
-  }
-}
 export function changeStatus(context) {
   const state = getState(context);
 
@@ -92,7 +90,7 @@ export function changeStatus(context) {
       context.card.classList.remove('is-unavailable');
   }
 
-  if (isLight(context)) {
+  if (isEntityType(context, "light")) {
       context.card.classList.add('is-light');
   } else {
       context.card.classList.remove('is-light');

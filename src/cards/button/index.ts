@@ -1,9 +1,9 @@
+import { changeState, changeSubButtonState } from "../../tools/global-changes.ts";
 import {
     changeStatus,
     changeButton,
     changeName,
     changeIcon,
-    changeState,
     changeSlider,
     changeStyle
 } from './changes.ts'
@@ -38,5 +38,6 @@ export function handleButton(context) {
     changeIcon(context);
     changeState(context);
     changeSlider(context);
+    changeSubButtonState(context)
     changeStyle(context);
 }

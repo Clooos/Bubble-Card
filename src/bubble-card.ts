@@ -6,6 +6,7 @@ import { handleButton } from './cards/button/index.ts';
 import { handleSeparator } from './cards/separator/index.ts';
 import { handleCover } from './cards/cover/index.ts';
 import { handleEmptyColumn } from './cards/empty-column/index.ts';
+import { handleMediaPlayer } from './cards/media-player/index.ts';
 import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {
@@ -13,7 +14,6 @@ class BubbleCard extends HTMLElement {
     isConnected = false;
 
     connectedCallback() {
-        window.addEventListener('focus', this.updateOnFocus);
         this.isConnected = true;
 
         if (this._hass) {
@@ -22,13 +22,7 @@ class BubbleCard extends HTMLElement {
     }
 
     disconnectedCallback() {
-        window.removeEventListener('focus', this.updateOnFocus);
         this.isConnected = false;
-    }
-
-    updateOnFocus = () => {
-        // Fix entities not updating after coming back to the HA Companion app
-        this.hass = this._hass;
     }
 
     set editMode(editMode) {
@@ -61,34 +55,39 @@ class BubbleCard extends HTMLElement {
 
         switch (this.config.card_type) {
 
-            // Initialize pop-up card
+            // Update pop-up card
             case 'pop-up':
                 handlePopUp(this);
                 break;
 
-            // Initialize button
+            // Update button
             case 'button' :
                 handleButton(this);
                 break;
 
-            // Initialize separator
+            // Update separator
             case 'separator' :
                 handleSeparator(this);
                 break;
 
-            // Initialize cover card
+            // Update cover card
             case 'cover' :
                 handleCover(this);
                 break;
 
-            // Intitalize empty card
+            // Update empty card
             case 'empty-column' :
                 handleEmptyColumn(this);
                 break;
 
-            // Initialize horizontal buttons stack
+            // Update horizontal buttons stack
             case 'horizontal-buttons-stack' :
                 handleHorizontalButtonsStack(this);
+                break;
+
+            // Update media player
+            case 'media-player' :
+                handleMediaPlayer(this);
                 break;
         }
     }

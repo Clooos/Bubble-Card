@@ -1,4 +1,5 @@
 import { createElement } from "../../tools/utils.ts";
+import { addActions } from "../../tools/tap-actions.ts";
 import styles from "./styles.ts";
 
 export function createStructure(context) {
@@ -21,6 +22,8 @@ export function createStructure(context) {
   context.content.appendChild(context.elements.separatorCard);
   context.content.appendChild(context.elements.style);
   context.content.appendChild(context.elements.customStyle);
+
+  addActions(context.elements.separatorCard, context.config);
 
   context.cardType = "separator";
 }

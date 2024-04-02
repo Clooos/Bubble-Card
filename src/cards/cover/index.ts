@@ -1,7 +1,7 @@
+import { changeState } from "../../tools/global-changes.ts";
 import {
   changeIcon,
   changeName,
-  changeState,
   changeStyle,
 } from './changes.ts'
 import { createStructure } from './create.ts';

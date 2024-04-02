@@ -1,6 +1,5 @@
 import { isColorCloseToWhite } from "../../tools/style.ts";
-import { getIcon, getIconColor, getImage, getName, getState, isStateOn } from "../../tools/utils.ts";
-import { isLight } from "../button/helpers.ts";
+import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isStateOn } from "../../tools/utils.ts";
 import { getBackdrop } from "./create.ts";
 import { addHash, onEditorChange, removeHash } from "./helpers.ts";
 
@@ -19,7 +18,7 @@ export function changeIcon(context) {
   const icon = getIcon(context);
   const image = getImage(context);
 
-  if (isLight(context) && isOn) {
+  if (isEntityType(context, "light") && isOn) {
       context.elements.iconContainer.style.color = getIconColor(context);
   } else {
       context.elements.iconContainer.style.color = '';
@@ -92,7 +91,7 @@ export function changeStatus(context) {
       context.card.classList.remove('is-unavailable');
   }
 
-  if (isLight(context)) {
+  if (isEntityType(context, "light")) {
       context.card.classList.add('is-light');
   } else {
       context.card.classList.remove('is-light');

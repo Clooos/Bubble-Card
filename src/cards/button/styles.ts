@@ -1,4 +1,3 @@
-
 export default `
     ha-card {
         margin-top: 0;
@@ -25,6 +24,8 @@ export default `
     .bubble-range-slider {
         display: flex;
         position: absolute;
+        justify-content: space-between;
+        align-items: center;
         height: 100%;
         width: 100%;
         transition: background-color 1.5s;
@@ -111,6 +112,7 @@ export default `
         background-position: center;
         height: 100%;
         width: 100%;
+        position: absolute;
     }
 
     .bubble-name-container {
@@ -124,16 +126,24 @@ export default `
         margin-right: 16px;
         pointer-events: none;
         position: relative;
+        overflow: hidden;
     }
 
     .bubble-name {
         margin: 2px 0;
+        white-space: nowrap;
+        display: flex;
+        position: relative;
     }
 
     .bubble-state {
         font-size: 12px;
         opacity: 0.7;
         margin: 2px 0;
+        font-weight: normal;
+        white-space: nowrap;
+        display: flex;
+        position: relative;
     }
 
     .bubble-feedback-element {

@@ -48,6 +48,7 @@ export default `
         font-size: 12px;
         opacity: 0.7;
         margin: 2px 0;
+        font-weight: normal;
     }
 
     .bubble-buttons {
