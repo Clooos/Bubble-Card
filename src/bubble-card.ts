@@ -1,24 +1,29 @@
 import { version } from './var/version.ts';
-import { addUrlListener } from './tools/url-listener.ts';
 import { initializeContent } from './tools/init.ts';
-import { handlePopUp } from './cards/pop-up.ts';
-import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack.ts';
-import { handleButton } from './cards/button.ts';
-import { handleSeparator } from './cards/separator.ts';
-import { handleCover } from './cards/cover.ts';
-import { handleEmptyColumn } from './cards/empty-column.ts';
+import { handlePopUp } from './cards/pop-up/index.ts';
+import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack/index.ts';
+import { handleButton } from './cards/button/index.ts';
+import { handleSeparator } from './cards/separator/index.ts';
+import { handleCover } from './cards/cover/index.ts';
+import { handleEmptyColumn } from './cards/empty-column/index.ts';
 import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {
     editor = false;
+    isConnected = false;
 
     connectedCallback() {
         window.addEventListener('focus', this.updateOnFocus);
-        addUrlListener();
+        this.isConnected = true;
+
+        if (this._hass) {
+            this.updateBubbleCard();
+        }
     }
 
     disconnectedCallback() {
         window.removeEventListener('focus', this.updateOnFocus);
+        this.isConnected = false;
     }
 
     updateOnFocus = () => {
@@ -27,6 +32,10 @@ class BubbleCard extends HTMLElement {
     }
 
     set editMode(editMode) {
+        if (this.editor === editMode) {
+            return;
+        }
+
         this.editor = editMode;
 
         if (this._hass) {
@@ -35,12 +44,13 @@ class BubbleCard extends HTMLElement {
     }
 
     set hass(hass) {
-
         initializeContent(this);
 
         this._hass = hass;
 
-        this.updateBubbleCard();
+        if (this.isConnected || this.config.card_type === 'pop-up') {
+            this.updateBubbleCard();
+        }
 
         if (!window.columnFix) {
             window.columnFix = this.config.column_fix
@@ -84,7 +94,6 @@ class BubbleCard extends HTMLElement {
     }
 
     setConfig(config) {
-
         if (config.card_type === 'pop-up') {
             if (!config.hash) {
                 throw new Error("You need to define an hash. Please note that this card must be placed inside a vertical_stack to work as a pop-up.");
@@ -108,17 +117,37 @@ class BubbleCard extends HTMLElement {
                 definedLinks[config[linkKey]] = true;
               }
             }
-        } else if (config.card_type === 'button' || config.card_type === 'cover' || config.card_type === 'state') {
+        } else if (config.card_type === 'button' || config.card_type === 'cover') {
             if (!config.entity) {
                 throw new Error("You need to define an entity");
             }
         }
-        
+
         if (window.entityError) {
             throw new Error("You need to define a valid entity");
         }
-        
-        this.config = config;
+        if (config.card_type === 'button') {
+            const enhancedConfig = {...config};
+            const buttonType = enhancedConfig.button_type || 'switch';
+
+            enhancedConfig.tap_action = enhancedConfig.tap_action ?? {
+                action: "more-info"
+            };
+            enhancedConfig.double_tap_action = enhancedConfig.double_tap_action ?? {
+                action: buttonType === "state" ? "more-info" : "toggle"
+            }
+            enhancedConfig.hold_action = enhancedConfig.hold_action ?? {
+                action: buttonType === "state" ? "more-info" : "toggle"
+            }
+
+            this.config = enhancedConfig;
+        } else {
+            this.config = config;
+        }
+
+        if (this._hass) {
+            this.updateBubbleCard();
+        }
     }
 
     getCardSize() {

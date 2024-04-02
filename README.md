@@ -6,7 +6,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ## Table of contents
 
-**[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Full example`](#full-example)** | **[`Styling`](#styling)** | **[`Conflicts`](#custom-components-conflicts)** | **[`Help`](#help)** | **[`Contribution`](#contribution)** 
+**[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Full example`](#full-example)** | **[`Styling`](#styling)** | **[`Conflicts`](#custom-components-conflicts)** | **[`Help`](#help)** | **[`Contribution`](#contribution)**
 
 
 ## Screenshots and features
@@ -244,7 +244,7 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `entity` | string | **Required** | Any switchable entity, any media player or any light | An entity to control |
-| `button_type` | string | Optional | `switch` (default) or `slider` | The behavior of your button |
+| `button_type` | string | Optional | `switch` (default), `slider` or `state` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
 | `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |

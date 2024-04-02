@@ -72,7 +72,7 @@ let bubblePopUpEditor = new MutationObserver((mutationsList, observer) => {
             }
 
             get _width_desktop() {
-                return this._config.width_desktop || '540px';
+                return this._config.width_desktop || '500px';
             }
             
             get _bg_color() {
