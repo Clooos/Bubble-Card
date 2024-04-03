@@ -649,30 +649,18 @@ export default class BubbleCardEditor extends LitElement {
               </div>
             `;
         } else if (this._config.card_type === 'horizontal-buttons-stack') {
-            if (!this.buttonAdded && this.shadowRoot.querySelector("#add-button")) {
+            if (!this.buttonAdded) {
                 this.buttonAdded = true;
-                const addButton = this.shadowRoot.querySelector("#add-button");
                 this.buttonIndex = 0;
 
                 while (this._config[(this.buttonIndex + 1) + '_link']) {
                     this.buttonIndex++;
                 }
-                
-                addButton.addEventListener("click", () => {
-                    this.buttonIndex++;
-                    
-                    const originalOpacity = addButton.style.opacity;
-                    const originalText = addButton.innerText;
-                
-                    addButton.style.opacity = '0.6';
-                    addButton.style.transition = 'opacity 1s';
-                    addButton.innerText = "Loading...";
-                
-                    setTimeout(() => {
-                        addButton.style.opacity = originalOpacity;
-                        addButton.innerText = originalText;
-                    }, 5000);
-                }, { passive: true });
+            }
+
+            function addButton() {
+                this.buttonIndex++;
+                this.requestUpdate();
             }
 
             return html`
@@ -681,7 +669,10 @@ export default class BubbleCardEditor extends LitElement {
                     <div id="buttons-container">
                         ${this.makeButton()}
                     </div>
-                    <button id="add-button">Add Button</button>
+                    <button class="icon-button" @click="${addButton}">
+                        <ha-icon icon="mdi:plus"></ha-icon>
+                        New button
+                    </button>
                     <ha-formfield .label="Auto order">
                         <ha-switch
                             aria-label="Toggle auto order"
@@ -757,7 +748,7 @@ export default class BubbleCardEditor extends LitElement {
                             </ha-formfield>
                         </div>
                     </ha-expansion-panel>
-                    <ha-alert alert-type="info">This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer.<br><br><b>Please note that this card may take some time to load in edit mode.</b></ha-alert>
+                    <ha-alert alert-type="info">This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer.</ha-alert>
                     ${this.makeVersion()}
                 </div>
             `;
@@ -1100,10 +1091,10 @@ export default class BubbleCardEditor extends LitElement {
             ? "mdi:gesture-double-tap"
             : "mdi:gesture-tap-hold";
         const valueType = label === "Tap action" 
-            ? this._tap_action 
+            ? context.tap_action || this._tap_action 
             : label === "Double tap action" 
-            ? this._double_tap_action
-            : this._hold_action;
+            ? context.double_tap_action || this._double_tap_action
+            : context.hold_action || this._hold_action;
         const configValueType = label === "Tap action" 
             ? "tap_action"
             : label === "Double tap action" 
@@ -1136,7 +1127,7 @@ export default class BubbleCardEditor extends LitElement {
                         <div class="ha-textfield">
                             <ha-textfield
                                 label="Navigation path"
-                                .value="${context?.valueType?.navigation_path}"
+                                .value="${context?.valueType?.navigation_path ?? ''}"
                                 .configValue="${config + configValueType}.navigation_path"
                                 @input="${this._valueChanged}"
                             ></ha-textfield>
@@ -1146,7 +1137,7 @@ export default class BubbleCardEditor extends LitElement {
                         <div class="ha-textfield">
                             <ha-textfield
                                 label="URL path"
-                                .value="${context?.valueType?.url_path}"
+                                .value="${context?.valueType?.url_path ?? ''}"
                                 .configValue="${config + configValueType}.url_path"
                                 @input="${this._valueChanged}"
                             ></ha-textfield>
@@ -1156,9 +1147,8 @@ export default class BubbleCardEditor extends LitElement {
                         <div class="ha-textfield">
                             <ha-textfield
                                 label="Service"
-                                .value="${context?.valueType?.service}"
+                                .value="${context?.valueType?.service ?? ''}"
                                 .configValue="${config + configValueType}.service"
-                                .items="${""}"
                                 @input="${this._valueChanged}"
                             ></ha-textfield>
                         </div>
@@ -1199,1202 +1189,47 @@ export default class BubbleCardEditor extends LitElement {
         }
     }
 
-    // makeSubButtonPanel() {
-    //   const subButtonElements = this._config?.sub_button?.map((subButton, index) => {
-    //     if (!subButton) {
-    //       return;
-    //     }
-
-    //     const subButtonIndex = 'sub_button.' + index + '.';
-
-    //     return html`
-    //         <ha-expansion-panel outlined>
-    //             <h4 slot="header">
-    //                 <ha-icon icon="mdi:border-radius"></ha-icon>
-    //                 ${subButton.position ? "Button " + subButton.position : "New button"}
-    //             </h4>
-    //             <div class="content">
-    //                 <div class="ha-textfield">
-    //                     <ha-textfield
-    //                         label="Button position"
-    //                         .value="${subButton.position ?? index}"
-    //                         .configValue="sub_button.${index}.position"
-    //                         .items="${""}"
-    //                         @input="${this._valueChanged}"
-    //                     ></ha-textfield>
-    //                 </div>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                         <ha-icon icon="mdi:cog"></ha-icon>
-    //                         Button settings
-    //                     </h4>
-    //                     <div class="content"> 
-    //                         <div class="ha-combo-box">
-    //                             <ha-combo-box
-    //                                 label="${"Optional - Entity (default to card entity)"}"
-    //                                 .value="${subButton.entity ?? this._config.entity}"
-    //                                 .configValue="sub_button.${index}.entity"
-    //                                 .items="${this.allEntitiesList}"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-combo-box>
-    //                         </div>
-    //                         <div class="ha-textfield">
-    //                             <ha-textfield
-    //                                 label="Optional - Name"
-    //                                 .value="${subButton.name ?? ''}"
-    //                                 .configValue="sub_button.${index}.name"
-    //                                 .items="${""}"
-    //                                 @input="${this._valueChanged}"
-    //                             ></ha-textfield>
-    //                         </div>
-    //                         <div class="ha-icon-picker">
-    //                             <ha-icon-picker
-    //                                 label="Optional - Icon"
-    //                                 .value="${subButton.icon}"
-    //                                 .configValue="sub_button.${index}.icon"
-    //                                 item-label-path="label"
-    //                                 item-value-path="value"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-icon-picker>
-    //                         </div>
-    //                         ${this.makeShowState(subButton, subButtonIndex, true, true)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                       <ha-icon icon="mdi:gesture-tap"></ha-icon>
-    //                       Tap action on button
-    //                     </h4>
-    //                     <div class="content">
-    //                         ${this.makeTapActionPanel("Tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Double tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Hold action", "tap_action", subButton, subButtonIndex)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //             </div>
-    //         </ha-expansion-panel>
-    //     `;
-    //   });
-
-    //   // Retourne un panneau d'expansion contenant tous les sub-buttons
-    //   return html`
-    //     <ha-expansion-panel outlined>
-    //       <h4 slot="header">
-    //         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-    //         Sub buttons editor
-    //       </h4>
-    //       <div class="content">
-    //         ${subButtonElements}
-    //         <button @click="">Ajouter un sub-button</button>
-    //       </div>
-    //     </ha-expansion-panel>
-    //   `;
-    // }
-
-    // makeSubButtonPanel() {
-    //   const subButtonElements = this._config?.sub_button?.map((subButton, index) => {
-    //     if (!subButton) {
-    //       return;
-    //     }
-
-    //     const subButtonIndex = 'sub_button.' + index + '.';
-
-    //     return html`
-    //         <ha-expansion-panel outlined>
-    //             <h4 slot="header">
-    //                 <ha-icon icon="mdi:border-radius"></ha-icon>
-    //                 ${subButton.position ? "Button " + subButton.position : "New button"}
-    //             </h4>
-    //             <div class="content">
-    //                 <div class="ha-textfield">
-    //                     <ha-textfield
-    //                         label="Button position"
-    //                         .value="${subButton.position ?? index}"
-    //                         .configValue="sub_button.${index}.position"
-    //                         .items="${""}"
-    //                         @input="${this._valueChanged}"
-    //                     ></ha-textfield>
-    //                 </div>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                         <ha-icon icon="mdi:cog"></ha-icon>
-    //                         Button settings
-    //                     </h4>
-    //                     <div class="content"> 
-    //                         <div class="ha-combo-box">
-    //                             <ha-combo-box
-    //                                 label="${"Optional - Entity (default to card entity)"}"
-    //                                 .value="${subButton.entity ?? this._config.entity}"
-    //                                 .configValue="sub_button.${index}.entity"
-    //                                 .items="${this.allEntitiesList}"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-combo-box>
-    //                         </div>
-    //                         <div class="ha-textfield">
-    //                             <ha-textfield
-    //                                 label="Optional - Name"
-    //                                 .value="${subButton.name ?? ''}"
-    //                                 .configValue="sub_button.${index}.name"
-    //                                 .items="${""}"
-    //                                 @input="${this._valueChanged}"
-    //                             ></ha-textfield>
-    //                         </div>
-    //                         <div class="ha-icon-picker">
-    //                             <ha-icon-picker
-    //                                 label="Optional - Icon"
-    //                                 .value="${subButton.icon}"
-    //                                 .configValue="sub_button.${index}.icon"
-    //                                 item-label-path="label"
-    //                                 item-value-path="value"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-icon-picker>
-    //                         </div>
-    //                         ${this.makeShowState(subButton, subButtonIndex, true, true)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                       <ha-icon icon="mdi:gesture-tap"></ha-icon>
-    //                       Tap action on button
-    //                     </h4>
-    //                     <div class="content">
-    //                         ${this.makeTapActionPanel("Tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Double tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Hold action", "tap_action", subButton, subButtonIndex)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //             </div>
-    //         </ha-expansion-panel>
-    //     `;
-    //   });
-
-    //   const addSubButton = () => {
-    //     const newSubButton = {
-    //       position: this._config.sub_button.length + 1,
-    //       entity: this._config.entity,
-    //       name: '',
-    //       icon: ''
-    //     };
-
-    //     this._config.sub_button.push(newSubButton);
-
-    //     this.requestUpdate();
-    //   };
-
-    //   // Return full panel for all sub-buttons
-    //   return html`
-    //     <ha-expansion-panel outlined>
-    //       <h4 slot="header">
-    //         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-    //         Sub buttons editor
-    //       </h4>
-    //       <div class="content">
-    //         ${subButtonElements}
-    //         <button @click="${addSubButton}">New sub button</button>
-    //       </div>
-    //     </ha-expansion-panel>
-    //   `;
-    // }
-
-    // makeSubButtonPanel() {
-    //   const subButtonElements = this._config?.sub_button?.map((subButton, index) => {
-    //     if (!subButton) {
-    //       return;
-    //     }
-
-    //     const subButtonIndex = 'sub_button.' + index + '.';
-
-    //     // Function to remove this sub-button
-    //     const removeSubButton = () => {
-    //       // Remove the subButton from the specific index of the array
-    //       this._config.sub_button.splice(index, 1);
-
-    //       // Force the component to update to display the remaining buttons
-    //       this.requestUpdate();
-    //     };
-
-    //     return html`
-    //         <ha-expansion-panel outlined>
-    //             <h4 slot="header">
-    //                 <ha-icon icon="mdi:border-radius"></ha-icon>
-    //                 ${subButton.position ? "Button " + subButton.position : "New button"}
-    //                 <button class="icon-button delete" @click="${removeSubButton}">
-    //                   <ha-icon icon="mdi:delete"></ha-icon>
-    //                 </button>
-    //             </h4>
-    //             <div class="content">
-    //                 <div class="ha-textfield">
-    //                     <ha-textfield
-    //                         label="Button position"
-    //                         .value="${subButton.position ?? index}"
-    //                         .configValue="sub_button.${index}.position"
-    //                         .items="${""}"
-    //                         @input="${this._valueChanged}"
-    //                     ></ha-textfield>
-    //                 </div>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                         <ha-icon icon="mdi:cog"></ha-icon>
-    //                         Button settings
-    //                     </h4>
-    //                     <div class="content"> 
-    //                         <div class="ha-combo-box">
-    //                             <ha-combo-box
-    //                                 label="${"Optional - Entity (default to card entity)"}"
-    //                                 .value="${subButton.entity ?? this._config.entity}"
-    //                                 .configValue="sub_button.${index}.entity"
-    //                                 .items="${this.allEntitiesList}"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-combo-box>
-    //                         </div>
-    //                         <div class="ha-textfield">
-    //                             <ha-textfield
-    //                                 label="Optional - Name"
-    //                                 .value="${subButton.name ?? ''}"
-    //                                 .configValue="sub_button.${index}.name"
-    //                                 .items="${""}"
-    //                                 @input="${this._valueChanged}"
-    //                             ></ha-textfield>
-    //                         </div>
-    //                         <div class="ha-icon-picker">
-    //                             <ha-icon-picker
-    //                                 label="Optional - Icon"
-    //                                 .value="${subButton.icon}"
-    //                                 .configValue="sub_button.${index}.icon"
-    //                                 item-label-path="label"
-    //                                 item-value-path="value"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-icon-picker>
-    //                         </div>
-    //                         ${this.makeShowState(subButton, subButtonIndex, true, true)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                       <ha-icon icon="mdi:gesture-tap"></ha-icon>
-    //                       Tap action on button
-    //                     </h4>
-    //                     <div class="content">
-    //                         ${this.makeTapActionPanel("Tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Double tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Hold action", "tap_action", subButton, subButtonIndex)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //             </div>
-    //         </ha-expansion-panel>
-    //     `;
-    //   });
-
-    //   const addSubButton = () => {
-    //     const newSubButton = {
-    //       position: this._config.sub_button.length + 1,
-    //       entity: this._config.entity,
-    //       name: '',
-    //       icon: ''
-    //     };
-
-    //     this._config.sub_button.push(newSubButton);
-
-    //     this.requestUpdate();
-    //   };
-
-    //   // Return full panel for all sub-buttons
-    //   return html`
-    //     <ha-expansion-panel outlined>
-    //       <h4 slot="header">
-    //         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-    //         Sub buttons editor
-    //       </h4>
-    //       <div class="content">
-    //         ${subButtonElements}
-    //         <button class="icon-button" @click="${addSubButton}">
-    //           <ha-icon icon="mdi:plus"></ha-icon>
-    //           New sub button
-    //         </button>
-    //       </div>
-    //     </ha-expansion-panel>
-    //   `;
-    // }
-
-    // makeSubButtonPanel() {
-    //   // Sort the sub_buttons array by the 'position' property
-    //   const sortedSubButtons = this._config?.sub_button?.sort((a, b) => a.position - b.position);
-
-    //   const subButtonElements = sortedSubButtons?.map((subButton, index) => {
-    //     if (!subButton) {
-    //       return;
-    //     }
-
-    //     const subButtonIndex = 'sub_button.' + index + '.';
-
-    //     // Function to remove this sub-button
-    //     const removeSubButton = () => {
-    //       // Remove the subButton from the specific index of the array
-    //       this._config.sub_button.splice(index, 1);
-
-    //       // Force the component to update to display the remaining buttons
-    //       this.requestUpdate();
-    //     };
-
-    //     return html`
-    //         <ha-expansion-panel outlined>
-    //             <h4 slot="header">
-    //                 <ha-icon icon="mdi:border-radius"></ha-icon>
-    //                 ${subButton.position ? "Button " + subButton.position : "New button"}
-    //                 <button class="icon-button delete" @click="${removeSubButton}">
-    //                   <ha-icon icon="mdi:delete"></ha-icon>
-    //                 </button>
-    //             </h4>
-    //             <div class="content">
-    //                 <ha-textfield
-    //                     label="Button position"
-    //                     type="number"
-    //                     inputMode="numeric"
-    //                     min="1"
-    //                     .value="${subButton.position}"
-    //                     .configValue="sub_button.${index}.position"
-    //                     @input="${this._valueChanged}"
-    //                 ></ha-textfield>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                         <ha-icon icon="mdi:cog"></ha-icon>
-    //                         Button settings
-    //                     </h4>
-    //                     <div class="content"> 
-    //                         <div class="ha-combo-box">
-    //                             <ha-combo-box
-    //                                 label="${"Optional - Entity (default to card entity)"}"
-    //                                 .value="${subButton.entity ?? this._config.entity}"
-    //                                 .configValue="sub_button.${index}.entity"
-    //                                 .items="${this.allEntitiesList}"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-combo-box>
-    //                         </div>
-    //                         <div class="ha-textfield">
-    //                             <ha-textfield
-    //                                 label="Optional - Name"
-    //                                 .value="${subButton.name ?? ''}"
-    //                                 .configValue="sub_button.${index}.name"
-    //                                 .items="${""}"
-    //                                 @input="${this._valueChanged}"
-    //                             ></ha-textfield>
-    //                         </div>
-    //                         <div class="ha-icon-picker">
-    //                             <ha-icon-picker
-    //                                 label="Optional - Icon"
-    //                                 .value="${subButton.icon}"
-    //                                 .configValue="sub_button.${index}.icon"
-    //                                 item-label-path="label"
-    //                                 item-value-path="value"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-icon-picker>
-    //                         </div>
-    //                         ${this.makeShowState(subButton, subButtonIndex, true, true)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                       <ha-icon icon="mdi:gesture-tap"></ha-icon>
-    //                       Tap action on button
-    //                     </h4>
-    //                     <div class="content">
-    //                         ${this.makeTapActionPanel("Tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Double tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Hold action", "tap_action", subButton, subButtonIndex)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //             </div>
-    //         </ha-expansion-panel>
-    //     `;
-    //   });
-
-    //   const addSubButton = () => {
-    //     const newSubButton = {
-    //       position: this._config.sub_button.length + 1,
-    //       entity: this._config.entity,
-    //       name: '',
-    //       icon: ''
-    //     };
-
-    //     this._config.sub_button.push(newSubButton);
-
-    //     this.requestUpdate();
-    //   };
-
-    //   // Return full panel for all sub-buttons
-    //   return html`
-    //     <ha-expansion-panel outlined>
-    //       <h4 slot="header">
-    //         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-    //         Sub buttons editor
-    //       </h4>
-    //       <div class="content">
-    //         ${subButtonElements}
-    //         <button class="icon-button" @click="${addSubButton}">
-    //           <ha-icon icon="mdi:plus"></ha-icon>
-    //           New sub button
-    //         </button>
-    //       </div>
-    //     </ha-expansion-panel>
-    //   `;
-    // }
-
-    // makeSubButtonPanel() {
-    //   // Sort the sub_buttons array by the 'position' property
-    //   const sortedSubButtons = this._config?.sub_button?.sort((a, b) => a.position - b.position);
-
-    //   const subButtonElements = sortedSubButtons?.map((subButton, index) => {
-    //     if (!subButton) {
-    //       return;
-    //     }
-
-    //     const subButtonIndex = 'sub_button.' + index + '.';
-
-    //     // Function to remove this sub-button
-    //     const removeSubButton = () => {
-    //       this._config.sub_button.splice(index, 1);
-    //       this.requestUpdate();
-    //     };
-
-    //     // Function to move this sub-button up
-    //     const moveSubButtonUp = () => {
-    //       if (index > 0) {
-    //         const temp = this._config.sub_button[index - 1];
-    //         this._config.sub_button[index - 1] = subButton;
-    //         this._config.sub_button[index] = temp;
-    //         this.requestUpdate();
-    //       }
-    //     };
-
-    //     // Function to move this sub-button down
-    //     const moveSubButtonDown = () => {
-    //       if (index < this._config.sub_button.length - 1) {
-    //         const temp = this._config.sub_button[index + 1];
-    //         this._config.sub_button[index + 1] = subButton;
-    //         this._config.sub_button[index] = temp;
-    //         this.requestUpdate();
-    //       }
-    //     };
-
-    //     return html`
-    //         <ha-expansion-panel outlined>
-    //             <h4 slot="header">
-    //                 <ha-icon icon="mdi:border-radius"></ha-icon>
-    //                 ${subButton.position ? "Button " + subButton.position : "New button"}
-    //                 <button class="icon-button delete" @click="${removeSubButton}">
-    //                   <ha-icon icon="mdi:delete"></ha-icon>
-    //                 </button>
-    //                 <button class="icon-button move-up" @click="${moveSubButtonUp}">
-    //                   <ha-icon icon="mdi:arrow-up"></ha-icon>
-    //                 </button>
-    //                 <button class="icon-button move-down" @click="${moveSubButtonDown}">
-    //                   <ha-icon icon="mdi:arrow-down"></ha-icon>
-    //                 </button>
-    //             </h4>
-    //             <div class="content">
-    //                 <ha-textfield
-    //                     label="Button position"
-    //                     type="number"
-    //                     inputMode="numeric"
-    //                     min="1"
-    //                     .value="${subButton.position}"
-    //                     .configValue="sub_button.${index}.position"
-    //                     @input="${this._valueChanged}"
-    //                 ></ha-textfield>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                         <ha-icon icon="mdi:cog"></ha-icon>
-    //                         Button settings
-    //                     </h4>
-    //                     <div class="content"> 
-    //                         <div class="ha-combo-box">
-    //                             <ha-combo-box
-    //                                 label="${"Optional - Entity (default to card entity)"}"
-    //                                 .value="${subButton.entity ?? this._config.entity}"
-    //                                 .configValue="sub_button.${index}.entity"
-    //                                 .items="${this.allEntitiesList}"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-combo-box>
-    //                         </div>
-    //                         <div class="ha-textfield">
-    //                             <ha-textfield
-    //                                 label="Optional - Name"
-    //                                 .value="${subButton.name ?? ''}"
-    //                                 .configValue="sub_button.${index}.name"
-    //                                 .items="${""}"
-    //                                 @input="${this._valueChanged}"
-    //                             ></ha-textfield>
-    //                         </div>
-    //                         <div class="ha-icon-picker">
-    //                             <ha-icon-picker
-    //                                 label="Optional - Icon"
-    //                                 .value="${subButton.icon}"
-    //                                 .configValue="sub_button.${index}.icon"
-    //                                 item-label-path="label"
-    //                                 item-value-path="value"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-icon-picker>
-    //                         </div>
-    //                         ${this.makeShowState(subButton, subButtonIndex, true, true)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                       <ha-icon icon="mdi:gesture-tap"></ha-icon>
-    //                       Tap action on button
-    //                     </h4>
-    //                     <div class="content">
-    //                         ${this.makeTapActionPanel("Tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Double tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Hold action", "tap_action", subButton, subButtonIndex)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //             </div>
-    //         </ha-expansion-panel>
-    //     `;
-    //   });
-
-    //   const addSubButton = () => {
-    //     const newSubButton = {
-    //       position: this._config.sub_button.length + 1,
-    //       entity: this._config.entity,
-    //       name: '',
-    //       icon: ''
-    //     };
-
-    //     this._config.sub_button.push(newSubButton);
-
-    //     this.requestUpdate();
-    //   };
-
-    //   // Return full panel for all sub-buttons
-    //   return html`
-    //     <ha-expansion-panel outlined>
-    //       <h4 slot="header">
-    //         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-    //         Sub buttons editor
-    //       </h4>
-    //       <div class="content">
-    //         ${subButtonElements}
-    //         <button class="icon-button" @click="${addSubButton}">
-    //           <ha-icon icon="mdi:plus"></ha-icon>
-    //           New sub button
-    //         </button>
-    //       </div>
-    //     </ha-expansion-panel>
-    //   `;
-    // }
-
-    // makeSubButtonPanel() {
-    //   // Sort the sub_buttons array by the 'position' property
-    //   const sortedSubButtons = this._config?.sub_button?.sort((a, b) => a.position - b.position);
-
-    //   const subButtonElements = sortedSubButtons?.map((subButton, index) => {
-    //     if (!subButton) {
-    //       return;
-    //     }
-
-    //     const subButtonIndex = 'sub_button.' + index + '.';
-
-    //     // Function to remove this sub-button
-    //     const removeSubButton = () => {
-    //       // Remove the subButton from the specific index of the array
-    //       this._config.sub_button.splice(index, 1);
-
-    //       // Update the position property of the remaining sub-buttons
-    //       this._config.sub_button.forEach((subButton, i) => {
-    //         subButton.position = i + 1;
-    //       });
-
-    //       // Force the component to update to display the remaining buttons
-    //       this.requestUpdate();
-    //     };
-
-    //     // Function to move this sub-button up
-    //     const moveSubButtonUp = (event) => {
-    //       event.stopPropagation(); // Stop event propagation
-    //       console.log("Up")
-    //       if (index > 0) {
-    //         // Swap the position property of this sub-button and the one above it
-    //         [subButton.position, this._config.sub_button[index - 1].position] = [this._config.sub_button[index - 1].position, subButton.position];
-
-    //         // Sort the sub_buttons array by the 'position' property
-    //         this._config.sub_button.sort((a, b) => a.position - b.position);
-
-    //         // Force the component to update to display the buttons in the new order
-    //         this.requestUpdate();
-    //       }
-    //     };
-
-    //     // Function to move this sub-button down
-    //     const moveSubButtonDown = (event) => {
-    //       event.stopPropagation(); // Stop event propagation
-    //       console.log("Down")
-    //       if (index < this._config.sub_button.length - 1) {
-    //         // Swap the position property of this sub-button and the one below it
-    //         [subButton.position, this._config.sub_button[index + 1].position] = [this._config.sub_button[index + 1].position, subButton.position];
-
-    //         // Sort the sub_buttons array by the 'position' property
-    //         this._config.sub_button.sort((a, b) => a.position - b.position);
-
-    //         // Force the component to update to display the buttons in the new order
-    //         this.requestUpdate();
-    //       }
-    //     };
-
-    //     return html`
-    //         <ha-expansion-panel outlined>
-    //             <h4 slot="header">
-    //                 <ha-icon icon="mdi:border-radius"></ha-icon>
-    //                 ${subButton.position ? "Button " + subButton.position : "New button"}
-    //                 <button class="icon-button header" @click="${removeSubButton}">
-    //                   <ha-icon icon="mdi:delete"></ha-icon>
-    //                 </button>
-    //                 <button class="icon-button header" @click="${moveSubButtonUp}">
-    //                   <ha-icon icon="mdi:arrow-up"></ha-icon>
-    //                 </button>
-    //                 <button class="icon-button header" @click="${moveSubButtonDown}">
-    //                   <ha-icon icon="mdi:arrow-down"></ha-icon>
-    //                 </button>
-    //             </h4>
-    //             <!-- The rest of your code... -->
-    //         </ha-expansion-panel>
-    //     `;
-    //   });
-
-    //   const addSubButton = () => {
-    //     const newSubButton = {
-    //       position: this._config.sub_button.length + 1,
-    //       entity: this._config.entity,
-    //       name: '',
-    //       icon: ''
-    //     };
-
-    //     this._config.sub_button.push(newSubButton);
-
-    //     this.requestUpdate();
-    //   };
-
-    //   // Return full panel for all sub-buttons
-    //   return html`
-    //     <ha-expansion-panel outlined>
-    //       <h4 slot="header">
-    //         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-    //         Sub buttons editor
-    //       </h4>
-    //       <div class="content">
-    //         ${subButtonElements}
-    //         <button class="icon-button" @click="${addSubButton}">
-    //           <ha-icon icon="mdi:plus"></ha-icon>
-    //           New sub button
-    //         </button>
-    //       </div>
-    //     </ha-expansion-panel>
-    //   `;
-    // }
-
-    // makeSubButtonPanel() {
-    //   // Sort the sub_buttons array by the 'position' property
-    //   const sortedSubButtons = this._config?.sub_button?.sort((a, b) => a.position - b.position);
-
-    //   const subButtonElements = sortedSubButtons?.map((subButton, index) => {
-    //     if (!subButton) {
-    //       return;
-    //     }
-
-    //     const subButtonIndex = 'sub_button.' + index + '.';
-
-    //     // Function to remove this sub-button
-    //     const removeSubButton = () => {
-    //       // Remove the subButton from the specific index of the array
-    //       this._config.sub_button.splice(index, 1);
-
-    //       // Update the position property of the remaining sub-buttons
-    //       this._config.sub_button.forEach((subButton, i) => {
-    //         subButton.position = i + 1;
-    //       });
-
-    //       // Force the component to update to display the remaining buttons
-    //       this.requestUpdate();
-    //     };
-
-    //     // Function to move this sub-button up
-    //     const moveSubButtonUp = (event) => {
-    //       event.stopPropagation(); // Stop event propagation
-
-    //       if (index > 0) {
-    //         // Swap the position property of this sub-button and the one above it
-    //         [subButton.position, this._config.sub_button[index - 1].position] = [this._config.sub_button[index - 1].position, subButton.position];
-
-    //         // Trigger the valueChanged function for both sub-buttons
-    //         this._valueChanged({ target: { configValue: `sub_button.${index}.position`, value: subButton.position } });
-    //         this._valueChanged({ target: { configValue: `sub_button.${index - 1}.position`, value: this._config.sub_button[index - 1].position } });
-    //       }
-    //     };
-
-    //     // Function to move this sub-button down
-    //     const moveSubButtonDown = (event) => {
-    //       event.stopPropagation(); // Stop event propagation
-
-    //       if (index < this._config.sub_button.length - 1) {
-    //         // Swap the position property of this sub-button and the one below it
-    //         [subButton.position, this._config.sub_button[index + 1].position] = [this._config.sub_button[index + 1].position, subButton.position];
-
-    //         // Trigger the valueChanged function for both sub-buttons
-    //         this._valueChanged({ target: { configValue: `sub_button.${index}.position`, value: subButton.position } });
-    //         this._valueChanged({ target: { configValue: `sub_button.${index + 1}.position`, value: this._config.sub_button[index + 1].position } });
-    //       }
-    //     };
-
-    //     return html`
-    //         <ha-expansion-panel outlined>
-    //             <h4 slot="header">
-    //                 <ha-icon icon="mdi:border-radius"></ha-icon>
-    //                 ${subButton.position ? "Button " + subButton.position : "New button"}
-    //                 <button class="icon-button header" @click="${removeSubButton}">
-    //                   <ha-icon icon="mdi:delete"></ha-icon>
-    //                 </button>
-    //                 <button class="icon-button header" @click="${moveSubButtonUp}">
-    //                   <ha-icon icon="mdi:arrow-up"></ha-icon>
-    //                 </button>
-    //                 <button class="icon-button header" @click="${moveSubButtonDown}">
-    //                   <ha-icon icon="mdi:arrow-down"></ha-icon>
-    //                 </button>
-    //             </h4>
-    //             <!-- The rest of your code... -->
-    //         </ha-expansion-panel>
-    //     `;
-    //   });
-
-    //   const addSubButton = () => {
-    //     const newSubButton = {
-    //       position: this._config.sub_button.length + 1,
-    //       entity: this._config.entity,
-    //       name: '',
-    //       icon: ''
-    //     };
-
-    //     this._config.sub_button.push(newSubButton);
-
-    //     this.requestUpdate();
-    //   };
-
-    //   // Return full panel for all sub-buttons
-    //   return html`
-    //     <ha-expansion-panel outlined>
-    //       <h4 slot="header">
-    //         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-    //         Sub buttons editor
-    //       </h4>
-    //       <div class="content">
-    //         ${subButtonElements}
-    //         <button class="icon-button" @click="${addSubButton}">
-    //           <ha-icon icon="mdi:plus"></ha-icon>
-    //           New sub button
-    //         </button>
-    //       </div>
-    //     </ha-expansion-panel>
-    //   `;
-    // }
-
-// makeSubButtonPanel() {
-//   // Sort the sub_buttons array by the 'position' property
-//   const sortedSubButtons = this._config?.sub_button?.sort((a, b) => a.position - b.position);
-
-//   const subButtonElements = sortedSubButtons?.map((subButton, index) => {
-//     if (!subButton) {
-//       return;
-//     }
-
-//     const subButtonIndex = 'sub_button.' + index + '.';
-
-//     // Function to remove this sub-button
-//     const removeSubButton = () => {
-//       console.log('Removing sub-button at position', subButton.position); // Debugging line
-
-//       // Remove the subButton from the specific index of the array
-//       this._config.sub_button.splice(index, 1);
-
-//       // Update the position property of the remaining sub-buttons
-//       this._config.sub_button.forEach((subButton, i) => {
-//         subButton.position = i + 1;
-//       });
-
-//       console.log('Updated sub-button positions:', this._config.sub_button.map(subButton => subButton.position)); // Debugging line
-
-//       // Force the component to update to display the remaining buttons
-//       this.requestUpdate();
-//     };
-
-//     // Function to move this sub-button up
-//     const moveSubButtonUp = (event) => {
-//       event.stopPropagation(); // Stop event propagation
-
-//       if (index > 0) {
-//         console.log('Moving sub-button at position', subButton.position, 'up'); // Debugging line
-
-//         // Swap the position property of this sub-button and the one above it
-//         [subButton.position, this._config.sub_button[index - 1].position] = [this._config.sub_button[index - 1].position, subButton.position];
-
-//         console.log('Updated sub-button positions:', this._config.sub_button.map(subButton => subButton.position)); // Debugging line
-
-//         // Force the component to update to display the buttons in the new order
-//         this.requestUpdate();
-//       }
-//     };
-
-//     // Function to move this sub-button down
-//     const moveSubButtonDown = (event) => {
-//       event.stopPropagation(); // Stop event propagation
-
-//       if (index < this._config.sub_button.length - 1) {
-//         console.log('Moving sub-button at position', subButton.position, 'down'); // Debugging line
-
-//         // Swap the position property of this sub-button and the one below it
-//         [subButton.position, this._config.sub_button[index + 1].position] = [this._config.sub_button[index + 1].position, subButton.position];
-
-//         console.log('Updated sub-button positions:', this._config.sub_button.map(subButton => subButton.position)); // Debugging line
-
-//         // Force the component to update to display the buttons in the new order
-//         this.requestUpdate();
-//       }
-//     };
-
-//     return html`
-//         <ha-expansion-panel outlined>
-//             <h4 slot="header">
-//                 <ha-icon icon="mdi:border-radius"></ha-icon>
-//                 ${subButton.position ? "Button " + subButton.position : "New button"}
-//                 <button class="icon-button delete" @click="${removeSubButton}">
-//                   <ha-icon icon="mdi:delete"></ha-icon>
-//                 </button>
-//                 <button class="icon-button move-up" @click="${moveSubButtonUp}">
-//                   <ha-icon icon="mdi:arrow-up"></ha-icon>
-//                 </button>
-//                 <button class="icon-button move-down" @click="${moveSubButtonDown}">
-//                   <ha-icon icon="mdi:arrow-down"></ha-icon>
-//                 </button>
-//             </h4>
-//             <!-- The rest of your code... -->
-//         </ha-expansion-panel>
-//     `;
-//   });
-
-//   const addSubButton = () => {
-//     const newSubButton = {
-//       position: this._config.sub_button.length + 1,
-//       entity: this._config.entity,
-//       name: '',
-//       icon: ''
-//     };
-
-//     this._config.sub_button.push(newSubButton);
-
-//     console.log('Added new sub-button at position', newSubButton.position); // Debugging line
-
-//     this.requestUpdate();
-//   };
-
-//   // Return full panel for all sub-buttons
-//   return html`
-//     <ha-expansion-panel outlined>
-//       <h4 slot="header">
-//         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-//         Sub buttons editor
-//       </h4>
-//       <div class="content">
-//         ${subButtonElements}
-//         <button class="icon-button" @click="${addSubButton}">
-//           <ha-icon icon="mdi:plus"></ha-icon>
-//           New sub button
-//         </button>
-//       </div>
-//     </ha-expansion-panel>
-//   `;
-// }
-
-
-
-
-    // makeSubButtonPanel() {
-    //   // Sort the sub_buttons array by the 'position' property
-    //   const sortedSubButtons = this._config?.sub_button?.sort((a, b) => a.position - b.position);
-
-    //   const subButtonElements = sortedSubButtons?.map((subButton, index) => {
-    //     if (!subButton) {
-    //       return;
-    //     }
-
-    //     const subButtonIndex = 'sub_button.' + index + '.';
-
-    //     // Function to remove this sub-button
-    //     const removeSubButton = () => {
-    //       // Remove the subButton from the specific index of the array
-    //       this._config.sub_button.splice(index, 1);
-
-    //       // Update the position property of the remaining sub-buttons
-    //       this._config.sub_button.forEach((subButton, i) => {
-    //         subButton.position = i + 1;
-    //       });
-
-    //       // Force the component to update to display the remaining buttons
-    //       this.requestUpdate();
-    //     };
-
-    //     // Fonction pour déplacer ce sous-bouton vers le haut
-    //     const moveSubButtonUp = (event) => {
-    //       event.stopPropagation(); // Stop event propagation
-
-    //       if (index > 0) {
-    //         // Échangez la propriété de position de ce sous-bouton et celle du dessus
-    //         [this._config.sub_button[index].position, this._config.sub_button[index - 1].position] = [this._config.sub_button[index - 1].position, this._config.sub_button[index].position];
-
-    //         // Triez le tableau sub_buttons
-    //         this._config.sub_button.sort((a, b) => a.position - b.position);
-
-    //         // Déclenchez la fonction valueChanged pour les deux sous-boutons
-    //         this._valueChanged({ target: { configValue: subButtonIndex, value: this._config.sub_button[index].position } });
-    //         this._valueChanged({ target: { configValue: subButtonIndex, value: this._config.sub_button[index - 1].position } });
-
-    //         console.log('Updated sub-button positions after moving up:', this._config.sub_button.map(button => button.position));
-    //       }
-    //     };
-
-    //     // Fonction pour déplacer ce sous-bouton vers le bas
-    //     const moveSubButtonDown = (event) => {
-    //       event.stopPropagation(); // Stop event propagation
-
-    //       if (index < this._config.sub_button.length - 1) {
-    //         // Échangez la propriété de position de ce sous-bouton et celle du dessous
-    //         [this._config.sub_button[index].position, this._config.sub_button[index + 1].position] = [this._config.sub_button[index + 1].position, this._config.sub_button[index].position];
-
-    //         // Triez le tableau sub_buttons
-    //         this._config.sub_button.sort((a, b) => a.position - b.position);
-
-    //         // Déclenchez la fonction valueChanged pour les deux sous-boutons
-    //         this._valueChanged({ target: { configValue: subButtonIndex, value: this._config.sub_button[index].position } });
-    //         this._valueChanged({ target: { configValue: subButtonIndex, value: this._config.sub_button[index + 1].position } });
-
-    //         console.log('Updated sub-button positions after moving down:', this._config.sub_button.map(button => button.position));
-    //       }
-    //     };
-
-    //     return html`
-    //         <ha-expansion-panel outlined>
-    //             <h4 slot="header">
-    //                 <ha-icon icon="mdi:border-radius"></ha-icon>
-    //                 ${subButton.position ? "Button " + subButton.position : "New button"}
-    //                 <button class="icon-button header" @click="${removeSubButton}">
-    //                   <ha-icon icon="mdi:delete"></ha-icon>
-    //                 </button>
-    //                 <button class="icon-button header" @click="${moveSubButtonUp}">
-    //                   <ha-icon icon="mdi:arrow-up"></ha-icon>
-    //                 </button>
-    //                 <button class="icon-button header" @click="${moveSubButtonDown}">
-    //                   <ha-icon icon="mdi:arrow-down"></ha-icon>
-    //                 </button>
-    //             </h4>
-    //             <div class="content">
-    //                 <ha-textfield
-    //                     label="Button position"
-    //                     type="number"
-    //                     inputMode="numeric"
-    //                     min="1"
-    //                     .value="${subButton.position}"
-    //                     .configValue="sub_button.${index}.position"
-    //                     @input="${this._valueChanged}"
-    //                 ></ha-textfield>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                         <ha-icon icon="mdi:cog"></ha-icon>
-    //                         Button settings
-    //                     </h4>
-    //                     <div class="content"> 
-    //                         <div class="ha-combo-box">
-    //                             <ha-combo-box
-    //                                 label="${"Optional - Entity (default to card entity)"}"
-    //                                 .value="${subButton.entity ?? this._config.entity}"
-    //                                 .configValue="sub_button.${index}.entity"
-    //                                 .items="${this.allEntitiesList}"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-combo-box>
-    //                         </div>
-    //                         <div class="ha-textfield">
-    //                             <ha-textfield
-    //                                 label="Optional - Name"
-    //                                 .value="${subButton.name ?? ''}"
-    //                                 .configValue="sub_button.${index}.name"
-    //                                 .items="${""}"
-    //                                 @input="${this._valueChanged}"
-    //                             ></ha-textfield>
-    //                         </div>
-    //                         <div class="ha-icon-picker">
-    //                             <ha-icon-picker
-    //                                 label="Optional - Icon"
-    //                                 .value="${subButton.icon}"
-    //                                 .configValue="sub_button.${index}.icon"
-    //                                 item-label-path="label"
-    //                                 item-value-path="value"
-    //                                 .disabled="${!subButton.position}"
-    //                                 @value-changed="${this._valueChanged}"
-    //                             ></ha-icon-picker>
-    //                         </div>
-    //                         ${this.makeShowState(subButton, subButtonIndex, true, true)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //                 <ha-expansion-panel outlined>
-    //                     <h4 slot="header">
-    //                       <ha-icon icon="mdi:gesture-tap"></ha-icon>
-    //                       Tap action on button
-    //                     </h4>
-    //                     <div class="content">
-    //                         ${this.makeTapActionPanel("Tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Double tap action", "tap_action", subButton, subButtonIndex)}
-    //                         ${this.makeTapActionPanel("Hold action", "tap_action", subButton, subButtonIndex)}
-    //                     </div>
-    //                 </ha-expansion-panel>
-    //             </div>
-    //         </ha-expansion-panel>
-    //     `;
-    //   });
-
-    //   const addSubButton = () => {
-    //     const newSubButton = {
-    //       position: this._config.sub_button.length + 1,
-    //       entity: this._config.entity,
-    //       name: '',
-    //       icon: ''
-    //     };
-
-    //     this._config.sub_button.push(newSubButton);
-
-    //     this.requestUpdate();
-    //   };
-
-    //   // Return full panel for all sub-buttons
-    //   return html`
-    //     <ha-expansion-panel outlined>
-    //       <h4 slot="header">
-    //         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-    //         Sub buttons editor
-    //       </h4>
-    //       <div class="content">
-    //         ${subButtonElements}
-    //         <button class="icon-button" @click="${addSubButton}">
-    //           <ha-icon icon="mdi:plus"></ha-icon>
-    //           New sub button
-    //         </button>
-    //       </div>
-    //     </ha-expansion-panel>
-    //   `;
-    // }
-
     makeSubButtonPanel() {
-      // Triez le tableau sub_buttons par la propriété 'position'
-      const sortedSubButtons = this._config?.sub_button?.sort((a, b) => a.position - b.position);
-
-      const subButtonElements = sortedSubButtons?.map((subButton, index) => {
+      const subButtonElements = this._config?.sub_button?.map((subButton, index) => {
         if (!subButton) {
           return;
         }
 
         const subButtonIndex = 'sub_button.' + index + '.';
 
-        // // Fonction pour supprimer ce sous-bouton
-        // const removeSubButton = () => {
-        //   // Supprimez le subButton de l'index spécifique du tableau
-        //   this._config.sub_button.splice(index, 1);
-
-        //   // Mettez à jour la propriété de position des sous-boutons restants
-        //   this._config.sub_button.forEach((subButton, i) => {
-        //     subButton.position = i + 1;
-        //   });
-
-        //   // Forcez le composant à se mettre à jour pour afficher les boutons restants
-        //   this.requestUpdate();
-        // };
-
-        // // Fonction pour supprimer ce sous-bouton
-        // const removeSubButton = () => {
-        //   // Supprimez le subButton de l'index spécifique du tableau
-        //   this._config.sub_button.splice(index, 1);
-
-        //   // Mettez à jour la propriété de position des sous-boutons restants
-        //   this._config.sub_button.forEach((subButton, i) => {
-        //     subButton.position = i + 1;
-        //     // Déclenchez la fonction valueChanged pour chaque sous-bouton restant
-        //     this._valueChanged({ target: { configValue: subButtonIndex, value: subButton.position } });
-        //   });
-
-        //   // Forcez le composant à se mettre à jour pour afficher les boutons restants
-        //   this.requestUpdate();
-        // };
-
         // Fonction pour supprimer ce sous-bouton
         const removeSubButton = () => {
-          // Supprimez le subButton de l'index spécifique du tableau
           this._config.sub_button.splice(index, 1);
 
-          this._valueChanged({ target: { configValue: 'sub_button.' + index } });
-
-          // Forcez le composant à se mettre à jour pour afficher les boutons restants
+          this._valueChanged({ target: { configValue: 'sub_button.' + (index - 1) } });
           this.requestUpdate();
         };
 
         // Fonction pour déplacer ce sous-bouton vers la gauche
         const moveSubButtonLeft = (event) => {
-          event.stopPropagation(); // Arrêtez la propagation de l'événement
-
+          event.stopPropagation();
           if (index > 0) {
-            // Échangez la propriété de position de ce sous-bouton et celle de gauche
-            [this._config.sub_button[index].position, this._config.sub_button[index - 1].position] = [this._config.sub_button[index - 1].position, this._config.sub_button[index].position];
-
-            // Triez le tableau sub_buttons
-            this._config.sub_button.sort((a, b) => a.position - b.position);
-
-            // Déclenchez la fonction valueChanged pour les deux sous-boutons
-            this._valueChanged({ target: { configValue: subButtonIndex, value: this._config.sub_button[index].position } });
-            this._valueChanged({ target: { configValue: subButtonIndex, value: this._config.sub_button[index - 1].position } });
-
-            console.log('Updated sub-button positions after moving left:', this._config.sub_button.map(button => button.position));
+            [this._config.sub_button[index], this._config.sub_button[index - 1]] = [this._config.sub_button[index - 1], this._config.sub_button[index]];
+            this._valueChanged({ target: { configValue: 'sub_button.' + index, value: this._config.sub_button[index] } });
           }
+          this.requestUpdate();
         };
 
         // Fonction pour déplacer ce sous-bouton vers la droite
         const moveSubButtonRight = (event) => {
-          event.stopPropagation(); // Arrêtez la propagation de l'événement
-
+          event.stopPropagation();
           if (index < this._config.sub_button.length - 1) {
-            // Échangez la propriété de position de ce sous-bouton et celle de droite
-            [this._config.sub_button[index].position, this._config.sub_button[index + 1].position] = [this._config.sub_button[index + 1].position, this._config.sub_button[index].position];
-
-            // Triez le tableau sub_buttons
-            this._config.sub_button.sort((a, b) => a.position - b.position);
-
-            // Déclenchez la fonction valueChanged pour les deux sous-boutons
-            this._valueChanged({ target: { configValue: subButtonIndex, value: this._config.sub_button[index].position } });
-            this._valueChanged({ target: { configValue: subButtonIndex, value: this._config.sub_button[index + 1].position } });
-
-            console.log('Updated sub-button positions after moving right:', this._config.sub_button.map(button => button.position));
+            [this._config.sub_button[index], this._config.sub_button[index + 1]] = [this._config.sub_button[index + 1], this._config.sub_button[index]];
+            this._valueChanged({ target: { configValue: 'sub_button.' + index, value: this._config.sub_button[index] } });
           }
+          this.requestUpdate();
         };
 
         return html`
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:border-radius"></ha-icon>
-                    ${subButton.position ? "Button " + subButton.position : "New button"}
+                    ${this._config.sub_button[index] ? "Button " + (index + 1) + (subButton.name ? " - " + subButton.name : "") : "New button"}
                     <button class="icon-button header" @click="${removeSubButton}">
                       <ha-icon icon="mdi:delete"></ha-icon>
                     </button>
@@ -2418,7 +1253,6 @@ export default class BubbleCardEditor extends LitElement {
                                     .value="${subButton.entity ?? this._config.entity}"
                                     .configValue="sub_button.${index}.entity"
                                     .items="${this.allEntitiesList}"
-                                    .disabled="${!subButton.position}"
                                     @value-changed="${this._valueChanged}"
                                 ></ha-combo-box>
                             </div>
@@ -2438,7 +1272,6 @@ export default class BubbleCardEditor extends LitElement {
                                     .configValue="sub_button.${index}.icon"
                                     item-label-path="label"
                                     item-value-path="value"
-                                    .disabled="${!subButton.position}"
                                     @value-changed="${this._valueChanged}"
                                 ></ha-icon-picker>
                             </div>
@@ -2462,11 +1295,12 @@ export default class BubbleCardEditor extends LitElement {
       });
 
       const addSubButton = () => {
+        if (!this._config.sub_button) {
+            this._config.sub_button = [];
+        }
+
         const newSubButton = {
-          position: this._config.sub_button.length + 1,
-          entity: this._config.entity,
-          name: '',
-          icon: ''
+            entity: this._config.entity
         };
 
         this._config.sub_button.push(newSubButton);
@@ -2493,10 +1327,8 @@ export default class BubbleCardEditor extends LitElement {
       `;
     }
 
-
     makeButton() {
         let buttons = [];
-
         for (let i = 1; i <= this.buttonIndex; i++) {
             buttons.push(html`
                 <div class="${i}_button">
@@ -2545,7 +1377,10 @@ export default class BubbleCardEditor extends LitElement {
                     </ha-expansion-panel>
                 </div>
             `);
+
+            //this.requestUpdate;
         }
+
         return buttons;
     }
     
@@ -2605,787 +1440,58 @@ export default class BubbleCardEditor extends LitElement {
         });
     }
 
-    // _valueChanged(ev) {
-    //     if (!this._config || !this.hass) {
-    //         return;
-    //     }
-    //     const target = ev.target;
-    //     const detail = ev.detail;
-    //     let rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
-    //     let value;
-
-    //     if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
-    //         return;
-    //     }
-
-    //     if (target.configValue) {
-    //         if (target.type === 'ha-switch') {
-    //             value = target.checked;
-    //         } else {
-    //             if (rawValue !== "") {
-    //                 if (!isNaN(parseFloat(rawValue)) && isFinite(rawValue)) {
-    //                     value = parseFloat(rawValue);
-    //                     if (isNaN(value)) {
-    //                         value = undefined;
-    //                     }
-    //                 } else {
-    //                     value = rawValue;
-    //                 }
-    //             }
-    //             value = value !== undefined ? value : (target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value);
-    //         }
-
-    //         // Check if the value has changed
-    //         if (this._config[target.configValue] !== value) {
-    //             this._config = {
-    //                 ...this._config,
-    //                 [target.configValue]: value,
-    //             };
-
-    //             fireEvent(this, "config-changed", {
-    //                 config: this._config
-    //             });
-    //         }
-    //     }
-
-    //     // Handle ha-combo-box value changes
-    //     if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
-    //         this._config = {
-    //             ...this._config,
-    //             [target.configValue]: detail.value,
-    //         };
-
-    //         fireEvent(this, "config-changed", {
-    //             config: this._config
-    //         });
-    //     }
-    // }
-
-    // _valueChanged(ev) {
-    //     if (!this._config || !this.hass) {
-    //         return;
-    //     }
-    //     const target = ev.target;
-    //     const detail = ev.detail;
-    //     let rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
-    //     let value;
-
-    //     if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
-    //         return;
-    //     }
-
-    //     if (target.configValue) {
-    //         if (target.type === 'ha-switch') {
-    //             value = target.checked;
-    //         } else {
-    //             if (rawValue !== "") {
-    //                 if (!isNaN(parseFloat(rawValue)) && isFinite(rawValue)) {
-    //                     value = parseFloat(rawValue);
-    //                     if (isNaN(value)) {
-    //                         value = undefined;
-    //                     }
-    //                 } else {
-    //                     value = rawValue;
-    //                 }
-    //             }
-    //             value = value !== undefined ? value : (target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value);
-    //         }
-
-    //         // Check if the value has changed
-    //         const configValueArray = target.configValue.split('.');
-    //         let obj = this._config;
-    //         for (let i = 0; i < configValueArray.length - 1; i++) {
-    //             if (!obj[configValueArray[i]]) {
-    //                 obj[configValueArray[i]] = {};
-    //             }
-    //             obj = obj[configValueArray[i]];
-    //         }
-    //         if (obj[configValueArray[configValueArray.length - 1]] !== value) {
-    //             obj[configValueArray[configValueArray.length - 1]] = value;
-
-    //             fireEvent(this, "config-changed", {
-    //                 config: this._config
-    //             });
-    //         }
-    //     }
-
-    //     // Handle ha-combo-box value changes
-    //     if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
-    //         if (target.configValue.includes('.')) {
-    //             const configValueArray = target.configValue.split('.');
-    //             let obj = this._config;
-
-    //             for (let i = 0; i < configValueArray.length - 1; i++) {
-    //                 if (!obj[configValueArray[i]]) {
-    //                     obj[configValueArray[i]] = {};
-    //                 }
-    //                 obj = obj[configValueArray[i]];
-    //             }
-
-    //             obj[configValueArray[configValueArray.length - 1]] = detail.value;
-    //         } else {
-    //             this._config = {
-    //                 ...this._config,
-    //                 [target.configValue]: detail.value,
-    //             };
-    //         }
-
-    //         fireEvent(this, "config-changed", {
-    //             config: this._config
-    //         });
-    //     }
-    // }
-
-    // _valueChanged(ev) {
-    //     if (!this._config || !this.hass) {
-    //         return;
-    //     }
-    //     const target = ev.target;
-    //     const detail = ev.detail;
-    //     let rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
-    //     let value;
-
-    //     if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
-    //         return;
-    //     }
-
-    //     if (target.configValue) {
-    //         if (target.type === 'ha-switch') {
-    //             value = target.checked;
-    //         } else {
-    //             if (rawValue !== "") {
-    //                 if (!isNaN(parseFloat(rawValue)) && isFinite(rawValue)) {
-    //                     value = parseFloat(rawValue);
-    //                     if (isNaN(value)) {
-    //                         value = undefined;
-    //                     }
-    //                 } else {
-    //                     value = rawValue;
-    //                 }
-    //             }
-    //             value = value !== undefined ? value : (target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value);
-    //         }
-
-    //         // Check if the value has changed
-    //         const configValueArray = target.configValue.split('.');
-    //         let obj = this._config;
-    //         for (let i = 0; i < configValueArray.length - 1; i++) {
-    //             if (!obj[configValueArray[i]]) {
-    //                 obj[configValueArray[i]] = {};
-    //             }
-    //             obj = obj[configValueArray[i]];
-    //         }
-    //         if (obj[configValueArray[configValueArray.length - 1]] !== value) {
-    //             obj[configValueArray[configValueArray.length - 1]] = value;
-
-    //             fireEvent(this, "config-changed", {
-    //                 config: this._config
-    //             });
-    //         }
-    //     }
-
-    //     // Handle ha-combo-box value changes
-    //     if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
-    //         if (target.configValue && target.configValue.includes('.')) {
-    //             const configValueArray = target.configValue.split('.');
-    //             let obj = this._config;
-
-    //             for (let i = 0; i < configValueArray.length - 1; i++) {
-    //                 if (!obj[configValueArray[i]]) {
-    //                     obj[configValueArray[i]] = {};
-    //                 }
-    //                 obj = obj[configValueArray[i]];
-    //             }
-
-    //             // Si le dernier élément de configValueArray est un index de sub_button
-    //             if (configValueArray[configValueArray.length - 2] === 'sub_button') {
-    //                 // Assurez-vous que sub_button est un tableau
-    //                 if (!Array.isArray(obj.sub_button)) {
-    //                     obj.sub_button = [];
-    //                 }
-
-    //                 // Créez un nouvel objet de sous-bouton si nécessaire
-    //                 const subButtonIndex = parseInt(configValueArray[configValueArray.length - 1]);
-    //                 if (!obj.sub_button[subButtonIndex]) {
-    //                     obj.sub_button.push({});
-    //                 }
-
-    //                 // Mettez à jour la propriété du sous-bouton
-    //                 obj.sub_button[subButtonIndex][configValueArray[configValueArray.length - 1]] = detail.value;
-    //             } else {
-    //                 // Mettez à jour la propriété comme d'habitude
-    //                 obj[configValueArray[configValueArray.length - 1]] = detail.value;
-    //             }
-    //         } else {
-    //             this._config = {
-    //                 ...this._config,
-    //                 [target.configValue]: detail.value,
-    //             };
-    //         }
-
-    //         fireEvent(this, "config-changed", {
-    //             config: this._config
-    //         });
-    //     }
-    // }
-
-    // _valueChanged(ev) {
-    //     if (!this._config || !this.hass) {
-    //         return;
-    //     }
-    //     const target = ev.target;
-    //     const detail = ev.detail;
-    //     let rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
-    //     let value;
-
-    //     if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
-    //         return;
-    //     }
-
-    //     if (target.configValue) {
-    //         if (target.type === 'ha-switch') {
-    //             value = target.checked;
-    //         } else {
-    //             if (rawValue !== "") {
-    //                 if (!isNaN(parseFloat(rawValue)) && isFinite(rawValue)) {
-    //                     value = parseFloat(rawValue);
-    //                     if (isNaN(value)) {
-    //                         value = undefined;
-    //                     }
-    //                 } else {
-    //                     value = rawValue;
-    //                 }
-    //             }
-    //             value = value !== undefined ? value : (target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value);
-    //         }
-
-    //         // Check if the value has changed
-    //         const configValueArray = target.configValue.split('.');
-    //         let obj = this._config;
-    //         for (let i = 0; i < configValueArray.length - 1; i++) {
-    //             if (!obj[configValueArray[i]]) {
-    //                 obj[configValueArray[i]] = {};
-    //             }
-    //             obj = obj[configValueArray[i]];
-    //         }
-    //         if (obj[configValueArray[configValueArray.length - 1]] !== value) {
-    //             // If the position of a sub-button is changed
-    //             if (configValueArray[0] === 'sub_button' && configValueArray[2] === 'position') {
-    //                 // Store the old position of the current sub-button
-    //                 const oldPosition = obj[configValueArray[configValueArray.length - 1]];
-
-    //                 // Find the sub-button that currently has this position
-    //                 const otherSubButton = this._config.sub_button.find((subButton, i) => i !== parseInt(configValueArray[1]) && subButton.position === value);
-
-    //                 // If found, change its position to the old position of the current sub-button
-    //                 if (otherSubButton) {
-    //                     otherSubButton.position = oldPosition;
-    //                 }
-    //             }
-
-    //             obj[configValueArray[configValueArray.length - 1]] = value;
-
-    //             fireEvent(this, "config-changed", {
-    //                 config: this._config
-    //             });
-    //         }
-    //     }
-
-    //     // Handle ha-combo-box value changes
-    //     if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
-    //         if (target.configValue && target.configValue.includes('.')) {
-    //             const configValueArray = target.configValue.split('.');
-    //             let obj = this._config;
-
-    //             for (let i = 0; i < configValueArray.length - 1; i++) {
-    //                 if (!obj[configValueArray[i]]) {
-    //                     obj[configValueArray[i]] = {};
-    //                 }
-    //                 obj = obj[configValueArray[i]];
-    //             }
-
-    //             // Si le dernier élément de configValueArray est un index de sub_button
-    //             if (configValueArray[configValueArray.length - 2] === 'sub_button') {
-    //                 // Assurez-vous que sub_button est un tableau
-    //                 if (!Array.isArray(obj.sub_button)) {
-    //                     obj.sub_button = [];
-    //                 }
-
-    //                 // Créez un nouvel objet de sous-bouton si nécessaire
-    //                 const subButtonIndex = parseInt(configValueArray[configValueArray.length - 1]);
-    //                 if (!obj.sub_button[subButtonIndex]) {
-    //                     obj.sub_button.push({});
-    //                 }
-
-    //                 // Mettez à jour la propriété du sous-bouton
-    //                 obj.sub_button[subButtonIndex][configValueArray[configValueArray.length - 1]] = detail.value;
-    //             } else {
-    //                 // Mettez à jour la propriété comme d'habitude
-    //                 obj[configValueArray[configValueArray.length - 1]] = detail.value;
-    //             }
-    //         } else {
-    //             this._config = {
-    //                 ...this._config,
-    //                 [target.configValue]: detail.value,
-    //             };
-    //         }
-
-    //         fireEvent(this, "config-changed", {
-    //             config: this._config
-    //         });
-    //     }
-    // }
-
-    // _valueChanged(ev) {
-    //     if (!this._config || !this.hass) {
-    //         return;
-    //     }
-    //     const target = ev.target;
-    //     const detail = ev.detail;
-    //     let rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
-    //     let value;
-
-    //     if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
-    //         return;
-    //     }
-
-    //     if (target.configValue) {
-    //         if (target.type === 'ha-switch') {
-    //             value = target.checked;
-    //         } else {
-    //             if (rawValue !== "") {
-    //                 if (!isNaN(parseFloat(rawValue)) && isFinite(rawValue)) {
-    //                     value = parseFloat(rawValue);
-    //                     if (isNaN(value)) {
-    //                         value = undefined;
-    //                     }
-    //                 } else {
-    //                     value = rawValue;
-    //                 }
-    //             }
-    //             value = value !== undefined ? value : (target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value);
-    //         }
-
-    //         // Check if the value has changed
-    //         const configValueArray = target.configValue.split('.');
-    //         let obj = this._config;
-    //         for (let i = 0; i < configValueArray.length - 1; i++) {
-    //             if (!obj[configValueArray[i]]) {
-    //                 obj[configValueArray[i]] = {};
-    //             }
-    //             obj = obj[configValueArray[i]];
-    //         }
-    //         if (obj[configValueArray[configValueArray.length - 1]] !== value) {
-    //             // If the position of a sub-button is changed
-    //             if (configValueArray[0] === 'sub_button' && configValueArray[2] === 'position') {
-    //                 // Store the old position of the current sub-button
-    //                 const oldPosition = obj[configValueArray[configValueArray.length - 1]];
-
-    //                 // Find the sub-button that currently has this position
-    //                 const otherSubButton = this._config.sub_button.find((subButton, i) => i !== parseInt(configValueArray[1]) && subButton.position === value);
-
-    //                 // If found, change its position to the old position of the current sub-button
-    //                 if (otherSubButton) {
-    //                     otherSubButton.position = oldPosition;
-    //                 }
-    //             }
-
-    //             obj[configValueArray[configValueArray.length - 1]] = value;
-
-    //             // Sort the sub_buttons array by the 'position' property
-    //             this._config.sub_button.sort((a, b) => a.position - b.position);
-
-    //             fireEvent(this, "config-changed", {
-    //                 config: this._config
-    //             });
-    //         }
-    //     }
-
-    //     // Handle ha-combo-box value changes
-    //     if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
-    //         if (target.configValue && target.configValue.includes('.')) {
-    //             const configValueArray = target.configValue.split('.');
-    //             let obj = this._config;
-
-    //             for (let i = 0; i < configValueArray.length - 1; i++) {
-    //                 if (!obj[configValueArray[i]]) {
-    //                     obj[configValueArray[i]] = {};
-    //                 }
-    //                 obj = obj[configValueArray[i]];
-    //             }
-
-    //             // Si le dernier élément de configValueArray est un index de sub_button
-    //             if (configValueArray[configValueArray.length - 2] === 'sub_button') {
-    //                 // Assurez-vous que sub_button est un tableau
-    //                 if (!Array.isArray(obj.sub_button)) {
-    //                     obj.sub_button = [];
-    //                 }
-
-    //                 // Créez un nouvel objet de sous-bouton si nécessaire
-    //                 const subButtonIndex = parseInt(configValueArray[configValueArray.length - 1]);
-    //                 if (!obj.sub_button[subButtonIndex]) {
-    //                     obj.sub_button.push({});
-    //                 }
-
-    //                 // Mettez à jour la propriété du sous-bouton
-    //                 obj.sub_button[subButtonIndex][configValueArray[configValueArray.length - 1]] = detail.value;
-    //             } else {
-    //                 // Mettez à jour la propriété comme d'habitude
-    //                 obj[configValueArray[configValueArray.length - 1]] = detail.value;
-    //             }
-    //         } else {
-    //             this._config = {
-    //                 ...this._config,
-    //                 [target.configValue]: detail.value,
-    //             };
-    //         }
-
-    //         fireEvent(this, "config-changed", {
-    //             config: this._config
-    //         });
-    //     }
-
-    //     this.requestUpdate();
-    // }
-
-// _valueChanged(ev) {
-//     console.log('_valueChanged called with event:', ev);
-
-//     if (!this._config || !this.hass) {
-//         console.log('Early return because _config or hass is not defined');
-//         return;
-//     }
-
-//     const target = ev.target;
-//     const detail = ev.detail;
-//     let rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
-//     let value;
-
-//     if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
-//         return;
-//     }
-
-//     if (target.configValue) {
-//         if (target.type === 'ha-switch') {
-//             value = target.checked;
-//         } else {
-//             if (rawValue !== "") {
-//                 if (!isNaN(parseFloat(rawValue)) && isFinite(rawValue)) {
-//                     value = parseFloat(rawValue);
-//                     if (isNaN(value)) {
-//                         value = undefined;
-//                     }
-//                 } else {
-//                     value = rawValue;
-//                 }
-//             }
-//             value = value !== undefined ? value : (target.checked !== undefined || !detail.value ? target.value || target.checked : target.checked || detail.value);
-//         }
-
-//         const configValueArray = target.configValue.split('.');
-//         let obj = this._config;
-//         for (let i = 0; i < configValueArray.length - 1; i++) {
-//             if (!obj[configValueArray[i]]) {
-//                 obj[configValueArray[i]] = {};
-//             }
-//             obj = obj[configValueArray[i]];
-//         }
-//         if (obj[configValueArray[configValueArray.length - 1]] !== value) {
-//             console.log('Value has changed for config value:', target.configValue);
-
-//             if (configValueArray[0] === 'sub_button' && configValueArray[2] === 'position') {
-//                 console.log('Position of a sub-button has changed');
-
-//                 const oldPosition = obj[configValueArray[configValueArray.length - 1]];
-
-//                 const otherSubButton = this._config.sub_button.find((subButton, i) => i !== parseInt(configValueArray[1]) && subButton.position === value);
-
-//                 if (otherSubButton) {
-//                     otherSubButton.position = oldPosition;
-//                 }
-//             }
-
-//             obj[configValueArray[configValueArray.length - 1]] = value;
-
-//             this._config.sub_button.sort((a, b) => a.position - b.position);
-
-//             console.log('Updated _config:', this._config);
-
-//             fireEvent(this, "config-changed", {
-//                 config: this._config
-//             });
-//         }
-//     }
-
-//     if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
-//         if (target.configValue && target.configValue.includes('.')) {
-//             const configValueArray = target.configValue.split('.');
-//             let obj = this._config;
-
-//             for (let i = 0; i < configValueArray.length - 1; i++) {
-//                 if (!obj[configValueArray[i]]) {
-//                     obj[configValueArray[i]] = {};
-//                 }
-//                 obj = obj[configValueArray[i]];
-//             }
-
-//             if (configValueArray[configValueArray.length - 2] === 'sub_button') {
-//                 if (!Array.isArray(obj.sub_button)) {
-//                     obj.sub_button = [];
-//                 }
-
-//                 const subButtonIndex = parseInt(configValueArray[configValueArray.length - 1]);
-//                 if (!obj.sub_button[subButtonIndex]) {
-//                     obj.sub_button.push({});
-//                 }
-
-//                 obj.sub_button[subButtonIndex][configValueArray[configValueArray.length - 1]] = detail.value;
-//             } else {
-//                 obj[configValueArray[configValueArray.length - 1]] = detail.value;
-//             }
-//         } else {
-//             this._config = {
-//                 ...this._config,
-//                 [target.configValue]: detail.value,
-//             };
-//         }
-
-//         console.log('About to fire config-changed event with new config:', this._config);
-//         fireEvent(this, "config-changed", {
-//             config: this._config
-//         });
-//         console.log('Fired config-changed event');
-//     }
-
-//     this.requestUpdate();
-// }
-
-// _valueChanged(ev) {
-//     console.log('_valueChanged called with event:', ev);
-
-//     if (!this._config || !this.hass) {
-//         console.log('Early return because _config or hass is not defined');
-//         return;
-//     }
-
-//     const target = ev.target;
-//     const detail = ev.detail;
-//     let rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
-//     let value;
-
-//     if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
-//         return;
-//     }
-
-//     if (target.configValue) {
-//         if (target.type === 'ha-switch') {
-//             value = target.checked;
-//         } else {
-//             value = rawValue;
-//             value = value !== '' ? 
-//                 value : 
-//                 (target.checked !== undefined || 
-//                     !detail.value ?
-//                         target.value || target.checked : 
-//                         target.checked || detail.value);
-
-//             fireEvent(this, "config-changed", {
-//                 config: this._config
-//             });
-//         }
-
-//         const configValueArray = target.configValue.split('.');
-//         let obj = this._config;
-//         for (let i = 0; i < configValueArray.length - 1; i++) {
-//             if (!obj[configValueArray[i]]) {
-//                 obj[configValueArray[i]] = {};
-//             }
-//             obj = obj[configValueArray[i]];
-//         }
-
-//         if (obj[configValueArray[configValueArray.length - 1]] !== value) {
-//             console.log('Value has changed for config value:', target.configValue);
-
-//             if (configValueArray[0] === 'sub_button' && configValueArray[2] === 'position') {
-//                 console.log('Position of a sub-button has changed');
-
-//                 const oldPosition = obj[configValueArray[configValueArray.length - 1]];
-
-//                 const otherSubButton = this._config.sub_button.find((subButton, i) => i !== parseInt(configValueArray[1]) && subButton.position === value);
-
-//                 if (otherSubButton) {
-//                     otherSubButton.position = oldPosition;
-//                 }
-//             }
-
-//             obj[configValueArray[configValueArray.length - 1]] = value;
-
-//             this._config.sub_button.sort((a, b) => a.position - b.position);
-
-//             console.log('Updated _config:', this._config);
-
-//             fireEvent(this, "config-changed", {
-//                 config: this._config
-//             });
-//         }
-//     }
-
-//     if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
-//         if (target.configValue && target.configValue.includes('.')) {
-//             const configValueArray = target.configValue.split('.');
-//             let obj = this._config;
-
-//             for (let i = 0; i < configValueArray.length - 1; i++) {
-//                 if (!obj[configValueArray[i]]) {
-//                     obj[configValueArray[i]] = {};
-//                 }
-//                 obj = obj[configValueArray[i]];
-//             }
-
-//             if (configValueArray[configValueArray.length - 2] === 'sub_button') {
-//                 if (!Array.isArray(obj.sub_button)) {
-//                     obj.sub_button = [];
-//                 }
-
-//                 const subButtonIndex = parseInt(configValueArray[configValueArray.length - 1]);
-//                 if (!obj.sub_button[subButtonIndex]) {
-//                     obj.sub_button.push({});
-//                 }
-
-//                 obj.sub_button[subButtonIndex][configValueArray[configValueArray.length - 1]] = detail.value;
-//             } else {
-//                 obj[configValueArray[configValueArray.length - 1]] = detail.value;
-//             }
-//         } else {
-//             this._config = {
-//                 ...this._config,
-//                 [target.configValue]: detail.value,
-//             };
-//         }
-
-//         console.log('About to fire config-changed event with new config:', this._config);
-//         fireEvent(this, "config-changed", {
-//             config: this._config
-//         });
-//         console.log('Fired config-changed event');
-//     }
-
-//     this.requestUpdate();
-// }
-
-_valueChanged(ev) {
-    console.log('_valueChanged called with event:', ev);
-
-    if (!this._config || !this.hass) {
-        console.log('Early return because _config or hass is not defined');
-        return;
-    }
-
-    const target = ev.target;
-    const detail = ev.detail;
-    let rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
-    let value;
-
-    if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
-        return;
-    }
-
-    if (target.configValue) {
-        if (target.checked !== undefined) {
-            value = target.checked;
-        } else {
-            value = rawValue;
-            // if (value !== '') {
-            //     value = !isNaN(parseFloat(rawValue)) && isFinite(rawValue) ? parseFloat(rawValue) : rawValue;
-            // } else {
-            //     value = target.checked || detail.value;
-            // }
-
-            fireEvent(this, "config-changed", {
-                config: this._config
-            });
+    _valueChanged(ev) {
+        const target = ev.target;
+        const detail = ev.detail;
+        const rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
+
+        if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
+            return;
         }
 
-        const configValueArray = target.configValue.split('.');
-        let obj = this._config;
-        for (let i = 0; i < configValueArray.length - 1; i++) {
-            if (!obj[configValueArray[i]]) {
-                obj[configValueArray[i]] = {};
-            }
-            obj = obj[configValueArray[i]];
-        }
-
-        if (obj[configValueArray[configValueArray.length - 1]] !== value) {
-            console.log('Value has changed for config value:', target.configValue);
-
-            if (configValueArray[0] === 'sub_button' && configValueArray[2] === 'position') {
-                console.log('Position of a sub-button has changed');
-
-                const oldPosition = obj[configValueArray[configValueArray.length - 1]];
-
-                const otherSubButton = this._config.sub_button.find((subButton, i) => i !== parseInt(configValueArray[1]) && subButton.position === value);
-
-                if (otherSubButton) {
-                    otherSubButton.position = oldPosition;
-                }
-            }
-
-            obj[configValueArray[configValueArray.length - 1]] = value;
-
-            this._config.sub_button.sort((a, b) => a.position - b.position);
-
-            console.log('Updated _config:', this._config);
-
-            fireEvent(this, "config-changed", {
-                config: this._config
-            });
-        }
-    }
-
-    if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
-        if (target.configValue && target.configValue.includes('.')) {
-            const configValueArray = target.configValue.split('.');
+        const { configValue, checked } = target;
+        if (configValue) {
+            const value = checked !== undefined ? checked : rawValue;
+            const configKeys = configValue.split('.');
             let obj = this._config;
 
-            for (let i = 0; i < configValueArray.length - 1; i++) {
-                if (!obj[configValueArray[i]]) {
-                    obj[configValueArray[i]] = {};
-                }
-                obj = obj[configValueArray[i]];
+            for (let i = 0; i < configKeys.length - 1; i++) {
+                obj[configKeys[i]] = obj[configKeys[i]] || {};
+                obj = obj[configKeys[i]];
             }
 
-            if (configValueArray[configValueArray.length - 2] === 'sub_button') {
-                if (!Array.isArray(obj.sub_button)) {
-                    obj.sub_button = [];
-                }
-
-                const subButtonIndex = parseInt(configValueArray[configValueArray.length - 1]);
-                if (!obj.sub_button[subButtonIndex]) {
-                    obj.sub_button.push({});
-                }
-
-                obj.sub_button[subButtonIndex][configValueArray[configValueArray.length - 1]] = detail.value;
-            } else {
-                obj[configValueArray[configValueArray.length - 1]] = detail.value;
+            if (obj[configKeys[configKeys.length - 1]] !== value) {
+                obj[configKeys[configKeys.length - 1]] = value;
             }
-        } else {
-            this._config = {
-                ...this._config,
-                [target.configValue]: detail.value,
-            };
         }
 
-        console.log('About to fire config-changed event with new config:', this._config);
-        fireEvent(this, "config-changed", {
-            config: this._config
-        });
-        console.log('Fired config-changed event');
+        if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
+            if (target.configValue && target.configValue.includes('.')) {
+                const configValueArray = target.configValue.split('.');
+                let obj = this._config;
+                for (let i = 0; i < configValueArray.length - 1; i++) {
+                    obj[configValueArray[i]] = obj[configValueArray[i]] || {};
+                    obj = obj[configValueArray[i]];
+                }
+
+                if (configValueArray[configValueArray.length - 2] === 'sub_button') {
+                    obj.sub_button = obj.sub_button || [];
+                    const subButtonIndex = parseInt(configValueArray[configValueArray.length - 1]);
+                    obj.sub_button[subButtonIndex] = obj.sub_button[subButtonIndex] || {};
+                    obj.sub_button[subButtonIndex][configValueArray[configValueArray.length - 1]] = detail.value;
+                } else {
+                    obj[configValueArray[configValueArray.length - 1]] = detail.value;
+                }
+            } else {
+                this._config = { ...this._config, [target.configValue]: detail.value };
+            }
+
+            fireEvent(this, "config-changed", { config: this._config });
+        }
+
+        fireEvent(this, "config-changed", { config: this._config });
+        this.requestUpdate();
     }
-
-    this.requestUpdate();
-}
-
-
 
     static get styles() {
         return css`

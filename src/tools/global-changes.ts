@@ -215,6 +215,9 @@ export function changeSubButtonState(context) {
         context.previousValues = {};
     }
 
+    // Avant la boucle for
+    let previousSubButtons = context.previousValues.subButtons || [];
+
     // Iterate over each sub button in subButtons
     for (let i = 0; i < subButtons.length; i++) {
         let subButton = subButtons[i];
@@ -223,7 +226,7 @@ export function changeSubButtonState(context) {
             continue;
         }
 
-        const position = subButton.position ?? "1";
+        const index = i + 1;
         const entity = subButton.entity ?? context.config.entity;
         const state = context._hass.states[entity];
         const name = subButton.name ?? getAttribute(context, "friendly_name", entity) ?? '';
@@ -240,141 +243,143 @@ export function changeSubButtonState(context) {
         const showIcon = subButton.show_icon ?? true;
         const showBackround = subButton.show_background ?? true;
 
-        // Check if state, attribute or lastUpdated has changed
-        if (context.previousValues[position]?.previousState !== state || context.previousValues[position]?.previousAttribute !== attribute || context.previousValues[position]?.previousLastUpdated !== state?.last_updated) {
-            // Update previous values
-            context.previousValues[position] = {
-                previousState: state,
-                previousAttribute: attribute,
-                previousLastUpdated: state?.last_updated
-            };
+        if (!context.elements.subButtonContainer) {
+            context.elements.subButtonContainer = createElement('div', 'bubble-sub-button-container');
+            context.elements.subButtonContainer.style.position = 'relative';
+            context.elements.subButtonContainer.style.display = 'flex';
+            context.elements.subButtonContainer.style.justifyContent = 'end';
+            context.elements.subButtonContainer.style.right = '8px';
+            context.elements.subButtonContainer.style.alignContent = 'center';
+            context.elements.subButtonContainer.style.gap = '8px';
+            context.content.firstChild.firstChild.appendChild(context.elements.subButtonContainer);
+        }
 
-            // Create sub-button container if it doesn't exist
-            if (!context.elements.subButtonContainer) {
-                context.elements.subButtonContainer = createElement('div', 'bubble-sub-button-container');
-                context.elements.subButtonContainer.style.position = 'relative';
-                context.elements.subButtonContainer.style.display = 'flex';
-                context.elements.subButtonContainer.style.justifyContent = 'end';
-                context.elements.subButtonContainer.style.right = '8px';
-                context.elements.subButtonContainer.style.alignContent = 'center';
-                context.elements.subButtonContainer.style.gap = '8px';
-                context.content.firstChild.firstChild.appendChild(context.elements.subButtonContainer);
+        if (!context.elements[index]) {
+            context.elements[index] = createElement('div', 'bubble-sub-button-' + index);
+            context.elements[index].style.flexWrap = 'nowrap';
+            context.elements[index].style.flexDirection = 'row-reverse';
+            context.elements[index].style.alignItems = 'center';
+            context.elements[index].style.justifyContent = 'center';
+            context.elements[index].style.position = 'relative';
+            context.elements[index].style.right = '0';
+            context.elements[index].style.boxSizing = 'border-box';
+            context.elements[index].style.width = 'min-content';
+            context.elements[index].style.minWidth = '36px';
+            context.elements[index].style.height = '36px';
+            context.elements[index].style.verticalAlign = 'middle';
+            context.elements[index].style.fontSize = '12px';
+            context.elements[index].style.color = 'white';
+            context.elements[index].style.borderRadius = '32px';
+            context.elements[index].style.padding = '0 8px';
+            context.elements[index].style.overflow = 'hidden';
+            context.elements[index].style.whiteSpace = 'nowrap';
+            context.elements[index].style.zIndex = '1';
+            context.elements[index].style.transition = 'all 0.5s ease-in-out';
+
+            context.elements[index].nameContainer = createElement('div', 'bubble-sub-button-name-container');
+            context.elements[index].nameContainer.style.display = 'flex';
+
+            context.elements[index].appendChild(context.elements[index].nameContainer);
+            context.elements.subButtonContainer.appendChild(context.elements[index]);
+        }
+
+        if (showIcon && icon && context.elements[index].previousIcon !== icon) {
+            context.elements[index].previousIcon = icon;
+
+            if (!context.elements[index].icon) context.elements[index].icon = createElement('ha-icon', 'bubble-sub-button-icon');
+
+            context.elements[index].icon.setAttribute('icon', icon);
+            context.elements[index].icon.style.setProperty('--mdc-icon-size', '16px');
+            context.elements[index].icon.style.display = 'flex';
+            context.elements[index].icon.style.marginRight = '4px';
+            context.elements[index].appendChild(context.elements[index].icon);
+        }
+
+        if (showBackround) {
+            context.elements[index].style.backgroundColor = backgroundColor;
+        }
+
+        if (subButton.tap_action) {
+            addActions(context.elements[index], subButton, entity);
+        }
+
+        // Format state and attributes based on button type
+        const formattedState = state && showState ? context._hass.formatEntityState(state) : '';
+        let formattedAttribute;
+        let formattedLastUpdated;
+        let displayedState = '';
+
+        if (showAttribute) {
+            formattedAttribute = state && attribute ? context._hass.formatEntityAttributeValue(state, attributeType) : '';
+        }
+
+        if (showLastUpdated) {
+            formattedLastUpdated = state ? formatDateTime(state.last_updated, context._hass.locale.language) : '';
+        }
+
+        if (showName && name) {
+            if (displayedState) {
+                displayedState += ' - ';
             }
+            displayedState += name;
+        }
 
-            // Create sub-button element if it doesn't exist
-            if (!context.elements[position]) {
-                context.elements[position] = createElement('div', 'bubble-sub-button-' + position);
-                context.elements[position].style.flexWrap = 'nowrap';
-                context.elements[position].style.flexDirection = 'row-reverse';
-                context.elements[position].style.alignItems = 'center';
-                context.elements[position].style.justifyContent = 'center';
-                context.elements[position].style.position = 'relative';
-                context.elements[position].style.right = '0';
-                context.elements[position].style.boxSizing = 'border-box';
-                context.elements[position].style.width = 'min-content';
-                context.elements[position].style.minWidth = '36px';
-                context.elements[position].style.height = '36px';
-                context.elements[position].style.verticalAlign = 'middle';
-                context.elements[position].style.fontSize = '12px';
-                context.elements[position].style.color = 'white';
-                context.elements[position].style.borderRadius = '32px';
-                context.elements[position].style.padding = '0 8px';
-                context.elements[position].style.overflow = 'hidden';
-                context.elements[position].style.whiteSpace = 'nowrap';
-                context.elements[position].style.zIndex = '1';
-                context.elements[position].style.transition = 'all 0.5s ease-in-out';
-
-                context.elements[position].nameContainer = createElement('div', 'bubble-sub-button-name-container');
-                context.elements[position].nameContainer.style.display = 'flex';
-
-                context.elements[position].appendChild(context.elements[position].nameContainer);
-                context.elements.subButtonContainer.appendChild(context.elements[position]);
+        if (formattedState) {
+            if (displayedState) {
+                displayedState += ' - ';
             }
+            displayedState += formattedState;
+        }
 
-            if (showIcon && icon && context.elements[position].previousIcon !== icon) {
-                context.elements[position].previousIcon = icon;
-
-                context.elements[position].icon = createElement('ha-icon', 'bubble-sub-button-icon');
-                context.elements[position].icon.setAttribute('icon', icon);
-                context.elements[position].icon.style.setProperty('--mdc-icon-size', '16px');
-                context.elements[position].icon.style.display = 'flex';
-                context.elements[position].icon.style.marginRight = '4px';
-                context.elements[position].appendChild(context.elements[position].icon);
-
-                // Need to only change attribute on icon, just create it once!!!!
+        if (formattedLastUpdated) {
+            if (displayedState) {
+                // Add a space if formattedState is not 'off', otherwise add a dash
+                displayedState += (formattedState.toLowerCase() !== 'off') ? ' ' : ' - ';
             }
+            // Capitalize formattedLastUpdated if formattedState is 'off'
+            displayedState += (formattedState.toLowerCase() === 'off') ? capitalizeFirstLetter(formattedLastUpdated) : formattedLastUpdated;
+        }
 
-            if (showBackround) {
-                context.elements[position].style.backgroundColor = backgroundColor;
+        if (formattedAttribute) {
+            if (displayedState) {
+                displayedState += ' - ';
             }
+            displayedState += formattedAttribute;
+        }
 
-            if (subButton.tap_action) {
-                addActions(context.elements[position], subButton, entity);
-            }
+        // Function to capitalize the first letter of a string
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
 
-            // Format state and attributes based on button type
-            const formattedState = state && showState ? context._hass.formatEntityState(state) : '';
-            let formattedAttribute;
-            let formattedLastUpdated;
-            let displayedState = '';
+        // Capitalize the first letter of displayedState
+        displayedState = capitalizeFirstLetter(displayedState);
 
-            if (showAttribute) {
-                formattedAttribute = state && attribute ? context._hass.formatEntityAttributeValue(state, attributeType) : '';
-            }
+        // Update display
+        if (displayedState === '' && !showIcon) {
+            context.elements[index].style.display = 'none';
+        } else if (displayedState === '' && showIcon) {
+            context.elements[index].style.display = 'flex';
+            context.elements[index].icon.style.marginRight = '0';
+        } else {
+            context.elements[index].style.display = 'flex';
+            context.elements[index].nameContainer.innerText = displayedState;
+            context.previousState = displayedState;
+        }
+    }
 
-            if (showLastUpdated) {
-                formattedLastUpdated = state ? formatDateTime(state.last_updated, context._hass.locale.language) : '';
-            }
+    context.previousValues.subButtons = subButtons.slice();
 
-            if (showName && name) {
-                if (displayedState) {
-                    displayedState += ' - ';
-                }
-                displayedState += name;
-            }
-
-            if (formattedState) {
-                if (displayedState) {
-                    displayedState += ' - ';
-                }
-                displayedState += formattedState;
-            }
-
-            if (formattedLastUpdated) {
-                if (displayedState) {
-                    // Add a space if formattedState is not 'off', otherwise add a dash
-                    displayedState += (formattedState.toLowerCase() !== 'off') ? ' ' : ' - ';
-                }
-                // Capitalize formattedLastUpdated if formattedState is 'off'
-                displayedState += (formattedState.toLowerCase() === 'off') ? capitalizeFirstLetter(formattedLastUpdated) : formattedLastUpdated;
-            }
-
-            if (formattedAttribute) {
-                if (displayedState) {
-                    displayedState += ' - ';
-                }
-                displayedState += formattedAttribute;
-            }
-
-            // Function to capitalize the first letter of a string
-            function capitalizeFirstLetter(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
-            }
-
-            // Capitalize the first letter of displayedState
-            displayedState = capitalizeFirstLetter(displayedState);
-
-            // Update display
-            if (displayedState === '' && !showIcon) {
-                context.elements[position].style.display = 'none';
-            } else if (displayedState === '' && showIcon) {
-                context.elements[position].style.display = 'flex';
-                context.elements[position].icon.style.marginRight = '0';
-            } else {
-                context.elements[position].style.display = 'flex';
-                context.elements[position].nameContainer.innerText = displayedState;
-                context.previousState = displayedState;
+    for (let i = 0; i < previousSubButtons.length; i++) {
+        let previousSubButton = previousSubButtons[i];
+        if (subButtons.indexOf(previousSubButton) === -1) {
+            // Supprimer le subButton
+            let element = context.elements[i + 1];
+            if (element && !context.config.sub_button[i]) {
+                context.elements.subButtonContainer.removeChild(element);
+                context.elements[i + 1] = null; // Réinitialiser la référence
             }
         }
     }
 }
+
