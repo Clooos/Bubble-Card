@@ -20,9 +20,25 @@ export default `
       scrollbar-width: none; /* for Firefox */
       overflow-y: auto; 
       overflow-x: hidden; 
-      z-index: 1 !important; /* Higher value hide the more-info panel */
+      z-index: 5 !important; /* Higher value hide the more-info panel */
       bottom: 0;
       left: calc(var(--mdc-drawer-width) / 2 + 50% - (var(--desktop-width) / 2));
+  }
+  .pop-up > :first-child::after {
+      content: '';
+      display: block;
+      position: sticky;
+      top: 0;
+      left: -50px;
+      margin: -70px 0 -36px -36px;
+      overflow: visible;
+      width: 200%;
+      height: 100px;
+      background: var(--card-background-color, var(--ha-card-background));
+      -webkit-mask-image: linear-gradient(0deg, transparent 0%, black 80%);
+      mask-image: linear-gradient(0deg, transparent 0%, black 80%);
+      z-index: 0;
+      pointer-events: none;
   }
   .pop-up::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, and Opera */
@@ -71,6 +87,9 @@ export default `
       height: auto !important;
       min-width: auto;
       border-radius: 42px;
+  }
+  .pop-up.editor > :first-child::after {
+      display: none;
   }
 `;
 

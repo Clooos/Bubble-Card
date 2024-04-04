@@ -1,5 +1,5 @@
 import { isColorCloseToWhite } from "../../tools/style.ts";
-import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isStateOn } from "../../tools/utils.ts";
+import { getIcon, getIconColor, getImage, getName, getState, isStateOn, isEntityType } from "../../tools/utils.ts";
 import { getBackdrop } from "./create.ts";
 import { addHash, onEditorChange, removeHash } from "./helpers.ts";
 
@@ -61,6 +61,10 @@ export function changeStyle(context) {
   const customStyle = context.config.styles
       ? Function('hass', 'entityId', 'state', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state)
       : '';
+
+  if (context.config.styles?.match(/\.(button-container|switch-button|name-container|icon-container|name|state|feedback-element|icon|entity-picture)/)) {
+      console.log('custom styles with no bubble prefix are deprecated on buttons. Please update your selectors.');
+  }
 
   context.elements.customStyle.innerText = customStyle;
   context.elements.cardCustomStyle.innerText = customStyle;

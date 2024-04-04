@@ -970,10 +970,10 @@ export default class BubbleCardEditor extends LitElement {
 
         return html`
             ${subButton ? html`
-                <ha-formfield .label="Optional - Show background when entity is on">
+                <ha-formfield .label="Optional - Show background">
                     <ha-switch
                         aria-label="Optional - Show background when entity is on"
-                        .checked=${context?.show_background}
+                        .checked=${context?.show_background ?? true}
                         .configValue="${config + "show_background"}"
                         @change=${this._valueChanged}
                     ></ha-switch>
@@ -1201,7 +1201,7 @@ export default class BubbleCardEditor extends LitElement {
         const removeSubButton = () => {
           this._config.sub_button.splice(index, 1);
 
-          this._valueChanged({ target: { configValue: 'sub_button.' + (index - 1) } });
+          this._valueChanged({ target: { configValue: 'sub_button.' + (index - 1), value: subButton } });
           this.requestUpdate();
         };
 
@@ -1300,11 +1300,12 @@ export default class BubbleCardEditor extends LitElement {
         }
 
         const newSubButton = {
-            entity: this._config.entity
+            entity: this._config.entity,
+            icon: '',
         };
 
         this._config.sub_button.push(newSubButton);
-
+        fireEvent(this, "config-changed", { config: this._config });
         this.requestUpdate();
       };
 

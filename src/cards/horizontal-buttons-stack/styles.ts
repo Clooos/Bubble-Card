@@ -21,7 +21,7 @@ export default `
         position: fixed;
         width: calc(100% - var(--mdc-drawer-width) - 8px);
         left: calc(var(--mdc-drawer-width) + 4px);
-        z-index: 1; /* Higher value hide the more-info panel */
+        z-index: 6; /* Higher value hide the more-info panel */
     }
     @media only screen and (max-width: 870px) {
         .horizontal-buttons-stack-card {
@@ -36,11 +36,11 @@ export default `
         content: '';
         position: absolute;
         top: -32px;
-        left: -100%;
         display: none;
         background: linear-gradient(0deg, var(--background-color, var(--primary-background-color)) 50%, rgba(79, 69, 87, 0));
         width: 200%;
         height: 100px;
+        pointer-events: none;
     }
     .has-gradient.horizontal-buttons-stack-card::before {
         display: block;
