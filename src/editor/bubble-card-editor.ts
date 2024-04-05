@@ -1117,7 +1117,7 @@ export default class BubbleCardEditor extends LitElement {
                     <div class="ha-combo-box">
                         <ha-combo-box
                             label="${label}"
-                            .value="${context?.valueType?.action || defaultAction}"
+                            .value="${valueType?.action || defaultAction}"
                             .configValue="${config + configValueType}.action"
                             .items="${this.tapActionTypeList}"
                             @value-changed="${this._valueChanged}"
@@ -1127,7 +1127,7 @@ export default class BubbleCardEditor extends LitElement {
                         <div class="ha-textfield">
                             <ha-textfield
                                 label="Navigation path"
-                                .value="${context?.valueType?.navigation_path ?? ''}"
+                                .value="${valueType?.navigation_path ?? ''}"
                                 .configValue="${config + configValueType}.navigation_path"
                                 @input="${this._valueChanged}"
                             ></ha-textfield>
@@ -1137,7 +1137,7 @@ export default class BubbleCardEditor extends LitElement {
                         <div class="ha-textfield">
                             <ha-textfield
                                 label="URL path"
-                                .value="${context?.valueType?.url_path ?? ''}"
+                                .value="${valueType?.url_path ?? ''}"
                                 .configValue="${config + configValueType}.url_path"
                                 @input="${this._valueChanged}"
                             ></ha-textfield>
@@ -1147,7 +1147,7 @@ export default class BubbleCardEditor extends LitElement {
                         <div class="ha-textfield">
                             <ha-textfield
                                 label="Service"
-                                .value="${context?.valueType?.service ?? ''}"
+                                .value="${valueType?.service ?? ''}"
                                 .configValue="${config + configValueType}.service"
                                 @input="${this._valueChanged}"
                             ></ha-textfield>
@@ -1155,14 +1155,14 @@ export default class BubbleCardEditor extends LitElement {
                         <div class="ha-combo-box">
                             <ha-combo-box
                                 label="Entity"
-                                .value="${context?.valueType?.target_entity}"
+                                .value="${valueType?.target_entity}"
                                 .configValue="${config + configValueType}.target.entity_id"
                                 .items="${this.allEntitiesList}"
                                 @value-changed="${this._valueChanged}"
                             ></ha-combo-box>
                         </div>
                     ` : ''}
-                    ${context?.valueType?.action === 'call-service' && context?.valueType?.service ? html`
+                    ${valueType?.action === 'call-service' && valueType?.service ? html`
                         <ha-alert alert-type="info">For now, you still need to switch to the YAML editor if you want to add <code>data:</code> to your service.</ha-alert>
                     ` : ''}
                 </div>

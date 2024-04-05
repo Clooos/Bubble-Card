@@ -10,6 +10,8 @@ export default `
       max-width: 100%;
       border-radius: 42px 42px 0 0;
       box-sizing: border-box;
+      grid-gap: 12px;
+      gap: 12px;
       margin-left: var(--custom-margin);
       grid-auto-rows: min-content;
       padding: 18px 18px 90px 18px;
@@ -18,16 +20,26 @@ export default `
       scrollbar-width: none; /* for Firefox */
       overflow-y: auto; 
       overflow-x: hidden; 
-      z-index: 6 !important;
+      z-index: 5 !important; /* Higher value hide the more-info panel */
       bottom: 0;
       left: calc(var(--mdc-drawer-width) / 2 + 50% - (var(--desktop-width) / 2));
-      grid-gap: 14px !important;
-      gap: 14px !important;
-      column-gap: 14px !important;
-      --grid-gap: 14px;
-      --vertical-stack-card-gap: 14px;
-      --horizontal-stack-card-gap: 14px;
-      --stack-card-gap: 14px;
+      
+  }
+  .pop-up > :first-child::after {
+      content: '';
+      display: block;
+      position: sticky;
+      top: 0;
+      left: -50px;
+      margin: -70px 0 -36px -36px;
+      overflow: visible;
+      width: 200%;
+      height: 100px;
+      background: var(--card-background-color, var(--ha-card-background));
+      -webkit-mask-image: linear-gradient(0deg, transparent 0%, black 80%);
+      mask-image: linear-gradient(0deg, transparent 0%, black 80%);
+      z-index: 0;
+      pointer-events: none;
   }
   .pop-up::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, and Opera */
@@ -51,18 +63,16 @@ export default `
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
   }
-  @media only screen and (min-width: 600px) {
+  /*@media only screen and (min-width: 600px) {
       .pop-up {
           margin: 0 !important;
-          min-width: var(--desktop-width);
-          width: calc(var(--mobile-width) - var(--mdc-drawer-width)) !important;
           height: calc(100% - var(--custom-height-offset-desktop) - var(--header-height)) !important;
-          left: calc(50% - (var(--desktop-width) / 2));
       }
-  }
-  @media only screen and (min-width: 870px) {
+  }*/
+  @media only screen and (min-width: 599px) {
       .pop-up {
-        left: calc(var(--mdc-drawer-width) / 2 + 50% - (var(--desktop-width) / 2));
+        min-width: var(--desktop-width);
+        width: calc(var(--desktop-width) - var(--mdc-drawer-width)) !important;
       }
       .is-sidebar-hidden.pop-up {
         width: var(--desktop-width) !important;
@@ -78,6 +88,9 @@ export default `
       height: auto !important;
       min-width: auto;
       border-radius: 42px;
+  }
+  .pop-up.editor > :first-child::after {
+      display: none;
   }
 `;
 
@@ -200,7 +213,7 @@ export const backdropStyles = `
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 5;
+    z-index: 0;
     opacity: 0;
     transition: opacity 0.3s;
     display: flex;

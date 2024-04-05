@@ -28,6 +28,10 @@ export default `
             width: calc(100% - 16px);
             left: 8px;
         }
+
+        .horizontal-buttons-stack-card::before {
+            left: -10px;
+        }
     }
     .is-sidebar-hidden.horizontal-buttons-stack-card {
         width: var(--desktop-width);
