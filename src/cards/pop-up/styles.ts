@@ -54,8 +54,7 @@ export default `
   @media only screen and (min-width: 600px) {
       .pop-up {
           margin: 0 !important;
-          min-width: var(--desktop-width);
-          width: calc(var(--mobile-width) - var(--mdc-drawer-width)) !important;
+          width: var(--desktop-width, 540px);
           height: calc(100% - var(--custom-height-offset-desktop) - var(--header-height)) !important;
           left: calc(50% - (var(--desktop-width) / 2));
       }
@@ -92,93 +91,16 @@ export const headerStyles = `
       margin: 0;
       padding: 0;
   }
-  .bubble-icon-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    justify-content: center;
-    min-width: 38px;
-    min-height: 38px;
-    margin: 6px;
-    border-radius: 50%;
-    background-color: var(--card-background-color, var(--ha-card-background));
-    overflow: hidden;
-    z-index: 1;
-    position: relative;
-    cursor: pointer;
-  }
-  .bubble-icon-container::after {
-    content: '';
-    background-color: currentColor;
-    position: absolute;
-    display: block;
-    width: 100%;
-    height: 100%;
-    transition: all 1s;
-    left: 0;
-    right: 0;
-    opacity: 0;
-  }
-  .is-light.is-on .bubble-icon-container::after {
-    opacity: 0.2;
-  }
-  .is-unavailable.is-light .bubble-icon-container::after {
-    opacity: 0;
-  }
-
-  .bubble-icon {
-    display: flex;
-    opacity: 0.6;
-    height: 22px;
-    width: 22px;
-  }
-
-  .is-on .bubble-icon {
-    filter: brightness(1.1);
-    opacity: 1;
-  }
-
-  .bubble-entity-picture {
-    background-size: cover;
-    background-position: center;
-    height: 100%;
-    width: 100%;
-  }
   .bubble-header {
       align-items: center;
       display: inline-flex;
       position: relative;
-      padding-right: 6px;
-      z-index: 1;
       flex-grow: 1;
-      transition: background 1s;
-      border-radius: 25px;
       margin-right: 14px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
   }
   .bubble-name {
-      display: inline-flex;
-      margin: 0 18px 0 0;
-      padding: 4px;
-      z-index: 1;
-      font-size: 18px;
-  }
-  .bubble-state {
-      display: inline-flex;
       font-size: 16px;
-      min-width: fit-content;
-      flex-grow: 1;
-  }
-  .bubble-power-button {
-      cursor: pointer;
-      width: 24px;
-      height: 24px;
-      border-radius: 12px;
-      margin: 0 10px;
-      background: none !important;
-      justify-content: flex-end;
-      background-color: var(--background-color,var(--secondary-background-color));
+      font-weight: heavy;
   }
   .bubble-close-button {
       height: 50px;
@@ -190,6 +112,11 @@ export const headerStyles = `
       color: var(--primary-text-color);
       flex-shrink: 0;
       cursor: pointer;
+  }
+  .bubble-button-card-container {
+      background: var(--background-color,var(--secondary-background-color)) !important;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
   }
 `;
 

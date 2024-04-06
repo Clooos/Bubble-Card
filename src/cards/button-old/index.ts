@@ -9,17 +9,20 @@ import {
 } from './changes.ts'
 import { getButtonType } from './helpers.ts';
 import {
-    createNameStructure,
+    createCustomStructure,
     createSliderStructure,
     createStateStructure,
     createStructure,
     createSwitchStructure
 } from './create.ts';
 
-export function handleButton(context, container = context.content, appendTo = container) {
+export function handleButton(context, cardContainer) {
     const buttonType = getButtonType(context);
-    if (context.cardType !== `button-${buttonType}` && context.buttonType !== buttonType) {
-        createStructure(context, container, appendTo);
+
+    if (!context.cardType) {
+        if (!cardContainer) {
+            createStructure(context, cardContainer);
+        }
 
         if (buttonType === 'switch') {
             createSwitchStructure(context);
@@ -27,21 +30,17 @@ export function handleButton(context, container = context.content, appendTo = co
             createSliderStructure(context);
         } else if (buttonType === 'state') {
             createStateStructure(context);
-        } else if (buttonType === 'name') {
-            createNameStructure(context);
+        } else if (buttonType === 'custom') {
+            createCustomStructure(context);
         }
     }
 
-    if (buttonType !== 'name') {
-        changeStatus(context);
-        changeButton(context);
-        changeState(context);
-        changeSlider(context);
-    }
-
-    changeIcon(context);
+    changeStatus(context);
+    changeButton(context);
     changeName(context);
-    changeSubButtonState(context, appendTo);
+    changeIcon(context);
+    changeState(context);
+    changeSlider(context);
+    changeSubButtonState(context)
     changeStyle(context);
 }
-

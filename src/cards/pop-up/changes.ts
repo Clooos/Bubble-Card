@@ -13,31 +13,31 @@ export function changeEditor(context) {
   }
   onEditorChange(context);
 }
-export function changeIcon(context) {
-  const isOn = isStateOn(context);
-  const icon = getIcon(context);
-  const image = getImage(context);
+// export function changeIcon(context) {
+//   const isOn = isStateOn(context);
+//   const icon = getIcon(context);
+//   const image = getImage(context);
 
-  if (isEntityType(context, "light") && isOn) {
-      context.elements.iconContainer.style.color = getIconColor(context);
-  } else {
-      context.elements.iconContainer.style.color = '';
-  }
+//   if (isEntityType(context, "light") && isOn) {
+//       context.elements.iconContainer.style.color = getIconColor(context);
+//   } else {
+//       context.elements.iconContainer.style.color = '';
+//   }
 
-  if (image !== '') {
-      context.elements.image.style.backgroundImage = 'url(' + image + ')';
-      context.elements.icon.style.display = 'none';
-      context.elements.image.style.display = '';
-  } else if (icon !== '') {
-      context.elements.icon.icon = icon;
-      context.elements.icon.style.color = isOn ? getIconColor(context) : 'inherit';
-      context.elements.icon.style.display = '';
-      context.elements.image.style.display = 'none';
-  } else {
-      context.elements.icon.style.display = 'none';
-      context.elements.image.style.display = 'none';
-  }
-}
+//   if (image !== '') {
+//       context.elements.image.style.backgroundImage = 'url(' + image + ')';
+//       context.elements.icon.style.display = 'none';
+//       context.elements.image.style.display = '';
+//   } else if (icon !== '') {
+//       context.elements.icon.icon = icon;
+//       context.elements.icon.style.color = isOn ? getIconColor(context) : 'inherit';
+//       context.elements.icon.style.display = '';
+//       context.elements.image.style.display = 'none';
+//   } else {
+//       context.elements.icon.style.display = 'none';
+//       context.elements.image.style.display = 'none';
+//   }
+// }
 export function changeName(context) {
   const name = getName(context);
   if (name !== context.elements.name.innerText) {
@@ -62,8 +62,9 @@ export function changeStyle(context) {
       ? Function('hass', 'entityId', 'state', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state)
       : '';
 
-  context.elements.customStyle.innerText = customStyle;
-  context.elements.cardCustomStyle.innerText = customStyle;
+  if (context.elements.customStyle) {
+    context.elements.customStyle.innerText = customStyle;
+  }
   backdropCustomStyle.innerText = customStyle;
 }
 export function changeLight(context) {

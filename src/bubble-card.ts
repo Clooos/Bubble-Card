@@ -117,7 +117,7 @@ class BubbleCard extends HTMLElement {
               }
             }
         } else if (config.card_type === 'button' || config.card_type === 'cover') {
-            if (!config.entity) {
+            if (!config.entity && config.button_type !== 'name') {
                 throw new Error("You need to define an entity");
             }
         }

@@ -297,7 +297,7 @@ export default class BubbleCardEditor extends LitElement {
             });
 
             this.cardTypeList = [{
-                    'label': 'Button (Switch, slider or state)',
+                    'label': 'Button',
                     'value': 'button'
                 },
                 {
@@ -337,6 +337,10 @@ export default class BubbleCardEditor extends LitElement {
                 {
                     'label': 'State',
                     'value': 'state'
+                },
+                {
+                    'label': 'Name / Text',
+                    'value': 'name'
                 }
             ];
 
@@ -375,6 +379,7 @@ export default class BubbleCardEditor extends LitElement {
         const coverList = this.coverList;
         const cardTypeList = this.cardTypeList;
         const buttonTypeList = this.buttonTypeList;
+        const nameButton = this._config.button_type === 'name';
 
         if (this._config.card_type === 'pop-up') {
             return html`
@@ -392,6 +397,8 @@ export default class BubbleCardEditor extends LitElement {
                           Header settings
                         </h4>
                         <div class="content">
+                            ${this.makeDropdown("Button type", "button_type", buttonTypeList)}
+                            ${this.makeDropdown("Optional - Entity", "entity", allEntitiesList, nameButton)}               
                             <ha-textfield
                                 label="Optional - Name"
                                 .value="${this._name}"
@@ -399,14 +406,7 @@ export default class BubbleCardEditor extends LitElement {
                                 @input="${this._valueChanged}"
                             ></ha-textfield>
                             ${this.makeDropdown("Optional - Icon", "icon")}
-                            ${this.makeDropdown("Optional - Entity to toggle (e.g. room light group)", "entity", allEntitiesList)}
-                            ${this.makeDropdown("Optional - Entity state to display (e.g. room temperature)", "state", allEntitiesList)}
-                            <ha-textfield
-                                label="Optional - Additional text"
-                                .value="${this._text}"
-                                .configValue="${"text"}"
-                                @input="${this._valueChanged}"
-                            ></ha-textfield>
+                            ${this.makeShowState()}
                         </div>
                     </ha-expansion-panel>
                     <ha-expansion-panel outlined>
@@ -579,6 +579,7 @@ export default class BubbleCardEditor extends LitElement {
                             ${this.makeTapActionPanel("Hold action", "tap_action")}
                         </div>
                     </ha-expansion-panel>
+                    ${this.makeSubButtonPanel()}
                     <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b></ha-alert>
                     <ha-alert alert-type="warning">Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, <a style="color: #fff" href="https://github.com/Clooos/Bubble-Card#pop-up-initialization-fix">you can install this similar fix.</a></ha-alert>
                     ${this.makeVersion()}
@@ -589,7 +590,7 @@ export default class BubbleCardEditor extends LitElement {
                 <div class="card-config">
                     ${this.makeDropdown("Card type", "card_type", cardTypeList)}
                     ${this.makeDropdown("Button type", "button_type", buttonTypeList)}
-                    ${this.makeDropdown(this._button_type !== 'slider' ? "Entity (toggle)" : "Entity (light or media_player)", "entity", allEntitiesList)}
+                    ${this.makeDropdown(this._button_type !== 'slider' ? "Entity (toggle)" : "Entity (light or media_player)", "entity", allEntitiesList, nameButton)}
                     <ha-expansion-panel outlined>
                         <h4 slot="header">
                           <ha-icon icon="mdi:cog"></ha-icon>
@@ -959,6 +960,8 @@ export default class BubbleCardEditor extends LitElement {
     makeShowState(context = this._config, config = '', subButton = false) {
         const entity = context?.entity ?? this._config.entity ?? '';
         const isDefault = context === this._config;
+        const nameButton = this._config.button_type === 'name';
+
 
         const attributeList = Object.keys(this.hass.states[entity]?.attributes || {}).map((attributeName) => {
             let state = this.hass.states[entity];
@@ -1012,6 +1015,7 @@ export default class BubbleCardEditor extends LitElement {
                     aria-label="Optional - Show entity state"
                     .checked="${context?.show_state}"
                     .configValue="${config + "show_state"}"
+                    .disabled="${nameButton}"
                     @change=${this._valueChanged}
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -1023,6 +1027,7 @@ export default class BubbleCardEditor extends LitElement {
                     aria-label="Optional - Show last updated"
                     .checked=${context?.show_last_updated}
                     .configValue="${config + "show_last_updated"}"
+                    .disabled="${nameButton}"
                     @change=${this._valueChanged}
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -1034,6 +1039,7 @@ export default class BubbleCardEditor extends LitElement {
                     aria-label="Optional - Show attribute"
                     .checked=${context?.show_attribute}
                     .configValue="${config + "show_attribute"}"
+                    .disabled="${nameButton}"
                     @change=${this._valueChanged}
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -1047,6 +1053,7 @@ export default class BubbleCardEditor extends LitElement {
                         .value="${context?.attribute}"
                         .configValue="${config + "attribute"}"
                         .items="${attributeList}"
+                        .disabled="${nameButton}"
                         @value-changed="${this._valueChanged}"
                     ></ha-combo-box>
                 </div>
@@ -1054,7 +1061,7 @@ export default class BubbleCardEditor extends LitElement {
         `;
     }
 
-    makeDropdown(label, configValue, items) {
+    makeDropdown(label, configValue, items, disabled) {
         if (label.includes('icon') || label.includes('Icon')) {
             return html`
                 <div class="ha-icon-picker">
@@ -1076,6 +1083,7 @@ export default class BubbleCardEditor extends LitElement {
                     .value="${this['_' + configValue]}"
                     .configValue="${configValue}"
                     .items="${items}"
+                    .disabled="${disabled}"
                     @value-changed="${this._valueChanged}"
                 ></ha-combo-box>
             </div>
@@ -1197,7 +1205,6 @@ export default class BubbleCardEditor extends LitElement {
 
         const subButtonIndex = 'sub_button.' + index + '.';
 
-        // Fonction pour supprimer ce sous-bouton
         const removeSubButton = () => {
           this._config.sub_button.splice(index, 1);
 
@@ -1205,7 +1212,6 @@ export default class BubbleCardEditor extends LitElement {
           this.requestUpdate();
         };
 
-        // Fonction pour déplacer ce sous-bouton vers la gauche
         const moveSubButtonLeft = (event) => {
           event.stopPropagation();
           if (index > 0) {
@@ -1215,7 +1221,6 @@ export default class BubbleCardEditor extends LitElement {
           this.requestUpdate();
         };
 
-        // Fonction pour déplacer ce sous-bouton vers la droite
         const moveSubButtonRight = (event) => {
           event.stopPropagation();
           if (index < this._config.sub_button.length - 1) {
@@ -1314,13 +1319,13 @@ export default class BubbleCardEditor extends LitElement {
         <ha-expansion-panel outlined>
           <h4 slot="header">
             <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-            Sub buttons editor
+            Sub-buttons editor
           </h4>
           <div class="content">
             ${subButtonElements}
             <button class="icon-button" @click="${addSubButton}">
               <ha-icon icon="mdi:plus"></ha-icon>
-              New sub button
+              New sub-button
             </button>
             <ha-alert alert-type="info">Add new customized buttons fixed to the right.</ha-alert>
           </div>

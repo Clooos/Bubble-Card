@@ -1,11 +1,7 @@
 import { throttle, isEntityType, getAttribute } from "../../tools/utils.ts";
 
 export function getButtonType(context) {
-  if (context.config.entity) {
-      return context.config.button_type || 'switch';
-  } else {
-      return context.config.button_type || 'name';
-  }
+  return context.config.button_type || 'switch';
 }
 
 export function updateEntity(context, value) {

@@ -3,12 +3,15 @@ import { createElement, toggleEntity } from "../../tools/utils.ts";
 import { getButtonType, onSliderChange } from "./helpers.ts";
 import styles from "./styles.ts";
 
-export function createStructure(context) {
+export function createStructure(context, container = context.content, appendTo = container) {
   const buttonType = getButtonType(context);
 
   context.dragging = false;
 
-  context.elements = {};
+  if (!context.elements) context.elements = {};
+
+  //if (context.elements.buttonCardContainer) return;
+
   context.elements.buttonCardContainer = createElement('div', 'bubble-button-card-container button-container');
   context.elements.buttonCard = createElement('div', 'bubble-button-card switch-button');
   context.elements.nameContainer = createElement('div', 'bubble-name-container name-container');
@@ -28,33 +31,52 @@ export function createStructure(context) {
   context.elements.iconContainer.appendChild(context.elements.image)
 
   context.elements.nameContainer.appendChild(context.elements.name);
-  context.elements.nameContainer.appendChild(context.elements.state);
+  if (buttonType !== "name") {
+      context.elements.nameContainer.appendChild(context.elements.state);    
+  }
+
   context.elements.buttonCard.appendChild(context.elements.iconContainer);
   context.elements.buttonCard.appendChild(context.elements.nameContainer);
   context.elements.buttonCard.appendChild(context.elements.feedback);
-  
-  context.content.innerHTML = '';
-
-  context.content.appendChild(context.elements.buttonCardContainer);
-  context.content.appendChild(context.elements.style);
-  context.content.appendChild(context.elements.customStyle);
-
   context.elements.buttonCardContainer.appendChild(context.elements.buttonCard);
 
-  context.cardType = `button-${buttonType}`;
+  container.innerHTML = '';
+
+  if (appendTo === container) {
+      container.appendChild(context.elements.buttonCardContainer);
+  }
+
+  container.appendChild(context.elements.style);
+  container.appendChild(context.elements.customStyle);
+
+  if (appendTo !== container) {
+      context.elements.buttonCardContainer.appendChild(container);
+      appendTo.appendChild(context.elements.buttonCardContainer);
+      context.buttonType = buttonType;
+  } else {
+      context.cardType = `button-${buttonType}`;
+  }
 }
 export function createSwitchStructure(context) {
   addActions(context.elements.iconContainer, context.config);
   addFeedback(context.elements.buttonCard, context.elements.feedback);
   context.elements.buttonCard.addEventListener('click', (event) => {
-    if (event.target.closest('.bubble-icon-container') === null) {
-      toggleEntity(context._hass, context.config.entity);
+    if (event.target.closest('.bubble-sub-button-container')) return;
+
+    if (
+        event.target.closest('.bubble-icon-container') === null ||
+        event.target.closest('.bubble-sub-button-container') === null
+    ){
+        event.stopPropagation();
+        toggleEntity(context._hass, context.config.entity);
     }
   })
 }
-export function createCustomStructure(context) {
-  addActions(context.elements.buttonCardContainer, context.config);
-  addFeedback(context.elements.buttonCard, context.elements.feedback);
+export function createNameStructure(context) {
+  if (context.config.tap_action) {
+      addActions(context.elements.buttonCardContainer, context.config);
+      addFeedback(context.elements.buttonCard, context.elements.feedback);
+  }
 }
 export function createStateStructure(context) {
   addActions(context.elements.buttonCardContainer, context.config);
@@ -113,22 +135,5 @@ export function createSliderStructure(context) {
       context.elements.buttonCardContainer.classList.remove('is-dragging');
       context.elements.buttonCardContainer.removeEventListener('pointermove', onPointerMove);
       context.elements.buttonCardContainer.removeEventListener('pointerup', onPointerUp);
-  }
-}
-
-export function handleButton(context) {
-  const buttonType = getButtonType(context);
-  if (context.cardType !== `button-${buttonType}`) {
-      createStructure(context);
-
-      if (buttonType ==='switch') {
-          createSwitchStructure(context);
-      } else if (buttonType === 'slider') {
-          createSliderStructure(context);
-      } else if (buttonType ==='state') {
-          createStateStructure(context);
-      } else if (buttonType ==='custom') {
-          createCustomStructure(context);
-      }
   }
 }

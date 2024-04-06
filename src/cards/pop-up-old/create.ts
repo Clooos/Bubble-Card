@@ -1,5 +1,5 @@
 import { convertToRGBA } from "../../tools/style.ts";
-import { addActions } from "../../tools/tap-actions.ts";
+//import { addActions } from "../../tools/tap-actions.ts";
 import { createElement, toggleEntity } from "../../tools/utils.ts";
 import { onUrlChange, removeHash } from "./helpers.ts";
 import styles, { backdropStyles, headerStyles } from "./styles.ts";
@@ -56,19 +56,19 @@ export function createHeader(context) {
   context.elements.closeButton.addEventListener('click', removeHash);
   context.elements.closeButton.appendChild(context.elements.closeIcon);
 
-  context.elements.icon = createElement('ha-icon', 'bubble-icon icon');
-  context.elements.image = createElement('div', 'bubble-entity-picture entity-picture');
-  context.elements.iconContainer = createElement('div', 'bubble-icon-container icon-container');
-  context.elements.iconContainer.appendChild(context.elements.icon);
-  context.elements.iconContainer.appendChild(context.elements.image);
-  addActions(context.elements.iconContainer, context.config);
+  // context.elements.icon = createElement('ha-icon', 'bubble-icon icon');
+  // context.elements.image = createElement('div', 'bubble-entity-picture entity-picture');
+  // context.elements.iconContainer = createElement('div', 'bubble-icon-container icon-container');
+  // context.elements.iconContainer.appendChild(context.elements.icon);
+  // context.elements.iconContainer.appendChild(context.elements.image);
+  //addActions(context.popUp.iconContainer, context.config);
 
-  context.elements.name = createElement('h2', 'bubble-name');
-  context.elements.state = createElement('p', 'bubble-state');
+  // context.elements.name = createElement('h2', 'bubble-name');
+  // context.elements.state = createElement('p', 'bubble-state');
   context.elements.header = createElement("div", "bubble-header");
-  context.elements.header.appendChild(context.elements.iconContainer);
-  context.elements.header.appendChild(context.elements.name);
-  context.elements.header.appendChild(context.elements.state);
+  // context.elements.header.appendChild(context.elements.iconContainer);
+  // context.elements.header.appendChild(context.elements.name);
+  // context.elements.header.appendChild(context.elements.state);
   if (context.config.entity) {
       context.elements.powerIcon = createElement('ha-icon', 'bubble-power-button power-button');
       context.elements.powerIcon.icon = 'mdi:power';

@@ -1,5 +1,15 @@
 import { isColorCloseToWhite } from "../../tools/style.ts";
-import { getIcon, getIconColor, getImage, getName, getState, isStateOn, isEntityType } from "../../tools/utils.ts";
+import { 
+  applyScrollingEffect,
+  getIcon,
+  getIconColor,
+  getImage,
+  getName,
+  getState,
+  getAttribute,
+  isStateOn,
+  isEntityType
+} from '../../tools/utils.ts';
 import { getBackdrop } from "./create.ts";
 import { addHash, onEditorChange, removeHash } from "./helpers.ts";
 
@@ -38,10 +48,18 @@ export function changeIcon(context) {
       context.elements.image.style.display = 'none';
   }
 }
+// export function changeName(context) {
+//   const name = getName(context);
+//   if (name !== context.elements.name.innerText) {
+//       context.elements.name.innerText = name;
+//   }
+// }
 export function changeName(context) {
   const name = getName(context);
-  if (name !== context.elements.name.innerText) {
+  if (name !== context.elements.previousName) {
       context.elements.name.innerText = name;
+      applyScrollingEffect(context.elements.name, name);
+      context.elements.previousName = name;
   }
 }
 export function changeState(context) {
@@ -61,10 +79,6 @@ export function changeStyle(context) {
   const customStyle = context.config.styles
       ? Function('hass', 'entityId', 'state', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state)
       : '';
-
-  if (context.config.styles?.match(/\.(button-container|switch-button|name-container|icon-container|name|state|feedback-element|icon|entity-picture)/)) {
-      console.log('custom styles with no bubble prefix are deprecated on buttons. Please update your selectors.');
-  }
 
   context.elements.customStyle.innerText = customStyle;
   context.elements.cardCustomStyle.innerText = customStyle;

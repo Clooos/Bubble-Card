@@ -24,7 +24,7 @@ export function removeHash() {
   window.dispatchEvent(new Event('location-changed'));
 }
 export function addHash(hash) {
-  const newURL = window.location.href.split('#')[0] + hash;
+  const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
 
   history.pushState(null, "", newURL);
   window.dispatchEvent(new Event('location-changed'));

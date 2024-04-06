@@ -50,33 +50,15 @@ export function getBackdrop(context) {
   return backdrop;
 }
 export function createHeader(context) {
+  context.elements = {};
   context.elements.closeIcon = createElement('ha-icon', 'bubble-close-icon');
   context.elements.closeIcon.icon = 'mdi:close';
   context.elements.closeButton = createElement("button", "bubble-close-button close-pop-up");
   context.elements.closeButton.addEventListener('click', removeHash);
   context.elements.closeButton.appendChild(context.elements.closeIcon);
 
-  context.elements.icon = createElement('ha-icon', 'bubble-icon icon');
-  context.elements.image = createElement('div', 'bubble-entity-picture entity-picture');
-  context.elements.iconContainer = createElement('div', 'bubble-icon-container icon-container');
-  context.elements.iconContainer.appendChild(context.elements.icon);
-  context.elements.iconContainer.appendChild(context.elements.image);
-  addActions(context.elements.iconContainer, context.config);
-
-  context.elements.name = createElement('h2', 'bubble-name');
-  context.elements.state = createElement('p', 'bubble-state');
-  context.elements.header = createElement("div", "bubble-header");
-  context.elements.header.appendChild(context.elements.iconContainer);
-  context.elements.header.appendChild(context.elements.name);
-  context.elements.header.appendChild(context.elements.state);
-  if (context.config.entity) {
-      context.elements.powerIcon = createElement('ha-icon', 'bubble-power-button power-button');
-      context.elements.powerIcon.icon = 'mdi:power';
-      context.elements.powerIcon.addEventListener('click', () => {
-          toggleEntity(context._hass, context.config.entity);
-      });
-      context.elements.header.appendChild(context.elements.powerIcon);
-  }
+  context.elements.buttonContainer = createElement('div', 'bubble-button-container');
+  context.elements.header = createElement('div', 'bubble-header');
 
   context.elements.headerContainer = createElement("div", 'bubble-header-container');
   context.elements.headerContainer.setAttribute("id", "header-container");
@@ -88,11 +70,11 @@ export function createStructure(context) {
   try {
     context.elements.style = createElement('style');
     context.elements.style.innerText = `${headerStyles}`;
-    context.elements.cardCustomStyle = createElement('style');
+    context.elements.customStyle = createElement('style');
 
     context.content.innerHTML = '';
     context.content.appendChild(context.elements.style);
-    context.content.appendChild(context.elements.cardCustomStyle);
+    context.content.appendChild(context.elements.customStyle);
 
     const themeColorBackground = 
       getComputedStyle(document.body).getPropertyValue('--ha-card-background') ??
@@ -102,7 +84,7 @@ export function createStructure(context) {
     const opacity = context.config.bg_opacity ?? 88;
     const rgbaColor = convertToRGBA(color, (opacity / 100), 1.02);
     context.popUp.style.backgroundColor = rgbaColor;
-    context.popUp.style.setProperty('--desktop-width', context.config.width_desktop ?? '500px');
+    context.popUp.style.setProperty('--desktop-width', context.config.width_desktop ?? '540px');
     if (context.config.is_sidebar_hidden) {
       context.popUp.classList.add('is-sidebar-hidden');
     }
@@ -141,7 +123,7 @@ export function prepareStructure(context) {
 
     context.popUp.style.setProperty('--custom-height-offset-desktop', context.config.margin_top_desktop  ?? '0px');
     context.popUp.style.setProperty('--custom-height-offset-mobile', context.config.margin_top_mobile  ?? '0px');
-    context.popUp.style.setProperty('--custom-margin', `-${context.config.margin ?? 7}px`);
+    context.popUp.style.setProperty('--custom-margin', `-${context.config.margin ?? '7px'}`);
     context.popUp.style.setProperty('--custom-backdrop-filter', hideBackdrop ? 'none' : `blur(${context.config.bg_blur ?? 10}px)`);
     context.popUp.style.setProperty('--custom-popup-filter', hideBackdrop ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
     context.popUp.style.setProperty('--custom-shadow-opacity', (context.config.shadow_opacity ?? 0) / 100);

@@ -14,19 +14,26 @@ import {
 export function changeButton(context) {
   const buttonType = getButtonType(context);
   const isOn = isStateOn(context);
+  const lightColor = getIconColor(context);
 
-  if ((buttonType ==='switch' || buttonType === 'custom') && isOn) {
-      context.elements.buttonCard.style.backgroundColor = 'var(--accent-color)';
+  if (buttonType ==='switch' && isOn) {
+      if (lightColor) {
+          context.elements.buttonCard.style.backgroundColor = getIconColor(context);
+      } else {
+          context.elements.buttonCard.style.backgroundColor = 'var(--accent-color)';
+      }
   } else {
       context.elements.buttonCard.style.backgroundColor = 'rgba(0, 0, 0, 0)';
   }
 }
 export function changeIcon(context) {
-  const isOn = isStateOn(context);
-  const icon = getIcon(context);
-  const image = getImage(context);
+  const buttonType = getButtonType(context);
+  const isOn = buttonType !== 'name' ? isStateOn(context) : false;
+  const icon = buttonType !== 'name' ? getIcon(context) : context.config.icon;
+  const image = buttonType !== 'name' ? getImage(context) : '';
+  const isLight = buttonType !== 'name' ? isEntityType(context, "light") : false;
 
-  if (isEntityType(context, "light") && isOn) {
+  if (isLight && isOn) {
       context.elements.iconContainer.style.color = getIconColor(context);
   } else {
       context.elements.iconContainer.style.color = '';
@@ -47,7 +54,8 @@ export function changeIcon(context) {
   }
 }
 export function changeName(context) {
-  const name = getName(context);
+  const buttonType = getButtonType(context);
+  const name = buttonType !== 'name' ? getName(context) : context.config.name;
   if (name !== context.elements.previousName) {
       context.elements.name.innerText = name;
       applyScrollingEffect(context.elements.name, name);

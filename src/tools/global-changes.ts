@@ -130,7 +130,7 @@ const stateStyles = {
     }
 };
 
-export function changeSubButtonState(context) {
+export function changeSubButtonState(context, container = context.content) {
     const subButtons = context.config.sub_button;
 
     if (!subButtons) {
@@ -170,7 +170,7 @@ export function changeSubButtonState(context) {
         if (!context.elements.subButtonContainer) {
             context.elements.subButtonContainer = createElement('div', 'bubble-sub-button-container');
             Object.assign(context.elements.subButtonContainer.style, subButtonStyles.subButtonContainer);
-            context.content.firstChild.firstChild.appendChild(context.elements.subButtonContainer);
+            container.firstChild.firstChild.appendChild(context.elements.subButtonContainer);
         }
 
         if (!context.elements[index]) {
@@ -258,7 +258,9 @@ export function changeSubButtonState(context) {
             context.elements[index].style.display = 'none';
         } else if (displayedState === '' && showIcon) {
             context.elements[index].style.display = 'flex';
-            context.elements[index].icon.style.marginRight = '0';
+            if (context.elements[index].icon) {
+                context.elements[index].icon.style.marginRight = '0';
+            }
         } else {
             context.elements[index].style.display = 'flex';
             context.elements[index].nameContainer.innerText = displayedState;
@@ -311,7 +313,7 @@ const subButtonStyles = {
         padding: '0 8px',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
-        zIndex: '1',
+        zIndex: '6',
         transition: 'all 0.5s ease-in-out'
     },
     nameContainer: {
