@@ -45,7 +45,7 @@ export function changeIcon(context) {
       context.elements.image.style.display = '';
   } else if (icon !== '') {
       context.elements.icon.icon = icon;
-      context.elements.icon.style.color = isOn ? getIconColor(context) : 'inherit';
+      context.elements.icon.style.color = isOn && buttonType !== 'state' ? getIconColor(context) : 'inherit';
       context.elements.icon.style.display = '';
       context.elements.image.style.display = 'none';
   } else {
