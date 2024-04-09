@@ -1,6 +1,6 @@
 import { convertToRGBA } from "../../tools/style.ts";
 import { addActions } from "../../tools/tap-actions.ts";
-import { createElement, toggleEntity } from "../../tools/utils.ts";
+import { createElement, toggleEntity, configChanged } from "../../tools/utils.ts";
 import { onUrlChange, removeHash } from "./helpers.ts";
 import styles, { backdropStyles, headerStyles } from "./styles.ts";
 
@@ -49,6 +49,7 @@ export function getBackdrop(context) {
 
   return backdrop;
 }
+
 export function createHeader(context) {
   context.elements = {};
   context.elements.closeIcon = createElement('ha-icon', 'bubble-close-icon');
@@ -64,15 +65,14 @@ export function createHeader(context) {
   context.elements.headerContainer.setAttribute("id", "header-container");
   context.elements.headerContainer.appendChild(context.elements.header);
   context.elements.headerContainer.appendChild(context.elements.closeButton);
-  context.content.appendChild(context.elements.headerContainer);
 }
+
 export function createStructure(context) {
   try {
     context.elements.style = createElement('style');
     context.elements.style.innerText = `${headerStyles}`;
     context.elements.customStyle = createElement('style');
 
-    context.content.innerHTML = '';
     context.content.appendChild(context.elements.style);
     context.content.appendChild(context.elements.customStyle);
 
@@ -105,16 +105,30 @@ export function createStructure(context) {
         removeHash();
       }
     });
+
+    context.elements.popUpContainer = createElement('div');
+    context.elements.popUpContainer.classList.add('bubble-pop-up-container');
+    let child = context.popUp.firstChild;
+
+    while (child) {
+      context.elements.popUpContainer.appendChild(child);
+      child = context.popUp.firstChild;
+    }
+
+    context.popUp.appendChild(context.elements.headerContainer);
+    context.popUp.appendChild(context.elements.popUpContainer);
+
   } catch (e) {
     console.error(e)
   }
 }
+
 export function prepareStructure(context) {
   try {
     context.cardType = "pop-up";
     context.verticalStack = context.getRootNode();
     context.popUp = context.verticalStack.querySelector('#root');
-    context.popUp.classList.add('pop-up', 'bubble-pop-up', 'is-popup-closed');
+    context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
     context.verticalStack.removeChild(context.popUp);
     context.elements = {};
     getBackdrop(context);

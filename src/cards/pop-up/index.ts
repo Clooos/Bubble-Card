@@ -11,8 +11,8 @@ export async function handlePopUp(context) {
         return;
       }
       prepareStructure(context);
-      createStructure(context);
       createHeader(context);
+      createStructure(context);
   } else if (context.config.entity || context.config.name) {
       const buttonType = getButtonType(context);
       const state = context._hass.states[context.config.entity];

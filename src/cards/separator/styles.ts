@@ -2,7 +2,7 @@ export default `
     .bubble-separator {
         display: flex;
         width: 100%;
-        padding: 12px 0 4px 0;
+        padding: 4px 0;
         align-items: center;
     }
     .bubble-icon {

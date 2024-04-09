@@ -1,26 +1,11 @@
 export default `
-  .pop-up.card-content {
-      width: 100% !important;
-      padding: 0 !important;
-  }
-  .pop-up {
-      transition: transform .36s;
-      position: fixed;
-      width: 100%;
-      max-width: 100%;
-      border-radius: 42px 42px 0 0;
-      box-sizing: border-box;
-      margin-left: var(--custom-margin);
-      grid-auto-rows: min-content;
-      padding: 18px 18px 90px 18px;
-      height: calc(100% - var(--custom-height-offset-mobile) - var(--header-height)) !important;
-      -ms-overflow-style: none; /* for Internet Explorer, Edge */
-      scrollbar-width: none; /* for Firefox */
-      overflow-y: auto; 
-      overflow-x: hidden; 
-      z-index: 6 !important;
-      bottom: 0;
-      left: calc(var(--mdc-drawer-width) / 2 + 50% - (var(--desktop-width) / 2));
+  .bubble-pop-up-container {
+      display: grid !important;
+      overflow: scroll;
+      height: calc(100% + 50px);
+      margin-top: -50px;
+      padding-top: 50px;
+      padding-bottom: 80px;
       grid-gap: 14px !important;
       gap: 14px !important;
       column-gap: 14px !important;
@@ -28,11 +13,39 @@ export default `
       --vertical-stack-card-gap: 14px;
       --horizontal-stack-card-gap: 14px;
       --stack-card-gap: 14px;
+      -ms-overflow-style: none; /* for Internet Explorer, Edge */
+      scrollbar-width: none; /* for Firefox */
+      overflow-y: auto; 
+      overflow-x: hidden; 
+      grid-auto-rows: min-content;
+      mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
   }
-  .pop-up::-webkit-scrollbar {
+  .bubble-pop-up.card-content {
+      width: 100% !important;
+      padding: 0 !important;
+  }
+  #root {
+    display: flex !important;
+    gap: 0 !important;
+  }
+  .bubble-pop-up {
+      display: flex !important;
+      transition: transform .36s;
+      position: fixed;
+      width: 100%;
+      max-width: 100%;
+      border-radius: 42px 42px 0 0;
+      box-sizing: border-box;
+      margin-left: var(--custom-margin);
+      padding: 18px 18px calc(150px - var(--custom-height-offset-mobile)) 18px;
+      z-index: 6 !important;
+      bottom: calc(-50px - var(--custom-height-offset-mobile));
+      left: calc(var(--mdc-drawer-width) / 2 + 50% - (var(--desktop-width) / 2));
+  }
+  .bubble-pop-up-container::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, and Opera */
   }
-  .pop-up > :first-child {
+  .bubble-pop-up > :first-child {
       position: sticky;
       top: 0;
       z-index: 1;
@@ -51,12 +64,13 @@ export default `
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
   }
-  @media only screen and (min-width: 600px) {
+  @media only screen and (min-width: 768px) {
       .pop-up {
-          margin: 0 !important;
+          margin-left: 0 !important;
+          bottom: calc(-50px - var(--custom-height-offset-desktop)) !important;
           width: var(--desktop-width, 540px);
-          height: calc(100% - var(--custom-height-offset-desktop) - var(--header-height)) !important;
           left: calc(50% - (var(--desktop-width) / 2));
+          padding: 18px 18px calc(50px + var(--custom-height-offset-desktop)) 18px;
       }
   }
   @media only screen and (min-width: 870px) {
@@ -67,7 +81,7 @@ export default `
         width: var(--desktop-width) !important;
       }
   }
-  .pop-up.editor {
+  .bubble-pop-up.editor {
       position: inherit !important;
       width: 100% !important;
       padding: 18px !important;
@@ -78,12 +92,6 @@ export default `
       min-width: auto;
       border-radius: 42px;
   }
-`;
-
-export const headerStyles = `
-  ha-card {
-      margin-top: 0 !important;
-  }
   .bubble-header-container {
       display: inline-flex;
       height: 50px;
@@ -91,8 +99,10 @@ export const headerStyles = `
       margin: 0;
       padding: 0;
   }
+  .bubble-range-fill {
+      opacity: .5;
+  }
   .bubble-header {
-      align-items: center;
       display: inline-flex;
       position: relative;
       flex-grow: 1;
@@ -118,6 +128,10 @@ export const headerStyles = `
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
   }
+`;
+
+export const headerStyles = `
+
 `;
 
 export const backdropStyles = `

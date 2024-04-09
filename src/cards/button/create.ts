@@ -50,6 +50,7 @@ export function createStructure(context, container = context.content, appendTo =
   container.appendChild(context.elements.customStyle);
 
   if (appendTo !== container) {
+      appendTo.innerHTML = '';
       context.elements.buttonCardContainer.appendChild(container);
       appendTo.appendChild(context.elements.buttonCardContainer);
       context.buttonType = buttonType;
