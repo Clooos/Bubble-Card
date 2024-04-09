@@ -1,10 +1,17 @@
 import { throttle, isEntityType, getAttribute } from "../../tools/utils.ts";
 
 export function getButtonType(context) {
+  let buttonType = context.config.button_type;
+
+  if (buttonType === 'custom') {
+    console.error('Buttons "custom" have been removed. Use either "switch", "slider", "state" or  "name"');
+    buttonType = '';
+  }
+
   if (context.config.entity) {
-      return context.config.button_type || 'switch';
+      return buttonType || 'switch';
   } else {
-      return context.config.button_type || 'name';
+      return buttonType || 'name';
   }
 }
 
