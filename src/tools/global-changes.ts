@@ -195,8 +195,8 @@ export function changeSubButtonState(context, container = context.content, appen
             if (!context.elements[index].icon) context.elements[index].icon = createElement('ha-icon', 'bubble-sub-button-icon');
             context.elements[index].icon.setAttribute('icon', icon);
             context.elements[index].appendChild(context.elements[index].icon);
-            context.elements[index].icon.style = subButtonStyles.icon;
             context.elements[index].icon.style.setProperty('--mdc-icon-size', '16px');
+            context.elements[index].icon.style.marginTop = '-2px';
         } else if (!showIcon && context.elements[index].icon) {
             context.elements[index].icon.style.display = 'none';
         }
@@ -264,6 +264,7 @@ export function changeSubButtonState(context, container = context.content, appen
             context.elements[index].style.display = 'flex';
             if (context.elements[index].icon) {
                 context.elements[index].icon.style.marginRight = '0';
+                context.elements[index].icon.style.setProperty('--mdc-icon-size', '20px');
             }
         } else {
             context.elements[index].style.display = 'flex';

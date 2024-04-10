@@ -19,6 +19,7 @@ export default `
       overflow-x: hidden; 
       grid-auto-rows: min-content;
       mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
   }
   .bubble-pop-up.card-content {
       width: 100% !important;
@@ -127,6 +128,14 @@ export default `
       background: var(--background-color,var(--secondary-background-color)) !important;
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
+  }
+  .bubble-pop-up.editor > .bubble-pop-up-container {
+      padding-bottom: 0 !important;
+      mask-image: none !important;
+      -webkit-mask-image: none !important;
+  }
+  .bubble-pop-up-container.hidden {
+      display: none !important;
   }
 `;
 

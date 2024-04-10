@@ -13,17 +13,20 @@ import {
 
 export function changeButton(context) {
   const buttonType = getButtonType(context);
+  const isLight = isEntityType(context, "light");
   const isOn = isStateOn(context);
   const lightColor = getIconColor(context);
 
-  if (buttonType ==='switch' && isOn) {
-      if (lightColor) {
-          context.elements.buttonCard.style.backgroundColor = getIconColor(context);
+  if (buttonType === 'switch' && isOn) {
+      if (lightColor && isLight) {
+          context.elements.buttonBackground.style.backgroundColor = getIconColor(context);
+          context.elements.buttonBackground.style.opacity = '.5';
       } else {
-          context.elements.buttonCard.style.backgroundColor = 'var(--accent-color)';
+          context.elements.buttonBackground.style.backgroundColor = 'var(--accent-color)';
+          context.elements.buttonBackground.style.opacity = '1';
       }
   } else {
-      context.elements.buttonCard.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+      context.elements.buttonBackground.style.backgroundColor = 'rgba(0, 0, 0, 0)';
   }
 }
 export function changeIcon(context) {

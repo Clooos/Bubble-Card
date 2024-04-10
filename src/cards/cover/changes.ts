@@ -16,20 +16,6 @@ export function changeName(context) {
       context.elements.previousName = name;
   }
 }
-// export function changeState(context) {
-//     const showState = context.config.show_state ?? false;
-//     const state = context._hass.states[context.config.entity];
-//     const formattedState = state ? context._hass.formatEntityState(state) : '';
-
-//     if (showState === false) {
-//         context.elements.state.style.display = 'none';
-//     } else {
-//         context.elements.state.style.display = '';
-//         if (formattedState !== context.elements.state.innerText) {
-//           context.elements.state.innerText = formattedState;
-//         }
-//     }
-// }
 export function changeStyle(context) {
   const state = getState(context);
 
