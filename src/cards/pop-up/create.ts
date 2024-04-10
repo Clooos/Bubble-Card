@@ -61,10 +61,19 @@ export function createHeader(context) {
   context.elements.buttonContainer = createElement('div', 'bubble-button-container');
   context.elements.header = createElement('div', 'bubble-header');
 
-  context.elements.headerContainer = createElement("div", 'bubble-header-container');
-  context.elements.headerContainer.setAttribute("id", "header-container");
-  context.elements.headerContainer.appendChild(context.elements.header);
-  context.elements.headerContainer.appendChild(context.elements.closeButton);
+  const existingHeader = context.popUp.querySelector('.bubble-header-container');
+  if (existingHeader === null) {
+    context.elements.headerContainer = createElement("div", 'bubble-header-container');
+    context.elements.headerContainer.setAttribute("id", "header-container");
+    context.elements.headerContainer.appendChild(context.elements.header);
+    context.elements.headerContainer.appendChild(context.elements.closeButton);
+  } else {
+    context.elements.headerContainer = existingHeader;
+    context.elements.closeIcon = existingHeader.querySelector('.bubble-close-icon');
+    context.elements.closeButton = existingHeader.querySelector('.bubble-close-button');
+    context.elements.buttonContainer = existingHeader.querySelector('.bubble-button-container');
+    context.elements.header = existingHeader.querySelector('.bubble-header');
+  }
 }
 
 export function createStructure(context) {
@@ -106,13 +115,19 @@ export function createStructure(context) {
       }
     });
 
-    context.elements.popUpContainer = createElement('div');
-    context.elements.popUpContainer.classList.add('bubble-pop-up-container');
-    let child = context.popUp.firstChild;
+    const existingContainer = context.popUp.querySelector('.bubble-pop-up-container');
+    if (existingContainer === null) {
 
-    while (child) {
-      context.elements.popUpContainer.appendChild(child);
-      child = context.popUp.firstChild;
+      context.elements.popUpContainer = createElement('div');
+      context.elements.popUpContainer.classList.add('bubble-pop-up-container');
+      let child = context.popUp.firstChild;
+      
+      while (child) {
+        context.elements.popUpContainer.appendChild(child);
+        child = context.popUp.firstChild;
+      }
+    } else {
+      context.elements.popUpContainer = existingContainer;
     }
 
     context.popUp.appendChild(context.elements.headerContainer);
