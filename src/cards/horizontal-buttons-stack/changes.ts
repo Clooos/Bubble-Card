@@ -16,7 +16,7 @@ export function sortButtons(context) {
         const bTime = states[b.pirSensor].last_updated;
 
         if (states[a.pirSensor].state === "on" && states[b.pirSensor].state === "on") {
-            return aTime > bTime ? -1 : 1;
+            return aTime > bTime ? -1 : aTime === bTime ? 0 : 1;
         }
 
         // If only a.pirSensor is "on", place a before b
@@ -26,7 +26,7 @@ export function sortButtons(context) {
         if (states[b.pirSensor].state === "on") return 1;
 
         // If neither PIR sensor is "on", arrangement based only on the state of last updated even if off
-        return aTime < bTime ? 1 : -1;
+        return aTime > bTime ? -1 : aTime === bTime ? 0 : 1;
     });
 }
 export function placeButtons(context) {
