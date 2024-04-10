@@ -23,7 +23,5 @@ export function createStructure(context) {
   context.content.appendChild(context.elements.style);
   context.content.appendChild(context.elements.customStyle);
 
-  addActions(context.elements.separatorCard, context.config);
-
   context.cardType = "separator";
 }

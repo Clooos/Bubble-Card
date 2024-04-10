@@ -1,3 +1,4 @@
+import { changeSubButtonState } from "../../tools/global-changes.ts";
 import { changeState } from "../../tools/global-changes.ts";
 import { 
     changeIcon, 
@@ -13,5 +14,6 @@ export function handleSeparator(context) {
 
     changeIcon(context);
     changeName(context);
+    changeSubButtonState(context, context.content, context.elements.separatorCard);
     changeStyle(context);
 }

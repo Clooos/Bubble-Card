@@ -190,7 +190,6 @@ export function applyScrollingEffect(element, text) {
 
     if (element.previousText === text) return;
 
-    // Get the class name from the element
     const classNames = element.className.split(' ');
     const className = classNames.find(name => name.startsWith('bubble-'));
 
@@ -201,15 +200,21 @@ export function applyScrollingEffect(element, text) {
     // Check if the text is longer than its container
     requestAnimationFrame(() => {
         if (element.scrollWidth > element.parentNode.offsetWidth) {
-            // Apply the scrolling effect
-            const separator = `<span class="bubble-scroll-separator">|</span>`
-            element.innerHTML = `<span>${text + separator + text + separator}</span>`;
-            
             // Add the CSS for the scrolling effect
+            const separator = `<span class="bubble-scroll-separator">|</span>`;
+            element.innerHTML = `<span>${text + separator + text + separator}</span>`;
+
+            // Ajoute le CSS pour l'effet de défilement
             const css = createScrollingEffectCSS(className);
-            element.styleElement = createElement('style');
-            element.styleElement.innerHTML = css;
+            element.styleElement = document.createElement('style');
             element.appendChild(element.styleElement);
+            element.styleElement.innerHTML = css;
+        } else {
+            // If the text fits without scrolling, remove the style element
+            if (element.styleElement) {
+                //element.removeChild(element.styleElement);
+                element.styleElement = null;
+            }
         }
     });
 
@@ -220,7 +225,6 @@ export function applyScrollingEffect(element, text) {
             .${className} {
                 white-space: nowrap;
                 mask-image: linear-gradient(to right, transparent, black calc(0% + 8px), black calc(100% - 8px), transparent);
-                caca: 100px;
             }
             .${className} span {
                 display: inline-block;
@@ -228,7 +232,7 @@ export function applyScrollingEffect(element, text) {
             }
 
             .bubble-scroll-separator {
-                opacity: .3; 
+                opacity: .3;
                 margin: 0 6px 0 8px;
             }
 
@@ -239,6 +243,7 @@ export function applyScrollingEffect(element, text) {
         `;
     }
 }
+
 
 export function formatDateTime(datetime, locale) {
     if (!datetime) return '';

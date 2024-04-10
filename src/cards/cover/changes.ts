@@ -1,4 +1,4 @@
-import { getName, getState } from "../../tools/utils.ts";
+import { getName, getState, applyScrollingEffect } from "../../tools/utils.ts";
 
 export function changeIcon(context) {
   const iconOpen = context.config.icon_open ?? 'mdi:window-shutter-open';
@@ -10,24 +10,26 @@ export function changeIcon(context) {
 }
 export function changeName(context) {
     const name = getName(context);
-    if (name !== context.elements.name.innerText) {
-        context.elements.name.innerText = name;
-    }
+    if (name !== context.elements.previousName) {
+      context.elements.name.innerText = name;
+      applyScrollingEffect(context.elements.name, name);
+      context.elements.previousName = name;
+  }
 }
-export function changeState(context) {
-    const showState = context.config.show_state ?? false;
-    const state = context._hass.states[context.config.entity];
-    const formattedState = state ? context._hass.formatEntityState(state) : '';
+// export function changeState(context) {
+//     const showState = context.config.show_state ?? false;
+//     const state = context._hass.states[context.config.entity];
+//     const formattedState = state ? context._hass.formatEntityState(state) : '';
 
-    if (showState === false) {
-        context.elements.state.style.display = 'none';
-    } else {
-        context.elements.state.style.display = '';
-        if (formattedState !== context.elements.state.innerText) {
-          context.elements.state.innerText = formattedState;
-        }
-    }
-}
+//     if (showState === false) {
+//         context.elements.state.style.display = 'none';
+//     } else {
+//         context.elements.state.style.display = '';
+//         if (formattedState !== context.elements.state.innerText) {
+//           context.elements.state.innerText = formattedState;
+//         }
+//     }
+// }
 export function changeStyle(context) {
   const state = getState(context);
 

@@ -12,6 +12,7 @@ export default `
     .bubble-header {
         display: flex;
         align-items: center;
+        overflow: hidden;
     }
 
     .bubble-icon-container {
@@ -34,14 +35,18 @@ export default `
         justify-content: center;
         flex-grow: 1;
         font-weight: 600;
-        margin-left: 10px;
+        margin-left: 4px;
         margin-right: 16px;
         pointer-events: none;
         position: relative;
+        overflow: hidden;
     }
 
     .bubble-name {
         margin: 2px 0;
+        white-space: nowrap;
+        display: flex;
+        position: relative;
     }
 
     .bubble-state {
@@ -49,6 +54,9 @@ export default `
         opacity: 0.7;
         margin: 2px 0;
         font-weight: normal;
+        white-space: nowrap;
+        display: flex;
+        position: relative;
     }
 
     .bubble-buttons {

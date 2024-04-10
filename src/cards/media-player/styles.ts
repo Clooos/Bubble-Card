@@ -225,7 +225,6 @@ export default `
         flex-grow: 1;
         font-weight: 600;
         margin-left: 4px;
-        /*margin-right: 16px;*/
         pointer-events: none;
         position: relative;
         overflow: hidden;
@@ -240,6 +239,10 @@ export default `
         opacity: 0.7;
         margin: 2px 0;
         font-weight: normal;
+    }
+
+    .bubble-sub-button-container {
+        right: 0 !important;
     }
 
     @media screen and (max-width: 250px) {

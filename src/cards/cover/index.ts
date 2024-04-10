@@ -1,4 +1,4 @@
-import { changeState } from "../../tools/global-changes.ts";
+import { changeState, changeSubButtonState } from "../../tools/global-changes.ts";
 import {
   changeIcon,
   changeName,
@@ -14,5 +14,6 @@ export function handleCover(context) {
     changeIcon(context);
     changeName(context);
     changeState(context);
+    changeSubButtonState(context, context.content, context.elements.headerContainer);
     changeStyle(context);
 }

@@ -111,7 +111,7 @@ export function changeState(context) {
         context.elements.state.style.display = 'none';
     } else if (context.previousState !== displayedState) {
         context.elements.state.style.display = stateStyles.state.display;
-        context.elements.state.innerText = displayedState;
+        //context.elements.state.innerText = displayedState;
         applyScrollingEffect(context.elements.state, displayedState);
         context.previousState = displayedState;
     }
@@ -130,7 +130,7 @@ const stateStyles = {
     }
 };
 
-export function changeSubButtonState(context, container = context.content) {
+export function changeSubButtonState(context, container = context.content, appendTo = container.firstChild.firstChild, before = false) {
     const subButtons = context.config.sub_button;
 
     if (!subButtons) {
@@ -170,7 +170,11 @@ export function changeSubButtonState(context, container = context.content) {
         if (!context.elements.subButtonContainer) {
             context.elements.subButtonContainer = createElement('div', 'bubble-sub-button-container');
             Object.assign(context.elements.subButtonContainer.style, subButtonStyles.subButtonContainer);
-            container.firstChild.firstChild.appendChild(context.elements.subButtonContainer);
+            if (before) {
+                appendTo.prepend(context.elements.subButtonContainer);
+            } else {
+                appendTo.appendChild(context.elements.subButtonContainer);
+            }
         }
 
         if (!context.elements[index]) {
@@ -192,7 +196,7 @@ export function changeSubButtonState(context, container = context.content) {
             context.elements[index].icon.setAttribute('icon', icon);
             context.elements[index].appendChild(context.elements[index].icon);
             context.elements[index].icon.style = subButtonStyles.icon;
-            context.elements[index].icon.style.setProperty('--mdc-icon-size', '16px'); // Définir la taille de l'icône directement
+            context.elements[index].icon.style.setProperty('--mdc-icon-size', '16px');
         } else if (!showIcon && context.elements[index].icon) {
             context.elements[index].icon.style.display = 'none';
         }
@@ -313,7 +317,7 @@ const subButtonStyles = {
         padding: '0 8px',
         overflow: 'hidden',
         whiteSpace: 'nowrap',
-        zIndex: '6',
+        zIndex: '1',
         transition: 'all 0.5s ease-in-out'
     },
     nameContainer: {

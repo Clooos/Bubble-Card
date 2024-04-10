@@ -1,4 +1,4 @@
-import { changeState } from "../../tools/global-changes.ts";
+import { changeState, changeSubButtonState } from "../../tools/global-changes.ts";
 import {
     changeStatus,
     changeName,
@@ -32,5 +32,6 @@ export function handleMediaPlayer(context) {
     changePlayPauseIcon(context);
     changeMuteIcon(context);
     changePowerIcon(context);
+    changeSubButtonState(context, context.content, context.elements.buttonContainer, true);
     changeStyle(context);
 }

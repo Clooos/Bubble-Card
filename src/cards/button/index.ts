@@ -41,7 +41,7 @@ export function handleButton(context, container = context.content, appendTo = co
 
     changeIcon(context);
     changeName(context);
-    changeSubButtonState(context, appendTo);
+    changeSubButtonState(context, container, appendTo.firstChild.firstChild);
     changeStyle(context);
 }
 

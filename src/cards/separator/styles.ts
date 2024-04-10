@@ -28,4 +28,7 @@ export default `
         height: 6px;
         background-color: var(--background-color, var(--secondary-background-color));
     }
+    .bubble-sub-button-container {
+        margin-left: 24px;
+    }
 `;

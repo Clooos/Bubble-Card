@@ -566,6 +566,7 @@ export default class BubbleCardEditor extends LitElement {
                                 </div>
                             </ha-formfield>
                             <ha-alert alert-type="info">Set this toggle to true on the first pop-up of your main dashboard to disable the backdrop on all pop-ups.</ha-alert>
+                            ${this.makeStyleEditor()}
                         </div>
                     </ha-expansion-panel>
                     <ha-expansion-panel outlined>
@@ -581,7 +582,7 @@ export default class BubbleCardEditor extends LitElement {
                     </ha-expansion-panel>
                     ${this.makeSubButtonPanel()}
                     <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it.</b></ha-alert>
-                    <ha-alert alert-type="warning">Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, <a style="color: #fff" href="https://github.com/Clooos/Bubble-Card#pop-up-initialization-fix">you can install this similar fix.</a></ha-alert>
+                    <ha-alert alert-type="warning">Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#pop-up-initialization-fix">you can install this similar fix.</a></ha-alert>
                     ${this.makeVersion()}
               </div>
             `;
@@ -618,6 +619,15 @@ export default class BubbleCardEditor extends LitElement {
                             ${this.makeTapActionPanel("Hold action", "tap_action")}
                         </div>
                     </ha-expansion-panel>
+                    <ha-expansion-panel outlined>
+                        <h4 slot="header">
+                          <ha-icon icon="mdi:palette"></ha-icon>
+                          Styling options
+                        </h4>
+                        <div class="content">
+                            ${this.makeStyleEditor()}
+                        </div>
+                    </ha-expansion-panel>
                     ${this.makeSubButtonPanel()}
                     <ha-alert alert-type="info">This card can be a slider or a button, allowing you to toggle your entities, control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.</ha-alert>
                     ${this.makeVersion()}
@@ -636,15 +646,14 @@ export default class BubbleCardEditor extends LitElement {
                     ${this.makeDropdown("Icon", "icon")}
                     <ha-expansion-panel outlined>
                         <h4 slot="header">
-                          <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                          Tap action on separator
+                          <ha-icon icon="mdi:palette"></ha-icon>
+                          Styling options
                         </h4>
                         <div class="content">
-                            ${this.makeTapActionPanel("Tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Double tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Hold action", "tap_action")}
+                            ${this.makeStyleEditor()}
                         </div>
                     </ha-expansion-panel>
+                    ${this.makeSubButtonPanel()}
                     <ha-alert alert-type="info">This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...</ha-alert>
                     ${this.makeVersion()}
               </div>
@@ -747,6 +756,7 @@ export default class BubbleCardEditor extends LitElement {
                                     <label class="mdc-label">Optional - Hide gradient</label> 
                                 </div>
                             </ha-formfield>
+                            ${this.makeStyleEditor()}
                         </div>
                     </ha-expansion-panel>
                     <ha-alert alert-type="info">This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer.</ha-alert>
@@ -809,6 +819,7 @@ export default class BubbleCardEditor extends LitElement {
                         <div class="content"> 
                             ${this.makeDropdown("Optional - Arrow down icon", "icon_down")}
                             ${this.makeDropdown("Optional - Arrow up icon", "icon_up")}
+                            ${this.makeStyleEditor()}
                         </div>
                     </ha-expansion-panel>
                     <ha-expansion-panel outlined>
@@ -822,6 +833,7 @@ export default class BubbleCardEditor extends LitElement {
                             ${this.makeTapActionPanel("Hold action", "tap_action")}
                         </div>
                     </ha-expansion-panel>
+                    ${this.makeSubButtonPanel()}
                     <ha-alert alert-type="info">This card allows you to control your covers.</ha-alert>
                     ${this.makeVersion()}
                 </div>
@@ -912,6 +924,15 @@ export default class BubbleCardEditor extends LitElement {
                     </ha-expansion-panel>
                     <ha-expansion-panel outlined>
                         <h4 slot="header">
+                          <ha-icon icon="mdi:palette"></ha-icon>
+                          Styling options
+                        </h4>
+                        <div class="content">
+                            ${this.makeStyleEditor()}
+                        </div>
+                    </ha-expansion-panel>
+                    <ha-expansion-panel outlined>
+                        <h4 slot="header">
                           <ha-icon icon="mdi:gesture-tap"></ha-icon>
                           Tap action on icon
                         </h4>
@@ -921,6 +942,7 @@ export default class BubbleCardEditor extends LitElement {
                             ${this.makeTapActionPanel("Hold action", "tap_action")}
                         </div>
                     </ha-expansion-panel>
+                    ${this.makeSubButtonPanel()}
                     <ha-alert alert-type="info">This card allows you to control a media player. You can tap on the icon to get more control.</ha-alert>
                     ${this.makeVersion()}
                 </div>
@@ -929,7 +951,15 @@ export default class BubbleCardEditor extends LitElement {
             return html`
                 <div class="card-config">
                     ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                    <h3>Empty column</h3>
+                    <ha-expansion-panel outlined>
+                        <h4 slot="header">
+                          <ha-icon icon="mdi:palette"></ha-icon>
+                          Styling options
+                        </h4>
+                        <div class="content">
+                            ${this.makeStyleEditor()}
+                        </div>
+                    </ha-expansion-panel>
                     <ha-alert alert-type="info">Just an empty card to fill any empty column.</ha-alert>
                     ${this.makeVersion()}
                 </div>
@@ -1446,6 +1476,23 @@ export default class BubbleCardEditor extends LitElement {
         });
     }
 
+    makeStyleEditor() {
+        return html`
+            <h3>Custom styles</h3>
+            <ha-code-editor
+                mode="yaml"
+                autofocus
+                autocomplete-entities
+                autocomplete-icons
+                .hass=${this.hass}
+                .value=${this._config.styles}
+                .configValue="${"styles"}"
+                @value-changed=${this._valueChanged}
+            ></ha-code-editor>
+            <ha-alert alert-type="info">For advanced users, you can edit the CSS style of this card in this editor. For more information, you can go <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically.</ha-alert>
+        `;
+    }
+
     _valueChanged(ev) {
         const target = ev.target;
         const detail = ev.detail;
@@ -1468,6 +1515,16 @@ export default class BubbleCardEditor extends LitElement {
 
             if (obj[configKeys[configKeys.length - 1]] !== value) {
                 obj[configKeys[configKeys.length - 1]] = value;
+            }
+
+            for (let i = 0; i < configKeys.length - 1; i++) {
+                // Si configValue est 'styles', créez une liste
+                if (configKeys[i] === 'styles') {
+                    obj[configKeys[i]] = obj[configKeys[i]] || [];
+                } else {
+                    obj[configKeys[i]] = obj[configKeys[i]] || {};
+                }
+                obj = obj[configKeys[i]];
             }
         }
 
@@ -1492,7 +1549,7 @@ export default class BubbleCardEditor extends LitElement {
                 this._config = { ...this._config, [target.configValue]: detail.value };
             }
 
-            fireEvent(this, "config-changed", { config: this._config });
+            // fireEvent(this, "config-changed", { config: this._config });
         }
 
         fireEvent(this, "config-changed", { config: this._config });
