@@ -12,8 +12,8 @@ export function handleHorizontalButtonsStack(context) {
     sortButtons(context);
     changeConfig(context);
     changeEditor(context);
-    changeLight(context);
-    changeStatus(context);
-    changeStyle(context);
     placeButtons(context);
+    changeLight(context);
+    changeStyle(context);
+    changeStatus(context);
 }
