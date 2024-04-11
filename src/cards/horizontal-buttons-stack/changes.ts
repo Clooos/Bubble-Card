@@ -52,7 +52,9 @@ export function placeButtons(context) {
     context.elements.cardContainer.style.width = `${position - BUTTON_MARGIN}px`;
 }
 export function changeEditor(context) {
-    if (context.editor) {
+    const detectedEditor = context.shadowRoot.host.closest('hui-card-preview, hui-card-options');
+
+    if (context.editor || detectedEditor !== null) {
         context.elements.cardContainer.classList.add('editor');
         context.card.classList.add('editor');
     } else {

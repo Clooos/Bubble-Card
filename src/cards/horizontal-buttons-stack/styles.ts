@@ -155,8 +155,13 @@ export default `
 
     .horizontal-buttons-stack-card.editor {
         position: static;
+        width: auto;
     }
     .horizontal-buttons-stack-card.editor::before {
         background: none;
+    }
+    .editor .card-content {
+        position: static;
+        transform: none;
     }
 `;
