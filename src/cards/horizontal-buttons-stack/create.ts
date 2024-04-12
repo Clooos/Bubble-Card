@@ -120,8 +120,8 @@ export function createStructure(context) {
     }
 
     // Fix for the last cards that are hidden by the HBS
-    const bubbleCardElement = context.getRootNode().querySelector("#columns");
-    bubbleCardElement.style.padding = '0 0 80px';
+    const columnElement = context.parentNode.parentNode;
+    columnElement.style.padding = '0 0 80px';
 
     context.cardType = "horizontal-buttons-stack";
 }
