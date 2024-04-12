@@ -150,19 +150,22 @@ class BubbleCard extends HTMLElement {
     }
 
     getCardSize() {
-        
-      // Fix the empty columns caused by the pop-ups on the dashboard
-      // Check the value of window.columnFix
-      if (window.columnFix === "true") {
-        // Return 0 if it is "true"
-        return 0;
-      } else if (typeof window.columnFix === "number") {
-        // Return the number if it is a number
-        return window.columnFix;
-      } else {
-        // Return -10 otherwise
-        return -10;
-      }
+        switch (this.config.card_type) {
+            case 'pop-up':
+                return -100000;
+            case 'button':
+                return 1;
+            case 'separator':
+                return 1;
+            case 'cover':
+                return 2;
+            case 'empty-column':
+                return 1;
+            case 'horizontal-buttons-stack':
+                return 0;
+            case 'media-player':
+                return 1;
+        }
     }
 
     static getConfigElement() {
@@ -177,7 +180,8 @@ window.customCards.push({
     type: "bubble-card",
     name: "Bubble Card",
     preview: false,
-    description: "A minimalist card collection with a nice pop-up touch."
+    description: "A minimalist card collection with a nice pop-up touch.",
+    documentationURL: "https://github.com/Clooos/Bubble-Card/"
 });
 
 console.info(

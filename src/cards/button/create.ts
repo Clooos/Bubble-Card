@@ -62,7 +62,15 @@ export function createStructure(context, container = context.content, appendTo =
 }
 export function createSwitchStructure(context) {
   addActions(context.elements.iconContainer, context.config);
+  
+  const switchDefaultActions = {
+      tap_action: { action: "toggle" },
+      double_tap_action: { action: "toggle" },
+      hold_action: { action: "more-info" }
+  };
+  addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, switchDefaultActions);
   addFeedback(context.elements.buttonCard, context.elements.feedback);
+  
   context.elements.buttonCard.addEventListener('click', (event) => {
     if (event.target.closest('.bubble-sub-button-container')) return;
 
@@ -71,7 +79,7 @@ export function createSwitchStructure(context) {
         event.target.closest('.bubble-sub-button-container') === null
     ){
         event.stopPropagation();
-        toggleEntity(context._hass, context.config.entity);
+        //toggleEntity(context._hass, context.config.entity);
     }
   })
 }

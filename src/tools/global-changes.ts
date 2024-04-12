@@ -207,7 +207,7 @@ export function changeSubButtonState(context, container = context.content, appen
             context.elements[index].style.backgroundColor = '';
         }
 
-        if (subButton.tap_action) {
+        if (subButton.tap_action || subButton.double_tap_action || subButton.hold_action) {
             addActions(context.elements[index], subButton, entity);
         }
 

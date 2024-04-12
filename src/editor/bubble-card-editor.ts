@@ -89,7 +89,7 @@ export default class BubbleCardEditor extends LitElement {
     }
     
     get _bg_color() {
-        return this._config.bg_color ||  window.color;
+        return this._config.bg_color || '';
     }
     
     get _bg_opacity() {
@@ -130,6 +130,14 @@ export default class BubbleCardEditor extends LitElement {
 
     get _icon_close() {
         return this._config.icon_close || '';
+    }
+
+    get _icon_down() {
+        return this._config.icon_down || '';
+    }
+
+    get _icon_up() {
+        return this._config.icon_up || '';
     }
 
     get _open_service() {
@@ -198,17 +206,6 @@ export default class BubbleCardEditor extends LitElement {
     get _hide_power_button() {
         return this._config.hide?.power_button || false;
     }  
-
-    // get _sub_button() {
-    //     return {
-    //         action: this._config.tap_action?.action || "more-info",
-    //         navigation_path: this._config.tap_action?.navigation_path || "",
-    //         url_path: this._config.tap_action?.url_path || "",
-    //         service: this._config.tap_action?.service || "",
-    //         target_entity: this._config.tap_action?.target?.entity_id || "",
-    //         data: this._config.tap_action?.data || ""
-    //     };
-    // }
 
     get _sub_button() {
         return this._config.sub_button || '';
@@ -581,7 +578,10 @@ export default class BubbleCardEditor extends LitElement {
                         </div>
                     </ha-expansion-panel>
                     ${this.makeSubButtonPanel()}
-                    <ha-alert alert-type="info">This card allows you to convert any vertical stack into a pop-up. Each pop-up can be opened by targeting its link (e.g. '#pop-up-name'), with navigation_path or with the horizontal buttons stack that is included.<br><b>It must be placed within a vertical-stack card at the top most position to function properly. The pop-up will be hidden by default until you open it by targeting its hash, more info <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack">here</a> and <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#example">here</a>.</b></ha-alert>
+                    <ha-alert alert-type="info">
+                        This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., '#pop-up-name'), with <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#example">any card</a> that support <code>navigation_path</code>, or with the <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack">horizontal buttons stack</a> that is included.
+                        <br><br><b>Important:</b> This card must be placed within a vertical-stack card at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
+                    </ha-alert>
                     <ha-alert alert-type="warning">Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#pop-up-initialization-fix">you can install this similar fix.</a></ha-alert>
                     ${this.makeVersion()}
               </div>
@@ -617,6 +617,17 @@ export default class BubbleCardEditor extends LitElement {
                             ${this.makeTapActionPanel("Tap action", "tap_action")}
                             ${this.makeTapActionPanel("Double tap action", "tap_action")}
                             ${this.makeTapActionPanel("Hold action", "tap_action")}
+                        </div>
+                    </ha-expansion-panel>
+                    <ha-expansion-panel outlined>
+                        <h4 slot="header">
+                          <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                          Tap action on button
+                        </h4>
+                        <div class="content">
+                            ${this.makeTapActionPanel("Tap action", "tap_action", this._config.button_action, 'button_action.', 'toggle')}
+                            ${this.makeTapActionPanel("Double tap action", "tap_action", this._config.button_action, 'button_action.', 'toggle')}
+                            ${this.makeTapActionPanel("Hold action", "tap_action", this._config.button_action, 'button_action.', 'more-info')}
                         </div>
                     </ha-expansion-panel>
                     <ha-expansion-panel outlined>
@@ -971,7 +982,6 @@ export default class BubbleCardEditor extends LitElement {
                     <ha-alert alert-type="info">You need to add a card type first.</ha-alert>
                     <img style="width: 100%; height: auto; border-radius: 24px;" src="https://user-images.githubusercontent.com/36499953/268039672-6dd13476-42c5-427c-a4d8-ad4981fc2db7.gif">
                     <p>The <b>Bubble Card ${version}</b> changelog is available <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}"><b>here</b></a>.
-                    <br/><br/><ha-alert alert-type="info"><b>Column fix</b>: If you experience some issues with your dashboard layout, such as empty columns or misaligned cards. You can apply a fix that restores the behavior of the previous versions by adding <code>column_fix: true</code> in YAML to the <b>first</b> Bubble Card on your dashboard. You can also try to add a negative value to find the one that fit your dashboard like <code>column_fix: -10</code>. Then refresh the page.<br><br>I'm still looking for a better solution.</ha-alert>
                     <hr />
                     <p>If you have an issue or a question you can find more details on my GitHub page.</p>
                     <a href="https://github.com/Clooos/Bubble-Card"><img src="https://img.shields.io/badge/GitHub-Documentation-blue?logo=github"></a>
@@ -998,8 +1008,6 @@ export default class BubbleCardEditor extends LitElement {
             let formattedName = this.hass.formatEntityAttributeName(state, attributeName);
             return { label: formattedName, value: attributeName };
         });
-
-        //const attributeList = isDefault ? this.attributeList : attributeList;
 
         return html`
             ${subButton ? html`
@@ -1121,7 +1129,7 @@ export default class BubbleCardEditor extends LitElement {
         }
     }
 
-    makeTapActionPanel(label, configValue, context = this._config, config = '') {
+    makeTapActionPanel(label, configValue, context = this._config, config = '', defaultAction = '') {
         const hass = this.hass;
         const icon = label === "Tap action" 
             ? "mdi:gesture-tap" 
@@ -1139,11 +1147,14 @@ export default class BubbleCardEditor extends LitElement {
             ? "double_tap_action"
             : "hold_action";
         const isDefault = context === this._config;
-        const defaultAction = isDefault && label === "Tap action" 
+        
+        if (defaultAction === '') {
+            defaultAction = isDefault && label === "Tap action" 
             ? "more-info"
             : isDefault 
             ? "toggle"
             : '';
+        }
   
         return html`
             <ha-expansion-panel outlined>

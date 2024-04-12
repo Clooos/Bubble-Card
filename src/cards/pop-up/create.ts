@@ -67,6 +67,7 @@ export function createHeader(context) {
     context.elements.headerContainer.setAttribute("id", "header-container");
     context.elements.headerContainer.appendChild(context.elements.header);
     context.elements.headerContainer.appendChild(context.elements.closeButton);
+    context.elements.header.appendChild(context.elements.buttonContainer);
   } else {
     context.elements.headerContainer = existingHeader;
     context.elements.closeIcon = existingHeader.querySelector('.bubble-close-icon');
