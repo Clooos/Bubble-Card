@@ -119,5 +119,9 @@ export function createStructure(context) {
         }, 1500);
     }
 
+    // Fix for the last cards that are hidden by the HBS
+    const bubbleCardElement = context.getRootNode().querySelector("#columns");
+    bubbleCardElement.style.padding = '0 0 80px';
+
     context.cardType = "horizontal-buttons-stack";
 }

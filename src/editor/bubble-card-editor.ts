@@ -211,6 +211,10 @@ export default class BubbleCardEditor extends LitElement {
         return this._config.sub_button || '';
     }
 
+    get _button_action() {
+        return this._config.button_action || '';
+    }
+
     get _tap_action() {
         return {
             action: this._config.tap_action?.action || "more-info",
@@ -625,9 +629,9 @@ export default class BubbleCardEditor extends LitElement {
                           Tap action on button
                         </h4>
                         <div class="content">
-                            ${this.makeTapActionPanel("Tap action", "tap_action", this._config.button_action, 'button_action.', 'toggle')}
-                            ${this.makeTapActionPanel("Double tap action", "tap_action", this._config.button_action, 'button_action.', 'toggle')}
-                            ${this.makeTapActionPanel("Hold action", "tap_action", this._config.button_action, 'button_action.', 'more-info')}
+                            ${this.makeTapActionPanel("Tap action", "tap_action", this._button_action, 'button_action.', 'toggle')}
+                            ${this.makeTapActionPanel("Double tap action", "tap_action", this._button_action, 'button_action.', 'toggle')}
+                            ${this.makeTapActionPanel("Hold action", "tap_action", this._button_action, 'button_action.', 'more-info')}
                         </div>
                     </ha-expansion-panel>
                     <ha-expansion-panel outlined>
@@ -1129,7 +1133,7 @@ export default class BubbleCardEditor extends LitElement {
         }
     }
 
-    makeTapActionPanel(label, configValue, context = this._config, config = '', defaultAction = '') {
+    makeTapActionPanel(label, configValue, context = this._config, config = '', defaultAction) {
         const hass = this.hass;
         const icon = label === "Tap action" 
             ? "mdi:gesture-tap" 
@@ -1137,18 +1141,18 @@ export default class BubbleCardEditor extends LitElement {
             ? "mdi:gesture-double-tap"
             : "mdi:gesture-tap-hold";
         const valueType = label === "Tap action" 
-            ? context.tap_action || this._tap_action 
+            ? context.tap_action
             : label === "Double tap action" 
-            ? context.double_tap_action || this._double_tap_action
-            : context.hold_action || this._hold_action;
+            ? context.double_tap_action
+            : context.hold_action;
         const configValueType = label === "Tap action" 
             ? "tap_action"
             : label === "Double tap action" 
             ? "double_tap_action"
             : "hold_action";
         const isDefault = context === this._config;
-        
-        if (defaultAction === '') {
+
+        if (!defaultAction) {
             defaultAction = isDefault && label === "Tap action" 
             ? "more-info"
             : isDefault 
@@ -1166,13 +1170,13 @@ export default class BubbleCardEditor extends LitElement {
                     <div class="ha-combo-box">
                         <ha-combo-box
                             label="${label}"
-                            .value="${valueType?.action || defaultAction}"
+                            .value="${valueType?.action ?? defaultAction}"
                             .configValue="${config + configValueType}.action"
                             .items="${this.tapActionTypeList}"
                             @value-changed="${this._valueChanged}"
                         ></ha-combo-box>
                     </div>
-                    ${valueType.action === 'navigate' ? html`
+                    ${valueType?.action === 'navigate' ? html`
                         <div class="ha-textfield">
                             <ha-textfield
                                 label="Navigation path"
@@ -1182,7 +1186,7 @@ export default class BubbleCardEditor extends LitElement {
                             ></ha-textfield>
                         </div>
                     ` : ''}
-                    ${valueType.action === 'url' ? html`
+                    ${valueType?.action === 'url' ? html`
                         <div class="ha-textfield">
                             <ha-textfield
                                 label="URL path"
@@ -1192,7 +1196,7 @@ export default class BubbleCardEditor extends LitElement {
                             ></ha-textfield>
                         </div>
                     ` : ''}
-                    ${valueType.action === 'call-service' ? html`
+                    ${valueType?.action === 'call-service' ? html`
                         <div class="ha-textfield">
                             <ha-textfield
                                 label="Service"
@@ -1509,7 +1513,14 @@ export default class BubbleCardEditor extends LitElement {
     _valueChanged(ev) {
         const target = ev.target;
         const detail = ev.detail;
-        const rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
+        let rawValue;
+
+        // Check if the target is a ha-switch
+        if (target.tagName === 'HA-SWITCH') {
+            rawValue = target.checked;
+        } else if (target.value !== undefined) {
+            rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
+        }
 
         if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
             return;
@@ -1526,40 +1537,13 @@ export default class BubbleCardEditor extends LitElement {
                 obj = obj[configKeys[i]];
             }
 
-            if (obj[configKeys[configKeys.length - 1]] !== value) {
-                obj[configKeys[configKeys.length - 1]] = value;
-            }
-
-            for (let i = 0; i < configKeys.length - 1; i++) {
-                // Si configValue est 'styles', créez une liste
-                if (configKeys[i] === 'styles') {
-                    obj[configKeys[i]] = obj[configKeys[i]] || [];
-                } else {
-                    obj[configKeys[i]] = obj[configKeys[i]] || {};
-                }
-                obj = obj[configKeys[i]];
-            }
-        }
-
-        if (target.tagName === 'HA-COMBO-BOX' && detail.value) {
-            if (target.configValue && target.configValue.includes('.')) {
-                const configValueArray = target.configValue.split('.');
-                let obj = this._config;
-                for (let i = 0; i < configValueArray.length - 1; i++) {
-                    obj[configValueArray[i]] = obj[configValueArray[i]] || {};
-                    obj = obj[configValueArray[i]];
-                }
-
-                if (configValueArray[configValueArray.length - 2] === 'sub_button') {
-                    obj.sub_button = obj.sub_button || [];
-                    const subButtonIndex = parseInt(configValueArray[configValueArray.length - 1]);
-                    obj.sub_button[subButtonIndex] = obj.sub_button[subButtonIndex] || {};
-                    obj.sub_button[subButtonIndex][configValueArray[configValueArray.length - 1]] = detail.value;
-                } else {
-                    obj[configValueArray[configValueArray.length - 1]] = detail.value;
-                }
-            } else {
-                this._config = { ...this._config, [target.configValue]: detail.value };
+            // If the event is of type 'input', update the configuration directly with the input's value
+            if (ev.type === 'input') {
+                obj[configKeys[configKeys.length - 1]] = rawValue;
+            } else if (detail && obj[configKeys[configKeys.length - 1]] !== detail.value) {
+                obj[configKeys[configKeys.length - 1]] = detail.value;
+            } else if (target.tagName === 'HA-SWITCH') {
+                obj[configKeys[configKeys.length - 1]] = rawValue;
             }
         }
 

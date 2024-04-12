@@ -114,7 +114,7 @@ export function createStructure(context) {
       if (event.key === 'Escape' && context.config.hash === location.hash) {
         removeHash();
       }
-    });
+    }, { passive: true });
 
     const existingContainer = context.popUp.querySelector('.bubble-pop-up-container');
     if (existingContainer === null) {

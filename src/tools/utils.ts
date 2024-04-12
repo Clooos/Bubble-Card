@@ -198,7 +198,7 @@ export function applyScrollingEffect(element, text) {
     element.style = '';
 
     // Check if the text is longer than its container
-    requestAnimationFrame(() => {
+    function checkIfContentIsLonger() {
         if (element.scrollWidth > element.parentNode.offsetWidth) {
             // Add the CSS for the scrolling effect
             const separator = `<span class="bubble-scroll-separator">|</span>`;
@@ -212,11 +212,15 @@ export function applyScrollingEffect(element, text) {
         } else {
             // If the text fits without scrolling, remove the style element
             if (element.styleElement) {
-                //element.removeChild(element.styleElement);
+                element.removeChild(element.styleElement);
                 element.styleElement = null;
             }
+            // If the condition is not met, check again at the next frame
+            requestAnimationFrame(checkIfContentIsLonger);
         }
-    });
+    }
+
+    requestAnimationFrame(checkIfContentIsLonger);
 
     element.previousText = text;
 

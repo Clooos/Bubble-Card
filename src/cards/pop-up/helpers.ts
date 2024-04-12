@@ -35,7 +35,7 @@ export function closePopup(context) {
   }
 
   popupCount--;
-  document.body.style.overflow = '';
+  document.body.style.position = '';
   context.popUp.classList.add('is-popup-closed');
   context.popUp.classList.remove('is-popup-opened');
   context.hideContentTimeout = setTimeout(function() {
@@ -66,13 +66,14 @@ export function openPopup(context) {
   popupCount++;
   clearTimeout(context.closeTimeout);
   clearTimeout(context.hideContentTimeout);
-  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
   context.popUp.style.display = '';
-  context.popUp.addEventListener('touchstart', context.resetCloseTimeout);
+  context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
 
   requestAnimationFrame(() => {
     context.popUp.classList.remove('is-popup-closed');
-    window.addEventListener('click', clickOutside);
+    window.addEventListener('click', clickOutside, { passive: true });
   });
 
   if (context.config.auto_close > 0) {

@@ -178,7 +178,7 @@ export function changeSubButtonState(context, container = context.content, appen
         }
 
         if (!context.elements[index]) {
-            context.elements[index] = createElement('div', 'bubble-sub-button-' + index);
+            context.elements[index] = createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
             Object.assign(context.elements[index].style, subButtonStyles.subButton);
             context.elements[index].nameContainer = createElement('div', 'bubble-sub-button-name-container');
             Object.assign(context.elements[index].nameContainer.style, subButtonStyles.nameContainer);

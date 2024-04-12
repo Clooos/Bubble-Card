@@ -38,7 +38,7 @@ export default `
       border-radius: 42px 42px 0 0;
       box-sizing: border-box;
       margin-left: var(--custom-margin);
-      padding: 18px 18px calc(150px - var(--custom-height-offset-mobile)) 18px;
+      padding: 18px 18px calc(50px + var(--custom-height-offset-mobile)) 18px;
       z-index: 6 !important;
       bottom: calc(-50px - var(--custom-height-offset-mobile));
       left: calc(var(--mdc-drawer-width) / 2 + 50% - (var(--desktop-width) / 2));
@@ -65,7 +65,7 @@ export default `
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
   }
-  @media only screen and (min-width: 768px) {
+  @media only screen and (min-width: 600px) {
       .pop-up {
           margin-left: 0 !important;
           bottom: calc(-50px - var(--custom-height-offset-desktop)) !important;

@@ -9,8 +9,8 @@ export function sortButtons(context) {
     const states = context._hass.states;
 
     context.elements.buttons.sort((a, b) => {
-        if (!a.pirSensor) return 1;
-        if (!b.pirSensor) return -1;
+        if (!states[a.pirSensor]) return 1;
+        if (!states[a.pirSensor]) return -1;
 
         const aTime = states[a.pirSensor].last_updated;
         const bTime = states[b.pirSensor].last_updated;
