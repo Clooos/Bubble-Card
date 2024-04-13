@@ -70,18 +70,6 @@ export function createSwitchStructure(context) {
   };
   addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, switchDefaultActions);
   addFeedback(context.elements.buttonCard, context.elements.feedback);
-  
-  context.elements.buttonCard.addEventListener('click', (event) => {
-    if (event.target.closest('.bubble-sub-button-container')) return;
-
-    if (
-        event.target.closest('.bubble-icon-container') === null ||
-        event.target.closest('.bubble-sub-button-container') === null
-    ){
-        event.stopPropagation();
-        //toggleEntity(context._hass, context.config.entity);
-    }
-  })
 }
 export function createNameStructure(context) {
   if (context.config.tap_action) {
@@ -127,12 +115,25 @@ export function createSliderStructure(context) {
     context.elements.buttonCardContainer.removeEventListener('pointerup', onPointerUp);
   }
 
+  // function onPointerMove(e) {
+  //     e.stopPropagation();
+
+  //     const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+  //     if (Math.abs(initialX-moveX) > 10) {
+  //       onSliderChange(context, moveX, true);
+  //     }
+  // }
   function onPointerMove(e) {
       e.stopPropagation();
 
       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
       if (Math.abs(initialX-moveX) > 10) {
         onSliderChange(context, moveX, true);
+      }
+
+      // Ajoutez cette ligne pour valider le slide même si vous sortez du slider
+      if (!context.dragging) {
+        onSliderChange(context, moveX);
       }
   }
   function onPointerUp(e) {

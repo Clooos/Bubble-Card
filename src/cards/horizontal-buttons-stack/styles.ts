@@ -154,14 +154,13 @@ export default `
 
 
     .horizontal-buttons-stack-card.editor {
-        position: static;
-        width: auto;
+        position: relative;
+        width: 100%;
+        left: 0;
+        bottom: 0;
     }
     .horizontal-buttons-stack-card.editor::before {
         background: none;
     }
-    .editor .card-content {
-        position: static;
-        transform: none;
-    }
+
 `;

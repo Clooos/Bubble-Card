@@ -100,6 +100,7 @@ export function getIcon(context, entity = context.config.entity, icon = context.
         input_select: 'mdi:format-list-bulleted',
         scene: 'mdi:palette',
         script: 'mdi:file-document-outline',
+        vacuum: 'mdi:robot-vacuum'
     };
 
     if (configIcon) return configIcon;
@@ -212,7 +213,6 @@ export function applyScrollingEffect(element, text) {
         } else {
             // If the text fits without scrolling, remove the style element
             if (element.styleElement) {
-                element.removeChild(element.styleElement);
                 element.styleElement = null;
             }
             // If the condition is not met, check again at the next frame
@@ -248,18 +248,17 @@ export function applyScrollingEffect(element, text) {
     }
 }
 
-
 export function formatDateTime(datetime, locale) {
     if (!datetime) return '';
     const date = new Date(datetime);
     const now = new Date();
-    const diffInSeconds = Math.floor((now - date) / 1000);
+    let diffInSeconds = Math.floor((now - date) / 1000);
 
     let unit;
     let value;
     if (diffInSeconds < 60) {
         unit = 'second';
-        value = diffInSeconds;
+        value = diffInSeconds + 1;
     } else if (diffInSeconds < 3600) {
         unit = 'minute';
         value = Math.floor(diffInSeconds / 60);

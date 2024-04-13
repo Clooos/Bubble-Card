@@ -1038,6 +1038,18 @@ export default class BubbleCardEditor extends LitElement {
                     <label class="mdc-label">Optional - Show icon</label> 
                 </div>
             </ha-formfield>
+            <ha-formfield .label="Optional - Prioritize icon over entity picture">
+                <ha-switch
+                    aria-label="Optional - Prioritize icon over entity picture"
+                    .checked=${context?.force_icon ?? false}
+                    .configValue="${config + "force_icon"}"
+                    .disabled="${nameButton}"
+                    @change=${this._valueChanged}
+                ></ha-switch>
+                <div class="mdc-form-field">
+                    <label class="mdc-label">Optional - Prioritize icon over entity picture</label> 
+                </div>
+            </ha-formfield>
             <ha-formfield .label="Optional - Show name">
                 <ha-switch
                     aria-label="Optional - Show name"
@@ -1384,11 +1396,14 @@ export default class BubbleCardEditor extends LitElement {
             buttons.push(html`
                 <div class="${i}_button">
                     <ha-expansion-panel outlined>
-                        <div slot="header" class="button-header">
-                            <ha-icon class="remove-button" icon="mdi:delete-circle" @click=${() => this.removeButton(i)}></ha-icon>
-                            <span class="button-number">Button ${i} ${this._config[i + '_name'] ? ("- " + this._config[i + '_name']) : ""}</span>
-                        </div>
-                        <div class="content">  
+                        <h4 slot="header">
+                            <ha-icon icon="mdi:border-radius"></ha-icon>
+                            Button ${i} ${this._config[i + '_name'] ? ("- " + this._config[i + '_name']) : ""}
+                            <button class="icon-button header" @click="${() => this.removeButton(i)}">
+                              <ha-icon icon="mdi:delete"></ha-icon>
+                            </button>
+                        </h4>
+                        <div class="content">
                             <ha-textfield
                                 label="Link / Hash to pop-up (e.g. #kitchen)"
                                 .value="${this._config[i + '_link'] || ''}"
@@ -1428,8 +1443,6 @@ export default class BubbleCardEditor extends LitElement {
                     </ha-expansion-panel>
                 </div>
             `);
-
-            //this.requestUpdate;
         }
 
         return buttons;
@@ -1485,7 +1498,7 @@ export default class BubbleCardEditor extends LitElement {
     
         // Updating index of the last button
         this.buttonIndex--;
-    
+
         fireEvent(this, "config-changed", {
             config: this._config
         });

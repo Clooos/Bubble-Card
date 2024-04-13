@@ -4,7 +4,7 @@ import styles from "./styles.ts";
 
 let isOpen = false;
 
-function createButton(context, index) {
+export function createButton(context, index) {
     const name = context.config[`${index}_name`] ?? '';
     const icon = context.config[`${index}_icon`] ?? '';
     const sensor = context.config[`${index}_pir_sensor`];
@@ -120,8 +120,11 @@ export function createStructure(context) {
     }
 
     // Fix for the last cards that are hidden by the HBS
-    const columnElement = context.parentNode.parentNode;
-    columnElement.style.padding = '0 0 80px';
+    const columnElement = context.parentNode?.parentNode;
+
+    if (!context.editor && columnElement) {
+        columnElement.style.padding = '0 0 80px';
+    }
 
     context.cardType = "horizontal-buttons-stack";
 }
