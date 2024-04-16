@@ -111,7 +111,6 @@ export function changeState(context) {
         context.elements.state.style.display = 'none';
     } else if (context.previousState !== displayedState) {
         context.elements.state.style.display = stateStyles.state.display;
-        //context.elements.state.innerText = displayedState;
         applyScrollingEffect(context.elements.state, displayedState);
         context.previousState = displayedState;
     }

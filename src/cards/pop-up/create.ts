@@ -110,6 +110,7 @@ export function createStructure(context) {
     }, 0);
 
     window.addEventListener('location-changed', contextOnUrlChange);
+    window.addEventListener('popstate', contextOnUrlChange);
     window.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && context.config.hash === location.hash) {
         removeHash();

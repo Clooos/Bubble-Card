@@ -90,7 +90,7 @@ export function onUrlChange(context) {
       closePopup(context);
     }
 
-    if (popupCount === 0) {
+    if (popupCount === 0 || context.editor) {
       hideBackdrop();
     } else {
       showBackdrop();

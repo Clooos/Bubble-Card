@@ -1262,7 +1262,8 @@ export default class BubbleCardEditor extends LitElement {
 
         const subButtonIndex = 'sub_button.' + index + '.';
 
-        const removeSubButton = () => {
+        const removeSubButton = (event) => {
+          event.stopPropagation();
           this._config.sub_button.splice(index, 1);
 
           this._valueChanged({ target: { configValue: 'sub_button.' + (index - 1), value: subButton } });

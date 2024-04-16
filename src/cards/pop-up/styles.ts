@@ -4,6 +4,7 @@ export default `
       overflow: scroll;
       height: calc(100% + 50px);
       margin-top: -50px;
+      max-width: 100%;
       padding-top: 50px;
       padding-bottom: 80px;
       grid-gap: 14px !important;
@@ -79,7 +80,7 @@ export default `
         left: calc(var(--mdc-drawer-width) / 2 + 50% - (var(--desktop-width) / 2));
       }
       .is-sidebar-hidden.pop-up {
-        width: var(--desktop-width) !important;
+        width: calc(var(--desktop-width) - var(--mdc-drawer-width)) !important;
       }
   }
   .bubble-pop-up.editor {
@@ -129,18 +130,16 @@ export default `
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
   }
+  .bubble-pop-up-container.hidden {
+      height: 140px !important;
+      mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%) !important;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%) !important;   
+  }
   .bubble-pop-up.editor > .bubble-pop-up-container {
       padding-bottom: 0 !important;
-      mask-image: none !important;
-      -webkit-mask-image: none !important;
+      mask-image: none;
+      -webkit-mask-image: none;      
   }
-  .bubble-pop-up-container.hidden {
-      display: none !important;
-  }
-`;
-
-export const headerStyles = `
-
 `;
 
 export const backdropStyles = `
@@ -152,7 +151,8 @@ export const backdropStyles = `
     height: 100%;
     z-index: 5;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: all 0.3s;
+    transition-delay: .1s;
     display: flex;
   }
 

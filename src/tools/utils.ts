@@ -274,6 +274,29 @@ export function formatDateTime(datetime, locale) {
     return rtf.format(-value, unit);
 }
 
+export function findElement(root, id) {
+    if (root.getElementById) {
+        let element = root.getElementById(id);
+        if (element) {
+            return element;
+        }
+    }
+    let nodes = root.childNodes;
+    for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].shadowRoot) {
+            let shadowElement = findElement(nodes[i].shadowRoot, id);
+            if (shadowElement) {
+                return shadowElement;
+            }
+        }
+        let childElement = findElement(nodes[i], id);
+        if (childElement) {
+            return childElement;
+        }
+    }
+    return null;
+}
+
 export function throttle(mainFunction, delay = 300) {
     let timerFlag;
 

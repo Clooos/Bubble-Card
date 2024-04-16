@@ -146,6 +146,13 @@ export function convertToRGBA(color, opacity, lighten = 1) {
     } else if (color.startsWith('rgb')) {
         let rgbValues = color.match(/\d+/g);
         rgbaColor = "rgba(" + Math.min(255, rgbValues[0] * lighten) + ", " + Math.min(255, rgbValues[1] * lighten) + ", " + Math.min(255, rgbValues[2] * lighten) + ", " + opacity + ")";
+    } else if (color.startsWith('var(--')) {
+        // New code for CSS variables
+        let cssVar = color.slice(4, -1);
+        let computedColor = window.getComputedStyle(document.documentElement).getPropertyValue(cssVar);
+        if (computedColor.startsWith('#') || computedColor.startsWith('rgb')) {
+            rgbaColor = convertToRGBA(computedColor, opacity, lighten);
+        }
     }
     return rgbaColor;
 }
