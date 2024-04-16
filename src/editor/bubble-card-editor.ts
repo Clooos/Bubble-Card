@@ -644,7 +644,7 @@ export default class BubbleCardEditor extends LitElement {
                         </div>
                     </ha-expansion-panel>
                     ${this.makeSubButtonPanel()}
-                    <ha-alert alert-type="info">This card can be a slider or a button, allowing you to toggle your entities, control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.</ha-alert>
+                    <ha-alert alert-type="info">This card allows you to control your entities. When used as a slider, it can control the brightness of a light, the volume of a media player, the position of a cover, and it also supports input number. To access color / control of an entity, simply tap on the icon.</ha-alert>
                     ${this.makeVersion()}
                 </div>
             `;

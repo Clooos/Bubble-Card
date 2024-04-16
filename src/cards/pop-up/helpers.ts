@@ -35,7 +35,7 @@ export function closePopup(context) {
   }
 
   popupCount--;
-  document.body.style.position = '';
+  document.body.style.overflow = '';
   context.popUp.classList.add('is-popup-closed');
   context.popUp.classList.remove('is-popup-opened');
   context.hideContentTimeout = setTimeout(function() {
@@ -66,8 +66,7 @@ export function openPopup(context) {
   popupCount++;
   clearTimeout(context.closeTimeout);
   clearTimeout(context.hideContentTimeout);
-  document.body.style.position = 'fixed';
-  document.body.style.width = '100%';
+  document.body.style.overflow = 'hidden';
   context.popUp.style.display = '';
   context.popUp.style.transform = '';
   context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });

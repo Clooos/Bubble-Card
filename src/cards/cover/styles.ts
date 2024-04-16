@@ -1,4 +1,7 @@
 export default `
+    * {
+        -webkit-tap-highlight-color: transparent !important;
+    }
     ha-card {
         margin-top: 0 !important;
         background: none !important;

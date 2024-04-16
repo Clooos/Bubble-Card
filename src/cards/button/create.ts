@@ -69,17 +69,17 @@ export function createSwitchStructure(context) {
       hold_action: { action: "more-info" }
   };
   addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, switchDefaultActions);
-  addFeedback(context.elements.buttonCard, context.elements.feedback);
+  addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
 export function createNameStructure(context) {
   if (context.config.tap_action) {
       addActions(context.elements.buttonCardContainer, context.config);
-      addFeedback(context.elements.buttonCard, context.elements.feedback);
+      addFeedback(context.elements.buttonBackground, context.elements.feedback);
   }
 }
 export function createStateStructure(context) {
   addActions(context.elements.buttonCardContainer, context.config);
-  addFeedback(context.elements.buttonCard, context.elements.feedback);
+  addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
 export function createSliderStructure(context) {
   addActions(context.elements.iconContainer, context.config);

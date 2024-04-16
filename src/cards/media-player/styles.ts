@@ -1,4 +1,8 @@
 export default `
+    * {
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    
     ha-card {
         margin-top: 0;
         background: none;
@@ -176,7 +180,7 @@ export default `
 
     .bubble-media-info-container {
         display: flex;
-        line-height: 1em;
+        line-height: 14px;
         font-size: 12px;
         flex-direction: column;
         justify-content: center;

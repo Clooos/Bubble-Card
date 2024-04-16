@@ -1,4 +1,4 @@
-import { addActions } from "../tools/tap-actions.ts";
+import { addActions, addFeedback } from "../tools/tap-actions.ts";
 import { 
     createElement,
     applyScrollingEffect,
@@ -181,6 +181,9 @@ export function changeSubButtonState(context, container = context.content, appen
             Object.assign(context.elements[index].style, subButtonStyles.subButton);
             context.elements[index].nameContainer = createElement('div', 'bubble-sub-button-name-container');
             Object.assign(context.elements[index].nameContainer.style, subButtonStyles.nameContainer);
+            context.elements[index].feedback = createElement('div', 'bubble-feedback-element feedback-element');
+-
+            context.elements[index].appendChild(context.elements[index].feedback);
             context.elements[index].appendChild(context.elements[index].nameContainer);
             context.elements.subButtonContainer.appendChild(context.elements[index]);
         }
@@ -208,6 +211,7 @@ export function changeSubButtonState(context, container = context.content, appen
 
         if (subButton.tap_action || subButton.double_tap_action || subButton.hold_action) {
             addActions(context.elements[index], subButton, entity);
+            addFeedback(context.elements[index], context.elements[index].feedback);
         }
 
         const formattedState = state && showState ? context._hass.formatEntityState(state) : '';

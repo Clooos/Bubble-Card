@@ -67,7 +67,7 @@ export function tapFeedback(feedbackElement) {
     forwardHaptic("success");
 
     feedbackElement.style.display = '';
-    feedbackElement.style.animation = 'tap-feedback .5s';
+    feedbackElement.style.animation = 'tap-feedback .3s';
 
     setTimeout(() => {
         feedbackElement.style.animation = 'none';
