@@ -282,7 +282,6 @@ export default `
 
     .bubble-name-container {
         display: flex;
-        line-height: 1em;
         flex-direction: column;
         justify-content: center;
         flex-grow: 1;

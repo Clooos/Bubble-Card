@@ -69,6 +69,7 @@ export function openPopup(context) {
   document.body.style.position = 'fixed';
   document.body.style.width = '100%';
   context.popUp.style.display = '';
+  context.popUp.style.transform = '';
   context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
 
   requestAnimationFrame(() => {

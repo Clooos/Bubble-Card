@@ -2,7 +2,7 @@ import { convertToRGBA } from "../../tools/style.ts";
 import { addActions } from "../../tools/tap-actions.ts";
 import { createElement, toggleEntity, configChanged } from "../../tools/utils.ts";
 import { onUrlChange, removeHash } from "./helpers.ts";
-import styles, { backdropStyles, headerStyles } from "./styles.ts";
+import styles, { backdropStyles } from "./styles.ts";
 
 let backdrop;
 let hideBackdrop = false;
@@ -75,12 +75,34 @@ export function createHeader(context) {
     context.elements.buttonContainer = existingHeader.querySelector('.bubble-button-container');
     context.elements.header = existingHeader.querySelector('.bubble-header');
   }
+
+  let startTouchY;
+  context.elements.header.addEventListener('touchstart', (event) => {
+    startTouchY = event.touches[0].clientY;
+  }, { passive: true });
+
+  context.elements.header.addEventListener('touchmove', (event) => {
+    const touchY = event.touches[0].clientY;
+    const offset = touchY - startTouchY;
+    if (offset > 0) {
+      context.popUp.style.transform = `translateY(${offset}px)`;
+    }
+  }, { passive: true });
+
+  context.elements.header.addEventListener('touchend', (event) => {
+    const touchY = event.changedTouches[0].clientY;
+    const offset = touchY - startTouchY;
+    if (offset > 50) { 
+      removeHash();
+    } else {
+      context.popUp.style.transform = '';
+    }
+  }, { passive: true });
 }
 
 export function createStructure(context) {
   try {
     context.elements.style = createElement('style');
-    context.elements.style.innerText = `${headerStyles}`;
     context.elements.customStyle = createElement('style');
 
     context.content.appendChild(context.elements.style);

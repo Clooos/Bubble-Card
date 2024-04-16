@@ -115,14 +115,6 @@ export function createSliderStructure(context) {
     context.elements.buttonCardContainer.removeEventListener('pointerup', onPointerUp);
   }
 
-  // function onPointerMove(e) {
-  //     e.stopPropagation();
-
-  //     const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-  //     if (Math.abs(initialX-moveX) > 10) {
-  //       onSliderChange(context, moveX, true);
-  //     }
-  // }
   function onPointerMove(e) {
       e.stopPropagation();
 
@@ -131,7 +123,6 @@ export function createSliderStructure(context) {
         onSliderChange(context, moveX, true);
       }
 
-      // Ajoutez cette ligne pour valider le slide même si vous sortez du slider
       if (!context.dragging) {
         onSliderChange(context, moveX);
       }
