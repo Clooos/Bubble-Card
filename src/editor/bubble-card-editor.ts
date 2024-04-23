@@ -576,9 +576,9 @@ export default class BubbleCardEditor extends LitElement {
                           Tap action on icon
                         </h4>
                         <div class="content">
-                            ${this.makeTapActionPanel("Tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Double tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Hold action", "tap_action")}
+                            ${this.makeTapActionPanel("Tap action")}
+                            ${this.makeTapActionPanel("Double tap action")}
+                            ${this.makeTapActionPanel("Hold action")}
                         </div>
                     </ha-expansion-panel>
                     ${this.makeSubButtonPanel()}
@@ -618,9 +618,9 @@ export default class BubbleCardEditor extends LitElement {
                           Tap action on icon
                         </h4>
                         <div class="content">
-                            ${this.makeTapActionPanel("Tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Double tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Hold action", "tap_action")}
+                            ${this.makeTapActionPanel("Tap action")}
+                            ${this.makeTapActionPanel("Double tap action")}
+                            ${this.makeTapActionPanel("Hold action")}
                         </div>
                     </ha-expansion-panel>
                     <ha-expansion-panel outlined>
@@ -629,9 +629,9 @@ export default class BubbleCardEditor extends LitElement {
                           Tap action on button
                         </h4>
                         <div class="content">
-                            ${this.makeTapActionPanel("Tap action", "tap_action", this._button_action, 'button_action.', 'toggle')}
-                            ${this.makeTapActionPanel("Double tap action", "tap_action", this._button_action, 'button_action.', 'toggle')}
-                            ${this.makeTapActionPanel("Hold action", "tap_action", this._button_action, 'button_action.', 'more-info')}
+                            ${this.makeTapActionPanel("Tap action", this._button_action, 'toggle', 'button_action')}
+                            ${this.makeTapActionPanel("Double tap action", this._button_action, 'toggle', 'button_action')}
+                            ${this.makeTapActionPanel("Hold action", this._button_action, 'more-info', 'button_action')}
                         </div>
                     </ha-expansion-panel>
                     <ha-expansion-panel outlined>
@@ -843,9 +843,9 @@ export default class BubbleCardEditor extends LitElement {
                           Tap action on icon
                         </h4>
                         <div class="content">
-                            ${this.makeTapActionPanel("Tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Double tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Hold action", "tap_action")}
+                            ${this.makeTapActionPanel("Tap action")}
+                            ${this.makeTapActionPanel("Double tap action")}
+                            ${this.makeTapActionPanel("Hold action")}
                         </div>
                     </ha-expansion-panel>
                     ${this.makeSubButtonPanel()}
@@ -952,9 +952,9 @@ export default class BubbleCardEditor extends LitElement {
                           Tap action on icon
                         </h4>
                         <div class="content">
-                            ${this.makeTapActionPanel("Tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Double tap action", "tap_action")}
-                            ${this.makeTapActionPanel("Hold action", "tap_action")}
+                            ${this.makeTapActionPanel("Tap action")}
+                            ${this.makeTapActionPanel("Double tap action")}
+                            ${this.makeTapActionPanel("Hold action")}
                         </div>
                     </ha-expansion-panel>
                     ${this.makeSubButtonPanel()}
@@ -1001,7 +1001,7 @@ export default class BubbleCardEditor extends LitElement {
         }
     }
 
-    makeShowState(context = this._config, config = '', subButton = false) {
+    makeShowState(context = this._config, config = '', array = false, index) {
         const entity = context?.entity ?? this._config.entity ?? '';
         const isDefault = context === this._config;
         const nameButton = this._config.button_type === 'name';
@@ -1014,13 +1014,12 @@ export default class BubbleCardEditor extends LitElement {
         });
 
         return html`
-            ${subButton ? html`
+            ${array === 'sub_button' ? html`
                 <ha-formfield .label="Optional - Show background">
                     <ha-switch
                         aria-label="Optional - Show background when entity is on"
                         .checked=${context?.show_background ?? true}
-                        .configValue="${config + "show_background"}"
-                        @change=${this._valueChanged}
+                        @change="${(ev) => this._arrayValueChange(index, { show_background: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
                         <label class="mdc-label">Optional - Show background when entity is on</label> 
@@ -1032,24 +1031,26 @@ export default class BubbleCardEditor extends LitElement {
                     aria-label="Optional - Show icon"
                     .checked=${context?.show_icon ?? true}
                     .configValue="${config + "show_icon"}"
-                    @change=${this._valueChanged}
+                    @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_icon: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
                     <label class="mdc-label">Optional - Show icon</label> 
                 </div>
             </ha-formfield>
-            <ha-formfield .label="Optional - Prioritize icon over entity picture">
-                <ha-switch
-                    aria-label="Optional - Prioritize icon over entity picture"
-                    .checked=${context?.force_icon ?? false}
-                    .configValue="${config + "force_icon"}"
-                    .disabled="${nameButton}"
-                    @change=${this._valueChanged}
-                ></ha-switch>
-                <div class="mdc-form-field">
-                    <label class="mdc-label">Optional - Prioritize icon over entity picture</label> 
-                </div>
-            </ha-formfield>
+            ${!array === 'sub_button' ? html`
+                <ha-formfield .label="Optional - Prioritize icon over entity picture">
+                    <ha-switch
+                        aria-label="Optional - Prioritize icon over entity picture"
+                        .checked=${context?.force_icon ?? false}
+                        .configValue="${config + "force_icon"}"
+                        .disabled="${nameButton}"
+                        @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { force_icon: ev.target.checked }, array)}"
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Optional - Prioritize icon over entity picture</label> 
+                    </div>
+                </ha-formfield>
+            ` : ''}
             <ha-formfield .label="Optional - Show name">
                 <ha-switch
                     aria-label="Optional - Show name"
@@ -1058,7 +1059,7 @@ export default class BubbleCardEditor extends LitElement {
                         false
                     }
                     .configValue="${config + "show_name"}"
-                    @change=${this._valueChanged}
+                    @change="${!array === 'sub_button' ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_name: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
                     <label class="mdc-label">Optional - Show name</label> 
@@ -1070,7 +1071,7 @@ export default class BubbleCardEditor extends LitElement {
                     .checked="${context?.show_state}"
                     .configValue="${config + "show_state"}"
                     .disabled="${nameButton}"
-                    @change=${this._valueChanged}
+                    @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_state: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
                     <label class="mdc-label">Optional - Show entity state</label> 
@@ -1082,7 +1083,7 @@ export default class BubbleCardEditor extends LitElement {
                     .checked=${context?.show_last_updated}
                     .configValue="${config + "show_last_updated"}"
                     .disabled="${nameButton}"
-                    @change=${this._valueChanged}
+                    @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_updated: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
                     <label class="mdc-label">Optional - Show last updated</label> 
@@ -1094,7 +1095,7 @@ export default class BubbleCardEditor extends LitElement {
                     .checked=${context?.show_attribute}
                     .configValue="${config + "show_attribute"}"
                     .disabled="${nameButton}"
-                    @change=${this._valueChanged}
+                    @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_attribute: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
                     <label class="mdc-label">Optional - Show attribute</label> 
@@ -1108,7 +1109,7 @@ export default class BubbleCardEditor extends LitElement {
                         .configValue="${config + "attribute"}"
                         .items="${attributeList}"
                         .disabled="${nameButton}"
-                        @value-changed="${this._valueChanged}"
+                        @value-changed="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { attribute: ev.detail.value }, array)}"
                     ></ha-combo-box>
                 </div>
             ` : ''}
@@ -1145,7 +1146,7 @@ export default class BubbleCardEditor extends LitElement {
         }
     }
 
-    makeTapActionPanel(label, configValue, context = this._config, config = '', defaultAction) {
+    makeTapActionPanel(label, context = this._config, defaultAction, array, index = this._config) {
         const hass = this.hass;
         const icon = label === "Tap action" 
             ? "mdi:gesture-tap" 
@@ -1171,7 +1172,7 @@ export default class BubbleCardEditor extends LitElement {
             ? "toggle"
             : '';
         }
-  
+
         return html`
             <ha-expansion-panel outlined>
                 <h4 slot="header">
@@ -1183,9 +1184,8 @@ export default class BubbleCardEditor extends LitElement {
                         <ha-combo-box
                             label="${label}"
                             .value="${valueType?.action ?? defaultAction}"
-                            .configValue="${config + configValueType}.action"
                             .items="${this.tapActionTypeList}"
-                            @value-changed="${this._valueChanged}"
+                            @value-changed="${(ev) => this._tapActionValueChange(index, { [configValueType]: { action: ev.detail.value } }, array)}"
                         ></ha-combo-box>
                     </div>
                     ${valueType?.action === 'navigate' ? html`
@@ -1193,8 +1193,7 @@ export default class BubbleCardEditor extends LitElement {
                             <ha-textfield
                                 label="Navigation path"
                                 .value="${valueType?.navigation_path ?? ''}"
-                                .configValue="${config + configValueType}.navigation_path"
-                                @input="${this._valueChanged}"
+                                @input="${(ev) => this._tapActionValueChange(index, { [configValueType]: { navigation_path: ev.target.value } }, array)}"
                             ></ha-textfield>
                         </div>
                     ` : ''}
@@ -1203,8 +1202,7 @@ export default class BubbleCardEditor extends LitElement {
                             <ha-textfield
                                 label="URL path"
                                 .value="${valueType?.url_path ?? ''}"
-                                .configValue="${config + configValueType}.url_path"
-                                @input="${this._valueChanged}"
+                                @input="${(ev) => this._tapActionValueChange(index, { [configValueType]: { url_path: ev.target.value } }, array)}"
                             ></ha-textfield>
                         </div>
                     ` : ''}
@@ -1213,17 +1211,15 @@ export default class BubbleCardEditor extends LitElement {
                             <ha-textfield
                                 label="Service"
                                 .value="${valueType?.service ?? ''}"
-                                .configValue="${config + configValueType}.service"
-                                @input="${this._valueChanged}"
+                                @input="${(ev) => this._tapActionValueChange(index, { [configValueType]: { service: ev.target.value } }, array)}"
                             ></ha-textfield>
                         </div>
                         <div class="ha-combo-box">
                             <ha-combo-box
                                 label="Entity"
                                 .value="${valueType?.target_entity}"
-                                .configValue="${config + configValueType}.target.entity_id"
                                 .items="${this.allEntitiesList}"
-                                @value-changed="${this._valueChanged}"
+                                @value-changed="${(ev) => this._tapActionValueChange(index, { [configValueType]: { target: { entity_id: ev.detail.value } } }, array)}"
                             ></ha-combo-box>
                         </div>
                     ` : ''}
@@ -1233,25 +1229,6 @@ export default class BubbleCardEditor extends LitElement {
                 </div>
             </ha-expansion-panel>
         `;
-
-        function filteredServices(localize, services, filter) {
-          if (!services) {
-            return [];
-          }
-          const processedServices = this._services(localize, services);
-
-          if (!filter) {
-            return processedServices;
-          }
-          const split_filter = filter.split(" ");
-          return processedServices.filter((service) => {
-            const lower_service_name = service.name.toLowerCase();
-            const lower_service = service.service.toLowerCase();
-            return split_filter.every(
-              (f) => lower_service_name.includes(f) || lower_service.includes(f)
-            );
-          });
-        }
     }
 
     makeSubButtonPanel() {
@@ -1264,7 +1241,9 @@ export default class BubbleCardEditor extends LitElement {
 
         const removeSubButton = (event) => {
           event.stopPropagation();
-          this._config.sub_button.splice(index, 1);
+          let subButtons = [...this._config.sub_button]; // Créer une copie
+          subButtons.splice(index, 1);
+          this._config.sub_button = subButtons; // Remplacer le tableau original
 
           this._valueChanged({ target: { configValue: 'sub_button.' + (index - 1), value: subButton } });
           this.requestUpdate();
@@ -1273,7 +1252,10 @@ export default class BubbleCardEditor extends LitElement {
         const moveSubButtonLeft = (event) => {
           event.stopPropagation();
           if (index > 0) {
-            [this._config.sub_button[index], this._config.sub_button[index - 1]] = [this._config.sub_button[index - 1], this._config.sub_button[index]];
+            let subButtons = [...this._config.sub_button]; // Créer une copie
+            [subButtons[index], subButtons[index - 1]] = [subButtons[index - 1], subButtons[index]];
+            this._config.sub_button = subButtons; // Remplacer le tableau original
+
             this._valueChanged({ target: { configValue: 'sub_button.' + index, value: this._config.sub_button[index] } });
           }
           this.requestUpdate();
@@ -1282,7 +1264,10 @@ export default class BubbleCardEditor extends LitElement {
         const moveSubButtonRight = (event) => {
           event.stopPropagation();
           if (index < this._config.sub_button.length - 1) {
-            [this._config.sub_button[index], this._config.sub_button[index + 1]] = [this._config.sub_button[index + 1], this._config.sub_button[index]];
+            let subButtons = [...this._config.sub_button]; // Créer une copie
+            [subButtons[index], subButtons[index + 1]] = [subButtons[index + 1], subButtons[index]];
+            this._config.sub_button = subButtons; // Remplacer le tableau original
+
             this._valueChanged({ target: { configValue: 'sub_button.' + index, value: this._config.sub_button[index] } });
           }
           this.requestUpdate();
@@ -1314,31 +1299,27 @@ export default class BubbleCardEditor extends LitElement {
                                 <ha-combo-box
                                     label="${"Optional - Entity (default to card entity)"}"
                                     .value="${subButton.entity ?? this._config.entity}"
-                                    .configValue="sub_button.${index}.entity"
                                     .items="${this.allEntitiesList}"
-                                    @value-changed="${this._valueChanged}"
+                                    @value-changed="${(ev) => this._arrayValueChange(index, { entity: ev.detail.value }, 'sub_button')}"
                                 ></ha-combo-box>
                             </div>
                             <div class="ha-textfield">
                                 <ha-textfield
                                     label="Optional - Name"
                                     .value="${subButton.name ?? ''}"
-                                    .configValue="sub_button.${index}.name"
-                                    .items="${""}"
-                                    @input="${this._valueChanged}"
+                                    @input="${(ev) => this._arrayValueChange(index, { name: ev.target.value }, 'sub_button')}"
                                 ></ha-textfield>
                             </div>
                             <div class="ha-icon-picker">
                                 <ha-icon-picker
                                     label="Optional - Icon"
                                     .value="${subButton.icon}"
-                                    .configValue="sub_button.${index}.icon"
                                     item-label-path="label"
                                     item-value-path="value"
-                                    @value-changed="${this._valueChanged}"
+                                    @value-changed="${(ev) => this._arrayValueChange(index, { icon: ev.detail.value }, 'sub_button')}"
                                 ></ha-icon-picker>
                             </div>
-                            ${this.makeShowState(subButton, subButtonIndex, true, true)}
+                            ${this.makeShowState(subButton, subButtonIndex, 'sub_button', index)}
                         </div>
                     </ha-expansion-panel>
                     <ha-expansion-panel outlined>
@@ -1347,9 +1328,9 @@ export default class BubbleCardEditor extends LitElement {
                           Tap action on button
                         </h4>
                         <div class="content">
-                            ${this.makeTapActionPanel("Tap action", "tap_action", subButton, subButtonIndex)}
-                            ${this.makeTapActionPanel("Double tap action", "tap_action", subButton, subButtonIndex)}
-                            ${this.makeTapActionPanel("Hold action", "tap_action", subButton, subButtonIndex)}
+                            ${this.makeTapActionPanel("Tap action", subButton, 'toggle', 'sub_button', index)}
+                            ${this.makeTapActionPanel("Double tap action", subButton, 'toggle', 'sub_button', index)}
+                            ${this.makeTapActionPanel("Hold action", subButton, 'more-info', 'sub_button', index)}
                         </div>
                     </ha-expansion-panel>
                 </div>
@@ -1362,11 +1343,10 @@ export default class BubbleCardEditor extends LitElement {
             this._config.sub_button = [];
         }
 
-        const newSubButton = {
-            entity: this._config.entity,
-            icon: '',
+        let newSubButton = {
+            entity: this._config.entity
         };
-
+        this._config.sub_button = [...this._config.sub_button];
         this._config.sub_button.push(newSubButton);
         fireEvent(this, "config-changed", { config: this._config });
         this.requestUpdate();
@@ -1559,6 +1539,62 @@ export default class BubbleCardEditor extends LitElement {
             } else if (target.tagName === 'HA-SWITCH') {
                 obj[configKeys[configKeys.length - 1]] = rawValue;
             }
+        }
+
+        fireEvent(this, "config-changed", { config: this._config });
+        this.requestUpdate();
+    }
+
+    _arrayValueChange(index, value, array) {
+      this._config[array] = this._config[array] || [];
+
+      let arrayCopy = [...this._config[array]];
+
+      arrayCopy[index] = arrayCopy[index] || {};
+      arrayCopy[index] = { ...arrayCopy[index], ...value };
+
+      this._config[array] = arrayCopy;
+
+      fireEvent(this, "config-changed", { config: this._config });
+
+      this.requestUpdate();
+    }
+
+    _tapActionValueChange(index, value, array) {
+        if (array === undefined) {
+            for (let key in value) {
+                this._config[key] = { ...this._config[key], ...value[key] };
+            }
+        } else {
+            this._config[array] = this._config[array] || (array ? {} : []);
+
+            let copy = Array.isArray(this._config[array]) ? [...this._config[array]] : {...this._config[array]};
+
+            if (Array.isArray(copy)) {
+                copy[index] = copy[index] || {};
+
+                let objCopy = { ...copy[index] };
+
+                for (let key in value) {
+                    if (key in objCopy) {
+                        objCopy[key] = { ...objCopy[key], ...value[key] };
+                    } else {
+                        objCopy[key] = value[key];
+                    }
+                }
+
+                copy[index] = objCopy;
+            } else {
+                for (let key in value) {
+                    if (!copy.hasOwnProperty(key)) {
+                        copy[key] = value[key];
+                    } else {
+                        copy[key] = { ...copy[key], ...value[key] };
+                    }
+                }
+            }
+
+            this._config[array] = copy;
         }
 
         fireEvent(this, "config-changed", { config: this._config });

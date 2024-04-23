@@ -1,6 +1,7 @@
 export default `
   .bubble-pop-up-container {
-      display: grid !important;
+      display: flex;
+      flex-direction: column;
       overflow: scroll;
       height: calc(100% + 50px);
       margin-top: -50px;

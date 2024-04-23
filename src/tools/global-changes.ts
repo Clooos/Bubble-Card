@@ -140,7 +140,11 @@ export function changeSubButtonState(context, container = context.content, appen
         context.previousValues = {};
     }
 
-    let previousSubButtons = context.previousValues.subButtons || [];
+    //let previousSubButtons = context.previousValues.subButtons || [];
+    let previousSubButtons = [...(context.previousValues.subButtons || [])];
+
+    // Assurez-vous que context.elements est extensible
+    context.elements = { ...context.elements };
 
     for (let i = 0; i < subButtons.length; i++) {
         let subButton = subButtons[i];

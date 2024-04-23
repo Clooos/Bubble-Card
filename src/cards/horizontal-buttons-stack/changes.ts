@@ -6,9 +6,9 @@ import { createButton } from './create.ts';
 const BUTTON_MARGIN = 12;
 
 export function sortButtons(context) {
-    const states = context._hass.states;
+    if (!context.config.auto_order) return;
 
-    if (!context.config.auto_order && !states) return;
+    const states = context._hass.states;
 
     context.elements.buttons.sort((a, b) => {
         if (!states[a.pirSensor]) return 1;

@@ -120,13 +120,14 @@ export function createStructure(context) {
     }
 
     // Fix for the last cards that are hidden by the HBS
-    let columnElement = 
-        findElement(document, "columns") || 
-        context.parentNode?.parentNode.classList.contains("container") ? 
-            context.parentNode?.parentNode : null;
 
-    if (!context.editor && columnElement) {
-        columnElement.style.padding = '0 0 80px';
+    let parentElement = 
+        findElement(document, "columns") || 
+        context.parentNode?.parentNode?.classList.contains("container") ? context.parentNode?.parentNode : null ||
+        context.parentNode;
+
+    if (!context.editor && parentElement !== null) {
+        parentElement.style.padding = '0 0 80px';
     }
 
     context.cardType = "horizontal-buttons-stack";
