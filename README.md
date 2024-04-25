@@ -55,50 +55,13 @@ This method allows you to get updates directly on the HACS main page
 
 If it's not working, try to clear your browser cache.
 
-### Video
+#### Videos
 
 There is also a detailed setup video from **BeardedTinker**, thank you so much to you!  
 ▶ [YouTube - Pop-up cards with Bubble Card in Home Assistant](https://www.youtube.com/watch?v=oCpxhNk5JkE)
 
 And also a video for the German users from **smart-live.net**, thanks a lot to you too!  
 ▶ [YouTube - Home Assistant Dashboard Bubble Card - Eine der Besten Karten 2023?](https://youtu.be/6ju6mTntvMI?si=EGvKm4qwjhcZdTyl)
-
-</details>
-
-### Pop-up optimization
-
-**⚠️ Important: Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, you can take a look at this similar fix below.**
-
-### Pop-up initialization fix
-
-<details>
-
-**<summary>Installation</summary>**
-
-This is only for users of v1.7.0 and up.
-
-If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
-
-You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
-```yaml
-frontend:
-  extra_module_url:
-    - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
-```
-If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
-
-For Android HA Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
-
-For iOS HA Companion App users, you can go to your HA settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
-
-For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
-
-```yaml
-type: vertical-stack
-cards:
-  - type: custom:bubble-card
-    card_type: pop-up
-```
 
 </details>
 
@@ -201,7 +164,7 @@ icon: mdi:fridge
 
 </details>
 
- ### Pop-ups trigger
+ ### Pop-up trigger
  
 This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
 
@@ -220,6 +183,43 @@ icon: mdi:video
 trigger_entity: binary_sensor.front_door_motion
 trigger_state: 'on'
 trigger_close: true
+```
+
+</details>
+
+### Pop-up optimization
+
+**⚠️ Important: Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, you can take a look at this similar fix below.**
+
+### Pop-up initialization fix
+
+<details>
+
+**<summary>Installation</summary>**
+
+This is only for users of v1.7.0 and up.
+
+If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
+
+You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
+```yaml
+frontend:
+  extra_module_url:
+    - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
+```
+If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
+
+For Android HA Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
+
+For iOS HA Companion App users, you can go to your HA settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
+
+For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
+
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:bubble-card
+    card_type: pop-up
 ```
 
 </details>
