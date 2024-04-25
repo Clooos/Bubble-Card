@@ -16,7 +16,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 <img width="2048" alt="Bubble Card Cover" src="https://github.com/Clooos/Bubble-Card/assets/36499953/681e99e0-17ce-471d-a71b-9ef8158af6d5">
 <img width="2048" alt="Bubble Card Video Preview" src="https://github.com/Clooos/Bubble-Card/assets/36499953/6dd13476-42c5-427c-a4d8-ad4981fc2db7">
 
-# Installation
+## Installation
 
 **Home Assistant lowest supported version:** 2023.9.0
 
@@ -65,7 +65,7 @@ And also a video for the German users from **smart-live.net**, thanks a lot to y
 
 </details>
 
-# Configuration
+## Configuration
 
 All options can be configured in the GUI editor. But you can find more details in the documentation below.
 
@@ -81,7 +81,7 @@ All options can be configured in the GUI editor. But you can find more details i
 
 </details>
 
-# Pop-up
+## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
 
@@ -230,7 +230,7 @@ cards:
 
 </details>
 
-# Horizontal buttons stack
+## Horizontal buttons stack
 
 ![readme-horizontal-buttons-stack](https://github.com/Clooos/Bubble-Card/assets/36499953/8fe89ade-c77a-469b-891f-577e0bb2f46b)
 
@@ -292,7 +292,7 @@ auto_order: true
 
 </details>
 
-# Button
+## Button
 
 ![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
 
@@ -334,7 +334,7 @@ icon: mdi:led-strip-variant
 
 </details>
 
-# Media player
+## Media player
 
 ![readme-media-player](https://github.com/Clooos/Bubble-Card/assets/36499953/c7ee0752-00e3-4edf-8e1c-983fbd29b5f3)
 
@@ -376,7 +376,7 @@ icon: mdi:led-strip-variant
 
 </details>
 
-# Cover
+## Cover
 
 ![readme-cover](https://github.com/Clooos/Bubble-Card/assets/36499953/27d1c329-76ab-480b-b424-c79c9e68c788)
 
@@ -423,7 +423,7 @@ icon_close: mdi:roller-shade-closed
 
 </details>
 
-# Separator
+## Separator
 
 ![readme-separator](https://github.com/Clooos/Bubble-Card/assets/36499953/7e416a34-b95e-4a03-a200-4b3aa04f560d)
 
@@ -457,7 +457,7 @@ icon: mdi:window-shutter
 
 </details>
 
-# Empty column
+## Empty column
 
 ![readme-empty-column](https://github.com/Clooos/Bubble-Card/assets/36499953/a97fa8df-8360-4613-8bb7-e8a269cb1913)
 
@@ -485,7 +485,7 @@ cards:
 
 </details>
 
-# Tap, double tap and hold actions
+## Tap, double tap and hold actions
 
 You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example. 
 
@@ -600,7 +600,7 @@ cards:
         card_type: empty-column
 ```
 
-# Styling
+## Styling
 
 You can directly use `styles: |` in YAML **without card-mod** which allows you to modify the CSS style of the pop-ups and all the other cards.
 
@@ -705,7 +705,7 @@ styles: |
   }
 ```
 
-# Custom components conflicts
+## Custom components conflicts
 
 ⚠️ For now there are some features that are not working with:
 
@@ -713,7 +713,7 @@ styles: |
 - Lovelace state switch (see https://github.com/Clooos/Bubble-Card/issues/47)
 - Kiosk mode, but here is a [workaround](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678/121?u=cloos)
 
-# Help
+## Help
 
 Feel free to open an [issue](https://github.com/Clooos/Bubble-Card/issues) if something is not working as expected. 
 
@@ -721,7 +721,7 @@ And for your questions, you can go ask here on the forum to get some help from m
 
 [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) 
 
-# Donate
+## Donate
 
 If you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated 🍻
 
