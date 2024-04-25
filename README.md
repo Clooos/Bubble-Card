@@ -14,11 +14,6 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 ## Screenshots and features
 
 <img width="2048" alt="Bubble Card Cover" src="https://github.com/Clooos/Bubble-Card/assets/36499953/681e99e0-17ce-471d-a71b-9ef8158af6d5">
-<img width="2048" alt="Bubble Card 1" src="https://github.com/Clooos/Bubble-Card/assets/36499953/286d3c0d-677f-4bd7-8d7e-667754af9019">
-<img width="2048" alt="Bubble Card 2" src="https://github.com/Clooos/Bubble-Card/assets/36499953/dd182185-a092-43f2-8b5e-b194da85bcb9">
-<img width="2048" alt="Bubble Card 3" src="https://github.com/Clooos/Bubble-Card/assets/36499953/c348db22-f3c7-46e2-b3ff-3978fcb4eb42">
-<img width="2048" alt="Bubble Card 4" src="https://github.com/Clooos/Bubble-Card/assets/36499953/ca92ad56-4e59-49e3-b050-39544ad523e2">
-<img width="2048" alt="Bubble Card 5" src="https://github.com/Clooos/Bubble-Card/assets/36499953/252a61c6-dc93-40e4-991a-28979a02eafc">
 <img width="2048" alt="Bubble Card Video Preview" src="https://github.com/Clooos/Bubble-Card/assets/36499953/6dd13476-42c5-427c-a4d8-ad4981fc2db7">
 
 # Installation
@@ -107,7 +102,7 @@ cards:
 
 </details>
 
-## Configuration
+# Configuration
 
 All options can be configured in the GUI editor. But you can find more details in the documentation below.
 
@@ -125,7 +120,7 @@ All options can be configured in the GUI editor. But you can find more details i
 
 # Pop-up
 
-![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/6a13be2b-eca5-4894-a7ea-213bec131ad6)
+![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
 
 This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., `'#pop-up-name'`), with any card that supports the `navigation_path` action, or with the horizontal buttons stack that is included.
 
@@ -335,6 +330,8 @@ icon: mdi:led-strip-variant
 
 # Cover
 
+![readme-cover](https://github.com/Clooos/Bubble-Card/assets/36499953/27d1c329-76ab-480b-b424-c79c9e68c788)
+
 This card allows you to control your covers.
 
 ### Options
@@ -380,6 +377,8 @@ icon_close: mdi:roller-shade-closed
 
 # Separator
 
+![readme-separator](https://github.com/Clooos/Bubble-Card/assets/36499953/7e416a34-b95e-4a03-a200-4b3aa04f560d)
+
 This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...
 
 ### Options
@@ -412,7 +411,9 @@ icon: mdi:window-shutter
 
 # Empty column
 
-This card is here to fill an empty column. This is useful if you have an `horizontal-stack` in your pop-up with only one card. Take a look at the bottom right corner of the second screenshot to (don't) see it.
+![readme-empty-column](https://github.com/Clooos/Bubble-Card/assets/36499953/a97fa8df-8360-4613-8bb7-e8a269cb1913)
+
+This card is here to fill an empty column. This is useful if you have an `horizontal-stack` in your pop-up with only one card. Take a look at the bottom right corner of this screenshot to (don't) see it.
 
 ### Options
 
