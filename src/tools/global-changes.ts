@@ -336,7 +336,8 @@ const subButtonStyles = {
         overflow: 'hidden',
         whiteSpace: 'nowrap',
         zIndex: '1',
-        transition: 'all 0.5s ease-in-out'
+        transition: 'all 0.5s ease-in-out',
+        color: 'var(--primary-text-color)'
     },
     nameContainer: {
         display: 'flex'
