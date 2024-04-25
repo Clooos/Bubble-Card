@@ -89,10 +89,16 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 
 **Important:** This card must be placed within a vertical stack card at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
 
+<details>
+
+**<summary>How to create a pop-up</summary>**
+
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
 2. This `vertical-stack` must be before all your other cards in your view order
 3. Now add a `Bubble Card` with the `Pop-up` type
 4. Just fill in the `Hash` inputs and the ones you need
+
+</details>
 
 ### Options
 
@@ -297,6 +303,48 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 <details>
 
 **<summary>Button options (YAML + description)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Required** | Any switchable entity, any media player or any light | An entity to control |
+| `button_type` | string | Optional | `switch` (default), `slider` or `state` | The behavior of your button |
+| `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
+
+</details>
+
+#### Example
+
+<details>
+
+**<summary>A slider button that can control the brightness of a light</summary>**
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+entity: light.kitchen_led
+name: Kitchen LED
+icon: mdi:led-strip-variant
+```
+
+</details>
+
+# Media player
+
+![readme-media-player](https://github.com/Clooos/Bubble-Card/assets/36499953/c7ee0752-00e3-4edf-8e1c-983fbd29b5f3)
+
+This card allows you to control a media player. You can tap on the icon to get more control.
+
+### Options
+
+<details>
+
+**<summary>Media player options (YAML + description)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
