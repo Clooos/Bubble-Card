@@ -21,7 +21,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 <img width="2048" alt="Bubble Card 5" src="https://github.com/Clooos/Bubble-Card/assets/36499953/252a61c6-dc93-40e4-991a-28979a02eafc">
 <img width="2048" alt="Bubble Card Video Preview" src="https://github.com/Clooos/Bubble-Card/assets/36499953/6dd13476-42c5-427c-a4d8-ad4981fc2db7">
 
-## Installation
+# Installation
 
 **Home Assistant lowest supported version:** 2023.9.0
 
@@ -109,7 +109,7 @@ cards:
 
 ## Configuration
 
-All options can be configured in the GUI editor.
+All options can be configured in the GUI editor. But you can find more details in the documentation below.
 
 <details>
 
@@ -123,7 +123,9 @@ All options can be configured in the GUI editor.
 
 </details>
 
-## Pop-up
+# Pop-up
+
+![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/6a13be2b-eca5-4894-a7ea-213bec131ad6)
 
 This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., `'#pop-up-name'`), with any card that supports the `navigation_path` action, or with the horizontal buttons stack that is included.
 
@@ -227,13 +229,19 @@ trigger_close: true
 
 </details>
 
-## Horizontal buttons stack
+# Horizontal buttons stack
+
+![readme-horizontal-buttons-stack](https://github.com/Clooos/Bubble-Card/assets/36499953/8fe89ade-c77a-469b-891f-577e0bb2f46b)
 
 This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer.
 
 **⚠️ Important: This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.**
 
 ### Options
+
+<details>
+
+**<summary>Horizontal buttons stack options (YAML + description)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -252,7 +260,13 @@ This card is a companion to the pop-up card, allowing you to open the correspond
 
 **The variables starting with a number define your buttons, just change this number to add more buttons (see example below).**
 
-### Example
+</details>
+
+#### Example
+
+<details>
+
+**<summary>An horizontal buttons stack that reorganize itself based on occupancy sensors</summary>**
 
 ```yaml
 type: custom:bubble-card
@@ -275,11 +289,19 @@ auto_order: true
 3_pir_sensor: binary_sensor.dining_room_motion
 ```
 
-## Button
+</details>
+
+# Button
+
+![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
 
 This card can be a slider or a button, allowing you to toggle your entities or automation, and control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.
 
 ### Options
+
+<details>
+
+**<summary>Button options (YAML + description)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -292,7 +314,13 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
-### Example
+</details>
+
+#### Example
+
+<details>
+
+**<summary>A slider button that can control the brightness of a light</summary>**
 
 ```yaml
 type: custom:bubble-card
@@ -303,51 +331,17 @@ name: Kitchen LED
 icon: mdi:led-strip-variant
 ```
 
-## Custom button
+</details>
 
-This is a customizable button (similar to the switch button) that allows you to use all the actions directly on the whole button allowing you to use it for almost everything. 
-
-This is only available in YAML for now.
-
-### Options
-
-| Name | Type | Requirement | Supported options | Description |
-| --- | --- | --- | --- | --- |
-| `entity` | string | **Required** (and soon optional) | Any entity that can be on/off or true/false, any media player, cover or light | An entity for the state of the button |
-| `button_type` | string | **Required** | `custom` | The behavior of your button |
-| `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
-| `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
-| `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
-| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button click, if undefined, `more-info` will be used. |
-| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on the button double click, if undefined, `toggle` will be used. |
-| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on button hold, if undefined, `more-info` will be used. |
-
-### Example
-
-Here is an example of a button that toggles all the lights of a room and if you double tap or hold it, it will open a pop-up with all your other lights:
-
-```yaml
-type: custom:bubble-card
-card_type: button
-button_type: custom
-entity: light.kitchen
-name: Kitchen
-icon: mdi:fridge
-tap_action:
-  action: toggle
-double_tap_action:
-  action: navigate
-  navigation_path: '#kitchen'
-hold_action:
-  action: navigate
-  navigation_path: '#kitchen'
-```
-
-## Cover
+# Cover
 
 This card allows you to control your covers.
 
 ### Options
+
+<details>
+
+**<summary>Cover options (YAML + description)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -365,7 +359,13 @@ This card allows you to control your covers.
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
-### Example
+</details>
+
+#### Example
+
+<details>
+
+**<summary>A card that can control a roller shade</summary>**
 
 ```yaml
 type: custom:bubble-card
@@ -376,18 +376,30 @@ icon_open: mdi:roller-shade
 icon_close: mdi:roller-shade-closed
 ```
 
-## Separator
+</details>
+
+# Separator
 
 This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...
 
 ### Options
+
+<details>
+
+**<summary>Separator options (YAML + description)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `name` | string | Optional but recommended | Any string | A name for your separator |
 | `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your separator |
 
-### Example
+</details>
+
+#### Example
+
+<details>
+
+**<summary>A separator/divider for a "Covers" section</summary>**
 
 ```yaml
 type: custom:bubble-card
@@ -396,7 +408,9 @@ name: Covers
 icon: mdi:window-shutter
 ```
 
-## Empty column
+</details>
+
+# Empty column
 
 This card is here to fill an empty column. This is useful if you have an `horizontal-stack` in your pop-up with only one card. Take a look at the bottom right corner of the second screenshot to (don't) see it.
 
@@ -404,14 +418,25 @@ This card is here to fill an empty column. This is useful if you have an `horizo
 
 This card has no options.
 
-### Example
+#### Example
+
+<details>
+
+**<summary>An empty column in an horizontal stack</summary>**
 
 ```yaml
-type: custom:bubble-card
-card_type: empty-column
+type: horizontal-stack
+cards:
+  - type: custom:bubble-card
+    card_type: button
+    ...
+  - type: custom:bubble-card
+    card_type: empty-column
 ```
 
-## Tap, double tap and hold actions
+</details>
+
+# Tap, double tap and hold actions
 
 You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example. 
 
@@ -429,7 +454,7 @@ This is still experimental and only available in YAML for now.
 | `data` or `service_data` | object | Any service data | Service data to include (e.g. `entity_id: media_player.kitchen`) when `action` defined as `call-service` |
 | `confirmation` | object | See [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Display a confirmation popup, overrides the default `confirmation` object |
 
-### Example
+#### Example
 
 ```yaml
 tap_action: 
@@ -441,7 +466,7 @@ hold_action:
   action: more-info
 ```
 
-## Full example
+#### Full example
 
 Here is the raw code of my "Cuisine" pop-up (Kitchen in english) as seen in some screenshots :
 
@@ -526,7 +551,7 @@ cards:
         card_type: empty-column
 ```
 
-## Styling
+# Styling
 
 You can directly use `styles: |` in YAML **without card-mod** which allows you to modify the CSS style of the pop-ups and all the other cards.
 
@@ -631,7 +656,7 @@ styles: |
   }
 ```
 
-## Custom components conflicts
+# Custom components conflicts
 
 ⚠️ For now there are some features that are not working with:
 
@@ -639,7 +664,7 @@ styles: |
 - Lovelace state switch (see https://github.com/Clooos/Bubble-Card/issues/47)
 - Kiosk mode, but here is a [workaround](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678/121?u=cloos)
 
-## Help
+# Help
 
 Feel free to open an [issue](https://github.com/Clooos/Bubble-Card/issues) if something is not working as expected. 
 
@@ -647,38 +672,7 @@ And for your questions, you can go ask here on the forum to get some help from m
 
 [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) 
 
-## Contribution
-
-As the project continues to expand, I've realized that any help would be greatly appreciated. Your contribution can make a real difference. 
-
-### Where to start?
-
-First, fork the [repository](https://github.com/Clooos/Bubble-Card) to your own GitHub account. This will create a copy of the project under your account.
-
-Clone the Repository:
-```
-git clone https://github.com/yourusername/Bubble-Card
-```
-Navigate to the project directory:
-```
-cd Bubble-Card
-```
-Create a new branch for your feature or bug fix:
-```
-git checkout -b feature-branch
-```
-Make your changes and commit them:
-```
-git add .
-git commit -m "Description of your changes"
-```
-Push your changes to your fork:
-```
-git push origin feature-branch
-```
-Finally Click on Create Pull request to contribute to this repository.
-
-## Donate
+# Donate
 
 If you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated 🍻
 
