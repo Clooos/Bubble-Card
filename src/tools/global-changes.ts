@@ -111,7 +111,7 @@ export function changeState(context) {
         context.elements.state.style.display = 'none';
     } else if (context.previousState !== displayedState) {
         context.elements.state.style.display = stateStyles.state.display;
-        applyScrollingEffect(context.elements.state, displayedState);
+        applyScrollingEffect(context, context.elements.state, displayedState);
         context.previousState = displayedState;
     }
 }
@@ -140,10 +140,7 @@ export function changeSubButtonState(context, container = context.content, appen
         context.previousValues = {};
     }
 
-    //let previousSubButtons = context.previousValues.subButtons || [];
     let previousSubButtons = [...(context.previousValues.subButtons || [])];
-
-    // Assurez-vous que context.elements est extensible
     context.elements = { ...context.elements };
 
     for (let i = 0; i < subButtons.length; i++) {
@@ -198,23 +195,36 @@ export function changeSubButtonState(context, container = context.content, appen
         }
 
         if (showIcon && icon) {
-            if (!context.elements[index].icon) context.elements[index].icon = createElement('ha-icon', 'bubble-sub-button-icon');
-            context.elements[index].icon.setAttribute('icon', icon);
-            context.elements[index].appendChild(context.elements[index].icon);
-            context.elements[index].icon.style.setProperty('--mdc-icon-size', '16px');
-            context.elements[index].icon.style.marginTop = '-2px';
-        } else if (!showIcon && context.elements[index].icon) {
+            if (!context.elements[index].icon) {
+                context.elements[index].icon = createElement('ha-icon', 'bubble-sub-button-icon');
+                context.elements[index].icon.setAttribute('icon', icon);
+                context.elements[index].appendChild(context.elements[index].icon);
+                context.elements[index].icon.style.setProperty('--mdc-icon-size', '16px');
+            }
+            if (context.elements[index].icon.style.display !== 'flex'){
+                context.elements[index].icon.style.display = 'flex';
+            }
+        } else if (!showIcon && context.elements[index].icon && context.elements[index].icon.style.display !== 'none') {
             context.elements[index].icon.style.display = 'none';
         }
 
-        if (showBackround) {
+        if (showBackround && context.elements[index].style.backgroundColor !== backgroundColor) {
             context.elements[index].style.backgroundColor = backgroundColor;
-        } else {
+        } else if (!showBackround && context.elements[index].style.backgroundColor !== '') {
             context.elements[index].style.backgroundColor = '';
         }
 
-        if (subButton.tap_action || subButton.double_tap_action || subButton.hold_action) {
-            addActions(context.elements[index], subButton, entity);
+        if (
+            subButton.tap_action?.action !== 'none' && 
+            subButton.double_tap_action?.action !== 'none' &&
+            subButton.hold_action?.action !== 'none'
+        ){
+            const defaultActions = {
+                tap_action: { action: "more-info" },
+                double_tap_action: { action: "none" },
+                hold_action: { action: "none" }
+            };
+            addActions(context.elements[index], subButton, entity, defaultActions);
             addFeedback(context.elements[index], context.elements[index].feedback);
         }
 

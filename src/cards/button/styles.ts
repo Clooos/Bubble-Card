@@ -118,33 +118,34 @@ export default `
         position: absolute;
     }
 
+    .bubble-name,
+    .bubble-state {
+        display: flex;
+        margin: 2px 0;
+        position: relative;
+        white-space: nowrap;
+    }
+
     .bubble-name-container {
         display: flex;
-        line-height: 20px;
+        line-height: 14px;
         flex-direction: column;
         justify-content: center;
         flex-grow: 1;
-        font-weight: 600;
         margin: 0 16px 0 4px;
         pointer-events: none;
         position: relative;
-        overflow: visible;
         overflow: hidden;
     }
 
     .bubble-name {
-        white-space: nowrap;
-        display: flex;
-        position: relative;
+        font-weight: 600;
     }
 
     .bubble-state {
         font-size: 12px;
         opacity: 0.7;
         font-weight: normal;
-        white-space: nowrap;
-        display: flex;
-        position: relative;
     }
 
     .bubble-feedback-element {

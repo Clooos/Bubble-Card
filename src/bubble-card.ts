@@ -7,7 +7,7 @@ import { handleSeparator } from './cards/separator/index.ts';
 import { handleCover } from './cards/cover/index.ts';
 import { handleEmptyColumn } from './cards/empty-column/index.ts';
 import { handleMediaPlayer } from './cards/media-player/index.ts';
-import BubbleCardEditor from './editor/bubble-card-editor.ts';
+import { createBubbleCardEditor } from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {
     editor = false;
@@ -169,6 +169,7 @@ class BubbleCard extends HTMLElement {
     }
 
     static getConfigElement() {
+        createBubbleCardEditor();
         return document.createElement("bubble-card-editor");
     }
 }

@@ -10,8 +10,6 @@ export function createStructure(context, container = context.content, appendTo =
 
   if (!context.elements) context.elements = {};
 
-  //if (context.elements.buttonCardContainer) return;
-
   context.elements.buttonCardContainer = createElement('div', 'bubble-button-card-container button-container');
   context.elements.buttonCard = createElement('div', 'bubble-button-card switch-button');
   context.elements.buttonBackground = createElement('div', 'bubble-button-background');
@@ -104,7 +102,7 @@ export function createSliderStructure(context) {
 
       context.elements.buttonCardContainer.classList.add('is-dragging');
       context.elements.buttonCardContainer.addEventListener('pointermove', onPointerMove);
-      context.elements.buttonCardContainer.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointerup', onPointerUp);
   });
 
   function onPointerCancel() {
@@ -112,7 +110,7 @@ export function createSliderStructure(context) {
 
     context.elements.buttonCardContainer.classList.remove('is-dragging');
     context.elements.buttonCardContainer.removeEventListener('pointermove', onPointerMove);
-    context.elements.buttonCardContainer.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointerup', onPointerUp);
   }
 
   function onPointerMove(e) {
@@ -137,6 +135,7 @@ export function createSliderStructure(context) {
 
       context.elements.buttonCardContainer.classList.remove('is-dragging');
       context.elements.buttonCardContainer.removeEventListener('pointermove', onPointerMove);
-      context.elements.buttonCardContainer.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointerup', onPointerUp);
   }
 }
+

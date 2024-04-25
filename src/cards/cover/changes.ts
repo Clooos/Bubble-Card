@@ -1,18 +1,22 @@
-import { getName, getState, applyScrollingEffect } from "../../tools/utils.ts";
+import { getName, getState, getAttribute, getIcon, applyScrollingEffect } from "../../tools/utils.ts";
 
 export function changeIcon(context) {
-  const iconOpen = context.config.icon_open ?? 'mdi:window-shutter-open';
-  const iconClosed = context.config.icon_close ?? 'mdi:window-shutter';
+  const iconOpen = context.config.icon_open;
+  const iconClosed = context.config.icon_close;
+  const isOpen = getState(context) !== 'closed';
+  const isCurtains = getAttribute(context, 'device_class') === 'curtain';
 
-  context.elements.icon.icon = context._hass.states[context.config.entity].state === 'open' ? iconOpen : iconClosed;
-  context.elements.iconOpen.icon = context.config.icon_up ?? "mdi:arrow-up";
-  context.elements.iconClose.icon = context.config.icon_down ?? "mdi:arrow-down";
+  context.elements.icon.icon = isOpen ? 
+    getIcon(context, context.config.entity, context.config.icon_open) :
+    getIcon(context, context.config.entity, context.config.icon_close);
+  context.elements.iconOpen.icon = context.config.icon_up ?? isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up";
+  context.elements.iconClose.icon = context.config.icon_down ?? isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down";
 }
 export function changeName(context) {
     const name = getName(context);
     if (name !== context.elements.previousName) {
       context.elements.name.innerText = name;
-      applyScrollingEffect(context.elements.name, name);
+      applyScrollingEffect(context, context.elements.name, name);
       context.elements.previousName = name;
   }
 }

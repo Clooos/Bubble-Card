@@ -60,7 +60,7 @@ export function changeName(context) {
   const buttonType = getButtonType(context);
   const name = buttonType !== 'name' ? getName(context) : context.config.name;
   if (name !== context.elements.previousName) {
-      applyScrollingEffect(context.elements.name, name);
+      applyScrollingEffect(context, context.elements.name, name);
       context.elements.previousName = name;
   }
 }

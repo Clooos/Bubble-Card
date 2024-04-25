@@ -2,7 +2,7 @@ export default `
     * {
         -webkit-tap-highlight-color: transparent !important;
     }
-    
+
     ha-card {
         margin-top: 0;
         background: none;
@@ -63,20 +63,6 @@ export default `
         background-color: var(--accent-color);
     }
 
-    /*
-    .bubble-play-pause-button:hover,
-    .bubble-previous-button:hover,
-    .bubble-next-button:hover,
-    .bubble-volume-button:hover {
-        background: rgba(0, 0, 0, 0.1);
-    }
-    */
-
-    .bubble-title,
-    .bubble-artist {
-        margin: 0 10px;
-    }
-
     .bubble-volume-slider {
         position: absolute;
         width: calc(100% - 150px);
@@ -90,6 +76,16 @@ export default `
         opacity: 1;
         transition: opacity .2s, transform .2s;
         transform: translateX(0);
+    }
+
+    .bubble-range-value {
+        display: flex;
+        justify-content: flex-end;
+        height: 38px;
+        align-items: center;
+        padding-right: 14px;
+        font-size: 12px;
+        opacity: 0.8;
     }
 
     .bubble-mute-button {
@@ -204,22 +200,6 @@ export default `
     .bubble-title {
         font-weight: 600;
     }
-
-    /*.bubble-title span,
-    .bubble-artist span {
-        display: inline-block;
-        animation: scroll 14s linear infinite;
-    }
-
-    .bubble-scroll-separator {
-        opacity: .3; 
-        margin: 0 6px 0 8px;
-    }
-
-    @keyframes scroll {
-        from { transform: translateX(0%); }
-        to { transform: translateX(-50%); }
-    }*/
 
     .bubble-name-container {
         display: flex;

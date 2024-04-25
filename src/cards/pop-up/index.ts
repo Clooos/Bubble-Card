@@ -13,13 +13,6 @@ export async function handlePopUp(context) {
       prepareStructure(context);
       createHeader(context);
       createStructure(context);
-  } else if (context.config.entity || context.config.name) {
-      const buttonType = getButtonType(context);
-      const state = context._hass.states[context.config.entity];
-      if (buttonType === 'name' || state !== context.previousState) {
-          handleButton(context, context.elements.buttonContainer, context.elements.header);
-          context.previousState = state;
-      }
   }
 
   if (
@@ -28,6 +21,10 @@ export async function handlePopUp(context) {
       configChanged(context, context.popUp)
   ){
       changeStyle(context);
+
+      if (context.config.entity || context.config.name) {
+          handleButton(context, context.elements.buttonContainer, context.elements.header);
+      }
   }
 
   changeTriggered(context);

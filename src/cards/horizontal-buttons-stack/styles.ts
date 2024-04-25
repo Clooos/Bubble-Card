@@ -19,8 +19,8 @@ export default `
         height: 51px;
         margin-top: 0;
         position: fixed;
-        width: calc(100% - var(--mdc-drawer-width) - 8px);
-        left: calc(var(--mdc-drawer-width) + 4px);
+        width: calc(100% - var(--mdc-drawer-width, 0px) - 8px);
+        left: calc(var(--mdc-drawer-width, 0px) + 4px);
         z-index: 6; /* Higher value hide the more-info panel */
     }
     @media only screen and (max-width: 870px) {
@@ -32,9 +32,6 @@ export default `
         .horizontal-buttons-stack-card::before {
             left: -10px;
         }
-    }
-    .is-sidebar-hidden.horizontal-buttons-stack-card {
-        width: var(--desktop-width);
     }
     .horizontal-buttons-stack-card::before {
         content: '';

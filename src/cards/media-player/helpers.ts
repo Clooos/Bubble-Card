@@ -18,7 +18,7 @@ export const throttledUpdateEntity = throttle(updateEntity);
 export function onSliderChange(context, leftDistance, throttle = false) {
   const rect = context.elements.rangeSlider.getBoundingClientRect();
   const percentage = 100 * (leftDistance - rect.left) / rect.width;
-  const rangedPercentage = Math.min(100, Math.max(0, percentage));
+  const rangedPercentage = Math.round(Math.min(100, Math.max(0, percentage)));
 
   context.elements.rangeFill.style.transform =`translateX(${rangedPercentage}%)`;
   if (throttle) {
@@ -26,4 +26,6 @@ export function onSliderChange(context, leftDistance, throttle = false) {
   } else {
     updateEntity(context, rangedPercentage);
   }
+
+  context.elements.rangeValue.innerText = rangedPercentage + '%';
 }

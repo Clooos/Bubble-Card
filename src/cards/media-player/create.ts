@@ -136,9 +136,12 @@ export function createStructure(context) {
 
 function createSlider(context, sliderContainer) {
     let initialX = 0;
+    let volumeLevel = getAttribute(context, 'volume_level') * 100 + '%';
 
     context.elements.rangeFill = createElement('div', 'bubble-range-fill range-fill');
     context.elements.rangeSlider = createElement('div', 'bubble-range-slider range-slider');
+    context.elements.rangeValue = createElement('div', 'bubble-range-value');
+    context.elements.rangeSlider.appendChild(context.elements.rangeValue);
     context.elements.rangeSlider.appendChild(context.elements.rangeFill);
     sliderContainer.appendChild(context.elements.rangeSlider);
 
@@ -187,4 +190,6 @@ function createSlider(context, sliderContainer) {
         sliderContainer.removeEventListener('pointermove', onPointerMove);
         sliderContainer.removeEventListener('pointerup', onPointerUp);
     }
+
+    context.elements.rangeValue.innerText = volumeLevel;
 }

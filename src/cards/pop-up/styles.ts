@@ -43,7 +43,6 @@ export default `
       padding: 18px 18px calc(50px + var(--custom-height-offset-mobile)) 18px;
       z-index: 6 !important;
       bottom: calc(-50px - var(--custom-height-offset-mobile));
-      left: calc(var(--mdc-drawer-width) / 2 + 50% - (var(--desktop-width) / 2));
   }
   .bubble-pop-up-container::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, and Opera */
@@ -71,17 +70,15 @@ export default `
       .pop-up {
           margin-left: 0 !important;
           bottom: calc(-50px - var(--custom-height-offset-desktop)) !important;
-          width: var(--desktop-width, 540px);
+          min-width: var(--desktop-width, 540px);
+          max-width: var(--desktop-width, 540px);
           left: calc(50% - (var(--desktop-width) / 2));
           padding: 18px 18px calc(50px + var(--custom-height-offset-desktop)) 18px;
       }
   }
   @media only screen and (min-width: 870px) {
       .pop-up {
-        left: calc(var(--mdc-drawer-width) / 2 + 50% - (var(--desktop-width) / 2));
-      }
-      .is-sidebar-hidden.pop-up {
-        width: calc(var(--desktop-width) - var(--mdc-drawer-width)) !important;
+        left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width) / 2));
       }
   }
   .bubble-pop-up.editor {

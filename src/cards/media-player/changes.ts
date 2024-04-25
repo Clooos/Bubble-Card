@@ -37,7 +37,7 @@ export function changeName(context) {
     if (name !== context.previousName) {
         context.elements.name.innerText = name;
         context.previousName = name;
-        applyScrollingEffect(context.elements.name, name);
+        applyScrollingEffect(context, context.elements.name, name);
     }
 }
 
@@ -53,8 +53,8 @@ export function changeMediaInfo(context) {
             context.elements.artist.style.display = 'flex';
         }
         
-        applyScrollingEffect(context.elements.title, title);
-        applyScrollingEffect(context.elements.artist, artist);
+        applyScrollingEffect(context, context.elements.title, title);
+        applyScrollingEffect(context, context.elements.artist, artist);
         context.previousState = state;
     }
 }
@@ -74,17 +74,6 @@ export function changeSlider(context) {
         context.elements.rangeFill.style.transform =`translateX(${percentage}%)`;
     }
 }
-
-// export function changeState(context) {
-//     const state = context._hass.states[context.config.entity];
-//     const formatedState = state ? context._hass.formatEntityState(state) : '';
-//     if (formatedState !== context.previousFormatedState) {
-//         context.elements.state.style.display = '';
-//         context.elements.state.innerText = formatedState;
-//         applyScrollingEffect(context.elements.state, formatedState);
-//         context.previousFormatedState = formatedState;
-//     }
-// }
 
 export function changeStatus(context) {
     const state = getState(context);

@@ -6,6 +6,8 @@ import styles, { backdropStyles } from "./styles.ts";
 
 let backdrop;
 let hideBackdrop = false;
+let startTouchY;
+let lastTouchY;
 
 export function getBackdrop(context) {
   if (backdrop) {
@@ -76,8 +78,7 @@ export function createHeader(context) {
     context.elements.header = existingHeader.querySelector('.bubble-header');
   }
 
-  let startTouchY;
-  context.elements.header.addEventListener('touchstart', (event) => {
+  context.popUp.addEventListener('touchstart', (event) => {
     startTouchY = event.touches[0].clientY;
   }, { passive: true });
 
@@ -117,9 +118,6 @@ export function createStructure(context) {
     const rgbaColor = convertToRGBA(color, (opacity / 100), 1.02);
     context.popUp.style.backgroundColor = rgbaColor;
     context.popUp.style.setProperty('--desktop-width', context.config.width_desktop ?? '540px');
-    if (context.config.is_sidebar_hidden) {
-      context.popUp.classList.add('is-sidebar-hidden');
-    }
 
     if (context.config.close_on_click) {
       context.popUp.addEventListener('touchend', removeHash);
@@ -137,6 +135,19 @@ export function createStructure(context) {
       if (event.key === 'Escape' && context.config.hash === location.hash) {
         removeHash();
       }
+    }, { passive: true });
+
+    context.popUp.addEventListener('touchmove', (event) => {
+        // Calculate the distance the finger has traveled
+        let touchMoveDistance = event.touches[0].clientY - startTouchY;
+
+        // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
+        if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
+            removeHash();
+        }
+
+        // Update the Y position of the last touch
+        lastTouchY = event.touches[0].clientY;
     }, { passive: true });
 
     const existingContainer = context.popUp.querySelector('.bubble-pop-up-container');

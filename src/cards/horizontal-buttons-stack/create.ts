@@ -88,9 +88,6 @@ export function createStructure(context) {
     if (!context.config.hide_gradient) {
       context.card.classList.add('has-gradient');
     }
-    if (context.config.is_sidebar_hidden) {
-      context.card.classList.add('is-sidebar-hidden');
-    }
     context.card.style.setProperty('--desktop-width', context.config.width_desktop ?? '500px');
     context.elements.cardContainer.appendChild(context.elements.style);
     context.elements.cardContainer.appendChild(context.elements.customStyle);
@@ -123,10 +120,10 @@ export function createStructure(context) {
 
     let parentElement = 
         findElement(document, "columns") || 
-        context.parentNode?.parentNode?.classList.contains("container") ? context.parentNode?.parentNode : null ||
+        (context.parentNode && context.parentNode.parentNode && context.parentNode.parentNode.classList.contains("container") ? context.parentNode.parentNode : null) ||
         context.parentNode;
 
-    if (!context.editor && parentElement !== null) {
+    if (context && !context.editor && parentElement !== null) {
         parentElement.style.padding = '0 0 80px';
     }
 
