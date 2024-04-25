@@ -25,7 +25,9 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 **Home Assistant lowest supported version:** 2023.9.0
 
-### Without HACS
+<details>
+
+**<summary>Without HACS</summary>**
 
 1. Download these files: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js) and [bubble-pop-up-fix.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up-fix.js)
 2. Add these files to your `<config>/www` folder
@@ -38,9 +40,13 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
 10. After any update of the file you will have to edit `/local/bubble-card.js?v=1` and change the version to any higher number
 
-If it's not working, just try to clear your browser cache.
+If it's not working, just try to clear your browser cache.`
 
-### With HACS
+</details>
+
+<details>
+
+**<summary>With HACS</summary>**
 
 This method allows you to get updates directly on the HACS main page
 
@@ -54,7 +60,7 @@ This method allows you to get updates directly on the HACS main page
 
 If it's not working, try to clear your browser cache.
 
-### With HACS - Video
+### Video
 
 There is also a detailed setup video from **BeardedTinker**, thank you so much to you!  
 ▶ [YouTube - Pop-up cards with Bubble Card in Home Assistant](https://www.youtube.com/watch?v=oCpxhNk5JkE)
@@ -62,11 +68,17 @@ There is also a detailed setup video from **BeardedTinker**, thank you so much t
 And also a video for the German users from **smart-live.net**, thanks a lot to you too!  
 ▶ [YouTube - Home Assistant Dashboard Bubble Card - Eine der Besten Karten 2023?](https://youtu.be/6ju6mTntvMI?si=EGvKm4qwjhcZdTyl)
 
+</details>
+
 ### Pop-up optimization
 
 **⚠️ Important: Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, you can take a look at this similar fix below.**
 
 ### Pop-up initialization fix
+
+<details>
+
+**<summary>Installation</summary>**
 
 This is only for users of v1.7.0 and up.
 
@@ -93,30 +105,40 @@ cards:
     card_type: pop-up
 ```
 
+</details>
+
 ## Configuration
 
-Most options can be configured in the GUI editor, except for custom styles, custom buttons and tap actions.
+All options can be configured in the GUI editor.
 
-### Main options
+<details>
+
+**<summary>Main options (YAML + description)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `type` | string | **Required** | `custom:bubble-card` | Type of the card |
 | `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `pop-up` or `separator` | Type of the Bubble Card, see below |
 | `styles` | object list | Optional | Any CSS stylesheets | Allows you to customize your cards, see [styling](#styling) |
-| `column_fix` | boolean or string | Optional | `true`, `false` (default) or a negative value like `-10` | Fix some issues with the dashboard layout, such as empty columns or misaligned cards. Add it in YAML to the **first** Bubble Card on your dashboard. You can also try to add a negative value to find the one that fit your dashboard. Then refresh the page. |
 
+</details>
 
 ## Pop-up
 
-This card allows you to convert any `vertical-stack` card into a pop-up. Each pop-up must have a unique hash (e.g. `'#kitchen'`), you can open them with any card that allows `navigation_path` or with the `horizontal-buttons-stack` that is included. This card comes with a header for your pop-up, if you add an entity to this card you will have a button to toggle this entity in that header, you can also display the state of an entity (e.g. the temperature of a room).
+This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., `'#pop-up-name'`), with any card that supports the `navigation_path` action, or with the horizontal buttons stack that is included.
+
+**Important:** This card must be placed within a vertical stack card at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
 
 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
-2. This `vertical-stack` must be after all your other cards and before your `horizontal-buttons-stack` if you have one
+2. This `vertical-stack` must be before all your other cards in your view order
 3. Now add a `Bubble Card` with the `Pop-up` type
-4. Just fill in the required inputs and the ones you need
+4. Just fill in the `Hash` inputs and the ones you need
 
 ### Options
+
+<details>
+
+**<summary>Pop-up options (YAML + description)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -124,12 +146,9 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `name` | string | Optional | Any string | A name for your pop-up header |
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your pop-up header, if not defined it will display the entity icon or the `entity-picture` |
 | `entity` | string | Optional | Any switchable entity | Display a button to toggle this entity |
-| `state` | string | Optional | Any entity | Display its state in your pop-up header |
 | `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |
 | `close_on_click` | boolean | Optional | `true` or `false` (default) | Automatically close the pop-up after any interaction |
-| `text` | string | Optional | Any string | An additional text to show next to your `name` |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
-| `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the pop-up position if the sidebar is hidden on the desktop (only if you have made a modification to hide it yourself) |
 | `margin` | string | Optional | Any CSS value | Use this **only** if your pop-up is not well centered on mobile (e.g. `13px`) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
 | `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for a half-sized pop-up) |
@@ -146,9 +165,16 @@ This card allows you to convert any `vertical-stack` card into a pop-up. Each po
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on the icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
-### Example
+You also have access to [all the button settings](#button) for the header of the pop-up.
 
-A pop-up
+</details>
+
+#### Examples
+
+<details>
+
+**<summary>A pop-up</summary>**
+
 ```yaml
 type: vertical-stack
 cards:
@@ -162,7 +188,11 @@ cards:
     back_open: true
 ```
 
-A button to open the pop-up (not a Bubble Card one)
+</details>
+<details>
+
+**<summary>A button to open the pop-up (not a Bubble Card one)</summary>**
+
 ```yaml
 type: button
 tap_action:
@@ -172,12 +202,18 @@ name: Kitchen
 icon: mdi:fridge
 ```
 
+</details>
+
  ### Pop-ups trigger
  
 This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
 
 #### Example
- 
+
+<details>
+
+**<summary>Opening a pop-up when a binary_sensor is `on`</summary>**
+
  ```yaml
 type: custom:bubble-card
 card_type: pop-up
@@ -188,6 +224,8 @@ trigger_entity: binary_sensor.front_door_motion
 trigger_state: 'on'
 trigger_close: true
 ```
+
+</details>
 
 ## Horizontal buttons stack
 
