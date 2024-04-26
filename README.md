@@ -10,11 +10,13 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 **[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Full example`](#full-example)** | **[`Styling`](#styling)** | **[`Conflicts`](#custom-components-conflicts)** | **[`Help`](#help)** | **[`Contribution`](#contribution)**
 
-
-## Screenshots and features
+<br>
 
 <img width="2048" alt="Bubble Card Cover" src="https://github.com/Clooos/Bubble-Card/assets/36499953/681e99e0-17ce-471d-a71b-9ef8158af6d5">
-<img width="2048" alt="Bubble Card Video Preview" src="https://github.com/Clooos/Bubble-Card/assets/36499953/6dd13476-42c5-427c-a4d8-ad4981fc2db7">
+<img width="2048" alt="Bubble Card Video Preview" border="10" src="https://github.com/Clooos/Bubble-Card/assets/36499953/6dd13476-42c5-427c-a4d8-ad4981fc2db7">
+
+<br>
+<br>
 
 ## Installation
 
@@ -65,9 +67,11 @@ And also a video for the German users from **smart-live.net**, thanks a lot to y
 
 </details>
 
+<br>
+
 ## Configuration
 
-All options can be configured in the GUI editor. But you can find more details in the documentation below.
+All options can be configured in the Home Assistant editor. But you can find more details in the documentation below.
 
 <details>
 
@@ -81,26 +85,20 @@ All options can be configured in the GUI editor. But you can find more details i
 
 </details>
 
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
 
 This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., `'#pop-up-name'`), with any card that supports the `navigation_path` action, or with the horizontal buttons stack that is included.
 
-**Important:** This card must be placed within a vertical stack card at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
+> [!IMPORTANT]  
+> This card must be placed within a vertical stack card at the first position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
 
-<details>
+---
 
-**<summary>How to create a pop-up</summary>**
-
-1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
-2. This `vertical-stack` must be before all your other cards in your view order
-3. Now add a `Bubble Card` with the `Pop-up` type
-4. Just fill in the `Hash` inputs and the ones you need
-
-</details>
-
-### Options
+### ⚙️ Options
 
 <details>
 
@@ -132,6 +130,17 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 
 You also have access to [all the button settings](#button) for the header of the pop-up.
+
+</details>
+
+<details>
+
+**<summary>How to create a pop-up in the editor</summary>**
+
+1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
+2. This `vertical-stack` must be before all your other cards in your view order
+3. Now add a `Bubble Card` with the `Pop-up` type
+4. Just fill in the `Hash` inputs and the ones you need
 
 </details>
 
@@ -170,7 +179,9 @@ icon: mdi:fridge
 
 </details>
 
- ### Pop-up trigger
+---
+
+### Pop-up trigger
  
 This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
 
@@ -193,19 +204,15 @@ trigger_close: true
 
 </details>
 
-### Pop-up optimization
-
-**⚠️ Important: Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, you can take a look at this similar fix below.**
+---
 
 ### Pop-up initialization fix
+
+If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
 
 <details>
 
 **<summary>Installation</summary>**
-
-This is only for users of v1.7.0 and up.
-
-If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
 
 You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
 ```yaml
@@ -230,15 +237,20 @@ cards:
 
 </details>
 
+<br>
+
 ## Horizontal buttons stack
 
 ![readme-horizontal-buttons-stack](https://github.com/Clooos/Bubble-Card/assets/36499953/8fe89ade-c77a-469b-891f-577e0bb2f46b)
 
 This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer.
 
-**⚠️ Important: This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.**
+> [!IMPORTANT]  
+> This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.
 
-### Options
+---
+
+### ⚙️ Options
 
 <details>
 
@@ -259,7 +271,8 @@ This card is a companion to the pop-up card, allowing you to open the correspond
 | `highlight_current_view` | boolean | Optional | `true` or `false` (default) | Highlight current hash / view with a smooth animation |
 | `hide_gradient` | boolean | Optional | `true` or `false` (default) | Set this to `false` to hide the gradient |
 
-**The variables starting with a number define your buttons, just change this number to add more buttons (see example below).**
+> [!IMPORTANT]  
+> The variables starting with a number define your buttons, just change this number to add more buttons (see example below).
 
 </details>
 
@@ -292,13 +305,17 @@ auto_order: true
 
 </details>
 
+<br>
+
 ## Button
 
 ![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
 
 This card can be a slider or a button, allowing you to toggle your entities or automation, and control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.
 
-### Options
+---
+
+### ⚙️ Options
 
 <details>
 
@@ -334,13 +351,17 @@ icon: mdi:led-strip-variant
 
 </details>
 
+<br>
+
 ## Media player
 
 ![readme-media-player](https://github.com/Clooos/Bubble-Card/assets/36499953/c7ee0752-00e3-4edf-8e1c-983fbd29b5f3)
 
 This card allows you to control a media player. You can tap on the icon to get more control.
 
-### Options
+---
+
+### ⚙️ Options
 
 <details>
 
@@ -376,13 +397,17 @@ icon: mdi:led-strip-variant
 
 </details>
 
+<br>
+
 ## Cover
 
 ![readme-cover](https://github.com/Clooos/Bubble-Card/assets/36499953/27d1c329-76ab-480b-b424-c79c9e68c788)
 
 This card allows you to control your covers.
 
-### Options
+---
+
+### ⚙️ Options
 
 <details>
 
@@ -423,13 +448,17 @@ icon_close: mdi:roller-shade-closed
 
 </details>
 
+<br>
+
 ## Separator
 
 ![readme-separator](https://github.com/Clooos/Bubble-Card/assets/36499953/7e416a34-b95e-4a03-a200-4b3aa04f560d)
 
 This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...
 
-### Options
+---
+
+### ⚙️ Options
 
 <details>
 
@@ -457,13 +486,17 @@ icon: mdi:window-shutter
 
 </details>
 
+<br>
+
 ## Empty column
 
 ![readme-empty-column](https://github.com/Clooos/Bubble-Card/assets/36499953/a97fa8df-8360-4613-8bb7-e8a269cb1913)
 
 This card is here to fill an empty column. This is useful if you have an `horizontal-stack` in your pop-up with only one card. Take a look at the bottom right corner of this screenshot to (don't) see it.
 
-### Options
+---
+
+### ⚙️ Options
 
 This card has no options.
 
@@ -485,13 +518,19 @@ cards:
 
 </details>
 
+<br>
+
 ## Tap, double tap and hold actions
 
-You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example. 
+You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example.
 
-This is still experimental and only available in YAML for now.
+---
 
-### Options
+### ⚙️ Options
+
+<details>
+
+**<summary>Action options (YAML + description)</summary>**
 
 | Name | Type | Supported options | Description |
 | --- | --- | --- | --- |
@@ -503,7 +542,13 @@ This is still experimental and only available in YAML for now.
 | `data` or `service_data` | object | Any service data | Service data to include (e.g. `entity_id: media_player.kitchen`) when `action` defined as `call-service` |
 | `confirmation` | object | See [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Display a confirmation popup, overrides the default `confirmation` object |
 
+</details>
+
 #### Example
+
+<details>
+
+**<summary>A button that...</summary>**
 
 ```yaml
 tap_action: 
@@ -515,119 +560,24 @@ hold_action:
   action: more-info
 ```
 
-#### Full example
+</details>
 
-Here is the raw code of my "Cuisine" pop-up (Kitchen in english) as seen in some screenshots :
-
-```yaml
-type: vertical-stack
-cards:
-  - type: custom:bubble-card
-    type: pop-up
-    entity: light.cuisine
-    icon: mdi:fridge-outline
-    name: Cuisine
-    hash: '#cuisine'
-    state: sensor.cuisine_temperature
-    width_desktop: 540px
-    margin_top_mobile: 18px
-    margin_top_desktop: 74px
-    styles: |
-      #root {
-        /* This is a fix for older Safari (for my wall-mounted iPad) but it won't work on Firefox, this is optional */
-        display: grid !important;
-      }
-  - type: custom:bubble-card
-    card_type: separator
-    name: Lampes
-    icon: mdi:lightbulb
-  - type: horizontal-stack
-    cards:
-      - type: custom:bubble-card
-        card_type: button
-        button_type: slider
-        entity: light.led_cuisine
-        name: LED
-      - type: custom:bubble-card
-        card_type: button
-        button_type: slider
-        entity: light.bar_cuisine
-        name: Bar
-        icon: mdi:light-recessed
-  - type: horizontal-stack
-    cards:
-      - type: custom:bubble-card
-        card_type: button
-        button_type: slider
-        entity: light.spots_cuisine
-        name: Plan de travail
-      - type: custom:bubble-card
-        card_type: button
-        button_type: switch
-        entity: light.hotte_cuisine
-        name: Hotte
-  - type: custom:bubble-card
-    card_type: separator
-    name: Appareils
-    icon: mdi:connection
-  - type: horizontal-stack
-    cards:
-      - type: custom:bubble-card
-        card_type: button
-        button_type: slider
-        entity: media_player.google_nest_cuisine
-        name: Google Mini
-        icon: mdi:speaker
-      - type: custom:bubble-card
-        card_type: button
-        button_type: switch
-        entity: fan.hotte_cuisine
-        name: Hotte
-        icon: mdi:fan
-  - type: custom:bubble-card
-    card_type: separator
-    name: Volets
-    icon: mdi:window-shutter
-  - type: horizontal-stack
-    cards:
-      - type: custom:bubble-card
-        card_type: cover
-        entity: cover.cuisine
-        name: Cuisine
-        icon_open: mdi:blinds-horizontal
-        icon_closed: mdi:blinds-horizontal-closed
-      - type: custom:bubble-card
-        card_type: empty-column
-```
+<br>
 
 ## Styling
 
-You can directly use `styles: |` in YAML **without card-mod** which allows you to modify the CSS style of the pop-ups and all the other cards.
+You can add custom styles in the editor or by adding `styles: |` in YAML **without using card-mod** which allows you to modify the CSS style of all the cards.
 
-Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
+> [!IMPORTANT]  
+> Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
 
-**Some cards needs a page refresh to display your CSS modifications (like the pop-ups).**
+---
 
-### Examples
+#### Examples
 
-Here is how to change the `pop-up` background (you can do it with `bg_color`, `bg_opacity` and `bg_blur` now).
+<details>
 
-```yaml
-styles: | 
-  .pop-up {
-    /* You can edit the last value (0.8) to change the opacity, 0 is transparent and 1 is the max value */
-    background-color: rgba(79, 69, 87, 0.8) !important;
-
-    /* Add blur on your background.
-    backdrop-filter: blur(10px);
-  }
-  bubble-card::after {
-    /* Hide the gradient in the top of the pop-up */
-    display: none !important;
-  }
-```
-
-To change the font size of any Bubble Card:
+**<summary>Changing the font size of any Bubble Card</summary>**
 
 ```yaml
 styles: |
@@ -636,7 +586,11 @@ styles: |
   }
 ```
 
-To change the background color of a single button in an `horizontal-buttons-stack`:
+</details>
+
+<details>
+
+**<summary>Changing the background color of a single button in an `horizontal-buttons-stack`</summary>**
 
 ```yaml
 styles: >
@@ -646,7 +600,11 @@ styles: >
   }
 ```
 
-To change the background color of a `button`:
+</details>
+
+<details>
+
+**<summary>Changing the background color of a `button switch`</summary>**
 
 ```yaml
 styles: | 
@@ -655,7 +613,11 @@ styles: |
   }
 ```
 
-Or the color of a `slider`:
+</details>
+
+<details>
+
+**<summary>Changing the color of a `button slider`</summary>**
 
 ```yaml
 styles: |
@@ -664,23 +626,16 @@ styles: |
   }
 ```
 
-The Bubble theme (like on the screenshots) can be found here: 
+</details>
+
+The Bubble theme for Home Assistant (like on the screenshots) can be found here: 
 https://github.com/Clooos/Bubble
+
+---
 
 ### Styles template
 
-Advanced users can add templates in JS in their custom styles, here is an example of a button that is red when it's off and blue when it's on.
-
-```yaml
-type: custom:bubble-card
-card_type: button
-entity: switch.test
-name: Test
-styles: |
-  .switch-button {
-    background-color: ${state === 'on' ? 'blue' : 'red'} !important;
-  }
-```
+Advanced users can add templates in JS directly in their custom styles (Bubble Card doesn’t support Jinja templates yet).
 
 More information here :
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator
@@ -689,6 +644,7 @@ For now, you have access to these variables in some cards (not all):
 
  `state` will return the state of your defined `entity`.  
  `entity` will return your entity you defined like `switch.test` in this example.  
+ `icon` can be used like this to change the icon `icon.setAttribute("icon", "mdi:lightbulb")`  
  `hass` is an advanced variable that alows you even more control, more info [here](https://developers.home-assistant.io/docs/dev_101_hass/).
 
 But in all cards you can also use this:
@@ -696,7 +652,28 @@ But in all cards you can also use this:
  `hass.states['light.kitchen'].state` will return the state of `light.kitchen`.  
  `hass.states['light.kitchen'].attributes.brightness` will return the brightness attribute of `light.kitchen`.
 
-Here is an example on how you can change the background color of a button based on an entity for the horizontal buttons stack:
+#### Examples
+
+<details>
+
+**<summary>Changing the background color of a button that is red when it's `off` and green when it's `on`</summary>**
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: switch.test
+name: Test
+styles: |
+  .switch-button {
+    background-color: ${state === 'on' ? 'green' : 'red'} !important;
+  }
+```
+
+</details>
+
+<details>
+
+**<summary>Changing the background color of a button based on an entity for the horizontal buttons stack</summary>**
 
 ```yaml
 styles: |
@@ -704,6 +681,10 @@ styles: |
     background-color: ${hass.states['light.kitchen'].state === 'on' ? 'blue' : 'red'} !important;
   }
 ```
+
+</details>
+
+<br>
 
 ## Custom components conflicts
 
@@ -713,6 +694,8 @@ styles: |
 - Lovelace state switch (see https://github.com/Clooos/Bubble-Card/issues/47)
 - Kiosk mode, but here is a [workaround](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678/121?u=cloos)
 
+<br>
+
 ## Help
 
 Feel free to open an [issue](https://github.com/Clooos/Bubble-Card/issues) if something is not working as expected. 
@@ -721,6 +704,8 @@ And for your questions, you can go ask here on the forum to get some help from m
 
 [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) 
 
+<br>
+
 ## Donate
 
 If you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated 🍻
@@ -728,6 +713,8 @@ If you like my project and want to support me, please consider making a donation
 [![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos)
 
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR)
+
+<br>
 
 Thank you, everyone, for your support, you all are my greatest motivation!
 
