@@ -1,21 +1,19 @@
-# Bubble Card
-
-# ⚠️ The readme still needs to be updated for v2.0.0
+# Bubble Card (Update in progress)
 
 Bubble Card is a minimalist and customizable card collection for Home Assistant with a nice pop-up touch.
 
 [![Stars](https://img.shields.io/github/stars/clooos/Bubble-Card)](#) [![Last commit](https://img.shields.io/github/last-commit/clooos/Bubble-Card)](#) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit)](https://www.reddit.com/r/BubbleCard/) [![Reddit Profile](https://img.shields.io/badge/Reddit-My%20stuff-orange?logo=reddit)](https://www.reddit.com/user/Clooooos/submitted/) [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR)
 
+<br>
+
+![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+
+<br>
+
 ## Table of contents
 
-**[`Installation`](#installation)** | **[`Configuration`](#configuration)** | **[`Pop-up`](#pop-up)** | **[`Horizontal buttons stack`](#horizontal-buttons-stack)** | **[`Button`](#button)** | **[`Custom button`](#custom-button)** | **[`Cover`](#cover)** | **[`Separator`](#separator)** | **[`Empty column`](#empty-column)** | **[`Actions`](#tap-double-tap-and-hold-actions)** | **[`Full example`](#full-example)** | **[`Styling`](#styling)** | **[`Conflicts`](#custom-components-conflicts)** | **[`Help`](#help)** | **[`Contribution`](#contribution)**
+**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
 
-<br>
-
-<img width="2048" alt="Bubble Card Cover" src="https://github.com/Clooos/Bubble-Card/assets/36499953/681e99e0-17ce-471d-a71b-9ef8158af6d5">
-<img width="2048" alt="Bubble Card Video Preview" border="10" src="https://github.com/Clooos/Bubble-Card/assets/36499953/6dd13476-42c5-427c-a4d8-ad4981fc2db7">
-
-<br>
 <br>
 
 ## Installation
@@ -24,7 +22,9 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 <details>
 
-**<summary>Without HACS</summary>**
+<summary>Without HACS</summary>
+
+<br>
 
 1. Download these files: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js) and [bubble-pop-up-fix.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up-fix.js)
 2. Add these files to your `<config>/www` folder
@@ -43,7 +43,9 @@ If it's not working, just try to clear your browser cache.`
 
 <details>
 
-**<summary>With HACS</summary>**
+<summary>With HACS (Recommended)</summary>
+
+<br>
 
 This method allows you to get updates directly on the HACS main page
 
@@ -95,6 +97,15 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 
 > [!IMPORTANT]  
 > This card must be placed within a vertical stack card at the first position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
+> <details>
+> <summary>How to create a pop-up in the editor</summary>
+> <br>
+> 
+> 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
+> 2. This `vertical-stack` must be before all your other cards in your view order
+> 3. Now add a `Bubble Card` with the `Pop-up` type
+> 4. Just fill in the `Hash` inputs and the ones you need
+> </details>
 
 ---
 
@@ -133,22 +144,13 @@ You also have access to [all the button settings](#button) for the header of the
 
 </details>
 
-<details>
-
-**<summary>How to create a pop-up in the editor</summary>**
-
-1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
-2. This `vertical-stack` must be before all your other cards in your view order
-3. Now add a `Bubble Card` with the `Pop-up` type
-4. Just fill in the `Hash` inputs and the ones you need
-
-</details>
-
 #### Examples
 
 <details>
 
-**<summary>A pop-up</summary>**
+<summary>A pop-up</summary>
+
+<br>
 
 ```yaml
 type: vertical-stack
@@ -166,7 +168,9 @@ cards:
 </details>
 <details>
 
-**<summary>A button to open the pop-up (not a Bubble Card one)</summary>**
+<summary>A button to open the pop-up (not a Bubble Card one)</summary>
+
+<br>
 
 ```yaml
 type: button
@@ -181,61 +185,58 @@ icon: mdi:fridge
 
 ---
 
-### Pop-up trigger
- 
-This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
-
-#### Example
-
-<details>
-
-**<summary>Opening a pop-up when a binary_sensor is `on`</summary>**
-
- ```yaml
-type: custom:bubble-card
-card_type: pop-up
-hash: '#kitchen'
-name: Security
-icon: mdi:video
-trigger_entity: binary_sensor.front_door_motion
-trigger_state: 'on'
-trigger_close: true
-```
-
-</details>
+> [!TIP]
+> ### Pop-up trigger 
+> This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
+> #### Example
+> <details>
+> <summary>Opening a pop-up when a binary_sensor is `on`</summary>
+> <br>
+>
+> ```yaml
+> type: custom:bubble-card
+> card_type: pop-up
+> hash: '#kitchen'
+> name: Security
+> icon: mdi:video
+> trigger_entity: binary_sensor.front_door_motion
+> trigger_state: 'on'
+> trigger_close: true
+> ```
+> 
+> </details>
 
 ---
 
-### Pop-up initialization fix
-
-If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
-
-<details>
-
-**<summary>Installation</summary>**
-
-You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
-```yaml
-frontend:
-  extra_module_url:
-    - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
-```
-If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
-
-For Android HA Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
-
-For iOS HA Companion App users, you can go to your HA settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
-
-For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
-
-```yaml
-type: vertical-stack
-cards:
-  - type: custom:bubble-card
-    card_type: pop-up
-```
-
-</details>
+> [!TIP]
+> ### Pop-up initialization fix
+> If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
+> <details>
+> <summary>Installation</summary>
+> <br>
+>
+> You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
+> ```yaml
+> frontend:
+>   extra_module_url:
+>     - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
+> ```
+> If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
+> 
+> For Android HA Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
+> 
+> For iOS HA Companion App users, you can go to your HA settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
+> 
+> For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
+> 
+> ```yaml
+> type: vertical-stack
+> cards:
+>   - type: custom:bubble-card
+>     card_type: pop-up
+> ```
+> 
+> </details>
 
 <br>
 
@@ -280,7 +281,9 @@ This card is a companion to the pop-up card, allowing you to open the correspond
 
 <details>
 
-**<summary>An horizontal buttons stack that reorganize itself based on occupancy sensors</summary>**
+<summary>An horizontal buttons stack that reorganize itself based on occupancy sensors</summary>
+
+<br>
 
 ```yaml
 type: custom:bubble-card
@@ -338,7 +341,9 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 
 <details>
 
-**<summary>A slider button that can control the brightness of a light</summary>**
+<summary>A slider button that can control the brightness of a light</summary>
+
+<br>
 
 ```yaml
 type: custom:bubble-card
@@ -384,7 +389,9 @@ This card allows you to control a media player. You can tap on the icon to get m
 
 <details>
 
-**<summary>A slider button that can control the brightness of a light</summary>**
+<summary>A slider button that can control the brightness of a light</summary>
+
+<br>
 
 ```yaml
 type: custom:bubble-card
@@ -435,7 +442,9 @@ This card allows you to control your covers.
 
 <details>
 
-**<summary>A card that can control a roller shade</summary>**
+<summary>A card that can control a roller shade</summary>
+
+<br>
 
 ```yaml
 type: custom:bubble-card
@@ -475,7 +484,9 @@ This card is a simple separator for dividing your pop-up into categories / secti
 
 <details>
 
-**<summary>A separator/divider for a "Covers" section</summary>**
+<summary>A separator/divider for a "Covers" section</summary>
+
+<br>
 
 ```yaml
 type: custom:bubble-card
@@ -504,7 +515,9 @@ This card has no options.
 
 <details>
 
-**<summary>An empty column in an horizontal stack</summary>**
+<summary>An empty column in an horizontal stack</summary>
+
+<br>
 
 ```yaml
 type: horizontal-stack
@@ -548,7 +561,9 @@ You can also use HA default tap actions, double tap actions and hold actions on 
 
 <details>
 
-**<summary>A button that...</summary>**
+<summary>A button that...</summary>
+
+<br>
 
 ```yaml
 tap_action: 
@@ -577,7 +592,9 @@ You can add custom styles in the editor or by adding `styles: |` in YAML **witho
 
 <details>
 
-**<summary>Changing the font size of any Bubble Card</summary>**
+<summary>Changing the font size of any Bubble Card</summary>
+
+<br>
 
 ```yaml
 styles: |
@@ -590,7 +607,9 @@ styles: |
 
 <details>
 
-**<summary>Changing the background color of a single button in an `horizontal-buttons-stack`</summary>**
+<summary>Changing the background color of a single button in an `horizontal-buttons-stack`</summary>
+
+<br>
 
 ```yaml
 styles: >
@@ -604,7 +623,9 @@ styles: >
 
 <details>
 
-**<summary>Changing the background color of a `button switch`</summary>**
+<summary>Changing the background color of a `button switch`</summary>
+
+<br>
 
 ```yaml
 styles: | 
@@ -617,7 +638,9 @@ styles: |
 
 <details>
 
-**<summary>Changing the color of a `button slider`</summary>**
+<summary>Changing the color of a `button slider`</summary>
+
+<br>
 
 ```yaml
 styles: |
@@ -656,7 +679,9 @@ But in all cards you can also use this:
 
 <details>
 
-**<summary>Changing the background color of a button that is red when it's `off` and green when it's `on`</summary>**
+<summary>Changing the background color of a button that is red when it's `off` and green when it's `on`</summary>
+
+<br>
 
 ```yaml
 type: custom:bubble-card
@@ -673,7 +698,9 @@ styles: |
 
 <details>
 
-**<summary>Changing the background color of a button based on an entity for the horizontal buttons stack</summary>**
+<summary>Changing the background color of a button based on an entity for the horizontal buttons stack</summary>
+
+<br>
 
 ```yaml
 styles: |
