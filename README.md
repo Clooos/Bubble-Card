@@ -209,6 +209,12 @@ icon: mdi:fridge
 ---
 
 > [!TIP]
+> ### Different ways to close a pop-up 
+> They are many ways to close a pop-up. For instance, you can swipe from the pop-up header to the bottom, by doing a long swipe inside the pop-up to the bottom, by pressing Escape on desktop, by removing the hash in the URL or by simply pressing the close button.
+
+---
+
+> [!TIP]
 > ### Pop-up initialization fix
 > If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
 > <details>
@@ -651,8 +657,7 @@ styles: |
 
 </details>
 
-The Bubble theme for Home Assistant (like on the screenshots) can be found here: 
-https://github.com/Clooos/Bubble
+The Bubble theme for Home Assistant (like on the screenshots) can be found [here](https://github.com/Clooos/Bubble).
 
 ---
 
@@ -660,10 +665,15 @@ https://github.com/Clooos/Bubble
 
 Advanced users can add templates in JS directly in their custom styles (Bubble Card doesn’t support Jinja templates yet).
 
-More information here :
-https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator
+More information about JS templates [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator).
 
-For now, you have access to these variables in some cards (not all):
+<details>
+
+<summary>Available variables</summary>
+
+<br>
+
+You have access to these variables in most cards:
 
  `state` will return the state of your defined `entity`.  
  `entity` will return your entity you defined like `switch.test` in this example.  
@@ -674,6 +684,8 @@ But in all cards you can also use this:
 
  `hass.states['light.kitchen'].state` will return the state of `light.kitchen`.  
  `hass.states['light.kitchen'].attributes.brightness` will return the brightness attribute of `light.kitchen`.
+
+</details>
 
 #### Examples
 
