@@ -93,7 +93,7 @@ All options can be configured in the Home Assistant editor. But you can find mor
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
 
-This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., `'#pop-up-name'`), with any card that supports the `navigation_path` action, or with the horizontal buttons stack that is included.
+This card allows you to convert any vertical stack into a pop-up. Each pop-up is **hidden by default** and can be opened by targeting its link (e.g. `'#pop-up-name'`), with any card that supports the `navigate` [action](#tap-double-tap-and-hold-actions), or with the [horizontal buttons stack](#horizontal-buttons-stack) that is included.
 
 > [!IMPORTANT]  
 > This card must be placed within a vertical stack card at the first position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
@@ -109,11 +109,11 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 
 ---
 
-### ⚙️ Options
+### Pop-up options
 
 <details>
 
-**<summary>Pop-up options (YAML + description)</summary>**
+**<summary>Options (YAML + descriptions)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -257,11 +257,11 @@ This card is a companion to the pop-up card, allowing you to open the correspond
 
 ---
 
-### ⚙️ Options
+### Horizontal buttons stack options
 
 <details>
 
-**<summary>Horizontal buttons stack options (YAML + description)</summary>**
+**<summary>Options (YAML + descriptions)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -324,11 +324,11 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 
 ---
 
-### ⚙️ Options
+### Button options
 
 <details>
 
-**<summary>Button options (YAML + description)</summary>**
+**<summary>Options (YAML + descriptions)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -372,11 +372,11 @@ This card allows you to control a media player. You can tap on the icon to get m
 
 ---
 
-### ⚙️ Options
+### Media player options
 
 <details>
 
-**<summary>Media player options (YAML + description)</summary>**
+**<summary>Options (YAML + descriptions)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -420,11 +420,11 @@ This card allows you to control your covers.
 
 ---
 
-### ⚙️ Options
+### Cover options
 
 <details>
 
-**<summary>Cover options (YAML + description)</summary>**
+**<summary>Options (YAML + descriptions)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -473,11 +473,11 @@ This card is a simple separator for dividing your pop-up into categories / secti
 
 ---
 
-### ⚙️ Options
+### Separator options
 
 <details>
 
-**<summary>Separator options (YAML + description)</summary>**
+**<summary>Options (YAML + descriptions)</summary>**
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -513,9 +513,9 @@ This card is here to fill an empty column. This is useful if you have an `horizo
 
 ---
 
-### ⚙️ Options
+### Empty column options
 
-This card has no options.
+This card has no options and doesn’t supports [styling](#styling).
 
 #### Example
 
@@ -545,11 +545,11 @@ You can also use HA default tap actions, double tap actions and hold actions on 
 
 ---
 
-### ⚙️ Options
+### Action options
 
 <details>
 
-**<summary>Action options (YAML + description)</summary>**
+**<summary>Options (YAML + description)</summary>**
 
 | Name | Type | Supported options | Description |
 | --- | --- | --- | --- |
