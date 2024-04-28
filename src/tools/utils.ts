@@ -367,7 +367,6 @@ export function applyScrollingEffect(context, element, text) {
     }
 }
 
-
 export function formatDateTime(datetime, locale) {
     if (!datetime) return '';
     const date = new Date(datetime);
@@ -398,30 +397,6 @@ export function formatDateTime(datetime, locale) {
     const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
     return rtf.format(-value, unit);
 }
-
-export function findElement(root, id) {
-    if (root && typeof root.getElementById === 'function') {
-        let element = root.getElementById(id);
-        if (element) {
-            return element;
-        }
-    }
-    let nodes = root.childNodes;
-    for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].shadowRoot) {
-            let shadowElement = findElement(nodes[i].shadowRoot, id);
-            if (shadowElement) {
-                return shadowElement;
-            }
-        }
-        let childElement = findElement(nodes[i], id);
-        if (childElement) {
-            return childElement;
-        }
-    }
-    return null;
-}
-
 
 export function throttle(mainFunction, delay = 300) {
     let timerFlag;

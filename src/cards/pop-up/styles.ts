@@ -41,7 +41,7 @@ export default `
       box-sizing: border-box;
       margin-left: var(--custom-margin);
       padding: 18px 18px calc(50px + var(--custom-height-offset-mobile)) 18px;
-      z-index: 6 !important;
+      z-index: 5 !important;
       bottom: calc(-50px - var(--custom-height-offset-mobile));
   }
   .bubble-pop-up-container::-webkit-scrollbar {
@@ -147,7 +147,7 @@ export const backdropStyles = `
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 5;
+    z-index: 4;
     opacity: 0;
     transition: all 0.3s;
     transition-delay: .1s;

@@ -170,9 +170,9 @@ export function createBubbleCardEditor() {
             return this._config.show_attribute || defaultState;
         }
 
-        get _show_last_updated() {
+        get _show_last_changed() {
             const defaultState = this._config.card_type === 'state' ? true : false;
-            return this._config.show_last_updated || defaultState;
+            return this._config.show_last_changed || this._config.show_last_updated || defaultState;
         }
 
         get _attribute() {
@@ -962,7 +962,7 @@ export function createBubbleCardEditor() {
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
                         <ha-alert alert-type="info">You need to add a card type first.</ha-alert>
-                        <img style="width: 100%; height: auto; border-radius: 24px;" src="https://user-images.githubusercontent.com/36499953/268039672-6dd13476-42c5-427c-a4d8-ad4981fc2db7.gif">
+                        <img style="width: 100%; height: auto; border-radius: 24px;" src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif">
                         <p>The <b>Bubble Card ${version}</b> changelog is available <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}"><b>here</b></a>.
                         <hr />
                         <p>If you have an issue or a question you can find more details on my GitHub page.</p>
@@ -992,17 +992,19 @@ export function createBubbleCardEditor() {
             });
 
             return html`
-                <ha-formfield .label="Optional - Text scrolling effect">
-                    <ha-switch
-                        aria-label="Optional - Text scrolling effect"
-                        .checked=${context?.scrolling_effect ?? true}
-                        .configValue="${config + "scrolling_effect"}"
-                        @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { scrolling_effect: ev.target.checked }, array)}"
-                    ></ha-switch>
-                    <div class="mdc-form-field">
-                        <label class="mdc-label">Optional - Text scrolling effect</label> 
-                    </div>
-                </ha-formfield>
+                ${array !== 'sub_button' ? html`
+                    <ha-formfield .label="Optional - Text scrolling effect">
+                        <ha-switch
+                            aria-label="Optional - Text scrolling effect"
+                            .checked=${context?.scrolling_effect ?? true}
+                            .configValue="${config + "scrolling_effect"}"
+                            @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { scrolling_effect: ev.target.checked }, array)}"
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Text scrolling effect</label> 
+                        </div>
+                    </ha-formfield>
+                ` : ''}
                 ${array === 'sub_button' ? html`
                     <ha-formfield .label="Optional - Show background">
                         <ha-switch
@@ -1066,16 +1068,16 @@ export function createBubbleCardEditor() {
                         <label class="mdc-label">Optional - Show entity state</label> 
                     </div>
                 </ha-formfield>
-                <ha-formfield .label="Optional - Show last updated">
+                <ha-formfield .label="Optional - Show last changed">
                     <ha-switch
-                        aria-label="Optional - Show last updated"
-                        .checked=${context?.show_last_updated}
-                        .configValue="${config + "show_last_updated"}"
+                        aria-label="Optional - Show last changed"
+                        .checked=${context?.show_last_changed}
+                        .configValue="${config + "show_last_changed"}"
                         .disabled="${nameButton}"
-                        @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_updated: ev.target.checked }, array)}"
+                        @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_changed: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Optional - Show last updated</label> 
+                        <label class="mdc-label">Optional - Show last changed</label> 
                     </div>
                 </ha-formfield>
                 <ha-formfield .label="Optional - Show attribute">
@@ -1113,8 +1115,8 @@ export function createBubbleCardEditor() {
                             label="${label}"
                             .value="${this['_' + configValue]}"
                             .configValue="${configValue}"
-                            item-label-path="label"
-                            item-value-path="value"
+                            item-value-path="icon"
+                            item-label-path="icon"
                             @value-changed="${this._valueChanged}"
                         ></ha-icon-picker>
                     </div>
@@ -1435,6 +1437,7 @@ export function createBubbleCardEditor() {
                         border-radius: 12px;
                         margin-right: -6px;
                         float: right;
+                        color: white;
                     ">
                         ${version}
                     </span>
@@ -1489,7 +1492,7 @@ export function createBubbleCardEditor() {
                         @value-changed=${this._valueChanged}
                     ></ha-code-editor>
                 </div>
-                <ha-alert alert-type="info">For advanced users, you can edit the CSS style of this card in this editor. For more information, you can go <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically.</ha-alert>
+                <ha-alert alert-type="info">For advanced users, you can edit the CSS style of this card in this editor. For more information, you can go <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically.</ha-alert>
             `;
         }
 
@@ -1620,12 +1623,12 @@ export function createBubbleCardEditor() {
                   cursor: pointer;
                 }
 
-                a {
-                  color: var(--primary-text-color);
-                }
-
                 p {
                   margin-bottom: 4px;
+                }
+
+                ha-icon, a, p, button, h4 {
+                  color: var(--primary-text-color) !important;
                 }
 
                 hr {

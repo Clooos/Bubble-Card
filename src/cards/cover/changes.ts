@@ -9,8 +9,8 @@ export function changeIcon(context) {
   context.elements.icon.icon = isOpen ? 
     getIcon(context, context.config.entity, context.config.icon_open) :
     getIcon(context, context.config.entity, context.config.icon_close);
-  context.elements.iconOpen.icon = context.config.icon_up ?? isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up";
-  context.elements.iconClose.icon = context.config.icon_down ?? isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down";
+  context.elements.iconOpen.icon = context.config.icon_up || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
+  context.elements.iconClose.icon = context.config.icon_down || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
 }
 export function changeName(context) {
     const name = getName(context);
@@ -24,7 +24,7 @@ export function changeStyle(context) {
   const state = getState(context);
 
   const customStyle = context.config.styles
-      ? Function('hass', 'entityId', 'state', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state)
+      ? Function('hass', 'entityId', 'state', 'icon', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state, context.elements.icon.icon)
       : '';
 
   context.elements.customStyle.innerText = customStyle;

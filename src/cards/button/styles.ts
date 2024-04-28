@@ -33,7 +33,7 @@ export default `
         height: 100%;
         width: 100%;
         transition: background-color 1.5s;
-        background-color: rgba(0,0,0,0);
+        background-color: var(--bubble-button-background-color);
     }
     .bubble-button-background {
         opacity: .5;

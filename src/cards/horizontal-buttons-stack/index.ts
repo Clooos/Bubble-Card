@@ -7,8 +7,8 @@ export function handleHorizontalButtonsStack(context) {
         createStructure(context);
     }
 
-    sortButtons(context);
     changeStyle(context);
+    sortButtons(context);
     changeConfig(context);
     changeEditor(context);
     placeButtons(context);

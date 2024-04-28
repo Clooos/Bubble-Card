@@ -15,7 +15,7 @@ export function getBackdrop(context) {
   }
 
   const themeColorBackground = 
-    getComputedStyle(document.body).getPropertyValue('--ha-card-background') ??
+    getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
     getComputedStyle(document.body).getPropertyValue('--card-background-color');
 
   const backdropStyle = createElement('style');
@@ -110,7 +110,7 @@ export function createStructure(context) {
     context.content.appendChild(context.elements.customStyle);
 
     const themeColorBackground = 
-      getComputedStyle(document.body).getPropertyValue('--ha-card-background') ??
+      getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
       getComputedStyle(document.body).getPropertyValue('--card-background-color');
 
     const color = context.config.bg_color ? context.config.bg_color : themeColorBackground;

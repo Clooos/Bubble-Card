@@ -1,4 +1,4 @@
-import { createElement, forwardHaptic, findElement } from "../../tools/utils.ts";
+import { createElement, forwardHaptic } from "../../tools/utils.ts";
 import { addHash, removeHash } from "../pop-up/helpers.ts";
 import styles from "./styles.ts";
 
@@ -117,13 +117,8 @@ export function createStructure(context) {
     }
 
     // Fix for the last cards that are hidden by the HBS
-
-    let parentElement = 
-        findElement(document, "columns") || 
-        (context.parentNode && context.parentNode.parentNode && context.parentNode.parentNode.classList.contains("container") ? context.parentNode.parentNode : null) ||
-        context.parentNode;
-
-    if (context && !context.editor && parentElement !== null) {
+    let parentElement = context.card.parentNode.host;
+    if (parentElement && !context.editor) {
         parentElement.style.padding = '0 0 80px';
     }
 

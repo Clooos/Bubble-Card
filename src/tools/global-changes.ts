@@ -20,19 +20,19 @@ export function changeState(context) {
     const showIcon = context.config.show_icon ?? true;
     const showState = context.config.show_state ?? defaultShowState;
     const showAttribute = context.config.show_attribute ?? defaultShowState;
-    const showLastUpdated = context.config.show_last_updated ?? '';
+    const showLastChanged = (context.config.show_last_updated || context.config.show_last_changed) ?? '';
 
     // Format state and attributes based on button type
     let formattedState = state && showState ? context._hass.formatEntityState(state) : '';
     let formattedAttribute;
-    let formattedLastUpdated;
+    let formattedLastChanged;
 
     if (showAttribute) {
         if (!attribute) {
             switch (buttonType) {
                 case "switch":
                 case "custom":
-                    formattedLastUpdated = state ? formatDateTime(state.last_updated, context._hass.locale.language) : '';
+                    formattedLastChanged = state ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
                     break;
                 case "slider":
                     const attributeKey = isEntityType(context, "cover") ? "current_subButton" :
@@ -49,8 +49,8 @@ export function changeState(context) {
         }
     }
 
-    if (showLastUpdated) {
-        formattedLastUpdated = state ? formatDateTime(state.last_updated, context._hass.locale.language) : '';
+    if (showLastChanged) {
+        formattedLastChanged = state ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
     }
 
     // Check if formattedState or formattedAttribute is 'Unknown'
@@ -68,13 +68,13 @@ export function changeState(context) {
         displayedState += formattedState;
     }
 
-    if (formattedLastUpdated) {
+    if (formattedLastChanged) {
         if (displayedState) {
             // Add a space if formattedState is not 'off', otherwise add a dash
             displayedState += (formattedState.toLowerCase() !== 'off') ? ' ' : ' - ';
         }
-        // Capitalize formattedLastUpdated if formattedState is 'off'
-        displayedState += (formattedState.toLowerCase() === 'off') ? capitalizeFirstLetter(formattedLastUpdated) : formattedLastUpdated;
+        // Capitalize formattedLastChanged if formattedState is 'off'
+        displayedState += (formattedState.toLowerCase() === 'off') ? capitalizeFirstLetter(formattedLastChanged) : formattedLastChanged;
     }
 
     if (formattedAttribute) {
@@ -163,7 +163,7 @@ export function changeSubButtonState(context, container = context.content, appen
         const showName = subButton.show_name ?? false;
         const showState = subButton.show_state ?? false;
         const showAttribute = subButton.show_attribute ?? false;
-        const showLastUpdated = subButton.show_last_updated ?? false;
+        const showLastChanged = (subButton.show_last_changed || subButton.show_last_updated) ?? false;
         const showIcon = subButton.show_icon ?? true;
         const showBackround = subButton.show_background ?? true;
 
@@ -230,15 +230,15 @@ export function changeSubButtonState(context, container = context.content, appen
 
         const formattedState = state && showState ? context._hass.formatEntityState(state) : '';
         let formattedAttribute;
-        let formattedLastUpdated;
+        let formattedLastChanged;
         let displayedState = '';
 
         if (showAttribute) {
             formattedAttribute = state && attribute ? context._hass.formatEntityAttributeValue(state, attributeType) : '';
         }
 
-        if (showLastUpdated) {
-            formattedLastUpdated = state ? formatDateTime(state.last_updated, context._hass.locale.language) : '';
+        if (showLastChanged) {
+            formattedLastChanged = state ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
         }
 
         if (showName && name) {
@@ -255,11 +255,11 @@ export function changeSubButtonState(context, container = context.content, appen
             displayedState += formattedState;
         }
 
-        if (formattedLastUpdated) {
+        if (formattedLastChanged) {
             if (displayedState) {
                 displayedState += (formattedState.toLowerCase() !== 'off') ? ' ' : ' - ';
             }
-            displayedState += (formattedState.toLowerCase() === 'off') ? capitalizeFirstLetter(formattedLastUpdated) : formattedLastUpdated;
+            displayedState += (formattedState.toLowerCase() === 'off') ? capitalizeFirstLetter(formattedLastChanged) : formattedLastChanged;
         }
 
         if (formattedAttribute) {

@@ -36,7 +36,7 @@ export function updateEntity(context, value) {
       const maxValue = getAttribute(context, "max");
       context._hass.callService('input_number', 'set_value', {
           entity_id: context.config.entity,
-          value: Math.round((maxValue - minValue) * value / 100 - maxValue)
+          value: Math.round((maxValue - minValue) * value / 100 + minValue)
       });
   }
 };

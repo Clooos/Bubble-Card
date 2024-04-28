@@ -19,14 +19,15 @@ export function changeButton(context) {
 
   if (buttonType === 'switch' && isOn) {
       if (lightColor && isLight) {
-          context.elements.buttonBackground.style.backgroundColor = getIconColor(context);
-          context.elements.buttonBackground.style.opacity = '.5';
+          context.card.style.setProperty('--bubble-button-background-color', getIconColor(context));
+          //context.elements.buttonBackground.style.opacity = '.5';
       } else {
-          context.elements.buttonBackground.style.backgroundColor = 'var(--accent-color)';
-          context.elements.buttonBackground.style.opacity = '1';
+          context.card.style.setProperty('--bubble-button-background-color', 'var(--accent-color)');
+          //context.elements.buttonBackground.style.opacity = '1';
       }
   } else {
-      context.elements.buttonBackground.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+      context.card.style.setProperty('--bubble-button-background-color', 'rgba(0, 0, 0, 0)');
+      //context.elements.buttonBackground.style.opacity = '.5';
   }
 }
 export function changeIcon(context) {
@@ -116,7 +117,7 @@ export function changeStyle(context) {
   const state = getState(context);
 
   const customStyle = context.config.styles
-      ? Function('hass', 'entityId', 'state', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state)
+      ? Function('hass', 'entityId', 'state', 'icon', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state, context.elements.icon)
       : '';
 
   context.elements.customStyle.innerText = customStyle;

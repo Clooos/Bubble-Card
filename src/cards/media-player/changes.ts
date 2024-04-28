@@ -141,7 +141,7 @@ export function changeStyle(context) {
     const state = getState(context);
 
     const customStyle = context.config.styles
-        ? Function('hass', 'entityId', 'state', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state)
+        ? Function('hass', 'entityId', 'state', 'icon', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state, context.elements.icon)
         : '';
 
     context.elements.customStyle.innerText = customStyle;
