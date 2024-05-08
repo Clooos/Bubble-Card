@@ -172,6 +172,25 @@ class BubbleCard extends HTMLElement {
         createBubbleCardEditor();
         return document.createElement("bubble-card-editor");
     }
+
+    getLayoutOptions() {
+        let  defaultRows = 1;
+        if (['popup', 'horizontal-buttons-stack'].includes(this.config.card_type)) {
+            defaultRows = 0;
+        } else if (['cover'].includes(this.config.card_type)) {
+            defaultRows = 2;
+        }
+
+        let  defaultColumns = 4;
+        if (['popup', 'horizontal-buttons-stack'].includes(this.config.card_type)) {
+            defaultColumns = 0;
+        }
+
+        return {
+            grid_columns: this.config.columns ?? defaultColumns,
+            grid_rows: this.config.rows ?? defaultRows,
+        }
+      }
 }
 
 customElements.define("bubble-card", BubbleCard);

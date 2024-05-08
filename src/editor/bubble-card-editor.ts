@@ -570,6 +570,7 @@ export function createBubbleCardEditor() {
                                 ${this.makeTapActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
+                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">
                             This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., '#pop-up-name'), with <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#example">any card</a> that support <code>navigation_path</code>, or with the <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack">horizontal buttons stack</a> that is included.
@@ -632,6 +633,7 @@ export function createBubbleCardEditor() {
                                 ${this.makeStyleEditor()}
                             </div>
                         </ha-expansion-panel>
+                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">This card allows you to control your entities. When used as a slider, it can control the brightness of a light, the volume of a media player, the position of a cover, and it also supports input number. To access color / control of an entity, simply tap on the icon.</ha-alert>
                         ${this.makeVersion()}
@@ -657,6 +659,7 @@ export function createBubbleCardEditor() {
                                 ${this.makeStyleEditor()}
                             </div>
                         </ha-expansion-panel>
+                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...</ha-alert>
                         ${this.makeVersion()}
@@ -826,6 +829,7 @@ export function createBubbleCardEditor() {
                                 ${this.makeTapActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
+                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">This card allows you to control your covers.</ha-alert>
                         ${this.makeVersion()}
@@ -935,6 +939,7 @@ export function createBubbleCardEditor() {
                                 ${this.makeTapActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
+                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">This card allows you to control a media player. You can tap on the icon to get more control.</ha-alert>
                         ${this.makeVersion()}
@@ -977,6 +982,33 @@ export function createBubbleCardEditor() {
                     </div>
                 `;
             }
+        }
+
+        makeLayoutOptions() {
+            return html`
+                <ha-expansion-panel outlined>
+                    <h4 slot="header">
+                        <ha-icon icon="mdi:palette"></ha-icon>
+                        Layout options for sections
+                    </h4>
+                    <div class="content">
+                        <ha-combo-box
+                            label="Columns"
+                            .value="${this._config.columns}"
+                            .configValue="${"columns"}"
+                            .items="${[{label: 'Auto', value: null}, {label: 1, value: 1}, {label: 2, value: 2}, {label: 3, value: 3}, {label: 4, value: 4}]}"
+                            @value-changed="${this._valueChanged}"
+                        ></ha-combo-box>
+                        <ha-combo-box
+                            label="Rows"
+                            .value="${this._config.rows}"
+                            .configValue="${"rows"}"
+                            .items="${[{label: 'Auto', value: null}, {label: 1, value: 1}, {label: 2, value: 2}, {label: 3, value: 3}, {label: 4, value: 4}]}"
+                            @value-changed="${this._valueChanged}"
+                        ></ha-combo-box>
+                    </div>
+                </ha-expansion-panel>
+            `;
         }
 
         makeShowState(context = this._config, config = '', array = false, index) {
