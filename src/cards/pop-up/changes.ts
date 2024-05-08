@@ -6,6 +6,16 @@ import { addHash, onEditorChange, removeHash } from "./helpers.ts";
 export function changeEditor(context) {
   const detectedEditor = context.verticalStack.host.closest('hui-card-preview');
 
+if (context.sectionRow.classList.contains('card')) {
+    // Fix the empty space caused by the pop-ups in the section view
+    if (!context.editor && context.sectionRow.style.position !== 'absolute') {
+        context.sectionRow.style.position = 'absolute';
+    } else if (context.editor && context.sectionRow.style.position !== '') {
+        context.sectionRow.style.position = '';
+    }
+    //context.sectionRow.style.position = !context.editor && context.sectionRow.style.position !== 'absolute' ? 'absolute' : 'absolute';
+}
+
   if (context.editor || detectedEditor !== null) {
     context.popUp.classList.add('editor');
 

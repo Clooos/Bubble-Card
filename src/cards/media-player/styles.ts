@@ -138,6 +138,8 @@ export default `
         height: 38px;
         min-width: 38px;
         min-height: 38px;
+        align-items: center;
+        justify-content: center;
         margin: 6px;
         border-radius: 50%;
         background-color: var(--card-background-color, var(--ha-card-background));

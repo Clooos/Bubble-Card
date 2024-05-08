@@ -35,12 +35,12 @@ export function handleButton(context, container = context.content, appendTo = co
     if (buttonType !== 'name') {
         changeStatus(context);
         changeButton(context);
-        changeState(context);
         changeSlider(context);
     }
 
     changeIcon(context);
     changeName(context);
+    changeState(context);
     changeSubButtonState(context, container, appendTo.firstChild.firstChild);
     changeStyle(context);
 }

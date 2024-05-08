@@ -177,6 +177,7 @@ export function prepareStructure(context) {
   try {
     context.cardType = "pop-up";
     context.verticalStack = context.getRootNode();
+    context.sectionRow = context.verticalStack.host.parentElement;
     context.popUp = context.verticalStack.querySelector('#root');
     context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
     context.verticalStack.removeChild(context.popUp);
@@ -191,6 +192,7 @@ export function prepareStructure(context) {
     context.popUp.style.setProperty('--custom-backdrop-filter', hideBackdrop ? 'none' : `blur(${context.config.bg_blur ?? 10}px)`);
     context.popUp.style.setProperty('--custom-popup-filter', hideBackdrop ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
     context.popUp.style.setProperty('--custom-shadow-opacity', (context.config.shadow_opacity ?? 0) / 100);
+
 
     const style = createElement('style');
     context.elements.customStyle = createElement('style');

@@ -20,14 +20,14 @@ export function changeButton(context) {
   if (buttonType === 'switch' && isOn) {
       if (lightColor && isLight) {
           context.card.style.setProperty('--bubble-button-background-color', getIconColor(context));
-          //context.elements.buttonBackground.style.opacity = '.5';
+          context.elements.buttonBackground.style.opacity = '.5';
       } else {
           context.card.style.setProperty('--bubble-button-background-color', 'var(--accent-color)');
-          //context.elements.buttonBackground.style.opacity = '1';
+          context.elements.buttonBackground.style.opacity = '1';
       }
   } else {
       context.card.style.setProperty('--bubble-button-background-color', 'rgba(0, 0, 0, 0)');
-      //context.elements.buttonBackground.style.opacity = '.5';
+      context.elements.buttonBackground.style.opacity = '.5';
   }
 }
 export function changeIcon(context) {
