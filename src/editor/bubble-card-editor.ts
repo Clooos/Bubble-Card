@@ -1013,7 +1013,6 @@ export function createBubbleCardEditor() {
 
         makeShowState(context = this._config, config = '', array = false, index) {
             const entity = context?.entity ?? this._config.entity ?? '';
-            const isDefault = context === this._config;
             const nameButton = this._config.button_type === 'name';
 
 
@@ -1077,12 +1076,9 @@ export function createBubbleCardEditor() {
                 <ha-formfield .label="Optional - Show name">
                     <ha-switch
                         aria-label="Optional - Show name"
-                        .checked=${context?.show_name || isDefault ? 
-                            true : 
-                            false
-                        }
+                        .checked=${context?.show_name ?? true}
                         .configValue="${config + "show_name"}"
-                        @change="${!array === 'sub_button' ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_name: ev.target.checked }, array)}"
+                        @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_name: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
                         <label class="mdc-label">Optional - Show name</label> 
