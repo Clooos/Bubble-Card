@@ -16,7 +16,7 @@ export function changeState(context) {
     const attribute = context.config.attribute ?? '';
 
     const defaultShowState = buttonType === 'state';
-    const showName = context.config.show_name ?? true;
+    const showName = context.config.show_name || true;
     const showIcon = context.config.show_icon ?? true;
     const showState = context.config.show_state ?? defaultShowState;
     const showAttribute = context.config.show_attribute ?? defaultShowState;
@@ -31,7 +31,7 @@ export function changeState(context) {
         if (!attribute) {
             switch (buttonType) {
                 case "switch":
-                case "custom":
+                case "state":
                     formattedLastChanged = state ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
                     break;
                 case "slider":
@@ -96,38 +96,27 @@ export function changeState(context) {
     if (!showName) {
         context.elements.name.style.display = 'none';
     } else {
-        context.elements.name.style.display = stateStyles.name.display;
+        context.elements.name.style.display = 'flex';
     }
+
+    console.log(context.elements.name)
 
     if (!showIcon) {
         context.elements.iconContainer.style.display = 'none';
         context.elements.nameContainer.style.marginLeft = '16px';
     } else {
-        context.elements.iconContainer.style.display = stateStyles.iconContainer.display;
-        context.elements.nameContainer.style.marginLeft = stateStyles.iconContainer.marginLeft;
+        context.elements.iconContainer.style.display = '';
+        context.elements.nameContainer.style.marginLeft = '';
     }
 
     if (displayedState === '') {
         context.elements.state.style.display = 'none';
     } else if (context.previousState !== displayedState) {
-        context.elements.state.style.display = stateStyles.state.display;
+        context.elements.state.style.display = '';
         applyScrollingEffect(context, context.elements.state, displayedState);
         context.previousState = displayedState;
     }
 }
-
-const stateStyles = {
-    name: {
-        display: ''
-    },
-    iconContainer: {
-        display: '',
-        marginLeft: ''
-    },
-    state: {
-        display: ''
-    }
-};
 
 export function changeSubButtonState(context, container = context.content, appendTo = container.firstChild.firstChild, before = false) {
     const subButtons = context.config.sub_button;
@@ -135,6 +124,8 @@ export function changeSubButtonState(context, container = context.content, appen
     if (!subButtons) {
         return;
     }
+
+    //changeStyle(context, subButtons);
 
     if (!context.previousValues) {
         context.previousValues = {};

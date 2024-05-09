@@ -41,6 +41,7 @@ export default `
       box-sizing: border-box;
       margin-left: var(--custom-margin);
       padding: 18px 18px calc(50px + var(--custom-height-offset-mobile)) 18px;
+      left: 8px;
       z-index: 5 !important;
       bottom: calc(-50px - var(--custom-height-offset-mobile));
   }

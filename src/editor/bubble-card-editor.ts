@@ -1093,7 +1093,7 @@ export function createBubbleCardEditor() {
                         aria-label="Optional - Show entity state"
                         .checked="${context?.show_state}"
                         .configValue="${config + "show_state"}"
-                        .disabled="${nameButton}"
+                        .disabled="${nameButton && !array === 'sub_button'}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_state: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
@@ -1105,7 +1105,7 @@ export function createBubbleCardEditor() {
                         aria-label="Optional - Show last changed"
                         .checked=${context?.show_last_changed}
                         .configValue="${config + "show_last_changed"}"
-                        .disabled="${nameButton}"
+                        .disabled="${nameButton && !array === 'sub_button'}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_changed: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
@@ -1117,7 +1117,7 @@ export function createBubbleCardEditor() {
                         aria-label="Optional - Show attribute"
                         .checked=${context?.show_attribute}
                         .configValue="${config + "show_attribute"}"
-                        .disabled="${nameButton}"
+                        .disabled="${nameButton && !array === 'sub_button'}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_attribute: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
@@ -1131,7 +1131,7 @@ export function createBubbleCardEditor() {
                             .value="${context?.attribute}"
                             .configValue="${config + "attribute"}"
                             .items="${attributeList}"
-                            .disabled="${nameButton}"
+                            .disabled="${nameButton && !array === 'sub_button'}"
                             @value-changed="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { attribute: ev.detail.value }, array)}"
                         ></ha-combo-box>
                     </div>

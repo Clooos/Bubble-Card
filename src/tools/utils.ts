@@ -76,9 +76,9 @@ export function tapFeedback(feedbackElement) {
 }
 
 export function getIcon(context, entity = context.config.entity, icon = context.config.icon) {
+    const entityType = entity?.split('.')[0];
     const entityIcon = getAttribute(context, "icon", entity);
     const configIcon = icon;
-    const entityType = entity?.split('.')[0];
     const state = getState(context, entity);
 
     function coverIcon() {
@@ -167,6 +167,41 @@ export function getIcon(context, entity = context.config.entity, icon = context.
       }
     }
 
+    function weatherIcon(weatherType = getState(context, entity)) {
+      switch (weatherType) {
+        case 'cloudy':
+          return "mdi:weather-cloudy";
+        case 'partlycloudy':
+          return "mdi:weather-partly-cloudy";
+        case 'rainy':
+          return "mdi:weather-rainy";
+        case 'snowy':
+          return "mdi:weather-snowy";
+        case 'sunny':
+          return "mdi:weather-sunny";
+        case 'clear-night':
+          return "mdi:weather-night";
+        case 'fog':
+          return "mdi:weather-fog";
+        case 'hail':
+          return "mdi:weather-hail";
+        case 'lightning':
+          return "mdi:weather-lightning";
+        case 'lightning-rainy':
+          return "mdi:weather-lightning-rainy";
+        case 'pouring':
+          return "mdi:weather-pouring";
+        case 'windy':
+          return "mdi:weather-windy";
+        case 'windy-variant':
+          return "mdi:weather-windy-variant";
+        case 'exceptional':
+          return "mdi:alert-circle-outline";
+        default:
+          return "mdi:weather-cloudy";
+      }
+    }
+
     const defaultIcons = {
         alarm_control_panel: 'mdi:shield',
         alert: "mdi:alert",
@@ -210,14 +245,50 @@ export function getIcon(context, entity = context.config.entity, icon = context.
         updater: "mdi:cloud-upload",
         vacuum: "mdi:robot-vacuum",
         water_heater: "mdi:thermometer",
+        weather: weatherIcon(),
         weblink: "mdi:open-in-new"
     };
 
-    if (configIcon) return configIcon;
+    if (configIcon && entityType !== 'weather') return configIcon;
     if (entityIcon) return entityIcon;
     if (defaultIcons[entityType]) return defaultIcons[entityType];
 
     return '';
+}
+
+export function getWeatherIcon(weatherType) {
+    switch (weatherType) {
+        case 'cloudy':
+          return "mdi:weather-cloudy";
+        case 'partlycloudy':
+          return "mdi:weather-partly-cloudy";
+        case 'rainy':
+          return "mdi:weather-rainy";
+        case 'snowy':
+          return "mdi:weather-snowy";
+        case 'sunny':
+          return "mdi:weather-sunny";
+        case 'clear-night':
+          return "mdi:weather-night";
+        case 'fog':
+          return "mdi:weather-fog";
+        case 'hail':
+          return "mdi:weather-hail";
+        case 'lightning':
+          return "mdi:weather-lightning";
+        case 'lightning-rainy':
+          return "mdi:weather-lightning-rainy";
+        case 'pouring':
+          return "mdi:weather-pouring";
+        case 'windy':
+          return "mdi:weather-windy";
+        case 'windy-variant':
+          return "mdi:weather-windy-variant";
+        case 'exceptional':
+          return "mdi:alert-circle-outline";
+        default:
+          return "mdi:weather-cloudy";
+    }
 }
 
 export function getIconColor(context) {
