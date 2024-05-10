@@ -16,7 +16,7 @@ export function changeState(context) {
     const attribute = context.config.attribute ?? '';
 
     const defaultShowState = buttonType === 'state';
-    const showName = context.config.show_name || true;
+    const showName = context.config.show_name ?? true;
     const showIcon = context.config.show_icon ?? true;
     const showState = context.config.show_state ?? defaultShowState;
     const showAttribute = context.config.show_attribute ?? defaultShowState;
@@ -93,13 +93,11 @@ export function changeState(context) {
     displayedState = capitalizeFirstLetter(displayedState);
 
     // Update display
-    if (!showName) {
-        context.elements.name.style.display = 'none';
+    if (showName) {
+        context.elements.name.style.display = '';
     } else {
-        context.elements.name.style.display = 'flex';
+        context.elements.name.style.display = 'none';
     }
-
-    console.log(context.elements.name)
 
     if (!showIcon) {
         context.elements.iconContainer.style.display = 'none';
@@ -174,7 +172,7 @@ export function changeSubButtonState(context, container = context.content, appen
             context.elements[index].nameContainer = createElement('div', 'bubble-sub-button-name-container');
             Object.assign(context.elements[index].nameContainer.style, subButtonStyles.nameContainer);
             context.elements[index].feedback = createElement('div', 'bubble-feedback-element feedback-element');
--
+
             context.elements[index].appendChild(context.elements[index].feedback);
             context.elements[index].appendChild(context.elements[index].nameContainer);
             context.elements.subButtonContainer.appendChild(context.elements[index]);
@@ -321,7 +319,6 @@ const subButtonStyles = {
         height: '36px',
         verticalAlign: 'middle',
         fontSize: '12px',
-        color: 'white',
         borderRadius: '32px',
         padding: '0 8px',
         overflow: 'hidden',
