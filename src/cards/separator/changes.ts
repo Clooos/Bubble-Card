@@ -1,4 +1,5 @@
-import { getIcon, getName, getState } from "../../tools/utils.ts";
+import { getIcon, getName, getState, getWeatherIcon, setLayout } from "../../tools/utils.ts";
+import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 
 export function changeIcon(context) {
   context.elements.icon.icon = getIcon(context);
@@ -10,11 +11,15 @@ export function changeName(context) {
   }
 }
 export function changeStyle(context) {
-  const state = getState(context);
+    initializesubButtonIcon(context);
+    setLayout(context);
 
-  const customStyle = context.config.styles
-      ? Function('hass', 'entityId', 'state', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state)
-      : '';
+    const state = getState(context);
 
-  context.elements.customStyle.innerText = customStyle;
+    const customStyle = context.config.styles
+        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
+          (context._hass, context.config.entity, state, context.elements.icon.icon, context.subButtonIcon, getWeatherIcon)
+        : '';
+
+    context.elements.customStyle.innerText = customStyle;
 }

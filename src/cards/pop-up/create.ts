@@ -1,11 +1,13 @@
 import { convertToRGBA } from "../../tools/style.ts";
 import { addActions } from "../../tools/tap-actions.ts";
-import { createElement, toggleEntity } from "../../tools/utils.ts";
+import { createElement, toggleEntity, configChanged } from "../../tools/utils.ts";
 import { onUrlChange, removeHash } from "./helpers.ts";
-import styles, { backdropStyles, headerStyles } from "./styles.ts";
+import styles, { backdropStyles } from "./styles.ts";
 
 let backdrop;
 let hideBackdrop = false;
+let startTouchY;
+let lastTouchY;
 
 export function getBackdrop(context) {
   if (backdrop) {
@@ -13,7 +15,7 @@ export function getBackdrop(context) {
   }
 
   const themeColorBackground = 
-    getComputedStyle(document.body).getPropertyValue('--ha-card-background') ??
+    getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
     getComputedStyle(document.body).getPropertyValue('--card-background-color');
 
   const backdropStyle = createElement('style');
@@ -49,63 +51,73 @@ export function getBackdrop(context) {
 
   return backdrop;
 }
+
 export function createHeader(context) {
+  context.elements = {};
   context.elements.closeIcon = createElement('ha-icon', 'bubble-close-icon');
   context.elements.closeIcon.icon = 'mdi:close';
   context.elements.closeButton = createElement("button", "bubble-close-button close-pop-up");
   context.elements.closeButton.addEventListener('click', removeHash);
   context.elements.closeButton.appendChild(context.elements.closeIcon);
 
-  context.elements.icon = createElement('ha-icon', 'bubble-icon icon');
-  context.elements.image = createElement('div', 'bubble-entity-picture entity-picture');
-  context.elements.iconContainer = createElement('div', 'bubble-icon-container icon-container');
-  context.elements.iconContainer.appendChild(context.elements.icon);
-  context.elements.iconContainer.appendChild(context.elements.image);
-  addActions(context.elements.iconContainer, context.config);
+  context.elements.buttonContainer = createElement('div', 'bubble-button-container');
+  context.elements.header = createElement('div', 'bubble-header');
 
-  context.elements.name = createElement('h2', 'bubble-name');
-  context.elements.state = createElement('p', 'bubble-state');
-  context.elements.header = createElement("div", "bubble-header");
-  context.elements.header.appendChild(context.elements.iconContainer);
-  context.elements.header.appendChild(context.elements.name);
-  context.elements.header.appendChild(context.elements.state);
-  if (context.config.entity) {
-      context.elements.powerIcon = createElement('ha-icon', 'bubble-power-button power-button');
-      context.elements.powerIcon.icon = 'mdi:power';
-      context.elements.powerIcon.addEventListener('click', () => {
-          toggleEntity(context._hass, context.config.entity);
-      });
-      context.elements.header.appendChild(context.elements.powerIcon);
+  const existingHeader = context.popUp.querySelector('.bubble-header-container');
+  if (existingHeader === null) {
+    context.elements.headerContainer = createElement("div", 'bubble-header-container');
+    context.elements.headerContainer.setAttribute("id", "header-container");
+    context.elements.headerContainer.appendChild(context.elements.header);
+    context.elements.headerContainer.appendChild(context.elements.closeButton);
+    context.elements.header.appendChild(context.elements.buttonContainer);
+  } else {
+    context.elements.headerContainer = existingHeader;
+    context.elements.closeIcon = existingHeader.querySelector('.bubble-close-icon');
+    context.elements.closeButton = existingHeader.querySelector('.bubble-close-button');
+    context.elements.buttonContainer = existingHeader.querySelector('.bubble-button-container');
+    context.elements.header = existingHeader.querySelector('.bubble-header');
   }
 
-  context.elements.headerContainer = createElement("div", 'bubble-header-container');
-  context.elements.headerContainer.setAttribute("id", "header-container");
-  context.elements.headerContainer.appendChild(context.elements.header);
-  context.elements.headerContainer.appendChild(context.elements.closeButton);
-  context.content.appendChild(context.elements.headerContainer);
+  context.popUp.addEventListener('touchstart', (event) => {
+    startTouchY = event.touches[0].clientY;
+  }, { passive: true });
+
+  context.elements.header.addEventListener('touchmove', (event) => {
+    const touchY = event.touches[0].clientY;
+    const offset = touchY - startTouchY;
+    if (offset > 0) {
+      context.popUp.style.transform = `translateY(${offset}px)`;
+    }
+  }, { passive: true });
+
+  context.elements.header.addEventListener('touchend', (event) => {
+    const touchY = event.changedTouches[0].clientY;
+    const offset = touchY - startTouchY;
+    if (offset > 50) { 
+      removeHash();
+    } else {
+      context.popUp.style.transform = '';
+    }
+  }, { passive: true });
 }
+
 export function createStructure(context) {
   try {
     context.elements.style = createElement('style');
-    context.elements.style.innerText = `${headerStyles}`;
-    context.elements.cardCustomStyle = createElement('style');
+    context.elements.customStyle = createElement('style');
 
-    context.content.innerHTML = '';
     context.content.appendChild(context.elements.style);
-    context.content.appendChild(context.elements.cardCustomStyle);
+    context.content.appendChild(context.elements.customStyle);
 
     const themeColorBackground = 
-      getComputedStyle(document.body).getPropertyValue('--ha-card-background') ??
+      getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
       getComputedStyle(document.body).getPropertyValue('--card-background-color');
 
     const color = context.config.bg_color ? context.config.bg_color : themeColorBackground;
     const opacity = context.config.bg_opacity ?? 88;
     const rgbaColor = convertToRGBA(color, (opacity / 100), 1.02);
     context.popUp.style.backgroundColor = rgbaColor;
-    context.popUp.style.setProperty('--desktop-width', context.config.width_desktop ?? '500px');
-    if (context.config.is_sidebar_hidden) {
-      context.popUp.classList.add('is-sidebar-hidden');
-    }
+    context.popUp.style.setProperty('--desktop-width', context.config.width_desktop ?? '540px');
 
     if (context.config.close_on_click) {
       context.popUp.addEventListener('touchend', removeHash);
@@ -118,21 +130,56 @@ export function createStructure(context) {
     }, 0);
 
     window.addEventListener('location-changed', contextOnUrlChange);
+    window.addEventListener('popstate', contextOnUrlChange);
     window.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && context.config.hash === location.hash) {
         removeHash();
       }
-    });
+    }, { passive: true });
+
+    context.popUp.addEventListener('touchmove', (event) => {
+        // Calculate the distance the finger has traveled
+        let touchMoveDistance = event.touches[0].clientY - startTouchY;
+
+        // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
+        if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
+            removeHash();
+        }
+
+        // Update the Y position of the last touch
+        lastTouchY = event.touches[0].clientY;
+    }, { passive: true });
+
+    const existingContainer = context.popUp.querySelector('.bubble-pop-up-container');
+    if (existingContainer === null) {
+
+      context.elements.popUpContainer = createElement('div');
+      context.elements.popUpContainer.classList.add('bubble-pop-up-container');
+      let child = context.popUp.firstChild;
+      
+      while (child) {
+        context.elements.popUpContainer.appendChild(child);
+        child = context.popUp.firstChild;
+      }
+    } else {
+      context.elements.popUpContainer = existingContainer;
+    }
+
+    context.popUp.appendChild(context.elements.headerContainer);
+    context.popUp.appendChild(context.elements.popUpContainer);
+
   } catch (e) {
     console.error(e)
   }
 }
+
 export function prepareStructure(context) {
   try {
     context.cardType = "pop-up";
     context.verticalStack = context.getRootNode();
+    context.sectionRow = context.verticalStack.host.parentElement;
     context.popUp = context.verticalStack.querySelector('#root');
-    context.popUp.classList.add('pop-up', 'bubble-pop-up', 'is-popup-closed');
+    context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
     context.verticalStack.removeChild(context.popUp);
     context.elements = {};
     getBackdrop(context);
@@ -141,10 +188,11 @@ export function prepareStructure(context) {
 
     context.popUp.style.setProperty('--custom-height-offset-desktop', context.config.margin_top_desktop  ?? '0px');
     context.popUp.style.setProperty('--custom-height-offset-mobile', context.config.margin_top_mobile  ?? '0px');
-    context.popUp.style.setProperty('--custom-margin', `-${context.config.margin ?? 7}px`);
+    context.popUp.style.setProperty('--custom-margin', `-${context.config.margin ?? '7px'}`);
     context.popUp.style.setProperty('--custom-backdrop-filter', hideBackdrop ? 'none' : `blur(${context.config.bg_blur ?? 10}px)`);
     context.popUp.style.setProperty('--custom-popup-filter', hideBackdrop ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
     context.popUp.style.setProperty('--custom-shadow-opacity', (context.config.shadow_opacity ?? 0) / 100);
+
 
     const style = createElement('style');
     context.elements.customStyle = createElement('style');

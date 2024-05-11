@@ -4,7 +4,7 @@ import styles from "./styles.ts";
 
 let isOpen = false;
 
-function createButton(context, index) {
+export function createButton(context, index) {
     const name = context.config[`${index}_name`] ?? '';
     const icon = context.config[`${index}_icon`] ?? '';
     const sensor = context.config[`${index}_pir_sensor`];
@@ -88,9 +88,6 @@ export function createStructure(context) {
     if (!context.config.hide_gradient) {
       context.card.classList.add('has-gradient');
     }
-    if (context.config.is_sidebar_hidden) {
-      context.card.classList.add('is-sidebar-hidden');
-    }
     context.card.style.setProperty('--desktop-width', context.config.width_desktop ?? '500px');
     context.elements.cardContainer.appendChild(context.elements.style);
     context.elements.cardContainer.appendChild(context.elements.customStyle);
@@ -117,6 +114,12 @@ export function createStructure(context) {
         setTimeout(() => {
             context.content.style.animation = 'none';
         }, 1500);
+    }
+
+    // Fix for the last cards that are hidden by the HBS
+    let parentElement = context.card.parentNode.host;
+    if (parentElement && !context.editor) {
+        parentElement.style.padding = '0 0 80px';
     }
 
     context.cardType = "horizontal-buttons-stack";

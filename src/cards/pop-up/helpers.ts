@@ -24,7 +24,7 @@ export function removeHash() {
   window.dispatchEvent(new Event('location-changed'));
 }
 export function addHash(hash) {
-  const newURL = window.location.href.split('#')[0] + hash;
+  const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
 
   history.pushState(null, "", newURL);
   window.dispatchEvent(new Event('location-changed'));
@@ -46,6 +46,13 @@ export function closePopup(context) {
   }
   context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
   window.removeEventListener('click', clickOutside);
+
+  const closeOnClick = context.config.close_on_click ?? false;
+  if (closeOnClick) {
+      context.popUp.removeEventListener('mouseup', removeHash);
+      context.popUp.removeEventListener('touchend', removeHash);  
+  }
+
   context.removeDomTimeout = window.setTimeout(() => {
     if (context.popUp.parentNode === context.verticalStack) {
       context.verticalStack.removeChild(context.popUp);
@@ -68,11 +75,18 @@ export function openPopup(context) {
   clearTimeout(context.hideContentTimeout);
   document.body.style.overflow = 'hidden';
   context.popUp.style.display = '';
-  context.popUp.addEventListener('touchstart', context.resetCloseTimeout);
+  context.popUp.style.transform = '';
+  context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
+
+  const closeOnClick = context.config.close_on_click ?? false;
+  if (closeOnClick) {
+      context.popUp.addEventListener('mouseup', removeHash, { passive: true });
+      context.popUp.addEventListener('touchend', removeHash, { passive: true });
+  }
 
   requestAnimationFrame(() => {
     context.popUp.classList.remove('is-popup-closed');
-    window.addEventListener('click', clickOutside);
+    window.addEventListener('click', clickOutside, { passive: true });
   });
 
   if (context.config.auto_close > 0) {
@@ -89,7 +103,7 @@ export function onUrlChange(context) {
       closePopup(context);
     }
 
-    if (popupCount === 0) {
+    if (popupCount === 0 || context.editor) {
       hideBackdrop();
     } else {
       showBackdrop();

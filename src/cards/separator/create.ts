@@ -1,4 +1,5 @@
 import { createElement } from "../../tools/utils.ts";
+import { addActions } from "../../tools/tap-actions.ts";
 import styles from "./styles.ts";
 
 export function createStructure(context) {

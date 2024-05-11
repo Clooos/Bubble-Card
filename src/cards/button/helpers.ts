@@ -1,27 +1,42 @@
-import { throttle } from "../../tools/utils.ts";
+import { throttle, isEntityType, getAttribute } from "../../tools/utils.ts";
 
 export function getButtonType(context) {
-  return context.config.button_type || 'switch';
-}
+  let buttonType = context.config.button_type;
 
-export function isLight(context) {
-  return context.config.entity?.startsWith("light.") ?? false;
-}
+  if (buttonType === 'custom') {
+    console.error('Buttons "custom" have been removed. Use either "switch", "slider", "state" or  "name"');
+    buttonType = '';
+  }
 
-export function isMediaPlayer(context) {
-  return context.config.entity?.startsWith("media_player.") ?? false;
+  if (context.config.entity) {
+      return buttonType || 'switch';
+  } else {
+      return buttonType || 'name';
+  }
 }
 
 export function updateEntity(context, value) {
-  if (isLight(context)) {
+  if (isEntityType(context, "light")) {
       context._hass.callService('light', 'turn_on', {
           entity_id: context.config.entity,
           brightness: 255 * value / 100
       });
-  } else if (isMediaPlayer(context)) {
+  } else if (isEntityType(context, "media_player")) {
       context._hass.callService('media_player', 'volume_set', {
           entity_id: context.config.entity,
           volume_level: value / 100
+      });
+  } else if (isEntityType(context, "cover")) {
+      context._hass.callService('cover', 'set_cover_position', {
+          entity_id: context.config.entity,
+          position: value
+      });
+  } else if (isEntityType(context, "input_number")) {
+      const minValue = getAttribute(context, "min");
+      const maxValue = getAttribute(context, "max");
+      context._hass.callService('input_number', 'set_value', {
+          entity_id: context.config.entity,
+          value: Math.round((maxValue - minValue) * value / 100 + minValue)
       });
   }
 };

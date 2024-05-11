@@ -1,5 +1,7 @@
 import { isColorCloseToWhite } from "../../tools/style.ts";
 import { getState } from "../../tools/utils.ts";
+import { createButton } from './create.ts';
+import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 
 const BUTTON_MARGIN = 12;
 
@@ -9,24 +11,24 @@ export function sortButtons(context) {
     const states = context._hass.states;
 
     context.elements.buttons.sort((a, b) => {
-        if (!a.pirSensor) return 1;
-        if (!b.pirSensor) return -1;
+        if (!states[a.pirSensor]) return 1;
+        if (!states[a.pirSensor]) return -1;
 
-        const aTime = states[a.pirSensor].last_updated;
-        const bTime = states[b.pirSensor].last_updated;
+        const aTime = states[a.pirSensor]?.last_updated;
+        const bTime = states[b.pirSensor]?.last_updated;
 
-        if (states[a.pirSensor].state === "on" && states[b.pirSensor].state === "on") {
-            return aTime > bTime ? -1 : 1;
+        if (states[a.pirSensor]?.state === "on" && states[b.pirSensor]?.state === "on") {
+            return aTime > bTime ? -1 : aTime === bTime ? 0 : 1;
         }
 
         // If only a.pirSensor is "on", place a before b
-        if (states[a.pirSensor].state === "on") return -1;
+        if (states[a.pirSensor]?.state === "on") return -1;
 
         // If only b.pirSensor is "on", place b before a
-        if (states[b.pirSensor].state === "on") return 1;
+        if (states[b.pirSensor]?.state === "on") return 1;
 
         // If neither PIR sensor is "on", arrangement based only on the state of last updated even if off
-        return aTime < bTime ? 1 : -1;
+        return aTime > bTime ? -1 : aTime === bTime ? 0 : 1;
     });
 }
 export function placeButtons(context) {
@@ -52,7 +54,9 @@ export function placeButtons(context) {
     context.elements.cardContainer.style.width = `${position - BUTTON_MARGIN}px`;
 }
 export function changeEditor(context) {
-    if (context.editor) {
+    const detectedEditor = context.shadowRoot.host.closest('hui-card-preview, hui-card-options');
+
+    if (context.editor || detectedEditor !== null) {
         context.elements.cardContainer.classList.add('editor');
         context.card.classList.add('editor');
     } else {
@@ -104,7 +108,26 @@ export function changeConfig(context) {
         } else {
             button.icon.style.display = 'none';
         }
+
+        if (link === undefined) {
+            button.remove();
+            context.elements.buttons = context.elements.buttons.filter((btn) => btn !== button);
+            context.elements.buttons.forEach((btn, idx) => {
+                btn.index = idx + 1;
+            });
+        }
     });
+
+    // Create a new button if necessary
+    let index = context.elements.buttons.length + 1;
+    while (context.config[`${index}_link`] !== undefined) {
+        const existingButton = context.elements.buttons.find(button => button.index === index);
+        if (!existingButton) {
+            const newButton = createButton(context, index);
+            context.elements.buttons.push(newButton);
+        }
+        index++;
+    }
 }
 export function changeStatus(context) {
     if (context.content.scrollWidth > context.content.offsetWidth) {

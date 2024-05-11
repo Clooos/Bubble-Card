@@ -1,32 +1,46 @@
-import { getButtonType, isLight, isMediaPlayer } from "./helpers.ts";
+import { getButtonType } from "./helpers.ts";
+import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 import { 
-  getBrightness,
+  applyScrollingEffect,
   getIcon,
   getIconColor,
   getImage,
   getName,
   getState,
-  getVolume,
+  getAttribute,
   isStateOn,
+  isEntityType,
+  getWeatherIcon,
+  setLayout
 } from '../../tools/utils.ts';
 
 export function changeButton(context) {
   const buttonType = getButtonType(context);
+  const isLight = isEntityType(context, "light");
   const isOn = isStateOn(context);
+  const lightColor = getIconColor(context);
 
-  if ((buttonType ==='switch' || buttonType === 'custom') && isOn) {
-      context.elements.buttonCard.style.backgroundColor = 'var(--accent-color)';
+  if (buttonType === 'switch' && isOn) {
+      if (lightColor && isLight) {
+          context.card.style.setProperty('--bubble-button-background-color', getIconColor(context));
+          context.elements.buttonBackground.style.opacity = '.5';
+      } else {
+          context.card.style.setProperty('--bubble-button-background-color', 'var(--accent-color)');
+          context.elements.buttonBackground.style.opacity = '1';
+      }
   } else {
-      context.elements.buttonCard.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+      context.card.style.setProperty('--bubble-button-background-color', 'rgba(0, 0, 0, 0)');
+      context.elements.buttonBackground.style.opacity = '.5';
   }
 }
 export function changeIcon(context) {
   const buttonType = getButtonType(context);
-  const isOn = isStateOn(context);
-  const icon = getIcon(context);
-  const image = getImage(context);
+  const isOn = buttonType !== 'name' ? isStateOn(context) : false;
+  const icon = buttonType !== 'name' ? getIcon(context) : context.config.icon;
+  const image = buttonType !== 'name' ? getImage(context) : '';
+  const isLight = buttonType !== 'name' ? isEntityType(context, "light") : false;
 
-  if (isLight(context) && isOn && buttonType !== 'state') {
+  if (isLight && isOn) {
       context.elements.iconContainer.style.color = getIconColor(context);
   } else {
       context.elements.iconContainer.style.color = '';
@@ -47,42 +61,40 @@ export function changeIcon(context) {
   }
 }
 export function changeName(context) {
-  const name = getName(context);
-  if (name !== context.elements.name.innerText) {
-      context.elements.name.innerText = name;
+  const buttonType = getButtonType(context);
+  const name = buttonType !== 'name' ? getName(context) : context.config.name;
+  if (name !== context.elements.previousName) {
+      applyScrollingEffect(context, context.elements.name, name);
+      context.elements.previousName = name;
   }
 }
 export function changeSlider(context) {
   const buttonType = getButtonType(context);
 
   if (buttonType === 'slider') {
-      context.elements.rangeFill.style.backgroundColor = getIconColor(context);
+    context.elements.rangeFill.style.backgroundColor = getIconColor(context);
 
-      if (isLight(context) && context.dragging === false) {
-          const percentage = 100 * getBrightness(context) / 255;
-          context.elements.rangeFill.style.transform =`translateX(${percentage}%)`;
-      } else if (isMediaPlayer(context) && context.dragging === false) {
-          const percentage = 100 * getVolume(context);
-          context.elements.rangeFill.style.transform =`translateX(${percentage}%)`;
-      }
+    if (context.dragging) return;
+
+    let percentage = 0;
+
+    if (isEntityType(context, "light")) {
+      percentage = 100 * getAttribute(context, "brightness") / 255;
+    } else if (isEntityType(context, "media_player")) {
+      percentage = 100 * getAttribute(context, "volume_level");
+    } else if (isEntityType(context, "cover")) {
+      percentage = getAttribute(context, "current_position");
+    } else if (isEntityType(context, "input_number")) {
+      const minValue = getAttribute(context, "min");
+      const maxValue = getAttribute(context, "max");
+      const value = getState(context);
+      percentage = 100 * (value - minValue) / (maxValue - minValue);
+    }
+
+    context.elements.rangeFill.style.transform = `translateX(${percentage}%)`;
   }
 }
-export function changeState(context) {
-  const buttonType = getButtonType(context);
-  const defaultShowState = buttonType === 'state' ? true : false;
-  const showState = context.config.show_state ?? defaultShowState;
 
-  const state = context._hass.states[context.config.entity];
-  const formattedState = state ? context._hass.formatEntityState(state) : '';
-  if (showState === false) {
-      context.elements.state.style.display = 'none';
-  } else {
-      context.elements.state.style.display = '';
-      if (formattedState !== context.elements.state.innerText) {
-        context.elements.state.innerText = formattedState;
-      }
-  }
-}
 export function changeStatus(context) {
   const state = getState(context);
 
@@ -92,7 +104,7 @@ export function changeStatus(context) {
       context.card.classList.remove('is-unavailable');
   }
 
-  if (isLight(context)) {
+  if (isEntityType(context, "light")) {
       context.card.classList.add('is-light');
   } else {
       context.card.classList.remove('is-light');
@@ -104,12 +116,17 @@ export function changeStatus(context) {
       context.card.classList.remove('is-on');
   }
 }
+
 export function changeStyle(context) {
-  const state = getState(context);
+    initializesubButtonIcon(context);
+    setLayout(context);
 
-  const customStyle = context.config.styles
-      ? Function('hass', 'entityId', 'state', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state)
-      : '';
+    const state = getState(context);
 
-  context.elements.customStyle.innerText = customStyle;
+    const customStyle = context.config.styles
+        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
+          (context._hass, context.config.entity, state, context.elements.icon.icon, context.subButtonIcon, getWeatherIcon)
+        : '';
+
+    context.elements.customStyle.innerText = customStyle;
 }

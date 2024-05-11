@@ -2,7 +2,7 @@ export default `
     .bubble-separator {
         display: flex;
         width: 100%;
-        padding: 12px 0 4px 0;
+        padding: 4px 0;
         align-items: center;
     }
     .bubble-icon {
@@ -27,5 +27,28 @@ export default `
         flex-grow: 1;
         height: 6px;
         background-color: var(--background-color, var(--secondary-background-color));
+    }
+    .bubble-sub-button-container {
+        margin-left: 24px;
+    }
+
+    .large .bubble-separator {
+      height: 58px;
+    }
+
+    .rows-2 .bubble-sub-button-container {
+      flex-direction: column;
+      gap: 4px !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, minmax(auto, max-content));
+      grid-auto-rows: none;
+      grid-auto-flow: column;
+      width: auto;
+      padding-right: 14px;
+    }
+
+    .rows-2 .bubble-sub-button {
+      height: 20px !important;
     }
 `;

@@ -1,5 +1,7 @@
-
 export default `
+    * {
+        -webkit-tap-highlight-color: transparent !important;
+    }
     ha-card {
         margin-top: 0;
         background: none;
@@ -22,15 +24,20 @@ export default `
     }
 
     .bubble-button-card,
-    .bubble-range-slider {
+    .bubble-range-slider,
+    .bubble-button-background {
         display: flex;
         position: absolute;
+        justify-content: space-between;
+        align-items: center;
         height: 100%;
         width: 100%;
         transition: background-color 1.5s;
-        background-color: rgba(0,0,0,0);
+        background-color: var(--bubble-button-background-color);
     }
-
+    .bubble-button-background {
+        opacity: .5;
+    }
     .bubble-range-fill {
         z-index: -1;
         position: absolute;
@@ -44,24 +51,21 @@ export default `
     .is-dragging .bubble-range-fill {
         transition: none;
     }
-    .is-light .bubble-range-fill {
+    .is-light .bubble-range-fill,
+    .bubble-button-background {
         opacity: 0.5;
     }
 
     .bubble-button-card {
         cursor: pointer;
     }
-    .is-unavailable .bubble-button-card {
-        cursor: not-allowed;
-    }
-
-    .bubble-range-slider {
-        cursor: ew-resize;
-    }
+    .is-unavailable .bubble-button-card,
     .is-unavailable .bubble-range-slider {
         cursor: not-allowed;
     }
-
+    .bubble-range-slider {
+        cursor: ew-resize;
+    }
     .bubble-icon-container {
         display: flex;
         flex-wrap: wrap;
@@ -111,29 +115,37 @@ export default `
         background-position: center;
         height: 100%;
         width: 100%;
+        position: absolute;
+    }
+
+    .bubble-name,
+    .bubble-state {
+        display: flex;
+        margin: 2px 0;
+        position: relative;
+        white-space: nowrap;
     }
 
     .bubble-name-container {
         display: flex;
-        line-height: 1em;
+        line-height: 14px;
         flex-direction: column;
         justify-content: center;
         flex-grow: 1;
-        font-weight: 600;
-        margin-left: 4px;
-        margin-right: 16px;
+        margin: 0 16px 0 4px;
         pointer-events: none;
         position: relative;
+        overflow: hidden;
     }
 
     .bubble-name {
-        margin: 2px 0;
+        font-weight: 600;
     }
 
     .bubble-state {
         font-size: 12px;
         opacity: 0.7;
-        margin: 2px 0;
+        font-weight: normal;
     }
 
     .bubble-feedback-element {
@@ -150,5 +162,32 @@ export default `
         0% {transform: translateX(-100%); opacity: 0;}
         64% {transform: translateX(0); opacity: 0.1;}
         100% {transform: translateX(100%); opacity: 0;}
+    }
+
+    .large .bubble-button-card-container {
+      height: 64px;
+      border-radius: 32px;
+    }
+
+    .large .bubble-icon-container {
+      --mdc-icon-size: 28px;
+      min-width: 48px !important;
+      min-height: 48px !important;
+      margin-left: 8px;
+    }
+
+    .rows-2 .bubble-sub-button-container {
+      flex-direction: column;
+      gap: 4px !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, min-content);
+      grid-template-rows: repeat(2, 1fr);
+      grid-auto-flow: column;
+      width: auto;
+      padding-right: 14px;
+    }
+
+    .rows-2 .bubble-sub-button {
+      height: 20px !important;
     }
 `;

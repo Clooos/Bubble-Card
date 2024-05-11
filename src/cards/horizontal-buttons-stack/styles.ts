@@ -19,28 +19,29 @@ export default `
         height: 51px;
         margin-top: 0;
         position: fixed;
-        width: calc(100% - var(--mdc-drawer-width) - 8px);
-        left: calc(var(--mdc-drawer-width) + 4px);
-        z-index: 1; /* Higher value hide the more-info panel */
+        width: calc(100% - var(--mdc-drawer-width, 0px) - 8px);
+        left: calc(var(--mdc-drawer-width, 0px) + 4px);
+        z-index: 6; /* Higher value hide the more-info panel */
     }
     @media only screen and (max-width: 870px) {
         .horizontal-buttons-stack-card {
             width: calc(100% - 16px);
             left: 8px;
         }
-    }
-    .is-sidebar-hidden.horizontal-buttons-stack-card {
-        width: var(--desktop-width);
+
+        .horizontal-buttons-stack-card::before {
+            left: -10px;
+        }
     }
     .horizontal-buttons-stack-card::before {
         content: '';
         position: absolute;
         top: -32px;
-        left: -100%;
         display: none;
         background: linear-gradient(0deg, var(--background-color, var(--primary-background-color)) 50%, rgba(79, 69, 87, 0));
         width: 200%;
         height: 100px;
+        pointer-events: none;
     }
     .has-gradient.horizontal-buttons-stack-card::before {
         display: block;
@@ -150,9 +151,13 @@ export default `
 
 
     .horizontal-buttons-stack-card.editor {
-        position: static;
+        position: relative;
+        width: 100%;
+        left: 0;
+        bottom: 0;
     }
     .horizontal-buttons-stack-card.editor::before {
         background: none;
     }
+
 `;

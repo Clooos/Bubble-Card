@@ -12,10 +12,12 @@ export function callAction(element, config, action) {
 }
 
 class ActionHandler {
-  constructor(element, config, sendActionEvent) {
+  constructor(element, config, sendActionEvent, defaultEntity, defaultActions) {
     this.element = element;
     this.config = config;
     this.sendActionEvent = sendActionEvent;
+    this.defaultEntity = defaultEntity;
+    this.defaultActions = defaultActions;
     this.tapTimeout = null;
     this.lastTap = 0;
     this.startTime = null;
@@ -26,13 +28,10 @@ class ActionHandler {
     e.stopImmediatePropagation();
 
     this.startTime = Date.now();
-
-    // Another action has started, we should clean the tap timeout
     clearTimeout(this.tapTimeout);
   }
 
   handleEnd() {
-    // There is no ongoing action
     if (this.startTime === null) return;
 
     const currentTime = Date.now();
@@ -43,39 +42,39 @@ class ActionHandler {
     this.startTime = null;
 
     if (holdDuration > maxHoldDuration) {
-      // First scenario: the user was holding the button for maxHoldDuration
-      this.sendActionEvent(this.element, this.config, 'hold');
+      this.sendActionEvent(this.element, this.config, 'hold', this.defaultEntity, this.defaultActions);
     } else if (doubleTapDuration < doubleTapTimeout) {
-      // Second scenario: the user is not holding and the previous tap was a short time ago
-      this.sendActionEvent(this.element, this.config, 'double_tap');
+      this.sendActionEvent(this.element, this.config, 'double_tap', this.defaultEntity, this.defaultActions);
     } else {
-      // Third scenario: we wait for the double tap amount of time and if nothing happens, send a tap
       this.tapTimeout = setTimeout(() => {
-        this.sendActionEvent(this.element, this.config, 'tap');
+        this.sendActionEvent(this.element, this.config, 'tap', this.defaultEntity, this.defaultActions);
       }, doubleTapTimeout);
     }
   }
 }
 
-export function sendActionEvent(element, config, action) {
-  const tapAction = config.tap_action ?? {  action: "more-info" };
-  const doubleTapAction = config.double_tap_action || { action: "toggle"}
-  const holdAction = config.hold_action || { action: "toggle"}
+export function sendActionEvent(element, config, action, defaultEntity, defaultActions) {
+  const tapAction = config?.tap_action || defaultActions?.tap_action || { action: "more-info" };
+  const doubleTapAction = config?.double_tap_action || defaultActions?.double_tap_action || { action: "toggle" };
+  const holdAction = config?.hold_action || defaultActions?.hold_action || { action: "toggle" };
+  const entity = config?.entity ?? defaultEntity;
 
   callAction(
     element,
-    { entity: config.entity, tap_action: tapAction, double_tap_action: doubleTapAction, hold_action: holdAction },
+    { entity: entity, tap_action: tapAction, double_tap_action: doubleTapAction, hold_action: holdAction },
     action
   );
 }
 
-export function addActions(element, config) {
-  const handler = new ActionHandler(element, config, sendActionEvent);
+export function addActions(element, config, defaultEntity, defaultActions) {
+  const handler = new ActionHandler(element, config, sendActionEvent, defaultEntity, defaultActions);
 
   element.addEventListener('pointerdown', handler.handleStart.bind(handler));
   element.addEventListener('pointerup', handler.handleEnd.bind(handler));
   element.addEventListener('contextmenu', (e) => e.preventDefault());
+  element.style.cursor = 'pointer';
 }
+
 export function addFeedback(element, feedbackElement) {
   element.addEventListener('click', () => tapFeedback(feedbackElement));
 }

@@ -6,14 +6,14 @@ import { handleButton } from './cards/button/index.ts';
 import { handleSeparator } from './cards/separator/index.ts';
 import { handleCover } from './cards/cover/index.ts';
 import { handleEmptyColumn } from './cards/empty-column/index.ts';
-import BubbleCardEditor from './editor/bubble-card-editor.ts';
+import { handleMediaPlayer } from './cards/media-player/index.ts';
+import { createBubbleCardEditor } from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {
     editor = false;
     isConnected = false;
 
     connectedCallback() {
-        window.addEventListener('focus', this.updateOnFocus);
         this.isConnected = true;
 
         if (this._hass) {
@@ -22,13 +22,7 @@ class BubbleCard extends HTMLElement {
     }
 
     disconnectedCallback() {
-        window.removeEventListener('focus', this.updateOnFocus);
         this.isConnected = false;
-    }
-
-    updateOnFocus = () => {
-        // Fix entities not updating after coming back to the HA Companion app
-        this.hass = this._hass;
     }
 
     set editMode(editMode) {
@@ -61,34 +55,39 @@ class BubbleCard extends HTMLElement {
 
         switch (this.config.card_type) {
 
-            // Initialize pop-up card
+            // Update pop-up card
             case 'pop-up':
                 handlePopUp(this);
                 break;
 
-            // Initialize button
+            // Update button
             case 'button' :
                 handleButton(this);
                 break;
 
-            // Initialize separator
+            // Update separator
             case 'separator' :
                 handleSeparator(this);
                 break;
 
-            // Initialize cover card
+            // Update cover card
             case 'cover' :
                 handleCover(this);
                 break;
 
-            // Intitalize empty card
+            // Update empty card
             case 'empty-column' :
                 handleEmptyColumn(this);
                 break;
 
-            // Initialize horizontal buttons stack
+            // Update horizontal buttons stack
             case 'horizontal-buttons-stack' :
                 handleHorizontalButtonsStack(this);
+                break;
+
+            // Update media player
+            case 'media-player' :
+                handleMediaPlayer(this);
                 break;
         }
     }
@@ -118,7 +117,7 @@ class BubbleCard extends HTMLElement {
               }
             }
         } else if (config.card_type === 'button' || config.card_type === 'cover') {
-            if (!config.entity) {
+            if (!config.entity && config.button_type !== 'name') {
                 throw new Error("You need to define an entity");
             }
         }
@@ -151,24 +150,47 @@ class BubbleCard extends HTMLElement {
     }
 
     getCardSize() {
-        
-      // Fix the empty columns caused by the pop-ups on the dashboard
-      // Check the value of window.columnFix
-      if (window.columnFix === "true") {
-        // Return 0 if it is "true"
-        return 0;
-      } else if (typeof window.columnFix === "number") {
-        // Return the number if it is a number
-        return window.columnFix;
-      } else {
-        // Return -10 otherwise
-        return -10;
-      }
+        switch (this.config.card_type) {
+            case 'pop-up':
+                return -100000;
+            case 'button':
+                return 1;
+            case 'separator':
+                return 1;
+            case 'cover':
+                return 2;
+            case 'empty-column':
+                return 1;
+            case 'horizontal-buttons-stack':
+                return 0;
+            case 'media-player':
+                return 1;
+        }
     }
 
     static getConfigElement() {
+        createBubbleCardEditor();
         return document.createElement("bubble-card-editor");
     }
+
+    getLayoutOptions() {
+        let  defaultRows = 1;
+        if (['popup', 'horizontal-buttons-stack'].includes(this.config.card_type)) {
+            defaultRows = 0;
+        } else if (['cover'].includes(this.config.card_type)) {
+            defaultRows = 2;
+        }
+
+        let  defaultColumns = 4;
+        if (['popup', 'horizontal-buttons-stack'].includes(this.config.card_type)) {
+            defaultColumns = 0;
+        }
+
+        return {
+            grid_columns: this.config.columns ?? defaultColumns,
+            grid_rows: this.config.rows ?? defaultRows,
+        }
+      }
 }
 
 customElements.define("bubble-card", BubbleCard);
@@ -178,7 +200,8 @@ window.customCards.push({
     type: "bubble-card",
     name: "Bubble Card",
     preview: false,
-    description: "A minimalist card collection with a nice pop-up touch."
+    description: "A minimalist card collection with a nice pop-up touch.",
+    documentationURL: "https://github.com/Clooos/Bubble-Card/"
 });
 
 console.info(
