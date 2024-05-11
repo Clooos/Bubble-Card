@@ -1,4 +1,13 @@
-import { getName, getState, getAttribute, getIcon, applyScrollingEffect } from "../../tools/utils.ts";
+import { 
+    getName, 
+    getState, 
+    getAttribute, 
+    getIcon, 
+    applyScrollingEffect,
+    getWeatherIcon,
+    setLayout
+} from "../../tools/utils.ts";
+import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 
 export function changeIcon(context) {
   const iconOpen = context.config.icon_open;
@@ -21,13 +30,17 @@ export function changeName(context) {
   }
 }
 export function changeStyle(context) {
-  const state = getState(context);
+    initializesubButtonIcon(context);
+    setLayout(context);
 
-  const customStyle = context.config.styles
-      ? Function('hass', 'entityId', 'state', 'icon', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state, context.elements.icon.icon)
-      : '';
+    const state = getState(context);
 
-  context.elements.customStyle.innerText = customStyle;
+    const customStyle = context.config.styles
+        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
+          (context._hass, context.config.entity, state, context.elements.icon.icon, context.subButtonIcon, getWeatherIcon)
+        : '';
+
+    context.elements.customStyle.innerText = customStyle;
 }
 
 

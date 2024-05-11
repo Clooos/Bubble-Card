@@ -97,6 +97,8 @@ export function changeState(context) {
         context.elements.name.style.display = '';
     } else {
         context.elements.name.style.display = 'none';
+        context.elements.state.style.opacity = '1';
+        context.elements.state.style.fontSize = '14px';
     }
 
     if (!showIcon) {
@@ -105,6 +107,10 @@ export function changeState(context) {
     } else {
         context.elements.iconContainer.style.display = '';
         context.elements.nameContainer.style.marginLeft = '';
+    }
+
+    if (showState) {
+        context.elements.state.style.display = 'flex';
     }
 
     if (displayedState === '') {
@@ -118,26 +124,22 @@ export function changeState(context) {
 
 export function changeSubButtonState(context, container = context.content, appendTo = container.firstChild.firstChild, before = false) {
     const subButtons = context.config.sub_button;
+    if (!subButtons) return;
 
-    if (!subButtons) {
-        return;
-    }
-
-    //changeStyle(context, subButtons);
-
-    if (!context.previousValues) {
-        context.previousValues = {};
-    }
-
+    context.previousValues = context.previousValues || {};
     let previousSubButtons = [...(context.previousValues.subButtons || [])];
     context.elements = { ...context.elements };
 
-    for (let i = 0; i < subButtons.length; i++) {
-        let subButton = subButtons[i];
+    const subButtonContainer = context.elements.subButtonContainer || createElement('div', 'bubble-sub-button-container');
+    if (!context.elements.subButtonContainer) {
+        Object.assign(subButtonContainer.style, subButtonStyles.subButtonContainer);
+        if (before) appendTo.prepend(subButtonContainer);
+        else appendTo.appendChild(subButtonContainer);
+        context.elements.subButtonContainer = subButtonContainer;
+    }
 
-        if (!subButton) {
-            continue;
-        }
+    subButtons.forEach((subButton, i) => {
+        if (!subButton) return;
 
         const index = i + 1;
         const entity = subButton.entity ?? context.config.entity;
@@ -156,141 +158,73 @@ export function changeSubButtonState(context, container = context.content, appen
         const showIcon = subButton.show_icon ?? true;
         const showBackround = subButton.show_background ?? true;
 
-        if (!context.elements.subButtonContainer) {
-            context.elements.subButtonContainer = createElement('div', 'bubble-sub-button-container');
-            Object.assign(context.elements.subButtonContainer.style, subButtonStyles.subButtonContainer);
-            if (before) {
-                appendTo.prepend(context.elements.subButtonContainer);
-            } else {
-                appendTo.appendChild(context.elements.subButtonContainer);
-            }
-        }
-
+        let subButtonElement = context.elements[index] || createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
         if (!context.elements[index]) {
-            context.elements[index] = createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
-            Object.assign(context.elements[index].style, subButtonStyles.subButton);
-            context.elements[index].nameContainer = createElement('div', 'bubble-sub-button-name-container');
-            Object.assign(context.elements[index].nameContainer.style, subButtonStyles.nameContainer);
-            context.elements[index].feedback = createElement('div', 'bubble-feedback-element feedback-element');
+            Object.assign(subButtonElement.style, subButtonStyles.subButton);
+            subButtonElement.nameContainer = createElement('div', 'bubble-sub-button-name-container');
+            Object.assign(subButtonElement.nameContainer.style, subButtonStyles.nameContainer);
+            subButtonElement.feedback = createElement('div', 'bubble-feedback-element feedback-element');
 
-            context.elements[index].appendChild(context.elements[index].feedback);
-            context.elements[index].appendChild(context.elements[index].nameContainer);
-            context.elements.subButtonContainer.appendChild(context.elements[index]);
-        }
-
-        if (context.elements[index]?.nameContainer?.innerText !== context.elements[index]?.previousNameContainer) {
-            context.elements[index].nameContainer.innerText = '';
-            context.elements[index].previousNameContainer = context.elements[index].nameContainer.innerText
+            subButtonElement.appendChild(subButtonElement.feedback);
+            subButtonElement.appendChild(subButtonElement.nameContainer);
+            subButtonContainer.appendChild(subButtonElement);
+            context.elements[index] = subButtonElement;
         }
 
         if (showIcon && icon) {
-            if (!context.elements[index].icon) {
-                context.elements[index].icon = createElement('ha-icon', 'bubble-sub-button-icon');
-                context.elements[index].icon.setAttribute('icon', icon);
-                context.elements[index].appendChild(context.elements[index].icon);
-                context.elements[index].icon.style.setProperty('--mdc-icon-size', '16px');
-            }
-            if (context.elements[index].icon.style.display !== 'flex'){
-                context.elements[index].icon.style.display = 'flex';
-            }
-        } else if (!showIcon && context.elements[index].icon && context.elements[index].icon.style.display !== 'none') {
-            context.elements[index].icon.style.display = 'none';
+            let iconElement = subButtonElement.icon || createElement('ha-icon', 'bubble-sub-button-icon');
+            iconElement.setAttribute('icon', icon);
+            iconElement.style.display = 'flex';
+            iconElement.style.setProperty('--mdc-icon-size', '16px');
+            subButtonElement.appendChild(iconElement);
+            subButtonElement.icon = iconElement;
+        } else if (subButtonElement.icon) {
+            subButtonElement.icon.style.display = 'none';
         }
 
-        if (showBackround && context.elements[index].style.backgroundColor !== backgroundColor) {
-            context.elements[index].style.backgroundColor = backgroundColor;
-        } else if (!showBackround && context.elements[index].style.backgroundColor !== '') {
-            context.elements[index].style.backgroundColor = '';
-        }
+        subButtonElement.style.backgroundColor = showBackround ? backgroundColor : '';
 
-        if (
-            subButton.tap_action?.action !== 'none' && 
-            subButton.double_tap_action?.action !== 'none' &&
-            subButton.hold_action?.action !== 'none'
-        ){
+        if (subButton.tap_action?.action !== 'none' || subButton.double_tap_action?.action !== 'none' || subButton.hold_action?.action !== 'none') {
             const defaultActions = {
                 tap_action: { action: "more-info" },
                 double_tap_action: { action: "none" },
                 hold_action: { action: "none" }
             };
-            addActions(context.elements[index], subButton, entity, defaultActions);
-            addFeedback(context.elements[index], context.elements[index].feedback);
+            addActions(subButtonElement, subButton, entity, defaultActions);
+            addFeedback(subButtonElement, subButtonElement.feedback);
         }
 
-        const formattedState = state && showState ? context._hass.formatEntityState(state) : '';
-        let formattedAttribute;
-        let formattedLastChanged;
         let displayedState = '';
+        const formattedState = state && showState ? context._hass.formatEntityState(state) : '';
+        const formattedAttribute = state && attribute && showAttribute ? context._hass.formatEntityAttributeValue(state, attributeType) : '';
+        const formattedLastChanged = state && showLastChanged ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
 
-        if (showAttribute) {
-            formattedAttribute = state && attribute ? context._hass.formatEntityAttributeValue(state, attributeType) : '';
-        }
+        if (showName && name) displayedState += name;
+        if (formattedState) displayedState += (displayedState ? ' - ' : '') + formattedState;
+        if (formattedLastChanged) displayedState += (displayedState ? ' - ' : '') + formattedLastChanged;
+        if (formattedAttribute) displayedState += (displayedState ? ' - ' : '') + formattedAttribute;
 
-        if (showLastChanged) {
-            formattedLastChanged = state ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
-        }
+        displayedState = displayedState.charAt(0).toUpperCase() + displayedState.slice(1);
 
-        if (showName && name) {
-            if (displayedState) {
-                displayedState += ' - ';
-            }
-            displayedState += name;
-        }
-
-        if (formattedState) {
-            if (displayedState) {
-                displayedState += ' - ';
-            }
-            displayedState += formattedState;
-        }
-
-        if (formattedLastChanged) {
-            if (displayedState) {
-                displayedState += (formattedState.toLowerCase() !== 'off') ? ' ' : ' - ';
-            }
-            displayedState += (formattedState.toLowerCase() === 'off') ? capitalizeFirstLetter(formattedLastChanged) : formattedLastChanged;
-        }
-
-        if (formattedAttribute) {
-            if (displayedState) {
-                displayedState += ' - ';
-            }
-            displayedState += formattedAttribute;
-        }
-
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
-        displayedState = capitalizeFirstLetter(displayedState);
-
-        if (displayedState === '' && !showIcon) {
-            context.elements[index].style.display = 'none';
-        } else if (displayedState === '' && showIcon) {
-            context.elements[index].style.display = 'flex';
-            if (context.elements[index].icon) {
-                context.elements[index].icon.style.marginRight = '0';
-                context.elements[index].icon.style.setProperty('--mdc-icon-size', '20px');
-            }
+        if (!displayedState && !showIcon) {
+            subButtonElement.style.display = 'none';
         } else {
-            context.elements[index].style.display = 'flex';
-            context.elements[index].nameContainer.innerText = displayedState;
-            context.previousState = displayedState;
+            subButtonElement.style.display = 'flex';
+            subButtonElement.nameContainer.innerText = displayedState;
+            if (showIcon && subButtonElement.icon) {
+                subButtonElement.icon.style.marginRight = displayedState ? '4px' : '0';
+                subButtonElement.icon.style.setProperty('--mdc-icon-size', displayedState ? '16px' : '20px');
+            }
         }
+    });
 
-        if (displayedState && showIcon) {
-            context.elements[index].style.display = 'flex';
-            context.elements[index].icon.style.marginRight = '4px';
-        }
-    }
-    
     context.previousValues.subButtons = subButtons.slice();
 
     for (let i = previousSubButtons.length; i > 0; i--) {
         if (i > subButtons.length) {
             let element = context.elements[i];
             if (element) {
-                context.elements.subButtonContainer.removeChild(element);
+                subButtonContainer.removeChild(element);
                 delete context.elements[i];
             }
         }
@@ -331,3 +265,13 @@ const subButtonStyles = {
         display: 'flex'
     }
 };
+
+export function initializesubButtonIcon(context) {
+    if (!Array.isArray(context.subButtonIcon)) {
+        context.subButtonIcon = [];
+    }
+
+    context.content.querySelectorAll('.bubble-sub-button-icon').forEach((iconElement, index) => {
+        context.subButtonIcon[index] = iconElement;
+    });
+}

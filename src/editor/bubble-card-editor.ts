@@ -37,7 +37,8 @@ export function createBubbleCardEditor() {
         }
 
         get _button_type() {
-            return this._config.button_type || 'switch';
+            return this._config.button_type || 
+                   (this._config.card_type === 'pop-up' ? '' : 'switch');
         }
 
         get _entity() {
@@ -484,78 +485,87 @@ export function createBubbleCardEditor() {
                               Styling options
                             </h4>
                             <div class="content">
-                                <ha-textfield
-                                    label="Optional - Margin (fix centering on some themes) (e.g. 13px)"
-                                    .value="${this._margin}"
-                                    .configValue="${"margin"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-textfield
-                                    label="Optional - Top margin on mobile (e.g. -56px if your header is hidden)"
-                                    .value="${this._margin_top_mobile}"
-                                    .configValue="${"margin_top_mobile"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-textfield
-                                    label="Optional - Top margin on desktop (e.g. 50% for an half sized pop-up)"
-                                    .value="${this._margin_top_desktop}"
-                                    .configValue="${"margin_top_desktop"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-textfield
-                                    label="Optional - Width on desktop (100% by default on mobile)"
-                                    .value="${this._width_desktop}"
-                                    .configValue="${"width_desktop"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-textfield
-                                    label="Optional - Background color (any var, hex, rgb or rgba value)"
-                                    .value="${this._bg_color}"
-                                    .configValue="${"bg_color"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-textfield
-                                    label="Optional - Background opacity (0-100 range)"
-                                    type="number"
-                                    inputMode="numeric"
-                                    min="0"
-                                    max="100"
-                                    .value="${this._bg_opacity}"
-                                    .configValue="${"bg_opacity"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-textfield
-                                    label="Optional - Background/Backdrop blur (0-100 range)"
-                                    type="number"
-                                    inputMode="numeric"
-                                    min="0"
-                                    max="100"
-                                    .value="${this._bg_blur}"
-                                    .configValue="${"bg_blur"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-textfield
-                                    label="Optional - Shadow opacity (0-100 range)"
-                                    type="number"
-                                    inputMode="numeric"
-                                    min="0"
-                                    max="100"
-                                    .configValue="${"shadow_opacity"}"
-                                    .value="${this._shadow_opacity}""
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-formfield .label="Optional - Hide pop-up backdrop (a refresh is needed)">
-                                    <ha-switch
-                                        aria-label="Optional - Hide pop-up backdrop (a refresh is needed)"
-                                        .checked=${this._hide_backdrop}
-                                        .configValue="${"hide_backdrop"}"
-                                        @change=${this._valueChanged}
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Optional - Hide pop-up backdrop (a refresh is needed)</label> 
+                                ${this.makeLayoutOptions()}
+                                <ha-expansion-panel outlined>
+                                    <h4 slot="header">
+                                      <ha-icon icon="mdi:palette"></ha-icon>
+                                      Pop-up styling
+                                    </h4>
+                                    <div class="content"> 
+                                        <ha-textfield
+                                            label="Optional - Margin (fix centering on some themes) (e.g. 13px)"
+                                            .value="${this._margin}"
+                                            .configValue="${"margin"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-textfield
+                                            label="Optional - Top margin on mobile (e.g. -56px if your header is hidden)"
+                                            .value="${this._margin_top_mobile}"
+                                            .configValue="${"margin_top_mobile"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-textfield
+                                            label="Optional - Top margin on desktop (e.g. 50% for an half sized pop-up)"
+                                            .value="${this._margin_top_desktop}"
+                                            .configValue="${"margin_top_desktop"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-textfield
+                                            label="Optional - Width on desktop (100% by default on mobile)"
+                                            .value="${this._width_desktop}"
+                                            .configValue="${"width_desktop"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-textfield
+                                            label="Optional - Background color (any var, hex, rgb or rgba value)"
+                                            .value="${this._bg_color}"
+                                            .configValue="${"bg_color"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-textfield
+                                            label="Optional - Background opacity (0-100 range)"
+                                            type="number"
+                                            inputMode="numeric"
+                                            min="0"
+                                            max="100"
+                                            .value="${this._bg_opacity}"
+                                            .configValue="${"bg_opacity"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-textfield
+                                            label="Optional - Background/Backdrop blur (0-100 range)"
+                                            type="number"
+                                            inputMode="numeric"
+                                            min="0"
+                                            max="100"
+                                            .value="${this._bg_blur}"
+                                            .configValue="${"bg_blur"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-textfield
+                                            label="Optional - Shadow opacity (0-100 range)"
+                                            type="number"
+                                            inputMode="numeric"
+                                            min="0"
+                                            max="100"
+                                            .configValue="${"shadow_opacity"}"
+                                            .value="${this._shadow_opacity}""
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-formfield .label="Optional - Hide pop-up backdrop (a refresh is needed)">
+                                            <ha-switch
+                                                aria-label="Optional - Hide pop-up backdrop (a refresh is needed)"
+                                                .checked=${this._hide_backdrop}
+                                                .configValue="${"hide_backdrop"}"
+                                                @change=${this._valueChanged}
+                                            ></ha-switch>
+                                            <div class="mdc-form-field">
+                                                <label class="mdc-label">Optional - Hide pop-up backdrop (a refresh is needed)</label> 
+                                            </div>
+                                        </ha-formfield>
+                                        <ha-alert alert-type="info">Set this toggle to true on the first pop-up of your main dashboard to disable the backdrop on all pop-ups.</ha-alert>
                                     </div>
-                                </ha-formfield>
-                                <ha-alert alert-type="info">Set this toggle to true on the first pop-up of your main dashboard to disable the backdrop on all pop-ups.</ha-alert>
+                                </ha-expansion-panel>
                                 ${this.makeStyleEditor()}
                             </div>
                         </ha-expansion-panel>
@@ -570,7 +580,6 @@ export function createBubbleCardEditor() {
                                 ${this.makeTapActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
-                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">
                             This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., '#pop-up-name'), with <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#example">any card</a> that support <code>navigation_path</code>, or with the <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack">horizontal buttons stack</a> that is included.
@@ -613,7 +622,7 @@ export function createBubbleCardEditor() {
                                 ${this.makeTapActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
-                        <ha-expansion-panel outlined>
+                        <ha-expansion-panel outlined style="display: ${this._config.button_type === 'slider' || this._config.button_type === 'name' ? 'none' : ''}">
                             <h4 slot="header">
                               <ha-icon icon="mdi:gesture-tap"></ha-icon>
                               Tap action on button
@@ -630,10 +639,10 @@ export function createBubbleCardEditor() {
                               Styling options
                             </h4>
                             <div class="content">
+                                ${this.makeLayoutOptions()}
                                 ${this.makeStyleEditor()}
                             </div>
                         </ha-expansion-panel>
-                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">This card allows you to control your entities. When used as a slider, it can control the brightness of a light, the volume of a media player, the position of a cover, and it also supports input number. To access color / control of an entity, simply tap on the icon.</ha-alert>
                         ${this.makeVersion()}
@@ -656,10 +665,10 @@ export function createBubbleCardEditor() {
                               Styling options
                             </h4>
                             <div class="content">
+                                ${this.makeLayoutOptions()}
                                 ${this.makeStyleEditor()}
                             </div>
                         </ha-expansion-panel>
-                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...</ha-alert>
                         ${this.makeVersion()}
@@ -707,51 +716,59 @@ export function createBubbleCardEditor() {
                               Styling options
                             </h4>
                             <div class="content">  
-                                <ha-textfield
-                                    label="Optional - Margin (fix centering on some themes) (e.g. 13px)"
-                                    .value="${this._margin}"
-                                    .configValue="${"margin"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-textfield
-                                    label="Optional - Width on desktop (100% by default on mobile)"
-                                    .value="${this._width_desktop}"
-                                    .configValue="${"width_desktop"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-formfield .label="Optional - Rise animation (Displays an animation once the page has loaded)">
-                                    <ha-switch
-                                        aria-label="Optional - Rise animation (Displays an animation once the page has loaded)"
-                                        .checked=${this._rise_animation}
-                                        .configValue="${"rise_animation"}"
-                                        @change=${this._valueChanged}
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Optional - Rise animation (Displays an animation once the page has loaded)</label> 
+                                <ha-expansion-panel outlined>
+                                    <h4 slot="header">
+                                      <ha-icon icon="mdi:palette"></ha-icon>
+                                      Horizontal buttons stack styling
+                                    </h4>
+                                    <div class="content"> 
+                                        <ha-textfield
+                                            label="Optional - Margin (fix centering on some themes) (e.g. 13px)"
+                                            .value="${this._margin}"
+                                            .configValue="${"margin"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-textfield
+                                            label="Optional - Width on desktop (100% by default on mobile)"
+                                            .value="${this._width_desktop}"
+                                            .configValue="${"width_desktop"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-formfield .label="Optional - Rise animation (Displays an animation once the page has loaded)">
+                                            <ha-switch
+                                                aria-label="Optional - Rise animation (Displays an animation once the page has loaded)"
+                                                .checked=${this._rise_animation}
+                                                .configValue="${"rise_animation"}"
+                                                @change=${this._valueChanged}
+                                            ></ha-switch>
+                                            <div class="mdc-form-field">
+                                                <label class="mdc-label">Optional - Rise animation (Displays an animation once the page has loaded)</label> 
+                                            </div>
+                                        </ha-formfield>
+                                        <ha-formfield .label="Optional - Highlight current hash / view">
+                                            <ha-switch
+                                                aria-label="Optional - Highlight current hash / view"
+                                                .checked=${this._highlight_current_view}
+                                                .configValue="${"highlight_current_view"}"
+                                                @change=${this._valueChanged}
+                                            ></ha-switch>
+                                            <div class="mdc-form-field">
+                                                <label class="mdc-label">Optional - Highlight current hash / view</label> 
+                                            </div>
+                                        </ha-formfield>
+                                        <ha-formfield .label="Optional - Hide gradient">
+                                            <ha-switch
+                                                aria-label="Optional - Hide gradient"
+                                                .checked=${this._hide_gradient}
+                                                .configValue="${"hide_gradient"}"
+                                                @change=${this._valueChanged}
+                                            ></ha-switch>
+                                            <div class="mdc-form-field">
+                                                <label class="mdc-label">Optional - Hide gradient</label> 
+                                            </div>
+                                        </ha-formfield>
                                     </div>
-                                </ha-formfield>
-                                <ha-formfield .label="Optional - Highlight current hash / view">
-                                    <ha-switch
-                                        aria-label="Optional - Highlight current hash / view"
-                                        .checked=${this._highlight_current_view}
-                                        .configValue="${"highlight_current_view"}"
-                                        @change=${this._valueChanged}
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Optional - Highlight current hash / view</label> 
-                                    </div>
-                                </ha-formfield>
-                                <ha-formfield .label="Optional - Hide gradient">
-                                    <ha-switch
-                                        aria-label="Optional - Hide gradient"
-                                        .checked=${this._hide_gradient}
-                                        .configValue="${"hide_gradient"}"
-                                        @change=${this._valueChanged}
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Optional - Hide gradient</label> 
-                                    </div>
-                                </ha-formfield>
+                                </ha-expansion-panel>
                                 ${this.makeStyleEditor()}
                             </div>
                         </ha-expansion-panel>
@@ -813,8 +830,17 @@ export function createBubbleCardEditor() {
                               Styling options
                             </h4>
                             <div class="content"> 
-                                ${this.makeDropdown("Optional - Arrow down icon", "icon_down")}
-                                ${this.makeDropdown("Optional - Arrow up icon", "icon_up")}
+                                ${this.makeLayoutOptions()}
+                                <ha-expansion-panel outlined>
+                                    <h4 slot="header">
+                                      <ha-icon icon="mdi:palette"></ha-icon>
+                                      Cover styling
+                                    </h4>
+                                    <div class="content"> 
+                                        ${this.makeDropdown("Optional - Arrow down icon", "icon_down")}
+                                        ${this.makeDropdown("Optional - Arrow up icon", "icon_up")}
+                                    </div>
+                                </ha-expansion-panel>
                                 ${this.makeStyleEditor()}
                             </div>
                         </ha-expansion-panel>
@@ -829,7 +855,6 @@ export function createBubbleCardEditor() {
                                 ${this.makeTapActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
-                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">This card allows you to control your covers.</ha-alert>
                         ${this.makeVersion()}
@@ -925,6 +950,7 @@ export function createBubbleCardEditor() {
                               Styling options
                             </h4>
                             <div class="content">
+                                ${this.makeLayoutOptions()}
                                 ${this.makeStyleEditor()}
                             </div>
                         </ha-expansion-panel>
@@ -939,7 +965,6 @@ export function createBubbleCardEditor() {
                                 ${this.makeTapActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
-                        ${this.makeLayoutOptions()}
                         ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">This card allows you to control a media player. You can tap on the icon to get more control.</ha-alert>
                         ${this.makeVersion()}
@@ -986,9 +1011,17 @@ export function createBubbleCardEditor() {
 
         makeLayoutOptions() {
             return html`
+                <ha-combo-box
+                    label="Card layout"
+                    .value="${this._config.card_layout || 'normal'}"
+                    .configValue="${"card_layout"}"
+                    .items="${[{label: 'Normal', value: 'normal'}, {label: 'Large (Optimized for sections)', value: 'large'}, {label: 'Large with 2 sub-buttons rows (Optimized for sections)', value: 'large-2-rows'}]}"
+                    @value-changed="${this._valueChanged}"
+                    style="display: ${this._config.card_type === "pop-up" ? 'none' : ''};"
+                ></ha-combo-box>
                 <ha-expansion-panel outlined>
                     <h4 slot="header">
-                        <ha-icon icon="mdi:palette"></ha-icon>
+                        <ha-icon icon="mdi:table"></ha-icon>
                         Layout options for sections
                     </h4>
                     <div class="content">
@@ -1236,9 +1269,15 @@ export function createBubbleCardEditor() {
                             <div class="ha-combo-box">
                                 <ha-combo-box
                                     label="Entity"
-                                    .value="${valueType?.target_entity}"
+                                    .value="${valueType?.target.entity_id}"
                                     .items="${this.allEntitiesList}"
-                                    @value-changed="${(ev) => this._tapActionValueChange(index, { [configValueType]: { target: { entity_id: ev.detail.value } } }, array)}"
+                                    @value-changed="${(ev) => {
+                                        const newValue = { [configValueType]: { target: { entity_id: ev.detail.value } } };
+                                        if (copy[index][configValueType] && copy[index][configValueType].target) {
+                                            newValue[configValueType].target = { ...copy[index][configValueType].target, ...newValue[configValueType].target };
+                                        }
+                                        this._tapActionValueChange(index, newValue, array);
+                                    }}"
                                 ></ha-combo-box>
                             </div>
                         ` : ''}
@@ -1507,20 +1546,27 @@ export function createBubbleCardEditor() {
 
         makeStyleEditor() {
             return html`
-                <h3>Custom styles</h3>
-                <div class="code-editor">
-                    <ha-code-editor
-                        mode="yaml"
-                        autofocus
-                        autocomplete-entities
-                        autocomplete-icons
-                        .hass=${this.hass}
-                        .value=${this._config.styles}
-                        .configValue="${"styles"}"
-                        @value-changed=${this._valueChanged}
-                    ></ha-code-editor>
-                </div>
-                <ha-alert alert-type="info">For advanced users, you can edit the CSS style of this card in this editor. For more information, you can go <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically.</ha-alert>
+                <ha-expansion-panel outlined>
+                    <h4 slot="header">
+                        <ha-icon icon="mdi:code-braces"></ha-icon>
+                        Custom styles
+                    </h4>
+                    <div class="content">
+                        <div class="code-editor">
+                            <ha-code-editor
+                                mode="yaml"
+                                autofocus
+                                autocomplete-entities
+                                autocomplete-icons
+                                .hass=${this.hass}
+                                .value=${this._config.styles}
+                                .configValue="${"styles"}"
+                                @value-changed=${this._valueChanged}
+                            ></ha-code-editor>
+                        </div>
+                        <ha-alert alert-type="info">For advanced users, you can edit the CSS style of this card in this editor. For more information, you can go <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically.</ha-alert>
+                    </div>
+                </ha-expansion-panel>
             `;
         }
 

@@ -86,4 +86,58 @@ export default `
         cursor: pointer;
         border: none;
     }
+
+    .large .bubble-cover-card-container {
+      height: 64px;
+      display: flex;
+      background: var(--background-color-2, var(--secondary-background-color));
+      border-radius: 32px;
+    }
+
+    .large .bubble-header-container {
+        height: 64px;
+    }
+
+    .large .bubble-header {
+        width: 100%;
+    }
+
+    .large .bubble-icon-container {
+      --mdc-icon-size: 28px;
+      min-width: 48px !important;
+      min-height: 48px !important;
+      margin-left: 2px;
+      align-content: center;
+    }
+
+    .large .bubble-icon {
+      align-items: center;
+    }
+
+    .large .bubble-buttons {
+      display: flex;
+      position: relative;
+      right: 18px;
+      align-self: center;
+      grid-gap: 18px;
+    }
+
+    .large .bubble-sub-button-container {
+      margin-right: 14px;
+    }
+
+    .rows-2 .bubble-sub-button-container {
+      flex-direction: column;
+      gap: 4px !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, min-content);
+      grid-template-rows: repeat(2, 1fr);
+      grid-auto-flow: column;
+      width: auto;
+      padding-right: 14px;
+    }
+
+    .rows-2 .bubble-sub-button {
+      height: 20px !important;
+    }
 `

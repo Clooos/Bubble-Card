@@ -1,3 +1,4 @@
+import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 import { 
     applyScrollingEffect,
     getBrightness,
@@ -9,6 +10,8 @@ import {
     getAttribute,
     isEntityType,
     isStateOn,
+    getWeatherIcon,
+    setLayout
 } from '../../tools/utils.ts';
 
 export function changeIcon(context) {
@@ -138,10 +141,14 @@ export function changeMuteIcon(context) {
 }
 
 export function changeStyle(context) {
+    initializesubButtonIcon(context);
+    setLayout(context);
+
     const state = getState(context);
 
     const customStyle = context.config.styles
-        ? Function('hass', 'entityId', 'state', 'icon', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state, context.elements.icon)
+        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
+          (context._hass, context.config.entity, state, context.elements.icon.icon, context.subButtonIcon, getWeatherIcon)
         : '';
 
     context.elements.customStyle.innerText = customStyle;

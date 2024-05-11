@@ -345,7 +345,7 @@ export function isEntityType(context, entityType) {
 export function isStateOn(context, entity = context.config.entity) {
     const state = getState(context, entity);
     const numericState = Number(state);
-    const activeStringStates = ['on', 'open', 'opening', 'closing', 'cleaning', 'true', 'idle', 'home', 'playing', 'locked', 'occupied', 'available', 'running', 'active', 'connected'];
+    const activeStringStates = ['on', 'open', 'opening', 'closing', 'cleaning', 'true', 'idle', 'home', 'playing', 'locked', 'occupied', 'available', 'running', 'active', 'connected', 'mowing'];
 
     if (activeStringStates.includes(state) || numericState > 0) {
         return true;
@@ -467,6 +467,29 @@ export function formatDateTime(datetime, locale) {
 
     const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
     return rtf.format(-value, unit);
+}
+
+export function setLayout(context) {
+    const cardLayout = context.config.card_layout;
+
+    if (cardLayout === 'large') {
+        if (!context.content.classList.contains('large')) {
+            context.content.classList.add('large');
+        }
+        if (context.content.classList.contains('rows-2')) {
+            context.content.classList.remove('rows-2');
+        } 
+    } else if (cardLayout === 'large-2-rows') {
+        if (!context.content.classList.contains('large')) {
+            context.content.classList.add('large');
+        } 
+        if (!context.content.classList.contains('rows-2')) {
+            context.content.classList.add('rows-2');
+        } 
+    } else {
+        context.content.classList.remove('large');
+        context.content.classList.remove('rows-2');
+    }
 }
 
 export function throttle(mainFunction, delay = 300) {

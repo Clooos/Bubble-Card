@@ -1,4 +1,5 @@
 import { getButtonType } from "./helpers.ts";
+import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 import { 
   applyScrollingEffect,
   getIcon,
@@ -9,7 +10,8 @@ import {
   getAttribute,
   isStateOn,
   isEntityType,
-  getWeatherIcon
+  getWeatherIcon,
+  setLayout
 } from '../../tools/utils.ts';
 
 export function changeButton(context) {
@@ -114,98 +116,13 @@ export function changeStatus(context) {
       context.card.classList.remove('is-on');
   }
 }
-// export function changeStyle(context) {
-//   const state = getState(context);
-
-//   const customStyle = context.config.styles
-//       ? Function('hass', 'entityId', 'state', 'icon', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state, context.elements.icon)
-//       : '';
-
-//   context.elements.customStyle.innerText = customStyle;
-// }
-
-// export function changeStyle(context) {
-//     // Utilisez subButton comme nécessaire dans cette fonction
-
-// // Initialisation d'un tableau pour stocker les références aux icônes
-// let subButtonIcon = [];
-
-// // Fonction pour initialiser les références aux icônes
-// export function initializesubButtonIcon(context) {
-//     const subButtons = context.config.sub_button;
-//     if (!subButtons) {
-//         return;
-//     }
-
-//     // Parcours des sous-boutons pour récupérer les icônes
-//     for (let i = 0; i < subButtons.length; i++) {
-//         const subButton = subButtons[i];
-//         if (!subButton) {
-//             continue;
-//         }
-
-//         // Sélection de l'élément icône en utilisant la classe CSS
-//         const iconElement = context.content.querySelector(`.bubble-sub-button-${i + 1} .bubble-sub-button-icon`);
-//         if (iconElement) {
-//             // Ajout de la référence de l'icône dans le tableau
-//             subButtonIcon.push(iconElement);
-//         }
-//     }
-// }
-
-// export function initializesubButtonIcon(context) {
-//     // Assurez-vous que context.subButtonIcon est initialisé
-//     if (!context.subButtonIcon) {
-//         context.subButtonIcon = {};
-//     }
-
-//     const iconElement = context.content.querySelector(`.bubble-sub-button-${index} .bubble-sub-button-icon`);
-//     if (iconElement) {
-//         // Stockez la référence de l'icône dans context.subButtonIcon avec l'identifiant comme clé
-//         context.subButtonIcon[subButtonId] = iconElement;
-//     }
-// }
-
-// export function changeStyle(context) {
-//     // Appel de la fonction pour initialiser les icônes
-//     initializesubButtonIcon(context);
-
-//     // Utilisez setTimeout ou une autre méthode pour attendre que le DOM soit prêt
-
-//     const state = getState(context);
-
-//     // Appliquez votre style personnalisé
-//     const customStyle = context.config.styles
-//         ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'return `' + context.config.styles + '`;')
-//           (context._hass, context.config.entity, state, context.elements.icon.icon, context.subButtonIcon)
-//         : '';
-
-//     context.elements.customStyle.innerText = customStyle;
-// }
-
-export function initializesubButtonIcon(context) {
-    // Assurez-vous que context.subButtonIcon est initialisé comme un tableau
-    if (!Array.isArray(context.subButtonIcon)) {
-        context.subButtonIcon = [];
-    }
-
-    // Trouvez tous les éléments d'icône et ajoutez-les au tableau
-    context.content.querySelectorAll('.bubble-sub-button-icon').forEach((iconElement, index) => {
-        // Stockez la référence de l'icône dans context.subButtonIcon à l'index correspondant
-        context.subButtonIcon[index] = iconElement;
-    });
-}
 
 export function changeStyle(context) {
-    // Appel de la fonction pour initialiser les icônes
     initializesubButtonIcon(context);
-
-    // Utilisez setTimeout ou une autre méthode pour attendre que le DOM soit prêt
-    // ...
+    setLayout(context);
 
     const state = getState(context);
 
-    // Appliquez votre style personnalisé
     const customStyle = context.config.styles
         ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
           (context._hass, context.config.entity, state, context.elements.icon.icon, context.subButtonIcon, getWeatherIcon)

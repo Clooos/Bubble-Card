@@ -1,7 +1,8 @@
 import { isColorCloseToWhite } from "../../tools/style.ts";
-import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isStateOn } from "../../tools/utils.ts";
+import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isStateOn, getWeatherIcon } from "../../tools/utils.ts";
 import { getBackdrop } from "./create.ts";
 import { addHash, onEditorChange, removeHash } from "./helpers.ts";
+import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 
 export function changeEditor(context) {
   const detectedEditor = context.verticalStack.host.closest('hui-card-preview');
@@ -13,7 +14,6 @@ if (context.sectionRow.classList.contains('card')) {
     } else if (context.editor && context.sectionRow.style.position !== '') {
         context.sectionRow.style.position = '';
     }
-    //context.sectionRow.style.position = !context.editor && context.sectionRow.style.position !== 'absolute' ? 'absolute' : 'absolute';
 }
 
   if (context.editor || detectedEditor !== null) {
@@ -30,19 +30,24 @@ if (context.sectionRow.classList.contains('card')) {
   }
   onEditorChange(context);
 }
+
 export function changeStyle(context) {
-  const state = getState(context);
-  const { backdropCustomStyle } = getBackdrop(context);
+    initializesubButtonIcon(context);
 
-  const customStyle = context.config.styles
-      ? Function('hass', 'entityId', 'state', 'icon', 'return `' + context.config.styles + '`;')(context._hass, context.config.entity, state, context.elements.icon)
-      : '';
+    const state = getState(context);
+    const { backdropCustomStyle } = getBackdrop(context);
 
-  if (context.elements.customStyle) {
+    const customStyle = context.config.styles
+        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
+          (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon)
+        : '';
+
+    if (context.elements.customStyle) {
     context.elements.customStyle.innerText = customStyle;
-  }
-  backdropCustomStyle.innerText = customStyle;
+    }
+    backdropCustomStyle.innerText = customStyle;
 }
+
 export function changeTriggered(context) {
     let triggerEntity = context.config.trigger_entity ?? '';
     let triggerState = context.config.trigger_state ?? '';

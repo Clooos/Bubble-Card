@@ -70,10 +70,16 @@ export function createSwitchStructure(context) {
   addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
 export function createNameStructure(context) {
-  if (context.config.tap_action) {
-      addActions(context.elements.buttonCardContainer, context.config);
-      addFeedback(context.elements.buttonBackground, context.elements.feedback);
-  }
+    const nameDefaultActions = {
+        tap_action: { action: "none" },
+        double_tap_action: { action: "none" },
+        hold_action: { action: "none" }
+    };
+
+    context.elements.buttonCard.style.cursor = 'auto';
+
+    addActions(context.elements.iconContainer, context.config, context.config.entity, nameDefaultActions);
+    addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
 export function createStateStructure(context) {
   addActions(context.elements.buttonCardContainer, context.config);

@@ -163,4 +163,31 @@ export default `
         64% {transform: translateX(0); opacity: 0.1;}
         100% {transform: translateX(100%); opacity: 0;}
     }
+
+    .large .bubble-button-card-container {
+      height: 64px;
+      border-radius: 32px;
+    }
+
+    .large .bubble-icon-container {
+      --mdc-icon-size: 28px;
+      min-width: 48px !important;
+      min-height: 48px !important;
+      margin-left: 8px;
+    }
+
+    .rows-2 .bubble-sub-button-container {
+      flex-direction: column;
+      gap: 4px !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, min-content);
+      grid-template-rows: repeat(2, 1fr);
+      grid-auto-flow: column;
+      width: auto;
+      padding-right: 14px;
+    }
+
+    .rows-2 .bubble-sub-button {
+      height: 20px !important;
+    }
 `;

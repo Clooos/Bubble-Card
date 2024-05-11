@@ -31,4 +31,24 @@ export default `
     .bubble-sub-button-container {
         margin-left: 24px;
     }
+
+    .large .bubble-separator {
+      height: 58px;
+    }
+
+    .rows-2 .bubble-sub-button-container {
+      flex-direction: column;
+      gap: 4px !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, minmax(auto, max-content));
+      grid-auto-rows: none;
+      grid-auto-flow: column;
+      width: auto;
+      padding-right: 14px;
+    }
+
+    .rows-2 .bubble-sub-button {
+      height: 20px !important;
+    }
 `;

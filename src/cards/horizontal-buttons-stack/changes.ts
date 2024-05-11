@@ -1,7 +1,7 @@
 import { isColorCloseToWhite } from "../../tools/style.ts";
 import { getState } from "../../tools/utils.ts";
 import { createButton } from './create.ts';
-
+import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 
 const BUTTON_MARGIN = 12;
 

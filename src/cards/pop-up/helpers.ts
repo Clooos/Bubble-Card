@@ -46,6 +46,13 @@ export function closePopup(context) {
   }
   context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
   window.removeEventListener('click', clickOutside);
+
+  const closeOnClick = context.config.close_on_click ?? false;
+  if (closeOnClick) {
+      context.popUp.removeEventListener('mouseup', removeHash);
+      context.popUp.removeEventListener('touchend', removeHash);  
+  }
+
   context.removeDomTimeout = window.setTimeout(() => {
     if (context.popUp.parentNode === context.verticalStack) {
       context.verticalStack.removeChild(context.popUp);
@@ -70,6 +77,12 @@ export function openPopup(context) {
   context.popUp.style.display = '';
   context.popUp.style.transform = '';
   context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
+
+  const closeOnClick = context.config.close_on_click ?? false;
+  if (closeOnClick) {
+      context.popUp.addEventListener('mouseup', removeHash, { passive: true });
+      context.popUp.addEventListener('touchend', removeHash, { passive: true });
+  }
 
   requestAnimationFrame(() => {
     context.popUp.classList.remove('is-popup-closed');
