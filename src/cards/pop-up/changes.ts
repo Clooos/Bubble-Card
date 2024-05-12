@@ -5,34 +5,59 @@ import { addHash, onEditorChange, removeHash } from "./helpers.ts";
 import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 
 export function changeEditor(context) {
-  const detectedEditor = context.verticalStack.host.closest('hui-card-preview');
+    const detectedEditor = context.verticalStack.host.closest('hui-card-preview');
 
-if (context.sectionRow.classList.contains('card')) {
-    // Fix the empty space caused by the pop-ups in the section view
-    if (!context.editor && context.sectionRow.style.position !== 'absolute') {
-        context.sectionRow.style.position = 'absolute';
-    } else if (context.editor && context.sectionRow.style.position !== '') {
-        context.sectionRow.style.position = '';
+    if (context.sectionRow.classList.contains('card')) {
+        // Fix the empty space caused by the pop-ups in the section view
+        if (!context.editor && context.sectionRow.style.position !== 'absolute') {
+            context.sectionRow.style.position = 'absolute';
+        } else if (context.editor && context.sectionRow.style.position !== '') {
+            context.sectionRow.style.position = '';
+        }
+
+        if (detectedEditor === null && !context.editor && context.sectionRow?.style.position !== 'absolute') {
+            context.sectionRow.style.position = 'absolute';
+        }
     }
-}
 
-  if (context.editor || detectedEditor !== null) {
-    context.popUp.classList.add('editor');
+    if (context.editor || detectedEditor !== null) {
+        context.popUp.classList.add('editor');
 
-    if (detectedEditor !== null) {
-        context.elements.popUpContainer.classList.remove('hidden');
+        if (detectedEditor !== null) {
+            context.elements.popUpContainer.classList.remove('hidden');
+        } else {
+            context.elements.popUpContainer.classList.add('hidden');
+        }
     } else {
-        context.elements.popUpContainer.classList.add('hidden');
+        context.popUp.classList.remove('editor');
+        context.elements.popUpContainer.classList.remove('hidden');
     }
-  } else {
-    context.popUp.classList.remove('editor');
-    context.elements.popUpContainer.classList.remove('hidden');
-  }
-  onEditorChange(context);
+    onEditorChange(context);
 }
 
 export function changeStyle(context) {
     initializesubButtonIcon(context);
+
+    const cardLayout = context.config.card_layout;
+
+    if (cardLayout === 'large') {
+        if (!context.popUp.classList.contains('large')) {
+            context.popUp.classList.add('large');
+        }
+        if (context.popUp.classList.contains('rows-2')) {
+            context.popUp.classList.remove('rows-2');
+        } 
+    } else if (cardLayout === 'large-2-rows') {
+        if (!context.popUp.classList.contains('large')) {
+            context.popUp.classList.add('large');
+        } 
+        if (!context.popUp.classList.contains('rows-2')) {
+            context.popUp.classList.add('rows-2');
+        } 
+    } else {
+        context.popUp.classList.remove('large');
+        context.popUp.classList.remove('rows-2');
+    }
 
     const state = getState(context);
     const { backdropCustomStyle } = getBackdrop(context);

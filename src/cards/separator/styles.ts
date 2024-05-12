@@ -27,9 +27,11 @@ export default `
         flex-grow: 1;
         height: 6px;
         background-color: var(--background-color, var(--secondary-background-color));
+        margin-right: 14px;
     }
     .bubble-sub-button-container {
-        margin-left: 24px;
+        margin: 0 8px;
+        right: 0 !important;
     }
 
     .large .bubble-separator {
@@ -40,12 +42,10 @@ export default `
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, minmax(auto, max-content));
-      grid-auto-rows: none;
+      grid-template-columns: repeat(2, min-content);
+      grid-template-rows: repeat(2, 1fr);
       grid-auto-flow: column;
       width: auto;
-      padding-right: 14px;
     }
 
     .rows-2 .bubble-sub-button {

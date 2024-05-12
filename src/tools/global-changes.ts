@@ -27,26 +27,8 @@ export function changeState(context) {
     let formattedAttribute;
     let formattedLastChanged;
 
-    if (showAttribute) {
-        if (!attribute) {
-            switch (buttonType) {
-                case "switch":
-                case "state":
-                    formattedLastChanged = state ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
-                    break;
-                case "slider":
-                    const attributeKey = isEntityType(context, "cover") ? "current_subButton" :
-                                         isEntityType(context, "light") && state.state !== 'off' ? "brightness" :
-                                         isEntityType(context, "media_player") && state.state !== 'off' ? "volume_level" :
-                                         null;
-                    formattedAttribute = state && attributeKey ? context._hass.formatEntityAttributeValue(state, attributeKey) : '';
-                    break;
-                default:
-                    formattedAttribute = "";
-            }
-        } else {
-            formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, attribute) : '';
-        }
+    if (showAttribute && attribute) {
+        formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, attribute) : '';
     }
 
     if (showLastChanged) {
@@ -131,7 +113,7 @@ export function changeSubButtonState(context, container = context.content, appen
     context.elements = { ...context.elements };
 
     const subButtonContainer = context.elements.subButtonContainer || createElement('div', 'bubble-sub-button-container');
-    if (!context.elements.subButtonContainer) {
+    if (!context.elements.subButtonContainer && context.config.sub_button) {
         Object.assign(subButtonContainer.style, subButtonStyles.subButtonContainer);
         if (before) appendTo.prepend(subButtonContainer);
         else appendTo.appendChild(subButtonContainer);
@@ -172,12 +154,17 @@ export function changeSubButtonState(context, container = context.content, appen
         }
 
         if (showIcon && icon) {
-            let iconElement = subButtonElement.icon || createElement('ha-icon', 'bubble-sub-button-icon');
-            iconElement.setAttribute('icon', icon);
-            iconElement.style.display = 'flex';
-            iconElement.style.setProperty('--mdc-icon-size', '16px');
-            subButtonElement.appendChild(iconElement);
-            subButtonElement.icon = iconElement;
+            let iconElement = subButtonElement.icon;
+            if (!iconElement) {
+                iconElement = createElement('ha-icon', 'bubble-sub-button-icon');
+                iconElement.style.display = 'flex';
+                iconElement.style.setProperty('--mdc-icon-size', '16px');
+                subButtonElement.appendChild(iconElement);
+                subButtonElement.icon = iconElement;
+            }
+            if (iconElement.getAttribute('icon') !== icon) {
+                iconElement.setAttribute('icon', icon);
+            }
         } else if (subButtonElement.icon) {
             subButtonElement.icon.style.display = 'none';
         }
@@ -216,6 +203,11 @@ export function changeSubButtonState(context, container = context.content, appen
                 subButtonElement.icon.style.setProperty('--mdc-icon-size', displayedState ? '16px' : '20px');
             }
         }
+
+        // if (!context.config.sub_button) {
+        //     console.log('NONE')
+        //     context.elements.subButtonContainer.style.display = 'none';
+        // }
     });
 
     context.previousValues.subButtons = subButtons.slice();

@@ -94,6 +94,11 @@ export default `
       border-radius: 32px;
     }
 
+    .large .bubble-buttons .bubble-icon {
+      color: var(--primary-text-color) !important;
+      opacity: 1;
+    }
+
     .large .bubble-header-container {
         height: 64px;
     }

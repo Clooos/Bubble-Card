@@ -1012,12 +1012,11 @@ export function createBubbleCardEditor() {
         makeLayoutOptions() {
             return html`
                 <ha-combo-box
-                    label="Card layout"
+                    label="${this._config.card_type === "pop-up" ? 'Header card layout' : 'Card layout'}"
                     .value="${this._config.card_layout || 'normal'}"
                     .configValue="${"card_layout"}"
                     .items="${[{label: 'Normal', value: 'normal'}, {label: 'Large (Optimized for sections)', value: 'large'}, {label: 'Large with 2 sub-buttons rows (Optimized for sections)', value: 'large-2-rows'}]}"
                     @value-changed="${this._valueChanged}"
-                    style="display: ${this._config.card_type === "pop-up" ? 'none' : ''};"
                 ></ha-combo-box>
                 <ha-expansion-panel outlined>
                     <h4 slot="header">

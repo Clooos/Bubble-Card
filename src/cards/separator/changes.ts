@@ -18,7 +18,7 @@ export function changeStyle(context) {
 
     const customStyle = context.config.styles
         ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
-          (context._hass, context.config.entity, state, context.elements.icon.icon, context.subButtonIcon, getWeatherIcon)
+          (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon)
         : '';
 
     context.elements.customStyle.innerText = customStyle;

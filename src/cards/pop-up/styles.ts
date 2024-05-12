@@ -56,10 +56,10 @@ export default `
       overflow: visible;
   }
   .is-popup-opened {
-      transform: translateY(0);
       box-shadow: 0px 0px 50px rgba(0, 0, 0, var(--custom-shadow-opacity));
       backdrop-filter: var(--custom-popup-filter);
       -webkit-backdrop-filter: var(--custom-popup-filter);
+      overflow: auto;
   }
   .is-popup-closed { 
       transform: translateY(100%) !important;
@@ -138,6 +138,46 @@ export default `
       padding-bottom: 0 !important;
       mask-image: none;
       -webkit-mask-image: none;      
+  }
+
+  .large .bubble-button-card-container {
+    height: 64px;
+    border-radius: 32px;
+  }
+
+  .large .bubble-pop-up-container {
+      margin-top: -36px;
+  }
+
+  .large .bubble-icon-container {
+    --mdc-icon-size: 28px;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    margin-left: 8px;
+  }
+
+  .large .bubble-close-button {
+      height: 64px;
+      width: 64px;
+      border: none;
+      border-radius: 50%;
+      z-index: 1;
+      --mdc-icon-size: 28px !important;
+  }
+
+  .rows-2 .bubble-sub-button-container {
+    flex-direction: column;
+    gap: 4px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, min-content);
+    grid-template-rows: repeat(2, 1fr);
+    grid-auto-flow: column;
+    width: auto;
+    padding-right: 14px;
+  }
+
+  .rows-2 .bubble-sub-button {
+    height: 20px !important;
   }
 `;
 
