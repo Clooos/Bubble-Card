@@ -23,7 +23,7 @@ module.exports = [
       'bubble-pop-up-fix': './src/bubble-pop-up-fix.ts'
     },
     output: {
-      path: path.resolve('/Volumes/config/www'),
+      path: path.resolve('/Volumes/config/www/community/Bubble-Card'),
       filename: '[name].js'
     }
   }

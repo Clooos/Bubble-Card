@@ -51,7 +51,7 @@ export function placeButtons(context) {
           position += +buttonWidth + BUTTON_MARGIN;
         }
     }
-    context.elements.cardContainer.style.width = `${position - BUTTON_MARGIN}px`;
+    context.elements.cardContainer.style.width = `${position}px`;
 }
 export function changeEditor(context) {
     const detectedEditor = context.shadowRoot.host.closest('hui-card-preview, hui-card-options');
@@ -130,7 +130,7 @@ export function changeConfig(context) {
     }
 }
 export function changeStatus(context) {
-    if (context.content.scrollWidth > context.content.offsetWidth) {
+    if (context.content.scrollWidth >= context.content.offsetWidth) {
         context.content.classList.add('is-scrollable');
     } else {
         context.content.classList.remove('is-scrollable');

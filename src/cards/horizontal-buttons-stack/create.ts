@@ -3,6 +3,7 @@ import { addHash, removeHash } from "../pop-up/helpers.ts";
 import styles from "./styles.ts";
 
 let isOpen = false;
+const BUTTON_MARGIN = 12;
 
 export function createButton(context, index) {
     const name = context.config[`${index}_name`] ?? '';
@@ -100,7 +101,7 @@ export function createStructure(context) {
             context.content.classList.remove('is-scrolled');
         }
 
-        if (context.content.scrollWidth === context.content.offsetWidth + context.content.scrollLeft) {
+        if (context.content.scrollWidth - BUTTON_MARGIN < context.content.offsetWidth + context.content.scrollLeft) {
             context.content.classList.add('is-maxed-scroll');
         } else {
             context.content.classList.remove('is-maxed-scroll');
