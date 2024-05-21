@@ -622,15 +622,15 @@ export function createBubbleCardEditor() {
                                 ${this.makeTapActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
-                        <ha-expansion-panel outlined style="display: ${this._config.button_type === 'slider' || this._config.button_type === 'name' ? 'none' : ''}">
+                        <ha-expansion-panel outlined style="display: ${this._config.button_type === 'slider' ? 'none' : ''}">
                             <h4 slot="header">
                               <ha-icon icon="mdi:gesture-tap"></ha-icon>
                               Tap action on button
                             </h4>
                             <div class="content">
-                                ${this.makeTapActionPanel("Tap action", this._button_action, 'toggle', 'button_action')}
-                                ${this.makeTapActionPanel("Double tap action", this._button_action, 'toggle', 'button_action')}
-                                ${this.makeTapActionPanel("Hold action", this._button_action, 'more-info', 'button_action')}
+                                ${this.makeTapActionPanel("Tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                ${this.makeTapActionPanel("Double tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                ${this.makeTapActionPanel("Hold action", this._button_action, this._config.button_type !== 'name' ? 'more-info' : 'none', 'button_action')}
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1028,14 +1028,14 @@ export function createBubbleCardEditor() {
                             label="Columns"
                             .value="${this._config.columns}"
                             .configValue="${"columns"}"
-                            .items="${[{label: 'Auto', value: null}, {label: 1, value: 1}, {label: 2, value: 2}, {label: 3, value: 3}, {label: 4, value: 4}]}"
+                            .items="${[{label: 'Auto', value: null}, {label: "1/4", value: 1}, {label: "2/4", value: 2}, {label: "3/4", value: 3}, {label: "4/4", value: 4}]}"
                             @value-changed="${this._valueChanged}"
                         ></ha-combo-box>
                         <ha-combo-box
                             label="Rows"
                             .value="${this._config.rows}"
                             .configValue="${"rows"}"
-                            .items="${[{label: 'Auto', value: null}, {label: 1, value: 1}, {label: 2, value: 2}, {label: 3, value: 3}, {label: 4, value: 4}]}"
+                            .items="${[{label: 'Auto', value: null}, {label: "1/4", value: 1}, {label: "2/4", value: 2}, {label: "3/4", value: 3}, {label: "4/4", value: 4}]}"
                             @value-changed="${this._valueChanged}"
                         ></ha-combo-box>
                     </div>
@@ -1091,7 +1091,7 @@ export function createBubbleCardEditor() {
                         <label class="mdc-label">Optional - Show icon</label> 
                     </div>
                 </ha-formfield>
-                ${!array === 'sub_button' ? html`
+                ${array !== 'sub_button' ? html`
                     <ha-formfield .label="Optional - Prioritize icon over entity picture">
                         <ha-switch
                             aria-label="Optional - Prioritize icon over entity picture"
@@ -1108,7 +1108,7 @@ export function createBubbleCardEditor() {
                 <ha-formfield .label="Optional - Show name">
                     <ha-switch
                         aria-label="Optional - Show name"
-                        .checked=${context?.show_name ?? true}
+                        .checked=${context?.show_name ?? array !== 'sub_button' ? true : false}
                         .configValue="${config + "show_name"}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_name: ev.target.checked }, array)}"
                     ></ha-switch>
@@ -1119,9 +1119,9 @@ export function createBubbleCardEditor() {
                 <ha-formfield .label="Optional - Show entity state">
                     <ha-switch
                         aria-label="Optional - Show entity state"
-                        .checked="${context?.show_state}"
+                        .checked="${context?.show_state ?? context.button_type === 'state'}"
                         .configValue="${config + "show_state"}"
-                        .disabled="${nameButton && !array === 'sub_button'}"
+                        .disabled="${nameButton}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_state: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
@@ -1133,7 +1133,7 @@ export function createBubbleCardEditor() {
                         aria-label="Optional - Show last changed"
                         .checked=${context?.show_last_changed}
                         .configValue="${config + "show_last_changed"}"
-                        .disabled="${nameButton && !array === 'sub_button'}"
+                        .disabled="${nameButton}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_changed: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
@@ -1145,7 +1145,7 @@ export function createBubbleCardEditor() {
                         aria-label="Optional - Show attribute"
                         .checked=${context?.show_attribute}
                         .configValue="${config + "show_attribute"}"
-                        .disabled="${nameButton && !array === 'sub_button'}"
+                        .disabled="${nameButton}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_attribute: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
@@ -1159,7 +1159,7 @@ export function createBubbleCardEditor() {
                             .value="${context?.attribute}"
                             .configValue="${config + "attribute"}"
                             .items="${attributeList}"
-                            .disabled="${nameButton && !array === 'sub_button'}"
+                            .disabled="${nameButton}"
                             @value-changed="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { attribute: ev.detail.value }, array)}"
                         ></ha-combo-box>
                     </div>
@@ -1218,9 +1218,9 @@ export function createBubbleCardEditor() {
 
             if (!defaultAction) {
                 defaultAction = isDefault && label === "Tap action" 
-                ? "more-info"
+                ? this._config.button_type !== "name" ? "more-info" : "none"
                 : isDefault 
-                ? "toggle"
+                ? this._config.button_type !== "name" ? "toggle" : "none"
                 : '';
             }
 
@@ -1268,15 +1268,9 @@ export function createBubbleCardEditor() {
                             <div class="ha-combo-box">
                                 <ha-combo-box
                                     label="Entity"
-                                    .value="${valueType?.target.entity_id}"
+                                    .value="${valueType?.target?.entity_id}"
                                     .items="${this.allEntitiesList}"
-                                    @value-changed="${(ev) => {
-                                        const newValue = { [configValueType]: { target: { entity_id: ev.detail.value } } };
-                                        if (copy[index][configValueType] && copy[index][configValueType].target) {
-                                            newValue[configValueType].target = { ...copy[index][configValueType].target, ...newValue[configValueType].target };
-                                        }
-                                        this._tapActionValueChange(index, newValue, array);
-                                    }}"
+                                    @value-changed="${(ev) => { this._tapActionValueChange(index, { [configValueType]: { target: { entity_id: ev.detail.value } } }, array)}}"
                                 ></ha-combo-box>
                             </div>
                         ` : ''}

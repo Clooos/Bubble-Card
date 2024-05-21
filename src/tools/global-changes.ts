@@ -20,12 +20,17 @@ export function changeState(context) {
     const showIcon = context.config.show_icon ?? true;
     const showState = context.config.show_state ?? defaultShowState;
     const showAttribute = context.config.show_attribute ?? defaultShowState;
-    const showLastChanged = (context.config.show_last_updated || context.config.show_last_changed) ?? '';
+    const showLastChanged = context.config.show_last_changed ?? context.config.show_last_updated ?? false;
 
-    // Format state and attributes based on button type
     let formattedState = state && showState ? context._hass.formatEntityState(state) : '';
     let formattedAttribute;
     let formattedLastChanged;
+
+    if (!context.elements.stateStyles) {
+        context.elements.stateStyles = createElement('style');
+        context.elements.stateStyles.innerText = stateStyles;
+        context.content.appendChild(context.elements.stateStyles);
+    }
 
     if (showAttribute && attribute) {
         formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, attribute) : '';
@@ -35,7 +40,6 @@ export function changeState(context) {
         formattedLastChanged = state ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
     }
 
-    // Check if formattedState or formattedAttribute is 'Unknown'
     if (formattedState === 'Unknown') {
         formattedState = '';
     }
@@ -46,63 +50,82 @@ export function changeState(context) {
 
     let displayedState = '';
 
-    if (formattedState) {
+    if (showState && formattedState) {
         displayedState += formattedState;
     }
 
-    if (formattedLastChanged) {
+    if (showLastChanged && formattedLastChanged) {
         if (displayedState) {
-            // Add a space if formattedState is not 'off', otherwise add a dash
-            displayedState += (formattedState.toLowerCase() !== 'off') ? ' ' : ' - ';
+            displayedState += (formattedState.toLowerCase() !== 'off') ? ' ' : ' · ';
         }
-        // Capitalize formattedLastChanged if formattedState is 'off'
         displayedState += (formattedState.toLowerCase() === 'off') ? capitalizeFirstLetter(formattedLastChanged) : formattedLastChanged;
     }
 
-    if (formattedAttribute) {
+    if (showAttribute && formattedAttribute) {
         if (displayedState) {
-            displayedState += ' - ';
+            displayedState += ' · ';
         }
         displayedState += formattedAttribute;
     }
 
-    // Function to capitalize the first letter of a string
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-    // Capitalize the first letter of displayedState
     displayedState = capitalizeFirstLetter(displayedState);
 
-    // Update display
-    if (showName) {
-        context.elements.name.style.display = '';
+    if (!showName) {
+        context.elements.name.classList.add('hidden');
     } else {
-        context.elements.name.style.display = 'none';
-        context.elements.state.style.opacity = '1';
-        context.elements.state.style.fontSize = '14px';
+        context.elements.name.classList.remove('hidden');
     }
 
     if (!showIcon) {
-        context.elements.iconContainer.style.display = 'none';
-        context.elements.nameContainer.style.marginLeft = '16px';
+        context.elements.iconContainer.classList.add('hidden');
+        context.elements.nameContainer.classList.add('name-without-icon');
     } else {
-        context.elements.iconContainer.style.display = '';
-        context.elements.nameContainer.style.marginLeft = '';
+        context.elements.iconContainer.classList.remove('hidden');
+        context.elements.nameContainer.classList.remove('name-without-icon');
     }
 
-    if (showState) {
-        context.elements.state.style.display = 'flex';
+    if ((showState || showLastChanged || showAttribute) && !showName) {
+        context.elements.state.classList.add('state-without-name');
+    } else {
+        context.elements.state.classList.remove('state-without-name');
     }
 
-    if (displayedState === '') {
-        context.elements.state.style.display = 'none';
-    } else if (context.previousState !== displayedState) {
-        context.elements.state.style.display = '';
+    if (showState || showLastChanged || showAttribute) {
+        context.elements.state.classList.add('display-state');
+        context.elements.state.classList.remove('hidden');
+    } else {
+        context.elements.state.classList.remove('display-state');
+        context.elements.state.classList.add('hidden');
+    }
+
+    if (displayedState !== '') {
         applyScrollingEffect(context, context.elements.state, displayedState);
         context.previousState = displayedState;
     }
 }
+
+const stateStyles = `
+    .hidden {
+        display: none;
+    }
+
+    .state-without-name {
+        opacity: 1;
+        font-size: 14px;
+    }
+
+    .name-without-icon {
+        margin-left: 16px;
+    }
+
+    .display-state {
+        display: flex;
+    }
+`;
 
 export function changeSubButtonState(context, container = context.content, appendTo = container.firstChild.firstChild, before = false) {
     const subButtons = context.config.sub_button;
@@ -112,11 +135,17 @@ export function changeSubButtonState(context, container = context.content, appen
     let previousSubButtons = [...(context.previousValues.subButtons || [])];
     context.elements = { ...context.elements };
 
-    const subButtonContainer = context.elements.subButtonContainer || createElement('div', 'bubble-sub-button-container');
+    const subButtonContainer = context.elements.subButtonContainer ?? createElement('div', 'bubble-sub-button-container');
     if (!context.elements.subButtonContainer && context.config.sub_button) {
-        Object.assign(subButtonContainer.style, subButtonStyles.subButtonContainer);
-        if (before) appendTo.prepend(subButtonContainer);
-        else appendTo.appendChild(subButtonContainer);
+        const style = createElement('style');
+        style.innerText = subButtonsStyles;
+        subButtonContainer.appendChild(style);
+
+        if (before) {
+            appendTo.prepend(subButtonContainer);
+        } else {
+            appendTo.appendChild(subButtonContainer);
+        }
         context.elements.subButtonContainer = subButtonContainer;
     }
 
@@ -129,9 +158,8 @@ export function changeSubButtonState(context, container = context.content, appen
         const name = subButton.name ?? getAttribute(context, "friendly_name", entity) ?? '';
         const attributeType = subButton.attribute ?? '';
         const attribute = getAttribute(context, attributeType, entity);
-        const icon = getIcon(context, entity, subButton.icon);
+        const icon = getIcon(context, subButton.entity, subButton.icon);
         const isOn = isStateOn(context, entity);
-        const backgroundColor = isOn ? 'var(--accent-color)' : 'var(--card-background-color, var(--ha-card-background))';
 
         const showName = subButton.show_name ?? false;
         const showState = subButton.show_state ?? false;
@@ -142,9 +170,7 @@ export function changeSubButtonState(context, container = context.content, appen
 
         let subButtonElement = context.elements[index] || createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
         if (!context.elements[index]) {
-            Object.assign(subButtonElement.style, subButtonStyles.subButton);
             subButtonElement.nameContainer = createElement('div', 'bubble-sub-button-name-container');
-            Object.assign(subButtonElement.nameContainer.style, subButtonStyles.nameContainer);
             subButtonElement.feedback = createElement('div', 'bubble-feedback-element feedback-element');
 
             subButtonElement.appendChild(subButtonElement.feedback);
@@ -157,19 +183,32 @@ export function changeSubButtonState(context, container = context.content, appen
             let iconElement = subButtonElement.icon;
             if (!iconElement) {
                 iconElement = createElement('ha-icon', 'bubble-sub-button-icon');
-                iconElement.style.display = 'flex';
-                iconElement.style.setProperty('--mdc-icon-size', '16px');
+                iconElement.classList.add('show-icon');
                 subButtonElement.appendChild(iconElement);
                 subButtonElement.icon = iconElement;
             }
             if (iconElement.getAttribute('icon') !== icon) {
                 iconElement.setAttribute('icon', icon);
             }
+            subButtonElement.icon.classList.remove('hidden');
+            subButtonElement.icon.classList.add('show-icon');
         } else if (subButtonElement.icon) {
-            subButtonElement.icon.style.display = 'none';
+            subButtonElement.icon.classList.remove('show-icon');
+            subButtonElement.icon.classList.add('hidden');
         }
 
-        subButtonElement.style.backgroundColor = showBackround ? backgroundColor : '';
+        if (showBackround) {
+            if (isOn) {
+                subButtonElement.classList.add('background-on');
+                subButtonElement.classList.remove('background-off');
+            } else {
+                subButtonElement.classList.add('background-off');
+                subButtonElement.classList.remove('background-on');
+            }
+        } else {
+            subButtonElement.classList.remove('background-on');
+            subButtonElement.classList.remove('background-off');
+        }
 
         if (subButton.tap_action?.action !== 'none' || subButton.double_tap_action?.action !== 'none' || subButton.hold_action?.action !== 'none') {
             const defaultActions = {
@@ -187,27 +226,29 @@ export function changeSubButtonState(context, container = context.content, appen
         const formattedLastChanged = state && showLastChanged ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
 
         if (showName && name) displayedState += name;
-        if (formattedState) displayedState += (displayedState ? ' - ' : '') + formattedState;
-        if (formattedLastChanged) displayedState += (displayedState ? ' - ' : '') + formattedLastChanged;
-        if (formattedAttribute) displayedState += (displayedState ? ' - ' : '') + formattedAttribute;
+        if (formattedState) displayedState += (displayedState ? ' · ' : '') + formattedState;
+        if (formattedLastChanged) displayedState += (displayedState ? ' · ' : '') + formattedLastChanged;
+        if (formattedAttribute) displayedState += (displayedState ? ' · ' : '') + formattedAttribute;
 
         displayedState = displayedState.charAt(0).toUpperCase() + displayedState.slice(1);
 
         if (!displayedState && !showIcon) {
-            subButtonElement.style.display = 'none';
+            subButtonElement.classList.add('hidden');
         } else {
-            subButtonElement.style.display = 'flex';
-            subButtonElement.nameContainer.innerText = displayedState;
+            subButtonElement.classList.remove('hidden');
+            if (subButtonElement.nameContainer.innerText !== displayedState) {
+                subButtonElement.nameContainer.innerText = displayedState;
+            }
             if (showIcon && subButtonElement.icon) {
-                subButtonElement.icon.style.marginRight = displayedState ? '4px' : '0';
-                subButtonElement.icon.style.setProperty('--mdc-icon-size', displayedState ? '16px' : '20px');
+                if (displayedState) {
+                    subButtonElement.icon.classList.add('icon-with-state');
+                    subButtonElement.icon.classList.remove('icon-without-state');
+                } else {
+                    subButtonElement.icon.classList.add('icon-without-state');
+                    subButtonElement.icon.classList.remove('icon-with-state');
+                }
             }
         }
-
-        // if (!context.config.sub_button) {
-        //     console.log('NONE')
-        //     context.elements.subButtonContainer.style.display = 'none';
-        // }
     });
 
     context.previousValues.subButtons = subButtons.slice();
@@ -223,40 +264,62 @@ export function changeSubButtonState(context, container = context.content, appen
     }
 }
 
-const subButtonStyles = {
-    subButtonContainer: {
-        position: 'relative',
-        display: 'flex',
-        justifyContent: 'end',
-        right: '8px',
-        alignContent: 'center',
-        gap: '8px'
-    },
-    subButton: {
-        flexWrap: 'nowrap',
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        right: '0',
-        boxSizing: 'border-box',
-        width: 'min-content',
-        minWidth: '36px',
-        height: '36px',
-        verticalAlign: 'middle',
-        fontSize: '12px',
-        borderRadius: '32px',
-        padding: '0 8px',
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        zIndex: '1',
-        transition: 'all 0.5s ease-in-out',
-        color: 'var(--primary-text-color)'
-    },
-    nameContainer: {
-        display: 'flex'
+const subButtonsStyles = `
+    .bubble-sub-button-container {
+        position: relative;
+        display: flex;
+        justify-content: end;
+        right: 8px;
+        align-content: center;
+        gap: 8px;
     }
-};
+    .bubble-sub-button {
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row-reverse;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        right: 0;
+        box-sizing: border-box;
+        width: min-content;
+        min-width: 36px;
+        height: 36px;
+        vertical-align: middle;
+        font-size: 12px;
+        border-radius: 32px;
+        padding: 0 8px;
+        overflow: hidden;
+        white-space: nowrap;
+        z-index: 1;
+        transition: all 0.5s ease-in-out;
+        color: var(--primary-text-color);
+    }
+    .bubble-sub-button-name-container {
+        display: flex;
+    }
+    .show-icon {
+        display: flex;
+        --mdc-icon-size: 16px;
+    }
+    .background-on {
+        background-color: var(--accent-color);
+    }
+    .background-off {
+        background-color: var(--card-background-color, var(--ha-card-background));
+    }
+    .hidden {
+        display: none;
+    }
+    .icon-with-state {
+        margin-right: 4px;
+        --mdc-icon-size: 16px;
+    }
+    .icon-without-state {
+        margin-right: 0;
+        --mdc-icon-size: 20px;
+    }
+`;
 
 export function initializesubButtonIcon(context) {
     if (!Array.isArray(context.subButtonIcon)) {

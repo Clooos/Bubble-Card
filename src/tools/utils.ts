@@ -377,15 +377,19 @@ export function applyScrollingEffect(context, element, text) {
     const classNames = element.className.split(' ');
     const className = classNames.find(name => name.startsWith('bubble-'));
 
-    // Remove the previous scrolling effect if it exists
-    element.innerHTML = text;
-    element.style = '';
-
     // Check if the text is longer than its container
     function checkIfContentIsLonger() {
-        if (scrollingEffect && element.scrollWidth > element.parentNode.offsetWidth) {
+        // Remove the previous scrolling effect if it exists
+        element.innerHTML = text;
+        element.style = '';
+
+        if (!element.originalTextWidth || element.originalTextWidth !== element.scrollWidth) {
+            element.originalTextWidth = element.scrollWidth;
+        }
+
+        if (scrollingEffect && element.originalTextWidth > element.parentNode.offsetWidth) {
             // Add the CSS for the scrolling effect
-            const separator = `<span class="bubble-scroll-separator">|</span>`;
+            const separator = `<span class="bubble-scroll-separator"> | </span>`;
             element.innerHTML = `<span>${text + separator + text + separator}</span>`;
 
             const css = createScrollingEffectCSS(className);
@@ -405,9 +409,12 @@ export function applyScrollingEffect(context, element, text) {
                 element.style.webkitBoxOrient = 'vertical';
                 element.style.textOverflow = 'ellipsis';
             }
-            // If the condition is not met, check again at the next frame
-            requestAnimationFrame(checkIfContentIsLonger);
         }
+    }
+
+    if (!element.eventAdded) {
+        window.addEventListener('resize', () => { requestAnimationFrame(checkIfContentIsLonger) });
+        element.eventAdded = true;
     }
 
     requestAnimationFrame(checkIfContentIsLonger);

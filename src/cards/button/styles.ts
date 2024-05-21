@@ -33,9 +33,9 @@ export default `
         height: 100%;
         width: 100%;
         transition: background-color 1.5s;
-        background-color: var(--bubble-button-background-color);
     }
     .bubble-button-background {
+        background-color: var(--bubble-button-background-color);
         opacity: .5;
     }
     .bubble-range-fill {

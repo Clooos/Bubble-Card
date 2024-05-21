@@ -79,6 +79,7 @@ export function createNameStructure(context) {
     context.elements.buttonCard.style.cursor = 'auto';
 
     addActions(context.elements.iconContainer, context.config, context.config.entity, nameDefaultActions);
+    addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, nameDefaultActions);
     addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
 export function createStateStructure(context) {

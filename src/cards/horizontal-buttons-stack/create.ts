@@ -88,7 +88,7 @@ export function createStructure(context) {
     if (!context.config.hide_gradient) {
       context.card.classList.add('has-gradient');
     }
-    context.card.style.setProperty('--desktop-width', context.config.width_desktop || '500px');
+    context.card.style.setProperty('--desktop-width', context.config.width_desktop ?? '500px');
     context.elements.cardContainer.appendChild(context.elements.style);
     context.elements.cardContainer.appendChild(context.elements.customStyle);
     context.content.appendChild(context.elements.cardContainer);

@@ -47,18 +47,19 @@ export function changeName(context) {
 export function changeMediaInfo(context) {
     const title = getAttribute(context, "media_title");
     const artist = getAttribute(context, "media_artist");
-    const state = title + artist;
+    const mediaState = title + artist;
 
-    if (state !== context.previousState) {
+    if (mediaState !== context.previousMediaState) {
         if (artist === '') {
             context.elements.artist.style.display = 'none';
         } else {
             context.elements.artist.style.display = 'flex';
         }
         
+        context.previousMediaState = mediaState;
+
         applyScrollingEffect(context, context.elements.title, title);
         applyScrollingEffect(context, context.elements.artist, artist);
-        context.previousState = state;
     }
 }
 
@@ -145,6 +146,7 @@ export function changeStyle(context) {
     setLayout(context);
 
     const state = getState(context);
+    const isOn = isStateOn(context);
 
     const customStyle = context.config.styles
         ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
@@ -152,4 +154,34 @@ export function changeStyle(context) {
         : '';
 
     context.elements.customStyle.innerText = customStyle;
+
+    if (context.config.hide?.power_button && context.elements.powerButton.style.display !== 'none') {
+        context.elements.powerButton.style.display = 'none';
+    } else if (!context.config.hide?.power_button && context.elements.powerButton.style.display === 'none') {
+        context.elements.powerButton.style.display = '';
+    }
+
+    if ((context.config.hide?.previous_button || (!context.editor && !isOn)) && context.elements.previousButton.style.display !== 'none') {
+        context.elements.previousButton.style.display = 'none';
+    } else if (!(context.config.hide?.previous_button || (!context.editor && !isOn)) && context.elements.previousButton.style.display === 'none') {
+        context.elements.previousButton.style.display = '';
+    }
+
+    if ((context.config.hide?.next_button || (!context.editor && !isOn)) && context.elements.nextButton.style.display !== 'none') {
+        context.elements.nextButton.style.display = 'none';
+    } else if (!(context.config.hide?.next_button || (!context.editor && !isOn)) && context.elements.nextButton.style.display === 'none') {
+        context.elements.nextButton.style.display = '';
+    }
+
+    if ((context.config.hide?.volume_button || (!context.editor && !isOn)) && context.elements.volumeButton.style.display !== 'none') {
+        context.elements.volumeButton.style.display = 'none';
+    } else if (!(context.config.hide?.volume_button || (!context.editor && !isOn)) && context.elements.volumeButton.style.display === 'none') {
+        context.elements.volumeButton.style.display = '';
+    }
+
+    if ((context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.style.display !== 'none') {
+        context.elements.playPauseButton.style.display = 'none';
+    } else if (!(context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.style.display === 'none') {
+        context.elements.playPauseButton.style.display = '';
+    }
 }

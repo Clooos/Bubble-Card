@@ -46,11 +46,11 @@ export function createStructure(context) {
     context.elements.mediaInfoContainer.appendChild(context.elements.title);
     context.elements.mediaInfoContainer.appendChild(context.elements.artist);
 
-    if (!context.config.hide?.power_button) context.elements.buttonContainer.appendChild(context.elements.powerButton);
-    if (!context.config.hide?.previous_button) context.elements.buttonContainer.appendChild(context.elements.previousButton);
-    if (!context.config.hide?.next_button) context.elements.buttonContainer.appendChild(context.elements.nextButton);
-    if (!context.config.hide?.volume_button) context.elements.buttonContainer.appendChild(context.elements.volumeButton);
-    if (!context.config.hide?.play_pause_button) context.elements.buttonContainer.appendChild(context.elements.playPauseButton);
+    context.elements.buttonContainer.appendChild(context.elements.powerButton);
+    context.elements.buttonContainer.appendChild(context.elements.previousButton);
+    context.elements.buttonContainer.appendChild(context.elements.nextButton);
+    context.elements.buttonContainer.appendChild(context.elements.volumeButton);
+    context.elements.buttonContainer.appendChild(context.elements.playPauseButton);
 
     context.elements.mediaPlayerCard.appendChild(context.elements.iconContainer);
     context.elements.mediaPlayerCard.appendChild(context.elements.mediaInfoContainer);

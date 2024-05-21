@@ -15,6 +15,7 @@ import {
 } from '../../tools/utils.ts';
 
 export function changeButton(context) {
+  const cardType = context.config.card_type;
   const buttonType = getButtonType(context);
   const isLight = isEntityType(context, "light");
   const isOn = isStateOn(context);
@@ -22,14 +23,26 @@ export function changeButton(context) {
 
   if (buttonType === 'switch' && isOn) {
       if (lightColor && isLight) {
-          context.card.style.setProperty('--bubble-button-background-color', getIconColor(context));
+          if (cardType === 'button') {
+              context.card.style.setProperty('--bubble-button-background-color', getIconColor(context));
+          } else if (cardType === 'pop-up') {
+              context.popUp.style.setProperty('--bubble-button-background-color', getIconColor(context));
+          }
           context.elements.buttonBackground.style.opacity = '.5';
       } else {
-          context.card.style.setProperty('--bubble-button-background-color', 'var(--accent-color)');
+          if (cardType === 'button') {
+              context.card.style.setProperty('--bubble-button-background-color', 'var(--accent-color)');
+          } else if (cardType === 'pop-up') {
+              context.popUp.style.setProperty('--bubble-button-background-color', 'var(--accent-color)');
+          }
           context.elements.buttonBackground.style.opacity = '1';
       }
   } else {
-      context.card.style.setProperty('--bubble-button-background-color', 'rgba(0, 0, 0, 0)');
+      if (cardType === 'button') {
+          context.card.style.setProperty('--bubble-button-background-color', 'rgba(0, 0, 0, 0)');
+      } else if (cardType === 'pop-up') {
+          context.popUp.style.setProperty('--bubble-button-background-color', 'rgba(0, 0, 0, 0)');
+      }
       context.elements.buttonBackground.style.opacity = '.5';
   }
 }
@@ -124,8 +137,8 @@ export function changeStyle(context) {
     const state = getState(context);
 
     const customStyle = context.config.styles
-        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
-          (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon)
+        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
+          (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
         : '';
 
     context.elements.customStyle.innerText = customStyle;

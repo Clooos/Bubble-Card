@@ -1,7 +1,7 @@
 import { tapFeedback } from "./utils.ts";
 
-const maxHoldDuration = 300;
-const doubleTapTimeout = 300;
+const maxHoldDuration = 200;
+const doubleTapTimeout = 200;
 
 export function callAction(element, config, action) {
   setTimeout(() => {
@@ -41,6 +41,9 @@ class ActionHandler {
     this.lastTap = currentTime;
     this.startTime = null;
 
+    const doubleTapAction = this.config?.double_tap_action || this.defaultActions?.double_tap_action || { action: "toggle" };
+    const doubleTapTimeout = doubleTapAction.action === "none" ? 0 : 200;
+
     if (holdDuration > maxHoldDuration) {
       this.sendActionEvent(this.element, this.config, 'hold', this.defaultEntity, this.defaultActions);
     } else if (doubleTapDuration < doubleTapTimeout) {
@@ -72,7 +75,16 @@ export function addActions(element, config, defaultEntity, defaultActions) {
   element.addEventListener('pointerdown', handler.handleStart.bind(handler));
   element.addEventListener('pointerup', handler.handleEnd.bind(handler));
   element.addEventListener('contextmenu', (e) => e.preventDefault());
-  element.style.cursor = 'pointer';
+
+  const tapAction = config?.tap_action?.action || defaultActions?.tap_action?.action || "more-info";
+  const doubleTapAction = config?.double_tap_action?.action || defaultActions?.double_tap_action?.action || "toggle";
+  const holdAction = config?.hold_action?.action || defaultActions?.hold_action?.action || "toggle";
+
+  if (tapAction === "none" && doubleTapAction === "none" && holdAction === "none") {
+    element.style.cursor = 'default';
+  } else {
+    element.style.cursor = 'pointer';
+  }
 }
 
 export function addFeedback(element, feedbackElement) {

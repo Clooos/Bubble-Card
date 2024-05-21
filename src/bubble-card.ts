@@ -175,15 +175,19 @@ class BubbleCard extends HTMLElement {
 
     getLayoutOptions() {
         let  defaultRows = 1;
-        if (['popup', 'horizontal-buttons-stack'].includes(this.config.card_type)) {
+        if (this.config.card_type === 'pop-up') {
             defaultRows = 0;
+        } else if (this.config.card_type === 'horizontal-buttons-stack') {
+            defaultRows = 1;
         } else if (['cover'].includes(this.config.card_type)) {
             defaultRows = 2;
         }
 
         let  defaultColumns = 4;
-        if (['popup', 'horizontal-buttons-stack'].includes(this.config.card_type)) {
+        if (this.config.card_type === 'pop-up') {
             defaultColumns = 0;
+        } else if (this.config.card_type === 'horizontal-buttons-stack') {
+            defaultColumns = 4;
         }
 
         return {
