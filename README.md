@@ -80,8 +80,8 @@ All options can be configured in the Home Assistant editor. But you can find mor
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `type` | string | **Required** | `custom:bubble-card` | Type of the card |
-| `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `pop-up` or `separator` | Type of the Bubble Card, see below |
-| `styles` | object list | Optional | Any CSS stylesheets | Allows you to customize your cards, see [styling](#styling) |
+| `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `media-player`, `pop-up` or `separator` | Type of the Bubble Card, see below |
+| `styles` | object list | Optional | Any CSS stylesheets | Allows you to customize your Bubble Card CSS, see [styling](#styling) |
 
 </details>
 
@@ -116,9 +116,6 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Required** | Any unique hash (e.g. `'#kitchen'`) with ' ' | This is how you will open your pop-up |
-| `name` | string | Optional | Any string | A name for your pop-up header |
-| `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your pop-up header, if not defined it will display the entity icon or the `entity-picture` |
-| `entity` | string | Optional | Any switchable entity | Display a button to toggle this entity |
 | `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |
 | `close_on_click` | boolean | Optional | `true` or `false` (default) | Automatically close the pop-up after any interaction |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
@@ -134,11 +131,8 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
-| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
-| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on the icon double click, if undefined, `toggle` will be used. |
-| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-
-You also have access to [all the button settings](#button) for the header of the pop-up.
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
+| **You also have access to [all the button settings](#button) for the header of the pop-up.** |
 
 </details>
 
@@ -159,24 +153,25 @@ cards:
     name: Kitchen
     icon: mdi:fridge
     entity: light.kitchen
-    state: sensor.kitchen_temperature
-    back_open: true
 ```
 
 </details>
 <details>
 
-<summary>A button to open the pop-up (not a Bubble Card one)</summary>
+<summary>A button to open the pop-up</summary>
 
 <br>
 
 ```yaml
-type: button
-tap_action:
-  action: navigate
-  navigation_path: '#kitchen'
+type: custom:bubble-card
+card_type: button
+button_type: name
 name: Kitchen
 icon: mdi:fridge
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#kitchen'
 ```
 
 </details>
@@ -248,7 +243,7 @@ icon: mdi:fridge
 
 ![readme-horizontal-buttons-stack](https://github.com/Clooos/Bubble-Card/assets/36499953/8fe89ade-c77a-469b-891f-577e0bb2f46b)
 
-This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer.
+This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion/occupancy sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer.
 
 > [!IMPORTANT]  
 > This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.
@@ -338,6 +333,7 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
 
 </details>
 
@@ -386,6 +382,7 @@ This card allows you to control a media player. You can tap on the icon to get m
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
 
 </details>
 
@@ -439,6 +436,7 @@ This card allows you to control your covers.
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
 
 </details>
 
@@ -481,6 +479,7 @@ This card is a simple separator for dividing your pop-up into categories / secti
 | --- | --- | --- | --- | --- |
 | `name` | string | Optional but recommended | Any string | A name for your separator |
 | `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your separator |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
 
 </details>
 
