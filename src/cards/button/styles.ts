@@ -58,6 +58,11 @@ export default `
 
     .bubble-button-card {
         overflow: scroll;
+        -ms-overflow-style: none; /* for Internet Explorer, Edge */
+        scrollbar-width: none; /* for Firefox */
+    }
+    .bubble-button-card::-webkit-scrollbar {
+        display: none; /* for Chrome, Safari, and Opera */
     }
     .is-unavailable .bubble-button-card,
     .is-unavailable .bubble-range-slider {
