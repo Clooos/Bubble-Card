@@ -1,5 +1,5 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.ts";
-import { createElement, toggleEntity, getAttribute, isStateOn } from "../../tools/utils.ts";
+import { createElement, toggleEntity, getAttribute, isStateOn, forwardHaptic } from "../../tools/utils.ts";
 import { onSliderChange } from "./helpers.ts";
 import { changeVolumeIcon } from "./changes.ts";
 import styles from "./styles.ts";
@@ -130,6 +130,8 @@ export function createStructure(context) {
 
         context.elements.playPauseButton.clicked = true;
     });
+
+    context.elements.mediaPlayerContainer.addEventListener('click', () => forwardHaptic("selection"));
 
     context.cardType = `media-player`;
 }

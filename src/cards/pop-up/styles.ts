@@ -24,7 +24,8 @@ export default `
       -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
   }
   .bubble-pop-up-container > * {
-    flex-shrink: 0;
+      flex-shrink: 0;
+      transform: translateZ(0);
   }
   .bubble-pop-up.card-content {
       width: 100% !important;
@@ -101,6 +102,7 @@ export default `
       width: 100%;
       margin: 0;
       padding: 0;
+      z-index: 5;
   }
   .bubble-range-fill {
       opacity: .5;

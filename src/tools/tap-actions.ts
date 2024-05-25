@@ -1,4 +1,4 @@
-import { tapFeedback } from "./utils.ts";
+import { tapFeedback, forwardHaptic } from "./utils.ts";
 
 const maxHoldDuration = 200;
 const doubleTapTimeout = 200;
@@ -85,6 +85,8 @@ export function addActions(element, config, defaultEntity, defaultActions) {
   } else {
     element.style.cursor = 'pointer';
   }
+
+  element.addEventListener('click', () => forwardHaptic("selection"));
 }
 
 export function addFeedback(element, feedbackElement) {

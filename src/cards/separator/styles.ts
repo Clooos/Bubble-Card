@@ -19,7 +19,7 @@ export default `
         text-overflow: ellipsis;
     }
     .bubble-name:empty {
-      display: none;
+        display: none;
     }
     .bubble-line {
         border-radius: 6px;
@@ -35,20 +35,20 @@ export default `
     }
 
     .large .bubble-separator {
-      height: 58px;
+        height: 58px;
     }
 
     .rows-2 .bubble-sub-button-container {
-      flex-direction: column;
-      gap: 4px !important;
-      display: grid !important;
-      grid-template-columns: repeat(2, min-content);
-      grid-template-rows: repeat(2, 1fr);
-      grid-auto-flow: column;
-      width: auto;
+        flex-direction: column;
+        gap: 4px !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, min-content);
+        grid-template-rows: repeat(2, 1fr);
+        grid-auto-flow: column;
+        width: auto;
     }
 
     .rows-2 .bubble-sub-button {
-      height: 20px !important;
+        height: 20px !important;
     }
 `;

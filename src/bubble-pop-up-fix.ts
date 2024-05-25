@@ -19,7 +19,7 @@ function hideElementsUntilBubbleCard() {
         clearInterval(intervalId);
         root.style.transition = "opacity 0.5s";
         root.style.opacity = "1";
-    }, 5000);
+    }, 1500);
 }
 
 hideElementsUntilBubbleCard();

@@ -409,6 +409,29 @@ export function createBubbleCardEditor() {
                                 ></ha-textfield>
                                 ${this.makeDropdown("Optional - Icon", "icon")}
                                 ${this.makeShowState()}
+                                <ha-expansion-panel outlined>
+                                    <h4 slot="header">
+                                      <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                                      Tap action on icon
+                                    </h4>
+                                    <div class="content">
+                                        ${this.makeTapActionPanel("Tap action")}
+                                        ${this.makeTapActionPanel("Double tap action")}
+                                        ${this.makeTapActionPanel("Hold action")}
+                                    </div>
+                                </ha-expansion-panel>
+                                <ha-expansion-panel outlined style="display: ${this._config.button_type === 'slider' ? 'none' : ''}">
+                                    <h4 slot="header">
+                                      <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                                      Tap action on button
+                                    </h4>
+                                    <div class="content">
+                                        ${this.makeTapActionPanel("Tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                        ${this.makeTapActionPanel("Double tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                        ${this.makeTapActionPanel("Hold action", this._button_action, this._config.button_type !== 'name' ? 'more-info' : 'none', 'button_action')}
+                                    </div>
+                                </ha-expansion-panel>
+                                ${this.makeSubButtonPanel()}
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -569,18 +592,6 @@ export function createBubbleCardEditor() {
                                 ${this.makeStyleEditor()}
                             </div>
                         </ha-expansion-panel>
-                        <ha-expansion-panel outlined>
-                            <h4 slot="header">
-                              <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                              Tap action on icon
-                            </h4>
-                            <div class="content">
-                                ${this.makeTapActionPanel("Tap action")}
-                                ${this.makeTapActionPanel("Double tap action")}
-                                ${this.makeTapActionPanel("Hold action")}
-                            </div>
-                        </ha-expansion-panel>
-                        ${this.makeSubButtonPanel()}
                         <ha-alert alert-type="info">
                             This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., '#pop-up-name'), with <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#example">any card</a> that support <code>navigation_path</code>, or with the <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack">horizontal buttons stack</a> that is included.
                             <br><br><b>Important:</b> This card must be placed within a vertical-stack card at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.

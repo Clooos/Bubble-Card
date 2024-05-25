@@ -64,8 +64,6 @@ export function toggleEntity(hass, entityId) {
 export function tapFeedback(feedbackElement) {
     if (feedbackElement === undefined) return;
 
-    forwardHaptic("success");
-
     feedbackElement.style.display = '';
     feedbackElement.style.animation = 'tap-feedback .3s';
 
@@ -400,6 +398,7 @@ export function applyScrollingEffect(context, element, text) {
             // If the text fits without scrolling, remove the style element
             if (scrollingEffect && element.styleElement) {
                 element.styleElement = null;
+                requestAnimationFrame(checkIfContentIsLonger);
             }
             // If scrollingEffect is false, limit the text to two lines
             if (!scrollingEffect) {

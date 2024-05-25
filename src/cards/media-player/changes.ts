@@ -146,7 +146,7 @@ export function changeStyle(context) {
     setLayout(context);
 
     const state = getState(context);
-    const isOn = isStateOn(context);
+    const isOn = state !== "off" && state !== "undefined";
 
     const customStyle = context.config.styles
         ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)

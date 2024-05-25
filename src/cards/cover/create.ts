@@ -1,5 +1,5 @@
 import { addActions } from "../../tools/tap-actions.ts";
-import { createElement } from "../../tools/utils.ts";
+import { createElement, forwardHaptic } from "../../tools/utils.ts";
 import styles from "./styles.ts";
 
 export function createStructure(context) {
@@ -70,6 +70,8 @@ export function createStructure(context) {
 
     context.elements.coverCardContainer.appendChild(context.elements.headerContainer);
     context.elements.coverCardContainer.appendChild(context.elements.buttonsContainer);
+
+    context.elements.coverCardContainer.addEventListener('click', () => forwardHaptic("selection"));
 
     context.cardType = "cover";
 }

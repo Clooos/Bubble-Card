@@ -57,7 +57,7 @@ export default `
     }
 
     .bubble-button-card {
-        cursor: pointer;
+        overflow: scroll;
     }
     .is-unavailable .bubble-button-card,
     .is-unavailable .bubble-range-slider {
