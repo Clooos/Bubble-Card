@@ -23,6 +23,9 @@ export default `
       mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
       -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
   }
+  .bubble-pop-up-container > * {
+    flex-shrink: 0;
+  }
   .bubble-pop-up.card-content {
       width: 100% !important;
       padding: 0 !important;
