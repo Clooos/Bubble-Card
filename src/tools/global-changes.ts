@@ -158,7 +158,7 @@ export function changeSubButtonState(context, container = context.content, appen
         const name = subButton.name ?? getAttribute(context, "friendly_name", entity) ?? '';
         const attributeType = subButton.attribute ?? '';
         const attribute = getAttribute(context, attributeType, entity);
-        const icon = getIcon(context, subButton.entity, subButton.icon);
+        const icon = getIcon(context, subButton.entity, subButton.icon ?? '');
         const isOn = isStateOn(context, entity);
 
         const showName = subButton.show_name ?? false;

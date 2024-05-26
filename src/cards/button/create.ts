@@ -76,15 +76,22 @@ export function createNameStructure(context) {
         hold_action: { action: "none" }
     };
 
-    context.elements.buttonCard.style.cursor = 'auto';
+    // context.elements.buttonCard.style.cursor = 'auto';
 
     addActions(context.elements.iconContainer, context.config, context.config.entity, nameDefaultActions);
     addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, nameDefaultActions);
     addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
 export function createStateStructure(context) {
-  addActions(context.elements.buttonCardContainer, context.config);
-  addFeedback(context.elements.buttonBackground, context.elements.feedback);
+    const stateDefaultActions = {
+        tap_action: { action: "more-info" },
+        double_tap_action: { action: "more-info" },
+        hold_action: { action: "more-info" }
+    };
+
+    addActions(context.elements.buttonCardContainer, context.config);
+    addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, stateDefaultActions);
+    addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
 // export function createSliderStructure(context) {
 //   addActions(context.elements.iconContainer, context.config);

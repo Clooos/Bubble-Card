@@ -149,7 +149,7 @@ export default `
 
     .bubble-state {
         font-size: 12px;
-        opacity: 0.7;
+        /*opacity: 0.7;*/
         font-weight: normal;
     }
 
