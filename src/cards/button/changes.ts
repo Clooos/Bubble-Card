@@ -110,23 +110,48 @@ export function changeSlider(context) {
 
 export function changeStatus(context) {
   const state = getState(context);
+  const cardType = context.config.card_type;
 
   if (state === 'unavailable') {
-      context.card.classList.add('is-unavailable');
+      if (cardType === 'button') {
+          context.card.classList.add('is-unavailable');
+      } else if (cardType === 'pop-up') {
+          context.elements.headerContainer.classList.add('is-unavailable');
+      }
   } else {
-      context.card.classList.remove('is-unavailable');
+      if (cardType === 'button') {
+          context.card.classList.remove('is-unavailable');
+      } else if (cardType === 'pop-up') {
+          context.elements.headerContainer.classList.remove('is-unavailable');
+      }
   }
 
   if (isEntityType(context, "light")) {
-      context.card.classList.add('is-light');
+      if (cardType === 'button') {
+          context.card.classList.add('is-light');
+      } else if (cardType === 'pop-up') {
+          context.elements.headerContainer.classList.add('is-light');
+      }
   } else {
-      context.card.classList.remove('is-light');
+      if (cardType === 'button') {
+          context.card.classList.remove('is-light');
+      } else if (cardType === 'pop-up') {
+          context.elements.headerContainer.classList.remove('is-light');
+      }
   }
 
   if (isStateOn(context)) {
-      context.card.classList.add('is-on');
+      if (cardType === 'button') {
+          context.card.classList.add('is-on');
+      } else if (cardType === 'pop-up') {
+          context.elements.headerContainer.classList.add('is-on');
+      }
   } else {
-      context.card.classList.remove('is-on');
+      if (cardType === 'button') {
+          context.card.classList.remove('is-on');
+      } else if (cardType === 'pop-up') {
+          context.elements.headerContainer.classList.remove('is-on');
+      }
   }
 }
 

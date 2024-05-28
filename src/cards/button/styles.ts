@@ -51,8 +51,7 @@ export default `
     .is-dragging .bubble-range-fill {
         transition: none;
     }
-    .is-light .bubble-range-fill,
-    .bubble-button-background {
+    .is-light .bubble-range-fill {
         opacity: 0.5;
     }
 
@@ -126,14 +125,13 @@ export default `
     .bubble-name,
     .bubble-state {
         display: flex;
-        margin: 2px 0;
         position: relative;
         white-space: nowrap;
     }
 
     .bubble-name-container {
         display: flex;
-        line-height: 14px;
+        line-height: 18px;
         flex-direction: column;
         justify-content: center;
         flex-grow: 1;
@@ -149,8 +147,8 @@ export default `
 
     .bubble-state {
         font-size: 12px;
-        /*opacity: 0.7;*/
         font-weight: normal;
+        opacity: 0.7;
     }
 
     .bubble-feedback-element {

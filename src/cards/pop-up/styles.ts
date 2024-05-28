@@ -25,7 +25,6 @@ export default `
   }
   .bubble-pop-up-container > * {
       flex-shrink: 0;
-      transform: translateZ(0);
   }
   .bubble-pop-up.card-content {
       width: 100% !important;
@@ -44,7 +43,7 @@ export default `
       box-sizing: border-box;
       margin-left: var(--custom-margin);
       padding: 18px 18px calc(50px + var(--custom-height-offset-mobile)) 18px;
-      left: 8px;
+      left: 7px;
       z-index: 5 !important;
       bottom: calc(-56px - var(--custom-height-offset-mobile));
   }
@@ -71,18 +70,18 @@ export default `
       -webkit-backdrop-filter: none !important;
   }
   @media only screen and (min-width: 600px) {
-      .pop-up {
+      .bubble-pop-up {
           margin-left: 0 !important;
           bottom: calc(-56px - var(--custom-height-offset-desktop)) !important;
           min-width: var(--desktop-width, 540px);
           max-width: var(--desktop-width, 540px);
-          left: calc(50% - (var(--desktop-width) / 2));
+          left: calc(50% - (var(--desktop-width, 540px) / 2));
           padding: 18px 18px calc(50px + var(--custom-height-offset-desktop)) 18px;
       }
   }
-  @media only screen and (min-width: 870px) {
-      .pop-up {
-        left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width) / 2));
+  @media only screen and (min-width: 768px) {
+      .bubble-pop-up {
+        left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width, 540px) / 2));
       }
   }
   .bubble-pop-up.editor {
@@ -103,9 +102,6 @@ export default `
       margin: 0;
       padding: 0;
       z-index: 5;
-  }
-  .bubble-range-fill {
-      opacity: .5;
   }
   .bubble-header {
       display: inline-flex;

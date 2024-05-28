@@ -11,12 +11,12 @@ export async function handlePopUp(context) {
         return;
       }
       prepareStructure(context);
+      changeStyle(context);
       createHeader(context);
       createStructure(context);
   }
 
   if (
-      context.cardType !== "pop-up" || 
       context.popUp.classList.contains('is-popup-opened') ||
       configChanged(context, context.popUp)
   ){

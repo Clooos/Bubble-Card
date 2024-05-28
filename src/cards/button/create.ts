@@ -93,68 +93,6 @@ export function createStateStructure(context) {
     addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, stateDefaultActions);
     addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
-// export function createSliderStructure(context) {
-//   addActions(context.elements.iconContainer, context.config);
-
-//   let initialX = 0;
-
-//   context.elements.rangeFill = createElement('div', 'bubble-range-fill range-fill');
-//   context.elements.rangeSlider = createElement('div', 'bubble-range-slider range-slider');
-//   context.elements.rangeSlider.appendChild(context.elements.rangeFill);
-//   context.elements.buttonCardContainer.appendChild(context.elements.rangeSlider);
-
-//   context.elements.buttonCardContainer.addEventListener('pointercancel', onPointerCancel);
-//   context.elements.buttonCardContainer.addEventListener('pointerdown', (e) => {
-//       context.elements.buttonCardContainer.setPointerCapture(e.pointerId);
-
-//       if (context.card.classList.contains('is-unavailable')) {
-//           return;
-//       }
-
-//       context.dragging = true;
-//       initialX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-
-//       context.elements.buttonCardContainer.classList.add('is-dragging');
-//       context.elements.buttonCardContainer.addEventListener('pointermove', onPointerMove);
-//       window.addEventListener('pointerup', onPointerUp);
-//   });
-
-//   function onPointerCancel() {
-//     context.dragging = false;
-
-//     context.elements.buttonCardContainer.classList.remove('is-dragging');
-//     context.elements.buttonCardContainer.removeEventListener('pointermove', onPointerMove);
-//     window.removeEventListener('pointerup', onPointerUp);
-//   }
-
-//   function onPointerMove(e) {
-//       e.stopPropagation();
-
-//       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-//       if (Math.abs(initialX-moveX) > 10) {
-//         onSliderChange(context, moveX, true);
-//       }
-
-//       if (!context.dragging) {
-//         onSliderChange(context, moveX);
-//       }
-
-//       forwardHaptic("selection");
-//   }
-
-//   function onPointerUp(e) {
-//       e.stopPropagation();
-
-//       context.dragging = false;
-
-//       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-//       onSliderChange(context, moveX);
-
-//       context.elements.buttonCardContainer.classList.remove('is-dragging');
-//       context.elements.buttonCardContainer.removeEventListener('pointermove', onPointerMove);
-//       window.removeEventListener('pointerup', onPointerUp);
-//   }
-// }
 
 export function createSliderStructure(context) {
   addActions(context.elements.iconContainer, context.config);
@@ -213,7 +151,7 @@ export function createSliderStructure(context) {
       clearTimeout(draggingTimeout);
       draggingTimeout = setTimeout(() => {
         context.dragging = false;
-      }, 500);
+      }, 1200);
 
       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
       onSliderChange(context, moveX);

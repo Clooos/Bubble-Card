@@ -49,7 +49,9 @@ export function onSliderChange(context, leftDistance, throttle = false) {
 
   context.elements.rangeFill.style.transform =`translateX(${rangedPercentage}%)`;
   if (throttle) {
-    throttledUpdateEntity(context, rangedPercentage);
+    if (context.dragging) return;
+    updateEntity(context, rangedPercentage);
+    //throttledUpdateEntity(context, rangedPercentage);
   } else {
     updateEntity(context, rangedPercentage);
   }

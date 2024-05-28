@@ -594,7 +594,7 @@ export function createBubbleCardEditor() {
                         </ha-expansion-panel>
                         <ha-alert alert-type="info">
                             This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., '#pop-up-name'), with <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#example">any card</a> that support <code>navigation_path</code>, or with the <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack">horizontal buttons stack</a> that is included.
-                            <br><br><b>Important:</b> This card must be placed within a vertical-stack card at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
+                            <br><br><b>Important:</b> This card must be placed within a vertical-stack card on the same view at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
                         </ha-alert>
                         <ha-alert alert-type="warning">Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#pop-up-initialization-fix">you can install this similar fix.</a></ha-alert>
                         ${this.makeVersion()}
@@ -605,7 +605,7 @@ export function createBubbleCardEditor() {
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
                         ${this.makeDropdown("Button type", "button_type", buttonTypeList)}
-                        ${this.makeDropdown(this._button_type !== 'slider' ? "Entity (toggle)" : "Entity (light or media_player)", "entity", allEntitiesList, nameButton)}
+                        ${this.makeDropdown(this._button_type !== 'slider' ? "Entity (toggle)" : "Entity (light, media_player, cover or input_number)", "entity", allEntitiesList, nameButton)}
                         <ha-expansion-panel outlined>
                             <h4 slot="header">
                               <ha-icon icon="mdi:cog"></ha-icon>
@@ -1009,11 +1009,12 @@ export function createBubbleCardEditor() {
                         <p>If you have an issue or a question you can find more details on my GitHub page.</p>
                         <a href="https://github.com/Clooos/Bubble-Card"><img src="https://img.shields.io/badge/GitHub-Documentation-blue?logo=github"></a>
                         <hr />
-                        <p>And if you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated! 🍻</p>
+                        <p>I dedicate most of my spare time to making this project the best it can be. So if you appreciate my work, any donation would be a great way to show your support.</p>
                         <div style="display: inline-block;">
                             <a href="https://www.buymeacoffee.com/clooos"><img src="https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee"></a> 
                             <a href="https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR"><img src="https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal"></img></a>
                         </div>
+                        <p style="margin-top: 0;">Thank you! 🍻</p>
                         ${this.makeVersion()}
                     </div>
                 `;
@@ -1712,8 +1713,8 @@ export function createBubbleCardEditor() {
                 hr {
                   display: inline-block;
                   width: 100%;
-                  background-color: var(--text-primary-color);
-                  opacity: .15;
+                  border: 1px solid var(--background-color, var(--secondary-background-color));
+                  opacity: 0.6;
                   margin: 8px 0 0 0;
                 }
 

@@ -68,8 +68,9 @@ export function changeStyle(context) {
         : '';
 
     if (context.elements.customStyle) {
-    context.elements.customStyle.innerText = customStyle;
+        context.elements.customStyle.innerText = customStyle;
     }
+    
     backdropCustomStyle.innerText = customStyle;
 }
 
