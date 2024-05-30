@@ -370,7 +370,12 @@ export function applyScrollingEffect(context, element, text) {
 
     const scrollingEffect = context.config.scrolling_effect ?? true;
 
-    if (element.previousText === text || element.style.whiteSpace === 'normal') return;
+    if (element.previousText === text) return;
+    if (scrollingEffect === false && element.style.whiteSpace === 'normal') {
+      element.innerHTML = text;
+      element.previousText = text;
+      return;
+    }
 
     const classNames = element.className.split(' ');
     const className = classNames.find(name => name.startsWith('bubble-'));
