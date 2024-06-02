@@ -71,7 +71,7 @@ And also a video for the German users from **smart-live.net**, thanks a lot to y
 
 ## Configuration
 
-All options can be configured in the Home Assistant editor. But you can find more details in the documentation below.
+All options can be configured in the Home Assistant editor. But you can find more details and the YAML in the documentation below.
 
 <details>
 
@@ -94,7 +94,7 @@ All options can be configured in the Home Assistant editor. But you can find mor
 This card allows you to convert any vertical stack into a pop-up. Each pop-up is **hidden by default** and can be opened by targeting its link (e.g. `'#pop-up-name'`), with any card that supports the `navigate` [action](#tap-double-tap-and-hold-actions), or with the [horizontal buttons stack](#horizontal-buttons-stack) that is included.
 
 > [!IMPORTANT]  
-> This card must be placed within a vertical stack card at the first position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
+> This card must be placed within a vertical-stack card on the same view at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
 > <details>
 > <summary>How to create a pop-up in the editor</summary>
 > <br>
@@ -118,6 +118,7 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `hash` | string | **Required** | Any unique hash (e.g. `'#kitchen'`) with ' ' | This is how you will open your pop-up |
 | `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |
 | `close_on_click` | boolean | Optional | `true` or `false` (default) | Automatically close the pop-up after any interaction |
+| `close_by_clicking_outside` | boolean | Optional | `true` (default) or `false` | Close the pop-up by clicking outside of it |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `margin` | string | Optional | Any CSS value | Use this **only** if your pop-up is not well centered on mobile (e.g. `13px`) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
@@ -131,8 +132,8 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
-| **You also have access to [all the button settings](#button) for the header of the pop-up.** |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the header, see [card layout](#card-layout) |
+| You also have access to [all the button settings](#button) for the header of the pop-up. | | Optional | | If undefined no header will be shown |
 
 </details>
 
@@ -183,7 +184,7 @@ button_action:
 > This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
 > #### Example
 > <details>
-> <summary>Opening a pop-up when a binary_sensor is `on`</summary>
+> <summary>Opening a pop-up when a binary_sensor is <code>on</code></summary>
 > <br>
 >
 > ```yaml
@@ -329,11 +330,22 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 | `button_type` | string | Optional | `switch` (default), `slider` or `state` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
-| `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
+| `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
+| `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see below | Allow to change the default actions on button click. Not available for the `slider` type. |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 | `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 
 </details>
 
@@ -352,6 +364,43 @@ button_type: slider
 entity: light.kitchen_led
 name: Kitchen LED
 icon: mdi:led-strip-variant
+```
+
+</details>
+
+<details>
+
+<summary>A button with all the options</summary>
+
+<br>
+
+```yaml
+entity: light.your_light
+button_type: switch
+show_icon: true
+force_icon: true
+show_name: true
+show_last_changed: true
+show_state: true
+show_last_updated: true
+show_attribute: true
+attribute: brightness
+scrolling_effect: true
+card_layout: large
+button_action:
+  tap_action:
+    action: toggle
+tap_action:
+  action: more-info
+sub_button:
+  - entity: light.your_light
+    icon: ''
+    show_state: false
+    show_attribute: true
+    attribute: brightness
+    show_icon: false
+    show_background: false
+    show_name: false
 ```
 
 </details>
@@ -378,11 +427,33 @@ This card allows you to control a media player. You can tap on the icon to get m
 | `button_type` | string | Optional | `switch` (default), `slider` or `state` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
-| `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
+| `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 | `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
+| `hide` | object | Optional | See below | Show or hide buttons |
+
+#### Hide options
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `play_pause_button` | boolean | Optional | `true` (default) or `false` | Show or hide the play/pause button |
+| `volume_button` | boolean | Optional | `true` (default) or `false` | Show or hide the volume button |
+| `previous_button` | boolean | Optional | `true` (default) or `false` | Show or hide the previous button |
+| `next_button` | boolean | Optional | `true` (default) or `false` | Show or hide the next button |
+| `power_button` | boolean | Optional | `true` (default) or `false` | Show or hide the power button |
+
 
 </details>
 
@@ -401,6 +472,53 @@ button_type: slider
 entity: light.kitchen_led
 name: Kitchen LED
 icon: mdi:led-strip-variant
+```
+
+</details>
+
+<details>
+
+<summary>A media player with all the options</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: media-player
+name: Media player
+entity: media_player.your_media_player
+show_state: true
+show_last_updated: true
+show_attribute: true
+attribute: assumed_state
+card_layout: large
+scrolling_effect: false
+show_icon: false
+force_icon: true
+show_name: false
+show_last_changed: true
+columns: 2
+rows: 1
+tap_action:
+  action: toggle
+hide:
+  play_pause_button: true
+  volume_button: true
+  previous_button: true
+  next_button: true
+  power_button: true
+sub_button:
+  - entity: media_player.salon_2
+    icon: mdi:volume-high
+    name: Volume level
+    tap_action:
+      action: more-info
+    show_name: false
+    show_state: false
+    show_last_updated: false
+    show_attribute: true
+    show_background: false
+    attribute: volume_level
 ```
 
 </details>
@@ -610,7 +728,7 @@ styles: |
 
 <details>
 
-<summary>Changing the background color of a single button in an `horizontal-buttons-stack`</summary>
+<summary>Changing the background color of a single button in an <code>horizontal-buttons-stack</code></summary>
 
 <br>
 
@@ -626,7 +744,7 @@ styles: >
 
 <details>
 
-<summary>Changing the background color of a `button switch`</summary>
+<summary>Changing the background color of a <code>button switch</code></summary>
 
 <br>
 
@@ -641,7 +759,7 @@ styles: |
 
 <details>
 
-<summary>Changing the color of a `button slider`</summary>
+<summary>Changing the color of a <code>button slider</code></summary>
 
 <br>
 
@@ -688,7 +806,7 @@ But in all cards you can also use this:
 
 <details>
 
-<summary>Changing the background color of a button that is red when it's `off` and green when it's `on`</summary>
+<summary>Changing the background color of a button that is red when it's <code>off</code> and green when it's <code>on</code></summary>
 
 <br>
 
@@ -726,9 +844,28 @@ styles: |
 
 ⚠️ For now there are some features that are not working with:
 
-- UI Lovelace Minimalist (see https://github.com/Clooos/Bubble-Card/issues/41)
-- Lovelace state switch (see https://github.com/Clooos/Bubble-Card/issues/47)
-- Kiosk mode, but here is a [workaround](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678/121?u=cloos)
+<details>
+
+<summary><code>Kiosk mode</code>, but click here for a workaround</summary>
+
+<br>
+
+To ensure full compatibility, here are the steps to follow:
+
+- First for your kiosk mode config, remove `hide_sidebard: true` or `kiosk: true` and just keep that under `kiosk_mode`:
+  ```yaml
+  kiosk_mode:
+    hide_header: true
+  ```
+
+- Then go to your HA profile configuration then toggle this:
+
+  ![image](https://github.com/Clooos/Bubble-Card/assets/36499953/2a33ca06-17c4-414a-81b9-cd7d25dfd30e)
+
+
+- This will now works as expected.
+
+</details>
 
 <br>
 
