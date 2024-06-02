@@ -312,7 +312,7 @@ auto_order: true
 
 ## Button
 
-![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
+![readme-button-without-sub-buttons](https://github.com/Clooos/Bubble-Card/assets/36499953/790cbe3c-bdcc-4242-81ac-48e6ca2f1d46)
 
 This card can be a slider or a button, allowing you to toggle your entities or automation, and control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.
 
@@ -326,10 +326,10 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
-| `entity` | string | **Required** | Any switchable entity, any media player or any light | An entity to control |
-| `button_type` | string | Optional | `switch` (default), `slider` or `state` | The behavior of your button |
+| `entity` | string | **Required** | Any entity | An entity to control |
+| `button_type` | string | Optional | `switch` (default), `slider`, `state` or `text` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
-| `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
 | `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
 | `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
 | `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
@@ -423,10 +423,9 @@ This card allows you to control a media player. You can tap on the icon to get m
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
-| `entity` | string | **Required** | Any switchable entity, any media player or any light | An entity to control |
-| `button_type` | string | Optional | `switch` (default), `slider` or `state` | The behavior of your button |
-| `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
-| `icon` | string | Optional | Any `mdi:` icon or a link to a square image | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
+| `entity` | string | **Required** | Any media player | The media player to control |
+| `name` | string | Optional | Any string | A name for your media player, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your media player, if not defined it will display the entity icon or the `entity-picture` |
 | `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
 | `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
 | `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
@@ -440,7 +439,7 @@ This card allows you to control a media player. You can tap on the icon to get m
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 | `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
-| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 | `hide` | object | Optional | See below | Show or hide buttons |
 
@@ -555,6 +554,9 @@ This card allows you to control your covers.
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
 | `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 
 </details>
 
@@ -598,6 +600,9 @@ This card is a simple separator for dividing your pop-up into categories / secti
 | `name` | string | Optional but recommended | Any string | A name for your separator |
 | `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your separator |
 | `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 
 </details>
 
@@ -654,6 +659,136 @@ cards:
 
 <br>
 
+## Sub-buttons
+
+![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
+
+In every cards that supports that option you can add sub-buttons to customize your cards even more. You can for exemple create a button that can control a vacuum, a weather card or almost anything that you can came up with. These sub-buttons supports the tap actions and most of the button options.
+
+---
+
+### Sub-buttons options
+
+<details>
+
+**<summary>Options (YAML + description)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | Optional | Any entity | An entity to control |
+| `name` | string | Optional | Any string | A name for your sub-button, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your sub-button, if not defined it will display the entity icon or the `entity-picture` |
+| `show_background` | boolean | Optional | `true` (default) or `false` | Show a background for your sub-button, it will change its color based on your entity state |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` or `false` (default) | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button hold, if undefined, `more-info` will be used. |
+
+</details>
+
+#### Example
+
+<details>
+
+<summary>A button with some sub-buttons to makes a vacuum card (like on the screenshot)</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: switch
+name: Vacuum
+entity: vacuum.downstairs
+icon: mdi:robot-vacuum
+show_state: true
+show_last_changed: true
+tap_action:
+  action: more-info
+button_action:
+  tap_action:
+    action: more-info
+sub_button:
+  - name: Battery
+    icon: mdi:battery
+    show_name: false
+    show_icon: true
+    show_background: false
+    show_attribute: true
+    attribute: battery_level
+  - name: Return to dock
+    icon: mdi:home
+    show_background: false
+    tap_action:
+      action: call-service
+      service: vacuum.return_to_base
+      target:
+        entity_id: vacuum.downstairs
+  - name: Pause
+    icon: mdi:pause
+    show_background: false
+    tap_action:
+      action: call-service
+      service: vacuum.pause
+      target:
+        entity_id: vacuum.downstairs
+  - name: Start
+    icon: mdi:play
+    tap_action:
+      action: call-service
+      service: vacuum.start
+      target:
+        entity_id: vacuum.downstairs
+styles: >-
+  .bubble-button-card-container {
+    /* Change the background color when the vacuum get an error (optional), more details in the styles template section */
+    background: ${state === 'error' ? 'rgb(200, 80, 40)' : ''} !important;
+  }
+  /* Change the first sub-button battery icon based on the battery_icon attribute, more details in the styles template section */
+  ${subButtonIcon[0].setAttribute("icon", hass.states['vacuum.downstairs'].attributes.battery_icon)}
+```
+
+</details>
+
+<details>
+
+<summary>A button slider with a sub-button that shows the brightness and one that toggle the light (like on the screenshot)</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+name: Kitchen
+entity: light.kitchen
+icon: mdi:fridge-outline
+show_last_updated: true
+sub_button:
+  - name: Brightness
+    entity: light.bas_tv
+    icon: mdi:fridge-outline
+    show_icon: false
+    show_background: false
+    show_attribute: true
+    attribute: brightness
+  - name: Toggle button
+    entity: light.bas_tv
+    icon: mdi:lightbulb
+    show_name: false
+    tap_action:
+      action: toggle
+```
+
+</details>
+
+<br>
+
 ## Tap, double tap and hold actions
 
 You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example.
@@ -682,18 +817,20 @@ You can also use HA default tap actions, double tap actions and hold actions on 
 
 <details>
 
-<summary>A button that...</summary>
+<summary>A button to open the pop-up</summary>
 
 <br>
 
 ```yaml
-tap_action: 
-  action: toggle 
-double_tap_action: 
-  action: call-service 
-  service: script.dark_scene 
-hold_action: 
-  action: more-info
+type: custom:bubble-card
+card_type: button
+button_type: name
+name: Kitchen
+icon: mdi:fridge
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#kitchen'
 ```
 
 </details>
@@ -790,15 +927,15 @@ More information about JS templates [here](https://developer.mozilla.org/en-US/d
 
 You have access to these variables in most cards:
 
- `state` will return the state of your defined `entity`.  
- `entity` will return your entity you defined like `switch.test` in this example.  
- `icon` can be used like this to change the icon `icon.setAttribute("icon", "mdi:lightbulb")`  
- `hass` is an advanced variable that alows you even more control, more info [here](https://developers.home-assistant.io/docs/dev_101_hass/).
+- `state` will return the state of your defined `entity`.  
+- `entity` will return your entity you defined like `switch.test` in this example.  
+- `icon` can be used like this to change the icon `icon.setAttribute("icon", "mdi:lightbulb")`  
+- `hass` is an advanced variable that alows you even more control, more info [here](https://developers.home-assistant.io/docs/dev_101_hass/).
 
 But in all cards you can also use this:
 
- `hass.states['light.kitchen'].state` will return the state of `light.kitchen`.  
- `hass.states['light.kitchen'].attributes.brightness` will return the brightness attribute of `light.kitchen`.
+- `hass.states['light.kitchen'].state` will return the state of `light.kitchen`.  
+- `hass.states['light.kitchen'].attributes.brightness` will return the brightness attribute of `light.kitchen`.
 
 </details>
 
