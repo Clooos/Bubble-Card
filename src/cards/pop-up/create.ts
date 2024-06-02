@@ -104,10 +104,9 @@ export function createHeader(context) {
 export function createStructure(context) {
   try {
     context.elements.style = createElement('style');
+    context.elements.style.innerText = styles;
     context.elements.customStyle = createElement('style');
-
-    context.content.appendChild(context.elements.style);
-    context.content.appendChild(context.elements.customStyle);
+    context.popUp.appendChild(context.elements.style);
 
     const themeColorBackground = 
       getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
@@ -192,14 +191,6 @@ export function prepareStructure(context) {
     context.popUp.style.setProperty('--custom-backdrop-filter', hideBackdrop ? 'none' : `blur(${context.config.bg_blur ?? 10}px)`);
     context.popUp.style.setProperty('--custom-popup-filter', hideBackdrop ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
     context.popUp.style.setProperty('--custom-shadow-opacity', (context.config.shadow_opacity ?? 0) / 100);
-
-
-    const style = createElement('style');
-    context.elements.customStyle = createElement('style');
-    style.innerText = styles;
-    context.popUp.appendChild(style);
-    context.popUp.appendChild(context.elements.customStyle);
-
   } catch (e) {
     console.error(e)
   }

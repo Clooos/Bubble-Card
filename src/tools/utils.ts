@@ -165,6 +165,46 @@ export function getIcon(context, entity = context.config.entity, icon = context.
       }
     }
 
+    function sensorIcon() {
+      const isOff = state === "off";
+      const sensorType = getAttribute(context, 'device_class', entity);
+
+      switch (sensorType) {
+        case "battery":
+            if (state === 100) {
+                return "mdi:battery";
+            } else if (state >= 90) {
+                return "mdi:battery-90";
+            } else if (state >= 80) {
+                return "mdi:battery-80";
+            } else if (state >= 70) {
+                return "mdi:battery-70";
+            } else if (state >= 60) {
+                return "mdi:battery-60";
+            } else if (state >= 50) {
+                return "mdi:battery-50";
+            } else if (state >= 40) {
+                return "mdi:battery-40";
+            } else if (state >= 30) {
+                return "mdi:battery-30";
+            } else if (state >= 20) {
+                return "mdi:battery-20";
+            } else if (state >= 10) {
+                return "mdi:battery-10";
+            } else {
+                return "mdi:battery-alert";
+            }
+        case "humidity": return "mdi:water-percent";
+        case "illuminance": return "mdi:brightness-5";
+        case "temperature": return "mdi:thermometer";
+        case "pressure": return "mdi:gauge";
+        case "power": return "mdi:flash";
+        case "signal_strength": return "mdi:wifi";
+        case "energy": return "mdi:lightning-bolt";
+        default: return "mdi:eye";
+      }
+    }
+
     function weatherIcon(weatherType = getState(context, entity)) {
       switch (weatherType) {
         case 'cloudy':
@@ -235,7 +275,7 @@ export function getIcon(context, entity = context.config.entity, icon = context.
         remote: "mdi:remote",
         scene: "mdi:palette",
         script: "mdi:file-document",
-        sensor: "mdi:eye",
+        sensor: sensorIcon(),
         simple_alarm: "mdi:bell",
         sun: "mdi:white-balance-sunny",
         switch: "mdi:flash",

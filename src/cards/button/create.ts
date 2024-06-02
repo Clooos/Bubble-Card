@@ -27,7 +27,7 @@ export function createStructure(context, container = context.content, appendTo =
   context.elements.style.innerText = styles;
 
   context.elements.iconContainer.appendChild(context.elements.icon);
-  context.elements.iconContainer.appendChild(context.elements.image)
+  context.elements.iconContainer.appendChild(context.elements.image);
 
   context.elements.nameContainer.appendChild(context.elements.name);
   if (buttonType !== "name") {

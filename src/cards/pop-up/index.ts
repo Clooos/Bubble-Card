@@ -18,7 +18,8 @@ export async function handlePopUp(context) {
 
   if (
       context.popUp.classList.contains('is-popup-opened') ||
-      configChanged(context, context.popUp)
+      configChanged(context, context.popUp) ||
+      context.editor
   ){
       changeStyle(context);
 

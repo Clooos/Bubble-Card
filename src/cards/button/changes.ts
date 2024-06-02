@@ -72,6 +72,8 @@ export function changeIcon(context) {
       context.elements.icon.style.display = 'none';
       context.elements.image.style.display = 'none';
   }
+
+  //context.elements.iconContainer.innerHTML = `<ha-state-icon .hass=${context._hass} .stateObj=${context._hass.states[context.config.entity]}></ha-state-icon>`;
 }
 export function changeName(context) {
   const buttonType = getButtonType(context);

@@ -3,7 +3,7 @@ export default `
       display: flex;
       flex-direction: column;
       overflow: scroll;
-      height: calc(100% + 50px);
+      height: auto;
       margin-top: -50px;
       max-width: 100%;
       padding-top: 40px;
@@ -25,6 +25,8 @@ export default `
   }
   .bubble-pop-up-container > * {
       flex-shrink: 0;
+      max-width: 100% !important;
+      max-height: 100% !important;
   }
   .bubble-pop-up.card-content {
       width: 100% !important;
@@ -69,6 +71,7 @@ export default `
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
   }
+
   @media only screen and (min-width: 600px) {
       .bubble-pop-up {
           margin-left: 0 !important;

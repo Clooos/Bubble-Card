@@ -68,6 +68,7 @@ export function changeStyle(context) {
         : '';
 
     if (context.elements.customStyle) {
+        context.popUp.appendChild(context.elements.customStyle);
         context.elements.customStyle.innerText = customStyle;
     }
     
