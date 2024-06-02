@@ -141,7 +141,7 @@ export function createStructure(context) {
         let touchMoveDistance = event.touches[0].clientY - startTouchY;
 
         // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
-        if (touchMoveDistance > 300 && event.touches[0].clientY > lastTouchY) {
+        if (touchMoveDistance > 400 && event.touches[0].clientY > lastTouchY) {
             removeHash();
         }
 
