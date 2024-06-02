@@ -105,6 +105,59 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 > 4. Just fill in the `Hash` input and the ones you need
 > </details>
 
+> [!TIP]
+> ### Pop-up trigger 
+> This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
+> #### Example
+> <details>
+> <summary>Opening a pop-up when a <code>binary_sensor</code> is <code>on</code></summary>
+> <br>
+>
+> ```yaml
+> type: custom:bubble-card
+> card_type: pop-up
+> hash: '#kitchen'
+> name: Security
+> icon: mdi:video
+> trigger_entity: binary_sensor.front_door_motion
+> trigger_state: 'on'
+> trigger_close: true
+> ```
+> 
+> </details>
+>
+> ### Different ways to close a pop-up 
+> They are many ways to close a pop-up. For instance, you can swipe from the pop-up header to the bottom, by doing a long swipe inside the pop-up to the bottom, by pressing Escape on desktop, by removing the hash in the URL or by simply pressing the close button.
+>
+> ### Pop-up initialization fix
+> If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
+> <details>
+> <summary>Installation</summary>
+> <br>
+>
+> You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
+> ```yaml
+> frontend:
+>   extra_module_url:
+>     - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
+> ```
+> If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
+> 
+> For Android HA Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
+> 
+> For iOS HA Companion App users, you can go to your HA settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
+> 
+> For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
+> 
+> ```yaml
+> type: vertical-stack
+> cards:
+>   - type: custom:bubble-card
+>     card_type: pop-up
+> ```
+> 
+> </details>
+
 ---
 
 ### Pop-up options
@@ -177,74 +230,13 @@ button_action:
 
 </details>
 
----
-
-> [!TIP]
-> ### Pop-up trigger 
-> This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
-> #### Example
-> <details>
-> <summary>Opening a pop-up when a binary_sensor is <code>on</code></summary>
-> <br>
->
-> ```yaml
-> type: custom:bubble-card
-> card_type: pop-up
-> hash: '#kitchen'
-> name: Security
-> icon: mdi:video
-> trigger_entity: binary_sensor.front_door_motion
-> trigger_state: 'on'
-> trigger_close: true
-> ```
-> 
-> </details>
-
----
-
-> [!TIP]
-> ### Different ways to close a pop-up 
-> They are many ways to close a pop-up. For instance, you can swipe from the pop-up header to the bottom, by doing a long swipe inside the pop-up to the bottom, by pressing Escape on desktop, by removing the hash in the URL or by simply pressing the close button.
-
----
-
-> [!TIP]
-> ### Pop-up initialization fix
-> If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
-> <details>
-> <summary>Installation</summary>
-> <br>
->
-> You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
-> ```yaml
-> frontend:
->   extra_module_url:
->     - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
-> ```
-> If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
-> 
-> For Android HA Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
-> 
-> For iOS HA Companion App users, you can go to your HA settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
-> 
-> For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
-> 
-> ```yaml
-> type: vertical-stack
-> cards:
->   - type: custom:bubble-card
->     card_type: pop-up
-> ```
-> 
-> </details>
-
 <br>
 
 ## Horizontal buttons stack
 
 ![readme-horizontal-buttons-stack](https://github.com/Clooos/Bubble-Card/assets/36499953/8fe89ade-c77a-469b-891f-577e0bb2f46b)
 
-This card is a companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion/occupancy sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer.
+This card is a good companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion/occupancy sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer.
 
 > [!IMPORTANT]  
 > This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.
@@ -349,7 +341,7 @@ This card can be a slider or a button, allowing you to toggle your entities or a
 
 </details>
 
-#### Example
+#### Examples
 
 <details>
 
@@ -456,7 +448,7 @@ This card allows you to control a media player. You can tap on the icon to get m
 
 </details>
 
-#### Example
+#### Examples
 
 <details>
 
@@ -677,7 +669,7 @@ In every cards that supports that option you can add sub-buttons to customize yo
 | --- | --- | --- | --- | --- |
 | `entity` | string | Optional | Any entity | An entity to control |
 | `name` | string | Optional | Any string | A name for your sub-button, if not defined it will display the entity name |
-| `icon` | string | Optional | Any `mdi:` icon | An icon for your sub-button, if not defined it will display the entity icon or the `entity-picture` |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your sub-button, if not defined it will display the entity icon |
 | `show_background` | boolean | Optional | `true` (default) or `false` | Show a background for your sub-button, it will change its color based on your entity state |
 | `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
 | `show_name` | boolean | Optional | `true` or `false` (default) | Show or hide the name |
@@ -691,7 +683,7 @@ In every cards that supports that option you can add sub-buttons to customize yo
 
 </details>
 
-#### Example
+#### Examples
 
 <details>
 
@@ -771,18 +763,63 @@ icon: mdi:fridge-outline
 show_last_updated: true
 sub_button:
   - name: Brightness
-    entity: light.bas_tv
     icon: mdi:fridge-outline
     show_icon: false
     show_background: false
     show_attribute: true
     attribute: brightness
   - name: Toggle button
-    entity: light.bas_tv
     icon: mdi:lightbulb
-    show_name: false
     tap_action:
       action: toggle
+```
+
+</details>
+
+<details>
+
+<summary>A button that shows the inside and outside temperature with the weather for today and tomorrow (screenshot included)</summary>
+
+<br>
+
+<img width="591" alt="image" src="https://github.com/Clooos/Bubble-Card/assets/36499953/360312de-db08-47bf-9b46-92afeb435edd">
+
+> Bad luck for me it's cloudy all the time but all the icons are changing based on the weather.
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+entity: weather.openweathermap
+name: Weather
+show_state: true
+card_layout: large-2-rows
+sub_button:
+  - name: Home temperature
+    icon: mdi:home-thermometer-outline
+    entity: sensor.home_temperature
+    show_state: true
+    show_icon: true
+    show_background: false
+  - name: Outside temperature
+    entity: sensor.outside_temperature
+    show_state: true
+    show_background: false
+  - name: Today
+    entity: sensor.home_realfeel_temperature_max_0d
+    show_name: true
+    show_state: true
+    tap_action:
+      action: more-info
+  - name: Tomorrow
+    entity: sensor.home_realfeel_temperature_max_1d
+    show_name: true
+    show_state: true
+    show_background: false
+styles: >-
+  /* Change the third and fourth sub-button icon based on the forecast.condition attribute, more details in the styles template section */
+  ${subButtonIcon[2].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[0]?.condition))}
+  ${subButtonIcon[3].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[1]?.condition))}
 ```
 
 </details>
@@ -817,7 +854,7 @@ You can also use HA default tap actions, double tap actions and hold actions on 
 
 <details>
 
-<summary>A button to open the pop-up</summary>
+<summary>A button to open a pop-up</summary>
 
 <br>
 
@@ -840,6 +877,11 @@ button_action:
 ## Styling
 
 You can add custom styles in the editor or by adding `styles: |` in YAML **without using card-mod** which allows you to modify the CSS style of all the cards.
+
+> [!TIP]  
+> **To understand which style classes can be modified**, you can take a look at the [`src/cards`](https://github.com/Clooos/Bubble-Card/tree/main/src/cards) folder in this repository. In each card folder, you will find a file named `styles.ts`. These files contain all the applied styles.
+> 
+> You can also find a lot of examples on the [Home Assistant forum](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/) by doing a bit of searching.
 
 > [!IMPORTANT]  
 > Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
