@@ -121,6 +121,10 @@ export function createBubbleCardEditor() {
             return this._config.close_on_click || false;
         }
 
+        get _close_by_clicking_outside() {
+            return this._config.close_by_clicking_outside ?? true;
+        }
+
         get _background_update() {
             return this._config.background_update || false;
         }
@@ -450,6 +454,17 @@ export function createBubbleCardEditor() {
                                     .configValue="${"auto_close"}"
                                     @input="${this._valueChanged}"
                                 ></ha-textfield>
+                                <ha-formfield .label="Optional - Close the pop-up by clicking outside of it (a refresh is needed)">
+                                    <ha-switch
+                                        aria-label="Optional - Close the pop-up by clicking outside of it (a refresh is needed)"
+                                        .checked=${this._close_by_clicking_outside}
+                                        .configValue="${"close_by_clicking_outside"}"
+                                        @change=${this._valueChanged}
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Optional - Close the pop-up by clicking outside of it (a refresh is needed)</label> 
+                                    </div>
+                                </ha-formfield>
                                 <ha-formfield .label="Optional - Close the pop-up after any click or tap">
                                     <ha-switch
                                         aria-label="Optional - Close the pop-up after any click or tap"

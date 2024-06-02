@@ -45,7 +45,10 @@ export function closePopup(context) {
     clearTimeout(context.closeTimeout);
   }
   context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
-  window.removeEventListener('click', clickOutside);
+
+  if (context.config.close_by_clicking_outside ?? true) {
+    window.removeEventListener('click', clickOutside);
+  }
 
   const closeOnClick = context.config.close_on_click ?? false;
   if (closeOnClick) {
@@ -86,7 +89,9 @@ export function openPopup(context) {
 
   requestAnimationFrame(() => {
     context.popUp.classList.remove('is-popup-closed');
-    window.addEventListener('click', clickOutside, { passive: true });
+    if (context.config.close_by_clicking_outside ?? true) {
+      window.addEventListener('click', clickOutside, { passive: true });
+    }
   });
 
   if (context.config.auto_close > 0) {
