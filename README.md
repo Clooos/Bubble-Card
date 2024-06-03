@@ -112,7 +112,6 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 > [!TIP]
 > ### Pop-up trigger 
 > This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
-> #### Example
 > <details>
 > <summary>Opening a pop-up when a <code>binary_sensor</code> is <code>on</code></summary>
 > <br>
@@ -314,7 +313,18 @@ auto_order: true
 
 ![readme-button-without-sub-buttons](https://github.com/Clooos/Bubble-Card/assets/36499953/790cbe3c-bdcc-4242-81ac-48e6ca2f1d46)
 
-This card can be a slider or a button, allowing you to toggle your entities or automation, and control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.
+This card allows you to control your entities and can be customized in many ways. To access color / control of an entity, simply tap on the icon.
+
+> [!TIP]
+> ### What are the differences between all the button types?
+>
+> - **The button switch** is the default one. By default, it toggles an entity and its background color changes based on the entity’s state or the color of a light.
+>
+> - **The button slider** can control the brightness of a light, the volume of a media player, the position of a cover, and it also supports input numbers. Its background color can change based on the color of a light.
+>
+> - **The button state** is perfect for displaying information from a sensor or any entity. When you press it, it will show the "More info" panel of the entity. Its background color does not change.
+>
+> - **The button text** is the only one that doesn't need an entity and allows you to display a short text or a title. You can also add some actions to it. Its background color does not change.
 
 ### Button options
 
@@ -1143,7 +1153,7 @@ styles: |
 This one is changing a button name with "It's currently sunny" depending on your weather.
 ```yaml
 styles: |
-  ${card.querySelector('.bubble-name').innerText = "It's currently " + hass.states['weather.maison'].state}
+  ${card.querySelector('.bubble-name').innerText = "It's currently " + hass.states['weather.home'].state}
 ```
 
 </details>
