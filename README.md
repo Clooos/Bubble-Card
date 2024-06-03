@@ -915,6 +915,8 @@ button_action:
 
 ## Styling
 
+![My-Bubble-Card-dashboard](https://github.com/Clooos/Bubble-Card/assets/36499953/0c049498-969b-4939-959e-fc49fb08d0a1)
+
 You can add custom styles in the editor or by adding `styles: |` in YAML **without using card-mod** which allows you to modify the CSS style of all the cards.
 
 > [!TIP]  
