@@ -10,7 +10,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ## Table of contents
 
-**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
+**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
 
 <br>
 
@@ -1228,9 +1228,9 @@ styles: |
 
 <br>
 
-### Styles template
+### Templates
 
-Advanced users can add templates in JS directly in their custom styles (Bubble Card doesn’t support Jinja templates yet). For example, this allows you to dynamically change an icon, the name or the color of an element, to show or hide an element conditionnaly (like a sub-button), or almost anything based on a state, an attribute and more.
+Advanced users can add templates in JS directly in their custom styles (Bubble Card doesn’t support Jinja templates). For example, this allows you to dynamically change an icon, the name or the color of an element, to show or hide an element conditionnaly (like a sub-button), or almost anything based on a state, an attribute and more.
 
 > [!TIP]  
 > More information about JS templates [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator). My advice is to always take a look at your browser console to be sure that everything is working correctly.
