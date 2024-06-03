@@ -1067,6 +1067,22 @@ styles: |
 
 <details>
 
+<summary>Changing the line color of a separator</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-line {
+    background: var(--primary-text-color);
+    opacity: 0.1;
+  }
+```
+
+</details>
+
+<details>
+
 <summary>Changing the color of an icon</summary>
 
 <br>
