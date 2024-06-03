@@ -87,6 +87,10 @@ All options can be configured in the Home Assistant editor. But you can find mor
 
 <br>
 
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -143,9 +147,9 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 > ```
 > If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
 > 
-> For Android HA Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
+> For Android Home Assistant Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
 > 
-> For iOS HA Companion App users, you can go to your HA settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
+> For iOS Home Assistant Companion App users, you can go to your Home Assistant settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
 > 
 > For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
 > 
@@ -157,8 +161,6 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 > ```
 > 
 > </details>
-
----
 
 ### Pop-up options
 
@@ -232,6 +234,10 @@ button_action:
 
 <br>
 
+---
+
+<br>
+
 ## Horizontal buttons stack
 
 ![readme-horizontal-buttons-stack](https://github.com/Clooos/Bubble-Card/assets/36499953/8fe89ade-c77a-469b-891f-577e0bb2f46b)
@@ -240,8 +246,6 @@ This card is a good companion to the pop-up card, allowing you to open the corre
 
 > [!IMPORTANT]  
 > This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.
-
----
 
 ### Horizontal buttons stack options
 
@@ -302,13 +306,15 @@ auto_order: true
 
 <br>
 
+---
+
+<br>
+
 ## Button
 
 ![readme-button-without-sub-buttons](https://github.com/Clooos/Bubble-Card/assets/36499953/790cbe3c-bdcc-4242-81ac-48e6ca2f1d46)
 
 This card can be a slider or a button, allowing you to toggle your entities or automation, and control the brightness of your lights and the volume of your media players. To access color / control of an entity, simply tap on the icon.
-
----
 
 ### Button options
 
@@ -399,13 +405,15 @@ sub_button:
 
 <br>
 
+---
+
+<br>
+
 ## Media player
 
 ![readme-media-player](https://github.com/Clooos/Bubble-Card/assets/36499953/c7ee0752-00e3-4edf-8e1c-983fbd29b5f3)
 
 This card allows you to control a media player. You can tap on the icon to get more control.
-
----
 
 ### Media player options
 
@@ -516,13 +524,15 @@ sub_button:
 
 <br>
 
+---
+
+<br>
+
 ## Cover
 
 ![readme-cover](https://github.com/Clooos/Bubble-Card/assets/36499953/27d1c329-76ab-480b-b424-c79c9e68c788)
 
 This card allows you to control your covers.
-
----
 
 ### Cover options
 
@@ -573,13 +583,15 @@ icon_close: mdi:roller-shade-closed
 
 <br>
 
+---
+
+<br>
+
 ## Separator
 
 ![readme-separator](https://github.com/Clooos/Bubble-Card/assets/36499953/7e416a34-b95e-4a03-a200-4b3aa04f560d)
 
 This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...
-
----
 
 ### Separator options
 
@@ -617,13 +629,15 @@ icon: mdi:window-shutter
 
 <br>
 
+---
+
+<br>
+
 ## Empty column
 
 ![readme-empty-column](https://github.com/Clooos/Bubble-Card/assets/36499953/a97fa8df-8360-4613-8bb7-e8a269cb1913)
 
 This card is here to fill an empty column. This is useful if you have an `horizontal-stack` in your pop-up with only one card. Take a look at the bottom right corner of this screenshot to (don't) see it.
-
----
 
 ### Empty column options
 
@@ -651,13 +665,15 @@ cards:
 
 <br>
 
+---
+
+<br>
+
 ## Sub-buttons
 
 ![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
 
 In every cards that supports that option you can add sub-buttons to customize your cards even more. You can for exemple create a button that can control a vacuum, a weather card or almost anything that you can came up with. These sub-buttons supports the tap actions and most of the button options.
-
----
 
 ### Sub-buttons options
 
@@ -826,11 +842,13 @@ styles: >-
 
 <br>
 
+---
+
+<br>
+
 ## Tap, double tap and hold actions
 
-You can also use HA default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example.
-
----
+You can also use Home Assistant default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example.
 
 ### Action options
 
@@ -874,6 +892,10 @@ button_action:
 
 <br>
 
+---
+
+<br>
+
 ## Styling
 
 You can add custom styles in the editor or by adding `styles: |` in YAML **without using card-mod** which allows you to modify the CSS style of all the cards.
@@ -882,11 +904,11 @@ You can add custom styles in the editor or by adding `styles: |` in YAML **witho
 > **To understand which style classes can be modified**, you can take a look at the [`src/cards`](https://github.com/Clooos/Bubble-Card/tree/main/src/cards) folder in this repository. In each card folder, you will find a file named `styles.ts`. These files contain all the applied styles.
 > 
 > You can also find a lot of examples on the [Home Assistant forum](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/) by doing a bit of searching.
+>
+> The Bubble theme for Home Assistant (like on the screenshots) can be found [here](https://github.com/Clooos/Bubble).
 
 > [!IMPORTANT]  
 > Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
-
----
 
 #### Examples
 
@@ -951,34 +973,70 @@ styles: |
 
 </details>
 
-The Bubble theme for Home Assistant (like on the screenshots) can be found [here](https://github.com/Clooos/Bubble).
-
----
+<br>
 
 ### Styles template
 
-Advanced users can add templates in JS directly in their custom styles (Bubble Card doesn’t support Jinja templates yet).
+Advanced users can add templates in JS directly in their custom styles (Bubble Card doesn’t support Jinja templates yet). For example, this allows you to dynamically change an icon, the name or the color of an element, to show or hide an element conditionnaly (like a sub-button), or almost anything based on a state, an attribute and more.
 
-More information about JS templates [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator).
+> [!TIP]  
+> More information about JS templates [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator). My advice is to always take a look at your browser console to be sure that everything is working correctly.
+
+#### Available variables and functions
 
 <details>
 
-<summary>Available variables</summary>
+<summary>Variables</summary>
 
 <br>
 
 You have access to these variables in most cards:
 
-- `state` will return the state of your defined `entity`.  
-- `entity` will return your entity you defined like `switch.test` in this example.  
-- `icon` can be used like this to change the icon `icon.setAttribute("icon", "mdi:lightbulb")`  
-- `hass` is an advanced variable that alows you even more control, more info [here](https://developers.home-assistant.io/docs/dev_101_hass/).
+- `state` will return the state of your defined `entity`.
+  
+- `entity` will return your entity you defined like `switch.test` in this example.
+  
+- `icon` can be used like this to change the icon `icon.setAttribute("icon", "mdi:lightbulb")`.
+  
+- `subButtonIcon[0]` can be used like this to change the first sub-button icon `subButtonIcon[0].setAttribute("icon", "mdi:lightbulb")`, `[0]` is the first sub-button icon, `[1]` the second...
+  
+- `card` will return the card element in the DOM.
+  
+- `hass` is an advanced variable that allows you even more control, for example you can return the state of `light.kitchen` like this `hass.states['light.kitchen'].state` or an attribute like this `hass.states[entity].attributes.brightness`.
 
-But in all cards you can also use this:
+- `this` will return a lot of usefull informations about your setup and dashboard, only use this if you know what you are doing.
 
-- `hass.states['light.kitchen'].state` will return the state of `light.kitchen`.  
-- `hass.states['light.kitchen'].attributes.brightness` will return the brightness attribute of `light.kitchen`.
+</details>
 
+<details>
+
+<summary>Functions (<code>getWeatherIcon</code>)</summary>
+
+<br>
+
+You have access to all the global JS functions, but you have also access to:
+
+- `getWeatherIcon` can be used to return a weather icon based on a state that return the weather. For example, you can can do this `${subButtonIcon[2].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[0]?.condition))}` to change the third sub-button icon to today's weather icon, `.forecast[1]?.condition` is for tomorrow...
+
+  You will have to create a template sensor for that. Here is what you can add in your `configuration.yaml`:
+  ```yaml
+    - trigger:
+        - platform: time_pattern
+          hours: /2
+      action:
+        - service: weather.get_forecasts
+          data:
+            type: daily
+          target:
+            entity_id: weather.home
+          response_variable: daily
+      sensor:
+        - name: Weather Forecast Daily
+          unique_id: weather_forecast_daily
+          state: "{{ now().isoformat() }}"
+          attributes:
+            forecast: "{{ daily['weather.home'].forecast }}"
+  ```
 </details>
 
 #### Examples
@@ -995,7 +1053,7 @@ card_type: button
 entity: switch.test
 name: Test
 styles: |
-  .switch-button {
+  .bubble-button-card-container {
     background-color: ${state === 'on' ? 'green' : 'red'} !important;
   }
 ```
@@ -1017,6 +1075,83 @@ styles: |
 
 </details>
 
+<details>
+
+<summary>Changing the color of a sub-button when a pop-up is open</summary>
+
+<br>
+
+```yaml
+styles: |
+  ${window.addEventListener('location-changed', () => { 
+  card.querySelector('.bubble-sub-button-1').style.backgroundColor = this.location.href.includes('#kitchen') ? 'blue' : '';
+  })}
+```
+
+</details>
+
+<details>
+
+<summary>Showing/Hiding a sub-button conditionnaly</summary>
+
+<br>
+
+This one is showing the first sub-button only when my vacuum is stuck.
+```yaml
+styles: |
+  .bubble-sub-button-1 {
+    display: ${hass.states['vacuum.downstairs'].state === 'error' ? '' : 'none'} !important;
+  }
+```
+
+This one is showing a sub-button when the battery is below 10%. Usefull with a sub-button that shows "Low battery".
+```yaml
+styles: |
+  .bubble-sub-button-1 {
+    display: ${hass.states['vacuum.downstairs'].attributes.battery_level <= 10 ? '' : 'none'} !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Changing an icon or sub-button icon conditionnaly</summary>
+
+<br>
+
+This one is changing a button icon only when a vacuum is stuck.
+```yaml
+styles: |
+  ${icon.setAttribute("icon", hass.states['vacuum.downstairs'].state === 'error' ? 'mdi:alert' : 'mdi:robot-vacuum')}
+```
+
+This one is changing the first sub-button icon only when a vacuum is stuck.
+```yaml
+styles: |
+  ${subButtonIcon[0].setAttribute("icon", hass.states['vacuum.downstairs'].state === 'error' ? 'mdi:alert' : 'mdi:robot-vacuum')}
+```
+
+</details>
+
+<details>
+
+<summary>Templating a button name</summary>
+
+<br>
+
+This one is changing a button name with "It's currently sunny" depending on your weather.
+```yaml
+styles: |
+  ${card.querySelector('.bubble-name').innerText = "It's currently " + hass.states['weather.maison'].state}
+```
+
+</details>
+
+<br>
+
+---
+
 <br>
 
 ## Custom components conflicts
@@ -1037,7 +1172,7 @@ To ensure full compatibility, here are the steps to follow:
     hide_header: true
   ```
 
-- Then go to your HA profile configuration then toggle this:
+- Then go to your Home Assistant profile configuration then toggle this:
 
   ![image](https://github.com/Clooos/Bubble-Card/assets/36499953/2a33ca06-17c4-414a-81b9-cd7d25dfd30e)
 
@@ -1048,26 +1183,35 @@ To ensure full compatibility, here are the steps to follow:
 
 <br>
 
+---
+
+<br>
+
 ## Help
 
-Feel free to open an [issue](https://github.com/Clooos/Bubble-Card/issues) if something is not working as expected. 
+Feel free to open an issue if something is not working as expected. 
 
-And for your questions, you can go ask here on the forum to get some help from me or the community :
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-green?logo=github)](https://github.com/Clooos/Bubble-Card/issues)
 
-[![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) 
+Got questions or thoughts about Bubble Card? Want to share your dashboards or discoveries? You can go on the Home Assistant forum, on the Bubble Card subreddit or on the GitHub Discussions section.
+
+[![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit)](https://www.reddit.com/r/BubbleCard/) [![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-lightgrey?logo=github)](https://github.com/Clooos/Bubble-Card/discussions)
+
+
+<br>
+
+---
 
 <br>
 
 ## Donate
 
-If you like my project and want to support me, please consider making a donation. Any amount is welcome and very much appreciated 🍻
+I dedicate most of my spare time to making this project the best it can be. So if you appreciate my work, any donation would be a great way to show your support 🍻
 
-[![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos)
-
-[![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR)
+[![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR)
 
 <br>
 
-Thank you, everyone, for your support, you all are my greatest motivation!
+Thank you everyone for your support, you all are my greatest motivation!
 
 <p align="right"><a href="#top"><img src="https://cdn-icons-png.flaticon.com/512/892/892692.png" height="50px"></a></p>
