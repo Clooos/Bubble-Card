@@ -177,7 +177,7 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the header, see [card layout](#card-layout) |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the header, see [card layouts](#card-layouts) |
 | You also have access to [all the button settings](#button) for the header of the pop-up. | | Optional | | If undefined no header will be shown |
 
 </details>
@@ -354,7 +354,7 @@ This card allows you to control your entities and can be customized in many ways
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
@@ -451,7 +451,7 @@ This card allows you to control a media player. You can tap on the icon to get m
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
@@ -576,7 +576,7 @@ This card allows you to control your covers.
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
@@ -624,7 +624,7 @@ This card is a simple separator for dividing your pop-up into categories / secti
 | --- | --- | --- | --- | --- |
 | `name` | string | Optional but recommended | Any string | A name for your separator |
 | `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your separator |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layout](#card-layout) |
+| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
@@ -867,6 +867,74 @@ styles: >-
 
 <br>
 
+## Card layouts
+
+![My-Bubble-Card-dashboard](https://github.com/Clooos/Bubble-Card/assets/36499953/0c049498-969b-4939-959e-fc49fb08d0a1)
+
+Bubble Card fully supports the Home Assistant section view, you can change the card layout to make the card bigger and also change the number of columns or rows the card should occupy in your section view (only on the cards that support that option). These layouts are also supported in all other view types.
+
+<details>
+
+**<summary>Available card layouts</summary>**
+
+| Layout | Description |
+| --- | --- |
+| `regular` | The regular layout (not optimized for the section view) |
+| `large` | A larger layout (optimized for the section view) |
+| `large_2_rows` | A larger layout with 2 rows of sub-buttons (optimized for the section view) |
+
+</details>
+
+#### Example
+
+<details>
+
+<summary>A large button that shows energy statistics with 2 rows of sub-buttons (screenshot included)</summary>
+
+<br>
+
+<img width="547" alt="image" src="https://github.com/Clooos/Bubble-Card/assets/36499953/faa643d5-5d1e-488d-b4a5-6bedd043c747">
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+card_layout: large-2-rows
+name: Energy
+entity: sensor.current_power_production
+icon: mdi:home-lightning-bolt-outline
+show_state: true
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#energy'
+sub_button:
+  - entity: sensor.electricity_counter
+    icon: mdi:counter
+    show_background: false
+    show_state: true
+    tap_action:
+      action: more-info
+  - entity: sensor.today_s_energy_production
+    show_state: true
+    show_background: false
+  - entity: sensor.average_daily_consumption
+    show_background: false
+    show_state: true
+  - entity: sensor.this_week_production
+    show_state: true
+    show_background: false
+    icon: mdi:calendar-week
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
 ## Tap, double tap and hold actions
 
 You can also use Home Assistant default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example.
@@ -918,8 +986,6 @@ button_action:
 <br>
 
 ## Styling
-
-![My-Bubble-Card-dashboard](https://github.com/Clooos/Bubble-Card/assets/36499953/0c049498-969b-4939-959e-fc49fb08d0a1)
 
 You can add custom styles in the editor or by adding `styles: |` in YAML **without using card-mod** which allows you to modify the CSS style of all the cards.
 
