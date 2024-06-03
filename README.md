@@ -324,7 +324,7 @@ This card allows you to control your entities and can be customized in many ways
 >
 > - **The button state** is perfect for displaying information from a sensor or any entity. When you press it, it will show the "More info" panel of the entity. Its background color does not change.
 >
-> - **The button text** is the only one that doesn't need an entity and allows you to display a short text or a title. You can also add some actions to it. Its background color does not change.
+> - **The button name** is the only one that doesn't need an entity and allows you to display a short text, a name or a title. You can also add some actions to it. Its background color does not change.
 
 ### Button options
 
@@ -335,7 +335,7 @@ This card allows you to control your entities and can be customized in many ways
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `entity` | string | **Required** | Any entity | An entity to control |
-| `button_type` | string | Optional | `switch` (default), `slider`, `state` or `text` | The behavior of your button |
+| `button_type` | string | Optional | `switch` (default), `slider`, `state` or `name` | The behavior of your button |
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
 | `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
@@ -1049,6 +1049,106 @@ styles: |
 styles: |
   .bubble-sub-button-2 {
     background-color: blue !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Changing the size of an icon</summary>
+
+<br>
+
+For the main icon.
+
+```yaml
+styles: |
+  .bubble-icon {
+    --mdc-icon-size: 26px !important;
+  }
+```
+
+For the sub-button icons.
+
+```yaml
+styles: |
+  .bubble-sub-button-icon {
+    --mdc-icon-size: 26px !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Advanced example: Creating an horizontal row of sub-buttons (screenshot included)</summary>
+
+<br>
+
+<img width="556" alt="image" src="https://github.com/Clooos/Bubble-Card/assets/36499953/b9be2bcf-93fc-4b06-8eae-ecac97dfb5e2">
+
+> I really love this one, I use it as a header on my dashboard.
+
+```yaml
+type: custom:bubble-card
+card_type: button
+card_layout: large
+button_type: name
+show_icon: false
+show_name: false
+sub_button:
+  - name: Mute
+    icon: mdi:volume-off
+    tap_action:
+      action: toggle
+      service: input_boolean.toggle
+    entity: input_boolean.silent_mode
+  - name: Covers
+    entity: cover.all_group
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#cover'
+  - name: Shopping list
+    icon: mdi:cart-outline
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#shopping-list'
+  - name: Security
+    icon: mdi:video-outline
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#security'
+  - name: Settings
+    icon: mdi:cog
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#configuration'
+styles: |
+  .card-content {
+    width: 100%;
+    margin: 0 !important;
+  }
+  .bubble-button-card-container {
+    background: none;
+  }
+  .bubble-sub-button {
+    height: 46px !important;
+    width: 46px !important;
+  }
+  .bubble-sub-button-container {
+    width: 100%;
+    justify-content: space-between !important;
+  }
+  .bubble-sub-button-icon {
+    --mdc-icon-size: inherit !important;
+  }
+  .bubble-name-container {
+    margin-right: 0px !important;
   }
 ```
 
