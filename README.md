@@ -99,15 +99,6 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 
 > [!IMPORTANT]  
 > This card must be placed within a vertical-stack card on the same view at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
-> <details>
-> <summary>How to create a pop-up in the editor</summary>
-> <br>
-> 
-> 1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
-> 2. This `vertical-stack` must be before all your other cards in your view order
-> 3. Now add a `Bubble Card` with the `Pop-up` type
-> 4. Just fill in the `Hash` input and the ones you need
-> </details>
 
 > [!TIP]
 > ### Pop-up trigger 
@@ -192,6 +183,19 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 </details>
 
 #### Examples
+
+<details>
+  
+<summary>How to create a pop-up in the editor</summary>
+
+<br>
+ 
+1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
+2. This `vertical-stack` must be before all your other cards in your view order
+3. Now add a `Bubble Card` with the `Pop-up` type
+4. Just fill in the `Hash` input and the ones you need
+
+</details>
 
 <details>
 
