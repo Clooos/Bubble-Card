@@ -658,7 +658,7 @@ icon: mdi:window-shutter
 
 ![readme-empty-column](https://github.com/Clooos/Bubble-Card/assets/36499953/a97fa8df-8360-4613-8bb7-e8a269cb1913)
 
-This card is here to fill an empty column. This is useful if you have an `horizontal-stack` in your pop-up with only one card. Take a look at the bottom right corner of this screenshot to (don't) see it.
+This card is here to fill an empty column. This is useful if you have an `horizontal-stack` in your pop-up with only one card. Take a look at the bottom right corner of this screenshot to (not) see it.
 
 ### Empty column options
 
@@ -694,7 +694,7 @@ cards:
 
 ![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
 
-In every cards that supports that option you can add sub-buttons to customize your cards even more. You can for exemple create a button that can control a vacuum, a weather card or almost anything that you can came up with. These sub-buttons supports the tap actions and most of the button options.
+In every cards that supports that option you can add sub-buttons to customize your cards even more. You can for exemple create a button that can control a vacuum, a weather card or almost anything that you can come up with. These sub-buttons supports the tap actions and most of the button options.
 
 ### Sub-buttons options
 
