@@ -1,4 +1,4 @@
-# Bubble Card (Update in progress)
+# Bubble Card
 
 ![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
 
@@ -554,7 +554,14 @@ This card allows you to control your covers.
 | --- | --- | --- | --- | --- |
 | `entity` | string | **Required** | Any cover | A cover to control |
 | `name` | string | Optional | Any string | A name for your cover, if not defined it will display the entity name |
-| `show_state` | boolean | Optional | `true` or `false` (default) | Show the state of your `entity` below its `name` |
+| `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
 | `icon_open` | string | Optional | Any `mdi:` icon | An icon for your open cover, if not defined it will display the default open cover icon |
 | `icon_close` | string | Optional | Any `mdi:` icon | An icon for your closed cover, if not defined it will display the default closed cover icon |
 | `icon_up` | string | Optional | Any `mdi:` icon | An icon for your open cover button, if not defined it will display the default open cover icon |
@@ -930,8 +937,8 @@ You can add custom styles in the editor or by adding `styles: |` in YAML **witho
 
 ```yaml
 styles: |
-  ha-card { 
-    font-size: 12px;
+  * { 
+    font-size: 16px !important;
   }
 ```
 
@@ -939,7 +946,7 @@ styles: |
 
 <details>
 
-<summary>Changing the background color of a single button in an <code>horizontal-buttons-stack</code></summary>
+<summary>Changing the background color of a single button in an horizontal buttons stack</summary>
 
 <br>
 
@@ -955,14 +962,32 @@ styles: >
 
 <details>
 
-<summary>Changing the background color of a <code>button switch</code></summary>
+<summary>Changing the background color of a button</summary>
 
 <br>
 
 ```yaml
 styles: | 
-  ha-card > div > div > div { 
-    background: blue !important; 
+  .bubble-button-card-container {
+    background: rgba(12,120,50,0.5) !important;
+  }
+```
+
+To change the color when it's `on` take a look at the style templates below.
+
+</details>
+
+<details>
+
+<summary>Changing the color of a button slider</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-range-fill { 
+    background: rgba(79, 69, 87, 1) !important;
+    opacity: 1 !important;
   }
 ```
 
@@ -970,14 +995,60 @@ styles: |
 
 <details>
 
-<summary>Changing the color of a <code>button slider</code></summary>
+<summary>Changing the color of an icon</summary>
 
 <br>
 
 ```yaml
 styles: |
-  .range-fill { 
-    background: rgba(79, 69, 87, 1) !important; 
+  .bubble-icon {
+    color: white !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Changing the background color of an icon container</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-icon-container {
+    background: rgb(230, 128, 41);
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Changing the size of the sub-buttons (perfect for the large layout)</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-sub-button {
+    height: 48px !important;
+    min-width: 48px !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Changing the background color of the second sub-button</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-sub-button-2 {
+    background-color: blue !important;
   }
 ```
 
