@@ -937,7 +937,7 @@ sub_button:
 
 ## Tap, double tap and hold actions
 
-You can also use Home Assistant default tap actions, double tap actions and hold actions on the icons of the buttons, the pop-ups and the covers. This allows you to display the “more info” window by holding the icon and to turn on/off the lamp of a slider by a single tap for example.
+You can also use Home Assistant default tap actions, double tap actions and hold actions on the cards that supports this option. For example, this allows you to display the “more info” window by holding a button icon or running a service when a sub-button is pressed.
 
 ### Action options
 
@@ -953,7 +953,7 @@ You can also use Home Assistant default tap actions, double tap actions and hold
 | `url_path` | string | Any link | URL to open on click (e.g. `https://www.google.com`) when action is `url` |
 | `service` | string | Any service | Service to call (e.g. `media_player.media_play_pause`) when `action` defined as `call-service` |
 | `data` or `service_data` | object | Any service data | Service data to include (e.g. `entity_id: media_player.kitchen`) when `action` defined as `call-service` |
-| `confirmation` | object | See [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Display a confirmation popup, overrides the default `confirmation` object |
+| `confirmation` | object | See [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Display a confirmation pop-up (not a Bubble Card one), overrides the default `confirmation` object |
 
 </details>
 
@@ -1239,6 +1239,8 @@ styles: |
     margin-right: 0px !important;
   }
 ```
+
+![Sub-buttons-everywhere](https://github.com/Clooos/Bubble-Card/assets/36499953/3bf04969-e00d-4755-89df-481e8f7d73b2)
 
 </details>
 
