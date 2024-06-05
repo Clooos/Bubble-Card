@@ -17,7 +17,7 @@ module.exports = [
   // My Home Assistant test server
 
   {
-    mode: 'production',
+    mode: 'development',
     entry: {
       'bubble-card': './src/bubble-card.ts',
       'bubble-pop-up-fix': './src/bubble-pop-up-fix.ts'
