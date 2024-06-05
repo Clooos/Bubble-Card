@@ -1368,21 +1368,6 @@ styles: |
 
 <details>
 
-<summary>Changing the color of a sub-button when a pop-up is open</summary>
-
-<br>
-
-```yaml
-styles: |
-  ${window.addEventListener('location-changed', () => { 
-  card.querySelector('.bubble-sub-button-1').style.backgroundColor = this.location.href.includes('#kitchen') ? 'blue' : '';
-  })}
-```
-
-</details>
-
-<details>
-
 <summary>Showing/Hiding a sub-button conditionnaly</summary>
 
 <br>
@@ -1435,6 +1420,21 @@ This one is changing a button name with "It's currently sunny" depending on your
 ```yaml
 styles: |
   ${card.querySelector('.bubble-name').innerText = "It's currently " + hass.states['weather.home'].state}
+```
+
+</details>
+
+<details>
+
+<summary>Advanced example: Changing the color of a sub-button when a pop-up is open</summary>
+
+<br>
+
+```yaml
+styles: |
+  ${window.addEventListener('location-changed', () => { 
+  card.querySelector('.bubble-sub-button-1').style.backgroundColor = this.location.href.includes('#kitchen') ? 'blue' : '';
+  })}
 ```
 
 </details>
