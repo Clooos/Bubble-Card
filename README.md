@@ -177,7 +177,7 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the header, see [card layouts](#card-layouts) |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the header, see [card layouts](#card-layouts) |
 | You also have access to [all the button settings](#button) for the header of the pop-up. | | Optional | | If undefined no header will be shown |
 
 </details>
@@ -354,7 +354,7 @@ This card allows you to control your entities and can be customized in many ways
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
@@ -451,7 +451,7 @@ This card allows you to control a media player. You can tap on the icon to get m
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
@@ -576,7 +576,7 @@ This card allows you to control your covers.
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
@@ -624,7 +624,7 @@ This card is a simple separator for dividing your pop-up into categories / secti
 | --- | --- | --- | --- | --- |
 | `name` | string | Optional but recommended | Any string | A name for your separator |
 | `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your separator |
-| `card_layout` | string | Optional | `regular` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
@@ -879,7 +879,7 @@ Bubble Card fully supports the Home Assistant section view, you can change the c
 
 | Layout | Description |
 | --- | --- |
-| `regular` | The regular layout (not optimized for the section view) |
+| `normal` | The regular layout (not optimized for the section view) |
 | `large` | A larger layout (optimized for the section view) |
 | `large_2_rows` | A larger layout with 2 rows of sub-buttons (optimized for the section view) |
 
