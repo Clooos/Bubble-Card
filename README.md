@@ -1170,6 +1170,26 @@ styles: |
 
 <details>
 
+<summary>Using a picture rather than an icon in a sub button</summary>
+
+<br>
+
+```yaml
+sub_button:
+  - icon: none
+styles: |-
+  .bubble-sub-button-1 {
+    background-image: url("/local/pictures/your_picture.jpg");
+    background-size: cover;
+  }
+```
+
+Just upload this picture in a “pictures” folder (or the name you want) in the Home Assistant “www” folder.
+
+</details>
+
+<details>
+
 <summary>Advanced example: Creating an horizontal row of sub-buttons (screenshot included)</summary>
 
 <br>
