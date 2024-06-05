@@ -1449,28 +1449,7 @@ styles: |
 
 ⚠️ For now there are some features that are not working with:
 
-<details>
-
-<summary><code>Kiosk mode</code>, but click here for a workaround</summary>
-
-<br>
-
-To ensure full compatibility, here are the steps to follow:
-
-- First for your kiosk mode config, remove `hide_sidebard: true` or `kiosk: true` and just keep that under `kiosk_mode`:
-  ```yaml
-  kiosk_mode:
-    hide_header: true
-  ```
-
-- Then go to your Home Assistant profile configuration then toggle this:
-
-  ![image](https://github.com/Clooos/Bubble-Card/assets/36499953/2a33ca06-17c4-414a-81b9-cd7d25dfd30e)
-
-
-- This will now works as expected.
-
-</details>
+- Kiosk mode, but this is fixed in Kiosk mode v6.0.1
 
 <br>
 
