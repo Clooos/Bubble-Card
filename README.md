@@ -1441,7 +1441,7 @@ styles: |
 
 <details>
 
-<summary>show/hide Horizontal buttons stack if user is_admin </summary>
+<summary>show/hide Horizontal buttons stack if user is_admin or name </summary>
 
 <br>
 
@@ -1450,6 +1450,10 @@ styles: |
   .settings {
     display: ${hass.user.is_admin ? '' : 'none'} !important;
   }
+
+.settings {
+  display: ${hass.user.name === "Marmoul" ? '' : 'none'} !important;
+}
 ```
 
 </details>
