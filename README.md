@@ -1439,6 +1439,22 @@ styles: |
 
 </details>
 
+<details>
+
+<summary>show/hide Horizontal buttons stack if user is_admin </summary>
+
+<br>
+
+```yaml
+styles: |
+  .settings {
+    border: none !important;
+    display: ${hass.user.is_admin ? '' : 'none'} !important;
+  }
+```
+
+</details>
+
 <br>
 
 ---
