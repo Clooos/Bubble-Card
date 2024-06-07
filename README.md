@@ -1448,7 +1448,6 @@ styles: |
 ```yaml
 styles: |
   .settings {
-    border: none !important;
     display: ${hass.user.is_admin ? '' : 'none'} !important;
   }
 ```
