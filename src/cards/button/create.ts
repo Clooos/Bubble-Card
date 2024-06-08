@@ -1,5 +1,5 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.ts";
-import { createElement, toggleEntity, throttle, forwardHaptic } from "../../tools/utils.ts";
+import { createElement, toggleEntity, throttle, forwardHaptic, isEntityType } from "../../tools/utils.ts";
 import { getButtonType, onSliderChange } from "./helpers.ts";
 import styles from "./styles.ts";
 
@@ -149,9 +149,10 @@ export function createSliderStructure(context) {
       e.stopPropagation();
 
       clearTimeout(draggingTimeout);
+
       draggingTimeout = setTimeout(() => {
         context.dragging = false;
-      }, 1200);
+      }, 2000);
 
       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
       onSliderChange(context, moveX);

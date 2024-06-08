@@ -33,13 +33,20 @@ export function closePopup(context) {
   if (context.popUp.classList.contains('is-popup-opened') === false) {
     return;
   }
-
+  
   popupCount--;
   document.body.style.overflow = '';
-  context.popUp.classList.add('is-popup-closed');
-  context.popUp.classList.remove('is-popup-opened');
   context.hideContentTimeout = setTimeout(function() {
     context.popUp.style.display = 'none';
+
+    if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
+      context.sectionRow.toggleAttribute("hidden", true);
+      context.sectionRow.style.display = "none";
+
+      if (context.sectionRowContainer?.classList.contains('card')) {
+        context.sectionRowContainer.style.display = "none";
+      }
+    }
   }, 380);
   context.resetCloseTimeout = () => {
     clearTimeout(context.closeTimeout);
@@ -61,6 +68,8 @@ export function closePopup(context) {
       context.verticalStack.removeChild(context.popUp);
     }
   }, 360);
+    context.popUp.classList.add('is-popup-closed');
+  context.popUp.classList.remove('is-popup-opened');
 }
 export function openPopup(context) {
   if (context.popUp.classList.contains('is-popup-opened')) {
@@ -69,10 +78,20 @@ export function openPopup(context) {
 
   context.popUp.classList.add('is-popup-opened');
 
+  if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
+    context.sectionRow.toggleAttribute("hidden", false);
+    context.sectionRow.style.display = "";
+
+    if (context.sectionRowContainer?.classList.contains('card')) {
+      context.sectionRowContainer.style.display = "";
+    }
+  }
+
   window.clearTimeout(context.removeDomTimeout);
   if (context.popUp.parentNode !== context.verticalStack) {
     context.verticalStack.appendChild(context.popUp);
   }
+
   popupCount++;
   clearTimeout(context.closeTimeout);
   clearTimeout(context.hideContentTimeout);

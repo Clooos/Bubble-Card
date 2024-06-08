@@ -93,6 +93,19 @@ export function changeSlider(context) {
 
     let percentage = 0;
 
+    // if (isEntityType(context, "light")) {
+    //   percentage = 100 * getAttribute(context, "brightness") / 255;
+    // } else if (isEntityType(context, "media_player")) {
+    //   percentage = 100 * getAttribute(context, "volume_level");
+    // } else if (isEntityType(context, "cover")) {
+    //   percentage = getAttribute(context, "current_position");
+    // } else if (isEntityType(context, "input_number")) {
+    //   const minValue = getAttribute(context, "min");
+    //   const maxValue = getAttribute(context, "max");
+    //   const value = getState(context);
+    //   percentage = 100 * (value - minValue) / (maxValue - minValue);
+    // }
+
     if (isEntityType(context, "light")) {
       percentage = 100 * getAttribute(context, "brightness") / 255;
     } else if (isEntityType(context, "media_player")) {
@@ -100,6 +113,18 @@ export function changeSlider(context) {
     } else if (isEntityType(context, "cover")) {
       percentage = getAttribute(context, "current_position");
     } else if (isEntityType(context, "input_number")) {
+      const minValue = getAttribute(context, "min");
+      const maxValue = getAttribute(context, "max");
+      const value = getState(context);
+      percentage = 100 * (value - minValue) / (maxValue - minValue);
+    } else if (isEntityType(context, "fan")) {
+      percentage = getAttribute(context, "percentage");
+    } else if (isEntityType(context, "climate")) {
+      const minValue = getAttribute(context, "min_temp");
+      const maxValue = getAttribute(context, "max_temp");
+      const value = getState(context);
+      percentage = 100 * (value - minValue) / (maxValue - minValue);
+    } else if (isEntityType(context, "number")) {
       const minValue = getAttribute(context, "min");
       const maxValue = getAttribute(context, "max");
       const value = getState(context);

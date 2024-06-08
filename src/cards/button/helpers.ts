@@ -19,24 +19,51 @@ export function updateEntity(context, value) {
   if (isEntityType(context, "light")) {
       context._hass.callService('light', 'turn_on', {
           entity_id: context.config.entity,
-          brightness: 255 * value / 100
+          brightness: Math.round(255 * value / 100)
       });
   } else if (isEntityType(context, "media_player")) {
       context._hass.callService('media_player', 'volume_set', {
           entity_id: context.config.entity,
-          volume_level: value / 100
+          volume_level: Math.round(value / 100)
       });
   } else if (isEntityType(context, "cover")) {
       context._hass.callService('cover', 'set_cover_position', {
           entity_id: context.config.entity,
-          position: value
+          position: Math.round(value)
       });
   } else if (isEntityType(context, "input_number")) {
-      const minValue = getAttribute(context, "min");
-      const maxValue = getAttribute(context, "max");
+      const minValue = getAttribute(context, "min") ?? 0;
+      const maxValue = getAttribute(context, "max") ?? 100;
+      const step = getAttribute(context, "step") ?? 1;
+      let rawValue = (maxValue - minValue) * value / 100 + minValue;
+      let adjustedValue = Math.round(rawValue / step) * step;
       context._hass.callService('input_number', 'set_value', {
           entity_id: context.config.entity,
-          value: Math.round((maxValue - minValue) * value / 100 + minValue)
+          value: adjustedValue
+      });
+  } else if (isEntityType(context, "fan")) {
+      const step = getAttribute(context, "percentage_step");
+      let adjustedValue = Math.round(value / step) * step;
+      context._hass.callService('fan', 'set_percentage', {
+          entity_id: context.config.entity,
+          percentage: adjustedValue
+      });
+  } else if (isEntityType(context, "climate")) {
+      const minValue = getAttribute(context, "min_temp");
+      const maxValue = getAttribute(context, "max_temp");
+      context._hass.callService('climate', 'set_temperature', {
+          entity_id: context.config.entity,
+          temperature: Math.round((maxValue - minValue) * value / 100 + minValue)
+      });
+  } else if (isEntityType(context, "number")) {
+      const minValue = getAttribute(context, "min") ?? 0;
+      const maxValue = getAttribute(context, "max") ?? 100;
+      const step = getAttribute(context, "step") ?? 1;
+      let rawValue = (maxValue - minValue) * value / 100 + minValue;
+      let adjustedValue = Math.round(rawValue / step) * step;
+      context._hass.callService('number', 'set_value', {
+          entity_id: context.config.entity,
+          value: adjustedValue
       });
   }
 };
@@ -49,9 +76,9 @@ export function onSliderChange(context, leftDistance, throttle = false) {
 
   context.elements.rangeFill.style.transform =`translateX(${rangedPercentage}%)`;
   if (throttle) {
-    if (context.dragging) return;
-    updateEntity(context, rangedPercentage);
+    if (context.dragging && isEntityType(context, "cover")) return;
     //throttledUpdateEntity(context, rangedPercentage);
+    updateEntity(context, rangedPercentage);
   } else {
     updateEntity(context, rangedPercentage);
   }

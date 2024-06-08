@@ -45,10 +45,6 @@ class BubbleCard extends HTMLElement {
         if (this.isConnected || this.config.card_type === 'pop-up') {
             this.updateBubbleCard();
         }
-
-        if (!window.columnFix) {
-            window.columnFix = this.config.column_fix
-        }
     }
 
     updateBubbleCard() {
@@ -194,7 +190,7 @@ class BubbleCard extends HTMLElement {
             grid_columns: this.config.columns ?? defaultColumns,
             grid_rows: this.config.rows ?? defaultRows,
         }
-      }
+    }
 }
 
 customElements.define("bubble-card", BubbleCard);

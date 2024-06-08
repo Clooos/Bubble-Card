@@ -7,16 +7,27 @@ import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 export function changeEditor(context) {
     const detectedEditor = context.verticalStack.host.closest('hui-card-preview');
 
-    if (context.sectionRow.classList.contains('card')) {
-        // Fix the empty space caused by the pop-ups in the section view
-        if (!context.editor && context.sectionRow.style.position !== 'absolute') {
-            context.sectionRow.style.position = 'absolute';
-        } else if (context.editor && context.sectionRow.style.position !== '') {
-            context.sectionRow.style.position = '';
+    // Fix the empty space caused by the pop-ups in the section view
+    if (!context.popUp.classList.contains('is-popup-opened') && context.sectionRow.tagName.toLowerCase() === 'hui-card') {
+        if (!context.editor && context.sectionRow?.style.display !== "none") {
+            context.sectionRow.toggleAttribute("hidden", true);
+            context.sectionRow.style.display = "none";
+        } else if (context.editor && context.sectionRow?.style.display !== "") {
+            context.sectionRow.toggleAttribute("hidden", false);
+            context.sectionRow.style.display = "";
         }
 
-        if (detectedEditor === null && !context.editor && context.sectionRow?.style.position !== 'absolute') {
-            context.sectionRow.style.position = 'absolute';
+        // Fix on older Safari versions
+        if (context.sectionRowContainer?.classList.contains('card')) {
+            if (context.popUp.classList.contains('is-popup-opened')) {
+                return;
+            }
+
+            if (!context.editor) {
+                context.sectionRowContainer.style.display = 'none';
+            } else if (context.editor) {
+                context.sectionRowContainer.style.display = '';
+            }
         }
     }
 
@@ -71,7 +82,7 @@ export function changeStyle(context) {
         context.popUp.appendChild(context.elements.customStyle);
         context.elements.customStyle.innerText = customStyle;
     }
-    
+
     backdropCustomStyle.innerText = customStyle;
 }
 
