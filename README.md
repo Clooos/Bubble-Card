@@ -98,8 +98,7 @@ All options can be configured in the Home Assistant editor. But you can find mor
 This card allows you to convert any vertical stack into a pop-up. Each pop-up is **hidden by default** and can be opened by targeting its link (e.g. `'#pop-up-name'`), with any card that supports the `navigate` [action](#tap-double-tap-and-hold-actions), or with the [horizontal buttons stack](#horizontal-buttons-stack) that is included.
 
 > [!IMPORTANT]  
-> This card must be placed within a vertical-stack card on the same view at the topmost position to function properly. To avoid misalignment with your layout, please place all your vertical stacks/pop-ups before any other cards on your dashboard.
-
+> This card must be placed within a [vertical stack](https://www.home-assistant.io/dashboards/vertical-stack/) card at the topmost position to function properly. To avoid misalignment with your view, place vertical stacks/pop-ups after all other dashboard cards. In a section view (recommended), you can place them anywhere. It should be called from the same view to work.
 > [!TIP]
 > ### Pop-up trigger 
 > This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
