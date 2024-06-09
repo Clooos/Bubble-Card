@@ -474,23 +474,6 @@ This card allows you to control a media player. You can tap on the icon to get m
 
 <details>
 
-<summary>A slider button that can control the brightness of a light</summary>
-
-<br>
-
-```yaml
-type: custom:bubble-card
-card_type: button
-button_type: slider
-entity: light.kitchen_led
-name: Kitchen LED
-icon: mdi:led-strip-variant
-```
-
-</details>
-
-<details>
-
 <summary>A media player with all the options</summary>
 
 <br>
