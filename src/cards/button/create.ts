@@ -152,7 +152,7 @@ export function createSliderStructure(context) {
 
       draggingTimeout = setTimeout(() => {
         context.dragging = false;
-      }, 2000);
+      }, 1400);
 
       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
       onSliderChange(context, moveX);

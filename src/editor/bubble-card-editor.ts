@@ -670,7 +670,7 @@ export function createBubbleCardEditor() {
                             </div>
                         </ha-expansion-panel>
                         ${this.makeSubButtonPanel()}
-                        <ha-alert alert-type="info">This card allows you to control your entities. When used as a slider, it can control the brightness of a light, the volume of a media player, the position of a cover, and it also supports input number. To access color / control of an entity, simply tap on the icon.</ha-alert>
+                        <ha-alert alert-type="info">This card allows you to control your entities. ${this._config.button_type === 'slider' ? 'Supported entities: Light (brightness), media player (volume), cover (position), fan (percentage), climate (temperature), input number and number (value). To access color / control of an entity, simply tap on the icon.' : ''}</ha-alert>
                         ${this.makeVersion()}
                     </div>
                 `;
