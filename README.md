@@ -167,7 +167,7 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `margin` | string | Optional | Any CSS value | Use this **only** if your pop-up is not well centered on mobile (e.g. `13px`) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
-| `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50%` for a half-sized pop-up) |
+| `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50vh` for a half-sized pop-up or `calc(100vh - 400px)` for a fixed height of `400px`) |
 | `bg_color` | string | Optional | Any hex, rgb or rgba value | The background color of your pop-up (e.g. `#ffffff` for a white background) |
 | `bg_opacity` | string | Optional | Any value from `0` to `100` | The background opacity of your pop-up (e.g. `100` for no transparency) |
 | `bg_blur` | string | Optional | Any value from `0` to `100` | The background blur effect of your pop-up, **this only work if `bg_opacity` is not set to `100`** (e.g. `0` for no blur)|
@@ -231,6 +231,29 @@ button_action:
   tap_action:
     action: navigate
     navigation_path: '#kitchen'
+```
+
+</details>
+
+<details>
+
+<summary>A pop-up with a fixed height</summary>
+
+<br>
+
+Replace `400px` with the size you need.
+
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#kitchen'
+    name: Kitchen
+    icon: mdi:fridge
+    entity: light.kitchen
+    margin_top_mobile: calc(100vh - 400px)
+    margin_top_desktop: calc(100vh - 400px)
 ```
 
 </details>
