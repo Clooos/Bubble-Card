@@ -1399,11 +1399,13 @@ styles: |
 
 <br>
 
-This one is changing a button name with "It's currently sunny" depending on your weather.
+This one is changing a button name/state with "It's currently sunny" depending on your weather.
 ```yaml
 styles: |
   ${card.querySelector('.bubble-name').innerText = "It's currently " + hass.states['weather.home'].state}
 ```
+
+If you want to template the state (`.bubble-state`) don't toggle `show_state: true` just toggle `show_attribute: true` without any attribute.
 
 </details>
 
