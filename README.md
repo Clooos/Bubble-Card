@@ -262,8 +262,8 @@ This card is a good companion to the pop-up card, allowing you to open the corre
 | `1_name` | string | Optional | Any string | A name for your button |
 | `1_icon` | string | Optional | Any `mdi:` icon | An icon for your button |
 | `1_entity` | string | Optional | Any light or light group | Display the color of that light in background |
-| `1_pir_sensor` | string | Optional | Any binary sensor | At least one pir sensor or more for `auto_order` |
-| `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the room you just entered, **it needs to be `false` if you don't have any `_pir_sensor` in your code** |
+| `1_pir_sensor` | string | Optional | Any binary sensor | At least one pir sensor or more for `auto_order`, in fact it also works with any entity type, for example you can add light groups and the order will change based on the last changed states. |
+| `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the `_pir_sensor` last changed time, **it needs to be `false` if you don't have any `_pir_sensor` in your code** |
 | `margin` | string | Optional | Any CSS value | Use this **only** if your `horizontal-buttons-stack` is not well centered on mobile (e.g. `13px`) |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the horizontal buttons stack position if the sidebar is hidden on the desktop (only if you have made a modification to hide it yourself) |
