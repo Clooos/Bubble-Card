@@ -1418,6 +1418,30 @@ styles: |
 
 <details>
 
+<summary>Changing an icon or sub-button icon color conditionnaly</summary>
+
+<br>
+
+This one is changing a button icon color based on its state.
+```yaml
+styles: |
+  .bubble-icon {
+    color: ${hass.states['light.your_light'].state === 'on' ? 'green' : 'red'} !important;
+  }
+```
+
+This one is changing a sub-button icon color based on its state. `.bubble-sub-button-1` is the first sub-button, replace `1` if you want to change another sub-button icon.
+```yaml
+styles: |
+  .bubble-sub-button-1 > ha-icon {
+    color: ${hass.states['light.your_light'].state === 'on' ? 'green' : 'red'} !important;
+  }
+```
+
+</details>
+
+<details>
+
 <summary>Templating a button name</summary>
 
 <br>
