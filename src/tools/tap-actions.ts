@@ -29,6 +29,7 @@ class ActionHandler {
 
     this.startTime = Date.now();
     clearTimeout(this.tapTimeout);
+    this.tapTimeout = null;
   }
 
   handleEnd() {
@@ -42,16 +43,16 @@ class ActionHandler {
     this.startTime = null;
 
     const doubleTapAction = this.config?.double_tap_action || this.defaultActions?.double_tap_action || { action: "toggle" };
-    const doubleTapTimeout = doubleTapAction.action === "none" ? 0 : 200;
+    const localDoubleTapTimeout = doubleTapAction.action === "none" ? 0 : doubleTapTimeout;
 
     if (holdDuration > maxHoldDuration) {
       this.sendActionEvent(this.element, this.config, 'hold', this.defaultEntity, this.defaultActions);
-    } else if (doubleTapDuration < doubleTapTimeout) {
+    } else if (doubleTapDuration < localDoubleTapTimeout) {
       this.sendActionEvent(this.element, this.config, 'double_tap', this.defaultEntity, this.defaultActions);
     } else {
       this.tapTimeout = setTimeout(() => {
         this.sendActionEvent(this.element, this.config, 'tap', this.defaultEntity, this.defaultActions);
-      }, doubleTapTimeout);
+      }, localDoubleTapTimeout);
     }
   }
 }
