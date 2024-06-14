@@ -1100,6 +1100,13 @@ styles: |
   }
 ```
 
+For an horizontal buttons stack icon.
+```yaml
+.kitchen > .bubble-icon {
+  color: grey !important
+}
+```
+
 </details>
 
 <details>
@@ -1435,6 +1442,26 @@ This one is changing a sub-button icon color based on its state. `.bubble-sub-bu
 styles: |
   .bubble-sub-button-1 > ha-icon {
     color: ${hass.states['light.your_light'].state === 'on' ? 'green' : 'red'} !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Animating a fan icon conditionnaly</summary>
+
+<br>
+
+This one is rotating a button icon when a fan is `on`.
+```yaml
+styles: |-
+  .bubble-icon {
+    animation: ${hass.states['fan.you_fan'].state === 'on' ? 'slow-rotate 2s linear infinite' : ''};
+  }
+  @keyframes slow-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 ```
 
