@@ -18,14 +18,15 @@ export async function handlePopUp(context) {
 
   if (
       context.popUp.classList.contains('is-popup-opened') ||
-      configChanged(context, context.popUp) ||
-      context.editor
+      configChanged(context, context.popUp)
   ){
-      changeStyle(context);
+      //changeStyle(context);
 
       if (context.config.entity || context.config.name) {
           handleButton(context, context.elements.buttonContainer, context.elements.header);
       }
+
+      changeStyle(context);
   }
 
   changeTriggered(context);

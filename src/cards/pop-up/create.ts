@@ -105,8 +105,16 @@ export function createStructure(context) {
   try {
     context.elements.style = createElement('style');
     context.elements.style.innerText = styles;
-    context.elements.customStyle = createElement('style');
-    context.popUp.appendChild(context.elements.style);
+
+    let existingStyle = context.popUp.querySelector('style');
+    
+    if (!existingStyle) {
+      context.elements.customStyle = createElement('style');
+      context.popUp.appendChild(context.elements.customStyle);
+      context.popUp.appendChild(context.elements.style);
+    } else {
+      context.elements.customStyle = existingStyle;
+    }
 
     const themeColorBackground = 
       getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||

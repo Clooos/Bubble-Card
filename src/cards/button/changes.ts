@@ -93,19 +93,6 @@ export function changeSlider(context) {
 
     let percentage = 0;
 
-    // if (isEntityType(context, "light")) {
-    //   percentage = 100 * getAttribute(context, "brightness") / 255;
-    // } else if (isEntityType(context, "media_player")) {
-    //   percentage = 100 * getAttribute(context, "volume_level");
-    // } else if (isEntityType(context, "cover")) {
-    //   percentage = getAttribute(context, "current_position");
-    // } else if (isEntityType(context, "input_number")) {
-    //   const minValue = getAttribute(context, "min");
-    //   const maxValue = getAttribute(context, "max");
-    //   const value = getState(context);
-    //   percentage = 100 * (value - minValue) / (maxValue - minValue);
-    // }
-
     if (isEntityType(context, "light")) {
       percentage = 100 * getAttribute(context, "brightness") / 255;
     } else if (isEntityType(context, "media_player")) {
@@ -188,10 +175,18 @@ export function changeStyle(context) {
 
     const state = getState(context);
 
-    const customStyle = context.config.styles
-        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
-          (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
-        : '';
+    let customStyle = '';
 
-    context.elements.customStyle.innerText = customStyle;
+    try {
+        customStyle = context.config.styles
+            ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
+              (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
+            : '';
+    } catch (error) {
+        console.error('Error in generating button custom templates:', error);
+    }
+
+    if (context.elements.customStyle) {
+        context.elements.customStyle.innerText = customStyle;
+    }
 }

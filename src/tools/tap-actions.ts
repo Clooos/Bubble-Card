@@ -44,7 +44,7 @@ class ActionHandler {
 
     const doubleTapAction = this.config?.double_tap_action || this.defaultActions?.double_tap_action || { action: "toggle" };
     const localDoubleTapTimeout = doubleTapAction.action === "none" ? 0 : doubleTapTimeout;
-
+    
     if (holdDuration > maxHoldDuration) {
       this.sendActionEvent(this.element, this.config, 'hold', this.defaultEntity, this.defaultActions);
     } else if (doubleTapDuration < localDoubleTapTimeout) {

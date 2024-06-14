@@ -44,4 +44,3 @@ export function handleButton(context, container = context.content, appendTo = co
     changeSubButtonState(context, container, appendTo.firstChild.firstChild);
     if (context.cardType !== 'pop-up') changeStyle(context);
 }
-

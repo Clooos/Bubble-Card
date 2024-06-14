@@ -287,7 +287,7 @@ export function getIcon(context, entity = context.config.entity, icon = context.
         weblink: "mdi:open-in-new"
     };
 
-    if (configIcon && entityType !== 'weather') return configIcon;
+    if (configIcon) return configIcon;
     if (entityIcon) return entityIcon;
     if (defaultIcons[entityType]) return defaultIcons[entityType];
 
@@ -410,50 +410,52 @@ export function applyScrollingEffect(context, element, text) {
 
     const scrollingEffect = context.config.scrolling_effect ?? true;
 
-    if (element.previousText === text) return;
-    if (scrollingEffect === false && element.style.whiteSpace === 'normal') {
+    if (scrollingEffect === false) {
       element.innerHTML = text;
       element.previousText = text;
+
+      element.style.whiteSpace = 'normal';
+      element.style.display = '-webkit-box';
+      element.style.webkitLineClamp = '2';
+      element.style.webkitBoxOrient = 'vertical';
+      element.style.textOverflow = 'ellipsis';
+
       return;
     }
+
+    if (element.previousText === text) return;
 
     const classNames = element.className.split(' ');
     const className = classNames.find(name => name.startsWith('bubble-'));
 
-    // Check if the text is longer than its container
     function checkIfContentIsLonger() {
         // Remove the previous scrolling effect if it exists
         element.innerHTML = text;
         element.style = '';
 
-        if (!element.originalTextWidth || element.originalTextWidth !== element.scrollWidth) {
-            element.originalTextWidth = element.scrollWidth;
-        }
-
-        if (scrollingEffect && element.originalTextWidth > element.parentNode.offsetWidth) {
-            // Add the CSS for the scrolling effect
-            const separator = `<span class="bubble-scroll-separator"> | </span>`;
-            element.innerHTML = `<span>${text + separator + text + separator}</span>`;
-
-            const css = createScrollingEffectCSS(className);
-            element.styleElement = document.createElement('style');
-            element.appendChild(element.styleElement);
-            element.styleElement.innerHTML = css;
-        } else {
-            // If the text fits without scrolling, remove the style element
-            if (scrollingEffect && element.styleElement) {
-                element.styleElement = null;
-                requestAnimationFrame(checkIfContentIsLonger);
+        const checkWidth = setInterval(() => {
+            if (!element.originalTextWidth || element.originalTextWidth !== element.scrollWidth) {
+                element.originalTextWidth = element.scrollWidth;
             }
-            // If scrollingEffect is false, limit the text to two lines
-            if (!scrollingEffect) {
-                element.style.whiteSpace = 'normal';
-                element.style.display = '-webkit-box';
-                element.style.webkitLineClamp = '2';
-                element.style.webkitBoxOrient = 'vertical';
-                element.style.textOverflow = 'ellipsis';
+
+            if (scrollingEffect && element.originalTextWidth > element.parentNode?.offsetWidth) {
+                // Add the CSS for the scrolling effect
+                const separator = `<span class="bubble-scroll-separator"> | </span>`;
+                element.innerHTML = `<span>${text + separator + text + separator}</span>`;
+
+                const css = createScrollingEffectCSS(className);
+                element.styleElement = document.createElement('style');
+                element.appendChild(element.styleElement);
+                element.styleElement.innerHTML = css;
+
+                clearInterval(checkWidth); // Stop checking once the width is not 0
+            } else {
+                // If the text fits without scrolling, remove the style element
+                if (scrollingEffect && element.styleElement) {
+                    element.styleElement = null;
+                }
             }
-        }
+        }, 400);
     }
 
     if (!element.eventAdded) {

@@ -62,7 +62,7 @@ export function createButton(context, index) {
         }
     }
 
-    window.addEventListener('urlChanged', handleUrlChange);
+    window.addEventListener('location-changed', handleUrlChange);
     
     context.elements.buttons.push(button);
 

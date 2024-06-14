@@ -30,7 +30,7 @@ export default `
       padding: 0 !important;
   }
   .bubble-pop-up {
-      transition: transform .36s;
+      transition: all .36s;
       position: fixed;
       width: 100%;
       max-width: 100%;
@@ -119,7 +119,7 @@ export default `
       cursor: pointer;
   }
   .bubble-button-card-container {
-      background: var(--background-color,var(--secondary-background-color)) !important;
+      background: var(--background-color,var(--secondary-background-color));
   }
   .bubble-pop-up-container.hidden {
       height: 140px !important;

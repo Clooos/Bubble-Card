@@ -148,13 +148,6 @@ export function changeStyle(context) {
     const state = getState(context);
     const isOn = state !== "off" && state !== "undefined";
 
-    const customStyle = context.config.styles
-        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
-          (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon)
-        : '';
-
-    context.elements.customStyle.innerText = customStyle;
-
     if (context.config.hide?.power_button && context.elements.powerButton.style.display !== 'none') {
         context.elements.powerButton.style.display = 'none';
     } else if (!context.config.hide?.power_button && context.elements.powerButton.style.display === 'none') {
@@ -183,5 +176,20 @@ export function changeStyle(context) {
         context.elements.playPauseButton.style.display = 'none';
     } else if (!(context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.style.display === 'none') {
         context.elements.playPauseButton.style.display = '';
+    }
+
+    let customStyle = '';
+
+    try {
+        customStyle = context.config.styles
+            ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
+              (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
+            : '';
+    } catch (error) {
+        console.error('Error in generating media player custom templates:', error);
+    }
+
+    if (context.elements.customStyle) {
+        context.elements.customStyle.innerText = customStyle;
     }
 }

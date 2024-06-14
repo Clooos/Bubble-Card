@@ -35,12 +35,20 @@ export function changeStyle(context) {
 
     const state = getState(context);
 
-    const customStyle = context.config.styles
-        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
-          (context._hass, context.config.entity, state, context.elements.icon.icon, context.subButtonIcon, getWeatherIcon)
-        : '';
+    let customStyle = '';
 
-    context.elements.customStyle.innerText = customStyle;
+    try {
+        customStyle = context.config.styles
+            ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
+              (context._hass, context.config.entity, state, context.elements.icon.icon, context.subButtonIcon, getWeatherIcon, context.card)
+            : '';
+    } catch (error) {
+        console.error('Error in generating media player custom templates:', error);
+    }
+
+    if (context.elements.customStyle) {
+        context.elements.customStyle.innerText = customStyle;
+    }
 }
 
 

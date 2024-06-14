@@ -9,10 +9,10 @@ export function changeEditor(context) {
 
     // Fix the empty space caused by the pop-ups in the section view
     if (!context.popUp.classList.contains('is-popup-opened') && context.sectionRow.tagName.toLowerCase() === 'hui-card') {
-        if (!context.editor && context.sectionRow?.style.display !== "none") {
+        if (!context.editor && !context.sectionRow.hasAttribute("hidden")) {
             context.sectionRow.toggleAttribute("hidden", true);
             context.sectionRow.style.display = "none";
-        } else if (context.editor && context.sectionRow?.style.display !== "") {
+        } else if (context.editor && context.sectionRow.hasAttribute("hidden")) {
             context.sectionRow.toggleAttribute("hidden", false);
             context.sectionRow.style.display = "";
         }
@@ -35,13 +35,13 @@ export function changeEditor(context) {
         context.popUp.classList.add('editor');
 
         if (detectedEditor !== null) {
-            context.elements.popUpContainer.classList.remove('hidden');
+            context.elements.popUpContainer?.classList.remove('hidden');
         } else {
-            context.elements.popUpContainer.classList.add('hidden');
+            context.elements.popUpContainer?.classList.add('hidden');
         }
     } else {
         context.popUp.classList.remove('editor');
-        context.elements.popUpContainer.classList.remove('hidden');
+        context.elements.popUpContainer?.classList.remove('hidden');
     }
     onEditorChange(context);
 }
@@ -73,13 +73,18 @@ export function changeStyle(context) {
     const state = getState(context);
     const { backdropCustomStyle } = getBackdrop(context);
 
-    const customStyle = context.config.styles
-        ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', `return \`${context.config.styles}\`;`)
-          (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon)
-        : '';
+    let customStyle = '';
+
+    try {
+        customStyle = context.config.styles
+            ? Function('hass', 'entityId', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
+              (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.popUp)
+            : '';
+    } catch (error) {
+        console.error('Error in generating pop-up custom templates:', error);
+    }
 
     if (context.elements.customStyle) {
-        context.popUp.appendChild(context.elements.customStyle);
         context.elements.customStyle.innerText = customStyle;
     }
 

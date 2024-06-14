@@ -150,11 +150,11 @@ export function createBubbleCardEditor() {
         }
 
         get _close_service() {
-            return this._config.open_service || 'cover.close_cover';
+            return this._config.close_service || 'cover.close_cover';
         }
 
         get _stop_service() {
-            return this._config.open_service || 'cover.stop_cover';
+            return this._config.stop_service || 'cover.stop_cover';
         }
 
         get _auto_order() {
@@ -543,7 +543,7 @@ export function createBubbleCardEditor() {
                                             @input="${this._valueChanged}"
                                         ></ha-textfield>
                                         <ha-textfield
-                                            label="Optional - Top margin on desktop (e.g. 50% for an half sized pop-up)"
+                                            label="Optional - Top margin on desktop (e.g. 50vh for an half sized pop-up)"
                                             .value="${this._margin_top_desktop}"
                                             .configValue="${"margin_top_desktop"}"
                                             @input="${this._valueChanged}"
@@ -1006,7 +1006,7 @@ export function createBubbleCardEditor() {
                               Styling options
                             </h4>
                             <div class="content">
-                                ${this.makeStyleEditor()}
+                                ${this.makeLayoutOptions()}
                             </div>
                         </ha-expansion-panel>
                         <ha-alert alert-type="info">Just an empty card to fill any empty column.</ha-alert>
@@ -1495,9 +1495,10 @@ export function createBubbleCardEditor() {
                                     .value="${this._config[i + '_pir_sensor'] || ''}"
                                     .configValue="${i}_pir_sensor"
                                     .disabled=${!this._config.auto_order}
-                                    .items="${this.binarySensorList}"
+                                    .items="${this.allEntitiesList}"
                                     @value-changed="${this._valueChanged}"
                                 ></ha-combo-box>
+                                <ha-alert alert-type="info">In fact you can also get the auto order with any entity type, for example you can add light groups to these fields and the order will change based on the last changed states.</ha-alert>
                             </div>
                         </ha-expansion-panel>
                     </div>

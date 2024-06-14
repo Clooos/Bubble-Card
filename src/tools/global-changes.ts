@@ -326,7 +326,13 @@ export function initializesubButtonIcon(context) {
         context.subButtonIcon = [];
     }
 
-    context.content.querySelectorAll('.bubble-sub-button-icon').forEach((iconElement, index) => {
-        context.subButtonIcon[index] = iconElement;
-    });
+    if (context.config.card_type === 'pop-up') {
+        context.popUp.querySelectorAll('.bubble-sub-button-icon').forEach((iconElement, index) => {
+            context.subButtonIcon[index] = iconElement;
+        }); 
+    } else {
+        context.content.querySelectorAll('.bubble-sub-button-icon').forEach((iconElement, index) => {
+            context.subButtonIcon[index] = iconElement;
+        });
+    }
 }
