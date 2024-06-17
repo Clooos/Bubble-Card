@@ -1357,8 +1357,9 @@ card_type: button
 entity: switch.test
 name: Test
 styles: |
-  .bubble-button-card-container {
-    background-color: ${state === 'on' ? 'green' : 'red'} !important;
+  .bubble-button-background {
+    opacity: 1 !important;
+    background-color: ${state === 'on' ? 'blue' : 'red'} !important;
   }
 ```
 
