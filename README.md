@@ -1499,6 +1499,43 @@ styles: |
 
 </details>
 
+<details>
+
+<summary>Advanced example: Templating a separator name based on a state translated to your language</summary>
+
+<br>
+
+You can use `hass.formatEntityState(state)` to transtale a state and `hass.formatEntityAttributeValue(state, "attribute")` to translate an attribute.
+
+This one is changing the name and the icon based on the weather, "Nuageux" means "Cloudy" in French.
+
+![image](https://github.com/Clooos/Bubble-Card/assets/36499953/35ac9d0f-c3b8-4c09-9c15-fe6954011d55)
+
+```yaml
+type: custom:bubble-card
+card_type: separator
+icon: mdi:weather-cloudy
+sub_button:
+  - entity: sensor.outside_temperature
+    icon: mdi:thermometer
+    name: Temperature
+    show_state: true
+    show_background: false
+styles: >
+  .bubble-line {
+    background: white;
+    opacity: 1;
+  }
+
+  ${card.querySelector('.bubble-name').innerText =
+  hass.formatEntityState(hass.states['weather.maison'])}
+
+  ${icon.setAttribute("icon",
+  getWeatherIcon(hass.states['weather.maison'].state))}
+```
+
+</details>
+
 <br>
 
 ---
