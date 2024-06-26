@@ -33,7 +33,7 @@ export function changeState(context) {
     }
 
     if (showAttribute && attribute) {
-        formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, attribute) : '';
+        formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, attribute) ?? attribute : '';
     }
 
     if (showLastChanged) {
@@ -222,7 +222,7 @@ export function changeSubButtonState(context, container = context.content, appen
 
         let displayedState = '';
         const formattedState = state && showState ? context._hass.formatEntityState(state) : '';
-        const formattedAttribute = state && attribute && showAttribute ? context._hass.formatEntityAttributeValue(state, attributeType) : '';
+        const formattedAttribute = state && attribute && showAttribute ? context._hass.formatEntityAttributeValue(state, attributeType) ?? attribute : '';
         const formattedLastChanged = state && showLastChanged ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
 
         if (showName && name) displayedState += name;

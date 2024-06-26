@@ -373,7 +373,9 @@ export function getState(context, entity = context.config.entity) {
 }
 
 export function getAttribute(context, attribute, entity = context.config.entity) {
-    return context._hass.states[entity]?.attributes[attribute] ?? '';
+    if (!attribute) return '';
+
+    return eval(`context._hass.states['${entity}']?.attributes.${attribute}`) ?? '';
 }
 
 export function isEntityType(context, entityType) {
