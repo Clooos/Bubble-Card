@@ -131,16 +131,19 @@ export function changeSubButtonState(context, container = context.content, appen
     const subButtons = context.config.sub_button;
     if (!subButtons) return;
 
+    // Initialize previousValues and elements if not already done
     context.previousValues = context.previousValues || {};
     let previousSubButtons = [...(context.previousValues.subButtons || [])];
-    context.elements = { ...context.elements };
+    context.elements = context.elements || {};
 
+    // Initialize or reuse subButtonContainer
     const subButtonContainer = context.elements.subButtonContainer ?? createElement('div', 'bubble-sub-button-container');
     if (!context.elements.subButtonContainer && context.config.sub_button) {
         const style = createElement('style');
         style.innerText = subButtonsStyles;
         subButtonContainer.appendChild(style);
 
+        // Append or prepend subButtonContainer
         if (before) {
             appendTo.prepend(subButtonContainer);
         } else {
@@ -149,6 +152,7 @@ export function changeSubButtonState(context, container = context.content, appen
         context.elements.subButtonContainer = subButtonContainer;
     }
 
+    // Process each subButton
     subButtons.forEach((subButton, i) => {
         if (!subButton) return;
 
@@ -168,6 +172,7 @@ export function changeSubButtonState(context, container = context.content, appen
         const showIcon = subButton.show_icon ?? true;
         const showBackround = subButton.show_background ?? true;
 
+        // Initialize or reuse subButtonElement
         let subButtonElement = context.elements[index] || createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
         if (!context.elements[index]) {
             subButtonElement.nameContainer = createElement('div', 'bubble-sub-button-name-container');
@@ -179,6 +184,7 @@ export function changeSubButtonState(context, container = context.content, appen
             context.elements[index] = subButtonElement;
         }
 
+        // Handle icon display
         if (showIcon && icon) {
             let iconElement = subButtonElement.icon;
             if (!iconElement) {
@@ -197,6 +203,7 @@ export function changeSubButtonState(context, container = context.content, appen
             subButtonElement.icon.classList.add('hidden');
         }
 
+        // Handle background display
         if (showBackround) {
             if (isOn) {
                 subButtonElement.classList.add('background-on');
@@ -210,16 +217,21 @@ export function changeSubButtonState(context, container = context.content, appen
             subButtonElement.classList.remove('background-off');
         }
 
+        // Attach actions if not already done
         if (subButton.tap_action?.action !== 'none' || subButton.double_tap_action?.action !== 'none' || subButton.hold_action?.action !== 'none') {
-            const defaultActions = {
-                tap_action: { action: "more-info" },
-                double_tap_action: { action: "none" },
-                hold_action: { action: "none" }
-            };
-            addActions(subButtonElement, subButton, entity, defaultActions);
-            addFeedback(subButtonElement, subButtonElement.feedback);
+            if (!subButtonElement.actionAdded) {
+                const defaultActions = {
+                    tap_action: { action: "more-info" },
+                    double_tap_action: { action: "none" },
+                    hold_action: { action: "none" }
+                };
+                addActions(subButtonElement, subButton, entity, defaultActions);
+                addFeedback(subButtonElement, subButtonElement.feedback);
+                subButtonElement.actionAdded = true;
+            }
         }
 
+        // Build the displayed state string
         let displayedState = '';
         const formattedState = state && showState ? context._hass.formatEntityState(state) : '';
         const formattedAttribute = state && attribute && showAttribute ? context._hass.formatEntityAttributeValue(state, attributeType) ?? attribute : '';
@@ -232,6 +244,7 @@ export function changeSubButtonState(context, container = context.content, appen
 
         displayedState = displayedState.charAt(0).toUpperCase() + displayedState.slice(1);
 
+        // Update the subButtonElement's display
         if (!displayedState && !showIcon) {
             subButtonElement.classList.add('hidden');
         } else {
@@ -251,8 +264,10 @@ export function changeSubButtonState(context, container = context.content, appen
         }
     });
 
+    // Update context.previousValues with current subButtons
     context.previousValues.subButtons = subButtons.slice();
 
+    // Clean up extra elements not needed
     for (let i = previousSubButtons.length; i > 0; i--) {
         if (i > subButtons.length) {
             let element = context.elements[i];
@@ -264,6 +279,7 @@ export function changeSubButtonState(context, container = context.content, appen
     }
 }
 
+
 const subButtonsStyles = `
     .bubble-sub-button-container {
         position: relative;
@@ -272,6 +288,7 @@ const subButtonsStyles = `
         right: 8px;
         align-content: center;
         gap: 8px;
+        align-items: center;
     }
     .bubble-sub-button {
         display: flex;
@@ -291,7 +308,6 @@ const subButtonsStyles = `
         padding: 0 8px;
         overflow: hidden;
         white-space: nowrap;
-        z-index: 1;
         transition: all 0.5s ease-in-out;
         color: var(--primary-text-color);
     }

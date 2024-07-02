@@ -7,8 +7,8 @@ export default `
     }
     .bubble-icon {
         display: inline-flex;
-        height: 24px;
-        width: 24px;
+        height: auto;
+        width: auto;
         margin: 0 22px 0 8px;
     }
     .bubble-name {

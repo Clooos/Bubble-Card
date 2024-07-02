@@ -7,6 +7,7 @@ import { handleSeparator } from './cards/separator/index.ts';
 import { handleCover } from './cards/cover/index.ts';
 import { handleEmptyColumn } from './cards/empty-column/index.ts';
 import { handleMediaPlayer } from './cards/media-player/index.ts';
+import { handleSelect } from './cards/dropdown/index.ts';
 import { createBubbleCardEditor } from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {
@@ -85,6 +86,11 @@ class BubbleCard extends HTMLElement {
             case 'media-player' :
                 handleMediaPlayer(this);
                 break;
+
+            // Update media player
+            case 'select' :
+                handleSelect(this);
+                break;
         }
     }
 
@@ -160,6 +166,8 @@ class BubbleCard extends HTMLElement {
             case 'horizontal-buttons-stack':
                 return 0;
             case 'media-player':
+                return 1;
+            case 'select':
                 return 1;
         }
     }

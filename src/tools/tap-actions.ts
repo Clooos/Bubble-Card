@@ -82,14 +82,19 @@ export function addActions(element, config, defaultEntity, defaultActions) {
   const holdAction = config?.hold_action?.action || defaultActions?.hold_action?.action || "toggle";
 
   if (tapAction === "none" && doubleTapAction === "none" && holdAction === "none") {
-    element.style.cursor = 'default';
+    element.style.cursor = '';
+    element.style.pointerEvents = 'none';
   } else {
     element.style.cursor = 'pointer';
+    element.style.pointerEvents = '';
   }
 
   element.addEventListener('click', () => forwardHaptic("selection"));
 }
 
 export function addFeedback(element, feedbackElement) {
-  element.addEventListener('click', () => tapFeedback(feedbackElement));
+  element.addEventListener('click', () => { 
+    forwardHaptic("selection");
+    tapFeedback(feedbackElement);
+  });
 }

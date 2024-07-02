@@ -296,6 +296,10 @@ export function createBubbleCardEditor() {
                     (eid) => eid.substr(0, eid.indexOf(".")) === "media_player"
                 ).map(formateList);
 
+                this.inputSelectList = Object.keys(this.hass.states).filter(
+                    (eid) => eid.substr(0, eid.indexOf(".")) === "input_select"
+                ).map(formateList);
+
                 this.attributeList = Object.keys(this.hass.states[this._entity]?.attributes || {}).map((attributeName) => {
                     let entity = this.hass.states[this._entity];
                     let formattedName = this.hass.formatEntityAttributeName(entity, attributeName);
@@ -325,6 +329,10 @@ export function createBubbleCardEditor() {
                     {
                         'label': 'Pop-up',
                         'value': 'pop-up'
+                    },
+                    {
+                        'label': 'Select',
+                        'value': 'select'
                     },
                     {
                         'label': 'Separator',
@@ -369,6 +377,10 @@ export function createBubbleCardEditor() {
                     {
                         'label': 'Call service',
                         'value': 'call-service'
+                    },
+                    {
+                        'label': 'Assist',
+                        'value': 'assist'
                     },
                     {
                         'label': 'No action',
@@ -1013,6 +1025,53 @@ export function createBubbleCardEditor() {
                         ${this.makeVersion()}
                     </div>
                 `;
+            } else if (this._config.card_type === 'select') {
+                return html`
+                    <div class="card-config">
+                        ${this.makeDropdown("Card type", "card_type", cardTypeList)}
+                        ${this.makeDropdown("Entity (input_select)", "entity", this.inputSelectList)}
+                        <ha-expansion-panel outlined>
+                            <h4 slot="header">
+                              <ha-icon icon="mdi:cog"></ha-icon>
+                              Button settings
+                            </h4>
+                            <div class="content">                   
+                                <ha-textfield
+                                    label="Optional - Name"
+                                    .value="${this._name}"
+                                    .configValue="${"name"}"
+                                    @input="${this._valueChanged}"
+                                ></ha-textfield>
+                                ${this.makeDropdown("Optional - Icon", "icon")}
+                                ${this.makeShowState()}
+                            </div>
+                        </ha-expansion-panel>
+                        <ha-expansion-panel outlined>
+                            <h4 slot="header">
+                              <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                              Tap action on icon
+                            </h4>
+                            <div class="content">
+                                ${this.makeTapActionPanel("Tap action")}
+                                ${this.makeTapActionPanel("Double tap action")}
+                                ${this.makeTapActionPanel("Hold action")}
+                            </div>
+                        </ha-expansion-panel>
+                        <ha-expansion-panel outlined>
+                            <h4 slot="header">
+                              <ha-icon icon="mdi:palette"></ha-icon>
+                              Styling options
+                            </h4>
+                            <div class="content">
+                                ${this.makeLayoutOptions()}
+                                ${this.makeStyleEditor()}
+                            </div>
+                        </ha-expansion-panel>
+                        ${this.makeSubButtonPanel()}
+                        <ha-alert alert-type="info">This card allows you to have a select menu for your <code>input_select</code> entities.</ha-alert>
+                        ${this.makeVersion()}
+                    </div>
+                `;
             } else if (!this._config.card_type) {
                 return html`
                     <div class="card-config">
@@ -1148,7 +1207,7 @@ export function createBubbleCardEditor() {
                         aria-label="Optional - Show entity state"
                         .checked="${context?.show_state ?? context.button_type === 'state'}"
                         .configValue="${config + "show_state"}"
-                        .disabled="${nameButton}"
+                        .disabled="${nameButton && array !== 'sub_button'}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_state: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
@@ -1160,7 +1219,7 @@ export function createBubbleCardEditor() {
                         aria-label="Optional - Show last changed"
                         .checked=${context?.show_last_changed}
                         .configValue="${config + "show_last_changed"}"
-                        .disabled="${nameButton}"
+                        .disabled="${nameButton && array !== 'sub_button'}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_changed: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
@@ -1172,7 +1231,7 @@ export function createBubbleCardEditor() {
                         aria-label="Optional - Show attribute"
                         .checked=${context?.show_attribute}
                         .configValue="${config + "show_attribute"}"
-                        .disabled="${nameButton}"
+                        .disabled="${nameButton && array !== 'sub_button'}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_attribute: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">

@@ -2,7 +2,7 @@ export default `
   .bubble-pop-up-container {
       display: flex;
       flex-direction: column;
-      height: auto;
+      height: 100%;
       margin-top: -50px;
       max-width: 100% !important;
       padding-top: 40px;
@@ -21,6 +21,7 @@ export default `
       grid-auto-rows: min-content;
       mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
       -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
+      padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
   }
   .bubble-pop-up-container > * {
       flex-shrink: 0 !important;
@@ -37,7 +38,6 @@ export default `
       border-radius: 42px 42px 0 0;
       box-sizing: border-box;
       margin-left: var(--custom-margin);
-      padding: 18px 18px calc(50px + var(--custom-height-offset-mobile)) 18px;
       left: 7px;
       z-index: 5 !important;
       bottom: calc(-56px - var(--custom-height-offset-mobile));
@@ -67,11 +67,13 @@ export default `
   @media only screen and (min-width: 600px) {
       .bubble-pop-up {
           margin-left: 0 !important;
-          bottom: calc(-56px - var(--custom-height-offset-desktop)) !important;
+          bottom: calc(-56px - var(--custom-height-offset-desktop));
           min-width: var(--desktop-width, 540px);
           max-width: var(--desktop-width, 540px);
           left: calc(50% - (var(--desktop-width, 540px) / 2));
-          padding: 18px 18px calc(50px + var(--custom-height-offset-desktop)) 18px;
+      }
+      .bubble-pop-up-container {
+          padding: 18px 18px calc(140px + var(--custom-height-offset-desktop)) 18px;
       }
   }
   @media only screen and (min-width: 768px) {
@@ -82,9 +84,8 @@ export default `
   .bubble-pop-up.editor {
       position: inherit !important;
       width: 100% !important;
-      padding: 18px !important;
       backdrop-filter: none !important;
-      display: block !important;
+      display: flex !important;
       transform: none !important;
       height: auto !important;
       min-width: auto;
@@ -93,10 +94,10 @@ export default `
   .bubble-header-container {
       display: inline-flex;
       height: 50px;
-      width: 100%;
       margin: 0;
       padding: 0;
       z-index: 5;
+      padding: 18px 18px 22px;
   }
   .bubble-header {
       display: inline-flex;
@@ -122,14 +123,14 @@ export default `
       background: var(--background-color,var(--secondary-background-color));
   }
   .bubble-pop-up-container.hidden {
-      height: 140px !important;
+      height: 122px !important;
       mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%) !important;
       -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%) !important;   
   }
   .bubble-pop-up.editor > .bubble-pop-up-container {
-      padding-bottom: 0 !important;
+      padding-bottom: 18px !important;
       mask-image: none;
-      -webkit-mask-image: none;      
+      -webkit-mask-image: none;    
   }
 
   .large .bubble-button-card-container {

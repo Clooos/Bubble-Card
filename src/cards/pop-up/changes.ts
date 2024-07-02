@@ -5,7 +5,7 @@ import { addHash, onEditorChange, removeHash } from "./helpers.ts";
 import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 
 export function changeEditor(context) {
-    const detectedEditor = context.verticalStack.host.closest('hui-card-preview');
+    const detectedEditor = context.verticalStack.host?.closest('hui-card-preview') || context.verticalStack.host?.closest('hui-card[preview][class]') || context.verticalStack.host?.getRootNode().host?.closest('hui-section[preview][class]');
 
     // Fix the empty space caused by the pop-ups in the section view
     if (!context.popUp.classList.contains('is-popup-opened') && context.sectionRow.tagName.toLowerCase() === 'hui-card') {
