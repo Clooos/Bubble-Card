@@ -3,10 +3,31 @@ import { tapFeedback, forwardHaptic } from "./utils.ts";
 const maxHoldDuration = 200;
 const doubleTapTimeout = 200;
 
-export function callAction(element, config, action) {
+export function callAction(element, actionConfig, action) {
   setTimeout(() => {
     const event = new Event('hass-action', { bubbles: true, composed: true });
-    event.detail = { config, action };
+
+    if (action === 'tap' || action === 'double_tap' || action === 'hold') {
+      event.detail = { 
+        config: actionConfig,
+        action: action,
+      };
+    } else {
+      // Handel direct call with any action name (e.g. open_action)
+      element.modifiedConfig = {
+        ...actionConfig,
+        tap_action: {
+          ...actionConfig[action],
+        },
+      };
+      delete element.modifiedConfig[action];
+
+      event.detail = { 
+        config: element.modifiedConfig,
+        action: 'tap',
+      };
+    }
+
     element.dispatchEvent(event);
   }, 1);
 }
@@ -87,9 +108,8 @@ export function addActions(element, config, defaultEntity, defaultActions) {
   } else {
     element.style.cursor = 'pointer';
     element.style.pointerEvents = '';
+    element.addEventListener('click', () => forwardHaptic("selection"));
   }
-
-  element.addEventListener('click', () => forwardHaptic("selection"));
 }
 
 export function addFeedback(element, feedbackElement) {

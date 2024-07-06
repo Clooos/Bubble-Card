@@ -1,4 +1,7 @@
 import { addActions, addFeedback } from "../tools/tap-actions.ts";
+import { createDropdownStructure, createDropdownActions } from "../cards/select/create.ts";
+import { changeDropdownList } from "../cards/select/changes.ts";
+import styles from "../cards/select/styles.ts";
 import { 
     createElement,
     applyScrollingEffect,
@@ -171,17 +174,41 @@ export function changeSubButtonState(context, container = context.content, appen
         const showLastChanged = (subButton.show_last_changed || subButton.show_last_updated) ?? false;
         const showIcon = subButton.show_icon ?? true;
         const showBackround = subButton.show_background ?? true;
+        const showArrow = subButton.show_arrow ?? true;
+
+        const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select");
 
         // Initialize or reuse subButtonElement
         let subButtonElement = context.elements[index] || createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
         if (!context.elements[index]) {
             subButtonElement.nameContainer = createElement('div', 'bubble-sub-button-name-container');
+            subButtonElement.feedbackContainer = createElement('div', 'bubble-feedback-container');
             subButtonElement.feedback = createElement('div', 'bubble-feedback-element feedback-element');
 
-            subButtonElement.appendChild(subButtonElement.feedback);
+            subButtonElement.appendChild(subButtonElement.feedbackContainer);
+            subButtonElement.feedbackContainer.appendChild(subButtonElement.feedback);
+
+            if (isSelect) {
+                createDropdownStructure(context, subButtonElement, showArrow);
+                subButtonElement.dropdownContainer.style.display = 'none';
+                createDropdownActions(context, subButtonElement, entity);
+            }
+
             subButtonElement.appendChild(subButtonElement.nameContainer);
             subButtonContainer.appendChild(subButtonElement);
             context.elements[index] = subButtonElement;
+        }
+
+        if (isSelect) {
+            changeDropdownList(context, subButtonElement, entity);
+
+            if (!showArrow) {
+                subButtonElement.dropdownArrow.style.display = 'none';
+                subButtonElement.dropdownContainer.style.width = '0px';
+            } else if (showArrow) {
+                subButtonElement.dropdownArrow.style.display = '';
+                subButtonElement.dropdownContainer.style.width = '24px';               
+            }
         }
 
         // Handle icon display
@@ -218,18 +245,24 @@ export function changeSubButtonState(context, container = context.content, appen
         }
 
         // Attach actions if not already done
-        if (subButton.tap_action?.action !== 'none' || subButton.double_tap_action?.action !== 'none' || subButton.hold_action?.action !== 'none') {
+        if ((subButton.tap_action?.action !== 'none' || subButton.double_tap_action?.action !== 'none' || subButton.hold_action?.action !== 'none') ) {
             if (!subButtonElement.actionAdded) {
                 const defaultActions = {
-                    tap_action: { action: "more-info" },
+                    tap_action: { action: !isSelect ? "more-info" : "none" },
                     double_tap_action: { action: "none" },
                     hold_action: { action: "none" }
                 };
-                addActions(subButtonElement, subButton, entity, defaultActions);
+                addActions(subButtonElement, !isSelect ? subButton : '', entity, defaultActions);
                 addFeedback(subButtonElement, subButtonElement.feedback);
+
+                if (isSelect) {
+                    subButtonElement.style.pointerEvents = "auto";
+                    subButtonElement.style.cursor = "pointer";
+                }
+
                 subButtonElement.actionAdded = true;
             }
-        }
+        } 
 
         // Build the displayed state string
         let displayedState = '';
@@ -306,10 +339,18 @@ const subButtonsStyles = `
         font-size: 12px;
         border-radius: 32px;
         padding: 0 8px;
-        overflow: hidden;
         white-space: nowrap;
         transition: all 0.5s ease-in-out;
         color: var(--primary-text-color);
+    }
+    .bubble-feedback-container {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        border-radius: 32px;
+        overflow: hidden;
+        pointer-events: none;
     }
     .bubble-sub-button-name-container {
         display: flex;

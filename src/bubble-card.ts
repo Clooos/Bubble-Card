@@ -7,7 +7,7 @@ import { handleSeparator } from './cards/separator/index.ts';
 import { handleCover } from './cards/cover/index.ts';
 import { handleEmptyColumn } from './cards/empty-column/index.ts';
 import { handleMediaPlayer } from './cards/media-player/index.ts';
-import { handleSelect } from './cards/dropdown/index.ts';
+import { handleSelect } from './cards/select/index.ts';
 import { createBubbleCardEditor } from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {

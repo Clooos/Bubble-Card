@@ -7,27 +7,89 @@ export default `
         background: none;
         opacity: 1;
     }
+    mwc-list-item {
+        border-radius: 24px;
+        margin: 0 8px;
+    }
+    mwc-list-item[selected] {
+        color: var(--primary-text-color) !important;
+        background-color: var(--accent-color);
+    }
+    ha-select {
+        --mdc-shape-medium: 30px;
+        --mdc-shape-large: 30px;
+        --mdc-shape-small: 64px;
+        --mdc-menu-max-width: min-content;
+        --mdc-menu-min-width: 150px;
+        --mdc-select-max-width: min-content;
+        --mdc-select-outlined-hover-border-color: transparent;
+        --mdc-select-outlined-idle-border-color: transparent;
+        --mdc-theme-primary: transparent;
+    }
+    .mdc-select {
+        color: transparent !important;
+        width: 150px !important;
+        position: absolute !important;
+        pointer-events: none;
+        right: -4px;
+        top: -5px;
+        z-index: 1;
+    }
+    .mdc-menu, mwc-list, .mdc-list-item {
+        pointer-events: auto;
+    }
+    .mdc-select__dropdown-icon {
+        display: none !important;
+    }
+    .mdc-select__selected-text {
+        color: transparent !important;
+    }
+    .mdc-select__anchor {
+        width: 100%;
+        pointer-events: none;
+    }
+    .bubble-dropdown-container {
+        display: flex;
+        width: auto;
+        height: 100%;
+        align-items: center;
+    }
+    .bubble-dropdown-arrow {
+        display: flex;
+        position: absolute;
+        background: var(--card-background-color, var(--ha-card-background));
+        height: 36px;
+        width: 36px;
+        right: 6px;
+        z-index: 1;
+        pointer-events: none;
+        border-radius: 20px;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+        pointer-events: none;
+    }
+    .bubble-dropdown-select {
+        width: 42px;
+    }
     .is-unavailable {
         opacity: 0.5;
     }
-
-    .bubble-button-card-container {
+    .bubble-select-card-container {
         position: relative;
         width: 100%;
         height: 50px;
         background-color: var(--background-color-2,var(--secondary-background-color));
-        border-radius: 32px;
-        overflow: scroll;
-        /*mask-image: radial-gradient(white, black);*/
-        -ms-overflow-style: none; /* for Internet Explorer, Edge */
-        scrollbar-width: none; /* for Firefox */
+        border-radius: 25px;
         -webkit-transform: translateZ(0);
         touch-action: pan-y;
+        box-sizing:border-box;
+        border: solid 2px transparent;
+        transition: all 0.15s;
+        cursor: pointer;
     }
-
-    .bubble-button-card,
-    .bubble-range-slider,
-    .bubble-button-background {
+    .bubble-select-card,
+    .bubble-select-background {
         display: flex;
         position: absolute;
         justify-content: space-between;
@@ -36,44 +98,14 @@ export default `
         width: 100%;
         transition: background-color 1.5s;
     }
-    .bubble-button-background {
-        background-color: var(--bubble-button-background-color);
+    .bubble-select-background {
+        background-color: var(--bubble-select-background-color);
         opacity: .5;
-        border-radius: 32px;
-    }
-    .bubble-range-fill {
-        z-index: -1;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        left: -100%;
-        transition: all .3s;
-    }
-    .is-dragging .bubble-range-fill {
-        transition: none;
-    }
-    .is-light .bubble-range-fill {
-        opacity: 0.5;
-    }
-
-    .bubble-button-card {
-        // overflow: scroll;
-        // -ms-overflow-style: none; /* for Internet Explorer, Edge */
-        // scrollbar-width: none; /* for Firefox */
-    }
-    .bubble-button-card::-webkit-scrollbar {
-        display: none; /* for Chrome, Safari, and Opera */
-    }
-    .is-unavailable .bubble-button-card,
-    .is-unavailable .bubble-range-slider {
-        cursor: not-allowed;
-    }
-    .bubble-range-slider {
-        cursor: ew-resize;
+        overflow: hidden !important;
         border-radius: 25px;
-        overflow: hidden;
+    }
+    .is-unavailable .bubble-select-card {
+        cursor: not-allowed;
     }
     .bubble-icon-container {
         display: flex;
@@ -82,7 +114,7 @@ export default `
         justify-content: center;
         min-width: 38px;
         min-height: 38px;
-        margin: 6px;
+        margin: 6px 6px 6px 4px;
         border-radius: 50%;
         background-color: var(--card-background-color, var(--ha-card-background));
         overflow: hidden;
@@ -102,21 +134,10 @@ export default `
         right: 0;
         opacity: 0;
     }
-    .is-light.is-on .bubble-icon-container::after {
-        opacity: 0.2;
-    }
-    .is-unavailable.is-light .bubble-icon-container::after {
-        opacity: 0;
-    }
 
     .bubble-icon {
         display: flex;
         opacity: 0.6;
-    }
-
-    .is-on .bubble-icon {
-      filter: brightness(1.1);
-      opacity: 1;
     }
 
     .bubble-entity-picture {
@@ -167,17 +188,13 @@ export default `
         pointer-events: none;
     }
 
-    .bubble-sub-button-container {
-        z-index: 1;
-    }
-
     @keyframes tap-feedback {
         0% {transform: translateX(-100%); opacity: 0;}
         64% {transform: translateX(0); opacity: 0.1;}
         100% {transform: translateX(100%); opacity: 0;}
     }
 
-    .large .bubble-button-card-container {
+    .large .bubble-select-card-container {
       height: 64px;
       border-radius: 32px;
     }
@@ -186,7 +203,7 @@ export default `
       --mdc-icon-size: 28px;
       min-width: 48px !important;
       min-height: 48px !important;
-      margin-left: 8px;
+      margin-left: 6px;
     }
 
     .rows-2 .bubble-sub-button-container {
@@ -197,7 +214,6 @@ export default `
       grid-template-rows: repeat(2, 1fr);
       grid-auto-flow: column;
       width: auto;
-      padding-right: 14px;
     }
 
     .rows-2 .bubble-sub-button {

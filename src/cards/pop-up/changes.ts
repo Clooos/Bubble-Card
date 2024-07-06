@@ -1,5 +1,5 @@
 import { isColorCloseToWhite } from "../../tools/style.ts";
-import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isStateOn, getWeatherIcon } from "../../tools/utils.ts";
+import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isStateOn, getWeatherIcon, fireEvent } from "../../tools/utils.ts";
 import { getBackdrop } from "./create.ts";
 import { addHash, onEditorChange, removeHash } from "./helpers.ts";
 import { initializesubButtonIcon } from '../../tools/global-changes.ts';
@@ -9,12 +9,9 @@ export function changeEditor(context) {
 
     // Fix the empty space caused by the pop-ups in the section view
     if (!context.popUp.classList.contains('is-popup-opened') && context.sectionRow.tagName.toLowerCase() === 'hui-card') {
-        if (!context.editor && !context.sectionRow.hasAttribute("hidden")) {
+        if (!context.editor && context.editorAccess && !detectedEditor) {
             context.sectionRow.toggleAttribute("hidden", true);
             context.sectionRow.style.display = "none";
-        } else if (context.editor && context.sectionRow.hasAttribute("hidden")) {
-            context.sectionRow.toggleAttribute("hidden", false);
-            context.sectionRow.style.display = "";
         }
 
         // Fix on older Safari versions
@@ -34,6 +31,8 @@ export function changeEditor(context) {
     if (context.editor || detectedEditor !== null) {
         context.popUp.classList.add('editor');
 
+        context.editorAccess = true;
+
         if (detectedEditor !== null) {
             context.elements.popUpContainer?.classList.remove('hidden');
         } else {
@@ -50,6 +49,7 @@ export function changeStyle(context) {
     initializesubButtonIcon(context);
 
     const cardLayout = context.config.card_layout;
+    const showHeader = context.config.show_header ?? true;
 
     if (cardLayout === 'large') {
         if (!context.popUp.classList.contains('large')) {
@@ -69,6 +69,13 @@ export function changeStyle(context) {
         context.popUp.classList.remove('large');
         context.popUp.classList.remove('rows-2');
     }
+
+    if (showHeader && context.popUp.classList.contains('no-header')) {
+        context.popUp.classList.remove('no-header');
+    } else if (!showHeader && !context.popUp.classList.contains('no-header')){
+        context.popUp.classList.add('no-header');
+    }
+        
 
     const state = getState(context);
     const { backdropCustomStyle } = getBackdrop(context);

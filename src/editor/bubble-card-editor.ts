@@ -220,6 +220,18 @@ export function createBubbleCardEditor() {
             return this._config.button_action || '';
         }
 
+        get _open_action() {
+            return this._config.open_action || '';
+        }
+
+        get _close_action() {
+            return this._config.close_action || '';
+        }
+
+        get _show_header() {
+            return this._config.show_header ?? true;
+        }
+
         get _tap_action() {
             return {
                 action: this._config.tap_action?.action || "more-info",
@@ -415,6 +427,18 @@ export function createBubbleCardEditor() {
                               Header settings
                             </h4>
                             <div class="content">
+                                <ha-alert alert-type="info">You can completely hide the pop-up header, including the close button. To close it when hidden, either swipe down from the header, make a long swipe within the pop-up, or click outside of it.</ha-alert>
+                                <ha-formfield .label="Optional - Show header">
+                                    <ha-switch
+                                        aria-label="Optional - Show header"
+                                        .checked=${this._show_header}
+                                        .configValue="${"show_header"}"
+                                        @change=${this._valueChanged}
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Optional - Show header</label> 
+                                    </div>
+                                </ha-formfield>
                                 ${this.makeDropdown("Button type", "button_type", buttonTypeList)}
                                 ${this.makeDropdown("Optional - Entity", "entity", allEntitiesList, nameButton)}               
                                 <ha-textfield
@@ -527,6 +551,17 @@ export function createBubbleCardEditor() {
                                         <label class="mdc-label">Optional - Close when the state is different</label> 
                                     </div>
                                 </ha-formfield>
+                            </div>
+                        </ha-expansion-panel>
+                        <ha-expansion-panel outlined>
+                            <h4 slot="header">
+                              <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                              Pop-up open/close action
+                            </h4>
+                            <div class="content">
+                                ${this.makeTapActionPanel("Open action", this._config, 'none')}
+                                ${this.makeTapActionPanel("Close action", this._config, 'none')}
+                                <ha-alert alert-type="info">This allows you to trigger an action on pop-up open/close.</ha-alert>
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1133,6 +1168,7 @@ export function createBubbleCardEditor() {
             const entity = context?.entity ?? this._config.entity ?? '';
             const nameButton = this._config.button_type === 'name';
 
+            const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select");
 
             const attributeList = Object.keys(this.hass.states[entity]?.attributes || {}).map((attributeName) => {
                 let state = this.hass.states[entity];
@@ -1250,6 +1286,19 @@ export function createBubbleCardEditor() {
                         ></ha-combo-box>
                     </div>
                 ` : ''}
+                ${array === 'sub_button' && isSelect ? html`
+                    <ha-formfield .label="Optional - Show arrow (Select entities only)">
+                        <ha-switch
+                            aria-label="Optional - Show arrow (Select entities only)"
+                            .checked=${context?.show_arrow ?? true}
+                            .configValue="${config + "show_arrow"}"
+                            @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_arrow: ev.target.checked }, array)}"
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Show arrow (Select entities only)</label> 
+                        </div>
+                    </ha-formfield>
+                ` : ''}
             `;
         }
 
@@ -1289,17 +1338,27 @@ export function createBubbleCardEditor() {
                 ? "mdi:gesture-tap" 
                 : label === "Double tap action" 
                 ? "mdi:gesture-double-tap"
-                : "mdi:gesture-tap-hold";
+                : label === "Hold action" 
+                ? "mdi:gesture-tap-hold"
+                : "mdi:gesture-tap";
             const valueType = label === "Tap action" 
                 ? context.tap_action
                 : label === "Double tap action" 
                 ? context.double_tap_action
-                : context.hold_action;
+                : label === "Hold action" 
+                ? context.hold_action
+                : label === "Open action"
+                ? context.open_action
+                : context.close_action;
             const configValueType = label === "Tap action" 
                 ? "tap_action"
                 : label === "Double tap action" 
                 ? "double_tap_action"
-                : "hold_action";
+                : label === "Hold action" 
+                ? "hold_action"
+                : label === "Open action"
+                ? "open_action"
+                : "close_action"
             const isDefault = context === this._config;
 
             if (!defaultAction) {
@@ -1410,6 +1469,9 @@ export function createBubbleCardEditor() {
               this.requestUpdate();
             };
 
+            const entity = subButton.entity ?? this._config.entity;
+            const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select");
+
             return html`
                 <ha-expansion-panel outlined>
                     <h4 slot="header">
@@ -1435,7 +1497,7 @@ export function createBubbleCardEditor() {
                                 <div class="ha-combo-box">
                                     <ha-combo-box
                                         label="${"Optional - Entity (default to card entity)"}"
-                                        .value="${subButton.entity ?? this._config.entity}"
+                                        .value="${entity}"
                                         .items="${this.allEntitiesList}"
                                         @value-changed="${(ev) => this._arrayValueChange(index, { entity: ev.detail.value }, 'sub_button')}"
                                     ></ha-combo-box>
@@ -1459,7 +1521,7 @@ export function createBubbleCardEditor() {
                                 ${this.makeShowState(subButton, subButtonIndex, 'sub_button', index)}
                             </div>
                         </ha-expansion-panel>
-                        <ha-expansion-panel outlined>
+                        <ha-expansion-panel outlined style="${isSelect ? 'opacity: 0.5; pointer-events: none;' : ''}">
                             <h4 slot="header">
                               <ha-icon icon="mdi:gesture-tap"></ha-icon>
                               Tap action on button
@@ -1502,7 +1564,7 @@ export function createBubbleCardEditor() {
                   <ha-icon icon="mdi:plus"></ha-icon>
                   New sub-button
                 </button>
-                <ha-alert alert-type="info">Add new customized buttons fixed to the right.</ha-alert>
+                <ha-alert alert-type="info">Add new customized buttons fixed to the right. These buttons also support <code>input_select</code> and <code>select</code> entities to display a list.</ha-alert>
               </div>
             </ha-expansion-panel>
           `;

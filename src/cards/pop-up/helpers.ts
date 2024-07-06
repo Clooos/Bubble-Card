@@ -1,4 +1,5 @@
 import { getBackdrop } from "./create.ts";
+import { callAction } from "../../tools/tap-actions.ts";
 
 let popupCount = 0;
 
@@ -68,8 +69,13 @@ export function closePopup(context) {
       context.verticalStack.removeChild(context.popUp);
     }
   }, 360);
-    context.popUp.classList.add('is-popup-closed');
+
+  context.popUp.classList.add('is-popup-closed');
   context.popUp.classList.remove('is-popup-opened');
+
+  if (context.config.close_action) {
+    callAction(context.popUp, context.config, 'close_action')
+  }
 }
 export function openPopup(context) {
   if (context.popUp.classList.contains('is-popup-opened')) {
@@ -116,6 +122,10 @@ export function openPopup(context) {
   if (context.config.auto_close > 0) {
     context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
   }
+
+  if (context.config.open_action) {
+    callAction(context.popUp, context.config, 'open_action')
+  }
 }
 export function onUrlChange(context) {
   const { hideBackdrop, showBackdrop } = getBackdrop(context);
@@ -136,7 +146,7 @@ export function onUrlChange(context) {
 }
 export function onEditorChange(context) {
   const { hideBackdrop, showBackdrop } = getBackdrop(context);
-  const detectedEditor = context.verticalStack.host.closest('hui-card-preview');
+  const detectedEditor = context.verticalStack.host?.closest('hui-card-preview') || context.verticalStack.host?.closest('hui-card[preview][class]') || context.verticalStack.host?.getRootNode().host?.closest('hui-section[preview][class]');
 
   if (context.editor || detectedEditor !== null) {
     hideBackdrop();

@@ -133,6 +133,16 @@ export default `
       -webkit-mask-image: none;    
   }
 
+  .no-header .bubble-header-container {
+      visibility: hidden !important;
+      height: 0px !important;
+  }
+  .no-header .bubble-pop-up-container {
+      padding-top: 4px !important;
+      mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
+  }
+
   .large .bubble-button-card-container {
     height: 64px;
     border-radius: 32px;
