@@ -31,7 +31,7 @@ export function changeStyle(context) {
               (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
             : '';
     } catch (error) {
-        console.error('Error in generating separator custom templates:', error);
+        throw new Error(`Error in generating separator custom templates: ${error.message}`);
     }
 
     if (context.elements.customStyle) {

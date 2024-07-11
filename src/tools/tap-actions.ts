@@ -29,7 +29,7 @@ export function callAction(element, actionConfig, action) {
     }
 
     element.dispatchEvent(event);
-  }, 1);
+  }, 10);
 }
 
 class ActionHandler {

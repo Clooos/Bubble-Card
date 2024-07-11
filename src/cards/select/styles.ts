@@ -25,6 +25,7 @@ export default `
         --mdc-select-outlined-hover-border-color: transparent;
         --mdc-select-outlined-idle-border-color: transparent;
         --mdc-theme-primary: transparent;
+        --mdc-menu-z-index: 8;
     }
     .mdc-select {
         color: transparent !important;
@@ -33,7 +34,6 @@ export default `
         pointer-events: none;
         right: -4px;
         top: -5px;
-        z-index: 1;
     }
     .mdc-menu, mwc-list, .mdc-list-item {
         pointer-events: auto;
@@ -61,7 +61,6 @@ export default `
         height: 36px;
         width: 36px;
         right: 6px;
-        z-index: 1;
         pointer-events: none;
         border-radius: 20px;
         align-items: center;
@@ -81,7 +80,6 @@ export default `
         height: 50px;
         background-color: var(--background-color-2,var(--secondary-background-color));
         border-radius: 25px;
-        -webkit-transform: translateZ(0);
         touch-action: pan-y;
         box-sizing:border-box;
         border: solid 2px transparent;

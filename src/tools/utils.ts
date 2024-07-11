@@ -385,7 +385,34 @@ export function isEntityType(context, entityType) {
 export function isStateOn(context, entity = context.config.entity) {
     const state = getState(context, entity);
     const numericState = Number(state);
-    const activeStringStates = ['on', 'open', 'opening', 'closing', 'cleaning', 'true', 'idle', 'home', 'playing', 'locked', 'occupied', 'available', 'running', 'active', 'connected', 'mowing'];
+    const activeStringStates = [
+        'on', 
+        'open', 
+        'opening', 
+        'closing', 
+        'cleaning', 
+        'true', 
+        'idle', 
+        'home', 
+        'playing', 
+        'paused',
+        'locked', 
+        'occupied', 
+        'available', 
+        'running', 
+        'active', 
+        'connected', 
+        'mowing', 
+        'starting',
+        'heat',
+        'cool',
+        'dry',
+        'heat_cool',
+        'fan_only',
+        'auto',
+        'alarm',
+        ''
+    ];
 
     if (activeStringStates.includes(state) || numericState > 0) {
         return true;

@@ -49,10 +49,12 @@ export function changeStatus(context) {
 }
 
 export function changeDropdownList(context, elements = context.elements, entity = context.config.entity) {
-  if (elements.previousEntity === entity) return;
+  elements.list = context._hass.states[entity].attributes.options;
+
+  if (elements.previousList === elements.list) return;
 
   // Append options to the dropdown select element
-  let options = context._hass.states[entity].attributes.options;
+  let options = elements.list;
   let state = context._hass.states[entity].state;
 
   // Clear the dropdown list
@@ -68,7 +70,7 @@ export function changeDropdownList(context, elements = context.elements, entity 
       opt.setAttribute('selected', '');
     }
     elements.dropdownSelect.appendChild(opt);
-    elements.previousEntity = entity;
+    elements.previousList = elements.list;
   });
 
   elements.dropdownContainer.appendChild(elements.dropdownSelect);
@@ -110,7 +112,7 @@ export function changeStyle(context) {
         (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
       : '';
   } catch (error) {
-    console.error('Error in generating select custom templates:', error);
+      throw new Error(`Error in generating select custom templates: ${error.message}`);
   }
 
   if (context.elements.customStyle) {

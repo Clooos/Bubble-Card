@@ -74,7 +74,7 @@ export function closePopup(context) {
   context.popUp.classList.remove('is-popup-opened');
 
   if (context.config.close_action) {
-    callAction(context.popUp, context.config, 'close_action')
+    callAction(context, context.config, 'close_action')
   }
 }
 export function openPopup(context) {

@@ -147,7 +147,7 @@ export function changeStyle(context) {
               (context._hass, context.config.entity, state, context.card)
             : '';
     } catch (error) {
-        console.error('Error in generating horizontal buttons stack custom templates:', error);
+        throw new Error(`Error in generating horizontal buttons stack custom templates: ${error.message}`);
     }
 
     if (context.elements.customStyle) {

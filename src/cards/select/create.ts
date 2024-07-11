@@ -81,6 +81,13 @@ export function createDropdownStructure(context, elements = context.elements, sh
         elements.dropdownArrow.style.width = '20px';
         elements.dropdownSelect.style.position = 'relative';
         elements.dropdownSelect.style.top = '-23px';
+
+        elements.mainContainer = elements.parentElement.parentElement.parentElement;
+        elements.mainContainer.style.overflow = 'visible';
+
+        let selectMenu = elements.dropdownSelect.shadowRoot.querySelector('mwc-menu');
+        selectMenu.style.position = 'relative';
+        selectMenu.style.right = '138px';
       } else {
         elements.dropdownSelect.shadowRoot.appendChild(elements.dropdownStyleElement);
         elements.dropdownSelect.shadowRoot.appendChild(elements.dropdownCustomStyleElement);
@@ -120,13 +127,11 @@ export function createDropdownActions(context, elements = context.elements, enti
     }
 
     if (elements !== context.elements) {
-      elements.mainContainer = elements.parentElement.parentElement.parentElement;
-      elements.mainContainer.style.overflow = 'visible';
-      elements.mainContainer.style.zIndex = '1';
-      selectMenu.style.position = 'relative';
-      selectMenu.style.right = '138px';
+        window.cardContainer = elements.mainContainer.getRootNode().querySelector(".card-content").firstChild;
+        window.cardContainer.style.zIndex = '8';
     } else {
-      card.style.zIndex = '1';
+        window.cardContainer = card.parentElement.parentElement.querySelector(".card-content").firstChild;
+        window.cardContainer.style.zIndex = '8';
     }
 
     if (!selectMenu.hasAttribute('open')) {
@@ -145,7 +150,12 @@ export function createDropdownActions(context, elements = context.elements, enti
     dropdownArrow.style.transform = 'rotate(0deg)';
     card.style.border = 'solid 2px rgba(0,0,0,0)';
     elements.dropdownArrow.style.background = '';
-    card.style.zIndex = '0';
+
+    if (elements !== context.elements && window.cardContainer !== elements.mainContainer.getRootNode().querySelector(".card-content").firstChild) {
+        elements.mainContainer.getRootNode().querySelector(".card-content").firstChild.style.zIndex = '';
+    } else if (elements === context.elements && window.cardContainer !== card.parentElement.parentElement.querySelector(".card-content").firstChild) {
+        card.parentElement.parentElement.querySelector(".card-content").firstChild.style.zIndex = '';
+    }
   });
 
   // Update selected input

@@ -10,12 +10,12 @@ export default `
     .bubble-cover-card-container {
         display: grid;
         gap: 10px;
+        overflow: hidden;
     }
 
     .bubble-header {
         display: flex;
         align-items: center;
-        overflow: hidden;
     }
 
     .bubble-icon-container {

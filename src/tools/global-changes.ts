@@ -180,7 +180,18 @@ export function changeSubButtonState(context, container = context.content, appen
 
         // Initialize or reuse subButtonElement
         let subButtonElement = context.elements[index] || createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
-        if (!context.elements[index]) {
+
+        if (!context.elements[index] || (isSelect && !subButtonElement.contains(subButtonElement.dropdownContainer))) {
+            // Store the current position of the subButtonElement
+            let positionIndex = Array.prototype.indexOf.call(subButtonContainer.children, subButtonElement);
+
+            if (isSelect && !subButtonElement.contains(subButtonElement.dropdownContainer)) {
+                if (subButtonContainer.contains(subButtonElement)) {
+                    subButtonContainer.removeChild(subButtonElement);
+                    subButtonElement = createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
+                } 
+            }
+
             subButtonElement.nameContainer = createElement('div', 'bubble-sub-button-name-container');
             subButtonElement.feedbackContainer = createElement('div', 'bubble-feedback-container');
             subButtonElement.feedback = createElement('div', 'bubble-feedback-element feedback-element');
@@ -195,7 +206,14 @@ export function changeSubButtonState(context, container = context.content, appen
             }
 
             subButtonElement.appendChild(subButtonElement.nameContainer);
-            subButtonContainer.appendChild(subButtonElement);
+
+            // Insert the subButtonElement back at its original position
+            if (positionIndex >= 0 && positionIndex < subButtonContainer.children.length) {
+                subButtonContainer.insertBefore(subButtonElement, subButtonContainer.children[positionIndex]);
+            } else {
+                subButtonContainer.appendChild(subButtonElement);
+            }
+
             context.elements[index] = subButtonElement;
         }
 
@@ -209,6 +227,8 @@ export function changeSubButtonState(context, container = context.content, appen
                 subButtonElement.dropdownArrow.style.display = '';
                 subButtonElement.dropdownContainer.style.width = '24px';               
             }
+        } else if (subButtonElement.contains(subButtonElement.dropdownContainer)) {
+            subButtonElement.removeChild(subButtonElement.dropdownContainer);
         }
 
         // Handle icon display

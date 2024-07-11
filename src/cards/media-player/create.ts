@@ -178,6 +178,11 @@ function createSlider(context, sliderContainer) {
         if (Math.abs(initialX-moveX) > 10) {
           onSliderChange(context, moveX, true);
         }
+
+        const rect = context.elements.rangeSlider.getBoundingClientRect();
+        const percentage = 100 * (moveX - rect.left) / rect.width;
+        const rangedPercentage = Math.min(100, Math.max(0, percentage));
+        context.elements.rangeValue.innerText = Math.round(rangedPercentage) + '%';
     }
 
     function onPointerUp(e) {
@@ -191,6 +196,11 @@ function createSlider(context, sliderContainer) {
         sliderContainer.classList.remove('is-dragging');
         sliderContainer.removeEventListener('pointermove', onPointerMove);
         sliderContainer.removeEventListener('pointerup', onPointerUp);
+
+        const rect = context.elements.rangeSlider.getBoundingClientRect();
+        const percentage = 100 * (moveX - rect.left) / rect.width;
+        const rangedPercentage = Math.min(100, Math.max(0, percentage));
+        context.elements.rangeValue.innerText = Math.round(rangedPercentage) + '%';
     }
 
     context.elements.rangeValue.innerText = volumeLevel;

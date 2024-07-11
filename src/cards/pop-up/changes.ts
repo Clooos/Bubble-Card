@@ -88,7 +88,7 @@ export function changeStyle(context) {
               (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.popUp)
             : '';
     } catch (error) {
-        console.error('Error in generating pop-up custom templates:', error);
+        throw new Error(`Error in generating pop-up custom templates: ${error.message}`);
     }
 
     if (context.elements.customStyle) {

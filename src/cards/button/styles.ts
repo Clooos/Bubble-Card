@@ -21,7 +21,6 @@ export default `
         /*mask-image: radial-gradient(white, black);*/
         -ms-overflow-style: none; /* for Internet Explorer, Edge */
         scrollbar-width: none; /* for Firefox */
-        -webkit-transform: translateZ(0);
         touch-action: pan-y;
     }
 
@@ -42,7 +41,6 @@ export default `
         border-radius: 32px;
     }
     .bubble-range-fill {
-        z-index: -1;
         position: absolute;
         top: 0;
         bottom: 0;
@@ -59,9 +57,8 @@ export default `
     }
 
     .bubble-button-card {
-        // overflow: scroll;
-        // -ms-overflow-style: none; /* for Internet Explorer, Edge */
-        // scrollbar-width: none; /* for Firefox */
+        -ms-overflow-style: none; /* for Internet Explorer, Edge */
+        scrollbar-width: none; /* for Firefox */
     }
     .bubble-button-card::-webkit-scrollbar {
         display: none; /* for Chrome, Safari, and Opera */
@@ -86,7 +83,6 @@ export default `
         border-radius: 50%;
         background-color: var(--card-background-color, var(--ha-card-background));
         overflow: hidden;
-        z-index: 1;
         position: relative;
         cursor: pointer;
     }

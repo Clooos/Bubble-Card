@@ -4,6 +4,7 @@ export default `
         width: 100%;
         padding: 4px 0;
         align-items: center;
+        z-index: 1;
     }
     .bubble-icon {
         display: inline-flex;

@@ -308,9 +308,11 @@ export function createBubbleCardEditor() {
                     (eid) => eid.substr(0, eid.indexOf(".")) === "media_player"
                 ).map(formateList);
 
-                this.inputSelectList = Object.keys(this.hass.states).filter(
-                    (eid) => eid.substr(0, eid.indexOf(".")) === "input_select"
-                ).map(formateList);
+                this.inputSelectList = Object.keys(this.hass.states)
+                    .filter((eid) => {
+                        const domain = eid.substr(0, eid.indexOf("."));
+                        return domain === "input_select" || domain === "select";
+                    }).map(formateList);
 
                 this.attributeList = Object.keys(this.hass.states[this._entity]?.attributes || {}).map((attributeName) => {
                     let entity = this.hass.states[this._entity];
@@ -427,7 +429,6 @@ export function createBubbleCardEditor() {
                               Header settings
                             </h4>
                             <div class="content">
-                                <ha-alert alert-type="info">You can completely hide the pop-up header, including the close button. To close it when hidden, either swipe down from the header, make a long swipe within the pop-up, or click outside of it.</ha-alert>
                                 <ha-formfield .label="Optional - Show header">
                                     <ha-switch
                                         aria-label="Optional - Show header"
@@ -439,39 +440,44 @@ export function createBubbleCardEditor() {
                                         <label class="mdc-label">Optional - Show header</label> 
                                     </div>
                                 </ha-formfield>
-                                ${this.makeDropdown("Button type", "button_type", buttonTypeList)}
-                                ${this.makeDropdown("Optional - Entity", "entity", allEntitiesList, nameButton)}               
-                                <ha-textfield
-                                    label="Optional - Name"
-                                    .value="${this._name}"
-                                    .configValue="${"name"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                ${this.makeDropdown("Optional - Icon", "icon")}
-                                ${this.makeShowState()}
-                                <ha-expansion-panel outlined>
-                                    <h4 slot="header">
-                                      <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                                      Tap action on icon
-                                    </h4>
-                                    <div class="content">
-                                        ${this.makeTapActionPanel("Tap action")}
-                                        ${this.makeTapActionPanel("Double tap action")}
-                                        ${this.makeTapActionPanel("Hold action")}
-                                    </div>
-                                </ha-expansion-panel>
-                                <ha-expansion-panel outlined style="display: ${this._config.button_type === 'slider' ? 'none' : ''}">
-                                    <h4 slot="header">
-                                      <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                                      Tap action on button
-                                    </h4>
-                                    <div class="content">
-                                        ${this.makeTapActionPanel("Tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
-                                        ${this.makeTapActionPanel("Double tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
-                                        ${this.makeTapActionPanel("Hold action", this._button_action, this._config.button_type !== 'name' ? 'more-info' : 'none', 'button_action')}
-                                    </div>
-                                </ha-expansion-panel>
-                                ${this.makeSubButtonPanel()}
+                                <ha-alert alert-type="info">You can completely hide the pop-up header, including the close button. To close it when hidden, either make a long swipe within the pop-up or click outside of it.</ha-alert>
+                                <div style="${!this._show_header ? 'display: none;' : ''}">
+                                    <hr />
+                                    ${this.makeDropdown("Button type", "button_type", buttonTypeList)}
+                                    ${this.makeDropdown("Optional - Entity", "entity", allEntitiesList, nameButton)}               
+                                    <ha-textfield
+                                        label="Optional - Name"
+                                        .value="${this._name}"
+                                        .configValue="${"name"}"
+                                        @input="${this._valueChanged}"
+                                    ></ha-textfield>
+                                    ${this.makeDropdown("Optional - Icon", "icon")}
+                                    ${this.makeShowState()}
+                                    <hr />
+                                    <ha-expansion-panel outlined>
+                                        <h4 slot="header">
+                                          <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                                          Tap action on icon
+                                        </h4>
+                                        <div class="content">
+                                            ${this.makeTapActionPanel("Tap action")}
+                                            ${this.makeTapActionPanel("Double tap action")}
+                                            ${this.makeTapActionPanel("Hold action")}
+                                        </div>
+                                    </ha-expansion-panel>
+                                    <ha-expansion-panel outlined style="display: ${this._config.button_type === 'slider' ? 'none' : ''}">
+                                        <h4 slot="header">
+                                          <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                                          Tap action on button
+                                        </h4>
+                                        <div class="content">
+                                            ${this.makeTapActionPanel("Tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                            ${this.makeTapActionPanel("Double tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                            ${this.makeTapActionPanel("Hold action", this._button_action, this._config.button_type !== 'name' ? 'more-info' : 'none', 'button_action')}
+                                        </div>
+                                    </ha-expansion-panel>
+                                    ${this.makeSubButtonPanel()}
+                                </div>
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -532,7 +538,6 @@ export function createBubbleCardEditor() {
                               Pop-up trigger
                             </h4>
                             <div class="content">
-                                <ha-alert alert-type="info">This allows you to open this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
                                 ${this.makeDropdown("Optional - Entity to open the pop-up based on its state", "trigger_entity", allEntitiesList)}
                                 <ha-textfield
                                     label="Optional - State to open the pop-up"
@@ -551,6 +556,7 @@ export function createBubbleCardEditor() {
                                         <label class="mdc-label">Optional - Close when the state is different</label> 
                                     </div>
                                 </ha-formfield>
+                                <ha-alert alert-type="info">This allows you to open this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1064,7 +1070,7 @@ export function createBubbleCardEditor() {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                        ${this.makeDropdown("Entity (input_select)", "entity", this.inputSelectList)}
+                        ${this.makeDropdown("Entity (input_select or select)", "entity", this.inputSelectList)}
                         <ha-expansion-panel outlined>
                             <h4 slot="header">
                               <ha-icon icon="mdi:cog"></ha-icon>
@@ -1103,7 +1109,7 @@ export function createBubbleCardEditor() {
                             </div>
                         </ha-expansion-panel>
                         ${this.makeSubButtonPanel()}
-                        <ha-alert alert-type="info">This card allows you to have a select menu for your <code>input_select</code> entities.</ha-alert>
+                        <ha-alert alert-type="info">This card allows you to have a select menu for your <code>input_select</code> and <code>input</code> entities.</ha-alert>
                         ${this.makeVersion()}
                     </div>
                 `;
@@ -1437,9 +1443,9 @@ export function createBubbleCardEditor() {
 
             const removeSubButton = (event) => {
               event.stopPropagation();
-              let subButtons = [...this._config.sub_button]; // Créer une copie
+              let subButtons = [...this._config.sub_button];
               subButtons.splice(index, 1);
-              this._config.sub_button = subButtons; // Remplacer le tableau original
+              this._config.sub_button = subButtons;
 
               this._valueChanged({ target: { configValue: 'sub_button.' + (index - 1), value: subButton } });
               this.requestUpdate();
@@ -1448,9 +1454,9 @@ export function createBubbleCardEditor() {
             const moveSubButtonLeft = (event) => {
               event.stopPropagation();
               if (index > 0) {
-                let subButtons = [...this._config.sub_button]; // Créer une copie
+                let subButtons = [...this._config.sub_button];
                 [subButtons[index], subButtons[index - 1]] = [subButtons[index - 1], subButtons[index]];
-                this._config.sub_button = subButtons; // Remplacer le tableau original
+                this._config.sub_button = subButtons;
 
                 this._valueChanged({ target: { configValue: 'sub_button.' + index, value: this._config.sub_button[index] } });
               }
@@ -1460,9 +1466,9 @@ export function createBubbleCardEditor() {
             const moveSubButtonRight = (event) => {
               event.stopPropagation();
               if (index < this._config.sub_button.length - 1) {
-                let subButtons = [...this._config.sub_button]; // Créer une copie
+                let subButtons = [...this._config.sub_button];
                 [subButtons[index], subButtons[index + 1]] = [subButtons[index + 1], subButtons[index]];
-                this._config.sub_button = subButtons; // Remplacer le tableau original
+                this._config.sub_button = subButtons;
 
                 this._valueChanged({ target: { configValue: 'sub_button.' + index, value: this._config.sub_button[index] } });
               }
@@ -1691,7 +1697,7 @@ export function createBubbleCardEditor() {
                 <ha-expansion-panel outlined>
                     <h4 slot="header">
                         <ha-icon icon="mdi:code-braces"></ha-icon>
-                        Custom styles
+                        Custom styles / Templates
                     </h4>
                     <div class="content">
                         <div class="code-editor">
@@ -1706,7 +1712,7 @@ export function createBubbleCardEditor() {
                                 @value-changed=${this._valueChanged}
                             ></ha-code-editor>
                         </div>
-                        <ha-alert alert-type="info">For advanced users, you can edit the CSS style of this card in this editor. For more information, you can go <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically.</ha-alert>
+                        <ha-alert alert-type="info">For advanced users, you can edit the CSS style of this card in this editor. More information <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically. You can also add <a href="https://github.com/Clooos/Bubble-Card#templates">templates</a>.</ha-alert>
                     </div>
                 </ha-expansion-panel>
             `;

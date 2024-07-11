@@ -104,6 +104,8 @@ export function createSliderStructure(context) {
   context.elements.rangeSlider = createElement('div', 'bubble-range-slider range-slider');
   context.elements.rangeSlider.appendChild(context.elements.rangeFill);
   context.elements.buttonCardContainer.appendChild(context.elements.rangeSlider);
+  context.elements.buttonCardContainer.insertBefore(context.elements.rangeSlider, context.elements.buttonCard);
+  context.elements.buttonCard.style.cursor = 'ew-resize';
 
   context.elements.buttonCardContainer.addEventListener('pointercancel', onPointerCancel);
   context.elements.buttonCardContainer.addEventListener('pointerdown', (e) => {
@@ -118,6 +120,7 @@ export function createSliderStructure(context) {
 
       context.elements.buttonCardContainer.classList.add('is-dragging');
       context.elements.buttonCardContainer.addEventListener('pointermove', onPointerMove);
+
       window.addEventListener('pointerup', onPointerUp);
   });
 

@@ -45,13 +45,13 @@ export default `
   .bubble-pop-up-container::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, and Opera */
   }
-  .bubble-pop-up > :first-child {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background: none !important;
-      overflow: visible;
-  }
+  // .bubble-pop-up > :first-child {
+  //     position: sticky;
+  //     top: 0;
+  //     z-index: 1;
+  //     background: none !important;
+  //     overflow: visible;
+  // }
   .is-popup-opened {
       box-shadow: 0px 0px 50px rgba(0, 0, 0, var(--custom-shadow-opacity));
       backdrop-filter: var(--custom-popup-filter);
@@ -98,6 +98,10 @@ export default `
       padding: 0;
       z-index: 5;
       padding: 18px 18px 22px;
+      position: sticky;
+      top: 0;
+      background: none !important;
+      overflow: visible;
   }
   .bubble-header {
       display: inline-flex;

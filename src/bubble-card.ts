@@ -95,6 +95,11 @@ class BubbleCard extends HTMLElement {
     }
 
     setConfig(config) {
+        // Check if there's an error in the config
+        if (config.error) {
+            throw new Error(config.error);
+        }
+
         if (config.card_type === 'pop-up') {
             if (!config.hash) {
                 throw new Error("You need to define an hash. Please note that this card must be placed inside a vertical_stack to work as a pop-up.");

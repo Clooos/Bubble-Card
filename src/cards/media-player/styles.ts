@@ -18,9 +18,7 @@ export default `
         height: 50px;
         background-color: var(--background-color-2,var(--secondary-background-color));
         border-radius: 25px;
-        mask-image: radial-gradient(white, black);
-        -webkit-transform: translateZ(0);
-        overflow: hidden;
+        overflow: visible;
         touch-action: pan-y;
     }
 
