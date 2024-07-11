@@ -16,7 +16,7 @@ import {
 export function changeState(context) {
     const buttonType = context.config.button_type;
     const state = context._hass.states[context.config.entity];
-    const attribute = context.config.attribute ?? '';
+    const attribute = getAttribute(context, context.config.attribute, context.config.entity);
 
     const defaultShowState = buttonType === 'state';
     const showName = context.config.show_name ?? true;
@@ -35,8 +35,8 @@ export function changeState(context) {
         context.content.appendChild(context.elements.stateStyles);
     }
 
-    if (showAttribute && attribute) {
-        formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, attribute) ?? attribute : '';
+    if (showAttribute && context.config.attribute) {
+        formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, context.config.attribute) ?? attribute : '';
     }
 
     if (showLastChanged) {
