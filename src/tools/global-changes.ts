@@ -298,8 +298,12 @@ export function changeSubButtonState(context, container = context.content, appen
         displayedState = displayedState.charAt(0).toUpperCase() + displayedState.slice(1);
 
         // Update the subButtonElement's display
-        if (!displayedState && !showIcon) {
+        if (!displayedState && !showIcon && !isSelect) {
             subButtonElement.classList.add('hidden');
+            if (subButtonElement.dropdownContainer) {
+                subButtonElement.dropdownContainer.classList.remove('no-icon-select-container');
+                subButtonElement.dropdownArrow.classList.remove('no-icon-select-arrow');
+            }
         } else {
             subButtonElement.classList.remove('hidden');
             if (subButtonElement.nameContainer.innerText !== displayedState) {
@@ -313,6 +317,13 @@ export function changeSubButtonState(context, container = context.content, appen
                     subButtonElement.icon.classList.add('icon-without-state');
                     subButtonElement.icon.classList.remove('icon-with-state');
                 }
+            }
+            if (!displayedState && !showIcon && isSelect) {
+                subButtonElement.dropdownContainer.classList.add('no-icon-select-container');
+                subButtonElement.dropdownArrow.classList.add('no-icon-select-arrow');
+            } else if (isSelect) {
+                subButtonElement.dropdownContainer.classList.remove('no-icon-select-container');
+                subButtonElement.dropdownArrow.classList.remove('no-icon-select-arrow');             
             }
         }
     });
@@ -395,6 +406,14 @@ const subButtonsStyles = `
     .icon-without-state {
         margin-right: 0;
         --mdc-icon-size: 20px;
+    }
+    .no-icon-select-arrow {
+        width: 28px !important;
+        height: 28px !important;
+        right: 2px !important;        
+    }
+    .no-icon-select-container {
+        width: 16px !important;
     }
 `;
 

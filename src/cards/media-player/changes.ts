@@ -121,9 +121,13 @@ export function changePowerIcon(context) {
 export function changeVolumeIcon(context) {
     if (context.elements.volumeButton.isHidden) {
         context.elements.volumeButton.setAttribute("icon", "mdi:volume-high");
+        context.elements.mediaInfoContainer.style.opacity = '1';
+        context.elements.nameContainer.style.opacity = '1';
         context.elements.volumeButton.isHidden = false;
     } else {
         context.elements.volumeButton.setAttribute("icon", "mdi:close");
+        context.elements.mediaInfoContainer.style.opacity = '0';
+        context.elements.nameContainer.style.opacity = '0';
         context.elements.volumeButton.isHidden = true;
     }
 }

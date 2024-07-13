@@ -69,7 +69,6 @@ export default `
         overflow: hidden;
         border-radius: 20px;
         z-index: 1;
-        border: 2px solid var(--background-color-2, var(--secondary-background-color));
         background-color: var(--card-background-color, var(--ha-card-background));
         opacity: 1;
         transition: opacity .2s, transform .2s;

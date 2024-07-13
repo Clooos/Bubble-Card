@@ -109,30 +109,30 @@ export function createDropdownStructure(context, elements = context.elements, sh
 }
 
 export function createDropdownActions(context, elements = context.elements, entity = context.config.entity) {
-  let dropdownArrow = elements.dropdownArrow;
-  let dropdownSelect = elements.dropdownSelect;
-  let card = elements === context.elements ? elements.selectCardContainer : elements;
-  let eventCaller = elements === context.elements ? elements.selectBackground : elements;
+  const {
+    dropdownArrow,
+    dropdownSelect,
+    selectCardContainer: defaultCard,
+    selectBackground: defaultEventCaller
+  } = elements;
+
+  const card = elements === context.elements ? defaultCard : elements;
+  const eventCaller = elements === context.elements ? defaultEventCaller : elements;
 
   if (elements !== context.elements) {
     card.style.border = 'solid 2px rgba(0,0,0,0)';
   }
 
-  // Focus animation
-  eventCaller.addEventListener('click', function(event) {
-    let selectMenu = dropdownSelect.shadowRoot.querySelector('mwc-menu');
+  const handleEventClick = (event) => {
+    const selectMenu = dropdownSelect.shadowRoot.querySelector('mwc-menu');
 
     if (event.target.tagName.toLowerCase() === 'mwc-list-item') {
       return;
     }
 
-    if (elements !== context.elements) {
-        window.cardContainer = elements.mainContainer.getRootNode().querySelector(".card-content").firstChild;
-        window.cardContainer.style.zIndex = '8';
-    } else {
-        window.cardContainer = card.parentElement.parentElement.querySelector(".card-content").firstChild;
-        window.cardContainer.style.zIndex = '8';
-    }
+    const cardContent = (elements !== context.elements)
+      ? elements.mainContainer.getRootNode().querySelector(".card-content").firstChild
+      : card.parentElement.parentElement.querySelector(".card-content").firstChild;
 
     if (!selectMenu.hasAttribute('open')) {
       selectMenu.setAttribute('open', '');
@@ -141,9 +141,9 @@ export function createDropdownActions(context, elements = context.elements, enti
     dropdownArrow.style.transform = 'rotate(180deg)';
     card.style.border = 'solid 2px var(--accent-color)';
     elements.dropdownArrow.style.background = 'var(--accent-color)';
-  });
+  };
 
-  dropdownSelect.addEventListener('closed', function(event) {
+  const handleMenuClosed = (event) => {
     event.stopPropagation();
     event.preventDefault();
 
@@ -151,21 +151,23 @@ export function createDropdownActions(context, elements = context.elements, enti
     card.style.border = 'solid 2px rgba(0,0,0,0)';
     elements.dropdownArrow.style.background = '';
 
-    if (elements !== context.elements && window.cardContainer !== elements.mainContainer.getRootNode().querySelector(".card-content").firstChild) {
-        elements.mainContainer.getRootNode().querySelector(".card-content").firstChild.style.zIndex = '';
-    } else if (elements === context.elements && window.cardContainer !== card.parentElement.parentElement.querySelector(".card-content").firstChild) {
-        card.parentElement.parentElement.querySelector(".card-content").firstChild.style.zIndex = '';
-    }
-  });
+    const cardContent = (elements !== context.elements)
+      ? elements.mainContainer.getRootNode().querySelector(".card-content").firstChild
+      : card.parentElement.parentElement.querySelector(".card-content").firstChild;
+  };
 
-  // Update selected input
-  elements.dropdownSelect.addEventListener('click', function(event) {
-    let selectedOption = elements.dropdownSelect.shadowRoot?.querySelector('.mdc-select__selected-text').textContent;
+  const handleDropdownSelect = (event) => {
+    const selectedOption = elements.dropdownSelect.shadowRoot?.querySelector('.mdc-select__selected-text').textContent;
     const isInputSelect = entity?.startsWith("input_select");
-    let service = isInputSelect ? 'input_select' : 'select';
+    const service = isInputSelect ? 'input_select' : 'select';
+
     context._hass.callService(service, 'select_option', {
-        entity_id: entity,
-        option: selectedOption
+      entity_id: entity,
+      option: selectedOption
     });
-  });
+  };
+
+  eventCaller.addEventListener('click', handleEventClick);
+  dropdownSelect.addEventListener('closed', handleMenuClosed);
+  elements.dropdownSelect.addEventListener('click', handleDropdownSelect);
 }

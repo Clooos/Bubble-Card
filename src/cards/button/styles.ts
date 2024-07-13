@@ -163,10 +163,6 @@ export default `
         pointer-events: none;
     }
 
-    .bubble-sub-button-container {
-        z-index: 1;
-    }
-
     @keyframes tap-feedback {
         0% {transform: translateX(-100%); opacity: 0;}
         64% {transform: translateX(0); opacity: 0.1;}

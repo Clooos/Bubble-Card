@@ -25,7 +25,6 @@ export default `
         --mdc-select-outlined-hover-border-color: transparent;
         --mdc-select-outlined-idle-border-color: transparent;
         --mdc-theme-primary: transparent;
-        --mdc-menu-z-index: 8;
     }
     .mdc-select {
         color: transparent !important;
