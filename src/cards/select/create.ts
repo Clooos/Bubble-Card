@@ -24,7 +24,7 @@ export function createStructure(context) {
   context.elements.style.innerText = styles;
 
   addFeedback(context.elements.selectBackground, context.elements.feedback);
-  addActions(context.elements.iconContainer, context.config);
+  addActions(context.elements.iconContainer, context.config, context.config.entity);
 
   context.elements.iconContainer.appendChild(context.elements.icon);
   context.elements.iconContainer.appendChild(context.elements.image);
@@ -70,7 +70,7 @@ export function createDropdownStructure(context, elements = context.elements, sh
     if (elements.dropdownSelect.shadowRoot) {
       // Apply additional styles if sub-button/other
       if (elements !== context.elements) {
-        elements.dropdownContainer.style.display = '';
+        elements.dropdownContainer.style.display = 'flex';
         elements.dropdownSelectStyleElement = createElement('style');
         elements.dropdownSelectStyleElement.textContent = styles;
         elements.dropdownSelect.shadowRoot.appendChild(elements.dropdownSelectStyleElement);
@@ -130,10 +130,6 @@ export function createDropdownActions(context, elements = context.elements, enti
       return;
     }
 
-    const cardContent = (elements !== context.elements)
-      ? elements.mainContainer.getRootNode().querySelector(".card-content").firstChild
-      : card.parentElement.parentElement.querySelector(".card-content").firstChild;
-
     if (!selectMenu.hasAttribute('open')) {
       selectMenu.setAttribute('open', '');
     }
@@ -150,10 +146,6 @@ export function createDropdownActions(context, elements = context.elements, enti
     dropdownArrow.style.transform = 'rotate(0deg)';
     card.style.border = 'solid 2px rgba(0,0,0,0)';
     elements.dropdownArrow.style.background = '';
-
-    const cardContent = (elements !== context.elements)
-      ? elements.mainContainer.getRootNode().querySelector(".card-content").firstChild
-      : card.parentElement.parentElement.querySelector(".card-content").firstChild;
   };
 
   const handleDropdownSelect = (event) => {

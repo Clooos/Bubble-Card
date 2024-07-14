@@ -144,6 +144,7 @@ export default `
         z-index: 1;
         position: relative;
         cursor: pointer;
+        pointer-events: auto;
     }
 
     .bubble-icon {

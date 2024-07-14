@@ -49,13 +49,14 @@ export function changeStatus(context) {
 }
 
 export function changeDropdownList(context, elements = context.elements, entity = context.config.entity) {
-  elements.list = context._hass.states[entity].attributes.options;
+  elements.currentList = context._hass.states[entity].attributes.options;
+  elements.currentState = context._hass.states[entity].state;
 
-  if (elements.previousList === elements.list) return;
+  if (elements.previousList === elements.currentList && elements.previousState === elements.currentState) return;
 
   // Append options to the dropdown select element
-  let options = elements.list;
-  let state = context._hass.states[entity].state;
+  let options = elements.currentList;
+  let state = elements.currentState;
 
   // Clear the dropdown list
   while (elements.dropdownSelect.firstChild) {
@@ -70,7 +71,8 @@ export function changeDropdownList(context, elements = context.elements, entity 
       opt.setAttribute('selected', '');
     }
     elements.dropdownSelect.appendChild(opt);
-    elements.previousList = elements.list;
+    elements.previousList = elements.currentList;
+    elements.previousState = elements.currentState;
   });
 
   elements.dropdownContainer.appendChild(elements.dropdownSelect);

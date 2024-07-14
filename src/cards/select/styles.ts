@@ -80,7 +80,7 @@ export default `
         background-color: var(--background-color-2,var(--secondary-background-color));
         border-radius: 25px;
         touch-action: pan-y;
-        box-sizing:border-box;
+        box-sizing: border-box;
         border: solid 2px transparent;
         transition: all 0.15s;
         cursor: pointer;
@@ -130,6 +130,7 @@ export default `
         left: 0;
         right: 0;
         opacity: 0;
+        pointer-events: none;
     }
 
     .bubble-icon {

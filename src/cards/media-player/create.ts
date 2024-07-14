@@ -65,8 +65,8 @@ export function createStructure(context) {
 
     context.elements.mediaPlayerContainer.appendChild(context.elements.mediaPlayerCard);
 
-    addActions(context.elements.icon, context.config);
-    addActions(context.elements.image, context.config);
+    addActions(context.elements.icon, context.config, context.config.entity);
+    addActions(context.elements.image, context.config, context.config.entity);
 
     // Volume slider
 
