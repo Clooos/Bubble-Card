@@ -177,7 +177,10 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
+| `open_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is opening |
+| `close_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is closing |
 | `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the header, see [card layouts](#card-layouts) |
+| `show_header` | boolean | Optional | `true` or `false` (default) | Show/Hide the pop-up header fully |
 | You also have access to [all the button settings](#button) for the header of the pop-up. | | Optional | | If undefined no header will be shown |
 
 </details>
@@ -604,6 +607,69 @@ entity: cover.kitchen
 name: Kitchen
 icon_open: mdi:roller-shade
 icon_close: mdi:roller-shade-closed
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Select
+
+![readme-select-card](https://github.com/user-attachments/assets/f1220aaf-da5a-4ec0-b74e-31905264ae0a)
+
+This card allows you to add a dropdown menu for your `input_select` / `select` entities. This card also supports the sub-buttons and all the common Bubble Card features.
+
+> [!TIP]
+> You can also have select sub-buttons if you want, this feature is available in all the cards that support the sub-buttons.
+
+### Select options
+
+<details>
+
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Required** | Any entity | An entity to control |
+| `name` | string | Optional | Any string | A name for your select, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your select, if not defined it will display the entity icon or the `entity-picture` |
+| `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
+
+</details>
+
+#### Examples
+
+<details>
+
+<summary>A select card with a list of scenes</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: select
+name: Scene
+entity: input_select.scenes
+icon: mdi:brightness-4
+show_state: true
 ```
 
 </details>
