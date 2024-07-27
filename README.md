@@ -953,7 +953,7 @@ Bubble Card fully supports the Home Assistant section view, you can change the c
 | --- | --- |
 | `normal` | The regular layout (not optimized for the section view) |
 | `large` | A larger layout (optimized for the section view) |
-| `large_2_rows` | A larger layout with 2 rows of sub-buttons (optimized for the section view) |
+| `large-2-rows` | A larger layout with 2 rows of sub-buttons (optimized for the section view) |
 
 </details>
 
