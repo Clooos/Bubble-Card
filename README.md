@@ -84,7 +84,7 @@ All options can be configured in the Home Assistant editor. But you can find mor
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `type` | string | **Required** | `custom:bubble-card` | Type of the card |
-| `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `media-player`, `pop-up` or `separator` | Type of the Bubble Card, see below |
+| `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `media-player`, `pop-up`, `select` or `separator` | Type of the Bubble Card, see below |
 | `styles` | object list | Optional | Any CSS stylesheets | Allows you to customize your Bubble Card CSS, see [styling](#styling) |
 
 </details>
