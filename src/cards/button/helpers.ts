@@ -24,7 +24,7 @@ export function updateEntity(context, value) {
   } else if (isEntityType(context, "media_player")) {
       context._hass.callService('media_player', 'volume_set', {
           entity_id: context.config.entity,
-          volume_level: Math.round(value / 100)
+          volume_level: (value / 100).toFixed(2)
       });
   } else if (isEntityType(context, "cover")) {
       context._hass.callService('cover', 'set_cover_position', {
