@@ -53,7 +53,7 @@ export function updateEntity(context, value) {
       const maxValue = getAttribute(context, "max_temp");
       context._hass.callService('climate', 'set_temperature', {
           entity_id: context.config.entity,
-          temperature: Math.round((maxValue - minValue) * value / 100 + minValue)
+          temperature: (maxValue - minValue) * value / 100 + minValue
       });
   } else if (isEntityType(context, "number")) {
       const minValue = getAttribute(context, "min") ?? 0;
@@ -67,7 +67,7 @@ export function updateEntity(context, value) {
       });
   }
 };
-export const throttledUpdateEntity = throttle(updateEntity);
+export const throttledUpdateEntity = throttle(updateEntity, 100);
 
 export function onSliderChange(context, leftDistance, throttle = false) {
   const rect = context.elements.rangeSlider.getBoundingClientRect();
@@ -76,9 +76,9 @@ export function onSliderChange(context, leftDistance, throttle = false) {
 
   context.elements.rangeFill.style.transform =`translateX(${rangedPercentage}%)`;
   if (throttle) {
-    if (context.dragging) return;
-    //throttledUpdateEntity(context, rangedPercentage);
-    updateEntity(context, rangedPercentage);
+    //if (context.dragging) return;
+    throttledUpdateEntity(context, rangedPercentage);
+    //updateEntity(context, rangedPercentage);
   } else {
     updateEntity(context, rangedPercentage);
   }

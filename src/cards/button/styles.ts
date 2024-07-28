@@ -1,6 +1,11 @@
 export default `
     * {
         -webkit-tap-highlight-color: transparent !important;
+        -ms-overflow-style: none; /* for Internet Explorer, Edge */
+        scrollbar-width: none; /* for Firefox */
+    }
+    *::-webkit-scrollbar {
+        display: none; /* for Chrome, Safari, and Opera */
     }
     ha-card {
         margin-top: 0;
@@ -18,9 +23,6 @@ export default `
         background-color: var(--background-color-2,var(--secondary-background-color));
         border-radius: 32px;
         overflow: scroll;
-        /*mask-image: radial-gradient(white, black);*/
-        -ms-overflow-style: none; /* for Internet Explorer, Edge */
-        scrollbar-width: none; /* for Firefox */
         touch-action: pan-y;
     }
 
@@ -54,14 +56,6 @@ export default `
     }
     .is-light .bubble-range-fill {
         opacity: 0.5;
-    }
-
-    .bubble-button-card {
-        -ms-overflow-style: none; /* for Internet Explorer, Edge */
-        scrollbar-width: none; /* for Firefox */
-    }
-    .bubble-button-card::-webkit-scrollbar {
-        display: none; /* for Chrome, Safari, and Opera */
     }
     .is-unavailable .bubble-button-card,
     .is-unavailable .bubble-range-slider {

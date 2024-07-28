@@ -87,7 +87,7 @@ export function changeSlider(context) {
   if (buttonType === 'slider') {
     context.elements.rangeFill.style.backgroundColor = getIconColor(context);
 
-    if (context.dragging) return;
+    //if (context.dragging) return;
 
     let percentage = 0;
 
@@ -107,7 +107,7 @@ export function changeSlider(context) {
     } else if (isEntityType(context, "climate")) {
       const minValue = getAttribute(context, "min_temp");
       const maxValue = getAttribute(context, "max_temp");
-      const value = getState(context);
+      const value = getAttribute(context, "temperature");
       percentage = 100 * (value - minValue) / (maxValue - minValue);
     } else if (isEntityType(context, "number")) {
       const minValue = getAttribute(context, "min");
