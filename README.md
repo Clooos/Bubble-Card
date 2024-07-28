@@ -71,6 +71,8 @@ And also a video for the German users from **smart-live.net**, thanks a lot to y
 
 [![Open Bubble Card on Home Assistant Community Store (HACS).](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=clooos&repository=Bubble-Card&category=frontend)
 
+<br>
+
 ## Configuration
 
 All options can be configured in the Home Assistant editor. But you can find more details and the YAML in the documentation below.
