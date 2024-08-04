@@ -10,7 +10,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ## Table of contents
 
-**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
+**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
 
 <br>
 
@@ -103,6 +103,18 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 
 > [!IMPORTANT]  
 > This card must be placed within a [vertical stack](https://www.home-assistant.io/dashboards/vertical-stack/) card at the topmost position to function properly. To avoid misalignment with your view, place vertical stacks/pop-ups after all other dashboard cards. In a section view (recommended), you can place them anywhere. It should be called from the same view to work.
+> <details>
+>  
+> <summary>How to create a pop-up in the editor</summary>
+>
+> <br>
+> 
+> 1. To add a pop-up you first need to add a `Vertical stack` card to your dashboard.
+> 2. This `Vertical stack` must be after all your other cards in your view order and before your horizontal buttons stack if you have one. In a section view type it can be placed anywhere.
+> 3. Now add a `Bubble Card` with the `Pop-up` type.
+> 4. Just fill in the `Hash` input and the ones you need.
+>
+> </details>
 
 > [!TIP]
 > ### Pop-up trigger 
@@ -190,19 +202,6 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 </details>
 
 #### Examples
-
-<details>
-  
-<summary>How to create a pop-up in the editor</summary>
-
-<br>
- 
-1. To add a pop-up you first need to add a `vertical-stack` card to your dashboard
-2. This `vertical-stack` must be before all your other cards in your view order
-3. Now add a `Bubble Card` with the `Pop-up` type
-4. Just fill in the `Hash` input and the ones you need
-
-</details>
 
 <details>
 
