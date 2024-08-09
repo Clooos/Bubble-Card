@@ -254,36 +254,36 @@ export default `
     }
 
     .large .bubble-media-player-container {
-      height: 64px;
-      border-radius: 34px;
+      height: 56px;
+      border-radius: 32px;
     }
 
     .large .bubble-icon-container {
-      --mdc-icon-size: 28px;
-      min-width: 48px !important;
-      min-height: 48px !important;
+      --mdc-icon-size: 24px;
+      min-width: 42px !important;
+      min-height: 42px !important;
       margin-left: 8px;
     }
     
     .large .bubble-play-pause-button {
       display: flex;
-      height: 48px;
-      width: 48px;
+      height: 42px;
+      width: 42px;
       padding: 0;
       align-items: center;
       justify-content: center;
     }
 
     .large .bubble-volume-slider {
-      height: 48px !important;
+      height: 42px;
       border-radius: 24px;
-      left: 66px !important;
-      width: calc(100% - 190px) !important;
+      left: 60px;
+      width: calc(100% - 174px);
     }
 
     .large .bubble-range-value {
       place-items: center;
-      height: 48px;
+      height: 42px;
     }
 
     .large .bubble-button-container {

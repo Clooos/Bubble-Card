@@ -88,7 +88,7 @@ export default `
     }
 
     .large .bubble-cover-card-container {
-      height: 64px;
+      height: 56px;
       display: flex;
       background: var(--background-color-2, var(--secondary-background-color));
       border-radius: 32px;
@@ -100,7 +100,7 @@ export default `
     }
 
     .large .bubble-header-container {
-        height: 64px;
+        height: 56px;
     }
 
     .large .bubble-header {
@@ -108,9 +108,9 @@ export default `
     }
 
     .large .bubble-icon-container {
-      --mdc-icon-size: 28px;
-      min-width: 48px !important;
-      min-height: 48px !important;
+      --mdc-icon-size: 24px;
+      min-width: 42px !important;
+      min-height: 42px !important;
       margin-left: 2px;
       align-content: center;
     }

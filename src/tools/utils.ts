@@ -484,17 +484,14 @@ export function applyScrollingEffect(context, element, text) {
                     element.styleElement = null;
                 }
             }
-        }, 400);
-    }
 
-    if (!element.eventAdded) {
-        window.addEventListener('resize', () => { requestAnimationFrame(checkIfContentIsLonger) });
-        element.eventAdded = true;
+            element.previousText = text;
+        }, 400);
     }
 
     requestAnimationFrame(checkIfContentIsLonger);
 
-    element.previousText = text;
+    // element.previousText = text;
 
     function createScrollingEffectCSS(className) {
         return `

@@ -2,7 +2,7 @@ export default `
     .bubble-separator {
         display: flex;
         width: 100%;
-        padding: 4px 0;
+        
         align-items: center;
         z-index: 1;
     }
@@ -36,7 +36,7 @@ export default `
     }
 
     .large .bubble-separator {
-        height: 58px;
+        height: 56px;
     }
 
     .rows-2 .bubble-sub-button-container {

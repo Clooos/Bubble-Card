@@ -14,68 +14,63 @@ import {
 } from './utils.ts';
 
 export function changeState(context) {
-    const buttonType = context.config.button_type;
     const state = context._hass.states[context.config.entity];
     const attribute = getAttribute(context, context.config.attribute, context.config.entity);
 
+    const buttonType = context.config.button_type;
     const defaultShowState = buttonType === 'state';
     const showName = context.config.show_name ?? true;
     const showIcon = context.config.show_icon ?? true;
     const showState = context.config.show_state ?? defaultShowState;
     const showAttribute = context.config.show_attribute ?? defaultShowState;
     const showLastChanged = context.config.show_last_changed ?? context.config.show_last_updated ?? false;
+    const scrollingEffect = context.config.scrolling_effect ?? true;
+
+    const previousConfig = context.previousConfig || {};
+
+    const configChanged = (
+        context.previousState !== state ||
+        context.previousAttribute !== attribute ||
+        previousConfig.showName !== showName ||
+        previousConfig.showIcon !== showIcon ||
+        previousConfig.showState !== showState ||
+        previousConfig.showAttribute !== showAttribute ||
+        previousConfig.showLastChanged !== showLastChanged ||
+        previousConfig.scrollingEffect !== scrollingEffect
+    );
+
+    if (!configChanged) return;
 
     let formattedState = state && showState ? context._hass.formatEntityState(state) : '';
-    let formattedAttribute;
-    let formattedLastChanged;
-
-    if (!context.elements.stateStyles) {
-        context.elements.stateStyles = createElement('style');
-        context.elements.stateStyles.innerText = stateStyles;
-        context.content.appendChild(context.elements.stateStyles);
-    }
-
-    if (showAttribute && context.config.attribute) {
-        formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, context.config.attribute) ?? attribute : '';
-    }
-
-    if (showLastChanged) {
-        formattedLastChanged = state ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
-    }
-
-    if (formattedState === 'Unknown') {
-        formattedState = '';
-    }
-
-    if (formattedAttribute === 'Unknown') {
-        formattedAttribute = '';
-    }
-
+    let formattedAttribute = '';
+    let formattedLastChanged = '';
     let displayedState = '';
-
-    if (showState && formattedState) {
-        displayedState += formattedState;
-    }
-
-    if (showLastChanged && formattedLastChanged) {
-        if (displayedState) {
-            displayedState += (formattedState.toLowerCase() !== 'off') ? ' ' : ' · ';
-        }
-        displayedState += (formattedState.toLowerCase() === 'off') ? capitalizeFirstLetter(formattedLastChanged) : formattedLastChanged;
-    }
-
-    if (showAttribute && formattedAttribute) {
-        if (displayedState) {
-            displayedState += ' · ';
-        }
-        displayedState += formattedAttribute;
-    }
 
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-    displayedState = capitalizeFirstLetter(displayedState);
+    if (showAttribute && attribute) {
+        formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, context.config.attribute) ?? attribute : '';
+    }
+
+    if (showLastChanged && state) {
+        formattedLastChanged = state ? capitalizeFirstLetter(
+            formatDateTime(state.last_changed, context._hass.locale.language)
+        ) : '';
+    }
+
+    if (!context.elements.stateStyles) {
+        context.elements.stateStyles = createElement('style');
+        context.elements.stateStyles.innerText = stateStyles;
+        context.content.appendChild(context.elements.stateStyles);
+
+        if (context.config.card_type === 'pop-up') {
+            context.elements.buttonContainer.appendChild(context.elements.stateStyles);
+        }
+    }
+
+    displayedState = formattedState + (formattedAttribute ? `${showState ? ' • ' : ''}${formattedAttribute}` : '') + (formattedLastChanged ? `${showState ? ' • ' : ''}${formattedLastChanged}` : '');
 
     if (!showName) {
         context.elements.name.classList.add('hidden');
@@ -107,8 +102,19 @@ export function changeState(context) {
 
     if (displayedState !== '') {
         applyScrollingEffect(context, context.elements.state, displayedState);
-        context.previousState = displayedState;
     }
+
+    // Update previous values
+    context.previousState = state;
+    context.previousAttribute = attribute;
+    context.previousConfig = {
+        showName,
+        showIcon,
+        showState,
+        showAttribute,
+        showLastChanged,
+        scrollingEffect,
+    };
 }
 
 const stateStyles = `

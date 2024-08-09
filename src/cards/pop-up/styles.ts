@@ -31,7 +31,8 @@ export default `
       padding: 0 !important;
   }
   .bubble-pop-up {
-      transition: all .36s;
+      transition: transform 0.3s ease;
+      will-change: transform;
       position: fixed;
       width: 100%;
       max-width: 100%;
@@ -45,13 +46,6 @@ export default `
   .bubble-pop-up-container::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, and Opera */
   }
-  // .bubble-pop-up > :first-child {
-  //     position: sticky;
-  //     top: 0;
-  //     z-index: 1;
-  //     background: none !important;
-  //     overflow: visible;
-  // }
   .is-popup-opened {
       box-shadow: 0px 0px 50px rgba(0, 0, 0, var(--custom-shadow-opacity));
       backdrop-filter: var(--custom-popup-filter);
@@ -148,7 +142,7 @@ export default `
   }
 
   .large .bubble-button-card-container {
-    height: 64px;
+    height: 56px;
     border-radius: 32px;
   }
 
@@ -157,15 +151,15 @@ export default `
   }
 
   .large .bubble-icon-container {
-    --mdc-icon-size: 28px;
-    min-width: 48px !important;
-    min-height: 48px !important;
+    --mdc-icon-size: 24px;
+    min-width: 42px !important;
+    min-height: 42px !important;
     margin-left: 8px;
   }
 
   .large .bubble-close-button {
-      height: 64px;
-      width: 64px;
+      height: 56px;
+      width: 56px;
       border: none;
       border-radius: 50%;
       z-index: 1;

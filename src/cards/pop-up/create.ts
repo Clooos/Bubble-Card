@@ -136,6 +136,7 @@ export function createStructure(context) {
       contextOnUrlChange();
     }, 0);
 
+    window.addEventListener('click', contextOnUrlChange);
     window.addEventListener('location-changed', contextOnUrlChange);
     window.addEventListener('popstate', contextOnUrlChange);
     window.addEventListener('keydown', (event) => {

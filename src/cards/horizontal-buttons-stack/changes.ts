@@ -143,7 +143,7 @@ export function changeStyle(context) {
 
     try {
         customStyle = context.config.styles
-            ? Function('hass', 'entityId', 'state', 'card', `return \`${context.config.styles}\`;`)
+            ? Function('hass', 'entity', 'state', 'card', `return \`${context.config.styles}\`;`)
               (context._hass, context.config.entity, state, context.card)
             : '';
     } catch (error) {

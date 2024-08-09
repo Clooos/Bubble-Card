@@ -13,6 +13,9 @@ export async function handlePopUp(context) {
       prepareStructure(context);
       changeStyle(context);
       createHeader(context);
+      if (context.config.entity || context.config.name) {
+          handleButton(context, context.elements.buttonContainer, context.elements.header);
+      }
       createStructure(context);
   }
 

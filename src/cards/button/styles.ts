@@ -164,14 +164,14 @@ export default `
     }
 
     .large .bubble-button-card-container {
-      height: 64px;
+      height: 56px;
       border-radius: 32px;
     }
 
     .large .bubble-icon-container {
-      --mdc-icon-size: 28px;
-      min-width: 48px !important;
-      min-height: 48px !important;
+      --mdc-icon-size: 24px;
+      min-width: 42px !important;
+      min-height: 42px !important;
       margin-left: 8px;
     }
 
