@@ -31,6 +31,8 @@ export function getBackdrop(context) {
   document.head.appendChild(backdropCustomStyle);
 
   const backdropElement = createElement('div', 'bubble-backdrop backdrop is-hidden');
+  backdropElement.style.willChange = 'all';
+
   if (context.config.hide_backdrop) {
     backdropElement.style.display = 'none';
     backdropElement.style.pointerEvents = 'none';
@@ -48,6 +50,8 @@ export function getBackdrop(context) {
   }
 
   backdrop = { hideBackdrop, showBackdrop, backdropElement, backdropCustomStyle };
+
+  backdropElement.style.willChange = '';
 
   return backdrop;
 }

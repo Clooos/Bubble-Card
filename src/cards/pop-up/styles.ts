@@ -32,7 +32,6 @@ export default `
   }
   .bubble-pop-up {
       transition: transform 0.3s ease;
-      will-change: transform;
       position: fixed;
       width: 100%;
       max-width: 100%;
@@ -129,6 +128,9 @@ export default `
       padding-bottom: 18px !important;
       mask-image: none;
       -webkit-mask-image: none;    
+  }
+  .will-change {
+    will-change: all;
   }
 
   .no-header .bubble-header-container {

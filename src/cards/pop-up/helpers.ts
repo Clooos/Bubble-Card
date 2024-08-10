@@ -32,15 +32,20 @@ export function addHash(hash) {
 }
 
 export function closePopup(context) {
+  const { hideBackdrop, showBackdrop } = getBackdrop(context);
+
   if (context.popUp.classList.contains('is-popup-closed')) return;
 
   popupCount--;
   document.body.style.overflow = '';
+  context.popUp.classList.add('will-change');
 
   // Clear any existing timeouts
   clearTimeout(context.hideContentTimeout);
   clearTimeout(context.removeDomTimeout);
   clearTimeout(context.closeTimeout);
+
+  hideBackdrop();
 
   // Hide content after delay
   context.hideContentTimeout = setTimeout(() => {
@@ -75,6 +80,7 @@ export function closePopup(context) {
   }, 360);
 
   context.popUp.classList.replace('is-popup-opened', 'is-popup-closed');
+  context.popUp.classList.remove('will-change');
 
   // Execute close action if defined
   if (context.config.close_action) {
@@ -83,7 +89,13 @@ export function closePopup(context) {
 }
 
 export function openPopup(context) {
+  const { hideBackdrop, showBackdrop } = getBackdrop(context);
+
   if (context.popUp.classList.contains('is-popup-opened')) return;
+
+  popupCount++;
+  showBackdrop();
+  context.popUp.classList.add('will-change');
   
   if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
     context.sectionRow.hidden = false;
@@ -100,11 +112,6 @@ export function openPopup(context) {
   if (context.popUp.parentNode !== context.verticalStack) {
     context.verticalStack.appendChild(context.popUp);
   }
-
-  // Force a reflow to ensure the popup is fully appended and recognized by the DOM
-  void context.popUp.offsetWidth;
-
-  popupCount++;
   
   // Add event listeners
   context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
@@ -136,21 +143,16 @@ export function openPopup(context) {
   if (context.config.open_action) {
     callAction(context.popUp, context.config, 'open_action');
   }
+
+  context.popUp.classList.remove('will-change');
 }
 
 export function onUrlChange(context) {
-  const { hideBackdrop, showBackdrop } = getBackdrop(context);
   return function() {
     if (context.config.hash === location.hash) {
       openPopup(context);
     } else {
       closePopup(context);
-    }
-
-    if (popupCount === 0 || context.editor) {
-      hideBackdrop();
-    } else {
-      showBackdrop();
     }
   }
 }
