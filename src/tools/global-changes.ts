@@ -293,13 +293,13 @@ export function changeSubButtonState(context, container = context.content, appen
         // Build the displayed state string
         let displayedState = '';
         const formattedState = state && showState ? context._hass.formatEntityState(state) : '';
-        const formattedAttribute = state && attribute && showAttribute ? context._hass.formatEntityAttributeValue(state, attributeType) ?? attribute : '';
+        const formattedAttribute = state && attribute !== '' && showAttribute ? context._hass.formatEntityAttributeValue(state, attributeType) ?? attribute : '';
         const formattedLastChanged = state && showLastChanged ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
 
-        if (showName && name) displayedState += name;
-        if (formattedState) displayedState += (displayedState ? ' · ' : '') + formattedState;
-        if (formattedLastChanged) displayedState += (displayedState ? ' · ' : '') + formattedLastChanged;
-        if (formattedAttribute) displayedState += (displayedState ? ' · ' : '') + formattedAttribute;
+        if (showName && name !== '') displayedState += name;
+        if (formattedState !== '') displayedState += (displayedState ? ' · ' : '') + formattedState;
+        if (formattedLastChanged !== '') displayedState += (displayedState ? ' · ' : '') + formattedLastChanged;
+        if (formattedAttribute !== '') displayedState += (displayedState ? ' · ' : '') + formattedAttribute;
 
         displayedState = displayedState.charAt(0).toUpperCase() + displayedState.slice(1);
 
