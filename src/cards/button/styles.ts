@@ -137,6 +137,7 @@ export default `
     }
 
     .bubble-name {
+        font-size: 13px;
         font-weight: 600;
     }
 

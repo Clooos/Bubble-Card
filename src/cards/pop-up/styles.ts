@@ -102,7 +102,7 @@ export default `
       margin-right: 14px;
   }
   .bubble-name {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: heavy;
   }
   .bubble-close-button {

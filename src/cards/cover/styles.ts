@@ -46,6 +46,7 @@ export default `
     }
 
     .bubble-name {
+        font-size: 13px;
         margin: 2px 0;
         white-space: nowrap;
         display: flex;

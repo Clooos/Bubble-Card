@@ -11,12 +11,13 @@ export async function handlePopUp(context) {
         return;
       }
       prepareStructure(context);
-      changeStyle(context);
+      //changeStyle(context);
       createHeader(context);
       if (context.config.entity || context.config.name) {
           handleButton(context, context.elements.buttonContainer, context.elements.header);
       }
       createStructure(context);
+      changeStyle(context);
   }
 
   if (
