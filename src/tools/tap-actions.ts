@@ -93,21 +93,17 @@ export function sendActionEvent(element, config, action, defaultEntity, defaultA
 
 export function addActions(element, config, defaultEntity, defaultActions) {
   const handler = new ActionHandler(element, config, sendActionEvent, defaultEntity, defaultActions);
-
-  element.addEventListener('pointerdown', handler.handleStart.bind(handler));
-  element.addEventListener('pointerup', handler.handleEnd.bind(handler));
-  element.addEventListener('contextmenu', (e) => e.preventDefault());
-
   const tapAction = config?.tap_action?.action || defaultActions?.tap_action?.action || "more-info";
   const doubleTapAction = config?.double_tap_action?.action || defaultActions?.double_tap_action?.action || "toggle";
   const holdAction = config?.hold_action?.action || defaultActions?.hold_action?.action || "toggle";
 
   if (tapAction === "none" && doubleTapAction === "none" && holdAction === "none") {
     element.style.cursor = '';
-    element.style.pointerEvents = 'none';
   } else {
     element.style.cursor = 'pointer';
-    element.style.pointerEvents = '';
+    element.addEventListener('pointerdown', handler.handleStart.bind(handler));
+    element.addEventListener('pointerup', handler.handleEnd.bind(handler));
+    element.addEventListener('contextmenu', (e) => e.preventDefault());
     element.addEventListener('click', () => forwardHaptic("selection"));
   }
 }

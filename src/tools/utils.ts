@@ -433,23 +433,20 @@ export function createElement(tag, classNames = '') {
     return element;
 }
 
-export function applyScrollingEffect(context, element, text) {
-    // Add a scrolling effect on any text element that is longer than its container
-    // You need to manually add "overflow: hidden" to your container CSS
+export function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
 
+export function applyScrollingEffect(context, element, text) {
     const scrollingEffect = context.config.scrolling_effect ?? true;
 
-    if (scrollingEffect === false) {
-      element.innerHTML = text;
-      element.previousText = text;
-
-      element.style.whiteSpace = 'normal';
-      element.style.display = '-webkit-box';
-      element.style.webkitLineClamp = '2';
-      element.style.webkitBoxOrient = 'vertical';
-      element.style.textOverflow = 'ellipsis';
-
-      return;
+    if (!scrollingEffect) {
+        applyNonScrollingStyle(element, text);
+        return;
     }
 
     if (element.previousText === text) return;
@@ -458,48 +455,49 @@ export function applyScrollingEffect(context, element, text) {
     const className = classNames.find(name => name.startsWith('bubble-'));
 
     function checkIfContentIsLonger() {
-        // Remove the previous scrolling effect if it exists
-        element.innerHTML = text;
+        element.innerHTML = `<div class="scrolling-container">${text}</div>`;
         element.style = '';
 
-        const checkWidth = setInterval(() => {
-            if (!element.originalTextWidth || element.originalTextWidth !== element.scrollWidth) {
-                element.originalTextWidth = element.scrollWidth;
-            }
+        const contentWidth = element.scrollWidth;  // Mesure de la largeur du texte réel dans le DOM
+        const containerWidth = element.parentNode?.offsetWidth || 0;
 
-            if (scrollingEffect && element.originalTextWidth > element.parentNode?.offsetWidth) {
-                // Add the CSS for the scrolling effect
-                const separator = `<span class="bubble-scroll-separator"> | </span>`;
-                element.innerHTML = `<span>${text + separator + text + separator}</span>`;
-
-                const css = createScrollingEffectCSS(className);
-                element.styleElement = document.createElement('style');
-                element.appendChild(element.styleElement);
-                element.styleElement.innerHTML = css;
-
-                clearInterval(checkWidth); // Stop checking once the width is not 0
-            } else {
-                // If the text fits without scrolling, remove the style element
-                if (scrollingEffect && element.styleElement) {
-                    element.styleElement = null;
-                }
-            }
-
+        if (scrollingEffect && contentWidth > containerWidth) {
+            applyScrollingStyle(element, text, className);
             element.previousText = text;
-        }, 400);
+        } else {
+            element.previousText = text;
+            return;
+        }
     }
 
     requestAnimationFrame(checkIfContentIsLonger);
 
-    // element.previousText = text;
+    if (!element.eventAdded) {
+        window.addEventListener('resize', debounce(checkIfContentIsLonger, 300));
+        element.eventAdded = true;
+    }
+
+    function applyScrollingStyle(element, text, className) {
+        const separator = `<span class="bubble-scroll-separator"> | </span>`;
+        const wrappedText = `<span>${text + separator + text + separator}</span>`;
+
+        element.innerHTML = `<div class="scrolling-container">${wrappedText}</div>`;
+
+        const css = createScrollingEffectCSS(className);
+        element.styleElement = document.createElement('style');
+        element.appendChild(element.styleElement);
+        element.styleElement.innerHTML = css;
+    }
 
     function createScrollingEffectCSS(className) {
         return `
-            .${className} {
+            .${className} .scrolling-container {
+                width: 100%;
                 white-space: nowrap;
                 mask-image: linear-gradient(to right, transparent, black calc(0% + 8px), black calc(100% - 8px), transparent);
+                mask-image: linear-gradient(to left, transparent, black calc(0% + 8px), black calc(100% - 8px), transparent);
             }
-            .${className} span {
+            .${className} .scrolling-container span {
                 display: inline-block;
                 animation: scroll 14s linear infinite;
             }
@@ -515,6 +513,17 @@ export function applyScrollingEffect(context, element, text) {
             }
         `;
     }
+}
+
+function applyNonScrollingStyle(element, text) {
+    element.innerHTML = text;
+    element.previousText = text;
+
+    element.style.whiteSpace = 'normal';
+    element.style.display = '-webkit-box';
+    element.style.webkitLineClamp = '2';
+    element.style.webkitBoxOrient = 'vertical';
+    element.style.textOverflow = 'ellipsis';
 }
 
 export function formatDateTime(datetime, locale) {

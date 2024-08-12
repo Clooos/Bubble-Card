@@ -32,22 +32,19 @@ export function addHash(hash) {
 }
 
 export function closePopup(context) {
-  const { hideBackdrop, showBackdrop } = getBackdrop(context);
+  const { hideBackdrop } = getBackdrop(context);
 
   if (context.popUp.classList.contains('is-popup-closed')) return;
 
   popupCount--;
   document.body.style.overflow = '';
-  context.popUp.classList.add('will-change');
 
-  // Clear any existing timeouts
   clearTimeout(context.hideContentTimeout);
   clearTimeout(context.removeDomTimeout);
   clearTimeout(context.closeTimeout);
 
   hideBackdrop();
 
-  // Hide content after delay
   context.hideContentTimeout = setTimeout(() => {
     context.popUp.style.display = 'none';
 
@@ -59,7 +56,7 @@ export function closePopup(context) {
         context.sectionRowContainer.style.display = "none";
       }
     }
-  }, 380);
+  }, 300);
 
   context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
 
@@ -72,30 +69,32 @@ export function closePopup(context) {
     context.popUp.removeEventListener('touchend', removeHash);
   }
 
-  // Remove popup from DOM after delay
   context.removeDomTimeout = setTimeout(() => {
     if (context.popUp.parentNode === context.verticalStack) {
       context.verticalStack.removeChild(context.popUp);
     }
-  }, 360);
+  }, 320);
 
   context.popUp.classList.replace('is-popup-opened', 'is-popup-closed');
-  context.popUp.classList.remove('will-change');
 
-  // Execute close action if defined
   if (context.config.close_action) {
     callAction(context, context.config, 'close_action');
   }
 }
 
 export function openPopup(context) {
-  const { hideBackdrop, showBackdrop } = getBackdrop(context);
+  const { showBackdrop } = getBackdrop(context);
 
   if (context.popUp.classList.contains('is-popup-opened')) return;
 
+  // Clear all existing timeouts before starting a new one
+  clearTimeout(context.hideContentTimeout);
+  clearTimeout(context.removeDomTimeout);
+  clearTimeout(context.closeTimeout);
+
   popupCount++;
   showBackdrop();
-  context.popUp.classList.add('will-change');
+  document.body.style.overflow = 'hidden';
   
   if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
     context.sectionRow.hidden = false;
@@ -108,12 +107,10 @@ export function openPopup(context) {
 
   clearTimeout(context.removeDomTimeout);
 
-  // Ensure popup is appended before doing anything else
   if (context.popUp.parentNode !== context.verticalStack) {
     context.verticalStack.appendChild(context.popUp);
   }
   
-  // Add event listeners
   context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
 
   if (context.config.close_on_click ?? false) {
@@ -121,30 +118,27 @@ export function openPopup(context) {
     context.popUp.addEventListener('touchend', removeHash, { passive: true });
   }
 
-  // Ensure display is set before the transition
   context.popUp.style.display = '';
 
-  // Apply the transition in the next frame
   requestAnimationFrame(() => {
-    context.popUp.classList.replace('is-popup-closed', 'is-popup-opened');
     context.popUp.style.transform = '';
+    
+    requestAnimationFrame(() => {
+      context.popUp.classList.replace('is-popup-closed', 'is-popup-opened')
+    });
 
     if (context.config.close_by_clicking_outside ?? true) {
       window.addEventListener('click', clickOutside, { passive: true });
     }
   });
 
-  // Auto-close if configured
   if (context.config.auto_close > 0) {
-    context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
+    context.closeTimeout = setTimeout(() => closePopup(context), context.config.auto_close); // <- Adjusted to close correctly
   }
 
-  // Execute open action if defined
   if (context.config.open_action) {
     callAction(context.popUp, context.config, 'open_action');
   }
-
-  context.popUp.classList.remove('will-change');
 }
 
 export function onUrlChange(context) {

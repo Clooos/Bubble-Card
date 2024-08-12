@@ -16,6 +16,7 @@ import {
 export function changeState(context) {
     const state = context._hass.states[context.config.entity];
     const attribute = getAttribute(context, context.config.attribute, context.config.entity);
+    const lastChanged = state?.last_changed;
 
     const buttonType = context.config.button_type;
     const defaultShowState = buttonType === 'state';
@@ -31,6 +32,7 @@ export function changeState(context) {
     const configChanged = (
         context.previousState !== state ||
         context.previousAttribute !== attribute ||
+        context.previousLastChanged !== lastChanged ||
         previousConfig.showName !== showName ||
         previousConfig.showIcon !== showIcon ||
         previousConfig.showState !== showState ||
@@ -56,7 +58,7 @@ export function changeState(context) {
 
     if (showLastChanged && state) {
         formattedLastChanged = state ? capitalizeFirstLetter(
-            formatDateTime(state.last_changed, context._hass.locale.language)
+            formatDateTime(lastChanged, context._hass.locale.language)
         ) : '';
     }
 

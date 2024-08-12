@@ -53,8 +53,6 @@ export default `
   .is-popup-closed { 
       transform: translateY(100%) !important;
       box-shadow: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
   }
 
   @media only screen and (min-width: 600px) {
@@ -89,7 +87,7 @@ export default `
       height: 50px;
       margin: 0;
       padding: 0;
-      z-index: 5;
+      z-index: 3;
       padding: 18px 18px 22px;
       position: sticky;
       top: 0;
@@ -129,9 +127,6 @@ export default `
       mask-image: none;
       -webkit-mask-image: none;    
   }
-  .will-change {
-    will-change: all;
-  }
 
   .no-header .bubble-header-container {
       visibility: hidden !important;
@@ -147,18 +142,15 @@ export default `
     height: 56px;
     border-radius: 32px;
   }
-
   .large .bubble-pop-up-container {
       margin-top: -36px;
   }
-
   .large .bubble-icon-container {
     --mdc-icon-size: 24px;
     min-width: 42px !important;
     min-height: 42px !important;
     margin-left: 8px;
   }
-
   .large .bubble-close-button {
       height: 56px;
       width: 56px;
@@ -178,7 +170,6 @@ export default `
     width: auto;
     padding-right: 14px;
   }
-
   .rows-2 .bubble-sub-button {
     height: 20px !important;
   }
@@ -200,8 +191,8 @@ export const backdropStyles = `
 
   .bubble-backdrop.is-visible {
     opacity: 1;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: var(--custom-backdrop-filter);
+    -webkit-backdrop-filter: var(--custom-backdrop-filter);
   }
 
   .bubble-backdrop.is-hidden {

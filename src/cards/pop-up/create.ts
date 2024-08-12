@@ -31,7 +31,6 @@ export function getBackdrop(context) {
   document.head.appendChild(backdropCustomStyle);
 
   const backdropElement = createElement('div', 'bubble-backdrop backdrop is-hidden');
-  backdropElement.style.willChange = 'all';
 
   if (context.config.hide_backdrop) {
     backdropElement.style.display = 'none';
@@ -40,6 +39,7 @@ export function getBackdrop(context) {
   document.body.appendChild(backdropElement);
 
   function showBackdrop() {
+    backdropElement.style.setProperty('--custom-backdrop-filter', `blur(${context.config.bg_blur ?? 10}px)`);
     backdropElement.classList.add('is-visible');
     backdropElement.classList.remove('is-hidden');
   }
@@ -50,8 +50,6 @@ export function getBackdrop(context) {
   }
 
   backdrop = { hideBackdrop, showBackdrop, backdropElement, backdropCustomStyle };
-
-  backdropElement.style.willChange = '';
 
   return backdrop;
 }
@@ -202,7 +200,6 @@ export function prepareStructure(context) {
     context.popUp.style.setProperty('--custom-height-offset-desktop', context.config.margin_top_desktop  ?? '0px');
     context.popUp.style.setProperty('--custom-height-offset-mobile', context.config.margin_top_mobile  ?? '0px');
     context.popUp.style.setProperty('--custom-margin', `-${context.config.margin ?? '7px'}`);
-    context.popUp.style.setProperty('--custom-backdrop-filter', hideBackdrop ? 'none' : `blur(${context.config.bg_blur ?? 10}px)`);
     context.popUp.style.setProperty('--custom-popup-filter', hideBackdrop ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
     context.popUp.style.setProperty('--custom-shadow-opacity', (context.config.shadow_opacity ?? 0) / 100);
 

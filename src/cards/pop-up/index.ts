@@ -11,7 +11,6 @@ export async function handlePopUp(context) {
         return;
       }
       prepareStructure(context);
-      //changeStyle(context);
       createHeader(context);
       if (context.config.entity || context.config.name) {
           handleButton(context, context.elements.buttonContainer, context.elements.header);
@@ -24,8 +23,6 @@ export async function handlePopUp(context) {
       context.popUp.classList.contains('is-popup-opened') ||
       configChanged(context, context.popUp)
   ){
-      //changeStyle(context);
-
       if (context.config.entity || context.config.name) {
           handleButton(context, context.elements.buttonContainer, context.elements.header);
       }

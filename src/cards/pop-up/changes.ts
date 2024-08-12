@@ -100,6 +100,9 @@ export function changeStyle(context) {
 
 export function changeTriggered(context) {
     let triggerEntity = context.config.trigger_entity ?? '';
+
+    if (triggerEntity === '') return;
+    
     let triggerState = context.config.trigger_state ?? '';
     let triggerClose = context.config.trigger_close ?? false;
     let triggerEntityState = context._hass.states[triggerEntity]?.state;

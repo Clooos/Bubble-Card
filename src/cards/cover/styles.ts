@@ -51,6 +51,7 @@ export default `
         white-space: nowrap;
         display: flex;
         position: relative;
+        overflow: hidden;
     }
 
     .bubble-state {
@@ -61,6 +62,7 @@ export default `
         white-space: nowrap;
         display: flex;
         position: relative;
+        overflow: hidden;
     }
 
     .bubble-buttons {
