@@ -36,12 +36,15 @@ export function getBackdrop(context) {
     backdropElement.style.display = 'none';
     backdropElement.style.pointerEvents = 'none';
   }
+
   document.body.appendChild(backdropElement);
+  backdropElement.style.setProperty('--custom-backdrop-filter', `blur(${context.config.bg_blur ?? 10}px)`);
 
   function showBackdrop() {
-    backdropElement.style.setProperty('--custom-backdrop-filter', `blur(${context.config.bg_blur ?? 10}px)`);
-    backdropElement.classList.add('is-visible');
-    backdropElement.classList.remove('is-hidden');
+    requestAnimationFrame(() => {
+      backdropElement.classList.add('is-visible');
+      backdropElement.classList.remove('is-hidden');
+    });
   }
   
   function hideBackdrop() {

@@ -32,8 +32,6 @@ export function addHash(hash) {
 }
 
 export function closePopup(context) {
-  const { hideBackdrop } = getBackdrop(context);
-
   if (context.popUp.classList.contains('is-popup-closed')) return;
 
   popupCount--;
@@ -43,7 +41,12 @@ export function closePopup(context) {
   clearTimeout(context.removeDomTimeout);
   clearTimeout(context.closeTimeout);
 
+  const { hideBackdrop } = getBackdrop(context);
   hideBackdrop();
+
+  requestAnimationFrame(() => {
+    context.popUp.classList.replace('is-popup-opened', 'is-popup-closed');
+  });
 
   context.hideContentTimeout = setTimeout(() => {
     context.popUp.style.display = 'none';
@@ -75,16 +78,12 @@ export function closePopup(context) {
     }
   }, 320);
 
-  context.popUp.classList.replace('is-popup-opened', 'is-popup-closed');
-
   if (context.config.close_action) {
     callAction(context, context.config, 'close_action');
   }
 }
 
 export function openPopup(context) {
-  const { showBackdrop } = getBackdrop(context);
-
   if (context.popUp.classList.contains('is-popup-opened')) return;
 
   // Clear all existing timeouts before starting a new one
@@ -92,24 +91,38 @@ export function openPopup(context) {
   clearTimeout(context.removeDomTimeout);
   clearTimeout(context.closeTimeout);
 
-  popupCount++;
-  showBackdrop();
-  document.body.style.overflow = 'hidden';
-  
-  if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
-    context.sectionRow.hidden = false;
-    context.sectionRow.style.display = "";
-
-    if (context.sectionRowContainer?.classList.contains('card')) {
-      context.sectionRowContainer.style.display = "";
-    }
-  }
-
-  clearTimeout(context.removeDomTimeout);
-
   if (context.popUp.parentNode !== context.verticalStack) {
     context.verticalStack.appendChild(context.popUp);
   }
+
+  popupCount++;
+
+  const { showBackdrop } = getBackdrop(context);
+  showBackdrop();
+
+  requestAnimationFrame(() => {
+    if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
+      context.sectionRow.hidden = false;
+      context.sectionRow.style.display = "";
+
+      if (context.sectionRowContainer?.classList.contains('card')) {
+        context.sectionRowContainer.style.display = "";
+      }
+    }
+
+    context.popUp.style.display = '';
+    context.popUp.style.transform = '';
+
+    requestAnimationFrame(() => {
+      context.popUp.classList.replace('is-popup-closed', 'is-popup-opened')
+    });
+
+    if (context.config.close_by_clicking_outside ?? true) {
+      window.addEventListener('click', clickOutside, { passive: true });
+    }
+
+    document.body.style.overflow = 'hidden';
+  });
   
   context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
 
@@ -118,22 +131,8 @@ export function openPopup(context) {
     context.popUp.addEventListener('touchend', removeHash, { passive: true });
   }
 
-  context.popUp.style.display = '';
-
-  requestAnimationFrame(() => {
-    context.popUp.style.transform = '';
-    
-    requestAnimationFrame(() => {
-      context.popUp.classList.replace('is-popup-closed', 'is-popup-opened')
-    });
-
-    if (context.config.close_by_clicking_outside ?? true) {
-      window.addEventListener('click', clickOutside, { passive: true });
-    }
-  });
-
   if (context.config.auto_close > 0) {
-    context.closeTimeout = setTimeout(() => closePopup(context), context.config.auto_close); // <- Adjusted to close correctly
+    context.closeTimeout = setTimeout(() => closePopup(context), context.config.auto_close);
   }
 
   if (context.config.open_action) {
@@ -160,13 +159,6 @@ export function onEditorChange(context) {
     window.clearTimeout(context.removeDomTimeout);
     if (context.popUp.parentNode !== context.verticalStack) {
       context.verticalStack.appendChild(context.popUp);
-    }
-  } else {
-    if (context.config.hash === location.hash) {
-      openPopup(context);
-      showBackdrop();
-    } else if (context.popUp.parentNode === context.verticalStack) {
-      context.verticalStack.removeChild(context.popUp);
     }
   }
 }
