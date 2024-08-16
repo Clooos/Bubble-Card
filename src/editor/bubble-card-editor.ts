@@ -7,14 +7,18 @@ import {
     getIcon 
 } from '../tools/utils.ts';
 
+let LitElement, html, css;
+
 export function createBubbleCardEditor() {
-    try {
-        const LitElement = Object.getPrototypeOf(customElements.get("ha-panel-lovelace"));
-        const html = LitElement.prototype?.html;
-        const css = LitElement.prototype?.css;
-    } catch (error) {
-        console.error(error.message);
-        return;
+    if (!LitElement) {
+        try {
+            LitElement = Object.getPrototypeOf(customElements.get("ha-panel-lovelace"));
+            html = LitElement.prototype?.html;
+            css = LitElement.prototype?.css;
+        } catch (error) {
+            console.error(error.message);
+            return;
+        }
     }
 
     class BubbleCardEditor extends LitElement {
