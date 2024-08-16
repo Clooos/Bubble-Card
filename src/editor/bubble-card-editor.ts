@@ -7,13 +7,13 @@ import {
     getIcon 
 } from '../tools/utils.ts';
 
-const LitElement = Object.getPrototypeOf(customElements.get("ha-panel-lovelace"));
-const html = LitElement?.prototype?.html;
-const css = LitElement?.prototype?.css;
-
 export function createBubbleCardEditor() {
-    if (!LitElement) {
-        console.error("The Bubble Card editor needs LitElement to be defined");
+    try {
+        const LitElement = Object.getPrototypeOf(customElements.get("ha-panel-lovelace"));
+        const html = LitElement.prototype?.html;
+        const css = LitElement.prototype?.css;
+    } catch (error) {
+        console.error(error.message);
         return;
     }
 
