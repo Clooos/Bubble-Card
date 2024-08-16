@@ -1,7 +1,7 @@
 import { convertToRGBA } from "../../tools/style.ts";
 import { addActions } from "../../tools/tap-actions.ts";
 import { createElement, toggleEntity, configChanged, fireEvent } from "../../tools/utils.ts";
-import { onUrlChange, removeHash } from "./helpers.ts";
+import { onUrlChange, removeHash, hideContent } from "./helpers.ts";
 import styles, { backdropStyles } from "./styles.ts";
 
 let backdrop;
@@ -141,7 +141,6 @@ export function createStructure(context) {
       contextOnUrlChange();
     }, 0);
 
-    window.addEventListener('click', contextOnUrlChange);
     window.addEventListener('location-changed', contextOnUrlChange);
     window.addEventListener('popstate', contextOnUrlChange);
     window.addEventListener('keydown', (event) => {
@@ -181,6 +180,7 @@ export function createStructure(context) {
     context.popUp.appendChild(context.elements.headerContainer);
     context.popUp.appendChild(context.elements.popUpContainer);
 
+    hideContent(context, 0);
   } catch (e) {
     console.error(e)
   }

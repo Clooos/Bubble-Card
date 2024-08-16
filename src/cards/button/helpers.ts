@@ -51,9 +51,12 @@ export function updateEntity(context, value) {
   } else if (isEntityType(context, "climate")) {
       const minValue = getAttribute(context, "min_temp");
       const maxValue = getAttribute(context, "max_temp");
+      const step = getAttribute(context, "target_temp_step") ?? 0.5;
+      let rawValue = (maxValue - minValue) * value / 100 + minValue;
+      let adjustedValue = Math.round(rawValue / step) * step;
       context._hass.callService('climate', 'set_temperature', {
           entity_id: context.config.entity,
-          temperature: (maxValue - minValue) * value / 100 + minValue
+          temperature: adjustedValue
       });
   } else if (isEntityType(context, "number")) {
       const minValue = getAttribute(context, "min") ?? 0;
@@ -76,9 +79,7 @@ export function onSliderChange(context, leftDistance, throttle = false) {
 
   context.elements.rangeFill.style.transform =`translateX(${rangedPercentage}%)`;
   if (throttle) {
-    //if (context.dragging) return;
     throttledUpdateEntity(context, rangedPercentage);
-    //updateEntity(context, rangedPercentage);
   } else {
     updateEntity(context, rangedPercentage);
   }

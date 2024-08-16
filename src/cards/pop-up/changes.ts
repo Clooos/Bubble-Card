@@ -9,39 +9,40 @@ export function changeEditor(context) {
 
     // Fix the empty space caused by the pop-ups in the section view
     if (!context.popUp.classList.contains('is-popup-opened') && context.sectionRow.tagName.toLowerCase() === 'hui-card') {
-        if (!context.editor && context.editorAccess && !detectedEditor) {
+        if (
+            !context.editor && 
+            context.editorAccess && 
+            !detectedEditor &&
+            context.sectionRow.style.display !== "none"
+        ){
             context.sectionRow.toggleAttribute("hidden", true);
             context.sectionRow.style.display = "none";
-        }
-
-        // Fix on older Safari versions
-        if (context.sectionRowContainer?.classList.contains('card')) {
-            if (context.popUp.classList.contains('is-popup-opened')) {
-                return;
-            }
-
-            if (!context.editor) {
-                context.sectionRowContainer.style.display = 'none';
-            } else if (context.editor) {
-                context.sectionRowContainer.style.display = '';
-            }
+        } else if (
+            context.sectionRowContainer?.classList.contains('card') && 
+            !context.popUp.classList.contains('is-popup-opened') && 
+            context.editor && 
+            context.sectionRowContainer.style.display !== ''
+        ){
+            context.sectionRowContainer.style.display = '';
         }
     }
 
+    // Change the pop-up style for the editor
     if (context.editor || detectedEditor !== null) {
         context.popUp.classList.add('editor');
 
         context.editorAccess = true;
 
         if (detectedEditor !== null) {
-            context.elements.popUpContainer?.classList.remove('hidden');
+            context.elements.popUpContainer?.classList.remove('editor-cropped');
         } else {
-            context.elements.popUpContainer?.classList.add('hidden');
+            context.elements.popUpContainer?.classList.add('editor-cropped');
         }
     } else {
         context.popUp.classList.remove('editor');
-        context.elements.popUpContainer?.classList.remove('hidden');
+        context.elements.popUpContainer?.classList.remove('editor-cropped');
     }
+
     onEditorChange(context);
 }
 
@@ -98,11 +99,39 @@ export function changeStyle(context) {
     backdropCustomStyle.innerText = customStyle;
 }
 
+// export function changeTriggered(context) {
+//     let triggerEntity = context.config.trigger_entity ?? '';
+
+//     if (triggerEntity === '') return;
+
+//     let triggerState = context.config.trigger_state ?? '';
+//     let triggerClose = context.config.trigger_close ?? false;
+//     let triggerEntityState = context._hass.states[triggerEntity]?.state;
+
+//     if (!triggerEntity) return;
+//     if (!triggerState) return;
+//     if (context.oldTriggerEntityState === triggerEntityState) return;
+
+//     if (context.config.hash === location.hash) {
+//         // Popup is opened: should we close it?
+//         if (triggerClose && triggerState !== triggerEntityState) {
+//             removeHash();
+//         }
+//     } else {
+//         // Popup is closed: should we open it?
+//         if (triggerEntityState === triggerState) {
+//             addHash(context.config.hash);
+//         }
+//     }
+
+//     context.oldTriggerEntityState = triggerEntityState;
+// }
+
 export function changeTriggered(context) {
     let triggerEntity = context.config.trigger_entity ?? '';
 
     if (triggerEntity === '') return;
-    
+
     let triggerState = context.config.trigger_state ?? '';
     let triggerClose = context.config.trigger_close ?? false;
     let triggerEntityState = context._hass.states[triggerEntity]?.state;
@@ -111,13 +140,20 @@ export function changeTriggered(context) {
     if (!triggerState) return;
     if (context.oldTriggerEntityState === triggerEntityState) return;
 
+    // Variable pour détecter le chargement initial
+    const isInitialLoad = !context.hasPageLoaded;
+    context.hasPageLoaded = true;
+
     if (context.config.hash === location.hash) {
-        // Popup is opened: should we close it?
+        // Popup est ouverte : devons-nous la fermer ?
         if (triggerClose && triggerState !== triggerEntityState) {
-            removeHash();
+            // Ignorer la fermeture si c'est le chargement initial et qu'il y a un hash
+            if (!isInitialLoad) {
+                removeHash();
+            }
         }
     } else {
-        // Popup is closed: should we open it?
+        // Popup est fermée : devons-nous l'ouvrir ?
         if (triggerEntityState === triggerState) {
             addHash(context.config.hash);
         }

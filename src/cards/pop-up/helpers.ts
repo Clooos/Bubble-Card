@@ -1,7 +1,7 @@
 import { getBackdrop } from "./create.ts";
 import { callAction } from "../../tools/tap-actions.ts";
 
-let popupCount = 0;
+let hashTimeout = null;
 
 export function clickOutside(event) {
   const targets = event.composedPath();
@@ -19,88 +19,52 @@ export function clickOutside(event) {
 }
 
 export function removeHash() {
-  const newURL = window.location.href.split('#')[0];
+  // Check if removeHash is executed too soon after addHash
+  if (hashTimeout) return;
 
+  const newURL = window.location.href.split('#')[0];
   history.replaceState(null, "", newURL);
   window.dispatchEvent(new Event('location-changed'));
 }
-export function addHash(hash) {
-  const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
 
+export function addHash(hash) {  
+  // Clear any existing timeout to reset the timer
+  if (hashTimeout) {
+    clearTimeout(hashTimeout);
+    hashTimeout = null;
+  }
+
+  const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
   history.pushState(null, "", newURL);
   window.dispatchEvent(new Event('location-changed'));
+
+  // Set a timeout after addHash to prevent immediate removal
+  hashTimeout = setTimeout(() => {
+    hashTimeout = null;
+  }, 10);
 }
 
-export function closePopup(context) {
-  if (context.popUp.classList.contains('is-popup-closed')) return;
+export function hideContent(context, delay) {
+  if (context.editor) return;
+  return new Promise((resolve) => {
+    context.hideContentTimeout = setTimeout(() => {
+      if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
+        context.sectionRow.hidden = true;
+        context.sectionRow.style.display = "none";
 
-  popupCount--;
-  document.body.style.overflow = '';
-
-  clearTimeout(context.hideContentTimeout);
-  clearTimeout(context.removeDomTimeout);
-  clearTimeout(context.closeTimeout);
-
-  const { hideBackdrop } = getBackdrop(context);
-  hideBackdrop();
-
-  requestAnimationFrame(() => {
-    context.popUp.classList.replace('is-popup-opened', 'is-popup-closed');
-  });
-
-  context.hideContentTimeout = setTimeout(() => {
-    context.popUp.style.display = 'none';
-
-    if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
-      context.sectionRow.hidden = true;
-      context.sectionRow.style.display = "none";
-
-      if (context.sectionRowContainer?.classList.contains('card')) {
-        context.sectionRowContainer.style.display = "none";
+        if (context.sectionRowContainer?.classList.contains('card')) {
+          context.sectionRowContainer.style.display = "none";
+        }
       }
-    }
-  }, 300);
-
-  context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
-
-  if (context.config.close_by_clicking_outside ?? true) {
-    window.removeEventListener('click', clickOutside);
-  }
-
-  if (context.config.close_on_click ?? false) {
-    context.popUp.removeEventListener('mouseup', removeHash);
-    context.popUp.removeEventListener('touchend', removeHash);
-  }
-
-  context.removeDomTimeout = setTimeout(() => {
-    if (context.popUp.parentNode === context.verticalStack) {
-      context.verticalStack.removeChild(context.popUp);
-    }
-  }, 320);
-
-  if (context.config.close_action) {
-    callAction(context, context.config, 'close_action');
-  }
+      resolve();
+    }, delay);
+  });
 }
 
-export function openPopup(context) {
-  if (context.popUp.classList.contains('is-popup-opened')) return;
+function displayContent(context) {
+  return new Promise((resolve) => {
+    context.popUp.style.transform = '';
 
-  // Clear all existing timeouts before starting a new one
-  clearTimeout(context.hideContentTimeout);
-  clearTimeout(context.removeDomTimeout);
-  clearTimeout(context.closeTimeout);
-
-  if (context.popUp.parentNode !== context.verticalStack) {
-    context.verticalStack.appendChild(context.popUp);
-  }
-
-  popupCount++;
-
-  const { showBackdrop } = getBackdrop(context);
-  showBackdrop();
-
-  requestAnimationFrame(() => {
     if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
       context.sectionRow.hidden = false;
       context.sectionRow.style.display = "";
@@ -109,21 +73,72 @@ export function openPopup(context) {
         context.sectionRowContainer.style.display = "";
       }
     }
-
-    context.popUp.style.display = '';
-    context.popUp.style.transform = '';
-
-    requestAnimationFrame(() => {
-      context.popUp.classList.replace('is-popup-closed', 'is-popup-opened')
-    });
-
-    if (context.config.close_by_clicking_outside ?? true) {
-      window.addEventListener('click', clickOutside, { passive: true });
-    }
-
-    document.body.style.overflow = 'hidden';
+    resolve();
   });
-  
+}
+
+function showBackdrop(context, show) {
+  const { showBackdrop, hideBackdrop } = getBackdrop(context);
+  return new Promise((resolve) => {
+    if (show) {
+      showBackdrop();
+    } else {
+      hideBackdrop();
+    }
+    resolve();
+  });
+}
+
+function appendPopup(context, append) {
+  return new Promise((resolve) => {
+    if (append && context.popUp.parentNode !== context.verticalStack) {
+      context.verticalStack.appendChild(context.popUp);
+    } else if (!append) {
+      context.removeDomTimeout = setTimeout(() => {
+        if (context.popUp.parentNode === context.verticalStack) {
+          context.verticalStack.removeChild(context.popUp);
+        }
+      }, 340);
+    }
+    resolve();
+  });
+}
+
+function updatePopupClass(context, open) {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (open) {
+          context.popUp.classList.replace('is-popup-closed', 'is-popup-opened');
+        } else {
+          context.popUp.classList.replace('is-popup-opened', 'is-popup-closed');
+        }
+        resolve();
+      });
+    });
+  });
+}
+
+export async function openPopup(context) {
+  if (context.popUp.classList.contains('is-popup-opened')) return;
+
+  // Clear all existing timeouts before starting a new one
+  clearTimeout(context.hideContentTimeout);
+  clearTimeout(context.removeDomTimeout);
+  clearTimeout(context.closeTimeout);
+
+  await appendPopup(context, true);
+
+  if (context.config.close_by_clicking_outside ?? true) {
+    window.addEventListener('click', clickOutside, { passive: true });
+  }
+
+  document.body.style.overflow = 'hidden';
+
+  await displayContent(context);
+  await showBackdrop(context, true);
+  await updatePopupClass(context, true);
+
   context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
 
   if (context.config.close_on_click ?? false) {
@@ -137,6 +152,37 @@ export function openPopup(context) {
 
   if (context.config.open_action) {
     callAction(context.popUp, context.config, 'open_action');
+  }
+}
+
+export async function closePopup(context) {
+  if (!context.popUp.classList.contains('is-popup-opened')) return;
+
+  document.body.style.overflow = '';
+
+  // Clear existing timeouts
+  clearTimeout(context.hideContentTimeout);
+  clearTimeout(context.removeDomTimeout);
+  clearTimeout(context.closeTimeout);
+
+  updatePopupClass(context, false);
+  showBackdrop(context, false);
+  hideContent(context, 300);
+  appendPopup(context, false);
+
+  context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
+
+  if (context.config.close_by_clicking_outside ?? true) {
+    window.removeEventListener('click', clickOutside);
+  }
+
+  if (context.config.close_on_click ?? false) {
+    context.popUp.removeEventListener('mouseup', removeHash);
+    context.popUp.removeEventListener('touchend', removeHash);
+  }
+
+  if (context.config.close_action) {
+    callAction(context, context.config, 'close_action');
   }
 }
 

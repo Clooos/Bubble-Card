@@ -8,8 +8,8 @@ import {
 } from '../tools/utils.ts';
 
 const LitElement = Object.getPrototypeOf(customElements.get("ha-panel-lovelace"));
-const html = LitElement?.prototype.html;
-const css = LitElement?.prototype.css;
+const html = LitElement?.prototype?.html;
+const css = LitElement?.prototype?.css;
 
 export function createBubbleCardEditor() {
     if (!LitElement) {

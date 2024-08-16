@@ -117,7 +117,7 @@ export default `
   .bubble-button-card-container {
       background: var(--background-color,var(--secondary-background-color));
   }
-  .bubble-pop-up-container.hidden {
+  .bubble-pop-up-container.editor-cropped {
       height: 122px !important;
       mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%) !important;
       -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%) !important;   
