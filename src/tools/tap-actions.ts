@@ -13,7 +13,7 @@ export function callAction(element, actionConfig, action) {
         action: action,
       };
     } else {
-      // Handel direct call with any action name (e.g. open_action)
+      // Handle direct call with any action name (e.g. open_action)
       element.modifiedConfig = {
         ...actionConfig,
         tap_action: {
@@ -104,11 +104,8 @@ export function addActions(element, config, defaultEntity, defaultActions) {
 
   if (tapAction === "none" && doubleTapAction === "none" && holdAction === "none") {
     element.style.cursor = '';
-    //element.style.pointerEvents = 'none';
   } else {
     element.style.cursor = 'pointer';
-    //element.style.pointerEvents = 'auto';
-    element.addEventListener('click', () => forwardHaptic("selection"));
   }
 }
 

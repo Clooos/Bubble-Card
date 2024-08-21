@@ -1,6 +1,6 @@
 import { convertToRGBA } from "../../tools/style.ts";
 import { addActions } from "../../tools/tap-actions.ts";
-import { createElement, toggleEntity, configChanged, fireEvent } from "../../tools/utils.ts";
+import { createElement, toggleEntity, configChanged, fireEvent, forwardHaptic } from "../../tools/utils.ts";
 import { onUrlChange, removeHash, hideContent } from "./helpers.ts";
 import styles, { backdropStyles } from "./styles.ts";
 
@@ -9,22 +9,31 @@ let hideBackdrop = false;
 let startTouchY;
 let lastTouchY;
 
+const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
 export function getBackdrop(context) {
   if (backdrop) {
     return backdrop;
   }
 
-  const themeColorBackground = 
-    getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
-    getComputedStyle(document.body).getPropertyValue('--card-background-color');
-
+  let themeColorBackground;
   const backdropStyle = createElement('style');
-  backdropStyle.innerHTML = `
-    ${backdropStyles}
-    .bubble-backdrop {
-      background-color: ${convertToRGBA(themeColorBackground, 0.7, 0.7)};
-    }
-  `;
+
+  function updateBackdropColor() {
+    themeColorBackground = 
+      getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
+      getComputedStyle(document.body).getPropertyValue('--card-background-color');
+
+      backdropStyle.style.setProperty('--bubble-backdrop-background-color', convertToRGBA(themeColorBackground, 0.7, 0.7));
+  }
+
+  colorScheme.addEventListener('change', () => {
+    updateBackdropColor()
+  });
+
+  updateBackdropColor();
+  
+  backdropStyle.innerHTML = backdropStyles;
   document.head.appendChild(backdropStyle);
 
   const backdropCustomStyle = createElement('style');
@@ -62,7 +71,10 @@ export function createHeader(context) {
   context.elements.closeIcon = createElement('ha-icon', 'bubble-close-icon');
   context.elements.closeIcon.icon = 'mdi:close';
   context.elements.closeButton = createElement("button", "bubble-close-button close-pop-up");
-  context.elements.closeButton.addEventListener('click', removeHash);
+  context.elements.closeButton.addEventListener('click', () => {
+      removeHash();
+      forwardHaptic("selection");
+  });
   context.elements.closeButton.appendChild(context.elements.closeIcon);
 
   context.elements.buttonContainer = createElement('div', 'bubble-button-container');
@@ -120,15 +132,27 @@ export function createStructure(context) {
     } else {
       context.elements.customStyle = existingStyle;
     }
-
-    const themeColorBackground = 
-      getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
-      getComputedStyle(document.body).getPropertyValue('--card-background-color');
-
-    const color = context.config.bg_color ? context.config.bg_color : themeColorBackground;
+    
+    let themeColorBackground;
     const opacity = context.config.bg_opacity ?? 88;
-    const rgbaColor = convertToRGBA(color, (opacity / 100), 1.02);
-    context.popUp.style.backgroundColor = rgbaColor;
+
+    function updatePopupColor() {
+      themeColorBackground = 
+        getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
+        getComputedStyle(document.body).getPropertyValue('--card-background-color');
+
+        const color = context.config.bg_color ? context.config.bg_color : themeColorBackground;
+        const rgbaColor = convertToRGBA(color, (opacity / 100), 1.02);
+
+        context.popUp.style.setProperty('--bubble-pop-up-background-color', rgbaColor);
+    }
+
+    colorScheme.addEventListener('change', () => {
+      updatePopupColor()
+    });
+
+    updatePopupColor();
+
     context.popUp.style.setProperty('--desktop-width', context.config.width_desktop ?? '540px');
 
     if (context.config.close_on_click) {
@@ -195,9 +219,11 @@ export function prepareStructure(context) {
     context.popUp = context.verticalStack.querySelector('#root');
     context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
     context.verticalStack.removeChild(context.popUp);
+    context.cardTitle = context.verticalStack.querySelector('.card-header');
     context.elements = {};
     getBackdrop(context);
 
+    if (context.cardTitle) context.cardTitle.style.display = 'none';
     hideBackdrop = hideBackdrop || (context.config.hide_backdrop ?? false);
 
     context.popUp.style.setProperty('--custom-height-offset-desktop', context.config.margin_top_desktop  ?? '0px');

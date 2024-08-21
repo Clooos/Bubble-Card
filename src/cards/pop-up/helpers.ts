@@ -1,8 +1,6 @@
 import { getBackdrop } from "./create.ts";
 import { callAction } from "../../tools/tap-actions.ts";
 
-let hashTimeout = null;
-
 export function clickOutside(event) {
   const targets = event.composedPath();
   const popupTarget = targets.find((target) => {
@@ -19,148 +17,131 @@ export function clickOutside(event) {
 }
 
 export function removeHash() {
-  // Check if removeHash is executed too soon after addHash
-  if (hashTimeout) return;
-
   const newURL = window.location.href.split('#')[0];
-  history.replaceState(null, "", newURL);
+  history.replaceState(null, null, newURL);
   window.dispatchEvent(new Event('location-changed'));
 }
 
-export function addHash(hash) {  
-  // Clear any existing timeout to reset the timer
-  if (hashTimeout) {
-    clearTimeout(hashTimeout);
-    hashTimeout = null;
-  }
-
-  const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
-  history.pushState(null, "", newURL);
+export function addHash(hash) {
+  const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : `#${hash}`;
+  history.pushState(null, null, newURL);
   window.dispatchEvent(new Event('location-changed'));
-
-  // Set a timeout after addHash to prevent immediate removal
-  hashTimeout = setTimeout(() => {
-    hashTimeout = null;
-  }, 10);
 }
 
 export function hideContent(context, delay) {
   if (context.editor) return;
-  return new Promise((resolve) => {
-    context.hideContentTimeout = setTimeout(() => {
-      if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
-        context.sectionRow.hidden = true;
-        context.sectionRow.style.display = "none";
 
-        if (context.sectionRowContainer?.classList.contains('card')) {
-          context.sectionRowContainer.style.display = "none";
-        }
+  context.hideContentTimeout = setTimeout(() => {
+    let { sectionRow, sectionRowContainer } = context;
+
+    if (sectionRow?.tagName.toLowerCase() === 'hui-card') {
+      sectionRow.hidden = true;
+      sectionRow.style.display = "none";
+
+      if (sectionRowContainer?.classList.contains('card')) {
+        sectionRowContainer.style.display = "none";
       }
-      resolve();
-    }, delay);
-  });
+    }
+  }, delay);
 }
 
 function displayContent(context) {
-  return new Promise((resolve) => {
-    context.popUp.style.transform = '';
+  let { sectionRow, sectionRowContainer, popUp } = context;
 
-    if (context.sectionRow?.tagName.toLowerCase() === 'hui-card') {
-      context.sectionRow.hidden = false;
-      context.sectionRow.style.display = "";
+  popUp.style.transform = '';
 
-      if (context.sectionRowContainer?.classList.contains('card')) {
-        context.sectionRowContainer.style.display = "";
-      }
+  if (sectionRow?.tagName.toLowerCase() === 'hui-card') {
+    sectionRow.hidden = false;
+    sectionRow.style.display = "";
+
+    if (sectionRowContainer?.classList.contains('card')) {
+      sectionRowContainer.style.display = "";
     }
-    resolve();
-  });
+  }
 }
 
 function showBackdrop(context, show) {
   const { showBackdrop, hideBackdrop } = getBackdrop(context);
-  return new Promise((resolve) => {
-    if (show) {
-      showBackdrop();
-    } else {
-      hideBackdrop();
-    }
-    resolve();
-  });
+  if (show) {
+    showBackdrop();
+  } else {
+    hideBackdrop();
+  }
 }
 
 function appendPopup(context, append) {
-  return new Promise((resolve) => {
-    if (append && context.popUp.parentNode !== context.verticalStack) {
-      context.verticalStack.appendChild(context.popUp);
-    } else if (!append) {
-      context.removeDomTimeout = setTimeout(() => {
-        if (context.popUp.parentNode === context.verticalStack) {
-          context.verticalStack.removeChild(context.popUp);
-        }
-      }, 340);
-    }
-    resolve();
-  });
+  let { popUp, verticalStack, removeDomTimeout } = context;
+
+  if (append && popUp.parentNode !== verticalStack) {
+    verticalStack.appendChild(context.popUp);
+  } else if (!append) {
+    removeDomTimeout = setTimeout(() => {
+      if (popUp.parentNode === verticalStack) {
+        verticalStack.removeChild(popUp);
+      }
+    }, 400);
+  }
 }
 
 function updatePopupClass(context, open) {
-  return new Promise((resolve) => {
+  let popUp = context.popUp;
+
+  requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (open) {
-          context.popUp.classList.replace('is-popup-closed', 'is-popup-opened');
-        } else {
-          context.popUp.classList.replace('is-popup-opened', 'is-popup-closed');
-        }
-        resolve();
-      });
+      if (open) {
+        popUp.classList.replace('is-popup-closed', 'is-popup-opened');
+      } else {
+        popUp.classList.replace('is-popup-opened', 'is-popup-closed');
+      }
     });
   });
 }
 
-export async function openPopup(context) {
+function updateListeners(context, add) {
+  let popUp = context.popUp;
+
+  if (add) {
+    if (!window.listenersAdded && (context.config.close_by_clicking_outside ?? true)) {
+      window.addEventListener('click', clickOutside);
+      window.listenersAdded = true;
+    }
+    popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
+    if (context.config.close_on_click ?? false) {
+      popUp.addEventListener('mouseup', removeHash, { once: true });
+      popUp.addEventListener('touchend', removeHash, { once: true });
+    }
+  } else {
+    popUp.removeEventListener('touchstart', context.resetCloseTimeout);
+  }
+}
+
+export function openPopup(context) {
   if (context.popUp.classList.contains('is-popup-opened')) return;
 
-  // Clear all existing timeouts before starting a new one
   clearTimeout(context.hideContentTimeout);
   clearTimeout(context.removeDomTimeout);
   clearTimeout(context.closeTimeout);
 
-  await appendPopup(context, true);
+  showBackdrop(context, true);
+  appendPopup(context, true);
+  displayContent(context);
+  updatePopupClass(context, true);
+  updateListeners(context, true)
 
-  if (context.config.close_by_clicking_outside ?? true) {
-    window.addEventListener('click', clickOutside, { passive: true });
+  if (context.config.auto_close > 0) {
+    context.closeTimeout = setTimeout(() => removeHash(), context.config.auto_close);
   }
 
   document.body.style.overflow = 'hidden';
-
-  await displayContent(context);
-  await showBackdrop(context, true);
-  await updatePopupClass(context, true);
-
-  context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
-
-  if (context.config.close_on_click ?? false) {
-    context.popUp.addEventListener('mouseup', removeHash, { passive: true });
-    context.popUp.addEventListener('touchend', removeHash, { passive: true });
-  }
-
-  if (context.config.auto_close > 0) {
-    context.closeTimeout = setTimeout(() => closePopup(context), context.config.auto_close);
-  }
 
   if (context.config.open_action) {
     callAction(context.popUp, context.config, 'open_action');
   }
 }
 
-export async function closePopup(context) {
+export function closePopup(context) {
   if (!context.popUp.classList.contains('is-popup-opened')) return;
 
-  document.body.style.overflow = '';
-
-  // Clear existing timeouts
   clearTimeout(context.hideContentTimeout);
   clearTimeout(context.removeDomTimeout);
   clearTimeout(context.closeTimeout);
@@ -169,17 +150,9 @@ export async function closePopup(context) {
   showBackdrop(context, false);
   hideContent(context, 300);
   appendPopup(context, false);
+  updateListeners(context, false)
 
-  context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
-
-  if (context.config.close_by_clicking_outside ?? true) {
-    window.removeEventListener('click', clickOutside);
-  }
-
-  if (context.config.close_on_click ?? false) {
-    context.popUp.removeEventListener('mouseup', removeHash);
-    context.popUp.removeEventListener('touchend', removeHash);
-  }
+  document.body.style.overflow = '';
 
   if (context.config.close_action) {
     callAction(context, context.config, 'close_action');
@@ -197,14 +170,21 @@ export function onUrlChange(context) {
 }
 
 export function onEditorChange(context) {
-  const { hideBackdrop, showBackdrop } = getBackdrop(context);
-  const detectedEditor = context.verticalStack.host?.closest('hui-card-preview') || context.verticalStack.host?.closest('hui-card[preview][class]') || context.verticalStack.host?.getRootNode().host?.closest('hui-section[preview][class]');
+  const { hideBackdrop } = getBackdrop(context);
+  let verticalStack = context.verticalStack;
+
+  const detectedEditor = 
+    verticalStack.host?.closest('hui-card-preview') || 
+    verticalStack.host?.closest('hui-card[preview][class]') || 
+    verticalStack.host?.getRootNode().host?.closest('hui-section[preview][class]');
 
   if (context.editor || detectedEditor !== null) {
     hideBackdrop();
     window.clearTimeout(context.removeDomTimeout);
-    if (context.popUp.parentNode !== context.verticalStack) {
-      context.verticalStack.appendChild(context.popUp);
+
+    const popUp = context.popUp;
+    if (popUp.parentNode !== verticalStack) {
+      verticalStack.appendChild(popUp);
     }
   }
 }

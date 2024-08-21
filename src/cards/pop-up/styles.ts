@@ -4,12 +4,12 @@ export default `
       flex-direction: column;
       height: 100%;
       margin-top: -50px;
-      max-width: 100% !important;
+      max-width: 100%;
       padding-top: 40px;
       padding-bottom: 80px;
-      grid-gap: 14px !important;
-      gap: 14px !important;
-      column-gap: 14px !important;
+      grid-gap: 14px;
+      gap: 14px;
+      column-gap: 14px;
       --grid-gap: 14px;
       --vertical-stack-card-gap: 14px;
       --horizontal-stack-card-gap: 14px;
@@ -32,6 +32,7 @@ export default `
   }
   .bubble-pop-up {
       transition: transform 0.3s ease;
+      background-color: var(--bubble-pop-up-background-color);
       position: fixed;
       width: 100%;
       max-width: 100%;
@@ -41,14 +42,14 @@ export default `
       left: 7px;
       z-index: 5 !important;
       bottom: calc(-56px - var(--custom-height-offset-mobile));
+      backdrop-filter: var(--custom-popup-filter);
+      -webkit-backdrop-filter: var(--custom-popup-filter);
   }
   .bubble-pop-up-container::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, and Opera */
   }
   .is-popup-opened {
       box-shadow: 0px 0px 50px rgba(0, 0, 0, var(--custom-shadow-opacity));
-      backdrop-filter: var(--custom-popup-filter);
-      -webkit-backdrop-filter: var(--custom-popup-filter);
   }
   .is-popup-closed { 
       transform: translateY(100%) !important;
@@ -98,6 +99,7 @@ export default `
       display: inline-flex;
       flex-grow: 1;
       margin-right: 14px;
+      color: var(--primary-text-color);
   }
   .bubble-name {
       font-size: 14px;
@@ -178,27 +180,26 @@ export default `
 export const backdropStyles = `
   .bubble-backdrop {
     position: fixed;
+    background-color: var(--bubble-backdrop-background-color);
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: 4;
     opacity: 0;
-    transition: all 0.3s;
+    transition: opacity 0.3s;
     transition-delay: .1s;
     display: flex;
-  }
-
-  .bubble-backdrop.is-visible {
-    opacity: 1;
     backdrop-filter: var(--custom-backdrop-filter);
     -webkit-backdrop-filter: var(--custom-backdrop-filter);
   }
 
+  .bubble-backdrop.is-visible {
+    opacity: 1;
+  }
+
   .bubble-backdrop.is-hidden {
     opacity: 0;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
     pointer-events: none;
   }
 `

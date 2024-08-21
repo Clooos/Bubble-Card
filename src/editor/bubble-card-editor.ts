@@ -658,7 +658,7 @@ export function createBubbleCardEditor() {
                                                 <label class="mdc-label">Optional - Hide pop-up backdrop (a refresh is needed)</label> 
                                             </div>
                                         </ha-formfield>
-                                        <ha-alert alert-type="info">Set this toggle to true on the first pop-up of your main dashboard to disable the backdrop on all pop-ups.</ha-alert>
+                                        <ha-alert alert-type="info">Set this toggle to true on the first pop-up of your main dashboard to disable the backdrop on all pop-ups. <b>Disable this feature if you notice a slowdown when opening pop-ups.</b></ha-alert>
                                     </div>
                                 </ha-expansion-panel>
                                 ${this.makeStyleEditor()}
