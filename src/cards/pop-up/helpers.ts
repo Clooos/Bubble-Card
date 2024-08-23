@@ -1,11 +1,17 @@
 import { getBackdrop } from "./create.ts";
 import { callAction } from "../../tools/tap-actions.ts";
 
+let hashTimeout = null;
+let hashRecentlyAdded = false;
+
 export function clickOutside(event) {
+  //if (!location.hash) return;
+
   const targets = event.composedPath();
   const popupTarget = targets.find((target) => {
     return (
       (target.classList && target.classList.contains('bubble-pop-up')) ||
+      target.nodeName === 'HA-DIALOG' ||
       target.nodeName === 'HA-MORE-INFO-DIALOG' ||
       target.nodeName === 'HA-DIALOG-DATE-PICKER'
     );
@@ -17,16 +23,23 @@ export function clickOutside(event) {
 }
 
 export function removeHash() {
-  const newURL = window.location.href.split('#')[0];
-  history.replaceState(null, null, newURL);
+  setTimeout(() => {
+    if (hashRecentlyAdded) {
+      return;
+    }
+
+    const newURL = window.location.href.split('#')[0];
+    history.pushState(null, "", newURL);
+    window.dispatchEvent(new Event('location-changed'));
+  }, 50);
+}
+
+export function addHash(hash) {  
+  const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
+  history.pushState(null, "", newURL);
   window.dispatchEvent(new Event('location-changed'));
 }
 
-export function addHash(hash) {
-  const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : `#${hash}`;
-  history.pushState(null, null, newURL);
-  window.dispatchEvent(new Event('location-changed'));
-}
 
 export function hideContent(context, delay) {
   if (context.editor) return;
@@ -162,6 +175,10 @@ export function closePopup(context) {
 export function onUrlChange(context) {
   return function() {
     if (context.config.hash === location.hash) {
+      hashRecentlyAdded = true;
+      setTimeout(() => {
+        hashRecentlyAdded = false;
+      }, 500);
       openPopup(context);
     } else {
       closePopup(context);

@@ -78,7 +78,7 @@ export default `
         width: 100%;
         height: 50px;
         background-color: var(--background-color-2,var(--secondary-background-color));
-        border-radius: 25px;
+        border-radius: 32px;
         touch-action: pan-y;
         box-sizing: border-box;
         border: solid 2px transparent;
@@ -111,11 +111,10 @@ export default `
         justify-content: center;
         min-width: 38px;
         min-height: 38px;
-        margin: 6px 6px 6px 4px;
+        margin: 6px;
         border-radius: 50%;
         background-color: var(--card-background-color, var(--ha-card-background));
         overflow: hidden;
-        z-index: 1;
         position: relative;
         cursor: pointer;
     }
@@ -193,14 +192,14 @@ export default `
     }
 
     .large .bubble-select-card-container {
-      height: 64px;
+      height: 56px;
       border-radius: 32px;
     }
 
     .large .bubble-icon-container {
-      --mdc-icon-size: 28px;
-      min-width: 48px !important;
-      min-height: 48px !important;
+      --mdc-icon-size: 24px;
+      min-width: 42px !important;
+      min-height: 42px !important;
       margin-left: 6px;
     }
 
