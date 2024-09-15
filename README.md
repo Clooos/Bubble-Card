@@ -61,7 +61,7 @@ If it's not working, try to clear your browser cache.
 
 You can also take a look at my YouTube channel for step by step videos.
 
-![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube)](https://www.youtube.com/@cloooos)
+[![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube)](https://www.youtube.com/@cloooos)
 
 </details>
 
