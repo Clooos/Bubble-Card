@@ -59,11 +59,9 @@ If it's not working, try to clear your browser cache.
 
 #### Videos
 
-There is also a detailed setup video from **BeardedTinker**, thank you so much to you!  
-▶ [YouTube - Pop-up cards with Bubble Card in Home Assistant](https://www.youtube.com/watch?v=oCpxhNk5JkE)
+You can also take a look at my YouTube channel for step by step videos.
 
-And also a video for the German users from **smart-live.net**, thanks a lot to you too!  
-▶ [YouTube - Home Assistant Dashboard Bubble Card - Eine der Besten Karten 2023?](https://youtu.be/6ju6mTntvMI?si=EGvKm4qwjhcZdTyl)
+![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube)](https://www.youtube.com/@cloooos)
 
 </details>
 
