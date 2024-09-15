@@ -20,8 +20,8 @@ export default `
         position: relative;
         width: 100%;
         height: 50px;
-        background-color: var(--background-color-2,var(--secondary-background-color));
-        border-radius: 32px;
+        background-color: var(--bubble-button-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
+        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
         overflow: scroll;
         touch-action: pan-y;
     }
@@ -40,7 +40,7 @@ export default `
     .bubble-button-background {
         background-color: var(--bubble-button-background-color);
         opacity: .5;
-        border-radius: 32px;
+        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
     }
     .bubble-range-fill {
         position: absolute;
@@ -63,8 +63,10 @@ export default `
     }
     .bubble-range-slider {
         cursor: ew-resize;
-        border-radius: 25px;
+        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
         overflow: hidden;
+        mask-image: radial-gradient(white, black);
+        -webkit-transform: translateZ(0);
     }
     .bubble-icon-container {
         display: flex;
@@ -74,8 +76,8 @@ export default `
         min-width: 38px;
         min-height: 38px;
         margin: 6px;
-        border-radius: 50%;
-        background-color: var(--card-background-color, var(--ha-card-background));
+        border-radius: var(--bubble-button-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
+        background-color: var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
         overflow: hidden;
         position: relative;
         cursor: pointer;
@@ -166,7 +168,7 @@ export default `
 
     .large .bubble-button-card-container {
       height: 56px;
-      border-radius: 32px;
+      border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
     }
 
     .large .bubble-icon-container {

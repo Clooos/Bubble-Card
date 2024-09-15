@@ -329,21 +329,26 @@ export function getWeatherIcon(weatherType) {
     }
 }
 
-export function getIconColor(context) {
-    const entity = context.config.entity;
-    const defaultColor = `var(--accent-color)`;
-    const entityRgbColor = getAttribute(context, "rgb_color");
+export function getIconColor(context, entity = context.config.entity, brightness = 1) {
+    const defaultColor = `var(--bubble-accent-color, var(--accent-color))`;
+    const entityRgbColor = getAttribute(context, "rgb_color", entity);
 
     if (!entity) return defaultColor;
     if (entity.startsWith("light.") === false) return defaultColor;
 
-    const defaultLightOnColor = 'rgba(255, 220, 200)';
-    const defaultLightOffColor = 'rgba(255, 255, 255)';
+    const defaultLightOnColor = [255, 220, 200];
+    const defaultLightOffColor = [255, 255, 255];
     const defaultLightColor = isStateOn(context) ? defaultLightOnColor : defaultLightOffColor;
 
-    if (!entityRgbColor) return defaultLightColor;
+    if (!entityRgbColor) {
+        const adjustedDefaultLightColor = defaultLightColor.map(channel => Math.min(255, channel * brightness));
+        return `rgba(${adjustedDefaultLightColor.join(', ')})`;
+    }
 
-    return isColorCloseToWhite(entityRgbColor) ? defaultLightOnColor : `rgba(${entityRgbColor.join(', ')})`;
+    const adjustedColor = entityRgbColor.map(channel => Math.min(255, channel * brightness));
+    return isColorCloseToWhite(entityRgbColor) ? 
+        `rgba(${defaultLightOnColor.map(channel => Math.min(255, channel * brightness)).join(', ')})` : 
+        `rgba(${adjustedColor.join(', ')})`;
 }
 
 export function getImage(context) {
@@ -458,7 +463,7 @@ export function applyScrollingEffect(context, element, text) {
         element.innerHTML = `<div class="scrolling-container">${text}</div>`;
         element.style = '';
 
-        const contentWidth = element.scrollWidth;  // Mesure de la largeur du texte réel dans le DOM
+        const contentWidth = element.scrollWidth;
         const containerWidth = element.parentNode?.offsetWidth || 0;
 
         if (scrollingEffect && contentWidth > containerWidth) {

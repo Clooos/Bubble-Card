@@ -150,7 +150,7 @@ export function changeStyle(context) {
     setLayout(context);
 
     const state = getState(context);
-    const isOn = state !== "off" && state !== "undefined";
+    const isOn = state !== "off" && state !== "unknown";
 
     if (context.config.hide?.power_button && context.elements.powerButton.style.display !== 'none') {
         context.elements.powerButton.style.display = 'none';

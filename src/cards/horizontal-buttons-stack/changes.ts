@@ -137,14 +137,12 @@ export function changeStatus(context) {
     }
 }
 export function changeStyle(context) {
-    const state = getState(context);
-
     let customStyle = '';
 
     try {
         customStyle = context.config.styles
-            ? Function('hass', 'entity', 'state', 'card', `return \`${context.config.styles}\`;`)
-              (context._hass, context.config.entity, state, context.card)
+            ? Function('hass', 'card', `return \`${context.config.styles}\`;`)
+              (context._hass, context.card)
             : '';
     } catch (error) {
         throw new Error(`Error in generating horizontal buttons stack custom templates: ${error.message}`);

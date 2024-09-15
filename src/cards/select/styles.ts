@@ -8,30 +8,32 @@ export default `
         opacity: 1;
     }
     mwc-list-item {
-        border-radius: 24px;
+        border-radius: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 24px));
         margin: 0 8px;
     }
     mwc-list-item[selected] {
         color: var(--primary-text-color) !important;
-        background-color: var(--accent-color);
+        background-color: var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--accent-color)));
     }
     ha-select {
-        --mdc-shape-medium: 30px;
-        --mdc-shape-large: 30px;
+        --mdc-shape-medium: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px));
+        --mdc-theme-surface: var(--bubble-select-list-background-color, var(--bubble-select-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))));
+        --mdc-shape-large: 32px;
         --mdc-shape-small: 64px;
         --mdc-menu-max-width: min-content;
-        --mdc-menu-min-width: 150px;
+        --mdc-menu-min-width: var(--bubble-select-list-width, 200px);
         --mdc-select-max-width: min-content;
         --mdc-select-outlined-hover-border-color: transparent;
         --mdc-select-outlined-idle-border-color: transparent;
         --mdc-theme-primary: transparent;
+        --right-value: calc(var(--mdc-menu-min-width) - 154px);
     }
     .mdc-select {
         color: transparent !important;
         width: 150px !important;
         position: absolute !important;
         pointer-events: none;
-        right: -4px;
+        right: var(--right-value, 46px);
         top: -5px;
     }
     .mdc-menu, mwc-list, .mdc-list-item {
@@ -56,12 +58,12 @@ export default `
     .bubble-dropdown-arrow {
         display: flex;
         position: absolute;
-        background: var(--card-background-color, var(--ha-card-background));
+        background: var(--bubble-select-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
         height: 36px;
         width: 36px;
         right: 6px;
         pointer-events: none;
-        border-radius: 20px;
+        border-radius: var(--bubble-select-button-border-radius, var(--bubble-border-radius, 20px));
         align-items: center;
         justify-content: center;
         transition: transform 0.2s;
@@ -77,8 +79,8 @@ export default `
         position: relative;
         width: 100%;
         height: 50px;
-        background-color: var(--background-color-2,var(--secondary-background-color));
-        border-radius: 32px;
+        background-color: var(--bubble-select-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
+        border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
         touch-action: pan-y;
         box-sizing: border-box;
         border: solid 2px transparent;
@@ -99,7 +101,7 @@ export default `
         background-color: var(--bubble-select-background-color);
         opacity: .5;
         overflow: hidden !important;
-        border-radius: 25px;
+        border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
     }
     .is-unavailable .bubble-select-card {
         cursor: not-allowed;
@@ -112,8 +114,8 @@ export default `
         min-width: 38px;
         min-height: 38px;
         margin: 6px;
-        border-radius: 50%;
-        background-color: var(--card-background-color, var(--ha-card-background));
+        border-radius: var(--bubble-select-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
+        background-color: var(--bubble-select-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
         overflow: hidden;
         position: relative;
         cursor: pointer;
@@ -193,7 +195,7 @@ export default `
 
     .large .bubble-select-card-container {
       height: 56px;
-      border-radius: 32px;
+      border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
     }
 
     .large .bubble-icon-container {

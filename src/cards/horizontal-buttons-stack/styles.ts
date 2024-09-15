@@ -102,7 +102,7 @@ export default `
 
     .bubble-button {
         align-items: center;
-        border-radius: 25px;
+        border-radius: var(--bubble-horizontal-buttons-stack-border-radius, var(--bubble-border-radius, 32px));
         color: var(--primary-text-color);
         cursor: pointer;
         display: inline-flex;
@@ -120,7 +120,7 @@ export default `
     }
     .bubble-background-color {
         border: 1px solid var(--primary-text-color);
-        border-radius: 24px;
+        border-radius: var(--bubble-horizontal-buttons-stack-border-radius, var(--bubble-border-radius, 32px));
         box-sizing: border-box;
         height: 100%;
         left: 0;
@@ -132,7 +132,7 @@ export default `
     }
     .bubble-background {
         opacity: 0.8;
-        border-radius: 24px;
+        border-radius: var(--bubble-horizontal-buttons-stack-border-radius, var(--bubble-border-radius, 32px));
         width: 100%;
         height: 100%;
         box-sizing: border-box !important;

@@ -10,7 +10,8 @@ import {
     isEntityType,
     getState,
     getAttribute,
-    getIcon 
+    getIcon,
+    getIconColor
 } from './utils.ts';
 
 export function changeState(context) {
@@ -102,9 +103,7 @@ export function changeState(context) {
         context.elements.state.classList.add('hidden');
     }
 
-    if (displayedState !== '') {
-        applyScrollingEffect(context, context.elements.state, displayedState);
-    }
+    applyScrollingEffect(context, context.elements.state, displayedState);
 
     // Update previous values
     context.previousState = state;
@@ -121,7 +120,7 @@ export function changeState(context) {
 
 const stateStyles = `
     .hidden {
-        display: none;
+        display: none !important;
     }
 
     .state-without-name {
@@ -261,6 +260,7 @@ export function changeSubButtonState(context, container = context.content, appen
         // Handle background display
         if (showBackround) {
             if (isOn) {
+                subButtonElement.style.setProperty('--bubble-sub-button-light-background-color', getIconColor(context, entity, 0.8));
                 subButtonElement.classList.add('background-on');
                 subButtonElement.classList.remove('background-off');
             } else {
@@ -376,7 +376,7 @@ const subButtonsStyles = `
         height: 36px;
         vertical-align: middle;
         font-size: 12px;
-        border-radius: 32px;
+        border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
         padding: 0 8px;
         white-space: nowrap;
         transition: all 0.5s ease-in-out;
@@ -387,7 +387,7 @@ const subButtonsStyles = `
         width: 100%;
         height: 100%;
         position: absolute;
-        border-radius: 32px;
+        border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
         overflow: hidden;
         pointer-events: none;
     }
@@ -399,10 +399,10 @@ const subButtonsStyles = `
         --mdc-icon-size: 16px;
     }
     .background-on {
-        background-color: var(--accent-color);
+        background-color: var(--bubble-sub-button-light-background-color, var(--accent-color));
     }
     .background-off {
-        background-color: var(--card-background-color, var(--ha-card-background));
+        background-color: var(--bubble-sub-button-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
     }
     .hidden {
         display: none;

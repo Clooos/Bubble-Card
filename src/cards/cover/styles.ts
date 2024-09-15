@@ -25,9 +25,9 @@ export default `
         justify-content: center;
         min-width: 38px;
         min-height: 38px;
-        border-radius: 50%;
-        background-color: var(--card-background-color, var(--ha-card-background));
-        border: 6px solid var(--background-color-2, var(--secondary-background-color));
+        border-radius: var(--bubble-cover-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
+        background-color: var(--bubble-cover-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
+        border: 6px solid var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
         cursor: pointer;
     }
 
@@ -81,9 +81,9 @@ export default `
 
     .bubble-button {
         display: flex;
-        background: var(--background-color-2, var(--secondary-background-color));
+        background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
         height: 42px;
-        border-radius: 32px;
+        border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, 32px));
         align-items: center;
         justify-content: center;
         cursor: pointer;
@@ -93,8 +93,8 @@ export default `
     .large .bubble-cover-card-container {
       height: 56px;
       display: flex;
-      background: var(--background-color-2, var(--secondary-background-color));
-      border-radius: 32px;
+      background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
+      border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, 32px));
     }
 
     .large .bubble-buttons .bubble-icon {
@@ -114,8 +114,9 @@ export default `
       --mdc-icon-size: 24px;
       min-width: 42px !important;
       min-height: 42px !important;
-      margin-left: 2px;
       align-content: center;
+      border: none;
+      margin: 8px 6px 8px 8px;
     }
 
     .large .bubble-icon {

@@ -1,5 +1,6 @@
 import { getBackdrop } from "./create.ts";
 import { callAction } from "../../tools/tap-actions.ts";
+import { manageEvents } from './create.ts';
 
 let hashTimeout = null;
 let hashRecentlyAdded = false;
@@ -24,12 +25,10 @@ export function clickOutside(event) {
 
 export function removeHash() {
   setTimeout(() => {
-    if (hashRecentlyAdded) {
-      return;
-    }
+    if (hashRecentlyAdded || !location.hash) return;
 
     const newURL = window.location.href.split('#')[0];
-    history.pushState(null, "", newURL);
+    history.replaceState(null, "", newURL);
     window.dispatchEvent(new Event('location-changed'));
   }, 50);
 }
@@ -49,6 +48,7 @@ export function hideContent(context, delay) {
 
     if (sectionRow?.tagName.toLowerCase() === 'hui-card') {
       sectionRow.hidden = true;
+      sectionRow.toggleAttribute("hidden", true);
       sectionRow.style.display = "none";
 
       if (sectionRowContainer?.classList.contains('card')) {
@@ -58,8 +58,10 @@ export function hideContent(context, delay) {
   }, delay);
 }
 
-function displayContent(context) {
+export function displayContent(context) {
   let { sectionRow, sectionRowContainer, popUp } = context;
+
+  //console.log("Display", context.config.hash, popUp)
 
   popUp.style.transform = '';
 
@@ -82,15 +84,17 @@ function showBackdrop(context, show) {
   }
 }
 
-function appendPopup(context, append) {
-  let { popUp, verticalStack, removeDomTimeout } = context;
-
-  if (append && popUp.parentNode !== verticalStack) {
-    verticalStack.appendChild(context.popUp);
+export function appendPopup(context, append) {
+  if (append && context.popUp.parentNode !== context.verticalStack) {
+    requestAnimationFrame(() => {
+      context.verticalStack.appendChild(context.popUp);
+    });
   } else if (!append) {
-    removeDomTimeout = setTimeout(() => {
-      if (popUp.parentNode === verticalStack) {
-        verticalStack.removeChild(popUp);
+    context.removeDomTimeout = setTimeout(() => {
+      if (context.popUp.parentNode === context.verticalStack) {
+        requestAnimationFrame(() => {
+          context.verticalStack.removeChild(context.popUp);
+        });
       }
     }, 400);
   }
@@ -178,7 +182,7 @@ export function onUrlChange(context) {
       hashRecentlyAdded = true;
       setTimeout(() => {
         hashRecentlyAdded = false;
-      }, 500);
+      }, 100);
       openPopup(context);
     } else {
       closePopup(context);

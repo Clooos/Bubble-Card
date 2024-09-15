@@ -16,8 +16,8 @@ export default `
         position: relative;
         width: 100%;
         height: 50px;
-        background-color: var(--background-color-2,var(--secondary-background-color));
-        border-radius: 25px;
+        background-color: var(--bubble-media-player-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
+        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
         overflow: visible;
         touch-action: pan-y;
     }
@@ -49,7 +49,7 @@ export default `
         background: none;
         border: none;
         cursor: pointer;
-        border-radius: 100%;
+        border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, 32px));
         padding: 6px;
         height: 24px;
         width: 24px;
@@ -67,9 +67,9 @@ export default `
         height: 38px;
         left: 50px;
         overflow: hidden;
-        border-radius: 20px;
+        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
         z-index: 1;
-        background-color: var(--card-background-color, var(--ha-card-background));
+        background-color: var(--bubble-media-player-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
         opacity: 1;
         transition: opacity .2s, transform .2s;
         transform: translateX(0);
@@ -138,8 +138,8 @@ export default `
         align-items: center;
         justify-content: center;
         margin: 6px;
-        border-radius: 50%;
-        background-color: var(--card-background-color, var(--ha-card-background));
+        border-radius: var(--bubble-media-player-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
+        background-color: var(--bubble-media-player-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));;
         overflow: hidden;
         z-index: 1;
         position: relative;
@@ -256,7 +256,7 @@ export default `
 
     .large .bubble-media-player-container {
       height: 56px;
-      border-radius: 32px;
+      border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
     }
 
     .large .bubble-icon-container {
@@ -277,7 +277,7 @@ export default `
 
     .large .bubble-volume-slider {
       height: 42px;
-      border-radius: 24px;
+      border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
       left: 60px;
       width: calc(100% - 174px);
     }

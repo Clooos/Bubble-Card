@@ -32,11 +32,11 @@ export default `
   }
   .bubble-pop-up {
       transition: transform 0.3s ease;
-      background-color: var(--bubble-pop-up-background-color);
+      background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
       position: fixed;
       width: 100%;
       max-width: 100%;
-      border-radius: 42px 42px 0 0;
+      border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
       box-sizing: border-box;
       margin-left: var(--custom-margin);
       left: 7px;
@@ -81,7 +81,7 @@ export default `
       transform: none !important;
       height: auto !important;
       min-width: auto;
-      border-radius: 42px;
+      border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
   }
   .bubble-header-container {
       display: inline-flex;
@@ -109,15 +109,15 @@ export default `
       height: 50px;
       width: 50px;
       border: none;
-      border-radius: 50%;
+      border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
       z-index: 1;
-      background: var(--background-color,var(--secondary-background-color));
+      background: var(--bubble-pop-up-main-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color))));
       color: var(--primary-text-color);
       flex-shrink: 0;
       cursor: pointer;
   }
   .bubble-button-card-container {
-      background: var(--background-color,var(--secondary-background-color));
+      background: var(--bubble-pop-up-main-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color))));
   }
   .bubble-pop-up-container.editor-cropped {
       height: 122px !important;
@@ -142,7 +142,7 @@ export default `
 
   .large .bubble-button-card-container {
     height: 56px;
-    border-radius: 32px;
+    border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 36px));
   }
   .large .bubble-pop-up-container {
       margin-top: -36px;
@@ -157,7 +157,7 @@ export default `
       height: 56px;
       width: 56px;
       border: none;
-      border-radius: 50%;
+      border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
       z-index: 1;
       --mdc-icon-size: 28px !important;
   }

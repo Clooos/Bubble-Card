@@ -31,9 +31,9 @@ export function changeButton(context) {
           context.elements.buttonBackground.style.opacity = '.5';
       } else {
           if (cardType === 'button') {
-              context.card.style.setProperty('--bubble-button-background-color', 'var(--accent-color)');
+              context.card.style.setProperty('--bubble-button-background-color', 'var(--bubble-button-accent-color, var(--bubble-accent-color, var(--accent-color)))');
           } else if (cardType === 'pop-up') {
-              context.popUp.style.setProperty('--bubble-button-background-color', 'var(--accent-color)');
+              context.popUp.style.setProperty('--bubble-button-background-color', 'var(--bubble-button-accent-color, var(--bubble-accent-color, var(--accent-color)))');
           }
           context.elements.buttonBackground.style.opacity = '1';
       }
@@ -87,7 +87,7 @@ export function changeSlider(context) {
   if (buttonType === 'slider') {
     context.elements.rangeFill.style.backgroundColor = getIconColor(context);
 
-    //if (context.dragging) return;
+    if (context.dragging) return;
 
     let percentage = 0;
 

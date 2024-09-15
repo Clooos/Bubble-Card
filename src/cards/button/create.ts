@@ -142,8 +142,6 @@ export function createSliderStructure(context) {
       if (!context.dragging) {
         onSliderChange(context, moveX);
       }
-
-      forwardHaptic("selection");
   }
 
   function onPointerUp(e) {
@@ -157,6 +155,7 @@ export function createSliderStructure(context) {
 
       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
       onSliderChange(context, moveX);
+      forwardHaptic("selection");
 
       context.elements.buttonCardContainer.classList.remove('is-dragging');
       context.elements.buttonCardContainer.removeEventListener('pointermove', onPointerMove);
