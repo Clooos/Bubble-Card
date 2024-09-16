@@ -1549,7 +1549,7 @@ styles: |-
 
 <details>
 
-<summary>Templating texts (like title or state)</summary>
+<summary>Templating texts (like name or state)</summary>
 
 <br>
 
