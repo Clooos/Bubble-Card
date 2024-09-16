@@ -1549,7 +1549,7 @@ styles: |-
 
 <details>
 
-<summary>Templating a button name</summary>
+<summary>Templating texts (like title or state)</summary>
 
 <br>
 
