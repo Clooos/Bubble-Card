@@ -93,6 +93,16 @@ All options can be configured in the Home Assistant editor. But you can find mor
 
 <br>
 
+[![Bubble-Card---Youtube-github](https://github.com/user-attachments/assets/643aa16a-3fc9-4770-8269-62ec01db49b3)](https://www.youtube.com/watch?v=0hSQOlBxKKI&t=18s)
+
+**Check out this [video](https://www.youtube.com/watch?v=0hSQOlBxKKI&t=18s) to learn about Bubble Card and its capabilities.** My YouTube channel is quite new and focuses on tutorials about Home Assistant and Bubble Card. Don’t hesitate to subscribe to help increase my channel’s visibility. Thank you in advance!
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
