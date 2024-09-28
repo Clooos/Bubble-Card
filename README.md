@@ -47,7 +47,7 @@ If it's not working, just try to clear your browser cache.`
 
 This method allows you to get updates directly on the HACS main page
 
-1. If HACS is not installed yet, download it following the instructions on [https://hacs.xyz/docs/setup/download](https://hacs.xyz/docs/setup/download/)
+1. If HACS is not installed yet, download it following the instructions on [(https://hacs.xyz/docs/setup/download/)](https://hacs.xyz/docs/use/download/download/)
 2. Proceed to the HACS initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
 3. On your sidebar go to `HACS` > `Frontend`
 4. Click on the `+` button at the bottom right corner
