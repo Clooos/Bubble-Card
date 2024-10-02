@@ -388,7 +388,7 @@ export function isEntityType(context, entityType) {
 }
 
 export function isStateOn(context, entity = context.config.entity) {
-    const state = getState(context, entity);
+    const state = getState(context, entity).toLowerCase();
     const numericState = Number(state);
     const activeStringStates = [
         'on', 
@@ -407,6 +407,7 @@ export function isStateOn(context, entity = context.config.entity) {
         'running', 
         'active', 
         'connected', 
+        'online',
         'mowing', 
         'starting',
         'heat',
