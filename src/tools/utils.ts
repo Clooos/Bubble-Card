@@ -75,6 +75,7 @@ export function tapFeedback(feedbackElement) {
 
 export function getIcon(context, entity = context.config.entity, icon = context.config.icon) {
     const entityType = entity?.split('.')[0];
+    const deviceClassType = getAttribute(context, "device_class", entity);
     const entityIcon = getAttribute(context, "icon", entity);
     const configIcon = icon;
     const state = getState(context, entity);
@@ -290,6 +291,7 @@ export function getIcon(context, entity = context.config.entity, icon = context.
     if (configIcon) return configIcon;
     if (entityIcon) return entityIcon;
     if (defaultIcons[entityType]) return defaultIcons[entityType];
+    if (defaultIcons[deviceClassType]) return defaultIcons[deviceClassType];
 
     return '';
 }
