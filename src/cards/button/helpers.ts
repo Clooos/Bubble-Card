@@ -1,4 +1,5 @@
-import { throttle, isEntityType, getAttribute } from "../../tools/utils.ts";
+import { addActions, addFeedback } from "../../tools/tap-actions.ts";
+import { createElement, toggleEntity, throttle, forwardHaptic, isEntityType } from "../../tools/utils.ts";
 
 export function getButtonType(context) {
   let buttonType = context.config.button_type;
@@ -13,6 +14,97 @@ export function getButtonType(context) {
   } else {
       return buttonType || 'name';
   }
+}
+
+export function createStructure(context, container = context.content, appendTo = container) {
+  const buttonType = getButtonType(context);
+
+  context.dragging = false;
+  if (!context.elements) context.elements = {};
+
+  context.elements.buttonCardContainer = createElement('div', 'bubble-button-card-container button-container');
+  context.elements.buttonCard = createElement('div', 'bubble-button-card switch-button');
+  context.elements.buttonBackground = createElement('div', 'bubble-button-background');
+  context.elements.nameContainer = createElement('div', 'bubble-name-container name-container');
+  context.elements.iconContainer = createElement('div', 'bubble-icon-container icon-container');
+  context.elements.name = createElement('div', 'bubble-name name');
+  context.elements.state = createElement('div', 'bubble-state state');
+  context.elements.feedback = createElement('div', 'bubble-feedback-element feedback-element');
+  context.elements.icon = createElement('ha-icon', 'bubble-icon icon');
+  context.elements.image = createElement('div', 'bubble-entity-picture entity-picture');
+  context.elements.style = createElement('style');
+  context.elements.customStyle = createElement('style');
+
+  context.elements.feedback.style.display = 'none';
+  context.elements.style.innerText = styles;
+
+  context.elements.iconContainer.appendChild(context.elements.icon);
+  context.elements.iconContainer.appendChild(context.elements.image);
+
+  context.elements.nameContainer.appendChild(context.elements.name);
+  if (buttonType !== "name") {
+      context.elements.nameContainer.appendChild(context.elements.state);    
+  }
+
+  context.elements.buttonCard.appendChild(context.elements.buttonBackground);
+  context.elements.buttonCard.appendChild(context.elements.iconContainer);
+  context.elements.buttonCard.appendChild(context.elements.nameContainer);
+  context.elements.buttonCard.appendChild(context.elements.feedback);
+  context.elements.buttonCardContainer.appendChild(context.elements.buttonCard);
+
+  container.innerHTML = '';
+
+  if (appendTo === container) {
+      container.appendChild(context.elements.buttonCardContainer);
+  }
+
+  container.appendChild(context.elements.style);
+  container.appendChild(context.elements.customStyle);
+
+  if (appendTo !== container) {
+      appendTo.innerHTML = '';
+      context.elements.buttonCardContainer.appendChild(container);
+      appendTo.appendChild(context.elements.buttonCardContainer);
+      context.buttonType = buttonType;
+  } else {
+      context.cardType = `button-${buttonType}`;
+  }
+}
+
+export function createSwitchStructure(context) {
+  addActions(context.elements.iconContainer, context.config);
+  
+  const switchDefaultActions = {
+      tap_action: { action: "toggle" },
+      double_tap_action: { action: "toggle" },
+      hold_action: { action: "more-info" }
+  };
+  addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, switchDefaultActions);
+  addFeedback(context.elements.buttonBackground, context.elements.feedback);
+}
+
+export function createNameStructure(context) {
+    const nameDefaultActions = {
+        tap_action: { action: "none" },
+        double_tap_action: { action: "none" },
+        hold_action: { action: "none" }
+    };
+
+    addActions(context.elements.iconContainer, context.config, context.config.entity, nameDefaultActions);
+    addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, nameDefaultActions);
+    addFeedback(context.elements.buttonBackground, context.elements.feedback);
+}
+
+export function createStateStructure(context) {
+    const stateDefaultActions = {
+        tap_action: { action: "more-info" },
+        double_tap_action: { action: "more-info" },
+        hold_action: { action: "more-info" }
+    };
+
+    addActions(context.elements.buttonCardContainer, context.config);
+    addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, stateDefaultActions);
+    addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
 
 export function updateEntity(context, value) {
@@ -69,7 +161,8 @@ export function updateEntity(context, value) {
           value: adjustedValue
       });
   }
-};
+}
+
 export const throttledUpdateEntity = throttle(updateEntity, 100);
 
 export function onSliderChange(context, leftDistance, throttle = false) {
@@ -79,7 +172,7 @@ export function onSliderChange(context, leftDistance, throttle = false) {
 
   context.elements.rangeFill.style.transform =`translateX(${rangedPercentage}%)`;
   if (throttle) {
-    if (context.dragging) return;
+    if (context.dragging && !context.config.slider_live_update) return;
     throttledUpdateEntity(context, rangedPercentage);
   } else {
     updateEntity(context, rangedPercentage);

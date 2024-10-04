@@ -107,6 +107,11 @@ export function createSliderStructure(context) {
 
   context.elements.buttonCardContainer.addEventListener('pointercancel', onPointerCancel);
   context.elements.buttonCardContainer.addEventListener('pointerdown', (e) => {
+      // Vérifie si l'élément cliqué a la classe .bubble-action
+      if (e.target.closest('.bubble-action')) {
+          return;
+      }
+
       context.elements.buttonCardContainer.setPointerCapture(e.pointerId);
 
       if (context.card.classList.contains('is-unavailable')) {
@@ -134,8 +139,13 @@ export function createSliderStructure(context) {
   function onPointerMove(e) {
       e.stopPropagation();
 
+      // Ignore les mouvements de pointeur si l'élément cliqué a la classe .bubble-action
+      if (e.target.closest('.bubble-action')) {
+          return;
+      }
+
       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-      if (Math.abs(initialX-moveX) > 10) {
+      if (Math.abs(initialX - moveX) > 10) {
         onSliderChange(context, moveX, true);
       }
 
@@ -162,5 +172,4 @@ export function createSliderStructure(context) {
       window.removeEventListener('pointerup', onPointerUp);
   }
 }
-
 

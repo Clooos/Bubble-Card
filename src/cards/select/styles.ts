@@ -58,7 +58,7 @@ export default `
     .bubble-dropdown-arrow {
         display: flex;
         position: absolute;
-        background: var(--bubble-select-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
+        background: var(--bubble-select-arrow-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
         height: 36px;
         width: 36px;
         right: 6px;

@@ -33,6 +33,8 @@ export function changeStyle(context) {
     initializesubButtonIcon(context);
     setLayout(context);
 
+    if (!context.config.styles) return;
+
     const state = getState(context);
 
     let customStyle = '';

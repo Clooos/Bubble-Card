@@ -37,141 +37,141 @@ export function createBubbleCardEditor() {
         }
 
         get _card_type() {
-            return this._config.card_type || '';
+            return this._config?.card_type || '';
         }
 
         get _button_type() {
-            return this._config.button_type || 
-                   (this._config.card_type === 'pop-up' ? '' : 'switch');
+            return this._config?.button_type || 
+                   (this._config?.card_type === 'pop-up' ? '' : 'switch');
         }
 
         get _entity() {
-            return this._config.entity || '';
+            return this._config?.entity || '';
         }
 
         get _name() {
-            return this._config.name || '';
+            return this._config?.name || '';
         }
 
         get _icon() {
-            return this._config.icon || '';
+            return this._config?.icon || '';
         }
 
         get _state() {
-            return this._config.state || '';
+            return this._config?.state || '';
         }
 
         get _text() {
-            return this._config.text || '';
+            return this._config?.text || '';
         }
 
         get _hash() {
-            return this._config.hash || '#pop-up-name';
+            return this._config?.hash || '#pop-up-name';
         }
         
         get _trigger_entity() {
-            return this._config.trigger_entity || '';
+            return this._config?.trigger_entity || '';
         }
         
         get _trigger_state() {
-            return this._config.trigger_state || '';
+            return this._config?.trigger_state || '';
         }
         
         get _trigger_close() {
-            return this._config.trigger_close || false;
+            return this._config?.trigger_close || false;
         }
         
         get _margin() {
-            return this._config.margin || '7px';
+            return this._config?.margin || '7px';
         }
 
         get _margin_top_mobile() {
-            return this._config.margin_top_mobile || '0px';
+            return this._config?.margin_top_mobile || '0px';
         }
 
         get _margin_top_desktop() {
-            return this._config.margin_top_desktop || '0px';
+            return this._config?.margin_top_desktop || '0px';
         }
 
         get _width_desktop() {
-            return this._config.width_desktop || '540px';
+            return this._config?.width_desktop || '540px';
         }
         
         get _bg_color() {
-            return this._config.bg_color || '';
+            return this._config?.bg_color || '';
         }
         
         get _bg_opacity() {
-            return this._config.bg_opacity !== undefined ? this._config.bg_opacity : '88';
+            return this._config?.bg_opacity !== undefined ? this._config?.bg_opacity : '88';
         }
         
         get _bg_blur() {
-            return this._config.bg_blur !== undefined ? this._config.bg_blur : '14';
+            return this._config?.bg_blur !== undefined ? this._config?.bg_blur : '14';
         }
         
         get _shadow_opacity() {
-            return this._config.shadow_opacity !== undefined ? this._config.shadow_opacity : '0';
+            return this._config?.shadow_opacity !== undefined ? this._config?.shadow_opacity : '0';
         }
         
         get _rise_animation() {
-            return this._config.rise_animation !== undefined ? this._config.rise_animation : true;
+            return this._config?.rise_animation !== undefined ? this._config?.rise_animation : true;
         }
         
         get _auto_close() {
-            return this._config.auto_close || '';
+            return this._config?.auto_close || '';
         }
         
         get _close_on_click() {
-            return this._config.close_on_click || false;
+            return this._config?.close_on_click || false;
         }
 
         get _close_by_clicking_outside() {
-            return this._config.close_by_clicking_outside ?? true;
+            return this._config?.close_by_clicking_outside ?? true;
         }
 
         get _background_update() {
-            return this._config.background_update || false;
+            return this._config?.background_update || false;
         }
 
         get _icon_open() {
-            return this._config.icon_open || '';
+            return this._config?.icon_open || '';
         }
 
         get _icon_close() {
-            return this._config.icon_close || '';
+            return this._config?.icon_close || '';
         }
 
         get _icon_down() {
-            return this._config.icon_down || '';
+            return this._config?.icon_down || '';
         }
 
         get _icon_up() {
-            return this._config.icon_up || '';
+            return this._config?.icon_up || '';
         }
 
         get _open_service() {
-            return this._config.open_service || 'cover.open_cover';
+            return this._config?.open_service || 'cover.open_cover';
         }
 
         get _close_service() {
-            return this._config.close_service || 'cover.close_cover';
+            return this._config?.close_service || 'cover.close_cover';
         }
 
         get _stop_service() {
-            return this._config.stop_service || 'cover.stop_cover';
+            return this._config?.stop_service || 'cover.stop_cover';
         }
 
         get _auto_order() {
-            return this._config.auto_order || false;
+            return this._config?.auto_order || false;
         }
 
         get _highlight_current_view() {
-            return this._config.highlight_current_view || false;
+            return this._config?.highlight_current_view || false;
         }
         
         get _show_state() {
-            const defaultState = this._config.card_type === 'state' ? true : false;
-            return this._config.show_state || defaultState;
+            const defaultState = this._config?.card_type === 'state' ? true : false;
+            return this._config?.show_state || defaultState;
         }
 
         get _show_attribute() {
@@ -234,6 +234,14 @@ export function createBubbleCardEditor() {
 
         get _show_header() {
             return this._config.show_header ?? true;
+        }
+
+        get _slide_to_close_distance() {
+            return this._config.slide_to_close_distance ?? 400;
+        }
+
+        get _slider_live_update() {
+            return this._config.slider_live_update ?? false;
         }
 
         get _tap_action() {
@@ -415,9 +423,9 @@ export function createBubbleCardEditor() {
             const coverList = this.coverList;
             const cardTypeList = this.cardTypeList;
             const buttonTypeList = this.buttonTypeList;
-            const nameButton = this._config.button_type === 'name';
+            const nameButton = this._config?.button_type === 'name';
 
-            if (this._config.card_type === 'pop-up') {
+            if (this._config?.card_type === 'pop-up') {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
@@ -498,6 +506,16 @@ export function createBubbleCardEditor() {
                                     step="1000"
                                     .value="${this._auto_close}"
                                     .configValue="${"auto_close"}"
+                                    @input="${this._valueChanged}"
+                                ></ha-textfield>
+                                <ha-textfield
+                                    label="Optional - Slide to close distance (default to 400)"
+                                    type="number"
+                                    inputMode="numeric"
+                                    min="0"
+                                    step="10"
+                                    .value="${this._slide_to_close_distance}"
+                                    .configValue="${"slide_to_close_distance"}"
                                     @input="${this._valueChanged}"
                                 ></ha-textfield>
                                 <ha-formfield .label="Optional - Close the pop-up by clicking outside of it (a refresh is needed)">
@@ -672,7 +690,7 @@ export function createBubbleCardEditor() {
                         ${this.makeVersion()}
                   </div>
                 `;
-            } else if (this._config.card_type === 'button') {
+            } else if (this._config?.card_type === 'button') {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
@@ -683,7 +701,7 @@ export function createBubbleCardEditor() {
                               <ha-icon icon="mdi:cog"></ha-icon>
                               Button settings
                             </h4>
-                            <div class="content">                   
+                            <div class="content">     
                                 <ha-textfield
                                     label="Optional - Name"
                                     .value="${this._name}"
@@ -692,6 +710,18 @@ export function createBubbleCardEditor() {
                                 ></ha-textfield>
                                 ${this.makeDropdown("Optional - Icon", "icon")}
                                 ${this.makeShowState()}
+                                <ha-formfield .label="Optional - Slider live update" style="display: ${this._button_type !== 'slider' ? 'none' : ''}">
+                                    <ha-switch
+                                        aria-label="Optional - Slider live update"
+                                        .checked=${this._slider_live_update}
+                                        .configValue="${"slider_live_update"}"
+                                        @change=${this._valueChanged}
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Optional - Slider live update</label> 
+                                    </div>
+                                </ha-formfield>
+                                <ha-alert style="display: ${this._button_type !== 'slider' ? 'none' : ''}" alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -731,7 +761,7 @@ export function createBubbleCardEditor() {
                         ${this.makeVersion()}
                     </div>
                 `;
-            } else if (this._config.card_type === 'separator') {
+            } else if (this._config?.card_type === 'separator') {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
@@ -757,7 +787,7 @@ export function createBubbleCardEditor() {
                         ${this.makeVersion()}
                   </div>
                 `;
-            } else if (this._config.card_type === 'horizontal-buttons-stack') {
+            } else if (this._config?.card_type === 'horizontal-buttons-stack') {
                 if (!this.buttonAdded) {
                     this.buttonAdded = true;
                     this.buttonIndex = 0;
@@ -859,7 +889,7 @@ export function createBubbleCardEditor() {
                         ${this.makeVersion()}
                     </div>
                 `;
-            } else if (this._config.card_type === 'cover') {
+            } else if (this._config?.card_type === 'cover') {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
@@ -943,7 +973,7 @@ export function createBubbleCardEditor() {
                         ${this.makeVersion()}
                     </div>
                 `;
-            } else if (this._config.card_type === 'media-player') {
+            } else if (this._config?.card_type === 'media-player') {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
@@ -1053,7 +1083,7 @@ export function createBubbleCardEditor() {
                         ${this.makeVersion()}
                     </div>
                 `;
-            } else if (this._config.card_type === 'empty-column') {
+            } else if (this._config?.card_type === 'empty-column') {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
@@ -1070,7 +1100,7 @@ export function createBubbleCardEditor() {
                         ${this.makeVersion()}
                     </div>
                 `;
-            } else if (this._config.card_type === 'select') {
+            } else if (this._config?.card_type === 'select') {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
@@ -1117,7 +1147,7 @@ export function createBubbleCardEditor() {
                         ${this.makeVersion()}
                     </div>
                 `;
-            } else if (!this._config.card_type) {
+            } else if (!this._config?.card_type) {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}

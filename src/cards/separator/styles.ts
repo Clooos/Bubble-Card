@@ -27,7 +27,7 @@ export default `
         opacity: 0.5;
         flex-grow: 1;
         height: 6px;
-        background-color: var(--background-color, var(--secondary-background-color));
+        background-color: var(--bubble-line-background-color, var(--background-color, var(--secondary-background-color)));
         margin-right: 14px;
     }
     .bubble-sub-button-container {

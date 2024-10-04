@@ -141,7 +141,6 @@ export default `
         border-radius: var(--bubble-media-player-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
         background-color: var(--bubble-media-player-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));;
         overflow: hidden;
-        z-index: 1;
         position: relative;
         cursor: pointer;
         pointer-events: auto;

@@ -50,6 +50,7 @@ export default `
         width: 100%;
         left: -100%;
         transition: all .3s;
+        z-index: 0;
     }
     .is-dragging .bubble-range-fill {
         transition: none;
@@ -66,7 +67,7 @@ export default `
         border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
         overflow: hidden;
         mask-image: radial-gradient(white, black);
-        -webkit-transform: translateZ(0);
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
     }
     .bubble-icon-container {
         display: flex;

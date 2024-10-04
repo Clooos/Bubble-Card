@@ -344,13 +344,13 @@ export function getIconColor(context, entity = context.config.entity, brightness
 
     if (!entityRgbColor) {
         const adjustedDefaultLightColor = defaultLightColor.map(channel => Math.min(255, channel * brightness));
-        return `rgba(${adjustedDefaultLightColor.join(', ')})`;
+        return `var(--bubble-light-color, rgba(${adjustedDefaultLightColor.join(', ')}))`;
     }
 
     const adjustedColor = entityRgbColor.map(channel => Math.min(255, channel * brightness));
     return isColorCloseToWhite(entityRgbColor) ? 
-        `rgba(${defaultLightOnColor.map(channel => Math.min(255, channel * brightness)).join(', ')})` : 
-        `rgba(${adjustedColor.join(', ')})`;
+        `var(--bubble-light-color, rgba(${defaultLightOnColor.map(channel => Math.min(255, channel * brightness)).join(', ')}))` : 
+        `var(--bubble-light-color, rgba(${adjustedColor.join(', ')}))`;
 }
 
 export function getImage(context) {
@@ -418,8 +418,7 @@ export function isStateOn(context, entity = context.config.entity) {
         'heat_cool',
         'fan_only',
         'auto',
-        'alarm',
-        ''
+        'alarm'
     ];
 
     if (activeStringStates.includes(state) || numericState > 0) {
@@ -566,25 +565,15 @@ export function formatDateTime(datetime, locale) {
 }
 
 export function setLayout(context) {
-    const cardLayout = context.config.card_layout;
+    const layoutClass = context.config.card_layout;
+    const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows';
+    const needsRows2 = layoutClass === 'large-2-rows';
 
-    if (cardLayout === 'large') {
-        if (!context.content.classList.contains('large')) {
-            context.content.classList.add('large');
-        }
-        if (context.content.classList.contains('rows-2')) {
-            context.content.classList.remove('rows-2');
-        } 
-    } else if (cardLayout === 'large-2-rows') {
-        if (!context.content.classList.contains('large')) {
-            context.content.classList.add('large');
-        } 
-        if (!context.content.classList.contains('rows-2')) {
-            context.content.classList.add('rows-2');
-        } 
-    } else {
-        context.content.classList.remove('large');
-        context.content.classList.remove('rows-2');
+    if (needsLarge !== context.content.classList.contains('large')) {
+        context.content.classList.toggle('large', needsLarge);
+    }
+    if (needsRows2 !== context.content.classList.contains('rows-2')) {
+        context.content.classList.toggle('rows-2', needsRows2);
     }
 }
 

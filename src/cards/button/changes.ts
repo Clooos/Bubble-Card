@@ -54,7 +54,7 @@ export function changeIcon(context) {
   const isLight = buttonType !== 'name' ? isEntityType(context, "light") : false;
 
   if (isLight && isOn) {
-      context.elements.iconContainer.style.color = getIconColor(context);
+      context.elements.iconContainer.style.color = `var(--bubble-icon-background-color, ${getIconColor(context)})`;
   } else {
       context.elements.iconContainer.style.color = '';
   }
@@ -170,6 +170,8 @@ export function changeStatus(context) {
 export function changeStyle(context) {
     initializesubButtonIcon(context);
     setLayout(context);
+
+    if (!context.config.styles) return;
 
     const state = getState(context);
 

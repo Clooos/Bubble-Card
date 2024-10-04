@@ -137,6 +137,8 @@ export function changeStatus(context) {
     }
 }
 export function changeStyle(context) {
+    if (!context.config.styles) return;
+    
     let customStyle = '';
 
     try {

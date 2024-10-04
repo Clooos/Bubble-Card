@@ -182,6 +182,8 @@ export function changeStyle(context) {
         context.elements.playPauseButton.style.display = '';
     }
 
+    if (!context.config.styles) return;
+
     let customStyle = '';
 
     try {

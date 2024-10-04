@@ -24,6 +24,10 @@ class BubbleCard extends HTMLElement {
 
     disconnectedCallback() {
         this.isConnected = false;
+
+        if (this._hass && !this.justDisconnected) {
+            this.updateBubbleCard();
+        }
     }
 
     set editMode(editMode) {

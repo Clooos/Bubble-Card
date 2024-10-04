@@ -36,12 +36,20 @@ export default `
       position: fixed;
       width: 100%;
       max-width: 100%;
-      border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
+      border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
       box-sizing: border-box;
       margin-left: var(--custom-margin);
       left: 7px;
       z-index: 5 !important;
       bottom: calc(-56px - var(--custom-height-offset-mobile));
+  }
+  .bubble-pop-up::before {
+      content: '';
+      width: 100%;
+      height: 100%;
+      display: flex;
+      position: absolute;
+      border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
       backdrop-filter: var(--custom-popup-filter);
       -webkit-backdrop-filter: var(--custom-popup-filter);
   }
@@ -128,6 +136,12 @@ export default `
       padding-bottom: 18px !important;
       mask-image: none;
       -webkit-mask-image: none;    
+  }
+  .bubble-pop-up.editor::before {
+      content: '';
+      display: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
   }
 
   .no-header .bubble-header-container {
