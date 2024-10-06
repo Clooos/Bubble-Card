@@ -1360,7 +1360,7 @@ styles: |
 
 ### Templates
 
-Advanced users can add templates in JS directly in their custom styles (Bubble Card doesn’t support Jinja templates). For example, this allows you to dynamically change an icon, the name or the color of an element, to show or hide an element conditionally (like a sub-button), or almost anything based on a state, an attribute and more.
+**Bubble Card doesn’t support Jinja templates** but advanced users can add templates in JS directly in their custom styles. For example, this allows you to dynamically change an icon, the texts or the colors of an element, to show or hide an element conditionally (like a sub-button), or almost anything based on a state, an attribute and more.
 
 > [!TIP]  
 > More information about JS templates [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator). My advice is to always take a look at your browser console to be sure that everything is working correctly.
