@@ -1,6 +1,6 @@
 import { tapFeedback, forwardHaptic } from "./utils.ts";
 
-const maxHoldDuration = 200;
+const maxHoldDuration = 500;
 const doubleTapTimeout = 200;
 
 // Global event listener
@@ -30,6 +30,7 @@ document.body.addEventListener('pointerdown', (event) => {
     actionElement.actionHandler.handleStart(event);
 
     actionElement.addEventListener('pointerup', actionElement.actionHandler.handleEnd.bind(actionElement.actionHandler), { once: true });
+    document.addEventListener('scroll', actionElement.actionHandler.handleScroll.bind(actionElement.actionHandler), { once: true });
   }
 });
 
@@ -153,6 +154,12 @@ class ActionHandler {
     // Update lastTap timestamp
     this.lastTap = currentTime;
     this.startTime = null;  // Reset start time
+  }
+
+  handleScroll() {
+    // Reset hold timeout if it's not triggered yet
+    clearTimeout(this.holdTimeout);
+    this.holdTimeout = null; // Reset hold timeout
   }
 }
 
