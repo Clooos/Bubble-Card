@@ -7,6 +7,7 @@ export default `
         margin-top: 0;
         background: none;
         opacity: 1;
+        overflow: visible !important;
     }
     .is-unavailable {
         opacity: 0.5;
@@ -17,9 +18,8 @@ export default `
         width: 100%;
         height: 50px;
         background-color: var(--bubble-media-player-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
-        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
-        overflow: visible;
         touch-action: pan-y;
+        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
     }
 
     .bubble-media-player {
@@ -227,6 +227,26 @@ export default `
 
     .bubble-sub-button-container {
         right: 0 !important;
+    }
+
+    .bubble-background-container {
+        display: flex;
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+        overflow: hidden;
+    }
+
+    .bubble-cover-background {
+        display: flex;
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background-size: cover;
+        background-position: 50%;
+        filter: blur(50px);
+        opacity: 0.5;
     }
 
     @media screen and (max-width: 250px) {

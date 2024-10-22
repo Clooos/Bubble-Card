@@ -21,7 +21,7 @@ export function handleSelect(context) {
         createDropdownActions(context);
     }
 
-    changeDropdownList(context);
+    changeDropdownList(context, context.elements, context.config.entity, context.config);
     changeStatus(context);
     changeIcon(context);
     changeName(context);

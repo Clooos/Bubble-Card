@@ -1,5 +1,6 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.ts";
 import { createElement, toggleEntity, throttle, forwardHaptic } from "../../tools/utils.ts";
+import { callSelectService } from "./helpers.ts";
 import styles from "./styles.ts";
 
 export function createStructure(context) {
@@ -65,40 +66,33 @@ export function createDropdownStructure(context, elements = context.elements, sh
   elements.dropdownCustomStyleElement = createElement('style');
   elements.dropdownStyleElement.textContent = styles;
 
-  // Function to add styles to shadowRoot
   function addStyleWhenShadowRootAvailable() {
     if (elements.dropdownSelect.shadowRoot) {
-      // Apply additional styles if sub-button/other
       if (elements !== context.elements) {
-        elements.dropdownContainer.style.display = 'flex';
         elements.dropdownSelectStyleElement = createElement('style');
         elements.dropdownSelectStyleElement.textContent = styles;
         elements.dropdownSelect.shadowRoot.appendChild(elements.dropdownSelectStyleElement);
         elements.dropdownContainer.appendChild(elements.dropdownStyleElement);
-
         if (showArrow) elements.dropdownContainer.style.width = '24px';
         elements.dropdownArrow.style.height = '20px';
         elements.dropdownArrow.style.width = '20px';
-        elements.dropdownSelect.style.position = 'relative';
-        elements.dropdownSelect.style.top = '-23px';
-
         elements.mainContainer = elements.parentElement.parentElement.parentElement;
         elements.mainContainer.style.overflow = 'visible';
-
         let selectMenu = elements.dropdownSelect.shadowRoot.querySelector('mwc-menu');
-        selectMenu.style.position = 'relative';
-        selectMenu.style.right = '138px';
+        if (selectMenu) {
+          selectMenu.style.position = 'relative';
+          selectMenu.style.right = '138px';
+        }
       } else {
         elements.dropdownSelect.shadowRoot.appendChild(elements.dropdownStyleElement);
         elements.dropdownSelect.shadowRoot.appendChild(elements.dropdownCustomStyleElement);
       }
-    } else {
-      setTimeout(addStyleWhenShadowRootAvailable);
     }
   }
 
-  // Invoke the function to add styles
-  addStyleWhenShadowRootAvailable();
+  elements.dropdownSelect.updateComplete.then(() => {
+    addStyleWhenShadowRootAvailable();
+  });
 
   // Append dropdownContainer to the appropriate parent
   if (elements === context.elements) {
@@ -108,7 +102,7 @@ export function createDropdownStructure(context, elements = context.elements, sh
   }
 }
 
-export function createDropdownActions(context, elements = context.elements, entity = context.config.entity) {
+export function createDropdownActions(context, elements = context.elements, entity = context.config.entity, config = context.config) {
   const {
     dropdownArrow,
     dropdownSelect,
@@ -123,40 +117,48 @@ export function createDropdownActions(context, elements = context.elements, enti
     card.style.border = 'solid 2px rgba(0,0,0,0)';
   }
 
+  let isFirstOpen = true;
+
   const handleEventClick = (event) => {
+    if (event.target.tagName.toLowerCase() === 'mwc-list-item') return;
+
     const selectMenu = dropdownSelect.shadowRoot.querySelector('mwc-menu');
+    const updateStyles = () => {
+      dropdownArrow.style.transform = 'rotate(180deg)';
+      elements.dropdownArrow.style.background = 'var(--accent-color)';
+      card.style.border = 'var(--bubble-select-border, solid 2px var(--accent-color))';
+    };
 
-    if (event.target.tagName.toLowerCase() === 'mwc-list-item') {
-      return;
-    }
-
-    if (!selectMenu.hasAttribute('open')) {
+    // Open then close it at first opening to fix its position
+    if (isFirstOpen) {
+      isFirstOpen = false;
+      dropdownArrow.style.transition = 'none';
       selectMenu.setAttribute('open', '');
+      requestAnimationFrame(() => {
+        selectMenu.removeAttribute('open');
+        setTimeout(() => {
+          dropdownArrow.style.transition = '';
+          updateStyles();
+        }, 140);
+      });
+    } else {
+      if (!selectMenu.hasAttribute('open')) selectMenu.setAttribute('open', '');
+      updateStyles();
     }
-
-    dropdownArrow.style.transform = 'rotate(180deg)';
-    card.style.border = 'solid 2px var(--accent-color)';
-    elements.dropdownArrow.style.background = 'var(--accent-color)';
   };
 
   const handleMenuClosed = (event) => {
     event.stopPropagation();
     event.preventDefault();
 
-    dropdownArrow.style.transform = 'rotate(0deg)';
+    dropdownArrow.style.transform = 'rotate(0deg)'; // Revenir à la position fermée
     card.style.border = 'solid 2px rgba(0,0,0,0)';
     elements.dropdownArrow.style.background = '';
   };
 
   const handleDropdownSelect = (event) => {
-    const selectedOption = elements.dropdownSelect.shadowRoot?.querySelector('.mdc-select__selected-text').textContent;
-    const isInputSelect = entity?.startsWith("input_select");
-    const service = isInputSelect ? 'input_select' : 'select';
-
-    context._hass.callService(service, 'select_option', {
-      entity_id: entity,
-      option: selectedOption
-    });
+    const selectedOption = event.target.value;
+    callSelectService(context, entity, selectedOption, config);
   };
 
   eventCaller.addEventListener('click', handleEventClick);

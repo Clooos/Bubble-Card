@@ -1,5 +1,5 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.ts";
-import { createElement, toggleEntity, throttle, forwardHaptic, isEntityType } from "../../tools/utils.ts";
+import { createElement, toggleEntity, throttle, forwardHaptic, isEntityType, getAttribute } from "../../tools/utils.ts";
 
 export function getButtonType(context) {
   let buttonType = context.config.button_type;
@@ -134,7 +134,7 @@ export function updateEntity(context, value) {
           value: adjustedValue
       });
   } else if (isEntityType(context, "fan")) {
-      const step = getAttribute(context, "percentage_step");
+      const step = getAttribute(context, "percentage_step") ?? 1;
       let adjustedValue = Math.round(value / step) * step;
       context._hass.callService('fan', 'set_percentage', {
           entity_id: context.config.entity,

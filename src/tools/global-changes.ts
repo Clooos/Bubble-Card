@@ -1,6 +1,7 @@
 import { addActions, addFeedback } from "../tools/tap-actions.ts";
 import { createDropdownStructure, createDropdownActions } from "../cards/select/create.ts";
 import { changeDropdownList } from "../cards/select/changes.ts";
+import { getOptionIcon } from "../cards/select/helpers.ts";
 import styles from "../cards/select/styles.ts";
 import { 
     createElement,
@@ -172,7 +173,6 @@ export function changeSubButtonState(context, container = context.content, appen
         const name = subButton.name ?? getAttribute(context, "friendly_name", entity) ?? '';
         const attributeType = subButton.attribute ?? '';
         const attribute = getAttribute(context, attributeType, entity);
-        const icon = getIcon(context, subButton.entity, subButton.icon ?? '');
         const isOn = isStateOn(context, entity);
 
         const showName = subButton.show_name ?? false;
@@ -180,10 +180,12 @@ export function changeSubButtonState(context, container = context.content, appen
         const showAttribute = subButton.show_attribute ?? false;
         const showLastChanged = (subButton.show_last_changed || subButton.show_last_updated) ?? false;
         const showIcon = subButton.show_icon ?? true;
-        const showBackround = subButton.show_background ?? true;
+        const showBackground = subButton.show_background ?? true;
+        const stateBackground = subButton.state_background ?? true;
         const showArrow = subButton.show_arrow ?? true;
 
-        const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select");
+        const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || subButton.select_attribute;
+        const icon = getIcon(context, subButton.entity, subButton.icon ?? '');
 
         // Initialize or reuse subButtonElement
         let subButtonElement = context.elements[index] || createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
@@ -209,7 +211,7 @@ export function changeSubButtonState(context, container = context.content, appen
             if (isSelect) {
                 createDropdownStructure(context, subButtonElement, showArrow);
                 subButtonElement.dropdownContainer.style.display = 'none';
-                createDropdownActions(context, subButtonElement, entity);
+                createDropdownActions(context, subButtonElement, entity, subButton);
             }
 
             subButtonElement.appendChild(subButtonElement.nameContainer);
@@ -225,31 +227,59 @@ export function changeSubButtonState(context, container = context.content, appen
         }
 
         if (isSelect) {
-            changeDropdownList(context, subButtonElement, entity);
+            changeDropdownList(context, subButtonElement, entity, subButton);
 
             if (!showArrow) {
                 subButtonElement.dropdownArrow.style.display = 'none';
                 subButtonElement.dropdownContainer.style.width = '0px';
+                subButtonElement.style.padding = '6px';
             } else if (showArrow) {
                 subButtonElement.dropdownArrow.style.display = '';
-                subButtonElement.dropdownContainer.style.width = '24px';               
+                subButtonElement.dropdownContainer.style.width = '24px';
             }
         } else if (subButtonElement.contains(subButtonElement.dropdownContainer)) {
             subButtonElement.removeChild(subButtonElement.dropdownContainer);
         }
 
-        // Handle icon display
+        // // Handle icon display
+        const selectedOption = isSelect && subButtonElement.dropdownSelect ?
+            Array.from(subButtonElement.dropdownSelect.children).find(option => option.hasAttribute('selected'))?.value : false;
+
         if (showIcon && icon) {
             let iconElement = subButtonElement.icon;
+
             if (!iconElement) {
                 iconElement = createElement('ha-icon', 'bubble-sub-button-icon');
                 iconElement.classList.add('show-icon');
                 subButtonElement.appendChild(iconElement);
                 subButtonElement.icon = iconElement;
             }
-            if (iconElement.getAttribute('icon') !== icon) {
-                iconElement.setAttribute('icon', icon);
+
+            if (selectedOption) {
+                const optionIcon = getOptionIcon(context, state, subButton.select_attribute, selectedOption);
+
+                if (optionIcon) {
+                    const isIconDifferent = iconElement.tagName !== optionIcon.tagName || 
+                        iconElement.icon !== optionIcon.icon || 
+                        iconElement.attribute !== optionIcon.attribute ||
+                        iconElement.attributeValue !== optionIcon.attributeValue;
+
+                    if (isIconDifferent) {
+                        subButtonElement.replaceChild(optionIcon, iconElement);
+                        subButtonElement.icon = optionIcon;
+                        iconElement = optionIcon;
+                    }
+                } else {
+                    if (iconElement.icon !== icon) {
+                        iconElement.setAttribute('icon', icon);
+                    }
+                }
+            } else {
+                if (iconElement.icon !== icon) {
+                    iconElement.setAttribute('icon', icon);
+                }
             }
+
             subButtonElement.icon.classList.remove('hidden');
             subButtonElement.icon.classList.add('show-icon');
         } else if (subButtonElement.icon) {
@@ -258,8 +288,8 @@ export function changeSubButtonState(context, container = context.content, appen
         }
 
         // Handle background display
-        if (showBackround) {
-            if (isOn) {
+        if (showBackground) {
+            if (isOn && stateBackground) {
                 subButtonElement.style.setProperty('--bubble-sub-button-light-background-color', getIconColor(context, entity, 0.8));
                 subButtonElement.classList.add('background-on');
                 subButtonElement.classList.remove('background-off');
@@ -422,6 +452,9 @@ const subButtonsStyles = `
     }
     .no-icon-select-container {
         width: 16px !important;
+    }
+    .bubble-dropdown-arrow {
+        background: var(--bubble-select-arrow-background-color) !important;
     }
 `;
 

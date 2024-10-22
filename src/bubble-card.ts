@@ -8,6 +8,7 @@ import { handleCover } from './cards/cover/index.ts';
 import { handleEmptyColumn } from './cards/empty-column/index.ts';
 import { handleMediaPlayer } from './cards/media-player/index.ts';
 import { handleSelect } from './cards/select/index.ts';
+import { handleClimate } from './cards/climate/index.ts';
 import { createBubbleCardEditor } from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {
@@ -91,9 +92,14 @@ class BubbleCard extends HTMLElement {
                 handleMediaPlayer(this);
                 break;
 
-            // Update media player
+            // Update select
             case 'select' :
                 handleSelect(this);
+                break;
+
+            // Update climate
+            case 'climate' :
+                handleClimate(this);
                 break;
         }
     }
@@ -127,7 +133,7 @@ class BubbleCard extends HTMLElement {
                 definedLinks[config[linkKey]] = true;
               }
             }
-        } else if (config.card_type === 'button' || config.card_type === 'cover') {
+        } else if (['button', 'cover', 'climate', 'select', 'media-player'].includes(config.card_type)) {
             if (!config.entity && config.button_type !== 'name') {
                 throw new Error("You need to define an entity");
             }

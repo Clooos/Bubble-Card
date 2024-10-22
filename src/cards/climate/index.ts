@@ -2,38 +2,25 @@ import { changeState, changeSubButtonState } from "../../tools/global-changes.ts
 import {
     changeStatus,
     changeName,
-    changeMediaInfo,
+    changeTemperatureInfo,
     changeDisplayedInfo,
     changeIcon,
-    changeBackground,
     changeSlider,
-    changePlayPauseIcon,
-    changeMuteIcon,
-    changePowerIcon,
     changeStyle
 } from './changes.ts';
 import {
-    createSmallStructure,
-    createLargeStructure,
     createStructure
 } from './create.ts';
 
-export function handleMediaPlayer(context) {
-    if (context.cardType !== `media-player`) {
+export function handleClimate(context) {
+    if (context.cardType !== `climate`) {
         createStructure(context);
     }
 
     changeStatus(context);
     changeName(context);
-    changeMediaInfo(context);
-    changeDisplayedInfo(context);
     changeIcon(context);
-    changeBackground(context);
     changeState(context);
-    changeSlider(context);
-    changePlayPauseIcon(context);
-    changeMuteIcon(context);
-    changePowerIcon(context);
     changeSubButtonState(context, context.content, context.elements.buttonContainer, true);
     changeStyle(context);
 }

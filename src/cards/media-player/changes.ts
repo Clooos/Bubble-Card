@@ -16,21 +16,63 @@ import {
 
 export function changeIcon(context) {
     const isOn = isStateOn(context);
-    const icon = getIcon(context);
-    const image = getImage(context);
+    const newIcon = getIcon(context);
+    const newImage = getImage(context);
 
-    if (image !== '') {
-        context.elements.image.style.backgroundImage = 'url(' + image + ')';
-        context.elements.icon.style.display = 'none';
-        context.elements.image.style.display = '';
-    } else if (icon !== '') {
-        context.elements.icon.icon = icon;
-        context.elements.icon.style.color = isOn ? 'var(--accent-color)' : 'inherit';
-        context.elements.icon.style.display = '';
-        context.elements.image.style.display = 'none';
+    const currentImage = context.elements.image.style.backgroundImage;
+    const currentIcon = context.elements.icon.icon;
+    const currentIconColor = context.elements.icon.style.color;
+
+    if (newImage !== '') {
+        const newBackgroundImage = 'url(' + newImage + ')';
+        if (currentImage !== newBackgroundImage) {
+            context.elements.image.style.backgroundImage = newBackgroundImage;
+        }
+        if (context.elements.icon.style.display !== 'none') {
+            context.elements.icon.style.display = 'none';
+        }
+        if (context.elements.image.style.display !== '') {
+            context.elements.image.style.display = '';
+        }
+    } else if (newIcon !== '') {
+        if (currentIcon !== newIcon) {
+            context.elements.icon.icon = newIcon;
+        }
+        const newColor = isOn ? 'var(--accent-color)' : 'inherit';
+        if (currentIconColor !== newColor) {
+            context.elements.icon.style.color = newColor;
+        }
+        if (context.elements.icon.style.display !== '') {
+            context.elements.icon.style.display = '';
+        }
+        if (context.elements.image.style.display !== 'none') {
+            context.elements.image.style.display = 'none';
+        }
     } else {
-        context.elements.icon.style.display = 'none';
-        context.elements.image.style.display = 'none';
+        if (context.elements.icon.style.display !== 'none') {
+            context.elements.icon.style.display = 'none';
+        }
+        if (context.elements.image.style.display !== 'none') {
+            context.elements.image.style.display = 'none';
+        }
+    }
+}
+
+export function changeBackground(context) {
+    const isOn = isStateOn(context);
+    const newMediaCover = getImage(context);
+    const coverBackground = context.config.cover_background;
+    const currentCoverBackground = context.elements.coverBackground.style.backgroundImage;
+
+    if (coverBackground && isOn && newMediaCover) {
+        const newBackgroundImage = 'url(' + newMediaCover + ')';
+        if (currentCoverBackground !== newBackgroundImage) {
+            context.elements.coverBackground.style.backgroundImage = newBackgroundImage;
+        }
+    } else {
+        if (currentCoverBackground !== '') {
+            context.elements.coverBackground.style.backgroundImage = '';
+        }
     }
 }
 

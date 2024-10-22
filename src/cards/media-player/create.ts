@@ -4,6 +4,8 @@ import { onSliderChange } from "./helpers.ts";
 import { changeVolumeIcon } from "./changes.ts";
 import styles from "./styles.ts";
 
+let volumeLevel;
+
 export function createStructure(context) {
     context.dragging = false;
 
@@ -14,6 +16,8 @@ export function createStructure(context) {
     context.elements.nameContainer = createElement('div', 'bubble-name-container');
     context.elements.buttonContainer = createElement('div', 'bubble-button-container');
     context.elements.iconContainer = createElement('div', 'bubble-icon-container');
+    context.elements.backgroundContainer = createElement('div', 'bubble-background-container');
+    context.elements.coverBackground = createElement('div', 'bubble-cover-background');
     context.elements.playPauseButton = createElement('ha-icon', 'bubble-play-pause-button');
     context.elements.previousButton = createElement('ha-icon', 'bubble-previous-button');
     context.elements.previousButton.setAttribute("icon", "mdi:skip-previous");
@@ -57,6 +61,9 @@ export function createStructure(context) {
     context.elements.mediaPlayerCard.appendChild(context.elements.nameContainer);
     context.elements.mediaPlayerCard.appendChild(context.elements.buttonContainer);
 
+    context.elements.backgroundContainer.appendChild(context.elements.coverBackground);
+    context.elements.mediaPlayerContainer.appendChild(context.elements.backgroundContainer);
+
     context.content.innerHTML = '';
 
     context.content.appendChild(context.elements.mediaPlayerContainer);
@@ -80,6 +87,7 @@ export function createStructure(context) {
         context.elements.icon.classList.toggle('is-hidden');
         context.elements.image.classList.toggle('is-hidden');
         changeVolumeIcon(context);
+        volumeLevel = Math.round(getAttribute(context, 'volume_level') * 100) + '%';
     });
 
     // Power button event
@@ -138,7 +146,7 @@ export function createStructure(context) {
 
 function createSlider(context, sliderContainer) {
     let initialX = 0;
-    let volumeLevel = Math.round(getAttribute(context, 'volume_level') * 100) + '%';
+    volumeLevel = Math.round(getAttribute(context, 'volume_level') * 100) + '%';
 
     context.elements.rangeFill = createElement('div', 'bubble-range-fill range-fill');
     context.elements.rangeSlider = createElement('div', 'bubble-range-slider range-slider');

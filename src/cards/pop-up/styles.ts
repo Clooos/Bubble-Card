@@ -19,8 +19,8 @@ export default `
       overflow-y: auto; 
       overflow-x: hidden; 
       grid-auto-rows: min-content;
-      mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
       padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
   }
   .bubble-pop-up-container > * {

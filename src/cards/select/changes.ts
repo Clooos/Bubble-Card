@@ -10,6 +10,11 @@ import {
   setLayout,
   createElement
 } from '../../tools/utils.ts';
+import { 
+  getTranslatedAttribute, 
+  getOptionIcon,
+  getSelectedAttribute
+} from "./helpers.ts";
 
 export function changeIcon(context) {
   const icon = getIcon(context);
@@ -48,9 +53,12 @@ export function changeStatus(context) {
   }
 }
 
-export function changeDropdownList(context, elements = context.elements, entity = context.config.entity) {
-  elements.currentList = context._hass.states[entity].attributes.options;
-  elements.currentState = context._hass.states[entity].state;
+export function changeDropdownList(context, elements = context.elements, entity = context.config.entity, config) {
+  elements.currentState = context._hass.states[entity]?.state;
+
+  if (!elements.currentState) return;
+
+  elements.currentList = entity?.startsWith("input_select") || entity?.startsWith("select") ? context._hass.states[entity].attributes.options : context._hass.states[entity].attributes[config.select_attribute];
 
   if (elements.previousList === elements.currentList && elements.previousState === elements.currentState) return;
 
@@ -63,16 +71,31 @@ export function changeDropdownList(context, elements = context.elements, entity 
     elements.dropdownSelect.removeChild(elements.dropdownSelect.firstChild);
   }
 
-  options.forEach((option, index) => {
-    const opt = createElement('mwc-list-item');
-    opt.setAttribute('value', option);
-    opt.textContent = option;
-    if (option === state) {
-      opt.setAttribute('selected', '');
-    }
-    elements.dropdownSelect.appendChild(opt);
-    elements.previousList = elements.currentList;
-    elements.previousState = elements.currentState;
+  options.forEach((option) => {
+      const opt = document.createElement('mwc-list-item');
+      opt.value = option;
+
+      const icon = getOptionIcon(context, context._hass.states[entity], config.select_attribute, option);
+      if (icon) {
+        opt.graphic = 'icon';
+        opt.appendChild(icon);
+      }
+
+      const translatedLabel = getTranslatedAttribute(
+          context, context._hass.states[entity], 
+          config.select_attribute, 
+          option
+      );
+
+      opt.appendChild(document.createTextNode(translatedLabel));
+
+      if (option === getSelectedAttribute(context._hass.states[entity], config.select_attribute)) {
+          opt.setAttribute('selected', '');
+      }
+
+      elements.dropdownSelect.appendChild(opt);
+      elements.previousList = elements.currentList;
+      elements.previousState = elements.currentState;
   });
 
   elements.dropdownContainer.appendChild(elements.dropdownSelect);
@@ -81,28 +104,6 @@ export function changeDropdownList(context, elements = context.elements, entity 
 export function changeStyle(context) {
   initializesubButtonIcon(context);
   setLayout(context);
-
-  const cardLayout = context.config.card_layout;
-
-  function addLayoutWhenShadowRootAvailable() {
-    const mwcMenu = context.elements.dropdownSelect.shadowRoot?.querySelector('mwc-menu');
-    const mwcMenuShadowRoot = mwcMenu?.shadowRoot;
-    const mwcMenuSurface = mwcMenuShadowRoot?.querySelector('mwc-menu-surface');
-    const mwcMenuSurfaceShadowRoot = mwcMenuSurface?.shadowRoot;
-    const mdcMenuSurface = mwcMenuSurfaceShadowRoot?.querySelector('.mdc-menu-surface');
-
-    if (mdcMenuSurface) {
-      if (cardLayout === 'large' || cardLayout === 'large-2-rows') {
-          mdcMenuSurface.style.marginTop = '14px';
-      } else {
-          mdcMenuSurface.style.marginTop = '';
-      }
-    } else {
-        setTimeout(addLayoutWhenShadowRootAvailable, 0);
-    }
-  }
-
-  addLayoutWhenShadowRootAvailable();
 
   const state = getState(context);
 

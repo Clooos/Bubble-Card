@@ -17,7 +17,7 @@ export default `
     }
     ha-select {
         --mdc-shape-medium: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px));
-        --mdc-theme-surface: var(--bubble-select-list-background-color, var(--bubble-select-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))));
+        --mdc-theme-surface: var(--bubble-select-list-background-color, var(--bubble-select-main-background-color, var(--bubble-main-background-color, var(--card-background-color, var(--secondary-background-color)))));
         --mdc-shape-large: 32px;
         --mdc-shape-small: 64px;
         --mdc-menu-max-width: min-content;
@@ -34,7 +34,7 @@ export default `
         position: absolute !important;
         pointer-events: none;
         right: var(--right-value, 46px);
-        top: -5px;
+        top: -28px;
     }
     .mdc-menu, mwc-list, .mdc-list-item {
         pointer-events: auto;
@@ -50,7 +50,7 @@ export default `
         pointer-events: none;
     }
     .bubble-dropdown-container {
-        display: flex;
+        display: flex !important;
         width: auto;
         height: 100%;
         align-items: center;
@@ -66,10 +66,11 @@ export default `
         border-radius: var(--bubble-select-button-border-radius, var(--bubble-border-radius, 20px));
         align-items: center;
         justify-content: center;
-        transition: transform 0.2s;
+        transition: background 0.2s, transform 0.2s;
         pointer-events: none;
     }
     .bubble-dropdown-select {
+        position: relative;
         width: 42px;
     }
     .is-unavailable {
