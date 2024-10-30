@@ -74,7 +74,9 @@ export function changeState(context) {
         }
     }
 
-    displayedState = formattedState + (formattedAttribute ? `${showState ? ' • ' : ''}${formattedAttribute}` : '') + (formattedLastChanged ? `${showState ? ' • ' : ''}${formattedLastChanged}` : '');
+    displayedState = [formattedState, formattedAttribute, formattedLastChanged]
+        .filter((item) => item)
+        .join(' • ');
 
     if (!showName) {
         context.elements.name.classList.add('hidden');
