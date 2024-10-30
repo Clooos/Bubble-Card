@@ -146,6 +146,7 @@ export function updateEntity(context, value) {
       const step = getAttribute(context, "target_temp_step") ?? 0.5;
       let rawValue = (maxValue - minValue) * value / 100 + minValue;
       let adjustedValue = Math.round(rawValue / step) * step;
+      adjustedValue = parseFloat(adjustedValue.toFixed(1));
       context._hass.callService('climate', 'set_temperature', {
           entity_id: context.config.entity,
           temperature: adjustedValue

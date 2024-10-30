@@ -25,6 +25,8 @@ colorScheme.addEventListener('change', updateBackdropColor);
 updateBackdropColor();
 
 export function getBackdrop(context) {
+  const isBackdropHidden = context.config.hide_backdrop ?? true;
+
   if (backdrop) return backdrop;
 
   backdropStyle.innerHTML = backdropStyles;
@@ -35,7 +37,7 @@ export function getBackdrop(context) {
 
   const backdropElement = createElement('div', 'bubble-backdrop backdrop is-hidden');
 
-  if (context.config.hide_backdrop) {
+  if (isBackdropHidden) {
     backdropElement.style.display = 'none';
     backdropElement.style.pointerEvents = 'none';
   }
@@ -148,14 +150,6 @@ export function createStructure(context) {
       context.popUp.addEventListener('touchend', removeHash, { passive: true });
     }
 
-    const contextOnUrlChange = onUrlChange(context);
-
-    setTimeout(() => {
-      contextOnUrlChange();
-    }, 0);
-
-    window.addEventListener('location-changed', contextOnUrlChange);
-    window.addEventListener('popstate', contextOnUrlChange);
     window.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && context.config.hash === location.hash) {
         removeHash();
@@ -209,21 +203,28 @@ export function prepareStructure(context) {
     context.sectionRowContainer = context.sectionRow?.parentElement;
     context.popUp = context.verticalStack.querySelector('#root');
     context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
-    if (!context.config.background_update) {
-      context.verticalStack.removeChild(context.popUp);
+    if (!context.editor && !context.config.background_update) {
+      requestAnimationFrame(() => {
+        context.verticalStack.removeChild(context.popUp);
+      });
     }
 
     context.elements = {};
     getBackdrop(context);
 
     if (context.cardTitle) context.cardTitle.style.display = 'none';
-    hideBackdrop = hideBackdrop || (context.config.hide_backdrop ?? false);
+    hideBackdrop = hideBackdrop || (context.config.hide_backdrop ?? true);
 
     context.popUp.style.setProperty('--custom-height-offset-desktop', context.config.margin_top_desktop ?? '0px');
     context.popUp.style.setProperty('--custom-height-offset-mobile', context.config.margin_top_mobile ?? '0px');
     context.popUp.style.setProperty('--custom-margin', `-${context.config.margin ?? '7px'}`);
     context.popUp.style.setProperty('--custom-popup-filter', hideBackdrop ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
     context.popUp.style.setProperty('--custom-shadow-opacity', (context.config.shadow_opacity ?? 0) / 100);
+
+    const contextOnUrlChange = onUrlChange(context);
+
+    window.addEventListener('location-changed', contextOnUrlChange);
+    window.addEventListener('popstate', contextOnUrlChange);
 
     window.dispatchEvent(new Event('location-changed'));
   } catch (e) {

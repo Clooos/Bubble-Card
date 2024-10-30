@@ -10,23 +10,27 @@ export async function handlePopUp(context) {
         // The card is not added in the DOM
         return;
       }
+      
       prepareStructure(context);
       createHeader(context);
-      if (context.config.entity || context.config.name) {
-          handleButton(context, context.elements.buttonContainer, context.elements.header);
-      }
       createStructure(context);
-      changeStyle(context);
-  }
+  } else if (context.elements) {
+      if (context.config.hash === location.hash || context.config !== context.previousConfig) {
+          if (context.config.entity || context.config.name) {
+              handleButton(context, context.elements.buttonContainer, context.elements.header);
+          }
 
-  if (!context.editor) {
-    if (context.popUp.classList.contains('is-popup-opened')) {
-        if (context.config.entity || context.config.name) {
-            handleButton(context, context.elements.buttonContainer, context.elements.header);
-        }
-        changeStyle(context);
-    }
-    changeTriggered(context);
+          requestAnimationFrame(() => {
+            changeStyle(context);
+          });
+
+          context.previousConfig = context.config;
+      }
+
+      if (!context.editor) {
+          changeTriggered(context);
+      }
+      
+      changeEditor(context);
   }
-  changeEditor(context);
 }

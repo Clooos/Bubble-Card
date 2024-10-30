@@ -1,6 +1,6 @@
 import { tapFeedback, forwardHaptic } from "./utils.ts";
 
-const maxHoldDuration = 500;
+const maxHoldDuration = 650;
 const doubleTapTimeout = 200;
 
 // Global event listener

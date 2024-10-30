@@ -1,5 +1,5 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.ts";
-import { createElement, toggleEntity, getAttribute, isStateOn, forwardHaptic } from "../../tools/utils.ts";
+import { createElement, toggleEntity, getState, getAttribute, isStateOn, forwardHaptic } from "../../tools/utils.ts";
 import styles from "./styles.ts";
 
 export function createStructure(context) {
@@ -8,6 +8,8 @@ export function createStructure(context) {
 
     const entity = context.config.entity;
     const state = context._hass.states[entity];
+    const isCelcius = context._hass.config.unit_system.temperature === '°C';
+    const defaultStep = isCelcius ? 0.5 : 1;
 
     context.elements.climateContainer = createElement('div', 'bubble-climate-container');
     context.elements.climateCard = createElement('div', 'bubble-climate');
@@ -65,31 +67,206 @@ export function createStructure(context) {
 
     addActions(context.elements.icon, context.config, context.config.entity);
 
+        //     let currentMode = getState(context);
+        // let currentTemp = state.attributes.temperature 
+        //     ? getAttribute(context, "temperature")
+        //     : currentMode === 'heat'
+        //         ? getAttribute(context, "target_temp_high")
+        //         : getAttribute(context, "target_temp_low");
+
+    // context.elements.minusButton.addEventListener('click', () => {
+    //     let currentTemp = getAttribute(context, "temperature");
+    //     const temperatureStep = state?.attributes?.target_temp_step ?? defaultStep;
+    //     const minTemperature = state?.attributes?.min_temp ?? 0;
+    //     const maxTemperature = state?.attributes?.max_temp ?? 1000;
+    //     currentTemp = Math.max(minTemperature, currentTemp - temperatureStep);
+
+    //     context._hass.callService('climate', 'set_temperature', {
+    //         entity_id: context.config.entity,
+    //         temperature: currentTemp
+    //     });
+    // });
+
+    // context.elements.plusButton.addEventListener('click', () => {
+    //     let currentTemp = getAttribute(context, "temperature");
+    //     const temperatureStep = state?.attributes?.target_temp_step ?? defaultStep;
+    //     const minTemperature = state?.attributes?.min_temp ?? 0;
+    //     const maxTemperature = state?.attributes?.max_temp ?? 1000;
+    //     currentTemp = Math.min(maxTemperature, currentTemp + temperatureStep);
+    //     currentTemp = parseFloat(currentTemp.toFixed(1));
+
+    //     context._hass.callService('climate', 'set_temperature', {
+    //         entity_id: context.config.entity,
+    //         temperature: currentTemp
+    //     });
+    // });
+
+    // context.elements.minusButton.addEventListener('click', () => {
+    //     let tempAction = ""
+    //     let currentTemp = getAttribute(context, "temperature");
+    //     const temperatureStep = state?.attributes?.target_temp_step ?? defaultStep;
+    //     const minTemperature = state?.attributes?.min_temp ?? 0;
+    //     const maxTemperature = state?.attributes?.max_temp ?? 1000;
+
+    //     if (currentTemp === undefined) {
+
+    //         const mode = getState(context);
+    //         if (mode === 'heat') {
+    //             currentTemp = getAttribute(context, "target_temp_low");
+
+    //         } else if (mode === 'cool') {
+    //             currentTemp = getAttribute(context, "target_temp_high");
+    //         }
+    //     }
+
+    //     currentTemp = Math.max(minTemperature, currentTemp - temperatureStep);
+
+    //     context._hass.callService('climate', 'set_temperature', {
+    //         entity_id: context.config.entity,
+    //         temperature: currentTemp
+    //     });
+    // });
+
+    // context.elements.plusButton.addEventListener('click', () => {
+    //     let currentTemp = getAttribute(context, "temperature");
+    //     const temperatureStep = state?.attributes?.target_temp_step ?? defaultStep;
+    //     const minTemperature = state?.attributes?.min_temp ?? 0;
+    //     const maxTemperature = state?.attributes?.max_temp ?? 1000;
+
+    //     if (currentTemp === undefined) {
+    //         const mode = getState(context);
+    //         if (mode === 'heat') {
+    //             currentTemp = getAttribute(context, "target_temp_low");
+    //         } else if (mode === 'cool') {
+    //             currentTemp = getAttribute(context, "target_temp_high");
+    //         }
+    //     }
+
+    //     currentTemp = Math.min(maxTemperature, currentTemp + temperatureStep);
+    //     currentTemp = parseFloat(currentTemp.toFixed(1));
+
+    //     context._hass.callService('climate', 'set_temperature', {
+    //         entity_id: context.config.entity,
+    //         temperature: currentTemp
+    //     });
+    // });
+
+
+
+
+    // context.elements.minusButton.addEventListener('click', () => {
+    //     let currentTemp = getAttribute(context, "temperature");
+    //     const temperatureStep = state?.attributes?.target_temp_step ?? defaultStep;
+    //     const minTemperature = state?.attributes?.min_temp ?? 0;
+    //     const maxTemperature = state?.attributes?.max_temp ?? 1000;
+    //     let serviceData = {
+    //         entity_id: context.config.entity
+    //     };
+
+    //     if (currentTemp === undefined) {
+    //         const mode = getState(context);
+    //         if (mode === 'heat') {
+    //             currentTemp = getAttribute(context, "target_temp_low");
+    //             serviceData.target_temp_low = currentTemp;
+    //         } else if (mode === 'cool') {
+    //             currentTemp = getAttribute(context, "target_temp_high");
+    //             serviceData.target_temp_high = currentTemp;
+    //         }
+    //     } else {
+    //         currentTemp = Math.max(minTemperature, currentTemp - temperatureStep);
+    //         serviceData.temperature = currentTemp;
+    //     }
+
+    //     context._hass.callService('climate', 'set_temperature', serviceData);
+    // });
+
+    // context.elements.plusButton.addEventListener('click', () => {
+    //     let currentTemp = getAttribute(context, "temperature");
+    //     const temperatureStep = state?.attributes?.target_temp_step ?? defaultStep;
+    //     const minTemperature = state?.attributes?.min_temp ?? 0;
+    //     const maxTemperature = state?.attributes?.max_temp ?? 1000;
+    //     let serviceData = {
+    //         entity_id: context.config.entity
+    //     };
+
+    //     if (currentTemp === undefined) {
+    //         const mode = getState(context);
+    //         if (mode === 'heat') {
+    //             currentTemp = getAttribute(context, "target_temp_low");
+    //             serviceData.target_temp_low = currentTemp;
+    //         } else if (mode === 'cool') {
+    //             currentTemp = getAttribute(context, "target_temp_high");
+    //             serviceData.target_temp_high = currentTemp;
+    //         }
+    //     } else {
+    //         currentTemp = Math.min(maxTemperature, currentTemp + temperatureStep);
+    //         currentTemp = parseFloat(currentTemp.toFixed(1));
+    //         serviceData.temperature = currentTemp;
+    //     }
+
+    //     context._hass.callService('climate', 'set_temperature', serviceData);
+    // });
+
+
     context.elements.minusButton.addEventListener('click', () => {
-        let currentTemp = parseFloat(getAttribute(context, "temperature"));
-        const temperatureStep = state?.attributes?.target_temp_step ?? 0.5;
+        let currentTemp = getAttribute(context, "temperature");
+        const temperatureStep = state?.attributes?.target_temp_step ?? defaultStep;
         const minTemperature = state?.attributes?.min_temp ?? 0;
         const maxTemperature = state?.attributes?.max_temp ?? 1000;
-        currentTemp = Math.max(minTemperature, currentTemp - temperatureStep);
+        let serviceData = {
+            entity_id: context.config.entity
+        };
 
-        context._hass.callService('climate', 'set_temperature', {
-            entity_id: context.config.entity,
-            temperature: currentTemp
-        });
+        if (currentTemp === undefined) {
+            const mode = getState(context);
+            if (mode === 'heat') {
+                currentTemp = getAttribute(context, "target_temp_low");
+                currentTemp = Math.max(minTemperature, currentTemp - temperatureStep);
+                serviceData.target_temp_low = currentTemp;
+            } else if (mode === 'cool') {
+                currentTemp = getAttribute(context, "target_temp_high");
+                currentTemp = Math.max(minTemperature, currentTemp - temperatureStep);
+                serviceData.target_temp_high = currentTemp;
+            }
+        } else {
+            currentTemp = Math.max(minTemperature, currentTemp - temperatureStep);
+            serviceData.temperature = currentTemp;
+        }
+
+        context._hass.callService('climate', 'set_temperature', serviceData);
     });
 
     context.elements.plusButton.addEventListener('click', () => {
-        let currentTemp = parseFloat(getAttribute(context, "temperature"));
-        const temperatureStep = state?.attributes?.target_temp_step ?? 0.5;
+        let currentTemp = getAttribute(context, "temperature");
+        const temperatureStep = state?.attributes?.target_temp_step ?? defaultStep;
         const minTemperature = state?.attributes?.min_temp ?? 0;
         const maxTemperature = state?.attributes?.max_temp ?? 1000;
-        currentTemp = Math.min(maxTemperature, currentTemp + temperatureStep);
+        let serviceData = {
+            entity_id: context.config.entity
+        };
 
-        context._hass.callService('climate', 'set_temperature', {
-            entity_id: context.config.entity,
-            temperature: currentTemp
-        });
+        if (currentTemp === undefined) {
+            const mode = getState(context);
+            if (mode === 'heat') {
+                currentTemp = getAttribute(context, "target_temp_low");
+                currentTemp = Math.min(maxTemperature, currentTemp + temperatureStep);
+                currentTemp = parseFloat(currentTemp.toFixed(1));
+                serviceData.target_temp_low = currentTemp;
+            } else if (mode === 'cool') {
+                currentTemp = getAttribute(context, "target_temp_high");
+                currentTemp = Math.min(maxTemperature, currentTemp + temperatureStep);
+                currentTemp = parseFloat(currentTemp.toFixed(1));
+                serviceData.target_temp_high = currentTemp;
+            }
+        } else {
+            currentTemp = Math.min(maxTemperature, currentTemp + temperatureStep);
+            currentTemp = parseFloat(currentTemp.toFixed(1));
+            serviceData.temperature = currentTemp;
+        }
+
+        context._hass.callService('climate', 'set_temperature', serviceData);
     });
+
 
     context.cardType = `climate`;
 }

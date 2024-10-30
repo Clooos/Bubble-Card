@@ -1,6 +1,6 @@
 export function getTranslatedAttribute(context, state, attribute, option) {
     function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+      return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     switch (attribute) {

@@ -38,6 +38,7 @@ export default `
         grid-auto-flow: column;
         gap: 10px;
         align-self: center;
+        align-items: center;
         margin-right: 8px;
     }
 
@@ -105,7 +106,7 @@ export default `
         height: 100%;
         position: absolute;
         border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
-        opacity: 0.8;
+        opacity: 0.7;
         transition: background-color 2s ease;
     }
 

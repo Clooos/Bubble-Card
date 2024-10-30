@@ -383,7 +383,6 @@ export function changeSubButtonState(context, container = context.content, appen
     }
 }
 
-
 const subButtonsStyles = `
     .bubble-sub-button-container {
         position: relative;

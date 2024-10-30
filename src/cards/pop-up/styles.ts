@@ -32,7 +32,6 @@ export default `
   }
   .bubble-pop-up {
       transition: transform 0.3s ease;
-      background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
       position: fixed;
       width: 100%;
       max-width: 100%;
@@ -49,9 +48,11 @@ export default `
       height: 100%;
       display: flex;
       position: absolute;
+      background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
       border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
       backdrop-filter: var(--custom-popup-filter);
       -webkit-backdrop-filter: var(--custom-popup-filter);
+      /*transform: translate3d(0, 0, 0);*/
   }
   .bubble-pop-up-container::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, and Opera */
@@ -82,6 +83,7 @@ export default `
       }
   }
   .bubble-pop-up.editor {
+      transition: none !important;
       position: inherit !important;
       width: 100% !important;
       backdrop-filter: none !important;
@@ -89,6 +91,7 @@ export default `
       transform: none !important;
       height: auto !important;
       min-width: auto;
+      background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
       border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
   }
   .bubble-header-container {
@@ -206,6 +209,7 @@ export const backdropStyles = `
     display: flex;
     backdrop-filter: var(--custom-backdrop-filter);
     -webkit-backdrop-filter: var(--custom-backdrop-filter);
+    transform: translate3d(0, 0, 0);
   }
 
   .bubble-backdrop.is-visible {
