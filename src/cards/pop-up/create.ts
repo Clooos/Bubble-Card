@@ -157,8 +157,17 @@ export function createStructure(context) {
     }, { passive: true });
 
     let slideToCloseDistance = context.config.slide_to_close_distance ?? 400;
+    let touchStartTime;
+    let isTouchMove = false;
+
+    context.popUp.addEventListener('touchstart', (event) => {
+        startTouchY = event.touches[0].clientY;
+        touchStartTime = Date.now();
+        isTouchMove = false;
+    }, { passive: true });
 
     context.popUp.addEventListener('touchmove', (event) => {
+        isTouchMove = true;
         // Calculate the distance the finger has traveled
         let touchMoveDistance = event.touches[0].clientY - startTouchY;
 
@@ -169,6 +178,21 @@ export function createStructure(context) {
 
         // Update the Y position of the last touch
         lastTouchY = event.touches[0].clientY;
+    }, { passive: true });
+
+    context.popUp.addEventListener('touchend', (event) => {
+        const touchEndTime = Date.now();
+        const touchDuration = touchEndTime - touchStartTime;
+
+        // If it's a quick tap (less than 300ms) and not a move, don't trigger removeHash
+        if (touchDuration < 300 && !isTouchMove) {
+            return;
+        }
+
+        let touchEndDistance = event.changedTouches[0].clientY - startTouchY;
+        if (touchEndDistance > slideToCloseDistance) {
+            removeHash();
+        }
     }, { passive: true });
 
     const existingContainer = context.popUp.querySelector('.bubble-pop-up-container');
