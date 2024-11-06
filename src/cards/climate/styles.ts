@@ -105,7 +105,7 @@ export default `
         width: 100%;
         height: 100%;
         position: absolute;
-        border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-climate-border-radius, var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px)));
         opacity: 0.7;
         transition: background-color 2s ease;
     }
@@ -124,8 +124,8 @@ export default `
         align-items: center;
         justify-content: center;
         margin: 6px;
-        border-radius: var(--bubble-media-player-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
-        background-color: var(--bubble-media-player-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));;
+        border-radius: var(--bubble-climate-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
+        background-color: var(--bubble-climate-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));;
         overflow: hidden;
         position: relative;
         cursor: pointer;
@@ -245,7 +245,7 @@ export default `
 
     .large .bubble-climate-container {
       height: 56px;
-      border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
+      border-radius: var(--bubble-climate-border-radius, var(--bubble-select-border-radius, var(--bubble-border-radius, 32px)));
     }
 
     .large .bubble-icon-container {
