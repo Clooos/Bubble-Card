@@ -105,7 +105,7 @@ export default `
         width: 100%;
         height: 100%;
         position: absolute;
-        border-radius: var(--bubble-climate-border-radius, var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px)));
+        border-radius: var(--bubble-climate-border-radius, var(--bubble-button-border-radius, var(--bubble-border-radius, 32px)));
         opacity: 0.7;
         transition: background-color 2s ease;
     }
