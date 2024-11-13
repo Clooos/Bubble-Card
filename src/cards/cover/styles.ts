@@ -79,6 +79,12 @@ export default `
         color: var(--primary-text-color);
     }
 
+    .bubble-button.disabled {
+        opacity: 0.3 !important;
+        pointer-events: none !important;
+        cursor: none !important;
+    }
+
     .bubble-button {
         display: flex;
         background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));

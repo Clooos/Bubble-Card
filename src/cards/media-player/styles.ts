@@ -58,7 +58,7 @@ export default `
     }
 
     .bubble-play-pause-button {
-        background-color: var(--accent-color);
+        background-color: var(--bubble-accent-color, var(--accent-color));
     }
 
     .bubble-volume-slider {

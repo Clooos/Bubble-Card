@@ -13,7 +13,7 @@ import { createBubbleCardEditor } from './editor/bubble-card-editor.ts';
 
 class BubbleCard extends HTMLElement {
     editor = false;
-    isConnected = false;
+    isConnected;
 
     connectedCallback() {
         this.isConnected = true;

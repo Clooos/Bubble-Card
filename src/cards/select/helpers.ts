@@ -1,6 +1,7 @@
 export function getTranslatedAttribute(context, state, attribute, option) {
-    function capitalizeFirstLetter(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
+    function formatString(string) {
+      const formattedString = string.replace(/_/g, ' ');
+      return formattedString.charAt(0).toUpperCase() + formattedString.slice(1);
     }
 
     switch (attribute) {
@@ -13,7 +14,7 @@ export function getTranslatedAttribute(context, state, attribute, option) {
         case 'preset_modes':
             return context._hass.formatEntityAttributeValue(state, "preset_mode", option);
         default:
-            return capitalizeFirstLetter(option);
+            return formatString(option);
     }
 }
 

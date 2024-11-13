@@ -38,6 +38,9 @@ export function changeEditor(context) {
     // Change the pop-up style for the editor
     if (context.editor || detectedEditor !== null) {
         if (!context.popUp.classList.contains('editor')) {
+            document.body.style.overflow = '';
+            context.popUp?.classList.remove('is-popup-opened');
+            context.popUp?.classList.add('is-popup-closed');
             context.popUp?.classList.add('editor');
         }
 

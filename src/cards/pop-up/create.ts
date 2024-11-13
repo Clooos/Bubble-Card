@@ -116,10 +116,11 @@ export function createStructure(context) {
 
     let existingStyle = context.popUp.querySelector('style');
     
-    if (!existingStyle) {
+    if (!context.stylesAdded || !existingStyle) {
       context.elements.customStyle = createElement('style');
       context.popUp.appendChild(context.elements.customStyle);
       context.popUp.appendChild(context.elements.style);
+      context.stylesAdded = true;
     } else {
       context.elements.customStyle = existingStyle;
     }
@@ -186,6 +187,8 @@ export function createStructure(context) {
       context.elements.popUpContainer = existingContainer;
     }
 
+    context.popUpBackground = createElement("div", 'bubble-pop-up-background');
+    context.popUp.appendChild(context.popUpBackground);
     context.popUp.appendChild(context.elements.headerContainer);
     context.popUp.appendChild(context.elements.popUpContainer);
 
@@ -204,9 +207,7 @@ export function prepareStructure(context) {
     context.popUp = context.verticalStack.querySelector('#root');
     context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
     if (!context.editor && !context.config.background_update) {
-      requestAnimationFrame(() => {
-        context.verticalStack.removeChild(context.popUp);
-      });
+      context.verticalStack.removeChild(context.popUp);
     }
 
     context.elements = {};

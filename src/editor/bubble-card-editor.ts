@@ -189,7 +189,7 @@ export function createBubbleCardEditor() {
         }
 
         get _hide_backdrop() {
-            return this._config.hide_backdrop || true;
+            return this._config.hide_backdrop ?? true;
         }
 
         get _hide_gradient() {
@@ -1108,7 +1108,7 @@ export function createBubbleCardEditor() {
                                 <ha-expansion-panel outlined>
                                     <h4 slot="header">
                                       <ha-icon icon="mdi:palette"></ha-icon>
-                                      Media-player styling
+                                      Media player styling
                                     </h4>
                                     <div class="content"> 
                                         <ha-formfield .label="Optional - Blurred media cover in background">
@@ -1226,75 +1226,32 @@ export function createBubbleCardEditor() {
                     </div>
                 `;
             } else if (this._config?.card_type === 'climate') {
-                // if (
-                //     this._config.card_type === "climate" && 
-                //     !this.climateSubButtonsAdded &&
-                //     this._config.entity && 
-                //     (!this._config.sub_button || this._config.sub_button.length === 0)
-                // ){
-                //     // Add default climate sub-buttons
-                //     const shouldAddHVACModes = this.hass.states[this._config.entity]?.attributes?.hvac_modes;
-                //     this._config.sub_button = [
-                //         shouldAddHVACModes ? { 
-                //             name: 'HVAC modes menu', 
-                //             select_attribute: 'hvac_modes', 
-                //             show_arrow: false 
-                //         } : null,
-                //         { 
-                //             name: 'Climate temperature', 
-                //             show_attribute: true, 
-                //             attribute: 'temperature', 
-                //             icon: 'mdi:thermometer', 
-                //             state_background: false 
-                //         }
-                //     ].filter(Boolean);
-
-                //     this.climateSubButtonsAdded = true;
-                // }
-
                 if (
                     this._config.card_type === "climate" && 
                     !this.climateSubButtonsAdded &&
-                    this._config.entity && 
-                    (!this._config.sub_button || this._config.sub_button.length === 0)
-                ){
-                    // Add default climate sub-buttons
-                    const hasHVACModes = this.hass.states[this._config.entity]?.attributes?.hvac_modes;
-                    const hasTemperature = this.hass.states[this._config.entity]?.attributes?.temperature;
-                    const hasTargetTempLow = this.hass.states[this._config.entity]?.attributes?.target_temp_low;
-                    const hasTargetTempHigh = this.hass.states[this._config.entity]?.attributes?.target_temp_high;
+                    this._config.entity
+                ) {
+                    const shouldAddHVACModes = this.hass.states[this._config.entity]?.attributes?.hvac_modes;
 
-                    this._config.sub_button = [
-                        hasHVACModes ? { 
-                            name: 'HVAC modes menu', 
-                            select_attribute: 'hvac_modes', 
-                            show_arrow: false 
-                        } : null,
-                        hasTemperature ? { 
-                            name: 'Climate temperature', 
-                            show_attribute: true, 
-                            attribute: 'temperature', 
-                            icon: 'mdi:thermometer', 
-                            state_background: false 
-                        } : null,
-                        hasTargetTempLow ? { 
-                            name: 'Target Temp Low', 
-                            show_attribute: true, 
-                            attribute: 'target_temp_low', 
-                            icon: 'mdi:snowflake', 
-                            state_background: false 
-                        } : null,
-                        hasTargetTempHigh ? { 
-                            name: 'Target Temp High', 
-                            show_attribute: true, 
-                            attribute: 'target_temp_high', 
-                            icon: 'mdi:fire', 
-                            state_background: false 
-                        } : null
-                    ].filter(Boolean);
+                    if (!this._config.sub_button || this._config.sub_button.length === 0) {
+                        this._config.sub_button = [
+                            shouldAddHVACModes ? { 
+                                name: 'HVAC modes menu', 
+                                select_attribute: 'hvac_modes', 
+                                state_background: false,
+                                show_arrow: false 
+                            } : null
+                        ].filter(Boolean);
+                    } else {
+                        // Remove the previously added temperature sub-button if it exists when the editor is opened
+                        this._config.sub_button = this._config.sub_button.filter(button => 
+                            !(button.attribute === 'temperature' && button.icon === 'mdi:thermometer')
+                        );
+                    }
 
                     this.climateSubButtonsAdded = true;
                 }
+
 
                 return html`
                     <div class="card-config">

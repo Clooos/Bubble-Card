@@ -1,5 +1,10 @@
 import { initializesubButtonIcon } from '../../tools/global-changes.ts';
-import { getClimateColor, getHvacModeIcon, getFanModeIcon, createHaAttributeIcon } from './helpers.ts';
+import { 
+    getClimateColor, 
+    getHvacModeIcon, 
+    getFanModeIcon, 
+    createHaAttributeIcon 
+} from './helpers.ts';
 import { 
     applyScrollingEffect,
     getIcon,
@@ -18,10 +23,11 @@ export function changeIcon(context) {
     const isOn = isStateOn(context);
     const icon = getIcon(context);
     const state = getState(context);
+    const stateObj = context._hass.states[context.config.entity];
 
     if (icon !== '') {
         context.elements.icon.icon = icon;
-        context.elements.icon.style.color = isOn ? getClimateColor(state) : 'inherit';
+        context.elements.icon.style.color = isOn ? getClimateColor(stateObj) : 'inherit';
         context.elements.icon.style.display = '';
     } else {
         context.elements.icon.style.display = 'none';
@@ -54,17 +60,48 @@ export function changeStatus(context) {
     }
 }
 
+export function changeTemperature(context) {
+    const currentTemp = getAttribute(context, "temperature");
+    if (currentTemp !== context.previousTemp) {
+        context.previousTemp = currentTemp;
+        if (context.elements.tempDisplay) {
+            context.elements.tempDisplay.innerText = parseFloat(currentTemp).toFixed(1);
+        }
+    }
+}
+
+export function changeTargetTempLow(context) {
+    const targetTempLow = getAttribute(context, "target_temp_low");
+    if (targetTempLow !== context.previousTargetTempLow) {
+        context.previousTargetTempLow = targetTempLow;
+        if (context.elements.lowTempDisplay) {
+            context.elements.lowTempDisplay.innerText = parseFloat(targetTempLow).toFixed(1);
+        }
+    }
+}
+
+export function changeTargetTempHigh(context) {
+    const targetTempHigh = getAttribute(context, "target_temp_high");
+    if (targetTempHigh !== context.previousTargetTempHigh) {
+        context.previousTargetTempHigh = targetTempHigh;
+        if (context.elements.highTempDisplay) {
+            context.elements.highTempDisplay.innerText = parseFloat(targetTempHigh).toFixed(1);
+        }
+    }
+}
+
 export function changeStyle(context) {
     initializesubButtonIcon(context);
     setLayout(context);
 
+    const stateObj = context._hass.states[context.config.entity];
     const state = getState(context);
     const isOn = state !== "off" && state !== "unknown";
 
     if (context.previousState !== state) {
         context.previousState = state;
         const element = context.elements.colorBackground;
-        element.style.backgroundColor = `var(--bubble-climate-background-color, ${getClimateColor(state)})`;
+        element.style.backgroundColor = `var(--bubble-climate-background-color, ${getClimateColor(stateObj)})`;
     }
 
     const cardLayout = context.config.card_layout;

@@ -42,6 +42,35 @@ export default `
         margin-right: 8px;
     }
 
+    .bubble-temperature-container, .bubble-low-temp-container, .bubble-high-temp-container {
+        display: inline-flex;
+        position: relative;
+        font-size: 12px;
+        white-space: nowrap;
+        justify-content: center;
+        align-items: center;
+        width: auto;
+        height: 100%;
+        border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
+        background-color: var(--bubble-climate-button-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))));
+    }
+
+    .bubble-low-temp-container {
+        color: var(--state-climate-heat-color, var(--state-climate-active-color, var(--state-active-color)));
+    }
+
+    .bubble-high-temp-container {
+        color: var(--state-climate-cool-color, var(--state-climate-active-color, var(--state-active-color)));
+    }
+
+    .bubble-target-temperature-container {
+        display: flex;
+    }
+
+    .bubble-low-temp-container {
+        margin-right: 8px;
+    }
+
     .bubble-climate-minus-button,
     .bubble-climate-plus-button {
         display: flex;
@@ -53,11 +82,16 @@ export default `
         height: 36px;
         vertical-align: middle;
         font-size: 18px;
-        border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
-        padding: 0 8px;
         color: var(--primary-text-color);
-        background-color: var(--bubble-climate-button-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))));
         cursor: pointer;
+    }
+
+    .bubble-climate-minus-button-icon,
+    .bubble-climate-plus-button-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        --mdc-icon-size: 16px;
     }
 
     .bubble-feedback-container {
@@ -81,36 +115,17 @@ export default `
         pointer-events: none;
     }
 
-    .bubble-temperature-container {
-        display: inline-flex;
-        position: relative;
-        font-weight: 400;
-        font-size: 14px;
-        justify-content: center;
-        align-items: center;
-        width: auto;
-        height: 100%;
-        padding: 0 12px 0 8px;
-        border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
-        background-color: var(--bubble-climate-button-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))));
-    }
-
-    .bubble-temperature-icon {
-        --mdc-icon-size: 16px;
-        margin-right: 4px;
-    }
-
     .bubble-color-background {
         display: flex;
         width: 100%;
         height: 100%;
         position: absolute;
-        border-radius: var(--bubble-climate-border-radius, var(--bubble-button-border-radius, var(--bubble-border-radius, 32px)));
+        border-radius: var(--bubble-climate-border-radius, var(--bubble-border-radius, 32px));
         opacity: 0.7;
         transition: background-color 2s ease;
     }
 
-    .is-unavailable .bubble-button-card {
+    .is-unavailable .bubble-climate {
         cursor: not-allowed;
     }
 
@@ -125,7 +140,7 @@ export default `
         justify-content: center;
         margin: 6px;
         border-radius: var(--bubble-climate-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
-        background-color: var(--bubble-climate-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));;
+        background-color: var(--bubble-climate-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
         overflow: hidden;
         position: relative;
         cursor: pointer;
@@ -141,8 +156,7 @@ export default `
       opacity: 1;
     }
 
-    .bubble-icon,
-    .bubble-mute-button {
+    .bubble-icon {
         display: flex;
         position: absolute;
         height: 38px;
@@ -165,10 +179,6 @@ export default `
         margin: 2px 0;
         position: relative;
         white-space: nowrap;
-    }
-
-    .bubble-title {
-        font-weight: 600;
     }
 
     .bubble-name-container {
@@ -196,45 +206,8 @@ export default `
         font-weight: normal;
     }
 
-    ha-control-select-menu {
-        box-sizing: border-box;
-        --control-select-menu-height: 36px;
-        width: 36px !important;
-        --control-select-menu-border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
-        line-height: 1.2;
-        display: block;
-        width: 100%;
-        --control-select-menu-background-color: var(--bubble-climate-button-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))));
-        --control-select-menu-background-opacity: 1;
-        --ha-ripple-color: none;
-        --control-select-menu-padding: 8px;
-    }
-
-    ha-list-item {
-        border-radius: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 24px));
-        margin: 0 8px;
-    }
-
     .bubble-sub-button-container {
         right: 0 !important;
-    }
-
-    @media screen and (max-width: 250px) {
-        .bubble-previous-button {
-            display: none;
-        }
-    }
-
-    @media screen and (max-width: 206px) {
-        .bubble-next-button {
-            display: none;
-        }
-    }
-
-    @media screen and (max-width: 160px) {
-        .bubble-volume-button {
-            display: none;
-        }
     }
 
     @keyframes tap-feedback {
@@ -245,7 +218,7 @@ export default `
 
     .large .bubble-climate-container {
       height: 56px;
-      border-radius: var(--bubble-climate-border-radius, var(--bubble-select-border-radius, var(--bubble-border-radius, 32px)));
+      border-radius: var(--bubble-climate-border-radius, var(--bubble-border-radius, 32px));
     }
 
     .large .bubble-icon-container {

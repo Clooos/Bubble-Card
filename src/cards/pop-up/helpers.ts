@@ -134,10 +134,10 @@ export function openPopup(context) {
     if (context.popUp.classList.contains('is-popup-opened')) return;
     
     clearAllTimeouts(context);
-    toggleBackdrop(context, true);
     appendPopup(context, true);
 
     requestAnimationFrame(() => {
+        toggleBackdrop(context, true);
         updatePopupClass(context.popUp, true);
         displayContent(context);
     });

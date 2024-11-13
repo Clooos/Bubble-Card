@@ -10,9 +10,14 @@ import {
 import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 
 export function changeIcon(context) {
+  const stateObj = context._hass.states[context.config.entity];
   const iconOpen = context.config.icon_open;
   const iconClosed = context.config.icon_close;
   const isOpen = getState(context) !== 'closed';
+  const currentPosition = stateObj.attributes.current_position;
+  const assumedState = stateObj.attributes.assumed_state;
+  const isFullyOpen = assumedState && !currentPosition ? false : currentPosition ? currentPosition === 100 : isOpen;
+  const isFullyClosed = assumedState && !currentPosition ? false : currentPosition ? currentPosition === 0 : !isOpen;
   const isCurtains = getAttribute(context, 'device_class') === 'curtain';
 
   context.elements.icon.icon = isOpen ? 
@@ -20,6 +25,18 @@ export function changeIcon(context) {
     getIcon(context, context.config.entity, context.config.icon_close);
   context.elements.iconOpen.icon = context.config.icon_up || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
   context.elements.iconClose.icon = context.config.icon_down || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
+
+  if (isFullyOpen) {
+    context.elements.buttonOpen.classList.add('disabled');
+  } else {
+    context.elements.buttonOpen.classList.remove('disabled');
+  }
+
+  if (isFullyClosed) {
+    context.elements.buttonClose.classList.add('disabled');
+  } else {
+    context.elements.buttonClose.classList.remove('disabled');
+  }
 }
 export function changeName(context) {
     const name = getName(context);

@@ -2,7 +2,9 @@ import { changeState, changeSubButtonState } from "../../tools/global-changes.ts
 import {
     changeStatus,
     changeName,
-    changeTemperatureInfo,
+    changeTemperature,
+    changeTargetTempLow,
+    changeTargetTempHigh,
     changeDisplayedInfo,
     changeIcon,
     changeSlider,
@@ -21,6 +23,9 @@ export function handleClimate(context) {
     changeName(context);
     changeIcon(context);
     changeState(context);
+    changeTemperature(context);
+    changeTargetTempLow(context);
+    changeTargetTempHigh(context);
     changeSubButtonState(context, context.content, context.elements.buttonContainer, true);
     changeStyle(context);
 }

@@ -1,11 +1,10 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.ts";
 import { createElement, toggleEntity, throttle, forwardHaptic, isEntityType } from "../../tools/utils.ts";
-import { getButtonType, onSliderChange } from "./helpers.ts";
+import { getButtonType, onSliderChange, updateEntity } from "./helpers.ts";
 import styles from "./styles.ts";
 
 export function createStructure(context, container = context.content, appendTo = container) {
   const buttonType = getButtonType(context);
-
   context.dragging = false;
 
   if (!context.elements) context.elements = {};
@@ -28,8 +27,8 @@ export function createStructure(context, container = context.content, appendTo =
 
   context.elements.iconContainer.appendChild(context.elements.icon);
   context.elements.iconContainer.appendChild(context.elements.image);
-
   context.elements.nameContainer.appendChild(context.elements.name);
+  
   if (buttonType !== "name") {
       context.elements.nameContainer.appendChild(context.elements.state);    
   }
@@ -58,6 +57,7 @@ export function createStructure(context, container = context.content, appendTo =
       context.cardType = `button-${buttonType}`;
   }
 }
+
 export function createSwitchStructure(context) {
   addActions(context.elements.iconContainer, context.config);
   
@@ -69,6 +69,7 @@ export function createSwitchStructure(context) {
   addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, switchDefaultActions);
   addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
+
 export function createNameStructure(context) {
     const nameDefaultActions = {
         tap_action: { action: "none" },
@@ -80,6 +81,7 @@ export function createNameStructure(context) {
     addActions(context.elements.buttonBackground, context.config.button_action, context.config.entity, nameDefaultActions);
     addFeedback(context.elements.buttonBackground, context.elements.feedback);
 }
+
 export function createStateStructure(context) {
     const stateDefaultActions = {
         tap_action: { action: "more-info" },
@@ -107,16 +109,11 @@ export function createSliderStructure(context) {
 
   context.elements.buttonCardContainer.addEventListener('pointercancel', onPointerCancel);
   context.elements.buttonCardContainer.addEventListener('pointerdown', (e) => {
-      // Vérifie si l'élément cliqué a la classe .bubble-action
-      if (e.target.closest('.bubble-action')) {
-          return;
-      }
+      if (e.target.closest('.bubble-action')) return;
 
       context.elements.buttonCardContainer.setPointerCapture(e.pointerId);
 
-      if (context.card.classList.contains('is-unavailable')) {
-          return;
-      }
+      if (context.card.classList.contains('is-unavailable')) return;
 
       context.dragging = true;
       initialX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
@@ -136,21 +133,19 @@ export function createSliderStructure(context) {
     window.removeEventListener('pointerup', onPointerUp);
   }
 
+  const throttledUpdateEntity = throttle(updateEntity, 200);
+
   function onPointerMove(e) {
       e.stopPropagation();
 
-      // Ignore les mouvements de pointeur si l'élément cliqué a la classe .bubble-action
-      if (e.target.closest('.bubble-action')) {
-          return;
-      }
+      if (e.target.closest('.bubble-action')) return;
 
       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-      if (Math.abs(initialX - moveX) > 10) {
-        onSliderChange(context, moveX, true);
-      }
+      
+      const rangedPercentage = onSliderChange(context, moveX);
 
-      if (!context.dragging) {
-        onSliderChange(context, moveX);
+      if (context.config.slider_live_update) {
+        throttledUpdateEntity(context, rangedPercentage);
       }
   }
 
@@ -164,7 +159,12 @@ export function createSliderStructure(context) {
       }, 1400);
 
       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-      onSliderChange(context, moveX);
+      const finalPercentage = onSliderChange(context, moveX);
+
+      if (!context.config.slider_live_update) {
+        updateEntity(context, finalPercentage);
+      }
+
       forwardHaptic("selection");
 
       context.elements.buttonCardContainer.classList.remove('is-dragging');
@@ -172,4 +172,3 @@ export function createSliderStructure(context) {
       window.removeEventListener('pointerup', onPointerUp);
   }
 }
-

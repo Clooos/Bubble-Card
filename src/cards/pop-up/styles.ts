@@ -42,17 +42,17 @@ export default `
       z-index: 5 !important;
       bottom: calc(-56px - var(--custom-height-offset-mobile));
   }
-  .bubble-pop-up::before {
-      content: '';
+  .bubble-pop-up-background {
       width: 100%;
       height: 100%;
       display: flex;
+      top: 0;
+      left: 0;
       position: absolute;
       background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
       border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
       backdrop-filter: var(--custom-popup-filter);
       -webkit-backdrop-filter: var(--custom-popup-filter);
-      /*transform: translate3d(0, 0, 0);*/
   }
   .bubble-pop-up-container::-webkit-scrollbar {
       display: none; /* for Chrome, Safari, and Opera */
@@ -84,15 +84,16 @@ export default `
   }
   .bubble-pop-up.editor {
       transition: none !important;
-      position: inherit !important;
+      position: relative !important;
+      top: 0;
+      left: 0;
       width: 100% !important;
       backdrop-filter: none !important;
       display: flex !important;
       transform: none !important;
       height: auto !important;
       min-width: auto;
-      background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
-      border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
+      z-index: 0 !important;
   }
   .bubble-header-container {
       display: inline-flex;
@@ -138,11 +139,19 @@ export default `
   .bubble-pop-up.editor > .bubble-pop-up-container {
       padding-bottom: 18px !important;
       mask-image: none;
-      -webkit-mask-image: none;    
+      -webkit-mask-image: none;  
+      overflow: hidden;  
   }
-  .bubble-pop-up.editor::before {
-      content: '';
-      display: none;
+  .editor .bubble-pop-up-background {
+      width: 100%;
+      height: 100%;
+      left: 0px;
+      top: 0px;
+      z-index: -1;
+      display: flex;
+      position: absolute;
+      background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
+      border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
   }

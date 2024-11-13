@@ -1,10 +1,26 @@
 import { tapFeedback, forwardHaptic } from "./utils.ts";
 
-const maxHoldDuration = 650;
+const maxHoldDuration = 400;
 const doubleTapTimeout = 200;
+const scrollDetectionDelay = 300; // Delay before confirming hold action
+const movementThreshold = 5; // Movement threshold to consider as scroll
+
+window.isScrolling = false; // Track if scrolling is active
+
+// Disable actions during scroll
+function disableActionsDuringScroll() {
+  window.isScrolling = true;
+  setTimeout(() => {
+    window.isScrolling = false;
+  }, 150);
+}
+
+document.addEventListener('scroll', disableActionsDuringScroll, { passive: true });
 
 // Global event listener
 document.body.addEventListener('pointerdown', (event) => {
+  if (window.isScrolling) return; // Do nothing if scrolling is active
+
   const path = event.composedPath();
   let actionElement = null;
 
@@ -32,7 +48,7 @@ document.body.addEventListener('pointerdown', (event) => {
     actionElement.addEventListener('pointerup', actionElement.actionHandler.handleEnd.bind(actionElement.actionHandler), { once: true });
     document.addEventListener('scroll', actionElement.actionHandler.handleScroll.bind(actionElement.actionHandler), { once: true });
   }
-});
+}, { passive: true });
 
 export function callAction(element, actionConfig, action) {
   setTimeout(() => {
@@ -44,7 +60,6 @@ export function callAction(element, actionConfig, action) {
         action: action,
       };
     } else {
-      // Handle direct call with any action name (e.g. open_action)
       element.modifiedConfig = {
         ...actionConfig,
         tap_action: {
@@ -67,22 +82,16 @@ export function callAction(element, actionConfig, action) {
 export function addActions(element, config, defaultEntity, defaultActions) {
   element.classList.add('bubble-action');
 
-  // Store full action configs as JSON strings
   element.dataset.entity = config?.entity || defaultEntity;
   element.dataset.tapAction = JSON.stringify(config?.tap_action || defaultActions?.tap_action || { action: "more-info" });
   element.dataset.doubleTapAction = JSON.stringify(config?.double_tap_action || defaultActions?.double_tap_action || { action: "toggle" });
   element.dataset.holdAction = JSON.stringify(config?.hold_action || defaultActions?.hold_action || { action: "toggle" });
 
-  // Set cursor style based on actions
   const tapAction = JSON.parse(element.dataset.tapAction);
   const doubleTapAction = JSON.parse(element.dataset.doubleTapAction);
   const holdAction = JSON.parse(element.dataset.holdAction);
 
-  if (tapAction.action === "none" && doubleTapAction.action === "none" && holdAction.action === "none") {
-    element.style.cursor = '';
-  } else {
-    element.style.cursor = 'pointer';
-  }
+  element.style.cursor = (tapAction.action === "none" && doubleTapAction.action === "none" && holdAction.action === "none") ? '' : 'pointer';
 }
 
 class ActionHandler {
@@ -91,75 +100,71 @@ class ActionHandler {
     this.config = config;
     this.sendActionEvent = sendActionEvent;
     this.tapTimeout = null;
-    this.holdTimeout = null;  // Hold timeout to delay the hold action
-    this.lastTap = 0;
-    this.startTime = null;
-    this.holdFired = false;  // Flag to check if hold action was triggered
+    this.holdTimeout = null;
+    this.startX = 0;
+    this.startY = 0;
+    this.holdFired = false;
+    this.pointerMoveListener = this.detectScrollLikeMove.bind(this);
   }
 
   handleStart(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
+    if (window.isScrolling || this.isDisconnected) return;
 
-    this.startTime = Date.now();
-    clearTimeout(this.tapTimeout);  // Clear any existing tap timeout
-    clearTimeout(this.holdTimeout); // Clear any existing hold timeout
-    this.holdFired = false;         // Reset hold fired flag
+    this.startX = e.clientX;
+    this.startY = e.clientY;
+    this.holdFired = false;
 
-    // Trigger hold action after maxHoldDuration if hold action is valid
-    const holdAction = this.config.hold_action || { action: 'none' };
-    if (holdAction.action !== 'none') {
-      this.holdTimeout = setTimeout(() => {
+    document.addEventListener('pointermove', this.pointerMoveListener);
+
+    this.holdTimeout = setTimeout(() => {
+      const holdAction = this.config.hold_action || { action: 'none' };
+      if (holdAction.action !== 'none' && !window.isScrolling) {
         this.sendActionEvent(this.element, this.config, 'hold');
-        this.holdFired = true;  // Mark that hold action was triggered
-      }, maxHoldDuration);
+        this.holdFired = true;
+      }
+    }, maxHoldDuration);
+  }
+
+  detectScrollLikeMove(e) {
+    const deltaX = Math.abs(e.clientX - this.startX);
+    const deltaY = Math.abs(e.clientY - this.startY);
+
+    if (deltaX > movementThreshold || deltaY > movementThreshold) {
+      clearTimeout(this.holdTimeout);
+      this.holdTimeout = null;
+      document.removeEventListener('pointermove', this.pointerMoveListener);
     }
   }
 
   handleEnd(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
+    if (window.isScrolling || this.isDisconnected) return;
 
-    if (this.startTime === null) return;
+    clearTimeout(this.holdTimeout);
+    this.holdTimeout = null;
+    document.removeEventListener('pointermove', this.pointerMoveListener);
+
+    if (this.holdFired) return;
 
     const currentTime = Date.now();
-    const timeSinceLastTap = currentTime - this.lastTap;
-
-    // Clear hold timeout if it's not triggered yet
-    clearTimeout(this.holdTimeout);
-    this.holdTimeout = null; // Reset hold timeout
-
     const doubleTapAction = this.config.double_tap_action || { action: 'none' };
     const tapAction = this.config.tap_action || { action: 'none' };
 
-    // If hold action was fired, prevent any tap or double-tap
-    if (this.holdFired) {
-      this.startTime = null;  // Reset start time and return
-      return;
-    }
-
-    // Double-tap detection
-    if (timeSinceLastTap < doubleTapTimeout && doubleTapAction.action !== 'none') {
-      clearTimeout(this.tapTimeout);  // Cancel pending single-tap action
+    if (this.lastTap && (currentTime - this.lastTap < doubleTapTimeout) && doubleTapAction.action !== 'none') {
+      clearTimeout(this.tapTimeout);
       this.sendActionEvent(this.element, this.config, 'double_tap');
     } else if (tapAction.action !== 'none') {
-      // Start timeout for single-tap if no double-tap detected
       this.tapTimeout = setTimeout(() => {
         this.sendActionEvent(this.element, this.config, 'tap');
-      }, doubleTapTimeout);  // Wait for double-tap window
+      }, doubleTapTimeout);
     }
 
-    // Update lastTap timestamp
     this.lastTap = currentTime;
-    this.startTime = null;  // Reset start time
   }
 
   handleScroll() {
-    // Reset hold timeout if it's not triggered yet
     clearTimeout(this.holdTimeout);
-    this.holdTimeout = null; // Reset hold timeout
+    this.holdTimeout = null;
+    document.removeEventListener('pointermove', this.pointerMoveListener);
   }
 }
 
