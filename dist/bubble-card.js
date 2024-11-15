@@ -863,12 +863,12 @@
                 ${"sub_button"===n&&(e?.show_background??1)&&(e?.entity?e?.entity?.startsWith("light"):this._config?.entity?.startsWith("light"))?ee`
                     <ha-formfield .label="Optional - Background color based on light color">
                         <ha-switch
-                            aria-label="Optional - Background color based light color"
+                            aria-label="Optional - Background color based on light color"
                             .checked=${e?.light_background??!0}
                             @change="${e=>this._arrayValueChange(a,{light_background:e.target.checked},n)}"
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Background color based light color</label> 
+                            <label class="mdc-label">Optional - Background color based on light color</label> 
                         </div>
                     </ha-formfield>
                 `:""}
