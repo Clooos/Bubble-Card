@@ -193,10 +193,14 @@ export function onUrlChange(context) {
 
 export function onEditorChange(context) {
     const { hideBackdrop } = getBackdrop(context);
-    if (context.editor || context.verticalStack.host?.closest('hui-card-preview')) {
+    const host = context.verticalStack.host;
+    const detectedEditor = host?.closest('hui-card-preview');
+
+    if (context.editor || detectedEditor) {
         hideBackdrop();
         clearTimeout(context.removeDomTimeout);
-        if (!context.verticalStack.contains(context.popUp)) {
+
+        if (!detectedEditor && !context.verticalStack.contains(context.popUp)) {
             context.verticalStack.appendChild(context.popUp);
         }
     }

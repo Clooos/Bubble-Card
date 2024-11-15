@@ -163,6 +163,7 @@ export default `
         width: 38px;
         justify-content: center;
         align-items: center;
+        transition: all 2s;
     }
 
     .bubble-entity-picture {
@@ -208,6 +209,10 @@ export default `
 
     .bubble-sub-button-container {
         right: 0 !important;
+    }
+
+    .hidden {
+        display: none !important;
     }
 
     @keyframes tap-feedback {

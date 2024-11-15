@@ -145,6 +145,17 @@ export function callSelectService(context, entity, selectedOption, config) {
             }
             break;
 
+        case 'fan':
+            switch (config.select_attribute) {
+                case 'preset_modes':
+                    context._hass.callService('fan', 'set_preset_mode', {
+                        entity_id: entity,
+                        preset_mode: selectedOption
+                    });
+                    break;
+            }
+            break;
+
         case 'light':
             switch (config.select_attribute) {
                 case 'effect_list':

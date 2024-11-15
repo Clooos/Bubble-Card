@@ -61,17 +61,31 @@ export function changeStatus(context) {
 }
 
 export function changeTemperature(context) {
-    const currentTemp = getAttribute(context, "temperature");
-    if (currentTemp !== context.previousTemp) {
-        context.previousTemp = currentTemp;
+    const temperature = getAttribute(context, "temperature");
+
+    if (temperature === '') {
+        context.elements.temperatureContainer?.classList.add('hidden');
+    } else {
+        context.elements.temperatureContainer?.classList.remove('hidden');
+    }
+
+    if (temperature !== context.previousTemp) {
+        context.previousTemp = temperature;
         if (context.elements.tempDisplay) {
-            context.elements.tempDisplay.innerText = parseFloat(currentTemp).toFixed(1);
+            context.elements.tempDisplay.innerText = parseFloat(temperature).toFixed(1);
         }
     }
 }
 
 export function changeTargetTempLow(context) {
     const targetTempLow = getAttribute(context, "target_temp_low");
+
+    if (targetTempLow === '') {
+        context.elements.targetTemperatureContainer?.classList.add('hidden');
+    } else {
+        context.elements.targetTemperatureContainer?.classList.remove('hidden');
+    }
+
     if (targetTempLow !== context.previousTargetTempLow) {
         context.previousTargetTempLow = targetTempLow;
         if (context.elements.lowTempDisplay) {

@@ -11,9 +11,11 @@ import { handleSelect } from './cards/select/index.ts';
 import { handleClimate } from './cards/climate/index.ts';
 import { createBubbleCardEditor } from './editor/bubble-card-editor.ts';
 
+let editor;
+
 class BubbleCard extends HTMLElement {
     editor = false;
-    isConnected;
+    isConnected = false;
 
     connectedCallback() {
         this.isConnected = true;

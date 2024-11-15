@@ -184,6 +184,7 @@ export function changeSubButtonState(context, container = context.content, appen
         const showIcon = subButton.show_icon ?? true;
         const showBackground = subButton.show_background ?? true;
         const stateBackground = subButton.state_background ?? true;
+        const lightBackground = subButton.light_background ?? true;
         const showArrow = subButton.show_arrow ?? true;
 
         const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || subButton.select_attribute;
@@ -292,7 +293,9 @@ export function changeSubButtonState(context, container = context.content, appen
         // Handle background display
         if (showBackground) {
             if (isOn && stateBackground) {
-                subButtonElement.style.setProperty('--bubble-sub-button-light-background-color', getIconColor(context, entity, 0.8));
+                if (lightBackground) {
+                    subButtonElement.style.setProperty('--bubble-sub-button-light-background-color', getIconColor(context, entity, 0.8));
+                }
                 subButtonElement.classList.add('background-on');
                 subButtonElement.classList.remove('background-off');
             } else {

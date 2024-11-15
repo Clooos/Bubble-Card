@@ -1406,6 +1406,18 @@ export function createBubbleCardEditor() {
                         </div>
                     </ha-formfield>
                 ` : ''}
+                ${array === 'sub_button' && (context?.show_background ?? true) && (context?.entity ? context?.entity?.startsWith("light") : this._config?.entity?.startsWith("light")) ? html`
+                    <ha-formfield .label="Optional - Background color based on light color">
+                        <ha-switch
+                            aria-label="Optional - Background color based light color"
+                            .checked=${context?.light_background ?? true}
+                            @change="${(ev) => this._arrayValueChange(index, { light_background: ev.target.checked }, array)}"
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Background color based light color</label> 
+                        </div>
+                    </ha-formfield>
+                ` : ''}
                 <ha-formfield .label="Optional - Show icon">
                     <ha-switch
                         aria-label="Optional - Show icon"

@@ -7,62 +7,55 @@ import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 export function changeEditor(context) {
     if (!context.verticalStack) return;
 
-    const detectedEditor = context.verticalStack.host?.closest('hui-card-preview') || 
-                           context.verticalStack.host?.closest('hui-card[preview][class]') || 
-                           context.verticalStack.host?.getRootNode().host?.closest('hui-section[preview][class]');
+    const host = context.verticalStack.host;
+    const detectedEditor = host?.closest('hui-card-preview') || 
+                           host?.closest('hui-card[preview][class]') || 
+                           host?.getRootNode().host?.closest('hui-section[preview][class]');
 
-    const isPopUpOpened = context.popUp?.classList.contains('is-popup-opened');
-    const isCard = context.sectionRow.tagName.toLowerCase() === 'hui-card';
+    const popUp = context.popUp;
+    const sectionRow = context.sectionRow;
+    const sectionRowContainer = context.sectionRowContainer;
+    const elements = context.elements;
 
-    if (context.previousEditorState === undefined) {
-        context.previousEditorState = null;
-    }
-    if (context.previousDetectedEditor === undefined) {
-        context.previousDetectedEditor = null;
-    }
+    const isPopUpOpened = popUp?.classList.contains('is-popup-opened');
+    const isCard = sectionRow.tagName.toLowerCase() === 'hui-card';
+
+    context.previousEditorState = context.previousEditorState ?? null;
+    context.previousDetectedEditor = context.previousDetectedEditor ?? null;
 
     // Fix the empty space caused by the pop-ups in the section view
     if (!isPopUpOpened && isCard) {
         if (!context.editor && context.editorAccess && !detectedEditor) {
-            if (context.sectionRow.style.display !== "none") {
-                context.sectionRow.toggleAttribute("hidden", true);
-                context.sectionRow.style.display = "none";
+            if (sectionRow.style.display !== "none") {
+                sectionRow.toggleAttribute("hidden", true);
+                sectionRow.style.display = "none";
             }
-        } else if (context.sectionRowContainer?.classList.contains('card') && context.editor) {
-            if (context.sectionRowContainer.style.display !== '') {
-                context.sectionRowContainer.style.display = '';
+        } else if (sectionRowContainer?.classList.contains('card') && context.editor) {
+            if (sectionRowContainer.style.display !== '') {
+                sectionRowContainer.style.display = '';
             }
         }
     }
 
     // Change the pop-up style for the editor
     if (context.editor || detectedEditor !== null) {
-        if (!context.popUp.classList.contains('editor')) {
+        if (!popUp.classList.contains('editor')) {
             document.body.style.overflow = '';
-            context.popUp?.classList.remove('is-popup-opened');
-            context.popUp?.classList.add('is-popup-closed');
-            context.popUp?.classList.add('editor');
+            popUp?.classList.remove('is-popup-opened');
+            popUp?.classList.add('is-popup-closed');
+            popUp?.classList.add('editor');
         }
 
         context.editorAccess = true;
 
         if (detectedEditor !== null) {
-            if (context.elements?.popUpContainer?.classList.contains('editor-cropped')) {
-                context.elements?.popUpContainer?.classList.remove('editor-cropped');
-            }
+            elements?.popUpContainer?.classList.remove('editor-cropped');
         } else {
-            if (!context.elements?.popUpContainer?.classList.contains('editor-cropped')) {
-                context.elements?.popUpContainer?.classList.add('editor-cropped');
-            }
+            elements?.popUpContainer?.classList.add('editor-cropped');
         }
     } else {
-        if (context.popUp?.classList.contains('editor')) {
-            context.popUp?.classList.remove('editor');
-        }
-
-        if (context.elements?.popUpContainer?.classList.contains('editor-cropped')) {
-            context.elements?.popUpContainer?.classList.remove('editor-cropped');
-        }
+        popUp?.classList.remove('editor');
+        elements?.popUpContainer?.classList.remove('editor-cropped');
     }
 
     if (context.editor !== context.previousEditorState || detectedEditor !== context.previousDetectedEditor) {
