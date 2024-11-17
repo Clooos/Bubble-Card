@@ -79,11 +79,18 @@ export function changeTemperature(context) {
 
 export function changeTargetTempLow(context) {
     const targetTempLow = getAttribute(context, "target_temp_low");
+    const hideTargetTempLow = context.config.hide_target_temp_low;
 
     if (targetTempLow === '') {
         context.elements.targetTemperatureContainer?.classList.add('hidden');
     } else {
         context.elements.targetTemperatureContainer?.classList.remove('hidden');
+    }
+
+    if (hideTargetTempLow) {
+        context.elements.lowTempContainer?.classList.add('hidden');
+    } else {
+        context.elements.lowTempContainer?.classList.remove('hidden');
     }
 
     if (targetTempLow !== context.previousTargetTempLow) {
@@ -96,6 +103,14 @@ export function changeTargetTempLow(context) {
 
 export function changeTargetTempHigh(context) {
     const targetTempHigh = getAttribute(context, "target_temp_high");
+    const hideTargetTempHigh = context.config.hide_target_temp_high;
+
+    if (hideTargetTempHigh) {
+        context.elements.highTempContainer?.classList.add('hidden');
+    } else {
+        context.elements.highTempContainer?.classList.remove('hidden');
+    }
+
     if (targetTempHigh !== context.previousTargetTempHigh) {
         context.previousTargetTempHigh = targetTempHigh;
         if (context.elements.highTempDisplay) {

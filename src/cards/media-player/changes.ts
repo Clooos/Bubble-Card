@@ -161,17 +161,19 @@ export function changePowerIcon(context) {
 }
 
 export function changeVolumeIcon(context) {
-    if (context.elements.volumeButton.isHidden) {
-        context.elements.volumeButton.setAttribute("icon", "mdi:volume-high");
-        context.elements.mediaInfoContainer.style.opacity = '1';
-        context.elements.nameContainer.style.opacity = '1';
-        context.elements.volumeButton.isHidden = false;
-    } else {
-        context.elements.volumeButton.setAttribute("icon", "mdi:close");
-        context.elements.mediaInfoContainer.style.opacity = '0';
-        context.elements.nameContainer.style.opacity = '0';
-        context.elements.volumeButton.isHidden = true;
-    }
+    const isHidden = context.elements.volumeButton.isHidden;
+    const newOpacity = isHidden ? '1' : '0';
+    const newIcon = isHidden ? "mdi:volume-high" : "mdi:close";
+
+    context.elements.volumeButton.setAttribute("icon", newIcon);
+    context.elements.mediaInfoContainer.style.opacity = newOpacity;
+    context.elements.nameContainer.style.opacity = newOpacity;
+    context.elements.subButtonContainer.style.opacity = newOpacity;
+    context.elements.previousButton.style.opacity = newOpacity;
+    context.elements.nextButton.style.opacity = newOpacity;
+    context.elements.powerButton.style.opacity = newOpacity;
+    
+    context.elements.volumeButton.isHidden = !isHidden;
 }
 
 export function changeMuteIcon(context) {

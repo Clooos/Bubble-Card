@@ -244,7 +244,7 @@ export function changeSubButtonState(context, container = context.content, appen
             subButtonElement.removeChild(subButtonElement.dropdownContainer);
         }
 
-        // // Handle icon display
+        // Handle icon display
         const selectedOption = isSelect && subButtonElement.dropdownSelect ?
             Array.from(subButtonElement.dropdownSelect.children).find(option => option.hasAttribute('selected'))?.value : false;
 
@@ -261,7 +261,7 @@ export function changeSubButtonState(context, container = context.content, appen
             if (selectedOption) {
                 const optionIcon = getOptionIcon(context, state, subButton.select_attribute, selectedOption);
 
-                if (optionIcon) {
+                if (optionIcon && !subButton.icon) {
                     const isIconDifferent = iconElement.tagName !== optionIcon.tagName || 
                         iconElement.icon !== optionIcon.icon || 
                         iconElement.attribute !== optionIcon.attribute ||

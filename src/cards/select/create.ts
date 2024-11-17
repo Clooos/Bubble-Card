@@ -151,7 +151,7 @@ export function createDropdownActions(context, elements = context.elements, enti
     event.stopPropagation();
     event.preventDefault();
 
-    dropdownArrow.style.transform = 'rotate(0deg)'; // Revenir à la position fermée
+    dropdownArrow.style.transform = 'rotate(0deg)';
     card.style.border = 'solid 2px rgba(0,0,0,0)';
     elements.dropdownArrow.style.background = '';
   };

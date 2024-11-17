@@ -27,10 +27,6 @@ class BubbleCard extends HTMLElement {
 
     disconnectedCallback() {
         this.isConnected = false;
-
-        if (this._hass && !this.justDisconnected) {
-            this.updateBubbleCard();
-        }
     }
 
     set editMode(editMode) {
@@ -49,6 +45,8 @@ class BubbleCard extends HTMLElement {
         initializeContent(this);
 
         this._hass = hass;
+
+        if (this.editor) return;
 
         if (this.isConnected || this.config.card_type === 'pop-up') {
             this.updateBubbleCard();
@@ -185,6 +183,8 @@ class BubbleCard extends HTMLElement {
             case 'media-player':
                 return 1;
             case 'select':
+                return 1;
+            case 'climate':
                 return 1;
         }
     }

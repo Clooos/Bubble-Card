@@ -1252,7 +1252,6 @@ export function createBubbleCardEditor() {
                     this.climateSubButtonsAdded = true;
                 }
 
-
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
@@ -1271,6 +1270,28 @@ export function createBubbleCardEditor() {
                                 ></ha-textfield>
                                 ${this.makeDropdown("Optional - Icon", "icon")}
                                 ${this.makeShowState()}
+                                <ha-formfield .label="Optional - Hide target temp low">
+                                    <ha-switch
+                                        aria-label="Optional - Hide target temp low"
+                                        .checked=${this._config.hide_target_temp_low}
+                                        .configValue="${"hide_target_temp_low"}"
+                                        @change=${this._valueChanged}
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Optional - Hide target temp low</label> 
+                                    </div>
+                                </ha-formfield>
+                                <ha-formfield .label="Optional - Hide target temp high">
+                                    <ha-switch
+                                        aria-label="Optional - Hide target temp high"
+                                        .checked=${this._config.hide_target_temp_high}
+                                        .configValue="${"hide_target_temp_high"}"
+                                        @change=${this._valueChanged}
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Optional - Hide target temp high</label> 
+                                    </div>
+                                </ha-formfield>
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1628,7 +1649,7 @@ export function createBubbleCardEditor() {
                             </div>
                             <div class="ha-combo-box">
                                 <ha-combo-box
-                                    label="Entity"
+                                    label="Optional - Entity"
                                     .value="${valueType?.target?.entity_id}"
                                     .items="${this.allEntitiesList}"
                                     @value-changed="${(ev) => { this._tapActionValueChange(index, { [configValueType]: { target: { entity_id: ev.detail.value } } }, array)}}"

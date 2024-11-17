@@ -298,7 +298,7 @@ export default `
       height: 42px;
       border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
       left: 60px;
-      width: calc(100% - 174px);
+      width: calc(100% - 168px);
     }
 
     .large .bubble-range-value {
@@ -308,7 +308,6 @@ export default `
 
     .large .bubble-button-container {
       align-items: center;
-      gap: 14px;
     }
 
     .rows-2 .bubble-sub-button-container {

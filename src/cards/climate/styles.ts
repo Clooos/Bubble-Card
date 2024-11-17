@@ -65,10 +65,7 @@ export default `
 
     .bubble-target-temperature-container {
         display: flex;
-    }
-
-    .bubble-low-temp-container {
-        margin-right: 8px;
+        gap: 10px;
     }
 
     .bubble-climate-minus-button,

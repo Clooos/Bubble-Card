@@ -54,16 +54,21 @@ export function callAction(element, actionConfig, action) {
   setTimeout(() => {
     const event = new Event('hass-action', { bubbles: true, composed: true });
 
+    const updatedConfig = { ...actionConfig };
+    if (!updatedConfig.entity_id && this?.config?.entity) {
+      updatedConfig.entity_id = this.config.entity;
+    }
+
     if (action === 'tap' || action === 'double_tap' || action === 'hold') {
       event.detail = { 
-        config: actionConfig,
+        config: updatedConfig,
         action: action,
       };
     } else {
       element.modifiedConfig = {
-        ...actionConfig,
+        ...updatedConfig,
         tap_action: {
-          ...actionConfig[action],
+          ...updatedConfig[action],
         },
       };
       delete element.modifiedConfig[action];
@@ -168,29 +173,50 @@ class ActionHandler {
   }
 }
 
-// sendActionEvent function
 export function sendActionEvent(element, config, action) {
   const tapAction = config.tap_action || { action: "more-info" };
   const doubleTapAction = config.double_tap_action || { action: "toggle" };
   const holdAction = config.hold_action || { action: "toggle" };
-  const entity = config.entity;
+  const entity = config.entity || this.config?.entity;
+
+  const updateAction = (actionConfig) => {
+    if (actionConfig.service && !actionConfig.target?.entity_id && entity) {
+      return {
+        ...actionConfig,
+        target: {
+          ...actionConfig.target,
+          entity_id: entity,
+        },
+      };
+    }
+    return actionConfig;
+  };
+
+  const updatedTapAction = updateAction(tapAction);
+  const updatedDoubleTapAction = updateAction(doubleTapAction);
+  const updatedHoldAction = updateAction(holdAction);
 
   let actionConfig;
   switch (action) {
     case 'tap':
-      actionConfig = tapAction;
+      actionConfig = updatedTapAction;
       break;
     case 'double_tap':
-      actionConfig = doubleTapAction;
+      actionConfig = updatedDoubleTapAction;
       break;
     case 'hold':
-      actionConfig = holdAction;
+      actionConfig = updatedHoldAction;
       break;
     default:
-      actionConfig = tapAction;
+      actionConfig = updatedTapAction;
   }
 
-  callAction(element, { entity: entity, tap_action: tapAction, double_tap_action: doubleTapAction, hold_action: holdAction }, action);
+  callAction(element, { 
+    entity: entity, 
+    tap_action: updatedTapAction, 
+    double_tap_action: updatedDoubleTapAction, 
+    hold_action: updatedHoldAction 
+  }, action);
 }
 
 export function addFeedback(element, feedbackElement) {

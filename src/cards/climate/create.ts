@@ -59,16 +59,51 @@ export function createStructure(context) {
         container.appendChild(tempDisplay);
         container.appendChild(plusButton);
 
+        let tempTimeout;
+        let currentTemp = parseFloat(getAttribute(context, attribute)) || 0;
+
+        function updateTempDisplay(newTemp) {
+            if (attribute === 'temperature') {
+                context.elements.tempDisplay.innerText = newTemp.toFixed(1);
+            } else if (attribute === 'target_temp_low') {
+                context.elements.lowTempDisplay.innerText = newTemp.toFixed(1);
+            } else if (attribute === 'target_temp_high') {
+                context.elements.highTempDisplay.innerText = newTemp.toFixed(1);
+            }
+        }
+
+        function callSetTemperature() {
+            const serviceData = { entity_id: context.config.entity };
+
+            if (attribute === 'target_temp_low') {
+                serviceData.target_temp_low = currentTemp;
+                serviceData.target_temp_high = getAttribute(context, 'target_temp_high');
+            } else if (attribute === 'target_temp_high') {
+                serviceData.target_temp_high = currentTemp;
+                serviceData.target_temp_low = getAttribute(context, 'target_temp_low');
+            } else {
+                serviceData[attribute] = currentTemp;
+            }
+
+            context._hass.callService('climate', 'set_temperature', serviceData);
+        }
+
         minusButton.addEventListener('click', () => {
-            let currentTemp = parseFloat(getAttribute(context, attribute)) || 0;
             currentTemp = parseFloat((currentTemp - step).toFixed(1));
-            adjustTemperature(attribute, currentTemp);
+            updateTempDisplay(currentTemp);
+
+            clearTimeout(tempTimeout);
+            
+            tempTimeout = setTimeout(callSetTemperature, 700);
         });
 
         plusButton.addEventListener('click', () => {
-            let currentTemp = parseFloat(getAttribute(context, attribute)) || 0;
             currentTemp = parseFloat((currentTemp + step).toFixed(1));
-            adjustTemperature(attribute, currentTemp);
+            updateTempDisplay(currentTemp);
+
+            clearTimeout(tempTimeout);
+            
+            tempTimeout = setTimeout(callSetTemperature, 700);
         });
     }
 
