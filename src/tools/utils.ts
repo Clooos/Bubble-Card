@@ -331,15 +331,76 @@ export function getWeatherIcon(weatherType) {
     }
 }
 
+let cachedColor = null;
+let cachedResult = null;
+
+function resolveCssVariable(cssVariable) {
+    const bodyStyles = getComputedStyle(document.body);
+    let value = cssVariable;
+
+    while (value.startsWith('var(')) {
+        const varName = value.match(/var\((--[^,]+),?\s*(.*)?\)/);
+        if (!varName) break;
+
+        const resolvedValue = bodyStyles.getPropertyValue(varName[1]).trim();
+        if (resolvedValue) {
+            value = resolvedValue;
+        } else if (varName[2]) {
+            value = varName[2].trim();
+        } else {
+            break;
+        }
+    }
+
+    return value;
+}
+
+export function isColorLight(cssVariable) {
+    const computedColor = resolveCssVariable(cssVariable);
+
+    if (!computedColor) {
+        return false;
+    }
+
+    if (computedColor === cachedColor) {
+        return cachedResult;
+    }
+
+    cachedColor = computedColor;
+
+    const rgbMatch = computedColor.match(/^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    let r, g, b;
+    if (rgbMatch) {
+        r = parseInt(rgbMatch[1], 16);
+        g = parseInt(rgbMatch[2], 16);
+        b = parseInt(rgbMatch[3], 16);
+    } else {
+        const rgbaMatch = computedColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+        if (!rgbaMatch) {
+            cachedResult = false;
+            return cachedResult;
+        }
+        r = parseInt(rgbaMatch[1], 10);
+        g = parseInt(rgbaMatch[2], 10);
+        b = parseInt(rgbaMatch[3], 10);
+    }
+
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    cachedResult = luminance > 0.5;
+    return cachedResult;
+}
+
 export function getIconColor(context, entity = context.config.entity, brightness = 1) {
     const defaultColor = `var(--bubble-accent-color, var(--accent-color))`;
     const entityRgbColor = getAttribute(context, "rgb_color", entity);
+    const isThemeLight = isColorLight('var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))))');
+    brightness = isThemeLight ? brightness - 0.2 : brightness;
 
     if (!entity) return defaultColor;
     if (entity.startsWith("light.") === false) return defaultColor;
 
-    const defaultLightOnColor = [255, 220, 200];
-    const defaultLightOffColor = [255, 255, 255];
+    const defaultLightOnColor = isThemeLight ? [236, 210, 160] : [255, 200, 140];
+    const defaultLightOffColor = isThemeLight ? [200, 180, 180] : [255, 255, 255];
     const defaultLightColor = isStateOn(context) ? defaultLightOnColor : defaultLightOffColor;
 
     if (!entityRgbColor) {

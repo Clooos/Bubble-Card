@@ -21,16 +21,45 @@ import {
 
 export function changeIcon(context) {
     const isOn = isStateOn(context);
-    const icon = getIcon(context);
-    const state = getState(context);
-    const stateObj = context._hass.states[context.config.entity];
+    const newIcon = getIcon(context);
+    const newImage = getImage(context);
 
-    if (icon !== '') {
-        context.elements.icon.icon = icon;
-        context.elements.icon.style.color = isOn ? getClimateColor(stateObj) : 'inherit';
-        context.elements.icon.style.display = '';
+    const currentImage = context.elements.image.style.backgroundImage;
+    const currentIcon = context.elements.icon.icon;
+    const currentIconColor = context.elements.icon.style.color;
+
+    if (newImage !== '') {
+        const newBackgroundImage = 'url(' + newImage + ')';
+        if (currentImage !== newBackgroundImage) {
+            context.elements.image.style.backgroundImage = newBackgroundImage;
+        }
+        if (context.elements.icon.style.display !== 'none') {
+            context.elements.icon.style.display = 'none';
+        }
+        if (context.elements.image.style.display !== '') {
+            context.elements.image.style.display = '';
+        }
+    } else if (newIcon !== '') {
+        if (currentIcon !== newIcon) {
+            context.elements.icon.icon = newIcon;
+        }
+        const newColor = isOn ? `var(--bubble-icon-background-color, ${getClimateColor(context)})` : 'inherit';
+        if (currentIconColor !== newColor) {
+            context.elements.icon.style.color = newColor;
+        }
+        if (context.elements.icon.style.display !== '') {
+            context.elements.icon.style.display = '';
+        }
+        if (context.elements.image.style.display !== 'none') {
+            context.elements.image.style.display = 'none';
+        }
     } else {
-        context.elements.icon.style.display = 'none';
+        if (context.elements.icon.style.display !== 'none') {
+            context.elements.icon.style.display = 'none';
+        }
+        if (context.elements.image.style.display !== 'none') {
+            context.elements.image.style.display = 'none';
+        }
     }
 }
 
@@ -123,14 +152,13 @@ export function changeStyle(context) {
     initializesubButtonIcon(context);
     setLayout(context);
 
-    const stateObj = context._hass.states[context.config.entity];
     const state = getState(context);
     const isOn = state !== "off" && state !== "unknown";
 
     if (context.previousState !== state) {
         context.previousState = state;
         const element = context.elements.colorBackground;
-        element.style.backgroundColor = `var(--bubble-climate-background-color, ${getClimateColor(stateObj)})`;
+        element.style.backgroundColor = `var(--bubble-climate-background-color, ${getClimateColor(context)})`;
     }
 
     const cardLayout = context.config.card_layout;

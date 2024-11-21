@@ -18,14 +18,14 @@ function updateBackdropColor() {
     getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
     getComputedStyle(document.body).getPropertyValue('--card-background-color');
 
-  backdropStyle.style.setProperty('--bubble-backdrop-background-color', convertToRGBA(themeColorBackground, 0.7, 0.7));
+  document.body.style.setProperty('--bubble-backdrop-background-color', convertToRGBA(themeColorBackground, 0.8, 0.6));
 }
 
 colorScheme.addEventListener('change', updateBackdropColor);
 updateBackdropColor();
 
 export function getBackdrop(context) {
-  const isBackdropHidden = context.config.hide_backdrop ?? true;
+  const isBackdropHidden = context.config.hide_backdrop ?? false;
 
   if (backdrop) return backdrop;
 
@@ -43,7 +43,7 @@ export function getBackdrop(context) {
   }
 
   document.body.appendChild(backdropElement);
-  backdropElement.style.setProperty('--custom-backdrop-filter', `blur(${context.config.bg_blur ?? 10}px)`);
+  backdropElement.style.setProperty('--custom-backdrop-filter', `blur(${context.config.backdrop_blur ?? 0}px)`);
 
   function showBackdrop() {
     requestAnimationFrame(() => {
@@ -193,6 +193,8 @@ export function createStructure(context) {
     context.popUp.appendChild(context.elements.popUpContainer);
 
     hideContent(context, 0);
+
+    window.dispatchEvent(new Event('location-changed'));
   } catch (e) {
     console.error(e)
   }
@@ -219,15 +221,13 @@ export function prepareStructure(context) {
     context.popUp.style.setProperty('--custom-height-offset-desktop', context.config.margin_top_desktop ?? '0px');
     context.popUp.style.setProperty('--custom-height-offset-mobile', context.config.margin_top_mobile ?? '0px');
     context.popUp.style.setProperty('--custom-margin', `-${context.config.margin ?? '7px'}`);
-    context.popUp.style.setProperty('--custom-popup-filter', hideBackdrop ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
+    context.popUp.style.setProperty('--custom-popup-filter', !context.config.backdrop_blur || context.config.backdrop_blur === '0' ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
     context.popUp.style.setProperty('--custom-shadow-opacity', (context.config.shadow_opacity ?? 0) / 100);
 
     const contextOnUrlChange = onUrlChange(context);
 
     window.addEventListener('location-changed', contextOnUrlChange);
     window.addEventListener('popstate', contextOnUrlChange);
-
-    window.dispatchEvent(new Event('location-changed'));
   } catch (e) {
     console.error(e);
   }

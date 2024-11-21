@@ -106,7 +106,11 @@ export function createBubbleCardEditor() {
         }
         
         get _bg_blur() {
-            return this._config?.bg_blur !== undefined ? this._config?.bg_blur : '14';
+            return this._config?.bg_blur !== undefined ? this._config?.bg_blur : '10';
+        }
+
+        get _backdrop_blur() {
+            return this._config?.backdrop_blur !== undefined ? this._config?.backdrop_blur : '0';
         }
         
         get _shadow_opacity() {
@@ -189,7 +193,7 @@ export function createBubbleCardEditor() {
         }
 
         get _hide_backdrop() {
-            return this._config.hide_backdrop ?? true;
+            return this._config.hide_backdrop ?? false;
         }
 
         get _hide_gradient() {
@@ -675,13 +679,23 @@ export function createBubbleCardEditor() {
                                             @input="${this._valueChanged}"
                                         ></ha-textfield>
                                         <ha-textfield
-                                            label="Optional - Background/Backdrop blur (0-100 range)"
+                                            label="Optional - Background blur (0-100 range)"
                                             type="number"
                                             inputMode="numeric"
                                             min="0"
                                             max="100"
                                             .value="${this._bg_blur}"
                                             .configValue="${"bg_blur"}"
+                                            @input="${this._valueChanged}"
+                                        ></ha-textfield>
+                                        <ha-textfield
+                                            label="Optional - Backdrop blur (0-100 range)"
+                                            type="number"
+                                            inputMode="numeric"
+                                            min="0"
+                                            max="100"
+                                            .value="${this._backdrop_blur}"
+                                            .configValue="${"backdrop_blur"}"
                                             @input="${this._valueChanged}"
                                         ></ha-textfield>
                                         <ha-textfield
@@ -1270,26 +1284,41 @@ export function createBubbleCardEditor() {
                                 ></ha-textfield>
                                 ${this.makeDropdown("Optional - Icon", "icon")}
                                 ${this.makeShowState()}
-                                <ha-formfield .label="Optional - Hide target temp low">
+                                ${this.hass.states[this._config.entity]?.attributes?.target_temp_low ? html`
+                                    <ha-formfield .label="Optional - Hide target temp low">
+                                        <ha-switch
+                                            aria-label="Optional - Hide target temp low"
+                                            .checked=${this._config.hide_target_temp_low}
+                                            .configValue="${"hide_target_temp_low"}"
+                                            @change=${this._valueChanged}
+                                        ></ha-switch>
+                                        <div class="mdc-form-field">
+                                            <label class="mdc-label">Optional - Hide target temp low</label> 
+                                        </div>
+                                    </ha-formfield>
+                                ` : ''}
+                                ${this.hass.states[this._config.entity]?.attributes?.target_temp_high ? html`
+                                    <ha-formfield .label="Optional - Hide target temp high">
+                                        <ha-switch
+                                            aria-label="Optional - Hide target temp high"
+                                            .checked=${this._config.hide_target_temp_high}
+                                            .configValue="${"hide_target_temp_high"}"
+                                            @change=${this._valueChanged}
+                                        ></ha-switch>
+                                        <div class="mdc-form-field">
+                                            <label class="mdc-label">Optional - Hide target temp high</label> 
+                                        </div>
+                                    </ha-formfield>
+                                ` : ''}
+                                <ha-formfield .label="Optional - Constant background color when ON">
                                     <ha-switch
-                                        aria-label="Optional - Hide target temp low"
-                                        .checked=${this._config.hide_target_temp_low}
-                                        .configValue="${"hide_target_temp_low"}"
+                                        aria-label="Optional - Constant background color when ON"
+                                        .checked=${this._config.state_color === true}
+                                        .configValue="${"state_color"}"
                                         @change=${this._valueChanged}
                                     ></ha-switch>
                                     <div class="mdc-form-field">
-                                        <label class="mdc-label">Optional - Hide target temp low</label> 
-                                    </div>
-                                </ha-formfield>
-                                <ha-formfield .label="Optional - Hide target temp high">
-                                    <ha-switch
-                                        aria-label="Optional - Hide target temp high"
-                                        .checked=${this._config.hide_target_temp_high}
-                                        .configValue="${"hide_target_temp_high"}"
-                                        @change=${this._valueChanged}
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Optional - Hide target temp high</label> 
+                                        <label class="mdc-label">Optional - Constant background color when ON</label> 
                                     </div>
                                 </ha-formfield>
                             </div>
@@ -1652,9 +1681,22 @@ export function createBubbleCardEditor() {
                                     label="Optional - Entity"
                                     .value="${valueType?.target?.entity_id}"
                                     .items="${this.allEntitiesList}"
-                                    @value-changed="${(ev) => { this._tapActionValueChange(index, { [configValueType]: { target: { entity_id: ev.detail.value } } }, array)}}"
+                                    @value-changed="${valueType?.target?.entity_id !== "entity" ? (ev) => { this._tapActionValueChange(index, { [configValueType]: { target: { entity_id: ev.detail.value } } }, array)} : ''}"
                                 ></ha-combo-box>
                             </div>
+                            <ha-formfield .label="Optional - Use default entity">
+                                <ha-switch
+                                    aria-label="Optional - Use default entity"
+                                    .checked=${valueType?.target?.entity_id === "entity"}
+                                    @change="${(ev) => { valueType?.target?.entity_id !== "entity" 
+                                        ? this._tapActionValueChange(index, { [configValueType]: { target: { entity_id: "entity" } } }, array) 
+                                        : this._tapActionValueChange(index, { [configValueType]: { target: {} } }, array) 
+                                    }}"
+                                ></ha-switch>
+                                <div class="mdc-form-field">
+                                    <label class="mdc-label">Optional - Use default entity</label> 
+                                </div>
+                            </ha-formfield>
                         ` : ''}
                         ${valueType?.action === 'call-service' && valueType?.service ? html`
                             <ha-alert alert-type="info">For now, you still need to switch to the YAML editor if you want to add <code>data:</code> to your service.</ha-alert>

@@ -20,12 +20,14 @@ export function createStructure(context) {
     context.elements.name = createElement('div', 'bubble-name');
     context.elements.state = createElement('div', 'bubble-state');
     context.elements.icon = createElement('ha-icon', 'bubble-icon');
+    context.elements.image = createElement('div', 'bubble-entity-picture entity-picture');
     context.elements.colorBackground = createElement('div', 'bubble-color-background');
     context.elements.style = createElement('style');
     context.elements.customStyle = createElement('style');
     context.elements.style.innerText = styles;
 
     context.elements.iconContainer.appendChild(context.elements.icon);
+    context.elements.iconContainer.appendChild(context.elements.image);
     context.elements.nameContainer.appendChild(context.elements.name);
     context.elements.nameContainer.appendChild(context.elements.state);
 
@@ -61,6 +63,7 @@ export function createStructure(context) {
 
         let tempTimeout;
         let currentTemp = parseFloat(getAttribute(context, attribute)) || 0;
+        let lastSyncedTemp = currentTemp;
 
         function updateTempDisplay(newTemp) {
             if (attribute === 'temperature') {
@@ -72,7 +75,17 @@ export function createStructure(context) {
             }
         }
 
+        function syncTemp() {
+            const latestTemp = parseFloat(getAttribute(context, attribute)) || 0;
+            if (latestTemp !== lastSyncedTemp) {
+                currentTemp = latestTemp;
+                lastSyncedTemp = latestTemp;
+            }
+        }
+
         function callSetTemperature() {
+            syncTemp();
+
             const serviceData = { entity_id: context.config.entity };
 
             if (attribute === 'target_temp_low') {
@@ -89,38 +102,22 @@ export function createStructure(context) {
         }
 
         minusButton.addEventListener('click', () => {
+            syncTemp();
             currentTemp = parseFloat((currentTemp - step).toFixed(1));
             updateTempDisplay(currentTemp);
 
             clearTimeout(tempTimeout);
-            
             tempTimeout = setTimeout(callSetTemperature, 700);
         });
 
         plusButton.addEventListener('click', () => {
+            syncTemp();
             currentTemp = parseFloat((currentTemp + step).toFixed(1));
             updateTempDisplay(currentTemp);
 
             clearTimeout(tempTimeout);
-            
             tempTimeout = setTimeout(callSetTemperature, 700);
         });
-    }
-
-    function adjustTemperature(attribute, newTemp) {
-        const serviceData = { entity_id: context.config.entity };
-
-        if (attribute === 'target_temp_low') {
-            serviceData.target_temp_low = newTemp;
-            serviceData.target_temp_high = getAttribute(context, 'target_temp_high');
-        } else if (attribute === 'target_temp_high') {
-            serviceData.target_temp_high = newTemp;
-            serviceData.target_temp_low = getAttribute(context, 'target_temp_low');
-        } else {
-            serviceData[attribute] = newTemp;
-        }
-
-        context._hass.callService('climate', 'set_temperature', serviceData);
     }
 
     const hasTargetTempLow = state?.attributes?.target_temp_low !== undefined;

@@ -173,6 +173,52 @@ class ActionHandler {
   }
 }
 
+// export function sendActionEvent(element, config, action) {
+//   const tapAction = config.tap_action || { action: "more-info" };
+//   const doubleTapAction = config.double_tap_action || { action: "toggle" };
+//   const holdAction = config.hold_action || { action: "toggle" };
+//   const entity = config.entity || this.config?.entity;
+
+//   const updateAction = (actionConfig) => {
+//     if (actionConfig.service && !actionConfig.target?.entity_id && entity) {
+//       return {
+//         ...actionConfig,
+//         target: {
+//           ...actionConfig.target,
+//           entity_id: entity,
+//         },
+//       };
+//     }
+//     return actionConfig;
+//   };
+
+//   const updatedTapAction = updateAction(tapAction);
+//   const updatedDoubleTapAction = updateAction(doubleTapAction);
+//   const updatedHoldAction = updateAction(holdAction);
+
+//   let actionConfig;
+//   switch (action) {
+//     case 'tap':
+//       actionConfig = updatedTapAction;
+//       break;
+//     case 'double_tap':
+//       actionConfig = updatedDoubleTapAction;
+//       break;
+//     case 'hold':
+//       actionConfig = updatedHoldAction;
+//       break;
+//     default:
+//       actionConfig = updatedTapAction;
+//   }
+
+//   callAction(element, { 
+//     entity: entity, 
+//     tap_action: updatedTapAction, 
+//     double_tap_action: updatedDoubleTapAction, 
+//     hold_action: updatedHoldAction 
+//   }, action);
+// }
+
 export function sendActionEvent(element, config, action) {
   const tapAction = config.tap_action || { action: "more-info" };
   const doubleTapAction = config.double_tap_action || { action: "toggle" };
@@ -180,12 +226,17 @@ export function sendActionEvent(element, config, action) {
   const entity = config.entity || this.config?.entity;
 
   const updateAction = (actionConfig) => {
-    if (actionConfig.service && !actionConfig.target?.entity_id && entity) {
+    // Vérifier si target.entity_id est défini explicitement comme "entity"
+    if (
+      actionConfig.service &&
+      actionConfig.target?.entity_id === "entity" &&
+      entity // Utiliser l'entité par défaut si elle existe
+    ) {
       return {
         ...actionConfig,
         target: {
           ...actionConfig.target,
-          entity_id: entity,
+          entity_id: entity, // Remplace "entity" par la valeur réelle
         },
       };
     }
@@ -218,6 +269,7 @@ export function sendActionEvent(element, config, action) {
     hold_action: updatedHoldAction 
   }, action);
 }
+
 
 export function addFeedback(element, feedbackElement) {
   element.addEventListener('click', () => { 

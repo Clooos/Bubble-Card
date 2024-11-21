@@ -118,14 +118,18 @@ export function updateIcon(context, hass, entityId, icon, iconContainer) {
     }
 }
 
-export function isColorCloseToWhite(rgbColor) {
-    let whiteThreshold = [220, 220, 190];
-    for(let i = 0; i < 3; i++) {
-        if(rgbColor[i] < whiteThreshold[i]) {
-            return false;
+export function isColorCloseToWhite(rgb, threshold = 40) {
+    if (!Array.isArray(rgb) || rgb.length !== 3) {
+        return;
+    }
+
+    for (let i = 0; i < 3; i++) {
+        if (rgb[i] < 0 || rgb[i] > 255) {
+            return;
         }
     }
-    return true;
+
+    return rgb.every(value => Math.abs(value - 255) <= threshold);
 }
 
 let rgbaColor;

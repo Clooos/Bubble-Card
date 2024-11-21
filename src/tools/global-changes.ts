@@ -12,7 +12,8 @@ import {
     getState,
     getAttribute,
     getIcon,
-    getIconColor
+    getIconColor,
+    isColorLight
 } from './utils.ts';
 
 export function changeState(context) {
@@ -293,8 +294,9 @@ export function changeSubButtonState(context, container = context.content, appen
         // Handle background display
         if (showBackground) {
             if (isOn && stateBackground) {
+                const isThemeLight = isColorLight('var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))))');
                 if (lightBackground) {
-                    subButtonElement.style.setProperty('--bubble-sub-button-light-background-color', getIconColor(context, entity, 0.8));
+                    subButtonElement.style.setProperty('--bubble-sub-button-light-background-color', getIconColor(context, entity, isThemeLight ? 1 : 0.8));
                 }
                 subButtonElement.classList.add('background-on');
                 subButtonElement.classList.remove('background-off');

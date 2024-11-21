@@ -41,6 +41,7 @@ export default `
         background-color: var(--bubble-button-background-color);
         opacity: .5;
         border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
+        transition: color .2s;
     }
     .bubble-range-fill {
         position: absolute;
@@ -82,24 +83,6 @@ export default `
         overflow: hidden;
         position: relative;
         cursor: pointer;
-    }
-    .bubble-icon-container::after {
-        content: '';
-        background-color: currentColor;
-        position: absolute;
-        display: block;
-        width: 100%;
-        height: 100%;
-        transition: all 1s;
-        left: 0;
-        right: 0;
-        opacity: 0;
-    }
-    .is-light.is-on .bubble-icon-container::after {
-        opacity: 0.2;
-    }
-    .is-unavailable.is-light .bubble-icon-container::after {
-        opacity: 0;
     }
 
     .bubble-icon {
