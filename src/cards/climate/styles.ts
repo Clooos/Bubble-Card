@@ -219,7 +219,7 @@ export default `
     }
 
     .large .bubble-climate-container {
-      height: 56px;
+      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
       border-radius: var(--bubble-climate-border-radius, var(--bubble-border-radius, 32px));
     }
 

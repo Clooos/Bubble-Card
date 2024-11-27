@@ -151,7 +151,7 @@ export default `
     }
 
     .large .bubble-button-card-container {
-      height: 56px;
+      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
       border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
     }
 

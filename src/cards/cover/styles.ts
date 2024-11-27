@@ -97,7 +97,7 @@ export default `
     }
 
     .large .bubble-cover-card-container {
-      height: 56px;
+      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
       display: flex;
       background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
       border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, 32px));
@@ -109,7 +109,7 @@ export default `
     }
 
     .large .bubble-header-container {
-        height: 56px;
+      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
     }
 
     .large .bubble-header {

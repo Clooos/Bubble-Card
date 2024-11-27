@@ -274,7 +274,7 @@ export default `
     }
 
     .large .bubble-media-player-container {
-      height: 56px;
+      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
       border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
     }
 

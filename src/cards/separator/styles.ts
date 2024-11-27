@@ -36,7 +36,7 @@ export default `
     }
 
     .large .bubble-separator {
-        height: 56px;
+      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
     }
 
     .rows-2 .bubble-sub-button-container {
