@@ -194,6 +194,19 @@ export default `
         100% {transform: translateX(100%); opacity: 0;}
     }
 
+    .large .bubble-select-card{
+        --line-height: 18px;
+        display: grid;
+        grid-template-areas:
+        'i n c a' 'b b b b' !important;
+        grid-template-columns: var(--row-height,56px) auto 1fr 42px;
+        grid-template-rows: var(--row-height,56px) 1fr;
+        justify-self: start;
+        justify-items: start;
+        align-self: center;
+        align-items: center;
+    }
+
     .large .bubble-select-card-container {
       height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
       border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
@@ -202,9 +215,40 @@ export default `
     .large .bubble-icon-container {
       --mdc-icon-size: 24px;
       min-width: 42px !important;
-      min-height: 42px !important;
+      max-height: 42px !important;
+      grid-area: i;
       margin-left: 6px;
     }
+    
+    .large .bubble-dropdown-container{
+        grid-area: a;
+    }
+
+    .large .bubble-name-container {
+        justify-content: flex-start;
+        grid-area: n;
+        overflow: hidden;
+    }
+
+    .large .bubble-sub-button-container {
+        grid-area: c !important;
+        overflow: hidden !important;
+        max-height: calc(100% - 14px) !important;
+        align-content: end !important;
+        max-width: 100%;
+        flex-wrap: wrap-reverse;
+        row-gap: 4px;
+    }
+
+    .multirow .large .bubble-sub-button-container {
+        grid-area: b !important;
+    }
+    .multirow .large .bubble-sub-button-container.expansion {
+        grid-area: c !important;
+    }
+
+
+
 
     .rows-2 .bubble-sub-button-container {
       flex-direction: column;

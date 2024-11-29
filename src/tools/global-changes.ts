@@ -143,6 +143,7 @@ const stateStyles = `
 
 export function changeSubButtonState(context, container = context.content, appendTo = container.firstChild.firstChild, before = false) {
     const subButtons = context.config.sub_button;
+    const largeFormat = context.row > 1 &&(context.card_layout === 'Large' || context.card_layout === 'large-2-rows')
     if (!subButtons) return;
 
     // Initialize previousValues and elements if not already done
@@ -164,6 +165,24 @@ export function changeSubButtonState(context, container = context.content, appen
             appendTo.appendChild(subButtonContainer);
         }
         context.elements.subButtonContainer = subButtonContainer;
+    }
+    const subButtonContainer2 = context.elements.subButtonContainer2 ?? createElement('div', 'bubble-sub-button-container expansion');
+
+    if (largeFormat){
+        if (!context.elements.subButtonContainer2 && context.config.sub_button) {
+            const style = createElement('style');
+            style.innerText = subButtonsStyles;
+            subButtonContainer2.appendChild(style);
+    
+            // Append or prepend subButtonContainer
+            if (before) {
+                appendTo.prepend(subButtonContainer2);
+            } else {
+                appendTo.appendChild(subButtonContainer2);
+            }
+            context.elements.subButtonContainer2 = subButtonContainer2;
+        }
+        appendTo.classList.add("multirow");
     }
 
     // Process each subButton
@@ -375,6 +394,18 @@ export function changeSubButtonState(context, container = context.content, appen
 
     // Update context.previousValues with current subButtons
     context.previousValues.subButtons = subButtons.slice();
+
+    // Move subbuttons when large 
+    if (largeFormat){
+        let overflow = subButtonContainer.scrollHeight > subButtonContainer.clientHeight || subButtonContainer.scrollWidth > subButtonContainer.clientWidth;
+
+        while(overflow){
+            let firstChild = subButtonContainer.lastChild
+            firstChild.remove()
+            subButtonContainer2.appendChild(firstChild);
+            overflow = subButtonContainer.scrollHeight > subButtonContainer.clientHeight || subButtonContainer.scrollWidth > subButtonContainer.clientWidth;
+        }
+    }
 
     // Clean up extra elements not needed
     for (let i = previousSubButtons.length; i > 0; i--) {

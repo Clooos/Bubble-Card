@@ -218,6 +218,10 @@ export default `
         100% {transform: translateX(100%); opacity: 0;}
     }
 
+    .large .bubble-climate-card{
+      --line-height: 18px;
+      align-items: normal;
+    }
     .large .bubble-climate-container {
       height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
       border-radius: var(--bubble-climate-border-radius, var(--bubble-border-radius, 32px));
@@ -226,10 +230,25 @@ export default `
     .large .bubble-icon-container {
       --mdc-icon-size: 24px;
       min-width: 42px !important;
-      min-height: 42px !important;
+      height: 42px !important;
       margin-left: 8px;
     }
 
+    .large .bubble-name-container {
+      justify-content: flex-start;
+      padding-top: calc(var(--row-height,56) / 2 - var(--line-height,18));
+    }
+
+    .large .bubble-sub-button-container {
+      position: absolute;
+      bottom: 0px;
+      padding-bottom: calc(var(--row-height,56) / 2 - var(--line-height,18));
+      max-width: 100%;
+      max-height: 100%;
+      flex-wrap: wrap-reverse;
+      row-gap: 4px;
+    }
+      
     .rows-2 .bubble-sub-button-container {
       flex-direction: column;
       gap: 4px !important;
