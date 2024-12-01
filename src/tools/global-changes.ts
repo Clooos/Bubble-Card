@@ -285,7 +285,7 @@ export function changeSubButtonState(context, container = context.content, appen
             }
 
             subButtonElement.icon.classList.remove('hidden');
-            subButtonElement.icon.classList.add('show-icon');
+            subButtonElement.icon.classList.add('bubble-sub-button-icon', 'show-icon');
         } else if (subButtonElement.icon) {
             subButtonElement.icon.classList.remove('show-icon');
             subButtonElement.icon.classList.add('hidden');

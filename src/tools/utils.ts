@@ -399,7 +399,7 @@ export function getIconColor(context, entity = context.config.entity, brightness
     if (!entity) return defaultColor;
     if (entity.startsWith("light.") === false) return defaultColor;
 
-    const defaultLightOnColor = isThemeLight ? [236, 210, 160] : [255, 200, 140];
+    const defaultLightOnColor = isThemeLight ? [200, 200, 195] : [225, 225, 222];
     const defaultLightOffColor = isThemeLight ? [200, 180, 180] : [255, 255, 255];
     const defaultLightColor = isStateOn(context) ? defaultLightOnColor : defaultLightOffColor;
 

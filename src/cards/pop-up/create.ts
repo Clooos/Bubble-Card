@@ -148,7 +148,7 @@ export function createStructure(context) {
     context.popUp.style.setProperty('--desktop-width', context.config.width_desktop ?? '540px');
 
     if (context.config.close_on_click) {
-      context.popUp.addEventListener('touchend', removeHash, { passive: true });
+      context.popUp.addEventListener('click', removeHash, { passive: true });
     }
 
     window.addEventListener('keydown', (event) => {
@@ -192,7 +192,9 @@ export function createStructure(context) {
     context.popUp.appendChild(context.elements.headerContainer);
     context.popUp.appendChild(context.elements.popUpContainer);
 
-    hideContent(context, 0);
+    if (context.config.hash !== location.hash) {
+      hideContent(context, 0);
+    }
 
     window.dispatchEvent(new Event('location-changed'));
   } catch (e) {

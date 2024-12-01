@@ -61,7 +61,7 @@ export default `
       box-shadow: 0px 0px 50px rgba(0, 0, 0, var(--custom-shadow-opacity));
   }
   .is-popup-closed { 
-      transform: translateY(100%) !important;
+      transform: translateY(100%);
       box-shadow: none !important;
   }
 

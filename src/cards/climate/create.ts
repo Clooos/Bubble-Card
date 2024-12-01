@@ -160,7 +160,7 @@ export function createStructure(context) {
     context.content.appendChild(context.elements.style);
     context.content.appendChild(context.elements.customStyle);
 
-    addActions(context.elements.icon, context.config, context.config.entity);
+    addActions(context.elements.iconContainer, context.config);
 
     context.cardType = `climate`;
 }

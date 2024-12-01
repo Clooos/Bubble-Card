@@ -9,35 +9,83 @@ import {
 } from "../../tools/utils.ts";
 import { initializesubButtonIcon } from '../../tools/global-changes.ts';
 
+export const coverEntityFeature = {
+  OPEN: 1,
+  CLOSE: 2,
+  STOP: 8,
+};
+
+export function supportsFeature(stateObj, feature) {
+  return supportsFeatureFromAttributes(stateObj.attributes, feature);
+}
+
+export function supportsFeatureFromAttributes(attributes, feature) {
+  if (!attributes || typeof attributes.supported_features === "undefined") {
+    return false;
+  }
+  return (attributes.supported_features & feature) !== 0;
+}
+
+export function isFullyOpen(stateObj) {
+  if (stateObj.attributes.current_position !== undefined) {
+    return stateObj.attributes.current_position === 100;
+  }
+  return stateObj.state === "open";
+}
+
+export function isFullyClosed(stateObj) {
+  if (stateObj.attributes.current_position !== undefined) {
+    return stateObj.attributes.current_position === 0;
+  }
+  return stateObj.state === "closed";
+}
+
 export function changeIcon(context) {
   const stateObj = context._hass.states[context.config.entity];
-  const iconOpen = context.config.icon_open;
-  const iconClosed = context.config.icon_close;
-  const isOpen = getState(context) !== 'closed';
-  const currentPosition = stateObj.attributes.current_position;
-  const assumedState = stateObj.attributes.assumed_state;
-  const isFullyOpen = assumedState && !currentPosition ? false : currentPosition ? currentPosition === 100 : isOpen;
-  const isFullyClosed = assumedState && !currentPosition ? false : currentPosition ? currentPosition === 0 : !isOpen;
-  const isCurtains = getAttribute(context, 'device_class') === 'curtain';
+  const { current_position: currentPosition, assumed_state: assumedState } = stateObj.attributes;
 
-  context.elements.icon.icon = isOpen ? 
-    getIcon(context, context.config.entity, context.config.icon_open) :
-    getIcon(context, context.config.entity, context.config.icon_close);
-  context.elements.iconOpen.icon = context.config.icon_up || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
-  context.elements.iconClose.icon = context.config.icon_down || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
+  const supportsOpen = supportsFeature(stateObj, coverEntityFeature.OPEN);
+  const supportsClose = supportsFeature(stateObj, coverEntityFeature.CLOSE);
+  const supportsStop = supportsFeature(stateObj, coverEntityFeature.STOP);
 
-  if (isFullyOpen) {
-    context.elements.buttonOpen.classList.add('disabled');
+  const fullyOpen = isFullyOpen(stateObj);
+  const fullyClosed = isFullyClosed(stateObj);
+  const isCurtains = getAttribute(context, "device_class") === "curtain";
+
+  context.elements.icon.icon = fullyOpen
+    ? getIcon(context, context.config.entity, context.config.icon_open)
+    : getIcon(context, context.config.entity, context.config.icon_close);
+
+  context.elements.iconOpen.icon =
+    context.config.icon_up || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
+  context.elements.iconClose.icon =
+    context.config.icon_down || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
+
+  if (currentPosition !== undefined) {
+    if (fullyOpen) {
+      context.elements.buttonOpen.classList.add("disabled");
+    } else if (supportsOpen) {
+      context.elements.buttonOpen.classList.remove("disabled");
+    }
+
+    if (fullyClosed) {
+      context.elements.buttonClose.classList.add("disabled");
+    } else if (supportsClose) {
+      context.elements.buttonClose.classList.remove("disabled");
+    }
   } else {
-    context.elements.buttonOpen.classList.remove('disabled');
+    context.elements.buttonOpen.classList.remove("disabled");
+    context.elements.buttonClose.classList.remove("disabled");
   }
 
-  if (isFullyClosed) {
-    context.elements.buttonClose.classList.add('disabled');
+  // Masquer le bouton stop si non supporté
+  if (!supportsStop) {
+    context.elements.buttonStop.style.display = "none";
   } else {
-    context.elements.buttonClose.classList.remove('disabled');
+    context.elements.buttonStop.style.display = "";
   }
 }
+
 export function changeName(context) {
     const name = getName(context);
     if (name !== context.elements.previousName) {
@@ -46,6 +94,7 @@ export function changeName(context) {
       context.elements.previousName = name;
   }
 }
+
 export function changeStyle(context) {
     initializesubButtonIcon(context);
     setLayout(context);
@@ -69,6 +118,3 @@ export function changeStyle(context) {
         context.elements.customStyle.innerText = customStyle;
     }
 }
-
-
-  

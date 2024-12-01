@@ -719,7 +719,7 @@ export function createBubbleCardEditor() {
                                                 <label class="mdc-label">Optional - Hide pop-up backdrop (a refresh is needed)</label> 
                                             </div>
                                         </ha-formfield>
-                                        <ha-alert alert-type="warning">Set this toggle to false on the first pop-up of your main dashboard to show a blurred backdrop behind all pop-ups. <b>Be aware that this feature can slow down your dashboard when opening pop-ups. It is now hidden by default for that reason.</b></ha-alert>
+                                        <ha-alert alert-type="warning">Set this toggle to true on the first pop-up of your main dashboard to hide the darker backdrop behind all pop-ups. <b>You can add a blurred effect to it by changing <code>Optional - Backdrop blur</code> just below, but be aware that this can slow down your dashboard when opening pop-ups. It is now set to 0 for that reason.</b></ha-alert>
                                     </div>
                                 </ha-expansion-panel>
                                 ${this.makeStyleEditor()}
@@ -1181,10 +1181,10 @@ export function createBubbleCardEditor() {
                         ${hasSelectAttributeList ? html`
                             <div class="ha-combo-box">
                                 <ha-combo-box
-                                    label="Optional - Select menu (from attributes)"
+                                    label="Select menu (from attributes)"
                                     .value="${this._config.select_attribute}"
                                     .items="${selectableAttributeList}"
-                                    .configValue="select_attribute"
+                                    .configValue="${"select_attribute"}"
                                     @value-changed="${this._valueChanged}"
                                 ></ha-combo-box>
                             </div>
@@ -1355,16 +1355,23 @@ export function createBubbleCardEditor() {
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
                         <ha-alert alert-type="info">You need to add a card type first. Please note that in some cases, a page refresh might be needed after exiting the editor.</ha-alert>
                         <img style="width: 100%; height: auto; border-radius: 24px;" src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif">
-                        <p>The <b>Bubble Card ${version}</b> changelog is available <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}"><b>here</b></a>.
+                        <p>The <b>Bubble Card ${version}</b> changelog is available <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}"><b>here</b></a>.</p>
                         <hr />
-                        <p>If you have an issue or a question you can find more details on my GitHub page.</p>
-                        <a href="https://github.com/Clooos/Bubble-Card"><img src="https://img.shields.io/badge/GitHub-Documentation-blue?logo=github"></a>
+                        <p>If you have an issue or a question you can find more details in the GitHub documentation. You can also find useful resources and help in these links.</p>
+                        <div style="display: inline-block;">
+                            <a href="https://github.com/Clooos/Bubble-Card"><img src="https://img.shields.io/badge/GitHub-Documentation-blue?logo=github"></a>
+                            <a href="https://www.youtube.com/@cloooos"><img src="https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube"></a>
+                            <a href="https://www.reddit.com/r/BubbleCard/"><img src="https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit"></a>
+                            <a href="https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678"><img src="https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant"></a>
+                        </div>
                         <hr />
                         <p>I dedicate most of my spare time to making this project the best it can be. So if you appreciate my work, any donation would be a great way to show your support.</p>
                         <div style="display: inline-block;">
                             <a href="https://www.buymeacoffee.com/clooos"><img src="https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee"></a> 
                             <a href="https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR"><img src="https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal"></img></a>
                         </div>
+                        <p>Looking for more advanced examples? Check out my <a href="https://www.patreon.com/Clooos"><b>Patreon</b></a> for exclusive custom styles and templates!</p>
+                        <a href="https://www.patreon.com/Clooos"><img src="https://img.shields.io/badge/Patreon-Clooos-orange?logo=patreon"></a>
                         <p style="margin-top: 0;">Thank you! 🍻</p>
                         ${this.makeVersion()}
                     </div>
@@ -2011,7 +2018,10 @@ export function createBubbleCardEditor() {
                                 @value-changed=${this._valueChanged}
                             ></ha-code-editor>
                         </div>
-                        <ha-alert alert-type="info">For advanced users, you can edit the CSS style of this card in this editor. More information <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically. You can also add <a href="https://github.com/Clooos/Bubble-Card#templates">templates</a>.</ha-alert>
+                        <ha-alert alert-type="info">
+                          For advanced users, you can edit the CSS style of this card in this editor. More information <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically. You can also add <a href="https://github.com/Clooos/Bubble-Card#templates">templates</a>.
+                          <br><br><b>Looking for more advanced examples?</b> Check out my <a href="https://www.patreon.com/Clooos">Patreon</a> for exclusive custom styles and advanced templates, this is also the best way to show your support to my project!
+                        </ha-alert>
                     </div>
                 </ha-expansion-panel>
             `;

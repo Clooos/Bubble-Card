@@ -28,13 +28,15 @@ function handleTouchEnd(event, popUp) {
     }
 }
 
-export function clickOutside(event) {
-    const targets = event.composedPath();
-    const popupTarget = targets.find(target => 
-        target.classList?.contains('bubble-pop-up') ||
-        ['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER'].includes(target.nodeName)
-    );
-    if (!popupTarget) removeHash();
+export function clickOutside(event, context) {
+    if (context.config.close_by_clicking_outside ?? true) {
+      const targets = event.composedPath();
+      const popupTarget = targets.find(target => 
+          target.classList?.contains('bubble-pop-up') ||
+          ['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER'].includes(target.nodeName)
+      );
+      if (!popupTarget) removeHash();
+    }
 }
 
 export function removeHash() {
@@ -99,6 +101,11 @@ function updatePopupClass(popUp, open) {
 }
 
 function updateListeners(context, add) {
+    // Création d'un wrapper lié au contexte
+    if (!context.boundClickOutside) {
+        context.boundClickOutside = event => clickOutside(event, context);
+    }
+
     if (add) {
         if (!context.listenersAdded) {
             context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
@@ -106,7 +113,7 @@ function updateListeners(context, add) {
         }
 
         if (!window.clickOutsideListenerAdded) {
-            window.addEventListener('click', clickOutside, { passive: true });
+            window.addEventListener('click', context.boundClickOutside, { passive: true });
             window.clickOutsideListenerAdded = true;
         }
     } else {
@@ -115,7 +122,7 @@ function updateListeners(context, add) {
             context.listenersAdded = false;
 
             if (!location.hash && window.clickOutsideListenerAdded) {
-                window.removeEventListener('click', clickOutside);
+                window.removeEventListener('click', context.boundClickOutside);
                 window.clickOutsideListenerAdded = false;
             }
         }

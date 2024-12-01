@@ -41,7 +41,6 @@ export default `
         background-color: var(--bubble-button-background-color);
         opacity: .5;
         border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
-        transition: color .2s;
     }
     .bubble-range-fill {
         position: absolute;
