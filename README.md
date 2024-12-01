@@ -4,13 +4,14 @@
 
 Bubble Card is a minimalist and customizable card collection for Home Assistant with a nice pop-up touch.
 
-[![Stars](https://img.shields.io/github/stars/clooos/Bubble-Card)](#) [![Last commit](https://img.shields.io/github/last-commit/clooos/Bubble-Card)](#) [![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube)](https://www.youtube.com/@cloooos) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit)](https://www.reddit.com/r/BubbleCard/) [![Reddit Profile](https://img.shields.io/badge/Reddit-My%20stuff-orange?logo=reddit)](https://www.reddit.com/user/Clooooos/submitted/) [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR)
+[![Stars](https://img.shields.io/github/stars/clooos/Bubble-Card)](#) [![Last commit](https://img.shields.io/github/last-commit/clooos/Bubble-Card)](#) [![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube)](https://www.youtube.com/@cloooos) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit)](https://www.reddit.com/r/BubbleCard/) [![Reddit Profile](https://img.shields.io/badge/Reddit-My%20stuff-orange?logo=reddit)](https://www.reddit.com/user/Clooooos/submitted/) [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR) [![Patreon Clooos](https://img.shields.io/badge/Patreon-Clooos-orange?logo=patreon)](https://www.patreon.com/Clooos)
+
 
 <br>
 
 ## Table of contents
 
-**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
+**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Climate`](#climate)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
 
 <br>
 
@@ -568,7 +569,7 @@ sub_button:
 
 ![readme-cover](https://github.com/Clooos/Bubble-Card/assets/36499953/27d1c329-76ab-480b-b424-c79c9e68c788)
 
-This card allows you to control your covers.
+This card allows you to control your `cover` entities.
 
 ### Cover options
 
@@ -683,6 +684,70 @@ name: Scene
 entity: input_select.scenes
 icon: mdi:brightness-4
 show_state: true
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Climate
+
+![readme-climate-card](https://github.com/user-attachments/assets/59145c69-2f85-4ee7-a290-e848971e1925)
+
+This card allows you to control your `climate` entities.
+
+> [!TIP]
+> The mode selection menu is a [sub-button](#sub-buttons) that is added automatically when creating the card. You can then modify or remove it as you wish.
+
+### Climate options
+
+<details>
+
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name                     | Type    | Requirement                         | Supported options                                  | Description                                                                                                     |
+|--------------------------|---------|-------------------------------------|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `entity`                | string  | **Required**                        | Climate entity                                   | The entity to control (e.g., `climate.living_room`).                                                            |
+| `name`                  | string  | Optional                            | Any string                                       | A custom name for the card. If not defined, it will display the entity name.                                    |
+| `icon`                  | string  | Optional                            | Any `mdi:` icon                                  | A custom icon for the card. If not defined, the entity icon or `entity-picture` will be used.                   |
+| `force_icon`            | boolean | Optional                            | `true` or `false` (default)                     | Gives priority to the icon over the `entity-picture`.                                                           |
+| `show_state`            | boolean | Optional                            | `true` or `false` (default)                     | Show or hide the current state of the `entity`.                                                                 |
+| `show_name`             | boolean | Optional                            | `true` (default) or `false`                     | Show or hide the name of the entity.                                                                            |
+| `show_icon`             | boolean | Optional                            | `true` (default) or `false`                     | Show or hide the icon.                                                                                          |
+| `hide_target_temp_low`  | boolean | Optional (only for entities supporting `target_temp_low`) | `true` or `false` (default) | Hides the low target temperature control if supported by the `entity`.                                          |
+| `hide_target_temp_high` | boolean | Optional (only for entities supporting `target_temp_high`)| `true` or `false` (default) | Hides the high target temperature control if supported by the `entity`.                                         |
+| `state_color`           | boolean | Optional                            | `true` or `false` (default)                     | Applies a constant background color when the climate entity is ON.                                              |
+| `tap_action`            | object  | Optional                            | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on tap. If not defined, `more-info` will be used.                                   |
+| `double_tap_action`     | object  | Optional                            | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on double tap. If not defined, `toggle` will be used.                               |
+| `hold_action`           | object  | Optional                            | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on hold. If not defined, `more-info` will be used.                                  |
+| `card_layout`           | string  | Optional                            | `normal` (default), `large`, `large-2-rows`     | Defines the styling layout of the card. See [card layouts](#card-layouts).                                      |
+| `columns`               | string  | Optional                            | `1`, `2`, `3`, or `4` (default)                 | Number of columns when placed in a **section view**.                                                            |
+| `rows`                  | string  | Optional                            | `1` (default), `2`, `3`, or `4`                 | Number of rows when placed in a **section view**.                                                               |
+| `sub_button`            | object  | Optional                            | See [sub-buttons](#sub-buttons)                | Adds custom buttons fixed to the right. Useful for a climate mode select menu.                                  |
+
+</details>
+
+#### Examples
+
+<details>
+
+<summary>A climate card with an HVAC modes dropdown menu</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: climate
+entity: climate.test_climate
+sub_button:
+  - name: HVAC modes menu
+    select_attribute: hvac_modes
+    show_arrow: false
+    state_background: false
 ```
 
 </details>
