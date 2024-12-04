@@ -15,6 +15,8 @@ import {
     getIconColor,
     isColorLight
 } from './utils.ts';
+//import {validateConditionalConfig} from '../tools/validate-condition.ts'
+
 
 export function changeState(context) {
     const state = context._hass.states[context.config.entity];
@@ -143,9 +145,11 @@ const stateStyles = `
 
 export function changeSubButtonState(context, container = context.content, appendTo = container.firstChild.firstChild, before = false) {
     const subButtons = context.config.sub_button;
-    const largeFormat = context.row > 1 &&(context.card_layout === 'Large' || context.card_layout === 'large-2-rows')
+    const numberOfRows = !context.config.grid_options ? 1 :context.config.grid_options.rows;
+    const largeFormat = numberOfRows> 1 &&(context.config.card_layout === 'large' || context.config.card_layout === 'large-2-rows')
     if (!subButtons) return;
-
+    let number_of_subButtons = subButtons.length;
+    
     // Initialize previousValues and elements if not already done
     context.previousValues = context.previousValues || {};
     let previousSubButtons = [...(context.previousValues.subButtons || [])];
@@ -166,6 +170,7 @@ export function changeSubButtonState(context, container = context.content, appen
         }
         context.elements.subButtonContainer = subButtonContainer;
     }
+
     const subButtonContainer2 = context.elements.subButtonContainer2 ?? createElement('div', 'bubble-sub-button-container expansion');
 
     if (largeFormat){
@@ -182,7 +187,8 @@ export function changeSubButtonState(context, container = context.content, appen
             }
             context.elements.subButtonContainer2 = subButtonContainer2;
         }
-        appendTo.classList.add("multirow");
+        subButtonContainer.classList.add("expanded");
+        container.classList.add("bubble-multi-row")
     }
 
     // Process each subButton
@@ -390,22 +396,32 @@ export function changeSubButtonState(context, container = context.content, appen
                 subButtonElement.dropdownArrow.classList.remove('no-icon-select-arrow');             
             }
         }
+
     });
 
     // Update context.previousValues with current subButtons
     context.previousValues.subButtons = subButtons.slice();
 
-    // Move subbuttons when large 
-    if (largeFormat){
-        let overflow = subButtonContainer.scrollHeight > subButtonContainer.clientHeight || subButtonContainer.scrollWidth > subButtonContainer.clientWidth;
+    if(context.config.card_layout === 'large-2-rows') number_of_subButtons = Math.ceil(number_of_subButtons/2,);
 
-        while(overflow){
-            let firstChild = subButtonContainer.lastChild
-            firstChild.remove()
-            subButtonContainer2.appendChild(firstChild);
-            overflow = subButtonContainer.scrollHeight > subButtonContainer.clientHeight || subButtonContainer.scrollWidth > subButtonContainer.clientWidth;
-        }
+    // Move subbuttons when large format to expansion-container WIP
+    if (largeFormat){
+    //     const total_number_of_subButtons = number_of_subButtons;
+    //     const rowheight = Number(getComputedStyle(context).getPropertyValue('--row-height').replace(/\D/g,''));
+    //     //let overflow = context.clientWidth - total_number_of_subButtons * 40  0
+    //     let overflow = subButtonContainer.scrollHeight > subButtonContainer.clientHeight || subButtonContainer.scrollWidth > subButtonContainer.clientWidth;
+        number_of_subButtons = 0;
+    //     while(overflow){
+    //         let firstChild = subButtonContainer.lastChild;
+    //         firstChild.remove();
+    //         subButtonContainer2.appendChild(firstChild);
+    //         overflow = subButtonContainer.scrollHeight > subButtonContainer.clientHeight || subButtonContainer.scrollWidth > subButtonContainer.clientWidth;
+    //         number_of_subButtons++; 
+    //     }
     }
+
+
+    context.style.setProperty('--number-subButtons', number_of_subButtons)
 
     // Clean up extra elements not needed
     for (let i = previousSubButtons.length; i > 0; i--) {
@@ -418,6 +434,8 @@ export function changeSubButtonState(context, container = context.content, appen
         }
     }
 }
+
+
 
 const subButtonsStyles = `
     .bubble-sub-button-container {

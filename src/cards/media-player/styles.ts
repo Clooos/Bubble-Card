@@ -272,65 +272,108 @@ export default `
         64% {transform: translateX(0); opacity: 0.1;}
         100% {transform: translateX(100%); opacity: 0;}
     }
-
-    .large .bubble-media-player-card{
-      --line-height: 18px;
-      align-items: normal;
+    .large .bubble-media-player-container{
+      display: flex;
     }
-
-    .large .bubble-media-player-container {
+    
+    .large .bubble-media-player-container{
       height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
-      border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
     }
 
-    .large .bubble-icon-container {
+    .large .bubble-media-player{
+      --line-height: 18px;
+      display: grid;
+      grid-template-areas:
+      'i n c a1 a2 a3 a4 a5' 'b b b b b b b b' !important;
+      grid-template-columns: var(--row-height,56px) 1fr auto auto auto auto auto auto;
+      grid-template-rows: var(--row-height,56px) 1fr;
+      border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+      justify-self: start;
+      justify-items: start;
+      align-self: center;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .large .bubble-media-player-container .bubble-icon-container {
       --mdc-icon-size: 24px;
       min-width: 42px !important;
       height: 42px !important;
+      grid-area: i;
       margin-left: 8px;
     }
     
-    .large .bubble-play-pause-button {
+    .large .bubble-media-player-container .bubble-button-container{
+        grid-area: a1;
+        align-items: center;
+        gap: 4;
+        display: contents !important;
+    }
+    
+   .large .bubble-media-player-container .bubble-power-button{
+      grid-area: a1;
+   }
+
+   .large .bubble-media-player-container .bubble-previous-button{
+      grid-area: a2;
+   }
+
+   .large .bubble-media-player-container .bubble-next-button{
+      grid-area: a3;
+   }
+
+   .large .bubble-media-player-container .bubble-volume-button{
+      grid-area: a4 !important;
+   }
+
+    .large .bubble-media-player-container  .bubble-play-pause-button {
       display: flex;
       height: 42px;
       width: 42px;
       padding: 0;
       align-items: center;
+      grid-area: a5;
       justify-content: center;
     }
 
-    .large .bubble-volume-slider {
-      height: 42px;
+    .large .bubble-media-player-container .bubble-volume-slider {
+      height: 80%;
       border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
-      left: 60px;
-      width: calc(100% - 168px);
+      position: relative;
+      left: 0px;
+      width: calc(100%);
+      grid-column-start: 2;
+      grid-column-end: 7;
+      grid-row-start: 1;
+      grid-row-end: 1;
+
     }
 
-    .large .bubble-range-value {
+    .large .bubble-media-player-container .bubble-range-value {
       place-items: center;
       height: 42px;
     }
-
-    .large .bubble-button-container {
-      align-items: center;
-    }
       
-    .large .bubble-name-container {
+    .large .bubble-media-player-container .bubble-name-container {
+      grid-area: n;
       justify-content: flex-start;
-      padding-top: calc(var(--row-height,56) / 2 - var(--line-height,18));
+      margin-left: 0px;
+
     }
 
-    .large .bubble-sub-button-container {
-      position: absolute;
-      bottom: 0px;
-      padding-bottom: calc(var(--row-height,56) / 2 - var(--line-height,18));
-      max-width: 100%;
-      max-height: 100%;
+    .large .bubble-media-player-container .bubble-sub-button-container {
+      grid-area: c;
       flex-wrap: wrap-reverse;
       row-gap: 4px;
     }
 
-    .rows-2 .bubble-sub-button-container {
+    .large.bubble-multi-row .bubble-media-player-container .bubble-sub-button-container {
+      grid-area: b;
+      justify-content: center;
+      justify-self: center;
+    }
+    
+    .rows-2 .bubble-media-player-container .bubble-sub-button-container {
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
@@ -340,7 +383,7 @@ export default `
       width: auto;
     }
 
-    .rows-2 .bubble-sub-button {
+    .rows-2 .bubble-media-player-container .bubble-sub-button-container .bubble-sub-button {
       height: 20px !important;
     }
 `;

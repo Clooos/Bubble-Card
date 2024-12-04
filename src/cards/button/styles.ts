@@ -80,7 +80,7 @@ export default `
         margin: 6px;
         border-radius: var(--bubble-button-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
         background-color: var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
-        overflow: hidden;
+        #overflow: hidden; #have to disable for subbutton functions. 
         position: relative;
         cursor: pointer;
     }
@@ -151,38 +151,71 @@ export default `
     }
 
     .large .bubble-button-card{
-      --line-height: 18px;
-      align-items: normal;
+        --line-height: 18px;
+        --name-container-width: calc(100% - var(--row-height,56px) * 1 - var(--row-height,56px) * var(--number-subButtons,1));
+        display: grid;
+        grid-template-areas:
+        'i n c' 'b b b' !important;
+        grid-template-columns: var(--row-height,56px) 1fr auto auto;
+        grid-template-rows: var(--row-height,56px) 1fr;
+        justify-self: start;
+        justify-items: start;
+        align-self: center;
+        align-items: center;
     }
+
+
 
     .large .bubble-button-card-container {
       height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
       border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
     }
 
-    .large .bubble-icon-container {
+    .large .bubble-button-card .bubble-icon-container {
       --mdc-icon-size: 24px;
       min-width: 42px !important;
-      height: 42px !important;
-      margin-left: 8px;
+      max-height: 42px !important;
+      grid-area: i;
+      margin-left: 6px;
     }
-
-    .large .bubble-name-container {
+    
+    .large .bubble-button-card .bubble-sub-button .bubble-dropdown-container{
+        display: flex !important;
+    }
+    
+    .large .bubble-button-card .bubble-name-container {
       justify-content: flex-start;
-      padding-top: calc(var(--row-height,56) / 2 - var(--line-height,18));
+      grid-area: n;
+      overflow: hidden;
+      max-width: 100% !important;
+      #padding-top: calc(var(--row-height,56) / 2 - var(--line-height,18));
     }
 
-    .large .bubble-sub-button-container {
-      position: absolute;
-      bottom: 0px;
-      padding-bottom: calc(var(--row-height,56) / 2 - var(--line-height,18));
-      max-width: 100%;
-      max-height: 100%;
-      flex-wrap: wrap-reverse;
-      row-gap: 4px;
+    .large .bubble-button-card .bubble-sub-button-container {
+        grid-area: c;
+        max-width: 100%;
+        height: 36px;
+        flex-wrap: wrap-reverse;
+        row-gap: 4px;
+        align-content: end;
+        justify-self: end;
     }
 
-    .rows-2 .bubble-sub-button-container {
+    .large .bubble-button-card .bubble-sub-button-container.expanded {
+        max-height: calc(100%);
+        height: auto !important;
+        grid-area: b;
+        overflow: hidden;
+        flex-wrap: wrap;
+        align-content: start;
+        align-self: end;
+        justify-items: center;
+        justify-content: end;
+        justify-self: center;
+        padding-bottom: 7px;
+    }
+
+    .rows-2 .bubble-button-card .bubble-sub-button-container {
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
@@ -193,7 +226,7 @@ export default `
       padding-right: 14px;
     }
 
-    .rows-2 .bubble-sub-button {
+    .rows-2 .bubble-button-card .bubble-sub-button {
       height: 20px !important;
     }
 `;

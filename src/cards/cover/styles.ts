@@ -94,71 +94,78 @@ export default `
         justify-content: center;
         cursor: pointer;
         border: none;
-    }
-
-    .large .bubble-cover-card{
-      --line-height: 18px;
-      align-items: normal;
-    }
-
+    }      
+    
     .large .bubble-cover-card-container {
       height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
-      display: flex;
       background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
       border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, 32px));
+      display: grid;
+      grid-template-areas:
+      'i n c a' 'b b b b' !important;
+      grid-template-columns: var(--row-height,56px) 1fr auto auto;
+      grid-template-rows: var(--row-height,56px) 1fr;
     }
 
-    .large .bubble-buttons .bubble-icon {
+    .large .bubble-cover-card-container .bubble-buttons .bubble-icon {
       color: var(--primary-text-color) !important;
       opacity: 1;
     }
-
-    .large .bubble-header-container {
-      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
+    
+    .large .bubble-cover-card-container .bubble-header {
+      display: contents;
+      height: var(--row-height,56);
+      width: 100%;
     }
 
-    .large .bubble-header {
-        width: 100%;
-    }
-
-    .large .bubble-icon-container {
+    .large .bubble-cover-card-container .bubble-header .bubble-icon-container {
       --mdc-icon-size: 24px;
       min-width: 42px !important;
-      height: 42px !important;
+      min-height: 42px !important;
       align-content: center;
       border: none;
       margin: 8px 6px 8px 8px;
+      grid-area: i;
     }
 
-    .large .bubble-name-container {
-      justify-content: flex-start;
-      padding-top: calc(var(--row-height,56) / 2 - var(--line-height,18));
+    .large .bubble-cover-card-container .bubble-name-container {
+      grid-area: n;
+      align-self: center;
     }
+    
 
-    .large .bubble-icon {
+    .large .bubble-cover-card-container .bubble-icon {
       align-items: center;
     }
 
-    .large .bubble-buttons {
+    .large .bubble-cover-card-container .bubble-buttons {
       display: flex;
       position: relative;
       right: 18px;
       align-self: center;
       grid-gap: 18px;
+      grid-area: a;
     }
 
-    .large .bubble-sub-button-container {
-      margin-right: 14px;
-      position: absolute;
-      bottom: 0px;
-      padding-bottom: calc(var(--row-height,56) / 2 - var(--line-height,18));
-      max-width: 100%;
-      max-height: 100%;
+    .large .bubble-cover-card-container .bubble-sub-button-container {
+      margin-right: 7px;
+      grid-area: c;
       flex-wrap: wrap-reverse;
-      row-gap: 4px;
+      align-content: center;
+      align-self: center;
     }
-
-    .rows-2 .bubble-sub-button-container {
+    
+    .large.bubble-multi-row .bubble-cover-card-container .bubble-sub-button-container {
+      grid-area: b;
+      justify-content: center;
+    
+    }
+    
+    .large .bubble-cover-card-container .bubble-sub-button .bubble-dropdown-container{
+        display: flex !important;
+    }
+    
+    .rows-2 .bubble-cover-card-container .bubble-sub-button-container {
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
@@ -166,10 +173,10 @@ export default `
       grid-template-rows: repeat(2, 1fr);
       grid-auto-flow: column;
       width: auto;
-      padding-right: 14px;
+      padding-right: 7px;
     }
 
-    .rows-2 .bubble-sub-button {
+    .rows-2 .bubble-cover-card-container .bubble-sub-button {
       height: 20px !important;
     }
 `

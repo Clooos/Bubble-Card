@@ -218,38 +218,81 @@ export default `
         100% {transform: translateX(100%); opacity: 0;}
     }
 
-    .large .bubble-climate-card{
-      --line-height: 18px;
-      align-items: normal;
-    }
-    .large .bubble-climate-container {
-      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
-      border-radius: var(--bubble-climate-border-radius, var(--bubble-border-radius, 32px));
+    .large .bubble-climate{
+        --line-height: 18px;
+        --name-container-width: calc(100% - var(--row-height,56px)  - 114px - 42px * var(--number-subButtons,1));
+        display: grid;
+        grid-template-areas:
+        'i n c a' 'b b b b' !important;
+        grid-template-columns: var(--row-height,56px) 1fr auto auto;
+        grid-template-rows: var(--row-height,56px) 1fr;
+        justify-self: start;
+        justify-items: start;
+        align-self: center;
+        align-items: center;
     }
 
-    .large .bubble-icon-container {
+    .large .bubble-climate-container {
+      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * (var(--row-size) - 1 ));
+      border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
+    }
+
+    .large .bubble-climate .bubble-icon-container {
       --mdc-icon-size: 24px;
       min-width: 42px !important;
-      height: 42px !important;
-      margin-left: 8px;
+      max-height: 42px !important;
+      grid-area: i;
+      margin-left: 6px;
+    }
+    
+    .large .bubble-climate .bubble-button-container{
+        grid-area: a;
+        display: contents !important;
+    }
+    
+    .large .bubble-climate .bubble-temperature-container{
+        grid-area: a;
+        height: calc(100% - 20px);
+        width: calc(100% - 14px);
+        justify-self: center;
+    }
+    
+    .large .bubble-climate .bubble-sub-button .bubble-dropdown-container{
+        display: flex !important;
+    }
+    
+    .large .bubble-climate .bubble-name-container {
+        justify-content: flex-start;
+        grid-area: n;
+        overflow: hidden;
+        max-width: 100% !important;
     }
 
-    .large .bubble-name-container {
-      justify-content: flex-start;
-      padding-top: calc(var(--row-height,56) / 2 - var(--line-height,18));
+    .large .bubble-climate .bubble-sub-button-container {
+        grid-area: c;
+        max-width: 100%;
+        height: 36px;
+        flex-wrap: wrap-reverse;
+        row-gap: 4px;
+        align-content: end;
+        justify-self: end;
     }
 
-    .large .bubble-sub-button-container {
-      position: absolute;
-      bottom: 0px;
-      padding-bottom: calc(var(--row-height,56) / 2 - var(--line-height,18));
-      max-width: 100%;
-      max-height: 100%;
-      flex-wrap: wrap-reverse;
-      row-gap: 4px;
+    .large .bubble-climate .bubble-sub-button-container.expanded {
+        max-height: calc(100%);
+        height: auto !important;
+        grid-area: b;
+        #overflow: hidden; #have to disable for subbutton functions. 
+        flex-wrap: wrap;
+        align-content: start;
+        align-self: end;
+        justify-items: center;
+        justify-content: end;
+        justify-self: center;
+        padding-bottom: 7px;
     }
-      
-    .rows-2 .bubble-sub-button-container {
+
+    .rows-2 .bubble-climate .bubble-sub-button-container {
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
@@ -259,7 +302,7 @@ export default `
       width: auto;
     }
 
-    .rows-2 .bubble-sub-button {
+    .rows-2 .bubble-climate .bubble-sub-button {
       height: 20px !important;
     }
 `;

@@ -196,10 +196,12 @@ export default `
 
     .large .bubble-select-card{
         --line-height: 18px;
+        --name-container-width: calc(100% - var(--row-height,56px) * 2 - var(--row-height,56px) * var(--number-subButtons,1));
         display: grid;
+        gap: 4px;
         grid-template-areas:
         'i n c a' 'b b b b' !important;
-        grid-template-columns: var(--row-height,56px) auto 1fr 42px;
+        grid-template-columns: var(--row-height,56px) 1fr auto auto;
         grid-template-rows: var(--row-height,56px) 1fr;
         justify-self: start;
         justify-items: start;
@@ -212,7 +214,7 @@ export default `
       border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
     }
 
-    .large .bubble-icon-container {
+    .large .bubble-select-card .bubble-icon-container {
       --mdc-icon-size: 24px;
       min-width: 42px !important;
       max-height: 42px !important;
@@ -220,37 +222,52 @@ export default `
       margin-left: 6px;
     }
     
-    .large .bubble-dropdown-container{
+    .large .bubble-select-card .bubble-dropdown-container{
         grid-area: a;
+        display: contents !important;
     }
 
-    .large .bubble-name-container {
+    .large .bubble-select-card .bubble-dropdown-arrow{
+        grid-area: a;
+    }
+    
+    .large .bubble-select-card .bubble-sub-button .bubble-dropdown-container{
+        display: flex;
+    }
+    
+    .large .bubble-select-card .bubble-name-container {
         justify-content: flex-start;
         grid-area: n;
         overflow: hidden;
+        max-width: 100% !important;
     }
 
-    .large .bubble-sub-button-container {
-        grid-area: c !important;
-        overflow: hidden !important;
-        max-height: calc(100% - 14px) !important;
-        align-content: end !important;
+    .large .bubble-select-card .bubble-sub-button-container {
+        grid-area: c;
         max-width: 100%;
+        height: 36px;
         flex-wrap: wrap-reverse;
         row-gap: 4px;
+        align-content: end;
+        justify-self: end;
+        right: 0px;
     }
 
-    .multirow .large .bubble-sub-button-container {
-        grid-area: b !important;
+    .large .bubble-select-card .bubble-sub-button-container.expanded {
+        max-height: calc(100%);
+        height: auto !important;
+        grid-area: b;
+        #overflow: hidden; #have to disable for subbutton functions. 
+        flex-wrap: wrap;
+        align-content: start;
+        align-self: end;
+        justify-items: center;
+        justify-content: end;
+        justify-self: center;
+        padding-bottom: 7px;
     }
-    .multirow .large .bubble-sub-button-container.expansion {
-        grid-area: c !important;
-    }
 
-
-
-
-    .rows-2 .bubble-sub-button-container {
+    .rows-2 .bubble-select-card .bubble-sub-button-container {
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
@@ -260,7 +277,7 @@ export default `
       width: auto;
     }
 
-    .rows-2 .bubble-sub-button {
+    .rows-2 .bubble-select-card .bubble-sub-button {
       height: 20px !important;
     }
 `;
