@@ -139,6 +139,13 @@ class BubbleCard extends HTMLElement {
             }
         }
 
+        if (config.card_type === 'select' && config.entity && !config.select_attribute) {
+            const isSelectEntity = config.entity?.startsWith("input_select") || config.entity?.startsWith("select");
+            if (!isSelectEntity) {
+                throw new Error('"Select menu (from attributes)" missing');
+            }
+        }
+
         if (window.entityError) {
             throw new Error("You need to define a valid entity");
         }

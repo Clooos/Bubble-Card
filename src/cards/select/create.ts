@@ -77,7 +77,7 @@ export function createDropdownStructure(context, elements = context.elements, sh
         elements.dropdownArrow.style.height = '20px';
         elements.dropdownArrow.style.width = '20px';
         elements.mainContainer = elements.parentElement.parentElement.parentElement;
-        elements.mainContainer.style.overflow = 'visible';
+        //elements.mainContainer.style.overflow = 'visible';
         let selectMenu = elements.dropdownSelect.shadowRoot.querySelector('mwc-menu');
         if (selectMenu) {
           selectMenu.style.position = 'relative';
@@ -127,6 +127,7 @@ export function createDropdownActions(context, elements = context.elements, enti
       dropdownArrow.style.transform = 'rotate(180deg)';
       elements.dropdownArrow.style.background = 'var(--accent-color)';
       card.style.border = 'var(--bubble-select-border, solid 2px var(--accent-color))';
+      if (elements.mainContainer) elements.mainContainer.style.overflow = 'visible';
     };
 
     // Open then close it at first opening to fix its position
@@ -142,7 +143,12 @@ export function createDropdownActions(context, elements = context.elements, enti
         }, 140);
       });
     } else {
-      if (!selectMenu.hasAttribute('open')) selectMenu.setAttribute('open', '');
+      if (!selectMenu.hasAttribute('open')) {
+        
+        selectMenu.removeAttribute('mdc-menu-surface--is-open-below');
+        selectMenu.setAttribute('mdc-menu-surface--is-open-above', '');
+        selectMenu.setAttribute('open', '');
+      }
       updateStyles();
     }
   };
@@ -154,6 +160,7 @@ export function createDropdownActions(context, elements = context.elements, enti
     dropdownArrow.style.transform = 'rotate(0deg)';
     card.style.border = 'solid 2px rgba(0,0,0,0)';
     elements.dropdownArrow.style.background = '';
+    if (elements.mainContainer) elements.mainContainer.style.overflow = '';
   };
 
   const handleDropdownSelect = (event) => {

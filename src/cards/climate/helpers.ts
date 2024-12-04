@@ -31,7 +31,7 @@ export function getClimateColor(context) {
             } else if (isOn && context.config.state_color) {
                 if (state === 'auto') {
                     overlayColor = 'var(--bubble-state-climate-auto-color, var(--state-climate-auto-color, var(--state-climate-active-color, var(--state-active-color))))';
-                } else if (state = "heat_cool") {
+                } else if (state === "heat_cool") {
                     overlayColor = 'var(--bubble-state-climate-heat-cool-color, var(--state-climate-heat-cool-color, var(--state-climate-active-color, var(--state-active-color))))';
                 } else {
                     overlayColor = 'var(--bubble-climate-accent-color, var(--bubble-accent-color, var(--accent-color)))';
