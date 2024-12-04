@@ -1764,6 +1764,7 @@ export function createBubbleCardEditor() {
                 let formattedName = this.hass.formatEntityAttributeName(state, attributeName);
                 return { label: formattedName, value: attributeName };
             }).filter(attribute => this._selectable_attributes.includes(attribute.value));
+            const conditions = subButton.visibility ?? [];
 
             return html`
                 <ha-expansion-panel outlined>
@@ -1833,6 +1834,23 @@ export function createBubbleCardEditor() {
                                 ${this.makeTapActionPanel("Tap action", subButton, 'more-info', 'sub_button', index)}
                                 ${this.makeTapActionPanel("Double tap action", subButton, 'none', 'sub_button', index)}
                                 ${this.makeTapActionPanel("Hold action", subButton, 'none', 'sub_button', index)}
+                            </div>
+                        </ha-expansion-panel>
+                        <ha-expansion-panel outlined>
+                            <h4 slot="header">
+                              <ha-icon icon="mdi:eye"></ha-icon>
+                            Visibility
+                            </h4>
+                            <div class="content">
+                                <p class="intro">
+                                    The entity will be shown when ALL conditions below are fulfilled. If no conditions are set, the entity will always be shown.
+                                </p>
+                                <ha-card-conditions-editor
+                                    .hass=${this.hass}
+                                    .conditions=${conditions}
+                                    @value-changed=${(ev) => this._conditionChanged(index ,ev,'sub_button')}
+                                >
+                                </ha-card-conditions-editor>
                             </div>
                         </ha-expansion-panel>
                     </div>
@@ -2080,6 +2098,7 @@ export function createBubbleCardEditor() {
             let arrayCopy = [...this._config[array]];
             arrayCopy[index] = arrayCopy[index] || {};
             arrayCopy[index] = { ...arrayCopy[index], ...value };
+            arrayCopy[index] = { ...arrayCopy[index].visibility, ...value };
             this._config[array] = arrayCopy;
             fireEvent(this, "config-changed", { config: this._config });
             this.requestUpdate();
@@ -2125,6 +2144,20 @@ export function createBubbleCardEditor() {
             fireEvent(this, "config-changed", { config: this._config });
             this.requestUpdate();
         }
+
+        _conditionChanged(index, ev, array) {
+            ev.stopPropagation();
+            this._config[array] = this._config[array] || [];
+            let arrayCopy = [...this._config[array]];
+            arrayCopy[index] = arrayCopy[index] || {};
+            const conditions = ev.detail.value;
+            arrayCopy[index] = { ...arrayCopy[index],
+                visibility: conditions };
+            this._config[array] = arrayCopy;
+            fireEvent(this, "config-changed", { config: this._config });
+            this.requestUpdate();
+        }
+        
 
         static get styles() {
             return css`
