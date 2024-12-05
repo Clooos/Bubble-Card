@@ -1843,7 +1843,7 @@ export function createBubbleCardEditor() {
                             </h4>
                             <div class="content">
                                 <p class="intro">
-                                    The entity will be shown when ALL conditions below are fulfilled. If no conditions are set, the entity will always be shown.
+                                    The sub-button will be shown when ALL conditions below are fulfilled. If no conditions are set, the sub-button will always be shown.
                                 </p>
                                 <ha-card-conditions-editor
                                     .hass=${this.hass}
