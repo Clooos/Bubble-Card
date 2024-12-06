@@ -168,7 +168,7 @@ export function changeVolumeIcon(context) {
     context.elements.volumeButton.setAttribute("icon", newIcon);
     context.elements.mediaInfoContainer.style.opacity = newOpacity;
     context.elements.nameContainer.style.opacity = newOpacity;
-    context.elements.subButtonContainer.style.opacity = newOpacity;
+    if(context.elements.subButtonContainer)context.elements.subButtonContainer.style.opacity = newOpacity;
     context.elements.previousButton.style.opacity = newOpacity;
     context.elements.nextButton.style.opacity = newOpacity;
     context.elements.powerButton.style.opacity = newOpacity;
