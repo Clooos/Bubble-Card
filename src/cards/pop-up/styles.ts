@@ -167,7 +167,7 @@ export default `
   }
 
   .large .bubble-button-card-container {
-    height: 56px;
+    height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
     border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 36px));
   }
   .large .bubble-pop-up-container {
@@ -180,7 +180,7 @@ export default `
     margin-left: 8px;
   }
   .large .bubble-close-button {
-      height: 56px;
+      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
       width: 56px;
       border: none;
       border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));

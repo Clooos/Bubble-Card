@@ -94,65 +94,106 @@ export default `
         justify-content: center;
         cursor: pointer;
         border: none;
-    }
-
+    }      
+    
     .large .bubble-cover-card-container {
-      height: 56px;
-      display: flex;
+      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
       background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
       border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, 32px));
+      
+      
+      --line-height: 18px;
+      --gap-to-edge: 7px;
+      display: grid;
+      gap: 4px;
+      grid-template-areas:
+      'i n c a' 'b b b b' !important;
+      grid-template-columns: var(--row-height,56px) 1fr auto auto;
+      grid-template-rows: var(--row-height,56px) 1fr;
+      justify-self: start;
+      justify-items: start;
+      align-self: center;
+      align-items: center;
+    }
+    .large.bubble-empty-sub-buttons .bubble-cover-card-container{
+        grid-template-rows: 1fr 0;
+        align-content: center;
     }
 
-    .large .bubble-buttons .bubble-icon {
+    .large .bubble-cover-card-container .bubble-buttons .bubble-icon {
       color: var(--primary-text-color) !important;
       opacity: 1;
     }
-
-    .large .bubble-header-container {
-        height: 56px;
+    
+    .large .bubble-cover-card-container .bubble-header {
+      display: contents;
+      height: var(--row-height,56);
+      width: 100%;
     }
 
-    .large .bubble-header {
-        width: 100%;
-    }
-
-    .large .bubble-icon-container {
+    .large .bubble-cover-card-container .bubble-header .bubble-icon-container {
       --mdc-icon-size: 24px;
       min-width: 42px !important;
       min-height: 42px !important;
-      align-content: center;
-      border: none;
-      margin: 8px 6px 8px 8px;
+      grid-area: i;
+      margin-left: 6px;
     }
 
-    .large .bubble-icon {
-      align-items: center;
-    }
-
-    .large .bubble-buttons {
+    .large .bubble-cover-card-container .bubble-buttons {
       display: flex;
       position: relative;
-      right: 18px;
       align-self: center;
-      grid-gap: 18px;
+      padding-right: var(--line-height,18px);
+      grid-gap: var(--line-height,18px);
+      grid-area: a;
     }
 
-    .large .bubble-sub-button-container {
-      margin-right: 14px;
+    .large .bubble-cover-card-container .bubble-name-container {
+      justify-content: flex-start;
+      grid-area: n;
+      overflow: hidden;
+      margin: 0px;
+      max-width: calc(100% - 2 * var(--gap-to-edge,7px));
     }
+    
 
-    .rows-2 .bubble-sub-button-container {
+    .large .bubble-cover-card-container .bubble-sub-button-container {
+      grid-area: c;
+        max-width: 100%;
+        height: 36px;
+        flex-wrap: wrap-reverse;
+        row-gap: 4px;
+        align-self: center;
+        align-content: center;
+    }
+    
+    .large.bubble-multi-row .bubble-cover-card-container .bubble-sub-button-container {
+        max-height: 100%;
+        height: auto;
+        max-width: calc(100% - 2 * var(--gap-to-edge,7px));
+        grid-area: b;
+        flex-wrap: wrap;
+        justify-self: center;
+        align-self: center;
+        justify-content: center;
+        align-content: start;
+        justify-items: center;
+        padding-bottom: 7px;    
+    }
+    
+    .rows-2 .bubble-cover-card-container .bubble-sub-button-container {
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
       grid-template-columns: repeat(2, min-content);
       grid-template-rows: repeat(2, 1fr);
       grid-auto-flow: column;
+      align-self: center;
       width: auto;
-      padding-right: 14px;
+      padding-right: 7px;
     }
 
-    .rows-2 .bubble-sub-button {
+    .rows-2 .bubble-cover-card-container .bubble-sub-button {
       height: 20px !important;
     }
 `
