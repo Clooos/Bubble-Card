@@ -147,6 +147,7 @@ export function changeSubButtonState(context, container = context.content, appen
     const subButtons = context.config.sub_button;
     const numberOfRows = !context.config.grid_options ? 1 :context.config.grid_options.rows;
     const largeFormat = numberOfRows> 1 &&(context.config.card_layout === 'large' || context.config.card_layout === 'large-2-rows')
+    if (!subButtons || subButtons.length < 1) container.classList.add("bubble-empty-sub-buttons"); 
     if (!subButtons) return;
     let number_of_subButtons = subButtons.length;
     
