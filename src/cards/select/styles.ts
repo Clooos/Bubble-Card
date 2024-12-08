@@ -263,6 +263,7 @@ export default `
     .large .bubble-select-card .bubble-sub-button-container.expanded {
         max-height: 100%;
         height: auto;
+        max-width: calc(100% - 2 * var(--gap-to-edge,7px));
         grid-area: b;
         flex-wrap: wrap;
         justify-self: center;
