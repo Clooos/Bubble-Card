@@ -182,10 +182,6 @@ export default `
       margin-left: 6px;
     }
     
-    .large .bubble-button-card .bubble-sub-button .bubble-dropdown-container{
-        display: flex !important;
-    }
-    
     .large .bubble-button-card .bubble-name-container {
       justify-content: flex-start;
       grid-area: n;

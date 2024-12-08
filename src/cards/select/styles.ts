@@ -228,17 +228,13 @@ export default `
       margin-left: 6px;
     }
     
-    .large .bubble-select-card .bubble-dropdown-container{
+    .large .bubble-select-card > .bubble-dropdown-container{
         grid-area: a;
         display: contents !important;
     }
 
     .large .bubble-select-card .bubble-dropdown-arrow{
         grid-area: a;
-    }
-    
-    .large .bubble-select-card .bubble-sub-button .bubble-dropdown-container{
-        display: flex;
     }
     
     .large .bubble-select-card .bubble-name-container {

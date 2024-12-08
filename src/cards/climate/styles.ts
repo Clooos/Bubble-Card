@@ -262,10 +262,6 @@ export default `
         justify-self: center;
     }
     
-    .large .bubble-climate .bubble-sub-button .bubble-dropdown-container{
-        display: flex;
-    }
-    
     .large .bubble-climate .bubble-name-container {
         justify-content: flex-start;
         grid-area: n;

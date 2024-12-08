@@ -181,10 +181,6 @@ export default `
         padding-bottom: 7px;    
     }
     
-    .large .bubble-cover-card-container .bubble-sub-button .bubble-dropdown-container{
-        display: flex !important;
-    }
-    
     .rows-2 .bubble-cover-card-container .bubble-sub-button-container {
       flex-direction: column;
       gap: 4px !important;
