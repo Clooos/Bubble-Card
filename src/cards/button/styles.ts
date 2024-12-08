@@ -151,16 +151,20 @@ export default `
 
     .large .bubble-button-card{
         --line-height: 18px;
-        --name-container-width: calc(100% - var(--row-height,56px) * 1 - var(--row-height,56px) * var(--number-subButtons,1));
+        --gap-to-edge: 7px;
         display: grid;
         grid-template-areas:
-        'i n c' 'b b b' !important;
+        'i n c a' 'b b b b' !important;
         grid-template-columns: var(--row-height,56px) 1fr auto auto;
         grid-template-rows: var(--row-height,56px) 1fr;
         justify-self: start;
         justify-items: start;
         align-self: center;
         align-items: center;
+    }
+    .large.bubble-empty-sub-buttons .bubble-button-card{
+        grid-template-rows: 1fr 0;
+        align-content: center;
     }
 
 
@@ -186,8 +190,8 @@ export default `
       justify-content: flex-start;
       grid-area: n;
       overflow: hidden;
-      max-width: 100% !important;
-      #padding-top: calc(var(--row-height,56) / 2 - var(--line-height,18));
+      margin: 0px;
+      max-width: calc(100% - 2 * var(--gap-to-edge,7px));
     }
 
     .large .bubble-button-card .bubble-sub-button-container {
@@ -196,21 +200,20 @@ export default `
         height: 36px;
         flex-wrap: wrap-reverse;
         row-gap: 4px;
-        align-content: end;
-        justify-self: end;
+        align-self: center;
+        align-content: center;
     }
 
     .large .bubble-button-card .bubble-sub-button-container.expanded {
-        max-height: calc(100%);
-        height: auto !important;
+        max-height: 100%;
+        height: auto;
         grid-area: b;
-        overflow: hidden;
         flex-wrap: wrap;
-        align-content: start;
-        align-self: end;
-        justify-items: center;
-        justify-content: end;
         justify-self: center;
+        align-self: center;
+        justify-content: center;
+        align-content: start;
+        justify-items: center;
         padding-bottom: 7px;
     }
 
@@ -221,8 +224,9 @@ export default `
       grid-template-columns: repeat(2, min-content);
       grid-template-rows: repeat(2, 1fr);
       grid-auto-flow: column;
+      align-self: center;
       width: auto;
-      padding-right: 14px;
+      padding-right: 7px;
     }
 
     .rows-2 .bubble-button-card .bubble-sub-button {

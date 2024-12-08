@@ -196,7 +196,7 @@ export default `
 
     .large .bubble-select-card{
         --line-height: 18px;
-        --name-container-width: calc(100% - var(--row-height,56px) * 2 - var(--row-height,56px) * var(--number-subButtons,1));
+        --gap-to-edge: 7px;
         display: grid;
         gap: 4px;
         grid-template-areas:
@@ -208,6 +208,12 @@ export default `
         align-self: center;
         align-items: center;
     }
+    .large.bubble-empty-sub-buttons .bubble-select-card{
+        grid-template-rows: 1fr 0;
+        align-content: center;
+    }
+
+
 
     .large .bubble-select-card-container {
       height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
@@ -239,7 +245,8 @@ export default `
         justify-content: flex-start;
         grid-area: n;
         overflow: hidden;
-        max-width: 100% !important;
+        margin: 0px;
+        max-width: calc(100% - 2 * var(--gap-to-edge,7px));
     }
 
     .large .bubble-select-card .bubble-sub-button-container {
@@ -248,22 +255,21 @@ export default `
         height: 36px;
         flex-wrap: wrap-reverse;
         row-gap: 4px;
-        align-content: end;
-        justify-self: end;
-        right: 0px;
+        align-self: center;
+        align-content: center;
     }
 
+
     .large .bubble-select-card .bubble-sub-button-container.expanded {
-        max-height: calc(100%);
-        height: auto !important;
+        max-height: 100%;
+        height: auto;
         grid-area: b;
-        #overflow: hidden; #have to disable for subbutton functions. 
         flex-wrap: wrap;
-        align-content: start;
-        align-self: end;
-        justify-items: center;
-        justify-content: end;
         justify-self: center;
+        align-self: center;
+        justify-content: center;
+        align-content: start;
+        justify-items: center;
         padding-bottom: 7px;
     }
 
@@ -274,6 +280,7 @@ export default `
       grid-template-columns: repeat(2, min-content);
       grid-template-rows: repeat(2, 1fr);
       grid-auto-flow: column;
+      align-self: center;
       width: auto;
     }
 

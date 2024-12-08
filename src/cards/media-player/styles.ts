@@ -272,17 +272,17 @@ export default `
         64% {transform: translateX(0); opacity: 0.1;}
         100% {transform: translateX(100%); opacity: 0;}
     }
+
     .large .bubble-media-player-container{
       display: flex;
-    }
-    
-    .large .bubble-media-player-container{
       height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
     }
 
     .large .bubble-media-player{
       --line-height: 18px;
+      --gap-to-edge: 7px;
       display: grid;
+      gap: 4px;
       grid-template-areas:
       'i n c a1 a2 a3 a4 a5' 'b b b b b b b b' !important;
       grid-template-columns: var(--row-height,56px) 1fr auto auto auto auto auto auto;
@@ -292,7 +292,10 @@ export default `
       justify-items: start;
       align-self: center;
       align-items: center;
-      gap: 4px;
+    }
+    .large.bubble-empty-sub-buttons .bubble-media-player{
+        grid-template-rows: 1fr 0;
+        align-content: center;
     }
 
     .large .bubble-media-player-container .bubble-icon-container {
@@ -300,14 +303,12 @@ export default `
       min-width: 42px !important;
       height: 42px !important;
       grid-area: i;
-      margin-left: 8px;
+      margin-left: 6px;
     }
     
     .large .bubble-media-player-container .bubble-button-container{
         grid-area: a1;
-        align-items: center;
-        gap: 4;
-        display: contents !important;
+        display: contents;
     }
     
    .large .bubble-media-player-container .bubble-power-button{
@@ -323,7 +324,7 @@ export default `
    }
 
    .large .bubble-media-player-container .bubble-volume-button{
-      grid-area: a4 !important;
+      grid-area: a4;
    }
 
     .large .bubble-media-player-container  .bubble-play-pause-button {
@@ -331,9 +332,10 @@ export default `
       height: 42px;
       width: 42px;
       padding: 0;
-      align-items: center;
       grid-area: a5;
+      align-items: center;
       justify-content: center;
+      margin: var(--gap-to-edge,7px) var(--gap-to-edge,7px) var(--gap-to-edge,7px) 0;
     }
 
     .large .bubble-media-player-container .bubble-volume-slider {
@@ -355,22 +357,35 @@ export default `
     }
       
     .large .bubble-media-player-container .bubble-name-container {
-      grid-area: n;
       justify-content: flex-start;
-      margin-left: 0px;
+      grid-area: n;
+      overflow: hidden;
+      margin: 0px;
+      max-width: calc(100% - 2 * var(--gap-to-edge,7px));
 
     }
 
     .large .bubble-media-player-container .bubble-sub-button-container {
       grid-area: c;
+      max-width: 100%;
+      height: 36px;
       flex-wrap: wrap-reverse;
       row-gap: 4px;
+      align-self: center;
+      align-content: center;
     }
 
     .large.bubble-multi-row .bubble-media-player-container .bubble-sub-button-container {
-      grid-area: b;
-      justify-content: center;
-      justify-self: center;
+        max-height: 100%;
+        height: auto;
+        grid-area: b;
+        flex-wrap: wrap;
+        justify-self: center;
+        align-self: center;
+        justify-content: center;
+        align-content: start;
+        justify-items: center;
+        padding-bottom: 7px;
     }
     
     .rows-2 .bubble-media-player-container .bubble-sub-button-container {
@@ -380,6 +395,7 @@ export default `
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, minmax(auto, max-content));
       grid-auto-flow: column;
+      align-self: center;
       width: auto;
     }
 

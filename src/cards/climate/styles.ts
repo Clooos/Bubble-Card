@@ -220,8 +220,9 @@ export default `
 
     .large .bubble-climate{
         --line-height: 18px;
-        --name-container-width: calc(100% - var(--row-height,56px)  - 114px - 42px * var(--number-subButtons,1));
+        --gap-to-edge: 7px;
         display: grid;
+        gap: 4px;
         grid-template-areas:
         'i n c a' 'b b b b' !important;
         grid-template-columns: var(--row-height,56px) 1fr auto auto;
@@ -230,6 +231,10 @@ export default `
         justify-items: start;
         align-self: center;
         align-items: center;
+    }
+    .large.bubble-empty-sub-buttons .bubble-media-player{
+        grid-template-rows: 1fr 0;
+        align-content: center;
     }
 
     .large .bubble-climate-container {
@@ -253,19 +258,20 @@ export default `
     .large .bubble-climate .bubble-temperature-container{
         grid-area: a;
         height: calc(100% - 20px);
-        width: calc(100% - 14px);
+        width: calc(100% - 2 * var(--gap-to-edge,7));
         justify-self: center;
     }
     
     .large .bubble-climate .bubble-sub-button .bubble-dropdown-container{
-        display: flex !important;
+        display: flex;
     }
     
     .large .bubble-climate .bubble-name-container {
         justify-content: flex-start;
         grid-area: n;
         overflow: hidden;
-        max-width: 100% !important;
+        margin: 0px;
+        max-width: calc(100% - 2 * var(--gap-to-edge,7px));
     }
 
     .large .bubble-climate .bubble-sub-button-container {
@@ -274,21 +280,20 @@ export default `
         height: 36px;
         flex-wrap: wrap-reverse;
         row-gap: 4px;
-        align-content: end;
-        justify-self: end;
+        align-self: center;
+        align-content: center;
     }
 
     .large .bubble-climate .bubble-sub-button-container.expanded {
-        max-height: calc(100%);
-        height: auto !important;
+        max-height: 100%;
+        height: auto;
         grid-area: b;
-        #overflow: hidden; #have to disable for subbutton functions. 
         flex-wrap: wrap;
-        align-content: start;
-        align-self: end;
-        justify-items: center;
-        justify-content: end;
         justify-self: center;
+        align-self: center;
+        justify-content: center;
+        align-content: start;
+        justify-items: center;
         padding-bottom: 7px;
     }
 
@@ -299,6 +304,7 @@ export default `
       grid-template-columns: repeat(2, min-content);
       grid-template-rows: repeat(2, 1fr);
       grid-auto-flow: column;
+      align-self: center;
       width: auto;
     }
 
