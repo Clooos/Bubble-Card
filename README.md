@@ -1491,7 +1491,7 @@ You have access to all the global JS functions, but you have also access to:
 
 <details>
 
-<summary>Changing the background color of a button that is red when it's <code>off</code> and green when it's <code>on</code></summary>
+<summary>Changing the background color of a button that is red when it's <code>off</code> and blue when it's <code>on</code></summary>
 
 <br>
 
