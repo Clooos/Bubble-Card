@@ -5,7 +5,7 @@ on:
   push:
   pull_request:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -116,7 +116,6 @@ jobs:
           operations-per-run: 250
           remove-stale-when-updated: true
           stale-issue-label: "needs-more-information"
-          labels-to-remove-when-unstale: "needs-more-information"
           exempt-issue-labels: "no-stale,help-wanted"
           stale-issue-message: >
             There has been a request for more information. 
