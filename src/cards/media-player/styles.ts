@@ -19,7 +19,7 @@ export default `
         height: 50px;
         background-color: var(--bubble-media-player-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
         touch-action: pan-y;
-        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: inherit;
     }
 
     .bubble-media-player {
@@ -30,6 +30,7 @@ export default `
         height: 100%;
         width: 100%;
         transition: background-color 1.5s;
+        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
         background-color: rgba(0,0,0,0);
     }
 
