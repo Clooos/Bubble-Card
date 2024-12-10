@@ -180,7 +180,7 @@ export default `
     margin-left: 8px;
   }
   .large .bubble-close-button {
-      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
+      height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
       width: 56px;
       border: none;
       border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));

@@ -275,7 +275,7 @@ export default `
 
     .large .bubble-media-player-container{
       display: flex;
-      height: calc( var(--row-height) * var(--row-size) + var(--row-gap) * ( var(--row-size) - 1 ));
+      height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
     }
 
     .large .bubble-media-player{
