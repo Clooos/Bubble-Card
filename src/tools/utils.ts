@@ -131,6 +131,8 @@ export function getIcon(context, entity = context.config.entity, icon = context.
           return isOff ? "mdi:power-plug-off" : "mdi:power-plug";
         case "tamper":
           return isOff ? "mdi:check-circle" : "mdi:alert-circle";
+        case "safety":
+          return isOff ? "mdi:check-circle" : "mdi:alert-circle";
         case "smoke":
           return isOff ? "mdi:check-circle" : "mdi:smoke";
         case "heat":
