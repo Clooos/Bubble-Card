@@ -25,6 +25,7 @@ export default `
         overflow: scroll;
         touch-action: pan-y;
     }
+        
 
     .bubble-button-card,
     .bubble-range-slider,
@@ -79,7 +80,7 @@ export default `
         margin: 6px;
         border-radius: var(--bubble-button-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
         background-color: var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
-        #overflow: hidden; #have to disable for subbutton functions. 
+        overflow: hidden; 
         position: relative;
         cursor: pointer;
     }
@@ -175,10 +176,10 @@ export default `
 
     .large .bubble-button-card .bubble-icon-container {
       --mdc-icon-size: 24px;
-      min-width: 42px !important;
-      max-height: 42px !important;
+      width: calc(var(--row-height,56px) - 14px);
+      height: calc(var(--row-height,56px) - 14px);
       grid-area: i;
-      margin-left: 6px;
+      margin: 7px;
     }
     
     .large .bubble-button-card .bubble-name-container {

@@ -202,7 +202,7 @@ export default `
         grid-template-areas:
         'i n c a' 'b b b b' !important;
         grid-template-columns: var(--row-height,56px) 1fr auto auto;
-        grid-template-rows: var(--row-height,56px) 1fr;
+        grid-template-rows: calc(var(--row-height,56px) - 4px) 1fr; # -4px for border thickness
         justify-self: start;
         justify-items: start;
         align-self: center;
@@ -221,10 +221,10 @@ export default `
 
     .large .bubble-select-card .bubble-icon-container {
       --mdc-icon-size: 24px;
-      min-width: 42px !important;
-      max-height: 42px !important;
+      width: calc(var(--row-height,56px) - 2 * var(--gap-to-edge,7px));
+      height: calc(var(--row-height,56px) - 2 * var(--gap-to-edge,7px));
       grid-area: i;
-      margin-left: 6px;
+      margin: calc(var(--gap-to-edge,7px) - 2px);
     }
     
     .large .bubble-select-card > .bubble-dropdown-container{

@@ -243,10 +243,10 @@ export default `
 
     .large .bubble-climate .bubble-icon-container {
       --mdc-icon-size: 24px;
-      min-width: 42px !important;
-      max-height: 42px !important;
+      width: calc(var(--row-height,56px) - 14px);
+      height: calc(var(--row-height,56px) - 14px);
       grid-area: i;
-      margin-left: 6px;
+      margin: 7px;
     }
     
     .large .bubble-climate .bubble-button-container{
