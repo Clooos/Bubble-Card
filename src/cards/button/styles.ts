@@ -21,7 +21,7 @@ export default `
         width: 100%;
         height: 50px;
         background-color: var(--bubble-button-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
-        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
         overflow: scroll;
         touch-action: pan-y;
     }
@@ -40,7 +40,7 @@ export default `
     .bubble-button-background {
         background-color: var(--bubble-button-background-color);
         opacity: .5;
-        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: inherit;
     }
     .bubble-range-fill {
         position: absolute;
@@ -64,7 +64,7 @@ export default `
     }
     .bubble-range-slider {
         cursor: ew-resize;
-        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: inherit);
         overflow: hidden;
         mask-image: radial-gradient(white, black);
         -webkit-mask-image: -webkit-radial-gradient(white, black);
@@ -171,7 +171,6 @@ export default `
 
     .large .bubble-button-card-container {
       height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
-      border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
     }
 
     .large .bubble-button-card .bubble-icon-container {

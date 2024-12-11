@@ -19,7 +19,7 @@ export default `
         height: 50px;
         background-color: var(--bubble-media-player-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
         touch-action: pan-y;
-        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     }
 
     .bubble-media-player {
@@ -49,7 +49,7 @@ export default `
         background: none;
         border: none;
         cursor: pointer;
-        border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, 50%));
         padding: 6px;
         height: 24px;
         width: 24px;
@@ -67,7 +67,7 @@ export default `
         height: 38px;
         left: 50px;
         overflow: hidden;
-        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 50%));
         z-index: 1;
         background-color: var(--bubble-media-player-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
         opacity: 1;
@@ -234,7 +234,7 @@ export default `
         position: absolute;
         height: 100%;
         width: 100%;
-        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: inherit;
         overflow: hidden;
     }
 
@@ -287,7 +287,6 @@ export default `
       'i n c a1 a2 a3 a4 a5' 'b b b b b b b b' !important;
       grid-template-columns: var(--row-height,56px) 1fr auto auto auto auto auto auto;
       grid-template-rows: var(--row-height,56px) 1fr;
-      border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
       justify-self: start;
       justify-items: start;
       align-self: center;
@@ -340,7 +339,6 @@ export default `
 
     .large .bubble-media-player-container .bubble-volume-slider {
       height: 80%;
-      border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
       position: relative;
       left: 0px;
       width: calc(100%);

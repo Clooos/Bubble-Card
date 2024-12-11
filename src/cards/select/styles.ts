@@ -81,7 +81,7 @@ export default `
         width: 100%;
         height: 50px;
         background-color: var(--bubble-select-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
-        border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
         touch-action: pan-y;
         box-sizing: border-box;
         border: solid 2px transparent;
@@ -102,7 +102,7 @@ export default `
         background-color: var(--bubble-select-background-color);
         opacity: .5;
         overflow: hidden !important;
-        border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: inherit;
     }
     .is-unavailable .bubble-select-card {
         cursor: not-allowed;
@@ -217,7 +217,6 @@ export default `
 
     .large .bubble-select-card-container {
       height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
-      border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
     }
 
     .large .bubble-select-card .bubble-icon-container {

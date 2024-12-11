@@ -17,7 +17,7 @@ export default `
         width: 100%;
         height: 50px;
         background-color: var(--bubble-climate-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
-        border-radius: var(--bubble-climate-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
         overflow: visible;
         touch-action: pan-y;
     }
@@ -96,7 +96,7 @@ export default `
         width: 100%;
         height: 100%;
         position: absolute;
-        border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 50%));
         overflow: hidden;
         pointer-events: none;
     }
@@ -117,7 +117,7 @@ export default `
         width: 100%;
         height: 100%;
         position: absolute;
-        border-radius: var(--bubble-climate-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: inherit;
         opacity: 0.7;
         transition: background-color 2s ease;
     }
@@ -239,7 +239,6 @@ export default `
 
     .large .bubble-climate-container {
       height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
-      border-radius: var(--bubble-select-border-radius, var(--bubble-border-radius, 32px));
     }
 
     .large .bubble-climate .bubble-icon-container {
