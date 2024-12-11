@@ -67,7 +67,7 @@ export default `
         height: 38px;
         left: 50px;
         overflow: hidden;
-        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 50%));
+        border-radius: var(--bubble-media-player-border-radius, calc(var(--row-height,56px)/2));
         z-index: 1;
         background-color: var(--bubble-media-player-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
         opacity: 1;
@@ -309,6 +309,22 @@ export default `
         grid-area: a1;
         display: contents;
     }
+
+    .large.AlternativeLayout.bubble-multi-row .bubble-media-player-container .bubble-button-container {
+        grid-area: b;
+        height: calc(100% - 7px);
+        width: 100%;
+        display: flex !important;
+        row-gap: 4px;
+        flex-wrap: wrap;
+        align-self: center;
+        justify-self: center;
+        justify-content: center;
+        align-items: center;
+        justify-items: center;
+        padding-bottom: 7px;
+        overflow: hidden;
+    }
     
    .large .bubble-media-player-container .bubble-power-button{
       grid-area: a1;
@@ -385,6 +401,11 @@ export default `
         align-content: start;
         justify-items: center;
         padding-bottom: 7px;
+    }    
+    
+    .large.AlternativeLayout.bubble-multi-row .bubble-media-player-container .bubble-sub-button-container{
+        padding-bottom: 0px;   
+        display: contents;
     }
     
     .rows-2 .bubble-media-player-container .bubble-sub-button-container {

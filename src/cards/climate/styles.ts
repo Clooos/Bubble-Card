@@ -253,12 +253,30 @@ export default `
         grid-area: a;
         display: contents !important;
     }
+
+
+    .large.AlternativeLayout.bubble-multi-row .bubble-climate .bubble-button-container {
+        grid-area: b;
+        height: calc(100% - 7px);
+        width: 100%;
+        display: flex !important;
+        row-gap: 4px;
+        flex-wrap: wrap;
+        align-self: center;
+        justify-self: center;
+        justify-content: center;
+        align-items: center;
+        justify-items: center;
+        padding-bottom: 7px;
+        overflow: hidden;
+    }
     
     .large .bubble-climate .bubble-temperature-container{
         grid-area: a;
-        height: calc(100% - 20px);
-        width: calc(100% - 2 * var(--gap-to-edge,7));
+        height: calc(var(--row-height,56px) - 20px);
+        width: auto;
         justify-self: center;
+
     }
     
     .large .bubble-climate .bubble-name-container {
@@ -266,7 +284,7 @@ export default `
         grid-area: n;
         overflow: hidden;
         margin: 0px;
-        max-width: calc(100% - 2 * var(--gap-to-edge,7px));
+        max-width: 100%;
     }
 
     .large .bubble-climate .bubble-sub-button-container {
@@ -291,6 +309,11 @@ export default `
         align-content: start;
         justify-items: center;
         padding-bottom: 7px;
+    }
+
+    .large.AlternativeLayout.bubble-multi-row .bubble-climate .bubble-sub-button-container{
+        padding-bottom: 0px;   
+        display: contents;
     }
 
     .rows-2 .bubble-climate .bubble-sub-button-container {
