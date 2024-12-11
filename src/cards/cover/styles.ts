@@ -11,6 +11,7 @@ export default `
         display: grid;
         gap: 10px;
         overflow: hidden;
+        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     }
 
     .bubble-header {
