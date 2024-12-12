@@ -3,6 +3,7 @@ import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isSta
 import { getBackdrop } from "./create.ts";
 import { addHash, onEditorChange, removeHash } from "./helpers.ts";
 import { initializesubButtonIcon } from '../../tools/global-changes.ts';
+import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.ts';
 
 export function changeEditor(context) {
     if (!context.verticalStack) return;
@@ -110,34 +111,63 @@ export function changeStyle(context) {
     backdropCustomStyle.innerText = customStyle;
 }
 
-
 export function changeTriggered(context) {
-    let triggerEntity = context.config.trigger_entity ?? '';
+    const triggerConditions = context.config.trigger;
 
-    if (triggerEntity === '') return;
+    if (triggerConditions) {
+        const isInitialLoad = !context.hasPageLoaded;
+        context.hasPageLoaded = true;
 
-    let triggerState = context.config.trigger_state ?? '';
-    let triggerClose = context.config.trigger_close ?? false;
-    let triggerEntityState = context._hass.states[triggerEntity]?.state;
+        console.log(context.hashAdded)
 
-    if (!triggerEntity) return;
-    if (!triggerState) return;
-    if (context.oldTriggerEntityState === triggerEntityState) return;
+        //Check conditions
+        const triggerConditions_array = ensureArray(triggerConditions);
+        if (validateConditionalConfig(triggerConditions_array)){
+            const trigger = checkConditionsMet(triggerConditions_array,context._hass);
 
-    const isInitialLoad = !context.hasPageLoaded;
-    context.hasPageLoaded = true;
+            if (trigger === context.previousTrigger) return;
 
-    if (context.config.hash === location.hash) {
-        if (triggerClose && triggerState !== triggerEntityState) {
-            if (!isInitialLoad) {
-                removeHash();
-            }
+            if (context.config.hash === location.hash) {
+                if (!trigger && !isInitialLoad) {
+                    removeHash();
+                }
+            } else {
+                if (trigger) {
+                    addHash(context.config.hash);
+                }
+            }  
+
+            context.previousTrigger = trigger;          
         }
     } else {
-        if (triggerEntityState === triggerState) {
-            addHash(context.config.hash);
-        }
-    }
+        // Deprecated method
+        let triggerEntity = context.config.trigger_entity ?? '';
 
-    context.oldTriggerEntityState = triggerEntityState;
+        if (triggerEntity === '') return;
+
+        let triggerState = context.config.trigger_state ?? '';
+        let triggerClose = context.config.trigger_close ?? false;
+        let triggerEntityState = context._hass.states[triggerEntity]?.state;
+
+        if (!triggerEntity) return;
+        if (!triggerState) return;
+        if (context.oldTriggerEntityState === triggerEntityState) return;
+
+        const isInitialLoad = !context.hasPageLoaded;
+        context.hasPageLoaded = true;
+
+        if (context.config.hash === location.hash) {
+            if (triggerClose && triggerState !== triggerEntityState) {
+                if (!isInitialLoad) {
+                    removeHash();
+                }
+            }
+        } else {
+            if (triggerEntityState === triggerState) {
+                addHash(context.config.hash);
+            }
+        }
+
+        context.oldTriggerEntityState = triggerEntityState;        
+    }
 }

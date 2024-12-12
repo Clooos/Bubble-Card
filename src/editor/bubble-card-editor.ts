@@ -459,6 +459,7 @@ export function createBubbleCardEditor() {
             const nameButton = this._config?.button_type === 'name';
 
             if (this._config?.card_type === 'pop-up') {
+                const conditions = this._config?.trigger ?? [];
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
@@ -593,25 +594,15 @@ export function createBubbleCardEditor() {
                               Pop-up trigger
                             </h4>
                             <div class="content">
-                                ${this.makeDropdown("Optional - Entity to open the pop-up based on its state", "trigger_entity", allEntitiesList)}
-                                <ha-textfield
-                                    label="Optional - State to open the pop-up"
-                                    .value="${this._trigger_state}"
-                                    .configValue="${"trigger_state"}"
-                                    @input="${this._valueChanged}"
-                                ></ha-textfield>
-                                <ha-formfield .label="Optional - Close when the state is different">
-                                    <ha-switch
-                                        aria-label="Optional - Close when the state is different"
-                                        .checked=${this._trigger_close}
-                                        .configValue="${"trigger_close"}"
-                                        @change=${this._valueChanged}
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Optional - Close when the state is different</label> 
-                                    </div>
-                                </ha-formfield>
-                                <ha-alert alert-type="info">This allows you to open this pop-up based on the state of any entity, for example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.</ha-alert>
+                                <ha-card-conditions-editor
+                                    .hass=${this.hass}
+                                    .conditions=${conditions}
+                                    @value-changed=${(ev) => this._conditionChanged(ev)}
+                                >
+                                </ha-card-conditions-editor>
+                                <ha-alert alert-type="info">
+                                    The pop-up will be opened when ALL conditions are fulfilled. For example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (<code>input_boolean</code>) and trigger its opening/closing in an automation.
+                                </ha-alert>
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1256,11 +1247,6 @@ export function createBubbleCardEditor() {
                                 show_arrow: false 
                             } : null
                         ].filter(Boolean);
-                    } else {
-                        // Remove the previously added temperature sub-button if it exists when the editor is opened
-                        this._config.sub_button = this._config.sub_button.filter(button => 
-                            !(button.attribute === 'temperature' && button.icon === 'mdi:thermometer')
-                        );
                     }
 
                     this.climateSubButtonsAdded = true;
@@ -1477,7 +1463,7 @@ export function createBubbleCardEditor() {
                         </div>
                     </ha-formfield>
                 ` : ''}
-                ${array === 'sub_button' && (context?.show_background ?? true) && (context?.entity ? context?.entity?.startsWith("light") : this._config?.entity?.startsWith("light")) ? html`
+                ${array === 'sub_button' && (context?.state_background ?? true) && entity.startsWith("light") ? html`
                     <ha-formfield .label="Optional - Background color based on light color">
                         <ha-switch
                             aria-label="Optional - Background color based on light color"
@@ -1486,6 +1472,19 @@ export function createBubbleCardEditor() {
                         ></ha-switch>
                         <div class="mdc-form-field">
                             <label class="mdc-label">Optional - Background color based on light color</label> 
+                        </div>
+                    </ha-formfield>
+                ` : ''}
+                ${array !== 'sub_button' && entity.startsWith("light") ? html`
+                    <ha-formfield .label="Optional - Use accent color instead of light color">
+                        <ha-switch
+                            aria-label="Optional - Use accent color instead of light color"
+                            .checked=${context?.use_accent_color ?? false}
+                            .configValue="${config + "use_accent_color"}"
+                            @change="${this._valueChanged}"
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Use accent color instead of light color</label> 
                         </div>
                     </ha-formfield>
                 ` : ''}
@@ -1856,15 +1855,15 @@ export function createBubbleCardEditor() {
                             Visibility
                             </h4>
                             <div class="content">
-                                <p class="intro">
-                                    The sub-button will be shown when ALL conditions below are fulfilled. If no conditions are set, the sub-button will always be shown.
-                                </p>
                                 <ha-card-conditions-editor
                                     .hass=${this.hass}
                                     .conditions=${conditions}
-                                    @value-changed=${(ev) => this._conditionChanged(index ,ev,'sub_button')}
+                                    @value-changed=${(ev) => this._conditionChanged(ev, index, 'sub_button')}
                                 >
                                 </ha-card-conditions-editor>
+                                <ha-alert alert-type="info">
+                                    The sub-button will be shown when ALL conditions are fulfilled. If no conditions are set, the sub-button will always be shown.
+                                </ha-alert>
                             </div>
                         </ha-expansion-panel>
                     </div>
@@ -2112,7 +2111,6 @@ export function createBubbleCardEditor() {
             let arrayCopy = [...this._config[array]];
             arrayCopy[index] = arrayCopy[index] || {};
             arrayCopy[index] = { ...arrayCopy[index], ...value };
-            arrayCopy[index] = { ...arrayCopy[index].visibility, ...value };
             this._config[array] = arrayCopy;
             fireEvent(this, "config-changed", { config: this._config });
             this.requestUpdate();
@@ -2159,19 +2157,30 @@ export function createBubbleCardEditor() {
             this.requestUpdate();
         }
 
-        _conditionChanged(index, ev, array) {
+        _conditionChanged(ev, index, array) {
             ev.stopPropagation();
-            this._config[array] = this._config[array] || [];
-            let arrayCopy = [...this._config[array]];
-            arrayCopy[index] = arrayCopy[index] || {};
-            const conditions = ev.detail.value;
-            arrayCopy[index] = { ...arrayCopy[index],
-                visibility: conditions };
-            this._config[array] = arrayCopy;
+
+            if (array) {
+                this._config[array] = this._config[array] || [];
+                let arrayCopy = [...this._config[array]];
+                arrayCopy[index] = arrayCopy[index] || {};
+                const conditions = ev.detail.value;
+                arrayCopy[index] = { 
+                    ...arrayCopy[index],
+                    visibility: conditions 
+                };
+                this._config[array] = arrayCopy;
+            } else if (this._config.card_type === 'pop-up') {
+                const conditions = ev.detail.value;
+                this._config = { 
+                    ...this._config,
+                    trigger: conditions 
+                };
+            }
+
             fireEvent(this, "config-changed", { config: this._config });
             this.requestUpdate();
         }
-        
 
         static get styles() {
             return css`
@@ -2285,6 +2294,10 @@ export function createBubbleCardEditor() {
                   float: right;
                   padding: 0;
                   margin: 0 8px;
+                }
+
+                ha-card-conditions-editor {
+                  margin-top: -12px;
                 }
             `;
         }

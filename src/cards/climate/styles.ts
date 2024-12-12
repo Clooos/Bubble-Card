@@ -18,6 +18,7 @@ export default `
         height: 50px;
         background-color: var(--bubble-climate-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
         border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+        box-shadow: var(--bubble-climate-box-shadow, var(--bubble-box-shadow, none));
         overflow: visible;
         touch-action: pan-y;
     }

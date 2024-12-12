@@ -15,7 +15,7 @@ import {
     getIconColor,
     isColorLight
 } from './utils.ts';
-import {checkConditionsMet, validateConditionalConfig, ensureArray} from './validate-condition.ts';
+import { checkConditionsMet, validateConditionalConfig, ensureArray } from './validate-condition.ts';
 
 export function changeState(context) {
     const state = context._hass.states[context.config.entity];
@@ -205,6 +205,12 @@ export function changeSubButtonState(context, container = context.content, appen
         const attributeType = subButton.attribute ?? '';
         const attribute = getAttribute(context, attributeType, entity);
         const isOn = isStateOn(context, entity);
+
+        if (attributeType === 'fan_modes' && attribute == null) {
+            const subButtonElement = context.elements[index] || createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
+            subButtonElement.classList.add('hidden');
+            return;
+        }
 
         const showName = subButton.show_name ?? false;
         const showState = subButton.show_state ?? false;

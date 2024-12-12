@@ -77,8 +77,8 @@ export function changeBackground(context) {
 }
 
 export function changeName(context) {
+    if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
     const name = getName(context);
-
     if (name !== context.previousName) {
         context.elements.name.innerText = name;
         context.previousName = name;
@@ -168,7 +168,7 @@ export function changeVolumeIcon(context) {
     context.elements.volumeButton.setAttribute("icon", newIcon);
     context.elements.mediaInfoContainer.style.opacity = newOpacity;
     context.elements.nameContainer.style.opacity = newOpacity;
-    console.log('yey');
+
     if(context.elements.subButtonContainer && !context.content.classList.contains('bubble-multi-row'))context.elements.subButtonContainer.style.opacity = newOpacity;
     if(!context.content.classList.contains('AlternativeLayout') || !context.content.classList.contains('bubble-multi-row'))context.elements.previousButton.style.opacity = newOpacity;
     if(!context.content.classList.contains('AlternativeLayout') || !context.content.classList.contains('bubble-multi-row'))context.elements.nextButton.style.opacity = newOpacity;
