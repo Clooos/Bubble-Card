@@ -394,6 +394,7 @@ export function isColorLight(cssVariable) {
 
 export function getIconColor(context, entity = context.config.entity, brightness = 1) {
     const cardType = context.config.card_type;
+    const useAccentColor = context.config.use_accent_color;
     const defaultColor = `var(--bubble-accent-color, var(--accent-color))`;
     const entityRgbColor = getAttribute(context, "rgb_color", entity);
     const isThemeLight = isColorLight('var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))))');
@@ -401,7 +402,7 @@ export function getIconColor(context, entity = context.config.entity, brightness
 
     if (!entity) return defaultColor;
 
-    if (isEntityType(context, "light") && entityRgbColor) {
+    if (isEntityType(context, "light") && !useAccentColor) {
         if (cardType === 'button') {
             context.card.classList.add('is-light');
         } else if (cardType === 'pop-up') {
@@ -415,11 +416,9 @@ export function getIconColor(context, entity = context.config.entity, brightness
         }
     }
 
-    if (entity.startsWith("light.") === false || !entityRgbColor) return defaultColor;
+    if (entity.startsWith("light.") === false || useAccentColor) return defaultColor;
 
-    //const defaultLightOnColor = [225, 225, 210];
-    //const defaultLightOffColor = [255, 255, 255];
-    const defaultLightColor = [225, 225, 210]; //isStateOn(context) ? defaultLightOnColor : defaultLightOffColor;
+    const defaultLightColor = [225, 225, 210];
 
     if (!entityRgbColor) {
         const adjustedDefaultLightColor = defaultLightColor.map(channel => Math.min(255, channel * brightness));

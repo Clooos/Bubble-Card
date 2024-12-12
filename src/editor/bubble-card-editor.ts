@@ -1461,6 +1461,19 @@ export function createBubbleCardEditor() {
                         </div>
                     </ha-formfield>
                 ` : ''}
+                ${array !== 'sub_button' && entity.startsWith("light") ? html`
+                    <ha-formfield .label="Optional - Use accent color instead of light color">
+                        <ha-switch
+                            aria-label="Optional - Use accent color instead of light color"
+                            .checked=${context?.use_accent_color ?? false}
+                            .configValue="${config + "use_accent_color"}"
+                            @change="${this._valueChanged}"
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Use accent color instead of light color</label> 
+                        </div>
+                    </ha-formfield>
+                ` : ''}
                 <ha-formfield .label="Optional - Show icon">
                     <ha-switch
                         aria-label="Optional - Show icon"
