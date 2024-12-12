@@ -2084,7 +2084,6 @@ export function createBubbleCardEditor() {
             let arrayCopy = [...this._config[array]];
             arrayCopy[index] = arrayCopy[index] || {};
             arrayCopy[index] = { ...arrayCopy[index], ...value };
-            arrayCopy[index] = { ...arrayCopy[index].visibility, ...value };
             this._config[array] = arrayCopy;
             fireEvent(this, "config-changed", { config: this._config });
             this.requestUpdate();

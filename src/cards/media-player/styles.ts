@@ -19,7 +19,7 @@ export default `
         height: 50px;
         background-color: var(--bubble-media-player-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
         touch-action: pan-y;
-        border-radius: inherit;
+        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
         box-shadow: var(--bubble-media-player-box-shadow, var(--bubble-box-shadow, none));
     }
 
@@ -236,7 +236,7 @@ export default `
         position: absolute;
         height: 100%;
         width: 100%;
-        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: inherit;
         overflow: hidden;
     }
 
