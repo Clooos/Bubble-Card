@@ -370,7 +370,7 @@ export default `
       height: 42px;
     }
       
-    .large .bubble-media-player-container .bubble-name-container {
+    .large .bubble-media-player-container .bubble-name-container,.bubble-media-info-container {
       justify-content: flex-start;
       grid-area: n;
       overflow: hidden;
