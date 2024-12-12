@@ -1388,6 +1388,20 @@ export function createBubbleCardEditor() {
                     .items="${[{label: 'Normal', value: 'normal'}, {label: 'Large (Optimized for sections)', value: 'large'}, {label: 'Large with 2 sub-buttons rows (Optimized for sections)', value: 'large-2-rows'}]}"
                     @value-changed="${this._valueChanged}"
                 ></ha-combo-box>
+                
+                <ha-formfield .label="Only for Large layout - Alternative Layout">
+                <ha-switch
+                    aria-label="Only for Large layout - Alternative Layout"
+                    .checked=${this._config?.AlternativeLayout ?? false}
+                    .configValue="${"AlternativeLayout"}"
+                    .disabled="${(this._config.card_layout ?? 'normal') === 'normal'}"
+                    @change="${this._valueChanged}"
+                ></ha-switch>
+                <div class="mdc-form-field">    
+                    <label class="mdc-label">Only for Large layout - Alternative Layout</label> 
+                </div>
+                </ha-formfield>
+
                 <ha-expansion-panel outlined>
                     <h4 slot="header">
                         <ha-icon icon="mdi:table"></ha-icon>

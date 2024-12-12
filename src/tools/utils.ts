@@ -631,12 +631,16 @@ export function setLayout(context) {
     const layoutClass = context.config.card_layout;
     const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows';
     const needsRows2 = layoutClass === 'large-2-rows';
+    const needAlternativeLayout = (context.config.AlternativeLayout ?? false) && needsLarge;
 
     if (needsLarge !== context.content.classList.contains('large')) {
         context.content.classList.toggle('large', needsLarge);
     }
     if (needsRows2 !== context.content.classList.contains('rows-2')) {
         context.content.classList.toggle('rows-2', needsRows2);
+    }
+    if (needAlternativeLayout !== context.content.classList.contains('AlternativeLayout')) {
+        context.content.classList.toggle('AlternativeLayout', needAlternativeLayout);
     }
 }
 

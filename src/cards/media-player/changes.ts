@@ -168,10 +168,11 @@ export function changeVolumeIcon(context) {
     context.elements.volumeButton.setAttribute("icon", newIcon);
     context.elements.mediaInfoContainer.style.opacity = newOpacity;
     context.elements.nameContainer.style.opacity = newOpacity;
-    if(context.elements.subButtonContainer)context.elements.subButtonContainer.style.opacity = newOpacity;
-    context.elements.previousButton.style.opacity = newOpacity;
-    context.elements.nextButton.style.opacity = newOpacity;
-    context.elements.powerButton.style.opacity = newOpacity;
+    console.log('yey');
+    if(context.elements.subButtonContainer && !context.content.classList.contains('bubble-multi-row'))context.elements.subButtonContainer.style.opacity = newOpacity;
+    if(!context.content.classList.contains('AlternativeLayout') || !context.content.classList.contains('bubble-multi-row'))context.elements.previousButton.style.opacity = newOpacity;
+    if(!context.content.classList.contains('AlternativeLayout') || !context.content.classList.contains('bubble-multi-row'))context.elements.nextButton.style.opacity = newOpacity;
+    if(!context.content.classList.contains('AlternativeLayout') || !context.content.classList.contains('bubble-multi-row'))context.elements.powerButton.style.opacity = newOpacity;
     
     context.elements.volumeButton.isHidden = !isHidden;
 }
