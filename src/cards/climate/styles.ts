@@ -232,7 +232,7 @@ export default `
         align-self: center;
         align-items: center;
     }
-    .large.bubble-empty-sub-buttons .bubble-media-player{
+    .large.bubble-empty-sub-buttons .bubble-climate{
         grid-template-rows: 1fr 0;
         align-content: center;
     }
@@ -258,7 +258,7 @@ export default `
     .large.AlternativeLayout.bubble-multi-row .bubble-climate .bubble-button-container {
         grid-area: b;
         height: calc(100% - 7px);
-        width: 100%;
+        width: calc(100% - 2 * var(--gap-to-edge,7px));
         display: flex !important;
         row-gap: 4px;
         flex-wrap: wrap;
@@ -268,7 +268,7 @@ export default `
         align-items: center;
         justify-items: center;
         padding-bottom: 7px;
-        overflow: hidden;
+        margin-right: 0px;
     }
     
     .large .bubble-climate .bubble-temperature-container{
@@ -276,7 +276,10 @@ export default `
         height: calc(var(--row-height,56px) - 20px);
         width: auto;
         justify-self: center;
-
+        margin-right: var(--gap-to-edge,7px);
+    }
+    .large.AlternativeLayout .bubble-climate .bubble-temperature-container{
+        margin-right: 0px;
     }
     
     .large .bubble-climate .bubble-name-container {

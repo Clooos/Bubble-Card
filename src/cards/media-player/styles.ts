@@ -313,7 +313,7 @@ export default `
     .large.AlternativeLayout.bubble-multi-row .bubble-media-player-container .bubble-button-container {
         grid-area: b;
         height: calc(100% - 7px);
-        width: 100%;
+        width: calc(100% - 2 * var(--gap-to-edge,7px));
         display: flex !important;
         row-gap: 4px;
         flex-wrap: wrap;
@@ -323,7 +323,7 @@ export default `
         align-items: center;
         justify-items: center;
         padding-bottom: 7px;
-        overflow: hidden;
+        margin-right: 0px;
     }
     
    .large .bubble-media-player-container .bubble-power-button{
