@@ -127,14 +127,6 @@ export function getIcon(context, entity = context.config.entity, icon = context.
           return isOff ? "mdi:door-closed" : "mdi:door-open";
         case "garage_door":
           return isOff ? "mdi:garage" : "mdi:garage-open";
-        case "power":
-          return isOff ? "mdi:power-plug-off" : "mdi:power-plug";
-        case "tamper":
-          return isOff ? "mdi:check-circle" : "mdi:alert-circle";
-        case "safety":
-          return isOff ? "mdi:check-circle" : "mdi:alert-circle";
-        case "smoke":
-          return isOff ? "mdi:check-circle" : "mdi:smoke";
         case "heat":
           return isOff ? "mdi:thermometer" : "mdi:fire";
         case "light":
@@ -151,12 +143,20 @@ export function getIcon(context, entity = context.config.entity, icon = context.
           return isOff ? "mdi:square" : "mdi:square-outline";
         case "plug":
           return isOff ? "mdi:power-plug-off" : "mdi:power-plug";
+        case "power":
+          return isOff ? "mdi:power-plug-off" : "mdi:power-plug";
         case "presence":
           return isOff ? "mdi:home-outline" : "mdi:home";
         case "running":
           return isOff ? "mdi:stop" : "mdi:play";
+        case "safety":
+          return isOff ? "mdi:check-circle" : "mdi:alert-circle";
+        case "smoke":
+          return isOff ? "mdi:check-circle" : "mdi:smoke";
         case "sound":
           return isOff ? "mdi:music-note-off" : "mdi:music-note";
+        case "tamper":
+          return isOff ? "mdi:check-circle" : "mdi:alert-circle";
         case "update":
           return isOff ? "mdi:package" : "mdi:package-up";
         case "vibration":
@@ -393,17 +393,33 @@ export function isColorLight(cssVariable) {
 }
 
 export function getIconColor(context, entity = context.config.entity, brightness = 1) {
+    const cardType = context.config.card_type;
     const defaultColor = `var(--bubble-accent-color, var(--accent-color))`;
     const entityRgbColor = getAttribute(context, "rgb_color", entity);
     const isThemeLight = isColorLight('var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))))');
     brightness = isThemeLight ? brightness - 0.2 : brightness;
 
     if (!entity) return defaultColor;
-    if (entity.startsWith("light.") === false) return defaultColor;
 
-    const defaultLightOnColor = isThemeLight ? [200, 200, 195] : [225, 225, 222];
-    const defaultLightOffColor = isThemeLight ? [200, 180, 180] : [255, 255, 255];
-    const defaultLightColor = isStateOn(context) ? defaultLightOnColor : defaultLightOffColor;
+    if (isEntityType(context, "light") && entityRgbColor) {
+        if (cardType === 'button') {
+            context.card.classList.add('is-light');
+        } else if (cardType === 'pop-up') {
+            context.elements.headerContainer.classList.add('is-light');
+        }
+    } else {
+        if (cardType === 'button') {
+            context.card.classList.remove('is-light');
+        } else if (cardType === 'pop-up') {
+            context.elements.headerContainer.classList.remove('is-light');
+        }
+    }
+
+    if (entity.startsWith("light.") === false || !entityRgbColor) return defaultColor;
+
+    //const defaultLightOnColor = [225, 225, 210];
+    //const defaultLightOffColor = [255, 255, 255];
+    const defaultLightColor = [225, 225, 210]; //isStateOn(context) ? defaultLightOnColor : defaultLightOffColor;
 
     if (!entityRgbColor) {
         const adjustedDefaultLightColor = defaultLightColor.map(channel => Math.min(255, channel * brightness));
@@ -412,26 +428,32 @@ export function getIconColor(context, entity = context.config.entity, brightness
 
     const adjustedColor = entityRgbColor.map(channel => Math.min(255, channel * brightness));
     return isColorCloseToWhite(entityRgbColor) ? 
-        `var(--bubble-light-color, rgba(${defaultLightOnColor.map(channel => Math.min(255, channel * brightness)).join(', ')}))` : 
+        `var(--bubble-light-color, rgba(${defaultLightColor.map(channel => Math.min(255, channel * brightness)).join(', ')}))` : 
         `var(--bubble-light-color, rgba(${adjustedColor.join(', ')}))`;
 }
 
-export function getImage(context) {
+export function getImage(context, entity = context.config.entity) {
     if (context.config.force_icon) return '';
 
-    const entityImageLocal = getAttribute(context, "entity_picture_local");
-    const entityImage = getAttribute(context, "entity_picture");
+    const stateObj = context._hass.states[entity];
 
-    if (entityImageLocal) return entityImageLocal;
-    if (entityImage) return entityImage;
+    const entityPicture =
+      stateObj.attributes.entity_picture_local ||
+      stateObj.attributes.entity_picture;
 
-    return '';
+    if (!entityPicture) return '';
+
+    let imageUrl = context._hass.hassUrl(entityPicture);
+
+    return imageUrl;
 }
 
 export function getName(context) {
     const configName = context.config.name;
     const entityName = getAttribute(context, "friendly_name"); 
+    const templateName = context.name;
 
+    if (templateName) return templateName;
     if (configName) return configName;
     if (entityName) return entityName;
 

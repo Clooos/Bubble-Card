@@ -21,17 +21,17 @@ export function getTranslatedAttribute(context, state, attribute, option) {
 export function getSelectedAttribute(state, attribute) {
     switch (attribute) {
         case 'fan_modes':
-            return state.attributes.fan_mode;
+            return state.attributes.fan_mode || null;
         case 'swing_modes':
-            return state.attributes.swing_mode;
+            return state.attributes.swing_mode || null;
         case 'preset_modes':
-            return state.attributes.preset_mode;
+            return state.attributes.preset_mode || null;
         case 'effect_list':
-            return state.attributes.effect;
+            return state.attributes.effect || null;
         case 'source_list':
-            return state.attributes.source;
+            return state.attributes.source || null;
         case 'sound_mode_list':
-            return state.attributes.sound_mode;
+            return state.attributes.sound_mode || null;
         default:
             return state.state;
     }
@@ -68,6 +68,7 @@ export function getOptionIcon(context, state, attribute, option) {
             icon.icon = getHvacModeIcon(option);
             break;
         case 'fan_modes':
+            if (!state.attributes.fan_modes) return null;
             icon = document.createElement('ha-attribute-icon');
             icon.slot = 'graphic';
             icon.attribute = 'fan_mode';

@@ -115,6 +115,7 @@ export function changeIcon(context) {
 }
 
 export function changeName(context) {
+  if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
   const buttonType = getButtonType(context);
   const name = buttonType !== 'name' ? getName(context) : context.config.name;
   if (name !== context.elements.previousName) {
@@ -188,20 +189,6 @@ export function changeStatus(context) {
       }
   }
 
-  if (isEntityType(context, "light")) {
-      if (cardType === 'button') {
-          context.card.classList.add('is-light');
-      } else if (cardType === 'pop-up') {
-          context.elements.headerContainer.classList.add('is-light');
-      }
-  } else {
-      if (cardType === 'button') {
-          context.card.classList.remove('is-light');
-      } else if (cardType === 'pop-up') {
-          context.elements.headerContainer.classList.remove('is-light');
-      }
-  }
-
   if (isStateOn(context)) {
       if (cardType === 'button') {
           context.card.classList.add('is-on');
@@ -229,8 +216,8 @@ export function changeStyle(context) {
 
     try {
         customStyle = context.config.styles
-            ? Function('hass', 'entity', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
-              (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
+            ? Function('hass', 'entity', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', 'name', `return \`${context.config.styles}\`;`)
+              (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card, context.card.name)
             : '';
     } catch (error) {
         throw new Error(`Error in generating button custom templates: ${error.message}`);

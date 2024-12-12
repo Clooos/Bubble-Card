@@ -90,6 +90,7 @@ export default `
         background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
         height: 42px;
         border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, 32px));
+        box-shadow: var(--bubble-cover-box-shadow, var(--bubble-button-box-shadow, var(--bubble-box-shadow, none)));
         align-items: center;
         justify-content: center;
         cursor: pointer;

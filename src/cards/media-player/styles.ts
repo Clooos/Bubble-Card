@@ -20,6 +20,7 @@ export default `
         background-color: var(--bubble-media-player-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
         touch-action: pan-y;
         border-radius: inherit;
+        box-shadow: var(--bubble-media-player-box-shadow, var(--bubble-box-shadow, none));
     }
 
     .bubble-media-player {
