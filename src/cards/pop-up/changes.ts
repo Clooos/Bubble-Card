@@ -118,8 +118,6 @@ export function changeTriggered(context) {
         const isInitialLoad = !context.hasPageLoaded;
         context.hasPageLoaded = true;
 
-        console.log(context.hashAdded)
-
         //Check conditions
         const triggerConditions_array = ensureArray(triggerConditions);
         if (validateConditionalConfig(triggerConditions_array)){

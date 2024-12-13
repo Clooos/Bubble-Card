@@ -102,6 +102,7 @@ export default `
       display: flex;
       background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
       border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, 32px));
+      box-shadow: var(--bubble-cover-box-shadow, var(--bubble-button-box-shadow, var(--bubble-box-shadow, none)));
     }
 
     .large .bubble-buttons .bubble-icon {
@@ -136,6 +137,11 @@ export default `
       right: 18px;
       align-self: center;
       grid-gap: 18px;
+    }
+
+    .large .bubble-button,
+    .large .bubble-sub-button {
+      box-shadow: none;
     }
 
     .large .bubble-sub-button-container {
