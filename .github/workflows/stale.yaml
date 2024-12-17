@@ -18,6 +18,7 @@ jobs:
       # - No PRs marked as no-stale
       # - No issues (-1)
       - name: 60 days stale PRs policy
+        if: github.repository_owner == 'Clooos'
         uses: actions/stale@v9.0.0
         with:
           days-before-stale: 60
@@ -45,6 +46,7 @@ jobs:
       # - No issues marked as no-stale or help-wanted
       # - No PRs (-1)
       - name: 90 days stale issues
+        if: github.repository_owner == 'Clooos'
         uses: actions/stale@v9.0.0
         with:
           days-before-stale: 90
@@ -75,6 +77,7 @@ jobs:
       # - No Issues marked as no-stale or help-wanted
       # - No PRs (-1)
       - name: Needs more information stale issues policy
+        if: github.repository_owner == 'Clooos'
         uses: actions/stale@v9.0.0
         with:
           only-labels: "needs-more-information"
@@ -106,6 +109,7 @@ jobs:
       # - No Issues marked as no-stale or help-wanted
       # - No PRs (-1)
       - name: Remove needs-more-information label
+        if: github.repository_owner == 'Clooos'
         uses: actions/stale@v9.0.0
         with:
           only-labels: "needs-more-information"
