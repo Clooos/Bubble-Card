@@ -9,6 +9,7 @@ on:
 jobs:
   hacs:
     name: HACS Action
+    if: github.repository_owner == 'Clooos'
     runs-on: "ubuntu-latest"
     steps:
       - name: HACS Action

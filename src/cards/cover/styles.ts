@@ -101,8 +101,6 @@ export default `
     .large .bubble-cover-card-container {
       height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
       background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
-      
-      
       --line-height: 18px;
       --gap-to-edge: 7px;
       display: grid;
@@ -115,6 +113,7 @@ export default `
       justify-items: start;
       align-self: center;
       align-items: center;
+      box-shadow: var(--bubble-cover-box-shadow, var(--bubble-button-box-shadow, var(--bubble-box-shadow, none)));
     }
     .large.bubble-empty-sub-buttons .bubble-cover-card-container{
         grid-template-rows: 1fr 0;
@@ -179,7 +178,12 @@ export default `
         justify-content: center;
         align-content: start;
         justify-items: center;
-        padding-bottom: 7px;    
+        padding-bottom: 7px;
+    }
+    
+    .large .bubble-button,
+    .large .bubble-sub-button {
+      box-shadow: none;
     }
     
     .rows-2 .bubble-cover-card-container .bubble-sub-button-container {
