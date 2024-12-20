@@ -434,11 +434,9 @@ export function getIconColor(context, entity = context.config.entity, brightness
 export function getImage(context, entity = context.config.entity) {
     if (context.config.force_icon) return '';
 
-    const stateObj = context._hass.states[entity];
-
     const entityPicture =
-      stateObj.attributes.entity_picture_local ||
-      stateObj.attributes.entity_picture;
+      getAttribute(context, "entity_picture_local", entity) ||
+      getAttribute(context, "entity_picture", entity);
 
     if (!entityPicture) return '';
 
