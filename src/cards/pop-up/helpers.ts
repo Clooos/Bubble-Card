@@ -39,6 +39,13 @@ export function clickOutside(event, context) {
     }
 }
 
+function resetCloseTimeout(context) {	
+	if(!context.config.auto_close || !context.closeTimeout) return;
+	// Clear current timeout and reset
+	clearTimeout(context.closeTimeout);
+	context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
+}
+
 export function removeHash() {
     if (hashRecentlyAdded || !location.hash) return;
     setTimeout(() => {
@@ -106,9 +113,16 @@ function updateListeners(context, add) {
         context.boundClickOutside = event => clickOutside(event, context);
     }
 
+		if(!context.resetCloseTimeout) {
+			context.resetCloseTimeout = () => {
+				resetCloseTimeout(context);
+			}
+		}
+
     if (add) {
         if (!context.listenersAdded) {
             context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
+            context.popUp.addEventListener('click', context.resetCloseTimeout, { passive: true });
             context.listenersAdded = true;
         }
 
@@ -119,6 +133,7 @@ function updateListeners(context, add) {
     } else {
         if (context.listenersAdded) {
             context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
+            context.popUp.removeEventListener('click', context.resetCloseTimeout);
             context.listenersAdded = false;
 
             if (!location.hash && window.clickOutsideListenerAdded) {
