@@ -30,7 +30,9 @@ export function changeButton(context) {
   let newOpacity = '';
 
   if (buttonType === 'switch' && isOn) {
-    if (lightColor && isLight) {
+    const useAccentColor = context.config.use_accent_color;
+    
+    if (lightColor && isLight && !useAccentColor) {
       newButtonColor = getIconColor(context);
       newOpacity = '.5';
     } else {
@@ -115,7 +117,7 @@ export function changeIcon(context) {
 }
 
 export function changeName(context) {
-  if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
+  // if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
   const buttonType = getButtonType(context);
   const name = buttonType !== 'name' ? getName(context) : context.config.name;
   if (name !== context.elements.previousName) {

@@ -78,7 +78,6 @@ export function changeIcon(context) {
     context.elements.buttonClose.classList.remove("disabled");
   }
 
-  // Masquer le bouton stop si non supporté
   if (!supportsStop) {
     context.elements.buttonStop.style.display = "none";
   } else {
@@ -87,7 +86,7 @@ export function changeIcon(context) {
 }
 
 export function changeName(context) {
-    if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
+    //if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
     const name = getName(context);
     if (name !== context.elements.previousName) {
       context.elements.name.innerText = name;
