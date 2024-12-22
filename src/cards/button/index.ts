@@ -39,9 +39,8 @@ export function handleButton(context, container = context.content, appendTo = co
     }
 
     changeIcon(context);
-    
+    changeName(context);
     changeState(context);
     changeSubButtonState(context, container, context.elements.buttonCard);
     if (context.cardType !== 'pop-up') changeStyle(context);
-    changeName(context);
 }

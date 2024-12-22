@@ -31,7 +31,7 @@ function handleTouchEnd(event, popUp) {
 export function clickOutside(event, context) {
     if (context.config.close_by_clicking_outside ?? true) {
       const targets = event.composedPath();
-      const popupTarget = targets.find(target => 
+      const popupTarget = targets.find(target =>
           target.classList?.contains('bubble-pop-up') ||
           ['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER'].includes(target.nodeName)
       );
@@ -48,7 +48,7 @@ export function removeHash() {
     }, 50);
 }
 
-export function addHash(hash) {  
+export function addHash(hash) {
     const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
     history.pushState(null, "", newURL);
     window.dispatchEvent(new Event('location-changed'));
@@ -88,9 +88,16 @@ function toggleBackdrop(context, show) {
 export function appendPopup(context, append) {
     if (context.config.background_update) return;
     const action = append ? 'appendChild' : 'removeChild';
-    requestAnimationFrame(() => {
-        context.verticalStack[action](context.popUp);
-    });
+
+    if (append) {
+        requestAnimationFrame(() => {
+            context.verticalStack.appendChild(context.popUp);
+        });
+    } else {
+        requestAnimationFrame(() => {
+            context.verticalStack.removeChild(context.popUp);
+        });
+    }
 }
 
 function updatePopupClass(popUp, open) {
@@ -101,7 +108,6 @@ function updatePopupClass(popUp, open) {
 }
 
 function updateListeners(context, add) {
-    // Création d'un wrapper lié au contexte
     if (!context.boundClickOutside) {
         context.boundClickOutside = event => clickOutside(event, context);
     }
@@ -112,19 +118,18 @@ function updateListeners(context, add) {
             context.listenersAdded = true;
         }
 
-        if (!window.clickOutsideListenerAdded) {
+        if (!context.clickOutsideListenerAdded) {
             window.addEventListener('click', context.boundClickOutside, { passive: true });
-            window.clickOutsideListenerAdded = true;
+            context.clickOutsideListenerAdded = true;
         }
     } else {
         if (context.listenersAdded) {
             context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
-            context.listenersAdded = false;
-
-            if (!location.hash && window.clickOutsideListenerAdded) {
-                window.removeEventListener('click', context.boundClickOutside);
-                window.clickOutsideListenerAdded = false;
-            }
+             context.listenersAdded = false;
+        }
+        if (context.clickOutsideListenerAdded) {
+            window.removeEventListener('click', context.boundClickOutside);
+            context.clickOutsideListenerAdded = false;
         }
     }
 }
@@ -139,9 +144,9 @@ function clearAllTimeouts(context) {
 
 export function openPopup(context) {
     if (context.popUp.classList.contains('is-popup-opened')) return;
-    
+
     clearAllTimeouts(context);
-    appendPopup(context, true);
+    appendPopup(context, true); // Afficher la pop-up structure
 
     requestAnimationFrame(() => {
         toggleBackdrop(context, true);
@@ -163,8 +168,7 @@ export function openPopup(context) {
 }
 
 export function closePopup(context) {
-    if (!context.popUp.classList.contains('is-popup-opened')) return;
-
+     if (!context.popUp.classList.contains('is-popup-opened')) return;
     clearAllTimeouts(context);
     updatePopupClass(context.popUp, false);
     toggleBackdrop(context, false);
@@ -186,7 +190,7 @@ export function closePopup(context) {
 
 export function onUrlChange(context) {
     return () => {
-        if (context.config.hash === location.hash) {
+       if (context.config.hash === location.hash) {
             hashRecentlyAdded = true;
             setTimeout(() => {
                 hashRecentlyAdded = false;

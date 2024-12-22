@@ -1,32 +1,5 @@
 import { isColorCloseToWhite } from "./style.ts";
 
-export function hasStateChanged(context, hass, entityId) {
-    context.hasState = hass.states[entityId];
-    if (context.hasState) {
-        context.newState = [context.hasState.state, context.hasState.attributes.rgb_color];
-        if (!context.oldState || context.newState[0] !== context.oldState[0] || context.newState[1] !== context.oldState[1]) {
-            context.oldState = context.newState;
-            context.stateChanged = true;
-        } else {
-            context.stateChanged = false;
-        }
-        
-        return context.stateChanged;
-    }
-}
-
-export function configChanged(context, card) {
-    if (  
-        card.classList.contains('editor') &&
-        context.config !== context.previousConfig
-    ){
-        context.previousConfig = context.config;
-        return true;
-    } else {
-        return false;
-    }
-}
-
 export const fireEvent = (node, type, detail, options) => {
     options = options || {};
     detail = detail === null || detail === undefined ? {} : detail;
@@ -53,12 +26,6 @@ export const navigate = (_node, path, replace = false) => {
     fireEvent(window, "location-changed", {
         replace
     })
-}
-
-export function toggleEntity(hass, entityId) {
-    hass.callService('homeassistant', 'toggle', {
-        entity_id: entityId
-    });
 }
 
 export function tapFeedback(feedbackElement) {
@@ -333,72 +300,72 @@ export function getWeatherIcon(weatherType) {
     }
 }
 
-let cachedColor = null;
-let cachedResult = null;
+const colorCache = new Map();
 
 function resolveCssVariable(cssVariable) {
-    const bodyStyles = getComputedStyle(document.body);
     let value = cssVariable;
+    const bodyStyles = getComputedStyle(document.body);
 
-    while (value.startsWith('var(')) {
-        const varName = value.match(/var\((--[^,]+),?\s*(.*)?\)/);
-        if (!varName) break;
+    while (value && value.startsWith('var(')) {
+        const match = value.match(/var\((--[^,]+),?\s*(.*)?\)/);
+        if (!match) break;
+        const [, varName, fallback] = match;
+        const resolvedValue = bodyStyles.getPropertyValue(varName).trim();
 
-        const resolvedValue = bodyStyles.getPropertyValue(varName[1]).trim();
-        if (resolvedValue) {
-            value = resolvedValue;
-        } else if (varName[2]) {
-            value = varName[2].trim();
-        } else {
-            break;
-        }
+        value = resolvedValue || (fallback && fallback.trim()) || '';
+
     }
 
     return value;
 }
 
+function hexToRgb(hex) {
+    const match = hex.match(/^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    return match ? [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16)] : null;
+}
+
+function rgbStringToRgb(rgbString) {
+    const match = rgbString.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    return match ? [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10)] : null;
+}
+
+function calculateLuminance(r, g, b) {
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+
 export function isColorLight(cssVariable) {
     const computedColor = resolveCssVariable(cssVariable);
+    if (!computedColor) return false;
 
-    if (!computedColor) {
+
+    if (colorCache.has(computedColor)) {
+        return colorCache.get(computedColor);
+    }
+
+    let rgb = hexToRgb(computedColor) || rgbStringToRgb(computedColor);
+
+    if (!rgb) {
+        colorCache.set(computedColor, false);
         return false;
     }
+    
+    const luminance = calculateLuminance(...rgb);
+    const isLight = luminance > 0.5;
+    colorCache.set(computedColor, isLight);
+    return isLight;
+}
 
-    if (computedColor === cachedColor) {
-        return cachedResult;
-    }
-
-    cachedColor = computedColor;
-
-    const rgbMatch = computedColor.match(/^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-    let r, g, b;
-    if (rgbMatch) {
-        r = parseInt(rgbMatch[1], 16);
-        g = parseInt(rgbMatch[2], 16);
-        b = parseInt(rgbMatch[3], 16);
-    } else {
-        const rgbaMatch = computedColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-        if (!rgbaMatch) {
-            cachedResult = false;
-            return cachedResult;
-        }
-        r = parseInt(rgbaMatch[1], 10);
-        g = parseInt(rgbaMatch[2], 10);
-        b = parseInt(rgbaMatch[3], 10);
-    }
-
-    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-    cachedResult = luminance > 0.5;
-    return cachedResult;
+function adjustColor(rgb, brightness) {
+  return rgb.map(channel => Math.min(255, Math.round(channel * brightness)));
 }
 
 export function getIconColor(context, entity = context.config.entity, brightness = 1) {
-    const cardType = context.config.card_type;
-    const useAccentColor = context.config.use_accent_color;
+    const { card_type: cardType, use_accent_color: useAccentColor } = context.config;
     const defaultColor = `var(--bubble-accent-color, var(--accent-color))`;
     const entityRgbColor = getAttribute(context, "rgb_color", entity);
     const isThemeLight = isColorLight('var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))))');
-    brightness = isThemeLight ? brightness - 0.2 : brightness;
+
+    const adjustedBrightness = isThemeLight ? brightness - 0.2 : brightness;
 
     if (!entity) return defaultColor;
 
@@ -416,29 +383,29 @@ export function getIconColor(context, entity = context.config.entity, brightness
         }
     }
 
-    if (entity.startsWith("light.") === false || useAccentColor) return defaultColor;
+    if (!entity.startsWith("light.") || useAccentColor) return defaultColor;
 
     const defaultLightColor = [225, 225, 210];
+    const adjustedDefaultLightColor = adjustColor(defaultLightColor, adjustedBrightness);
+
 
     if (!entityRgbColor) {
-        const adjustedDefaultLightColor = defaultLightColor.map(channel => Math.min(255, channel * brightness));
-        return `var(--bubble-light-color, rgba(${adjustedDefaultLightColor.join(', ')}))`;
+      return `var(--bubble-light-color, rgba(${adjustedDefaultLightColor.join(', ')}))`;
     }
 
-    const adjustedColor = entityRgbColor.map(channel => Math.min(255, channel * brightness));
-    return isColorCloseToWhite(entityRgbColor) ? 
-        `var(--bubble-light-color, rgba(${defaultLightColor.map(channel => Math.min(255, channel * brightness)).join(', ')}))` : 
-        `var(--bubble-light-color, rgba(${adjustedColor.join(', ')}))`;
+
+   const adjustedColor = adjustColor(entityRgbColor, adjustedBrightness);
+   return isColorCloseToWhite(entityRgbColor) ?
+        `var(--bubble-light-color, rgba(${adjustedDefaultLightColor.join(', ')}))` :
+       `var(--bubble-light-color, rgba(${adjustedColor.join(', ')}))`;
 }
 
 export function getImage(context, entity = context.config.entity) {
     if (context.config.force_icon) return '';
 
-    const stateObj = context._hass.states[entity];
-
     const entityPicture =
-      stateObj.attributes.entity_picture_local ||
-      stateObj.attributes.entity_picture;
+      getAttribute(context, "entity_picture_local", entity) ||
+      getAttribute(context, "entity_picture", entity);
 
     if (!entityPicture) return '';
 
