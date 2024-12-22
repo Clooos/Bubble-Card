@@ -506,9 +506,9 @@ export function createBubbleCardEditor() {
                                           Tap action on icon
                                         </h4>
                                         <div class="content">
-                                            ${this.makeTapActionPanel("Tap action")}
-                                            ${this.makeTapActionPanel("Double tap action")}
-                                            ${this.makeTapActionPanel("Hold action")}
+                                            ${this.makeActionPanel("Tap action")}
+                                            ${this.makeActionPanel("Double tap action")}
+                                            ${this.makeActionPanel("Hold action")}
                                         </div>
                                     </ha-expansion-panel>
                                     <ha-expansion-panel outlined style="display: ${this._config.button_type === 'slider' ? 'none' : ''}">
@@ -517,9 +517,9 @@ export function createBubbleCardEditor() {
                                           Tap action on button
                                         </h4>
                                         <div class="content">
-                                            ${this.makeTapActionPanel("Tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
-                                            ${this.makeTapActionPanel("Double tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
-                                            ${this.makeTapActionPanel("Hold action", this._button_action, this._config.button_type !== 'name' ? 'more-info' : 'none', 'button_action')}
+                                            ${this.makeActionPanel("Tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                            ${this.makeActionPanel("Double tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                            ${this.makeActionPanel("Hold action", this._button_action, this._config.button_type !== 'name' ? 'more-info' : 'none', 'button_action')}
                                         </div>
                                     </ha-expansion-panel>
                                     ${this.makeSubButtonPanel()}
@@ -611,8 +611,8 @@ export function createBubbleCardEditor() {
                               Pop-up open/close action
                             </h4>
                             <div class="content">
-                                ${this.makeTapActionPanel("Open action", this._config, 'none')}
-                                ${this.makeTapActionPanel("Close action", this._config, 'none')}
+                                ${this.makeActionPanel("Open action", this._config, 'none')}
+                                ${this.makeActionPanel("Close action", this._config, 'none')}
                                 <ha-alert alert-type="info">This allows you to trigger an action on pop-up open/close.</ha-alert>
                             </div>
                         </ha-expansion-panel>
@@ -765,9 +765,9 @@ export function createBubbleCardEditor() {
                               Tap action on icon
                             </h4>
                             <div class="content">
-                                ${this.makeTapActionPanel("Tap action")}
-                                ${this.makeTapActionPanel("Double tap action")}
-                                ${this.makeTapActionPanel("Hold action")}
+                                ${this.makeActionPanel("Tap action")}
+                                ${this.makeActionPanel("Double tap action")}
+                                ${this.makeActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined style="display: ${this._config.button_type === 'slider' ? 'none' : ''}">
@@ -776,9 +776,9 @@ export function createBubbleCardEditor() {
                               Tap action on button
                             </h4>
                             <div class="content">
-                                ${this.makeTapActionPanel("Tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
-                                ${this.makeTapActionPanel("Double tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
-                                ${this.makeTapActionPanel("Hold action", this._button_action, this._config.button_type !== 'name' ? 'more-info' : 'none', 'button_action')}
+                                ${this.makeActionPanel("Tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                ${this.makeActionPanel("Double tap action", this._button_action, this._config.button_type !== 'name' ? (this._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
+                                ${this.makeActionPanel("Hold action", this._button_action, this._config.button_type !== 'name' ? 'more-info' : 'none', 'button_action')}
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -978,9 +978,9 @@ export function createBubbleCardEditor() {
                               Tap action on icon
                             </h4>
                             <div class="content">
-                                ${this.makeTapActionPanel("Tap action")}
-                                ${this.makeTapActionPanel("Double tap action")}
-                                ${this.makeTapActionPanel("Hold action")}
+                                ${this.makeActionPanel("Tap action")}
+                                ${this.makeActionPanel("Double tap action")}
+                                ${this.makeActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1098,9 +1098,9 @@ export function createBubbleCardEditor() {
                               Tap action on icon
                             </h4>
                             <div class="content">
-                                ${this.makeTapActionPanel("Tap action")}
-                                ${this.makeTapActionPanel("Double tap action")}
-                                ${this.makeTapActionPanel("Hold action")}
+                                ${this.makeActionPanel("Tap action")}
+                                ${this.makeActionPanel("Double tap action")}
+                                ${this.makeActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1202,9 +1202,9 @@ export function createBubbleCardEditor() {
                               Tap action on icon
                             </h4>
                             <div class="content">
-                                ${this.makeTapActionPanel("Tap action")}
-                                ${this.makeTapActionPanel("Double tap action")}
-                                ${this.makeTapActionPanel("Hold action")}
+                                ${this.makeActionPanel("Tap action")}
+                                ${this.makeActionPanel("Double tap action")}
+                                ${this.makeActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1315,9 +1315,9 @@ export function createBubbleCardEditor() {
                               Tap action on icon
                             </h4>
                             <div class="content">
-                                ${this.makeTapActionPanel("Tap action")}
-                                ${this.makeTapActionPanel("Double tap action")}
-                                ${this.makeTapActionPanel("Hold action")}
+                                ${this.makeActionPanel("Tap action")}
+                                ${this.makeActionPanel("Double tap action")}
+                                ${this.makeActionPanel("Hold action")}
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1604,8 +1604,7 @@ export function createBubbleCardEditor() {
             }
         }
 
-        makeTapActionPanel(label, context = this._config, defaultAction, array, index = this._config) {
-            const hass = this.hass;
+        makeActionPanel(label, context = this._config, defaultAction, array, index = this._config) {
             const icon = label === "Tap action" 
                 ? "mdi:gesture-tap" 
                 : label === "Double tap action" 
@@ -1613,15 +1612,6 @@ export function createBubbleCardEditor() {
                 : label === "Hold action" 
                 ? "mdi:gesture-tap-hold"
                 : "mdi:gesture-tap";
-            const valueType = label === "Tap action" 
-                ? context.tap_action
-                : label === "Double tap action" 
-                ? context.double_tap_action
-                : label === "Hold action" 
-                ? context.hold_action
-                : label === "Open action"
-                ? context.open_action
-                : context.close_action;
             const configValueType = label === "Tap action" 
                 ? "tap_action"
                 : label === "Double tap action" 
@@ -1648,65 +1638,16 @@ export function createBubbleCardEditor() {
                         ${label}
                     </h4>
                     <div class="content"> 
-                        <div class="ha-combo-box">
-                            <ha-combo-box
-                                label="${label}"
-                                .value="${valueType?.action ?? defaultAction}"
-                                .items="${this.tapActionTypeList}"
-                                @value-changed="${(ev) => this._tapActionValueChange(index, { [configValueType]: { action: ev.detail.value } }, array)}"
-                            ></ha-combo-box>
-                        </div>
-                        ${valueType?.action === 'navigate' ? html`
-                            <div class="ha-textfield">
-                                <ha-textfield
-                                    label="Navigation path"
-                                    .value="${valueType?.navigation_path ?? ''}"
-                                    @input="${(ev) => this._tapActionValueChange(index, { [configValueType]: { navigation_path: ev.target.value } }, array)}"
-                                ></ha-textfield>
-                            </div>
-                        ` : ''}
-                        ${valueType?.action === 'url' ? html`
-                            <div class="ha-textfield">
-                                <ha-textfield
-                                    label="URL path"
-                                    .value="${valueType?.url_path ?? ''}"
-                                    @input="${(ev) => this._tapActionValueChange(index, { [configValueType]: { url_path: ev.target.value } }, array)}"
-                                ></ha-textfield>
-                            </div>
-                        ` : ''}
-                        ${valueType?.action === 'call-service' ? html`
-                            <div class="ha-textfield">
-                                <ha-textfield
-                                    label="Service"
-                                    .value="${valueType?.service ?? ''}"
-                                    @input="${(ev) => this._tapActionValueChange(index, { [configValueType]: { service: ev.target.value } }, array)}"
-                                ></ha-textfield>
-                            </div>
-                            <div class="ha-combo-box">
-                                <ha-combo-box
-                                    label="Optional - Entity"
-                                    .value="${valueType?.target?.entity_id}"
-                                    .items="${this.allEntitiesList}"
-                                    @value-changed="${valueType?.target?.entity_id !== "entity" ? (ev) => { this._tapActionValueChange(index, { [configValueType]: { target: { entity_id: ev.detail.value } } }, array)} : ''}"
-                                ></ha-combo-box>
-                            </div>
-                            <ha-formfield .label="Optional - Use default entity">
-                                <ha-switch
-                                    aria-label="Optional - Use default entity"
-                                    .checked=${valueType?.target?.entity_id === "entity"}
-                                    @change="${(ev) => { valueType?.target?.entity_id !== "entity" 
-                                        ? this._tapActionValueChange(index, { [configValueType]: { target: { entity_id: "entity" } } }, array) 
-                                        : this._tapActionValueChange(index, { [configValueType]: { target: {} } }, array) 
-                                    }}"
-                                ></ha-switch>
-                                <div class="mdc-form-field">
-                                    <label class="mdc-label">Optional - Use default entity</label> 
-                                </div>
-                            </ha-formfield>
-                        ` : ''}
-                        ${valueType?.action === 'call-service' && valueType?.service ? html`
-                            <ha-alert alert-type="info">For now, you still need to switch to the YAML editor if you want to add <code>data:</code> to your service.</ha-alert>
-                        ` : ''}
+                        <ha-form
+                            .hass=${this.hass}
+                            .data=${context}
+                            .schema=${[{name: configValueType,
+                                        selector: { ui_action: {
+                                            default_action: defaultAction,} },
+                                        }]}   
+                            .computeLabel=${this._computeLabelCallback}
+                            @value-changed=${(ev) => this._ActionChanged(ev,array,index)}
+                        ></ha-form>
                     </div>
                 </ha-expansion-panel>
             `;
@@ -1830,9 +1771,9 @@ export function createBubbleCardEditor() {
                               Tap action on button
                             </h4>
                             <div class="content">
-                                ${this.makeTapActionPanel("Tap action", subButton, 'more-info', 'sub_button', index)}
-                                ${this.makeTapActionPanel("Double tap action", subButton, 'none', 'sub_button', index)}
-                                ${this.makeTapActionPanel("Hold action", subButton, 'none', 'sub_button', index)}
+                                ${this.makeActionPanel("Tap action", subButton, 'more-info', 'sub_button', index)}
+                                ${this.makeActionPanel("Double tap action", subButton, 'none', 'sub_button', index)}
+                                ${this.makeActionPanel("Hold action", subButton, 'none', 'sub_button', index)}
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1856,6 +1797,7 @@ export function createBubbleCardEditor() {
                 </ha-expansion-panel>
             `;
           });
+          
 
           const addSubButton = () => {
             if (!this._config.sub_button) {
@@ -2102,46 +2044,34 @@ export function createBubbleCardEditor() {
             this.requestUpdate();
         }
 
-        _tapActionValueChange(index, value, array) {
-            if (array === undefined) {
-                for (let key in value) {
-                    this._config[key] = { ...this._config[key], ...value[key] };
-                }
+        _ActionChanged(ev,array,index) {
+            ev.stopPropagation();
+            if( array === 'button_action'){
+                var configExist= this._config[array] ? true : false;
+                var valueWasChanged = ev.detail.value[ev.currentTarget.__schema[0].name] != null
+                if (configExist || valueWasChanged) this._config[array] = ev.detail.value;
+            }else if (array) {
+                this._config[array] = this._config[array] || [];
+                let arrayCopy = [...this._config[array]];
+                arrayCopy[index] = ev.detail.value;
+                this._config[array] = arrayCopy;
             } else {
-                this._config[array] = this._config[array] || (array ? {} : []);
-
-                let copy = Array.isArray(this._config[array]) ? [...this._config[array]] : {...this._config[array]};
-
-                if (Array.isArray(copy)) {
-                    copy[index] = copy[index] || {};
-
-                    let objCopy = { ...copy[index] };
-
-                    for (let key in value) {
-                        if (key in objCopy) {
-                            objCopy[key] = { ...objCopy[key], ...value[key] };
-                        } else {
-                            objCopy[key] = value[key];
-                        }
-                    }
-
-                    copy[index] = objCopy;
-                } else {
-                    for (let key in value) {
-                        if (!copy.hasOwnProperty(key)) {
-                            copy[key] = value[key];
-                        } else {
-                            copy[key] = { ...copy[key], ...value[key] };
-                        }
-                    }
-                }
-
-                this._config[array] = copy;
+                this._config = ev.detail.value;
             }
 
-            fireEvent(this, "config-changed", { config: this._config });
-            this.requestUpdate();
+            fireEvent(this, "config-changed", { config: this._config});
         }
+    
+         _computeLabelCallback = (schema) => {
+            switch (schema.name) {
+              case "theme": return "Theme"
+              case "hold_action": return "Hold Action"
+              case "double_tap_action": return "Double tap action"
+              case "open_action": return "Open action"
+              case "close_action": return "Close action"
+              default: return "Tap action"
+            }
+          };
 
         _conditionChanged(ev, index, array) {
             ev.stopPropagation();
