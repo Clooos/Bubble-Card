@@ -1620,7 +1620,20 @@ export function createBubbleCardEditor() {
                 ? "hold_action"
                 : label === "Open action"
                 ? "open_action"
-                : "close_action"
+                : "close_action";
+            let value;
+            try{
+               value = label === "Tap action" 
+                    ? context.tap_action
+                    : label === "Double tap action" 
+                    ? context.double_tap_action
+                    : label === "Hold action" 
+                    ? context.hold_action
+                    : label === "Open action"
+                    ? context.open_action
+                    : context.close_action;
+            }catch{}
+
             const isDefault = context === this._config;
 
             if (!defaultAction) {
@@ -1641,6 +1654,8 @@ export function createBubbleCardEditor() {
                         <ha-form
                             .hass=${this.hass}
                             .data=${context}
+                            .configValue="${
+                                          (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType}" 
                             .schema=${[{name: configValueType,
                                         selector: { ui_action: {
                                             default_action: defaultAction,} },
@@ -1649,6 +1664,20 @@ export function createBubbleCardEditor() {
                             @value-changed=${(ev) => this._ActionChanged(ev,array,index)}
                         ></ha-form>
                     </div>
+                    ${ value?.action  === 'call-service' || value?.action === 'perform-action' ? html`
+                        <ha-formfield .label="Optional - Use default entity">
+                            <ha-switch
+                                aria-label="Optional - Use default entity"
+                                .configValue="${
+                                              (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType+".default_entity"}" 
+                                .checked=${value?.target?.entity_id === "entity"}
+                                 @change=${this._updateActionsEntity}
+                            ></ha-switch>
+                            <div class="mdc-form-field">
+                                <label class="mdc-label">Optional - Use default entity</label> 
+                            </div>
+                        </ha-formfield>
+                    ` : ''}
                 </ha-expansion-panel>
             `;
         }
@@ -2045,7 +2074,19 @@ export function createBubbleCardEditor() {
         }
 
         _ActionChanged(ev,array,index) {
-            ev.stopPropagation();
+            var hasDefaultEntity = false;
+            try{if(ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'][0] === 'entity') hasDefaultEntity = true;}
+              catch{}
+            try{if(ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'] === 'entity') hasDefaultEntity = true;}
+              catch{}
+            if(hasDefaultEntity){
+                ev.detail.value[ev.currentTarget.__schema[0].name]['action'] = 'call-service';
+                if(ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action']!= undefined){
+                    ev.detail.value[ev.currentTarget.__schema[0].name]['service'] = ""+ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'] ;
+                    delete ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'];
+                    }
+              }
+
             if( array === 'button_action'){
                 var configExist= this._config[array] ? true : false;
                 var valueWasChanged = ev.detail.value[ev.currentTarget.__schema[0].name] != null
@@ -2062,6 +2103,29 @@ export function createBubbleCardEditor() {
             fireEvent(this, "config-changed", { config: this._config});
         }
     
+        _updateActionsEntity(ev){
+            let obj = JSON.parse(JSON.stringify(this._config)); //get rid of the referencing 
+            const configKeys = ev.target.configValue.split('.');
+            let i = 0
+            for (i = 0; i < configKeys.length - 2; i++) {
+                obj = obj[configKeys[i]] ? obj[configKeys[i]] : {};
+            }
+
+            if (!ev.target.checked){
+                if(obj[configKeys[i]].target?.entity_id ==='entity'){
+                    obj[configKeys[i]]['target']={};
+                  }
+              }else{
+                obj[configKeys[i]]['target']={'entity_id':'entity'};    
+              }
+
+            var detail ={'value':obj};
+            var currentTarget = {'__schema':[{'name':configKeys[configKeys.length - 2]}]};
+            var newev = {...ev,detail ,currentTarget};
+
+            this._ActionChanged(newev,configKeys.length >2 ? configKeys[0] : null,configKeys.length >3 ? configKeys[1] : null);
+        }
+
          _computeLabelCallback = (schema) => {
             switch (schema.name) {
               case "theme": return "Theme"
