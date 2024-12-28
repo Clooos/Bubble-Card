@@ -88,6 +88,24 @@ All options can be configured in the Home Assistant editor. But you can find mor
 
 </details>
 
+<details>
+
+**<summary>Global CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-border-radius` | `px` | Border radius for all supported elements |
+| `--bubble-main-background-color` | `color` | Main background color for all supported elements |
+| `--bubble-secondary-background-color` | `color` | Secondary background color for all supported elements |
+| `--bubble-accent-color` | `color` | Accent color for all supported elements |
+| `--bubble-icon-border-radius` | `px` | Icon border radius for all supported elements |
+| `--bubble-icon-background-color` | `color` | Icon background color for all supported elements |
+| `--bubble-sub-button-border-radius` | `px` | Border radius for all sub-buttons |
+| `--bubble-sub-button-background-color` | `color` | Background color for all sub-buttons |
+| `--bubble-box-shadow` | see [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for all supported elements |
+
+</details>
+
 <br>
 
 ---
@@ -212,6 +230,21 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 
 </details>
 
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-pop-up-border-radius` | `px` | Border radius for the pop-up |
+| `--bubble-pop-up-main-background-color` | `color` | Main background color for supported elements of the pop-up |
+| `--bubble-pop-up-background-color` | `color` | Background color of the pop-up |
+| `--bubble-backdrop-background-color` | `color` | Background color for the backdrop |
+| You also have access to [all the button CSS variables](#button-options) for the header of the pop-up. | | |
+
+</details>
+
+
 #### Examples
 
 <details>
@@ -316,6 +349,18 @@ This card is a good companion to the pop-up card, allowing you to open the corre
 
 </details>
 
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-horizontal-buttons-stack-border-radius` | `px` | Border radius for horizontal button stack buttons |
+| `--bubble-horizontal-buttons-stack-background-color` | `color` | Background color for horizontal button stack buttons |
+
+</details>
+
+
 #### Example
 
 <details>
@@ -400,6 +445,21 @@ This card allows you to control your entities and can be customized in many ways
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 
 </details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-button-main-background-color` | `color` | Main background color for supported elements in the button |
+| `--bubble-button-border-radius` | `px` | Border radius for the button |
+| `--bubble-button-icon-border-radius` | `px` | Border radius for the button icon container |
+| `--bubble-button-icon-background-color` | `color` | Background color for the button icon container |
+| `--bubble-button-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the button |
+
+</details>
+
 
 #### Examples
 
@@ -507,8 +567,24 @@ This card allows you to control a media player. You can tap on the icon to get m
 | `next_button` | boolean | Optional | `true` (default) or `false` | Show or hide the next button |
 | `power_button` | boolean | Optional | `true` (default) or `false` | Show or hide the power button |
 
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-media-player-main-background-color` | `color` | Main background color for the media player |
+| `--bubble-media-player-border-radius` | `px` | Border radius for the media player |
+| `--bubble-media-player-buttons-border-radius` | `px` | Border radius for the media player buttons |
+| `--bubble-media-player-slider-background-color` | `color` | Background color for the volume slider |
+| `--bubble-media-player-icon-border-radius` | `px` | Border radius for the media player icon container |
+| `--bubble-media-player-icon-background-color` | `color` | Background color for the media player icon container |
+| `--bubble-media-player-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the media player |
 
 </details>
+
 
 #### Examples
 
@@ -606,6 +682,22 @@ This card allows you to control your `cover` entities.
 
 </details>
 
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-cover-main-background-color` | `color` | Main background color for supported elements in the cover card |
+| `--bubble-cover-border-radius` | `px` | Border radius for the cover card |
+| `--bubble-cover-icon-border-radius` | `px` | Border radius for the cover card icon container |
+| `--bubble-cover-icon-background-color` | `color` | Background color for the cover card icon container |
+| `--bubble-cover-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the cover card |
+| `--bubble-button-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for buttons in the cover card |
+
+</details>
+
+
 #### Example
 
 <details>
@@ -669,6 +761,28 @@ This card allows you to add a dropdown menu for your `input_select` / `select` e
 
 </details>
 
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-select-main-background-color` | `color` | Main background color for supported elements in the select card |
+| `--bubble-select-background-color` | `color` | Background color for select card |
+| `--bubble-select-list-border-radius` | `px` | Border radius for the dropdown menu in the card |
+| `--bubble-select-list-item-accent-color` | `color` | Accent color for the selected item |
+| `--bubble-select-list-background-color` | `color` | Background color for the dropdown menu in the card |
+| `--bubble-select-list-width` | `px` | Width of the dropdown menu in the card |
+| `--bubble-select-arrow-background-color` | `color` | Background color for dropdown arrow |
+| `--bubble-select-button-border-radius` | `px` | Border radius for select button |
+| `--bubble-select-border-radius` | `px` | Border radius for the select card |
+| `--bubble-select-icon-border-radius` | `px` | Border radius for the select card icon container |
+| `--bubble-select-icon-background-color` | `color` | Background color for the select card icon container |
+| `--bubble-select-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the select card |
+
+</details>
+
+
 #### Examples
 
 <details>
@@ -731,6 +845,28 @@ This card allows you to control your `climate` entities.
 
 </details>
 
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-climate-main-background-color` | `color` | Main background color for supported elements in the climate card |
+| `--bubble-climate-border-radius` | `px` | Border radius for supported elements in the climate card elements |
+| `--bubble-climate-button-background-color` | `color` | Background color for the climate card buttons |
+| `--bubble-climate-icon-border-radius` | `px` | Border radius for the climate card icon container |
+| `--bubble-state-climate-fan-only-color` | `color` | Overlay color for the fan-only state |
+| `--bubble-state-climate-dry-color` | `color` | Overlay color for the dry state |
+| `--bubble-state-climate-cool-color` | `color` | Overlay color for the cool state |
+| `--bubble-state-climate-heat-color` | `color` | Overlay color for the heat state |
+| `--bubble-state-climate-auto-color` | `color` | Overlay color for the auto state |
+| `--bubble-state-climate-heat-cool-color` | `color` | Overlay color for the heat-cool state |
+| `--bubble-climate-accent-color` | `color` | Accent color for the climate card |
+| `--bubble-climate-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for climate container. |
+
+</details>
+
+
 #### Examples
 
 <details>
@@ -778,6 +914,16 @@ This card is a simple separator for dividing your pop-up into categories / secti
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-line-background-color` | `color` | Background color for the line in the separator |
 
 </details>
 
@@ -867,6 +1013,17 @@ In every card that supports that option, you can add sub-buttons to customize yo
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button double click, if undefined, `toggle` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button hold, if undefined, `more-info` will be used. |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-sub-button-border-radius` | `px` | Border radius for the sub-buttons |
+| `--bubble-sub-button-background-color` | `color` | Background color for the sub-buttons |
 
 </details>
 
@@ -1137,14 +1294,46 @@ button_action:
 
 ## Styling
 
-You can add custom styles in the editor or by adding `styles: |` in YAML **without using card-mod** which allows you to modify the CSS style of all the cards.
+You can add custom styles to modify the CSS of all cards **without using card-mod** in three ways:
+
+- In the editor, go to the card you want to modify, then navigate to _Styling options > Custom styles / Templates_, and add your custom styles (check the tips and examples below).
+- In a [theme](https://www.home-assistant.io/integrations/frontend/#defining-themes) file by adding CSS variables in YAML (these are available in each card's documentation above). This allows for global modifications.
+
+  <details>
+  
+  <summary>Example</a></summary>
+  
+  <br>
+
+  Don't copy the `Bubble:` line, this is the name of the theme you use. You also need to remove the `--` from the variables.
+
+  You need to run the [`frontend.reload_themes`](https://www.home-assistant.io/integrations/frontend/#setting-themes) action to refresh the theme after any modifications.
+
+  ```yaml
+  Bubble:  
+    # Bubble Card variables test
+    bubble-border-radius: "8px"
+    bubble-main-background-color: "rgb(50,70,90)"
+    bubble-secondary-background-color: "rgb(0,70,90)"
+    bubble-pop-up-main-background-color: "rgba(200,200,200,0.5)"
+    bubble-accent-color: "rgb(100,140,180)"
+    bubble-icon-background-color: "rgb(50,80,100)"
+    bubble-select-list-width: "200px"
+    bubble-select-list-background-color: "rgb(100,140,180)"
+  ```
+  
+  </details>
+  
+- In YAML by adding `styles: |` followed by your custom styles (check the tips and examples below).
 
 > [!TIP]  
-> **To understand which style classes can be modified**, you can take a look at the [`src/cards`](https://github.com/Clooos/Bubble-Card/tree/main/src/cards) folder in this repository. In each card folder, you will find a file named `styles.ts`. These files contain all the applied styles.
+> **To understand which style classes can be modified**, you can take a look at the [`src/cards`](https://github.com/Clooos/Bubble-Card/tree/main/src/cards) folder in this repository. In each card folder, you will find a file named `styles.ts`. These files contain all the applied styles. This allows for a lot more possibilities than CSS variables, but it needs to be added individually to each card.
 > 
-> You can also find a lot of examples on the [Home Assistant forum](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/) by doing a bit of searching.
+> You can also find a lot of [examples from the community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-custom-styles-templates-and-dashboards), or on the [Home Assistant forum](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/) by doing a bit of searching.
 >
 > The Bubble theme for Home Assistant (like on the screenshots) can be found [here](https://github.com/Clooos/Bubble).
+>
+> A tutorial video is coming soon on my [YouTube channel](https://www.youtube.com/@cloooos)!
 
 > [!IMPORTANT]  
 > Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
@@ -1184,9 +1373,20 @@ styles: >
 
 <details>
 
-<summary>Changing the background color of a button</summary>
+<summary>Changing the background color of a card</summary>
 
 <br>
+
+This one works on all Bubble Card types (except for the pop-ups):
+
+```yaml
+styles: | 
+  ha-card {
+    --bubble-main-background-color: rgba(12,120,50,0.5) !important;
+  }
+```
+
+This one is doing the same in a button card only (it works for the pop-up header): 
 
 ```yaml
 styles: | 
@@ -1259,10 +1459,21 @@ For an horizontal buttons stack icon.
 
 <br>
 
+This one works on all Bubble Card types (except for the pop-ups):
+
+```yaml
+styles: | 
+  ha-card {
+    --bubble-icon-background-color: rgb(230, 128, 41) !important;
+  }
+```
+
+This one is doing the same for the pop-up header: 
+
 ```yaml
 styles: |
   .bubble-icon-container {
-    background: rgb(230, 128, 41);
+    background: rgb(230, 128, 41) !important;
   }
 ```
 
@@ -1425,10 +1636,13 @@ styles: |
 
 ### Templates
 
-**Bubble Card doesn’t support Jinja templates** but advanced users can add templates in JS directly in their custom styles. For example, this allows you to dynamically change an icon, the texts or the colors of an element, to show or hide an element conditionally (like a sub-button), or almost anything based on a state, an attribute and more.
+**Bubble Card doesn’t support Jinja templates** but advanced users can add templates in JS directly in their [custom styles](#styling). For example, this allows you to dynamically change an icon, the texts or the colors of an element, to show or hide an element conditionally (like a sub-button), or almost anything based on a state, an attribute and more.
 
 > [!TIP]  
-> More information about JS templates [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator). My advice is to always take a look at your browser console to be sure that everything is working correctly.
+> More information about JS templates [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator). My advice is to **always take a look at your browser console** to be sure that everything is working correctly.
+
+> [!IMPORTANT]  
+> **All templates that are not modifying a CSS property must be placed at the end! Like modifying an icon, a text or any element.**
 
 #### Available variables and functions
 
@@ -1458,13 +1672,15 @@ You have access to these variables in most cards:
 
 <details>
 
-<summary>Functions (<code>getWeatherIcon</code>)</summary>
+<summary>Functions</summary>
 
 <br>
 
 You have access to all the global JS functions, but you have also access to:
 
 - `getWeatherIcon` can be used to return a weather icon based on a state that return the weather. For example, you can can do this `${subButtonIcon[2].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[0]?.condition))}` to change the third sub-button icon to today's weather icon, `.forecast[1]?.condition` is for tomorrow...
+- `hass.formatEntityState(state)` can be used to transtale a state (Can also be used to get a state unit, without the need to add it manually).
+- `hass.formatEntityAttributeValue(state, "attribute")` can be used to translate an attribute (Can also be used to get a state unit, without the need to add it manually).
 
   You will have to create a template sensor for that. Here is what you can add in your `configuration.yaml`:
   ```yaml
