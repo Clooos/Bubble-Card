@@ -1329,7 +1329,7 @@ You can add custom styles to modify the CSS of all cards **without using card-mo
 > [!TIP]  
 > **To understand which style classes can be modified**, you can take a look at the [`src/cards`](https://github.com/Clooos/Bubble-Card/tree/main/src/cards) folder in this repository. In each card folder, you will find a file named `styles.ts`. These files contain all the applied styles. This allows for a lot more possibilities than CSS variables, but it needs to be added individually to each card.
 > 
-> You can also find a lot of [examples from the community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-custom-styles-templates-and-dashboards), or on the [Home Assistant forum](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/) by doing a bit of searching.
+> You can also find a lot of [examples from the community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-custom-styles-templates-and-dashboards), or some from the [Home Assistant forum](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/) by doing a bit of searching.
 >
 > The Bubble theme for Home Assistant (like on the screenshots) can be found [here](https://github.com/Clooos/Bubble).
 >
@@ -1704,6 +1704,39 @@ You have access to all the global JS functions, but you have also access to:
 </details>
 
 #### Examples
+
+You can find a lot of examples below, but you can also find very advanced templates on my [Patreon page](https://www.patreon.com/c/Clooos), like one (my favorite) that allows up to four conditional badges placed around the card’s icons. It’s also a great way to learn about all the possibilities of Bubble Card custom styles and templates!
+
+<details>
+<summary>Examples from my Patreon page</summary>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/e95ab7f8-f5a3-4fca-b3fd-61479540b723" alt="Example 2" />
+    <br>
+    <a href="https://www.patreon.com/posts/adding-home-like-116764324">Adding Home Assistant like badges to any card</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/24ad619b-2a98-49c0-bc9d-a59f00541731" alt="Example 4" />
+    <br>
+    <a href="https://www.patreon.com/posts/showing-date-and-116766943">Showing formatted date and time in a separator without using any entity</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/0c8891a8-ca96-45a9-ada6-fc91268cb815" alt="Example 1" />
+    <br>
+    <a href="https://www.patreon.com/posts/showing-sub-on-116808854">Showing a sub-button state on two lines</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/c90d561c-ab6a-4e4e-bd00-fe8676c2bf5b" alt="Example 3" />
+    <br>
+    <a href="https://www.patreon.com/posts/customizing-and-116753941">Customizing labels and icons inside a select sub-button</a>
+</p>
+
+<br>
+
+</details>
 
 <details>
 
