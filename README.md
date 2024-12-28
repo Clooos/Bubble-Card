@@ -1679,8 +1679,6 @@ You have access to these variables in most cards:
 You have access to all the global JS functions, but you have also access to:
 
 - `getWeatherIcon` can be used to return a weather icon based on a state that return the weather. For example, you can can do this `${subButtonIcon[2].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[0]?.condition))}` to change the third sub-button icon to today's weather icon, `.forecast[1]?.condition` is for tomorrow...
-- `hass.formatEntityState(state)` can be used to transtale a state (Can also be used to get a state unit, without the need to add it manually).
-- `hass.formatEntityAttributeValue(state, "attribute")` can be used to translate an attribute (Can also be used to get a state unit, without the need to add it manually).
 
   You will have to create a template sensor for that. Here is what you can add in your `configuration.yaml`:
   ```yaml
@@ -1701,6 +1699,9 @@ You have access to all the global JS functions, but you have also access to:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `hass.formatEntityState(state)` can be used to transtale a state (Can also be used to get a state unit, without the need to add it manually).
+- `hass.formatEntityAttributeValue(state, "attribute")` can be used to translate an attribute (Can also be used to get a state unit, without the need to add it manually).
+
 </details>
 
 #### Examples
