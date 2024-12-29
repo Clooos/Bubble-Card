@@ -210,6 +210,7 @@ export function prepareStructure(context) {
     context.sectionRowContainer = context.sectionRow?.parentElement;
     context.popUp = context.verticalStack.querySelector('#root');
     context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
+    context.cardTitle = context.verticalStack.querySelector('.card-header');
     if (!context.editor && !context.config.background_update) {
       context.verticalStack.removeChild(context.popUp);
     }
