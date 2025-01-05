@@ -1364,7 +1364,7 @@ styles: |
 ```yaml
 styles: >
   /* Selector for the '#kitchen' button */
-  .kitchen > .color-background {
+  .kitchen > .bubble-background-color {
     background-color: blue !important;
   }
 ```
