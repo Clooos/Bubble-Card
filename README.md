@@ -1632,6 +1632,61 @@ styles: |
 
 </details>
 
+<details>
+<summary>Advanced example: Set a consistent but random background color based on an entities value and ensure readable text color</summary>
+This example demonstrates how to display a "person" entity in a state button card with dynamic styling. If the person is not home, the card's background changes to a color derived from a hash function applied to the entity's value. This ensures that the background color is consistent for a given location. Additionally, the luminance of the background color is calculated to dynamically select a text color (black or white) for optimal readability.
+
+<br>
+
+```yaml
+.bubble-button-background {
+  opacity: 0.7 !important;
+  background-color: ${state === 'home' ? '' : (() => {
+    let hash = 0;
+    for (let i = 0; i < state.length; i++) {
+      hash = state.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return `hsl(${hash % 360}, 70%, 50%)`;
+  })()} !important;
+}
+
+.bubble-name-container {
+  color: ${state === 'home' ? '' : (() => {
+    let hash = 0;
+    for (let i = 0; i < state.length; i++) {
+      hash = state.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = hash % 360;
+    const saturation = 70 / 100;
+    const lightness = 50 / 100;
+
+    // HSL to RGB conversion
+    const q = lightness < 0.5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation;
+    const p = 2 * lightness - q;
+    const hue2rgb = (t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    };
+    const r = hue2rgb((hue / 360) + 1 / 3);
+    const g = hue2rgb(hue / 360);
+    const b = hue2rgb((hue / 360) - 1 / 3);
+
+    // Luminance calculation
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    // Return white for dark backgrounds and black for light backgrounds
+    return luminance > 0.5 ? 'black' : 'white';
+  })()} !important;
+}
+
+```
+
+</details>
+
 <br>
 
 ### Templates
