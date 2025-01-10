@@ -1735,6 +1735,12 @@ You can find a lot of examples below, but you can also find very advanced templa
     <a href="https://www.patreon.com/posts/customizing-and-116753941">Customizing labels and icons inside a select sub-button</a>
 </p>
 
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/02782c6b-12e7-40bf-ad23-2bacf8016392" alt="Example 5" />
+    <br>
+    <a href="https://www.patreon.com/posts/119701174">Adding a persistent reminder pop-up that shows up only when needed</a>
+</p>
+
 <br>
 
 </details>
