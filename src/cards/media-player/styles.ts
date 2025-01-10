@@ -19,7 +19,7 @@ export default `
         height: 50px;
         background-color: var(--bubble-media-player-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
         touch-action: pan-y;
-        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
         box-shadow: var(--bubble-media-player-box-shadow, var(--bubble-box-shadow, none));
     }
 
@@ -51,7 +51,7 @@ export default `
         background: none;
         border: none;
         cursor: pointer;
-        border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, 50%));
         padding: 6px;
         height: 24px;
         width: 24px;
@@ -69,7 +69,7 @@ export default `
         height: 38px;
         left: 50px;
         overflow: hidden;
-        border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+        border-radius: var(--bubble-media-player-border-radius, calc(var(--row-height,56px)/2));
         z-index: 1;
         background-color: var(--bubble-media-player-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
         opacity: 1;
@@ -275,54 +275,153 @@ export default `
         100% {transform: translateX(100%); opacity: 0;}
     }
 
-    .large .bubble-media-player-container {
-      height: 56px;
-      border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+    .large .bubble-media-player-container{
+      display: flex;
+      height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
     }
 
-    .large .bubble-icon-container {
+    .large .bubble-media-player{
+      --line-height: 18px;
+      --gap-to-edge: 7px;
+      display: grid;
+      gap: 4px;
+      grid-template-areas:
+      'i n c a1 a2 a3 a4 a5' 'b b b b b b b b' !important;
+      grid-template-columns: var(--row-height,56px) 1fr auto auto auto auto auto auto;
+      grid-template-rows: var(--row-height,56px) 1fr;
+      justify-self: start;
+      justify-items: start;
+      align-self: center;
+      align-items: center;
+    }
+    .large.bubble-empty-sub-buttons .bubble-media-player{
+        grid-template-rows: 1fr 0;
+        align-content: center;
+    }
+
+    .large .bubble-media-player-container .bubble-icon-container {
       --mdc-icon-size: 24px;
-      min-width: 42px !important;
-      min-height: 42px !important;
-      margin-left: 8px;
+      width: calc(var(--row-height,56px) - 14px);
+      height: calc(var(--row-height,56px) - 14px);
+      grid-area: i;
+      margin: 7px;
     }
     
-    .large .bubble-play-pause-button {
+    .large .bubble-media-player-container .bubble-button-container{
+        grid-area: a1;
+        display: contents;
+    }
+
+    .large.AlternativeLayout.bubble-multi-row .bubble-media-player-container .bubble-button-container {
+        grid-area: b;
+        height: calc(100% - 7px);
+        width: calc(100% - 2 * var(--gap-to-edge,7px));
+        display: flex !important;
+        row-gap: 4px;
+        flex-wrap: wrap;
+        align-self: center;
+        justify-self: center;
+        justify-content: center;
+        align-items: center;
+        justify-items: center;
+        padding-bottom: 7px;
+        margin-right: 0px;
+    }
+    
+   .large .bubble-media-player-container .bubble-power-button{
+      grid-area: a1;
+   }
+
+   .large .bubble-media-player-container .bubble-previous-button{
+      grid-area: a2;
+   }
+
+   .large .bubble-media-player-container .bubble-next-button{
+      grid-area: a3;
+   }
+
+   .large .bubble-media-player-container .bubble-volume-button{
+      grid-area: a4;
+   }
+
+    .large .bubble-media-player-container  .bubble-play-pause-button {
       display: flex;
       height: 42px;
       width: 42px;
       padding: 0;
+      grid-area: a5;
       align-items: center;
       justify-content: center;
+      margin: var(--gap-to-edge,7px) var(--gap-to-edge,7px) var(--gap-to-edge,7px) 0;
     }
 
-    .large .bubble-volume-slider {
-      height: 42px;
-      border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
-      left: 60px;
-      width: calc(100% - 168px);
+    .large .bubble-media-player-container .bubble-volume-slider {
+      height: 80%;
+      position: relative;
+      left: 0px;
+      width: calc(100%);
+      grid-column-start: 2;
+      grid-column-end: 7;
+      grid-row-start: 1;
+      grid-row-end: 1;
+
     }
 
-    .large .bubble-range-value {
+    .large .bubble-media-player-container .bubble-range-value {
       place-items: center;
       height: 42px;
     }
+      
+    .large .bubble-media-player-container .bubble-name-container,.bubble-media-info-container {
+      justify-content: flex-start;
+      grid-area: n;
+      overflow: hidden;
+      margin: 0px;
+      max-width: calc(100% - 2 * var(--gap-to-edge,7px));
 
-    .large .bubble-button-container {
-      align-items: center;
     }
 
-    .rows-2 .bubble-sub-button-container {
+    .large .bubble-media-player-container .bubble-sub-button-container {
+      grid-area: c;
+      max-width: 100%;
+      height: 36px;
+      flex-wrap: wrap-reverse;
+      row-gap: 4px;
+      align-self: center;
+      align-content: center;
+    }
+
+    .large.bubble-multi-row .bubble-media-player-container .bubble-sub-button-container {
+        max-height: 100%;
+        height: auto;
+        max-width: calc(100% - 2 * var(--gap-to-edge,7px));
+        grid-area: b;
+        flex-wrap: wrap;
+        justify-self: center;
+        align-self: center;
+        justify-content: center;
+        align-content: start;
+        justify-items: center;
+        padding-bottom: 7px;
+    }    
+    
+    .large.AlternativeLayout.bubble-multi-row .bubble-media-player-container .bubble-sub-button-container{
+        padding-bottom: 0px;   
+        display: contents;
+    }
+    
+    .rows-2 .bubble-media-player-container .bubble-sub-button-container {
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, minmax(auto, max-content));
       grid-auto-flow: column;
+      align-self: center;
       width: auto;
     }
 
-    .rows-2 .bubble-sub-button {
+    .rows-2 .bubble-media-player-container .bubble-sub-button-container .bubble-sub-button {
       height: 20px !important;
     }
 `;
