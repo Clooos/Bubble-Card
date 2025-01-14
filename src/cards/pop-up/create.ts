@@ -104,8 +104,12 @@ export function createHeader(context) {
 
   context.elements.header.addEventListener('touchend', (event) => {
     const offset = event.changedTouches[0].clientY - startTouchY;
-    if (offset > 50) removeHash();
-    else context.popUp.style.transform = '';
+    if (offset > 50) {
+      context.popUp.style.transform = `translateY(calc(${offset}px + (100% - ${offset}px)))`
+      removeHash();
+    } else {
+      context.popUp.style.transform = '';
+    }
   }, { passive: true });
 }
 

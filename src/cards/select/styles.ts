@@ -13,7 +13,7 @@ export default `
     }
     mwc-list-item[selected] {
         color: var(--primary-text-color) !important;
-        background-color: var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--accent-color)));
+        background-color: var(--bubble-select-list-item-accent-color, var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--accent-color)))); /* Added the missing 'select' in the first var without removing the previous one for compatibilty */ 
     }
     ha-select {
         --mdc-shape-medium: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px));
