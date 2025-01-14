@@ -161,9 +161,7 @@ export function createSliderStructure(context) {
       const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
       const finalPercentage = onSliderChange(context, moveX);
 
-      if (!context.config.slider_live_update) {
-        updateEntity(context, finalPercentage);
-      }
+      updateEntity(context, finalPercentage);
 
       forwardHaptic("selection");
 
