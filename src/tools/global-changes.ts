@@ -179,48 +179,18 @@ export function changeSubButtonState(context, container = context.content, appen
       subButtons.forEach((subButton, i) => {
           if (!subButton) return;
 
-          const index = i + 1;
-          const entity = subButton.entity ?? context.config.entity;
-          const state = context._hass.states[entity];
-          const name = subButton.name ?? getAttribute(context, "friendly_name", entity) ?? '';
-          const attributeType = subButton.attribute ?? '';
-          const attribute = getAttribute(context, attributeType, entity);
-          const isOn = isStateOn(context, entity);
+            const index = i + 1;
+            const entity = subButton.entity ?? context.config.entity;
+            const state = context._hass.states[entity];
+            const name = subButton.name ?? getAttribute(context, "friendly_name", entity) ?? '';
+            const attributeType = subButton.attribute ?? '';
+            const attribute = getAttribute(context, attributeType, entity);
+            const isOn = isStateOn(context, entity);
 
-          if (attributeType === 'fan_modes' && attribute == null) {
-              const subButtonElement = context.elements[index] || createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
-              subButtonElement.classList.add('hidden');
-              return;
-          }
-
-          const showName = subButton.show_name ?? false;
-          const showState = subButton.show_state ?? false;
-          const showAttribute = subButton.show_attribute ?? false;
-          const showLastChanged = (subButton.show_last_changed || subButton.show_last_updated) ?? false;
-          const showIcon = subButton.show_icon ?? true;
-          const showBackground = subButton.show_background ?? true;
-          const stateBackground = subButton.state_background ?? true;
-          const lightBackground = subButton.light_background ?? true;
-          const showArrow = subButton.show_arrow ?? true;
-
-          const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || subButton.select_attribute;
-          const icon = getIcon(context, subButton.entity, subButton.icon ?? '');
-
-           // Initialize or reuse subButtonElement
-          let subButtonElement = context.elements[index];
-
-          if (!subButtonElement || (isSelect && !subButtonElement.dropdownContainer)) {
-              // Store the current position of the subButtonElement
-              let positionIndex = -1;
-               if (subButtonElement) positionIndex = Array.prototype.indexOf.call(subButtonContainer.children, subButtonElement);
-
-              if (subButtonElement) {
-                   if (isSelect && !subButtonElement.dropdownContainer) {
-                        if (subButtonContainer.contains(subButtonElement)) {
-                             subButtonContainer.removeChild(subButtonElement);
-                              subButtonElement = null;
-                        }
-                    }
+            if (attributeType === 'fan_modes' && attribute == null) {
+                const subButtonElement = context.elements[index] || createElement('div', 'bubble-sub-button bubble-sub-button-' + index);
+                subButtonElement.classList.add('hidden');
+                return;
             }
 
             const showName = subButton.show_name ?? false;
@@ -423,19 +393,19 @@ export function changeSubButtonState(context, container = context.content, appen
                 }
             }
         });
+    }
+    context.previousValues.subButtons = subButtons.slice();
 
-        context.previousValues.subButtons = subButtons.slice();
-
-        for (let i = previousSubButtons.length; i > 0; i--) {
-            if (i > subButtons.length) {
-                const element = context.elements[i];
-                if (element) {
-                    subButtonContainer.removeChild(element);
-                    delete context.elements[i];
-                }
+    for (let i = previousSubButtons.length; i > 0; i--) {
+        if (i > subButtons.length) {
+            const element = context.elements[i];
+            if (element) {
+                subButtonContainer.removeChild(element);
+                delete context.elements[i];
             }
         }
-    });
+    }
+ 
 
     // Update context.previousValues with current subButtons
     context.previousValues.subButtons = subButtons.slice();
