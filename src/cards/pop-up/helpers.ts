@@ -4,29 +4,6 @@ import { manageEvents } from './create.ts';
 
 let hashTimeout = null;
 let hashRecentlyAdded = false;
-let startTouchY;
-
-function handleTouchStart(event) {
-    startTouchY = event.touches[0].clientY;
-}
-
-function handleTouchMove(event, popUp) {
-    const offset = event.touches[0].clientY - startTouchY;
-    if (offset > 0) {
-        requestAnimationFrame(() => {
-            popUp.style.transform = `translateY(${offset}px)`;
-        });
-    }
-}
-
-function handleTouchEnd(event, popUp) {
-    const offset = event.changedTouches[0].clientY - startTouchY;
-    if (offset > 50) {
-        removeHash();
-    } else {
-        popUp.style.transform = '';
-    }
-}
 
 export function clickOutside(event, context) {
     if (context.config.close_by_clicking_outside ?? true) {
@@ -37,6 +14,13 @@ export function clickOutside(event, context) {
       );
       if (!popupTarget) removeHash();
     }
+}
+
+function resetCloseTimeout(context) { 
+    if(!context.config.auto_close || !context.closeTimeout) return;
+    // Clear current timeout and reset
+    clearTimeout(context.closeTimeout);
+    context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
 }
 
 export function removeHash() {
@@ -112,9 +96,18 @@ function updateListeners(context, add) {
         context.boundClickOutside = event => clickOutside(event, context);
     }
 
+    if (!context.resetCloseTimeout) {
+      context.resetCloseTimeout = () => {
+        resetCloseTimeout(context);
+      }
+    }
+
     if (add) {
         if (!context.listenersAdded) {
-            context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
+            if (context.config.auto_close) {
+                context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
+                context.popUp.addEventListener('click', context.resetCloseTimeout, { passive: true });
+            }
             context.listenersAdded = true;
         }
 
@@ -124,8 +117,11 @@ function updateListeners(context, add) {
         }
     } else {
         if (context.listenersAdded) {
-            context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
-             context.listenersAdded = false;
+            if (context.config.auto_close) {
+                context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
+                context.popUp.removeEventListener('click', context.resetCloseTimeout);
+            }
+            context.listenersAdded = false;
         }
         if (context.clickOutsideListenerAdded) {
             window.removeEventListener('click', context.boundClickOutside);
@@ -146,7 +142,7 @@ export function openPopup(context) {
     if (context.popUp.classList.contains('is-popup-opened')) return;
 
     clearAllTimeouts(context);
-    appendPopup(context, true); // Afficher la pop-up structure
+    appendPopup(context, true);
 
     requestAnimationFrame(() => {
         toggleBackdrop(context, true);
