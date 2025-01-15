@@ -120,6 +120,11 @@ export function changeTriggered(context) {
 
         //Check conditions
         const triggerConditions_array = ensureArray(triggerConditions);
+        if (triggerConditions_array.length === 0) {
+            context.previousTrigger = false;
+            return;
+        }
+
         if (validateConditionalConfig(triggerConditions_array)){
             const trigger = checkConditionsMet(triggerConditions_array,context._hass);
 
