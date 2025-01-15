@@ -354,6 +354,15 @@ export function createBubbleCardEditor() {
                     })
                     .map(formateList);
 
+                this.inputSelectList2 = {states:{}, locale : this.hass.locale, localize : this.hass.localize, entities : this.hass.entities };
+
+                this.inputSelectList.forEach((item) => {
+                    const entityId = item.label || item;
+                    const entity = this.hass.states[entityId]; // Retrieve the corresponding state from hass.states
+                    if (entity) {
+                        this.inputSelectList2.states[entityId] = entity;
+                    }
+                });
 
                 this.attributeList = Object.keys(this.hass.states[this._entity]?.attributes || {}).map((attributeName) => {
                     let entity = this.hass.states[this._entity];
@@ -490,7 +499,19 @@ export function createBubbleCardEditor() {
                                 <div style="${!this._show_header ? 'display: none;' : ''}">
                                     <hr />
                                     ${this.makeDropdown("Button type", "button_type", buttonTypeList)}
-                                    ${this.makeDropdown("Optional - Entity", "entity", allEntitiesList, nameButton)}               
+                                    <ha-form
+                                        .hass=${this.hass}
+                                        .data=${this._config}
+                                        .schema=${[
+                                                    { name: "entity",
+                                                    label: "Optional - Entity", 
+                                                    selector: { entity: {} },
+                                                    },
+                                                ]}   
+                                        .computeLabel=${this._computeLabelCallback}
+                                        .disabled="${nameButton}"
+                                        @value-changed=${this._valueChanged}
+                                    ></ha-form>
                                     <ha-textfield
                                         label="Optional - Name"
                                         .value="${this._name}"
@@ -726,11 +747,26 @@ export function createBubbleCardEditor() {
                   </div>
                 `;
             } else if (this._config?.card_type === 'button') {
+                let entityList = {}
+                if (this._button_type === 'slider') entityList = {domain:["light", "media_player", "cover","input_number"]};
+
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
                         ${this.makeDropdown("Button type", "button_type", buttonTypeList)}
-                        ${this.makeDropdown(this._button_type !== 'slider' ? "Entity (toggle)" : "Entity (light, media_player, cover or input_number)", "entity", allEntitiesList, nameButton)}
+                        <ha-form
+                            .hass=${this.hass}
+                            .data=${this._config}
+                            .schema=${[
+                                        { name: "entity",
+                                        label: this._button_type !== 'slider' ? "Entity (toggle)" : "Entity (light, media_player, cover or input_number)", 
+                                        selector: { entity: entityList },
+                                        },
+                                    ]}   
+                            .computeLabel=${this._computeLabelCallback}
+                            .disabled="${nameButton}"
+                            @value-changed=${this._valueChanged}
+                        ></ha-form>
                         <ha-expansion-panel outlined>
                             <h4 slot="header">
                               <ha-icon icon="mdi:cog"></ha-icon>
@@ -928,7 +964,18 @@ export function createBubbleCardEditor() {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                        ${this.makeDropdown("Entity", "entity", coverList)}
+                        <ha-form
+                            .hass=${this.hass}
+                            .data=${this._config}
+                            .schema=${[
+                                        { name: "entity",
+                                        label: "Entity", 
+                                        selector: { entity: {domain:["cover"]}  },
+                                        },
+                                    ]}   
+                            .computeLabel=${this._computeLabelCallback}
+                            @value-changed=${this._valueChanged}
+                        ></ha-form>
                         <ha-expansion-panel outlined>
                             <h4 slot="header">
                               <ha-icon icon="mdi:cog"></ha-icon>
@@ -1012,7 +1059,18 @@ export function createBubbleCardEditor() {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                        ${this.makeDropdown("Entity", "entity", this.mediaPlayerList)}
+                        <ha-form
+                            .hass=${this.hass}
+                            .data=${this._config}
+                            .schema=${[
+                                        { name: "entity",
+                                        label: "Entity", 
+                                        selector: { entity: {domain:["media_player"]}  },
+                                        },
+                                    ]}   
+                            .computeLabel=${this._computeLabelCallback}
+                            @value-changed=${this._valueChanged}
+                        ></ha-form>
                         <ha-expansion-panel outlined>
                             <h4 slot="header">
                               <ha-icon icon="mdi:cog"></ha-icon>
@@ -1168,7 +1226,18 @@ export function createBubbleCardEditor() {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                        ${this.makeDropdown("Entity", "entity", this.inputSelectList)}
+                        <ha-form
+                            .hass=${this.inputSelectList2}
+                            .data=${this._config}
+                            .schema=${[
+                                        { name: "entity",
+                                        label: "Entity", 
+                                        selector: { entity: {}},
+                                        },
+                                    ]}   
+                            .computeLabel=${this._computeLabelCallback}
+                            @value-changed=${this._valueChanged}
+                        ></ha-form>
                         ${hasSelectAttributeList ? html`
                             <div class="ha-combo-box">
                                 <ha-combo-box
@@ -1255,7 +1324,18 @@ export function createBubbleCardEditor() {
                 return html`
                     <div class="card-config">
                         ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                        ${this.makeDropdown("Entity", "entity", this.climateList)}
+                        <ha-form
+                            .hass=${this.hass}
+                            .data=${this._config}
+                            .schema=${[
+                                        { name: "entity",
+                                        label: "Entity", 
+                                        selector: { entity: {domain:["climate"]}  },
+                                        },
+                                    ]}   
+                            .computeLabel=${this._computeLabelCallback}
+                            @value-changed=${this._valueChanged}
+                        ></ha-form>
                         <ha-expansion-panel outlined>
                             <h4 slot="header">
                               <ha-icon icon="mdi:cog"></ha-icon>
@@ -1695,7 +1775,8 @@ export function createBubbleCardEditor() {
               this.requestUpdate();
             };
 
-            const entity = subButton.entity ?? this._config.entity;
+            subButton.entity = subButton.entity ?? this._config.entity;
+            let entity = subButton.entity;
             const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || subButton.select_attribute;
             const entityAttribute = this.hass.states[entity]?.attributes;
             const hasSelectAttributeList = this._selectable_attributes.some(attr => entityAttribute?.[attr]);
@@ -1728,14 +1809,18 @@ export function createBubbleCardEditor() {
                                 Button settings
                             </h4>
                             <div class="content"> 
-                                <div class="ha-combo-box">
-                                    <ha-combo-box
-                                        label="${"Optional - Entity (default to card entity)"}"
-                                        .value="${entity}"
-                                        .items="${this.allEntitiesList}"
-                                        @value-changed="${(ev) => this._arrayValueChange(index, { entity: ev.detail.value }, 'sub_button')}"
-                                    ></ha-combo-box>
-                                </div>
+                                <ha-form
+                                    .hass=${this.hass}
+                                    .data=${subButton}
+                                    .schema=${[
+                                                { name: "entity",
+                                                  label: "Optional - Entity (default to card entity)", 
+                                                  selector: { entity: {} },
+                                                },
+                                            ]}   
+                                    .computeLabel=${this._computeLabelCallback}
+                                    @value-changed=${(ev) => this._arrayValueChange(index, { entity: ev.detail.value }, 'sub_button')}
+                                ></ha-form>
                                 ${hasSelectAttributeList ? html`
                                     <div class="ha-combo-box">
                                         <ha-combo-box
@@ -1875,21 +1960,30 @@ export function createBubbleCardEditor() {
                                     item-value-path="value"
                                     @value-changed="${this._valueChanged}"
                                 ></ha-icon-picker>
-                                <ha-combo-box
-                                    label="Optional - Light / Light group (For background color)"
-                                    .value="${this._config[i + '_entity'] || ''}"
-                                    .configValue="${i}_entity"
-                                    .items="${this.allEntitiesList}"
-                                    @value-changed="${this._valueChanged}"
-                                ></ha-combo-box>
-                                <ha-combo-box
-                                    label="Optional - Presence / Occupancy sensor (For button auto order)"
-                                    .value="${this._config[i + '_pir_sensor'] || ''}"
-                                    .configValue="${i}_pir_sensor"
-                                    .disabled=${!this._config.auto_order}
-                                    .items="${this.allEntitiesList}"
-                                    @value-changed="${this._valueChanged}"
-                                ></ha-combo-box>
+                                <ha-form
+                                    .hass=${this.hass}
+                                    .data=${this._config}
+                                    .schema=${[
+                                                { name: i+"_entity",
+                                                  label: "Optional - Light / Light group (For background color)", 
+                                                  selector: { entity: {} },
+                                                },
+                                            ]}   
+                                    .computeLabel=${this._computeLabelCallback}
+                                    @value-changed=${this._valueChanged}
+                                ></ha-form>
+                                <ha-form
+                                    .hass=${this.hass}
+                                    .data=${this._config}
+                                    .schema=${[
+                                                { name: i+"_pir_sensor",
+                                                  label: "Optional - Presence / Occupancy sensor (For button auto order)", 
+                                                  selector: { entity: {} },
+                                                },
+                                            ]}   
+                                    .computeLabel=${this._computeLabelCallback}
+                                    @value-changed=${this._valueChanged}
+                                ></ha-form>
                                 <ha-alert alert-type="info">In fact you can also get the auto order with any entity type, for example you can add light groups to these fields and the order will change based on the last changed states.</ha-alert>
                             </div>
                         </ha-expansion-panel>
@@ -2021,6 +2115,8 @@ export function createBubbleCardEditor() {
                 } else if (target.tagName === 'HA-SWITCH') {
                     obj[configKeys[configKeys.length - 1]] = rawValue;
                 }
+            }else{
+                this._config = detail.value;
             }
 
             fireEvent(this, "config-changed", { config: this._config });
@@ -2072,6 +2168,21 @@ export function createBubbleCardEditor() {
               default: return "Tap action"
             }
           };
+
+        _computeLabelCallback = (schema) => {
+            if (schema.label){
+                return schema.label
+              }else{
+                switch (schema.name) {
+                case "theme": return "Theme"
+                case "hold_action": return "Hold Action"
+                case "double_tap_action": return "Double tap action"
+                case "open_action": return "Open action"
+                case "close_action": return "Close action"
+                default: return "Tap action"
+                };
+            }
+        };
 
         _conditionChanged(ev, index, array) {
             ev.stopPropagation();
