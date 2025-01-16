@@ -781,18 +781,6 @@ export function createBubbleCardEditor() {
                                 ></ha-textfield>
                                 ${this.makeDropdown("Optional - Icon", "icon")}
                                 ${this.makeShowState()}
-                                <ha-formfield .label="Optional - Slider live update" style="display: ${this._button_type !== 'slider' ? 'none' : ''}">
-                                    <ha-switch
-                                        aria-label="Optional - Slider live update"
-                                        .checked=${this._slider_live_update}
-                                        .configValue="${"slider_live_update"}"
-                                        @change=${this._valueChanged}
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Optional - Slider live update</label> 
-                                    </div>
-                                </ha-formfield>
-                                <ha-alert style="display: ${this._button_type !== 'slider' ? 'none' : ''}" alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
                             </div>
                         </ha-expansion-panel>
                         <ha-expansion-panel outlined>
@@ -1650,6 +1638,20 @@ export function createBubbleCardEditor() {
                             <label class="mdc-label">Optional - Show arrow (Select menu only)</label> 
                         </div>
                     </ha-formfield>
+                ` : ''}
+                ${array !== 'sub_button' && this._button_type === 'slider' ? html`
+                    <ha-formfield .label="Optional - Slider live update">
+                        <ha-switch
+                            aria-label="Optional - Slider live update"
+                            .checked=${this._slider_live_update}
+                            .configValue="${"slider_live_update"}"
+                            @change=${this._valueChanged}
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Slider live update</label> 
+                        </div>
+                    </ha-formfield>
+                    <ha-alert alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
                 ` : ''}
             `;
         }
