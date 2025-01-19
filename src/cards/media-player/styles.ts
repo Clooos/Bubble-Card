@@ -316,7 +316,7 @@ export default `
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(1, 1fr);
       grid-template-rows: repeat(2, minmax(auto, max-content));
       grid-auto-flow: column;
       width: auto;
