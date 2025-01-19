@@ -2168,7 +2168,6 @@ class BubbleCardEditor extends LitElement {
     }
 
     _ActionChanged(ev,array,index) {
-        ev.stopPropagation();
         var hasDefaultEntity = false;
         try{if(ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'][0] === 'entity') hasDefaultEntity = true;}
           catch{}
