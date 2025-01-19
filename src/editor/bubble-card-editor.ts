@@ -1818,7 +1818,7 @@ class BubbleCardEditor extends LitElement {
                                             },
                                         ]}   
                                 .computeLabel=${this._computeLabelCallback}
-                                @value-changed=${(ev) => this._arrayValueChange(index, { entity: ev.detail.value }, 'sub_button')}
+                                @value-changed=${(ev) => this._arrayValueChange(index, ev.detail.value, 'sub_button')}
                             ></ha-form>
                             ${hasSelectAttributeList ? html`
                                 <div class="ha-combo-box">
