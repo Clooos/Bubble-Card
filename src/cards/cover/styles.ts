@@ -152,11 +152,10 @@ export default `
       flex-direction: column;
       gap: 4px !important;
       display: grid !important;
-      grid-template-columns: repeat(2, min-content);
+      grid-template-columns: repeat(1, min-content);
       grid-template-rows: repeat(2, 1fr);
       grid-auto-flow: column;
       width: auto;
-      padding-right: 14px;
     }
 
     .rows-2 .bubble-sub-button {

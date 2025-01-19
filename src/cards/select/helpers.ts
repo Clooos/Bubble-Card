@@ -14,7 +14,7 @@ export function getTranslatedAttribute(context, state, attribute, option) {
         case 'preset_modes':
             return context._hass.formatEntityAttributeValue(state, "preset_mode", option);
         default:
-            return formatString(option);
+            return formatString(context._hass.formatEntityState(state, option)) ?? formatString(option);
     }
 }
 

@@ -7,13 +7,13 @@ export default `
       max-width: 100%;
       padding-top: 40px;
       padding-bottom: 80px;
-      grid-gap: 14px;
-      gap: 14px;
-      column-gap: 14px;
-      --grid-gap: 14px;
-      --vertical-stack-card-gap: 14px;
-      --horizontal-stack-card-gap: 14px;
-      --stack-card-gap: 14px;
+      grid-gap: var(--bubble-pop-up-gap, 14px);
+      gap: var(--bubble-pop-up-gap, 14px);
+      column-gap: var(--bubble-pop-up-gap, 14px);
+      --grid-gap: var(--bubble-pop-up-gap, 14px);
+      --vertical-stack-card-gap: var(--bubble-pop-up-gap, 14px);
+      --horizontal-stack-card-gap: var(--bubble-pop-up-gap, 14px);
+      --stack-card-gap: var(--bubble-pop-up-gap, 14px);
       -ms-overflow-style: none; /* for Internet Explorer, Edge */
       scrollbar-width: none; /* for Firefox */
       overflow-y: auto; 
@@ -68,7 +68,6 @@ export default `
   @media only screen and (min-width: 600px) {
       .bubble-pop-up {
           margin-left: 0 !important;
-          bottom: calc(-56px - var(--custom-height-offset-desktop));
           min-width: var(--desktop-width, 540px);
           max-width: var(--desktop-width, 540px);
           left: calc(50% - (var(--desktop-width, 540px) / 2));
@@ -79,6 +78,7 @@ export default `
   }
   @media only screen and (min-width: 768px) {
       .bubble-pop-up {
+        bottom: calc(-56px - var(--custom-height-offset-desktop));
         left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width, 540px) / 2));
       }
   }
@@ -192,11 +192,11 @@ export default `
     flex-direction: column;
     gap: 4px !important;
     display: grid !important;
-    grid-template-columns: repeat(2, min-content);
+    grid-template-columns: repeat(1, min-content);
     grid-template-rows: repeat(2, 1fr);
     grid-auto-flow: column;
     width: auto;
-    padding-right: 14px;
+    padding-right: 4px;
   }
   .rows-2 .bubble-sub-button {
     height: 20px !important;

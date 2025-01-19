@@ -9,7 +9,7 @@ import { handleEmptyColumn } from './cards/empty-column/index.ts';
 import { handleMediaPlayer } from './cards/media-player/index.ts';
 import { handleSelect } from './cards/select/index.ts';
 import { handleClimate } from './cards/climate/index.ts';
-import { createBubbleCardEditor } from './editor/bubble-card-editor.ts';
+import BubbleCardEditor from './editor/bubble-card-editor.ts';
 
 let editor;
 
@@ -197,7 +197,6 @@ class BubbleCard extends HTMLElement {
     }
 
     static getConfigElement() {
-        createBubbleCardEditor();
         return document.createElement("bubble-card-editor");
     }
 

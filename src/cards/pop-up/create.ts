@@ -104,8 +104,12 @@ export function createHeader(context) {
 
   context.elements.header.addEventListener('touchend', (event) => {
     const offset = event.changedTouches[0].clientY - startTouchY;
-    if (offset > 50) removeHash();
-    else context.popUp.style.transform = '';
+    if (offset > 50) {
+      context.popUp.style.transform = `translateY(calc(${offset}px + (100% - ${offset}px)))`
+      removeHash();
+    } else {
+      context.popUp.style.transform = '';
+    }
   }, { passive: true });
 }
 
@@ -210,6 +214,7 @@ export function prepareStructure(context) {
     context.sectionRowContainer = context.sectionRow?.parentElement;
     context.popUp = context.verticalStack.querySelector('#root');
     context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
+    context.cardTitle = context.verticalStack.querySelector('.card-header');
     if (!context.editor && !context.config.background_update) {
       context.verticalStack.removeChild(context.popUp);
     }
