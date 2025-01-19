@@ -456,6 +456,7 @@ This card allows you to control your entities and can be customized in many ways
 | `--bubble-button-border-radius` | `px` | Border radius for the button |
 | `--bubble-button-icon-border-radius` | `px` | Border radius for the button icon container |
 | `--bubble-button-icon-background-color` | `color` | Background color for the button icon container |
+| `--bubble-light-color` | `color` | Replace the color of light buttons/sliders |
 | `--bubble-button-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the button |
 
 </details>

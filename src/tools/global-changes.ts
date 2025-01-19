@@ -18,8 +18,6 @@ import {
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from './validate-condition.ts';
 
 export function changeState(context) {
-    if (context.config.styles?.includes("card.querySelector('.bubble-state').innerText")) return;
-
     const state = context._hass.states[context.config.entity];
     const attribute = getAttribute(context, context.config.attribute, context.config.entity);
     const lastChanged = state?.last_changed;
@@ -88,8 +86,10 @@ export function changeState(context) {
     context.elements.state.classList.toggle('state-without-name', (showState || showLastChanged || showAttribute) && !showName);
     context.elements.state.classList.toggle('display-state', showState || showLastChanged || showAttribute);
     context.elements.state.classList.toggle('hidden', !(showState || showLastChanged || showAttribute));
-
-    applyScrollingEffect(context, context.elements.state, displayedState);
+    
+    if (!context.config.styles?.includes("card.querySelector('.bubble-state').innerText")) {
+        applyScrollingEffect(context, context.elements.state, displayedState);
+    }
     
     // Update previous values
     context.previousState = state;

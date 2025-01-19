@@ -38,7 +38,7 @@ export default `
         position: absolute;
         top: -32px;
         display: none;
-        background: linear-gradient(0deg, var(--bubble-horizontal-buttons-stack-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))) 50%, transparent);
+        background: linear-gradient(0deg, var(--bubble-horizontal-buttons-stack-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--primary-background-color)))) 50%, transparent);
         width: 200%;
         height: 100px;
         pointer-events: none;
