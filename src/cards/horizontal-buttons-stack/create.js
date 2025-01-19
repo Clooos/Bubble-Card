@@ -1,6 +1,6 @@
 import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { addHash, removeHash } from "../pop-up/helpers.js";
-import styles from "./styles.js";
+import styles from "./styles.css";
 
 let isOpen = false;
 const BUTTON_MARGIN = 12;

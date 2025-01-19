@@ -2,7 +2,7 @@ import { addActions, addFeedback } from "../../tools/tap-actions.js";
 import { createElement, toggleEntity, getAttribute, isStateOn, forwardHaptic } from "../../tools/utils.js";
 import { onSliderChange } from "./helpers.js";
 import { changeVolumeIcon } from "./changes.js";
-import styles from "./styles.js";
+import styles from "./styles.css";
 
 let volumeLevel;
 

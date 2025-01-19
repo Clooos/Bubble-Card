@@ -1,5 +1,5 @@
 import { createElement } from "../../tools/utils.js";
-import styles from "./styles.js";
+import styles from "./styles.css";
 
 export function createStructure(context) {
   context.elements = {};

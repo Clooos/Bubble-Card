@@ -2,7 +2,7 @@ import { addActions, addFeedback } from "../tools/tap-actions.js";
 import { createDropdownStructure, createDropdownActions } from "../cards/select/create.js";
 import { changeDropdownList } from "../cards/select/changes.js";
 import { getOptionIcon } from "../cards/select/helpers.js";
-import styles from "../cards/select/styles.js";
+import styles from "../cards/select/styles.css";
 import {
     createElement,
     applyScrollingEffect,
