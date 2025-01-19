@@ -1,15 +1,15 @@
 import { version } from '../var/version.ts';
 import { 
-    fireEvent,
-    isStateOn,
-    getState,
-    getAttribute,
-    getIcon 
+fireEvent,
+isStateOn,
+getState,
+getAttribute,
+getIcon 
 } from '../tools/utils.ts';
 import {
-    LitElement,
-    html,
-    css
+LitElement,
+html,
+css
 } from 'lit';
 
 class BubbleCardEditor extends LitElement {
@@ -59,19 +59,19 @@ class BubbleCardEditor extends LitElement {
     get _hash() {
         return this._config?.hash || '#pop-up-name';
     }
-    
+
     get _trigger_entity() {
         return this._config?.trigger_entity || '';
     }
-    
+
     get _trigger_state() {
         return this._config?.trigger_state || '';
     }
-    
+
     get _trigger_close() {
         return this._config?.trigger_close || false;
     }
-    
+
     get _margin() {
         return this._config?.margin || '7px';
     }
@@ -87,15 +87,15 @@ class BubbleCardEditor extends LitElement {
     get _width_desktop() {
         return this._config?.width_desktop || '540px';
     }
-    
+
     get _bg_color() {
         return this._config?.bg_color || '';
     }
-    
+
     get _bg_opacity() {
         return this._config?.bg_opacity !== undefined ? this._config?.bg_opacity : '88';
     }
-    
+
     get _bg_blur() {
         return this._config?.bg_blur !== undefined ? this._config?.bg_blur : '10';
     }
@@ -103,19 +103,19 @@ class BubbleCardEditor extends LitElement {
     get _backdrop_blur() {
         return this._config?.backdrop_blur !== undefined ? this._config?.backdrop_blur : '0';
     }
-    
+
     get _shadow_opacity() {
         return this._config?.shadow_opacity !== undefined ? this._config?.shadow_opacity : '0';
     }
-    
+
     get _rise_animation() {
         return this._config?.rise_animation !== undefined ? this._config?.rise_animation : true;
     }
-    
+
     get _auto_close() {
         return this._config?.auto_close || '';
     }
-    
+
     get _close_on_click() {
         return this._config?.close_on_click || false;
     }
@@ -163,7 +163,7 @@ class BubbleCardEditor extends LitElement {
     get _highlight_current_view() {
         return this._config?.highlight_current_view || false;
     }
-    
+
     get _show_state() {
         const defaultState = this._config?.card_type === 'state' ? true : false;
         return this._config?.show_state || defaultState;
@@ -326,7 +326,7 @@ class BubbleCardEditor extends LitElement {
             this.sensorList = Object.keys(this.hass.states).filter(
                 (eid) => eid.substr(0, eid.indexOf(".")) === "sensor"
             ).map(formateList);
-            
+
             this.binarySensorList = Object.keys(this.hass.states).filter(
                 (eid) => eid.substr(0, eid.indexOf(".")) === "binary_sensor"
             ).map(formateList);
@@ -353,15 +353,15 @@ class BubbleCardEditor extends LitElement {
                 })
                 .map(formateList);
 
-            this.inputSelectList2 = {states:{}, locale : this.hass.locale, localize : this.hass.localize, entities : this.hass.entities };
+                this.inputSelectList2 = {states:{}, locale : this.hass.locale, localize : this.hass.localize, entities : this.hass.entities };
 
-            this.inputSelectList.forEach((item) => {
-                const entityId = item.label || item;
-                const entity = this.hass.states[entityId]; // Retrieve the corresponding state from hass.states
-                if (entity) {
-                    this.inputSelectList2.states[entityId] = entity;
-                }
-            });
+                this.inputSelectList.forEach((item) => {
+                    const entityId = item.label || item;
+                    const entity = this.hass.states[entityId]; // Retrieve the corresponding state from hass.states
+                    if (entity) {
+                        this.inputSelectList2.states[entityId] = entity;
+                    }
+                });
 
             this.attributeList = Object.keys(this.hass.states[this._entity]?.attributes || {}).map((attributeName) => {
                 let entity = this.hass.states[this._entity];
@@ -510,7 +510,7 @@ class BubbleCardEditor extends LitElement {
                                     .computeLabel=${this._computeLabelCallback}
                                     .disabled="${nameButton}"
                                     @value-changed=${this._valueChanged}
-                                ></ha-form>
+                                ></ha-form>                                         
                                 <ha-textfield
                                     label="Optional - Name"
                                     .value="${this._name}"
@@ -1322,20 +1322,20 @@ class BubbleCardEditor extends LitElement {
 
             return html`
                 <div class="card-config">
-                    ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                    <ha-form
-                        .hass=${this.hass}
-                        .data=${this._config}
-                        .schema=${[
-                                    { name: "entity",
-                                    label: "Entity", 
-                                    selector: { entity: {domain:["climate"]}  },
-                                    },
-                                ]}   
-                        .computeLabel=${this._computeLabelCallback}
-                        @value-changed=${this._valueChanged}
-                    ></ha-form>
-                    <ha-expansion-panel outlined>
+                ${this.makeDropdown("Card type", "card_type", cardTypeList)}
+                <ha-form
+                    .hass=${this.hass}
+                    .data=${this._config}
+                    .schema=${[
+                                { name: "entity",
+                                label: "Entity", 
+                                selector: { entity: {domain:["climate"]}  },
+                                },
+                            ]}   
+                    .computeLabel=${this._computeLabelCallback}
+                    @value-changed=${this._valueChanged}
+                ></ha-form>
+                                        <ha-expansion-panel outlined>
                         <h4 slot="header">
                           <ha-icon icon="mdi:cog"></ha-icon>
                           Climate settings
@@ -1699,7 +1699,20 @@ class BubbleCardEditor extends LitElement {
             ? "hold_action"
             : label === "Open action"
             ? "open_action"
-            : "close_action"
+            : "close_action";
+        let value;
+        try{
+           value = label === "Tap action" 
+                ? context.tap_action
+                : label === "Double tap action" 
+                ? context.double_tap_action
+                : label === "Hold action" 
+                ? context.hold_action
+                : label === "Open action"
+                ? context.open_action
+                : context.close_action;
+        }catch{}
+
         const isDefault = context === this._config;
 
         if (!defaultAction) {
@@ -1720,6 +1733,8 @@ class BubbleCardEditor extends LitElement {
                     <ha-form
                         .hass=${this.hass}
                         .data=${context}
+                        .configValue="${
+                                      (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType}" 
                         .schema=${[{name: configValueType,
                                     selector: { ui_action: {
                                         default_action: defaultAction,} },
@@ -1728,6 +1743,20 @@ class BubbleCardEditor extends LitElement {
                         @value-changed=${(ev) => this._ActionChanged(ev,array,index)}
                     ></ha-form>
                 </div>
+                ${ value?.action  === 'call-service' || value?.action === 'perform-action' ? html`
+                    <ha-formfield .label="Optional - Use default entity">
+                        <ha-switch
+                            aria-label="Optional - Use default entity"
+                            .configValue="${
+                                          (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType+".default_entity"}" 
+                            .checked=${value?.target?.entity_id === "entity"}
+                             @change=${this._updateActionsEntity}
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Use default entity</label> 
+                        </div>
+                    </ha-formfield>
+                ` : ''}
             </ha-expansion-panel>
         `;
     }
@@ -1774,8 +1803,7 @@ class BubbleCardEditor extends LitElement {
           this.requestUpdate();
         };
 
-        subButton.entity = subButton.entity ?? this._config.entity;
-        let entity = subButton.entity;
+        const entity = subButton.entity ?? this._config.entity;
         const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || subButton.select_attribute;
         const entityAttribute = this.hass.states[entity]?.attributes;
         const hasSelectAttributeList = this._selectable_attributes.some(attr => entityAttribute?.[attr]);
@@ -1808,18 +1836,18 @@ class BubbleCardEditor extends LitElement {
                             Button settings
                         </h4>
                         <div class="content"> 
-                            <ha-form
-                                .hass=${this.hass}
-                                .data=${subButton}
-                                .schema=${[
-                                            { name: "entity",
-                                              label: "Optional - Entity (default to card entity)", 
-                                              selector: { entity: {} },
-                                            },
-                                        ]}   
-                                .computeLabel=${this._computeLabelCallback}
-                                @value-changed=${(ev) => this._arrayValueChange(index, ev.detail.value, 'sub_button')}
-                            ></ha-form>
+                        <ha-form
+                            .hass=${this.hass}
+                            .data=${subButton}
+                            .schema=${[
+                                        { name: "entity",
+                                          label: "Optional - Entity (default to card entity)", 
+                                          selector: { entity: {} },
+                                        },
+                                    ]}   
+                            .computeLabel=${this._computeLabelCallback}
+                            @value-changed=${(ev) => this._arrayValueChange(index, ev.detail.value, 'sub_button')}
+                        ></ha-form>
                             ${hasSelectAttributeList ? html`
                                 <div class="ha-combo-box">
                                     <ha-combo-box
@@ -1881,7 +1909,7 @@ class BubbleCardEditor extends LitElement {
             </ha-expansion-panel>
         `;
       });
-      
+
 
       const addSubButton = () => {
         if (!this._config.sub_button) {
@@ -1959,40 +1987,40 @@ class BubbleCardEditor extends LitElement {
                                 item-value-path="value"
                                 @value-changed="${this._valueChanged}"
                             ></ha-icon-picker>
-                            <ha-form
-                                .hass=${this.hass}
-                                .data=${this._config}
-                                .schema=${[
-                                            { name: i+"_entity",
-                                              label: "Optional - Light / Light group (For background color)", 
-                                              selector: { entity: {} },
-                                            },
-                                        ]}   
-                                .computeLabel=${this._computeLabelCallback}
-                                @value-changed=${this._valueChanged}
-                            ></ha-form>
-                            <ha-form
-                                .hass=${this.hass}
-                                .data=${this._config}
-                                .schema=${[
-                                            { name: i+"_pir_sensor",
-                                              label: "Optional - Presence / Occupancy sensor (For button auto order)", 
-                                              selector: { entity: {} },
-                                            },
-                                        ]}   
-                                .computeLabel=${this._computeLabelCallback}
-                                @value-changed=${this._valueChanged}
-                            ></ha-form>
-                            <ha-alert alert-type="info">In fact you can also get the auto order with any entity type, for example you can add light groups to these fields and the order will change based on the last changed states.</ha-alert>
-                        </div>
-                    </ha-expansion-panel>
-                </div>
-            `);
-        }
+                        <ha-form
+                            .hass=${this.hass}
+                            .data=${this._config}
+                            .schema=${[
+                                        { name: i+"_entity",
+                                          label: "Optional - Light / Light group (For background color)", 
+                                          selector: { entity: {} },
+                                        },
+                                    ]}   
+                            .computeLabel=${this._computeLabelCallback}
+                            @value-changed=${this._valueChanged}
+                        ></ha-form>
+                        <ha-form
+                            .hass=${this.hass}
+                            .data=${this._config}
+                            .schema=${[
+                                        { name: i+"_pir_sensor",
+                                          label: "Optional - Presence / Occupancy sensor (For button auto order)", 
+                                          selector: { entity: {} },
+                                        },
+                                    ]}   
+                            .computeLabel=${this._computeLabelCallback}
+                            @value-changed=${this._valueChanged}
+                        ></ha-form>
+                        <ha-alert alert-type="info">In fact you can also get the auto order with any entity type, for example you can add light groups to these fields and the order will change based on the last changed states.</ha-alert>
+                    </div>
+                </ha-expansion-panel>
+            </div>
+        `);
+    }
 
         return buttons;
     }
-    
+
     makeVersion() {
         return html`
             <h4 style="
@@ -2025,7 +2053,7 @@ class BubbleCardEditor extends LitElement {
         delete this._config[index + '_link'];
         delete this._config[index + '_entity'];
         delete this._config[index + '_pir_sensor'];
-    
+
         // Updating indexes of following buttons
         for (let i = index; i < this.buttonIndex; i++) {
             this._config[i + '_name'] = this._config[(i + 1) + '_name'];
@@ -2034,14 +2062,14 @@ class BubbleCardEditor extends LitElement {
             this._config[i + '_entity'] = this._config[(i + 1) + '_entity'];
             this._config[i + '_pir_sensor'] = this._config[(i + 1) + '_pir_sensor'];
         }
-    
+
         // Removing fields of the last button
         delete this._config[this.buttonIndex + '_name'];
         delete this._config[this.buttonIndex + '_icon'];
         delete this._config[this.buttonIndex + '_link'];
         delete this._config[this.buttonIndex + '_entity'];
         delete this._config[this.buttonIndex + '_pir_sensor'];
-    
+
         // Updating index of the last button
         this.buttonIndex--;
 
@@ -2129,7 +2157,7 @@ class BubbleCardEditor extends LitElement {
             setTimeout(() => this._arrayValueChange(index, value, array), 10);
             return;
         }
-        
+
         this._config[array] = this._config[array] || [];
         let arrayCopy = [...this._config[array]];
         arrayCopy[index] = arrayCopy[index] || {};
@@ -2140,7 +2168,19 @@ class BubbleCardEditor extends LitElement {
     }
 
     _ActionChanged(ev,array,index) {
-        ev.stopPropagation();
+        var hasDefaultEntity = false;
+        try{if(ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'][0] === 'entity') hasDefaultEntity = true;}
+          catch{}
+        try{if(ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'] === 'entity') hasDefaultEntity = true;}
+          catch{}
+        if(hasDefaultEntity){
+            ev.detail.value[ev.currentTarget.__schema[0].name]['action'] = 'call-service';
+            if(ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action']!= undefined){
+                ev.detail.value[ev.currentTarget.__schema[0].name]['service'] = ""+ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'] ;
+                delete ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'];
+                }
+          }
+
         if( array === 'button_action'){
             var configExist= this._config[array] ? true : false;
             var valueWasChanged = ev.detail.value[ev.currentTarget.__schema[0].name] != null
@@ -2157,21 +2197,33 @@ class BubbleCardEditor extends LitElement {
         fireEvent(this, "config-changed", { config: this._config});
     }
 
-     _computeLabelCallback = (schema) => {
-        switch (schema.name) {
-          case "theme": return "Theme"
-          case "hold_action": return "Hold Action"
-          case "double_tap_action": return "Double tap action"
-          case "open_action": return "Open action"
-          case "close_action": return "Close action"
-          default: return "Tap action"
+    _updateActionsEntity(ev){
+        let obj = JSON.parse(JSON.stringify(this._config)); //get rid of the referencing 
+        const configKeys = ev.target.configValue.split('.');
+        let i = 0
+        for (i = 0; i < configKeys.length - 2; i++) {
+            obj = obj[configKeys[i]] ? obj[configKeys[i]] : {};
         }
-      };
+
+        if (!ev.target.checked){
+            if(obj[configKeys[i]].target?.entity_id ==='entity'){
+                obj[configKeys[i]]['target']={};
+              }
+          }else{
+            obj[configKeys[i]]['target']={'entity_id':'entity'};    
+          }
+
+        var detail ={'value':obj};
+        var currentTarget = {'__schema':[{'name':configKeys[configKeys.length - 2]}]};
+        var newev = {...ev,detail ,currentTarget};
+
+        this._ActionChanged(newev,configKeys.length >2 ? configKeys[0] : null,configKeys.length >3 ? configKeys[1] : null);
+    }
 
     _computeLabelCallback = (schema) => {
         if (schema.label){
             return schema.label
-          }else{
+        }else{
             switch (schema.name) {
             case "theme": return "Theme"
             case "hold_action": return "Hold Action"
@@ -2306,27 +2358,27 @@ class BubbleCardEditor extends LitElement {
             }
 
             .icon-button {
-              background: var(--accent-color);
-              border: none;
-              cursor: pointer;
-              padding: 8px;
-              margin: 0;
-              border-radius: 32px;
-              font-weight: bold;
-            }
+                background: var(--accent-color);
+                border: none;
+                cursor: pointer;
+                padding: 8px;
+                margin: 0;
+                border-radius: 32px;
+                font-weight: bold;
+              }
 
-            .icon-button.header {
-              background: none;
-              float: right;
-              padding: 0;
-              margin: 0 8px;
-            }
+              .icon-button.header {
+                background: none;
+                float: right;
+                padding: 0;
+                margin: 0 8px;
+              }
 
-            ha-card-conditions-editor {
-              margin-top: -12px;
-            }
-        `;
-    }
-}
+              ha-card-conditions-editor {
+                margin-top: -12px;
+              }
+          `;
+      }
+  }
 
-customElements.define('bubble-card-editor', BubbleCardEditor);
+  customElements.define('bubble-card-editor', BubbleCardEditor);
