@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "bubble-card",
+  "version": "0.0.0",
+  "scripts": {
+    "dist": "webpack"
+  },
+  "dependencies": {
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "webpack-cli": "^6.0.1"
+  }
+}

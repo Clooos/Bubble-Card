@@ -12,8 +12,8 @@ module.exports = [
       path: path.resolve(__dirname, 'dist'),
       filename: '[name].js'
     }
-  },    
-  
+  },
+
   // My Home Assistant test server
 
   {
@@ -23,7 +23,7 @@ module.exports = [
       'bubble-pop-up-fix': './src/bubble-pop-up-fix.ts'
     },
     output: {
-      path: path.resolve('/Volumes/config/www'),
+      path: path.resolve(__dirname, 'www'),
       filename: '[name].js'
     }
   }
