@@ -5,8 +5,8 @@ module.exports = [
   {
     mode: 'production',
     entry: {
-      'bubble-card': './src/bubble-card.ts',
-      'bubble-pop-up-fix': './src/bubble-pop-up-fix.ts'
+      'bubble-card': './src/bubble-card.js',
+      'bubble-pop-up-fix': './src/bubble-pop-up-fix.js'
     },
     output: {
       path: path.resolve(__dirname, 'dist'),
@@ -19,8 +19,8 @@ module.exports = [
   {
     mode: 'development',
     entry: {
-      'bubble-card': './src/bubble-card.ts',
-      'bubble-pop-up-fix': './src/bubble-pop-up-fix.ts'
+      'bubble-card': './src/bubble-card.js',
+      'bubble-pop-up-fix': './src/bubble-pop-up-fix.js'
     },
     output: {
       path: path.resolve(__dirname, 'www'),

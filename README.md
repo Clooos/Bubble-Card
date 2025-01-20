@@ -1328,7 +1328,7 @@ You can add custom styles to modify the CSS of all cards **without using card-mo
 - In YAML by adding `styles: |` followed by your custom styles (check the tips and examples below).
 
 > [!TIP]  
-> **To understand which style classes can be modified**, you can take a look at the [`src/cards`](https://github.com/Clooos/Bubble-Card/tree/main/src/cards) folder in this repository. In each card folder, you will find a file named `styles.ts`. These files contain all the applied styles. This allows for a lot more possibilities than CSS variables, but it needs to be added individually to each card.
+> **To understand which style classes can be modified**, you can take a look at the [`src/cards`](https://github.com/Clooos/Bubble-Card/tree/main/src/cards) folder in this repository. In each card folder, you will find a file named `styles.js`. These files contain all the applied styles. This allows for a lot more possibilities than CSS variables, but it needs to be added individually to each card.
 > 
 > You can also find a lot of [examples from the community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-custom-styles-templates-and-dashboards), or some from the [Home Assistant forum](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/) by doing a bit of searching.
 >
