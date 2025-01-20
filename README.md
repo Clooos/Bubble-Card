@@ -435,14 +435,15 @@ This card allows you to control your entities and can be customized in many ways
 | `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
 | `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
 | `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
-| `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see below | Allow to change the default actions on button click. Not available for the `slider` type. |
-| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
-| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
-| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
+| `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see below | Allow to change the default actions on button click. Not available for the `slider` type |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used |
 | `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
 | `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
 | `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
+| `slider_live_update` | boolean | Optional (`button_type` must be set to `slider`) | `true` or `false` (default) | If toggled, value is updated while sliding instead of only on release |
 
 </details>
 
