@@ -2,7 +2,8 @@ import { convertToRGBA } from "../../tools/style.js";
 import { addActions } from "../../tools/tap-actions.js";
 import { createElement, toggleEntity, configChanged, fireEvent, forwardHaptic } from "../../tools/utils.js";
 import { onUrlChange, removeHash, hideContent } from "./helpers.js";
-import styles, { backdropStyles } from "./styles.js";
+import styles from "./styles.css";
+import backdropStyles from "./backdrop.css";
 
 let backdrop;
 let hideBackdrop = false;

@@ -1,7 +1,7 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
 import { createElement, toggleEntity, throttle, forwardHaptic, isEntityType } from "../../tools/utils.js";
 import { getButtonType, onSliderChange, updateEntity } from "./helpers.js";
-import styles from "./styles.js";
+import styles from "./styles.css";
 
 export function createStructure(context, container = context.content, appendTo = container) {
   const buttonType = getButtonType(context);

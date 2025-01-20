@@ -1,7 +1,7 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
 import { createElement, toggleEntity, throttle, forwardHaptic } from "../../tools/utils.js";
 import { callSelectService } from "./helpers.js";
-import styles from "./styles.js";
+import styles from "./styles.css";
 
 export function createStructure(context) {
   if (!context.elements) context.elements = {};

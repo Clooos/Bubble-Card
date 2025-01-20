@@ -1,6 +1,6 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
 import { createElement, toggleEntity, getState, getAttribute, isStateOn, forwardHaptic } from "../../tools/utils.js";
-import styles from "./styles.js";
+import styles from "./styles.css";
 
 export function createStructure(context) {
     context.dragging = false;
