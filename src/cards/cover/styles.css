@@ -88,7 +88,7 @@ ha-card {
     display: flex;
     background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
     height: 42px;
-    border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, 32px));
+    border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     box-shadow: var(--bubble-cover-box-shadow, var(--bubble-button-box-shadow, var(--bubble-box-shadow, none)));
     align-items: center;
     justify-content: center;
@@ -97,10 +97,10 @@ ha-card {
 }
 
 .large .bubble-cover-card-container {
-  height: 56px;
+  height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
   display: flex;
   background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
-  border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, 32px));
+  border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
   box-shadow: var(--bubble-cover-box-shadow, var(--bubble-button-box-shadow, var(--bubble-box-shadow, none)));
 }
 
@@ -110,7 +110,7 @@ ha-card {
 }
 
 .large .bubble-header-container {
-    height: 56px;
+    height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
 }
 
 .large .bubble-header {

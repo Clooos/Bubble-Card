@@ -166,7 +166,7 @@
 }
 
 .large .bubble-button-card-container {
-  height: 56px;
+  height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
   border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 36px));
 }
 .large .bubble-pop-up-container {
@@ -179,8 +179,8 @@
   margin-left: 8px;
 }
 .large .bubble-close-button {
-    height: 56px;
-    width: 56px;
+    height: var(--row-height,56px);
+    width: var(--row-height,56px);
     border: none;
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
     z-index: 1;

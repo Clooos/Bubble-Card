@@ -389,6 +389,9 @@ const subButtonsStyles = `
         gap: 8px;
         align-items: center;
     }
+    .large .bubble-sub-button-container{
+        flex-wrap: wrap;
+    }
     .bubble-sub-button {
         display: flex;
         flex-wrap: nowrap;
