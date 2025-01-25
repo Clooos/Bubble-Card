@@ -777,74 +777,6 @@ class BubbleCardEditor extends LitElement {
       `;
     }
 
-    makeButton() {
-        let buttons = [];
-        for (let i = 1; i <= this.buttonIndex; i++) {
-            buttons.push(html`
-                <div class="${i}_button">
-                    <ha-expansion-panel outlined>
-                        <h4 slot="header">
-                            <ha-icon icon="mdi:border-radius"></ha-icon>
-                            Button ${i} ${this._config[i + '_name'] ? ("- " + this._config[i + '_name']) : ""}
-                            <button class="icon-button header" @click="${() => this.removeButton(i)}">
-                              <ha-icon icon="mdi:delete"></ha-icon>
-                            </button>
-                        </h4>
-                        <div class="content">
-                            <ha-textfield
-                                label="Link / Hash to pop-up (e.g. #kitchen)"
-                                .value="${this._config[i + '_link'] || ''}"
-                                .configValue="${i}_link"
-                                @input="${this._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Optional - Name"
-                                .value="${this._config[i + '_name'] || ''}"
-                                .configValue="${i}_name"
-                                @input="${this._valueChanged}"
-                            ></ha-textfield>
-                            <ha-icon-picker
-                                label="Optional - Icon"
-                                .value="${this._config[i + '_icon'] || ''}"
-                                .configValue="${i}_icon"
-                                item-label-path="label"
-                                item-value-path="value"
-                                @value-changed="${this._valueChanged}"
-                            ></ha-icon-picker>
-                        <ha-form
-                            .hass=${this.hass}
-                            .data=${this._config}
-                            .schema=${[
-                                        { name: i+"_entity",
-                                          label: "Optional - Light / Light group (For background color)", 
-                                          selector: { entity: {} },
-                                        },
-                                    ]}   
-                            .computeLabel=${this._computeLabelCallback}
-                            @value-changed=${this._valueChanged}
-                        ></ha-form>
-                        <ha-form
-                            .hass=${this.hass}
-                            .data=${this._config}
-                            .schema=${[
-                                        { name: i+"_pir_sensor",
-                                          label: "Optional - Presence / Occupancy sensor (For button auto order)", 
-                                          selector: { entity: {} },
-                                        },
-                                    ]}   
-                            .computeLabel=${this._computeLabelCallback}
-                            @value-changed=${this._valueChanged}
-                        ></ha-form>
-                        <ha-alert alert-type="info">In fact you can also get the auto order with any entity type, for example you can add light groups to these fields and the order will change based on the last changed states.</ha-alert>
-                    </div>
-                </ha-expansion-panel>
-            </div>
-        `);
-    }
-
-        return buttons;
-    }
-
     makeVersion() {
         return html`
             <h4 class="version">
@@ -854,38 +786,6 @@ class BubbleCardEditor extends LitElement {
                 </span>
             </h4>
         `;
-    }
-
-    removeButton(index) {
-        // Removing button fields
-        delete this._config[index + '_name'];
-        delete this._config[index + '_icon'];
-        delete this._config[index + '_link'];
-        delete this._config[index + '_entity'];
-        delete this._config[index + '_pir_sensor'];
-
-        // Updating indexes of following buttons
-        for (let i = index; i < this.buttonIndex; i++) {
-            this._config[i + '_name'] = this._config[(i + 1) + '_name'];
-            this._config[i + '_icon'] = this._config[(i + 1) + '_icon'];
-            this._config[i + '_link'] = this._config[(i + 1) + '_link'];
-            this._config[i + '_entity'] = this._config[(i + 1) + '_entity'];
-            this._config[i + '_pir_sensor'] = this._config[(i + 1) + '_pir_sensor'];
-        }
-
-        // Removing fields of the last button
-        delete this._config[this.buttonIndex + '_name'];
-        delete this._config[this.buttonIndex + '_icon'];
-        delete this._config[this.buttonIndex + '_link'];
-        delete this._config[this.buttonIndex + '_entity'];
-        delete this._config[this.buttonIndex + '_pir_sensor'];
-
-        // Updating index of the last button
-        this.buttonIndex--;
-
-        fireEvent(this, "config-changed", {
-            config: this._config
-        });
     }
 
     makeStyleEditor() {
