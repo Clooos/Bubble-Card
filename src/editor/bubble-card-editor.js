@@ -847,23 +847,9 @@ class BubbleCardEditor extends LitElement {
 
     makeVersion() {
         return html`
-            <h4 style="
-                font-size: 12px !important;
-                color: #fff;
-                background: rgba(0,0,0,0.1);
-                padding: 8px 16px;
-                border-radius: 32px;
-            ">
+            <h4 class="version">
                 Bubble Card 
-                <span style="
-                    font-size: 10px;
-                    background: rgba(0,120,180,1);
-                    padding: 0px 8px;
-                    border-radius: 12px;
-                    margin-right: -6px;
-                    float: right;
-                    color: white;
-                ">
+                <span class="versionNumber">
                     ${version}
                 </span>
             </h4>
