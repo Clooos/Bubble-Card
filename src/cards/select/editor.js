@@ -16,7 +16,7 @@ export function renderSelectEditor(editor){
         <div class="card-config">
             ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
             <ha-form
-                .hass=${editor.inputSelectList2}
+                .hass=${editor.inputSelectList}
                 .data=${editor._config}
                 .schema=${[
                             { name: "entity",

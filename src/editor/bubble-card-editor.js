@@ -91,7 +91,9 @@ class BubbleCardEditor extends LitElement {
                 value: item
             });
 
-            this.inputSelectList = Object.keys(this.hass.states)
+            this.inputSelectList = {states:{}, locale : this.hass.locale, localize : this.hass.localize, entities : this.hass.entities };
+
+            Object.keys(this.hass.states)
                 .filter((eid) => {
                     const entity = this.hass.states[eid];
                     const domain = eid.substr(0, eid.indexOf("."));
@@ -99,17 +101,13 @@ class BubbleCardEditor extends LitElement {
                     const hasSelectableAttributes = this._selectable_attributes.some(attr => entity.attributes?.[attr]);
                     return isSelectDomain || hasSelectableAttributes;
                 })
-                .map(formateList);
-
-                this.inputSelectList2 = {states:{}, locale : this.hass.locale, localize : this.hass.localize, entities : this.hass.entities };
-
-                this.inputSelectList.forEach((item) => {
-                    const entityId = item.label || item;
-                    const entity = this.hass.states[entityId]; // Retrieve the corresponding state from hass.states
-                    if (entity) {
-                        this.inputSelectList2.states[entityId] = entity;
-                    }
-                });
+                .map(formateList).forEach((item) => {
+                        const entityId = item.label || item;
+                        const entity = this.hass.states[entityId]; // Retrieve the corresponding state from hass.states
+                        if (entity) {
+                            this.inputSelectList.states[entityId] = entity;
+                        }
+                    });
 
             this.attributeList = Object.keys(this.hass.states[this._entity]?.attributes || {}).map((attributeName) => {
                 let entity = this.hass.states[this._entity];
