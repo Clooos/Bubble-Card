@@ -9,7 +9,8 @@ getIcon
 import {
 LitElement,
 html,
-css
+css,
+unsafeCSS
 } from 'lit';
 import { renderButtonEditor } from '../cards/button/editor.js';
 import { renderPopUpEditor } from '../cards/pop-up/editor.js';
@@ -19,6 +20,7 @@ import { renderCoverEditor } from '../cards/cover/editor.js';
 import { renderClimateEditor } from '../cards/climate/editor.js';
 import { renderSelectEditor } from '../cards/select/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
+import styles from './styles.css'
 
 class BubbleCardEditor extends LitElement {
 
@@ -1084,121 +1086,7 @@ class BubbleCardEditor extends LitElement {
 
     static get styles() {
         return css`
-            div {
-              display: grid;
-              grid-gap: 12px;
-            }
-
-            ha-combo-box[label="Card type"]::after {
-              content: "";
-              position: relative;
-              background-color: var(--background-color, var(--secondary-background-color));
-              display: block;
-              width: 100%;
-              height: 1px;
-              top: 12px;
-              margin-bottom: 12px !important;
-              opacity: 0.6;
-            }
-
-            #add-button {
-              margin: 0 0 14px 0;
-              color: var(--text-primary-color);
-              width: 100%;
-              height: 32px;
-              border-radius: 16px;
-              border: none;
-              background-color: var(--accent-color);
-              cursor: pointer;
-            }
-
-            p {
-              margin-bottom: 4px;
-            }
-
-            ha-icon, a, p, button, h4 {
-              color: var(--primary-text-color) !important;
-            }
-
-            hr {
-              display: inline-block;
-              width: 100%;
-              border: 1px solid var(--background-color, var(--secondary-background-color));
-              opacity: 0.6;
-              margin: 8px 0 0 0;
-            }
-
-            code {
-              background: var(--accent-color);
-              background-blend-mode: darken;
-              padding: 2px 4px;
-              border-radius: 6px;
-            }
-
-            .button-header {
-              height: auto;
-              width: 100%;
-              display: inline-flex;
-              align-items: center;
-              margin: 0 8px;
-            }
-
-            .button-number {
-              display: inline-flex;
-              width: auto;
-            }
-
-            .remove-button {
-              display: inline-flex;
-              border-radius: 50%;
-              width: 24px;
-              height: 24px;
-              text-align: center;
-              line-height: 24px;
-              vertical-align: middle;
-              cursor: pointer;
-            }
-
-            .content {
-              margin: 12px 4px 14px 4px;
-            }
-
-            h4 > ha-icon {
-              margin: 8px;
-            }
-
-            ha-textfield {
-              width: 100%;
-            }
-
-            h3 {
-              margin: 4px 0;
-            }
-
-            .code-editor {
-                overflow: scroll;
-            }
-
-            .icon-button {
-                background: var(--accent-color);
-                border: none;
-                cursor: pointer;
-                padding: 8px;
-                margin: 0;
-                border-radius: 32px;
-                font-weight: bold;
-              }
-
-              .icon-button.header {
-                background: none;
-                float: right;
-                padding: 0;
-                margin: 0 8px;
-              }
-
-              ha-card-conditions-editor {
-                margin-top: -12px;
-              }
+            ${unsafeCSS(styles)}
           `;
       }
   }
