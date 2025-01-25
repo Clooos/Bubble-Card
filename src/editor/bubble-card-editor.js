@@ -149,36 +149,6 @@ class BubbleCardEditor extends LitElement {
                 }
             ];
 
-            this.tapActionTypeList = [{
-                    'label': 'More info',
-                    'value': 'more-info'
-                },
-                {
-                    'label': 'Toggle',
-                    'value': 'toggle'
-                },
-                {
-                    'label': 'Navigate',
-                    'value': 'navigate'
-                },
-                {
-                    'label': 'URL',
-                    'value': 'url'
-                },
-                {
-                    'label': 'Call service',
-                    'value': 'call-service'
-                },
-                {
-                    'label': 'Assist',
-                    'value': 'assist'
-                },
-                {
-                    'label': 'No action',
-                    'value': 'none'
-                }
-            ];
-
             this.listsUpdated = true;
         }
 
