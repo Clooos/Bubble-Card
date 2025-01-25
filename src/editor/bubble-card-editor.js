@@ -1,10 +1,6 @@
 import { version } from '../var/version.js';
 import { 
-fireEvent,
-isStateOn,
-getState,
-getAttribute,
-getIcon 
+fireEvent
 } from '../tools/utils.js';
 import {
 LitElement,
@@ -558,9 +554,10 @@ class BubbleCardEditor extends LitElement {
                         .configValue="${
                                       (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType}" 
                         .schema=${[{name: configValueType,
+                                    label : label,
                                     selector: { ui_action: {
                                         default_action: defaultAction,} },
-                                    }]}   
+                                    }]}  
                         .computeLabel=${this._computeLabelCallback}
                         @value-changed=${(ev) => this._ActionChanged(ev,array,index)}
                     ></ha-form>
@@ -929,19 +926,8 @@ class BubbleCardEditor extends LitElement {
     }
 
     _computeLabelCallback = (schema) => {
-        if (schema.label){
-            return schema.label
-        }else{
-            switch (schema.name) {
-            case "theme": return "Theme"
-            case "hold_action": return "Hold Action"
-            case "double_tap_action": return "Double tap action"
-            case "open_action": return "Open action"
-            case "close_action": return "Close action"
-            default: return "Tap action"
-            };
-        }
-    };
+        return schema.label;
+    }
 
     _conditionChanged(ev, index, array) {
         ev.stopPropagation();
