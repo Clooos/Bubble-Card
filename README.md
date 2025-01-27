@@ -992,7 +992,7 @@ cards:
 
 ![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
 
-In every card that supports that option, you can add sub-buttons to customize your cards even more. You can, for exemple, create a button that can control a vacuum, a weather card, or almost anything that you can come up with. These sub-buttons support the tap actions and most of the button options.
+In every card that supports that option, you can add sub-buttons to customize your cards even more. You can, for example, create a button that can control a vacuum, a weather card, or almost anything that you can come up with. These sub-buttons support the tap actions and most of the button options.
 
 ### Sub-buttons options
 
