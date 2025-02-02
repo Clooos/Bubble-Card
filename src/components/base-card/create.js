@@ -17,8 +17,11 @@ export function createBaseStructure(context, config = {}) {
         ...config 
     };
 
-    if (options.withBaseElements) {
+    if (options.withMainContainer) {
         context.elements.mainContainer = createElement('div', `bubble-${options.type}-container bubble-container`);
+    }
+
+    if (options.withBaseElements) {
         context.elements.cardWrapper = createElement('div', `bubble-${options.type} bubble-wrapper`);
         context.elements.contentContainer = createElement('div', 'bubble-content-container');
         context.elements.buttonsContainer = createElement('div', 'bubble-buttons-container');
