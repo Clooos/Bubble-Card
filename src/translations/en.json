@@ -1,0 +1,22 @@
+{
+  "cards": {
+    "calendar": {
+      "busy": "Busy",
+      "all_day": "All day"
+    }
+  },
+  "editor": {
+    "calendar": {
+      "entity": "Entity",
+      "color": "Color",
+      "limit": "Limit",
+      "list_of_calendars": "List of calendars",
+      "show_end": "Show end time",
+      "show_progress": "Show progress",
+      "name": "Calendar",
+      "new_calendar": "Add another calendar",
+      "remove_calendar": "Remove this calendar",
+      "settings": "Calendar settings"
+    }
+  }
+}
