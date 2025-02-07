@@ -92,6 +92,7 @@ export function renderButtonEditor(editor){
                 <div class="content">
                     ${editor.makeLayoutOptions()}
                     ${editor.makeStyleEditor()}
+                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}

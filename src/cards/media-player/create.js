@@ -10,7 +10,7 @@ export function createStructure(context) {
     context.dragging = false;
 
     context.elements = {};
-    context.elements.mediaPlayerContainer = createElement('div', 'bubble-media-player-container');
+    context.elements.mediaPlayerContainer = createElement('div', 'bubble-media-player-container bubble-container');
     context.elements.mediaPlayerCard = createElement('div', 'bubble-media-player');
     context.elements.mediaInfoContainer = createElement('div', 'bubble-media-info-container');
     context.elements.nameContainer = createElement('div', 'bubble-name-container');

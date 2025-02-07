@@ -1,0 +1,68 @@
+## Bubble global custom styles and templates [v1.0]
+
+## HOW TO USE?
+
+# If you want to edit or add global styles and templates here, first copy bubble-custom.yaml from /www/community/Bubble-Card/ (if installed via HACS) 
+# to /www/bubble/ (you'll need to create this folder). Make sure to clear your browser/app cache after each modification.
+
+# The first CSS commented line is for the name displayed in the editor, the second one is for the description.
+
+# All custom styles/templates placed under "default:" are applied to all cards by default.
+
+
+default: >
+    /* Default */
+    /* No changes are applied by default. Add modifications under <code>default:</code> in your YAML file to apply them to all cards.  */
+
+
+home-assistant-default: >
+    /* Home Assistant default */
+    /* Follow the default Home Assistant styling. To set it as the default, move it under <code>default:</code> in your YAML file. */
+
+    :host {
+        --bubble-accent-color: rgba(0,170,240,0.6);
+        --bubble-main-background-color: var(--ha-card-background, var(--card-background-color, #fff));
+        --bubble-border-radius: var(--ha-card-border-radius, 12px);
+        --bubble-icon-border-radius: 32px;
+        --bubble-button-border-radius: var(--bubble-border-radius);
+        --bubble-icon-background-color: var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)));
+        --bubble-climate-button-background-color: var(--bubble-icon-background-color);
+        --bubble-border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color, var(--divider-color, #e0e0e0));
+    }
+    
+    .bubble-container, 
+    .bubble-pop-up-background {
+        -webkit-backdrop-filter: var(--ha-card-backdrop-filter, none);
+        backdrop-filter: var(--ha-card-backdrop-filter, none);
+        box-shadow: var(--ha-card-box-shadow, none);
+        box-sizing: border-box;
+    }
+    
+    .bubble-icon-container, 
+    .large .bubble-icon-container {
+        --mdc-icon-size: 22px;
+        min-width: 36px !important;
+        min-height: 36px !important;
+    }
+    
+    .large .bubble-icon-container {
+         margin-left: 9px;
+    }
+    
+    .bubble-state {
+        opacity: 1;
+        font-weight: 400;
+        font-size: 12px;
+        letter-spacing: .4px;
+    }
+    
+    .bubble-name {
+        font-weight: 500;
+        font-size: 14px;
+        letter-spacing: .1px;
+    }
+    
+    .bubble-pop-up-background { 
+        filter: brightness(0.96); /* Improve pop-up background contrast */
+        --bubble-pop-up-border-radius: calc(var(--ha-card-border-radius, 12px) * 1.4);
+    }

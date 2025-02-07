@@ -110,6 +110,7 @@ export function renderClimateEditor(editor){
                 <div class="content">
                     ${editor.makeLayoutOptions()}
                     ${editor.makeStyleEditor()}
+                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}

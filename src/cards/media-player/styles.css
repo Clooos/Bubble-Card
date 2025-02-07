@@ -20,6 +20,7 @@ ha-card {
     touch-action: pan-y;
     border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
     box-shadow: var(--bubble-media-player-box-shadow, var(--bubble-box-shadow, none));
+    border: var(--bubble-media-player-border, var(--bubble-border, none));
 }
 
 .bubble-media-player {

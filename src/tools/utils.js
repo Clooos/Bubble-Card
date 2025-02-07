@@ -500,7 +500,7 @@ export function debounce(func, wait) {
 }
 
 export function applyScrollingEffect(context, element, text) {
-    const scrollingEffect = context.config.scrolling_effect ?? true;
+    const { scrolling_effect: scrollingEffect = true } = context.config;
 
     if (!scrollingEffect) {
         applyNonScrollingStyle(element, text);
@@ -509,79 +509,79 @@ export function applyScrollingEffect(context, element, text) {
 
     if (element.previousText === text) return;
 
-    const classNames = element.className.split(' ');
-    const className = classNames.find(name => name.startsWith('bubble-'));
+    const className = getBubbleClassName(element);
 
-    function checkIfContentIsLonger() {
+    function updateContent() {
         element.innerHTML = `<div class="scrolling-container">${text}</div>`;
         element.style = '';
 
-        const contentWidth = element.scrollWidth;
-        const containerWidth = element.parentNode?.offsetWidth || 0;
+        // Utiliser un délai pour s'assurer que le contenu est rendu
+        setTimeout(() => {
+            const contentWidth = element.scrollWidth;
+            const containerWidth = element.parentNode?.offsetWidth || 0;
 
-        if (scrollingEffect && contentWidth > containerWidth) {
-            applyScrollingStyle(element, text, className);
+            if (contentWidth > containerWidth) {
+                applyScrollingStyle(element, text, className);
+            }
             element.previousText = text;
-        } else {
-            element.previousText = text;
-            return;
-        }
+        }, 500);
     }
 
-    requestAnimationFrame(checkIfContentIsLonger);
+    requestAnimationFrame(updateContent);
 
     if (!element.eventAdded) {
-        window.addEventListener('resize', debounce(checkIfContentIsLonger, 300));
+        window.addEventListener('resize', debounce(updateContent, 300));
         element.eventAdded = true;
     }
+}
 
-    function applyScrollingStyle(element, text, className) {
-        const separator = `<span class="bubble-scroll-separator"> | </span>`;
-        const wrappedText = `<span>${text + separator + text + separator}</span>`;
+function getBubbleClassName(element) {
+    return element.className.split(' ').find(name => name.startsWith('bubble-'));
+}
 
-        element.innerHTML = `<div class="scrolling-container">${wrappedText}</div>`;
+function applyScrollingStyle(element, text, className) {
+    const separator = `<span class="bubble-scroll-separator"> | </span>`;
+    const wrappedText = `<span>${text + separator + text + separator}</span>`;
 
-        const css = createScrollingEffectCSS(className);
-        element.styleElement = document.createElement('style');
-        element.appendChild(element.styleElement);
-        element.styleElement.innerHTML = css;
-    }
+    element.innerHTML = `<div class="scrolling-container">${wrappedText}</div>`;
+    applyScrollingCSS(element, className);
+}
 
-    function createScrollingEffectCSS(className) {
-        return `
-            .${className} .scrolling-container {
-                width: 100%;
-                white-space: nowrap;
-                mask-image: linear-gradient(to right, transparent, black calc(0% + 8px), black calc(100% - 8px), transparent);
-                mask-image: linear-gradient(to left, transparent, black calc(0% + 8px), black calc(100% - 8px), transparent);
-            }
-            .${className} .scrolling-container span {
-                display: inline-block;
-                animation: scroll 14s linear infinite;
-            }
-
-            .bubble-scroll-separator {
-                opacity: .3;
-                margin: 0 6px 0 8px;
-            }
-
-            @keyframes scroll {
-                from { transform: translateX(0%); }
-                to { transform: translateX(-50%); }
-            }
-        `;
-    }
+function applyScrollingCSS(element, className) {
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+        .${className} .scrolling-container {
+            width: 100%;
+            white-space: nowrap;
+            mask-image: linear-gradient(to right, transparent, black 8px, black calc(100% - 8px), transparent);
+        }
+        .${className} .scrolling-container span {
+            display: inline-block;
+            animation: scroll 14s linear infinite;
+        }
+        .bubble-scroll-separator {
+            opacity: .3;
+            margin: 0 6px 0 8px;
+        }
+        @keyframes scroll {
+            from { transform: translateX(0%); }
+            to { transform: translateX(-50%); }
+        }
+    `;
+    element.appendChild(styleElement);
 }
 
 function applyNonScrollingStyle(element, text) {
     element.innerHTML = text;
     element.previousText = text;
 
-    element.style.whiteSpace = 'normal';
-    element.style.display = '-webkit-box';
-    element.style.webkitLineClamp = '2';
-    element.style.webkitBoxOrient = 'vertical';
-    element.style.textOverflow = 'ellipsis';
+    Object.assign(element.style, {
+        whiteSpace: 'normal',
+        display: '-webkit-box',
+        WebkitLineClamp: '2',
+        WebkitBoxOrient: 'vertical',
+        textOverflow: 'ellipsis'
+    });
 }
 
 export function formatDateTime(datetime, locale) {

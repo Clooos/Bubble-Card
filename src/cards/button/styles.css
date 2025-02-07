@@ -24,6 +24,7 @@ ha-card {
     box-shadow: var(--bubble-button-box-shadow, var(--bubble-box-shadow, none));
     overflow: scroll;
     touch-action: pan-y;
+    border: var(--bubble-button-border, var(--bubble-border, none));
 }
 
 .bubble-button-card,
@@ -40,7 +41,7 @@ ha-card {
 .bubble-button-background {
     background-color: var(--bubble-button-background-color);
     opacity: .5;
-    border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
+    border-radius: calc(var(--bubble-button-border-radius, var(--bubble-border-radius, 32px)) / 1.1);
 }
 .bubble-range-fill {
     position: absolute;
@@ -64,7 +65,7 @@ ha-card {
 }
 .bubble-range-slider {
     cursor: ew-resize;
-    border-radius: var(--bubble-button-border-radius, var(--bubble-border-radius, 32px));
+    border-radius: calc(var(--bubble-button-border-radius, var(--bubble-border-radius, 32px)) / 1.1);
     overflow: hidden;
     mask-image: radial-gradient(white, black);
     -webkit-mask-image: -webkit-radial-gradient(white, black);

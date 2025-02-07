@@ -87,6 +87,7 @@ ha-select {
     border: solid 2px transparent;
     transition: all 0.15s;
     cursor: pointer;
+    border: var(--bubble-select-border, var(--bubble-border, none));
 }
 .bubble-select-card,
 .bubble-select-background {

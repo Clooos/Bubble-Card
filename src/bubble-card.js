@@ -9,16 +9,18 @@ import { handleEmptyColumn } from './cards/empty-column/index.js';
 import { handleMediaPlayer } from './cards/media-player/index.js';
 import { handleSelect } from './cards/select/index.js';
 import { handleClimate } from './cards/climate/index.js';
+import { changeEditor } from './cards/pop-up/changes.js';
+import { preloadYAMLStyles } from './tools/style-utils.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
-
-let editor;
 
 class BubbleCard extends HTMLElement {
     editor = false;
     isConnected = false;
+    _cachedDetectedEditor = null;
 
     connectedCallback() {
         this.isConnected = true;
+        preloadYAMLStyles(this);
 
         if (this._hass) {
             this.updateBubbleCard();
@@ -29,26 +31,28 @@ class BubbleCard extends HTMLElement {
         this.isConnected = false;
     }
 
+    get detectedEditor() {
+        if (this.editor) {
+            return window.history?.state?.dialog === "hui-dialog-edit-card";
+        }
+    }
+
     set editMode(editMode) {
         if (this.editor === editMode) {
             return;
         }
-
         this.editor = editMode;
 
-        if (this._hass) {
-            this.updateBubbleCard();
-        }
+        this.updateBubbleCard();
     }
 
     set hass(hass) {
         initializeContent(this);
-
         this._hass = hass;
 
-        if (this.editor) return;
+        const isPopUp = this.config.card_type === 'pop-up';
 
-        if (this.isConnected || this.config.card_type === 'pop-up') {
+        if ((!this.editor && (this.isConnected || isPopUp)) || this.detectedEditor) {
             this.updateBubbleCard();
         }
     }
@@ -166,10 +170,6 @@ class BubbleCard extends HTMLElement {
             this.config = enhancedConfig;
         } else {
             this.config = config;
-        }
-
-        if (this._hass) {
-            this.updateBubbleCard();
         }
     }
 

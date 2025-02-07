@@ -8,7 +8,7 @@ export function createStructure(context) {
 
   let container = context.content;
 
-  context.elements.selectCardContainer = createElement('div', 'bubble-select-card-container');
+  context.elements.selectCardContainer = createElement('div', 'bubble-select-card-container bubble-container');
   context.elements.selectCard = createElement('div', 'bubble-select-card');
   context.elements.selectBackground = createElement('div', 'bubble-select-background');
   context.elements.nameContainer = createElement('div', 'bubble-name-container');

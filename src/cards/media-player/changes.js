@@ -13,6 +13,7 @@ import {
     getWeatherIcon,
     setLayout
 } from '../../tools/utils.js';
+import { handleCustomStyles } from '../../tools/style-utils.js';
 
 export function changeIcon(context) {
     const isOn = isStateOn(context);
@@ -192,6 +193,7 @@ export function changeMuteIcon(context) {
 export function changeStyle(context) {
     initializesubButtonIcon(context);
     setLayout(context);
+    handleCustomStyles(context);
 
     const state = getState(context);
     const isOn = state !== "off" && state !== "unknown";
@@ -224,22 +226,5 @@ export function changeStyle(context) {
         context.elements.playPauseButton.style.display = 'none';
     } else if (!(context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.style.display === 'none') {
         context.elements.playPauseButton.style.display = '';
-    }
-
-    if (!context.config.styles) return;
-
-    let customStyle = '';
-
-    try {
-        customStyle = context.config.styles
-            ? Function('hass', 'entity', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
-              (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
-            : '';
-    } catch (error) {
-        throw new Error(`Error in generating media player custom templates: ${error.message}`);
-    }
-
-    if (context.elements.customStyle) {
-        context.elements.customStyle.innerText = customStyle;
     }
 }

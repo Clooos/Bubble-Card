@@ -18,6 +18,7 @@ import {
     isStateOn,
     setLayout
 } from '../../tools/utils.js';
+import { handleCustomStyles } from '../../tools/style-utils.js';
 
 export function changeIcon(context) {
     const isOn = isStateOn(context);
@@ -43,7 +44,7 @@ export function changeIcon(context) {
         if (currentIcon !== newIcon) {
             context.elements.icon.icon = newIcon;
         }
-        const newColor = isOn ? `var(--bubble-icon-background-color, ${getClimateColor(context)})` : 'inherit';
+        const newColor = isOn ? `${getClimateColor(context)}` : 'inherit';
         if (currentIconColor !== newColor) {
             context.elements.icon.style.color = newColor;
         }
@@ -151,9 +152,9 @@ export function changeTargetTempHigh(context) {
 export function changeStyle(context) {
     initializesubButtonIcon(context);
     setLayout(context);
+    handleCustomStyles(context);
 
     const state = getState(context);
-    const isOn = state !== "off" && state !== "unknown";
 
     if (context.previousState !== state) {
         context.previousState = state;
@@ -163,21 +164,4 @@ export function changeStyle(context) {
 
     const cardLayout = context.config.card_layout;
     const dropdown = context.elements.hvacModeDropdown;
-
-    if (!context.config.styles) return;
-
-    let customStyle = '';
-
-    try {
-        customStyle = context.config.styles
-            ? Function('hass', 'entity', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
-              (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
-            : '';
-    } catch (error) {
-        throw new Error(`Error in generating climate custom templates: ${error.message}`);
-    }
-
-    if (context.elements.customStyle) {
-        context.elements.customStyle.innerText = customStyle;
-    }
 }

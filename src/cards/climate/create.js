@@ -11,7 +11,7 @@ export function createStructure(context) {
     const isCelcius = context._hass.config.unit_system.temperature === '°C';
     const defaultStep = state.attributes.target_temp_step ? state.attributes.target_temp_step : isCelcius ? 0.5 : 1;
 
-    context.elements.climateContainer = createElement('div', 'bubble-climate-container');
+    context.elements.climateContainer = createElement('div', 'bubble-climate-container bubble-container');
     context.elements.climateCard = createElement('div', 'bubble-climate');
     context.elements.buttonContainer = createElement('div', 'bubble-button-container');
     context.elements.nameContainer = createElement('div', 'bubble-name-container');

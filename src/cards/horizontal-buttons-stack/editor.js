@@ -97,6 +97,7 @@ export function renderHorButtonStackEditor(editor){
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}
+                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
             <ha-alert alert-type="info">This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer.</ha-alert>

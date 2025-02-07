@@ -2,6 +2,7 @@ import { isColorCloseToWhite } from "../../tools/style.js";
 import { getState } from "../../tools/utils.js";
 import { createButton } from './create.js';
 import { initializesubButtonIcon } from '../../tools/global-changes.js';
+import { handleCustomStyles } from '../../tools/style-utils.js';
 
 const BUTTON_MARGIN = 12;
 
@@ -137,20 +138,5 @@ export function changeStatus(context) {
     }
 }
 export function changeStyle(context) {
-    if (!context.config.styles) return;
-    
-    let customStyle = '';
-
-    try {
-        customStyle = context.config.styles
-            ? Function('hass', 'card', `return \`${context.config.styles}\`;`)
-              (context._hass, context.card)
-            : '';
-    } catch (error) {
-        throw new Error(`Error in generating horizontal buttons stack custom templates: ${error.message}`);
-    }
-
-    if (context.elements.customStyle) {
-        context.elements.customStyle.innerText = customStyle;
-    }
+    handleCustomStyles(context);
 }

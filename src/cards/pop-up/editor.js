@@ -293,6 +293,7 @@ export function renderPopUpEditor(editor){
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}
+                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
             <ha-alert alert-type="info">

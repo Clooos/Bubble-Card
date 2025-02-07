@@ -1,9 +1,10 @@
 import { isColorCloseToWhite } from "../../tools/style.js";
 import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isStateOn, getWeatherIcon, fireEvent } from "../../tools/utils.js";
 import { getBackdrop } from "./create.js";
-import { addHash, onEditorChange, removeHash } from "./helpers.js";
+import { addHash, onEditorChange, removeHash, toggleBodyScroll } from "./helpers.js";
 import { initializesubButtonIcon } from '../../tools/global-changes.js';
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.js';
+import { handleCustomStyles } from '../../tools/style-utils.js';
 
 export function changeEditor(context) {
     if (!context.verticalStack) return;
@@ -11,66 +12,57 @@ export function changeEditor(context) {
     const { host } = context.verticalStack;
     const { popUp, sectionRow, sectionRowContainer, elements } = context;
 
-    // Cache detectedEditor and flags for performance
-    const detectedEditor = context._cachedDetectedEditor ??= (
-        host?.closest('hui-card-preview') ||
-        host?.closest('hui-card[preview][class]') ||
-        host?.getRootNode().host?.closest('hui-section[preview][class]')
-    );
+    if (context.detectedEditor) {
+          window.addEventListener("dialog-closed", () => {
+            elements?.popUpContainer?.classList.add('editor-cropped');
+          }, { once: true });
+    }
 
     const isPopUpOpened = popUp?.classList.contains('is-popup-opened');
     const isCard = sectionRow?.tagName.toLowerCase() === 'hui-card';
+    const isEditorActive = context.editor || context.detectedEditor;
 
-    // Initialize previous states if undefined
-    context.previousEditorState ??= null;
-    context.previousDetectedEditor ??= null;
-
-    // Optimize DOM manipulations for hidden attribute and display style
     if (!isPopUpOpened && isCard) {
         const { editor, editorAccess } = context;
 
-        if (!editor && editorAccess && !detectedEditor && !sectionRow?.hasAttribute("hidden")) {
-            sectionRow.setAttribute("hidden", "");
-            sectionRow.style.display = "none";
-        } else if (sectionRowContainer?.classList.contains('card') && editor && sectionRowContainer.style.display === "none") {
+        if (sectionRowContainer?.classList.contains('card') && isEditorActive && sectionRowContainer.style.display === "none") {
             sectionRowContainer.style.display = '';
         }
     }
 
-    // Avoid redundant style updates for the pop-up
     const popUpClasses = popUp?.classList;
-    const isEditorActive = context.editor || detectedEditor;
 
     if (isEditorActive) {
         if (!popUpClasses?.contains('editor')) {
-            document.body.style.overflow = '';
+            toggleBodyScroll(false);
             popUpClasses?.remove('is-popup-opened');
             popUpClasses?.add('is-popup-closed', 'editor');
-        }
-        context.editorAccess = true;
 
-        // Update 'editor-cropped' class only if necessary
-        const shouldCrop = detectedEditor === null;
-        if (elements?.popUpContainer?.classList.contains('editor-cropped') !== shouldCrop) {
-            elements.popUpContainer.classList.toggle('editor-cropped', shouldCrop);
+            if (!context.detectedEditor) {
+                elements?.popUpContainer?.classList.add('editor-cropped');
+            }
         }
+
+        context.editorAccess = true;
     } else {
         if (popUpClasses?.contains('editor')) {
             popUpClasses.remove('editor');
+            elements?.popUpContainer?.classList.remove('editor-cropped');
         }
-        elements?.popUpContainer?.classList.remove('editor-cropped');
     }
 
-    // Trigger editor change only if necessary
-    if (context.editor !== context.previousEditorState || detectedEditor !== context.previousDetectedEditor) {
+    if (context.editor && !context.detectedEditor && (isEditorActive !== context.previousEditorState)) {
         onEditorChange(context);
-        context.previousEditorState = context.editor;
-        context.previousDetectedEditor = detectedEditor;
+        context.previousEditorState = isEditorActive;
     }
 }
 
 export function changeStyle(context) {
     initializesubButtonIcon(context);
+    const { backdropCustomStyle } = getBackdrop(context);
+
+    handleCustomStyles(context, context.elements.customStyle);
+    handleCustomStyles(context, backdropCustomStyle);
 
     const layoutClass = context.config.card_layout;
     const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows';
@@ -87,28 +79,6 @@ export function changeStyle(context) {
     if (context.popUp.classList.contains('no-header') === showHeader) {
         context.popUp.classList.toggle('no-header', !showHeader);
     }
-
-    if (!context.config.styles) return;
-
-    const state = getState(context);
-    const { backdropCustomStyle } = getBackdrop(context);
-
-    let customStyle = '';
-
-    try {
-        customStyle = context.config.styles
-            ? Function('hass', 'entity', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
-              (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.popUp)
-            : '';
-    } catch (error) {
-        throw new Error(`Error in generating pop-up custom templates: ${error.message}`);
-    }
-
-    if (context.elements.customStyle) {
-        context.elements.customStyle.innerText = customStyle;
-    }
-
-    backdropCustomStyle.innerText = customStyle;
 }
 
 export function changeTriggered(context) {

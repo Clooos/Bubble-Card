@@ -1,13 +1,11 @@
-import { version } from '../var/version.js';
-import { 
-fireEvent
-} from '../tools/utils.js';
 import {
-LitElement,
-html,
-css,
-unsafeCSS
+    LitElement,
+    html,
+    css,
+    unsafeCSS
 } from 'lit';
+import { version } from '../var/version.js';
+import { fireEvent } from '../tools/utils.js';
 import { renderButtonEditor } from '../cards/button/editor.js';
 import { renderPopUpEditor } from '../cards/pop-up/editor.js';
 import { renderSeparatorEditor } from '../cards/separator/editor.js';
@@ -16,6 +14,8 @@ import { renderCoverEditor } from '../cards/cover/editor.js';
 import { renderClimateEditor } from '../cards/climate/editor.js';
 import { renderSelectEditor } from '../cards/select/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
+import { renderEmptyColumnEditor } from '../cards/empty-column/editor.js';
+import { yamlKeysMap, loadYAMLStyles } from '../tools/style-utils.js'
 import styles from './styles.css'
 
 class BubbleCardEditor extends LitElement {
@@ -155,66 +155,52 @@ class BubbleCardEditor extends LitElement {
         const cardTypeList = this.cardTypeList;
         const buttonTypeList = this.buttonTypeList;
 
-        if (this._config?.card_type === 'pop-up') {
-            return renderPopUpEditor(this);
-        } else if (this._config?.card_type === 'button') {
-            return renderButtonEditor(this);
-        } else if (this._config?.card_type === 'separator') {
-            return renderSeparatorEditor(this);
-        } else if (this._config?.card_type === 'horizontal-buttons-stack') {
-            return renderHorButtonStackEditor(this);
-        } else if (this._config?.card_type === 'cover') {
-            return renderCoverEditor(this);
-        } else if (this._config?.card_type === 'media-player') {
-            return renderMediaPlayerEditor(this);
-        } else if (this._config?.card_type === 'empty-column') {
-            return html`
-                <div class="card-config">
-                    ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                    <ha-expansion-panel outlined>
-                        <h4 slot="header">
-                          <ha-icon icon="mdi:palette"></ha-icon>
-                          Styling options
-                        </h4>
-                        <div class="content">
-                            ${this.makeLayoutOptions()}
+        switch (this._config?.card_type) {
+            case 'pop-up':
+                return renderPopUpEditor(this);
+            case 'button':
+                return renderButtonEditor(this);
+            case 'separator':
+                return renderSeparatorEditor(this);
+            case 'horizontal-buttons-stack':
+                return renderHorButtonStackEditor(this);
+            case 'cover':
+                return renderCoverEditor(this);
+            case 'media-player':
+                return renderMediaPlayerEditor(this);
+            case 'empty-column':
+                return renderEmptyColumnEditor(this);
+            case 'select':
+                return renderSelectEditor(this);
+            case 'climate':
+                return renderClimateEditor(this);
+            case undefined:
+                return html`
+                    <div class="card-config">
+                        ${this.makeDropdown("Card type", "card_type", cardTypeList)}
+                        <ha-alert alert-type="info">You need to add a card type first. Please note that in some cases, a page refresh might be needed after exiting the editor.</ha-alert>
+                        <img style="width: 100%; height: auto; border-radius: 24px;" src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif">
+                        <p>The <b>Bubble Card ${version}</b> changelog is available <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}"><b>here</b></a>.</p>
+                        <hr />
+                        <p>If you have an issue or a question you can find more details in the GitHub documentation. You can also find useful resources and help in these links.</p>
+                        <div style="display: inline-block;">
+                            <a href="https://github.com/Clooos/Bubble-Card"><img src="https://img.shields.io/badge/GitHub-Documentation-blue?logo=github"></a>
+                            <a href="https://www.youtube.com/@cloooos"><img src="https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube"></a>
+                            <a href="https://www.reddit.com/r/BubbleCard/"><img src="https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit"></a>
+                            <a href="https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678"><img src="https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant"></a>
                         </div>
-                    </ha-expansion-panel>
-                    <ha-alert alert-type="info">Just an empty card to fill any empty column.</ha-alert>
-                    ${this.makeVersion()}
-                </div>
-            `;
-        } else if (this._config?.card_type === 'select') {
-            return renderSelectEditor(this);
-        } else if (this._config?.card_type === 'climate') {
-            return renderClimateEditor(this);
-        } else if (!this._config?.card_type) {
-            return html`
-                <div class="card-config">
-                    ${this.makeDropdown("Card type", "card_type", cardTypeList)}
-                    <ha-alert alert-type="info">You need to add a card type first. Please note that in some cases, a page refresh might be needed after exiting the editor.</ha-alert>
-                    <img style="width: 100%; height: auto; border-radius: 24px;" src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif">
-                    <p>The <b>Bubble Card ${version}</b> changelog is available <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}"><b>here</b></a>.</p>
-                    <hr />
-                    <p>If you have an issue or a question you can find more details in the GitHub documentation. You can also find useful resources and help in these links.</p>
-                    <div style="display: inline-block;">
-                        <a href="https://github.com/Clooos/Bubble-Card"><img src="https://img.shields.io/badge/GitHub-Documentation-blue?logo=github"></a>
-                        <a href="https://www.youtube.com/@cloooos"><img src="https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube"></a>
-                        <a href="https://www.reddit.com/r/BubbleCard/"><img src="https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit"></a>
-                        <a href="https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678"><img src="https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant"></a>
+                        <hr />
+                        <p>I dedicate most of my spare time to making this project the best it can be. So if you appreciate my work, any donation would be a great way to show your support.</p>
+                        <div style="display: inline-block;">
+                            <a href="https://www.buymeacoffee.com/clooos"><img src="https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee"></a> 
+                            <a href="https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR"><img src="https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal"></img></a>
+                        </div>
+                        <p>Looking for more advanced examples? Check out my <a href="https://www.patreon.com/Clooos"><b>Patreon</b></a> for exclusive custom styles and templates!</p>
+                        <a href="https://www.patreon.com/Clooos"><img src="https://img.shields.io/badge/Patreon-Clooos-orange?logo=patreon"></a>
+                        <p style="margin-top: 0;">Thank you! 🍻</p>
+                        ${this.makeVersion()}
                     </div>
-                    <hr />
-                    <p>I dedicate most of my spare time to making this project the best it can be. So if you appreciate my work, any donation would be a great way to show your support.</p>
-                    <div style="display: inline-block;">
-                        <a href="https://www.buymeacoffee.com/clooos"><img src="https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee"></a> 
-                        <a href="https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR"><img src="https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal"></img></a>
-                    </div>
-                    <p>Looking for more advanced examples? Check out my <a href="https://www.patreon.com/Clooos"><b>Patreon</b></a> for exclusive custom styles and templates!</p>
-                    <a href="https://www.patreon.com/Clooos"><img src="https://img.shields.io/badge/Patreon-Clooos-orange?logo=patreon"></a>
-                    <p style="margin-top: 0;">Thank you! 🍻</p>
-                    ${this.makeVersion()}
-                </div>
-            `;
+                `;
         }
     }
 
@@ -227,28 +213,6 @@ class BubbleCardEditor extends LitElement {
                 .items="${[{label: 'Normal', value: 'normal'}, {label: 'Large (Optimized for sections)', value: 'large'}, {label: 'Large with 2 sub-buttons rows (Optimized for sections)', value: 'large-2-rows'}]}"
                 @value-changed="${this._valueChanged}"
             ></ha-combo-box>
-            <ha-expansion-panel outlined>
-                <h4 slot="header">
-                    <ha-icon icon="mdi:table"></ha-icon>
-                    Layout options for sections
-                </h4>
-                <div class="content">
-                    <ha-combo-box
-                        label="Columns"
-                        .value="${this._config.columns}"
-                        .configValue="${"columns"}"
-                        .items="${[{label: 'Auto', value: null}, {label: "1/4", value: 1}, {label: "2/4", value: 2}, {label: "3/4", value: 3}, {label: "4/4", value: 4}]}"
-                        @value-changed="${this._valueChanged}"
-                    ></ha-combo-box>
-                    <ha-combo-box
-                        label="Rows"
-                        .value="${this._config.rows}"
-                        .configValue="${"rows"}"
-                        .items="${[{label: 'Auto', value: null}, {label: "1/4", value: 1}, {label: "2/4", value: 2}, {label: "3/4", value: 3}, {label: "4/4", value: 4}]}"
-                        @value-changed="${this._valueChanged}"
-                    ></ha-combo-box>
-                </div>
-            </ha-expansion-panel>
         `;
     }
 
@@ -758,7 +722,7 @@ class BubbleCardEditor extends LitElement {
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:code-braces"></ha-icon>
-                    Custom styles / Templates
+                    Custom styles & templates - This card
                 </h4>
                 <div class="content">
                     <div class="code-editor">
@@ -773,9 +737,125 @@ class BubbleCardEditor extends LitElement {
                             @value-changed=${this._valueChanged}
                         ></ha-code-editor>
                     </div>
+                    ${this.createErrorConsole()}
                     <ha-alert alert-type="info">
                       For advanced users, you can edit the CSS style of this card in this editor. More information <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically. You can also add <a href="https://github.com/Clooos/Bubble-Card#templates">templates</a>.
                       <br><br><b>Looking for more advanced examples?</b> Check out my <a href="https://www.patreon.com/Clooos">Patreon</a> for exclusive custom styles and advanced templates, this is also the best way to show your support to my project!
+                    </ha-alert>
+                </div>
+            </ha-expansion-panel>
+        `;
+    }
+
+    createErrorConsole() {        
+        if (!this._errorListener) {
+            this._errorListener = (event) => {
+                this.errorMessage = event.detail;
+                this.requestUpdate();
+            };
+            window.addEventListener('bubble-card-error', this._errorListener);
+        }
+
+        return html`
+            <ha-alert 
+                alert-type="error"
+                style="display: ${!this.errorMessage ? 'none' : ''}">
+                ${this.errorMessage}
+            </ha-alert>
+        `;
+    }
+
+    makeYAMLStyleEditor() {
+        const getTextFromMap = (key, lineIndex, keyAsDefault = true) => {
+            const value = yamlKeysMap.get(key);
+            if (value) {
+                const line = value.split('\n')[lineIndex].trim();
+                if (line.startsWith('/*') && line.endsWith('*/')) {
+                    return line.slice(2, -2).trim();
+                }
+            }
+
+            if (keyAsDefault) {
+                return key;
+            }
+        };
+
+        const handleValueChanged = (event) => {
+            const target = event.target;
+            const value = target.configValue;
+            const isChecked = target.checked;
+
+            if (!this._config.style_templates) {
+                this._config.style_templates = [];
+            }
+
+            if (isChecked) {
+                // Add the key if checked
+                if (!this._config.style_templates.includes(value)) {
+                    this._config.style_templates = [...this._config.style_templates, value];
+                }
+            } else {
+                // Remove the key if unchecked
+                this._config.style_templates = this._config.style_templates.filter((key) => key !== value);
+            }
+
+            fireEvent(this, "config-changed", { config: this._config });
+
+            this.requestUpdate();
+        };
+
+        // Ensure "default" is active if style_templates is null or undefined
+        const styleTemplates = this._config.style_templates || ['default'];
+
+        return html`
+            <ha-expansion-panel outlined>
+                <h4 slot="header">
+                    <ha-icon icon="mdi:code-block-braces"></ha-icon>
+                    Custom styles & templates - Global
+                </h4>
+                <div class="content">
+                    ${Array.from(yamlKeysMap.keys()).map((key) => {
+                        const label = getTextFromMap(key, 0);
+                        const info = getTextFromMap(key, 1, false);
+                        const isChecked = styleTemplates.includes(key);
+                        return html`
+                            <ha-expansion-panel outlined>
+                                <h4 slot="header">
+                                    <ha-icon 
+                                        icon="${isChecked ? 'mdi:check-circle-outline' : 'mdi:circle-outline'}"
+                                        style="opacity: ${isChecked ? '1' : '0.3'}"
+                                    ></ha-icon>
+                                    ${label}
+                                </h4>
+                                <div class="content">
+                                    <ha-formfield .label="${'Apply to this card'}">
+                                        <ha-switch
+                                            aria-label="${'Apply to this card'}"
+                                            .checked=${isChecked}
+                                            .configValue="${key}"
+                                            @change=${handleValueChanged}
+                                        ></ha-switch>
+                                    </ha-formfield>
+                                    <ha-alert 
+                                        alert-type="info" 
+                                        style="display: ${!info ? 'none' : ''}">
+                                        ${html`<span .innerHTML=${info}></span>`}
+                                    </ha-alert>
+                                </div>
+                            </ha-expansion-panel>
+                        `;
+                    })}
+                    ${this.createErrorConsole()}
+                    <ha-alert 
+                        alert-type="warning" 
+                        style="display: ${!window.bubbleYamlWarning ? 'none' : ''}">
+                        <b>If you want to edit or add global styles and templates here</b>, first copy <code>bubble-custom.yaml</code> from <code>/www/community/Bubble-Card/</code> (if installed via HACS) to <code>/www/bubble/</code> (you'll need to create this folder). Make sure to clear your cache after each modification.
+                    </ha-alert>
+                    <ha-alert 
+                        alert-type="info">
+                        For advanced users, you can define global custom <a href="https://github.com/Clooos/Bubble-Card#styling">styles</a> and <a href="https://github.com/Clooos/Bubble-Card#templates">templates</a> in a YAML file and apply them across multiple cards. 
+                        To use this, add your modifications under a key inside the YAML file, like <code>default:</code> to apply them everywhere, or create new ones. This allows you to reuse and maintain custom styles and templates more efficiently.
+                        <br><br><b>Looking for more advanced examples?</b> Check out my <a href="https://www.patreon.com/Clooos">Patreon</a> for exclusive custom styles and advanced templates, this is also the best way to show your support to my project!
                     </ha-alert>
                 </div>
             </ha-expansion-panel>

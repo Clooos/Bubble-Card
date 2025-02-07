@@ -4,7 +4,7 @@ import styles from "./styles.css";
 
 export function createStructure(context) {
     context.elements = {};
-    context.elements.coverCardContainer = createElement('div', 'bubble-cover-card-container cover-container');
+    context.elements.coverCardContainer = createElement('div', 'bubble-cover-card-container bubble-container cover-container');
     context.elements.headerContainer = createElement('div', 'bubble-header header-container');
     context.elements.buttonsContainer = createElement('div', 'bubble-buttons buttons-container');
     context.elements.iconContainer = createElement('div', 'bubble-icon-container icon-container');

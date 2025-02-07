@@ -135,6 +135,7 @@ export function renderMediaPlayerEditor(editor){
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}
+                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
