@@ -3,9 +3,10 @@ labels: ["Module"]
 body:
   - type: textarea
     attributes:
-      label: Please edit the lines starting with ->
+      label: Module post template
+      description: Please edit the lines starting with -> (you need to scroll down)
       value: | 
-        "# -> My module name
+        # -> My module name
         
         **Version:** v1.0  
         **Creator:** -> User
@@ -77,7 +78,9 @@ body:
         
         ### Screenshot:
         
-        -> Drag and drop/Upload one (or more) screenshot here"
+        -> Drag and drop/Upload one (or more) screenshot here
+    validations:
+      required: true
 
   - type: checkboxes
     attributes:
