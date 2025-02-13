@@ -4,7 +4,6 @@ body:
   - type: textarea
     attributes:
       label: Please edit the lines starting with ->
-      required: true
       value: | 
         "# -> My module name
         
