@@ -1,8 +1,10 @@
+title: "[Styling Module, JS Module, JS+Editor Module] My module name"
+labels: ["Module"]
 body:
   - type: markdown
     attributes:
-      value: |
-        # -> My module name
+      value: | 
+        "# -> My module name
         
         **Version:** v1.0  
         **Creator:** -> User
@@ -74,4 +76,19 @@ body:
         
         ### Screenshot:
         
-        -> Drag and drop/Upload one (or more) screenshot here
+        -> Drag and drop/Upload one (or more) screenshot here"
+
+  - type: checkboxes
+    attributes:
+      label: Before posting your module
+      options:
+        - label: I've replaced all lines starting with ->
+          required: true
+        - label: I've updated the unsupported cards above the description and under the `unsupported` property
+          required: true
+        - label: I've added a screenshot
+          required: true
+        - label: I've chosen a unique `your_module_key`
+          required: true
+        - label: I really enjoyed working on this module ❤️
+          required: false
