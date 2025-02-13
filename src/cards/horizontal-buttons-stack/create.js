@@ -119,7 +119,7 @@ export function createStructure(context) {
 
     // Fix for the last cards that are hidden by the HBS
     let parentElement = context.card.parentNode.host;
-    if (parentElement && !context.editor && parentElement.parentElement.tagName.toLowerCase() !== 'hui-card') {
+    if (parentElement && !context.editor && parentElement.parentElement?.tagName.toLowerCase() !== 'hui-card') {
         parentElement.style.padding = '0 0 80px';
     } else if (parentElement.parentElement && !context.editor && parentElement.parentElement.tagName.toLowerCase() === 'hui-card') {
         parentElement.parentElement.style.padding = '0 0 80px';
