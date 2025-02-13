@@ -61,7 +61,7 @@ export function changeStyle(context) {
     initializesubButtonIcon(context);
     const { backdropCustomStyle } = getBackdrop(context);
 
-    handleCustomStyles(context, context.elements.customStyle);
+    handleCustomStyles(context, context.popUp);
     handleCustomStyles(context, backdropCustomStyle);
 
     const layoutClass = context.config.card_layout;

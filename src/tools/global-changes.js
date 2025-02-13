@@ -15,7 +15,11 @@ import {
     getIconColor,
     isColorLight
 } from './utils.js';
-import { checkConditionsMet, validateConditionalConfig, ensureArray } from './validate-condition.js';
+import { 
+    checkConditionsMet, 
+    validateConditionalConfig, 
+    ensureArray 
+} from './validate-condition.js';
 
 export function changeState(context) {
     const state = context._hass.states[context.config.entity];
@@ -86,10 +90,8 @@ export function changeState(context) {
     context.elements.state.classList.toggle('state-without-name', (showState || showLastChanged || showAttribute) && !showName);
     context.elements.state.classList.toggle('display-state', showState || showLastChanged || showAttribute);
     context.elements.state.classList.toggle('hidden', !(showState || showLastChanged || showAttribute));
-    
-    if (!context.config.styles?.includes("card.querySelector('.bubble-state').innerText")) {
-        applyScrollingEffect(context, context.elements.state, displayedState);
-    }
+
+    applyScrollingEffect(context, context.elements.state, displayedState);
     
     // Update previous values
     context.previousState = state;

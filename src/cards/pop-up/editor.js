@@ -293,9 +293,9 @@ export function renderPopUpEditor(editor){
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}
-                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
+            ${editor.makeModulesEditor()}
             <ha-alert alert-type="info">
                 This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., '#pop-up-name'), with <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#example">any card</a> that supports the <code>navigate</code> action, or with the <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack">horizontal buttons stack</a> that is included.
                 <br><br><b>Important:</b> This card must be placed within a <a style="color: var(--text-primary-color)" href="https://www.home-assistant.io/dashboards/vertical-stack/">vertical stack</a> card at the topmost position to function properly. To avoid misalignment with your view, place vertical stacks/pop-ups after all other dashboard cards. It should be called from the same view to work. 

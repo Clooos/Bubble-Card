@@ -110,10 +110,10 @@ export function renderClimateEditor(editor){
                 <div class="content">
                     ${editor.makeLayoutOptions()}
                     ${editor.makeStyleEditor()}
-                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
+            ${editor.makeModulesEditor()}
             <ha-alert alert-type="info">This card allows you to control your climate entities. You can also add a sub-button that display a select menu for your climate modes (check if you have "Select menu" available when you create a new sub-button).</ha-alert>
             ${editor.makeVersion()}
         </div>

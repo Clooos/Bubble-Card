@@ -135,10 +135,10 @@ export function renderMediaPlayerEditor(editor){
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}
-                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
+            ${editor.makeModulesEditor()}
             <ha-alert alert-type="info">This card allows you to control a media player. You can tap on the icon to get more control.</ha-alert>
             ${editor.makeVersion()}
         </div>

@@ -117,7 +117,6 @@ export function changeIcon(context) {
 }
 
 export function changeName(context) {
-  if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
   const buttonType = getButtonType(context);
   const name = buttonType !== 'name' ? getName(context) : context.config.name;
   if (name !== context.elements.previousName) {

@@ -9,14 +9,15 @@ function getValueFromEntityId(hass,value){
   return undefined;
 }
 
-function checkStateCondition(condition,hass){
+function checkStateCondition(condition, hass) {
+  const entityId = condition.entity_id || condition.entity;
   const state =
-    condition.entity && hass.states[condition.entity]
-      ? hass.states[condition.entity].state
+    entityId && hass.states[entityId]
+      ? hass.states[entityId].state
       : "unavailable";
+
   let value = condition.state ?? condition.state_not;
 
-  // Handle entity_id, UI should be updated for conditionnal card (filters does not have UI for now)
   if (Array.isArray(value)) {
     const entityValues = value
       .map((v) => getValueFromEntityId(hass, v))
@@ -30,9 +31,13 @@ function checkStateCondition(condition,hass){
     }
   }
 
-  return condition.state != null
-    ? ensureArray(value).includes(state)
-    : !ensureArray(value).includes(state);
+  if (condition.state != null) {
+    return ensureArray(value).includes(state);
+  } else if (condition.state_not != null) {
+    return !ensureArray(value).includes(state);
+  }
+
+  return false;
 }
 
 export function ensureArray(value) {

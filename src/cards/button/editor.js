@@ -92,10 +92,10 @@ export function renderButtonEditor(editor){
                 <div class="content">
                     ${editor.makeLayoutOptions()}
                     ${editor.makeStyleEditor()}
-                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
+            ${editor.makeModulesEditor()}
             <ha-alert alert-type="info">This card allows you to control your entities. ${editor._config.button_type === 'slider' ? 'Supported entities: Light (brightness), media player (volume), cover (position), fan (percentage), climate (temperature), input number and number (value). To access color / control of an entity, simply tap on the icon.' : ''}</ha-alert>
             ${editor.makeVersion()}
         </div>

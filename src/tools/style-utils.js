@@ -1,61 +1,71 @@
-import { getState, getWeatherIcon } from "../tools/utils.js";
+import { 
+    getState, 
+    getWeatherIcon
+} from "../tools/utils.js";
+import * as YAML from 'js-yaml';
 
 export let yamlKeysMap = new Map();
 let stylesYAML;
 let yamlCache = new Map();
 
+export function preloadYAMLStyles(context) {
+  if (context.config?.card_type && !context.stylesYAML) {
+    if (!stylesYAML) {
+      stylesYAML = loadYAML([
+        "/local/bubble/bubble-modules.yaml",
+        "/hacsfiles/Bubble-Card/bubble-modules.yaml",
+        "/local/community/Bubble-Card/bubble-modules.yaml",
+      ]);
+    }
+    context.stylesYAML = stylesYAML;
+  }
+}
+
 export const loadYAML = async (urls) => {
   for (const url of urls) {
-    if (yamlCache.has(url)) return yamlCache.get(url);
+    const cacheBuster = `?v=${Date.now()}`; // Prevent caching
+    const fullUrl = url + cacheBuster;
+
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Failed to fetch ${url}`);
-      
+      const response = await fetch(fullUrl, { cache: "no-store" });
+
+      if (!response.ok) {
+        console.warn(`'bubble-modules.yaml' not found at ${fullUrl} (status: ${response.status}). Trying next...`);
+        window.bubbleYamlWarning = true;
+        continue;
+      }
+
       const yamlText = await response.text();
       const parsedYAML = parseYAML(yamlText);
-      
+
       if (!yamlKeysMap.size) {
-        Object.entries(parsedYAML).forEach(([key, value]) => yamlKeysMap.set(key, value));
+        Object.entries(parsedYAML).forEach(([key, value]) =>
+          yamlKeysMap.set(key, value)
+        );
       }
-      
+
       yamlCache.set(url, parsedYAML);
       return parsedYAML;
     } catch (error) {
-      console.warn(`Error fetching YAML from ${url}:`, error);
+      console.warn(`Error fetching 'bubble-modules.yaml' from ${fullUrl}:`, error);
       window.bubbleYamlWarning = true;
     }
   }
   return null;
 };
 
-export const parseYAML = (yaml) => {
-  const result = {};
-  let currentKey = null, currentValue = "";
-  let inFoldedBlock = false;
-
-  yaml.split("\n").forEach((line) => {
-    line = line.trim();
-    if (!line) return;
-
-    if (line.includes(": >")) {
-      if (currentKey) result[currentKey] = currentValue.trim();
-      [currentKey] = line.split(": >");
-      currentValue = "";
-      inFoldedBlock = true;
-    } else if (line.endsWith(":") && !inFoldedBlock) {
-      if (currentKey) result[currentKey] = currentValue.trim();
-      currentKey = line.slice(0, -1);
-      currentValue = "";
-    } else {
-      currentValue += line + "\n";
-    }
-  });
-  if (currentKey) result[currentKey] = currentValue.trim();
-  return result;
+export const parseYAML = (yamlString) => {
+  try {
+    const parsedYAML = YAML.load(yamlString);
+    return parsedYAML;
+  } catch (error) {
+    console.error("YAML parsing error:", error);
+    return null;
+  }
 };
 
 export const handleCustomStyles = async (context, element = context.card) => {
-  const card = context.config.card_type !== "pop-up" ? element : context.popUp;
+  const card = element;
   const styleTemplates = context.config.style_templates ?? "default";
   const customStyles = context.config.styles;
 
@@ -72,10 +82,24 @@ export const handleCustomStyles = async (context, element = context.card) => {
       element.appendChild(styleElement);
     }
 
-    const parsedStyles = await context.stylesYAML;
-    let combinedStyles = Array.isArray(styleTemplates)
-      ? styleTemplates.map((t) => parsedStyles[t] ?? "").join("\n")
-      : parsedStyles[styleTemplates] || "";
+    const parsedStyles = (await context.stylesYAML) || {};
+    let combinedStyles = "";
+
+    if (Array.isArray(styleTemplates)) {
+      combinedStyles = styleTemplates.map((t) => {
+        let tmpl = parsedStyles[t] ?? "";
+        if (typeof tmpl === "object" && tmpl.code) {
+          tmpl = tmpl.code;
+        }
+        return tmpl;
+      }).join("\n");
+    } else {
+      let tmpl = parsedStyles[styleTemplates] || "";
+      if (typeof tmpl === "object" && tmpl.code) {
+        tmpl = tmpl.code;
+      }
+      combinedStyles = tmpl;
+    }
 
     const finalStyles = `${evalStyles(context, customStyles)}\n${evalStyles(context, combinedStyles)}`.trim();
 
@@ -95,12 +119,34 @@ export const handleCustomStyles = async (context, element = context.card) => {
   }
 };
 
+function emitEditorError(message) {
+  window.dispatchEvent(new CustomEvent("bubble-card-error", { detail: message }));
+}
+
 export function evalStyles(context, styles = "") {
   if (!styles) return "";
 
+  // Detect template by element type and add a flag to block the text scrolling effect for compatibility
+  const elementTypes = ["state", "name"];
+  const propertyNames = ["innerText", "textContent", "innerHTML"];
+
+  elementTypes.forEach(type => {
+    const selectors = propertyNames.map(prop => `card.querySelector('.bubble-${type}').${prop} =`);
+    if (selectors.some(selector => styles.includes(selector)) && !context.elements[type].templateDetected) {
+        context.elements[type].templateDetected = true;
+    }
+  });
+
   try {
     const result = cleanCSS(Function(
-      "hass", "entity", "state", "icon", "subButtonIcon", "getWeatherIcon", "card", "name", 
+      "hass",
+      "entity",
+      "state",
+      "icon",
+      "subButtonIcon",
+      "getWeatherIcon",
+      "card",
+      "name",
       `return \`${styles}\`;`
     ).call(
       context,
@@ -114,50 +160,32 @@ export function evalStyles(context, styles = "") {
       context.card.name
     ));
 
-    if (context.editor && context.templateError) {
-        emitEditorError('');
-        context.templateError = '';
+    if (context.editor) {
+      emitEditorError('');
     }
 
     return result;
   } catch (error) {
-    const errorMessage = `Bubble Card - Template error from a ${context.config.card_type} card: ${error.message}`;
-    
     if (context.editor) {
-        requestAnimationFrame(() => emitEditorError(error.message));
-        context.templateError = error.message;
+      requestAnimationFrame(() => emitEditorError(error.message));
     }
 
-    console.error(errorMessage);
+    console.error(`Bubble Card - Template error from a ${context.config.card_type} card: ${error.message}`);
     return "";
   }
 }
 
-
-
 function cleanCSS(css) {
+  // Remove custom templates from custom styles
   return css
-    .replace(/undefined(?=(?:(?:[^"]*"){2})*[^"]*$)/g, "")
-    .replace(/[^{}]\s*{\s*}/g, "")
-    .replace(/([a-z-]+)\s*:\s*;/g, "")
-    .replace(/\s+/g, " ")
+    .replace(/\/\*[\s\S]*?\*\//g, "") // Remove CSS comments
+    .split("\n")
+    .filter(line => line.includes("{") || line.includes("}") || line.includes(":")) // Keep only CSS lines
+    .join("\n")
+    .replace(/undefined(?=(?:(?:[^"]*"){2})*[^"]*$)/g, "") // Remove unwanted "undefined" values
+    .replace(/[^{};]\s*{\s*}/g, "") // Remove empty blocks unless they contain valid CSS rules
+    .replace(/([a-z-]+)\s*:\s*;/g, "") // Remove empty declarations
+    .replace(/\s+/g, " ") // Reduce multiple spaces
     .trim()
-    .match(/(@[^{]*?{(?:[^{}]*?{[^{}]*?}?)*?[^{}]*?}|[^{}]*?{[^{}]*?})/g)?.join("\n") || "";
-}
-
-function emitEditorError(message) {
-  window.dispatchEvent(new CustomEvent("bubble-card-error", { detail: message }));
-}
-
-export function preloadYAMLStyles(context) {
-  if (context.config?.card_type && !context.stylesYAML) {
-    if (!stylesYAML) {
-      stylesYAML = loadYAML([
-        "/local/bubble/bubble-custom.yaml",
-        "/hacsfiles/Bubble-Card/bubble-custom.yaml",
-        "/local/community/Bubble-Card/bubble-custom.yaml",
-      ]);
-    }
-    context.stylesYAML = stylesYAML;
-  }
+    .match(/(@keyframes\s+[^{]+\{(?:[^{}]*\{[^{}]*\})+[^{}]*\}|@[^{]*?\{(?:[^{}]*?\{[^{}]*?\})*?[^{}]*?\}|[^{}]*?\{[^{}]*?\})/g)?.join("\n") || "";
 }

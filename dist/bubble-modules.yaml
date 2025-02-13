@@ -1,0 +1,237 @@
+# Bubble Modules
+#
+# How to use:
+# 
+# - To edit or add modules (global styles and templates), first copy the 
+#   "bubble-modules.yaml" file from "/www/community/Bubble-Card/" (if installed via HACS) 
+#   to "/www/bubble/" (Create the folder if it doesn't exist). 
+#
+# - You can share/find modules here:
+#   github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules
+#
+# - After making changes, you need to refresh your page to apply the modifications.
+# 
+# - Styles and templates defined under the "default:" key are applied globally to all cards by default.
+
+
+default:
+  name: Default
+  description: Empty and enabled by default. Move your styles/templates here to apply them to all cards.
+  code: |
+        /* CSS or JS templates (see examples below) */
+
+home-assistant-default:
+    name: Home Assistant default styling
+    version: "v1.0"
+    creator: "Clooos"
+    link: "https://github.com/Clooos/Bubble-Card/discussions/1230"
+    description: This module applies Home Assistant’s default styling to Bubble Card. To set it as the default, move it under <code>default:</code> in your YAML file.
+    code: |
+        :host {
+            --bubble-accent-color: rgba(0,170,240,0.6);
+            --bubble-main-background-color: var(--ha-card-background, var(--card-background-color, #fff));
+            --bubble-border-radius: var(--ha-card-border-radius, 12px);
+            --bubble-icon-border-radius: 32px;
+            --bubble-button-border-radius: var(--bubble-border-radius);
+            --bubble-icon-background-color: var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)));
+            --bubble-climate-button-background-color: var(--bubble-icon-background-color);
+            --bubble-border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color, var(--divider-color, #e0e0e0));
+        }
+        
+        .bubble-container {
+            -webkit-backdrop-filter: var(--ha-card-backdrop-filter, none);
+            backdrop-filter: var(--ha-card-backdrop-filter, none);
+            box-shadow: var(--ha-card-box-shadow, none);
+            box-sizing: border-box;
+        }
+        
+        .bubble-icon-container, 
+        .large .bubble-icon-container {
+            --mdc-icon-size: 22px;
+            min-width: 36px !important;
+            min-height: 36px !important;
+        }
+        
+        .large .bubble-icon-container {
+             margin-left: 9px;
+        }
+        
+        .bubble-state {
+            opacity: 1;
+            font-weight: 400;
+            font-size: 12px;
+            letter-spacing: .4px;
+        }
+        
+        :not(.bubble-separator) > .bubble-name {
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 0.1px;
+        }
+        
+        .bubble-pop-up-background { 
+            filter: brightness(0.96); /* Improve pop-up background contrast */
+            --bubble-pop-up-border-radius: calc(var(--ha-card-border-radius, 12px) * 1.4);
+        }
+
+
+icon_container_color:
+    name: "Example: Customize the icon container color"
+    version: "v1.0"
+    creator: "Clooos"
+    link: "https://github.com/Clooos/Bubble-Card/discussions/1231"
+
+    unsupported:
+        - horizontal-buttons-stack
+        - separator
+
+    description: |
+        An RGB color picker to customize the icon container color.
+        Configure this module via the editor or in YAML, for example:
+        <br><br>
+        <code-block><pre>
+        icon_container_color:
+            - 100
+            - 150
+            - 180
+        </pre></code-block>
+
+    code: |
+        .bubble-icon-container {
+          opacity: 1 !important;
+          background-color: rgb(${this.config.icon_container_color}) !important;
+        }
+
+    editor:
+      - label: "Color"
+        selector:
+            color_rgb: {}
+
+
+get_state_attribute:
+
+    # Some informations about your module
+
+    name: "Advanced example: Get state/attribute from other entities"
+    version: "v1.0"
+    creator: "Clooos"
+    link: "https://github.com/Clooos/Bubble-Card/discussions/1232"
+
+    # Disable this module for unsupported "card_type"
+
+    unsupported:
+        - horizontal-buttons-stack
+        - separator
+
+    # The description have HTML support like in this example.
+
+    description: |
+        Get state/attribute from other entities and replace the default state/attribute field.
+        <img class="example" src="https://github.com/Clooos/Bubble-Card/blob/main/img/get_state_template_example.png?raw=true" />
+        To use this module, you can use the configuration form, or add this in YAML:
+        <br><br>
+        <code-block><pre>
+        get_state_attribute:
+            - entity: weather.home
+            - entity: sensor.weather_station
+              attribute: humidity
+            - entity: sensor.weather_station
+              attribute: temperature
+        </pre></code-block>
+        <br>
+        <b>If it doesn't work, make sure at least one of "Show state" or "Show attribute" is turned on in your card configuration.</b>
+
+    # Code blocks must always start with ${(() => { and end with })()}
+    # Inline codes must always start with ${ and end with }
+    # This section only supports JavaScript and CSS
+
+    code: |
+        ${(() => {
+          // Retrieve the configuration or use an empty array by default
+          const config = this.config.get_state_attribute || [];
+
+          // Format the retrieved value from the entity for each entry
+          const values = config
+            .map(cfg => {
+              const entity = hass.states[cfg.entity];
+              if (entity) {
+                return cfg.attribute
+                  ? hass.formatEntityAttributeValue(entity, cfg.attribute)
+                  : hass.formatEntityState(entity);
+              }
+              return null;
+            })
+            .filter(value => value !== null); // Remove null values
+        
+          // Update the DOM element with the class 'bubble-state'
+          // displaying values separated by ' • '
+          card.querySelector('.bubble-state').innerText = values.join(' • ');
+        })()}
+
+    # The editor part can be tricky, but improves modules a lot!
+    #
+    # To understand what you can do here, take a look at my examples and at the "ha-form" sources here:
+    # https://github.com/home-assistant/frontend/blob/dev/src/components/ha-form/types.ts
+    #
+    # And here for the selectors: 
+    # https://github.com/home-assistant/frontend/blob/03a415beff6e6f9c87a95287804f6c03c8fef3d5/src/data/selector.ts
+    #
+    # I will try to document that for clarity!
+
+    editor:
+      - type: expandable
+        title: "Select entities and attributes"
+        icon: "mdi:list-box-outline"
+        schema:
+          - name: '0'
+            type: expandable
+            title: "Entity 1"
+            schema:
+              - name: entity
+                label: "Entity"
+                selector:
+                    entity: {}
+              - name: attribute
+                label: "Attribute"
+                selector:
+                    attribute:
+                        entity_id: "config.get_state_attribute.0.entity"
+          - name: '1'
+            type: expandable
+            title: "Entity 2"
+            schema:
+              - name: entity
+                label: "Entity"
+                selector:
+                    entity: {}
+              - name: attribute
+                label: "Attribute"
+                selector:
+                    attribute:
+                        entity_id: "config.get_state_attribute.1.entity"
+          - name: '2'
+            type: expandable
+            title: "Entity 3"
+            schema:
+              - name: entity
+                label: "Entity"
+                selector:
+                    entity: {}
+              - name: attribute
+                label: "Attribute"
+                selector:
+                    attribute:
+                        entity_id: "config.get_state_attribute.2.entity"
+          - name: '3'
+            type: expandable
+            title: "Entity 4"
+            schema:
+              - name: entity
+                label: "Entity"
+                selector:
+                    entity: {}
+              - name: attribute
+                label: "Attribute"
+                selector:
+                    attribute:
+                        entity_id: "config.get_state_attribute.3.entity"

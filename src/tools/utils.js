@@ -512,10 +512,11 @@ export function applyScrollingEffect(context, element, text) {
     const className = getBubbleClassName(element);
 
     function updateContent() {
+        if (element.templateDetected) return;
+
         element.innerHTML = `<div class="scrolling-container">${text}</div>`;
         element.style = '';
 
-        // Utiliser un délai pour s'assurer que le contenu est rendu
         setTimeout(() => {
             const contentWidth = element.scrollWidth;
             const containerWidth = element.parentNode?.offsetWidth || 0;

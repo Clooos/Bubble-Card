@@ -37,7 +37,6 @@ export function changeIcon(context) {
 }
 
 export function changeName(context) {
-  if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
   const name = getName(context);
   if (name !== context.elements.previousName) {
     applyScrollingEffect(context, context.elements.name, name);

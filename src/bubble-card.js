@@ -11,12 +11,12 @@ import { handleSelect } from './cards/select/index.js';
 import { handleClimate } from './cards/climate/index.js';
 import { changeEditor } from './cards/pop-up/changes.js';
 import { preloadYAMLStyles } from './tools/style-utils.js';
+import { checkConditionsMet } from './tools/validate-condition.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 class BubbleCard extends HTMLElement {
     editor = false;
     isConnected = false;
-    _cachedDetectedEditor = null;
 
     connectedCallback() {
         this.isConnected = true;
@@ -56,6 +56,10 @@ class BubbleCard extends HTMLElement {
             this.updateBubbleCard();
         }
     }
+
+    evaluateCondition(conditions, hass) {
+        return checkConditionsMet(conditions, hass);
+    };
 
     updateBubbleCard() {
 

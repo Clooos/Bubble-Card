@@ -1,133 +1,190 @@
 div {
-    display: grid;
-    grid-gap: 12px;
+  display: grid;
+  grid-gap: 12px;
 }
 
 ha-combo-box[label="Card type"]::after {
-    content: "";
-    position: relative;
-    background-color: var(--background-color, var(--secondary-background-color));
-    display: block;
-    width: 100%;
-    height: 1px;
-    top: 12px;
-    margin-bottom: 12px !important;
-    opacity: 0.6;
+  content: "";
+  position: relative;
+  background-color: var(--background-color, var(--secondary-background-color));
+  display: block;
+  width: 100%;
+  height: 1px;
+  top: 12px;
+  margin-bottom: 12px !important;
+  opacity: 0.6;
 }
 
 #add-button {
-    margin: 0 0 14px 0;
-    color: var(--text-primary-color);
-    width: 100%;
-    height: 32px;
-    border-radius: 16px;
-    border: none;
-    background-color: var(--accent-color);
-    cursor: pointer;
+  margin: 0 0 14px 0;
+  color: var(--text-primary-color);
+  width: 100%;
+  height: 32px;
+  border-radius: 16px;
+  border: none;
+  background-color: var(--accent-color);
+  cursor: pointer;
 }
 
 p {
-    margin-bottom: 4px;
+  margin-bottom: 4px;
 }
 
 ha-icon, a, p, button, h4 {
-    color: var(--primary-text-color) !important;
+  color: var(--primary-text-color) !important;
 }
 
 hr {
-    display: inline-block;
-    width: 100%;
-    border: 1px solid var(--background-color, var(--secondary-background-color));
-    opacity: 0.6;
-    margin: 8px 0 0 0;
+  display: inline-block;
+  width: 100%;
+  height: 1px;
+  border: none;
+  background-color: var(--outline-color);
+  margin: 8px 0 0 0;
 }
 
-code {
-    background: var(--accent-color);
-    background-blend-mode: darken;
-    padding: 2px 4px;
-    border-radius: 6px;
+code, code-block {
+  background: rgba(0,120,180,0.3);
+  color: var(--primary-text-color);
+  background-blend-mode: darken;
+  padding: 1px 3px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+code-block {
+  display: grid;
+  width: 100%;
+  padding: 0;
+  max-height: 285px;
+  overflow: auto;
+}
+
+code-block pre {
+  white-space: pre;
+  overflow: auto;
+  margin: 8px;
+}
+
+img {
+  max-width: 100%;
+  margin: 14px 0;
+}
+
+img.example {
+  padding: 32px;
+  box-sizing: border-box;
+  background: rgba(0, 120, 180, 0.8);
+  border-radius: 6px;
 }
 
 .button-header {
-    height: auto;
-    width: 100%;
-    display: inline-flex;
-    align-items: center;
-    margin: 0 8px;
+  height: auto;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 8px;
 }
 
 .button-number {
-    display: inline-flex;
-    width: auto;
+  display: inline-flex;
+  width: auto;
 }
 
 .remove-button {
-    display: inline-flex;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    text-align: center;
-    line-height: 24px;
-    vertical-align: middle;
-    cursor: pointer;
+  display: inline-flex;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  line-height: 24px;
+  vertical-align: middle;
+  cursor: pointer;
 }
 
 .content {
-    margin: 12px 4px 14px 4px;
+  margin: 12px 4px 14px 4px;
 }
 
 h4 > ha-icon {
-    margin: 8px;
+  margin: 8px 12px 8px 8px;
+}
+
+ha-expansion-panel h4:not(.version) {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+ha-form {
+  --expansion-panel-summary-padding: 2px 14px;
 }
 
 ha-textfield {
-    width: 100%;
+  width: 100%;
 }
 
 h3 {
-    margin: 4px 0;
+  margin: 4px 0;
 }
 
 .code-editor {
-    overflow: scroll;
+  overflow: scroll;
 }
 
 .icon-button {
-    background: var(--accent-color);
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    margin: 0;
-    border-radius: 32px;
-    font-weight: bold;
+  background: rgba(0,120,180,0.5);
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  margin: 0;
+  border-radius: 32px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
 }
 
 .icon-button.header {
-    background: none;
-    float: right;
-    padding: 0;
-    margin: 0 8px;
+  background: none;
+  padding: 0;
+  margin: 0 8px;
+}
+
+.icon-button.header:first-of-type {
+    margin: 0 8px 0 auto;
 }
 
 ha-card-conditions-editor {
-    margin-top: -12px;
+  margin-top: -12px;
 }
 
-.version{
-    font-size: 12px !important;
-    color: #fff;
-    background: rgba(0,0,0,0.1);
-    padding: 8px 16px;
-    border-radius: 32px;
+.disabled {
+  opacity: 0.5; 
+  pointer-events: none;
 }
 
-.versionNumber{
-    font-size: 10px;
-    background: rgba(0,120,180,1);
-    padding: 0px 8px;
-    border-radius: 12px;
-    margin-right: -6px;
-    float: right;
-    color: white;
+.version {
+  font-size: 12px !important;
+  color: #fff;
+  background: rgba(0,0,0,0.1);
+  padding: 8px 16px;
+  border-radius: 32px;
+}
+
+.module-version {
+  margin: 0;
+}
+
+.version-number {
+  font-size: 10px;
+  background: rgba(0,120,180,1);
+  padding: 0px 8px;
+  border-radius: 12px;
+  margin-right: -6px;
+  float: right;
+  color: white;
+}
+
+.version-number a {
+  color: white !important;
 }

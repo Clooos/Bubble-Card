@@ -21,10 +21,10 @@ export function renderSeparatorEditor(editor){
             <div class="content">
                 ${editor.makeLayoutOptions()}
                 ${editor.makeStyleEditor()}
-                ${editor.makeYAMLStyleEditor()}
             </div>
         </ha-expansion-panel>
         ${editor.makeSubButtonPanel()}
+        ${editor.makeModulesEditor()}
         <ha-alert alert-type="info">This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...</ha-alert>
         ${editor.makeVersion()}
   </div>

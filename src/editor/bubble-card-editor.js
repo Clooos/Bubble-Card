@@ -710,7 +710,7 @@ class BubbleCardEditor extends LitElement {
         return html`
             <h4 class="version">
                 Bubble Card 
-                <span class="versionNumber">
+                <span class="version-number">
                     ${version}
                 </span>
             </h4>
@@ -765,101 +765,217 @@ class BubbleCardEditor extends LitElement {
         `;
     }
 
-    makeYAMLStyleEditor() {
-        const getTextFromMap = (key, lineIndex, keyAsDefault = true) => {
-            const value = yamlKeysMap.get(key);
-            if (value) {
-                const line = value.split('\n')[lineIndex].trim();
-                if (line.startsWith('/*') && line.endsWith('*/')) {
-                    return line.slice(2, -2).trim();
-                }
-            }
+    _valueChangedForTemplate(e, key) {
+      const newValue = e.detail.value;
+      let finalValue = newValue;
 
-            if (keyAsDefault) {
-                return key;
-            }
-        };
+      if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
+        const keys = Object.keys(newValue);
+        if (keys.length > 0 && keys.every(k => !isNaN(parseInt(k, 10)))) {
+          finalValue = keys
+            .sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
+            .map(k => newValue[k]);
+        }
+      }
 
-        const handleValueChanged = (event) => {
-            const target = event.target;
-            const value = target.configValue;
-            const isChecked = target.checked;
+      this._config = {
+        ...this._config,
+        [key]: finalValue,
+      };
+      fireEvent(this, "config-changed", { config: this._config });
+      this.requestUpdate();
+    }
 
-            if (!this._config.style_templates) {
-                this._config.style_templates = [];
-            }
+    makeModulesEditor() {
+      const resolvePath = (path, configData) => {
+        return path.split('.').reduce((acc, part) => acc && acc[part], configData);
+      };
 
-            if (isChecked) {
-                // Add the key if checked
-                if (!this._config.style_templates.includes(value)) {
-                    this._config.style_templates = [...this._config.style_templates, value];
-                }
+      const processSchema = (schema, configData, baseKey = null) => {
+        return schema.map(field => {
+          if (
+            field.selector &&
+            field.selector.attribute &&
+            typeof field.selector.attribute.entity_id === 'string'
+          ) {
+            let ref = field.selector.attribute.entity_id;
+            let resolved;
+
+            if (ref.startsWith("config.")) {
+              ref = ref.slice("config.".length);
+              resolved = resolvePath(ref, this._config);
             } else {
-                // Remove the key if unchecked
-                this._config.style_templates = this._config.style_templates.filter((key) => key !== value);
+              if (baseKey && ref.startsWith(baseKey + '.')) {
+                ref = ref.slice(baseKey.length + 1);
+              }
+              if (ref.includes('.')) {
+                resolved = resolvePath(ref, configData);
+              } else if (configData && ref in configData) {
+                resolved = configData[ref];
+              }
             }
+            if (resolved !== undefined) {
+              field.selector.attribute.entity_id = resolved;
+            }
+          }
+          if (field.schema && Array.isArray(field.schema)) {
+            field.schema = processSchema(field.schema, configData, baseKey);
+          }
+          return field;
+        });
+      };
 
-            fireEvent(this, "config-changed", { config: this._config });
+      const getTextFromMap = (key) => {
+        const value = yamlKeysMap.get(key) || {};
+        let name = value.name || key;
+        let description = value.description || '';
+        let formSchema = value.editor || [];
+        let unsupportedCard = value.unsupported || [];
+        let creator = value.creator || '';
+        let moduleLink = value.link || '';
+        let moduleVersion = value.version || '';
 
-            this.requestUpdate();
-        };
+        if (!Array.isArray(formSchema)) {
+          formSchema = [formSchema];
+        }
 
-        // Ensure "default" is active if style_templates is null or undefined
-        const styleTemplates = this._config.style_templates || ['default'];
+        if (!Array.isArray(unsupportedCard)) {
+          unsupportedCard = [unsupportedCard];
+        }
 
-        return html`
-            <ha-expansion-panel outlined>
-                <h4 slot="header">
-                    <ha-icon icon="mdi:code-block-braces"></ha-icon>
-                    Custom styles & templates - Global
-                </h4>
-                <div class="content">
-                    ${Array.from(yamlKeysMap.keys()).map((key) => {
-                        const label = getTextFromMap(key, 0);
-                        const info = getTextFromMap(key, 1, false);
-                        const isChecked = styleTemplates.includes(key);
-                        return html`
-                            <ha-expansion-panel outlined>
-                                <h4 slot="header">
-                                    <ha-icon 
-                                        icon="${isChecked ? 'mdi:check-circle-outline' : 'mdi:circle-outline'}"
-                                        style="opacity: ${isChecked ? '1' : '0.3'}"
-                                    ></ha-icon>
-                                    ${label}
-                                </h4>
-                                <div class="content">
-                                    <ha-formfield .label="${'Apply to this card'}">
-                                        <ha-switch
-                                            aria-label="${'Apply to this card'}"
-                                            .checked=${isChecked}
-                                            .configValue="${key}"
-                                            @change=${handleValueChanged}
-                                        ></ha-switch>
-                                    </ha-formfield>
-                                    <ha-alert 
-                                        alert-type="info" 
-                                        style="display: ${!info ? 'none' : ''}">
-                                        ${html`<span .innerHTML=${info}></span>`}
-                                    </ha-alert>
-                                </div>
-                            </ha-expansion-panel>
-                        `;
-                    })}
-                    ${this.createErrorConsole()}
-                    <ha-alert 
-                        alert-type="warning" 
-                        style="display: ${!window.bubbleYamlWarning ? 'none' : ''}">
-                        <b>If you want to edit or add global styles and templates here</b>, first copy <code>bubble-custom.yaml</code> from <code>/www/community/Bubble-Card/</code> (if installed via HACS) to <code>/www/bubble/</code> (you'll need to create this folder). Make sure to clear your cache after each modification.
+        return { name, description, formSchema, unsupportedCard, moduleVersion, creator, moduleLink };
+      };
+
+      const handleValueChanged = (event) => {
+        const target = event.target;
+        const value = target.configValue;
+        const isChecked = target.checked;
+
+        if (!this._config.style_templates) {
+          this._config.style_templates = [];
+        }
+
+        if (isChecked) {
+          if (!this._config.style_templates.includes(value)) {
+            this._config.style_templates = [...this._config.style_templates, value];
+          }
+        } else {
+          this._config.style_templates = this._config.style_templates.filter((key) => key !== value);
+        }
+
+        fireEvent(this, "config-changed", { config: this._config });
+        this.requestUpdate();
+      };
+
+      const styleTemplates = this._config.style_templates || ['default'];
+
+      return html`
+        <ha-expansion-panel outlined>
+          <h4 slot="header">
+            <ha-icon icon="mdi:puzzle"></ha-icon>
+            Modules
+          </h4>
+          <div class="content">
+            ${Array.from(yamlKeysMap.keys()).map((key) => {
+              const { 
+                name: label, 
+                description, 
+                formSchema, 
+                unsupportedCard,
+                creator,
+                moduleLink,
+                moduleVersion
+              } = getTextFromMap(key);
+              const isChecked = (this._config.style_templates || ['default']).includes(key);
+              const unsupported = unsupportedCard.includes(this._config.card_type ?? "");
+              let processedFormSchema = formSchema;
+              if (formSchema && formSchema.length > 0) {
+                processedFormSchema = processSchema(
+                  JSON.parse(JSON.stringify(formSchema)),
+                  this._config[key] || {},
+                  key
+                );
+              }
+
+              return html`
+                <ha-expansion-panel 
+                    outlined 
+                    class="${unsupported ? 'disabled' : ''}"
+                >
+                  <h4 slot="header">
+                    <ha-icon
+                      icon="${isChecked ? 'mdi:puzzle-check' : 'mdi:puzzle-outline'}"
+                      style="opacity: ${isChecked ? '1' : '0.3'}"
+                    ></ha-icon>
+                    ${label}
+                  </h4>
+                  <div class="content">
+                    <ha-formfield .label=${'Apply to this card'}>
+                      <ha-switch
+                        aria-label="Apply to this card"
+                        .checked=${isChecked}
+                        .configValue=${key}
+                        @change=${handleValueChanged}
+                      ></ha-switch>
+                    </ha-formfield>
+                    <hr>
+
+                    ${processedFormSchema.length > 0
+                      ? html`
+                        <h4 class="${!isChecked ? 'disabled' : ''}">
+                          <ha-icon icon="mdi:cog"></ha-icon>
+                          Configuration
+                        </h4>
+                        <ha-form 
+                          class="${!isChecked ? 'disabled' : ''}"
+                          .hass=${this.hass}
+                          .data=${this._config[key]}
+                          .schema=${processedFormSchema}
+                          .computeLabel=${this._computeLabelCallback}
+                          .disabled=${!isChecked}
+                          @value-changed=${(e) => this._valueChangedForTemplate(e, key)}
+                        ></ha-form>
+                        <hr>
+                        `
+                    : ''}
+
+                    <ha-alert alert-type="info" style="display: ${!description ? 'none' : ''}">
+                      ${html`<span .innerHTML=${description}></span>`}
                     </ha-alert>
-                    <ha-alert 
-                        alert-type="info">
-                        For advanced users, you can define global custom <a href="https://github.com/Clooos/Bubble-Card#styling">styles</a> and <a href="https://github.com/Clooos/Bubble-Card#templates">templates</a> in a YAML file and apply them across multiple cards. 
-                        To use this, add your modifications under a key inside the YAML file, like <code>default:</code> to apply them everywhere, or create new ones. This allows you to reuse and maintain custom styles and templates more efficiently.
-                        <br><br><b>Looking for more advanced examples?</b> Check out my <a href="https://www.patreon.com/Clooos">Patreon</a> for exclusive custom styles and advanced templates, this is also the best way to show your support to my project!
-                    </ha-alert>
-                </div>
-            </ha-expansion-panel>
-        `;
+
+                    ${creator || moduleLink || moduleVersion
+                      ? html`
+                        <h4 class="version module-version">
+                          ${creator ? `Created by ${creator}` : ''}
+                          <span class="version-number">
+                            ${moduleLink ? html`<a href="${moduleLink}">Module link</a> • ` : ''}
+                            ${moduleVersion || ''}
+                          </span>
+                        </h4>
+                        `
+                    : ''}
+                  </div>
+                </ha-expansion-panel>
+              `;
+            })}
+            ${this.createErrorConsole()}
+            <a class="icon-button" href="https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules">
+              <ha-icon icon="mdi:open-in-new"></ha-icon>
+              Community Modules
+            </a>
+            <ha-alert alert-type="warning" style="display: ${!window.bubbleYamlWarning ? 'none' : ''}">
+              <b>If you want to edit or add modules here</b>, first copy
+              <code>bubble-modules.yaml</code> from <code>/www/community/Bubble-Card/</code> (if installed via HACS) to
+              <code>/www/bubble/</code> (you'll need to create this folder). Make sure to refresh your page after each modification.
+            </ha-alert>
+            <ha-alert alert-type="info">
+              Modules are the best way to apply <a href="https://github.com/Clooos/Bubble-Card#styling">custom styles</a> and/or <a href="https://github.com/Clooos/Bubble-Card#templates">custom templates</a> to your cards, as they are managed in a single external YAML file. 
+              This makes it easy to change things like the styles of all your cards, and for advanced users, to add or modify features. <br><br>The best approach when starting is to first test your changes in the "Custom styles & templates" editor under "Styling options" for a live preview, and once it's working, try to add it as a module. 
+              It's a good idea to check out <code>bubble-module.yaml</code> to see the possibilities.
+            </ha-alert>
+          </div>
+        </ha-expansion-panel>
+      `;
     }
 
     _valueChanged(ev) {

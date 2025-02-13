@@ -73,10 +73,10 @@ export function renderSelectEditor(editor){
                 <div class="content">
                     ${editor.makeLayoutOptions()}
                     ${editor.makeStyleEditor()}
-                    ${editor.makeYAMLStyleEditor()}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
+            ${editor.makeModulesEditor()}
             <ha-alert alert-type="info">
               This card allows you to have a select menu for your 
               <code>input_select</code>, <code>select</code> entities, and 
