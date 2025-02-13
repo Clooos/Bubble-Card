@@ -1,8 +1,10 @@
 title: "[Styling Module, JS Module, JS+Editor Module] My module name"
 labels: ["Module"]
 body:
-  - type: markdown
+  - type: textarea
     attributes:
+      label: Please edit the lines starting with ->
+      required: true
       value: | 
         "# -> My module name
         
