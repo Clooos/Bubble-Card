@@ -4,7 +4,7 @@ body:
   - type: textarea
     attributes:
       label: Module post template
-      description: Please edit the lines starting with -> (you need to scroll down)
+      description: Please edit the lines starting with -> (click on the form below to enlarge it)
       value: | 
         # -> My module name
         
