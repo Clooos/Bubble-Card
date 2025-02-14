@@ -176,14 +176,19 @@ export function evalStyles(context, styles = "") {
 }
 
 function cleanCSS(css) {
-  // Remove custom templates from custom styles
   return css
     .replace(/\/\*[\s\S]*?\*\//g, "") // Remove CSS comments
     .split("\n")
-    .filter(line => line.includes("{") || line.includes("}") || line.includes(":")) // Keep only CSS lines
+    .filter(line => 
+      line.includes("{") || 
+      line.includes("}") || 
+      line.includes(":") || 
+      line.trim().match(/['"]/g)?.length === 2 || // Keep grid-template-areas
+      line.includes("${") // Keep Home Assistant interpolations
+    )
     .join("\n")
-    .replace(/undefined(?=(?:(?:[^"]*"){2})*[^"]*$)/g, "") // Remove unwanted "undefined" values
-    .replace(/[^{};]\s*{\s*}/g, "") // Remove empty blocks unless they contain valid CSS rules
+    .replace(/undefined(?=(?:(?:[^"]*"){2})*[^"]*$)/g, "") // Remove "undefined"
+    .replace(/[^{};]\s*{\s*}/g, "") // Remove empty blocks
     .replace(/([a-z-]+)\s*:\s*;/g, "") // Remove empty declarations
     .replace(/\s+/g, " ") // Reduce multiple spaces
     .trim()
