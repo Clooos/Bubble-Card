@@ -178,20 +178,21 @@ export function evalStyles(context, styles = "") {
 function cleanCSS(css) {
   return css
     .replace(/\/\*[\s\S]*?\*\//g, "") // Remove CSS comments
-    .replace(/,\s*\n/g, ", ") // Ensure selectors stay on the same line
-    .split("\n")
-    .filter(line => 
-      line.includes("{") || 
-      line.includes("}") || 
-      line.includes(":") || 
-      line.trim().match(/['"]/g)?.length === 2 || // Keep grid-template-areas
-      line.includes("${") // Keep Home Assistant interpolations
-    )
-    .join("\n")
+    .replace(/\s+/g, " ") // Reduce multiple spaces
+    .replace(/\s*([{};,])\s*/g, "$1") // Normalize spacing around special characters
+    .replace(/([a-zA-Z0-9_-]+)\s*:\s*;/g, "") // Remove empty declarations
     .replace(/undefined(?=(?:(?:[^"]*"){2})*[^"]*$)/g, "") // Remove "undefined"
     .replace(/[^{};]\s*{\s*}/g, "") // Remove empty blocks
-    .replace(/([a-z-]+)\s*:\s*;/g, "") // Remove empty declarations
-    .replace(/\s+/g, " ") // Reduce multiple spaces
-    .trim()
-    .match(/(@keyframes\s+[^{]+\{(?:[^{}]*\{[^{}]*\})+[^{}]*\}|@[^{]*?\{(?:[^{}]*?\{[^{}]*?\})*?[^{}]*?\}|[^{}]*?\{[^{}]*?\})/g)?.join("\n") || "";
+    .replace(/,(?=\s*[}\n])/g, "") // Remove trailing commas in selectors
+    .split("\n")
+    .filter(line =>
+      line.includes("{") ||
+      line.includes("}") ||
+      line.includes(":") ||
+      line.trim().match(/['"]{2}/g) || // Keep grid-template-areas
+      line.includes("${") || // Keep Home Assistant interpolations
+      line.match(/^@supports|^@media|^@keyframes|^@layer/) // Keep special at-rules
+    )
+    .join("\n")
+    .match(/(@[^{]*?\{(?:[^{}]*?\{[^{}]*?\})*?[^{}]*?\}|[^{}]*?\{[^{}]*?\})/g)?.join("\n") || "";
 }
