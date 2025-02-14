@@ -178,6 +178,7 @@ export function evalStyles(context, styles = "") {
 function cleanCSS(css) {
   return css
     .replace(/\/\*[\s\S]*?\*\//g, "") // Remove CSS comments
+    .replace(/,\s*\n/g, ", ") // Ensure selectors stay on the same line
     .split("\n")
     .filter(line => 
       line.includes("{") || 
