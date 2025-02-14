@@ -4,14 +4,24 @@
 # 
 # - To edit or add modules (global styles and templates), first copy the 
 #   "bubble-modules.yaml" file from "/www/community/Bubble-Card/" (if installed via HACS) 
-#   to "/www/bubble/" (Create the folder if it doesn't exist). 
+#   to "/www/bubble/" (you'll need to create this folder). 
 #
-# - You can share/find modules here:
-#   github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules
+#   Then add these lines in your "configuration.yaml" under "homeassistant:":
+#
+#   homeassistant:
+#     allowlist_external_dirs:
+#       - /config/www/bubble
+#       # Not needed if you already have this line:
+#       - /config/www
+#
+#   Then save and restart Home Assistant.
 #
 # - After making changes, you need to refresh your page to apply the modifications.
 # 
-# - Styles and templates defined under the "default:" key are applied globally to all cards by default.
+# - Styles and templates defined under "default:" are applied globally to all cards by default.
+#
+# - You can share/find modules here:
+#   github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules
 
 
 default:

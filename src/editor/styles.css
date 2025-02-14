@@ -61,9 +61,14 @@ code-block {
 }
 
 code-block pre {
-  white-space: pre;
+  white-space: pre-line;
   overflow: auto;
   margin: 8px;
+}
+
+code-block pre > i {
+    white-space: pre;
+    font-style: normal;
 }
 
 img {

@@ -963,11 +963,19 @@ class BubbleCardEditor extends LitElement {
               <ha-icon icon="mdi:open-in-new"></ha-icon>
               Community Modules
             </a>
+
             <ha-alert alert-type="warning" style="display: ${!window.bubbleYamlWarning ? 'none' : ''}">
               <b>If you want to edit or add modules here</b>, first copy
               <code>bubble-modules.yaml</code> from <code>/www/community/Bubble-Card/</code> (if installed via HACS) to
-              <code>/www/bubble/</code> (you'll need to create this folder). Make sure to refresh your page after each modification.
+              <code>/www/bubble/</code> (you'll need to create this folder). 
+              <br><br>Then add these lines in your <code>configuration.yaml</code> under <code>homeassistant:</code>:
+              <br><br><code-block><pre>
+                <i>homeassistant:</i>
+                <i>  allowlist_external_dirs:</i>
+                <i>    - /config/www/bubble</pre></code-block></i>
+              <br>Now save and restart Home Assistant, then <b>check if this warning is gone</b>. Make sure to refresh your page after each modification.
             </ha-alert>
+
             <ha-alert alert-type="info">
               Modules are the best way to apply <a href="https://github.com/Clooos/Bubble-Card#styling">custom styles</a> and/or <a href="https://github.com/Clooos/Bubble-Card#templates">custom templates</a> to your cards, as they are managed in a single external YAML file. 
               This makes it easy to change things like the styles of all your cards, and for advanced users, to add or modify features. <br><br>The best approach when starting is to first test your changes in the "Custom styles & templates" editor under "Styling options" for a live preview, and once it's working, try to add it as a module. 
