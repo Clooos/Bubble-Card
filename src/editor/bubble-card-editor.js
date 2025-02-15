@@ -969,7 +969,7 @@ class BubbleCardEditor extends LitElement {
               <code>bubble-modules.yaml</code> from <code>/www/community/Bubble-Card/</code> (if installed via HACS) to
               <code>/www/bubble/</code> (you'll need to create this folder). 
               <br><br>Then add these lines in your <code>configuration.yaml</code> under <code>homeassistant:</code>:
-              <br><br><code-block><pre>
+              <br><br><code-block class="with-i"><pre>
                 <i>homeassistant:</i>
                 <i>  allowlist_external_dirs:</i>
                 <i>    - /config/www/bubble</pre></code-block></i>

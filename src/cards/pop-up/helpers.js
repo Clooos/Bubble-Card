@@ -1,11 +1,10 @@
-
-
 import { getBackdrop } from "./create.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { manageEvents } from './create.js';
 
 let hashTimeout = null;
 let hashRecentlyAdded = false;
+let scrollY = 0;
 
 export function clickOutside(event, context) {
     if (context.config.close_by_clicking_outside ?? true) {
@@ -138,7 +137,8 @@ function injectNoScrollStyles() {
             overflow: hidden;
             position: fixed;
             width: 100%;
-            height: 100%;
+            touch-action: none;
+            left: 0;
         }
     `;
 
@@ -149,9 +149,15 @@ export function toggleBodyScroll(disable) {
     injectNoScrollStyles();
 
     if (disable) {
+        scrollY = window.scrollY;
+        document.body.style.top = `-${scrollY}px`;
         document.body.classList.add('no-scroll');
     } else {
         document.body.classList.remove('no-scroll');
+        window.scrollTo({ top: scrollY, behavior: 'instant' }); // Assure un retour immédiat
+        setTimeout(() => {
+            document.body.style.top = ''; // Supprime `top` après la restauration du scroll
+        }, 0);
     }
 }
 

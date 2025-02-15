@@ -61,14 +61,20 @@ code-block {
 }
 
 code-block pre {
+  white-space: pre;
+  overflow: auto;
+  margin: 8px;
+}
+
+code-block.with-i pre {
   white-space: pre-line;
   overflow: auto;
   margin: 8px;
 }
 
-code-block pre > i {
-    white-space: pre;
-    font-style: normal;
+code-block.with-i pre > i {
+  white-space: pre;
+  font-style: normal;
 }
 
 img {
@@ -151,12 +157,9 @@ h3 {
 
 .icon-button.header {
   background: none;
+  margin-left: auto !important;
   padding: 0;
   margin: 0 8px;
-}
-
-.icon-button.header:first-of-type {
-    margin: 0 8px 0 auto;
 }
 
 ha-card-conditions-editor {
