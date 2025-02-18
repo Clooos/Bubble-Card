@@ -10,19 +10,17 @@ export async function handlePopUp(context) {
         // The card is not added in the DOM
         return;
       }
-      
+
       prepareStructure(context);
       createHeader(context);
       createStructure(context);
   } else if (context.popUp && context.elements) {
-      if (context.config.hash === location.hash || context.config !== context.previousConfig) {
+      if ((context.config.hash === location.hash || context.editor) || context.config !== context.previousConfig) {
+          changeStyle(context);
+
           if (context.config.entity || context.config.name) {
               handleButton(context, context.elements.buttonContainer, context.elements.header);
           }
-
-          requestAnimationFrame(() => {
-            changeStyle(context);
-          });
 
           context.previousConfig = context.config;
       }

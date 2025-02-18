@@ -4,6 +4,7 @@ import { manageEvents } from './create.js';
 
 let hashTimeout = null;
 let hashRecentlyAdded = false;
+let scrollY = 0;
 
 export function clickOutside(event, context) {
     if (context.config.close_by_clicking_outside ?? true) {
@@ -74,13 +75,9 @@ export function appendPopup(context, append) {
     const action = append ? 'appendChild' : 'removeChild';
 
     if (append) {
-        requestAnimationFrame(() => {
-            context.verticalStack.appendChild(context.popUp);
-        });
+        context.verticalStack.appendChild(context.popUp);
     } else {
-        requestAnimationFrame(() => {
-            context.verticalStack.removeChild(context.popUp);
-        });
+        context.verticalStack.removeChild(context.popUp);
     }
 }
 
@@ -130,8 +127,38 @@ function updateListeners(context, add) {
     }
 }
 
-function toggleBodyOverflow(status) {
-    document.body.style.overflow = status;
+function injectNoScrollStyles() {
+    if (document.getElementById('no-scroll-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'no-scroll-styles';
+    style.textContent = `
+        body.no-scroll {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            touch-action: none;
+            left: 0;
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+export function toggleBodyScroll(disable) {
+    injectNoScrollStyles();
+
+    if (disable) {
+        scrollY = window.scrollY;
+        document.body.style.top = `-${scrollY}px`;
+        document.body.classList.add('no-scroll');
+    } else {
+        document.body.classList.remove('no-scroll');
+        window.scrollTo({ top: scrollY, behavior: 'instant' }); // Assure un retour immédiat
+        setTimeout(() => {
+            document.body.style.top = ''; // Supprime `top` après la restauration du scroll
+        }, 0);
+    }
 }
 
 function clearAllTimeouts(context) {
@@ -156,7 +183,7 @@ export function openPopup(context) {
         context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
     }
 
-    toggleBodyOverflow('hidden');
+    toggleBodyScroll(true);
 
     if (context.config.open_action) {
         callAction(context.popUp, context.config, 'open_action');
@@ -177,7 +204,7 @@ export function closePopup(context) {
     }, animationDuration);
 
     updateListeners(context, false);
-    toggleBodyOverflow('');
+    toggleBodyScroll(false);
 
     if (context.config.close_action) {
         callAction(context, context.config, 'close_action');
@@ -201,14 +228,44 @@ export function onUrlChange(context) {
 export function onEditorChange(context) {
     const { hideBackdrop } = getBackdrop(context);
     const host = context.verticalStack.host;
-    const detectedEditor = host?.closest('hui-card-preview');
+    const detectedEditor = context.detectedEditor;
 
     if (context.editor || detectedEditor) {
         hideBackdrop();
         clearTimeout(context.removeDomTimeout);
 
-        if (!detectedEditor && !context.verticalStack.contains(context.popUp)) {
-            context.verticalStack.appendChild(context.popUp);
+        if (!detectedEditor) {
+            setupVisibilityObserver(context);
         }
+    }
+}
+
+function setupVisibilityObserver(context) {
+    if (context.observer) {
+        context.observer.disconnect();
+        context.observer = null;
+    }
+
+    if (context.sectionRow) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !context.verticalStack.contains(context.popUp)) {
+                    context.verticalStack.appendChild(context.popUp);
+                }
+            });
+        }, {
+            rootMargin: '100px',
+            threshold: 0.01
+        });
+
+        observer.observe(context.sectionRow);
+        context.observer = observer;
+    }
+}
+
+export function cleanupContext(context) {
+    if (context.observer) {
+        context.observer.disconnect();
+        context.observer = null;
     }
 }

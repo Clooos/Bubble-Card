@@ -1,0 +1,98 @@
+title: "[Styling Module, JS Module, JS+Editor Module] My module name"
+labels: ["Module"]
+body:
+  - type: textarea
+    attributes:
+      label: Module post template
+      description: Please edit the lines starting with -> (click on the form below to enlarge it)
+      value: | 
+        # -> My module name
+        
+        **Version:** v1.0  
+        **Creator:** -> [My username](https://github.com/my_username)
+        
+        > [!IMPORTANT] 
+        > **Unsupported cards:**
+        >  - Button
+        >  - Cover
+        >  - Climate
+        >  - Horizontal buttons stack
+        >  - Media player
+        >  - Pop-up
+        >  - Select
+        >  - Separator
+        
+        -> My module description here.
+        Configure this module via the editor or in YAML, for example: 
+        
+        ```yaml
+        -> your_module_key:
+            - entity: weather.home
+            - entity: sensor.weather_station
+              attribute: humidity
+            - entity: sensor.weather_station
+              attribute: temperature
+        ```
+        
+        ---
+        
+        <details>
+        
+        <summary><b>🧩 Get this Module</b></summary>
+        
+        <br>
+        
+        > To use this module, simply copy and paste the following configuration into your `/www/bubble/bubble-modules.yaml` file.
+        
+        ```yaml
+        your_module_key:
+            name: "Your module name"
+            version: "v1.0"
+            creator: "User"
+            # Post your module first, then edit it with the correct discussion URL.
+            link: "https://github.com/Clooos/Bubble-Card/discussions/****"
+        
+            unsupported:
+              - button
+              - cover
+              - climate
+              - horizontal-buttons-stack
+              - media-player
+              - pop-up
+              - select
+              - separator
+        
+            description: |
+                -> My module description.
+        
+            code: |
+                -> My code
+        
+            editor:
+                -> My editor configuration
+        ```
+        
+        </details>
+        
+        ---
+        
+        ### Screenshot:
+        
+        -> Drag and drop/Upload one (or more) screenshot here
+    validations:
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Before posting your module
+      options:
+        - label: I've replaced all lines starting with ->
+          required: true
+        - label: I've updated the unsupported cards above the description and under the `unsupported` property
+          required: true
+        - label: I've added a screenshot
+          required: true
+        - label: I've chosen a unique `your_module_key`
+          required: true
+        - label: I really enjoyed working on this module ❤️
+          required: false

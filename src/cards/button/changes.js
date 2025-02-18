@@ -10,9 +10,9 @@ import {
   getAttribute,
   isStateOn,
   isEntityType,
-  getWeatherIcon,
   setLayout
 } from '../../tools/utils.js';
+import { handleCustomStyles } from '../../tools/style-utils.js';
 
 export function changeButton(context) {
   const cardType = context.config.card_type;
@@ -117,7 +117,6 @@ export function changeIcon(context) {
 }
 
 export function changeName(context) {
-  if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
   const buttonType = getButtonType(context);
   const name = buttonType !== 'name' ? getName(context) : context.config.name;
   if (name !== context.elements.previousName) {
@@ -209,23 +208,6 @@ export function changeStatus(context) {
 export function changeStyle(context) {
     initializesubButtonIcon(context);
     setLayout(context);
-
-    if (!context.config.styles) return;
-
-    const state = getState(context);
-
-    let customStyle = '';
-
-    try {
-        customStyle = context.config.styles
-            ? Function('hass', 'entity', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', 'name', `return \`${context.config.styles}\`;`)
-              (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card, context.card.name)
-            : '';
-    } catch (error) {
-        throw new Error(`Error in generating button custom templates: ${error.message}`);
-    }
-
-    if (context.elements.customStyle) {
-        context.elements.customStyle.innerText = customStyle;
-    }
+    handleCustomStyles(context);
 }
+

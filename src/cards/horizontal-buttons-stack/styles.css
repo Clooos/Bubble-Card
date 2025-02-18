@@ -127,7 +127,7 @@ ha-card {
     top: 0;
     transition: background-color 1s;
     width: 100%;
-    z-index: -1;
+    z-index: 1;
 }
 .bubble-background {
     opacity: 0.8;
@@ -137,17 +137,18 @@ ha-card {
     box-sizing: border-box !important;
     position: absolute;
     left: 0;
-    z-index: -2;
+    z-index: 0;
     background-color: var(--bubble-horizontal-buttons-stack-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color))));
 }
 .bubble-icon {
     height: 24px;
     width: 24px;
+    z-index: 2;
 }
 .bubble-icon + .bubble-name {
     margin-left: 8px;
+    z-index: 2;
 }
-
 
 .horizontal-buttons-stack-card.editor {
     position: relative;

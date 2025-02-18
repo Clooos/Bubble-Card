@@ -1,5 +1,3 @@
-import { version } from '../var/version.js';
-
 // Initialize the content if it's not there yet.
 
 export function initializeContent(context) {

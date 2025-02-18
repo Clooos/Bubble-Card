@@ -52,6 +52,7 @@
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
     backdrop-filter: var(--custom-popup-filter);
     -webkit-backdrop-filter: var(--custom-popup-filter);
+    border: var(--bubble-pop-up-border, var(--bubble-border, none));
 }
 .bubble-pop-up-container::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
@@ -119,7 +120,7 @@
 .bubble-close-button {
     height: 50px;
     width: 50px;
-    border: none;
+    border: var(--bubble-pop-up-close-button-border, var(--bubble-pop-up-border, var(--bubble-border, none)));
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
     z-index: 1;
     background: var(--bubble-pop-up-main-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color))));

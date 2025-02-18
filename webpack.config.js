@@ -1,5 +1,6 @@
 const webpack = require ('webpack');
 const path = require('path');
+const CompressionPlugin = require("compression-webpack-plugin");
 
 const rules = [
   {
@@ -14,6 +15,11 @@ const performance = {
 
 module.exports = [
   {
+    plugins: [
+      new CompressionPlugin({
+                  algorithm: 'gzip'
+              }),      
+    ],
     mode: 'production',
     entry: {
       'bubble-card': './src/bubble-card.js',

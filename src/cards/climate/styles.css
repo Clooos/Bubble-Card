@@ -20,6 +20,7 @@ ha-card {
     box-shadow: var(--bubble-climate-box-shadow, var(--bubble-box-shadow, none));
     overflow: visible;
     touch-action: pan-y;
+    border: var(--bubble-climate-border, var(--bubble-border, none));
 }
 
 .bubble-climate {

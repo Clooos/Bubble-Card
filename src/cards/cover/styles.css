@@ -24,10 +24,30 @@ ha-card {
     justify-content: center;
     min-width: 38px;
     min-height: 38px;
-    border-radius: var(--bubble-cover-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
-    background-color: var(--bubble-cover-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
-    border: 6px solid var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
+    margin: 6px;
+    border-radius: var(--bubble-button-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
+    background-color: var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
+    overflow: hidden;
+    position: relative;
     cursor: pointer;
+}
+
+.bubble-icon {
+    display: flex;
+    opacity: 0.6;
+}
+
+.is-on .bubble-icon {
+  filter: brightness(1.1);
+  opacity: 1;
+}
+
+.bubble-entity-picture {
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
 }
 
 .bubble-name-container {
@@ -71,13 +91,6 @@ ha-card {
     grid-gap: 18px;
 }
 
-.bubble-icon {
-    display: flex; 
-    height: 24px; 
-    width: 24px; 
-    color: var(--primary-text-color);
-}
-
 .bubble-button.disabled {
     opacity: 0.3 !important;
     pointer-events: none !important;
@@ -93,7 +106,7 @@ ha-card {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: none;
+    border: var(--bubble-cover-border, var(--bubble-border, none));
 }
 
 .large .bubble-cover-card-container {
@@ -102,6 +115,7 @@ ha-card {
   background: var(--bubble-cover-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
   border-radius: var(--bubble-cover-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
   box-shadow: var(--bubble-cover-box-shadow, var(--bubble-button-box-shadow, var(--bubble-box-shadow, none)));
+  border: var(--bubble-cover-border, var(--bubble-border, none));
 }
 
 .large .bubble-buttons .bubble-icon {
@@ -141,6 +155,7 @@ ha-card {
 .large .bubble-button,
 .large .bubble-sub-button {
   box-shadow: none;
+  border: none;
 }
 
 .large .bubble-sub-button-container {

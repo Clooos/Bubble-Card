@@ -9,7 +9,7 @@ export function createStructure(context, container = context.content, appendTo =
 
   if (!context.elements) context.elements = {};
 
-  context.elements.buttonCardContainer = createElement('div', 'bubble-button-card-container button-container');
+  context.elements.buttonCardContainer = createElement('div', 'bubble-button-card-container bubble-container button-container');
   context.elements.buttonCard = createElement('div', 'bubble-button-card switch-button');
   context.elements.buttonBackground = createElement('div', 'bubble-button-background');
   context.elements.nameContainer = createElement('div', 'bubble-name-container name-container');

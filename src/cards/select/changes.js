@@ -15,6 +15,7 @@ import {
   getOptionIcon,
   getSelectedAttribute
 } from "./helpers.js";
+import { handleCustomStyles } from '../../tools/style-utils.js';
 
 export function changeIcon(context) {
   const icon = getIcon(context);
@@ -36,7 +37,6 @@ export function changeIcon(context) {
 }
 
 export function changeName(context) {
-  if (context.config.styles?.includes("card.querySelector('.bubble-name').innerText")) return;
   const name = getName(context);
   if (name !== context.elements.previousName) {
     applyScrollingEffect(context, context.elements.name, name);
@@ -105,22 +105,5 @@ export function changeDropdownList(context, elements = context.elements, entity 
 export function changeStyle(context) {
   initializesubButtonIcon(context);
   setLayout(context);
-
-  const state = getState(context);
-
-  let customStyle = '';
-
-  try {
-    customStyle = context.config.styles
-      ? Function('hass', 'entity', 'state', 'icon', 'subButtonIcon', 'getWeatherIcon', 'card', `return \`${context.config.styles}\`;`)
-        (context._hass, context.config.entity, state, context.elements.icon, context.subButtonIcon, getWeatherIcon, context.card)
-      : '';
-  } catch (error) {
-      throw new Error(`Error in generating select custom templates: ${error.message}`);
-  }
-
-  if (context.elements.customStyle) {
-    context.elements.customStyle.innerText = customStyle;
-    context.elements.dropdownCustomStyleElement.innerText = customStyle;
-  }
+  handleCustomStyles(context);
 }
