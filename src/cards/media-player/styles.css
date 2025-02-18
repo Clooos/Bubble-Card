@@ -18,7 +18,7 @@ ha-card {
     height: 50px;
     background-color: var(--bubble-media-player-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
     touch-action: pan-y;
-    border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+    border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     box-shadow: var(--bubble-media-player-box-shadow, var(--bubble-box-shadow, none));
     border: var(--bubble-media-player-border, var(--bubble-border, none));
 }
@@ -31,7 +31,7 @@ ha-card {
     height: 100%;
     width: 100%;
     transition: background-color 1.5s;
-    border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+    border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     background-color: rgba(0,0,0,0);
 }
 
@@ -51,7 +51,7 @@ ha-card {
     background: none;
     border: none;
     cursor: pointer;
-    border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, 32px));
+    border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     padding: 6px;
     height: 24px;
     width: 24px;
@@ -69,7 +69,7 @@ ha-card {
     height: 38px;
     left: 50px;
     overflow: hidden;
-    border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+    border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     z-index: 1;
     background-color: var(--bubble-media-player-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
     opacity: 1;
@@ -276,8 +276,8 @@ ha-card {
 }
 
 .large .bubble-media-player-container {
-  height: 56px;
-  border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+  height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
+  border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
 }
 
 .large .bubble-icon-container {
@@ -298,7 +298,7 @@ ha-card {
 
 .large .bubble-volume-slider {
   height: 42px;
-  border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, 32px));
+  border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
   left: 60px;
   width: calc(100% - 168px);
 }
@@ -312,16 +312,24 @@ ha-card {
   align-items: center;
 }
 
+.large .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
+    grid-row: 1 / calc(var(--row-size,1) + 1);
+}
+
 .rows-2 .bubble-sub-button-container {
   flex-direction: column;
   gap: 4px !important;
   display: grid !important;
   grid-template-columns: repeat(1, 1fr);
-  grid-template-rows: repeat(2, minmax(auto, max-content));
+  grid-template-rows: repeat(calc(2*var(--row-size,1)), minmax(auto, max-content));
   grid-auto-flow: column;
   width: auto;
 }
 
 .rows-2 .bubble-sub-button {
   height: 20px !important;
+}
+
+.large.rows-2 .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
+    grid-row: 1 / calc(2*var(--row-size,1) + 1);
 }

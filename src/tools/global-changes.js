@@ -391,6 +391,12 @@ const subButtonsStyles = `
         gap: 8px;
         align-items: center;
     }
+    .large .bubble-sub-button-container{
+        display: grid;
+        grid-template-rows: repeat(var(--row-size,1), 1fr);
+        grid-template-columns: repeat(1, 1fr);
+        grid-auto-flow: column;
+    }
     .bubble-sub-button {
         display: flex;
         flex-wrap: nowrap;
