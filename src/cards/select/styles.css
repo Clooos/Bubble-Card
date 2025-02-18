@@ -207,6 +207,11 @@ ha-select {
   margin-left: 6px;
 }
 
+.large .bubble-sub-button-container:has(> :last-child:nth-child(2))
+:nth-child(2) {
+    grid-row: 1 / calc(var(--row-size,1) + 1);
+}
+
 .rows-2 .bubble-sub-button-container {
   flex-direction: column;
   gap: 4px !important;
@@ -219,4 +224,9 @@ ha-select {
 
 .rows-2 .bubble-sub-button {
   height: 20px !important;
+}
+
+.large.rows-2 .bubble-sub-button-container:has(> :last-child:nth-child(2))
+:nth-child(2) {
+    grid-row: 1 / calc(2*var(--row-size,1) + 1);
 }
