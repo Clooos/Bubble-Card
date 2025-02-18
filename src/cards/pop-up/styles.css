@@ -188,8 +188,7 @@
     --mdc-icon-size: 28px !important;
 }
 
-.large .bubble-sub-button-container:has(> :last-child:nth-child(2))
-:nth-child(2) {
+.large .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
     grid-row: 1 / calc(var(--row-size,1) + 1);
 }
 
@@ -207,7 +206,6 @@
   height: 20px !important;
 }
 
-.large.rows-2 .bubble-sub-button-container:has(> :last-child:nth-child(2))
-:nth-child(2) {
+.large.rows-2 .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
     grid-row: 1 / calc(2*var(--row-size,1) + 1);
 }
