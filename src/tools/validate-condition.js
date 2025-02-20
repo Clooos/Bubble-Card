@@ -1,5 +1,3 @@
-
-
 function getValueFromEntityId(hass,value){
   try{
     if (hass.states[value]) {
@@ -11,10 +9,12 @@ function getValueFromEntityId(hass,value){
 
 function checkStateCondition(condition, hass) {
   const entityId = condition.entity_id || condition.entity;
-  const state =
-    entityId && hass.states[entityId]
-      ? hass.states[entityId].state
-      : "unavailable";
+  const entity = entityId && hass.states[entityId] ? hass.states[entityId] : null;
+  const current = entity
+    ? condition.attribute && entity.attributes
+      ? entity.attributes[condition.attribute]
+      : entity.state
+    : "unavailable";
 
   let value = condition.state ?? condition.state_not;
 
@@ -32,9 +32,9 @@ function checkStateCondition(condition, hass) {
   }
 
   if (condition.state != null) {
-    return ensureArray(value).includes(state);
+    return ensureArray(value).includes(current);
   } else if (condition.state_not != null) {
-    return !ensureArray(value).includes(state);
+    return !ensureArray(value).includes(current);
   }
 
   return false;

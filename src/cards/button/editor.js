@@ -22,7 +22,7 @@ function getButtonList(){
 }
 
 export function renderButtonEditor(editor){
-    let entityList = {}
+    let entityList = {};
     if (editor._config.button_type === 'slider') entityList = {domain:["light", "media_player", "cover","input_number"]};
 
     let button_action = editor._config.button_action || '';

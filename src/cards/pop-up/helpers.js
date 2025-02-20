@@ -154,9 +154,9 @@ export function toggleBodyScroll(disable) {
         document.body.classList.add('no-scroll');
     } else {
         document.body.classList.remove('no-scroll');
-        window.scrollTo({ top: scrollY, behavior: 'instant' }); // Assure un retour immédiat
+        window.scrollTo({ top: scrollY, behavior: 'instant' });
         setTimeout(() => {
-            document.body.style.top = ''; // Supprime `top` après la restauration du scroll
+            document.body.style.top = '';
         }, 0);
     }
 }

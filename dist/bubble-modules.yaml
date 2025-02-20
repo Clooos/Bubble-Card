@@ -11,7 +11,7 @@
 #   homeassistant:
 #     allowlist_external_dirs:
 #       - /config/www/bubble
-#       # Not needed if you already have this line:
+#       # This step is not needed if you already have this line:
 #       - /config/www
 #
 #   Then save and restart Home Assistant.
@@ -20,32 +20,35 @@
 # 
 # - Styles and templates defined under "default:" are applied globally to all cards by default.
 #
+# - See the final example in this file for further details on how to create a module.
+#
 # - You can share/find modules here:
 #   github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules
 
 
 default:
   name: Default
-  description: Empty and enabled by default. Move your styles/templates here to apply them to all cards.
+  description: Empty and enabled by default. Move your styles/templates here in the <code>bubble-modules.yaml</code> file to apply them to all cards.
   code: |
         /* CSS or JS templates (see examples below) */
 
+
 home-assistant-default:
     name: Home Assistant default styling
-    version: "v1.0"
+    version: "v1.1"
     creator: "Clooos"
     link: "https://github.com/Clooos/Bubble-Card/discussions/1230"
-    description: This module applies Home Assistant’s default styling to Bubble Card. To set it as the default, move it under <code>default:</code> in your YAML file.
+    description: This module applies Home Assistant’s default styling to Bubble Card. To set it as the default, move it under <code>default:</code> in the <code>bubble-modules.yaml</code> file.
     code: |
         :host {
-            --bubble-accent-color: rgba(0,170,240,0.6);
+            --bubble-button-accent-color: rgba(0,140,255,0.3); /* Edit this color if needed */
             --bubble-main-background-color: var(--ha-card-background, var(--card-background-color, #fff));
             --bubble-border-radius: var(--ha-card-border-radius, 12px);
             --bubble-icon-border-radius: 32px;
             --bubble-button-border-radius: var(--bubble-border-radius);
-            --bubble-icon-background-color: var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)));
             --bubble-climate-button-background-color: var(--bubble-icon-background-color);
             --bubble-border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color, var(--divider-color, #e0e0e0));
+            --bubble-secondary-background-color: transparent;
         }
         
         .bubble-container {
@@ -60,6 +63,47 @@ home-assistant-default:
             --mdc-icon-size: 22px;
             min-width: 36px !important;
             min-height: 36px !important;
+        }
+        
+        .large .bubble-cover-card-container > .bubble-buttons {
+            --bubble-cover-main-background-color: none;
+        }
+        
+        .bubble-range-fill {
+            --bubble-accent-color: var(--bubble-button-accent-color);
+        }
+        
+        .bubble-sub-button.background-on::before,
+        .bubble-sub-button.background-off::before,
+        .bubble-temperature-container::before,
+        .bubble-icon-container::before {
+            content: "";
+            position: absolute;
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%;  
+            opacity: var(--control-number-buttons-background-opacity, .2);
+            border-radius: var(--bubble-border-radius);
+            background: var(--control-number-buttons-background-color, var(--disabled-color));
+        }
+        
+        .is-on {
+            --bubble-icon-background-color: var(--view-background,var(--lovelace-background,var(--primary-background-color)));
+            transition: all ease-in 0.3s !important;
+        }
+        
+        .bubble-icon-container::before {
+            background: var(--state-inactive-color);
+            border-radius: var(--bubble-icon-border-radius);
+        }
+        
+        .bubble-sub-button {
+            border: 0px solid transparent !important;
+        }
+        
+        .no-icon-select-arrow {
+            right: 4px !important;
         }
         
         .large .bubble-icon-container {
@@ -83,11 +127,36 @@ home-assistant-default:
             filter: brightness(0.96); /* Improve pop-up background contrast */
             --bubble-pop-up-border-radius: calc(var(--ha-card-border-radius, 12px) * 1.4);
         }
+        
+        .bubble-header-container {
+            --bubble-secondary-background-color: var(--background-color-2); 
+        }
+        
+        ha-select {
+            --bubble-list-item-accent-color: none !important;
+            --mdc-theme-surface: var(--card-background-color);
+        }
+        
+        mwc-list-item[selected] {
+            color: inherit !important;
+            --mdc-ripple-press-opacity: 0 !important;
+        }
+        
+        mwc-list-item[selected]::before {
+            content: "";
+            position: absolute;
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%;  
+            background-color: var(--primary-color);
+            opacity: 0.24;
+        }
 
 
 icon_container_color:
     name: "Example: Customize the icon container color"
-    version: "v1.0"
+    version: "v1.1"
     creator: "Clooos"
     link: "https://github.com/Clooos/Bubble-Card/discussions/1231"
 
@@ -96,49 +165,46 @@ icon_container_color:
         - separator
 
     description: |
-        An RGB color picker to customize the icon container color.
+        A list of predefined colors to customize the icon container color.
         Configure this module via the editor or in YAML, for example:
         <br><br>
         <code-block><pre>
-        icon_container_color:
-            - 100
-            - 150
-            - 180
+        icon_container_color: 
+            color: light-blue
         </pre></code-block>
 
     code: |
         .bubble-icon-container {
           opacity: 1 !important;
-          background-color: rgb(${this.config.icon_container_color}) !important;
+          background: var(--${this.config.icon_container_color?.color}-color) !important;
         }
 
     editor:
-      - label: "Color"
+      - name: color
+        label: "Color"
         selector:
-            color_rgb: {}
+            ui_color:
+                include_none: true
 
 
 get_state_attribute:
-
-    # Some informations about your module
-
+    
+    # Some informations about your module (this is shown in the editor)
     name: "Advanced example: Get state/attribute from other entities"
-    version: "v1.0"
+    version: "v1.1"
     creator: "Clooos"
-    link: "https://github.com/Clooos/Bubble-Card/discussions/1232"
+    link: "https://github.com/Clooos/Bubble-Card"
 
     # Disable this module for unsupported "card_type"
-
     unsupported:
         - horizontal-buttons-stack
         - separator
 
-    # The description have HTML support like in this example.
-
+    # The description have HTML support like in this example. This model is my favorite.
     description: |
         Get state/attribute from other entities and replace the default state/attribute field.
         <img class="example" src="https://github.com/Clooos/Bubble-Card/blob/main/img/get_state_template_example.png?raw=true" />
-        To use this module, you can use the configuration form, or add this in YAML:
+        Configure this module via the editor or in YAML, for example:
         <br><br>
         <code-block><pre>
         get_state_attribute:
@@ -153,8 +219,8 @@ get_state_attribute:
 
     # Code blocks must always start with ${(() => { and end with })()}
     # Inline codes must always start with ${ and end with }
-    # This section only supports JavaScript and CSS
-
+    #
+    # This section only supports JavaScript and/or CSS
     code: |
         ${(() => {
           // Retrieve the configuration or use an empty array by default
@@ -180,14 +246,16 @@ get_state_attribute:
 
     # The editor part can be tricky, but improves modules a lot!
     #
-    # To understand what you can do here, take a look at my examples and at the "ha-form" sources here:
-    # https://github.com/home-assistant/frontend/blob/dev/src/components/ha-form/types.ts
+    # In this example, it will create your configuration to this variable:
+    # this.config.get_state_attribute
+    #
+    # To understand what you can do here, take a look at the "ha-form" sources here:
+    # https://github.com/home-assistant/frontend/tree/03a415beff6e6f9c87a95287804f6c03c8fef3d5/src/components/ha-form
     #
     # And here for the selectors: 
     # https://github.com/home-assistant/frontend/blob/03a415beff6e6f9c87a95287804f6c03c8fef3d5/src/data/selector.ts
     #
     # I will try to document that for clarity!
-
     editor:
       - type: expandable
         title: "Select entities and attributes"
@@ -204,8 +272,7 @@ get_state_attribute:
               - name: attribute
                 label: "Attribute"
                 selector:
-                    attribute:
-                        entity_id: "config.get_state_attribute.0.entity"
+                    attribute: {}
           - name: '1'
             type: expandable
             title: "Entity 2"
@@ -217,8 +284,7 @@ get_state_attribute:
               - name: attribute
                 label: "Attribute"
                 selector:
-                    attribute:
-                        entity_id: "config.get_state_attribute.1.entity"
+                    attribute: {}
           - name: '2'
             type: expandable
             title: "Entity 3"
@@ -230,8 +296,7 @@ get_state_attribute:
               - name: attribute
                 label: "Attribute"
                 selector:
-                    attribute:
-                        entity_id: "config.get_state_attribute.2.entity"
+                    attribute: {}
           - name: '3'
             type: expandable
             title: "Entity 4"
@@ -243,5 +308,4 @@ get_state_attribute:
               - name: attribute
                 label: "Attribute"
                 selector:
-                    attribute:
-                        entity_id: "config.get_state_attribute.3.entity"
+                    attribute: {}

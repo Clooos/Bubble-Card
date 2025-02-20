@@ -115,9 +115,11 @@ function makeButton(editor) {
                     <h4 slot="header">
                         <ha-icon icon="mdi:border-radius"></ha-icon>
                         Button ${i} ${editor._config[i + '_name'] ? ("- " + editor._config[i + '_name']) : ""}
-                        <button class="icon-button header" @click="${() => removeButton(editor,i)}">
-                          <ha-icon icon="mdi:delete"></ha-icon>
-                        </button>
+                        <div class="button-container">
+                            <button class="icon-button header" @click="${() => removeButton(editor,i)}">
+                              <ha-icon icon="mdi:delete"></ha-icon>
+                            </button>
+                        </div>
                     </h4>
                     <div class="content">
                         <ha-textfield

@@ -11,7 +11,6 @@ import { handleSelect } from './cards/select/index.js';
 import { handleClimate } from './cards/climate/index.js';
 import { changeEditor } from './cards/pop-up/changes.js';
 import { preloadYAMLStyles } from './tools/style-utils.js';
-import { checkConditionsMet } from './tools/validate-condition.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 class BubbleCard extends HTMLElement {
@@ -56,10 +55,6 @@ class BubbleCard extends HTMLElement {
             this.updateBubbleCard();
         }
     }
-
-    evaluateCondition(conditions, hass) {
-        return checkConditionsMet(conditions, hass);
-    };
 
     updateBubbleCard() {
 
@@ -198,6 +193,19 @@ class BubbleCard extends HTMLElement {
             case 'climate':
                 return 1;
         }
+    }
+
+    getGridOptions() {
+        const currentColumns = this.config.columns;
+        const convertedColumns = currentColumns ? currentColumns * 3 : 12;
+        let LovelaceGridOptions = { columns: convertedColumns };
+
+        switch (this.config.card_type) {
+            case 'horizontal-buttons-stack':
+                LovelaceGridOptions = { rows: 1.3 };
+                break;
+        }
+        return LovelaceGridOptions;
     }
 
     static getConfigElement() {

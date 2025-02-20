@@ -442,6 +442,7 @@ export function isEntityType(context, entityType) {
 
 export function isStateOn(context, entity = context.config.entity) {
     const state = getState(context, entity).toLowerCase();
+    const card = context.card;
     const numericState = Number(state);
     const activeStringStates = [
         'on', 
@@ -473,9 +474,17 @@ export function isStateOn(context, entity = context.config.entity) {
     ];
 
     if (activeStringStates.includes(state) || numericState > 0) {
+        if (!card.classList.contains('is-on')) {
+          card.classList.remove('is-off');
+          card.classList.add('is-on');
+        }
         return true;
     }
 
+    if (!card.classList.contains('is-off')) {
+      card.classList.remove('is-on');
+      card.classList.add('is-off');
+    }
     return false;
 }
 

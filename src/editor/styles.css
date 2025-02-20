@@ -157,9 +157,13 @@ h3 {
 
 .icon-button.header {
   background: none;
-  margin-left: auto !important;
   padding: 0;
-  margin: 0 8px;
+  margin: 0 4px;
+}
+
+.button-container {
+    display: flex;
+    margin-left: auto !important;
 }
 
 ha-card-conditions-editor {

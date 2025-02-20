@@ -16,6 +16,7 @@ import { renderSelectEditor } from '../cards/select/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
 import { renderEmptyColumnEditor } from '../cards/empty-column/editor.js';
 import { yamlKeysMap, loadYAMLStyles } from '../tools/style-utils.js'
+import { checkConditionsMet } from '../tools/validate-condition.js';
 import styles from './styles.css'
 
 class BubbleCardEditor extends LitElement {
@@ -572,15 +573,17 @@ class BubbleCardEditor extends LitElement {
                 <h4 slot="header">
                     <ha-icon icon="mdi:border-radius"></ha-icon>
                     ${this._config.sub_button[index] ? "Button " + (index + 1) + (subButton.name ? " - " + subButton.name : "") : "New button"}
-                    <button class="icon-button header" @click="${removeSubButton}">
-                      <ha-icon icon="mdi:delete"></ha-icon>
-                    </button>
-                    ${index > 0 ? html`<button class="icon-button header" @click="${moveSubButtonLeft}">
-                      <ha-icon icon="mdi:arrow-left"></ha-icon>
-                    </button>` : ''}
-                    ${index < this._config.sub_button.length - 1 ? html`<button class="icon-button header" @click="${moveSubButtonRight}">
-                      <ha-icon icon="mdi:arrow-right"></ha-icon>
-                    </button>` : ''}
+                    <div class="button-container">
+                        <button class="icon-button header" @click="${removeSubButton}">
+                          <ha-icon icon="mdi:delete"></ha-icon>
+                        </button>
+                        ${index > 0 ? html`<button class="icon-button header" @click="${moveSubButtonLeft}">
+                          <ha-icon icon="mdi:arrow-left"></ha-icon>
+                        </button>` : ''}
+                        ${index < this._config.sub_button.length - 1 ? html`<button class="icon-button header" @click="${moveSubButtonRight}">
+                          <ha-icon icon="mdi:arrow-right"></ha-icon>
+                        </button>` : ''}
+                    </div>
                 </h4>
                 <div class="content">
                     <ha-expansion-panel outlined>
@@ -765,64 +768,101 @@ class BubbleCardEditor extends LitElement {
         `;
     }
 
-    _valueChangedForTemplate(e, key) {
-      const newValue = e.detail.value;
-      let finalValue = newValue;
+    _getProcessedSchema(key, originalSchema, config) {
+      if (this._processedSchemas && this._processedSchemas[key]) {
+        return this._processedSchemas[key];
+      }
+      const schemaCopy = structuredClone(originalSchema);
+      const updatedSchema = this._updateAttributeSelectors(schemaCopy, config, key);
+      this._processedSchemas = { ...this._processedSchemas, [key]: updatedSchema };
+      return updatedSchema;
+    }
 
-      if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
-        const keys = Object.keys(newValue);
+    _valueChangedInHaForm(e, key, originalSchema) {
+      let value = e.detail.value;
+
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const keys = Object.keys(value);
         if (keys.length > 0 && keys.every(k => !isNaN(parseInt(k, 10)))) {
-          finalValue = keys
+          value = keys
             .sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
-            .map(k => newValue[k]);
+            .map(k => value[k]);
         }
       }
 
-      this._config = {
-        ...this._config,
-        [key]: finalValue,
-      };
+      value = this._cleanEmpty(value, key);
+
+      if (this._isEmpty(value)) {
+        if (this._config && this._config.hasOwnProperty(key)) {
+          const { [key]: removed, ...rest } = this._config;
+          this._config = rest;
+        }
+      } else {
+        this._config = { ...this._config, [key]: value };
+      }
+
+      const newProcessedSchema = structuredClone(originalSchema);
+      const updatedSchema = this._updateAttributeSelectors(newProcessedSchema, this._config[key], key);
+      this._processedSchemas = { ...this._processedSchemas, [key]: updatedSchema };
+
       fireEvent(this, "config-changed", { config: this._config });
       this.requestUpdate();
     }
 
+    _cleanEmpty(value, key) {
+      if (Array.isArray(value)) {
+        return value
+          .map(item => this._cleanEmpty(item, undefined))
+          .filter(item => !this._isEmpty(item));
+      } else if (value && typeof value === "object") {
+        const cleaned = {};
+        Object.keys(value).forEach(k => {
+          const cleanedValue = this._cleanEmpty(value[k], k);
+          if (!this._isEmpty(cleanedValue)) {
+            cleaned[k] = cleanedValue;
+          }
+        });
+        return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+      } else if (typeof value === 'string' && value === "") {
+        if (key !== 'state') {
+          return undefined;
+        }
+      }
+      return value;
+    }
+
+    _isEmpty(value) {
+      if (value === null || value === undefined) return true;
+      if (Array.isArray(value)) return value.length === 0;
+      if (typeof value === "object") return Object.keys(value).length === 0;
+      return false;
+    }
+
+    _updateAttributeSelectors = (schema, configData, inheritedEntity = undefined) => {
+      return schema.map(field => {
+        if (field.selector && field.selector.entity) {
+          if (configData && configData.entity) {
+            inheritedEntity = configData.entity;
+          } else {
+            inheritedEntity = undefined;
+          }
+        }
+
+        if (field.selector && field.selector.attribute) {
+          field.selector.attribute.entity_id = inheritedEntity;
+        }
+
+        const nestedConfig = configData && configData[field.name] ? configData[field.name] : configData;
+        if (Array.isArray(field.schema)) {
+          field.schema = this._updateAttributeSelectors(field.schema, nestedConfig, inheritedEntity);
+        }
+        return field;
+      });
+    };
+
     makeModulesEditor() {
       const resolvePath = (path, configData) => {
         return path.split('.').reduce((acc, part) => acc && acc[part], configData);
-      };
-
-      const processSchema = (schema, configData, baseKey = null) => {
-        return schema.map(field => {
-          if (
-            field.selector &&
-            field.selector.attribute &&
-            typeof field.selector.attribute.entity_id === 'string'
-          ) {
-            let ref = field.selector.attribute.entity_id;
-            let resolved;
-
-            if (ref.startsWith("config.")) {
-              ref = ref.slice("config.".length);
-              resolved = resolvePath(ref, this._config);
-            } else {
-              if (baseKey && ref.startsWith(baseKey + '.')) {
-                ref = ref.slice(baseKey.length + 1);
-              }
-              if (ref.includes('.')) {
-                resolved = resolvePath(ref, configData);
-              } else if (configData && ref in configData) {
-                resolved = configData[ref];
-              }
-            }
-            if (resolved !== undefined) {
-              field.selector.attribute.entity_id = resolved;
-            }
-          }
-          if (field.schema && Array.isArray(field.schema)) {
-            field.schema = processSchema(field.schema, configData, baseKey);
-          }
-          return field;
-        });
       };
 
       const getTextFromMap = (key) => {
@@ -846,28 +886,35 @@ class BubbleCardEditor extends LitElement {
         return { name, description, formSchema, unsupportedCard, moduleVersion, creator, moduleLink };
       };
 
+      // Add the 'default' key to the modules config to not have to enable it manually
+      if (!this._config.modules) {
+        // Ensure backward compatibility with betas
+        this._config.modules = this._config.style_templates || ['default'];
+        delete this._config.style_templates;
+
+        fireEvent(this, "config-changed", { config: this._config });
+        this.requestUpdate();
+      }
+
       const handleValueChanged = (event) => {
         const target = event.target;
         const value = target.configValue;
         const isChecked = target.checked;
 
-        if (!this._config.style_templates) {
-          this._config.style_templates = [];
-        }
-
         if (isChecked) {
-          if (!this._config.style_templates.includes(value)) {
-            this._config.style_templates = [...this._config.style_templates, value];
+          if (!this._config.modules.includes(value)) {
+            this._config.modules = [...this._config.modules, value];
           }
         } else {
-          this._config.style_templates = this._config.style_templates.filter((key) => key !== value);
+          this._config.modules = this._config.modules.filter((key) => key !== value);
         }
 
         fireEvent(this, "config-changed", { config: this._config });
         this.requestUpdate();
       };
 
-      const styleTemplates = this._config.style_templates || ['default'];
+      // Use "modules" as primary, fallback to "style_templates" for backward compatibility
+      const modules = this._config.modules || this._config.style_templates || ['default'];
 
       return html`
         <ha-expansion-panel outlined>
@@ -886,22 +933,15 @@ class BubbleCardEditor extends LitElement {
                 moduleLink,
                 moduleVersion
               } = getTextFromMap(key);
-              const isChecked = (this._config.style_templates || ['default']).includes(key);
+              const isChecked = this._config.modules.includes(key);
               const unsupported = unsupportedCard.includes(this._config.card_type ?? "");
-              let processedFormSchema = formSchema;
-              if (formSchema && formSchema.length > 0) {
-                processedFormSchema = processSchema(
-                  JSON.parse(JSON.stringify(formSchema)),
-                  this._config[key] || {},
-                  key
-                );
-              }
+              const config = this._config[key];
+              const processedFormSchema = (formSchema && formSchema.length > 0)
+                ? this._getProcessedSchema(key, formSchema, config)
+                : [];
 
               return html`
-                <ha-expansion-panel 
-                    outlined 
-                    class="${unsupported ? 'disabled' : ''}"
-                >
+                <ha-expansion-panel outlined class="${unsupported ? 'disabled' : ''}">
                   <h4 slot="header">
                     <ha-icon
                       icon="${isChecked ? 'mdi:puzzle-check' : 'mdi:puzzle-outline'}"
@@ -920,7 +960,14 @@ class BubbleCardEditor extends LitElement {
                     </ha-formfield>
                     <hr>
 
-                    ${processedFormSchema.length > 0
+                    <!-- Form init caché pour corriger les sélecteurs conditionnels -->
+                    <ha-form
+                      style="display: none"
+                      .hass=${this.hass}
+                      .schema=${[{ selector: { entity: { domain: ["input_number"] }}}]}
+                    ></ha-form>
+
+                    ${formSchema.length > 0
                       ? html`
                         <h4 class="${!isChecked ? 'disabled' : ''}">
                           <ha-icon icon="mdi:cog"></ha-icon>
@@ -929,14 +976,16 @@ class BubbleCardEditor extends LitElement {
                         <ha-form 
                           class="${!isChecked ? 'disabled' : ''}"
                           .hass=${this.hass}
-                          .data=${this._config[key]}
+                          .data=${config}
                           .schema=${processedFormSchema}
                           .computeLabel=${this._computeLabelCallback}
                           .disabled=${!isChecked}
-                          @value-changed=${(e) => this._valueChangedForTemplate(e, key)}
+                          @value-changed=${(e) =>
+                            this._valueChangedInHaForm(e, key, formSchema)
+                          }
                         ></ha-form>
                         <hr>
-                        `
+                      `
                     : ''}
 
                     <ha-alert alert-type="info" style="display: ${!description ? 'none' : ''}">
