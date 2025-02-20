@@ -1613,12 +1613,14 @@ styles: |
   }
   .bubble-button-card-container {
     background: none;
+    border: none;
   }
   .bubble-sub-button {
     height: 46px !important;
     width: 46px !important;
   }
   .bubble-sub-button-container {
+    display: flex !important;
     width: 100%;
     justify-content: space-between !important;
   }
