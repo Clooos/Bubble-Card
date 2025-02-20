@@ -5,9 +5,6 @@ import {
 import { checkConditionsMet } from '../tools/validate-condition.js';
 import * as YAML from 'js-yaml';
 
-// Hide body only once before all styles are loaded
-document.body.style.display = "none";
-
 export let yamlKeysMap = new Map();
 let stylesYAML;
 let yamlCache = new Map();
@@ -85,6 +82,10 @@ export const handleCustomStyles = async (context, element = context.card) => {
     context.initialLoad = true;
   }
 
+  if (context.initialLoad) {
+    card.style.display = "none";
+  }
+
   const styleElement = getOrCreateStyleElement(context, element);
   const parsedStyles = (await context.stylesYAML) || {};
 
@@ -115,7 +116,7 @@ export const handleCustomStyles = async (context, element = context.card) => {
   }
 
   if (context.initialLoad) {
-    document.body.style.display = "";
+    card.style.display = "";
     context.initialLoad = false;
     context.cardLoaded = true;
   }
