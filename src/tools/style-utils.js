@@ -1,5 +1,6 @@
 import { 
   getState, 
+  getSubButtonsStates,
   getWeatherIcon
 } from "../tools/utils.js";
 import { checkConditionsMet } from '../tools/validate-condition.js';
@@ -141,6 +142,7 @@ export function evalStyles(context, styles = "") {
         "hass",
         "entity",
         "state",
+        "subButtonStates",
         "icon",
         "subButtonIcon",
         "getWeatherIcon",
@@ -157,6 +159,7 @@ export function evalStyles(context, styles = "") {
       context._hass,
       context.config.entity,
       getState(context),
+      getSubButtonsStates(context),
       context.elements.icon,
       context.subButtonIcon,
       getWeatherIcon,
