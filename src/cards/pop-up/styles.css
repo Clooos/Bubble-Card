@@ -195,7 +195,8 @@
 
 .rows-2 .bubble-sub-button-container {
   flex-direction: column;
-  gap: 4px !important;
+  row-gap: calc( ( ( var(--row-height,56px) - 40px ) * var(--row-size,1) + var(--row-gap, 8px) * ( var(--row-size,1) - 1 ) ) / ( 2*var(--row-size,1) + 2 ));
+  column-gap: 4px !important;
   display: grid !important;
   grid-template-columns: repeat(1, min-content);
   grid-template-rows: repeat(calc(2*var(--row-size,1)), 1fr);
