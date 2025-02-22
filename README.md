@@ -1189,12 +1189,12 @@ Bubble Card fully supports the Home Assistant section view, you can change the c
 | Layout | Description |
 | --- | --- |
 | `normal` | The regular layout (not optimized for the section view) |
-| `large` | A larger layout (optimized for the section view) |
-| `large-2-rows` | A larger layout with 2 rows of sub-buttons (optimized for the section view) |
+| `large` | A larger layout that will resize to the selected rows in the section view (optimized for the section view) |
+| `large-2-rows` | A larger layout with 2 rows of sub-buttons  that will resize to the selected rows in the section view (optimized for the section view) |
 
 </details>
 
-#### Example
+#### Examples
 
 <details>
 
@@ -1234,6 +1234,50 @@ sub_button:
     show_state: true
     show_background: false
     icon: mdi:calendar-week
+```
+
+</details>
+
+
+<summary>A large button with multiple rows with 12 sub-buttons</summary>
+
+<br>
+
+<img width="547" alt="image" src="/img/Example_Layout_Large_multi-row.png">
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+entity: sun.sun
+sub_button:
+  - entity: sun.sun
+    icon: mdi:numeric-0
+  - entity: sun.sun
+    icon: mdi:numeric-1
+  - entity: sun.sun
+    icon: mdi:numeric-2
+  - entity: sun.sun
+    icon: mdi:numeric-3
+  - entity: sun.sun
+    icon: mdi:numeric-4
+  - entity: sun.sun
+    icon: mdi:numeric-5
+  - entity: sun.sun
+    icon: mdi:numeric-6
+  - entity: sun.sun
+    icon: mdi:numeric-7
+  - entity: sun.sun
+    icon: mdi:numeric-8
+  - entity: sun.sun
+    icon: mdi:numeric-9
+  - entity: sun.sun
+    icon: mdi:numeric-10
+  - entity: sun.sun
+    icon: mdi:numeric-negative-1
+card_layout: large
+grid_options:
+  rows: 3
 ```
 
 </details>
