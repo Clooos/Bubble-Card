@@ -13,6 +13,7 @@
     --vertical-stack-card-gap: var(--bubble-pop-up-gap, 14px);
     --horizontal-stack-card-gap: var(--bubble-pop-up-gap, 14px);
     --stack-card-gap: var(--bubble-pop-up-gap, 14px);
+    --row-size: 1;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
     overflow-y: auto; 
