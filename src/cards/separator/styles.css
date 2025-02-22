@@ -35,7 +35,11 @@
 }
 
 .large .bubble-separator {
-    height: 56px;
+    height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
+}
+
+.large .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
+    grid-row: 1 / calc(var(--row-size,1) + 1);
 }
 
 .rows-2 .bubble-sub-button-container {
@@ -50,4 +54,8 @@
 
 .rows-2 .bubble-sub-button {
     height: 20px !important;
+}
+
+.large.rows-2 .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
+    grid-row: 1 / calc(2*var(--row-size,1) + 1);
 }
