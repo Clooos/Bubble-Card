@@ -393,6 +393,7 @@ const subButtonsStyles = `
     }
     .large .bubble-sub-button-container{
         display: grid;
+        row-gap: calc( ( ( var(--row-height,56px) - 36px ) * var(--row-size,1) + var(--row-gap, 8px) * ( var(--row-size,1) - 1 ) ) / ( var(--row-size,1) + 1 ));
         grid-template-rows: repeat(var(--row-size,1), 1fr);
         grid-template-columns: repeat(1, 1fr);
         grid-auto-flow: column;
