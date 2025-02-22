@@ -1238,6 +1238,7 @@ sub_button:
 
 </details>
 
+<details>
 
 <summary>A large button with multiple rows with 12 sub-buttons</summary>
 
