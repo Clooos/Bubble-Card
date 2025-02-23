@@ -25,6 +25,7 @@ export function changeState(context) {
     const state = context._hass.states[context.config.entity];
     const attribute = getAttribute(context, context.config.attribute, context.config.entity);
     const lastChanged = state?.last_changed;
+    const lastUpdated = state?.last_updated;
 
     const buttonType = context.config.button_type;
     const defaultShowState = buttonType === 'state';
@@ -32,7 +33,8 @@ export function changeState(context) {
     const showIcon = context.config.show_icon ?? true;
     const showState = context.config.show_state ?? defaultShowState;
     const showAttribute = context.config.show_attribute ?? defaultShowState;
-    const showLastChanged = context.config.show_last_changed ?? context.config.show_last_updated ?? false;
+    const showLastChanged = context.config.show_last_changed ?? false;
+    const showLastUpdated = context.config.show_last_updated ?? false;
     const scrollingEffect = context.config.scrolling_effect ?? true;
 
     const previousConfig = context.previousConfig || {};
@@ -41,11 +43,13 @@ export function changeState(context) {
         context.previousState !== state ||
         context.previousAttribute !== attribute ||
         context.previousLastChanged !== lastChanged ||
+        context.previousLastUpdated !== lastUpdated ||
         previousConfig.showName !== showName ||
         previousConfig.showIcon !== showIcon ||
         previousConfig.showState !== showState ||
         previousConfig.showAttribute !== showAttribute ||
         previousConfig.showLastChanged !== showLastChanged ||
+        previousConfig.showLastUpdated !== showLastUpdated ||
         previousConfig.scrollingEffect !== scrollingEffect
     );
 
@@ -54,6 +58,7 @@ export function changeState(context) {
     let formattedState = state && showState ? context._hass.formatEntityState(state) : '';
     let formattedAttribute = '';
     let formattedLastChanged = '';
+    let formattedLastUpdated = '';
     let displayedState = '';
 
     function capitalizeFirstLetter(string) {
@@ -70,6 +75,12 @@ export function changeState(context) {
         ) : '';
     }
 
+    if (showLastUpdated && state) {
+        formattedLastUpdated = state ? capitalizeFirstLetter(
+            formatDateTime(lastUpdated, context._hass.locale.language)
+        ) : '';
+    }
+
     if (!context.elements.stateStyles) {
         context.elements.stateStyles = createElement('style');
         context.elements.stateStyles.textContent = stateStyles;
@@ -80,16 +91,16 @@ export function changeState(context) {
         }
     }
 
-    displayedState = [formattedState, formattedAttribute, formattedLastChanged]
+    displayedState = [formattedState, formattedAttribute, formattedLastChanged, formattedLastUpdated]
         .filter(Boolean)
         .join(' • ');
 
     context.elements.name.classList.toggle('hidden', !showName);
     context.elements.iconContainer.classList.toggle('hidden', !showIcon);
     context.elements.nameContainer.classList.toggle('name-without-icon', !showIcon);
-    context.elements.state.classList.toggle('state-without-name', (showState || showLastChanged || showAttribute) && !showName);
-    context.elements.state.classList.toggle('display-state', showState || showLastChanged || showAttribute);
-    context.elements.state.classList.toggle('hidden', !(showState || showLastChanged || showAttribute));
+    context.elements.state.classList.toggle('state-without-name', (showState || showLastChanged || showLastUpdated || showAttribute) && !showName);
+    context.elements.state.classList.toggle('display-state', showState || showLastChanged || showLastUpdated || showAttribute);
+    context.elements.state.classList.toggle('hidden', !(showState || showLastChanged || showLastUpdated || showAttribute));
 
     applyScrollingEffect(context, context.elements.state, displayedState);
     
@@ -102,6 +113,7 @@ export function changeState(context) {
         showState,
         showAttribute,
         showLastChanged,
+        showLastUpdated,
         scrollingEffect,
     };
 }
@@ -169,7 +181,8 @@ export function changeSubButtonState(context, container = context.content, appen
             const showName = subButton.show_name ?? false;
             const showState = subButton.show_state ?? false;
             const showAttribute = subButton.show_attribute ?? false;
-            const showLastChanged = (subButton.show_last_changed || subButton.show_last_updated) ?? false;
+            const showLastChanged = subButton.show_last_changed ?? false;
+            const showLastUpdated = subButton.show_last_updated ?? false;
             const showIcon = subButton.show_icon ?? true;
             const showBackground = subButton.show_background ?? true;
             const stateBackground = subButton.state_background ?? true;
@@ -324,10 +337,12 @@ export function changeSubButtonState(context, container = context.content, appen
             const formattedState = state && showState ? context._hass.formatEntityState(state) : '';
             const formattedAttribute = state && attribute !== '' && showAttribute ? context._hass.formatEntityAttributeValue(state, attributeType) ?? attribute : '';
             const formattedLastChanged = state && showLastChanged ? formatDateTime(state.last_changed, context._hass.locale.language) : '';
+            const formattedLastUpdated = state && showLastUpdated ? formatDateTime(state.last_updated, context._hass.locale.language) : '';
 
             if (showName && name !== '') displayedState += name;
             if (formattedState !== '') displayedState += (displayedState ? ' · ' : '') + formattedState;
             if (formattedLastChanged !== '') displayedState += (displayedState ? ' · ' : '') + formattedLastChanged;
+            if (formattedLastUpdated !== '') displayedState += (displayedState ? ' · ' : '') + formattedLastUpdated;
             if (formattedAttribute !== '') displayedState += (displayedState ? ' · ' : '') + formattedAttribute;
 
             displayedState = displayedState.charAt(0).toUpperCase() + displayedState.slice(1);
