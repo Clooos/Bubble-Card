@@ -106,9 +106,9 @@ export const handleCustomStyles = async (context, element = context.card) => {
     combinedStyles = tmpl;
   }
 
-  const evaluatedCustomStyles = evalStyles(context, customStyles);
   const evaluatedCombinedStyles = evalStyles(context, combinedStyles);
-  const finalStyles = `${evaluatedCustomStyles}\n${evaluatedCombinedStyles}`.trim();
+  const evaluatedCustomStyles = evalStyles(context, customStyles);
+  const finalStyles = `${evaluatedCombinedStyles}\n${evaluatedCustomStyles}`.trim();
 
   if (finalStyles !== context.lastEvaluatedStyles) {
     styleElement.textContent = finalStyles;
