@@ -1,7 +1,7 @@
-import { changeState, changeSubButtonState } from "../../tools/global-changes.js";
+import { changeState, changeIcon, changeName, changeStatus } from "../../components/base-card/changes.js";
+import { changeSubButtons } from "../../components/sub-button/changes.js";
 import {
-  changeIcon,
-  changeName,
+  changeCoverIcons,
   changeStyle,
 } from './changes.js'
 import { createStructure } from './create.js';
@@ -11,9 +11,11 @@ export function handleCover(context) {
         createStructure(context);
     }
 
+    changeStatus(context);
     changeIcon(context);
     changeName(context);
     changeState(context);
-    changeSubButtonState(context, context.content, context.elements.headerContainer);
+    changeCoverIcons(context);
+    changeSubButtons(context);
     changeStyle(context);
 }

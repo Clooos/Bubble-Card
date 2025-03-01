@@ -1,0 +1,22 @@
+.bubble-range-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    left: -100%;
+    transition: all .3s;
+    z-index: 0;
+}
+
+.is-dragging .bubble-range-fill {
+    transition: none;
+}
+
+.is-light .bubble-range-fill {
+    opacity: 0.5;
+}
+
+.is-unavailable .bubble-range-slider {
+    cursor: not-allowed;
+}

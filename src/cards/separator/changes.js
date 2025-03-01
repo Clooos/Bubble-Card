@@ -1,6 +1,6 @@
-import { getIcon, getName, getState, getWeatherIcon, setLayout } from "../../tools/utils.js";
-import { initializesubButtonIcon } from '../../tools/global-changes.js';
-import { handleCustomStyles } from '../../tools/style-utils.js';
+import { getName, setLayout } from "../../tools/utils.js";
+import { getIcon } from '../../tools/icon.js';
+import { handleCustomStyles } from '../../tools/style-processor.js';
 
 export function changeIcon(context) {
   context.elements.icon.icon = getIcon(context);
@@ -19,7 +19,6 @@ export function changeName(context) {
   }
 }
 export function changeStyle(context) {
-    initializesubButtonIcon(context);
     setLayout(context);
     handleCustomStyles(context);
 }

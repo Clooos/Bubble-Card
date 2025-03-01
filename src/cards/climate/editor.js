@@ -2,6 +2,8 @@ import { html } from "lit";
 
 
 export function renderClimateEditor(editor){
+    let button_action = editor._config.button_action || '';
+
     if (
         editor._config.card_type === "climate" && 
         !editor.climateSubButtonsAdded &&
@@ -100,6 +102,17 @@ export function renderClimateEditor(editor){
                     ${editor.makeActionPanel("Tap action")}
                     ${editor.makeActionPanel("Double tap action")}
                     ${editor.makeActionPanel("Hold action")}
+                </div>
+            </ha-expansion-panel>
+            <ha-expansion-panel outlined style="display: ${editor._config.button_type === 'slider' ? 'none' : ''}">
+                <h4 slot="header">
+                <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                Tap action on card
+                </h4>
+                <div class="content">
+                    ${editor.makeActionPanel("Tap action", button_action, 'more-info', 'button_action')}
+                    ${editor.makeActionPanel("Double tap action", button_action, 'toggle', 'button_action')}
+                    ${editor.makeActionPanel("Hold action", button_action, 'toggle', 'button_action')}
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>

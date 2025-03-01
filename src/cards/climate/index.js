@@ -1,21 +1,15 @@
-import { changeState, changeSubButtonState } from "../../tools/global-changes.js";
+import { changeState, changeIcon, changeName, changeStatus } from "../../components/base-card/changes.js";
+import { changeSubButtons } from "../../components/sub-button/changes.js";
 import {
-    changeStatus,
-    changeName,
     changeTemperature,
     changeTargetTempLow,
     changeTargetTempHigh,
-    changeDisplayedInfo,
-    changeIcon,
-    changeSlider,
     changeStyle
 } from './changes.js';
-import {
-    createStructure
-} from './create.js';
+import { createStructure } from './create.js';
 
 export function handleClimate(context) {
-    if (context.cardType !== `climate`) {
+    if (context.cardType !== 'climate') {
         createStructure(context);
     }
 
@@ -26,6 +20,6 @@ export function handleClimate(context) {
     changeTemperature(context);
     changeTargetTempLow(context);
     changeTargetTempHigh(context);
-    changeSubButtonState(context, context.content, context.elements.buttonContainer, true);
+    changeSubButtons(context);
     changeStyle(context);
 }

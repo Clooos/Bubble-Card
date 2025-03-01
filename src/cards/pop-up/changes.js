@@ -1,10 +1,7 @@
-import { isColorCloseToWhite } from "../../tools/style.js";
-import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isStateOn, getWeatherIcon, fireEvent } from "../../tools/utils.js";
 import { getBackdrop } from "./create.js";
 import { addHash, onEditorChange, removeHash, toggleBodyScroll } from "./helpers.js";
-import { initializesubButtonIcon } from '../../tools/global-changes.js';
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.js';
-import { handleCustomStyles } from '../../tools/style-utils.js';
+import { handleCustomStyles } from '../../tools/style-processor.js';
 
 export function changeEditor(context) {
     if (!context.verticalStack) return;
@@ -58,13 +55,12 @@ export function changeEditor(context) {
 }
 
 export function changeStyle(context) {
-    initializesubButtonIcon(context);
     const { backdropCustomStyle } = getBackdrop(context);
 
     handleCustomStyles(context, context.popUp);
     handleCustomStyles(context, backdropCustomStyle);
 
-    const layoutClass = context.config.card_layout;
+    const layoutClass = context.config.card_layout ?? 'large';
     const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows';
     const needsRows2 = layoutClass === 'large-2-rows';
 

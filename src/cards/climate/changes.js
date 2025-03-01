@@ -1,93 +1,12 @@
-import { initializesubButtonIcon } from '../../tools/global-changes.js';
 import { 
     getClimateColor, 
-    getHvacModeIcon, 
-    getFanModeIcon, 
-    createHaAttributeIcon 
 } from './helpers.js';
 import { 
-    applyScrollingEffect,
-    getIcon,
-    getIconColor,
-    getImage,
-    getName,
     getState,
     getAttribute,
-    getWeatherIcon,
-    isEntityType,
-    isStateOn,
     setLayout
 } from '../../tools/utils.js';
-import { handleCustomStyles } from '../../tools/style-utils.js';
-
-export function changeIcon(context) {
-    const isOn = isStateOn(context);
-    const newIcon = getIcon(context);
-    const newImage = getImage(context);
-
-    const currentImage = context.elements.image.style.backgroundImage;
-    const currentIcon = context.elements.icon.icon;
-    const currentIconColor = context.elements.icon.style.color;
-
-    if (newImage !== '') {
-        const newBackgroundImage = 'url(' + newImage + ')';
-        if (currentImage !== newBackgroundImage) {
-            context.elements.image.style.backgroundImage = newBackgroundImage;
-        }
-        if (context.elements.icon.style.display !== 'none') {
-            context.elements.icon.style.display = 'none';
-        }
-        if (context.elements.image.style.display !== '') {
-            context.elements.image.style.display = '';
-        }
-    } else if (newIcon !== '') {
-        if (currentIcon !== newIcon) {
-            context.elements.icon.icon = newIcon;
-        }
-        const newColor = isOn ? `${getClimateColor(context)}` : 'inherit';
-        if (currentIconColor !== newColor) {
-            context.elements.icon.style.color = newColor;
-        }
-        if (context.elements.icon.style.display !== '') {
-            context.elements.icon.style.display = '';
-        }
-        if (context.elements.image.style.display !== 'none') {
-            context.elements.image.style.display = 'none';
-        }
-    } else {
-        if (context.elements.icon.style.display !== 'none') {
-            context.elements.icon.style.display = 'none';
-        }
-        if (context.elements.image.style.display !== 'none') {
-            context.elements.image.style.display = 'none';
-        }
-    }
-}
-
-export function changeName(context) {
-    const name = getName(context);
-    if (name !== context.previousName && context.elements.name) {
-        context.elements.name.innerText = name;
-        context.previousName = name;
-        applyScrollingEffect(context, context.elements.name, name);
-    }
-}
-
-export function changeStatus(context) {
-    const state = getState(context);
-
-    if (state === 'unavailable') {
-        context.card.classList.add('is-unavailable');
-    } else {
-        context.card.classList.remove('is-unavailable');
-    }
-
-    if (isStateOn(context)) {
-        context.card.classList.add('is-on');
-    } else {
-        context.card.classList.remove('is-on');
-    }
-}
+import { handleCustomStyles } from '../../tools/style-processor.js';
 
 export function changeTemperature(context) {
     const temperature = getAttribute(context, "temperature");
@@ -149,7 +68,6 @@ export function changeTargetTempHigh(context) {
 }
 
 export function changeStyle(context) {
-    initializesubButtonIcon(context);
     setLayout(context);
     handleCustomStyles(context);
 
@@ -157,7 +75,7 @@ export function changeStyle(context) {
 
     if (context.previousState !== state) {
         context.previousState = state;
-        const element = context.elements.colorBackground;
+        const element = context.elements.background;
         element.style.backgroundColor = `var(--bubble-climate-background-color, ${getClimateColor(context)})`;
     }
 

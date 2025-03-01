@@ -15,8 +15,7 @@ import { renderClimateEditor } from '../cards/climate/editor.js';
 import { renderSelectEditor } from '../cards/select/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
 import { renderEmptyColumnEditor } from '../cards/empty-column/editor.js';
-import { yamlKeysMap, loadYAMLStyles } from '../tools/style-utils.js'
-import { checkConditionsMet } from '../tools/validate-condition.js';
+import { yamlKeysMap } from '../tools/style-processor.js'
 import styles from './styles.css'
 
 class BubbleCardEditor extends LitElement {
@@ -412,7 +411,7 @@ class BubbleCardEditor extends LitElement {
                 <div class="ha-icon-picker">
                     <ha-icon-picker
                         label="${label}"
-                        .value="${this['_' + configValue]}"
+                        .value="${this._config[configValue]}"
                         .configValue="${configValue}"
                         item-value-path="icon"
                         item-label-path="icon"

@@ -1,88 +1,29 @@
-import { initializesubButtonIcon } from '../../tools/global-changes.js';
 import { 
     applyScrollingEffect,
-    getBrightness,
-    getIcon,
-    getIconColor,
-    getImage,
-    getName,
     getState,
     getAttribute,
-    isEntityType,
     isStateOn,
-    getWeatherIcon,
     setLayout
 } from '../../tools/utils.js';
-import { handleCustomStyles } from '../../tools/style-utils.js';
-
-export function changeIcon(context) {
-    const isOn = isStateOn(context);
-    const newIcon = getIcon(context);
-    const newImage = getImage(context);
-
-    const currentImage = context.elements.image.style.backgroundImage;
-    const currentIcon = context.elements.icon.icon;
-    const currentIconColor = context.elements.icon.style.color;
-
-    if (newImage !== '') {
-        const newBackgroundImage = 'url(' + newImage + ')';
-        if (currentImage !== newBackgroundImage) {
-            context.elements.image.style.backgroundImage = newBackgroundImage;
-        }
-        if (context.elements.icon.style.display !== 'none') {
-            context.elements.icon.style.display = 'none';
-        }
-        if (context.elements.image.style.display !== '') {
-            context.elements.image.style.display = '';
-        }
-    } else if (newIcon !== '') {
-        if (currentIcon !== newIcon) {
-            context.elements.icon.icon = newIcon;
-        }
-        const newColor = isOn ? 'var(--accent-color)' : 'inherit';
-        if (currentIconColor !== newColor) {
-            context.elements.icon.style.color = newColor;
-        }
-        if (context.elements.icon.style.display !== '') {
-            context.elements.icon.style.display = '';
-        }
-        if (context.elements.image.style.display !== 'none') {
-            context.elements.image.style.display = 'none';
-        }
-    } else {
-        if (context.elements.icon.style.display !== 'none') {
-            context.elements.icon.style.display = 'none';
-        }
-        if (context.elements.image.style.display !== 'none') {
-            context.elements.image.style.display = 'none';
-        }
-    }
-}
+import { getImage } from '../../tools/icon.js';
+import { updateSlider } from '../../components/slider/changes.js';
+import { handleCustomStyles } from '../../tools/style-processor.js';
 
 export function changeBackground(context) {
     const isOn = isStateOn(context);
     const newMediaCover = getImage(context);
     const coverBackground = context.config.cover_background;
-    const currentCoverBackground = context.elements.coverBackground.style.backgroundImage;
+    const currentCoverBackground = context.elements.background.style.backgroundImage;
 
     if (coverBackground && isOn && newMediaCover) {
         const newBackgroundImage = 'url(' + newMediaCover + ')';
         if (currentCoverBackground !== newBackgroundImage) {
-            context.elements.coverBackground.style.backgroundImage = newBackgroundImage;
+            context.elements.background.style.backgroundImage = newBackgroundImage;
         }
     } else {
         if (currentCoverBackground !== '') {
-            context.elements.coverBackground.style.backgroundImage = '';
+            context.elements.background.style.backgroundImage = '';
         }
-    }
-}
-
-export function changeName(context) {
-    const name = getName(context);
-    if (name !== context.previousName) {
-        context.elements.name.innerText = name;
-        context.previousName = name;
-        applyScrollingEffect(context, context.elements.name, name);
     }
 }
 
@@ -115,26 +56,9 @@ export function changeDisplayedInfo(context) {
 }
 
 export function changeSlider(context) {
-    if (isEntityType(context, "media_player") && context.dragging === false && context.elements.rangeFill) {
-        const percentage = 100 * getAttribute(context, "volume_level");
-        context.elements.rangeFill.style.transform =`translateX(${percentage}%)`;
-    }
-}
+    if (!context.elements.rangeFill) return;
 
-export function changeStatus(context) {
-    const state = getState(context);
-
-    if (state === 'unavailable') {
-        context.card.classList.add('is-unavailable');
-    } else {
-        context.card.classList.remove('is-unavailable');
-    }
-
-    if (isStateOn(context)) {
-        context.card.classList.add('is-on');
-    } else {
-        context.card.classList.remove('is-on');
-    }
+    updateSlider(context);
 }
 
 export function changePlayPauseIcon(context) {
@@ -190,7 +114,6 @@ export function changeMuteIcon(context) {
 }
 
 export function changeStyle(context) {
-    initializesubButtonIcon(context);
     setLayout(context);
     handleCustomStyles(context);
 

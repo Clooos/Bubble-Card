@@ -1,27 +1,29 @@
+import { createBaseStructure } from "../../components/base-card/index.js";
 import { createElement } from "../../tools/utils.js";
-import { addActions } from "../../tools/tap-actions.js";
 import styles from "./styles.css";
 
 export function createStructure(context) {
-  context.elements = {};
-  context.elements.separatorCard = createElement('div', 'bubble-separator separator-container');
+  const cardType = 'separator';
 
+  context.elements = {};
+  context.elements.mainContainer = createElement('div', 'bubble-container bubble-separator separator-container');
   context.elements.icon = createElement('ha-icon', 'bubble-icon');
   context.elements.name = createElement('h4', 'bubble-name');
   context.elements.line = createElement('div', 'bubble-line');
+  //context.elements.subButtonContainer = createElement('div', 'bubble-sub-button-container');
 
-  context.elements.style = createElement('style');
-  context.elements.style.innerText = styles;
-  context.elements.customStyle = createElement('style');
+  context.elements.mainContainer.appendChild(context.elements.icon);
+  context.elements.mainContainer.appendChild(context.elements.name);
+  context.elements.mainContainer.appendChild(context.elements.line);
+  //context.elements.mainContainer.appendChild(context.elements.subButtonContainer);
 
-  context.elements.separatorCard.appendChild(context.elements.icon);
-  context.elements.separatorCard.appendChild(context.elements.name);
-  context.elements.separatorCard.appendChild(context.elements.line);
+  const elements = createBaseStructure(context, {
+    type: cardType,
+    styles: styles,
+    withBaseElements: false,
+    withSubButtons: true,
+    iconActions: false
+  });
 
-  context.content.innerHTML = '';
-  context.content.appendChild(context.elements.separatorCard);
-  context.content.appendChild(context.elements.style);
-  context.content.appendChild(context.elements.customStyle);
-
-  context.cardType = "separator";
+  context.cardType = cardType;
 }

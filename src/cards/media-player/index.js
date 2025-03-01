@@ -1,10 +1,8 @@
-import { changeState, changeSubButtonState } from "../../tools/global-changes.js";
+import { changeState, changeIcon, changeName, changeStatus } from "../../components/base-card/changes.js";
+import { changeSubButtons } from "../../components/sub-button/changes.js";
 import {
-    changeStatus,
-    changeName,
     changeMediaInfo,
     changeDisplayedInfo,
-    changeIcon,
     changeBackground,
     changeSlider,
     changePlayPauseIcon,
@@ -12,11 +10,7 @@ import {
     changePowerIcon,
     changeStyle
 } from './changes.js';
-import {
-    createSmallStructure,
-    createLargeStructure,
-    createStructure
-} from './create.js';
+import { createStructure } from './create.js';
 
 export function handleMediaPlayer(context) {
     if (context.cardType !== `media-player`) {
@@ -34,6 +28,6 @@ export function handleMediaPlayer(context) {
     changePlayPauseIcon(context);
     changeMuteIcon(context);
     changePowerIcon(context);
-    changeSubButtonState(context, context.content, context.elements.buttonContainer, true);
+    changeSubButtons(context);
     changeStyle(context);
 }

@@ -17,38 +17,41 @@ function disableActionsDuringScroll() {
 
 document.addEventListener('scroll', disableActionsDuringScroll, { passive: true });
 
-// Global event listener
-document.body.addEventListener('pointerdown', (event) => {
-  if (window.isScrolling) return; // Do nothing if scrolling is active
+const actionHandler = new WeakMap();
 
-  const path = event.composedPath();
-  let actionElement = null;
+function handlePointerDown(event) {
+  if (window.isScrolling) return;
 
-  for (const element of path) {
-    if (element.classList && element.classList.contains('bubble-action')) {
-      actionElement = element;
-      break;
-    }
+  const actionElement = event.composedPath().find(element => 
+    element.classList?.contains('bubble-action')
+  );
+
+  if (!actionElement) return;
+
+  const config = {
+    tap_action: JSON.parse(actionElement.dataset.tapAction),
+    double_tap_action: JSON.parse(actionElement.dataset.doubleTapAction),
+    hold_action: JSON.parse(actionElement.dataset.holdAction),
+    entity: actionElement.dataset.entity,
+  };
+
+  if (!actionHandler.has(actionElement)) {
+    actionHandler.set(actionElement, new ActionHandler(actionElement, config, sendActionEvent));
   }
 
-  if (actionElement) {
-    const config = {
-      tap_action: JSON.parse(actionElement.dataset.tapAction),
-      double_tap_action: JSON.parse(actionElement.dataset.doubleTapAction),
-      hold_action: JSON.parse(actionElement.dataset.holdAction),
-      entity: actionElement.dataset.entity,
-    };
+  const handler = actionHandler.get(actionElement);
+  handler.handleStart(event);
 
-    if (!actionElement.actionHandler) {
-      actionElement.actionHandler = new ActionHandler(actionElement, config, sendActionEvent);
-    }
+  const cleanup = () => {
+    actionElement.removeEventListener('pointerup', handler.handleEnd);
+    document.removeEventListener('scroll', handler.handleScroll);
+  };
 
-    actionElement.actionHandler.handleStart(event);
+  actionElement.addEventListener('pointerup', handler.handleEnd.bind(handler), { once: true });
+  document.addEventListener('scroll', handler.handleScroll.bind(handler), { once: true });
+}
 
-    actionElement.addEventListener('pointerup', actionElement.actionHandler.handleEnd.bind(actionElement.actionHandler), { once: true });
-    document.addEventListener('scroll', actionElement.actionHandler.handleScroll.bind(actionElement.actionHandler), { once: true });
-  }
-}, { passive: true });
+document.body.addEventListener('pointerdown', handlePointerDown, { passive: true });
 
 export function callAction(element, actionConfig, action) {
   setTimeout(() => {

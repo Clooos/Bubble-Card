@@ -1,16 +1,9 @@
-import { changeState, changeSubButtonState } from "../../tools/global-changes.js";
-import {
-    changeStatus,
-    changeName,
-    changeIcon,
-    changeStyle,
-    changeDropdownList
-} from './changes.js'
-import {
-    createStructure,
-    createDropdownStructure,
-    createDropdownActions
-} from './create.js';
+import { changeState, changeIcon, changeName, changeStatus } from "../../components/base-card/changes.js";
+import { changeSubButtons } from "../../components/sub-button/changes.js";
+import { createDropdownStructure, createDropdownActions } from "../../components/dropdown/index.js";
+import { changeDropdownList } from "../../components/dropdown/changes.js";
+import { changeStyle } from './changes.js'
+import { createStructure } from './create.js';
 
 export function handleSelect(context) {
     const cardType = context.cardType;
@@ -26,6 +19,6 @@ export function handleSelect(context) {
     changeIcon(context);
     changeName(context);
     changeState(context);
-    changeSubButtonState(context, context.content, context.elements.dropdownContainer, true);
+    changeSubButtons(context);
     changeStyle(context);
 }

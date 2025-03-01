@@ -1,14 +1,9 @@
 import { 
-    getName, 
-    getState, 
     getAttribute, 
-    getIcon, 
-    applyScrollingEffect,
-    getWeatherIcon,
     setLayout
 } from "../../tools/utils.js";
-import { initializesubButtonIcon } from '../../tools/global-changes.js';
-import { handleCustomStyles } from '../../tools/style-utils.js';
+import { getIcon } from '../../tools/icon.js';
+import { handleCustomStyles } from '../../tools/style-processor.js';
 
 export const coverEntityFeature = {
   OPEN: 1,
@@ -41,7 +36,7 @@ export function isFullyClosed(stateObj) {
   return stateObj.state === "closed";
 }
 
-export function changeIcon(context) {
+export function changeCoverIcons(context) {
   const stateObj = context._hass.states[context.config.entity];
   const { current_position: currentPosition, assumed_state: assumedState } = stateObj.attributes;
 
@@ -86,17 +81,7 @@ export function changeIcon(context) {
   }
 }
 
-export function changeName(context) {
-    const name = getName(context);
-    if (name !== context.elements.previousName) {
-      context.elements.name.innerText = name;
-      applyScrollingEffect(context, context.elements.name, name);
-      context.elements.previousName = name;
-  }
-}
-
 export function changeStyle(context) {
-    initializesubButtonIcon(context);
     setLayout(context);
     handleCustomStyles(context);
 }

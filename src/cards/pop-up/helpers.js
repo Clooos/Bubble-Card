@@ -2,7 +2,6 @@ import { getBackdrop } from "./create.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { manageEvents } from './create.js';
 
-let hashTimeout = null;
 let hashRecentlyAdded = false;
 let scrollY = 0;
 
@@ -154,10 +153,10 @@ export function toggleBodyScroll(disable) {
         document.body.classList.add('no-scroll');
     } else {
         document.body.classList.remove('no-scroll');
-        window.scrollTo({ top: scrollY, behavior: 'instant' });
-        setTimeout(() => {
+        window.scrollTo({ top: scrollY, behavior: 'auto' });
+        requestAnimationFrame(() => {
             document.body.style.top = '';
-        }, 0);
+        });
     }
 }
 
@@ -218,9 +217,13 @@ export function onUrlChange(context) {
             setTimeout(() => {
                 hashRecentlyAdded = false;
             }, 100);
-            openPopup(context);
+            requestAnimationFrame(() => {
+                openPopup(context);
+            });
         } else {
-            closePopup(context);
+            requestAnimationFrame(() => {
+                closePopup(context);
+            });
         }
     };
 }
