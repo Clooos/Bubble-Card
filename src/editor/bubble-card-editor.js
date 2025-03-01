@@ -222,6 +222,7 @@ class BubbleCardEditor extends LitElement {
         const nameButton = this._config.button_type === 'name';
 
         const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || context.select_attribute;
+        const isLight = entity?.startsWith("light");
 
         const attributeList = Object.keys(this.hass.states[entity]?.attributes || {}).map((attributeName) => {
             let state = this.hass.states[entity];
@@ -403,6 +404,37 @@ class BubbleCardEditor extends LitElement {
                 </ha-formfield>
                 <ha-alert alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
             ` : ''}
+            ${array !== 'sub_button' && this._button_type === 'slider' && isLight ? html`
+                <ha-formfield .label="Optional - Enable smooth brightness transitions">
+                    <ha-switch
+                        aria-label="Optional - Enable smooth brightness transitions"
+                        .checked=${this._config.enable_brightness_transition ?? false}
+                        .configValue="${"enable_brightness_transition"}"
+                        @change=${this._valueChanged}
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Optional - Enable smooth brightness transitions</label> 
+                    </div>
+                </ha-formfield>
+                ${this._config.enable_brightness_transition ? html`
+                    <ha-textfield
+                        label="Transition time (ms)"
+                        type="number"
+                        min="0"
+                        max="2000"
+                        .value="${this._config.brightness_transition_time ?? 500}"
+                        .configValue="${"brightness_transition_time"}"
+                        @input="${this._valueChanged}"
+                    ></ha-textfield>
+                    <ha-alert alert-type="info">
+                        Important – This option applies only to lights that offer the 
+                        <a href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">
+                            transition
+                        </a> attribute. 
+                        When combined with slider live updates, it enables smooth, real-time brightness adjustments. Try starting with 500ms if combined with live updates.
+                    </ha-alert>
+                ` : ''}
+              ` : ''}
         `;
     }
 
