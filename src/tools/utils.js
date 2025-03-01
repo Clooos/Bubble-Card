@@ -430,6 +430,17 @@ export function getState(context, entity = context.config.entity) {
     return context._hass.states[entity]?.state ?? '';
 }
 
+export function getSubButtonsStates(context) {
+  const subButtons = context.config.sub_button;
+  if (!subButtons || !Array.isArray(subButtons)) return [];
+
+  return subButtons.map((subButton) => {
+    if (!subButton) return '';
+    const entity = subButton.entity ?? context.config.entity;
+    return context._hass.states[entity]?.state ?? '';
+  });
+}
+
 export function getAttribute(context, attribute, entity = context.config.entity) {
   if (!attribute) return '';
 
