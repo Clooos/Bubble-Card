@@ -10,7 +10,8 @@ import {
   getAttribute,
   isStateOn,
   isEntityType,
-  setLayout
+  setLayout,
+  MAX_BRIGHTNESS
 } from '../../tools/utils.js';
 import { handleCustomStyles } from '../../tools/style-utils.js';
 
@@ -136,7 +137,7 @@ export function changeSlider(context) {
     let percentage = 0;
 
     if (isEntityType(context, "light")) {
-      percentage = 100 * getAttribute(context, "brightness") / 255;
+      percentage = 100 * getAttribute(context, "brightness") / MAX_BRIGHTNESS;
     } else if (isEntityType(context, "media_player")) {
       if (isStateOn(context)) {
         percentage = 100 * getAttribute(context, "volume_level");

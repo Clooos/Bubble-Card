@@ -5,7 +5,7 @@ import {
     unsafeCSS
 } from 'lit';
 import { version } from '../var/version.js';
-import { fireEvent } from '../tools/utils.js';
+import { fireEvent, DEFAULT_LIGHT_TRANSITION_TIME } from '../tools/utils.js';
 import { renderButtonEditor } from '../cards/button/editor.js';
 import { renderPopUpEditor } from '../cards/pop-up/editor.js';
 import { renderSeparatorEditor } from '../cards/separator/editor.js';
@@ -23,9 +23,7 @@ class BubbleCardEditor extends LitElement {
 
     setConfig(config) {
         this._config = {
-            ...config,
-            // Set default transition time to 500ms for smooth light slider transitions
-            light_transition_time: config.light_transition_time ?? 500
+            ...config
         };
     }
 
@@ -224,7 +222,7 @@ class BubbleCardEditor extends LitElement {
         const nameButton = this._config.button_type === 'name';
 
         const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || context.select_attribute;
-        const isLight = entity?.startsWith("light");
+        const isLight = entity?.startsWith("light") ?? false;
 
         const attributeList = Object.keys(this.hass.states[entity]?.attributes || {}).map((attributeName) => {
             let state = this.hass.states[entity];
@@ -270,7 +268,7 @@ class BubbleCardEditor extends LitElement {
                     </div>
                 </ha-formfield>
             ` : ''}
-            ${array === 'sub_button' && (context?.state_background ?? true) && entity.startsWith("light") ? html`
+            ${array === 'sub_button' && (context?.state_background ?? true) && isLight ? html`
                 <ha-formfield .label="Optional - Background color based on light color">
                     <ha-switch
                         aria-label="Optional - Background color based on light color"
@@ -282,7 +280,7 @@ class BubbleCardEditor extends LitElement {
                     </div>
                 </ha-formfield>
             ` : ''}
-            ${array !== 'sub_button' && entity.startsWith("light") ? html`
+            ${array !== 'sub_button' && isLight ? html`
                 <ha-formfield .label="Optional - Use accent color instead of light color">
                     <ha-switch
                         aria-label="Optional - Use accent color instead of light color"
@@ -424,7 +422,7 @@ class BubbleCardEditor extends LitElement {
                         type="number"
                         min="0"
                         max="2000"
-                        .value="${this._config.light_transition_time}"
+                        .value="${this._config.light_transition_time ?? DEFAULT_LIGHT_TRANSITION_TIME}"
                         .configValue="${"light_transition_time"}"
                         @input="${this._valueChanged}"
                     ></ha-textfield>
