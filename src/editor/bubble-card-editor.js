@@ -427,9 +427,12 @@ class BubbleCardEditor extends LitElement {
                         @input="${this._valueChanged}"
                     ></ha-textfield>
                     <ha-alert alert-type="info">
-                        <span style="font-weight: bold;">Important</span> – This option only applies to lights that support the 
+                        Transition time in ms for brightness adjustments. When combined with slider live updates, it enables smooth, real-time updates. 
+                        Try starting with 500ms if combined with live updates for an analog dimmer style experience!
+
+                        <br><span style="font-weight: bold;">Important</span> – This feature only works for lights that support the 
                         <a target="_blank" rel="noopener noreferrer" href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">light.turn_on</a> transition attribute. 
-                        <br><br>When combined with slider live updates, it enables smooth, real-time brightness adjustments. Try starting with 500ms if combined with live updates.
+                        Enabling this for lights that do not support transitions will unfortunatley have no effect. 
                     </ha-alert>
                 ` : ''}
               ` : ''}
