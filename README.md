@@ -445,7 +445,7 @@ This card allows you to control your entities and can be customized in many ways
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 | `slider_live_update` | boolean | Optional (`button_type` must be set to `slider`) | `true` or `false` (default) | If toggled, value is updated while sliding instead of only on release |
 | `enable_light_transition` | boolean | Optional (`button_type` must be set to `slider` and entity must be of type `light`) | `true` or `false` (default) | If toggled, enables smooth brightness transitions for light. Note: your light must support the `light.turn_on` `transition` property. |
-| `light_transition_time` | number | Options (`button_type` must be set to `slider`, entity must be of type `light`, and `enable_light_transition` must be toggled) | `0`ms to `2000`ms (default `500ms`) | Provide transition time for brightness adjustments | 
+| `light_transition_time` | number | Optional (`button_type` must be set to `slider`, entity must be of type `light`, and `enable_light_transition` must be toggled) | `0`ms to `2000`ms (default `500`ms) | Provide transition time for smooth brightness adjustments - recommend > `200`ms | 
 
 </details>
 
