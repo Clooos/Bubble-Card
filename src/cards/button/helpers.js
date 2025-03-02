@@ -1,5 +1,14 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
-import { createElement, toggleEntity, throttle, forwardHaptic, isEntityType, getAttribute } from "../../tools/utils.js";
+import { 
+    createElement, 
+    toggleEntity, 
+    throttle, 
+    forwardHaptic, 
+    isEntityType, 
+    getAttribute, 
+    DEFAULT_LIGHT_TRANSITION_TIME, 
+    MAX_BRIGHTNESS 
+} from "../../tools/utils.js";
 
 export function getButtonType(context) {
   let buttonType = context.config.button_type;
@@ -20,10 +29,16 @@ export function updateEntity(context, value) {
   const state = context._hass.states[context.config.entity];
 
   if (isEntityType(context, "light")) {
-      context._hass.callService('light', 'turn_on', {
-          entity_id: context.config.entity,
-          brightness: Math.round(255 * value / 100)
-      });
+    const isTransitionEnabled = context.config.enable_light_transition;
+    const transitionTime = (context.config.light_transition_time === "" || isNaN(context.config.light_transition_time))
+                                ? DEFAULT_LIGHT_TRANSITION_TIME 
+                                : context.config.light_transition_time;
+
+    context._hass.callService('light', 'turn_on', {
+      entity_id: context.config.entity,
+      brightness: Math.round(MAX_BRIGHTNESS * value / 100),
+      ...(isTransitionEnabled && { transition: transitionTime / 1000 })
+    });
   } else if (isEntityType(context, "media_player")) {
       context._hass.callService('media_player', 'volume_set', {
           entity_id: context.config.entity,

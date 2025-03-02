@@ -1,5 +1,8 @@
 import { isColorCloseToWhite } from "./style.js";
 
+export const DEFAULT_LIGHT_TRANSITION_TIME = 500; // in milliseconds
+export const MAX_BRIGHTNESS = 255;
+
 export const fireEvent = (node, type, detail, options) => {
     options = options || {};
     detail = detail === null || detail === undefined ? {} : detail;
