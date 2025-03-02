@@ -417,23 +417,21 @@ class BubbleCardEditor extends LitElement {
                     </div>
                 </ha-formfield>
                 ${this._config.enable_light_transition ? html`
+                    <ha-alert alert-type="info">
+                        <span style="font-weight: bold;">Important</span> – This feature only works for lights that support the 
+                        <a target="_blank" rel="noopener noreferrer" href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">light.turn_on</a> transition attribute. 
+                        Enabling this for lights that do not support transitions will unfortunatley have no effect. Defaults to 500ms unless overridden below.
+                    </ha-alert>
+                    
                     <ha-textfield
                         label="Transition time (ms)"
                         type="number"
-                        min="0"
+                        min="1"
                         max="2000"
-                        .value="${this._config.light_transition_time ?? DEFAULT_LIGHT_TRANSITION_TIME}"
+                        .value="${this._config.light_transition_time}"
                         .configValue="${"light_transition_time"}"
                         @input="${this._valueChanged}"
                     ></ha-textfield>
-                    <ha-alert alert-type="info">
-                        Transition time in ms for brightness adjustments. When combined with slider live updates, it enables smooth, real-time updates. 
-                        Try starting with 500ms if combined with live updates for an analog dimmer style experience!
-
-                        <br><span style="font-weight: bold;">Important</span> – This feature only works for lights that support the 
-                        <a target="_blank" rel="noopener noreferrer" href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">light.turn_on</a> transition attribute. 
-                        Enabling this for lights that do not support transitions will unfortunatley have no effect. 
-                    </ha-alert>
                 ` : ''}
               ` : ''}
         `;
