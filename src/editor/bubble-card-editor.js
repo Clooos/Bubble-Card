@@ -23,7 +23,9 @@ class BubbleCardEditor extends LitElement {
 
     setConfig(config) {
         this._config = {
-            ...config
+            ...config,
+            // Set default transition time to 500ms for smooth light slider transitions
+            light_transition_time: config.light_transition_time ?? 500
         };
     }
 
@@ -408,30 +410,28 @@ class BubbleCardEditor extends LitElement {
                 <ha-formfield .label="Optional - Enable smooth brightness transitions">
                     <ha-switch
                         aria-label="Optional - Enable smooth brightness transitions"
-                        .checked=${this._config.enable_brightness_transition ?? false}
-                        .configValue="${"enable_brightness_transition"}"
+                        .checked=${this._config.enable_light_transition ?? false}
+                        .configValue="${"enable_light_transition"}"
                         @change=${this._valueChanged}
                     ></ha-switch>
                     <div class="mdc-form-field">
                         <label class="mdc-label">Optional - Enable smooth brightness transitions</label> 
                     </div>
                 </ha-formfield>
-                ${this._config.enable_brightness_transition ? html`
+                ${this._config.enable_light_transition ? html`
                     <ha-textfield
                         label="Transition time (ms)"
                         type="number"
                         min="0"
                         max="2000"
-                        .value="${this._config.brightness_transition_time ?? 500}"
-                        .configValue="${"brightness_transition_time"}"
+                        .value="${this._config.light_transition_time}"
+                        .configValue="${"light_transition_time"}"
                         @input="${this._valueChanged}"
                     ></ha-textfield>
                     <ha-alert alert-type="info">
-                        Important – This option applies only to lights that offer the 
-                        <a href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">
-                            transition
-                        </a> attribute. 
-                        When combined with slider live updates, it enables smooth, real-time brightness adjustments. Try starting with 500ms if combined with live updates.
+                        <span style="font-weight: bold;">Important</span> – This option only applies to lights that support the 
+                        <a target="_blank" rel="noopener noreferrer" href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">light.turn_on</a> transition attribute. 
+                        <br><br>When combined with slider live updates, it enables smooth, real-time brightness adjustments. Try starting with 500ms if combined with live updates.
                     </ha-alert>
                 ` : ''}
               ` : ''}

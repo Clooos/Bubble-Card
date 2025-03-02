@@ -20,15 +20,13 @@ export function updateEntity(context, value) {
   const state = context._hass.states[context.config.entity];
 
   if (isEntityType(context, "light")) {
-    const isTransitionEnabled = context.config.enable_brightness_transition ?? false;
-    const transitionTime = isTransitionEnabled
-                            ? (Number(context.config.brightness_transition_time) || 0)
-                            : 0;
-  
-    context._hass.callService("light", "turn_on", {
+    const isTransitionEnabled = context.config.enable_light_transition;
+    const transitionTime = isTransitionEnabled ? (context.config.light_transition_time / 1000) : 0;
+
+    context._hass.callService('light', 'turn_on', {
       entity_id: context.config.entity,
       brightness: Math.round(255 * value / 100),
-      transition: transitionTime,
+      ...(isTransitionEnabled && { transition: transitionTime })
     });
   } else if (isEntityType(context, "media_player")) {
       context._hass.callService('media_player', 'volume_set', {
