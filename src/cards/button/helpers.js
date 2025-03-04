@@ -1,5 +1,14 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
-import { createElement, toggleEntity, throttle, forwardHaptic, isEntityType, getAttribute } from "../../tools/utils.js";
+import { 
+    createElement, 
+    toggleEntity, 
+    throttle, 
+    forwardHaptic, 
+    isEntityType, 
+    getAttribute, 
+    CLIMATE_DEFAULT_MAX_TEMP, 
+    CLIMATE_DEFAULT_MIN_TEMP 
+} from "../../tools/utils.js";
 
 export function getButtonType(context) {
   let buttonType = context.config.button_type;
@@ -52,8 +61,8 @@ export function updateEntity(context, value) {
           percentage: adjustedValue
       });
   } else if (isEntityType(context, "climate")) {
-      const minValue = state.attributes.min_temp ?? 0;
-      const maxValue = state.attributes.max_temp ?? 10000;
+      const minValue = state.attributes.min_temp ?? CLIMATE_DEFAULT_MIN_TEMP;
+      const maxValue = state.attributes.max_temp ?? CLIMATE_DEFAULT_MAX_TEMP;
       const isCelcius = context._hass.config.unit_system.temperature === '°C';
       const step = state.attributes.target_temp_step ? state.attributes.target_temp_step : isCelcius ? 0.5 : 1;
       let rawValue = (maxValue - minValue) * value / 100 + minValue;
