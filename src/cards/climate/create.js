@@ -10,6 +10,8 @@ export function createStructure(context) {
     const state = context._hass.states[entity];
     const isCelcius = context._hass.config.unit_system.temperature === '°C';
     const defaultStep = state.attributes.target_temp_step ? state.attributes.target_temp_step : isCelcius ? 0.5 : 1;
+    const minTemp = state.attributes.min_temp ?? 0;
+    const maxTemp = state.attributes.max_temp ?? 10000;
 
     context.elements.climateContainer = createElement('div', 'bubble-climate-container bubble-container');
     context.elements.climateCard = createElement('div', 'bubble-climate');
@@ -101,23 +103,36 @@ export function createStructure(context) {
             context._hass.callService('climate', 'set_temperature', serviceData);
         }
 
-        minusButton.addEventListener('click', () => {
+        function adjustTemperature(change) {
             syncTemp();
-            currentTemp = parseFloat((currentTemp - step).toFixed(1));
-            updateTempDisplay(currentTemp);
+            
+            let newTemp = parseFloat((currentTemp + change).toFixed(1));
+            newTemp = Math.min(maxTemp, Math.max(minTemp, newTemp));
 
-            clearTimeout(tempTimeout);
-            tempTimeout = setTimeout(callSetTemperature, 700);
-        });
+            if (newTemp < minTemp) {
+                newTemp = minTemp;
+            } else if (newTemp > maxTemp) {
+                newTemp = maxTemp;
+            }
+            
+            if (newTemp !== currentTemp) {
+                currentTemp = newTemp;
+                updateTempDisplay(currentTemp);
+                
+                clearTimeout(tempTimeout);
+                tempTimeout = setTimeout(callSetTemperature, 700);
+            } else {
+                forwardHaptic("failure");
+                const climateContainer = context.elements.climateContainer;
+                climateContainer.style.animation = 'tap-warning 0.4s cubic-bezier(.36,.07,.19,.97) both';
+                setTimeout(() => {
+                    climateContainer.style.animation = '';
+                }, 500);
+            }
+        }
 
-        plusButton.addEventListener('click', () => {
-            syncTemp();
-            currentTemp = parseFloat((currentTemp + step).toFixed(1));
-            updateTempDisplay(currentTemp);
-
-            clearTimeout(tempTimeout);
-            tempTimeout = setTimeout(callSetTemperature, 700);
-        });
+        minusButton.addEventListener('click', () => adjustTemperature(-step));
+        plusButton.addEventListener('click', () => adjustTemperature(step));
     }
 
     const hasTargetTempLow = state?.attributes?.target_temp_low !== undefined;
