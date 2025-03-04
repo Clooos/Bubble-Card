@@ -1,5 +1,8 @@
 import { isColorCloseToWhite } from "./style.js";
 
+export const CLIMATE_DEFAULT_MIN_TEMP = 0;
+export const CLIMATE_DEFAULT_MAX_TEMP = 10000;
+
 export const fireEvent = (node, type, detail, options) => {
     options = options || {};
     detail = detail === null || detail === undefined ? {} : detail;

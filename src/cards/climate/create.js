@@ -1,5 +1,14 @@
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
-import { createElement, toggleEntity, getState, getAttribute, isStateOn, forwardHaptic } from "../../tools/utils.js";
+import { 
+    createElement, 
+    toggleEntity, 
+    getState, 
+    getAttribute, 
+    isStateOn, 
+    forwardHaptic, 
+    CLIMATE_DEFAULT_MIN_TEMP, 
+    CLIMATE_DEFAULT_MAX_TEMP
+} from "../../tools/utils.js";
 import styles from "./styles.css";
 
 export function createStructure(context) {
@@ -10,8 +19,8 @@ export function createStructure(context) {
     const state = context._hass.states[entity];
     const isCelcius = context._hass.config.unit_system.temperature === '°C';
     const defaultStep = state.attributes.target_temp_step ? state.attributes.target_temp_step : isCelcius ? 0.5 : 1;
-    const minTemp = state.attributes.min_temp ?? 0;
-    const maxTemp = state.attributes.max_temp ?? 10000;
+    const minTemp = state.attributes.min_temp ?? CLIMATE_DEFAULT_MIN_TEMP;
+    const maxTemp = state.attributes.max_temp ?? CLIMATE_DEFAULT_MAX_TEMP;
 
     context.elements.climateContainer = createElement('div', 'bubble-climate-container bubble-container');
     context.elements.climateCard = createElement('div', 'bubble-climate');
