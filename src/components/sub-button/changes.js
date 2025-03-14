@@ -194,6 +194,11 @@ function updateSubButtonContent(context, element, options) {
     }
     element.icon.classList.toggle('icon-with-state', !!displayedState);
     element.icon.classList.toggle('icon-without-state', !displayedState);
+    
+    if (element.icon.getAttribute('icon') !== element.icon.icon) {
+      element.icon.setAttribute('icon', element.icon.icon);
+    }
+  
   }
 }
 

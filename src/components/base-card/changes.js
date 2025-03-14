@@ -103,7 +103,7 @@ export function changeIcon(context) {
         (cardType === 'pop-up' && !buttonType)
 
     let newIconColor = 'inherit';
-    
+
     if (isOn) {
         if ((isEntityType(context, "light") && !useAccentColor) || !noColor) {
             newIconColor = `var(--bubble-icon-background-color, ${getIconColor(context)})`;
@@ -154,6 +154,11 @@ export function changeIcon(context) {
             context.elements.image.style.display = 'none';
         }
     }
+
+    if (context.elements.icon.getAttribute('icon') !== context.elements.icon.icon) {
+        context.elements.icon.setAttribute('icon', context.elements.icon.icon);
+    }
+    
 }
 
 export function changeName(context, textScrolling = true) {
