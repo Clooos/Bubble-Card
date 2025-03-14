@@ -5,7 +5,7 @@ import {
     unsafeCSS
 } from 'lit';
 import { version } from '../var/version.js';
-import { fireEvent } from '../tools/utils.js';
+import { fireEvent, DEFAULT_LIGHT_TRANSITION_TIME } from '../tools/utils.js';
 import { renderButtonEditor } from '../cards/button/editor.js';
 import { renderPopUpEditor } from '../cards/pop-up/editor.js';
 import { renderSeparatorEditor } from '../cards/separator/editor.js';
@@ -222,6 +222,7 @@ class BubbleCardEditor extends LitElement {
         const nameButton = this._config.button_type === 'name';
 
         const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || context.select_attribute;
+        const isLight = entity?.startsWith("light") ?? false;
 
         const attributeList = Object.keys(this.hass.states[entity]?.attributes || {}).map((attributeName) => {
             let state = this.hass.states[entity];
@@ -267,7 +268,7 @@ class BubbleCardEditor extends LitElement {
                     </div>
                 </ha-formfield>
             ` : ''}
-            ${array === 'sub_button' && (context?.state_background ?? true) && entity.startsWith("light") ? html`
+            ${array === 'sub_button' && (context?.state_background ?? true) && isLight ? html`
                 <ha-formfield .label="Optional - Background color based on light color">
                     <ha-switch
                         aria-label="Optional - Background color based on light color"
@@ -279,7 +280,7 @@ class BubbleCardEditor extends LitElement {
                     </div>
                 </ha-formfield>
             ` : ''}
-            ${array !== 'sub_button' && entity.startsWith("light") ? html`
+            ${array !== 'sub_button' && isLight ? html`
                 <ha-formfield .label="Optional - Use accent color instead of light color">
                     <ha-switch
                         aria-label="Optional - Use accent color instead of light color"
@@ -403,6 +404,36 @@ class BubbleCardEditor extends LitElement {
                 </ha-formfield>
                 <ha-alert alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
             ` : ''}
+            ${array !== 'sub_button' && this._button_type === 'slider' && isLight ? html`
+                <ha-formfield .label="Optional - Enable smooth brightness transitions">
+                    <ha-switch
+                        aria-label="Optional - Enable smooth brightness transitions"
+                        .checked=${this._config.enable_light_transition ?? false}
+                        .configValue="${"enable_light_transition"}"
+                        @change=${this._valueChanged}
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Optional - Enable smooth brightness transitions</label> 
+                    </div>
+                </ha-formfield>
+                ${this._config.enable_light_transition ? html`
+                    <ha-alert alert-type="info">
+                        <span style="font-weight: bold;">Important</span> – This feature only works for lights that support the 
+                        <a target="_blank" rel="noopener noreferrer" href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">light.turn_on</a> transition attribute. 
+                        Enabling this for lights that do not support transitions will unfortunatley have no effect. Defaults to 500ms unless overridden below.
+                    </ha-alert>
+                    
+                    <ha-textfield
+                        label="Transition time (ms)"
+                        type="number"
+                        min="1"
+                        max="2000"
+                        .value="${this._config.light_transition_time}"
+                        .configValue="${"light_transition_time"}"
+                        @input="${this._valueChanged}"
+                    ></ha-textfield>
+                ` : ''}
+              ` : ''}
         `;
     }
 
