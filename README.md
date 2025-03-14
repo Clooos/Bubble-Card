@@ -1708,6 +1708,8 @@ You have access to these variables in most cards:
 - `entity` will return your entity you defined like `switch.test` in this example.
   
 - `icon` can be used like this to change the icon `icon.setAttribute("icon", "mdi:lightbulb")`.
+
+- `subButtonState[0]` will return the state of your first sub-button defined `entity`, `[0]` is the first sub-button state, `[1]` the second...
   
 - `subButtonIcon[0]` can be used like this to change the first sub-button icon `subButtonIcon[0].setAttribute("icon", "mdi:lightbulb")`, `[0]` is the first sub-button icon, `[1]` the second...
   
