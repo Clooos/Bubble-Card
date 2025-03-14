@@ -432,6 +432,7 @@ This card allows you to control your entities and can be customized in many ways
 | `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
 | `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
 | `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
 | `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
 | `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
 | `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
@@ -547,6 +548,7 @@ This card allows you to control a media player. You can tap on the icon to get m
 | `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
 | `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
 | `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
 | `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
 | `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
 | `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
@@ -664,6 +666,7 @@ This card allows you to control your `cover` entities.
 | `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
 | `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
 | `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
 | `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
 | `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
 | `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
@@ -750,6 +753,7 @@ This card allows you to add a dropdown menu for your `input_select` / `select` e
 | `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
 | `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
 | `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
 | `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
 | `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
 | `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
@@ -1010,6 +1014,7 @@ In every card that supports that option, you can add sub-buttons to customize yo
 | `show_name` | boolean | Optional | `true` or `false` (default) | Show or hide the name |
 | `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
 | `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
 | `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
 | `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button click, if undefined, `more-info` will be used. |
