@@ -2,22 +2,22 @@ import { tapFeedback, forwardHaptic } from "./utils.js";
 
 const maxHoldDuration = 400;
 const doubleTapTimeout = 200;
-const scrollDetectionDelay = 300; // Delay before confirming hold action
 const movementThreshold = 5; // Movement threshold to consider as scroll
+const scrollDisableTime = 300;
 
-window.isScrolling = false; // Track if scrolling is active
+window.isScrolling = false;
 
-// Disable actions during scroll
 function disableActionsDuringScroll() {
   window.isScrolling = true;
   setTimeout(() => {
     window.isScrolling = false;
-  }, 150);
+  }, scrollDisableTime);
 }
 
 document.addEventListener('scroll', disableActionsDuringScroll, { passive: true });
 
 const actionHandler = new WeakMap();
+const activeHandlers = new Set();
 
 function handlePointerDown(event) {
   if (window.isScrolling) return;
@@ -36,19 +36,36 @@ function handlePointerDown(event) {
   };
 
   if (!actionHandler.has(actionElement)) {
-    actionHandler.set(actionElement, new ActionHandler(actionElement, config, sendActionEvent));
+    const handler = new ActionHandler(actionElement, config, sendActionEvent);
+    actionHandler.set(actionElement, handler);
+    activeHandlers.add(handler);
   }
 
   const handler = actionHandler.get(actionElement);
   handler.handleStart(event);
 
   const cleanup = () => {
-    actionElement.removeEventListener('pointerup', handler.handleEnd);
-    document.removeEventListener('scroll', handler.handleScroll);
+    actionElement.removeEventListener('pointerup', endHandler);
+    actionElement.removeEventListener('pointercancel', endHandler);
+    document.removeEventListener('pointerup', endHandler);
+    document.removeEventListener('scroll', scrollHandler);
+    activeHandlers.delete(handler);
   };
 
-  actionElement.addEventListener('pointerup', handler.handleEnd.bind(handler), { once: true });
-  document.addEventListener('scroll', handler.handleScroll.bind(handler), { once: true });
+  const endHandler = (e) => {
+    handler.handleEnd(e);
+    cleanup();
+  };
+
+  const scrollHandler = () => {
+    handler.handleScroll();
+    cleanup();
+  };
+
+  actionElement.addEventListener('pointerup', endHandler, { once: true });
+  actionElement.addEventListener('pointercancel', endHandler, { once: true });
+  document.addEventListener('pointerup', endHandler, { once: true });
+  document.addEventListener('scroll', scrollHandler, { once: true });
 }
 
 document.body.addEventListener('pointerdown', handlePointerDown, { passive: true });
@@ -113,6 +130,17 @@ class ActionHandler {
     this.startY = 0;
     this.holdFired = false;
     this.pointerMoveListener = this.detectScrollLikeMove.bind(this);
+    this.isDisconnected = false;
+    this.hasMoved = false;
+  }
+
+  cleanup() {
+    this.isDisconnected = true;
+    clearTimeout(this.tapTimeout);
+    clearTimeout(this.holdTimeout);
+    document.removeEventListener('pointermove', this.pointerMoveListener);
+    this.tapTimeout = null;
+    this.holdTimeout = null;
   }
 
   handleStart(e) {
@@ -121,12 +149,13 @@ class ActionHandler {
     this.startX = e.clientX;
     this.startY = e.clientY;
     this.holdFired = false;
+    this.hasMoved = false;
 
-    document.addEventListener('pointermove', this.pointerMoveListener);
+    document.addEventListener('pointermove', this.pointerMoveListener, { passive: true });
 
     this.holdTimeout = setTimeout(() => {
       const holdAction = this.config.hold_action || { action: 'none' };
-      if (holdAction.action !== 'none' && !window.isScrolling) {
+      if (holdAction.action !== 'none' && !window.isScrolling && !this.hasMoved) {
         this.sendActionEvent(this.element, this.config, 'hold');
         this.holdFired = true;
       }
@@ -138,14 +167,21 @@ class ActionHandler {
     const deltaY = Math.abs(e.clientY - this.startY);
 
     if (deltaX > movementThreshold || deltaY > movementThreshold) {
+      // Considérer cela comme un mouvement de type drag/scroll
+      this.hasMoved = true;
+      disableActionsDuringScroll(); // Désactiver les actions pendant un court laps de temps
+      
+      // Nettoyer les timeouts pour éviter les actions non désirées
       clearTimeout(this.holdTimeout);
       this.holdTimeout = null;
+      
+      // Arrêter d'écouter les mouvements une fois qu'un drag est détecté
       document.removeEventListener('pointermove', this.pointerMoveListener);
     }
   }
 
   handleEnd(e) {
-    if (window.isScrolling || this.isDisconnected) return;
+    if (window.isScrolling || this.isDisconnected || this.hasMoved) return;
 
     clearTimeout(this.holdTimeout);
     this.holdTimeout = null;
@@ -170,6 +206,7 @@ class ActionHandler {
   }
 
   handleScroll() {
+    this.hasMoved = true;
     clearTimeout(this.holdTimeout);
     this.holdTimeout = null;
     document.removeEventListener('pointermove', this.pointerMoveListener);
@@ -226,10 +263,17 @@ export function sendActionEvent(element, config, action) {
   }, action);
 }
 
-
 export function addFeedback(element, feedbackElement) {
   element.addEventListener('click', () => { 
     forwardHaptic("selection");
     tapFeedback(feedbackElement);
   });
+}
+
+// Add cleanup function
+export function cleanupTapActions() {
+  for (const handler of activeHandlers) {
+    handler.cleanup();
+  }
+  activeHandlers.clear();
 }

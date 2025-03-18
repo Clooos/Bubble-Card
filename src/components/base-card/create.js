@@ -55,8 +55,8 @@ export function createBaseStructure(context, config = {}) {
             context.elements.background = createElement('div', 'bubble-background');
             context.elements.cardWrapper.prepend(context.elements.background);
         }
-    
-        if (options.withFeedback) {
+
+        if (options.withFeedback && options.buttonActions?.tap_action?.action !== 'none') {
             context.elements.feedbackContainer = createElement('div', 'bubble-feedback-container feedback-container');
             context.elements.feedback = createElement('div', 'bubble-feedback-element feedback-element');
             context.elements.feedback.style.display = 'none';
@@ -68,7 +68,10 @@ export function createBaseStructure(context, config = {}) {
         context.elements.mainContainer.appendChild(context.elements.cardWrapper);
     
         if (options.withSlider) {
-            createSliderStructure(context);
+            createSliderStructure(context, {
+                holdToSlide: options.holdToSlide,
+                readOnlySlider: options.readOnlySlider
+            });
         }
     }
 

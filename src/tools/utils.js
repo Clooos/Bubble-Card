@@ -73,10 +73,9 @@ function calculateLuminance(r, g, b) {
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }
 
-export function isColorLight(cssVariable) {
+export function isColorLight(cssVariable, threshold = 0.5) {
     const computedColor = resolveCssVariable(cssVariable);
     if (!computedColor) return false;
-
 
     if (colorCache.has(computedColor)) {
         return colorCache.get(computedColor);
@@ -90,7 +89,7 @@ export function isColorLight(cssVariable) {
     }
     
     const luminance = calculateLuminance(...rgb);
-    const isLight = luminance > 0.5;
+    const isLight = luminance > threshold;
     colorCache.set(computedColor, isLight);
     return isLight;
 }
@@ -166,25 +165,9 @@ export function isStateOn(context, entity = context.config.entity) {
     ];
 
     if (activeStringStates.includes(state) || numericState) {
-        if (!card.classList.contains('is-on') 
-          && entity === context.config.entity
-          && context.config.button_type !== 'state' 
-          && state
-        ){
-          card.classList.remove('is-off');
-          card.classList.add('is-on');
-        }
         return true;
     }
 
-    if (!card.classList.contains('is-off') 
-      && entity === context.config.entity
-      && context.config.button_type !== 'state'
-      && state
-    ){
-      card.classList.remove('is-on');
-      card.classList.add('is-off');
-    }
     return false;
 }
 
@@ -326,20 +309,26 @@ export function formatDateTime(datetime, locale) {
 }
 
 export function setLayout(context) {
-    const layoutClass = context.config.card_layout ?? 'large';
+    const homeAssistant = document.querySelector("body > home-assistant");
+    const main = homeAssistant.shadowRoot.querySelector("home-assistant-main").shadowRoot;
+    const drawer = main.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace").shadowRoot;
+    const huiRoot = drawer.querySelector("hui-root").shadowRoot;
+    const masonryView = huiRoot.querySelector("#view > hui-view > hui-masonry-view");
+
+    window.isSectionView = !masonryView;
+    const defaultLayout = window.isSectionView ? "large" : "normal";
+    const layoutClass = context.config.card_layout ?? defaultLayout;
     
     if (context.previousLayout === layoutClass) {
         return;
     }
     context.previousLayout = layoutClass;
 
-    //requestAnimationFrame(() => {
-        const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows';
-        const needsRows2 = layoutClass === 'large-2-rows';
+    const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows';
+    const needsRows2 = layoutClass === 'large-2-rows';
 
-        context.content.classList.toggle('large', needsLarge);
-        context.content.classList.toggle('rows-2', needsRows2);
-    //});
+    context.content.classList.toggle('large', needsLarge);
+    context.content.classList.toggle('rows-2', needsRows2);
 }
 
 export function throttle(mainFunction, delay = 300) {
@@ -353,4 +342,38 @@ export function throttle(mainFunction, delay = 300) {
             }, delay);
         }
     };
+}
+
+function injectNoScrollStyles() {
+    if (document.getElementById('no-scroll-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'no-scroll-styles';
+    style.textContent = `
+        body.no-scroll {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            touch-action: none;
+            left: 0;
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+export function toggleBodyScroll(disable) {
+    injectNoScrollStyles();
+
+    if (disable) {
+        scrollY = window.scrollY;
+        document.body.style.top = `-${scrollY}px`;
+        document.body.classList.add('no-scroll');
+    } else {
+        document.body.classList.remove('no-scroll');
+        window.scrollTo({ top: scrollY, behavior: 'auto' });
+        requestAnimationFrame(() => {
+            document.body.style.top = '';
+        });
+    }
 }

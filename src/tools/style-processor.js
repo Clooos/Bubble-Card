@@ -1,5 +1,6 @@
 import { getState } from "./utils.js";
 import { getWeatherIcon } from "./icon.js";
+import { getSubButtonsStates } from "../components/sub-button/changes.js";
 import { checkConditionsMet } from './validate-condition.js';
 import * as YAML from 'js-yaml';
 
@@ -136,9 +137,9 @@ export const handleCustomStyles = async (context, element = context.card) => {
     combinedStyles = tmpl;
   }
 
-  const evaluatedCustomStyles = evalStyles(context, customStyles);
   const evaluatedCombinedStyles = evalStyles(context, combinedStyles);
-  const finalStyles = `${evaluatedCustomStyles}\n${evaluatedCombinedStyles}`.trim();
+  const evaluatedCustomStyles = evalStyles(context, customStyles);
+  const finalStyles = `${evaluatedCombinedStyles}\n${evaluatedCustomStyles}`.trim();
 
   if (finalStyles !== context.lastEvaluatedStyles) {
     styleElement.textContent = finalStyles;
@@ -172,6 +173,7 @@ export function evalStyles(context, styles = "") {
         "entity",
         "state",
         "icon",
+        "subButtonState",
         "subButtonIcon",
         "getWeatherIcon",
         "card",
@@ -188,6 +190,7 @@ export function evalStyles(context, styles = "") {
       context.config.entity,
       getState(context),
       context.elements.icon,
+      getSubButtonsStates(context),
       context.subButtonIcon,
       getWeatherIcon,
       card,

@@ -1,6 +1,8 @@
 import { version } from './var/version.js';
 import { initializeContent } from './tools/init.js';
 import { handlePopUp } from './cards/pop-up/index.js';
+import { updateListeners as updatePopupListeners } from './cards/pop-up/helpers.js';
+import { cleanupTapActions } from './tools/tap-actions';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack/index.js';
 import { handleButton } from './cards/button/index.js';
 import { handleSeparator } from './cards/separator/index.js';
@@ -27,6 +29,13 @@ class BubbleCard extends HTMLElement {
 
     disconnectedCallback() {
         this.isConnected = false;
+        cleanupTapActions();
+
+        switch (this.config.card_type) {
+            case 'pop-up':
+                updatePopupListeners(this, false);
+                break;
+        }
     }
 
     get detectedEditor() {
@@ -41,7 +50,9 @@ class BubbleCard extends HTMLElement {
         }
         this.editor = editMode;
 
-        this.updateBubbleCard();
+        if (this.config.card_type === 'pop-up') {
+            this.updateBubbleCard();
+        }
     }
 
     set hass(hass) {

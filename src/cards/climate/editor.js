@@ -43,7 +43,7 @@ export function renderClimateEditor(editor){
                                 <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:cog"></ha-icon>
-                  Climate settings
+                  Card settings
                 </h4>
                 <div class="content">     
                     <ha-textfield
@@ -54,6 +54,50 @@ export function renderClimateEditor(editor){
                     ></ha-textfield>
                     ${editor.makeDropdown("Optional - Icon", "icon")}
                     ${editor.makeShowState()}
+                </div>
+            </ha-expansion-panel>
+            <ha-expansion-panel outlined>
+                <h4 slot="header">
+                <ha-icon icon="mdi:tune-variant"></ha-icon>
+                Climate settings
+                </h4>
+                <div class="content">
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${editor._config}
+                        .schema=${[
+                            {
+                                type: "grid",
+                                flatten: true,
+                                schema: [
+                                    {
+                                        name: "min_temp",
+                                        label: "Min temperature",
+                                        selector: { number: {
+                                            step: "any"
+                                        } },
+                                    },
+                                    {
+                                        name: "max_temp",
+                                        label: "Max temperature",
+                                        selector: { number: {
+                                            step: "any"
+                                        } },
+                                    },
+                                    {
+                                        name: "step",
+                                        label: "Step",
+                                        selector: { number: {
+                                            step: "any"
+                                        } },
+                                    },
+                                ],
+                            },
+                        ]}   
+                        .computeLabel=${editor._computeLabelCallback}
+                        .disabled="${editor._config.button_type === 'name'}"
+                        @value-changed=${editor._valueChanged}
+                    ></ha-form>
                     ${editor.hass.states[editor._config.entity]?.attributes?.target_temp_low ? html`
                         <ha-formfield .label="Optional - Hide target temp low">
                             <ha-switch
@@ -104,9 +148,9 @@ export function renderClimateEditor(editor){
                     ${editor.makeActionPanel("Hold action")}
                 </div>
             </ha-expansion-panel>
-            <ha-expansion-panel outlined style="display: ${editor._config.button_type === 'slider' ? 'none' : ''}">
+            <ha-expansion-panel outlined>
                 <h4 slot="header">
-                <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                <ha-icon icon="mdi:gesture-tap-button"></ha-icon>
                 Tap action on card
                 </h4>
                 <div class="content">
@@ -115,6 +159,7 @@ export function renderClimateEditor(editor){
                     ${editor.makeActionPanel("Hold action", button_action, 'toggle', 'button_action')}
                 </div>
             </ha-expansion-panel>
+            ${editor.makeSubButtonPanel()}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
@@ -125,7 +170,6 @@ export function renderClimateEditor(editor){
                     ${editor.makeStyleEditor()}
                 </div>
             </ha-expansion-panel>
-            ${editor.makeSubButtonPanel()}
             ${editor.makeModulesEditor()}
             <ha-alert alert-type="info">This card allows you to control your climate entities. You can also add a sub-button that display a select menu for your climate modes (check if you have "Select menu" available when you create a new sub-button).</ha-alert>
             ${editor.makeVersion()}

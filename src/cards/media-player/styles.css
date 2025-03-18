@@ -8,8 +8,8 @@
     border: none;
     cursor: pointer;
     border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-    height: 36px;
-    width: 36px;
+    height: 42px;
+    width: 42px;
     transition: background 0.3s ease;
     align-self: center;
     align-items: center;
@@ -40,9 +40,9 @@
     justify-content: flex-end;
     height: 38px;
     align-items: center;
-    padding-right: 14px;
     font-size: 12px;
     opacity: 0.8;
+    z-index: 1;
 }
 
 .bubble-mute-button {

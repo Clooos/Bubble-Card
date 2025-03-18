@@ -5,6 +5,10 @@
     -webkit-tap-highlight-color: transparent !important;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
+
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
 }
 
 *::-webkit-scrollbar {
@@ -49,9 +53,11 @@ ha-card {
 }
 
 .bubble-buttons-container {
+    --icon-primary-color: var(--primary-text-color);
     display: flex;
     margin-right: 8px;
-    gap: 8px;
+    gap: 4px;
+    z-index: 1;
 }
 
 .bubble-background {
@@ -61,8 +67,8 @@ ha-card {
     width: 100%;
     transition: background-color 1.5s;
     border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-    -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 98%, rgba(0, 0, 0, 0) 100%);
-    mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 98%, rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
+    mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
 }
 
 .bubble-icon-container {
@@ -78,6 +84,7 @@ ha-card {
     overflow: hidden;
     position: relative;
     cursor: pointer;
+    transition: all 0.3s ease-in-out;
 }
 
 .is-off .bubble-main-icon {

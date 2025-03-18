@@ -101,13 +101,17 @@ export function changeVolumeIcon(context) {
 }
 
 export function changeMuteIcon(context) {
-    const isVolumeMuted = getAttribute(context, "is_volume_muted") === true;
+    const isVolumeMuted = getAttribute(context, "is_volume_muted") == true;
     const clicked = context.elements.muteButton.clicked;
+    
+    if (context.elements.muteButton.style.color !== "var(--primary-text-color)") {
+        context.elements.muteButton.style.color = "var(--primary-text-color)";
+    }
 
     if (isVolumeMuted) {
-        context.elements.muteButton.style.color = clicked ? "" : "var(--accent-color)";
+        context.elements.muteButton.setAttribute("icon", "mdi:volume-off");
     } else {
-        context.elements.muteButton.style.color = clicked ? "var(--accent-color)" : "";
+        context.elements.muteButton.setAttribute("icon", "mdi:volume-high");
     }
 
     context.elements.muteButton.clicked = false;

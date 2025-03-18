@@ -24,9 +24,9 @@ export function changeButton(context) {
   let newButtonColor = '';
   let newOpacity = '';
 
-  if (buttonType === 'switch' && isOn) {
-    const useAccentColor = context.config.use_accent_color;
+  const useAccentColor = context.config.use_accent_color;
 
+  if (buttonType === 'switch' && isOn) {
     if (lightColor && isLight && !useAccentColor) {
       newButtonColor = getIconColor(context);
       newOpacity = '.5';
@@ -39,6 +39,18 @@ export function changeButton(context) {
     newOpacity = '.5';
   }
 
+  if (buttonType === 'slider') {
+    if (isOn) {
+      if (isLight && !useAccentColor) {   
+        context.elements.rangeFill.style.backgroundColor = getIconColor(context);
+      } else {
+        context.elements.rangeFill.style.backgroundColor = 'var(--bubble-button-accent-color, var(--bubble-accent-color, var(--accent-color)))';
+      }
+    }
+
+    updateSlider(context);
+  }
+
   if (currentButtonColor !== newButtonColor) {
     if (cardType === 'button') {
       context.card.style.setProperty('--bubble-button-background-color', newButtonColor);
@@ -49,16 +61,6 @@ export function changeButton(context) {
 
   if (currentOpacity !== newOpacity) {
     context.elements.background.style.opacity = newOpacity;
-  }
-}
-
-export function changeSlider(context) {
-  const buttonType = getButtonType(context);
-
-  if (buttonType === 'slider') {
-    context.elements.rangeFill.style.backgroundColor = getIconColor(context);
-
-    updateSlider(context);
   }
 }
 

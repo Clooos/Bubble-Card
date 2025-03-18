@@ -1,6 +1,4 @@
-import { addActions, addFeedback } from "../../tools/tap-actions.js";
-import { createElement, toggleEntity, throttle, forwardHaptic, isEntityType, getAttribute } from "../../tools/utils.js";
-
+import { isEntityType, getAttribute } from "../../tools/utils.js";
 export function getButtonType(context) {
   let buttonType = context.config.button_type;
 
@@ -14,4 +12,12 @@ export function getButtonType(context) {
   } else {
       return buttonType || 'name';
   }
+}
+
+export function readOnlySlider(context) {
+  const entity = context.config.entity;
+  const readOnlySlider = 
+    isEntityType(context, "sensor", entity) && getAttribute(context, "unit_of_measurement", entity) === "%";
+
+  return readOnlySlider;
 }

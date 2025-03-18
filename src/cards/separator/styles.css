@@ -4,6 +4,7 @@
     align-items: center;
     height: 40px;
     overflow: visible;
+    --bubble-separator-border: none;
 }
 .bubble-icon {
     display: inline-flex;

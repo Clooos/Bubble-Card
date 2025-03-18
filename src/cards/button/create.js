@@ -1,5 +1,6 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
-import { getButtonType } from "./helpers.js";
+import { isEntityType } from "../../tools/utils.js";
+import { getButtonType, readOnlySlider } from "./helpers.js";
 import styles from "./styles.css";
 
 export function createStructure(context, appendTo = context.container) {
@@ -7,6 +8,15 @@ export function createStructure(context, appendTo = context.container) {
     const buttonType = getButtonType(context);
     const isSlider = buttonType === 'slider';
     const actions = {};
+
+    actions['slider'] = {
+        icon: true,
+        button: {
+            tap_action: { action: isEntityType(context, "sensor") ? "more-info" : "toggle" },
+            double_tap_action: { action: "none" },
+            hold_action: { action: "none" }
+        }
+    };
 
     actions['switch'] = {
         icon: true,
@@ -48,10 +58,15 @@ export function createStructure(context, appendTo = context.container) {
         appendTo: appendTo,
         styles: styles,
         withSlider: isSlider,
-        withFeedback: !isSlider,
+        holdToSlide: isSlider,
+        readOnlySlider: readOnlySlider(context),
+        withFeedback: !context.config.tap_to_slide,
         withSubButtons: true,
-        iconActions: !isSlider ? actions[buttonType]?.icon : true,
-        buttonActions: !isSlider ? actions[buttonType]?.button : false,
+        iconActions: actions[buttonType]?.icon,
+        buttonActions: 
+            !context.config.tap_to_slide 
+                ? actions[buttonType]?.button 
+                : false,
     });
 
     // Add backward compatibility

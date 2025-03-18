@@ -48,7 +48,8 @@ export function ensureArray(value) {
 }
 
 function checkStateNumericCondition(condition,hass) {
-  const state = (condition.entity ? hass.states[condition.entity] : undefined)
+  const entityId = condition.entity_id || condition.entity;
+  const state = (entityId ? hass.states[entityId] : undefined)
     ?.state;
   let above = condition.above;
   let below = condition.below;
@@ -165,8 +166,9 @@ export function extractConditionEntityIds(conditions) {
 }
 
 function validateStateCondition(condition) {
+  const entityId = condition.entity_id || condition.entity;
   return (
-    condition.entity != null &&
+    entityId != null &&
     (condition.state != null || condition.state_not != null)
   );
 }
@@ -188,8 +190,9 @@ function validateOrCondition(condition) {
 }
 
 function validateNumericStateCondition(condition) {
+  const entityId = condition.entity_id || condition.entity;
   return (
-    condition.entity != null &&
+    entityId != null &&
     (condition.above != null || condition.below != null)
   );
 }

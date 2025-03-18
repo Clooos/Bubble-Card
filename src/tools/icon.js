@@ -263,13 +263,16 @@ export function getWeatherIcon(weatherType) {
 
 export function getIconColor(context, entity = context.config.entity, brightness = 1) {
     const { card_type: cardType, use_accent_color: useAccentColor } = context.config;
-    const defaultColor = `var(--bubble-accent-color, var(--accent-color))`;
+    const defaultColor = `var(--bubble-icon-color)`;
+    const accentColor = `var(--bubble-accent-color, var(--accent-color))`;
     const entityRgbColor = getAttribute(context, "rgb_color", entity);
     const isThemeLight = isColorLight('var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))))');
 
     const adjustedBrightness = isThemeLight ? brightness - 0.2 : brightness;
+    const isTemperature = entity === context.config.entity && getAttribute(context, "unit_of_measurement", entity)?.includes('°');
+    const containsNumber = entity === context.config.entity && context._hass.states[entity]?.state?.match(/\d+/);
 
-    if (!entity) return defaultColor;
+    if (!entity || isTemperature || containsNumber) return defaultColor;
 
     if (isEntityType(context, "light") && !useAccentColor) {
         if (cardType === 'button') {
@@ -285,21 +288,19 @@ export function getIconColor(context, entity = context.config.entity, brightness
         }
     }
 
-    if (!entity.startsWith("light.") || useAccentColor) return defaultColor;
+    if (!entity.startsWith("light.") || useAccentColor) return accentColor;
 
     const defaultLightColor = [225, 225, 210];
     const adjustedDefaultLightColor = adjustColor(defaultLightColor, adjustedBrightness);
-
 
     if (!entityRgbColor) {
       return `var(--bubble-light-color, rgba(${adjustedDefaultLightColor.join(', ')}))`;
     }
 
-
-   const adjustedColor = adjustColor(entityRgbColor, adjustedBrightness);
-   return isColorCloseToWhite(entityRgbColor) ?
+    const adjustedColor = adjustColor(entityRgbColor, adjustedBrightness);
+    return isColorCloseToWhite(entityRgbColor) ?
         `var(--bubble-light-color, rgba(${adjustedDefaultLightColor.join(', ')}))` :
-       `var(--bubble-light-color, rgba(${adjustedColor.join(', ')}))`;
+        `var(--bubble-light-color, rgba(${adjustedColor.join(', ')}))`;
 }
 
 export function getImage(context, entity = context.config.entity) {

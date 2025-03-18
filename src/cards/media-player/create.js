@@ -14,7 +14,7 @@ export function createStructure(context) {
     const elements = createBaseStructure(context, {
         type: cardType,
         styles: styles,
-        iconActions: true,
+        iconActions: false,
         buttonActions: true,
         withSubButtons: true,
     });
@@ -57,6 +57,7 @@ export function createStructure(context) {
         targetElement: elements.volumeSliderContainer,
         sliderLiveUpdate: false,
         withValueDisplay: true,
+        holdToSlide: false
     });
 
     elements.cardWrapper.appendChild(elements.volumeSliderContainer);

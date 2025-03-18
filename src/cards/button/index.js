@@ -3,7 +3,6 @@ import { changeSubButtons } from "../../components/sub-button/changes.js";
 import {
     changeStatus,
     changeButton,
-    changeSlider,
     changeStyle
 } from './changes.js'
 import { getButtonType } from './helpers.js';
@@ -20,7 +19,6 @@ export function handleButton(context, appendTo = context.content) {
         changeButton(context);
     }
 
-    changeSlider(context);
     changeIcon(context);
     changeName(context);
     changeState(context);

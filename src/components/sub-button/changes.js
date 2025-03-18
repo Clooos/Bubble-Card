@@ -19,7 +19,8 @@ function getSubButtonOptions(context, subButton, index) {
     showName: subButton.show_name ?? false,
     showState: subButton.show_state ?? false,
     showAttribute: subButton.show_attribute ?? false,
-    showLastChanged: (subButton.show_last_changed || subButton.show_last_updated) ?? false,
+    showLastChanged: subButton.show_last_changed ?? false,
+    showLastUpdated: subButton.show_last_updated ?? false,
     showIcon: subButton.show_icon ?? true,
     showBackground: subButton.show_background ?? true,
     stateBackground: subButton.state_background ?? true,
@@ -64,14 +65,24 @@ function updateDropdownArrow(element, showArrow) {
 }
 
 function buildDisplayedState(options, context) {
-  const { state, name, attribute, attributeType, showName, showState, showAttribute, showLastChanged } = options;
+  const { state, name, attribute, attributeType, showName, showState, showAttribute, showLastChanged, showLastUpdated } = options;
   
   const parts = [];
   if (showName && name) parts.push(name);
   if (state && showState) parts.push(context._hass.formatEntityState(state));
   if (state && showLastChanged) parts.push(formatDateTime(state.last_changed, context._hass.locale.language));
-  if (state && attribute && showAttribute) {
-    parts.push(context._hass.formatEntityAttributeValue(state, attributeType) ?? attribute);
+  if (state && showLastUpdated) parts.push(formatDateTime(state.last_updated, context._hass.locale.language));
+  if (state && showAttribute) {
+    const formattedAttribute = context._hass.formatEntityAttributeValue(state, attributeType);
+    
+    const isZeroWithUnit = formattedAttribute && 
+                          (typeof formattedAttribute === 'string') && 
+                          formattedAttribute.trim().startsWith('0') && 
+                          formattedAttribute.trim().length > 1;
+    
+    if (attribute !== 0 || isZeroWithUnit) {
+      parts.push(formattedAttribute ?? attribute);
+    }
   }
 
   return parts.length ? parts.join(' · ').charAt(0).toUpperCase() + parts.join(' · ').slice(1) : '';
@@ -129,7 +140,12 @@ function setupActions(element, options) {
       hold_action: { action: "none" }
     };
 
-    addActions(element, !isSelect ? subButton : '', entity, defaultActions);
+    if (!isSelect) {
+      addActions(element, !isSelect ? subButton : '', entity, defaultActions);
+    } else {
+      element.setAttribute("no-slide", "");
+    }
+
     addFeedback(element, element.feedback);
 
     if (isSelect) {
@@ -194,11 +210,27 @@ function updateSubButtonContent(context, element, options) {
     }
     element.icon.classList.toggle('icon-with-state', !!displayedState);
     element.icon.classList.toggle('icon-without-state', !displayedState);
+  }
+
+  if (element.icon?.getAttribute('icon') !== element.icon?.icon) {
+    element.icon.setAttribute('icon', element.icon.icon);
+  }
+
+  const backgroundColor = getComputedStyle(element).getPropertyValue('--bubble-sub-button-light-background-color');
+  element.backgroundColor = element.backgroundColor !== backgroundColor ? backgroundColor : element.backgroundColor;
+
+  if (!element) return;
+
+  const isOn = isStateOn(context, options.entity);
+
+  if (element.previousBackgroundColor !== element.backgroundColor || element.previousIsOn !== isOn) {
+    const isBackgroundLight = isColorLight(backgroundColor);
+    const shouldHaveBrightBackground = isBackgroundLight && backgroundColor !== 'rgba(0, 0, 0, 0)' && backgroundColor !== '' && isOn;
     
-    if (element.icon.getAttribute('icon') !== element.icon.icon) {
-      element.icon.setAttribute('icon', element.icon.icon);
-    }
-  
+    element.classList.toggle("bright-background", shouldHaveBrightBackground);
+    
+    element.previousBackgroundColor = element.backgroundColor;
+    element.previousIsOn = isOn;
   }
 }
 
@@ -243,5 +275,16 @@ function initializesubButtonIcon(context) {
   const container = context.config.card_type === 'pop-up' ? context.popUp : context.content;
   container.querySelectorAll('.bubble-sub-button-icon').forEach((iconElement, index) => {
     context.subButtonIcon[index] = iconElement;
+  });
+}
+
+export function getSubButtonsStates(context) {
+  const subButtons = context.config.sub_button;
+  if (!subButtons || !Array.isArray(subButtons)) return [];
+
+  return subButtons.map((subButton) => {
+    if (!subButton) return '';
+    const entity = subButton.entity ?? context.config.entity;
+    return context._hass.states[entity]?.state ?? '';
   });
 }

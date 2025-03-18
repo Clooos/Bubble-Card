@@ -23,7 +23,7 @@ export function renderMediaPlayerEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:cog"></ha-icon>
-                  Media player settings
+                  Card settings
                 </h4>
                 <div class="content"> 
                     <ha-textfield
@@ -38,10 +38,38 @@ export function renderMediaPlayerEditor(editor){
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
                 <h4 slot="header">
-                  <ha-icon icon="mdi:eye-off"></ha-icon>
-                  Display/hide buttons
+                <ha-icon icon="mdi:tune-variant"></ha-icon>
+                Media player settings
                 </h4>
-                <div class="content"> 
+                <div class="content">
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${editor._config}
+                        .schema=${[
+                            {
+                                type: "grid",
+                                flatten: true,
+                                schema: [
+                                    {
+                                        name: "min_volume",
+                                        label: "Min volume",
+                                        selector: { number: {
+                                            step: "any"
+                                        } },
+                                    },
+                                    {
+                                        name: "max_volume",
+                                        label: "Max volume",
+                                        selector: { number: {
+                                            step: "any"
+                                        } },
+                                    },
+                                ],
+                            },
+                        ]}   
+                        .computeLabel=${editor._computeLabelCallback}
+                        @value-changed=${editor._valueChanged}
+                    ></ha-form>
                     <ha-formfield .label="Optional - Hide play/pause button">
                         <ha-switch
                             aria-label="Optional - Hide play/pause button"
@@ -110,9 +138,9 @@ export function renderMediaPlayerEditor(editor){
                     ${editor.makeActionPanel("Hold action")}
                 </div>
             </ha-expansion-panel>
-            <ha-expansion-panel outlined style="display: ${editor._config.button_type === 'slider' ? 'none' : ''}">
+            <ha-expansion-panel outlined>
                 <h4 slot="header">
-                <ha-icon icon="mdi:gesture-tap"></ha-icon>
+                <ha-icon icon="mdi:gesture-tap-button"></ha-icon>
                 Tap action on card
                 </h4>
                 <div class="content">
@@ -121,6 +149,7 @@ export function renderMediaPlayerEditor(editor){
                     ${editor.makeActionPanel("Hold action", button_action, 'toggle', 'button_action')}
                 </div>
             </ha-expansion-panel>
+            ${editor.makeSubButtonPanel()}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
@@ -150,7 +179,6 @@ export function renderMediaPlayerEditor(editor){
                     ${editor.makeStyleEditor()}
                 </div>
             </ha-expansion-panel>
-            ${editor.makeSubButtonPanel()}
             ${editor.makeModulesEditor()}
             <ha-alert alert-type="info">This card allows you to control a media player. You can tap on the icon to get more control.</ha-alert>
             ${editor.makeVersion()}

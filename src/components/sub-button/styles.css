@@ -38,6 +38,10 @@
     --mdc-icon-size: 16px;
 }
 
+.bright-background {
+    color: var(--bubble-sub-button-dark-text-color, rgba(0, 0, 0, 0.5));
+}
+
 .background-on {
     background-color: var(--bubble-sub-button-light-background-color, var(--accent-color));
 }

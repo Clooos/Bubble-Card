@@ -41,7 +41,7 @@ export function renderSelectEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:cog"></ha-icon>
-                  Button settings
+                  Card settings
                 </h4>
                 <div class="content">                   
                     <ha-textfield
@@ -65,6 +65,7 @@ export function renderSelectEditor(editor){
                     ${editor.makeActionPanel("Hold action")}
                 </div>
             </ha-expansion-panel>
+            ${editor.makeSubButtonPanel()}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
@@ -75,7 +76,6 @@ export function renderSelectEditor(editor){
                     ${editor.makeStyleEditor()}
                 </div>
             </ha-expansion-panel>
-            ${editor.makeSubButtonPanel()}
             ${editor.makeModulesEditor()}
             <ha-alert alert-type="info">
               This card allows you to have a select menu for your 

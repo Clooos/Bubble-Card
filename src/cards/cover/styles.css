@@ -10,9 +10,8 @@
   border: none;
   cursor: pointer;
   border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-  padding: 6px;
-  height: 24px;
-  width: 24px;
+  height: 42px;
+  width: 42px;
   transition: background 0.3s ease;
   align-self: center;
   align-items: center;

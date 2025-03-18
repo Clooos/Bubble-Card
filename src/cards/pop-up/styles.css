@@ -192,8 +192,5 @@
 .large .bubble-close-button {
     height: var(--row-height,56px);
     width: var(--row-height,56px);
-    border: none;
-    border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
-    z-index: 1;
     --mdc-icon-size: 28px !important;
 }
