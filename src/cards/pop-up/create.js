@@ -94,16 +94,16 @@ export function createHeader(context) {
     });
   }
 
-  context.popUp.addEventListener('touchstart', (event) => {
+  context.handleTouchStart = (event) => {
     startTouchY = event.touches[0].clientY;
-  }, { passive: true });
+  };
 
-  context.elements.header.addEventListener('touchmove', (event) => {
+  context.handleHeaderTouchMove = (event) => {
     const offset = event.touches[0].clientY - startTouchY;
     if (offset > 0) context.popUp.style.transform = `translateY(${offset}px)`;
-  }, { passive: true });
+  };
 
-  context.elements.header.addEventListener('touchend', (event) => {
+  context.handleHeaderTouchEnd = (event) => {
     const offset = event.changedTouches[0].clientY - startTouchY;
     if (offset > 50) {
       context.popUp.style.transform = `translateY(calc(${offset}px + (100% - ${offset}px)))`
@@ -111,7 +111,7 @@ export function createHeader(context) {
     } else {
       context.popUp.style.transform = '';
     }
-  }, { passive: true });
+  };
 }
 
 export function createStructure(context) {
@@ -152,30 +152,23 @@ export function createStructure(context) {
 
     context.popUp.style.setProperty('--desktop-width', context.config.width_desktop ?? '540px');
 
-    if (context.config.close_on_click) {
-      context.popUp.addEventListener('click', removeHash, { passive: true });
-    }
-
-    window.addEventListener('keydown', (event) => {
+    context.closeOnEscape = (event) => {
       if (event.key === 'Escape' && context.config.hash === location.hash) {
         removeHash();
       }
-    }, { passive: true });
+    };
 
     let slideToCloseDistance = context.config.slide_to_close_distance ?? 400;
 
-    context.popUp.addEventListener('touchmove', (event) => {
-        // Calculate the distance the finger has traveled
-        let touchMoveDistance = event.touches[0].clientY - startTouchY;
+    context.handleTouchMove = (event) => {
+      const touchMoveDistance = event.touches[0].clientY - startTouchY;
+      if (touchMoveDistance > slideToCloseDistance && event.touches[0].clientY > lastTouchY) {
+        removeHash();
+      }
+      lastTouchY = event.touches[0].clientY;
+    };
 
-        // If the distance is positive (i.e., the finger is moving downward) and exceeds a certain threshold, close the pop-up
-        if (touchMoveDistance > slideToCloseDistance && event.touches[0].clientY > lastTouchY) {
-            removeHash();
-        }
-
-        // Update the Y position of the last touch
-        lastTouchY = event.touches[0].clientY;
-    }, { passive: true });
+    //context.popUp.addEventListener('touchmove', context.handleTouchMove, { passive: true });
 
     const existingContainer = context.popUp.querySelector('.bubble-pop-up-container');
     if (existingContainer === null) {

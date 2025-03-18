@@ -1,6 +1,8 @@
 import { version } from './var/version.js';
 import { initializeContent } from './tools/init.js';
 import { handlePopUp } from './cards/pop-up/index.js';
+import { updateListeners as updatePopupListeners } from './cards/pop-up/helpers.js';
+import { cleanupTapActions } from './tools/tap-actions';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack/index.js';
 import { handleButton } from './cards/button/index.js';
 import { handleSeparator } from './cards/separator/index.js';
@@ -9,8 +11,7 @@ import { handleEmptyColumn } from './cards/empty-column/index.js';
 import { handleMediaPlayer } from './cards/media-player/index.js';
 import { handleSelect } from './cards/select/index.js';
 import { handleClimate } from './cards/climate/index.js';
-import { changeEditor } from './cards/pop-up/changes.js';
-import { preloadYAMLStyles } from './tools/style-utils.js';
+import { preloadYAMLStyles } from './tools/style-processor.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 class BubbleCard extends HTMLElement {
@@ -28,6 +29,13 @@ class BubbleCard extends HTMLElement {
 
     disconnectedCallback() {
         this.isConnected = false;
+        cleanupTapActions();
+
+        switch (this.config.card_type) {
+            case 'pop-up':
+                updatePopupListeners(this, false);
+                break;
+        }
     }
 
     get detectedEditor() {
@@ -42,7 +50,9 @@ class BubbleCard extends HTMLElement {
         }
         this.editor = editMode;
 
-        this.updateBubbleCard();
+        if (this.config.card_type === 'pop-up') {
+            this.updateBubbleCard();
+        }
     }
 
     set hass(hass) {
@@ -198,11 +208,15 @@ class BubbleCard extends HTMLElement {
     getGridOptions() {
         const currentColumns = this.config.columns;
         const convertedColumns = currentColumns ? currentColumns * 3 : 12;
-        let LovelaceGridOptions = { columns: convertedColumns };
+        const convertedRows = this.config.rows ?? 1;
+        let LovelaceGridOptions = { columns: convertedColumns, rows: convertedRows };
 
         switch (this.config.card_type) {
             case 'horizontal-buttons-stack':
                 LovelaceGridOptions = { rows: 1.3 };
+                break;
+            case 'separator':
+                LovelaceGridOptions = { rows: 0.8 };
                 break;
         }
         return LovelaceGridOptions;

@@ -1,6 +1,8 @@
 import { html } from "lit";
 
 export function renderCoverEditor(editor){
+
+    let button_action = editor._config.button_action || '';
     return html`
         <div class="card-config">
             ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
@@ -19,7 +21,7 @@ export function renderCoverEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:cog"></ha-icon>
-                  Cover settings
+                  Card settings
                 </h4>
                 <div class="content"> 
                     <ha-textfield
@@ -72,6 +74,18 @@ export function renderCoverEditor(editor){
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
                 <h4 slot="header">
+                <ha-icon icon="mdi:gesture-tap-button"></ha-icon>
+                Tap action on card
+                </h4>
+                <div class="content">
+                    ${editor.makeActionPanel("Tap action", button_action, 'more-info', 'button_action')}
+                    ${editor.makeActionPanel("Double tap action", button_action, 'toggle', 'button_action')}
+                    ${editor.makeActionPanel("Hold action", button_action, 'toggle', 'button_action')}
+                </div>
+            </ha-expansion-panel>
+            ${editor.makeSubButtonPanel()}
+            <ha-expansion-panel outlined>
+                <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
                   Styling options
                 </h4>
@@ -90,7 +104,6 @@ export function renderCoverEditor(editor){
                     ${editor.makeStyleEditor()}
                 </div>
             </ha-expansion-panel>
-            ${editor.makeSubButtonPanel()}
             ${editor.makeModulesEditor()}
             <ha-alert alert-type="info">This card allows you to control your covers.</ha-alert>
             ${editor.makeVersion()}

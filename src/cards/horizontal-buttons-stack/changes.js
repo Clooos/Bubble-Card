@@ -1,8 +1,6 @@
 import { isColorCloseToWhite } from "../../tools/style.js";
-import { getState } from "../../tools/utils.js";
 import { createButton } from './create.js';
-import { initializesubButtonIcon } from '../../tools/global-changes.js';
-import { handleCustomStyles } from '../../tools/style-utils.js';
+import { handleCustomStyles } from '../../tools/style-processor.js';
 
 const BUTTON_MARGIN = 12;
 

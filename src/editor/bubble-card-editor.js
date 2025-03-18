@@ -15,8 +15,7 @@ import { renderClimateEditor } from '../cards/climate/editor.js';
 import { renderSelectEditor } from '../cards/select/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
 import { renderEmptyColumnEditor } from '../cards/empty-column/editor.js';
-import { yamlKeysMap, loadYAMLStyles } from '../tools/style-utils.js'
-import { checkConditionsMet } from '../tools/validate-condition.js';
+import { yamlKeysMap } from '../tools/style-processor.js'
 import styles from './styles.css'
 
 class BubbleCardEditor extends LitElement {
@@ -66,8 +65,8 @@ class BubbleCardEditor extends LitElement {
 
         const homeAssistant = document.querySelector("body > home-assistant");
         if (homeAssistant?.shadowRoot) {
-            const root = homeAssistant.shadowRoot;
-            const dialog = root.querySelector("hui-dialog-edit-card")?.shadowRoot;
+            const root = homeAssistant?.shadowRoot;
+            const dialog = root?.querySelector("hui-dialog-edit-card")?.shadowRoot;
 
             if (dialog) {
                 const previewElement = dialog.querySelector("ha-dialog > div.content > div.element-preview");
@@ -206,10 +205,11 @@ class BubbleCardEditor extends LitElement {
     }
 
     makeLayoutOptions() {
+        const defaultLayout = window.isSectionView ? 'large' : 'normal';
         return html`
             <ha-combo-box
                 label="${this._config.card_type === "pop-up" ? 'Header card layout' : 'Card layout'}"
-                .value="${this._config.card_layout || 'normal'}"
+                .value="${this._config.card_layout || defaultLayout}"
                 .configValue="${"card_layout"}"
                 .items="${[{label: 'Normal', value: 'normal'}, {label: 'Large (Optimized for sections)', value: 'large'}, {label: 'Large with 2 sub-buttons rows (Optimized for sections)', value: 'large-2-rows'}]}"
                 @value-changed="${this._valueChanged}"
@@ -401,20 +401,6 @@ class BubbleCardEditor extends LitElement {
                     </div>
                 </ha-formfield>
             ` : ''}
-            ${array !== 'sub_button' && this._button_type === 'slider' ? html`
-                <ha-formfield .label="Optional - Slider live update">
-                    <ha-switch
-                        aria-label="Optional - Slider live update"
-                        .checked=${this._config.slider_live_update ?? false}
-                        .configValue="${"slider_live_update"}"
-                        @change=${this._valueChanged}
-                    ></ha-switch>
-                    <div class="mdc-form-field">
-                        <label class="mdc-label">Optional - Slider live update</label> 
-                    </div>
-                </ha-formfield>
-                <ha-alert alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
-            ` : ''}
         `;
     }
 
@@ -424,7 +410,7 @@ class BubbleCardEditor extends LitElement {
                 <div class="ha-icon-picker">
                     <ha-icon-picker
                         label="${label}"
-                        .value="${this['_' + configValue]}"
+                        .value="${this._config[configValue]}"
                         .configValue="${configValue}"
                         item-value-path="icon"
                         item-label-path="icon"
@@ -737,7 +723,7 @@ class BubbleCardEditor extends LitElement {
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:code-braces"></ha-icon>
-                    Custom styles & templates - This card
+                    Custom styles and JS templates
                 </h4>
                 <div class="content">
                     <div class="code-editor">
@@ -754,7 +740,7 @@ class BubbleCardEditor extends LitElement {
                     </div>
                     ${this.createErrorConsole()}
                     <ha-alert alert-type="info">
-                      For advanced users, you can edit the CSS style of this card in this editor. More information <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically. You can also add <a href="https://github.com/Clooos/Bubble-Card#templates">templates</a>.
+                      For advanced users, you can edit the CSS style of this card in this editor. More information <a href="https://github.com/Clooos/Bubble-Card#styling">here</a>. You don't need to add <code>styles: |</code>, it will be added automatically. You can also add <a href="https://github.com/Clooos/Bubble-Card#templates">JS templates</a> (Jinja is not supported).
                       <br><br><b>Looking for more advanced examples?</b> Check out my <a href="https://www.patreon.com/Clooos">Patreon</a> for exclusive custom styles and advanced templates, this is also the best way to show your support to my project!
                     </ha-alert>
                 </div>
@@ -793,6 +779,26 @@ class BubbleCardEditor extends LitElement {
     _valueChangedInHaForm(e, key, originalSchema) {
       let value = e.detail.value;
 
+      // Handle conditions differently to avoid firing the event too early to prevent panels from being collapsed
+      // I haven't found a better way to fix this (fix only the state conditions)
+      const hasCompleteConditions = (obj) => {
+        if (!obj) return true;
+        
+        if (Array.isArray(obj) && obj[0]?.condition) {
+          return obj.every(cond => this._isConditionComplete(cond));
+        }
+        
+        if (obj.condition && Array.isArray(obj.condition)) {
+          return obj.condition.every(cond => this._isConditionComplete(cond));
+        }
+        
+        if (typeof obj === 'object') {
+          return Object.values(obj).every(val => hasCompleteConditions(val));
+        }
+        
+        return true;
+      };
+
       if (value && typeof value === "object" && !Array.isArray(value)) {
         const keys = Object.keys(value);
         if (keys.length > 0 && keys.every(k => !isNaN(parseInt(k, 10)))) {
@@ -804,21 +810,24 @@ class BubbleCardEditor extends LitElement {
 
       value = this._cleanEmpty(value, key);
 
-      if (this._isEmpty(value)) {
-        if (this._config && this._config.hasOwnProperty(key)) {
-          const { [key]: removed, ...rest } = this._config;
-          this._config = rest;
-        }
-      } else {
-        this._config = { ...this._config, [key]: value };
-      }
-
       const newProcessedSchema = structuredClone(originalSchema);
-      const updatedSchema = this._updateAttributeSelectors(newProcessedSchema, this._config[key], key);
+      const updatedSchema = this._updateAttributeSelectors(newProcessedSchema, value, key);
       this._processedSchemas = { ...this._processedSchemas, [key]: updatedSchema };
 
-      fireEvent(this, "config-changed", { config: this._config });
-      this.requestUpdate();
+      if (hasCompleteConditions(value)) {
+        fireEvent(this, "config-changed", { config: { ...this._config, [key]: value } });
+      }
+    }
+
+    _isConditionComplete(condition) {
+      if (!condition || !condition.condition) return false;
+      
+      return (
+        // For state conditions, we need an entity and a state or an attribute with a state
+        (condition.condition === 'state' && condition.entity_id && (condition.state !== "" || (condition.attribute && condition.state !== ""))) ||
+        // For all other conditions, too complex to handle (need a better way to handle this)
+        (condition.condition !== 'state' && condition.condition !== '' && condition.condition !== undefined)
+      );
     }
 
     _cleanEmpty(value, key) {
@@ -972,7 +981,7 @@ class BubbleCardEditor extends LitElement {
                     </ha-formfield>
                     <hr>
 
-                    <!-- Form init caché pour corriger les sélecteurs conditionnels -->
+                    <!-- Form init to fix conditional selectors -->
                     <ha-form
                       style="display: none"
                       .hass=${this.hass}

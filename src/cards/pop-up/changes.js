@@ -1,70 +1,88 @@
-import { isColorCloseToWhite } from "../../tools/style.js";
-import { getIcon, getIconColor, getImage, getName, getState, isEntityType, isStateOn, getWeatherIcon, fireEvent } from "../../tools/utils.js";
 import { getBackdrop } from "./create.js";
-import { addHash, onEditorChange, removeHash, toggleBodyScroll } from "./helpers.js";
-import { initializesubButtonIcon } from '../../tools/global-changes.js';
+import { addHash, onEditorChange, removeHash, closePopup } from "./helpers.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.js';
-import { handleCustomStyles } from '../../tools/style-utils.js';
+import { handleCustomStyles } from '../../tools/style-processor.js';
+import { toggleBodyScroll } from "../../tools/utils.js";
 
 export function changeEditor(context) {
     if (!context.verticalStack) return;
 
-    const { host } = context.verticalStack;
     const { popUp, sectionRow, sectionRowContainer, elements } = context;
-
-    if (context.detectedEditor) {
-          window.addEventListener("dialog-closed", () => {
-            elements?.popUpContainer?.classList.add('editor-cropped');
-          }, { once: true });
-    }
-
+    const popUpClasses = popUp?.classList;
     const isPopUpOpened = popUp?.classList.contains('is-popup-opened');
     const isCard = sectionRow?.tagName.toLowerCase() === 'hui-card';
     const isEditorActive = context.editor || context.detectedEditor;
+    const wasEditorActive = context.previousEditorState;
+    
+    if (context.detectedEditor && !context.dialogClosedListenerAdded) {
+        window.addEventListener("dialog-closed", () => {
+            if (elements?.popUpContainer) {
+                elements.popUpContainer.classList.add('editor-cropped');
+            }
+        }, { once: true });
+        context.dialogClosedListenerAdded = true;
+    }
 
-    if (!isPopUpOpened && isCard) {
-        const { editor, editorAccess } = context;
-
-        if (sectionRowContainer?.classList.contains('card') && isEditorActive && sectionRowContainer.style.display === "none") {
+    if (!isPopUpOpened && isCard && sectionRowContainer) {
+        if (sectionRowContainer.classList.contains('card') && isEditorActive && sectionRowContainer.style.display === "none") {
             sectionRowContainer.style.display = '';
         }
     }
 
-    const popUpClasses = popUp?.classList;
-
+    // Editor just opened
     if (isEditorActive) {
         if (!popUpClasses?.contains('editor')) {
             toggleBodyScroll(false);
-            popUpClasses?.remove('is-popup-opened');
-            popUpClasses?.add('is-popup-closed', 'editor');
+            
+            if (popUpClasses) {
+                popUpClasses.remove('is-popup-opened');
+                popUpClasses.add('is-popup-closed', 'editor');
+            }
 
-            if (!context.detectedEditor) {
-                elements?.popUpContainer?.classList.add('editor-cropped');
+            if (!context.detectedEditor && elements?.popUpContainer) {
+                elements.popUpContainer.classList.add('editor-cropped');
             }
         }
-
+        
         context.editorAccess = true;
-    } else {
-        if (popUpClasses?.contains('editor')) {
-            popUpClasses.remove('editor');
-            elements?.popUpContainer?.classList.remove('editor-cropped');
+    } 
+    
+    // Editor just closed
+    else if (popUpClasses?.contains('editor')) {
+        popUpClasses.remove('editor');
+        
+        if (elements?.popUpContainer) {
+            elements.popUpContainer.classList.remove('editor-cropped');
         }
+
+        if (context.observer) {
+            context.observer.disconnect();
+            context.observer = null;
+        }
+
+        if (context.verticalStack.contains(context.popUp)) {
+            closePopup(context, true);
+        }
+        
+        context.editorAccess = false;
+        context.dialogClosedListenerAdded = false;
+        
+        context.previousEditorState = isEditorActive;
     }
 
-    if (context.editor && !context.detectedEditor && (isEditorActive !== context.previousEditorState)) {
+    if (context.editor && !context.detectedEditor && (isEditorActive !== wasEditorActive) && isEditorActive) {
         onEditorChange(context);
         context.previousEditorState = isEditorActive;
     }
 }
 
 export function changeStyle(context) {
-    initializesubButtonIcon(context);
     const { backdropCustomStyle } = getBackdrop(context);
 
     handleCustomStyles(context, context.popUp);
     handleCustomStyles(context, backdropCustomStyle);
 
-    const layoutClass = context.config.card_layout;
+    const layoutClass = context.config.card_layout ?? 'large';
     const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows';
     const needsRows2 = layoutClass === 'large-2-rows';
 
@@ -83,6 +101,7 @@ export function changeStyle(context) {
 
 export function changeTriggered(context) {
     const triggerConditions = context.config.trigger;
+    const triggerClose = context.config.trigger_close ?? true;
 
     if (triggerConditions) {
         const isInitialLoad = !context.hasPageLoaded;
@@ -101,7 +120,7 @@ export function changeTriggered(context) {
             if (trigger === context.previousTrigger) return;
 
             if (context.config.hash === location.hash) {
-                if (!trigger && !isInitialLoad) {
+                if (!trigger && !isInitialLoad && triggerClose) {
                     removeHash();
                 }
             } else {

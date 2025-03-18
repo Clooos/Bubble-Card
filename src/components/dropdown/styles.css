@@ -1,0 +1,80 @@
+mwc-list-item {
+    border-radius: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 24px));
+    margin: 0 8px;
+}
+
+mwc-list-item[selected] {
+    color: var(--primary-text-color) !important;
+    background-color: var(--bubble-select-list-item-accent-color, var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--accent-color)))); /* Added the missing 'select' in the first var without removing the previous one for compatibilty */ 
+}
+
+ha-select {
+    --mdc-shape-medium: var(--bubble-select-list-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    --mdc-theme-surface: var(--bubble-select-list-background-color, var(--bubble-select-main-background-color, var(--bubble-main-background-color, var(--card-background-color, var(--secondary-background-color)))));
+    --mdc-shape-large: 32px;
+    --mdc-shape-small: 64px;
+    --mdc-menu-max-width: min-content;
+    --mdc-menu-min-width: var(--bubble-select-list-width, 200px);
+    --mdc-select-max-width: min-content;
+    --mdc-select-outlined-hover-border-color: transparent;
+    --mdc-select-outlined-idle-border-color: transparent;
+    --mdc-theme-primary: transparent;
+    --right-value: calc(var(--mdc-menu-min-width) - 160px);
+}
+
+.bubble-sub-button ha-select {
+    --right-value: calc(var(--mdc-menu-min-width) - 168px);
+}
+
+.mdc-select {
+    color: transparent !important;
+    width: 150px !important;
+    position: absolute !important;
+    pointer-events: none;
+    right: var(--right-value, 46px);
+    top: -28px;
+}
+
+.mdc-menu, mwc-list, .mdc-list-item {
+    pointer-events: auto;
+}
+
+.mdc-select__dropdown-icon {
+    display: none !important;
+}
+
+.mdc-select__selected-text {
+    color: transparent !important;
+}
+
+.mdc-select__anchor {
+    width: 100%;
+    pointer-events: none;
+}
+
+.bubble-dropdown-container {
+    display: flex !important;
+    width: auto;
+    height: 100%;
+    align-items: center;
+}
+
+.bubble-dropdown-arrow {
+    display: flex;
+    position: absolute;
+    background: var(--bubble-select-arrow-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
+    height: 36px;
+    width: 36px;
+    right: 6px;
+    pointer-events: none;
+    border-radius: var(--bubble-select-button-border-radius, var(--bubble-border-radius, 20px));
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+    pointer-events: none;
+}
+
+.bubble-dropdown-select {
+    position: relative;
+    width: 42px;
+}

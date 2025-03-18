@@ -19,7 +19,7 @@ export async function handlePopUp(context) {
           changeStyle(context);
 
           if (context.config.entity || context.config.name) {
-              handleButton(context, context.elements.buttonContainer, context.elements.header);
+              handleButton(context, context.elements.header);
           }
 
           context.previousConfig = context.config;

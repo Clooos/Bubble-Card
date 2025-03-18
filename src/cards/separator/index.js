@@ -1,11 +1,10 @@
-import { changeSubButtonState } from "../../tools/global-changes.js";
-import { changeState } from "../../tools/global-changes.js";
+import { createStructure } from './create.js';
+import { changeSubButtons } from "../../components/sub-button/changes.js";
+import { changeName } from "../../components/base-card/changes.js";
 import { 
     changeIcon, 
-    changeName, 
     changeStyle 
 } from './changes.js'
-import { createStructure } from './create.js';
 
 export function handleSeparator(context) {
     if (context.cardType !== "separator") {
@@ -13,7 +12,7 @@ export function handleSeparator(context) {
     }
 
     changeIcon(context);
-    changeName(context);
-    changeSubButtonState(context, context.content, context.elements.separatorCard);
+    changeName(context, false);
+    changeSubButtons(context);
     changeStyle(context);
 }

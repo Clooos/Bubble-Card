@@ -79,6 +79,70 @@ export function renderPopUpEditor(editor){
                         ${editor.makeDropdown("Optional - Icon", "icon")}
                         ${editor.makeShowState()}
                         <hr />
+                        <ha-expansion-panel outlined style="display: ${editor._config.button_type !== 'slider' ? 'none' : ''}">
+                            <h4 slot="header">
+                            <ha-icon icon="mdi:tune-variant"></ha-icon>
+                            Slider settings
+                            </h4>
+                            <div class="content">
+                                <ha-form
+                                    .hass=${editor.hass}
+                                    .data=${editor._config}
+                                    .schema=${[
+                                        {
+                                            type: "grid",
+                                            flatten: true,
+                                            schema: [
+                                                {
+                                                    name: "min_value",
+                                                    label: "Min value",
+                                                    selector: { number: {} },
+                                                },
+                                                {
+                                                    name: "max_value",
+                                                    label: "Max value",
+                                                    selector: { number: {} },
+                                                },
+                                            ],
+                                        },
+                                    ]}   
+                                    .computeLabel=${editor._computeLabelCallback}
+                                    .disabled="${editor._config.button_type === 'name'}"
+                                    @value-changed=${editor._valueChanged}
+                                ></ha-form>
+                                <ha-formfield>
+                                    <ha-switch
+                                        .checked=${editor._config.tap_to_slide}
+                                        .configValue="${"tap_to_slide"}"
+                                        @change="${editor._valueChanged}"
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Tap to slide (previous behavior)</label> 
+                                    </div>
+                                </ha-formfield>
+                                <ha-formfield>
+                                    <ha-switch
+                                        .checked=${editor._config.read_only_slider}
+                                        .configValue="${"read_only_slider"}"
+                                        @change="${editor._valueChanged}"
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Read only slider</label> 
+                                    </div>
+                                </ha-formfield>
+                                <ha-formfield>
+                                    <ha-switch
+                                        .checked=${editor._config.slider_live_update}
+                                        .configValue="${"slider_live_update"}"
+                                        @change="${editor._valueChanged}"
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Slider live update</label> 
+                                    </div>
+                                </ha-formfield>
+                                <ha-alert alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
+                            </div>
+                        </ha-expansion-panel>
                         <ha-expansion-panel outlined>
                             <h4 slot="header">
                               <ha-icon icon="mdi:gesture-tap"></ha-icon>
@@ -173,6 +237,16 @@ export function renderPopUpEditor(editor){
                   Pop-up trigger
                 </h4>
                 <div class="content">
+                    <ha-formfield>
+                        <ha-switch
+                            .checked=${editor._config.trigger_close ?? true}
+                            .configValue="${"trigger_close"}"
+                            @change=${editor._valueChanged}
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Close pop-up when conditions are not met</label> 
+                        </div>
+                    </ha-formfield>
                     <ha-card-conditions-editor
                         .hass=${editor.hass}
                         .conditions=${conditions}

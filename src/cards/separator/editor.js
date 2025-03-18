@@ -13,6 +13,7 @@ export function renderSeparatorEditor(editor){
             @input="${editor._valueChanged}"
         ></ha-textfield>
         ${editor.makeDropdown("Icon", "icon")}
+        ${editor.makeSubButtonPanel()}
         <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:palette"></ha-icon>
@@ -23,7 +24,6 @@ export function renderSeparatorEditor(editor){
                 ${editor.makeStyleEditor()}
             </div>
         </ha-expansion-panel>
-        ${editor.makeSubButtonPanel()}
         ${editor.makeModulesEditor()}
         <ha-alert alert-type="info">This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...</ha-alert>
         ${editor.makeVersion()}

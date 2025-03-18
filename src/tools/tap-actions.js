@@ -2,53 +2,73 @@ import { tapFeedback, forwardHaptic } from "./utils.js";
 
 const maxHoldDuration = 400;
 const doubleTapTimeout = 200;
-const scrollDetectionDelay = 300; // Delay before confirming hold action
 const movementThreshold = 5; // Movement threshold to consider as scroll
+const scrollDisableTime = 300;
 
-window.isScrolling = false; // Track if scrolling is active
+window.isScrolling = false;
 
-// Disable actions during scroll
 function disableActionsDuringScroll() {
   window.isScrolling = true;
   setTimeout(() => {
     window.isScrolling = false;
-  }, 150);
+  }, scrollDisableTime);
 }
 
 document.addEventListener('scroll', disableActionsDuringScroll, { passive: true });
 
-// Global event listener
-document.body.addEventListener('pointerdown', (event) => {
-  if (window.isScrolling) return; // Do nothing if scrolling is active
+const actionHandler = new WeakMap();
+const activeHandlers = new Set();
 
-  const path = event.composedPath();
-  let actionElement = null;
+function handlePointerDown(event) {
+  if (window.isScrolling) return;
 
-  for (const element of path) {
-    if (element.classList && element.classList.contains('bubble-action')) {
-      actionElement = element;
-      break;
-    }
+  const actionElement = event.composedPath().find(element => 
+    element.classList?.contains('bubble-action')
+  );
+
+  if (!actionElement) return;
+
+  const config = {
+    tap_action: JSON.parse(actionElement.dataset.tapAction),
+    double_tap_action: JSON.parse(actionElement.dataset.doubleTapAction),
+    hold_action: JSON.parse(actionElement.dataset.holdAction),
+    entity: actionElement.dataset.entity,
+  };
+
+  if (!actionHandler.has(actionElement)) {
+    const handler = new ActionHandler(actionElement, config, sendActionEvent);
+    actionHandler.set(actionElement, handler);
+    activeHandlers.add(handler);
   }
 
-  if (actionElement) {
-    const config = {
-      tap_action: JSON.parse(actionElement.dataset.tapAction),
-      double_tap_action: JSON.parse(actionElement.dataset.doubleTapAction),
-      hold_action: JSON.parse(actionElement.dataset.holdAction),
-      entity: actionElement.dataset.entity,
-    };
+  const handler = actionHandler.get(actionElement);
+  handler.handleStart(event);
 
-    if (!actionElement.actionHandler) {
-      actionElement.actionHandler = new ActionHandler(actionElement, config, sendActionEvent);
-    }
+  const cleanup = () => {
+    actionElement.removeEventListener('pointerup', endHandler);
+    actionElement.removeEventListener('pointercancel', endHandler);
+    document.removeEventListener('pointerup', endHandler);
+    document.removeEventListener('scroll', scrollHandler);
+    activeHandlers.delete(handler);
+  };
 
-    actionElement.actionHandler.handleStart(event);
+  const endHandler = (e) => {
+    handler.handleEnd(e);
+    cleanup();
+  };
 
-    actionElement.addEventListener('pointerup', actionElement.actionHandler.handleEnd.bind(actionElement.actionHandler), { once: true });
-    document.addEventListener('scroll', actionElement.actionHandler.handleScroll.bind(actionElement.actionHandler), { once: true });
-  }
-}, { passive: true });
+  const scrollHandler = () => {
+    handler.handleScroll();
+    cleanup();
+  };
+
+  actionElement.addEventListener('pointerup', endHandler, { once: true });
+  actionElement.addEventListener('pointercancel', endHandler, { once: true });
+  document.addEventListener('pointerup', endHandler, { once: true });
+  document.addEventListener('scroll', scrollHandler, { once: true });
+}
+
+document.body.addEventListener('pointerdown', handlePointerDown, { passive: true });
 
 export function callAction(element, actionConfig, action) {
   setTimeout(() => {
@@ -110,6 +130,17 @@ class ActionHandler {
     this.startY = 0;
     this.holdFired = false;
     this.pointerMoveListener = this.detectScrollLikeMove.bind(this);
+    this.isDisconnected = false;
+    this.hasMoved = false;
+  }
+
+  cleanup() {
+    this.isDisconnected = true;
+    clearTimeout(this.tapTimeout);
+    clearTimeout(this.holdTimeout);
+    document.removeEventListener('pointermove', this.pointerMoveListener);
+    this.tapTimeout = null;
+    this.holdTimeout = null;
   }
 
   handleStart(e) {
@@ -118,12 +149,13 @@ class ActionHandler {
     this.startX = e.clientX;
     this.startY = e.clientY;
     this.holdFired = false;
+    this.hasMoved = false;
 
-    document.addEventListener('pointermove', this.pointerMoveListener);
+    document.addEventListener('pointermove', this.pointerMoveListener, { passive: true });
 
     this.holdTimeout = setTimeout(() => {
       const holdAction = this.config.hold_action || { action: 'none' };
-      if (holdAction.action !== 'none' && !window.isScrolling) {
+      if (holdAction.action !== 'none' && !window.isScrolling && !this.hasMoved) {
         this.sendActionEvent(this.element, this.config, 'hold');
         this.holdFired = true;
       }
@@ -135,14 +167,21 @@ class ActionHandler {
     const deltaY = Math.abs(e.clientY - this.startY);
 
     if (deltaX > movementThreshold || deltaY > movementThreshold) {
+      // Considérer cela comme un mouvement de type drag/scroll
+      this.hasMoved = true;
+      disableActionsDuringScroll(); // Désactiver les actions pendant un court laps de temps
+      
+      // Nettoyer les timeouts pour éviter les actions non désirées
       clearTimeout(this.holdTimeout);
       this.holdTimeout = null;
+      
+      // Arrêter d'écouter les mouvements une fois qu'un drag est détecté
       document.removeEventListener('pointermove', this.pointerMoveListener);
     }
   }
 
   handleEnd(e) {
-    if (window.isScrolling || this.isDisconnected) return;
+    if (window.isScrolling || this.isDisconnected || this.hasMoved) return;
 
     clearTimeout(this.holdTimeout);
     this.holdTimeout = null;
@@ -167,6 +206,7 @@ class ActionHandler {
   }
 
   handleScroll() {
+    this.hasMoved = true;
     clearTimeout(this.holdTimeout);
     this.holdTimeout = null;
     document.removeEventListener('pointermove', this.pointerMoveListener);
@@ -223,10 +263,17 @@ export function sendActionEvent(element, config, action) {
   }, action);
 }
 
-
 export function addFeedback(element, feedbackElement) {
   element.addEventListener('click', () => { 
     forwardHaptic("selection");
     tapFeedback(feedbackElement);
   });
+}
+
+// Add cleanup function
+export function cleanupTapActions() {
+  for (const handler of activeHandlers) {
+    handler.cleanup();
+  }
+  activeHandlers.clear();
 }
