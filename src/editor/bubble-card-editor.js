@@ -352,6 +352,18 @@ class BubbleCardEditor extends LitElement {
                     <label class="mdc-label">Optional - Show last changed</label> 
                 </div>
             </ha-formfield>
+            <ha-formfield .label="Optional - Show last updated">
+                <ha-switch
+                    aria-label="Optional - Show last updated"
+                    .checked=${context?.show_last_updated}
+                    .configValue="${config + "show_last_updated"}"
+                    .disabled="${nameButton && array !== 'sub_button'}"
+                    @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_updated: ev.target.checked }, array)}"
+                ></ha-switch>
+                <div class="mdc-form-field">
+                    <label class="mdc-label">Optional - Show last updated</label> 
+                </div>
+            </ha-formfield>
             <ha-formfield .label="Optional - Show attribute">
                 <ha-switch
                     aria-label="Optional - Show attribute"
