@@ -4,6 +4,7 @@ import { changeDropdownList } from "../dropdown/changes.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from "../../tools/validate-condition.js";
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
 import { getIcon, getIconColor } from "../../tools/icon.js";
+import { getOptionIcon } from "../dropdown/helpers.js";
 
 function getSubButtonOptions(context, subButton, index) {
   const entity = subButton.entity ?? context.config.entity;
@@ -200,38 +201,66 @@ function updateSubButtonContent(context, element, options) {
     element.nameContainer.textContent = displayedState;
   }
 
+  const selectedOption = options.isSelect && element.dropdownSelect ?
+    Array.from(element.dropdownSelect.children).find(option => option.hasAttribute('selected'))?.value : false;
+
   if (options.showIcon && options.icon) {
-    if (!element.icon) {
-      element.icon = createElement('ha-icon', 'bubble-sub-button-icon');
-      element.icon.icon = options.icon;
-      element.appendChild(element.icon);
-    } else {
-      element.icon.icon = options.icon;
+    let iconElement = element.icon;
+    if (!iconElement) {
+      iconElement = createElement('ha-icon', 'bubble-sub-button-icon');
+      iconElement.classList.add('show-icon');
+      element.appendChild(iconElement);
+      element.icon = iconElement;
     }
-    element.icon.classList.toggle('icon-with-state', !!displayedState);
-    element.icon.classList.toggle('icon-without-state', !displayedState);
+
+    if (selectedOption) {
+      const optionIcon = getOptionIcon(context, options.state, options.subButton.select_attribute, selectedOption);
+      if (optionIcon && !options.subButton.icon) {
+        const isIconDifferent = iconElement.tagName !== optionIcon.tagName || 
+          iconElement.icon !== optionIcon.icon || 
+          iconElement.attribute !== optionIcon.attribute ||
+          iconElement.attributeValue !== optionIcon.attributeValue;
+        if (isIconDifferent) {
+          element.replaceChild(optionIcon, iconElement);
+          element.icon = optionIcon;
+          iconElement = optionIcon;
+        }
+      } else if (iconElement.icon !== options.icon) {
+        iconElement.setAttribute('icon', options.icon);
+      }
+    } else if (iconElement.icon !== options.icon) {
+      iconElement.setAttribute('icon', options.icon);
+    }
+
+    iconElement.classList.remove('hidden');
+    iconElement.classList.add('bubble-sub-button-icon', 'show-icon');
+    iconElement.classList.toggle('icon-with-state', !!displayedState);
+    iconElement.classList.toggle('icon-without-state', !displayedState);
+  } else if (element.icon) {
+    element.icon.classList.remove('show-icon');
+    element.icon.classList.add('hidden');
   }
 
   if (element.icon?.getAttribute('icon') !== element.icon?.icon) {
     element.icon.setAttribute('icon', element.icon.icon);
   }
 
-  const backgroundColor = getComputedStyle(element).getPropertyValue('--bubble-sub-button-light-background-color');
-  element.backgroundColor = element.backgroundColor !== backgroundColor ? backgroundColor : element.backgroundColor;
+  // const backgroundColor = getComputedStyle(element).getPropertyValue('--bubble-sub-button-light-background-color');
+  // element.backgroundColor = element.backgroundColor !== backgroundColor ? backgroundColor : element.backgroundColor;
 
-  if (!element) return;
+  // if (!element) return;
 
-  const isOn = isStateOn(context, options.entity);
+  // const isOn = isStateOn(context, options.entity);
 
-  if (element.previousBackgroundColor !== element.backgroundColor || element.previousIsOn !== isOn) {
-    const isBackgroundLight = isColorLight(backgroundColor);
-    const shouldHaveBrightBackground = isBackgroundLight && backgroundColor !== 'rgba(0, 0, 0, 0)' && backgroundColor !== '' && isOn;
+  // if (element.previousBackgroundColor !== element.backgroundColor || element.previousIsOn !== isOn) {
+  //   const isBackgroundLight = isColorLight(backgroundColor);
+  //   const shouldHaveBrightBackground = isBackgroundLight && backgroundColor !== 'rgba(0, 0, 0, 0)' && backgroundColor !== '' && isOn;
     
-    element.classList.toggle("bright-background", shouldHaveBrightBackground);
+  //   element.classList.toggle("bright-background", shouldHaveBrightBackground);
     
-    element.previousBackgroundColor = element.backgroundColor;
-    element.previousIsOn = isOn;
-  }
+  //   element.previousBackgroundColor = element.backgroundColor;
+  //   element.previousIsOn = isOn;
+  // }
 }
 
 function handleVisibilityConditions(element, subButton, hass) {

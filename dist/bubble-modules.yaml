@@ -191,7 +191,7 @@ get_state_attribute:
     
     # Some informations about your module (this is shown in the editor)
     name: "Advanced example: Get state/attribute from other entities"
-    version: "v1.1"
+    version: "v1.2"
     creator: "Clooos"
     link: "https://github.com/Clooos/Bubble-Card"
 
@@ -237,7 +237,8 @@ get_state_attribute:
               }
               return null;
             })
-            .filter(value => value !== null); // Remove null values
+            // Remove null values and empty strings or strings with only spaces
+            .filter(value => value !== null && value !== "" && value.trim() !== "");
         
           // Update the DOM element with the class 'bubble-state'
           // displaying values separated by ' • '

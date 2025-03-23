@@ -1,5 +1,4 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
-import { addActions, addFeedback } from "../../tools/tap-actions.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
 import styles from "./styles.css";
 
@@ -37,6 +36,7 @@ export function createStructure(context) {
     );
 
     elements.buttonOpen.addEventListener('click', () => {
+        forwardHaptic("selection");
         const openCover = context.config.open_service ?? 'cover.open_cover';
         const [domain, action] = openCover.split('.');
         context._hass.callService(domain, action, {
@@ -45,6 +45,7 @@ export function createStructure(context) {
     });
 
     elements.buttonStop.addEventListener('click', () => {
+        forwardHaptic("selection");
         const stopCover = context.config.stop_service ?? 'cover.stop_cover';
         const [domain, action] = stopCover.split('.');
         context._hass.callService(domain, action, {
@@ -53,6 +54,7 @@ export function createStructure(context) {
     });
 
     elements.buttonClose.addEventListener('click', () => {
+        forwardHaptic("selection");
         const closeCover = context.config.close_service ?? 'cover.close_cover';
         const [domain, action] = closeCover.split('.');
         context._hass.callService(domain, action, {

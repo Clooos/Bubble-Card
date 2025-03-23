@@ -36,43 +36,64 @@ export function createSliderStructure(context, config = {}) {
     context.elements.rangeSlider.appendChild(style);
   }
 
+  function calculateRangePercentage(value, minValue, maxValue) {
+    return 100 * (value - minValue) / (maxValue - minValue);
+  }
+
   function calculateInitialPercentage() {
     let initialPercentage = 0;
-    
-    if (isEntityType(context, "light", context.config.entity)) {
-      initialPercentage = 100 * getAttribute(context, "brightness", context.config.entity) / 255;
-    } else if (isEntityType(context, "media_player", context.config.entity)) {
-      if (isStateOn(context, context.config.entity)) {
-        initialPercentage = 100 * getAttribute(context, "volume_level", context.config.entity);
-      }
-    } else if (isEntityType(context, "cover", context.config.entity)) {
-      initialPercentage = getAttribute(context, "current_position", context.config.entity);
-    } else if (isEntityType(context, "input_number", context.config.entity)) {
-      const minValue = getAttribute(context, "min", context.config.entity);
-      const maxValue = getAttribute(context, "max", context.config.entity);
-      const value = getState(context, context.config.entity);
-      initialPercentage = 100 * (value - minValue) / (maxValue - minValue);
-    } else if (isEntityType(context, "fan", context.config.entity)) {
-      if (isStateOn(context, context.config.entity)) {
-        initialPercentage = getAttribute(context, "percentage", context.config.entity);
-      }
-    } else if (isEntityType(context, "climate", context.config.entity)) {
-      if (isStateOn(context, context.config.entity)) {
-        const minValue = getAttribute(context, "min_temp", context.config.entity);
-        const maxValue = getAttribute(context, "max_temp", context.config.entity);
-        const value = getAttribute(context, "temperature", context.config.entity);
-        initialPercentage = 100 * (value - minValue) / (maxValue - minValue);
-      }
-    } else if (isEntityType(context, "number", context.config.entity)) {
-      const minValue = getAttribute(context, "min", context.config.entity);
-      const maxValue = getAttribute(context, "max", context.config.entity);
-      const value = getState(context, context.config.entity);
-      initialPercentage = 100 * (value - minValue) / (maxValue - minValue);
-    } else if (isEntityType(context, "sensor", context.config.entity) && getAttribute(context, "unit_of_measurement", context.config.entity) === "%") {
-      initialPercentage = getState(context, context.config.entity);
-    } else if (context.config.min_value !== undefined && context.config.max_value !== undefined) {
-      context.sliderMinValue = undefined;
-      context.sliderMaxValue = undefined;
+    const entity = context.config.entity;
+    const entityType = entity.split('.')[0];
+
+    // Early return for percentage-based sensors
+    if (entityType === 'sensor' && getAttribute(context, "unit_of_measurement", entity) === "%") {
+      return getState(context, entity);
+    }
+
+    switch (entityType) {
+      case 'light':
+        initialPercentage = 100 * getAttribute(context, "brightness", entity) / 255;
+        break;
+
+      case 'media_player':
+        if (isStateOn(context, entity)) {
+          initialPercentage = 100 * getAttribute(context, "volume_level", entity);
+        }
+        break;
+
+      case 'cover':
+        initialPercentage = getAttribute(context, "current_position", entity);
+        break;
+
+      case 'input_number':
+      case 'number':
+        const minValue = getAttribute(context, "min", entity);
+        const maxValue = getAttribute(context, "max", entity);
+        const value = getState(context, entity);
+        initialPercentage = calculateRangePercentage(value, minValue, maxValue);
+        break;
+
+      case 'fan':
+        if (isStateOn(context, entity)) {
+          initialPercentage = getAttribute(context, "percentage", entity);
+        }
+        break;
+
+      case 'climate':
+        if (isStateOn(context, entity)) {
+          const minTemp = getAttribute(context, "min_temp", entity);
+          const maxTemp = getAttribute(context, "max_temp", entity);
+          const temp = getAttribute(context, "temperature", entity);
+          initialPercentage = calculateRangePercentage(temp, minTemp, maxTemp);
+        }
+        break;
+
+      default:
+        // Handle custom min/max values
+        if (context.config.min_value !== undefined && context.config.max_value !== undefined) {
+          context.sliderMinValue = undefined;
+          context.sliderMaxValue = undefined;
+        }
     }
     
     return initialPercentage;
@@ -97,34 +118,52 @@ export function createSliderStructure(context, config = {}) {
   function updateValueDisplay(percentage) {
     if (!context.elements.rangeValue) return;
     
-    if (isEntityType(context, "climate", context.config.entity) && isStateOn(context, context.config.entity)) {
-      const minValue = getAttribute(context, "min_temp", context.config.entity);
-      const maxValue = getAttribute(context, "max_temp", context.config.entity);
-      const temperature = (maxValue - minValue) * percentage / 100 + minValue;
-      const isCelcius = context._hass.config.unit_system.temperature === '°C';
-      const step = context.config.step || getAttribute(context, "target_temp_step", context.config.entity) || (isCelcius ? 0.5 : 1);
-      const adjustedTemp = Math.round(temperature / step) * step;
-      context.elements.rangeValue.innerText = adjustedTemp.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F');
-    } else {
-      if (context.sliderMinValue !== undefined || context.sliderMaxValue !== undefined) {
-        const minValue = context.sliderMinValue !== undefined ? context.sliderMinValue : 0;
-        const maxValue = context.sliderMaxValue !== undefined ? context.sliderMaxValue : 100;
+    const entityType = context.config.entity.split('.')[0];
+    
+    switch (entityType) {
+      case 'climate':
+        if (isStateOn(context, context.config.entity)) {
+          const minValue = getAttribute(context, "min_temp", context.config.entity);
+          const maxValue = getAttribute(context, "max_temp", context.config.entity);
+          const temperature = (maxValue - minValue) * percentage / 100 + minValue;
+          const isCelcius = context._hass.config.unit_system.temperature === '°C';
+          const step = context.config.step || getAttribute(context, "target_temp_step", context.config.entity) || (isCelcius ? 0.5 : 1);
+          const adjustedTemp = Math.round(temperature / step) * step;
+          context.elements.rangeValue.innerText = adjustedTemp.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F');
+        }
+        break;
+
+      case 'number':
+      case 'input_number':
+        const minValue = getAttribute(context, "min", context.config.entity);
+        const maxValue = getAttribute(context, "max", context.config.entity);
         const actualValue = minValue + (percentage / 100) * (maxValue - minValue);
-        
-        if (context.config.step) {
-          const adjustedValue = Math.round(actualValue / context.config.step) * context.config.step;
-          context.elements.rangeValue.innerText = adjustedValue.toFixed(1).replace(/\.0$/, '') + '%';
+        const step = context.config.step || getAttribute(context, "step", context.config.entity) || 1;
+        const adjustedValue = Math.round(actualValue / step) * step;
+        const unit = getAttribute(context, "unit_of_measurement", context.config.entity) || '';
+        context.elements.rangeValue.innerText = adjustedValue.toFixed(1).replace(/\.0$/, '') + (unit ? ` ${unit}` : '');
+        break;
+
+      default:
+        if (context.sliderMinValue !== undefined || context.sliderMaxValue !== undefined) {
+          const minValue = context.sliderMinValue !== undefined ? context.sliderMinValue : 0;
+          const maxValue = context.sliderMaxValue !== undefined ? context.sliderMaxValue : 100;
+          const actualValue = minValue + (percentage / 100) * (maxValue - minValue);
+          
+          if (context.config.step) {
+            const adjustedValue = Math.round(actualValue / context.config.step) * context.config.step;
+            context.elements.rangeValue.innerText = adjustedValue.toFixed(1).replace(/\.0$/, '') + '%';
+          } else {
+            context.elements.rangeValue.innerText = Math.round(actualValue) + '%';
+          }
         } else {
-          context.elements.rangeValue.innerText = Math.round(actualValue) + '%';
+          if (context.config.step) {
+            const adjustedValue = Math.round(percentage / context.config.step) * context.config.step;
+            context.elements.rangeValue.innerText = adjustedValue.toFixed(1).replace(/\.0$/, '') + '%';
+          } else {
+            context.elements.rangeValue.innerText = Math.round(percentage) + '%';
+          }
         }
-      } else {
-        if (context.config.step) {
-          const adjustedValue = Math.round(percentage / context.config.step) * context.config.step;
-          context.elements.rangeValue.innerText = adjustedValue.toFixed(1).replace(/\.0$/, '') + '%';
-        } else {
-          context.elements.rangeValue.innerText = Math.round(percentage) + '%';
-        }
-      }
     }
   }
 
@@ -186,12 +225,10 @@ export function createSliderStructure(context, config = {}) {
 
   function onPointerUp(e) {
     e.stopPropagation();
-    clearTimeout(draggingTimeout);
-    draggingTimeout = setTimeout(() => {
-      context.dragging = false;
-      window.isScrolling = false;
-
-    }, 1500);
+    
+    if (draggingTimeout) {
+      clearTimeout(draggingTimeout);
+    }
 
     const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
     const finalPercentage = onSliderChange(context, moveX);
@@ -201,38 +238,48 @@ export function createSliderStructure(context, config = {}) {
       e.stopImmediatePropagation();
     }
 
+    options.targetElement.classList.remove('is-dragging');
+    options.targetElement.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+
     if (isEntityType(context, "climate", context.config.entity) && !isStateOn(context, context.config.entity)) {
       context._hass.callService('climate', 'turn_on', {
         entity_id: context.config.entity
-      });
-      setTimeout(() => {
+      }).then(() => {
         updateEntity(context, finalPercentage);
-      }, 300);
+      }).catch(error => {
+        console.error('Error turning on climate entity:', error);
+      });
     } else {
       updateEntity(context, finalPercentage);
     }
     
     forwardHaptic("selection");
-
-    options.targetElement.classList.remove('is-dragging');
-    options.targetElement.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('pointerup', onPointerUp);
-
     updateValueDisplay(finalPercentage);
 
     const allElements = options.targetElement.querySelectorAll('*');
     allElements.forEach(element => {
-      if ( element !== context.elements.rangeFill 
-        && element !== context.elements.rangeSlider 
-        && options.holdToSlide 
-        && !context.config.tap_to_slide
+      if (element !== context.elements.rangeFill 
+          && element !== context.elements.rangeSlider 
+          && options.holdToSlide 
+          && !context.config.tap_to_slide
       ) {
         element.style.transition = 'opacity 0.3s ease-in-out';
         element.style.pointerEvents = null;
         element.style.opacity = null;
-        context.elements.rangeValue.style.display = 'none';
+        
+        if (context.elements.rangeValue) {
+          context.elements.rangeValue.style.display = 'none';
+        }
       }
     });
+
+    draggingTimeout = setTimeout(() => {
+      if (context) {
+        context.dragging = false;
+        window.isScrolling = false;
+      }
+    }, 100);
   }
 
   function setupRangeValueDisplay(rangedPercentage) {
@@ -320,6 +367,9 @@ export function createSliderStructure(context, config = {}) {
       const noSlide = e.target.closest('.bubble-sub-button')?.hasAttribute('no-slide');
 
       if (noSlide || (bubbleAction && bubbleAction.getAttribute('data-hold-action') !== '{"action":"none"}')) return;
+
+      const subButton = e.target.closest('.bubble-sub-button');
+      if (subButton) return;
 
       options.targetElement.setPointerCapture(e.pointerId);
 

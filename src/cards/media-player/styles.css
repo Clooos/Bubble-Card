@@ -21,6 +21,11 @@
     background-color: var(--bubble-accent-color, var(--accent-color));
 }
 
+.bubble-play-pause-button:not(.large) {
+    height: 36px;
+    width: 36px;
+}
+
 .bubble-volume-slider {
     position: absolute;
     width: calc(100% - 150px);

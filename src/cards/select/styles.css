@@ -1,5 +1,6 @@
 .bubble-container {
     border: solid 2px transparent;
+    overflow: inherit;
 }
 
 .bubble-icon-container {

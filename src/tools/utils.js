@@ -324,11 +324,13 @@ export function setLayout(context) {
     }
     context.previousLayout = layoutClass;
 
-    const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows';
+    const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows' || layoutClass === 'large-sub-buttons-grid';
     const needsRows2 = layoutClass === 'large-2-rows';
+    const needsSubButtonsGrid = layoutClass === 'large-sub-buttons-grid';
 
     context.content.classList.toggle('large', needsLarge);
     context.content.classList.toggle('rows-2', needsRows2);
+    context.content.classList.toggle('sub-buttons-grid', needsSubButtonsGrid);
 }
 
 export function throttle(mainFunction, delay = 300) {
@@ -343,6 +345,8 @@ export function throttle(mainFunction, delay = 300) {
         }
     };
 }
+
+let scrollY = 0;
 
 function injectNoScrollStyles() {
     if (document.getElementById('no-scroll-styles')) return;
@@ -370,10 +374,14 @@ export function toggleBodyScroll(disable) {
         document.body.style.top = `-${scrollY}px`;
         document.body.classList.add('no-scroll');
     } else {
+        // Garder la position fixée jusqu'à ce que nous soyons prêts à restaurer le scroll
+        // Cela empêche le flash visuel où la page remonte en haut
+
+        // Prépositionner le scroll avant de retirer les styles bloquants
+        window.scrollTo(0, scrollY);
+        
+        // Retirer les styles bloquants dans le même cycle de rendu
+        document.body.style.top = '';
         document.body.classList.remove('no-scroll');
-        window.scrollTo({ top: scrollY, behavior: 'auto' });
-        requestAnimationFrame(() => {
-            document.body.style.top = '';
-        });
     }
 }

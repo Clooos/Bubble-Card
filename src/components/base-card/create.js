@@ -109,6 +109,16 @@ export function createBaseStructure(context, config = {}) {
         addActions(context.elements.iconContainer, context.config, context.config.entity, options.iconActions);
     }
 
+    if (options.iconActions &&options.iconActions?.tap_action?.action !== 'none') {
+        context.elements.iconFeedbackContainer = createElement('div', 'bubble-icon-feedback-container bubble-feedback-container');
+        context.elements.iconContainer.appendChild(context.elements.iconFeedbackContainer);
+        context.elements.iconFeedback = createElement('div', 'bubble-icon-feedback bubble-feedback-element feedback-element');
+        context.elements.iconFeedback.style.display = 'none';
+        context.elements.iconFeedbackContainer.appendChild(context.elements.iconFeedback);
+        context.elements.iconContainer.appendChild(context.elements.iconFeedbackContainer);
+        addFeedback(context.elements.iconContainer, context.elements.iconFeedback);
+    }
+
     if (options.buttonActions === true) {
         addActions(context.elements.background, context.config.button_action, context.config.entity);
     } else if (options.buttonActions !== undefined && options.buttonActions !== false) {

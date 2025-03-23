@@ -143,7 +143,7 @@ export function renderButtonEditor(editor){
                         </div>
                     </ha-formfield>
                     <ha-alert alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
-                    ${editor._config.entity.startsWith("light") ? html`
+                    ${editor._config.entity?.startsWith("light") ? html`
                         <hr>
                         <ha-formfield>
                             <ha-switch

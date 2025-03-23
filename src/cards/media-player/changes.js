@@ -124,33 +124,47 @@ export function changeStyle(context) {
     const state = getState(context);
     const isOn = state !== "off" && state !== "unknown";
 
+    // Vérifier si tous les boutons sont configurés pour être cachés
+    const allButtonsHidden = context.config.hide?.power_button &&
+        context.config.hide?.previous_button &&
+        context.config.hide?.next_button &&
+        context.config.hide?.volume_button &&
+        context.config.hide?.play_pause_button;
+
+    // Masquer ou afficher le conteneur de boutons
+    if (allButtonsHidden && context.elements.buttonsContainer.style.display !== 'none') {
+        context.elements.buttonsContainer.classList.add('hidden');
+    } else if (!allButtonsHidden && context.elements.buttonsContainer.classList.contains('hidden')) {
+        context.elements.buttonsContainer.classList.remove('hidden');
+    }
+
     if (context.config.hide?.power_button && context.elements.powerButton.style.display !== 'none') {
-        context.elements.powerButton.style.display = 'none';
-    } else if (!context.config.hide?.power_button && context.elements.powerButton.style.display === 'none') {
-        context.elements.powerButton.style.display = '';
+        context.elements.powerButton.classList.add('hidden');
+    } else if (!context.config.hide?.power_button && context.elements.powerButton.classList.contains('hidden')) {
+        context.elements.powerButton.classList.remove('hidden');
     }
 
     if ((context.config.hide?.previous_button || (!context.editor && !isOn)) && context.elements.previousButton.style.display !== 'none') {
-        context.elements.previousButton.style.display = 'none';
-    } else if (!(context.config.hide?.previous_button || (!context.editor && !isOn)) && context.elements.previousButton.style.display === 'none') {
-        context.elements.previousButton.style.display = '';
+        context.elements.previousButton.classList.add('hidden');
+    } else if (!(context.config.hide?.previous_button || (!context.editor && !isOn)) && context.elements.previousButton.classList.contains('hidden')) {
+        context.elements.previousButton.classList.remove('hidden');
     }
 
     if ((context.config.hide?.next_button || (!context.editor && !isOn)) && context.elements.nextButton.style.display !== 'none') {
-        context.elements.nextButton.style.display = 'none';
-    } else if (!(context.config.hide?.next_button || (!context.editor && !isOn)) && context.elements.nextButton.style.display === 'none') {
-        context.elements.nextButton.style.display = '';
+        context.elements.nextButton.classList.add('hidden');
+    } else if (!(context.config.hide?.next_button || (!context.editor && !isOn)) && context.elements.nextButton.classList.contains('hidden')) {
+        context.elements.nextButton.classList.remove('hidden');
     }
 
     if ((context.config.hide?.volume_button || (!context.editor && !isOn)) && context.elements.volumeButton.style.display !== 'none') {
-        context.elements.volumeButton.style.display = 'none';
-    } else if (!(context.config.hide?.volume_button || (!context.editor && !isOn)) && context.elements.volumeButton.style.display === 'none') {
-        context.elements.volumeButton.style.display = '';
+        context.elements.volumeButton.classList.add('hidden');
+    } else if (!(context.config.hide?.volume_button || (!context.editor && !isOn)) && context.elements.volumeButton.classList.contains('hidden')) {
+        context.elements.volumeButton.classList.remove('hidden');
     }
 
-    if ((context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.style.display !== 'none') {
-        context.elements.playPauseButton.style.display = 'none';
-    } else if (!(context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.style.display === 'none') {
-        context.elements.playPauseButton.style.display = '';
+    if ((context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.classList.contains('hidden')) {
+        context.elements.playPauseButton.classList.add('hidden');
+    } else if (!(context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.classList.contains('hidden')) {
+        context.elements.playPauseButton.classList.remove('hidden');
     }
 }

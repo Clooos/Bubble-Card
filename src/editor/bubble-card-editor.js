@@ -64,21 +64,14 @@ class BubbleCardEditor extends LitElement {
         }
 
         const homeAssistant = document.querySelector("body > home-assistant");
-        if (homeAssistant?.shadowRoot) {
-            const root = homeAssistant?.shadowRoot;
-            const dialog = root?.querySelector("hui-dialog-edit-card")?.shadowRoot;
+        const previewElement = homeAssistant?.shadowRoot
+            ?.querySelector("hui-dialog-edit-card")
+            ?.shadowRoot
+            ?.querySelector("ha-dialog > div.content > div.element-preview");
 
-            if (dialog) {
-                const previewElement = dialog.querySelector("ha-dialog > div.content > div.element-preview");
-
-                if (!previewElement) return;
-
-                // Change the default preview element to be sticky
-                if (previewElement.style.position !== 'sticky') {
-                    previewElement.style.position = 'sticky';
-                    previewElement.style.top = '0';
-                }
-            }
+        if (previewElement?.style && previewElement.style.position !== 'sticky') {
+            previewElement.style.position = 'sticky';
+            previewElement.style.top = '0';
         }
 
         if (!this.listsUpdated) {
@@ -211,7 +204,12 @@ class BubbleCardEditor extends LitElement {
                 label="${this._config.card_type === "pop-up" ? 'Header card layout' : 'Card layout'}"
                 .value="${this._config.card_layout || defaultLayout}"
                 .configValue="${"card_layout"}"
-                .items="${[{label: 'Normal', value: 'normal'}, {label: 'Large (Optimized for sections)', value: 'large'}, {label: 'Large with 2 sub-buttons rows (Optimized for sections)', value: 'large-2-rows'}]}"
+                .items="${[
+                    { label: 'Normal (previous default)', value: 'normal' },
+                    { label: 'Large', value: 'large' },
+                    { label: 'Large with 2 sub-buttons rows', value: 'large-2-rows' },
+                    { label: 'Large with sub-buttons in a grid (Layout: min. 2 rows)', value: 'large-sub-buttons-grid' }
+                ]}"
                 @value-changed="${this._valueChanged}"
             ></ha-combo-box>
         `;

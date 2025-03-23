@@ -39,7 +39,7 @@
 }
 
 .bright-background {
-    color: var(--bubble-sub-button-dark-text-color, rgba(0, 0, 0, 0.5));
+    color: var(--bubble-sub-button-dark-text-color, rgb(0, 0, 0));
 }
 
 .background-on {
@@ -74,7 +74,7 @@
     background: var(--bubble-select-arrow-background-color) !important;
 }
 
-.large .bubble-sub-button-container {
+.sub-buttons-grid .bubble-sub-button-container {
     display: grid;
     row-gap: calc( ( ( var(--row-height,56px) - 36px ) * var(--row-size,1) + var(--row-gap, 8px) * ( var(--row-size,1) - 1 ) ) / ( var(--row-size,1) + 1 ));
     grid-template-rows: repeat(var(--row-size,1), 1fr);
@@ -82,7 +82,7 @@
     grid-auto-flow: column;
 }
 
-.large .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
+.sub-buttons-grid .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
     grid-row: 1 / calc(var(--row-size,1) + 1);
 }
 

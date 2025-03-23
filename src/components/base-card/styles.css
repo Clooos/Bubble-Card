@@ -57,7 +57,7 @@ ha-card {
     display: flex;
     margin-right: 8px;
     gap: 4px;
-    z-index: 1;
+    /* z-index: 1; */
 }
 
 .bubble-background {
@@ -85,6 +85,11 @@ ha-card {
     position: relative;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
+}
+
+.bubble-icon-feedback-container {
+    border-radius: var(--bubble-card-type-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
+    overflow: hidden !important;
 }
 
 .is-off .bubble-main-icon {
