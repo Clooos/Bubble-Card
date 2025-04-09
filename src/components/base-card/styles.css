@@ -178,12 +178,13 @@ ha-card {
 }
 
 .state-without-name {
-    opacity: var(--bubble-state-without-name-opacity, 1);
-    font-size: var(--bubble-state-without-name-font-size, 0.875rem);
+    --bubble-state-font-size: 0.875rem;
+    --bubble-state-font-weight: 600;
+    --bubble-state-opacity: 1;
 }
 
 .name-without-icon {
-    margin-left: var(--bubble-name-without-icon-margin-left, 1rem);
+    --bubble-name-container-margin-left: 1rem;
 }
 
 .display-state {
@@ -215,16 +216,12 @@ ha-card {
 }
 
 .large .bubble-container {
-    height: calc( var(--row-height,3.5rem) * var(--row-size,1) + var(--row-gap,0.5rem) * ( var(--row-size,1) - 1 ));
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
+    --bubble-container-height: calc( var(--row-height,3.5rem) * var(--row-size,1) + var(--row-gap,0.5rem) * ( var(--row-size,1) - 1 ));
 }
 
 .large .bubble-icon-container {
     --mdc-icon-size: 1.5rem;
-    min-width: var(--bubble-icon-container-large-min-width, 2.625rem);
-    min-height: var(--bubble-icon-container-large-min-height, 2.625rem);
-    margin-top: var(--bubble-icon-container-large-margin-top, 0rem);
-    margin-right: var(--bubble-icon-container-large-margin-right, 0rem);
-    margin-bottom: var(--bubble-icon-container-large-margin-bottom, 0rem);
-    margin-left: var(--bubble-icon-container-large-margin-left, 0.5rem);
+    --bubble-icon-container-min-width: 2.625rem;
+    --bubble-icon-container-min-height: 2.625rem;
+    --bubble-icon-container-margin-right: 0.5rem;
 }
