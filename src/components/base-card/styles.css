@@ -29,7 +29,7 @@ ha-card {
     width: 100%;
     height: var(--bubble-container-height, 3.125rem);
     background-color: var(--bubble-card-type-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
     box-shadow: var(--bubble-card-type-box-shadow, var(--bubble-box-shadow, none));
     overflow: scroll;
     touch-action: pan-y;
