@@ -15,21 +15,18 @@
     display: none; /* for Chrome, Safari, and Opera */
 }
 
-bubble-card {
-    font-size: 16px; /* default font size for scaling */
-}
-
 ha-card {
     background: none;
     opacity: 1;
 }
 
 .bubble-container {
+    font-size: 16px; /* default font size for EM scaling */
     position: relative;
     width: 100%;
-    height: var(--bubble-container-height, 3.125rem);
+    height: var(--bubble-container-height, 3.125em);
     background-color: var(--bubble-card-type-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
+    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5em)/2)));
     box-shadow: var(--bubble-card-type-box-shadow, var(--bubble-box-shadow, none));
     overflow: scroll;
     touch-action: pan-y;
@@ -49,7 +46,7 @@ ha-card {
     transition-duration: var(--bubble-wrapper-transition-duration, 1.5s);
     transition-timing-function: var(--bubble-wrapper-transition-timing-function, ease-in-out);
     transition-delay: var(--bubble-wrapper-transition-delay, 0s);
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
+    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5em)/2)));
     background-color: var(--bubble-wrapper-background-color, rgba(0,0,0,0));
     overflow: visible;
 }
@@ -63,11 +60,11 @@ ha-card {
 .bubble-buttons-container {
     --icon-primary-color: var(--primary-text-color);
     display: flex;
-    margin-right: var(--bubble-buttons-container-margin-right, 0.5rem);
-    margin-left: var(--bubble-buttons-container-margin-left, 0rem);
-    margin-top: var(--bubble-buttons-container-margin-top, 0rem);
-    margin-bottom: var(--bubble-buttons-container-margin-bottom, 0rem);
-    gap: var(--bubble-buttons-container-gap, 0.25rem);
+    margin-right: var(--bubble-buttons-container-margin-right, 0.5em);
+    margin-left: var(--bubble-buttons-container-margin-left, 0em);
+    margin-top: var(--bubble-buttons-container-margin-top, 0em);
+    margin-bottom: var(--bubble-buttons-container-margin-bottom, 0em);
+    gap: var(--bubble-buttons-container-gap, 0.25em);
     /* z-index: 1; */
 }
 
@@ -80,7 +77,7 @@ ha-card {
     transition-duration: var(--bubble-wrapper-transition-duration, var(--bubble-background-transition-duration, 1.5s));
     transition-timing-function: var(--bubble-wrapper-transition-timing-function, var(--bubble-background-timing-function, ease-in-out));
     transition-delay: var(--bubble-wrapper-transition-delay, var(--bubble-background-transition-delay, 0s));
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
+    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5em)/2)));
     --bubble-background-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
     -webkit-mask-image: var(--bubble-background-mask-image);
     mask-image: var(--bubble-background-mask-image);
@@ -91,9 +88,9 @@ ha-card {
     flex-wrap: wrap;
     align-content: var(--bubble-icon-container-align-content, center);
     justify-content: var(--bubble-icon-container-justify-content, center);
-    min-width: var(--bubble-icon-container-min-width, 2.375rem);
-    min-height: var(--bubble-icon-container-min-height, 2.375rem);
-    --bubble-icon-container-margin: 0.375rem;
+    min-width: var(--bubble-icon-container-min-width, 2.375em);
+    min-height: var(--bubble-icon-container-min-height, 2.375em);
+    --bubble-icon-container-margin: 0.375em;
     margin: var(--bubble-icon-container-margin);
     margin-top: var(--bubble-icon-container-margin-top, var(--bubble-icon-container-margin));
     margin-right: var(--bubble-icon-container-margin-right, var(--bubble-icon-container-margin));
@@ -141,26 +138,26 @@ ha-card {
 
 .bubble-name-container {
     display: flex;
-    line-height: var(--bubble-name-container, 1.125rem);
+    line-height: var(--bubble-name-container, 1.125em);
     flex-direction: column;
     justify-content: center;
     flex-grow: 1;
-    margin-top: var(--bubble-name-container-margin-top, 0rem);
-    margin-right: var(--bubble-name-container-margin-right, 1rem);
-    margin-bottom: var(--bubble-name-container-margin-bottom, 0rem);
-    margin-left: var(--bubble-name-container-margin-left, 0.25rem);
+    margin-top: var(--bubble-name-container-margin-top, 0em);
+    margin-right: var(--bubble-name-container-margin-right, 1em);
+    margin-bottom: var(--bubble-name-container-margin-bottom, 0em);
+    margin-left: var(--bubble-name-container-margin-left, 0.25em);
     pointer-events: none;
     position: relative;
     overflow: hidden;
 }
 
 .bubble-name {
-    font-size: var(--bubble-name-font-size, 0.813rem);
+    font-size: var(--bubble-name-font-size, 0.813em);
     font-weight: var(--bubble-name-font-weight, 600);
 }
 
 .bubble-state {
-    font-size: var(--bubble-state-font-size, 0.75rem);
+    font-size: var(--bubble-state-font-size, 0.75em);
     font-weight: var(--bubble-state-font-weight, 500);
     opacity: var(--bubble-state-opacity, 0.7);
 }
@@ -178,13 +175,13 @@ ha-card {
 }
 
 .state-without-name {
-    --bubble-state-font-size: 0.875rem;
+    --bubble-state-font-size: 0.875em;
     --bubble-state-font-weight: 600;
     --bubble-state-opacity: 1;
 }
 
 .name-without-icon {
-    --bubble-name-container-margin-left: 1rem;
+    --bubble-name-container-margin-left: 1em;
 }
 
 .display-state {
@@ -200,7 +197,7 @@ ha-card {
     height: 100%;
     pointer-events: none;
     overflow: hidden;
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
+    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5em)/2)));
 }
 
 .bubble-feedback-element {
@@ -216,12 +213,12 @@ ha-card {
 }
 
 .large .bubble-container {
-    --bubble-container-height: calc( var(--row-height,3.5rem) * var(--row-size,1) + var(--row-gap,0.5rem) * ( var(--row-size,1) - 1 ));
+    --bubble-container-height: calc( var(--row-height,3.5em) * var(--row-size,1) + var(--row-gap,0.5em) * ( var(--row-size,1) - 1 ));
 }
 
 .large .bubble-icon-container {
-    --mdc-icon-size: 1.5rem;
-    --bubble-icon-container-min-width: 2.625rem;
-    --bubble-icon-container-min-height: 2.625rem;
-    --bubble-icon-container-margin-right: 0.5rem;
+    --mdc-icon-size: 1.5em;
+    --bubble-icon-container-min-width: 2.625em;
+    --bubble-icon-container-min-height: 2.625em;
+    --bubble-icon-container-margin-right: 0.5em;
 }
