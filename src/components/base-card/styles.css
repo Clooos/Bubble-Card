@@ -15,6 +15,10 @@
     display: none; /* for Chrome, Safari, and Opera */
 }
 
+bubble-card {
+    font-size: 16px; /* default font size for scaling */
+}
+
 ha-card {
     background: none;
     opacity: 1;
@@ -23,7 +27,7 @@ ha-card {
 .bubble-container {
     position: relative;
     width: 100%;
-    height: 50px;
+    height: var(--bubble-container-height, 3.125rem);
     background-color: var(--bubble-card-type-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
     border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     box-shadow: var(--bubble-card-type-box-shadow, var(--bubble-box-shadow, none));
@@ -36,13 +40,17 @@ ha-card {
 .bubble-wrapper {
     display: flex;
     position: absolute;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: var(--bubble-wrapper-justify-content, space-between);
+    align-items: var(--bubble-wrapper-align-items, center);
+    flex-direction: var(--bubble-wrapper-direction, row);
     height: 100%;
     width: 100%;
-    transition: all 1.5s;
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-    background-color: rgba(0,0,0,0);
+    transition-property: var(--bubble-wrapper-transition-property, all);
+    transition-duration: var(--bubble-wrapper-transition-duration, 1.5s);
+    transition-timing-function: var(--bubble-wrapper-transition-timing-function, ease-in-out);
+    transition-delay: var(--bubble-wrapper-transition-delay, 0s);
+    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
+    background-color: var(--bubble-wrapper-background-color, rgba(0,0,0,0));
     overflow: visible;
 }
 
@@ -55,8 +63,11 @@ ha-card {
 .bubble-buttons-container {
     --icon-primary-color: var(--primary-text-color);
     display: flex;
-    margin-right: 8px;
-    gap: 4px;
+    margin-right: var(--bubble-buttons-container-margin-right, 0.5rem);
+    margin-left: var(--bubble-buttons-container-margin-left, 0rem);
+    margin-top: var(--bubble-buttons-container-margin-top, 0rem);
+    margin-bottom: var(--bubble-buttons-container-margin-bottom, 0rem);
+    gap: var(--bubble-buttons-container-gap, 0.25rem);
     /* z-index: 1; */
 }
 
@@ -65,26 +76,38 @@ ha-card {
     position: absolute;
     height: 100%;
     width: 100%;
-    transition: background-color 1.5s;
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-    -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
-    mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
+    transition-property: var(--bubble-wrapper-transition-property, var(--bubble-background-transition-property, background-color));
+    transition-duration: var(--bubble-wrapper-transition-duration, var(--bubble-background-transition-duration, 1.5s));
+    transition-timing-function: var(--bubble-wrapper-transition-timing-function, var(--bubble-background-timing-function, ease-in-out));
+    transition-delay: var(--bubble-wrapper-transition-delay, var(--bubble-background-transition-delay, 0s));
+    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
+    --bubble-background-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
+    -webkit-mask-image: var(--bubble-background-mask-image);
+    mask-image: var(--bubble-background-mask-image);
 }
 
 .bubble-icon-container {
     display: flex;
     flex-wrap: wrap;
-    align-content: center;
-    justify-content: center;
-    min-width: 38px;
-    min-height: 38px;
-    margin: 6px;
+    align-content: var(--bubble-icon-container-align-content, center);
+    justify-content: var(--bubble-icon-container-justify-content, center);
+    min-width: var(--bubble-icon-container-min-width, 2.375rem);
+    min-height: var(--bubble-icon-container-min-height, 2.375rem);
+    --bubble-icon-container-margin: 0.375rem;
+    margin: var(--bubble-icon-container-margin);
+    margin-top: var(--bubble-icon-container-margin-top, var(--bubble-icon-container-margin));
+    margin-right: var(--bubble-icon-container-margin-right, var(--bubble-icon-container-margin));
+    margin-bottom: var(--bubble-icon-container-margin-bottom, var(--bubble-icon-container-margin));
+    margin-left: var(--bubble-icon-container-margin-left, var(--bubble-icon-container-margin));
     border-radius: var(--bubble-card-type-icon-border-radius, var(--bubble-icon-border-radius, var(--bubble-border-radius, 50%)));
     background-color: var(--bubble-card-type-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
     overflow: hidden;
     position: relative;
     cursor: pointer;
-    transition: all 0.3s ease-in-out;
+    transition-property: var(--bubble-icon-container-transition-property, all);
+    transition-duration: var(--bubble-icon-container-transition-duration, 0.3s);
+    transition-timing-function: var(--bubble-icon-container-transition-timing-function, ease-in-out);
+    transition-delay: var(--bubble-icon-container-transition-delay, 0s);
 }
 
 .bubble-icon-feedback-container {
@@ -93,12 +116,12 @@ ha-card {
 }
 
 .is-off .bubble-main-icon {
-    opacity: 0.6;
+    opacity: var(--bubble-main-icon-opacity-off-state, 0.6);
 }
 
 .is-on .bubble-main-icon {
-  filter: brightness(1.1);
-  opacity: 1;
+    filter: var(--bubble-main-icon-filter-on-state, brightness(1.1));
+    opacity: var(--bubble-main-icon-opacity-on-state, 1);
 }
 
 .bubble-entity-picture {
@@ -118,25 +141,28 @@ ha-card {
 
 .bubble-name-container {
     display: flex;
-    line-height: 18px;
+    line-height: var(--bubble-name-container, 1.125rem);
     flex-direction: column;
     justify-content: center;
     flex-grow: 1;
-    margin: 0 16px 0 4px;
+    margin-top: var(--bubble-name-container-margin-top, 0rem);
+    margin-right: var(--bubble-name-container-margin-right, 1rem);
+    margin-bottom: var(--bubble-name-container-margin-bottom, 0rem);
+    margin-left: var(--bubble-name-container-margin-left, 0.25rem);
     pointer-events: none;
     position: relative;
     overflow: hidden;
 }
 
 .bubble-name {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--bubble-name-font-size, 0.813rem);
+    font-weight: var(--bubble-name-font-weight, 600);
 }
 
 .bubble-state {
-    font-size: 12px;
-    font-weight: normal;
-    opacity: 0.7;
+    font-size: var(--bubble-state-font-size, 0.75rem);
+    font-weight: var(--bubble-state-font-weight, 500);
+    opacity: var(--bubble-state-opacity, 0.7);
 }
 
 .is-unavailable .bubble-wrapper {
@@ -144,7 +170,7 @@ ha-card {
 }
 
 .is-unavailable {
-    opacity: 0.5;
+    opacity: var(--bubble-unavailable-opacity, 0.5);
 }
 
 .hidden {
@@ -152,12 +178,12 @@ ha-card {
 }
 
 .state-without-name {
-    opacity: 1;
-    font-size: 14px;
+    opacity: var(--bubble-state-without-name-opacity, 1);
+    font-size: var(--bubble-state-without-name-font-size, 0.875rem);
 }
 
 .name-without-icon {
-    margin-left: 16px;
+    margin-left: var(--bubble-name-without-icon-margin-left, 1rem);
 }
 
 .display-state {
@@ -173,7 +199,7 @@ ha-card {
     height: 100%;
     pointer-events: none;
     overflow: hidden;
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
 }
 
 .bubble-feedback-element {
@@ -189,13 +215,16 @@ ha-card {
 }
 
 .large .bubble-container {
-    height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
-    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    height: calc( var(--row-height,3.5rem) * var(--row-size,1) + var(--row-gap,0.5rem) * ( var(--row-size,1) - 1 ));
+    border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5rem)/2)));
 }
 
 .large .bubble-icon-container {
-    --mdc-icon-size: 24px;
-    min-width: 42px;
-    min-height: 42px;
-    margin-left: 8px;
+    --mdc-icon-size: 1.5rem;
+    min-width: var(--bubble-icon-container-large-min-width, 2.625rem);
+    min-height: var(--bubble-icon-container-large-min-height, 2.625rem);
+    margin-top: var(--bubble-icon-container-large-margin-top, 0rem);
+    margin-right: var(--bubble-icon-container-large-margin-right, 0rem);
+    margin-bottom: var(--bubble-icon-container-large-margin-bottom, 0rem);
+    margin-left: var(--bubble-icon-container-large-margin-left, 0.5rem);
 }
