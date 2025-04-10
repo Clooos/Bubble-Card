@@ -1,19 +1,22 @@
 .bubble-button.disabled {
-    opacity: 0.3 !important;
-    pointer-events: none !important;
-    cursor: none !important;
+    opacity: var(--bubble-button-disabled-opacity, 0.3);
+    pointer-events: none;
+    cursor: none;
 }
 
 .bubble-button {
-  display: flex;
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-  height: 42px;
-  width: 42px;
-  transition: background 0.3s ease;
-  align-self: center;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--bubble-cover-control-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5em)/2)));
+    height: var(--bubble-cover-control-button-size, 2.625em);
+    width: var(--bubble-cover-control-button-size, 2.625em);
+    transition: var(--bubble-button-transition-property, background);
+    transition-duration: var(--bubble-button-transition-duration, 0.3s);
+    transition-timing-function: var(--bubble-button-transition-timing-function, ease-in-out);
+    transition-delay: var(--bubble-button-transition-delay, 0s);
+    align-self: center;
+    align-items: center;
+    justify-content: center;
 }

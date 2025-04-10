@@ -14,32 +14,32 @@ ha-card {
     border-radius: 0;
 }
 .horizontal-buttons-stack-card {
-    bottom: 16px;
-    height: 51px;
+    bottom: 1em;
+    height: 3.188em;
     margin-top: 0;
     position: fixed;
-    width: calc(100% - var(--mdc-drawer-width, 0px) - 8px);
-    left: calc(var(--mdc-drawer-width, 0px) + 4px);
+    width: calc(100% - var(--mdc-drawer-width, 0px) - 0.5em);
+    left: calc(var(--mdc-drawer-width, 0px) + 0.25em);
     z-index: 6; /* Higher value hide the more-info panel */
 }
 @media only screen and (max-width: 870px) {
     .horizontal-buttons-stack-card {
-        width: calc(100% - 16px);
-        left: 8px;
+        width: calc(100% - 1em);
+        left: 0.5em;
     }
 
     .horizontal-buttons-stack-card::before {
-        left: -10px;
+        left: -0.625em;
     }
 }
 .horizontal-buttons-stack-card::before {
     content: '';
     position: absolute;
-    top: -32px;
+    top: -2em;
     display: none;
     background: linear-gradient(0deg, var(--bubble-horizontal-buttons-stack-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--primary-background-color)))) 50%, transparent);
     width: 200%;
-    height: 100px;
+    height: 6.25em;
     pointer-events: none;
 }
 .has-gradient.horizontal-buttons-stack-card::before {
@@ -47,9 +47,9 @@ ha-card {
 }
 
 .card-content {
-    width: calc(100% + 36px);
+    width: calc(100% + 2em);
     padding: 0 !important;
-    max-width: calc(var(--desktop-width) - 8px);
+    max-width: calc(var(--desktop-width) - 0.5em);
     box-sizing: border-box;
     overflow: scroll;
     position: absolute;
@@ -94,28 +94,32 @@ ha-card {
 }
 
 .bubble-horizontal-buttons-stack-card-container {
-    height: 51px;
+    height: 3.188em;
     position: relative;
     margin: auto;
 }
 
 .bubble-button {
     align-items: center;
-    border-radius: var(--bubble-horizontal-buttons-stack-border-radius, var(--bubble-border-radius, 32px));
+    border-radius: var(--bubble-horizontal-buttons-stack-border-radius, var(--bubble-border-radius, 2em));
     color: var(--primary-text-color);
     cursor: pointer;
     display: inline-flex;
-    height: 50px;
+    height: var(--bubble-button-height, 3.125em);
     left: 0;
-    padding: 0 16px;
+    padding: var(--bubble-button-padding-y, 0) var(--bubble-button-padding-x, 1em);
     position: absolute;
     white-space: nowrap;
     z-index: 1;
-    transition: transform 1s;
+    transition-property: var(--bubble-button-transition-property, transform);
+    transition-duration: var(--bubble-button-transition-duration, 1s);
+    transition-timing-function: var(--bubble-button-transition-timing-function, ease);
+    transition-delay: var(--bubble-button-transition-delay, 0s);
     box-sizing: border-box;
 }
 .bubble-button.highlight {
     animation: pulse 1.4s infinite alternate;
+    animation-duration: var(--bubble-button-highlight-speed, 1.4s);
 }
 .bubble-background-color {
     border: 1px solid var(--primary-text-color);
@@ -125,13 +129,16 @@ ha-card {
     left: 0;
     position: absolute;
     top: 0;
-    transition: background-color 1s;
+    transition-property: var(--bubble-button-background-transition-property, background-color);
+    transition-duration: var(--bubble-button-background-transition-duration, 1s);
+    transition-timing-function: var(--bubble-button-background-transition-timing-function, ease-in-out);
+    transition-delay: var(--bubble-button-background-transition-delay, 0s);
     width: 100%;
     z-index: 1;
 }
 .bubble-background {
-    opacity: 0.8;
-    border-radius: var(--bubble-horizontal-buttons-stack-border-radius, var(--bubble-border-radius, 32px));
+    opacity: var(--bubble-background-opacity, 0.8);
+    border-radius: var(--bubble-horizontal-buttons-stack-border-radius, var(--bubble-border-radius, 2em));
     width: 100%;
     height: 100%;
     box-sizing: border-box !important;
@@ -141,12 +148,12 @@ ha-card {
     background-color: var(--bubble-horizontal-buttons-stack-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color))));
 }
 .bubble-icon {
-    height: 24px;
-    width: 24px;
+    height: var(--bubble-icon-size, 1.5em);
+    width: var(--bubble-icon-size, 1.5em);
     z-index: 2;
 }
 .bubble-icon + .bubble-name {
-    margin-left: 8px;
+    margin-left: var(--bubble-name-margin-left, 0.5em);
     z-index: 2;
 }
 

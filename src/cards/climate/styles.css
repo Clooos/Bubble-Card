@@ -1,14 +1,17 @@
 .bubble-temperature-container, .bubble-low-temp-container, .bubble-high-temp-container {
     display: inline-flex;
     position: relative;
-    font-size: 12px;
     white-space: nowrap;
-    justify-content: center;
-    align-items: center;
+    justify-content: var(--bubble-temperature-justify-content, center);
+    align-items: var(--bubble-temperature-align-items, center);
     width: auto;
-    height: 36px;
-    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    height: var(--bubble-temperature-height, 2.25em);
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5em)/2)));
     background-color: var(--bubble-climate-button-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))));
+}
+
+.bubble-temperature-display {
+    font-size: var(--bubble-temperature-display-font-size, 0.75em);
 }
 
 .bubble-low-temp-container {
@@ -21,7 +24,7 @@
 
 .bubble-target-temperature-container {
     display: flex;
-    gap: 10px;
+    gap: var(--bubble-target-temperature-gap, 0.625em);
 }
 
 .bubble-climate-minus-button,
@@ -31,12 +34,15 @@
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    width: 36px;
-    height: 36px;
+    width: var(--bubble-climate-button-size, 2.25em);
+    height: var(--bubble-climate-button-size, 2.25em);
     vertical-align: middle;
-    font-size: 18px;
     color: var(--primary-text-color);
     cursor: pointer;
+}
+
+.bubble-temperature-container ha-icon {
+    --bubble-icon-size: 1.125em;
 }
 
 .bubble-climate-minus-button-icon,
@@ -44,7 +50,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    --mdc-icon-size: 16px;
+    --mdc-icon-size: 1em;
 }
 
 @keyframes tap-warning {

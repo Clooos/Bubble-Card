@@ -1,4 +1,5 @@
 .bubble-backdrop {
+  --bubble-backdrop-opacity: 0;
   position: fixed;
   background-color: var(--bubble-backdrop-background-color);
   top: 0;
@@ -6,9 +7,12 @@
   width: 100%;
   height: 100%;
   z-index: 4;
-  opacity: 0;
+  opacity: var(--bubble-backdrop-opacity);
   transition: opacity 0.3s;
-  transition-delay: .1s;
+  transition-property: var(--bubble-backdrop-transition);
+    transition-duration: var(--bubble-backdrop-transition-duration, 0.3s);
+    transition-timing-function: var(--bubble-backdrop-transition-timing-function, ease-in-out);
+  transition-delay: var(--bubble-backdrop-transition-delay, 0.1s);
   display: flex;
   backdrop-filter: var(--custom-backdrop-filter);
   -webkit-backdrop-filter: var(--custom-backdrop-filter);
@@ -16,10 +20,10 @@
 }
 
 .bubble-backdrop.is-visible {
-  opacity: 1;
+  --bubble-backdrop-opacity: 1;
 }
 
 .bubble-backdrop.is-hidden {
-  opacity: 0;
+  --bubble-backdrop-opacity: 0;
   pointer-events: none;
 }

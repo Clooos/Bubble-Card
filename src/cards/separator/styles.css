@@ -2,7 +2,7 @@
     display: flex;
     background: none;
     align-items: center;
-    height: 40px;
+    height: var(--bubble-separator-height, 2.5em);
     overflow: visible;
     --bubble-separator-border: none;
 }
@@ -10,11 +10,13 @@
     display: inline-flex;
     height: auto;
     width: auto;
-    margin: 0 22px 0 8px;
+    margin-top: var(--bubble-separator-margin-top, 0em);
+    margin-right: var(--bubble-separator-margin-right, 1.375em);
+    margin-bottom: var(--bubble-separator-margin-bottom, 0em);
+    margin-left: var(--bubble-separator-margin-left, 0.5em);
 }
 .bubble-name {
-    margin: 0 30px 0 0;
-    font-size: 16px;
+    margin-right: var(--bubble-separator-name-margin-right, 1.875em);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -24,22 +26,22 @@
 }
 
 .bubble-line {
-    border-radius: 6px;
-    margin-right: 14px;
-    opacity: 0.6;
+    border-radius: var(--bubble-separator-line-border-radius, 0.375em);
+    margin-right: var(--bubble-separator-line-margin-right, 0.875em);
+    opacity: var(--bubble-separator-line-opacity, 0.6);
     flex-grow: 1;
-    height: 6px;
+    height: var(--bubble-separator-line-height, 0.375em);
     background-color: var(--bubble-line-background-color, var(--ha-card-background-color, var(--secondary-background-color)));
 }
 
 .bubble-sub-button-container {
-    margin-left: 8px;
+    margin-left: var(--bubble-separator-sub-button-margin-left, 0.5em);
 }
 
 .rows-2 .bubble-sub-button-container {
-    margin-left: 14px;
+    --bubble-separator-sub-button-margin-left: 0.875em;
 }
 
 .large .bubble-container {
-    height: 44px;
+    --bubble-separator-height: 2.75em;
 }
