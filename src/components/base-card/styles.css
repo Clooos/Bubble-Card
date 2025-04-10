@@ -221,7 +221,7 @@ ha-card {
     --mdc-icon-size: 1.5em;
     --bubble-icon-container-min-width: 2.625em;
     --bubble-icon-container-min-height: 2.625em;
-    --bubble-icon-container-margin-right: 0.5em;
+    --bubble-icon-container-margin-left: 0.5em;
 }
 
 .bubble-container ha-icon {
