@@ -22,7 +22,7 @@ export function createStructure(context, appendTo = context.container) {
         icon: true,
         button: {
             tap_action: { action: "toggle" },
-            double_tap_action: { action: "toggle" },
+            double_tap_action: { action: "none" },
             hold_action: { action: "more-info" }
         }
     };
@@ -30,12 +30,12 @@ export function createStructure(context, appendTo = context.container) {
     actions['state'] = {
         icon: {
             tap_action: { action: "more-info" },
-            double_tap_action: { action: "more-info" },
+            double_tap_action: { action: "none" },
             hold_action: { action: "more-info" }
         },
         button: {
             tap_action: { action: "more-info" },
-            double_tap_action: { action: "more-info" },
+            double_tap_action: { action: "none" },
             hold_action: { action: "more-info" }
         }
     };

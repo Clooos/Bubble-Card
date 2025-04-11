@@ -109,7 +109,7 @@ export function addActions(element, config, defaultEntity, defaultActions) {
 
   element.dataset.entity = config?.entity || defaultEntity;
   element.dataset.tapAction = JSON.stringify(config?.tap_action || defaultActions?.tap_action || { action: "more-info" });
-  element.dataset.doubleTapAction = JSON.stringify(config?.double_tap_action || defaultActions?.double_tap_action || { action: "toggle" });
+  element.dataset.doubleTapAction = JSON.stringify(config?.double_tap_action || defaultActions?.double_tap_action || { action: "none" });
   element.dataset.holdAction = JSON.stringify(config?.hold_action || defaultActions?.hold_action || { action: "toggle" });
 
   const tapAction = JSON.parse(element.dataset.tapAction);
@@ -215,7 +215,7 @@ class ActionHandler {
 
 export function sendActionEvent(element, config, action) {
   const tapAction = config.tap_action || { action: "more-info" };
-  const doubleTapAction = config.double_tap_action || { action: "toggle" };
+  const doubleTapAction = config.double_tap_action || { action: "none" };
   const holdAction = config.hold_action || { action: "toggle" };
   const entity = config.entity || this.config?.entity;
 

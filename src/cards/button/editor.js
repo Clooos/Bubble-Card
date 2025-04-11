@@ -193,7 +193,7 @@ export function renderButtonEditor(editor){
                 </h4>
                 <div class="content">
                     ${editor.makeActionPanel("Tap action", button_action, editor._config.button_type !== 'name' ? (editor._config.button_type === 'state' ? 'more-info' : (editor._config.button_type === 'slider' ? (isEntityType(editor, "sensor", editor._config.entity) ? 'more-info' : 'toggle') : 'toggle')) : 'none', 'button_action')}
-                    ${editor.makeActionPanel("Double tap action", button_action, editor._config.button_type !== 'name' ? (editor._config.button_type === 'state' ? 'more-info' : (editor._config.button_type === 'slider' ? 'none' : 'toggle')) : 'none', 'button_action')}
+                    ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
                     ${editor._config.button_type !== 'slider' ? editor.makeActionPanel("Hold action", button_action, editor._config.button_type !== 'name' ? (editor._config.button_type === 'slider' ? 'none' : 'more-info') : 'none', 'button_action') : ''}
                 </div>
             </ha-expansion-panel>
