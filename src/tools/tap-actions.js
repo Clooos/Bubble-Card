@@ -197,9 +197,13 @@ class ActionHandler {
       clearTimeout(this.tapTimeout);
       this.sendActionEvent(this.element, this.config, 'double_tap');
     } else if (tapAction.action !== 'none') {
-      this.tapTimeout = setTimeout(() => {
+      if (doubleTapAction.action !== 'none') {
+        this.tapTimeout = setTimeout(() => {
+          this.sendActionEvent(this.element, this.config, 'tap');
+        }, doubleTapTimeout);
+      } else {
         this.sendActionEvent(this.element, this.config, 'tap');
-      }, doubleTapTimeout);
+      }
     }
 
     this.lastTap = currentTime;
