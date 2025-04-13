@@ -1,1033 +1,2040 @@
-# Bubble Card Module Editor schema documentation
+# Bubble Card
 
-This documentation covers all available options for creating editor schemas in Bubble Card modules. These schemas define the user interface presented to users when configuring your module.
+![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
 
-<img width="455" alt="image" src="https://github.com/user-attachments/assets/6c04ebef-d8f7-4816-9006-808f80a7e14e" />
+Bubble Card is a minimalist and customizable card collection for Home Assistant with a nice pop-up touch.
+
+[![Stars](https://img.shields.io/github/stars/clooos/Bubble-Card)](#) [![Last commit](https://img.shields.io/github/last-commit/clooos/Bubble-Card)](#) [![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube)](https://www.youtube.com/@cloooos) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit)](https://www.reddit.com/r/BubbleCard/) [![Reddit Profile](https://img.shields.io/badge/Reddit-My%20stuff-orange?logo=reddit)](https://www.reddit.com/user/Clooooos/submitted/) [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR) [![Patreon Clooos](https://img.shields.io/badge/Patreon-Clooos-orange?logo=patreon)](https://www.patreon.com/Clooos)
+
+
+<br>
 
 ## Table of contents
 
-- [Basic structure](#basic-structure)
-- [Accessing configuration values in your module code](#accessing-configuration-values-in-your-module-code)
-  - [Accessing configuration in JavaScript templates](#accessing-configuration-in-javascript-templates)
-  - [Tips for working with configuration values](#tips-for-working-with-configuration-values)
-  - [Example: Complete module with editor and code](#example-complete-module-with-editor-and-code)
-- [Field properties](#field-properties)
-- [Field types](#field-types)
-  - [Selector-based fields](#selector-based-fields-recommended)
-    - [Text input selector](#text-input-selectors)
-    - [Number selector](#number-selector)
-    - [Boolean selector](#boolean-selector)
-    - [Select selector](#select-selector)
-    - [Color selector](#color-selector)
-    - [Icon selector](#icon-selector)
-    - [Condition selector](#condition-selector)
-    - [Entity selector](#entity-selector)
-    - [Device selector](#device-selector)
-    - [Area selector](#area-selector)
-    - [Theme selector](#theme-selector)
-    - [Action selector](#action-selector)
-    - [Time selector](#time-selector)
-    - [Date selector](#date-selector)
-    - [Datetime selector](#datetime-selector)
-    - [Media selector](#media-selector)
-    - [Attribute selector](#attribute-selector)
-    - [State selector](#state-selector)
-    - [Target selector](#target-selector)
-    - [Config entry selector](#config-entry-selector)
-    - [Addon selector](#addon-selector)
-    - [Location selector](#location-selector)
-    - [Object selector](#object-selector)
-    - [Backup selector](#backup-selector)
-    - [Assistance selector](#assistance-selector)
-    - [Label selector](#label-selector)
-    - [Language selector](#language-selector)
-    - [Schedule selector](#schedule-selector)
-    - [Template selector](#template-selector)
-    - [File selector](#file-selector)
-    - [QR code selector](#qr-code-selector)
-    - [Conversation agent selector](#conversation-agent-selector)
-    - [Duration selector](#duration-selector)
-    - [Dashboard selector](#dashboard-selector)
-    - [Floor selector](#floor-selector)
-  - [Legacy type-based fields](#legacy-type-based-fields)
-    - [String field](#string-field)
-    - [Integer field](#integer-field)
-    - [Float field](#float-field)
-    - [Boolean field](#boolean-field)
-    - [Select field](#select-field)
-    - [Multi-select field](#multi-select-field)
-- [Advanced structure](#advanced-structure)
-  - [Grid layout](#grid-layout)
-  - [Expandable sections](#expandable-sections)
-- [Best practices](#best-practices)
-- [Example: Complete module editor schema](#example-complete-module-editor-schema)
-- [References](#references)
+**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Climate`](#climate)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
+
+<br>
+
+## Installation
+
+**Home Assistant lowest supported version:** 2023.9.0
+
+<details>
+
+<summary>Without HACS</summary>
+
+<br>
+
+1. Download these files: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js) and [bubble-pop-up-fix.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up-fix.js)
+2. Add these files to your `<config>/www` folder
+3. On your dashboard click on the icon at the right top corner then on `Edit dashboard`
+4. Click again on that icon and then click on `Manage resources`
+5. Click on `Add resource`
+6. Copy and paste this: `/local/bubble-card.js?v=1`
+7. Click on `JavaScript Module` then `Create`
+8. Go back and refresh your page
+9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
+10. After any update of the file you will have to edit `/local/bubble-card.js?v=1` and change the version to any higher number
+
+If it's not working, just try to clear your browser cache.`
+
+</details>
+
+<details>
+
+<summary>With HACS (Recommended)</summary>
+
+<br>
+
+This method allows you to get updates directly on the HACS main page
+
+1. If HACS is not installed yet, download it following the instructions on [https://hacs.xyz/docs/setup/download/](https://hacs.xyz/docs/use/download/download/)
+2. Proceed to the HACS initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
+3. On your sidebar go to `HACS` > `Frontend`
+4. Click on the `+` button at the bottom right corner
+5. Now search for `Bubble Card` and then click on the button at the bottom right corner to download it
+6. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
+7. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
+
+If it's not working, try to clear your browser cache.
+
+#### Videos
+
+You can also take a look at my YouTube channel for step by step videos.
+
+[![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube)](https://www.youtube.com/@cloooos)
+
+</details>
+
+<br>
+
+[![Open Bubble Card on Home Assistant Community Store (HACS).](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=clooos&repository=Bubble-Card&category=frontend)
+
+<br>
+
+## Configuration
+
+All options can be configured in the Home Assistant editor. But you can find more details and the YAML in the documentation below.
+
+<details>
+
+**<summary>Main options (YAML + description)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `type` | string | **Required** | `custom:bubble-card` | Type of the card |
+| `card_type` | string | **Required** | `button`, `cover`, `empty-column`, `horizontal-buttons-stack`, `media-player`, `pop-up`, `select` or `separator` | Type of the Bubble Card, see below |
+| `styles` | object list | Optional | Any CSS stylesheets | Allows you to customize your Bubble Card CSS, see [styling](#styling) |
+
+</details>
+
+<details>
+
+**<summary>Global CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-border-radius` | `px` | Border radius for all supported elements |
+| `--bubble-main-background-color` | `color` | Main background color for all supported elements |
+| `--bubble-secondary-background-color` | `color` | Secondary background color for all supported elements |
+| `--bubble-accent-color` | `color` | Accent color for all supported elements |
+| `--bubble-icon-border-radius` | `px` | Icon border radius for all supported elements |
+| `--bubble-icon-background-color` | `color` | Icon background color for all supported elements |
+| `--bubble-sub-button-border-radius` | `px` | Border radius for all sub-buttons |
+| `--bubble-sub-button-background-color` | `color` | Background color for all sub-buttons |
+| `--bubble-box-shadow` | see [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for all supported elements |
+
+</details>
+
+<br>
 
 ---
 
-## Basic structure
+<br>
 
-A module editor schema is an array of objects, where each object represents a form field:
+[![Bubble-Card---Youtube-github](https://github.com/user-attachments/assets/643aa16a-3fc9-4770-8269-62ec01db49b3)](https://www.youtube.com/watch?v=0hSQOlBxKKI)
 
-```yaml
-editor:
-  - name: color
-    label: "Color"
-    selector:
-      select:
-        options:
-          - label: "Red"
-            value: "red"
-          - label: "Blue"
-            value: "blue"
-  - name: icon_size
-    label: "Icon Size"
-    selector:
-      number:
-        min: 20
-        max: 50
-        unit_of_measurement: "px"
-```
+**Check out this [video](https://www.youtube.com/watch?v=0hSQOlBxKKI) to learn about Bubble Card and its capabilities.** My YouTube channel is quite new and focuses on tutorials about Home Assistant and Bubble Card. Don’t hesitate to subscribe to help increase my channel’s visibility. Thank you in advance!
 
-## Accessing configuration values in your module code
+<br>
 
-When creating a Bubble Card module, you'll need to access the values configured by users through the editor. These values are available in your module's code through the `this.config` object.
+---
 
-### Accessing configuration in JavaScript templates
+<br>
 
-In your module's `code` section, you can access the configured values using JavaScript template literals. The configuration values follow a specific structure:
+## Pop-up
 
-```
-this.config.module_id?.field_name
-```
+![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
 
-Where:
-- `module_id` is the ID of your module as defined in your module definition
-- `field_name` corresponds directly to the `name` property of the field in your editor schema
+This card allows you to convert any vertical stack into a pop-up. Each pop-up is **hidden by default** and can be opened by targeting its link (e.g. `'#pop-up-name'`), with any card that supports the `navigate` [action](#tap-double-tap-and-hold-actions), or with the [horizontal buttons stack](#horizontal-buttons-stack) that is included.
+
+> [!IMPORTANT]  
+> This card must be placed within a [vertical stack](https://www.home-assistant.io/dashboards/vertical-stack/) card at the topmost position to function properly. To avoid misalignment with your view, place vertical stacks/pop-ups after all other dashboard cards. It should be called from the same view to work.
+> <details>
+>  
+> <summary><b>How to create a pop-up in the editor</b></summary>
+>
+> <br>
+> 
+> 1. To add a pop-up you first need to add a `Vertical stack` card to your dashboard.
+> 2. This `Vertical stack` must be after all your other cards in your view order and before your horizontal buttons stack if you have one. In a section view type it can be placed anywhere.
+> 3. Now add a `Bubble Card` with the `Pop-up` type.
+> 4. Just fill in the `Hash` input and the ones you need.
+>
+> **You can also watch [this step by step video](https://www.youtube.com/watch?v=7mOV7BfWoFc).**
+>
+> </details>
+
+> [!TIP]
+> ### Pop-up trigger 
+> This feature allows you to open a pop-up based on the state of any entity, for example, you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (input_boolean) and trigger its opening/closing in an automation.
+> <details>
+> <summary>Opening a pop-up when a <code>binary_sensor</code> is <code>on</code></summary>
+> <br>
+>
+> ```yaml
+> type: custom:bubble-card
+> card_type: pop-up
+> hash: '#kitchen'
+> name: Security
+> icon: mdi:video
+> trigger_entity: binary_sensor.front_door_motion
+> trigger_state: 'on'
+> trigger_close: true
+> ```
+> 
+> </details>
+>
+> ### Different ways to close a pop-up 
+> They are many ways to close a pop-up. For instance, you can swipe from the pop-up header to the bottom, by doing a long swipe inside the pop-up to the bottom, by pressing Escape on desktop, by removing the hash in the URL or by simply pressing the close button.
+>
+> ### Pop-up initialization fix
+> If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
+> <details>
+> <summary>Installation</summary>
+> <br>
+>
+> You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
+> ```yaml
+> frontend:
+>   extra_module_url:
+>     - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
+> ```
+> If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
+> 
+> For Android Home Assistant Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
+> 
+> For iOS Home Assistant Companion App users, you can go to your Home Assistant settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
+> 
+> For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
+> 
+> ```yaml
+> type: vertical-stack
+> cards:
+>   - type: custom:bubble-card
+>     card_type: pop-up
+> ```
+> 
+> </details>
+
+### Pop-up options
 
 <details>
-<summary><b>Example</b></summary>
 
-If you have this editor schema:
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `hash` | string | **Required** | Any unique hash (e.g. `'#kitchen'`) with ' ' | This is how you will open your pop-up |
+| `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |
+| `close_on_click` | boolean | Optional | `true` or `false` (default) | Automatically close the pop-up after any interaction |
+| `close_by_clicking_outside` | boolean | Optional | `true` (default) or `false` | Close the pop-up by clicking outside of it |
+| `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
+| `margin` | string | Optional | Any CSS value | Use this **only** if your pop-up is not well centered on mobile (e.g. `13px`) |
+| `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |
+| `margin_top_desktop` | string | Optional | Any CSS value | Top margin on desktop (e.g. `50vh` for a half-sized pop-up or `calc(100vh - 400px)` for a fixed height of `400px`) |
+| `bg_color` | string | Optional | Any hex, rgb or rgba value | The background color of your pop-up (e.g. `#ffffff` for a white background) |
+| `bg_opacity` | string | Optional | Any value from `0` to `100` | The background opacity of your pop-up (e.g. `100` for no transparency) |
+| `bg_blur` | string | Optional | Any value from `0` to `100` | The background blur effect of your pop-up, **this only work if `bg_opacity` is not set to `100`** (e.g. `0` for no blur)|
+| `shadow_opacity` | string | Optional | Any value from `0` to `100` | The shadow opacity of your pop-up (e.g. `0` to hide it) |
+| `hide_backdrop` | boolean | Optional | `true` or `false` (default) | Set this to true on the first pop-up of your main dashboard to disable the backdrop on all pop-ups. |
+| `background_update` | boolean | Optional | `true` or `false` (default) | Update pop-up content in background (not recommended) |
+| `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity |
+| `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
+| `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
+| `open_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is opening |
+| `close_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is closing |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the header, see [card layouts](#card-layouts) |
+| `show_header` | boolean | Optional | `true` or `false` (default) | Show/Hide the pop-up header fully |
+| You also have access to [all the button settings](#button) for the header of the pop-up. | | Optional | | If undefined no header will be shown |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-pop-up-border-radius` | `px` | Border radius for the pop-up |
+| `--bubble-pop-up-main-background-color` | `color` | Main background color for supported elements of the pop-up |
+| `--bubble-pop-up-background-color` | `color` | Background color of the pop-up |
+| `--bubble-backdrop-background-color` | `color` | Background color for the backdrop |
+| You also have access to [all the button CSS variables](#button-options) for the header of the pop-up. | | |
+
+</details>
+
+
+#### Examples
+
+<details>
+
+<summary>A pop-up</summary>
+
+<br>
 
 ```yaml
-editor:
-  - name: color                # This becomes "color" in your code
-    label: "Background Color"
-    selector:
-      ui_color: {}
-  - name: size                 # This becomes "size" in your code
-    label: "Icon Size"
-    selector:
-      number:
-        min: 10
-        max: 50
-        unit_of_measurement: "px"
-  - name: show_icon            # This becomes "show_icon" in your code
-    label: "Show Icon"
-    selector:
-      boolean: {}
+type: vertical-stack
+cards:
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#kitchen'
+    name: Kitchen
+    icon: mdi:fridge
+    entity: light.kitchen
 ```
 
-Then in your module's `code` section, you would access these values like this:
+</details>
+<details>
+
+<summary>A button to open the pop-up</summary>
+
+<br>
 
 ```yaml
-.bubble-icon-container {
-  /* Access the "color" field */
-  background: var(--${this.config.module_id?.color}-color) !important;
+type: custom:bubble-card
+card_type: button
+button_type: name
+name: Kitchen
+icon: mdi:fridge
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#kitchen'
+```
+
+</details>
+
+<details>
+
+<summary>A pop-up with a fixed height</summary>
+
+<br>
+
+Replace `400px` with the size you need.
+
+```yaml
+type: vertical-stack
+cards:
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#kitchen'
+    name: Kitchen
+    icon: mdi:fridge
+    entity: light.kitchen
+    margin_top_mobile: calc(100vh - 400px)
+    margin_top_desktop: calc(100vh - 400px)
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Horizontal buttons stack
+
+![readme-horizontal-buttons-stack](https://github.com/Clooos/Bubble-Card/assets/36499953/8fe89ade-c77a-469b-891f-577e0bb2f46b)
+
+This card is a good companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion/occupancy sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible, and acts as a footer.
+
+> [!IMPORTANT]  
+> This card has to be the last one in your view (after every card and pop-up). It can't be inside any stack.
+
+### Horizontal buttons stack options
+
+<details>
+
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `1_link` | string | **Required** | The pop-up hash (e.g. `'#kitchen'`) with ' ' or any link | A link to open |
+| `1_name` | string | Optional | Any string | A name for your button |
+| `1_icon` | string | Optional | Any `mdi:` icon | An icon for your button |
+| `1_entity` | string | Optional | Any light or light group | Display the color of that light in background |
+| `1_pir_sensor` | string | Optional | Any binary sensor | At least one pir sensor or more for `auto_order`, in fact it also works with any entity type, for example you can add light groups and the order will change based on the last changed states. |
+| `auto_order` | boolean | Optional | `true` or `false` (default) | Change the order of the buttons according to the `_pir_sensor` last changed time, **it needs to be `false` if you don't have any `_pir_sensor` in your code** |
+| `margin` | string | Optional | Any CSS value | Use this **only** if your `horizontal-buttons-stack` is not well centered on mobile (e.g. `13px`) |
+| `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
+| `is_sidebar_hidden` | boolean | Optional | `true` or `false` (default) | Fix the horizontal buttons stack position if the sidebar is hidden on the desktop (only if you have made a modification to hide it yourself) |
+| `rise_animation` | boolean | Optional | `true` (default) or `false` | Set this to `false` to disable the animation that activates once the page has loaded |
+| `highlight_current_view` | boolean | Optional | `true` or `false` (default) | Highlight current hash / view with a smooth animation |
+| `hide_gradient` | boolean | Optional | `true` or `false` (default) | Set this to `false` to hide the gradient |
+
+> [!IMPORTANT]  
+> The variables starting with a number define your buttons, just change this number to add more buttons (see example below).
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-horizontal-buttons-stack-border-radius` | `px` | Border radius for horizontal button stack buttons |
+| `--bubble-horizontal-buttons-stack-background-color` | `color` | Background color for horizontal button stack buttons |
+
+</details>
+
+
+#### Example
+
+<details>
+
+<summary>An horizontal buttons stack that reorganize itself based on occupancy sensors</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: horizontal-buttons-stack
+auto_order: true
+1_name: Living room
+1_icon: mdi:sofa
+1_link: '#living-room'
+1_entity: light.living_room
+1_pir_sensor: binary_sensor.living_room_motion
+2_name: Kitchen
+2_icon: mdi:fridge
+2_link: '#kitchen'
+2_entity: light.kitchen
+2_pir_sensor: binary_sensor.kitchen_motion
+3_name: Dining room
+3_icon: mdi:silverware-fork-knife
+3_link: '#dining-room'
+3_entity: light.dining_room
+3_pir_sensor: binary_sensor.dining_room_motion
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Button
+
+![readme-button-without-sub-buttons](https://github.com/Clooos/Bubble-Card/assets/36499953/790cbe3c-bdcc-4242-81ac-48e6ca2f1d46)
+
+This card allows you to control your entities and can be customized in many ways. To access color / control of an entity, simply tap on the icon.
+
+> [!TIP]
+> ### What are the differences between all the button types?
+>
+> - **The button switch** is the default one. By default, it toggles an entity and its background color changes based on the entity’s state or the color of a light.
+>
+> - **The button slider** can control the brightness of a light, the volume of a media player, the position of a cover, and it also supports input numbers. Its background color can change based on the color of a light.
+>
+> - **The button state** is perfect for displaying information from a sensor or any entity. When you press it, it will show the "More info" panel of the entity. Its background color does not change.
+>
+> - **The button name** is the only one that doesn't need an entity and allows you to display a short text, a name or a title. You can also add some actions to it. Its background color does not change.
+
+### Button options
+
+<details>
+
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Required** | Any entity | An entity to control |
+| `button_type` | string | Optional | `switch` (default), `slider`, `state` or `name` | The behavior of your button |
+| `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
+| `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
+| `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see below | Allow to change the default actions on button click. Not available for the `slider` type |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
+| `slider_live_update` | boolean | Optional (`button_type` must be set to `slider`) | `true` or `false` (default) | If toggled, value is updated while sliding instead of only on release |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-button-main-background-color` | `color` | Main background color for supported elements in the button |
+| `--bubble-button-border-radius` | `px` | Border radius for the button |
+| `--bubble-button-icon-border-radius` | `px` | Border radius for the button icon container |
+| `--bubble-button-icon-background-color` | `color` | Background color for the button icon container |
+| `--bubble-light-color` | `color` | Replace the color of light buttons/sliders |
+| `--bubble-button-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the button |
+
+</details>
+
+
+#### Examples
+
+<details>
+
+<summary>A slider button that can control the brightness of a light</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+entity: light.kitchen_led
+name: Kitchen LED
+icon: mdi:led-strip-variant
+```
+
+</details>
+
+<details>
+
+<summary>A button with all the options</summary>
+
+<br>
+
+```yaml
+entity: light.your_light
+button_type: switch
+show_icon: true
+force_icon: true
+show_name: true
+show_last_changed: true
+show_state: true
+show_last_updated: true
+show_attribute: true
+attribute: brightness
+scrolling_effect: true
+card_layout: large
+button_action:
+  tap_action:
+    action: toggle
+tap_action:
+  action: more-info
+sub_button:
+  - entity: light.your_light
+    icon: ''
+    show_state: false
+    show_attribute: true
+    attribute: brightness
+    show_icon: false
+    show_background: false
+    show_name: false
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Media player
+
+![readme-media-player](https://github.com/Clooos/Bubble-Card/assets/36499953/c7ee0752-00e3-4edf-8e1c-983fbd29b5f3)
+
+This card allows you to control a media player. You can tap on the icon to get more control.
+
+### Media player options
+
+<details>
+
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Required** | Any media player | The media player to control |
+| `name` | string | Optional | Any string | A name for your media player, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your media player, if not defined it will display the entity icon or the `entity-picture` |
+| `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
+| `hide` | object | Optional | See below | Show or hide buttons |
+
+#### Hide options
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `play_pause_button` | boolean | Optional | `true` (default) or `false` | Show or hide the play/pause button |
+| `volume_button` | boolean | Optional | `true` (default) or `false` | Show or hide the volume button |
+| `previous_button` | boolean | Optional | `true` (default) or `false` | Show or hide the previous button |
+| `next_button` | boolean | Optional | `true` (default) or `false` | Show or hide the next button |
+| `power_button` | boolean | Optional | `true` (default) or `false` | Show or hide the power button |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-media-player-main-background-color` | `color` | Main background color for the media player |
+| `--bubble-media-player-border-radius` | `px` | Border radius for the media player |
+| `--bubble-media-player-buttons-border-radius` | `px` | Border radius for the media player buttons |
+| `--bubble-media-player-slider-background-color` | `color` | Background color for the volume slider |
+| `--bubble-media-player-icon-border-radius` | `px` | Border radius for the media player icon container |
+| `--bubble-media-player-icon-background-color` | `color` | Background color for the media player icon container |
+| `--bubble-media-player-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the media player |
+
+</details>
+
+
+#### Examples
+
+<details>
+
+<summary>A media player with all the options</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: media-player
+name: Media player
+entity: media_player.your_media_player
+show_state: true
+show_last_updated: true
+show_attribute: true
+attribute: assumed_state
+card_layout: large
+scrolling_effect: false
+show_icon: false
+force_icon: true
+show_name: false
+show_last_changed: true
+columns: 2
+rows: 1
+tap_action:
+  action: toggle
+hide:
+  play_pause_button: true
+  volume_button: true
+  previous_button: true
+  next_button: true
+  power_button: true
+sub_button:
+  - entity: media_player.salon_2
+    icon: mdi:volume-high
+    name: Volume level
+    tap_action:
+      action: more-info
+    show_name: false
+    show_state: false
+    show_last_updated: false
+    show_attribute: true
+    show_background: false
+    attribute: volume_level
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Cover
+
+![readme-cover](https://github.com/Clooos/Bubble-Card/assets/36499953/27d1c329-76ab-480b-b424-c79c9e68c788)
+
+This card allows you to control your `cover` entities.
+
+### Cover options
+
+<details>
+
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Required** | Any cover | A cover to control |
+| `name` | string | Optional | Any string | A name for your cover, if not defined it will display the entity name |
+| `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
+| `icon_open` | string | Optional | Any `mdi:` icon | An icon for your open cover, if not defined it will display the default open cover icon |
+| `icon_close` | string | Optional | Any `mdi:` icon | An icon for your closed cover, if not defined it will display the default closed cover icon |
+| `icon_up` | string | Optional | Any `mdi:` icon | An icon for your open cover button, if not defined it will display the default open cover icon |
+| `icon_down` | string | Optional | Any `mdi:` icon | An icon for your close cover button, if not defined it will display the default close cover icon |
+| `open_service` | string | Optional | Any service or script | A service to open your cover, default to `cover.open_cover` |
+| `stop_service` | string | Optional | Any service or script | A service to stop your cover, default to `cover.stop_cover` |
+| `close_service` | string | Optional | Any service or script | A service to close your cover, default to `cover.close_cover` |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-cover-main-background-color` | `color` | Main background color for supported elements in the cover card |
+| `--bubble-cover-border-radius` | `px` | Border radius for the cover card |
+| `--bubble-cover-icon-border-radius` | `px` | Border radius for the cover card icon container |
+| `--bubble-cover-icon-background-color` | `color` | Background color for the cover card icon container |
+| `--bubble-cover-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the cover card |
+| `--bubble-button-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for buttons in the cover card |
+
+</details>
+
+
+#### Example
+
+<details>
+
+<summary>A card that can control a roller shade</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: cover
+entity: cover.kitchen
+name: Kitchen
+icon_open: mdi:roller-shade
+icon_close: mdi:roller-shade-closed
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Select
+
+![readme-select-card](https://github.com/user-attachments/assets/f1220aaf-da5a-4ec0-b74e-31905264ae0a)
+
+This card allows you to add a dropdown menu for your `input_select` / `select` entities. This card also supports the sub-buttons and all the common Bubble Card features.
+
+> [!TIP]
+> You can also have select sub-buttons if you want, this feature is available in all the cards that support the sub-buttons.
+
+### Select options
+
+<details>
+
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Required** | Any entity | An entity to control |
+| `name` | string | Optional | Any string | A name for your select, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your select, if not defined it will display the entity icon or the `entity-picture` |
+| `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-select-main-background-color` | `color` | Main background color for supported elements in the select card |
+| `--bubble-select-background-color` | `color` | Background color for select card |
+| `--bubble-select-list-border-radius` | `px` | Border radius for the dropdown menu in the card |
+| `--bubble-select-list-item-accent-color` | `color` | Accent color for the selected item |
+| `--bubble-select-list-background-color` | `color` | Background color for the dropdown menu in the card |
+| `--bubble-select-list-width` | `px` | Width of the dropdown menu in the card |
+| `--bubble-select-arrow-background-color` | `color` | Background color for dropdown arrow |
+| `--bubble-select-button-border-radius` | `px` | Border radius for select button |
+| `--bubble-select-border-radius` | `px` | Border radius for the select card |
+| `--bubble-select-icon-border-radius` | `px` | Border radius for the select card icon container |
+| `--bubble-select-icon-background-color` | `color` | Background color for the select card icon container |
+| `--bubble-select-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the select card |
+
+</details>
+
+
+#### Examples
+
+<details>
+
+<summary>A select card with a list of scenes</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: select
+name: Scene
+entity: input_select.scenes
+icon: mdi:brightness-4
+show_state: true
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Climate
+
+![readme-climate-card](https://github.com/user-attachments/assets/59145c69-2f85-4ee7-a290-e848971e1925)
+
+This card allows you to control your `climate` entities.
+
+> [!TIP]
+> The mode selection menu is a [sub-button](#sub-buttons) that is added automatically when creating the card. You can then modify or remove it as you wish.
+
+### Climate options
+
+<details>
+
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name                     | Type    | Requirement                         | Supported options                                  | Description                                                                                                     |
+|--------------------------|---------|-------------------------------------|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `entity`                | string  | **Required**                        | Climate entity                                   | The entity to control (e.g., `climate.living_room`).                                                            |
+| `name`                  | string  | Optional                            | Any string                                       | A custom name for the card. If not defined, it will display the entity name.                                    |
+| `icon`                  | string  | Optional                            | Any `mdi:` icon                                  | A custom icon for the card. If not defined, the entity icon or `entity-picture` will be used.                   |
+| `force_icon`            | boolean | Optional                            | `true` or `false` (default)                     | Gives priority to the icon over the `entity-picture`.                                                           |
+| `show_state`            | boolean | Optional                            | `true` or `false` (default)                     | Show or hide the current state of the `entity`.                                                                 |
+| `show_name`             | boolean | Optional                            | `true` (default) or `false`                     | Show or hide the name of the entity.                                                                            |
+| `show_icon`             | boolean | Optional                            | `true` (default) or `false`                     | Show or hide the icon.                                                                                          |
+| `hide_target_temp_low`  | boolean | Optional (only for entities supporting `target_temp_low`) | `true` or `false` (default) | Hides the low target temperature control if supported by the `entity`.                                          |
+| `hide_target_temp_high` | boolean | Optional (only for entities supporting `target_temp_high`)| `true` or `false` (default) | Hides the high target temperature control if supported by the `entity`.                                         |
+| `state_color`           | boolean | Optional                            | `true` or `false` (default)                     | Applies a constant background color when the climate entity is ON.                                              |
+| `tap_action`            | object  | Optional                            | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on tap. If not defined, `more-info` will be used.                                   |
+| `double_tap_action`     | object  | Optional                            | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on double tap. If not defined, `toggle` will be used.                               |
+| `hold_action`           | object  | Optional                            | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on hold. If not defined, `more-info` will be used.                                  |
+| `card_layout`           | string  | Optional                            | `normal` (default), `large`, `large-2-rows`     | Defines the styling layout of the card. See [card layouts](#card-layouts).                                      |
+| `columns`               | string  | Optional                            | `1`, `2`, `3`, or `4` (default)                 | Number of columns when placed in a **section view**.                                                            |
+| `rows`                  | string  | Optional                            | `1` (default), `2`, `3`, or `4`                 | Number of rows when placed in a **section view**.                                                               |
+| `sub_button`            | object  | Optional                            | See [sub-buttons](#sub-buttons)                | Adds custom buttons fixed to the right. Useful for a climate mode select menu.                                  |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-climate-main-background-color` | `color` | Main background color for supported elements in the climate card |
+| `--bubble-climate-border-radius` | `px` | Border radius for supported elements in the climate card elements |
+| `--bubble-climate-button-background-color` | `color` | Background color for the climate card buttons |
+| `--bubble-climate-icon-border-radius` | `px` | Border radius for the climate card icon container |
+| `--bubble-state-climate-fan-only-color` | `color` | Overlay color for the fan-only state |
+| `--bubble-state-climate-dry-color` | `color` | Overlay color for the dry state |
+| `--bubble-state-climate-cool-color` | `color` | Overlay color for the cool state |
+| `--bubble-state-climate-heat-color` | `color` | Overlay color for the heat state |
+| `--bubble-state-climate-auto-color` | `color` | Overlay color for the auto state |
+| `--bubble-state-climate-heat-cool-color` | `color` | Overlay color for the heat-cool state |
+| `--bubble-climate-accent-color` | `color` | Accent color for the climate card |
+| `--bubble-climate-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for climate container. |
+
+</details>
+
+
+#### Examples
+
+<details>
+
+<summary>A climate card with an HVAC modes dropdown menu</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: climate
+entity: climate.test_climate
+sub_button:
+  - name: HVAC modes menu
+    select_attribute: hvac_modes
+    show_arrow: false
+    state_background: false
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Separator
+
+![readme-separator](https://github.com/Clooos/Bubble-Card/assets/36499953/7e416a34-b95e-4a03-a200-4b3aa04f560d)
+
+This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...
+
+### Separator options
+
+<details>
+
+**<summary>Options (YAML + descriptions)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `name` | string | Optional but recommended | Any string | A name for your separator |
+| `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your separator |
+| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
+| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-line-background-color` | `color` | Background color for the line in the separator |
+
+</details>
+
+#### Example
+
+<details>
+
+<summary>A separator/divider for a "Covers" section</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: separator
+name: Covers
+icon: mdi:window-shutter
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Empty column
+
+![readme-empty-column](https://github.com/Clooos/Bubble-Card/assets/36499953/a97fa8df-8360-4613-8bb7-e8a269cb1913)
+
+This card is here to fill an empty column. This is useful if you have a `horizontal-stack` in your pop-up with only one card. Take a look at the bottom right corner of this screenshot to (not) see it.
+
+### Empty column options
+
+This card has no options and doesn’t support [styling](#styling), though it does support layout options for HA sections.
+
+#### Example
+
+<details>
+
+<summary>An empty column in an horizontal stack</summary>
+
+<br>
+
+```yaml
+type: horizontal-stack
+cards:
+  - type: custom:bubble-card
+    card_type: button
+    ...
+  - type: custom:bubble-card
+    card_type: empty-column
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Sub-buttons
+
+![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
+
+In every card that supports that option, you can add sub-buttons to customize your cards even more. You can, for example, create a button that can control a vacuum, a weather card, or almost anything that you can come up with. These sub-buttons support the tap actions and most of the button options.
+
+### Sub-buttons options
+
+<details>
+
+**<summary>Options (YAML + description)</summary>**
+
+| Name | Type | Requirement | Supported options | Description |
+| --- | --- | --- | --- | --- |
+| `entity` | string | Optional | Any entity | An entity to control |
+| `name` | string | Optional | Any string | A name for your sub-button, if not defined it will display the entity name |
+| `icon` | string | Optional | Any `mdi:` icon | An icon for your sub-button, if not defined it will display the entity icon |
+| `show_background` | boolean | Optional | `true` (default) or `false` | Show a background for your sub-button, it will change its color based on your entity state |
+| `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
+| `show_name` | boolean | Optional | `true` or `false` (default) | Show or hide the name |
+| `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
+| `show_last_changed` | boolean | Optional | `true` or `false` (default) | Show the last changed time of your `entity` |
+| `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
+| `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
+| `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button double click, if undefined, `toggle` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button hold, if undefined, `more-info` will be used. |
+
+</details>
+
+<details>
+
+**<summary>CSS variables (see [Styling](#styling))</summary>**
+
+| Variable | Expected value | Description |
+| --- | --- | --- |
+| `--bubble-sub-button-border-radius` | `px` | Border radius for the sub-buttons |
+| `--bubble-sub-button-background-color` | `color` | Background color for the sub-buttons |
+
+</details>
+
+#### Examples
+
+<details>
+
+<summary>A button with some sub-buttons to make a vacuum card (like on the screenshot)</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: switch
+name: Vacuum
+entity: vacuum.downstairs
+icon: mdi:robot-vacuum
+show_state: true
+show_last_changed: true
+tap_action:
+  action: more-info
+button_action:
+  tap_action:
+    action: more-info
+sub_button:
+  - name: Battery
+    icon: mdi:battery
+    show_name: false
+    show_icon: true
+    show_background: false
+    show_attribute: true
+    attribute: battery_level
+  - name: Return to dock
+    icon: mdi:home
+    show_background: false
+    tap_action:
+      action: call-service
+      service: vacuum.return_to_base
+      target:
+        entity_id: vacuum.downstairs
+  - name: Pause
+    icon: mdi:pause
+    show_background: false
+    tap_action:
+      action: call-service
+      service: vacuum.pause
+      target:
+        entity_id: vacuum.downstairs
+  - name: Start
+    icon: mdi:play
+    tap_action:
+      action: call-service
+      service: vacuum.start
+      target:
+        entity_id: vacuum.downstairs
+styles: >-
+  .bubble-button-card-container {
+    /* Change the background color when the vacuum get an error (optional), more details in the styles template section */
+    background: ${state === 'error' ? 'rgb(200, 80, 40)' : ''} !important;
+  }
+  /* Change the first sub-button battery icon based on the battery_icon attribute, more details in the styles template section */
+  ${subButtonIcon[0].setAttribute("icon", hass.states['vacuum.downstairs'].attributes.battery_icon)}
+```
+
+</details>
+
+<details>
+
+<summary>A button slider with a sub-button that shows the brightness and one that toggle the light (like on the screenshot)</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+name: Kitchen
+entity: light.kitchen
+icon: mdi:fridge-outline
+show_last_updated: true
+sub_button:
+  - name: Brightness
+    icon: mdi:fridge-outline
+    show_icon: false
+    show_background: false
+    show_attribute: true
+    attribute: brightness
+  - name: Toggle button
+    icon: mdi:lightbulb
+    tap_action:
+      action: toggle
+```
+
+</details>
+
+<details>
+
+<summary>A button that shows the inside and outside temperature with the weather for today and tomorrow (screenshot included)</summary>
+
+<br>
+
+<img width="591" alt="image" src="https://github.com/Clooos/Bubble-Card/assets/36499953/360312de-db08-47bf-9b46-92afeb435edd">
+
+> Bad luck for me it's cloudy all the time but all the icons are changing based on the weather.
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+entity: weather.openweathermap
+name: Weather
+show_state: true
+card_layout: large-2-rows
+sub_button:
+  - name: Home temperature
+    icon: mdi:home-thermometer-outline
+    entity: sensor.home_temperature
+    show_state: true
+    show_icon: true
+    show_background: false
+  - name: Outside temperature
+    entity: sensor.outside_temperature
+    show_state: true
+    show_background: false
+  - name: Today
+    entity: sensor.home_realfeel_temperature_max_0d
+    show_name: true
+    show_state: true
+    tap_action:
+      action: more-info
+  - name: Tomorrow
+    entity: sensor.home_realfeel_temperature_max_1d
+    show_name: true
+    show_state: true
+    show_background: false
+styles: >-
+  /* Change the third and fourth sub-button icon based on the forecast.condition attribute, more details in the styles template section */
+  ${subButtonIcon[2].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[0]?.condition))}
+  ${subButtonIcon[3].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[1]?.condition))}
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Card layouts
+
+![My-Bubble-Card-dashboard](https://github.com/Clooos/Bubble-Card/assets/36499953/0c049498-969b-4939-959e-fc49fb08d0a1)
+
+Bubble Card fully supports the Home Assistant section view, you can change the card layout to make the card bigger and also change the number of columns or rows the card should occupy in your section view (only on the cards that support that option). These layouts are also supported in all other view types.
+
+<details>
+
+**<summary>Available card layouts</summary>**
+
+| Layout | Description |
+| --- | --- |
+| `normal` | The regular layout (not optimized for the section view) |
+| `large` | A larger layout that will resize to the selected rows in the section view (optimized for the section view) |
+| `large-2-rows` | A larger layout with 2 rows of sub-buttons  that will resize to the selected rows in the section view (optimized for the section view) |
+
+</details>
+
+#### Examples
+
+<details>
+
+<summary>A large button that shows energy statistics with 2 rows of sub-buttons (screenshot included)</summary>
+
+<br>
+
+<img width="547" alt="image" src="https://github.com/Clooos/Bubble-Card/assets/36499953/faa643d5-5d1e-488d-b4a5-6bedd043c747">
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+card_layout: large-2-rows
+name: Energy
+entity: sensor.current_power_production
+icon: mdi:home-lightning-bolt-outline
+show_state: true
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#energy'
+sub_button:
+  - entity: sensor.electricity_counter
+    icon: mdi:counter
+    show_background: false
+    show_state: true
+    tap_action:
+      action: more-info
+  - entity: sensor.today_s_energy_production
+    show_state: true
+    show_background: false
+  - entity: sensor.average_daily_consumption
+    show_background: false
+    show_state: true
+  - entity: sensor.this_week_production
+    show_state: true
+    show_background: false
+    icon: mdi:calendar-week
+```
+
+</details>
+
+<details>
+
+<summary>A large button with multiple rows with 12 sub-buttons</summary>
+
+<br>
+
+<img width="547" alt="image" src="/img/Example_Layout_Large_multi-row.png">
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+entity: sun.sun
+sub_button:
+  - entity: sun.sun
+    icon: mdi:numeric-0
+  - entity: sun.sun
+    icon: mdi:numeric-1
+  - entity: sun.sun
+    icon: mdi:numeric-2
+  - entity: sun.sun
+    icon: mdi:numeric-3
+  - entity: sun.sun
+    icon: mdi:numeric-4
+  - entity: sun.sun
+    icon: mdi:numeric-5
+  - entity: sun.sun
+    icon: mdi:numeric-6
+  - entity: sun.sun
+    icon: mdi:numeric-7
+  - entity: sun.sun
+    icon: mdi:numeric-8
+  - entity: sun.sun
+    icon: mdi:numeric-9
+  - entity: sun.sun
+    icon: mdi:numeric-10
+  - entity: sun.sun
+    icon: mdi:numeric-negative-1
+card_layout: large
+grid_options:
+  rows: 3
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Tap, double tap and hold actions
+
+You can also use Home Assistant default tap actions, double tap actions and hold actions on the cards that supports this option. For example, this allows you to display the “more info” window by holding a button icon or running a service when a sub-button is pressed.
+
+### Action options
+
+<details>
+
+**<summary>Options (YAML + description)</summary>**
+
+| Name | Type | Supported options | Description |
+| --- | --- | --- | --- |
+| `action` | string | `more-info`, `toggle`, `call-service`, `navigate`, `url`, `fire-dom-event`, `none` | Action to perform |
+| `target` | object |  | Only works with `call-service`. Follows the [home-assistant syntax](https://www.home-assistant.io/docs/scripts/service-calls/#targeting-areas-and-devices) |
+| `navigation_path` | string | Any path of your dashboard | Path to navigate to (e.g. `'#kitchen'` for opening a pop-up) when action defined as navigate |
+| `url_path` | string | Any link | URL to open on click (e.g. `https://www.google.com`) when action is `url` |
+| `service` | string | Any service | Service to call (e.g. `media_player.media_play_pause`) when `action` defined as `call-service` |
+| `data` or `service_data` | object | Any service data | Service data to include (e.g. `entity_id: media_player.kitchen`) when `action` defined as `call-service` |
+| `confirmation` | object | See [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Display a confirmation pop-up (not a Bubble Card one), overrides the default `confirmation` object |
+
+</details>
+
+#### Example
+
+<details>
+
+<summary>A button to open a pop-up</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: name
+name: Kitchen
+icon: mdi:fridge
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#kitchen'
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Styling
+
+You can add custom styles to modify the CSS of all cards **without using card-mod** in three ways:
+
+- In the editor, go to the card you want to modify, then navigate to _Styling options > Custom styles / Templates_, and add your custom styles (check the tips and examples below).
+- In a [theme](https://www.home-assistant.io/integrations/frontend/#defining-themes) file by adding CSS variables in YAML (these are available in each card's documentation above). This allows for global modifications.
+
+  <details>
   
-  /* Access the "size" field with a default value if undefined */
-  --mdc-icon-size: ${this.config.module_id?.size || 24}px;
+  <summary>Example</a></summary>
   
-  /* Access the "show_icon" boolean field */
-  display: ${this.config.module_id?.show_icon ? 'flex' : 'none'};
-}
-```
+  <br>
 
-Remember to replace `module_id` with your actual module ID in your code.
+  Don't copy the `Bubble:` line, this is the name of the theme you use. You also need to remove the `--` from the variables.
+
+  You need to run the [`frontend.reload_themes`](https://www.home-assistant.io/integrations/frontend/#setting-themes) action to refresh the theme after any modifications.
+
+  ```yaml
+  Bubble:  
+    # Bubble Card variables test
+    bubble-border-radius: "8px"
+    bubble-main-background-color: "rgb(50,70,90)"
+    bubble-secondary-background-color: "rgb(0,70,90)"
+    bubble-pop-up-main-background-color: "rgba(200,200,200,0.5)"
+    bubble-accent-color: "rgb(100,140,180)"
+    bubble-icon-background-color: "rgb(50,80,100)"
+    bubble-select-list-width: "200px"
+    bubble-select-list-background-color: "rgb(100,140,180)"
+  ```
+  
+  </details>
+  
+- In YAML by adding `styles: |` followed by your custom styles (check the tips and examples below).
+
+> [!TIP]  
+> **To understand which style classes can be modified**, you can take a look at the [`src/cards`](https://github.com/Clooos/Bubble-Card/tree/main/src/cards) folder in this repository. In each card folder, you will find a file named `styles.css`. These files contain all the applied styles. This allows for a lot more possibilities than CSS variables, but it needs to be added individually to each card.
+> 
+> You can also find a lot of [examples from the community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-custom-styles-templates-and-dashboards), or some from the [Home Assistant forum](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/) by doing a bit of searching.
+>
+> The Bubble theme for Home Assistant (like on the screenshots) can be found [here](https://github.com/Clooos/Bubble).
+>
+> A tutorial video is coming soon on my [YouTube channel](https://www.youtube.com/@cloooos)!
+
+> [!IMPORTANT]  
+> Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
+
+#### Examples
+
+<details>
+
+<summary>Changing the font size of any Bubble Card</summary>
+
+<br>
+
+```yaml
+styles: |
+  * { 
+    font-size: 16px !important;
+  }
+```
 
 </details>
 
-### Tips for working with configuration values
-
-- **Use optional chaining**: Always use the optional chaining operator (`?.`) when accessing nested configuration properties to prevent errors if the configuration is missing.
-
-- **Provide default values if possible**: In some cases, use the OR operator (`||`) to supply default values in case the configuration value is undefined.
-
-### Example: Complete module with editor and code
-
 <details>
-<summary><b>Complete module example</b></summary>
 
-Here's a complete example of a module definition showing both the editor schema and how to use the values in the code:
+<summary>Changing the background color of a single button in an horizontal buttons stack</summary>
+
+<br>
 
 ```yaml
-icon_container_color:
-  name: 'Example: Customize the icon container color'
-  version: v1.1
-  creator: Clooos
-  link: https://github.com/Clooos/Bubble-Card/discussions/1231
-  unsupported:
-    - horizontal-buttons-stack
-    - separator
-  description: |
-    A list of predefined colors to customize the icon container color.
-    Configure this module via the editor or in YAML, for example:
-    <br><br>
-    <code-block><pre>
-    icon_container_color: 
-        color: light-blue
-    </pre></code-block>
-  code: |
-    .bubble-icon-container {
-      opacity: 1 !important;
-      background: var(--${this.config.icon_container_color?.color}-color) !important;
-    }
-  editor:
-    - name: color
-      label: Color
-      selector:
-        ui_color:
-          include_none: true
+styles: >
+  /* Selector for the '#kitchen' button */
+  .kitchen > .bubble-background-color {
+    background-color: blue !important;
+  }
 ```
+
 </details>
 
-## Field properties
+<details>
 
-Every field in your editor schema can have these common properties:
+<summary>Changing the background color of a card</summary>
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | string | **Required**. The key used to store the value in the module configuration |
-| `label` | string | The displayed name for the field |
-| `required` | boolean | Whether the field is required |
-| `disabled` | boolean | Whether the field is disabled |
-| `default` | any | Default value if no value is provided |
+<br>
 
-## Field types
-
-You can define fields using either the legacy type syntax or the modern selector syntax.
-
-> [!IMPORTANT]
-> **Not** all selector types have been tested with Bubble Card modules. Some selectors might not work correctly or might not be fully compatible. If you encounter an issue, please report it [here](https://github.com/Clooos/Bubble-Card/issues).
-
-### Selector-based fields
-
-Selector-based fields provide rich UI controls. Simply use the `selector` property with one of the following selector types:
-
-#### Text input selectors
+This one works on all Bubble Card types (except for the pop-ups):
 
 ```yaml
-- name: title
-  label: "Title"
-  selector:
-    text: {}
+styles: | 
+  ha-card {
+    --bubble-main-background-color: rgba(12,120,50,0.5) !important;
+  }
 ```
 
-<details>
-<summary><b>Options</b></summary>
+This one is doing the same in a button card only (it works for the pop-up header): 
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `multiline` | boolean | Enable multiline text input |
-| `type` | string | HTML input type (e.g., "email", "url", "password") |
-| `autocomplete` | string | Browser autocomplete attribute |
-| `prefix` | string | Text to display before the input |
-| `suffix` | string | Text to display after the input |
+```yaml
+styles: | 
+  .bubble-button-card-container {
+    background: rgba(12,120,50,0.5) !important;
+  }
+```
+
+To change the color when it's `on` take a look at the style templates below.
+
 </details>
 
-#### Number selector
+<details>
+
+<summary>Changing the color of a button slider</summary>
+
+<br>
 
 ```yaml
-- name: opacity
-  label: "Opacity"
-  selector:
-    number:
-      min: 0
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
+styles: |
+  .bubble-range-fill { 
+    background: rgba(79, 69, 87, 1) !important;
+    opacity: 1 !important;
+  }
 ```
 
-<details>
-<summary><b>Options</b></summary>
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `min` | number | Minimum value |
-| `max` | number | Maximum value |
-| `step` | number | Step value |
-| `mode` | string | Display mode: "box" or "slider" (default: "slider") |
-| `unit_of_measurement` | string | Unit label |
-| `min_step` | number | Minimum step value |
 </details>
 
-#### Boolean selector
-
-```yaml
-- name: show_icon
-  label: "Show Icon"
-  selector:
-    boolean: {}
-```
-
-*No additional option for this selector.*
-
-#### Select selector
-
-```yaml
-- name: theme
-  label: "Theme"
-  selector:
-    select:
-      options:
-        - label: "Light"
-          value: "light"
-        - label: "Dark"
-          value: "dark"
-        - label: "Auto"
-          value: "auto"
-      multiple: false
-      custom_value: false
-      mode: "dropdown"
-```
-
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `options` | array | List of options with label/value pairs, or simple string arrays |
-| `translation_key` | string | Translation key for the options |
-| `multiple` | boolean | Allow multiple selection |
-| `custom_value` | boolean | Allow custom values |
-| `mode` | string | Display mode: "dropdown" or "list" |
+<summary>Changing the line color of a separator</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-line {
+    background: var(--primary-text-color);
+    opacity: 0.1;
+  }
+```
+
 </details>
 
-#### Color selector
-
-```yaml
-- name: background_color
-  label: "Background Color"
-  selector:
-    ui_color: {}
-```
-
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `default_color` | string | Default color to use if no color is selected |
-| `include_none` | boolean | Include an option to select no color |
-| `include_state` | boolean | Include a color based on the entity state |
-</details>
+<summary>Changing the color of an icon</summary>
 
-#### Icon selector
+<br>
 
 ```yaml
-- name: custom_icon
-  label: "Custom Icon"
-  selector:
-    icon: {}
+styles: |
+  .bubble-icon {
+    color: white !important;
+  }
 ```
 
-*No additional option for this selector.*
-
-#### Condition selector
-
+For an horizontal buttons stack icon.
 ```yaml
-- name: conditions
-  label: "Conditions"
-  selector:
-    condition: {}
-```
-
-The condition selector allows you to define complex conditions based on entity states, numeric values, time, and more. This is especially powerful for creating conditional UI elements or behaviors.
-
-<details>
-<summary><b>Using conditions in your module code</b></summary>
-
-In your JavaScript code, you can use the `checkConditionsMet` function to evaluate conditions at runtime:
-
-```yaml
-// Example of checking if conditions are met
-if (!badgeConfig?.condition || (badgeConfig?.condition && checkConditionsMet([].concat(badgeConfig.condition), hass))) {
-  // The condition is met or there is no condition defined
-  // Show or activate your component here
-}
-```
-
-Here's a simple example:
-
-```yaml
-# Module configuration example
-my_module:
-  element_to_show:
-    condition:
-      - condition: state
-        entity_id: light.living_room
-        state: 'on'
-      - condition: numeric_state
-        entity_id: sensor.temperature
-        above: 20
-```
-
-```yaml
-// In your module code
-const elementConfig = this.config.my_module?.element_to_show;
-if (!elementConfig?.condition || checkConditionsMet([].concat(elementConfig.condition), hass)) {
-  // Show element when living room light is ON and temperature is above 20
+.kitchen > .bubble-icon {
+  color: grey !important
 }
 ```
 
 </details>
 
-*No additional selector options.*
+<details>
 
-#### Entity selector
+<summary>Changing the background color of an icon container</summary>
+
+<br>
+
+This one works on all Bubble Card types (except for the pop-ups):
 
 ```yaml
-- name: target_entity
-  label: "Target Entity"
-  selector:
-    entity:
-      filter:
-        domain: light
+styles: | 
+  ha-card {
+    --bubble-icon-background-color: rgb(230, 128, 41) !important;
+  }
 ```
 
-<details>
-<summary><b>Options</b></summary>
+This one is doing the same for the pop-up header: 
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `filter.domain` | string \| string[] | Filter by entity domain(s) |
-| `filter.device_class` | string \| string[] | Filter by device class(es) |
-| `filter.integration` | string | Filter by integration |
-| `filter.supported_features` | number \| number[] | Filter by supported features flags |
-| `include_entities` | string[] | List of entities to include |
-| `exclude_entities` | string[] | List of entities to exclude |
-| `multiple` | boolean | Allow multiple selection |
+```yaml
+styles: |
+  .bubble-icon-container {
+    background: rgb(230, 128, 41) !important;
+  }
+```
+
 </details>
 
-#### Device selector
+<details>
+
+<summary>Changing the size of the sub-buttons (perfect for the large layout)</summary>
+
+<br>
 
 ```yaml
-- name: device
-  label: "Device"
-  selector:
-    device:
-      filter:
-        integration: zwave
+styles: |
+  .bubble-sub-button {
+    height: 48px !important;
+    min-width: 48px !important;
+  }
 ```
 
-<details>
-<summary><b>Options</b></summary>
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `filter.integration` | string \| string[] | Filter by integration(s) |
-| `filter.manufacturer` | string \| string[] | Filter by manufacturer(s) |
-| `filter.model` | string \| string[] | Filter by model(s) |
-| `entity.domain` | string \| string[] | Filter by entity domain(s) |
-| `entity.device_class` | string \| string[] | Filter by entity device class(es) |
-| `multiple` | boolean | Allow multiple selection |
 </details>
 
-#### Area selector
+<details>
+
+<summary>Changing the background color of the second sub-button</summary>
+
+<br>
 
 ```yaml
-- name: area
-  label: "Area"
-  selector:
-    area: {}
+styles: |
+  .bubble-sub-button-2 {
+    background-color: blue !important;
+  }
 ```
 
-<details>
-<summary><b>Options</b></summary>
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `entity.domain` | string \| string[] | Filter by entities in area with domain(s) |
-| `entity.device_class` | string \| string[] | Filter by entities in area with device class(es) |
-| `device.integration` | string \| string[] | Filter by devices in area with integration(s) |
-| `device.manufacturer` | string \| string[] | Filter by devices in area with manufacturer(s) |
-| `device.model` | string \| string[] | Filter by devices in area with model(s) |
-| `multiple` | boolean | Allow multiple selection |
 </details>
 
-#### Theme selector
+<details>
+
+<summary>Changing the size of an icon</summary>
+
+<br>
+
+For the main icon.
 
 ```yaml
-- name: card_theme
-  label: "Card Theme"
-  selector:
-    theme: {}
+styles: |
+  .bubble-icon {
+    --mdc-icon-size: 26px !important;
+  }
 ```
 
-<details>
-<summary><b>Options</b></summary>
+For the sub-button icons.
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `include_default` | boolean | Include the default theme |
+```yaml
+styles: |
+  .bubble-sub-button-icon {
+    --mdc-icon-size: 26px !important;
+  }
+```
+
 </details>
 
-#### Action selector
+<details>
+
+<summary>Using a picture rather than an icon in a sub button</summary>
+
+<br>
 
 ```yaml
-- name: tap_action
-  label: "Tap Action"
-  selector:
-    action: {}
+sub_button:
+  - icon: none
+styles: |-
+  .bubble-sub-button-1 {
+    background-image: url("/local/pictures/your_picture.jpg");
+    background-size: cover;
+  }
 ```
 
-<details>
-<summary><b>Options</b></summary>
+Just upload this picture in a “pictures” folder (or the name you want) in the Home Assistant “www” folder.
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `actions` | string[] | List of allowed actions (e.g., ["more-info", "toggle", "call-service", "navigate", "url", "none"]) |
 </details>
 
-#### Time selector
-
-```yaml
-- name: start_time
-  label: "Start Time"
-  selector:
-    time: {}
-```
-
-*No additional option for this selector.*
-
-#### Date selector
-
-```yaml
-- name: event_date
-  label: "Event Date"
-  selector:
-    date: {}
-```
-
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `min` | string | Minimum date in ISO format (YYYY-MM-DD) |
-| `max` | string | Maximum date in ISO format (YYYY-MM-DD) |
+<summary>Advanced example: Creating an horizontal row of sub-buttons (screenshot included)</summary>
+
+<br>
+
+<img width="556" alt="image" src="https://github.com/Clooos/Bubble-Card/assets/36499953/b9be2bcf-93fc-4b06-8eae-ecac97dfb5e2">
+
+> I really love this one, I use it as a header on my dashboard.
+
+```yaml
+type: custom:bubble-card
+card_type: button
+card_layout: large
+button_type: name
+show_icon: false
+show_name: false
+sub_button:
+  - name: Mute
+    icon: mdi:volume-off
+    tap_action:
+      action: toggle
+      service: input_boolean.toggle
+    entity: input_boolean.silent_mode
+  - name: Covers
+    entity: cover.all_group
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#cover'
+  - name: Shopping list
+    icon: mdi:cart-outline
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#shopping-list'
+  - name: Security
+    icon: mdi:video-outline
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#security'
+  - name: Settings
+    icon: mdi:cog
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#configuration'
+styles: |
+  .card-content {
+    width: 100%;
+    margin: 0 !important;
+  }
+  .bubble-button-card-container {
+    background: none;
+    border: none;
+  }
+  .bubble-sub-button {
+    height: 46px !important;
+    width: 46px !important;
+  }
+  .bubble-sub-button-container {
+    display: flex !important;
+    width: 100%;
+    justify-content: space-between !important;
+  }
+  .bubble-sub-button-icon {
+    --mdc-icon-size: inherit !important;
+  }
+  .bubble-name-container {
+    margin-right: 0px !important;
+  }
+```
+
+![Sub-buttons-everywhere](https://github.com/Clooos/Bubble-Card/assets/36499953/3bf04969-e00d-4755-89df-481e8f7d73b2)
+
 </details>
 
-#### Datetime selector
+<br>
 
-```yaml
-- name: event_datetime
-  label: "Event Date and Time"
-  selector:
-    datetime: {}
-```
+### Templates
 
-<details>
-<summary><b>Options</b></summary>
+**Bubble Card doesn’t support Jinja templates** but advanced users can add templates in JS directly in their [custom styles](#styling). For example, this allows you to dynamically change an icon, the texts or the colors of an element, to show or hide an element conditionally (like a sub-button), or almost anything based on a state, an attribute and more.
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `min` | string | Minimum datetime in ISO format |
-| `max` | string | Maximum datetime in ISO format |
-</details>
+> [!TIP]  
+> More information about JS templates [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator). My advice is to **always take a look at your browser console** to be sure that everything is working correctly.
 
-#### Media selector
+> [!IMPORTANT]  
+> **All templates that are not modifying a CSS property must be placed at the end! Like modifying an icon, a text or any element.**
 
-```yaml
-- name: media
-  label: "Media"
-  selector:
-    media: {}
-```
+#### Available variables and functions
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `filter_media_source` | boolean | Filter media sources |
-| `filter_local_media` | boolean | Filter local media |
+<summary>Variables</summary>
+
+<br>
+
+You have access to these variables in most cards:
+
+- `state` will return the state of your defined `entity`.
+  
+- `entity` will return your entity you defined like `switch.test` in this example.
+  
+- `icon` can be used like this to change the icon `icon.setAttribute("icon", "mdi:lightbulb")`.
+
+- `subButtonState[0]` will return the state of your first sub-button defined `entity`, `[0]` is the first sub-button state, `[1]` the second...
+  
+- `subButtonIcon[0]` can be used like this to change the first sub-button icon `subButtonIcon[0].setAttribute("icon", "mdi:lightbulb")`, `[0]` is the first sub-button icon, `[1]` the second...
+  
+- `card` will return the card element in the DOM.
+  
+- `hass` is an advanced variable that allows you even more control, for example you can return the state of `light.kitchen` like this `hass.states['light.kitchen'].state` or an attribute like this `hass.states[entity].attributes.brightness`.
+
+- `this` will return a lot of usefull informations about your setup and dashboard, only use this if you know what you are doing.
+
 </details>
-
-#### Attribute selector
-
-```yaml
-- name: attribute
-  label: "Attribute"
-  selector:
-    attribute:
-      entity_id: sensor.temperature
-```
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `entity_id` | string | Required: Entity ID to select attribute from |
-| `hide_attributes` | string[] | List of attributes to exclude |
+<summary>Functions</summary>
+
+<br>
+
+You have access to all the global JS functions, but you have also access to:
+
+- `getWeatherIcon` can be used to return a weather icon based on a state that return the weather. For example, you can can do this `${subButtonIcon[2].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[0]?.condition))}` to change the third sub-button icon to today's weather icon, `.forecast[1]?.condition` is for tomorrow...
+
+  You will have to create a template sensor for that. Here is what you can add in your `configuration.yaml`:
+  ```yaml
+    - trigger:
+        - platform: time_pattern
+          hours: /2
+      action:
+        - service: weather.get_forecasts
+          data:
+            type: daily
+          target:
+            entity_id: weather.home
+          response_variable: daily
+      sensor:
+        - name: Weather Forecast Daily
+          unique_id: weather_forecast_daily
+          state: "{{ now().isoformat() }}"
+          attributes:
+            forecast: "{{ daily['weather.home'].forecast }}"
+  ```
+- `hass.formatEntityState(state)` can be used to transtale a state (Can also be used to get a state unit, without the need to add it manually).
+- `hass.formatEntityAttributeValue(state, "attribute")` can be used to translate an attribute (Can also be used to get a state unit, without the need to add it manually).
+
 </details>
 
-#### State selector
+#### Examples
 
-```yaml
-- name: target_state
-  label: "Target State"
-  selector:
-    state:
-      entity_id: climate.living_room
-```
+You can find a lot of examples below, but you can also find very advanced templates on my [Patreon page](https://www.patreon.com/c/Clooos), like one (my favorite) that allows up to four conditional badges placed around the card’s icons. It’s also a great way to learn about all the possibilities of Bubble Card custom styles and templates!
 
 <details>
-<summary><b>Options</b></summary>
+<summary>Examples from my Patreon page</summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `entity_id` | string | Required: Entity ID to select state from |
-| `attribute` | string | Select from entity attribute rather than state |
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/e95ab7f8-f5a3-4fca-b3fd-61479540b723" alt="Example 2" />
+    <br>
+    <a href="https://www.patreon.com/posts/adding-home-like-116764324">Adding Home Assistant like badges to any card</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/24ad619b-2a98-49c0-bc9d-a59f00541731" alt="Example 4" />
+    <br>
+    <a href="https://www.patreon.com/posts/showing-date-and-116766943">Showing formatted date and time in a separator without using any entity</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/0c8891a8-ca96-45a9-ada6-fc91268cb815" alt="Example 1" />
+    <br>
+    <a href="https://www.patreon.com/posts/showing-sub-on-116808854">Showing a sub-button state on two lines</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/c90d561c-ab6a-4e4e-bd00-fe8676c2bf5b" alt="Example 3" />
+    <br>
+    <a href="https://www.patreon.com/posts/customizing-and-116753941">Customizing labels and icons inside a select sub-button</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/02782c6b-12e7-40bf-ad23-2bacf8016392" alt="Example 5" />
+    <br>
+    <a href="https://www.patreon.com/posts/119701174">Adding a persistent reminder pop-up that shows up only when needed</a>
+</p>
+
+<br>
+
 </details>
-
-#### Target selector
-
-```yaml
-- name: target
-  label: "Target"
-  selector:
-    target:
-      entity:
-        domain: light
-```
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `entity` | object | Entity filters (same as entity selector) |
-| `device` | object | Device filters (same as device selector) |
-| `area` | object | Area filters (same as area selector) |
-</details>
+<summary>Changing the background color of a button that is red when it's <code>off</code> and blue when it's <code>on</code></summary>
 
-#### Config entry selector
+<br>
 
 ```yaml
-- name: config_entry
-  label: "Integration"
-  selector:
-    config_entry:
-      domain: zwave_js
+type: custom:bubble-card
+card_type: button
+entity: switch.test
+name: Test
+styles: |
+  .bubble-button-background {
+    opacity: 1 !important;
+    background-color: ${state === 'on' ? 'blue' : 'red'} !important;
+  }
 ```
+
+</details>
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `domain` | string | Filter by domain |
-</details>
+<summary>Changing the background color of a button based on an entity for the horizontal buttons stack</summary>
 
-#### Addon selector
+<br>
 
 ```yaml
-- name: addon
-  label: "Add-on"
-  selector:
-    addon: {}
+styles: |
+  .kitchen > .color-background {
+    background-color: ${hass.states['light.kitchen'].state === 'on' ? 'blue' : 'red'} !important;
+  }
 ```
+
+</details>
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `name` | string | Filter by add-on name |
-</details>
+<summary>Showing/Hiding a sub-button conditionally</summary>
 
-#### Location selector
+<br>
 
+This one is showing the first sub-button only when my vacuum is stuck.
 ```yaml
-- name: location
-  label: "Location"
-  selector:
-    location:
-      radius: true
-      icon: "mdi:home"
+styles: |
+  .bubble-sub-button-1 {
+    display: ${hass.states['vacuum.downstairs'].state === 'error' ? '' : 'none'} !important;
+  }
 ```
+
+This one is showing a sub-button when the battery is below 10%. Usefull with a sub-button that shows "Low battery".
+```yaml
+styles: |
+  .bubble-sub-button-1 {
+    display: ${hass.states['vacuum.downstairs'].attributes.battery_level <= 10 ? '' : 'none'} !important;
+  }
+```
+
+</details>
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `radius` | boolean | Allow setting a radius around the location |
-| `icon` | string | Icon to show on the map |
+<summary>Changing an icon or sub-button icon conditionally</summary>
+
+<br>
+
+This one is changing a button icon only when a vacuum is stuck.
+```yaml
+styles: |
+  ${icon.setAttribute("icon", hass.states['vacuum.downstairs'].state === 'error' ? 'mdi:alert' : 'mdi:robot-vacuum')}
+```
+
+This one is changing the first sub-button icon only when a vacuum is stuck.
+```yaml
+styles: |
+  ${subButtonIcon[0].setAttribute("icon", hass.states['vacuum.downstairs'].state === 'error' ? 'mdi:alert' : 'mdi:robot-vacuum')}
+```
+
 </details>
-
-#### Object selector
-
-```yaml
-- name: advanced_options
-  label: "Advanced Options"
-  selector:
-    object: {}
-```
-
-*No additional option for this selector.*
-
-#### Backup selector
-
-```yaml
-- name: backup
-  label: "Backup"
-  selector:
-    backup:
-      integration: google_assistant
-```
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `integration` | string | Filter backups by integration |
+<summary>Changing an icon or sub-button icon color conditionally</summary>
+
+<br>
+
+This one is changing a button icon color based on its state.
+```yaml
+styles: |
+  .bubble-icon {
+    color: ${hass.states['light.your_light'].state === 'on' ? 'green' : 'red'} !important;
+  }
+```
+
+This one is changing a sub-button icon color based on its state. `.bubble-sub-button-1` is the first sub-button, replace `1` if you want to change another sub-button icon.
+```yaml
+styles: |
+  .bubble-sub-button-1 > ha-icon {
+    color: ${hass.states['light.your_light'].state === 'on' ? 'green' : 'red'} !important;
+  }
+```
+
 </details>
-
-#### Assistance selector
-
-```yaml
-- name: assistance_pipeline
-  label: "Assistance Pipeline"
-  selector:
-    assistance: {}
-```
-
-*No additional option for this selector.*
-
-#### Label selector
-
-```yaml
-- name: labels
-  label: "Labels"
-  selector:
-    label:
-      multiple: true
-```
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `multiple` | boolean | Allow multiple selection |
+<summary>Animating a fan icon conditionally</summary>
+
+<br>
+
+This one is rotating a button icon when a fan is `on`.
+```yaml
+styles: |-
+  .bubble-icon {
+    animation: ${hass.states['fan.you_fan'].state === 'on' ? 'slow-rotate 2s linear infinite' : ''};
+  }
+  @keyframes slow-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+```
+
 </details>
-
-#### Language selector
-
-```yaml
-- name: language
-  label: "Language"
-  selector:
-    language: {}
-```
-
-*No additional option for this selector.*
-
-#### Schedule selector
-
-```yaml
-- name: schedule
-  label: "Schedule"
-  selector:
-    schedule: {}
-```
-
-*No additional option for this selector.*
-
-#### Template selector
-
-```yaml
-- name: template
-  label: "Template"
-  selector:
-    template: {}
-```
-
-*No additional option for this selector.*
-
-#### File selector
-
-```yaml
-- name: config_file
-  label: "Configuration File"
-  selector:
-    file:
-      accept: ".yaml,.json"
-```
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `accept` | string | Comma-separated list of acceptable file extensions |
+<summary>Templating texts (like name or state)</summary>
+
+<br>
+
+This one is changing a button name/state with "It's currently sunny" depending on your weather.
+```yaml
+styles: |
+  ${card.querySelector('.bubble-name').innerText = "It's currently " + hass.states['weather.home'].state}
+```
+
+If you want to template the state (`.bubble-state`) don't toggle `show_state: true` just toggle `show_attribute: true` without any attribute.
+
 </details>
-
-#### QR code selector
-
-```yaml
-- name: qr_data
-  label: "QR Code Data"
-  selector:
-    qr_code: {}
-```
-
-*No additional option for this selector.*
-
-#### Conversation agent selector
-
-```yaml
-- name: agent
-  label: "Conversation Agent"
-  selector:
-    conversation_agent: {}
-```
-
-*No additional option for this selector.*
-
-#### Duration selector
-
-```yaml
-- name: timeout
-  label: "Timeout"
-  selector:
-    duration:
-      enable_day: false
-```
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `enable_day` | boolean | Include days in the duration selector |
-</details>
+<summary>Advanced example: Changing the color of a sub-button when a pop-up is open</summary>
 
-#### Dashboard selector
+<br>
 
 ```yaml
-- name: dashboard
-  label: "Dashboard"
-  selector:
-    dashboard:
-      include_dashboards: ["lovelace"]
+styles: |
+  ${window.addEventListener('location-changed', () => { 
+  card.querySelector('.bubble-sub-button-1').style.backgroundColor = this.location.href.includes('#kitchen') ? 'blue' : '';
+  })}
 ```
+
+</details>
 
 <details>
-<summary><b>Options</b></summary>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `include_dashboards` | string[] | List of dashboards to include |
+<summary>Advanced example: Templating a separator name based on a state translated to your language</summary>
+
+<br>
+
+You can use `hass.formatEntityState(state)` to transtale a state and `hass.formatEntityAttributeValue(state, "attribute")` to translate an attribute.
+
+This one is changing the name and the icon based on the weather, "Nuageux" means "Cloudy" in French.
+
+![image](https://github.com/Clooos/Bubble-Card/assets/36499953/35ac9d0f-c3b8-4c09-9c15-fe6954011d55)
+
+```yaml
+type: custom:bubble-card
+card_type: separator
+icon: mdi:weather-cloudy
+sub_button:
+  - entity: sensor.outside_temperature
+    icon: mdi:thermometer
+    name: Temperature
+    show_state: true
+    show_background: false
+styles: >
+  .bubble-line {
+    background: white;
+    opacity: 1;
+  }
+
+  ${card.querySelector('.bubble-name').innerText =
+  hass.formatEntityState(hass.states['weather.maison'])}
+
+  ${icon.setAttribute("icon",
+  getWeatherIcon(hass.states['weather.maison'].state))}
+```
+
 </details>
 
-#### Floor selector
+<br>
 
-```yaml
-- name: floor
-  label: "Floor"
-  selector:
-    floor: {}
-```
+---
 
-*No additional option for this selector.*
+<br>
 
-### Legacy type-based fields
+## Custom components conflicts
 
-While selector-based fields are recommended, you can also use the legacy type syntax:
+⚠️ For now there are some features that are not working with:
 
-#### String field
+- Kiosk mode, but this is fixed in Kiosk mode v6.0.1
 
-```yaml
-- name: title
-  label: "Title"
-  type: string
-```
+<br>
 
-#### Integer field
+---
 
-```yaml
-- name: count
-  label: "Count"
-  type: integer
-  valueMin: 0
-  valueMax: 100
-```
+<br>
 
-#### Float field
+## Help
 
-```yaml
-- name: opacity
-  label: "Opacity"
-  type: float
-```
+Feel free to open an issue if something is not working as expected. 
 
-#### Boolean field
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-green?logo=github)](https://github.com/Clooos/Bubble-Card/issues)
 
-```yaml
-- name: enabled
-  label: "Enabled"
-  type: boolean
-```
+Got questions or thoughts about Bubble Card? Want to share your dashboards or discoveries? You can go on the Home Assistant forum, on the Bubble Card subreddit or on the GitHub Discussions section.
 
-#### Select field
+[![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit)](https://www.reddit.com/r/BubbleCard/) [![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-lightgrey?logo=github)](https://github.com/Clooos/Bubble-Card/discussions)
 
-```yaml
-- name: mode
-  label: "Mode"
-  type: select
-  options:
-    - ["auto", "Automatic"]
-    - ["manual", "Manual"]
-```
 
-#### Multi-select field
+<br>
 
-```yaml
-- name: features
-  label: "Features"
-  type: multi_select
-  options:
-    - ["animations", "Animations"]
-    - ["colors", "Custom Colors"]
-    - ["icons", "Custom Icons"]
-```
+---
 
-## Advanced structure
+<br>
 
-### Grid layout
+## Donate
 
-You can organize fields in a grid layout:
+I dedicate most of my spare time to making this project the best it can be. So if you appreciate my work, any donation would be a great way to show your support 🍻
 
-```yaml
-- type: grid
-  name: appearance
-  schema:
-    - name: color
-      label: "Color"
-      selector:
-        select:
-          options:
-            - label: "Red"
-              value: "red"
-            - label: "Blue"
-              value: "blue"
-    - name: size
-      label: "Size"
-      selector:
-        number:
-          min: 10
-          max: 100
-```
+[![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR) [![Patreon Clooos](https://img.shields.io/badge/Patreon-Clooos-orange?logo=patreon)](https://www.patreon.com/Clooos)
 
-<details>
-<summary><b>Options</b></summary>
+<br>
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `column_min_width` | string | Minimum column width (CSS value) |
-| `schema` | array | Fields in the grid |
-</details>
+Thank you everyone for your support, you all are my greatest motivation!
 
-### Expandable sections
-
-You can create collapsible sections:
-
-```yaml
-- type: expandable
-  name: advanced_settings
-  title: "Advanced Settings"
-  icon: "mdi:tune"
-  expanded: false
-  schema:
-    - name: animation_speed
-      label: "Animation Speed"
-      selector:
-        number:
-          min: 1
-          max: 10
-```
-
-<details>
-<summary><b>Options</b></summary>
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `title` | string | Section title |
-| `icon` | string | Section icon (Material Design Icons) |
-| `expanded` | boolean | Initially expanded |
-| `schema` | array | Fields in the section |
-</details>
-
-## Best practices
-
-1. **Keep it simple**: Only include fields that users actually need to configure
-2. **Use clear labels**: Make field labels descriptive but concise
-3. **Provide defaults**: Set sensible default values where possible
-4. **Group related fields**: Use grid or expandable sections to organize complex options
-5. **Add descriptions**: Use the description property to explain complex options
-6. **Test your UI**: Ensure your form is user-friendly before sharing
-
-## Example: Complete module editor schema
-
-```yaml
-editor:
-  - name: color_mode
-    label: "Color Mode"
-    selector:
-      select:
-        options:
-          - label: "Custom Color"
-            value: "custom"
-          - label: "Theme Color"
-            value: "theme"
-  - name: custom_color
-    label: "Custom Color"
-    selector:
-      ui_color: {}
-  - type: expandable
-    title: "Advanced Settings"
-    expanded: false
-    schema:
-      - name: animation
-        label: "Animation"
-        selector:
-          boolean: {}
-      - name: animation_speed
-        label: "Animation Speed"
-        selector:
-          number:
-            min: 1
-            max: 10
-            step: 0.1
-      - name: opacity
-        label: "Opacity"
-        selector:
-          number:
-            min: 0
-            max: 100
-            unit_of_measurement: "%"
-```
-
-This schema creates a form with a select dropdown for color mode, a color picker, and an expandable section with animation controls. This is the example shown in the screenshot at the top of this documentation.
-
-## References
-
-This documentation is based on Home Assistant's form schemas:
-- [Home Assistant Form Types](https://github.com/home-assistant/frontend/blob/03a415beff6e6f9c87a95287804f6c03c8fef3d5/src/components/ha-form/types.ts)
-- [Home Assistant Selectors](https://github.com/home-assistant/frontend/blob/03a415beff6e6f9c87a95287804f6c03c8fef3d5/src/data/selector.ts) 
+<p align="right"><a href="#top"><img src="https://cdn-icons-png.flaticon.com/512/892/892692.png" height="50px"></a></p>
