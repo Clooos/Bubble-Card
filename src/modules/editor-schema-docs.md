@@ -1,4 +1,4 @@
-# Bubble Card Module Editor schema documentation
+# Bubble Card Module editor schema documentation
 
 This documentation covers all available options for creating editor schemas in Bubble Card modules. These schemas define the user interface presented to users when configuring your module.
 
