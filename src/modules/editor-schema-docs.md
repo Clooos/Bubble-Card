@@ -1,4 +1,4 @@
-# Bubble Card Module editor schema documentation
+# Bubble Card Module Editor schema documentation
 
 This documentation covers all available options for creating editor schemas in Bubble Card modules. These schemas define the user interface presented to users when configuring your module.
 
@@ -8,7 +8,7 @@ This documentation covers all available options for creating editor schemas in B
 
 - [Basic structure](#basic-structure)
 - [Accessing configuration values in your module code](#accessing-configuration-values-in-your-module-code)
-  - [Accessing configuration in JavaScript/CSS templates](#accessing-configuration-in-javascriptcss-templates)
+  - [Accessing configuration in JavaScript templates](#accessing-configuration-in-javascript-templates)
   - [Tips for working with configuration values](#tips-for-working-with-configuration-values)
   - [Example: Complete module with editor and code](#example-complete-module-with-editor-and-code)
 - [Field properties](#field-properties)
@@ -20,6 +20,7 @@ This documentation covers all available options for creating editor schemas in B
     - [Select selector](#select-selector)
     - [Color selector](#color-selector)
     - [Icon selector](#icon-selector)
+    - [Condition selector](#condition-selector)
     - [Entity selector](#entity-selector)
     - [Device selector](#device-selector)
     - [Area selector](#area-selector)
@@ -34,6 +35,20 @@ This documentation covers all available options for creating editor schemas in B
     - [Target selector](#target-selector)
     - [Config entry selector](#config-entry-selector)
     - [Addon selector](#addon-selector)
+    - [Location selector](#location-selector)
+    - [Object selector](#object-selector)
+    - [Backup selector](#backup-selector)
+    - [Assistance selector](#assistance-selector)
+    - [Label selector](#label-selector)
+    - [Language selector](#language-selector)
+    - [Schedule selector](#schedule-selector)
+    - [Template selector](#template-selector)
+    - [File selector](#file-selector)
+    - [QR code selector](#qr-code-selector)
+    - [Conversation agent selector](#conversation-agent-selector)
+    - [Duration selector](#duration-selector)
+    - [Dashboard selector](#dashboard-selector)
+    - [Floor selector](#floor-selector)
   - [Legacy type-based fields](#legacy-type-based-fields)
     - [String field](#string-field)
     - [Integer field](#integer-field)
@@ -78,7 +93,7 @@ editor:
 
 When creating a Bubble Card module, you'll need to access the values configured by users through the editor. These values are available in your module's code through the `this.config` object.
 
-### Accessing configuration in JavaScript/CSS templates
+### Accessing configuration in JavaScript templates
 
 In your module's `code` section, you can access the configured values using JavaScript template literals. The configuration values follow a specific structure:
 
@@ -90,7 +105,10 @@ Where:
 - `module_id` is the ID of your module as defined in your module definition
 - `field_name` corresponds directly to the `name` property of the field in your editor schema
 
-For example, if you have this editor schema:
+<details>
+<summary><b>Example</b></summary>
+
+If you have this editor schema:
 
 ```yaml
 editor:
@@ -128,6 +146,8 @@ Then in your module's `code` section, you would access these values like this:
 
 Remember to replace `module_id` with your actual module ID in your code.
 
+</details>
+
 ### Tips for working with configuration values
 
 - **Use optional chaining**: Always use the optional chaining operator (`?.`) when accessing nested configuration properties to prevent errors if the configuration is missing.
@@ -135,6 +155,9 @@ Remember to replace `module_id` with your actual module ID in your code.
 - **Provide default values if possible**: In some cases, use the OR operator (`||`) to supply default values in case the configuration value is undefined.
 
 ### Example: Complete module with editor and code
+
+<details>
+<summary><b>Complete module example</b></summary>
 
 Here's a complete example of a module definition showing both the editor schema and how to use the values in the code:
 
@@ -167,6 +190,7 @@ icon_container_color:
         ui_color:
           include_none: true
 ```
+</details>
 
 ## Field properties
 
@@ -179,7 +203,6 @@ Every field in your editor schema can have these common properties:
 | `required` | boolean | Whether the field is required |
 | `disabled` | boolean | Whether the field is disabled |
 | `default` | any | Default value if no value is provided |
-| `description` | object | Additional info with optional `suffix` text |
 
 ## Field types
 
@@ -188,7 +211,7 @@ You can define fields using either the legacy type syntax or the modern selector
 > [!IMPORTANT]
 > **Not** all selector types have been tested with Bubble Card modules. Some selectors might not work correctly or might not be fully compatible. If you encounter an issue, please report it [here](https://github.com/Clooos/Bubble-Card/issues).
 
-### Selector-based fields (Recommended)
+### Selector-based fields
 
 Selector-based fields provide rich UI controls. Simply use the `selector` property with one of the following selector types:
 
@@ -201,6 +224,9 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     text: {}
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `multiline` | boolean | Enable multiline text input |
@@ -208,6 +234,7 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
 | `autocomplete` | string | Browser autocomplete attribute |
 | `prefix` | string | Text to display before the input |
 | `suffix` | string | Text to display after the input |
+</details>
 
 #### Number selector
 
@@ -222,6 +249,9 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
       unit_of_measurement: "%"
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `min` | number | Minimum value |
@@ -230,6 +260,7 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
 | `mode` | string | Display mode: "box" or "slider" (default: "slider") |
 | `unit_of_measurement` | string | Unit label |
 | `min_step` | number | Minimum step value |
+</details>
 
 #### Boolean selector
 
@@ -240,7 +271,7 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     boolean: {}
 ```
 
-*No additionnal option for this selector.*
+*No additional option for this selector.*
 
 #### Select selector
 
@@ -261,6 +292,9 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
       mode: "dropdown"
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `options` | array | List of options with label/value pairs, or simple string arrays |
@@ -268,6 +302,7 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
 | `multiple` | boolean | Allow multiple selection |
 | `custom_value` | boolean | Allow custom values |
 | `mode` | string | Display mode: "dropdown" or "list" |
+</details>
 
 #### Color selector
 
@@ -278,11 +313,15 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     ui_color: {}
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `default_color` | string | Default color to use if no color is selected |
 | `include_none` | boolean | Include an option to select no color |
 | `include_state` | boolean | Include a color based on the entity state |
+</details>
 
 #### Icon selector
 
@@ -293,7 +332,58 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     icon: {}
 ```
 
-*No additionnal option for this selector.*
+*No additional option for this selector.*
+
+#### Condition selector
+
+```yaml
+- name: conditions
+  label: "Conditions"
+  selector:
+    condition: {}
+```
+
+The condition selector allows you to define complex conditions based on entity states, numeric values, time, and more. This is especially powerful for creating conditional UI elements or behaviors.
+
+<details>
+<summary><b>Using conditions in your module code</b></summary>
+
+In your JavaScript code, you can use the `checkConditionsMet` function to evaluate conditions at runtime:
+
+```yaml
+// Example of checking if conditions are met
+if (!badgeConfig?.condition || (badgeConfig?.condition && checkConditionsMet([].concat(badgeConfig.condition), hass))) {
+  // The condition is met or there is no condition defined
+  // Show or activate your component here
+}
+```
+
+Here's a simple example:
+
+```yaml
+# Module configuration example
+my_module:
+  element_to_show:
+    condition:
+      - condition: state
+        entity_id: light.living_room
+        state: 'on'
+      - condition: numeric_state
+        entity_id: sensor.temperature
+        above: 20
+```
+
+```yaml
+// In your module code
+const elementConfig = this.config.my_module?.element_to_show;
+if (!elementConfig?.condition || checkConditionsMet([].concat(elementConfig.condition), hass)) {
+  // Show element when living room light is ON and temperature is above 20
+}
+```
+
+</details>
+
+*No additional selector options.*
 
 #### Entity selector
 
@@ -306,6 +396,9 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
         domain: light
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `filter.domain` | string \| string[] | Filter by entity domain(s) |
@@ -315,6 +408,7 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
 | `include_entities` | string[] | List of entities to include |
 | `exclude_entities` | string[] | List of entities to exclude |
 | `multiple` | boolean | Allow multiple selection |
+</details>
 
 #### Device selector
 
@@ -327,6 +421,9 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
         integration: zwave
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `filter.integration` | string \| string[] | Filter by integration(s) |
@@ -335,6 +432,7 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
 | `entity.domain` | string \| string[] | Filter by entity domain(s) |
 | `entity.device_class` | string \| string[] | Filter by entity device class(es) |
 | `multiple` | boolean | Allow multiple selection |
+</details>
 
 #### Area selector
 
@@ -345,6 +443,9 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     area: {}
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `entity.domain` | string \| string[] | Filter by entities in area with domain(s) |
@@ -353,6 +454,7 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
 | `device.manufacturer` | string \| string[] | Filter by devices in area with manufacturer(s) |
 | `device.model` | string \| string[] | Filter by devices in area with model(s) |
 | `multiple` | boolean | Allow multiple selection |
+</details>
 
 #### Theme selector
 
@@ -363,9 +465,13 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     theme: {}
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `include_default` | boolean | Include the default theme |
+</details>
 
 #### Action selector
 
@@ -376,9 +482,13 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     action: {}
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `actions` | string[] | List of allowed actions (e.g., ["more-info", "toggle", "call-service", "navigate", "url", "none"]) |
+</details>
 
 #### Time selector
 
@@ -389,7 +499,7 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     time: {}
 ```
 
-*Aucune option supplémentaire pour ce sélecteur.*
+*No additional option for this selector.*
 
 #### Date selector
 
@@ -400,10 +510,14 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     date: {}
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `min` | string | Minimum date in ISO format (YYYY-MM-DD) |
 | `max` | string | Maximum date in ISO format (YYYY-MM-DD) |
+</details>
 
 #### Datetime selector
 
@@ -414,10 +528,14 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     datetime: {}
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `min` | string | Minimum datetime in ISO format |
 | `max` | string | Maximum datetime in ISO format |
+</details>
 
 #### Media selector
 
@@ -428,10 +546,14 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     media: {}
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `filter_media_source` | boolean | Filter media sources |
 | `filter_local_media` | boolean | Filter local media |
+</details>
 
 #### Attribute selector
 
@@ -443,10 +565,14 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
       entity_id: sensor.temperature
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `entity_id` | string | Required: Entity ID to select attribute from |
 | `hide_attributes` | string[] | List of attributes to exclude |
+</details>
 
 #### State selector
 
@@ -458,10 +584,14 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
       entity_id: climate.living_room
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `entity_id` | string | Required: Entity ID to select state from |
 | `attribute` | string | Select from entity attribute rather than state |
+</details>
 
 #### Target selector
 
@@ -474,11 +604,15 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
         domain: light
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `entity` | object | Entity filters (same as entity selector) |
 | `device` | object | Device filters (same as device selector) |
 | `area` | object | Area filters (same as area selector) |
+</details>
 
 #### Config entry selector
 
@@ -490,9 +624,13 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
       domain: zwave_js
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `domain` | string | Filter by domain |
+</details>
 
 #### Addon selector
 
@@ -503,9 +641,211 @@ Selector-based fields provide rich UI controls. Simply use the `selector` proper
     addon: {}
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `name` | string | Filter by add-on name |
+</details>
+
+#### Location selector
+
+```yaml
+- name: location
+  label: "Location"
+  selector:
+    location:
+      radius: true
+      icon: "mdi:home"
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `radius` | boolean | Allow setting a radius around the location |
+| `icon` | string | Icon to show on the map |
+</details>
+
+#### Object selector
+
+```yaml
+- name: advanced_options
+  label: "Advanced Options"
+  selector:
+    object: {}
+```
+
+*No additional option for this selector.*
+
+#### Backup selector
+
+```yaml
+- name: backup
+  label: "Backup"
+  selector:
+    backup:
+      integration: google_assistant
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `integration` | string | Filter backups by integration |
+</details>
+
+#### Assistance selector
+
+```yaml
+- name: assistance_pipeline
+  label: "Assistance Pipeline"
+  selector:
+    assistance: {}
+```
+
+*No additional option for this selector.*
+
+#### Label selector
+
+```yaml
+- name: labels
+  label: "Labels"
+  selector:
+    label:
+      multiple: true
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `multiple` | boolean | Allow multiple selection |
+</details>
+
+#### Language selector
+
+```yaml
+- name: language
+  label: "Language"
+  selector:
+    language: {}
+```
+
+*No additional option for this selector.*
+
+#### Schedule selector
+
+```yaml
+- name: schedule
+  label: "Schedule"
+  selector:
+    schedule: {}
+```
+
+*No additional option for this selector.*
+
+#### Template selector
+
+```yaml
+- name: template
+  label: "Template"
+  selector:
+    template: {}
+```
+
+*No additional option for this selector.*
+
+#### File selector
+
+```yaml
+- name: config_file
+  label: "Configuration File"
+  selector:
+    file:
+      accept: ".yaml,.json"
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `accept` | string | Comma-separated list of acceptable file extensions |
+</details>
+
+#### QR code selector
+
+```yaml
+- name: qr_data
+  label: "QR Code Data"
+  selector:
+    qr_code: {}
+```
+
+*No additional option for this selector.*
+
+#### Conversation agent selector
+
+```yaml
+- name: agent
+  label: "Conversation Agent"
+  selector:
+    conversation_agent: {}
+```
+
+*No additional option for this selector.*
+
+#### Duration selector
+
+```yaml
+- name: timeout
+  label: "Timeout"
+  selector:
+    duration:
+      enable_day: false
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `enable_day` | boolean | Include days in the duration selector |
+</details>
+
+#### Dashboard selector
+
+```yaml
+- name: dashboard
+  label: "Dashboard"
+  selector:
+    dashboard:
+      include_dashboards: ["lovelace"]
+```
+
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `include_dashboards` | string[] | List of dashboards to include |
+</details>
+
+#### Floor selector
+
+```yaml
+- name: floor
+  label: "Floor"
+  selector:
+    floor: {}
+```
+
+*No additional option for this selector.*
 
 ### Legacy type-based fields
 
@@ -595,10 +935,14 @@ You can organize fields in a grid layout:
           max: 100
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `column_min_width` | string | Minimum column width (CSS value) |
 | `schema` | array | Fields in the grid |
+</details>
 
 ### Expandable sections
 
@@ -619,12 +963,16 @@ You can create collapsible sections:
           max: 10
 ```
 
+<details>
+<summary><b>Options</b></summary>
+
 | Option | Type | Description |
 |--------|------|-------------|
 | `title` | string | Section title |
 | `icon` | string | Section icon (Material Design Icons) |
 | `expanded` | boolean | Initially expanded |
 | `schema` | array | Fields in the section |
+</details>
 
 ## Best practices
 
