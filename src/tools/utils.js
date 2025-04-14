@@ -334,14 +334,23 @@ export function setLayout(context) {
 }
 
 export function throttle(mainFunction, delay = 300) {
-    let timerFlag;
+    let throttleTimeout;
+    let lastAction = new Date(0);
+    let lastArgs;
 
     return (...args) => {
-        if (timerFlag === undefined) {
-            mainFunction(...args);
-            timerFlag = setTimeout(() => {
-                timerFlag = undefined;
-            }, delay);
+        lastArgs = args;
+        const sinceLastAction = Date.now() - lastAction;
+
+        if (sinceLastAction >= delay) {
+            lastAction = Date.now();
+            mainFunction(...lastArgs);
+        } else if (!throttleTimeout) {
+            throttleTimeout = setTimeout(() => {
+                throttleTimeout = undefined;
+                lastAction = Date.now();
+                mainFunction(...lastArgs);
+            }, delay - sinceLastAction);
         }
     };
 }
