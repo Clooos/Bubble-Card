@@ -331,6 +331,10 @@ export function createSliderStructure(context, config = {}) {
     options.targetElement.classList.add('is-dragging');
     options.targetElement.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }, { capture: true, once: true });
   }
 
   if (context.config.read_only_slider) return;
