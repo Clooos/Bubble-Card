@@ -310,7 +310,9 @@ export function createSliderStructure(context, config = {}) {
 
     setupRangeValueDisplay(rangedPercentage);
     updateValueDisplay(rangedPercentage);
-    throttledUpdateEntity(context, rangedPercentage);
+    if (options.sliderLiveUpdate) {
+      throttledUpdateEntity(context, rangedPercentage);
+    }
 
     options.targetElement.classList.add('slider-appear-animation');
     forwardHaptic("selection");
