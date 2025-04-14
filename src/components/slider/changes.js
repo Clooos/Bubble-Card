@@ -77,7 +77,7 @@ function getCurrentValue(context, entity, entityType) {
   
   // Check for pending value and if it's still valid
   if (pendingValue) {
-    const lastChanged = new Date(currentState.last_changed).getTime();
+    const lastChanged = new Date(currentState.last_updated).getTime();
     if (lastChanged < pendingValue.timestamp) {
       return pendingValue.percentage;
     }
