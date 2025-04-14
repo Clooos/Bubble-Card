@@ -246,12 +246,12 @@ export function createSliderStructure(context, config = {}) {
       context._hass.callService('climate', 'turn_on', {
         entity_id: context.config.entity
       }).then(() => {
-        updateEntity(context, finalPercentage);
+        throttledUpdateEntity(context, finalPercentage);
       }).catch(error => {
         console.error('Error turning on climate entity:', error);
       });
     } else {
-      updateEntity(context, finalPercentage);
+      throttledUpdateEntity(context, finalPercentage);
     }
     
     forwardHaptic("selection");
@@ -310,6 +310,7 @@ export function createSliderStructure(context, config = {}) {
 
     setupRangeValueDisplay(rangedPercentage);
     updateValueDisplay(rangedPercentage);
+    throttledUpdateEntity(context, rangedPercentage);
 
     options.targetElement.classList.add('slider-appear-animation');
     forwardHaptic("selection");
