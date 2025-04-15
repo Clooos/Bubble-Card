@@ -130,11 +130,12 @@ export function isEntityType(context, entityType, entity = context.config.entity
 
 export function isStateOn(context, entity = context.config.entity) {
     const state = getState(context, entity).toLowerCase();
+    const isTemperature = getAttribute(context, "unit_of_measurement", entity)?.includes('°')
     const card = 
       context.config.card_type !== 'pop-up' ? 
         context.card : 
         context.elements.headerContainer;
-    const numericState = Number(state) || Number(state) === 0;
+    const numericState = Number(state);
     const activeStringStates = [
         'on', 
         'open', 
@@ -164,7 +165,7 @@ export function isStateOn(context, entity = context.config.entity) {
         'alarm'
     ];
 
-    if (activeStringStates.includes(state) || numericState) {
+    if (activeStringStates.includes(state) || numericState || isTemperature) {
         return true;
     }
 
