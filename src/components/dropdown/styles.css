@@ -1,6 +1,6 @@
 mwc-list-item {
-    border-radius: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 24px));
-    margin: 0 8px;
+    border-radius: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 1.5em));
+    margin: var(--bubble-select-list-item-margin-y, 0em) var(--bubble-select-list-item-margin-x, 0.5em);
 }
 
 mwc-list-item[selected] {
@@ -9,30 +9,30 @@ mwc-list-item[selected] {
 }
 
 ha-select {
-    --mdc-shape-medium: var(--bubble-select-list-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    --mdc-shape-medium: var(--bubble-select-list-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5em)/2)));
     --mdc-theme-surface: var(--bubble-select-list-background-color, var(--bubble-select-main-background-color, var(--bubble-main-background-color, var(--card-background-color, var(--secondary-background-color)))));
-    --mdc-shape-large: 32px;
-    --mdc-shape-small: 64px;
+    --mdc-shape-large: 2em;
+    --mdc-shape-small: 4em;
     --mdc-menu-max-width: min-content;
-    --mdc-menu-min-width: var(--bubble-select-list-width, 200px);
+    --mdc-menu-min-width: var(--bubble-select-list-width, 12.5em);
     --mdc-select-max-width: min-content;
     --mdc-select-outlined-hover-border-color: transparent;
     --mdc-select-outlined-idle-border-color: transparent;
     --mdc-theme-primary: transparent;
-    --right-value: calc(var(--mdc-menu-min-width) - 160px);
+    --right-value: calc(var(--mdc-menu-min-width) - 10em);
 }
 
 .bubble-sub-button ha-select {
-    --right-value: calc(var(--mdc-menu-min-width) - 168px);
+    --right-value: calc(var(--mdc-menu-min-width) - 10.5em);
 }
 
 .mdc-select {
     color: transparent !important;
-    width: 150px !important;
+    width: var(--bubble-select-width, 9.375em) !important;
     position: absolute !important;
     pointer-events: none;
-    right: var(--right-value, 46px);
-    top: -28px;
+    right: var(--right-value, 2.875em);
+    top: var(--bubble-select-top, -1.75em) !important;
 }
 
 .mdc-menu, mwc-list, .mdc-list-item {
@@ -63,18 +63,21 @@ ha-select {
     display: flex;
     position: absolute;
     background: var(--bubble-select-arrow-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
-    height: 36px;
-    width: 36px;
-    right: 6px;
+    height: var(--bubble-select-arrow-size, 2.25em);
+    width: var(--bubble-select-arrow-size, 2.25em);
+    right: var(--bubble-select-arrow-right, 0.375em);
     pointer-events: none;
-    border-radius: var(--bubble-select-button-border-radius, var(--bubble-border-radius, 20px));
+    border-radius: var(--bubble-select-button-border-radius, var(--bubble-border-radius, 1.25em));
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, transform 0.2s;
+    transition-property: var(--bubble-select-arrow-transition-property, background, transform);
+    transition-duration: var(--bubble-select-arrow-transition-duration, 0.2s);
+    transition-timing-function: var(--bubble-select-arrow-transition-timing-function, ease-in-out);
+    transition-delay: var(--bubble-select-arrow-transition-delay, 0s);
     pointer-events: none;
 }
 
 .bubble-dropdown-select {
     position: relative;
-    width: 42px;
+    width: var(--bubble-dropdown-select-width, 2.625em);
 }

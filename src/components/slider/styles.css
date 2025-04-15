@@ -5,7 +5,10 @@
     left: 0;
     width: 100%;
     left: -100%;
-    transition: all .3s;
+    transition-property: var(--bubble-range-fill-transition-property, all);
+    transition-duration: var(--bubble-range-fill-transition-duration, 0.3s);
+    transition-timing-function: var(--bubble-range-fill-transition-timing-function, linear);
+    transition-delay: var(--bubble-range-fill-transition-delay, 0s);
     z-index: 0;
 }
 
@@ -19,12 +22,12 @@
 }
 
 .is-light .bubble-range-fill {
-    opacity: 0.5;
+    background-color: var(--bubble-light-range-fill, 0.5);
 }
 
 .bubble-range-value {
     position: absolute;
-    right: 14px;
+    right: var(--bubble-range-value-right, 0.875em);
 }
 
 .is-unavailable .bubble-range-slider {
