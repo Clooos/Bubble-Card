@@ -155,7 +155,7 @@ export function renderClimateEditor(editor){
                 </h4>
                 <div class="content">
                     ${editor.makeActionPanel("Tap action", button_action, 'more-info', 'button_action')}
-                    ${editor.makeActionPanel("Double tap action", button_action, 'toggle', 'button_action')}
+                    ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
                     ${editor.makeActionPanel("Hold action", button_action, 'toggle', 'button_action')}
                 </div>
             </ha-expansion-panel>

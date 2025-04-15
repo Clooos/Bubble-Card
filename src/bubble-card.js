@@ -170,7 +170,7 @@ class BubbleCard extends HTMLElement {
                 action: "more-info"
             };
             enhancedConfig.double_tap_action = enhancedConfig.double_tap_action ?? {
-                action: buttonType === "state" ? "more-info" : "toggle"
+                action: "none"
             }
             enhancedConfig.hold_action = enhancedConfig.hold_action ?? {
                 action: buttonType === "state" ? "more-info" : "toggle"

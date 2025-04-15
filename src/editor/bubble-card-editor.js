@@ -467,8 +467,8 @@ class BubbleCardEditor extends LitElement {
         if (!defaultAction) {
             defaultAction = isDefault && label === "Tap action" 
             ? this._config.button_type !== "name" ? "more-info" : "none"
-            : isDefault 
-            ? this._config.button_type !== "name" ? "toggle" : "none"
+            : isDefault
+            ? "none"
             : '';
         }
 
