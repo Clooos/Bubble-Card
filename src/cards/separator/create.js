@@ -20,6 +20,7 @@ export function createStructure(context) {
   const elements = createBaseStructure(context, {
     type: cardType,
     styles: styles,
+    withMainContainer: false,
     withBaseElements: false,
     withSubButtons: true,
     iconActions: false
