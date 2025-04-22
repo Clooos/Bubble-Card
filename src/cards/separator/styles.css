@@ -17,6 +17,7 @@
 }
 .bubble-name {
     margin-right: var(--bubble-separator-name-margin-right, 1.875em);
+    font-size: var(--bubble-separator-font-size, 1em);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
