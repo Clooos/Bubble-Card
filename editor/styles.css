@@ -1,0 +1,418 @@
+div {
+  display: grid;
+  grid-gap: 12px;
+}
+
+ha-combo-box[label="Card type"]::after {
+  content: "";
+  position: relative;
+  background-color: var(--background-color, var(--secondary-background-color));
+  display: block;
+  width: 100%;
+  height: 1px;
+  top: 12px;
+  margin-bottom: 12px !important;
+  opacity: 0.6;
+}
+
+#add-button {
+  margin: 0 0 14px 0;
+  color: var(--text-primary-color);
+  width: 100%;
+  height: 32px;
+  border-radius: 16px;
+  border: none;
+  background-color: var(--accent-color);
+  cursor: pointer;
+}
+
+p {
+  margin-bottom: 4px;
+}
+
+ul {
+  margin: 0px 14px !important;
+  padding-left: 0px !important;
+}
+
+ha-icon, a, p, button, h4 {
+  color: var(--primary-text-color) !important;
+}
+
+hr {
+  display: inline-block;
+  width: 100%;
+  height: 1px;
+  border: none;
+  background-color: var(--outline-color);
+  margin: 8px 0 0 0;
+}
+
+code, code-block {
+  background: rgba(0,120,180,0.3);
+  color: var(--primary-text-color);
+  background-blend-mode: darken;
+  padding: 1px 3px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+code-block {
+  display: grid;
+  width: 100%;
+  padding: 0;
+  max-height: 285px;
+  overflow: auto;
+}
+
+code-block pre {
+  white-space: pre;
+  overflow: auto;
+  margin: 8px;
+}
+
+code-block.with-i pre {
+  white-space: pre-line;
+  overflow: auto;
+  margin: 8px;
+}
+
+code-block.with-i pre > i {
+  white-space: pre;
+  font-style: normal;
+}
+
+img {
+  max-width: 100%;
+  margin: 14px 0;
+}
+
+img.example {
+  padding: 32px;
+  box-sizing: border-box;
+  background: rgba(0, 120, 180, 0.8);
+  border-radius: 6px;
+}
+
+.button-header {
+  height: auto;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 8px;
+}
+
+.button-number {
+  display: inline-flex;
+  width: auto;
+}
+
+.remove-button {
+  display: inline-flex;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  line-height: 24px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.content {
+  margin: 12px 4px 14px 4px;
+}
+
+h4 > ha-icon {
+  margin: 8px 12px 8px 8px;
+}
+
+ha-expansion-panel h4:not(.version) {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+ha-form {
+  --expansion-panel-summary-padding: 2px 14px;
+}
+
+ha-textfield {
+  width: 100%;
+}
+
+h3 {
+  margin: 4px 0;
+}
+
+.code-editor {
+  overflow: scroll;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(0,120,180,0.5);
+  border: none;
+  cursor: pointer;
+  margin: 0;
+  border-radius: 32px;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background: rgba(0,120,180,0.7);
+  transform: translateY(-1px);
+}
+
+.icon-button:active {
+  background: rgba(0,120,180,0.9);
+}
+
+.icon-button.header {
+  background: none;
+  padding: 0;
+  margin: 0 4px;
+}
+
+.button-container {
+  display: flex;
+  margin-left: auto !important;
+}
+
+ha-card-conditions-editor {
+  margin-top: -12px;
+}
+
+.disabled {
+  opacity: 0.5; 
+  pointer-events: none;
+}
+
+.version {
+  font-size: 12px !important;
+  color: #fff;
+  background: rgba(0,0,0,0.1);
+  padding: 8px 16px;
+  border-radius: 32px;
+}
+
+.module-version {
+  margin: 0;
+}
+
+.version-number {
+  font-size: 10px;
+  background: rgba(0,120,180,1);
+  padding: 0px 8px;
+  border-radius: 12px;
+  margin-right: -6px;
+  float: right;
+  color: white;
+}
+
+.version-number a {
+  color: white !important;
+}
+
+.bubble-info-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.bubble-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: -6px !important;
+  color: var(--primary-text-color) !important;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 4px;
+}
+
+.bubble-section-title ha-icon {
+  color: var(--info-color) !important;
+  margin: 8px 8px 8px 0;
+}
+
+.bubble-section-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--primary-color);
+  border-radius: 2px;
+}
+
+.bubble-info {
+  padding: 0 0 14px;
+  position: relative;
+}
+
+.bubble-info .content {
+  margin: 0;
+  padding: 0 18px;
+}
+
+.bubble-info::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: var(--info-color);
+  border-radius: 4px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.bubble-info.warning::before {
+  background-color: var(--warning-color);
+  opacity: 0.15;
+}
+
+.bubble-info.warning .bubble-section-title::before {
+  background: var(--warning-color);
+}
+
+.bubble-info.warning .bubble-section-title ha-icon {
+  color: var(--warning-color) !important;
+}
+
+.bubble-info.error::before {
+  background-color: var(--error-color);
+  opacity: 0.15;
+}
+
+.bubble-info.error .bubble-section-title::before {
+  background: var(--error-color);
+}
+
+.bubble-info.error .bubble-section-title ha-icon {
+  color: var(--error-color) !important;
+}
+
+.bubble-info h4 {
+  margin: 8px 0 0 0;
+  padding: 0 18px;
+}
+
+.bubble-info p {
+  margin: 0;
+}
+
+.bubble-info * {
+  z-index: 1;
+}
+
+.bubble-section-title + p {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.bubble-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0;
+  justify-content: flex-start;
+}
+
+.bubble-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  text-decoration: none;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  height: 26px;
+  border: none;
+  position: relative;
+  border-radius: 18px;
+  white-space: nowrap;
+  background-color: var(--mdc-text-field-disabled-line-color);
+}
+
+.bubble-badge:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 120, 180, 0.5);
+}
+
+.bubble-badge ha-icon {
+  color: var(--primary-text-color) !important;
+  --mdc-icon-size: 16px;
+  line-height: normal;
+}
+
+.paypal-icon, .bmc-icon, .patreon-icon {
+  width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paypal-icon svg, .bmc-icon svg, .patreon-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--primary-text-color);
+}
+
+.bubble-thank-you {
+  margin: 0 !important;
+  padding: 8px !important;
+  opacity: 0.8;
+}
+
+.creator-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.creator-message a {
+  display: flex;
+  transition: all 0.2s ease;
+}
+
+.creator-message a:hover {
+  transform: scale(0.95);
+}
+
+.creator-avatar {
+  min-width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  margin: 0;
+}
+
+ul.icon-list {
+  list-style-type: none;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+ul.icon-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  line-height: 24px;
+}
+
+ul.icon-list li ha-icon {
+  min-width: 24px;
+  margin-right: 8px;
+  --mdc-icon-size: 18px;
+}
