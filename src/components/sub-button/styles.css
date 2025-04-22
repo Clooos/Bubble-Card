@@ -43,7 +43,7 @@
 }
 
 .background-on {
-    background-color: var(--bubble-sub-button-light-background-color, var(--accent-color));
+    background-color: var(--bubble-sub-button-light-background-color, var(--bubble-default-color));
 }
 
 .background-off {

@@ -8,8 +8,8 @@ const languages = {
 
 const DEFAULT_LANG = "en";
 
-function getCurrentLocale(context) {
-  return context._hass?.locale.language ?? DEFAULT_LANG;
+function getCurrentLocale(hass) {
+  return hass?.locale.language ?? DEFAULT_LANG;
 }
 
 function dotStringReducer(currentObject, key) {
@@ -25,9 +25,9 @@ function getTranslatedString(key, lang) {
   }
 }
 
-export default function setupTranslation(context) {
+export default function setupTranslation(hass) {
   return function (key) {
-    const lang = getCurrentLocale(context);
+    const lang = getCurrentLocale(hass);
     const translation = getTranslatedString(key, lang);
 
     if (translation) return translation;

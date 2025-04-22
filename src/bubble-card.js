@@ -51,7 +51,7 @@ class BubbleCard extends HTMLElement {
         }
         this.editor = editMode;
 
-        if (this.config.card_type === 'pop-up') {
+        if (this.config.card_type === 'pop-up' || this.config.card_type === 'horizontal-buttons-stack') {
             this.updateBubbleCard();
         }
     }
@@ -129,9 +129,13 @@ class BubbleCard extends HTMLElement {
             throw new Error(config.error);
         }
 
+        if (!config.card_type) {
+            throw new Error("You need to define a card type");
+        }
+
         if (config.card_type === 'pop-up') {
-            if (!config.hash) {
-                throw new Error("You need to define an hash. Please note that this card must be placed inside a vertical_stack to work as a pop-up.");
+            if (config.hash && config.button_type && config.button_type !== 'name' && !config.entity && config.modules) {
+                throw new Error("You need to define an entity");
             }
         } else if (config.card_type === 'horizontal-buttons-stack') {
             var definedLinks = {};
@@ -156,6 +160,7 @@ class BubbleCard extends HTMLElement {
             if (!config.entity && config.button_type !== 'name') {
                 throw new Error("You need to define an entity");
             }
+
         } else if (config.card_type === 'calendar') {
             if (!config.entities) {
                 throw new Error("You need to define an entity list");
@@ -220,7 +225,7 @@ class BubbleCard extends HTMLElement {
     getGridOptions() {
         const currentColumns = this.config.columns;
         const convertedColumns = currentColumns ? currentColumns * 3 : 12;
-        const convertedRows = this.config.rows ?? 1;
+        const convertedRows = this.config.rows ?? 'auto';
         let LovelaceGridOptions = { columns: convertedColumns, rows: convertedRows };
 
         switch (this.config.card_type) {
@@ -262,19 +267,38 @@ class BubbleCard extends HTMLElement {
     }
 }
 
-customElements.define("bubble-card", BubbleCard);
+function registerBubbleCard() {
+  try {
+    if (!customElements.get("bubble-card")) {
+      customElements.define("bubble-card", BubbleCard);
+    }
+    
+    window.customCards = window.customCards || [];
+    
+    const isAlreadyRegistered = window.customCards.some(card => card.type === "bubble-card");
+    
+    if (!isAlreadyRegistered) {
+      window.customCards.push({
+        type: "bubble-card",
+        name: "Bubble Card",
+        preview: false,
+        description: "A minimalist card collection with a nice pop-up touch.",
+        documentationURL: "https://github.com/Clooos/Bubble-Card/"
+      });
+    }
+    
+    console.info(
+      `%c Bubble Card %c ${version} `,
+      'background-color: #555;color: #fff;padding: 3px 2px 3px 3px;border-radius: 14px 0 0 14px;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)',
+      'background-color: #506eac;color: #fff;padding: 3px 3px 3px 2px;border-radius: 0 14px 14px 0;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)'
+    );
+    
+  } catch (e) {
+    console.error("Error registering Bubble Card, retrying in 1 second", e);
+    setTimeout(() => {
+      registerBubbleCard();
+    }, 1000);
+  }
+}
 
-window.customCards = window.customCards || [];
-window.customCards.push({
-    type: "bubble-card",
-    name: "Bubble Card",
-    preview: false,
-    description: "A minimalist card collection with a nice pop-up touch.",
-    documentationURL: "https://github.com/Clooos/Bubble-Card/"
-});
-
-console.info(
-    `%c Bubble Card %c ${version} `,
-    'background-color: #555;color: #fff;padding: 3px 2px 3px 3px;border-radius: 14px 0 0 14px;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)',
-    'background-color: #506eac;color: #fff;padding: 3px 3px 3px 2px;border-radius: 0 14px 14px 0;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)'
-);
+registerBubbleCard();

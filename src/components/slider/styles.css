@@ -14,7 +14,7 @@
 }
 
 .is-dragging .bubble-range-fill {
-    background-color: var(--bubble-accent-color, var(--accent-color));
+    background-color: var(--bubble-accent-color, var(--info-color));
     transition: none !important;
 }
 

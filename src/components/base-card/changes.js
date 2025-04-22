@@ -57,7 +57,25 @@ export function changeState(context) {
     }
 
     if (showAttribute && attribute) {
-        formattedAttribute = state ? context._hass.formatEntityAttributeValue(state, context.config.attribute) ?? attribute : '';
+        if (context.config.attribute.includes('forecast')) {
+            // Format weather forecast attributes
+            const isCelcius = context._hass.config.unit_system.temperature === '°C';
+            const isMetric = context._hass.config.unit_system.length === 'km';
+            
+            if (context.config.attribute.includes('temperature')) {
+                formattedAttribute = state && attribute ? parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + (isCelcius ? ' °C' : ' °F') : '';
+            } else if (context.config.attribute.includes('humidity')) {
+                formattedAttribute = state && attribute ? parseFloat(attribute).toFixed(0) + ' %' : '';
+            } else if (context.config.attribute.includes('precipitation')) {
+                formattedAttribute = state && attribute ? parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + ' mm' : '';
+            } else if (context.config.attribute.includes('wind_speed')) {
+                formattedAttribute = state && attribute ? parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + (isMetric ? ' km/h' : ' mph') : '';
+            } else {
+                formattedAttribute = state ? attribute : '';
+            }
+        } else {
+            formattedAttribute = state ? context.config.attribute.includes('[') ? attribute : context._hass.formatEntityAttributeValue(state, context.config.attribute) ?? attribute : '';
+        }
     }
 
     if (showLastChanged && state) {

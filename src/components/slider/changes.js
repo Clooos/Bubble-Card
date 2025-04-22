@@ -27,10 +27,47 @@ function requestAnimationFrameThrottle(callback) {
   }
 }
 
-export function onSliderChange(context, positionX) {
+function getAdjustedPercentage(context, percentage) {
+  if (!context.config.step && !context._hass.states[context.config.entity]?.attributes?.step) {
+    return percentage;
+  }
+
+  const step = context.config.step ?? context._hass.states[context.config.entity]?.attributes?.step ?? 1;
+  let adjustedPercentage = percentage;
+
+  if (context.sliderMinValue !== undefined || context.sliderMaxValue !== undefined) {
+    const minValue = context.sliderMinValue ?? 0;
+    const maxValue = context.sliderMaxValue ?? 100;
+    const value = minValue + (percentage / 100) * (maxValue - minValue);
+    const adjustedValue = getAdjustedValue(value, step);
+    adjustedPercentage = ((adjustedValue - minValue) / (maxValue - minValue)) * 100;
+  } else {
+    adjustedPercentage = getAdjustedValue(percentage, step);
+  }
+
+  return Math.max(0, Math.min(100, adjustedPercentage));
+}
+
+export function onSliderChange(context, positionX, shouldAdjustToStep = false) {
   const sliderRect = context.elements.rangeSlider.getBoundingClientRect();
-  const percentage = Math.max(0, Math.min(100, ((positionX - sliderRect.left) / sliderRect.width) * 100));
+  let percentage = Math.max(0, Math.min(100, ((positionX - sliderRect.left) / sliderRect.width) * 100));
   
+  if (shouldAdjustToStep) {
+    percentage = getAdjustedPercentage(context, percentage);
+  }
+
+  if (isEntityType(context, "climate", context.config.entity)) {
+    pendingValues.set(context.config.entity, {
+      percentage,
+      timestamp: Date.now()
+    });
+    
+    // Force immediate visual update for direct user interaction
+    context.elements.rangeFill.style.transform = `translateX(${percentage}%)`;
+    
+    return percentage;
+  }
+
   // Store the pending value when user changes the slider
   pendingValues.set(context.config.entity, {
     percentage,
@@ -90,8 +127,10 @@ function getCurrentValue(context, entity, entityType) {
       return 100 * getAttribute(context, "brightness", entity) / 255;
     case 'media_player':
       return isStateOn(context, entity) ? 100 * getAttribute(context, "volume_level", entity) : 0;
-    case 'cover':
-      return getAttribute(context, "current_position", entity);
+    case 'cover': {
+      const position = getAttribute(context, "current_position", entity);
+      return position !== undefined && position !== null ? position : 0;
+    }
     case 'input_number':
     case 'number': {
       const minValue = getAttribute(context, "min", entity);
@@ -102,10 +141,23 @@ function getCurrentValue(context, entity, entityType) {
       return isStateOn(context, entity) ? getAttribute(context, "percentage", entity) : 0;
     case 'climate':
       if (isStateOn(context, entity)) {
-        const minTemp = getAttribute(context, "min_temp", entity);
-        const maxTemp = getAttribute(context, "max_temp", entity);
+        let minTemp = getAttribute(context, "min_temp", entity);
+        let maxTemp = getAttribute(context, "max_temp", entity);
+        
+        if (context.config.min_value !== undefined) {
+          minTemp = parseFloat(context.config.min_value);
+        }
+        if (context.config.max_value !== undefined) {
+          maxTemp = parseFloat(context.config.max_value);
+        }
+        
         const temp = getAttribute(context, "temperature", entity);
-        return calculateRangePercentage(temp, minTemp, maxTemp);
+        if (temp === undefined || minTemp === undefined || maxTemp === undefined) {
+          return 0;
+        }
+        
+        const cappedTemp = Math.max(minTemp, Math.min(maxTemp, temp));
+        return calculateRangePercentage(cappedTemp, minTemp, maxTemp);
       }
       return 0;
     default:
@@ -126,7 +178,7 @@ export function updateSlider(
 ) {
   if (context.dragging) return;
 
-  const entityType = entity.split('.')[0];
+  const entityType = entity?.split('.')[0];
   let percentage = 0;
 
   // Clear any pending RAF to ensure we don't have conflicting updates
@@ -147,9 +199,33 @@ export function updateSlider(
     if (isStateOn(context, entity)) {
       const temp = getAttribute(context, "temperature", entity);
       const isCelcius = context._hass.config.unit_system.temperature === '°C';
-      context.elements.rangeValue.innerText = temp.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F');
+      
+      let minTemp = getAttribute(context, "min_temp", entity);
+      let maxTemp = getAttribute(context, "max_temp", entity);
+      
+      if (context.config.min_value !== undefined) {
+        minTemp = parseFloat(context.config.min_value);
+      }
+      if (context.config.max_value !== undefined) {
+        maxTemp = parseFloat(context.config.max_value);
+      }
+      
+      if (temp !== undefined && minTemp !== undefined && maxTemp !== undefined) {
+        const cappedTemp = Math.max(minTemp, Math.min(maxTemp, temp));
+        percentage = calculateRangePercentage(cappedTemp, minTemp, maxTemp);
+        
+        context.elements.rangeValue.innerText = temp.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F');
+
+        container.style.transform = `translateX(${Math.round(percentage)}%)`;
+        return;
+      } else {
+        context.elements.rangeValue.innerText = temp ? (temp.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F')) : '0%';
+      }
     } else {
       context.elements.rangeValue.innerText = '0%';
+      percentage = 0;
+      container.style.transform = `translateX(0%)`;
+      return;
     }
   }
 
@@ -251,16 +327,45 @@ export function updateEntity(context, value) {
     }
 
     case 'climate': {
-      const minValue = state.attributes.min_temp ?? 0;
-      const maxValue = state.attributes.max_temp ?? 10000;
+      let minValue = state.attributes.min_temp ?? 0;
+      let maxValue = state.attributes.max_temp ?? 10000;
+      
+      if (context.config.min_value !== undefined) {
+        minValue = parseFloat(context.config.min_value);
+      }
+      if (context.config.max_value !== undefined) {
+        maxValue = parseFloat(context.config.max_value);
+      }
+      
       const isCelcius = context._hass.config.unit_system.temperature === '°C';
       const step = context.config.step ?? (state.attributes.target_temp_step ? state.attributes.target_temp_step : isCelcius ? 0.5 : 1);
-      const rawValue = (maxValue - minValue) * adjustedPercentage / 100 + minValue;
+      
+      const rawValue = minValue + (value / 100) * (maxValue - minValue);
       const adjustedValue = parseFloat(getAdjustedValue(rawValue, step).toFixed(1));
-      context._hass.callService('climate', 'set_temperature', {
-        entity_id: context.config.entity,
-        temperature: adjustedValue
-      });
+      
+      const finalValue = Math.max(minValue, Math.min(maxValue, adjustedValue));
+      
+      if (!isStateOn(context, context.config.entity)) {
+        context._hass.callService('climate', 'turn_on', {
+          entity_id: context.config.entity
+        }).then(() => {
+          context._hass.callService('climate', 'set_temperature', {
+            entity_id: context.config.entity,
+            temperature: finalValue
+          });
+        }).catch(error => {
+          console.error('Error turning on climate entity:', error);
+          context._hass.callService('climate', 'set_temperature', {
+            entity_id: context.config.entity,
+            temperature: finalValue
+          });
+        });
+      } else {
+        context._hass.callService('climate', 'set_temperature', {
+          entity_id: context.config.entity,
+          temperature: finalValue
+        });
+      }
       break;
     }
 

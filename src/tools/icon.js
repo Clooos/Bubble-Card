@@ -264,7 +264,7 @@ export function getWeatherIcon(weatherType) {
 export function getIconColor(context, entity = context.config.entity, brightness = 1) {
     const { card_type: cardType, use_accent_color: useAccentColor } = context.config;
     const defaultColor = `var(--bubble-icon-color)`;
-    const accentColor = `var(--bubble-accent-color, var(--accent-color))`;
+    const accentColor = `var(--bubble-accent-color, var(--bubble-default-color))`;
     const entityRgbColor = getAttribute(context, "rgb_color", entity);
     const isThemeLight = isColorLight('var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))))');
 

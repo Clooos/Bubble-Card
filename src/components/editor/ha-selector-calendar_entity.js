@@ -34,23 +34,24 @@ export class HaCalendarEntitySelector extends LitElement {
 
   static properties = {
     hass: {},
-    value: [],
+    value: { type: Array },
     label: {},
   }
   
   constructor() {
     super();
+    this.value = [];
   }
 
   render() {
     const t = setupTranslation(this.hass);
     const addCalendar = () => {
-      const newValue = [...this.value];
+      const newValue = [...(this.value || [])];
       newValue.push({ entity: '', color: '' });
       this.valueChanged({ detail: { value: newValue } });
     }
     const removeCalendar = (index) => () => {
-      const newValue = [...this.value];
+      const newValue = [...(this.value || [])];
       newValue.splice(index, 1);
       this.valueChanged({ detail: { value: newValue } });
     }
@@ -58,16 +59,16 @@ export class HaCalendarEntitySelector extends LitElement {
     const value = this.value ?? [];
     
     return html`
-      <ha-expansion-panel outlined>
-        <h4 slot="header">
-          <ha-icon icon="mdi:calendar"></ha-icon>
+      <ha-expansion-panel outlined style="--expansion-panel-summary-padding: 0 8px;">
+        <h4 slot="header" style="display: flex; align-items: center; margin: 10px 0;">
+          <ha-icon icon="mdi:calendar" style="margin: 8px;"></ha-icon>
           &nbsp;${t('editor.calendar.list_of_calendars')}
         </h4>
         <div class="content"> 
           ${value.map((entity, index) => {
             const valueChanged = (ev) => {
               ev.stopPropagation();
-              const newValue = [...this.value];
+              const newValue = [...(this.value || [])];
               newValue[index] = ev.detail.value;
               this.valueChanged({ detail: { value: newValue } });
             }

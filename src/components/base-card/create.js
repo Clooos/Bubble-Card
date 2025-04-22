@@ -13,6 +13,16 @@ export function createBaseStructure(context, config = {}) {
     const options = { 
         ...defaultOptions, 
         appendTo: context.content,
+        iconDefaultActions: {
+            tap_action: { action: "more-info" },
+            double_tap_action: { action: "none" },
+            hold_action: { action: "none" }
+        },
+        buttonDefaultActions: {
+            tap_action: { action: "none" },
+            double_tap_action: { action: "none" },
+            hold_action: { action: "none" }
+        },
         baseCardStyles: styles,
         ...config 
     };
@@ -26,7 +36,7 @@ export function createBaseStructure(context, config = {}) {
         context.elements.contentContainer = createElement('div', 'bubble-content-container');
         context.elements.buttonsContainer = createElement('div', 'bubble-buttons-container');
 
-        context.elements.iconContainer = createElement('div', 'bubble-icon-container icon-container');
+        context.elements.iconContainer = createElement('div', 'bubble-main-icon-container bubble-icon-container icon-container');
         context.elements.icon = createElement('ha-icon', 'bubble-main-icon bubble-icon icon');
         context.elements.image = createElement('div', 'bubble-entity-picture entity-picture');
         
@@ -59,15 +69,6 @@ export function createBaseStructure(context, config = {}) {
             context.elements.cardWrapper.prepend(context.elements.background);
         }
 
-        if (options.withFeedback && options.buttonActions?.tap_action?.action !== 'none') {
-            context.elements.feedbackContainer = createElement('div', 'bubble-feedback-container feedback-container');
-            context.elements.feedback = createElement('div', 'bubble-feedback-element feedback-element');
-            context.elements.feedback.style.display = 'none';
-            context.elements.feedbackContainer.append(context.elements.feedback);
-            context.elements.cardWrapper.append(context.elements.feedbackContainer);
-            addFeedback(context.elements.background, context.elements.feedback);    
-        }
-    
         context.elements.mainContainer.appendChild(context.elements.cardWrapper);
     
         if (options.withSlider) {
@@ -106,26 +107,56 @@ export function createBaseStructure(context, config = {}) {
         }
     }
 
+    let iconDefaults;
     if (options.iconActions === true) {
-        addActions(context.elements.iconContainer, context.config, context.config.entity);
-    } else if (options.iconActions !== undefined && options.iconActions !== false) {
-        addActions(context.elements.iconContainer, context.config, context.config.entity, options.iconActions);
+        iconDefaults = options.iconDefaultActions;
+    } else if (typeof options.iconActions === 'object') {
+        iconDefaults = options.iconActions;
     }
 
-    if (options.iconActions &&options.iconActions?.tap_action?.action !== 'none') {
+    let buttonDefaults;
+    if (options.buttonActions === true) {
+        buttonDefaults = options.buttonDefaultActions;
+    } else if (typeof options.buttonActions === 'object') {
+        buttonDefaults = options.buttonActions;
+    }
+
+    let finalIconActions = { has_action: false };
+    if (context.elements.iconContainer) {
+        finalIconActions = addActions(
+            context.elements.iconContainer, 
+            context.config,
+            context.config.entity, 
+            iconDefaults
+        );
+    }
+
+    let finalButtonActions = { has_action: false };
+    if (options.buttonActions !== false && context.elements.background) { 
+        finalButtonActions = addActions(
+            context.elements.background, 
+            context.config.button_action,
+            context.config.entity,
+            buttonDefaults
+        );
+    }
+
+    if (finalIconActions.has_action && context.elements.iconContainer) {
         context.elements.iconFeedbackContainer = createElement('div', 'bubble-icon-feedback-container bubble-feedback-container');
         context.elements.iconContainer.appendChild(context.elements.iconFeedbackContainer);
         context.elements.iconFeedback = createElement('div', 'bubble-icon-feedback bubble-feedback-element feedback-element');
         context.elements.iconFeedback.style.display = 'none';
         context.elements.iconFeedbackContainer.appendChild(context.elements.iconFeedback);
-        context.elements.iconContainer.appendChild(context.elements.iconFeedbackContainer);
         addFeedback(context.elements.iconContainer, context.elements.iconFeedback);
     }
 
-    if (options.buttonActions === true) {
-        addActions(context.elements.background, context.config.button_action, context.config.entity);
-    } else if (options.buttonActions !== undefined && options.buttonActions !== false) {
-        addActions(context.elements.background, context.config.button_action, context.config.entity, options.buttonActions);
+    if (options.withFeedback && finalButtonActions.has_action && context.elements.background) {
+        context.elements.feedbackContainer = createElement('div', 'bubble-feedback-container feedback-container');
+        context.elements.feedback = createElement('div', 'bubble-feedback-element feedback-element');
+        context.elements.feedback.style.display = 'none';
+        context.elements.feedbackContainer.append(context.elements.feedback);
+        context.elements.cardWrapper.append(context.elements.feedbackContainer);
+        addFeedback(context.elements.background, context.elements.feedback);
     }
 
     if (options.appendTo === context.content) {

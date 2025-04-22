@@ -69,20 +69,40 @@ function buildDisplayedState(options, context) {
   const { state, name, attribute, attributeType, showName, showState, showAttribute, showLastChanged, showLastUpdated } = options;
   
   const parts = [];
-  if (showName && name) parts.push(name);
-  if (state && showState) parts.push(context._hass.formatEntityState(state));
-  if (state && showLastChanged) parts.push(formatDateTime(state.last_changed, context._hass.locale.language));
-  if (state && showLastUpdated) parts.push(formatDateTime(state.last_updated, context._hass.locale.language));
+  if (showName && name && name !== 'unknown') parts.push(name);
+  if (state && showState && state.state !== 'unknown') parts.push(context._hass.formatEntityState(state));
+  if (state && showLastChanged && state.last_changed !== 'unknown') parts.push(formatDateTime(state.last_changed, context._hass.locale.language));
+  if (state && showLastUpdated && state.last_updated !== 'unknown') parts.push(formatDateTime(state.last_updated, context._hass.locale.language));
   if (state && showAttribute) {
-    const formattedAttribute = context._hass.formatEntityAttributeValue(state, attributeType);
-    
-    const isZeroWithUnit = formattedAttribute && 
-                          (typeof formattedAttribute === 'string') && 
-                          formattedAttribute.trim().startsWith('0') && 
-                          formattedAttribute.trim().length > 1;
-    
-    if (attribute !== 0 || isZeroWithUnit) {
-      parts.push(formattedAttribute ?? attribute);
+    if (attributeType && attributeType.includes('forecast')) {
+      const isCelcius = context._hass.config.unit_system.temperature === '°C';
+      const isMetric = context._hass.config.unit_system.length === 'km';
+      
+      if (attributeType.includes('temperature') && attribute !== null && attribute !== undefined) {
+        parts.push(parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + (isCelcius ? ' °C' : ' °F'));
+      } else if (attributeType.includes('humidity') && attribute !== null && attribute !== undefined) {
+        parts.push(parseFloat(attribute).toFixed(0) + ' %');
+      } else if (attributeType.includes('precipitation') && attribute !== null && attribute !== undefined) {
+        parts.push(parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + ' mm');
+      } else if (attributeType.includes('wind_speed') && attribute !== null && attribute !== undefined) {
+        parts.push(parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + (isMetric ? ' km/h' : ' mph'));
+      } else if (attribute !== null && attribute !== undefined && attribute !== 'unknown') {
+        parts.push(attribute);
+      }
+    } else {
+      const formattedAttribute = context._hass.formatEntityAttributeValue(state, attributeType);
+      const rawAttribute = state.attributes?.[attributeType];
+      
+      const isZeroWithUnit = formattedAttribute && 
+                            (typeof formattedAttribute === 'string') && 
+                            formattedAttribute.trim().startsWith('0') && 
+                            formattedAttribute.trim().length > 1;
+      
+      if ((attribute !== 0 && attribute !== 'unknown' && attribute != null) || isZeroWithUnit) {
+        if (rawAttribute !== 'unknown' && rawAttribute != null) {
+          parts.push(formattedAttribute ?? attribute);
+        }
+      }
     }
   }
 

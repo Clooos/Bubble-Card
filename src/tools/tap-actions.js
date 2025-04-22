@@ -104,19 +104,24 @@ export function callAction(element, actionConfig, action) {
 }
 
 // Function to add actions and store configs in data attributes
-export function addActions(element, config, defaultEntity, defaultActions) {
+export function addActions(element, config, defaultEntity, defaultActions = {}) {
   element.classList.add('bubble-action');
 
+  // Use provided config for actions if available, otherwise use defaults
+  const tapAction = config?.tap_action || defaultActions?.tap_action || { action: "none" };
+  const doubleTapAction = config?.double_tap_action || defaultActions?.double_tap_action || { action: "none" };
+  const holdAction = config?.hold_action || defaultActions?.hold_action || { action: "none" };
+
   element.dataset.entity = config?.entity || defaultEntity;
-  element.dataset.tapAction = JSON.stringify(config?.tap_action || defaultActions?.tap_action || { action: "more-info" });
-  element.dataset.doubleTapAction = JSON.stringify(config?.double_tap_action || defaultActions?.double_tap_action || { action: "none" });
-  element.dataset.holdAction = JSON.stringify(config?.hold_action || defaultActions?.hold_action || { action: "toggle" });
+  element.dataset.tapAction = JSON.stringify(tapAction);
+  element.dataset.doubleTapAction = JSON.stringify(doubleTapAction);
+  element.dataset.holdAction = JSON.stringify(holdAction);
 
-  const tapAction = JSON.parse(element.dataset.tapAction);
-  const doubleTapAction = JSON.parse(element.dataset.doubleTapAction);
-  const holdAction = JSON.parse(element.dataset.holdAction);
+  const hasAction = tapAction.action !== "none" || doubleTapAction.action !== "none" || holdAction.action !== "none";
+  element.style.cursor = hasAction ? 'pointer' : '';
 
-  element.style.cursor = (tapAction.action === "none" && doubleTapAction.action === "none" && holdAction.action === "none") ? '' : 'pointer';
+  // Return the final actions applied
+  return { tap_action: tapAction, double_tap_action: doubleTapAction, hold_action: holdAction, has_action: hasAction };
 }
 
 class ActionHandler {
@@ -167,15 +172,15 @@ class ActionHandler {
     const deltaY = Math.abs(e.clientY - this.startY);
 
     if (deltaX > movementThreshold || deltaY > movementThreshold) {
-      // Considérer cela comme un mouvement de type drag/scroll
+      // Consider this as a drag/scroll type movement
       this.hasMoved = true;
-      disableActionsDuringScroll(); // Désactiver les actions pendant un court laps de temps
+      disableActionsDuringScroll(); // Disable actions for a short period of time
       
-      // Nettoyer les timeouts pour éviter les actions non désirées
+      // Clean up timeouts to avoid unwanted actions
       clearTimeout(this.holdTimeout);
       this.holdTimeout = null;
       
-      // Arrêter d'écouter les mouvements une fois qu'un drag est détecté
+      // Stop listening for movements once a drag is detected
       document.removeEventListener('pointermove', this.pointerMoveListener);
     }
   }

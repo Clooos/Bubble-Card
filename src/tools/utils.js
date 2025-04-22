@@ -124,17 +124,16 @@ export function getAttribute(context, attribute, entity = context.config.entity)
   }
 }
 
-export function isEntityType(context, entityType, entity = context.config.entity) {
-  return entity?.startsWith(entityType + ".") ?? false;
+export function isEntityType(context, entityType, entity) {
+  if (entity === undefined) {
+    entity = context?.config?.entity;
+  }
+  return entity && typeof entity === 'string' && entity.startsWith(entityType + ".") || false;
 }
 
 export function isStateOn(context, entity = context.config.entity) {
     const state = getState(context, entity).toLowerCase();
-    const isTemperature = getAttribute(context, "unit_of_measurement", entity)?.includes('°')
-    const card = 
-      context.config.card_type !== 'pop-up' ? 
-        context.card : 
-        context.elements.headerContainer;
+    const isTemperature = getAttribute(context, "unit_of_measurement", entity)?.includes('°');
     const numericState = Number(state);
     const activeStringStates = [
         'on', 
@@ -143,7 +142,6 @@ export function isStateOn(context, entity = context.config.entity) {
         'closing', 
         'cleaning', 
         'true', 
-        'idle', 
         'home', 
         'playing', 
         'paused',
@@ -309,12 +307,39 @@ export function formatDateTime(datetime, locale) {
     return rtf.format(-value, unit);
 }
 
+// Variables to store DOM references
+let cachedHomeAssistant = null;
+let cachedMain = null;
+let cachedDrawer = null;
+let cachedHuiRoot = null;
+let isCached = false;
+
 export function setLayout(context) {
-    const homeAssistant = document.querySelector("body > home-assistant");
-    const main = homeAssistant.shadowRoot.querySelector("home-assistant-main").shadowRoot;
-    const drawer = main.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace").shadowRoot;
-    const huiRoot = drawer.querySelector("hui-root").shadowRoot;
-    const masonryView = huiRoot.querySelector("#view > hui-view > hui-masonry-view");
+    // Use cached references if available
+    if (!isCached) {
+        cachedHomeAssistant = document.querySelector("body > home-assistant");
+        if (!cachedHomeAssistant) return;
+
+        cachedMain = cachedHomeAssistant.shadowRoot?.querySelector("home-assistant-main");
+        if (!cachedMain || !cachedMain.shadowRoot) return;
+
+        cachedDrawer = cachedMain.shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace");
+        if (!cachedDrawer || !cachedDrawer.shadowRoot) return;
+
+        cachedHuiRoot = cachedDrawer.shadowRoot.querySelector("hui-root");
+        if (!cachedHuiRoot || !cachedHuiRoot.shadowRoot) return;
+        
+        // Mark as cached only if all elements are found
+        isCached = true;
+    }
+    
+    // If an element is not available (for example after navigation), reset the cache
+    if (!cachedHuiRoot.isConnected) {
+        isCached = false;
+        return;
+    }
+    
+    const masonryView = cachedHuiRoot.shadowRoot.querySelector("#view > hui-view > hui-masonry-view");
 
     window.isSectionView = !masonryView;
     const defaultLayout = window.isSectionView ? "large" : "normal";
@@ -384,13 +409,13 @@ export function toggleBodyScroll(disable) {
         document.body.style.top = `-${scrollY}px`;
         document.body.classList.add('no-scroll');
     } else {
-        // Garder la position fixée jusqu'à ce que nous soyons prêts à restaurer le scroll
-        // Cela empêche le flash visuel où la page remonte en haut
-
-        // Prépositionner le scroll avant de retirer les styles bloquants
+        // Keep the fixed position until we're ready to restore the scroll
+        // This prevents the visual flash where the page jumps back to the top
+        
+        // Pre-position the scroll before removing the blocking styles
         window.scrollTo(0, scrollY);
         
-        // Retirer les styles bloquants dans le même cycle de rendu
+        // Remove the blocking styles in the same render cycle
         document.body.style.top = '';
         document.body.classList.remove('no-scroll');
     }
