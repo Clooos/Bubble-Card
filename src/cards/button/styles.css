@@ -6,7 +6,7 @@
     height: 100%;
     width: 100%;
     cursor: ew-resize;
-    border-radius: calc(var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2))) / 1.1);
+    border-radius: calc(var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5em)/2))) / 1.1);
     overflow: hidden;
     mask-image: radial-gradient(white, black);
     -webkit-mask-image: -webkit-radial-gradient(white, black);
@@ -14,7 +14,7 @@
 
 .bubble-background {
     background-color: var(--bubble-button-background-color);
-    border-radius: calc(var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2))) / 1.1 );
+    border-radius: calc(var(--bubble-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,3.5em)/2))) / 1.1 );
 }
 
 .bubble-buttons-container {

@@ -2,26 +2,26 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    margin-top: -50px;
     max-width: 100%;
-    padding-top: 40px;
-    padding-bottom: 80px;
-    grid-gap: var(--bubble-pop-up-gap, 14px);
-    gap: var(--bubble-pop-up-gap, 14px);
-    column-gap: var(--bubble-pop-up-gap, 14px);
-    --grid-gap: var(--bubble-pop-up-gap, 14px);
-    --vertical-stack-card-gap: var(--bubble-pop-up-gap, 14px);
-    --horizontal-stack-card-gap: var(--bubble-pop-up-gap, 14px);
-    --stack-card-gap: var(--bubble-pop-up-gap, 14px);
+    margin-top: var(--bubble-pop-up-container-margin-top, -3.125em);
+    padding-top: var(--bubble-pop-up-container-padding-top, 2.5em);
+    padding-bottom: var(--bubble-pop-up-container-padding-bottom, 5em);
+    grid-gap: var(--bubble-pop-up-gap, 0.875em);
+    gap: var(--bubble-pop-up-gap, 0.875em);
+    column-gap: var(--bubble-pop-up-gap, 0.875em);
+    --grid-gap: var(--bubble-pop-up-gap, 0.875em);
+    --vertical-stack-card-gap: var(--bubble-pop-up-gap, 0.875em);
+    --horizontal-stack-card-gap: var(--bubble-pop-up-gap, 0.875em);
+    --stack-card-gap: var(--bubble-pop-up-gap, 0.875em);
     --row-size: 1;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
     overflow-y: auto; 
     overflow-x: hidden; 
     grid-auto-rows: min-content;
-    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
-    padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
+    mask-image: linear-gradient(to bottom, transparent 0em, black 1.5em, black calc(100% - 2.5em), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0em, black 1.5em, black calc(100% - 2.5em), transparent 100%);
+    padding: 1.125em 1.125em calc(8.75em + var(--custom-height-offset-mobile)) 1.125em;
 }
 
 .bubble-pop-up-container > * {
@@ -34,16 +34,19 @@
 }
 
 .bubble-pop-up {
-    transition: transform 0.3s ease;
+    transition-property: var(--bubble-pop-up-transition-property, transform);
+    transition-duration: var(--bubble-pop-up-transition-duration, 0.3s);
+    transition-timing-function: var(--bubble-pop-up-transition-timing-function, ease-in-out);
+    transition-delay: var(--bubble-pop-up-transition-delay, 0s);
     position: fixed;
     width: 100%;
     max-width: 100%;
-    border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
+    border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 2.625em)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 2.625em)) 0 0;
     box-sizing: border-box;
     margin-left: var(--custom-margin);
-    left: 7px;
+    left: 0.438em;
     z-index: 5 !important;
-    bottom: calc(-56px - var(--custom-height-offset-mobile));
+    bottom: calc(-3.5em - var(--custom-height-offset-mobile));
 }
 
 .bubble-pop-up-background {
@@ -65,7 +68,7 @@
 }
 
 .is-popup-opened {
-    box-shadow: 0px 0px 50px rgba(0, 0, 0, var(--custom-shadow-opacity));
+    box-shadow: 0px 0px 3.125em rgba(0, 0, 0, var(--custom-shadow-opacity));
 }
 
 .is-popup-closed { 
@@ -87,7 +90,7 @@
 
 @media only screen and (min-width: 768px) {
     .bubble-pop-up {
-      bottom: calc(-56px - var(--custom-height-offset-desktop));
+      bottom: calc(-3.5em - var(--custom-height-offset-desktop));
       left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width, 540px) / 2));
     }
 }
@@ -108,7 +111,7 @@
 
 .bubble-header-container {
     display: inline-flex;
-    height: 50px;
+    height: var(--bubble-pop-up-header-height, 3.125em);
     margin: 0;
     padding: 0;
     z-index: 3;
@@ -122,20 +125,20 @@
 .bubble-header {
     display: inline-flex;
     flex-grow: 1;
-    margin-right: 14px;
+    margin-right: 0.875em;
     color: var(--primary-text-color);
 }
 
 .bubble-name {
-    font-size: 14px;
+    font-size: 0.875em;
     font-weight: heavy;
 }
 
 .bubble-close-button {
-    height: 50px;
-    width: 50px;
+    height: var(--bubble-pop-up-close-button-size, 3.125em);
+    width: var(--bubble-pop-up-close-button-size, 3.125em);
     border: var(--bubble-pop-up-close-button-border, var(--bubble-pop-up-border, var(--bubble-border, none)));
-    border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
+    border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 2.625em));
     z-index: 1;
     background: var(--bubble-pop-up-main-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color))));
     color: var(--primary-text-color);
@@ -180,17 +183,17 @@
 }
 
 .no-header .bubble-pop-up-container {
-    padding-top: 4px !important;
+    --bubble-pop-up-container-padding-top: 0.25em;
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
 }
 
 .large .bubble-header-container {
-  height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
+  height: calc( var(--row-height,3.5em) * var(--row-size,1) + var(--row-gap,0.5em) * ( var(--row-size,1) - 1 ));
 }
 
 .large .bubble-close-button {
-    height: var(--row-height,56px);
-    width: var(--row-height,56px);
-    --mdc-icon-size: 28px !important;
+    height: var(--row-height,3.5em);
+    width: var(--row-height,3.5em);
+    --mdc-icon-size: 1.75em;
 }

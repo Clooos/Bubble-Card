@@ -1,13 +1,15 @@
 .bubble-container {
-    border: solid 2px transparent;
+    border-style: var(--bubble-select-border-style, solid);
+    border-width: var(--bubble-select-border-width, 2px);
+    border-color: var(--bubble-select-border-color, transparent);
     overflow: inherit;
 }
 
 .bubble-icon-container {
     padding-left: 0px;
-    margin: 6px;
+    margin: var(--bubble-select-icon-margin, 0.375em);
 }
 
 .large .bubble-icon-container {
-    margin-left: 6px;
+    margin-left: var(--bubble-select-icon-margin, 0.375em)
 }
