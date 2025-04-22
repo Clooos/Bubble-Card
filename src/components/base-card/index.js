@@ -6,6 +6,7 @@ export const defaultOptions = {
     appendTo: null,
     baseCardStyles: null,
     styles: '',
+    withMainContainer: true,
     withBaseElements: true,
     withFeedback: true,
     withImage: true,
