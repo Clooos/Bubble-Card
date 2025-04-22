@@ -1,4 +1,5 @@
 import { isEntityType, getAttribute } from "../../tools/utils.js";
+
 export function getButtonType(context) {
   let buttonType = context.config.button_type;
 

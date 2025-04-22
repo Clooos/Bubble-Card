@@ -53,9 +53,10 @@ export function placeButtons(context) {
     context.elements.cardContainer.style.width = `${position}px`;
 }
 export function changeEditor(context) {
-    const detectedEditor = context.shadowRoot.host.closest('hui-card-preview, hui-card-options');
+    // const detectedEditor = context.shadowRoot.host.closest('hui-card-preview, hui-card-options');
+    const detectedEditor = context.editor || context.detectedEditor;
 
-    if (context.editor || detectedEditor !== null) {
+    if (detectedEditor) {
         context.elements.cardContainer.classList.add('editor');
         context.card.classList.add('editor');
     } else {

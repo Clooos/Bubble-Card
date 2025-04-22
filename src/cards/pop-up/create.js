@@ -1,9 +1,9 @@
 import { convertToRGBA } from "../../tools/style.js";
-import { addActions } from "../../tools/tap-actions.js";
-import { createElement, toggleEntity, configChanged, fireEvent, forwardHaptic } from "../../tools/utils.js";
+import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { onUrlChange, removeHash, hideContent } from "./helpers.js";
 import styles from "./styles.css";
 import backdropStyles from "./backdrop.css";
+import { html, render } from "lit";
 
 let backdrop;
 let hideBackdrop = false;
@@ -50,12 +50,14 @@ export function getBackdrop(context) {
     requestAnimationFrame(() => {
       backdropElement.classList.add('is-visible');
       backdropElement.classList.remove('is-hidden');
+      backdropElement.style.willChange = 'opacity, backdrop-filter';
     });
   }
   
   function hideBackdropFunc() {
     backdropElement.classList.add('is-hidden');
     backdropElement.classList.remove('is-visible');
+    backdropElement.style.willChange = 'none';
   }
 
   backdrop = { hideBackdrop: hideBackdropFunc, showBackdrop, backdropElement, backdropCustomStyle };
@@ -77,7 +79,7 @@ export function createHeader(context) {
     forwardHaptic("selection");
   });
 
-  const existingHeader = context.popUp.querySelector('.bubble-header-container');
+  const existingHeader = context.popUp?.querySelector('.bubble-header-container');
   if (!existingHeader) {
     context.elements.headerContainer = createElement("div", 'bubble-header-container');
     context.elements.headerContainer.setAttribute("id", "header-container");
@@ -116,6 +118,10 @@ export function createHeader(context) {
 
 export function createStructure(context) {
   try {
+    if (!context.popUp) {
+      return;
+    }
+
     context.elements.style = createElement('style');
     context.elements.style.innerText = styles;
 
@@ -168,8 +174,6 @@ export function createStructure(context) {
       lastTouchY = event.touches[0].clientY;
     };
 
-    //context.popUp.addEventListener('touchmove', context.handleTouchMove, { passive: true });
-
     const existingContainer = context.popUp.querySelector('.bubble-pop-up-container');
     if (existingContainer === null) {
 
@@ -207,6 +211,10 @@ export function prepareStructure(context) {
     context.sectionRow = context.verticalStack.host.parentElement;
     context.sectionRowContainer = context.sectionRow?.parentElement;
     context.popUp = context.verticalStack.querySelector('#root');
+    if (!context.popUp) {
+      // This part is handled in the editor
+      throw new Error('Vertical stack not found, don\'t panic, it will be added automatically to your pop-up.');
+    }
     context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
     context.cardTitle = context.verticalStack.querySelector('.card-header');
     if (!context.editor && !context.config.background_update) {
@@ -229,7 +237,27 @@ export function prepareStructure(context) {
 
     window.addEventListener('location-changed', contextOnUrlChange);
     window.addEventListener('popstate', contextOnUrlChange);
+
+    window.popUpError = false;
+
   } catch (e) {
-    console.error(e);
+    console.warn(e);
+
+    if (!window.popUpError) {
+      window.popUpError = true;
+
+      const errorText = createElement("div", "bubble-error-text");
+      const template = html`
+        <ha-alert 
+          alert-type="error"
+          .title=${'You need to define a unique hash for this pop-up'}
+        >
+          <p>Once created and saved, this pop-up will be <b>hidden by default</b> and <b>can be opened by targeting its hash</b>. You can trigger it using <a href="https://github.com/Clooos/Bubble-Card#example" target="_blank" rel="noopener noreferrer">any card</a> that supports the <code>navigate</code> <a href="https://github.com/Clooos/Bubble-Card?tab=readme-ov-file#tap-double-tap-and-hold-actions" target="_blank" rel="noopener noreferrer">action</a> (check the example), or with the included <a href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack" target="_blank" rel="noopener noreferrer">horizontal buttons stack</a> card.</p>
+        </ha-alert>
+      `;
+      render(template, errorText);
+
+      context.content.appendChild(errorText);
+    }
   }
 }

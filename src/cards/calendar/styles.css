@@ -6,17 +6,17 @@
 .card-content::after {
   border-radius: 0 0 var(--bubble-calendar-border-radius, var(--bubble-border-radius, 32px)) var(--bubble-calendar-border-radius, var(--bubble-border-radius, 32px));
   content: "";
+  display: flex;
   height: 32px;
   width: 100%;
   position: absolute;
   bottom: 0;
-  opacity: 0;
   pointer-events: none;
   transition: opacity .2s, transform .2s;
-  background: linear-gradient(to top, var(--bubble-calendar-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))), transparent);
-}
-.is-overflowing::after {
-  opacity: 1;
+  background: -webkit-linear-gradient(0deg, var(--bubble-calendar-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))), transparent 14px);
+  background: -moz-linear-gradient(0deg, var(--bubble-calendar-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))), transparent 14px);
+  background: linear-gradient(0deg, var(--bubble-calendar-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))), transparent 14px);
+  z-index: 1;
 }
 .bubble-calendar-content {
   flex-grow: 1;
@@ -87,7 +87,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 6px;
+  padding-right: 6px;
   border-radius: var(--bubble-calendar-border-radius, var(--bubble-border-radius, 32px));
 }
 .bubble-event-time {

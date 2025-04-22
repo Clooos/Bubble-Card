@@ -18,7 +18,7 @@
 }
 
 .bubble-play-pause-button {
-    background-color: var(--bubble-accent-color, var(--accent-color));
+    background-color: var(--bubble-accent-color, var(--bubble-default-color));
 }
 
 .bubble-play-pause-button:not(.large) {
@@ -28,9 +28,9 @@
 
 .bubble-volume-slider {
     position: absolute;
-    width: calc(100% - 150px);
     height: 38px;
-    left: 50px;
+    width: var(--bubble-volume-slider-width-calc, var(--volume-slider-width-calc, calc(100% - 150px)));
+    left: var(--bubble-volume-slider-left-offset, var(--volume-slider-left-offset, 56px));
     overflow: hidden;
     border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     z-index: 1;
@@ -63,7 +63,7 @@
 }
 
 .bubble-range-fill {
-    background-color: var(--accent-color);
+    background-color: var(--bubble-accent-color, var(--bubble-default-color));
 }
 
 .bubble-mute-button {
@@ -138,8 +138,8 @@
 .large .bubble-volume-slider {
   height: 42px;
   border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-  left: 60px;
-  width: calc(100% - 164px);
+  left: var(--volume-slider-left-offset, 60px);
+  width: var(--volume-slider-width-calc, calc(100% - 164px));
 }
 
 .large .bubble-range-value {

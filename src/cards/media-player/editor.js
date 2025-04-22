@@ -144,9 +144,9 @@ export function renderMediaPlayerEditor(editor){
                 Tap action on card
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel("Tap action", button_action, 'more-info', 'button_action')}
+                    ${editor.makeActionPanel("Tap action", button_action, 'none', 'button_action')}
                     ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
-                    ${editor.makeActionPanel("Hold action", button_action, 'toggle', 'button_action')}
+                    ${editor.makeActionPanel("Hold action", button_action, 'none', 'button_action')}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
@@ -180,7 +180,15 @@ export function renderMediaPlayerEditor(editor){
                 </div>
             </ha-expansion-panel>
             ${editor.makeModulesEditor()}
-            <ha-alert alert-type="info">This card allows you to control a media player. You can tap on the icon to get more control.</ha-alert>
+            <div class="bubble-info">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:information-outline"></ha-icon>
+                    Media player card
+                </h4>
+                <div class="content">
+                    <p>This card allows you to control a media player entity.</p>
+                </div>
+            </div>
             ${editor.makeVersion()}
         </div>
     `;    

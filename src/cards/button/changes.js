@@ -31,7 +31,7 @@ export function changeButton(context) {
       newButtonColor = getIconColor(context);
       newOpacity = '.5';
     } else {
-      newButtonColor = 'var(--bubble-button-accent-color, var(--bubble-accent-color, var(--accent-color)))';
+      newButtonColor = 'var(--bubble-button-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))';
       newOpacity = '1';
     }
   } else {
@@ -44,7 +44,7 @@ export function changeButton(context) {
       if (isLight && !useAccentColor) {   
         context.elements.rangeFill.style.backgroundColor = getIconColor(context);
       } else {
-        context.elements.rangeFill.style.backgroundColor = 'var(--bubble-button-accent-color, var(--bubble-accent-color, var(--accent-color)))';
+        context.elements.rangeFill.style.backgroundColor = 'var(--bubble-button-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))';
       }
     }
 

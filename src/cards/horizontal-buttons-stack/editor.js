@@ -26,6 +26,7 @@ export function renderHorButtonStackEditor(editor){
                 <ha-icon icon="mdi:plus"></ha-icon>
                 New button
             </button>
+            <hr>
             <ha-formfield .label="Auto order">
                 <ha-switch
                     aria-label="Toggle auto order"
@@ -97,10 +98,18 @@ export function renderHorButtonStackEditor(editor){
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}
-                    ${editor.makeModulesEditor()}
                 </div>
             </ha-expansion-panel>
-            <ha-alert alert-type="info">This card is the companion to the pop-up card, allowing you to open the corresponding pop-ups. It also allows you to open any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer.</ha-alert>
+            ${editor.makeModulesEditor()}
+            <div class="bubble-info">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:information-outline"></ha-icon>
+                    Horizontal buttons stack card
+                </h4>
+                <div class="content">
+                    <p>This card is a good companion to the pop-up card, allowing you to open pop-ups or any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer.</p>
+                </div>
+            </div>
             ${editor.makeVersion()}
         </div>
     `;

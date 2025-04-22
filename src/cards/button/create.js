@@ -3,6 +3,12 @@ import { isEntityType } from "../../tools/utils.js";
 import { getButtonType, readOnlySlider } from "./helpers.js";
 import styles from "./styles.css";
 
+const defaultIconActions = {
+    tap_action: { action: "more-info" },
+    double_tap_action: { action: "none" },
+    hold_action: { action: "toggle" }
+};
+
 export function createStructure(context, appendTo = context.container) {
     const cardType = 'button';
     const buttonType = getButtonType(context);
@@ -41,17 +47,34 @@ export function createStructure(context, appendTo = context.container) {
     };
 
     actions['name'] = {
-        button: {
+        icon: {
             tap_action: { action: "none" },
             double_tap_action: { action: "none" },
             hold_action: { action: "none" }
         },
-        icon: {
+        button: {
             tap_action: { action: "none" },
             double_tap_action: { action: "none" },
             hold_action: { action: "none" }
         }
     };
+
+    // Determine the correct default actions to pass based on buttonType
+    let iconDefaults;
+    if (actions[buttonType]?.icon === true) {
+        iconDefaults = defaultIconActions;
+    } else if (typeof actions[buttonType]?.icon === 'object') {
+        iconDefaults = actions[buttonType]?.icon;
+    } else {
+        iconDefaults = { tap_action: { action: "none" }, double_tap_action: { action: "none" }, hold_action: { action: "none" } }; // Default to none if not specified
+    }
+
+    let buttonDefaults;
+    if (actions[buttonType]?.button) {
+        buttonDefaults = actions[buttonType]?.button;
+    } else {
+        buttonDefaults = { tap_action: { action: "none" }, double_tap_action: { action: "none" }, hold_action: { action: "none" } }; // Default to none if not specified
+    }
 
     const elements = createBaseStructure(context, {
         type: cardType,
@@ -62,11 +85,11 @@ export function createStructure(context, appendTo = context.container) {
         readOnlySlider: readOnlySlider(context),
         withFeedback: !context.config.tap_to_slide,
         withSubButtons: true,
-        iconActions: actions[buttonType]?.icon,
-        buttonActions: 
-            !context.config.tap_to_slide 
-                ? actions[buttonType]?.button 
-                : false,
+        iconActions: iconDefaults,
+        buttonActions:
+            !context.config.tap_to_slide
+                ? buttonDefaults
+                : false, // Keep false if tap_to_slide is enabled
     });
 
     // Add backward compatibility

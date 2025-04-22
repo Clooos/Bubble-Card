@@ -1,31 +1,232 @@
 import { html } from 'lit';
+import { fireEvent } from '../../tools/utils.js';
+import { makeButtonSliderPanel } from '../../components/slider/editor.js';
+import { renderButtonEditor } from '../button/editor.js';
 
-function getButtonList(){
-    return [{
-        'label': 'Switch',
-        'value': 'switch'
-    },
-    {
-        'label': 'Slider',
-        'value': 'slider'
-    },
-    {
-        'label': 'State',
-        'value': 'state'
-    },
-    {
-        'label': 'Name / Text',
-        'value': 'name'
-    }
-];
+function getButtonList() {
+    return [
+        { 'label': 'Switch', 'value': 'switch' },
+        { 'label': 'Slider', 'value': 'slider' },
+        { 'label': 'State', 'value': 'state' },
+        { 'label': 'Name / Text', 'value': 'name' }
+    ];
 }
 
+function findSuitableEntities(hass, entityType = 'light', limit = 2) {
+    const entities = [];
+    
+    if (!hass || !hass.states) return entities;
+    
+    Object.keys(hass.states).forEach(entityId => {
+        if (entities.length >= limit) return;
+        
+        if (entityId.startsWith(entityType + '.')) {
+            const entity = hass.states[entityId];
+            let supportsBrightness = false;
+            
+            if ('brightness' in entity.attributes) {
+                supportsBrightness = true;
+            }
+            
+            entities.push({
+                entity: entityId,
+                supportsBrightness: supportsBrightness
+            });
+        }
+    });
+    
+    return entities;
+}
 
-export function renderPopUpEditor(editor){
+function updateUIForVerticalStack(editor, isInVerticalStack) {
+    if (!editor.shadowRoot) return;
+    
+    // Update the alert container
+    const alertContainer = editor.shadowRoot.querySelector('#vertical-stack-alert-container');
+    if (alertContainer) {
+        alertContainer.style.display = isInVerticalStack ? 'block' : 'none';
+    }
+    
+    // Update the button icon and text
+    const buttonIcon = editor.shadowRoot.querySelector('.icon-button ha-icon');
+    if (buttonIcon) {
+        buttonIcon.icon = isInVerticalStack ? 'mdi:content-save' : 'mdi:plus';
+    }
+    
+    const buttonText = editor.shadowRoot.querySelector('#button-text');
+    if (buttonText) {
+        buttonText.textContent = isInVerticalStack ? 'Update Hash' : 'Create Pop-up';
+    }
+    
+    // Update the toggle and its label
+    const exampleSwitch = editor.shadowRoot.querySelector('#include-example');
+    if (exampleSwitch) {
+        exampleSwitch.disabled = isInVerticalStack;
+    }
+    
+    const exampleLabel = editor.shadowRoot.querySelector('.mdc-form-field .mdc-label');
+    if (exampleLabel) {
+        exampleLabel.textContent = 'Include example configuration' + 
+            (isInVerticalStack ? ' (disabled because pop-up is already in a vertical stack)' : '');
+    }
+}
+
+function createPopUpConfig(editor, originalConfig) {
+    try {
+        const isInVerticalStack = !window.popUpError;
+        
+        // Get form value
+        const includeExample = editor.shadowRoot.querySelector("#include-example")?.checked || false;
+        let hashValue = '#pop-up-name';
+        const hashInput = editor.shadowRoot.querySelector('#hash-input');
+        if (hashInput && hashInput.value) {
+            hashValue = hashInput.value;
+        }
+        
+        if (isInVerticalStack) {
+            editor._config.hash = hashValue;
+            fireEvent(editor, "config-changed", { config: editor._config });
+            console.info("Pop-up already in a vertical stack. Hash updated. Note that manually creating a vertical stack is no longer required.");
+            return;
+        }
+        
+        if (includeExample) {
+            const suitableEntities = findSuitableEntities(editor.hass);
+            
+            editor._config = {          
+                type: 'vertical-stack',
+                cards: [
+                    {
+                        type: 'custom:bubble-card',
+                        card_type: 'pop-up',
+                        name: 'Living room',
+                        icon: 'mdi:sofa-outline',
+                        hash: hashValue
+                    },
+                    {   
+                        type: 'custom:bubble-card',
+                        card_type: 'separator',
+                        name: 'Lights (example)',
+                        icon: 'mdi:lightbulb-outline',
+                    },
+                    {   
+                        type: 'horizontal-stack',
+                        cards: suitableEntities.length > 0 ? suitableEntities.map(entity => ({
+                                type: 'custom:bubble-card',
+                                card_type: 'button',
+                                button_type: entity.supportsBrightness ? 'slider' : 'switch',
+                                entity: entity.entity,
+                                show_state: true,
+                            })) : [
+                            {
+                                type: 'custom:bubble-card',
+                                card_type: 'button',
+                                button_type: 'name',
+                                name: 'Floor lamp',
+                                icon: 'mdi:floor-lamp-outline',
+                            }
+                        ]
+                    }
+                ]
+            };
+        } else {
+            // Just create a basic pop-up without examples
+            editor._config = {          
+                type: 'vertical-stack',
+                cards: [
+                    {
+                        type: 'custom:bubble-card',
+                        card_type: 'pop-up',
+                        hash: hashValue
+                    }
+                ]
+            };
+        }
+        
+        fireEvent(editor, "config-changed", { config: editor._config });
+    } catch (error) {
+        console.error("Error creating pop-up:", error);
+        // Restore original config if there's an error
+        editor._config = originalConfig;
+        editor._config.hash = editor.shadowRoot.querySelector('#hash-input')?.value || '#pop-up-name';
+        fireEvent(editor, "config-changed", { config: editor._config });
+    }
+}
+
+export function renderPopUpEditor(editor) {
     const conditions = editor._config?.trigger ?? [];
     let button_action = editor._config.button_action || '';
 
+    // Initial configuration screen for pop-up creation
+    if (Object.keys(editor._config).length === 2 &&
+        editor._config.card_type === 'pop-up') {
 
+        const originalConfig = { ...editor._config };
+
+        let isInVerticalStack = false;
+
+        // Use setTimeout to correctly check if we're in a vertical stack
+        setTimeout(() => {
+            isInVerticalStack = !window.popUpError;
+            updateUIForVerticalStack(editor, isInVerticalStack);
+        }, 0);
+
+        editor.createPopUpConfig = () => createPopUpConfig(editor, originalConfig);
+
+        return html`
+            <div class="card-config">
+                ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
+                <div id="vertical-stack-alert-container" style="display: none;">
+                    <div class="bubble-info warning">
+                        <h4 class="bubble-section-title">
+                            <ha-icon icon="mdi:alert-outline"></ha-icon>
+                            Old configuration detected
+                        </h4>
+                        <div class="content">
+                            <p>This pop-up is already inside a vertical stack (old method). This is no longer required, but it will work fine. You can simply update the hash below.</p>
+                        </div>
+                    </div>
+                </div>
+                <ha-textfield
+                    label="Hash (e.g. #kitchen)"
+                    .value="${editor._config?.hash || '#pop-up-name'}"
+                    id="hash-input"
+                ></ha-textfield>
+                <ha-formfield .label="Include example configuration">
+                    <ha-switch
+                        aria-label="Include example configuration"
+                        .checked=${false}
+                        id="include-example"
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Include example configuration</label>
+                    </div>
+                </ha-formfield>
+                
+                <button class="icon-button" @click="${() => editor.createPopUpConfig()}">
+                    <ha-icon icon="mdi:plus"></ha-icon>
+                    <span id="button-text">Create pop-up</span>
+                </button>
+
+                <hr />
+
+                <div class="bubble-info">
+                    <h4 class="bubble-section-title">
+                        <ha-icon icon="mdi:information-outline"></ha-icon>
+                        Pop-up
+                    </h4>
+                    <div class="content">
+                        <p>Pop-ups are a great way to declutter your dashboard and quickly display more information when you need it.</p>
+                        <p>If it's your first time creating a pop-up, you can use the example configuration to get started.</p>
+                    </div>
+                </div>
+                
+                ${editor.makeVersion()}
+            </div>
+        `;
+    }
+
+    // Full configuration interface for an existing pop-up
     return html`
         <div class="card-config">
             ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
@@ -41,131 +242,29 @@ export function renderPopUpEditor(editor){
                   Header settings
                 </h4>
                 <div class="content">
-                    <ha-formfield .label="Optional - Show header">
+                    <ha-formfield .label="Show header">
                         <ha-switch
-                            aria-label="Optional - Show header"
+                            aria-label="Show header"
                             .checked=${editor._config.show_header ?? true}
                             .configValue="${"show_header"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Show header</label> 
+                            <label class="mdc-label">Show header</label> 
                         </div>
                     </ha-formfield>
-                    <ha-alert alert-type="info">You can completely hide the pop-up header, including the close button. To close it when hidden, either make a long swipe within the pop-up or click outside of it.</ha-alert>
+                    <div class="bubble-info">
+                        <h4 class="bubble-section-title">
+                            <ha-icon icon="mdi:information-outline"></ha-icon>
+                            Hidden header
+                        </h4>
+                        <div class="content">
+                            <p>You can completely hide the pop-up header, including the close button. To close it when hidden, either make a long swipe within the pop-up or click outside of it.</p>
+                        </div>
+                    </div>
                     <div style="${!(editor._config?.show_header ?? true) ? 'display: none;' : ''}">
                         <hr />
-
-                        ${editor.makeDropdown("Button type", "button_type", getButtonList())}
-                        <ha-form
-                            .hass=${editor.hass}
-                            .data=${editor._config}
-                            .schema=${[
-                                        { name: "entity",
-                                        label: "Optional - Entity", 
-                                        selector: { entity: {} },
-                                        },
-                                    ]}   
-                            .computeLabel=${editor._computeLabelCallback}
-                            .disabled="${editor._config.button_type === 'name'}"
-                            @value-changed=${editor._valueChanged}
-                        ></ha-form>                                         
-                        <ha-textfield
-                            label="Optional - Name"
-                            .value="${editor._config?.name || ''}"
-                            .configValue="${"name"}"
-                            @input="${editor._valueChanged}"
-                        ></ha-textfield>
-                        ${editor.makeDropdown("Optional - Icon", "icon")}
-                        ${editor.makeShowState()}
-                        <hr />
-                        <ha-expansion-panel outlined style="display: ${editor._config.button_type !== 'slider' ? 'none' : ''}">
-                            <h4 slot="header">
-                            <ha-icon icon="mdi:tune-variant"></ha-icon>
-                            Slider settings
-                            </h4>
-                            <div class="content">
-                                <ha-form
-                                    .hass=${editor.hass}
-                                    .data=${editor._config}
-                                    .schema=${[
-                                        {
-                                            type: "grid",
-                                            flatten: true,
-                                            schema: [
-                                                {
-                                                    name: "min_value",
-                                                    label: "Min value",
-                                                    selector: { number: {} },
-                                                },
-                                                {
-                                                    name: "max_value",
-                                                    label: "Max value",
-                                                    selector: { number: {} },
-                                                },
-                                            ],
-                                        },
-                                    ]}   
-                                    .computeLabel=${editor._computeLabelCallback}
-                                    .disabled="${editor._config.button_type === 'name'}"
-                                    @value-changed=${editor._valueChanged}
-                                ></ha-form>
-                                <ha-formfield>
-                                    <ha-switch
-                                        .checked=${editor._config.tap_to_slide}
-                                        .configValue="${"tap_to_slide"}"
-                                        @change="${editor._valueChanged}"
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Tap to slide (previous behavior)</label> 
-                                    </div>
-                                </ha-formfield>
-                                <ha-formfield>
-                                    <ha-switch
-                                        .checked=${editor._config.read_only_slider}
-                                        .configValue="${"read_only_slider"}"
-                                        @change="${editor._valueChanged}"
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Read only slider</label> 
-                                    </div>
-                                </ha-formfield>
-                                <ha-formfield>
-                                    <ha-switch
-                                        .checked=${editor._config.slider_live_update}
-                                        .configValue="${"slider_live_update"}"
-                                        @change="${editor._valueChanged}"
-                                    ></ha-switch>
-                                    <div class="mdc-form-field">
-                                        <label class="mdc-label">Slider live update</label> 
-                                    </div>
-                                </ha-formfield>
-                                <ha-alert alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
-                            </div>
-                        </ha-expansion-panel>
-                        <ha-expansion-panel outlined>
-                            <h4 slot="header">
-                              <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                              Tap action on icon
-                            </h4>
-                            <div class="content">
-                                ${editor.makeActionPanel("Tap action")}
-                                ${editor.makeActionPanel("Double tap action")}
-                                ${editor.makeActionPanel("Hold action")}
-                            </div>
-                        </ha-expansion-panel>
-                        <ha-expansion-panel outlined style="display: ${editor._config.button_type === 'slider' ? 'none' : ''}">
-                            <h4 slot="header">
-                              <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                              Tap action on button
-                            </h4>
-                            <div class="content">
-                                ${editor.makeActionPanel("Tap action", button_action, editor._config.button_type !== 'name' ? (editor._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
-                                ${editor.makeActionPanel("Double tap action", button_action, editor._config.button_type !== 'name' ? (editor._config.button_type === 'state' ? 'more-info' : 'toggle') : 'none', 'button_action')}
-                                ${editor.makeActionPanel("Hold action", button_action, editor._config.button_type !== 'name' ? 'more-info' : 'none', 'button_action')}
-                            </div>
-                        </ha-expansion-panel>
-                        ${editor.makeSubButtonPanel()}
+                        ${renderButtonEditor(editor)}
                     </div>
                 </div>
             </ha-expansion-panel>
@@ -176,7 +275,7 @@ export function renderPopUpEditor(editor){
                 </h4>
                 <div class="content">
                     <ha-textfield
-                        label="Optional - Auto close in milliseconds (e.g. 15000)"
+                        label="Auto close in milliseconds (e.g. 15000)"
                         type="number"
                         inputMode="numeric"
                         min="0"
@@ -186,7 +285,7 @@ export function renderPopUpEditor(editor){
                         @input="${editor._valueChanged}"
                     ></ha-textfield>
                     <ha-textfield
-                        label="Optional - Slide to close distance (default to 400)"
+                        label="Slide to close distance (default to 400)"
                         type="number"
                         inputMode="numeric"
                         min="0"
@@ -195,40 +294,48 @@ export function renderPopUpEditor(editor){
                         .configValue="${"slide_to_close_distance"}"
                         @input="${editor._valueChanged}"
                     ></ha-textfield>
-                    <ha-formfield .label="Optional - Close the pop-up by clicking outside of it (a refresh is needed)">
+                    <ha-formfield .label="Close the pop-up by clicking outside of it (a refresh is needed)">
                         <ha-switch
-                            aria-label="Optional - Close the pop-up by clicking outside of it (a refresh is needed)"
+                            aria-label="Close the pop-up by clicking outside of it (a refresh is needed)"
                             .checked=${editor._config?.close_by_clicking_outside ?? true}
                             .configValue="${"close_by_clicking_outside"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Close the pop-up by clicking outside of it (a refresh is needed)</label> 
+                            <label class="mdc-label">Close the pop-up by clicking outside of it (a refresh is needed)</label> 
                         </div>
                     </ha-formfield>
-                    <ha-formfield .label="Optional - Close the pop-up after any click or tap">
+                    <ha-formfield .label="Close the pop-up after any click or tap">
                         <ha-switch
-                            aria-label="Optional - Close the pop-up after any click or tap"
+                            aria-label="Close the pop-up after any click or tap"
                             .checked=${editor._config?.close_on_click || false}
                             .configValue="${"close_on_click"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Close the pop-up after any click or tap</label> 
+                            <label class="mdc-label">Close the pop-up after any click or tap</label> 
                         </div>
                     </ha-formfield>
-                    <ha-formfield .label="Optional - Update cards in background (not recommended)">
+                    <ha-formfield .label="Update cards in background (not recommended)">
                         <ha-switch
-                            aria-label="Optional - Update cards in background (not recommended)"
+                            aria-label="Update cards in background (not recommended)"
                             .checked=${editor._config?.background_update || false}
                             .configValue="${"background_update"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Update cards in background (not recommended)</label> 
+                            <label class="mdc-label">Update cards in background (not recommended)</label> 
                         </div>
                     </ha-formfield>
-                    <ha-alert alert-type="info">Background updates are only recommended if you encounter issues with certain cards within your pop-up.</ha-alert>
+                    <div class="bubble-info">
+                        <h4 class="bubble-section-title">
+                            <ha-icon icon="mdi:information-outline"></ha-icon>
+                            Background updates
+                        </h4>
+                        <div class="content">
+                            <p>Background updates are only recommended if you encounter issues with certain cards within your pop-up.</p>
+                        </div>
+                    </div>
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
@@ -253,9 +360,16 @@ export function renderPopUpEditor(editor){
                         @value-changed=${(ev) => editor._conditionChanged(ev)}
                     >
                     </ha-card-conditions-editor>
-                    <ha-alert alert-type="info">
-                        The pop-up will be opened when ALL conditions are fulfilled. For example you can open a "Security" pop-up with a camera when a person is in front of your house. You can also create a toggle helper (<code>input_boolean</code>) and trigger its opening/closing in an automation.
-                    </ha-alert>
+                    <div class="bubble-info">
+                        <h4 class="bubble-section-title">
+                            <ha-icon icon="mdi:information-outline"></ha-icon>
+                            About conditions
+                        </h4>
+                        <div class="content">
+                            <p>The pop-up will be opened when ALL conditions are fulfilled. For example you can open a "Security" pop-up with a camera when a person is in front of your house.</p>
+                            <p>You can also create a toggle helper (<code>input_boolean</code>) and trigger its opening/closing in an automation.</p>
+                        </div>
+                    </div>
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
@@ -266,7 +380,15 @@ export function renderPopUpEditor(editor){
                 <div class="content">
                     ${editor.makeActionPanel("Open action", editor._config, 'none')}
                     ${editor.makeActionPanel("Close action", editor._config, 'none')}
-                    <ha-alert alert-type="info">This allows you to trigger an action on pop-up open/close.</ha-alert>
+                    <div class="bubble-info">
+                        <h4 class="bubble-section-title">
+                            <ha-icon icon="mdi:information-outline"></ha-icon>
+                            About actions
+                        </h4>
+                        <div class="content">
+                            <p>This allows you to trigger an action on pop-up open/close.</p>
+                        </div>
+                    </div>
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
@@ -283,37 +405,37 @@ export function renderPopUpEditor(editor){
                         </h4>
                         <div class="content"> 
                             <ha-textfield
-                                label="Optional - Margin (fix centering on some themes) (e.g. 13px)"
+                                label="Margin (fix centering on some themes) (e.g. 13px)"
                                 .value="${editor._config?.margin || '7px'}"
                                 .configValue="${"margin"}"
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Optional - Top margin on mobile (e.g. -56px if your header is hidden)"
+                                label="Top margin on mobile (e.g. -56px if your header is hidden)"
                                 .value="${editor._config?.margin_top_mobile || '0px'}"
                                 .configValue="${"margin_top_mobile"}"
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Optional - Top margin on desktop (e.g. 50vh for an half sized pop-up)"
+                                label="Top margin on desktop (e.g. 50vh for an half sized pop-up)"
                                 .value="${editor._config?.margin_top_desktop || '0px'}"
                                 .configValue="${"margin_top_desktop"}"
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Optional - Width on desktop (100% by default on mobile)"
+                                label="Width on desktop (100% by default on mobile)"
                                 .value="${editor._config?.width_desktop || '540px'}"
                                 .configValue="${"width_desktop"}"
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Optional - Background color (any var, hex, rgb or rgba value)"
+                                label="Background color (any var, hex, rgb or rgba value)"
                                 .value="${editor._config?.bg_color || ''}"
                                 .configValue="${"bg_color"}"
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Optional - Background opacity (0-100 range)"
+                                label="Background opacity (0-100 range)"
                                 type="number"
                                 inputMode="numeric"
                                 min="0"
@@ -323,7 +445,7 @@ export function renderPopUpEditor(editor){
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Optional - Background blur (0-100 range)"
+                                label="Background blur (0-100 range)"
                                 type="number"
                                 inputMode="numeric"
                                 min="0"
@@ -333,7 +455,7 @@ export function renderPopUpEditor(editor){
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Optional - Backdrop blur (0-100 range)"
+                                label="Backdrop blur (0-100 range)"
                                 type="number"
                                 inputMode="numeric"
                                 min="0"
@@ -343,7 +465,7 @@ export function renderPopUpEditor(editor){
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Optional - Shadow opacity (0-100 range)"
+                                label="Shadow opacity (0-100 range)"
                                 type="number"
                                 inputMode="numeric"
                                 min="0"
@@ -352,31 +474,59 @@ export function renderPopUpEditor(editor){
                                 .value="${editor._config?.shadow_opacity !== undefined ? editor._config?.shadow_opacity : '0'}"
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
-                            <ha-formfield .label="Optional - Hide pop-up backdrop (a refresh is needed)">
+                            <ha-formfield .label="Hide pop-up backdrop (a refresh is needed)">
                                 <ha-switch
-                                    aria-label="Optional - Hide pop-up backdrop (a refresh is needed)"
+                                    aria-label="Hide pop-up backdrop (a refresh is needed)"
                                     .checked=${editor._config.hide_backdrop ?? false}
                                     .configValue="${"hide_backdrop"}"
                                     @change=${editor._valueChanged}
                                 ></ha-switch>
                                 <div class="mdc-form-field">
-                                    <label class="mdc-label">Optional - Hide pop-up backdrop (a refresh is needed)</label> 
+                                    <label class="mdc-label">Hide pop-up backdrop (a refresh is needed)</label> 
                                 </div>
                             </ha-formfield>
-                            <ha-alert alert-type="warning">Set this toggle to true on the first pop-up of your main dashboard to hide the darker backdrop behind all pop-ups. <b>You can add a blurred effect to it by changing <code>Optional - Backdrop blur</code> just below, but be aware that this can slow down your dashboard when opening pop-ups. It is now set to 0 for that reason.</b></ha-alert>
+                            <div class="bubble-info">
+                                <h4 class="bubble-section-title">
+                                    <ha-icon icon="mdi:information-outline"></ha-icon>
+                                    Hide pop-up backdrop
+                                </h4>
+                                <div class="content">
+                                    <p>This will hide the pop-up backdrop, which is a dark overlay that appears behind the pop-up.</p>
+                                    <p>You can enable this setting for all your pop-ups at once by turning it on in the first pop-up on your dashboard.</p>
+                                    <p><b>Hiding it is recommended if you encounter performance issues when opening/closing pop-ups.</b></p>
+                                </div>
+                            </div>
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}
                 </div>
             </ha-expansion-panel>
             ${editor.makeModulesEditor()}
-            <ha-alert alert-type="info">
-                This card allows you to convert any vertical stack into a pop-up. Each pop-up is hidden by default and can be opened by targeting its link (e.g., '#pop-up-name'), with <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#example">any card</a> that supports the <code>navigate</code> action, or with the <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack">horizontal buttons stack</a> that is included.
-                <br><br><b>Important:</b> This card must be placed within a <a style="color: var(--text-primary-color)" href="https://www.home-assistant.io/dashboards/vertical-stack/">vertical stack</a> card at the topmost position to function properly. To avoid misalignment with your view, place vertical stacks/pop-ups after all other dashboard cards. It should be called from the same view to work. 
-                <br><br><b>You can also watch this <a style="color: var(--text-primary-color)" href="https://www.youtube.com/watch?v=7mOV7BfWoFc">video</a> that explains how to create your first pop-up.</b>
-            </ha-alert>
-            <ha-alert alert-type="warning">Since v1.7.0, the optimized mode has been removed to ensure stability and to simplify updates for everyone. However, if your pop-up content still appears on the screen during page loading, <a style="color: var(--text-primary-color)" href="https://github.com/Clooos/Bubble-Card#pop-up-initialization-fix">you can install this similar fix.</a></ha-alert>
+            <div class="bubble-info-container">
+                <div class="bubble-info">
+                    <h4 class="bubble-section-title">
+                        <ha-icon icon="mdi:information-outline"></ha-icon>
+                        How to use pop-ups
+                    </h4>
+                    <div class="content">
+                        <p>Each pop-up is <b>hidden by default</b> and <b>can be opened by targeting its hash</b> (e.g., '#pop-up-name'), with <a href="https://github.com/Clooos/Bubble-Card#example" target="_blank" rel="noopener noreferrer">any card</a> that supports the <code>navigate</code> <a href="https://github.com/Clooos/Bubble-Card?tab=readme-ov-file#tap-double-tap-and-hold-actions" target="_blank" rel="noopener noreferrer">action</a>.</p>
+                        <p><b>You can also watch this <a href="https://www.youtube.com/watch?v=7mOV7BfWoFc" target="_blank" rel="noopener noreferrer">video</a> that explains how to create your first pop-up</b> (this video is outdated, you don't need to add a vertical stack anymore).</p>
+                    </div>
+                </div>
+                
+                <div class="bubble-info warning">
+                    <h4 class="bubble-section-title">
+                        <ha-icon icon="mdi:alert-outline"></ha-icon>
+                        Important
+                    </h4>
+                    <div class="content">
+                        <p>To avoid misalignment with your view, place this card after all other dashboard cards. You can't trigger it from a different view.</p>
+                        <p>If the content of your pop-up appears on the screen during page loading, <a href="https://github.com/Clooos/Bubble-Card#pop-up-initialization-fix" target="_blank" rel="noopener noreferrer">you can install this fix</a> (recommended).</p>
+                    </div>
+                </div>
+            </div>
             ${editor.makeVersion()}
       </div>
     `;
 }
+

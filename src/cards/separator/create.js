@@ -23,7 +23,8 @@ export function createStructure(context) {
     withMainContainer: false,
     withBaseElements: false,
     withSubButtons: true,
-    iconActions: false
+    iconActions: false,
+    buttonActions: false
   });
 
   context.cardType = cardType;

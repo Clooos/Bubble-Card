@@ -60,12 +60,13 @@ export async function changeEvents(context) {
     const eventDay = new Date(day);
     const today = new Date();
     const dayNumber = document.createElement('div');
+    const getCurrentLocale = context._hass.locale.language;
     dayNumber.classList.add('bubble-day-number');
     dayNumber.innerHTML = `${eventDay.getDate()}`;
 
     const dayMonth = document.createElement('div');
     dayMonth.classList.add('bubble-day-month');
-    dayMonth.innerHTML = eventDay.toLocaleString('default', { month: 'short' });
+    dayMonth.innerHTML = eventDay.toLocaleString(getCurrentLocale, { month: 'short' });
 
     const dayChip = document.createElement('div');
     dayChip.classList.add('bubble-day-chip');
@@ -81,9 +82,9 @@ export async function changeEvents(context) {
     eventsGroupedByDay[day].forEach((event) => {
       const eventTime = document.createElement('div');
       eventTime.classList.add('bubble-event-time');
-      eventTime.innerHTML = event.start.date ? t("cards.calendar.all_day") : new Date(event.start.dateTime).toLocaleTimeString('default', { hour: 'numeric', minute: 'numeric' });
+      eventTime.innerHTML = event.start.date ? t("cards.calendar.all_day") : new Date(event.start.dateTime).toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric' });
       if (!event.start.date && context.config.show_end === true) {
-        eventTime.innerHTML += ` – ${new Date(event.end.dateTime).toLocaleTimeString('default', { hour: 'numeric', minute: 'numeric' })}`;
+        eventTime.innerHTML += ` – ${new Date(event.end.dateTime).toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric' })}`;
       }
 
       const eventName = document.createElement('div');

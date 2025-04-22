@@ -78,7 +78,15 @@ export function renderCalendarEditor(editor){
                 </div>
             </ha-expansion-panel>
             ${editor.makeModulesEditor()}
-            <ha-alert alert-type="info">This card allows you to control a calendar. You can tap on the icon to get more control.</ha-alert>
+            <div class="bubble-info">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:information-outline"></ha-icon>
+                    Calendar card
+                </h4>
+                <div class="content">
+                    <p>This card allows you to display a calendar and is scrollable, so you can view additional events.</p>
+                </div>
+            </div>
             ${editor.makeVersion()}
         </div>
     `;    

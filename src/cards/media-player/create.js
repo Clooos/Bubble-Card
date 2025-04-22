@@ -1,12 +1,8 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
-import { addActions, addFeedback } from "../../tools/tap-actions.js";
-import { createElement, toggleEntity, getAttribute, isStateOn, forwardHaptic } from "../../tools/utils.js";
-import { onSliderChange } from "./helpers.js";
+import { createElement, getAttribute, isStateOn, forwardHaptic } from "../../tools/utils.js";
 import { createSliderStructure } from "../../components/slider/index.js";
 import { changeVolumeIcon } from "./changes.js";
 import styles from "./styles.css";
-
-let volumeLevel = 0;
 
 export function createStructure(context) {
     const cardType = 'media-player';
@@ -14,7 +10,7 @@ export function createStructure(context) {
     const elements = createBaseStructure(context, {
         type: cardType,
         styles: styles,
-        iconActions: false,
+        iconActions: true,
         buttonActions: true,
         withSubButtons: true,
     });
@@ -49,9 +45,6 @@ export function createStructure(context) {
         elements.playPauseButton
     );
 
-    addActions(elements.icon, context.config, context.config.entity);
-    addActions(elements.image, context.config, context.config.entity);
-
     elements.volumeSliderContainer = createElement('div', 'bubble-volume-slider is-hidden');
     createSliderStructure(context, {
         targetElement: elements.volumeSliderContainer,
@@ -77,7 +70,8 @@ export function createStructure(context) {
         });
     });
 
-    elements.muteButton.addEventListener('click', () => {
+    elements.muteButton.addEventListener('pointerdown', (event) => {
+        event.stopPropagation();
         const isVolumeMuted = getAttribute(context, "is_volume_muted") === true;
         context._hass.callService('media_player', 'volume_mute', {
             entity_id: context.config.entity,

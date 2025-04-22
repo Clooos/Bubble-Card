@@ -77,15 +77,15 @@ export function renderSelectEditor(editor){
                 </div>
             </ha-expansion-panel>
             ${editor.makeModulesEditor()}
-            <ha-alert alert-type="info">
-              This card allows you to have a select menu for your 
-              <code>input_select</code>, <code>select</code> entities, and 
-              any other entities that have attribute lists like 
-              <code>source_list</code>, <code>sound_mode_list</code>, 
-              <code>hvac_modes</code>, <code>fan_modes</code>, 
-              <code>swing_modes</code>, <code>preset_modes</code>, or 
-              <code>effect_list</code>.
-            </ha-alert>
+            <div class="bubble-info">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:information-outline"></ha-icon>
+                    Select card
+                </h4>
+                <div class="content">
+                    <p>This card allows you to have a select menu for your <code>input_select</code>, <code>select</code> entities, and any other entities that have attribute lists like <code>source_list</code>, <code>sound_mode_list</code>, <code>hvac_modes</code>, <code>fan_modes</code>, <code>swing_modes</code>, <code>preset_modes</code>, or <code>effect_list</code>.</p>
+                </div>
+            </div>
             ${editor.makeVersion()}
         </div>
     `;    

@@ -1,6 +1,5 @@
 import { html } from 'lit';
 
-
 export function renderEmptyColumnEditor(editor){
 
     return html`
@@ -15,7 +14,15 @@ export function renderEmptyColumnEditor(editor){
                     ${editor.makeLayoutOptions()}
                 </div>
             </ha-expansion-panel>
-            <ha-alert alert-type="info">Just an empty card to fill any empty column.</ha-alert>
+            <div class="bubble-info">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:information-outline"></ha-icon>
+                    Empty column card
+                </h4>
+                <div class="content">
+                    <p>Just an empty card to fill any empty column.</p>
+                </div>
+            </div>
             ${editor.makeVersion()}
         </div>
     `;

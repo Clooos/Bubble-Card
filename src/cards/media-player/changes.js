@@ -117,6 +117,36 @@ export function changeMuteIcon(context) {
     context.elements.muteButton.clicked = false;
 }
 
+function updateVolumeSliderPosition(context) {
+    // For normal layout
+    let leftOffset = 50;
+    let totalWidth = 146;
+    
+    // For large layout
+    if (context.content.classList.contains('large')) {
+        leftOffset = 58;
+        totalWidth = 158;
+    }
+
+    // Check if the play/pause button is hidden
+    const state = getState(context);
+    const isOn = state !== "off" && state !== "unknown";
+
+    if (context.config.hide?.play_pause_button || (!context.editor && !isOn)) {
+        // For large layout
+        if (context.content.classList.contains('large')) {
+            totalWidth -= 42;
+        } 
+        // For normal layout
+        else {
+            totalWidth -= 36;
+        }
+    }
+
+    context.elements.cardWrapper.style.setProperty('--volume-slider-left-offset', `${leftOffset}px`);
+    context.elements.cardWrapper.style.setProperty('--volume-slider-width-calc', `calc(100% - ${totalWidth}px)`);
+}
+
 export function changeStyle(context) {
     setLayout(context);
     handleCustomStyles(context);
@@ -124,15 +154,15 @@ export function changeStyle(context) {
     const state = getState(context);
     const isOn = state !== "off" && state !== "unknown";
 
-    // Vérifier si tous les boutons sont configurés pour être cachés
+    // Check if all buttons are configured to be hidden
     const allButtonsHidden = context.config.hide?.power_button &&
         context.config.hide?.previous_button &&
         context.config.hide?.next_button &&
         context.config.hide?.volume_button &&
         context.config.hide?.play_pause_button;
 
-    // Masquer ou afficher le conteneur de boutons
-    if (allButtonsHidden && context.elements.buttonsContainer.style.display !== 'none') {
+    // Hide or show the buttons container
+    if ((!isOn || allButtonsHidden) && context.elements.buttonsContainer.style.display !== 'none') {
         context.elements.buttonsContainer.classList.add('hidden');
     } else if (!allButtonsHidden && context.elements.buttonsContainer.classList.contains('hidden')) {
         context.elements.buttonsContainer.classList.remove('hidden');
@@ -162,9 +192,11 @@ export function changeStyle(context) {
         context.elements.volumeButton.classList.remove('hidden');
     }
 
-    if ((context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.classList.contains('hidden')) {
+    if ((context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.style.display !== 'none') {
         context.elements.playPauseButton.classList.add('hidden');
     } else if (!(context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.classList.contains('hidden')) {
         context.elements.playPauseButton.classList.remove('hidden');
     }
+    
+    updateVolumeSliderPosition(context);
 }

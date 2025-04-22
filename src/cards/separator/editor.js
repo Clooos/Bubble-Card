@@ -25,7 +25,15 @@ export function renderSeparatorEditor(editor){
             </div>
         </ha-expansion-panel>
         ${editor.makeModulesEditor()}
-        <ha-alert alert-type="info">This card is a simple separator for dividing your pop-up into categories / sections. e.g. Lights, Devices, Covers, Settings, Automations...</ha-alert>
+        <div class="bubble-info">
+            <h4 class="bubble-section-title">
+                <ha-icon icon="mdi:information-outline"></ha-icon>
+                Separator card
+            </h4>
+            <div class="content">
+                <p>This card is a simple separator for dividing your pop-up/dashboard into categories or sections. e.g. Lights, Devices, Covers, Settings, Automations...</p>
+            </div>
+        </div>
         ${editor.makeVersion()}
   </div>
 `;

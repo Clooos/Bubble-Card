@@ -1,7 +1,6 @@
-import { Schema } from 'js-yaml';
 import { html } from 'lit';
 import { isEntityType } from "../../tools/utils.js";
-
+import { makeButtonSliderPanel } from '../../components/slider/editor.js';
 function getButtonList(){
     return [{
         'label': 'Switch',
@@ -22,9 +21,9 @@ function getButtonList(){
 ];
 }
 
-export function renderButtonEditor(editor){
+export function renderButtonEditor(editor){    
     let entityList = {};
-    if (editor._config.button_type === 'slider') {        
+    if (editor._config.button_type === 'slider' && !editor._disableEntityFilter) {        
         entityList = {
             filter: [
                 { domain: ["light", "media_player", "cover", "input_number", "number", "climate", "fan"] },
@@ -33,13 +32,18 @@ export function renderButtonEditor(editor){
         }
     }
 
-    let button_action = editor._config.button_action || '';
-    let button_type = editor._config?.button_type || 'switch';
+    const isPopUp = editor._config.card_type === 'pop-up';
 
+    let button_action = editor._config.button_action || '';
+    
+    if (!editor._config.button_type) {
+        editor._config.button_type = isPopUp ? 'name' : 'switch';
+    }
+    let button_type = editor._config.button_type;
 
     return html`
         <div class="card-config">
-            ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
+            ${!isPopUp ? editor.makeDropdown("Card type", "card_type", editor.cardTypeList) : ''}
             ${editor.makeDropdown("Button type", "button_type", getButtonList() )}
             <ha-form
                 .hass=${editor.hass}
@@ -57,7 +61,7 @@ export function renderButtonEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:cog"></ha-icon>
-                Card settings
+                ${isPopUp ? 'Header card settings' : 'Card settings'}
                 </h4>
                 <div class="content">     
                     <ha-textfield
@@ -70,111 +74,7 @@ export function renderButtonEditor(editor){
                     ${editor.makeShowState()}
                 </div>
             </ha-expansion-panel>
-            <ha-expansion-panel outlined style="display: ${editor._config.button_type !== 'slider' ? 'none' : ''}">
-                <h4 slot="header">
-                <ha-icon icon="mdi:tune-variant"></ha-icon>
-                Slider settings
-                </h4>
-                <div class="content">
-                    <ha-form
-                        .hass=${editor.hass}
-                        .data=${editor._config}
-                        .schema=${[
-                            {
-                                type: "grid",
-                                flatten: true,
-                                schema: [
-                                    {
-                                        name: "min_value",
-                                        label: "Min value",
-                                        selector: { number: {
-                                            step: "any"
-                                        } },
-                                    },
-                                    {
-                                        name: "max_value",
-                                        label: "Max value",
-                                        selector: { number: {
-                                            step: "any"
-                                        } },
-                                    },
-                                    {
-                                        name: "step",
-                                        label: "Step",
-                                        selector: { number: {
-                                            step: "any"
-                                        } },
-                                    },
-                                ],
-                            },
-                        ]}   
-                        .computeLabel=${editor._computeLabelCallback}
-                        .disabled="${editor._config.button_type === 'name'}"
-                        @value-changed=${editor._valueChanged}
-                    ></ha-form>
-                    <ha-formfield>
-                        <ha-switch
-                            .checked=${editor._config.tap_to_slide}
-                            .configValue="${"tap_to_slide"}"
-                            @change="${editor._valueChanged}"
-                        ></ha-switch>
-                        <div class="mdc-form-field">
-                            <label class="mdc-label">Tap to slide (previous behavior)</label> 
-                        </div>
-                    </ha-formfield>
-                    <ha-formfield>
-                        <ha-switch
-                            .checked=${editor._config.read_only_slider}
-                            .configValue="${"read_only_slider"}"
-                            @change="${editor._valueChanged}"
-                        ></ha-switch>
-                        <div class="mdc-form-field">
-                            <label class="mdc-label">Read only slider</label> 
-                        </div>
-                    </ha-formfield>
-                    <ha-formfield>
-                        <ha-switch
-                            .checked=${editor._config.slider_live_update}
-                            .configValue="${"slider_live_update"}"
-                            @change="${editor._valueChanged}"
-                        ></ha-switch>
-                        <div class="mdc-form-field">
-                            <label class="mdc-label">Slider live update</label> 
-                        </div>
-                    </ha-formfield>
-                    <ha-alert alert-type="info">By default, sliders are updated only on release. You can toggle this option to enable live updates while sliding.</ha-alert>
-                    ${editor._config.entity?.startsWith("light") ? html`
-                        <hr>
-                        <ha-formfield>
-                            <ha-switch
-                                .checked=${editor._config.light_transition}
-                                .configValue="${"light_transition"}"
-                                @change=${editor._valueChanged}
-                            ></ha-switch>
-                            <div class="mdc-form-field">
-                                <label class="mdc-label">Enable smooth brightness transitions</label> 
-                            </div>
-                        </ha-formfield>
-                        ${editor._config.light_transition ? html`
-                            <ha-alert alert-type="info">
-                                <b>Important:</b> This feature only works for lights that support the 
-                                <a target="_blank" rel="noopener noreferrer" href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">light.turn_on</a> transition attribute. 
-                                Enabling this for lights that do not support transitions will unfortunatley have no effect. Defaults to 500ms unless overridden below.
-                            </ha-alert>
-                            
-                            <ha-textfield
-                                label="Transition time (ms)"
-                                type="number"
-                                min="1"
-                                max="2000"
-                                .value="${editor._config.light_transition_time}"
-                                .configValue="${"light_transition_time"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                        ` : ''}
-                    ` : ''}
-                </div>
-            </ha-expansion-panel>
+            ${makeButtonSliderPanel(editor)}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:gesture-tap"></ha-icon>
@@ -192,9 +92,26 @@ export function renderButtonEditor(editor){
                 Tap action on card
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel("Tap action", button_action, editor._config.button_type !== 'name' ? (editor._config.button_type === 'state' ? 'more-info' : (editor._config.button_type === 'slider' ? (isEntityType(editor, "sensor", editor._config.entity) ? 'more-info' : 'toggle') : 'toggle')) : 'none', 'button_action')}
+                    <!-- 
+                      Default button action mapping to match create.js defaults:
+                      - name: tap="none", double="none", hold="none"
+                      - state: tap="more-info", double="none", hold="more-info" 
+                      - slider: tap="more-info"(sensor)/"toggle"(others), double="none", hold="none"
+                      - switch: tap="toggle", double="none", hold="more-info"
+                    -->
+                    ${editor.makeActionPanel("Tap action", button_action, 
+                        editor._config.button_type === 'name' ? 'none' : 
+                        editor._config.button_type === 'state' ? 'more-info' : 
+                        editor._config.button_type === 'slider' ? 
+                            (isEntityType(editor, "sensor", editor._config.entity) ? 'more-info' : 'toggle') : 
+                            'toggle', 
+                        'button_action')}
                     ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
-                    ${editor._config.button_type !== 'slider' ? editor.makeActionPanel("Hold action", button_action, editor._config.button_type !== 'name' ? (editor._config.button_type === 'slider' ? 'none' : 'more-info') : 'none', 'button_action') : ''}
+                    ${editor.makeActionPanel("Hold action", button_action, 
+                        editor._config.button_type === 'name' ? 'none' :
+                        editor._config.button_type === 'slider' ? 'none' :
+                        'more-info', 
+                        'button_action')}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
@@ -205,14 +122,47 @@ export function renderButtonEditor(editor){
                 </h4>
                 <div class="content">
                     ${editor.makeLayoutOptions()}
-                    ${editor.makeStyleEditor()}
+                    ${!isPopUp ? editor.makeStyleEditor() : ''}
                 </div>
             </ha-expansion-panel>
-            ${editor.makeModulesEditor()}
-            <ha-alert alert-type="info">This card allows you to control your entities. 
-                ${editor._config.button_type === 'slider' ? html`Supported entities: Light (brightness), media player (volume), cover (position), fan (percentage), climate (temperature), battery sensor (percentage), input number and number (value). <b>You can also use any entity with a numeric state by defining it in YAML mode, then define the min and max values.</b>` : ''}
-            </ha-alert>
-            ${editor.makeVersion()}
+            ${!isPopUp ? editor.makeModulesEditor() : ''}
+            <div class="bubble-info">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:information-outline"></ha-icon>
+                    Button card ${isPopUp ? '(as pop-up header)' : ''}
+                </h4>
+                <div class="content">
+                    <p>This card is very versatile. It can be used as a <b>switch</b>, a <b>slider</b>, a <b>state</b> or a <b>name/text</b> button. Select the type of button you want to get more information about it.</p>
+                    
+                    ${editor._config.button_type === 'switch' || !editor._config.button_type ? html`
+                        <p><strong>Switch button:</strong> This is the default button type. By default, it toggles an entity and its background color changes based on the entity's state or the color of a light. You can change its action in the <b>Tap action on card</b> section.</p>
+                    ` : ''}
+                    
+                    ${editor._config.button_type === 'slider' ? html`
+                        <p><strong>Slider button:</strong> This button type lets you control entities with adjustable ranges. It's ideal for dimming lights, and its fill color will adapt to the light's color. You can also use it to display values, such as a battery level.</p>
+                        <p>Supported entities for sliders:</p>
+                        <ul class="icon-list">
+                            <li><ha-icon icon="mdi:lightbulb-outline"></ha-icon>Light (brightness)</li>
+                            <li><ha-icon icon="mdi:speaker"></ha-icon>Media player (volume)</li>
+                            <li><ha-icon icon="mdi:window-shutter"></ha-icon>Cover (position)</li>
+                            <li><ha-icon icon="mdi:fan"></ha-icon>Fan (percentage)</li>
+                            <li><ha-icon icon="mdi:thermometer"></ha-icon>Climate (temperature)</li>
+                            <li><ha-icon icon="mdi:numeric"></ha-icon>Input number and number (value)</li>
+                            <li><ha-icon icon="mdi:battery-50"></ha-icon>Battery sensor (percentage, read only)</li>
+                        </ul>
+                        <p>You can also use any entity with a <b>numeric state</b> by disabling the entity filter in <b>Slider settings</b>, then define the <b>min</b> and <b>max</b> values. This option is read only.</p>
+                    ` : ''}
+                    
+                    ${editor._config.button_type === 'state' ? html`
+                        <p><strong>State button:</strong> Perfect for displaying information from a sensor or any entity. When you press it, it will show the "More info" panel of the entity. Its background color does not change.</p>
+                    ` : ''}
+                    
+                    ${editor._config.button_type === 'name' ? html`
+                        <p><strong>Name/Text button:</strong> The only button type that doesn't need an entity. It allows you to display a short text, a name or a title. You can also add actions to it. Its background color does not change.</p>
+                    ` : ''}
+                </div>
+            </div>
+            ${!isPopUp ? editor.makeVersion() : ''}
         </div>
     `;
 }

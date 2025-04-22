@@ -18,13 +18,6 @@ export function createStructure(context) {
 
   elements.mainContainer.style.setProperty('--bubble-calendar-height', `${(context.config.rows ?? 1) * 56}px`);
   elements.mainContainer.prepend(elements.calendarCardContent);
-  elements.mainContainer.addEventListener('scroll', () => {
-    if (elements.mainContainer.scrollHeight > elements.mainContainer.offsetHeight + elements.mainContainer.scrollTop) {
-     context.content.classList.add('is-overflowing');
-    } else {
-     context.content.classList.remove('is-overflowing');
-    }
-  });
 
   context.cardType = cardType;
 }
