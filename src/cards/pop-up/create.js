@@ -1,6 +1,6 @@
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
-import { onUrlChange, removeHash, hideContent } from "./helpers.js";
+import { onUrlChange, removeHash, hideContent, registerPopup } from "./helpers.js";
 import styles from "./styles.css";
 import backdropStyles from "./backdrop.css";
 import { html, render } from "lit";
@@ -50,14 +50,12 @@ export function getBackdrop(context) {
     requestAnimationFrame(() => {
       backdropElement.classList.add('is-visible');
       backdropElement.classList.remove('is-hidden');
-      backdropElement.style.willChange = 'opacity, backdrop-filter';
     });
   }
   
   function hideBackdropFunc() {
     backdropElement.classList.add('is-hidden');
     backdropElement.classList.remove('is-visible');
-    backdropElement.style.willChange = 'none';
   }
 
   backdrop = { hideBackdrop: hideBackdropFunc, showBackdrop, backdropElement, backdropCustomStyle };
@@ -223,6 +221,10 @@ export function prepareStructure(context) {
 
     context.elements = {};
     getBackdrop(context);
+    
+    if (context.config.hash) {
+      registerPopup(context);
+    }
 
     if (context.cardTitle) context.cardTitle.style.display = 'none';
     hideBackdrop = hideBackdrop || (context.config.hide_backdrop ?? true);

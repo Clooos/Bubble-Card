@@ -7,6 +7,65 @@ const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-
 window.pendingHashChange = false;
 window.activePopup = null;
 
+window.popupRegistry = window.popupRegistry || {
+  byDashboard: new Map(),
+  currentDashboard: null
+};
+
+export function getDashboardPath() {
+  return window.location.pathname;
+}
+
+export function registerPopup(context) {
+  const dashboardPath = getDashboardPath();
+  const popupHash = context.config.hash;
+  
+  if (!popupHash) return;
+  
+  // Initialize registry if it doesn't exist
+  if (!window.popupRegistry.byDashboard.has(dashboardPath)) {
+    window.popupRegistry.byDashboard.set(dashboardPath, new Map());
+  }
+  
+  // Register this popup in the registry
+  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
+  dashboardPopups.set(popupHash, context);
+  
+  // Update current dashboard
+  window.popupRegistry.currentDashboard = dashboardPath;
+}
+
+export function unregisterPopup(context) {
+  const dashboardPath = getDashboardPath();
+  const popupHash = context.config.hash;
+  
+  if (!popupHash || !window.popupRegistry.byDashboard.has(dashboardPath)) return;
+  
+  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
+  dashboardPopups.delete(popupHash);
+}
+
+export function trackDashboardChange() {
+  const currentPath = getDashboardPath();
+  
+  // If we've changed dashboard
+  if (window.popupRegistry.currentDashboard !== currentPath) {
+    // Close all pop-ups from the old dashboard
+    if (window.popupRegistry.currentDashboard) {
+      const oldDashboardPopups = window.popupRegistry.byDashboard.get(window.popupRegistry.currentDashboard);
+      if (oldDashboardPopups) {
+        oldDashboardPopups.forEach(context => {
+          if (context.popUp.classList.contains('is-popup-opened')) {
+            closePopup(context, true);
+          }
+        });
+      }
+    }
+    
+    window.popupRegistry.currentDashboard = currentPath;
+  }
+}
+
 export function clickOutside(event, context) {
     if (!(context.config.close_by_clicking_outside ?? true)) return;
     
@@ -28,34 +87,52 @@ function resetCloseTimeout(context) {
 }
 
 export function removeHash() {
-    if (!location.hash) return;
-    if (window.pendingHashChange) return;
+  if (!location.hash) return;
+  
+  const currentHash = location.hash;
+  const dashboardPath = getDashboardPath();
+  
+  // Check if this hash is registered for this dashboard
+  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
+  const popupContext = dashboardPopups?.get(currentHash);
+  
+  if (popupContext) {
+    // First visually close the popup
+    closePopup(popupContext);
     
-    const currentHash = location.hash;
-    window.pendingHashChange = true;
-    
-    setTimeout(() => {
-        // If hash changed during the delay, it means we're transitioning between popups
-        if (location.hash && location.hash !== currentHash) {
-            window.pendingHashChange = false;
-            return;
-        }
-        
-        // If hash hasn't changed or was removed, proceed with removing it
-        if (location.hash === currentHash) {
-            const newURL = window.location.href.split('#')[0];
-            history.pushState(null, "", newURL);
-            window.dispatchEvent(new Event('location-changed'));
-        }
-        
-        window.pendingHashChange = false;
-    }, 10);
+    // Then modify the URL
+    const newURL = window.location.href.split('#')[0];
+    history.pushState(null, "", newURL);
+    window.dispatchEvent(new Event('location-changed'));
+  } else {
+    // Default behavior if not found in the registry
+    const newURL = window.location.href.split('#')[0];
+    history.pushState(null, "", newURL);
+    window.dispatchEvent(new Event('location-changed'));
+  }
 }
 
 export function addHash(hash) {
-    const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
-    history.pushState(null, "", newURL);
-    window.dispatchEvent(new Event('location-changed'));
+  if (!hash) return;
+  
+  const formattedHash = hash.startsWith('#') ? hash : `#${hash}`;
+  
+  // Close any active pop-up on this dashboard before opening a new one
+  const dashboardPath = getDashboardPath();
+  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
+  
+  if (dashboardPopups) {
+    dashboardPopups.forEach((context, popupHash) => {
+      if (popupHash !== formattedHash && context.popUp.classList.contains('is-popup-opened')) {
+        closePopup(context);
+      }
+    });
+  }
+  
+  // Modify the URL
+  const newURL = window.location.href.split('#')[0] + formattedHash;
+  history.pushState(null, "", newURL);
+  window.dispatchEvent(new Event('location-changed'));
 }
 
 export function hideContent(context, delay) {
@@ -225,88 +302,22 @@ function clearAllTimeouts(context) {
     });
 }
 
-export function openPopup(context) {
-    if (context.popUp.classList.contains('is-popup-opened')) return;
-
-    clearAllTimeouts(context);
-    
-    // Close any existing active popup that isn't this one
-    if (window.activePopup && window.activePopup !== context.popUp) {
-        const activeContext = window.activePopup._context;
-        if (activeContext) {
-            closePopup(activeContext, true);
-        }
-    }
-    
-    // Set this popup as the active one and store a reference to its context
-    window.activePopup = context.popUp;
-    context.popUp._context = context;
-    
-    const { popUp } = context;
-    
-    if (!context.verticalStack.contains(popUp)) {
-        appendPopup(context, true);
-    }
-
-    requestAnimationFrame(() => {
-        toggleBackdrop(context, true);
-        updatePopupClass(popUp, true);
-        displayContent(context);
-    });
-
-    updateListeners(context, true);
-
-    if (context.config.auto_close > 0) {
-        context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
-    }
-
-    toggleBodyScroll(true);
-
-    if (context.config.open_action) {
-        callAction(context.popUp, context.config, 'open_action');
-    }
-}
-
-export function closePopup(context, force = false) {
-    if (!context.popUp.classList.contains('is-popup-opened') && !force) return;
-    
-    clearAllTimeouts(context);
-    
-    // Clear the active popup reference if this is the active one
-    if (window.activePopup === context.popUp) {
-        window.activePopup = null;
-    }
-    
-    updatePopupClass(context.popUp, false);
-    toggleBackdrop(context, false);
-
-    const animationDuration = 300;
-
-    context.removeDomTimeout = setTimeout(() => {
-        appendPopup(context, false);
-        hideContent(context, 0);
-    }, animationDuration);
-
-    updateListeners(context, false);
-    toggleBodyScroll(false);
-
-    if (context.config.close_action) {
-        callAction(context, context.config, 'close_action');
-    }
-}
-
 export function onUrlChange(context) {
-    return () => {
-       if (context.config.hash === location.hash) {
-            requestAnimationFrame(() => {
-                openPopup(context);
-            });
-        } else {
-            requestAnimationFrame(() => {
-                closePopup(context);
-            });
-        }
-    };
+  return () => {
+    // Detect dashboard changes
+    trackDashboardChange();
+    
+    // Then handle opening/closing based on the hash
+    if (context.config.hash === location.hash) {
+      requestAnimationFrame(() => {
+        openPopup(context);
+      });
+    } else {
+      requestAnimationFrame(() => {
+        closePopup(context);
+      });
+    }
+  };
 }
 
 export function onEditorChange(context) {
@@ -374,7 +385,10 @@ export function cleanupContext(context) {
     
     updateListeners(context, false);
     
-    // Clear the active popup reference if this is the active one
+    // Unregister this popup
+    unregisterPopup(context);
+    
+    // Clean up the active popup reference if necessary
     if (window.activePopup === context.popUp) {
         window.activePopup = null;
     }
@@ -436,4 +450,81 @@ export function createTouchHandlers(context) {
         handleTouchMove: context.handleTouchMove,
         handleTouchEnd: context.handleTouchEnd
     };
+}
+
+export function openPopup(context) {
+  if (context.popUp.classList.contains('is-popup-opened')) return;
+
+  clearAllTimeouts(context);
+  
+  // Ensure the popup is registered
+  registerPopup(context);
+  
+  // Close any other active pop-up on this dashboard
+  const dashboardPath = getDashboardPath();
+  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
+  
+  if (dashboardPopups) {
+    dashboardPopups.forEach((otherContext, hash) => {
+      if (otherContext !== context && otherContext.popUp.classList.contains('is-popup-opened')) {
+        closePopup(otherContext, true);
+      }
+    });
+  }
+  
+  // Set this popup as active
+  window.activePopup = context.popUp;
+  context.popUp._context = context;
+  
+  const { popUp } = context;
+  
+  if (!context.verticalStack.contains(popUp)) {
+    appendPopup(context, true);
+  }
+
+  requestAnimationFrame(() => {
+    toggleBackdrop(context, true);
+    updatePopupClass(popUp, true);
+    displayContent(context);
+  });
+
+  updateListeners(context, true);
+
+  if (context.config.auto_close > 0) {
+    context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
+  }
+
+  toggleBodyScroll(true);
+
+  if (context.config.open_action) {
+    callAction(context.popUp, context.config, 'open_action');
+  }
+}
+
+export function closePopup(context, force = false) {
+    if (!context.popUp.classList.contains('is-popup-opened') && !force) return;
+    
+    clearAllTimeouts(context);
+    
+    // Clear the active popup reference if this is the active one
+    if (window.activePopup === context.popUp) {
+        window.activePopup = null;
+    }
+    
+    updatePopupClass(context.popUp, false);
+    toggleBackdrop(context, false);
+
+    const animationDuration = 300;
+
+    context.removeDomTimeout = setTimeout(() => {
+        appendPopup(context, false);
+        hideContent(context, 0);
+    }, animationDuration);
+
+    updateListeners(context, false);
+    toggleBodyScroll(false);
+
+    if (context.config.close_action) {
+        callAction(context, context.config, 'close_action');
+    }
 }
