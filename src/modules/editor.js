@@ -52,17 +52,17 @@ export function makeModulesEditor(context) {
   version: ''
   description: Empty and enabled by default. Add your custom styles and/or JS templates here to apply them to all cards by pressing the <ha-icon icon="mdi:pencil"></ha-icon> button above.
   code: '{}'
-`;
+  `;
     
-    // Install the default module
-    installManualModule(context, defaultModuleYaml)
-      .then(() => {
-        console.info("Default module created automatically");
-        context.requestUpdate();
-      })
-      .catch(error => {
-        console.error("Error creating default module:", error);
-      });
+  // Install the default module
+  installManualModule(context, defaultModuleYaml)
+    .then(() => {
+      console.info("Default module created automatically");
+      context.requestUpdate();
+    })
+    .catch(error => {
+      console.error("Error creating default module:", error);
+    });
   }
 
   // Check for available module updates
@@ -113,7 +113,7 @@ export function makeModulesEditor(context) {
       <h4 slot="header">
         <ha-icon icon="mdi:puzzle"></ha-icon>
         Modules
-        ${moduleUpdates.hasUpdates ? html`
+        ${moduleUpdates.hasUpdates && entityExists ? html`
           <span class="bubble-badge update-badge" style="margin-left: 8px; font-size: 0.8em; vertical-align: middle;">
             <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
             ${moduleUpdates.updateCount} update${moduleUpdates.updateCount > 1 ? 's' : ''} available
@@ -123,31 +123,35 @@ export function makeModulesEditor(context) {
       <div class="content">
 
         ${!entityExists ? html`
-          <!-- Warning about missing persistent entity -->
-          <div class="bubble-info warning">
-            <h4 class="bubble-section-title">
-              <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-              Persistent storage not configured
-            </h4>
-            <div class="content">
-              <p>Your modules will only be saved locally and won't persist across Home Assistant restarts.</p>
-              <p>To enable persistent module storage, add this to your <code>configuration.yaml</code> file:</p>
-              <pre><code>
-# Persistent storage for Bubble Card modules
+            <div class="bubble-info warning">
+              <h4 class="bubble-section-title">
+                <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
+                Configuration required
+              </h4>
+              <div class="content">
+                <p>The storage entity <code>sensor.bubble_card_modules</code> is not configured in your Home Assistant instance.</p>
+                <hr />
+                <p><b>To use the Module Store and the Module Editor, follow these steps:</b></p>
+
+                <p>1. Add the following to your <code>configuration.yaml</code> file:</p>
+                <code-block><pre>
+# Storage for Bubble Card Modules
 template:
-  - trigger:
-      - platform: event
+  - triggers:
+      - trigger: event
         event_type: bubble_card_update_modules
     sensor:
       - name: "Bubble Card Modules"
         state: "saved"
+        icon: "mdi:puzzle"
         attributes:
           modules: "{{ trigger.event.data.modules }}"
           last_updated: "{{ trigger.event.data.last_updated }}"
-              </code></pre>
-              <p>Then save the file and restart Home Assistant. This warning will disappear if everything is setup correctly.</p>
+                </pre></code-block>
+                <p>2. Save the file and restart Home Assistant</p>
+                <p>3. Enjoy the Module Store and the Module Editor!</p>
+              </div>
             </div>
-          </div>
         ` : ''}
 
         <div id="module-editor-top-marker"></div>
@@ -165,7 +169,7 @@ template:
             <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
             My Modules
           </paper-tab>
-          <paper-tab>
+          <paper-tab class="${!entityExists ? 'disabled' : ''}">
             <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
             Module Store
           </paper-tab>
@@ -258,7 +262,7 @@ template:
                 : [];
               
               // Check if this module has an update
-              const hasUpdate = moduleUpdates.modules.some(m => m.id === key);
+              const hasUpdate = moduleUpdates.modules.some(m => m.id === key) && entityExists;
               const moduleUpdate = hasUpdate ? moduleUpdates.modules.find(m => m.id === key) : null;
 
               return html`
@@ -379,7 +383,7 @@ template:
           `}
 
           <hr>
-          ${!context._showNewModuleForm && !context._editingModule ? html`
+          ${!context._showNewModuleForm && !context._editingModule && entityExists ? html`
           <div class="module-editor-buttons-container" style="display: flex;">
             <button class="icon-button" style="flex: 1;" @click=${() => {
               context._showNewModuleForm = true;

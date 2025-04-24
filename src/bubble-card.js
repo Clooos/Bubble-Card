@@ -267,38 +267,19 @@ class BubbleCard extends HTMLElement {
     }
 }
 
-function registerBubbleCard() {
-  try {
-    if (!customElements.get("bubble-card")) {
-      customElements.define("bubble-card", BubbleCard);
-    }
-    
-    window.customCards = window.customCards || [];
-    
-    const isAlreadyRegistered = window.customCards.some(card => card.type === "bubble-card");
-    
-    if (!isAlreadyRegistered) {
-      window.customCards.push({
-        type: "bubble-card",
-        name: "Bubble Card",
-        preview: false,
-        description: "A minimalist card collection with a nice pop-up touch.",
-        documentationURL: "https://github.com/Clooos/Bubble-Card/"
-      });
-    }
-    
-    console.info(
-      `%c Bubble Card %c ${version} `,
-      'background-color: #555;color: #fff;padding: 3px 2px 3px 3px;border-radius: 14px 0 0 14px;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)',
-      'background-color: #506eac;color: #fff;padding: 3px 3px 3px 2px;border-radius: 0 14px 14px 0;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)'
-    );
-    
-  } catch (e) {
-    console.error("Error registering Bubble Card, retrying in 1 second", e);
-    setTimeout(() => {
-      registerBubbleCard();
-    }, 1000);
-  }
-}
+customElements.define("bubble-card", BubbleCard);
 
-registerBubbleCard();
+window.customCards = window.customCards || [];
+window.customCards.push({
+    type: "bubble-card",
+    name: "Bubble Card",
+    preview: false,
+    description: "A minimalist card collection with a nice pop-up touch.",
+    documentationURL: "https://github.com/Clooos/Bubble-Card/"
+});
+
+console.info(
+    `%c Bubble Card %c ${version} `,
+    'background-color: #555;color: #fff;padding: 3px 2px 3px 3px;border-radius: 14px 0 0 14px;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)',
+    'background-color: #506eac;color: #fff;padding: 3px 3px 3px 2px;border-radius: 0 14px 14px 0;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)'
+);
