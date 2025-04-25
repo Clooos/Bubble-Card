@@ -7,8 +7,8 @@
   height: 100%;
   z-index: 4;
   opacity: 0;
-  transition: opacity 0.2s;
-  transition-delay: 0.1s;
+  transition: opacity 0.3s;
+  transition-delay: .1s;
   display: flex;
   backdrop-filter: var(--custom-backdrop-filter);
   -webkit-backdrop-filter: var(--custom-backdrop-filter);

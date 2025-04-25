@@ -15,12 +15,7 @@ export function changeEditor(context) {
     const wasEditorActive = context.previousEditorState;
     
     if (context.detectedEditor && !context.dialogClosedListenerAdded) {
-        window.addEventListener("dialog-closed", (e) => {
-            const dialogEvent = e.detail?.dialog;
-            if (dialogEvent !== 'hui-dialog-edit-card') {
-                return;
-            }
-
+        window.addEventListener("dialog-closed", () => {
             if (elements?.popUpContainer) {
                 elements.popUpContainer.classList.add('editor-cropped');
             }

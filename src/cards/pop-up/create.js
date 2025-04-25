@@ -1,9 +1,9 @@
+import { html, render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
-import { onUrlChange, removeHash, hideContent, registerPopup } from "./helpers.js";
+import { onUrlChange, removeHash, hideContent } from "./helpers.js";
 import styles from "./styles.css";
 import backdropStyles from "./backdrop.css";
-import { html, render } from "lit";
 
 let backdrop;
 let hideBackdrop = false;
@@ -116,10 +116,6 @@ export function createHeader(context) {
 
 export function createStructure(context) {
   try {
-    if (!context.popUp) {
-      return;
-    }
-
     context.elements.style = createElement('style');
     context.elements.style.innerText = styles;
 
@@ -172,6 +168,8 @@ export function createStructure(context) {
       lastTouchY = event.touches[0].clientY;
     };
 
+    //context.popUp.addEventListener('touchmove', context.handleTouchMove, { passive: true });
+
     const existingContainer = context.popUp.querySelector('.bubble-pop-up-container');
     if (existingContainer === null) {
 
@@ -221,10 +219,6 @@ export function prepareStructure(context) {
 
     context.elements = {};
     getBackdrop(context);
-    
-    if (context.config.hash) {
-      registerPopup(context);
-    }
 
     if (context.cardTitle) context.cardTitle.style.display = 'none';
     hideBackdrop = hideBackdrop || (context.config.hide_backdrop ?? true);

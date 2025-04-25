@@ -1,6 +1,8 @@
-import { changeEditor, changeStyle, changeTriggered } from './changes.js';
+import { changeEditor, changeIcon, changeLight, changeName, changeState, changeStatus, changeStyle, changeTriggered } from './changes.js';
 import { createHeader, createStructure, prepareStructure } from './create.js';
+import { configChanged } from "../../tools/utils.js";
 import { handleButton } from "../../cards/button/index.js";
+import { getButtonType } from "../../cards/button/helpers.js";
 
 export async function handlePopUp(context) {
   if (context.cardType !== "pop-up") {
@@ -14,15 +16,11 @@ export async function handlePopUp(context) {
       createStructure(context);
   } else if (context.popUp && context.elements) {
       if ((context.config.hash === location.hash || context.editor) || context.config !== context.previousConfig) {
-          if (context.config.entity || context.config.name) {
-              requestAnimationFrame(() => {
-                  handleButton(context, context.elements.header);
-              });
-          }
+          changeStyle(context);
 
-          requestAnimationFrame(() => {
-              changeStyle(context);
-          });
+          if (context.config.entity || context.config.name) {
+              handleButton(context, context.elements.header);
+          }
 
           context.previousConfig = context.config;
       }
@@ -30,9 +28,7 @@ export async function handlePopUp(context) {
       if (!context.editor) {
           changeTriggered(context);
       }
-
-      requestAnimationFrame(() => {
-          changeEditor(context);
-      });
+      
+      changeEditor(context);
   }
 }

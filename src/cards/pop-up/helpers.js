@@ -2,69 +2,18 @@ import { getBackdrop } from "./create.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll } from "../../tools/utils.js";
 
-const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER']);
-
-window.pendingHashChange = false;
-window.activePopup = null;
-
-window.popupRegistry = window.popupRegistry || {
-  byDashboard: new Map(),
-  currentDashboard: null
+const popupState = {
+  hashRecentlyAdded: false,
+  scrollY: 0,
+  currentHash: null,
+  hashChangeProtection: false,
+  isAnimating: false,
+  animationDuration: 300, // Animation duration in ms
+  activePopups: new Set(), // Track active popups
+  entityTriggeredPopup: null // Reference to entity-triggered popup
 };
 
-export function getDashboardPath() {
-  return window.location.pathname;
-}
-
-export function registerPopup(context) {
-  const dashboardPath = getDashboardPath();
-  const popupHash = context.config.hash;
-  
-  if (!popupHash) return;
-  
-  // Initialize registry if it doesn't exist
-  if (!window.popupRegistry.byDashboard.has(dashboardPath)) {
-    window.popupRegistry.byDashboard.set(dashboardPath, new Map());
-  }
-  
-  // Register this popup in the registry
-  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
-  dashboardPopups.set(popupHash, context);
-  
-  // Update current dashboard
-  window.popupRegistry.currentDashboard = dashboardPath;
-}
-
-export function unregisterPopup(context) {
-  const dashboardPath = getDashboardPath();
-  const popupHash = context.config.hash;
-  
-  if (!popupHash || !window.popupRegistry.byDashboard.has(dashboardPath)) return;
-  
-  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
-  dashboardPopups.delete(popupHash);
-}
-
-export function trackDashboardChange() {
-  const currentPath = getDashboardPath();
-  
-  // If we've changed dashboard
-  if (window.popupRegistry.currentDashboard !== currentPath) {
-    // Close all pop-ups from the old dashboard
-    if (window.popupRegistry.currentDashboard) {
-      const oldDashboardPopups = window.popupRegistry.byDashboard.get(window.popupRegistry.currentDashboard);
-      if (oldDashboardPopups) {
-        oldDashboardPopups.forEach(context => {
-          if (context.popUp.classList.contains('is-popup-opened')) {
-            closePopup(context, true);
-          }
-        });
-      }
-    }
-    
-    window.popupRegistry.currentDashboard = currentPath;
-  }
-}
+const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER']);
 
 export function clickOutside(event, context) {
     if (!(context.config.close_by_clicking_outside ?? true)) return;
@@ -80,69 +29,37 @@ export function clickOutside(event, context) {
 }
 
 function resetCloseTimeout(context) { 
-    if (!context.config.auto_close || !context.closeTimeout) return;
-
+    if(!context.config.auto_close || !context.closeTimeout) return;
     clearTimeout(context.closeTimeout);
     context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
 }
 
 export function removeHash() {
-  if (!location.hash) return;
-  
-  const currentHash = location.hash;
-  const dashboardPath = getDashboardPath();
-  
-  // Check if this hash is registered for this dashboard
-  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
-  const popupContext = dashboardPopups?.get(currentHash);
-  
-  if (popupContext) {
-    // First visually close the popup
-    closePopup(popupContext);
+    if (popupState.hashRecentlyAdded || !location.hash || popupState.hashChangeProtection) return;
     
-    // Then modify the URL
-    const newURL = window.location.href.split('#')[0];
-    history.pushState(null, "", newURL);
-    window.dispatchEvent(new Event('location-changed'));
-  } else {
-    // Default behavior if not found in the registry
-    const newURL = window.location.href.split('#')[0];
-    history.pushState(null, "", newURL);
-    window.dispatchEvent(new Event('location-changed'));
-  }
+    setTimeout(() => {
+        if (popupState.hashChangeProtection) return;
+        
+        const newURL = window.location.href.split('#')[0];
+        history.replaceState(null, "", newURL);
+        window.dispatchEvent(new Event('location-changed'));
+    }, 50);
 }
 
 export function addHash(hash) {
-  if (!hash) return;
-  
-  const formattedHash = hash.startsWith('#') ? hash : `#${hash}`;
-  
-  // Close any active pop-up on this dashboard before opening a new one
-  const dashboardPath = getDashboardPath();
-  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
-  
-  if (dashboardPopups) {
-    dashboardPopups.forEach((context, popupHash) => {
-      if (popupHash !== formattedHash && context.popUp.classList.contains('is-popup-opened')) {
-        closePopup(context);
-      }
-    });
-  }
-  
-  // Modify the URL
-  const newURL = window.location.href.split('#')[0] + formattedHash;
-  history.pushState(null, "", newURL);
-  window.dispatchEvent(new Event('location-changed'));
+    popupState.hashChangeProtection = true;
+    
+    const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
+    history.pushState(null, "", newURL);
+    window.dispatchEvent(new Event('location-changed'));
+    
+    setTimeout(() => {
+        popupState.hashChangeProtection = false;
+    }, 200);
 }
 
 export function hideContent(context, delay) {
-    if (context.config.background_update) {
-        context.popUp.style.display = 'none';
-        return;
-    } else if (context.editor) {
-        return;
-    }
-
+    if (context.editor) return;
     context.hideContentTimeout = setTimeout(() => {
         const { sectionRow, sectionRowContainer } = context;
         if (sectionRow?.tagName.toLowerCase() === 'hui-card') {
@@ -156,11 +73,6 @@ export function hideContent(context, delay) {
 }
 
 export function displayContent(context) {
-    if (context.config.background_update) {
-        context.popUp.style.display = '';
-        return;
-    }
-
     const { sectionRow, sectionRowContainer, popUp } = context;
     popUp.style.transform = '';
     if (sectionRow?.tagName.toLowerCase() === 'hui-card') {
@@ -174,9 +86,7 @@ export function displayContent(context) {
 
 function toggleBackdrop(context, show) {
     const { showBackdrop, hideBackdrop } = getBackdrop(context);
-    requestAnimationFrame(() => {
-        show ? showBackdrop() : hideBackdrop();
-    });
+    show ? showBackdrop() : hideBackdrop();
 }
 
 export function appendPopup(context, append) {
@@ -185,15 +95,23 @@ export function appendPopup(context, append) {
 
     if (append) {
         context.verticalStack.appendChild(context.popUp);
-    } else if (context.verticalStack?.contains(context.popUp) && !context.config.background_update) {
+    } else {
         context.verticalStack.removeChild(context.popUp);
     }
 }
 
 function updatePopupClass(popUp, open) {
+    // Set animation flag to prevent simultaneous animations
+    popupState.isAnimating = true;
+    
     requestAnimationFrame(() => {
         popUp.classList.toggle('is-popup-opened', open);
         popUp.classList.toggle('is-popup-closed', !open);
+        
+        // Clear animation flag after animation completes
+        setTimeout(() => {
+            popupState.isAnimating = false;
+        }, popupState.animationDuration);
     });
 }
 
@@ -302,22 +220,168 @@ function clearAllTimeouts(context) {
     });
 }
 
-export function onUrlChange(context) {
-  return () => {
-    // Detect dashboard changes
-    trackDashboardChange();
+export function openPopup(context) {
+    // If popup is already open, return
+    if (context.popUp.classList.contains('is-popup-opened')) return;
     
-    // Then handle opening/closing based on the hash
-    if (context.config.hash === location.hash) {
-      requestAnimationFrame(() => {
-        openPopup(context);
-      });
-    } else {
-      requestAnimationFrame(() => {
-        closePopup(context);
-      });
+    // Check if another popup is active
+    if (popupState.activePopups.size > 0) {
+        // If this popup is triggered by entity state, close all other popups first
+        if (context.config.triggered_by_entity) {
+            // Close all active popups
+            closeAllPopupsExcept(context);
+            // Store reference to entity-triggered popup
+            popupState.entityTriggeredPopup = context;
+        } 
+        // If a popup triggered by entity is already open, don't open hash-triggered popups
+        else if (popupState.entityTriggeredPopup && !context.config.triggered_by_entity) {
+            return;
+        }
     }
-  };
+    
+    if (popupState.isAnimating) {
+        // Defer opening until current animation completes
+        setTimeout(() => openPopup(context), popupState.animationDuration / 2);
+        return;
+    }
+
+    clearAllTimeouts(context);
+    
+    const { popUp } = context;
+    
+    if (!context.verticalStack.contains(popUp)) {
+        appendPopup(context, true);
+    }
+
+    // Add to active popups set
+    popupState.activePopups.add(context);
+    
+    // If this is an entity-triggered popup, store reference
+    if (context.config.triggered_by_entity) {
+        popupState.entityTriggeredPopup = context;
+    }
+
+    // Use a single requestAnimationFrame for better performance
+    requestAnimationFrame(() => {
+        toggleBackdrop(context, true);
+        updatePopupClass(popUp, true);
+        displayContent(context);
+        
+        updateListeners(context, true);
+        
+        if (context.config.auto_close > 0) {
+            context.closeTimeout = setTimeout(() => {
+                removeHash();
+                closePopup(context);
+            }, context.config.auto_close);
+        }
+        
+        toggleBodyScroll(true);
+        
+        // Trigger open_action after animation completes for better performance
+        if (context.config.open_action) {
+            setTimeout(() => {
+                callAction(context.popUp, context.config, 'open_action');
+            }, 50);
+        }
+    });
+}
+
+export function closePopup(context, force = false) {
+    if ((!context.popUp.classList.contains('is-popup-opened') && !force)) return;
+    
+    clearAllTimeouts(context);
+    
+    // Remove from active popups set
+    popupState.activePopups.delete(context);
+    
+    // If this was an entity-triggered popup, clear the reference
+    if (popupState.entityTriggeredPopup === context) {
+        popupState.entityTriggeredPopup = null;
+    }
+    
+    updatePopupClass(context.popUp, false);
+    toggleBackdrop(context, false);
+
+    // Use the shared animation duration constant
+    context.removeDomTimeout = setTimeout(() => {
+        appendPopup(context, false);
+        hideContent(context, 0);
+    }, popupState.animationDuration);
+
+    updateListeners(context, false);
+    toggleBodyScroll(false);
+
+    if (context.config.close_action) {
+        // Defer close action execution for better performance
+        setTimeout(() => {
+            callAction(context, context.config, 'close_action');
+        }, 50);
+    }
+}
+
+// Helper function to close all popups except the specified one
+function closeAllPopupsExcept(exceptContext) {
+    for (const popupContext of popupState.activePopups) {
+        if (popupContext !== exceptContext) {
+            // Close the popup
+            closePopup(popupContext, true);
+            
+            // If it was hash-triggered, also remove the hash
+            if (popupContext.config.hash && location.hash === popupContext.config.hash) {
+                // Temporarily enable hash removal even during protection
+                const wasProtected = popupState.hashChangeProtection;
+                popupState.hashChangeProtection = false;
+                removeHash();
+                popupState.hashChangeProtection = wasProtected;
+            }
+        }
+    }
+}
+
+export function onUrlChange(context) {
+    return () => {
+       if (context.config.hash === location.hash) {
+            // If entity-triggered popup is active and this is hash-triggered, don't open
+            if (popupState.entityTriggeredPopup && !context.config.triggered_by_entity) {
+                return;
+            }
+            
+            popupState.hashRecentlyAdded = true;
+            popupState.currentHash = location.hash;
+            
+            // Enable protection during hash change handling
+            popupState.hashChangeProtection = true;
+            
+            setTimeout(() => {
+                popupState.hashRecentlyAdded = false;
+                // Keep protection for a bit longer than hashRecentlyAdded
+                setTimeout(() => {
+                    popupState.hashChangeProtection = false;
+                }, 100);
+            }, 100);
+            
+            // If animations are in progress, wait before opening
+            if (popupState.isAnimating) {
+                setTimeout(() => {
+                    requestAnimationFrame(() => {
+                        openPopup(context);
+                    });
+                }, popupState.animationDuration / 2);
+            } else {
+                requestAnimationFrame(() => {
+                    openPopup(context);
+                });
+            }
+        } else {
+            requestAnimationFrame(() => {
+                // Only close this popup if it's the one with the matching hash
+                if (context.config.hash && context.config.hash !== location.hash) {
+                    closePopup(context);
+                }
+            });
+        }
+    };
 }
 
 export function onEditorChange(context) {
@@ -341,33 +405,22 @@ export function onEditorChange(context) {
 }
 
 function setupVisibilityObserver(context) {
-    // Clean up existing observer
     if (context.observer) {
         context.observer.disconnect();
         context.observer = null;
     }
 
-    // Check if we're in editor mode
     if (context.sectionRow) {
-        // Use a lighter observer with less sensitivity
         const observer = new IntersectionObserver((entries) => {
-            // Limit the frequency of checks
-            if (!context.observerThrottled) {
-                context.observerThrottled = true;
-                setTimeout(() => {
-                    context.observerThrottled = false;
-                }, 100); // Throttle to 100ms
-                
-                entries.forEach(entry => {
-                    const isEditorActive = context.editor || context.detectedEditor;
-                    if (entry.isIntersecting && !context.verticalStack.contains(context.popUp) && isEditorActive) {
-                        context.verticalStack.appendChild(context.popUp);
-                    }
-                });
-            }
+            entries.forEach(entry => {
+                const isEditorActive = context.editor || context.detectedEditor;
+                if (entry.isIntersecting && !context.verticalStack.contains(context.popUp) && isEditorActive) {
+                    context.verticalStack.appendChild(context.popUp);
+                }
+            });
         }, {
-            rootMargin: '0px', // Reduce the margin
-            threshold: 0.1 // Increase the threshold for fewer triggers
+            rootMargin: '100px',
+            threshold: 0.01
         });
 
         observer.observe(context.sectionRow);
@@ -385,12 +438,12 @@ export function cleanupContext(context) {
     
     updateListeners(context, false);
     
-    // Unregister this popup
-    unregisterPopup(context);
+    // Remove from active popups set
+    popupState.activePopups.delete(context);
     
-    // Clean up the active popup reference if necessary
-    if (window.activePopup === context.popUp) {
-        window.activePopup = null;
+    // If this was an entity-triggered popup, clear the reference
+    if (popupState.entityTriggeredPopup === context) {
+        popupState.entityTriggeredPopup = null;
     }
     
     if (context.popUp && context.popUp.parentNode) {
@@ -450,81 +503,4 @@ export function createTouchHandlers(context) {
         handleTouchMove: context.handleTouchMove,
         handleTouchEnd: context.handleTouchEnd
     };
-}
-
-export function openPopup(context) {
-  if (context.popUp.classList.contains('is-popup-opened')) return;
-
-  clearAllTimeouts(context);
-  
-  // Ensure the popup is registered
-  registerPopup(context);
-  
-  // Close any other active pop-up on this dashboard
-  const dashboardPath = getDashboardPath();
-  const dashboardPopups = window.popupRegistry.byDashboard.get(dashboardPath);
-  
-  if (dashboardPopups) {
-    dashboardPopups.forEach((otherContext, hash) => {
-      if (otherContext !== context && otherContext.popUp.classList.contains('is-popup-opened')) {
-        closePopup(otherContext, true);
-      }
-    });
-  }
-  
-  // Set this popup as active
-  window.activePopup = context.popUp;
-  context.popUp._context = context;
-  
-  const { popUp } = context;
-  
-  if (!context.verticalStack.contains(popUp)) {
-    appendPopup(context, true);
-  }
-
-  requestAnimationFrame(() => {
-    toggleBackdrop(context, true);
-    updatePopupClass(popUp, true);
-    displayContent(context);
-  });
-
-  updateListeners(context, true);
-
-  if (context.config.auto_close > 0) {
-    context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
-  }
-
-  toggleBodyScroll(true);
-
-  if (context.config.open_action) {
-    callAction(context.popUp, context.config, 'open_action');
-  }
-}
-
-export function closePopup(context, force = false) {
-    if (!context.popUp.classList.contains('is-popup-opened') && !force) return;
-    
-    clearAllTimeouts(context);
-    
-    // Clear the active popup reference if this is the active one
-    if (window.activePopup === context.popUp) {
-        window.activePopup = null;
-    }
-    
-    updatePopupClass(context.popUp, false);
-    toggleBackdrop(context, false);
-
-    const animationDuration = 300;
-
-    context.removeDomTimeout = setTimeout(() => {
-        appendPopup(context, false);
-        hideContent(context, 0);
-    }, animationDuration);
-
-    updateListeners(context, false);
-    toggleBodyScroll(false);
-
-    if (context.config.close_action) {
-        callAction(context, context.config, 'close_action');
-    }
 }

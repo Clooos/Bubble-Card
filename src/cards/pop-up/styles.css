@@ -175,7 +175,6 @@
 }
 
 .no-header .bubble-header-container {
-    opacity: 0 !important;
     visibility: hidden !important;
     height: 0px !important;
 }
