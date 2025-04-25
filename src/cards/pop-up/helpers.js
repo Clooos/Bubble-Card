@@ -59,7 +59,13 @@ export function addHash(hash) {
 }
 
 export function hideContent(context, delay) {
-    if (context.editor) return;
+    if (context.config.background_update) {
+        context.popUp.style.display = 'none';
+        return;
+    } else if (context.editor) {
+        return;
+    }
+
     context.hideContentTimeout = setTimeout(() => {
         const { sectionRow, sectionRowContainer } = context;
         if (sectionRow?.tagName.toLowerCase() === 'hui-card') {
@@ -73,6 +79,11 @@ export function hideContent(context, delay) {
 }
 
 export function displayContent(context) {
+    if (context.config.background_update) {
+        context.popUp.style.display = '';
+        return;
+    }
+
     const { sectionRow, sectionRowContainer, popUp } = context;
     popUp.style.transform = '';
     if (sectionRow?.tagName.toLowerCase() === 'hui-card') {
@@ -91,11 +102,10 @@ function toggleBackdrop(context, show) {
 
 export function appendPopup(context, append) {
     if (context.config.background_update) return;
-    const action = append ? 'appendChild' : 'removeChild';
 
     if (append) {
         context.verticalStack.appendChild(context.popUp);
-    } else {
+    } else if (!append && !context.config.background_update) {
         context.verticalStack.removeChild(context.popUp);
     }
 }
@@ -446,7 +456,7 @@ export function cleanupContext(context) {
         popupState.entityTriggeredPopup = null;
     }
     
-    if (context.popUp && context.popUp.parentNode) {
+    if (context.popUp && context.popUp.parentNode && !context.config.background_update) {
         context.popUp.parentNode.removeChild(context.popUp);
     }
     
