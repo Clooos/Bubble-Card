@@ -16,11 +16,11 @@ export async function handlePopUp(context) {
       createStructure(context);
   } else if (context.popUp && context.elements) {
       if ((context.config.hash === location.hash || context.editor) || context.config !== context.previousConfig) {
-          changeStyle(context);
-
           if (context.config.entity || context.config.name) {
               handleButton(context, context.elements.header);
           }
+
+          changeStyle(context);
 
           context.previousConfig = context.config;
       }
