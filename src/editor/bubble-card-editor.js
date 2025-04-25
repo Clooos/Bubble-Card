@@ -26,7 +26,9 @@ import moduleStyles from '../modules/styles.css';
 class BubbleCardEditor extends LitElement {
 
     setConfig(config) {
-        this._config = config;
+        this._config = {
+            ...config
+        };
     }
 
     static get properties() {
@@ -816,31 +818,77 @@ class BubbleCardEditor extends LitElement {
       return;
     }
 
-    const { configValue, checked } = target;
-    if (configValue) {
-      const value = checked !== undefined ? checked : rawValue;
-      const configKeys = configValue.split('.');
-      let obj = this._config;
-
-      for (let i = 0; i < configKeys.length - 1; i++) {
-        obj[configKeys[i]] = obj[configKeys[i]] || {};
-        obj = obj[configKeys[i]];
+    // Create a new config object to avoid mutating the original config
+    let newConfig;
+    try {
+      newConfig = { ...this._config };
+      
+      const { configValue, checked } = target;
+      if (configValue) {
+        const value = checked !== undefined ? checked : rawValue;
+        const configKeys = configValue.split('.');
+        
+        // For nested properties, we need to clone progressively the structure
+        if (configKeys.length > 1) {
+          let tempConfig = newConfig;
+          let path = '';
+          
+          for (let i = 0; i < configKeys.length - 1; i++) {
+            const key = configKeys[i];
+            path = path ? `${path}.${key}` : key;
+            
+            // Create the object if it doesn't exist
+            if (!tempConfig[key]) tempConfig[key] = {};
+            
+            // Clone the object to ensure it is extensible
+            tempConfig[key] = { ...tempConfig[key] };
+            tempConfig = tempConfig[key];
+          }
+          
+          // Update the value
+          const lastKey = configKeys[configKeys.length - 1];
+          if (ev.type === 'input') {
+            tempConfig[lastKey] = rawValue;
+          } else if (detail && tempConfig[lastKey] !== detail.value) {
+            tempConfig[lastKey] = detail.value;
+          } else if (target.tagName === 'HA-SWITCH') {
+            tempConfig[lastKey] = rawValue;
+          }
+        } else {
+          // Simple case - top level key
+          const key = configKeys[0];
+          if (ev.type === 'input') {
+            newConfig[key] = rawValue;
+          } else if (detail && newConfig[key] !== detail.value) {
+            newConfig[key] = detail.value;
+          } else if (target.tagName === 'HA-SWITCH') {
+            newConfig[key] = rawValue;
+          }
+        }
+      } else {
+        newConfig = detail.value;
       }
-
-      // If the event is of type 'input', update the configuration directly with the input's value
-      if (ev.type === 'input') {
-        obj[configKeys[configKeys.length - 1]] = rawValue;
-      } else if (detail && obj[configKeys[configKeys.length - 1]] !== detail.value) {
-        obj[configKeys[configKeys.length - 1]] = detail.value;
-      } else if (target.tagName === 'HA-SWITCH') {
-        obj[configKeys[configKeys.length - 1]] = rawValue;
+      
+      // Update this._config with the new config
+      this._config = newConfig;
+      
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de la configuration:", error);
+      
+      // If an error occurs, try to update directly with the new config
+      if (configValue && detail) {
+        const simpleConfig = { ...this._config };
+        simpleConfig[configValue] = detail.value;
+        newConfig = simpleConfig;
+      } else if (detail) {
+        newConfig = detail.value;
+      } else {
+        return; // Do nothing if we can't retrieve the value
       }
-    } else {
-      this._config = detail.value;
     }
 
-    fireEvent(this, "config-changed", { config: this._config });
-    //this.requestUpdate();
+    // Emit the event with the new configuration
+    fireEvent(this, "config-changed", { config: newConfig });
   }
 
   _arrayValueChange(index, value, array) {

@@ -137,7 +137,7 @@ export function makeModulesEditor(context) {
                 <code-block><pre>
 # Storage for Bubble Card Modules
 template:
-  - triggers:
+  - trigger:
       - trigger: event
         event_type: bubble_card_update_modules
     sensor:
