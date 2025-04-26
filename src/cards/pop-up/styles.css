@@ -177,6 +177,7 @@
 .no-header .bubble-header-container {
     visibility: hidden !important;
     height: 0px !important;
+    opacity: 0 !important;
 }
 
 .no-header .bubble-pop-up-container {
