@@ -72,8 +72,8 @@ export function createDropdownActions(context, elements = context.elements, enti
 
         if (!selectMenu.hasAttribute('open')) {
             dropdownArrow.style.transform = 'rotate(180deg)';
-            elements.dropdownArrow.style.background = 'var(--bubble-default-color)';
-            card.style.border = 'var(--bubble-select-border, solid 2px var(--bubble-default-color))';
+            elements.dropdownArrow.style.background = 'var(--bubble-accent-color, var(--bubble-default-color))';
+            card.style.border = 'var(--bubble-select-border, solid 2px var(--bubble-accent-color, var(--bubble-default-color)))';
             context.elements.mainContainer.style.overflow = 'visible';
             selectMenu.setAttribute('open', '');
         }
