@@ -1342,6 +1342,9 @@ type: custom:bubble-card
 card_type: button
 button_type: state
 entity: sun.sun
+card_layout: large-sub-buttons-grid
+grid_options:
+  rows: 3
 sub_button:
   - entity: sun.sun
     icon: mdi:numeric-0
@@ -1367,9 +1370,6 @@ sub_button:
     icon: mdi:numeric-10
   - entity: sun.sun
     icon: mdi:numeric-negative-1
-card_layout: large
-grid_options:
-  rows: 3
 ```
 
 </details>
