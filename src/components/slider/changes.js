@@ -1,3 +1,4 @@
+import { _$LE } from 'lit';
 import { 
   getState,
   getAttribute,
@@ -51,7 +52,7 @@ function getAdjustedPercentage(context, percentage) {
 export function onSliderChange(context, positionX, shouldAdjustToStep = false) {
   const sliderRect = context.elements.rangeSlider.getBoundingClientRect();
   let percentage = Math.max(0, Math.min(100, ((positionX - sliderRect.left) / sliderRect.width) * 100));
-  
+
   if (shouldAdjustToStep) {
     percentage = getAdjustedPercentage(context, percentage);
   }
@@ -103,7 +104,7 @@ function calculateRangePercentage(value, minValue, maxValue) {
 
 function adjustToRange(percentage, minValue, maxValue) {
   if (percentage >= minValue && percentage <= maxValue) {
-    return ((percentage - minValue) / (maxValue - minValue)) * 100;
+    return 100 * ((percentage - minValue) / (maxValue - minValue));
   }
   return percentage < minValue ? 0 : 100;
 }
@@ -227,13 +228,6 @@ export function updateSlider(
       container.style.transform = `translateX(0%)`;
       return;
     }
-  }
-
-  // Adjust percentage based on slider min/max values
-  if (context.sliderMinValue !== undefined || context.sliderMaxValue !== undefined) {
-    const minValue = context.sliderMinValue ?? 0;
-    const maxValue = context.sliderMaxValue ?? 100;
-    percentage = adjustToRange(percentage, minValue, maxValue);
   }
 
   // Always update the slider position to reflect the current state

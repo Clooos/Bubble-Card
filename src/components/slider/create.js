@@ -224,6 +224,10 @@ export function createSliderStructure(context, config = {}) {
     
     const initialPercentage = calculateInitialPercentage();
     const visualPercentage = calculateVisualPercentage(initialPercentage);
+    if (context.config.entity === "sensor.envoy_122227015952_current_power_production") {
+      console.log(calculateRangePercentage(initialPercentage, 0, 100));
+      console.log(calculateVisualPercentage(initialPercentage));
+    }
     
     if (isEntityType(context, "climate", context.config.entity)) {
       if (isStateOn(context, context.config.entity)) {
