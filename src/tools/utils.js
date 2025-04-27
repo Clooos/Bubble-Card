@@ -213,11 +213,11 @@ export function applyScrollingEffect(context, element, text) {
     function checkAndApplyScrolling() {
         // Check if element is still in the DOM
         if (!element.isConnected) return;
-        
-        // Read dimensions
+
+        // Read dimensions: scrollWidth (total text width) vs clientWidth (visible area)
         const contentWidth = element.scrollWidth;
-        const containerWidth = element.parentNode?.offsetWidth || 0;
-        const shouldAnimate = contentWidth > containerWidth;
+        const availableWidth = element.clientWidth;
+        const shouldAnimate = contentWidth > availableWidth;
 
         // Apply scrolling if needed
         if (shouldAnimate) {
@@ -225,6 +225,19 @@ export function applyScrollingEffect(context, element, text) {
             const wrappedText = `<span>${text + separator + text + separator}</span>`;
             element.innerHTML = `<div class="scrolling-container">${wrappedText}</div>`;
             element.setAttribute('data-animated', 'true');
+            
+            // Get the span element to calculate duration
+            const spanElement = element.querySelector('.scrolling-container span');
+
+            // Calculate and set animation duration after the element is rendered
+            requestAnimationFrame(() => {
+                if (spanElement && spanElement.scrollWidth > 0) {
+                    const SCROLL_SPEED = 16; // Pixels per second
+                    const scrollDistance = spanElement.scrollWidth / 2;
+                    const duration = Math.max(1, scrollDistance / SCROLL_SPEED); // Min duration 1s
+                    spanElement.style.animationDuration = `${duration.toFixed(2)}s`;
+                }
+            });
             
             // Observe visibility for performance
             if ('IntersectionObserver' in window) {
@@ -254,11 +267,6 @@ export function applyScrollingEffect(context, element, text) {
             
             // 3. Try again after a longer delay for slower devices
             setTimeout(checkAndApplyScrolling, 300);
-            
-            // 4. One final check when page is fully loaded
-            if (document.readyState !== 'complete') {
-                window.addEventListener('load', checkAndApplyScrolling, { once: true });
-            }
         }, 50);
     });
 

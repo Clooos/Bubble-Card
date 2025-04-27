@@ -34,7 +34,9 @@ ha-card {
 
 .scrolling-container span {
     display: inline-block;
-    animation: bubble-scroll 14s linear infinite;
+    animation-name: bubble-scroll;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
 }
 
 .bubble-scroll-separator {

@@ -1,4 +1,4 @@
-import { setLayout } from "../../tools/utils.js";
+import { setLayout, applyScrollingEffect } from "../../tools/utils.js";
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import setupTranslation from "../../tools/localize.js";
 import { addActions } from "../../tools/tap-actions.js";
@@ -89,30 +89,9 @@ export async function changeEvents(context) {
 
       const eventName = document.createElement('div');
       eventName.classList.add('bubble-event-name');
-      eventName.innerHTML = event.summary || t("cards.calendar.busy");
       
-      // Check if the scrolling effect is enabled
-      const scrollingEffectEnabled = context.config.scrolling_effect !== false;
-      
-      // Apply the scrolling effect only if the option is enabled
-      if (scrollingEffectEnabled) {
-        // Wait for the element to be rendered to check if it overflows
-        setTimeout(() => {
-          const text = event.summary || t("cards.calendar.busy");
-          // Reset any previous width
-          eventName.style.width = '';
-          
-          const textWidth = eventName.scrollWidth;
-          const containerWidth = eventName.clientWidth;
-          
-          // Apply the scrolling effect only if the text overflows
-          if (textWidth > containerWidth) {
-            const separator = `<span class="bubble-scroll-separator"> | </span>`;
-            const wrappedText = `<span>${text + separator + text + separator}</span>`;
-            eventName.innerHTML = `<div class="scrolling-container">${wrappedText}</div>`;
-          }
-        }, 50);
-      }
+      const eventText = event.summary || t("cards.calendar.busy");
+      applyScrollingEffect(context, eventName, eventText);
 
       const eventColor = document.createElement('div');
       eventColor.classList.add('bubble-event-color');

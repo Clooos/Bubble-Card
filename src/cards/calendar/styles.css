@@ -24,6 +24,8 @@
 }
 .bubble-sub-button-container {
   flex-shrink: 0;
+  position: sticky !important;
+  top: 0;
 }
 .bubble-day-wrapper {
   display: flex;
