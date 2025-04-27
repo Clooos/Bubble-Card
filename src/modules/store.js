@@ -16,6 +16,26 @@ export function makeModuleStore(context) {
     context._storeShowOnlyCompatible = true; // Set to true by default
   }
   
+  // Check if ranking info has been dismissed
+  if (context._rankingInfoDismissed === undefined) {
+    try {
+      context._rankingInfoDismissed = localStorage.getItem('bubble-card-ranking-info-dismissed') === 'true';
+    } catch (e) {
+      context._rankingInfoDismissed = false;
+    }
+  }
+  
+  // Function to dismiss ranking info
+  context._dismissRankingInfo = () => {
+    context._rankingInfoDismissed = true;
+    try {
+      localStorage.setItem('bubble-card-ranking-info-dismissed', 'true');
+    } catch (e) {
+      console.warn('Failed to save ranking info dismiss state to localStorage', e);
+    }
+    context.requestUpdate();
+  };
+  
   // If entity doesn't exist, show setup instructions instead of the store
   if (!entityExists) {
     return html`
@@ -188,6 +208,32 @@ template:
           </ha-formfield>
         </div>
       </div>
+
+      ${!context._rankingInfoDismissed ? html`
+        <div class="bubble-info info">
+          <div class="bubble-info-header">
+            <h4 class="bubble-section-title">
+              <ha-icon icon="mdi:information-outline"></ha-icon>
+              How modules are ranked
+              <div class="bubble-info-dismiss bubble-badge" @click=${context._dismissRankingInfo} title="Dismiss" 
+                style="
+                  display: inline-flex;
+                  align-items: center;
+                  position: absolute;
+                  right: 16px;
+                  padding: 0 8px;"
+              >
+                <ha-icon icon="mdi:close" style="margin: 0;"></ha-icon>
+                Dismiss
+              </div>
+            </h4>
+          </div>
+          <div class="content">
+            <p>Due to a limitation in GitHub's API, only top-level reactions like ❤️ 👍 🚀 on the main discussion post are counted for popularity, along with other factors like recent activity, number of comments, updates...</p>
+            <p><b>Click the "More info" button and show some love there if you find a module useful!</b></p>
+          </div>
+        </div>
+      ` : ''}
 
       <div class="store-modules">
         ${_getFilteredStoreModules(context).map(module => {

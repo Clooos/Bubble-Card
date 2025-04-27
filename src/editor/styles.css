@@ -240,6 +240,7 @@ ha-card-conditions-editor {
 .bubble-section-title ha-icon {
   color: var(--info-color) !important;
   margin: 8px 8px 8px 0;
+  line-height: normal !important;
 }
 
 .bubble-section-title::before {

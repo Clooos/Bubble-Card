@@ -14,18 +14,18 @@ export function makeSubButtonPanel(editor) {
             subButtons.splice(index, 1);
             editor._config.sub_button = subButtons;
 
-            editor._valueChanged({ target: { configValue: 'sub_button.' + (index - 1), value: subButton } });
+            editor._valueChanged({ target: { configValue: 'sub_button', value: subButtons } });
             editor.requestUpdate();
         };
 
         const moveSubButtonLeft = (event) => {
             event.stopPropagation();
             if (index > 0) {
-            let subButtons = [...editor._config.sub_button];
-            [subButtons[index], subButtons[index - 1]] = [subButtons[index - 1], subButtons[index]];
-            editor._config.sub_button = subButtons;
+                let subButtons = [...editor._config.sub_button];
+                [subButtons[index], subButtons[index - 1]] = [subButtons[index - 1], subButtons[index]];
+                editor._config.sub_button = subButtons;
 
-            editor._valueChanged({ target: { configValue: 'sub_button.' + index, value: editor._config.sub_button[index] } });
+                editor._valueChanged({ target: { configValue: 'sub_button', value: subButtons } });
             }
             editor.requestUpdate();
         };
@@ -33,11 +33,11 @@ export function makeSubButtonPanel(editor) {
         const moveSubButtonRight = (event) => {
             event.stopPropagation();
             if (index < editor._config.sub_button.length - 1) {
-            let subButtons = [...editor._config.sub_button];
-            [subButtons[index], subButtons[index + 1]] = [subButtons[index + 1], subButtons[index]];
-            editor._config.sub_button = subButtons;
+                let subButtons = [...editor._config.sub_button];
+                [subButtons[index], subButtons[index + 1]] = [subButtons[index + 1], subButtons[index]];
+                editor._config.sub_button = subButtons;
 
-            editor._valueChanged({ target: { configValue: 'sub_button.' + index, value: editor._config.sub_button[index] } });
+                editor._valueChanged({ target: { configValue: 'sub_button', value: subButtons } });
             }
             editor.requestUpdate();
         };

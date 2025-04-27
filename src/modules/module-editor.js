@@ -50,11 +50,31 @@ function broadcastModuleUpdate(moduleId, moduleData) {
   }));
 }
 
+function setHAEditorSaveButtonDisabled(disabled) {
+  try {
+    // Path to the HA editor save button
+    const saveButton = document.querySelector("body > home-assistant")
+      ?.shadowRoot?.querySelector("hui-dialog-edit-card")
+      ?.shadowRoot?.querySelector("ha-dialog > div:nth-child(4) > mwc-button:nth-child(2)");
+    
+    if (saveButton) {
+      saveButton.style.display = disabled ? 'none' : '';
+    }
+  } catch (error) {
+    //console.error("Error accessing HA editor save button:", error);
+  }
+}
+
 // Renders the module editor form
 export function renderModuleEditorForm(context) {
   if (!context._editingModule) {
+    // Ensure the button is enabled if the editor is not shown
+    setHAEditorSaveButtonDisabled(false); 
     return html``;
   }
+
+  // Disable HA save button when module editor is active
+  setHAEditorSaveButtonDisabled(true);
 
   // Check if module is from YAML file
   const isFromYamlFile = _isModuleInstalledViaYaml ? _isModuleInstalledViaYaml(context._editingModule.id) : false;
@@ -439,6 +459,8 @@ export function renderModuleEditorForm(context) {
               context._editingModule = null;
               context._showNewModuleForm = false;
               context._previousModuleId = null;
+              // Re-enable HA save button on cancel
+              setHAEditorSaveButtonDisabled(false); 
               context.requestUpdate();
               setTimeout(() => scrollToModuleForm(context), 0);
             }}>
@@ -636,6 +658,9 @@ export async function saveModule(context, moduleData) {
     // Force UI refresh
     forceUIRefresh(context);
     
+    // Re-enable HA save button after successful save
+    setHAEditorSaveButtonDisabled(false);
+    
   } catch (error) {
     console.error("Error saving module:", error);
   }
@@ -796,6 +821,9 @@ export function editModule(context, moduleId) {
     ...moduleData
   };
   
+  // Disable HA save button when starting edit
+  setHAEditorSaveButtonDisabled(true);
+  
   // Set default values if missing
   if (!context._editingModule.code) {
     context._editingModule.code = '';
@@ -869,6 +897,9 @@ export async function deleteModule(context, moduleId) {
     
     // Force UI refresh
     forceUIRefresh(context);
+    
+    // Re-enable HA save button after successful deletion
+    setHAEditorSaveButtonDisabled(false);
     
   } catch (error) {
     console.error("Error deleting module:", error);
