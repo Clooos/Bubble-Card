@@ -44,10 +44,10 @@ default:
 
 home-assistant-default:
     name: Home Assistant default styling
-    version: "v1.1"
+    version: "v1.3"
     creator: "Clooos"
     link: "https://github.com/Clooos/Bubble-Card/discussions/1230"
-    description: This module applies Home Assistant’s default styling to Bubble Card. To set it as the default, move it under <code>default:</code> in the <code>bubble-modules.yaml</code> file.
+    description: This module applies Home Assistant's default styling to Bubble Card. To set it as the default, move it under <code>default:</code> in the <code>bubble-modules.yaml</code> file.
     code: |
         :host {
             --bubble-button-accent-color: rgba(0,140,255,0.3); /* Edit this color if needed */
@@ -114,6 +114,10 @@ home-assistant-default:
         .no-icon-select-arrow {
             right: 4px !important;
         }
+
+        .bubble-select.bubble-wrapper {
+            margin: 0 -2px;
+        }
         
         .large .bubble-icon-container {
              margin-left: 9px;
@@ -169,9 +173,14 @@ icon_container_color:
     creator: "Clooos"
     link: "https://github.com/Clooos/Bubble-Card/discussions/1231"
 
-    unsupported:
-        - horizontal-buttons-stack
-        - separator
+    supported:
+        - calendar
+        - pop-up
+        - cover
+        - button
+        - media-player
+        - climate
+        - select
 
     description: |
         A list of predefined colors to customize the icon container color.
@@ -200,7 +209,7 @@ get_state_attribute:
     
     # Some informations about your module (this is shown in the editor)
     name: "Advanced example: Get state/attribute from other entities"
-    version: "v1.2"
+    version: "v1.3"
     creator: "Clooos"
     link: "https://github.com/Clooos/Bubble-Card"
 
@@ -244,9 +253,18 @@ get_state_attribute:
             .map(cfg => {
               const entity = hass.states[cfg.entity];
               if (entity) {
-                return cfg.attribute
-                  ? hass.formatEntityAttributeValue(entity, cfg.attribute)
-                  : hass.formatEntityState(entity);
+                let rawValue;
+                if (cfg.attribute) {
+                  rawValue = entity.attributes[cfg.attribute];
+                  if (rawValue !== undefined && rawValue !== 'unknown' && rawValue !== 'unavailable' && rawValue !== 'null' && rawValue !== '') {
+                    return hass.formatEntityAttributeValue(entity, cfg.attribute);
+                  }
+                } else {
+                  rawValue = entity.state;
+                  if (rawValue !== undefined && rawValue !== 'unknown' && rawValue !== 'unavailable' && rawValue !== 'null' && rawValue !== '') {
+                    return hass.formatEntityState(entity);
+                  }
+                }
               }
               return null;
             })
