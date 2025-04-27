@@ -48,6 +48,13 @@ export function renderCalendarEditor(editor){
                           label: t('editor.calendar.show_progress'),
                           title: t('editor.calendar.show_progress'),
                           selector: { boolean: {} },
+                        },
+                        {
+                          name: 'scrolling_effect',
+                          label: t('editor.calendar.text_scrolling'),
+                          title: t('editor.calendar.text_scrolling'),
+                          selector: { boolean: {} },
+                          default: true
                         }
                       ]}   
                       .computeLabel=${editor._computeLabelCallback}

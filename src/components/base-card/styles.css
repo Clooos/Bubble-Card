@@ -23,6 +23,31 @@ ha-card {
     opacity: 1;
 }
 
+/* Styles for text scrolling animation */
+.scrolling-container {
+    width: 100%;
+    white-space: nowrap;
+    mask-image: linear-gradient(to right, transparent, black 8px, black calc(100% - 8px), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8px, black calc(100% - 8px), transparent);
+    overflow: hidden;
+}
+
+.scrolling-container span {
+    display: inline-block;
+    animation: bubble-scroll 14s linear infinite;
+}
+
+.bubble-scroll-separator {
+    opacity: .3;
+    margin: 0 6px 0 8px;
+}
+
+@keyframes bubble-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+/* End of scrolling styles */
+
 .bubble-container {
     position: relative;
     width: 100%;

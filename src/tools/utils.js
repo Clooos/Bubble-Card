@@ -198,69 +198,80 @@ export function applyScrollingEffect(context, element, text) {
         return;
     }
 
+    // Skip unnecessary updates
     if (element.previousText === text) return;
+    
+    // Store original text for future comparison
+    element.previousText = text;
 
-    const className = getBubbleClassName(element);
+    // First show the text normally to check if it overflows
+    element.innerHTML = text;
+    element.style = '';
+    element.removeAttribute('data-animated');
 
-    function updateContent() {
-        if (element.templateDetected) return;
+    // Function to check and apply scrolling if needed
+    function checkAndApplyScrolling() {
+        // Check if element is still in the DOM
+        if (!element.isConnected) return;
+        
+        // Read dimensions
+        const contentWidth = element.scrollWidth;
+        const containerWidth = element.parentNode?.offsetWidth || 0;
+        const shouldAnimate = contentWidth > containerWidth;
 
-        element.innerHTML = `<div class="scrolling-container">${text}</div>`;
-        element.style = '';
-
-        setTimeout(() => {
-            const contentWidth = element.scrollWidth;
-            const containerWidth = element.parentNode?.offsetWidth || 0;
-
-            if (contentWidth > containerWidth) {
-                applyScrollingStyle(element, text, className);
+        // Apply scrolling if needed
+        if (shouldAnimate) {
+            const separator = `<span class="bubble-scroll-separator"> | </span>`;
+            const wrappedText = `<span>${text + separator + text + separator}</span>`;
+            element.innerHTML = `<div class="scrolling-container">${wrappedText}</div>`;
+            element.setAttribute('data-animated', 'true');
+            
+            // Observe visibility for performance
+            if ('IntersectionObserver' in window) {
+                if (!window.bubbleScrollObserver) {
+                    window.bubbleScrollObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            const container = entry.target.querySelector('.scrolling-container span');
+                            if (container) {
+                                container.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused';
+                            }
+                        });
+                    }, { threshold: 0.1 });
+                }
+                
+                window.bubbleScrollObserver.observe(element);
             }
-            element.previousText = text;
-        }, 500);
+        }
     }
 
-    requestAnimationFrame(updateContent);
+    // Try multiple approaches to ensure rendering is complete before measuring
+    
+    // 1. Use requestAnimationFrame for immediate first attempt
+    requestAnimationFrame(() => {
+        // 2. Use a small delay to allow for layout calculations
+        setTimeout(() => {
+            checkAndApplyScrolling();
+            
+            // 3. Try again after a longer delay for slower devices
+            setTimeout(checkAndApplyScrolling, 300);
+            
+            // 4. One final check when page is fully loaded
+            if (document.readyState !== 'complete') {
+                window.addEventListener('load', checkAndApplyScrolling, { once: true });
+            }
+        }, 50);
+    });
 
+    // Add resize listener only once per element
     if (!element.eventAdded) {
-        window.addEventListener('resize', debounce(updateContent, 300));
+        const debouncedUpdate = debounce(() => {
+            element.innerHTML = text;
+            checkAndApplyScrolling();
+        }, 500);
+        
+        window.addEventListener('resize', debouncedUpdate);
         element.eventAdded = true;
     }
-}
-
-function getBubbleClassName(element) {
-    return element.className.split(' ').find(name => name.startsWith('bubble-'));
-}
-
-function applyScrollingStyle(element, text, className) {
-    const separator = `<span class="bubble-scroll-separator"> | </span>`;
-    const wrappedText = `<span>${text + separator + text + separator}</span>`;
-
-    element.innerHTML = `<div class="scrolling-container">${wrappedText}</div>`;
-    applyScrollingCSS(element, className);
-}
-
-function applyScrollingCSS(element, className) {
-    const styleElement = document.createElement('style');
-    styleElement.innerHTML = `
-        .${className} .scrolling-container {
-            width: 100%;
-            white-space: nowrap;
-            mask-image: linear-gradient(to right, transparent, black 8px, black calc(100% - 8px), transparent);
-        }
-        .${className} .scrolling-container span {
-            display: inline-block;
-            animation: scroll 14s linear infinite;
-        }
-        .bubble-scroll-separator {
-            opacity: .3;
-            margin: 0 6px 0 8px;
-        }
-        @keyframes scroll {
-            from { transform: translateX(0%); }
-            to { transform: translateX(-50%); }
-        }
-    `;
-    element.appendChild(styleElement);
 }
 
 function applyNonScrollingStyle(element, text) {
