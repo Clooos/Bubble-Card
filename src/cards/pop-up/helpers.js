@@ -230,6 +230,18 @@ function clearAllTimeouts(context) {
     });
 }
 
+// Helper function to close all popups except the specified one
+function closeAllPopupsExcept(exceptContext) {
+    // Create a copy of the Set to iterate over, as closing modifies the original Set
+    const popupsToClose = new Set(popupState.activePopups);
+    for (const popupContext of popupsToClose) {
+        if (popupContext !== exceptContext) {
+            // Close the popup immediately and forcefully
+            closePopup(popupContext, true);
+        }
+    }
+}
+
 export function openPopup(context) {
     // If popup is already open, return
     if (context.popUp.classList.contains('is-popup-opened')) return;
@@ -237,22 +249,9 @@ export function openPopup(context) {
     // Check if another popup is active
     if (popupState.activePopups.size > 0) {
         // If this popup is triggered by entity state, close all other popups first
-        if (context.config.triggered_by_entity) {
-            // Close all active popups
-            closeAllPopupsExcept(context);
-            // Store reference to entity-triggered popup
-            popupState.entityTriggeredPopup = context;
-        } 
-        // If a popup triggered by entity is already open, don't open hash-triggered popups
-        else if (popupState.entityTriggeredPopup && !context.config.triggered_by_entity) {
+        if (popupState.entityTriggeredPopup) {
             return;
         }
-    }
-    
-    if (popupState.isAnimating) {
-        // Defer opening until current animation completes
-        setTimeout(() => openPopup(context), popupState.animationDuration / 2);
-        return;
     }
 
     clearAllTimeouts(context);
@@ -265,13 +264,7 @@ export function openPopup(context) {
 
     // Add to active popups set
     popupState.activePopups.add(context);
-    
-    // If this is an entity-triggered popup, store reference
-    if (context.config.triggered_by_entity) {
-        popupState.entityTriggeredPopup = context;
-    }
 
-    // Use a single requestAnimationFrame for better performance
     requestAnimationFrame(() => {
         toggleBackdrop(context, true);
         updatePopupClass(popUp, true);
@@ -288,11 +281,8 @@ export function openPopup(context) {
         
         toggleBodyScroll(true);
         
-        // Trigger open_action after animation completes for better performance
         if (context.config.open_action) {
-            setTimeout(() => {
-                callAction(context.popUp, context.config, 'open_action');
-            }, 50);
+            callAction(context.popUp, context.config, 'open_action');
         }
     });
 }
@@ -323,29 +313,7 @@ export function closePopup(context, force = false) {
     toggleBodyScroll(false);
 
     if (context.config.close_action) {
-        // Defer close action execution for better performance
-        setTimeout(() => {
-            callAction(context, context.config, 'close_action');
-        }, 50);
-    }
-}
-
-// Helper function to close all popups except the specified one
-function closeAllPopupsExcept(exceptContext) {
-    for (const popupContext of popupState.activePopups) {
-        if (popupContext !== exceptContext) {
-            // Close the popup
-            closePopup(popupContext, true);
-            
-            // If it was hash-triggered, also remove the hash
-            if (popupContext.config.hash && location.hash === popupContext.config.hash) {
-                // Temporarily enable hash removal even during protection
-                const wasProtected = popupState.hashChangeProtection;
-                popupState.hashChangeProtection = false;
-                removeHash();
-                popupState.hashChangeProtection = wasProtected;
-            }
-        }
+        callAction(context, context.config, 'close_action');
     }
 }
 
@@ -353,7 +321,7 @@ export function onUrlChange(context) {
     return () => {
        if (context.config.hash === location.hash) {
             // If entity-triggered popup is active and this is hash-triggered, don't open
-            if (popupState.entityTriggeredPopup && !context.config.triggered_by_entity) {
+            if (popupState.entityTriggeredPopup) {
                 return;
             }
             
@@ -363,6 +331,16 @@ export function onUrlChange(context) {
             // Enable protection during hash change handling
             popupState.hashChangeProtection = true;
             
+            // Ensure only one popup is open. Close others before potentially opening this one.
+            // Check for entity-triggered popup *before* closing others
+            if (popupState.entityTriggeredPopup) {
+                popupState.hashChangeProtection = false; // Release protection if we're not opening
+                return; // Don't open hash popup if entity popup is active
+            }
+
+            // Now, close any other potentially open popups (e.g., another hash popup)
+            closeAllPopupsExcept(context);
+            
             setTimeout(() => {
                 popupState.hashRecentlyAdded = false;
                 // Keep protection for a bit longer than hashRecentlyAdded
@@ -370,19 +348,10 @@ export function onUrlChange(context) {
                     popupState.hashChangeProtection = false;
                 }, 100);
             }, 100);
-            
-            // If animations are in progress, wait before opening
-            if (popupState.isAnimating) {
-                setTimeout(() => {
-                    requestAnimationFrame(() => {
-                        openPopup(context);
-                    });
-                }, popupState.animationDuration / 2);
-            } else {
-                requestAnimationFrame(() => {
-                    openPopup(context);
-                });
-            }
+
+            requestAnimationFrame(() => {
+                openPopup(context);
+            });
         } else {
             requestAnimationFrame(() => {
                 // Only close this popup if it's the one with the matching hash
