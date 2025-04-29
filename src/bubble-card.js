@@ -13,7 +13,10 @@ import { handleMediaPlayer } from './cards/media-player/index.js';
 import { handleSelect } from './cards/select/index.js';
 import { handleClimate } from './cards/climate/index.js';
 import { preloadYAMLStyles } from './tools/style-processor.js';
+import { createBubbleDefaultColor, initBubbleColorThemeWatcher } from './tools/style.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
+
+let themeWatcherInitialized = false;
 
 class BubbleCard extends HTMLElement {
     editor = false;
@@ -22,6 +25,13 @@ class BubbleCard extends HTMLElement {
     connectedCallback() {
         this.isConnected = true;
         preloadYAMLStyles(this);
+
+        if (!themeWatcherInitialized) {
+            initBubbleColorThemeWatcher();
+            themeWatcherInitialized = true;
+        } else {
+            createBubbleDefaultColor();
+        }
 
         if (this._hass) {
             this.updateBubbleCard();
@@ -177,24 +187,8 @@ class BubbleCard extends HTMLElement {
         if (window.entityError) {
             throw new Error("You need to define a valid entity");
         }
-        if (config.card_type === 'button') {
-            const enhancedConfig = {...config};
-            const buttonType = enhancedConfig.button_type || 'switch';
 
-            enhancedConfig.tap_action = enhancedConfig.tap_action ?? {
-                action: "more-info"
-            };
-            enhancedConfig.double_tap_action = enhancedConfig.double_tap_action ?? {
-                action: "none"
-            }
-            enhancedConfig.hold_action = enhancedConfig.hold_action ?? {
-                action: buttonType === "state" ? "more-info" : "toggle"
-            }
-
-            this.config = enhancedConfig;
-        } else {
-            this.config = config;
-        }
+        this.config = config;
     }
 
     getCardSize() {
