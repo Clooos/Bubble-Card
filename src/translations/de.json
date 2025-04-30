@@ -1,8 +1,8 @@
 ﻿{
   "cards": {
     "calendar": {
-      "busy": "beschäftigt",
-      "all_day": "ganztägig"
+      "busy": "Beschäftigt",
+      "all_day": "Ganztags"
     }
   },
   "editor": {
