@@ -224,10 +224,6 @@ export function createSliderStructure(context, config = {}) {
     
     const initialPercentage = calculateInitialPercentage();
     const visualPercentage = calculateVisualPercentage(initialPercentage);
-    if (context.config.entity === "sensor.envoy_122227015952_current_power_production") {
-      console.log(calculateRangePercentage(initialPercentage, 0, 100));
-      console.log(calculateVisualPercentage(initialPercentage));
-    }
     
     if (isEntityType(context, "climate", context.config.entity)) {
       if (isStateOn(context, context.config.entity)) {
@@ -409,9 +405,6 @@ export function createSliderStructure(context, config = {}) {
     if (entityType === 'sensor') return true;
     
     if (!supportedEntities.includes(entityType)) return true;
-    
-    if (entityType === 'media_player' && !getAttribute(context, "volume_level", entity)) return true;
-    if (entityType === 'cover' && getAttribute(context, "current_position", entity) === undefined) return true;
     
     return false;
   })();

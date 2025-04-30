@@ -1,24 +1,35 @@
-.bubble-play-pause-button,
-.bubble-previous-button,
-.bubble-next-button,
-.bubble-volume-button,
-.bubble-power-button {
+.bubble-media-button {
     display: flex;
-    background: none;
-    border: none;
-    cursor: pointer;
+    position: relative;
+    height: 36px;
+    width: 36px;
     border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-    height: 42px;
-    width: 42px;
-    transition: background 0.3s ease;
-    align-self: center;
+    background-color: var(--bubble-media-player-button-background-color);
+    cursor: pointer;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.bubble-button-container {
+    align-items: center;
+    gap: 8px;
+  }
+
+.bubble-media-button-icon {
     --mdc-icon-size: 20px;
+    color: var(--primary-text-color);
+    line-height: normal;
 }
 
 .bubble-play-pause-button {
     background-color: var(--bubble-accent-color, var(--bubble-default-color));
+}
+
+.bubble-play-pause-button .bubble-media-button-icon {
+    color: var(--bubble-media-player-play-pause-icon-color, var(--bubble-button-active-icon-color, var(--primary-background-color, white)));
 }
 
 .bubble-play-pause-button:not(.large) {
@@ -125,11 +136,6 @@
     }
 }
 
-.large .bubble-play-pause-button {
-  height: 42px;
-  width: 42px;
-}
-
 .large .bubble-mute-button {
   height: 42px;
   width: 42px;
@@ -147,6 +153,7 @@
   height: 42px;
 }
 
-.large .bubble-button-container {
-  align-items: center;
+.large .bubble-play-pause-button {
+  height: 42px;
+  width: 42px;
 }

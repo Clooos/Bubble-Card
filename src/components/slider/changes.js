@@ -77,6 +77,11 @@ export function onSliderChange(context, positionX, shouldAdjustToStep = false) {
 
   // Force immediate visual update for direct user interaction
   context.elements.rangeFill.style.transform = `translateX(${percentage}%)`;
+  
+  // Update volume value display immediately for media players
+  if (isEntityType(context, "media_player", context.config.entity) && context.elements.rangeValue) {
+    context.elements.rangeValue.innerText = `${Math.round(percentage)}%`;
+  }
 
   return percentage;
 }
@@ -126,8 +131,10 @@ function getCurrentValue(context, entity, entityType) {
   switch (entityType) {
     case 'light':
       return 100 * getAttribute(context, "brightness", entity) / 255;
-    case 'media_player':
-      return isStateOn(context, entity) ? 100 * getAttribute(context, "volume_level", entity) : 0;
+    case 'media_player': {
+      const volume = getAttribute(context, "volume_level", entity);
+      return volume !== undefined && volume !== null ? 100 * volume : 0;
+    }
     case 'cover': {
       const position = getAttribute(context, "current_position", entity);
       return position !== undefined && position !== null ? position : 0;
@@ -193,6 +200,15 @@ export function updateSlider(
     percentage = getState(context, entity);
   } else {
     percentage = getCurrentValue(context, entity, entityType);
+  }
+
+  // Update media player volume display if needed
+  if (entityType === 'media_player' && context.elements.rangeValue) {
+    const state = getState(context, entity);
+    const volume = getAttribute(context, "volume_level", entity);
+    const volumeValue = volume !== undefined && volume !== null ? Math.round(volume * 100) : 0;
+    
+    context.elements.rangeValue.innerText = `${volumeValue}%`;
   }
 
   // Update climate display value if needed

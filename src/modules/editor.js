@@ -56,7 +56,7 @@ export function makeModulesEditor(context) {
   name: Default
   version: ''
   description: Empty and enabled by default. Add your custom styles and/or JS templates here to apply them to all cards by pressing the <ha-icon icon="mdi:pencil"></ha-icon> button above.
-  code: '{}'
+  code: ''
   `;
     
   // Install the default module

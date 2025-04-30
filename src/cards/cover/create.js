@@ -1,5 +1,6 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
+import { addFeedback } from "../../tools/tap-actions.js";
 import styles from "./styles.css";
 
 export function createStructure(context) {
@@ -16,18 +17,27 @@ export function createStructure(context) {
     // Add backward compatibility
     elements.buttonsContainer.classList.add('bubble-buttons', 'buttons-container');
 
-    elements.buttonOpen = createElement('div', 'bubble-button bubble-open button open');
-    elements.buttonStop = createElement('div', 'bubble-button bubble-stop button stop');
-    elements.buttonClose = createElement('div', 'bubble-button bubble-close button close');
+    function createCoverButton(iconName, className) {
+        const button = createElement('div', `bubble-cover-button ${className}`);
+        const icon = createElement('ha-icon', 'bubble-cover-button-icon');
+        icon.setAttribute("icon", iconName);
+        
+        const feedbackContainer = createElement('div', 'bubble-feedback-container');
+        const feedback = createElement('div', 'bubble-feedback-element feedback-element');
+        
+        feedbackContainer.appendChild(feedback);
+        button.appendChild(feedbackContainer);
+        button.appendChild(icon);
+        
+        button.icon = icon;
+        button.feedback = feedback;
+        
+        return button;
+    }
 
-    elements.iconOpen = createElement('ha-icon', 'bubble-icon bubble-icon-open');
-    elements.iconStop = createElement('ha-icon', 'bubble-icon bubble-icon-stop');
-    elements.iconStop.setAttribute("icon", "mdi:stop");
-    elements.iconClose = createElement('ha-icon', 'bubble-icon bubble-icon-close');
-
-    elements.buttonOpen.appendChild(elements.iconOpen);
-    elements.buttonStop.appendChild(elements.iconStop);
-    elements.buttonClose.appendChild(elements.iconClose);
+    elements.buttonOpen = createCoverButton("mdi:arrow-up", 'bubble-button bubble-open button open');
+    elements.buttonStop = createCoverButton("mdi:stop", 'bubble-button bubble-stop button stop');
+    elements.buttonClose = createCoverButton("mdi:arrow-down", 'bubble-button bubble-close button close');
 
     elements.buttonsContainer.append(
         elements.buttonOpen,
@@ -43,6 +53,7 @@ export function createStructure(context) {
             entity_id: context.config.entity
         });
     });
+    addFeedback(elements.buttonOpen, elements.buttonOpen.feedback);
 
     elements.buttonStop.addEventListener('click', () => {
         forwardHaptic("selection");
@@ -52,6 +63,7 @@ export function createStructure(context) {
             entity_id: context.config.entity
         });
     });
+    addFeedback(elements.buttonStop, elements.buttonStop.feedback);
 
     elements.buttonClose.addEventListener('click', () => {
         forwardHaptic("selection");
@@ -61,6 +73,7 @@ export function createStructure(context) {
             entity_id: context.config.entity
         });
     });
+    addFeedback(elements.buttonClose, elements.buttonClose.feedback);
 
     context.cardType = cardType;
 }

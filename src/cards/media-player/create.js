@@ -1,7 +1,8 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
-import { createElement, getAttribute, isStateOn, forwardHaptic } from "../../tools/utils.js";
+import { createElement, getAttribute, getState, forwardHaptic } from "../../tools/utils.js";
 import { createSliderStructure } from "../../components/slider/index.js";
 import { changeVolumeIcon } from "./changes.js";
+import { addFeedback } from "../../tools/tap-actions.js";
 import styles from "./styles.css";
 
 export function createStructure(context) {
@@ -16,17 +17,32 @@ export function createStructure(context) {
     });
 
     elements.mediaInfoContainer = createElement('div', 'bubble-media-info-container');
-    elements.playPauseButton = createElement('ha-icon', 'bubble-play-pause-button');
-    elements.previousButton = createElement('ha-icon', 'bubble-previous-button');
-    elements.previousButton.setAttribute("icon", "mdi:skip-previous");
-    elements.nextButton = createElement('ha-icon', 'bubble-next-button');
-    elements.nextButton.setAttribute("icon", "mdi:skip-next");
-    elements.volumeButton = createElement('ha-icon', 'bubble-volume-button');
-    elements.volumeButton.setAttribute("icon", "mdi:volume-high");
-    elements.powerButton = createElement('ha-icon', 'bubble-power-button');
-    elements.powerButton.setAttribute("icon", "mdi:power-standby");
-    elements.muteButton = createElement('ha-icon', 'bubble-mute-button is-hidden');
-    elements.muteButton.setAttribute("icon", "mdi:volume-off");
+    
+    function createMediaButton(iconName, className) {
+        const button = createElement('div', `bubble-media-button ${className}`);
+        const icon = createElement('ha-icon', 'bubble-media-button-icon');
+        icon.setAttribute("icon", iconName);
+        
+        const feedbackContainer = createElement('div', 'bubble-feedback-container');
+        const feedback = createElement('div', 'bubble-feedback-element feedback-element');
+        
+        feedbackContainer.appendChild(feedback);
+        button.appendChild(feedbackContainer);
+        button.appendChild(icon);
+        
+        button.icon = icon;
+        button.feedback = feedback;
+        
+        return button;
+    }
+    
+    elements.playPauseButton = createMediaButton("mdi:play", 'bubble-play-pause-button');
+    elements.previousButton = createMediaButton("mdi:skip-previous", 'bubble-previous-button');
+    elements.nextButton = createMediaButton("mdi:skip-next", 'bubble-next-button');
+    elements.volumeButton = createMediaButton("mdi:volume-high", 'bubble-volume-button');
+    elements.powerButton = createMediaButton("mdi:power", 'bubble-power-button');
+    elements.muteButton = createMediaButton("mdi:volume-off", 'bubble-mute-button is-hidden');
+    
     elements.title = createElement('div', 'bubble-title');
     elements.artist = createElement('div', 'bubble-artist');
 
@@ -62,13 +78,16 @@ export function createStructure(context) {
         elements.image.classList.toggle('is-hidden');
         changeVolumeIcon(context);
     });
+    addFeedback(elements.volumeButton, elements.volumeButton.feedback);
 
     elements.powerButton.addEventListener('click', () => {
-        const isOn = isStateOn(context);
+        const state = getState(context);
+        const isOn = state !== "off" && state !== "unknown";
         context._hass.callService('media_player', isOn ? 'turn_off' : 'turn_on', {
             entity_id: context.config.entity
         });
     });
+    addFeedback(elements.powerButton, elements.powerButton.feedback);
 
     elements.muteButton.addEventListener('pointerdown', (event) => {
         event.stopPropagation();
@@ -79,18 +98,21 @@ export function createStructure(context) {
         });
         elements.muteButton.clicked = true;
     });
+    addFeedback(elements.muteButton, elements.muteButton.feedback);
 
     elements.previousButton.addEventListener('click', () => {
         context._hass.callService('media_player', 'media_previous_track', {
             entity_id: context.config.entity
         });
     });
+    addFeedback(elements.previousButton, elements.previousButton.feedback);
 
     elements.nextButton.addEventListener('click', () => {
         context._hass.callService('media_player', 'media_next_track', {
             entity_id: context.config.entity
         });
     });
+    addFeedback(elements.nextButton, elements.nextButton.feedback);
 
     elements.playPauseButton.addEventListener('click', () => {
         context._hass.callService('media_player', 'media_play_pause', {
@@ -98,6 +120,7 @@ export function createStructure(context) {
         });
         elements.playPauseButton.clicked = true;
     });
+    addFeedback(elements.playPauseButton, elements.playPauseButton.feedback);
 
     elements.mainContainer.addEventListener('click', () => forwardHaptic("selection"));
 

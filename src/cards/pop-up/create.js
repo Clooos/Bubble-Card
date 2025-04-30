@@ -1,6 +1,7 @@
 import { html, render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
+import { addFeedback } from "../../tools/tap-actions.js";
 import { onUrlChange, removeHash, hideContent } from "./helpers.js";
 import styles from "./styles.css";
 import backdropStyles from "./backdrop.css";
@@ -65,17 +66,27 @@ export function getBackdrop(context) {
 export function createHeader(context) {
   context.elements = {
     closeIcon: createElement('ha-icon', 'bubble-close-icon'),
-    closeButton: createElement("button", "bubble-close-button close-pop-up"),
+    closeButton: createElement("div", "bubble-close-button close-pop-up"),
     buttonContainer: createElement('div', 'bubble-button-container'),
     header: createElement('div', 'bubble-header')
   };
 
+  const feedbackContainer = createElement('div', 'bubble-feedback-container');
+  const feedback = createElement('div', 'bubble-feedback-element feedback-element');
+  
+  feedbackContainer.appendChild(feedback);
+  context.elements.closeButton.appendChild(feedbackContainer);
+  
   context.elements.closeIcon.icon = 'mdi:close';
   context.elements.closeButton.appendChild(context.elements.closeIcon);
+  context.elements.closeButton.feedback = feedback;
+  
   context.elements.closeButton.addEventListener('click', () => {
     removeHash();
     forwardHaptic("selection");
   });
+  
+  addFeedback(context.elements.closeButton, context.elements.closeButton.feedback);
 
   const existingHeader = context.popUp?.querySelector('.bubble-header-container');
   if (!existingHeader) {

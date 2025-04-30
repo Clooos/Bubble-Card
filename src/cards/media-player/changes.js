@@ -62,25 +62,27 @@ export function changeSlider(context) {
 }
 
 export function changePlayPauseIcon(context) {
-    const isPlaying = getState(context) === 'playing';
+    const state = getState(context);
+    const isPlaying = state === 'playing';
     const clicked = context.elements.playPauseButton.clicked;
 
     if (isPlaying) {
-        context.elements.playPauseButton.setAttribute("icon", clicked ? "mdi:play" : "mdi:pause");
+        context.elements.playPauseButton.icon.setAttribute("icon", clicked ? "mdi:play" : "mdi:pause");
     } else {
-        context.elements.playPauseButton.setAttribute("icon", clicked ? "mdi:pause" : "mdi:play");
+        context.elements.playPauseButton.icon.setAttribute("icon", clicked ? "mdi:pause" : "mdi:play");
     }
 
     context.elements.playPauseButton.clicked = false;
 }
 
 export function changePowerIcon(context) {
-    const isOn = isStateOn(context);
+    const state = getState(context);
+    const isOn = state !== "off" && state !== "unknown";
 
     if (!isOn) {
-        context.elements.powerButton.style.color = "";
+        context.elements.powerButton.icon.style.color = "";
     } else {
-        context.elements.powerButton.style.color = "var(--accent-color)";
+        context.elements.powerButton.icon.style.color = "var(--accent-color)";
     }
 }
 
@@ -89,7 +91,7 @@ export function changeVolumeIcon(context) {
     const newOpacity = isHidden ? '1' : '0';
     const newIcon = isHidden ? "mdi:volume-high" : "mdi:close";
 
-    context.elements.volumeButton.setAttribute("icon", newIcon);
+    context.elements.volumeButton.icon.setAttribute("icon", newIcon);
     context.elements.mediaInfoContainer.style.opacity = newOpacity;
     context.elements.nameContainer.style.opacity = newOpacity;
     if (context.elements.subButtonContainer) context.elements.subButtonContainer.style.opacity = newOpacity;
@@ -104,14 +106,14 @@ export function changeMuteIcon(context) {
     const isVolumeMuted = getAttribute(context, "is_volume_muted") == true;
     const clicked = context.elements.muteButton.clicked;
     
-    if (context.elements.muteButton.style.color !== "var(--primary-text-color)") {
-        context.elements.muteButton.style.color = "var(--primary-text-color)";
+    if (context.elements.muteButton.icon.style.color !== "var(--primary-text-color)") {
+        context.elements.muteButton.icon.style.color = "var(--primary-text-color)";
     }
 
     if (isVolumeMuted) {
-        context.elements.muteButton.setAttribute("icon", "mdi:volume-off");
+        context.elements.muteButton.icon.setAttribute("icon", "mdi:volume-off");
     } else {
-        context.elements.muteButton.setAttribute("icon", "mdi:volume-high");
+        context.elements.muteButton.icon.setAttribute("icon", "mdi:volume-high");
     }
 
     context.elements.muteButton.clicked = false;
@@ -125,7 +127,7 @@ function updateVolumeSliderPosition(context) {
     // For large layout
     if (context.content.classList.contains('large')) {
         leftOffset = 58;
-        totalWidth = 158;
+        totalWidth = 160;
     }
 
     // Check if the play/pause button is hidden
@@ -161,10 +163,10 @@ export function changeStyle(context) {
         context.config.hide?.volume_button &&
         context.config.hide?.play_pause_button;
 
-    // Hide or show the buttons container
-    if ((!isOn || allButtonsHidden) && context.elements.buttonsContainer.style.display !== 'none') {
+    // Hide or show the buttons container - Make sure it's always visible if power button is needed
+    if (((!isOn && context.config.hide?.power_button) || allButtonsHidden) && context.elements.buttonsContainer.style.display !== 'none') {
         context.elements.buttonsContainer.classList.add('hidden');
-    } else if (!allButtonsHidden && context.elements.buttonsContainer.classList.contains('hidden')) {
+    } else if ((!allButtonsHidden || !context.config.hide?.power_button) && context.elements.buttonsContainer.classList.contains('hidden')) {
         context.elements.buttonsContainer.classList.remove('hidden');
     }
 
