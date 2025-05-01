@@ -106,7 +106,9 @@ export function appendPopup(context, append) {
     if (append) {
         context.verticalStack.appendChild(context.popUp);
     } else if (!append && !context.config.background_update) {
-        context.verticalStack.removeChild(context.popUp);
+        if (context.verticalStack.contains(context.popUp)) {
+            context.verticalStack.removeChild(context.popUp);
+        }
     }
 }
 

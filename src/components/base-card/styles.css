@@ -2,9 +2,6 @@
    in card-structure.js for easier maintenance */
 
 * {
-    /* Automatically adapts color contrast based on background color */
-    --bubble-default-color: color-mix(in srgb, rgb(0, 155, 255) 70%, var(--primary-background-color, #ffffff) 30%);
-
     -webkit-tap-highlight-color: transparent !important;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
@@ -113,7 +110,6 @@ ha-card {
     background-color: var(--bubble-card-type-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
     overflow: hidden;
     position: relative;
-    cursor: pointer;
     transition: all 0.3s ease-in-out;
 }
 

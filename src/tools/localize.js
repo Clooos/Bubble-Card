@@ -1,6 +1,6 @@
 import * as en from "../translations/en.json";
 import * as fr from "../translations/fr.json";
-import * as fr from "../translations/de.json";
+import * as de from "../translations/de.json";
 
 const languages = {
   en,

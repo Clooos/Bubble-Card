@@ -44,6 +44,11 @@ export function makeModulesEditor(context) {
   // Initialize module editor state
   initModuleEditor(context);
 
+  // Ensure _workingModuleConfigs exists on context
+  if (!context._workingModuleConfigs) {
+    context._workingModuleConfigs = {};
+  }
+
   // Check if the 'default' module exists, create it if it doesn't
   if (context._modulesLoaded && !yamlKeysMap.has('default') && entityExists) {
     // Create default module YAML content
@@ -51,7 +56,7 @@ export function makeModulesEditor(context) {
   name: Default
   version: ''
   description: Empty and enabled by default. Add your custom styles and/or JS templates here to apply them to all cards by pressing the <ha-icon icon="mdi:pencil"></ha-icon> button above.
-  code: '{}'
+  code: ''
   `;
     
   // Install the default module
@@ -246,6 +251,16 @@ template:
               } = getTextFromMap(key);
               const isChecked = context._config.modules?.includes(key);
               
+              // Get the current configuration for the module key
+              const currentConfig = context._config[key];
+
+              // Ensure a working copy exists for this key, create if not
+              if (context._workingModuleConfigs[key] === undefined) {
+                  context._workingModuleConfigs[key] = structuredClone(currentConfig ?? {});
+              }
+              // Retrieve the working copy (this reference should be stable across edits from this form)
+              const workingConfig = context._workingModuleConfigs[key];
+
               // Use supportedCards if available, otherwise use unsupportedCards for backward compatibility
               const cardType = context._config.card_type ?? "";
               let unsupported = false;
@@ -256,9 +271,9 @@ template:
                 unsupported = unsupportedCard.includes(cardType);
               }
               
-              const config = context._config[key];
+              // Get processed schema based on the *current* config for dependency evaluation
               const processedFormSchema = (formSchema && formSchema.length > 0)
-                ? context._getProcessedSchema(key, formSchema, config)
+                ? context._getProcessedSchema(key, formSchema, currentConfig) // Schema depends on CURRENT config
                 : [];
               
               // Check if this module has an update
@@ -342,7 +357,7 @@ template:
                         <ha-form
                           class="${!isChecked ? 'disabled' : ''}"
                           .hass=${context.hass}
-                          .data=${config}
+                          .data=${workingConfig}
                           .schema=${processedFormSchema}
                           .computeLabel=${context._computeLabelCallback}
                           .disabled=${!isChecked}

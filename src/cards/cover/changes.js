@@ -52,10 +52,11 @@ export function changeCoverIcons(context) {
     ? getIcon(context, context.config.entity, context.config.icon_open)
     : getIcon(context, context.config.entity, context.config.icon_close);
 
-  context.elements.iconOpen.icon =
-    context.config.icon_up || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
-  context.elements.iconClose.icon =
-    context.config.icon_down || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
+  const iconUpName = context.config.icon_up || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
+  const iconDownName = context.config.icon_down || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
+  
+  context.elements.buttonOpen.icon.setAttribute("icon", iconUpName);
+  context.elements.buttonClose.icon.setAttribute("icon", iconDownName);
 
   if (currentPosition !== undefined) {
     if (fullyOpen) {

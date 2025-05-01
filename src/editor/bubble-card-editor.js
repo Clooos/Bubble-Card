@@ -692,26 +692,6 @@ class BubbleCardEditor extends LitElement {
     _valueChangedInHaForm(e, key, originalSchema) {
       let value = e.detail.value;
 
-      // Handle conditions differently to avoid firing the event too early to prevent panels from being collapsed
-      // I haven't found a better way to fix this (fix only the state conditions)
-      const hasCompleteConditions = (obj) => {
-        if (!obj) return true;
-        
-        if (Array.isArray(obj) && obj[0]?.condition) {
-          return obj.every(cond => this._isConditionComplete(cond));
-        }
-        
-        if (obj.condition && Array.isArray(obj.condition)) {
-          return obj.condition.every(cond => this._isConditionComplete(cond));
-        }
-        
-        if (typeof obj === 'object') {
-          return Object.values(obj).every(val => hasCompleteConditions(val));
-        }
-        
-        return true;
-      };
-
       if (value && typeof value === "object" && !Array.isArray(value)) {
         const keys = Object.keys(value);
         if (keys.length > 0 && keys.every(k => !isNaN(parseInt(k, 10)))) {
@@ -721,26 +701,21 @@ class BubbleCardEditor extends LitElement {
         }
       }
 
-      value = this._cleanEmpty(value, key);
+      // Update the working copy FIRST to keep the form stable for the immediate re-render
+      if (this._workingModuleConfigs) { // Ensure it exists
+          this._workingModuleConfigs[key] = value;
+      }
 
+      // Now clean the value before updating the main config and schema
+      const cleanedValue = this._cleanEmpty(value, key); 
+
+      // Update processed schema based on the CLEANED value
       const newProcessedSchema = structuredClone(originalSchema);
-      const updatedSchema = this._updateAttributeSelectors(newProcessedSchema, value, key);
+      const updatedSchema = this._updateAttributeSelectors(newProcessedSchema, cleanedValue, key);
       this._processedSchemas = { ...this._processedSchemas, [key]: updatedSchema };
 
-      if (hasCompleteConditions(value)) {
-        fireEvent(this, "config-changed", { config: { ...this._config, [key]: value } });
-      }
-    }
-
-    _isConditionComplete(condition) {
-      if (!condition || !condition.condition) return false;
-      
-      return (
-        // For state conditions, we need an entity and a state or an attribute with a state
-        (condition.condition === 'state' && condition.entity_id && (condition.state !== "" || (condition.attribute && condition.state !== ""))) ||
-        // For all other conditions, too complex to handle (need a better way to handle this)
-        (condition.condition !== 'state' && condition.condition !== '' && condition.condition !== undefined)
-      );
+      // Fire event to update the main config (_config) with the CLEANED value
+      fireEvent(this, "config-changed", { config: { ...this._config, [key]: cleanedValue } });
     }
 
     _cleanEmpty(value, key) {

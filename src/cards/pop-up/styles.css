@@ -132,6 +132,8 @@
 }
 
 .bubble-close-button {
+    display: flex;
+    position: relative;
     height: 50px;
     width: 50px;
     border: var(--bubble-pop-up-close-button-border, var(--bubble-pop-up-border, var(--bubble-border, none)));
@@ -141,6 +143,17 @@
     color: var(--primary-text-color);
     flex-shrink: 0;
     cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.bubble-close-icon {
+    --mdc-icon-size: 24px;
+    color: var(--primary-text-color);
+    line-height: normal;
 }
 
 .bubble-button-card-container {

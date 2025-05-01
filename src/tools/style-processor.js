@@ -265,6 +265,9 @@ export const handleCustomStyles = async (context, element = context.card) => {
     if (Array.isArray(styleTemplates)) {
       combinedStyles = styleTemplates.map((t) => {      
         let tmpl = parsedStyles[t] ?? "";
+        if ((typeof tmpl === "object" && tmpl.code === "") || tmpl === "") {
+          return "{}";
+        }
         return typeof tmpl === "object" && tmpl.code ? tmpl.code : tmpl;
       }).join("\n");
     }

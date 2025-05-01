@@ -7,14 +7,14 @@
     left: -100%;
     transition: all .3s;
     z-index: 0;
+    background-color: var(--bubble-accent-color, var(--bubble-default-color));
 }
 
-.is-light .is-dragging .bubble-range-fill {
+.is-light .bubble-range-fill {
     background-color: var(--bubble-light-color, rgb(225, 225, 210));
 }
 
 .is-dragging .bubble-range-fill {
-    background-color: var(--bubble-accent-color, var(--info-color));
     transition: none !important;
 }
 

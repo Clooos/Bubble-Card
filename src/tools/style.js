@@ -1,3 +1,5 @@
+import { resolveCssVariable, hexToRgb, rgbStringToRgb } from './utils.js';
+
 export function updateIcon(context, hass, entityId, icon, iconContainer) {
     while (iconContainer.firstChild) {
         iconContainer.removeChild(iconContainer.firstChild);
@@ -77,4 +79,83 @@ export function convertToRGBA(color, opacity, lighten = 1) {
         }
     }
     return rgbaColor;
+}
+
+export function createBubbleDefaultColor(applyImmediately = true) {
+    // Default bubble blue color
+    const bubbleBlue = [0, 145, 255];
+    
+    // Get primary background color with fallback to white
+    const primaryBgColor = resolveCssVariable('var(--primary-background-color, #ffffff)');
+    
+    // Parse the background color
+    let bgColorRgb = hexToRgb(primaryBgColor) || rgbStringToRgb(primaryBgColor) || [255, 255, 255];
+    
+    // Mix colors: 70% bubbleBlue + 30% background color
+    const mixedColor = bubbleBlue.map((channel, i) => 
+        Math.round((channel * 0.7) + (bgColorRgb[i] * 0.3))
+    );
+    
+    // Format as rgb string
+    const colorValue = `rgb(${mixedColor[0]}, ${mixedColor[1]}, ${mixedColor[2]})`;
+    
+    if (applyImmediately) {
+        // Set the CSS variable
+        document.documentElement.style.setProperty('--bubble-default-color', colorValue);
+    }
+    
+    return colorValue;
+}
+
+export function initBubbleColorThemeWatcher() {
+    // Create initial color
+    createBubbleDefaultColor();
+    
+    // Set up observer for theme changes on body
+    const bodyObserver = new MutationObserver((mutations) => {
+        // Check if any mutations affect the CSS variables
+        for (const mutation of mutations) {
+            if (mutation.type === 'attributes' && 
+                (mutation.attributeName === 'style' || 
+                 mutation.attributeName === 'class')) {
+                createBubbleDefaultColor();
+                break;
+            }
+        }
+    });
+    
+    // Set up observer for theme changes on html element
+    const htmlObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            if (mutation.type === 'attributes' && 
+                (mutation.attributeName === 'style' || 
+                 mutation.attributeName === 'class' ||
+                 mutation.attributeName === 'data-theme')) {
+                createBubbleDefaultColor();
+                break;
+            }
+        }
+    });
+    
+    // Observe document body for theme changes
+    bodyObserver.observe(document.body, { 
+        attributes: true,
+        attributeFilter: ['style', 'class']
+    });
+    
+    // Observe HTML element for theme changes
+    htmlObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['style', 'class', 'data-theme']
+    });
+    
+    // Also update on window load to ensure it's applied after all styles
+    window.addEventListener('load', () => createBubbleDefaultColor());
+    
+    // Update when Home Assistant triggers theme update event
+    if (typeof window.addEventListener === 'function') {
+        window.addEventListener('hass-theme-updated', () => {
+            setTimeout(() => createBubbleDefaultColor(), 100);
+        });
+    }
 }

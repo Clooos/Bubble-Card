@@ -557,12 +557,13 @@ if (!elementConfig?.condition || checkConditionsMet([].concat(elementConfig.cond
 
 #### Attribute selector
 
+This selector works only if combined to an entity selector at the same level.
+
 ```yaml
 - name: attribute
   label: "Attribute"
   selector:
-    attribute:
-      entity_id: sensor.temperature
+    attribute: {}
 ```
 
 <details>
@@ -576,12 +577,13 @@ if (!elementConfig?.condition || checkConditionsMet([].concat(elementConfig.cond
 
 #### State selector
 
+This selector works only if combined to an entity selector at the same level.
+
 ```yaml
 - name: target_state
   label: "Target State"
   selector:
-    state:
-      entity_id: climate.living_room
+    state: {}
 ```
 
 <details>

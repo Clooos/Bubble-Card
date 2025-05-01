@@ -4,6 +4,7 @@ const maxHoldDuration = 400;
 const doubleTapTimeout = 200;
 const movementThreshold = 5; // Movement threshold to consider as scroll
 const scrollDisableTime = 300;
+const interactionDelay = 50; // Needed for iOS, can't be lower
 
 window.isScrolling = false;
 
@@ -27,6 +28,10 @@ function handlePointerDown(event) {
   );
 
   if (!actionElement) return;
+
+  if (event.cancelable) {
+    event.preventDefault();
+  }
 
   const config = {
     tap_action: JSON.parse(actionElement.dataset.tapAction),
@@ -151,12 +156,16 @@ class ActionHandler {
   handleStart(e) {
     if (window.isScrolling || this.isDisconnected) return;
 
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+
     this.startX = e.clientX;
     this.startY = e.clientY;
     this.holdFired = false;
     this.hasMoved = false;
 
-    document.addEventListener('pointermove', this.pointerMoveListener, { passive: true });
+    document.addEventListener('pointermove', this.pointerMoveListener);
 
     this.holdTimeout = setTimeout(() => {
       const holdAction = this.config.hold_action || { action: 'none' };
@@ -188,6 +197,10 @@ class ActionHandler {
   handleEnd(e) {
     if (window.isScrolling || this.isDisconnected || this.hasMoved) return;
 
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+
     clearTimeout(this.holdTimeout);
     this.holdTimeout = null;
     document.removeEventListener('pointermove', this.pointerMoveListener);
@@ -207,7 +220,9 @@ class ActionHandler {
           this.sendActionEvent(this.element, this.config, 'tap');
         }, doubleTapTimeout);
       } else {
-        this.sendActionEvent(this.element, this.config, 'tap');
+        setTimeout(() => {
+          this.sendActionEvent(this.element, this.config, 'tap');
+        }, interactionDelay);
       }
     }
 
@@ -225,7 +240,7 @@ class ActionHandler {
 export function sendActionEvent(element, config, action) {
   const tapAction = config.tap_action || { action: "more-info" };
   const doubleTapAction = config.double_tap_action || { action: "none" };
-  const holdAction = config.hold_action || { action: "toggle" };
+  const holdAction = config.hold_action || { action: "none" };
   const entity = config.entity || this.config?.entity;
 
   const updateAction = (actionConfig) => {
@@ -273,7 +288,10 @@ export function sendActionEvent(element, config, action) {
 }
 
 export function addFeedback(element, feedbackElement) {
-  element.addEventListener('click', () => { 
+  element.addEventListener('pointerup', (e) => { 
+    if (e.cancelable) {
+      e.preventDefault();
+    }
     forwardHaptic("selection");
     tapFeedback(feedbackElement);
   });

@@ -42,7 +42,7 @@ export function tapFeedback(feedbackElement) {
 
 const colorCache = new Map();
 
-function resolveCssVariable(cssVariable) {
+export function resolveCssVariable(cssVariable) {
     let value = cssVariable;
     const bodyStyles = getComputedStyle(document.body);
 
@@ -59,17 +59,17 @@ function resolveCssVariable(cssVariable) {
     return value;
 }
 
-function hexToRgb(hex) {
+export function hexToRgb(hex) {
     const match = hex.match(/^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
     return match ? [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16)] : null;
 }
 
-function rgbStringToRgb(rgbString) {
+export function rgbStringToRgb(rgbString) {
     const match = rgbString.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
     return match ? [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10)] : null;
 }
 
-function calculateLuminance(r, g, b) {
+export function calculateLuminance(r, g, b) {
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }
 
