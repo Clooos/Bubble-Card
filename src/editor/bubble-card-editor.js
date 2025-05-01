@@ -293,6 +293,7 @@ class BubbleCardEditor extends LitElement {
 
     makeLayoutOptions() {
         const defaultLayout = window.isSectionView ? 'large' : 'normal';
+        const defaultRows = this._config.card_type === "separator" ? '0.8' : '1';
         return html`
             <ha-combo-box
                 label="${this._config.card_type === "pop-up" ? 'Header card layout' : 'Card layout'}"
@@ -306,6 +307,18 @@ class BubbleCardEditor extends LitElement {
                 ]}"
                 @value-changed="${this._valueChanged}"
             ></ha-combo-box>
+            ${this._config.card_type !== "pop-up" && this._config.card_layout.includes("large") ? html`
+                <ha-textfield
+                    label="Rows"
+                    type="number"
+                    inputMode="numeric"
+                    min="0"
+                    step="0.1"
+                    .value="${this._config.rows || this._config.grid_options?.rows || defaultRows}"
+                    .configValue="${"rows"}"
+                    @input="${this._valueChanged}"
+                ></ha-textfield>
+            ` : ''}
         `;
     }
 

@@ -376,6 +376,12 @@ export function setLayout(context) {
     context.content.classList.toggle('large', needsLarge);
     context.content.classList.toggle('rows-2', needsRows2);
     context.content.classList.toggle('sub-buttons-grid', needsSubButtonsGrid);
+
+    if (context.elements.mainContainer && (context.config.rows || context.config.grid_options?.rows)) {
+        if (context.config.rows === 'auto' || context.config.grid_options?.rows === 'auto') return;
+        // Set the row size for the large card layout (e.g. add the possibilty to set a custom row size inside of a pop-up)
+        context.elements.mainContainer.style.setProperty('--row-size', context.config.rows || context.config.grid_options?.rows);
+    }
 }
 
 export function throttle(mainFunction, delay = 300) {
