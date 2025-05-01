@@ -183,8 +183,19 @@ export function makeSubButtonPanel(editor) {
                     Sub-buttons
                 </h4>
                 <div class="content">
-                    <p>This editor allows you to add customized sub-buttons to your card. These buttons can also display a dropdown menu for your <code>input_select</code>, <code>select</code> entities, and any other entities that have attribute lists like:</p>
-                    <p><code>source_list</code>, <code>sound_mode_list</code>, <code>hvac_modes</code>, <code>fan_modes</code>, <code>swing_modes</code>, <code>preset_modes</code>, or <code>effect_list</code>.</p>
+                    <p>This editor allows you to add customized sub-buttons to your card.</p>
+                    <p>These buttons can also display dropdown menus if combined with selectable entities like:</p>
+                    <ul class="icon-list">
+                        <li><ha-icon icon="mdi:format-list-bulleted"></ha-icon>Input Select entities</li>
+                        <li><ha-icon icon="mdi:form-dropdown"></ha-icon>Select entities</li>
+                        <li><ha-icon icon="mdi:playlist-music"></ha-icon>Media players with&nbsp;<b>source list</b></li>
+                        <li><ha-icon icon="mdi:speaker"></ha-icon>Media players with&nbsp;<b>sound mode list</b></li>
+                        <li><ha-icon icon="mdi:thermostat"></ha-icon>Climate entities with&nbsp;<b>hvac modes</b></li>
+                        <li><ha-icon icon="mdi:fan"></ha-icon>Climate/Fan entities with&nbsp;<b>fan modes</b></li>
+                        <li><ha-icon icon="mdi:air-conditioner"></ha-icon>Climate entities with&nbsp;<b>swing modes</b></li>
+                        <li><ha-icon icon="mdi:thermostat-auto"></ha-icon>Climate entities with&nbsp;<b>preset modes</b></li>
+                        <li><ha-icon icon="mdi:lightbulb-group"></ha-icon>Light entities with&nbsp;<b>effect list</b></li>
+                    </ul>
                 </div>
             </div>
             </div>
