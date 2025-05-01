@@ -16,6 +16,10 @@
     border-radius: var(--bubble-border-radius);
 }
 
+.bubble-background {
+    cursor: pointer;
+}
+
 .bubble-icon-container {
     padding-left: 0px;
     margin: 6px;
