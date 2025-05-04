@@ -1,4 +1,4 @@
-import { createElement, getAttribute, isStateOn, isColorLight, formatDateTime } from "../../tools/utils.js";
+import { createElement, getState, getAttribute, isStateOn, isColorLight, formatDateTime } from "../../tools/utils.js";
 import { createSubButtonElement } from "./create.js";
 import { changeDropdownList } from "../dropdown/changes.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from "../../tools/validate-condition.js";
@@ -199,6 +199,15 @@ export function updateSubButtons(context, subButtons) {
     let element = context.elements[options.index];
     if (!element || (options.isSelect && !element.dropdownContainer)) {
       element = createSubButtonElement(context, options.index, options.isSelect, options.showArrow, options.entity, subButton);
+    }
+
+    if (context.config.entity && !context.detectedEditor) {
+      if (getState(context, context.config.entity) === 'unavailable') {
+        element.style.display = 'none';
+        return;
+      } else if (element.style.display === 'none') {
+        element.style.display = '';
+      }
     }
 
     updateSubButtonContent(context, element, { ...options, subButton });

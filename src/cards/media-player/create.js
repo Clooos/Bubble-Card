@@ -32,6 +32,9 @@ export function createStructure(context) {
         
         button.icon = icon;
         button.feedback = feedback;
+
+        button.haRipple = createElement('ha-ripple');
+        button.appendChild(button.haRipple);
         
         return button;
     }

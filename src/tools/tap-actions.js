@@ -1,4 +1,4 @@
-import { tapFeedback, forwardHaptic } from "./utils.js";
+import { forwardHaptic, createElement } from "./utils.js";
 
 const maxHoldDuration = 400;
 const doubleTapTimeout = 200;
@@ -123,7 +123,11 @@ export function addActions(element, config, defaultEntity, defaultActions = {}) 
   element.dataset.holdAction = JSON.stringify(holdAction);
 
   const hasAction = tapAction.action !== "none" || doubleTapAction.action !== "none" || holdAction.action !== "none";
-  element.style.cursor = hasAction ? 'pointer' : '';
+  if (hasAction) {
+    element.classList.add('bubble-action-enabled');
+    element.haRipple = createElement('ha-ripple');
+    element.appendChild(element.haRipple);
+  }
 
   // Return the final actions applied
   return { tap_action: tapAction, double_tap_action: doubleTapAction, hold_action: holdAction, has_action: hasAction };
@@ -293,7 +297,6 @@ export function addFeedback(element, feedbackElement) {
       e.preventDefault();
     }
     forwardHaptic("selection");
-    tapFeedback(feedbackElement);
   });
 }
 

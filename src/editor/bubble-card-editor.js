@@ -78,7 +78,7 @@ class BubbleCardEditor extends LitElement {
         if (previewElement?.style && previewElement.style.position !== 'sticky') {
             previewElement.style.position = 'sticky';
             previewElement.style.top = '0';
-            previewElement.style.maxHeight = 'calc(100vh - 200px)';
+            previewElement.style.height = 'calc(100vh - 224px)';
             previewElement.style.overflowY = 'auto';
         }
 

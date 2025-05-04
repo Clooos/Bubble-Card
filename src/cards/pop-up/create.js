@@ -85,6 +85,9 @@ export function createHeader(context) {
     removeHash();
     forwardHaptic("selection");
   });
+
+  context.elements.closeButton.haRipple = createElement('ha-ripple');
+  context.elements.closeButton.appendChild(context.elements.closeButton.haRipple);
   
   addFeedback(context.elements.closeButton, context.elements.closeButton.feedback);
 

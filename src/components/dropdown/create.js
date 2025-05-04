@@ -33,6 +33,8 @@ export function createDropdownStructure(context, elements = context.elements, sh
                 if (showArrow) elements.dropdownContainer.style.width = '24px';
                 elements.dropdownArrow.style.height = '20px';
                 elements.dropdownArrow.style.width = '20px';
+                elements.dropdownArrow.parentElement.parentElement.haRipple = createElement('ha-ripple');
+                elements.dropdownArrow.parentElement.parentElement.appendChild(elements.dropdownArrow.parentElement.parentElement.haRipple);
             }
         }
     }
@@ -59,11 +61,12 @@ export function createDropdownActions(context, elements = context.elements, enti
     const card = elements === context.elements ? defaultCard : elements;
     const eventCaller = elements === context.elements ? defaultEventCaller : elements;
 
+    card.haRipple = createElement('ha-ripple');
+    card.appendChild(card.haRipple);
+
     if (elements !== context.elements) {
         card.style.border = 'solid 2px rgba(0,0,0,0)';
     }
-
-    let isFirstOpen = true;
 
     const handleEventClick = (event) => {
         if (event.target.tagName.toLowerCase() === 'mwc-list-item') return;

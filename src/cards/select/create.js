@@ -1,6 +1,4 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
-import { createElement, toggleEntity, throttle, forwardHaptic } from "../../tools/utils.js";
-import { callSelectService } from "./helpers.js";
 import styles from "./styles.css";
 
 export function createStructure(context) {

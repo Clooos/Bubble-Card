@@ -31,6 +31,9 @@ export function createStructure(context) {
         
         button.icon = icon;
         button.feedback = feedback;
+
+        button.haRipple = createElement('ha-ripple');
+        button.appendChild(button.haRipple);
         
         return button;
     }
@@ -53,7 +56,6 @@ export function createStructure(context) {
             entity_id: context.config.entity
         });
     });
-    addFeedback(elements.buttonOpen, elements.buttonOpen.feedback);
 
     elements.buttonStop.addEventListener('click', () => {
         forwardHaptic("selection");
@@ -63,7 +65,6 @@ export function createStructure(context) {
             entity_id: context.config.entity
         });
     });
-    addFeedback(elements.buttonStop, elements.buttonStop.feedback);
 
     elements.buttonClose.addEventListener('click', () => {
         forwardHaptic("selection");
@@ -73,7 +74,6 @@ export function createStructure(context) {
             entity_id: context.config.entity
         });
     });
-    addFeedback(elements.buttonClose, elements.buttonClose.feedback);
 
     context.cardType = cardType;
 }

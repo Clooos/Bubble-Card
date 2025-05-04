@@ -28,18 +28,6 @@ export const navigate = (_node, path, replace = false) => {
     })
 }
 
-export function tapFeedback(feedbackElement) {
-    if (feedbackElement === undefined) return;
-
-    feedbackElement.style.display = '';
-    feedbackElement.style.animation = 'tap-feedback .3s';
-
-    setTimeout(() => {
-        feedbackElement.style.animation = 'none';
-        feedbackElement.style.display = 'none';
-    }, 500);
-}
-
 const colorCache = new Map();
 
 export function resolveCssVariable(cssVariable) {

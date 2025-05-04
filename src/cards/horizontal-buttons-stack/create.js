@@ -51,6 +51,9 @@ export function createButton(context, index) {
     button.link = link;
     button.index = index;
 
+    button.haRipple = createElement('ha-ripple');
+    button.appendChild(button.haRipple);
+
     function handleUrlChange() {
         if (!context.config.highlight_current_view) return;
 
