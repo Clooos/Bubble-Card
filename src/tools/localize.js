@@ -1,11 +1,13 @@
 import * as en from "../translations/en.json";
 import * as fr from "../translations/fr.json";
 import * as de from "../translations/de.json";
+import * as zh_cn from "../translations/zh_cn.json";
 
 const languages = {
   en,
   fr,
   de,
+  zh_cn,
 };
 
 const DEFAULT_LANG = "en";
