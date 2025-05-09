@@ -7,7 +7,7 @@ const languages = {
   en,
   fr,
   de,
-  zh_cn,
+  "zh-Hans": zh_cn
 };
 
 const DEFAULT_LANG = "en";
