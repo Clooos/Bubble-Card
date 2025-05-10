@@ -1,8 +1,7 @@
-import { createElement } from "../../tools/utils.js";
-import { 
-  throttle, 
-  forwardHaptic, 
-  toggleBodyScroll,
+import {
+  throttle,
+  forwardHaptic,
+  createElement,
   isEntityType,
   getAttribute,
   isStateOn,
@@ -18,6 +17,7 @@ export function createSliderStructure(context, config = {}) {
     targetElement: context.elements.mainContainer,
     insertBefore: context.elements.cardWrapper,
     sliderLiveUpdate: context.config.slider_live_update,
+    relativeSlide: context.config.relative_slide,
     holdToSlide: false,
     readOnlySlider: false,
     styles: styles,
@@ -257,7 +257,8 @@ export function createSliderStructure(context, config = {}) {
     options.targetElement.style.cursor = 'ew-resize';
   }
 
-  let initialX = 0;
+  let initialTouchX = 0;
+  let initialSliderX = 0;
   let draggingTimeout = null;
 
   function onPointerMove(e) {
@@ -266,8 +267,7 @@ export function createSliderStructure(context, config = {}) {
 
     window.isScrolling = true;
 
-    const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-    const rangedPercentage = onSliderChange(context, moveX);
+    const rangedPercentage = onSliderChange(context, calculateMoveX(e));
 
     if (isEntityType(context, "climate", context.config.entity)) {
       throttledUpdateEntity(context, rangedPercentage);
@@ -278,6 +278,17 @@ export function createSliderStructure(context, config = {}) {
     updateValueDisplay(rangedPercentage);
   }
 
+  function calculateMoveX(event) {
+    const moveX = event.pageX || (event.touches ? event.touches[0].pageX : 0);
+
+    if (!options.relativeSlide) {
+      return moveX;
+    }
+
+    const offset = moveX - initialTouchX;
+    return initialSliderX + offset;
+  }
+
   function onPointerUp(e) {
     e.stopPropagation();
     
@@ -286,9 +297,9 @@ export function createSliderStructure(context, config = {}) {
     }
 
     const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-    const finalPercentage = onSliderChange(context, moveX, true);
+    const finalPercentage = onSliderChange(context, calculateMoveX(e), true);
 
-    if (Math.abs(moveX - initialX) > 5) {
+    if (Math.abs(moveX - initialTouchX) > 5) {
       e.preventDefault();
       e.stopImmediatePropagation();
     }
@@ -346,6 +357,19 @@ export function createSliderStructure(context, config = {}) {
     context.elements.rangeValue.style.display = '';
   }
 
+  function calculateInitialX(event) {
+    initialTouchX = event.pageX || (event.touches ? event.touches[0].pageX : 0);
+
+    if (!options.relativeSlide) {
+      return initialTouchX;
+    }
+
+    const initialPercentage = calculateVisualPercentage(calculateInitialPercentage());
+    const sliderRect = context.elements.rangeSlider.getBoundingClientRect();
+    initialSliderX = sliderRect.left + (sliderRect.width * initialPercentage / 100);
+    return initialSliderX;
+  }
+
   function handleLongPress(e) {
     options.targetElement.setPointerCapture(e.pointerId);
     
@@ -353,14 +377,14 @@ export function createSliderStructure(context, config = {}) {
 
     context.dragging = true;
     window.isScrolling = true;
-    initialX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+    initialTouchX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
 
     let rangedPercentage = 0;
     if (isEntityType(context, "climate") && !isStateOn(context, context.config.entity)) {
       rangedPercentage = 0;
       context.elements.rangeFill.style.transform = `translateX(${rangedPercentage}%)`;
     } else {
-      rangedPercentage = onSliderChange(context, initialX);
+      rangedPercentage = onSliderChange(context, calculateInitialX(e))
     }
 
     setupRangeValueDisplay(rangedPercentage);
@@ -453,7 +477,7 @@ export function createSliderStructure(context, config = {}) {
 
       context.dragging = true;
       window.isScrolling = true;
-      initialX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+      initialTouchX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
 
       options.targetElement.classList.add('is-dragging');
       options.targetElement.addEventListener('pointermove', onPointerMove);
