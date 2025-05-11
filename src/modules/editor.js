@@ -13,8 +13,26 @@ import { installManualModule } from './install.js';
 import { checkModuleUpdates } from './store.js';
 import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
+import { getLazyLoadedPanelContent } from '../editor/utils.js';
+
+// Function to detect if sl-tab-group is available in the current HA version
+function isSlTabGroupAvailable() {
+  return typeof customElements !== 'undefined' && 
+         customElements.get('sl-tab-group') !== undefined;
+}
 
 export function makeModulesEditor(context) {
+  if (typeof context._selectedModuleTab === 'undefined') {
+    context._selectedModuleTab = 0;
+  }
+
+  // Initialize state for expanded panels if it doesn't exist
+  if (typeof context._expandedPanelStates === 'undefined') {
+    context._expandedPanelStates = {};
+  }
+
+  const tabGroupId = "bubble-card-module-editor-tab-group";
+
   // Load modules if they haven't been loaded yet
   if (!context._modulesLoaded) {
     initializeModules(context).then(() => {
@@ -90,6 +108,20 @@ export function makeModulesEditor(context) {
     context.requestUpdate();
   };
 
+  // Handler for tab change event
+  const handleTabChange = (e) => {
+    const useSlTabs = isSlTabGroupAvailable();
+    
+    // Get the selected tab index depending on the component used
+    const selectedTab = useSlTabs ? parseInt(e.detail.name) : e.detail.value;
+    
+    context._selectedModuleTab = selectedTab;
+    context.requestUpdate();
+    requestAnimationFrame(() => {
+      scrollToModuleForm(context, false);
+    });
+  };
+
   // Handler for manual module import
   const handleManualImport = async () => {
     try {
@@ -110,12 +142,50 @@ export function makeModulesEditor(context) {
     }
   };
 
-  // Use "modules" as primary, fallback to "style_templates" for backward compatibility
-  const modules = context._config.modules || context._config.style_templates || ['default'];
+  // Render the appropriate tab component based on availability
+  const renderTabs = () => {
+    const useSlTabs = isSlTabGroupAvailable();
+    const selectedTab = context._selectedModuleTab || 0;
 
-  return html`
+    if (useSlTabs) {
+      return html`
+        <sl-tab-group 
+          id="${tabGroupId}"
+          .selected=${selectedTab.toString()}
+          @sl-tab-show=${handleTabChange}>
+          <sl-tab slot="nav" panel="0">
+            <ha-icon icon="mdi:puzzle-heart-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
+            My Modules
+          </sl-tab>
+          <sl-tab slot="nav" panel="1" ?disabled=${!entityExists}>
+            <ha-icon icon="mdi:puzzle-plus-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
+            Module Store
+          </sl-tab>
+          <sl-tab-panel name="0"></sl-tab-panel>
+          <sl-tab-panel name="1"></sl-tab-panel>
+        </sl-tab-group>
+      `;
+    } else {
+      return html`
+        <ha-tabs
+          .selected=${selectedTab}
+          @selected-changed=${handleTabChange}>
+          <paper-tab>
+            <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
+            My Modules
+          </paper-tab>
+          <paper-tab class="${!entityExists ? 'disabled' : ''}">
+            <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
+            Module Store
+          </paper-tab>
+        </ha-tabs>
+      `;
+    }
+  };
+
+  const templateResult = html`
     <ha-expansion-panel outlined>
-      <h4 slot="header">
+      <h4 slot="header" style="z-index: 8;">
         <ha-icon icon="mdi:puzzle"></ha-icon>
         Modules
         ${moduleUpdates.hasUpdates && entityExists ? html`
@@ -125,8 +195,7 @@ export function makeModulesEditor(context) {
           </span>
         ` : ''}
       </h4>
-      <div class="content">
-
+      <div class="content" style="margin: -8px 4px 14px 4px;">
         ${!entityExists ? html`
             <div class="bubble-info warning">
               <h4 class="bubble-section-title">
@@ -161,24 +230,7 @@ template:
 
         <div id="module-editor-top-marker"></div>
         
-        <ha-tabs
-            .selected=${context._selectedModuleTab || 0}
-            @selected-changed=${(e) => {
-              context._selectedModuleTab = e.detail.value;
-              context.requestUpdate();
-              requestAnimationFrame(() => {
-                scrollToModuleForm(context, false);
-              });
-            }}>
-          <paper-tab>
-            <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
-            My Modules
-          </paper-tab>
-          <paper-tab class="${!entityExists ? 'disabled' : ''}">
-            <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
-            Module Store
-          </paper-tab>
-        </ha-tabs>
+        ${renderTabs()}
 
         ${context._selectedModuleTab === 0 ? html`
           ${context._showManualImportForm ? html`
@@ -281,7 +333,14 @@ template:
               const moduleUpdate = hasUpdate ? moduleUpdates.modules.find(m => m.id === key) : null;
 
               return html`
-                <ha-expansion-panel outlined class="${unsupported ? 'disabled' : ''}">
+                <ha-expansion-panel 
+                  outlined 
+                  class="${unsupported ? 'disabled' : ''}"
+                  @expanded-changed=${(e) => {
+                    context._expandedPanelStates[key] = e.target.expanded;
+                    context.requestUpdate();
+                  }}
+                >
                   <h4 slot="header">
                     <ha-icon
                       icon="${isChecked ? 'mdi:puzzle-check' : 'mdi:puzzle-outline'}"
@@ -296,100 +355,94 @@ template:
                     ` : ''}
                   </h4>
                   <div class="content">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <ha-formfield class="apply-module-button" .label=${'Apply to this card'}>
-                        <ha-switch
-                          aria-label="Apply to this card"
-                          .checked=${isChecked}
-                          .configValue=${key}
-                          @change=${handleValueChanged}
-                        ></ha-switch>
-                      </ha-formfield>
-                      
-                      <!-- Module Action Buttons -->
-                      <div class="module-actions">
-                        ${hasUpdate ? html`
-                          <button 
-                            class="icon-button update-button" 
-                            style="margin: 0 24px;"
-                            @click=${() => {
-                              // Switch to store tab to update the module
-                              context._selectedModuleTab = 1;
-                              // Set search to module name for easy finding
-                              context._storeSearchQuery = label;
-                              context.requestUpdate();
-                            }} 
-                            title="Update Module"
-                          >
-                            <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
-                            Update
-                          </button>
-                        ` : ''}
-                        <button class="icon-button" @click=${() => editModule(context, key)} title="Edit Module">
-                          <ha-icon icon="mdi:pencil"></ha-icon>
-                        </button>
-                        ${(() => {
-                          const isFromYamlFile = _isModuleInstalledViaYaml ? _isModuleInstalledViaYaml(key) : false;
-                          // Do not display the delete button for YAML modules or the default module
-                          return !isFromYamlFile && key !== 'default' ? html`
-                            <button class="icon-button" @click=${() => deleteModule(context, key)} title="Delete Module">
-                              <ha-icon icon="mdi:delete"></ha-icon>
+                    ${getLazyLoadedPanelContent(context, key, !!context._expandedPanelStates[key], () => html`
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <ha-formfield class="apply-module-button" .label=${'Apply to this card'}>
+                          <ha-switch
+                            aria-label="Apply to this card"
+                            .checked=${isChecked}
+                            .configValue=${key}
+                            @change=${handleValueChanged}
+                          ></ha-switch>
+                        </ha-formfield>
+                        
+                        <!-- Module Action Buttons -->
+                        <div class="module-actions">
+                          ${hasUpdate ? html`
+                            <button 
+                              class="icon-button update-button" 
+                              style="margin: 0 24px;"
+                              @click=${() => {
+                                // Switch to store tab to update the module
+                                context._selectedModuleTab = 1;
+                                context._storeSearchQuery = label;
+                                context.requestUpdate();
+                              }} 
+                              title="Update Module"
+                            >
+                              <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
+                              Update
                             </button>
-                          ` : '';
-                        })()}
+                          ` : ''}
+                          <button class="icon-button" @click=${() => editModule(context, key)} title="Edit Module">
+                            <ha-icon icon="mdi:pencil"></ha-icon>
+                          </button>
+                          ${(() => {
+                            const isFromYamlFile = _isModuleInstalledViaYaml ? _isModuleInstalledViaYaml(key) : false;
+                            // Do not display the delete button for YAML modules or the default module
+                            return !isFromYamlFile && key !== 'default' ? html`
+                              <button class="icon-button" @click=${() => deleteModule(context, key)} title="Delete Module">
+                                <ha-icon icon="mdi:delete"></ha-icon>
+                              </button>
+                            ` : '';
+                          })()}
+                        </div>
                       </div>
-                    </div>
-                    <hr>
+                      <hr>
 
-                    <!-- Form init to fix conditional selectors -->
-                    <ha-form
-                      style="display: none"
-                      .hass=${context.hass}
-                      .schema=${[{ selector: { entity: { domain: ["input_number"] }}}]}
-                    ></ha-form>
-
-                    ${formSchema.length > 0
-                      ? html`
-                        <h4 class="${!isChecked ? 'disabled' : ''}">
-                          <ha-icon icon="mdi:cog"></ha-icon>
-                          Configuration
-                        </h4>
-                        <ha-form
-                          class="${!isChecked ? 'disabled' : ''}"
-                          .hass=${context.hass}
-                          .data=${workingConfig}
-                          .schema=${processedFormSchema}
-                          .computeLabel=${context._computeLabelCallback}
-                          .disabled=${!isChecked}
-                          @value-changed=${(e) =>
-                            context._valueChangedInHaForm(e, key, formSchema)
-                          }
-                        ></ha-form>
-                        <hr>
-                      `
-                      : ''}
-
-                    <div class="bubble-info" style="display: ${!description ? 'none' : ''}">
-                      <h4 class="bubble-section-title">
-                        <ha-icon icon="mdi:information-outline"></ha-icon>
-                          About this module
-                      </h4>
-                      <div class="content">
-                        ${html`<span .innerHTML=${description}></span>`}
-                      </div>
-                    </div>
-
-                    ${creator || moduleLink || moduleVersion
-                      ? html`
-                        <h4 class="version module-version">
-                          ${creator ? `Created by ${creator}` : ''}
-                          <span class="version-number">
-                            ${moduleLink ? html`<a href="${moduleLink}" target="_blank" rel="noopener noreferrer">Module link</a> • ` : ''}
-                            ${moduleVersion || ''}
-                          </span>
-                        </h4>
+                      ${formSchema.length > 0
+                        ? html`
+                          <h4 class="${!isChecked ? 'disabled' : ''}">
+                            <ha-icon icon="mdi:cog"></ha-icon>
+                            Configuration
+                          </h4>
+                          <ha-form
+                            class="${!isChecked ? 'disabled' : ''}"
+                            .hass=${context.hass}
+                            .data=${workingConfig}
+                            .schema=${processedFormSchema}
+                            .computeLabel=${context._computeLabelCallback}
+                            .disabled=${!isChecked}
+                            @value-changed=${(e) =>
+                              context._valueChangedInHaForm(e, key, formSchema)
+                            }
+                          ></ha-form>
+                          <hr>
                         `
-                      : ''}
+                        : ''}
+
+                      <div class="bubble-info" style="display: ${!description ? 'none' : ''}">
+                        <h4 class="bubble-section-title">
+                          <ha-icon icon="mdi:information-outline"></ha-icon>
+                            About this module
+                        </h4>
+                        <div class="content">
+                          ${html`<span .innerHTML=${description}></span>`}
+                        </div>
+                      </div>
+
+                      ${creator || moduleLink || moduleVersion
+                        ? html`
+                          <h4 class="version module-version">
+                            ${creator ? `Created by ${creator}` : ''}
+                            <span class="version-number">
+                              ${moduleLink ? html`<a href="${moduleLink}" target="_blank" rel="noopener noreferrer">Module link</a> • ` : ''}
+                              ${moduleVersion || ''}
+                            </span>
+                          </h4>
+                          `
+                        : ''}
+                    `)}
                   </div>
                 </ha-expansion-panel>
               `;
@@ -462,4 +515,16 @@ template:
       </div>
     </ha-expansion-panel>
   `;
+
+  if (isSlTabGroupAvailable()) {
+    requestAnimationFrame(() => {
+      const tabGroupElement = context.shadowRoot?.getElementById(tabGroupId);
+      if (tabGroupElement && typeof tabGroupElement.show === 'function') {
+        const panelToShow = context._selectedModuleTab !== undefined ? context._selectedModuleTab.toString() : "0";
+        tabGroupElement.show(panelToShow);
+      }
+    });
+  }
+
+  return templateResult;
 }

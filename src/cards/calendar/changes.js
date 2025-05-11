@@ -112,7 +112,7 @@ export async function changeEvents(context) {
       const now = new Date();
       const start = new Date(event.start.dateTime ?? event.start.date);
       const end = new Date(event.end.dateTime ?? event.end.date);
-      const activeColor = 'var(--bubble-event-accent-color, var(--bubble-accent-color, var(--accent-color)))';
+      const activeColor = 'var(--bubble-event-accent-color, var(--bubble-accent-color, var(--bubble-primary-color)))';
 
       if (context.config.show_progress === true && event.start.date && start < now) {
         eventLine.style.setProperty('--bubble-event-background-color', activeColor);

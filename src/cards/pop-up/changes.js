@@ -2,18 +2,16 @@ import { getBackdrop } from "./create.js";
 import { addHash, onEditorChange, removeHash, closePopup } from "./helpers.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
-import { toggleBodyScroll } from "../../tools/utils.js";
+import { toggleBodyScroll, setLayout } from "../../tools/utils.js";
 
 export function changeEditor(context) {
-    if (!context.verticalStack) return;
+    if (!context.verticalStack || !context.popUp) return;
 
-    const { popUp, sectionRow, sectionRowContainer, elements } = context;
-    const popUpClasses = popUp?.classList;
-    const isPopUpOpened = popUp?.classList.contains('is-popup-opened');
+    const { popUp, sectionRow, sectionRowContainer, elements, config } = context;
+    const popUpClasses = popUp.classList;
     const isCard = sectionRow?.tagName.toLowerCase() === 'hui-card';
-    const isEditorActive = context.editor || context.detectedEditor;
-    const wasEditorActive = context.previousEditorState;
-    
+    const isHAEditorModeActive = context.editor || context.detectedEditor;
+
     if (context.detectedEditor && !context.dialogClosedListenerAdded) {
         window.addEventListener("dialog-closed", () => {
             if (elements?.popUpContainer) {
@@ -21,77 +19,76 @@ export function changeEditor(context) {
             }
         }, { once: true });
         context.dialogClosedListenerAdded = true;
+    } else if (!context.detectedEditor && context.dialogClosedListenerAdded) {
+        context.dialogClosedListenerAdded = false;
     }
 
-    if (!isPopUpOpened && isCard && sectionRowContainer) {
-        if (sectionRowContainer.classList.contains('card') && isEditorActive && sectionRowContainer.style.display === "none") {
+    const isPopUpEffectivelyOpened = popUpClasses.contains('is-popup-opened') && !popUpClasses.contains('editor');
+    if (!isPopUpEffectivelyOpened && isCard && sectionRowContainer) {
+        if (sectionRowContainer.classList.contains('card') && isHAEditorModeActive && sectionRowContainer.style.display === "none") {
             sectionRowContainer.style.display = '';
         }
     }
 
-    // Editor just opened
-    if (isEditorActive) {
-        if (!popUpClasses?.contains('editor')) {
+    if (isHAEditorModeActive) {
+        if (!context.editorAccess) {
             toggleBodyScroll(false);
             
-            if (popUpClasses) {
-                popUpClasses.remove('is-popup-opened');
-                popUpClasses.add('is-popup-closed', 'editor');
+            popUpClasses.remove('is-popup-opened');
+            popUpClasses.add('is-popup-closed', 'editor');
+
+            if (elements?.content) {
+                elements.content.classList.add('popup-content-in-editor-mode');
             }
 
             if (!context.detectedEditor && elements?.popUpContainer) {
                 elements.popUpContainer.classList.add('editor-cropped');
             }
+            
+            context.editorAccess = true;
+            onEditorChange(context);
         }
-        
-        context.editorAccess = true;
-    } 
-    
-    // Editor just closed
-    else if (popUpClasses?.contains('editor')) {
-        popUpClasses.remove('editor');
-        
-        if (elements?.popUpContainer) {
-            elements.popUpContainer.classList.remove('editor-cropped');
-        }
+    } else {
+        if (context.editorAccess) {
+            popUpClasses.remove('editor');
+            if (elements?.popUpContainer) {
+                elements.popUpContainer.classList.remove('editor-cropped');
+            }
 
-        if (context.observer) {
-            context.observer.disconnect();
-            context.observer = null;
-        }
+            if (elements?.content) {
+                elements.content.classList.remove('popup-content-in-editor-mode');
+            }
 
-        if (context.verticalStack.contains(context.popUp)) {
-            closePopup(context, true);
-        }
-        
-        context.editorAccess = false;
-        context.dialogClosedListenerAdded = false;
-        
-        context.previousEditorState = isEditorActive;
-    }
+            if (context.observer) {
+                context.observer.disconnect();
+                context.observer = null;
+            }
+            
+            const currentHash = location.hash;
+            const popUpHash = config.hash ? (config.hash.startsWith('#') ? config.hash : '#' + config.hash) : '';
 
-    if (context.editor && !context.detectedEditor && (isEditorActive !== wasEditorActive) && isEditorActive) {
-        onEditorChange(context);
-        context.previousEditorState = isEditorActive;
+            if (popUpHash && currentHash === popUpHash) {
+                popUpClasses.remove('is-popup-closed');
+                popUpClasses.add('is-popup-opened');
+                toggleBodyScroll(true);
+            } else {
+                if (context.verticalStack.contains(popUp)) {
+                    closePopup(context, true);
+                }
+            }
+            
+            context.editorAccess = false;
+        }
     }
 }
 
 export function changeStyle(context) {
     const { backdropCustomStyle } = getBackdrop(context);
 
+    setLayout(context, context.popUp);
+
     handleCustomStyles(context, context.popUp);
     handleCustomStyles(context, backdropCustomStyle);
-
-    const layoutClass = context.config.card_layout ?? 'large';
-    const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows';
-    const needsRows2 = layoutClass === 'large-2-rows';
-
-    if (needsLarge !== context.popUp.classList.contains('large')) {
-        context.popUp.classList.toggle('large', needsLarge);
-    }
-    if (needsRows2 !== context.popUp.classList.contains('rows-2')) {
-        context.popUp.classList.toggle('rows-2', needsRows2);
-    }
 
     const showHeader = context.config.show_header ?? true;
     if (context.popUp.classList.contains('no-header') === showHeader) {
@@ -107,7 +104,6 @@ export function changeTriggered(context) {
         const isInitialLoad = !context.hasPageLoaded;
         context.hasPageLoaded = true;
 
-        //Check conditions
         const triggerConditions_array = ensureArray(triggerConditions);
         if (triggerConditions_array.length === 0) {
             context.previousTrigger = false;
@@ -132,7 +128,6 @@ export function changeTriggered(context) {
             context.previousTrigger = trigger;          
         }
     } else {
-        // Deprecated method
         let triggerEntity = context.config.trigger_entity ?? '';
 
         if (triggerEntity === '') return;

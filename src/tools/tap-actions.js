@@ -73,7 +73,7 @@ function handlePointerDown(event) {
   document.addEventListener('scroll', scrollHandler, { once: true });
 }
 
-document.body.addEventListener('pointerdown', handlePointerDown, { passive: true });
+document.body.addEventListener('pointerdown', handlePointerDown);
 
 export function callAction(element, actionConfig, action) {
   setTimeout(() => {

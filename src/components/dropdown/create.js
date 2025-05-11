@@ -68,28 +68,88 @@ export function createDropdownActions(context, elements = context.elements, enti
         card.style.border = 'solid 2px rgba(0,0,0,0)';
     }
 
+    let isFirstOpen = true;
+
+    const updateVisualStyles = () => {
+        dropdownArrow.style.transform = 'rotate(180deg)';
+        elements.dropdownArrow.style.background = 'var(--bubble-accent-color, var(--bubble-default-color))';
+        card.style.border = 'var(--bubble-select-border, solid 2px var(--bubble-accent-color, var(--bubble-default-color)))';
+        if (context.elements && context.elements.mainContainer) {
+            context.elements.mainContainer.style.overflow = 'visible';
+        }
+    };
+
+    const handleFirstOpen = (open, close) => {
+        isFirstOpen = false;
+        dropdownArrow.style.transition = 'none';
+        open();
+        requestAnimationFrame(() => {
+            close();
+            setTimeout(() => {
+                dropdownArrow.style.transition = '';
+                updateVisualStyles();
+                open();
+            }, 140);
+        });
+    };
+
     const handleEventClick = (event) => {
         if (event.target.tagName.toLowerCase() === 'mwc-list-item') return;
 
-        const selectMenu = dropdownSelect.shadowRoot.querySelector('mwc-menu');
+        const menuElement = dropdownSelect.shadowRoot.querySelector('ha-menu.mdc-select__menu');
 
-        if (!selectMenu.hasAttribute('open')) {
-            dropdownArrow.style.transform = 'rotate(180deg)';
-            elements.dropdownArrow.style.background = 'var(--bubble-accent-color, var(--bubble-default-color))';
-            card.style.border = 'var(--bubble-select-border, solid 2px var(--bubble-accent-color, var(--bubble-default-color)))';
-            context.elements.mainContainer.style.overflow = 'visible';
-            selectMenu.setAttribute('open', '');
+        if (!menuElement) {
+            // Fallback to mwc-menu if ha-menu is not found
+            const oldSelectMenu = dropdownSelect.shadowRoot.querySelector('mwc-menu');
+            if (oldSelectMenu) {
+                if (isFirstOpen) {
+                    handleFirstOpen(
+                        () => oldSelectMenu.setAttribute('open', ''),
+                        () => oldSelectMenu.removeAttribute('open')
+                    );
+                } else if (!oldSelectMenu.hasAttribute('open')) {
+                    oldSelectMenu.setAttribute('open', '');
+                    updateVisualStyles();
+                }
+            }
+            return;
+        }
+
+        if (typeof menuElement.open === 'boolean') {
+            if (isFirstOpen) {
+                handleFirstOpen(
+                    () => menuElement.open = true,
+                    () => menuElement.open = false
+                );
+            } else if (!menuElement.open) {
+                menuElement.open = true;
+                updateVisualStyles();
+            }
+        } else if (typeof menuElement.show === 'function') {
+            const anchor = dropdownSelect.shadowRoot.querySelector('.mdc-select__anchor');
+            const isCurrentlyOpen = anchor ? anchor.getAttribute('aria-expanded') === 'true' : false;
+            
+            if (isFirstOpen) {
+                handleFirstOpen(
+                    () => menuElement.show(),
+                    () => menuElement.close()
+                );
+            } else if (!isCurrentlyOpen) {
+                menuElement.show();
+                updateVisualStyles();
+            }
         }
     };
 
     const handleMenuClosed = (event) => {
         event.stopPropagation();
-        event.preventDefault();
 
         dropdownArrow.style.transform = 'rotate(0deg)';
         card.style.border = 'solid 2px rgba(0,0,0,0)';
         elements.dropdownArrow.style.background = '';
-        context.elements.mainContainer.style.overflow = '';
+        if (context.elements && context.elements.mainContainer) {
+            context.elements.mainContainer.style.overflow = '';
+        }
     };
 
     const handleDropdownSelect = (event) => {

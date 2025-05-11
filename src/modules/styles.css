@@ -476,7 +476,7 @@
 }
 
 /* Material tabs */
-ha-tabs {
+ha-tabs, sl-tab-group {
   margin-bottom: 16px;
   --primary-tab-color: var(--primary-color);
   --secondary-tab-color: var(--secondary-text-color);
@@ -490,6 +490,9 @@ ha-tabs {
   top: -40px;
 }
 
+sl-tab-group {
+  border-bottom: none;
+}
 .module-editor-top-marker {
   display: flex;
   position: relative;
@@ -566,6 +569,11 @@ paper-ripple {
     padding: 0 12px;
     font-size: 13px;
   }
+}
+
+sl-tab {
+  flex: 1;
+  text-align: center;
 }
 
 .bubble-badge.hoverable {
@@ -875,14 +883,13 @@ paper-ripple {
   --mdc-icon-size: 18px;
 }
 
-.css-editor-container, .editor-schema-container {
+.code-editor-container, .editor-schema-container {
   position: relative;
   margin-bottom: 8px;
   overflow: auto;
 }
 
-.css-editor-container ha-code-editor {
-  max-height: 500px;
+.code-editor-container ha-code-editor {
   height: auto; 
   max-width: 100%;
   border: 1px solid var(--divider-color);

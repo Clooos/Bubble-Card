@@ -109,15 +109,6 @@ export function renderModuleEditorForm(context) {
     };
     yamlKeysMap.set(moduleId, updatedModule);
     
-    // Add visual effect on editor
-    const editorContainer = context.shadowRoot?.querySelector('.css-editor-container');
-    if (editorContainer) {
-      editorContainer.classList.add('applying-styles');
-      setTimeout(() => {
-        editorContainer.classList.remove('applying-styles');
-      }, 300);
-    }
-    
     // Ensure module is enabled in configuration
     updateModuleInConfig(context, moduleId, context._previousModuleId);
     
@@ -212,176 +203,188 @@ export function renderModuleEditorForm(context) {
         <div class="form-content">
           <h3>
             <ha-icon style="margin: 8px;" icon="${context._showNewModuleForm ? 'mdi:puzzle-plus-outline' : 'mdi:puzzle-edit-outline'}"></ha-icon>
-            ${context._showNewModuleForm ? 'Create new Module' : 'Edit Module'}
+            ${context._showNewModuleForm ? 'Create new Module' : context._editingModule.id === 'default' ? 'Edit Default Module' : 'Edit Module'}
           </h3>
           
-          ${isFromYamlFile ? html`
-            <div class="bubble-info warning">
-              <h4 class="bubble-section-title">
-                <ha-icon icon="mdi:file-document-alert"></ha-icon>
-                Read-only Module
-              </h4>
-              <div class="content">
-                <p>This Module is installed from a YAML file. You need to modify the <code>bubble-modules.yaml</code> 
-                file directly, or remove it from your YAML file then import it here.</p>
+          <div class="module-editor-not-default" style="display: ${context._editingModule.id === 'default' ? 'none' : ''}">
+            ${isFromYamlFile ? html`
+              <div class="bubble-info warning">
+                <h4 class="bubble-section-title">
+                  <ha-icon icon="mdi:file-document-alert"></ha-icon>
+                  Read-only Module
+                </h4>
+                <div class="content">
+                  <p>This Module is installed from a YAML file. You need to modify the <code>bubble-modules.yaml</code> 
+                  file directly, or remove it from your YAML file then import it here.</p>
+                </div>
               </div>
+            ` : ''}
+            
+            <ha-textfield
+              label="Module ID"
+              .value=${context._editingModule.id || ''}
+              @input=${(e) => { 
+                // Store old ID before changing
+                const oldId = context._editingModule.id;
+                
+                // Update module ID
+                context._editingModule.id = e.target.value; 
+                
+                // Update config modules list if creating new module
+                if (context._showNewModuleForm && context._config.modules) {
+                  updateModuleInConfig(context, e.target.value, oldId);
+                  fireEvent(context, "config-changed", { config: context._config });
+                }
+              }}
+              ?disabled=${!context._showNewModuleForm || isFromYamlFile}
+            ></ha-textfield>
+            <span class="helper-text">
+              Must be unique and cannot be changed after the Module is created.
+            </span>
+            
+            <ha-textfield
+              label="Module Name"
+              .value=${context._editingModule.name || ''}
+              @input=${(e) => { context._editingModule.name = e.target.value; }}
+              ?disabled=${isFromYamlFile}
+            ></ha-textfield>
+            
+            <ha-textfield
+              label="Version"
+              .value=${context._editingModule.version || '1.0'}
+              @input=${(e) => { context._editingModule.version = e.target.value; }}
+              ?disabled=${isFromYamlFile}
+            ></ha-textfield>
+            
+            <ha-textfield
+              label="Creator"
+              .value=${context._editingModule.creator || ''}
+              @input=${(e) => { context._editingModule.creator = e.target.value; }}
+              ?disabled=${isFromYamlFile}
+            ></ha-textfield>
+            
+            <ha-expansion-panel .header=${html`
+              <ha-icon icon="mdi:filter-check-outline" style="margin-right: 8px;"></ha-icon>
+              Supported cards
+            `}>
+              <div>
+                ${renderSupportedCardCheckboxes(context, isFromYamlFile)}
+              </div>
+            </ha-expansion-panel>
+
+            <ha-expansion-panel .header=${html`
+              <ha-icon icon="mdi:file-document-outline" style="margin-right: 8px;"></ha-icon>
+              Description
+            `}>
+              <div class="code-editor-container">
+                <ha-code-editor
+                  class="${isFromYamlFile ? 'disabled' : ''}"
+                  mode="yaml"
+                  .value=${context._editingModule.description || ''}
+                  @value-changed=${(e) => { context._editingModule.description = e.detail.value; }}
+                ></ha-code-editor>
+              </div>
+              <span class="helper-text">
+                This description appears in your module and in the Module Store (if you share it), so make sure it's clear and concise. <b>You can use HTML and inline CSS</b>, but note that it will only be rendered in your module, the Module Store will not display it.            
+              </span>
+            </ha-expansion-panel>
+          </div>
+
+          <ha-expansion-panel .header=${html`
+            <ha-icon icon="mdi:code-json" style="margin-right: 8px;"></ha-icon>
+            Code (CSS/JS template)
+          `}>
+            <div class="code-editor-container">
+              <ha-code-editor
+                class="${isFromYamlFile ? 'disabled' : ''}"
+                mode="yaml"
+                .value=${context._editingModule.code || ''}
+                @value-changed=${(e) => applyLiveStyles(e.detail.value)}
+              ></ha-code-editor>
             </div>
-          ` : ''}
-          
-          <ha-textfield
-            label="Module ID"
-            .value=${context._editingModule.id || ''}
-            @input=${(e) => { 
-              // Store old ID before changing
-              const oldId = context._editingModule.id;
-              
-              // Update module ID
-              context._editingModule.id = e.target.value; 
-              
-              // Update config modules list if creating new module
-              if (context._showNewModuleForm && context._config.modules) {
-                updateModuleInConfig(context, e.target.value, oldId);
-                fireEvent(context, "config-changed", { config: context._config });
-              }
-            }}
-            ?disabled=${!context._showNewModuleForm || isFromYamlFile}
-          ></ha-textfield>
-          <span class="helper-text">
-            Must be unique and cannot be changed after the Module is created.
-          </span>
-          
-          <ha-textfield
-            label="Module Name"
-            .value=${context._editingModule.name || ''}
-            @input=${(e) => { context._editingModule.name = e.target.value; }}
-            ?disabled=${isFromYamlFile}
-          ></ha-textfield>
-          
-          <ha-textfield
-            label="Version"
-            .value=${context._editingModule.version || '1.0'}
-            @input=${(e) => { context._editingModule.version = e.target.value; }}
-            ?disabled=${isFromYamlFile}
-          ></ha-textfield>
-          
-          <ha-textarea
-            style="height: 120px;"
-            label="Description (supports HTML/inline CSS)"
-            .value=${context._editingModule.description || ''}
-            @input=${(e) => { context._editingModule.description = e.target.value; }}
-            ?disabled=${isFromYamlFile}
-          ></ha-textarea>
-          
-          <ha-textfield
-            label="Creator"
-            .value=${context._editingModule.creator || ''}
-            @input=${(e) => { context._editingModule.creator = e.target.value; }}
-            ?disabled=${isFromYamlFile}
-          ></ha-textfield>
-          
-          <ha-expansion-panel .header=${"Supported cards"}>
-            <div>
-              ${renderSupportedCardCheckboxes(context, isFromYamlFile)}
-            </div>
+            ${context.createErrorConsole(context)}
+            <span class="helper-text">
+              More information and examples about the CSS and JS template possibilities can be found in the <a href="https://github.com/Clooos/Bubble-Card?tab=readme-ov-file#styling" target="_blank">Styling and Templates documentation</a>. Tip: You can enlarge the editor by clicking on the panel title (Bubble Card configuration).
+            </span>
           </ha-expansion-panel>
           
-          <h4>
-            <ha-icon icon="mdi:code-json"></ha-icon>
-            Code (CSS/JS template)
-          </h4>
-          <div class="css-editor-container">
-            <ha-code-editor
-              class="${isFromYamlFile ? 'disabled' : ''}"
-              mode="yaml"
-              .value=${context._editingModule.code || ''}
-              @value-changed=${(e) => applyLiveStyles(e.detail.value)}
-              class="code-editor"
-            ></ha-code-editor>
-          </div>
-          <span class="helper-text">
-            More information and examples about the CSS and JS template possibilities can be found in the <a href="https://github.com/Clooos/Bubble-Card?tab=readme-ov-file#styling" target="_blank">Styling and Templates documentation</a>. Tip: You can enlarge the editor by clicking on the panel title (Bubble Card configuration).
-          </span>
-
-          ${context.createErrorConsole(context)}
-          
-          <h4>
-            <ha-icon icon="mdi:form-select"></ha-icon>
+          <ha-expansion-panel .header=${html`
+            <ha-icon icon="mdi:form-select" style="margin-right: 8px;"></ha-icon>
             Optional: Editor schema (YAML)
-          </h4>
-          <div class="editor-schema-container">
-            <ha-code-editor
-              class="${isFromYamlFile ? 'disabled' : ''}"
-              mode="yaml"
-              .value=${context._editingModule.editor_raw || 
-                (typeof context._editingModule.editor === 'object' 
-                  ? jsyaml.dump(context._editingModule.editor) 
-                  : context._editingModule.editor || '')}
-              @value-changed=${(e) => { 
-                // Save the raw value to prevent cursor loss
-                context._editingModule.editor_raw = e.detail.value;
-                
-                // Use a debounce to prevent parsing incomplete YAML
-                clearTimeout(context._editorSchemaDebounce);
-                context._editorSchemaDebounce = setTimeout(() => {
-                  try {
-                    const newSchema = jsyaml.load(e.detail.value);
-                    // Only apply if it's a valid object and not null
-                    if (newSchema !== null && typeof newSchema === 'object') {
-                      applyLiveEditorSchema(newSchema);
-                      // Clear any previous YAML error
-                      if (context._yamlErrorMessage) {
-                        context._yamlErrorMessage = null;
-                        context.requestUpdate();
+          `}>
+            <div class="editor-schema-container">
+              <ha-code-editor
+                class="${isFromYamlFile ? 'disabled' : ''}"
+                mode="yaml"
+                .value=${context._editingModule.editor_raw || 
+                  (typeof context._editingModule.editor === 'object' 
+                    ? jsyaml.dump(context._editingModule.editor) 
+                    : context._editingModule.editor || '')}
+                @value-changed=${(e) => { 
+                  // Save the raw value to prevent cursor loss
+                  context._editingModule.editor_raw = e.detail.value;
+                  
+                  // Use a debounce to prevent parsing incomplete YAML
+                  clearTimeout(context._editorSchemaDebounce);
+                  context._editorSchemaDebounce = setTimeout(() => {
+                    try {
+                      const newSchema = jsyaml.load(e.detail.value);
+                      // Only apply if it's a valid object and not null
+                      if (newSchema !== null && typeof newSchema === 'object') {
+                        applyLiveEditorSchema(newSchema);
+                        // Clear any previous YAML error
+                        if (context._yamlErrorMessage) {
+                          context._yamlErrorMessage = null;
+                          context.requestUpdate();
+                        }
                       }
+                    } catch (error) {
+                      console.warn("Invalid YAML for editor schema:", error);
+                      // Keep the raw value
+                      context._editingModule.editor = context._editingModule.editor_raw || e.detail.value;
+                      // Set the error message
+                      context._yamlErrorMessage = error.message;
+                      context.requestUpdate();
                     }
-                  } catch (error) {
-                    console.warn("Invalid YAML for editor schema:", error);
-                    // Keep the raw value
-                    context._editingModule.editor = context._editingModule.editor_raw || e.detail.value;
-                    // Set the error message
-                    context._yamlErrorMessage = error.message;
-                    context.requestUpdate();
-                  }
-                }, 100); // Wait 1 second after the last modification
-              }}
-              class="code-editor"
-            ></ha-code-editor>
-          </div>
-          <div class="bubble-info error" 
-              style="display: ${!context._yamlErrorMessage ? 'none' : ''}">
-              <h4 class="bubble-section-title">
-                  <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-                  Error in YAML schema
-              </h4>
-              <div class="content">
-                  <pre style="margin: 0; white-space: pre-wrap; font-size: 12px;">${context._yamlErrorMessage ? context._yamlErrorMessage.charAt(0).toUpperCase() + context._yamlErrorMessage.slice(1) : ''}</pre>
-              </div>
-          </div>
-          <span class="helper-text">
-            This allows you to add a visual editor to your module. Learn about all available editor schema options in the <a href="https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md" target="_blank">editor schema documentation</a>.
-          </span>
-          
-          ${context._editingModule.editor && Array.isArray(context._editingModule.editor) && context._editingModule.editor.length > 0 ? html`
-            <div class="form-preview">
-              <h4>Editor preview</h4>
-              <div class="form-preview-container">
-                <ha-form
-                  .hass=${context.hass}
-                  .data=${{}}
-                  .schema=${context._editingModule.editor}
-                  .computeLabel=${context._computeLabelCallback || (schema => schema.label || schema.name)}
-                ></ha-form>
-              </div>
+                  }, 100); // Wait 1 second after the last modification
+                }}
+              ></ha-code-editor>
             </div>
-          ` : ''}
+            <div class="bubble-info error" 
+                style="display: ${!context._yamlErrorMessage ? 'none' : ''}">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
+                    Error in YAML schema
+                </h4>
+                <div class="content">
+                    <pre style="margin: 0; white-space: pre-wrap; font-size: 12px;">${context._yamlErrorMessage ? context._yamlErrorMessage.charAt(0).toUpperCase() + context._yamlErrorMessage.slice(1) : ''}</pre>
+                </div>
+            </div>
+            <span class="helper-text">
+              This allows you to add a visual editor to your module. Learn about all available editor schema options in the <a href="https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md" target="_blank">editor schema documentation</a>.
+            </span>
 
-          <ha-expansion-panel>
-            <h4 slot="header">
-                <ha-icon
-                icon="mdi:export"
-                ></ha-icon>
-                Export Module
-            </h4>
+            ${context._editingModule.editor && Array.isArray(context._editingModule.editor) && context._editingModule.editor.length > 0 ? html`
+              <div class="form-preview">
+                <h4>Editor preview</h4>
+                <div class="form-preview-container">
+                  <ha-form
+                    .hass=${context.hass}
+                    .data=${{}}
+                    .schema=${context._editingModule.editor}
+                    .computeLabel=${context._computeLabelCallback || (schema => schema.label || schema.name)}
+                  ></ha-form>
+                </div>
+              </div>
+            ` : ''}
+          </ha-expansion-panel>
+
+          <hr>
+
+          <ha-expansion-panel .header=${html`
+            <ha-icon icon="mdi:export" style="margin-right: 8px;"></ha-icon>
+            Export Module
+          `}>
             <div class="content">
                 <div class="export-section">
                     <div class="export-buttons">
@@ -715,7 +718,6 @@ async function saveModuleToHomeAssistant(context, entityId, moduleData) {
         supported: moduleData.supported || [],
         // Maintain backward compatibility if necessary - only if supported doesn't exist
         ...(moduleData.supported ? {} : { unsupported: moduleData.unsupported || [] })
-        // We only use specific properties to ensure that editor_raw is not included
       };
       
       // Send to Home Assistant

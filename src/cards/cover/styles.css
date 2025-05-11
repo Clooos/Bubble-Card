@@ -1,35 +1,35 @@
 .bubble-cover-button {
-    display: flex;
-    position: relative;
-    height: 36px;
-    width: 36px;
-    border-radius: var(--bubble-cover-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-    background-color: var(--bubble-cover-button-background-color);
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
+  display: flex;
+  position: relative;
+  height: 36px;
+  width: 36px;
+  border-radius: var(--bubble-cover-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+  background-color: var(--bubble-cover-button-background-color);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .bubble-cover-button-icon {
-    --mdc-icon-size: 20px;
-    color: var(--primary-text-color);
-    line-height: normal;
+  --mdc-icon-size: 20px;
+  color: var(--primary-text-color);
+  line-height: normal;
 }
 
 .bubble-buttons-container {
-    align-items: center;
-    gap: 8px;
+  align-items: center;
+  gap: 8px;
 }
 
 .bubble-button.disabled {
-    opacity: 0.3 !important;
-    pointer-events: none !important;
-    cursor: none !important;
+  opacity: 0.3 !important;
+  pointer-events: none !important;
+  cursor: none !important;
 }
 
 .large .bubble-cover-button-icon {
-    --mdc-icon-size: 24px;
+  --mdc-icon-size: 24px;
 }

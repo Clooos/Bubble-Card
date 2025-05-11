@@ -22,7 +22,7 @@ export function createStructure(context) {
     
     elements.buttonsContainer.append(
         elements.temperatureContainer,
-        elements.targetTemperatureContainer
+        elements.targetTemperatureContainer,
     );
 
     function createTemperatureControls(container, attribute, step) {
@@ -32,11 +32,15 @@ export function createStructure(context) {
         const minusIcon = createElement('ha-icon', 'bubble-climate-minus-button-icon');
         minusIcon.setAttribute("icon", "mdi:minus");
         minusButton.appendChild(minusIcon);
+        minusButton.haRipple = createElement('ha-ripple'),
+        minusButton.appendChild(minusButton.haRipple);
         addFeedback(minusButton);
 
         const plusIcon = createElement('ha-icon', 'bubble-climate-plus-button-icon');
         plusIcon.setAttribute("icon", "mdi:plus");
         plusButton.appendChild(plusIcon);
+        plusButton.haRipple = createElement('ha-ripple'),
+        plusButton.appendChild(plusButton.haRipple);
         addFeedback(plusButton);
 
         let tempDisplay;

@@ -22,8 +22,19 @@ import { makeModuleStore, _fetchModuleStore } from '../modules/store.js';
 import setupTranslation from '../tools/localize.js';
 import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
+import { getLazyLoadedPanelContent } from './utils.js';
 
 class BubbleCardEditor extends LitElement {
+    _previewStyleApplied = false;
+    _entityCache = {};
+    _cachedAttributeList = null;
+    _cachedAttributeListEntity = null;
+    _expandedPanelStates = {};
+
+    constructor() {
+        super();
+        this._expandedPanelStates = {};
+    }
 
     setConfig(config) {
         this._config = {
@@ -63,97 +74,56 @@ class BubbleCardEditor extends LitElement {
         ];
     }
 
+    updated(changedProperties) {
+        super.updated(changedProperties);
+        if (changedProperties.has('hass')) {
+            // If hass changes, entity lists might be stale
+            this.listsUpdated = false;
+            // Clear entity cache when hass changes
+            this._entityCache = {};
+            // Clear attribute list cache as well
+            this._cachedAttributeList = null;
+            this._cachedAttributeListEntity = null;
+        }
+    }
+
+    async firstUpdated(changedProperties) {
+        super.firstUpdated(changedProperties);
+        if (this.hass && this.hass.loadFragmentTranslation) {
+            try {
+                await this.hass.loadFragmentTranslation("config");
+            } catch (e) {
+                console.error("Bubble Card Editor: Failed to load 'config' fragment translation", e);
+            }
+        }
+    }
+
     render() {
         if (!this.hass) {
             return html``;
         }
 
         const t = setupTranslation(this.hass);
-        const homeAssistant = document.querySelector("body > home-assistant");
-        const previewElement = homeAssistant?.shadowRoot
-            ?.querySelector("hui-dialog-edit-card")
-            ?.shadowRoot
-            ?.querySelector("ha-dialog > div.content > div.element-preview");
+        
+        // Apply preview style only once
+        if (!this._previewStyleApplied) {
+            const homeAssistant = document.querySelector("body > home-assistant");
+            const previewElement = homeAssistant?.shadowRoot
+                ?.querySelector("hui-dialog-edit-card")
+                ?.shadowRoot
+                ?.querySelector("ha-dialog > div.content > div.element-preview");
 
-        if (previewElement?.style && previewElement.style.position !== 'sticky') {
-            previewElement.style.position = 'sticky';
-            previewElement.style.top = '0';
-            previewElement.style.height = 'calc(100vh - 224px)';
-            previewElement.style.overflowY = 'auto';
+            if (previewElement?.style && previewElement.style.position !== 'sticky') {
+                previewElement.style.position = 'sticky';
+                previewElement.style.top = '0';
+                previewElement.style.height = 'calc(100vh - 224px)';
+                previewElement.style.overflowY = 'auto';
+                this._previewStyleApplied = true;
+            }
         }
 
         if (!this.listsUpdated) {
-            const formateList = item => ({
-                label: item,
-                value: item
-            });
-
-            this.inputSelectList = {states:{}, locale : this.hass.locale, localize : this.hass.localize, entities : this.hass.entities };
-
-            Object.keys(this.hass.states)
-                .filter((eid) => {
-                    const entity = this.hass.states[eid];
-                    const domain = eid.substr(0, eid.indexOf("."));
-                    const isSelectDomain = domain === "input_select" || domain === "select";
-                    const hasSelectableAttributes = this._selectable_attributes.some(attr => entity.attributes?.[attr]);
-                    return isSelectDomain || hasSelectableAttributes;
-                })
-                .map(formateList).forEach((item) => {
-                        const entityId = item.label || item;
-                        const entity = this.hass.states[entityId]; // Retrieve the corresponding state from hass.states
-                        if (entity) {
-                            this.inputSelectList.states[entityId] = entity;
-                        }
-                    });
-
-            this.attributeList = Object.keys(this.hass.states[this._entity]?.attributes || {}).map((attributeName) => {
-                let entity = this.hass.states[this._entity];
-                let formattedName = this.hass.formatEntityAttributeName(entity, attributeName);
-                return { label: formattedName, value: attributeName };
-            });
-
-            this.cardTypeList = [{
-                    'label': 'Button (Switch, slider, ...)',
-                    'value': 'button'
-                },
-                {
-                    'label': t('editor.calendar.name'),
-                    'value': 'calendar'
-                },
-                {
-                    'label': 'Cover',
-                    'value': 'cover'
-                },
-                {
-                    'label': 'Climate',
-                    'value': 'climate'
-                },
-                {
-                    'label': 'Empty column',
-                    'value': 'empty-column'
-                },
-                {
-                    'label': 'Horizontal buttons stack',
-                    'value': 'horizontal-buttons-stack'
-                },
-                {
-                    'label': 'Media player',
-                    'value': 'media-player'
-                },
-                {
-                    'label': 'Pop-up',
-                    'value': 'pop-up'
-                },
-                {
-                    'label': 'Select',
-                    'value': 'select'
-                },
-                {
-                    'label': 'Separator',
-                    'value': 'separator'
-                }
-            ];
-
+            this._initializeLists(t);
             this.listsUpdated = true;
         }
 
@@ -312,7 +282,7 @@ class BubbleCardEditor extends LitElement {
                 ]}"
                 @value-changed="${this._valueChanged}"
             ></ha-combo-box>
-            ${showRowsOption ? html`
+            ${this._renderConditionalContent(showRowsOption, html`
                 <ha-textfield
                     label="Rows"
                     type="number"
@@ -323,7 +293,7 @@ class BubbleCardEditor extends LitElement {
                     .configValue="${"rows"}"
                     @input="${this._valueChanged}"
                 ></ha-textfield>
-            ` : ''}
+            `)}
         `;
     }
 
@@ -333,14 +303,17 @@ class BubbleCardEditor extends LitElement {
 
         const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || context.select_attribute;
 
-        const attributeList = Object.keys(this.hass.states[entity]?.attributes || {}).map((attributeName) => {
-            let state = this.hass.states[entity];
-            let formattedName = this.hass.formatEntityAttributeName(state, attributeName);
-            return { label: formattedName, value: attributeName };
-        });
+        const attributeList = context?.show_attribute 
+            ? Object.keys(this.hass.states[entity]?.attributes || {}).map((attributeName) => {
+                let state = this.hass.states[entity];
+                let formattedName = this.hass.formatEntityAttributeName(state, attributeName);
+                return { label: formattedName, value: attributeName };
+              })
+            : [];
 
         return html`
-            ${array !== 'sub_button' ? html`
+
+            ${this._renderConditionalContent(array !== 'sub_button', html`
                 <ha-formfield .label="Text scrolling effect">
                     <ha-switch
                         aria-label="Text scrolling effect"
@@ -352,8 +325,8 @@ class BubbleCardEditor extends LitElement {
                         <label class="mdc-label">Text scrolling effect</label> 
                     </div>
                 </ha-formfield>
-            ` : ''}
-            ${array === 'sub_button' ? html`
+            `)}
+            ${this._renderConditionalContent(array === 'sub_button', html`
                 <ha-formfield .label="Show background">
                     <ha-switch
                         aria-label="Show background when entity is on"
@@ -364,8 +337,8 @@ class BubbleCardEditor extends LitElement {
                         <label class="mdc-label">Show background when entity is on</label> 
                     </div>
                 </ha-formfield>
-            ` : ''}
-            ${array === 'sub_button' && (context?.show_background ?? true) ? html`
+            `)}
+            ${this._renderConditionalContent(array === 'sub_button' && (context?.show_background ?? true), html`
                 <ha-formfield .label="Background color based on state">
                     <ha-switch
                         aria-label="Background color based on state"
@@ -376,8 +349,8 @@ class BubbleCardEditor extends LitElement {
                         <label class="mdc-label">Background color based on state</label> 
                     </div>
                 </ha-formfield>
-            ` : ''}
-            ${array === 'sub_button' && (context?.state_background ?? true) && entity.startsWith("light") ? html`
+            `)}
+            ${this._renderConditionalContent(array === 'sub_button' && (context?.state_background ?? true) && entity.startsWith("light"), html`
                 <ha-formfield .label="Background color based on light color">
                     <ha-switch
                         aria-label="Background color based on light color"
@@ -388,8 +361,8 @@ class BubbleCardEditor extends LitElement {
                         <label class="mdc-label">Background color based on light color</label> 
                     </div>
                 </ha-formfield>
-            ` : ''}
-            ${array !== 'sub_button' && entity.startsWith("light") ? html`
+            `)}
+            ${this._renderConditionalContent(array !== 'sub_button' && entity.startsWith("light"), html`
                 <ha-formfield .label="Use accent color instead of light color">
                     <ha-switch
                         aria-label="Use accent color instead of light color"
@@ -401,7 +374,7 @@ class BubbleCardEditor extends LitElement {
                         <label class="mdc-label">Use accent color instead of light color</label> 
                     </div>
                 </ha-formfield>
-            ` : ''}
+            `)}
             <ha-formfield .label="Show icon">
                 <ha-switch
                     aria-label="Show icon"
@@ -413,7 +386,7 @@ class BubbleCardEditor extends LitElement {
                     <label class="mdc-label">Show icon</label> 
                 </div>
             </ha-formfield>
-            ${array !== 'sub_button' ? html`
+            ${this._renderConditionalContent(array !== 'sub_button', html`
                 <ha-formfield .label="Prioritize icon over entity picture">
                     <ha-switch
                         aria-label="Prioritize icon over entity picture"
@@ -426,7 +399,7 @@ class BubbleCardEditor extends LitElement {
                         <label class="mdc-label">Prioritize icon over entity picture</label> 
                     </div>
                 </ha-formfield>
-            ` : ''}
+            `)}
             <ha-formfield .label="Show name">
                 <ha-switch
                     aria-label="Show name"
@@ -486,7 +459,7 @@ class BubbleCardEditor extends LitElement {
                     <label class="mdc-label">Show attribute</label> 
                 </div>
             </ha-formfield>
-            ${context?.show_attribute ? html`
+            ${this._renderConditionalContent(context?.show_attribute, html`
                 <div class="ha-combo-box">
                     <ha-combo-box
                         label="Attribute to show"
@@ -497,8 +470,8 @@ class BubbleCardEditor extends LitElement {
                         @value-changed="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { attribute: ev.detail.value }, array)}"
                     ></ha-combo-box>
                 </div>
-            ` : ''}
-            ${array === 'sub_button' && isSelect ? html`
+            `)}
+            ${this._renderConditionalContent(array === 'sub_button' && isSelect, html`
                 <ha-formfield .label="Show arrow (Select entities only)">
                     <ha-switch
                         aria-label="Show arrow (Select entities only)"
@@ -510,7 +483,7 @@ class BubbleCardEditor extends LitElement {
                         <label class="mdc-label">Show arrow (Select menu only)</label> 
                     </div>
                 </ha-formfield>
-            ` : ''}
+            `)}
         `;
     }
 
@@ -528,6 +501,45 @@ class BubbleCardEditor extends LitElement {
                     ></ha-icon-picker>
                 </div>
             `;
+        } else if (label.includes('Entity') || label.includes('entity')) {
+            let includeDomains = [];
+            let excludeDomains = [];
+            
+            switch(this._config.card_type) {
+                case 'button':
+                    break;
+                case 'cover':
+                    includeDomains = ['cover'];
+                    break;
+                case 'climate':
+                    includeDomains = ['climate'];
+                    break;
+                case 'media-player':
+                    includeDomains = ['media_player'];
+                    break;
+                case 'select':
+                    includeDomains = ['input_select', 'select'];
+                    if (this._config.select_attribute) {
+                        includeDomains = [];
+                    }
+                    break;
+                default:
+                    break;
+            }
+            
+            return html`
+                <ha-entity-picker
+                    label="${label}"
+                    .hass="${this.hass}"
+                    .value="${this._config[configValue]}"
+                    .configValue="${configValue}"
+                    .includeDomains="${includeDomains.length ? includeDomains : undefined}"
+                    .excludeDomains="${excludeDomains.length ? excludeDomains : undefined}"
+                    .disabled="${disabled}"
+                    allow-custom-entity
+                    @value-changed="${this._valueChanged}"
+                ></ha-entity-picker>
+            `;
         } else {
             return html`
             <div class="ha-combo-box">
@@ -542,6 +554,10 @@ class BubbleCardEditor extends LitElement {
             </div>
           `;
         }
+    }
+
+    _renderConditionalContent(condition, content) {
+        return condition ? content : html``;
     }
 
     makeActionPanel(label, context = this._config, defaultAction, array, index = this._config) {
@@ -561,6 +577,12 @@ class BubbleCardEditor extends LitElement {
             : label === "Open action"
             ? "open_action"
             : "close_action";
+        
+        // Create a unique key for the panel
+        const panelKey = array 
+            ? `action_panel_${array}_${index}_${configValueType}` 
+            : `action_panel_config_${configValueType}`;
+
         let value;
         try{
            value = label === "Tap action" 
@@ -585,40 +607,48 @@ class BubbleCardEditor extends LitElement {
         }
 
         return html`
-            <ha-expansion-panel outlined>
+            <ha-expansion-panel 
+                outlined
+                @expanded-changed=${(e) => {
+                    this._expandedPanelStates[panelKey] = e.target.expanded;
+                    this.requestUpdate();
+                }}
+            >
                 <h4 slot="header">
                     <ha-icon icon="${icon}"></ha-icon>
                     ${label}
                 </h4>
                 <div class="content"> 
-                    <ha-form
-                        .hass=${this.hass}
-                        .data=${context}
-                        .configValue="${
-                                      (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType}" 
-                        .schema=${[{name: configValueType,
-                                    label : label,
-                                    selector: { ui_action: {
-                                        default_action: defaultAction,} },
-                                    }]}  
-                        .computeLabel=${this._computeLabelCallback}
-                        @value-changed=${(ev) => this._ActionChanged(ev,array,index)}
-                    ></ha-form>
-                </div>
-                ${ value?.action  === 'call-service' || value?.action === 'perform-action' ? html`
-                    <ha-formfield .label="Use default entity">
-                        <ha-switch
-                            aria-label="Use default entity"
+                    ${getLazyLoadedPanelContent(this, panelKey, !!this._expandedPanelStates[panelKey], () => html`
+                        <ha-form
+                            .hass=${this.hass}
+                            .data=${context}
                             .configValue="${
-                                          (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType+".default_entity"}" 
-                            .checked=${value?.target?.entity_id === "entity"}
-                             @change=${this._updateActionsEntity}
-                        ></ha-switch>
-                        <div class="mdc-form-field">
-                            <label class="mdc-label">Use default entity</label> 
-                        </div>
-                    </ha-formfield>
-                ` : ''}
+                                          (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType}" 
+                            .schema=${[{name: configValueType,
+                                        label : label,
+                                        selector: { ui_action: {
+                                            default_action: defaultAction,} },
+                                        }]}  
+                            .computeLabel=${this._computeLabelCallback}
+                            @value-changed=${(ev) => this._ActionChanged(ev,array,index)}
+                        ></ha-form>
+                        ${ value?.action  === 'call-service' || value?.action === 'perform-action' ? html`
+                            <ha-formfield .label="Use default entity">
+                                <ha-switch
+                                    aria-label="Use default entity"
+                                    .configValue="${
+                                                  (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType+".default_entity"}" 
+                                    .checked=${value?.target?.entity_id === "entity"}
+                                     @change=${this._updateActionsEntity}
+                                ></ha-switch>
+                                <div class="mdc-form-field">
+                                    <label class="mdc-label">Use default entity</label> 
+                                </div>
+                            </ha-formfield>
+                        ` : ''}
+                    `)}
+                </div>
             </ha-expansion-panel>
         `;
     }
@@ -639,26 +669,36 @@ class BubbleCardEditor extends LitElement {
     }
 
     makeStyleEditor() {
+        const panelKey = 'style_editor_panel'; // Unique key for this panel
+
         return html`
-            <ha-expansion-panel outlined>
+            <ha-expansion-panel 
+                outlined
+                @expanded-changed="${(e) => { 
+                    this._expandedPanelStates[panelKey] = e.target.expanded; 
+                    this.requestUpdate(); 
+                }}"
+            >
                 <h4 slot="header">
                     <ha-icon icon="mdi:code-braces"></ha-icon>
                     Custom styles & JS templates
                 </h4>
                 <div class="content">
-                    <div class="code-editor">
-                        <ha-code-editor
-                            mode="yaml"
-                            autofocus
-                            autocomplete-entities
-                            autocomplete-icons
-                            .hass=${this.hass}
-                            .value=${this._config.styles}
-                            .configValue="${"styles"}"
-                            @value-changed=${this._valueChanged}
-                        ></ha-code-editor>
-                    </div>
-                    ${this.createErrorConsole()}
+                    ${getLazyLoadedPanelContent(this, panelKey, !!this._expandedPanelStates[panelKey], () => html`
+                        <div class="code-editor">
+                            <ha-code-editor
+                                mode="yaml"
+                                autofocus
+                                autocomplete-entities
+                                autocomplete-icons
+                                .hass=${this.hass}
+                                .value=${this._config.styles}
+                                .configValue="${"styles"}"
+                                @value-changed=${this._valueChanged}
+                            ></ha-code-editor>
+                        </div>
+                        ${this.createErrorConsole()}
+                    `)}
                     <div class="bubble-info">
                         <h4 class="bubble-section-title">
                             <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -798,88 +838,90 @@ class BubbleCardEditor extends LitElement {
   _valueChanged(ev) {
     const target = ev.target;
     const detail = ev.detail;
+    
+    let needsUpdate = false;
     let rawValue;
 
     // Check if the target is a ha-switch
     if (target.tagName === 'HA-SWITCH') {
-      rawValue = target.checked;
+        rawValue = target.checked;
+        needsUpdate = true;
     } else if (target.value !== undefined) {
-      rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
+        rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
+        needsUpdate = true;
+    } else if (detail?.value !== undefined) {
+        needsUpdate = true;
     }
 
+    if (!needsUpdate) return;
+
     if (typeof rawValue === 'string' && (rawValue.endsWith(".") || rawValue === "-")) {
-      return;
+        return;
     }
 
     // Create a new config object to avoid mutating the original config
-    let newConfig;
+    let newConfig = { ...this._config };
+    
     try {
-      newConfig = { ...this._config };
-      
-      const { configValue, checked } = target;
-      if (configValue) {
-        const value = checked !== undefined ? checked : rawValue;
-        const configKeys = configValue.split('.');
-        
-        // For nested properties, we need to clone progressively the structure
-        if (configKeys.length > 1) {
-          let tempConfig = newConfig;
-          let path = '';
-          
-          for (let i = 0; i < configKeys.length - 1; i++) {
-            const key = configKeys[i];
-            path = path ? `${path}.${key}` : key;
+        const { configValue, checked } = target;
+        if (configValue) {
+            const value = checked !== undefined ? checked : rawValue;
+            const configKeys = configValue.split('.');
             
-            // Create the object if it doesn't exist
-            if (!tempConfig[key]) tempConfig[key] = {};
-            
-            // Clone the object to ensure it is extensible
-            tempConfig[key] = { ...tempConfig[key] };
-            tempConfig = tempConfig[key];
-          }
-          
-          // Update the value
-          const lastKey = configKeys[configKeys.length - 1];
-          if (ev.type === 'input') {
-            tempConfig[lastKey] = rawValue;
-          } else if (detail && tempConfig[lastKey] !== detail.value) {
-            tempConfig[lastKey] = detail.value;
-          } else if (target.tagName === 'HA-SWITCH') {
-            tempConfig[lastKey] = rawValue;
-          }
+            // For nested properties, we need to clone progressively the structure
+            if (configKeys.length > 1) {
+                let tempConfig = newConfig;
+                let path = '';
+                
+                for (let i = 0; i < configKeys.length - 1; i++) {
+                    const key = configKeys[i];
+                    path = path ? `${path}.${key}` : key;
+                    
+                    // Create the object if it doesn't exist
+                    if (!tempConfig[key]) tempConfig[key] = {};
+                    
+                    // Clone the object to ensure it is extensible
+                    tempConfig[key] = { ...tempConfig[key] };
+                    tempConfig = tempConfig[key];
+                }
+                
+                // Update the value
+                const lastKey = configKeys[configKeys.length - 1];
+                if (ev.type === 'input') {
+                    tempConfig[lastKey] = rawValue;
+                } else if (detail && tempConfig[lastKey] !== detail.value) {
+                    tempConfig[lastKey] = detail.value;
+                } else if (target.tagName === 'HA-SWITCH') {
+                    tempConfig[lastKey] = rawValue;
+                }
+            } else {
+                // Simple case - top level key
+                const key = configKeys[0];
+                if (ev.type === 'input') {
+                    newConfig[key] = rawValue;
+                } else if (detail && newConfig[key] !== detail.value) {
+                    newConfig[key] = detail.value;
+                } else if (target.tagName === 'HA-SWITCH') {
+                    newConfig[key] = rawValue;
+                }
+            }
         } else {
-          // Simple case - top level key
-          const key = configKeys[0];
-          if (ev.type === 'input') {
-            newConfig[key] = rawValue;
-          } else if (detail && newConfig[key] !== detail.value) {
-            newConfig[key] = detail.value;
-          } else if (target.tagName === 'HA-SWITCH') {
-            newConfig[key] = rawValue;
-          }
+            newConfig = detail.value;
         }
-      } else {
-        newConfig = detail.value;
-      }
-      
-      // Update this._config with the new config
-      this._config = newConfig;
-      
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour de la configuration:", error);
-      
-      // If an error occurs, try to update directly with the new config
-      if (configValue && detail) {
-        const simpleConfig = { ...this._config };
-        simpleConfig[configValue] = detail.value;
-        newConfig = simpleConfig;
-      } else if (detail) {
-        newConfig = detail.value;
-      } else {
-        return; // Do nothing if we can't retrieve the value
-      }
+    } catch (error) {        
+        // If an error occurs, try to update directly with the new config
+        if (target.configValue && detail) {
+            newConfig[target.configValue] = detail.value;
+        } else if (detail) {
+            newConfig = detail.value;
+        } else {
+            return;
+        }
     }
 
+    // Update this._config with the new config
+    this._config = newConfig;
+    
     // Emit the event with the new configuration
     fireEvent(this, "config-changed", { config: newConfig });
   }
@@ -903,22 +945,44 @@ class BubbleCardEditor extends LitElement {
 
   _ActionChanged(ev, array, index) {
     var hasDefaultEntity = false;
-    try { if (ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'][0] === 'entity') hasDefaultEntity = true; }
+    try { 
+      if (ev.currentTarget && 
+          ev.currentTarget.__schema && 
+          ev.currentTarget.__schema[0] && 
+          ev.detail.value[ev.currentTarget.__schema[0].name] &&
+          ev.detail.value[ev.currentTarget.__schema[0].name]['target'] &&
+          ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'] &&
+          ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'][0] === 'entity') {
+        hasDefaultEntity = true;
+      }
+    }
     catch { }
-    try { if (ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'] === 'entity') hasDefaultEntity = true; }
+    try { 
+      if (ev.currentTarget && 
+          ev.currentTarget.__schema && 
+          ev.currentTarget.__schema[0] && 
+          ev.detail.value[ev.currentTarget.__schema[0].name] &&
+          ev.detail.value[ev.currentTarget.__schema[0].name]['target'] &&
+          ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'] === 'entity') {
+        hasDefaultEntity = true;
+      }
+    }
     catch { }
     if (hasDefaultEntity) {
-      ev.detail.value[ev.currentTarget.__schema[0].name]['action'] = 'call-service';
-      if (ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'] != undefined) {
-        ev.detail.value[ev.currentTarget.__schema[0].name]['service'] = "" + ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'];
-        delete ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'];
+      if (ev.currentTarget && 
+          ev.currentTarget.__schema && 
+          ev.currentTarget.__schema[0] &&
+          ev.detail.value[ev.currentTarget.__schema[0].name]) {
+        ev.detail.value[ev.currentTarget.__schema[0].name]['action'] = 'call-service';
+        if (ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'] != undefined) {
+          ev.detail.value[ev.currentTarget.__schema[0].name]['service'] = "" + ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'];
+          delete ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'];
+        }
       }
     }
 
     if (array === 'button_action') {
-      var configExist = this._config[array] ? true : false;
-      var valueWasChanged = ev.detail.value[ev.currentTarget.__schema[0].name] != null
-      if (configExist || valueWasChanged) this._config[array] = ev.detail.value;
+      this._config[array] = ev.detail.value;
     } else if (array) {
       this._config[array] = this._config[array] || [];
       let arrayCopy = [...this._config[array]];
@@ -940,11 +1004,16 @@ class BubbleCardEditor extends LitElement {
     }
 
     if (!ev.target.checked) {
-      if (obj[configKeys[i]].target?.entity_id === 'entity') {
+      if (obj[configKeys[i]] && obj[configKeys[i]].target?.entity_id === 'entity') {
         obj[configKeys[i]]['target'] = {};
       }
     } else {
-      obj[configKeys[i]]['target'] = { 'entity_id': 'entity' };
+      if (obj[configKeys[i]]) {
+        obj[configKeys[i]]['target'] = { 'entity_id': 'entity' };
+      } else {
+        // Initialize the object if it doesn't exist
+        obj[configKeys[i]] = { 'target': { 'entity_id': 'entity' } };
+      }
     }
 
     var detail = { 'value': obj };
@@ -987,6 +1056,136 @@ class BubbleCardEditor extends LitElement {
     return css`
         ${unsafeCSS(styles + moduleStyles)}
     `;
+  }
+
+  _initializeLists(t) {
+    const formateList = item => ({
+        label: item,
+        value: item
+    });
+
+    let selectEntities = [];
+
+    if (Object.keys(this._entityCache).length === 0) {
+        // Populate _entityCache and identify selectEntities in a single pass
+        Object.keys(this.hass.states).forEach(entityId => {
+            const entity = this.hass.states[entityId];
+            const domain = entityId.split('.')[0];
+            
+            if (!this._entityCache[domain]) {
+                this._entityCache[domain] = [];
+            }
+            this._entityCache[domain].push(entityId);
+
+            // Check for selectable attributes for selectEntities
+            if (this._selectable_attributes.some(attr => entity.attributes?.[attr])) {
+                if (!selectEntities.includes(entityId)) {
+                    selectEntities.push(entityId);
+                }
+            }
+        });
+    } else {
+        const relevantDomainsForSelect = ['input_select', 'select'];
+        relevantDomainsForSelect.forEach(domain => {
+            if (this._entityCache[domain]) {
+                selectEntities = [...selectEntities, ...this._entityCache[domain]];
+            }
+        });
+        // Still need to check for other entities with selectable attributes not in input_select/select domains
+        Object.keys(this.hass.states).forEach(entityId => {
+            const entity = this.hass.states[entityId];
+            if (this._selectable_attributes.some(attr => entity.attributes?.[attr])) {
+                if (!selectEntities.includes(entityId)) { // Avoid duplicates
+                    selectEntities.push(entityId);
+                }
+            }
+        });
+    }
+    
+    // Add entities from relevantDomains to selectEntities if not already present from attribute check
+    const relevantDomains = ['input_select', 'select'];
+    relevantDomains.forEach(domain => {
+        if (this._entityCache[domain]) {
+            this._entityCache[domain].forEach(entityId => {
+                if (!selectEntities.includes(entityId)) {
+                    selectEntities.push(entityId);
+                }
+            });
+        }
+    });
+    // Ensure unique entities
+    selectEntities = [...new Set(selectEntities)];
+
+    const filteredStates = {};
+    selectEntities.forEach(entityId => {
+        if (this.hass.states[entityId]) {
+            filteredStates[entityId] = this.hass.states[entityId];
+        }
+    });
+
+    this.inputSelectList = { ...this.hass };
+    this.inputSelectList.states = filteredStates;
+
+    // Cache attributeList
+    if (this._entity) {
+        if (this._entity === this._cachedAttributeListEntity && this._cachedAttributeList) {
+            this.attributeList = this._cachedAttributeList;
+        } else {
+            this.attributeList = Object.keys(this.hass.states[this._entity]?.attributes || {}).map((attributeName) => {
+                let entity = this.hass.states[this._entity];
+                let formattedName = this.hass.formatEntityAttributeName(entity, attributeName);
+                return { label: formattedName, value: attributeName };
+            });
+            this._cachedAttributeList = this.attributeList;
+            this._cachedAttributeListEntity = this._entity;
+        }
+    } else {
+        this.attributeList = [];
+        this._cachedAttributeList = null;
+        this._cachedAttributeListEntity = null;
+    }
+
+    this.cardTypeList = [{
+            'label': 'Button (Switch, slider, ...)',
+            'value': 'button'
+        },
+        {
+            'label': t('editor.calendar.name'),
+            'value': 'calendar'
+        },
+        {
+            'label': 'Cover',
+            'value': 'cover'
+        },
+        {
+            'label': 'Climate',
+            'value': 'climate'
+        },
+        {
+            'label': 'Empty column',
+            'value': 'empty-column'
+        },
+        {
+            'label': 'Horizontal buttons stack',
+            'value': 'horizontal-buttons-stack'
+        },
+        {
+            'label': 'Media player',
+            'value': 'media-player'
+        },
+        {
+            'label': 'Pop-up',
+            'value': 'pop-up'
+        },
+        {
+            'label': 'Select',
+            'value': 'select'
+        },
+        {
+            'label': 'Separator',
+            'value': 'separator'
+        }
+    ];
   }
 }
 

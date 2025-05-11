@@ -20,17 +20,13 @@ export async function handlePopUp(context) {
               handleButton(context, context.elements.header);
           }
 
-          requestAnimationFrame(() => {
-            changeStyle(context);
-          });
+          changeStyle(context);
 
           context.previousConfig = context.config;
       }
 
       if (!context.editor) {
-        requestAnimationFrame(() => {
           changeTriggered(context);
-        });
       }
       
       changeEditor(context);

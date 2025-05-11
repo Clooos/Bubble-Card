@@ -132,7 +132,6 @@ export function isStateOn(context, entity = context.config.entity) {
         'true', 
         'home', 
         'playing', 
-        'paused',
         'locked', 
         'occupied', 
         'available', 
@@ -141,6 +140,7 @@ export function isStateOn(context, entity = context.config.entity) {
         'connected', 
         'online',
         'mowing', 
+        'edgecut',
         'starting',
         'heat',
         'cool',
@@ -321,54 +321,66 @@ let cachedDrawer = null;
 let cachedHuiRoot = null;
 let isCached = false;
 
-export function setLayout(context) {
-    // Use cached references if available
-    if (!isCached) {
-        cachedHomeAssistant = document.querySelector("body > home-assistant");
-        if (!cachedHomeAssistant) return;
+export function setLayout(context, targetElementOverride = null, defaultLayoutOverride = null) {
+    const targetElement = targetElementOverride || context.content;
 
-        cachedMain = cachedHomeAssistant.shadowRoot?.querySelector("home-assistant-main");
-        if (!cachedMain || !cachedMain.shadowRoot) return;
+    if (!targetElement) return;
 
-        cachedDrawer = cachedMain.shadowRoot.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace");
-        if (!cachedDrawer || !cachedDrawer.shadowRoot) return;
+    let determinedLayoutClass;
 
-        cachedHuiRoot = cachedDrawer.shadowRoot.querySelector("hui-root");
-        if (!cachedHuiRoot || !cachedHuiRoot.shadowRoot) return;
+    if (defaultLayoutOverride) {
+        determinedLayoutClass = context.config.card_layout ?? defaultLayoutOverride;
+    } else {
+        if (!isCached) {
+            cachedHomeAssistant = document.querySelector("body > home-assistant");
+            cachedMain = cachedHomeAssistant?.shadowRoot?.querySelector("home-assistant-main");
+            cachedDrawer = cachedMain?.shadowRoot?.querySelector("ha-drawer > partial-panel-resolver > ha-panel-lovelace");
+            cachedHuiRoot = cachedDrawer?.shadowRoot?.querySelector("hui-root");
+            
+            if (cachedHomeAssistant && cachedMain && cachedDrawer && cachedHuiRoot) {
+                isCached = true;
+            } else {
+                cachedHomeAssistant = null; cachedMain = null; cachedDrawer = null; cachedHuiRoot = null;
+                isCached = false;
+            }
+        }
+
+        if (cachedHuiRoot && !cachedHuiRoot.isConnected) {
+            isCached = false; 
+            cachedHomeAssistant = null; cachedMain = null; cachedDrawer = null; cachedHuiRoot = null;
+        }
         
-        // Mark as cached only if all elements are found
-        isCached = true;
+        let defaultViewLayout = "normal";
+        if (cachedHuiRoot?.shadowRoot) {
+            const masonryView = cachedHuiRoot.shadowRoot.querySelector("#view > hui-view > hui-masonry-view");
+            window.isSectionView = !masonryView;
+            defaultViewLayout = window.isSectionView ? "large" : "normal";
+        }
+        determinedLayoutClass = context.config.card_layout ?? defaultViewLayout;
     }
-    
-    // If an element is not available (for example after navigation), reset the cache
-    if (!cachedHuiRoot.isConnected) {
-        isCached = false;
+
+    if (context.previousLayout === determinedLayoutClass) {
         return;
     }
-    
-    const masonryView = cachedHuiRoot.shadowRoot.querySelector("#view > hui-view > hui-masonry-view");
+    context.previousLayout = determinedLayoutClass;
 
-    window.isSectionView = !masonryView;
-    const defaultLayout = window.isSectionView ? "large" : "normal";
-    const layoutClass = context.config.card_layout ?? defaultLayout;
-    
-    if (context.previousLayout === layoutClass) {
-        return;
-    }
-    context.previousLayout = layoutClass;
+    const needsLarge = determinedLayoutClass === 'large' || determinedLayoutClass === 'large-2-rows' || determinedLayoutClass === 'large-sub-buttons-grid';
+    const needsRows2 = determinedLayoutClass === 'large-2-rows';
+    const needsSubButtonsGrid = determinedLayoutClass === 'large-sub-buttons-grid';
 
-    const needsLarge = layoutClass === 'large' || layoutClass === 'large-2-rows' || layoutClass === 'large-sub-buttons-grid';
-    const needsRows2 = layoutClass === 'large-2-rows';
-    const needsSubButtonsGrid = layoutClass === 'large-sub-buttons-grid';
+    targetElement.classList.toggle('large', needsLarge);
+    targetElement.classList.toggle('rows-2', needsRows2);
+    targetElement.classList.toggle('sub-buttons-grid', needsSubButtonsGrid);
 
-    context.content.classList.toggle('large', needsLarge);
-    context.content.classList.toggle('rows-2', needsRows2);
-    context.content.classList.toggle('sub-buttons-grid', needsSubButtonsGrid);
-
-    if (context.elements.mainContainer && (context.config.rows || context.config.grid_options?.rows)) {
-        if (context.config.rows === 'auto' || context.config.grid_options?.rows === 'auto') return;
-        // Set the row size for the large card layout (e.g. add the possibilty to set a custom row size inside of a pop-up)
-        context.elements.mainContainer.style.setProperty('--row-size', context.config.rows || context.config.grid_options?.rows);
+    if (targetElement === context.content &&
+        context.elements?.mainContainer && 
+        (context.config.rows || context.config.grid_options?.rows)) {
+        
+        if (context.config.rows === 'auto' || context.config.grid_options?.rows === 'auto') {
+            // context.elements.mainContainer.style.removeProperty('--row-size');
+        } else {
+            context.elements.mainContainer.style.setProperty('--row-size', context.config.rows || context.config.grid_options?.rows);
+        }
     }
 }
 

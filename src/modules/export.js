@@ -11,7 +11,7 @@ export function generateYamlExport(moduleData) {
     delete moduleContent.id;
     
     // Ensure editor_raw is removed if it exists
-    if (moduleContent.editor_raw) {
+    if (moduleContent.editor_raw || moduleContent.editor_raw === '') {
       delete moduleContent.editor_raw;
     }
     
@@ -42,7 +42,7 @@ export function generateGitHubExport(moduleData) {
   try {
     // Create a clean copy without editor_raw
     const cleanModuleData = { ...moduleData };
-    if (cleanModuleData.editor_raw) {
+    if (cleanModuleData.editor_raw || moduleContent.editor_raw === '') {
       delete cleanModuleData.editor_raw;
     }
     
@@ -199,7 +199,7 @@ export function copyToClipboard(context, text, successMessage, updatePreviewCall
       updatePreviewCallback(text);
     }
   } catch (err) {
-    console.error("Fallback clipboard copy failed:", err);
+    console.error("Clipboard copy failed:", err);
     fireToast(context, "Could not copy to clipboard. Please copy manually from the preview below.", "error");
     
     if (typeof updatePreviewCallback === 'function') {

@@ -21,6 +21,7 @@ let themeWatcherInitialized = false;
 class BubbleCard extends HTMLElement {
     editor = false;
     isConnected = false;
+    _editorUpdateTimeout = null;
 
     connectedCallback() {
         this.isConnected = true;
@@ -41,6 +42,7 @@ class BubbleCard extends HTMLElement {
     disconnectedCallback() {
         this.isConnected = false;
         cleanupTapActions();
+        clearTimeout(this._editorUpdateTimeout);
 
         switch (this.config.card_type) {
             case 'pop-up':
@@ -53,6 +55,7 @@ class BubbleCard extends HTMLElement {
         if (this.editor) {
             return window.history?.state?.dialog === "hui-dialog-edit-card";
         }
+        return false;
     }
 
     set editMode(editMode) {
@@ -66,67 +69,61 @@ class BubbleCard extends HTMLElement {
         }
     }
 
+    _scheduleEditorUpdate() {
+        clearTimeout(this._editorUpdateTimeout);
+        this._editorUpdateTimeout = setTimeout(() => {
+            if (this.isConnected && this.detectedEditor) {
+                this.updateBubbleCard();
+            }
+        }, 300);
+    }
+
     set hass(hass) {
         initializeContent(this);
         this._hass = hass;
 
         const isPopUp = this.config.card_type === 'pop-up';
 
-        if ((!this.editor && (this.isConnected || isPopUp)) || this.detectedEditor) {
+        if (this.detectedEditor) {
+            this._scheduleEditorUpdate();
+        } else if (!this.editor && (this.isConnected || isPopUp)) {
             this.updateBubbleCard();
         }
     }
 
     updateBubbleCard() {
-
+        if (!this.isConnected && this.config.card_type !== 'pop-up') {
+            return;
+        }
+        
         switch (this.config.card_type) {
-
-            // Update pop-up card
             case 'pop-up':
                 handlePopUp(this);
                 break;
-
-            // Update button
             case 'button' :
                 handleButton(this);
                 break;
-
-            // Update separator
             case 'separator' :
                 handleSeparator(this);
                 break;
-
-            // Update cover card
             case 'cover' :
                 handleCover(this);
                 break;
-
-            // Update empty card
             case 'empty-column' :
                 handleEmptyColumn(this);
                 break;
-
-            // Update horizontal buttons stack
             case 'horizontal-buttons-stack' :
                 handleHorizontalButtonsStack(this);
                 break;
-
-            // Update calendar
             case 'calendar' :
                 handleCalendar(this);
                 break;
-
-            // Update media player
             case 'media-player' :
                 handleMediaPlayer(this);
                 break;
-
-            // Update select
             case 'select' :
                 handleSelect(this);
                 break;
-
-            // Update climate
             case 'climate' :
                 handleClimate(this);
                 break;
@@ -134,7 +131,6 @@ class BubbleCard extends HTMLElement {
     }
 
     setConfig(config) {
-        // Check if there's an error in the config
         if (config.error) {
             throw new Error(config.error);
         }
