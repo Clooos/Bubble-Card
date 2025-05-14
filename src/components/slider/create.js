@@ -12,6 +12,49 @@ import { updateEntity, onSliderChange } from './changes.js';
 import { defaultOptions } from './index.js';
 import styles from './styles.css';
 
+function getEntityMinValue(context, state) {
+  if (context.config.min_value !== undefined) return parseFloat(context.config.min_value);
+  const entityType = state.entity_id.split('.')[0];
+  if (entityType === 'climate') return state.attributes.min_temp ?? 0;
+  return state.attributes.min ?? 0;
+}
+
+function getEntityMaxValue(context, state) {
+  if (context.config.max_value !== undefined) return parseFloat(context.config.max_value);
+  const entityType = state.entity_id.split('.')[0];
+  if (entityType === 'climate') return state.attributes.max_temp ?? 100;
+  return state.attributes.max ?? 100;
+}
+
+function getEntityStep(context, state) {
+  if (context.config.step !== undefined) return parseFloat(context.config.step);
+  const entityType = state.entity_id.split('.')[0];
+  switch (entityType) {
+    case 'input_number':
+    case 'number':
+      return state.attributes.step ?? 1;
+    case 'fan':
+      return state.attributes.percentage_step ?? 1;
+    case 'climate': {      
+      const isCelcius = context._hass.config.unit_system.temperature === '°C';
+      return state.attributes.target_temp_step ?? (isCelcius ? 0.5 : 1);
+    }
+    case 'media_player':
+      return 0.01;
+    case 'cover':
+      return 1;
+    case 'light':
+        return 1; 
+    default:
+      return 1;
+  }
+}
+
+function getAdjustedValue(value, step) {
+  if (step <= 0) return value; // Avoid division by zero or infinite loops
+  return Math.round(value / step) * step;
+}
+
 export function createSliderStructure(context, config = {}) {
   const options = { 
     ...defaultOptions,
@@ -24,14 +67,29 @@ export function createSliderStructure(context, config = {}) {
     ...config 
   };
 
-  // For climate entities, we handle min/max values differently
-  if (context.config.entity?.split('.')[0] === 'climate') {
-    context.sliderMinValue = undefined;
-    context.sliderMaxValue = undefined;
+  // Determine effective min/max for the slider display
+  const entityState = context._hass.states[context.config.entity];
+  const entityType = context.config.entity?.split('.')[0];
+
+  if (entityState) {
+    context.sliderMinValue = getEntityMinValue(context, entityState);
+    context.sliderMaxValue = getEntityMaxValue(context, entityState);
+    context.sliderStep = getEntityStep(context, entityState);
   } else {
-    // For other entities, use the standard approach
-    context.sliderMinValue = context.config.min_value ?? context.config.min_volume ?? 0;
-    context.sliderMaxValue = context.config.max_value ?? context.config.max_volume ?? 100;
+    // Fallback if entity state is not available - use config or defaults
+    context.sliderMinValue = context.config.min_value ?? 0;
+    context.sliderMaxValue = context.config.max_value ?? 100;
+    // Cannot determine step reliably without entity state, use config or default 1
+    context.sliderStep = context.config.step ?? 1;
+  }
+  
+  // Ensure min < max
+  if (context.sliderMaxValue <= context.sliderMinValue) {
+    if (entityType === 'climate') {
+        context.sliderMaxValue = context.sliderMinValue + 1; // Default diff for climate
+    } else {
+        context.sliderMaxValue = context.sliderMinValue + 100; // Default diff for others
+    }
   }
 
   context.elements.rangeFill = createElement('div', 'bubble-range-fill range-fill');
@@ -44,7 +102,10 @@ export function createSliderStructure(context, config = {}) {
   }
 
   function calculateRangePercentage(value, minValue, maxValue) {
-    return 100 * (value - minValue) / (maxValue - minValue);
+    if (maxValue <= minValue) return 0; // Avoid division by zero or negative
+    // Clamp value before calculating percentage
+    const clampedValue = Math.max(minValue, Math.min(maxValue, value));
+    return 100 * (clampedValue - minValue) / (maxValue - minValue);
   }
 
   function calculateInitialPercentage() {
@@ -65,97 +126,58 @@ export function createSliderStructure(context, config = {}) {
 
       case 'media_player':
         if (isStateOn(context, entity)) {
-          initialPercentage = 100 * getAttribute(context, "volume_level", entity);
+          // Volume is 0-1, but slider/percentage is 0-100
+          initialPercentage = 100 * (getAttribute(context, "volume_level", entity) ?? 0);
         }
         break;
 
-      case 'cover': {
-        const position = getAttribute(context, "current_position", entity);
-        initialPercentage = position !== undefined && position !== null ? position : 0;
+      case 'cover': { 
+        // Covers are usually 0-100, use effective min/max
+        const value = parseFloat(getAttribute(context, "current_position", entity) ?? 0);
+        initialPercentage = calculateRangePercentage(value, context.sliderMinValue, context.sliderMaxValue);
         break;
       }
 
       case 'input_number':
       case 'number': {
-        const minValue = getAttribute(context, "min", entity);
-        const maxValue = getAttribute(context, "max", entity);
-        const value = getState(context, entity);
-        initialPercentage = calculateRangePercentage(value, minValue, maxValue);
+        const value = parseFloat(getState(context, entity));
+        initialPercentage = calculateRangePercentage(value, context.sliderMinValue, context.sliderMaxValue);
         break;
       }
 
       case 'fan':
         if (isStateOn(context, entity)) {
-          initialPercentage = getAttribute(context, "percentage", entity);
+          // Fans are usually 0-100, use effective min/max
+          const value = parseFloat(getAttribute(context, "percentage", entity) ?? 0);
+          initialPercentage = calculateRangePercentage(value, context.sliderMinValue, context.sliderMaxValue);
         }
         break;
 
       case 'climate':
         if (isStateOn(context, entity)) {
-          let minTemp = getAttribute(context, "min_temp", entity);
-          let maxTemp = getAttribute(context, "max_temp", entity);
-          
-          if (context.config.min_value !== undefined) {
-            minTemp = parseFloat(context.config.min_value);
-          }
-          if (context.config.max_value !== undefined) {
-            maxTemp = parseFloat(context.config.max_value);
-          }
-          
-          // Get current temperature
-          const temp = getAttribute(context, "temperature", entity);
-          
-          // Handle undefined values
-          if (temp === undefined || minTemp === undefined || maxTemp === undefined) {
-            initialPercentage = 0;
-          } else {
-            // Make sure temperature is within bounds
-            const cappedTemp = Math.max(minTemp, Math.min(maxTemp, temp));
-            // Calculate percentage correctly
-            initialPercentage = calculateRangePercentage(cappedTemp, minTemp, maxTemp);
+          const temp = parseFloat(getAttribute(context, "temperature", entity));
+          if (!isNaN(temp)) {
+             initialPercentage = calculateRangePercentage(temp, context.sliderMinValue, context.sliderMaxValue);
           }
         }
         break;
 
       default:
-        // Handle custom min/max values
-        if (context.config.min_value !== undefined && context.config.max_value !== undefined) {
-          const value = getState(context, entity);
-          const minValue = parseFloat(context.config.min_value);
-          const maxValue = parseFloat(context.config.max_value);
-          initialPercentage = calculateRangePercentage(value, minValue, maxValue);
+        // Handle generic case using state and effective min/max
+        if (context.sliderMinValue !== undefined && context.sliderMaxValue !== undefined) {
+          const value = parseFloat(getState(context, entity));
+           if (!isNaN(value)) {
+             initialPercentage = calculateRangePercentage(value, context.sliderMinValue, context.sliderMaxValue);
+           }
         }
     }
     
-    return initialPercentage;
+    // Ensure percentage is always between 0 and 100
+    return Math.max(0, Math.min(100, initialPercentage));
   }
 
   function calculateVisualPercentage(initialPercentage) {
-    // Special handling for climate entities
-    if (isEntityType(context, "climate", context.config.entity)) {
-      // initialPercentage is already calculated correctly in calculateInitialPercentage
-      // We shouldn't apply sliderMinValue/sliderMaxValue adjustments again for climate
-      return initialPercentage;
-    }
-    
-    // For other entities, apply min/max adjustments
-    if (context.sliderMinValue !== undefined || context.sliderMaxValue !== undefined) {
-      const minValue = context.sliderMinValue !== undefined ? context.sliderMinValue : 0;
-      const maxValue = context.sliderMaxValue !== undefined ? context.sliderMaxValue : 100;
-
-      let after;
-      
-      if (initialPercentage >= minValue && initialPercentage <= maxValue) {
-        after = ((initialPercentage - minValue) / (maxValue - minValue)) * 100;
-      } else if (initialPercentage < minValue) {
-        after = 0;
-      } else if (initialPercentage > maxValue) {
-        after = 100;
-      }
-      
-      return after;
-    }
-    return initialPercentage;
+    return Math.max(0, Math.min(100, initialPercentage));
   }
 
   function updateValueDisplay(percentage) {
@@ -166,55 +188,60 @@ export function createSliderStructure(context, config = {}) {
     switch (entityType) {
       case 'climate':
         if (isStateOn(context, context.config.entity)) {
-          let minValue = getAttribute(context, "min_temp", context.config.entity);
-          let maxValue = getAttribute(context, "max_temp", context.config.entity);
+          const minValue = context.sliderMinValue;
+          const maxValue = context.sliderMaxValue;
+          const climateStep = context.sliderStep;
           
-          if (context.config.min_value !== undefined) {
-            minValue = parseFloat(context.config.min_value);
-          }
-          if (context.config.max_value !== undefined) {
-            maxValue = parseFloat(context.config.max_value);
-          }
+          const temperature = minValue + (percentage / 100) * (maxValue - minValue);
+          // Display the value adjusted to the step
+          const adjustedTempValue = getAdjustedValue(temperature, climateStep);
+          // Clamp display value to min/max bounds
+          const clampedTempValue = Math.max(minValue, Math.min(maxValue, adjustedTempValue));
           
-          const temperature = (maxValue - minValue) * percentage / 100 + minValue;
           const isCelcius = context._hass.config.unit_system.temperature === '°C';
-          const step = context.config.step || getAttribute(context, "target_temp_step", context.config.entity) || (isCelcius ? 0.5 : 1);
+          const entityState = context._hass.states[context.config.entity];
+          const step = context.config.step || (entityState?.attributes.target_temp_step) || (isCelcius ? 0.5 : 1);
           const adjustedTemp = Math.round(temperature / step) * step;
-          context.elements.rangeValue.innerText = adjustedTemp.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F');
+          context.elements.rangeValue.innerText = clampedTempValue.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F');
+        } else {
+          // If climate is off, show a default or placeholder
+          context.elements.rangeValue.innerText = context._hass.localize('state.default.off');
         }
         break;
 
       case 'number':
       case 'input_number':
-        const minValue = getAttribute(context, "min", context.config.entity);
-        const maxValue = getAttribute(context, "max", context.config.entity);
+        const minValue = context.sliderMinValue;
+        const maxValue = context.sliderMaxValue;
+        const step = context.sliderStep;
         const actualValue = minValue + (percentage / 100) * (maxValue - minValue);
-        const step = context.config.step || getAttribute(context, "step", context.config.entity) || 1;
-        const adjustedValue = Math.round(actualValue / step) * step;
+        
+        // Display the value adjusted to the step
+        const adjustedValue = getAdjustedValue(actualValue, step);
+        // Clamp display value to min/max bounds
+        const clampedAdjustedValue = Math.max(minValue, Math.min(maxValue, adjustedValue));
+
         const unit = getAttribute(context, "unit_of_measurement", context.config.entity) || '';
-        context.elements.rangeValue.innerText = adjustedValue.toFixed(1).replace(/\.0$/, '') + (unit ? ` ${unit}` : '');
+        // Use precision from entity state if available, default to 1 decimal if not integer
+        const precision = context._hass.states[context.config.entity]?.attributes?.precision ?? (Number.isInteger(clampedAdjustedValue) ? 0 : 1);
+        context.elements.rangeValue.innerText = clampedAdjustedValue.toFixed(precision).replace(/\.0$/, '') + (unit ? ` ${unit}` : '');
         break;
 
       default:
-        if (context.sliderMinValue !== undefined || context.sliderMaxValue !== undefined) {
-          const minValue = context.sliderMinValue !== undefined ? context.sliderMinValue : 0;
-          const maxValue = context.sliderMaxValue !== undefined ? context.sliderMaxValue : 100;
-          const actualValue = minValue + (percentage / 100) * (maxValue - minValue);
-          
-          if (context.config.step) {
-            const adjustedValue = Math.round(actualValue / context.config.step) * context.config.step;
-            context.elements.rangeValue.innerText = adjustedValue.toFixed(1).replace(/\.0$/, '') + '%';
-          } else {
-            context.elements.rangeValue.innerText = Math.round(actualValue) + '%';
-          }
-        } else {
-          if (context.config.step) {
-            const adjustedValue = Math.round(percentage / context.config.step) * context.config.step;
-            context.elements.rangeValue.innerText = adjustedValue.toFixed(1).replace(/\.0$/, '') + '%';
-          } else {
-            context.elements.rangeValue.innerText = Math.round(percentage) + '%';
-          }
-        }
+        // For other types (like light brightness % or fan %)
+        const currentMinValue = context.sliderMinValue; // Typically 0 for these unless overridden
+        const currentMaxValue = context.sliderMaxValue; // Typically 100 for these unless overridden
+        const currentStep = context.sliderStep; // Typically 1 for these unless overridden
+        
+        let displayValue = currentMinValue + (percentage / 100) * (currentMaxValue - currentMinValue);
+
+        // Display the value adjusted to the step
+        const adjustedDisplayValue = getAdjustedValue(displayValue, currentStep);
+        // Clamp display value to min/max bounds
+        const clampedDisplayValue = Math.max(currentMinValue, Math.min(currentMaxValue, adjustedDisplayValue));
+
+        // Assuming percentage display for defaults like light/fan
+        context.elements.rangeValue.innerText = Math.round(clampedDisplayValue) + '%';
     }
   }
 

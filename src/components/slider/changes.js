@@ -1,4 +1,3 @@
-import { _$LE } from 'lit';
 import { 
   getState,
   getAttribute,
@@ -6,45 +5,50 @@ import {
   isEntityType
 } from '../../tools/utils.js';
 
-const pendingValues = new Map();
-const throttleDelay = 16;
-let lastRenderTime = 0;
 let pendingRaf = null;
 
-// Optimized throttle function for RAF with guaranteed execution
-function requestAnimationFrameThrottle(callback) {
-  if (pendingRaf) {
-    cancelAnimationFrame(pendingRaf);
-  }
+// Helper functions to get entity properties consistently
+function getEntityMinValue(context, state) {
+  if (context.config.min_value !== undefined) return parseFloat(context.config.min_value);
+  const entityType = state.entity_id.split('.')[0];
+  if (entityType === 'climate') return state.attributes.min_temp ?? 0;
+  return state.attributes.min ?? 0;
+}
 
-  if (!lastRenderTime || Date.now() - lastRenderTime >= throttleDelay) {
-    lastRenderTime = Date.now();
-    callback();
-  } else {
-    pendingRaf = requestAnimationFrame(() => {
-      lastRenderTime = Date.now();
-      callback();
-    });
+function getEntityMaxValue(context, state) {
+  if (context.config.max_value !== undefined) return parseFloat(context.config.max_value);
+  const entityType = state.entity_id.split('.')[0];
+  if (entityType === 'climate') return state.attributes.max_temp ?? 100; // Default might need adjustment
+  return state.attributes.max ?? 100;
+}
+
+function getEntityStep(context, state) {
+  if (context.config.step !== undefined) return parseFloat(context.config.step);
+  const entityType = state.entity_id.split('.')[0];
+  switch (entityType) {
+    case 'input_number':
+    case 'number':
+      return state.attributes.step ?? 1;
+    case 'fan':
+      return state.attributes.percentage_step ?? 1;
+    case 'climate': {      
+      const isCelcius = context._hass.config.unit_system.temperature === '°C';
+      return state.attributes.target_temp_step ?? (isCelcius ? 0.5 : 1);
+    }
+    case 'media_player':
+      return 0.01; // Default step for volume
+    case 'cover':
+      return 1; // Default step for position
+    default:
+      return 1;
   }
 }
 
 function getAdjustedPercentage(context, percentage) {
-  if (!context.config.step && !context._hass.states[context.config.entity]?.attributes?.step) {
-    return percentage;
-  }
+  const state = context._hass.states[context.config.entity];
+  if (!state) return percentage;
 
-  const step = context.config.step ?? context._hass.states[context.config.entity]?.attributes?.step ?? 1;
   let adjustedPercentage = percentage;
-
-  if (context.sliderMinValue !== undefined || context.sliderMaxValue !== undefined) {
-    const minValue = context.sliderMinValue ?? 0;
-    const maxValue = context.sliderMaxValue ?? 100;
-    const value = minValue + (percentage / 100) * (maxValue - minValue);
-    const adjustedValue = getAdjustedValue(value, step);
-    adjustedPercentage = ((adjustedValue - minValue) / (maxValue - minValue)) * 100;
-  } else {
-    adjustedPercentage = getAdjustedValue(percentage, step);
-  }
 
   return Math.max(0, Math.min(100, adjustedPercentage));
 }
@@ -52,28 +56,27 @@ function getAdjustedPercentage(context, percentage) {
 export function onSliderChange(context, positionX, shouldAdjustToStep = false) {
   const sliderRect = context.elements.rangeSlider.getBoundingClientRect();
   let percentage = Math.max(0, Math.min(100, ((positionX - sliderRect.left) / sliderRect.width) * 100));
+  percentage = getAdjustedPercentage(context, percentage);
 
-  if (shouldAdjustToStep) {
-    percentage = getAdjustedPercentage(context, percentage);
+  // Special handling for lights when tap_to_slide is not active
+  const entityType = context.config.entity?.split('.')[0];
+  if (
+    entityType === 'light' && 
+    (context.config.tap_to_slide === false || context.config.tap_to_slide === undefined) &&
+    (context.config.allow_light_slider_to_0 !== true)
+  ) {
+    // If dragging to the very minimum, keep it at 1% instead of 0%
+    // This allows tap action to turn it off, but sliding keeps it dimly lit.
+    if (percentage < 1) {
+      percentage = 1;
+    }
   }
 
   if (isEntityType(context, "climate", context.config.entity)) {
-    pendingValues.set(context.config.entity, {
-      percentage,
-      timestamp: Date.now()
-    });
-    
-    // Force immediate visual update for direct user interaction
     context.elements.rangeFill.style.transform = `translateX(${percentage}%)`;
     
     return percentage;
   }
-
-  // Store the pending value when user changes the slider
-  pendingValues.set(context.config.entity, {
-    percentage,
-    timestamp: Date.now()
-  });
 
   // Force immediate visual update for direct user interaction
   context.elements.rangeFill.style.transform = `translateX(${percentage}%)`;
@@ -115,17 +118,11 @@ function adjustToRange(percentage, minValue, maxValue) {
 }
 
 function getCurrentValue(context, entity, entityType) {
-  const pendingValue = pendingValues.get(entity);
   const currentState = context._hass.states[entity];
-  
-  // Check for pending value and if it's still valid
-  if (pendingValue) {
-    const lastChanged = new Date(currentState.last_changed).getTime();
-    if (lastChanged < pendingValue.timestamp) {
-      return pendingValue.percentage;
-    }
-    pendingValues.delete(entity);
-  }
+  if (!currentState) return 0;
+
+  const minValue = getEntityMinValue(context, currentState);
+  const maxValue = getEntityMaxValue(context, currentState);
   
   // Calculate current value based on entity state
   switch (entityType) {
@@ -141,39 +138,39 @@ function getCurrentValue(context, entity, entityType) {
     }
     case 'input_number':
     case 'number': {
-      const minValue = getAttribute(context, "min", entity);
-      const maxValue = getAttribute(context, "max", entity);
-      return calculateRangePercentage(getState(context, entity), minValue, maxValue);
+      const value = parseFloat(getState(context, entity));
+      const clampedValue = Math.max(minValue, Math.min(maxValue, value));
+      return calculateRangePercentage(clampedValue, minValue, maxValue);
     }
     case 'fan':
-      return isStateOn(context, entity) ? getAttribute(context, "percentage", entity) : 0;
+      if (isStateOn(context, entity)) {
+        const percentageAttribute = getAttribute(context, "percentage", entity);
+        // Fan percentage is already 0-100, no need for min/max scaling unless specified in config
+        if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+            const value = parseFloat(percentageAttribute);
+            const clampedValue = Math.max(minValue, Math.min(maxValue, value));
+            return calculateRangePercentage(clampedValue, minValue, maxValue);
+        } else {
+            return percentageAttribute ?? 0;
+        }
+      } 
+      return 0;
     case 'climate':
       if (isStateOn(context, entity)) {
-        let minTemp = getAttribute(context, "min_temp", entity);
-        let maxTemp = getAttribute(context, "max_temp", entity);
-        
-        if (context.config.min_value !== undefined) {
-          minTemp = parseFloat(context.config.min_value);
-        }
-        if (context.config.max_value !== undefined) {
-          maxTemp = parseFloat(context.config.max_value);
-        }
-        
-        const temp = getAttribute(context, "temperature", entity);
-        if (temp === undefined || minTemp === undefined || maxTemp === undefined) {
+        const temp = parseFloat(getAttribute(context, "temperature", entity));
+        if (isNaN(temp) || minValue === undefined || maxValue === undefined) {
           return 0;
         }
         
-        const cappedTemp = Math.max(minTemp, Math.min(maxTemp, temp));
-        return calculateRangePercentage(cappedTemp, minTemp, maxTemp);
+        const cappedTemp = Math.max(minValue, Math.min(maxValue, temp));
+        return calculateRangePercentage(cappedTemp, minValue, maxValue);
       }
       return 0;
     default:
       if (context.config.min_value !== undefined && context.config.max_value !== undefined) {
         const value = parseFloat(getState(context, entity));
-        const minValue = parseFloat(context.config.min_value);
-        const maxValue = parseFloat(context.config.max_value);
-        return calculateRangePercentage(value, minValue, maxValue);
+        const clampedValue = Math.max(minValue, Math.min(maxValue, value));
+        return calculateRangePercentage(clampedValue, minValue, maxValue);
       }
       return 0;
   }
@@ -254,25 +251,31 @@ function getAdjustedValue(value, step) {
   return Math.round(value / step) * step;
 }
 
-export function updateEntity(context, value) {
+export function updateEntity(context, percentage) {
   const state = context._hass.states[context.config.entity];
-  const entityType = context.config.entity.split('.')[0];
+  if (!state) return; // Don't update if state is missing
   
-  let adjustedPercentage = value;
-  if (context.sliderMinValue !== undefined || context.sliderMaxValue !== undefined) {
-    const minValue = context.sliderMinValue ?? 0;
-    const maxValue = context.sliderMaxValue ?? 100;
-    adjustedPercentage = minValue + (value / 100) * (maxValue - minValue);
-  }
+  const entityType = context.config.entity.split('.')[0];
+  const minValue = getEntityMinValue(context, state);
+  const maxValue = getEntityMaxValue(context, state);
+  const step = getEntityStep(context, state);
 
-  if (context.config.step) {
-    adjustedPercentage = getAdjustedValue(adjustedPercentage, context.config.step);
-  }
+  // Convert the percentage (0-100) back to the raw value based on min/max
+  let rawValue = minValue + (percentage / 100) * (maxValue - minValue);
+
+  // Now, apply the step adjustment to the raw value
+  let adjustedValue = getAdjustedValue(rawValue, step);
+
+  // Clamp the adjusted value within the min/max bounds
+  adjustedValue = Math.max(minValue, Math.min(maxValue, adjustedValue));
 
   switch (entityType) {
     case 'light': {
-      const brightnessPercentage = Math.min(100, Math.max(0, adjustedPercentage));
-      const brightness = Math.round(255 * brightnessPercentage / 100);
+      // Light brightness is special (0-255), percentage is 0-100
+      // Step adjustment for lights usually isn't standard via `step` attribute.
+      // Convert the 0-100 percentage directly to 0-255 brightness.
+      // We assume the step logic isn't needed here unless explicitly configured? Let's stick to direct percentage.
+      const brightness = Math.round(255 * percentage / 100);
       const isTransitionEnabled = context.config.light_transition;
       const transitionTime = (context.config.light_transition_time === "" || isNaN(context.config.light_transition_time))
         ? 500 // in milliseconds
@@ -287,11 +290,13 @@ export function updateEntity(context, value) {
     }
 
     case 'media_player': {
-      const step = context.config.step ?? 0.01;
-      const volumeLevel = getAdjustedValue(
-        Math.min(1, Math.max(0, adjustedPercentage / 100)),
-        step
-      );
+      // Media player volume is 0.0 to 1.0
+      // Convert the 0-100 percentage to 0-1 volume level
+      let volumeLevel = percentage / 100;
+      // Apply step adjustment (defaulting to 0.01)
+      volumeLevel = getAdjustedValue(volumeLevel, step); 
+      // Clamp to 0-1 range
+      volumeLevel = Math.max(0, Math.min(1, volumeLevel));
       context._hass.callService('media_player', 'volume_set', {
         entity_id: context.config.entity,
         volume_level: volumeLevel.toFixed(2)
@@ -300,11 +305,9 @@ export function updateEntity(context, value) {
     }
 
     case 'cover': {
-      const step = context.config.step ?? 1;
-      const position = getAdjustedValue(
-        Math.min(100, Math.max(0, Math.round(adjustedPercentage))),
-        step
-      );
+      // Cover position is 0-100
+      // adjustedValue already holds the step-adjusted value within min/max (which are typically 0-100 for covers)
+      const position = Math.round(adjustedValue);
       context._hass.callService('cover', 'set_cover_position', {
         entity_id: context.config.entity,
         position: position
@@ -313,11 +316,6 @@ export function updateEntity(context, value) {
     }
 
     case 'input_number': {
-      const minValue = state.attributes.min ?? 0;
-      const maxValue = state.attributes.max ?? 100;
-      const step = context.config.step ?? getAttribute(context, "step") ?? 1;
-      const rawValue = (maxValue - minValue) * adjustedPercentage / 100 + minValue;
-      const adjustedValue = getAdjustedValue(rawValue, step);
       context._hass.callService('input_number', 'set_value', {
         entity_id: context.config.entity,
         value: adjustedValue
@@ -326,9 +324,8 @@ export function updateEntity(context, value) {
     }
 
     case 'fan': {
-      const step = context.config.step ?? state.attributes.percentage_step ?? 1;
-      const fanPercentage = Math.min(100, Math.max(0, Math.round(adjustedPercentage)));
-      const adjustedValue = getAdjustedValue(fanPercentage, step);
+      // Fan percentage is 0-100
+      // adjustedValue already holds the step-adjusted value within min/max (which are typically 0-100 for fans)
       context._hass.callService('fan', 'set_percentage', {
         entity_id: context.config.entity,
         percentage: adjustedValue
@@ -337,23 +334,8 @@ export function updateEntity(context, value) {
     }
 
     case 'climate': {
-      let minValue = state.attributes.min_temp ?? 0;
-      let maxValue = state.attributes.max_temp ?? 10000;
-      
-      if (context.config.min_value !== undefined) {
-        minValue = parseFloat(context.config.min_value);
-      }
-      if (context.config.max_value !== undefined) {
-        maxValue = parseFloat(context.config.max_value);
-      }
-      
-      const isCelcius = context._hass.config.unit_system.temperature === '°C';
-      const step = context.config.step ?? (state.attributes.target_temp_step ? state.attributes.target_temp_step : isCelcius ? 0.5 : 1);
-      
-      const rawValue = minValue + (value / 100) * (maxValue - minValue);
-      const adjustedValue = parseFloat(getAdjustedValue(rawValue, step).toFixed(1));
-      
-      const finalValue = Math.max(minValue, Math.min(maxValue, adjustedValue));
+      // adjustedValue already holds the step-adjusted temperature within the effective min/max
+      const finalValue = parseFloat(adjustedValue.toFixed(1)); // Ensure correct precision
       
       if (!isStateOn(context, context.config.entity)) {
         context._hass.callService('climate', 'turn_on', {
@@ -380,11 +362,6 @@ export function updateEntity(context, value) {
     }
 
     case 'number': {
-      const minValue = state.attributes.min ?? 0;
-      const maxValue = state.attributes.max ?? 100;
-      const step = context.config.step ?? state.attributes.step ?? 1;
-      const rawValue = (maxValue - minValue) * adjustedPercentage / 100 + minValue;
-      const adjustedValue = getAdjustedValue(rawValue, step);
       context._hass.callService('number', 'set_value', {
         entity_id: context.config.entity,
         value: adjustedValue

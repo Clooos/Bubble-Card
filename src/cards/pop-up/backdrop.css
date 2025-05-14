@@ -1,6 +1,6 @@
 .bubble-backdrop {
   position: fixed;
-  background-color: var(--bubble-backdrop-background-color);
+  background-color: var(--bubble-backdrop-background-color, var(--bubble-default-backdrop-background-color));
   top: 0;
   left: 0;
   width: 100%;

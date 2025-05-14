@@ -301,13 +301,13 @@ export function formatDateTime(datetime, locale) {
         value = diffInSeconds + 1;
     } else if (diffInSeconds < 3600) {
         unit = 'minute';
-        value = Math.floor(diffInSeconds / 60);
+        value = Math.round(diffInSeconds / 60);
     } else if (diffInSeconds < 86400) {
         unit = 'hour';
-        value = Math.floor(diffInSeconds / 3600);
+        value = Math.round(diffInSeconds / 3600);
     } else {
         unit = 'day';
-        value = Math.floor(diffInSeconds / 86400);
+        value = Math.round(diffInSeconds / 86400);
     }
 
     const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });

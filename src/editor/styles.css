@@ -257,6 +257,7 @@ ha-card-conditions-editor {
 .bubble-info {
   padding: 0 0 14px;
   position: relative;
+  overflow: auto;
 }
 
 .bubble-info .content {

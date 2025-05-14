@@ -13,10 +13,8 @@ import { handleMediaPlayer } from './cards/media-player/index.js';
 import { handleSelect } from './cards/select/index.js';
 import { handleClimate } from './cards/climate/index.js';
 import { preloadYAMLStyles } from './tools/style-processor.js';
-import { createBubbleDefaultColor, initBubbleColorThemeWatcher } from './tools/style.js';
+import { createBubbleDefaultColor } from './tools/style.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
-
-let themeWatcherInitialized = false;
 
 class BubbleCard extends HTMLElement {
     editor = false;
@@ -26,13 +24,7 @@ class BubbleCard extends HTMLElement {
     connectedCallback() {
         this.isConnected = true;
         preloadYAMLStyles(this);
-
-        if (!themeWatcherInitialized) {
-            initBubbleColorThemeWatcher();
-            themeWatcherInitialized = true;
-        } else {
-            createBubbleDefaultColor();
-        }
+        createBubbleDefaultColor();
 
         if (this._hass) {
             this.updateBubbleCard();

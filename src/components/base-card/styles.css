@@ -169,6 +169,10 @@ ha-card {
     cursor: not-allowed;
 }
 
+.is-unavailable .bubble-buttons-container {
+    display: none;
+}
+
 .is-unavailable {
     opacity: 0.5;
 }

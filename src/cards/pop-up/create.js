@@ -20,7 +20,7 @@ function updateBackdropColor() {
     getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
     getComputedStyle(document.body).getPropertyValue('--card-background-color');
 
-  document.body.style.setProperty('--bubble-backdrop-background-color', convertToRGBA(themeColorBackground, 0.8, 0.6));
+  document.body.style.setProperty('--bubble-default-backdrop-background-color', convertToRGBA(themeColorBackground, 0.8, 0.6));
 }
 
 colorScheme.addEventListener('change', updateBackdropColor);

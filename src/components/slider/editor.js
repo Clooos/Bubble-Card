@@ -139,6 +139,18 @@ export function makeButtonSliderPanel(editor) {
                             <label class="mdc-label">Use accent color instead of light color</label> 
                         </div>
                     </ha-formfield>
+                    ${!editor._config.tap_to_slide ? html`
+                        <ha-formfield>
+                            <ha-switch
+                                .checked=${editor._config.allow_light_slider_to_0 ?? false}
+                                .configValue="${'allow_light_slider_to_0'}"
+                                @change=${editor._valueChanged}
+                            ></ha-switch>
+                            <div class="mdc-form-field">
+                                <label class="mdc-label">Allow slider to turn off light (reach 0%)</label> 
+                            </div>
+                        </ha-formfield>
+                    ` : ''}
                     <ha-formfield>
                         <ha-switch
                             .checked=${editor._config.light_transition}
