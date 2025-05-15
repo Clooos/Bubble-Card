@@ -1,6 +1,6 @@
 > [!WARNING]
 > May 11 update:
-> ### Hi everyone! The latest Home Assistant update (2025.5) breaks some Bubble Card features. If you still want to update, you can install the [latest v3.0.0 beta](https://github.com/Clooos/Bubble-Card/releases/tag/v3.0.0-beta.6). It has a few remaining minor issues but offers full support for HA 2025.5.
+> ### Hi everyone! The latest Home Assistant update (2025.5) breaks some Bubble Card features. If you still want to update, you can install the [latest v3.0.0 beta](https://github.com/Clooos/Bubble-Card/releases). It has a few remaining minor issues but offers full support for HA 2025.5.
 
 <br>
 
