@@ -35,6 +35,7 @@
   gap: 8px;
   padding: 7px 16px 7px 8px;
   position: relative;
+  box-sizing: border-box;
 }
 .bubble-day-wrapper + .bubble-day-wrapper::before {
   content: "";
@@ -91,6 +92,8 @@
   gap: 8px;
   padding-right: 6px;
   border-radius: var(--bubble-calendar-border-radius, var(--bubble-border-radius, 32px));
+  padding-left: 6px;
+  margin-left: -6px;
 }
 .bubble-event-time {
   font-size: 12px;
