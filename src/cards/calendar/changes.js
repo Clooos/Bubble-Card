@@ -147,7 +147,11 @@ export async function changeEvents(context) {
       eventLine.appendChild(eventColor);
       eventLine.appendChild(eventTime);
       eventLine.appendChild(eventName);
-      addActions(eventLine, { ...context.config, entity: event.entity.entity });
+      addActions(eventLine, { ...context.config, entity: event.entity.entity }, event.entity.entity, {
+        tap_action: { action: "more-info" },
+        double_tap_action: { action: "none" },
+        hold_action: { action: "none" }
+    });
 
       const activeColor = 'var(--bubble-event-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))';
 

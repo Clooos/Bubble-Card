@@ -94,6 +94,7 @@
   border-radius: var(--bubble-calendar-border-radius, var(--bubble-border-radius, 32px));
   padding-left: 6px;
   margin-left: -6px;
+  position: relative;
 }
 .bubble-event-time {
   font-size: 12px;
