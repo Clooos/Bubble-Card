@@ -88,17 +88,16 @@
   background-color: var(--bubble-event-background-color);
   background-image: var(--bubble-event-background-image);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-  padding-right: 6px;
+  padding: 4px 6px;
   border-radius: var(--bubble-calendar-border-radius, var(--bubble-border-radius, 32px));
-  padding-left: 6px;
   margin-left: -6px;
   position: relative;
+  line-height: 1em;
 }
 .bubble-event-time {
   font-size: 12px;
-  line-height: 21px;
   font-weight: 400;
   white-space: nowrap;
   flex-shrink: 0;
@@ -112,9 +111,12 @@
   flex-shrink: 0;
   flex-grow: 0;
 }
+.bubble-event-name-wrapper {
+  width: 10px;
+  flex: 1;
+}
 .bubble-event-name {
   font-size: 13px;
-  line-height: 21px;
   font-weight: 600;
   max-width: 100%;
   min-width: 0;
@@ -123,4 +125,22 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+.bubble-event-place {
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  min-width: 0;
+  flex-shrink: 1;
+  flex-grow: 1;
+}
+.bubble-event-place-icon {
+  display: inline-flex;
+  --mdc-icon-size: 12px;
+  margin-right: 4px;
 }
