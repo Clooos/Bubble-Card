@@ -50,6 +50,12 @@ export function renderCalendarEditor(editor){
                           selector: { boolean: {} },
                         },
                         {
+                          name: 'show_place',
+                          label: t('editor.calendar.show_place'),
+                          title: t('editor.calendar.show_place'),
+                          selector: { boolean: {} },
+                        },
+                        {
                           name: 'scrolling_effect',
                           label: t('editor.calendar.text_scrolling'),
                           title: t('editor.calendar.text_scrolling'),

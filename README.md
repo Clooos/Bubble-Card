@@ -928,6 +928,7 @@ This card allows you to display your `calendar` entities.
 | `limit`             | number  | Optional     | A number                                        | The amont of events that will be displayed on the card                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Show or hide the end time for events                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Show or hide the event progress bar                                                     |
+| `show_place`        | boolean | Optional     | `true` (default) or `false`                     | Show or hide the event place                                                            |
 | `tap_action`        | object  | Optional     | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on tap. If not defined, `more-info` will be used.           |
 | `double_tap_action` | object  | Optional     | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on double tap. If not defined, `toggle` will be used.       |
 | `hold_action`       | object  | Optional     | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on hold. If not defined, `more-info` will be used.          |
