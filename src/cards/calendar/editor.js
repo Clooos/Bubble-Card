@@ -4,6 +4,15 @@ import "../../components/editor/ha-selector-calendar_entity.js";
 
 export function renderCalendarEditor(editor){
     const t = setupTranslation(editor.hass);
+    
+    // S'assurer que event_action est initialisé
+    if (!editor._config.event_action) {
+        editor._config.event_action = {
+            tap_action: { action: "more-info" },
+            double_tap_action: { action: "none" },
+            hold_action: { action: "none" }
+        };
+    }
 
     return html`
         <div class="card-config">
@@ -50,6 +59,12 @@ export function renderCalendarEditor(editor){
                           selector: { boolean: {} },
                         },
                         {
+                          name: 'show_place',
+                          label: t('editor.calendar.show_place'),
+                          title: t('editor.calendar.show_place'),
+                          selector: { boolean: {} },
+                        },
+                        {
                           name: 'scrolling_effect',
                           label: t('editor.calendar.text_scrolling'),
                           title: t('editor.calendar.text_scrolling'),
@@ -65,12 +80,23 @@ export function renderCalendarEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                  Tap action on icon
+                  Tap action on day
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel("Tap action")}
+                    ${editor.makeActionPanel("Tap action", editor._config, 'none')}
                     ${editor.makeActionPanel("Double tap action")}
                     ${editor.makeActionPanel("Hold action")}
+                </div>
+            </ha-expansion-panel>
+            <ha-expansion-panel outlined>
+                <h4 slot="header">
+                  <ha-icon icon="mdi:gesture-tap-button"></ha-icon>
+                  Tap action on event
+                </h4>
+                <div class="content">
+                    ${editor.makeActionPanel("Tap action", editor._config.event_action, 'none', 'event_action')}
+                    ${editor.makeActionPanel("Double tap action", editor._config.event_action, 'none', 'event_action')}
+                    ${editor.makeActionPanel("Hold action", editor._config.event_action, 'none', 'event_action')}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}

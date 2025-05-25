@@ -21,6 +21,132 @@ function isSlTabGroupAvailable() {
          customElements.get('sl-tab-group') !== undefined;
 }
 
+export async function setModuleGlobalStatus(context, moduleId, isGlobal) {
+  try {
+    if (!context.hass) {
+      return false;
+    }
+
+    const entityId = "sensor.bubble_card_modules";
+    const entityExists = context.hass && context.hass.states && context.hass.states[entityId];
+    
+    if (!entityExists) {
+      return false;
+    }
+
+    const token = context.hass.auth.data.access_token;
+    if (!token) {
+      return false;
+    }
+
+    const baseUrl = window.location.origin;
+    let existingModules = {};
+
+    try {
+      // Retrieve the current state of the entity
+      const entityResponse = await fetch(`${baseUrl}/api/states/${entityId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!entityResponse.ok) {
+        throw new Error(`Failed to retrieve entity state: ${entityResponse.statusText}`);
+      }
+
+      const entityData = await entityResponse.json();
+      
+      // Retrieve the module collection
+      if (entityData.attributes && entityData.attributes.modules) {
+        existingModules = entityData.attributes.modules;
+      }
+    } catch (error) {
+      console.error("Error retrieving modules:", error);
+      return false;
+    }
+
+    // Check if the module exists
+    if (!existingModules[moduleId]) {
+      console.warn(`Module ${moduleId} does not exist in storage`);
+      return false;
+    }
+
+    // Update the module's global status
+    existingModules[moduleId].is_global = isGlobal;
+
+    // Update using an event for the trigger template sensor
+    try {
+      await fetch(`${baseUrl}/api/events/bubble_card_update_modules`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          modules: existingModules,
+          last_updated: new Date().toISOString()
+        })
+      });
+
+      // Force a refresh of components that use modules
+      document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
+      
+      return true;
+    } catch (error) {
+      console.error("Error updating module global status:", error);
+      return false;
+    }
+  } catch (error) {
+    console.error("Unexpected error setting module global status:", error);
+    return false;
+  }
+}
+
+export function isModuleGlobal(moduleId, hass) {
+  try {
+    const entityId = "sensor.bubble_card_modules";
+    
+    // Check if Home Assistant states are available
+    if (!hass || !hass.states || !hass.states[entityId]) {
+      return false;
+    }
+    
+    const entity = hass.states[entityId];
+    if (!entity.attributes || !entity.attributes.modules) {
+      return false;
+    }
+    
+    // Check if the module exists and is marked as global
+    const module = entity.attributes.modules[moduleId];
+    return module && module.is_global === true;
+  } catch (error) {
+    console.warn(`Error checking if module ${moduleId} is global:`, error);
+    return false;
+  }
+}
+
+export function shouldApplyModule(context, moduleId) {
+  // Get the configured modules from the card config
+  const configModules = context._config?.modules || [];
+  
+  // Convert to array if it's a string
+  const modulesList = Array.isArray(configModules) ? configModules : [configModules];
+  
+  // Check if the module is explicitly excluded with !moduleId syntax
+  if (modulesList.includes(`!${moduleId}`)) {
+    return false;
+  }
+  
+  // Check if the module is explicitly included in the card's config
+  if (modulesList.includes(moduleId)) {
+    return true;
+  }
+  
+  // Check if it's a global module
+  return isModuleGlobal(moduleId, context.hass);
+}
+
 export function makeModulesEditor(context) {
   if (typeof context._selectedModuleTab === 'undefined') {
     context._selectedModuleTab = 0;
@@ -37,6 +163,19 @@ export function makeModulesEditor(context) {
   if (!context._modulesLoaded) {
     initializeModules(context).then(() => {
       context._modulesLoaded = true;
+      // Check and update 'default' module global status after modules are loaded
+      if (context.hass && context.hass.states['sensor.bubble_card_modules']) {
+        const modulesData = context.hass.states['sensor.bubble_card_modules'].attributes.modules;
+        if (modulesData && modulesData.default && modulesData.default.is_global !== true) {
+          setModuleGlobalStatus(context, 'default', true).then(success => {
+            if (success) {
+              document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
+            } else {
+              console.warn("Failed to set module 'default' to global in sensor.bubble_card_modules.");
+            }
+          });
+        }
+      }
       context.requestUpdate();
     });
   }
@@ -48,16 +187,6 @@ export function makeModulesEditor(context) {
   const resolvePath = (path, configData) => {
     return path.split('.').reduce((acc, part) => acc && acc[part], configData);
   };
-
-  // Add the 'default' key to the modules config to not have to enable it manually
-  if (!context._config.modules) {
-    // Ensure backward compatibility with betas
-    context._config.modules = context._config.style_templates || ['default'];
-    delete context._config.style_templates;
-
-    fireEvent(context, "config-changed", { config: context._config });
-    context.requestUpdate();
-  }
 
   // Initialize module editor state
   initModuleEditor(context);
@@ -75,6 +204,7 @@ export function makeModulesEditor(context) {
   version: ''
   description: Empty and enabled by default. Add your custom styles and/or JS templates here to apply them to all cards by pressing the <ha-icon icon="mdi:pencil"></ha-icon> button above.
   code: ''
+  is_global: true
   `;
     
   // Install the default module
@@ -93,19 +223,65 @@ export function makeModulesEditor(context) {
 
   const handleValueChanged = (event) => {
     const target = event.target;
-    const value = target.configValue;
-    const isChecked = target.checked;
+    const moduleId = target.configValue;
+    const switchToOn = target.checked;
+    
+    // Ensure context._config.modules is an array
+    context._config.modules = Array.isArray(context._config.modules) ? context._config.modules : [];
 
-    if (isChecked) {
-      if (!context._config.modules.includes(value)) {
-        context._config.modules = [...context._config.modules, value];
+    // Check if the module is global
+    const moduleIsCurrentlyGlobal = isModuleGlobal(moduleId, context.hass);
+
+    if (switchToOn) {
+      // Turning "Apply to this card" ON
+      // Remove any explicit exclusion `!moduleId`
+      context._config.modules = context._config.modules.filter(item => item !== `!${moduleId}`);
+      
+      // If the module is NOT global, and not already in modules, add it explicitly
+      if (!moduleIsCurrentlyGlobal) {
+        if (!context._config.modules.includes(moduleId)) {
+          context._config.modules = [...context._config.modules, moduleId];
+        }
       }
+      // If it IS global, we don't need to add it to _config.modules for it to be active.
+      // Removing `!${moduleId}` ensures it's not actively excluded.
     } else {
-      context._config.modules = context._config.modules.filter((key) => key !== value);
+      // Turning "Apply to this card" OFF
+      if (moduleIsCurrentlyGlobal) {
+        // If it's global and we're turning it off for this card, add explicit exclusion `!moduleId`
+        if (!context._config.modules.includes(`!${moduleId}`)) {
+          context._config.modules = [...context._config.modules, `!${moduleId}`];
+        }
+        // And remove any direct inclusion `moduleId` if it exists
+        context._config.modules = context._config.modules.filter(item => item !== moduleId);
+      } else {
+        // Not global, just remove direct inclusion `moduleId`
+        context._config.modules = context._config.modules.filter(item => item !== moduleId);
+      }
     }
 
     fireEvent(context, "config-changed", { config: context._config });
     context.requestUpdate();
+  };
+
+  // Handler for toggling global module status
+  const handleGlobalToggle = async (moduleId, desiredGlobalState) => {
+    const success = await setModuleGlobalStatus(context, moduleId, desiredGlobalState);
+    if (success) {
+      if (desiredGlobalState === true) {
+        // If making module global, remove any explicit local exclusion for this card
+        context._config.modules = Array.isArray(context._config.modules) ? context._config.modules.filter(
+          (item) => item !== `!${moduleId}`
+        ) : [];
+      }
+      // If making it not global, its application to this card will be determined by `shouldApplyModule`
+      // which re-evaluates on requestUpdate.
+
+      fireEvent(context, "config-changed", { config: context._config });
+      context.requestUpdate();
+      // Adding a slight delay for the second update to allow HA state to propagate
+      setTimeout(() => context.requestUpdate(), 100); 
+    }
   };
 
   // Handler for tab change event
@@ -301,7 +477,18 @@ template:
                 moduleLink,
                 moduleVersion
               } = getTextFromMap(key);
-              const isChecked = context._config.modules?.includes(key);
+              
+              // Check if the module should be applied to this card
+              const isChecked = shouldApplyModule(context, key);
+              
+              // Check if the module is global
+              const isGlobal = isModuleGlobal(key, context.hass);
+
+              // Determine if the "All cards" button should be disabled and its text/title
+              const hasEditor = formSchema && formSchema.length > 0;
+              const isDefaultModule = key === 'default';
+              const allCardsDisabled = isDefaultModule || hasEditor;
+              let allCardsButtonText = "All cards";
               
               // Get the current configuration for the module key
               const currentConfig = context._config[key];
@@ -347,24 +534,77 @@ template:
                       style="${isChecked ? 'opacity: 1; color: var(--info-color) !important;' : 'opacity: 0.3;'}"
                     ></ha-icon>
                     ${label}
-                    ${hasUpdate ? html`
-                      <span class="bubble-badge update-badge" style="margin-left: 8px; font-size: 0.8em; vertical-align: middle;">
-                        <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
-                        Update: ${moduleUpdate.newVersion}
-                      </span>
-                    ` : ''}
+                    <span class="module-badges" style="display: inline-flex; margin-left: auto;">
+                      ${hasUpdate ? html`
+                        <span class="bubble-badge update-badge">
+                          <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
+                          Update: ${moduleUpdate.newVersion}
+                        </span>
+                      ` : ''}
+                      ${isGlobal ? html`
+                        <span class="bubble-badge update-badge global-badge">
+                          <ha-icon icon="mdi:cards-outline" style="color: var(--primary-text-color) !important;"></ha-icon>
+                        </span>
+                      ` : ''}
+                    </span>
                   </h4>
-                  <div class="content">
+                  <div class="content" style="margin-top: 4px;">
                     ${getLazyLoadedPanelContent(context, key, !!context._expandedPanelStates[key], () => html`
                       <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <ha-formfield class="apply-module-button" .label=${'Apply to this card'}>
-                          <ha-switch
-                            aria-label="Apply to this card"
-                            .checked=${isChecked}
-                            .configValue=${key}
-                            @change=${handleValueChanged}
-                          ></ha-switch>
-                        </ha-formfield>
+                        <div class="module-toggles-container">
+                          <span class="module-toggles-label">
+                            APPLY TO
+                          </span>
+                          <div class="module-toggles">
+                            <button 
+                              class="bubble-badge toggle-badge ${isChecked ? 'install-button' : 'link-button'}"
+                              style="cursor: pointer;"
+                              @click=${() => {
+                                const toggleEvent = { 
+                                  target: { 
+                                    checked: !isChecked, 
+                                    configValue: key 
+                                  } 
+                                };
+                                handleValueChanged(toggleEvent);
+                              }}
+                              style="${key === 'default' && isChecked ? 'cursor: default;' : ''}"
+                            >
+                              <ha-icon icon="mdi:card-outline"></ha-icon>
+                              <span>This card</span>
+                            </button>
+                            
+                            ${entityExists ? html`
+                              <button 
+                                class="bubble-badge toggle-badge ${isGlobal && !hasEditor ? 'update-button' : 'link-button'} ${allCardsDisabled ? 'disabled' : ''}"
+                                style="cursor: pointer; ${allCardsDisabled ? 'opacity: 0.7; cursor: default;' : ''}"
+                                @click=${() => {
+                                  if (!allCardsDisabled) {
+                                    handleGlobalToggle(key, !isGlobal);
+                                  }
+                                }}
+                                ?disabled=${allCardsDisabled}
+                              >
+                                <ha-icon icon="mdi:cards-outline"></ha-icon>
+                                <span>${allCardsButtonText}</span>
+                              </button>
+                              ${allCardsDisabled && !isDefaultModule ? html`
+                                <button 
+                                  class="bubble-badge toggle-badge"
+                                  style="padding: 4px;"
+                                  @click=${(e) => {
+                                    e.stopPropagation();
+                                    context._helpModuleId = context._helpModuleId === key ? null : key;
+                                    context.requestUpdate();
+                                  }}
+                                  title="Show help"
+                                >
+                                  <ha-icon icon="mdi:help"></ha-icon>
+                                </button>
+                              ` : ''}
+                            ` : ''}
+                          </div>
+                        </div>
                         
                         <!-- Module Action Buttons -->
                         <div class="module-actions">
@@ -399,6 +639,18 @@ template:
                         </div>
                       </div>
                       <hr>
+
+                      ${context._helpModuleId === key ? html`
+                        <div class="bubble-info">
+                          <h4 class="bubble-section-title">
+                            <ha-icon icon="mdi:information-outline"></ha-icon>
+                            Why "All cards" is disabled?
+                          </h4>
+                          <div class="content">
+                            <p>Modules with custom editors cannot be applied globally. This feature is reserved for modules that only apply styles.</p>
+                          </div>
+                        </div>
+                      ` : ''}
 
                       ${formSchema.length > 0
                         ? html`
@@ -447,7 +699,6 @@ template:
                 </ha-expansion-panel>
               `;
             })}
-            ${context.createErrorConsole(context)}
           `}
 
           <hr>
@@ -466,7 +717,8 @@ template:
               
               // Prepare modules in configuration if they don't exist
               if (!context._config.modules) {
-                context._config.modules = context._config.style_templates || ['default'];
+                // No longer add 'default' module by default since it's applied globally
+                context._config.modules = context._config.style_templates || [];
               }
               
               // Add temporarily the module to the list of active modules

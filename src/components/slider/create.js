@@ -1,8 +1,7 @@
-import { createElement } from "../../tools/utils.js";
 import { 
   throttle, 
   forwardHaptic, 
-  toggleBodyScroll,
+  createElement,
   isEntityType,
   getAttribute,
   isStateOn,

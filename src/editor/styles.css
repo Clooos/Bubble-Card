@@ -334,7 +334,7 @@ ha-card-conditions-editor {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 4px 8px;
   text-decoration: none;
   font-size: 13px;
   transition: all 0.2s ease;

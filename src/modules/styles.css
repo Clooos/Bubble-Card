@@ -1014,3 +1014,49 @@ ha-formfield.apply-module-button {
   padding: 8px 0;
   z-index: 1;
 }
+
+.module-toggles-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.module-toggles-label {
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--secondary-text-color);
+  padding-left: 4px;
+  margin-bottom: -4px;
+}
+
+.module-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.module-badges {
+  display: inline-flex;
+  margin-left: auto;
+  gap: 4px;
+}
+
+.module-badges .update-badge {
+  margin-left: 0 !important;
+}
+
+.global-badge {
+  background-color: transparent !important;
+  border: 1px solid rgb(0, 220, 80);
+  padding: 1px 3px !important;
+}
+
+.update-badge + .global-badge {
+  margin-left: 4px !important;
+}
+
+.toggle-badge {
+  cursor: pointer !important;
+  border: 1px solid var(--primary-text-color);
+}

@@ -20,7 +20,6 @@ ha-card {
     opacity: 1;
 }
 
-/* Styles for text scrolling animation */
 .scrolling-container {
     width: 100%;
     white-space: nowrap;
@@ -76,7 +75,6 @@ ha-card {
 .bubble-content-container {
     display: contents;
     flex-grow: 1;
-    overflow: hidden;
 }
 
 .bubble-buttons-container {
@@ -84,7 +82,6 @@ ha-card {
     display: flex;
     margin-right: 8px;
     gap: 4px;
-    /* z-index: 1; */
 }
 
 .bubble-background {

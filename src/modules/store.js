@@ -174,7 +174,11 @@ template:
           </div>
           <div 
             class="store-refresh-button" 
-            @click=${() => _fetchModuleStore(context)}
+            @click=${() => {
+              // Reset the API call in progress flag to ensure refresh works
+              context._isApiCallInProgress = false;
+              _fetchModuleStore(context, false);
+            }}
             title="Refresh module list"
           >
             <ha-icon icon="mdi:refresh"></ha-icon>
@@ -710,6 +714,12 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     return;
   }
 
+  // Force reset any previous API call in progress state
+  context._isApiCallInProgress = true;
+
+  // Determine if this is a manual refresh (direct click on refresh button)
+  const isManualRefresh = !isBackgroundFetch && context._storeModules !== undefined;
+
   // First, check GitHub API rate limit status
   let useCache = false;
   
@@ -752,98 +762,95 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
   }
 
   try {
-    const rateResponse = await fetch('https://api.github.com/rate_limit', {
-      method: "GET",
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    });
-
-    if (!isBackgroundFetch) {
-      context._loadingStatus = "Analyzing API response";
-      context._loadingProgress = Math.min(context._loadingProgress + 5, 30);
-      context.requestUpdate();
-    }
-
-    if (rateResponse.ok) {
-      const rateData = await rateResponse.json();
-      const remaining = rateData.resources.core.remaining;
-      
-      // Only use cache if we're actually out of API calls
-      if (remaining <= 1) { // Keep 1 call as buffer
-        console.warn("⚠️ API limit reached, using cache instead");
-        useCache = true;
-      }
-    } else {
-      // If we can't check rate limit, fall back to cooldown logic
-      useCache = true;
-      console.warn("⚠️ Could not check API rate limit, using cooldown logic");
-    }
-  } catch (error) {
-    console.error("Error checking rate limit:", error);
-    useCache = true;
-  }
-
-  // Update loading status
-  if (!isBackgroundFetch) {
-    context._loadingStatus = "Processing API data";
-    context._loadingProgress = Math.min(context._loadingProgress + 5, 40);
-    context.requestUpdate();
-  }
-
-  // Check if we're in cooldown after an API failure, only if we couldn't check rate limit
-  if (useCache) {
-    const lastApiFailure = localStorage.getItem('bubble-card-api-failure-timestamp');
-    if (lastApiFailure) {
-      const failureTime = parseInt(lastApiFailure);
-      const cooldownPeriod = 30 * 60 * 1000; // 30 minutes
-      
-      if (Date.now() - failureTime < cooldownPeriod) {
-        
-        // Use cache if available
-        const { getCachedModuleData } = await import('./cache.js');
-        const cachedData = getCachedModuleData();
-        if (cachedData && !context._storeModules) {
-          context._storeModules = cachedData.modules;
-          context._isLoadingStore = false;
-          context.requestUpdate();
+    // Skip rate limit check for manual refreshes if user explicitly clicked refresh
+    if (!isManualRefresh) {
+      const rateResponse = await fetch('https://api.github.com/rate_limit', {
+        method: "GET",
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'X-GitHub-Api-Version': '2022-11-28'
         }
+      });
+
+      if (!isBackgroundFetch) {
+        context._loadingStatus = "Analyzing API response";
+        context._loadingProgress = Math.min(context._loadingProgress + 5, 30);
+        context.requestUpdate();
+      }
+
+      if (rateResponse.ok) {
+        const rateData = await rateResponse.json();
+        const remaining = rateData.resources.core.remaining;
         
-        // Update loading status for using cache
-        if (!isBackgroundFetch) {
-          context._loadingStatus = "Loading from cache";
-          context._loadingProgress = 60;
-          context.requestUpdate();
+        // Only use cache if we're actually out of API calls
+        if (remaining <= 1) { // Keep 1 call as buffer
+          console.warn("⚠️ API limit reached, using cache instead");
+          useCache = true;
         }
-        
-        return;
       } else {
-        // Cooldown finished, we can retry
-        localStorage.removeItem('bubble-card-api-failure-timestamp');
+        // If we can't check rate limit, fall back to cooldown logic
+        useCache = true;
+        console.warn("⚠️ Could not check API rate limit, using cooldown logic");
       }
     }
-  } else if (useCache) {
-    // If we need to use cache due to rate limit, return cached data
-    const { getCachedModuleData } = await import('./cache.js');
-    const cachedData = getCachedModuleData();
-    if (cachedData && !context._storeModules) {
-      context._storeModules = cachedData.modules;
-      context._isLoadingStore = false;
-      context.requestUpdate();
-    }
-    
-    // Update loading status for using cache
+
+    // Update loading status
     if (!isBackgroundFetch) {
-      context._loadingStatus = "Loading from cache";
-      context._loadingProgress = 60;
+      context._loadingStatus = "Processing API data";
+      context._loadingProgress = Math.min(context._loadingProgress + 5, 40);
       context.requestUpdate();
     }
-  }
 
-  context._isApiCallInProgress = true;
+    // Check if we're in cooldown after an API failure, only if we couldn't check rate limit
+    // Skip this for manual refreshes (user explicitly clicked refresh)
+    if (useCache && !isManualRefresh) {
+      const lastApiFailure = localStorage.getItem('bubble-card-api-failure-timestamp');
+      if (lastApiFailure) {
+        const failureTime = parseInt(lastApiFailure);
+        const cooldownPeriod = 30 * 60 * 1000; // 30 minutes
+        
+        if (Date.now() - failureTime < cooldownPeriod) {
+          
+          // Use cache if available
+          const { getCachedModuleData } = await import('./cache.js');
+          const cachedData = getCachedModuleData();
+          if (cachedData && !context._storeModules) {
+            context._storeModules = cachedData.modules;
+            context._isLoadingStore = false;
+            context.requestUpdate();
+          }
+          
+          // Update loading status for using cache
+          if (!isBackgroundFetch) {
+            context._loadingStatus = "Loading from cache";
+            context._loadingProgress = 60;
+            context.requestUpdate();
+          }
+          
+          return;
+        } else {
+          // Cooldown finished, we can retry
+          localStorage.removeItem('bubble-card-api-failure-timestamp');
+        }
+      }
+    } else if (useCache && !isManualRefresh) {
+      // If we need to use cache due to rate limit, return cached data
+      const { getCachedModuleData } = await import('./cache.js');
+      const cachedData = getCachedModuleData();
+      if (cachedData && !context._storeModules) {
+        context._storeModules = cachedData.modules;
+        context._isLoadingStore = false;
+        context.requestUpdate();
+      }
+      
+      // Update loading status for using cache
+      if (!isBackgroundFetch) {
+        context._loadingStatus = "Loading from cache";
+        context._loadingProgress = 60;
+        context.requestUpdate();
+      }
+    }
 
-  try {
     // Retrieve all discussions with pagination
     let allDiscussions = [];
     let page = 1;
@@ -985,6 +992,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       }
     }
   } finally {
+    // Always reset API call in progress, even if there's an error
     context._isApiCallInProgress = false;
     if (!isBackgroundFetch) {
       context.requestUpdate();

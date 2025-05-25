@@ -57,6 +57,7 @@ ha-select {
     width: auto;
     height: 100%;
     align-items: center;
+    justify-content: center;
 }
 
 .bubble-dropdown-arrow {
@@ -65,7 +66,6 @@ ha-select {
     background: var(--bubble-select-arrow-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
     height: 36px;
     width: 36px;
-    right: 6px;
     pointer-events: none;
     border-radius: var(--bubble-select-button-border-radius, var(--bubble-border-radius, 20px));
     align-items: center;
@@ -76,5 +76,18 @@ ha-select {
 
 .bubble-dropdown-select {
     position: relative;
-    width: 42px;
+    width: 36px;
+}
+
+.bubble-dropdown-inner-border {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: var(--bubble-select-border, solid 2px var(--bubble-accent-color, var(--bubble-default-color)));
+    border-radius: var(--bubble-border-radius, 32px);
+    box-sizing: border-box;
+    pointer-events: none;
 }

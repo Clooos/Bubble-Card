@@ -74,12 +74,13 @@ function buildDisplayedState(options, context) {
   if (state && showLastChanged && state.last_changed !== 'unknown') parts.push(formatDateTime(state.last_changed, context._hass.locale.language));
   if (state && showLastUpdated && state.last_updated !== 'unknown') parts.push(formatDateTime(state.last_updated, context._hass.locale.language));
   if (state && showAttribute) {
-    if (attributeType && attributeType.includes('forecast')) {
+    if (attributeType.includes('forecast')) {
       const isCelcius = context._hass.config.unit_system.temperature === '°C';
       const isMetric = context._hass.config.unit_system.length === 'km';
       
       if (attributeType.includes('temperature') && attribute !== null && attribute !== undefined) {
-        parts.push(parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + (isCelcius ? ' °C' : ' °F'));
+        const tempValue = parseFloat(attribute);
+        parts.push((tempValue === 0 || tempValue === 0.0 ? '0' : tempValue.toFixed(1).replace(/\.0$/, '')) + (isCelcius ? ' °C' : ' °F'));
       } else if (attributeType.includes('humidity') && attribute !== null && attribute !== undefined) {
         parts.push(parseFloat(attribute).toFixed(0) + ' %');
       } else if (attributeType.includes('precipitation') && attribute !== null && attribute !== undefined) {

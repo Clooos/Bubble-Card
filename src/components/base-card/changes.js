@@ -55,6 +55,17 @@ export function changeState(context) {
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
+    
+    // Utility function to format numeric values
+    function formatNumericValue(value, precision, unit, removeTrailingZeros = true) {
+        if (value === undefined || value === null) return '';
+        const numValue = parseFloat(value);
+        if (isNaN(numValue)) return value;
+        
+        let formatted = numValue === 0 ? '0' : numValue.toFixed(precision);
+        if (removeTrailingZeros) formatted = formatted.replace(/\.0$/, '');
+        return formatted + ' ' + unit;
+    }
 
     if (showAttribute && attribute) {
         if (context.config.attribute.includes('forecast')) {
@@ -63,13 +74,13 @@ export function changeState(context) {
             const isMetric = context._hass.config.unit_system.length === 'km';
             
             if (context.config.attribute.includes('temperature')) {
-                formattedAttribute = state && attribute ? parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + (isCelcius ? ' °C' : ' °F') : '';
+                formattedAttribute = state ? formatNumericValue(attribute, 1, isCelcius ? '°C' : '°F') : '';
             } else if (context.config.attribute.includes('humidity')) {
-                formattedAttribute = state && attribute ? parseFloat(attribute).toFixed(0) + ' %' : '';
+                formattedAttribute = state ? formatNumericValue(attribute, 0, '%', false) : '';
             } else if (context.config.attribute.includes('precipitation')) {
-                formattedAttribute = state && attribute ? parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + ' mm' : '';
+                formattedAttribute = state ? formatNumericValue(attribute, 1, 'mm') : '';
             } else if (context.config.attribute.includes('wind_speed')) {
-                formattedAttribute = state && attribute ? parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + (isMetric ? ' km/h' : ' mph') : '';
+                formattedAttribute = state ? formatNumericValue(attribute, 1, isMetric ? 'km/h' : 'mph') : '';
             } else {
                 formattedAttribute = state ? attribute : '';
             }

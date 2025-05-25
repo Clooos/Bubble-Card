@@ -35,12 +35,10 @@ function refreshStyles(context) {
   context.lastEvaluatedStyles = "";
   context.stylesYAML = null;
   
-  // Apply styles if possible
   if (context.handleCustomStyles && context.card) {
     context.handleCustomStyles(context, context.card);
   }
   
-  // Force update
   context.requestUpdate();
 }
 
@@ -85,6 +83,11 @@ export function renderModuleEditorForm(context) {
     
     const moduleId = context._editingModule.id;
     
+    // Call the main editor's method to clear errors for this module
+    if (typeof context._clearCurrentModuleError === 'function') {
+        context._clearCurrentModuleError(moduleId);
+    }
+    
     // Save original module state if not already saved
     if (!context._originalModuleState) {
       const originalModule = yamlKeysMap.get(moduleId);
@@ -93,7 +96,6 @@ export function renderModuleEditorForm(context) {
       }
     }
     
-    // Update code
     context._editingModule.code = newCssCode;
     
     // Reset style cache
@@ -111,9 +113,6 @@ export function renderModuleEditorForm(context) {
     
     // Ensure module is enabled in configuration
     updateModuleInConfig(context, moduleId, context._previousModuleId);
-    
-    // Apply changes immediately
-    refreshStyles(context);
     
     // Notify other card instances
     broadcastModuleUpdate(moduleId, updatedModule);
@@ -308,7 +307,7 @@ export function renderModuleEditorForm(context) {
             </span>
           </ha-expansion-panel>
           
-          <ha-expansion-panel .header=${html`
+          <ha-expansion-panel style="display: ${context._editingModule.id === 'default' ? 'none' : ''}" .header=${html`
             <ha-icon icon="mdi:form-select" style="margin-right: 8px;"></ha-icon>
             Optional: Editor schema (YAML)
           `}>
@@ -346,7 +345,7 @@ export function renderModuleEditorForm(context) {
                       context._yamlErrorMessage = error.message;
                       context.requestUpdate();
                     }
-                  }, 100); // Wait 1 second after the last modification
+                  }, 100); // Wait 100ms after the last modification
                 }}
               ></ha-code-editor>
             </div>
@@ -436,42 +435,44 @@ export function renderModuleEditorForm(context) {
           
           <div class="module-editor-buttons-container">
             <button class="icon-button" style="flex: 1;" @click=${() => {
-              // Restore original module if canceling edit
-              if (!context._showNewModuleForm && context._editingModule) {
-                const moduleId = context._editingModule.id;
-                resetModuleChanges(context, moduleId);
-              } else if (context._showNewModuleForm && context._editingModule) {
-                // For new module creation cancellation
-                const moduleId = context._editingModule.id;
-                
-                // Remove temporary module from configuration
-                if (context._config && context._config.modules && moduleId) {
-                  context._config.modules = context._config.modules.filter(id => id !== moduleId);
-                  fireEvent(context, "config-changed", { config: context._config });
+              try {
+                // Restore original module if canceling edit
+                if (!context._showNewModuleForm && context._editingModule) {
+                  const moduleId = context._editingModule.id;
+                  resetModuleChanges(context, moduleId);
+                } else if (context._showNewModuleForm && context._editingModule) {
+                  // For new module creation cancellation
+                  const moduleId = context._editingModule.id;
                   
-                  // Remove from yamlKeysMap if present
-                  if (yamlKeysMap.has(moduleId)) {
-                    yamlKeysMap.delete(moduleId);
+                  // Remove temporary module from configuration
+                  if (context._config && context._config.modules && moduleId) {
+                    context._config.modules = context._config.modules.filter(id => id !== moduleId);
+                    fireEvent(context, "config-changed", { config: context._config });
+                    
+                    // Remove from yamlKeysMap if present
+                    if (yamlKeysMap.has(moduleId)) {
+                      yamlKeysMap.delete(moduleId);
+                    }
+                    
+                    refreshStyles(context);
                   }
-                  
-                  refreshStyles(context);
                 }
+              } finally {
+                // Reset editor state
+                context._editingModule = null;
+                context._showNewModuleForm = false;
+                context._previousModuleId = null;
+                // Re-enable HA save button on cancel
+                setHAEditorButtonsDisabled(false); 
+                context.requestUpdate();
+                setTimeout(() => scrollToModuleForm(context), 0);
               }
-              
-              // Reset editor state
-              context._editingModule = null;
-              context._showNewModuleForm = false;
-              context._previousModuleId = null;
-              // Re-enable HA save button on cancel
-              setHAEditorButtonsDisabled(false); 
-              context.requestUpdate();
-              setTimeout(() => scrollToModuleForm(context), 0);
             }}>
               <ha-icon icon="mdi:close"></ha-icon>
               Cancel
             </button>
             
-            <button class="icon-button ${isFromYamlFile ? 'disabled' : ''}" style="flex: 1;" @click=${() => {
+            <button class="icon-button ${isFromYamlFile ? 'disabled' : ''}" style="flex: 1;" @click=${() => {              
               saveModule(context, context._editingModule);
               setTimeout(() => scrollToModuleForm(context), 0);
             }}>
@@ -666,6 +667,9 @@ export async function saveModule(context, moduleData) {
     
   } catch (error) {
     console.error("Error saving module:", error);
+  } finally {
+    // Ensure HA editor buttons are re-enabled even if an error occurs
+    setHAEditorButtonsDisabled(false);
   }
 }
 
@@ -706,6 +710,10 @@ async function saveModuleToHomeAssistant(context, entityId, moduleData) {
         haModules = {};
       }
       
+      // Check if module already exists and preserve is_global property
+      const existingModule = haModules[moduleData.id];
+      const isGlobal = existingModule && existingModule.is_global === true;
+      
       // Special format for Home Assistant with direct content
       haModules[moduleData.id] = {
         id: moduleData.id,
@@ -716,6 +724,10 @@ async function saveModuleToHomeAssistant(context, entityId, moduleData) {
         code: moduleData.code,
         editor: moduleData.editor,
         supported: moduleData.supported || [],
+        // Preserve is_global property if it was set to true
+        ...(isGlobal ? { is_global: true } : {}),
+        // If this is the default module, ensure is_global is true
+        ...(moduleData.id === 'default' ? { is_global: true } : {}),
         // Maintain backward compatibility if necessary - only if supported doesn't exist
         ...(moduleData.supported ? {} : { unsupported: moduleData.unsupported || [] })
       };
@@ -905,6 +917,9 @@ export async function deleteModule(context, moduleId) {
     
   } catch (error) {
     console.error("Error deleting module:", error);
+  } finally {
+    // Ensure HA editor buttons are re-enabled even if an error occurs
+    setHAEditorButtonsDisabled(false);
   }
 }
 

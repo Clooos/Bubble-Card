@@ -33,8 +33,8 @@ export function createDropdownStructure(context, elements = context.elements, sh
                 if (showArrow) elements.dropdownContainer.style.width = '24px';
                 elements.dropdownArrow.style.height = '20px';
                 elements.dropdownArrow.style.width = '20px';
-                elements.dropdownArrow.parentElement.parentElement.haRipple = createElement('ha-ripple');
-                elements.dropdownArrow.parentElement.parentElement.appendChild(elements.dropdownArrow.parentElement.parentElement.haRipple);
+                // elements.dropdownArrow.parentElement.parentElement.haRipple = createElement('ha-ripple');
+                // elements.dropdownArrow.parentElement.parentElement.appendChild(elements.dropdownArrow.parentElement.parentElement.haRipple);
             }
         }
     }
@@ -61,11 +61,26 @@ export function createDropdownActions(context, elements = context.elements, enti
     const card = elements === context.elements ? defaultCard : elements;
     const eventCaller = elements === context.elements ? defaultEventCaller : elements;
 
+    // Create and append the inner border element
+    elements.innerBorderElement = createElement('div');
+    elements.innerBorderElement.classList.add('bubble-dropdown-inner-border');
+    card.appendChild(elements.innerBorderElement);
+
+    // Ensure the card can host an absolutely positioned child
+    // Only set if it's static, to avoid overriding other position values.
+    if (window.getComputedStyle(card).position === 'static') {
+        card.style.position = 'relative';
+    }
+
     card.haRipple = createElement('ha-ripple');
-    card.appendChild(card.haRipple);
+    if (elements === context.elements) {
+        elements.background.appendChild(card.haRipple);
+    } else {
+        card.appendChild(card.haRipple);
+    }
 
     if (elements !== context.elements) {
-        card.style.border = 'solid 2px rgba(0,0,0,0)';
+        // card.style.border = 'solid 2px rgba(0,0,0,0)'; // This line is removed
     }
 
     let isFirstOpen = true;
@@ -73,7 +88,10 @@ export function createDropdownActions(context, elements = context.elements, enti
     const updateVisualStyles = () => {
         dropdownArrow.style.transform = 'rotate(180deg)';
         elements.dropdownArrow.style.background = 'var(--bubble-accent-color, var(--bubble-default-color))';
-        card.style.border = 'var(--bubble-select-border, solid 2px var(--bubble-accent-color, var(--bubble-default-color)))';
+        // card.style.border = 'var(--bubble-select-border, solid 2px var(--bubble-accent-color, var(--bubble-default-color)))'; // Replaced by inner border logic
+        if (elements.innerBorderElement) {
+            elements.innerBorderElement.style.display = 'block';
+        }
         if (context.elements && context.elements.mainContainer) {
             context.elements.mainContainer.style.overflow = 'visible';
         }
@@ -145,7 +163,10 @@ export function createDropdownActions(context, elements = context.elements, enti
         event.stopPropagation();
 
         dropdownArrow.style.transform = 'rotate(0deg)';
-        card.style.border = 'solid 2px rgba(0,0,0,0)';
+        // card.style.border = 'solid 2px rgba(0,0,0,0)'; // Replaced by inner border logic
+        if (elements.innerBorderElement) {
+            elements.innerBorderElement.style.display = 'none';
+        }
         elements.dropdownArrow.style.background = '';
         if (context.elements && context.elements.mainContainer) {
             context.elements.mainContainer.style.overflow = '';

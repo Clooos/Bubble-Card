@@ -146,16 +146,19 @@ const INCLUDE_TYPE = new YAML.Type('!include', {
 const INCLUDE_SCHEMA = YAML.DEFAULT_SCHEMA.extend([INCLUDE_TYPE]);
 
 export let yamlKeysMap = new Map();
-let stylesYAML;
 let yamlCache = new Map();
 const compiledTemplateCache = new Map();
 
 function getOrCreateStyleElement(context, element) {
-  if (!context.styleElement) {
-    const styleElement = document.createElement("style");
-    styleElement.id = "bubble-styles";
-    element.appendChild(styleElement);
-    context.styleElement = styleElement;
+  if (element.tagName === 'STYLE') {
+    return element;
+  }
+
+  if (!context.styleElement || context.styleElement.parentElement !== element) {
+    const styleElementToCache = document.createElement("style");
+    styleElementToCache.id = "bubble-styles"; 
+    element.appendChild(styleElementToCache);
+    context.styleElement = styleElementToCache;
   }
   return context.styleElement;
 }
@@ -213,19 +216,18 @@ export const parseYAML = (yamlString) => {
 };
 
 export const handleCustomStyles = async (context, element = context.card) => {
-  const card = element;
-  const styleTemplates = context.config.modules ?? context.config.style_templates ?? "default";
+  const isDirectStyleElement = element.tagName === 'STYLE';
+  const targetElementForDisplayLogic = isDirectStyleElement ? null : element; 
+
   const customStyles = context.config.styles;
 
-  // Initialization of the cache if necessary
-  if (typeof context.cardLoaded === "undefined") {
+  if (typeof context.cardLoaded === "undefined" && !isDirectStyleElement) {
     context.lastEvaluatedStyles = "";
     context.initialLoad = true;
     
     // Optimization of the event listener
     if (!context._moduleChangeListenerAdded) {
       const refreshHandler = () => {
-        // Immediate reset of the caches
         context.lastEvaluatedStyles = "";
         context.stylesYAML = null;
         yamlKeysMap.forEach((value, key) => {
@@ -233,68 +235,149 @@ export const handleCustomStyles = async (context, element = context.card) => {
             delete context._processedSchemas[key];
           }
         });
-        // Immediate application of the styles
-        handleCustomStyles(context, element);
+        handleCustomStyles(context, context.card); 
       };
       
       window.addEventListener('bubble-card-modules-changed', refreshHandler);
       window.addEventListener('bubble-card-module-updated', refreshHandler);
+      document.addEventListener('yaml-modules-updated', refreshHandler);
       context._moduleChangeListenerAdded = true;
       context._moduleChangeHandler = refreshHandler;
     }
   }
-
+  
   // Hide the card during the initial loading only
-  if (context.initialLoad) {
-    card.style.display = "none";
+  if (context.initialLoad && targetElementForDisplayLogic?.style) {
+    targetElementForDisplayLogic.style.display = "none";
   }
 
-  const styleElement = getOrCreateStyleElement(context, element);
+  const styleElementToInjectInto = getOrCreateStyleElement(context, element); 
 
   try {
-    let parsedStyles = {};
+    let parsedYamlModules = {}; 
     if (yamlKeysMap.size > 0) {
       yamlKeysMap.forEach((value, key) => {
-        parsedStyles[key] = value;
+        parsedYamlModules[key] = value;
       });
     } else {
-      parsedStyles = (await context.stylesYAML) || {};
+      parsedYamlModules = (await context.stylesYAML) || {};
     }
 
-    let combinedStyles = "";
-    if (Array.isArray(styleTemplates)) {
-      combinedStyles = styleTemplates.map((t) => {      
-        let tmpl = parsedStyles[t] ?? "";
-        if ((typeof tmpl === "object" && tmpl.code === "") || tmpl === "") {
+    let modulesToApply = [];
+    const activeModules = new Set();
+    const configDefinedModules = [];
+    const configExcludedModules = new Set();
+
+    if (Array.isArray(context.config.modules)) {
+        context.config.modules.forEach(mod => {
+            if (typeof mod === 'string' && mod.startsWith('!')) {
+                configExcludedModules.add(mod.substring(1));
+            } else if (typeof mod === 'string') {
+                configDefinedModules.push(mod);
+            }
+        });
+    } else if (context.config.modules && typeof context.config.modules === 'string') {
+        if (context.config.modules.startsWith('!')) {
+            configExcludedModules.add(context.config.modules.substring(1));
+        } else {
+            configDefinedModules.push(context.config.modules);
+        }
+    }
+
+    if (yamlKeysMap.has('default') && !configExcludedModules.has('default')) {
+        activeModules.add('default');
+    }
+
+    const getGlobalModules = (hass) => {
+        if (!hass || !hass.states || !hass.states['sensor.bubble_card_modules']) return;
+        const globalModulesData = hass.states['sensor.bubble_card_modules'].attributes.modules;
+        if (!globalModulesData) return;
+        for (const moduleId in globalModulesData) {
+            if (globalModulesData[moduleId].is_global === true &&
+                yamlKeysMap.has(moduleId) &&
+                !configExcludedModules.has(moduleId)) {
+                activeModules.add(moduleId);
+            }
+        }
+    };
+
+    if (context._hass) getGlobalModules(context._hass);
+
+    configDefinedModules.forEach(moduleId => {
+        if (yamlKeysMap.has(moduleId) && !configExcludedModules.has(moduleId)) {
+            activeModules.add(moduleId);
+        }
+    });
+
+    modulesToApply = Array.from(activeModules);
+    
+    let combinedModuleStylesContent = "";
+    if (modulesToApply.length > 0) {
+      const moduleStyles = modulesToApply.map((moduleId) => {
+        try {
+          let tmpl = parsedYamlModules[moduleId] ?? "";
+          if ((typeof tmpl === "object" && tmpl.code === "") || tmpl === "") return "{}";
+          const moduleCode = typeof tmpl === "object" && tmpl.code ? tmpl.code : tmpl;
+          return evalStyles(context, moduleCode, { type: 'module', id: moduleId });
+        } catch (moduleError) {
+          console.error(`Bubble Card - Error processing module "${moduleId}" before evaluation:`, moduleError);
           return "{}";
         }
-        return typeof tmpl === "object" && tmpl.code ? tmpl.code : tmpl;
-      }).join("\n");
+      });
+      combinedModuleStylesContent = moduleStyles.join("\n");
     }
 
-    const evaluatedCombinedStyles = evalStyles(context, combinedStyles);
-    const evaluatedCustomStyles = evalStyles(context, customStyles);
-    const finalStyles = `${evaluatedCombinedStyles}\n${evaluatedCustomStyles}`.trim();
+    let evaluatedCustomStylesContent = "";
+    try {
+      evaluatedCustomStylesContent = evalStyles(context, customStyles, { type: 'custom_styles' });
+    } catch (customStyleError) {
+      console.error("Bubble Card - Error processing custom styles before evaluation:", customStyleError);
+    }
+    
+    const finalStylesToInject = `${combinedModuleStylesContent}\n${evaluatedCustomStylesContent}`.trim();
+    
+    let stylesHaveChanged = true;
 
-    // Apply styles only if they have changed
-    if (finalStyles !== context.lastEvaluatedStyles) {
-      styleElement.textContent = finalStyles;
-      context.lastEvaluatedStyles = finalStyles;
+    if (isDirectStyleElement) {
+      if (finalStylesToInject === styleElementToInjectInto.textContent) {
+        stylesHaveChanged = false;
+      }
+    } else {
+      if (finalStylesToInject === context.lastEvaluatedStyles) {
+        stylesHaveChanged = false;
+      } else {
+        context.lastEvaluatedStyles = finalStylesToInject;
+      }
     }
 
-    // Display the card after the initial loading
-    if (context.initialLoad) {
-      card.style.display = "";
-      context.initialLoad = false;
-      context.cardLoaded = true;
+    if (stylesHaveChanged) {
+      styleElementToInjectInto.textContent = finalStylesToInject;
+    }
+
+    if (context.initialLoad && targetElementForDisplayLogic?.style) {
+      targetElementForDisplayLogic.style.display = "";
+      if (!isDirectStyleElement) { 
+        context.initialLoad = false;
+        context.cardLoaded = true;
+      }
     }
   } catch (error) {
     console.error("Error applying styles:", error);
+    if (context.initialLoad && targetElementForDisplayLogic?.style) {
+        targetElementForDisplayLogic.style.display = "";
+    }
   }
 };
 
-export function evalStyles(context, styles = "") {
+export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' }) {
   if (!styles) return "";
+
+  // If this card is in editor mode and its template was previously marked as temporarily failed
+  if (context.editor && context.templateEvaluationBlocked) {
+    // To avoid flickering, we don't re-evaluate immediately.
+    // The original error should remain displayed in the editor.
+    return ""; // Prevents re-evaluation and flickering
+  }
 
   const elementTypes = ["state", "name"];
   const propertyNames = ["innerText", "textContent", "innerHTML"];
@@ -337,16 +420,74 @@ export function evalStyles(context, styles = "") {
       card.name,
       checkConditionsMet
     ));
+
+    // If we get here, evaluation was successful.
     if (context.editor) {
-      emitEditorError('');
+      // If there was a blocking or displayed error for this card, clear it.
+      if (context.templateEvaluationBlocked || context.lastEmittedEditorError) {
+        // Signal to the editor that everything is OK for THIS context.
+        const errorContext = {
+          cardType: context.config?.card_type,
+          entityId: context.config?.entity,
+          sourceType: sourceInfo.type,
+          moduleId: sourceInfo.id
+        };
+        requestAnimationFrame(() => emitEditorError('', errorContext));
+      }
+      context.templateEvaluationBlocked = false;
+      context.lastEmittedEditorError = null;
+      if (context.templateErrorClearTimeout) {
+        clearTimeout(context.templateErrorClearTimeout);
+        context.templateErrorClearTimeout = null;
+      }
     }
     return result;
+
   } catch (error) {
-    if (context.editor) {
-      requestAnimationFrame(() => emitEditorError(error.message));
+    let sourceDescription = 'Unknown source';
+    if (sourceInfo.type === 'module' && sourceInfo.id) {
+      sourceDescription = `Module ('${sourceInfo.id}')`;
+    } else if (sourceInfo.type === 'custom_styles') {
+      sourceDescription = 'Card Configuration (styles section)';
+    } else if (sourceInfo.type === 'unknown') {
+      sourceDescription = 'Direct call or unspecified source';
     }
-    console.error(`Bubble Card - Template error from a ${context.config.card_type} card: ${error.message}`);
-    return "";
+
+    const cardType = context.config?.card_type || 'N/A';
+    const entityId = context.config?.entity || 'N/A';
+    const errorMessageToLog = 
+`Bubble Card - Template Error:
+  Card Type: ${cardType}
+  Entity: ${entityId}
+  Source: ${sourceDescription}
+  Error: ${error.message}`;
+
+    if (context.editor) {
+      const editorErrorMessage = error.message;
+      context.lastEmittedEditorError = editorErrorMessage;
+      
+      // Create error context object for filtering
+      const errorContext = {
+        cardType: cardType,
+        entityId: entityId,
+        sourceType: sourceInfo.type,
+        moduleId: sourceInfo.id
+      };
+      
+      requestAnimationFrame(() => emitEditorError(editorErrorMessage, errorContext));
+
+      context.templateEvaluationBlocked = true;
+      
+      if (context.templateErrorClearTimeout) {
+        clearTimeout(context.templateErrorClearTimeout);
+      }
+      
+      context.templateErrorClearTimeout = setTimeout(() => {
+        context.templateEvaluationBlocked = false;
+      }, 2000); 
+    }
+    console.error(errorMessageToLog);
+    return ""; // Important: return an empty string to avoid breaking styles.
   }
 }
 
@@ -373,8 +514,21 @@ function cleanCSS(css) {
   return cleaned;
 }
 
-function emitEditorError(message) {
-  window.dispatchEvent(new CustomEvent("bubble-card-error", { detail: message }));
+function emitEditorError(message, errorContext) {
+  // if (!errorContext && message) {
+  //   // Legacy mode: just the error message, without context
+  //   window.dispatchEvent(new CustomEvent("bubble-card-error", { 
+  //     detail: message 
+  //   }));
+  //   return;
+  // }
+  
+  window.dispatchEvent(new CustomEvent("bubble-card-error", { 
+    detail: {
+      message: message,
+      context: errorContext
+    }
+  }));
 }
 
 // Improved function to load modules from text

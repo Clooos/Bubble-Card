@@ -56,31 +56,15 @@ class BubbleCard extends HTMLElement {
         }
         this.editor = editMode;
 
-        if (this.config.card_type === 'pop-up' || this.config.card_type === 'horizontal-buttons-stack') {
+        if (['pop-up', 'horizontal-buttons-stack'].includes(this.config.card_type)) {
             this.updateBubbleCard();
         }
-    }
-
-    _scheduleEditorUpdate() {
-        clearTimeout(this._editorUpdateTimeout);
-        this._editorUpdateTimeout = setTimeout(() => {
-            if (this.isConnected && this.detectedEditor) {
-                this.updateBubbleCard();
-            }
-        }, 300);
     }
 
     set hass(hass) {
         initializeContent(this);
         this._hass = hass;
-
-        const isPopUp = this.config.card_type === 'pop-up';
-
-        if (this.detectedEditor) {
-            this._scheduleEditorUpdate();
-        } else if (!this.editor && (this.isConnected || isPopUp)) {
-            this.updateBubbleCard();
-        }
+        this.updateBubbleCard();
     }
 
     updateBubbleCard() {
@@ -127,46 +111,57 @@ class BubbleCard extends HTMLElement {
             throw new Error(config.error);
         }
 
-        if (!config.card_type) {
+        // Create a shallow mutable copy of the config to work with.
+        // This prevents "object is not extensible" errors if HA passes a frozen config
+        // and we need to potentially add/modify properties like 'rows'.
+        const workingConfig = { ...config };
+
+        if (!workingConfig.card_type) {
             throw new Error("You need to define a card type");
         }
 
-        if (config.card_type === 'pop-up') {
-            if (config.hash && config.button_type && config.button_type !== 'name' && !config.entity && config.modules) {
+        // If grid_options.rows is provided by Home Assistant (via workingConfig.grid_options),
+        // it should take precedence for the 'rows' property of our working config.
+        if (workingConfig.grid_options && typeof workingConfig.grid_options.rows !== 'undefined') {
+            workingConfig.rows = workingConfig.grid_options.rows;
+        }
+
+        if (workingConfig.card_type === 'pop-up') {
+            if (workingConfig.hash && workingConfig.button_type && workingConfig.button_type !== 'name' && !workingConfig.entity && workingConfig.modules) {
                 throw new Error("You need to define an entity");
             }
-        } else if (config.card_type === 'horizontal-buttons-stack') {
+        } else if (workingConfig.card_type === 'horizontal-buttons-stack') {
             var definedLinks = {};
             
-            for (var key in config) {
+            for (var key in workingConfig) {
               if (key.match(/^\d+_icon$/)) {
                 var iconKey = key;
                 var linkKey = key.replace('_icon', '_link');
             
-                if (config[linkKey] === undefined) {
+                if (workingConfig[linkKey] === undefined) {
                     throw new Error("You need to define " + linkKey);
                 }
             
-                if (definedLinks[config[linkKey]]) {
-                    throw new Error("You can't use " + config[linkKey] + " twice" );
+                if (definedLinks[workingConfig[linkKey]]) {
+                    throw new Error("You can't use " + workingConfig[linkKey] + " twice" );
                 }
             
-                definedLinks[config[linkKey]] = true;
+                definedLinks[workingConfig[linkKey]] = true;
               }
             }
-        } else if (['button', 'cover', 'climate', 'select', 'media-player'].includes(config.card_type)) {
-            if (!config.entity && config.button_type !== 'name') {
+        } else if (['button', 'cover', 'climate', 'select', 'media-player'].includes(workingConfig.card_type)) {
+            if (!workingConfig.entity && workingConfig.button_type !== 'name') {
                 throw new Error("You need to define an entity");
             }
 
-        } else if (config.card_type === 'calendar') {
-            if (!config.entities) {
+        } else if (workingConfig.card_type === 'calendar') {
+            if (!workingConfig.entities) {
                 throw new Error("You need to define an entity list");
             }
         }
 
-        if (config.card_type === 'select' && config.entity && !config.select_attribute) {
-            const isSelectEntity = config.entity?.startsWith("input_select") || config.entity?.startsWith("select");
+        if (workingConfig.card_type === 'select' && workingConfig.entity && !workingConfig.select_attribute) {
+            const isSelectEntity = workingConfig.entity?.startsWith("input_select") || workingConfig.entity?.startsWith("select");
             if (!isSelectEntity) {
                 throw new Error('"Select menu (from attributes)" missing');
             }
@@ -176,7 +171,7 @@ class BubbleCard extends HTMLElement {
             throw new Error("You need to define a valid entity");
         }
 
-        this.config = config;
+        this.config = workingConfig;
     }
 
     getCardSize() {
@@ -207,15 +202,30 @@ class BubbleCard extends HTMLElement {
     getGridOptions() {
         const currentColumns = this.config.columns;
         const convertedColumns = currentColumns ? currentColumns * 3 : 12;
-        const convertedRows = this.config.rows ?? 'auto';
-        let LovelaceGridOptions = { columns: convertedColumns, rows: convertedRows };
+        
+        // After setConfig, this.config.rows already holds the prioritized value 
+        // (HA's grid_options.rows if available, otherwise user's config.rows)
+        const baseRowsForGrid = this.config.rows ?? 'auto';
+
+        let LovelaceGridOptions = { 
+            columns: convertedColumns, 
+            rows: baseRowsForGrid 
+        };
 
         switch (this.config.card_type) {
             case 'horizontal-buttons-stack':
-                LovelaceGridOptions = { rows: 1.3 };
+                LovelaceGridOptions.rows = 1.3; // Specific override
                 break;
             case 'separator':
-                LovelaceGridOptions = { rows: 0.8 };
+                // If Home Assistant provided grid_options.rows, that value (already in baseRowsForGrid) should be used.
+                // The special logic for separator (0.8 or 'auto' based on user's rows config)
+                // only applies if HA did not specify grid_options.rows.
+                if (!(this.config.grid_options && typeof this.config.grid_options.rows !== 'undefined')) {
+                    // HA did not provide grid_options.rows. Apply original separator logic
+                    // based on this.config.rows (which, in this case, is the user's configured value or undefined).
+                    LovelaceGridOptions.rows = !this.config.rows ? 0.8 : 'auto';
+                }
+                // If HA did provide grid_options.rows, LovelaceGridOptions.rows (which is baseRowsForGrid) is already correct.
                 break;
         }
         return LovelaceGridOptions;
@@ -231,7 +241,7 @@ class BubbleCard extends HTMLElement {
             defaultRows = 0;
         } else if (this.config.card_type === 'horizontal-buttons-stack') {
             defaultRows = 1;
-        } else if (['cover'].includes(this.config.card_type)) {
+        } else if (this.config.card_type === 'cover') {
             defaultRows = 2;
         }
 

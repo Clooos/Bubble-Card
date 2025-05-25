@@ -258,6 +258,9 @@ export function openPopup(context) {
 
     clearAllTimeouts(context);
     
+    // Save current scroll position
+    popupState.scrollY = window.scrollY;
+    
     const { popUp } = context;
     
     if (!context.verticalStack.contains(popUp)) {
@@ -309,6 +312,11 @@ export function closePopup(context, force = false) {
     context.removeDomTimeout = setTimeout(() => {
         appendPopup(context, false);
         hideContent(context, 0);
+        
+        // Restore scroll position
+        if (popupState.scrollY !== undefined) {
+            window.scrollTo(0, popupState.scrollY);
+        }
     }, popupState.animationDuration);
 
     updateListeners(context, false);

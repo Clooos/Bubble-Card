@@ -19,6 +19,11 @@ export function generateYamlExport(moduleData) {
     if (moduleContent.supported && moduleContent.unsupported) {
       delete moduleContent.unsupported;
     }
+
+    // Remove is_global for export
+    if (moduleContent.hasOwnProperty('is_global')) {
+      delete moduleContent.is_global;
+    }
     
     // Set the module object
     moduleObj[moduleData.id] = moduleContent;
@@ -42,13 +47,18 @@ export function generateGitHubExport(moduleData) {
   try {
     // Create a clean copy without editor_raw
     const cleanModuleData = { ...moduleData };
-    if (cleanModuleData.editor_raw || moduleContent.editor_raw === '') {
+    if (cleanModuleData.editor_raw || cleanModuleData.editor_raw === '') {
       delete cleanModuleData.editor_raw;
     }
     
     // Remove unsupported if supported is present (for backward compatibility)
     if (cleanModuleData.supported && cleanModuleData.unsupported) {
       delete cleanModuleData.unsupported;
+    }
+
+    // Remove is_global for export
+    if (cleanModuleData.hasOwnProperty('is_global')) {
+      delete cleanModuleData.is_global;
     }
     
     const { id, name, version, creator, description, code, editor, supported = [] } = cleanModuleData;
@@ -98,7 +108,7 @@ export function generateGitHubExport(moduleData) {
     githubContent += "<details>\n\n";
     githubContent += "<summary><b>🧩 Get this Module</b></summary>\n\n";
     githubContent += "<br>\n\n";
-    githubContent += "> To use this module, simply copy and paste the following configuration into your `/www/bubble/bubble-modules.yaml` file.\n\n";
+    githubContent += "> To use this module, simply install it from the Module Store (from the editor of any card > Modules), or copy and paste the following configuration into your `/www/bubble/bubble-modules.yaml` file.\n\n";
     
     // Full YAML definition
     githubContent += "```yaml\n";

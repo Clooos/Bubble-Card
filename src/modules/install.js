@@ -278,12 +278,20 @@ export async function installOrUpdateModule(context, module) {
             // Store the GitHub URL from the module object - this ensures we always have the correct URL
             link: module.moduleLink || moduleMetadata.link || moduleData.link
           };
+          // If this is the default module, ensure is_global is true
+          if (moduleId === 'default') {
+            existingModules[moduleId].is_global = true;
+          }
         } else {
           // If we couldn't parse the module data, use all metadata we've extracted
           existingModules[moduleId] = {
             id: moduleId,
             ...moduleMetadata
           };
+          // If this is the default module, ensure is_global is true
+          if (moduleId === 'default') {
+            existingModules[moduleId].is_global = true;
+          }
         }
       } catch (parseError) {
         console.warn("Error parsing module YAML for storage:", parseError);
@@ -295,6 +303,10 @@ export async function installOrUpdateModule(context, module) {
           description: moduleMetadata.description,
           creator: moduleMetadata.creator
         };
+        // If this is the default module, ensure is_global is true
+        if (moduleId === 'default') {
+          existingModules[moduleId].is_global = true;
+        }
       }
 
       // Update using an event for the trigger template sensor

@@ -41,5 +41,5 @@
 }
 
 .large .bubble-container {
-    height: 44px;
+    height: calc( var(--row-height,44px) * var(--row-size,0.8) + var(--row-gap,8px) * ( var(--row-size,0.8) - 1 ))
 }

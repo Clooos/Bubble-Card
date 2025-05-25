@@ -105,10 +105,18 @@ export function getState(context, entity = context.config.entity) {
 export function getAttribute(context, attribute, entity = context.config.entity) {
   if (!attribute) return '';
 
-  if (attribute.includes(' ')) {
-    return eval(`context._hass.states['${entity}']?.attributes['${attribute}']`) ?? '';
-  } else {
-    return eval(`context._hass.states['${entity}']?.attributes.${attribute}`) ?? '';
+  try {
+    if (attribute.includes(' ')) {
+      return eval(`context._hass.states['${entity}']?.attributes['${attribute}']`) ?? '';
+    } else {
+      // Gestion spéciale pour les attributs de type forecast avec notation de chemin
+      const result = eval(`context._hass.states['${entity}']?.attributes.${attribute}`);
+      // Assurer que 0 est retourné comme '0' et pas comme une chaîne vide
+      return result === 0 ? '0' : result ?? '';
+    }
+  } catch (error) {
+    console.warn(`Error accessing attribute '${attribute}' for entity '${entity}':`, error);
+    return '';
   }
 }
 
@@ -261,7 +269,7 @@ export function applyScrollingEffect(context, element, text) {
     // Add resize listener only once per element
     if (!element.eventAdded) {
         const debouncedUpdate = debounce(() => {
-            element.innerHTML = text;
+            element.innerHTML = element.previousText;
             checkAndApplyScrolling();
         }, 500);
         
@@ -381,6 +389,8 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
         } else {
             context.elements.mainContainer.style.setProperty('--row-size', context.config.rows || context.config.grid_options?.rows);
         }
+    } else if (context.config.card_type === 'separator') {
+        context.elements.mainContainer.style.setProperty('--row-size', 0.8);
     }
 }
 
@@ -434,13 +444,7 @@ export function toggleBodyScroll(disable) {
         document.body.style.top = `-${scrollY}px`;
         document.body.classList.add('no-scroll');
     } else {
-        // Keep the fixed position until we're ready to restore the scroll
-        // This prevents the visual flash where the page jumps back to the top
-        
-        // Pre-position the scroll before removing the blocking styles
-        window.scrollTo(0, scrollY);
-        
-        // Remove the blocking styles in the same render cycle
+        window.scrollTo({ top: scrollY, behavior: 'instant' });
         document.body.style.top = '';
         document.body.classList.remove('no-scroll');
     }

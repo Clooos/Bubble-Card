@@ -31,35 +31,44 @@ export function getBackdrop(context) {
 
   if (backdrop) return backdrop;
 
-  backdropStyle.innerHTML = backdropStyles;
-  document.head.appendChild(backdropStyle);
+  const backdropHostElement = createElement('div', 'bubble-backdrop-host');
+  const shadowRoot = backdropHostElement.attachShadow({ mode: 'open' });
+
+  const internalBackdropElement = createElement('div', 'bubble-backdrop backdrop is-hidden');
+  shadowRoot.appendChild(internalBackdropElement);
+
+  const defaultStylesTag = createElement('style');
+  defaultStylesTag.innerHTML = backdropStyles;
+  shadowRoot.appendChild(defaultStylesTag);
 
   const backdropCustomStyle = createElement('style');
-  document.head.appendChild(backdropCustomStyle);
-
-  const backdropElement = createElement('div', 'bubble-backdrop backdrop is-hidden');
+  shadowRoot.appendChild(backdropCustomStyle);
 
   if (isBackdropHidden) {
-    backdropElement.style.display = 'none';
-    backdropElement.style.pointerEvents = 'none';
+    backdropHostElement.style.display = 'none';
+    backdropHostElement.style.pointerEvents = 'none';
   }
 
-  document.body.appendChild(backdropElement);
-  backdropElement.style.setProperty('--custom-backdrop-filter', `blur(${context.config.backdrop_blur ?? 0}px)`);
+  document.body.appendChild(backdropHostElement);
+  internalBackdropElement.style.setProperty('--custom-backdrop-filter', `blur(${context.config.backdrop_blur ?? 0}px)`);
 
   function showBackdrop() {
     requestAnimationFrame(() => {
-      backdropElement.classList.add('is-visible');
-      backdropElement.classList.remove('is-hidden');
+      internalBackdropElement.classList.add('is-visible');
+      internalBackdropElement.classList.remove('is-hidden');
+      if (!isBackdropHidden) {
+        backdropHostElement.style.display = '';
+        backdropHostElement.style.pointerEvents = '';
+      }
     });
   }
   
   function hideBackdropFunc() {
-    backdropElement.classList.add('is-hidden');
-    backdropElement.classList.remove('is-visible');
+    internalBackdropElement.classList.add('is-hidden');
+    internalBackdropElement.classList.remove('is-visible');
   }
 
-  backdrop = { hideBackdrop: hideBackdropFunc, showBackdrop, backdropElement, backdropCustomStyle };
+  backdrop = { hideBackdrop: hideBackdropFunc, showBackdrop, backdropElement: internalBackdropElement, backdropCustomStyle };
   return backdrop;
 }
 

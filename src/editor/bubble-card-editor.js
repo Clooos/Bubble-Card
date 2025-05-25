@@ -30,6 +30,8 @@ class BubbleCardEditor extends LitElement {
     _cachedAttributeList = null;
     _cachedAttributeListEntity = null;
     _expandedPanelStates = {};
+    _moduleErrorCache = {};
+    _moduleCodeEvaluating = null;
 
     constructor() {
         super();
@@ -289,10 +291,22 @@ class BubbleCardEditor extends LitElement {
                     inputMode="numeric"
                     min="0"
                     step="0.1"
+                    .disabled="${this._config.grid_options?.rows}"
                     .value="${this._config.rows || this._config.grid_options?.rows || defaultRows}"
                     .configValue="${"rows"}"
                     @input="${this._valueChanged}"
                 ></ha-textfield>
+            `)}
+            ${this._renderConditionalContent(this._config.grid_options?.rows, html`
+            <div class="bubble-info warning">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:alert-outline"></ha-icon>
+                    Rows are already set in the "Layout" options
+                </h4>
+                <div class="content">
+                    <p>If you want to change the rows, you can do it in the "Layout" options at the top of this editor. Or remove it from your config in YAML to enable this option.</p>
+                </div>
+            </div>
             `)}
         `;
     }
@@ -694,7 +708,11 @@ class BubbleCardEditor extends LitElement {
                                 .hass=${this.hass}
                                 .value=${this._config.styles}
                                 .configValue="${"styles"}"
-                                @value-changed=${this._valueChanged}
+                                @value-changed=${(e) => {
+                                    // Clear errors for this card when code is modified
+                                    this._valueChanged(e);
+                                    this._clearCurrentCardError();
+                                }}
                             ></ha-code-editor>
                         </div>
                         ${this.createErrorConsole()}
@@ -714,24 +732,160 @@ class BubbleCardEditor extends LitElement {
         `;
     }
 
+    _clearCurrentCardError() {
+        if (!window.bubbleCardErrorRegistry) return;
+        
+        const currentCardType = this._config?.card_type;
+        const currentEntityId = this._config?.entity;
+        if (!currentCardType || !currentEntityId) return;
+        
+        const currentCardKey = `${currentCardType}_${currentEntityId}`;
+        
+        if (window.bubbleCardErrorRegistry[currentCardKey]) {
+            delete window.bubbleCardErrorRegistry[currentCardKey];
+            // Clear displayed error immediately
+            this.errorMessage = '';
+            this.errorSource = '';
+            this.requestUpdate();
+        }
+    }
+
+    _clearCurrentModuleError(moduleId) {
+        this._moduleCodeEvaluating = moduleId;
+        // Clear displayed error immediately
+        this.errorMessage = '';
+        this.errorSource = '';
+        this.requestUpdate();
+    }
+
     createErrorConsole(context = this) {
+        if (!window.bubbleCardErrorRegistry) {
+            window.bubbleCardErrorRegistry = {};
+        }
+
+        // Function to update the displayed error based on current context
+        const updateDisplayedError = () => {
+            const isModuleEditor = context._editingModule !== undefined;
+            
+            if (isModuleEditor && context._editingModule) {
+                const moduleId = context._editingModule.id;
+                
+                if (!moduleId) {
+                    context.errorMessage = '';
+                    context.errorSource = '';
+                    return;
+                }
+                
+                let foundModuleError = false;
+                
+                if (window.bubbleCardErrorRegistry) {
+                    Object.values(window.bubbleCardErrorRegistry).forEach(error => {
+                        if (error.moduleId === moduleId) {
+                            context.errorMessage = error.message;
+                            context.errorSource = error.source;
+                            foundModuleError = true;
+                        }
+                    });
+                }
+                
+                if (!foundModuleError) {
+                    context.errorMessage = '';
+                    context.errorSource = '';
+                }
+            } else {
+                // Standard card context, use card_type and entity
+                const currentCardType = context._config?.card_type;
+                const currentEntityId = context._config?.entity;
+                
+                if (!currentCardType || !currentEntityId) {
+                    context.errorMessage = '';
+                    context.errorSource = '';
+                    return;
+                }
+                
+                const currentCardKey = `${currentCardType}_${currentEntityId}`;
+                
+                if (window.bubbleCardErrorRegistry && window.bubbleCardErrorRegistry[currentCardKey]) {
+                    const currentCardError = window.bubbleCardErrorRegistry[currentCardKey];
+                    context.errorMessage = currentCardError.message;
+                    context.errorSource = currentCardError.source;
+                } else {
+                    // No error found for this card, ensure we clear any displayed errors
+                    context.errorMessage = '';
+                    context.errorSource = '';
+                }
+            }
+            
+            // Force a UI update
+            context.requestUpdate();
+        };
+
         if (!context._errorListener) {
             context._errorListener = (event) => {
-                context.errorMessage = event.detail;
-                context.requestUpdate();
+                const errorDetail = event.detail;
+                
+                if (errorDetail && typeof errorDetail === 'object' && errorDetail.context) {
+                    const { message, context: errorContext } = errorDetail;
+                    
+                    if (message) {
+                        // Only process if we have a cardType and entityId (needed for regular cards)
+                        if (errorContext.cardType && errorContext.entityId) {
+                            // Create a unique key for this error based on card type and entity
+                            const errorKey = `${errorContext.cardType}_${errorContext.entityId}`;
+                            
+                            // Store the error in the registry with source info
+                            window.bubbleCardErrorRegistry[errorKey] = {
+                                message: message,
+                                source: errorContext.sourceType === 'module' 
+                                    ? `Module ('${errorContext.moduleId}')` 
+                                    : 'Card Configuration (styles section)',
+                                cardType: errorContext.cardType,
+                                entityId: errorContext.entityId,
+                                moduleId: errorContext.sourceType === 'module' ? errorContext.moduleId : null
+                            };
+                        }
+                    } else {
+                        // If message is empty, clear the error from the registry
+                        if (errorContext.sourceType === 'module' && errorContext.moduleId) {
+                            // Clear module-specific error
+                            Object.keys(window.bubbleCardErrorRegistry).forEach(key => {
+                                if (window.bubbleCardErrorRegistry[key]?.moduleId === errorContext.moduleId) {
+                                    delete window.bubbleCardErrorRegistry[key];
+                                }
+                            });
+                        } else if (errorContext.cardType && errorContext.entityId) {
+                            // Clear card-specific error
+                            const errorKey = `${errorContext.cardType}_${errorContext.entityId}`;
+                            if (window.bubbleCardErrorRegistry[errorKey]) {
+                                delete window.bubbleCardErrorRegistry[errorKey];
+                            }
+                        }
+                    }
+                }
+                
+                // Update displayed error based on current context
+                updateDisplayedError();
             };
             window.addEventListener('bubble-card-error', context._errorListener);
         }
+        
+        // Always update the displayed error when this function is called
+        // This ensures we show the correct error when switching between cards/modules
+        updateDisplayedError();
 
         return html`
             <div class="bubble-info error" 
-                style="display: ${!context.errorMessage ? 'none' : ''}">
+                style="display: ${!context.errorMessage ? 'none' : ''}; margin-bottom: 8px;">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
                     Error in JS template
                 </h4>
                 <div class="content">
                     <p>${context.errorMessage}</p>
+                    ${context._editingModule !== undefined ? html`<hr><span class="helper-text" style="margin: 0;">
+                        <ha-icon icon="mdi:information-outline"></ha-icon>
+                        JS template errors can sometimes be delayed in the Module Editor.
+                    </span>` : ''}
                 </div>
             </div>
         `;
@@ -981,7 +1135,7 @@ class BubbleCardEditor extends LitElement {
       }
     }
 
-    if (array === 'button_action') {
+    if (array === 'button_action' || array === 'event_action') {
       this._config[array] = ev.detail.value;
     } else if (array) {
       this._config[array] = this._config[array] || [];

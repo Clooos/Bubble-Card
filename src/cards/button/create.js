@@ -74,6 +74,11 @@ export function createStructure(context, appendTo = context.container) {
     elements.mainContainer.classList.add('bubble-button-card-container');
     elements.cardWrapper.classList.add('bubble-button-card');
 
+    if (isSlider) {
+        // Indicate that it's a slider button to allow Swipe Navigation to filter this card
+        elements.mainContainer.classList.add('bubble-button-slider-container');
+    }
+
     if (appendTo !== context.container) {
         context.buttonType = buttonType;
     } else {

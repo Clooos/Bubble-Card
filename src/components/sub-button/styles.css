@@ -61,9 +61,9 @@
 }
 
 .no-icon-select-arrow {
-    width: 28px !important;
-    height: 28px !important;
-    right: 2px !important;        
+    width: 24px !important;
+    height: 24px !important;
+    --mdc-icon-size: 24px;
 }
 
 .no-icon-select-container {

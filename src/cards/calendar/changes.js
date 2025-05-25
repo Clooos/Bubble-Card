@@ -1,4 +1,4 @@
-import { setLayout, applyScrollingEffect } from "../../tools/utils.js";
+import { createElement, setLayout, applyScrollingEffect } from "../../tools/utils.js";
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import setupTranslation from "../../tools/localize.js";
 import { addActions } from "../../tools/tap-actions.js";
@@ -9,6 +9,26 @@ function dateDiffInMinutes(a, b) {
 
   return Math.floor((b - a) / MS_PER_MINUTES);
 }
+
+function parseEventDateTime(event) {
+  if (event.date) {
+    const parts = event.date.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    return new Date(year, month, day);
+  }
+
+  return new Date(event.dateTime);
+}
+
+const getEventDateKey = (eventStart) => {
+  const d = parseEventDateTime(eventStart);
+  const year = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const dayOfMonth = d.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${dayOfMonth}`;
+};
 
 export async function changeEventList(context) {
   const daysOfEvents = context.config.days ?? 7;
@@ -27,20 +47,33 @@ export async function changeEventList(context) {
   const events = await Promise.all(promises);
 
   context.events = events.flat()
-    .sort(
-      (a, b) => new Date(a.start.date ?? a.start.dateTime).getTime() - new Date(b.start.date ?? b.start.dateTime).getTime()
-    )
+    .sort((a, b) => {
+      const dateA = parseEventDateTime(a.start);
+      const dateB = parseEventDateTime(b.start);
+
+      const isAllDayA = a.start.date !== undefined;
+      const isAllDayB = b.start.date !== undefined;
+
+      if (isAllDayA && !isAllDayB) {
+        return -1;
+      }
+      if (!isAllDayA && isAllDayB) {
+        return 1;
+      }
+
+      return dateA.getTime() - dateB.getTime();
+    })
     .slice(0, context.config.limit ?? undefined);
 }
 
 export async function changeEvents(context) {
   const t = setupTranslation(context._hass);
   const eventsGroupedByDay = context.events.reduce((acc, event) => {
-    const day = event.start.date ?? event.start.dateTime.split('T')[0];
-    if (!acc[day]) {
-      acc[day] = [];
+    const dayKey = getEventDateKey(event.start);
+    if (!acc[dayKey]) {
+      acc[dayKey] = [];
     }
-    acc[day].push(event);
+    acc[dayKey].push(event);
     return acc;
   }, {});
 
@@ -54,71 +87,93 @@ export async function changeEvents(context) {
     }];
   }
 
-  context.elements.calendarCardContent.innerHTML = '';
+  const fragment = new DocumentFragment();
 
   Object.keys(eventsGroupedByDay).sort().forEach((day) => {
-    const eventDay = new Date(day);
+    const eventDay = parseEventDateTime({date: day});
     const today = new Date();
-    const dayNumber = document.createElement('div');
+    const dayNumber = createElement('div', 'bubble-day-number');
     const getCurrentLocale = context._hass.locale.language;
-    dayNumber.classList.add('bubble-day-number');
     dayNumber.innerHTML = `${eventDay.getDate()}`;
 
-    const dayMonth = document.createElement('div');
-    dayMonth.classList.add('bubble-day-month');
+    const dayMonth = createElement('div', 'bubble-day-month');
     dayMonth.innerHTML = eventDay.toLocaleString(getCurrentLocale, { month: 'short' });
 
-    const dayChip = document.createElement('div');
-    dayChip.classList.add('bubble-day-chip');
+    const dayChip = createElement('div', 'bubble-day-chip');
     dayChip.appendChild(dayNumber);
     dayChip.appendChild(dayMonth);
     if (eventDay.getDate() === today.getDate() && eventDay.getMonth() === today.getMonth()) {
       dayChip.classList.add('is-active');
     }
+    
+    addActions(dayChip, { 
+      ...context.config, 
+    }, null);
 
-    const dayEvents = document.createElement('div');
-    dayEvents.classList.add('bubble-day-events');
+    const dayEvents = createElement('div', 'bubble-day-events');
 
     eventsGroupedByDay[day].forEach((event) => {
-      const eventTime = document.createElement('div');
-      eventTime.classList.add('bubble-event-time');
-      eventTime.innerHTML = event.start.date ? t("cards.calendar.all_day") : new Date(event.start.dateTime).toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric' });
-      if (!event.start.date && context.config.show_end === true) {
-        eventTime.innerHTML += ` – ${new Date(event.end.dateTime).toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric' })}`;
+      const isAllDay = event.start.date !== undefined;
+      const now = new Date();
+      const eventStart = parseEventDateTime(event.start);
+      const eventEnd = parseEventDateTime(event.end);
+
+      const eventTime = createElement('div', 'bubble-event-time');
+      eventTime.innerHTML = isAllDay ? t("cards.calendar.all_day") : eventStart.toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric' });
+      if (!isAllDay && context.config.show_end === true) {
+        eventTime.innerHTML += ` – ${eventEnd.toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric' })}`;
       }
 
-      const eventName = document.createElement('div');
-      eventName.classList.add('bubble-event-name');
-      
+      const eventNameWrapper = createElement('div', 'bubble-event-name-wrapper');
+      const eventName = createElement('div', 'bubble-event-name');
+
       const eventText = event.summary || t("cards.calendar.busy");
       applyScrollingEffect(context, eventName, eventText);
+      eventName.innerHTML = eventText;
+      eventNameWrapper.appendChild(eventName);
 
-      const eventColor = document.createElement('div');
-      eventColor.classList.add('bubble-event-color');
+      const eventColor = createElement('div', 'bubble-event-color');
       eventColor.style.backgroundColor = event.entity.color
-        ? `var(--${event.entity.color}-color)`
+        ? event.entity.color.startsWith('#')
+          ? event.entity.color
+          : `var(--${event.entity.color}-color)`
         : intToRGB(hashCode(event.entity.entity));
       if (event.entity.color === 'transparent') {
         eventColor.style.display = 'none';
       }
 
-      const eventLine = document.createElement('div');
-      eventLine.classList.add('bubble-event');
+      if (context.config.show_place === true && event.location !== null) {
+        const eventPlace = createElement('div', 'bubble-event-place');
+        eventPlace.innerHTML = event.location;
+
+        applyScrollingEffect(context, eventPlace, event.location);
+
+        eventNameWrapper.appendChild(eventPlace);
+      }
+
+      const eventLine = createElement('div', 'bubble-event');
       eventLine.appendChild(eventColor);
       eventLine.appendChild(eventTime);
-      eventLine.appendChild(eventName);
-      addActions(eventLine, { ...context.config, entity: event.entity.entity });
+      eventLine.appendChild(eventNameWrapper);
 
-      const now = new Date();
-      const start = new Date(event.start.dateTime ?? event.start.date);
-      const end = new Date(event.end.dateTime ?? event.end.date);
-      const activeColor = 'var(--bubble-event-accent-color, var(--bubble-accent-color, var(--bubble-primary-color)))';
+      addActions(
+        eventLine, 
+        context.config.event_action,
+        event.entity.entity,
+        {
+          tap_action: { action: "none" },
+          double_tap_action: { action: "none" },
+          hold_action: { action: "none" }
+        }
+      );
 
-      if (context.config.show_progress === true && event.start.date && start < now) {
+      const activeColor = 'var(--bubble-event-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))';
+
+      if (context.config.show_progress === true && isAllDay && eventStart < now) {
         eventLine.style.setProperty('--bubble-event-background-color', activeColor);
-      } else if (context.config.show_progress === true &&event.start.dateTime && start < now) {
-        const durationDiff = dateDiffInMinutes(start, end);
-        const startDiff = dateDiffInMinutes(start, now);
+      } else if (context.config.show_progress === true && !isAllDay && eventStart < now) {
+        const durationDiff = dateDiffInMinutes(eventStart, eventEnd);
+        const startDiff = dateDiffInMinutes(eventStart, now);
         const percentage = 100 * startDiff / durationDiff;
 
         eventLine.style.setProperty('--bubble-event-background-image', `linear-gradient(to right, ${activeColor} ${percentage}%, transparent ${percentage}%)`);
@@ -127,18 +182,19 @@ export async function changeEvents(context) {
       dayEvents.appendChild(eventLine);
     });
 
-    const dayWrapper = document.createElement('div');
-    dayWrapper.classList.add('bubble-day-wrapper');
+    const dayWrapper = createElement('div', 'bubble-day-wrapper');
     dayWrapper.appendChild(dayChip);
     dayWrapper.appendChild(dayEvents);
 
-    context.elements.calendarCardContent.appendChild(dayWrapper);
+    fragment.appendChild(dayWrapper);
 
     if (context.elements.mainContainer.scrollHeight > context.elements.mainContainer.offsetHeight) {
       context.content.classList.add('is-overflowing');
     }
   });
 
+  context.elements.calendarCardContent.innerHTML = '';
+  context.elements.calendarCardContent.appendChild(fragment);
 }
 
 export function changeStyle(context) {
