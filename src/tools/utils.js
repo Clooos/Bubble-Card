@@ -416,36 +416,42 @@ export function throttle(mainFunction, delay = 300) {
     };
 }
 
-let scrollY = 0;
+let previousScrollY = 0;
+const scrollLockHtmlClass = 'bubble-html-scroll-locked';
 
 function injectNoScrollStyles() {
-    if (document.getElementById('no-scroll-styles')) return;
+    const styleId = 'bubble-card-no-scroll-styles';
+    if (document.getElementById(styleId)) return;
 
-    const style = document.createElement('style');
-    style.id = 'no-scroll-styles';
-    style.textContent = `
-        body.no-scroll {
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            touch-action: none;
-            left: 0;
+    const styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    styleElement.textContent = `
+        html.${scrollLockHtmlClass} {
+            overflow: hidden !important;
         }
     `;
-
-    document.head.appendChild(style);
+    document.head.appendChild(styleElement);
 }
 
 export function toggleBodyScroll(disable) {
     injectNoScrollStyles();
 
     if (disable) {
-        scrollY = window.scrollY;
-        document.body.style.top = `-${scrollY}px`;
-        document.body.classList.add('no-scroll');
+        if (document.documentElement.classList.contains(scrollLockHtmlClass)) {
+            return;
+        }
+
+        previousScrollY = window.scrollY !== undefined 
+            ? window.scrollY 
+            : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+        
+        document.documentElement.classList.add(scrollLockHtmlClass);        
     } else {
-        window.scrollTo({ top: scrollY, behavior: 'instant' });
-        document.body.style.top = '';
-        document.body.classList.remove('no-scroll');
+        if (!document.documentElement.classList.contains(scrollLockHtmlClass)) {
+            return;
+        }
+
+        document.documentElement.classList.remove(scrollLockHtmlClass);
+        window.scrollTo({ top: previousScrollY, behavior: 'instant' });
     }
 }

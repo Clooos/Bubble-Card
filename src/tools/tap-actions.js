@@ -27,11 +27,7 @@ function handlePointerDown(event) {
   );
 
   if (!actionElement) return;
-
-  if (event.cancelable) {
-    event.preventDefault();
-  }
-
+  
   let handler = actionHandler.get(actionElement);
 
   if (!handler) {
@@ -45,8 +41,13 @@ function handlePointerDown(event) {
     actionHandler.set(actionElement, handler);
   }
   
-  activeHandlers.add(handler); // Ensure handler is in activeHandlers
   handler.handleStart(event);
+  
+  if (!handler.isInteractionInProgress()) {
+    return;
+  }
+
+  activeHandlers.add(handler);
 
   const cleanup = () => {
     actionElement.removeEventListener('pointerup', endHandler);
@@ -78,9 +79,8 @@ function handlePointerDown(event) {
   document.addEventListener('scroll', scrollHandler, { once: true });
 }
 
-// Ajout des écouteurs touch pour améliorer la compatibilité
-document.body.addEventListener('pointerdown', handlePointerDown);
-document.body.addEventListener('touchstart', handlePointerDown, { passive: false });
+document.body.addEventListener('pointerdown', handlePointerDown, { passive: true });
+document.body.addEventListener('touchstart', handlePointerDown, { passive: true });
 
 export function callAction(element, actionConfig, action) {
   const event = new Event('hass-action', { bubbles: true, composed: true });
@@ -154,6 +154,14 @@ class ActionHandler {
     this.isDisconnected = false;
     this.hasMoved = false;
     this.interactionStarted = false;
+    this.justEndedTouchEventTime = 0;
+    this.currentInteractionType = null;
+    this.interactionStartTime = 0;
+    this.preventDefaultCalled = false;
+  }
+
+  isInteractionInProgress() {
+    return this.interactionStarted;
   }
 
   cleanup() {
@@ -168,30 +176,38 @@ class ActionHandler {
   }
 
   handleStart(e) {
-    if (window.isScrolling || this.isDisconnected) return;
-    
-    // Avoid double triggers between touch and pointer
-    if (this.interactionStarted) return;
-    this.interactionStarted = true;
+    const now = Date.now();
 
-    if (e.cancelable) {
-      e.preventDefault();
+    if (e.type === 'pointerdown' && (now - this.justEndedTouchEventTime < 50)) {
+      return; 
     }
 
-    // Determine initial coordinates based on event type
-    if (e.type === 'touchstart' && e.touches && e.touches[0]) {
+    if (window.isScrolling || this.isDisconnected) return;
+
+    if (this.interactionStarted) {
+      if (e.type === 'touchstart' && this.currentInteractionType === 'pointerdown' && (now - this.interactionStartTime < 50)) {
+        return;
+      }
+      return;
+    }
+
+    this.interactionStarted = true;
+    this.currentInteractionType = e.type;
+    this.interactionStartTime = now;
+    
+    this.holdFired = false;
+    this.hasMoved = false;
+
+    if (e.touches && e.touches[0]) {
       this.startX = e.touches[0].clientX;
       this.startY = e.touches[0].clientY;
     } else {
       this.startX = e.clientX;
       this.startY = e.clientY;
     }
-    
-    this.holdFired = false;
-    this.hasMoved = false;
 
-    document.addEventListener('pointermove', this.pointerMoveListener, { passive: false });
-    document.addEventListener('touchmove', this.touchMoveListener, { passive: false });
+    document.addEventListener('pointermove', this.pointerMoveListener, { passive: true });
+    document.addEventListener('touchmove', this.touchMoveListener, { passive: true });
 
     this.holdTimeout = setTimeout(() => {
       const holdAction = this.config.hold_action || { action: 'none' };
@@ -205,8 +221,7 @@ class ActionHandler {
   detectScrollLikeMove(e) {
     let currentX, currentY;
     
-    // Extract coordinates based on event type
-    if (e.type === 'touchmove' && e.touches && e.touches[0]) {
+    if (e.touches && e.touches[0]) {
       currentX = e.touches[0].clientX;
       currentY = e.touches[0].clientY;
     } else {
@@ -218,55 +233,79 @@ class ActionHandler {
     const deltaY = Math.abs(currentY - this.startY);
 
     if (deltaX > movementThreshold || deltaY > movementThreshold) {
-      // Consider this as a drag/scroll type movement
       this.hasMoved = true;
-      disableActionsDuringScroll(); // Disable actions for a short period of time
+      disableActionsDuringScroll();
       
-      // Clean up timeouts to avoid unwanted actions
       clearTimeout(this.holdTimeout);
       this.holdTimeout = null;
       
-      // Stop listening for movements once a drag is detected
       document.removeEventListener('pointermove', this.pointerMoveListener);
       document.removeEventListener('touchmove', this.touchMoveListener);
     }
   }
 
   handleEnd(e) {
+    if (e.type === 'touchend' || e.type === 'touchcancel') {
+        this.justEndedTouchEventTime = Date.now();
+    }
+
+    if (!this.interactionStarted) {
+        return;
+    }
+
     if (window.isScrolling || this.isDisconnected || this.hasMoved) {
       this.interactionStarted = false;
       return;
     }
-
-    if (e.cancelable) {
-      e.preventDefault();
-    }
-
+    
     clearTimeout(this.holdTimeout);
     this.holdTimeout = null;
     document.removeEventListener('pointermove', this.pointerMoveListener);
     document.removeEventListener('touchmove', this.touchMoveListener);
 
-    if (this.holdFired) {
-      this.interactionStarted = false;
-      return;
-    }
-
+    const wasHoldFired = this.holdFired;
     const currentTime = Date.now();
     const doubleTapAction = this.config.double_tap_action || { action: 'none' };
     const tapAction = this.config.tap_action || { action: 'none' };
+    let actionInitiatedForTapOrDoubleTap = false;
 
-    if (this.lastTap && (currentTime - this.lastTap < doubleTapTimeout) && doubleTapAction.action !== 'none') {
-      clearTimeout(this.tapTimeout);
-      this.sendActionEvent(this.element, this.config, 'double_tap');
-    } else if (tapAction.action !== 'none') {
-      if (doubleTapAction.action !== 'none') {
-        this.tapTimeout = setTimeout(() => {
+    if (!wasHoldFired) {
+      if (this.lastTap && (currentTime - this.lastTap < doubleTapTimeout) && doubleTapAction.action !== 'none') {
+        clearTimeout(this.tapTimeout); // Annule le tap simple en attente
+        this.sendActionEvent(this.element, this.config, 'double_tap');
+        actionInitiatedForTapOrDoubleTap = true;
+      } else if (tapAction.action !== 'none') {
+        if (doubleTapAction.action !== 'none') {
+          this.tapTimeout = setTimeout(() => {
+            if (!this.isDisconnected && !this.holdFired && !this.hasMoved) {
+              this.sendActionEvent(this.element, this.config, 'tap');
+            }
+          }, doubleTapTimeout);
+          actionInitiatedForTapOrDoubleTap = true;
+        } else {
           this.sendActionEvent(this.element, this.config, 'tap');
-        }, doubleTapTimeout);
-      } else {
-        this.sendActionEvent(this.element, this.config, 'tap');
+          actionInitiatedForTapOrDoubleTap = true;
+        }
       }
+    }
+
+    if (actionInitiatedForTapOrDoubleTap || wasHoldFired) {
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+
+      const preventSecondEvent = (clickEvent) => {
+        clickEvent.stopPropagation();
+        
+        if (wasHoldFired) { 
+          clickEvent.preventDefault();
+        }
+      };
+      document.body.addEventListener('click', preventSecondEvent, { capture: true, once: true });
+
+      setTimeout(() => {
+        document.body.removeEventListener('click', preventSecondEvent, { capture: true });
+      }, 350); // Delay needed to prevent second click on iOS
     }
 
     this.lastTap = currentTime;

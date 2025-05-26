@@ -32,7 +32,7 @@ ha-select {
     position: absolute !important;
     pointer-events: none;
     right: var(--right-value, 46px);
-    top: -28px;
+    height: 0px !important;
 }
 
 .mdc-menu, mwc-list, .mdc-list-item {
@@ -50,6 +50,8 @@ ha-select {
 .mdc-select__anchor {
     width: 100%;
     pointer-events: none;
+    top: -14px !important;
+    height: 28px !important;
 }
 
 .bubble-dropdown-container {

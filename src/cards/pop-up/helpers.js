@@ -37,13 +37,9 @@ function resetCloseTimeout(context) {
 export function removeHash() {
     if (popupState.hashRecentlyAdded || !location.hash || popupState.hashChangeProtection) return;
     
-    setTimeout(() => {
-        if (popupState.hashChangeProtection) return;
-        
-        const newURL = window.location.href.split('#')[0];
-        history.replaceState(null, "", newURL);
-        window.dispatchEvent(new Event('location-changed'));
-    }, 50);
+    const newURL = window.location.href.split('#')[0];
+    history.replaceState(null, "", newURL);
+    window.dispatchEvent(new Event('location-changed'));
 }
 
 export function addHash(hash) {

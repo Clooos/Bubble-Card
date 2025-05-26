@@ -21,21 +21,21 @@ export function createDropdownStructure(context, elements = context.elements, sh
     elements.dropdownContainer.appendChild(elements.dropdownArrow);
     elements.dropdownContainer.appendChild(elements.dropdownContainerStyle);
 
+    function fixMenuDisplay(menuElement) {
+        menuElement.style.display = 'none';
+        menuElement.setAttribute('open', '');
+        setTimeout(() => {
+            menuElement.removeAttribute('open');
+            menuElement.style.display = '';
+        }, 600); // Give time to the dropdown to be open
+    }
+
     function addStyleWhenShadowRootAvailable() {
         if (elements.dropdownSelect.shadowRoot) {
             elements.dropdownSelect.shadowRoot.appendChild(elements.dropdownStyleElement);
             elements.dropdownSelect.shadowRoot.appendChild(elements.dropdownCustomStyleElement);
-            if (elements !== context.elements) {
-                elements.dropdownSelectStyleElement = createElement('style');
-                elements.dropdownSelectStyleElement.textContent = styles;
-                elements.dropdownSelect.shadowRoot.appendChild(elements.dropdownSelectStyleElement);
-                elements.dropdownContainer.appendChild(elements.dropdownStyleElement);
-                if (showArrow) elements.dropdownContainer.style.width = '24px';
-                elements.dropdownArrow.style.height = '20px';
-                elements.dropdownArrow.style.width = '20px';
-                // elements.dropdownArrow.parentElement.parentElement.haRipple = createElement('ha-ripple');
-                // elements.dropdownArrow.parentElement.parentElement.appendChild(elements.dropdownArrow.parentElement.parentElement.haRipple);
-            }
+            const menuElement = elements.dropdownSelect.shadowRoot.querySelector('ha-menu.mdc-select__menu');
+            fixMenuDisplay(menuElement);
         }
     }
 
@@ -66,12 +66,6 @@ export function createDropdownActions(context, elements = context.elements, enti
     elements.innerBorderElement.classList.add('bubble-dropdown-inner-border');
     card.appendChild(elements.innerBorderElement);
 
-    // Ensure the card can host an absolutely positioned child
-    // Only set if it's static, to avoid overriding other position values.
-    if (window.getComputedStyle(card).position === 'static') {
-        card.style.position = 'relative';
-    }
-
     card.haRipple = createElement('ha-ripple');
     if (elements === context.elements) {
         elements.background.appendChild(card.haRipple);
@@ -79,36 +73,17 @@ export function createDropdownActions(context, elements = context.elements, enti
         card.appendChild(card.haRipple);
     }
 
-    if (elements !== context.elements) {
-        // card.style.border = 'solid 2px rgba(0,0,0,0)'; // This line is removed
-    }
-
     let isFirstOpen = true;
 
     const updateVisualStyles = () => {
         dropdownArrow.style.transform = 'rotate(180deg)';
         elements.dropdownArrow.style.background = 'var(--bubble-accent-color, var(--bubble-default-color))';
-        // card.style.border = 'var(--bubble-select-border, solid 2px var(--bubble-accent-color, var(--bubble-default-color)))'; // Replaced by inner border logic
         if (elements.innerBorderElement) {
             elements.innerBorderElement.style.display = 'block';
         }
         if (context.elements && context.elements.mainContainer) {
             context.elements.mainContainer.style.overflow = 'visible';
         }
-    };
-
-    const handleFirstOpen = (open, close) => {
-        isFirstOpen = false;
-        dropdownArrow.style.transition = 'none';
-        open();
-        requestAnimationFrame(() => {
-            close();
-            setTimeout(() => {
-                dropdownArrow.style.transition = '';
-                updateVisualStyles();
-                open();
-            }, 140);
-        });
     };
 
     const handleEventClick = (event) => {
@@ -120,50 +95,26 @@ export function createDropdownActions(context, elements = context.elements, enti
             // Fallback to mwc-menu if ha-menu is not found
             const oldSelectMenu = dropdownSelect.shadowRoot.querySelector('mwc-menu');
             if (oldSelectMenu) {
-                if (isFirstOpen) {
-                    handleFirstOpen(
-                        () => oldSelectMenu.setAttribute('open', ''),
-                        () => oldSelectMenu.removeAttribute('open')
-                    );
-                } else if (!oldSelectMenu.hasAttribute('open')) {
-                    oldSelectMenu.setAttribute('open', '');
-                    updateVisualStyles();
-                }
+                oldSelectMenu.setAttribute('open', '');
+                updateVisualStyles();
             }
             return;
         }
-
-        if (typeof menuElement.open === 'boolean') {
-            if (isFirstOpen) {
-                handleFirstOpen(
-                    () => menuElement.open = true,
-                    () => menuElement.open = false
-                );
-            } else if (!menuElement.open) {
-                menuElement.open = true;
-                updateVisualStyles();
-            }
-        } else if (typeof menuElement.show === 'function') {
-            const anchor = dropdownSelect.shadowRoot.querySelector('.mdc-select__anchor');
-            const isCurrentlyOpen = anchor ? anchor.getAttribute('aria-expanded') === 'true' : false;
-            
-            if (isFirstOpen) {
-                handleFirstOpen(
-                    () => menuElement.show(),
-                    () => menuElement.close()
-                );
-            } else if (!isCurrentlyOpen) {
-                menuElement.show();
-                updateVisualStyles();
-            }
-        }
+        // if (typeof menuElement.open === 'boolean') {
+        //     console.log('open');
+        //     menuElement.open = true;
+        //     updateVisualStyles();
+        // } else if (typeof menuElement.show === 'function') {
+            // console.log('show');
+            menuElement.show();
+            updateVisualStyles();
+        // }
     };
 
     const handleMenuClosed = (event) => {
         event.stopPropagation();
 
         dropdownArrow.style.transform = 'rotate(0deg)';
-        // card.style.border = 'solid 2px rgba(0,0,0,0)'; // Replaced by inner border logic
         if (elements.innerBorderElement) {
             elements.innerBorderElement.style.display = 'none';
         }

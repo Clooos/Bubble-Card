@@ -10,8 +10,12 @@ export function changeDropdownList(context, elements = context.elements, entity 
     if (!elements.currentState) return;
   
     elements.currentList = entity?.startsWith("input_select") || entity?.startsWith("select") ? context._hass.states[entity].attributes.options : context._hass.states[entity].attributes[config.select_attribute];
-  
-    if (elements.previousList === elements.currentList && elements.previousState === elements.currentState) return;
+    elements.currentSelectedAttribute = getSelectedAttribute(context._hass.states[entity], config.select_attribute);
+    
+    // Only update if the list, state or selected attribute has changed
+    if (elements.previousList === elements.currentList && 
+        elements.previousState === elements.currentState && 
+        elements.previousSelectedAttribute === elements.currentSelectedAttribute) return;
   
     // Append options to the dropdown select element
     let options = elements.currentList;
@@ -42,15 +46,18 @@ export function changeDropdownList(context, elements = context.elements, entity 
     
           opt.appendChild(document.createTextNode(translatedLabel));
     
-          if (option === getSelectedAttribute(context._hass.states[entity], config.select_attribute)) {
+          if (option === elements.currentSelectedAttribute) {
               opt.setAttribute('selected', '');
           }
     
           elements.dropdownSelect.appendChild(opt);
-          elements.previousList = elements.currentList;
-          elements.previousState = elements.currentState;
       });
     } // End of Array.isArray check
+    
+    // Enregistrer les valeurs actuelles pour la comparaison future
+    elements.previousList = elements.currentList;
+    elements.previousState = elements.currentState;
+    elements.previousSelectedAttribute = elements.currentSelectedAttribute;
   
     elements.dropdownContainer.appendChild(elements.dropdownSelect);
   }
