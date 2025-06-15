@@ -50,7 +50,13 @@ export function getBackdrop(context) {
   }
 
   document.body.appendChild(backdropHostElement);
-  internalBackdropElement.style.setProperty('--custom-backdrop-filter', `blur(${context.config.backdrop_blur ?? 0}px)`);
+  
+  const backdropBlur = context.config.backdrop_blur ?? 0;
+  if (parseFloat(backdropBlur) > 0) {
+      internalBackdropElement.style.setProperty('--custom-backdrop-filter', `blur(${backdropBlur}px)`);
+  } else {
+      internalBackdropElement.style.setProperty('--custom-backdrop-filter', 'none');
+  }
 
   function showBackdrop() {
     requestAnimationFrame(() => {
@@ -167,9 +173,11 @@ export function createStructure(context) {
         context.popUp.style.setProperty('--bubble-pop-up-background-color', rgbaColor);
     }
 
-    colorScheme.addEventListener('change', () => {
-      updatePopupColor()
-    }, { passive: true });
+    context.updatePopupColorListener = () => {
+      updatePopupColor();
+    };
+
+    colorScheme.addEventListener('change', context.updatePopupColorListener, { passive: true });
 
     updatePopupColor();
 
@@ -207,6 +215,31 @@ export function createStructure(context) {
     } else {
       context.elements.popUpContainer = existingContainer;
     }
+
+    const popUpContainer = context.elements.popUpContainer;
+    
+    const checkScrollable = () => {
+        // To get a reliable scrollHeight, overflow must not be 'visible'.
+        // We set it to 'auto' temporarily for the check.
+        const originalOverflow = popUpContainer.style.overflow;
+        popUpContainer.style.overflow = 'auto';
+
+        // Add a class if scrollHeight is greater than clientHeight
+        const isScrollable = popUpContainer.scrollHeight > popUpContainer.clientHeight;
+        
+        // Restore original overflow style from CSS by clearing the inline style.
+        // This lets the CSS classes (.is-scrollable) apply correctly.
+        popUpContainer.style.overflow = '';
+
+        popUpContainer.classList.toggle('is-scrollable', isScrollable);
+    };
+
+    // Use ResizeObserver to detect size changes
+    const resizeObserver = new ResizeObserver(checkScrollable);
+    resizeObserver.observe(popUpContainer);
+
+    // Initial check after a short delay to ensure rendering is complete
+    setTimeout(checkScrollable, 150);
 
     context.popUpBackground = createElement("div", 'bubble-pop-up-background');
     context.popUp.appendChild(context.popUpBackground);
@@ -252,10 +285,10 @@ export function prepareStructure(context) {
     context.popUp.style.setProperty('--custom-popup-filter', !context.config.backdrop_blur || context.config.backdrop_blur === '0' ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
     context.popUp.style.setProperty('--custom-shadow-opacity', (context.config.shadow_opacity ?? 0) / 100);
 
-    const contextOnUrlChange = onUrlChange(context);
+    context.boundOnUrlChange = onUrlChange(context);
 
-    window.addEventListener('location-changed', contextOnUrlChange);
-    window.addEventListener('popstate', contextOnUrlChange);
+    window.addEventListener('location-changed', context.boundOnUrlChange);
+    window.addEventListener('popstate', context.boundOnUrlChange);
 
     window.popUpError = false;
 

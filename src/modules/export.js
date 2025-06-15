@@ -1,39 +1,60 @@
 import jsyaml from 'js-yaml';
 import { fireToast } from './cache.js';
 
+function getCleanExportData(moduleData) {
+  // Destructure to extract only the desired properties.
+  // This ensures that any extra properties on moduleData are ignored.
+  const { 
+    id, 
+    name, 
+    version, 
+    creator, 
+    link,
+    supported,
+    description, 
+    code, 
+    editor 
+  } = { ...moduleData };
+
+  // Reconstruct the object to control the order of properties for consistent output.
+  const cleanData = {
+    name,
+    version,
+    creator,
+    link,
+    supported,
+    description,
+    code,
+    editor
+  };
+  
+  // Remove any properties that are undefined, null, or an empty link.
+  Object.keys(cleanData).forEach(key => {
+    const value = cleanData[key];
+    if (value === undefined || value === null || (key === 'link' && value === '')) {
+      delete cleanData[key];
+    }
+  });
+
+  return { id, cleanData };
+}
+
 export function generateYamlExport(moduleData) {
   try {
+    const { id, cleanData } = getCleanExportData(moduleData);
+    
     // Create YAML structure
-    const moduleObj = {};
-    const moduleContent = { ...moduleData };
-    
-    // Remove id from internal structure as it becomes the key
-    delete moduleContent.id;
-    
-    // Ensure editor_raw is removed if it exists
-    if (moduleContent.editor_raw || moduleContent.editor_raw === '') {
-      delete moduleContent.editor_raw;
-    }
-    
-    // Remove unsupported if supported is present (for backward compatibility)
-    if (moduleContent.supported && moduleContent.unsupported) {
-      delete moduleContent.unsupported;
-    }
-
-    // Remove is_global for export
-    if (moduleContent.hasOwnProperty('is_global')) {
-      delete moduleContent.is_global;
-    }
-    
-    // Set the module object
-    moduleObj[moduleData.id] = moduleContent;
+    const moduleObj = {
+      [id]: cleanData
+    };
     
     // Convert to YAML
     const yamlContent = jsyaml.dump(moduleObj, {
       indent: 2,
       lineWidth: -1,
       noRefs: true,
-      noCompatMode: true
+      noCompatMode: true,
+      sortKeys: false // Keep property order
     });
     
     return yamlContent;
@@ -45,23 +66,8 @@ export function generateYamlExport(moduleData) {
 
 export function generateGitHubExport(moduleData) {
   try {
-    // Create a clean copy without editor_raw
-    const cleanModuleData = { ...moduleData };
-    if (cleanModuleData.editor_raw || cleanModuleData.editor_raw === '') {
-      delete cleanModuleData.editor_raw;
-    }
-    
-    // Remove unsupported if supported is present (for backward compatibility)
-    if (cleanModuleData.supported && cleanModuleData.unsupported) {
-      delete cleanModuleData.unsupported;
-    }
-
-    // Remove is_global for export
-    if (cleanModuleData.hasOwnProperty('is_global')) {
-      delete cleanModuleData.is_global;
-    }
-    
-    const { id, name, version, creator, description, code, editor, supported = [] } = cleanModuleData;
+    const { id, cleanData } = getCleanExportData(moduleData);
+    const { name, version, creator, description, code, editor, supported = [] } = cleanData;
     
     // Build the GitHub discussion markdown format
     let githubContent = `# ${name}\n\n`;

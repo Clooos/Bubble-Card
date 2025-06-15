@@ -9,10 +9,9 @@
   opacity: 0;
   transition: opacity 0.3s;
   transition-delay: .1s;
-  display: flex;
   backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
   -webkit-backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
-  transform: translate3d(0, 0, 0);
+  will-change: opacity;
 }
 
 .bubble-backdrop.is-visible {

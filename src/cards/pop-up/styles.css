@@ -16,12 +16,15 @@
     --row-size: 1;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
-    overflow-y: auto; 
-    overflow-x: hidden; 
+    overflow: visible; 
     grid-auto-rows: min-content;
+    padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
+}
+
+.bubble-pop-up-container.is-scrollable {
+    overflow: auto;
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
-    padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
 }
 
 .bubble-pop-up-container > * {
@@ -44,6 +47,7 @@
     left: 7px;
     z-index: 5 !important;
     bottom: calc(-56px - var(--custom-height-offset-mobile));
+    will-change: transform;
 }
 
 .bubble-pop-up-background {
@@ -195,6 +199,9 @@
 
 .no-header .bubble-pop-up-container {
     padding-top: 4px !important;
+}
+
+.no-header .bubble-pop-up-container.is-scrollable {
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
 }

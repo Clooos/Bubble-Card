@@ -295,7 +295,16 @@ class ActionHandler {
       }
 
       const preventSecondEvent = (clickEvent) => {
-        clickEvent.stopPropagation();
+        const popupElement = clickEvent.composedPath().find(el => el.classList && el.classList.contains('bubble-pop-up'));
+        let shouldStopPropagation = true;
+
+        if (popupElement && popupElement.dataset.closeOnClick === 'true') {
+          shouldStopPropagation = false;
+        }
+
+        if (shouldStopPropagation) {
+          clickEvent.stopPropagation();
+        }
         
         if (wasHoldFired) { 
           clickEvent.preventDefault();

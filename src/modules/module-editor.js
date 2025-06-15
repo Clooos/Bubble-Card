@@ -28,6 +28,9 @@ function updateModuleInConfig(context, moduleId, oldId = null) {
   
   // Save current ID for tracking
   context._previousModuleId = moduleId;
+  
+  // Ensure the config is properly updated in the editor
+  fireEvent(context, "config-changed", { config: context._config });
 }
 
 function refreshStyles(context) {
@@ -425,7 +428,7 @@ export function renderModuleEditorForm(context) {
                       <div class="content">
                         <p>To share your Module to the Module Store, click on <strong>Copy for GitHub</strong> and paste the content in a new discussion in the
                         <a href="https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules" target="_blank">Share your Modules</a> category.
-                        <strong>Edit the description</strong> (if needed), <strong>the example</strong> (for YAML users), and remember to <strong>include at least one screenshot</strong> for the Module Store.</strong></p>
+                        <strong>Edit the description</strong> (if needed), <strong>the example</strong> (for YAML users), and remember to <strong>include at least one screenshot</strong> for the Module Store.</p>
                         <p><strong>Your Module becomes available right after that</strong> (after a Store refresh), so double-check that everything is correctly written and the Module is working as expected. You can of course edit/update the Module after it is shared.</p>
                       </div>
                     </div>
@@ -635,9 +638,37 @@ export async function saveModule(context, moduleData) {
     // Signal modules have been updated
     document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
     
-    // Update yamlKeysMap
-    yamlKeysMap.delete(moduleData.id);
-    yamlKeysMap.set(moduleData.id, metadata);
+    // Update yamlKeysMap while preserving order
+    const oldKeys = Array.from(yamlKeysMap.keys());
+    const newMap = new Map();
+    
+    oldKeys.forEach(key => {
+      if (key === moduleData.id) {
+        newMap.set(moduleData.id, metadata);
+      } else {
+        newMap.set(key, yamlKeysMap.get(key));
+      }
+    });
+
+    // If it's a new module, add it to the map
+    if (!oldKeys.includes(moduleData.id)) {
+        newMap.set(moduleData.id, metadata);
+    }
+    
+    // Replace the old map with the new one
+    yamlKeysMap.clear();
+    newMap.forEach((value, key) => {
+      yamlKeysMap.set(key, value);
+    });
+    
+    // Ensure the module is added to the card's configuration
+    if (context._config && context._config.modules) {
+      if (!context._config.modules.includes(moduleId)) {
+        context._config.modules.push(moduleId);
+      }
+      // Notify the editor of config changes
+      fireEvent(context, "config-changed", { config: context._config });
+    }
     
     // Save to Home Assistant if entity exists
     if (entityExists) {

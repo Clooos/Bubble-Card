@@ -22,12 +22,20 @@ export function createDropdownStructure(context, elements = context.elements, sh
     elements.dropdownContainer.appendChild(elements.dropdownContainerStyle);
 
     function fixMenuDisplay(menuElement) {
+        if (!menuElement) return;
+
+        // We listen for the 'opened' event to know when the component is ready.
+        const onOpened = () => {
+            setTimeout(() => {
+                menuElement.removeAttribute('open');
+                menuElement.style.display = '';
+            }, 0);
+        };
+
+        menuElement.addEventListener('opened', onOpened, { once: true });
+
         menuElement.style.display = 'none';
         menuElement.setAttribute('open', '');
-        setTimeout(() => {
-            menuElement.removeAttribute('open');
-            menuElement.style.display = '';
-        }, 600); // Give time to the dropdown to be open
     }
 
     function addStyleWhenShadowRootAvailable() {
@@ -73,7 +81,12 @@ export function createDropdownActions(context, elements = context.elements, enti
         card.appendChild(card.haRipple);
     }
 
-    let isFirstOpen = true;
+    const mainContainer = context.elements.mainContainer;
+    if (mainContainer && typeof mainContainer.openDropdowns === 'undefined') {
+        mainContainer.openDropdowns = 0;
+    }
+
+    let isMenuOpen = false;
 
     const updateVisualStyles = () => {
         dropdownArrow.style.transform = 'rotate(180deg)';
@@ -82,6 +95,12 @@ export function createDropdownActions(context, elements = context.elements, enti
             elements.innerBorderElement.style.display = 'block';
         }
         if (context.elements && context.elements.mainContainer) {
+            if (!isMenuOpen) {
+                isMenuOpen = true;
+                if (mainContainer) {
+                    mainContainer.openDropdowns++;
+                }
+            }
             context.elements.mainContainer.style.overflow = 'visible';
         }
     };
@@ -100,15 +119,9 @@ export function createDropdownActions(context, elements = context.elements, enti
             }
             return;
         }
-        // if (typeof menuElement.open === 'boolean') {
-        //     console.log('open');
-        //     menuElement.open = true;
-        //     updateVisualStyles();
-        // } else if (typeof menuElement.show === 'function') {
-            // console.log('show');
-            menuElement.show();
-            updateVisualStyles();
-        // }
+
+        menuElement.show();
+        updateVisualStyles();
     };
 
     const handleMenuClosed = (event) => {
@@ -120,7 +133,15 @@ export function createDropdownActions(context, elements = context.elements, enti
         }
         elements.dropdownArrow.style.background = '';
         if (context.elements && context.elements.mainContainer) {
-            context.elements.mainContainer.style.overflow = '';
+            if (isMenuOpen) {
+                isMenuOpen = false;
+                if (mainContainer) {
+                    mainContainer.openDropdowns--;
+                }
+            }
+            if (mainContainer && mainContainer.openDropdowns === 0) {
+                context.elements.mainContainer.style.overflow = '';
+            }
         }
     };
 

@@ -23,6 +23,7 @@ class BubbleCard extends HTMLElement {
 
     connectedCallback() {
         this.isConnected = true;
+        initializeContent(this);
         preloadYAMLStyles(this);
         createBubbleDefaultColor();
 
@@ -62,7 +63,6 @@ class BubbleCard extends HTMLElement {
     }
 
     set hass(hass) {
-        initializeContent(this);
         this._hass = hass;
         this.updateBubbleCard();
     }

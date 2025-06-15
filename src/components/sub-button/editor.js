@@ -177,6 +177,12 @@ export function makeSubButtonPanel(editor) {
                             </h4>
                             <div class="content">
                                 ${getLazyLoadedPanelContent(editor, visibilityPanelKey, !!editor._expandedPanelStates[visibilityPanelKey], () => html`
+                                    <ha-formfield label="Hide when parent entity is unavailable">
+                                        <ha-switch
+                                            .checked=${subButton.hide_when_parent_unavailable ?? false}
+                                            @change=${(ev) => editor._arrayValueChange(index, { hide_when_parent_unavailable: ev.target.checked }, 'sub_button')}
+                                        ></ha-switch>
+                                    </ha-formfield>
                                     <ha-card-conditions-editor
                                         .hass=${editor.hass}
                                         .conditions=${conditions}

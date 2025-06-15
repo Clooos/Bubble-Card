@@ -225,7 +225,8 @@ template:
                   align-items: center;
                   position: absolute;
                   right: 16px;
-                  padding: 0 8px;"
+                  padding: 0 8px;
+                  cursor: pointer;"
               >
                 <ha-icon icon="mdi:close" style="margin: 0;"></ha-icon>
                 Dismiss
@@ -471,13 +472,13 @@ function sortModulesByRelevance(modules) {
     
     // 2. Reactions (hearts, +1, etc.)
     if (module.reactions?.total_count) {
-      score += module.reactions.total_count * 5; // Max 40 points from reactions (10 reactions)
+      score += module.reactions.total_count * 5; // 5 points per reaction
       hasPopularity = true;
     }
     
     // Specifically value heart reactions more
     if (module.reactions?.heart) {
-      score += module.reactions.total_count * 10; // Max 15 extra points from hearts (5 hearts)
+      score += module.reactions.total_count * 10; // 10 points per heart
       hasPopularity = true;
     }
     
@@ -971,7 +972,6 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       const cachedData = getCachedModuleData();
       if (cachedData) {
         
-        // Courte pause avant 100% pour rendre le changement visible
         await new Promise(resolve => setTimeout(resolve, 300));
         
         context._storeModules = cachedData.modules;

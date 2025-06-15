@@ -17,9 +17,9 @@ export function createStructure(context) {
     // Add backward compatibility
     elements.buttonsContainer.classList.add('bubble-buttons', 'buttons-container');
 
-    function createCoverButton(iconName, className) {
+    function createCoverButton(iconName, className, iconClassName) {
         const button = createElement('div', `bubble-cover-button ${className}`);
-        const icon = createElement('ha-icon', 'bubble-cover-button-icon');
+        const icon = createElement('ha-icon', `bubble-cover-button-icon ${iconClassName}`);
         icon.setAttribute("icon", iconName);
         
         const feedbackContainer = createElement('div', 'bubble-feedback-container');
@@ -38,9 +38,9 @@ export function createStructure(context) {
         return button;
     }
 
-    elements.buttonOpen = createCoverButton("mdi:arrow-up", 'bubble-button bubble-open button open');
-    elements.buttonStop = createCoverButton("mdi:stop", 'bubble-button bubble-stop button stop');
-    elements.buttonClose = createCoverButton("mdi:arrow-down", 'bubble-button bubble-close button close');
+    elements.buttonOpen = createCoverButton("mdi:arrow-up", 'bubble-button bubble-open button open', 'bubble-icon-open');
+    elements.buttonStop = createCoverButton("mdi:stop", 'bubble-button bubble-stop button stop', 'bubble-icon-stop');
+    elements.buttonClose = createCoverButton("mdi:arrow-down", 'bubble-button bubble-close button close', 'bubble-icon-close');
 
     elements.buttonsContainer.append(
         elements.buttonOpen,

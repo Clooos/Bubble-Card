@@ -168,6 +168,9 @@ export function updateListeners(context, add) {
                 }
                 if (context.config.close_on_click) {
                     context.popUp.addEventListener('click', removeHash, { passive: true });
+                    context.popUp.dataset.closeOnClick = 'true';
+                } else {
+                    delete context.popUp.dataset.closeOnClick;
                 }
             }
             context.listenersAdded = true;
@@ -207,6 +210,7 @@ export function updateListeners(context, add) {
                 }
                 if (context.config.close_on_click) {
                     context.popUp.removeEventListener('click', removeHash);
+                    delete context.popUp.dataset.closeOnClick;
                 }
             }
             context.listenersAdded = false;
@@ -266,25 +270,39 @@ export function openPopup(context) {
     // Add to active popups set
     popupState.activePopups.add(context);
 
+    // Actions to perform at the very start of the opening process (synchronized with animation frame)
     requestAnimationFrame(() => {
-        toggleBackdrop(context, true);
         updatePopupClass(popUp, true);
         displayContent(context);
+        toggleBackdrop(context, true);
         
-        updateListeners(context, true);
-        
-        if (context.config.auto_close > 0) {
-            context.closeTimeout = setTimeout(() => {
-                removeHash();
-                closePopup(context);
-            }, context.config.auto_close);
-        }
-        
-        toggleBodyScroll(true);
-        
-        if (context.config.open_action) {
-            callAction(context.popUp, context.config, 'open_action');
-        }
+        // Actions to perform after the main CSS animation is complete
+        setTimeout(() => {
+            // Check if the popup wasn't closed before this timeout executed
+            if (!popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
+                return;
+            }
+
+            toggleBodyScroll(true);
+            updateListeners(context, true);
+            
+            if (context.config.auto_close > 0) {
+                if (context.closeTimeout) clearTimeout(context.closeTimeout); 
+                context.closeTimeout = setTimeout(() => {
+                    // Ensure context is still valid and popup is the one to close or hash matches
+                    if (popupState.activePopups.has(context) && 
+                        (context.config.hash === location.hash || !context.config.hash)) {
+                         removeHash();
+                    } else if (popupState.activePopups.has(context)) {
+                         closePopup(context);
+                    }
+                }, context.config.auto_close);
+            }
+            
+            if (context.config.open_action) {
+                callAction(context.popUp, context.config, 'open_action');
+            }
+        }, popupState.animationDuration);
     });
 }
 
@@ -429,6 +447,20 @@ export function cleanupContext(context) {
     // If this was an entity-triggered popup, clear the reference
     if (popupState.entityTriggeredPopup === context) {
         popupState.entityTriggeredPopup = null;
+    }
+    
+    // Remove the URL change listener
+    if (context.boundOnUrlChange) {
+        window.removeEventListener('location-changed', context.boundOnUrlChange);
+        window.removeEventListener('popstate', context.boundOnUrlChange);
+        context.boundOnUrlChange = null;
+    }
+    
+    // Clean up the colorScheme listener
+    if (context.updatePopupColorListener) {
+        const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        colorScheme.removeEventListener('change', context.updatePopupColorListener);
+        context.updatePopupColorListener = null;
     }
     
     if (context.popUp && context.popUp.parentNode && !context.config.background_update) {

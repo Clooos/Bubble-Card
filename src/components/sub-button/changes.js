@@ -202,7 +202,10 @@ export function updateSubButtons(context, subButtons) {
       element = createSubButtonElement(context, options.index, options.isSelect, options.showArrow, options.entity, subButton);
     }
 
-    if (context.config.entity && !context.detectedEditor) {
+    // Default to false if not specified
+    const hideWhenParentUnavailable = subButton.hide_when_parent_unavailable ?? false;
+
+    if (hideWhenParentUnavailable && context.config.entity && !context.detectedEditor) {
       if (getState(context, context.config.entity) === 'unavailable') {
         element.style.display = 'none';
         return;
