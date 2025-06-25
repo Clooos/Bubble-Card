@@ -515,14 +515,6 @@ function cleanCSS(css) {
 }
 
 function emitEditorError(message, errorContext) {
-  // if (!errorContext && message) {
-  //   // Legacy mode: just the error message, without context
-  //   window.dispatchEvent(new CustomEvent("bubble-card-error", { 
-  //     detail: message 
-  //   }));
-  //   return;
-  // }
-  
   window.dispatchEvent(new CustomEvent("bubble-card-error", { 
     detail: {
       message: message,

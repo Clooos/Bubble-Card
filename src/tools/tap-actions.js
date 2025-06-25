@@ -26,6 +26,16 @@ function handlePointerDown(event) {
     element.classList?.contains('bubble-action')
   );
 
+  // Exclude pop-up close buttons to avoid conflicts
+  const isCloseButton = event.composedPath().find(element => 
+    element.classList?.contains('close-pop-up') || 
+    element.classList?.contains('bubble-close-button')
+  );
+  
+  if (isCloseButton) {
+    return;
+  }
+
   if (!actionElement) return;
   
   let handler = actionHandler.get(actionElement);
@@ -39,6 +49,9 @@ function handlePointerDown(event) {
     };
     handler = new ActionHandler(actionElement, config, sendActionEvent);
     actionHandler.set(actionElement, handler);
+  } else {
+    // Reset the state of the existing handler to avoid problems after navigation
+    handler.resetState();
   }
   
   handler.handleStart(event);
@@ -162,6 +175,28 @@ class ActionHandler {
 
   isInteractionInProgress() {
     return this.interactionStarted;
+  }
+
+  resetState() {
+    // Clear all active timeouts and event listeners
+    clearTimeout(this.tapTimeout);
+    clearTimeout(this.holdTimeout);
+    document.removeEventListener('pointermove', this.pointerMoveListener);
+    document.removeEventListener('touchmove', this.touchMoveListener);
+    
+    // Reset all states
+    this.tapTimeout = null;
+    this.holdTimeout = null;
+    this.holdFired = false;
+    this.hasMoved = false;
+    this.interactionStarted = false;
+    this.isDisconnected = false;
+    this.justEndedTouchEventTime = 0;
+    this.currentInteractionType = null;
+    this.interactionStartTime = 0;
+    this.preventDefaultCalled = false;
+    this.startX = 0;
+    this.startY = 0;
   }
 
   cleanup() {

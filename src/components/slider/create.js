@@ -288,6 +288,8 @@ export function createSliderStructure(context, config = {}) {
 
   function onPointerMove(e) {
     e.stopPropagation();
+    e.preventDefault();
+
     if (e.target.closest('.bubble-action')) return;
 
     window.isScrolling = true;
@@ -306,6 +308,7 @@ export function createSliderStructure(context, config = {}) {
 
   function onPointerUp(e) {
     e.stopPropagation();
+    e.preventDefault();
     
     if (draggingTimeout) {
       clearTimeout(draggingTimeout);
@@ -322,6 +325,8 @@ export function createSliderStructure(context, config = {}) {
     options.targetElement.classList.remove('is-dragging');
     options.targetElement.removeEventListener('pointermove', onPointerMove);
     window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('touchmove', onPointerMove);
+    window.removeEventListener('touchend', onPointerUp);
 
     if (isEntityType(context, "climate", context.config.entity) && !isStateOn(context, context.config.entity)) {
       context._hass.callService('climate', 'turn_on', {
@@ -413,8 +418,10 @@ export function createSliderStructure(context, config = {}) {
     }, 300);
 
     options.targetElement.classList.add('is-dragging');
-    options.targetElement.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
+    options.targetElement.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp, { passive: false });
     window.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -453,7 +460,7 @@ export function createSliderStructure(context, config = {}) {
         isLongPress = true;
         handleLongPress(e);
       }, longPressDuration);
-    });
+    }, { passive: false });
 
     options.targetElement.addEventListener('pointerup', (e) => {
       clearTimeout(longPressTimer);
@@ -482,9 +489,11 @@ export function createSliderStructure(context, config = {}) {
       initialX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
 
       options.targetElement.classList.add('is-dragging');
-      options.targetElement.addEventListener('pointermove', onPointerMove);
-      window.addEventListener('pointerup', onPointerUp);
-    });
+      options.targetElement.addEventListener('pointermove', onPointerMove, { passive: false });
+      window.addEventListener('pointerup', onPointerUp, { passive: false });
+      window.addEventListener('touchmove', onPointerMove, { passive: false });
+      window.addEventListener('touchend', onPointerUp, { passive: false });
+    }, { passive: false });
   }
 
   const throttledUpdateEntity = throttle(updateEntity, 200);

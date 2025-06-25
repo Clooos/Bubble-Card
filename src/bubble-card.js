@@ -37,10 +37,8 @@ class BubbleCard extends HTMLElement {
         cleanupTapActions();
         clearTimeout(this._editorUpdateTimeout);
 
-        switch (this.config.card_type) {
-            case 'pop-up':
-                updatePopupListeners(this, false);
-                break;
+        if (this.config.card_type === 'pop-up') {
+            updatePopupListeners(this, false);
         }
     }
 
@@ -111,17 +109,12 @@ class BubbleCard extends HTMLElement {
             throw new Error(config.error);
         }
 
-        // Create a shallow mutable copy of the config to work with.
-        // This prevents "object is not extensible" errors if HA passes a frozen config
-        // and we need to potentially add/modify properties like 'rows'.
         const workingConfig = { ...config };
 
         if (!workingConfig.card_type) {
             throw new Error("You need to define a card type");
         }
 
-        // If grid_options.rows is provided by Home Assistant (via workingConfig.grid_options),
-        // it should take precedence for the 'rows' property of our working config.
         if (workingConfig.grid_options && typeof workingConfig.grid_options.rows !== 'undefined') {
             workingConfig.rows = workingConfig.grid_options.rows;
         }
@@ -135,7 +128,6 @@ class BubbleCard extends HTMLElement {
             
             for (var key in workingConfig) {
               if (key.match(/^\d+_icon$/)) {
-                var iconKey = key;
                 var linkKey = key.replace('_icon', '_link');
             
                 if (workingConfig[linkKey] === undefined) {
@@ -202,9 +194,6 @@ class BubbleCard extends HTMLElement {
     getGridOptions() {
         const currentColumns = this.config.columns;
         const convertedColumns = currentColumns ? currentColumns * 3 : 12;
-        
-        // After setConfig, this.config.rows already holds the prioritized value 
-        // (HA's grid_options.rows if available, otherwise user's config.rows)
         const baseRowsForGrid = this.config.rows ?? 'auto';
 
         let LovelaceGridOptions = { 
@@ -217,22 +206,12 @@ class BubbleCard extends HTMLElement {
                 LovelaceGridOptions.rows = 1.3; // Specific override
                 break;
             case 'separator':
-                // If Home Assistant provided grid_options.rows, that value (already in baseRowsForGrid) should be used.
-                // The special logic for separator (0.8 or 'auto' based on user's rows config)
-                // only applies if HA did not specify grid_options.rows.
                 if (!(this.config.grid_options && typeof this.config.grid_options.rows !== 'undefined')) {
-                    // HA did not provide grid_options.rows. Apply original separator logic
-                    // based on this.config.rows (which, in this case, is the user's configured value or undefined).
                     LovelaceGridOptions.rows = !this.config.rows ? 0.8 : 'auto';
                 }
-                // If HA did provide grid_options.rows, LovelaceGridOptions.rows (which is baseRowsForGrid) is already correct.
                 break;
         }
         return LovelaceGridOptions;
-    }
-
-    static getConfigElement() {
-        return document.createElement("bubble-card-editor");
     }
 
     getLayoutOptions() {
@@ -256,6 +235,10 @@ class BubbleCard extends HTMLElement {
             grid_columns: this.config.columns ?? defaultColumns,
             grid_rows: this.config.rows ?? defaultRows,
         }
+    }
+
+    static getConfigElement() {
+        return document.createElement("bubble-card-editor");
     }
 }
 

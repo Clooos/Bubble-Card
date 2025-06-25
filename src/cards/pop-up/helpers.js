@@ -35,11 +35,21 @@ function resetCloseTimeout(context) {
 }
 
 export function removeHash() {
-    if (popupState.hashRecentlyAdded || !location.hash || popupState.hashChangeProtection) return;
+    if (popupState.hashRecentlyAdded || !location.hash || popupState.hashChangeProtection) {
+        return false;
+    }
     
-    const newURL = window.location.href.split('#')[0];
-    history.replaceState(null, "", newURL);
-    window.dispatchEvent(new Event('location-changed'));
+    setTimeout(() => {
+        if (popupState.hashChangeProtection) {
+            return;
+        }
+        
+        const newURL = window.location.href.split('#')[0];
+        history.replaceState(null, "", newURL);
+        window.dispatchEvent(new Event('location-changed'));
+    }, 50);
+    
+    return true;
 }
 
 export function addHash(hash) {

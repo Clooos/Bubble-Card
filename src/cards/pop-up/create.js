@@ -1,7 +1,6 @@
 import { html, render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
-import { addFeedback } from "../../tools/tap-actions.js";
 import { onUrlChange, removeHash, hideContent } from "./helpers.js";
 import styles from "./styles.css";
 import backdropStyles from "./backdrop.css";
@@ -96,16 +95,50 @@ export function createHeader(context) {
   context.elements.closeButton.appendChild(context.elements.closeIcon);
   context.elements.closeButton.feedback = feedback;
   
-  context.elements.closeButton.addEventListener('click', () => {
-    removeHash();
+  // Enhanced close function with fallback mechanism
+  const handleClose = (event) => {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    
+    // Force close function for fallback
+    const forceClose = () => {
+      if (location.hash) {
+        const newURL = window.location.href.split('#')[0];
+        history.replaceState(null, "", newURL);
+        window.dispatchEvent(new Event('location-changed'));
+      }
+    };
+    
+    // Try normal close, fallback to force close if needed
+    try {
+      removeHash();
+      // If removeHash() didn't work due to protections, force close after short delay
+      setTimeout(() => {
+        if (location.hash === context.config.hash) {
+          forceClose();
+        }
+      }, 100);
+    } catch (error) {
+      forceClose();
+    }
+    
     forwardHaptic("selection");
+  };
+
+  // Use multiple event types to ensure reliable closing
+  context.elements.closeButton.addEventListener('click', handleClose);
+  context.elements.closeButton.addEventListener('touchend', handleClose);
+  
+  // Prevent propagation to avoid conflicts
+  context.elements.closeButton.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
   });
 
   context.elements.closeButton.haRipple = createElement('ha-ripple');
   context.elements.closeButton.appendChild(context.elements.closeButton.haRipple);
   
-  addFeedback(context.elements.closeButton, context.elements.closeButton.feedback);
-
   const existingHeader = context.popUp?.querySelector('.bubble-header-container');
   if (!existingHeader) {
     context.elements.headerContainer = createElement("div", 'bubble-header-container');

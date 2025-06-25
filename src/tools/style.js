@@ -55,6 +55,10 @@ export function isColorCloseToWhite(rgb, threshold = 40) {
 let rgbaColor;
 
 export function convertToRGBA(color, opacity, lighten = 1) {
+    if (!color || typeof color !== 'string') {
+        return `rgba(0, 0, 0, ${opacity})`;
+    }
+    
     if (color.startsWith('#')) {
         if (color.length === 4) {  // Short hexadecimal color
             let r = Math.min(255, parseInt(color.charAt(1).repeat(2), 16) * lighten),
@@ -69,15 +73,23 @@ export function convertToRGBA(color, opacity, lighten = 1) {
         }
     } else if (color.startsWith('rgb')) {
         let rgbValues = color.match(/\d+/g);
-        rgbaColor = "rgba(" + Math.min(255, rgbValues[0] * lighten) + ", " + Math.min(255, rgbValues[1] * lighten) + ", " + Math.min(255, rgbValues[2] * lighten) + ", " + opacity + ")";
+        if (rgbValues && rgbValues.length >= 3) {
+            rgbaColor = "rgba(" + Math.min(255, rgbValues[0] * lighten) + ", " + Math.min(255, rgbValues[1] * lighten) + ", " + Math.min(255, rgbValues[2] * lighten) + ", " + opacity + ")";
+        }
     } else if (color.startsWith('var(--')) {
         // New code for CSS variables
         let cssVar = color.slice(4, -1);
         let computedColor = window.getComputedStyle(document.documentElement).getPropertyValue(cssVar);
-        if (computedColor.startsWith('#') || computedColor.startsWith('rgb')) {
+        if (computedColor && (computedColor.startsWith('#') || computedColor.startsWith('rgb'))) {
             rgbaColor = convertToRGBA(computedColor, opacity, lighten);
         }
     }
+    
+    // Return default transparent color if no valid color was processed
+    if (!rgbaColor) {
+        rgbaColor = `rgba(0, 0, 0, ${opacity})`;
+    }
+    
     return rgbaColor;
 }
 

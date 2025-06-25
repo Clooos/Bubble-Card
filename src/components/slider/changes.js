@@ -18,7 +18,7 @@ function getEntityMinValue(context, state) {
 function getEntityMaxValue(context, state) {
   if (context.config.max_value !== undefined) return parseFloat(context.config.max_value);
   const entityType = state.entity_id.split('.')[0];
-  if (entityType === 'climate') return state.attributes.max_temp ?? 100; // Default might need adjustment
+  if (entityType === 'climate') return state.attributes.max_temp ?? 1000;
   return state.attributes.max ?? 100;
 }
 
@@ -126,15 +126,38 @@ function getCurrentValue(context, entity, entityType) {
   
   // Calculate current value based on entity state
   switch (entityType) {
-    case 'light':
-      return 100 * getAttribute(context, "brightness", entity) / 255;
+    case 'light': {
+      const brightness = getAttribute(context, "brightness", entity);
+      const lightPercentage = 100 * brightness / 255;
+      
+      // Apply custom min/max if configured
+      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+        const clampedValue = Math.max(minValue, Math.min(maxValue, lightPercentage));
+        return calculateRangePercentage(clampedValue, minValue, maxValue);
+      }
+      return lightPercentage;
+    }
     case 'media_player': {
       const volume = getAttribute(context, "volume_level", entity);
-      return volume !== undefined && volume !== null ? 100 * volume : 0;
+      const volumePercentage = volume !== undefined && volume !== null ? 100 * volume : 0;
+      
+      // Apply custom min/max if configured
+      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+        const clampedValue = Math.max(minValue, Math.min(maxValue, volumePercentage));
+        return calculateRangePercentage(clampedValue, minValue, maxValue);
+      }
+      return volumePercentage;
     }
     case 'cover': {
       const position = getAttribute(context, "current_position", entity);
-      return position !== undefined && position !== null ? position : 0;
+      const coverPosition = position !== undefined && position !== null ? position : 0;
+      
+      // Apply custom min/max if configured
+      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+        const clampedValue = Math.max(minValue, Math.min(maxValue, coverPosition));
+        return calculateRangePercentage(clampedValue, minValue, maxValue);
+      }
+      return coverPosition;
     }
     case 'input_number':
     case 'number': {
@@ -271,11 +294,16 @@ export function updateEntity(context, percentage) {
 
   switch (entityType) {
     case 'light': {
-      // Light brightness is special (0-255), percentage is 0-100
-      // Step adjustment for lights usually isn't standard via `step` attribute.
-      // Convert the 0-100 percentage directly to 0-255 brightness.
-      // We assume the step logic isn't needed here unless explicitly configured? Let's stick to direct percentage.
-      const brightness = Math.round(255 * percentage / 100);
+      // Handle custom min/max for lights
+      let brightness;
+      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+        // Use the adjusted value directly as percentage when custom min/max are set
+        brightness = Math.round(255 * adjustedValue / 100);
+      } else {
+        // Standard light brightness conversion (0-100% to 0-255)
+        brightness = Math.round(255 * percentage / 100);
+      }
+      
       const isTransitionEnabled = context.config.light_transition;
       const transitionTime = (context.config.light_transition_time === "" || isNaN(context.config.light_transition_time))
         ? 500 // in milliseconds
@@ -290,11 +318,17 @@ export function updateEntity(context, percentage) {
     }
 
     case 'media_player': {
-      // Media player volume is 0.0 to 1.0
-      // Convert the 0-100 percentage to 0-1 volume level
-      let volumeLevel = percentage / 100;
-      // Apply step adjustment (defaulting to 0.01)
-      volumeLevel = getAdjustedValue(volumeLevel, step); 
+      // Handle custom min/max for media players
+      let volumeLevel;
+      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+        // Use the adjusted value directly when custom min/max are set
+        volumeLevel = adjustedValue / 100;
+      } else {
+        // Standard volume conversion (0-100% to 0-1)
+        volumeLevel = percentage / 100;
+        volumeLevel = getAdjustedValue(volumeLevel, step);
+      }
+      
       // Clamp to 0-1 range
       volumeLevel = Math.max(0, Math.min(1, volumeLevel));
       context._hass.callService('media_player', 'volume_set', {
@@ -305,9 +339,16 @@ export function updateEntity(context, percentage) {
     }
 
     case 'cover': {
-      // Cover position is 0-100
-      // adjustedValue already holds the step-adjusted value within min/max (which are typically 0-100 for covers)
-      const position = Math.round(adjustedValue);
+      // Handle custom min/max for covers
+      let position;
+      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+        // Use the adjusted value directly when custom min/max are set
+        position = Math.round(adjustedValue);
+      } else {
+        // Standard cover position (percentage is already 0-100)
+        position = Math.round(percentage);
+      }
+      
       context._hass.callService('cover', 'set_cover_position', {
         entity_id: context.config.entity,
         position: position
@@ -324,11 +365,19 @@ export function updateEntity(context, percentage) {
     }
 
     case 'fan': {
-      // Fan percentage is 0-100
-      // adjustedValue already holds the step-adjusted value within min/max (which are typically 0-100 for fans)
+      // Handle custom min/max for fans
+      let fanPercentage;
+      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+        // Use the adjusted value directly when custom min/max are set
+        fanPercentage = Math.round(adjustedValue);
+      } else {
+        // Standard fan percentage (percentage is already 0-100)
+        fanPercentage = Math.round(percentage);
+      }
+      
       context._hass.callService('fan', 'set_percentage', {
         entity_id: context.config.entity,
-        percentage: adjustedValue
+        percentage: fanPercentage
       });
       break;
     }
