@@ -11,7 +11,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ## Table of contents
 
-**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Climate`](#climate)**  **[`Calendar`](#calendar)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
+**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Climate`](#climate)**  **[`Calendar`](#calendar)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Help`](#help)**  **[`Donate`](#donate)**
 
 <br>
 
@@ -103,6 +103,7 @@ All options can be configured in the Home Assistant editor. But you can find mor
 | `--bubble-sub-button-border-radius` | `px` | Border radius for all sub-buttons |
 | `--bubble-sub-button-background-color` | `color` | Background color for all sub-buttons |
 | `--bubble-box-shadow` | see [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for all supported elements |
+| `--bubble-border` | see [border](https://developer.mozilla.org/fr/docs/Web/CSS/border) | Border for all supported cards |
 
 </details>
 
@@ -132,7 +133,6 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 > To avoid misalignment with your view, place this card after all other dashboard cards. You can't trigger it from a different view.
 >
 > **For YAML only users:** This card must be placed within a [vertical stack](https://www.home-assistant.io/dashboards/vertical-stack/) card at the topmost position to function properly. See example below.
-> <details>
 >
 > **You can also watch [this step by step video](https://www.youtube.com/watch?v=7mOV7BfWoFc).** This video is bit outdated, you don't need to create a vertical stack anymore, it will be added automatically.
 
@@ -857,6 +857,9 @@ This card allows you to control your `climate` entities.
 | `hide_target_temp_low`  | boolean | Optional (only for entities supporting `target_temp_low`) | `true` or `false` (default) | Hides the low target temperature control if supported by the `entity`.                                          |
 | `hide_target_temp_high` | boolean | Optional (only for entities supporting `target_temp_high`)| `true` or `false` (default) | Hides the high target temperature control if supported by the `entity`.                                         |
 | `state_color`           | boolean | Optional                            | `true` or `false` (default)                     | Applies a constant background color when the climate entity is ON.                                              |
+| `step` | number | Optional | Any number | The temperature step. |
+| `min_temp` | number | Optional | Any number | The minimum temperature. |
+| `max_temp` | number | Optional | Any number | The maximum temperature. |
 | `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#tap-double-tap-and-hold-actions) | Allow to change the default actions on button click. |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `none` will be used. |
@@ -1465,10 +1468,10 @@ button_action:
 
 ## Styling
 
-You can add custom styles to modify the CSS of all cards **without using card-mod** in three ways:
+You can add custom styles to modify the CSS of all cards **without using card-mod** in four ways:
 
 - In the editor, go to the card you want to modify, then navigate to _Styling options > Custom styles & JS templates_, and add your custom styles (check the tips and examples below).
-- In the editor, go to the card you want to modify, then navigate to _Modules_, then create a new Module (it will be available on all cards), or go to the **Module Store** to install any available Module (more details about the Modules can be found [below](#modules)).
+- In the editor (or in [YAML](#modules)), go to the card you want to modify, then navigate to _Modules_, then create a new module (it will be available to all cards), or go to the **Module Store** to install any available Module (more details about modules can be found [below](#modules)).
 - In a [theme](https://www.home-assistant.io/integrations/frontend/#defining-themes) file by adding CSS variables in YAML (these are available in each card's documentation above). This allows for global modifications.
 
   <details>
@@ -2122,18 +2125,25 @@ But this feature is so much more powerful than that, it lets you add actual feat
 
 You can also browse the **Module Store** to find and install [modules created by the community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), or share your own creations!
 
-> [!IMPORTANT]
+> [!TIP]
 > A Module's code works exactly the same way as the code in the `styles` section of a card. All the same variables and functions from the [Templates](#templates) section are available.
 
 <br>
 
 ### Initial Setup
 
-Before you can use Modules, you need to configure storage for them. There are two methods depending on whether you use the **editor** or **YAML-only configuration**.
+> [!IMPORTANT]
+> Before you can use Modules, you need to configure storage for them. There are two methods depending on whether you use the **editor** or **YAML-only configuration**.
 
 #### Method 1: With editor support (Recommended)
 
 This method allows you to use the Module Editor and the Module Store.
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
 
 1. Add the following template sensor to your `configuration.yaml` file:
 
@@ -2155,13 +2165,27 @@ template:
 2. Save the file and restart Home Assistant.
 3. You can now access the Module Editor and Module Store from any Bubble Card!
 
+<br>
+
+</details>
+
 #### Method 2: YAML-only configuration
 
 This method is for users who prefer to work exclusively in YAML without using the visual editor.
 
-1. Create a file called `bubble-modules.yaml` in a newly created `/www/bubble/` folder
+<details>
 
-2. Structure your modules in the file like this [example](https://github.com/Clooos/Bubble-Card/discussions/1232), click on "Get this Module" to see the YAML.
+<summary>Click to expand</summary>
+
+<br>
+
+1. Create a file called `bubble-modules.yaml` in a newly created `/www/bubble/` folder.
+2. Structure your modules in the file like in this [example](https://github.com/Clooos/Bubble-Card/blob/main/dist/bubble-modules-example.yaml), check the last module for more details.
+
+
+<br>
+
+</details>
 
 <br>
 
@@ -2195,12 +2219,13 @@ This tab will display [all available modules from the community](https://github.
 
 <br>
 
-### How to Use Modules
+### How to use modules
 
-#### Creating a New Module
+#### Creating a new module
 
 <details>
-<summary>Step-by-step guide</summary>
+
+<summary>Click to expand</summary>
 
 <br>
 
@@ -2215,9 +2240,17 @@ This tab will display [all available modules from the community](https://github.
 
 Your module is now available to be used on any of your cards!
 
+<br>
+
 </details>
 
-#### Applying Modules to Cards
+#### Applying a module to a card
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
 
 - **Via the editor:**
 
@@ -2237,12 +2270,21 @@ Your module is now available to be used on any of your cards!
     - module_id_2
   ```
 
-#### Global Modules
+<br>
+
+</details>
+
+#### Applying a module globally
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
 
 You can set a module to apply automatically to all Bubble Cards:
 
-> [!IMPORTANT]
-> This is not available for modules with an editor, as those require a specific configuration to work.
+**This is not available for modules with an editor, as those require a specific configuration to work.**
 
 - **Via the editor:**
 
@@ -2254,7 +2296,17 @@ You can set a module to apply automatically to all Bubble Cards:
 
   In your module YAML configuration (in `bubble-modules.yaml`), just add `is_global: true`.
 
-#### Excluding global modules
+<br>
+
+</details>
+
+#### Excluding a single card from a global module
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
 
 If you have a global module but want to exclude it from a specific card:
 
@@ -2273,13 +2325,33 @@ If you have a global module but want to exclude it from a specific card:
     - !global_module_id  # The ! prefix excludes this global module
   ```
 
-#### Sharing your Module to the Store
+<br>
+
+</details>
+
+#### Sharing your module to the Module Store
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
 
 To share your Module to the Module Store, in the Module Editor, at the bottom in "Export Module", click on "Copy for GitHub" and paste the content in a new discussion in the [Share your Modules](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) category. **Edit the description** (if needed), **the example** (for YAML users), and remember to **include at least one screenshot** for the Module Store.
 
 **Your Module becomes available right after that** (after a Store refresh), so double-check that everything is correctly written and the Module is working as expected. You can of course edit/update the Module after it is shared.
 
+<br>
+
+</details>
+
 #### Version management
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
 
 The Module Store automatically checks for updates to installed modules. When updates are available:
 
@@ -2287,7 +2359,17 @@ The Module Store automatically checks for updates to installed modules. When upd
 2. Click **Update** in modules with available updates.
 3. Confirm the update in the Module Store.
 
-#### Supported card types
+<br>
+
+</details>
+
+#### Defining supported card types
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
 
 Some modules may not be compatible with all card types. You can specify which cards a module support:
 
@@ -2299,6 +2381,8 @@ my_module:
   code: |
     /* Your module code here */
 ```
+
+</details>
 
 <br>
 
@@ -2320,6 +2404,8 @@ blue_cards:
       --bubble-main-background-color: #007acc;
     }
 ```
+
+<br>
 
 </details>
 
@@ -2365,21 +2451,11 @@ icon_container_color:
           include_none: true
 ```
 
+<br>
+
 </details>
 
 More examples can be found in the Module Store, or [here](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
-
-<br>
-
----
-
-<br>
-
-## Custom components conflicts
-
-⚠️ For now there are some features that are not working with:
-
-- Kiosk mode, but this is fixed in Kiosk mode v6.0.1
 
 <br>
 
