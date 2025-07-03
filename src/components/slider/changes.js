@@ -10,14 +10,22 @@ let pendingRaf = null;
 // Helper functions to get entity properties consistently
 function getEntityMinValue(context, state) {
   if (context.config.min_value !== undefined) return parseFloat(context.config.min_value);
+  // Support for media player volume min/max
   const entityType = state.entity_id.split('.')[0];
+  if (entityType === 'media_player' && context.config.min_volume !== undefined) {
+    return parseFloat(context.config.min_volume);
+  }
   if (entityType === 'climate') return state.attributes.min_temp ?? 0;
   return state.attributes.min ?? 0;
 }
 
 function getEntityMaxValue(context, state) {
   if (context.config.max_value !== undefined) return parseFloat(context.config.max_value);
+  // Support for media player volume min/max
   const entityType = state.entity_id.split('.')[0];
+  if (entityType === 'media_player' && context.config.max_volume !== undefined) {
+    return parseFloat(context.config.max_volume);
+  }
   if (entityType === 'climate') return state.attributes.max_temp ?? 1000;
   return state.attributes.max ?? 100;
 }
@@ -141,8 +149,9 @@ function getCurrentValue(context, entity, entityType) {
       const volume = getAttribute(context, "volume_level", entity);
       const volumePercentage = volume !== undefined && volume !== null ? 100 * volume : 0;
       
-      // Apply custom min/max if configured
-      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+      // Apply custom min/max if configured (check both volume-specific and generic config)
+      if (context.config.min_value !== undefined || context.config.max_value !== undefined ||
+          context.config.min_volume !== undefined || context.config.max_volume !== undefined) {
         const clampedValue = Math.max(minValue, Math.min(maxValue, volumePercentage));
         return calculateRangePercentage(clampedValue, minValue, maxValue);
       }
@@ -318,9 +327,10 @@ export function updateEntity(context, percentage) {
     }
 
     case 'media_player': {
-      // Handle custom min/max for media players
+      // Handle custom min/max for media players (check both volume-specific and generic config)
       let volumeLevel;
-      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
+      if (context.config.min_value !== undefined || context.config.max_value !== undefined ||
+          context.config.min_volume !== undefined || context.config.max_volume !== undefined) {
         // Use the adjusted value directly when custom min/max are set
         volumeLevel = adjustedValue / 100;
       } else {

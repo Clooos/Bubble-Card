@@ -882,7 +882,7 @@ class BubbleCardEditor extends LitElement {
                 </h4>
                 <div class="content">
                     <p>${context.errorMessage}</p>
-                    ${context._editingModule !== undefined ? html`<hr><span class="helper-text" style="margin: 0;">
+                    ${context._editingModule && typeof context._editingModule === 'object' && context._editingModule.id ? html`<hr><span class="helper-text" style="margin: 0;">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
                         JS template errors can sometimes be delayed in the Module Editor.
                     </span>` : ''}

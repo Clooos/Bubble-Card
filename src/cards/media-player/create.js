@@ -101,6 +101,13 @@ export function createStructure(context) {
         });
         elements.muteButton.clicked = true;
     });
+
+    // Avoid propagation on all touch events
+    ['click', 'touchstart', 'touchend', 'pointerup', 'pointercancel'].forEach(eventType => {
+        elements.muteButton.addEventListener(eventType, (event) => {
+            event.stopPropagation();
+        });
+    });
     addFeedback(elements.muteButton, elements.muteButton.feedback);
 
     elements.previousButton.addEventListener('click', () => {

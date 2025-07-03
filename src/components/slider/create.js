@@ -13,14 +13,22 @@ import styles from './styles.css';
 
 function getEntityMinValue(context, state) {
   if (context.config.min_value !== undefined) return parseFloat(context.config.min_value);
+  // Support for media player volume min/max
   const entityType = state.entity_id.split('.')[0];
+  if (entityType === 'media_player' && context.config.min_volume !== undefined) {
+    return parseFloat(context.config.min_volume);
+  }
   if (entityType === 'climate') return state.attributes.min_temp ?? 0;
   return state.attributes.min ?? 0;
 }
 
 function getEntityMaxValue(context, state) {
   if (context.config.max_value !== undefined) return parseFloat(context.config.max_value);
+  // Support for media player volume min/max
   const entityType = state.entity_id.split('.')[0];
+  if (entityType === 'media_player' && context.config.max_volume !== undefined) {
+    return parseFloat(context.config.max_volume);
+  }
   if (entityType === 'climate') return state.attributes.max_temp ?? 100;
   return state.attributes.max ?? 100;
 }
