@@ -1,16 +1,8 @@
-> [!WARNING]
-> May 11 update:
-> ### Hi everyone! The latest Home Assistant update (2025.5) breaks some Bubble Card features. If you still want to update, you can install the [latest v3.0.0 beta](https://github.com/Clooos/Bubble-Card/releases). It has a few remaining minor issues but offers full support for HA 2025.5.
-
-<br>
-
----
-
 # Bubble Card
 
 ![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
 
-Bubble Card is a minimalist and customizable card collection for Home Assistant with a nice pop-up touch.
+Bubble Card is a minimalist and customizable card collection for Home Assistant with a nice pop-up touch... and a Module Store!
 
 [![Stars](https://img.shields.io/github/stars/clooos/Bubble-Card)](#) [![Last commit](https://img.shields.io/github/last-commit/clooos/Bubble-Card)](#) [![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube)](https://www.youtube.com/@cloooos) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit)](https://www.reddit.com/r/BubbleCard/) [![Reddit Profile](https://img.shields.io/badge/Reddit-My%20stuff-orange?logo=reddit)](https://www.reddit.com/user/Clooooos/submitted/) [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR) [![Patreon Clooos](https://img.shields.io/badge/Patreon-Clooos-orange?logo=patreon)](https://www.patreon.com/Clooos)
 
@@ -19,7 +11,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ## Table of contents
 
-**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Climate`](#climate)**  **[`Calendar`](#calendar)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Conflicts`](#custom-components-conflicts)**  **[`Help`](#help)**  **[`Donate`](#donate)**
+**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Climate`](#climate)**  **[`Calendar`](#calendar)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Modules`](#modules)**  **[`Help`](#help)**  **[`Donate`](#donate)**
 
 <br>
 
@@ -111,6 +103,7 @@ All options can be configured in the Home Assistant editor. But you can find mor
 | `--bubble-sub-button-border-radius` | `px` | Border radius for all sub-buttons |
 | `--bubble-sub-button-background-color` | `color` | Background color for all sub-buttons |
 | `--bubble-box-shadow` | see [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for all supported elements |
+| `--bubble-border` | see [border](https://developer.mozilla.org/fr/docs/Web/CSS/border) | Border for all supported cards |
 
 </details>
 
@@ -137,21 +130,11 @@ All options can be configured in the Home Assistant editor. But you can find mor
 This card allows you to convert any vertical stack into a pop-up. Each pop-up is **hidden by default** and can be opened by targeting its link (e.g. `'#pop-up-name'`), with any card that supports the `navigate` [action](#tap-double-tap-and-hold-actions), or with the [horizontal buttons stack](#horizontal-buttons-stack) that is included.
 
 > [!IMPORTANT]  
-> This card must be placed within a [vertical stack](https://www.home-assistant.io/dashboards/vertical-stack/) card at the topmost position to function properly. To avoid misalignment with your view, place vertical stacks/pop-ups after all other dashboard cards. It should be called from the same view to work.
-> <details>
->  
-> <summary><b>How to create a pop-up in the editor</b></summary>
+> To avoid misalignment with your view, place this card after all other dashboard cards. You can't trigger it from a different view.
 >
-> <br>
-> 
-> 1. To add a pop-up you first need to add a `Vertical stack` card to your dashboard.
-> 2. This `Vertical stack` must be after all your other cards in your view order and before your horizontal buttons stack if you have one. In a section view type it can be placed anywhere.
-> 3. Now add a `Bubble Card` with the `Pop-up` type.
-> 4. Just fill in the `Hash` input and the ones you need.
+> **For YAML only users:** This card must be placed within a [vertical stack](https://www.home-assistant.io/dashboards/vertical-stack/) card at the topmost position to function properly. See example below.
 >
-> **You can also watch [this step by step video](https://www.youtube.com/watch?v=7mOV7BfWoFc).**
->
-> </details>
+> **You can also watch [this step by step video](https://www.youtube.com/watch?v=7mOV7BfWoFc).** This video is bit outdated, you don't need to create a vertical stack anymore, it will be added automatically.
 
 > [!TIP]
 > ### Pop-up trigger 
@@ -194,15 +177,6 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 > 
 > For iOS Home Assistant Companion App users, you can go to your Home Assistant settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
 > 
-> For previous users of the **Optimized mode**, you will need to replace your `type: custom:bubble-pop-up` with this in YAML mode:
-> 
-> ```yaml
-> type: vertical-stack
-> cards:
->   - type: custom:bubble-card
->     card_type: pop-up
-> ```
-> 
 > </details>
 
 ### Pop-up options
@@ -232,7 +206,6 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
 | `open_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is opening |
 | `close_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is closing |
-| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the header, see [card layouts](#card-layouts) |
 | `show_header` | boolean | Optional | `true` or `false` (default) | Show/Hide the pop-up header fully |
 | You also have access to [all the button settings](#button) for the header of the pop-up. | | Optional | | If undefined no header will be shown |
 
@@ -410,18 +383,28 @@ auto_order: true
 
 ![readme-button-without-sub-buttons](https://github.com/Clooos/Bubble-Card/assets/36499953/790cbe3c-bdcc-4242-81ac-48e6ca2f1d46)
 
-This card allows you to control your entities and can be customized in many ways. To access color / control of an entity, simply tap on the icon.
+This card is very versatile. It can be used as a **switch**, a **slider**, a **state** or a **name/text** button.
 
 > [!TIP]
 > ### What are the differences between all the button types?
 >
-> - **The button switch** is the default one. By default, it toggles an entity and its background color changes based on the entity’s state or the color of a light.
+> - **Switch button:** This is the default button type. By default, it toggles an entity and its background color changes based on the entity's state or the color of a light. You can change its action in the **Tap action on card** section.
 >
-> - **The button slider** can control the brightness of a light, the volume of a media player, the position of a cover, and it also supports input numbers. Its background color can change based on the color of a light.
+> - **Slider button:** This button type lets you control entities with adjustable ranges. It's ideal for dimming lights, and its fill color will adapt to the light's color. You can also use it to display values, such as a battery level.
+>   Supported entities for sliders:
+>   - Light (brightness)
+>   - Media player (volume)
+>   - Cover (position)
+>   - Fan (percentage)
+>   - Climate (temperature)
+>   - Input number and number (value)
+>   - Battery sensor (percentage, read only)
 >
-> - **The button state** is perfect for displaying information from a sensor or any entity. When you press it, it will show the "More info" panel of the entity. Its background color does not change.
+>   You can also use any entity with a numeric state by disabling the entity filter in **Slider settings**, then define the `min` and `max` values. This option is read only.
 >
-> - **The button name** is the only one that doesn't need an entity and allows you to display a short text, a name or a title. You can also add some actions to it. Its background color does not change.
+> - **State button:** Perfect for displaying information from a sensor or any entity. When you press it, it will show the "More info" panel of the entity. Its background color does not change.
+>
+> - **Name/Text button:** The only button type that doesn't need an entity. It allows you to display a short text, a name or a title. You can also add actions to it. Its background color does not change.
 
 ### Button options
 
@@ -436,6 +419,7 @@ This card allows you to control your entities and can be customized in many ways
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
 | `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `use_accent_color` | boolean | Optional (`false` default) | **For lights only.** Use the theme's accent color instead of the light's color.                         |
 | `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
 | `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
 | `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
@@ -444,15 +428,13 @@ This card allows you to control your entities and can be customized in many ways
 | `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
 | `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
 | `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
-| `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see below | Allow to change the default actions on button click. Not available for the `slider` type |
+| `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see below | Allow to change the default actions on button click. |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `none` will be used |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used |
-| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
-| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
-| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
+| `card_layout` | string | Optional | `normal` (default if not in section view), `large` (default if in section view), `large-2-rows`, `large-sub-buttons-grid` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `rows` | number | Optional | Any number | Number of rows (height) (e.g. `2`) |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
-| `slider_live_update` | boolean | Optional (`button_type` must be set to `slider`) | `true` or `false` (default) | If toggled, value is updated while sliding instead of only on release |
 
 </details>
 
@@ -471,6 +453,25 @@ This card allows you to control your entities and can be customized in many ways
 
 </details>
 
+These options are only available when `button_type` is set to `slider`.
+
+<details>
+
+**<summary>Slider options (YAML + descriptions)</summary>**
+
+| Name                  | Type    | Requirement                     | Description                                                                                             |
+| --------------------- | ------- | ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `min_value`             | number  | Optional                        | The minimum value of the slider. For custom sliders.                                                    |
+| `max_value`             | number  | Optional                        | The maximum value of the slider. For custom sliders.                                                    |
+| `step`                  | number  | Optional                        | The step value of the slider.                                                                           |
+| `tap_to_slide`          | boolean | Optional (`false` default)      | Enable the previous slider behavior where you tap to activate the slider, instead of holding it.        |
+| `read_only_slider`      | boolean | Optional (`false` default)      | Make the slider read-only. Automatically enabled for some entities like sensors.                        |
+| `slider_live_update`    | boolean | Optional (`false` default)      | The entity state is updated while sliding. **This feature is not recommended for all entities.**        |
+| `allow_light_slider_to_0` | boolean | Optional (`false` default)    | **For lights only.** Allows the slider to reach 0%, which turns off the light. Not available with `tap_to_slide`. |
+| `light_transition`      | boolean | Optional (`false` default)      | **For lights only.** Enable smooth brightness transitions for supported lights.                           |
+| `light_transition_time` | number  | Optional (`500` default)        | **For lights only.** The transition time in milliseconds. Requires `light_transition: true`.            |
+
+</details>
 
 #### Examples
 
@@ -493,11 +494,13 @@ icon: mdi:led-strip-variant
 
 <details>
 
-<summary>A button with all the options</summary>
+<summary>A button with more options</summary>
 
 <br>
 
 ```yaml
+type: custom:bubble-card
+card_type: button
 entity: light.your_light
 button_type: switch
 show_icon: true
@@ -538,7 +541,7 @@ sub_button:
 
 ![readme-media-player](https://github.com/Clooos/Bubble-Card/assets/36499953/c7ee0752-00e3-4edf-8e1c-983fbd29b5f3)
 
-This card allows you to control a media player. You can tap on the icon to get more control.
+This card allows you to control a media player entity.
 
 ### Media player options
 
@@ -560,24 +563,27 @@ This card allows you to control a media player. You can tap on the icon to get m
 | `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
 | `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
 | `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
+| `min_volume` | number | Optional | Any number | The minimum value of the volume slider. |
+| `max_volume` | number | Optional | Any number | The maximum value of the volume slider. |
+| `cover_background` | boolean | Optional | `true` or `false` (default) | Use a blurred media cover as the card background. |
+| `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#tap-double-tap-and-hold-actions) | Allow to change the default actions on button click. |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `none` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
-| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
-| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
+| `card_layout` | string | Optional | `normal` (default if not in section view), `large` (default if in section view), `large-2-rows`, `large-sub-buttons-grid` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `rows` | number | Optional | Any number | Number of rows (height) (e.g. `2`) |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
-| `hide` | object | Optional | See below | Show or hide buttons |
+| `hide` | object | Optional | See below | Hide buttons from the card |
 
 #### Hide options
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
-| `play_pause_button` | boolean | Optional | `true` (default) or `false` | Show or hide the play/pause button |
-| `volume_button` | boolean | Optional | `true` (default) or `false` | Show or hide the volume button |
-| `previous_button` | boolean | Optional | `true` (default) or `false` | Show or hide the previous button |
-| `next_button` | boolean | Optional | `true` (default) or `false` | Show or hide the next button |
-| `power_button` | boolean | Optional | `true` (default) or `false` | Show or hide the power button |
+| `play_pause_button` | boolean | Optional | `true` or `false` (default) | Hide the play/pause button |
+| `volume_button` | boolean | Optional | `true` or `false` (default) | Hide the volume button |
+| `previous_button` | boolean | Optional | `true` or `false` (default) | Hide the previous button |
+| `next_button` | boolean | Optional | `true` or `false` (default) | Hide the next button |
+| `power_button` | boolean | Optional | `true` or `false` (default) | Hide the power button |
 
 </details>
 
@@ -623,6 +629,9 @@ show_name: false
 show_last_changed: true
 columns: 2
 rows: 1
+min_volume: 10
+max_volume: 80
+cover_background: true
 tap_action:
   action: toggle
 hide:
@@ -655,7 +664,7 @@ sub_button:
 
 ## Cover
 
-![readme-cover](https://github.com/Clooos/Bubble-Card/assets/36499953/27d1c329-76ab-480b-b424-c79c9e68c788)
+![readme-cover-bubble-card](https://github.com/user-attachments/assets/9eb46c69-ee40-4dc7-88c7-9073f9deda12)
 
 This card allows you to control your `cover` entities.
 
@@ -685,12 +694,12 @@ This card allows you to control your `cover` entities.
 | `open_service` | string | Optional | Any service or script | A service to open your cover, default to `cover.open_cover` |
 | `stop_service` | string | Optional | Any service or script | A service to stop your cover, default to `cover.stop_cover` |
 | `close_service` | string | Optional | Any service or script | A service to close your cover, default to `cover.close_cover` |
+| `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#tap-double-tap-and-hold-actions) | Allow to change the default actions on button click. |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `none` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
-| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
-| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
+| `card_layout` | string | Optional | `normal` (default if not in section view), `large` (default if in section view), `large-2-rows`, `large-sub-buttons-grid` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `rows` | number | Optional | Any number | Number of rows (height) (e.g. `2`) |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 
 </details>
@@ -768,9 +777,8 @@ This card allows you to add a dropdown menu for your `input_select` / `select` e
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `none` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |
-| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
-| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
-| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** (e.g. `2` is 2/4) |
+| `card_layout` | string | Optional | `normal` (default if not in section view), `large` (default if in section view), `large-2-rows`, `large-sub-buttons-grid` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `rows` | number | Optional | Any number | Number of rows (height) (e.g. `2`) |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 
 </details>
@@ -849,12 +857,15 @@ This card allows you to control your `climate` entities.
 | `hide_target_temp_low`  | boolean | Optional (only for entities supporting `target_temp_low`) | `true` or `false` (default) | Hides the low target temperature control if supported by the `entity`.                                          |
 | `hide_target_temp_high` | boolean | Optional (only for entities supporting `target_temp_high`)| `true` or `false` (default) | Hides the high target temperature control if supported by the `entity`.                                         |
 | `state_color`           | boolean | Optional                            | `true` or `false` (default)                     | Applies a constant background color when the climate entity is ON.                                              |
-| `tap_action`            | object  | Optional                            | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on tap. If not defined, `more-info` will be used.                                   |
-| `double_tap_action`     | object  | Optional                            | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on double tap. If not defined, `none` will be used.                               |
-| `hold_action`           | object  | Optional                            | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on hold. If not defined, `more-info` will be used.                                  |
-| `card_layout`           | string  | Optional                            | `normal` (default), `large`, `large-2-rows`     | Defines the styling layout of the card. See [card layouts](#card-layouts).                                      |
-| `columns`               | string  | Optional                            | `1`, `2`, `3`, or `4` (default)                 | Number of columns when placed in a **section view**.                                                            |
-| `rows`                  | string  | Optional                            | `1` (default), `2`, `3`, or `4`                 | Number of rows when placed in a **section view**.                                                               |
+| `step` | number | Optional | Any number | The temperature step. |
+| `min_temp` | number | Optional | Any number | The minimum temperature. |
+| `max_temp` | number | Optional | Any number | The maximum temperature. |
+| `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#tap-double-tap-and-hold-actions) | Allow to change the default actions on button click. |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `none` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon hold, if undefined, `more-info` will be used. |                              |
+| `card_layout` | string | Optional | `normal` (default if not in section view), `large` (default if in section view), `large-2-rows`, `large-sub-buttons-grid` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `rows` | number | Optional | Any number | Number of rows (height) (e.g. `2`) |
 | `sub_button`            | object  | Optional                            | See [sub-buttons](#sub-buttons)                | Adds custom buttons fixed to the right. Useful for a climate mode select menu.                                  |
 
 </details>
@@ -910,9 +921,9 @@ sub_button:
 
 ## Calendar
 
-<!-- ![readme-climate-card](https://github.com/user-attachments/assets/59145c69-2f85-4ee7-a290-e848971e1925)  -->
+![readme-calendar-bubble-card](https://github.com/user-attachments/assets/8b6a231c-c99b-4d7a-8197-b7fd49952f62)
 
-This card allows you to display your `calendar` entities.
+This card allows you to display your calendar entities. Its content is scrollable, so you can easily browse upcoming events.
 
 ### Calendar options
 
@@ -928,13 +939,14 @@ This card allows you to display your `calendar` entities.
 | `limit`             | number  | Optional     | A number                                        | The amont of events that will be displayed on the card                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Show or hide the end time for events                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Show or hide the event progress bar                                                     |
-| `tap_action`        | object  | Optional     | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on tap. If not defined, `more-info` will be used.           |
-| `double_tap_action` | object  | Optional     | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on double tap. If not defined, `toggle` will be used.       |
-| `hold_action`       | object  | Optional     | See [actions](#tap-double-tap-and-hold-actions) | Define the action triggered on hold. If not defined, `more-info` will be used.          |
-| `card_layout`       | string  | Optional     | `normal` (default), `large`, `large-2-rows`     | Defines the styling layout of the card. See [card layouts](#card-layouts).              |
-| `columns`           | string  | Optional     | `1`, `2`, `3`, or `4` (default)                 | Number of columns when placed in a **section view**.                                    |
-| `rows`              | string  | Optional     | `1` (default), `2`, `3`, or `4`                 | Number of rows when placed in a **section view**.                                       |
-| `sub_button`        | object  | Optional     | See [sub-buttons](#sub-buttons)                 | Adds custom buttons fixed to the right. Useful for a climate mode select menu.          |
+| `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
+| `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#tap-double-tap-and-hold-actions) | Allow to add actions on event click. |
+| `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on day click, if undefined, `none` will be used. |
+| `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on day double click, if undefined, `none` will be used. |
+| `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on day hold, if undefined, `none` will be used. |
+| `card_layout` | string | Optional | `normal` (default if not in section view), `large` (default if in section view), `large-2-rows`, `large-sub-buttons-grid` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `rows` | number | Optional | Any number | Number of rows (height) (e.g. `2`) |
+| `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 
 </details>
 
@@ -946,7 +958,7 @@ This card allows you to display your `calendar` entities.
 | ----------------------------------------- | -------------- | ------------------------------------------------------------------ |
 | `--bubble-calendar-main-background-color` | `color`        | Main background color for supported elements in the calendar card  |
 | `--bubble-calendar-border-radius`         | `px`           | Border radius for supported elements in the calendar card elements |
-| `--bubble-calendar-height`                | `px`           | Height for the climate card                                        |
+| `--bubble-calendar-height`                | `px`           | Height for the calendar card                                        |
 
 </details>
 
@@ -1010,9 +1022,8 @@ This card is a simple separator for dividing your pop-up into categories / secti
 | --- | --- | --- | --- | --- |
 | `name` | string | Optional but recommended | Any string | A name for your separator |
 | `icon` | string | Optional but recommended | Any `mdi:` icon | An icon for your separator |
-| `card_layout` | string | Optional | `normal` (default), `large`, `large-2-rows` | Styling layout of the card, see [card layouts](#card-layouts) |
-| `columns` | string | Optional | `1`, `2`, `3` or `4` (default) | Number of columns when placed in a **section view** (e.g. `2` is 2/4) |
-| `rows` | string | Optional | `1` (default), `2`, `3` or `4` | Number of rows when placed in a **section view** |
+| `card_layout` | string | Optional | `normal` (default if not in section view), `large` (default if in section view), `large-2-rows`, `large-sub-buttons-grid` | Styling layout of the card, see [card layouts](#card-layouts) |
+| `rows` | number | Optional | Any number | Number of rows (height) (e.g. `2`) |
 | `sub_button` | object | Optional | See [sub-buttons](#sub-buttons) | Add customized buttons fixed to the right |
 
 </details>
@@ -1092,6 +1103,18 @@ cards:
 
 In every card that supports that option, you can add sub-buttons to customize your cards even more. You can, for example, create a button that can control a vacuum, a weather card, or almost anything that you can come up with. These sub-buttons support the tap actions and most of the button options.
 
+These sub-buttons can also display dropdown menus if combined with selectable entities like:
+
+- Input Select entities
+- Select entities
+- Media players with **source list**
+- Media players with **sound mode list**
+- Climate entities with **hvac modes**
+- Climate/Fan entities with **fan modes**
+- Climate entities with **swing modes**
+- Climate entities with **preset modes**
+- Light entities with **effect list**
+
 ### Sub-buttons options
 
 <details>
@@ -1111,6 +1134,7 @@ In every card that supports that option, you can add sub-buttons to customize yo
 | `show_last_updated` | boolean | Optional | `true` or `false` (default) | Show the last updated time of your `entity` |
 | `show_attribute` | boolean | Optional | `true` or `false` (default) | Show an attribute of your `entity` below its `name` |
 | `attribute` | string | Optional (required if `show_attribute` is set to `true`) | An attribute from your `entity` | The attribute to show (e.g. `brightness`) |
+| `select_attribute` | string | Optional | An attribute list from your `entity` (see supported options above) | This attribute list will open a dropdown if clicked (e.g. `effect_list`) |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button double click, if undefined, `none` will be used. |
 | `hold_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on sub-button hold, if undefined, `more-info` will be used. |
@@ -1289,7 +1313,8 @@ Bubble Card fully supports the Home Assistant section view, you can change the c
 | --- | --- |
 | `normal` | The regular layout (not optimized for the section view) |
 | `large` | A larger layout that will resize to the selected rows in the section view (optimized for the section view) |
-| `large-2-rows` | A larger layout with 2 rows of sub-buttons  that will resize to the selected rows in the section view (optimized for the section view) |
+| `large-2-rows` | A larger layout with 2 rows of sub-buttons that will resize to the selected rows in the section view (optimized for the section view) |
+| `large-sub-buttons-grid` | This layout will displays sub-buttons in a grid, `rows` must be set to at least `2`.
 
 </details>
 
@@ -1443,9 +1468,10 @@ button_action:
 
 ## Styling
 
-You can add custom styles to modify the CSS of all cards **without using card-mod** in three ways:
+You can add custom styles to modify the CSS of all cards **without using card-mod** in four ways:
 
-- In the editor, go to the card you want to modify, then navigate to _Styling options > Custom styles / Templates_, and add your custom styles (check the tips and examples below).
+- In the editor, go to the card you want to modify, then navigate to _Styling options > Custom styles & JS templates_, and add your custom styles (check the tips and examples below).
+- In the editor (or in [YAML](#modules)), go to the card you want to modify, then navigate to _Modules_, then create a new module (it will be available to all cards), or go to the **Module Store** to install any available Module (more details about modules can be found [below](#modules)).
 - In a [theme](https://www.home-assistant.io/integrations/frontend/#defining-themes) file by adding CSS variables in YAML (these are available in each card's documentation above). This allows for global modifications.
 
   <details>
@@ -1485,7 +1511,7 @@ You can add custom styles to modify the CSS of all cards **without using card-mo
 > A tutorial video is coming soon on my [YouTube channel](https://www.youtube.com/@cloooos)!
 
 > [!IMPORTANT]  
-> Please note that you will have to add `!important;` to some CSS styles that are already defined (see examples below).
+> Please note that you might have to add `!important;` to some CSS styles that are already defined (see examples below).
 
 #### Examples
 
@@ -1785,7 +1811,7 @@ styles: |
 
 <br>
 
-### Templates
+## Templates
 
 **Bubble Card doesn’t support Jinja templates** but advanced users can add templates in JS directly in their [custom styles](#styling). For example, this allows you to dynamically change an icon, the texts or the colors of an element, to show or hide an element conditionally (like a sub-button), or almost anything based on a state, an attribute and more.
 
@@ -2091,15 +2117,345 @@ styles: >
 
 <br>
 
----
+## Modules
+
+Modules are a powerful feature that allows you to save, reuse, and share your custom styles and templates across all of your Bubble Cards. Instead of copying and pasting the same code into multiple cards, you can create a Module and apply it wherever you need it. This makes managing your dashboard's look and feel much easier and more efficient.
+
+But this feature is so much more powerful than that, it lets you add actual features yourself in the Bubble Card editor, using all the default [Home Assistant form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) options!
+
+You can also browse the **Module Store** to find and install [modules created by the community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), or share your own creations!
+
+> [!TIP]
+> A Module's code works exactly the same way as the code in the `styles` section of a card. All the same variables and functions from the [Templates](#templates) section are available.
 
 <br>
 
-## Custom components conflicts
+### Initial Setup
 
-⚠️ For now there are some features that are not working with:
+> [!IMPORTANT]
+> Before you can use Modules, you need to configure storage for them. There are two methods depending on whether you use the **editor** or **YAML-only configuration**.
 
-- Kiosk mode, but this is fixed in Kiosk mode v6.0.1
+#### Method 1: With editor support (Recommended)
+
+This method allows you to use the Module Editor and the Module Store.
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
+
+1. Add the following template sensor to your `configuration.yaml` file:
+
+```yaml
+# Storage for Bubble Card Modules
+template:
+  - trigger:
+      - platform: event
+        event_type: bubble_card_update_modules
+    sensor:
+      - name: "Bubble Card Modules"
+        state: "saved"
+        icon: "mdi:puzzle"
+        attributes:
+          modules: "{{ trigger.event.data.modules }}"
+          last_updated: "{{ trigger.event.data.last_updated }}"
+```
+
+2. Save the file and restart Home Assistant.
+3. You can now access the Module Editor and Module Store from any Bubble Card!
+
+<br>
+
+</details>
+
+#### Method 2: YAML-only configuration
+
+This method is for users who prefer to work exclusively in YAML without using the visual editor.
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
+
+1. Create a file called `bubble-modules.yaml` in a newly created `/www/bubble/` folder.
+2. Structure your modules in the file like in this [example](https://github.com/Clooos/Bubble-Card/blob/main/dist/bubble-modules-example.yaml), check the last module for more details.
+
+
+<br>
+
+</details>
+
+<br>
+
+### The Module Editor
+
+You can access the Module Editor from any card's settings, under the **Modules** section. The editor provides two main tabs:
+
+#### My Modules tab
+
+![module-editor-preview](https://github.com/user-attachments/assets/94b4b481-2d51-4f7b-8c02-1a65391d78ca)
+
+This tab shows all your installed modules and allows you to:
+
+- **Apply** existing modules to the current card
+- **Create** a new module from scratch
+- **Edit** existing modules with live preview
+- **Delete** modules you no longer need
+- **Set global status** to make a module apply to all cards automatically
+- **Import/Export** modules for backup or sharing
+
+#### Module Store tab
+
+![update-module-store-s](https://github.com/user-attachments/assets/c7249c0c-8f8c-4ffc-835f-701c9dfcadaf)
+
+This tab will display [all available modules from the community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), and allows you to:
+
+- **Browse** all community-created modules
+- **Search** and filter modules by name, compatibility, or keywords
+- **Install** modules with one click
+- **Update** installed modules when new versions are available
+
+<br>
+
+### How to use modules
+
+#### Creating a new module
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
+
+![module-preview](https://github.com/user-attachments/assets/4670b486-5a48-4476-a868-2ec4d42226a5)
+
+1. Go to any card's editor and expand the **Modules** section.
+2. Click on **Create new module**.
+3. Fill in the module information.
+4. Write your CSS and/or JavaScript template code in the **Code** editor.
+5. (Optional) Create a custom configuration UI in the **Editor** section (like the color picker in the screenshot above, full documentation available [here](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+6. Click **Save**.
+
+Your module is now available to be used on any of your cards!
+
+<br>
+
+</details>
+
+#### Applying a module to a card
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
+
+- **Via the editor:**
+
+  - Go to the editor of the card you want to apply the module to.
+  - Expand the **Modules** section.
+  - Click on the module you want to apply from the list.
+  - Under "Apply to", click on "This card". The module is now active. You can apply multiple modules to the same card.
+
+- **Via YAML:**
+
+  ```yaml
+  type: custom:bubble-card
+  card_type: button
+  entity: light.example
+  modules:
+    - module_id_1
+    - module_id_2
+  ```
+
+<br>
+
+</details>
+
+#### Applying a module globally
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
+
+You can set a module to apply automatically to all Bubble Cards:
+
+**This is not available for modules with an editor, as those require a specific configuration to work.**
+
+- **Via the editor:**
+
+  - In the Module editor, find your module in the **My Modules** tab.
+  - Toggle the **Global** switch next to the module name.
+  - The module will now be applied to all cards automatically.
+ 
+- **Via YAML:**
+
+  In your module YAML configuration (in `bubble-modules.yaml`), just add `is_global: true`.
+
+<br>
+
+</details>
+
+#### Excluding a single card from a global module
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
+
+If you have a global module but want to exclude it from a specific card:
+
+- **Via the editor:**
+  
+  - In the card's **Modules** section, you'll see global modules listed.
+  - Click on a global module, disable "This card" to exclude it from this specific card.
+
+- **Via YAML:**
+  
+  ```yaml
+  type: custom:bubble-card
+  card_type: button
+  entity: light.example
+  modules:
+    - !global_module_id  # The ! prefix excludes this global module
+  ```
+
+<br>
+
+</details>
+
+#### Sharing your module to the Module Store
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
+
+To share your Module to the Module Store, in the Module Editor, at the bottom in "Export Module", click on "Copy for GitHub" and paste the content in a new discussion in the [Share your Modules](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) category. **Edit the description** (if needed), **the example** (for YAML users), and remember to **include at least one screenshot** for the Module Store.
+
+**Your Module becomes available right after that** (after a Store refresh), so double-check that everything is correctly written and the Module is working as expected. You can of course edit/update the Module after it is shared.
+
+<br>
+
+</details>
+
+#### Version management
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
+
+The Module Store automatically checks for updates to installed modules. When updates are available:
+
+1. You'll see an update indicator in the **Module Store** tab.
+2. Click **Update** in modules with available updates.
+3. Confirm the update in the Module Store.
+
+<br>
+
+</details>
+
+#### Defining supported card types
+
+<details>
+
+<summary>Click to expand</summary>
+
+<br>
+
+Some modules may not be compatible with all card types. You can specify which cards a module support:
+
+```yaml
+my_module:
+  name: "Button Only Module"
+  supported:
+    - button
+  code: |
+    /* Your module code here */
+```
+
+</details>
+
+<br>
+
+### Examples
+
+<details>
+<summary>Basic styling module</summary>
+
+<br>
+
+```yaml
+blue_cards:
+  name: "Blue Cards Theme"
+  version: "1.0"
+  creator: "Your Name"
+  description: "Makes all cards backgrounds blue"
+  code: |
+    ha-card {
+      --bubble-main-background-color: #007acc;
+    }
+```
+
+<br>
+
+</details>
+
+<details>
+<summary>Module with custom configuration</summary>
+
+<br>
+
+This module is available [here](https://github.com/Clooos/Bubble-Card/discussions/1231).
+
+```yaml
+icon_container_color:
+  name: 'Example: Customize the icon container color'
+  version: v1.2
+  creator: Clooos
+  supported:
+    - calendar
+    - pop-up
+    - cover
+    - button
+    - media-player
+    - climate
+    - select
+  description: |
+    A list of predefined colors to customize the icon container color.
+    Configure this module via the editor or in YAML, for example:
+    <br><br>
+    <code-block><pre>
+    icon_container_color: 
+        color: light-blue
+    </pre></code-block>
+  code: |
+    .bubble-icon-container,
+    .bubble-day-chip {
+      opacity: 1 !important;
+      --bubble-icon-background-color: var(--${this.config.icon_container_color?.color}-color) !important;
+    }
+  editor:
+    - name: color
+      label: Color
+      selector:
+        ui_color:
+          include_none: true
+```
+
+<br>
+
+</details>
+
+More examples can be found in the Module Store, or [here](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
 
 <br>
 
