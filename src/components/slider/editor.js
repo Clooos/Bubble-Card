@@ -88,13 +88,24 @@ export function makeButtonSliderPanel(editor) {
                 <hr>
                 <ha-formfield>
                     <ha-switch
-                        .checked=${editor._config.tap_to_slide}
+                        .checked=${editor._config.tap_to_slide && !editor._config.relative_slide}
                         .configValue="${"tap_to_slide"}"
                         @change="${editor._valueChanged}"
-                        .disabled=${isReadOnlyEntity(editor)}
+                        .disabled=${editor._config.relative_slide || isReadOnlyEntity(editor)}
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Tap to slide (previous behavior)</label> 
+                        <label class="mdc-label">Tap to slide (previous behavior)</label>
+                    </div>
+                </ha-formfield>
+                <ha-formfield>
+                    <ha-switch
+                        .checked=${!editor._config.tap_to_slide && editor._config.relative_slide}
+                        .configValue="${"relative_slide"}"
+                        @change="${editor._valueChanged}"
+                        .disabled=${editor._config.tap_to_slide || isReadOnlyEntity(editor)}
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Relative slide (incompatible with tap to slide)</label>
                     </div>
                 </ha-formfield>
                 <ha-formfield>
