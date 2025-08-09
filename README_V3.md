@@ -465,6 +465,7 @@ These options are only available when `button_type` is set to `slider`.
 | `max_value`             | number  | Optional                        | The maximum value of the slider. For custom sliders.                                                    |
 | `step`                  | number  | Optional                        | The step value of the slider.                                                                           |
 | `tap_to_slide`          | boolean | Optional (`false` default)      | Enable the previous slider behavior where you tap to activate the slider, instead of holding it.        |
+| `relative_slide`        | boolean | Optional (`false` default )     | Update value relative to the starting value, rather than the starting touch point.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Make the slider read-only. Automatically enabled for some entities like sensors.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | The entity state is updated while sliding. **This feature is not recommended for all entities.**        |
 | `allow_light_slider_to_0` | boolean | Optional (`false` default)    | **For lights only.** Allows the slider to reach 0%, which turns off the light. Not available with `tap_to_slide`. |
