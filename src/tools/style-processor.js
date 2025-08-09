@@ -54,9 +54,7 @@ export async function initializeModules(context) {
   initPromise = (async () => {    
     // Load from YAML files first
     const yamlModules = await loadYAML([
-      "/local/bubble/bubble-modules.yaml",
-      "/hacsfiles/Bubble-Card/bubble-modules.yaml",
-      "/local/community/Bubble-Card/bubble-modules.yaml",
+      "/local/bubble/bubble-modules.yaml"
     ]);
     
     // Load modules from text
