@@ -47,7 +47,6 @@
     left: 7px;
     z-index: 5 !important;
     bottom: calc(-56px - var(--custom-height-offset-mobile));
-    will-change: transform;
 }
 
 .bubble-pop-up-background {
