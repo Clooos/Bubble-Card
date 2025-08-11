@@ -51,7 +51,9 @@ export function saveCachedModuleData(modules) {
     const expiration = Date.now() + 86400000; // 24 hours
     localStorage.setItem('bubble-card-module-store', JSON.stringify({
       modules,
-      expiration
+      expiration,
+      // Store when the cache was last refreshed to support SWR checks
+      lastFetchedAt: Date.now()
     }));
     console.log("Module data cached until", new Date(expiration));
   } catch (e) {

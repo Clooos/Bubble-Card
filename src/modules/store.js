@@ -80,10 +80,12 @@ template:
       context._storeModules = cachedData.modules;
       context._isLoadingStore = false;
 
-      // Always check expiration and refresh if needed regardless of previous API failures
-      // This will now check the actual rate limit before making API calls
+      // SWR: refresh silently if stale (>6h) or near expiry (<1h)
       const now = Date.now();
-      if (cachedData.expiration < now + 3600000) { // 1 hour before expiration
+      const lastFetchedAt = cachedData.lastFetchedAt || (cachedData.expiration ? cachedData.expiration - 86400000 : 0);
+      const isStale = now - lastFetchedAt > 21600000; // 6 hours
+      const isNearExpiry = cachedData.expiration < now + 3600000; // 1 hour
+      if (isStale || isNearExpiry) {
         _fetchModuleStore(context, true);
       }
     } else {
@@ -91,6 +93,15 @@ template:
       context._isLoadingStore = true;
       _fetchModuleStore(context);
     }
+  }
+
+  // Set up a periodic background refresh every 6 hours
+  if (!context._storeAutoRefreshTimer) {
+    // Store an interval id on the context to avoid multiple timers
+    context._storeAutoRefreshTimer = setInterval(() => {
+      // Fire background refresh; built-in guard prevents overlapping calls
+      _fetchModuleStore(context, true);
+    }, 21600000);
   }
 
   if (context._isLoadingStore) {
@@ -802,8 +813,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       context.requestUpdate();
     }
 
-    // Check if we're in cooldown after an API failure, only if we couldn't check rate limit
-    // Skip this for manual refreshes (user explicitly clicked refresh)
+    // When rate-limited or rate status unknown, prefer using cache and skip network
     if (useCache && !isManualRefresh) {
       const lastApiFailure = localStorage.getItem('bubble-card-api-failure-timestamp');
       if (lastApiFailure) {
@@ -811,7 +821,6 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
         const cooldownPeriod = 30 * 60 * 1000; // 30 minutes
         
         if (Date.now() - failureTime < cooldownPeriod) {
-          
           // Use cache if available
           const { getCachedModuleData } = await import('./cache.js');
           const cachedData = getCachedModuleData();
@@ -830,12 +839,12 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
           
           return;
         } else {
-          // Cooldown finished, we can retry
+          // Cooldown finished, we can retry next time
           localStorage.removeItem('bubble-card-api-failure-timestamp');
         }
       }
-    } else if (useCache && !isManualRefresh) {
-      // If we need to use cache due to rate limit, return cached data
+
+      // Use cache due to rate limit or unknown status and exit early
       const { getCachedModuleData } = await import('./cache.js');
       const cachedData = getCachedModuleData();
       if (cachedData && !context._storeModules) {
@@ -844,12 +853,13 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
         context.requestUpdate();
       }
       
-      // Update loading status for using cache
       if (!isBackgroundFetch) {
         context._loadingStatus = "Loading from cache";
         context._loadingProgress = 60;
         context.requestUpdate();
       }
+      
+      return;
     }
 
     // Retrieve all discussions with pagination
@@ -957,6 +967,12 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
         context._progressInterval = null;
       }
       
+      context.requestUpdate();
+    }
+
+    // For background fetches, also refresh UI to reflect new data
+    if (isBackgroundFetch && context._storeModules) {
+      context._storeModules = parsedModules;
       context.requestUpdate();
     }
   } catch (error) {
