@@ -15,10 +15,55 @@ import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
 import { getLazyLoadedPanelContent } from '../editor/utils.js';
 
+// Storage sensor entity ID for Bubble Card modules
+const MODULES_SENSOR_ENTITY_ID = 'sensor.bubble_card_modules';
+
 // Function to detect if sl-tab-group is available in the current HA version
 function isSlTabGroupAvailable() {
   return typeof customElements !== 'undefined' && 
          customElements.get('sl-tab-group') !== undefined;
+}
+
+// Validate the storage entity used to persist modules
+// This ensures the warning stays visible until the configuration is complete and usable
+function getModulesStorageStatus(hass) {
+  // Validate Home Assistant object
+  const status = {
+    entityFound: false,
+    hasAttributes: false,
+    hasModulesAttribute: false,
+    modulesIsObject: false,
+    hasLastUpdated: false,
+    isReady: false,
+  };
+
+  if (!hass || !hass.states) {
+    return status;
+  }
+
+  const entity = hass.states[MODULES_SENSOR_ENTITY_ID];
+
+  if (!entity) {
+    return status;
+  }
+
+  status.entityFound = true;
+
+  const attributes = entity.attributes || {};
+  status.hasAttributes = !!entity.attributes;
+
+  if ('modules' in attributes) {
+    status.hasModulesAttribute = true;
+    status.modulesIsObject = attributes.modules !== null && typeof attributes.modules === 'object';
+  }
+
+  if ('last_updated' in attributes) {
+    status.hasLastUpdated = typeof attributes.last_updated === 'string' && attributes.last_updated.length > 0;
+  }
+
+  status.isReady = status.entityFound && status.hasModulesAttribute && status.modulesIsObject && status.hasLastUpdated;
+
+  return status;
 }
 
 export async function setModuleGlobalStatus(context, moduleId, isGlobal) {
@@ -27,8 +72,14 @@ export async function setModuleGlobalStatus(context, moduleId, isGlobal) {
       return false;
     }
 
-    const entityId = "sensor.bubble_card_modules";
-    const entityExists = context.hass && context.hass.states && context.hass.states[entityId];
+    // Ensure the storage entity is valid before attempting to modify it
+    const storageStatus = getModulesStorageStatus(context.hass);
+    if (!storageStatus.isReady) {
+      console.warn(`Modules storage is not ready. Please configure '${MODULES_SENSOR_ENTITY_ID}' correctly.`);
+      return false;
+    }
+
+    const entityExists = context.hass && context.hass.states && context.hass.states[MODULES_SENSOR_ENTITY_ID];
     
     if (!entityExists) {
       return false;
@@ -38,7 +89,7 @@ export async function setModuleGlobalStatus(context, moduleId, isGlobal) {
 
     try {
       // Retrieve the current state of the entity via HA helper
-      const entityData = await context.hass.callApi("get", `states/${entityId}`);
+      const entityData = await context.hass.callApi("get", `states/${MODULES_SENSOR_ENTITY_ID}`);
 
       if (!entityData) {
         throw new Error("Failed to retrieve entity state");
@@ -85,14 +136,12 @@ export async function setModuleGlobalStatus(context, moduleId, isGlobal) {
 
 export function isModuleGlobal(moduleId, hass) {
   try {
-    const entityId = "sensor.bubble_card_modules";
-    
     // Check if Home Assistant states are available
-    if (!hass || !hass.states || !hass.states[entityId]) {
+    if (!hass || !hass.states || !hass.states[MODULES_SENSOR_ENTITY_ID]) {
       return false;
     }
     
-    const entity = hass.states[entityId];
+    const entity = hass.states[MODULES_SENSOR_ENTITY_ID];
     if (!entity.attributes || !entity.attributes.modules) {
       return false;
     }
@@ -144,14 +193,16 @@ export function makeModulesEditor(context) {
     initializeModules(context).then(() => {
       context._modulesLoaded = true;
       // Check and update 'default' module global status after modules are loaded
-      if (context.hass && context.hass.states['sensor.bubble_card_modules']) {
-        const modulesData = context.hass.states['sensor.bubble_card_modules'].attributes.modules;
+      // Only attempt this when storage is fully ready
+      const storageStatusAfterInit = getModulesStorageStatus(context.hass);
+      if (storageStatusAfterInit.isReady) {
+        const modulesData = context.hass.states[MODULES_SENSOR_ENTITY_ID].attributes.modules;
         if (modulesData && modulesData.default && modulesData.default.is_global !== true) {
           setModuleGlobalStatus(context, 'default', true).then(success => {
             if (success) {
               document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
             } else {
-              console.warn("Failed to set module 'default' to global in sensor.bubble_card_modules.");
+              console.warn(`Failed to set module 'default' to global in ${MODULES_SENSOR_ENTITY_ID}.`);
             }
           });
         }
@@ -160,9 +211,25 @@ export function makeModulesEditor(context) {
     });
   }
 
-  // Check if the sensor entity exists in Home Assistant
-  const entityId = 'sensor.bubble_card_modules';
-  const entityExists = context.hass && context.hass.states && context.hass.states[entityId];
+  // Check storage status for the template sensor entity
+  const storageStatus = getModulesStorageStatus(context.hass);
+
+  // Treat the store as available only when storage is fully ready
+  const entityExists = storageStatus.isReady;
+
+  // Attempt to bootstrap the storage once if the entity exists but is not yet initialized
+  // This helps users who created the entity but haven't fired any event yet
+  if (storageStatus.entityFound && !storageStatus.isReady && !context._attemptedModulesStorageBootstrap && context.hass) {
+    context._attemptedModulesStorageBootstrap = true;
+    context.hass.callApi('post', 'events/bubble_card_update_modules', {
+      modules: {},
+      last_updated: new Date().toISOString(),
+    }).then(() => {
+      setTimeout(() => context.requestUpdate(), 150);
+    }).catch(() => {
+      // No-op: keep the warning visible if the bootstrap fails
+    });
+  }
 
   const resolvePath = (path, configData) => {
     return path.split('.').reduce((acc, part) => acc && acc[part], configData);
@@ -359,7 +426,11 @@ export function makeModulesEditor(context) {
                 Configuration required
               </h4>
               <div class="content">
-                <p>The storage entity <code>sensor.bubble_card_modules</code> is not configured in your Home Assistant instance.</p>
+                ${storageStatus.entityFound ? html`
+                  <p><b><code>${MODULES_SENSOR_ENTITY_ID}</code> is detected, but its configuration is incomplete or incorrect.</b></p>
+                ` : html`
+                  <p>The storage entity <code>${MODULES_SENSOR_ENTITY_ID}</code> is not configured in your Home Assistant instance.</p>
+                `}
                 <hr />
                 <p><b>To use the Module Store and the Module Editor, follow these steps:</b></p>
 
@@ -388,7 +459,7 @@ template:
         
         ${renderTabs()}
 
-        ${context._selectedModuleTab === 0 ? html`
+        ${context._selectedModuleTab === 0 || !entityExists ? html`
           ${context._showManualImportForm ? html`
             <div class="module-editor-form">
               <div class="card-content">
@@ -538,7 +609,7 @@ template:
                           <div class="module-toggles">
                             <button 
                               class="bubble-badge toggle-badge ${isChecked ? 'install-button' : 'link-button'}"
-                              style="cursor: pointer;"
+                              style="${key === 'default' && isChecked ? 'cursor: default;' : ''} cursor: pointer;"
                               @click=${() => {
                                 const toggleEvent = { 
                                   target: { 
@@ -548,7 +619,6 @@ template:
                                 };
                                 handleValueChanged(toggleEvent);
                               }}
-                              style="${key === 'default' && isChecked ? 'cursor: default;' : ''}"
                             >
                               <ha-icon icon="mdi:card-outline"></ha-icon>
                               <span>This card</span>
