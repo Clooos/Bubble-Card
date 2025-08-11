@@ -80,6 +80,11 @@ export function renderModuleEditorForm(context) {
   // Check if module is from YAML file
   const isFromYamlFile = _isModuleInstalledViaYaml ? _isModuleInstalledViaYaml(context._editingModule.id) : false;
 
+  // Determine if there are blocking errors (YAML schema parsing or template errors)
+  const hasYamlError = !!context._yamlErrorMessage;
+  const hasTemplateError = !!context.errorMessage && !!context._editingModule; // set by createErrorConsole for current module
+  const hasBlockingErrors = hasYamlError || hasTemplateError;
+
   // Apply styles in real-time
   const applyLiveStyles = (newCssCode) => {
     if (!context._editingModule || !context._config || isFromYamlFile) return;
@@ -381,6 +386,22 @@ export function renderModuleEditorForm(context) {
             ` : ''}
           </ha-expansion-panel>
 
+          ${(!isFromYamlFile && hasBlockingErrors) ? html`
+            <div class="bubble-info warning" style="margin-top: 8px;">
+              <h4 class="bubble-section-title">
+                <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
+                Save disabled
+              </h4>
+              <div class="content">
+                <p style="margin: 0;">
+                  ${hasYamlError ? html`Fix the error(s) in the Editor schema (YAML) above to enable saving.` : ''}
+                  ${hasYamlError && hasTemplateError ? html`<br>` : ''}
+                  ${hasTemplateError ? html`Fix the error(s) in the CSS/JS template above to enable saving.` : ''}
+                </p>
+              </div>
+            </div>
+          ` : ''}
+
           <hr>
 
           <ha-expansion-panel .header=${html`
@@ -475,7 +496,8 @@ export function renderModuleEditorForm(context) {
               Cancel
             </button>
             
-            <button class="icon-button ${isFromYamlFile ? 'disabled' : ''}" style="flex: 1;" @click=${() => {              
+            <button class="icon-button ${isFromYamlFile || hasBlockingErrors ? 'disabled' : ''}" ?disabled=${isFromYamlFile || hasBlockingErrors} style="flex: 1;" @click=${() => {              
+              if (isFromYamlFile || hasBlockingErrors) { return; }
               saveModule(context, context._editingModule);
               setTimeout(() => scrollToModuleForm(context), 0);
             }}>
@@ -707,22 +729,10 @@ export async function saveModule(context, moduleData) {
 // Save module to Home Assistant
 async function saveModuleToHomeAssistant(context, entityId, moduleData) {
   try {
-    const token = context.hass.auth.data.access_token;
-    if (!token) {
-      throw new Error("Authentication token not available");
-    }
+    // Use Home Assistant helper to handle auth and token refresh
+    const entityData = await context.hass.callApi("get", `states/${entityId}`);
     
-    const baseUrl = window.location.origin;
-    
-    const entityResponse = await fetch(`${baseUrl}/api/states/${entityId}`, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    });
-    
-    if (entityResponse.ok) {
-      const entityData = await entityResponse.json();
+    if (entityData) {
       let haModules = {};
       
       if (entityData.attributes && entityData.attributes.modules) {
@@ -957,22 +967,10 @@ export async function deleteModule(context, moduleId) {
 // Update Home Assistant modules after deletion
 async function updateHomeAssistantModules(context, entityId, moduleId) {
   try {
-    const token = context.hass.auth.data.access_token;
-    if (!token) {
-      throw new Error("Authentication token not available");
-    }
+    // Use Home Assistant helper to handle auth and token refresh
+    const entityData = await context.hass.callApi("get", `states/${entityId}`);
     
-    const baseUrl = window.location.origin;
-    
-    const entityResponse = await fetch(`${baseUrl}/api/states/${entityId}`, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    });
-    
-    if (entityResponse.ok) {
-      const entityData = await entityResponse.json();
+    if (entityData) {
       let haModules = {};
       
       if (entityData.attributes && entityData.attributes.modules) {

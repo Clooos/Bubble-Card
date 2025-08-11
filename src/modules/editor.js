@@ -34,29 +34,16 @@ export async function setModuleGlobalStatus(context, moduleId, isGlobal) {
       return false;
     }
 
-    const token = context.hass.auth.data.access_token;
-    if (!token) {
-      return false;
-    }
-
-    const baseUrl = window.location.origin;
     let existingModules = {};
 
     try {
-      // Retrieve the current state of the entity
-      const entityResponse = await fetch(`${baseUrl}/api/states/${entityId}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
+      // Retrieve the current state of the entity via HA helper
+      const entityData = await context.hass.callApi("get", `states/${entityId}`);
 
-      if (!entityResponse.ok) {
-        throw new Error(`Failed to retrieve entity state: ${entityResponse.statusText}`);
+      if (!entityData) {
+        throw new Error("Failed to retrieve entity state");
       }
 
-      const entityData = await entityResponse.json();
-      
       // Retrieve the module collection
       if (entityData.attributes && entityData.attributes.modules) {
         existingModules = entityData.attributes.modules;
@@ -77,16 +64,9 @@ export async function setModuleGlobalStatus(context, moduleId, isGlobal) {
 
     // Update using an event for the trigger template sensor
     try {
-      await fetch(`${baseUrl}/api/events/bubble_card_update_modules`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          modules: existingModules,
-          last_updated: new Date().toISOString()
-        })
+      await context.hass.callApi("post", "events/bubble_card_update_modules", {
+        modules: existingModules,
+        last_updated: new Date().toISOString()
       });
 
       // Force a refresh of components that use modules

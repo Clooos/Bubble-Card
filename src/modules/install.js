@@ -203,12 +203,6 @@ export async function installOrUpdateModule(context, module) {
 
     // Save module in Home Assistant
     try {
-      const token = context.hass.auth.data.access_token;
-      if (!token) {
-        throw new Error("Authentication token not available");
-      }
-
-      const baseUrl = window.location.origin;
       const entityId = "sensor.bubble_card_modules";
 
       // Check if the entity exists in Home Assistant
@@ -228,27 +222,18 @@ export async function installOrUpdateModule(context, module) {
       let existingModules = {};
 
       try {
-        // Try to retrieve the current state of the entity
-        const entityResponse = await fetch(`${baseUrl}/api/states/${entityId}`, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        });
+        // Try to retrieve the current state of the entity using HA helper (manages auth/refresh)
+        const entityData = await context.hass.callApi("get", `states/${entityId}`);
 
-        if (entityResponse.ok) {
-          const entityData = await entityResponse.json();
-
-          // Retrieve the module collection
-          if (entityData.attributes && entityData.attributes.modules) {
-            existingModules = entityData.attributes.modules;
-          }
-          // If we have the format with a single module_data
-          else if (entityData.attributes && entityData.attributes.module_data) {
-            const singleModule = entityData.attributes.module_data;
-            if (singleModule && singleModule.id) {
-              existingModules[singleModule.id] = singleModule;
-            }
+        // Retrieve the module collection
+        if (entityData && entityData.attributes && entityData.attributes.modules) {
+          existingModules = entityData.attributes.modules;
+        }
+        // If we have the format with a single module_data
+        else if (entityData && entityData.attributes && entityData.attributes.module_data) {
+          const singleModule = entityData.attributes.module_data;
+          if (singleModule && singleModule.id) {
+            existingModules[singleModule.id] = singleModule;
           }
         }
       } catch (loadError) {
@@ -311,40 +296,22 @@ export async function installOrUpdateModule(context, module) {
 
       // Update using an event for the trigger template sensor
       try {
-        await fetch(`${baseUrl}/api/events/bubble_card_update_modules`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            modules: existingModules,
-            last_updated: new Date().toISOString()
-          })
+        await context.hass.callApi("post", "events/bubble_card_update_modules", {
+          modules: existingModules,
+          last_updated: new Date().toISOString()
         });
       } catch (eventError) {
         console.warn("Unable to send event, trying to update state directly:", eventError);
         
         // Fallback: try to update the state directly
-        const updateResponse = await fetch(`${baseUrl}/api/states/${entityId}`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            state: "saved",
-            attributes: {
-              friendly_name: "Bubble Card Modules",
-              modules: existingModules,
-              last_updated: new Date().toISOString()
-            }
-          })
+        await context.hass.callApi("post", `states/${entityId}`, {
+          state: "saved",
+          attributes: {
+            friendly_name: "Bubble Card Modules",
+            modules: existingModules,
+            last_updated: new Date().toISOString()
+          }
         });
-
-        if (!updateResponse.ok) {
-          throw new Error(`Update error (${updateResponse.status}): ${updateResponse.statusText}`);
-        }
       }
 
       fireToast(context, "Module installed successfully");
