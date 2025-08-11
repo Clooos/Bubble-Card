@@ -1,8 +1,74 @@
-import { yamlKeysMap } from '../tools/style-processor.js';
+import { yamlKeysMap, moduleSourceMap } from '../tools/style-processor.js';
 import { fireToast } from './cache.js';
 import { extractFirstKeyFromYaml, extractYamlFromMarkdown, extractModuleMetadata } from './parser.js';
 import { fireEvent } from '../tools/utils.js';
 import jsyaml from 'js-yaml';
+
+// Broadcast a focused module update event so listeners can refresh fast
+function broadcastModuleUpdate(moduleId, moduleData) {
+  try {
+    window.dispatchEvent(new CustomEvent('bubble-card-module-updated', {
+      detail: { moduleId, moduleData }
+    }));
+  } catch (e) {
+    // noop
+  }
+}
+
+// Force a complete UI refresh of the editor similar to the editor save flow
+function forceEditorUIRefresh(context) {
+  try {
+    if (context._processedSchemas) {
+      context._processedSchemas = {};
+    }
+    if (!context._schemaCache) {
+      context._schemaCache = {};
+    } else {
+      Object.keys(context._schemaCache).forEach(key => {
+        delete context._schemaCache[key];
+      });
+    }
+
+    context.lastEvaluatedStyles = "";
+
+    if (context.card && typeof context.handleCustomStyles === 'function') {
+      context.handleCustomStyles(context, context.card);
+    }
+
+    // Notify parent components and trigger updates
+    fireEvent(context, 'editor-refresh', {});
+    context.requestUpdate();
+
+    // Secondary update after a short delay
+    setTimeout(() => {
+      if (context.card && typeof context.handleCustomStyles === 'function') {
+        context.handleCustomStyles(context, context.card);
+      }
+      context.requestUpdate();
+
+      // More aggressive fallback if still not reflected
+      setTimeout(() => {
+        if (context._config) {
+          const config = { ...context._config };
+
+          if (context.stylesYAML) {
+            context.stylesYAML = null;
+            document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
+          }
+
+          fireEvent(context, "config-changed", { config });
+
+          if (context.card && typeof context.handleCustomStyles === 'function') {
+            context.handleCustomStyles(context, context.card);
+          }
+        }
+        context.requestUpdate();
+      }, 100);
+    }, 50);
+  } catch (e) {
+    // noop
+  }
+}
 
 export async function installOrUpdateModule(context, module) {
   try {
@@ -197,9 +263,13 @@ export async function installOrUpdateModule(context, module) {
 
     // Add to yamlKeysMap so it appears as installed
     yamlKeysMap.set(moduleId, moduleMetadata);
+    // Mark this module as coming from the persistent entity (not YAML file)
+    try { moduleSourceMap.set(moduleId, 'entity'); } catch (e) {}
 
     // Force a refresh of components that use yamlKeysMap
     document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
+    // Also broadcast a targeted module update for faster listeners
+    broadcastModuleUpdate(moduleId, moduleMetadata);
 
     // Save module in Home Assistant
     try {
@@ -210,7 +280,8 @@ export async function installOrUpdateModule(context, module) {
       if (!entityExists) {
         fireToast(context, "Persistent storage not configured - module saved locally only", "warning");
         
-        // Save locally but inform about the missing entity
+        // Proactively refresh editor UI and styles so changes appear immediately
+        forceEditorUIRefresh(context);
         return { 
           success: true, 
           storage: "local_only",
@@ -317,12 +388,17 @@ export async function installOrUpdateModule(context, module) {
       fireToast(context, "Module installed successfully");
       fireEvent(context, "config-changed", { config: context._config });
 
+      // Ensure UI and styles reflect changes immediately
+      forceEditorUIRefresh(context);
+
       context.requestUpdate();
 
       return { success: true };
     } catch (apiError) {
       console.error("REST API not available or error:", apiError);
       fireToast(context, "Module saved locally only", "warning");
+      // Ensure UI refresh even if HA persistence failed
+      forceEditorUIRefresh(context);
       return { success: true, storage: "local_only" };
     }
   } catch (err) {
