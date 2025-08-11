@@ -102,14 +102,18 @@ function checkOrCondition(condition, hass) {
   return condition.conditions.some((c) => checkConditionsMet([c], hass));
 }
 
-/**
- * Return the result of applying conditions
- * @param conditions conditions to apply
- * @param hass Home Assistant object
- * @returns true if conditions are respected
- */
+// Add NOT condition support: passes if all embedded conditions are not true.
+function checkNotCondition(condition, hass) {
+  if (!condition.conditions) return true;
+  return !condition.conditions.some((c) => checkConditionsMet([c], hass));
+}
+
 export function checkConditionsMet(conditions,hass) {
   return conditions.every((c) => {
+    // Ignore disabled conditions, they behave as if removed
+    if (c && c.enabled === false) {
+      return true;
+    }
     if ("condition" in c) {
       switch (c.condition) {
         case "screen":
@@ -122,6 +126,8 @@ export function checkConditionsMet(conditions,hass) {
           return checkAndCondition(c, hass);
         case "or":
           return checkOrCondition(c, hass);
+        case "not":
+          return checkNotCondition(c, hass);
         default:
           return checkStateCondition(c, hass);
       }
@@ -189,6 +195,11 @@ function validateOrCondition(condition) {
   return condition.conditions != null;
 }
 
+// Validate NOT condition
+function validateNotCondition(condition) {
+  return condition.conditions != null;
+}
+
 function validateNumericStateCondition(condition) {
   const entityId = condition.entity_id || condition.entity;
   return (
@@ -196,13 +207,13 @@ function validateNumericStateCondition(condition) {
     (condition.above != null || condition.below != null)
   );
 }
-/**
- * Validate the conditions config for the UI
- * @param conditions conditions to apply
- * @returns true if conditions are validated
- */
+
 export function validateConditionalConfig(conditions){
   return conditions.every((c) => {
+    // Disabled conditions are considered valid (as if removed)
+    if (c && c.enabled === false) {
+      return true;
+    }
     if ("condition" in c) {
       switch (c.condition) {
         case "screen":
@@ -215,6 +226,8 @@ export function validateConditionalConfig(conditions){
           return validateAndCondition(c);
         case "or":
           return validateOrCondition(c);
+        case "not":
+          return validateNotCondition(c);
         default:
           return validateStateCondition(c);
       }
@@ -223,12 +236,6 @@ export function validateConditionalConfig(conditions){
   });
 }
 
-/**
- * Build a condition for filters
- * @param condition condition to apply
- * @param entityId base the condition on that entity
- * @returns a new condition with entity id
- */
 export function addEntityToCondition(condition,  entityId) {
   if ("conditions" in condition && condition.conditions) {
     return {
@@ -250,7 +257,6 @@ export function addEntityToCondition(condition,  entityId) {
   }
   return condition;
 }
-
 
 const validEntityId = /^(\w+)\.(\w+)$/;
 
