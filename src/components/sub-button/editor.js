@@ -202,16 +202,17 @@ export function makeSubButtonPanel(editor) {
     });
 
     const addSubButton = () => {
-    if (!editor._config.sub_button) {
-        editor._config.sub_button = [];
-    }
+        if (!editor._config.sub_button) {
+            editor._config.sub_button = [];
+        }
 
-    let newSubButton = {
-        entity: editor._config.entity
-    };
-    editor._config.sub_button = [...editor._config.sub_button];
-    editor._config.sub_button.push(newSubButton);
-    editor.requestUpdate();
+        let newSubButton = {
+            entity: editor._config.entity
+        };
+        editor._config.sub_button = [...editor._config.sub_button];
+        editor._config.sub_button.push(newSubButton);
+        editor._valueChanged({ target: { configValue: 'sub_button', value: editor._config.sub_button } });
+        editor.requestUpdate();
     };
 
     // Return full panel for all sub-buttons
