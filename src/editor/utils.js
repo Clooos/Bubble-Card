@@ -1,17 +1,3 @@
-import { html } from 'lit';
-
-/**
- * Provides content for an expansion panel, loading it lazily.
- * The content is rendered only after the panel has been expanded at least once.
- * The parent component is responsible for managing the `isExpanded` state and
- * triggering re-renders when it changes.
- *
- * @param {Object} context - The component instance (expected to have a `requestUpdate` method and store flags).
- * @param {string} contentKey - A unique key for this content block.
- * @param {boolean} isExpanded - True if the panel is currently expanded.
- * @param {Function} renderContentCallback - A function that returns the lit-html TemplateResult for the content.
- * @returns {TemplateResult | undefined} The content to render or undefined.
- */
 export function getLazyLoadedPanelContent(context, contentKey, isExpanded, renderContentCallback) {
   // Initialize storage for loaded flags if it doesn't exist on the context
   if (typeof context._lazyContentLoadedFlags === 'undefined') {
