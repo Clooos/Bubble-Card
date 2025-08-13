@@ -673,14 +673,37 @@ This selector works only if combined to an entity selector at the same level.
 
 #### Object selector
 
+The object selector lets users enter structured objects defined by a set of sub-fields. Each sub-field uses its own selector (e.g., text, number, icon). It can capture a single object or a list when `multiple` is `true`. Use `label_field` and `description_field` to control the label and secondary text displayed for each item. The output is an object or a list of objects.
+
 ```yaml
-- name: advanced_options
-  label: "Advanced Options"
+- name: main_item
+  label: "Main item"
   selector:
-    object: {}
+    object:
+      fields:
+        name:
+          label: "Name"
+          selector:
+            text: {}
+        icon:
+          label: "Icon"
+          selector:
+            icon: {}
+      label_field: name
+      description_field: icon
+      multiple: true
 ```
 
-*No additional option for this selector.*
+<details>
+<summary><b>Options</b></summary>
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `fields` | object | Map of field keys to field schemas. Each field supports a `label` and a nested `selector` (any selector type). |
+| `label_field` | string | Property key used as the item label in the UI (useful when `multiple` is `true`). |
+| `description_field` | string | Property key used as an optional item description in the UI. |
+| `multiple` | boolean | Allow entering a list of objects. If `true`, the resulting value is a list. |
+</details>
 
 #### Backup selector
 
