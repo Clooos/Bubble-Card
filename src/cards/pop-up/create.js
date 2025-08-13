@@ -270,6 +270,7 @@ export function createStructure(context) {
     // Use ResizeObserver to detect size changes
     const resizeObserver = new ResizeObserver(checkScrollable);
     resizeObserver.observe(popUpContainer);
+    context.popUpResizeObserver = resizeObserver;
 
     // Initial check after a short delay to ensure rendering is complete
     setTimeout(checkScrollable, 150);

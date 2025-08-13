@@ -421,6 +421,20 @@ function _getFilteredStoreModules(context) {
   if (!context._storeModules) return [];
 
   let filteredModules = [...context._storeModules];
+  
+  // Blacklist with reasons (hidden unless already installed, can still be installed manually)
+  // The main reason is modules that compete too much with my Patreon modules, as I need this financial support to maintain the project.
+  const storeBlacklist = new Map([
+    ['smart_icons'], // Competes with "Conditional icon badges" from my Patreon, and covers the same features (even if it is more advanced), sorry!
+  ]);
+  
+  // Apply blacklist
+  filteredModules = filteredModules.filter(module => {
+    const id = module && module.id;
+    if (!id) return true;
+    if (!storeBlacklist.has(id)) return true;
+    return _isModuleInstalled(id);
+  });
 
   // Filter by search
   if (context._storeSearchQuery) {

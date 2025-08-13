@@ -1,88 +1,92 @@
 import { 
-    getAttribute, 
+    getClimateColor, 
+} from './helpers.js';
+import { 
+    getState,
+    getAttribute,
     setLayout
-} from "../../tools/utils.js";
-import { getIcon } from '../../tools/icon.js';
+} from '../../tools/utils.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
 
-export const coverEntityFeature = {
-  OPEN: 1,
-  CLOSE: 2,
-  STOP: 8,
-};
+export function changeTemperature(context) {
+    const temperature = getAttribute(context, "temperature");
+    const state = getState(context);
 
-export function supportsFeature(stateObj, feature) {
-  return supportsFeatureFromAttributes(stateObj.attributes, feature);
-}
-
-export function supportsFeatureFromAttributes(attributes, feature) {
-  if (!attributes || typeof attributes.supported_features === "undefined") {
-    return false;
-  }
-  return (attributes.supported_features & feature) !== 0;
-}
-
-export function isFullyOpen(stateObj) {
-  if (stateObj.attributes.current_position !== undefined) {
-    return stateObj.attributes.current_position === 100;
-  }
-  return stateObj.state === "open";
-}
-
-export function isFullyClosed(stateObj) {
-  if (stateObj.attributes.current_position !== undefined) {
-    return stateObj.attributes.current_position === 0;
-  }
-  return stateObj.state === "closed";
-}
-
-export function changeCoverIcons(context) {
-  const stateObj = context._hass.states[context.config.entity];
-  const { current_position: currentPosition, assumed_state: assumedState } = stateObj.attributes;
-
-  const supportsOpen = supportsFeature(stateObj, coverEntityFeature.OPEN);
-  const supportsClose = supportsFeature(stateObj, coverEntityFeature.CLOSE);
-  const supportsStop = supportsFeature(stateObj, coverEntityFeature.STOP);
-
-  const fullyOpen = isFullyOpen(stateObj);
-  const fullyClosed = isFullyClosed(stateObj);
-  const isCurtains = getAttribute(context, "device_class") === "curtain";
-
-  context.elements.icon.icon = fullyOpen
-    ? getIcon(context, context.config.entity, context.config.icon_open)
-    : getIcon(context, context.config.entity, context.config.icon_close);
-
-  const iconUpName = context.config.icon_up || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
-  const iconDownName = context.config.icon_down || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
-  
-  context.elements.buttonOpen.icon.setAttribute("icon", iconUpName);
-  context.elements.buttonClose.icon.setAttribute("icon", iconDownName);
-
-  if (currentPosition !== undefined) {
-    if (fullyOpen) {
-      context.elements.buttonOpen.classList.add("disabled");
-    } else if (supportsOpen) {
-      context.elements.buttonOpen.classList.remove("disabled");
+    // Affichage conditionnel selon disponibilité et présence d'attribut
+    const shouldHide = state === 'unavailable' || temperature === '' || temperature === undefined;
+    if (shouldHide) {
+        context.elements.temperatureContainer?.classList.add('hidden');
+    } else {
+        context.elements.temperatureContainer?.classList.remove('hidden');
     }
 
-    if (fullyClosed) {
-      context.elements.buttonClose.classList.add("disabled");
-    } else if (supportsClose) {
-      context.elements.buttonClose.classList.remove("disabled");
+    if (temperature !== context.previousTemp) {
+        context.previousTemp = temperature;
+        if (context.elements.tempDisplay && temperature !== '' && temperature !== undefined) {
+            context.elements.tempDisplay.innerText = parseFloat(temperature).toFixed(1);
+        }
     }
-  } else {
-    context.elements.buttonOpen.classList.remove("disabled");
-    context.elements.buttonClose.classList.remove("disabled");
-  }
+}
 
-  if (!supportsStop) {
-    context.elements.buttonStop.style.display = "none";
-  } else {
-    context.elements.buttonStop.style.display = "";
-  }
+export function changeTargetTempLow(context) {
+    const targetTempLow = getAttribute(context, "target_temp_low");
+    const hideTargetTempLow = context.config.hide_target_temp_low;
+    const state = getState(context);
+
+    // Masquer si indisponible, sinon respecter hide_target_temp_low
+    const shouldHideLow = state === 'unavailable' || targetTempLow === '' || targetTempLow === undefined || hideTargetTempLow;
+
+    if (shouldHideLow) {
+        context.elements.targetTemperatureContainer?.classList.add('hidden');
+        context.elements.lowTempContainer?.classList.add('hidden');
+    } else {
+        context.elements.targetTemperatureContainer?.classList.remove('hidden');
+        context.elements.lowTempContainer?.classList.remove('hidden');
+    }
+
+    if (targetTempLow !== context.previousTargetTempLow) {
+        context.previousTargetTempLow = targetTempLow;
+        if (context.elements.lowTempDisplay && targetTempLow !== '' && targetTempLow !== undefined) {
+            context.elements.lowTempDisplay.innerText = parseFloat(targetTempLow).toFixed(1);
+        }
+    }
+}
+
+export function changeTargetTempHigh(context) {
+    const targetTempHigh = getAttribute(context, "target_temp_high");
+    const hideTargetTempHigh = context.config.hide_target_temp_high;
+    const state = getState(context);
+
+    // Masquer si indisponible, sinon respecter hide_target_temp_high
+    const shouldHideHigh = state === 'unavailable' || targetTempHigh === '' || targetTempHigh === undefined || hideTargetTempHigh;
+
+    if (shouldHideHigh) {
+        context.elements.highTempContainer?.classList.add('hidden');
+    } else {
+        context.elements.highTempContainer?.classList.remove('hidden');
+        context.elements.targetTemperatureContainer?.classList.remove('hidden');
+    }
+
+    if (targetTempHigh !== context.previousTargetTempHigh) {
+        context.previousTargetTempHigh = targetTempHigh;
+        if (context.elements.highTempDisplay && targetTempHigh !== '' && targetTempHigh !== undefined) {
+            context.elements.highTempDisplay.innerText = parseFloat(targetTempHigh).toFixed(1);
+        }
+    }
 }
 
 export function changeStyle(context) {
     setLayout(context);
     handleCustomStyles(context);
+
+    const state = getState(context);
+
+    if (context.previousState !== state) {
+        context.previousState = state;
+        const element = context.elements.background;
+        element.style.backgroundColor = `var(--bubble-climate-background-color, ${getClimateColor(context)})`;
+    }
+
+    const cardLayout = context.config.card_layout;
+    const dropdown = context.elements.hvacModeDropdown;
 }

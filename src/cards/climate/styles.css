@@ -1,35 +1,57 @@
-.bubble-cover-button {
-  display: flex;
-  position: relative;
-  height: 36px;
-  width: 36px;
-  border-radius: var(--bubble-cover-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-  background-color: var(--bubble-cover-button-background-color);
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
+.bubble-temperature-container, .bubble-low-temp-container, .bubble-high-temp-container {
+    display: inline-flex;
+    position: relative;
+    font-size: 12px;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    height: 36px;
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    background-color: var(--bubble-climate-button-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))));
 }
 
-.bubble-cover-button-icon {
-  --mdc-icon-size: 20px;
-  color: var(--primary-text-color);
-  line-height: normal;
+.bubble-low-temp-container {
+    color: var(--state-climate-heat-color, var(--state-climate-active-color, var(--state-active-color)));
 }
 
-.bubble-buttons-container {
-  align-items: center;
-  gap: 8px;
+.bubble-high-temp-container {
+    color: var(--state-climate-cool-color, var(--state-climate-active-color, var(--state-active-color)));
 }
 
-.bubble-button.disabled {
-  opacity: 0.3 !important;
-  pointer-events: none !important;
-  cursor: none !important;
+.bubble-target-temperature-container {
+    display: flex;
+    gap: 10px;
 }
 
-.large .bubble-cover-button-icon {
-  --mdc-icon-size: 24px;
+.bubble-climate-minus-button,
+.bubble-climate-plus-button {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 34px;
+    height: 34px;
+    margin: 2px;
+    vertical-align: middle;
+    font-size: 18px;
+    color: var(--primary-text-color);
+    cursor: pointer;
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+}
+
+.bubble-climate-minus-button-icon,
+.bubble-climate-plus-button-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    --mdc-icon-size: 16px;
+}
+
+@keyframes tap-warning {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(1px); }
+    30%, 50%, 70% { transform: translateX(-2px); }
+    40%, 60% { transform: translateX(2px); }
 }

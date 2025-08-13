@@ -3,6 +3,7 @@ import { initializeContent } from './tools/init.js';
 import { cleanupTapActions } from './tools/tap-actions';
 import { preloadYAMLStyles } from './tools/style-processor.js';
 import { createBubbleDefaultColor } from './tools/style.js';
+import { cleanupScrollingEffects } from './tools/utils.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 import { handlePopUp } from './cards/pop-up/index.js';
@@ -48,6 +49,16 @@ class BubbleCard extends HTMLElement {
   disconnectedCallback() {
     this.isConnected = false;
     cleanupTapActions();
+    try { if (this.content) cleanupScrollingEffects(this.content); } catch (e) {}
+    try {
+      if (this._moduleChangeHandler) {
+        window.removeEventListener('bubble-card-modules-changed', this._moduleChangeHandler);
+        window.removeEventListener('bubble-card-module-updated', this._moduleChangeHandler);
+        document.removeEventListener('yaml-modules-updated', this._moduleChangeHandler);
+        this._moduleChangeHandler = null;
+        this._moduleChangeListenerAdded = false;
+      }
+    } catch (e) {}
     clearTimeout(this._editorUpdateTimeout);
   }
 

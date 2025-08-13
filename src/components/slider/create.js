@@ -486,10 +486,6 @@ export function createSliderStructure(context, config = {}) {
       const bubbleAction = e.target.closest('.bubble-action');
       const noSlide = e.target.closest('.bubble-sub-button')?.hasAttribute('no-slide');
 
-      // Do not start sliding when clicking on actionable icon areas
-      // This ensures icon tap_action remains usable even with tap_to_slide
-      if (e.target.closest('.bubble-action.bubble-action-enabled')) return;
-
       if (noSlide || (bubbleAction && bubbleAction.getAttribute('data-hold-action') !== '{"action":"none"}')) return;
 
       isLongPress = false;
@@ -509,17 +505,11 @@ export function createSliderStructure(context, config = {}) {
     });
   } else if (!options.readOnlySlider) {
     options.targetElement.addEventListener('pointerdown', (e) => {
-      const bubbleAction = e.target.closest('.bubble-action');
-      const noSlide = e.target.closest('.bubble-sub-button')?.hasAttribute('no-slide');
-
-      // Do not start sliding when clicking on actionable icon areas
-      // This ensures icon tap_action remains usable even with tap_to_slide
-      if (e.target.closest('.bubble-action.bubble-action-enabled')) return;
-
-      if (noSlide || (bubbleAction && bubbleAction.getAttribute('data-hold-action') !== '{"action":"none"}')) return;
-
+      // When tap_to_slide is true, block starting a slide from the icon or sub-buttons only
+      const isOnIcon = !!e.target.closest('.bubble-main-icon-container');
       const subButton = e.target.closest('.bubble-sub-button');
-      if (subButton) return;
+      const noSlide = subButton?.hasAttribute('no-slide');
+      if (isOnIcon || subButton || noSlide) return;
 
       options.targetElement.setPointerCapture(e.pointerId);
 

@@ -1,21 +1,25 @@
 import { changeState, changeIcon, changeName, changeStatus } from "../../components/base-card/changes.js";
 import { changeSubButtons } from "../../components/sub-button/changes.js";
 import {
-  changeCoverIcons,
-  changeStyle,
-} from './changes.js'
+    changeTemperature,
+    changeTargetTempLow,
+    changeTargetTempHigh,
+    changeStyle
+} from './changes.js';
 import { createStructure } from './create.js';
 
-export function handleCover(context) {
-    if (context.cardType !== "cover") {
+export function handleClimate(context) {
+    if (context.cardType !== 'climate') {
         createStructure(context);
     }
 
     changeStatus(context);
-    changeIcon(context);
     changeName(context);
+    changeIcon(context);
     changeState(context);
-    changeCoverIcons(context);
+    changeTemperature(context);
+    changeTargetTempLow(context);
+    changeTargetTempHigh(context);
     changeSubButtons(context);
     changeStyle(context);
 }

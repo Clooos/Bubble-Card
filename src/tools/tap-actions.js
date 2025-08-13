@@ -14,7 +14,13 @@ function disableActionsDuringScroll() {
   }, scrollDisableTime);
 }
 
-document.addEventListener('scroll', disableActionsDuringScroll, { passive: true });
+// Register global listeners only once
+if (!window.__bubbleTapActionsInitialized) {
+  document.addEventListener('scroll', disableActionsDuringScroll, { passive: true });
+  document.body.addEventListener('pointerdown', handlePointerDown, { passive: true });
+  document.body.addEventListener('touchstart', handlePointerDown, { passive: true });
+  window.__bubbleTapActionsInitialized = true;
+}
 
 const actionHandler = new WeakMap();
 const activeHandlers = new Set();
@@ -91,9 +97,6 @@ function handlePointerDown(event) {
   document.addEventListener('touchend', endHandler, { once: true });
   document.addEventListener('scroll', scrollHandler, { once: true });
 }
-
-document.body.addEventListener('pointerdown', handlePointerDown, { passive: true });
-document.body.addEventListener('touchstart', handlePointerDown, { passive: true });
 
 export function callAction(element, actionConfig, action) {
   const event = new Event('hass-action', { bubbles: true, composed: true });

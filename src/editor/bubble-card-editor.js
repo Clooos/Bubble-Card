@@ -100,6 +100,23 @@ class BubbleCardEditor extends LitElement {
         }
     }
 
+    disconnectedCallback() {
+        super.disconnectedCallback?.();
+        try { if (this._errorListener) { window.removeEventListener('bubble-card-error', this._errorListener); this._errorListener = null; } } catch (e) {}
+        try {
+            if (this._moduleChangeHandler) {
+                window.removeEventListener('bubble-card-modules-changed', this._moduleChangeHandler);
+                window.removeEventListener('bubble-card-module-updated', this._moduleChangeHandler);
+                document.removeEventListener('yaml-modules-updated', this._moduleChangeHandler);
+                this._moduleChangeHandler = null;
+                this._moduleChangeListenerAdded = false;
+            }
+        } catch (e) {}
+        try { if (this._storeAutoRefreshTimer) { clearInterval(this._storeAutoRefreshTimer); this._storeAutoRefreshTimer = null; } } catch (e) {}
+        try { if (this._progressInterval) { clearInterval(this._progressInterval); this._progressInterval = null; } } catch (e) {}
+        try { if (this._editorSchemaDebounce) { clearTimeout(this._editorSchemaDebounce); this._editorSchemaDebounce = null; } } catch (e) {}
+    }
+
     render() {
         if (!this.hass) {
             return html``;

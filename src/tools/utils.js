@@ -103,21 +103,45 @@ export function getState(context, entity = context.config.entity) {
 }
 
 export function getAttribute(context, attribute, entity = context.config.entity) {
-  if (!attribute) return '';
+    if (!attribute) return '';
 
-  try {
-    if (attribute.includes(' ')) {
-      return eval(`context._hass.states['${entity}']?.attributes['${attribute}']`) ?? '';
-    } else {
-      // Gestion spéciale pour les attributs de type forecast avec notation de chemin
-      const result = eval(`context._hass.states['${entity}']?.attributes.${attribute}`);
-      // Assurer que 0 est retourné comme '0' et pas comme une chaîne vide
-      return result === 0 ? '0' : result ?? '';
+    // Resolve nested attributes safely without using eval
+    // Supports dot and bracket notation, e.g., forecast[0].datetime or forecast.0.datetime
+    function resolveObjectPath(objectRoot, pathExpression) {
+        if (!objectRoot || !pathExpression || typeof pathExpression !== 'string') return undefined;
+        const tokenRegex = /[^.\[\]]+|\[(?:'([^']+)'|"([^"]+)"|(\d+))\]/g;
+        let match;
+        let current = objectRoot;
+        while ((match = tokenRegex.exec(pathExpression)) && current != null) {
+            const [, singleQuoted, doubleQuoted, numeric] = match;
+            const key = numeric !== undefined
+                ? Number(numeric)
+                : (singleQuoted !== undefined ? singleQuoted : (doubleQuoted !== undefined ? doubleQuoted : match[0]));
+            // If match[0] was a simple token (no brackets), it's already the key
+            const resolvedKey = (singleQuoted !== undefined || doubleQuoted !== undefined || numeric !== undefined)
+                ? key
+                : match[0];
+            current = current?.[resolvedKey];
+        }
+        return current;
     }
-  } catch (error) {
-    console.warn(`Error accessing attribute '${attribute}' for entity '${entity}':`, error);
-    return '';
-  }
+
+    try {
+        const attributesRoot = context?._hass?.states?.[entity]?.attributes;
+        if (!attributesRoot) return '';
+
+        // When attribute contains spaces, treat it as a flat key
+        if (attribute.includes(' ')) {
+            const value = attributesRoot[attribute];
+            return value === 0 ? '0' : (value ?? '');
+        }
+        
+        const result = resolveObjectPath(attributesRoot, attribute);
+        return result === 0 ? '0' : (result ?? '');
+    } catch (error) {
+        console.warn(`Error accessing attribute '${attribute}' for entity '${entity}':`, error);
+        return '';
+    }
 }
 
 export function isEntityType(context, entityType, entity) {
@@ -249,6 +273,7 @@ export function applyScrollingEffect(context, element, text) {
                 }
                 
                 window.bubbleScrollObserver.observe(element);
+                element._bubbleObserved = true;
             }
         }
     }
@@ -269,11 +294,26 @@ export function applyScrollingEffect(context, element, text) {
     // Add resize listener only once per element
     if (!element.eventAdded) {
         const debouncedUpdate = debounce(() => {
+            // If element has been detached, cleanup listeners/observers once and stop
+            if (!element.isConnected) {
+                if (element._bubbleResizeListener) {
+                    window.removeEventListener('resize', element._bubbleResizeListener);
+                    element._bubbleResizeListener = null;
+                }
+                if (window.bubbleScrollObserver && element._bubbleObserved) {
+                    try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
+                    element._bubbleObserved = false;
+                }
+                element.eventAdded = false;
+                return;
+            }
+
             element.innerHTML = element.previousText;
             checkAndApplyScrolling();
         }, 500);
         
         window.addEventListener('resize', debouncedUpdate);
+        element._bubbleResizeListener = debouncedUpdate;
         element.eventAdded = true;
     }
 }
@@ -453,5 +493,23 @@ export function toggleBodyScroll(disable) {
 
         document.documentElement.classList.remove(scrollLockHtmlClass);
         window.scrollTo({ top: previousScrollY, behavior: 'instant' });
+    }
+}
+
+export function cleanupScrollingEffects(root) {
+    try {
+        const elements = root.querySelectorAll('*');
+        elements.forEach((el) => {
+            if (el._bubbleResizeListener) {
+                window.removeEventListener('resize', el._bubbleResizeListener);
+                el._bubbleResizeListener = null;
+                el.eventAdded = false;
+            }
+            if (window.bubbleScrollObserver) {
+                try { window.bubbleScrollObserver.unobserve(el); } catch (e) {}
+            }
+        });
+    } catch (e) {
+        // no-op
     }
 }

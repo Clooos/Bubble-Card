@@ -11,7 +11,6 @@
   transition-delay: .1s;
   backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
   -webkit-backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
-  will-change: opacity;
 }
 
 .bubble-backdrop.is-visible {

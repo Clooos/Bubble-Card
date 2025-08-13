@@ -403,6 +403,12 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
         `return \`${styles}\`;`
       );
       compiledTemplateCache.set(styles, compiledFunction);
+      // Prevent unbounded growth of the compiled template cache
+      // Keep the most recent ~500 entries as a simple safeguard
+      if (compiledTemplateCache.size > 500) {
+        const oldestKey = compiledTemplateCache.keys().next().value;
+        compiledTemplateCache.delete(oldestKey);
+      }
     }
     const card = context.config.card_type === 'pop-up' ? context.popUp : context.card;
     const result = cleanCSS(compiledFunction.call(

@@ -408,7 +408,7 @@ export function makeModulesEditor(context) {
 
   const templateResult = html`
     <ha-expansion-panel outlined>
-      <h4 slot="header" style="z-index: 8;">
+      <h4 slot="header">
         <ha-icon icon="mdi:puzzle"></ha-icon>
         Modules
         ${moduleUpdates.hasUpdates && entityExists ? html`
