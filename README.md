@@ -2290,7 +2290,7 @@ You can set a module to apply automatically to all Bubble Cards:
 - **Via the editor:**
 
   - In the Module editor, find your module in the **My Modules** tab.
-  - Toggle the **Global** switch next to the module name.
+  - Toggle the **All cards** button next to the module name.
   - The module will now be applied to all cards automatically.
  
 - **Via YAML:**
