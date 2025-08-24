@@ -41,6 +41,12 @@ export function renderCalendarEditor(editor){
                       .data=${editor._config}
                       .schema=${[
                         {
+                          name: 'days',
+                          label: t('editor.calendar.days'),
+                          title: t('editor.calendar.days'),
+                          selector: { number: { step: 1, min: 1, max: 7} },
+                        },
+                        {
                           name: 'limit',
                           label: t('editor.calendar.limit'),
                           title: t('editor.calendar.limit'),
