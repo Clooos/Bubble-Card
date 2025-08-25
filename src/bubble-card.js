@@ -1,6 +1,6 @@
 import { version } from './var/version.js';
 import { initializeContent } from './tools/init.js';
-import { cleanupTapActions } from './tools/tap-actions';
+import { cleanupTapActions } from './tools/tap-actions.js';
 import { preloadYAMLStyles } from './tools/style-processor.js';
 import { createBubbleDefaultColor } from './tools/style.js';
 import { cleanupScrollingEffects } from './tools/utils.js';
