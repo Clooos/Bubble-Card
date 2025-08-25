@@ -9,6 +9,7 @@
     "calendar": {
       "entity": "实体",
       "color": "颜色",
+      "days": "最大天数",
       "limit": "限制",
       "list_of_calendars": "日历列表",
       "show_end": "显示结束时间",
