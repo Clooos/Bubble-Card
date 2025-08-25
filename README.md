@@ -934,7 +934,7 @@ This card allows you to display your calendar entities. Its content is scrollabl
 
 | Name                | Type    | Requirement  | Supported options                               | Description                                                                             |
 |---------------------|---------|--------------|-------------------------------------------------|-----------------------------------------------------------------------------------------|
-| `days`              | number  | Optional     | A number                                        | The maximum number of days to display in the calendar (default: 7)                      |
+| `days`              | number  | Optional     | Any number (minimum: 1)                        | Number of calendar days to fetch events for, from now until the end of the Nth day (default: 7) |
 | `entities`          | object  | **Required** | A calendar entity object (see below)            | The entity to control (e.g., `calendar.main_calendar`).                                 |
 | `entities.entity`   | string  | **Required** | A calendar entity                               | The calendar entity to display                                                          |
 | `entities.color`    | string  | Optional     | A color                                         | A custom color for the calendar chip. If not defined, an automatic color will be picked |
