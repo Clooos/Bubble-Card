@@ -296,6 +296,24 @@ export function createSliderStructure(context, config = {}) {
   let initialSliderX = 0;
   let draggingTimeout = null;
 
+  // Prevent conflicts with HA sidebar swipe (especially on iOS app)
+  function isSidebarSwipeStart(e) {
+    try {
+      const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+      if (path && path.some(el => el?.tagName && el.tagName.toLowerCase() === 'ha-sidebar')) {
+        return true;
+      }
+    } catch (_) {}
+
+    // Detect left-edge swipe gesture
+    const clientX = (e.clientX !== undefined)
+      ? e.clientX
+      : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    const isTouch = (e.pointerType === 'touch') || !!e.touches;
+    const NEAR_LEFT_EDGE_PX = 30;
+    return isTouch && clientX <= NEAR_LEFT_EDGE_PX;
+  }
+
   function onPointerMove(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -411,6 +429,7 @@ export function createSliderStructure(context, config = {}) {
   }
 
   function handleLongPress(e) {
+    if (isSidebarSwipeStart(e)) return;
     options.targetElement.setPointerCapture(e.pointerId);
     
     if (context.card && context.card.classList.contains('is-unavailable')) return;
@@ -483,6 +502,7 @@ export function createSliderStructure(context, config = {}) {
     let isLongPress = false;
 
     options.targetElement.addEventListener('pointerdown', (e) => {
+      if (isSidebarSwipeStart(e)) return;
       const bubbleAction = e.target.closest('.bubble-action');
       const noSlide = e.target.closest('.bubble-sub-button')?.hasAttribute('no-slide');
 
@@ -505,6 +525,7 @@ export function createSliderStructure(context, config = {}) {
     });
   } else if (!options.readOnlySlider) {
     options.targetElement.addEventListener('pointerdown', (e) => {
+      if (isSidebarSwipeStart(e)) return;
       // When tap_to_slide is true, block starting a slide from the icon or sub-buttons only
       const isOnIcon = !!e.target.closest('.bubble-main-icon-container');
       const subButton = e.target.closest('.bubble-sub-button');
