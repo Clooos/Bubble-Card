@@ -15,6 +15,45 @@ const popupState = {
 
 const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER']);
 
+// Pre-warm compositor layers and force style calculation to avoid first-open stutter
+function prewarmLayers(context) {
+    try {
+        const { backdropElement } = getBackdrop(context);
+        const popUp = context.popUp;
+        const popUpBackground = context.popUpBackground || popUp.querySelector('.bubble-pop-up-background');
+
+        if (popUp && popUp.style) {
+            popUp.style.willChange = 'transform';
+        }
+        if (backdropElement && backdropElement.style) {
+            backdropElement.style.willChange = 'opacity, filter';
+        }
+        if (popUpBackground && popUpBackground.style) {
+            popUpBackground.style.willChange = 'backdrop-filter, -webkit-backdrop-filter';
+        }
+
+        // Force a sync layout/paint so the next frame can animate smoothly
+        try { void popUp.getBoundingClientRect(); } catch (_) {}
+        try { if (backdropElement) void backdropElement.getBoundingClientRect(); } catch (_) {}
+        try {
+            if (popUpBackground) {
+                const cs = getComputedStyle(popUpBackground);
+                cs.getPropertyValue('backdrop-filter');
+                cs.getPropertyValue('-webkit-backdrop-filter');
+            }
+        } catch (_) {}
+
+        // Cleanup function to remove hints after animation
+        return () => {
+            try { if (popUp && popUp.style) popUp.style.willChange = ''; } catch (_) {}
+            try { if (backdropElement && backdropElement.style) backdropElement.style.willChange = ''; } catch (_) {}
+            try { if (popUpBackground && popUpBackground.style) popUpBackground.style.willChange = ''; } catch (_) {}
+        };
+    } catch (_) {
+        return () => {};
+    }
+}
+
 export function clickOutside(event, context) {
     if (!(context.config.close_by_clicking_outside ?? true)) return;
     
@@ -280,39 +319,48 @@ export function openPopup(context) {
     // Add to active popups set
     popupState.activePopups.add(context);
 
-    // Actions to perform at the very start of the opening process (synchronized with animation frame)
-    requestAnimationFrame(() => {
-        updatePopupClass(popUp, true);
-        displayContent(context);
-        toggleBackdrop(context, true);
-        
-        // Actions to perform after the main CSS animation is complete
-        setTimeout(() => {
-            // Check if the popup wasn't closed before this timeout executed
-            if (!popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
-                return;
-            }
+    // Pre-warm compositor layers and ensure a layout pass before toggling classes
+    const cleanupWillChange = prewarmLayers(context);
 
-            toggleBodyScroll(true);
-            updateListeners(context, true);
-            
-            if (context.config.auto_close > 0) {
-                if (context.closeTimeout) clearTimeout(context.closeTimeout); 
-                context.closeTimeout = setTimeout(() => {
-                    // Ensure context is still valid and popup is the one to close or hash matches
-                    if (popupState.activePopups.has(context) && 
-                        (context.config.hash === location.hash || !context.config.hash)) {
-                         removeHash();
-                    } else if (popupState.activePopups.has(context)) {
-                         closePopup(context);
-                    }
-                }, context.config.auto_close);
-            }
-            
-            if (context.config.open_action) {
-                callAction(context.popUp, context.config, 'open_action');
-            }
-        }, popupState.animationDuration);
+    // Use a double rAF to guarantee the closed state is fully committed before starting the transition
+    requestAnimationFrame(() => {
+        try { void popUp.getBoundingClientRect(); } catch (_) {}
+        requestAnimationFrame(() => {
+            updatePopupClass(popUp, true);
+            displayContent(context);
+            toggleBackdrop(context, true);
+
+            // Actions to perform after the main CSS animation is complete
+            setTimeout(() => {
+                // Cleanup temporary will-change hints regardless of state
+                try { cleanupWillChange(); } catch (_) {}
+
+                // Check if the popup wasn't closed before this timeout executed
+                if (!popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
+                    return;
+                }
+
+                toggleBodyScroll(true);
+                updateListeners(context, true);
+                
+                if (context.config.auto_close > 0) {
+                    if (context.closeTimeout) clearTimeout(context.closeTimeout); 
+                    context.closeTimeout = setTimeout(() => {
+                        // Ensure context is still valid and popup is the one to close or hash matches
+                        if (popupState.activePopups.has(context) && 
+                            (context.config.hash === location.hash || !context.config.hash)) {
+                             removeHash();
+                        } else if (popupState.activePopups.has(context)) {
+                             closePopup(context);
+                        }
+                    }, context.config.auto_close);
+                }
+                
+                if (context.config.open_action) {
+                    callAction(context.popUp, context.config, 'open_action');
+                }
+            }, popupState.animationDuration);
+        });
     });
 }
 
