@@ -2,6 +2,7 @@ import { createBaseStructure } from "../../components/base-card/index.js";
 import { createElement, getAttribute, getState, forwardHaptic } from "../../tools/utils.js";
 import { createSliderStructure } from "../../components/slider/index.js";
 import { changeVolumeIcon } from "./changes.js";
+import { computePlaybackControl } from "./helpers.js";
 import { addFeedback } from "../../tools/tap-actions.js";
 import styles from "./styles.css";
 
@@ -125,7 +126,8 @@ export function createStructure(context) {
     addFeedback(elements.nextButton, elements.nextButton.feedback);
 
     elements.playPauseButton.addEventListener('click', () => {
-        context._hass.callService('media_player', 'media_play_pause', {
+        const { service } = computePlaybackControl(context);
+        context._hass.callService('media_player', service, {
             entity_id: context.config.entity
         });
         elements.playPauseButton.clicked = true;

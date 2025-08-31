@@ -5,6 +5,7 @@ import {
     isStateOn,
     setLayout
 } from '../../tools/utils.js';
+import { computePlaybackControl, getMediaControlsSupport } from './helpers.js';
 import { getImage } from '../../tools/icon.js';
 import { updateSlider } from '../../components/slider/changes.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
@@ -62,16 +63,8 @@ export function changeSlider(context) {
 }
 
 export function changePlayPauseIcon(context) {
-    const state = getState(context);
-    const isPlaying = state === 'playing';
-    const clicked = context.elements.playPauseButton.clicked;
-
-    if (isPlaying) {
-        context.elements.playPauseButton.icon.setAttribute("icon", clicked ? "mdi:play" : "mdi:pause");
-    } else {
-        context.elements.playPauseButton.icon.setAttribute("icon", clicked ? "mdi:pause" : "mdi:play");
-    }
-
+    const { icon } = computePlaybackControl(context);
+    context.elements.playPauseButton.icon.setAttribute("icon", icon);
     context.elements.playPauseButton.clicked = false;
 }
 
@@ -155,13 +148,27 @@ export function changeStyle(context) {
 
     const state = getState(context);
     const isOn = state !== "off" && state !== "unknown";
+    const isPlaying = state === 'playing';
+    const isPaused = state === 'paused';
+    const isIdle = state === 'idle';
+    const support = getMediaControlsSupport(context);
 
-    // Check if all buttons are configured to be hidden
-    const allButtonsHidden = context.config.hide?.power_button &&
-        context.config.hide?.previous_button &&
-        context.config.hide?.next_button &&
-        context.config.hide?.volume_button &&
-        context.config.hide?.play_pause_button;
+    // Determine visibility based on config and supported features
+    const showPower = !context.config.hide?.power_button && (support.canTurnOn || support.canTurnOff);
+    // Previous/Next: show only when actively engaged (playing/paused), not idle
+    const showPrevious = !context.config.hide?.previous_button && support.canPrevious && (context.editor || (isPlaying || isPaused));
+    const showNext = !context.config.hide?.next_button && support.canNext && (context.editor || (isPlaying || isPaused));
+    // Volume/Mute: allowed while device is on
+    const showVolume = !context.config.hide?.volume_button && (support.canVolumeSet || support.canVolumeStep || support.canMute) && (context.editor || isOn);
+    // Play/Pause/Stop visibility mirrors HA: when playing -> need pause/stop; when paused/idle -> need play
+    const showPlayPause = !context.config.hide?.play_pause_button && (
+        context.editor || (
+            (isOn && isPlaying && (support.canPause || support.canStop)) ||
+            (isOn && (isPaused || isIdle) && support.canPlay)
+        )
+    );
+
+    const allButtonsHidden = !(showPower || showPrevious || showNext || showVolume || showPlayPause);
 
     // Hide or show the buttons container - Make sure it's always visible if power button is needed
     if (((!isOn && context.config.hide?.power_button) || allButtonsHidden) && context.elements.buttonsContainer.style.display !== 'none') {
@@ -170,34 +177,43 @@ export function changeStyle(context) {
         context.elements.buttonsContainer.classList.remove('hidden');
     }
 
-    if (context.config.hide?.power_button && context.elements.powerButton.style.display !== 'none') {
+    if (!showPower && context.elements.powerButton.style.display !== 'none') {
         context.elements.powerButton.classList.add('hidden');
-    } else if (!context.config.hide?.power_button && context.elements.powerButton.classList.contains('hidden')) {
+    } else if (showPower && context.elements.powerButton.classList.contains('hidden')) {
         context.elements.powerButton.classList.remove('hidden');
     }
 
-    if ((context.config.hide?.previous_button || (!context.editor && !isOn)) && context.elements.previousButton.style.display !== 'none') {
+    if (!showPrevious && context.elements.previousButton.style.display !== 'none') {
         context.elements.previousButton.classList.add('hidden');
-    } else if (!(context.config.hide?.previous_button || (!context.editor && !isOn)) && context.elements.previousButton.classList.contains('hidden')) {
+    } else if (showPrevious && context.elements.previousButton.classList.contains('hidden')) {
         context.elements.previousButton.classList.remove('hidden');
     }
 
-    if ((context.config.hide?.next_button || (!context.editor && !isOn)) && context.elements.nextButton.style.display !== 'none') {
+    if (!showNext && context.elements.nextButton.style.display !== 'none') {
         context.elements.nextButton.classList.add('hidden');
-    } else if (!(context.config.hide?.next_button || (!context.editor && !isOn)) && context.elements.nextButton.classList.contains('hidden')) {
+    } else if (showNext && context.elements.nextButton.classList.contains('hidden')) {
         context.elements.nextButton.classList.remove('hidden');
     }
 
-    if ((context.config.hide?.volume_button || (!context.editor && !isOn)) && context.elements.volumeButton.style.display !== 'none') {
+    if (!showVolume && context.elements.volumeButton.style.display !== 'none') {
         context.elements.volumeButton.classList.add('hidden');
-    } else if (!(context.config.hide?.volume_button || (!context.editor && !isOn)) && context.elements.volumeButton.classList.contains('hidden')) {
+    } else if (showVolume && context.elements.volumeButton.classList.contains('hidden')) {
         context.elements.volumeButton.classList.remove('hidden');
     }
 
-    if ((context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.style.display !== 'none') {
+    if (!showPlayPause && context.elements.playPauseButton.style.display !== 'none') {
         context.elements.playPauseButton.classList.add('hidden');
-    } else if (!(context.config.hide?.play_pause_button || (!context.editor && !isOn)) && context.elements.playPauseButton.classList.contains('hidden')) {
+    } else if (showPlayPause && context.elements.playPauseButton.classList.contains('hidden')) {
         context.elements.playPauseButton.classList.remove('hidden');
+    }
+
+    // Mute button availability mirrors volume mute support
+    if (context.elements.muteButton) {
+        if (!(showVolume && support.canMute) && context.elements.muteButton.style.display !== 'none') {
+            context.elements.muteButton.classList.add('hidden');
+        } else if ((showVolume && support.canMute) && context.elements.muteButton.classList.contains('hidden')) {
+            context.elements.muteButton.classList.remove('hidden');
+        }
     }
     
     updateVolumeSliderPosition(context);
