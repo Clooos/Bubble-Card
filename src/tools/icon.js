@@ -50,7 +50,7 @@ export function getIcon(context, entity = context.config.entity, icon = context.
         case "cold":
           return isOff ? "mdi:thermometer" : "mdi:snowflake";
         case "connectivity":
-          return isOff ? "mdi:server-network-off" : "mdi:server-network";
+          return isOff ? "mdi:close-network-outline" : "mdi:check-network-outline";
         case "door":
           return isOff ? "mdi:door-closed" : "mdi:door-open";
         case "garage_door":
