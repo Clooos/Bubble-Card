@@ -1,11 +1,75 @@
 import { forwardHaptic, createElement } from "./utils.js";
 
-const maxHoldDuration = 400;
+const maxHoldDuration = 500;
 const doubleTapTimeout = 200;
 const movementThreshold = 5; // Movement threshold to consider as scroll
 const scrollDisableTime = 300;
 
 window.isScrolling = false;
+
+// Lightweight hold indicator adapted from HA action-handler
+let __bubbleHoldIndicator;
+let __bubbleHoldIndicatorListenersSet = false;
+
+function ensureHoldIndicator(isTouch) {
+  if (!__bubbleHoldIndicator) {
+    const el = document.createElement('div');
+    __bubbleHoldIndicator = el;
+    document.body.appendChild(el);
+  }
+
+  const size = isTouch ? 100 : 50;
+  Object.assign(__bubbleHoldIndicator.style, {
+    position: 'fixed',
+    width: `${size}px`,
+    height: `${size}px`,
+    transform: 'translate(-50%, -50%) scale(0)',
+    pointerEvents: 'none',
+    zIndex: '999',
+    background: 'var(--primary-color)',
+    display: 'none',
+    opacity: '0.4',
+    borderRadius: '50%',
+    transition: 'transform 180ms ease-in-out',
+  });
+
+  if (!__bubbleHoldIndicatorListenersSet) {
+    ['touchcancel','mouseout','mouseup','touchmove','mousewheel','wheel','scroll','pointercancel']
+      .forEach((ev) => {
+        document.addEventListener(ev, () => {
+          stopHoldIndicator();
+        }, { passive: true });
+      });
+    __bubbleHoldIndicatorListenersSet = true;
+  }
+
+  return __bubbleHoldIndicator;
+}
+
+function showHoldIndicator(x, y, isTouch) {
+  const el = ensureHoldIndicator(isTouch);
+  const size = isTouch ? 100 : 50;
+  el.style.width = `${size}px`;
+  el.style.height = `${size}px`;
+  el.style.left = `${Math.round(x)}px`;
+  el.style.top = `${Math.round(y)}px`;
+  el.style.display = 'block';
+  // Force reflow then animate scale in
+  // eslint-disable-next-line no-unused-expressions
+  el.offsetWidth;
+  el.style.transform = 'translate(-50%, -50%) scale(1)';
+}
+
+function stopHoldIndicator() {
+  if (!__bubbleHoldIndicator) return;
+  __bubbleHoldIndicator.style.transform = 'translate(-50%, -50%) scale(0)';
+  // Hide after transition completes
+  setTimeout(() => {
+    if (__bubbleHoldIndicator) {
+      __bubbleHoldIndicator.style.display = 'none';
+    }
+  }, 180);
+}
 
 function disableActionsDuringScroll() {
   window.isScrolling = true;
@@ -60,6 +124,13 @@ function handlePointerDown(event) {
     handler.resetState();
   }
   
+  // Start ripple feedback immediately on press, as in HA
+  try {
+    if (event.type === 'pointerdown' && actionElement.haRipple && typeof actionElement.haRipple.startPress === 'function') {
+      actionElement.haRipple.startPress(event);
+    }
+  } catch (_) {}
+
   handler.handleStart(event);
   
   if (!handler.isInteractionInProgress()) {
@@ -76,6 +147,12 @@ function handlePointerDown(event) {
     document.removeEventListener('pointerup', endHandler);
     document.removeEventListener('touchend', endHandler);
     document.removeEventListener('scroll', scrollHandler);
+    // End ripple on release/cancel/scroll
+    try {
+      if (actionElement.haRipple && typeof actionElement.haRipple.endPress === 'function') {
+        actionElement.haRipple.endPress();
+      }
+    } catch (_) {}
     activeHandlers.delete(handler);
   };
 
@@ -250,8 +327,11 @@ class ActionHandler {
     this.holdTimeout = setTimeout(() => {
       const holdAction = this.config.hold_action || { action: 'none' };
       if (holdAction.action !== 'none' && !window.isScrolling && !this.hasMoved) {
-        this.sendActionEvent(this.element, this.config, 'hold');
+        // Mark hold as recognized; dispatch on release to match HA behavior
         this.holdFired = true;
+        // Show indicator where the press started
+        const isTouch = this.currentInteractionType === 'touchstart';
+        showHoldIndicator(this.startX, this.startY, isTouch);
       }
     }, maxHoldDuration);
   }
@@ -293,6 +373,7 @@ class ActionHandler {
 
     if (window.isScrolling || this.isDisconnected || this.hasMoved) {
       this.interactionStarted = false;
+      stopHoldIndicator();
       return;
     }
     
@@ -309,7 +390,7 @@ class ActionHandler {
 
     if (!wasHoldFired) {
       if (this.lastTap && (currentTime - this.lastTap < doubleTapTimeout) && doubleTapAction.action !== 'none') {
-        clearTimeout(this.tapTimeout); // Annule le tap simple en attente
+        clearTimeout(this.tapTimeout);
         this.sendActionEvent(this.element, this.config, 'double_tap');
         actionInitiatedForTapOrDoubleTap = true;
       } else if (tapAction.action !== 'none') {
@@ -325,6 +406,9 @@ class ActionHandler {
           actionInitiatedForTapOrDoubleTap = true;
         }
       }
+    } else {
+      // Hold recognized: fire on release to align with HA
+      this.sendActionEvent(this.element, this.config, 'hold');
     }
 
     if (actionInitiatedForTapOrDoubleTap || wasHoldFired) {
@@ -357,6 +441,7 @@ class ActionHandler {
 
     this.lastTap = currentTime;
     this.interactionStarted = false;
+    stopHoldIndicator();
   }
 
   handleScroll() {
