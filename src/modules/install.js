@@ -252,14 +252,6 @@ export async function installOrUpdateModule(context, module) {
       yaml: formattedYamlContent
     };
 
-    // Storage in localStorage
-    try {
-      const existingModules = JSON.parse(localStorage.getItem('bubble-card-modules') || '{}');
-      existingModules[moduleId] = simplifiedModuleData;
-      localStorage.setItem('bubble-card-modules', JSON.stringify(existingModules));
-    } catch (storageError) {
-      console.warn("localStorage storage error:", storageError);
-    }
 
     // Add to yamlKeysMap so it appears as installed
     yamlKeysMap.set(moduleId, moduleMetadata);

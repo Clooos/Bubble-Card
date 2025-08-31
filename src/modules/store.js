@@ -54,7 +54,7 @@ export function makeModuleStore(context) {
 # Storage for Bubble Card Modules
 template:
   - trigger:
-      - platform: event
+      - trigger: event
         event_type: bubble_card_update_modules
     sensor:
       - name: "Bubble Card Modules"

@@ -80,9 +80,7 @@ export function extractYamlFromMarkdown(markdown, moduleLink = null) {
             return yamlContent;
           }
         }
-      } catch (e) {
-        console.warn("Error parsing YAML block:", e);
-      }
+      } catch (e) {}
     }
     
     // If no valid module is found, use the first intact block
@@ -107,9 +105,7 @@ export function extractYamlFromMarkdown(markdown, moduleLink = null) {
             });
           }
         }
-      } catch (e) {
-        console.warn("Error adding link to raw YAML block:", e);
-      }
+      } catch (e) {}
     }
     
     return firstBlock;
@@ -148,15 +144,12 @@ export function extractYamlFromMarkdown(markdown, moduleLink = null) {
             });
           }
         }
-      } catch (e) {
-        console.warn("Error adding link to generic code block:", e);
-      }
+      } catch (e) {}
     }
     
     return bestMatch;
   }
 
-  console.warn("No YAML block found in description");
   return "";
 }
 

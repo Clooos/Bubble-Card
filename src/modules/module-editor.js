@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { fireEvent } from '../tools/utils.js';
-import { yamlKeysMap } from '../tools/style-processor.js';
+import { yamlKeysMap, moduleSourceMap } from '../tools/style-processor.js';
 import { extractModuleMetadata } from './parser.js';
 import jsyaml from 'js-yaml';
 import { 
@@ -621,35 +621,11 @@ export async function saveModule(context, moduleData) {
       noCompatMode: true
     });
     
-    // Create simplified module data for storage
+    // Create simplified module data for storage (kept for HA entity payload only)
     const simplifiedModuleData = {
       id: moduleData.id,
       yaml: yamlContent
     };
-    
-    // Save to localStorage
-    try {
-      let existingModules = {};
-      const storedData = localStorage.getItem('bubble-card-modules');
-      
-      if (storedData && storedData.trim() !== '') {
-        try {
-          existingModules = JSON.parse(storedData);
-        } catch (parseError) {
-          console.warn("Error parsing stored modules, resetting storage:", parseError);
-        }
-      }
-      
-      if (!existingModules || typeof existingModules !== 'object') {
-        existingModules = {};
-      }
-      
-      existingModules[moduleData.id] = simplifiedModuleData;
-      localStorage.setItem('bubble-card-modules', JSON.stringify(existingModules));
-      console.info("Module saved locally in localStorage");
-    } catch (storageError) {
-      console.warn("localStorage storage error:", storageError);
-    }
     
     // Extract metadata and update in yamlKeysMap
     const metadata = extractModuleMetadata(yamlContent, moduleData.id, {
@@ -682,6 +658,9 @@ export async function saveModule(context, moduleData) {
     newMap.forEach((value, key) => {
       yamlKeysMap.set(key, value);
     });
+    
+    // Mark this module as coming from the persistent entity (not YAML file)
+    try { moduleSourceMap.set(moduleId, 'entity'); } catch (e) {}
     
     // Ensure the module is added to the card's configuration
     if (context._config && context._config.modules) {
@@ -913,27 +892,10 @@ export async function deleteModule(context, moduleId) {
   }
   
   try {
-    // Remove from localStorage
-    let existingModules = {};
-    const storedData = localStorage.getItem('bubble-card-modules');
-    
-    if (storedData && storedData.trim() !== '') {
-      try {
-        existingModules = JSON.parse(storedData);
-      } catch (parseError) {
-        console.warn("Error parsing stored modules during deletion:", parseError);
-      }
-    }
-    
-    if (!existingModules || typeof existingModules !== 'object') {
-      existingModules = {};
-    }
-    
-    delete existingModules[moduleId];
-    localStorage.setItem('bubble-card-modules', JSON.stringify(existingModules));
-    
     // Remove from yamlKeysMap
     yamlKeysMap.delete(moduleId);
+    // Remove source mapping
+    try { moduleSourceMap.delete(moduleId); } catch (e) {}
     
     // Force refresh
     document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
