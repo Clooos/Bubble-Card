@@ -497,7 +497,7 @@ class BubbleCardEditor extends LitElement {
                         .value="${context?.attribute}"
                         .configValue="${config + "attribute"}"
                         .items="${attributeList}"
-                        .disabled="${nameButton}"
+                        .disabled="${nameButton && array !== 'sub_button'}"
                         @value-changed="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { attribute: ev.detail.value }, array)}"
                     ></ha-combo-box>
                 </div>
