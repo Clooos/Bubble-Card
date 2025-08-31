@@ -26,6 +26,12 @@ Steps to reproduce the behavior:
 **Expected behavior**  
 A clear and concise description of what you expected to happen.
 
+**HA logs**
+If applicable.
+
+**Browser console logs**
+If applicable.
+
 **Screenshots**  
 If applicable, add screenshots to help explain your problem.
 
@@ -36,7 +42,7 @@ If applicable, add any relevant YAML code.
 Your code here
 ```
 
-**Informations (please complete the following information):**  
+**Information (please complete the following information):**  
  - OS: [e.g. iOS]
  - Browser/App: [e.g. chrome, safari]
  - Bubble Card version: [e.g. 2.0.4]
