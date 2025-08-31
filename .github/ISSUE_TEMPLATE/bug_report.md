@@ -26,10 +26,10 @@ Steps to reproduce the behavior:
 **Expected behavior**  
 A clear and concise description of what you expected to happen.
 
-**HA logs**
+**HA logs**  
 If applicable.
 
-**Browser console logs**
+**Browser console logs**  
 If applicable.
 
 **Screenshots**  
