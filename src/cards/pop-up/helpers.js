@@ -13,6 +13,50 @@ const popupState = {
   entityTriggeredPopup: null // Reference to entity-triggered popup
 };
 
+// Simple global de-duplication: if the same hash is pushed consecutively,
+// automatically go back one step so the user only needs one Back press.
+if (!window.__bubbleLocationDeduperAdded) {
+    try {
+        let pendingHashBase = null;
+        let pendingTimestamp = 0;
+        let guardNextNoHash = false;
+
+        window.addEventListener('location-changed', () => {
+            const href = window.location.href;
+            const hasHash = !!window.location.hash;
+            const base = href.split('#')[0];
+
+            if (hasHash) {
+                // A hash navigation just happened (likely popup open)
+                pendingHashBase = base;
+                pendingTimestamp = Date.now();
+                guardNextNoHash = false;
+                return;
+            }
+
+            // No-hash navigation (likely popup close via replaceState)
+            if (guardNextNoHash) {
+                guardNextNoHash = false;
+                return;
+            }
+
+            if (pendingHashBase && base === pendingHashBase && (Date.now() - pendingTimestamp) < 1500) {
+                // We just had a hash on this same base recently; close likely used replaceState.
+                // Pop one entry so the back button won't require extra presses.
+                try { 
+                    guardNextNoHash = true;
+                    history.back();
+                } catch (_) {}
+            }
+
+            pendingHashBase = null;
+        });
+        window.__bubbleLocationDeduperAdded = true;
+    } catch (_) {
+        // no-op
+    }
+}
+
 const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER']);
 
 // Pre-warm compositor layers and force style calculation to avoid first-open stutter
@@ -77,27 +121,26 @@ export function removeHash() {
     if (popupState.hashRecentlyAdded || !location.hash || popupState.hashChangeProtection) {
         return false;
     }
-    
+
     setTimeout(() => {
         if (popupState.hashChangeProtection) {
             return;
         }
-        
         const newURL = window.location.href.split('#')[0];
         history.replaceState(null, "", newURL);
         window.dispatchEvent(new Event('location-changed'));
     }, 50);
-    
+
     return true;
 }
 
 export function addHash(hash) {
     popupState.hashChangeProtection = true;
-    
+
     const newURL = hash.startsWith('#') ? window.location.href.split('#')[0] + hash : hash;
     history.pushState(null, "", newURL);
     window.dispatchEvent(new Event('location-changed'));
-    
+
     setTimeout(() => {
         popupState.hashChangeProtection = false;
     }, 200);
