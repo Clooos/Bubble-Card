@@ -164,7 +164,7 @@ export function isStateOn(context, entity = context.config.entity) {
         'true', 
         'home', 
         'playing', 
-        'locked', 
+        'unlocked', 
         'occupied', 
         'available', 
         'running', 
