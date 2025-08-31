@@ -124,6 +124,17 @@ export function renderClimateEditor(editor){
                             </div>
                         </ha-formfield>
                     ` : ''}
+                    <ha-formfield .label="Optional - Hide temperature control">
+                        <ha-switch
+                            aria-label="Optional - Hide temperature control"
+                            .checked=${editor._config.hide_temperature}
+                            .configValue="${"hide_temperature"}"
+                            @change=${editor._valueChanged}
+                        ></ha-switch>
+                        <div class="mdc-form-field">
+                            <label class="mdc-label">Optional - Hide temperature control</label> 
+                        </div>
+                    </ha-formfield>
                     <ha-formfield .label="Optional - Constant background color when ON">
                         <ha-switch
                             aria-label="Optional - Constant background color when ON"

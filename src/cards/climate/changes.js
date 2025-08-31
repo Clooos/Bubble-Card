@@ -16,7 +16,8 @@ export function changeTemperature(context) {
 
     const decimals = getTemperatureDecimals(context);
 
-    const shouldHide = state === 'unavailable' || temperature === '' || temperature === undefined;
+    const hideTemperature = context.config.hide_temperature;
+    const shouldHide = hideTemperature || state === 'unavailable' || temperature === '' || temperature === undefined;
     if (shouldHide) {
         context.elements.temperatureContainer?.classList.add('hidden');
     } else {
