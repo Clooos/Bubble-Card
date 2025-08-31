@@ -1,6 +1,7 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
 import { addFeedback } from "../../tools/tap-actions.js";
 import { createElement, getAttribute, forwardHaptic } from "../../tools/utils.js";
+import { getTemperatureDecimals, formatTemperature } from "./helpers.js";
 import styles from "./styles.css";
 
 export function createStructure(context) {
@@ -26,6 +27,7 @@ export function createStructure(context) {
     );
 
     function createTemperatureControls(container, attribute, step) {
+        const decimals = getTemperatureDecimals(context, step);
         const minusButton = createElement('div', 'bubble-climate-minus-button');
         const plusButton = createElement('div', 'bubble-climate-plus-button');
 
@@ -65,11 +67,11 @@ export function createStructure(context) {
 
         function updateTempDisplay(newTemp) {
             if (attribute === 'temperature') {
-                elements.tempDisplay.innerText = newTemp.toFixed(1);
+                elements.tempDisplay.innerText = formatTemperature(newTemp, context, step);
             } else if (attribute === 'target_temp_low') {
-                elements.lowTempDisplay.innerText = newTemp.toFixed(1);
+                elements.lowTempDisplay.innerText = formatTemperature(newTemp, context, step);
             } else if (attribute === 'target_temp_high') {
-                elements.highTempDisplay.innerText = newTemp.toFixed(1);
+                elements.highTempDisplay.innerText = formatTemperature(newTemp, context, step);
             }
         }
 
@@ -105,7 +107,7 @@ export function createStructure(context) {
             const stateNow = context._hass.states[context.config.entity];
             const minTemp = context.config.min_temp ?? (stateNow?.attributes?.min_temp ?? 0);
             const maxTemp = context.config.max_temp ?? (stateNow?.attributes?.max_temp ?? 1000);
-            let newTemp = parseFloat((currentTemp + change).toFixed(1));
+            let newTemp = parseFloat((currentTemp + change).toFixed(decimals));
             newTemp = Math.min(maxTemp, Math.max(minTemp, newTemp));
 
             if (newTemp < minTemp) {

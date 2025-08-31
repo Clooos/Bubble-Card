@@ -42,3 +42,18 @@ export function getClimateColor(context) {
 
     return overlayColor;
 }
+
+export function getTemperatureDecimals(context, stepOverride) {
+    const hass = context._hass;
+    const stateObj = hass?.states?.[context.config.entity];
+    const isCelcius = hass?.config?.unit_system?.temperature === '°C';
+    const effectiveStep = stepOverride ?? context.config.step ?? (stateObj?.attributes?.target_temp_step ?? (isCelcius ? 0.5 : 1));
+    return Number.isInteger(Number(effectiveStep)) ? 0 : 1;
+}
+
+export function formatTemperature(value, context, stepOverride) {
+    const decimals = getTemperatureDecimals(context, stepOverride);
+    const num = Number(value);
+    if (Number.isNaN(num)) return '';
+    return num.toFixed(decimals);
+}

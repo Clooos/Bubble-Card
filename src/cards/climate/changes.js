@@ -1,5 +1,7 @@
 import { 
     getClimateColor, 
+    getTemperatureDecimals,
+    formatTemperature
 } from './helpers.js';
 import { 
     getState,
@@ -12,7 +14,8 @@ export function changeTemperature(context) {
     const temperature = getAttribute(context, "temperature");
     const state = getState(context);
 
-    // Affichage conditionnel selon disponibilité et présence d'attribut
+    const decimals = getTemperatureDecimals(context);
+
     const shouldHide = state === 'unavailable' || temperature === '' || temperature === undefined;
     if (shouldHide) {
         context.elements.temperatureContainer?.classList.add('hidden');
@@ -23,7 +26,7 @@ export function changeTemperature(context) {
     if (temperature !== context.previousTemp) {
         context.previousTemp = temperature;
         if (context.elements.tempDisplay && temperature !== '' && temperature !== undefined) {
-            context.elements.tempDisplay.innerText = parseFloat(temperature).toFixed(1);
+            context.elements.tempDisplay.innerText = formatTemperature(temperature, context);
         }
     }
 }
@@ -33,7 +36,8 @@ export function changeTargetTempLow(context) {
     const hideTargetTempLow = context.config.hide_target_temp_low;
     const state = getState(context);
 
-    // Masquer si indisponible, sinon respecter hide_target_temp_low
+    const decimals = getTemperatureDecimals(context);
+
     const shouldHideLow = state === 'unavailable' || targetTempLow === '' || targetTempLow === undefined || hideTargetTempLow;
 
     if (shouldHideLow) {
@@ -47,7 +51,7 @@ export function changeTargetTempLow(context) {
     if (targetTempLow !== context.previousTargetTempLow) {
         context.previousTargetTempLow = targetTempLow;
         if (context.elements.lowTempDisplay && targetTempLow !== '' && targetTempLow !== undefined) {
-            context.elements.lowTempDisplay.innerText = parseFloat(targetTempLow).toFixed(1);
+            context.elements.lowTempDisplay.innerText = formatTemperature(targetTempLow, context);
         }
     }
 }
@@ -57,7 +61,8 @@ export function changeTargetTempHigh(context) {
     const hideTargetTempHigh = context.config.hide_target_temp_high;
     const state = getState(context);
 
-    // Masquer si indisponible, sinon respecter hide_target_temp_high
+    const decimals = getTemperatureDecimals(context);
+
     const shouldHideHigh = state === 'unavailable' || targetTempHigh === '' || targetTempHigh === undefined || hideTargetTempHigh;
 
     if (shouldHideHigh) {
@@ -70,7 +75,7 @@ export function changeTargetTempHigh(context) {
     if (targetTempHigh !== context.previousTargetTempHigh) {
         context.previousTargetTempHigh = targetTempHigh;
         if (context.elements.highTempDisplay && targetTempHigh !== '' && targetTempHigh !== undefined) {
-            context.elements.highTempDisplay.innerText = parseFloat(targetTempHigh).toFixed(1);
+            context.elements.highTempDisplay.innerText = formatTemperature(targetTempHigh, context);
         }
     }
 }
