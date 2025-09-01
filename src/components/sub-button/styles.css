@@ -71,7 +71,11 @@
 }
 
 .bubble-sub-button .bubble-dropdown-arrow {
-    background: var(--bubble-select-arrow-background-color) !important;
+    background: none !important;
+}
+
+.bubble-sub-button.is-select.background-on {
+    background: var(--bubble-select-arrow-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))))) !important;
 }
 
 .sub-buttons-grid .bubble-sub-button-container {

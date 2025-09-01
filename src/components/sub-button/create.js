@@ -43,6 +43,7 @@ export function createSubButtonElement(context, index, isSelect, showArrow, enti
   subButtonElement.feedbackContainer.appendChild(subButtonElement.feedback);
 
   if (isSelect) {
+    subButtonElement.classList.add('is-select');
     createDropdownStructure(context, subButtonElement, showArrow);
     subButtonElement.dropdownContainer.style.display = 'none';
     createDropdownActions(context, subButtonElement, entity, subButton);
