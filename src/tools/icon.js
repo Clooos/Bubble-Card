@@ -294,12 +294,12 @@ export function getIconColor(context, entity = context.config.entity, brightness
     const adjustedDefaultLightColor = adjustColor(defaultLightColor, adjustedBrightness);
 
     if (!entityRgbColor) {
-      return `var(--bubble-light-color, rgba(${adjustedDefaultLightColor.join(', ')}))`;
+      return `var(--bubble-light-color, var(--bubble-light-white-color, rgba(${adjustedDefaultLightColor.join(', ')})))`;
     }
 
     const adjustedColor = adjustColor(entityRgbColor, adjustedBrightness);
     return isColorCloseToWhite(entityRgbColor) ?
-        `var(--bubble-light-color, rgba(${adjustedDefaultLightColor.join(', ')}))` :
+        `var(--bubble-light-color, var(--bubble-light-white-color, rgba(${adjustedDefaultLightColor.join(', ')})))` :
         `var(--bubble-light-color, rgba(${adjustedColor.join(', ')}))`;
 }
 
