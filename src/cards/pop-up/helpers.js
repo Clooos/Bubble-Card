@@ -586,6 +586,7 @@ export function createTouchHandlers(context) {
         };
         
         context.handleTouchMove = (event) => {
+            // Allow pinch-zoom and multi-touch gestures
             if (event.touches.length !== 1) return;
             
             currentY = event.touches[0].clientY;
@@ -596,6 +597,7 @@ export function createTouchHandlers(context) {
                 
                 if (deltaY > 0) {
                     context.popUp.style.transform = `translateY(${deltaY}px)`;
+                    // Only prevent default for single-touch drag to keep pinch-zoom working
                     event.preventDefault();
                 }
             }

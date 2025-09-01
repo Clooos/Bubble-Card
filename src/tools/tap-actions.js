@@ -91,6 +91,10 @@ const activeHandlers = new Set();
 
 function handlePointerDown(event) {
   if (window.isScrolling) return;
+  // Ignore multi-touch to allow pinch-to-zoom and system gestures
+  if ((event.touches && event.touches.length > 1) || (event.pointerType === 'touch' && event.isPrimary === false)) {
+    return;
+  }
 
   const actionElement = event.composedPath().find(element => 
     element.classList?.contains('bubble-action')
@@ -310,6 +314,12 @@ class ActionHandler {
     this.currentInteractionType = e.type;
     this.interactionStartTime = now;
     
+    // Abort on multi-touch to not interfere with pinch-zoom
+    if (e.touches && e.touches.length > 1) {
+      this.interactionStarted = false;
+      return;
+    }
+
     this.holdFired = false;
     this.hasMoved = false;
 

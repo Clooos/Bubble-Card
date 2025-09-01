@@ -316,7 +316,10 @@ export function createSliderStructure(context, config = {}) {
 
   function onPointerMove(e) {
     e.stopPropagation();
-    e.preventDefault();
+    // Do not block multi-touch gestures like pinch-to-zoom
+    if (!(e.touches && e.touches.length > 1)) {
+      e.preventDefault();
+    }
 
     if (e.target.closest('.bubble-action')) return;
 
@@ -346,7 +349,9 @@ export function createSliderStructure(context, config = {}) {
 
   function onPointerUp(e) {
     e.stopPropagation();
-    e.preventDefault();
+    if (!(e.touches && e.touches.length > 1)) {
+      e.preventDefault();
+    }
     
     if (draggingTimeout) {
       clearTimeout(draggingTimeout);
