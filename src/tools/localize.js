@@ -1,7 +1,7 @@
-import * as en from "../translations/en.json";
-import * as fr from "../translations/fr.json";
-import * as de from "../translations/de.json";
-import * as zh_cn from "../translations/zh_cn.json";
+import en from "../translations/en.js";
+import fr from "../translations/fr.js";
+import de from "../translations/de.js";
+import zh_cn from "../translations/zh_cn.js";
 
 const languages = {
   en,
