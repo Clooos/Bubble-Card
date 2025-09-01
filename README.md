@@ -448,7 +448,8 @@ This card is very versatile. It can be used as a **switch**, a **slider**, a **s
 | `--bubble-button-border-radius` | `px` | Border radius for the button |
 | `--bubble-button-icon-border-radius` | `px` | Border radius for the button icon container |
 | `--bubble-button-icon-background-color` | `color` | Background color for the button icon container |
-| `--bubble-light-color` | `color` | Replace the color of light buttons/sliders |
+| `--bubble-light-white-color` | `color` | Replace the default white color of light buttons/sliders |
+| `--bubble-light-color` | `color` | Replace the color of light buttons/sliders (even RGB lights) |
 | `--bubble-button-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for the button |
 
 </details>
