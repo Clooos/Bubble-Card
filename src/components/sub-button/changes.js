@@ -163,8 +163,12 @@ function setupActions(element, options) {
     };
 
     if (!isSelect) {
-      addActions(element, !isSelect ? subButton : '', entity, defaultActions);
+      addActions(element, subButton, entity, defaultActions);
     } else {
+      // For dropdown sub-buttons, enable double-tap and hold actions but keep single tap for opening the dropdown
+      // We explicitly disable tap action on the action handler side to avoid blocking the dropdown open on single tap
+      const actionConfig = { ...subButton, tap_action: { action: "none" } };
+      addActions(element, actionConfig, entity);
       element.setAttribute("no-slide", "");
     }
 

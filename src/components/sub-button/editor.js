@@ -146,7 +146,6 @@ export function makeSubButtonPanel(editor) {
                         </ha-expansion-panel>
                         <ha-expansion-panel 
                             outlined 
-                            style="${isSelect ? 'opacity: 0.5; pointer-events: none;' : ''}"
                             @expanded-changed=${(e) => {
                                 editor._expandedPanelStates[actionsPanelKey] = e.target.expanded;
                                 editor.requestUpdate();
@@ -158,7 +157,9 @@ export function makeSubButtonPanel(editor) {
                             </h4>
                             <div class="content">
                                 ${getLazyLoadedPanelContent(editor, actionsPanelKey, !!editor._expandedPanelStates[actionsPanelKey], () => html`
-                                    ${editor.makeActionPanel("Tap action", subButton, 'more-info', 'sub_button', index)}
+                                    <div style="${isSelect ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                                        ${editor.makeActionPanel("Tap action", subButton, 'more-info', 'sub_button', index)}
+                                    </div>
                                     ${editor.makeActionPanel("Double tap action", subButton, 'none', 'sub_button', index)}
                                     ${editor.makeActionPanel("Hold action", subButton, 'none', 'sub_button', index)}
                                 `)}

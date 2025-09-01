@@ -12,6 +12,8 @@ export function renderSelectEditor(editor){
         return { label: formattedName, value: attributeName };
       }).filter(attribute => editor._selectable_attributes.includes(attribute.value));
 
+    let button_action = editor._config.button_action || '';
+
     return html`
         <div class="card-config">
             ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
@@ -63,6 +65,19 @@ export function renderSelectEditor(editor){
                     ${editor.makeActionPanel("Tap action")}
                     ${editor.makeActionPanel("Double tap action")}
                     ${editor.makeActionPanel("Hold action")}
+                </div>
+            </ha-expansion-panel>
+            <ha-expansion-panel outlined>
+                <h4 slot="header">
+                  <ha-icon icon="mdi:gesture-tap-button"></ha-icon>
+                  Tap action on button
+                </h4>
+                <div class="content">
+                    <div style="${isSelect ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                        ${editor.makeActionPanel("Tap action", button_action, 'none', 'button_action')}
+                    </div>
+                    ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
+                    ${editor.makeActionPanel("Hold action", button_action, 'none', 'button_action')}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}

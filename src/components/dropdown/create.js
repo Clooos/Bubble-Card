@@ -87,6 +87,12 @@ export function createDropdownActions(context, elements = context.elements, enti
     }
 
     let isMenuOpen = false;
+    let pendingOpenTimer = null;
+    let cancelNextOpenUntil = 0; // Timestamp until which we should not open (double-tap/hold guard)
+    const isTopLevelCard = elements === context.elements;
+    const hasDoubleTapAction = isTopLevelCard
+        ? !!(config && config.button_action && config.button_action.double_tap_action && config.button_action.double_tap_action.action && config.button_action.double_tap_action.action !== 'none')
+        : !!(config && config.double_tap_action && config.double_tap_action.action && config.double_tap_action.action !== 'none');
 
     const updateVisualStyles = () => {
         dropdownArrow.style.transform = 'rotate(180deg)';
@@ -105,6 +111,21 @@ export function createDropdownActions(context, elements = context.elements, enti
         }
     };
 
+    // Cancel any pending open if a double-tap or hold action is fired
+    const cancelOnAction = (ev) => {
+        const actionType = ev?.detail?.action;
+        if (actionType !== 'double_tap' && actionType !== 'hold') return;
+        // Only react if the action originated from the same clickable area (background or sub-button element)
+        const path = (typeof ev.composedPath === 'function') ? ev.composedPath() : [];
+        if (!path.includes(eventCaller)) return;
+        if (pendingOpenTimer) {
+            clearTimeout(pendingOpenTimer);
+            pendingOpenTimer = null;
+        }
+        cancelNextOpenUntil = Date.now() + 300;
+    };
+    card.addEventListener('hass-action', cancelOnAction);
+
     const handleEventClick = (event) => {
         if (event.target.tagName.toLowerCase() === 'mwc-list-item') return;
 
@@ -120,8 +141,42 @@ export function createDropdownActions(context, elements = context.elements, enti
             return;
         }
 
-        menuElement.show();
-        updateVisualStyles();
+        // If menu is already open, let the click close it and do not schedule a reopen
+        if (isMenuOpen) {
+            if (pendingOpenTimer) {
+                clearTimeout(pendingOpenTimer);
+                pendingOpenTimer = null;
+            }
+            cancelNextOpenUntil = Date.now() + 200;
+            return;
+        }
+
+        // If a double-tap/hold just happened, skip opening
+        if (Date.now() < cancelNextOpenUntil) {
+            return;
+        }
+
+        if (hasDoubleTapAction) {
+            // Delay opening slightly to allow double-tap detection to cancel
+            if (pendingOpenTimer) {
+                clearTimeout(pendingOpenTimer);
+                pendingOpenTimer = null;
+            }
+            pendingOpenTimer = setTimeout(() => {
+                // Guard again in case an action fired during the delay
+                if (Date.now() < cancelNextOpenUntil) {
+                    pendingOpenTimer = null;
+                    return;
+                }
+                menuElement.show();
+                updateVisualStyles();
+                pendingOpenTimer = null;
+            }, 220);
+        } else {
+            // Open immediately if no double-tap action is configured
+            menuElement.show();
+            updateVisualStyles();
+        }
     };
 
     const handleMenuClosed = (event) => {
