@@ -31,11 +31,17 @@ const getEventDateKey = (eventStart) => {
 };
 
 export async function changeEventList(context) {
-  const daysOfEvents = context.config.days ?? 7;
+  const daysOfEvents = Math.max(1, context.config.days ?? 7);
 
-  const start = new Date().toISOString();
-  const end = new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * daysOfEvents).toISOString();
-  const params = `start=${start}&end=${end}`;
+  const now = new Date();
+  const start = now.toISOString();
+
+  // End time: remaining hours today + (days-1) full 24-hour periods
+  const end = new Date(now);
+  end.setDate(end.getDate() + (daysOfEvents - 1));
+  end.setHours(23, 59, 59, 999);
+
+  const params = `start=${start}&end=${end.toISOString()}`;
 
   const promises = context.config.entities.map(async (entity) => {
     const url = `calendars/${entity.entity}?${params}`;
