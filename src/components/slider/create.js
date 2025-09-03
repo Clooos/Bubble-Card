@@ -95,6 +95,7 @@ export function createSliderStructure(context, config = {}) {
   if (context.sliderMaxValue <= context.sliderMinValue) {
     if (entityType === 'climate') {
         context.sliderMaxValue = context.sliderMinValue + 1; // Default diff for climate
+    } else if (entityType === 'cover') {
     } else {
         context.sliderMaxValue = context.sliderMinValue + 100; // Default diff for others
     }
@@ -233,6 +234,18 @@ export function createSliderStructure(context, config = {}) {
         // Use precision from entity state if available, default to 1 decimal if not integer
         const precision = context._hass.states[context.config.entity]?.attributes?.precision ?? (Number.isInteger(clampedAdjustedValue) ? 0 : 1);
         context.elements.rangeValue.innerText = clampedAdjustedValue.toFixed(precision).replace(/\.0$/, '') + (unit ? ` ${unit}` : '');
+        break;
+
+      case 'cover':
+        const minCoverValue = context.sliderMinValue;
+        const maxCoverValue = context.sliderMaxValue;
+        const coverStep = context.sliderStep;
+        
+        let displayCoverValue = minCoverValue + (percentage / 100) * (maxCoverValue - minCoverValue);
+
+        // Display the value adjusted to the step
+        const adjustedCoverDisplayValue = getAdjustedValue(displayCoverValue, coverStep);
+        context.elements.rangeValue.innerText = Math.round(adjustedCoverDisplayValue) + '%';
         break;
 
       default:

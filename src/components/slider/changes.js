@@ -163,8 +163,7 @@ function getCurrentValue(context, entity, entityType) {
       
       // Apply custom min/max if configured
       if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
-        const clampedValue = Math.max(minValue, Math.min(maxValue, coverPosition));
-        return calculateRangePercentage(clampedValue, minValue, maxValue);
+        return calculateRangePercentage(coverPosition, minValue, maxValue);
       }
       return coverPosition;
     }
@@ -299,7 +298,9 @@ export function updateEntity(context, percentage) {
   let adjustedValue = getAdjustedValue(rawValue, step);
 
   // Clamp the adjusted value within the min/max bounds
-  adjustedValue = Math.max(minValue, Math.min(maxValue, adjustedValue));
+  if (entityType !== 'cover') {
+    adjustedValue = Math.max(minValue, Math.min(maxValue, adjustedValue));
+  }
 
   switch (entityType) {
     case 'light': {
