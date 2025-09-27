@@ -476,7 +476,7 @@
 }
 
 /* Material tabs */
-ha-tabs, sl-tab-group {
+ha-tabs, ha-tab-group, sl-tab-group {
   margin-bottom: 16px;
   --primary-tab-color: var(--primary-color);
   --secondary-tab-color: var(--secondary-text-color);
@@ -492,6 +492,25 @@ ha-tabs, sl-tab-group {
 
 sl-tab-group {
   border-bottom: none;
+}
+
+ha-tab-group {
+  display: block;
+}
+
+ha-tab-group-tab {
+  flex-grow: 1;
+  text-align: center;
+}
+
+ha-tab-group-tab[active] {
+  color: var(--primary-text-color);
+  opacity: 1;
+}
+
+ha-tab-group-tab[disabled] {
+  opacity: 0.4;
+  pointer-events: none;
 }
 .module-editor-top-marker {
   display: flex;
@@ -516,6 +535,12 @@ paper-tab {
 paper-tab[aria-selected="true"] {
   color: var(--primary-text-color);
   opacity: 1;
+}
+
+paper-tab.disabled,
+paper-tab[disabled] {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 paper-tab ha-icon {
@@ -1044,6 +1069,7 @@ ha-formfield.apply-module-button {
 
 .module-badges .update-badge {
   margin-left: 0 !important;
+  z-index: 7;
 }
 
 .global-badge {

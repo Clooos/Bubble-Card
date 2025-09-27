@@ -18,10 +18,34 @@ import { getLazyLoadedPanelContent } from '../editor/utils.js';
 // Storage sensor entity ID for Bubble Card modules
 const MODULES_SENSOR_ENTITY_ID = 'sensor.bubble_card_modules';
 
+// Ordered identifiers used for the module editor tabs
+const MODULE_TAB_IDS = ['modules', 'store'];
+
 // Function to detect if sl-tab-group is available in the current HA version
 function isSlTabGroupAvailable() {
   return typeof customElements !== 'undefined' && 
          customElements.get('sl-tab-group') !== undefined;
+}
+
+// Detect if the new ha-tab-group component is available
+function isHaTabGroupAvailable() {
+  return typeof customElements !== 'undefined' &&
+         customElements.get('ha-tab-group') !== undefined &&
+         customElements.get('ha-tab-group-tab') !== undefined;
+}
+
+// Select the tab implementation the editor should render
+function getTabImplementation() {
+  // Prefer the new HA tabs when available
+  if (isHaTabGroupAvailable()) {
+    return 'ha-tab-group';
+  }
+
+  if (isSlTabGroupAvailable()) {
+    return 'sl-tab-group';
+  }
+
+  return 'ha-tabs';
 }
 
 // Validate the storage entity used to persist modules
@@ -333,11 +357,32 @@ export function makeModulesEditor(context) {
 
   // Handler for tab change event
   const handleTabChange = (e) => {
-    const useSlTabs = isSlTabGroupAvailable();
-    
-    // Get the selected tab index depending on the component used
-    const selectedTab = useSlTabs ? parseInt(e.detail.name) : e.detail.value;
-    
+    const tabVariant = getTabImplementation();
+    let selectedTab;
+
+    if (tabVariant === 'sl-tab-group') {
+      const rawValue = e?.detail?.name ?? e?.target?.activeTab ?? e?.detail?.value;
+      selectedTab = parseInt(rawValue, 10);
+    } else if (tabVariant === 'ha-tab-group') {
+      const detail = e?.detail ?? {};
+      const eventTarget = detail.tab ?? detail.target ?? detail.item;
+      const derivedPanel = eventTarget?.getAttribute ? eventTarget.getAttribute('panel') : undefined;
+      const panel = detail.panel ?? detail.tabId ?? derivedPanel ?? detail.value ?? e?.target?.activePanel ?? e?.target?.activeTab;
+
+      if (typeof panel === 'number') {
+        selectedTab = panel;
+      } else if (typeof panel === 'string') {
+        const mappedIndex = MODULE_TAB_IDS.indexOf(panel);
+        selectedTab = mappedIndex !== -1 ? mappedIndex : parseInt(panel, 10);
+      }
+    } else {
+      selectedTab = e?.detail?.value ?? e?.target?.selected;
+    }
+
+    if (!Number.isFinite(selectedTab)) {
+      selectedTab = 0;
+    }
+
     context._selectedModuleTab = selectedTab;
     context.requestUpdate();
     requestAnimationFrame(() => {
@@ -367,15 +412,55 @@ export function makeModulesEditor(context) {
 
   // Render the appropriate tab component based on availability
   const renderTabs = () => {
-    const useSlTabs = isSlTabGroupAvailable();
+    const tabVariant = getTabImplementation();
     const selectedTab = context._selectedModuleTab || 0;
+    const selectedPanel = MODULE_TAB_IDS[selectedTab] ?? selectedTab.toString();
 
-    if (useSlTabs) {
+    const handleHaTabNavClick = (panelId) => {
+      const idx = MODULE_TAB_IDS.indexOf(panelId);
+      context._selectedModuleTab = idx !== -1 ? idx : parseInt(panelId, 10) || 0;
+      context.requestUpdate();
+      requestAnimationFrame(() => scrollToModuleForm(context, false));
+    };
+
+    if (tabVariant === 'ha-tab-group') {
       return html`
-        <sl-tab-group 
+        <ha-tab-group
+          id="${tabGroupId}"
+          .activePanel=${selectedPanel}
+          @wa-tab-show=${handleTabChange}
+          @active-panel-changed=${handleTabChange}
+          >
+          <ha-tab-group-tab
+            slot="nav"
+            panel=${MODULE_TAB_IDS[0]}
+            .active=${selectedPanel === MODULE_TAB_IDS[0]}
+            @click=${() => handleHaTabNavClick(MODULE_TAB_IDS[0])}
+          >
+            <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
+            My Modules
+          </ha-tab-group-tab>
+          <ha-tab-group-tab
+            slot="nav"
+            panel=${MODULE_TAB_IDS[1]}
+            .active=${selectedPanel === MODULE_TAB_IDS[1]}
+            ?disabled=${!entityExists}
+            @click=${() => handleHaTabNavClick(MODULE_TAB_IDS[1])}
+          >
+            <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
+            Module Store
+          </ha-tab-group-tab>
+        </ha-tab-group>
+      `;
+    }
+
+    if (tabVariant === 'sl-tab-group') {
+      return html`
+        <sl-tab-group
           id="${tabGroupId}"
           .selected=${selectedTab.toString()}
-          @sl-tab-show=${handleTabChange}>
+          @sl-tab-show=${handleTabChange}
+        >
           <sl-tab slot="nav" panel="0">
             <ha-icon icon="mdi:puzzle-heart-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
             My Modules
@@ -388,22 +473,23 @@ export function makeModulesEditor(context) {
           <sl-tab-panel name="1"></sl-tab-panel>
         </sl-tab-group>
       `;
-    } else {
-      return html`
-        <ha-tabs
-          .selected=${selectedTab}
-          @selected-changed=${handleTabChange}>
-          <paper-tab>
-            <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
-            My Modules
-          </paper-tab>
-          <paper-tab class="${!entityExists ? 'disabled' : ''}">
-            <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
-            Module Store
-          </paper-tab>
-        </ha-tabs>
-      `;
     }
+
+    return html`
+      <ha-tabs
+        .selected=${selectedTab}
+        @selected-changed=${handleTabChange}
+      >
+        <paper-tab>
+          <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
+          My Modules
+        </paper-tab>
+        <paper-tab class="${!entityExists ? 'disabled' : ''}" ?disabled=${!entityExists}>
+          <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
+          Module Store
+        </paper-tab>
+      </ha-tabs>
+    `;
   };
 
   const templateResult = html`
@@ -818,13 +904,31 @@ template:
     </ha-expansion-panel>
   `;
 
-  if (isSlTabGroupAvailable()) {
+  const tabVariant = getTabImplementation();
+
+  if (tabVariant === 'sl-tab-group') {
     requestAnimationFrame(() => {
       const tabGroupElement = context.shadowRoot?.getElementById(tabGroupId);
       if (tabGroupElement && typeof tabGroupElement.show === 'function') {
-        const panelToShow = context._selectedModuleTab !== undefined ? context._selectedModuleTab.toString() : "0";
+        const panelToShow = context._selectedModuleTab !== undefined ? context._selectedModuleTab.toString() : '0';
         tabGroupElement.show(panelToShow);
       }
+    });
+  } else if (tabVariant === 'ha-tab-group') {
+    requestAnimationFrame(() => {
+      const tabGroupElement = context.shadowRoot?.getElementById(tabGroupId);
+      if (!tabGroupElement) {
+        return;
+      }
+
+      const panelToShow = MODULE_TAB_IDS[context._selectedModuleTab ?? 0] ?? (context._selectedModuleTab ?? 0).toString();
+
+      if ('activePanel' in tabGroupElement) {
+        tabGroupElement.activePanel = panelToShow;
+      }
+
+      // Fallback attribute for builds that rely on attributes instead of properties
+      tabGroupElement.setAttribute('active-panel', panelToShow);
     });
   }
 
