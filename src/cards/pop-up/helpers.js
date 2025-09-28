@@ -20,6 +20,8 @@ if (!window.__bubbleLocationDeduperAdded) {
         let pendingHashBase = null;
         let pendingTimestamp = 0;
         let guardNextNoHash = false;
+        let pendingPreviousHash = "";
+        let lastKnownHash = window.location.hash || "";
 
         window.addEventListener('location-changed', () => {
             const href = window.location.href;
@@ -31,25 +33,37 @@ if (!window.__bubbleLocationDeduperAdded) {
                 pendingHashBase = base;
                 pendingTimestamp = Date.now();
                 guardNextNoHash = false;
+                pendingPreviousHash = lastKnownHash || "";
+                lastKnownHash = window.location.hash;
                 return;
             }
 
             // No-hash navigation (likely popup close via replaceState)
             if (guardNextNoHash) {
                 guardNextNoHash = false;
+                pendingHashBase = null;
+                pendingPreviousHash = "";
+                lastKnownHash = window.location.hash || "";
                 return;
             }
 
-            if (pendingHashBase && base === pendingHashBase && (Date.now() - pendingTimestamp) < 1500) {
-                // We just had a hash on this same base recently; close likely used replaceState.
-                // Pop one entry so the back button won't require extra presses.
-                try { 
+            if (
+                pendingHashBase &&
+                base === pendingHashBase &&
+                (Date.now() - pendingTimestamp) < 1500 &&
+                !pendingPreviousHash
+            ) {
+                // We just had a hash on this same base recently and the previous state had no hash.
+                // Pop one entry so the back button will not require extra presses.
+                try {
                     guardNextNoHash = true;
                     history.back();
                 } catch (_) {}
             }
 
             pendingHashBase = null;
+            pendingPreviousHash = "";
+            lastKnownHash = window.location.hash || "";
         });
         window.__bubbleLocationDeduperAdded = true;
     } catch (_) {
