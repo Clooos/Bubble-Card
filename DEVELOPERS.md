@@ -2,6 +2,20 @@
 
 This guide explains how to test changes to BubbleCard during development.
 
+## Running Tests
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Run Tests
+
+```bash
+npm test
+```
+
 ## Testing BubbleCard Changes With Home Assistant
 
 When making modifications to BubbleCard, follow this workflow to test your changes:
