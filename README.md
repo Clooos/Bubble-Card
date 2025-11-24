@@ -938,6 +938,7 @@ This card allows you to display your calendar entities. Its content is scrollabl
 | `entities`          | object  | **Required** | A calendar entity object (see below)            | The entity to control (e.g., `calendar.main_calendar`).                                 |
 | `entities.entity`   | string  | **Required** | A calendar entity                               | The calendar entity to display                                                          |
 | `entities.color`    | string  | Optional     | A color                                         | A custom color for the calendar chip. If not defined, an automatic color will be picked |
+| `days`              | number  | Optional     | Any number (minimum: 1)                         | Number of calendar days to fetch events for, from now until the end of the Nth day (default: 7) |
 | `limit`             | number  | Optional     | A number                                        | The amont of events that will be displayed on the card                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Show or hide the end time for events                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Show or hide the event progress bar                                                     |
