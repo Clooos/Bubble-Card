@@ -1,4 +1,4 @@
-{
+export default {
   "cards": {
     "calendar": {
       "busy": "Occupé",
@@ -21,4 +21,4 @@
       "settings": "Paramètres du calendrier"
     }
   }
-}
+};
