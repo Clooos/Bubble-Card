@@ -3,7 +3,9 @@
   "name": "bubble-card",
   "version": "0.0.0",
   "scripts": {
-    "dist": "webpack"
+    "dist": "webpack",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
   },
   "dependencies": {
     "compression-webpack-plugin": "^11.1.0",
@@ -11,7 +13,9 @@
     "lit": "^3.2.1"
   },
   "devDependencies": {
-    "webpack-cli": "^6.0.1"
+    "webpack-cli": "^6.0.1",
+    "jest": "^29.7.0",
+    "@jest/globals": "^29.7.0"
   },
   "type": "module"
 }
