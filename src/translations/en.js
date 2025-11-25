@@ -9,7 +9,7 @@ export default {
     "calendar": {
       "entity": "Entity",
       "color": "Color",
-      "days": "Max Days",
+      "days": "Max days",
       "limit": "Limit",
       "list_of_calendars": "List of calendars",
       "show_end": "Show end time",

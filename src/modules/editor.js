@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { fireEvent } from '../tools/utils.js';
-import { yamlKeysMap, initializeModules } from '../tools/style-processor.js';
+import { yamlKeysMap, initializeModules } from './registry.js';
 import { getTextFromMap } from './utils.js';
 import { makeModuleStore } from './store.js';
 import { 
@@ -14,6 +14,7 @@ import { checkModuleUpdates } from './store.js';
 import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
 import { getLazyLoadedPanelContent } from '../editor/utils.js';
+import { ensureBCTProviderAvailable, isBCTAvailableSync, writeModuleYaml, getAllModulesLastModified } from './bct-provider.js';
 
 // Storage sensor entity ID for Bubble Card modules
 const MODULES_SENSOR_ENTITY_ID = 'sensor.bubble_card_modules';
@@ -92,87 +93,47 @@ function getModulesStorageStatus(hass) {
 
 export async function setModuleGlobalStatus(context, moduleId, isGlobal) {
   try {
-    if (!context.hass) {
+    if (!context.hass) return false;
+
+    // Use Bubble Card Tools file persistence; no writes to legacy entity
+    const available = await ensureBCTProviderAvailable(context.hass);
+    if (!available) {
+      console.warn("Bubble Card Tools is required to change global status.");
       return false;
     }
 
-    // Ensure the storage entity is valid before attempting to modify it
-    const storageStatus = getModulesStorageStatus(context.hass);
-    if (!storageStatus.isReady) {
-      console.warn(`Modules storage is not ready. Please configure '${MODULES_SENSOR_ENTITY_ID}' correctly.`);
-      return false;
+    const current = yamlKeysMap.get(moduleId) || {};
+    const updated = { ...current };
+    if (isGlobal === true) {
+      updated.is_global = true;
+    } else {
+      delete updated.is_global;
     }
+    yamlKeysMap.set(moduleId, updated);
 
-    const entityExists = context.hass && context.hass.states && context.hass.states[MODULES_SENSOR_ENTITY_ID];
-    
-    if (!entityExists) {
-      return false;
-    }
-
-    let existingModules = {};
-
-    try {
-      // Retrieve the current state of the entity via HA helper
-      const entityData = await context.hass.callApi("get", `states/${MODULES_SENSOR_ENTITY_ID}`);
-
-      if (!entityData) {
-        throw new Error("Failed to retrieve entity state");
-      }
-
-      // Retrieve the module collection
-      if (entityData.attributes && entityData.attributes.modules) {
-        existingModules = entityData.attributes.modules;
-      }
-    } catch (error) {
-      console.error("Error retrieving modules:", error);
-      return false;
-    }
-
-    // Check if the module exists
-    if (!existingModules[moduleId]) {
-      console.warn(`Module ${moduleId} does not exist in storage`);
-      return false;
-    }
-
-    // Update the module's global status
-    existingModules[moduleId].is_global = isGlobal;
-
-    // Update using an event for the trigger template sensor
-    try {
-      await context.hass.callApi("post", "events/bubble_card_update_modules", {
-        modules: existingModules,
-        last_updated: new Date().toISOString()
-      });
-
-      // Force a refresh of components that use modules
-      document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
-      
-      return true;
-    } catch (error) {
-      console.error("Error updating module global status:", error);
-      return false;
-    }
+    // Persist to file
+    await writeModuleYaml(context.hass, moduleId, updated);
+    document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
+    return true;
   } catch (error) {
-    console.error("Unexpected error setting module global status:", error);
+    console.error("Error setting module global status:", error);
     return false;
   }
 }
 
 export function isModuleGlobal(moduleId, hass) {
   try {
-    // Check if Home Assistant states are available
-    if (!hass || !hass.states || !hass.states[MODULES_SENSOR_ENTITY_ID]) {
-      return false;
-    }
-    
+    // Prefer file-based flag
+    const local = yamlKeysMap.get(moduleId);
+    if (local && typeof local === 'object' && local.is_global === true) return true;
+    // If Bubble Card Tools is available (post-migration), do not use the legacy entity at all
+    if (isBCTAvailableSync && isBCTAvailableSync()) return false;
+    // Fallback to legacy entity attribute (read-only) when BCT is not available
+    if (!hass || !hass.states || !hass.states[MODULES_SENSOR_ENTITY_ID]) return false;
     const entity = hass.states[MODULES_SENSOR_ENTITY_ID];
-    if (!entity.attributes || !entity.attributes.modules) {
-      return false;
-    }
-    
-    // Check if the module exists and is marked as global
-    const module = entity.attributes.modules[moduleId];
-    return module && module.is_global === true;
+    if (!entity.attributes || !entity.attributes.modules) return false;
+    const mod = entity.attributes.modules[moduleId];
+    return mod && mod.is_global === true;
   } catch (error) {
     console.warn(`Error checking if module ${moduleId} is global:`, error);
     return false;
@@ -200,6 +161,96 @@ export function shouldApplyModule(context, moduleId) {
   return isModuleGlobal(moduleId, context.hass);
 }
 
+function _getFilteredAndSortedModules(context) {
+  if (!yamlKeysMap || yamlKeysMap.size === 0) return [];
+  
+  let modules = Array.from(yamlKeysMap.keys());
+  
+  // Filter by search query
+  const searchQuery = context._myModulesSearchQuery;
+  if (searchQuery && searchQuery.trim()) {
+    const query = searchQuery.toLowerCase().trim();
+    modules = modules.filter(key => {
+      const moduleData = getTextFromMap(key);
+      const name = (moduleData.name || key).toLowerCase();
+      const description = (moduleData.description || '').toLowerCase();
+      const creator = (moduleData.creator || '').toLowerCase();
+      return name.includes(query) || description.includes(query) || creator.includes(query);
+    });
+  }
+  
+  // Sort modules - load from localStorage or use 'default' as default
+  if (!context._myModulesSortOrder) {
+    try {
+      const savedOrder = localStorage.getItem('bubble-card-modules-sort-order');
+      context._myModulesSortOrder = savedOrder || 'default';
+    } catch (e) {
+      context._myModulesSortOrder = 'default';
+    }
+  }
+  const sortOrder = context._myModulesSortOrder || 'default';
+  
+  // Load all timestamps once for performance (single cache access)
+  const lastModifiedMap = getAllModulesLastModified();
+  const getTimestamp = (moduleId) => {
+    const lastModified = lastModifiedMap.get(moduleId);
+    if (!lastModified) return 0;
+    const timestamp = new Date(lastModified).getTime();
+    return isNaN(timestamp) ? 0 : timestamp;
+  };
+  
+  modules.sort((a, b) => {
+    // Always put 'default' first regardless of sort order
+    if (a === 'default') return -1;
+    if (b === 'default') return 1;
+    
+    const moduleA = getTextFromMap(a);
+    const moduleB = getTextFromMap(b);
+    const isActiveA = shouldApplyModule(context, a);
+    const isActiveB = shouldApplyModule(context, b);
+    
+    switch (sortOrder) {
+      case 'alphabetical':
+        return (moduleA.name || a).localeCompare(moduleB.name || b, undefined, { sensitivity: 'base' });
+      
+      case 'default':
+        if (isActiveA !== isActiveB) {
+          return isActiveA ? -1 : 1;
+        }
+        // Within active/inactive groups, sort by last modified (most recent first)
+        const timestampA = getTimestamp(a);
+        const timestampB = getTimestamp(b);
+        if (timestampA !== timestampB && timestampA > 0 && timestampB > 0) {
+          return timestampB - timestampA; // Most recent first
+        }
+        return (moduleA.name || a).localeCompare(moduleB.name || b, undefined, { sensitivity: 'base' });
+      
+      case 'recent-first':
+        const recentTimestampA = getTimestamp(a);
+        const recentTimestampB = getTimestamp(b);
+        if (recentTimestampA !== recentTimestampB && recentTimestampA > 0 && recentTimestampB > 0) {
+          return recentTimestampB - recentTimestampA; // Most recent first
+        }
+        // If no timestamp available, fall back to alphabetical
+        return (moduleA.name || a).localeCompare(moduleB.name || b, undefined, { sensitivity: 'base' });
+      
+      default:
+        // Fallback to default sort (active first)
+        if (isActiveA !== isActiveB) {
+          return isActiveA ? -1 : 1;
+        }
+        const fallbackTimestampA = getTimestamp(a);
+        const fallbackTimestampB = getTimestamp(b);
+        if (fallbackTimestampA !== fallbackTimestampB && fallbackTimestampA > 0 && fallbackTimestampB > 0) {
+          return fallbackTimestampB - fallbackTimestampA;
+        }
+        return (moduleA.name || a).localeCompare(moduleB.name || b, undefined, { sensitivity: 'base' });
+    }
+  });
+  
+  return modules;
+}
+
 export function makeModulesEditor(context) {
   if (typeof context._selectedModuleTab === 'undefined') {
     context._selectedModuleTab = 0;
@@ -210,50 +261,54 @@ export function makeModulesEditor(context) {
     context._expandedPanelStates = {};
   }
 
+  // Initialize sort order from localStorage
+  if (typeof context._myModulesSortOrder === 'undefined') {
+    try {
+      const savedOrder = localStorage.getItem('bubble-card-modules-sort-order');
+      context._myModulesSortOrder = savedOrder || 'default';
+    } catch (e) {
+      context._myModulesSortOrder = 'default';
+    }
+  }
+
+  // Ensure sort order is always defined
+  const currentSortOrder = context._myModulesSortOrder || 'default';
+
   const tabGroupId = "bubble-card-module-editor-tab-group";
 
   // Load modules if they haven't been loaded yet
   if (!context._modulesLoaded) {
     initializeModules(context).then(() => {
       context._modulesLoaded = true;
-      // Check and update 'default' module global status after modules are loaded
-      // Only attempt this when storage is fully ready
-      const storageStatusAfterInit = getModulesStorageStatus(context.hass);
-      if (storageStatusAfterInit.isReady) {
-        const modulesData = context.hass.states[MODULES_SENSOR_ENTITY_ID].attributes.modules;
-        if (modulesData && modulesData.default && modulesData.default.is_global !== true) {
-          setModuleGlobalStatus(context, 'default', true).then(success => {
-            if (success) {
-              document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
-            } else {
-              console.warn(`Failed to set module 'default' to global in ${MODULES_SENSOR_ENTITY_ID}.`);
-            }
-          });
+      // Do not consult legacy entity after migration/BCT availability
+      // Legacy bootstrapping only if BCT is not available
+      if (!isBCTAvailableSync || !isBCTAvailableSync()) {
+        const storageStatusAfterInit = getModulesStorageStatus(context.hass);
+        if (storageStatusAfterInit.isReady) {
+          const modulesData = context.hass.states[MODULES_SENSOR_ENTITY_ID].attributes.modules;
+          if (modulesData && modulesData.default && modulesData.default.is_global !== true) {
+            setModuleGlobalStatus(context, 'default', true).then(success => {
+              if (success) {
+                document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
+              } else {
+                console.warn(`Failed to set module 'default' to global in ${MODULES_SENSOR_ENTITY_ID}.`);
+              }
+            });
+          }
         }
       }
       context.requestUpdate();
     });
   }
 
-  // Check storage status for the template sensor entity
-  const storageStatus = getModulesStorageStatus(context.hass);
-
-  // Treat the store as available only when storage is fully ready
-  const entityExists = storageStatus.isReady;
-
-  // Attempt to bootstrap the storage once if the entity exists but is not yet initialized
-  // This helps users who created the entity but haven't fired any event yet
-  if (storageStatus.entityFound && !storageStatus.isReady && !context._attemptedModulesStorageBootstrap && context.hass) {
-    context._attemptedModulesStorageBootstrap = true;
-    context.hass.callApi('post', 'events/bubble_card_update_modules', {
-      modules: {},
-      last_updated: new Date().toISOString(),
-    }).then(() => {
-      setTimeout(() => context.requestUpdate(), 150);
-    }).catch(() => {
-      // No-op: keep the warning visible if the bootstrap fails
-    });
+  // Resolve Bubble Card Tools availability for persistence
+  const bctAvailable = isBCTAvailableSync();
+  if (context.hass && !context._bctChecked) {
+    context._bctChecked = true;
+    ensureBCTProviderAvailable(context.hass).then(() => context.requestUpdate());
   }
+
+  // No bootstrap of legacy sensor anymore
 
   const resolvePath = (path, configData) => {
     return path.split('.').reduce((acc, part) => acc && acc[part], configData);
@@ -267,8 +322,8 @@ export function makeModulesEditor(context) {
     context._workingModuleConfigs = {};
   }
 
-  // Check if the 'default' module exists, create it if it doesn't
-  if (context._modulesLoaded && !yamlKeysMap.has('default') && entityExists) {
+  // Check if the 'default' module exists, create it if it doesn't (files only)
+  if (context._modulesLoaded && !yamlKeysMap.has('default') && bctAvailable) {
     // Create default module YAML content
     const defaultModuleYaml = `default:
   name: Default
@@ -331,8 +386,50 @@ export function makeModulesEditor(context) {
       }
     }
 
+    // Track recently toggled module for smooth UX when sorting by "default"
+    const sortOrder = context._myModulesSortOrder || 'default';
+    const wasExpanded = context._expandedPanelStates?.[moduleId] === true;
+    
+    if (sortOrder === 'default') {
+      context._recentlyToggledModuleId = moduleId;
+      // Preserve expansion state for the toggled module
+      if (wasExpanded) {
+        context._expandedPanelStates = context._expandedPanelStates || {};
+        context._expandedPanelStates[moduleId] = true;
+      }
+      // Clear the highlight after animation completes
+      setTimeout(() => {
+        context._recentlyToggledModuleId = null;
+        context.requestUpdate();
+      }, 2000);
+    }
+
     fireEvent(context, "config-changed", { config: context._config });
     context.requestUpdate();
+    
+    // Scroll to the module after update if sorting by default
+    if (sortOrder === 'default' && switchToOn) {
+      // Use double requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const modulePanel = context.shadowRoot?.querySelector(`ha-expansion-panel[data-module-id="${moduleId}"]`);
+          if (modulePanel) {
+            // Restore expansion state if it was expanded
+            if (wasExpanded && !modulePanel.expanded) {
+              modulePanel.expanded = true;
+            }
+            
+            // Check if element is already visible in viewport
+            const rect = modulePanel.getBoundingClientRect();
+            const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+            
+            if (!isVisible) {
+              modulePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        });
+      });
+    }
   };
 
   // Handler for toggling global module status
@@ -440,11 +537,11 @@ export function makeModulesEditor(context) {
             <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
             My Modules
           </ha-tab-group-tab>
-          <ha-tab-group-tab
+            <ha-tab-group-tab
             slot="nav"
             panel=${MODULE_TAB_IDS[1]}
-            .active=${selectedPanel === MODULE_TAB_IDS[1]}
-            ?disabled=${!entityExists}
+              .active=${selectedPanel === MODULE_TAB_IDS[1]}
+              ?disabled=${!bctAvailable}
             @click=${() => handleHaTabNavClick(MODULE_TAB_IDS[1])}
           >
             <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
@@ -465,7 +562,7 @@ export function makeModulesEditor(context) {
             <ha-icon icon="mdi:puzzle-heart-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
             My Modules
           </sl-tab>
-          <sl-tab slot="nav" panel="1" ?disabled=${!entityExists}>
+          <sl-tab slot="nav" panel="1" ?disabled=${!bctAvailable}>
             <ha-icon icon="mdi:puzzle-plus-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
             Module Store
           </sl-tab>
@@ -484,7 +581,7 @@ export function makeModulesEditor(context) {
           <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
           My Modules
         </paper-tab>
-        <paper-tab class="${!entityExists ? 'disabled' : ''}" ?disabled=${!entityExists}>
+        <paper-tab class="${!bctAvailable ? 'disabled' : ''}" ?disabled=${!bctAvailable}>
           <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
           Module Store
         </paper-tab>
@@ -497,46 +594,27 @@ export function makeModulesEditor(context) {
       <h4 slot="header">
         <ha-icon icon="mdi:puzzle"></ha-icon>
         Modules
-        ${moduleUpdates.hasUpdates && entityExists ? html`
-          <span class="bubble-badge update-badge" style="margin-left: 8px; font-size: 0.8em; vertical-align: middle;">
+        ${moduleUpdates.hasUpdates && bctAvailable ? html`
+          <span class="bubble-badge update-badge" style="margin-left: 8px; font-size: 0.8em; vertical-align: middle; z-index: 7;">
             <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
             ${moduleUpdates.updateCount} update${moduleUpdates.updateCount > 1 ? 's' : ''} available
           </span>
         ` : ''}
       </h4>
       <div class="content" style="margin: -8px 4px 14px 4px;">
-        ${!entityExists ? html`
+        ${!bctAvailable ? html`
             <div class="bubble-info warning">
               <h4 class="bubble-section-title">
                 <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-                Configuration required
+                Bubble Card Tools required
               </h4>
               <div class="content">
-                ${storageStatus.entityFound ? html`
-                  <p><b><code>${MODULES_SENSOR_ENTITY_ID}</code> is detected, but its configuration is incomplete or incorrect.</b></p>
+                ${ (yamlKeysMap && yamlKeysMap.size > 0) || (context.hass && context.hass.states && context.hass.states[MODULES_SENSOR_ENTITY_ID]) ? html`
+                  <p><b>Since v3.1.0, to install, edit or delete modules, and to use the Module Store, please install <a href="https://github.com/Clooos/Bubble-Card-Tools" target="_blank" rel="noopener noreferrer">Bubble Card Tools</a> (everything is explained there).</b></p>
+                  <p>Your existing modules will be automatically migrated once Bubble Card Tools is installed.</p>
                 ` : html`
-                  <p>The storage entity <code>${MODULES_SENSOR_ENTITY_ID}</code> is not configured in your Home Assistant instance.</p>
+                  <p><b>No modules detected yet.</b> To create and manage modules and to use the Module Store, please install <a href="https://github.com/Clooos/Bubble-Card-Tools" target="_blank" rel="noopener noreferrer">Bubble Card Tools</a> (everything is explained there).</p>
                 `}
-                <hr />
-                <p><b>To use the Module Store and the Module Editor, follow these steps:</b></p>
-
-                <p>1. Add the following to your <code>configuration.yaml</code> file:</p>
-                <code-block><pre>
-# Storage for Bubble Card Modules
-template:
-  - trigger:
-      - trigger: event
-        event_type: bubble_card_update_modules
-    sensor:
-      - name: "Bubble Card Modules"
-        state: "saved"
-        icon: "mdi:puzzle"
-        attributes:
-          modules: "{{ trigger.event.data.modules }}"
-          last_updated: "{{ trigger.event.data.last_updated }}"
-                </pre></code-block>
-                <p>2. Save the file and restart Home Assistant</p>
-                <p>3. Enjoy the Module Store and the Module Editor!</p>
               </div>
             </div>
         ` : ''}
@@ -545,7 +623,7 @@ template:
         
         ${renderTabs()}
 
-        ${context._selectedModuleTab === 0 || !entityExists ? html`
+        ${context._selectedModuleTab === 0 || !bctAvailable ? html`
           ${context._showManualImportForm ? html`
             <div class="module-editor-form">
               <div class="card-content">
@@ -596,14 +674,76 @@ template:
           ${context._showNewModuleForm || context._editingModule ? 
             renderModuleEditorForm(context) : 
             html`
+            <!-- Search and Sort Controls -->
+            <div class="my-modules-controls">
+              <div class="my-modules-search">
+                <ha-textfield
+                  label="Search modules"
+                  icon
+                  .value=${context._myModulesSearchQuery || ''}
+                  @input=${(e) => {
+                    context._myModulesSearchQuery = e.target.value;
+                    context.requestUpdate();
+                  }}
+                >
+                  <slot name="prefix" slot="leadingIcon">
+                    <ha-icon slot="prefix" icon="mdi:magnify"></ha-icon>
+                  </slot>
+                </ha-textfield>
+              </div>
+              <div class="my-modules-sort-menu">
+                <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
+                  <mwc-icon-button slot="trigger" class="icon-button header sort-trigger" title="Sort modules">
+                    <ha-icon icon="mdi:sort"></ha-icon>
+                  </mwc-icon-button>
+                  <mwc-list-item 
+                    graphic="icon" 
+                    ?selected=${currentSortOrder === 'default'}
+                    @click=${(e) => {
+                      e.stopPropagation();
+                      context._myModulesSortOrder = 'default';
+                      try {
+                        localStorage.setItem('bubble-card-modules-sort-order', 'default');
+                      } catch (err) {}
+                      context.requestUpdate();
+                    }}>
+                    <ha-icon icon="mdi:check-circle" slot="graphic"></ha-icon>
+                    Active and recent first
+                  </mwc-list-item>
+                  <mwc-list-item 
+                    graphic="icon" 
+                    ?selected=${currentSortOrder === 'alphabetical'}
+                    @click=${(e) => {
+                      e.stopPropagation();
+                      context._myModulesSortOrder = 'alphabetical';
+                      try {
+                        localStorage.setItem('bubble-card-modules-sort-order', 'alphabetical');
+                      } catch (err) {}
+                      context.requestUpdate();
+                    }}>
+                    <ha-icon icon="mdi:sort-alphabetical-ascending" slot="graphic"></ha-icon>
+                    Alphabetical
+                  </mwc-list-item>
+                  <mwc-list-item 
+                    graphic="icon" 
+                    ?selected=${currentSortOrder === 'recent-first'}
+                    @click=${(e) => {
+                      e.stopPropagation();
+                      context._myModulesSortOrder = 'recent-first';
+                      try {
+                        localStorage.setItem('bubble-card-modules-sort-order', 'recent-first');
+                      } catch (err) {}
+                      context.requestUpdate();
+                    }}>
+                    <ha-icon icon="mdi:clock-outline" slot="graphic"></ha-icon>
+                    Recent first
+                  </mwc-list-item>
+                </ha-button-menu>
+              </div>
+            </div>
+            
             <!-- Installed Modules List -->
-            ${Array.from(yamlKeysMap.keys()).sort((a, b) => {
-              // Always put 'default' first
-              if (a === 'default') return -1;
-              if (b === 'default') return 1;
-              // Keep the original order for other modules
-              return 0;
-            }).map((key) => {
+            ${_getFilteredAndSortedModules(context).map((key) => {
               const {
                 name: label,
                 description,
@@ -653,13 +793,17 @@ template:
                 : [];
               
               // Check if this module has an update
-              const hasUpdate = moduleUpdates.modules.some(m => m.id === key) && entityExists;
+              const hasUpdate = moduleUpdates.modules.some(m => m.id === key) && bctAvailable;
               const moduleUpdate = hasUpdate ? moduleUpdates.modules.find(m => m.id === key) : null;
 
+              const isRecentlyToggled = context._recentlyToggledModuleId === key;
+              
               return html`
                 <ha-expansion-panel 
                   outlined 
-                  class="${unsupported ? 'disabled' : ''}"
+                  class="${unsupported ? 'disabled' : ''} ${isRecentlyToggled ? 'recently-toggled' : ''}"
+                  data-module-id="${key}"
+                  .expanded=${!!context._expandedPanelStates[key]}
                   @expanded-changed=${(e) => {
                     context._expandedPanelStates[key] = e.target.expanded;
                     context.requestUpdate();
@@ -710,34 +854,32 @@ template:
                               <span>This card</span>
                             </button>
                             
-                            ${entityExists ? html`
+                            <button 
+                              class="bubble-badge toggle-badge ${isGlobal && !hasEditor ? 'update-button' : 'link-button'} ${allCardsDisabled || !bctAvailable ? 'disabled' : ''}"
+                              style="cursor: pointer; ${allCardsDisabled || !bctAvailable ? 'opacity: 0.7; cursor: default;' : ''}"
+                              @click=${() => {
+                                if (!allCardsDisabled) {
+                                  handleGlobalToggle(key, !isGlobal);
+                                }
+                              }}
+                              ?disabled=${allCardsDisabled || !bctAvailable}
+                            >
+                              <ha-icon icon="mdi:cards-outline"></ha-icon>
+                              <span>${allCardsButtonText}</span>
+                            </button>
+                            ${allCardsDisabled && !isDefaultModule ? html`
                               <button 
-                                class="bubble-badge toggle-badge ${isGlobal && !hasEditor ? 'update-button' : 'link-button'} ${allCardsDisabled ? 'disabled' : ''}"
-                                style="cursor: pointer; ${allCardsDisabled ? 'opacity: 0.7; cursor: default;' : ''}"
-                                @click=${() => {
-                                  if (!allCardsDisabled) {
-                                    handleGlobalToggle(key, !isGlobal);
-                                  }
+                                class="bubble-badge toggle-badge"
+                                style="padding: 4px;"
+                                @click=${(e) => {
+                                  e.stopPropagation();
+                                  context._helpModuleId = context._helpModuleId === key ? null : key;
+                                  context.requestUpdate();
                                 }}
-                                ?disabled=${allCardsDisabled}
+                                title="Show help"
                               >
-                                <ha-icon icon="mdi:cards-outline"></ha-icon>
-                                <span>${allCardsButtonText}</span>
+                                <ha-icon icon="mdi:help"></ha-icon>
                               </button>
-                              ${allCardsDisabled && !isDefaultModule ? html`
-                                <button 
-                                  class="bubble-badge toggle-badge"
-                                  style="padding: 4px;"
-                                  @click=${(e) => {
-                                    e.stopPropagation();
-                                    context._helpModuleId = context._helpModuleId === key ? null : key;
-                                    context.requestUpdate();
-                                  }}
-                                  title="Show help"
-                                >
-                                  <ha-icon icon="mdi:help"></ha-icon>
-                                </button>
-                              ` : ''}
                             ` : ''}
                           </div>
                         </div>
@@ -760,14 +902,14 @@ template:
                               Update
                             </button>
                           ` : ''}
-                          <button class="icon-button" @click=${() => editModule(context, key)} title="Edit Module">
+                          <button class="icon-button ${!bctAvailable ? 'disabled' : ''}" @click=${() => editModule(context, key)} title="Edit Module">
                             <ha-icon icon="mdi:pencil"></ha-icon>
                           </button>
                           ${(() => {
                             const isFromYamlFile = _isModuleInstalledViaYaml ? _isModuleInstalledViaYaml(key) : false;
                             // Do not display the delete button for YAML modules or the default module
                             return !isFromYamlFile && key !== 'default' ? html`
-                              <button class="icon-button" @click=${() => deleteModule(context, key)} title="Delete Module">
+                              <button class="icon-button ${!bctAvailable ? 'disabled' : ''}" @click=${() => deleteModule(context, key)} title="Delete Module">
                                 <ha-icon icon="mdi:delete"></ha-icon>
                               </button>
                             ` : '';
@@ -835,10 +977,22 @@ template:
                 </ha-expansion-panel>
               `;
             })}
+            
+            ${_getFilteredAndSortedModules(context).length === 0 ? html`
+              <div class="bubble-info">
+                <h4 class="bubble-section-title">
+                  <ha-icon icon="mdi:information-outline"></ha-icon>
+                  No modules found
+                </h4>
+                <div class="content">
+                  <p>No modules match your search criteria. Try modifying your search or sort order.</p>
+                </div>
+              </div>
+            ` : ''}
           `}
 
           <hr>
-          ${!context._showNewModuleForm && !context._editingModule && entityExists ? html`
+          ${!context._showNewModuleForm && !context._editingModule && bctAvailable ? html`
           <div class="module-editor-buttons-container" style="display: flex;">
             <button class="icon-button" style="flex: 1;" @click=${() => {
               context._showNewModuleForm = true;

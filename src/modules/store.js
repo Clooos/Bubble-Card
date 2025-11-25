@@ -1,10 +1,11 @@
 import { html } from 'lit';
-import { yamlKeysMap, moduleSourceMap } from '../tools/style-processor.js';
+import { yamlKeysMap, moduleSourceMap } from './registry.js';
 import { _formatModuleDescription, _getIconForType, _compareVersions, scrollToModuleForm } from './utils.js';
 import { parseDiscussionsREST } from './parser.js';
 import { getCachedModuleData } from './cache.js';
 import { installOrUpdateModule } from './install.js';
 import jsyaml from 'js-yaml';
+import { ensureBCTProviderAvailable, isBCTAvailableSync } from './bct-provider.js';
 
 export function makeModuleStore(context) {
   // Check if the persistent entity exists
@@ -36,36 +37,27 @@ export function makeModuleStore(context) {
     context.requestUpdate();
   };
   
-  // If entity doesn't exist, show setup instructions instead of the store
-  if (!entityExists) {
+  // Gate the store on Bubble Card Tools availability, replacing legacy sensor instructions
+  const bctAvailable = isBCTAvailableSync();
+  if (context.hass && !context._storeBctChecked) {
+    context._storeBctChecked = true;
+    ensureBCTProviderAvailable(context.hass).then(() => context.requestUpdate());
+  }
+  if (!bctAvailable) {
+    const hasAnyModules = (yamlKeysMap && yamlKeysMap.size > 0) || entityExists;
     return html`
       <div class="bubble-info warning">
         <h4 class="bubble-section-title">
           <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-          Configuration required
+          Bubble Card Tools required
         </h4>
         <div class="content">
-          <p>The storage entity <code>sensor.bubble_card_modules</code> is not configured in your Home Assistant instance.</p>
-          <hr />
-          <p><b>To use the Module store, follow these steps:</b></p>
-
-          <p>1. Add the following to your <code>configuration.yaml</code> file:</p>
-          <code-block><pre>
-# Storage for Bubble Card Modules
-template:
-  - trigger:
-      - trigger: event
-        event_type: bubble_card_update_modules
-    sensor:
-      - name: "Bubble Card Modules"
-        state: "saved"
-        icon: "mdi:puzzle"
-        attributes:
-          modules: "{{ trigger.event.data.modules }}"
-          last_updated: "{{ trigger.event.data.last_updated }}"
-          </pre></code-block>
-          <p>2. Save the file and restart Home Assistant</p>
-          <p>3. Enjoy the Module store!</p>
+          ${hasAnyModules ? html`
+            <p><b>To use the Module Store and to install/edit modules, install <code>Bubble Card Tools</code>.</b></p>
+            <p>Existing modules will still be read from legacy sources for compatibility.</p>
+          ` : html`
+            <p><b>No modules detected yet.</b> To install or edit modules and use the Module Store, install <code>Bubble Card Tools</code>.</p>
+          `}
         </div>
       </div>
     `;
@@ -557,13 +549,13 @@ function sortModulesByRelevance(modules) {
 
     // Bonus for modules created by great contributors
     if (module.creator === 'Clooos') {
-      score += 40; // Well deserved
+      score += 100; // Well deserved
     }
 
     // Make sure new modules always appear at the top regardless of other factors
     const isNew = _isNewModule(module);
     if (isNew) {
-      score += 150; // Ensure new modules always bubble to the top
+      score += 10000; // Ensure new modules always bubble to the top
     }
     
     return { ...module, relevanceScore: score };

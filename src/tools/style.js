@@ -52,13 +52,13 @@ export function isColorCloseToWhite(rgb, threshold = 40) {
     return rgb.every(value => Math.abs(value - 255) <= threshold);
 }
 
-let rgbaColor;
-
 export function convertToRGBA(color, opacity, lighten = 1) {
     if (!color || typeof color !== 'string') {
         return `rgba(0, 0, 0, ${opacity})`;
     }
-    
+
+    let rgbaColor;
+
     if (color.startsWith('#')) {
         if (color.length === 4) {  // Short hexadecimal color
             let r = Math.min(255, parseInt(color.charAt(1).repeat(2), 16) * lighten),
@@ -86,11 +86,7 @@ export function convertToRGBA(color, opacity, lighten = 1) {
     }
     
     // Return default transparent color if no valid color was processed
-    if (!rgbaColor) {
-        rgbaColor = `rgba(0, 0, 0, ${opacity})`;
-    }
-    
-    return rgbaColor;
+    return rgbaColor ?? `rgba(0, 0, 0, ${opacity})`;
 }
 
 export function createBubbleDefaultColor(applyImmediately = true) {

@@ -1,4 +1,4 @@
-import { yamlKeysMap } from '../tools/style-processor.js';
+import { yamlKeysMap } from './registry.js';
 
 // Gets text data from the yamlKeysMap for a module key
 export function getTextFromMap(key) {

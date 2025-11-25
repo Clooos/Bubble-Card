@@ -3,6 +3,7 @@ import { forwardHaptic, createElement } from "./utils.js";
 const maxHoldDuration = 500;
 const doubleTapTimeout = 200;
 const movementThreshold = 5; // Movement threshold to consider as scroll
+const holdReleaseDeadZone = 15; // Dead zone for hold release to allow minor finger movement
 const scrollDisableTime = 300;
 
 window.isScrolling = false;
@@ -245,6 +246,8 @@ class ActionHandler {
     this.holdTimeout = null;
     this.startX = 0;
     this.startY = 0;
+    this.lastX = 0;
+    this.lastY = 0;
     this.holdFired = false;
     this.pointerMoveListener = this.detectScrollLikeMove.bind(this);
     this.touchMoveListener = this.detectScrollLikeMove.bind(this);
@@ -281,6 +284,8 @@ class ActionHandler {
     this.preventDefaultCalled = false;
     this.startX = 0;
     this.startY = 0;
+    this.lastX = 0;
+    this.lastY = 0;
   }
 
   cleanup() {
@@ -326,9 +331,13 @@ class ActionHandler {
     if (e.touches && e.touches[0]) {
       this.startX = e.touches[0].clientX;
       this.startY = e.touches[0].clientY;
+      this.lastX = this.startX;
+      this.lastY = this.startY;
     } else {
       this.startX = e.clientX;
       this.startY = e.clientY;
+      this.lastX = this.startX;
+      this.lastY = this.startY;
     }
 
     document.addEventListener('pointermove', this.pointerMoveListener, { passive: true });
@@ -336,12 +345,19 @@ class ActionHandler {
 
     this.holdTimeout = setTimeout(() => {
       const holdAction = this.config.hold_action || { action: 'none' };
-      if (holdAction.action !== 'none' && !window.isScrolling && !this.hasMoved) {
-        // Mark hold as recognized; dispatch on release to match HA behavior
-        this.holdFired = true;
-        // Show indicator where the press started
-        const isTouch = this.currentInteractionType === 'touchstart';
-        showHoldIndicator(this.startX, this.startY, isTouch);
+      if (holdAction.action !== 'none' && !window.isScrolling) {
+        // Check if total movement is within dead zone
+        const deltaX = Math.abs(this.lastX - this.startX);
+        const deltaY = Math.abs(this.lastY - this.startY);
+        const totalDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        if (totalDistance <= holdReleaseDeadZone) {
+          // Mark hold as recognized; dispatch on release to match HA behavior
+          this.holdFired = true;
+          // Show indicator where the press started
+          const isTouch = this.currentInteractionType === 'touchstart';
+          showHoldIndicator(this.startX, this.startY, isTouch);
+        }
       }
     }, maxHoldDuration);
   }
@@ -357,18 +373,27 @@ class ActionHandler {
       currentY = e.clientY;
     }
     
+    // Store last known position
+    this.lastX = currentX;
+    this.lastY = currentY;
+    
     const deltaX = Math.abs(currentX - this.startX);
     const deltaY = Math.abs(currentY - this.startY);
+    const totalDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
+    // Mark as moved if exceeds threshold, but only cancel hold if exceeds dead zone
     if (deltaX > movementThreshold || deltaY > movementThreshold) {
       this.hasMoved = true;
       disableActionsDuringScroll();
       
-      clearTimeout(this.holdTimeout);
-      this.holdTimeout = null;
-      
-      document.removeEventListener('pointermove', this.pointerMoveListener);
-      document.removeEventListener('touchmove', this.touchMoveListener);
+      // Only cancel hold timeout if movement exceeds hold dead zone
+      if (totalDistance > holdReleaseDeadZone) {
+        clearTimeout(this.holdTimeout);
+        this.holdTimeout = null;
+        
+        document.removeEventListener('pointermove', this.pointerMoveListener);
+        document.removeEventListener('touchmove', this.touchMoveListener);
+      }
     }
   }
 
@@ -381,7 +406,24 @@ class ActionHandler {
         return;
     }
 
-    if (window.isScrolling || this.isDisconnected || this.hasMoved) {
+    // Check final position for hold dead zone
+    let endX, endY;
+    if (e.changedTouches && e.changedTouches[0]) {
+      endX = e.changedTouches[0].clientX;
+      endY = e.changedTouches[0].clientY;
+    } else {
+      endX = e.clientX;
+      endY = e.clientY;
+    }
+
+    const totalDeltaX = Math.abs(endX - this.startX);
+    const totalDeltaY = Math.abs(endY - this.startY);
+    const totalDistance = Math.sqrt(totalDeltaX * totalDeltaX + totalDeltaY * totalDeltaY);
+    
+    // Allow hold if it was fired and total movement is within dead zone
+    const isHoldWithinDeadZone = this.holdFired && totalDistance <= holdReleaseDeadZone;
+
+    if (window.isScrolling || this.isDisconnected || (this.hasMoved && !isHoldWithinDeadZone)) {
       this.interactionStarted = false;
       stopHoldIndicator();
       return;

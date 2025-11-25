@@ -2,150 +2,23 @@ import { getState } from "./utils.js";
 import { getWeatherIcon } from "./icon.js";
 import { getSubButtonsStates } from "../components/sub-button/changes.js";
 import { checkConditionsMet } from './validate-condition.js';
-import * as YAML from 'js-yaml';
+import { yamlKeysMap } from '../modules/registry.js';
+import { isBCTAvailableSync } from '../modules/bct-provider.js';
 
-// Global variable to store all modules, including those from text
-let allModules = null;
-let modulesInitialized = false;
-let initPromise = null;
-// Map to track module origins
-export let moduleSourceMap = new Map(); // To track if a module comes from YAML or from a text entity
-
-// Listen for module updates to invalidate cache
-document.addEventListener('yaml-modules-updated', () => {
-  // Reset module state to force reload
-  modulesInitialized = false;
-  allModules = null;
-  initPromise = null;
-  
-  // Force a refresh on all bubble cards that might be using modules
-  window.dispatchEvent(new CustomEvent('bubble-card-modules-changed'));
-});
-
-// Listen for specific module updates (used by editor)
-window.addEventListener('bubble-card-module-updated', (event) => {
-  if (event.detail && event.detail.moduleId && event.detail.moduleData) {
-    // Update the specific module in yamlKeysMap
-    yamlKeysMap.set(event.detail.moduleId, event.detail.moduleData);
-    
-    // Update the module source map if needed
-    if (!moduleSourceMap.has(event.detail.moduleId)) {
-      moduleSourceMap.set(event.detail.moduleId, 'editor');
-    }
-    
-    // Force a refresh on relevant cards
-    window.dispatchEvent(new CustomEvent('bubble-card-modules-changed'));
-  }
-});
-
-// Function to initialize and load all modules from all sources
-export async function initializeModules(context) {
-  // If already initialized, return existing modules
-  if (modulesInitialized && allModules) {
-    return allModules;
-  }
-  
-  // If initialization is already in progress, wait for it
-  if (initPromise) {
-    return initPromise;
-  }
-  
-  // Create a promise for initialization
-  initPromise = (async () => {    
-    // Load from YAML files first
-    const yamlModules = await loadYAML([
-      "/local/bubble/bubble-modules.yaml"
-    ]);
-    
-    // Load modules from text
-    const entityModules = context?._hass 
-      ? await loadModulesFromEntity(context._hass)
-      : {};
-
-    // Reset moduleSourceMap
-    moduleSourceMap.clear();
-    
-    // Track the source of each module
-    if (yamlModules) {
-      Object.keys(yamlModules).forEach(key => {
-        if (key !== 'modules' && key !== 'friendly_name' && key !== 'last_updated') {
-          moduleSourceMap.set(key, 'yaml');
-        }
-      });
-    }
-    
-    if (entityModules) {
-      Object.keys(entityModules).forEach(key => {
-        if (key !== 'modules' && key !== 'friendly_name' && key !== 'last_updated') {
-          moduleSourceMap.set(key, 'entity');
-        }
-      });
-    }
-
-    // Merge sources (entity overwrites YAML duplicates)
-    allModules = { 
-      ...yamlModules,
-      ...entityModules 
-    };
-    
-    // Update yamlKeysMap with all modules
-    yamlKeysMap.clear();
-    Object.entries(allModules).forEach(([key, value]) => {
-      if (key !== 'modules' && key !== 'friendly_name' && key !== 'last_updated') {
-        yamlKeysMap.set(key, value);
-      }
-    });
-    
-    // Mark as initialized
-    modulesInitialized = true;
-    
-    return allModules;
-  })();
-  
-  return initPromise;
-}
-
-export function preloadYAMLStyles(context) {
-  if (context.config?.card_type && !context.stylesYAML) {
-    // Utilize the same promise for all components
-    if (modulesInitialized && allModules) {
-      context.stylesYAML = Promise.resolve(allModules);
-    } else {
-      context.stylesYAML = initializeModules(context);
-    }
-  }
-}
-
-// Custom YAML type definition for !include
-const INCLUDE_TYPE = new YAML.Type('!include', {
-  kind: 'scalar',
-  resolve: function(data) {
-    return typeof data === 'string';
-  },
-  construct: function(data) {
-    const request = new XMLHttpRequest();
-    request.open('GET', `/local/bubble/${data}`, false);
-    request.send(null);
-    if (request.status === 200) {
-      try {
-        return YAML.load(request.responseText, { schema: INCLUDE_SCHEMA });
-      } catch (e) {
-        console.error(`Error parsing the included YAML file (/local/bubble/${data}):`, e);
-        return null;
-      }
-    } else {
-      console.error(`Error including the file /local/bubble/${data}: HTTP status ${request.status}`);
-      return null;
-    }
-  }
-});
-
-// Create a YAML schema that supports !include by extending the default schema
-const INCLUDE_SCHEMA = YAML.DEFAULT_SCHEMA.extend([INCLUDE_TYPE]);
-
-export let yamlKeysMap = new Map();
-let yamlCache = new Map();
 const compiledTemplateCache = new Map();
+
+const CLEAN_CSS_CACHE_LIMIT = 300; // conservative limit to bound memory
+const cleanCSSCache = new Map(); // LRU cache (Map preserves insertion order)
+
+// Precompiled regex patterns
+const RE_BLOCK_COMMENTS = /\/\*[\s\S]*?\*\//g;
+const RE_MULTI_WHITESPACE = /\s+/g;
+const RE_SPACE_AROUND_SEPARATORS = /\s*([{};,])\s*/g;
+const RE_EMPTY_DECLARATION = /([a-zA-Z0-9_-]+)\s*:\s*;/g;
+const RE_UNDEFINED_OUTSIDE_QUOTES = /undefined(?=(?:(?:[^"]*"){2})*[^"]*$)/g;
+const RE_EMPTY_BLOCK = /[^{};]+\s*{\s*}/g;
+const RE_TRAILING_COMMA = /,(?=\s*[}\n])/g;
+const RE_BLOCKS_OR_AT_RULES = /(@[^{}]*?\{(?:[^{}]*?\{[^{}]*?\})*?[^{}]*?\}|[^{}]*?\{[^{}]*?\})/g;
 
 function getOrCreateStyleElement(context, element) {
   if (element.tagName === 'STYLE') {
@@ -161,61 +34,18 @@ function getOrCreateStyleElement(context, element) {
   return context.styleElement;
 }
 
-export const loadYAML = async (urls) => {
-  for (const url of urls) {
-    const cacheBuster = `?v=${Date.now()}`; // Prevent caching
-    const fullUrl = url + cacheBuster;
-
-    try {
-      const response = await fetch(fullUrl, { cache: "no-store" });
-
-      if (!response.ok) {
-        window.bubbleYamlWarning = true;
-        continue;
-      }
-
-      const yamlText = await response.text();
-      let parsedYAML;
-      
-      // Try to parse as YAML
-      parsedYAML = parseYAML(yamlText);
-      
-      if (!yamlKeysMap.size && parsedYAML) {
-        Object.entries(parsedYAML).forEach(([key, value]) => {
-          if (key !== 'modules' && key !== 'friendly_name' && key !== 'last_updated') {
-            yamlKeysMap.set(key, value);
-          }
-        });
-      }
-
-      yamlCache.set(url, parsedYAML);
-      return parsedYAML;
-    } catch (error) {
-      console.warn(`Error fetching 'bubble-modules.yaml' from ${fullUrl}:`, error);
-      window.bubbleYamlWarning = true;
-    }
-  }
-  return null;
-};
-
-export const parseYAML = (yamlString) => {
-  if (!yamlString || typeof yamlString !== 'string') {
-    return null;
-  }
-  
-  try {
-    // Use the custom schema that supports !include
-    const parsedYAML = YAML.load(yamlString, { schema: INCLUDE_SCHEMA });
-    return parsedYAML;
-  } catch (error) {
-    console.error("YAML parsing error:", error);
-    return null;
-  }
-};
-
 export const handleCustomStyles = async (context, element = context.card) => {
   const isDirectStyleElement = element.tagName === 'STYLE';
   const targetElementForDisplayLogic = isDirectStyleElement ? null : element; 
+  const isPopupRoot = context.cardType === 'pop-up' && element === context.popUp;
+  const loadHideTarget = isPopupRoot
+    ? (context.elements?.popUpContainer 
+        || (typeof element.querySelector === 'function' 
+          ? element.querySelector('.bubble-pop-up-container')
+          : null)
+        || targetElementForDisplayLogic)
+    : targetElementForDisplayLogic;
+  const loadHideMode = isPopupRoot ? 'visibility' : 'display';
 
   const customStyles = context.config.styles;
 
@@ -223,7 +53,6 @@ export const handleCustomStyles = async (context, element = context.card) => {
     context.lastEvaluatedStyles = "";
     context.initialLoad = true;
     
-    // Optimization of the event listener
     if (!context._moduleChangeListenerAdded) {
       const refreshHandler = () => {
         context.lastEvaluatedStyles = "";
@@ -233,7 +62,9 @@ export const handleCustomStyles = async (context, element = context.card) => {
             delete context._processedSchemas[key];
           }
         });
-        handleCustomStyles(context, context.card); 
+        // Use popUp element for pop-up cards, otherwise use card element
+        const targetElement = context.cardType === 'pop-up' && context.popUp ? context.popUp : context.card;
+        handleCustomStyles(context, targetElement); 
       };
       
       window.addEventListener('bubble-card-modules-changed', refreshHandler);
@@ -245,8 +76,13 @@ export const handleCustomStyles = async (context, element = context.card) => {
   }
   
   // Hide the card during the initial loading only
-  if (context.initialLoad && targetElementForDisplayLogic?.style) {
-    targetElementForDisplayLogic.style.display = "none";
+  if (context.initialLoad && loadHideTarget?.style && !loadHideTarget.dataset.bubbleStyleHideMode) {
+    if (loadHideMode === 'visibility') {
+      loadHideTarget.style.visibility = 'hidden';
+    } else {
+      loadHideTarget.style.display = 'none';
+    }
+    loadHideTarget.dataset.bubbleStyleHideMode = loadHideMode;
   }
 
   const styleElementToInjectInto = getOrCreateStyleElement(context, element); 
@@ -286,7 +122,7 @@ export const handleCustomStyles = async (context, element = context.card) => {
         activeModules.add('default');
     }
 
-    const getGlobalModules = (hass) => {
+    const addGlobalModulesFromEntity = (hass) => {
         if (!hass || !hass.states || !hass.states['sensor.bubble_card_modules']) return;
         const globalModulesData = hass.states['sensor.bubble_card_modules'].attributes.modules;
         if (!globalModulesData) return;
@@ -299,7 +135,22 @@ export const handleCustomStyles = async (context, element = context.card) => {
         }
     };
 
-    if (context._hass) getGlobalModules(context._hass);
+    const addGlobalModulesFromFiles = () => {
+        try {
+            yamlKeysMap.forEach((value, key) => {
+                if (value && typeof value === 'object' && value.is_global === true && !configExcludedModules.has(key)) {
+                    activeModules.add(key);
+                }
+            });
+        } catch (_) {}
+    };
+
+    // Read global flags from files only when BCT/migration is available
+    // Legacy entity is used strictly as a fallback when BCT is not available
+    addGlobalModulesFromFiles();
+    if ((!isBCTAvailableSync || !isBCTAvailableSync()) && context._hass) {
+      addGlobalModulesFromEntity(context._hass);
+    }
 
     configDefinedModules.forEach(moduleId => {
         if (yamlKeysMap.has(moduleId) && !configExcludedModules.has(moduleId)) {
@@ -352,8 +203,13 @@ export const handleCustomStyles = async (context, element = context.card) => {
       styleElementToInjectInto.textContent = finalStylesToInject;
     }
 
-    if (context.initialLoad && targetElementForDisplayLogic?.style) {
-      targetElementForDisplayLogic.style.display = "";
+    if (context.initialLoad && loadHideTarget?.style) {
+      if (loadHideTarget.dataset.bubbleStyleHideMode === 'visibility') {
+        loadHideTarget.style.visibility = '';
+      } else {
+        loadHideTarget.style.display = '';
+      }
+      delete loadHideTarget.dataset.bubbleStyleHideMode;
       if (!isDirectStyleElement) { 
         context.initialLoad = false;
         context.cardLoaded = true;
@@ -372,8 +228,6 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
 
   // If this card is in editor mode and its template was previously marked as temporarily failed
   if (context.editor && context.templateEvaluationBlocked) {
-    // To avoid flickering, we don't re-evaluate immediately.
-    // The original error should remain displayed in the editor.
     return ""; // Prevents re-evaluation and flickering
   }
 
@@ -488,7 +342,15 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
       
       context.templateErrorClearTimeout = setTimeout(() => {
         context.templateEvaluationBlocked = false;
-      }, 2000); 
+        try {
+          // Trigger a refresh to re-evaluate templates quickly
+          if (typeof context.handleCustomStyles === 'function') {
+            context.lastEvaluatedStyles = "";
+            context.stylesYAML = null;
+            requestAnimationFrame(() => context.handleCustomStyles(context, context.card));
+          }
+        } catch (_) {}
+      }, 900);
     }
     console.error(errorMessageToLog);
     return ""; // Important: return an empty string to avoid breaking styles.
@@ -496,26 +358,57 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
 }
 
 function cleanCSS(css) {
-  const cleaned = css
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/\s+/g, " ")
-    .replace(/\s*([{};,])\s*/g, "$1")
-    .replace(/([a-zA-Z0-9_-]+)\s*:\s*;/g, "")
-    .replace(/undefined(?=(?:(?:[^"]*"){2})*[^"]*$)/g, "")
-    .replace(/[^{};]+\s*{\s*}/g, "")
-    .replace(/,(?=\s*[}\n])/g, "")
-    .split("\n")
-    .filter(line =>
-      line.includes("{") ||
-      line.includes("}") ||
-      line.includes(":") ||
-      line.trim().match(/['"]{2}/g) ||
-      line.includes("${") ||
-      line.match(/^@supports|^@media|^@keyframes|^@layer/)
-    )
-    .join("\n")
-    .match(/(@[^{]*?\{(?:[^{}]*?\{[^{}]*?\})*?[^{}]*?\}|[^{}]*?\{[^{}]*?\})/g)?.join("\n") || "";
-  return cleaned;
+  // Fast-path for non-strings or empty strings
+  if (!css || typeof css !== "string") return "";
+
+  // LRU cache lookup
+  if (cleanCSSCache.has(css)) {
+    const cached = cleanCSSCache.get(css);
+    // refresh recency
+    cleanCSSCache.delete(css);
+    cleanCSSCache.set(css, cached);
+    return cached;
+  }
+
+  let result = css;
+
+  // Apply inexpensive guards before heavier regex passes
+  if (result.includes("/*")) result = result.replace(RE_BLOCK_COMMENTS, "");
+  // Whitespace normalization is cheap; do it unconditionally
+  result = result.replace(RE_MULTI_WHITESPACE, " ");
+  result = result.replace(RE_SPACE_AROUND_SEPARATORS, "$1");
+  if (result.includes(":;") || result.includes(": ")) result = result.replace(RE_EMPTY_DECLARATION, "");
+  if (result.includes("undefined")) result = result.replace(RE_UNDEFINED_OUTSIDE_QUOTES, "");
+  if (result.includes("{")) result = result.replace(RE_EMPTY_BLOCK, "");
+  if (result.includes(",")) result = result.replace(RE_TRAILING_COMMA, "");
+
+  // Line filtering only when newlines exist
+  if (result.includes("\n")) {
+    result = result
+      .split("\n")
+      .filter(line =>
+        line.includes("{") ||
+        line.includes("}") ||
+        line.includes(":") ||
+        line.trim().match(/["']{2}/g) ||
+        line.includes("${") ||
+        line.match(/^@supports|^@media|^@keyframes|^@layer/)
+      )
+      .join("\n");
+  }
+
+  // Keep only well-formed blocks and at-rules (same logic as before)
+  const matched = result.match(RE_BLOCKS_OR_AT_RULES);
+  result = matched ? matched.join("\n") : "";
+
+  // Store in LRU cache and evict oldest if needed
+  cleanCSSCache.set(css, result);
+  if (cleanCSSCache.size > CLEAN_CSS_CACHE_LIMIT) {
+    const oldestKey = cleanCSSCache.keys().next().value;
+    cleanCSSCache.delete(oldestKey);
+  }
+
+  return result;
 }
 
 function emitEditorError(message, errorContext) {
@@ -525,55 +418,4 @@ function emitEditorError(message, errorContext) {
       context: errorContext
     }
   }));
-}
-
-// Improved function to load modules from text
-async function loadModulesFromEntity(hass) {
-  const entityId = 'sensor.bubble_card_modules';
-  const entity = hass.states[entityId];
-  
-  if (!entity) {
-    return {};
-  }
-  
-  if (!entity.attributes?.modules) {
-    return {};
-  }
-
-  const modules = {};
-  let totalModules = 0;
-  let parsedModules = 0;
-  
-  try {
-    // Transform object.values into array for easier traversal
-    totalModules = Object.keys(entity.attributes.modules).length;
-    
-    Object.values(entity.attributes.modules).forEach(module => {
-      try {
-        // Check if the module has already a complete structure (with code, description, etc.)
-        if (!module.yaml && (module.code || module.description)) {
-          // Use the existing structure directly
-          modules[module.id] = module;
-          parsedModules++;
-          return;
-        }
-        
-        if (!module.yaml) {
-          return;
-        }
-      } catch (e) {
-        console.error(`❌ YAML parsing error for module ${module.id}:`, e);
-        // Display problematic content safely (if it's a string)
-        if (typeof module.yaml === 'string') {
-          console.error("Problematic YAML content:", module.yaml.substring(0, 100) + "...");
-        } else {
-          console.error("Problematic YAML content type:", typeof module.yaml);
-        }
-      }
-    });
-  } catch (error) {
-    console.error("Error while processing modules from text entity:", error);
-  }
-
-  return modules;
 }

@@ -262,7 +262,7 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
   const yamlSetProperties = {
     name: false, version: false, author: false, creator: false,
     description: false, type: false, link: false, supported: false, unsupported: false,
-    editor: false, code: false, imageUrl: false
+    editor: false, code: false, imageUrl: false, is_global: false
   };
 
   // Utility function to apply a property from an object
@@ -325,6 +325,7 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
             applyProperty(mainObj, 'editor');
             applyProperty(mainObj, 'link');
             applyProperty(mainObj, 'creator');
+            applyProperty(mainObj, 'is_global');
             
             // Properties with alternative names
             applyProperty(mainObj, 'form_schema', 'editor');
@@ -370,6 +371,7 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
           applyProperty(parsedYaml, 'editor');
           applyProperty(parsedYaml, 'link');
           applyProperty(parsedYaml, 'creator');
+          applyProperty(parsedYaml, 'is_global');
           
           // Properties with alternative names
           applyProperty(parsedYaml, 'form_schema', 'editor');

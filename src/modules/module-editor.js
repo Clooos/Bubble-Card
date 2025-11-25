@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { fireEvent } from '../tools/utils.js';
-import { yamlKeysMap, moduleSourceMap } from '../tools/style-processor.js';
+import { yamlKeysMap, moduleSourceMap } from './registry.js';
 import { extractModuleMetadata } from './parser.js';
 import jsyaml from 'js-yaml';
 import { 
@@ -9,6 +9,7 @@ import {
   copyToClipboard,
   downloadModuleAsYaml
 } from './export.js';
+import { ensureBCTProviderAvailable, writeModuleYaml, deleteModuleFile } from './bct-provider.js';
 import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
 
@@ -82,7 +83,7 @@ export function renderModuleEditorForm(context) {
 
   // Determine if there are blocking errors (YAML schema parsing or template errors)
   const hasYamlError = !!context._yamlErrorMessage;
-  const hasTemplateError = !!context.errorMessage && !!context._editingModule; // set by createErrorConsole for current module
+  const hasTemplateError = typeof context.errorMessage === 'string' && context.errorMessage.trim().length > 0 && !!context._editingModule;
   const hasBlockingErrors = hasYamlError || hasTemplateError;
 
   // Apply styles in real-time
@@ -105,25 +106,29 @@ export function renderModuleEditorForm(context) {
     }
     
     context._editingModule.code = newCssCode;
-    
-    // Reset style cache
-    if (context.stylesYAML) {
-      context.stylesYAML = null;
-    }
-    
-    // Update yamlKeysMap
-    const updatedModule = {
-      ...yamlKeysMap.get(moduleId) || {},
-      code: newCssCode,
-      id: moduleId
-    };
-    yamlKeysMap.set(moduleId, updatedModule);
-    
-    // Ensure module is enabled in configuration
-    updateModuleInConfig(context, moduleId, context._previousModuleId);
-    
-    // Notify other card instances
-    broadcastModuleUpdate(moduleId, updatedModule);
+
+    // Debounce heavy updates to avoid thrashing while typing
+    try { if (context._moduleCodeDebounce) { clearTimeout(context._moduleCodeDebounce); } } catch (_) {}
+    context._moduleCodeDebounce = setTimeout(() => {
+      // Reset style cache just-in-time
+      if (context.stylesYAML) {
+        context.stylesYAML = null;
+      }
+
+      // Update yamlKeysMap with the latest code
+      const debouncedUpdatedModule = {
+        ...yamlKeysMap.get(moduleId) || {},
+        code: context._editingModule.code,
+        id: moduleId
+      };
+      yamlKeysMap.set(moduleId, debouncedUpdatedModule);
+
+      // Ensure module is enabled in configuration
+      updateModuleInConfig(context, moduleId, context._previousModuleId);
+
+      // Broadcast only once per keystroke burst
+      broadcastModuleUpdate(moduleId, debouncedUpdatedModule);
+    }, 140);
   };
   
   // Apply editor schema changes in real-time
@@ -463,6 +468,10 @@ export function renderModuleEditorForm(context) {
                 // Restore original module if canceling edit
                 if (!context._showNewModuleForm && context._editingModule) {
                   const moduleId = context._editingModule.id;
+                  // Clear any lingering module errors on cancel
+                  if (typeof context._clearCurrentModuleError === 'function') {
+                    context._clearCurrentModuleError(moduleId);
+                  }
                   resetModuleChanges(context, moduleId);
                 } else if (context._showNewModuleForm && context._editingModule) {
                   // For new module creation cancellation
@@ -498,6 +507,10 @@ export function renderModuleEditorForm(context) {
             
             <button class="icon-button ${isFromYamlFile || hasBlockingErrors ? 'disabled' : ''}" ?disabled=${isFromYamlFile || hasBlockingErrors} style="flex: 1;" @click=${() => {              
               if (isFromYamlFile || hasBlockingErrors) { return; }
+              // Clear any lingering module errors prior to saving
+              if (typeof context._clearCurrentModuleError === 'function' && context._editingModule?.id) {
+                context._clearCurrentModuleError(context._editingModule.id);
+              }
               saveModule(context, context._editingModule);
               setTimeout(() => scrollToModuleForm(context), 0);
             }}>
@@ -510,10 +523,9 @@ export function renderModuleEditorForm(context) {
   `;
 }
 
-// Function to render checkboxes for supported cards
-function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
-  // Map of available card types with friendly names
-  const availableCardTypes = [
+// Get available card types (exported for use in other modules)
+export function getAvailableCardTypes() {
+  return [
     { id: 'button', name: 'Button' }, 
     { id: 'calendar', name: 'Calendar' }, 
     { id: 'climate', name: 'Climate' }, 
@@ -522,36 +534,74 @@ function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
     { id: 'media-player', name: 'Media player' }, 
     { id: 'pop-up', name: 'Pop-up' }, 
     { id: 'select', name: 'Select' }, 
-    { id: 'separator', name: 'Separator' }
+    { id: 'separator', name: 'Separator' },
+    { id: 'sub-buttons', name: 'Sub-buttons' }
   ];
+}
+
+// Function to render checkboxes for supported cards
+function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
+  const availableCardTypes = getAvailableCardTypes();
+  const allCardIds = availableCardTypes.map(card => card.id);
   
   // Initialize supported array if not exists
-  if (!context._editingModule.supported) {
-    context._editingModule.supported = [];
-    
+  if (context._editingModule.supported === undefined) {
     // If module has legacy unsupported property, convert it to supported
     if (context._editingModule.unsupported && context._editingModule.unsupported.length > 0) {
       // All cards except those in unsupported are supported
-      context._editingModule.supported = availableCardTypes
-        .map(card => card.id)
+      context._editingModule.supported = allCardIds
         .filter(id => !context._editingModule.unsupported.includes(id));
     } else {
       // Default: all cards are supported if no 'unsupported' array exists
-      context._editingModule.supported = availableCardTypes.map(card => card.id);
+      // Don't create supported property - it means all cards are supported
+      // Set to undefined so it won't be included in exports
+      context._editingModule.supported = undefined;
     }
   }
   
+  // Check if all cards are selected (supported is undefined/null or contains all cards)
+  const allCardsSelected = !context._editingModule.supported || 
+    (Array.isArray(context._editingModule.supported) &&
+     context._editingModule.supported.length === allCardIds.length &&
+     allCardIds.every(id => context._editingModule.supported.includes(id)));
+  
   return html`
     <div class="checkbox-grid">
+      <ha-formfield label="All cards" style="grid-column: 1 / -1; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--divider-color);">
+        <ha-checkbox
+          .checked=${allCardsSelected}
+          @change=${(e) => {
+            if (isFromYamlFile) return;
+            if (e.target.checked) {
+              // Remove supported to indicate all cards are supported
+              delete context._editingModule.supported;
+            } else {
+              // Deselect all cards
+              context._editingModule.supported = [];
+            }
+            context.requestUpdate();
+          }}
+          ?disabled=${isFromYamlFile}
+        ></ha-checkbox>
+      </ha-formfield>
       ${availableCardTypes.map(card => html`
         <ha-formfield label="${card.name}">
           <ha-checkbox
-            .checked=${context._editingModule.supported.includes(card.id)}
+            .checked=${!context._editingModule.supported || context._editingModule.supported.includes(card.id)}
             @change=${(e) => {
               if (isFromYamlFile) return;
+              // Ensure supported array exists when modifying individual cards
+              if (!context._editingModule.supported) {
+                context._editingModule.supported = allCardIds.slice();
+              }
               if (e.target.checked) {
                 if (!context._editingModule.supported.includes(card.id)) {
                   context._editingModule.supported.push(card.id);
+                }
+                // If all cards are now selected, remove supported to indicate all cards
+                if (context._editingModule.supported.length === allCardIds.length &&
+                    allCardIds.every(id => context._editingModule.supported.includes(id))) {
+                  delete context._editingModule.supported;
                 }
               } else {
                 context._editingModule.supported = context._editingModule.supported.filter(
@@ -577,6 +627,10 @@ export async function saveModule(context, moduleData) {
     const moduleId = moduleData.id;
     const wasModuleEnabled = context._config.modules && context._config.modules.includes(moduleId);
     
+    // Preserve is_global from existing module before saving
+    const existingModule = yamlKeysMap.get(moduleId);
+    const wasGlobal = existingModule && existingModule.is_global === true;
+    
     // Ensure we use the parsed version for saving
     if (moduleData.editor_raw && typeof moduleData.editor_raw === 'string') {
       try {
@@ -599,39 +653,29 @@ export async function saveModule(context, moduleData) {
       delete moduleData.unsupported;
     }
     
-    // Check if HA entity exists
-    const entityId = 'sensor.bubble_card_modules';
-    const entityExists = context.hass && context.hass.states && context.hass.states[entityId];
-
-    // Create YAML structure
-    const moduleObj = {};
-    const moduleContent = { ...moduleData };
+    // Remove supported if it contains all cards (for compatibility with older versions)
+    const availableCardTypes = getAvailableCardTypes();
+    const allCardIds = availableCardTypes.map(card => card.id);
+    if (moduleData.supported && Array.isArray(moduleData.supported) &&
+        moduleData.supported.length === allCardIds.length &&
+        allCardIds.every(id => moduleData.supported.includes(id))) {
+      delete moduleData.supported;
+    }
     
-    // Remove id from internal structure as it becomes the key
-    delete moduleContent.id;
-    
-    // Set the module object
-    moduleObj[moduleData.id] = moduleContent;
-    
-    // Convert to YAML
-    const yamlContent = jsyaml.dump(moduleObj, {
-      indent: 2,
-      lineWidth: -1,
-      noRefs: true,
-      noCompatMode: true
-    });
-    
-    // Create simplified module data for storage (kept for HA entity payload only)
-    const simplifiedModuleData = {
-      id: moduleData.id,
-      yaml: yamlContent
-    };
+    // Build a clean YAML string for persistence using only supported fields
+    const { generateYamlExport } = await import('./export.js');
+    const yamlContent = generateYamlExport(moduleData);
     
     // Extract metadata and update in yamlKeysMap
     const metadata = extractModuleMetadata(yamlContent, moduleData.id, {
       title: moduleData.name,
       defaultCreator: moduleData.creator
     });
+    
+    // Preserve is_global property if it was set before saving
+    if (wasGlobal) {
+      metadata.is_global = true;
+    }
     
     // Signal modules have been updated
     document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
@@ -660,7 +704,7 @@ export async function saveModule(context, moduleData) {
     });
     
     // Mark this module as coming from the persistent entity (not YAML file)
-    try { moduleSourceMap.set(moduleId, 'entity'); } catch (e) {}
+    // Will be overridden below depending on storage provider
     
     // Ensure the module is added to the card's configuration
     if (context._config && context._config.modules) {
@@ -671,9 +715,25 @@ export async function saveModule(context, moduleData) {
       fireEvent(context, "config-changed", { config: context._config });
     }
     
-    // Save to Home Assistant if entity exists
-    if (entityExists) {
-      await saveModuleToHomeAssistant(context, entityId, moduleData);
+    // Persist using Bubble Card Tools files if available; otherwise keep changes local only (no entity writes)
+    let savedViaFiles = false;
+    try {
+      const bctAvailable = await ensureBCTProviderAvailable(context.hass);
+      if (bctAvailable) {
+        // Persist to modules/<id>.yaml using the provider with the YAML string
+        await writeModuleYaml(context.hass, moduleId, yamlContent);
+        try { moduleSourceMap.set(moduleId, 'file'); } catch (e) {}
+        // Notify the system to reload modules from files
+        document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
+        savedViaFiles = true;
+      }
+    } catch (e) {
+      // Keep local-only if file save fails
+      console.warn('File-based save failed; keeping changes local only:', e);
+    }
+    // No writes to the legacy entity; if files are unavailable, changes remain local-only
+    if (!savedViaFiles) {
+      try { moduleSourceMap.set(moduleId, 'editor'); } catch (e) {}
     }
     
     // Broadcast change to all cards
@@ -705,69 +765,7 @@ export async function saveModule(context, moduleData) {
   }
 }
 
-// Save module to Home Assistant
-async function saveModuleToHomeAssistant(context, entityId, moduleData) {
-  try {
-    // Use Home Assistant helper to handle auth and token refresh
-    const entityData = await context.hass.callApi("get", `states/${entityId}`);
-    
-    if (entityData) {
-      let haModules = {};
-      
-      if (entityData.attributes && entityData.attributes.modules) {
-        try {
-          if (typeof entityData.attributes.modules === 'string') {
-            haModules = JSON.parse(entityData.attributes.modules);
-          } else {
-            haModules = entityData.attributes.modules;
-          }
-        } catch (e) {
-          console.warn("Error parsing modules from Home Assistant:", e);
-        }
-      }
-      
-      if (!haModules || typeof haModules !== 'object') {
-        haModules = {};
-      }
-      
-      // Check if module already exists and preserve is_global property
-      const existingModule = haModules[moduleData.id];
-      const isGlobal = existingModule && existingModule.is_global === true;
-      
-      // Special format for Home Assistant with direct content
-      haModules[moduleData.id] = {
-        id: moduleData.id,
-        name: moduleData.name,
-        version: moduleData.version,
-        creator: moduleData.creator,
-        description: moduleData.description,
-        code: moduleData.code,
-        editor: moduleData.editor,
-        supported: moduleData.supported || [],
-        // Preserve is_global property if it was set to true
-        ...(isGlobal ? { is_global: true } : {}),
-        // If this is the default module, ensure is_global is true
-        ...(moduleData.id === 'default' ? { is_global: true } : {}),
-        // Maintain backward compatibility if necessary - only if supported doesn't exist
-        ...(moduleData.supported ? {} : { unsupported: moduleData.unsupported || [] })
-      };
-      
-      // Send to Home Assistant
-      context.hass.callWS({
-        type: "fire_event",
-        event_type: "bubble_card_update_modules",
-        event_data: {
-          modules: haModules,
-          last_updated: new Date().toISOString()
-        }
-      }).catch(error => {
-        console.error("Error firing event:", error);
-      });
-    }
-  } catch (error) {
-    console.error("Error saving module to Home Assistant:", error);
-  }
-}
+// No longer writing modules to Home Assistant; persistence is handled by Bubble Card Tools files.
 
 // Function to force a complete UI refresh
 function forceUIRefresh(context) {
@@ -882,10 +880,6 @@ export function editModule(context, moduleId) {
 
 // Delete a module
 export async function deleteModule(context, moduleId) {
-  // Check if HA entity exists
-  const entityId = 'sensor.bubble_card_modules';
-  const entityExists = context.hass && context.hass.states && context.hass.states[entityId];
-
   // Confirm deletion
   if (!confirm(`Are you sure you want to delete module "${moduleId}"?`)) {
     return;
@@ -900,10 +894,20 @@ export async function deleteModule(context, moduleId) {
     // Force refresh
     document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
     
-    // Update Home Assistant if entity exists
-    if (entityExists) {
-      await updateHomeAssistantModules(context, entityId, moduleId);
+    // Prefer deleting from Bubble Card Tools files; no legacy entity writes
+    let deletedViaFiles = false;
+    try {
+      const bctAvailable = await ensureBCTProviderAvailable(context.hass);
+      if (bctAvailable) {
+        await deleteModuleFile(context.hass, moduleId);
+        // Notify reload
+        document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
+        deletedViaFiles = true;
+      }
+    } catch (e) {
+      console.warn('File-based deletion failed; keeping changes local only:', e);
     }
+    // No writes to legacy entity
     
     // Remove module from current config
     if (context._config && context._config.modules) {
@@ -926,50 +930,7 @@ export async function deleteModule(context, moduleId) {
   }
 }
 
-// Update Home Assistant modules after deletion
-async function updateHomeAssistantModules(context, entityId, moduleId) {
-  try {
-    // Use Home Assistant helper to handle auth and token refresh
-    const entityData = await context.hass.callApi("get", `states/${entityId}`);
-    
-    if (entityData) {
-      let haModules = {};
-      
-      if (entityData.attributes && entityData.attributes.modules) {
-        try {
-          if (typeof entityData.attributes.modules === 'string') {
-            haModules = JSON.parse(entityData.attributes.modules);
-          } else {
-            haModules = entityData.attributes.modules;
-          }
-        } catch (e) {
-          console.warn("Error parsing modules from Home Assistant:", e);
-        }
-      }
-      
-      if (!haModules || typeof haModules !== 'object') {
-        haModules = {};
-      }
-      
-      // Remove module
-      delete haModules[moduleId];
-      
-      // Update in Home Assistant
-      context.hass.callWS({
-        type: "fire_event",
-        event_type: "bubble_card_update_modules",
-        event_data: {
-          modules: haModules,
-          last_updated: new Date().toISOString()
-        }
-      }).catch(error => {
-        console.error("Error firing event:", error);
-      });
-    }
-  } catch (error) {
-    console.error("Error updating Home Assistant entity:", error);
-  }
-}
+// No longer updating Home Assistant entity when deleting modules.
 
 // Initialize module editor context
 export function initModuleEditor(context) {
@@ -1014,7 +975,7 @@ export function initModuleEditor(context) {
       description: '',
       creator: '',
       version: '1.0',
-      supported: ['button', 'calendar', 'climate', 'cover', 'horizontal-buttons-stack', 'media-player', 'pop-up', 'select', 'separator'],
+      // No supported property = all cards are supported (compatible with older versions)
       code: '',
       editor: '',
     };

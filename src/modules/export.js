@@ -1,5 +1,6 @@
 import jsyaml from 'js-yaml';
 import { fireToast } from './cache.js';
+import { getAvailableCardTypes } from './module-editor.js';
 
 function getCleanExportData(moduleData) {
   // Destructure to extract only the desired properties.
@@ -13,8 +14,20 @@ function getCleanExportData(moduleData) {
     supported,
     description, 
     code, 
-    editor 
+    editor,
+    is_global
   } = { ...moduleData };
+
+  // Get all available card IDs
+  const allCardIds = getAvailableCardTypes().map(card => card.id);
+  
+  // Check if supported contains all cards - if so, remove it for compatibility
+  let cleanedSupported = supported;
+  if (supported && Array.isArray(supported) && 
+      supported.length === allCardIds.length &&
+      allCardIds.every(id => supported.includes(id))) {
+    cleanedSupported = undefined;
+  }
 
   // Reconstruct the object to control the order of properties for consistent output.
   const cleanData = {
@@ -22,11 +35,16 @@ function getCleanExportData(moduleData) {
     version,
     creator,
     link,
-    supported,
+    supported: cleanedSupported,
     description,
     code,
     editor
   };
+  
+  // Include is_global only if it's true
+  if (is_global === true) {
+    cleanData.is_global = true;
+  }
   
   // Remove any properties that are undefined, null, or an empty link.
   Object.keys(cleanData).forEach(key => {
@@ -67,24 +85,35 @@ export function generateYamlExport(moduleData) {
 export function generateGitHubExport(moduleData) {
   try {
     const { id, cleanData } = getCleanExportData(moduleData);
-    const { name, version, creator, description, code, editor, supported = [] } = cleanData;
+    const { name, version, creator, description, code, editor, supported } = cleanData;
+    
+    // Get all available card IDs
+    const allCardIds = getAvailableCardTypes().map(card => card.id);
+    
+    // Check if all cards are supported (supported is undefined/null or contains all cards)
+    const allCardsSupported = !supported || 
+      (Array.isArray(supported) && 
+       supported.length === allCardIds.length &&
+       allCardIds.every(id => supported.includes(id)));
     
     // Build the GitHub discussion markdown format
     let githubContent = `# ${name}\n\n`;
     githubContent += `**Version:** ${version}  \n`;
     githubContent += `**Creator:** ${creator}\n\n`;
     
-    // Add supported cards section if any
-    if (supported && supported.length > 0) {
-      githubContent += `> [!IMPORTANT] \n`;
-      githubContent += `> **Supported cards:**\n`;
-      
+    // Add supported cards section
+    githubContent += `> [!IMPORTANT] \n`;
+    githubContent += `> **Supported cards:**\n`;
+    
+    if (allCardsSupported) {
+      githubContent += `>  - All cards are supported\n`;
+    } else if (supported && supported.length > 0) {
       supported.forEach(card => {
         githubContent += `>  - ${card.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}\n`;
       });
-      
-      githubContent += `\n`;
     }
+    
+    githubContent += `\n`;
     
     // Add description
     if (description) {
@@ -114,7 +143,7 @@ export function generateGitHubExport(moduleData) {
     githubContent += "<details>\n\n";
     githubContent += "<summary><b>🧩 Get this Module</b></summary>\n\n";
     githubContent += "<br>\n\n";
-    githubContent += "> To use this module, simply install it from the Module Store (from the editor of any card > Modules), or copy and paste the following configuration into your `/www/bubble/bubble-modules.yaml` file.\n\n";
+    githubContent += `> To use this module, simply install it from the Module Store (from the editor of any card > Modules), or copy and paste the following configuration into a \`/www/bubble/modules/${id}.yaml\` file.\n\n`;
     
     // Full YAML definition
     githubContent += "```yaml\n";
@@ -126,8 +155,8 @@ export function generateGitHubExport(moduleData) {
     // Optional link placeholder
     githubContent += `    link: "https://github.com/Clooos/Bubble-Card/discussions/XXXX"\n\n`;
     
-    // Supported cards if any
-    if (supported && supported.length > 0) {
+    // Supported cards if any (don't include if all cards are supported)
+    if (supported && supported.length > 0 && !allCardsSupported) {
       githubContent += `    supported:\n`;
       supported.forEach(card => {
         githubContent += `        - ${card}\n`;

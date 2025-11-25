@@ -995,11 +995,16 @@ sl-tab {
 
 ha-expansion-panel {
   --input-fill-color: none;
+  scroll-margin-top: 64px;
 }
 
 @keyframes highlight {
-  0% { background-color: rgba(var(--rgb-primary-color), 0.2); }
-  100% { background-color: var(--secondary-background-color); }
+  0% { background-color: var(--primary-color); }
+  100% { background-color: transparent; }
+}
+
+ha-expansion-panel.recently-toggled {
+  animation: highlight 2s;
 }
 
 .helper-text {
@@ -1069,7 +1074,6 @@ ha-formfield.apply-module-button {
 
 .module-badges .update-badge {
   margin-left: 0 !important;
-  z-index: 7;
 }
 
 .global-badge {
@@ -1085,4 +1089,53 @@ ha-formfield.apply-module-button {
 .toggle-badge {
   cursor: pointer !important;
   border: 1px solid var(--primary-text-color);
+}
+
+/* My Modules Search and Sort Controls */
+.my-modules-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  background-color: var(--card-background-color);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid var(--divider-color);
+  box-shadow: var(--shadow-elevation-1dp);
+}
+
+.my-modules-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border-radius: 32px;
+  overflow: hidden;
+}
+
+.my-modules-search ha-textfield {
+  flex-grow: 1;
+  width: 100%;
+}
+
+.my-modules-sort-menu {
+  display: flex;
+  align-items: center;
+}
+
+.my-modules-sort-menu .sort-trigger {
+  background: none;
+  padding: 0;
+  margin: 0 4px;
+}
+
+.my-modules-sort-menu mwc-list-item[selected] {
+  background-color: rgba(var(--rgb-primary-color), 0.12) !important;
+}
+
+.my-modules-sort-menu mwc-list-item[selected]:hover {
+  background-color: rgba(var(--rgb-primary-color), 0.18) !important;
+}
+
+mwc-icon-button ha-icon {
+  line-height: 100% !important;
 }

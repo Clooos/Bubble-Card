@@ -9,7 +9,7 @@ export default {
     "calendar": {
       "entity": "Entité",
       "color": "Couleur",
-      "days": "Jours Max",
+      "days": "Jours max.",
       "limit": "Limite",
       "list_of_calendars": "Liste des calendriers",
       "show_end": "Voir l'heure de fin",
@@ -22,4 +22,4 @@ export default {
       "settings": "Paramètres du calendrier"
     }
   }
-};
+}

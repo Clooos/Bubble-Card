@@ -1,4 +1,6 @@
 import { isColorCloseToWhite } from "./style.js";
+import { updateContentContainerFixedClass } from "../components/base-card/index.js";
+import { getIconColor } from "./icon.js";
 
 export const fireEvent = (node, type, detail, options) => {
     options = options || {};
@@ -29,6 +31,27 @@ export const navigate = (_node, path, replace = false) => {
 }
 
 const colorCache = new Map();
+
+// Cache for getComputedStyle to avoid expensive recalculations
+// Cache is invalidated on each animation frame to ensure accuracy
+let cachedDocumentElementStyles = null;
+let rafScheduled = false;
+
+function invalidateStyleCache() {
+    cachedDocumentElementStyles = null;
+    rafScheduled = false;
+}
+
+export function getCachedDocumentElementStyles() {
+    if (!cachedDocumentElementStyles) {
+        cachedDocumentElementStyles = getComputedStyle(document.documentElement);
+        if (!rafScheduled) {
+            requestAnimationFrame(invalidateStyleCache);
+            rafScheduled = true;
+        }
+    }
+    return cachedDocumentElementStyles;
+}
 
 export function resolveCssVariable(cssVariable) {
     let value = cssVariable;
@@ -84,6 +107,118 @@ export function isColorLight(cssVariable, threshold = 0.5) {
 
 export function adjustColor(rgb, brightness) {
   return rgb.map(channel => Math.min(255, Math.round(channel * brightness)));
+}
+
+// Compare two RGB colors to check if they are similar (within a threshold)
+export function areColorsSimilar(rgb1, rgb2, threshold = 15) {
+  if (!rgb1 || !rgb2 || rgb1.length !== 3 || rgb2.length !== 3) return false;
+  const diff = Math.abs(rgb1[0] - rgb2[0]) + Math.abs(rgb1[1] - rgb2[1]) + Math.abs(rgb1[2] - rgb2[2]);
+  return diff <= threshold;
+}
+
+export function getStateSurfaceColor(context, entity = context.config.entity, useLightBackground = true, cardBackgroundColor = null, subButtonColor = null) {
+  
+  // If light_background is false, force use of accent color instead of RGB light color
+  const originalUseAccentColor = context.config.use_accent_color;
+  if (!useLightBackground && entity?.startsWith('light.')) {
+    context.config.use_accent_color = true;
+  }
+  
+  const baseColorExpr = getIconColor(context, entity);
+  
+  // Restore original config
+  if (!useLightBackground && entity?.startsWith('light.')) {
+    context.config.use_accent_color = originalUseAccentColor;
+  }
+
+  try {
+    // Resolve CSS variables recursively
+    let resolved = resolveCssVariable(baseColorExpr);
+    // If still a variable, try resolving from document root
+    if (resolved && resolved.startsWith('var(')) {
+      const match = resolved.match(/var\((--[^,]+),?\s*(.*)?\)/);
+      if (match) {
+        const [, varName] = match;
+        const computed = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        if (computed) resolved = computed;
+      }
+    }
+    
+    const rgb = hexToRgb(resolved) || rgbStringToRgb(resolved);
+
+    if (!rgb) {
+      return baseColorExpr;
+    }
+
+    // For RGB light colors (useLightBackground === true), always apply derivation
+    // For accent colors (useLightBackground === false), only apply if card background matches or sub-button color matches
+    const isRgbLightColor = useLightBackground && entity?.startsWith('light.') && !context.config.use_accent_color;
+    
+    // Check if sub-button color matches (for slider contrast)
+    let shouldApplyDerivation = false;
+    let subButtonRgb = null;
+    
+    if (subButtonColor) {
+      let subButtonResolved = resolveCssVariable(subButtonColor);
+      if (subButtonResolved && subButtonResolved.startsWith('var(')) {
+        const match = subButtonResolved.match(/var\((--[^,]+),?\s*(.*)?\)/);
+        if (match) {
+          const [, varName] = match;
+          const computed = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+          if (computed) subButtonResolved = computed;
+        }
+      }
+      subButtonRgb = hexToRgb(subButtonResolved) || rgbStringToRgb(subButtonResolved);
+      
+      if (subButtonRgb && areColorsSimilar(rgb, subButtonRgb)) {
+        shouldApplyDerivation = true;
+      }
+    }
+    
+    if (!isRgbLightColor && cardBackgroundColor) {
+      // Check if card background matches sub-button color
+      // Only apply derivation if colors are similar (to avoid unnecessary changes)
+      let cardResolved = resolveCssVariable(cardBackgroundColor);
+      if (cardResolved && cardResolved.startsWith('var(')) {
+        const match = cardResolved.match(/var\((--[^,]+),?\s*(.*)?\)/);
+        if (match) {
+          const [, varName] = match;
+          const computed = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+          if (computed) cardResolved = computed;
+        }
+      }
+      const cardRgb = hexToRgb(cardResolved) || rgbStringToRgb(cardResolved);
+      
+      // Only apply derivation if card background and sub-button colors are similar
+      if (cardRgb && areColorsSimilar(rgb, cardRgb)) {
+        shouldApplyDerivation = true;
+      }
+    }
+    
+    // For accent colors, only apply derivation if card background or sub-button color matches
+    // For RGB light colors, always apply derivation
+    if (!isRgbLightColor && !shouldApplyDerivation) {
+      return baseColorExpr;
+    }
+
+    // Check if text color is light (white/light colors)
+    // If text is light, we need to darken the background to maintain contrast
+    // If text is dark, we need to lighten the background
+    const textColor = resolveCssVariable('var(--primary-text-color, #ffffff)');
+    const textRgb = hexToRgb(textColor) || rgbStringToRgb(textColor);
+    const isTextLight = textRgb ? calculateLuminance(...textRgb) > 0.5 : true;
+    
+    // Darken if text is light (to contrast with white text), lighten if text is dark (to contrast with dark text)
+    const factor = isRgbLightColor
+      ? (isTextLight ? 0.84 : 1.16)  // Stronger adjustment for RGB light colors
+      : (isTextLight ? 0.92 : 1.08); // Subtle adjustment for accent colors
+    
+    const adjustedRgb = adjustColor(rgb, factor);
+
+    return `rgb(${adjustedRgb[0]}, ${adjustedRgb[1]}, ${adjustedRgb[2]})`;
+  } catch (_) {
+    return baseColorExpr;
+  }
 }
 
 export function getName(context) {
@@ -164,7 +299,8 @@ export function isStateOn(context, entity = context.config.entity) {
         'true', 
         'home', 
         'playing', 
-        'unlocked', 
+        'locked', 
+        'unlocked',
         'occupied', 
         'available', 
         'running', 
@@ -180,7 +316,8 @@ export function isStateOn(context, entity = context.config.entity) {
         'heat_cool',
         'fan_only',
         'auto',
-        'alarm'
+        'alarm',
+        'error'
     ];
 
     if (activeStringStates.includes(state) || numericState || isTemperature) {
@@ -188,6 +325,16 @@ export function isStateOn(context, entity = context.config.entity) {
     }
 
     return false;
+}
+
+export function isStateRequiringAttention(context, entity = context.config.entity) {
+    const state = getState(context, entity).toLowerCase();
+    const attentionStates = [
+        'unlocked',
+        'error'
+    ];
+    
+    return attentionStates.includes(state);
 }
 
 export function createElement(tag, classNames = '') {
@@ -210,112 +357,164 @@ export function debounce(func, wait) {
     };
 }
 
-export function applyScrollingEffect(context, element, text) {
-    const { scrolling_effect: scrollingEffect = true } = context.config;
+// Shared state and observers for scrolling effect
+const bubbleScrollState = new WeakMap();
 
-    if (!scrollingEffect) {
-        applyNonScrollingStyle(element, text);
+function getBubbleResizeObserver() {
+    if (!window.bubbleScrollResizeObserver) {
+        window.bubbleScrollResizeObserver = new ResizeObserver((entries) => {
+            entries.forEach((entry) => {
+                const element = entry.target;
+                const state = bubbleScrollState.get(element);
+                if (!state) return;
+
+                if (!element.isConnected) {
+                    try { window.bubbleScrollResizeObserver.unobserve(element); } catch (e) {}
+                    if (window.bubbleScrollObserver) {
+                        try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
+                    }
+                    bubbleScrollState.delete(element);
         return;
     }
 
-    // Skip unnecessary updates
-    if (element.previousText === text) return;
-    
-    // Store original text for future comparison
-    element.previousText = text;
+                measureAndApplyScrolling(element, state);
+            });
+        });
+    }
+    return window.bubbleScrollResizeObserver;
+}
 
-    // First show the text normally to check if it overflows
-    element.innerHTML = text;
-    element.style = '';
-    element.removeAttribute('data-animated');
+function getBubbleIntersectionObserver() {
+    if (!window.bubbleScrollObserver) {
+        window.bubbleScrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                const span = entry.target.querySelector('.scrolling-container span');
+                if (span) {
+                    span.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused';
+                }
+            });
+        }, { threshold: 0.1 });
+    }
+    return window.bubbleScrollObserver;
+}
 
-    // Function to check and apply scrolling if needed
-    function checkAndApplyScrolling() {
-        // Check if element is still in the DOM
+function measureAndApplyScrolling(element, state) {
+    const text = state.text;
+    if (!text) return;
         if (!element.isConnected) return;
 
-        // Read dimensions: scrollWidth (total text width) vs clientWidth (visible area)
-        const contentWidth = element.scrollWidth;
         const availableWidth = element.clientWidth;
-        const shouldAnimate = contentWidth > availableWidth;
+    const isAnimated = element.getAttribute('data-animated') === 'true';
+    const SCROLL_SPEED = 16; // Pixels per second
 
-        // Apply scrolling if needed
-        if (shouldAnimate) {
+    if (isAnimated) {
+        const span = element.querySelector('.scrolling-container span');
+        if (!span) return;
+
+        const baseWidth = Math.max(1, span.scrollWidth / 2);
+        if (baseWidth <= availableWidth) {
+            element.removeAttribute('data-animated');
+            element.innerHTML = text;
+            if (state.observed && window.bubbleScrollObserver) {
+                try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
+                state.observed = false;
+            }
+            return;
+        }
+
+        const scrollDistance = baseWidth;
+        const duration = Math.max(1, scrollDistance / SCROLL_SPEED);
+        span.style.animationDuration = `${duration.toFixed(2)}s`;
+        return;
+    } else {
+        const baseWidth = element.scrollWidth;
+        if (baseWidth > availableWidth) {
             const separator = `<span class="bubble-scroll-separator"> | </span>`;
             const wrappedText = `<span>${text + separator + text + separator}</span>`;
             element.innerHTML = `<div class="scrolling-container">${wrappedText}</div>`;
             element.setAttribute('data-animated', 'true');
             
-            // Get the span element to calculate duration
-            const spanElement = element.querySelector('.scrolling-container span');
-
-            // Calculate and set animation duration after the element is rendered
-            requestAnimationFrame(() => {
-                if (spanElement && spanElement.scrollWidth > 0) {
-                    const SCROLL_SPEED = 16; // Pixels per second
-                    const scrollDistance = spanElement.scrollWidth / 2;
-                    const duration = Math.max(1, scrollDistance / SCROLL_SPEED); // Min duration 1s
-                    spanElement.style.animationDuration = `${duration.toFixed(2)}s`;
-                }
-            });
-            
-            // Observe visibility for performance
-            if ('IntersectionObserver' in window) {
-                if (!window.bubbleScrollObserver) {
-                    window.bubbleScrollObserver = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                            const container = entry.target.querySelector('.scrolling-container span');
-                            if (container) {
-                                container.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused';
-                            }
-                        });
-                    }, { threshold: 0.1 });
-                }
-                
-                window.bubbleScrollObserver.observe(element);
-                element._bubbleObserved = true;
+            const span = element.querySelector('.scrolling-container span');
+            if (span && span.scrollWidth > 0) {
+                const scrollDistance = Math.max(1, span.scrollWidth / 2);
+                const duration = Math.max(1, scrollDistance / SCROLL_SPEED);
+                span.style.animationDuration = `${duration.toFixed(2)}s`;
             }
+
+            const io = getBubbleIntersectionObserver();
+            try { io.observe(element); } catch (e) {}
+            state.observed = true;
+            return;
+        } else if (state.observed && window.bubbleScrollObserver) {
+            try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
+            state.observed = false;
         }
     }
+}
 
-    // Try multiple approaches to ensure rendering is complete before measuring
-    
-    // 1. Use requestAnimationFrame for immediate first attempt
-    requestAnimationFrame(() => {
-        // 2. Use a small delay to allow for layout calculations
-        setTimeout(() => {
-            checkAndApplyScrolling();
-            
-            // 3. Try again after a longer delay for slower devices
-            setTimeout(checkAndApplyScrolling, 300);
-        }, 50);
-    });
+export function applyScrollingEffect(context, element, text) {
+    const { scrolling_effect: scrollingEffect = true } = context.config;
 
-    // Add resize listener only once per element
-    if (!element.eventAdded) {
-        const debouncedUpdate = debounce(() => {
-            // If element has been detached, cleanup listeners/observers once and stop
-            if (!element.isConnected) {
-                if (element._bubbleResizeListener) {
-                    window.removeEventListener('resize', element._bubbleResizeListener);
-                    element._bubbleResizeListener = null;
-                }
-                if (window.bubbleScrollObserver && element._bubbleObserved) {
-                    try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
-                    element._bubbleObserved = false;
-                }
-                element.eventAdded = false;
+    if (!scrollingEffect) {
+		applyNonScrollingStyle(element, text);
+		// Cleanup observers if present
+		const ro = window.bubbleScrollResizeObserver;
+		if (ro) {
+			try { ro.unobserve(element); } catch (e) {}
+		}
+		const io = window.bubbleScrollObserver;
+		if (io && element) {
+			try { io.unobserve(element); } catch (e) {}
+		}
+		bubbleScrollState.delete(element);
                 return;
             }
 
-            element.innerHTML = element.previousText;
-            checkAndApplyScrolling();
-        }, 500);
-        
-        window.addEventListener('resize', debouncedUpdate);
-        element._bubbleResizeListener = debouncedUpdate;
-        element.eventAdded = true;
-    }
+	// Skip unnecessary updates but ensure observers remain
+	if (element.previousText === text && bubbleScrollState.has(element)) return;
+
+	// Store original text for future comparison
+	element.previousText = text;
+	bubbleScrollState.set(element, { text });
+
+	// Check if animation is already running
+	const isAnimated = element.getAttribute('data-animated') === 'true';
+	const existingSpan = element.querySelector('.scrolling-container span');
+	
+	if (isAnimated && existingSpan) {
+		// Update content without interrupting animation
+		const separator = `<span class="bubble-scroll-separator"> | </span>`;
+		const wrappedText = `${text + separator + text + separator}`;
+		existingSpan.innerHTML = wrappedText;
+		
+		// Recalculate animation duration if needed
+		const availableWidth = element.clientWidth;
+		const baseWidth = Math.max(1, existingSpan.scrollWidth / 2);
+		if (baseWidth > availableWidth) {
+			const SCROLL_SPEED = 16;
+			const scrollDistance = baseWidth;
+			const duration = Math.max(1, scrollDistance / SCROLL_SPEED);
+			existingSpan.style.animationDuration = `${duration.toFixed(2)}s`;
+		}
+		
+		// Ensure observers remain active
+		const ro = getBubbleResizeObserver();
+		try { ro.observe(element); } catch (e) {}
+		
+		return;
+	}
+
+	// Set plain text first; ResizeObserver will decide to animate
+	element.innerHTML = text;
+	element.style = '';
+	element.removeAttribute('data-animated');
+
+	const ro = getBubbleResizeObserver();
+	try { ro.observe(element); } catch (e) {}
+
+	// Measure immediately to avoid relying solely on observer scheduling
+	const state = bubbleScrollState.get(element);
+	measureAndApplyScrolling(element, state);
 }
 
 function applyNonScrollingStyle(element, text) {
@@ -327,7 +526,8 @@ function applyNonScrollingStyle(element, text) {
         display: '-webkit-box',
         WebkitLineClamp: '2',
         WebkitBoxOrient: 'vertical',
-        textOverflow: 'ellipsis'
+        textOverflow: 'ellipsis',
+        lineHeight: 'normal'
     });
 }
 
@@ -362,6 +562,195 @@ export function formatDateTime(datetime, locale) {
     return rtf.format(-value, unit);
 }
 
+// Timer utility functions
+export function durationToSeconds(duration) {
+    if (!duration) return 0;
+    
+    if (typeof duration === 'number') {
+        return duration;
+    }
+    
+    if (typeof duration === 'string') {
+        // Parse ISO 8601 duration format (PT1H30M45S) or simple format (1:30:45)
+        let seconds = 0;
+        
+        // Try ISO 8601 format first
+        const isoMatch = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+        if (isoMatch) {
+            seconds += (parseInt(isoMatch[1] || 0, 10) * 3600);
+            seconds += (parseInt(isoMatch[2] || 0, 10) * 60);
+            seconds += parseInt(isoMatch[3] || 0, 10);
+            return seconds;
+        }
+        
+        // Try simple format (HH:MM:SS or MM:SS)
+        const parts = duration.split(':').map(p => parseInt(p, 10));
+        if (parts.length === 3) {
+            return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        } else if (parts.length === 2) {
+            return parts[0] * 60 + parts[1];
+        }
+    }
+    
+    return 0;
+}
+
+export function secondsToDuration(seconds) {
+    if (seconds === undefined || seconds === null || isNaN(seconds)) {
+        return null;
+    }
+    
+    const totalSeconds = Math.floor(seconds);
+    if (totalSeconds < 0) return '0';
+    
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+    
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    } else if (minutes > 0) {
+        return `${minutes}:${String(secs).padStart(2, '0')}`;
+    } else {
+        return `0:${String(secs).padStart(2, '0')}`;
+    }
+}
+
+export function isTimerEntity(entity) {
+    return entity && typeof entity === 'string' && entity.startsWith('timer.');
+}
+
+export function timerTimeRemaining(stateObj) {
+    if (!stateObj || !stateObj.attributes) {
+        return undefined;
+    }
+    
+    if (!stateObj.attributes.remaining) {
+        return undefined;
+    }
+    
+    let timeRemaining = durationToSeconds(stateObj.attributes.remaining);
+    
+    if (stateObj.state === 'active' && stateObj.attributes.finishes_at) {
+        const now = new Date().getTime();
+        const finishes = new Date(stateObj.attributes.finishes_at).getTime();
+        timeRemaining = Math.max((finishes - now) / 1000, 0);
+    }
+    
+    return timeRemaining;
+}
+
+export function computeDisplayTimer(hass, stateObj, timeRemaining) {
+    if (!stateObj) {
+        return null;
+    }
+    
+    if (stateObj.state === 'idle' || timeRemaining === 0) {
+        return hass.formatEntityState(stateObj);
+    }
+    
+    let display = secondsToDuration(timeRemaining || 0) || '0';
+    
+    if (stateObj.state === 'paused') {
+        display = `${display} (${hass.formatEntityState(stateObj)})`;
+    }
+    
+    return display;
+}
+
+// Timer interval management for active timers
+const timerIntervals = new WeakMap();
+const elementTimerIntervals = new WeakMap();
+
+export function startTimerInterval(context, entity, updateCallback) {
+    // Stop any existing interval for this context
+    stopTimerInterval(context);
+    
+    const state = context._hass?.states?.[entity];
+    if (!state || state.state !== 'active') {
+        return;
+    }
+    
+    // Create interval that updates every second
+    const intervalId = setInterval(() => {
+        // Check if context is still valid and entity still exists
+        if (!context._hass?.states?.[entity]) {
+            stopTimerInterval(context);
+            return;
+        }
+        
+        const currentState = context._hass.states[entity];
+        // Stop interval if timer is no longer active
+        if (!currentState || currentState.state !== 'active') {
+            stopTimerInterval(context);
+            return;
+        }
+        
+        // Call the update callback
+        if (updateCallback) {
+            updateCallback();
+        }
+    }, 1000);
+    
+    timerIntervals.set(context, intervalId);
+}
+
+export function stopTimerInterval(context) {
+    const intervalId = timerIntervals.get(context);
+    if (intervalId) {
+        clearInterval(intervalId);
+        timerIntervals.delete(context);
+    }
+}
+
+// Timer interval management for sub-button elements
+export function startElementTimerInterval(element, context, entity, updateCallback) {
+    // Stop any existing interval for this element
+    stopElementTimerInterval(element);
+    
+    const state = context._hass?.states?.[entity];
+    if (!state || state.state !== 'active') {
+        return;
+    }
+    
+    // Create interval that updates every second
+    const intervalId = setInterval(() => {
+        // Check if element is still in DOM
+        if (!element.isConnected) {
+            stopElementTimerInterval(element);
+            return;
+        }
+        
+        // Check if context is still valid and entity still exists
+        if (!context._hass?.states?.[entity]) {
+            stopElementTimerInterval(element);
+            return;
+        }
+        
+        const currentState = context._hass.states[entity];
+        // Stop interval if timer is no longer active
+        if (!currentState || currentState.state !== 'active') {
+            stopElementTimerInterval(element);
+            return;
+        }
+        
+        // Call the update callback
+        if (updateCallback) {
+            updateCallback();
+        }
+    }, 1000);
+    
+    elementTimerIntervals.set(element, intervalId);
+}
+
+export function stopElementTimerInterval(element) {
+    const intervalId = elementTimerIntervals.get(element);
+    if (intervalId) {
+        clearInterval(intervalId);
+        elementTimerIntervals.delete(element);
+    }
+}
+
 // Variables to store DOM references
 let cachedHomeAssistant = null;
 let cachedMain = null;
@@ -373,6 +762,54 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
     const targetElement = targetElementOverride || context.content;
 
     if (!targetElement) return;
+
+    const applyMainButtonsLayout = () => {
+        const buttonsContainer = context.elements?.buttonsContainer;
+        const cardWrapper = context.elements?.cardWrapper;
+        const bottomSubButtonContainer = context.elements?.bottomSubButtonContainer;
+        if (!buttonsContainer || !cardWrapper) {
+            return;
+        }
+
+        const position = context.config?.main_buttons_position || 'default';
+        const alignment = context.config?.main_buttons_alignment || 'end';
+        // Set main_buttons_full_width to true by default when position is bottom
+        const fullWidth = context.config?.main_buttons_full_width ?? (position === 'bottom' ? true : false);
+
+        const alignClasses = ['align-start', 'align-center', 'align-end', 'align-space-between'];
+        buttonsContainer.classList.remove('bottom-fixed', 'full-width', ...alignClasses);
+        cardWrapper.classList.remove('has-bottom-buttons');
+        bottomSubButtonContainer?.classList.remove('with-main-buttons-bottom');
+
+        if (position !== 'bottom') {
+            return;
+        }
+
+        const alignmentClassMap = {
+            start: 'align-start',
+            center: 'align-center',
+            end: 'align-end',
+            'space-between': 'align-space-between'
+        };
+
+        const resolvedAlignClass = alignmentClassMap[alignment] || 'align-end';
+
+        buttonsContainer.classList.add('bottom-fixed', resolvedAlignClass);
+        if (fullWidth) {
+            buttonsContainer.classList.add('full-width');
+        }
+
+        cardWrapper.classList.add('has-bottom-buttons');
+        
+        // Only add with-main-buttons-bottom if main buttons are actually visible
+        const isMainButtonsVisible = !buttonsContainer.classList.contains('hidden') && 
+                                     buttonsContainer.style.display !== 'none' &&
+                                     getComputedStyle(buttonsContainer).display !== 'none';
+        
+        if (isMainButtonsVisible) {
+            bottomSubButtonContainer?.classList.add('with-main-buttons-bottom');
+        }
+    };
 
     let determinedLayoutClass;
 
@@ -405,6 +842,28 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
             defaultViewLayout = window.isSectionView ? "large" : "normal";
         }
         determinedLayoutClass = context.config.card_layout ?? defaultViewLayout;
+
+        // Auto-upgrade layout to 'large' when bottom sub-buttons are present
+        // and we're not in Section view, only if user layout is unset or 'normal'
+        try {
+            const rawSubButton = context?.config?.sub_button;
+            const hasBottomSubButtons = (() => {
+                if (!rawSubButton) return false;
+                if (Array.isArray(rawSubButton)) return false; // legacy schema had no bottom section
+                const bottom = Array.isArray(rawSubButton.bottom) ? rawSubButton.bottom : [];
+                return bottom.some(item => !!item);
+            })();
+
+            if (hasBottomSubButtons) {
+                const isSection = Boolean(window.isSectionView);
+                const currentLayout = context?.config?.card_layout;
+                const isNormalLayout = currentLayout == null || currentLayout === 'normal';
+                if (!isSection && isNormalLayout) {
+                    determinedLayoutClass = 'large';
+                    context.config.card_layout = 'large';
+                }
+            }
+        } catch (_) {}
     }
 
     if (context.previousLayout === determinedLayoutClass) {
@@ -419,6 +878,9 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
     targetElement.classList.toggle('large', needsLarge);
     targetElement.classList.toggle('rows-2', needsRows2);
     targetElement.classList.toggle('sub-buttons-grid', needsSubButtonsGrid);
+
+    applyMainButtonsLayout();
+    updateContentContainerFixedClass(context);
 
     if (targetElement === context.content &&
         context.elements?.mainContainer && 

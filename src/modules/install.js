@@ -1,4 +1,4 @@
-import { yamlKeysMap, moduleSourceMap } from '../tools/style-processor.js';
+import { yamlKeysMap, moduleSourceMap } from './registry.js';
 import { fireToast } from './cache.js';
 import { extractFirstKeyFromYaml, extractYamlFromMarkdown, extractModuleMetadata } from './parser.js';
 import { fireEvent } from '../tools/utils.js';
@@ -244,14 +244,7 @@ export async function installOrUpdateModule(context, module) {
       console.warn("Error processing YAML structure:", yamlError);
     }
 
-    // Optimized format for storage that preserves the proper YAML structure
-    // Ensure the YAML maintains its hierarchical structure with module ID as the root key
-    // This fixes the issue with modules being stored incorrectly
-    const simplifiedModuleData = {
-      id: moduleId,
-      yaml: formattedYamlContent
-    };
-
+    const formattedYaml = formattedYamlContent;
 
     // Add to yamlKeysMap so it appears as installed
     yamlKeysMap.set(moduleId, moduleMetadata);
@@ -263,133 +256,26 @@ export async function installOrUpdateModule(context, module) {
     // Also broadcast a targeted module update for faster listeners
     broadcastModuleUpdate(moduleId, moduleMetadata);
 
-    // Save module in Home Assistant
+    // Persist via Bubble Card Tools file backend only (no entity writes)
     try {
-      const entityId = "sensor.bubble_card_modules";
-
-      // Check if the entity exists in Home Assistant
-      const entityExists = context.hass && context.hass.states && context.hass.states[entityId];
-      if (!entityExists) {
-        fireToast(context, "Persistent storage not configured - module saved locally only", "warning");
-        
-        // Proactively refresh editor UI and styles so changes appear immediately
-        forceEditorUIRefresh(context);
-        return { 
-          success: true, 
-          storage: "local_only",
-          reason: "missing_entity",
-          message: "The persistent storage entity is not configured. Please check the setup instructions in the Module tab."
-        };
+      const bct = await import('./bct-provider.js');
+      const bctAvailable = await bct.ensureBCTProviderAvailable(context.hass);
+      if (bctAvailable) {
+        // Persist to modules/<id>.yaml using the provider with the final YAML string
+        await bct.writeModuleYaml(context.hass, moduleId, formattedYaml);
+        document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
+        fireToast(context, "Module installed successfully");
+      } else {
+        fireToast(context, "Install Bubble Card Tools to save modules persistently", "warning");
       }
 
-      let existingModules = {};
-
-      try {
-        // Try to retrieve the current state of the entity using HA helper (manages auth/refresh)
-        const entityData = await context.hass.callApi("get", `states/${entityId}`);
-
-        // Retrieve the module collection
-        if (entityData && entityData.attributes && entityData.attributes.modules) {
-          existingModules = entityData.attributes.modules;
-        }
-        // If we have the format with a single module_data
-        else if (entityData && entityData.attributes && entityData.attributes.module_data) {
-          const singleModule = entityData.attributes.module_data;
-          if (singleModule && singleModule.id) {
-            existingModules[singleModule.id] = singleModule;
-          }
-        }
-      } catch (loadError) {
-        console.warn("Unable to load existing modules:", loadError);
-      }
-
-      // Add the new module to the collection
-      existingModules[moduleId] = simplifiedModuleData;
-
-      // Parse YAML content to get direct module data for storage
-      try {
-        const parsedModuleData = jsyaml.load(formattedYamlContent);
-        if (parsedModuleData && parsedModuleData[moduleId]) {
-          // Store the complete parsed YAML structure
-          const moduleData = parsedModuleData[moduleId];
-
-          // Store the parsed module data directly instead of the YAML string
-          existingModules[moduleId] = {
-            id: moduleId,
-            // Store actual module data with proper structure
-            ...moduleData,
-            // Also store complete metadata for reference
-            name: moduleMetadata.name || moduleData.name,
-            version: moduleMetadata.version || moduleData.version,
-            description: moduleMetadata.description || moduleData.description,
-            creator: moduleMetadata.creator || moduleData.creator || moduleMetadata.author,
-            // Store the GitHub URL from the module object - this ensures we always have the correct URL
-            link: module.moduleLink || moduleMetadata.link || moduleData.link
-          };
-          // If this is the default module, ensure is_global is true
-          if (moduleId === 'default') {
-            existingModules[moduleId].is_global = true;
-          }
-        } else {
-          // If we couldn't parse the module data, use all metadata we've extracted
-          existingModules[moduleId] = {
-            id: moduleId,
-            ...moduleMetadata
-          };
-          // If this is the default module, ensure is_global is true
-          if (moduleId === 'default') {
-            existingModules[moduleId].is_global = true;
-          }
-        }
-      } catch (parseError) {
-        console.warn("Error parsing module YAML for storage:", parseError);
-        // Fallback to simplified format if parsing fails
-        existingModules[moduleId] = {
-          id: moduleId,
-          name: moduleMetadata.name,
-          version: moduleMetadata.version,
-          description: moduleMetadata.description,
-          creator: moduleMetadata.creator
-        };
-        // If this is the default module, ensure is_global is true
-        if (moduleId === 'default') {
-          existingModules[moduleId].is_global = true;
-        }
-      }
-
-      // Update using an event for the trigger template sensor
-      try {
-        await context.hass.callApi("post", "events/bubble_card_update_modules", {
-          modules: existingModules,
-          last_updated: new Date().toISOString()
-        });
-      } catch (eventError) {
-        console.warn("Unable to send event, trying to update state directly:", eventError);
-        
-        // Fallback: try to update the state directly
-        await context.hass.callApi("post", `states/${entityId}`, {
-          state: "saved",
-          attributes: {
-            friendly_name: "Bubble Card Modules",
-            modules: existingModules,
-            last_updated: new Date().toISOString()
-          }
-        });
-      }
-
-      fireToast(context, "Module installed successfully");
       fireEvent(context, "config-changed", { config: context._config });
-
-      // Ensure UI and styles reflect changes immediately
       forceEditorUIRefresh(context);
-
       context.requestUpdate();
-
       return { success: true };
     } catch (apiError) {
-      console.error("REST API not available or error:", apiError);
+      console.error("Persistence error:", apiError);
       fireToast(context, "Module saved locally only", "warning");
-      // Ensure UI refresh even if HA persistence failed
       forceEditorUIRefresh(context);
       return { success: true, storage: "local_only" };
     }
