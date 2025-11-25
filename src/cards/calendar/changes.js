@@ -2,24 +2,12 @@ import { createElement, setLayout, applyScrollingEffect } from "../../tools/util
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import setupTranslation from "../../tools/localize.js";
 import { addActions } from "../../tools/tap-actions.js";
-import { hashCode, intToRGB } from "./helpers.js";
+import { hashCode, intToRGB, parseEventDateTime } from "./helpers.js";
 
 function dateDiffInMinutes(a, b) {
   const MS_PER_MINUTES = 1000 * 60;
 
   return Math.floor((b - a) / MS_PER_MINUTES);
-}
-
-function parseEventDateTime(event) {
-  if (event.date) {
-    const parts = event.date.split('-');
-    const year = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1;
-    const day = parseInt(parts[2], 10);
-    return new Date(year, month, day);
-  }
-
-  return new Date(event.dateTime);
 }
 
 const getEventDateKey = (eventStart) => {

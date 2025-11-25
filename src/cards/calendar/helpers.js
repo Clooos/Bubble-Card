@@ -10,3 +10,15 @@ export function intToRGB(i) {
 
   return "#" + "00000".substring(0, 6 - c.length) + c;
 }
+
+export function parseEventDateTime(event) {
+  if (event.date) {
+    const parts = event.date.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    return new Date(year, month, day);
+  }
+
+  return new Date(event.dateTime);
+}
