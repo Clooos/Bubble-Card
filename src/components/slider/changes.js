@@ -1,70 +1,174 @@
 import { 
-  getState,
-  getAttribute,
   isStateOn,
-  isEntityType
+  isEntityType,
+  resolveCssVariable,
+  getCachedDocumentElementStyles
 } from '../../tools/utils.js';
+import { getStateSurfaceColor } from '../../tools/utils.js';
+import { getIconColor } from '../../tools/icon.js';
+import {
+  getEntityMinValue,
+  getEntityMaxValue,
+  getEntityStep,
+  getAdjustedValue,
+  clampPercentage,
+  fromPercentageToValue,
+  getCurrentPercentage,
+  formatDisplayValue,
+  formatDisplayValueFromEntity
+} from './helpers.js';
 
-let pendingRaf = null;
-
-// Helper functions to get entity properties consistently
-function getEntityMinValue(context, state) {
-  if (context.config.min_value !== undefined) return parseFloat(context.config.min_value);
-  // Support for media player volume min/max
-  const entityType = state.entity_id.split('.')[0];
-  if (entityType === 'media_player' && context.config.min_volume !== undefined) {
-    return parseFloat(context.config.min_volume);
-  }
-  if (entityType === 'climate') return state.attributes.min_temp ?? 0;
-  return state.attributes.min ?? 0;
+// Smoothly animate slider position for external updates
+function parseTranslateXPercent(transformString) {
+  const match = /translateX\(([-\d.]+)%\)/.exec(transformString || '');
+  return match ? parseFloat(match[1]) : null;
 }
 
-function getEntityMaxValue(context, state) {
-  if (context.config.max_value !== undefined) return parseFloat(context.config.max_value);
-  // Support for media player volume min/max
-  const entityType = state.entity_id.split('.')[0];
-  if (entityType === 'media_player' && context.config.max_volume !== undefined) {
-    return parseFloat(context.config.max_volume);
-  }
-  if (entityType === 'climate') return state.attributes.max_temp ?? 1000;
-  return state.attributes.max ?? 100;
-}
-
-function getEntityStep(context, state) {
-  if (context.config.step !== undefined) return parseFloat(context.config.step);
-  const entityType = state.entity_id.split('.')[0];
-  switch (entityType) {
-    case 'input_number':
-    case 'number':
-      return state.attributes.step ?? 1;
-    case 'fan':
-      return state.attributes.percentage_step ?? 1;
-    case 'climate': {      
-      const isCelcius = context._hass.config.unit_system.temperature === '°C';
-      return state.attributes.target_temp_step ?? (isCelcius ? 0.5 : 1);
+function getDisplayedPercentage(context, isColorMode) {
+  try {
+    if (isColorMode && context.elements?.colorCursor) {
+      const left = context.elements.colorCursor.style.left;
+      const val = parseFloat(left);
+      if (Number.isFinite(val)) return val;
     }
-    case 'media_player':
-      return 0.01; // Default step for volume
-    case 'cover':
-      return 1; // Default step for position
-    default:
-      return 1;
+    if (context.elements?.rangeFill) {
+      const parsed = parseTranslateXPercent(context.elements.rangeFill.style.transform);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  } catch (_) {}
+  try {
+    return Math.round(getCurrentPercentage(context, context.config.entity));
+  } catch (_) {
+    return 0;
   }
 }
 
-function getAdjustedPercentage(context, percentage) {
-  const state = context._hass.states[context.config.entity];
-  if (!state) return percentage;
+function animateToPercentage(context, targetPercentage) {
+  if (!context || !context.elements) return;
+  if (context.dragging) return; // Never animate during drag
 
-  let adjustedPercentage = percentage;
+  const entityType = context.config.entity?.split?.('.')[0];
+  const lightSliderType = context?.config?.light_slider_type || 'brightness';
+  const isColorMode = (entityType === 'light' && ['hue', 'saturation', 'white_temp'].includes(lightSliderType));
 
-  return Math.max(0, Math.min(100, adjustedPercentage));
+  const to = clampPercentage(Math.round(targetPercentage));
+  const from = getDisplayedPercentage(context, isColorMode);
+
+  // If small delta, snap immediately
+  if (!Number.isFinite(from) || Math.abs(from - to) < 0.5) {
+    setVisual(to);
+    updateValue(to, true); // Use entity value for accurate display
+    // Keep color track visuals in sync for hue/sat
+    if (isColorMode && (lightSliderType === 'hue' || lightSliderType === 'saturation') && typeof context.updateColorTrackBackground === 'function') {
+      try { context.updateColorTrackBackground(); } catch (_) {}
+    }
+    return;
+  }
+
+  // Cancel any existing animation on this context
+  try { if (context._sliderAnimRaf) cancelAnimationFrame(context._sliderAnimRaf); } catch (_) {}
+
+  const durationMs = 250;
+  const startTs = performance.now();
+
+  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+  const step = (now) => {
+    if (context.dragging) return; // Abort if user starts dragging
+    const t = Math.min(1, (now - startTs) / durationMs);
+    const current = from + (to - from) * easeOutCubic(t);
+    setVisual(current);
+    updateValue(current);
+    if (t < 1) {
+      context._sliderAnimRaf = requestAnimationFrame(step);
+    } else {
+      // Finalize - use entity value for accurate display
+      setVisual(to);
+      updateValue(to, true); // Use entity value for accurate display
+      if (isColorMode && (lightSliderType === 'hue' || lightSliderType === 'saturation') && typeof context.updateColorTrackBackground === 'function') {
+        try { context.updateColorTrackBackground(); } catch (_) {}
+      }
+      try { context._sliderAnimRaf = null; } catch (_) {}
+    }
+  };
+  context._sliderAnimRaf = requestAnimationFrame(step);
+
+  function setVisual(pct) {
+    const pctRounded = Math.round(clampPercentage(pct));
+    try {
+      if (isColorMode && context.elements?.colorCursor) {
+        const currentLeft = context.elements.colorCursor.style.left;
+        const newLeft = `${pctRounded}%`;
+        if (currentLeft !== newLeft) {
+          context.elements.colorCursor.style.left = newLeft;
+          if (typeof context.updateColorCursorIndicator === 'function') {
+            try { context.updateColorCursorIndicator(pctRounded); } catch (_) {}
+          }
+        }
+      }
+      if (context.elements?.rangeFill) {
+        const currentTransform = context.elements.rangeFill.style.transform;
+        const newTransform = `translateX(${pctRounded}%)`;
+        if (currentTransform !== newTransform) {
+          context.elements.rangeFill.style.transform = newTransform;
+        }
+      }
+    } catch (_) {}
+  }
+
+  function updateValue(pct, useEntityValue = false) {
+    if (!context.elements?.rangeValue) return;
+    try {
+      const newValue = useEntityValue 
+        ? formatDisplayValueFromEntity(context)
+        : formatDisplayValue(context, clampPercentage(pct));
+      if (context.elements.rangeValue.textContent !== newValue) {
+        context.elements.rangeValue.textContent = newValue;
+      }
+    } catch (_) {}
+  }
 }
 
-export function onSliderChange(context, positionX, shouldAdjustToStep = false) {
-  const sliderRect = context.elements.rangeSlider.getBoundingClientRect();
-  let percentage = Math.max(0, Math.min(100, ((positionX - sliderRect.left) / sliderRect.width) * 100));
-  percentage = getAdjustedPercentage(context, percentage);
+// Global frame counter for bounding rect cache invalidation
+let sliderRectFrameCounter = 0;
+let sliderRectRafScheduled = false;
+
+function invalidateSliderRectCache() {
+  sliderRectFrameCounter++;
+  sliderRectRafScheduled = false;
+}
+
+export function onSliderChange(context, positionX, shouldAdjustToStep = false, sliderBounds = null) {
+  // Use provided bounds or cached bounds to avoid expensive getBoundingClientRect calls
+  let sliderRect = sliderBounds;
+  if (!sliderRect) {
+    // Check cache first - cache is valid for current frame
+    if (context._sliderRectCache && context._sliderRectCache.frameId === sliderRectFrameCounter) {
+      sliderRect = context._sliderRectCache.rect;
+    } else {
+      sliderRect = context.elements.rangeSlider.getBoundingClientRect();
+      // Cache the result for this frame
+      if (!context._sliderRectCache) {
+        context._sliderRectCache = {};
+      }
+      context._sliderRectCache.rect = sliderRect;
+      context._sliderRectCache.frameId = sliderRectFrameCounter;
+      
+      // Schedule cache invalidation for next frame
+      if (!sliderRectRafScheduled) {
+        requestAnimationFrame(invalidateSliderRectCache);
+        sliderRectRafScheduled = true;
+      }
+    }
+  }
+  const sliderWidth = sliderRect?.width ?? 0;
+
+  if (sliderWidth <= 0) {
+    return clampPercentage(getCurrentPercentage(context, context.config.entity));
+  }
+
+  let percentage = Math.max(0, Math.min(100, ((positionX - sliderRect.left) / sliderWidth) * 100));
+  percentage = clampPercentage(percentage);
 
   // Special handling for lights when tap_to_slide is not active
   const entityType = context.config.entity?.split('.')[0];
@@ -80,131 +184,191 @@ export function onSliderChange(context, positionX, shouldAdjustToStep = false) {
     }
   }
 
+  const newTransform = `translateX(${percentage}%)`;
+  
   if (isEntityType(context, "climate", context.config.entity)) {
-    context.elements.rangeFill.style.transform = `translateX(${percentage}%)`;
-    
+    if (context.elements.rangeFill.style.transform !== newTransform) {
+      context.elements.rangeFill.style.transform = newTransform;
+    }
     return percentage;
   }
 
   // Force immediate visual update for direct user interaction
-  context.elements.rangeFill.style.transform = `translateX(${percentage}%)`;
-  
-  // Update volume value display immediately for media players
-  if (isEntityType(context, "media_player", context.config.entity) && context.elements.rangeValue) {
-    context.elements.rangeValue.innerText = `${Math.round(percentage)}%`;
+  if (context.elements.rangeFill.style.transform !== newTransform) {
+    context.elements.rangeFill.style.transform = newTransform;
   }
 
   return percentage;
 }
 
-// Cache for calculated values with shorter duration for more responsiveness
-const valueCache = new Map();
-const cacheDuration = 100; // Reduced to 50ms for better responsiveness
-
-function getCachedValue(key, calculator) {
-  const cached = valueCache.get(key);
-  const now = Date.now();
+// Cache for expensive color calculations
+function getCachedSubButtonColor(context) {
+  // Use entity as primary cache key - sub_button config rarely changes
+  // Only recalculate if entity changes or cache is missing
+  const cacheKey = context.config.entity;
   
-  if (cached && now - cached.timestamp < cacheDuration) {
-    return cached.value;
-  }
-  
-  const value = calculator();
-  valueCache.set(key, { value, timestamp: now });
-  return value;
-}
-
-function calculateRangePercentage(value, minValue, maxValue) {
-  return 100 * (value - minValue) / (maxValue - minValue);
-}
-
-function adjustToRange(percentage, minValue, maxValue) {
-  if (percentage >= minValue && percentage <= maxValue) {
-    return 100 * ((percentage - minValue) / (maxValue - minValue));
-  }
-  return percentage < minValue ? 0 : 100;
-}
-
-function getCurrentValue(context, entity, entityType) {
-  const currentState = context._hass.states[entity];
-  if (!currentState) return 0;
-
-  const minValue = getEntityMinValue(context, currentState);
-  const maxValue = getEntityMaxValue(context, currentState);
-  
-  // Calculate current value based on entity state
-  switch (entityType) {
-    case 'light': {
-      const brightness = getAttribute(context, "brightness", entity);
-      const lightPercentage = 100 * brightness / 255;
-      
-      // Apply custom min/max if configured
-      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
-        const clampedValue = Math.max(minValue, Math.min(maxValue, lightPercentage));
-        return calculateRangePercentage(clampedValue, minValue, maxValue);
-      }
-      return lightPercentage;
-    }
-    case 'media_player': {
-      const volume = getAttribute(context, "volume_level", entity);
-      const volumePercentage = volume !== undefined && volume !== null ? 100 * volume : 0;
-      
-      // Apply custom min/max if configured (check both volume-specific and generic config)
-      if (context.config.min_value !== undefined || context.config.max_value !== undefined ||
-          context.config.min_volume !== undefined || context.config.max_volume !== undefined) {
-        const clampedValue = Math.max(minValue, Math.min(maxValue, volumePercentage));
-        return calculateRangePercentage(clampedValue, minValue, maxValue);
-      }
-      return volumePercentage;
-    }
-    case 'cover': {
-      const position = getAttribute(context, "current_position", entity);
-      const coverPosition = position !== undefined && position !== null ? position : 0;
-      
-      // Apply custom min/max if configured
-      if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
-        const clampedValue = Math.max(minValue, Math.min(maxValue, coverPosition));
-        return calculateRangePercentage(clampedValue, minValue, maxValue);
-      }
-      return coverPosition;
-    }
-    case 'input_number':
-    case 'number': {
-      const value = parseFloat(getState(context, entity));
-      const clampedValue = Math.max(minValue, Math.min(maxValue, value));
-      return calculateRangePercentage(clampedValue, minValue, maxValue);
-    }
-    case 'fan':
-      if (isStateOn(context, entity)) {
-        const percentageAttribute = getAttribute(context, "percentage", entity);
-        // Fan percentage is already 0-100, no need for min/max scaling unless specified in config
-        if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
-            const value = parseFloat(percentageAttribute);
-            const clampedValue = Math.max(minValue, Math.min(maxValue, value));
-            return calculateRangePercentage(clampedValue, minValue, maxValue);
+  if (!context._sliderStyleCache || context._sliderStyleCache.key !== cacheKey) {
+    let subButtonBaseColor = null;
+    try {
+      const rawSubButton = context?.config?.sub_button;
+      if (rawSubButton) {
+        // Optimize array creation - avoid spread operator when possible
+        let subButtonsArray;
+        if (Array.isArray(rawSubButton)) {
+          subButtonsArray = rawSubButton;
         } else {
-            return percentageAttribute ?? 0;
-        }
-      } 
-      return 0;
-    case 'climate':
-      if (isStateOn(context, entity)) {
-        const temp = parseFloat(getAttribute(context, "temperature", entity));
-        if (isNaN(temp) || minValue === undefined || maxValue === undefined) {
-          return 0;
+          const main = Array.isArray(rawSubButton.main) ? rawSubButton.main : [];
+          const bottom = Array.isArray(rawSubButton.bottom) ? rawSubButton.bottom : [];
+          // Pre-allocate array size for better performance
+          subButtonsArray = new Array(main.length + bottom.length);
+          for (let i = 0; i < main.length; i++) {
+            subButtonsArray[i] = main[i];
+          }
+          for (let i = 0; i < bottom.length; i++) {
+            subButtonsArray[main.length + i] = bottom[i];
+          }
         }
         
-        const cappedTemp = Math.max(minValue, Math.min(maxValue, temp));
-        return calculateRangePercentage(cappedTemp, minValue, maxValue);
+        // Early exit optimization
+        const entityId = context.config.entity;
+        for (let i = 0; i < subButtonsArray.length; i++) {
+          const subButton = subButtonsArray[i];
+          if (!subButton || Array.isArray(subButton.group)) continue;
+          
+          const subButtonEntity = subButton.entity ?? entityId;
+          if (subButtonEntity === entityId && subButton.show_background !== false && subButton.state_background !== false) {
+            const subButtonBaseColorExpr = getIconColor(context, subButtonEntity);
+            let subButtonResolved = resolveCssVariable(subButtonBaseColorExpr);
+            if (subButtonResolved && subButtonResolved.startsWith('var(')) {
+              const match = subButtonResolved.match(/var\((--[^,]+),?\s*(.*)?\)/);
+              if (match) {
+                const [, varName] = match;
+                const computed = getCachedDocumentElementStyles().getPropertyValue(varName).trim();
+                if (computed) subButtonResolved = computed;
+              }
+            }
+            subButtonBaseColor = subButtonResolved;
+            break;
+          }
+        }
       }
-      return 0;
-    default:
-      if (context.config.min_value !== undefined && context.config.max_value !== undefined) {
-        const value = parseFloat(getState(context, entity));
-        const clampedValue = Math.max(minValue, Math.min(maxValue, value));
-        return calculateRangePercentage(clampedValue, minValue, maxValue);
+    } catch (_) {
+      // Ignore errors when searching for sub-buttons
+    }
+    
+    if (!context._sliderStyleCache) {
+      context._sliderStyleCache = {};
+    }
+    context._sliderStyleCache.key = cacheKey;
+    context._sliderStyleCache.subButtonBaseColor = subButtonBaseColor;
+  }
+  return context._sliderStyleCache.subButtonBaseColor;
+}
+
+export function updateSliderStyle(context) {
+  if (!context.elements?.rangeFill) return;
+
+  const entityType = context.config.entity?.split('.')[0];
+  const isLight = entityType === 'light';
+  const isOn = isStateOn(context, context.config.entity);
+  const lightSliderType = context?.config?.light_slider_type || 'brightness';
+  const isLightBrightnessSlider = isLight && lightSliderType === 'brightness';
+  const useAccentColor = context.config.use_accent_color;
+
+  // Check current state to avoid unnecessary DOM updates
+  const hasLightColorClass = context.elements.rangeFill.classList.contains('slider-use-light-color');
+  const hasAccentColorClass = context.elements.rangeFill.classList.contains('slider-use-accent-color');
+  const currentColor = context.elements.rangeFill.style.getPropertyValue('--bubble-slider-fill-color');
+
+  // Cache key based on entity state and color
+  const state = context._hass?.states?.[context.config.entity];
+  const entityColorKey = state?.attributes?.rgb_color 
+    ? state.attributes.rgb_color.join(',') 
+    : (state?.attributes?.hs_color ? state.attributes.hs_color.join(',') : '');
+  const cacheKey = `${context.config.entity}_${isOn}_${entityColorKey}_${useAccentColor}`;
+  
+  // Check if we need to recalculate
+  if (!context._sliderStyleCache || context._sliderStyleCache.styleCacheKey !== cacheKey) {
+    if (isOn) {
+      if (isLightBrightnessSlider && !useAccentColor) {
+        const cardType = context.config.card_type;
+        const cardBackgroundColor = cardType === 'button'
+          ? context.card?.style.getPropertyValue('--bubble-button-background-color')
+          : context.popUp?.style.getPropertyValue('--bubble-button-background-color');
+        
+        const subButtonBaseColor = getCachedSubButtonColor(context);
+        const surfaceColor = getStateSurfaceColor(context, context.config.entity, true, cardBackgroundColor || null, subButtonBaseColor);
+        
+        if (!context._sliderStyleCache) {
+          context._sliderStyleCache = {};
+        }
+        context._sliderStyleCache.styleCacheKey = cacheKey;
+        context._sliderStyleCache.surfaceColor = surfaceColor;
+        context._sliderStyleCache.shouldUseLightColor = true;
+      } else {
+        // For accent color sliders, also check for sub-button color to ensure contrast
+        const cardType = context.config.card_type;
+        const cardBackgroundColor = cardType === 'button'
+          ? context.card?.style.getPropertyValue('--bubble-button-background-color')
+          : context.popUp?.style.getPropertyValue('--bubble-button-background-color');
+        
+        const subButtonBaseColor = getCachedSubButtonColor(context);
+        // Use accent color with sub-button color check for contrast
+        const surfaceColor = getStateSurfaceColor(context, context.config.entity, false, cardBackgroundColor || null, subButtonBaseColor);
+        
+        if (!context._sliderStyleCache) {
+          context._sliderStyleCache = {};
+        }
+        context._sliderStyleCache.styleCacheKey = cacheKey;
+        context._sliderStyleCache.surfaceColor = surfaceColor;
+        context._sliderStyleCache.shouldUseLightColor = false;
       }
-      return 0;
+    } else {
+      if (!context._sliderStyleCache) {
+        context._sliderStyleCache = {};
+      }
+      context._sliderStyleCache.styleCacheKey = cacheKey;
+      context._sliderStyleCache.shouldUseLightColor = null;
+    }
+  }
+
+  // Apply cached style
+  if (isOn) {
+    if (isLightBrightnessSlider && !useAccentColor && context._sliderStyleCache.shouldUseLightColor) {
+      const surfaceColor = context._sliderStyleCache.surfaceColor;
+      if (!hasLightColorClass || currentColor !== surfaceColor) {
+        context.elements.rangeFill.classList.remove('slider-use-accent-color');
+        context.elements.rangeFill.style.setProperty('--bubble-slider-fill-color', surfaceColor);
+        context.elements.rangeFill.classList.add('slider-use-light-color');
+      }
+    } else {
+      // For accent color, check if we need to use adjusted color for contrast with sub-button
+      const subButtonBaseColor = getCachedSubButtonColor(context);
+      const surfaceColor = context._sliderStyleCache.surfaceColor;
+      // Check if color was adjusted (RGB format) vs using base color expression (CSS variable)
+      const isAdjustedColor = surfaceColor && surfaceColor.startsWith('rgb(');
+      
+      if (subButtonBaseColor && isAdjustedColor) {
+        // Use adjusted color if sub-button exists and color was adjusted
+        if (!hasLightColorClass || currentColor !== surfaceColor) {
+          context.elements.rangeFill.classList.remove('slider-use-accent-color');
+          context.elements.rangeFill.style.setProperty('--bubble-slider-fill-color', surfaceColor);
+          context.elements.rangeFill.classList.add('slider-use-light-color');
+        }
+      } else {
+        // No sub-button or no adjustment needed, use standard accent color
+        if (!hasAccentColorClass) {
+          context.elements.rangeFill.classList.remove('slider-use-light-color');
+          context.elements.rangeFill.style.removeProperty('--bubble-slider-fill-color');
+          context.elements.rangeFill.classList.add('slider-use-accent-color');
+        }
+      }
+    }
+  } else {
+    if (hasLightColorClass || hasAccentColorClass) {
+      context.elements.rangeFill.classList.remove('slider-use-light-color', 'slider-use-accent-color');
+      context.elements.rangeFill.style.removeProperty('--bubble-slider-fill-color');
+    }
   }
 }
 
@@ -215,72 +379,56 @@ export function updateSlider(
 ) {
   if (context.dragging) return;
 
-  const entityType = entity?.split('.')[0];
-  let percentage = 0;
+  const percentage = getCurrentPercentage(context, entity);
 
-  // Clear any pending RAF to ensure we don't have conflicting updates
-  if (pendingRaf) {
-    cancelAnimationFrame(pendingRaf);
-    pendingRaf = null;
+  const previousPercentage = context._lastSliderPercentage;
+  
+  // Update style first (cached, fast)
+  updateSliderStyle(context);
+  
+  // If percentage hasn't changed significantly, skip animation
+  if (previousPercentage !== undefined && Math.abs(previousPercentage - percentage) < 0.01) {
+    return;
   }
 
-  // Early return for percentage-based sensors
-  if (entityType === 'sensor' && getAttribute(context, "unit_of_measurement", entity) === "%") {
-    percentage = getState(context, entity);
-  } else {
-    percentage = getCurrentValue(context, entity, entityType);
-  }
+  context._lastSliderPercentage = percentage;
 
-  // Update media player volume display if needed
-  if (entityType === 'media_player' && context.elements.rangeValue) {
-    const state = getState(context, entity);
-    const volume = getAttribute(context, "volume_level", entity);
-    const volumeValue = volume !== undefined && volume !== null ? Math.round(volume * 100) : 0;
-    
-    context.elements.rangeValue.innerText = `${volumeValue}%`;
-  }
+  // Handle light color sliders (hue, saturation, white_temp) separately
+  const entityType = entity?.split?.(".")[0];
+  if (entityType === 'light') {
+    const lightSliderType = context?.config?.light_slider_type || 'brightness';
+    const isColorMode = ['hue', 'saturation', 'white_temp'].includes(lightSliderType);
 
-  // Update climate display value if needed
-  if (entityType === 'climate' && context.elements.rangeValue) {
-    if (isStateOn(context, entity)) {
-      const temp = getAttribute(context, "temperature", entity);
-      const isCelcius = context._hass.config.unit_system.temperature === '°C';
-      
-      let minTemp = getAttribute(context, "min_temp", entity);
-      let maxTemp = getAttribute(context, "max_temp", entity);
-      
-      if (context.config.min_value !== undefined) {
-        minTemp = parseFloat(context.config.min_value);
-      }
-      if (context.config.max_value !== undefined) {
-        maxTemp = parseFloat(context.config.max_value);
-      }
-      
-      if (temp !== undefined && minTemp !== undefined && maxTemp !== undefined) {
-        const cappedTemp = Math.max(minTemp, Math.min(maxTemp, temp));
-        percentage = calculateRangePercentage(cappedTemp, minTemp, maxTemp);
-        
-        context.elements.rangeValue.innerText = temp.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F');
-
-        container.style.transform = `translateX(${Math.round(percentage)}%)`;
-        return;
-      } else {
-        context.elements.rangeValue.innerText = temp ? (temp.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F')) : '0%';
-      }
-    } else {
-      context.elements.rangeValue.innerText = '0%';
-      percentage = 0;
-      container.style.transform = `translateX(0%)`;
+    if (isColorMode && context.elements?.colorCursor) {
+      // For color sliders, use animation
+      animateToPercentage(context, percentage);
       return;
     }
   }
 
-  // Always update the slider position to reflect the current state
-  container.style.transform = `translateX(${Math.round(percentage)}%)`;
-}
-
-function getAdjustedValue(value, step) {
-  return Math.round(value / step) * step;
+  // For initial render or large changes, update immediately without animation
+  // Only animate for small incremental changes (external updates)
+  const isInitialRender = previousPercentage === undefined;
+  const isLargeChange = previousPercentage !== undefined && Math.abs(previousPercentage - percentage) > 5;
+  
+  if (isInitialRender || isLargeChange) {
+    // Immediate update for instant rendering
+    const pctRounded = Math.round(clampPercentage(percentage));
+    try {
+      if (context.elements?.rangeFill) {
+        context.elements.rangeFill.style.transform = `translateX(${pctRounded}%)`;
+      }
+      if (context.elements?.rangeValue) {
+        const newValue = formatDisplayValueFromEntity(context);
+        if (context.elements.rangeValue.textContent !== newValue) {
+          context.elements.rangeValue.textContent = newValue;
+        }
+      }
+    } catch (_) {}
+  } else {
+    // Animate for small incremental changes
+    animateToPercentage(context, percentage);
+  }
 }
 
 export function updateEntity(context, percentage) {
@@ -293,7 +441,7 @@ export function updateEntity(context, percentage) {
   const step = getEntityStep(context, state);
 
   // Convert the percentage (0-100) back to the raw value based on min/max
-  let rawValue = minValue + (percentage / 100) * (maxValue - minValue);
+  let rawValue = fromPercentageToValue(percentage, minValue, maxValue);
 
   // Now, apply the step adjustment to the raw value
   let adjustedValue = getAdjustedValue(rawValue, step);
@@ -303,21 +451,55 @@ export function updateEntity(context, percentage) {
 
   switch (entityType) {
     case 'light': {
-      // Handle custom min/max for lights
+      const lightSliderType = context?.config?.light_slider_type || 'brightness';
+
+      if (lightSliderType === 'hue' || lightSliderType === 'saturation') {
+        // hs_color = [hue(0-360), sat(0-100)]
+        const currentHs = context._hass.states[context.config.entity]?.attributes?.hs_color || [];
+        const currentHue = parseFloat(currentHs[0]) || 0;
+        const currentSat = parseFloat(currentHs[1]) || 0;
+        const newHue = lightSliderType === 'hue' ? Math.round((percentage / 100) * 360) : currentHue;
+
+        // When adjusting hue: only force saturation to 100% if previously too low (< 10%)
+        // When adjusting saturation: use the chosen saturation value
+        const SAT_THRESHOLD = 10;
+        const forceSat = context.config?.hue_force_saturation === true;
+        const forcedValueRaw = Number(context.config?.hue_force_saturation_value);
+        const forcedValue = Number.isFinite(forcedValueRaw) ? Math.max(0, Math.min(100, forcedValueRaw)) : 100;
+        const newSat = (lightSliderType === 'saturation')
+          ? Math.round(percentage)
+          : (forceSat ? forcedValue : (currentSat < SAT_THRESHOLD ? 100 : currentSat));
+
+        context._hass.callService('light', 'turn_on', {
+          entity_id: context.config.entity,
+          hs_color: [newHue, newSat]
+        });
+        break;
+      }
+
+      if (lightSliderType === 'white_temp') {
+        const minMireds = context._hass.states[context.config.entity]?.attributes?.min_mireds ?? 153;
+        const maxMireds = context._hass.states[context.config.entity]?.attributes?.max_mireds ?? 500;
+        const value = fromPercentageToValue(percentage, minMireds, maxMireds);
+        const mireds = Math.round(getAdjustedValue(value, 1));
+        context._hass.callService('light', 'turn_on', {
+          entity_id: context.config.entity,
+          color_temp: mireds
+        });
+        break;
+      }
+
+      // Handle brightness (default)
       let brightness;
       if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
-        // Use the adjusted value directly as percentage when custom min/max are set
         brightness = Math.round(255 * adjustedValue / 100);
       } else {
-        // Standard light brightness conversion (0-100% to 0-255)
         brightness = Math.round(255 * percentage / 100);
       }
-      
       const isTransitionEnabled = context.config.light_transition;
       const transitionTime = (context.config.light_transition_time === "" || isNaN(context.config.light_transition_time))
-        ? 500 // in milliseconds
+        ? 500
         : context.config.light_transition_time;
-
       context._hass.callService('light', 'turn_on', {
         entity_id: context.config.entity,
         brightness: brightness,
@@ -393,7 +575,6 @@ export function updateEntity(context, percentage) {
     }
 
     case 'climate': {
-      // adjustedValue already holds the step-adjusted temperature within the effective min/max
       const finalValue = parseFloat(adjustedValue.toFixed(1)); // Ensure correct precision
       
       if (!isStateOn(context, context.config.entity)) {

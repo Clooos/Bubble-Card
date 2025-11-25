@@ -6,6 +6,7 @@ export const defaultOptions = {
   sliderLiveUpdate: false,
   withValueDisplay: false,
   initialValue: null,
+  persistentValueDisplay: false,
 };
 
 export { createSliderStructure };

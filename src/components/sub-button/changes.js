@@ -1,334 +1,154 @@
-import { createElement, getState, getAttribute, isStateOn, isColorLight, formatDateTime } from "../../tools/utils.js";
-import { createSubButtonElement } from "./create.js";
-import { changeDropdownList } from "../dropdown/changes.js";
-import { checkConditionsMet, validateConditionalConfig, ensureArray } from "../../tools/validate-condition.js";
-import { addActions, addFeedback } from "../../tools/tap-actions.js";
-import { getIcon, getIconColor } from "../../tools/icon.js";
-import { getOptionIcon } from "../dropdown/helpers.js";
-
-function getSubButtonOptions(context, subButton, index) {
-  const entity = subButton.entity ?? context.config.entity;
-  return {
-    index,
-    entity,
-    context,
-    state: context._hass.states[entity],
-    name: subButton.name ?? getAttribute(context, "friendly_name", entity) ?? '',
-    attributeType: subButton.attribute ?? '',
-    attribute: getAttribute(context, subButton.attribute ?? '', entity),
-    isOn: isStateOn(context, entity),
-    showName: subButton.show_name ?? false,
-    showState: subButton.show_state ?? false,
-    showAttribute: subButton.show_attribute ?? false,
-    showLastChanged: subButton.show_last_changed ?? false,
-    showLastUpdated: subButton.show_last_updated ?? false,
-    showIcon: subButton.show_icon ?? true,
-    showBackground: subButton.show_background ?? true,
-    stateBackground: subButton.state_background ?? true,
-    lightBackground: subButton.light_background ?? true,
-    showArrow: subButton.show_arrow ?? true,
-    isSelect: entity?.startsWith("input_select") || entity?.startsWith("select") || subButton.select_attribute,
-    icon: getIcon(context, entity, subButton.icon ?? '')
-  };
-}
-
-function handleDropdown(context, subButtonElement, options) {
-  const { isSelect, showArrow, entity, subButton } = options;
-
-  if (isSelect && subButtonElement.dropdownSelect) {
-    const currentState = context._hass.states[entity]?.state;
-    const previousState = context.previousValues[entity]?.state;
-
-    if (currentState !== previousState) {
-      if (currentState && subButtonElement.dropdownSelect.value !== currentState) {
-        subButtonElement.dropdownSelect.value = currentState;
-        subButtonElement.dropdownSelect.dispatchEvent(new Event("change", { bubbles: true }));
-      }
-      context.previousValues[entity] = { state: currentState };
-    }
-
-    changeDropdownList(context, subButtonElement, entity, subButton);
-    updateDropdownArrow(subButtonElement, showArrow);
-  } else if (subButtonElement.contains(subButtonElement.dropdownContainer)) {
-    subButtonElement.removeChild(subButtonElement.dropdownContainer);
-  }
-}
-
-function updateDropdownArrow(element, showArrow) {
-  if (!showArrow) {
-    element.dropdownArrow.style.display = 'none';
-    element.dropdownContainer.style.width = '0px';
-    element.style.padding = '6px';
-  } else {
-    element.dropdownArrow.style.display = '';
-    element.dropdownContainer.style.width = '24px';
-  }
-}
-
-function buildDisplayedState(options, context) {
-  const { state, name, attribute, attributeType, showName, showState, showAttribute, showLastChanged, showLastUpdated } = options;
-  
-  const parts = [];
-  if (showName && name && name !== 'unknown') parts.push(name);
-  if (state && showState && state.state !== 'unknown') parts.push(context._hass.formatEntityState(state));
-  if (state && showLastChanged && state.last_changed !== 'unknown') parts.push(formatDateTime(state.last_changed, context._hass.locale.language));
-  if (state && showLastUpdated && state.last_updated !== 'unknown') parts.push(formatDateTime(state.last_updated, context._hass.locale.language));
-  if (state && showAttribute) {
-    if (attributeType.includes('forecast')) {
-      const isCelcius = context._hass.config.unit_system.temperature === '°C';
-      const isMetric = context._hass.config.unit_system.length === 'km';
-      
-      if (attributeType.includes('temperature') && attribute !== null && attribute !== undefined) {
-        const tempValue = parseFloat(attribute);
-        parts.push((tempValue === 0 || tempValue === 0.0 ? '0' : tempValue.toFixed(1).replace(/\.0$/, '')) + (isCelcius ? ' °C' : ' °F'));
-      } else if (attributeType.includes('humidity') && attribute !== null && attribute !== undefined) {
-        parts.push(parseFloat(attribute).toFixed(0) + ' %');
-      } else if (attributeType.includes('precipitation') && attribute !== null && attribute !== undefined) {
-        parts.push(parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + ' mm');
-      } else if (attributeType.includes('wind_speed') && attribute !== null && attribute !== undefined) {
-        parts.push(parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + (isMetric ? ' km/h' : ' mph'));
-      } else if (attribute !== null && attribute !== undefined && attribute !== 'unknown') {
-        parts.push(attribute);
-      }
-    } else {
-      const formattedAttribute = context._hass.formatEntityAttributeValue(state, attributeType);
-      const rawAttribute = state.attributes?.[attributeType];
-      
-      const isZeroWithUnit = formattedAttribute && 
-                            (typeof formattedAttribute === 'string') && 
-                            formattedAttribute.trim().startsWith('0') && 
-                            formattedAttribute.trim().length > 1;
-      
-      if ((attribute !== 0 && attribute !== 'unknown' && attribute != null) || isZeroWithUnit) {
-        if (rawAttribute !== 'unknown' && rawAttribute != null) {
-          parts.push(formattedAttribute ?? attribute);
-        }
-      }
-    }
-  }
-
-  return parts.length ? parts.join(' · ').charAt(0).toUpperCase() + parts.join(' · ').slice(1) : '';
-}
-
-function updateElementVisibility(element, options, displayedState) {
-  const { showIcon, isSelect } = options;
-  
-  if (!element._hasVisibilityConditions) {
-    const isHidden = !displayedState && !showIcon && !isSelect;
-    element.classList.toggle('hidden', isHidden);
-  }
-  
-  if (element.dropdownContainer) {
-    element.dropdownContainer.classList.toggle('no-icon-select-container', !displayedState && !showIcon && isSelect);
-    element.dropdownArrow.classList.toggle('no-icon-select-arrow', !displayedState && !showIcon && isSelect);
-  }
-}
-
-function updateBackground(element, options) {
-  const { showBackground, isOn, stateBackground, lightBackground, entity, context } = options;
-  
-  if (!showBackground) {
-    element.classList.remove('background-on', 'background-off');
-    return;
-  }
-
-  const isThemeLight = isColorLight('var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))))');
-  
-  if (isOn && stateBackground) {
-    if (lightBackground) {
-      element.style.setProperty(
-        '--bubble-sub-button-light-background-color', 
-        getIconColor(context, entity, isThemeLight ? 1 : 0.8)
-      );
-    }
-    element.classList.add('background-on');
-    element.classList.remove('background-off');
-  } else {
-    element.classList.add('background-off');
-    element.classList.remove('background-on');
-  }
-}
-
-function setupActions(element, options) {
-  const { subButton, isSelect, entity } = options;
-  const hasActions = subButton.tap_action?.action !== 'none' || 
-                    subButton.double_tap_action?.action !== 'none' || 
-                    subButton.hold_action?.action !== 'none';
-
-  if (hasActions && !element.actionAdded) {
-    const defaultActions = {
-      tap_action: { action: !isSelect ? "more-info" : "none" },
-      double_tap_action: { action: "none" },
-      hold_action: { action: "none" }
-    };
-
-    if (!isSelect) {
-      addActions(element, subButton, entity, defaultActions);
-    } else {
-      // For dropdown sub-buttons, enable double-tap and hold actions but keep single tap for opening the dropdown
-      // We explicitly disable tap action on the action handler side to avoid blocking the dropdown open on single tap
-      const actionConfig = { ...subButton, tap_action: { action: "none" } };
-      addActions(element, actionConfig, entity);
-      element.setAttribute("no-slide", "");
-    }
-
-    addFeedback(element, element.feedback);
-
-    if (isSelect) {
-      element.style.pointerEvents = "auto";
-      element.style.cursor = "pointer";
-    }
-
-    element.actionAdded = true;
-  }
-}
+import { createElement } from "../../tools/utils.js";
+import { createSubButtonElement, normalizeNameToClass } from "./create.js";
+import { updateContentContainerFixedClass } from "../base-card/index.js";
+import { getSubButtonOptions, handleVisibilityConditions, applyFillWidthClass, applyWidthStyles, applyHeightStyles, handleHideWhenParentUnavailable, ensureNewSubButtonsSchemaObject, isNewSubButtonsSchema, convertOldToNewSubButtons } from "./utils.js";
+import { handleDefaultSubButton } from "./types/default/index.js";
+import { handleDropdownSubButton } from "./types/dropdown/index.js";
+import { handleSliderSubButton } from "./types/slider/index.js";
+import { updateSlider } from "../slider/changes.js";
 
 export function updateSubButtons(context, subButtons) {
   if (!subButtons) return;
 
-  context.previousValues = context.previousValues || {};
-  const previousSubButtons = [...(context.previousValues.subButtons || [])];
-  
-  subButtons.forEach((subButton, i) => {
-    if (!subButton) return;
+  // Resolve to sectioned schema
+  let sectioned;
+  if (Array.isArray(subButtons)) {
+    sectioned = { main: subButtons, bottom: [] };
+  } else if (isNewSubButtonsSchema(subButtons)) {
+    sectioned = subButtons;
+  } else {
+    sectioned = convertOldToNewSubButtons(subButtons || []);
+  }
 
-    const options = getSubButtonOptions(context, subButton, i + 1);
-    
+  context.previousValues = context.previousValues || {};
+  // Only consider real buttons (exclude inline groups)
+  const mainButtons = (Array.isArray(sectioned.main) ? sectioned.main : []).filter(item => item && !Array.isArray(item.group));
+  const previousMainButtons = [...(context.previousValues.mainSubButtons || [])];
+
+  // Update main buttons first with contiguous indices (1..N)
+  let visibleIndex = 1;
+  (Array.isArray(sectioned.main) ? sectioned.main : []).forEach((subButton) => {
+    if (!subButton || Array.isArray(subButton.group)) return; // skip groups here
+
+    const options = getSubButtonOptions(context, subButton, visibleIndex);
+
     if (options.attributeType === 'fan_modes' && options.attribute == null) {
-      const element = context.elements[options.index] || 
-                     createElement('div', `bubble-sub-button bubble-sub-button-${options.index}`);
+      let element = context.elements[options.index];
+      if (!element) {
+        const classes = [`bubble-sub-button`, `bubble-sub-button-${options.index}`];
+        if (subButton?.name) {
+          const nameClass = normalizeNameToClass(subButton.name);
+          if (nameClass) {
+            classes.push(`bubble-sub-button-name-${nameClass}`);
+          }
+        }
+        element = createElement('div', classes.join(' '));
+      }
       element.classList.add('hidden');
+      visibleIndex++;
       return;
     }
 
     let element = context.elements[options.index];
-    if (!element || (options.isSelect && !element.dropdownContainer)) {
+    if (!element) {
       element = createSubButtonElement(context, options.index, options.isSelect, options.showArrow, options.entity, subButton);
     }
 
-    // Default to false if not specified
-    const hideWhenParentUnavailable = subButton.hide_when_parent_unavailable ?? false;
-
-    if (hideWhenParentUnavailable && context.config.entity && !context.detectedEditor) {
-      if (getState(context, context.config.entity) === 'unavailable') {
-        element.style.display = 'none';
-        return;
-      } else if (element.style.display === 'none') {
-        element.style.display = '';
-      }
+    if (handleHideWhenParentUnavailable(element, subButton, context)) {
+      visibleIndex++;
+      return;
     }
 
-    updateSubButtonContent(context, element, { ...options, subButton });
+    updateSubButtonContent(context, element, { ...options, subButton, groupContainer: null, section: 'main' });
     handleVisibilityConditions(element, subButton, context._hass);
+    visibleIndex++;
   });
 
-  cleanupOldButtons(context, previousSubButtons, subButtons);
-  context.previousValues.subButtons = subButtons.slice();
+  // Then update the group buttons (inline only)
+  updateGroupButtons(context, sectioned);
+
+  // Ensure content container is pinned appropriately based on group positions
+  updateContentContainerFixedClass(context);
 }
 
 function updateSubButtonContent(context, element, options) {
-  handleDropdown(context, element, options);
-  updateBackground(element, options);
-  setupActions(element, options);
+  applyFillWidthClass(element, options.subButton);
+  applyWidthStyles(element, options.subButton, options.section || 'main');
+  applyHeightStyles(element, options.subButton);
 
-  const displayedState = buildDisplayedState(options, context);
-  updateElementVisibility(element, options, displayedState);
-
-  if (element.nameContainer.textContent !== displayedState) {
-    element.nameContainer.textContent = displayedState;
-  }
-
-  const selectedOption = options.isSelect && element.dropdownSelect ?
-    Array.from(element.dropdownSelect.children).find(option => option.hasAttribute('selected'))?.value : false;
-
-  if (options.showIcon && options.icon) {
-    let iconElement = element.icon;
-    if (!iconElement) {
-      iconElement = createElement('ha-icon', 'bubble-sub-button-icon');
-      iconElement.classList.add('show-icon');
-      element.appendChild(iconElement);
-      element.icon = iconElement;
-    }
-
-    if (selectedOption) {
-      const optionIcon = getOptionIcon(context, options.state, options.subButton.select_attribute, selectedOption);
-      if (optionIcon && !options.subButton.icon) {
-        const isIconDifferent = iconElement.tagName !== optionIcon.tagName || 
-          iconElement.icon !== optionIcon.icon || 
-          iconElement.attribute !== optionIcon.attribute ||
-          iconElement.attributeValue !== optionIcon.attributeValue;
-        if (isIconDifferent) {
-          element.replaceChild(optionIcon, iconElement);
-          element.icon = optionIcon;
-          iconElement = optionIcon;
-        }
-      } else if (iconElement.icon !== options.icon) {
-        iconElement.setAttribute('icon', options.icon);
-      }
-    } else if (iconElement.icon !== options.icon) {
-      iconElement.setAttribute('icon', options.icon);
-    }
-
-    iconElement.classList.remove('hidden');
-    iconElement.classList.add('bubble-sub-button-icon', 'show-icon');
-    iconElement.classList.toggle('icon-with-state', !!displayedState);
-    iconElement.classList.toggle('icon-without-state', !displayedState);
-  } else if (element.icon) {
-    element.icon.classList.remove('show-icon');
-    element.icon.classList.add('hidden');
-  }
-
-  if (element.icon?.getAttribute('icon') !== element.icon?.icon) {
-    element.icon.setAttribute('icon', element.icon.icon);
-  }
-
-  // const backgroundColor = getComputedStyle(element).getPropertyValue('--bubble-sub-button-light-background-color');
-  // element.backgroundColor = element.backgroundColor !== backgroundColor ? backgroundColor : element.backgroundColor;
-
-  // if (!element) return;
-
-  // const isOn = isStateOn(context, options.entity);
-
-  // if (element.previousBackgroundColor !== element.backgroundColor || element.previousIsOn !== isOn) {
-  //   const isBackgroundLight = isColorLight(backgroundColor);
-  //   const shouldHaveBrightBackground = isBackgroundLight && backgroundColor !== 'rgba(0, 0, 0, 0)' && backgroundColor !== '' && isOn;
-    
-  //   element.classList.toggle("bright-background", shouldHaveBrightBackground);
-    
-  //   element.previousBackgroundColor = element.backgroundColor;
-  //   element.previousIsOn = isOn;
-  // }
-}
-
-function handleVisibilityConditions(element, subButton, hass) {
-  const conditions = subButton.visibility;
-  if (conditions != null) {
-    element._hasVisibilityConditions = true;
-    const conditionsArray = ensureArray(conditions);
-    if (validateConditionalConfig(conditionsArray)) {
-      const isVisible = checkConditionsMet(conditionsArray, hass);
-      
-      if (element._previousVisibilityState === undefined || element._previousVisibilityState !== isVisible) {
-        element.classList.toggle('hidden', !isVisible);
-        element._previousVisibilityState = isVisible;
-      }
-    }
+  if (options.subButtonType === 'slider') {
+    handleSliderSubButton(context, element, options);
+  } else if (
+    options.subButtonType === 'select' ||
+    (!options.subButton?.sub_button_type && options.isSelect)
+  ) {
+    handleDropdownSubButton(context, element, options);
   } else {
-    element._hasVisibilityConditions = false;
+    handleDefaultSubButton(context, element, options);
   }
 }
 
-function cleanupOldButtons(context, previousButtons, currentButtons) {
-  for (let i = previousButtons.length; i > currentButtons.length; i--) {
-    const element = context.elements[i];
-    if (element) {
-      context.elements.subButtonContainer.removeChild(element);
-      delete context.elements[i];
-    }
+export function getSubButtonsStates(context) {
+  const sectioned = ensureNewSubButtonsSchemaObject(context.config);
+  const main = Array.isArray(sectioned.main) ? sectioned.main : [];
+  const bottom = Array.isArray(sectioned.bottom) ? sectioned.bottom : [];
+
+  const states = [];
+  
+  // Get states from main sub-buttons
+  main
+    .filter(item => item && !Array.isArray(item.group))
+    .forEach((subButton) => {
+      const entity = subButton.entity ?? context.config.entity;
+      states.push(context._hass.states[entity]);
+    });
+  
+  // Get states from buttons in groups
+  const allGroups = [
+    ...main.filter(item => item && Array.isArray(item.group)).map(g => g.group),
+    ...bottom.filter(item => item && Array.isArray(item.group)).map(g => g.group)
+  ];
+  allGroups.forEach((buttons) => {
+      buttons.forEach((button) => {
+        if (button) {
+          const entity = button.entity ?? context.config.entity;
+          states.push(context._hass.states[entity]);
+        }
+      });
+    });
+
+  return states;
+}
+
+function updateAllSliderSubButtons(context) {
+  // Update main sub-button sliders
+  if (context.elements) {
+    Object.keys(context.elements).forEach(key => {
+      const element = context.elements[key];
+      if (element && element.sliderContext && element.sliderContext.config) {
+        element.sliderContext._hass = context._hass;
+        updateSlider(element.sliderContext);
+      }
+    });
+  }
+
+  // Update group sub-button sliders
+  if (context.elements && context.elements.groups) {
+    Object.values(context.elements.groups).forEach(group => {
+      if (group.buttons) {
+        Object.values(group.buttons).forEach(element => {
+          if (element && element.sliderContext && element.sliderContext.config) {
+            element.sliderContext._hass = context._hass;
+            updateSlider(element.sliderContext);
+          }
+        });
+      }
+    });
   }
 }
 
 export function changeSubButtons(context, subButtons = context.config.sub_button) {
+  updateAllSliderSubButtons(context);
   updateSubButtons(context, subButtons);
   initializesubButtonIcon(context);
 }
@@ -339,18 +159,178 @@ function initializesubButtonIcon(context) {
   }
 
   const container = context.config.card_type === 'pop-up' ? context.popUp : context.content;
+  
+  // Main buttons
   container.querySelectorAll('.bubble-sub-button-icon').forEach((iconElement, index) => {
     context.subButtonIcon[index] = iconElement;
   });
+  
+  // Group buttons
+  if (context.elements && context.elements.groups) {
+    Object.values(context.elements.groups).forEach(group => {
+      if (group.container) {
+        const groupIcons = group.container.querySelectorAll('.bubble-sub-button-icon');
+        groupIcons.forEach(iconElement => {
+          context.subButtonIcon.push(iconElement);
+        });
+      }
+    });
+  }
 }
 
-export function getSubButtonsStates(context) {
-  const subButtons = context.config.sub_button;
-  if (!subButtons || !Array.isArray(subButtons)) return [];
+// Handle updating buttons within groups
+export function updateGroupButtons(context, sectionedArg) {
+  context.elements.groups = context.elements.groups || {};
+  context.previousValues = context.previousValues || {};
+  context.previousValues.groupButtons = context.previousValues.groupButtons || {};
 
-  return subButtons.map((subButton) => {
-    if (!subButton) return '';
-    const entity = subButton.entity ?? context.config.entity;
-    return context._hass.states[entity]?.state ?? '';
+  // Build unified list of groups from sectioned schema
+  let sectioned;
+  if (Array.isArray(sectionedArg)) {
+    sectioned = { main: sectionedArg, bottom: [] };
+  } else if (sectionedArg && (Array.isArray(sectionedArg.main) || Array.isArray(sectionedArg.bottom))) {
+    sectioned = sectionedArg;
+  } else {
+    sectioned = ensureNewSubButtonsSchemaObject(context.config);
+  }
+
+  // Count non-group buttons to calculate global index starting point
+  const mainNonGroupButtons = (Array.isArray(sectioned.main) ? sectioned.main : [])
+    .filter(item => item && !Array.isArray(item.group));
+  const bottomNonGroupButtons = (Array.isArray(sectioned.bottom) ? sectioned.bottom : [])
+    .filter(item => item && !Array.isArray(item.group));
+  const totalNonGroupButtons = mainNonGroupButtons.length + bottomNonGroupButtons.length;
+  
+  // Start global index after non-group buttons (starting from 1)
+  let globalIndex = totalNonGroupButtons + 1;
+
+  const mainGroups = (Array.isArray(sectioned.main) ? sectioned.main : [])
+    .map((item, idx) => ({ key: `g_main_${idx}`, position: 'top', item }))
+    .filter(({ item }) => item && Array.isArray(item.group));
+  const bottomGroups = (Array.isArray(sectioned.bottom) ? sectioned.bottom : [])
+    .map((item, idx) => ({ key: `g_bottom_${idx}`, position: 'bottom', item }))
+    .filter(({ item }) => item && Array.isArray(item.group));
+  // Handle bottom non-group buttons: create individual groups when mixed with explicit groups
+  const bottomExplicitGroups = (Array.isArray(sectioned.bottom) ? sectioned.bottom : []).filter(it => it && Array.isArray(it.group));
+  
+  let bottomNonGroupGroups = [];
+  if (bottomNonGroupButtons.length > 0) {
+    if (bottomExplicitGroups.length > 0) {
+      // Mixed case: create individual groups for each non-group button to maintain YAML order
+      bottomNonGroupButtons.forEach((item, idx) => {
+        bottomNonGroupGroups.push({ 
+          key: `g_bottom_individual_${idx}`, 
+          position: 'bottom', 
+          item: { group: [item], buttons_layout: 'inline' } 
+        });
+      });
+    } else {
+      // All individual buttons: use single auto group for efficiency
+      bottomNonGroupGroups = [{ 
+        key: 'g_bottom_auto', 
+        position: 'bottom', 
+        item: { group: bottomNonGroupButtons, buttons_layout: 'inline' } 
+      }];
+    }
+  }
+
+  const globalMainLayout = (context.config?.sub_button?.main_layout) ?? 'inline';
+  const globalBottomLayout = (context.config?.sub_button?.bottom_layout) ?? 'inline';
+  const inlineGroups = [...mainGroups, ...bottomGroups, ...bottomNonGroupGroups]
+    .map(({ key, position, item }) => ({
+      key,
+      group: {
+        buttons: item.group,
+        position,
+        justify_content: item.justify_content,
+        group_layout: position === 'bottom' ? globalBottomLayout : globalMainLayout,
+        display: item.buttons_layout
+      }
+    }));
+
+  const allGroups = inlineGroups;
+
+  allGroups.forEach(({ key, group }) => {
+    if (!group || !Array.isArray(group.buttons)) return;
+
+    if (!context.elements.groups[key]) {
+      context.elements.groups[key] = { buttons: {} };
+    }
+    if (!context.previousValues.groupButtons[key]) {
+      context.previousValues.groupButtons[key] = [];
+    }
+
+    const groupElementsObj = context.elements.groups[key];
+    const groupContainer = groupElementsObj.container;
+    if (!groupContainer) return;
+
+    group.buttons.forEach((button, buttonIndex) => {
+      if (!button) return;
+
+      // Use global index starting from 1, with dashes instead of underscores
+      const buttonIndexForClass = globalIndex;
+      globalIndex++;
+
+      // Keep buttonId for internal tracking, but use normalized index for CSS class
+      const buttonId = `${key}_button_${buttonIndex}`;
+      const options = getSubButtonOptions(context, button, buttonIndexForClass);
+
+      let element = groupElementsObj.buttons ? groupElementsObj.buttons[buttonId] : null;
+      if (!element) {
+        element = createSubButtonElement(context, buttonIndexForClass, options.isSelect, options.showArrow, options.entity, button, groupContainer);
+        if (!groupElementsObj.buttons) {
+          groupElementsObj.buttons = {};
+        }
+        groupElementsObj.buttons[buttonId] = element;
+      } else {
+        // Update existing element classes if needed
+        const normalizedIndex = String(buttonIndexForClass).replace(/_/g, '-');
+        const expectedClass = `bubble-sub-button-${normalizedIndex}`;
+        const currentClasses = Array.from(element.classList);
+        const currentIndexClass = currentClasses.find(cls => cls.startsWith('bubble-sub-button-') && cls !== 'bubble-sub-button');
+        
+        if (currentIndexClass !== expectedClass) {
+          // Remove old index class
+          if (currentIndexClass) {
+            element.classList.remove(currentIndexClass);
+          }
+          // Add new index class
+          element.classList.add(expectedClass);
+        }
+        
+        // Update name-based class if name is defined
+        if (button?.name) {
+          const nameClass = normalizeNameToClass(button.name);
+          if (nameClass) {
+            const expectedNameClass = `bubble-sub-button-name-${nameClass}`;
+            const hasNameClass = currentClasses.some(cls => cls.startsWith('bubble-sub-button-name-'));
+            if (!hasNameClass || !currentClasses.includes(expectedNameClass)) {
+              // Remove all existing name classes
+              currentClasses.forEach(cls => {
+                if (cls.startsWith('bubble-sub-button-name-')) {
+                  element.classList.remove(cls);
+                }
+              });
+              // Add new name class
+              element.classList.add(expectedNameClass);
+            }
+          }
+        }
+      }
+
+      if (handleHideWhenParentUnavailable(element, button, context)) {
+        return;
+      }
+
+      const overlayAtCardLevel = (group.position || 'top') === 'top' && button.sub_button_type === 'slider' && !button.always_visible;
+      // Default bottom buttons (in any bottom group) to fill width, but allow user override
+      const isBottomGroup = (group.position || 'top') === 'bottom';
+      const subButtonWithAutoWidth = isBottomGroup
+        ? { ...button, fill_width: (button.fill_width == null ? true : button.fill_width) }
+        : button;
+      const section = isBottomGroup ? 'bottom' : 'main';
+      updateSubButtonContent(context, element, { ...options, subButton: subButtonWithAutoWidth, groupContainer, overlayAtCardLevel, section });
+      handleVisibilityConditions(element, button, context._hass);
+    });
   });
 }

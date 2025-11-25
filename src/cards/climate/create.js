@@ -47,13 +47,13 @@ export function createStructure(context) {
 
         let tempDisplay;
         if (attribute === 'temperature') {
-            elements.tempDisplay = createElement('div', 'bubble-temperature-display');
+            elements.tempDisplay = createElement('div', 'bubble-temperature-display bubble-climate-temp-display');
             tempDisplay = elements.tempDisplay;
         } else if (attribute === 'target_temp_low') {
-            elements.lowTempDisplay = createElement('div', 'bubble-low-temperature-display');
+            elements.lowTempDisplay = createElement('div', 'bubble-low-temperature-display bubble-climate-temp-display');
             tempDisplay = elements.lowTempDisplay;
         } else if (attribute === 'target_temp_high') {
-            elements.highTempDisplay = createElement('div', 'bubble-high-temperature-display');
+            elements.highTempDisplay = createElement('div', 'bubble-high-temperature-display bubble-climate-temp-display');
             tempDisplay = elements.highTempDisplay;
         }
 

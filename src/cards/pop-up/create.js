@@ -4,6 +4,7 @@ import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { onUrlChange, removeHash, hideContent } from "./helpers.js";
 import styles from "./styles.css";
 import backdropStyles from "./backdrop.css";
+import { handleCustomStyles } from "../../tools/style-processor.js";
 
 let backdrop;
 let hideBackdrop = false;
@@ -12,7 +13,6 @@ let lastTouchY;
 let themeColorBackground;
 
 const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
-const backdropStyle = createElement('style');
 
 function updateBackdropColor() {
   themeColorBackground = 
@@ -41,6 +41,7 @@ export function getBackdrop(context) {
   shadowRoot.appendChild(defaultStylesTag);
 
   const backdropCustomStyle = createElement('style');
+  backdropCustomStyle.dataset.bubbleTarget = 'backdrop';
   shadowRoot.appendChild(backdropCustomStyle);
 
   if (isBackdropHidden) {
@@ -51,15 +52,44 @@ export function getBackdrop(context) {
   document.body.appendChild(backdropHostElement);
   
   const backdropBlur = context.config.backdrop_blur ?? 0;
-  if (parseFloat(backdropBlur) > 0) {
-      internalBackdropElement.style.setProperty('--custom-backdrop-filter', `blur(${backdropBlur}px)`);
+  const hasBlur = parseFloat(backdropBlur) > 0;
+  internalBackdropElement.classList.toggle('has-blur', hasBlur);
+  if (hasBlur) {
+    internalBackdropElement.style.setProperty('--custom-backdrop-filter', `blur(${backdropBlur}px)`);
   } else {
-      internalBackdropElement.style.setProperty('--custom-backdrop-filter', 'none');
+    // Ensure no backdrop filter cost when blur is disabled
+    internalBackdropElement.style.removeProperty('--custom-backdrop-filter');
   }
+
+  // Debounced, non-blocking backdrop styles computation to avoid jank on open
+  let backdropStylesUpdateScheduled = false;
+  function scheduleBackdropStylesUpdate() {
+    if (backdropStylesUpdateScheduled) return;
+    backdropStylesUpdateScheduled = true;
+    const run = () => {
+      backdropStylesUpdateScheduled = false;
+      try { handleCustomStyles(context, backdropCustomStyle); } catch (_) {}
+    };
+    const idle = (cb) => {
+      try {
+        if (typeof window.requestIdleCallback === 'function') {
+          window.requestIdleCallback(cb, { timeout: 500 });
+          return;
+        }
+      } catch (_) {}
+      // Fallback: defer past the likely popup open animation (~300ms)
+      setTimeout(cb, 350);
+    };
+    idle(run);
+  }
+  // Initial async styles apply (once)
+  scheduleBackdropStylesUpdate();
 
   function showBackdrop() {
     requestAnimationFrame(() => {
-      internalBackdropElement.classList.add('is-visible');
+      if (!internalBackdropElement.classList.contains('is-visible')) {
+        internalBackdropElement.classList.add('is-visible');
+      }
       internalBackdropElement.classList.remove('is-hidden');
       if (!isBackdropHidden) {
         backdropHostElement.style.display = '';
@@ -69,11 +99,19 @@ export function getBackdrop(context) {
   }
   
   function hideBackdropFunc() {
-    internalBackdropElement.classList.add('is-hidden');
+    if (!internalBackdropElement.classList.contains('is-hidden')) {
+      internalBackdropElement.classList.add('is-hidden');
+    }
     internalBackdropElement.classList.remove('is-visible');
   }
 
-  backdrop = { hideBackdrop: hideBackdropFunc, showBackdrop, backdropElement: internalBackdropElement, backdropCustomStyle };
+  backdrop = { 
+    hideBackdrop: hideBackdropFunc, 
+    showBackdrop, 
+    backdropElement: internalBackdropElement, 
+    backdropCustomStyle,
+    updateBackdropStyles: scheduleBackdropStylesUpdate
+  };
   return backdrop;
 }
 
@@ -232,8 +270,6 @@ export function createStructure(context) {
       lastTouchY = event.touches[0].clientY;
     };
 
-    //context.popUp.addEventListener('touchmove', context.handleTouchMove, { passive: true });
-
     const existingContainer = context.popUp.querySelector('.bubble-pop-up-container');
     if (existingContainer === null) {
 
@@ -250,30 +286,6 @@ export function createStructure(context) {
     }
 
     const popUpContainer = context.elements.popUpContainer;
-    
-    const checkScrollable = () => {
-        // To get a reliable scrollHeight, overflow must not be 'visible'.
-        // We set it to 'auto' temporarily for the check.
-        const originalOverflow = popUpContainer.style.overflow;
-        popUpContainer.style.overflow = 'auto';
-
-        // Add a class if scrollHeight is greater than clientHeight
-        const isScrollable = popUpContainer.scrollHeight > popUpContainer.clientHeight;
-        
-        // Restore original overflow style from CSS by clearing the inline style.
-        // This lets the CSS classes (.is-scrollable) apply correctly.
-        popUpContainer.style.overflow = '';
-
-        popUpContainer.classList.toggle('is-scrollable', isScrollable);
-    };
-
-    // Use ResizeObserver to detect size changes
-    const resizeObserver = new ResizeObserver(checkScrollable);
-    resizeObserver.observe(popUpContainer);
-    context.popUpResizeObserver = resizeObserver;
-
-    // Initial check after a short delay to ensure rendering is complete
-    setTimeout(checkScrollable, 150);
 
     context.popUpBackground = createElement("div", 'bubble-pop-up-background');
     context.popUp.appendChild(context.popUpBackground);

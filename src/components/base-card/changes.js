@@ -5,7 +5,12 @@ import {
     getAttribute,
     isEntityType,
     isStateOn,
-    getName
+    getName,
+    isTimerEntity,
+    timerTimeRemaining,
+    computeDisplayTimer,
+    startTimerInterval,
+    stopTimerInterval
 } from '../../tools/utils.js';
 import { getIcon, getImage, getIconColor } from '../../tools/icon.js';
 import { getClimateColor } from '../../cards/climate/helpers.js';
@@ -46,7 +51,41 @@ export function changeState(context) {
 
     if (!configChanged) return;
 
-    let formattedState = state && showState ? context._hass.formatEntityState(state) : '';
+    // Check if entity is a timer and format accordingly
+    const isTimer = isTimerEntity(entity);
+    let formattedState = '';
+    if (state && showState) {
+        if (isTimer) {
+            const timeRemaining = timerTimeRemaining(state);
+            formattedState = computeDisplayTimer(context._hass, state, timeRemaining) || '';
+            
+            // Start/stop interval for active timers
+            if (state.state === 'active') {
+                startTimerInterval(context, entity, () => {
+                    // Force update by calling changeState again
+                    const currentState = context._hass.states[entity];
+                    if (currentState && currentState.state === 'active') {
+                        // Temporarily mark as changed to force update
+                        context.previousState = null;
+                        changeState(context);
+                    } else {
+                        stopTimerInterval(context);
+                    }
+                });
+            } else {
+                stopTimerInterval(context);
+            }
+        } else {
+            formattedState = context._hass.formatEntityState(state);
+            // Stop any timer interval if entity is no longer a timer
+            stopTimerInterval(context);
+        }
+    } else {
+        // Stop timer interval if state is not shown
+        if (isTimer) {
+            stopTimerInterval(context);
+        }
+    }
     let formattedAttribute = '';
     let formattedLastChanged = '';
     let formattedLastUpdated = '';
@@ -260,4 +299,76 @@ export function updateListeners(context, add) {
         }
         }
     }
+}
+
+// Toggle `.fixed-top` on the bubble wrapper when bottom groups or main buttons are present
+export function updateContentContainerFixedClass(context) {
+  const cardWrapper = context?.elements?.cardWrapper;
+  const subButtonContainer = context?.elements?.subButtonContainer;
+  if (!cardWrapper && !subButtonContainer) return;
+
+  const subButtons = context?.config?.sub_button;
+  const mainButtonsPosition = context?.config?.main_buttons_position || 'default';
+  let hasBottomGroup = false;
+  let hasTopGroup = false;
+
+  // Support both new and legacy schemas
+  if (subButtons) {
+    if (Array.isArray(subButtons)) {
+      for (const item of subButtons) {
+        if (item && Array.isArray(item.buttons)) {
+          const pos = (item.position || 'top');
+          if (pos === 'bottom') hasBottomGroup = true;
+          else if (pos === 'top') hasTopGroup = true;
+        }
+        if (hasBottomGroup && hasTopGroup) break;
+      }
+    } else {
+      const main = Array.isArray(subButtons.main) ? subButtons.main : [];
+      const bottom = Array.isArray(subButtons.bottom) ? subButtons.bottom : [];
+      for (const g of main) {
+        if (g && Array.isArray(g.group)) { hasTopGroup = true; break; }
+      }
+      // Consider bottom non-group buttons as a bottom group for layout pinning
+      for (const g of bottom) {
+        if (g) {
+          if (Array.isArray(g.group)) { hasBottomGroup = true; break; }
+          hasBottomGroup = true; // any bottom item should pin top
+          break;
+        }
+      }
+    }
+  }
+
+  const hasBottomMainButtons = mainButtonsPosition === 'bottom';
+
+  if (hasBottomGroup || hasBottomMainButtons) {
+    // When any group is at the bottom or main buttons are at the bottom, pin elements to the top
+    if (cardWrapper) cardWrapper.classList.add('fixed-top');
+    if (subButtonContainer) subButtonContainer.classList.add('fixed-top');
+  } else {
+    // Remove fixed-top class when no bottom groups and no bottom main buttons
+    if (cardWrapper) cardWrapper.classList.remove('fixed-top');
+    if (subButtonContainer) subButtonContainer.classList.remove('fixed-top');
+  }
+
+  // Update with-main-buttons-bottom class based on actual main buttons visibility
+  const bottomSubButtonContainer = context?.elements?.bottomSubButtonContainer;
+  if (bottomSubButtonContainer && hasBottomMainButtons) {
+    const buttonsContainer = context?.elements?.buttonsContainer;
+    if (buttonsContainer) {
+      const isMainButtonsVisible = !buttonsContainer.classList.contains('hidden') && 
+                                   buttonsContainer.style.display !== 'none' &&
+                                   getComputedStyle(buttonsContainer).display !== 'none';
+      
+      if (isMainButtonsVisible) {
+        bottomSubButtonContainer.classList.add('with-main-buttons-bottom');
+      } else {
+        bottomSubButtonContainer.classList.remove('with-main-buttons-bottom');
+      }
+    } else {
+      // No buttons container means no main buttons, so remove the class
+      bottomSubButtonContainer.classList.remove('with-main-buttons-bottom');
+    }
+  }
 }

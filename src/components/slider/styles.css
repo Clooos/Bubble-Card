@@ -10,25 +10,71 @@
     background-color: var(--bubble-accent-color, var(--bubble-default-color));
 }
 
+.slider-use-light-color {
+    background-color: var(--bubble-slider-fill-color, var(--bubble-light-color, rgb(225, 225, 210))) !important;
+    opacity: 0.7;
+}
+
+.slider-use-accent-color {
+    background-color: var(--bubble-button-accent-color, var(--bubble-accent-color, var(--bubble-default-color))) !important;
+    opacity: 1;
+}
+
 .is-light .bubble-range-fill {
     background-color: var(--bubble-light-color, rgb(225, 225, 210));
+    opacity: 0.7;
 }
 
 .is-dragging .bubble-range-fill {
     transition: none !important;
 }
 
-.is-light .bubble-range-fill {
-    opacity: 0.5;
-}
-
 .bubble-range-value {
     position: absolute;
     right: 14px;
+    display: none;
+}
+
+.bubble-range-value.is-visible {
+    display: flex;
 }
 
 .is-unavailable .bubble-range-slider {
     cursor: not-allowed;
+}
+
+/* Ensure touch drag is recognized on mobile for slider track */
+.bubble-range-slider {
+    touch-action: pan-x;
+    backface-visibility: hidden;
+    height: 100%;
+}
+
+/* Slider container styles */
+.slider-container {
+    cursor: ew-resize;
+    touch-action: pan-y;
+}
+
+.slider-container.is-touching,
+.slider-container.is-touching .bubble-range-slider,
+.bubble-range-slider.is-touching {
+    touch-action: none;
+}
+
+/* When dragging, disable all touch actions to prevent conflicts */
+.is-dragging .bubble-range-slider,
+.is-dragging.slider-container {
+    touch-action: none;
+}
+
+.slider-container.slider-hold-focus > :not(.bubble-range-slider):not(style) {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.slider-container.slider-hold-focus.is-dragging > :not(.bubble-range-slider):not(style) {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .slider-appear-animation {
@@ -46,4 +92,57 @@
         transform: scale(1);
         opacity: 1;
     }
+}
+
+/* Color slider specific */
+.is-color-slider .bubble-range-fill { 
+    background: transparent !important; 
+    opacity: 0 !important; 
+}
+
+.bubble-color-track {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 0;
+}
+
+.bubble-color-cursor {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 90%;
+    border-radius: 999px;
+    background: var(--bubble-color-cursor-background, #fff);
+    z-index: 1;
+    transition: transform .15s ease, left .15s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+
+.bubble-color-cursor::before {
+    content: "";
+    position: absolute;
+    top: var(--bubble-color-cursor-indicator-top, 18%);
+    bottom: var(--bubble-color-cursor-indicator-bottom, 18%);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: var(--bubble-color-cursor-indicator-color, var(--primary-text-color));
+    border-radius: 2px;
+    opacity: var(--bubble-color-cursor-indicator-opacity, 0.7);
+    transition: background-color .15s ease, top .15s ease, bottom .15s ease;
+}
+
+.is-dragging .bubble-color-cursor {
+    transition: none !important;
+}
+
+.is-dragging .bubble-color-cursor::before {
+    opacity: var(--bubble-color-cursor-indicator-active-opacity, 0.9);
+    top: var(--bubble-color-cursor-indicator-active-top, 12%);
+    bottom: var(--bubble-color-cursor-indicator-active-bottom, 12%);
+    width: 4px;
 }

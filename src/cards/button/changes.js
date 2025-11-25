@@ -2,6 +2,7 @@ import { getButtonType } from "./helpers.js";
 import { 
   getState,
   isStateOn,
+  isStateRequiringAttention,
   isEntityType,
   setLayout
 } from '../../tools/utils.js';
@@ -14,6 +15,7 @@ export function changeButton(context) {
   const buttonType = getButtonType(context);
   const isLight = isEntityType(context, "light");
   const isOn = isStateOn(context);
+  const requiresAttention = isStateRequiringAttention(context);
   const lightColor = getIconColor(context);
 
   const currentButtonColor = cardType === 'button'
@@ -27,7 +29,10 @@ export function changeButton(context) {
   const useAccentColor = context.config.use_accent_color;
 
   if (buttonType === 'switch' && isOn) {
-    if (lightColor && isLight && !useAccentColor) {
+    if (requiresAttention) {
+      newButtonColor = 'var(--red-color, var(--error-color))';
+      newOpacity = '1';
+    } else if (lightColor && isLight && !useAccentColor) {
       newButtonColor = getIconColor(context);
       newOpacity = '.5';
     } else {
@@ -40,14 +45,7 @@ export function changeButton(context) {
   }
 
   if (buttonType === 'slider') {
-    if (isOn) {
-      if (isLight && !useAccentColor) {   
-        context.elements.rangeFill.style.backgroundColor = getIconColor(context);
-      } else {
-        context.elements.rangeFill.style.backgroundColor = 'var(--bubble-button-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))';
-      }
-    }
-
+    // All slider logic (including style updates) is handled in slider/changes.js
     updateSlider(context);
   }
 

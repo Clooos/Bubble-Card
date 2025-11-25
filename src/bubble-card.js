@@ -1,13 +1,14 @@
 import { version } from './var/version.js';
 import { initializeContent } from './tools/init.js';
 import { cleanupTapActions } from './tools/tap-actions.js';
-import { preloadYAMLStyles } from './tools/style-processor.js';
+import { preloadYAMLStyles } from './modules/registry.js';
 import { createBubbleDefaultColor } from './tools/style.js';
-import { cleanupScrollingEffects } from './tools/utils.js';
+import { cleanupScrollingEffects, stopTimerInterval } from './tools/utils.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 import { handlePopUp } from './cards/pop-up/index.js';
 import { handleButton } from './cards/button/index.js';
+import { handleSubButtons } from './cards/sub-buttons/index.js';
 import { handleSeparator } from './cards/separator/index.js';
 import { handleCover } from './cards/cover/index.js';
 import { handleEmptyColumn } from './cards/empty-column/index.js';
@@ -20,6 +21,7 @@ import { handleClimate } from './cards/climate/index.js';
 const handlers = {
   'pop-up': handlePopUp,
   'button': handleButton,
+  'sub-buttons': handleSubButtons,
   'separator': handleSeparator,
   'cover': handleCover,
   'empty-column': handleEmptyColumn,
@@ -51,6 +53,12 @@ class BubbleCard extends HTMLElement {
     cleanupTapActions();
     try { if (this.content) cleanupScrollingEffects(this.content); } catch (e) {}
     try {
+      // Stop timer intervals for main card
+      if (this.context) {
+        stopTimerInterval(this.context);
+      }
+    } catch (e) {}
+    try {
       if (this._moduleChangeHandler) {
         window.removeEventListener('bubble-card-modules-changed', this._moduleChangeHandler);
         window.removeEventListener('bubble-card-module-updated', this._moduleChangeHandler);
@@ -72,7 +80,7 @@ class BubbleCard extends HTMLElement {
   set editMode(editMode) {
     if (this.editor === editMode) return;
     this.editor = editMode;
-    if (['pop-up', 'horizontal-buttons-stack'].includes(this.config.card_type)) {
+    if (['pop-up', 'horizontal-buttons-stack', 'sub-buttons'].includes(this.config.card_type)) {
       this.updateBubbleCard();
     }
   }
@@ -137,6 +145,7 @@ class BubbleCard extends HTMLElement {
     switch (this.config.card_type) {
       case 'pop-up': return -100000;
       case 'button':
+      case 'sub-buttons':
       case 'separator':
       case 'empty-column':
       case 'horizontal-buttons-stack':

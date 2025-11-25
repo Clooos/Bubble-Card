@@ -418,3 +418,37 @@ ul.icon-list li ha-icon {
   margin-right: 8px;
   --mdc-icon-size: 18px;
 }
+
+.layout-subsection {
+  display: grid;
+  grid-gap: 12px;
+  padding: 12px 0 0;
+}
+
+.layout-subtitle {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-text-color);
+}
+
+.layout-subtitle ha-icon {
+  margin-right: 8px;
+  --mdc-icon-size: 18px;
+}
+
+.element-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.no-bg {
+  background: none;
+  box-shadow: none;
+}
+
+mwc-list-item[disabled] ha-icon {
+  opacity: 0.38;
+}

@@ -73,45 +73,6 @@ if (!window.__bubbleLocationDeduperAdded) {
 
 const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER']);
 
-// Pre-warm compositor layers and force style calculation to avoid first-open stutter
-function prewarmLayers(context) {
-    try {
-        const { backdropElement } = getBackdrop(context);
-        const popUp = context.popUp;
-        const popUpBackground = context.popUpBackground || popUp.querySelector('.bubble-pop-up-background');
-
-        if (popUp && popUp.style) {
-            popUp.style.willChange = 'transform';
-        }
-        if (backdropElement && backdropElement.style) {
-            backdropElement.style.willChange = 'opacity, filter';
-        }
-        if (popUpBackground && popUpBackground.style) {
-            popUpBackground.style.willChange = 'backdrop-filter, -webkit-backdrop-filter';
-        }
-
-        // Force a sync layout/paint so the next frame can animate smoothly
-        try { void popUp.getBoundingClientRect(); } catch (_) {}
-        try { if (backdropElement) void backdropElement.getBoundingClientRect(); } catch (_) {}
-        try {
-            if (popUpBackground) {
-                const cs = getComputedStyle(popUpBackground);
-                cs.getPropertyValue('backdrop-filter');
-                cs.getPropertyValue('-webkit-backdrop-filter');
-            }
-        } catch (_) {}
-
-        // Cleanup function to remove hints after animation
-        return () => {
-            try { if (popUp && popUp.style) popUp.style.willChange = ''; } catch (_) {}
-            try { if (backdropElement && backdropElement.style) backdropElement.style.willChange = ''; } catch (_) {}
-            try { if (popUpBackground && popUpBackground.style) popUpBackground.style.willChange = ''; } catch (_) {}
-        };
-    } catch (_) {
-        return () => {};
-    }
-}
-
 export function clickOutside(event, context) {
     if (!(context.config.close_by_clicking_outside ?? true)) return;
     
@@ -175,6 +136,8 @@ export function hideContent(context, delay) {
             sectionRow.style.display = "none";
             if (sectionRowContainer?.classList.contains('card')) {
                 sectionRowContainer.style.display = "none";
+                // Restore normal position when pop-up closes
+                sectionRowContainer.style.position = '';
             }
         }
     }, delay);
@@ -193,6 +156,8 @@ export function displayContent(context) {
         sectionRow.style.display = "";
         if (sectionRowContainer?.classList.contains('card')) {
             sectionRowContainer.style.display = "";
+            // Extract from grid to prevent gap when pop-up opens
+            sectionRowContainer.style.position = 'absolute';
         }
     }
 }
@@ -204,9 +169,12 @@ function toggleBackdrop(context, show) {
 
 export function appendPopup(context, append) {
     if (context.config.background_update) return;
-
+    
     if (append) {
-        context.verticalStack.appendChild(context.popUp);
+        // Only append if not already in DOM to avoid unnecessary operations
+        if (!context.verticalStack.contains(context.popUp)) {
+            context.verticalStack.appendChild(context.popUp);
+        }
     } else if (!append && !context.config.background_update) {
         if (context.verticalStack.contains(context.popUp)) {
             context.verticalStack.removeChild(context.popUp);
@@ -217,6 +185,8 @@ export function appendPopup(context, append) {
 function updatePopupClass(popUp, open) {
     // Set animation flag to prevent simultaneous animations
     popupState.isAnimating = true;
+
+    popUp.classList.add(open ? 'is-opening' : 'is-closing');
     
     requestAnimationFrame(() => {
         popUp.classList.toggle('is-popup-opened', open);
@@ -225,6 +195,7 @@ function updatePopupClass(popUp, open) {
         // Clear animation flag after animation completes
         setTimeout(() => {
             popupState.isAnimating = false;
+            popUp.classList.remove('is-opening', 'is-closing');
         }, popupState.animationDuration);
     });
 }
@@ -369,61 +340,57 @@ export function openPopup(context) {
     
     const { popUp } = context;
     
-    if (!context.verticalStack.contains(popUp)) {
-        appendPopup(context, true);
-    }
-
-    // Add to active popups set
+    // Add to active popups set before DOM operations
     popupState.activePopups.add(context);
 
-    // Pre-warm compositor layers and ensure a layout pass before toggling classes
-    const cleanupWillChange = prewarmLayers(context);
-
-    // Use a double rAF to guarantee the closed state is fully committed before starting the transition
+    // Batch DOM operations in requestAnimationFrame to reduce layout thrashing
+    // This is critical when pop-up contains many cards (vertical stack)
     requestAnimationFrame(() => {
-        try { void popUp.getBoundingClientRect(); } catch (_) {}
-        requestAnimationFrame(() => {
-            updatePopupClass(popUp, true);
-            displayContent(context);
-            toggleBackdrop(context, true);
+        // Double-check popup is still valid and not closed
+        if (!popupState.activePopups.has(context)) return;
+        
+        if (!context.verticalStack.contains(popUp)) {
+            appendPopup(context, true);
+        }
 
-            // Actions to perform after the main CSS animation is complete
-            setTimeout(() => {
-                // Cleanup temporary will-change hints regardless of state
-                try { cleanupWillChange(); } catch (_) {}
+        // Start transition after DOM insertion
+        updatePopupClass(popUp, true);
+        displayContent(context);
+        toggleBackdrop(context, true);
 
-                // Check if the popup wasn't closed before this timeout executed
-                if (!popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
-                    return;
-                }
+        // Actions to perform after the main CSS animation is complete
+        setTimeout(() => {
+            // Check if the popup wasn't closed before this timeout executed
+            if (!popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
+                return;
+            }
 
-                toggleBodyScroll(true);
-                updateListeners(context, true);
-                
-                if (context.config.auto_close > 0) {
-                    if (context.closeTimeout) clearTimeout(context.closeTimeout); 
-                    context.closeTimeout = setTimeout(() => {
-                        // Ensure context is still valid and popup is the one to close or hash matches
-                        if (popupState.activePopups.has(context) && 
-                            (context.config.hash === location.hash || !context.config.hash)) {
-                             removeHash();
-                        } else if (popupState.activePopups.has(context)) {
-                             closePopup(context);
-                        }
-                    }, context.config.auto_close);
-                }
-                
-                if (context.config.open_action) {
-                    callAction(context.popUp, context.config, 'open_action');
-                }
-            }, popupState.animationDuration);
-        });
+            toggleBodyScroll(true);
+            updateListeners(context, true);
+            
+            if (context.config.auto_close > 0) {
+                if (context.closeTimeout) clearTimeout(context.closeTimeout); 
+                context.closeTimeout = setTimeout(() => {
+                    // Ensure context is still valid and popup is the one to close or hash matches
+                    if (popupState.activePopups.has(context) && 
+                        (context.config.hash === location.hash || !context.config.hash)) {
+                            removeHash();
+                    } else if (popupState.activePopups.has(context)) {
+                            closePopup(context);
+                    }
+                }, context.config.auto_close);
+            }
+            
+            if (context.config.open_action) {
+                callAction(context.popUp, context.config, 'open_action');
+            }
+        }, popupState.animationDuration);
     });
 }
 
 export function closePopup(context, force = false) {
     if ((!context.popUp.classList.contains('is-popup-opened') && !force)) return;
-    
+
     clearAllTimeouts(context);
     
     // Remove from active popups set
@@ -458,7 +425,15 @@ export function closePopup(context, force = false) {
 
 export function onUrlChange(context) {
     return () => {
-       if (context.config.hash === location.hash) {
+        // Clean up orphaned popups (open but hash doesn't match)
+        const orphanedPopups = Array.from(popupState.activePopups).filter(ctx => 
+            ctx.config.hash && 
+            ctx.config.hash !== location.hash &&
+            ctx.popUp.classList.contains('is-popup-opened')
+        );
+        orphanedPopups.forEach(ctx => closePopup(ctx));
+        
+        if (context.config.hash === location.hash) {
             // If entity-triggered popup is active and this is hash-triggered, don't open
             if (popupState.entityTriggeredPopup) {
                 return;
@@ -470,14 +445,7 @@ export function onUrlChange(context) {
             // Enable protection during hash change handling
             popupState.hashChangeProtection = true;
             
-            // Ensure only one popup is open. Close others before potentially opening this one.
-            // Check for entity-triggered popup *before* closing others
-            if (popupState.entityTriggeredPopup) {
-                popupState.hashChangeProtection = false; // Release protection if we're not opening
-                return; // Don't open hash popup if entity popup is active
-            }
-
-            // Now, close any other potentially open popups (e.g., another hash popup)
+            // Close any other potentially open popups (e.g., another hash popup)
             closeAllPopupsExcept(context);
             
             setTimeout(() => {
@@ -493,8 +461,10 @@ export function onUrlChange(context) {
             });
         } else {
             requestAnimationFrame(() => {
-                // Only close this popup if it's the one with the matching hash
-                if (context.config.hash && context.config.hash !== location.hash) {
+                // Close this popup if it's open and hash doesn't match or was removed
+                if (context.popUp.classList.contains('is-popup-opened') && 
+                    context.config.hash && 
+                    context.config.hash !== location.hash) {
                     closePopup(context);
                 }
             });
@@ -543,47 +513,6 @@ function setupVisibilityObserver(context) {
 
         observer.observe(context.sectionRow);
         context.observer = observer;
-    }
-}
-
-export function cleanupContext(context) {
-    if (context.observer) {
-        context.observer.disconnect();
-        context.observer = null;
-    }
-    
-    clearAllTimeouts(context);
-    
-    updateListeners(context, false);
-    
-    // Remove from active popups set
-    popupState.activePopups.delete(context);
-    
-    // If this was an entity-triggered popup, clear the reference
-    if (popupState.entityTriggeredPopup === context) {
-        popupState.entityTriggeredPopup = null;
-    }
-    
-    // Remove the URL change listener
-    if (context.boundOnUrlChange) {
-        window.removeEventListener('location-changed', context.boundOnUrlChange);
-        window.removeEventListener('popstate', context.boundOnUrlChange);
-        context.boundOnUrlChange = null;
-    }
-    
-    // Clean up the colorScheme listener
-    if (context.updatePopupColorListener) {
-        const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
-        colorScheme.removeEventListener('change', context.updatePopupColorListener);
-        context.updatePopupColorListener = null;
-    }
-    
-    if (context.popUp && context.popUp.parentNode && !context.config.background_update) {
-        context.popUp.parentNode.removeChild(context.popUp);
-    }
-    
-    if (context.elements) {
-        context.elements = null;
     }
 }
 

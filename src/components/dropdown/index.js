@@ -1,1 +1,1 @@
-export { createDropdownStructure, createDropdownActions } from './create.js';
+export { createDropdownStructure, createDropdownActions, destroyDropdown } from './create.js';

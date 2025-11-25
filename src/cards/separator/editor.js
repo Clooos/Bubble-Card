@@ -17,10 +17,10 @@ export function renderSeparatorEditor(editor){
         <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:palette"></ha-icon>
-              Styling options
+              Styling and layout options
             </h4>
             <div class="content">
-                ${editor.makeLayoutOptions()}
+                ${editor.makeLayoutPanel()}
                 ${editor.makeStyleEditor()}
             </div>
         </ha-expansion-panel>

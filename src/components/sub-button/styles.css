@@ -1,11 +1,85 @@
 .bubble-sub-button-container {
     position: relative;
     display: flex;
-    justify-content: end;
+    justify-content: var(--bubble-sub-button-justify-content, end);
     right: 8px;
     align-content: center;
     gap: 8px;
     align-items: center;
+}
+
+.bubble-sub-button-container.fixed-top {
+    align-self: flex-start;
+}
+
+.fixed-top .bubble-sub-button-container {
+    margin-top: 10px;
+}
+
+/* Group containers */
+.bubble-sub-button-group {
+    display: flex;
+    position: relative;
+    gap: 8px;
+    align-items: center;
+}
+
+.bubble-sub-button-group.position-top {
+    margin-top: 0;
+}
+
+.bubble-sub-button-group.position-bottom {
+    margin-top: 0;
+}
+
+.bubble-sub-button-bottom-container {
+    position: absolute;
+    display: flex;
+    justify-content: var(--bubble-sub-button-justify-content, end);
+    bottom: 0;
+    width: calc(100% - 16px);
+    margin: 0 8px 8px 8px;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.bubble-sub-button-bottom-container.with-main-buttons-bottom {
+    bottom: 44px;
+}
+
+.bubble-sub-button-bottom-container > * {
+    pointer-events: auto;
+}
+
+.bubble-sub-button-bottom-container .bubble-sub-button-group {
+    flex-grow: 1;
+}
+
+/* Display styles for groups */
+.bubble-sub-button-group.display-inline {
+    flex-direction: row;
+    justify-content: var(--bubble-sub-button-group-justify-content, end);
+}
+
+.bubble-sub-button-group.display-column {
+    flex-direction: column;
+    align-items: var(--bubble-sub-button-group-justify-content, end);
+    gap: 6px;
+}
+
+/* Group placement layout (rows vs inline) */
+.bubble-sub-button-container.groups-layout-rows,
+.bubble-sub-button-bottom-container.groups-layout-rows {
+    flex-direction: column;
+}
+.bubble-sub-button-container.groups-layout-inline,
+.bubble-sub-button-bottom-container.groups-layout-inline {
+    flex-direction: row;
+}
+
+/* When groups-layout-rows is active, each group spans full width by default */
+.groups-layout-rows .bubble-sub-button-group {
+    width: 100%;
 }
 
 .bubble-sub-button {
@@ -19,18 +93,81 @@
     box-sizing: border-box;
     width: min-content;
     min-width: 36px;
-    height: 36px;
+    height: var(--bubble-sub-button-height, 36px);
     vertical-align: middle;
     font-size: 12px;
-    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 32px));
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 18px));
     padding: 0 8px;
     white-space: nowrap;
     transition: all 0.5s ease-in-out;
     color: var(--primary-text-color);
 }
 
+.bubble-sub-button.fill-width {
+    flex-grow: 1;
+}
+
+.bubble-sub-button-group.display-column > .bubble-sub-button.fill-width {
+    width: 100%;
+}
+
+/* When a slider is inline, allow it to expand to fill width when requested */
+.bubble-sub-slider-wrapper.inline.fill-width {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.bubble-sub-button-slider.inline.fill-width {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+/* Hide only the host button content (icon + text) when inline slider is shown */
+.bubble-sub-button.inline-slider-host {
+    padding: 0;
+    min-width: 0;
+    display: none;
+}
+.bubble-sub-button.inline-slider-host > .bubble-sub-button-name-container,
+.bubble-sub-button.inline-slider-host > .bubble-sub-button-icon,
+.bubble-sub-button.inline-slider-host > .bubble-feedback-container,
+.bubble-sub-button.inline-slider-host > .bubble-dropdown-arrow {
+    display: none !important;
+}
+
 .bubble-sub-button-name-container {
     display: flex;
+    overflow: auto;
+}
+
+/* Content layout styles */
+.bubble-sub-button.content-icon-top {
+    flex-direction: column-reverse;
+    justify-content: center;
+}
+
+.bubble-sub-button.content-icon-bottom {
+    flex-direction: column;
+    justify-content: center;
+}
+
+.bubble-sub-button.content-icon-right {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.bubble-sub-button.content-icon-left {
+    flex-direction: row-reverse;
+    justify-content: center;
+}
+
+.content-icon-right .icon-with-state {
+    margin: 0 0 0 4px;
+}
+
+.content-icon-top .icon-with-state,
+.content-icon-bottom .icon-with-state {
+    margin: 0;
 }
 
 .show-icon {
@@ -78,18 +215,6 @@
     background: var(--bubble-select-arrow-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))))) !important;
 }
 
-.sub-buttons-grid .bubble-sub-button-container {
-    display: grid;
-    row-gap: calc( ( ( var(--row-height,56px) - 36px ) * var(--row-size,1) + var(--row-gap, 8px) * ( var(--row-size,1) - 1 ) ) / ( var(--row-size,1) + 1 ));
-    grid-template-rows: repeat(var(--row-size,1), 1fr);
-    grid-template-columns: repeat(1, 1fr);
-    grid-auto-flow: column;
-}
-
-.sub-buttons-grid .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
-    grid-row: 1 / calc(var(--row-size,1) + 1);
-}
-
 .rows-2 .bubble-sub-button-container {
     flex-direction: column;
     gap: 4px !important;
@@ -109,3 +234,197 @@
 .large.rows-2 .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
     grid-row: 1 / calc(2*var(--row-size,1) + 1);
 }
+
+/* Slider overlay wrapper: holds slider + close button and positions them relatively to card/group */
+.bubble-sub-slider-wrapper {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    width: calc(100% - 16px);
+    left: 8px;
+    right: 8px;
+    z-index: 2;
+    opacity: 1;
+    transition: all 0.2s ease-in-out;
+    transform: translateX(0);
+    /* Prevent browser from handling horizontal pan on mobile during drag */
+    touch-action: none;
+}
+
+/* The actual slider surface in overlay mode fills remaining space inside wrapper */
+.bubble-sub-slider-wrapper > .bubble-sub-button-slider {
+    position: relative;
+    flex: 1 1 auto;
+    height: 100%;
+    overflow: hidden;
+    border-radius: var(--bubble-sub-slider-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    background-color: var(--bubble-sub-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
+}
+
+/* Align wrapper vertically when overlay is card-level at top */
+.bubble-sub-slider-wrapper.top-aligned {
+    top: 7px;
+    bottom: auto;
+}
+
+/* Specific positioning for bottom containers to maintain existing behavior */
+.bubble-sub-button-bottom-container .bubble-sub-slider-wrapper {
+    width: 100%;
+    left: 0;
+    right: auto;
+}
+
+.bubble-sub-slider-close {
+    display: flex;
+    position: relative;
+    right: auto;
+    height: 36px;
+    width: 36px;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 3;
+    overflow: hidden;
+    box-sizing: border-box;
+    border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    background-color: var(--bubble-media-player-button-background-color);
+    transition: all 0.3s ease;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.bubble-sub-slider-close ha-icon {
+    --mdc-icon-size: 20px;
+    color: var(--primary-text-color);
+    line-height: normal;
+}
+
+.bubble-sub-button-slider .bubble-range-value {
+    display: flex;
+    justify-content: flex-end;
+    height: 36px;
+    align-items: center;
+    font-size: 12px;
+    opacity: 0.8;
+    z-index: 1;
+}
+
+.is-hidden {
+    opacity: 0 !important;
+    pointer-events: none;
+    transform: translateX(14px);
+}
+
+.bubble-icon-container.is-hidden,
+.bubble-main-icon-container.is-hidden {
+    transform: none;
+    transition: opacity 0.15s ease-in-out;
+}
+
+/* Prevent hidden close button from shifting outside and causing horizontal overflow */
+.bubble-sub-slider-close.is-hidden {
+    transform: none;
+}
+
+.bubble-sub-button-slider .bubble-range-fill {
+    height: 101%; /* Ensure the fill is not glitching */
+}
+
+.bubble-sub-button-slider .bubble-range-fill.slider-use-light-color {
+    opacity: 1;
+}
+
+.large .bubble-sub-slider-wrapper {
+    height: 36px;
+}
+.large .bubble-sub-slider-wrapper > .bubble-sub-button-slider {
+    border-radius: var(--bubble-sub-slider-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 18px));
+
+}
+
+.large .bubble-sub-button-slider .bubble-range-value {
+    place-items: center;
+    height: 36px;
+}
+
+/* Inline sub-slider mode (alwaysVisible): wrapper + slider sit inside sub-buttons row */
+.bubble-sub-slider-wrapper.inline {
+    position: relative;
+    left: 0;
+    width: auto;
+    height: var(--bubble-sub-slider-height, 36px);
+    transform: none;
+    z-index: 1;
+    touch-action: pan-y pinch-zoom;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+/* Custom width wrapper styles */
+.bubble-sub-slider-wrapper.inline.has-custom-width {
+    flex: 0 0 auto;
+}
+
+/* Slider container inline styles */
+.bubble-sub-button-slider.inline {
+    position: relative;
+    left: 0;
+    width: auto;
+    min-width: 96px;
+    height: var(--bubble-sub-slider-height, 36px);
+    transform: none;
+    opacity: 1;
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 18px));
+}
+
+/* Bottom section: container fills wrapper width */
+.bubble-sub-button-bottom-container .bubble-sub-button-slider.inline.has-custom-width,
+.bubble-sub-button-group.position-bottom .bubble-sub-button-slider.inline.has-custom-width {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Main section: container respects wrapper width when custom width is small */
+.bubble-sub-button-container .bubble-sub-button-slider.inline.has-custom-width,
+.bubble-sub-button-group.position-top .bubble-sub-button-slider.inline.has-custom-width,
+.bubble-sub-button-group:not(.position-bottom) .bubble-sub-button-slider.inline.has-custom-width {
+    min-width: var(--slider-container-min-width, 96px);
+}
+.bubble-sub-button-slider.inline.slider-container {
+    touch-action: pan-x pan-y pinch-zoom;
+}
+.bubble-sub-button-slider.inline .bubble-range-slider {
+    touch-action: pan-x pan-y pinch-zoom;
+}
+
+.bubble-sub-button-slider > .bubble-range-slider {
+    overflow: visible; /* Fix a slight visual glitch when border-radius is applied to the slider */
+}
+
+.bubble-sub-button-slider.inline .bubble-range-value {
+    height: var(--bubble-sub-slider-height, 36px);
+}
+
+/* Fade only group content when a group-owned slider is open */
+.bubble-sub-button-group.group-slider-open > *:not(.bubble-sub-slider-wrapper) {
+    opacity: 0.0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+}
+
+/* Also fade inline (alwaysVisible) sliders when a group overlay is open */
+.bubble-sub-button-group.group-slider-open > .bubble-sub-slider-wrapper.inline {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+}
+
+.element-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+

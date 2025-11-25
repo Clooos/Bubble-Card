@@ -1,4 +1,4 @@
-import { changeState, changeIcon, changeName, changeStatus } from "../../components/base-card/changes.js";
+import { changeState, changeName, changeStatus } from "../../components/base-card/changes.js";
 import { changeSubButtons } from "../../components/sub-button/changes.js";
 import {
     changeMediaInfo,
@@ -8,7 +8,8 @@ import {
     changePlayPauseIcon,
     changeMuteIcon,
     changePowerIcon,
-    changeStyle
+    changeStyle,
+    changeMediaIcon
 } from './changes.js';
 import { createStructure } from './create.js';
 
@@ -21,7 +22,7 @@ export function handleMediaPlayer(context) {
     changeName(context);
     changeMediaInfo(context);
     changeDisplayedInfo(context);
-    changeIcon(context);
+    changeMediaIcon(context);
     changeBackground(context);
     changeState(context);
     changeSlider(context);

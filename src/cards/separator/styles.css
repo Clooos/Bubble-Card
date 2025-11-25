@@ -43,3 +43,18 @@
 .large .bubble-container {
     height: calc( var(--row-height,44px) * var(--row-size,0.8) + var(--row-gap,8px) * ( var(--row-size,0.8) - 1 ))
 }
+
+.bubble-container.with-bottom-buttons {
+    align-items: flex-start;
+}
+
+.with-bottom-buttons .bubble-line {
+    margin-top: 15px;
+}
+
+.with-bottom-buttons .bubble-icon,
+.with-bottom-buttons .bubble-name,
+.with-bottom-buttons .bubble-line {
+    display: initial;
+    line-height: 36px;
+}

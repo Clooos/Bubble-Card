@@ -1,5 +1,5 @@
 export { createSubButtonStructure } from './create.js';
-export { updateSubButtons } from './changes.js';
+export { updateSubButtons, updateGroupButtons } from './changes.js';
 
 export function handleSubButtons(context, options = {}) {
   const subButtonContainer = createSubButtonStructure(context, options);

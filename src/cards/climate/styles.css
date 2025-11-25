@@ -49,9 +49,57 @@
     --mdc-icon-size: 16px;
 }
 
+.bubble-climate-temp-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
 @keyframes tap-warning {
     10%, 90% { transform: translateX(-1px); }
     20%, 80% { transform: translateX(1px); }
     30%, 50%, 70% { transform: translateX(-2px); }
     40%, 60% { transform: translateX(2px); }
+}
+
+/* Full width styles for climate buttons when in bottom position */
+
+.full-width > .bubble-temperature-container,
+.full-width > .bubble-target-temperature-container,
+.full-width .bubble-low-temp-container,
+.full-width .bubble-high-temp-container {
+    background-color: transparent;
+    gap: 8px;
+    flex: 1;
+}
+
+.full-width > .bubble-target-temperature-container {
+    display: flex;
+}
+
+.full-width .bubble-climate-minus-button,
+.full-width .bubble-climate-plus-button {
+    flex: 1;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    background-color: var(--bubble-main-buttons-background-color, var(--bubble-sub-button-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))))));
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 18px));
+}
+
+.full-width .bubble-climate-minus-button-icon,
+.full-width .bubble-climate-plus-button-icon {
+    --mdc-icon-size: 20px;
+}
+
+.full-width .bubble-climate-temp-display {
+    flex: 1;
+    height: 36px;
+    background-color: var(--bubble-main-buttons-background-color, var(--bubble-sub-button-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))))));
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 18px));
+    padding: 0;
 }

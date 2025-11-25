@@ -46,6 +46,8 @@ export function createStructure(context) {
     elements.volumeButton = createMediaButton("mdi:volume-high", 'bubble-volume-button');
     elements.powerButton = createMediaButton("mdi:power", 'bubble-power-button');
     elements.muteButton = createMediaButton("mdi:volume-off", 'bubble-mute-button is-hidden');
+    elements.volumeSliderMuteButton = createMediaButton("mdi:volume-high", 'bubble-volume-slider-mute-button');
+    elements.volumeSliderCloseButton = createMediaButton("mdi:close", 'bubble-volume-slider-close-button');
     
     elements.title = createElement('div', 'bubble-title');
     elements.artist = createElement('div', 'bubble-artist');
@@ -65,7 +67,10 @@ export function createStructure(context) {
         elements.playPauseButton
     );
 
-    elements.volumeSliderContainer = createElement('div', 'bubble-volume-slider is-hidden');
+    // Create wrapper for volume slider with mute and close buttons
+    elements.volumeSliderWrapper = createElement('div', 'bubble-volume-slider-wrapper is-hidden');
+    
+    elements.volumeSliderContainer = createElement('div', 'bubble-volume-slider');
     createSliderStructure(context, {
         targetElement: elements.volumeSliderContainer,
         sliderLiveUpdate: false,
@@ -73,16 +78,67 @@ export function createStructure(context) {
         holdToSlide: false
     });
 
-    elements.cardWrapper.appendChild(elements.volumeSliderContainer);
+    elements.volumeSliderWrapper.appendChild(elements.volumeSliderMuteButton);
+    elements.volumeSliderWrapper.appendChild(elements.volumeSliderContainer);
+    elements.volumeSliderWrapper.appendChild(elements.volumeSliderCloseButton);
+    elements.cardWrapper.appendChild(elements.volumeSliderWrapper);
 
-    elements.volumeButton.addEventListener('click', () => {
-        elements.volumeSliderContainer.classList.toggle('is-hidden');
-        elements.muteButton.classList.toggle('is-hidden');
-        elements.icon.classList.toggle('is-hidden');
-        elements.image.classList.toggle('is-hidden');
-        changeVolumeIcon(context);
+    // Prevent clicks inside the slider from bubbling up (so outside handler doesn't close it)
+    if (!elements._volumeStopPropAdded) {
+        const stop = (ev) => ev.stopPropagation();
+        ['pointerdown', 'pointermove', 'touchstart', 'touchmove', 'mousedown', 'mousemove', 'click'].forEach(evt => {
+            elements.volumeSliderWrapper.addEventListener(evt, stop, { passive: false });
+        });
+        elements._volumeStopPropAdded = true;
+    }
+
+    // Helper to close the volume slider from anywhere
+    function closeVolumeSlider() {
+        if (elements.volumeSliderWrapper.classList.contains('is-hidden')) return;
+        const isBottomFixed = elements.buttonsContainer?.classList.contains('bottom-fixed');
+        
+        elements.volumeSliderWrapper.classList.add('is-hidden');
+        
+        if (isBottomFixed) {
+            // In bottom mode, only show buttons container
+            elements.buttonsContainer.classList.remove('is-hidden');
+        } else {
+            // In normal mode, restore icon/image and mute button
+            elements.muteButton.classList.add('is-hidden');
+            changeVolumeIcon(context);
+        }
+    }
+
+    elements.volumeButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isBottomFixed = elements.buttonsContainer?.classList.contains('bottom-fixed');
+        
+        elements.volumeSliderWrapper.classList.toggle('is-hidden');
+        
+        if (isBottomFixed) {
+            // In bottom mode, only hide buttons container
+            elements.buttonsContainer.classList.toggle('is-hidden');
+        } else {
+            // In normal mode, toggle mute button and update opacity of other elements
+            elements.muteButton.classList.toggle('is-hidden');
+            changeVolumeIcon(context);
+        }
     });
     addFeedback(elements.volumeButton, elements.volumeButton.feedback);
+
+    // Close volume slider when clicking outside
+    if (!elements._volumeOutsideListenerAdded) {
+        const outsideHandler = (ev) => {
+            if (elements.volumeSliderWrapper.classList.contains('is-hidden')) return;
+            const target = ev.target;
+            if (elements.volumeSliderWrapper.contains(target)) return;
+            if (elements.volumeButton && elements.volumeButton.contains(target)) return;
+            closeVolumeSlider();
+        };
+        document.addEventListener('click', outsideHandler, { passive: true });
+        elements._volumeOutsideListenerAdded = true;
+        elements._volumeOutsideHandler = outsideHandler;
+    }
 
     elements.powerButton.addEventListener('click', () => {
         const state = getState(context);
@@ -93,23 +149,29 @@ export function createStructure(context) {
     });
     addFeedback(elements.powerButton, elements.powerButton.feedback);
 
-    elements.muteButton.addEventListener('pointerdown', (event) => {
-        event.stopPropagation();
-        const isVolumeMuted = getAttribute(context, "is_volume_muted") === true;
-        context._hass.callService('media_player', 'volume_mute', {
-            entity_id: context.config.entity,
-            is_volume_muted: !isVolumeMuted
-        });
-        elements.muteButton.clicked = true;
-    });
-
-    // Avoid propagation on all touch events
-    ['click', 'touchstart', 'touchend', 'pointerup', 'pointercancel'].forEach(eventType => {
-        elements.muteButton.addEventListener(eventType, (event) => {
+    // Setup mute button event handlers (original position)
+    const setupMuteButtonEvents = (button) => {
+        button.addEventListener('pointerdown', (event) => {
             event.stopPropagation();
+            const isVolumeMuted = getAttribute(context, "is_volume_muted") === true;
+            context._hass.callService('media_player', 'volume_mute', {
+                entity_id: context.config.entity,
+                is_volume_muted: !isVolumeMuted
+            });
+            button.clicked = true;
         });
-    });
-    addFeedback(elements.muteButton, elements.muteButton.feedback);
+
+        // Avoid propagation on all touch events
+        ['click', 'touchstart', 'touchend', 'pointerup', 'pointercancel'].forEach(eventType => {
+            button.addEventListener(eventType, (event) => {
+                event.stopPropagation();
+            });
+        });
+        addFeedback(button, button.feedback);
+    };
+    
+    setupMuteButtonEvents(elements.muteButton);
+    setupMuteButtonEvents(elements.volumeSliderMuteButton);
 
     elements.previousButton.addEventListener('click', () => {
         context._hass.callService('media_player', 'media_previous_track', {
@@ -133,6 +195,13 @@ export function createStructure(context) {
         elements.playPauseButton.clicked = true;
     });
     addFeedback(elements.playPauseButton, elements.playPauseButton.feedback);
+
+    // Setup close button event handler
+    elements.volumeSliderCloseButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        closeVolumeSlider();
+    });
+    addFeedback(elements.volumeSliderCloseButton, elements.volumeSliderCloseButton.feedback);
 
     elements.mainContainer.addEventListener('click', () => forwardHaptic("selection"));
 

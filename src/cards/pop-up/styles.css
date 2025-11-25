@@ -16,13 +16,9 @@
     --row-size: 1;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
-    overflow: visible; 
+    overflow: auto; 
     grid-auto-rows: min-content;
     padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
-}
-
-.bubble-pop-up-container.is-scrollable {
-    overflow: auto;
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
 }
@@ -61,6 +57,7 @@
     backdrop-filter: var(--custom-popup-filter);
     -webkit-backdrop-filter: var(--custom-popup-filter);
     border: var(--bubble-pop-up-border, var(--bubble-border, none));
+    contain: layout paint;
 }
 
 .bubble-pop-up-container::-webkit-scrollbar {
@@ -74,6 +71,7 @@
 .is-popup-closed { 
     transform: translateY(100%);
     box-shadow: none !important;
+    contain: layout paint;
 }
 
 @media only screen and (min-width: 600px) {
@@ -107,6 +105,27 @@
     height: auto !important;
     min-width: auto;
     z-index: 0 !important;
+}
+
+.bubble-pop-up.is-opening,
+.bubble-pop-up.is-closing {
+    will-change: transform;
+}
+
+/* Optimize performance during open/close transitions */
+.bubble-pop-up.is-opening .bubble-pop-up-container,
+.bubble-pop-up.is-closing .bubble-pop-up-container {
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.bubble-pop-up.is-opening .bubble-pop-up-background,
+.bubble-pop-up.is-closing .bubble-pop-up-background {
+    will-change: transform, backdrop-filter;
+    transform: translateZ(0);
+    contain: layout paint;
 }
 
 .bubble-header-container {
@@ -188,6 +207,10 @@
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+}
+
+.editor * {
+    transition: none !important;
 }
 
 .no-header .bubble-header-container {

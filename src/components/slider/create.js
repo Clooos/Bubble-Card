@@ -1,66 +1,22 @@
 import { 
-  throttle, 
-  forwardHaptic, 
   createElement,
   isEntityType,
-  getAttribute,
   isStateOn,
-  getState
+  forwardHaptic,
+  throttle
 } from '../../tools/utils.js';
-import { updateEntity, onSliderChange } from './changes.js';
+import { onSliderChange, updateEntity } from './changes.js';
 import { defaultOptions } from './index.js';
 import styles from './styles.css';
-
-function getEntityMinValue(context, state) {
-  if (context.config.min_value !== undefined) return parseFloat(context.config.min_value);
-  // Support for media player volume min/max
-  const entityType = state.entity_id.split('.')[0];
-  if (entityType === 'media_player' && context.config.min_volume !== undefined) {
-    return parseFloat(context.config.min_volume);
-  }
-  if (entityType === 'climate') return state.attributes.min_temp ?? 0;
-  return state.attributes.min ?? 0;
-}
-
-function getEntityMaxValue(context, state) {
-  if (context.config.max_value !== undefined) return parseFloat(context.config.max_value);
-  // Support for media player volume min/max
-  const entityType = state.entity_id.split('.')[0];
-  if (entityType === 'media_player' && context.config.max_volume !== undefined) {
-    return parseFloat(context.config.max_volume);
-  }
-  if (entityType === 'climate') return state.attributes.max_temp ?? 100;
-  return state.attributes.max ?? 100;
-}
-
-function getEntityStep(context, state) {
-  if (context.config.step !== undefined) return parseFloat(context.config.step);
-  const entityType = state.entity_id.split('.')[0];
-  switch (entityType) {
-    case 'input_number':
-    case 'number':
-      return state.attributes.step ?? 1;
-    case 'fan':
-      return state.attributes.percentage_step ?? 1;
-    case 'climate': {      
-      const isCelcius = context._hass.config.unit_system.temperature === '°C';
-      return state.attributes.target_temp_step ?? (isCelcius ? 0.5 : 1);
-    }
-    case 'media_player':
-      return 0.01;
-    case 'cover':
-      return 1;
-    case 'light':
-        return 1; 
-    default:
-      return 1;
-  }
-}
-
-function getAdjustedValue(value, step) {
-  if (step <= 0) return value; // Avoid division by zero or infinite loops
-  return Math.round(value / step) * step;
-}
+import {
+  getEntityMinValue,
+  getEntityMaxValue,
+  getEntityStep,
+  getCurrentPercentage,
+  clampPercentage,
+  formatDisplayValue,
+  formatDisplayValueFromEntity
+} from './helpers.js';
 
 export function createSliderStructure(context, config = {}) {
   const options = { 
@@ -109,175 +65,101 @@ export function createSliderStructure(context, config = {}) {
     context.elements.rangeSlider.appendChild(style);
   }
 
-  function calculateRangePercentage(value, minValue, maxValue) {
-    if (maxValue <= minValue) return 0; // Avoid division by zero or negative
-    // Clamp value before calculating percentage
-    const clampedValue = Math.max(minValue, Math.min(maxValue, value));
-    return 100 * (clampedValue - minValue) / (maxValue - minValue);
+  const lightSliderType = context?.config?.light_slider_type;
+  const isColorMode = entityType === 'light' && ['hue', 'saturation', 'white_temp'].includes(lightSliderType);
+
+  if (isColorMode) {
+    context.elements.rangeSlider.classList.add('is-color-slider');
+    context.elements.rangeSlider.classList.add(`is-color-${lightSliderType}`);
+    context.elements.colorTrack = createElement('div', 'bubble-color-track');
+    context.elements.colorCursor = createElement('div', 'bubble-color-cursor');
+    context.elements.rangeSlider.appendChild(context.elements.colorTrack);
+    context.elements.rangeSlider.appendChild(context.elements.colorCursor);
+
+    function updateColorTrackBackground() {
+      if (!context?.elements?.colorTrack) return;
+      if (lightSliderType === 'hue') {
+        const hs = context._hass.states[context.config.entity]?.attributes?.hs_color || [];
+        const sat = Number(hs[1] ?? 100);
+        const effectiveSat = sat < 10 ? 100 : sat;
+        context.elements.colorTrack.style.background = `linear-gradient(90deg, hsl(0 ${effectiveSat}% 50%), hsl(60 ${effectiveSat}% 50%), hsl(120 ${effectiveSat}% 50%), hsl(180 ${effectiveSat}% 50%), hsl(240 ${effectiveSat}% 50%), hsl(300 ${effectiveSat}% 50%), hsl(360 ${effectiveSat}% 50%))`;
+      } else if (lightSliderType === 'saturation') {
+        const hs = context._hass.states[context.config.entity]?.attributes?.hs_color || [];
+        const hue = Number(hs[0] ?? 180);
+        context.elements.colorTrack.style.background = `linear-gradient(90deg, hsl(${hue} 0% 50%), hsl(${hue} 100% 50%))`;
+      } else if (lightSliderType === 'white_temp') {
+        // Cool (left) to Warm (right)
+        context.elements.colorTrack.style.background = 'linear-gradient(90deg, #d2e7ff, #f3f7ff 35%, #fff1e0 65%, #ffb56b)';
+      }
+    }
+
+    function updateColorCursorIndicator(percentage) {
+      if (!context?.elements?.colorCursor) return;
+      
+      let currentColor = '#000000'; // Default fallback
+      
+      if (lightSliderType === 'hue') {
+        const hs = context._hass.states[context.config.entity]?.attributes?.hs_color || [];
+        const sat = Number(hs[1] ?? 100);
+        const effectiveSat = sat < 10 ? 100 : sat;
+        const hue = (percentage / 100) * 360;
+        currentColor = `hsl(${hue}, ${effectiveSat}%, 50%)`;
+      } else if (lightSliderType === 'saturation') {
+        const hs = context._hass.states[context.config.entity]?.attributes?.hs_color || [];
+        const hue = Number(hs[0] ?? 180);
+        const saturation = percentage;
+        currentColor = `hsl(${hue}, ${saturation}%, 50%)`;
+      } else if (lightSliderType === 'white_temp') {
+        const temp = percentage / 100;
+        if (temp < 0.35) {
+          currentColor = '#d2e7ff'; // Cool blue
+        } else if (temp < 0.65) {
+          currentColor = '#fff1e0'; // Neutral white
+        } else {
+          currentColor = '#ffb56b'; // Warm orange
+        }
+      }
+      
+      // Apply the color to the cursor indicator
+      context.elements.colorCursor.style.setProperty('--bubble-color-cursor-indicator-color', currentColor);
+    }
+
+    updateColorTrackBackground();
+    context.updateColorTrackBackground = updateColorTrackBackground;
+    context.updateColorCursorIndicator = updateColorCursorIndicator;
   }
 
   function calculateInitialPercentage() {
-    let initialPercentage = 0;
-    const entity = context.config.entity;
-
-    const entityType = entity?.split('.')[0];
-
-    // Early return for percentage-based sensors
-    if (entityType === 'sensor' && getAttribute(context, "unit_of_measurement", entity) === "%") {
-      return getState(context, entity);
-    }
-
-    switch (entityType) {
-      case 'light':
-        initialPercentage = 100 * getAttribute(context, "brightness", entity) / 255;
-        break;
-
-      case 'media_player':
-        if (isStateOn(context, entity)) {
-          // Volume is 0-1, but slider/percentage is 0-100
-          initialPercentage = 100 * (getAttribute(context, "volume_level", entity) ?? 0);
-        }
-        break;
-
-      case 'cover': { 
-        // Covers are usually 0-100, use effective min/max
-        const value = parseFloat(getAttribute(context, "current_position", entity) ?? 0);
-        initialPercentage = calculateRangePercentage(value, context.sliderMinValue, context.sliderMaxValue);
-        break;
-      }
-
-      case 'input_number':
-      case 'number': {
-        const value = parseFloat(getState(context, entity));
-        initialPercentage = calculateRangePercentage(value, context.sliderMinValue, context.sliderMaxValue);
-        break;
-      }
-
-      case 'fan':
-        if (isStateOn(context, entity)) {
-          // Fans are usually 0-100, use effective min/max
-          const value = parseFloat(getAttribute(context, "percentage", entity) ?? 0);
-          initialPercentage = calculateRangePercentage(value, context.sliderMinValue, context.sliderMaxValue);
-        }
-        break;
-
-      case 'climate':
-        if (isStateOn(context, entity)) {
-          const temp = parseFloat(getAttribute(context, "temperature", entity));
-          if (!isNaN(temp)) {
-             initialPercentage = calculateRangePercentage(temp, context.sliderMinValue, context.sliderMaxValue);
-          }
-        }
-        break;
-
-      default:
-        // Handle generic case using state and effective min/max
-        if (context.sliderMinValue !== undefined && context.sliderMaxValue !== undefined) {
-          const value = parseFloat(getState(context, entity));
-           if (!isNaN(value)) {
-             initialPercentage = calculateRangePercentage(value, context.sliderMinValue, context.sliderMaxValue);
-           }
-        }
-    }
-    
-    // Ensure percentage is always between 0 and 100
-    return Math.max(0, Math.min(100, initialPercentage));
+    return getCurrentPercentage(context);
   }
 
   function calculateVisualPercentage(initialPercentage) {
-    return Math.max(0, Math.min(100, initialPercentage));
+    return clampPercentage(initialPercentage);
   }
 
   function updateValueDisplay(percentage) {
     if (!context.elements.rangeValue) return;
     
-    const entityType = context.config.entity?.split('.')[0];
-    
-    switch (entityType) {
-      case 'climate':
-        if (isStateOn(context, context.config.entity)) {
-          const minValue = context.sliderMinValue;
-          const maxValue = context.sliderMaxValue;
-          const climateStep = context.sliderStep;
-          
-          const temperature = minValue + (percentage / 100) * (maxValue - minValue);
-          // Display the value adjusted to the step
-          const adjustedTempValue = getAdjustedValue(temperature, climateStep);
-          // Clamp display value to min/max bounds
-          const clampedTempValue = Math.max(minValue, Math.min(maxValue, adjustedTempValue));
-          
-          const isCelcius = context._hass.config.unit_system.temperature === '°C';
-          const entityState = context._hass.states[context.config.entity];
-          const step = context.config.step || (entityState?.attributes.target_temp_step) || (isCelcius ? 0.5 : 1);
-          const adjustedTemp = Math.round(temperature / step) * step;
-          context.elements.rangeValue.innerText = clampedTempValue.toFixed(1).replace(/\.0$/, '') + (isCelcius ? '°C' : '°F');
-        } else {
-          // If climate is off, show a default or placeholder
-          context.elements.rangeValue.innerText = context._hass.localize('state.default.off');
-        }
-        break;
-
-      case 'number':
-      case 'input_number':
-        const minValue = context.sliderMinValue;
-        const maxValue = context.sliderMaxValue;
-        const step = context.sliderStep;
-        const actualValue = minValue + (percentage / 100) * (maxValue - minValue);
-        
-        // Display the value adjusted to the step
-        const adjustedValue = getAdjustedValue(actualValue, step);
-        // Clamp display value to min/max bounds
-        const clampedAdjustedValue = Math.max(minValue, Math.min(maxValue, adjustedValue));
-
-        const unit = getAttribute(context, "unit_of_measurement", context.config.entity) || '';
-        // Use precision from entity state if available, default to 1 decimal if not integer
-        const precision = context._hass.states[context.config.entity]?.attributes?.precision ?? (Number.isInteger(clampedAdjustedValue) ? 0 : 1);
-        context.elements.rangeValue.innerText = clampedAdjustedValue.toFixed(precision).replace(/\.0$/, '') + (unit ? ` ${unit}` : '');
-        break;
-
-      default:
-        // For other types (like light brightness % or fan %)
-        const currentMinValue = context.sliderMinValue; // Typically 0 for these unless overridden
-        const currentMaxValue = context.sliderMaxValue; // Typically 100 for these unless overridden
-        const currentStep = context.sliderStep; // Typically 1 for these unless overridden
-        
-        let displayValue = currentMinValue + (percentage / 100) * (currentMaxValue - currentMinValue);
-
-        // Display the value adjusted to the step
-        const adjustedDisplayValue = getAdjustedValue(displayValue, currentStep);
-        // Clamp display value to min/max bounds
-        const clampedDisplayValue = Math.max(currentMinValue, Math.min(currentMaxValue, adjustedDisplayValue));
-
-        // Assuming percentage display for defaults like light/fan
-        context.elements.rangeValue.innerText = Math.round(clampedDisplayValue) + '%';
-    }
+    context.elements.rangeValue.textContent = formatDisplayValue(context, percentage);
   }
 
-  if (options.withValueDisplay) {
+  // Initialize initial visual state once
+  const initialPercentage = calculateVisualPercentage(calculateInitialPercentage());
+  if (options.withValueDisplay && !isColorMode) {
     context.elements.rangeValue = createElement('div', 'bubble-range-value');
     context.elements.rangeSlider.appendChild(context.elements.rangeValue);
-    
-    const initialPercentage = calculateInitialPercentage();
-    const visualPercentage = calculateVisualPercentage(initialPercentage);
-    
-    if (isEntityType(context, "climate", context.config.entity)) {
-      if (isStateOn(context, context.config.entity)) {
-        updateValueDisplay(visualPercentage);
-      } else {
-        context.elements.rangeValue.innerText = '0%';
-      }
-      context.elements.rangeFill.style.transform = `translateX(${visualPercentage}%)`;
-      context.elements.rangeValue.style.display = '';
-    } else {
-      updateValueDisplay(visualPercentage);
-      context.elements.rangeValue.style.display = '';
-      context.elements.rangeFill.style.transform = `translateX(${visualPercentage}%)`;
+    context.elements.rangeValue.classList.add('is-visible');
+    // Use entity value for accurate initial display
+    context.elements.rangeValue.textContent = formatDisplayValueFromEntity(context);
+  }
+  if (isColorMode && context.elements.colorCursor) {
+    context.elements.colorCursor.style.left = `${initialPercentage}%`;
+    // Update the cursor indicator color based on initial position
+    if (typeof context.updateColorCursorIndicator === 'function') {
+      context.updateColorCursorIndicator(initialPercentage);
     }
   } else {
-    const initialPercentage = calculateInitialPercentage();
-    const visualPercentage = calculateVisualPercentage(initialPercentage);
-    
-    context.elements.rangeFill.style.transform = `translateX(${visualPercentage}%)`;
+    context.elements.rangeFill.style.transform = `translateX(${initialPercentage}%)`;
   }
 
   context.elements.rangeSlider.appendChild(context.elements.rangeFill);
@@ -289,12 +171,134 @@ export function createSliderStructure(context, config = {}) {
   }
 
   if (options.targetElement) {
-    options.targetElement.style.cursor = 'ew-resize';
+    options.targetElement.classList.add('slider-container');
+    if (options.holdToSlide && !context.config.tap_to_slide) {
+      options.targetElement.classList.add('slider-hold-focus');
+    }
   }
 
+  const listenerOptions = { passive: false };
   let initialTouchX = 0;
+  let initialTouchY = 0;
   let initialSliderX = 0;
   let draggingTimeout = null;
+  let isScrollIntent = false;
+  const scrollThreshold = 10; // pixels threshold to determine scroll vs slider intent
+  const horizontalIntentThreshold = 4; // pixels threshold to lock into horizontal sliding
+  let sliderRectCache = null;
+  let hasHorizontalIntent = false;
+  let touchLockActive = false;
+
+  function getSliderRect() {
+    if (!sliderRectCache) {
+      sliderRectCache = context.elements.rangeSlider.getBoundingClientRect();
+    }
+    return sliderRectCache;
+  }
+
+  function resetSliderRectCache() {
+    sliderRectCache = null;
+  }
+
+  function resetGestureIntent() {
+    isScrollIntent = false;
+    hasHorizontalIntent = false;
+  }
+
+  function lockTouchActions() {
+    if (touchLockActive) return;
+    touchLockActive = true;
+    options.targetElement.classList.add('is-touching');
+    if (context.elements.rangeSlider) {
+      context.elements.rangeSlider.classList.add('is-touching');
+    }
+  }
+
+  function unlockTouchActions() {
+    if (!touchLockActive) return;
+    touchLockActive = false;
+    options.targetElement.classList.remove('is-touching');
+    if (context.elements.rangeSlider) {
+      context.elements.rangeSlider.classList.remove('is-touching');
+    }
+  }
+
+  // Safely get pageX from event (handles pointer, touchstart/touchmove, and touchend events)
+  function getEventPageX(event) {
+    if (event.pageX !== undefined) return event.pageX;
+    // For touchend events, use changedTouches instead of touches
+    if (event.changedTouches && event.changedTouches[0]) {
+      return event.changedTouches[0].pageX;
+    }
+    if (event.touches && event.touches[0]) {
+      return event.touches[0].pageX;
+    }
+    // Fallback to clientX if available
+    if (event.clientX !== undefined) return event.clientX;
+    return 0;
+  }
+
+  // Safely get pageY from event (handles pointer, touchstart/touchmove, and touchend events)
+  function getEventPageY(event) {
+    if (event.pageY !== undefined) return event.pageY;
+    // For touchend events, use changedTouches instead of touches
+    if (event.changedTouches && event.changedTouches[0]) {
+      return event.changedTouches[0].pageY;
+    }
+    if (event.touches && event.touches[0]) {
+      return event.touches[0].pageY;
+    }
+    // Fallback to clientY if available
+    if (event.clientY !== undefined) return event.clientY;
+    return 0;
+  }
+
+  function releasePointerCaptureSafely(event) {
+    if (typeof event?.pointerId !== 'number') return;
+    try {
+      if (
+        typeof options.targetElement.hasPointerCapture === 'function' &&
+        options.targetElement.hasPointerCapture(event.pointerId)
+      ) {
+        options.targetElement.releasePointerCapture(event.pointerId);
+      }
+    } catch (_) {}
+  }
+
+  function detachPointerListeners() {
+    options.targetElement.removeEventListener('pointermove', onPointerMove, listenerOptions);
+    window.removeEventListener('pointermove', onPointerMove, listenerOptions);
+    window.removeEventListener('pointerup', onPointerUp, listenerOptions);
+    window.removeEventListener('touchmove', onPointerMove, listenerOptions);
+    window.removeEventListener('touchend', onPointerUp, listenerOptions);
+  }
+
+  function attachPointerListeners() {
+    options.targetElement.addEventListener('pointermove', onPointerMove, listenerOptions);
+    window.addEventListener('pointermove', onPointerMove, listenerOptions);
+    window.addEventListener('pointerup', onPointerUp, listenerOptions);
+    window.addEventListener('touchmove', onPointerMove, listenerOptions);
+    window.addEventListener('touchend', onPointerUp, listenerOptions);
+  }
+
+  // Detect if user intends to scroll vertically instead of using slider
+  function detectScrollIntent(e) {
+    if (hasHorizontalIntent) return false;
+
+    const currentX = getEventPageX(e);
+    const currentY = getEventPageY(e);
+    
+    const deltaX = Math.abs(currentX - initialTouchX);
+    const deltaY = Math.abs(currentY - initialTouchY);
+
+    if (deltaX >= horizontalIntentThreshold) {
+      hasHorizontalIntent = true;
+      return false;
+    }
+    
+    // Treat as scroll only when vertical intent clearly dominates and no horizontal drag intent detected
+    return deltaY > scrollThreshold && deltaX < horizontalIntentThreshold;
+  }
 
   // Prevent conflicts with HA sidebar swipe (especially on iOS app)
   function isSidebarSwipeStart(e) {
@@ -306,18 +310,40 @@ export function createSliderStructure(context, config = {}) {
     } catch (_) {}
 
     // Detect left-edge swipe gesture
-    const clientX = (e.clientX !== undefined)
-      ? e.clientX
-      : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-    const isTouch = (e.pointerType === 'touch') || !!e.touches;
+    let clientX = e.clientX;
+    if (clientX === undefined) {
+      // For touchend events, use changedTouches instead of touches
+      if (e.changedTouches && e.changedTouches[0]) {
+        clientX = e.changedTouches[0].clientX;
+      } else if (e.touches && e.touches[0]) {
+        clientX = e.touches[0].clientX;
+      } else {
+        clientX = 0;
+      }
+    }
+    const isTouch = (e.pointerType === 'touch') || !!e.touches || !!e.changedTouches;
     const NEAR_LEFT_EDGE_PX = 30;
     return isTouch && clientX <= NEAR_LEFT_EDGE_PX;
   }
 
   function onPointerMove(e) {
+    // Check if this is scroll intent - if so, don't interfere with scrolling
+    if (detectScrollIntent(e)) {
+      unlockTouchActions();
+      isScrollIntent = true;
+      hasHorizontalIntent = false;
+      releasePointerCaptureSafely(e);
+      detachPointerListeners();
+      options.targetElement.classList.remove('is-dragging');
+      context.dragging = false;
+      window.isScrolling = false;
+      resetSliderRectCache();
+      return;
+    }
+
     e.stopPropagation();
     // Do not block multi-touch gestures like pinch-to-zoom
-    if (!(e.touches && e.touches.length > 1)) {
+    if (!(e.touches && e.touches.length > 1) && e.cancelable) {
       e.preventDefault();
     }
 
@@ -325,11 +351,20 @@ export function createSliderStructure(context, config = {}) {
 
     window.isScrolling = true;
 
-    const rangedPercentage = onSliderChange(context, calculateMoveX(e));
+    const rangedPercentage = onSliderChange(context, calculateMoveX(e), false, getSliderRect());
 
-    if (isEntityType(context, "climate", context.config.entity)) {
-      throttledUpdateEntity(context, rangedPercentage);
-    } else if (options.sliderLiveUpdate) {
+    if (isColorMode && context.elements.colorCursor) {
+      context.elements.colorCursor.style.left = `${rangedPercentage}%`;
+      if (lightSliderType === 'saturation' && typeof context.updateColorTrackBackground === 'function') {
+        context.updateColorTrackBackground();
+      }
+      // Update the cursor indicator color based on current position
+      if (typeof context.updateColorCursorIndicator === 'function') {
+        context.updateColorCursorIndicator(rangedPercentage);
+      }
+    }
+
+    if (options.sliderLiveUpdate) {
       throttledUpdateEntity(context, rangedPercentage);
     }
 
@@ -337,7 +372,7 @@ export function createSliderStructure(context, config = {}) {
   }
 
   function calculateMoveX(event) {
-    const moveX = event.pageX || (event.touches ? event.touches[0].pageX : 0);
+    const moveX = getEventPageX(event);
 
     if (!options.relativeSlide) {
       return moveX;
@@ -348,17 +383,26 @@ export function createSliderStructure(context, config = {}) {
   }
 
   function onPointerUp(e) {
+    // If scroll intent was detected, don't process slider logic
+    if (isScrollIntent) {
+      unlockTouchActions();
+      resetGestureIntent();
+      resetSliderRectCache();
+      return;
+    }
+
     e.stopPropagation();
     if (!(e.touches && e.touches.length > 1)) {
       e.preventDefault();
     }
+    releasePointerCaptureSafely(e);
     
     if (draggingTimeout) {
       clearTimeout(draggingTimeout);
     }
 
-    const moveX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-    const finalPercentage = onSliderChange(context, calculateMoveX(e), true);
+    const moveX = getEventPageX(e);
+    const finalPercentage = onSliderChange(context, calculateMoveX(e), true, getSliderRect());
 
     if (Math.abs(moveX - initialTouchX) > 5) {
       e.preventDefault();
@@ -366,10 +410,18 @@ export function createSliderStructure(context, config = {}) {
     }
 
     options.targetElement.classList.remove('is-dragging');
-    options.targetElement.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('pointerup', onPointerUp);
-    window.removeEventListener('touchmove', onPointerMove);
-    window.removeEventListener('touchend', onPointerUp);
+    detachPointerListeners();
+    resetGestureIntent();
+    resetSliderRectCache();
+    unlockTouchActions();
+
+    if (isColorMode && context.elements.colorCursor) {
+      context.elements.colorCursor.style.left = `${finalPercentage}%`;
+      // Update the cursor indicator color based on final position
+      if (typeof context.updateColorCursorIndicator === 'function') {
+        context.updateColorCursorIndicator(finalPercentage);
+      }
+    }
 
     if (isEntityType(context, "climate", context.config.entity) && !isStateOn(context, context.config.entity)) {
       context._hass.callService('climate', 'turn_on', {
@@ -386,22 +438,11 @@ export function createSliderStructure(context, config = {}) {
     forwardHaptic("selection");
     updateValueDisplay(finalPercentage);
 
-    const allElements = options.targetElement.querySelectorAll('*');
-    allElements.forEach(element => {
-      if (element !== context.elements.rangeFill 
-          && element !== context.elements.rangeSlider 
-          && options.holdToSlide 
-          && !context.config.tap_to_slide
-      ) {
-        element.style.transition = 'opacity 0.3s ease-in-out';
-        element.style.pointerEvents = null;
-        element.style.opacity = null;
-        
-        if (context.elements.rangeValue) {
-          context.elements.rangeValue.style.display = 'none';
-        }
+    if (options.holdToSlide && !context.config.tap_to_slide) {
+      if (context.elements.rangeValue && !options.persistentValueDisplay) {
+        context.elements.rangeValue.classList.remove('is-visible');
       }
-    });
+    }
 
     draggingTimeout = setTimeout(() => {
       if (context) {
@@ -412,43 +453,64 @@ export function createSliderStructure(context, config = {}) {
   }
 
   function setupRangeValueDisplay(rangedPercentage) {
+    if (isColorMode) return; // Do not display value for color sliders
     if (!context.elements.rangeValue) {
       context.elements.rangeValue = createElement('div', 'bubble-range-value');
       context.elements.rangeSlider.appendChild(context.elements.rangeValue);
       updateValueDisplay(rangedPercentage);
     }
-    context.elements.rangeValue.style.display = '';
+    context.elements.rangeValue.classList.add('is-visible');
   }
 
   function calculateInitialX(event) {
-    initialTouchX = event.pageX || (event.touches ? event.touches[0].pageX : 0);
+    initialTouchX = getEventPageX(event);
+    initialTouchY = getEventPageY(event);
+    resetGestureIntent();
 
     if (!options.relativeSlide) {
       return initialTouchX;
     }
 
     const initialPercentage = calculateVisualPercentage(calculateInitialPercentage());
-    const sliderRect = context.elements.rangeSlider.getBoundingClientRect();
+    const sliderRect = getSliderRect();
     initialSliderX = sliderRect.left + (sliderRect.width * initialPercentage / 100);
     return initialSliderX;
   }
 
   function handleLongPress(e) {
-    if (isSidebarSwipeStart(e)) return;
-    options.targetElement.setPointerCapture(e.pointerId);
+    if (isSidebarSwipeStart(e)) {
+      unlockTouchActions();
+      return;
+    }
+    // Some browsers (older iOS Safari) may throw here; fail gracefully
+    try { options.targetElement.setPointerCapture(e.pointerId); } catch (_) {}
     
-    if (context.card && context.card.classList.contains('is-unavailable')) return;
+    if (context.card && context.card.classList.contains('is-unavailable')) {
+      unlockTouchActions();
+      return;
+    }
 
     context.dragging = true;
     window.isScrolling = true;
-    initialTouchX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+    initialTouchX = getEventPageX(e);
+    initialTouchY = getEventPageY(e);
+    resetGestureIntent();
+    resetSliderRectCache();
 
     let rangedPercentage = 0;
     if (isEntityType(context, "climate") && !isStateOn(context, context.config.entity)) {
       rangedPercentage = 0;
-      context.elements.rangeFill.style.transform = `translateX(${rangedPercentage}%)`;
+      if (isColorMode && context.elements.colorCursor) {
+        context.elements.colorCursor.style.transform = `translateX(${rangedPercentage}%)`;
+        // Update the cursor indicator color based on position
+        if (typeof context.updateColorCursorIndicator === 'function') {
+          context.updateColorCursorIndicator(rangedPercentage);
+        }
+      } else {
+        context.elements.rangeFill.style.transform = `translateX(${rangedPercentage}%)`;
+      }
     } else {
-      rangedPercentage = onSliderChange(context, calculateInitialX(e))
+      rangedPercentage = onSliderChange(context, calculateInitialX(e), false, getSliderRect());
     }
 
     setupRangeValueDisplay(rangedPercentage);
@@ -460,26 +522,14 @@ export function createSliderStructure(context, config = {}) {
     options.targetElement.classList.add('slider-appear-animation');
     forwardHaptic("selection");
 
-    const allElements = options.targetElement.querySelectorAll('*');
-    allElements.forEach(element => {
-      if (element !== context.elements.rangeFill && element !== context.elements.rangeSlider && element !== context.elements.rangeValue) {
-        element.style.transition = 'opacity 0.3s ease-in-out';
-        element.style.pointerEvents = 'none';
-        element.style.opacity = '0';
-        setupRangeValueDisplay(rangedPercentage);
-      }
-    });
-
     setTimeout(() => {
       options.targetElement.classList.remove('slider-appear-animation');
     }, 300);
 
     options.targetElement.classList.add('is-dragging');
-    options.targetElement.addEventListener('pointermove', onPointerMove, { passive: false });
-    window.addEventListener('pointerup', onPointerUp, { passive: false });
-    window.addEventListener('touchmove', onPointerMove, { passive: false });
-    window.addEventListener('touchend', onPointerUp, { passive: false });
-    window.addEventListener('click', (e) => {
+    attachPointerListeners();
+    // Swallow only the immediate click on the slider itself (avoid global suppression)
+    options.targetElement.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
     }, { capture: true, once: true });
@@ -504,7 +554,31 @@ export function createSliderStructure(context, config = {}) {
   if (options.holdToSlide && !options.readOnlySlider && !context.config.tap_to_slide) {
     let longPressTimer;
     const longPressDuration = 200;
-    let isLongPress = false;
+    const immediateDragThreshold = 6;
+    let preDragMoveHandler = null;
+    let preDragCancelHandler = null;
+    let dragInitiated = false;
+
+    const clearPreDragHandlers = () => {
+      if (preDragMoveHandler) {
+        options.targetElement.removeEventListener('pointermove', preDragMoveHandler);
+        preDragMoveHandler = null;
+      }
+      if (preDragCancelHandler) {
+        options.targetElement.removeEventListener('pointerup', preDragCancelHandler);
+        options.targetElement.removeEventListener('pointercancel', preDragCancelHandler);
+        preDragCancelHandler = null;
+      }
+    };
+
+    const startDrag = (eventToUse) => {
+      if (dragInitiated) return;
+      dragInitiated = true;
+      clearTimeout(longPressTimer);
+      clearPreDragHandlers();
+      lockTouchActions();
+      handleLongPress(eventToUse);
+    };
 
     options.targetElement.addEventListener('pointerdown', (e) => {
       if (isSidebarSwipeStart(e)) return;
@@ -513,20 +587,57 @@ export function createSliderStructure(context, config = {}) {
 
       if (noSlide || (bubbleAction && bubbleAction.getAttribute('data-hold-action') !== '{"action":"none"}')) return;
 
-      isLongPress = false;
-      longPressTimer = setTimeout(() => {
-        isLongPress = true;
-        handleLongPress(e);
-      }, longPressDuration);
+      dragInitiated = false;
+      clearTimeout(longPressTimer);
+      clearPreDragHandlers();
+      if (context.card && context.card.classList.contains('is-unavailable')) return;
+      lockTouchActions();
+
+      initialTouchX = getEventPageX(e);
+      initialTouchY = getEventPageY(e);
+      resetGestureIntent();
+
+      const detectImmediateDrag = (moveEvent) => {
+        const currentX = getEventPageX(moveEvent);
+        const currentY = getEventPageY(moveEvent);
+        const deltaX = Math.abs(currentX - initialTouchX);
+        const deltaY = Math.abs(currentY - initialTouchY);
+        if (deltaY > scrollThreshold && deltaX < horizontalIntentThreshold) {
+          isScrollIntent = true;
+          cancelPreDrag();
+          return;
+        }
+        if (deltaX > immediateDragThreshold && deltaX >= deltaY) {
+          startDrag(moveEvent);
+        }
+      };
+
+      const cancelPreDrag = () => {
+        clearTimeout(longPressTimer);
+        clearPreDragHandlers();
+        unlockTouchActions();
+      };
+
+      preDragMoveHandler = detectImmediateDrag;
+      preDragCancelHandler = cancelPreDrag;
+
+      options.targetElement.addEventListener('pointermove', detectImmediateDrag, { passive: false });
+      options.targetElement.addEventListener('pointerup', cancelPreDrag);
+      options.targetElement.addEventListener('pointercancel', cancelPreDrag);
+
+      longPressTimer = setTimeout(() => startDrag(e), longPressDuration);
     }, { passive: false });
 
-    options.targetElement.addEventListener('pointerup', (e) => {
+    options.targetElement.addEventListener('pointerup', () => {
       clearTimeout(longPressTimer);
+      clearPreDragHandlers();
+      unlockTouchActions();
     });
 
     options.targetElement.addEventListener('pointercancel', () => {
       clearTimeout(longPressTimer);
-      isLongPress = false;
+      clearPreDragHandlers();
+      unlockTouchActions();
     });
   } else if (!options.readOnlySlider) {
     options.targetElement.addEventListener('pointerdown', (e) => {
@@ -537,20 +648,29 @@ export function createSliderStructure(context, config = {}) {
       const noSlide = subButton?.hasAttribute('no-slide');
       if (isOnIcon || subButton || noSlide) return;
 
-      options.targetElement.setPointerCapture(e.pointerId);
+      // Some browsers (older iOS Safari) may throw here; fail gracefully
+      try { options.targetElement.setPointerCapture(e.pointerId); } catch (_) {}
 
       if (context.card && context.card.classList.contains('is-unavailable')) return;
 
       context.dragging = true;
       window.isScrolling = true;
-      initialTouchX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+      lockTouchActions();
+      initialTouchX = getEventPageX(e);
+      initialTouchY = getEventPageY(e);
+      resetGestureIntent();
+      resetSliderRectCache();
+      if (options.relativeSlide) {
+        const initialPercentage = calculateVisualPercentage(calculateInitialPercentage());
+        const sliderRect = getSliderRect();
+        initialSliderX = sliderRect.left + (sliderRect.width * initialPercentage / 100);
+      } else {
+        getSliderRect();
+      }
 
       options.targetElement.classList.add('is-dragging');
-      options.targetElement.addEventListener('pointermove', onPointerMove, { passive: false });
-      window.addEventListener('pointerup', onPointerUp, { passive: false });
-      window.addEventListener('touchmove', onPointerMove, { passive: false });
-      window.addEventListener('touchend', onPointerUp, { passive: false });
-    }, { passive: false });
+      attachPointerListeners();
+    }, listenerOptions);
   }
 
   const throttledUpdateEntity = throttle(updateEntity, 200);

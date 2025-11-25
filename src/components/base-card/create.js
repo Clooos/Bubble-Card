@@ -2,6 +2,7 @@ import { createElement } from "../../tools/utils.js";
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
 import { createSliderStructure } from "../slider/index.js";
 import { createSubButtonStructure } from "../sub-button/index.js";
+import { ensureNewSubButtonsSchemaObject } from "../sub-button/utils.js";
 import { defaultOptions } from "./index.js";
 import styles from "./styles.css";
 
@@ -104,6 +105,17 @@ export function createBaseStructure(context, config = {}) {
         
         if (context.elements.buttonsContainer) {
             context.elements.cardWrapper.appendChild(context.elements.buttonsContainer);
+        }
+    }
+
+    // Add with-bottom-buttons class if sub-buttons or main buttons are in bottom position
+    if (context.elements.mainContainer) {
+        const sectioned = ensureNewSubButtonsSchemaObject(context.config);
+        const hasBottomSubButtons = Array.isArray(sectioned.bottom) && sectioned.bottom.length > 0;
+        const hasBottomMainButtons = context.config?.main_buttons_position === 'bottom';
+        
+        if (hasBottomSubButtons || hasBottomMainButtons) {
+            context.elements.mainContainer.classList.add('with-bottom-buttons');
         }
     }
 

@@ -8,9 +8,6 @@
   z-index: 4;
   opacity: 0;
   transition: opacity 0.3s;
-  transition-delay: .1s;
-  backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
-  -webkit-backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
 }
 
 .bubble-backdrop.is-visible {
@@ -20,4 +17,9 @@
 .bubble-backdrop.is-hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+.bubble-backdrop.has-blur {
+  backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
+  -webkit-backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
 }

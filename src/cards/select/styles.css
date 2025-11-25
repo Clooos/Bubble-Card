@@ -6,3 +6,7 @@
 .bubble-background {
     cursor: pointer;
 }
+
+.with-bottom-buttons .bubble-dropdown-container {
+    display: initial !important;
+}

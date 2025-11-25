@@ -13,6 +13,44 @@
     box-sizing: border-box;
 }
 
+.bubble-media-player .bubble-entity-picture {
+    inset: 0;
+    pointer-events: none;
+}
+
+.bubble-cover-icon-crossfade,
+.bubble-cover-background-crossfade {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.bubble-cover-crossfade-layer {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 2s ease;
+    pointer-events: none;
+}
+
+.bubble-cover-crossfade-layer.is-visible {
+    opacity: 1;
+}
+
+.bubble-cover-crossfade-layer.is-empty {
+    opacity: 0;
+}
+
+.bubble-cover-crossfade-layer--icon {
+    z-index: 0;
+}
+
+.bubble-media-player .bubble-cover-background {
+    overflow: hidden;
+}
+
 .bubble-button-container {
     align-items: center;
     gap: 8px;
@@ -24,7 +62,8 @@
     line-height: normal;
 }
 
-.bubble-play-pause-button {
+.bubble-play-pause-button,
+.full-width > .bubble-play-pause-button {
     background-color: var(--bubble-accent-color, var(--bubble-default-color));
 }
 
@@ -37,18 +76,29 @@
     width: 36px;
 }
 
-.bubble-volume-slider {
+/* Volume slider wrapper (similar to sub-button slider) */
+.bubble-volume-slider-wrapper {
     position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     height: 38px;
-    width: var(--bubble-volume-slider-width-calc, var(--volume-slider-width-calc, calc(100% - 150px)));
-    left: var(--bubble-volume-slider-left-offset, var(--volume-slider-left-offset, 56px));
-    overflow: hidden;
-    border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    width: calc(100% - 16px);
+    left: 8px;
     z-index: 1;
-    background-color: var(--bubble-media-player-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
     opacity: 1;
     transition: opacity .2s, transform .2s;
     transform: translateX(0);
+    touch-action: none;
+}
+
+.bubble-volume-slider {
+    position: relative;
+    flex: 1 1 auto;
+    height: 100%;
+    overflow: hidden;
+    border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    background-color: var(--bubble-media-player-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
 }
 
 .bubble-range-value {
@@ -73,10 +123,18 @@
     transform: translateX(14px);
 }
 
-.bubble-range-fill {
-    background-color: var(--bubble-accent-color, var(--bubble-default-color));
+/* Position volume slider at bottom when buttons are in bottom-fixed mode */
+.bubble-wrapper.has-bottom-buttons .bubble-volume-slider-wrapper {
+    bottom: 8px;
+    top: auto;
 }
 
+.bubble-range-fill {
+    background-color: var(--bubble-accent-color, var(--bubble-default-color));
+    height: 101%; /* Ensure the fill covers the entire slider */
+}
+
+/* Original mute button (in icon container, normal mode) */
 .bubble-mute-button {
     display: flex;
     position: absolute;
@@ -84,6 +142,42 @@
     width: 38px;
     justify-content: center;
     align-items: center;
+}
+
+/* Mute button in volume slider wrapper */
+.bubble-volume-slider-mute-button {
+    display: flex;
+    position: relative;
+    height: 36px;
+    width: 36px;
+    border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    background-color: var(--bubble-media-player-button-background-color);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    touch-action: none;
+}
+
+/* Close button in volume slider wrapper */
+.bubble-volume-slider-close-button {
+    display: flex;
+    position: relative;
+    height: 36px;
+    width: 36px;
+    border-radius: var(--bubble-media-player-buttons-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
+    background-color: var(--bubble-media-player-button-background-color);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    touch-action: none;
 }
 
 .bubble-media-info-container {
@@ -118,6 +212,10 @@
     opacity: 0.5;
 }
 
+.bubble-media-info-container.name-without-icon {
+    margin-left: 16px;
+}
+
 @media screen and (max-width: 250px) {
     .bubble-previous-button {
         display: none;
@@ -141,11 +239,19 @@
   width: 42px;
 }
 
+.large .bubble-volume-slider-wrapper {
+  height: 42px;
+}
+
 .large .bubble-volume-slider {
   height: 42px;
   border-radius: var(--bubble-media-player-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-  left: var(--volume-slider-left-offset, 60px);
-  width: var(--volume-slider-width-calc, calc(100% - 164px));
+}
+
+.large .bubble-volume-slider-mute-button,
+.large .bubble-volume-slider-close-button {
+  height: 42px;
+  width: 42px;
 }
 
 .large .bubble-range-value {
@@ -153,7 +259,40 @@
   height: 42px;
 }
 
+.full-width > .bubble-play-pause-button,
+.large .full-width > .bubble-play-pause-button {
+    height: 36px;
+}
+
 .large .bubble-play-pause-button {
   height: 42px;
   width: 42px;
+}
+
+/* Ensure volume slider + its wrapper buttons match sub-buttons size when bottom-fixed */
+.bubble-wrapper.has-bottom-buttons .bubble-volume-slider-wrapper {
+    height: 36px;
+}
+
+.bubble-wrapper.has-bottom-buttons .bubble-volume-slider,
+.bubble-wrapper.has-bottom-buttons .bubble-range-value {
+    height: 36px;
+}
+
+.bubble-wrapper.has-bottom-buttons .bubble-volume-slider-mute-button,
+.bubble-wrapper.has-bottom-buttons .bubble-volume-slider-close-button {
+    height: 36px;
+    width: 36px;
+}
+
+.fixed-top .bubble-buttons-container {
+    margin-top: 7px;
+}
+
+.fixed-top .bubble-buttons-container:not(.bottom-fixed) {
+    height: 42px;
+}
+
+.fixed-top .bubble-volume-slider-wrapper {
+    margin-top: 7px;
 }

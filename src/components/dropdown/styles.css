@@ -89,7 +89,12 @@ ha-select {
     width: 100%;
     height: 100%;
     border: var(--bubble-select-border, solid 2px var(--bubble-accent-color, var(--bubble-default-color)));
-    border-radius: var(--bubble-border-radius, 32px);
+    border-radius: var(--bubble-border-radius, 28px);
     box-sizing: border-box;
     pointer-events: none;
+}
+
+.bubble-sub-button .bubble-dropdown-inner-border,
+.bubble-sub-button-group .bubble-dropdown-inner-border {
+    border-radius: var(--bubble-border-radius, 18px);
 }

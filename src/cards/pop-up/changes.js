@@ -27,6 +27,8 @@ export function changeEditor(context) {
     if (!isPopUpEffectivelyOpened && isCard && sectionRowContainer) {
         if (sectionRowContainer.classList.contains('card') && isHAEditorModeActive && sectionRowContainer.style.display === "none") {
             sectionRowContainer.style.display = '';
+            // Restore normal position in editor mode
+            sectionRowContainer.style.position = '';
         }
     }
 
@@ -83,12 +85,18 @@ export function changeEditor(context) {
 }
 
 export function changeStyle(context) {
-    const { backdropCustomStyle } = getBackdrop(context);
+    const { backdropCustomStyle, updateBackdropStyles } = getBackdrop(context);
 
     setLayout(context, context.popUp);
 
     handleCustomStyles(context, context.popUp);
-    handleCustomStyles(context, backdropCustomStyle);
+    // Backdrop styles are applied asynchronously to avoid blocking open animation
+    if (typeof updateBackdropStyles === 'function') {
+        updateBackdropStyles();
+    } else {
+        // Fallback for older contexts
+        requestAnimationFrame(() => handleCustomStyles(context, backdropCustomStyle));
+    }
 
     const showHeader = context.config.show_header ?? true;
     if (context.popUp.classList.contains('no-header') === showHeader) {

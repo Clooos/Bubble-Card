@@ -15,7 +15,7 @@ function getButtonList(){
         'value': 'state'
     },
     {
-        'label': 'Name / Text',
+        'label': 'Name / Text (No entity required)',
         'value': 'name'
     }
 ];
@@ -118,10 +118,10 @@ export function renderButtonEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:palette"></ha-icon>
-                Styling options
+                Styling and layout options
                 </h4>
                 <div class="content">
-                    ${editor.makeLayoutOptions()}
+                    ${editor.makeLayoutPanel()}
                     ${!isPopUp ? editor.makeStyleEditor() : ''}
                 </div>
             </ha-expansion-panel>

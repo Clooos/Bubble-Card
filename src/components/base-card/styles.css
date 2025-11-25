@@ -70,11 +70,30 @@ ha-card {
     border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     background-color: rgba(0,0,0,0);
     overflow: visible;
+    /* z-index: 1; */
+}
+
+.bubble-wrapper.fixed-top {
+    align-items: baseline;
 }
 
 .bubble-content-container {
     display: contents;
+}
+
+.bubble-wrapper.fixed-top .bubble-content-container {
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+    overflow: hidden;
     flex-grow: 1;
+    margin-top: 1px;
+    min-height: 54px;
+}
+
+.bubble-content-container.fixed-bottom {
+    display: flex;
+    align-self: flex-end;
 }
 
 .bubble-buttons-container {
@@ -82,6 +101,42 @@ ha-card {
     display: flex;
     margin-right: 8px;
     gap: 4px;
+}
+
+.fixed-top .bubble-buttons-container {
+    margin-top: 10px;
+}
+
+.bubble-buttons-container.bottom-fixed {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    padding: 0 8px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.full-width > .bubble-button,
+.full-width > .bubble-media-button {
+    width: 100% !important;
+    background-color: var(--bubble-main-buttons-background-color, var(--bubble-sub-button-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))))));
+}
+
+.bubble-buttons-container.bottom-fixed.align-start {
+    justify-content: flex-start;
+}
+
+.bubble-buttons-container.bottom-fixed.align-center {
+    justify-content: center;
+}
+
+.bubble-buttons-container.bottom-fixed.align-end {
+    justify-content: flex-end;
+}
+
+.bubble-buttons-container.bottom-fixed.align-space-between {
+    justify-content: space-between;
 }
 
 .bubble-background {

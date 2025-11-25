@@ -7,6 +7,7 @@ import {
 import { version } from '../var/version.js';
 import { fireEvent } from '../tools/utils.js';
 import { renderButtonEditor } from '../cards/button/editor.js';
+import { renderSubButtonsEditor } from '../cards/sub-buttons/editor.js';
 import { renderPopUpEditor } from '../cards/pop-up/editor.js';
 import { renderSeparatorEditor } from '../cards/separator/editor.js';
 import { renderHorButtonStackEditor } from '../cards/horizontal-buttons-stack/editor.js';
@@ -16,7 +17,7 @@ import { renderSelectEditor } from '../cards/select/editor.js';
 import { renderCalendarEditor } from '../cards/calendar/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
 import { renderEmptyColumnEditor } from '../cards/empty-column/editor.js';
-import { makeSubButtonPanel } from '../components/sub-button/editor.js';
+import { makeSubButtonPanel } from '../components/sub-button/editor/index.js';
 import { makeModulesEditor } from '../modules/editor.js';
 import { makeModuleStore, _fetchModuleStore } from '../modules/store.js';
 import setupTranslation from '../tools/localize.js';
@@ -32,6 +33,7 @@ class BubbleCardEditor extends LitElement {
     _expandedPanelStates = {};
     _moduleErrorCache = {};
     _moduleCodeEvaluating = null;
+    _rowsAutoMode = undefined; // true = auto-manage rows, false = user-managed
 
     constructor() {
         super();
@@ -42,6 +44,10 @@ class BubbleCardEditor extends LitElement {
         this._config = {
             ...config
         };
+        // Initialize rows auto mode once per editor session based on incoming config
+        if (this._rowsAutoMode === undefined) {
+            this._rowsAutoMode = true;
+        }
     }
 
     static get properties() {
@@ -87,6 +93,8 @@ class BubbleCardEditor extends LitElement {
             this._cachedAttributeList = null;
             this._cachedAttributeListEntity = null;
         }
+    
+        this._setupAutoRowsObserver();
     }
 
     async firstUpdated(changedProperties) {
@@ -115,6 +123,14 @@ class BubbleCardEditor extends LitElement {
         try { if (this._storeAutoRefreshTimer) { clearInterval(this._storeAutoRefreshTimer); this._storeAutoRefreshTimer = null; } } catch (e) {}
         try { if (this._progressInterval) { clearInterval(this._progressInterval); this._progressInterval = null; } } catch (e) {}
         try { if (this._editorSchemaDebounce) { clearTimeout(this._editorSchemaDebounce); this._editorSchemaDebounce = null; } } catch (e) {}
+    
+        if (BubbleCardEditor._resizeObserver && this._observedElements) {
+            this._observedElements.forEach(el => {
+                BubbleCardEditor._resizeObserver.unobserve(el);
+                BubbleCardEditor._editorInstanceMap.delete(el);
+            });
+            this._observedElements = [];
+        }
     }
 
     render() {
@@ -154,6 +170,8 @@ class BubbleCardEditor extends LitElement {
                 return renderPopUpEditor(this);
             case 'button':
                 return renderButtonEditor(this);
+            case 'sub-buttons':
+                return renderSubButtonsEditor(this);
             case 'separator':
                 return renderSeparatorEditor(this);
             case 'horizontal-buttons-stack':
@@ -289,6 +307,40 @@ class BubbleCardEditor extends LitElement {
             (this._config.card_layout?.includes("large") || (window.isSectionView && !this._config.card_layout));
 
         return html`
+            ${this._renderConditionalContent(this._config.grid_options?.rows, html`
+                <div class="bubble-info warning">
+                    <h4 class="bubble-section-title">
+                        <ha-icon icon="mdi:alert-outline"></ha-icon>
+                        Rows are already set in the "Layout" options
+                    </h4>
+                    <div class="content">
+                        <p>If you want to change the rows, you can do it in the "Layout" options at the top of this editor. Or remove it from your config in YAML to enable this option.</p>
+                    </div>
+                </div>
+            `)}
+            ${this._renderConditionalContent(showRowsOption, html`
+                <ha-textfield
+                    label="Rows (Card height)"
+                    type="number"
+                    inputMode="numeric"
+                    min="0"
+                    step="0.1"
+                    .disabled="${this._config.grid_options?.rows}"
+                    .value="${this._config.rows || this._config.grid_options?.rows || defaultRows}"
+                    .configValue="${"rows"}"
+                    @input="${this._valueChanged}"
+                ></ha-textfield>
+                <br>
+            `)}
+            <div class="bubble-info warning">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:alert-outline"></ha-icon>
+                    Card layout deprecation
+                </h4>
+                <div class="content">
+                    <p><b>The card layout options are deprecated, but still available for backwards compatibility.</b> Please use the new sub-button groups and layout options instead for better flexibility.</p>
+                </div>
+            </div>
             <ha-combo-box
                 label="${this._config.card_type === "pop-up" ? 'Header card layout' : 'Card layout'}"
                 .value="${this._config.card_layout || defaultLayout}"
@@ -301,30 +353,20 @@ class BubbleCardEditor extends LitElement {
                 ]}"
                 @value-changed="${this._valueChanged}"
             ></ha-combo-box>
-            ${this._renderConditionalContent(showRowsOption, html`
-                <ha-textfield
-                    label="Rows"
-                    type="number"
-                    inputMode="numeric"
-                    min="0"
-                    step="0.1"
-                    .disabled="${this._config.grid_options?.rows}"
-                    .value="${this._config.rows || this._config.grid_options?.rows || defaultRows}"
-                    .configValue="${"rows"}"
-                    @input="${this._valueChanged}"
-                ></ha-textfield>
-            `)}
-            ${this._renderConditionalContent(this._config.grid_options?.rows, html`
-            <div class="bubble-info warning">
-                <h4 class="bubble-section-title">
-                    <ha-icon icon="mdi:alert-outline"></ha-icon>
-                    Rows are already set in the "Layout" options
+        `;
+    }
+
+    makeLayoutPanel() {
+        return html`
+            <ha-expansion-panel outlined>
+                <h4 slot="header">
+                    <ha-icon icon="mdi:view-grid"></ha-icon>
+                    Layout
                 </h4>
                 <div class="content">
-                    <p>If you want to change the rows, you can do it in the "Layout" options at the top of this editor. Or remove it from your config in YAML to enable this option.</p>
+                    ${this.makeLayoutOptions()}
                 </div>
-            </div>
-            `)}
+            </ha-expansion-panel>
         `;
     }
 
@@ -332,7 +374,10 @@ class BubbleCardEditor extends LitElement {
         const entity = context?.entity ?? this._config.entity ?? '';
         const nameButton = this._config.button_type === 'name';
 
-        const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || context.select_attribute;
+        const isSelectEntity = entity?.startsWith("input_select") || entity?.startsWith("select") || context.select_attribute;
+        // Consider both top-level sub_button and nested group paths like "sub_button.0.buttons"
+        const isSubButton = array === 'sub_button' || (typeof array === 'string' && array.startsWith('sub_button'));
+        const showSelectUi = isSubButton && (context?.sub_button_type === 'select' || (!context?.sub_button_type && isSelectEntity));
 
         const attributeList = context?.show_attribute 
             ? Object.keys(this.hass.states[entity]?.attributes || {}).map((attributeName) => {
@@ -344,20 +389,18 @@ class BubbleCardEditor extends LitElement {
 
         return html`
 
-            ${this._renderConditionalContent(array !== 'sub_button', html`
-                <ha-formfield .label="Text scrolling effect">
-                    <ha-switch
-                        aria-label="Text scrolling effect"
-                        .checked=${context?.scrolling_effect ?? true}
-                        .configValue="${config + "scrolling_effect"}"
-                        @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { scrolling_effect: ev.target.checked }, array)}"
-                    ></ha-switch>
-                    <div class="mdc-form-field">
-                        <label class="mdc-label">Text scrolling effect</label> 
-                    </div>
-                </ha-formfield>
-            `)}
-            ${this._renderConditionalContent(array === 'sub_button', html`
+            <ha-formfield .label="Text scrolling effect">
+                <ha-switch
+                    aria-label="Text scrolling effect"
+                    .checked=${context?.scrolling_effect ?? true}
+                    .configValue="${config + "scrolling_effect"}"
+                    @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { scrolling_effect: ev.target.checked }, array)}"
+                ></ha-switch>
+                <div class="mdc-form-field">
+                    <label class="mdc-label">Text scrolling effect</label> 
+                </div>
+            </ha-formfield>
+            ${this._renderConditionalContent(isSubButton, html`
                 <ha-formfield .label="Show background">
                     <ha-switch
                         aria-label="Show background when entity is on"
@@ -369,7 +412,7 @@ class BubbleCardEditor extends LitElement {
                     </div>
                 </ha-formfield>
             `)}
-            ${this._renderConditionalContent(array === 'sub_button' && (context?.show_background ?? true), html`
+            ${this._renderConditionalContent(isSubButton && (context?.show_background ?? true), html`
                 <ha-formfield .label="Background color based on state">
                     <ha-switch
                         aria-label="Background color based on state"
@@ -381,7 +424,7 @@ class BubbleCardEditor extends LitElement {
                     </div>
                 </ha-formfield>
             `)}
-            ${this._renderConditionalContent(array === 'sub_button' && (context?.state_background ?? true) && entity.startsWith("light"), html`
+            ${this._renderConditionalContent(isSubButton && (context?.state_background ?? true) && entity.startsWith("light"), html`
                 <ha-formfield .label="Background color based on light color">
                     <ha-switch
                         aria-label="Background color based on light color"
@@ -393,7 +436,7 @@ class BubbleCardEditor extends LitElement {
                     </div>
                 </ha-formfield>
             `)}
-            ${this._renderConditionalContent(array !== 'sub_button' && entity.startsWith("light"), html`
+            ${this._renderConditionalContent(!isSubButton && entity.startsWith("light"), html`
                 <ha-formfield .label="Use accent color instead of light color">
                     <ha-switch
                         aria-label="Use accent color instead of light color"
@@ -417,7 +460,7 @@ class BubbleCardEditor extends LitElement {
                     <label class="mdc-label">Show icon</label> 
                 </div>
             </ha-formfield>
-            ${this._renderConditionalContent(array !== 'sub_button', html`
+            ${this._renderConditionalContent(!isSubButton, html`
                 <ha-formfield .label="Prioritize icon over entity picture">
                     <ha-switch
                         aria-label="Prioritize icon over entity picture"
@@ -434,7 +477,7 @@ class BubbleCardEditor extends LitElement {
             <ha-formfield .label="Show name">
                 <ha-switch
                     aria-label="Show name"
-                    .checked=${context?.show_name ?? array !== 'sub_button' ? true : false}
+                    .checked=${ context?.show_name ?? (!isSubButton ? true : false) }
                     .configValue="${config + "show_name"}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_name: ev.target.checked }, array)}"
                 ></ha-switch>
@@ -447,7 +490,7 @@ class BubbleCardEditor extends LitElement {
                     aria-label="Show entity state"
                     .checked="${context?.show_state ?? context.button_type === 'state'}"
                     .configValue="${config + "show_state"}"
-                    .disabled="${nameButton && array !== 'sub_button'}"
+                    .disabled="${nameButton && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_state: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -459,7 +502,7 @@ class BubbleCardEditor extends LitElement {
                     aria-label="Show last changed"
                     .checked=${context?.show_last_changed}
                     .configValue="${config + "show_last_changed"}"
-                    .disabled="${nameButton && array !== 'sub_button'}"
+                    .disabled="${nameButton && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_changed: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -471,7 +514,7 @@ class BubbleCardEditor extends LitElement {
                     aria-label="Show last updated"
                     .checked=${context?.show_last_updated}
                     .configValue="${config + "show_last_updated"}"
-                    .disabled="${nameButton && array !== 'sub_button'}"
+                    .disabled="${nameButton && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_updated: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -483,7 +526,7 @@ class BubbleCardEditor extends LitElement {
                     aria-label="Show attribute"
                     .checked=${context?.show_attribute}
                     .configValue="${config + "show_attribute"}"
-                    .disabled="${nameButton && array !== 'sub_button'}"
+                    .disabled="${nameButton && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_attribute: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -497,12 +540,12 @@ class BubbleCardEditor extends LitElement {
                         .value="${context?.attribute}"
                         .configValue="${config + "attribute"}"
                         .items="${attributeList}"
-                        .disabled="${nameButton && array !== 'sub_button'}"
+                        .disabled="${nameButton && !isSubButton}"
                         @value-changed="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { attribute: ev.detail.value }, array)}"
                     ></ha-combo-box>
                 </div>
             `)}
-            ${this._renderConditionalContent(array === 'sub_button' && isSelect, html`
+            ${this._renderConditionalContent(showSelectUi, html`
                 <ha-formfield .label="Show arrow (Select entities only)">
                     <ha-switch
                         aria-label="Show arrow (Select entities only)"
@@ -518,13 +561,13 @@ class BubbleCardEditor extends LitElement {
         `;
     }
 
-    makeDropdown(label, configValue, items, disabled) {
+    makeDropdown(label, configValue, items, disabled, default_value) {
         if (label.includes('icon') || label.includes('Icon')) {
             return html`
                 <div class="ha-icon-picker">
                     <ha-icon-picker
                         label="${label}"
-                        .value="${this._config[configValue]}"
+                        .value="${this._config[configValue] || default_value}"
                         .configValue="${configValue}"
                         item-value-path="icon"
                         item-label-path="icon"
@@ -769,6 +812,16 @@ class BubbleCardEditor extends LitElement {
 
     _clearCurrentModuleError(moduleId) {
         this._moduleCodeEvaluating = moduleId;
+        // Also purge any stored error for this module from the global registry
+        try {
+            if (window.bubbleCardErrorRegistry && moduleId) {
+                Object.keys(window.bubbleCardErrorRegistry).forEach(key => {
+                    if (window.bubbleCardErrorRegistry[key]?.moduleId === moduleId) {
+                        delete window.bubbleCardErrorRegistry[key];
+                    }
+                });
+            }
+        } catch (_) {}
         // Clear displayed error immediately
         this.errorMessage = '';
         this.errorSource = '';
@@ -1012,6 +1065,12 @@ class BubbleCardEditor extends LitElement {
     
     let needsUpdate = false;
     let rawValue;
+    const hasExplicitUndefinedValue = Boolean(
+      target &&
+      target.configValue &&
+      Object.prototype.hasOwnProperty.call(target, 'value') &&
+      target.value === undefined
+    );
 
     // Check if the target is a ha-switch
     if (target.tagName === 'HA-SWITCH') {
@@ -1019,6 +1078,9 @@ class BubbleCardEditor extends LitElement {
         needsUpdate = true;
     } else if (target.value !== undefined) {
         rawValue = typeof target.value === 'string' ? target.value.replace(",", ".") : target.value;
+        needsUpdate = true;
+    } else if (hasExplicitUndefinedValue) {
+        rawValue = target.value;
         needsUpdate = true;
     } else if (detail?.value !== undefined) {
         needsUpdate = true;
@@ -1090,12 +1152,29 @@ class BubbleCardEditor extends LitElement {
         }
     }
 
+    // Update auto/manuel mode when user edits rows
+    try {
+        if (target?.configValue === 'rows') {
+            const r = newConfig?.rows;
+            this._rowsAutoMode = (r === undefined || r === null || r === '');
+        } else if (target?.configValue === 'grid_options.rows') {
+            // grid_options.rows is an explicit override of sizing
+            this._rowsAutoMode = false;
+        }
+        // When card_type changes to calendar, set rows to 1 if not already set
+        if (target?.configValue === 'card_type' && detail?.value === 'calendar') {
+            if (newConfig.rows === undefined || newConfig.rows === null || newConfig.rows === '') {
+                newConfig.rows = 1;
+            }
+        }
+    } catch (e) {}
+
     // Update this._config with the new config
     this._config = newConfig;
     
     // Emit the event with the new configuration
     fireEvent(this, "config-changed", { config: newConfig });
-  }
+}
 
   _arrayValueChange(index, value, array) {
     // Fix the climate sub-button addition
@@ -1105,11 +1184,69 @@ class BubbleCardEditor extends LitElement {
       return;
     }
 
-    this._config[array] = this._config[array] || [];
-    let arrayCopy = [...this._config[array]];
-    arrayCopy[index] = arrayCopy[index] || {};
-    arrayCopy[index] = { ...arrayCopy[index], ...value };
-    this._config[array] = arrayCopy;
+    // Support nested array paths like "sub_button.2.buttons"
+    const updateNestedArray = (root, path, arrIndex, patchValue) => {
+      // Create intermediate objects/arrays as needed and update target array element
+      const parts = String(path).split('.').filter(Boolean);
+      let target = root;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const key = parts[i];
+        const nextKey = parts[i + 1];
+        const nextIsIndex = !isNaN(parseInt(nextKey, 10));
+        if (target[key] === undefined || target[key] === null) {
+          target[key] = nextIsIndex ? [] : {};
+        }
+        // Ensure we always work on a shallow-cloned container to avoid side-effects
+        if (Array.isArray(target[key])) {
+          target[key] = [...target[key]];
+        } else {
+          target[key] = { ...target[key] };
+        }
+        target = target[key];
+      }
+      const lastKey = parts[parts.length - 1];
+      const existingArray = Array.isArray(target[lastKey]) ? target[lastKey] : (target[lastKey] ? [...target[lastKey]] : []);
+      const arrayCopy = Array.isArray(existingArray) ? [...existingArray] : [];
+      const current = arrayCopy[arrIndex] || {};
+      arrayCopy[arrIndex] = { ...current, ...patchValue };
+      target[lastKey] = arrayCopy;
+      return arrayCopy[arrIndex];
+    };
+
+    let updatedItem;
+    if (typeof array === 'string' && array.includes('.')) {
+      // Nested: e.g., sub_button.2.buttons
+      updatedItem = updateNestedArray(this._config, array, index, value);
+    } else {
+      // Top-level array case (e.g., 'sub_button')
+      this._config[array] = this._config[array] || [];
+      const arrayCopy = [...this._config[array]];
+      const current = arrayCopy[index] || {};
+      arrayCopy[index] = { ...current, ...value };
+      this._config[array] = arrayCopy;
+      updatedItem = arrayCopy[index];
+    }
+
+    // Auto-assign explicit 'select' type when entity/select_attribute implies a dropdown and type is not set
+    try {
+      if (typeof array === 'string' && array.startsWith('sub_button')) {
+        const sub = updatedItem || {};
+        const entityId = sub.entity ?? this._config.entity ?? '';
+        const looksLikeSelect = typeof entityId === 'string' && (entityId.startsWith('input_select') || entityId.startsWith('select'));
+        const hasSelectAttribute = !!sub.select_attribute;
+        if (!sub.sub_button_type && (looksLikeSelect || hasSelectAttribute)) {
+          if (typeof array === 'string' && array.includes('.')) {
+            updateNestedArray(this._config, array, index, { sub_button_type: 'select' });
+          } else {
+            const arrayCopy = [...this._config[array]];
+            const current = arrayCopy[index] || {};
+            arrayCopy[index] = { ...current, sub_button_type: 'select' };
+            this._config[array] = arrayCopy;
+          }
+        }
+      }
+    } catch {}
+
     fireEvent(this, "config-changed", { config: this._config });
     this.requestUpdate();
   }
@@ -1152,14 +1289,56 @@ class BubbleCardEditor extends LitElement {
       }
     }
 
+    // Update config with support for nested sub_button paths
     if (array === 'button_action' || array === 'event_action') {
+      // Simple action containers
       this._config[array] = ev.detail.value;
+    } else if (typeof array === 'string' && array.startsWith('sub_button')) {
+      const patchValue = ev.detail.value; // e.g., { tap_action: {...} } or full sub-button object (from _updateActionsEntity)
+
+      // Helper: merge patch into nested array element (supports paths like "sub_button.3.buttons")
+      const updateNestedArrayMerge = (root, path, arrIndex, patch) => {
+        const parts = String(path).split('.').filter(Boolean);
+        let target = root;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const key = parts[i];
+          const nextKey = parts[i + 1];
+          const nextIsIndex = !isNaN(parseInt(nextKey, 10));
+          if (target[key] === undefined || target[key] === null) {
+            target[key] = nextIsIndex ? [] : {};
+          }
+          if (Array.isArray(target[key])) {
+            target[key] = [...target[key]];
+          } else {
+            target[key] = { ...target[key] };
+          }
+          target = target[key];
+        }
+        const lastKey = parts[parts.length - 1];
+        const existingArray = Array.isArray(target[lastKey]) ? target[lastKey] : (target[lastKey] ? [...target[lastKey]] : []);
+        const arrayCopy = Array.isArray(existingArray) ? [...existingArray] : [];
+        const current = arrayCopy[arrIndex] || {};
+        // Merge patch onto current sub-button object
+        arrayCopy[arrIndex] = { ...current, ...patch };
+        target[lastKey] = arrayCopy;
+        return arrayCopy[arrIndex];
+      };
+
+      if (array.includes('.')) {
+        updateNestedArrayMerge(this._config, array, index, patchValue);
+      } else {
+        // Top-level sub_button array (no nested groups)
+        this._config[array] = this._config[array] || [];
+        const arrayCopy = [...this._config[array]];
+        const current = arrayCopy[index] || {};
+        arrayCopy[index] = { ...current, ...patchValue };
+        this._config[array] = arrayCopy;
+      }
     } else if (array) {
-      this._config[array] = this._config[array] || [];
-      let arrayCopy = [...this._config[array]];
-      arrayCopy[index] = ev.detail.value;
-      this._config[array] = arrayCopy;
+      // Legacy/simple arrays
+      this._config[array] = ev.detail.value;
     } else {
+      // Top-level object replacement
       this._config = ev.detail.value;
     }
 
@@ -1167,7 +1346,7 @@ class BubbleCardEditor extends LitElement {
   }
 
   _updateActionsEntity(ev) {
-    let obj = JSON.parse(JSON.stringify(this._config)); //get rid of the referencing
+    let obj = JSON.parse(JSON.stringify(this._config)); // create a deep copy to work on
     const configKeys = ev.target.configValue.split('.');
     let i = 0
     for (i = 0; i < configKeys.length - 2; i++) {
@@ -1187,11 +1366,34 @@ class BubbleCardEditor extends LitElement {
       }
     }
 
-    var detail = { 'value': obj };
-    var currentTarget = { '__schema': [{ 'name': configKeys[configKeys.length - 2] }] };
-    var newev = { ...ev, detail, currentTarget };
+    // Build a minimal patch containing only the action that was modified (from our locally-updated copy)
+    const actionName = configKeys[configKeys.length - 2];
+    const actionObject = (obj && typeof obj === 'object' && obj[actionName]) ? obj[actionName] : {};
+    const detail = { value: { [actionName]: actionObject } };
+    const currentTarget = { '__schema': [{ 'name': actionName }] };
+    const newev = { ...ev, detail, currentTarget };
 
-    this._ActionChanged(newev, configKeys.length > 2 ? configKeys[0] : null, configKeys.length > 3 ? configKeys[1] : null);
+    // Derive the correct array path and index for nested sub-buttons
+    let arrayPath = null;
+    let idx = null;
+    if (configKeys[0] === 'button_action' || configKeys[0] === 'event_action') {
+      arrayPath = configKeys[0];
+    } else if (configKeys.length >= 4) {
+      // Handles: sub_button.0.tap_action.default_entity (top-level sub_button)
+      //          sub_button.3.buttons.1.tap_action.default_entity (nested group button)
+      const maybeIndex = configKeys[configKeys.length - 3];
+      const pathParts = configKeys.slice(0, configKeys.length - 3);
+      arrayPath = pathParts.join('.');
+      const parsed = parseInt(maybeIndex, 10);
+      idx = isNaN(parsed) ? null : parsed;
+    } else if (configKeys.length >= 3) {
+      // Fallback for simpler top-level paths
+      arrayPath = configKeys[0];
+      const parsed = parseInt(configKeys[1], 10);
+      idx = isNaN(parsed) ? null : parsed;
+    }
+
+    this._ActionChanged(newev, arrayPath, idx);
   }
 
   _computeLabelCallback = (schema) => {
@@ -1227,6 +1429,273 @@ class BubbleCardEditor extends LitElement {
     return css`
         ${unsafeCSS(styles + moduleStyles)}
     `;
+  }
+
+  // Observer for auto-rows computation
+  static _resizeObserver = null;
+  static _editorInstanceMap = new WeakMap();
+
+  _getBubbleCardFromPreview() {
+    try {
+      const homeAssistant = document.querySelector("body > home-assistant");
+      const previewElement = homeAssistant?.shadowRoot
+        ?.querySelector("hui-dialog-edit-card")
+        ?.shadowRoot
+        ?.querySelector("ha-dialog > div.content > div.element-preview");
+      if (!previewElement) return null;
+
+      // Try to locate the bubble-card across different HA view types.
+      // 1) Sections view (hui-grid-section)
+      const sectionHost = previewElement.querySelector("hui-grid-section");
+      const sectionShadow = sectionHost?.shadowRoot;
+      const sectionBubble = sectionShadow?.querySelector("bubble-card")?.shadowRoot;
+      if (sectionBubble) return sectionBubble;
+
+      // 2) Masonry view (hui-masonry-view)
+      const masonryHost = previewElement.querySelector("hui-masonry-view");
+      const masonryShadow = masonryHost?.shadowRoot;
+      const masonryBubble = masonryShadow?.querySelector("bubble-card")?.shadowRoot;
+      if (masonryBubble) return masonryBubble;
+
+      // 3) Generic view container (hui-view) → direct bubble-card
+      const huiView = previewElement.querySelector("hui-view") || previewElement.querySelector("#view > hui-view");
+      const huiViewShadow = huiView?.shadowRoot || huiView;
+      const viewBubble = huiViewShadow?.querySelector?.("bubble-card")?.shadowRoot || huiViewShadow?.querySelector?.("bubble-card")?.shadowRoot;
+      if (viewBubble) return viewBubble;
+
+      // 4) Fallback: search recursively for bubble-card within preview
+      const anyBubble = previewElement.querySelector("bubble-card");
+      return anyBubble?.shadowRoot || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  _setupAutoRowsObserver() {
+    // Only in editor context and when grid_options.rows is not explicitly set
+    if (!this._config || (this._config?.grid_options && this._config.grid_options.rows !== undefined)) return;
+
+    // Respect user-managed mode
+    if (this._rowsAutoMode === false) return;
+
+    const bubbleCard = this._getBubbleCardFromPreview();
+
+    if (!bubbleCard) return;
+
+    const elementsToObserve = [
+      bubbleCard.querySelector('.bubble-sub-button-bottom-container'),
+      bubbleCard.querySelector('.bubble-buttons-container.bottom-fixed'),
+      bubbleCard.querySelector('.bubble-sub-button-container')
+    ].filter(Boolean);
+
+    // Initialize observer if it doesn't exist
+    if (!BubbleCardEditor._resizeObserver) {
+      BubbleCardEditor._resizeObserver = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const editor = BubbleCardEditor._editorInstanceMap.get(entry.target);
+          if (editor) {
+            const card = editor._getBubbleCardFromPreview();
+            if (card) {
+              editor._computeAndApplyRows(card);
+            }
+          }
+        }
+      });
+    }
+
+    // Unobserve elements that are no longer relevant for this instance
+    if (this._observedElements) {
+      this._observedElements.forEach(el => {
+        if (!elementsToObserve.includes(el)) {
+          BubbleCardEditor._resizeObserver.unobserve(el);
+          BubbleCardEditor._editorInstanceMap.delete(el);
+        }
+      });
+    }
+
+    // Observe new elements
+    elementsToObserve.forEach(el => {
+      if (!this._observedElements?.includes(el)) {
+        BubbleCardEditor._resizeObserver.observe(el);
+        BubbleCardEditor._editorInstanceMap.set(el, this);
+      }
+    });
+
+    this._observedElements = elementsToObserve;
+
+    // Perform an initial computation
+    requestAnimationFrame(() => {
+        const currentCard = this._getBubbleCardFromPreview();
+        if (currentCard) {
+            this._computeAndApplyRows(currentCard);
+        }
+    });
+  }
+
+  _computeAndApplyRows(bubbleCard) {
+    try {
+      if (!bubbleCard || this._rowsAutoMode === false || !this._config) return;
+
+      const isCalendar = this._config.card_type === 'calendar';
+      const isSeparator = this._config.card_type === 'separator';
+      const bottomSubButtons = bubbleCard.querySelector('.bubble-sub-button-bottom-container');
+      const bottomMainButtons = bubbleCard.querySelector('.bubble-buttons-container.bottom-fixed');
+      const mainSubButtons = bubbleCard.querySelector('.bubble-sub-button-container');
+      const contentContainer = bubbleCard.querySelector('.bubble-content-container');
+      
+      // For calendar cards without bottom buttons, fix rows to 1 and prevent recalculation
+      if (isCalendar) {
+        const hasBottomButtons = (bottomSubButtons && bottomSubButtons.getBoundingClientRect().height > 0) ||
+                                 (bottomMainButtons && bottomMainButtons.getBoundingClientRect().height > 0);
+        if (!hasBottomButtons) {
+          this._firstRowsComputation = true;
+          // Ensure rows is set to 1 and prevent further recalculations
+          if (this._config.rows !== 1) {
+            const newConfig = { ...this._config, rows: 1 };
+            this._config = newConfig;
+            fireEvent(this, 'config-changed', { config: newConfig });
+          }
+          return;
+        }
+      }
+
+      const container = bubbleCard.querySelector('.bubble-container');
+      const containerRect = container ? container.getBoundingClientRect() : null;
+
+      // Check if content container is visible and has content
+      let hasVisibleContent = false;
+      if (contentContainer) {
+        const children = Array.from(contentContainer.children || []);
+        hasVisibleContent = children.some(child => {
+          const rect = child.getBoundingClientRect();
+          const style = getComputedStyle(child);
+          return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+        });
+      }
+
+      // Check if there are main sub-buttons
+      const hasMainSubButtons = mainSubButtons && mainSubButtons.getBoundingClientRect().height > 0;
+
+      let reservedFromBottom = 0;
+      if (containerRect) {
+        const overlayTops = [];
+        if (bottomSubButtons) {
+          const r = bottomSubButtons.getBoundingClientRect();
+          if (r.height > 0) overlayTops.push(r.top);
+        }
+        if (bottomMainButtons) {
+          const r = bottomMainButtons.getBoundingClientRect();
+          if (r.height > 0) overlayTops.push(r.top);
+        }
+        if (overlayTops.length > 0) {
+          const minTop = Math.min(...overlayTops);
+          reservedFromBottom = Math.max(0, containerRect.bottom - minTop) - 8;
+        }
+      } else {
+        const subButtonsHeight = bottomSubButtons ? bottomSubButtons.getBoundingClientRect().height : 0;
+        const mainButtonsHeight = bottomMainButtons ? bottomMainButtons.getBoundingClientRect().height : 0;
+        reservedFromBottom = subButtonsHeight + mainButtonsHeight;
+      }
+
+      // Calculate height reserved by main sub-buttons (in the main area)
+      // Only count this if there are actual main sub-buttons present
+      let reservedFromMain = 0;
+      if (hasMainSubButtons) {
+        const mainRect = mainSubButtons.getBoundingClientRect();
+        if (mainRect.height > 0) {
+          // Main sub-buttons take space in the main content area
+          // We need to account for their height in the overall card height calculation
+          reservedFromMain = mainRect.height;
+
+          // Add padding based on the actual computed styles
+          const mainComputed = getComputedStyle(mainSubButtons);
+          const marginTop = parseFloat(mainComputed.marginTop) || 0;
+          const marginBottom = parseFloat(mainComputed.marginBottom) || 0;
+          const paddingTop = parseFloat(mainComputed.paddingTop) || 0;
+          const paddingBottom = parseFloat(mainComputed.paddingBottom) || 0;
+
+          reservedFromMain += marginTop + marginBottom + paddingTop + paddingBottom;
+        }
+      }
+
+      // Ensure reservedFromMain doesn't go below overshoot value
+      // 36 if no bottom sub-buttons, 46 if there are bottom sub-buttons
+      const hasBottomSubButtons = reservedFromBottom > 0;
+      const minOvershootValue = hasBottomSubButtons ? 46 : 36;
+      if (reservedFromMain > 0) {
+        reservedFromMain = Math.max(reservedFromMain, minOvershootValue);
+      }
+      
+      const computed = (container || bubbleCard) ? getComputedStyle(container || bubbleCard) : null;
+      const rowHeightVar = computed ? computed.getPropertyValue('--row-height') : '';
+      const rowHeight = parseFloat(rowHeightVar) || 56;
+      const rowGapVar = computed ? computed.getPropertyValue('--row-gap') : '';
+      const rowGap = parseFloat(rowGapVar) || 8;
+      const effectiveRowStep = rowHeight + rowGap;
+
+      const defaultRows = this._config.card_type === 'separator' ? 0.8 : 1;
+      let computedRows;
+
+      // Check if there are bottom sub-buttons but no main sub-buttons
+      // For separator and calendar cards, always need overshoot when bottom sub-buttons exist without main sub-buttons
+      const needsOvershoot = hasBottomSubButtons && !hasMainSubButtons && (hasVisibleContent || isCalendar || isSeparator);
+
+      // Calculate total reserved height (bottom overlays + main sub-buttons)
+      const totalReservedHeight = reservedFromBottom + reservedFromMain;
+
+      if (totalReservedHeight > 0 || needsOvershoot) {
+        const divisor = (Number.isFinite(effectiveRowStep) && effectiveRowStep > 0) ? effectiveRowStep : rowHeight;
+        // Convert required additional height to whole pixels with a small overshoot for stability
+        // Add extra overshoot when bottom sub-buttons exist without main sub-buttons and content is visible
+        const baseOvershootPx = -36; // small safety margin to avoid oscillations
+        const extraOvershootPx = needsOvershoot ? 46 : 0; // additional overshoot for bottom-only case
+        // Additional reduction for sub-buttons card type
+        const subButtonsAdjustment = this._config.card_type === 'sub-buttons' ? -4 : 0;
+        const overshootPx = baseOvershootPx + extraOvershootPx + subButtonsAdjustment;
+        const extraPx = Math.ceil((totalReservedHeight || 0) + overshootPx);
+        const extraRows = extraPx / divisor;
+        computedRows = defaultRows + extraRows;
+        // Keep high precision to avoid rounding jitter; clamp minimal value
+        computedRows = Math.max(0.1, Math.round(computedRows * 1000) / 1000);
+      } else {
+        computedRows = undefined;
+      }
+      
+      const currentRows = this._config.rows;
+
+      if (computedRows === currentRows || (computedRows === undefined && currentRows === undefined)) {
+        this._firstRowsComputation = true;
+        return;
+      }
+      // Avoid tiny oscillations due to subpixel layout differences
+      if (typeof computedRows === 'number' && typeof currentRows === 'number') {
+        if (Math.abs(computedRows - currentRows) < 0.01) {
+          return;
+        }
+      }
+      
+      if (computedRows === defaultRows && currentRows === undefined) {
+        return;
+      }
+
+      if (this._rowsAutoMode === false) return;
+
+      const newConfig = { ...this._config };
+      if (computedRows === undefined) {
+          delete newConfig.rows;
+      } else {
+          newConfig.rows = computedRows;
+      }
+      
+      this._config = newConfig;
+
+      if (!this._firstRowsComputation) {
+        this._firstRowsComputation = true;
+        return;
+      }
+
+      fireEvent(this, 'config-changed', { config: newConfig });
+    } catch (_) {}
   }
 
   _initializeLists(t) {
@@ -1355,6 +1824,10 @@ class BubbleCardEditor extends LitElement {
         {
             'label': 'Separator',
             'value': 'separator'
+        },
+        {
+            'label': 'Sub-buttons only',
+            'value': 'sub-buttons'
         }
     ];
   }

@@ -1,0 +1,431 @@
+// Common sub-button editor utilities to be used in both individual sub-buttons and grouped buttons
+import { html } from 'lit';
+import { isReadOnlyEntityId } from '../../slider/helpers.js';
+import { makeGenericSliderSettings } from '../../slider/editor.js';
+import { getLazyLoadedPanelContent } from '../../../editor/utils.js';
+import { loadSubButtonClipboard } from './clipboard.js';
+
+export function makeUnifiedSubButtonEditor(editor, button, index, path, updateValueFn, deleteFn, moveFn, copyFn, cutFn, options = {}) {
+  const {
+    panelKeyPrefix = 'sub_button',
+    buttonTitle = `Button ${index + 1}${button.name ? ` - ${button.name}` : ''}`,
+    arrayLength = null
+  } = options;
+
+  // Initialize expanded panel states if needed
+  if (typeof editor._expandedPanelStates === 'undefined') {
+    editor._expandedPanelStates = {};
+  }
+
+  const entity = button.entity ?? editor._config.entity;
+  const isReadOnly = isReadOnlyEntityId(entity);
+  const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || button.select_attribute;
+  
+  // Auto-upgrade implicit select to explicit type for better control in editor
+  if (!button.sub_button_type && isSelect) {
+    try { setTimeout(() => updateValueFn({ sub_button_type: 'select' })); } catch (_) {}
+  }
+  
+  const entityAttribute = editor.hass.states[entity]?.attributes;
+  const hasSelectAttributeList = editor._selectable_attributes.some(attr => entityAttribute?.[attr]);
+  const selectableAttributeList = Object.keys(editor.hass.states[entity]?.attributes || {}).map((attributeName) => {
+    let state = editor.hass.states[entity];
+    let formattedName = editor.hass.formatEntityAttributeName(state, attributeName);
+    return { label: formattedName, value: attributeName };
+  }).filter(attribute => editor._selectable_attributes.includes(attribute.value));
+  const conditions = button.visibility ?? [];
+
+  // Supported types based on entity capabilities
+  const sliderSupported = !isReadOnly;
+  const selectSupported = isSelect || hasSelectAttributeList;
+  const typeItems = [
+    { label: 'Default (button)', value: 'default' },
+    ...(sliderSupported ? [{ label: 'Slider', value: 'slider' }] : []),
+    ...(selectSupported ? [{ label: 'Dropdown / Select', value: 'select' }] : [])
+  ];
+
+  const mainPanelKey = `${panelKeyPrefix}_main_${index}`;
+  const settingsPanelKey = `${panelKeyPrefix}_settings_${index}`;
+  const actionsPanelKey = `${panelKeyPrefix}_actions_${index}`;
+  const visibilityPanelKey = `${panelKeyPrefix}_visibility_${index}`;
+  const layoutPanelKey = `${panelKeyPrefix}_layout_${index}`;
+  const sliderTypePanelKey = `${panelKeyPrefix}_type_slider_${index}`;
+
+  const disableActions = (button.sub_button_type === 'select' || (!button.sub_button_type && isSelect)) || button.sub_button_type === 'slider';
+
+  const isBottomSection = typeof path === 'string' && path.startsWith('sub_button.bottom');
+  const effectiveFillWidth = (button.fill_width == null) ? (isBottomSection ? true : false) : button.fill_width;
+
+  const canMoveLeft = arrayLength !== null ? index > 0 : true;
+  const canMoveRight = arrayLength !== null ? index < arrayLength - 1 : true;
+
+  return html`
+    <ha-expansion-panel 
+      outlined
+      @expanded-changed=${(e) => {
+        editor._expandedPanelStates[mainPanelKey] = e.target.expanded;
+        editor.requestUpdate();
+      }}
+    >
+      <h4 slot="header">
+        <ha-icon icon="mdi:border-radius"></ha-icon>
+        ${buttonTitle}
+        <div class="button-container" @click=${(e) => e.stopPropagation()} @mousedown=${(e) => e.stopPropagation()} @touchstart=${(e) => e.stopPropagation()}>
+          <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
+            <mwc-icon-button slot="trigger" class="icon-button header" title="Options">
+              <ha-icon style="display: flex" icon="mdi:dots-vertical"></ha-icon>
+            </mwc-icon-button>
+            <mwc-list-item graphic="icon" ?disabled=${!canMoveLeft} @click=${(e) => { e.stopPropagation(); if (canMoveLeft) moveFn(-1); }}>
+              <ha-icon icon="mdi:arrow-left" slot="graphic"></ha-icon>
+              Move left
+            </mwc-list-item>
+            <mwc-list-item graphic="icon" ?disabled=${!canMoveRight} @click=${(e) => { e.stopPropagation(); if (canMoveRight) moveFn(1); }}>
+              <ha-icon icon="mdi:arrow-right" slot="graphic"></ha-icon>
+              Move right
+            </mwc-list-item>
+            <li divider role="separator"></li>
+            <mwc-list-item graphic="icon" @click=${(e) => { e.stopPropagation(); copyFn(e); }}>
+              <ha-icon icon="mdi:content-copy" slot="graphic"></ha-icon>
+              Copy
+            </mwc-list-item>
+            <mwc-list-item graphic="icon" @click=${(e) => { e.stopPropagation(); cutFn(e); }}>
+              <ha-icon icon="mdi:content-cut" slot="graphic"></ha-icon>
+              Cut
+            </mwc-list-item>
+            <li divider role="separator"></li>
+            <mwc-list-item graphic="icon" class="warning" @click=${(e) => { e.stopPropagation(); deleteFn(e); }}>
+              <ha-icon icon="mdi:delete" slot="graphic"></ha-icon>
+              Delete
+            </mwc-list-item>
+          </ha-button-menu>
+        </div>
+      </h4>
+      <div class="content">
+        ${getLazyLoadedPanelContent(editor, mainPanelKey, !!editor._expandedPanelStates[mainPanelKey], () => html`
+          <ha-expansion-panel 
+            outlined
+            @expanded-changed=${(e) => {
+              editor._expandedPanelStates[settingsPanelKey] = e.target.expanded;
+              editor.requestUpdate();
+            }}
+          >
+            <h4 slot="header">
+              <ha-icon icon="mdi:cog"></ha-icon>
+              Button settings
+            </h4>
+            <div class="content">
+              ${getLazyLoadedPanelContent(editor, settingsPanelKey, !!editor._expandedPanelStates[settingsPanelKey], () => html` 
+                <ha-form
+                  .hass=${editor.hass}
+                  .data=${button}
+                  .schema=${[
+                    { 
+                      name: "entity",
+                      label: "Optional - Entity (default to card entity)", 
+                      selector: { entity: {} }
+                    }
+                  ]}   
+                  .computeLabel=${editor._computeLabelCallback}
+                  @value-changed=${(ev) => updateValueFn(ev.detail.value)}
+                ></ha-form>
+                <ha-combo-box
+                  label="Sub-button type"
+                  .value="${button.sub_button_type ?? 'default'}"
+                  .items="${typeItems}"
+                  item-label-path="label"
+                  item-value-path="value"
+                  @value-changed="${(ev) => updateValueFn({ sub_button_type: ev.detail.value })}"
+                ></ha-combo-box>
+                ${button.sub_button_type === 'slider' ? html`
+                  <div class="bubble-info">
+                    <h4 class="bubble-section-title">
+                      <ha-icon icon="mdi:information-outline"></ha-icon>
+                      Slider behavior
+                    </h4>
+                    <div class="content">
+                      <p>By default, you need to tap the sub-button to reveal the slider. To make the slider always visible, enable the "Always show slider" option in the Layout section below.</p>
+                    </div>
+                  </div>
+                ` : ''}
+                ${(button.sub_button_type === 'select' || (!button.sub_button_type && isSelect)) && hasSelectAttributeList ? html`
+                  <div class="ha-combo-box">
+                    <ha-combo-box
+                      label="Optional - Select menu (from attributes)"
+                      .value="${button.select_attribute}"
+                      .items="${selectableAttributeList}"
+                      @value-changed="${(ev) => updateValueFn({ select_attribute: ev.detail.value })}"
+                    ></ha-combo-box>
+                  </div>
+                ` : ''}
+                <div class="ha-textfield">
+                  <ha-textfield
+                    label="Optional - Name"
+                    .value="${button.name ?? ''}"
+                    @input="${(ev) => updateValueFn({ name: ev.target.value })}"
+                  ></ha-textfield>
+                </div>
+                <div class="ha-icon-picker">
+                  <ha-icon-picker
+                    label="Optional - Icon"
+                    .value="${button.icon}"
+                    item-label-path="label"
+                    item-value-path="value"
+                    @value-changed="${(ev) => updateValueFn({ icon: ev.detail.value })}"
+                  ></ha-icon-picker>
+                </div>
+              `)}
+              ${editor.makeShowState(button, `${path}.${index}.`, path, index)}
+            </div>
+          </ha-expansion-panel>
+
+          ${button.sub_button_type === 'slider' ? html`
+            <ha-expansion-panel 
+              outlined
+              @expanded-changed=${(e) => {
+                editor._expandedPanelStates[sliderTypePanelKey] = e.target.expanded;
+                editor.requestUpdate();
+              }}
+            >
+              <h4 slot="header">
+                <ha-icon icon="mdi:tune-variant"></ha-icon>
+                Slider settings
+              </h4>
+              <div class="content">
+                ${getLazyLoadedPanelContent(editor, sliderTypePanelKey, !!editor._expandedPanelStates[sliderTypePanelKey], () => html`
+                  ${makeGenericSliderSettings({
+                    hass: editor.hass,
+                    data: button,
+                    entity,
+                    computeLabel: editor._computeLabelCallback,
+                    onFormChange: (ev) => updateValueFn(ev.detail.value),
+                    onToggleChange: (key, value) => updateValueFn({ [key]: value }),
+                    isReadOnly
+                  })}
+                `)}
+              </div>
+            </ha-expansion-panel>
+          ` : ''}
+
+          <ha-expansion-panel 
+            outlined 
+            @expanded-changed=${(e) => {
+              editor._expandedPanelStates[actionsPanelKey] = e.target.expanded;
+              editor.requestUpdate();
+            }}
+          >
+            <h4 slot="header">
+              <ha-icon icon="mdi:gesture-tap"></ha-icon>
+              Tap action on button
+            </h4>
+            <div class="content">
+              ${getLazyLoadedPanelContent(editor, actionsPanelKey, !!editor._expandedPanelStates[actionsPanelKey], () => html`
+                <div style="${disableActions ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                  ${editor.makeActionPanel("Tap action", button, 'more-info', path, index)}
+                </div>
+                ${editor.makeActionPanel("Double tap action", button, 'none', path, index)}
+                ${editor.makeActionPanel("Hold action", button, 'none', path, index)}
+              `)}
+            </div>
+          </ha-expansion-panel>
+
+          <ha-expansion-panel 
+            outlined
+            @expanded-changed=${(e) => {
+              editor._expandedPanelStates[visibilityPanelKey] = e.target.expanded;
+              editor.requestUpdate();
+            }}
+          >
+            <h4 slot="header">
+              <ha-icon icon="mdi:eye"></ha-icon>
+              Visibility
+            </h4>
+            <div class="content">
+              ${getLazyLoadedPanelContent(editor, visibilityPanelKey, !!editor._expandedPanelStates[visibilityPanelKey], () => html`
+                <ha-formfield label="Hide when parent entity is unavailable">
+                  <ha-switch
+                    .checked=${button.hide_when_parent_unavailable ?? false}
+                    @change=${(ev) => updateValueFn({ hide_when_parent_unavailable: ev.target.checked })}
+                  ></ha-switch>
+                </ha-formfield>
+                <ha-card-conditions-editor
+                  .hass=${editor.hass}
+                  .conditions=${conditions}
+                  @value-changed=${(ev) => updateValueFn({ visibility: ev.detail.value })}
+                >
+                </ha-card-conditions-editor>
+                <ha-alert alert-type="info">
+                  The sub-button will be shown when ALL conditions are fulfilled. If no conditions are set, the sub-button will always be shown.
+                </ha-alert>
+              `)}
+            </div>
+          </ha-expansion-panel>
+
+          <ha-expansion-panel 
+            outlined
+            @expanded-changed=${(e) => {
+              editor._expandedPanelStates[layoutPanelKey] = e.target.expanded;
+              editor.requestUpdate();
+            }}
+          >
+            <h4 slot="header">
+              <ha-icon icon="mdi:view-grid"></ha-icon>
+              Layout
+            </h4>
+            <div class="content">
+              ${getLazyLoadedPanelContent(editor, layoutPanelKey, !!editor._expandedPanelStates[layoutPanelKey], () => html`
+                <ha-form
+                  .hass=${editor.hass}
+                  .data=${{ ...button, fill_width: effectiveFillWidth }}
+                  .schema=${[
+                    ...(isBottomSection
+                      ? [{
+                          name: "fill_width",
+                          label: "Fill available width",
+                          selector: { boolean: {} }
+                        }]
+                      : []
+                    ),
+                    ...(button.sub_button_type === 'slider' ? [{
+                      name: "always_visible",
+                      label: "Always show slider",
+                      selector: { boolean: {} }
+                    }] : []),
+                    {
+                      name: "width",
+                      label: isBottomSection ? "Custom button width (%)" : "Custom button width (px)",
+                      selector: { 
+                        number: { 
+                          min: isBottomSection 
+                            ? 0 
+                            : (button.sub_button_type === 'slider' && button.always_visible ? 68 : 36), 
+                          max: isBottomSection ? 100 : 600, 
+                          mode: "box" 
+                        } 
+                      },
+                      disabled: effectiveFillWidth === true
+                    },
+                    {
+                      name: "custom_height",
+                      label: "Custom button height (px)",
+                      selector: { number: { min: 20, max: 100, mode: "box" } }
+                    },
+                    ...(button.sub_button_type !== 'slider' || !button.always_visible ? [{
+                      name: "content_layout",
+                      label: "Content layout",
+                      selector: { 
+                        select: {
+                          options: [
+                            { value: "icon-left", label: "Icon on left (default)" },
+                            { value: "icon-top", label: "Icon on top" },
+                            { value: "icon-bottom", label: "Icon on bottom" },
+                            { value: "icon-right", label: "Icon on right" }
+                          ],
+                          mode: "dropdown"
+                        }
+                      }
+                    }] : [])
+                  ]}   
+                  .computeLabel=${editor._computeLabelCallback}
+                  @value-changed=${(ev) => updateValueFn(ev.detail.value)}
+                ></ha-form>
+              `)}
+            </div>
+          </ha-expansion-panel>
+        `)}
+      </div>
+    </ha-expansion-panel>
+  `;
+}
+
+// Common clipboard operations
+export function createCopyHandler(editor, itemToCopy, saveFn) {
+  return (event) => {
+    event?.stopPropagation();
+    if (!itemToCopy) return;
+    try {
+      editor._clipboardButton = JSON.parse(JSON.stringify(itemToCopy));
+    } catch (_) {
+      editor._clipboardButton = itemToCopy;
+    }
+    if (saveFn) saveFn(editor._clipboardButton);
+    editor.requestUpdate();
+  };
+}
+
+export function createCutHandler(editor, itemToCopy, removeFn, saveFn) {
+  return (event) => {
+    event?.stopPropagation();
+    createCopyHandler(editor, itemToCopy, saveFn)(event);
+    if (removeFn) removeFn(event);
+  };
+}
+
+// Common remove operation
+export function createRemoveHandler(editor, targetArray, index, onValueChanged) {
+  return (event) => {
+    event?.stopPropagation();
+    targetArray.splice(index, 1);
+    if (onValueChanged) onValueChanged(editor);
+    editor.requestUpdate();
+  };
+}
+
+// Common move operation
+export function createMoveHandler(editor, targetArray, index, onValueChanged) {
+  return (direction) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= targetArray.length) return;
+    [targetArray[index], targetArray[newIndex]] = [targetArray[newIndex], targetArray[index]];
+    if (onValueChanged) onValueChanged(editor);
+    editor.requestUpdate();
+  };
+}
+
+// Common paste operation
+export function createPasteHandler(editor, targetArray, onValueChanged, getClipboardFn) {
+  return () => {
+    const stored = editor._clipboardButton || (getClipboardFn ? getClipboardFn() : null);
+    if (!stored) return;
+    editor._clipboardButton = stored;
+    const clone = JSON.parse(JSON.stringify(stored));
+    if (Array.isArray(clone.buttons) || Array.isArray(clone.group)) {
+      const buttons = clone.buttons || clone.group || [];
+      targetArray.push({ 
+        name: clone.name, 
+        buttons_layout: clone.display || clone.buttons_layout || 'inline', 
+        justify_content: clone.justify_content, 
+        group: buttons 
+      });
+    } else {
+      targetArray.push(clone);
+    }
+    if (onValueChanged) onValueChanged(editor);
+    editor.requestUpdate();
+  };
+}
+
+// Paste handler for buttons within a group
+export function createGroupButtonPasteHandler(editor, targetArray, groupIndex, onValueChanged, getClipboardFn) {
+  return () => {
+    const stored = editor._clipboardButton || (getClipboardFn ? getClipboardFn() : null);
+    if (!stored) return;
+    editor._clipboardButton = stored;
+    if (!Array.isArray(targetArray[groupIndex].group)) targetArray[groupIndex].group = [];
+    const isGroup = Array.isArray(stored?.buttons) || Array.isArray(stored?.group);
+    if (isGroup) {
+      const copy = JSON.parse(JSON.stringify(stored.buttons || stored.group || []));
+      targetArray[groupIndex].group.push(...copy);
+    } else {
+      targetArray[groupIndex].group.push(JSON.parse(JSON.stringify(stored)));
+    }
+    if (onValueChanged) onValueChanged(editor);
+    editor.requestUpdate();
+  };
+}
+
+// Get paste button text
+export function getPasteButtonText(editor, getClipboardFn) {
+  const c = editor._clipboardButton || (getClipboardFn ? getClipboardFn() : null);
+  return c ? `Paste "${c.name || 'sub-button'}"` : 'Paste';
+}
+

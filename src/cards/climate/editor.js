@@ -1,4 +1,5 @@
 import { html } from "lit";
+import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 
 
 export function renderClimateEditor(editor){
@@ -11,15 +12,22 @@ export function renderClimateEditor(editor){
     ) {
         const shouldAddHVACModes = editor.hass.states[editor._config.entity]?.attributes?.hvac_modes;
 
-        if (!editor._config.sub_button || editor._config.sub_button.length === 0) {
-            editor._config.sub_button = [
-                shouldAddHVACModes ? { 
+        if (shouldAddHVACModes) {
+            const sectioned = ensureNewSubButtonsSchemaObject(editor._config);
+            const hasMainButtons = Array.isArray(sectioned.main) && sectioned.main.length > 0;
+            
+            if (!hasMainButtons) {
+                const newSubButton = { 
                     name: 'HVAC modes menu', 
                     select_attribute: 'hvac_modes', 
                     state_background: false,
                     show_arrow: false 
-                } : null
-            ].filter(Boolean);
+                };
+                
+                sectioned.main.push(newSubButton);
+                editor._config.sub_button = sectioned;
+                editor._firstRowsComputation = true;
+            }
         }
 
         editor.climateSubButtonsAdded = true;
@@ -174,10 +182,10 @@ export function renderClimateEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
-                  Styling options
+                  Styling and layout options
                 </h4>
                 <div class="content">
-                    ${editor.makeLayoutOptions()}
+                    ${editor.makeLayoutPanel()}
                     ${editor.makeStyleEditor()}
                 </div>
             </ha-expansion-panel>
