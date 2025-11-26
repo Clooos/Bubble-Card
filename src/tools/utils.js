@@ -487,15 +487,27 @@ export function applyScrollingEffect(context, element, text) {
 		const wrappedText = `${text + separator + text + separator}`;
 		existingSpan.innerHTML = wrappedText;
 		
-		// Recalculate animation duration if needed
+		// Check if text now fits in container
 		const availableWidth = element.clientWidth;
 		const baseWidth = Math.max(1, existingSpan.scrollWidth / 2);
-		if (baseWidth > availableWidth) {
-			const SCROLL_SPEED = 16;
-			const scrollDistance = baseWidth;
-			const duration = Math.max(1, scrollDistance / SCROLL_SPEED);
-			existingSpan.style.animationDuration = `${duration.toFixed(2)}s`;
+		
+		if (baseWidth <= availableWidth) {
+			// Text now fits, disable animation
+			element.removeAttribute('data-animated');
+			element.innerHTML = text;
+			const state = bubbleScrollState.get(element);
+			if (state && state.observed && window.bubbleScrollObserver) {
+				try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
+				state.observed = false;
+			}
+			return;
 		}
+		
+		// Recalculate animation duration if needed
+		const SCROLL_SPEED = 16;
+		const scrollDistance = baseWidth;
+		const duration = Math.max(1, scrollDistance / SCROLL_SPEED);
+		existingSpan.style.animationDuration = `${duration.toFixed(2)}s`;
 		
 		// Ensure observers remain active
 		const ro = getBubbleResizeObserver();
