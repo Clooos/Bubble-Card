@@ -100,6 +100,8 @@ export function renderSubButtonsEditor(editor) {
                 </div>
             </ha-expansion-panel>
 
+            ${editor.makeModulesEditor()}
+
             <div class="bubble-info">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:information-outline"></ha-icon>
