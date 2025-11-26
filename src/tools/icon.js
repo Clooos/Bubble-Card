@@ -136,6 +136,11 @@ export function getIcon(context, entity = context.config.entity, icon = context.
       }
     }
 
+    function lockIcon() {
+      const lockState = state.toLowerCase();
+      return lockState === 'unlocked' ? 'mdi:lock-open' : 'mdi:lock';
+    }
+
     function weatherIcon(weatherType = getState(context, entity)) {
       switch (weatherType) {
         case 'cloudy':
@@ -195,7 +200,7 @@ export function getIcon(context, entity = context.config.entity, icon = context.
         input_select: "mdi:format-list-bulleted",
         input_text: "mdi:textbox",
         light: "mdi:lightbulb",
-        lock: 'mdi:lock',
+        lock: lockIcon(),
         mailbox: "mdi:mailbox",
         media_player: 'mdi:speaker',
         mower: "mdi:robot-mower",
