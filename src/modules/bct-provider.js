@@ -222,8 +222,8 @@ export async function readAllModules(hass) {
 
   const readResults = await Promise.all(readPromises);
 
-  // Build updated cache: keep unchanged + new reads
-  const updatedFilesCache = { ...cachedFiles };
+  // Build updated cache: only keep files that still exist
+  const updatedFilesCache = {};
   for (const u of unchanged) {
     updatedFilesCache[u.name] = { updated_at: u.updated_at, modules: u.modules };
   }

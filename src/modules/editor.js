@@ -805,8 +805,11 @@ export function makeModulesEditor(context) {
                   data-module-id="${key}"
                   .expanded=${!!context._expandedPanelStates[key]}
                   @expanded-changed=${(e) => {
-                    context._expandedPanelStates[key] = e.target.expanded;
-                    context.requestUpdate();
+                    // Only handle events from this panel, not from nested expandables
+                    if (e.target.getAttribute('data-module-id') === key) {
+                      context._expandedPanelStates[key] = e.target.expanded;
+                      context.requestUpdate();
+                    }
                   }}
                 >
                   <h4 slot="header">

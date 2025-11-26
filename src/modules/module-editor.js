@@ -275,19 +275,25 @@ export function renderModuleEditorForm(context) {
               ?disabled=${isFromYamlFile}
             ></ha-textfield>
             
-            <ha-expansion-panel .header=${html`
-              <ha-icon icon="mdi:filter-check-outline" style="margin-right: 8px;"></ha-icon>
-              Supported cards
-            `}>
+            <ha-expansion-panel 
+              .header=${html`
+                <ha-icon icon="mdi:filter-check-outline" style="margin-right: 8px;"></ha-icon>
+                Supported cards
+              `}
+              @expanded-changed=${(e) => e.stopPropagation()}
+            >
               <div>
                 ${renderSupportedCardCheckboxes(context, isFromYamlFile)}
               </div>
             </ha-expansion-panel>
 
-            <ha-expansion-panel .header=${html`
-              <ha-icon icon="mdi:file-document-outline" style="margin-right: 8px;"></ha-icon>
-              Description
-            `}>
+            <ha-expansion-panel 
+              .header=${html`
+                <ha-icon icon="mdi:file-document-outline" style="margin-right: 8px;"></ha-icon>
+                Description
+              `}
+              @expanded-changed=${(e) => e.stopPropagation()}
+            >
               <div class="code-editor-container">
                 <ha-code-editor
                   class="${isFromYamlFile ? 'disabled' : ''}"
@@ -302,10 +308,13 @@ export function renderModuleEditorForm(context) {
             </ha-expansion-panel>
           </div>
 
-          <ha-expansion-panel .header=${html`
-            <ha-icon icon="mdi:code-json" style="margin-right: 8px;"></ha-icon>
-            Code (CSS/JS template)
-          `}>
+          <ha-expansion-panel 
+            .header=${html`
+              <ha-icon icon="mdi:code-json" style="margin-right: 8px;"></ha-icon>
+              Code (CSS/JS template)
+            `}
+            @expanded-changed=${(e) => e.stopPropagation()}
+          >
             <div class="code-editor-container">
               <ha-code-editor
                 class="${isFromYamlFile ? 'disabled' : ''}"
@@ -320,10 +329,14 @@ export function renderModuleEditorForm(context) {
             </span>
           </ha-expansion-panel>
           
-          <ha-expansion-panel style="display: ${context._editingModule.id === 'default' ? 'none' : ''}" .header=${html`
-            <ha-icon icon="mdi:form-select" style="margin-right: 8px;"></ha-icon>
-            Optional: Editor schema (YAML)
-          `}>
+          <ha-expansion-panel 
+            style="display: ${context._editingModule.id === 'default' ? 'none' : ''}" 
+            .header=${html`
+              <ha-icon icon="mdi:form-select" style="margin-right: 8px;"></ha-icon>
+              Optional: Editor schema (YAML)
+            `}
+            @expanded-changed=${(e) => e.stopPropagation()}
+          >
             <div class="editor-schema-container">
               <ha-code-editor
                 class="${isFromYamlFile ? 'disabled' : ''}"
@@ -409,10 +422,13 @@ export function renderModuleEditorForm(context) {
 
           <hr>
 
-          <ha-expansion-panel .header=${html`
-            <ha-icon icon="mdi:export" style="margin-right: 8px;"></ha-icon>
-            Export Module
-          `}>
+          <ha-expansion-panel 
+            .header=${html`
+              <ha-icon icon="mdi:export" style="margin-right: 8px;"></ha-icon>
+              Export Module
+            `}
+            @expanded-changed=${(e) => e.stopPropagation()}
+          >
             <div class="content">
                 <div class="export-section">
                     <div class="export-buttons">
@@ -441,7 +457,10 @@ export function renderModuleEditorForm(context) {
                     </div>
                     
                     <div class="export-preview">
-                        <ha-expansion-panel .header=${"Export preview"}>
+                        <ha-expansion-panel 
+                          .header=${"Export preview"}
+                          @expanded-changed=${(e) => e.stopPropagation()}
+                        >
                         <pre id="export-preview-content">Click on a button above to generate the preview</pre>
                         </ha-expansion-panel>
                     </div>
