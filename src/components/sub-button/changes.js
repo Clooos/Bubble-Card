@@ -1,5 +1,5 @@
 import { createElement } from "../../tools/utils.js";
-import { createSubButtonElement, normalizeNameToClass } from "./create.js";
+import { createSubButtonElement, normalizeNameToClass, syncLaneFillStateForGroup } from "./create.js";
 import { updateContentContainerFixedClass } from "../base-card/index.js";
 import { getSubButtonOptions, handleVisibilityConditions, applyFillWidthClass, applyWidthStyles, applyHeightStyles, handleHideWhenParentUnavailable, ensureNewSubButtonsSchemaObject, isNewSubButtonsSchema, convertOldToNewSubButtons } from "./utils.js";
 import { handleDefaultSubButton } from "./types/default/index.js";
@@ -73,7 +73,7 @@ export function updateSubButtons(context, subButtons) {
 
 function updateSubButtonContent(context, element, options) {
   applyFillWidthClass(element, options.subButton);
-  applyWidthStyles(element, options.subButton, options.section || 'main');
+  applyWidthStyles(element, options.subButton, options.section || 'main', options.groupContainer || null);
   applyHeightStyles(element, options.subButton);
 
   if (options.subButtonType === 'slider') {
@@ -206,12 +206,12 @@ export function updateGroupButtons(context, sectionedArg) {
 
   const mainGroups = (Array.isArray(sectioned.main) ? sectioned.main : [])
     .map((item, idx) => ({ key: `g_main_${idx}`, position: 'top', item }))
-    .filter(({ item }) => item && Array.isArray(item.group));
+    .filter(({ item }) => item && Array.isArray(item.group) && item.group.length > 0);
   const bottomGroups = (Array.isArray(sectioned.bottom) ? sectioned.bottom : [])
     .map((item, idx) => ({ key: `g_bottom_${idx}`, position: 'bottom', item }))
-    .filter(({ item }) => item && Array.isArray(item.group));
+    .filter(({ item }) => item && Array.isArray(item.group) && item.group.length > 0);
   // Handle bottom non-group buttons: create individual groups when mixed with explicit groups
-  const bottomExplicitGroups = (Array.isArray(sectioned.bottom) ? sectioned.bottom : []).filter(it => it && Array.isArray(it.group));
+  const bottomExplicitGroups = (Array.isArray(sectioned.bottom) ? sectioned.bottom : []).filter(it => it && Array.isArray(it.group) && it.group.length > 0);
   
   let bottomNonGroupGroups = [];
   if (bottomNonGroupButtons.length > 0) {
@@ -263,6 +263,21 @@ export function updateGroupButtons(context, sectionedArg) {
     const groupElementsObj = context.elements.groups[key];
     const groupContainer = groupElementsObj.container;
     if (!groupContainer) return;
+
+    // Calculate total number of buttons with defined width (not fill_width) for gap adjustment
+    const buttonsWithWidth = group.buttons.filter(button => 
+      button && 
+      !button.fill_width && 
+      button.width != null && 
+      button.width !== ''
+    );
+    const totalButtonsWithWidth = buttonsWithWidth.length;
+    // Store on container for use in applyWidthStyles
+    if (totalButtonsWithWidth > 0 && groupContainer.classList.contains('display-inline')) {
+      groupContainer.dataset.totalButtonsWithWidth = totalButtonsWithWidth.toString();
+    } else {
+      delete groupContainer.dataset.totalButtonsWithWidth;
+    }
 
     group.buttons.forEach((button, buttonIndex) => {
       if (!button) return;
@@ -332,5 +347,7 @@ export function updateGroupButtons(context, sectionedArg) {
       updateSubButtonContent(context, element, { ...options, subButton: subButtonWithAutoWidth, groupContainer, overlayAtCardLevel, section });
       handleVisibilityConditions(element, button, context._hass);
     });
+
+    syncLaneFillStateForGroup(groupContainer);
   });
 }

@@ -32,6 +32,27 @@ function getOrInitSectionArray(editor, sectionKey) {
   return editor._config.sub_button[sectionKey];
 }
 
+// Helper to safely update section array (clones to ensure extensibility)
+function updateSectionArray(editor, sectionKey, updater, onValueChanged) {
+  const targetArr = getOrInitSectionArray(editor, sectionKey);
+  const targetArrCopy = updater([...targetArr]);
+  editor._config.sub_button[sectionKey] = targetArrCopy;
+  if (onValueChanged) onValueChanged(editor);
+  editor.requestUpdate();
+}
+
+// Helper to safely update a group within a section array
+function updateGroupInSection(editor, sectionKey, groupIndex, updater, onValueChanged) {
+  const targetArr = getOrInitSectionArray(editor, sectionKey);
+  const targetArrCopy = [...targetArr];
+  const groupCopy = { ...targetArrCopy[groupIndex] };
+  const updatedGroup = updater(groupCopy);
+  targetArrCopy[groupIndex] = updatedGroup;
+  editor._config.sub_button[sectionKey] = targetArrCopy;
+  if (onValueChanged) onValueChanged(editor);
+  editor.requestUpdate();
+}
+
 // Commit minimal sub_button to config: remove empty sections and drop the property when empty
 function subButtonsValueChanged(editor) {
   const sb = editor._config.sub_button;
@@ -75,63 +96,62 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
   const targetArr = sectionKey === 'main' ? editor._config.sub_button.main : editor._config.sub_button.bottom;
 
   const updateGroupValues = (values) => {
-    const next = { ...(targetArr[groupIndex] || {}) };
-    const currentGroup = targetArr[groupIndex] || {};
-    const groupButtons = Array.isArray(currentGroup.group) ? currentGroup.group : [];
-    const hasExplicitFill = groupButtons.some((b) => b && b.fill_width === true);
-    // Map editor values to schema fields
-    if (Object.prototype.hasOwnProperty.call(values, 'name')) next.name = values.name;
-    // group_layout removed in favor of global layout controls
-    if (Object.prototype.hasOwnProperty.call(values, 'buttons_layout')) next.buttons_layout = values.buttons_layout;
-    if (Object.prototype.hasOwnProperty.call(values, 'justify_content')) {
-      const requested = values.justify_content;
-      // Map UI pseudo-value 'fill' to config (remove justify_content), otherwise set real CSS value
-      if (requested === 'fill') {
-        // Selecting Fill available width does not set a CSS justify; remove to use default
-        if (Object.prototype.hasOwnProperty.call(next, 'justify_content')) delete next.justify_content;
-        // Restore per-button fill behavior
-        if (Array.isArray(groupButtons)) {
-          for (let i = 0; i < groupButtons.length; i += 1) {
-            const btn = groupButtons[i];
-            if (!btn) continue;
-            if (sectionKey === 'bottom') {
-              // Bottom defaults to fill when undefined: remove explicit false
-              if (btn.fill_width === false) {
-                const { fill_width, ...rest } = btn;
-                groupButtons[i] = { ...rest };
-              }
-            } else {
-              // Top does not default to fill: explicitly enable fill_width
-              if (btn.fill_width !== true) {
-                groupButtons[i] = { ...btn, fill_width: true };
-              }
-            }
-          }
-          next.group = groupButtons;
-        }
-      } else {
-        // If any sub-button explicitly forces fill_width, ignore alignment change and keep UI locked to 'fill'
-        if (hasExplicitFill) {
-          // No-op: do not update justify_content; UI will recompute to 'fill' and be disabled
-        } else {
-          next.justify_content = requested;
-          // Switching to a non-fill alignment disables fill width on all buttons in the group
+    updateGroupInSection(editor, sectionKey, groupIndex, (group) => {
+      const next = { ...group };
+      const groupButtons = Array.isArray(group.group) ? [...group.group] : [];
+      const hasExplicitFill = groupButtons.some((b) => b && b.fill_width === true);
+      // Map editor values to schema fields
+      if (Object.prototype.hasOwnProperty.call(values, 'name')) next.name = values.name;
+      // group_layout removed in favor of global layout controls
+      if (Object.prototype.hasOwnProperty.call(values, 'buttons_layout')) next.buttons_layout = values.buttons_layout;
+      if (Object.prototype.hasOwnProperty.call(values, 'justify_content')) {
+        const requested = values.justify_content;
+        // Map UI pseudo-value 'fill' to config (remove justify_content), otherwise set real CSS value
+        if (requested === 'fill') {
+          // Selecting Fill available width does not set a CSS justify; remove to use default
+          if (Object.prototype.hasOwnProperty.call(next, 'justify_content')) delete next.justify_content;
+          // Restore per-button fill behavior
           if (Array.isArray(groupButtons)) {
             for (let i = 0; i < groupButtons.length; i += 1) {
               const btn = groupButtons[i];
               if (!btn) continue;
-              if (btn.fill_width !== false) {
-                groupButtons[i] = { ...btn, fill_width: false };
+              if (sectionKey === 'bottom') {
+                // Bottom defaults to fill when undefined: remove explicit false
+                if (btn.fill_width === false) {
+                  const { fill_width, ...rest } = btn;
+                  groupButtons[i] = { ...rest };
+                }
+              } else {
+                // Top does not default to fill: explicitly enable fill_width
+                if (btn.fill_width !== true) {
+                  groupButtons[i] = { ...btn, fill_width: true };
+                }
               }
             }
             next.group = groupButtons;
           }
+        } else {
+          // If any sub-button explicitly forces fill_width, ignore alignment change and keep UI locked to 'fill'
+          if (hasExplicitFill) {
+            // No-op: do not update justify_content; UI will recompute to 'fill' and be disabled
+          } else {
+            next.justify_content = requested;
+            // Switching to a non-fill alignment disables fill width on all buttons in the group
+            if (Array.isArray(groupButtons)) {
+              for (let i = 0; i < groupButtons.length; i += 1) {
+                const btn = groupButtons[i];
+                if (!btn) continue;
+                if (btn.fill_width !== false) {
+                  groupButtons[i] = { ...btn, fill_width: false };
+                }
+              }
+              next.group = groupButtons;
+            }
+          }
         }
       }
-    }
-    targetArr[groupIndex] = next;
-    subButtonsValueChanged(editor);
-    editor.requestUpdate();
+      return next;
+    }, subButtonsValueChanged);
   };
 
   const groupToCopy = targetArr[groupIndex];
@@ -292,33 +312,38 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
             if (!button) return null;
 
             const updateButton = (values) => {
-              const targetArr = sectionKey === 'main' ? editor._config.sub_button.main : editor._config.sub_button.bottom;
-              const nextButtons = Array.isArray(targetArr[groupIndex].group) ? targetArr[groupIndex].group.slice() : [];
-              nextButtons[buttonIndex] = { ...(nextButtons[buttonIndex] || {}), ...values };
-              targetArr[groupIndex].group = nextButtons;
-              subButtonsValueChanged(editor);
-              editor.requestUpdate();
+              updateGroupInSection(editor, sectionKey, groupIndex, (group) => {
+                const groupCopy = { ...group };
+                const nextButtons = Array.isArray(groupCopy.group) ? [...groupCopy.group] : [];
+                nextButtons[buttonIndex] = { ...(nextButtons[buttonIndex] || {}), ...values };
+                groupCopy.group = nextButtons;
+                return groupCopy;
+              }, subButtonsValueChanged);
             };
 
             const removeButton = (event) => {
               event?.stopPropagation();
-              const targetArr = sectionKey === 'main' ? editor._config.sub_button.main : editor._config.sub_button.bottom;
-              const nextButtons = Array.isArray(targetArr[groupIndex].group) ? targetArr[groupIndex].group.slice() : [];
-              nextButtons.splice(buttonIndex, 1);
-              targetArr[groupIndex].group = nextButtons;
-              subButtonsValueChanged(editor);
-              editor.requestUpdate();
+              updateGroupInSection(editor, sectionKey, groupIndex, (group) => {
+                const groupCopy = { ...group };
+                const nextButtons = Array.isArray(groupCopy.group) ? [...groupCopy.group] : [];
+                nextButtons.splice(buttonIndex, 1);
+                groupCopy.group = nextButtons;
+                return groupCopy;
+              }, subButtonsValueChanged);
             };
 
             const moveButton = (direction) => {
               const targetIndex = buttonIndex + direction;
-              const targetArr = sectionKey === 'main' ? editor._config.sub_button.main : editor._config.sub_button.bottom;
-              const buttons = Array.isArray(targetArr[groupIndex].group) ? targetArr[groupIndex].group : [];
+              const targetArr = getOrInitSectionArray(editor, sectionKey);
+              const buttons = Array.isArray(targetArr[groupIndex]?.group) ? targetArr[groupIndex].group : [];
               if (targetIndex < 0 || targetIndex >= buttons.length) return;
-              [buttons[buttonIndex], buttons[targetIndex]] = [buttons[targetIndex], buttons[buttonIndex]];
-              targetArr[groupIndex].group = buttons;
-              subButtonsValueChanged(editor);
-              editor.requestUpdate();
+              updateGroupInSection(editor, sectionKey, groupIndex, (group) => {
+                const groupCopy = { ...group };
+                const buttonsCopy = Array.isArray(groupCopy.group) ? [...groupCopy.group] : [];
+                [buttonsCopy[buttonIndex], buttonsCopy[targetIndex]] = [buttonsCopy[targetIndex], buttonsCopy[buttonIndex]];
+                groupCopy.group = buttonsCopy;
+                return groupCopy;
+              }, subButtonsValueChanged);
             };
 
             const btnToCopy = Array.isArray(group.group) ? group.group[buttonIndex] : null;
@@ -351,11 +376,12 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
             </button>
             <button class="icon-button" @click=${() => {
               const newButton = { entity: editor._config.entity };
-              const targetArr = sectionKey === 'main' ? getOrInitSectionArray(editor, 'main') : getOrInitSectionArray(editor, 'bottom');
-              if (!Array.isArray(targetArr[groupIndex].group)) targetArr[groupIndex].group = [];
-              targetArr[groupIndex].group.push(newButton);
-              subButtonsValueChanged(editor);
-              editor.requestUpdate();
+              updateGroupInSection(editor, sectionKey, groupIndex, (group) => {
+                const groupCopy = { ...group };
+                if (!Array.isArray(groupCopy.group)) groupCopy.group = [];
+                groupCopy.group = [...groupCopy.group, newButton];
+                return groupCopy;
+              }, subButtonsValueChanged);
             }}>
               <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
               Add sub-button
@@ -372,17 +398,15 @@ function makeSectionList(editor, sectionKey) {
   const items = Array.isArray(sectionedView?.[sectionKey]) ? sectionedView[sectionKey] : [];
 
   const addButton = () => {
-    const targetArr = sectionKey === 'main' ? getOrInitSectionArray(editor, 'main') : getOrInitSectionArray(editor, 'bottom');
-    targetArr.push({ entity: editor._config.entity });
-    subButtonsValueChanged(editor);
-    editor.requestUpdate();
+    updateSectionArray(editor, sectionKey, (arr) => [...arr, { entity: editor._config.entity }], subButtonsValueChanged);
   };
 
   const addGroup = () => {
-    const targetArr = sectionKey === 'main' ? getOrInitSectionArray(editor, 'main') : getOrInitSectionArray(editor, 'bottom');
-    targetArr.push({ name: `Group ${(targetArr.filter(i => i && Array.isArray(i.group)).length + 1)}`, buttons_layout: 'inline', group: [] });
-    subButtonsValueChanged(editor);
-    editor.requestUpdate();
+    updateSectionArray(editor, sectionKey, (arr) => {
+      const arrCopy = [...arr];
+      arrCopy.push({ name: `Group ${(arrCopy.filter(i => i && Array.isArray(i.group)).length + 1)}`, buttons_layout: 'inline', group: [] });
+      return arrCopy;
+    }, subButtonsValueChanged);
   };
 
   return html`
@@ -398,9 +422,11 @@ function makeSectionList(editor, sectionKey) {
       const targetArr = sectionKey === 'main' ? editor._config.sub_button.main : editor._config.sub_button.bottom;
       
       const updateButton = (values) => {
-        targetArr[index] = { ...(targetArr[index] || {}), ...values };
-        subButtonsValueChanged(editor);
-        editor.requestUpdate();
+        updateSectionArray(editor, sectionKey, (arr) => {
+          const arrCopy = [...arr];
+          arrCopy[index] = { ...(arrCopy[index] || {}), ...values };
+          return arrCopy;
+        }, subButtonsValueChanged);
       };
       const removeButton = createRemoveHandler(editor, targetArr, index, subButtonsValueChanged);
       const moveButton = createMoveHandler(editor, targetArr, index, subButtonsValueChanged);

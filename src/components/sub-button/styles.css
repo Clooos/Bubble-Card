@@ -41,6 +41,11 @@
     margin: 0 8px 8px 8px;
     gap: 8px;
     pointer-events: none;
+    flex-wrap: nowrap;
+}
+
+.bubble-sub-button-bottom-container.alignment-lanes-active {
+    justify-content: flex-start;
 }
 
 .bubble-sub-button-bottom-container.with-main-buttons-bottom {
@@ -51,8 +56,58 @@
     pointer-events: auto;
 }
 
+.bubble-sub-button-alignment-lane {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.bubble-sub-button-alignment-lane.lane-start,
+.bubble-sub-button-alignment-lane.lane-center,
+.bubble-sub-button-alignment-lane.lane-end {
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.bubble-sub-button-alignment-lane.lane-start {
+    justify-content: flex-start;
+}
+
+.bubble-sub-button-alignment-lane.lane-center {
+    justify-content: center;
+    flex: 1 1 0%;
+    min-width: 0;
+}
+
+.bubble-sub-button-alignment-lane.lane-end {
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+.bubble-sub-button-alignment-lane.lane-expand {
+    flex: 1 1 0%;
+    min-width: 0;
+}
+
+.bubble-sub-button-alignment-lane.lane-fill {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+}
+
 .bubble-sub-button-bottom-container .bubble-sub-button-group {
-    flex-grow: 1;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.bubble-sub-button-bottom-container .bubble-sub-button-group.alignment-fill {
+    flex: 1 1 0%;
+}
+
+.bubble-sub-button-bottom-container .bubble-sub-button-group.alignment-fill-auto {
+    flex: 1 1 0%;
 }
 
 /* Display styles for groups */
@@ -91,7 +146,7 @@
     position: relative;
     right: 0;
     box-sizing: border-box;
-    width: min-content;
+    width: max-content;
     min-width: 36px;
     height: var(--bubble-sub-button-height, 36px);
     vertical-align: middle;
@@ -427,4 +482,5 @@
     display: flex;
     justify-content: flex-end;
 }
+
 

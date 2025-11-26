@@ -272,17 +272,54 @@ export function handleVisibilityConditions(element, subButton, hass) {
 }
 
 // Apply width styles to an element
-export function applyWidthStyles(element, subButton, section = 'main') {
+export function applyWidthStyles(element, subButton, section = 'main', groupContainer = null) {
   try {
     const widthVal = subButton.width;
     if (!subButton.fill_width && widthVal != null && widthVal !== '') {
       const widthNum = Number(widthVal);
       if (!Number.isNaN(widthNum) && widthNum > 0) {
         const unit = (section === 'main') ? 'px' : '%';
-        element.style.width = `${widthNum}${unit}`;
+        let finalWidth = `${widthNum}${unit}`;
+        
+        // Adjust width for percentage values in inline groups to account for gap
+        if (unit === '%' && groupContainer && groupContainer.classList.contains('display-inline')) {
+          const gap = 8; // Gap between buttons in pixels (from CSS)
+          const totalButtonsWithWidth = parseInt(groupContainer.dataset.totalButtonsWithWidth || '0', 10);
+          
+          if (totalButtonsWithWidth > 0) {
+            // Calculate gap share per button
+            // For N buttons, there are (N-1) gaps between them
+            // Each button should subtract its share: (N-1) * gap / N
+            const gapSharePerButton = ((totalButtonsWithWidth - 1) * gap) / totalButtonsWithWidth;
+            finalWidth = `calc(${widthNum}% - ${gapSharePerButton}px)`;
+          }
+        }
+        
+        element.style.width = finalWidth;
         element.style.flex = '0 0 auto';
       } else if (typeof widthVal === 'string') {
-        element.style.width = widthVal;
+        // Handle string values like '50%', '10rem', etc.
+        let finalWidth = widthVal;
+        
+        // Adjust width for percentage values in inline groups to account for gap
+        if (widthVal.includes('%') && groupContainer && groupContainer.classList.contains('display-inline')) {
+          const percentMatch = widthVal.match(/(\d+(?:\.\d+)?)%/);
+          if (percentMatch) {
+            const percentValue = parseFloat(percentMatch[1]);
+            const gap = 8; // Gap between buttons in pixels
+            const totalButtonsWithWidth = parseInt(groupContainer.dataset.totalButtonsWithWidth || '0', 10);
+            
+            if (totalButtonsWithWidth > 0) {
+              // Calculate gap share per button
+              // For N buttons, there are (N-1) gaps between them
+              // Each button should subtract its share: (N-1) * gap / N
+              const gapSharePerButton = ((totalButtonsWithWidth - 1) * gap) / totalButtonsWithWidth;
+              finalWidth = `calc(${percentValue}% - ${gapSharePerButton}px)`;
+            }
+          }
+        }
+        
+        element.style.width = finalWidth;
         element.style.flex = '0 0 auto';
       }
     } else if (subButton.fill_width) {

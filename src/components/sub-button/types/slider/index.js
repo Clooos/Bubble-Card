@@ -442,13 +442,27 @@ export function ensureSliderForSubButton(context, element, options) {
 }
 
 export function handleSliderSubButton(context, element, options) {
-  updateBackground(element, options);
-  setupActions(element, options);
-
   const displayedState = buildDisplayedState(options, context, element);
-  updateElementVisibility(element, options, displayedState);
-  if (element.nameContainer) {
-    applySubButtonScrollingEffect(context, element.nameContainer, displayedState, options.subButton);
+  
+  // Check if displayed state has changed to avoid unnecessary DOM updates
+  const previousDisplayedState = element._previousDisplayedState;
+  const previousState = element._previousState;
+  const currentState = options.state?.state;
+  const displayedStateChanged = previousDisplayedState !== displayedState;
+  const entityStateChanged = previousState !== currentState;
+  
+  // Store current values for next comparison
+  element._previousDisplayedState = displayedState;
+  element._previousState = currentState;
+  
+  // Only update DOM if displayed state changed, entity state changed, or if this is the first update
+  if (displayedStateChanged || entityStateChanged || previousDisplayedState === undefined) {
+    updateBackground(element, options);
+    setupActions(element, options);
+    updateElementVisibility(element, options, displayedState);
+    if (element.nameContainer) {
+      applySubButtonScrollingEffect(context, element.nameContainer, displayedState, options.subButton);
+    }
   }
 
   // Determine icon (defaults for color sliders)

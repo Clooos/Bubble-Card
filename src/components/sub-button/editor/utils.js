@@ -360,11 +360,31 @@ export function createCutHandler(editor, itemToCopy, removeFn, saveFn) {
   };
 }
 
+// Helper to find section key from array reference
+function findSectionKey(editor, targetArray) {
+  if (targetArray === editor._config.sub_button?.main) return 'main';
+  if (targetArray === editor._config.sub_button?.bottom) return 'bottom';
+  return null;
+}
+
 // Common remove operation
 export function createRemoveHandler(editor, targetArray, index, onValueChanged) {
   return (event) => {
     event?.stopPropagation();
-    targetArray.splice(index, 1);
+    const sectionKey = findSectionKey(editor, targetArray);
+    if (!sectionKey) {
+      // Fallback for non-section arrays
+      const targetArrayCopy = [...targetArray];
+      targetArrayCopy.splice(index, 1);
+      if (onValueChanged) onValueChanged(editor);
+      editor.requestUpdate();
+      return;
+    }
+    // Use section update helper
+    const targetArr = editor._config.sub_button[sectionKey];
+    const targetArrayCopy = [...targetArr];
+    targetArrayCopy.splice(index, 1);
+    editor._config.sub_button[sectionKey] = targetArrayCopy;
     if (onValueChanged) onValueChanged(editor);
     editor.requestUpdate();
   };
@@ -375,7 +395,20 @@ export function createMoveHandler(editor, targetArray, index, onValueChanged) {
   return (direction) => {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= targetArray.length) return;
-    [targetArray[index], targetArray[newIndex]] = [targetArray[newIndex], targetArray[index]];
+    const sectionKey = findSectionKey(editor, targetArray);
+    if (!sectionKey) {
+      // Fallback for non-section arrays
+      const targetArrayCopy = [...targetArray];
+      [targetArrayCopy[index], targetArrayCopy[newIndex]] = [targetArrayCopy[newIndex], targetArrayCopy[index]];
+      if (onValueChanged) onValueChanged(editor);
+      editor.requestUpdate();
+      return;
+    }
+    // Use section update helper
+    const targetArr = editor._config.sub_button[sectionKey];
+    const targetArrayCopy = [...targetArr];
+    [targetArrayCopy[index], targetArrayCopy[newIndex]] = [targetArrayCopy[newIndex], targetArrayCopy[index]];
+    editor._config.sub_button[sectionKey] = targetArrayCopy;
     if (onValueChanged) onValueChanged(editor);
     editor.requestUpdate();
   };
@@ -388,17 +421,40 @@ export function createPasteHandler(editor, targetArray, onValueChanged, getClipb
     if (!stored) return;
     editor._clipboardButton = stored;
     const clone = JSON.parse(JSON.stringify(stored));
+    const sectionKey = findSectionKey(editor, targetArray);
+    if (!sectionKey) {
+      // Fallback for non-section arrays
+      const targetArrayCopy = [...targetArray];
+      if (Array.isArray(clone.buttons) || Array.isArray(clone.group)) {
+        const buttons = clone.buttons || clone.group || [];
+        targetArrayCopy.push({ 
+          name: clone.name, 
+          buttons_layout: clone.display || clone.buttons_layout || 'inline', 
+          justify_content: clone.justify_content, 
+          group: buttons 
+        });
+      } else {
+        targetArrayCopy.push(clone);
+      }
+      if (onValueChanged) onValueChanged(editor);
+      editor.requestUpdate();
+      return;
+    }
+    // Use section update helper
+    const targetArr = editor._config.sub_button[sectionKey];
+    const targetArrayCopy = [...targetArr];
     if (Array.isArray(clone.buttons) || Array.isArray(clone.group)) {
       const buttons = clone.buttons || clone.group || [];
-      targetArray.push({ 
+      targetArrayCopy.push({ 
         name: clone.name, 
         buttons_layout: clone.display || clone.buttons_layout || 'inline', 
         justify_content: clone.justify_content, 
         group: buttons 
       });
     } else {
-      targetArray.push(clone);
+      targetArrayCopy.push(clone);
     }
+    editor._config.sub_button[sectionKey] = targetArrayCopy;
     if (onValueChanged) onValueChanged(editor);
     editor.requestUpdate();
   };
@@ -410,14 +466,22 @@ export function createGroupButtonPasteHandler(editor, targetArray, groupIndex, o
     const stored = editor._clipboardButton || (getClipboardFn ? getClipboardFn() : null);
     if (!stored) return;
     editor._clipboardButton = stored;
-    if (!Array.isArray(targetArray[groupIndex].group)) targetArray[groupIndex].group = [];
+    const sectionKey = findSectionKey(editor, targetArray);
+    if (!sectionKey) return;
+    // Use section update helper
+    const targetArr = editor._config.sub_button[sectionKey];
+    const targetArrayCopy = [...targetArr];
+    const groupCopy = { ...targetArrayCopy[groupIndex] };
+    if (!Array.isArray(groupCopy.group)) groupCopy.group = [];
     const isGroup = Array.isArray(stored?.buttons) || Array.isArray(stored?.group);
     if (isGroup) {
       const copy = JSON.parse(JSON.stringify(stored.buttons || stored.group || []));
-      targetArray[groupIndex].group.push(...copy);
+      groupCopy.group = [...groupCopy.group, ...copy];
     } else {
-      targetArray[groupIndex].group.push(JSON.parse(JSON.stringify(stored)));
+      groupCopy.group = [...groupCopy.group, JSON.parse(JSON.stringify(stored))];
     }
+    targetArrayCopy[groupIndex] = groupCopy;
+    editor._config.sub_button[sectionKey] = targetArrayCopy;
     if (onValueChanged) onValueChanged(editor);
     editor.requestUpdate();
   };
