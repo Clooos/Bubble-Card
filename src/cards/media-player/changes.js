@@ -159,9 +159,11 @@ export function changeDisplayedInfo(context) {
     const artist = getAttribute(context, "media_artist");
     const noMediaInfo = (title + artist) === '';
     const showIcon = context.config.show_icon ?? true;
+    const state = getState(context);
+    const isIdle = state === 'idle';
 
-    context.elements.mediaInfoContainer.style.display = noMediaInfo ? 'none' : '';
-    context.elements.nameContainer.style.display = noMediaInfo ? '' : 'none';
+    context.elements.mediaInfoContainer.style.display = (noMediaInfo || isIdle) ? 'none' : '';
+    context.elements.nameContainer.style.display = (noMediaInfo || isIdle) ? '' : 'none';
     context.elements.mediaInfoContainer.classList.toggle('name-without-icon', !showIcon);
 }
 
