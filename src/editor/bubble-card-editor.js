@@ -1785,51 +1785,56 @@ class BubbleCardEditor extends LitElement {
         this._cachedAttributeListEntity = null;
     }
 
-    this.cardTypeList = [{
-            'label': 'Button (Switch, slider, ...)',
-            'value': 'button'
-        },
-        {
-            'label': t('editor.calendar.name'),
-            'value': 'calendar'
-        },
-        {
-            'label': 'Cover',
-            'value': 'cover'
-        },
-        {
-            'label': 'Climate',
-            'value': 'climate'
-        },
-        {
-            'label': 'Empty column',
-            'value': 'empty-column'
-        },
-        {
-            'label': 'Horizontal buttons stack',
-            'value': 'horizontal-buttons-stack'
-        },
-        {
-            'label': 'Media player',
-            'value': 'media-player'
-        },
-        {
-            'label': 'Pop-up',
-            'value': 'pop-up'
-        },
-        {
-            'label': 'Select',
-            'value': 'select'
-        },
-        {
-            'label': 'Separator',
-            'value': 'separator'
-        },
-        {
-            'label': 'Sub-buttons only',
-            'value': 'sub-buttons'
-        }
-    ];
+    // Only recreate cardTypeList if it doesn't exist or if translation might have changed
+    const calendarLabel = t('editor.calendar.name');
+    if (!this.cardTypeList || (this._cachedCalendarLabel && this._cachedCalendarLabel !== calendarLabel)) {
+        this.cardTypeList = [{
+                'label': 'Button (Switch, slider, ...)',
+                'value': 'button'
+            },
+            {
+                'label': calendarLabel,
+                'value': 'calendar'
+            },
+            {
+                'label': 'Cover',
+                'value': 'cover'
+            },
+            {
+                'label': 'Climate',
+                'value': 'climate'
+            },
+            {
+                'label': 'Empty column',
+                'value': 'empty-column'
+            },
+            {
+                'label': 'Horizontal buttons stack',
+                'value': 'horizontal-buttons-stack'
+            },
+            {
+                'label': 'Media player',
+                'value': 'media-player'
+            },
+            {
+                'label': 'Pop-up',
+                'value': 'pop-up'
+            },
+            {
+                'label': 'Select',
+                'value': 'select'
+            },
+            {
+                'label': 'Separator',
+                'value': 'separator'
+            },
+            {
+                'label': 'Sub-buttons only',
+                'value': 'sub-buttons'
+            }
+        ];
+        this._cachedCalendarLabel = calendarLabel;
+    }
   }
 }
 
