@@ -857,6 +857,7 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
 
         // Auto-upgrade layout to 'large' when bottom sub-buttons are present
         // and we're not in Section view, only if user layout is unset or 'normal'
+        // In Section view, remove 'normal' layout to use default 'large'
         try {
             const rawSubButton = context?.config?.sub_button;
             const hasBottomSubButtons = (() => {
@@ -869,8 +870,20 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
             if (hasBottomSubButtons) {
                 const isSection = Boolean(window.isSectionView);
                 const currentLayout = context?.config?.card_layout;
+                const hasCardLayoutExplicitlyDefined = Object.prototype.hasOwnProperty.call(context?.config, 'card_layout');
                 const isNormalLayout = currentLayout == null || currentLayout === 'normal';
-                if (!isSection && isNormalLayout) {
+                
+                if (isSection && hasCardLayoutExplicitlyDefined && currentLayout === 'normal') {
+                    // In section view, remove 'normal' to use default 'large'
+                    try {
+                        delete context.config.card_layout;
+                    } catch (_) {
+                        const configCopy = { ...context.config };
+                        delete configCopy.card_layout;
+                        context.config = configCopy;
+                    }
+                } else if (!isSection && isNormalLayout) {
+                    // In non-section view, set to 'large' if layout is unset or 'normal'
                     determinedLayoutClass = 'large';
                     context.config.card_layout = 'large';
                 }
