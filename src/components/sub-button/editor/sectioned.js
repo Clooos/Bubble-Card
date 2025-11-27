@@ -36,7 +36,18 @@ function getOrInitSectionArray(editor, sectionKey) {
 function updateSectionArray(editor, sectionKey, updater, onValueChanged) {
   const targetArr = getOrInitSectionArray(editor, sectionKey);
   const targetArrCopy = updater([...targetArr]);
-  editor._config.sub_button[sectionKey] = targetArrCopy;
+  // Clone sub_button object to ensure it is extensible
+  try {
+    editor._config.sub_button[sectionKey] = targetArrCopy;
+  } catch (_) {
+    // If sub_button is frozen, clone it
+    try {
+      editor._config.sub_button = { ...editor._config.sub_button, [sectionKey]: targetArrCopy };
+    } catch (__) {
+      // If config itself is frozen, clone the entire config
+      editor._config = { ...editor._config, sub_button: { ...editor._config.sub_button, [sectionKey]: targetArrCopy } };
+    }
+  }
   if (onValueChanged) onValueChanged(editor);
   editor.requestUpdate();
 }
@@ -48,7 +59,18 @@ function updateGroupInSection(editor, sectionKey, groupIndex, updater, onValueCh
   const groupCopy = { ...targetArrCopy[groupIndex] };
   const updatedGroup = updater(groupCopy);
   targetArrCopy[groupIndex] = updatedGroup;
-  editor._config.sub_button[sectionKey] = targetArrCopy;
+  // Clone sub_button object to ensure it is extensible
+  try {
+    editor._config.sub_button[sectionKey] = targetArrCopy;
+  } catch (_) {
+    // If sub_button is frozen, clone it
+    try {
+      editor._config.sub_button = { ...editor._config.sub_button, [sectionKey]: targetArrCopy };
+    } catch (__) {
+      // If config itself is frozen, clone the entire config
+      editor._config = { ...editor._config, sub_button: { ...editor._config.sub_button, [sectionKey]: targetArrCopy } };
+    }
+  }
   if (onValueChanged) onValueChanged(editor);
   editor.requestUpdate();
 }
@@ -81,6 +103,19 @@ function subButtonsValueChanged(editor) {
 
   if (hasBottom) {
     editor._firstRowsComputation = true;
+    // In section view, if card_layout is explicitly set to 'normal', remove it to use default 'large'
+    const isSectionView = Boolean(window.isSectionView);
+    const hasCardLayoutExplicitlyDefined = Object.prototype.hasOwnProperty.call(editor._config, 'card_layout');
+    if (isSectionView && hasCardLayoutExplicitlyDefined && editor._config.card_layout === 'normal') {
+      try {
+        delete editor._config.card_layout;
+      } catch (_) {
+        const configCopy = { ...editor._config };
+        delete configCopy.card_layout;
+        editor._config = configCopy;
+      }
+      editor._valueChanged({ target: { configValue: 'card_layout', value: undefined } });
+    }
   }
 
   const value = {};
@@ -577,6 +612,8 @@ export function makeSectionedSubButtonsPanel(editor) {
   const mainButtonsFullWidth = editor._config.main_buttons_full_width ?? (isMainButtonsBottom ? true : false);
   const isSectionView = Boolean(window.isSectionView);
   const isLargeConfigured = (editor._config.card_layout || '').includes('large');
+  const hasCardLayoutExplicitlyDefined = Object.prototype.hasOwnProperty.call(editor._config, 'card_layout');
+  const isNormalLayoutExplicitlySet = hasCardLayoutExplicitlyDefined && editor._config.card_layout === 'normal';
   const hasBottomConfigured = Array.isArray(sectionedView.bottom) && sectionedView.bottom.some(item => !!item);
   const hasRowsDefined = editor._config.rows !== undefined && editor._config.rows !== null && editor._config.rows !== '';
   const hasGridRowsDefined = editor._config.grid_options?.rows !== undefined && editor._config.grid_options?.rows !== null && editor._config.grid_options?.rows !== '';
@@ -679,7 +716,7 @@ export function makeSectionedSubButtonsPanel(editor) {
             </h4>
             <div class="content">
               ${makeLayoutForm(editor, 'bottom')}
-              ${editor._renderConditionalContent(!isSectionView && !isLargeConfigured && !hasBottomConfigured, html`
+              ${editor._renderConditionalContent(!isLargeConfigured && !hasBottomConfigured && (isNormalLayoutExplicitlySet || (!isSectionView && !hasCardLayoutExplicitlyDefined)), html`
                 <div class="bubble-info warning">
                   <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-outline"></ha-icon>

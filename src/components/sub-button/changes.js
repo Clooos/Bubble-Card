@@ -39,7 +39,7 @@ export function updateSubButtons(context, subButtons) {
         if (subButton?.name) {
           const nameClass = normalizeNameToClass(subButton.name);
           if (nameClass) {
-            classes.push(`bubble-sub-button-name-${nameClass}`);
+            classes.push(nameClass);
           }
         }
         element = createElement('div', classes.join(' '));
@@ -311,25 +311,6 @@ export function updateGroupButtons(context, sectionedArg) {
           }
           // Add new index class
           element.classList.add(expectedClass);
-        }
-        
-        // Update name-based class if name is defined
-        if (button?.name) {
-          const nameClass = normalizeNameToClass(button.name);
-          if (nameClass) {
-            const expectedNameClass = `bubble-sub-button-name-${nameClass}`;
-            const hasNameClass = currentClasses.some(cls => cls.startsWith('bubble-sub-button-name-'));
-            if (!hasNameClass || !currentClasses.includes(expectedNameClass)) {
-              // Remove all existing name classes
-              currentClasses.forEach(cls => {
-                if (cls.startsWith('bubble-sub-button-name-')) {
-                  element.classList.remove(cls);
-                }
-              });
-              // Add new name class
-              element.classList.add(expectedNameClass);
-            }
-          }
         }
       }
 

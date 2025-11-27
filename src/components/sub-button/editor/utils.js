@@ -367,6 +367,21 @@ function findSectionKey(editor, targetArray) {
   return null;
 }
 
+// Helper to safely update sub_button property
+function updateSubButtonProperty(editor, sectionKey, updater) {
+  try {
+    editor._config.sub_button[sectionKey] = updater(editor._config.sub_button[sectionKey]);
+  } catch (_) {
+    // If sub_button is frozen, clone it
+    try {
+      editor._config.sub_button = { ...editor._config.sub_button, [sectionKey]: updater(editor._config.sub_button[sectionKey]) };
+    } catch (__) {
+      // If config itself is frozen, clone the entire config
+      editor._config = { ...editor._config, sub_button: { ...editor._config.sub_button, [sectionKey]: updater(editor._config.sub_button[sectionKey]) } };
+    }
+  }
+}
+
 // Common remove operation
 export function createRemoveHandler(editor, targetArray, index, onValueChanged) {
   return (event) => {
@@ -384,7 +399,7 @@ export function createRemoveHandler(editor, targetArray, index, onValueChanged) 
     const targetArr = editor._config.sub_button[sectionKey];
     const targetArrayCopy = [...targetArr];
     targetArrayCopy.splice(index, 1);
-    editor._config.sub_button[sectionKey] = targetArrayCopy;
+    updateSubButtonProperty(editor, sectionKey, () => targetArrayCopy);
     if (onValueChanged) onValueChanged(editor);
     editor.requestUpdate();
   };
@@ -408,7 +423,7 @@ export function createMoveHandler(editor, targetArray, index, onValueChanged) {
     const targetArr = editor._config.sub_button[sectionKey];
     const targetArrayCopy = [...targetArr];
     [targetArrayCopy[index], targetArrayCopy[newIndex]] = [targetArrayCopy[newIndex], targetArrayCopy[index]];
-    editor._config.sub_button[sectionKey] = targetArrayCopy;
+    updateSubButtonProperty(editor, sectionKey, () => targetArrayCopy);
     if (onValueChanged) onValueChanged(editor);
     editor.requestUpdate();
   };
@@ -454,7 +469,7 @@ export function createPasteHandler(editor, targetArray, onValueChanged, getClipb
     } else {
       targetArrayCopy.push(clone);
     }
-    editor._config.sub_button[sectionKey] = targetArrayCopy;
+    updateSubButtonProperty(editor, sectionKey, () => targetArrayCopy);
     if (onValueChanged) onValueChanged(editor);
     editor.requestUpdate();
   };
@@ -481,7 +496,7 @@ export function createGroupButtonPasteHandler(editor, targetArray, groupIndex, o
       groupCopy.group = [...groupCopy.group, JSON.parse(JSON.stringify(stored))];
     }
     targetArrayCopy[groupIndex] = groupCopy;
-    editor._config.sub_button[sectionKey] = targetArrayCopy;
+    updateSubButtonProperty(editor, sectionKey, () => targetArrayCopy);
     if (onValueChanged) onValueChanged(editor);
     editor.requestUpdate();
   };

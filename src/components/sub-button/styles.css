@@ -146,7 +146,7 @@
     position: relative;
     right: 0;
     box-sizing: border-box;
-    width: max-content;
+    width: auto;
     min-width: 36px;
     height: var(--bubble-sub-button-height, 36px);
     vertical-align: middle;
