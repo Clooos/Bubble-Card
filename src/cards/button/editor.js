@@ -63,7 +63,7 @@ export function renderButtonEditor(editor){
                 <ha-icon icon="mdi:cog"></ha-icon>
                 ${isPopUp ? 'Header card settings' : 'Card settings'}
                 </h4>
-                <div class="content">     
+                <div class="content">
                     <ha-textfield
                         label="Optional - Name"
                         .value="${editor._config?.name || ''}"
@@ -72,6 +72,13 @@ export function renderButtonEditor(editor){
                     ></ha-textfield>
                     ${editor.makeDropdown("Optional - Icon", "icon")}
                     ${editor.makeShowState()}
+                    <ha-textfield
+                        label="Optional - Active state expression"
+                        .value="${editor._config?.active || ''}"
+                        .configValue="${"active"}"
+                        @input="${editor._valueChanged}"
+                        placeholder="hass.states['entity_id'].state === 'value'"
+                    ></ha-textfield>
                 </div>
             </ha-expansion-panel>
             ${makeButtonSliderPanel(editor)}
