@@ -419,6 +419,7 @@ This card is very versatile. It can be used as a **switch**, a **slider**, a **s
 | `name` | string | Optional | Any string | A name for your button, if not defined it will display the entity name |
 | `icon` | string | Optional | Any `mdi:` icon | An icon for your button, if not defined it will display the entity icon or the `entity-picture` |
 | `force_icon` | boolean | Optional | `true` or `false` (default) | Give the priority to the icon instead of the `entity-picture` |
+| `active` | string | Optional | JavaScript expression | Override the default active/on state logic with a custom expression (e.g., `hass.states['sensor.temperature'].state > 20`). The expression has access to `hass`, `entity`, and `state` variables |
 | `use_accent_color` | boolean | Optional (`false` default) | **For lights only.** Use the theme's accent color instead of the light's color.                         |
 | `show_state` | boolean | Optional | `true` or `false` (default) | Show or hide the state of your `entity` |
 | `show_name` | boolean | Optional | `true` (default) or `false` | Show or hide the name |
@@ -530,6 +531,39 @@ sub_button:
     show_background: false
     show_name: false
 ```
+
+</details>
+
+<details>
+
+<summary>A button with custom active state based on a condition</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: climate.thermostat
+button_type: switch
+name: Heating
+active: hass.states['sensor.temperature'].state < 18
+```
+
+This button will show as active (highlighted) when the temperature drops below 18°C, providing a visual indicator that heating is needed. Another example could be a washing machine button that highlights when the power consumption indicates it's running:
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: switch.washing_machine
+button_type: switch
+name: Washing Machine
+active: hass.states['sensor.washing_machine_power'].state > 10
+```
+
+You can use any JavaScript expression that evaluates to a boolean. The expression has access to:
+- `hass`: The Home Assistant state object (access any entity via `hass.states['entity_id']`)
+- `entity`: The current entity ID (the button's `entity` property)
+- `state`: The current state of the button's entity
 
 </details>
 

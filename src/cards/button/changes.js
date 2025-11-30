@@ -1,5 +1,5 @@
-import { getButtonType } from "./helpers.js";
-import { 
+import { getButtonType, evaluateActiveState } from "./helpers.js";
+import {
   getState,
   isStateOn,
   isStateRequiringAttention,
@@ -14,7 +14,8 @@ export function changeButton(context) {
   const cardType = context.config.card_type;
   const buttonType = getButtonType(context);
   const isLight = isEntityType(context, "light");
-  const isOn = isStateOn(context);
+  const customActive = evaluateActiveState(context);
+  const isOn = customActive !== null ? customActive : isStateOn(context);
   const requiresAttention = isStateRequiringAttention(context);
   const lightColor = getIconColor(context);
 
