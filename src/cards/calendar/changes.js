@@ -2,7 +2,7 @@ import { createElement, setLayout, applyScrollingEffect } from "../../tools/util
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import setupTranslation from "../../tools/localize.js";
 import { addActions } from "../../tools/tap-actions.js";
-import { hashCode, intToRGB, parseEventDateTime } from "./helpers.js";
+import { hashCode, intToRGB, parseEventDateTime, sortEvents } from "./helpers.js";
 
 function dateDiffInMinutes(a, b) {
   const MS_PER_MINUTES = 1000 * 60;
@@ -41,22 +41,7 @@ export async function changeEventList(context) {
   const events = await Promise.all(promises);
 
   context.events = events.flat()
-    .sort((a, b) => {
-      const dateA = parseEventDateTime(a.start);
-      const dateB = parseEventDateTime(b.start);
-
-      const isAllDayA = a.start.date !== undefined;
-      const isAllDayB = b.start.date !== undefined;
-
-      if (isAllDayA && !isAllDayB) {
-        return -1;
-      }
-      if (!isAllDayA && isAllDayB) {
-        return 1;
-      }
-
-      return dateA.getTime() - dateB.getTime();
-    })
+    .sort(sortEvents)
     .slice(0, context.config.limit ?? undefined);
 }
 
