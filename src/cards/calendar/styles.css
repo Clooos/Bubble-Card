@@ -3,25 +3,25 @@
   display: flex;
   gap: 8px;
 }
+.card-content::after {
+  border-radius: 0 0 var(--bubble-calendar-border-radius, var(--bubble-border-radius, 32px)) var(--bubble-calendar-border-radius, var(--bubble-border-radius, 32px));
+  content: "";
+  display: flex;
+  height: 32px;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+  background: -webkit-linear-gradient(0deg, var(--bubble-calendar-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))), transparent 14px);
+  background: -moz-linear-gradient(0deg, var(--bubble-calendar-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))), transparent 14px);
+  background: linear-gradient(0deg, var(--bubble-calendar-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)))), transparent 14px);
+  z-index: 1;
+}
 .bubble-calendar-content {
   flex-grow: 1;
   min-width: 0;
-  height: 100%;
-  overflow: scroll;
 }
-.bubble-calendar-content.can-scroll-top {
-  mask-image: linear-gradient(to bottom, transparent 0%, black var(--bubble-calendar-mask-size, 16px), black 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black var(--bubble-calendar-mask-size, 16px), black 100%);
-}
-.bubble-calendar-content.can-scroll-bottom {
-  mask-image: linear-gradient(to bottom, black 0%, black calc(100% - var(--bubble-calendar-mask-size, 16px)), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(100% - var(--bubble-calendar-mask-size, 16px)), transparent 100%);
-}
-.bubble-calendar-content.can-scroll-top.can-scroll-bottom {
-  mask-image: linear-gradient(to bottom, transparent 0%, black var(--bubble-calendar-mask-size, 16px), black calc(100% - var(--bubble-calendar-mask-size, 16px)), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black var(--bubble-calendar-mask-size, 16px), black calc(100% - var(--bubble-calendar-mask-size, 16px)), transparent 100%);
-}
-
 .bubble-sub-button-container {
   flex-shrink: 0;
   position: sticky !important;
@@ -143,12 +143,4 @@
   display: inline-flex;
   --mdc-icon-size: 12px;
   margin-right: 4px;
-}
-
-.bubble-sub-button-container.fixed-top  {
-  margin-top: 10px;
-}
-
-.with-bottom-buttons .bubble-calendar-content {
-  height: 52px;
 }

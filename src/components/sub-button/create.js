@@ -368,11 +368,12 @@ export function normalizeNameToClass(name) {
     .replace(/^-+|-+$/g, '');
 }
 
-export function createSubButtonElement(context, index, isSelect, showArrow, entity, subButton, customContainer) {
+export function createSubButtonElement(context, index, isSelect, showArrow, entity, subButton, customContainer, creationOptions = {}) {
   if (!context.elements.subButtonContainer && !customContainer) {
     createSubButtonStructure(context);
   }
 
+  const { attachToDom = true } = creationOptions;
   const normalizedIndex = String(index).replace(/_/g, '-');
   const classes = [`bubble-sub-button`, `bubble-sub-button-${normalizedIndex}`];
   
@@ -419,9 +420,13 @@ export function createSubButtonElement(context, index, isSelect, showArrow, enti
   
   // If custom container is provided, append to it instead of default container
   if (customContainer) {
-    customContainer.appendChild(subButtonElement);
+    if (attachToDom) {
+      customContainer.appendChild(subButtonElement);
+    }
   } else {
-    context.elements.subButtonContainer.appendChild(subButtonElement);
+    if (attachToDom) {
+      context.elements.subButtonContainer.appendChild(subButtonElement);
+    }
     context.elements[index] = subButtonElement;
   }
 

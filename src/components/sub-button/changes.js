@@ -50,8 +50,24 @@ export function updateSubButtons(context, subButtons) {
     }
 
     let element = context.elements[options.index];
+    const skipHostElement = options.subButtonType === 'slider' && options.alwaysVisible;
     if (!element) {
-      element = createSubButtonElement(context, options.index, options.isSelect, options.showArrow, options.entity, subButton);
+      element = createSubButtonElement(
+        context,
+        options.index,
+        options.isSelect,
+        options.showArrow,
+        options.entity,
+        subButton,
+        null,
+        { attachToDom: !skipHostElement }
+      );
+    } else if (skipHostElement && element.parentElement) {
+      element.parentElement.removeChild(element);
+    }
+
+    if (!skipHostElement && !element.isConnected && context.elements.subButtonContainer) {
+      context.elements.subButtonContainer.appendChild(element);
     }
 
     if (handleHideWhenParentUnavailable(element, subButton, context)) {
@@ -199,10 +215,10 @@ export function updateGroupButtons(context, sectionedArg) {
     .filter(item => item && !Array.isArray(item.group));
   const bottomNonGroupButtons = (Array.isArray(sectioned.bottom) ? sectioned.bottom : [])
     .filter(item => item && !Array.isArray(item.group));
-  const totalNonGroupButtons = mainNonGroupButtons.length + bottomNonGroupButtons.length;
   
-  // Start global index after non-group buttons (starting from 1)
-  let globalIndex = totalNonGroupButtons + 1;
+  // Start global index after main non-group buttons (starting from 1)
+  // Bottom non-group buttons will be indexed consecutively after main buttons
+  let globalIndex = mainNonGroupButtons.length + 1;
 
   const mainGroups = (Array.isArray(sectioned.main) ? sectioned.main : [])
     .map((item, idx) => ({ key: `g_main_${idx}`, position: 'top', item }))
@@ -290,9 +306,19 @@ export function updateGroupButtons(context, sectionedArg) {
       const buttonId = `${key}_button_${buttonIndex}`;
       const options = getSubButtonOptions(context, button, buttonIndexForClass);
 
+      const skipHostElement = options.subButtonType === 'slider' && options.alwaysVisible;
       let element = groupElementsObj.buttons ? groupElementsObj.buttons[buttonId] : null;
       if (!element) {
-        element = createSubButtonElement(context, buttonIndexForClass, options.isSelect, options.showArrow, options.entity, button, groupContainer);
+        element = createSubButtonElement(
+          context,
+          buttonIndexForClass,
+          options.isSelect,
+          options.showArrow,
+          options.entity,
+          button,
+          groupContainer,
+          { attachToDom: !skipHostElement }
+        );
         if (!groupElementsObj.buttons) {
           groupElementsObj.buttons = {};
         }
@@ -312,6 +338,12 @@ export function updateGroupButtons(context, sectionedArg) {
           // Add new index class
           element.classList.add(expectedClass);
         }
+      }
+
+      if (skipHostElement && element.parentElement) {
+        element.parentElement.removeChild(element);
+      } else if (!skipHostElement && !element.isConnected && groupContainer) {
+        groupContainer.appendChild(element);
       }
 
       if (handleHideWhenParentUnavailable(element, button, context)) {

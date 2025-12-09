@@ -1,4 +1,5 @@
 import { createElement, isEntityType } from "../../../../tools/utils.js";
+import { normalizeNameToClass } from "../../create.js";
 import { createSliderStructure } from "../../../slider/index.js";
 import { updateSlider } from "../../../slider/changes.js";
 import { updateBackground, setupActions, buildDisplayedState, updateElementVisibility, updateIconClasses, applySubButtonScrollingEffect } from "../../utils.js";
@@ -15,6 +16,9 @@ function buildSubSliderConfig(context, options) {
     ...(options.subButton?.relative_slide !== undefined ? { relative_slide: options.subButton.relative_slide } : {}),
     ...(options.subButton?.read_only_slider !== undefined ? { read_only_slider: options.subButton.read_only_slider } : {}),
     ...(options.subButton?.slider_live_update !== undefined ? { slider_live_update: options.subButton.slider_live_update } : {}),
+    ...(options.subButton?.invert_slider_value !== undefined ? { invert_slider_value: options.subButton.invert_slider_value } : {}),
+    ...(options.subButton?.slider_fill_orientation !== undefined ? { slider_fill_orientation: options.subButton.slider_fill_orientation } : {}),
+    ...(options.subButton?.slider_value_position !== undefined ? { slider_value_position: options.subButton.slider_value_position } : {}),
     ...(options.subButton?.use_accent_color !== undefined ? { use_accent_color: options.subButton.use_accent_color } : {}),
     ...(options.subButton?.allow_light_slider_to_0 !== undefined ? { allow_light_slider_to_0: options.subButton.allow_light_slider_to_0 } : {}),
     ...(options.subButton?.light_transition !== undefined ? { light_transition: options.subButton.light_transition } : {}),
@@ -23,6 +27,35 @@ function buildSubSliderConfig(context, options) {
     ...(options.subButton?.hue_force_saturation !== undefined ? { hue_force_saturation: options.subButton.hue_force_saturation } : {}),
     ...(options.subButton?.hue_force_saturation_value !== undefined ? { hue_force_saturation_value: options.subButton.hue_force_saturation_value } : {}),
   };
+}
+
+function applySliderIdentityClasses(sliderContainer, options) {
+  if (!sliderContainer || !options) return;
+  const normalizedIndex = options.index != null ? String(options.index).replace(/_/g, '-') : null;
+  const previousIndexClass = sliderContainer.dataset?.sliderIndexClass;
+  if (normalizedIndex) {
+    const desiredIndexClass = `bubble-sub-button-slider-${normalizedIndex}`;
+    if (previousIndexClass && previousIndexClass !== desiredIndexClass) {
+      sliderContainer.classList.remove(previousIndexClass);
+    }
+    sliderContainer.classList.add(desiredIndexClass);
+    sliderContainer.dataset.sliderIndexClass = desiredIndexClass;
+  } else if (previousIndexClass) {
+    sliderContainer.classList.remove(previousIndexClass);
+    delete sliderContainer.dataset.sliderIndexClass;
+  }
+
+  const nameClass = normalizeNameToClass(options.subButton?.name);
+  const previousNameClass = sliderContainer.dataset?.sliderNameClass;
+  if (previousNameClass && previousNameClass !== nameClass) {
+    sliderContainer.classList.remove(previousNameClass);
+  }
+  if (nameClass) {
+    sliderContainer.classList.add(nameClass);
+    sliderContainer.dataset.sliderNameClass = nameClass;
+  } else if (previousNameClass) {
+    delete sliderContainer.dataset.sliderNameClass;
+  }
 }
 
 // Block interactions outside of the sub-slider when it is open
@@ -439,6 +472,8 @@ export function ensureSliderForSubButton(context, element, options) {
       }
     }
   } catch (_) {}
+
+  applySliderIdentityClasses(element.sliderContainer, options);
 }
 
 export function handleSliderSubButton(context, element, options) {
@@ -510,5 +545,3 @@ export function handleSliderSubButton(context, element, options) {
     updateSlider(element.sliderContext);
   }
 }
-
-

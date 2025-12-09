@@ -37,7 +37,9 @@ export async function ensureBCTProviderAvailable(hass) {
     availabilityCache.available = ok;
     setGlobalAvailabilityFlag(ok);
     // Subscribe to backend events to invalidate cache when files change
-    if (ok && typeof hass?.connection?.subscribeEvents === 'function' && !eventsSubscribed) {
+    // Only subscribe if user is admin/owner to avoid permission errors in logs
+    const isAdmin = hass?.user?.is_admin || hass?.user?.is_owner;
+    if (ok && typeof hass?.connection?.subscribeEvents === 'function' && !eventsSubscribed && isAdmin) {
       try {
         hass.connection.subscribeEvents(() => {
           // Clear local cache and notify UI parts

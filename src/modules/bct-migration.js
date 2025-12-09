@@ -1,6 +1,5 @@
 // Automatic migration from legacy sources (entity + single YAML) to Bubble Card Tools files
 
-import jsyaml from 'js-yaml';
 import { 
   ensureBCTProviderAvailable,
   isMigrationDone,
@@ -9,6 +8,10 @@ import {
   writeModuleYaml,
   readFile as bctReadFile,
 } from './bct-provider.js';
+import { parseYamlWithIncludes } from './yaml-schema.js';
+
+const RESERVED_YAML_KEYS = ['modules', 'friendly_name', 'last_updated'];
+const MODULE_FIELD_HINTS = ['name', 'code', 'description', 'editor', 'version', 'creator', 'link', 'supported', 'unsupported', 'is_global'];
 
 async function readLegacyEntityModules(hass) {
   try {
@@ -25,17 +28,15 @@ async function readLegacyEntityModules(hass) {
       let parsed = null;
       try {
         if (typeof entry.yaml === 'string' && entry.yaml.trim()) {
-          const obj = jsyaml.load(entry.yaml);
+          const obj = parseYamlWithIncludes(entry.yaml);
           if (obj && typeof obj === 'object') {
             const keys = Object.keys(obj);
             if (keys.length === 1) {
               const k = keys[0];
               parsed = { id: k, ...(obj[k] || {}) };
-            } else {
+            } else if (id && obj[id] && typeof obj[id] === 'object') {
               // Multi-root, try best-effort using provided id
-              if (id && obj[id] && typeof obj[id] === 'object') {
-                parsed = { id, ...obj[id] };
-              }
+              parsed = { id, ...obj[id] };
             }
           }
         }
@@ -64,6 +65,36 @@ async function readLegacyEntityModules(hass) {
   }
 }
 
+function hasModuleShape(obj) {
+  if (!obj || typeof obj !== 'object') return false;
+  return MODULE_FIELD_HINTS.some((field) => field in obj);
+}
+
+function registerModule(target, moduleId, moduleData) {
+  if (!moduleId || typeof moduleId !== 'string') return;
+  if (!moduleData || typeof moduleData !== 'object') return;
+  if (!hasModuleShape(moduleData)) return;
+  target.set(moduleId, { id: moduleId, ...moduleData });
+}
+
+function extractModulesFromYamlRoot(data) {
+  const modules = new Map();
+  if (!data || typeof data !== 'object') return modules;
+
+  Object.keys(data).forEach((key) => {
+    if (RESERVED_YAML_KEYS.includes(key)) return;
+    registerModule(modules, key, data[key]);
+  });
+
+  if (data.modules && typeof data.modules === 'object') {
+    Object.keys(data.modules).forEach((key) => {
+      registerModule(modules, key, data.modules[key]);
+    });
+  }
+
+  return modules;
+}
+
 async function readLegacyYamlFromLocal() {
   try {
     const cacheBuster = `?v=${Date.now()}`;
@@ -72,17 +103,9 @@ async function readLegacyYamlFromLocal() {
     if (!res.ok) return new Map();
     const txt = await res.text();
     if (!txt || !txt.trim()) return new Map();
-    const data = jsyaml.load(txt);
+    const data = parseYamlWithIncludes(txt);
     if (!data || typeof data !== 'object') return new Map();
-    const out = new Map();
-    Object.keys(data).forEach((k) => {
-      if (['modules','friendly_name','last_updated'].includes(k)) return;
-      const obj = data[k];
-      if (obj && typeof obj === 'object' && (obj.name || obj.code)) {
-        out.set(k, { id: k, ...obj });
-      }
-    });
-    return out;
+    return extractModulesFromYamlRoot(data);
   } catch (e) {
     return new Map();
   }

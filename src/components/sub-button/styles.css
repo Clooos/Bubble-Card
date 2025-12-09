@@ -42,6 +42,8 @@
     gap: 8px;
     pointer-events: none;
     flex-wrap: nowrap;
+    /* Allow bottom inline sliders to shrink without affecting top sliders */
+    --slider-container-min-width: 36px;
 }
 
 .bubble-sub-button-bottom-container.alignment-lanes-active {
@@ -283,7 +285,8 @@
 }
 
 .rows-2 .bubble-sub-button {
-    height: 20px !important;
+    height: 20px;
+    justify-content: left;
 }
 
 .large.rows-2 .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
@@ -302,7 +305,7 @@
     right: 8px;
     z-index: 2;
     opacity: 1;
-    transition: all 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
     transform: translateX(0);
     /* Prevent browser from handling horizontal pan on mobile during drag */
     touch-action: none;
@@ -384,6 +387,16 @@
     transform: none;
 }
 
+/* Allow overlay sliders to translate out without extending card width */
+.bubble-sub-slider-wrapper:not(.inline).is-hidden {
+    right: calc(8px + 14px);
+}
+
+/* Bottom-aligned overlays rely on explicit width instead of right offsets */
+.bubble-sub-button-bottom-container .bubble-sub-slider-wrapper:not(.inline).is-hidden {
+    width: calc(100% - 14px);
+}
+
 .bubble-sub-button-slider .bubble-range-fill {
     height: 101%; /* Ensure the fill is not glitching */
 }
@@ -429,7 +442,7 @@
     position: relative;
     left: 0;
     width: auto;
-    min-width: 96px;
+    min-width: var(--slider-container-min-width, 96px);
     height: var(--bubble-sub-slider-height, 36px);
     transform: none;
     opacity: 1;
@@ -454,6 +467,15 @@
 }
 .bubble-sub-button-slider.inline .bubble-range-slider {
     touch-action: pan-x pan-y pinch-zoom;
+}
+.bubble-sub-button-slider.inline.slider-container.is-touching,
+.bubble-sub-button-slider.inline.slider-container.is-dragging {
+    touch-action: none;
+}
+.bubble-sub-button-slider.inline.slider-container.is-touching .bubble-range-slider,
+.bubble-sub-button-slider.inline.slider-container.is-dragging .bubble-range-slider,
+.bubble-sub-button-slider.inline .bubble-range-slider.is-touching {
+    touch-action: none;
 }
 
 .bubble-sub-button-slider > .bubble-range-slider {

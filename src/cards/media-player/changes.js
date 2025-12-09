@@ -7,7 +7,7 @@ import {
     setLayout
 } from '../../tools/utils.js';
 import { updateContentContainerFixedClass } from '../../components/base-card/changes.js';
-import { computePlaybackControl, getMediaControlsSupport } from './helpers.js';
+import { computePlaybackControl, getMediaControlsSupport, hasMediaControl } from './helpers.js';
 import { getIcon, getImage, getIconColor } from '../../tools/icon.js';
 import { updateSlider } from '../../components/slider/changes.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
@@ -155,9 +155,12 @@ export function changeMediaInfo(context) {
 }
 
 export function changeDisplayedInfo(context) {
-    const title = getAttribute(context, "media_title");
-    const artist = getAttribute(context, "media_artist");
-    const noMediaInfo = (title + artist) === '';
+    const normalize = (value) => value === undefined || value === null ? '' : String(value).trim();
+    const title = normalize(getAttribute(context, "media_title"));
+    const artist = normalize(getAttribute(context, "media_artist"));
+    const source = normalize(getAttribute(context, "source"));
+    const isTitleSourceOnly = title !== '' && source !== '' && title === source;
+    const noMediaInfo = (title + artist) === '' || isTitleSourceOnly;
     const showIcon = context.config.show_icon ?? true;
     const state = getState(context);
     const isIdle = state === 'idle';
@@ -486,22 +489,18 @@ export function changeStyle(context) {
     const isPlaying = state === 'playing';
     const isPaused = state === 'paused';
     const isIdle = state === 'idle';
+    const hasControl = hasMediaControl(context);
     const support = getMediaControlsSupport(context);
 
     // Determine visibility based on config and supported features
     const showPower = !context.config.hide?.power_button && (support.canTurnOn || support.canTurnOff);
-    // Previous/Next: show only when actively engaged (playing/paused), not idle
-    const showPrevious = !context.config.hide?.previous_button && support.canPrevious && (context.editor || (isPlaying || isPaused));
-    const showNext = !context.config.hide?.next_button && support.canNext && (context.editor || (isPlaying || isPaused));
-    // Volume/Mute: allowed while device is on
-    const showVolume = !context.config.hide?.volume_button && (support.canVolumeSet || support.canVolumeStep || support.canMute) && (context.editor || isOn);
-    // Play/Pause/Stop visibility mirrors HA: when playing -> need pause/stop; when paused/idle -> need play
-    const showPlayPause = !context.config.hide?.play_pause_button && (
-        context.editor || (
-            (isOn && isPlaying && (support.canPause || support.canStop)) ||
-            (isOn && (isPaused || isIdle) && support.canPlay)
-        )
-    );
+    // Previous/Next visible when features exist and entity is controllable (or in editor)
+    const showPrevious = !context.config.hide?.previous_button && support.canPrevious && (context.editor || hasControl);
+    const showNext = !context.config.hide?.next_button && support.canNext && (context.editor || hasControl);
+    // Volume/Mute available whenever features exist and entity is controllable; editor always shows
+    const showVolume = !context.config.hide?.volume_button && (support.canVolumeSet || support.canVolumeStep || support.canMute) && (context.editor || hasControl || isOn);
+    // Play/Pause/Stop visible when controllable; fallback to toggle if features missing
+    const showPlayPause = !context.config.hide?.play_pause_button && (context.editor || hasControl || isOn || isIdle || isPaused || isPlaying);
 
     const allButtonsHidden = !(showPower || showPrevious || showNext || showVolume || showPlayPause);
 

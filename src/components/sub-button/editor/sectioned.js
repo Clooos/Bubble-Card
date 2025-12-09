@@ -25,10 +25,33 @@ function getOrInitSectionArray(editor, sectionKey) {
     const minimal = {};
     if (Array.isArray(converted.main) && converted.main.length) minimal.main = converted.main.slice();
     if (Array.isArray(converted.bottom) && converted.bottom.length) minimal.bottom = converted.bottom.slice();
-    editor._config.sub_button = minimal;
+    try {
+      editor._config.sub_button = minimal;
+    } catch (_) {
+      // If config is frozen/non-extensible, replace it with a cloned one
+      editor._config = { ...editor._config, sub_button: minimal };
+    }
   }
-  if (!editor._config.sub_button) editor._config.sub_button = {};
-  if (!Array.isArray(editor._config.sub_button[sectionKey])) editor._config.sub_button[sectionKey] = [];
+  if (!editor._config.sub_button) {
+    try {
+      editor._config.sub_button = {};
+    } catch (_) {
+      editor._config = { ...editor._config, sub_button: {} };
+    }
+  }
+  if (!Array.isArray(editor._config.sub_button[sectionKey])) {
+    try {
+      editor._config.sub_button[sectionKey] = [];
+    } catch (_) {
+      // If sub_button is frozen, clone it
+      try {
+        editor._config.sub_button = { ...editor._config.sub_button, [sectionKey]: [] };
+      } catch (__) {
+        // If config itself is frozen, clone the entire config
+        editor._config = { ...editor._config, sub_button: { ...editor._config.sub_button, [sectionKey]: [] } };
+      }
+    }
+  }
   return editor._config.sub_button[sectionKey];
 }
 
@@ -540,8 +563,25 @@ function makeLayoutForm(editor, sectionKey) {
       .computeLabel=${editor._computeLabelCallback}
       @value-changed=${(ev) => {
         const val = ev.detail?.value?.[layoutKey];
-        if (!editor._config.sub_button) editor._config.sub_button = {};
-        editor._config.sub_button[layoutKey] = val;
+        if (!editor._config.sub_button) {
+          try {
+            editor._config.sub_button = {};
+          } catch (_) {
+            editor._config = { ...editor._config, sub_button: {} };
+          }
+        }
+        // Clone sub_button object to ensure it is extensible
+        try {
+          editor._config.sub_button[layoutKey] = val;
+        } catch (_) {
+          // If sub_button is frozen, clone it
+          try {
+            editor._config.sub_button = { ...editor._config.sub_button, [layoutKey]: val };
+          } catch (__) {
+            // If config itself is frozen, clone the entire config
+            editor._config = { ...editor._config, sub_button: { ...editor._config.sub_button, [layoutKey]: val } };
+          }
+        }
         subButtonsValueChanged(editor);
         editor.requestUpdate();
       }}

@@ -255,6 +255,16 @@ export function setupActions(element, options) {
 // Evaluate user-defined visibility conditions
 export function handleVisibilityConditions(element, subButton, hass) {
   const conditions = subButton.visibility;
+  const ensureVisibleAlwaysSlider = (isVisible) => {
+    if (!element?.sliderAlwaysVisible || !element.sliderWrapper) return;
+    if (isVisible) {
+      element.sliderWrapper.style.removeProperty('display');
+      element.sliderWrapper.removeAttribute('aria-hidden');
+    } else {
+      element.sliderWrapper.style.display = 'none';
+      element.sliderWrapper.setAttribute('aria-hidden', 'true');
+    }
+  };
   if (conditions != null) {
     element._hasVisibilityConditions = true;
     const conditionsArray = ensureArray(conditions);
@@ -265,9 +275,13 @@ export function handleVisibilityConditions(element, subButton, hass) {
         element.classList.toggle('hidden', !isVisible);
         element._previousVisibilityState = isVisible;
       }
+      ensureVisibleAlwaysSlider(isVisible);
+    } else {
+      ensureVisibleAlwaysSlider(true);
     }
   } else {
     element._hasVisibilityConditions = false;
+    ensureVisibleAlwaysSlider(true);
   }
 }
 
@@ -349,11 +363,9 @@ export function applyHeightStyles(element, subButton) {
 
 // Apply fill-width class to an element
 export function applyFillWidthClass(element, subButton) {
-  if (subButton.fill_width) {
-    element.classList.add('fill-width');
-  } else {
-    element.classList.remove('fill-width');
-  }
+  if (!element || !element.classList) return;
+  const shouldFill = !!subButton?.fill_width;
+  element.classList.toggle('fill-width', shouldFill);
 }
 
 // Update icon classes based on displayed state

@@ -31,7 +31,6 @@ export function getCachedModuleData() {
 
     // Data expired, but keep it available in case API checks show no remaining quota
     if (cachedData) {
-      console.log("⚠️ Cache expired but kept for potential API limit situations");
       return cachedData;
     }
 

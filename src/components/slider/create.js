@@ -15,7 +15,12 @@ import {
   getCurrentPercentage,
   clampPercentage,
   formatDisplayValue,
-  formatDisplayValueFromEntity
+  formatDisplayValueFromEntity,
+  toVisualPercentage,
+  getFillOrientation,
+  getSliderValuePosition,
+  setRangeFillTransform,
+  SLIDER_VALUE_POSITIONS
 } from './helpers.js';
 
 export function createSliderStructure(context, config = {}) {
@@ -30,6 +35,12 @@ export function createSliderStructure(context, config = {}) {
     styles: styles,
     ...config 
   };
+
+  const valuePositionClasses = [
+    ...SLIDER_VALUE_POSITIONS.map((position) => `value-position-${position}`),
+    'value-position-inline-end',
+    'value-position-inline-start'
+  ];
 
   // Determine effective min/max for the slider display
   const entityState = context._hass.states[context.config.entity];
@@ -67,6 +78,44 @@ export function createSliderStructure(context, config = {}) {
 
   const lightSliderType = context?.config?.light_slider_type;
   const isColorMode = entityType === 'light' && ['hue', 'saturation', 'white_temp'].includes(lightSliderType);
+  context._isColorSlider = isColorMode;
+  context._currentSliderValuePosition = null;
+  context._shouldDisplaySliderValue = false;
+
+  const syncSliderValuePosition = () => {
+    if (!context.elements?.rangeSlider) return;
+    const slider = context.elements.rangeSlider;
+    const desiredPosition = getSliderValuePosition(context);
+    const shouldDisplayValue = !context._isColorSlider && desiredPosition !== 'hidden';
+    if (!shouldDisplayValue) {
+      valuePositionClasses.forEach((cls) => slider.classList.remove(cls));
+      context._currentSliderValuePosition = null;
+      context._shouldDisplaySliderValue = false;
+      if (context.elements.rangeValue) {
+        context.elements.rangeValue.classList.remove('is-visible');
+      }
+      return;
+    }
+
+    context._shouldDisplaySliderValue = true;
+    if (context._currentSliderValuePosition !== desiredPosition) {
+      if (context._currentSliderValuePosition) {
+        slider.classList.remove(`value-position-${context._currentSliderValuePosition}`);
+      }
+      slider.classList.add(`value-position-${desiredPosition}`);
+      context._currentSliderValuePosition = desiredPosition;
+    }
+
+    if (!context.elements.rangeValue) {
+      context.elements.rangeValue = createElement('div', 'bubble-range-value');
+      slider.appendChild(context.elements.rangeValue);
+      context.elements.rangeValue.textContent = formatDisplayValueFromEntity(context);
+    }
+  };
+
+  context.syncSliderValuePosition = syncSliderValuePosition;
+
+  let setColorCursorPosition = null;
 
   if (isColorMode) {
     context.elements.rangeSlider.classList.add('is-color-slider');
@@ -76,22 +125,65 @@ export function createSliderStructure(context, config = {}) {
     context.elements.rangeSlider.appendChild(context.elements.colorTrack);
     context.elements.rangeSlider.appendChild(context.elements.colorCursor);
 
+    const orientationClasses = ['left', 'right', 'top', 'bottom'];
+
+    function applyColorOrientationClasses(orientation) {
+      if (!context?.elements?.colorTrack || !context?.elements?.colorCursor) return;
+      orientationClasses.forEach(dir => {
+        context.elements.colorTrack.classList.remove(`fill-orientation-${dir}`);
+        context.elements.colorCursor.classList.remove(`fill-orientation-${dir}`);
+      });
+      context.elements.colorTrack.classList.add(`fill-orientation-${orientation}`);
+      context.elements.colorCursor.classList.add(`fill-orientation-${orientation}`);
+    }
+
+    applyColorOrientationClasses(getFillOrientation(context));
+
     function updateColorTrackBackground() {
       if (!context?.elements?.colorTrack) return;
+      const fillOrientationForColor = getFillOrientation(context);
+      const gradientAngle = (() => {
+        if (fillOrientationForColor === 'right') return '270deg';
+        if (fillOrientationForColor === 'left') return '90deg';
+        if (fillOrientationForColor === 'top') return '180deg';
+        return '0deg';
+      })();
       if (lightSliderType === 'hue') {
         const hs = context._hass.states[context.config.entity]?.attributes?.hs_color || [];
         const sat = Number(hs[1] ?? 100);
         const effectiveSat = sat < 10 ? 100 : sat;
-        context.elements.colorTrack.style.background = `linear-gradient(90deg, hsl(0 ${effectiveSat}% 50%), hsl(60 ${effectiveSat}% 50%), hsl(120 ${effectiveSat}% 50%), hsl(180 ${effectiveSat}% 50%), hsl(240 ${effectiveSat}% 50%), hsl(300 ${effectiveSat}% 50%), hsl(360 ${effectiveSat}% 50%))`;
+        context.elements.colorTrack.style.background = `linear-gradient(${gradientAngle}, hsl(0 ${effectiveSat}% 50%), hsl(60 ${effectiveSat}% 50%), hsl(120 ${effectiveSat}% 50%), hsl(180 ${effectiveSat}% 50%), hsl(240 ${effectiveSat}% 50%), hsl(300 ${effectiveSat}% 50%), hsl(360 ${effectiveSat}% 50%))`;
       } else if (lightSliderType === 'saturation') {
         const hs = context._hass.states[context.config.entity]?.attributes?.hs_color || [];
         const hue = Number(hs[0] ?? 180);
-        context.elements.colorTrack.style.background = `linear-gradient(90deg, hsl(${hue} 0% 50%), hsl(${hue} 100% 50%))`;
+        context.elements.colorTrack.style.background = `linear-gradient(${gradientAngle}, hsl(${hue} 0% 50%), hsl(${hue} 100% 50%))`;
       } else if (lightSliderType === 'white_temp') {
         // Cool (left) to Warm (right)
-        context.elements.colorTrack.style.background = 'linear-gradient(90deg, #d2e7ff, #f3f7ff 35%, #fff1e0 65%, #ffb56b)';
+        context.elements.colorTrack.style.background = `linear-gradient(${gradientAngle}, #d2e7ff, #f3f7ff 35%, #fff1e0 65%, #ffb56b)`;
       }
     }
+
+    setColorCursorPosition = (percentage) => {
+      if (!context?.elements?.colorCursor) return;
+      const visualPercentage = toVisualPercentage(context, percentage);
+      context._lastVisualFillPercentage = visualPercentage;
+      const orientation = getFillOrientation(context);
+      const axisPercentage = (orientation === 'right' || orientation === 'bottom')
+        ? 100 - visualPercentage
+        : visualPercentage;
+      const cursor = context.elements.colorCursor;
+      cursor.style.removeProperty('right');
+      cursor.style.removeProperty('bottom');
+      if (orientation === 'left' || orientation === 'right') {
+        cursor.style.left = `${axisPercentage}%`;
+        cursor.style.top = '50%';
+      } else {
+        cursor.style.top = `${axisPercentage}%`;
+        cursor.style.left = '50%';
+      }
+    };
+
+    context.setColorCursorPosition = setColorCursorPosition;
 
     function updateColorCursorIndicator(percentage) {
       if (!context?.elements?.colorCursor) return;
@@ -134,7 +226,7 @@ export function createSliderStructure(context, config = {}) {
   }
 
   function calculateVisualPercentage(initialPercentage) {
-    return clampPercentage(initialPercentage);
+    return toVisualPercentage(context, initialPercentage);
   }
 
   function updateValueDisplay(percentage) {
@@ -145,21 +237,25 @@ export function createSliderStructure(context, config = {}) {
 
   // Initialize initial visual state once
   const initialPercentage = calculateVisualPercentage(calculateInitialPercentage());
-  if (options.withValueDisplay && !isColorMode) {
-    context.elements.rangeValue = createElement('div', 'bubble-range-value');
-    context.elements.rangeSlider.appendChild(context.elements.rangeValue);
+  context.syncSliderValuePosition();
+
+  if (options.withValueDisplay && context._shouldDisplaySliderValue && context.elements.rangeValue) {
     context.elements.rangeValue.classList.add('is-visible');
-    // Use entity value for accurate initial display
     context.elements.rangeValue.textContent = formatDisplayValueFromEntity(context);
   }
+  const fillOrientation = getFillOrientation(context);
+  const isVerticalFill = fillOrientation === 'top' || fillOrientation === 'bottom';
+  context.elements.rangeFill.classList.add(`fill-orientation-${fillOrientation}`);
+  context.elements.rangeSlider.classList.add(`fill-orientation-${fillOrientation}`);
+
   if (isColorMode && context.elements.colorCursor) {
-    context.elements.colorCursor.style.left = `${initialPercentage}%`;
+    setColorCursorPosition?.(initialPercentage);
     // Update the cursor indicator color based on initial position
     if (typeof context.updateColorCursorIndicator === 'function') {
       context.updateColorCursorIndicator(initialPercentage);
     }
   } else {
-    context.elements.rangeFill.style.transform = `translateX(${initialPercentage}%)`;
+    setRangeFillTransform(context, initialPercentage);
   }
 
   context.elements.rangeSlider.appendChild(context.elements.rangeFill);
@@ -181,12 +277,13 @@ export function createSliderStructure(context, config = {}) {
   let initialTouchX = 0;
   let initialTouchY = 0;
   let initialSliderX = 0;
+  let initialSliderY = 0;
   let draggingTimeout = null;
   let isScrollIntent = false;
   const scrollThreshold = 10; // pixels threshold to determine scroll vs slider intent
-  const horizontalIntentThreshold = 4; // pixels threshold to lock into horizontal sliding
+  const primaryAxisIntentThreshold = 4; // pixels threshold to lock into slider intent
   let sliderRectCache = null;
-  let hasHorizontalIntent = false;
+  let hasPrimaryAxisIntent = false;
   let touchLockActive = false;
 
   function getSliderRect() {
@@ -202,7 +299,7 @@ export function createSliderStructure(context, config = {}) {
 
   function resetGestureIntent() {
     isScrollIntent = false;
-    hasHorizontalIntent = false;
+    hasPrimaryAxisIntent = false;
   }
 
   function lockTouchActions() {
@@ -253,6 +350,42 @@ export function createSliderStructure(context, config = {}) {
     return 0;
   }
 
+  function getEventClientX(event) {
+    if (event.clientX !== undefined) return event.clientX;
+    if (event.changedTouches && event.changedTouches[0]) {
+      return event.changedTouches[0].clientX;
+    }
+    if (event.touches && event.touches[0]) {
+      return event.touches[0].clientX;
+    }
+    // Fallback to pageX adjusted by scroll
+    return getEventPageX(event) - (window.scrollX || window.pageXOffset || 0);
+  }
+
+  function getEventClientY(event) {
+    if (event.clientY !== undefined) return event.clientY;
+    if (event.changedTouches && event.changedTouches[0]) {
+      return event.changedTouches[0].clientY;
+    }
+    if (event.touches && event.touches[0]) {
+      return event.touches[0].clientY;
+    }
+    // Fallback to pageY adjusted by scroll
+    return getEventPageY(event) - (window.scrollY || window.pageYOffset || 0);
+  }
+
+  function getPrimaryAxisCoordinate(event) {
+    return isVerticalFill ? getEventPageY(event) : getEventPageX(event);
+  }
+
+  function getSecondaryAxisCoordinate(event) {
+    return isVerticalFill ? getEventPageX(event) : getEventPageY(event);
+  }
+
+  function getPrimaryAxisClientCoordinate(event) {
+    return isVerticalFill ? getEventClientY(event) : getEventClientX(event);
+  }
+
   function releasePointerCaptureSafely(event) {
     if (typeof event?.pointerId !== 'number') return;
     try {
@@ -281,23 +414,26 @@ export function createSliderStructure(context, config = {}) {
     window.addEventListener('touchend', onPointerUp, listenerOptions);
   }
 
-  // Detect if user intends to scroll vertically instead of using slider
+  // Detect if user intends to scroll instead of using slider
   function detectScrollIntent(e) {
-    if (hasHorizontalIntent) return false;
+    if (hasPrimaryAxisIntent) return false;
 
-    const currentX = getEventPageX(e);
-    const currentY = getEventPageY(e);
+    const currentPrimary = getPrimaryAxisCoordinate(e);
+    const currentSecondary = getSecondaryAxisCoordinate(e);
+
+    const initialPrimary = isVerticalFill ? initialTouchY : initialTouchX;
+    const initialSecondary = isVerticalFill ? initialTouchX : initialTouchY;
     
-    const deltaX = Math.abs(currentX - initialTouchX);
-    const deltaY = Math.abs(currentY - initialTouchY);
+    const deltaPrimary = Math.abs(currentPrimary - initialPrimary);
+    const deltaSecondary = Math.abs(currentSecondary - initialSecondary);
 
-    if (deltaX >= horizontalIntentThreshold) {
-      hasHorizontalIntent = true;
+    if (deltaPrimary >= primaryAxisIntentThreshold) {
+      hasPrimaryAxisIntent = true;
       return false;
     }
     
-    // Treat as scroll only when vertical intent clearly dominates and no horizontal drag intent detected
-    return deltaY > scrollThreshold && deltaX < horizontalIntentThreshold;
+    // Treat as scroll only when movement on secondary axis dominates
+    return deltaSecondary > scrollThreshold && deltaPrimary < primaryAxisIntentThreshold;
   }
 
   // Prevent conflicts with HA sidebar swipe (especially on iOS app)
@@ -331,7 +467,7 @@ export function createSliderStructure(context, config = {}) {
     if (detectScrollIntent(e)) {
       unlockTouchActions();
       isScrollIntent = true;
-      hasHorizontalIntent = false;
+      hasPrimaryAxisIntent = false;
       releasePointerCaptureSafely(e);
       detachPointerListeners();
       options.targetElement.classList.remove('is-dragging');
@@ -351,10 +487,10 @@ export function createSliderStructure(context, config = {}) {
 
     window.isScrolling = true;
 
-    const rangedPercentage = onSliderChange(context, calculateMoveX(e), false, getSliderRect());
+    const rangedPercentage = onSliderChange(context, calculateMoveCoordinate(e), false, getSliderRect());
 
     if (isColorMode && context.elements.colorCursor) {
-      context.elements.colorCursor.style.left = `${rangedPercentage}%`;
+      setColorCursorPosition?.(rangedPercentage);
       if (lightSliderType === 'saturation' && typeof context.updateColorTrackBackground === 'function') {
         context.updateColorTrackBackground();
       }
@@ -371,15 +507,18 @@ export function createSliderStructure(context, config = {}) {
     updateValueDisplay(rangedPercentage);
   }
 
-  function calculateMoveX(event) {
-    const moveX = getEventPageX(event);
+  function calculateMoveCoordinate(event) {
+    const moveCoordClient = getPrimaryAxisClientCoordinate(event);
+    const moveCoordPage = getPrimaryAxisCoordinate(event);
 
     if (!options.relativeSlide) {
-      return moveX;
+      return moveCoordClient;
     }
 
-    const offset = moveX - initialTouchX;
-    return initialSliderX + offset;
+    const initialPrimaryTouch = isVerticalFill ? initialTouchY : initialTouchX;
+    const offset = moveCoordPage - initialPrimaryTouch;
+    const initialSliderCoord = isVerticalFill ? initialSliderY : initialSliderX;
+    return initialSliderCoord + offset;
   }
 
   function onPointerUp(e) {
@@ -401,10 +540,11 @@ export function createSliderStructure(context, config = {}) {
       clearTimeout(draggingTimeout);
     }
 
-    const moveX = getEventPageX(e);
-    const finalPercentage = onSliderChange(context, calculateMoveX(e), true, getSliderRect());
+    const movePrimary = getPrimaryAxisCoordinate(e);
+    const finalPercentage = onSliderChange(context, calculateMoveCoordinate(e), true, getSliderRect());
+    const initialPrimary = isVerticalFill ? initialTouchY : initialTouchX;
 
-    if (Math.abs(moveX - initialTouchX) > 5) {
+    if (Math.abs(movePrimary - initialPrimary) > 5) {
       e.preventDefault();
       e.stopImmediatePropagation();
     }
@@ -416,7 +556,7 @@ export function createSliderStructure(context, config = {}) {
     unlockTouchActions();
 
     if (isColorMode && context.elements.colorCursor) {
-      context.elements.colorCursor.style.left = `${finalPercentage}%`;
+      setColorCursorPosition?.(finalPercentage);
       // Update the cursor indicator color based on final position
       if (typeof context.updateColorCursorIndicator === 'function') {
         context.updateColorCursorIndicator(finalPercentage);
@@ -439,7 +579,7 @@ export function createSliderStructure(context, config = {}) {
     updateValueDisplay(finalPercentage);
 
     if (options.holdToSlide && !context.config.tap_to_slide) {
-      if (context.elements.rangeValue && !options.persistentValueDisplay) {
+      if (context._shouldDisplaySliderValue && context.elements.rangeValue && !options.persistentValueDisplay) {
         context.elements.rangeValue.classList.remove('is-visible');
       }
     }
@@ -453,26 +593,33 @@ export function createSliderStructure(context, config = {}) {
   }
 
   function setupRangeValueDisplay(rangedPercentage) {
-    if (isColorMode) return; // Do not display value for color sliders
-    if (!context.elements.rangeValue) {
-      context.elements.rangeValue = createElement('div', 'bubble-range-value');
-      context.elements.rangeSlider.appendChild(context.elements.rangeValue);
-      updateValueDisplay(rangedPercentage);
-    }
+    if (context._isColorSlider) return; // Do not display value for color sliders
+    context.syncSliderValuePosition?.();
+    if (!context._shouldDisplaySliderValue || !context.elements.rangeValue) return;
+    updateValueDisplay(rangedPercentage);
     context.elements.rangeValue.classList.add('is-visible');
   }
 
-  function calculateInitialX(event) {
+  function calculateInitialCoordinate(event) {
     initialTouchX = getEventPageX(event);
     initialTouchY = getEventPageY(event);
     resetGestureIntent();
 
     if (!options.relativeSlide) {
-      return initialTouchX;
+      return isVerticalFill ? getEventClientY(event) : getEventClientX(event);
     }
 
     const initialPercentage = calculateVisualPercentage(calculateInitialPercentage());
     const sliderRect = getSliderRect();
+    
+    if (isVerticalFill) {
+      const axisPercentage = fillOrientation === 'bottom'
+        ? 100 - initialPercentage
+        : initialPercentage;
+      initialSliderY = sliderRect.top + (sliderRect.height * axisPercentage / 100);
+      return initialSliderY;
+    }
+
     initialSliderX = sliderRect.left + (sliderRect.width * initialPercentage / 100);
     return initialSliderX;
   }
@@ -501,16 +648,16 @@ export function createSliderStructure(context, config = {}) {
     if (isEntityType(context, "climate") && !isStateOn(context, context.config.entity)) {
       rangedPercentage = 0;
       if (isColorMode && context.elements.colorCursor) {
-        context.elements.colorCursor.style.transform = `translateX(${rangedPercentage}%)`;
+        setColorCursorPosition?.(rangedPercentage);
         // Update the cursor indicator color based on position
         if (typeof context.updateColorCursorIndicator === 'function') {
           context.updateColorCursorIndicator(rangedPercentage);
         }
       } else {
-        context.elements.rangeFill.style.transform = `translateX(${rangedPercentage}%)`;
+        setRangeFillTransform(context, rangedPercentage);
       }
     } else {
-      rangedPercentage = onSliderChange(context, calculateInitialX(e), false, getSliderRect());
+      rangedPercentage = onSliderChange(context, calculateInitialCoordinate(e), false, getSliderRect());
     }
 
     setupRangeValueDisplay(rangedPercentage);
@@ -598,16 +745,18 @@ export function createSliderStructure(context, config = {}) {
       resetGestureIntent();
 
       const detectImmediateDrag = (moveEvent) => {
-        const currentX = getEventPageX(moveEvent);
-        const currentY = getEventPageY(moveEvent);
-        const deltaX = Math.abs(currentX - initialTouchX);
-        const deltaY = Math.abs(currentY - initialTouchY);
-        if (deltaY > scrollThreshold && deltaX < horizontalIntentThreshold) {
+        const currentPrimary = getPrimaryAxisCoordinate(moveEvent);
+        const currentSecondary = getSecondaryAxisCoordinate(moveEvent);
+        const initialPrimary = isVerticalFill ? initialTouchY : initialTouchX;
+        const initialSecondary = isVerticalFill ? initialTouchX : initialTouchY;
+        const deltaPrimary = Math.abs(currentPrimary - initialPrimary);
+        const deltaSecondary = Math.abs(currentSecondary - initialSecondary);
+        if (deltaSecondary > scrollThreshold && deltaPrimary < primaryAxisIntentThreshold) {
           isScrollIntent = true;
           cancelPreDrag();
           return;
         }
-        if (deltaX > immediateDragThreshold && deltaX >= deltaY) {
+        if (deltaPrimary > immediateDragThreshold && deltaPrimary >= deltaSecondary) {
           startDrag(moveEvent);
         }
       };
@@ -663,7 +812,14 @@ export function createSliderStructure(context, config = {}) {
       if (options.relativeSlide) {
         const initialPercentage = calculateVisualPercentage(calculateInitialPercentage());
         const sliderRect = getSliderRect();
+        if (isVerticalFill) {
+          const axisPercentage = fillOrientation === 'bottom'
+            ? 100 - initialPercentage
+            : initialPercentage;
+          initialSliderY = sliderRect.top + (sliderRect.height * axisPercentage / 100);
+        } else {
         initialSliderX = sliderRect.left + (sliderRect.width * initialPercentage / 100);
+        }
       } else {
         getSliderRect();
       }

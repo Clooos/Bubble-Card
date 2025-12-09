@@ -85,6 +85,7 @@
     height: 38px;
     width: calc(100% - 16px);
     left: 8px;
+    right: 8px;
     z-index: 1;
     opacity: 1;
     transition: opacity .2s, transform .2s;
@@ -123,10 +124,25 @@
     transform: translateX(14px);
 }
 
+/* Keep hidden volume slider overlays inside card width */
+.bubble-volume-slider-wrapper.is-hidden {
+    right: calc(8px + 14px);
+}
+
 /* Position volume slider at bottom when buttons are in bottom-fixed mode */
 .bubble-wrapper.has-bottom-buttons .bubble-volume-slider-wrapper {
     bottom: 8px;
     top: auto;
+    width: 100%;
+    left: 0;
+    right: auto;
+    padding: 0px 8px;
+    box-sizing: border-box;
+}
+
+/* Bottom-fixed layout uses explicit width reduction to absorb the translateX */
+.bubble-wrapper.has-bottom-buttons .bubble-volume-slider-wrapper.is-hidden {
+    width: calc(100% - 14px);
 }
 
 .bubble-range-fill {

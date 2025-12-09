@@ -15,25 +15,37 @@ import {
   fromPercentageToValue,
   getCurrentPercentage,
   formatDisplayValue,
-  formatDisplayValueFromEntity
+  formatDisplayValueFromEntity,
+  toVisualPercentage,
+  toActualPercentage,
+  getFillOrientation,
+  setRangeFillTransform
 } from './helpers.js';
 
 // Smoothly animate slider position for external updates
-function parseTranslateXPercent(transformString) {
-  const match = /translateX\(([-\d.]+)%\)/.exec(transformString || '');
-  return match ? parseFloat(match[1]) : null;
+function parseTranslatePercent(transformString) {
+  const match = /translate([XY])\(([-\d.]+)%\)/.exec(transformString || '');
+  if (!match) return null;
+  const [, axis, value] = match;
+  const numericValue = parseFloat(value);
+  if (!Number.isFinite(numericValue)) return null;
+  return { axis, value: numericValue };
 }
 
-function getDisplayedPercentage(context, isColorMode) {
+function getDisplayedPercentage(context) {
   try {
-    if (isColorMode && context.elements?.colorCursor) {
-      const left = context.elements.colorCursor.style.left;
-      const val = parseFloat(left);
-      if (Number.isFinite(val)) return val;
+    if (Number.isFinite(context._lastVisualFillPercentage)) {
+      return toActualPercentage(context, context._lastVisualFillPercentage);
     }
     if (context.elements?.rangeFill) {
-      const parsed = parseTranslateXPercent(context.elements.rangeFill.style.transform);
-      if (Number.isFinite(parsed)) return parsed;
+      const parsed = parseTranslatePercent(context.elements.rangeFill.style.transform);
+      if (parsed) {
+        const orientation = getFillOrientation(context);
+        const expectedAxis = (orientation === 'top' || orientation === 'bottom') ? 'Y' : 'X';
+        if (parsed.axis === expectedAxis) {
+          return toActualPercentage(context, Math.abs(parsed.value));
+        }
+      }
     }
   } catch (_) {}
   try {
@@ -52,7 +64,7 @@ function animateToPercentage(context, targetPercentage) {
   const isColorMode = (entityType === 'light' && ['hue', 'saturation', 'white_temp'].includes(lightSliderType));
 
   const to = clampPercentage(Math.round(targetPercentage));
-  const from = getDisplayedPercentage(context, isColorMode);
+  const from = getDisplayedPercentage(context);
 
   // If small delta, snap immediately
   if (!Number.isFinite(from) || Math.abs(from - to) < 0.5) {
@@ -96,23 +108,13 @@ function animateToPercentage(context, targetPercentage) {
   function setVisual(pct) {
     const pctRounded = Math.round(clampPercentage(pct));
     try {
-      if (isColorMode && context.elements?.colorCursor) {
-        const currentLeft = context.elements.colorCursor.style.left;
-        const newLeft = `${pctRounded}%`;
-        if (currentLeft !== newLeft) {
-          context.elements.colorCursor.style.left = newLeft;
-          if (typeof context.updateColorCursorIndicator === 'function') {
-            try { context.updateColorCursorIndicator(pctRounded); } catch (_) {}
-          }
+      if (isColorMode && typeof context.setColorCursorPosition === 'function') {
+        context.setColorCursorPosition(pctRounded);
+        if (typeof context.updateColorCursorIndicator === 'function') {
+          try { context.updateColorCursorIndicator(pctRounded); } catch (_) {}
         }
       }
-      if (context.elements?.rangeFill) {
-        const currentTransform = context.elements.rangeFill.style.transform;
-        const newTransform = `translateX(${pctRounded}%)`;
-        if (currentTransform !== newTransform) {
-          context.elements.rangeFill.style.transform = newTransform;
-        }
-      }
+      setRangeFillTransform(context, pctRounded);
     } catch (_) {}
   }
 
@@ -138,7 +140,7 @@ function invalidateSliderRectCache() {
   sliderRectRafScheduled = false;
 }
 
-export function onSliderChange(context, positionX, shouldAdjustToStep = false, sliderBounds = null) {
+export function onSliderChange(context, positionCoordinate, shouldAdjustToStep = false, sliderBounds = null) {
   // Use provided bounds or cached bounds to avoid expensive getBoundingClientRect calls
   let sliderRect = sliderBounds;
   if (!sliderRect) {
@@ -161,14 +163,22 @@ export function onSliderChange(context, positionX, shouldAdjustToStep = false, s
       }
     }
   }
-  const sliderWidth = sliderRect?.width ?? 0;
+  const orientation = getFillOrientation(context);
+  const isVertical = orientation === 'top' || orientation === 'bottom';
+  const axisSize = isVertical ? (sliderRect?.height ?? 0) : (sliderRect?.width ?? 0);
 
-  if (sliderWidth <= 0) {
+  if (axisSize <= 0) {
     return clampPercentage(getCurrentPercentage(context, context.config.entity));
   }
 
-  let percentage = Math.max(0, Math.min(100, ((positionX - sliderRect.left) / sliderWidth) * 100));
-  percentage = clampPercentage(percentage);
+  const axisStart = isVertical ? sliderRect.top : sliderRect.left;
+  let visualPercentage = ((positionCoordinate - axisStart) / axisSize) * 100;
+  visualPercentage = clampPercentage(visualPercentage);
+  if (orientation === 'right' || orientation === 'bottom') {
+    visualPercentage = 100 - visualPercentage;
+  }
+
+  let percentage = toActualPercentage(context, visualPercentage);
 
   // Special handling for lights when tap_to_slide is not active
   const entityType = context.config.entity?.split('.')[0];
@@ -184,20 +194,9 @@ export function onSliderChange(context, positionX, shouldAdjustToStep = false, s
     }
   }
 
-  const newTransform = `translateX(${percentage}%)`;
-  
-  if (isEntityType(context, "climate", context.config.entity)) {
-    if (context.elements.rangeFill.style.transform !== newTransform) {
-      context.elements.rangeFill.style.transform = newTransform;
-    }
-    return percentage;
-  }
+  percentage = clampPercentage(percentage);
 
-  // Force immediate visual update for direct user interaction
-  if (context.elements.rangeFill.style.transform !== newTransform) {
-    context.elements.rangeFill.style.transform = newTransform;
-  }
-
+  setRangeFillTransform(context, percentage);
   return percentage;
 }
 
@@ -370,6 +369,12 @@ export function updateSliderStyle(context) {
       context.elements.rangeFill.style.removeProperty('--bubble-slider-fill-color');
     }
   }
+
+  if (typeof context.syncSliderValuePosition === 'function') {
+    try {
+      context.syncSliderValuePosition();
+    } catch (_) {}
+  }
 }
 
 export function updateSlider(
@@ -415,9 +420,7 @@ export function updateSlider(
     // Immediate update for instant rendering
     const pctRounded = Math.round(clampPercentage(percentage));
     try {
-      if (context.elements?.rangeFill) {
-        context.elements.rangeFill.style.transform = `translateX(${pctRounded}%)`;
-      }
+      setRangeFillTransform(context, pctRounded);
       if (context.elements?.rangeValue) {
         const newValue = formatDisplayValueFromEntity(context);
         if (context.elements.rangeValue.textContent !== newValue) {

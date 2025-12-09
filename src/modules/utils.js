@@ -238,12 +238,34 @@ export function _slugify(text) {
     .replace(/-+$/, '');            // Trim - from end of text
 }
 
+function _normalizeVersionInput(version) {
+  if (version === null || version === undefined) return '';
+  if (typeof version === 'string') return version.trim();
+  if (typeof version === 'number') return String(version);
+  if (Array.isArray(version)) {
+    return version.map(item => _normalizeVersionInput(item)).filter(Boolean).join('.');
+  }
+  if (typeof version === 'object') {
+    if (typeof version.version === 'string' || typeof version.version === 'number') {
+      return _normalizeVersionInput(version.version);
+    }
+    if (typeof version.value === 'string' || typeof version.value === 'number') {
+      return _normalizeVersionInput(version.value);
+    }
+    return '';
+  }
+  return '';
+}
+
 export function _compareVersions(v1, v2) {
   // Simple version comparison like 2025.03.15 > 2025.03.10
-  if (!v1 || !v2) return 0;
+  const normalizedV1 = _normalizeVersionInput(v1);
+  const normalizedV2 = _normalizeVersionInput(v2);
 
-  const v1Parts = v1.split('.').map(Number);
-  const v2Parts = v2.split('.').map(Number);
+  if (!normalizedV1 || !normalizedV2) return 0;
+
+  const v1Parts = normalizedV1.split('.').map(Number);
+  const v2Parts = normalizedV2.split('.').map(Number);
 
   for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
     const part1 = v1Parts[i] || 0;

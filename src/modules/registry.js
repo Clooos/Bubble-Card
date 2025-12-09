@@ -1,6 +1,6 @@
-import * as YAML from 'js-yaml';
 import { ensureBCTProviderAvailable, readAllModules as bctReadAllModules, getCachedAggregatedModules } from './bct-provider.js';
 import { migrateIfNeeded } from './bct-migration.js';
+import { parseYamlWithIncludes } from './yaml-schema.js';
 
 // In-memory state for modules loaded from files and legacy sources
 let allModules = null;
@@ -33,40 +33,7 @@ window.addEventListener('bubble-card-module-updated', (event) => {
   }
 });
 
-// Custom YAML type to support !include directive
-const INCLUDE_TYPE = new YAML.Type('!include', {
-  kind: 'scalar',
-  resolve: (data) => typeof data === 'string',
-  construct: (data) => {
-    const request = new XMLHttpRequest();
-    request.open('GET', `/local/bubble/${data}`, false);
-    request.send(null);
-    if (request.status === 200) {
-      try {
-        return YAML.load(request.responseText, { schema: INCLUDE_SCHEMA });
-      } catch (e) {
-        console.error(`Error parsing the included YAML file (/local/bubble/${data}):`, e);
-        return null;
-      }
-    } else {
-      console.error(`Error including the file /local/bubble/${data}: HTTP status ${request.status}`);
-      return null;
-    }
-  }
-});
-
-// Schema extended with !include
-const INCLUDE_SCHEMA = YAML.DEFAULT_SCHEMA.extend([INCLUDE_TYPE]);
-
-export const parseYAML = (yamlString) => {
-  if (!yamlString || typeof yamlString !== 'string') return null;
-  try {
-    return YAML.load(yamlString, { schema: INCLUDE_SCHEMA });
-  } catch (error) {
-    console.error('YAML parsing error:', error);
-    return null;
-  }
-};
+export const parseYAML = (yamlString) => parseYamlWithIncludes(yamlString);
 
 export const loadYAML = async (urls) => {
   for (const url of urls) {

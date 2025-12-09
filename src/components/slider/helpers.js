@@ -4,6 +4,18 @@ import {
   isStateOn
 } from '../../tools/utils.js';
 
+const FILL_ORIENTATION_VALUES = ['left', 'right', 'top', 'bottom'];
+export const SLIDER_VALUE_POSITIONS = ['right', 'left', 'center'];
+
+const LEGACY_SLIDER_VALUE_POSITIONS = {
+  'inline-end': 'right',
+  'inline-start': 'left'
+};
+const RECOGNIZED_SLIDER_VALUE_POSITIONS = new Set([
+  ...SLIDER_VALUE_POSITIONS,
+  ...Object.keys(LEGACY_SLIDER_VALUE_POSITIONS)
+]);
+
 // Generic helpers
 export function getEntityTypeFromId(entityId) {
   return entityId?.split('.')[0];
@@ -17,6 +29,75 @@ export function clamp(value, min, max) {
 
 export function clampPercentage(percentage) {
   return Math.max(0, Math.min(100, percentage));
+}
+
+export function shouldInvertSlider(context) {
+  if (!context?.config?.invert_slider_value) {
+    return false;
+  }
+  const entityType = getEntityTypeFromId(context?.config?.entity);
+  if (entityType === 'light') {
+    const sliderType = context?.config?.light_slider_type;
+    if (['hue', 'saturation', 'white_temp'].includes(sliderType)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function toVisualPercentage(context, actualPercentage) {
+  const safeActual = clampPercentage(Number(actualPercentage) || 0);
+  return shouldInvertSlider(context) ? 100 - safeActual : safeActual;
+}
+
+export function toActualPercentage(context, visualPercentage) {
+  const safeVisual = clampPercentage(Number(visualPercentage) || 0);
+  return shouldInvertSlider(context) ? 100 - safeVisual : safeVisual;
+}
+
+export function getFillOrientation(context) {
+  const orientation = context?.config?.slider_fill_orientation;
+  return FILL_ORIENTATION_VALUES.includes(orientation) ? orientation : 'left';
+}
+
+export function getSliderValuePosition(context) {
+  const rawValue = context?.config?.slider_value_position;
+  if (rawValue === 'hidden') return 'hidden';
+  if (!rawValue) return 'right';
+  if (LEGACY_SLIDER_VALUE_POSITIONS[rawValue]) {
+    return LEGACY_SLIDER_VALUE_POSITIONS[rawValue];
+  }
+  if (RECOGNIZED_SLIDER_VALUE_POSITIONS.has(rawValue)) {
+    return rawValue;
+  }
+  return 'right';
+}
+
+function buildFillTransform(orientation, visualPercentage) {
+  switch (orientation) {
+    case 'right':
+      return `translateX(-${visualPercentage}%)`;
+    case 'top':
+      return `translateY(${visualPercentage}%)`;
+    case 'bottom':
+      return `translateY(-${visualPercentage}%)`;
+    case 'left':
+    default:
+      return `translateX(${visualPercentage}%)`;
+  }
+}
+
+export function setRangeFillTransform(context, percentage) {
+  if (!context?.elements?.rangeFill) return;
+  const visualPercentage = toVisualPercentage(context, percentage);
+  const orientation = getFillOrientation(context);
+  const transformValue = buildFillTransform(orientation, visualPercentage);
+  const currentTransform = context.elements.rangeFill.style.transform;
+  if (currentTransform !== transformValue) {
+    context.elements.rangeFill.style.transform = transformValue;
+  }
+  context._lastVisualFillPercentage = visualPercentage;
+  context._lastFillOrientation = orientation;
 }
 
 export function getAdjustedValue(value, step) {

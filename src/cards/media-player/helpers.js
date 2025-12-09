@@ -24,7 +24,10 @@ const SUPPORT_PREVIOUS_TRACK = 16;
 const SUPPORT_NEXT_TRACK = 32;
 const SUPPORT_TURN_ON = 128;
 const SUPPORT_TURN_OFF = 256;
+const SUPPORT_PLAY_MEDIA = 512;
 const SUPPORT_VOLUME_STEP = 1024;
+const SUPPORT_SELECT_SOURCE = 2048;
+const SUPPORT_SELECT_SOUND_MODE = 65536;
 
 function getSupportedFeatures(context) {
     const raw = getAttribute(context, "supported_features");
@@ -38,6 +41,11 @@ function hasFeature(features, featureMask) {
 
 // Compute the appropriate playback UI and action based on entity state and supported features.
 // Returns an object with the desired icon and the service to call on tap.
+export function hasMediaControl(context) {
+    const state = (context?._hass?.states?.[context?.config?.entity]?.state) ?? '';
+    return state === 'playing' || state === 'paused' || state === 'unknown' || state === 'on';
+}
+
 export function computePlaybackControl(context) {
     const state = (context?._hass?.states?.[context?.config?.entity]?.state) ?? '';
     const features = getSupportedFeatures(context);
@@ -80,6 +88,9 @@ export function getMediaControlsSupport(context) {
         canTurnOff: hasFeature(features, SUPPORT_TURN_OFF),
         canVolumeSet: hasFeature(features, SUPPORT_VOLUME_SET),
         canVolumeStep: hasFeature(features, SUPPORT_VOLUME_STEP),
-        canMute: hasFeature(features, SUPPORT_VOLUME_MUTE)
+        canMute: hasFeature(features, SUPPORT_VOLUME_MUTE),
+        canPlayMedia: hasFeature(features, SUPPORT_PLAY_MEDIA),
+        canSelectSource: hasFeature(features, SUPPORT_SELECT_SOURCE),
+        canSelectSoundMode: hasFeature(features, SUPPORT_SELECT_SOUND_MODE)
     };
 }
