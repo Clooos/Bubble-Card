@@ -374,6 +374,46 @@ function cleanCSS(css) {
 
   // Apply inexpensive guards before heavier regex passes
   if (result.includes("/*")) result = result.replace(RE_BLOCK_COMMENTS, "");
+
+  if (result.includes("\n")) {
+    let nestingLevel = 0;
+    const filteredLines = [];
+
+    result.split("\n").forEach((line) => {
+      const trimmed = line.trim();
+      const openBraces = (line.match(/\{/g) || []).length;
+      const closeBraces = (line.match(/\}/g) || []).length;
+      const hasTrailingComma = /,\s*(\/\*.*\*\/)?$/.test(trimmed);
+      const startsWithSelectorChar = /^[.:#&\[*]/.test(trimmed) || /^[>+~]/.test(trimmed);
+      const looksLikeTagSelector = /^[a-zA-Z][a-zA-Z0-9-_]*$/.test(trimmed);
+      const hasImmediatePseudo = /::?[a-zA-Z_-][a-zA-Z0-9_-]*/.test(trimmed);
+      const isGroupingLine = /^[()\[\]]+,?$/.test(trimmed);
+
+      const shouldKeep =
+        nestingLevel > 0 ||
+        openBraces > 0 ||
+        closeBraces > 0 ||
+        trimmed.startsWith("@") ||
+        trimmed.startsWith("--") ||
+        hasTrailingComma ||
+        startsWithSelectorChar ||
+        looksLikeTagSelector ||
+        hasImmediatePseudo ||
+        isGroupingLine;
+
+      if (shouldKeep && trimmed !== "") {
+        filteredLines.push(line);
+      }
+
+      nestingLevel += openBraces - closeBraces;
+      if (nestingLevel < 0) {
+        nestingLevel = 0;
+      }
+    });
+
+    result = filteredLines.join("\n");
+  }
+
   // Whitespace normalization is cheap; do it unconditionally
   result = result.replace(RE_MULTI_WHITESPACE, " ");
   result = result.replace(RE_SPACE_AROUND_SEPARATORS, "$1");
@@ -382,22 +422,7 @@ function cleanCSS(css) {
   if (result.includes("{")) result = result.replace(RE_EMPTY_BLOCK, "");
   if (result.includes(",")) result = result.replace(RE_TRAILING_COMMA, "");
 
-  // Line filtering only when newlines exist
-  if (result.includes("\n")) {
-    result = result
-      .split("\n")
-      .filter(line =>
-        line.includes("{") ||
-        line.includes("}") ||
-        line.includes(":") ||
-        line.trim().match(/["']{2}/g) ||
-        line.includes("${") ||
-        line.match(/^@supports|^@media|^@keyframes|^@layer/)
-      )
-      .join("\n");
-  }
-
-  // Keep only well-formed blocks and at-rules (same logic as before)
+  // Keep only well-formed blocks and at-rules
   const matched = result.match(RE_BLOCKS_OR_AT_RULES);
   result = matched ? matched.join("\n") : "";
 

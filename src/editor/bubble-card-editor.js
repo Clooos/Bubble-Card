@@ -1030,23 +1030,83 @@ class BubbleCardEditor extends LitElement {
     }
 
     _updateAttributeSelectors = (schema, configData, inheritedEntity = undefined) => {
-      return schema.map(field => {
+      // Helper to resolve an entity from any supported config shape (object or array)
+      const resolveEntityFromConfig = (data, fallback) => {
+        if (!data) return fallback;
+        if (typeof data === "string") return data || fallback;
+        if (Array.isArray(data)) {
+          const firstWithEntity = data.find(
+            (item) => (item && item.entity) || typeof item === "string"
+          );
+          if (typeof firstWithEntity === "string") return firstWithEntity || fallback;
+          return firstWithEntity?.entity ?? fallback;
+        }
+        return data.entity ?? fallback;
+      };
+
+      // Helper to pick the config slice matching the current field
+      const getFieldConfig = (data, fieldName) => {
+        if (!data || fieldName === undefined) return data;
+        if (Array.isArray(data)) return data;
+        return data[fieldName] !== undefined ? data[fieldName] : data;
+      };
+
+      // Recursively process object selector fields (map or array) and preserve the original shape
+      const processObjectFields = (fields, value, currentEntity) => {
+        const toArray = Array.isArray(fields)
+          ? fields
+          : Object.entries(fields || {}).map(([name, def]) => ({ name, ...def }));
+
+        // Try to use the matching object when multiple entries are present
+        const valueForObject =
+          Array.isArray(value) && value.length > 0
+            ? value.find((item) => item && typeof item === "object") ?? value[0]
+            : value;
+
+        const updated = this._updateAttributeSelectors(
+          toArray,
+          valueForObject,
+          currentEntity
+        );
+
+        if (Array.isArray(fields)) {
+          return updated;
+        }
+
+        return updated.reduce((acc, fieldDef) => {
+          const { name, ...rest } = fieldDef;
+          acc[name] = rest;
+          return acc;
+        }, {});
+      };
+
+      let currentInherited = inheritedEntity;
+
+      return schema.map((field) => {
+        const fieldConfig = getFieldConfig(configData, field.name);
+
         if (field.selector && field.selector.entity) {
-          if (configData && configData.entity) {
-            inheritedEntity = configData.entity;
-          } else {
-            inheritedEntity = undefined;
-          }
+          currentInherited = resolveEntityFromConfig(fieldConfig, undefined);
         }
 
         if (field.selector && field.selector.attribute) {
-          field.selector.attribute.entity_id = inheritedEntity;
+          field.selector.attribute.entity_id = currentInherited;
         }
 
-        const nestedConfig = configData && configData[field.name] ? configData[field.name] : configData;
         if (Array.isArray(field.schema)) {
-          field.schema = this._updateAttributeSelectors(field.schema, nestedConfig, inheritedEntity);
+          field.schema = this._updateAttributeSelectors(
+            field.schema,
+            fieldConfig,
+            currentInherited
+          );
+        } else if (field.selector && field.selector.object && field.selector.object.fields) {
+          field.selector.object.fields = processObjectFields(
+            field.selector.object.fields,
+            fieldConfig,
+            currentInherited
+          );
         }
+
         return field;
       });
     };
@@ -1057,6 +1117,44 @@ class BubbleCardEditor extends LitElement {
 
   makeModuleStore() {
     return makeModuleStore(this);
+  }
+
+  _normalizeConfigValuePath(configValue) {
+    const toSegment = (segment) => {
+      if (segment === undefined || segment === null) {
+        return "";
+      }
+      const normalized = String(segment).trim();
+      return normalized;
+    };
+
+    if (typeof configValue === "string" || typeof configValue === "number") {
+      return toSegment(configValue);
+    }
+
+    if (Array.isArray(configValue)) {
+      return configValue
+        .map((segment) => toSegment(segment))
+        .filter(Boolean)
+        .join(".");
+    }
+
+    if (configValue && typeof configValue === "object") {
+      if (Array.isArray(configValue.path)) {
+        return configValue.path
+          .map((segment) => toSegment(segment))
+          .filter(Boolean)
+          .join(".");
+      }
+      if (configValue.path !== undefined) {
+        return toSegment(configValue.path);
+      }
+      if (configValue.key !== undefined) {
+        return toSegment(configValue.key);
+      }
+    }
+
+    return "";
   }
 
   _valueChanged(ev) {
@@ -1099,7 +1197,16 @@ class BubbleCardEditor extends LitElement {
         const { configValue, checked } = target;
         if (configValue) {
             const value = checked !== undefined ? checked : rawValue;
-            const configKeys = configValue.split('.');
+            const normalizedPath = this._normalizeConfigValuePath(configValue);
+            if (!normalizedPath) {
+                console.warn("Bubble Card Editor: skipped update due to invalid configValue", configValue);
+                return;
+            }
+            const configKeys = normalizedPath.split('.').filter(Boolean);
+            if (!configKeys.length) {
+                console.warn("Bubble Card Editor: empty config path provided", configValue);
+                return;
+            }
             
             // For nested properties, we need to clone progressively the structure
             if (configKeys.length > 1) {
