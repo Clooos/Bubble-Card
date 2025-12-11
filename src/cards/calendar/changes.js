@@ -174,9 +174,42 @@ export async function changeEvents(context) {
 
   context.elements.calendarCardContent.innerHTML = '';
   context.elements.calendarCardContent.appendChild(fragment);
+
+  // Update masks after DOM is rendered
+  setTimeout(() => updateScrollMasks(context), 0);
+}
+
+function updateScrollMasks(context) {
+  const content = context.elements.calendarCardContent;
+  if (!content) {
+    return;
+  }
+
+  const canScrollTop = content.scrollTop > 0;
+  const canScrollBottom = content.scrollHeight > content.clientHeight &&
+                          content.scrollTop < content.scrollHeight - content.clientHeight - 1;
+
+  content.classList.toggle('can-scroll-top', canScrollTop);
+  content.classList.toggle('can-scroll-bottom', canScrollBottom);
+
+  // Calculate mask size based on height (16px for small, 32px for large)
+  const height = content.clientHeight;
+  const maskSize = height <= 100 ? 16 : 32;
+  content.style.setProperty('--bubble-calendar-mask-size', `${maskSize}px`);
 }
 
 export function changeStyle(context) {
     setLayout(context);
     handleCustomStyles(context);
+
+    if (context.elements?.calendarCardContent) {
+      updateScrollMasks(context);
+
+      // Update masks on scroll
+      const content = context.elements.calendarCardContent;
+      if (content && !content._scrollListener) {
+        content._scrollListener = () => updateScrollMasks(context);
+        content.addEventListener('scroll', content._scrollListener);
+      }
+    }
 }

@@ -95,6 +95,7 @@ class BubbleCard extends HTMLElement {
     const type = this.config.card_type;
     if (handlers[type]) {
       handlers[type](this);
+      this._notifyEditorContext();
     }
   }
 
@@ -190,6 +191,25 @@ class BubbleCard extends HTMLElement {
 
   static getConfigElement() {
     return document.createElement("bubble-card-editor");
+  }
+
+  _notifyEditorContext() {
+    try {
+      if (!this.config || !this.card) return;
+      const detail = {
+        context: this,
+        card: this.card,
+        config: this.config,
+        card_type: this.config.card_type,
+        entity: this.config.entity,
+        hash: this.config.hash,
+        isEditor: this.detectedEditor,
+        editMode: this.editor
+      };
+      window.dispatchEvent(new CustomEvent('bubble-card-context', { detail }));
+    } catch (_) {
+      /* no-op */
+    }
   }
 }
 

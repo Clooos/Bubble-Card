@@ -47,10 +47,107 @@ export function ensureArray(value) {
   return [value];
 }
 
+function normalizeEntityIds(entityId) {
+  if (Array.isArray(entityId)) {
+    return entityId.filter(Boolean);
+  }
+  return entityId ? [entityId] : [];
+}
+
+function evaluateTemplate(template, hass, variables = {}) {
+  if (!template || typeof template !== "string") {
+    return undefined;
+  }
+
+  // Extract inner expression when wrapped in {{ }}
+  const match = template.trim().match(/^{{(.*)}}$/s);
+  let expr = (match ? match[1] : template).trim();
+
+  // Basic Jinja → JS translations
+  expr = expr
+    .replace(/\band\b/gi, "&&")
+    .replace(/\bor\b/gi, "||")
+    .replace(/\bnot\b/gi, "!")
+    .replace(/\bnone\b/gi, "null")
+    .replace(/\bTrue\b/g, "true")
+    .replace(/\bFalse\b/g, "false");
+
+  // Simple filter rewrites
+  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*int\(([^)]*)\)/gi, "__INT__(state_attr($1), $2)");
+  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*int\b/gi, "__INT__(state_attr($1))");
+  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*float\(([^)]*)\)/gi, "__FLOAT__(state_attr($1), $2)");
+  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*float\b/gi, "__FLOAT__(state_attr($1))");
+  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*lower\b/gi, "__LOWER__(state_attr($1))");
+  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*upper\b/gi, "__UPPER__(state_attr($1))");
+
+  // Generic pipe handling for int/float/lower/upper on any expression (best-effort)
+  expr = expr.replace(/([^)>\s|]+)\s*\|\s*int\(([^)]*)\)/gi, "__INT__($1, $2)");
+  expr = expr.replace(/([^)>\s|]+)\s*\|\s*int\b/gi, "__INT__($1)");
+  expr = expr.replace(/([^)>\s|]+)\s*\|\s*float\(([^)]*)\)/gi, "__FLOAT__($1, $2)");
+  expr = expr.replace(/([^)>\s|]+)\s*\|\s*float\b/gi, "__FLOAT__($1)");
+  expr = expr.replace(/([^)>\s|]+)\s*\|\s*lower\b/gi, "__LOWER__($1)");
+  expr = expr.replace(/([^)>\s|]+)\s*\|\s*upper\b/gi, "__UPPER__($1)");
+
+  const ctx = {
+    ...variables,
+    state_attr: (entityId, attribute) =>
+      hass?.states?.[entityId]?.attributes?.[attribute],
+    states: (entityId) => hass?.states?.[entityId]?.state,
+    is_state: (entityId, value) => hass?.states?.[entityId]?.state === value,
+    is_state_attr: (entityId, attribute, value) =>
+      hass?.states?.[entityId]?.attributes?.[attribute] === value,
+    __INT__: (value, defaultValue = 0) => {
+      const n = parseInt(value, 10);
+      return Number.isNaN(n) ? defaultValue : n;
+    },
+    __FLOAT__: (value, defaultValue = 0) => {
+      const n = parseFloat(value);
+      return Number.isNaN(n) ? defaultValue : n;
+    },
+    __LOWER__: (value) =>
+      typeof value === "string" ? value.toLowerCase() : value,
+    __UPPER__: (value) =>
+      typeof value === "string" ? value.toUpperCase() : value,
+  };
+
+  try {
+    // eslint-disable-next-line no-new-func
+    const fn = new Function(
+      "__CTX__",
+      `with (__CTX__) { return (${expr}); }`
+    );
+    return fn(ctx);
+  } catch {
+    return undefined;
+  }
+}
+
+function renderTemplateValue(valueTemplate, hass, variables = {}) {
+  if (!valueTemplate) {
+    return undefined;
+  }
+
+  if (typeof hass.renderTemplate === "function") {
+    try {
+      const result = hass.renderTemplate(valueTemplate, { variables });
+      if (!(result instanceof Promise)) {
+        return result;
+      }
+    } catch {
+      // Fall back to local evaluation
+    }
+  }
+
+  return evaluateTemplate(valueTemplate, hass, variables);
+}
+
 function checkStateNumericCondition(condition,hass) {
-  const entityId = condition.entity_id || condition.entity;
-  const state = (entityId ? hass.states[entityId] : undefined)
-    ?.state;
+  const entityIds = normalizeEntityIds(condition.entity_id || condition.entity);
+
+  if (!entityIds.length) {
+    return false;
+  }
+
   let above = condition.above;
   let below = condition.below;
 
@@ -62,22 +159,45 @@ function checkStateNumericCondition(condition,hass) {
     below = getValueFromEntityId(hass, below) ?? below;
   }
 
-  const numericState = Number(state);
   const numericAbove = Number(above);
   const numericBelow = Number(below);
 
-  if (isNaN(numericState)) {
-    return false;
-  }
+  return entityIds.some((id) => {
+    const entity = hass.states[id];
+    if (!entity) {
+      return false;
+    }
 
-  return (
-    (condition.above == null ||
-      isNaN(numericAbove) ||
-      numericAbove < numericState) &&
-    (condition.below == null ||
-      isNaN(numericBelow) ||
-      numericBelow > numericState)
-  );
+    let state = condition.attribute && entity.attributes
+      ? entity.attributes[condition.attribute]
+      : entity.state;
+
+    if (condition.value_template) {
+      const rendered = renderTemplateValue(condition.value_template, hass, {
+        value: state,
+        entity,
+        entity_id: id,
+      });
+      if (rendered !== undefined) {
+        state = rendered;
+      }
+    }
+
+    const numericState = Number(state);
+
+    if (isNaN(numericState)) {
+      return false;
+    }
+
+    return (
+      (condition.above == null ||
+        isNaN(numericAbove) ||
+        numericAbove < numericState) &&
+      (condition.below == null ||
+        isNaN(numericBelow) ||
+        numericBelow > numericState)
+    );
+  });
 }
 
 function checkScreenCondition(condition) {
@@ -108,6 +228,21 @@ function checkNotCondition(condition, hass) {
   return !condition.conditions.some((c) => checkConditionsMet([c], hass));
 }
 
+// Evaluate Jinja template condition using hass.renderTemplate when available
+function checkTemplateCondition(condition, hass) {
+  if (!condition.value_template) {
+    return false;
+  }
+
+  try {
+    const result = renderTemplateValue(condition.value_template, hass);
+    // Accept truthy/non-empty values as pass
+    return result === true || result === "true" || result === 1 || result === "1" || result === "True";
+  } catch {
+    return false;
+  }
+}
+
 export function checkConditionsMet(conditions,hass) {
   return conditions.every((c) => {
     // Ignore disabled conditions, they behave as if removed
@@ -122,6 +257,8 @@ export function checkConditionsMet(conditions,hass) {
           return checkUserCondition(c, hass);
         case "numeric_state":
           return checkStateNumericCondition(c, hass);
+        case "template":
+          return checkTemplateCondition(c, hass);
         case "and":
           return checkAndCondition(c, hass);
         case "or":
@@ -200,10 +337,17 @@ function validateNotCondition(condition) {
   return condition.conditions != null;
 }
 
+function validateTemplateCondition(condition) {
+  return condition.value_template != null;
+}
+
 function validateNumericStateCondition(condition) {
   const entityId = condition.entity_id || condition.entity;
+  const hasEntity = Array.isArray(entityId)
+    ? entityId.length > 0
+    : entityId != null;
   return (
-    entityId != null &&
+    hasEntity &&
     (condition.above != null || condition.below != null)
   );
 }
@@ -222,6 +366,8 @@ export function validateConditionalConfig(conditions){
           return validateUserCondition(c);
         case "numeric_state":
           return validateNumericStateCondition(c);
+        case "template":
+          return validateTemplateCondition(c);
         case "and":
           return validateAndCondition(c);
         case "or":
