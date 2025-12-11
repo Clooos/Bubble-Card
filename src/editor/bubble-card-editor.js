@@ -34,16 +34,23 @@ class BubbleCardEditor extends LitElement {
     _moduleErrorCache = {};
     _moduleCodeEvaluating = null;
     _rowsAutoMode = undefined; // true = auto-manage rows, false = user-managed
+    _previewCardRoot = null;
+    _previewCardHost = null;
+    _previewCardScore = -Infinity;
+    _cardContextListener = null;
 
     constructor() {
         super();
         this._expandedPanelStates = {};
+        this._cardContextListener = (event) => this._handleCardContext(event);
+        window.addEventListener('bubble-card-context', this._cardContextListener);
     }
 
     setConfig(config) {
         this._config = {
             ...config
         };
+        this._resetPreviewCardReference();
         // Initialize rows auto mode once per editor session based on incoming config
         if (this._rowsAutoMode === undefined) {
             this._rowsAutoMode = true;
@@ -123,6 +130,7 @@ class BubbleCardEditor extends LitElement {
         try { if (this._storeAutoRefreshTimer) { clearInterval(this._storeAutoRefreshTimer); this._storeAutoRefreshTimer = null; } } catch (e) {}
         try { if (this._progressInterval) { clearInterval(this._progressInterval); this._progressInterval = null; } } catch (e) {}
         try { if (this._editorSchemaDebounce) { clearTimeout(this._editorSchemaDebounce); this._editorSchemaDebounce = null; } } catch (e) {}
+        try { if (this._cardContextListener) { window.removeEventListener('bubble-card-context', this._cardContextListener); this._cardContextListener = null; } } catch (e) {}
     
         if (BubbleCardEditor._resizeObserver && this._observedElements) {
             this._observedElements.forEach(el => {
@@ -1544,35 +1552,13 @@ class BubbleCardEditor extends LitElement {
 
   _getBubbleCardFromPreview() {
     try {
-      const homeAssistant = document.querySelector("body > home-assistant");
-      const previewElement = homeAssistant?.shadowRoot
-        ?.querySelector("hui-dialog-edit-card")
-        ?.shadowRoot
-        ?.querySelector("ha-dialog > div.content > div.element-preview");
-      if (!previewElement) return null;
-
-      // Try to locate the bubble-card across different HA view types.
-      // 1) Sections view (hui-grid-section)
-      const sectionHost = previewElement.querySelector("hui-grid-section");
-      const sectionShadow = sectionHost?.shadowRoot;
-      const sectionBubble = sectionShadow?.querySelector("bubble-card")?.shadowRoot;
-      if (sectionBubble) return sectionBubble;
-
-      // 2) Masonry view (hui-masonry-view)
-      const masonryHost = previewElement.querySelector("hui-masonry-view");
-      const masonryShadow = masonryHost?.shadowRoot;
-      const masonryBubble = masonryShadow?.querySelector("bubble-card")?.shadowRoot;
-      if (masonryBubble) return masonryBubble;
-
-      // 3) Generic view container (hui-view) → direct bubble-card
-      const huiView = previewElement.querySelector("hui-view") || previewElement.querySelector("#view > hui-view");
-      const huiViewShadow = huiView?.shadowRoot || huiView;
-      const viewBubble = huiViewShadow?.querySelector?.("bubble-card")?.shadowRoot || huiViewShadow?.querySelector?.("bubble-card")?.shadowRoot;
-      if (viewBubble) return viewBubble;
-
-      // 4) Fallback: search recursively for bubble-card within preview
-      const anyBubble = previewElement.querySelector("bubble-card");
-      return anyBubble?.shadowRoot || null;
+      // Prefer the direct context provided by the card itself (works in pop-ups)
+      if (this._previewCardRoot) {
+        const host = this._previewCardRoot.host || this._previewCardHost;
+        if (host?.isConnected || this._previewCardRoot.isConnected) {
+          return this._previewCardRoot;
+        }
+      }
     } catch (e) {
       return null;
     }
@@ -1942,6 +1928,42 @@ class BubbleCardEditor extends LitElement {
         ];
         this._cachedCalendarLabel = calendarLabel;
     }
+  }
+
+  _handleCardContext(event) {
+    try {
+      const detail = event?.detail;
+      if (!detail) return;
+      const score = this._scoreCardContext(detail);
+      if (score <= this._previewCardScore) return;
+
+      const host = detail.context || detail.card?.closest?.('bubble-card') || detail.card?.getRootNode?.()?.host || null;
+      const root = detail.context?.shadowRoot || host?.shadowRoot || detail.card?.getRootNode?.() || null;
+      if (!root) return;
+
+      this._previewCardScore = score;
+      this._previewCardRoot = root;
+      this._previewCardHost = host || root.host || null;
+      this._setupAutoRowsObserver();
+    } catch (_) {}
+  }
+
+  _scoreCardContext(detail) {
+    const cfg = detail?.config || {};
+    const target = this._config || {};
+    let score = 0;
+    if (detail?.isEditor || detail?.editMode) score += 5;
+    if (cfg.card_type && cfg.card_type === target.card_type) score += 4;
+    if (cfg.entity && cfg.entity === target.entity) score += 3;
+    if (cfg.hash && cfg.hash === target.hash) score += 2;
+    if (cfg.button_type && cfg.button_type === target.button_type) score += 1;
+    return score;
+  }
+
+  _resetPreviewCardReference() {
+    this._previewCardRoot = null;
+    this._previewCardHost = null;
+    this._previewCardScore = -Infinity;
   }
 }
 

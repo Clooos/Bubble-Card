@@ -451,6 +451,10 @@ export function updateEntity(context, percentage) {
 
   // Clamp the adjusted value within the min/max bounds
   adjustedValue = Math.max(minValue, Math.min(maxValue, adjustedValue));
+  const range = maxValue - minValue;
+  const adjustedPercentage = range > 0
+    ? clampPercentage(((adjustedValue - minValue) / range) * 100)
+    : 0;
 
   switch (entityType) {
     case 'light': {
@@ -461,7 +465,7 @@ export function updateEntity(context, percentage) {
         const currentHs = context._hass.states[context.config.entity]?.attributes?.hs_color || [];
         const currentHue = parseFloat(currentHs[0]) || 0;
         const currentSat = parseFloat(currentHs[1]) || 0;
-        const newHue = lightSliderType === 'hue' ? Math.round((percentage / 100) * 360) : currentHue;
+        const newHue = lightSliderType === 'hue' ? Math.round((adjustedPercentage / 100) * 360) : currentHue;
 
         // When adjusting hue: only force saturation to 100% if previously too low (< 10%)
         // When adjusting saturation: use the chosen saturation value
@@ -470,7 +474,7 @@ export function updateEntity(context, percentage) {
         const forcedValueRaw = Number(context.config?.hue_force_saturation_value);
         const forcedValue = Number.isFinite(forcedValueRaw) ? Math.max(0, Math.min(100, forcedValueRaw)) : 100;
         const newSat = (lightSliderType === 'saturation')
-          ? Math.round(percentage)
+          ? Math.round(adjustedPercentage)
           : (forceSat ? forcedValue : (currentSat < SAT_THRESHOLD ? 100 : currentSat));
 
         context._hass.callService('light', 'turn_on', {
@@ -483,7 +487,7 @@ export function updateEntity(context, percentage) {
       if (lightSliderType === 'white_temp') {
         const minMireds = context._hass.states[context.config.entity]?.attributes?.min_mireds ?? 153;
         const maxMireds = context._hass.states[context.config.entity]?.attributes?.max_mireds ?? 500;
-        const value = fromPercentageToValue(percentage, minMireds, maxMireds);
+        const value = fromPercentageToValue(adjustedPercentage, minMireds, maxMireds);
         const mireds = Math.round(getAdjustedValue(value, 1));
         context._hass.callService('light', 'turn_on', {
           entity_id: context.config.entity,
@@ -497,7 +501,8 @@ export function updateEntity(context, percentage) {
       if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
         brightness = Math.round(255 * adjustedValue / 100);
       } else {
-        brightness = Math.round(255 * percentage / 100);
+        const effectivePercentage = Number.isFinite(adjustedPercentage) ? adjustedPercentage : percentage;
+        brightness = Math.round(255 * effectivePercentage / 100);
       }
       const isTransitionEnabled = context.config.light_transition;
       const transitionTime = (context.config.light_transition_time === "" || isNaN(context.config.light_transition_time))
@@ -519,9 +524,8 @@ export function updateEntity(context, percentage) {
         // Use the adjusted value directly when custom min/max are set
         volumeLevel = adjustedValue / 100;
       } else {
-        // Standard volume conversion (0-100% to 0-1)
-        volumeLevel = percentage / 100;
-        volumeLevel = getAdjustedValue(volumeLevel, step);
+        // Standard volume conversion (0-100% to 0-1) using stepped percentage
+        volumeLevel = adjustedPercentage / 100;
       }
       
       // Clamp to 0-1 range
@@ -541,7 +545,7 @@ export function updateEntity(context, percentage) {
         position = Math.round(adjustedValue);
       } else {
         // Standard cover position (percentage is already 0-100)
-        position = Math.round(percentage);
+        position = Math.round(adjustedPercentage);
       }
       
       context._hass.callService('cover', 'set_cover_position', {
@@ -567,7 +571,7 @@ export function updateEntity(context, percentage) {
         fanPercentage = Math.round(adjustedValue);
       } else {
         // Standard fan percentage (percentage is already 0-100)
-        fanPercentage = Math.round(percentage);
+        fanPercentage = Math.round(adjustedPercentage);
       }
       
       context._hass.callService('fan', 'set_percentage', {

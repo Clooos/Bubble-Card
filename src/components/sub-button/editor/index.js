@@ -15,4 +15,3 @@ export function makeSubButtonPanel(editor) {
     // Use the sectioned panel (Main / Bottom) with transparent migration
     return makeSectionedSubButtonsPanel(editor);
 }
-

@@ -264,8 +264,17 @@
     width: 16px !important;
 }
 
+.bubble-sub-button .bubble-dropdown-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .bubble-sub-button .bubble-dropdown-arrow {
     background: none !important;
+    inset: 0;
+    margin: auto -4px;
 }
 
 .bubble-sub-button.is-select.background-on {

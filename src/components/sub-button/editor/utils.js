@@ -307,7 +307,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                     {
                       name: "custom_height",
                       label: "Custom button height (px)",
-                      selector: { number: { min: 20, max: 100, mode: "box" } }
+                      selector: { number: { min: 20, max: 600, mode: "box" } }
                     },
                     ...(button.sub_button_type !== 'slider' || !button.always_visible ? [{
                       name: "content_layout",
