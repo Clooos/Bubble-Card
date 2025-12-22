@@ -3,10 +3,12 @@ import { getOptionIcon } from "../../../dropdown/helpers.js";
 import { buildDisplayedState, updateBackground, setupActions, updateElementVisibility, updateIconClasses, applySubButtonScrollingEffect } from "../../utils.js";
 
 function updateDropdownArrow(element, showArrow) {
+  // Keep default padding so icon-only dropdown buttons match regular sub-button sizing
+  element.style.removeProperty('padding');
+
   if (!showArrow) {
     element.dropdownArrow.style.display = 'none';
     element.dropdownContainer.style.width = '0px';
-    element.style.padding = '6px';
   } else {
     element.dropdownArrow.style.display = '';
     element.dropdownContainer.style.width = '24px';

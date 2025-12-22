@@ -112,15 +112,28 @@
 
 /* Ensure touch drag is recognized on mobile for slider track */
 .bubble-range-slider {
-    touch-action: pan-x;
+    touch-action: pan-y;
     backface-visibility: hidden;
     height: 100%;
+}
+
+/* Vertical sliders: allow horizontal scroll, block vertical */
+.bubble-range-slider.fill-orientation-top,
+.bubble-range-slider.fill-orientation-bottom {
+    touch-action: pan-x;
 }
 
 /* Slider container styles */
 .slider-container {
     cursor: ew-resize;
     touch-action: pan-y;
+}
+
+/* Vertical slider containers: allow horizontal scroll, block vertical */
+.slider-container:has(.fill-orientation-top),
+.slider-container:has(.fill-orientation-bottom) {
+    cursor: ns-resize;
+    touch-action: pan-x;
 }
 
 .slider-container.is-touching,

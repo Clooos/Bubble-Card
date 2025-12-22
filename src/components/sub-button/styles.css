@@ -148,8 +148,7 @@
     position: relative;
     right: 0;
     box-sizing: border-box;
-    width: auto;
-    min-width: 36px;
+    width: max-content;
     height: var(--bubble-sub-button-height, 36px);
     vertical-align: middle;
     font-size: 12px;
@@ -161,22 +160,25 @@
 }
 
 .bubble-sub-button.fill-width {
-    flex-grow: 1;
+    flex: 1 1 0%;
 }
 
 .bubble-sub-button-group.display-column > .bubble-sub-button.fill-width {
     width: 100%;
+    flex: 0 0 auto;
 }
 
 /* When a slider is inline, allow it to expand to fill width when requested */
 .bubble-sub-slider-wrapper.inline.fill-width {
-    flex: 1 1 auto;
+    flex: 1 1 0%;
     width: 100%;
+    min-width: 0;
 }
 
 .bubble-sub-button-slider.inline.fill-width {
-    flex: 1 1 auto;
+    flex: 1 1 0%;
     width: 100%;
+    min-width: 0;
 }
 
 /* Hide only the host button content (icon + text) when inline slider is shown */
@@ -441,6 +443,12 @@
     box-sizing: border-box;
 }
 
+/* Vertical inline sliders: allow horizontal scroll, block vertical initially */
+.bubble-sub-slider-wrapper.inline:has(.fill-orientation-top),
+.bubble-sub-slider-wrapper.inline:has(.fill-orientation-bottom) {
+    touch-action: pan-x pinch-zoom;
+}
+
 /* Custom width wrapper styles */
 .bubble-sub-slider-wrapper.inline.has-custom-width {
     flex: 0 0 auto;
@@ -471,12 +479,25 @@
 .bubble-sub-button-group:not(.position-bottom) .bubble-sub-button-slider.inline.has-custom-width {
     min-width: var(--slider-container-min-width, 96px);
 }
+/* Horizontal inline sliders: allow vertical scroll, block horizontal */
 .bubble-sub-button-slider.inline.slider-container {
-    touch-action: pan-x pan-y pinch-zoom;
+    touch-action: pan-y pinch-zoom;
 }
 .bubble-sub-button-slider.inline .bubble-range-slider {
-    touch-action: pan-x pan-y pinch-zoom;
+    touch-action: pan-y pinch-zoom;
 }
+
+/* Vertical inline sliders: allow horizontal scroll, block vertical */
+.bubble-sub-button-slider.inline.slider-container:has(.fill-orientation-top),
+.bubble-sub-button-slider.inline.slider-container:has(.fill-orientation-bottom) {
+    touch-action: pan-x pinch-zoom;
+}
+.bubble-sub-button-slider.inline .bubble-range-slider.fill-orientation-top,
+.bubble-sub-button-slider.inline .bubble-range-slider.fill-orientation-bottom {
+    touch-action: pan-x pinch-zoom;
+}
+
+/* When touching or dragging any inline slider, block all touch actions */
 .bubble-sub-button-slider.inline.slider-container.is-touching,
 .bubble-sub-button-slider.inline.slider-container.is-dragging {
     touch-action: none;

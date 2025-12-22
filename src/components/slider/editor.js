@@ -231,6 +231,15 @@ export function makeGenericSliderSettings({
                         @value-changed=${(ev) => callToggleChange('slider_fill_orientation', ev.detail.value, meta('ha-combo-box', 'value-changed'))}
                     ></ha-combo-box>
                 </div>
+                <div class="bubble-info" style="display: ${['top', 'bottom'].includes(data.slider_fill_orientation) ? '' : 'none'}">
+                    <h4 class="bubble-section-title">
+                        <ha-icon icon="mdi:information-outline"></ha-icon>
+                        Vertical slider behavior
+                    </h4>
+                    <div class="content">
+                        <p>When using vertical fill orientation (top or bottom), swiping over the card on mobile will activate the slider. This is because there's no way to distinguish between scrolling and slider interaction.</p>
+                    </div>
+                </div>
                 ${isLightColorMode ? '' : html`
                     <div class="ha-combo-box">
                         <ha-combo-box

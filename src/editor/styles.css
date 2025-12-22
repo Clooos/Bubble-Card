@@ -3,6 +3,12 @@ div {
   grid-gap: 12px;
 }
 
+/* ha-expansion-panel {
+  contain: inline-size;
+  max-width: 100%;
+  box-sizing: border-box;
+} */
+
 ha-combo-box[label="Card type"]::after {
   content: "";
   position: relative;
@@ -130,6 +136,12 @@ ha-expansion-panel h4:not(.version) {
   display: flex;
   align-items: center;
   margin: 10px 0;
+}
+
+ha-expansion-panel > .content, ha-expansion-panel .content {
+  overflow-x: visible !important;
+  display: flex;
+  flex-direction: column; 
 }
 
 ha-form {

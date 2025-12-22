@@ -6,6 +6,8 @@ import {
 } from 'lit';
 import { version } from '../var/version.js';
 import { fireEvent } from '../tools/utils.js';
+// Custom selector for object fields with dynamic entity-attribute context support
+import '../components/editor/ha-selector-bc_object.js';
 import { renderButtonEditor } from '../cards/button/editor.js';
 import { renderSubButtonsEditor } from '../cards/sub-buttons/editor.js';
 import { renderPopUpEditor } from '../cards/pop-up/editor.js';
@@ -20,6 +22,7 @@ import { renderEmptyColumnEditor } from '../cards/empty-column/editor.js';
 import { makeSubButtonPanel } from '../components/sub-button/editor/index.js';
 import { makeModulesEditor } from '../modules/editor.js';
 import { makeModuleStore, _fetchModuleStore } from '../modules/store.js';
+import { yamlKeysMap } from '../modules/registry.js';
 import setupTranslation from '../tools/localize.js';
 import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
@@ -970,12 +973,10 @@ class BubbleCardEditor extends LitElement {
     }
 
     _getProcessedSchema(key, originalSchema, config) {
-      if (this._processedSchemas && this._processedSchemas[key]) {
-        return this._processedSchemas[key];
-      }
+      // Always recalculate schema based on current config to handle dynamic dependencies
+      // This ensures attribute selectors are properly linked to their entity fields
       const schemaCopy = structuredClone(originalSchema);
       const updatedSchema = this._updateAttributeSelectors(schemaCopy, config, key);
-      this._processedSchemas = { ...this._processedSchemas, [key]: updatedSchema };
       return updatedSchema;
     }
 
@@ -996,16 +997,13 @@ class BubbleCardEditor extends LitElement {
           this._workingModuleConfigs[key] = value;
       }
 
-      // Now clean the value before updating the main config and schema
+      // Now clean the value before updating the main config
       const cleanedValue = this._cleanEmpty(value, key); 
 
-      // Update processed schema based on the CLEANED value
-      const newProcessedSchema = structuredClone(originalSchema);
-      const updatedSchema = this._updateAttributeSelectors(newProcessedSchema, cleanedValue, key);
-      this._processedSchemas = { ...this._processedSchemas, [key]: updatedSchema };
-
       // Fire event to update the main config (_config) with the CLEANED value
+      // The schema will be recalculated on next render based on the updated config
       fireEvent(this, "config-changed", { config: { ...this._config, [key]: cleanedValue } });
+      this.requestUpdate();
     }
 
     _cleanEmpty(value, key) {
@@ -1043,6 +1041,7 @@ class BubbleCardEditor extends LitElement {
         if (!data) return fallback;
         if (typeof data === "string") return data || fallback;
         if (Array.isArray(data)) {
+          // Find first item that has an entity property
           const firstWithEntity = data.find(
             (item) => (item && item.entity) || typeof item === "string"
           );
@@ -1054,9 +1053,21 @@ class BubbleCardEditor extends LitElement {
 
       // Helper to pick the config slice matching the current field
       const getFieldConfig = (data, fieldName) => {
-        if (!data || fieldName === undefined) return data;
+        if (!data || fieldName === undefined) return undefined;
         if (Array.isArray(data)) return data;
-        return data[fieldName] !== undefined ? data[fieldName] : data;
+        // Only return the field value if it exists, otherwise return undefined
+        return data[fieldName];
+      };
+
+      // Check if an object selector has both entity and attribute fields as siblings
+      const hasEntityAttributeSiblings = (fields) => {
+        const fieldsArray = Array.isArray(fields)
+          ? fields
+          : Object.entries(fields || {}).map(([name, def]) => ({ name, ...def }));
+        
+        const hasEntityField = fieldsArray.some(f => f.selector && f.selector.entity);
+        const hasAttributeField = fieldsArray.some(f => f.selector && f.selector.attribute);
+        return hasEntityField && hasAttributeField;
       };
 
       // Recursively process object selector fields (map or array) and preserve the original shape
@@ -1065,15 +1076,34 @@ class BubbleCardEditor extends LitElement {
           ? fields
           : Object.entries(fields || {}).map(([name, def]) => ({ name, ...def }));
 
-        // Try to use the matching object when multiple entries are present
-        const valueForObject =
-          Array.isArray(value) && value.length > 0
-            ? value.find((item) => item && typeof item === "object") ?? value[0]
-            : value;
+        // For objects without entity+attribute siblings, use standard processing
+        if (Array.isArray(value) && value.length > 0) {
+          // Prioritize finding an item with an entity field set, then fall back to first object
+          const valueForObject = value.find((item) => item && typeof item === "object" && item.entity) 
+            ?? value.find((item) => item && typeof item === "object") 
+            ?? value[0];
 
+          const updated = this._updateAttributeSelectors(
+            toArray,
+            valueForObject,
+            currentEntity
+          );
+
+          if (Array.isArray(fields)) {
+            return updated;
+          }
+
+          return updated.reduce((acc, fieldDef) => {
+            const { name, ...rest } = fieldDef;
+            acc[name] = rest;
+            return acc;
+          }, {});
+        }
+
+        // For empty arrays or no data, still process schema structure
         const updated = this._updateAttributeSelectors(
           toArray,
-          valueForObject,
+          value,
           currentEntity
         );
 
@@ -1108,11 +1138,25 @@ class BubbleCardEditor extends LitElement {
             currentInherited
           );
         } else if (field.selector && field.selector.object && field.selector.object.fields) {
-          field.selector.object.fields = processObjectFields(
-            field.selector.object.fields,
-            fieldConfig,
-            currentInherited
-          );
+          // Check if this object selector has entity+attribute siblings
+          // If so, convert to bc_object for dynamic context support
+          if (hasEntityAttributeSiblings(field.selector.object.fields)) {
+            // Convert to bc_object selector for dynamic entity-attribute linking
+            const objectConfig = field.selector.object;
+            field.selector = {
+              bc_object: {
+                ...objectConfig,
+                // Keep fields as-is, bc_object will handle context internally
+              }
+            };
+          } else {
+            // Standard processing for objects without entity+attribute siblings
+            field.selector.object.fields = processObjectFields(
+              field.selector.object.fields,
+              fieldConfig,
+              currentInherited
+            );
+          }
         }
 
         return field;
@@ -1625,9 +1669,98 @@ class BubbleCardEditor extends LitElement {
     });
   }
 
+  /**
+   * Checks if custom styles or modules contain CSS that affects the container height.
+   * Patterns detected: aspect-ratio, height: 100%, height: XXXpx on .bubble-container
+   */
+  _hasCustomHeightStyles() {
+    // Regex pattern to detect height-affecting styles on .bubble-container
+    // Matches: aspect-ratio, height: 100%, height: XXXpx/em/rem/vh/etc
+    const heightPatterns = [
+      /\.bubble-container[^{]*\{[^}]*aspect-ratio\s*:/i,
+      /\.bubble-container[^{]*\{[^}]*height\s*:\s*100%/i,
+      /\.bubble-container[^{]*\{[^}]*height\s*:\s*\d+(\.\d+)?\s*(px|em|rem|vh|vw|%)/i,
+    ];
+
+    const checkStylesForPatterns = (stylesString) => {
+      if (!stylesString || typeof stylesString !== 'string') return false;
+      return heightPatterns.some(pattern => pattern.test(stylesString));
+    };
+
+    // Check custom styles from config
+    if (this._config?.styles && checkStylesForPatterns(this._config.styles)) {
+      return true;
+    }
+
+    // Check active modules for height-affecting styles
+    try {
+      if (yamlKeysMap && yamlKeysMap.size > 0) {
+        // Get list of active modules for this card
+        const activeModules = new Set();
+        const configExcludedModules = new Set();
+
+        // Parse config.modules to find active and excluded modules
+        if (Array.isArray(this._config?.modules)) {
+          this._config.modules.forEach(mod => {
+            if (typeof mod === 'string' && mod.startsWith('!')) {
+              configExcludedModules.add(mod.substring(1));
+            } else if (typeof mod === 'string') {
+              activeModules.add(mod);
+            }
+          });
+        } else if (this._config?.modules && typeof this._config.modules === 'string') {
+          if (this._config.modules.startsWith('!')) {
+            configExcludedModules.add(this._config.modules.substring(1));
+          } else {
+            activeModules.add(this._config.modules);
+          }
+        }
+
+        // Add default module if present and not excluded
+        if (yamlKeysMap.has('default') && !configExcludedModules.has('default')) {
+          activeModules.add('default');
+        }
+
+        // Add global modules
+        yamlKeysMap.forEach((value, key) => {
+          if (value && typeof value === 'object' && value.is_global === true && !configExcludedModules.has(key)) {
+            activeModules.add(key);
+          }
+        });
+
+        // Check each active module for height-affecting styles
+        for (const moduleId of activeModules) {
+          const moduleData = yamlKeysMap.get(moduleId);
+          if (moduleData) {
+            const moduleCode = typeof moduleData === 'object' ? moduleData.code : moduleData;
+            if (checkStylesForPatterns(moduleCode)) {
+              return true;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Silently fail if module check fails
+    }
+
+    return false;
+  }
+
   _computeAndApplyRows(bubbleCard) {
     try {
       if (!bubbleCard || this._rowsAutoMode === false || !this._config) return;
+
+      // Skip auto rows calculation if custom height styles are detected
+      if (this._hasCustomHeightStyles()) {
+        // Remove rows from config if it was auto-set
+        if (this._config.rows !== undefined && this._rowsAutoMode !== false) {
+          const newConfig = { ...this._config };
+          delete newConfig.rows;
+          this._config = newConfig;
+          fireEvent(this, 'config-changed', { config: newConfig });
+        }
+        return;
+      }
 
       const isCalendar = this._config.card_type === 'calendar';
       const isSeparator = this._config.card_type === 'separator';
@@ -1669,25 +1802,33 @@ class BubbleCardEditor extends LitElement {
       // Check if there are main sub-buttons
       const hasMainSubButtons = mainSubButtons && mainSubButtons.getBoundingClientRect().height > 0;
 
-      let reservedFromBottom = 0;
-      if (containerRect) {
-        const overlayTops = [];
-        if (bottomSubButtons) {
-          const r = bottomSubButtons.getBoundingClientRect();
-          if (r.height > 0) overlayTops.push(r.top);
+      const hasBottomConfigured = (() => {
+        const rawSubButton = this._config?.sub_button;
+        if (!rawSubButton) return false;
+        if (Array.isArray(rawSubButton)) return false;
+        const bottom = Array.isArray(rawSubButton.bottom) ? rawSubButton.bottom : [];
+        return bottom.some((item) => !!item);
+      })();
+
+      const bottomSubButtonsHeight = bottomSubButtons ? bottomSubButtons.getBoundingClientRect().height : 0;
+      const bottomMainButtonsHeight = bottomMainButtons ? bottomMainButtons.getBoundingClientRect().height : 0;
+
+      let reservedFromBottom = bottomSubButtonsHeight + bottomMainButtonsHeight;
+      if (reservedFromBottom <= 0 && hasBottomConfigured) {
+        reservedFromBottom = 46;
+      }
+      const computeBottomOffset = (element) => {
+        if (!element) return 0;
+        try {
+          const style = getComputedStyle(element);
+          const offset = parseFloat(style.bottom);
+          return Number.isFinite(offset) ? Math.max(0, offset) : 0;
+        } catch (_) {
+          return 0;
         }
-        if (bottomMainButtons) {
-          const r = bottomMainButtons.getBoundingClientRect();
-          if (r.height > 0) overlayTops.push(r.top);
-        }
-        if (overlayTops.length > 0) {
-          const minTop = Math.min(...overlayTops);
-          reservedFromBottom = Math.max(0, containerRect.bottom - minTop) - 8;
-        }
-      } else {
-        const subButtonsHeight = bottomSubButtons ? bottomSubButtons.getBoundingClientRect().height : 0;
-        const mainButtonsHeight = bottomMainButtons ? bottomMainButtons.getBoundingClientRect().height : 0;
-        reservedFromBottom = subButtonsHeight + mainButtonsHeight;
+      };
+      if (bottomMainButtons) {
+        reservedFromBottom += computeBottomOffset(bottomMainButtons);
       }
 
       // Calculate height reserved by main sub-buttons (in the main area)

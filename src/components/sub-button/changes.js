@@ -116,7 +116,8 @@ export function getSubButtonsStates(context) {
     .filter(item => item && !Array.isArray(item.group))
     .forEach((subButton) => {
       const entity = subButton.entity ?? context.config.entity;
-      states.push(context._hass.states[entity]);
+      const stateObj = context._hass.states[entity];
+      states.push(stateObj?.state ?? 'unknown');
     });
   
   // Get states from buttons in groups
@@ -128,7 +129,8 @@ export function getSubButtonsStates(context) {
       buttons.forEach((button) => {
         if (button) {
           const entity = button.entity ?? context.config.entity;
-          states.push(context._hass.states[entity]);
+          const stateObj = context._hass.states[entity];
+          states.push(stateObj?.state ?? 'unknown');
         }
       });
     });
