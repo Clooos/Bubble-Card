@@ -31,7 +31,7 @@ export function getTextFromMap(key) {
 
   // Handle backward compatibility
   if (unsupportedCard.length > 0 && supportedCards.length === 0) {
-    const allCards = ['button', 'climate', 'cover', 'horizontal-buttons-stack', 'media-player', 'pop-up', 'select', 'separator'];
+    const allCards = ['button', 'climate', 'cover', 'horizontal-buttons-stack', 'media-player', 'pop-up', 'select', 'separator', 'sub-buttons'];
     supportedCards = allCards.filter(id => !unsupportedCard.includes(id));
   }
 
@@ -240,7 +240,11 @@ export function _slugify(text) {
 
 function _normalizeVersionInput(version) {
   if (version === null || version === undefined) return '';
-  if (typeof version === 'string') return version.trim();
+  if (typeof version === 'string') {
+    const trimmed = version.trim();
+    // Remove 'v' or 'V' prefix if present
+    return trimmed.replace(/^[vV]/, '');
+  }
   if (typeof version === 'number') return String(version);
   if (Array.isArray(version)) {
     return version.map(item => _normalizeVersionInput(item)).filter(Boolean).join('.');

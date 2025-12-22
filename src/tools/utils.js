@@ -944,43 +944,108 @@ export function throttle(mainFunction, delay = 300) {
 }
 
 let previousScrollY = 0;
-const scrollLockHtmlClass = 'bubble-html-scroll-locked';
+let previousScrollX = 0;
+const legacyScrollLockClass = 'bubble-html-scroll-locked';
+const scrollLockBodyClass = 'bubble-body-scroll-locked';
+const scrollLockInlineDatasetKey = 'bubbleScrollLockInline';
+const scrollLockStyleProps = ['position', 'width', 'top', 'left', 'right'];
 
 function injectNoScrollStyles() {
     const styleId = 'bubble-card-no-scroll-styles';
-    if (document.getElementById(styleId)) return;
-
-    const styleElement = document.createElement('style');
-    styleElement.id = styleId;
-    styleElement.textContent = `
-        html.${scrollLockHtmlClass} {
+    const cssContent = `
+        body.${scrollLockBodyClass} {
             overflow: hidden !important;
+            overscroll-behavior: none;
         }
     `;
-    document.head.appendChild(styleElement);
+    let styleElement = document.getElementById(styleId);
+    if (!styleElement) {
+        styleElement = document.createElement('style');
+        styleElement.id = styleId;
+        document.head.appendChild(styleElement);
+    }
+    if (styleElement.textContent !== cssContent) {
+        styleElement.textContent = cssContent;
+    }
+}
+
+function saveBodyInlineStyles(body) {
+    const saved = {};
+    scrollLockStyleProps.forEach((prop) => {
+        const value = body.style[prop];
+        if (value) {
+            saved[prop] = value;
+        }
+    });
+    body.dataset[scrollLockInlineDatasetKey] = JSON.stringify(saved);
+}
+
+function restoreBodyInlineStyles(body) {
+    const raw = body.dataset[scrollLockInlineDatasetKey];
+    delete body.dataset[scrollLockInlineDatasetKey];
+
+    if (!raw) {
+        scrollLockStyleProps.forEach((prop) => body.style.removeProperty(prop));
+        return;
+    }
+
+    try {
+        const saved = JSON.parse(raw);
+        scrollLockStyleProps.forEach((prop) => {
+            if (saved[prop]) {
+                body.style[prop] = saved[prop];
+            } else {
+                body.style.removeProperty(prop);
+            }
+        });
+    } catch (_) {
+        scrollLockStyleProps.forEach((prop) => body.style.removeProperty(prop));
+    }
 }
 
 export function toggleBodyScroll(disable) {
     injectNoScrollStyles();
 
+    const html = document.documentElement;
+    const body = document.body;
+    if (!body) return;
+
     if (disable) {
-        if (document.documentElement.classList.contains(scrollLockHtmlClass)) {
+        if (body.classList.contains(scrollLockBodyClass)) {
             return;
         }
 
         previousScrollY = window.scrollY !== undefined 
             ? window.scrollY 
-            : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-        
-        document.documentElement.classList.add(scrollLockHtmlClass);        
-    } else {
-        if (!document.documentElement.classList.contains(scrollLockHtmlClass)) {
-            return;
-        }
+            : (html || document.body.parentNode || document.body).scrollTop;
 
-        document.documentElement.classList.remove(scrollLockHtmlClass);
-        window.scrollTo({ top: previousScrollY, behavior: 'instant' });
+        previousScrollX = window.scrollX !== undefined
+            ? window.scrollX
+            : (html || document.body.parentNode || document.body).scrollLeft;
+
+        saveBodyInlineStyles(body);
+
+        body.classList.add(scrollLockBodyClass);
+        body.style.position = 'fixed';
+        body.style.width = '100%';
+        body.style.top = `-${previousScrollY}px`;
+        body.style.left = '0';
+        body.style.right = '0';
+        return;
     }
+
+    if (html) {
+        html.classList.remove(legacyScrollLockClass);
+    }
+
+    if (!body.classList.contains(scrollLockBodyClass)) {
+        return;
+    }
+
+    body.classList.remove(scrollLockBodyClass);
+    restoreBodyInlineStyles(body);
+
+    window.scrollTo({ top: previousScrollY, left: previousScrollX, behavior: 'auto' });
 }
 
 export function cleanupScrollingEffects(root) {

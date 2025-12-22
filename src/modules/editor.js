@@ -21,6 +21,8 @@ const MODULES_SENSOR_ENTITY_ID = 'sensor.bubble_card_modules';
 
 // Ordered identifiers used for the module editor tabs
 const MODULE_TAB_IDS = ['modules', 'store'];
+const BCT_CHECK_RETRY_MS = 5000;
+const FORCE_UNSUPPORTED_STORAGE_KEY = 'bubble-card-force-unsupported-modules';
 
 // Function to detect if sl-tab-group is available in the current HA version
 function isSlTabGroupAvailable() {
@@ -274,6 +276,15 @@ export function makeModulesEditor(context) {
   // Ensure sort order is always defined
   const currentSortOrder = context._myModulesSortOrder || 'default';
 
+  if (typeof context._forceUnsupportedModules === 'undefined') {
+    try {
+      const storedValue = localStorage.getItem(FORCE_UNSUPPORTED_STORAGE_KEY);
+      context._forceUnsupportedModules = storedValue === 'true';
+    } catch (err) {
+      context._forceUnsupportedModules = false;
+    }
+  }
+
   const tabGroupId = "bubble-card-module-editor-tab-group";
 
   // Load modules if they haven't been loaded yet
@@ -303,9 +314,54 @@ export function makeModulesEditor(context) {
 
   // Resolve Bubble Card Tools availability for persistence
   const bctAvailable = isBCTAvailableSync();
-  if (context.hass && !context._bctChecked) {
-    context._bctChecked = true;
-    ensureBCTProviderAvailable(context.hass).then(() => context.requestUpdate());
+
+  if (context._bctRetryHandle && bctAvailable) {
+    clearTimeout(context._bctRetryHandle);
+    context._bctRetryHandle = null;
+  }
+
+  // Only trigger check if BCT is not available AND we haven't checked yet, or if check failed and retry delay expired
+  if (context.hass && !bctAvailable && !context._bctCheckAttempted) {
+    const now = Date.now();
+    const lastCheck = context._lastBctCheckAt ?? 0;
+    const elapsed = lastCheck ? now - lastCheck : Infinity;
+    const withinThrottle = lastCheck && elapsed < BCT_CHECK_RETRY_MS;
+
+    if (!context._bctCheckInFlight && !withinThrottle) {
+      if (context._bctRetryHandle) {
+        clearTimeout(context._bctRetryHandle);
+        context._bctRetryHandle = null;
+      }
+      context._bctCheckInFlight = true;
+      context._bctCheckAttempted = true;
+      context._lastBctCheckAt = now;
+      ensureBCTProviderAvailable(context.hass)
+        .finally(() => {
+          context._bctCheckInFlight = false;
+          context.requestUpdate();
+        });
+    } else if (withinThrottle && !context._bctRetryHandle) {
+      const waitMs = Math.max(50, BCT_CHECK_RETRY_MS - elapsed);
+      context._bctRetryHandle = setTimeout(() => {
+        context._bctRetryHandle = null;
+        context.requestUpdate();
+      }, waitMs);
+    }
+  } else if (context.hass && bctAvailable && !context._bctCheckAttempted) {
+    // If BCT is available but we haven't marked as attempted, do a background check to confirm
+    // This ensures the cache is properly initialized
+    if (!context._bctCheckInFlight) {
+      context._bctCheckInFlight = true;
+      context._bctCheckAttempted = true;
+      ensureBCTProviderAvailable(context.hass)
+        .finally(() => {
+          context._bctCheckInFlight = false;
+          // Only update if status changed
+          if (isBCTAvailableSync() !== bctAvailable) {
+            context.requestUpdate();
+          }
+        });
+    }
   }
 
   // No bootstrap of legacy sensor anymore
@@ -633,12 +689,11 @@ export function makeModulesEditor(context) {
                 </h3>
                 <p style="margin-top: 0;">Paste the complete YAML code of the module:</p>
                 
-                <div class="css-editor-container" style="max-height: 500px; overflow: auto;">
+                <div class="css-editor-container">
                   <ha-code-editor
                     .value=${context._manualYamlContent || ''}
                     .mode=${'yaml'}
                     .autofocus=${true}
-                    style="height: auto; max-width: 100%;"
                     @value-changed=${(e) => {
                       context._manualYamlContent = e.detail.value;
                     }}
@@ -676,70 +731,96 @@ export function makeModulesEditor(context) {
             html`
             <!-- Search and Sort Controls -->
             <div class="my-modules-controls">
-              <div class="my-modules-search">
-                <ha-textfield
-                  label="Search modules"
-                  icon
-                  .value=${context._myModulesSearchQuery || ''}
-                  @input=${(e) => {
-                    context._myModulesSearchQuery = e.target.value;
+              <div class="my-modules-top-row">
+                <div class="my-modules-search">
+                  <ha-textfield
+                    label="Search modules"
+                    icon
+                    .value=${context._myModulesSearchQuery || ''}
+                    @input=${(e) => {
+                      context._myModulesSearchQuery = e.target.value;
+                      context.requestUpdate();
+                    }}
+                  >
+                    <slot name="prefix" slot="leadingIcon">
+                      <ha-icon slot="prefix" icon="mdi:magnify"></ha-icon>
+                    </slot>
+                  </ha-textfield>
+                </div>
+                <div class="my-modules-sort-menu">
+                  <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
+                    <mwc-icon-button slot="trigger" class="icon-button header sort-trigger" title="Sort modules">
+                      <ha-icon icon="mdi:sort"></ha-icon>
+                    </mwc-icon-button>
+                    <mwc-list-item 
+                      graphic="icon" 
+                      ?selected=${currentSortOrder === 'default'}
+                      @click=${(e) => {
+                        e.stopPropagation();
+                        context._myModulesSortOrder = 'default';
+                        try {
+                          localStorage.setItem('bubble-card-modules-sort-order', 'default');
+                        } catch (err) {}
+                        context.requestUpdate();
+                      }}>
+                      <ha-icon icon="mdi:check-circle" slot="graphic"></ha-icon>
+                      Active and recent first
+                    </mwc-list-item>
+                    <mwc-list-item 
+                      graphic="icon" 
+                      ?selected=${currentSortOrder === 'alphabetical'}
+                      @click=${(e) => {
+                        e.stopPropagation();
+                        context._myModulesSortOrder = 'alphabetical';
+                        try {
+                          localStorage.setItem('bubble-card-modules-sort-order', 'alphabetical');
+                        } catch (err) {}
+                        context.requestUpdate();
+                      }}>
+                      <ha-icon icon="mdi:sort-alphabetical-ascending" slot="graphic"></ha-icon>
+                      Alphabetical
+                    </mwc-list-item>
+                    <mwc-list-item 
+                      graphic="icon" 
+                      ?selected=${currentSortOrder === 'recent-first'}
+                      @click=${(e) => {
+                        e.stopPropagation();
+                        context._myModulesSortOrder = 'recent-first';
+                        try {
+                          localStorage.setItem('bubble-card-modules-sort-order', 'recent-first');
+                        } catch (err) {}
+                        context.requestUpdate();
+                      }}>
+                      <ha-icon icon="mdi:clock-outline" slot="graphic"></ha-icon>
+                      Recent first
+                    </mwc-list-item>
+                  </ha-button-menu>
+                </div>
+              </div>
+              <ha-formfield label="Enable unsupported modules">
+                <ha-switch
+                  .checked=${!!context._forceUnsupportedModules}
+                  @change=${(e) => {
+                    const nextValue = e.target.checked;
+                    context._forceUnsupportedModules = nextValue;
+                    try {
+                      localStorage.setItem(FORCE_UNSUPPORTED_STORAGE_KEY, nextValue ? 'true' : 'false');
+                    } catch (err) {}
                     context.requestUpdate();
                   }}
-                >
-                  <slot name="prefix" slot="leadingIcon">
-                    <ha-icon slot="prefix" icon="mdi:magnify"></ha-icon>
-                  </slot>
-                </ha-textfield>
-              </div>
-              <div class="my-modules-sort-menu">
-                <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
-                  <mwc-icon-button slot="trigger" class="icon-button header sort-trigger" title="Sort modules">
-                    <ha-icon icon="mdi:sort"></ha-icon>
-                  </mwc-icon-button>
-                  <mwc-list-item 
-                    graphic="icon" 
-                    ?selected=${currentSortOrder === 'default'}
-                    @click=${(e) => {
-                      e.stopPropagation();
-                      context._myModulesSortOrder = 'default';
-                      try {
-                        localStorage.setItem('bubble-card-modules-sort-order', 'default');
-                      } catch (err) {}
-                      context.requestUpdate();
-                    }}>
-                    <ha-icon icon="mdi:check-circle" slot="graphic"></ha-icon>
-                    Active and recent first
-                  </mwc-list-item>
-                  <mwc-list-item 
-                    graphic="icon" 
-                    ?selected=${currentSortOrder === 'alphabetical'}
-                    @click=${(e) => {
-                      e.stopPropagation();
-                      context._myModulesSortOrder = 'alphabetical';
-                      try {
-                        localStorage.setItem('bubble-card-modules-sort-order', 'alphabetical');
-                      } catch (err) {}
-                      context.requestUpdate();
-                    }}>
-                    <ha-icon icon="mdi:sort-alphabetical-ascending" slot="graphic"></ha-icon>
-                    Alphabetical
-                  </mwc-list-item>
-                  <mwc-list-item 
-                    graphic="icon" 
-                    ?selected=${currentSortOrder === 'recent-first'}
-                    @click=${(e) => {
-                      e.stopPropagation();
-                      context._myModulesSortOrder = 'recent-first';
-                      try {
-                        localStorage.setItem('bubble-card-modules-sort-order', 'recent-first');
-                      } catch (err) {}
-                      context.requestUpdate();
-                    }}>
-                    <ha-icon icon="mdi:clock-outline" slot="graphic"></ha-icon>
-                    Recent first
-                  </mwc-list-item>
-                </ha-button-menu>
-              </div>
+                ></ha-switch>
+              </ha-formfield>
+              ${context._forceUnsupportedModules ? html`
+                <div class="bubble-info warning unsupported-modules-warning">
+                  <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
+                    Use carefully
+                  </h4>
+                  <div class="content">
+                    <p>Some modules may work despite being marked as unsupported, while others can fail entirely.</p>
+                  </div>
+                </div>
+              ` : ''}
             </div>
             
             <!-- Installed Modules List -->
@@ -787,9 +868,12 @@ export function makeModulesEditor(context) {
                 unsupported = unsupportedCard.includes(cardType);
               }
               
+              const forceUnsupportedModules = context._forceUnsupportedModules === true;
+              const shouldShowDisabledState = unsupported && !forceUnsupportedModules && !isChecked && !isGlobal && !isDefaultModule;
+              
               // Get processed schema based on the *current* config for dependency evaluation
               const processedFormSchema = (formSchema && formSchema.length > 0)
-                ? context._getProcessedSchema(key, formSchema, currentConfig) // Schema depends on CURRENT config
+                ? context._getProcessedSchema(key, formSchema, workingConfig) // Schema depends on WORKING config
                 : [];
               
               // Check if this module has an update
@@ -801,7 +885,7 @@ export function makeModulesEditor(context) {
               return html`
                 <ha-expansion-panel 
                   outlined 
-                  class="${unsupported ? 'disabled' : ''} ${isRecentlyToggled ? 'recently-toggled' : ''}"
+                  class="${shouldShowDisabledState ? 'disabled' : ''} ${isRecentlyToggled ? 'recently-toggled' : ''}"
                   data-module-id="${key}"
                   .expanded=${!!context._expandedPanelStates[key]}
                   @expanded-changed=${(e) => {
@@ -995,7 +1079,7 @@ export function makeModulesEditor(context) {
           `}
 
           <hr>
-          ${!context._showNewModuleForm && !context._editingModule && bctAvailable ? html`
+          ${!context._showNewModuleForm && !context._showManualImportForm && !context._editingModule && bctAvailable ? html`
           <div class="module-editor-buttons-container" style="display: flex;">
             <button class="icon-button" style="flex: 1;" @click=${() => {
               context._showNewModuleForm = true;

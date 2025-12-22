@@ -2,10 +2,17 @@
 
 import jsyaml from 'js-yaml';
 
+const ERROR_RETRY_DELAY_MS = 5000;
+const UNAVAILABLE_RETRY_DELAY_MS = 30000;
+const CACHE_VALIDITY_MS = 60000; // Cache remains valid for 1 minute even if hass becomes null
+
 // Simple in-memory cache for availability and module listings
 const availabilityCache = {
   checked: false,
   available: false,
+  lastChecked: 0,
+  retryAt: 0,
+  pendingPromise: null,
 };
 
 // Global hint to UI parts that persistence is available
@@ -18,49 +25,127 @@ function setGlobalAvailabilityFlag(isAvailable) {
 }
 
 export async function ensureBCTProviderAvailable(hass) {
+  const now = Date.now();
+
+  // If hass is null, check if we have a recent valid cache
   if (!hass) {
-    availabilityCache.checked = true;
-    availabilityCache.available = false;
-    setGlobalAvailabilityFlag(false);
-    return false;
-  }
-
-  if (availabilityCache.checked) {
-    return availabilityCache.available;
-  }
-
-  try {
-    // Try a lightweight list call
-    const res = await hass.callWS({ type: 'bubble_card_tools/list_modules' });
-    const ok = !!res && Array.isArray(res.files);
-    availabilityCache.checked = true;
-    availabilityCache.available = ok;
-    setGlobalAvailabilityFlag(ok);
-    // Subscribe to backend events to invalidate cache when files change
-    // Only subscribe if user is admin/owner to avoid permission errors in logs
-    const isAdmin = hass?.user?.is_admin || hass?.user?.is_owner;
-    if (ok && typeof hass?.connection?.subscribeEvents === 'function' && !eventsSubscribed && isAdmin) {
-      try {
-        hass.connection.subscribeEvents(() => {
-          // Clear local cache and notify UI parts
-          clearBCTCache();
-          try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
-        }, 'bubble_card_tools.updated');
-        eventsSubscribed = true;
-      } catch (_) {}
+    // Only invalidate cache if it's old (more than CACHE_VALIDITY_MS)
+    if (availabilityCache.checked && availabilityCache.available && 
+        (now - availabilityCache.lastChecked) < CACHE_VALIDITY_MS) {
+      // Keep the previous positive result if cache is still fresh
+      return true;
     }
-    return ok;
-  } catch (e) {
-    availabilityCache.checked = true;
-    availabilityCache.available = false;
-    setGlobalAvailabilityFlag(false);
+    // If cache is stale or was negative, reset it
+    if (availabilityCache.checked && !availabilityCache.available) {
+      // Keep negative cache but allow retry after delay
+      if (availabilityCache.retryAt && now < availabilityCache.retryAt) {
+        return false;
+      }
+    } else {
+      // Reset only if cache is stale
+      availabilityCache.checked = false;
+      availabilityCache.available = false;
+      availabilityCache.retryAt = 0;
+      setGlobalAvailabilityFlag(false);
+    }
     return false;
   }
+
+  if (availabilityCache.pendingPromise) {
+    return availabilityCache.pendingPromise;
+  }
+
+  // If we have a valid positive cache, return it immediately
+  if (availabilityCache.checked && availabilityCache.available) {
+    // Consider cache valid for 5 minutes
+    if ((now - availabilityCache.lastChecked) < 300000) {
+      return true;
+    }
+  }
+
+  // If we have a negative cache, check retry delay
+  if (availabilityCache.checked && !availabilityCache.available) {
+    if (availabilityCache.retryAt && now < availabilityCache.retryAt) {
+      return false;
+    }
+    // Retry delay expired, allow new check
+    availabilityCache.checked = false;
+  } else if (availabilityCache.retryAt && now < availabilityCache.retryAt) {
+    return false;
+  }
+
+  availabilityCache.pendingPromise = (async () => {
+    try {
+      const res = await hass.callWS({ type: 'bubble_card_tools/list_modules' });
+      const ok = !!res && Array.isArray(res.files);
+      availabilityCache.checked = true;
+      availabilityCache.available = ok;
+      availabilityCache.lastChecked = Date.now();
+      availabilityCache.retryAt = ok ? 0 : Date.now() + UNAVAILABLE_RETRY_DELAY_MS;
+      setGlobalAvailabilityFlag(ok);
+
+      const isAdmin = hass?.user?.is_admin || hass?.user?.is_owner;
+      if (ok && typeof hass?.connection?.subscribeEvents === 'function' && !eventsSubscribed && isAdmin) {
+        try {
+          hass.connection.subscribeEvents(() => {
+            clearBCTCache();
+            try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
+          }, 'bubble_card_tools.updated');
+          eventsSubscribed = true;
+        } catch (_) {}
+      }
+
+      return ok;
+    } catch (e) {
+      // On error, only invalidate cache if it was previously positive
+      // If it was already negative, keep the negative state to avoid flip-flopping
+      const wasPositive = availabilityCache.checked && availabilityCache.available;
+      
+      if (wasPositive) {
+        // Previous check was positive, but now failed - might be temporary error
+        // Don't immediately mark as unavailable, allow retry soon
+        availabilityCache.checked = false;
+        availabilityCache.available = false;
+        availabilityCache.lastChecked = Date.now();
+        availabilityCache.retryAt = Date.now() + ERROR_RETRY_DELAY_MS;
+        setGlobalAvailabilityFlag(false);
+      } else {
+        // Was already negative, just update retry time
+        availabilityCache.lastChecked = Date.now();
+        availabilityCache.retryAt = Date.now() + ERROR_RETRY_DELAY_MS;
+      }
+      
+      return false;
+    } finally {
+      availabilityCache.pendingPromise = null;
+    }
+  })();
+
+  return availabilityCache.pendingPromise;
 }
 
 export function isBCTAvailableSync() {
   // Best-effort sync hint for UI rendering
-  if (availabilityCache.checked) return availabilityCache.available;
+  const now = Date.now();
+  
+  // If cache is checked and available, return true (even if slightly stale)
+  if (availabilityCache.checked && availabilityCache.available) {
+    // Consider positive cache valid for 5 minutes
+    if ((now - availabilityCache.lastChecked) < 300000) {
+      return true;
+    }
+  }
+  
+  // If cache is checked but negative, check retry delay
+  if (availabilityCache.checked && !availabilityCache.available) {
+    // If retry delay hasn't expired, return false
+    if (availabilityCache.retryAt && now < availabilityCache.retryAt) {
+      return false;
+    }
+    // Retry delay expired, but we don't know current state - check global flag
+  }
+  
+  // Fallback to global flag (set by async checks)
   return !!(typeof window !== 'undefined' && window.__bubble_bct_available);
 }
 

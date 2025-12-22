@@ -7,6 +7,8 @@ import { installOrUpdateModule } from './install.js';
 import jsyaml from 'js-yaml';
 import { ensureBCTProviderAvailable, isBCTAvailableSync } from './bct-provider.js';
 
+const BCT_CHECK_RETRY_MS = 5000;
+
 export function makeModuleStore(context) {
   // Check if the persistent entity exists
   const entityId = 'sensor.bubble_card_modules';
@@ -39,10 +41,56 @@ export function makeModuleStore(context) {
   
   // Gate the store on Bubble Card Tools availability, replacing legacy sensor instructions
   const bctAvailable = isBCTAvailableSync();
-  if (context.hass && !context._storeBctChecked) {
-    context._storeBctChecked = true;
-    ensureBCTProviderAvailable(context.hass).then(() => context.requestUpdate());
+
+  if (context._storeBctRetryHandle && bctAvailable) {
+    clearTimeout(context._storeBctRetryHandle);
+    context._storeBctRetryHandle = null;
   }
+
+  // Only trigger check if BCT is not available AND we haven't checked yet, or if check failed and retry delay expired
+  if (context.hass && !bctAvailable && !context._storeBctCheckAttempted) {
+    const now = Date.now();
+    const lastCheck = context._storeLastBctCheckAt ?? 0;
+    const elapsed = lastCheck ? now - lastCheck : Infinity;
+    const withinThrottle = lastCheck && elapsed < BCT_CHECK_RETRY_MS;
+
+    if (!context._storeBctCheckInFlight && !withinThrottle) {
+      if (context._storeBctRetryHandle) {
+        clearTimeout(context._storeBctRetryHandle);
+        context._storeBctRetryHandle = null;
+      }
+      context._storeBctCheckInFlight = true;
+      context._storeBctCheckAttempted = true;
+      context._storeLastBctCheckAt = now;
+      ensureBCTProviderAvailable(context.hass)
+        .finally(() => {
+          context._storeBctCheckInFlight = false;
+          context.requestUpdate();
+        });
+    } else if (withinThrottle && !context._storeBctRetryHandle) {
+      const waitMs = Math.max(50, BCT_CHECK_RETRY_MS - elapsed);
+      context._storeBctRetryHandle = setTimeout(() => {
+        context._storeBctRetryHandle = null;
+        context.requestUpdate();
+      }, waitMs);
+    }
+  } else if (context.hass && bctAvailable && !context._storeBctCheckAttempted) {
+    // If BCT is available but we haven't marked as attempted, do a background check to confirm
+    // This ensures the cache is properly initialized
+    if (!context._storeBctCheckInFlight) {
+      context._storeBctCheckInFlight = true;
+      context._storeBctCheckAttempted = true;
+      ensureBCTProviderAvailable(context.hass)
+        .finally(() => {
+          context._storeBctCheckInFlight = false;
+          // Only update if status changed
+          if (isBCTAvailableSync() !== bctAvailable) {
+            context.requestUpdate();
+          }
+        });
+    }
+  }
+
   if (!bctAvailable) {
     const hasAnyModules = (yamlKeysMap && yamlKeysMap.size > 0) || entityExists;
     return html`
@@ -243,6 +291,36 @@ export function makeModuleStore(context) {
         </div>
       ` : ''}
 
+      ${context._rateLimitWarning ? html`
+        <div class="bubble-info warning">
+          <div class="bubble-info-header">
+            <h4 class="bubble-section-title">
+              <ha-icon icon="mdi:alert-outline"></ha-icon>
+              API rate limit reached
+              <div class="bubble-info-dismiss bubble-badge" @click=${() => { context._rateLimitWarning = false; context.requestUpdate(); }} title="Dismiss" 
+                style="
+                  display: inline-flex;
+                  align-items: center;
+                  position: absolute;
+                  right: 16px;
+                  padding: 0 8px;
+                  cursor: pointer;"
+              >
+                <ha-icon icon="mdi:close" style="margin: 0;"></ha-icon>
+                Dismiss
+              </div>
+            </h4>
+          </div>
+          <div class="content">
+            <p>GitHub API rate limit was reached. The module list is loaded from cache. ${
+              context._rateLimitResetTime 
+                ? `Please try again in ${_formatTimeRemaining(context._rateLimitResetTime)}.`
+                : 'Please try again later.'
+            }</p>
+          </div>
+        </div>
+      ` : ''}
+
       <div class="store-modules">
         ${_getFilteredStoreModules(context).map(module => {
           const isInstalled = _isModuleInstalled(module.id);
@@ -253,7 +331,7 @@ export function makeModuleStore(context) {
           const cardType = context._config.card_type ?? "";
           let isCompatible = true;
           
-          if (module.supportedCards && Array.isArray(module.supportedCards) && module.supportedCards.length > 0) {
+          if (Array.isArray(module.supportedCards)) {
             isCompatible = module.supportedCards.includes(cardType);
           } else {
             isCompatible = !module.unsupportedCards || !module.unsupportedCards.includes(cardType);
@@ -407,6 +485,28 @@ export function makeModuleStore(context) {
       </div>
     ` : ''}
   `;
+}
+
+function _formatTimeRemaining(resetTimestamp) {
+  const now = Date.now();
+  const diff = resetTimestamp - now;
+  
+  if (diff <= 0) return 'now';
+  
+  const minutes = Math.ceil(diff / 60000);
+  
+  if (minutes < 60) {
+    return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+  }
+  
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  
+  if (remainingMinutes === 0) {
+    return `${hours} hour${hours > 1 ? 's' : ''}`;
+  }
+  
+  return `${hours} hour${hours > 1 ? 's' : ''} and ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}`;
 }
 
 function _getFilteredStoreModules(context) {
@@ -872,6 +972,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     let allDiscussions = [];
     let page = 1;
     let hasMorePages = true;
+    let rateLimitReached = false;
 
     if (!isBackgroundFetch) {
       context._loadingStatus = "Downloading module data";
@@ -915,11 +1016,18 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
 
       // Check remaining API limit
       const remainingRequests = restResponse.headers.get('x-ratelimit-remaining');
+      const rateLimitReset = restResponse.headers.get('x-ratelimit-reset');
 
       // If approaching API limit, stop pagination but don't trigger cooldown
       if (remainingRequests <= 5) {
         console.warn("⚠️ API limit approaching, stopping pagination");
+        rateLimitReached = true;
         hasMorePages = false;
+        
+        // Store reset timestamp for display
+        if (rateLimitReset) {
+          context._rateLimitResetTime = parseInt(rateLimitReset) * 1000;
+        }
       }
     }
 
@@ -942,6 +1050,48 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     // Parse discussions to extract module information
     const parsedModules = parseDiscussionsREST(moduleDiscussions);
 
+    // Check if we have enough data or if rate limit stopped us early
+    const { getCachedModuleData: getCached, saveCachedModuleData } = await import('./cache.js');
+    const existingCache = getCached();
+    const hasEnoughData = parsedModules.length > 0;
+    const shouldPreserveCache = rateLimitReached && existingCache && existingCache.modules && 
+                                 existingCache.modules.length > parsedModules.length;
+
+    // If rate limit was reached and cache has more data, preserve it
+    if (shouldPreserveCache) {
+      console.warn("⚠️ Rate limit reached with incomplete data, preserving existing cache");
+      
+      if (!isBackgroundFetch) {
+        context._loadingStatus = "Rate limit reached - Using cached data";
+        context._loadingProgress = 95;
+        context._rateLimitWarning = true;
+        context.requestUpdate();
+      }
+
+      // Use cached data instead
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      if (!isBackgroundFetch) {
+        context._loadingProgress = 100;
+        context._loadingStatus = "Loaded from cache (API limit reached)";
+        context.requestUpdate();
+      }
+
+      context._storeModules = existingCache.modules;
+      context._isLoadingStore = false;
+      
+      if (context._progressInterval) {
+        clearInterval(context._progressInterval);
+        context._progressInterval = null;
+      }
+      
+      context.requestUpdate();
+      return;
+    }
+
+    // Clear rate limit warning if we got good data
+    context._rateLimitWarning = false;
+
     // Update loading status
     if (!isBackgroundFetch) {
       context._loadingStatus = "Saving to cache";
@@ -949,9 +1099,10 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       context.requestUpdate();
     }
 
-    // Save to cache
-    const { saveCachedModuleData } = await import('./cache.js');
-    saveCachedModuleData(parsedModules);
+    // Save to cache only if we have data
+    if (hasEnoughData) {
+      saveCachedModuleData(parsedModules);
+    }
 
     // Make sure we reach 100% at the end
     if (!isBackgroundFetch) {
@@ -964,7 +1115,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
 
     // Update displayed data
     if (!isBackgroundFetch || !context._storeModules) {
-      context._storeModules = parsedModules;
+      context._storeModules = hasEnoughData ? parsedModules : (existingCache?.modules || []);
       context._isLoadingStore = false;
       
       // Clear interval if it exists
@@ -977,7 +1128,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     }
 
     // For background fetches, also refresh UI to reflect new data
-    if (isBackgroundFetch && context._storeModules) {
+    if (isBackgroundFetch && context._storeModules && hasEnoughData) {
       context._storeModules = parsedModules;
       context.requestUpdate();
     }

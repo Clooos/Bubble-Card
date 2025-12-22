@@ -1,5 +1,201 @@
 import jsyaml from 'js-yaml';
 import { _slugify, _cleanMarkdown } from './utils.js';
+import { getAvailableCardTypes } from './module-editor.js';
+
+// Helper function to normalize card names to IDs
+function normalizeCardNameToId(cardName) {
+  if (!cardName || typeof cardName !== 'string') return null;
+  
+  const normalized = cardName.trim().toLowerCase().replace(/['"]/g, '');
+  const availableCards = getAvailableCardTypes();
+  
+  // First try exact match (case-insensitive)
+  const exactMatch = availableCards.find(card => 
+    card.id.toLowerCase() === normalized || 
+    card.name.toLowerCase() === normalized
+  );
+  if (exactMatch) return exactMatch.id;
+  
+  // Try matching by normalizing spaces and special chars
+  const normalizedId = normalized.replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const normalizedMatch = availableCards.find(card => 
+    card.id.replace(/-/g, '') === normalizedId.replace(/-/g, '') ||
+    card.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') === normalizedId
+  );
+  if (normalizedMatch) return normalizedMatch.id;
+  
+  // Return the normalized string as-is if no match found (might be a valid ID)
+  return normalized;
+}
+
+function parseSupportedCardsFromText(text) {
+  if (!text || typeof text !== 'string') return [];
+
+  const availableCards = getAvailableCardTypes();
+  const cardsByPriority = [...availableCards].sort((a, b) => {
+    const aLen = (a?.name || a?.id || '').length;
+    const bLen = (b?.name || b?.id || '').length;
+    return bLen - aLen;
+  });
+
+  // Keep the parsing constrained to the supported-cards value itself.
+  let remaining = text.trim();
+  remaining = remaining.replace(/^[\[\(\{]\s*/, '').replace(/\s*[\]\)\}]\s*$/, '');
+  remaining = remaining.split('|')[0] || remaining;
+  remaining = remaining.split('**')[0] || remaining;
+
+  const results = [];
+
+  const isBoundary = (ch) => {
+    if (!ch) return true;
+    return /\s|,|;|\||\/|&|\+|\]|\)|\}/.test(ch);
+  };
+
+  const matchAtStart = (input, candidate) => {
+    if (!candidate) return null;
+    const trimmed = input.trimStart();
+    const lower = trimmed.toLowerCase();
+    const candLower = candidate.toLowerCase();
+    if (!lower.startsWith(candLower)) return null;
+    const nextCh = lower[candLower.length];
+    if (!isBoundary(nextCh)) return null;
+    const leadingTrimmed = input.length - trimmed.length;
+    return { length: leadingTrimmed + candLower.length };
+  };
+
+  for (let i = 0; i < 10; i++) {
+    let matched = null;
+    let matchedCard = null;
+
+    // Remove bullets/markers between items.
+    remaining = remaining.replace(/^\s*(?:-|\*|•)\s*/g, '');
+
+    for (const card of cardsByPriority) {
+      const byName = matchAtStart(remaining, card.name);
+      const byId = matchAtStart(remaining, card.id);
+      matched = byName || byId;
+      if (matched) {
+        matchedCard = card;
+        break;
+      }
+    }
+
+    if (!matched || !matchedCard) break;
+
+    if (!results.includes(matchedCard.id)) results.push(matchedCard.id);
+
+    remaining = remaining.slice(matched.length);
+    remaining = remaining.replace(/^\s*(?:,|;|\||\/|&|\+|\band\b|\bor\b)\s*/i, '');
+    if (!remaining.trim()) break;
+  }
+
+  return results;
+}
+
+function extractSupportedCardsFromMarkdownBody(bodyText) {
+  if (!bodyText || typeof bodyText !== 'string') return null;
+
+  const lines = bodyText.split(/\r?\n/);
+
+  const isAllSupportedValue = (value) => {
+    if (!value || typeof value !== 'string') return false;
+    const v = value.trim();
+    // Accept "All", "All cards"
+    return /^all(?:\s+cards?)?\b/i.test(v);
+  };
+
+  const cleanLine = (line) => (line || '').replace(/^\s*>\s*/g, '').trim();
+
+  const isSectionBoundary = (line) => {
+    const l = cleanLine(line);
+    if (!l) return false;
+    if (/^\[!\w+\]/.test(l)) return true; // GitHub admonitions: [!IMPORTANT], [!NOTE], ...
+    if (/^#{1,6}\s+/.test(l)) return true; // headings
+    if (/^\*\*[^*]+:\*\*/.test(l)) return true; // new metadata line
+    return false;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const l = cleanLine(raw);
+    if (!l) continue;
+    if (/unsupported\s*cards?/i.test(l)) continue;
+
+    // Match both "**Supported cards:**" and "Supported cards:"
+    const headerMatch = l.match(/(?:\*\*)?\s*supported\s*(?:cards|card)?\s*:\s*(?:\*\*)?\s*(.*)$/i);
+    if (!headerMatch) continue;
+
+    const inlineValue = (headerMatch[1] || '').trim();
+    if (inlineValue) {
+      if (isAllSupportedValue(inlineValue)) return undefined; // undefined means "all supported"
+      const parsedInline = parseSupportedCardsFromText(inlineValue);
+      if (parsedInline.length) return parsedInline;
+
+      const fallbackInline = inlineValue
+        .split(',')
+        .map((c) => normalizeCardNameToId(c.trim()))
+        .filter(Boolean);
+      if (fallbackInline.length) return [...new Set(fallbackInline)];
+    }
+
+    // Multi-line format:
+    // **Supported cards:**
+    // - Button
+    // - Pop-up
+    const listItems = [];
+    for (let j = i + 1; j < lines.length; j++) {
+      const nextRaw = lines[j];
+      const next = cleanLine(nextRaw);
+
+      if (!next) {
+        if (listItems.length) break;
+        continue;
+      }
+      if (/^\[!\w+\]/.test(next)) continue;
+      if (isSectionBoundary(nextRaw) && listItems.length) break;
+
+      const bulletMatch = next.match(/^(?:-|\*|•)\s+(.+)$/);
+      if (bulletMatch) {
+        listItems.push(bulletMatch[1].trim());
+        continue;
+      }
+
+      // If we already collected bullets, stop at the first non-bullet line.
+      if (listItems.length) break;
+
+      // Otherwise treat the next meaningful line as the supported-cards value.
+      if (isAllSupportedValue(next)) return undefined;
+      const parsedNextLine = parseSupportedCardsFromText(next);
+      if (parsedNextLine.length) return parsedNextLine;
+
+      const fallbackNextLine = next
+        .split(',')
+        .map((c) => normalizeCardNameToId(c.trim()))
+        .filter(Boolean);
+      if (fallbackNextLine.length) return [...new Set(fallbackNextLine)];
+      break;
+    }
+
+    if (listItems.length) {
+      if (listItems.some((item) => isAllSupportedValue(item))) return undefined;
+      const parsedFromBullets = listItems
+        .map((item) => parseSupportedCardsFromText(item))
+        .flat()
+        .filter(Boolean);
+      if (parsedFromBullets.length) return [...new Set(parsedFromBullets)];
+
+      const fallbackFromBullets = listItems
+        .map((c) => normalizeCardNameToId(c.trim()))
+        .filter(Boolean);
+      if (fallbackFromBullets.length) return [...new Set(fallbackFromBullets)];
+    }
+
+    // Keep scanning in case there is another supported-cards block.
+  }
+
+  // Return null to indicate "not found".
+  return null;
+}
 
 export function extractFirstKeyFromYaml(yamlContent) {
   if (!yamlContent) return null;
@@ -201,9 +397,11 @@ export function parseDiscussionsREST(discussions) {
             moduleLink: discussion.html_url,
             type: metadata.type,
             imageUrl: metadata.imageUrl,
-            supportedCards: Array.isArray(metadata.supported) 
-              ? metadata.supported 
-              : (metadata.supported ? [metadata.supported] : []),
+            supportedCards: metadata.supported === undefined 
+              ? undefined 
+              : (Array.isArray(metadata.supported) 
+                  ? metadata.supported 
+                  : (metadata.supported ? [metadata.supported] : [])),
             unsupportedCards: Array.isArray(metadata.unsupported) 
               ? metadata.unsupported 
               : (metadata.unsupported ? [metadata.unsupported] : []),
@@ -250,7 +448,7 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
     description: "",
     type: "Module",
     editor: [],     // for formSchema
-    supported: ['button', 'climate', 'cover', 'horizontal-buttons-stack', 'media-player', 'pop-up', 'select', 'separator'], // default supported cards
+    supported: ['button', 'climate', 'cover', 'horizontal-buttons-stack', 'media-player', 'pop-up', 'select', 'separator', 'sub-buttons'], // default supported cards
     unsupported: [], // for backward compatibility
     creator: defaultCreator || "",
     link: "",       // for moduleLink
@@ -329,13 +527,13 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
             
             // Properties with alternative names
             applyProperty(mainObj, 'form_schema', 'editor');
-            applyProperty(mainObj, 'supported', 'supported');
-            applyProperty(mainObj, 'unsupported', 'unsupported', ['unsupported_card']);
+            applyProperty(mainObj, 'supported', 'supported', ['supported_card', 'supported_cards']);
+            applyProperty(mainObj, 'unsupported', 'unsupported', ['unsupported_card', 'unsupported_cards']);
             
             // Handle backward compatibility - if unsupported is set but supported is not
             if (mainObj.unsupported && !mainObj.supported && !yamlSetProperties.supported) {
               // All cards except those in unsupported are supported
-              const allCards = ['button', 'climate', 'cover', 'horizontal-buttons-stack', 'media-player', 'pop-up', 'select', 'separator'];
+              const allCards = ['button', 'climate', 'cover', 'horizontal-buttons-stack', 'media-player', 'pop-up', 'select', 'separator', 'sub-buttons'];
               metadata.supported = allCards.filter(id => !mainObj.unsupported.includes(id));
               yamlSetProperties.supported = true;
             }
@@ -354,6 +552,8 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
               applyProperty(mainObj.info, 'type');
               applyProperty(mainObj.info, 'creator');
               applyProperty(mainObj.info, 'link');
+              applyProperty(mainObj.info, 'supported', 'supported', ['supported_card', 'supported_cards']);
+              applyProperty(mainObj.info, 'unsupported', 'unsupported', ['unsupported_card', 'unsupported_cards']);
               
               if (mainObj.info.description !== undefined && !yamlSetProperties.description) {
                 metadata.description = processDescription(mainObj.info.description);
@@ -375,13 +575,13 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
           
           // Properties with alternative names
           applyProperty(parsedYaml, 'form_schema', 'editor');
-          applyProperty(parsedYaml, 'supported', 'supported');
-          applyProperty(parsedYaml, 'unsupported', 'unsupported', ['unsupported_card']);
+          applyProperty(parsedYaml, 'supported', 'supported', ['supported_card', 'supported_cards']);
+          applyProperty(parsedYaml, 'unsupported', 'unsupported', ['unsupported_card', 'unsupported_cards']);
           
           // Handle backward compatibility - if unsupported is set but supported is not
           if (parsedYaml.unsupported && !parsedYaml.supported && !yamlSetProperties.supported) {
             // All cards except those in unsupported are supported
-            const allCards = ['button', 'climate', 'cover', 'horizontal-buttons-stack', 'media-player', 'pop-up', 'select', 'separator'];
+            const allCards = ['button', 'climate', 'cover', 'horizontal-buttons-stack', 'media-player', 'pop-up', 'select', 'separator', 'sub-buttons'];
             metadata.supported = allCards.filter(id => !parsedYaml.unsupported.includes(id));
             yamlSetProperties.supported = true;
           }
@@ -475,12 +675,61 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
     }
 
     // Supported cards extraction
-    if (!yamlSetProperties.supported && metadata.supported.length === 0) {
-      const supportedMatch = bodyText.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*\[(.*?)\]/i);
-      if (supportedMatch) {
-        metadata.supported = supportedMatch[1]
-          .split(",")
-          .map(card => card.trim().replace(/['"]/g, ""));
+    if (!yamlSetProperties.supported) {
+      const supportedFromBody = extractSupportedCardsFromMarkdownBody(bodyText);
+      if (supportedFromBody === undefined) {
+        // undefined indicates "all cards supported"
+        metadata.supported = undefined;
+        yamlSetProperties.supported = true;
+      } else if (Array.isArray(supportedFromBody) && supportedFromBody.length > 0) {
+        metadata.supported = supportedFromBody;
+        yamlSetProperties.supported = true;
+      }
+
+      if (!yamlSetProperties.supported) {
+      // Check for "All" or "all cards" first
+      const allMatch = bodyText.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*(?:-\s*)?(?:All|all\s+cards?)/i);
+      if (allMatch) {
+        // Set to undefined to indicate all cards are supported
+        metadata.supported = undefined;
+        yamlSetProperties.supported = true;
+      } else {
+        // Check for list format [card1, card2]
+        const supportedMatch = bodyText.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*\[(.*?)\]/i);
+        if (supportedMatch) {
+          const parsedFromList = supportedMatch[1]
+            .split(",")
+            .map(card => normalizeCardNameToId(card.trim()))
+            .filter(card => card && card.length > 0);
+          if (parsedFromList.length > 0) {
+            metadata.supported = parsedFromList;
+            yamlSetProperties.supported = true;
+          }
+        } else {
+          // Check for single card format without brackets: "Supported cards: Button"
+          const singleCardMatch = bodyText.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*([^\n\r]+?)(?=\||\n|$)/i);
+          if (singleCardMatch) {
+            const cardText = singleCardMatch[1].trim();
+            // Only process if it's not "All" or "all cards" (already handled above)
+            if (!/^(?:All|all\s+cards?)$/i.test(cardText)) {
+              const parsedFromStart = parseSupportedCardsFromText(cardText);
+              if (parsedFromStart.length > 0) {
+                metadata.supported = parsedFromStart;
+                yamlSetProperties.supported = true;
+              } else {
+                const parsedFallback = cardText
+                  .split(",")
+                  .map(card => normalizeCardNameToId(card.trim()))
+                  .filter(card => card && card.length > 0);
+                if (parsedFallback.length > 0) {
+                  metadata.supported = parsedFallback;
+                  yamlSetProperties.supported = true;
+                }
+              }
+            }
+          }
+        }
+      }
       }
     }
 

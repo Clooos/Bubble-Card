@@ -29,7 +29,7 @@ ha-card.footer-mode {
   position: fixed;
   width: calc(100% - var(--mdc-drawer-width, 0px) - 8px);
   left: calc(var(--mdc-drawer-width, 0px) + 4px);
-  z-index: 6; /* Higher value hide the more-info panel */
+  z-index: 5;
 }
 
 ha-card.footer-mode:not(.footer-full-width) {
@@ -70,4 +70,8 @@ ha-card.footer-mode.editor {
   width: 100%;
   left: 0;
   bottom: 0;
+}
+
+.editor {
+  transition: none !important;
 }

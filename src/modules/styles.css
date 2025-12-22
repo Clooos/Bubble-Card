@@ -882,8 +882,86 @@ sl-tab {
 
 .module-editor-form ha-code-editor {
   max-height: 600px;
+  width: 100%;
+  max-width: 100%;
   border: 1px solid var(--divider-color);
   border-radius: 4px;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: block;
+}
+
+.module-editor-form ha-code-editor::part(editor) {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.module-editor-form ha-code-editor .monaco-editor {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.module-editor-form ha-code-editor .monaco-editor .monaco-editor-background {
+  width: 100% !important;
+}
+
+.module-editor-form ha-code-editor .monaco-editor .overflow-guard {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+.module-editor-form ha-code-editor .monaco-editor .monaco-scrollable-element {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+.css-editor-container {
+  width: 100%;
+  max-width: 100%;
+  max-height: 500px;
+  overflow-x: auto;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.css-editor-container ha-code-editor {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: block;
+}
+
+.css-editor-container ha-code-editor::part(editor) {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.css-editor-container ha-code-editor .monaco-editor {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.css-editor-container ha-code-editor .monaco-editor .monaco-editor-background {
+  width: 100% !important;
+}
+
+.css-editor-container ha-code-editor .monaco-editor .overflow-guard {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+.css-editor-container ha-code-editor .monaco-editor .monaco-scrollable-element {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
 }
 
 .module-editor-form ha-textarea {
@@ -911,15 +989,56 @@ sl-tab {
 .code-editor-container, .editor-schema-container {
   position: relative;
   margin-bottom: 8px;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: visible;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.code-editor-container ha-code-editor {
+.code-editor-container ha-code-editor,
+.editor-schema-container ha-code-editor {
   height: auto; 
+  width: 100%;
   max-width: 100%;
   border: 1px solid var(--divider-color);
   border-radius: 4px;
-  overflow: auto;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: block;
+}
+
+.code-editor-container ha-code-editor::part(editor),
+.editor-schema-container ha-code-editor::part(editor) {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.code-editor-container ha-code-editor .monaco-editor,
+.editor-schema-container ha-code-editor .monaco-editor {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.code-editor-container ha-code-editor .monaco-editor .monaco-editor-background,
+.editor-schema-container ha-code-editor .monaco-editor .monaco-editor-background {
+  width: 100% !important;
+}
+
+.code-editor-container ha-code-editor .monaco-editor .overflow-guard,
+.editor-schema-container ha-code-editor .monaco-editor .overflow-guard {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+.code-editor-container ha-code-editor .monaco-scrollable-element,
+.editor-schema-container ha-code-editor .monaco-scrollable-element {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
 }
 
 .form-preview {
@@ -996,6 +1115,27 @@ sl-tab {
 ha-expansion-panel {
   --input-fill-color: none;
   scroll-margin-top: 64px;
+  contain: inline-size;
+  overflow: hidden;
+}
+
+ha-expansion-panel > .content,
+ha-expansion-panel .content {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  box-sizing: border-box;
+}
+
+ha-yaml-editor,
+ha-code-editor {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  contain: inline-size;
 }
 
 @keyframes highlight {
@@ -1072,6 +1212,20 @@ ha-formfield.apply-module-button {
   gap: 4px;
 }
 
+/* Module status icon */
+.module-status-icon {
+  opacity: 0.3;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.module-status-icon--opaque {
+  opacity: 1;
+}
+
+.module-status-icon--active {
+  color: var(--info-color) !important;
+}
+
 .module-badges .update-badge {
   margin-left: 0 !important;
 }
@@ -1094,7 +1248,7 @@ ha-formfield.apply-module-button {
 /* My Modules Search and Sort Controls */
 .my-modules-controls {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
   margin-bottom: 16px;
   background-color: var(--card-background-color);
@@ -1102,6 +1256,12 @@ ha-formfield.apply-module-button {
   padding: 16px;
   border: 1px solid var(--divider-color);
   box-shadow: var(--shadow-elevation-1dp);
+}
+
+.my-modules-top-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .my-modules-search {
@@ -1120,6 +1280,11 @@ ha-formfield.apply-module-button {
 .my-modules-sort-menu {
   display: flex;
   align-items: center;
+}
+
+
+.unsupported-modules-warning {
+  margin: 0;
 }
 
 .my-modules-sort-menu .sort-trigger {

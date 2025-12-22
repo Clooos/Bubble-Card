@@ -231,7 +231,6 @@ export function createStructure(context) {
     }
     
     let themeColorBackground;
-    const opacity = context.config.bg_opacity ?? 88;
 
     function updatePopupColor() {
       themeColorBackground = 
@@ -239,9 +238,13 @@ export function createStructure(context) {
         getComputedStyle(document.body).getPropertyValue('--card-background-color');
 
         const color = context.config.bg_color ? context.config.bg_color : themeColorBackground;
-        const rgbaColor = convertToRGBA(color, (opacity / 100), 1.02);
+        const opacity = Math.min(1, Math.max(0, (context.config.bg_opacity ?? 88) / 100));
+        const rgbaColor = convertToRGBA(color, opacity, 1.02);
+        const fadeOpacity = Math.min(1, opacity * 0.65);
+        const fadeColor = convertToRGBA(color, fadeOpacity, 1.02);
 
         context.popUp.style.setProperty('--bubble-pop-up-background-color', rgbaColor);
+        context.popUp.style.setProperty('--bubble-pop-up-fade-color', fadeColor);
     }
 
     context.updatePopupColorListener = () => {

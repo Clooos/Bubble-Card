@@ -424,23 +424,38 @@ export function closePopup(context, force = false) {
 }
 
 export function onUrlChange(context) {
+    let lastKnownHash = location.hash;
+
     return () => {
+        const currentHash = location.hash;
+        const hashChanged = currentHash !== lastKnownHash;
+        lastKnownHash = currentHash;
+
         // Clean up orphaned popups (open but hash doesn't match)
         const orphanedPopups = Array.from(popupState.activePopups).filter(ctx => 
             ctx.config.hash && 
-            ctx.config.hash !== location.hash &&
+            ctx.config.hash !== currentHash &&
             ctx.popUp.classList.contains('is-popup-opened')
         );
         orphanedPopups.forEach(ctx => closePopup(ctx));
         
-        if (context.config.hash === location.hash) {
+        if (context.config.hash === currentHash) {
+            const isPopupOpen = context.popUp.classList.contains('is-popup-opened');
+            const shouldToggleClose = isPopupOpen && !hashChanged && !popupState.entityTriggeredPopup;
+
+            // Re-run navigate on the same hash should close the currently opened popup
+            if (shouldToggleClose) {
+                removeHash();
+                return;
+            }
+
             // If entity-triggered popup is active and this is hash-triggered, don't open
             if (popupState.entityTriggeredPopup) {
                 return;
             }
             
             popupState.hashRecentlyAdded = true;
-            popupState.currentHash = location.hash;
+            popupState.currentHash = currentHash;
             
             // Enable protection during hash change handling
             popupState.hashChangeProtection = true;
@@ -464,7 +479,7 @@ export function onUrlChange(context) {
                 // Close this popup if it's open and hash doesn't match or was removed
                 if (context.popUp.classList.contains('is-popup-opened') && 
                     context.config.hash && 
-                    context.config.hash !== location.hash) {
+                    context.config.hash !== currentHash) {
                     closePopup(context);
                 }
             });
