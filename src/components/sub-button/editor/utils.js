@@ -275,7 +275,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
               ${getLazyLoadedPanelContent(editor, layoutPanelKey, !!editor._expandedPanelStates[layoutPanelKey], () => html`
                 <ha-form
                   .hass=${editor.hass}
-                  .data=${{ ...button, fill_width: effectiveFillWidth }}
+                  .data=${{ ...button, ...(isBottomSection ? { fill_width: effectiveFillWidth } : {}) }}
                   .schema=${[
                     ...(isBottomSection
                       ? [{

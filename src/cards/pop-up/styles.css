@@ -183,9 +183,58 @@
 }
 
 .bubble-pop-up-container.editor-cropped {
-    height: 122px !important;
-    mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%) !important;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 40px, black calc(100% - 40px), transparent 100%) !important;   
+    height: 72px !important;
+}
+
+/* Container with placeholder - ensure proper sizing */
+.bubble-pop-up-container.has-placeholder {
+    min-height: 80px;
+    padding-top: 18px !important;
+    padding-bottom: 18px !important;
+}
+
+/* Editor placeholder styling */
+.bubble-editor-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    margin-top: 20px;
+    background: var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)));
+    border-radius: var(--bubble-border-radius, 32px);
+    color: var(--primary-text-color);
+    font-size: 16px;
+    opacity: 0.8;
+    min-height: 56px;
+    box-sizing: border-box;
+    border: 1px dashed var(--divider-color, rgba(127, 127, 127, 0.3));
+    width: 100%;
+}
+
+.bubble-editor-placeholder ha-icon {
+    --mdc-icon-size: 24px;
+    color: var(--primary-text-color);
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.bubble-editor-placeholder-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.bubble-editor-placeholder-hash {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--primary-text-color);
+}
+
+.bubble-editor-placeholder-hint {
+    font-size: 11px;
+    color: var(--secondary-text-color);
+    opacity: 0.7;
 }
 
 .bubble-pop-up.editor > .bubble-pop-up-container {

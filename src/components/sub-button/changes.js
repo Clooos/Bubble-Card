@@ -24,61 +24,73 @@ export function updateSubButtons(context, subButtons) {
   // Only consider real buttons (exclude inline groups)
   const mainButtons = (Array.isArray(sectioned.main) ? sectioned.main : []).filter(item => item && !Array.isArray(item.group));
   const previousMainButtons = [...(context.previousValues.mainSubButtons || [])];
+  const bottomItems = Array.isArray(sectioned.bottom) ? sectioned.bottom : [];
+
+  // Determine if main buttons should be handled by updateGroupButtons instead
+  const globalMainLayout = (context.config?.sub_button?.main_layout) ?? 'inline';
+  const mainExplicitGroupsExist = (Array.isArray(sectioned.main) ? sectioned.main : [])
+    .some(item => item && Array.isArray(item.group) && item.group.length > 0);
+  const bottomExplicitGroupsExist = bottomItems.some(item => item && Array.isArray(item.group) && item.group.length > 0);
+  const bottomNonGroupButtonsExist = bottomItems.some(item => item && !Array.isArray(item.group));
+  const needsMainAutoGroup = globalMainLayout === 'rows' || mainExplicitGroupsExist || bottomNonGroupButtonsExist || bottomExplicitGroupsExist;
 
   // Update main buttons first with contiguous indices (1..N)
+  // Skip if they will be handled as auto groups in updateGroupButtons
   let visibleIndex = 1;
-  (Array.isArray(sectioned.main) ? sectioned.main : []).forEach((subButton) => {
-    if (!subButton || Array.isArray(subButton.group)) return; // skip groups here
+  if (!needsMainAutoGroup) {
+    (Array.isArray(sectioned.main) ? sectioned.main : []).forEach((subButton) => {
+      if (!subButton || Array.isArray(subButton.group)) return; // skip groups here
 
-    const options = getSubButtonOptions(context, subButton, visibleIndex);
+      const options = getSubButtonOptions(context, subButton, visibleIndex);
 
-    if (options.attributeType === 'fan_modes' && options.attribute == null) {
-      let element = context.elements[options.index];
-      if (!element) {
-        const classes = [`bubble-sub-button`, `bubble-sub-button-${options.index}`];
-        if (subButton?.name) {
-          const nameClass = normalizeNameToClass(subButton.name);
-          if (nameClass) {
-            classes.push(nameClass);
+      if (options.attributeType === 'fan_modes' && options.attribute == null) {
+        let element = context.elements[options.index];
+        if (!element) {
+          const classes = [`bubble-sub-button`, `bubble-sub-button-${options.index}`];
+          if (subButton?.name) {
+            const nameClass = normalizeNameToClass(subButton.name);
+            if (nameClass) {
+              classes.push(nameClass);
+            }
           }
+          element = createElement('div', classes.join(' '));
         }
-        element = createElement('div', classes.join(' '));
+        element.classList.add('hidden');
+        visibleIndex++;
+        return;
       }
-      element.classList.add('hidden');
+
+      let element = context.elements[options.index];
+      const skipHostElement = options.subButtonType === 'slider' && options.alwaysVisible;
+      if (!element) {
+        element = createSubButtonElement(
+          context,
+          options.index,
+          options.isSelect,
+          options.showArrow,
+          options.entity,
+          subButton,
+          null,
+          { attachToDom: !skipHostElement }
+        );
+      } else if (skipHostElement && element.parentElement) {
+        element.parentElement.removeChild(element);
+      }
+
+      if (!skipHostElement && !element.isConnected && context.elements.subButtonContainer) {
+        context.elements.subButtonContainer.appendChild(element);
+      }
+
+      if (handleHideWhenParentUnavailable(element, subButton, context)) {
+        visibleIndex++;
+        return;
+      }
+
+      updateSubButtonContent(context, element, { ...options, subButton, groupContainer: null, section: 'main' });
+      handleVisibilityConditions(element, subButton, context._hass);
       visibleIndex++;
-      return;
-    }
-
-    let element = context.elements[options.index];
-    const skipHostElement = options.subButtonType === 'slider' && options.alwaysVisible;
-    if (!element) {
-      element = createSubButtonElement(
-        context,
-        options.index,
-        options.isSelect,
-        options.showArrow,
-        options.entity,
-        subButton,
-        null,
-        { attachToDom: !skipHostElement }
-      );
-    } else if (skipHostElement && element.parentElement) {
-      element.parentElement.removeChild(element);
-    }
-
-    if (!skipHostElement && !element.isConnected && context.elements.subButtonContainer) {
-      context.elements.subButtonContainer.appendChild(element);
-    }
-
-    if (handleHideWhenParentUnavailable(element, subButton, context)) {
-      visibleIndex++;
-      return;
-    }
-
-    updateSubButtonContent(context, element, { ...options, subButton, groupContainer: null, section: 'main' });
-    handleVisibilityConditions(element, subButton, context._hass);
-    visibleIndex++;
-  });
+    });
+  }
 
   // Then update the group buttons (inline only)
   updateGroupButtons(context, sectioned);
@@ -217,17 +229,32 @@ export function updateGroupButtons(context, sectionedArg) {
     .filter(item => item && !Array.isArray(item.group));
   const bottomNonGroupButtons = (Array.isArray(sectioned.bottom) ? sectioned.bottom : [])
     .filter(item => item && !Array.isArray(item.group));
-  
-  // Start global index after main non-group buttons (starting from 1)
-  // Bottom non-group buttons will be indexed consecutively after main buttons
-  let globalIndex = mainNonGroupButtons.length + 1;
 
-  const mainGroups = (Array.isArray(sectioned.main) ? sectioned.main : [])
+  const mainExplicitGroups = (Array.isArray(sectioned.main) ? sectioned.main : [])
     .map((item, idx) => ({ key: `g_main_${idx}`, position: 'top', item }))
     .filter(({ item }) => item && Array.isArray(item.group) && item.group.length > 0);
   const bottomGroups = (Array.isArray(sectioned.bottom) ? sectioned.bottom : [])
     .map((item, idx) => ({ key: `g_bottom_${idx}`, position: 'bottom', item }))
     .filter(({ item }) => item && Array.isArray(item.group) && item.group.length > 0);
+
+  const globalMainLayout = (context.config?.sub_button?.main_layout) ?? 'inline';
+  const globalBottomLayout = (context.config?.sub_button?.bottom_layout) ?? 'inline';
+
+  // Handle main non-group buttons: create auto group when using rows layout or when mixed with explicit groups
+  const mainNonGroupItems = mainNonGroupButtons;
+  const hasMainExplicitGroups = mainExplicitGroups.length > 0;
+  const needsMainAutoGroup = globalMainLayout === 'rows' || hasMainExplicitGroups || bottomNonGroupButtons.length > 0 || bottomGroups.length > 0;
+  
+  let mainNonGroupGroups = [];
+  if (mainNonGroupItems.length > 0 && needsMainAutoGroup) {
+    // Always use single auto group to keep individual buttons on the same line
+    mainNonGroupGroups = [{ 
+      key: 'g_main_auto', 
+      position: 'top', 
+      item: { group: mainNonGroupItems, buttons_layout: 'inline' } 
+    }];
+  }
+
   // Handle bottom non-group buttons: create individual groups when mixed with explicit groups
   const bottomExplicitGroups = (Array.isArray(sectioned.bottom) ? sectioned.bottom : []).filter(it => it && Array.isArray(it.group) && it.group.length > 0);
   
@@ -252,9 +279,7 @@ export function updateGroupButtons(context, sectionedArg) {
     }
   }
 
-  const globalMainLayout = (context.config?.sub_button?.main_layout) ?? 'inline';
-  const globalBottomLayout = (context.config?.sub_button?.bottom_layout) ?? 'inline';
-  const inlineGroups = [...mainGroups, ...bottomGroups, ...bottomNonGroupGroups]
+  const inlineGroups = [...mainExplicitGroups, ...mainNonGroupGroups, ...bottomGroups, ...bottomNonGroupGroups]
     .map(({ key, position, item }) => ({
       key,
       group: {
@@ -267,6 +292,10 @@ export function updateGroupButtons(context, sectionedArg) {
     }));
 
   const allGroups = inlineGroups;
+
+  // Start global index: if main non-group buttons are handled in auto groups, start at 1
+  // Otherwise start after main non-group buttons
+  let globalIndex = (mainNonGroupGroups.length > 0) ? 1 : (mainNonGroupButtons.length + 1);
 
   allGroups.forEach(({ key, group }) => {
     if (!group || !Array.isArray(group.buttons)) return;

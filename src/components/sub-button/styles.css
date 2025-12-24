@@ -124,11 +124,17 @@
     gap: 6px;
 }
 
+.bubble-sub-button-group.display-column > .bubble-sub-button,
+.bubble-sub-button-group.group-layout-inline > .bubble-sub-button {
+    width: auto;
+}
+
 /* Group placement layout (rows vs inline) */
 .bubble-sub-button-container.groups-layout-rows,
 .bubble-sub-button-bottom-container.groups-layout-rows {
     flex-direction: column;
 }
+
 .bubble-sub-button-container.groups-layout-inline,
 .bubble-sub-button-bottom-container.groups-layout-inline {
     flex-direction: row;
@@ -149,6 +155,7 @@
     right: 0;
     box-sizing: border-box;
     width: max-content;
+    min-width: 36px;
     height: var(--bubble-sub-button-height, 36px);
     vertical-align: middle;
     font-size: 12px;

@@ -2,7 +2,7 @@ import { html } from 'lit';
 import { yamlKeysMap, moduleSourceMap } from './registry.js';
 import { _formatModuleDescription, _getIconForType, _compareVersions, scrollToModuleForm } from './utils.js';
 import { parseDiscussionsREST } from './parser.js';
-import { getCachedModuleData } from './cache.js';
+import { getCachedModuleData, saveCachedModuleData } from './cache.js';
 import { installOrUpdateModule } from './install.js';
 import jsyaml from 'js-yaml';
 import { ensureBCTProviderAvailable, isBCTAvailableSync } from './bct-provider.js';
@@ -892,7 +892,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
 
       if (!isBackgroundFetch) {
         context._loadingStatus = "Analyzing API response";
-        context._loadingProgress = Math.min(context._loadingProgress + 5, 30);
+        context._loadingProgress = Math.max(context._loadingProgress, 30);
         context.requestUpdate();
       }
 
@@ -915,7 +915,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     // Update loading status
     if (!isBackgroundFetch) {
       context._loadingStatus = "Processing API data";
-      context._loadingProgress = Math.min(context._loadingProgress + 5, 40);
+      context._loadingProgress = Math.max(context._loadingProgress, 40);
       context.requestUpdate();
     }
 
@@ -928,7 +928,6 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
         
         if (Date.now() - failureTime < cooldownPeriod) {
           // Use cache if available
-          const { getCachedModuleData } = await import('./cache.js');
           const cachedData = getCachedModuleData();
           if (cachedData && !context._storeModules) {
             context._storeModules = cachedData.modules;
@@ -939,8 +938,14 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
           // Update loading status for using cache
           if (!isBackgroundFetch) {
             context._loadingStatus = "Loading from cache";
-            context._loadingProgress = 60;
+            context._loadingProgress = Math.max(context._loadingProgress, 60);
             context.requestUpdate();
+            
+            // Clear interval
+            if (context._progressInterval) {
+              clearInterval(context._progressInterval);
+              context._progressInterval = null;
+            }
           }
           
           return;
@@ -951,7 +956,6 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       }
 
       // Use cache due to rate limit or unknown status and exit early
-      const { getCachedModuleData } = await import('./cache.js');
       const cachedData = getCachedModuleData();
       if (cachedData && !context._storeModules) {
         context._storeModules = cachedData.modules;
@@ -961,8 +965,14 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       
       if (!isBackgroundFetch) {
         context._loadingStatus = "Loading from cache";
-        context._loadingProgress = 60;
+        context._loadingProgress = Math.max(context._loadingProgress, 60);
         context.requestUpdate();
+        
+        // Clear interval
+        if (context._progressInterval) {
+          clearInterval(context._progressInterval);
+          context._progressInterval = null;
+        }
       }
       
       return;
@@ -976,28 +986,83 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
 
     if (!isBackgroundFetch) {
       context._loadingStatus = "Downloading module data";
-      context._loadingProgress = 50;
+      context._loadingProgress = Math.max(context._loadingProgress, 50);
       context.requestUpdate();
     }
 
     while (hasMorePages) {
-      const restResponse = await fetch(`https://api.github.com/repos/Clooos/Bubble-Card/discussions?per_page=100&page=${page}`, {
-        method: "GET",
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'X-GitHub-Api-Version': '2022-11-28'
+      let restResponse;
+      let retryCount = 0;
+      const maxRetries = 2;
+      
+      while (retryCount <= maxRetries) {
+        try {
+          restResponse = await fetch(`https://api.github.com/repos/Clooos/Bubble-Card/discussions?per_page=100&page=${page}`, {
+            method: "GET",
+            headers: {
+              'Accept': 'application/vnd.github.v3+json',
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          });
+          
+          // If successful or client error (4xx), break retry loop
+          if (restResponse.ok || (restResponse.status >= 400 && restResponse.status < 500)) {
+            break;
+          }
+          
+          // Server error (5xx), retry after delay
+          if (retryCount < maxRetries) {
+            console.warn(`⚠️ Server error ${restResponse.status} on page ${page}, retrying in ${(retryCount + 1) * 500}ms...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 500));
+            retryCount++;
+          } else {
+            break;
+          }
+        } catch (networkError) {
+          // Network error (CORS, timeout, connection refused, etc.)
+          if (retryCount < maxRetries) {
+            console.warn(`⚠️ Network error on page ${page}, retrying in ${(retryCount + 1) * 500}ms...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 500));
+            retryCount++;
+          } else {
+            console.warn(`⚠️ Network error on page ${page} after ${maxRetries} retries:`, networkError.message);
+            
+            if (allDiscussions.length > 0) {
+              // We have data from previous pages, use it
+              console.warn(`Using ${allDiscussions.length} discussions from previous pages`);
+              rateLimitReached = true;
+              hasMorePages = false;
+              restResponse = null;
+              break;
+            }
+            // No data at all, rethrow to trigger cache fallback
+            throw networkError;
+          }
         }
-      });
+      }
+      
+      // Skip processing if we're using partial data
+      if (!restResponse) {
+        continue;
+      }
 
       if (!isBackgroundFetch) {
         context._loadingStatus = `Processing page ${page}`;
         // Gradually increase progress as pages load
-        context._loadingProgress = Math.min(50 + (page * 5), 80);
+        context._loadingProgress = Math.max(context._loadingProgress, Math.min(50 + (page * 5), 80));
         context.requestUpdate();
       }
 
       if (!restResponse.ok) {
         console.error("❌ REST API Error:", restResponse.status, restResponse.statusText);
+        
+        // If we have data from previous pages and it's a server error (5xx), use what we have
+        if (allDiscussions.length > 0 && restResponse.status >= 500) {
+          console.warn(`⚠️ Server error on page ${page}, using ${allDiscussions.length} discussions from previous pages`);
+          rateLimitReached = true;
+          hasMorePages = false;
+          continue;
+        }
         
         // Save failure timestamp for cooldown
         localStorage.setItem('bubble-card-api-failure-timestamp', Date.now().toString());
@@ -1012,6 +1077,11 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       } else {
         allDiscussions = [...allDiscussions, ...discussionsData];
         page++;
+        
+        // Add delay between requests to avoid 504 Gateway Timeout
+        if (hasMorePages) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
 
       // Check remaining API limit
@@ -1035,7 +1105,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     // Update loading status
     if (!isBackgroundFetch) {
       context._loadingStatus = "Filtering modules";
-      context._loadingProgress = 85;
+      context._loadingProgress = Math.max(context._loadingProgress, 85);
       context.requestUpdate();
     }
 
@@ -1051,8 +1121,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     const parsedModules = parseDiscussionsREST(moduleDiscussions);
 
     // Check if we have enough data or if rate limit stopped us early
-    const { getCachedModuleData: getCached, saveCachedModuleData } = await import('./cache.js');
-    const existingCache = getCached();
+    const existingCache = getCachedModuleData();
     const hasEnoughData = parsedModules.length > 0;
     const shouldPreserveCache = rateLimitReached && existingCache && existingCache.modules && 
                                  existingCache.modules.length > parsedModules.length;
@@ -1063,7 +1132,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       
       if (!isBackgroundFetch) {
         context._loadingStatus = "Rate limit reached - Using cached data";
-        context._loadingProgress = 95;
+        context._loadingProgress = Math.max(context._loadingProgress, 95);
         context._rateLimitWarning = true;
         context.requestUpdate();
       }
@@ -1095,7 +1164,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     // Update loading status
     if (!isBackgroundFetch) {
       context._loadingStatus = "Saving to cache";
-      context._loadingProgress = 95;
+      context._loadingProgress = Math.max(context._loadingProgress, 95);
       context.requestUpdate();
     }
 
@@ -1138,10 +1207,9 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     // In case of error, use cached data if available
     if (!isBackgroundFetch) {
       context._loadingStatus = "Error - Loading from cache";
-      context._loadingProgress = 85;
+      context._loadingProgress = Math.max(context._loadingProgress, 85);
       context.requestUpdate();
       
-      const { getCachedModuleData } = await import('./cache.js');
       const cachedData = getCachedModuleData();
       if (cachedData) {
         

@@ -79,13 +79,28 @@ export function createSubButtonStructure(context, options = {}) {
   }
 
   // Build group containers from sectioned config (inline groups)
-  const mainGroups = mainItems
+  const mainExplicitGroups = mainItems
     .map((item, idx) => ({ key: `g_main_${idx}`, item, idx, position: 'top' }))
     .filter(({ item }) => item && Array.isArray(item.group) && item.group.length > 0);
   const bottomGroups = bottomItems
     .map((item, idx) => ({ key: `g_bottom_${idx}`, item, idx, position: 'bottom' }))
     .filter(({ item }) => item && Array.isArray(item.group) && item.group.length > 0);
-  const inlineGroups = [...mainGroups, ...bottomGroups];
+  const inlineGroups = [...mainExplicitGroups, ...bottomGroups];
+
+  // Handle main non-group buttons: create auto group when using rows layout or when mixed with explicit groups
+  const mainNonGroupItems = mainItems.filter(item => item && !Array.isArray(item.group));
+  const hasMainExplicitGroups = mainExplicitGroups.length > 0;
+  const needsMainAutoGroup = globalMainLayout === 'rows' || hasMainExplicitGroups || bottomItems.length > 0;
+  
+  if (mainNonGroupItems.length > 0 && needsMainAutoGroup) {
+    // Always use single auto group to keep individual buttons on the same line
+    inlineGroups.push({
+      key: 'g_main_auto',
+      item: { group: mainNonGroupItems, buttons_layout: 'inline' },
+      idx: -1,
+      position: 'top'
+    });
+  }
 
   // Handle bottom non-group buttons: create individual groups when mixed with explicit groups
   const bottomNonGroupItems = bottomItems.filter(item => item && !Array.isArray(item.group));
@@ -117,7 +132,7 @@ export function createSubButtonStructure(context, options = {}) {
     // Clean up containers that no longer exist
     const validKeys = new Set(inlineGroups.map(({ key }) => key));
     Object.keys(context.elements.groups).forEach(key => {
-      // Only manage inline-group keys here
+      // Only manage inline-group keys here (including auto groups)
       if (!key.startsWith('g_main_') && !key.startsWith('g_bottom_')) return;
       if (!validKeys.has(key) && context.elements.groups[key]?.container) {
         const containerToRemove = context.elements.groups[key].container;

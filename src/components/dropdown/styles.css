@@ -35,6 +35,11 @@ ha-select {
     height: 0px !important;
 }
 
+.mdc-select.bubble-open-right {
+    right: auto;
+    left: calc(var(--right-value, 46px) - 58px);
+}
+
 .mdc-menu, mwc-list, .mdc-list-item {
     pointer-events: auto;
 }

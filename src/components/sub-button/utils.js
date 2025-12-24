@@ -402,7 +402,8 @@ export function isNewSubButtonsSchema(raw) {
 // Convert an old inline array-based sub_button to the new schema.
 // Old buttons remain buttons under `main`.
 export function convertOldToNewSubButtons(raw) {
-  if (!Array.isArray(raw)) return raw || { main: [], bottom: [] };
+  // If raw is not an array, return empty schema to prevent forEach errors
+  if (!Array.isArray(raw)) return { main: [], bottom: [] };
 
   const main = [];
 

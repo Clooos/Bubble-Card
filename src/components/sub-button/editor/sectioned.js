@@ -162,7 +162,8 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
       if (Object.prototype.hasOwnProperty.call(values, 'name')) next.name = values.name;
       // group_layout removed in favor of global layout controls
       if (Object.prototype.hasOwnProperty.call(values, 'buttons_layout')) next.buttons_layout = values.buttons_layout;
-      if (Object.prototype.hasOwnProperty.call(values, 'justify_content')) {
+      // Only process justify_content for bottom section (selector is not shown for main)
+      if (sectionKey === 'bottom' && Object.prototype.hasOwnProperty.call(values, 'justify_content')) {
         const requested = values.justify_content;
         // Map UI pseudo-value 'fill' to config (remove justify_content), otherwise set real CSS value
         if (requested === 'fill') {

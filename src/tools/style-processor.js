@@ -20,6 +20,14 @@ const RE_EMPTY_BLOCK = /[^{};]+\s*{\s*}/g;
 const RE_TRAILING_COMMA = /,(?=\s*[}\n])/g;
 const RE_BLOCKS_OR_AT_RULES = /(@[^{}]*?\{(?:[^{}]*?\{[^{}]*?\})*?[^{}]*?\}|[^{}]*?\{[^{}]*?\})/g;
 
+// Optimized regex patterns for line checks
+const RE_LINE_TRAILING_COMMA = /,\s*(\/\*.*\*\/)?$/;
+const RE_START_SELECTOR = /^[.:#&\[*]/;
+const RE_COMBINATOR = /^[>+~]/;
+const RE_TAG_SELECTOR = /^[a-zA-Z][a-zA-Z0-9-_]*$/;
+const RE_PSEUDO = /::?[a-zA-Z_-][a-zA-Z0-9_-]*/;
+const RE_GROUPING = /^[()\[\]]+,?$/;
+
 function getOrCreateStyleElement(context, element) {
   if (element.tagName === 'STYLE') {
     return element;
@@ -265,7 +273,9 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
       }
     }
     const card = context.config.card_type === 'pop-up' ? context.popUp : context.card;
-    const result = cleanCSS(compiledFunction.call(
+    
+    // Execute the compiled function to get the raw string result
+    const rawResult = compiledFunction.call(
       context,
       context._hass,
       context.config.entity,
@@ -277,7 +287,28 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
       card,
       card.name,
       checkConditionsMet
-    ));
+    );
+
+    // Optimization: Local cache to avoid re-cleaning CSS if the raw output hasn't changed.
+    // This significantly reduces CPU usage on dashboards with many cards/modules.
+    if (!context._localStyleCache) {
+      context._localStyleCache = new Map();
+    }
+
+    const cachedStyle = context._localStyleCache.get(styles);
+    if (cachedStyle && cachedStyle.raw === rawResult) {
+      return cachedStyle.cleaned;
+    }
+
+    const cleanedResult = cleanCSS(rawResult);
+
+    // Store the new result in the local cache
+    context._localStyleCache.set(styles, {
+      raw: rawResult,
+      cleaned: cleanedResult
+    });
+
+    return cleanedResult;
 
     // If we get here, evaluation was successful.
     if (context.editor) {
@@ -378,38 +409,51 @@ function cleanCSS(css) {
   if (result.includes("\n")) {
     let nestingLevel = 0;
     const filteredLines = [];
+    const lines = result.split("\n");
 
-    result.split("\n").forEach((line) => {
-      const trimmed = line.trim();
-      const openBraces = (line.match(/\{/g) || []).length;
-      const closeBraces = (line.match(/\}/g) || []).length;
-      const hasTrailingComma = /,\s*(\/\*.*\*\/)?$/.test(trimmed);
-      const startsWithSelectorChar = /^[.:#&\[*]/.test(trimmed) || /^[>+~]/.test(trimmed);
-      const looksLikeTagSelector = /^[a-zA-Z][a-zA-Z0-9-_]*$/.test(trimmed);
-      const hasImmediatePseudo = /::?[a-zA-Z_-][a-zA-Z0-9_-]*/.test(trimmed);
-      const isGroupingLine = /^[()\[\]]+,?$/.test(trimmed);
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        
+        // Skip empty lines immediately
+        if (!trimmed) continue;
 
-      const shouldKeep =
-        nestingLevel > 0 ||
-        openBraces > 0 ||
-        closeBraces > 0 ||
-        trimmed.startsWith("@") ||
-        trimmed.startsWith("--") ||
-        hasTrailingComma ||
-        startsWithSelectorChar ||
-        looksLikeTagSelector ||
-        hasImmediatePseudo ||
-        isGroupingLine;
+        // Efficient brace counting
+        let openBraces = 0;
+        let closeBraces = 0;
+        
+        // Count braces using a simple loop to avoid regex overhead on every line
+        for (let j = 0; j < line.length; j++) {
+            if (line[j] === '{') openBraces++;
+            else if (line[j] === '}') closeBraces++;
+        }
 
-      if (shouldKeep && trimmed !== "") {
-        filteredLines.push(line);
-      }
+        let shouldKeep = nestingLevel > 0;
 
-      nestingLevel += openBraces - closeBraces;
-      if (nestingLevel < 0) {
-        nestingLevel = 0;
-      }
-    });
+        // If we are not in a block, we need to check if the line looks like valid CSS
+        if (!shouldKeep) {
+            shouldKeep = 
+                openBraces > 0 ||
+                closeBraces > 0 ||
+                trimmed.startsWith("@") ||
+                trimmed.startsWith("--") ||
+                RE_LINE_TRAILING_COMMA.test(trimmed) ||
+                RE_START_SELECTOR.test(trimmed) || 
+                RE_COMBINATOR.test(trimmed) ||
+                RE_TAG_SELECTOR.test(trimmed) ||
+                RE_PSEUDO.test(trimmed) ||
+                RE_GROUPING.test(trimmed);
+        }
+
+        if (shouldKeep) {
+            filteredLines.push(line);
+        }
+
+        nestingLevel += openBraces - closeBraces;
+        if (nestingLevel < 0) {
+            nestingLevel = 0;
+        }
+    }
 
     result = filteredLines.join("\n");
   }

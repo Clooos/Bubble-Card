@@ -2,6 +2,65 @@ import { createElement } from "../../tools/utils.js";
 import { callSelectService } from "./helpers.js";
 import styles from "./styles.css";
 
+const MENU_WIDTH = 200;
+const MENU_OVERLAP = 40;
+
+/**
+ * Find the closest ancestor matching a selector, traversing shadow DOM boundaries.
+ */
+function closestAcrossShadowDOM(element, selector) {
+    let current = element;
+    while (current) {
+        const found = current.closest?.(selector);
+        if (found) return found;
+        const root = current.getRootNode?.();
+        if (root instanceof ShadowRoot) {
+            current = root.host;
+        } else {
+            break;
+        }
+    }
+    return null;
+}
+
+/**
+ * Check if the dropdown should open to the right instead of left.
+ */
+function shouldOpenRight(dropdownContainer) {
+    if (!dropdownContainer) return false;
+
+    const dropdownLeft = dropdownContainer.getBoundingClientRect().left;
+    const popupContainer = closestAcrossShadowDOM(dropdownContainer, '.bubble-pop-up-container');
+    
+    if (!popupContainer) {
+        return dropdownLeft < (MENU_WIDTH - MENU_OVERLAP);
+    }
+    
+    const containerRect = popupContainer.getBoundingClientRect();
+    const paddingLeft = parseFloat(getComputedStyle(popupContainer).paddingLeft) || 0;
+    const availableSpace = dropdownLeft - containerRect.left - paddingLeft;
+    
+    return availableSpace < (MENU_WIDTH - MENU_OVERLAP);
+}
+
+/**
+ * Apply or remove the open-right positioning based on available space.
+ */
+function updateDropdownPosition(dropdownSelect, dropdownContainer) {
+    if (!dropdownSelect?.shadowRoot || !dropdownContainer) return;
+    
+    const mdcSelect = dropdownSelect.shadowRoot.querySelector('.mdc-select');
+    const openRight = shouldOpenRight(dropdownContainer);
+    
+    if (openRight) {
+        mdcSelect?.classList.add('bubble-open-right');
+        dropdownContainer.classList.add('bubble-open-right');
+    } else {
+        mdcSelect?.classList.remove('bubble-open-right');
+        dropdownContainer.classList.remove('bubble-open-right');
+    }
+}
+
 export function createDropdownStructure(context, elements = context.elements, showArrow) {
     elements.dropdownContainer = elements.dropdownContainer || createElement('div', 'bubble-dropdown-container');
     elements.dropdownSelect = elements.dropdownSelect || createElement('ha-select', 'bubble-dropdown-select');
@@ -167,6 +226,7 @@ export function createDropdownActions(context, elements = context.elements, enti
             // Fallback to mwc-menu if ha-menu is not found
             const oldSelectMenu = dropdownSelect.shadowRoot.querySelector('mwc-menu');
             if (oldSelectMenu) {
+                updateDropdownPosition(dropdownSelect, elements.dropdownContainer);
                 oldSelectMenu.setAttribute('open', '');
                 updateVisualStyles();
             }
@@ -200,12 +260,14 @@ export function createDropdownActions(context, elements = context.elements, enti
                     pendingOpenTimer = null;
                     return;
                 }
+                updateDropdownPosition(dropdownSelect, elements.dropdownContainer);
                 menuElement.show();
                 updateVisualStyles();
                 pendingOpenTimer = null;
             }, 220);
         } else {
             // Open immediately if no double-tap action is configured
+            updateDropdownPosition(dropdownSelect, elements.dropdownContainer);
             menuElement.show();
             updateVisualStyles();
         }
