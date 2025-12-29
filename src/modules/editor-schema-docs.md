@@ -202,7 +202,9 @@ Every field in your editor schema can have these common properties:
 | `label` | string | The displayed name for the field |
 | `required` | boolean | Whether the field is required |
 | `disabled` | boolean | Whether the field is disabled |
-| `default` | any | Default value if no value is provided |
+| `default` | any | Default value to show if no value is provided[^1] |
+
+[^1]: Note that this only communicates the default to the user, but the value provided here is not applied to the configuration.
 
 ## Field types
 
