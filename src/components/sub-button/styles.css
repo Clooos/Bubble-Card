@@ -206,6 +206,11 @@
     overflow: auto;
 }
 
+/* Lower line-height when scrolling effect is disabled (multi-line mode) */
+.bubble-sub-button-name-container[style*="-webkit-box"] {
+    line-height: 1.1;
+}
+
 /* Content layout styles */
 .bubble-sub-button.content-icon-top {
     flex-direction: column-reverse;

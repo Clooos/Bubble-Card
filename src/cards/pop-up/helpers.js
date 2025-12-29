@@ -73,8 +73,34 @@ if (!window.__bubbleLocationDeduperAdded) {
 
 const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER']);
 
+// Track when a dialog was recently closed to prevent popup from closing
+const dialogState = {
+    recentlyClosedTimestamp: 0,
+    protectionWindow: 500 // ms to protect after dialog close
+};
+
+// Listen for dialog close events
+if (!window.__bubbleDialogListenerAdded) {
+    window.addEventListener('dialog-closed', () => {
+        dialogState.recentlyClosedTimestamp = Date.now();
+    }, { capture: true });
+    
+    // Also listen for iron-overlay-closed which is used by some HA dialogs
+    window.addEventListener('iron-overlay-closed', () => {
+        dialogState.recentlyClosedTimestamp = Date.now();
+    }, { capture: true });
+    
+    window.__bubbleDialogListenerAdded = true;
+}
+
 export function clickOutside(event, context) {
     if (!(context.config.close_by_clicking_outside ?? true)) return;
+    
+    // Protect popup from closing if a dialog was recently closed
+    const timeSinceDialogClosed = Date.now() - dialogState.recentlyClosedTimestamp;
+    if (timeSinceDialogClosed < dialogState.protectionWindow) {
+        return;
+    }
     
     const targets = event.composedPath();
     const popupTarget = targets.find(target => {
@@ -441,7 +467,12 @@ export function onUrlChange(context) {
         
         if (context.config.hash === currentHash) {
             const isPopupOpen = context.popUp.classList.contains('is-popup-opened');
-            const shouldToggleClose = isPopupOpen && !hashChanged && !popupState.entityTriggeredPopup;
+            
+            // Don't toggle close if a dialog was recently closed to prevent unwanted popup closure
+            const timeSinceDialogClosed = Date.now() - dialogState.recentlyClosedTimestamp;
+            const dialogRecentlyClosed = timeSinceDialogClosed < dialogState.protectionWindow;
+            
+            const shouldToggleClose = isPopupOpen && !hashChanged && !popupState.entityTriggeredPopup && !dialogRecentlyClosed;
 
             // Re-run navigate on the same hash should close the currently opened popup
             if (shouldToggleClose) {

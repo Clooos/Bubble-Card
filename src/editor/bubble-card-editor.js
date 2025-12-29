@@ -37,6 +37,7 @@ class BubbleCardEditor extends LitElement {
     _moduleErrorCache = {};
     _moduleCodeEvaluating = null;
     _rowsAutoMode = undefined; // true = auto-manage rows, false = user-managed
+    _autoRowsComputeScheduled = false;
     _previewCardRoot = null;
     _previewCardHost = null;
     _previewCardScore = -Infinity;
@@ -50,14 +51,141 @@ class BubbleCardEditor extends LitElement {
     }
 
     setConfig(config) {
-        this._config = {
-            ...config
-        };
-        this._resetPreviewCardReference();
-        // Initialize rows auto mode once per editor session based on incoming config
-        if (this._rowsAutoMode === undefined) {
-            this._rowsAutoMode = true;
+        // Keep existing preview reference if still connected.
+        const prevHost = this._previewCardHost || this._previewCardRoot?.host || null;
+        const previewStillConnected = !!prevHost?.isConnected;
+
+        this._config = { ...config };
+        if (!previewStillConnected) {
+            this._resetPreviewCardReference();
+        } else {
+            this._previewCardScore = -Infinity;
         }
+
+        // Initialize rows auto mode once per editor session.
+        if (this._rowsAutoMode === undefined) this._rowsAutoMode = true;
+
+        // Track if rows are explicitly set (disables auto mode).
+        const hasGridRows =
+            this._config?.grid_options?.rows !== undefined &&
+            this._config?.grid_options?.rows !== null &&
+            this._config?.grid_options?.rows !== '';
+
+        if (hasGridRows) {
+            this._rowsAutoMode = false;
+        }
+    }
+
+    _deepQuerySelector(root, selector, maxDepth = 6) {
+        try {
+            if (!root || maxDepth < 0) return null;
+            const direct = root.querySelector?.(selector);
+            if (direct) return direct;
+
+            const all = root.querySelectorAll?.('*') || [];
+            for (const el of all) {
+                if (el?.shadowRoot) {
+                    const found = this._deepQuerySelector(el.shadowRoot, selector, maxDepth - 1);
+                    if (found) return found;
+                }
+            }
+            return null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    _getEditorPreviewContainer() {
+        // Best-effort lookup of the HA card editor preview container.
+        try {
+            const homeAssistant = document.querySelector("body > home-assistant");
+            return homeAssistant?.shadowRoot
+                ?.querySelector("hui-dialog-edit-card")
+                ?.shadowRoot
+                ?.querySelector("ha-dialog > div.content > div.element-preview") || null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    _removeRowsOverrideAndRecalculate = () => {
+        // Remove grid_options.rows (and rows) from config, re-enable auto mode, and recalculate.
+        try {
+            const newConfig = { ...this._config };
+
+            // Remove grid_options.rows but keep other grid_options if present.
+            if (newConfig.grid_options) {
+                const { rows, ...restGridOptions } = newConfig.grid_options;
+                if (Object.keys(restGridOptions).length > 0) {
+                    newConfig.grid_options = restGridOptions;
+                } else {
+                    delete newConfig.grid_options;
+                }
+            }
+
+            // Remove rows as well since we'll recalculate it.
+            delete newConfig.rows;
+
+            // Re-enable auto mode.
+            this._rowsAutoMode = true;
+
+            // Update config and emit change.
+            this._config = newConfig;
+            fireEvent(this, 'config-changed', { config: newConfig });
+
+            // Trigger recalculation (force emit since this is an explicit user action).
+            requestAnimationFrame(() => {
+                try {
+                    this._firstRowsComputation = true; // Bypass first-computation skip
+                    this._setupAutoRowsObserver();
+                    const card = this._getBubbleCardFromPreview();
+                    if (card) {
+                        this._computeAndApplyRows(card);
+                    } else {
+                        this._waitForPreviewAndRecompute();
+                    }
+                } catch (_) {}
+            });
+        } catch (e) {
+            console.error('Bubble Card Editor: failed to remove rows override', e);
+        }
+    }
+
+    _waitForPreviewAndRecompute(attempt = 0) {
+        // Retry briefly to catch the moment the preview becomes available.
+        const maxAttempts = 40; // ~2s
+        const delayMs = 50;
+
+        try {
+            const card = this._getBubbleCardFromPreview();
+            if (card) {
+                this._setupAutoRowsObserver();
+                const result = this._computeAndApplyRows(card);
+                if (result?.applied) return;
+            }
+        } catch (_) {}
+
+        if (attempt + 1 >= maxAttempts) return;
+        setTimeout(() => this._waitForPreviewAndRecompute(attempt + 1), delayMs);
+    }
+
+    _scheduleAutoRowsCompute() {
+        if (this._autoRowsComputeScheduled) return;
+        this._autoRowsComputeScheduled = true;
+        requestAnimationFrame(() => {
+            this._autoRowsComputeScheduled = false;
+            try {
+                const hasGridRows =
+                    this._config?.grid_options?.rows !== undefined &&
+                    this._config?.grid_options?.rows !== null &&
+                    this._config?.grid_options?.rows !== '';
+                if (hasGridRows || this._rowsAutoMode === false) return;
+
+                this._setupAutoRowsObserver();
+                const card = this._getBubbleCardFromPreview();
+                if (card) this._computeAndApplyRows(card);
+            } catch (_) {}
+        });
     }
 
     static get properties() {
@@ -1311,14 +1439,18 @@ class BubbleCardEditor extends LitElement {
         }
     }
 
-    // Update auto/manuel mode when user edits rows
+    // Update auto/manual mode when user edits rows
     try {
         if (target?.configValue === 'rows') {
             const r = newConfig?.rows;
-            this._rowsAutoMode = (r === undefined || r === null || r === '');
+            const cleared = (r === undefined || r === null || r === '');
+            this._rowsAutoMode = cleared;
+            if (cleared) delete newConfig.rows;
         } else if (target?.configValue === 'grid_options.rows') {
-            // grid_options.rows is an explicit override of sizing
-            this._rowsAutoMode = false;
+            const r = newConfig?.grid_options?.rows;
+            const cleared = (r === undefined || r === null || r === '');
+            this._rowsAutoMode = cleared;
+            if (cleared && newConfig?.grid_options) delete newConfig.grid_options.rows;
         }
         // When card_type changes to calendar, set rows to 1 if not already set
         if (target?.configValue === 'card_type' && detail?.value === 'calendar') {
@@ -1408,6 +1540,15 @@ class BubbleCardEditor extends LitElement {
 
     fireEvent(this, "config-changed", { config: this._config });
     this.requestUpdate();
+
+    // Some editor interactions (esp. YAML edits) won't trigger ResizeObserver.
+    // Recompute rows when sub_button structure changes.
+    try {
+      const a = String(array || '');
+      if (a === 'sub_button' || a.startsWith('sub_button')) {
+        this._scheduleAutoRowsCompute('sub_button changed');
+      }
+    } catch (_) {}
   }
 
   _ActionChanged(ev, array, index) {
@@ -1603,6 +1744,22 @@ class BubbleCardEditor extends LitElement {
           return this._previewCardRoot;
         }
       }
+      // Fallback: if we have a connected host but no cached root yet, use its shadowRoot/root node.
+      // This avoids missing the preview when the context event hasn't fired again after YAML edits.
+      if (this._previewCardHost?.isConnected) {
+        return this._previewCardHost.shadowRoot || this._previewCardHost.getRootNode?.() || null;
+      }
+      // Last fallback: locate the preview card through the editor dialog DOM (deep shadow traversal).
+      const previewContainer = this._getEditorPreviewContainer();
+      if (previewContainer) {
+        const bubbleCardEl = this._deepQuerySelector(previewContainer, 'bubble-card');
+        const root = bubbleCardEl?.shadowRoot || null;
+        if (root) {
+          this._previewCardHost = bubbleCardEl;
+          this._previewCardRoot = root;
+          return root;
+        }
+      }
     } catch (e) {
       return null;
     }
@@ -1610,13 +1767,13 @@ class BubbleCardEditor extends LitElement {
 
   _setupAutoRowsObserver() {
     // Only in editor context and when grid_options.rows is not explicitly set
-    if (!this._config || (this._config?.grid_options && this._config.grid_options.rows !== undefined)) return;
-
-    // Respect user-managed mode
-    if (this._rowsAutoMode === false) return;
+    const hasGridRows =
+      this._config?.grid_options?.rows !== undefined &&
+      this._config?.grid_options?.rows !== null &&
+      this._config?.grid_options?.rows !== '';
+    if (!this._config || hasGridRows || this._rowsAutoMode === false) return;
 
     const bubbleCard = this._getBubbleCardFromPreview();
-
     if (!bubbleCard) return;
 
     const elementsToObserve = [
@@ -1748,18 +1905,17 @@ class BubbleCardEditor extends LitElement {
 
   _computeAndApplyRows(bubbleCard) {
     try {
-      if (!bubbleCard || this._rowsAutoMode === false || !this._config) return;
+      if (!bubbleCard || this._rowsAutoMode === false || !this._config) return { applied: false };
 
       // Skip auto rows calculation if custom height styles are detected
       if (this._hasCustomHeightStyles()) {
-        // Remove rows from config if it was auto-set
         if (this._config.rows !== undefined && this._rowsAutoMode !== false) {
           const newConfig = { ...this._config };
           delete newConfig.rows;
           this._config = newConfig;
           fireEvent(this, 'config-changed', { config: newConfig });
         }
-        return;
+        return { applied: false };
       }
 
       const isCalendar = this._config.card_type === 'calendar';
@@ -1827,7 +1983,10 @@ class BubbleCardEditor extends LitElement {
           return 0;
         }
       };
-      if (bottomMainButtons) {
+      // Only add bottom offset for main buttons when there are also bottom sub-buttons
+      // The 8px CSS bottom offset is aesthetic spacing that doesn't require extra rows
+      // when main buttons are alone at the bottom
+      if (bottomMainButtons && bottomSubButtonsHeight > 0) {
         reservedFromBottom += computeBottomOffset(bottomMainButtons);
       }
 
@@ -1899,20 +2058,20 @@ class BubbleCardEditor extends LitElement {
 
       if (computedRows === currentRows || (computedRows === undefined && currentRows === undefined)) {
         this._firstRowsComputation = true;
-        return;
+        return { applied: false };
       }
       // Avoid tiny oscillations due to subpixel layout differences
       if (typeof computedRows === 'number' && typeof currentRows === 'number') {
         if (Math.abs(computedRows - currentRows) < 0.01) {
-          return;
+          return { applied: false };
         }
       }
       
       if (computedRows === defaultRows && currentRows === undefined) {
-        return;
+        return { applied: false };
       }
 
-      if (this._rowsAutoMode === false) return;
+      if (this._rowsAutoMode === false) return { applied: false };
 
       const newConfig = { ...this._config };
       if (computedRows === undefined) {
@@ -1923,13 +2082,17 @@ class BubbleCardEditor extends LitElement {
       
       this._config = newConfig;
 
+      // Skip emitting config-changed on the very first computation to avoid
+      // visual "flash" when opening the editor on a card that already had auto-calculated rows.
       if (!this._firstRowsComputation) {
         this._firstRowsComputation = true;
-        return;
+        return { applied: false, skippedFirst: true };
       }
 
       fireEvent(this, 'config-changed', { config: newConfig });
+      return { applied: true, rows: newConfig.rows };
     } catch (_) {}
+    return { applied: false };
   }
 
   _initializeLists(t) {
@@ -2109,3 +2272,4 @@ class BubbleCardEditor extends LitElement {
 }
 
 customElements.define('bubble-card-editor', BubbleCardEditor);
+

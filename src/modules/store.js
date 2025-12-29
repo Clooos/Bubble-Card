@@ -8,6 +8,38 @@ import jsyaml from 'js-yaml';
 import { ensureBCTProviderAvailable, isBCTAvailableSync } from './bct-provider.js';
 
 const BCT_CHECK_RETRY_MS = 5000;
+const RATE_LIMIT_WARNING_STORAGE_KEY = 'bubble-card-rate-limit-warning';
+
+function _persistRateLimitWarning(resetTimeMs) {
+  try {
+    const resetTime = typeof resetTimeMs === 'number' && Number.isFinite(resetTimeMs)
+      ? resetTimeMs
+      : (Date.now() + 3600000);
+    localStorage.setItem(RATE_LIMIT_WARNING_STORAGE_KEY, JSON.stringify({ resetTime }));
+  } catch (e) {
+    console.warn('Failed to persist rate limit warning to localStorage', e);
+  }
+}
+
+function _clearPersistedRateLimitWarning() {
+  try {
+    localStorage.removeItem(RATE_LIMIT_WARNING_STORAGE_KEY);
+  } catch (e) {
+    console.warn('Failed to clear rate limit warning from localStorage', e);
+  }
+}
+
+function _readPersistedRateLimitWarning() {
+  try {
+    const raw = localStorage.getItem(RATE_LIMIT_WARNING_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch (e) {
+    return null;
+  }
+}
 
 export function makeModuleStore(context) {
   // Check if the persistent entity exists
@@ -25,6 +57,19 @@ export function makeModuleStore(context) {
       context._rankingInfoDismissed = localStorage.getItem('bubble-card-ranking-info-dismissed') === 'true';
     } catch (e) {
       context._rankingInfoDismissed = false;
+    }
+  }
+
+  // Restore rate limit warning across reloads (only while reset time is in the future)
+  if (context._rateLimitWarning === undefined) {
+    const persisted = _readPersistedRateLimitWarning();
+    const resetTime = persisted?.resetTime;
+    if (typeof resetTime === 'number' && resetTime > Date.now()) {
+      context._rateLimitWarning = true;
+      context._rateLimitResetTime = resetTime;
+    } else {
+      context._rateLimitWarning = false;
+      if (persisted) _clearPersistedRateLimitWarning();
     }
   }
   
@@ -297,7 +342,7 @@ export function makeModuleStore(context) {
             <h4 class="bubble-section-title">
               <ha-icon icon="mdi:alert-outline"></ha-icon>
               API rate limit reached
-              <div class="bubble-info-dismiss bubble-badge" @click=${() => { context._rateLimitWarning = false; context.requestUpdate(); }} title="Dismiss" 
+              <div class="bubble-info-dismiss bubble-badge" @click=${() => { context._rateLimitWarning = false; _clearPersistedRateLimitWarning(); context.requestUpdate(); }} title="Dismiss" 
                 style="
                   display: inline-flex;
                   align-items: center;
@@ -838,14 +883,11 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
   // Determine if this is a manual refresh (direct click on refresh button)
   const isManualRefresh = !isBackgroundFetch && context._storeModules !== undefined;
 
-  // First, check GitHub API rate limit status
-  let useCache = false;
-  
   if (!isBackgroundFetch) {
     context._isLoadingStore = true;
     context._storeError = null;
     context._loadingProgress = 5;
-    context._loadingStatus = "Checking API limits";
+    context._loadingStatus = "Connecting to GitHub";
     context.requestUpdate();
     
     // Start progress animation
@@ -880,54 +922,15 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
   }
 
   try {
-    // Skip rate limit check for manual refreshes if user explicitly clicked refresh
+    // Check cooldown from previous API failures
     if (!isManualRefresh) {
-      const rateResponse = await fetch('https://api.github.com/rate_limit', {
-        method: "GET",
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'X-GitHub-Api-Version': '2022-11-28'
-        }
-      });
-
-      if (!isBackgroundFetch) {
-        context._loadingStatus = "Analyzing API response";
-        context._loadingProgress = Math.max(context._loadingProgress, 30);
-        context.requestUpdate();
-      }
-
-      if (rateResponse.ok) {
-        const rateData = await rateResponse.json();
-        const remaining = rateData.resources.core.remaining;
-        
-        // Only use cache if we're actually out of API calls
-        if (remaining <= 1) { // Keep 1 call as buffer
-          console.warn("⚠️ API limit reached, using cache instead");
-          useCache = true;
-        }
-      } else {
-        // If we can't check rate limit, fall back to cooldown logic
-        useCache = true;
-        console.warn("⚠️ Could not check API rate limit, using cooldown logic");
-      }
-    }
-
-    // Update loading status
-    if (!isBackgroundFetch) {
-      context._loadingStatus = "Processing API data";
-      context._loadingProgress = Math.max(context._loadingProgress, 40);
-      context.requestUpdate();
-    }
-
-    // When rate-limited or rate status unknown, prefer using cache and skip network
-    if (useCache && !isManualRefresh) {
       const lastApiFailure = localStorage.getItem('bubble-card-api-failure-timestamp');
       if (lastApiFailure) {
         const failureTime = parseInt(lastApiFailure);
         const cooldownPeriod = 30 * 60 * 1000; // 30 minutes
         
         if (Date.now() - failureTime < cooldownPeriod) {
-          // Use cache if available
+          // Use cache if available during cooldown
           const cachedData = getCachedModuleData();
           if (cachedData && !context._storeModules) {
             context._storeModules = cachedData.modules;
@@ -935,47 +938,24 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
             context.requestUpdate();
           }
           
-          // Update loading status for using cache
           if (!isBackgroundFetch) {
             context._loadingStatus = "Loading from cache";
-            context._loadingProgress = Math.max(context._loadingProgress, 60);
+            context._loadingProgress = 100;
             context.requestUpdate();
             
-            // Clear interval
             if (context._progressInterval) {
               clearInterval(context._progressInterval);
               context._progressInterval = null;
             }
           }
           
+          context._isApiCallInProgress = false;
           return;
         } else {
-          // Cooldown finished, we can retry next time
+          // Cooldown finished, we can retry
           localStorage.removeItem('bubble-card-api-failure-timestamp');
         }
       }
-
-      // Use cache due to rate limit or unknown status and exit early
-      const cachedData = getCachedModuleData();
-      if (cachedData && !context._storeModules) {
-        context._storeModules = cachedData.modules;
-        context._isLoadingStore = false;
-        context.requestUpdate();
-      }
-      
-      if (!isBackgroundFetch) {
-        context._loadingStatus = "Loading from cache";
-        context._loadingProgress = Math.max(context._loadingProgress, 60);
-        context.requestUpdate();
-        
-        // Clear interval
-        if (context._progressInterval) {
-          clearInterval(context._progressInterval);
-          context._progressInterval = null;
-        }
-      }
-      
-      return;
     }
 
     // Retrieve all discussions with pagination
@@ -1054,7 +1034,16 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       }
 
       if (!restResponse.ok) {
-        console.error("❌ REST API Error:", restResponse.status, restResponse.statusText);
+        // If we are rate-limited, persist the warning so it survives reloads
+        const remainingHeader = restResponse.headers.get('x-ratelimit-remaining');
+        const resetHeader = restResponse.headers.get('x-ratelimit-reset');
+        const remaining = remainingHeader !== null ? Number(remainingHeader) : null;
+        const resetTimeMs = resetHeader ? (parseInt(resetHeader, 10) * 1000) : null;
+        if (restResponse.status === 403 && remaining === 0) {
+          if (resetTimeMs) context._rateLimitResetTime = resetTimeMs;
+          context._rateLimitWarning = true;
+          _persistRateLimitWarning(context._rateLimitResetTime);
+        }
         
         // If we have data from previous pages and it's a server error (5xx), use what we have
         if (allDiscussions.length > 0 && restResponse.status >= 500) {
@@ -1130,10 +1119,11 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     if (shouldPreserveCache) {
       console.warn("⚠️ Rate limit reached with incomplete data, preserving existing cache");
       
+      context._rateLimitWarning = true;
+      _persistRateLimitWarning(context._rateLimitResetTime);
       if (!isBackgroundFetch) {
         context._loadingStatus = "Rate limit reached - Using cached data";
         context._loadingProgress = Math.max(context._loadingProgress, 95);
-        context._rateLimitWarning = true;
         context.requestUpdate();
       }
 
@@ -1160,6 +1150,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
 
     // Clear rate limit warning if we got good data
     context._rateLimitWarning = false;
+    _clearPersistedRateLimitWarning();
 
     // Update loading status
     if (!isBackgroundFetch) {

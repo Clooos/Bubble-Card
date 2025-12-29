@@ -79,9 +79,27 @@ function disableActionsDuringScroll() {
   }, scrollDisableTime);
 }
 
+// Prevent context menu on elements with hold action configured
+function handleContextMenu(event) {
+  const actionElement = event.composedPath().find(element => 
+    element.classList?.contains('bubble-action')
+  );
+
+  if (actionElement && actionElement.dataset.holdAction) {
+    try {
+      const holdAction = JSON.parse(actionElement.dataset.holdAction);
+      if (holdAction.action !== 'none') {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    } catch (_) {}
+  }
+}
+
 // Register global listeners only once
 if (!window.__bubbleTapActionsInitialized) {
   document.addEventListener('scroll', disableActionsDuringScroll, { passive: true });
+  document.addEventListener('contextmenu', handleContextMenu);
   document.body.addEventListener('pointerdown', handlePointerDown, { passive: true });
   document.body.addEventListener('touchstart', handlePointerDown, { passive: true });
   window.__bubbleTapActionsInitialized = true;
@@ -144,11 +162,21 @@ function handlePointerDown(event) {
 
   activeHandlers.add(handler);
 
+  const contextMenuHandler = (e) => {
+    // Prevent context menu if hold action is configured
+    const holdAction = handler.config.hold_action || { action: 'none' };
+    if (holdAction.action !== 'none') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   const cleanup = () => {
     actionElement.removeEventListener('pointerup', endHandler);
     actionElement.removeEventListener('pointercancel', endHandler);
     actionElement.removeEventListener('touchend', endHandler);
     actionElement.removeEventListener('touchcancel', endHandler);
+    actionElement.removeEventListener('contextmenu', contextMenuHandler);
     document.removeEventListener('pointerup', endHandler);
     document.removeEventListener('touchend', endHandler);
     document.removeEventListener('scroll', scrollHandler);
@@ -175,6 +203,7 @@ function handlePointerDown(event) {
   actionElement.addEventListener('pointercancel', endHandler, { once: true });
   actionElement.addEventListener('touchend', endHandler, { once: true });
   actionElement.addEventListener('touchcancel', endHandler, { once: true });
+  actionElement.addEventListener('contextmenu', contextMenuHandler);
   document.addEventListener('pointerup', endHandler, { once: true });
   document.addEventListener('touchend', endHandler, { once: true });
   document.addEventListener('scroll', scrollHandler, { once: true });

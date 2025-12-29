@@ -125,6 +125,15 @@ export function renderMediaPlayerEditor(editor){
                             <label class="mdc-label">Optional - Hide power button</label>
                         </div>
                     </ha-formfield>
+                    <div class="bubble-info">
+                        <h4 class="bubble-section-title">
+                            <ha-icon icon="mdi:information-outline"></ha-icon>
+                            Buttons default behavior
+                        </h4>
+                        <div class="content">
+                            <p>Outside of the editor, buttons other than the power button only appear if the media player is turned on.</p>
+                        </div>
+                    </div>
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>

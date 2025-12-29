@@ -295,7 +295,12 @@ export function createStructure(context) {
     context.popUp.appendChild(context.elements.headerContainer);
     context.popUp.appendChild(context.elements.popUpContainer);
 
-    if (context.config.hash !== location.hash) {
+    // Always hide popup initially when background_update is enabled
+    // This prevents a flash when the page loads with the popup hash
+    // openPopup will properly show it via displayContent
+    if (context.config.background_update) {
+      context.popUp.style.display = 'none';
+    } else if (context.config.hash !== location.hash) {
       hideContent(context, 0);
     }
 

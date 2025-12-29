@@ -40,6 +40,7 @@ function isCardBeingEdited(context) {
     return false;
 }
 
+
 function createEditorPlaceholder(context) {
     const placeholder = createElement('div', 'bubble-editor-placeholder');
     
@@ -124,11 +125,16 @@ export function changeEditor(context) {
 
     if (context.detectedEditor && !context.dialogClosedListenerAdded) {
         window.addEventListener("dialog-closed", () => {
-            if (elements?.popUpContainer) {
-                elements.popUpContainer.classList.add('editor-cropped');
+            // Only apply editor cropping and store content if this card was never actively edited
+            // This prevents cropping/placeholder when closing more-info dialogs from the preview
+            if (!context.wasBeingEdited && !isCardBeingEdited(context)) {
+                if (elements?.popUpContainer) {
+                    elements.popUpContainer.classList.add('editor-cropped');
+                }
+                storePopUpContent(context);
             }
-            // Store content again when dialog closes (back to editor mode)
-            storePopUpContent(context);
+            // Reset flag to allow re-adding listener for future dialog closes
+            context.dialogClosedListenerAdded = false;
         }, { once: true });
         context.dialogClosedListenerAdded = true;
     } else if (!context.detectedEditor && context.dialogClosedListenerAdded) {
@@ -164,15 +170,20 @@ export function changeEditor(context) {
         }
         
         // Handle content visibility based on detectedEditor state
+        // Use a persistent flag to remember if this card was being edited
+        // This prevents placeholder from appearing when dialogs temporarily change DOM state
         if (isCardBeingEdited(context)) {
-            // This specific card is being edited - restore content to allow editing
+            context.wasBeingEdited = true;
             restorePopUpContent(context);
-        } else {
-            // General edit mode or background card - store content to save CPU
+        } else if (!context.wasBeingEdited) {
+            // Only store content if this card was never actively edited in this session
             storePopUpContent(context);
         }
     } else {
         if (context.editorAccess) {
+            // Reset the "was being edited" flag when leaving editor mode
+            context.wasBeingEdited = false;
+            
             if (elements?.popUpContainer) {
                 elements.popUpContainer.classList.remove('editor-cropped');
             }

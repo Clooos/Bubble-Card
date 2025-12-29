@@ -359,6 +359,12 @@ export function debounce(func, wait) {
 
 // Shared state and observers for scrolling effect
 const bubbleScrollState = new WeakMap();
+const SCROLL_SPEED = 16; // Pixels per second for scrolling animation
+
+// Force browser reflow to ensure accurate layout measurements after DOM changes
+function forceReflow(element) {
+    void element.offsetWidth;
+}
 
 function getBubbleResizeObserver() {
     if (!window.bubbleScrollResizeObserver) {
@@ -374,8 +380,8 @@ function getBubbleResizeObserver() {
                         try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
                     }
                     bubbleScrollState.delete(element);
-        return;
-    }
+                    return;
+                }
 
                 measureAndApplyScrolling(element, state);
             });
@@ -398,20 +404,25 @@ function getBubbleIntersectionObserver() {
     return window.bubbleScrollObserver;
 }
 
+function calculateAnimationDuration(scrollWidth) {
+    const scrollDistance = Math.max(1, scrollWidth / 2);
+    return Math.max(1, scrollDistance / SCROLL_SPEED);
+}
+
 function measureAndApplyScrolling(element, state) {
     const text = state.text;
-    if (!text) return;
-        if (!element.isConnected) return;
+    if (!text || !element.isConnected) return;
 
-        const availableWidth = element.clientWidth;
+    const availableWidth = element.clientWidth;
     const isAnimated = element.getAttribute('data-animated') === 'true';
-    const SCROLL_SPEED = 16; // Pixels per second
 
     if (isAnimated) {
         const span = element.querySelector('.scrolling-container span');
         if (!span) return;
 
+        forceReflow(span);
         const baseWidth = Math.max(1, span.scrollWidth / 2);
+        
         if (baseWidth <= availableWidth) {
             element.removeAttribute('data-animated');
             element.innerHTML = text;
@@ -422,10 +433,8 @@ function measureAndApplyScrolling(element, state) {
             return;
         }
 
-        const scrollDistance = baseWidth;
-        const duration = Math.max(1, scrollDistance / SCROLL_SPEED);
+        const duration = calculateAnimationDuration(span.scrollWidth);
         span.style.animationDuration = `${duration.toFixed(2)}s`;
-        return;
     } else {
         const baseWidth = element.scrollWidth;
         if (baseWidth > availableWidth) {
@@ -435,16 +444,17 @@ function measureAndApplyScrolling(element, state) {
             element.setAttribute('data-animated', 'true');
             
             const span = element.querySelector('.scrolling-container span');
-            if (span && span.scrollWidth > 0) {
-                const scrollDistance = Math.max(1, span.scrollWidth / 2);
-                const duration = Math.max(1, scrollDistance / SCROLL_SPEED);
-                span.style.animationDuration = `${duration.toFixed(2)}s`;
+            if (span) {
+                forceReflow(span);
+                if (span.scrollWidth > 0) {
+                    const duration = calculateAnimationDuration(span.scrollWidth);
+                    span.style.animationDuration = `${duration.toFixed(2)}s`;
+                }
             }
 
             const io = getBubbleIntersectionObserver();
             try { io.observe(element); } catch (e) {}
             state.observed = true;
-            return;
         } else if (state.observed && window.bubbleScrollObserver) {
             try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
             state.observed = false;
@@ -456,77 +466,80 @@ export function applyScrollingEffect(context, element, text) {
     const { scrolling_effect: scrollingEffect = true } = context.config;
 
     if (!scrollingEffect) {
-		applyNonScrollingStyle(element, text);
-		// Cleanup observers if present
-		const ro = window.bubbleScrollResizeObserver;
-		if (ro) {
-			try { ro.unobserve(element); } catch (e) {}
-		}
-		const io = window.bubbleScrollObserver;
-		if (io && element) {
-			try { io.unobserve(element); } catch (e) {}
-		}
-		bubbleScrollState.delete(element);
-                return;
+        applyNonScrollingStyle(element, text);
+        // Cleanup observers if present
+        if (window.bubbleScrollResizeObserver) {
+            try { window.bubbleScrollResizeObserver.unobserve(element); } catch (e) {}
+        }
+        if (window.bubbleScrollObserver) {
+            try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
+        }
+        bubbleScrollState.delete(element);
+        return;
+    }
+
+    const textChanged = element.previousText !== text;
+    
+    // Skip if text hasn't changed and state exists
+    if (!textChanged && bubbleScrollState.has(element)) return;
+
+    element.previousText = text;
+    
+    // Get or create state
+    let state = bubbleScrollState.get(element);
+    if (state) {
+        state.text = text;
+    } else {
+        state = { text, observed: false };
+        bubbleScrollState.set(element, state);
+    }
+
+    const isAnimated = element.getAttribute('data-animated') === 'true';
+    const existingSpan = element.querySelector('.scrolling-container span');
+    
+    if (isAnimated && existingSpan) {
+        // Update content while animation runs
+        const separator = `<span class="bubble-scroll-separator"> | </span>`;
+        existingSpan.innerHTML = `${text + separator + text + separator}`;
+        
+        // Force reflow to get accurate measurements after DOM change
+        forceReflow(existingSpan);
+        
+        const availableWidth = element.clientWidth;
+        const baseWidth = Math.max(1, existingSpan.scrollWidth / 2);
+        
+        if (baseWidth <= availableWidth) {
+            // Text now fits, disable animation
+            element.removeAttribute('data-animated');
+            element.innerHTML = text;
+            if (state.observed && window.bubbleScrollObserver) {
+                try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
+                state.observed = false;
             }
+            return;
+        }
+        
+        // Recalculate animation duration with new text length
+        const duration = calculateAnimationDuration(existingSpan.scrollWidth);
+        existingSpan.style.animationDuration = `${duration.toFixed(2)}s`;
+        
+        // Ensure resize observer remains active
+        const ro = getBubbleResizeObserver();
+        try { ro.observe(element); } catch (e) {}
+        
+        return;
+    }
 
-	// Skip unnecessary updates but ensure observers remain
-	if (element.previousText === text && bubbleScrollState.has(element)) return;
+    // Set plain text first; ResizeObserver will decide to animate
+    element.innerHTML = text;
+    element.style = '';
+    element.removeAttribute('data-animated');
 
-	// Store original text for future comparison
-	element.previousText = text;
-	bubbleScrollState.set(element, { text });
+    const ro = getBubbleResizeObserver();
+    try { ro.observe(element); } catch (e) {}
 
-	// Check if animation is already running
-	const isAnimated = element.getAttribute('data-animated') === 'true';
-	const existingSpan = element.querySelector('.scrolling-container span');
-	
-	if (isAnimated && existingSpan) {
-		// Update content without interrupting animation
-		const separator = `<span class="bubble-scroll-separator"> | </span>`;
-		const wrappedText = `${text + separator + text + separator}`;
-		existingSpan.innerHTML = wrappedText;
-		
-		// Check if text now fits in container
-		const availableWidth = element.clientWidth;
-		const baseWidth = Math.max(1, existingSpan.scrollWidth / 2);
-		
-		if (baseWidth <= availableWidth) {
-			// Text now fits, disable animation
-			element.removeAttribute('data-animated');
-			element.innerHTML = text;
-			const state = bubbleScrollState.get(element);
-			if (state && state.observed && window.bubbleScrollObserver) {
-				try { window.bubbleScrollObserver.unobserve(element); } catch (e) {}
-				state.observed = false;
-			}
-			return;
-		}
-		
-		// Recalculate animation duration if needed
-		const SCROLL_SPEED = 16;
-		const scrollDistance = baseWidth;
-		const duration = Math.max(1, scrollDistance / SCROLL_SPEED);
-		existingSpan.style.animationDuration = `${duration.toFixed(2)}s`;
-		
-		// Ensure observers remain active
-		const ro = getBubbleResizeObserver();
-		try { ro.observe(element); } catch (e) {}
-		
-		return;
-	}
-
-	// Set plain text first; ResizeObserver will decide to animate
-	element.innerHTML = text;
-	element.style = '';
-	element.removeAttribute('data-animated');
-
-	const ro = getBubbleResizeObserver();
-	try { ro.observe(element); } catch (e) {}
-
-	// Measure immediately to avoid relying solely on observer scheduling
-	const state = bubbleScrollState.get(element);
-	measureAndApplyScrolling(element, state);
+    // Measure immediately to avoid relying solely on observer scheduling
+    measureAndApplyScrolling(element, state);
 }
 
 function applyNonScrollingStyle(element, text) {
@@ -539,7 +552,7 @@ function applyNonScrollingStyle(element, text) {
         WebkitLineClamp: '2',
         WebkitBoxOrient: 'vertical',
         textOverflow: 'ellipsis',
-        lineHeight: 'normal'
+        overflow: 'hidden'
     });
 }
 

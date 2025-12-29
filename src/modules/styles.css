@@ -886,7 +886,7 @@ sl-tab {
   max-width: 100%;
   border: 1px solid var(--divider-color);
   border-radius: 4px;
-  overflow: hidden;
+  overflow: scroll !important;
   box-sizing: border-box;
   display: block;
 }
@@ -1116,7 +1116,7 @@ ha-expansion-panel {
   --input-fill-color: none;
   scroll-margin-top: 64px;
   contain: inline-size;
-  overflow: hidden;
+  overflow: clip;
 }
 
 ha-expansion-panel > .content,
