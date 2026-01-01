@@ -148,10 +148,12 @@ export function changeMediaInfo(context) {
         }
         
         context.previousMediaState = mediaState;
-
-        applyScrollingEffect(context, context.elements.title, title);
-        applyScrollingEffect(context, context.elements.artist, artist);
     }
+
+    // Always call applyScrollingEffect, it handles its own optimization
+    // and can detect when element needs animation restart after reconnection
+    applyScrollingEffect(context, context.elements.title, title);
+    applyScrollingEffect(context, context.elements.artist, artist);
 }
 
 export function changeDisplayedInfo(context) {

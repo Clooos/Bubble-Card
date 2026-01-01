@@ -4,7 +4,8 @@ import {
   isStateOn,
   isStateRequiringAttention,
   isEntityType,
-  setLayout
+  setLayout,
+  getStateSurfaceColor
 } from '../../tools/utils.js';
 import { getIconColor } from '../../tools/icon.js';
 import { updateSlider } from '../../components/slider/changes.js';
@@ -33,8 +34,8 @@ export function changeButton(context) {
       newButtonColor = 'var(--red-color, var(--error-color))';
       newOpacity = '1';
     } else if (lightColor && isLight && !useAccentColor) {
-      newButtonColor = getIconColor(context);
-      newOpacity = '.5';
+      newButtonColor = getStateSurfaceColor(context, context.config.entity, true, null, null);
+      newOpacity = '.7';
     } else {
       newButtonColor = 'var(--bubble-button-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))';
       newOpacity = '1';

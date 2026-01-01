@@ -223,14 +223,21 @@ export function makeGenericSliderSettings({
                 Slider layout
             </h4>
             <div class="content">
-                <div class="ha-combo-box">
-                    <ha-combo-box
-                        label="Fill orientation"
-                        .value=${data.slider_fill_orientation || 'left'}
-                        .items=${FILL_ORIENTATION_OPTIONS}
-                        @value-changed=${(ev) => callToggleChange('slider_fill_orientation', ev.detail.value, meta('ha-combo-box', 'value-changed'))}
-                    ></ha-combo-box>
-                </div>
+                <ha-form
+                    .hass=${hass}
+                    .data=${{ slider_fill_orientation: data.slider_fill_orientation || 'left' }}
+                    .schema=${[{
+                        name: 'slider_fill_orientation',
+                        selector: {
+                            select: {
+                                options: FILL_ORIENTATION_OPTIONS,
+                                mode: 'dropdown'
+                            }
+                        }
+                    }]}
+                    .computeLabel=${() => 'Fill orientation'}
+                    @value-changed=${(ev) => callToggleChange('slider_fill_orientation', ev.detail.value.slider_fill_orientation, meta('ha-form', 'value-changed'))}
+                ></ha-form>
                 <div class="bubble-info" style="display: ${['top', 'bottom'].includes(data.slider_fill_orientation) ? '' : 'none'}">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -241,14 +248,21 @@ export function makeGenericSliderSettings({
                     </div>
                 </div>
                 ${isLightColorMode ? '' : html`
-                    <div class="ha-combo-box">
-                        <ha-combo-box
-                            label="Value position"
-                            .value=${data.slider_value_position || 'right'}
-                            .items=${VALUE_POSITION_OPTIONS}
-                            @value-changed=${(ev) => callToggleChange('slider_value_position', ev.detail.value, meta('ha-combo-box', 'value-changed'))}
-                        ></ha-combo-box>
-                    </div>
+                    <ha-form
+                        .hass=${hass}
+                        .data=${{ slider_value_position: data.slider_value_position || 'right' }}
+                        .schema=${[{
+                            name: 'slider_value_position',
+                            selector: {
+                                select: {
+                                    options: VALUE_POSITION_OPTIONS,
+                                    mode: 'dropdown'
+                                }
+                            }
+                        }]}
+                        .computeLabel=${() => 'Value position'}
+                        @value-changed=${(ev) => callToggleChange('slider_value_position', ev.detail.value.slider_value_position, meta('ha-form', 'value-changed'))}
+                    ></ha-form>
                 `}
                 <ha-formfield style="display: ${hideInvertSliderToggle ? 'none' : ''}">
                     <ha-switch
@@ -268,19 +282,26 @@ export function makeGenericSliderSettings({
                     Light options
                 </h4>
                 <div class="content">
-                    <div class="ha-combo-box">
-                        <ha-combo-box
-                            label="Light slider mode"
-                            .value=${data.light_slider_type || 'brightness'}
-                            @value-changed=${(ev) => callToggleChange('light_slider_type', ev.detail.value, meta('ha-combo-box', 'value-changed'))}
-                            .items=${[
-                                { label: 'Brightness (default)', value: 'brightness' },
-                                { label: 'Color (Hue)', value: 'hue' },
-                                { label: 'Saturation', value: 'saturation' },
-                                { label: 'White temperature', value: 'white_temp' }
-                            ]}
-                        ></ha-combo-box>
-                    </div>
+                    <ha-form
+                        .hass=${hass}
+                        .data=${{ light_slider_type: data.light_slider_type || 'brightness' }}
+                        .schema=${[{
+                            name: 'light_slider_type',
+                            selector: {
+                                select: {
+                                    options: [
+                                        { label: 'Brightness (default)', value: 'brightness' },
+                                        { label: 'Color (Hue)', value: 'hue' },
+                                        { label: 'Saturation', value: 'saturation' },
+                                        { label: 'White temperature', value: 'white_temp' }
+                                    ],
+                                    mode: 'dropdown'
+                                }
+                            }
+                        }]}
+                        .computeLabel=${() => 'Light slider mode'}
+                        @value-changed=${(ev) => callToggleChange('light_slider_type', ev.detail.value.light_slider_type, meta('ha-form', 'value-changed'))}
+                    ></ha-form>
                     ${data.light_slider_type === 'hue' ? html`
                         <ha-formfield>
                             <ha-switch

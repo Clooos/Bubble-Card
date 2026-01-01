@@ -479,11 +479,15 @@ export function applyScrollingEffect(context, element, text) {
     }
 
     const textChanged = element.previousText !== text;
+    const hasState = bubbleScrollState.has(element);
     
-    // Skip if text hasn't changed and state exists
-    if (!textChanged && bubbleScrollState.has(element)) return;
+    // Skip if text hasn't changed and state exists (element was never disconnected)
+    if (!textChanged && hasState) return;
 
     element.previousText = text;
+    
+    // Detect if element was disconnected and reconnected (state was cleaned up)
+    const wasReconnected = !hasState && element.getAttribute('data-animated') === 'true';
     
     // Get or create state
     let state = bubbleScrollState.get(element);
@@ -522,6 +526,21 @@ export function applyScrollingEffect(context, element, text) {
         // Recalculate animation duration with new text length
         const duration = calculateAnimationDuration(existingSpan.scrollWidth);
         existingSpan.style.animationDuration = `${duration.toFixed(2)}s`;
+        
+        // If element was reconnected, restart animation and reconnect observers
+        if (wasReconnected) {
+            // Force animation restart by toggling animation property
+            existingSpan.style.animation = 'none';
+            forceReflow(existingSpan);
+            existingSpan.style.animation = '';
+            existingSpan.style.animationDuration = `${duration.toFixed(2)}s`;
+            existingSpan.style.animationPlayState = 'running';
+            
+            // Reconnect IntersectionObserver to manage play state on visibility
+            const io = getBubbleIntersectionObserver();
+            try { io.observe(element); } catch (e) {}
+            state.observed = true;
+        }
         
         // Ensure resize observer remains active
         const ro = getBubbleResizeObserver();

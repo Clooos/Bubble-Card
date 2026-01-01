@@ -5,16 +5,16 @@ import { handleCustomStyles } from '../../tools/style-processor.js';
 import { toggleBodyScroll, setLayout, createElement } from "../../tools/utils.js";
 
 function isCardBeingEdited(context) {
-    if (!context.detectedEditor) return false;
+    if (!context.editor && !context.detectedEditor) return false;
+    
+    const previewTags = ['hui-card-preview', 'hui-section-preview', 'element-preview'];
     
     try {
-        // Check if this card is inside the editor preview
         let el = context.popUp;
         while (el) {
-            if (el.tagName && el.tagName.toLowerCase() === 'hui-card-preview') return true;
-            if (el.classList && el.classList.contains('element-preview')) return true;
+            if (el.tagName && previewTags.includes(el.tagName.toLowerCase())) return true;
+            if (el.classList?.contains('element-preview')) return true;
             
-            // Handle Shadow DOM
             if (el.parentNode) {
                 el = el.parentNode;
             } else if (el.getRootNode() instanceof ShadowRoot) {
@@ -23,23 +23,10 @@ function isCardBeingEdited(context) {
                 break;
             }
         }
-        
-        // Alternative check via root node
-        const root = context.getRootNode();
-        if (root instanceof ShadowRoot && root.host) {
-             let host = root.host;
-             while (host) {
-                 if (host.tagName && host.tagName.toLowerCase() === 'hui-card-preview') return true;
-                 host = host.parentElement || (host.getRootNode() instanceof ShadowRoot ? host.getRootNode().host : null);
-             }
-        }
-    } catch (e) {
-        console.error("Error checking editor status:", e);
-    }
+    } catch (e) {}
     
     return false;
 }
-
 
 function createEditorPlaceholder(context) {
     const placeholder = createElement('div', 'bubble-editor-placeholder');
@@ -65,52 +52,26 @@ function createEditorPlaceholder(context) {
 
 // Store pop-up content outside the DOM to prevent CPU usage from streams/heavy cards
 function storePopUpContent(context) {
-    if (!context.elements?.popUpContainer) return;
-    if (context.storedContent) return; // Already stored
+    if (!context.elements?.popUpContainer || context.storedContent) return;
     
     const container = context.elements.popUpContainer;
     const fragment = document.createDocumentFragment();
     
-    // Collect children to move, but KEEP <style> elements in the DOM
-    const childrenToMove = [];
-    for (const child of container.children) {
-        if (child.tagName !== 'STYLE') {
-            childrenToMove.push(child);
-        }
-    }
-    
-    // Move non-style children to the fragment (removes them from DOM)
-    for (const child of childrenToMove) {
-        fragment.appendChild(child);
-    }
+    const childrenToMove = [...container.children].filter(c => c.tagName !== 'STYLE');
+    childrenToMove.forEach(child => fragment.appendChild(child));
     
     context.storedContent = fragment;
-    
-    // Add placeholder
-    const placeholder = createEditorPlaceholder(context);
-    container.appendChild(placeholder);
-    
-    // Ensure container has some height/style to show background
+    container.appendChild(createEditorPlaceholder(context));
     container.classList.add('has-placeholder');
 }
 
 // Restore pop-up content back to the DOM
 function restorePopUpContent(context) {
-    if (!context.elements?.popUpContainer) return;
-    if (!context.storedContent) return; // Nothing to restore
+    if (!context.elements?.popUpContainer || !context.storedContent) return;
     
     const container = context.elements.popUpContainer;
-    
-    // Remove placeholder class
     container.classList.remove('has-placeholder');
-    
-    // Remove placeholder
-    const placeholder = container.querySelector('.bubble-editor-placeholder');
-    if (placeholder) {
-        placeholder.remove();
-    }
-    
-    // Restore all children from the fragment
+    container.querySelector('.bubble-editor-placeholder')?.remove();
     container.appendChild(context.storedContent);
     context.storedContent = null;
 }
@@ -119,33 +80,26 @@ export function changeEditor(context) {
     if (!context.verticalStack || !context.popUp) return;
 
     const { popUp, sectionRow, sectionRowContainer, elements, config } = context;
-    const popUpClasses = popUp.classList;
-    const isCard = sectionRow?.tagName.toLowerCase() === 'hui-card';
     const isHAEditorModeActive = context.editor || context.detectedEditor;
+    const isInPreview = isCardBeingEdited(context);
+    const isCard = sectionRow?.tagName?.toLowerCase() === 'hui-card';
 
-    if (context.detectedEditor && !context.dialogClosedListenerAdded) {
-        window.addEventListener("dialog-closed", () => {
-            // Only apply editor cropping and store content if this card was never actively edited
-            // This prevents cropping/placeholder when closing more-info dialogs from the preview
-            if (!context.wasBeingEdited && !isCardBeingEdited(context)) {
-                if (elements?.popUpContainer) {
-                    elements.popUpContainer.classList.add('editor-cropped');
-                }
-                storePopUpContent(context);
-            }
-            // Reset flag to allow re-adding listener for future dialog closes
-            context.dialogClosedListenerAdded = false;
-        }, { once: true });
-        context.dialogClosedListenerAdded = true;
-    } else if (!context.detectedEditor && context.dialogClosedListenerAdded) {
-        context.dialogClosedListenerAdded = false;
+    // Generate unique instance ID for tracking newly created popups
+    context.bubbleInstanceId = context.bubbleInstanceId || Math.random().toString(36).slice(2, 15);
+
+    window.bubbleNewlyCreatedInstances = window.bubbleNewlyCreatedInstances || new Set();
+
+    const isNewlyCreated = window.bubbleNewlyCreatedInstances.has(context.bubbleInstanceId) ||
+                           (window.bubbleNewlyCreatedHashes?.has(config.hash) && isInPreview);
+
+    if (isNewlyCreated && isInPreview) {
+        window.bubbleNewlyCreatedInstances.add(context.bubbleInstanceId);
     }
 
-    const isPopUpEffectivelyOpened = popUpClasses.contains('is-popup-opened') && !popUpClasses.contains('editor');
-    if (!isPopUpEffectivelyOpened && isCard && sectionRowContainer) {
-        if (sectionRowContainer.classList.contains('card') && isHAEditorModeActive && sectionRowContainer.style.display === "none") {
+    // Make sure popup container is visible when entering editor mode from dashboard
+    if (isHAEditorModeActive && isCard && sectionRowContainer) {
+        if (sectionRowContainer.style.display === "none") {
             sectionRowContainer.style.display = '';
-            // Restore normal position in editor mode
             sectionRowContainer.style.position = '';
         }
     }
@@ -153,72 +107,57 @@ export function changeEditor(context) {
     if (isHAEditorModeActive) {
         if (!context.editorAccess) {
             toggleBodyScroll(false);
+            popUp.classList.remove('is-popup-opened');
+            popUp.classList.add('is-popup-closed', 'editor');
+            elements?.content?.classList.add('popup-content-in-editor-mode');
             
-            popUpClasses.remove('is-popup-opened');
-            popUpClasses.add('is-popup-closed', 'editor');
-
-            if (elements?.content) {
-                elements.content.classList.add('popup-content-in-editor-mode');
-            }
-
-            if (!context.detectedEditor && elements?.popUpContainer) {
-                elements.popUpContainer.classList.add('editor-cropped');
-            }
+            // Ensure popup is in the DOM when entering editor mode
+            appendPopup(context, true);
             
             context.editorAccess = true;
             onEditorChange(context);
         }
-        
-        // Handle content visibility based on detectedEditor state
-        // Use a persistent flag to remember if this card was being edited
-        // This prevents placeholder from appearing when dialogs temporarily change DOM state
-        if (isCardBeingEdited(context)) {
-            context.wasBeingEdited = true;
+
+        // Global listener to reset visibility states when editor dialog closes
+        if (!window.bubbleDialogListenerAdded) {
+            window.addEventListener("dialog-closed", () => {
+                setTimeout(() => {
+                    window.bubbleNewlyCreatedInstances?.clear();
+                    window.bubbleNewlyCreatedHashes?.clear();
+                    window.dispatchEvent(new Event('location-changed'));
+                }, 100);
+            }, { capture: true });
+            window.bubbleDialogListenerAdded = true;
+        }
+
+        // Show content only if in preview or newly created instance
+        if (isInPreview || isNewlyCreated) {
             restorePopUpContent(context);
-        } else if (!context.wasBeingEdited) {
-            // Only store content if this card was never actively edited in this session
+        } else {
             storePopUpContent(context);
         }
-    } else {
-        if (context.editorAccess) {
-            // Reset the "was being edited" flag when leaving editor mode
-            context.wasBeingEdited = false;
-            
-            if (elements?.popUpContainer) {
-                elements.popUpContainer.classList.remove('editor-cropped');
-            }
+    } else if (context.editorAccess) {
+        elements?.content?.classList.remove('popup-content-in-editor-mode');
+        restorePopUpContent(context);
 
-            if (elements?.content) {
-                elements.content.classList.remove('popup-content-in-editor-mode');
-            }
-            
-            // Restore content when leaving editor mode
-            restorePopUpContent(context);
-
-            if (context.observer) {
-                context.observer.disconnect();
-                context.observer = null;
-            }
-            
-            const currentHash = location.hash;
-            const popUpHash = config.hash ? (config.hash.startsWith('#') ? config.hash : '#' + config.hash) : '';
-
-            if (popUpHash && currentHash === popUpHash) {
-                // Pop-up should be open, remove editor class and show it
-                popUpClasses.remove('editor');
-                popUpClasses.remove('is-popup-closed');
-                popUpClasses.add('is-popup-opened');
-                toggleBodyScroll(true);
-            } else {
-                // Pop-up should be closed, remove from DOM without animation
-                // Keep editor class until after DOM removal to prevent animation
-                appendPopup(context, false);
-                hideContent(context, 0);
-                popUpClasses.remove('editor');
-            }
-            
-            context.editorAccess = false;
+        if (context.observer) {
+            context.observer.disconnect();
+            context.observer = null;
         }
+        
+        const popUpHash = config.hash ? (config.hash.startsWith('#') ? config.hash : '#' + config.hash) : '';
+
+        if (popUpHash && location.hash === popUpHash) {
+            popUp.classList.remove('editor', 'is-popup-closed');
+            popUp.classList.add('is-popup-opened');
+            toggleBodyScroll(true);
+        } else {
+            appendPopup(context, false);
+            hideContent(context, 0);
+            popUp.classList.remove('editor');
+        }
+        
+        context.editorAccess = false;
     }
 }
 
@@ -304,3 +243,4 @@ export function changeTriggered(context) {
         context.oldTriggerEntityState = triggerEntityState;        
     }
 }
+

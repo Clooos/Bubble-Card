@@ -265,13 +265,18 @@ export function changeIcon(context) {
 export function changeName(context, textScrolling = true) {
     const buttonType = context.config.button_type;
     const name = buttonType !== 'name' ? getName(context) : context.config.name;
-    if (name !== context.previousName && context.elements.name) {
+    
+    if (!context.elements.name) return;
+    
+    if (textScrolling) {
+        // Always call applyScrollingEffect, it handles its own optimization
+        // and can detect when element needs animation restart after reconnection
+        applyScrollingEffect(context, context.elements.name, name);
+    } else if (name !== context.previousName) {
         context.elements.name.innerText = name;
-        context.previousName = name;
-        if (textScrolling) {
-            applyScrollingEffect(context, context.elements.name, name);
-        }
     }
+    
+    context.previousName = name;
 }
 
 export function changeStatus(context) {

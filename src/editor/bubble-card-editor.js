@@ -42,6 +42,8 @@ class BubbleCardEditor extends LitElement {
     _previewCardHost = null;
     _previewCardScore = -Infinity;
     _cardContextListener = null;
+    // Stabilization for auto-rows calculation to prevent loops from micro layout changes
+    _lastMeasuredHeights = null;
 
     constructor() {
         super();
@@ -137,6 +139,7 @@ class BubbleCardEditor extends LitElement {
             requestAnimationFrame(() => {
                 try {
                     this._firstRowsComputation = true; // Bypass first-computation skip
+                    this._lastMeasuredHeights = null; // Reset to force fresh calculation
                     this._setupAutoRowsObserver();
                     const card = this._getBubbleCardFromPreview();
                     if (card) {
@@ -480,18 +483,31 @@ class BubbleCardEditor extends LitElement {
                     <p><b>The card layout options are deprecated, but still available for backwards compatibility.</b> Please use the new sub-button groups and layout options instead for better flexibility.</p>
                 </div>
             </div>
-            <ha-combo-box
-                label="${this._config.card_type === "pop-up" ? 'Header card layout' : 'Card layout'}"
-                .value="${this._config.card_layout || defaultLayout}"
-                .configValue="${"card_layout"}"
-                .items="${[
-                    { label: 'Normal (previous default)', value: 'normal' },
-                    { label: 'Large', value: 'large' },
-                    { label: 'Large with 2 sub-buttons rows', value: 'large-2-rows' },
-                    { label: 'Large with sub-buttons in a grid (Layout: min. 2 rows)', value: 'large-sub-buttons-grid' }
-                ]}"
-                @value-changed="${this._valueChanged}"
-            ></ha-combo-box>
+            <ha-form
+                .hass=${this.hass}
+                .data=${{ card_layout: this._config.card_layout || defaultLayout }}
+                .schema=${[{
+                    name: 'card_layout',
+                    selector: {
+                        select: {
+                            options: [
+                                { label: 'Normal (previous default)', value: 'normal' },
+                                { label: 'Large', value: 'large' },
+                                { label: 'Large with 2 sub-buttons rows', value: 'large-2-rows' },
+                                { label: 'Large with sub-buttons in a grid (Layout: min. 2 rows)', value: 'large-sub-buttons-grid' }
+                            ],
+                            mode: 'dropdown'
+                        }
+                    }
+                }]}
+                .computeLabel=${() => this._config.card_type === "pop-up" ? 'Header card layout' : 'Card layout'}
+                @value-changed=${(ev) => {
+                    this._valueChanged({
+                        target: { configValue: 'card_layout' },
+                        detail: { value: ev.detail.value.card_layout }
+                    });
+                }}
+            ></ha-form>
         `;
     }
 
@@ -673,16 +689,32 @@ class BubbleCardEditor extends LitElement {
                 </div>
             </ha-formfield>
             ${this._renderConditionalContent(context?.show_attribute, html`
-                <div class="ha-combo-box">
-                    <ha-combo-box
-                        label="Attribute to show"
-                        .value="${context?.attribute}"
-                        .configValue="${config + "attribute"}"
-                        .items="${attributeList}"
-                        .disabled="${nameButton && !isSubButton}"
-                        @value-changed="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { attribute: ev.detail.value }, array)}"
-                    ></ha-combo-box>
-                </div>
+                <ha-form
+                    .hass=${this.hass}
+                    .data=${{ attribute: context?.attribute }}
+                    .schema=${[{
+                        name: 'attribute',
+                        selector: {
+                            select: {
+                                options: attributeList,
+                                mode: 'dropdown'
+                            }
+                        }
+                    }]}
+                    .disabled=${nameButton && !isSubButton}
+                    .computeLabel=${() => 'Attribute to show'}
+                    @value-changed=${(ev) => {
+                        const value = ev.detail.value.attribute;
+                        if (!array) {
+                            this._valueChanged({
+                                target: { configValue: config + "attribute" },
+                                detail: { value }
+                            });
+                        } else {
+                            this._arrayValueChange(index, { attribute: value }, array);
+                        }
+                    }}
+                ></ha-form>
             `)}
             ${this._renderConditionalContent(showSelectUi, html`
                 <ha-formfield .label="Show arrow (Select entities only)">
@@ -755,16 +787,28 @@ class BubbleCardEditor extends LitElement {
             `;
         } else {
             return html`
-            <div class="ha-combo-box">
-                <ha-combo-box
-                    label="${label}"
-                    .value="${this['_' + configValue]}"
-                    .configValue="${configValue}"
-                    .items="${items}"
-                    .disabled="${disabled}"
-                    @value-changed="${this._valueChanged}"
-                ></ha-combo-box>
-            </div>
+                <ha-form
+                    .hass=${this.hass}
+                    .data=${{ [configValue]: this['_' + configValue] }}
+                    .schema=${[{
+                        name: configValue,
+                        selector: {
+                            select: {
+                                options: items,
+                                mode: 'dropdown'
+                            }
+                        }
+                    }]}
+                    .disabled=${disabled}
+                    .computeLabel=${() => label}
+                    @value-changed=${(ev) => {
+                        const value = ev.detail.value[configValue];
+                        this._valueChanged({
+                            target: { configValue },
+                            detail: { value }
+                        });
+                    }}
+                ></ha-form>
           `;
         }
     }
@@ -1924,11 +1968,33 @@ class BubbleCardEditor extends LitElement {
       const bottomMainButtons = bubbleCard.querySelector('.bubble-buttons-container.bottom-fixed');
       const mainSubButtons = bubbleCard.querySelector('.bubble-sub-button-container');
       const contentContainer = bubbleCard.querySelector('.bubble-content-container');
+
+      // Measure heights once to avoid multiple reflows
+      const bottomSubButtonsHeight = bottomSubButtons ? bottomSubButtons.getBoundingClientRect().height : 0;
+      const bottomMainButtonsHeight = bottomMainButtons ? bottomMainButtons.getBoundingClientRect().height : 0;
+      const mainSubButtonsHeight = mainSubButtons ? mainSubButtons.getBoundingClientRect().height : 0;
+
+      // Stabilization: ignore micro layout changes (< 2px) to prevent infinite loops
+      // caused by modules with dynamic JS expressions that trigger small reflows
+      const currentHeights = {
+        bottomSub: Math.round(bottomSubButtonsHeight),
+        bottomMain: Math.round(bottomMainButtonsHeight),
+        mainSub: Math.round(mainSubButtonsHeight)
+      };
+      if (this._lastMeasuredHeights) {
+        const threshold = 1;
+        const bottomSubDiff = Math.abs(currentHeights.bottomSub - this._lastMeasuredHeights.bottomSub);
+        const bottomMainDiff = Math.abs(currentHeights.bottomMain - this._lastMeasuredHeights.bottomMain);
+        const mainSubDiff = Math.abs(currentHeights.mainSub - this._lastMeasuredHeights.mainSub);
+        if (bottomSubDiff < threshold && bottomMainDiff < threshold && mainSubDiff < threshold) {
+          return { applied: false };
+        }
+      }
+      this._lastMeasuredHeights = currentHeights;
       
       // For calendar cards without bottom buttons, fix rows to 1 and prevent recalculation
       if (isCalendar) {
-        const hasBottomButtons = (bottomSubButtons && bottomSubButtons.getBoundingClientRect().height > 0) ||
-                                 (bottomMainButtons && bottomMainButtons.getBoundingClientRect().height > 0);
+        const hasBottomButtons = bottomSubButtonsHeight > 0 || bottomMainButtonsHeight > 0;
         if (!hasBottomButtons) {
           this._firstRowsComputation = true;
           // Ensure rows is set to 1 and prevent further recalculations
@@ -1955,8 +2021,8 @@ class BubbleCardEditor extends LitElement {
         });
       }
 
-      // Check if there are main sub-buttons
-      const hasMainSubButtons = mainSubButtons && mainSubButtons.getBoundingClientRect().height > 0;
+      // Check if there are main sub-buttons (use already measured height)
+      const hasMainSubButtons = mainSubButtonsHeight > 0;
 
       const hasBottomConfigured = (() => {
         const rawSubButton = this._config?.sub_button;
@@ -1965,9 +2031,6 @@ class BubbleCardEditor extends LitElement {
         const bottom = Array.isArray(rawSubButton.bottom) ? rawSubButton.bottom : [];
         return bottom.some((item) => !!item);
       })();
-
-      const bottomSubButtonsHeight = bottomSubButtons ? bottomSubButtons.getBoundingClientRect().height : 0;
-      const bottomMainButtonsHeight = bottomMainButtons ? bottomMainButtons.getBoundingClientRect().height : 0;
 
       let reservedFromBottom = bottomSubButtonsHeight + bottomMainButtonsHeight;
       if (reservedFromBottom <= 0 && hasBottomConfigured) {
@@ -1994,21 +2057,18 @@ class BubbleCardEditor extends LitElement {
       // Only count this if there are actual main sub-buttons present
       let reservedFromMain = 0;
       if (hasMainSubButtons) {
-        const mainRect = mainSubButtons.getBoundingClientRect();
-        if (mainRect.height > 0) {
-          // Main sub-buttons take space in the main content area
-          // We need to account for their height in the overall card height calculation
-          reservedFromMain = mainRect.height;
+        // Main sub-buttons take space in the main content area
+        // We need to account for their height in the overall card height calculation
+        reservedFromMain = mainSubButtonsHeight;
 
-          // Add padding based on the actual computed styles
-          const mainComputed = getComputedStyle(mainSubButtons);
-          const marginTop = parseFloat(mainComputed.marginTop) || 0;
-          const marginBottom = parseFloat(mainComputed.marginBottom) || 0;
-          const paddingTop = parseFloat(mainComputed.paddingTop) || 0;
-          const paddingBottom = parseFloat(mainComputed.paddingBottom) || 0;
+        // Add padding based on the actual computed styles
+        const mainComputed = getComputedStyle(mainSubButtons);
+        const marginTop = parseFloat(mainComputed.marginTop) || 0;
+        const marginBottom = parseFloat(mainComputed.marginBottom) || 0;
+        const paddingTop = parseFloat(mainComputed.paddingTop) || 0;
+        const paddingBottom = parseFloat(mainComputed.paddingBottom) || 0;
 
-          reservedFromMain += marginTop + marginBottom + paddingTop + paddingBottom;
-        }
+        reservedFromMain += marginTop + marginBottom + paddingTop + paddingBottom;
       }
 
       // Ensure reservedFromMain doesn't go below overshoot value
@@ -2268,6 +2328,7 @@ class BubbleCardEditor extends LitElement {
     this._previewCardRoot = null;
     this._previewCardHost = null;
     this._previewCardScore = -Infinity;
+    this._lastMeasuredHeights = null;
   }
 }
 

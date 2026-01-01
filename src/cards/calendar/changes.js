@@ -108,7 +108,6 @@ export async function changeEvents(context) {
 
       const eventText = event.summary || t("cards.calendar.busy");
       applyScrollingEffect(context, eventName, eventText);
-      eventName.innerHTML = eventText;
       eventNameWrapper.appendChild(eventName);
 
       const eventColor = createElement('div', 'bubble-event-color');
@@ -123,10 +122,7 @@ export async function changeEvents(context) {
 
       if (context.config.show_place === true && event.location !== null) {
         const eventPlace = createElement('div', 'bubble-event-place');
-        eventPlace.innerHTML = event.location;
-
         applyScrollingEffect(context, eventPlace, event.location);
-
         eventNameWrapper.appendChild(eventPlace);
       }
 

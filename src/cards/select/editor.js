@@ -30,15 +30,26 @@ export function renderSelectEditor(editor){
                 @value-changed=${editor._valueChanged}
             ></ha-form>
             ${hasSelectAttributeList ? html`
-                <div class="ha-combo-box">
-                    <ha-combo-box
-                        label="Select menu (from attributes)"
-                        .value="${editor._config.select_attribute}"
-                        .items="${selectableAttributeList}"
-                        .configValue="${"select_attribute"}"
-                        @value-changed="${editor._valueChanged}"
-                    ></ha-combo-box>
-                </div>
+                <ha-form
+                    .hass=${editor.hass}
+                    .data=${{ select_attribute: editor._config.select_attribute }}
+                    .schema=${[{
+                        name: 'select_attribute',
+                        selector: {
+                            select: {
+                                options: selectableAttributeList,
+                                mode: 'dropdown'
+                            }
+                        }
+                    }]}
+                    .computeLabel=${() => 'Select menu (from attributes)'}
+                    @value-changed=${(ev) => {
+                        editor._valueChanged({
+                            target: { configValue: 'select_attribute' },
+                            detail: { value: ev.detail.value.select_attribute }
+                        });
+                    }}
+                ></ha-form>
             ` : ''}
             <ha-expansion-panel outlined>
                 <h4 slot="header">

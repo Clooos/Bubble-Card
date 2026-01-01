@@ -128,14 +128,21 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                   .computeLabel=${editor._computeLabelCallback}
                   @value-changed=${(ev) => updateValueFn(ev.detail.value)}
                 ></ha-form>
-                <ha-combo-box
-                  label="Sub-button type"
-                  .value="${button.sub_button_type ?? 'default'}"
-                  .items="${typeItems}"
-                  item-label-path="label"
-                  item-value-path="value"
-                  @value-changed="${(ev) => updateValueFn({ sub_button_type: ev.detail.value })}"
-                ></ha-combo-box>
+                <ha-form
+                  .hass=${editor.hass}
+                  .data=${{ sub_button_type: button.sub_button_type ?? 'default' }}
+                  .schema=${[{
+                      name: 'sub_button_type',
+                      selector: {
+                          select: {
+                              options: typeItems,
+                              mode: 'dropdown'
+                          }
+                      }
+                  }]}
+                  .computeLabel=${() => 'Sub-button type'}
+                  @value-changed=${(ev) => updateValueFn({ sub_button_type: ev.detail.value.sub_button_type })}
+                ></ha-form>
                 ${button.sub_button_type === 'slider' ? html`
                   <div class="bubble-info">
                     <h4 class="bubble-section-title">
@@ -148,14 +155,21 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                   </div>
                 ` : ''}
                 ${(button.sub_button_type === 'select' || (!button.sub_button_type && isSelect)) && hasSelectAttributeList ? html`
-                  <div class="ha-combo-box">
-                    <ha-combo-box
-                      label="Optional - Select menu (from attributes)"
-                      .value="${button.select_attribute}"
-                      .items="${selectableAttributeList}"
-                      @value-changed="${(ev) => updateValueFn({ select_attribute: ev.detail.value })}"
-                    ></ha-combo-box>
-                  </div>
+                  <ha-form
+                    .hass=${editor.hass}
+                    .data=${{ select_attribute: button.select_attribute }}
+                    .schema=${[{
+                        name: 'select_attribute',
+                        selector: {
+                            select: {
+                                options: selectableAttributeList,
+                                mode: 'dropdown'
+                            }
+                        }
+                    }]}
+                    .computeLabel=${() => 'Optional - Select menu (from attributes)'}
+                    @value-changed=${(ev) => updateValueFn({ select_attribute: ev.detail.value.select_attribute })}
+                  ></ha-form>
                 ` : ''}
                 <div class="ha-textfield">
                   <ha-textfield
@@ -429,47 +443,46 @@ export function createMoveHandler(editor, targetArray, index, onValueChanged) {
   };
 }
 
+// Convert individual buttons to a group, preserving existing groups
+export function convertIndividualButtonsToGroup(arr) {
+  const individuals = arr.filter(item => item && !Array.isArray(item.group));
+  if (individuals.length === 0) return [...arr];
+  
+  const groups = arr.filter(item => item && Array.isArray(item.group));
+  return [
+    { name: 'Automatically grouped', buttons_layout: 'inline', group: individuals },
+    ...groups
+  ];
+}
+
 // Common paste operation
 export function createPasteHandler(editor, targetArray, onValueChanged, getClipboardFn) {
   return () => {
     const stored = editor._clipboardButton || (getClipboardFn ? getClipboardFn() : null);
     if (!stored) return;
+    
     editor._clipboardButton = stored;
     const clone = JSON.parse(JSON.stringify(stored));
     const sectionKey = findSectionKey(editor, targetArray);
-    if (!sectionKey) {
-      // Fallback for non-section arrays
-      const targetArrayCopy = [...targetArray];
-      if (Array.isArray(clone.buttons) || Array.isArray(clone.group)) {
-        const buttons = clone.buttons || clone.group || [];
-        targetArrayCopy.push({ 
-          name: clone.name, 
-          buttons_layout: clone.display || clone.buttons_layout || 'inline', 
-          justify_content: clone.justify_content, 
-          group: buttons 
-        });
-      } else {
-        targetArrayCopy.push(clone);
-      }
-      if (onValueChanged) onValueChanged(editor);
-      editor.requestUpdate();
-      return;
-    }
-    // Use section update helper
-    const targetArr = editor._config.sub_button[sectionKey];
-    const targetArrayCopy = [...targetArr];
-    if (Array.isArray(clone.buttons) || Array.isArray(clone.group)) {
-      const buttons = clone.buttons || clone.group || [];
-      targetArrayCopy.push({ 
+    const isPastingGroup = Array.isArray(clone.buttons) || Array.isArray(clone.group);
+    
+    const sourceArr = sectionKey ? editor._config.sub_button[sectionKey] : targetArray;
+    let result = isPastingGroup ? convertIndividualButtonsToGroup(sourceArr) : [...sourceArr];
+    
+    if (isPastingGroup) {
+      result.push({ 
         name: clone.name, 
         buttons_layout: clone.display || clone.buttons_layout || 'inline', 
         justify_content: clone.justify_content, 
-        group: buttons 
+        group: clone.buttons || clone.group || []
       });
     } else {
-      targetArrayCopy.push(clone);
+      result.push(clone);
     }
-    updateSubButtonProperty(editor, sectionKey, () => targetArrayCopy);
+    
+    if (sectionKey) {
+      updateSubButtonProperty(editor, sectionKey, () => result);
+    }
     if (onValueChanged) onValueChanged(editor);
     editor.requestUpdate();
   };
@@ -488,12 +501,25 @@ export function createGroupButtonPasteHandler(editor, targetArray, groupIndex, o
     const targetArrayCopy = [...targetArr];
     const groupCopy = { ...targetArrayCopy[groupIndex] };
     if (!Array.isArray(groupCopy.group)) groupCopy.group = [];
+    
+    // Check if group has non-fill alignment in bottom section
+    const hasNonFillAlignment = sectionKey === 'bottom' && groupCopy.justify_content && groupCopy.justify_content !== 'fill';
+    
     const isGroup = Array.isArray(stored?.buttons) || Array.isArray(stored?.group);
     if (isGroup) {
-      const copy = JSON.parse(JSON.stringify(stored.buttons || stored.group || []));
+      let copy = JSON.parse(JSON.stringify(stored.buttons || stored.group || []));
+      // Apply fill_width: false to pasted buttons if group has non-fill alignment
+      if (hasNonFillAlignment) {
+        copy = copy.map(btn => btn ? { ...btn, fill_width: false } : btn);
+      }
       groupCopy.group = [...groupCopy.group, ...copy];
     } else {
-      groupCopy.group = [...groupCopy.group, JSON.parse(JSON.stringify(stored))];
+      let copy = JSON.parse(JSON.stringify(stored));
+      // Apply fill_width: false to pasted button if group has non-fill alignment
+      if (hasNonFillAlignment && copy) {
+        copy.fill_width = false;
+      }
+      groupCopy.group = [...groupCopy.group, copy];
     }
     targetArrayCopy[groupIndex] = groupCopy;
     updateSubButtonProperty(editor, sectionKey, () => targetArrayCopy);

@@ -73,7 +73,9 @@ function updateUIForVerticalStack(editor, isInVerticalStack) {
 
 function createPopUpConfig(editor, originalConfig) {
     try {
-        const isInVerticalStack = !window.popUpError;
+        // Check if already in a vertical-stack by verifying window.popUpError is explicitly false
+        // If undefined or true, treat as not in vertical-stack
+        const isInVerticalStack = window.popUpError === false;
         
         // Get form value
         const includeExample = editor.shadowRoot.querySelector("#include-example")?.checked || false;
@@ -141,6 +143,10 @@ function createPopUpConfig(editor, originalConfig) {
                     }
                 ]
             };
+
+            // Mark as newly created to keep it visible in preview during editing
+            window.bubbleNewlyCreatedHashes = window.bubbleNewlyCreatedHashes || new Set();
+            window.bubbleNewlyCreatedHashes.add(hashValue);
         }
         
         fireEvent(editor, "config-changed", { config: editor._config });
@@ -158,16 +164,19 @@ export function renderPopUpEditor(editor) {
     let button_action = editor._config.button_action || '';
 
     // Initial configuration screen for pop-up creation
-    if (Object.keys(editor._config).length === 2 &&
-        editor._config.card_type === 'pop-up') {
+    // A new pop-up is detected when card_type is 'pop-up' and hash is not defined
+    // This is more robust than checking the number of keys since HA may add default properties
+    const isNewPopUp = editor._config.card_type === 'pop-up' && !editor._config.hash;
+    if (isNewPopUp) {
 
         const originalConfig = { ...editor._config };
 
         let isInVerticalStack = false;
 
         // Use setTimeout to correctly check if we're in a vertical stack
+        // Only consider it in a vertical-stack if window.popUpError is explicitly false
         setTimeout(() => {
-            isInVerticalStack = !window.popUpError;
+            isInVerticalStack = window.popUpError === false;
             updateUIForVerticalStack(editor, isInVerticalStack);
         }, 0);
 

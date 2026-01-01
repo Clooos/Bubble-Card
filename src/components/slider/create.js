@@ -285,6 +285,8 @@ export function createSliderStructure(context, config = {}) {
   let sliderRectCache = null;
   let hasPrimaryAxisIntent = false;
   let touchLockActive = false;
+  let dragStartTime = 0; // Timestamp when drag was initiated
+  const cancelGracePeriod = 150; // ms to ignore pointercancel after drag start (iOS workaround)
 
   function getSliderRect() {
     if (!sliderRectCache) {
@@ -400,18 +402,40 @@ export function createSliderStructure(context, config = {}) {
 
   function detachPointerListeners() {
     options.targetElement.removeEventListener('pointermove', onPointerMove, listenerOptions);
+    options.targetElement.removeEventListener('touchmove', onPointerMove, listenerOptions);
+    options.targetElement.removeEventListener('touchend', onPointerUp, listenerOptions);
     window.removeEventListener('pointermove', onPointerMove, listenerOptions);
     window.removeEventListener('pointerup', onPointerUp, listenerOptions);
+    window.removeEventListener('pointercancel', onPointerCancel, listenerOptions);
     window.removeEventListener('touchmove', onPointerMove, listenerOptions);
     window.removeEventListener('touchend', onPointerUp, listenerOptions);
+    window.removeEventListener('touchcancel', onPointerCancel, listenerOptions);
+    window.removeEventListener('blur', onPointerCancel);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+  }
+
+  // Handle page visibility change (e.g., user switches to another app)
+  function onVisibilityChange() {
+    if (document.hidden && context.dragging) {
+      onPointerCancel();
+    }
   }
 
   function attachPointerListeners() {
+    // Listen on targetElement for more reliable event capture on iOS
     options.targetElement.addEventListener('pointermove', onPointerMove, listenerOptions);
+    options.targetElement.addEventListener('touchmove', onPointerMove, listenerOptions);
+    options.targetElement.addEventListener('touchend', onPointerUp, listenerOptions);
+    // Also listen on window to catch events when finger moves outside element
     window.addEventListener('pointermove', onPointerMove, listenerOptions);
     window.addEventListener('pointerup', onPointerUp, listenerOptions);
+    window.addEventListener('pointercancel', onPointerCancel, listenerOptions);
     window.addEventListener('touchmove', onPointerMove, listenerOptions);
     window.addEventListener('touchend', onPointerUp, listenerOptions);
+    window.addEventListener('touchcancel', onPointerCancel, listenerOptions);
+    // Safety: cancel slider if browser loses focus or visibility changes
+    window.addEventListener('blur', onPointerCancel);
+    document.addEventListener('visibilitychange', onVisibilityChange);
   }
 
   // Detect if user intends to scroll instead of using slider
@@ -519,6 +543,54 @@ export function createSliderStructure(context, config = {}) {
     const offset = moveCoordPage - initialPrimaryTouch;
     const initialSliderCoord = isVerticalFill ? initialSliderY : initialSliderX;
     return initialSliderCoord + offset;
+  }
+
+  // Handle cancelled touch/pointer events (e.g., when browser loses focus or touch is interrupted)
+  function onPointerCancel(e) {
+    // Skip if not currently dragging
+    if (!context.dragging) return;
+    
+    // On iOS, pointercancel can fire spuriously right after drag starts if the system
+    // initially interpreted the gesture as a potential scroll. Ignore cancels during
+    // the grace period to avoid resetting the slider unexpectedly.
+    const timeSinceDragStart = Date.now() - dragStartTime;
+    if (timeSinceDragStart < cancelGracePeriod) {
+      return;
+    }
+    
+    releasePointerCaptureSafely(e);
+    
+    if (draggingTimeout) {
+      clearTimeout(draggingTimeout);
+    }
+
+    options.targetElement.classList.remove('is-dragging');
+    detachPointerListeners();
+    resetGestureIntent();
+    resetSliderRectCache();
+    unlockTouchActions();
+
+    // Reset to current entity value without updating the entity
+    const currentPercentage = calculateVisualPercentage(calculateInitialPercentage());
+    
+    if (isColorMode && context.elements.colorCursor) {
+      setColorCursorPosition?.(currentPercentage);
+      if (typeof context.updateColorCursorIndicator === 'function') {
+        context.updateColorCursorIndicator(currentPercentage);
+      }
+    } else {
+      setRangeFillTransform(context, currentPercentage);
+    }
+
+    if (context._shouldDisplaySliderValue && context.elements.rangeValue) {
+      context.elements.rangeValue.textContent = formatDisplayValueFromEntity(context);
+      if (options.holdToSlide && !context.config.tap_to_slide && !options.persistentValueDisplay) {
+        context.elements.rangeValue.classList.remove('is-visible');
+      }
+    }
+
+    context.dragging = false;
+    window.isScrolling = false;
   }
 
   function onPointerUp(e) {
@@ -639,9 +711,13 @@ export function createSliderStructure(context, config = {}) {
 
     context.dragging = true;
     window.isScrolling = true;
+    dragStartTime = Date.now(); // Record when drag started for iOS cancel grace period
     initialTouchX = getEventPageX(e);
     initialTouchY = getEventPageY(e);
     resetGestureIntent();
+    // Mark primary axis intent as confirmed since drag is now initiated
+    // This prevents detectScrollIntent from aborting the drag due to secondary axis jitter
+    hasPrimaryAxisIntent = true;
     resetSliderRectCache();
 
     let rangedPercentage = 0;
@@ -738,7 +814,8 @@ export function createSliderStructure(context, config = {}) {
       clearTimeout(longPressTimer);
       clearPreDragHandlers();
       if (context.card && context.card.classList.contains('is-unavailable')) return;
-      lockTouchActions();
+      // Do not lock touch actions here: on iOS this can block scrolling and trigger
+      // pointercancel even if the user intended to scroll. Lock only once drag is initiated.
 
       initialTouchX = getEventPageX(e);
       initialTouchY = getEventPageY(e);
@@ -751,7 +828,10 @@ export function createSliderStructure(context, config = {}) {
         const initialSecondary = isVerticalFill ? initialTouchX : initialTouchY;
         const deltaPrimary = Math.abs(currentPrimary - initialPrimary);
         const deltaSecondary = Math.abs(currentSecondary - initialSecondary);
-        if (deltaSecondary > scrollThreshold && deltaPrimary < primaryAxisIntentThreshold) {
+        // Allow some primary-axis jitter while scrolling (notably on iOS)
+        // Treat as scroll when secondary axis movement clearly dominates
+        const secondaryDominates = deltaSecondary > (deltaPrimary + primaryAxisIntentThreshold);
+        if (deltaSecondary > scrollThreshold && secondaryDominates) {
           isScrollIntent = true;
           cancelPreDrag();
           return;

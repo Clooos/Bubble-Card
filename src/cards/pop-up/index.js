@@ -11,6 +11,7 @@ export async function handlePopUp(context) {
         }
 
         prepareStructure(context);
+        if (!context.popUp) return;
         createHeader(context);
         createStructure(context);
 

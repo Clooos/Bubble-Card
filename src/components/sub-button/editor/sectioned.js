@@ -8,7 +8,8 @@ import {
   createMoveHandler, 
   createPasteHandler,
   createGroupButtonPasteHandler,
-  getPasteButtonText
+  getPasteButtonText,
+  convertIndividualButtonsToGroup
 } from './utils.js';
 import { loadSubButtonClipboard, saveSubButtonClipboard } from './clipboard.js';
 import { ensureNewSubButtonsSchemaObject, convertOldToNewSubButtons, isNewSubButtonsSchema } from '../utils.js';
@@ -331,7 +332,7 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
                   if (sectionKey === 'bottom') {
                     schema.push({
                       name: 'justify_content',
-                      label: 'Button alignment',
+                      label: 'Buttons alignment',
                       selector: {
                         select: {
                           options: justifyContentOptions,
@@ -355,7 +356,7 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
                   <div class="bubble-info">
                     <h4 class="bubble-section-title">
                       <ha-icon icon="mdi:information-outline"></ha-icon>
-                      Button alignment locked by sub-button settings
+                      Buttons alignment locked by sub-button settings
                     </h4>
                     <div class="content">
                       <p>One or more sub-buttons explicitly enable "Fill available width". To change alignment, first disable "Fill available width" in those sub-buttons.</p>
@@ -434,10 +435,14 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
               </span>
             </button>
             <button class="icon-button" @click=${() => {
-              const newButton = { entity: editor._config.entity };
               updateGroupInSection(editor, sectionKey, groupIndex, (group) => {
                 const groupCopy = { ...group };
                 if (!Array.isArray(groupCopy.group)) groupCopy.group = [];
+                // If group has a non-fill alignment in bottom section, new button should have fill_width: false
+                const hasNonFillAlignment = sectionKey === 'bottom' && groupCopy.justify_content && groupCopy.justify_content !== 'fill';
+                const newButton = hasNonFillAlignment
+                  ? { entity: editor._config.entity, fill_width: false }
+                  : { entity: editor._config.entity };
                 groupCopy.group = [...groupCopy.group, newButton];
                 return groupCopy;
               }, subButtonsValueChanged);
@@ -452,9 +457,45 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
   `;
 }
 
-function makeSectionList(editor, sectionKey) {
+// Helper to check section state
+function getSectionState(editor, sectionKey) {
   const sectionedView = ensureNewSubButtonsSchemaObject(editor._config);
   const items = Array.isArray(sectionedView?.[sectionKey]) ? sectionedView[sectionKey] : [];
+  return {
+    items,
+    hasGroups: items.some(item => item && Array.isArray(item.group)),
+    hasIndividualButtons: items.some(item => item && !Array.isArray(item.group))
+  };
+}
+
+// Initialize and get dismiss state for groups info
+function getGroupsInfoDismissState(editor, sectionKey) {
+  const dismissKey = `bubble-card-groups-info-dismissed-${sectionKey}`;
+  if (!editor._groupsInfoDismissed) editor._groupsInfoDismissed = {};
+  if (editor._groupsInfoDismissed[sectionKey] === undefined) {
+    try { editor._groupsInfoDismissed[sectionKey] = localStorage.getItem(dismissKey) === 'true'; } 
+    catch (_) { editor._groupsInfoDismissed[sectionKey] = false; }
+  }
+  return {
+    isDismissed: editor._groupsInfoDismissed[sectionKey],
+    dismiss: () => {
+      editor._groupsInfoDismissed[sectionKey] = true;
+      try { localStorage.setItem(dismissKey, 'true'); } catch (_) {}
+      editor.requestUpdate();
+    }
+  };
+}
+
+function makeSectionList(editor, sectionKey) {
+  let { items, hasGroups, hasIndividualButtons } = getSectionState(editor, sectionKey);
+  
+  // Auto-migrate mixed configurations on editor load
+  if (hasGroups && hasIndividualButtons) {
+    items = convertIndividualButtonsToGroup(items);
+    updateSectionArray(editor, sectionKey, () => items, subButtonsValueChanged);
+  }
+  
+  const { isDismissed, dismiss } = getGroupsInfoDismissState(editor, sectionKey);
 
   const addButton = () => {
     updateSectionArray(editor, sectionKey, (arr) => [...arr, { entity: editor._config.entity }], subButtonsValueChanged);
@@ -462,13 +503,29 @@ function makeSectionList(editor, sectionKey) {
 
   const addGroup = () => {
     updateSectionArray(editor, sectionKey, (arr) => {
-      const arrCopy = [...arr];
-      arrCopy.push({ name: `Group ${(arrCopy.filter(i => i && Array.isArray(i.group)).length + 1)}`, buttons_layout: 'inline', group: [] });
-      return arrCopy;
+      const converted = convertIndividualButtonsToGroup(arr);
+      const groupCount = converted.filter(i => i && Array.isArray(i.group)).length;
+      return [...converted, { name: `Group ${groupCount + 1}`, buttons_layout: 'inline', group: [] }];
     }, subButtonsValueChanged);
   };
 
   return html`
+    ${hasGroups && !isDismissed ? html`
+      <div class="bubble-info">
+        <h4 class="bubble-section-title">
+          <ha-icon icon="mdi:information-outline"></ha-icon>
+          Groups mode
+          <div class="bubble-info-dismiss bubble-badge" @click=${dismiss} title="Dismiss" 
+            style="display: inline-flex; align-items: center; position: absolute; right: 16px; padding: 0 8px; cursor: pointer;">
+            <ha-icon icon="mdi:close" style="margin: 0;"></ha-icon>
+            Dismiss
+          </div>
+        </h4>
+        <div class="content">
+          <p>You are now in <b>groups mode</b>. All sub-buttons must be inside a group to ensure consistent ordering. You can rename, reorder, or delete groups as needed.</p>
+        </div>
+      </div>
+    ` : ''}
     ${items.map((item, index) => {
       if (!item) return null;
       // Group
@@ -520,25 +577,34 @@ function makeSectionList(editor, sectionKey) {
           </button>
         `;
       })()}
-      <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
-        <button slot="trigger" class="icon-button add-menu-trigger">
-          <ha-icon icon="mdi:plus"></ha-icon>
-          Add
-        </button>
-        <mwc-list-item graphic="icon" @click=${() => { addButton(); }}>
-          <ha-icon icon="mdi:shape-square-rounded-plus" slot="graphic"></ha-icon>
-          Add sub-button
-        </mwc-list-item>
-        <mwc-list-item graphic="icon" @click=${() => { addGroup(); }}>
-          <ha-icon icon="mdi:format-list-group-plus" slot="graphic"></ha-icon>
+      ${hasGroups ? html`
+        <button class="icon-button" @click=${() => { addGroup(); }}>
+          <ha-icon icon="mdi:format-list-group-plus"></ha-icon>
           Add group
-        </mwc-list-item>
-      </ha-button-menu>
+        </button>
+      ` : html`
+        <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
+          <button slot="trigger" class="icon-button add-menu-trigger">
+            <ha-icon icon="mdi:plus"></ha-icon>
+            Add
+          </button>
+          <mwc-list-item graphic="icon" @click=${() => { addButton(); }}>
+            <ha-icon icon="mdi:shape-square-rounded-plus" slot="graphic"></ha-icon>
+            Add sub-button
+          </mwc-list-item>
+          <mwc-list-item graphic="icon" @click=${() => { addGroup(); }}>
+            <ha-icon icon="mdi:format-list-group-plus" slot="graphic"></ha-icon>
+            Add group
+          </mwc-list-item>
+        </ha-button-menu>
+      `}
     </div>
   `;
 }
 
 function makeLayoutForm(editor, sectionKey) {
+  if (!getSectionState(editor, sectionKey).hasGroups) return '';
+  
   const layoutKey = `${sectionKey}_layout`;
   const layoutValue = editor._config?.sub_button?.[layoutKey] ?? 'inline';
   
@@ -678,7 +744,11 @@ export function makeSectionedSubButtonsPanel(editor) {
               Rows configuration detected
             </h4>
             <div class="content">
-              <p>The card height (rows) is explicitly set in your configuration. This will prevent automatic row adjustments when sub-buttons are added (for example, when adding bottom sub-buttons). To enable automatic row calculation, remove the <code>rows</code> or <code>grid_options.rows</code> setting from the editor or from your YAML configuration.</p>
+              <p>The card height (rows) is explicitly set in your configuration. This will prevent automatic row adjustments when sub-buttons are added (for example, when adding bottom sub-buttons). Click the button below to remove the override and let Bubble Card auto-calculate the rows.</p>
+              <button class="icon-button" @click="${editor._removeRowsOverrideAndRecalculate}">
+                <ha-icon icon="mdi:autorenew"></ha-icon>
+                Remove override and auto-calculate
+              </button>
             </div>
           </div>
         ` : ''}
@@ -689,16 +759,29 @@ export function makeSectionedSubButtonsPanel(editor) {
               Card specific buttons
             </h4>
             <div class="content">
-              <ha-combo-box
-                  label="Main buttons position"
-                  .value="${mainButtonsPosition}"
-                  .configValue="${"main_buttons_position"}"
-                  .items="${[
-                      { label: 'Default', value: 'default' },
-                      { label: 'Bottom (fixed)', value: 'bottom' }
-                  ]}"
-                  @value-changed="${editor._valueChanged}"
-              ></ha-combo-box>
+              <ha-form
+                  .hass=${editor.hass}
+                  .data=${{ main_buttons_position: mainButtonsPosition }}
+                  .schema=${[{
+                      name: 'main_buttons_position',
+                      selector: {
+                          select: {
+                              options: [
+                                  { label: 'Default', value: 'default' },
+                                  { label: 'Bottom (fixed)', value: 'bottom' }
+                              ],
+                              mode: 'dropdown'
+                          }
+                      }
+                  }]}
+                  .computeLabel=${() => 'Main buttons position'}
+                  @value-changed=${(ev) => {
+                      editor._valueChanged({
+                          target: { configValue: 'main_buttons_position' },
+                          detail: { value: ev.detail.value.main_buttons_position }
+                      });
+                  }}
+              ></ha-form>
               ${editor._renderConditionalContent(isMainButtonsBottom, html`
                   <ha-formfield .label="Full width action buttons">
                       <ha-switch
@@ -712,18 +795,31 @@ export function makeSectionedSubButtonsPanel(editor) {
                       </div>
                   </ha-formfield>
                   ${editor._renderConditionalContent(!mainButtonsFullWidth, html`
-                      <ha-combo-box
-                          label="Main buttons alignment"
-                          .value="${mainButtonsAlignment}"
-                          .configValue="${"main_buttons_alignment"}"
-                          .items="${[
-                              { label: 'Right (default)', value: 'end' },
-                              { label: 'Center', value: 'center' },
-                              { label: 'Left', value: 'start' },
-                              { label: 'Space between', value: 'space-between' }
-                          ]}"
-                          @value-changed="${editor._valueChanged}"
-                      ></ha-combo-box>
+                      <ha-form
+                          .hass=${editor.hass}
+                          .data=${{ main_buttons_alignment: mainButtonsAlignment }}
+                          .schema=${[{
+                              name: 'main_buttons_alignment',
+                              selector: {
+                                  select: {
+                                      options: [
+                                          { label: 'Right (default)', value: 'end' },
+                                          { label: 'Center', value: 'center' },
+                                          { label: 'Left', value: 'start' },
+                                          { label: 'Space between', value: 'space-between' }
+                                      ],
+                                      mode: 'dropdown'
+                                  }
+                              }
+                          }]}
+                          .computeLabel=${() => 'Main buttons alignment'}
+                          @value-changed=${(ev) => {
+                              editor._valueChanged({
+                                  target: { configValue: 'main_buttons_alignment' },
+                                  detail: { value: ev.detail.value.main_buttons_alignment }
+                              });
+                          }}
+                      ></ha-form>
                   `)}
               `)}
             </div>
