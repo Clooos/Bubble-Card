@@ -55,6 +55,25 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
 
   const isBottomSection = typeof path === 'string' && path.startsWith('sub_button.bottom');
   const effectiveFillWidth = (button.fill_width == null) ? (isBottomSection ? true : false) : button.fill_width;
+  
+  // Check if button is in a group with Right/Left/Center alignment
+  let hasNonFillAlignment = false;
+  if (typeof path === 'string' && path.includes('.group')) {
+    // Parse path to extract section and group index: sub_button.bottom.0.group or sub_button.main.0.group
+    const pathMatch = path.match(/^sub_button\.(main|bottom)\.(\d+)\.group$/);
+    if (pathMatch) {
+      const [, sectionKey, groupIndex] = pathMatch;
+      const sectionedView = editor._config.sub_button;
+      if (sectionedView && sectionedView[sectionKey]) {
+        const group = sectionedView[sectionKey][parseInt(groupIndex, 10)];
+        if (group && group.justify_content) {
+          const alignment = group.justify_content.toLowerCase();
+          // Check if alignment is Right (end), Left (start), or Center
+          hasNonFillAlignment = ['end', 'start', 'center'].includes(alignment);
+        }
+      }
+    }
+  }
 
   const canMoveLeft = arrayLength !== null ? index > 0 : true;
   const canMoveRight = arrayLength !== null ? index < arrayLength - 1 : true;
@@ -213,7 +232,8 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                     computeLabel: editor._computeLabelCallback,
                     onFormChange: (ev) => updateValueFn(ev.detail.value),
                     onToggleChange: (key, value) => updateValueFn({ [key]: value }),
-                    isReadOnly
+                    isReadOnly,
+                    forceValuePositionRight: !!(button.always_visible && button.show_button_info)
                   })}
                 `)}
               </div>
@@ -287,61 +307,66 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
             </h4>
             <div class="content">
               ${getLazyLoadedPanelContent(editor, layoutPanelKey, !!editor._expandedPanelStates[layoutPanelKey], () => html`
-                <ha-form
-                  .hass=${editor.hass}
-                  .data=${{ ...button, ...(isBottomSection ? { fill_width: effectiveFillWidth } : {}) }}
-                  .schema=${[
-                    ...(isBottomSection
-                      ? [{
-                          name: "fill_width",
-                          label: "Fill available width",
-                          selector: { boolean: {} }
-                        }]
-                      : []
-                    ),
-                    ...(button.sub_button_type === 'slider' ? [{
-                      name: "always_visible",
-                      label: "Always show slider",
-                      selector: { boolean: {} }
-                    }] : []),
-                    {
-                      name: "width",
-                      label: isBottomSection ? "Custom button width (%)" : "Custom button width (px)",
-                      selector: { 
-                        number: { 
-                          min: isBottomSection 
-                            ? 0 
-                            : (button.sub_button_type === 'slider' && button.always_visible ? 68 : 36), 
-                          max: isBottomSection ? 100 : 600, 
-                          mode: "box" 
-                        } 
-                      },
-                      disabled: effectiveFillWidth === true
-                    },
-                    {
-                      name: "custom_height",
-                      label: "Custom button height (px)",
-                      selector: { number: { min: 20, max: 600, mode: "box" } }
-                    },
-                    ...(button.sub_button_type !== 'slider' || !button.always_visible ? [{
-                      name: "content_layout",
-                      label: "Content layout",
-                      selector: { 
-                        select: {
-                          options: [
-                            { value: "icon-left", label: "Icon on left (default)" },
-                            { value: "icon-top", label: "Icon on top" },
-                            { value: "icon-bottom", label: "Icon on bottom" },
-                            { value: "icon-right", label: "Icon on right" }
-                          ],
-                          mode: "dropdown"
-                        }
-                      }
-                    }] : [])
-                  ]}   
-                  .computeLabel=${editor._computeLabelCallback}
-                  @value-changed=${(ev) => updateValueFn(ev.detail.value)}
-                ></ha-form>
+                ${isBottomSection ? html`
+                  <ha-formfield label="Fill available width">
+                    <ha-switch
+                      .checked=${effectiveFillWidth ?? true}
+                      @change=${(ev) => updateValueFn({ fill_width: ev.target.checked })}
+                    ></ha-switch>
+                  </ha-formfield>
+                ` : ''}
+                ${button.sub_button_type === 'slider' ? html`
+                  <ha-formfield label="Always show slider">
+                    <ha-switch
+                      .checked=${button.always_visible ?? false}
+                      @change=${(ev) => updateValueFn({ always_visible: ev.target.checked })}
+                    ></ha-switch>
+                  </ha-formfield>
+                ` : ''}
+                ${button.sub_button_type === 'slider' && button.always_visible ? html`
+                  <ha-formfield label="Show button info (Icon, name, state...)">
+                    <ha-switch
+                      .checked=${button.show_button_info ?? false}
+                      @change=${(ev) => updateValueFn({ show_button_info: ev.target.checked })}
+                    ></ha-switch>
+                  </ha-formfield>
+                ` : ''}
+                <ha-textfield
+                  label="${(isBottomSection && !hasNonFillAlignment) ? 'Custom button width (%)' : 'Custom button width (px)'}"
+                  type="number"
+                  min="${(isBottomSection && !hasNonFillAlignment) ? 0 : (button.sub_button_type === 'slider' && button.always_visible ? 68 : 36)}"
+                  max="${(isBottomSection && !hasNonFillAlignment) ? 100 : 600}"
+                  .value="${button.width ?? ''}"
+                  .disabled=${effectiveFillWidth === true}
+                  @input="${(ev) => {
+                    const value = ev.target.value;
+                    updateValueFn({ width: value === '' ? undefined : Number(value) });
+                  }}"
+                ></ha-textfield>
+                <ha-textfield
+                  label="Custom button height (px)"
+                  type="number"
+                  min="20"
+                  max="600"
+                  .value="${button.custom_height ?? ''}"
+                  @input="${(ev) => {
+                    const value = ev.target.value;
+                    updateValueFn({ custom_height: value === '' ? undefined : Number(value) });
+                  }}"
+                ></ha-textfield>
+                ${button.sub_button_type !== 'slider' || !button.always_visible ? html`
+                  <ha-select
+                    label="Content layout"
+                    .value="${button.content_layout ?? 'icon-left'}"
+                    @selected="${(ev) => updateValueFn({ content_layout: ev.target.value })}"
+                    @closed="${(ev) => ev.stopPropagation()}"
+                  >
+                    <mwc-list-item value="icon-left">Icon on left (default)</mwc-list-item>
+                    <mwc-list-item value="icon-top">Icon on top</mwc-list-item>
+                    <mwc-list-item value="icon-bottom">Icon on bottom</mwc-list-item>
+                    <mwc-list-item value="icon-right">Icon on right</mwc-list-item>
+                  </ha-select>
+                ` : ''}
               `)}
             </div>
           </ha-expansion-panel>

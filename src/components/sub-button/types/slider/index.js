@@ -2,11 +2,15 @@ import { createElement, isEntityType } from "../../../../tools/utils.js";
 import { normalizeNameToClass } from "../../create.js";
 import { createSliderStructure } from "../../../slider/index.js";
 import { updateSlider } from "../../../slider/changes.js";
-import { updateBackground, setupActions, buildDisplayedState, updateElementVisibility, updateIconClasses, applySubButtonScrollingEffect } from "../../utils.js";
+import { updateIconClasses } from "../../../../tools/icon.js";
+import { updateBackground, setupActions, buildDisplayedState, updateElementVisibility, applySubButtonScrollingEffect } from "../../utils.js";
 
 // Build a normalized slider config from context and sub-button options
 // This avoids duplicating merge logic between initial creation and updates
 function buildSubSliderConfig(context, options) {
+  // Force slider_value_position to 'right' when show_button_info is enabled
+  const forceValuePositionRight = !!(options.alwaysVisible && options.subButton?.show_button_info);
+  
   return {
     entity: options.entity,
     ...(options.subButton?.min_value !== undefined ? { min_value: options.subButton.min_value } : {}),
@@ -18,7 +22,8 @@ function buildSubSliderConfig(context, options) {
     ...(options.subButton?.slider_live_update !== undefined ? { slider_live_update: options.subButton.slider_live_update } : {}),
     ...(options.subButton?.invert_slider_value !== undefined ? { invert_slider_value: options.subButton.invert_slider_value } : {}),
     ...(options.subButton?.slider_fill_orientation !== undefined ? { slider_fill_orientation: options.subButton.slider_fill_orientation } : {}),
-    ...(options.subButton?.slider_value_position !== undefined ? { slider_value_position: options.subButton.slider_value_position } : {}),
+    // Force 'right' position when show_button_info is enabled, otherwise use configured value
+    slider_value_position: forceValuePositionRight ? 'right' : (options.subButton?.slider_value_position ?? 'right'),
     ...(options.subButton?.use_accent_color !== undefined ? { use_accent_color: options.subButton.use_accent_color } : {}),
     ...(options.subButton?.allow_light_slider_to_0 !== undefined ? { allow_light_slider_to_0: options.subButton.allow_light_slider_to_0 } : {}),
     ...(options.subButton?.light_transition !== undefined ? { light_transition: options.subButton.light_transition } : {}),
@@ -275,6 +280,48 @@ export function ensureSliderForSubButton(context, element, options) {
     }
     element.sliderWrapper.classList.add('inline');
     element.sliderContainer.classList.add('inline');
+    
+    // Create info wrapper when always_visible is true
+    const showButtonInfo = !!options.subButton?.show_button_info;
+    if (element.sliderContext?.elements?.rangeValue) {
+      // Create or get info container (always present when always_visible is true)
+      if (!element.sliderInfoWrapper) {
+        element.sliderInfoWrapper = createElement('div', 'bubble-sub-button-info-wrapper');
+        element.sliderContainer.insertBefore(element.sliderInfoWrapper, element.sliderContainer.firstChild);
+      }
+      
+      // Move rangeValue into info wrapper
+      const rangeValue = element.sliderContext.elements.rangeValue;
+      if (rangeValue && rangeValue.parentNode !== element.sliderInfoWrapper) {
+        element.sliderInfoWrapper.appendChild(rangeValue);
+        rangeValue.classList.add('in-info-wrapper');
+      }
+      
+      // Always add class to ensure proper layout when wrapper is present
+      element.sliderContainer.classList.add('has-info-wrapper');
+      element.sliderWrapper.classList.add('has-info-wrapper');
+      
+      // Only move nameContainer and icon if show_button_info is enabled
+      if (showButtonInfo) {
+        // With row-reverse, add in this order to get visual: [icon] [nameContainer] [rangeValue]
+        // nameContainer (will be in the middle after reverse)
+        if (element.nameContainer && element.nameContainer.parentNode !== element.sliderInfoWrapper) {
+          element.sliderInfoWrapper.appendChild(element.nameContainer);
+        }
+        
+        element.sliderContainer.classList.add('with-button-info');
+        element.sliderWrapper.classList.add('with-button-info');
+      } else {
+        // Move nameContainer back to element if show_button_info is disabled
+        if (element.nameContainer && element.nameContainer.parentNode === element.sliderInfoWrapper) {
+          element.appendChild(element.nameContainer);
+        }
+        
+        element.sliderContainer.classList.remove('with-button-info');
+        element.sliderWrapper.classList.remove('with-button-info');
+      }
+    } 
+
     // Make inline slider fill width when requested by layout
     if (options.subButton?.fill_width) {
       element.sliderWrapper.classList.add('fill-width');
@@ -479,7 +526,10 @@ export function ensureSliderForSubButton(context, element, options) {
 export function handleSliderSubButton(context, element, options) {
   const displayedState = buildDisplayedState(options, context, element);
   
-  // Check if displayed state has changed to avoid unnecessary DOM updates
+  // Always update background (it handles its own optimization like changeIcon)
+  updateBackground(element, options);
+  
+  // Check if displayed state has changed to avoid unnecessary DOM updates for other elements
   const previousDisplayedState = element._previousDisplayedState;
   const previousState = element._previousState;
   const currentState = options.state?.state;
@@ -490,9 +540,8 @@ export function handleSliderSubButton(context, element, options) {
   element._previousDisplayedState = displayedState;
   element._previousState = currentState;
   
-  // Only update DOM if displayed state changed, entity state changed, or if this is the first update
+  // Only update other DOM elements if state changed or first update
   if (displayedStateChanged || entityStateChanged || previousDisplayedState === undefined) {
-    updateBackground(element, options);
     setupActions(element, options);
     updateElementVisibility(element, options, displayedState);
     if (element.nameContainer) {
@@ -539,6 +588,19 @@ export function handleSliderSubButton(context, element, options) {
   }
 
   ensureSliderForSubButton(context, element, options);
+  
+  // Move icon into info wrapper when show_button_info is enabled
+  const showButtonInfo = !!(options.alwaysVisible && options.subButton?.show_button_info);
+  if (showButtonInfo && element.icon && element.sliderInfoWrapper) {
+    if (element.icon.parentNode !== element.sliderInfoWrapper) {
+      element.sliderInfoWrapper.appendChild(element.icon);
+    }
+  } else if (element.icon && !showButtonInfo) {
+    // Move icon back to element
+    if (element.icon.parentNode !== element) {
+      element.appendChild(element.icon);
+    }
+  }
   if (element.sliderContext) {
     element.sliderContext._hass = context._hass;
     // updateSlider calls updateSliderStyle which handles RGB color transitions via CSS variables

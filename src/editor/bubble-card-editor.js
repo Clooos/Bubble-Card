@@ -615,20 +615,18 @@ class BubbleCardEditor extends LitElement {
                     <label class="mdc-label">Show icon</label> 
                 </div>
             </ha-formfield>
-            ${this._renderConditionalContent(!isSubButton, html`
-                <ha-formfield .label="Prioritize icon over entity picture">
-                    <ha-switch
-                        aria-label="Prioritize icon over entity picture"
-                        .checked=${context?.force_icon ?? false}
-                        .configValue="${config + "force_icon"}"
-                        .disabled="${nameButton}"
-                        @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { force_icon: ev.target.checked }, array)}"
-                    ></ha-switch>
-                    <div class="mdc-form-field">
-                        <label class="mdc-label">Prioritize icon over entity picture</label> 
-                    </div>
-                </ha-formfield>
-            `)}
+            <ha-formfield .label="Prioritize icon over entity picture">
+                <ha-switch
+                    aria-label="Prioritize icon over entity picture"
+                    .checked=${context?.force_icon ?? false}
+                    .configValue="${config + "force_icon"}"
+                    .disabled="${nameButton && !isSubButton}"
+                    @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { force_icon: ev.target.checked }, array)}"
+                ></ha-switch>
+                <div class="mdc-form-field">
+                    <label class="mdc-label">Prioritize icon over entity picture</label> 
+                </div>
+            </ha-formfield>
             <ha-formfield .label="Show name">
                 <ha-switch
                     aria-label="Show name"
@@ -1231,17 +1229,6 @@ class BubbleCardEditor extends LitElement {
         return data[fieldName];
       };
 
-      // Check if an object selector has both entity and attribute fields as siblings
-      const hasEntityAttributeSiblings = (fields) => {
-        const fieldsArray = Array.isArray(fields)
-          ? fields
-          : Object.entries(fields || {}).map(([name, def]) => ({ name, ...def }));
-        
-        const hasEntityField = fieldsArray.some(f => f.selector && f.selector.entity);
-        const hasAttributeField = fieldsArray.some(f => f.selector && f.selector.attribute);
-        return hasEntityField && hasAttributeField;
-      };
-
       // Recursively process object selector fields (map or array) and preserve the original shape
       const processObjectFields = (fields, value, currentEntity) => {
         const toArray = Array.isArray(fields)
@@ -1310,25 +1297,19 @@ class BubbleCardEditor extends LitElement {
             currentInherited
           );
         } else if (field.selector && field.selector.object && field.selector.object.fields) {
-          // Check if this object selector has entity+attribute siblings
-          // If so, convert to bc_object for dynamic context support
-          if (hasEntityAttributeSiblings(field.selector.object.fields)) {
-            // Convert to bc_object selector for dynamic entity-attribute linking
-            const objectConfig = field.selector.object;
-            field.selector = {
-              bc_object: {
-                ...objectConfig,
-                // Keep fields as-is, bc_object will handle context internally
-              }
-            };
-          } else {
-            // Standard processing for objects without entity+attribute siblings
-            field.selector.object.fields = processObjectFields(
-              field.selector.object.fields,
-              fieldConfig,
-              currentInherited
-            );
-          }
+          // Always convert to bc_object selector for consistency and dynamic features
+          const objectConfig = field.selector.object;
+          field.selector = {
+            bc_object: {
+              ...objectConfig,
+              // Keep fields processed for inherited entities support
+              fields: processObjectFields(
+                objectConfig.fields,
+                fieldConfig,
+                currentInherited
+              )
+            }
+          };
         }
 
         return field;

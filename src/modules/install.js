@@ -272,12 +272,12 @@ export async function installOrUpdateModule(context, module) {
       fireEvent(context, "config-changed", { config: context._config });
       forceEditorUIRefresh(context);
       context.requestUpdate();
-      return { success: true };
+      return { success: true, moduleId };
     } catch (apiError) {
       console.error("Persistence error:", apiError);
       fireToast(context, "Module saved locally only", "warning");
       forceEditorUIRefresh(context);
-      return { success: true, storage: "local_only" };
+      return { success: true, storage: "local_only", moduleId };
     }
   } catch (err) {
     console.error("Installation error:", err);

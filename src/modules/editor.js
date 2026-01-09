@@ -552,12 +552,33 @@ export function makeModulesEditor(context) {
         return;
       }
       
-      await installManualModule(context, yamlContent);
+      const result = await installManualModule(context, yamlContent);
       
       // Reset the form and close it
       context._showManualImportForm = false;
       context._manualYamlContent = '';
+      
+      if (result && result.moduleId) {
+        context._recentlyToggledModuleId = result.moduleId;
+        
+        setTimeout(() => {
+          context._recentlyToggledModuleId = null;
+          context.requestUpdate();
+        }, 2000);
+      }
+
       context.requestUpdate();
+      
+      if (result && result.moduleId) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            const modulePanel = context.shadowRoot?.querySelector(`ha-expansion-panel[data-module-id="${result.moduleId}"]`);
+            if (modulePanel) {
+              modulePanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
+        });
+      }
     } catch (error) {
       console.error("Error installing manual module:", error);
     }
@@ -700,7 +721,7 @@ export function makeModulesEditor(context) {
                   ></ha-code-editor>
                 </div>
                 
-                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <div class="module-editor-buttons-container">
                   <button 
                     class="icon-button" 
                     style="flex: 1;"
@@ -721,12 +742,9 @@ export function makeModulesEditor(context) {
                     Import Module
                   </button>
                 </div>
-                <hr>
               </div>
             </div>
-          ` : ''}
-
-          ${context._showNewModuleForm || context._editingModule ? 
+          ` : (context._showNewModuleForm || context._editingModule ? 
             renderModuleEditorForm(context) : 
             html`
             <!-- Search and Sort Controls -->
@@ -1076,7 +1094,7 @@ export function makeModulesEditor(context) {
                 </div>
               </div>
             ` : ''}
-          `}
+          `)}
 
           <hr>
           ${!context._showNewModuleForm && !context._showManualImportForm && !context._editingModule && bctAvailable ? html`

@@ -24,10 +24,7 @@
     align-items: center;
 }
 
-.bubble-sub-button-group.position-top {
-    margin-top: 0;
-}
-
+.bubble-sub-button-group.position-top,
 .bubble-sub-button-group.position-bottom {
     margin-top: 0;
 }
@@ -79,7 +76,6 @@
 .bubble-sub-button-alignment-lane.lane-center {
     justify-content: center;
     flex: 1 1 0%;
-    min-width: 0;
 }
 
 .bubble-sub-button-alignment-lane.lane-end {
@@ -104,10 +100,7 @@
     min-width: 0;
 }
 
-.bubble-sub-button-bottom-container .bubble-sub-button-group.alignment-fill {
-    flex: 1 1 0%;
-}
-
+.bubble-sub-button-bottom-container .bubble-sub-button-group.alignment-fill,
 .bubble-sub-button-bottom-container .bubble-sub-button-group.alignment-fill-auto {
     flex: 1 1 0%;
 }
@@ -176,12 +169,7 @@
 }
 
 /* When a slider is inline, allow it to expand to fill width when requested */
-.bubble-sub-slider-wrapper.inline.fill-width {
-    flex: 1 1 0%;
-    width: 100%;
-    min-width: 0;
-}
-
+.bubble-sub-slider-wrapper.inline.fill-width,
 .bubble-sub-button-slider.inline.fill-width {
     flex: 1 1 0%;
     width: 100%;
@@ -194,6 +182,7 @@
     min-width: 0;
     display: none;
 }
+
 .bubble-sub-button.inline-slider-host > .bubble-sub-button-name-container,
 .bubble-sub-button.inline-slider-host > .bubble-sub-button-icon,
 .bubble-sub-button.inline-slider-host > .bubble-feedback-container,
@@ -212,24 +201,27 @@
 }
 
 /* Content layout styles */
+.bubble-sub-button.content-icon-top,
+.bubble-sub-button.content-icon-bottom,
+.bubble-sub-button.content-icon-right,
+.bubble-sub-button.content-icon-left {
+    justify-content: center;
+}
+
 .bubble-sub-button.content-icon-top {
     flex-direction: column-reverse;
-    justify-content: center;
 }
 
 .bubble-sub-button.content-icon-bottom {
     flex-direction: column;
-    justify-content: center;
 }
 
 .bubble-sub-button.content-icon-right {
     flex-direction: row;
-    justify-content: center;
 }
 
 .bubble-sub-button.content-icon-left {
     flex-direction: row-reverse;
-    justify-content: center;
 }
 
 .content-icon-right .icon-with-state {
@@ -246,12 +238,58 @@
     --mdc-icon-size: 16px;
 }
 
+.bubble-sub-button-image {
+    background-size: cover;
+    background-position: center;
+    min-width: 20px;
+    min-height: 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.bubble-sub-button-image.icon-with-state {
+    margin-right: 4px;
+}
+
+.bubble-sub-button-image.icon-without-state,
+.content-icon-top .bubble-sub-button-image.icon-with-state,
+.content-icon-bottom .bubble-sub-button-image.icon-with-state {
+    margin: 0;
+}
+
+.content-icon-right .bubble-sub-button-image.icon-with-state {
+    margin: 0 0 0 4px;
+}
+
+/* Full-size entity picture when only the icon is displayed */
+.bubble-sub-button.has-image-full {
+    padding: 0;
+    overflow: hidden;
+}
+
+.bubble-sub-button-image.image-full {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-width: unset;
+    min-height: unset;
+    border-radius: inherit;
+    margin: 0;
+}
+
 .bright-background {
     color: var(--bubble-sub-button-dark-text-color, rgb(0, 0, 0));
 }
 
 .background-on {
     background-color: var(--bubble-sub-button-light-background-color, var(--bubble-accent-color, var(--bubble-default-color)));
+    /* Optimize repaints on Safari */
+    will-change: background-color;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 .background-off {
@@ -292,7 +330,7 @@
 }
 
 .bubble-sub-button.is-select.background-on {
-    background: var(--bubble-select-arrow-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))))) !important;
+    background-color: var(--bubble-select-arrow-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
 }
 
 .sub-buttons-grid .bubble-sub-button-container {
@@ -412,14 +450,14 @@
 }
 
 .bubble-icon-container.is-hidden,
-.bubble-main-icon-container.is-hidden {
-    transform: none;
-    transition: opacity 0.15s ease-in-out;
-}
-
-/* Prevent hidden close button from shifting outside and causing horizontal overflow */
+.bubble-main-icon-container.is-hidden,
 .bubble-sub-slider-close.is-hidden {
     transform: none;
+}
+
+.bubble-icon-container.is-hidden,
+.bubble-main-icon-container.is-hidden {
+    transition: opacity 0.15s ease-in-out;
 }
 
 /* Allow overlay sliders to translate out without extending card width */
@@ -440,18 +478,17 @@
     opacity: 1;
 }
 
-.large .bubble-sub-slider-wrapper {
+.large .bubble-sub-slider-wrapper,
+.large .bubble-sub-button-slider .bubble-range-value {
     height: 36px;
 }
-.large .bubble-sub-slider-wrapper > .bubble-sub-button-slider {
-    border-radius: var(--bubble-sub-slider-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
-    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 18px));
 
+.large .bubble-sub-slider-wrapper > .bubble-sub-button-slider {
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 18px));
 }
 
 .large .bubble-sub-button-slider .bubble-range-value {
     place-items: center;
-    height: 36px;
 }
 
 /* Inline sub-slider mode (alwaysVisible): wrapper + slider sit inside sub-buttons row */
@@ -504,18 +541,14 @@
     min-width: var(--slider-container-min-width, 96px);
 }
 /* Horizontal inline sliders: allow vertical scroll, block horizontal */
-.bubble-sub-button-slider.inline.slider-container {
-    touch-action: pan-y pinch-zoom;
-}
+.bubble-sub-button-slider.inline.slider-container,
 .bubble-sub-button-slider.inline .bubble-range-slider {
     touch-action: pan-y pinch-zoom;
 }
 
 /* Vertical inline sliders: allow horizontal scroll, block vertical */
 .bubble-sub-button-slider.inline.slider-container:has(.fill-orientation-top),
-.bubble-sub-button-slider.inline.slider-container:has(.fill-orientation-bottom) {
-    touch-action: pan-x pinch-zoom;
-}
+.bubble-sub-button-slider.inline.slider-container:has(.fill-orientation-bottom),
 .bubble-sub-button-slider.inline .bubble-range-slider.fill-orientation-top,
 .bubble-sub-button-slider.inline .bubble-range-slider.fill-orientation-bottom {
     touch-action: pan-x pinch-zoom;
@@ -523,9 +556,7 @@
 
 /* When touching or dragging any inline slider, block all touch actions */
 .bubble-sub-button-slider.inline.slider-container.is-touching,
-.bubble-sub-button-slider.inline.slider-container.is-dragging {
-    touch-action: none;
-}
+.bubble-sub-button-slider.inline.slider-container.is-dragging,
 .bubble-sub-button-slider.inline.slider-container.is-touching .bubble-range-slider,
 .bubble-sub-button-slider.inline.slider-container.is-dragging .bubble-range-slider,
 .bubble-sub-button-slider.inline .bubble-range-slider.is-touching {
@@ -541,13 +572,7 @@
 }
 
 /* Fade only group content when a group-owned slider is open */
-.bubble-sub-button-group.group-slider-open > *:not(.bubble-sub-slider-wrapper) {
-    opacity: 0.0;
-    pointer-events: none;
-    transition: opacity .2s ease;
-}
-
-/* Also fade inline (alwaysVisible) sliders when a group overlay is open */
+.bubble-sub-button-group.group-slider-open > *:not(.bubble-sub-slider-wrapper),
 .bubble-sub-button-group.group-slider-open > .bubble-sub-slider-wrapper.inline {
     opacity: 0;
     pointer-events: none;
@@ -559,4 +584,117 @@
     justify-content: flex-end;
 }
 
+/* Slider with button info container - same structure as normal sub-button */
+.bubble-sub-button-info-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 12px 0 12px;
+    font-size: 12px;
+    color: var(--primary-text-color);
+    z-index: 1;
+    pointer-events: none;
+    min-width: 0;
+    width: 100%;
+    height: var(--bubble-sub-slider-height, 36px);
+    position: relative;
+    white-space: nowrap;
+}
 
+/* When with-button-info is active, use row-reverse for proper icon/name/value order */
+.bubble-sub-button-slider.inline.with-button-info .bubble-sub-button-info-wrapper {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+}
+
+/* When with-button-info is active, value should always be on the right (forced) */
+.bubble-sub-button-slider.inline.with-button-info .bubble-sub-button-info-wrapper .bubble-range-value.in-info-wrapper {
+    margin-left: auto;
+}
+
+.bubble-sub-button-info-wrapper .bubble-sub-button-name-container {
+    overflow: auto;
+    min-width: 0;
+    flex-shrink: 1;
+    margin-right: 16px;
+}
+
+.bubble-sub-button-info-wrapper .bubble-sub-button-icon {
+    flex-shrink: 0;
+}
+
+.bubble-sub-button-info-wrapper .bubble-sub-button-icon.icon-with-state {
+    margin-right: 4px;
+}
+
+.bubble-sub-button-info-wrapper .bubble-sub-button-icon.icon-without-state {
+    margin-right: 0;
+}
+
+.bubble-sub-button-info-wrapper .bubble-range-value.in-info-wrapper {
+    position: static;
+    transform: none;
+    padding: 0;
+    flex-shrink: 0;
+    display: flex;
+    opacity: 0.8;
+    pointer-events: auto;
+}
+
+/* Respect value-position classes from rangeSlider (only when show_button_info is false) */
+.bubble-sub-button-slider.inline:not(.with-button-info):has(.bubble-range-slider.value-position-right) .bubble-sub-button-info-wrapper,
+.bubble-sub-button-slider.inline:not(.with-button-info):has(.bubble-range-slider.value-position-inline-end) .bubble-sub-button-info-wrapper {
+    justify-content: flex-end;
+}
+
+.bubble-sub-button-slider.inline:not(.with-button-info):has(.bubble-range-slider.value-position-left) .bubble-sub-button-info-wrapper,
+.bubble-sub-button-slider.inline:not(.with-button-info):has(.bubble-range-slider.value-position-inline-start) .bubble-sub-button-info-wrapper {
+    justify-content: flex-start;
+}
+
+.bubble-sub-button-slider.inline:not(.with-button-info):has(.bubble-range-slider.value-position-center) .bubble-sub-button-info-wrapper {
+    justify-content: center;
+}
+
+/* Reset margin-left for all value positions except when with-button-info is active */
+.bubble-sub-button-slider.inline:not(.with-button-info) .bubble-sub-button-info-wrapper .bubble-range-value.in-info-wrapper {
+    margin-left: 0;
+}
+
+/* Hidden value position works for both modes */
+.bubble-sub-button-slider.inline:has(.bubble-range-slider.value-position-hidden) .bubble-sub-button-info-wrapper .bubble-range-value.in-info-wrapper {
+    display: none;
+}
+
+/* During drag: keep rangeValue visible, hide other info elements */
+.bubble-sub-button-slider.inline.is-dragging .bubble-range-value.in-info-wrapper,
+.bubble-sub-button-slider.inline.is-touching .bubble-range-value.in-info-wrapper {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.bubble-sub-button-slider.inline.slider-hold-focus.is-dragging .bubble-sub-button-info-wrapper {
+    opacity: 1;
+    pointer-events: none;
+}
+
+.bubble-sub-button-slider.inline.slider-hold-focus.is-dragging .bubble-sub-button-info-wrapper .bubble-sub-button-name-container,
+.bubble-sub-button-slider.inline.slider-hold-focus.is-dragging .bubble-sub-button-info-wrapper .bubble-sub-button-icon {
+    opacity: 0;
+}
+
+/* Ensure slider container has proper layout when info wrapper is present */
+.bubble-sub-button-slider.inline.has-info-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.bubble-sub-button-slider.inline.has-info-wrapper .bubble-range-slider {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}

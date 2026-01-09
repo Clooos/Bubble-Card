@@ -1,6 +1,7 @@
 import { changeDropdownList } from "../../../dropdown/changes.js";
 import { getOptionIcon } from "../../../dropdown/helpers.js";
-import { buildDisplayedState, updateBackground, setupActions, updateElementVisibility, updateIconClasses, applySubButtonScrollingEffect } from "../../utils.js";
+import { updateSubButtonIconOrImage } from "../../../../tools/icon.js";
+import { buildDisplayedState, updateBackground, setupActions, updateElementVisibility, applySubButtonScrollingEffect } from "../../utils.js";
 
 function updateDropdownArrow(element, showArrow) {
   // Keep default padding so icon-only dropdown buttons match regular sub-button sizing
@@ -40,7 +41,10 @@ export function handleDropdownSubButton(context, element, options) {
 
   const displayedState = buildDisplayedState(options, context, element);
   
-  // Check if displayed state has changed to avoid unnecessary DOM updates
+  // Always update background (it handles its own optimization like changeIcon)
+  updateBackground(element, options);
+  
+  // Check if displayed state has changed to avoid unnecessary DOM updates for other elements
   const previousDisplayedState = element._previousDisplayedState;
   const previousState = element._previousState;
   const currentState = options.state?.state;
@@ -51,9 +55,8 @@ export function handleDropdownSubButton(context, element, options) {
   element._previousDisplayedState = displayedState;
   element._previousState = currentState;
   
-  // Only update DOM if displayed state changed, entity state changed, or if this is the first update
+  // Only update other DOM elements if state changed or first update
   if (displayedStateChanged || entityStateChanged || previousDisplayedState === undefined) {
-    updateBackground(element, options);
     setupActions(element, options);
     updateElementVisibility(element, options, displayedState);
     if (element.nameContainer) {
@@ -61,7 +64,7 @@ export function handleDropdownSubButton(context, element, options) {
     }
   }
 
-  // Icon logic with optimization to avoid overwriting external changes (e.g., custom modules)
+  // Track selected option for dropdown-specific icon logic
   const selectedOption = isSelect && element.dropdownSelect
     ? Array.from(element.dropdownSelect.children).find(option => option.hasAttribute('selected'))?.value
     : false;
@@ -76,45 +79,35 @@ export function handleDropdownSubButton(context, element, options) {
   element._prevSelectedOption = selectedOption;
   element._prevConfigIcon = options.icon;
 
-  if (options.showIcon && options.icon) {
-    let iconElement = element.icon;
-    if (!iconElement) {
-      iconElement = document.createElement('ha-icon');
-      iconElement.classList.add('bubble-sub-button-icon');
-      iconElement.classList.add('show-icon');
-      element.appendChild(iconElement);
-      element.icon = iconElement;
-    }
-
-    // Only update icon if selection or config changed, to preserve external modifications
-    if (selectionChanged || configIconChanged || prevSelected === undefined) {
-      if (selectedOption) {
-        const optionIcon = getOptionIcon(context, options.state, options.subButton.select_attribute, selectedOption);
-        if (optionIcon && !options.subButton.icon) {
-          const isIconDifferent = iconElement.tagName !== optionIcon.tagName || 
-            iconElement.icon !== optionIcon.icon || 
-            iconElement.getAttribute?.('attribute') !== optionIcon.getAttribute?.('attribute') ||
-            iconElement.getAttribute?.('attributeValue') !== optionIcon.getAttribute?.('attributeValue');
-          if (isIconDifferent) {
-            element.replaceChild(optionIcon, iconElement);
-            element.icon = optionIcon;
-            iconElement = optionIcon;
+  // Handle entity picture and icon display using unified function
+  // with dropdown-specific icon update callback
+  updateSubButtonIconOrImage(element, options, displayedState, {
+    beforeIconUpdate: (iconElement, opts) => {
+      // Only update icon if selection or config changed, to preserve external modifications
+      if (selectionChanged || configIconChanged || prevSelected === undefined) {
+        if (selectedOption) {
+          const optionIcon = getOptionIcon(context, opts.state, opts.subButton.select_attribute, selectedOption);
+          if (optionIcon && !opts.subButton.icon) {
+            const isIconDifferent = iconElement.tagName !== optionIcon.tagName || 
+              iconElement.icon !== optionIcon.icon || 
+              iconElement.getAttribute?.('attribute') !== optionIcon.getAttribute?.('attribute') ||
+              iconElement.getAttribute?.('attributeValue') !== optionIcon.getAttribute?.('attributeValue');
+            if (isIconDifferent) {
+              element.replaceChild(optionIcon, iconElement);
+              element.icon = optionIcon;
+              return optionIcon;
+            }
+            return iconElement; // No change needed
+          } else if (iconElement.icon !== opts.icon) {
+            iconElement.setAttribute('icon', opts.icon);
           }
-        } else if (iconElement.icon !== options.icon) {
-          iconElement.setAttribute('icon', options.icon);
+        } else if (iconElement.icon !== opts.icon) {
+          iconElement.setAttribute('icon', opts.icon);
         }
-      } else if (iconElement.icon !== options.icon) {
-        iconElement.setAttribute('icon', options.icon);
       }
+      return iconElement; // Return current element to indicate it was handled
     }
-
-    iconElement.classList.remove('hidden');
-    iconElement.classList.add('bubble-sub-button-icon', 'show-icon');
-    updateIconClasses(iconElement, displayedState);
-  } else if (element.icon) {
-    element.icon.classList.remove('show-icon');
-    element.icon.classList.add('hidden');
-  }
+  });
 
   // Sync icon attribute if needed (for ha-icon elements)
   if (element.icon?.getAttribute('icon') !== element.icon?.icon) {

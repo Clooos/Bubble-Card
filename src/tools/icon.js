@@ -1,6 +1,26 @@
 import { getAttribute, getState, isColorLight, isEntityType, adjustColor } from "./utils.js";
 import { isColorCloseToWhite } from "./style.js";
 
+// Generate a signature string from light entity attributes that affect color
+// Used to detect color changes without state changes (e.g., light stays "on" but color changes)
+export function getLightColorSignature(state, entity) {
+  if (!state || !entity || !entity.startsWith('light.')) {
+    return '';
+  }
+  const attrs = state.attributes || {};
+  const parts = [];
+  
+  if (attrs.rgb_color) parts.push(`rgb:${attrs.rgb_color.join(',')}`);
+  if (attrs.hs_color) parts.push(`hs:${attrs.hs_color.join(',')}`);
+  if (attrs.xy_color) parts.push(`xy:${attrs.xy_color.join(',')}`);
+  if (attrs.color_temp != null) parts.push(`ct:${attrs.color_temp}`);
+  if (attrs.color_temp_kelvin != null) parts.push(`ctk:${attrs.color_temp_kelvin}`);
+  if (attrs.brightness != null) parts.push(`br:${attrs.brightness}`);
+  if (attrs.color_mode) parts.push(`cm:${attrs.color_mode}`);
+  
+  return parts.join('|');
+}
+
 export function getIcon(context, entity = context.config.entity, icon = context.config.icon) {
     const entityType = entity?.split('.')[0];
     const deviceClassType = getAttribute(context, "device_class", entity);
@@ -308,8 +328,10 @@ export function getIconColor(context, entity = context.config.entity, brightness
         `var(--bubble-light-color, rgba(${adjustedColor.join(', ')}))`;
 }
 
-export function getImage(context, entity = context.config.entity) {
-    if (context.config.force_icon) return '';
+export function getImage(context, entity = context.config.entity, ignoreConfigIcon = false) {
+    // Don't show entity picture if force_icon is set or if an icon is explicitly configured
+    // Unless ignoreConfigIcon is true (e.g., for sub-buttons that should only check their own icon)
+    if (!ignoreConfigIcon && (context.config.force_icon || context.config.icon)) return '';
 
     const entityPicture =
       getAttribute(context, "entity_picture_local", entity) ||
@@ -320,4 +342,115 @@ export function getImage(context, entity = context.config.entity) {
     let imageUrl = context._hass.hassUrl(entityPicture);
 
     return imageUrl;
+}
+
+// Update icon classes based on displayed state
+export function updateIconClasses(iconElement, displayedState) {
+  if (!iconElement) return;
+  iconElement.classList.remove('hidden');
+  iconElement.classList.add('bubble-sub-button-icon', 'show-icon');
+  iconElement.classList.toggle('icon-with-state', !!displayedState);
+  iconElement.classList.toggle('icon-without-state', !displayedState);
+}
+
+// Unified icon/image display handler for sub-buttons
+// Returns the active icon element (either icon or image) for further processing
+// Options:
+//   - beforeIconUpdate: callback(iconElement, options) called before updating icon, return new icon value or null to skip
+export function updateSubButtonIconOrImage(element, options, displayedState, callbacks = {}) {
+  const { beforeIconUpdate } = callbacks;
+  const newImage = options.image;
+  let newIcon = options.icon;
+  const showIcon = options.showIcon;
+
+  // Determine if the image should fill the entire sub-button
+  // This happens when only the icon is displayed (no text, no dropdown arrow)
+  const hasText = !!displayedState;
+  const isDropdownWithArrow = options.isSelect && options.showArrow;
+  const shouldImageFill = !hasText && !isDropdownWithArrow;
+
+  if (showIcon && newImage) {
+    // Entity picture available - show image, hide icon
+    let imageElement = element.image;
+    if (!imageElement) {
+      imageElement = document.createElement('div');
+      imageElement.classList.add('bubble-sub-button-image');
+      imageElement.classList.add('show-icon');
+      element.appendChild(imageElement);
+      element.image = imageElement;
+    }
+    
+    const newBackgroundImage = `url(${newImage})`;
+    const currentImage = imageElement.style.backgroundImage;
+    if (currentImage !== newBackgroundImage) {
+      imageElement.style.backgroundImage = newBackgroundImage;
+    }
+    
+    imageElement.classList.remove('hidden');
+    imageElement.classList.add('show-icon');
+    updateIconClasses(imageElement, displayedState);
+    
+    // Apply or remove full-size image class
+    imageElement.classList.toggle('image-full', shouldImageFill);
+    element.classList.toggle('has-image-full', shouldImageFill);
+    
+    // Hide icon if it exists
+    if (element.icon) {
+      element.icon.classList.remove('show-icon');
+      element.icon.classList.add('hidden');
+    }
+    
+    return imageElement;
+  } else if (showIcon && newIcon) {
+    // No entity picture but icon available - show icon, hide image
+    let iconElement = element.icon;
+    if (!iconElement) {
+      iconElement = document.createElement('ha-icon');
+      iconElement.classList.add('bubble-sub-button-icon');
+      iconElement.classList.add('show-icon');
+      element.appendChild(iconElement);
+      element.icon = iconElement;
+    }
+    
+    // Allow callback to modify icon update behavior (e.g., for dropdown option icons)
+    if (beforeIconUpdate) {
+      const result = beforeIconUpdate(iconElement, options);
+      if (result !== null && result !== undefined) {
+        // Callback returned a new icon element or handled the update
+        if (result instanceof HTMLElement && result !== iconElement) {
+          element.icon = result;
+          iconElement = result;
+        }
+      }
+    } else if (iconElement.icon !== newIcon) {
+      iconElement.setAttribute('icon', newIcon);
+    }
+    
+    iconElement.classList.remove('hidden');
+    iconElement.classList.add('bubble-sub-button-icon', 'show-icon');
+    updateIconClasses(iconElement, displayedState);
+    
+    // Remove full-size image classes when showing icon
+    element.classList.remove('has-image-full');
+    
+    // Hide image if it exists
+    if (element.image) {
+      element.image.classList.remove('show-icon', 'image-full');
+      element.image.classList.add('hidden');
+    }
+    
+    return iconElement;
+  } else {
+    // No icon to show - hide both
+    element.classList.remove('has-image-full');
+    if (element.icon) {
+      element.icon.classList.remove('show-icon');
+      element.icon.classList.add('hidden');
+    }
+    if (element.image) {
+      element.image.classList.remove('show-icon', 'image-full');
+      element.image.classList.add('hidden');
+    }
+    return null;
+  }
 }

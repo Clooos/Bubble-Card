@@ -148,6 +148,10 @@ ha-card {
     border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
     mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
+    /* Optimize repaints on Safari for color transitions */
+    will-change: background-color;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 .bubble-icon-container {
@@ -162,7 +166,6 @@ ha-card {
     background-color: var(--bubble-card-type-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
     overflow: hidden;
     position: relative;
-    transition: all 0.3s ease-in-out;
 }
 
 .bubble-icon-feedback-container {
@@ -170,12 +173,16 @@ ha-card {
     overflow: hidden !important;
 }
 
+.bubble-main-icon {
+    transition: all .3s ease-in-out;
+}
+
 .is-off .bubble-main-icon {
     opacity: 0.6;
 }
 
 .is-on .bubble-main-icon {
-  filter: brightness(1.1);
+  /* filter: brightness(1.1); */
   opacity: 1;
 }
 
@@ -260,4 +267,4 @@ ha-card {
     min-width: 42px;
     min-height: 42px;
     margin-left: 8px;
-}
+} 

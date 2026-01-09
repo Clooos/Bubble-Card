@@ -1,11 +1,8 @@
 import { 
   isStateOn,
-  isEntityType,
-  resolveCssVariable,
-  getCachedDocumentElementStyles
+  getStateSurfaceColor
 } from '../../tools/utils.js';
-import { getStateSurfaceColor } from '../../tools/utils.js';
-import { getIconColor } from '../../tools/icon.js';
+import { getLightColorSignature } from '../../tools/icon.js';
 import {
   getEntityMinValue,
   getEntityMaxValue,
@@ -200,70 +197,6 @@ export function onSliderChange(context, positionCoordinate, shouldAdjustToStep =
   return percentage;
 }
 
-// Cache for expensive color calculations
-function getCachedSubButtonColor(context) {
-  // Use entity as primary cache key - sub_button config rarely changes
-  // Only recalculate if entity changes or cache is missing
-  const cacheKey = context.config.entity;
-  
-  if (!context._sliderStyleCache || context._sliderStyleCache.key !== cacheKey) {
-    let subButtonBaseColor = null;
-    try {
-      const rawSubButton = context?.config?.sub_button;
-      if (rawSubButton) {
-        // Optimize array creation - avoid spread operator when possible
-        let subButtonsArray;
-        if (Array.isArray(rawSubButton)) {
-          subButtonsArray = rawSubButton;
-        } else {
-          const main = Array.isArray(rawSubButton.main) ? rawSubButton.main : [];
-          const bottom = Array.isArray(rawSubButton.bottom) ? rawSubButton.bottom : [];
-          // Pre-allocate array size for better performance
-          subButtonsArray = new Array(main.length + bottom.length);
-          for (let i = 0; i < main.length; i++) {
-            subButtonsArray[i] = main[i];
-          }
-          for (let i = 0; i < bottom.length; i++) {
-            subButtonsArray[main.length + i] = bottom[i];
-          }
-        }
-        
-        // Early exit optimization
-        const entityId = context.config.entity;
-        for (let i = 0; i < subButtonsArray.length; i++) {
-          const subButton = subButtonsArray[i];
-          if (!subButton || Array.isArray(subButton.group)) continue;
-          
-          const subButtonEntity = subButton.entity ?? entityId;
-          if (subButtonEntity === entityId && subButton.show_background !== false && subButton.state_background !== false) {
-            const subButtonBaseColorExpr = getIconColor(context, subButtonEntity);
-            let subButtonResolved = resolveCssVariable(subButtonBaseColorExpr);
-            if (subButtonResolved && subButtonResolved.startsWith('var(')) {
-              const match = subButtonResolved.match(/var\((--[^,]+),?\s*(.*)?\)/);
-              if (match) {
-                const [, varName] = match;
-                const computed = getCachedDocumentElementStyles().getPropertyValue(varName).trim();
-                if (computed) subButtonResolved = computed;
-              }
-            }
-            subButtonBaseColor = subButtonResolved;
-            break;
-          }
-        }
-      }
-    } catch (_) {
-      // Ignore errors when searching for sub-buttons
-    }
-    
-    if (!context._sliderStyleCache) {
-      context._sliderStyleCache = {};
-    }
-    context._sliderStyleCache.key = cacheKey;
-    context._sliderStyleCache.subButtonBaseColor = subButtonBaseColor;
-  }
-  return context._sliderStyleCache.subButtonBaseColor;
-}
-
 export function updateSliderStyle(context) {
   if (!context.elements?.rangeFill) return;
 
@@ -274,99 +207,50 @@ export function updateSliderStyle(context) {
   const isLightBrightnessSlider = isLight && lightSliderType === 'brightness';
   const useAccentColor = context.config.use_accent_color;
 
-  // Check current state to avoid unnecessary DOM updates
-  const hasLightColorClass = context.elements.rangeFill.classList.contains('slider-use-light-color');
-  const hasAccentColorClass = context.elements.rangeFill.classList.contains('slider-use-accent-color');
-  const currentColor = context.elements.rangeFill.style.getPropertyValue('--bubble-slider-fill-color');
-
-  // Cache key based on entity state and color
+  // Check for light color changes using getLightColorSignature
   const state = context._hass?.states?.[context.config.entity];
-  const entityColorKey = state?.attributes?.rgb_color 
-    ? state.attributes.rgb_color.join(',') 
-    : (state?.attributes?.hs_color ? state.attributes.hs_color.join(',') : '');
-  const cacheKey = `${context.config.entity}_${isOn}_${entityColorKey}_${useAccentColor}`;
-  
-  // Check if we need to recalculate
-  if (!context._sliderStyleCache || context._sliderStyleCache.styleCacheKey !== cacheKey) {
-    if (isOn) {
-      if (isLightBrightnessSlider && !useAccentColor) {
-        const cardType = context.config.card_type;
-        const cardBackgroundColor = cardType === 'button'
-          ? context.card?.style.getPropertyValue('--bubble-button-background-color')
-          : context.popUp?.style.getPropertyValue('--bubble-button-background-color');
-        
-        const subButtonBaseColor = getCachedSubButtonColor(context);
-        const surfaceColor = getStateSurfaceColor(context, context.config.entity, true, cardBackgroundColor || null, subButtonBaseColor);
-        
-        if (!context._sliderStyleCache) {
-          context._sliderStyleCache = {};
-        }
-        context._sliderStyleCache.styleCacheKey = cacheKey;
-        context._sliderStyleCache.surfaceColor = surfaceColor;
-        context._sliderStyleCache.shouldUseLightColor = true;
-      } else {
-        // For accent color sliders, also check for sub-button color to ensure contrast
-        const cardType = context.config.card_type;
-        const cardBackgroundColor = cardType === 'button'
-          ? context.card?.style.getPropertyValue('--bubble-button-background-color')
-          : context.popUp?.style.getPropertyValue('--bubble-button-background-color');
-        
-        const subButtonBaseColor = getCachedSubButtonColor(context);
-        // Use accent color with sub-button color check for contrast
-        const surfaceColor = getStateSurfaceColor(context, context.config.entity, false, cardBackgroundColor || null, subButtonBaseColor);
-        
-        if (!context._sliderStyleCache) {
-          context._sliderStyleCache = {};
-        }
-        context._sliderStyleCache.styleCacheKey = cacheKey;
-        context._sliderStyleCache.surfaceColor = surfaceColor;
-        context._sliderStyleCache.shouldUseLightColor = false;
-      }
-    } else {
-      if (!context._sliderStyleCache) {
-        context._sliderStyleCache = {};
-      }
-      context._sliderStyleCache.styleCacheKey = cacheKey;
-      context._sliderStyleCache.shouldUseLightColor = null;
-    }
-  }
+  const currentColorSignature = getLightColorSignature(state, context.config.entity);
+  const previousColorSignature = context._previousSliderColorSignature;
+  const colorChanged = previousColorSignature !== currentColorSignature;
+  context._previousSliderColorSignature = currentColorSignature;
 
-  // Apply cached style
+  const rangeFill = context.elements.rangeFill;
+  const hasLightColorClass = rangeFill.classList.contains('slider-use-light-color');
+  const hasAccentColorClass = rangeFill.classList.contains('slider-use-accent-color');
+
+  // Safari fix: detect rapid color changes to disable transitions temporarily
+  const now = Date.now();
+  const lastChange = context._lastSliderStyleChange || 0;
+  const timeSinceLastChange = now - lastChange;
+  context._lastSliderStyleChange = now;
+
   if (isOn) {
-    if (isLightBrightnessSlider && !useAccentColor && context._sliderStyleCache.shouldUseLightColor) {
-      const surfaceColor = context._sliderStyleCache.surfaceColor;
-      if (!hasLightColorClass || currentColor !== surfaceColor) {
-        context.elements.rangeFill.classList.remove('slider-use-accent-color');
-        context.elements.rangeFill.style.setProperty('--bubble-slider-fill-color', surfaceColor);
-        context.elements.rangeFill.classList.add('slider-use-light-color');
-      }
-    } else {
-      // For accent color, check if we need to use adjusted color for contrast with sub-button
-      const subButtonBaseColor = getCachedSubButtonColor(context);
-      const surfaceColor = context._sliderStyleCache.surfaceColor;
-      // Check if color was adjusted (RGB format) vs using base color expression (CSS variable)
-      const isAdjustedColor = surfaceColor && surfaceColor.startsWith('rgb(');
+    if (isLightBrightnessSlider && !useAccentColor) {
+      // Use light color for brightness slider
+      const cardType = context.config.card_type;
+      const cardBackgroundColor = cardType === 'button'
+        ? context.card?.style.getPropertyValue('--bubble-button-background-color')
+        : context.popUp?.style.getPropertyValue('--bubble-button-background-color');
       
-      if (subButtonBaseColor && isAdjustedColor) {
-        // Use adjusted color if sub-button exists and color was adjusted
-        if (!hasLightColorClass || currentColor !== surfaceColor) {
-          context.elements.rangeFill.classList.remove('slider-use-accent-color');
-          context.elements.rangeFill.style.setProperty('--bubble-slider-fill-color', surfaceColor);
-          context.elements.rangeFill.classList.add('slider-use-light-color');
-        }
-      } else {
-        // No sub-button or no adjustment needed, use standard accent color
-        if (!hasAccentColorClass) {
-          context.elements.rangeFill.classList.remove('slider-use-light-color');
-          context.elements.rangeFill.style.removeProperty('--bubble-slider-fill-color');
-          context.elements.rangeFill.classList.add('slider-use-accent-color');
-        }
+      const surfaceColor = getStateSurfaceColor(context, context.config.entity, true, cardBackgroundColor || null, null);
+      
+      if (!hasLightColorClass) {
+        rangeFill.classList.remove('slider-use-accent-color');
+        rangeFill.classList.add('slider-use-light-color');
+      }
+      rangeFill.style.setProperty('--bubble-slider-fill-color', surfaceColor);
+    } else {
+      // Use accent color
+      if (!hasAccentColorClass) {
+        rangeFill.classList.remove('slider-use-light-color');
+        rangeFill.style.removeProperty('--bubble-slider-fill-color');
+        rangeFill.classList.add('slider-use-accent-color');
       }
     }
   } else {
     if (hasLightColorClass || hasAccentColorClass) {
-      context.elements.rangeFill.classList.remove('slider-use-light-color', 'slider-use-accent-color');
-      context.elements.rangeFill.style.removeProperty('--bubble-slider-fill-color');
+      rangeFill.classList.remove('slider-use-light-color', 'slider-use-accent-color');
+      rangeFill.style.removeProperty('--bubble-slider-fill-color');
     }
   }
 

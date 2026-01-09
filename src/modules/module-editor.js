@@ -17,15 +17,21 @@ import { scrollToModuleForm } from './utils.js';
 function updateModuleInConfig(context, moduleId, oldId = null) {
   if (!context._config || !context._config.modules) return;
   
+  // Create a new array to avoid extensibility issues
+  let modules = [...context._config.modules];
+  
   // Remove old ID if needed
   if (oldId && oldId !== moduleId) {
-    context._config.modules = context._config.modules.filter(id => id !== oldId);
+    modules = modules.filter(id => id !== oldId);
   }
   
   // Add new ID if not already present
-  if (!context._config.modules.includes(moduleId)) {
-    context._config.modules.push(moduleId);
+  if (!modules.includes(moduleId)) {
+    modules = [...modules, moduleId];
   }
+  
+  // Update the config with the new array
+  context._config.modules = modules;
   
   // Save current ID for tracking
   context._previousModuleId = moduleId;

@@ -100,7 +100,8 @@ export function makeGenericSliderSettings({
     entityFilterValue = false,
     onEntityFilterToggle,
     showEntityFilterInfo = entityFilterValue,
-    rangeFormDisabled = false
+    rangeFormDisabled = false,
+    forceValuePositionRight = false
 }) {
     const isLightColorMode = entity?.startsWith("light") && ['hue', 'saturation', 'white_temp'].includes(data.light_slider_type);
     const hideInvertSliderToggle = isLightColorMode;
@@ -117,127 +118,136 @@ export function makeGenericSliderSettings({
     };
 
     return html`
-        ${showEntityFilterToggle ? html`
-            <div class="checkbox-wrapper">
-                <ha-formfield label="Disable entity filter (for custom slider)">
-                    <ha-switch
-                        .checked=${entityFilterValue}
-                        @change=${(ev) => handleEntityFilterToggle(ev.target.checked)}
-                    ></ha-switch>
-                </ha-formfield>
-            </div>
-            <div class="bubble-info" style="display: ${showEntityFilterInfo ? '' : 'none'}">
-                <h4 class="bubble-section-title">
-                    <ha-icon icon="mdi:information-outline"></ha-icon>
-                    Custom slider
-                </h4>
-                <div class="content">
-                    <p>To create a custom slider (read only), select an <b>entity with a numeric state</b> above, then define the <b>min</b> and <b>max</b> values below.</p>
-                    <p>For example, this allows you to display your solar production within a specific range.</p>
-                </div>
-            </div>
-        ` : ''}
-        <ha-form
-            .hass=${hass}
-            .data=${data}
-            .schema=${[
-                {
-                    type: "grid",
-                    flatten: true,
-                    schema: [
-                        {
-                            name: "min_value",
-                            label: "Min value",
-                            selector: { number: { step: "any" } },
-                        },
-                        {
-                            name: "max_value",
-                            label: "Max value",
-                            selector: { number: { step: "any" } },
-                        },
-                        {
-                            name: "step",
-                            label: "Step",
-                            selector: { number: { step: "any" } },
-                        },
-                    ],
-                },
-            ]}
-            .computeLabel=${computeLabel}
-            .disabled=${rangeFormDisabled}
-            @value-changed=${onFormChange}
-        ></ha-form>
-        <hr>
-        <ha-formfield>
-            <ha-switch
-                .checked=${data.tap_to_slide && !data.relative_slide}
-                @change=${(ev) => callToggleChange('tap_to_slide', ev.target.checked, meta('ha-switch', 'change'))}
-                .disabled=${data.relative_slide || isReadOnly}
-            ></ha-switch>
-            <div class="mdc-form-field">
-                <label class="mdc-label">Tap to slide (previous behavior)</label>
-            </div>
-        </ha-formfield>
-        <ha-formfield>
-            <ha-switch
-                .checked=${!data.tap_to_slide && data.relative_slide}
-                @change=${(ev) => callToggleChange('relative_slide', ev.target.checked, meta('ha-switch', 'change'))}
-                .disabled=${data.tap_to_slide || isReadOnly}
-            ></ha-switch>
-            <div class="mdc-form-field">
-                <label class="mdc-label">Relative slide (incompatible with tap to slide)</label>
-            </div>
-        </ha-formfield>
-        <ha-formfield>
-            <ha-switch
-                .checked=${data.read_only_slider ?? isReadOnly}
-                @change=${(ev) => callToggleChange('read_only_slider', ev.target.checked, meta('ha-switch', 'change'))}
-                .disabled=${isReadOnly}
-            ></ha-switch>
-            <div class="mdc-form-field">
-                <label class="mdc-label">Read only slider</label>
-            </div>
-        </ha-formfield>
-        <ha-formfield>
-            <ha-switch
-                .checked=${data.slider_live_update ?? false}
-                @change=${(ev) => callToggleChange('slider_live_update', ev.target.checked, meta('ha-switch', 'change'))}
-                .disabled=${isReadOnly}
-            ></ha-switch>
-            <div class="mdc-form-field">
-                <label class="mdc-label">Slider live update</label>
-            </div>
-        </ha-formfield>
-        <div class="bubble-info" style="display: ${(data.slider_live_update ?? false) ? '' : 'none'}">
-            <h4 class="bubble-section-title">
-                <ha-icon icon="mdi:information-outline"></ha-icon>
-                Slider live update
+
+        <ha-expansion-panel outlined>
+            <h4 slot="header">
+                <ha-icon icon="mdi:gesture-swipe-horizontal"></ha-icon>
+                Slider behavior
             </h4>
             <div class="content">
-                <p>By default, sliders are updated only on release. When this option is enabled, the slider will update the entity state while sliding. <b>This feature is not recommended for all entities, disable it if you encounter issues.</b></p>
+                ${showEntityFilterToggle ? html`
+                    <div class="checkbox-wrapper">
+                        <ha-formfield label="Disable entity filter (for custom slider)">
+                            <ha-switch
+                                .checked=${entityFilterValue}
+                                @change=${(ev) => handleEntityFilterToggle(ev.target.checked)}
+                            ></ha-switch>
+                        </ha-formfield>
+                    </div>
+                    <div class="bubble-info" style="display: ${showEntityFilterInfo ? '' : 'none'}">
+                        <h4 class="bubble-section-title">
+                            <ha-icon icon="mdi:information-outline"></ha-icon>
+                            Custom slider
+                        </h4>
+                        <div class="content">
+                            <p>To create a custom slider (read only), select an <b>entity with a numeric state</b> above, then define the <b>min</b> and <b>max</b> values below.</p>
+                            <p>For example, this allows you to display your solar production within a specific range.</p>
+                        </div>
+                    </div>
+                ` : ''}
+                <div class="range-inputs" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                    <ha-textfield
+                        label="Min value"
+                        type="number"
+                        step="any"
+                        .value="${data.min_value ?? ''}"
+                        .disabled=${rangeFormDisabled}
+                        @input="${(ev) => {
+                            const value = ev.target.value;
+                            callToggleChange('min_value', value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
+                        }}"
+                    ></ha-textfield>
+                    <ha-textfield
+                        label="Max value"
+                        type="number"
+                        step="any"
+                        .value="${data.max_value ?? ''}"
+                        .disabled=${rangeFormDisabled}
+                        @input="${(ev) => {
+                            const value = ev.target.value;
+                            callToggleChange('max_value', value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
+                        }}"
+                    ></ha-textfield>
+                    <ha-textfield
+                        label="Step"
+                        type="number"
+                        step="any"
+                        .value="${data.step ?? ''}"
+                        .disabled=${rangeFormDisabled}
+                        @input="${(ev) => {
+                            const value = ev.target.value;
+                            callToggleChange('step', value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
+                        }}"
+                    ></ha-textfield>
+                </div>
+                <ha-formfield>
+                    <ha-switch
+                        .checked=${data.tap_to_slide && !data.relative_slide}
+                        @change=${(ev) => callToggleChange('tap_to_slide', ev.target.checked, meta('ha-switch', 'change'))}
+                        .disabled=${data.relative_slide || isReadOnly}
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Tap to slide (previous behavior)</label>
+                    </div>
+                </ha-formfield>
+                <ha-formfield>
+                    <ha-switch
+                        .checked=${!data.tap_to_slide && data.relative_slide}
+                        @change=${(ev) => callToggleChange('relative_slide', ev.target.checked, meta('ha-switch', 'change'))}
+                        .disabled=${data.tap_to_slide || isReadOnly}
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Relative slide (incompatible with tap to slide)</label>
+                    </div>
+                </ha-formfield>
+                <ha-formfield>
+                    <ha-switch
+                        .checked=${data.read_only_slider ?? isReadOnly}
+                        @change=${(ev) => callToggleChange('read_only_slider', ev.target.checked, meta('ha-switch', 'change'))}
+                        .disabled=${isReadOnly}
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Read only slider</label>
+                    </div>
+                </ha-formfield>
+                <ha-formfield>
+                    <ha-switch
+                        .checked=${data.slider_live_update ?? false}
+                        @change=${(ev) => callToggleChange('slider_live_update', ev.target.checked, meta('ha-switch', 'change'))}
+                        .disabled=${isReadOnly}
+                    ></ha-switch>
+                    <div class="mdc-form-field">
+                        <label class="mdc-label">Slider live update</label>
+                    </div>
+                </ha-formfield>
+                <div class="bubble-info" style="display: ${(data.slider_live_update ?? false) ? '' : 'none'}">
+                    <h4 class="bubble-section-title">
+                        <ha-icon icon="mdi:information-outline"></ha-icon>
+                        Slider live update
+                    </h4>
+                    <div class="content">
+                        <p>By default, sliders are updated only on release. When this option is enabled, the slider will update the entity state while sliding. <b>This feature is not recommended for all entities, disable it if you encounter issues.</b></p>
+                    </div>
+                </div>
             </div>
-        </div>
+        </ha-expansion-panel>
         <ha-expansion-panel outlined>
             <h4 slot="header">
                 <ha-icon icon="mdi:view-grid"></ha-icon>
                 Slider layout
             </h4>
             <div class="content">
-                <ha-form
-                    .hass=${hass}
-                    .data=${{ slider_fill_orientation: data.slider_fill_orientation || 'left' }}
-                    .schema=${[{
-                        name: 'slider_fill_orientation',
-                        selector: {
-                            select: {
-                                options: FILL_ORIENTATION_OPTIONS,
-                                mode: 'dropdown'
-                            }
-                        }
-                    }]}
-                    .computeLabel=${() => 'Fill orientation'}
-                    @value-changed=${(ev) => callToggleChange('slider_fill_orientation', ev.detail.value.slider_fill_orientation, meta('ha-form', 'value-changed'))}
-                ></ha-form>
+                <ha-select
+                    label="Fill orientation"
+                    .value="${data.slider_fill_orientation || 'left'}"
+                    @selected="${(ev) => callToggleChange('slider_fill_orientation', ev.target.value, meta('ha-select', 'selected'))}"
+                    @closed="${(ev) => ev.stopPropagation()}"
+                >
+                    <mwc-list-item value="left">Fill from left (default)</mwc-list-item>
+                    <mwc-list-item value="right">Fill from right</mwc-list-item>
+                    <mwc-list-item value="top">Fill from top</mwc-list-item>
+                    <mwc-list-item value="bottom">Fill from bottom</mwc-list-item>
+                </ha-select>
                 <div class="bubble-info" style="display: ${['top', 'bottom'].includes(data.slider_fill_orientation) ? '' : 'none'}">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -248,21 +258,29 @@ export function makeGenericSliderSettings({
                     </div>
                 </div>
                 ${isLightColorMode ? '' : html`
-                    <ha-form
-                        .hass=${hass}
-                        .data=${{ slider_value_position: data.slider_value_position || 'right' }}
-                        .schema=${[{
-                            name: 'slider_value_position',
-                            selector: {
-                                select: {
-                                    options: VALUE_POSITION_OPTIONS,
-                                    mode: 'dropdown'
-                                }
-                            }
-                        }]}
-                        .computeLabel=${() => 'Value position'}
-                        @value-changed=${(ev) => callToggleChange('slider_value_position', ev.detail.value.slider_value_position, meta('ha-form', 'value-changed'))}
-                    ></ha-form>
+                    <ha-select
+                        label="Value position"
+                        .value="${forceValuePositionRight ? 'right' : (data.slider_value_position || 'right')}"
+                        .disabled=${forceValuePositionRight}
+                        @selected="${(ev) => callToggleChange('slider_value_position', ev.target.value, meta('ha-select', 'selected'))}"
+                        @closed="${(ev) => ev.stopPropagation()}"
+                    >
+                        <mwc-list-item value="right">Right (default)</mwc-list-item>
+                        <mwc-list-item value="left">Left</mwc-list-item>
+                        <mwc-list-item value="center">Center</mwc-list-item>
+                        <mwc-list-item value="hidden">Hidden</mwc-list-item>
+                    </ha-select>
+                    ${forceValuePositionRight ? html`
+                        <div class="bubble-info">
+                            <h4 class="bubble-section-title">
+                                <ha-icon icon="mdi:information-outline"></ha-icon>
+                                Value position locked
+                            </h4>
+                            <div class="content">
+                                <p>Value position is forced to "Right" because "Show button info" is enabled. Disable it to change this setting.</p>
+                            </div>
+                        </div>
+                    ` : ''}
                 `}
                 <ha-formfield style="display: ${hideInvertSliderToggle ? 'none' : ''}">
                     <ha-switch
@@ -282,26 +300,17 @@ export function makeGenericSliderSettings({
                     Light options
                 </h4>
                 <div class="content">
-                    <ha-form
-                        .hass=${hass}
-                        .data=${{ light_slider_type: data.light_slider_type || 'brightness' }}
-                        .schema=${[{
-                            name: 'light_slider_type',
-                            selector: {
-                                select: {
-                                    options: [
-                                        { label: 'Brightness (default)', value: 'brightness' },
-                                        { label: 'Color (Hue)', value: 'hue' },
-                                        { label: 'Saturation', value: 'saturation' },
-                                        { label: 'White temperature', value: 'white_temp' }
-                                    ],
-                                    mode: 'dropdown'
-                                }
-                            }
-                        }]}
-                        .computeLabel=${() => 'Light slider mode'}
-                        @value-changed=${(ev) => callToggleChange('light_slider_type', ev.detail.value.light_slider_type, meta('ha-form', 'value-changed'))}
-                    ></ha-form>
+                    <ha-select
+                        label="Light slider mode"
+                        .value="${data.light_slider_type || 'brightness'}"
+                        @selected="${(ev) => callToggleChange('light_slider_type', ev.target.value, meta('ha-select', 'selected'))}"
+                        @closed="${(ev) => ev.stopPropagation()}"
+                    >
+                        <mwc-list-item value="brightness">Brightness (default)</mwc-list-item>
+                        <mwc-list-item value="hue">Color (Hue)</mwc-list-item>
+                        <mwc-list-item value="saturation">Saturation</mwc-list-item>
+                        <mwc-list-item value="white_temp">White temperature</mwc-list-item>
+                    </ha-select>
                     ${data.light_slider_type === 'hue' ? html`
                         <ha-formfield>
                             <ha-switch

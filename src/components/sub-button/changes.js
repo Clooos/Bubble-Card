@@ -190,18 +190,22 @@ function initializesubButtonIcon(context) {
 
   const container = context.config.card_type === 'pop-up' ? context.popUp : context.content;
   
-  // Main buttons
-  container.querySelectorAll('.bubble-sub-button-icon').forEach((iconElement, index) => {
-    context.subButtonIcon[index] = iconElement;
+  // Main buttons - use direct element references to avoid cloned icons
+  container.querySelectorAll('.bubble-sub-button:not(.bubble-sub-button-group *)').forEach((subButtonElement) => {
+    if (subButtonElement.icon) {
+      context.subButtonIcon.push(subButtonElement.icon);
+    }
   });
   
-  // Group buttons
+  // Group buttons - use direct element references to avoid cloned icons
   if (context.elements && context.elements.groups) {
     Object.values(context.elements.groups).forEach(group => {
       if (group.container) {
-        const groupIcons = group.container.querySelectorAll('.bubble-sub-button-icon');
-        groupIcons.forEach(iconElement => {
-          context.subButtonIcon.push(iconElement);
+        const groupButtons = group.container.querySelectorAll('.bubble-sub-button');
+        groupButtons.forEach(subButtonElement => {
+          if (subButtonElement.icon) {
+            context.subButtonIcon.push(subButtonElement.icon);
+          }
         });
       }
     });
@@ -392,6 +396,28 @@ export function updateGroupButtons(context, sectionedArg) {
       handleVisibilityConditions(element, button, context._hass);
     });
 
+    // Hide group if all its sub-buttons are hidden
+    updateGroupVisibility(groupContainer);
+
     syncLaneFillStateForGroup(groupContainer);
   });
+}
+
+// Hide group container if all its visible sub-buttons are hidden
+function updateGroupVisibility(groupContainer) {
+  if (!groupContainer) return;
+  
+  // Get all sub-buttons in the group (excluding sliders and other non-button elements)
+  const subButtons = Array.from(groupContainer.querySelectorAll('.bubble-sub-button'));
+  
+  if (subButtons.length === 0) return;
+  
+  // Check if all sub-buttons are hidden
+  const allHidden = subButtons.every(btn => {
+    // Check if button is hidden by visibility conditions or parent unavailable
+    return btn.classList.contains('hidden') || btn.style.display === 'none';
+  });
+  
+  // Toggle hidden class on the group container
+  groupContainer.classList.toggle('hidden', allHidden);
 }

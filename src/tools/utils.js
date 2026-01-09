@@ -35,38 +35,80 @@ const colorCache = new Map();
 // Cache for getComputedStyle to avoid expensive recalculations
 // Cache is invalidated on each animation frame to ensure accuracy
 let cachedDocumentElementStyles = null;
+let cachedBodyStyles = null;
+let stylesCacheFrameId = 0;
 let rafScheduled = false;
 
 function invalidateStyleCache() {
     cachedDocumentElementStyles = null;
+    cachedBodyStyles = null;
+    stylesCacheFrameId++;
     rafScheduled = false;
+}
+
+function ensureStyleCacheValid() {
+    if (!rafScheduled) {
+        requestAnimationFrame(invalidateStyleCache);
+        rafScheduled = true;
+    }
 }
 
 export function getCachedDocumentElementStyles() {
     if (!cachedDocumentElementStyles) {
         cachedDocumentElementStyles = getComputedStyle(document.documentElement);
-        if (!rafScheduled) {
-            requestAnimationFrame(invalidateStyleCache);
-            rafScheduled = true;
-        }
+        ensureStyleCacheValid();
     }
     return cachedDocumentElementStyles;
 }
 
-export function resolveCssVariable(cssVariable) {
-    let value = cssVariable;
-    const bodyStyles = getComputedStyle(document.body);
+function getCachedBodyStyles() {
+    if (!cachedBodyStyles) {
+        cachedBodyStyles = getComputedStyle(document.body);
+        ensureStyleCacheValid();
+    }
+    return cachedBodyStyles;
+}
 
-    while (value && value.startsWith('var(')) {
+// Cache for resolved CSS variables - cleared each frame
+const cssVariableCache = new Map();
+let cssVariableCacheFrameId = -1;
+
+export function resolveCssVariable(cssVariable) {
+    if (!cssVariable) return '';
+    
+    // Clear cache if frame changed
+    if (cssVariableCacheFrameId !== stylesCacheFrameId) {
+        cssVariableCache.clear();
+        cssVariableCacheFrameId = stylesCacheFrameId;
+    }
+    
+    // Check cache first
+    if (cssVariableCache.has(cssVariable)) {
+        return cssVariableCache.get(cssVariable);
+    }
+    
+    let value = cssVariable;
+    
+    // Fast path: if not a CSS variable, return as-is
+    if (!value.startsWith('var(')) {
+        cssVariableCache.set(cssVariable, value);
+        return value;
+    }
+    
+    const bodyStyles = getCachedBodyStyles();
+    let iterations = 0;
+    const maxIterations = 10; // Prevent infinite loops
+
+    while (value && value.startsWith('var(') && iterations < maxIterations) {
         const match = value.match(/var\((--[^,]+),?\s*(.*)?\)/);
         if (!match) break;
         const [, varName, fallback] = match;
         const resolvedValue = bodyStyles.getPropertyValue(varName).trim();
-
         value = resolvedValue || (fallback && fallback.trim()) || '';
-
+        iterations++;
     }
 
+    cssVariableCache.set(cssVariable, value);
     return value;
 }
 
@@ -139,7 +181,7 @@ export function getStateSurfaceColor(context, entity = context.config.entity, us
       const match = resolved.match(/var\((--[^,]+),?\s*(.*)?\)/);
       if (match) {
         const [, varName] = match;
-        const computed = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        const computed = getCachedDocumentElementStyles().getPropertyValue(varName).trim();
         if (computed) resolved = computed;
       }
     }
@@ -156,7 +198,6 @@ export function getStateSurfaceColor(context, entity = context.config.entity, us
     
     // Check if sub-button color matches (for slider contrast)
     let shouldApplyDerivation = false;
-    let subButtonRgb = null;
     
     if (subButtonColor) {
       let subButtonResolved = resolveCssVariable(subButtonColor);
@@ -164,11 +205,11 @@ export function getStateSurfaceColor(context, entity = context.config.entity, us
         const match = subButtonResolved.match(/var\((--[^,]+),?\s*(.*)?\)/);
         if (match) {
           const [, varName] = match;
-          const computed = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+          const computed = getCachedDocumentElementStyles().getPropertyValue(varName).trim();
           if (computed) subButtonResolved = computed;
         }
       }
-      subButtonRgb = hexToRgb(subButtonResolved) || rgbStringToRgb(subButtonResolved);
+      const subButtonRgb = hexToRgb(subButtonResolved) || rgbStringToRgb(subButtonResolved);
       
       if (subButtonRgb && areColorsSimilar(rgb, subButtonRgb)) {
         shouldApplyDerivation = true;
@@ -183,7 +224,7 @@ export function getStateSurfaceColor(context, entity = context.config.entity, us
         const match = cardResolved.match(/var\((--[^,]+),?\s*(.*)?\)/);
         if (match) {
           const [, varName] = match;
-          const computed = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+          const computed = getCachedDocumentElementStyles().getPropertyValue(varName).trim();
           if (computed) cardResolved = computed;
         }
       }
@@ -416,6 +457,9 @@ function measureAndApplyScrolling(element, state) {
     const availableWidth = element.clientWidth;
     const isAnimated = element.getAttribute('data-animated') === 'true';
 
+    // Tolerance threshold to handle sub-pixel rounding errors (especially on Safari with zoom)
+    const SCROLL_TOLERANCE = 2;
+
     if (isAnimated) {
         const span = element.querySelector('.scrolling-container span');
         if (!span) return;
@@ -423,7 +467,7 @@ function measureAndApplyScrolling(element, state) {
         forceReflow(span);
         const baseWidth = Math.max(1, span.scrollWidth / 2);
         
-        if (baseWidth <= availableWidth) {
+        if (baseWidth <= availableWidth + SCROLL_TOLERANCE) {
             element.removeAttribute('data-animated');
             element.innerHTML = text;
             if (state.observed && window.bubbleScrollObserver) {
@@ -437,7 +481,7 @@ function measureAndApplyScrolling(element, state) {
         span.style.animationDuration = `${duration.toFixed(2)}s`;
     } else {
         const baseWidth = element.scrollWidth;
-        if (baseWidth > availableWidth) {
+        if (baseWidth > availableWidth + SCROLL_TOLERANCE) {
             const separator = `<span class="bubble-scroll-separator"> | </span>`;
             const wrappedText = `<span>${text + separator + text + separator}</span>`;
             element.innerHTML = `<div class="scrolling-container">${wrappedText}</div>`;
@@ -501,6 +545,9 @@ export function applyScrollingEffect(context, element, text) {
     const isAnimated = element.getAttribute('data-animated') === 'true';
     const existingSpan = element.querySelector('.scrolling-container span');
     
+    // Tolerance threshold to handle sub-pixel rounding errors (especially on Safari with zoom)
+    const SCROLL_TOLERANCE = 2;
+
     if (isAnimated && existingSpan) {
         // Update content while animation runs
         const separator = `<span class="bubble-scroll-separator"> | </span>`;
@@ -512,7 +559,7 @@ export function applyScrollingEffect(context, element, text) {
         const availableWidth = element.clientWidth;
         const baseWidth = Math.max(1, existingSpan.scrollWidth / 2);
         
-        if (baseWidth <= availableWidth) {
+        if (baseWidth <= availableWidth + SCROLL_TOLERANCE) {
             // Text now fits, disable animation
             element.removeAttribute('data-animated');
             element.innerHTML = text;
@@ -571,7 +618,7 @@ function applyNonScrollingStyle(element, text) {
         WebkitLineClamp: '2',
         WebkitBoxOrient: 'vertical',
         textOverflow: 'ellipsis',
-        overflow: 'hidden'
+        overflow: 'hidden',
     });
 }
 
