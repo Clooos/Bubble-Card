@@ -286,10 +286,6 @@
 
 .background-on {
     background-color: var(--bubble-sub-button-light-background-color, var(--bubble-accent-color, var(--bubble-default-color)));
-    /* Optimize repaints on Safari */
-    will-change: background-color;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
 }
 
 .background-off {

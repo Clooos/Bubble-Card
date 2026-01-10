@@ -49,10 +49,6 @@
 .slider-use-light-color {
     background-color: var(--bubble-slider-fill-color, var(--bubble-light-color, rgb(225, 225, 210))) !important;
     opacity: 0.7;
-    /* Optimize repaints on Safari */
-    will-change: background-color;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
 }
 
 .slider-use-accent-color {

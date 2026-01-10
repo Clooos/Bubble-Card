@@ -51,7 +51,8 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
   const layoutPanelKey = `${panelKeyPrefix}_layout_${index}`;
   const sliderTypePanelKey = `${panelKeyPrefix}_type_slider_${index}`;
 
-  const disableActions = (button.sub_button_type === 'select' || (!button.sub_button_type && isSelect)) || button.sub_button_type === 'slider';
+  const isSliderWithAlwaysVisible = button.sub_button_type === 'slider' && button.always_visible;
+  const disableActions = (button.sub_button_type === 'select' || (!button.sub_button_type && isSelect)) || isSliderWithAlwaysVisible;
 
   const isBottomSection = typeof path === 'string' && path.startsWith('sub_button.bottom');
   const effectiveFillWidth = (button.fill_width == null) ? (isBottomSection ? true : false) : button.fill_width;
@@ -253,11 +254,26 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
             </h4>
             <div class="content">
               ${getLazyLoadedPanelContent(editor, actionsPanelKey, !!editor._expandedPanelStates[actionsPanelKey], () => html`
+                ${isSliderWithAlwaysVisible ? html`
+                  <div class="bubble-info">
+                    <h4 class="bubble-section-title">
+                      <ha-icon icon="mdi:information-outline"></ha-icon>
+                      Actions disabled
+                    </h4>
+                    <div class="content">
+                      <p>Tap, double tap, and hold actions are disabled on this sub-button because "Always show slider" is enabled.</p>
+                    </div>
+                  </div>
+                ` : ''}
                 <div style="${disableActions ? 'opacity: 0.5; pointer-events: none;' : ''}">
                   ${editor.makeActionPanel("Tap action", button, 'more-info', path, index)}
                 </div>
-                ${editor.makeActionPanel("Double tap action", button, 'none', path, index)}
-                ${editor.makeActionPanel("Hold action", button, 'none', path, index)}
+                <div style="${disableActions ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                  ${editor.makeActionPanel("Double tap action", button, 'none', path, index)}
+                </div>
+                <div style="${disableActions ? 'opacity: 0.5; pointer-events: none;' : ''}">
+                  ${editor.makeActionPanel("Hold action", button, 'none', path, index)}
+                </div>
               `)}
             </div>
           </ha-expansion-panel>
@@ -360,6 +376,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                     .value="${button.content_layout ?? 'icon-left'}"
                     @selected="${(ev) => updateValueFn({ content_layout: ev.target.value })}"
                     @closed="${(ev) => ev.stopPropagation()}"
+                    fixedMenuPosition
                   >
                     <mwc-list-item value="icon-left">Icon on left (default)</mwc-list-item>
                     <mwc-list-item value="icon-top">Icon on top</mwc-list-item>

@@ -183,6 +183,37 @@ export function changeSubButtons(context, subButtons = context.config.sub_button
   initializesubButtonIcon(context);
 }
 
+// To fix: Index issue with sub-buttons but use direct element references to avoid cloned icons #2103
+
+// function initializesubButtonIcon(context) {
+//   if (!Array.isArray(context.subButtonIcon)) {
+//     context.subButtonIcon = [];
+//   }
+
+//   const container = context.config.card_type === 'pop-up' ? context.popUp : context.content;
+  
+//   // Main buttons - use direct element references to avoid cloned icons
+//   container.querySelectorAll('.bubble-sub-button:not(.bubble-sub-button-group *)').forEach((subButtonElement) => {
+//     if (subButtonElement.icon) {
+//       context.subButtonIcon.push(subButtonElement.icon);
+//     }
+//   });
+  
+//   // Group buttons - use direct element references to avoid cloned icons
+//   if (context.elements && context.elements.groups) {
+//     Object.values(context.elements.groups).forEach(group => {
+//       if (group.container) {
+//         const groupButtons = group.container.querySelectorAll('.bubble-sub-button');
+//         groupButtons.forEach(subButtonElement => {
+//           if (subButtonElement.icon) {
+//             context.subButtonIcon.push(subButtonElement.icon);
+//           }
+//         });
+//       }
+//     });
+//   }
+// }
+
 function initializesubButtonIcon(context) {
   if (!Array.isArray(context.subButtonIcon)) {
     context.subButtonIcon = [];
@@ -190,22 +221,18 @@ function initializesubButtonIcon(context) {
 
   const container = context.config.card_type === 'pop-up' ? context.popUp : context.content;
   
-  // Main buttons - use direct element references to avoid cloned icons
-  container.querySelectorAll('.bubble-sub-button:not(.bubble-sub-button-group *)').forEach((subButtonElement) => {
-    if (subButtonElement.icon) {
-      context.subButtonIcon.push(subButtonElement.icon);
-    }
+  // Main buttons
+  container.querySelectorAll('.bubble-sub-button-icon').forEach((iconElement, index) => {
+    context.subButtonIcon[index] = iconElement;
   });
   
-  // Group buttons - use direct element references to avoid cloned icons
+  // Group buttons
   if (context.elements && context.elements.groups) {
     Object.values(context.elements.groups).forEach(group => {
       if (group.container) {
-        const groupButtons = group.container.querySelectorAll('.bubble-sub-button');
-        groupButtons.forEach(subButtonElement => {
-          if (subButtonElement.icon) {
-            context.subButtonIcon.push(subButtonElement.icon);
-          }
+        const groupIcons = group.container.querySelectorAll('.bubble-sub-button-icon');
+        groupIcons.forEach(iconElement => {
+          context.subButtonIcon.push(iconElement);
         });
       }
     });

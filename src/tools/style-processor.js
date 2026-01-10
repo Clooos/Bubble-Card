@@ -2,6 +2,7 @@ import { getState } from "./utils.js";
 import { getWeatherIcon } from "./icon.js";
 import { getSubButtonsStates } from "../components/sub-button/changes.js";
 import { checkConditionsMet } from './validate-condition.js';
+import { onTemplateChange } from './render-template.js';
 import { yamlKeysMap } from '../modules/registry.js';
 import { isBCTAvailableSync } from '../modules/bct-provider.js';
 
@@ -74,12 +75,28 @@ export const handleCustomStyles = async (context, element = context.card) => {
         const targetElement = context.cardType === 'pop-up' && context.popUp ? context.popUp : context.card;
         handleCustomStyles(context, targetElement); 
       };
+
+      // Light refresh for template result changes (no need to clear module caches)
+      const templateRefreshHandler = () => {
+        context.lastEvaluatedStyles = "";
+        // Increment template version counter for modules that track template changes
+        context._templateResultVersion = (context._templateResultVersion || 0) + 1;
+        // Invalidate bubble_badges module cache to force re-evaluation
+        if (context._bb_cache) {
+          context._bb_cache.lastStateSignature = '';
+        }
+        const targetElement = context.cardType === 'pop-up' && context.popUp ? context.popUp : context.card;
+        handleCustomStyles(context, targetElement);
+      };
       
       window.addEventListener('bubble-card-modules-changed', refreshHandler);
       window.addEventListener('bubble-card-module-updated', refreshHandler);
+      // Subscribe to template changes
+      onTemplateChange(templateRefreshHandler);
       document.addEventListener('yaml-modules-updated', refreshHandler);
       context._moduleChangeListenerAdded = true;
       context._moduleChangeHandler = refreshHandler;
+      context._templateChangeHandler = templateRefreshHandler;
     }
   }
   

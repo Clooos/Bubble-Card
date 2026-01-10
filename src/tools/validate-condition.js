@@ -1,3 +1,5 @@
+import { getRenderedTemplate } from "./render-template.js";
+
 function getValueFromEntityId(hass,value){
   try{
     if (hass.states[value]) {
@@ -54,93 +56,6 @@ function normalizeEntityIds(entityId) {
   return entityId ? [entityId] : [];
 }
 
-function evaluateTemplate(template, hass, variables = {}) {
-  if (!template || typeof template !== "string") {
-    return undefined;
-  }
-
-  // Extract inner expression when wrapped in {{ }}
-  const match = template.trim().match(/^{{(.*)}}$/s);
-  let expr = (match ? match[1] : template).trim();
-
-  // Basic Jinja → JS translations
-  expr = expr
-    .replace(/\band\b/gi, "&&")
-    .replace(/\bor\b/gi, "||")
-    .replace(/\bnot\b/gi, "!")
-    .replace(/\bnone\b/gi, "null")
-    .replace(/\bTrue\b/g, "true")
-    .replace(/\bFalse\b/g, "false");
-
-  // Simple filter rewrites
-  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*int\(([^)]*)\)/gi, "__INT__(state_attr($1), $2)");
-  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*int\b/gi, "__INT__(state_attr($1))");
-  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*float\(([^)]*)\)/gi, "__FLOAT__(state_attr($1), $2)");
-  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*float\b/gi, "__FLOAT__(state_attr($1))");
-  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*lower\b/gi, "__LOWER__(state_attr($1))");
-  expr = expr.replace(/state_attr\(([^)]+)\)\s*\|\s*upper\b/gi, "__UPPER__(state_attr($1))");
-
-  // Generic pipe handling for int/float/lower/upper on any expression (best-effort)
-  expr = expr.replace(/([^)>\s|]+)\s*\|\s*int\(([^)]*)\)/gi, "__INT__($1, $2)");
-  expr = expr.replace(/([^)>\s|]+)\s*\|\s*int\b/gi, "__INT__($1)");
-  expr = expr.replace(/([^)>\s|]+)\s*\|\s*float\(([^)]*)\)/gi, "__FLOAT__($1, $2)");
-  expr = expr.replace(/([^)>\s|]+)\s*\|\s*float\b/gi, "__FLOAT__($1)");
-  expr = expr.replace(/([^)>\s|]+)\s*\|\s*lower\b/gi, "__LOWER__($1)");
-  expr = expr.replace(/([^)>\s|]+)\s*\|\s*upper\b/gi, "__UPPER__($1)");
-
-  const ctx = {
-    ...variables,
-    state_attr: (entityId, attribute) =>
-      hass?.states?.[entityId]?.attributes?.[attribute],
-    states: (entityId) => hass?.states?.[entityId]?.state,
-    is_state: (entityId, value) => hass?.states?.[entityId]?.state === value,
-    is_state_attr: (entityId, attribute, value) =>
-      hass?.states?.[entityId]?.attributes?.[attribute] === value,
-    __INT__: (value, defaultValue = 0) => {
-      const n = parseInt(value, 10);
-      return Number.isNaN(n) ? defaultValue : n;
-    },
-    __FLOAT__: (value, defaultValue = 0) => {
-      const n = parseFloat(value);
-      return Number.isNaN(n) ? defaultValue : n;
-    },
-    __LOWER__: (value) =>
-      typeof value === "string" ? value.toLowerCase() : value,
-    __UPPER__: (value) =>
-      typeof value === "string" ? value.toUpperCase() : value,
-  };
-
-  try {
-    // eslint-disable-next-line no-new-func
-    const fn = new Function(
-      "__CTX__",
-      `with (__CTX__) { return (${expr}); }`
-    );
-    return fn(ctx);
-  } catch {
-    return undefined;
-  }
-}
-
-function renderTemplateValue(valueTemplate, hass, variables = {}) {
-  if (!valueTemplate) {
-    return undefined;
-  }
-
-  if (typeof hass.renderTemplate === "function") {
-    try {
-      const result = hass.renderTemplate(valueTemplate, { variables });
-      if (!(result instanceof Promise)) {
-        return result;
-      }
-    } catch {
-      // Fall back to local evaluation
-    }
-  }
-
-  return evaluateTemplate(valueTemplate, hass, variables);
-}
-
 function checkStateNumericCondition(condition,hass) {
   const entityIds = normalizeEntityIds(condition.entity_id || condition.entity);
 
@@ -173,7 +88,7 @@ function checkStateNumericCondition(condition,hass) {
       : entity.state;
 
     if (condition.value_template) {
-      const rendered = renderTemplateValue(condition.value_template, hass, {
+      const rendered = getRenderedTemplate(hass, condition.value_template, {
         value: state,
         entity,
         entity_id: id,
@@ -234,13 +149,9 @@ function checkTemplateCondition(condition, hass) {
     return false;
   }
 
-  try {
-    const result = renderTemplateValue(condition.value_template, hass);
-    // Accept truthy/non-empty values as pass
-    return result === true || result === "true" || result === 1 || result === "1" || result === "True";
-  } catch {
-    return false;
-  }
+  const result = getRenderedTemplate(hass, condition.value_template);
+  // Accept truthy/non-empty values as pass
+  return result === true || result === "true" || result === 1 || result === "1" || result === "True";
 }
 
 export function checkConditionsMet(conditions,hass) {

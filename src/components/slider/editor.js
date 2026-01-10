@@ -242,6 +242,7 @@ export function makeGenericSliderSettings({
                     .value="${data.slider_fill_orientation || 'left'}"
                     @selected="${(ev) => callToggleChange('slider_fill_orientation', ev.target.value, meta('ha-select', 'selected'))}"
                     @closed="${(ev) => ev.stopPropagation()}"
+                    fixedMenuPosition
                 >
                     <mwc-list-item value="left">Fill from left (default)</mwc-list-item>
                     <mwc-list-item value="right">Fill from right</mwc-list-item>
@@ -264,6 +265,7 @@ export function makeGenericSliderSettings({
                         .disabled=${forceValuePositionRight}
                         @selected="${(ev) => callToggleChange('slider_value_position', ev.target.value, meta('ha-select', 'selected'))}"
                         @closed="${(ev) => ev.stopPropagation()}"
+                        fixedMenuPosition
                     >
                         <mwc-list-item value="right">Right (default)</mwc-list-item>
                         <mwc-list-item value="left">Left</mwc-list-item>
@@ -305,6 +307,7 @@ export function makeGenericSliderSettings({
                         .value="${data.light_slider_type || 'brightness'}"
                         @selected="${(ev) => callToggleChange('light_slider_type', ev.target.value, meta('ha-select', 'selected'))}"
                         @closed="${(ev) => ev.stopPropagation()}"
+                        fixedMenuPosition
                     >
                         <mwc-list-item value="brightness">Brightness (default)</mwc-list-item>
                         <mwc-list-item value="hue">Color (Hue)</mwc-list-item>
