@@ -78,7 +78,7 @@ All options can be configured in the Home Assistant editor. But you can find mor
 
 <details>
 
-**<summary>Main options (YAML + description)</summary>**
+<summary><b>Main options (YAML + description)</b></summary>
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -90,7 +90,7 @@ All options can be configured in the Home Assistant editor. But you can find mor
 
 <details>
 
-**<summary>Global CSS variables (see [Styling](#styling))</summary>**
+<summary><b>Global CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -183,7 +183,7 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 
 <details>
 
-**<summary>Options (YAML + descriptions)</summary>**
+<summary><b>Options (YAML + descriptions)</b></summary>
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -213,7 +213,7 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -308,7 +308,7 @@ This card is a good companion to the pop-up card, allowing you to open the corre
 
 <details>
 
-**<summary>Options (YAML + descriptions)</summary>**
+<summary><b>Options (YAML + descriptions)</b></summary>
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -332,7 +332,7 @@ This card is a good companion to the pop-up card, allowing you to open the corre
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -410,7 +410,7 @@ This card is very versatile. It can be used as a **switch**, a **slider**, a **s
 
 <details>
 
-**<summary>Options (YAML + descriptions)</summary>**
+<summary><b>Options (YAML + descriptions)</b></summary>
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -440,7 +440,7 @@ This card is very versatile. It can be used as a **switch**, a **slider**, a **s
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -458,7 +458,7 @@ These options are only available when `button_type` is set to `slider`.
 
 <details>
 
-**<summary>Slider options (YAML + descriptions)</summary>**
+<summary><b>Slider options (YAML + descriptions)</b></summary>
 
 | Name                  | Type    | Requirement                     | Description                                                                                             |
 | --------------------- | ------- | ------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -549,7 +549,7 @@ This card allows you to control a media player entity.
 
 <details>
 
-**<summary>Options (YAML + descriptions)</summary>**
+<summary><b>Options (YAML + descriptions)</b></summary>
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -591,7 +591,7 @@ This card allows you to control a media player entity.
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -674,7 +674,7 @@ This card allows you to control your `cover` entities.
 
 <details>
 
-**<summary>Options (YAML + descriptions)</summary>**
+<summary><b>Options (YAML + descriptions)</b></summary>
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -708,7 +708,7 @@ This card allows you to control your `cover` entities.
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -760,7 +760,7 @@ This card allows you to add a dropdown menu for your `input_select` / `select` e
 
 <details>
 
-**<summary>Options (YAML + descriptions)</summary>**
+<summary><b>Options (YAML + descriptions)</b></summary>
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -787,7 +787,7 @@ This card allows you to add a dropdown menu for your `input_select` / `select` e
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -845,7 +845,7 @@ This card allows you to control your `climate` entities.
 
 <details>
 
-**<summary>Options (YAML + descriptions)</summary>**
+<summary><b>Options (YAML + descriptions)</b></summary>
 
 | Name                     | Type    | Requirement                         | Supported options                                  | Description                                                                                                     |
 |--------------------------|---------|-------------------------------------|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
@@ -874,7 +874,7 @@ This card allows you to control your `climate` entities.
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -931,7 +931,7 @@ This card allows you to display your calendar entities. Its content is scrollabl
 
 <details>
 
-**<summary>Options (YAML + descriptions)</summary>**
+<summary><b>Options (YAML + descriptions)</b></summary>
 
 | Name                | Type    | Requirement  | Supported options                               | Description                                                                             |
 |---------------------|---------|--------------|-------------------------------------------------|-----------------------------------------------------------------------------------------|
@@ -956,7 +956,7 @@ This card allows you to display your calendar entities. Its content is scrollabl
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable                                  | Expected value | Description                                                        |
 | ----------------------------------------- | -------------- | ------------------------------------------------------------------ |
@@ -1020,7 +1020,7 @@ This card is a simple separator for dividing your pop-up into categories / secti
 
 <details>
 
-**<summary>Options (YAML + descriptions)</summary>**
+<summary><b>Options (YAML + descriptions)</b></summary>
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -1034,7 +1034,7 @@ This card is a simple separator for dividing your pop-up into categories / secti
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -1123,7 +1123,7 @@ These sub-buttons can also display dropdown menus if combined with selectable en
 
 <details>
 
-**<summary>Options (YAML + description)</summary>**
+<summary><b>Options (YAML + description)</b></summary>
 
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
@@ -1147,7 +1147,7 @@ These sub-buttons can also display dropdown menus if combined with selectable en
 
 <details>
 
-**<summary>CSS variables (see [Styling](#styling))</summary>**
+<summary><b>CSS variables (see <a href="#styling">Styling</a>)</b></summary>
 
 | Variable | Expected value | Description |
 | --- | --- | --- |
@@ -1311,7 +1311,7 @@ Bubble Card fully supports the Home Assistant section view, you can change the c
 
 <details>
 
-**<summary>Available card layouts</summary>**
+<summary><b>Available card layouts</b></summary>
 
 | Layout | Description |
 | --- | --- |
@@ -1428,7 +1428,7 @@ of a double tap. If this delay is undesirable, set `double_tap_action` to `none`
 
 <details>
 
-**<summary>Options (YAML + description)</summary>**
+<summary><b>Options (YAML + description)</b></summary>
 
 | Name | Type | Supported options | Description |
 | --- | --- | --- | --- |
