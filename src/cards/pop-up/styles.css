@@ -21,6 +21,7 @@
     padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
+    touch-action: pan-y;
 }
 
 .bubble-pop-up-container > * {
@@ -58,6 +59,7 @@
     -webkit-backdrop-filter: var(--custom-popup-filter);
     border: var(--bubble-pop-up-border, var(--bubble-border, none));
     contain: layout paint;
+    pointer-events: none;
 }
 
 .bubble-pop-up-container::-webkit-scrollbar {
