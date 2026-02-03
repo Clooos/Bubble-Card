@@ -1,7 +1,9 @@
 import { 
     throttle, 
     getAttribute,
-    isEntityType
+    isEntityType,
+    formatNumericValue,
+    getTemperatureUnit
 } from "../../tools/utils.js";
 
 export function getClimateColor(context) {
@@ -53,7 +55,7 @@ export function getTemperatureDecimals(context, stepOverride) {
 
 export function formatTemperature(value, context, stepOverride) {
     const decimals = getTemperatureDecimals(context, stepOverride);
-    const num = Number(value);
-    if (Number.isNaN(num)) return '';
-    return num.toFixed(decimals);
+    const unit = getTemperatureUnit(context._hass);
+    const locale = context._hass?.locale?.language || 'en-US';
+    return formatNumericValue(value, decimals, unit, locale);
 }

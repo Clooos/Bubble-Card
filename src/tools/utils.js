@@ -1144,3 +1144,22 @@ export function cleanupScrollingEffects(root) {
         // no-op
     }
 }
+
+export function formatNumericValue(value, decimals = 0, unit = '', locale = 'en-US') {
+    const num = Number(value);
+    if (Number.isNaN(num)) return '';
+    
+    // Use toLocaleString for proper locale-based formatting
+    const formatted = num.toLocaleString(locale, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+        useGrouping: false // Don't add thousands separators
+    });
+    
+    // Add unit with space if provided
+    return unit ? `${formatted} ${unit}` : formatted;
+}
+
+export function getTemperatureUnit(hass) {
+    return hass?.config?.unit_system?.temperature === '°C' ? '°C' : '°F';
+}

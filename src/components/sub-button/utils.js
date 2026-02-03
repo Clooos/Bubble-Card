@@ -1,4 +1,4 @@
-import { getAttribute, isStateOn, isStateRequiringAttention, formatDateTime, createElement, getStateSurfaceColor, getState, isTimerEntity, timerTimeRemaining, computeDisplayTimer, startElementTimerInterval, stopElementTimerInterval, applyScrollingEffect } from "../../tools/utils.js";
+import { getAttribute, isStateOn, isStateRequiringAttention, formatDateTime, createElement, getStateSurfaceColor, getState, isTimerEntity, timerTimeRemaining, computeDisplayTimer, startElementTimerInterval, stopElementTimerInterval, applyScrollingEffect, formatNumericValue, getTemperatureUnit } from "../../tools/utils.js";
 import { getIcon, getLightColorSignature, getImage } from "../../tools/icon.js";
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from "../../tools/validate-condition.js";
@@ -123,18 +123,21 @@ export function buildDisplayedState(options, context, element = null) {
   if (state && showLastUpdated && state.last_updated !== 'unknown') parts.push(formatDateTime(state.last_updated, context._hass.locale.language));
   if (state && showAttribute) {
     if (attributeType.includes('forecast')) {
-      const isCelcius = context._hass.config.unit_system.temperature === '°C';
       const isMetric = context._hass.config.unit_system.length === 'km';
+      const locale = context._hass?.locale?.language || 'en-US';
 
       if (attributeType.includes('temperature') && attribute !== null && attribute !== undefined) {
         const tempValue = parseFloat(attribute);
-        parts.push((tempValue === 0 || tempValue === 0.0 ? '0' : tempValue.toFixed(1).replace(/\.0$/, '')) + (isCelcius ? ' °C' : ' °F'));
+        const unit = getTemperatureUnit(context._hass);
+        const decimals = (tempValue === 0 || tempValue === 0.0) ? 0 : 1;
+        parts.push(formatNumericValue(tempValue, decimals, unit, locale));
       } else if (attributeType.includes('humidity') && attribute !== null && attribute !== undefined) {
-        parts.push(parseFloat(attribute).toFixed(0) + ' %');
+        parts.push(formatNumericValue(parseFloat(attribute), 0, '%', locale));
       } else if (attributeType.includes('precipitation') && attribute !== null && attribute !== undefined) {
-        parts.push(parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + ' mm');
+        parts.push(formatNumericValue(parseFloat(attribute), 1, 'mm', locale));
       } else if (attributeType.includes('wind_speed') && attribute !== null && attribute !== undefined) {
-        parts.push(parseFloat(attribute).toFixed(1).replace(/\.0$/, '') + (isMetric ? ' km/h' : ' mph'));
+        const unit = isMetric ? 'km/h' : 'mph';
+        parts.push(formatNumericValue(parseFloat(attribute), 1, unit, locale));
       } else if (attribute !== null && attribute !== undefined && attribute !== 'unknown') {
         parts.push(attribute);
       }

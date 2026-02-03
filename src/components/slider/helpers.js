@@ -1,7 +1,9 @@
 import { 
   getAttribute,
   getState,
-  isStateOn
+  isStateOn,
+  formatNumericValue,
+  getTemperatureUnit
 } from '../../tools/utils.js';
 
 const FILL_ORIENTATION_VALUES = ['left', 'right', 'top', 'bottom'];
@@ -374,52 +376,36 @@ export function formatDisplayValueFromEntity(context) {
 
 // Helper function to format a value with proper units and precision
 function formatValue(context, value, entityType, entityId, hass) {
+  const locale = hass?.locale?.language || 'en-US';
+  const format = (val, decimals, unit) => formatNumericValue(val, decimals, unit, locale);
+  
   switch (entityType) {
     case 'climate': {
       if (!isStateOn(context, entityId)) {
         return hass?.localize?.('state.default.off') || '0%';
       }
-      const isCelcius = hass?.config?.unit_system?.temperature === '°C';
-      const formatted = value.toFixed(1).replace(/\.0$/, '');
-      return `${formatted}${isCelcius ? '°C' : '°F'}`;
+      const unit = getTemperatureUnit(hass);
+      const decimals = Number.isInteger(value) ? 0 : 1;
+      return format(value, decimals, unit);
     }
     case 'input_number':
     case 'number': {
       const unit = getAttribute(context, 'unit_of_measurement', entityId) || '';
       const precision = hass?.states?.[entityId]?.attributes?.precision ?? (Number.isInteger(value) ? 0 : 1);
-      const formatted = value.toFixed(precision).replace(/\.0$/, '');
-      return unit ? `${formatted} ${unit}` : formatted;
+      return format(value, precision, unit);
     }
-    case 'light': {
-      // For lights, display brightness percentage
-      const rounded = Math.round(value);
-      return `${rounded}%`;
-    }
-    case 'media_player': {
-      // For media players, display volume percentage
-      const rounded = Math.round(value);
-      return `${rounded}%`;
-    }
-    case 'cover': {
-      // For covers, display position percentage
-      const rounded = Math.round(value);
-      return `${rounded}%`;
-    }
-    case 'fan': {
-      // For fans, display percentage
-      const rounded = Math.round(value);
-      return `${rounded}%`;
-    }
+    case 'light':
+    case 'media_player':
+    case 'cover':
+    case 'fan':
+      return format(Math.round(value), 0, '%');
     default: {
-      // For other types, check if there's a unit of measurement
       const unit = getAttribute(context, 'unit_of_measurement', entityId) || '';
       if (unit) {
         const precision = hass?.states?.[entityId]?.attributes?.precision ?? (Number.isInteger(value) ? 0 : 1);
-        const formatted = value.toFixed(precision).replace(/\.0$/, '');
-        return `${formatted} ${unit}`;
+        return format(value, precision, unit);
       }
-      const rounded = Math.round(value);
-      return `${rounded}%`;
+      return format(Math.round(value), 0, '%');
     }
   }
 }
