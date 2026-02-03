@@ -1,4 +1,4 @@
-import { 
+import {
     applyScrollingEffect,
     getState,
     getAttribute,
@@ -146,7 +146,7 @@ export function changeMediaInfo(context) {
         } else {
             context.elements.artist.style.display = 'flex';
         }
-        
+
         context.previousMediaState = mediaState;
     }
 
@@ -197,12 +197,12 @@ export function changePowerIcon(context) {
 
 export function changeVolumeIcon(context) {
     const isBottomFixed = context.elements.buttonsContainer?.classList.contains('bottom-fixed');
-    
+
     // In bottom mode, don't change volume button icon or hide other elements
     if (isBottomFixed) {
         return;
     }
-    
+
     const isSliderOpen = !context.elements.volumeSliderWrapper.classList.contains('is-hidden');
     const newOpacity = isSliderOpen ? '0' : '1';
 
@@ -219,7 +219,7 @@ export function changeVolumeIcon(context) {
 
 export function changeMuteIcon(context) {
     const isVolumeMuted = getAttribute(context, "is_volume_muted") == true;
-    
+
     if (context.elements.muteButton.icon.style.color !== "var(--primary-text-color)") {
         context.elements.muteButton.icon.style.color = "var(--primary-text-color)";
     }
@@ -265,7 +265,14 @@ function getMediaCoverState(context) {
 function evaluateCoverState(context) {
     const coverState = getMediaCoverState(context);
     const forceIcon = Boolean(context.config.force_icon);
-    const rawCover = forceIcon ? '' : (getImage(context) || '');
+
+    // Logic to determine background image
+    const backgroundEntity = context.config.background_entity;
+    const backgroundEntityPicture = backgroundEntity
+        ? context._hass.states[backgroundEntity]?.attributes.entity_picture
+        : undefined;
+
+    const rawCover = backgroundEntityPicture || (forceIcon ? '' : (getImage(context) || ''));
     const entityState = (getState(context) || '').toLowerCase();
     const shouldReset = forceIcon || MEDIA_COVER_RESET_STATES.has(entityState);
     const isIdle = entityState === 'idle';
@@ -348,7 +355,7 @@ function ensureCoverLayers(context, scope) {
 
 function fadeOutCovers(context) {
     const coverState = getMediaCoverState(context);
-    
+
     if (coverState.iconDisplayedUrl) {
         const iconLayers = ensureCoverLayers(context, 'icon');
         if (iconLayers && iconLayers.currentValue) {
@@ -374,7 +381,7 @@ function fadeOutCovers(context) {
             }
         }
     }
-    
+
     if (coverState.backgroundDisplayedUrl) {
         const backgroundLayers = ensureCoverLayers(context, 'background');
         if (backgroundLayers && backgroundLayers.currentValue) {
@@ -426,7 +433,7 @@ function crossfadeTo(layerState, imageUrl, onComplete) {
     if (imageUrl) {
         const normalized = `url(${imageUrl})`;
         const isAlreadySet = nextLayer.style.backgroundImage === normalized;
-        
+
         if (!isAlreadySet) {
             const img = new Image();
             img.onload = () => {
@@ -456,7 +463,7 @@ function updateVolumeSliderPosition(context) {
     // For normal layout
     let leftOffset = 50;
     let totalWidth = 146;
-    
+
     // For large layout
     if (context.content.classList.contains('large')) {
         leftOffset = 58;
@@ -471,7 +478,7 @@ function updateVolumeSliderPosition(context) {
         // For large layout
         if (context.content.classList.contains('large')) {
             totalWidth -= 42;
-        } 
+        }
         // For normal layout
         else {
             totalWidth -= 36;
@@ -553,6 +560,6 @@ export function changeStyle(context) {
             context.elements.muteButton.classList.remove('hidden');
         }
     }
-    
+
     updateVolumeSliderPosition(context);
 }

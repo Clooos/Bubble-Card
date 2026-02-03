@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { isEntityType } from "../../tools/utils.js";
 import { makeButtonSliderPanel } from '../../components/slider/editor.js';
-function getButtonList(){
+function getButtonList() {
     return [{
         'label': 'Switch',
         'value': 'switch'
@@ -18,12 +18,12 @@ function getButtonList(){
         'label': 'Name / Text (No entity required)',
         'value': 'name'
     }
-];
+    ];
 }
 
-export function renderButtonEditor(editor){    
+export function renderButtonEditor(editor) {
     let entityList = {};
-    if (editor._config.button_type === 'slider' && !editor._disableEntityFilter) {        
+    if (editor._config.button_type === 'slider' && !editor._disableEntityFilter) {
         entityList = {
             filter: [
                 { domain: ["light", "media_player", "cover", "input_number", "number", "climate", "fan"] },
@@ -35,7 +35,7 @@ export function renderButtonEditor(editor){
     const isPopUp = editor._config.card_type === 'pop-up';
 
     let button_action = editor._config.button_action || '';
-    
+
     if (!editor._config.button_type) {
         editor._config.button_type = isPopUp ? 'name' : 'switch';
     }
@@ -44,16 +44,17 @@ export function renderButtonEditor(editor){
     return html`
         <div class="card-config">
             ${!isPopUp ? editor.makeDropdown("Card type", "card_type", editor.cardTypeList) : ''}
-            ${editor.makeDropdown("Button type", "button_type", getButtonList() )}
+            ${editor.makeDropdown("Button type", "button_type", getButtonList())}
             <ha-form
                 .hass=${editor.hass}
                 .data=${editor._config}
                 .schema=${[
-                            { name: "entity",
-                            label: button_type !== 'slider' ? "Entity (toggle)" : "Entity (See text below for supported entities)", 
-                            selector: { entity: entityList },
-                            },
-                        ]}   
+            {
+                name: "entity",
+                label: button_type !== 'slider' ? "Entity (toggle)" : "Entity (See text below for supported entities)",
+                selector: { entity: entityList },
+            }
+        ]}   
                 .computeLabel=${editor._computeLabelCallback}
                 .disabled="${editor._config.button_type === 'name'}"
                 @value-changed=${editor._valueChanged}
@@ -71,6 +72,7 @@ export function renderButtonEditor(editor){
                         @input="${editor._valueChanged}"
                     ></ha-textfield>
                     ${editor.makeDropdown("Optional - Icon", "icon")}
+                    ${editor.makeDropdown("Optional - Background entity", "background_entity")}
                     ${editor.makeShowState()}
                 </div>
             </ha-expansion-panel>
@@ -99,19 +101,19 @@ export function renderButtonEditor(editor){
                       - slider: tap="more-info"(sensor)/"toggle"(others), double="none", hold="none"
                       - switch: tap="toggle", double="none", hold="more-info"
                     -->
-                    ${editor.makeActionPanel("Tap action", button_action, 
-                        editor._config.button_type === 'name' ? 'none' : 
-                        editor._config.button_type === 'state' ? 'more-info' : 
-                        editor._config.button_type === 'slider' ? 
-                            (isEntityType(editor, "sensor", editor._config.entity) ? 'more-info' : 'toggle') : 
-                            'toggle', 
-                        'button_action')}
+                    ${editor.makeActionPanel("Tap action", button_action,
+            editor._config.button_type === 'name' ? 'none' :
+                editor._config.button_type === 'state' ? 'more-info' :
+                    editor._config.button_type === 'slider' ?
+                        (isEntityType(editor, "sensor", editor._config.entity) ? 'more-info' : 'toggle') :
+                        'toggle',
+            'button_action')}
                     ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
-                    ${editor.makeActionPanel("Hold action", button_action, 
-                        editor._config.button_type === 'name' ? 'none' :
-                        editor._config.button_type === 'slider' ? 'none' :
-                        'more-info', 
-                        'button_action')}
+                    ${editor.makeActionPanel("Hold action", button_action,
+                editor._config.button_type === 'name' ? 'none' :
+                    editor._config.button_type === 'slider' ? 'none' :
+                        'more-info',
+                'button_action')}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
