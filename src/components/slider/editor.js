@@ -47,10 +47,11 @@ export function makeButtonSliderPanel(editor) {
             target.value = value;
         }
 
+        const includeDetailValue = eventType === 'value-changed' || eventType === 'selected';
         const syntheticEvent = {
             type: eventType,
             target,
-            detail: eventType === 'value-changed' ? { value } : undefined
+            detail: includeDetailValue ? { value } : undefined
         };
 
         editor._valueChanged(syntheticEvent);
