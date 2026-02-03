@@ -378,6 +378,8 @@ export function normalizeNameToClass(name) {
   if (!name || typeof name !== 'string') return null;
   return name
     .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
