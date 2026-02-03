@@ -799,7 +799,7 @@ export function createSliderStructure(context, config = {}) {
       dragInitiated = true;
       clearTimeout(longPressTimer);
       clearPreDragHandlers();
-      lockTouchActions();
+      // Touch actions already locked in pointerdown handler
       handleLongPress(eventToUse);
     };
 
@@ -814,8 +814,9 @@ export function createSliderStructure(context, config = {}) {
       clearTimeout(longPressTimer);
       clearPreDragHandlers();
       if (context.card && context.card.classList.contains('is-unavailable')) return;
-      // Do not lock touch actions here: on iOS this can block scrolling and trigger
-      // pointercancel even if the user intended to scroll. Lock only once drag is initiated.
+      
+      // Lock touch actions immediately to prevent page scroll during slider interaction
+      lockTouchActions();
 
       initialTouchX = getEventPageX(e);
       initialTouchY = getEventPageY(e);
@@ -828,6 +829,14 @@ export function createSliderStructure(context, config = {}) {
         const initialSecondary = isVerticalFill ? initialTouchX : initialTouchY;
         const deltaPrimary = Math.abs(currentPrimary - initialPrimary);
         const deltaSecondary = Math.abs(currentSecondary - initialSecondary);
+        
+        // On iOS, prioritize slider intent early to prevent page scroll
+        // Start drag if there's any primary axis movement with minimal secondary movement
+        if (deltaPrimary >= 2 && deltaSecondary <= primaryAxisIntentThreshold) {
+          startDrag(moveEvent);
+          return;
+        }
+        
         // Allow some primary-axis jitter while scrolling (notably on iOS)
         // Treat as scroll when secondary axis movement clearly dominates
         const secondaryDominates = deltaSecondary > (deltaPrimary + primaryAxisIntentThreshold);
@@ -836,6 +845,7 @@ export function createSliderStructure(context, config = {}) {
           cancelPreDrag();
           return;
         }
+        
         if (deltaPrimary > immediateDragThreshold && deltaPrimary >= deltaSecondary) {
           startDrag(moveEvent);
         }
@@ -844,7 +854,10 @@ export function createSliderStructure(context, config = {}) {
       const cancelPreDrag = () => {
         clearTimeout(longPressTimer);
         clearPreDragHandlers();
-        unlockTouchActions();
+        // Only unlock if scroll intent was detected, otherwise keep locked until pointerup
+        if (isScrollIntent) {
+          unlockTouchActions();
+        }
       };
 
       preDragMoveHandler = detectImmediateDrag;
@@ -858,15 +871,25 @@ export function createSliderStructure(context, config = {}) {
     }, { passive: false });
 
     options.targetElement.addEventListener('pointerup', () => {
-      clearTimeout(longPressTimer);
-      clearPreDragHandlers();
-      unlockTouchActions();
+      // Only handle cleanup if drag was never initiated
+      if (!dragInitiated) {
+        clearTimeout(longPressTimer);
+        clearPreDragHandlers();
+        // Reset scroll intent state
+        isScrollIntent = false;
+        unlockTouchActions();
+      }
     });
 
     options.targetElement.addEventListener('pointercancel', () => {
-      clearTimeout(longPressTimer);
-      clearPreDragHandlers();
-      unlockTouchActions();
+      // Only handle cleanup if drag was never initiated
+      if (!dragInitiated) {
+        clearTimeout(longPressTimer);
+        clearPreDragHandlers();
+        // Reset scroll intent state
+        isScrollIntent = false;
+        unlockTouchActions();
+      }
     });
   } else if (!options.readOnlySlider) {
     options.targetElement.addEventListener('pointerdown', (e) => {
@@ -882,9 +905,11 @@ export function createSliderStructure(context, config = {}) {
 
       if (context.card && context.card.classList.contains('is-unavailable')) return;
 
+      // Lock touch actions immediately to prevent page scroll during slider interaction
+      lockTouchActions();
+      
       context.dragging = true;
       window.isScrolling = true;
-      lockTouchActions();
       initialTouchX = getEventPageX(e);
       initialTouchY = getEventPageY(e);
       resetGestureIntent();

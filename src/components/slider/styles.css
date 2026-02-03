@@ -142,6 +142,13 @@
     touch-action: none;
 }
 
+html.bubble-slider-dragging,
+body.bubble-slider-dragging {
+    touch-action: none;
+    overscroll-behavior: contain;
+    overflow: hidden;
+}
+
 /* When dragging, disable all touch actions to prevent conflicts */
 .is-dragging .bubble-range-slider,
 .is-dragging.slider-container {
