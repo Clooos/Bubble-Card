@@ -73,6 +73,7 @@ export async function changeEvents(context) {
     const today = new Date();
     const dayNumber = createElement('div', 'bubble-day-number');
     const getCurrentLocale = context._hass.locale.language;
+    const getCurrentLocaleTimeFormat = context._hass.locale.time_format;
     dayNumber.innerHTML = `${eventDay.getDate()}`;
 
     const dayMonth = createElement('div', 'bubble-day-month');
@@ -98,9 +99,9 @@ export async function changeEvents(context) {
       const eventEnd = parseEventDateTime(event.end);
 
       const eventTime = createElement('div', 'bubble-event-time');
-      eventTime.innerHTML = isAllDay ? t("cards.calendar.all_day") : eventStart.toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric' });
+      eventTime.innerHTML = isAllDay ? t("cards.calendar.all_day") : eventStart.toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric', hour12: getCurrentLocaleTimeFormat === "12" });
       if (!isAllDay && context.config.show_end === true) {
-        eventTime.innerHTML += ` – ${eventEnd.toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric' })}`;
+        eventTime.innerHTML += ` – ${eventEnd.toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric', hour12: getCurrentLocaleTimeFormat === "12" })}`;
       }
 
       const eventNameWrapper = createElement('div', 'bubble-event-name-wrapper');
