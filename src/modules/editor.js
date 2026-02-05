@@ -13,7 +13,7 @@ import { installManualModule } from './install.js';
 import { checkModuleUpdates } from './store.js';
 import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
-import { getLazyLoadedPanelContent } from '../editor/utils.js';
+import { getLazyLoadedPanelContent, renderDropdown } from '../editor/utils.js';
 import { ensureBCTProviderAvailable, isBCTAvailableSync, writeModuleYaml, getAllModulesLastModified } from './bct-provider.js';
 
 // Storage sensor entity ID for Bubble Card modules
@@ -766,53 +766,57 @@ export function makeModulesEditor(context) {
                   </ha-textfield>
                 </div>
                 <div class="my-modules-sort-menu">
-                  <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
-                    <mwc-icon-button slot="trigger" class="icon-button header sort-trigger" title="Sort modules">
-                      <ha-icon icon="mdi:sort"></ha-icon>
-                    </mwc-icon-button>
-                    <mwc-list-item 
-                      graphic="icon" 
-                      ?selected=${currentSortOrder === 'default'}
-                      @click=${(e) => {
-                        e.stopPropagation();
-                        context._myModulesSortOrder = 'default';
-                        try {
-                          localStorage.setItem('bubble-card-modules-sort-order', 'default');
-                        } catch (err) {}
-                        context.requestUpdate();
-                      }}>
-                      <ha-icon icon="mdi:check-circle" slot="graphic"></ha-icon>
-                      Active and recent first
-                    </mwc-list-item>
-                    <mwc-list-item 
-                      graphic="icon" 
-                      ?selected=${currentSortOrder === 'alphabetical'}
-                      @click=${(e) => {
-                        e.stopPropagation();
-                        context._myModulesSortOrder = 'alphabetical';
-                        try {
-                          localStorage.setItem('bubble-card-modules-sort-order', 'alphabetical');
-                        } catch (err) {}
-                        context.requestUpdate();
-                      }}>
-                      <ha-icon icon="mdi:sort-alphabetical-ascending" slot="graphic"></ha-icon>
-                      Alphabetical
-                    </mwc-list-item>
-                    <mwc-list-item 
-                      graphic="icon" 
-                      ?selected=${currentSortOrder === 'recent-first'}
-                      @click=${(e) => {
-                        e.stopPropagation();
-                        context._myModulesSortOrder = 'recent-first';
-                        try {
-                          localStorage.setItem('bubble-card-modules-sort-order', 'recent-first');
-                        } catch (err) {}
-                        context.requestUpdate();
-                      }}>
-                      <ha-icon icon="mdi:clock-outline" slot="graphic"></ha-icon>
-                      Recent first
-                    </mwc-list-item>
-                  </ha-button-menu>
+                  ${renderDropdown({
+                    trigger: html`
+                      <mwc-icon-button slot="trigger" class="icon-button header sort-trigger" title="Sort modules">
+                        <ha-icon icon="mdi:sort"></ha-icon>
+                      </mwc-icon-button>
+                    `,
+                    items: [
+                      { 
+                        type: 'checkbox',
+                        icon: 'mdi:check-circle', 
+                        label: 'Active and recent first',
+                        checked: currentSortOrder === 'default',
+                        onClick: (e) => {
+                          e.stopPropagation();
+                          context._myModulesSortOrder = 'default';
+                          try {
+                            localStorage.setItem('bubble-card-modules-sort-order', 'default');
+                          } catch (err) {}
+                          context.requestUpdate();
+                        }
+                      },
+                      { 
+                        type: 'checkbox',
+                        icon: 'mdi:sort-alphabetical-ascending', 
+                        label: 'Alphabetical',
+                        checked: currentSortOrder === 'alphabetical',
+                        onClick: (e) => {
+                          e.stopPropagation();
+                          context._myModulesSortOrder = 'alphabetical';
+                          try {
+                            localStorage.setItem('bubble-card-modules-sort-order', 'alphabetical');
+                          } catch (err) {}
+                          context.requestUpdate();
+                        }
+                      },
+                      { 
+                        type: 'checkbox',
+                        icon: 'mdi:clock-outline', 
+                        label: 'Recent first',
+                        checked: currentSortOrder === 'recent-first',
+                        onClick: (e) => {
+                          e.stopPropagation();
+                          context._myModulesSortOrder = 'recent-first';
+                          try {
+                            localStorage.setItem('bubble-card-modules-sort-order', 'recent-first');
+                          } catch (err) {}
+                          context.requestUpdate();
+                        }
+                      }
+                    ]
+                  })}
                 </div>
               </div>
               <ha-formfield label="Enable unsupported modules">

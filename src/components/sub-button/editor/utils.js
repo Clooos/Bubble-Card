@@ -2,7 +2,7 @@
 import { html } from 'lit';
 import { isReadOnlyEntityId } from '../../slider/helpers.js';
 import { makeGenericSliderSettings } from '../../slider/editor.js';
-import { getLazyLoadedPanelContent } from '../../../editor/utils.js';
+import { getLazyLoadedPanelContent, renderDropdown } from '../../../editor/utils.js';
 import { loadSubButtonClipboard } from './clipboard.js';
 
 export function makeUnifiedSubButtonEditor(editor, button, index, path, updateValueFn, deleteFn, moveFn, copyFn, cutFn, options = {}) {
@@ -91,33 +91,50 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
         <ha-icon icon="mdi:border-radius"></ha-icon>
         ${buttonTitle}
         <div class="button-container" @click=${(e) => e.stopPropagation()} @mousedown=${(e) => e.stopPropagation()} @touchstart=${(e) => e.stopPropagation()}>
-          <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
-            <mwc-icon-button slot="trigger" class="icon-button header" title="Options">
-              <ha-icon style="display: flex" icon="mdi:dots-vertical"></ha-icon>
-            </mwc-icon-button>
-            <mwc-list-item graphic="icon" ?disabled=${!canMoveLeft} @click=${(e) => { e.stopPropagation(); if (canMoveLeft) moveFn(-1); }}>
-              <ha-icon icon="mdi:arrow-left" slot="graphic"></ha-icon>
-              Move left
-            </mwc-list-item>
-            <mwc-list-item graphic="icon" ?disabled=${!canMoveRight} @click=${(e) => { e.stopPropagation(); if (canMoveRight) moveFn(1); }}>
-              <ha-icon icon="mdi:arrow-right" slot="graphic"></ha-icon>
-              Move right
-            </mwc-list-item>
-            <li divider role="separator"></li>
-            <mwc-list-item graphic="icon" @click=${(e) => { e.stopPropagation(); copyFn(e); }}>
-              <ha-icon icon="mdi:content-copy" slot="graphic"></ha-icon>
-              Copy
-            </mwc-list-item>
-            <mwc-list-item graphic="icon" @click=${(e) => { e.stopPropagation(); cutFn(e); }}>
-              <ha-icon icon="mdi:content-cut" slot="graphic"></ha-icon>
-              Cut
-            </mwc-list-item>
-            <li divider role="separator"></li>
-            <mwc-list-item graphic="icon" class="warning" @click=${(e) => { e.stopPropagation(); deleteFn(e); }}>
-              <ha-icon icon="mdi:delete" slot="graphic"></ha-icon>
-              Delete
-            </mwc-list-item>
-          </ha-button-menu>
+          ${renderDropdown({
+            trigger: html`
+              <mwc-icon-button slot="trigger" class="icon-button header" title="Options">
+                <ha-icon style="display: flex" icon="mdi:dots-vertical"></ha-icon>
+              </mwc-icon-button>
+            `,
+            items: [
+              { 
+                type: 'item',
+                icon: 'mdi:arrow-left', 
+                label: 'Move left',
+                disabled: !canMoveLeft,
+                onClick: (e) => { e.stopPropagation(); if (canMoveLeft) moveFn(-1); }
+              },
+              { 
+                type: 'item',
+                icon: 'mdi:arrow-right', 
+                label: 'Move right',
+                disabled: !canMoveRight,
+                onClick: (e) => { e.stopPropagation(); if (canMoveRight) moveFn(1); }
+              },
+              { type: 'divider' },
+              { 
+                type: 'item',
+                icon: 'mdi:content-copy', 
+                label: 'Copy',
+                onClick: (e) => { e.stopPropagation(); copyFn(e); }
+              },
+              { 
+                type: 'item',
+                icon: 'mdi:content-cut', 
+                label: 'Cut',
+                onClick: (e) => { e.stopPropagation(); cutFn(e); }
+              },
+              { type: 'divider' },
+              { 
+                type: 'item',
+                icon: 'mdi:delete', 
+                label: 'Delete',
+                variant: 'danger',
+                onClick: (e) => { e.stopPropagation(); deleteFn(e); }
+              }
+            ]
+          })}
         </div>
       </h4>
       <div class="content">

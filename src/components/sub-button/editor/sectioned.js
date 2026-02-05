@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import { getLazyLoadedPanelContent } from '../../../editor/utils.js';
+import { getLazyLoadedPanelContent, renderDropdown } from '../../../editor/utils.js';
 import { 
   makeUnifiedSubButtonEditor, 
   createCopyHandler, 
@@ -238,33 +238,50 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
         <ha-icon icon="mdi:format-list-group"></ha-icon>
         ${group.name || `Group ${groupIndex + 1}`}
         <div class="button-container" @click=${(e) => e.stopPropagation()} @mousedown=${(e) => e.stopPropagation()} @touchstart=${(e) => e.stopPropagation()}>
-          <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
-            <mwc-icon-button slot="trigger" class="icon-button header" title="Options">
-              <ha-icon style="display: flex" icon="mdi:dots-vertical"></ha-icon>
-            </mwc-icon-button>
-            <mwc-list-item graphic="icon" ?disabled=${!canMoveUp} @click=${(e) => { e.stopPropagation(); if (canMoveUp) moveGroup(-1); }}>
-              <ha-icon icon="mdi:arrow-up" slot="graphic"></ha-icon>
-              Move up
-            </mwc-list-item>
-            <mwc-list-item graphic="icon" ?disabled=${!canMoveDown} @click=${(e) => { e.stopPropagation(); if (canMoveDown) moveGroup(1); }}>
-              <ha-icon icon="mdi:arrow-down" slot="graphic"></ha-icon>
-              Move down
-            </mwc-list-item>
-            <li divider role="separator"></li>
-            <mwc-list-item graphic="icon" @click=${(e) => { e.stopPropagation(); copyGroup(e); }}>
-              <ha-icon icon="mdi:content-copy" slot="graphic"></ha-icon>
-              Copy group
-            </mwc-list-item>
-            <mwc-list-item graphic="icon" @click=${(e) => { e.stopPropagation(); cutGroup(e); }}>
-              <ha-icon icon="mdi:content-cut" slot="graphic"></ha-icon>
-              Cut group
-            </mwc-list-item>
-            <li divider role="separator"></li>
-            <mwc-list-item graphic="icon" class="warning" @click=${(e) => { e.stopPropagation(); removeGroup(e); }}>
-              <ha-icon icon="mdi:delete" slot="graphic"></ha-icon>
-              Delete
-            </mwc-list-item>
-          </ha-button-menu>
+          ${renderDropdown({
+            trigger: html`
+              <mwc-icon-button slot="trigger" class="icon-button header" title="Options">
+                <ha-icon style="display: flex" icon="mdi:dots-vertical"></ha-icon>
+              </mwc-icon-button>
+            `,
+            items: [
+              { 
+                type: 'item',
+                icon: 'mdi:arrow-up', 
+                label: 'Move up', 
+                disabled: !canMoveUp,
+                onClick: (e) => { e.stopPropagation(); if (canMoveUp) moveGroup(-1); }
+              },
+              { 
+                type: 'item',
+                icon: 'mdi:arrow-down', 
+                label: 'Move down',
+                disabled: !canMoveDown,
+                onClick: (e) => { e.stopPropagation(); if (canMoveDown) moveGroup(1); }
+              },
+              { type: 'divider' },
+              { 
+                type: 'item',
+                icon: 'mdi:content-copy', 
+                label: 'Copy group',
+                onClick: (e) => { e.stopPropagation(); copyGroup(e); }
+              },
+              { 
+                type: 'item',
+                icon: 'mdi:content-cut', 
+                label: 'Cut group',
+                onClick: (e) => { e.stopPropagation(); cutGroup(e); }
+              },
+              { type: 'divider' },
+              { 
+                type: 'item',
+                icon: 'mdi:delete', 
+                label: 'Delete',
+                variant: 'danger',
+                onClick: (e) => { e.stopPropagation(); removeGroup(e); }
+              }
+            ]
+          })}
         </div>
       </h4>
       <div class="content">
@@ -582,22 +599,28 @@ function makeSectionList(editor, sectionKey) {
           <ha-icon icon="mdi:format-list-group-plus"></ha-icon>
           Add group
         </button>
-      ` : html`
-        <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${(e) => e.stopPropagation()} @click=${(e) => e.stopPropagation()}>
+      ` : renderDropdown({
+        trigger: html`
           <button slot="trigger" class="icon-button add-menu-trigger">
             <ha-icon icon="mdi:plus"></ha-icon>
             Add
           </button>
-          <mwc-list-item graphic="icon" @click=${() => { addButton(); }}>
-            <ha-icon icon="mdi:shape-square-rounded-plus" slot="graphic"></ha-icon>
-            Add sub-button
-          </mwc-list-item>
-          <mwc-list-item graphic="icon" @click=${() => { addGroup(); }}>
-            <ha-icon icon="mdi:format-list-group-plus" slot="graphic"></ha-icon>
-            Add group
-          </mwc-list-item>
-        </ha-button-menu>
-      `}
+        `,
+        items: [
+          { 
+            type: 'item',
+            icon: 'mdi:shape-square-rounded-plus', 
+            label: 'Add sub-button',
+            onClick: () => { addButton(); }
+          },
+          { 
+            type: 'item',
+            icon: 'mdi:format-list-group-plus', 
+            label: 'Add group',
+            onClick: () => { addGroup(); }
+          }
+        ]
+      })}
     </div>
   `;
 }
