@@ -87,7 +87,7 @@ export function updateSubButtons(context, subButtons) {
       }
 
       updateSubButtonContent(context, element, { ...options, subButton, groupContainer: null, section: 'main' });
-      handleVisibilityConditions(element, subButton, context._hass);
+      handleVisibilityConditions(element, subButton, context._hass, context);
       visibleIndex++;
     });
   }
@@ -420,7 +420,7 @@ export function updateGroupButtons(context, sectionedArg) {
         : button;
       const section = isBottomGroup ? 'bottom' : 'main';
       updateSubButtonContent(context, element, { ...options, subButton: subButtonWithAutoWidth, groupContainer, overlayAtCardLevel, section });
-      handleVisibilityConditions(element, button, context._hass);
+      handleVisibilityConditions(element, button, context._hass, context);
     });
 
     // Hide group if all its sub-buttons are hidden
@@ -437,14 +437,22 @@ function updateGroupVisibility(groupContainer) {
   // Get all sub-buttons in the group (excluding sliders and other non-button elements)
   const subButtons = Array.from(groupContainer.querySelectorAll('.bubble-sub-button'));
   
-  if (subButtons.length === 0) return;
+  // Also check for always_visible slider wrappers (their host element is not in DOM)
+  const alwaysVisibleSliders = Array.from(groupContainer.querySelectorAll('.bubble-sub-slider-wrapper.inline'));
   
   // Check if all sub-buttons are hidden
-  const allHidden = subButtons.every(btn => {
-    // Check if button is hidden by visibility conditions or parent unavailable
+  const allSubButtonsHidden = subButtons.length === 0 || subButtons.every(btn => {
     return btn.classList.contains('hidden') || btn.style.display === 'none';
   });
   
+  // Check if any always_visible slider wrapper is visible
+  const hasVisibleAlwaysSlider = alwaysVisibleSliders.some(wrapper => {
+    return wrapper.style.display !== 'none' && !wrapper.classList.contains('hidden');
+  });
+  
+  // Group is hidden only if all sub-buttons are hidden AND no always_visible slider is visible
+  const shouldHide = allSubButtonsHidden && !hasVisibleAlwaysSlider;
+  
   // Toggle hidden class on the group container
-  groupContainer.classList.toggle('hidden', allHidden);
+  groupContainer.classList.toggle('hidden', shouldHide);
 }

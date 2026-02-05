@@ -299,7 +299,7 @@ export function setupActions(element, options) {
 }
 
 // Evaluate user-defined visibility conditions
-export function handleVisibilityConditions(element, subButton, hass) {
+export function handleVisibilityConditions(element, subButton, hass, context = null) {
   const conditions = subButton.visibility;
   const ensureVisibleAlwaysSlider = (isVisible) => {
     if (!element?.sliderAlwaysVisible || !element.sliderWrapper) return;
@@ -311,6 +311,57 @@ export function handleVisibilityConditions(element, subButton, hass) {
       element.sliderWrapper.setAttribute('aria-hidden', 'true');
     }
   };
+  const closeOpenedSlider = (isVisible) => {
+    // Close slider if visibility becomes false and slider is currently open
+    if (!isVisible && element.sliderOpen && !element.sliderAlwaysVisible && element.sliderWrapper && context) {
+      // Hide the slider wrapper immediately
+      element.sliderWrapper.classList.add('is-hidden');
+      element.sliderOpen = false;
+      
+      // Hide close button overlay
+      if (element.sliderCloseBtn) {
+        element.sliderCloseBtn.classList.add('is-hidden');
+      }
+      
+      // Clean up any group slider state
+      const groupContainer = element._parentGroupContainer;
+      if (groupContainer && groupContainer.classList) {
+        groupContainer.classList.remove('group-slider-open');
+      }
+      
+      // Restore card elements visibility if needed (non-group slider)
+      if (!groupContainer && context.elements) {
+        const setHidden = (el, hidden) => {
+          if (!el) return;
+          el.classList.toggle('is-hidden', hidden);
+        };
+        setHidden(context.elements?.nameContainer, false);
+        setHidden(context.elements?.iconContainer, false);
+        setHidden(context.elements?.image, false);
+        setHidden(context.elements?.buttonsContainer, false);
+        if (context.elements?.subButtonContainer) {
+          context.elements.subButtonContainer.style.opacity = '';
+          context.elements.subButtonContainer.style.pointerEvents = '';
+        }
+      }
+      
+      // Disable global interaction blocker
+      if (element._globalBlockerAdded && element._globalBlockerHandler) {
+        try {
+          (element._globalBlockerEvents || ['pointerdown', 'pointerup', 'click', 'touchstart', 'touchend', 'mousedown', 'mouseup'])
+            .forEach(evt => document.removeEventListener(evt, element._globalBlockerHandler, true));
+        } catch (_) {}
+        try {
+          delete element._globalBlockerHandler;
+          delete element._globalBlockerEvents;
+        } catch (_) {}
+        element._globalBlockerAdded = false;
+      }
+      
+      // Reset pointer down tracking
+      try { element._blockerPointerDownInside = false; } catch (_) {}
+    }
+  };
   if (conditions != null) {
     element._hasVisibilityConditions = true;
     const conditionsArray = ensureArray(conditions);
@@ -320,6 +371,9 @@ export function handleVisibilityConditions(element, subButton, hass) {
       if (element._previousVisibilityState === undefined || element._previousVisibilityState !== isVisible) {
         element.classList.toggle('hidden', !isVisible);
         element._previousVisibilityState = isVisible;
+        
+        // Close opened slider if visibility becomes false
+        closeOpenedSlider(isVisible);
       }
       ensureVisibleAlwaysSlider(isVisible);
     } else {
