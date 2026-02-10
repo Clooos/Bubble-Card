@@ -2,8 +2,16 @@ import { changeEditor, changeStyle, changeTriggered } from './changes.js';
 import { createHeader, createStructure, prepareStructure } from './create.js';
 import { handleButton } from "../../cards/button/index.js";
 import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
+import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
+
+initPopUpHashNavigationBridge();
 
 export async function handlePopUp(context) {
+    registerPopUpHash(context.config?.hash, {
+        name: context.config?.name,
+        icon: context.config?.icon
+    });
+
     if (context.cardType !== "pop-up") {
         if ((context.getRootNode() instanceof ShadowRoot) === false) {
             // The card is not added in the DOM

@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { fireEvent } from '../../tools/utils.js';
 import { makeButtonSliderPanel } from '../../components/slider/editor.js';
 import { renderButtonEditor } from '../button/editor.js';
+import { registerPopUpHash } from './navigation-picker-bridge.js';
 
 function getButtonList() {
     return [
@@ -87,6 +88,10 @@ function createPopUpConfig(editor, originalConfig) {
         
         if (isInVerticalStack) {
             editor._config.hash = hashValue;
+            registerPopUpHash(hashValue, {
+                name: editor._config.name,
+                icon: editor._config.icon
+            });
             fireEvent(editor, "config-changed", { config: editor._config });
             console.info("Pop-up already in a vertical stack. Hash updated. Note that manually creating a vertical stack is no longer required.");
             return;
@@ -148,6 +153,11 @@ function createPopUpConfig(editor, originalConfig) {
             window.bubbleNewlyCreatedHashes = window.bubbleNewlyCreatedHashes || new Set();
             window.bubbleNewlyCreatedHashes.add(hashValue);
         }
+
+        registerPopUpHash(hashValue, {
+            name: editor._config.cards?.[0]?.name,
+            icon: editor._config.cards?.[0]?.icon
+        });
         
         fireEvent(editor, "config-changed", { config: editor._config });
     } catch (error) {
@@ -155,6 +165,10 @@ function createPopUpConfig(editor, originalConfig) {
         // Restore original config if there's an error
         editor._config = originalConfig;
         editor._config.hash = editor.shadowRoot.querySelector('#hash-input')?.value || '#pop-up-name';
+        registerPopUpHash(editor._config.hash, {
+            name: editor._config.name,
+            icon: editor._config.icon
+        });
         fireEvent(editor, "config-changed", { config: editor._config });
     }
 }
