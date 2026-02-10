@@ -9,7 +9,9 @@ initPopUpHashNavigationBridge();
 export async function handlePopUp(context) {
     registerPopUpHash(context.config?.hash, {
         name: context.config?.name,
-        icon: context.config?.icon
+        icon: context.config?.icon,
+        isConnected: context.isConnected,
+        element: context.editor ? null : context
     });
 
     if (context.cardType !== "pop-up") {
