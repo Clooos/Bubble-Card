@@ -1,4 +1,4 @@
-import { getAttribute, getState, isColorLight, isEntityType, adjustColor } from "./utils.js";
+import { getAttribute, isColorLight, isEntityType, adjustColor } from "./utils.js";
 import { isColorCloseToWhite } from "./style.js";
 
 // Generate a signature string from light entity attributes that affect color
@@ -21,269 +21,228 @@ export function getLightColorSignature(state, entity) {
   return parts.join('|');
 }
 
-export function getIcon(context, entity = context.config.entity, icon = context.config.icon) {
-    const entityType = entity?.split('.')[0];
-    const deviceClassType = getAttribute(context, "device_class", entity);
-    const entityIcon = getAttribute(context, "icon", entity);
-    const configIcon = icon;
-    const state = getState(context, entity);
+// HA icon resources loaded via WebSocket and persisted in localStorage
+const ICONS_CACHE_KEY = 'bubble-card-icons-cache';
+let componentIcons = null;
+let componentIconsPromise = null;
+let componentIconsFailed = false;
+const platformIcons = {};
+const platformIconsPromises = {};
+const sortedRangeCache = new WeakMap();
+const pendingContexts = new Set();
 
-    function coverIcon() {
-      const open = state !== "closed";
-      const coverType = getAttribute(context, 'device_class', entity);
+// Restore component icons from previous session for instant first render
+try {
+  const cached = localStorage.getItem(ICONS_CACHE_KEY);
+  if (cached) componentIcons = JSON.parse(cached);
+} catch (_) {}
 
-      switch (coverType) {
-        case 'awning':
-          return open ? "mdi:awning-outline" : "mdi:awning";
-        case "blind":
-          return open ? "mdi:blinds-open" : "mdi:blinds";
-        case 'curtain':
-          return open ? "mdi:curtains" : "mdi:curtains-closed";
-        case 'damper':
-          return open ? "mdi:window-shutter-open" : "mdi:window-shutter"; // To be defined
-        case "door":
-          return open ? "mdi:door-open" : "mdi:door-closed";
-        case "garage":
-          return open ? "mdi:garage-open" : "mdi:garage";
-        case 'gate':
-          return open ? "mdi:gate-open" : "mdi:gate";
-        case 'shade':
-          return open ? "mdi:roller-shade" : "mdi:roller-shade-closed";
-        case "shutter":
-          return open ? "mdi:window-shutter-open" : "mdi:window-shutter";
-        case "window":
-          return open ? "mdi:window-open" : "mdi:window-closed";
-        default:
-          return open ? "mdi:window-shutter-open" : "mdi:window-shutter";
-      }
-    }
-
-    function binarySensorIcon() {
-      const isOff = state === "off";
-      const binarySensorType = getAttribute(context, 'device_class', entity);
-
-      switch (binarySensorType) {
-        case "battery":
-          return isOff ? "mdi:battery" : "mdi:battery-outline";
-        case "battery_charging":
-          return isOff ? "mdi:battery" : "mdi:battery-charging";
-        case "cold":
-          return isOff ? "mdi:thermometer" : "mdi:snowflake";
-        case "connectivity":
-          return isOff ? "mdi:close-network-outline" : "mdi:check-network-outline";
-        case "door":
-          return isOff ? "mdi:door-closed" : "mdi:door-open";
-        case "garage_door":
-          return isOff ? "mdi:garage" : "mdi:garage-open";
-        case "heat":
-          return isOff ? "mdi:thermometer" : "mdi:fire";
-        case "light":
-          return isOff ? "mdi:brightness-5" : "mdi:brightness-7";
-        case "lock":
-          return isOff ? "mdi:lock" : "mdi:lock-open";
-        case "moisture":
-          return isOff ? "mdi:water-off" : "mdi:water";
-        case "motion":
-          return isOff ? "mdi:motion-sensor-off" : "mdi:motion-sensor";
-        case "occupancy":
-          return isOff ? "mdi:home-outline" : "mdi:home";
-        case "opening":
-          return isOff ? "mdi:square" : "mdi:square-outline";
-        case "plug":
-          return isOff ? "mdi:power-plug-off" : "mdi:power-plug";
-        case "power":
-          return isOff ? "mdi:power-plug-off" : "mdi:power-plug";
-        case "presence":
-          return isOff ? "mdi:home-outline" : "mdi:home";
-        case "running":
-          return isOff ? "mdi:stop" : "mdi:play";
-        case "safety":
-          return isOff ? "mdi:check-circle" : "mdi:alert-circle";
-        case "smoke":
-          return isOff ? "mdi:check-circle" : "mdi:smoke";
-        case "sound":
-          return isOff ? "mdi:music-note-off" : "mdi:music-note";
-        case "tamper":
-          return isOff ? "mdi:check-circle" : "mdi:alert-circle";
-        case "update":
-          return isOff ? "mdi:package" : "mdi:package-up";
-        case "vibration":
-          return isOff ? "mdi:crop-portrait" : "mdi:vibrate";
-        case "window":
-          return isOff ? "mdi:window-closed" : "mdi:window-open";
-        default:
-          return isOff ? "mdi:radiobox-blank" : "mdi:checkbox-marked-circle";
-      }
-    }
-
-    function sensorIcon() {
-      const isOff = state === "off";
-      const sensorType = getAttribute(context, 'device_class', entity);
-
-      switch (sensorType) {
-        case "battery":
-            if (state == 100) {
-                return "mdi:battery";
-            } else if (state >= 90) {
-                return "mdi:battery-90";
-            } else if (state >= 80) {
-                return "mdi:battery-80";
-            } else if (state >= 70) {
-                return "mdi:battery-70";
-            } else if (state >= 60) {
-                return "mdi:battery-60";
-            } else if (state >= 50) {
-                return "mdi:battery-50";
-            } else if (state >= 40) {
-                return "mdi:battery-40";
-            } else if (state >= 30) {
-                return "mdi:battery-30";
-            } else if (state >= 20) {
-                return "mdi:battery-20";
-            } else if (state >= 10) {
-                return "mdi:battery-10";
-            } else {
-                return "mdi:battery-alert";
-            }
-        case "humidity": return "mdi:water-percent";
-        case "illuminance": return "mdi:brightness-5";
-        case "temperature": return "mdi:thermometer";
-        case "pressure": return "mdi:gauge";
-        case "power": return "mdi:flash";
-        case "signal_strength": return "mdi:wifi";
-        case "energy": return "mdi:lightning-bolt";
-        default: return "mdi:eye";
-      }
-    }
-
-    function lockIcon() {
-      const lockState = state.toLowerCase();
-      return lockState === 'unlocked' ? 'mdi:lock-open' : 'mdi:lock';
-    }
-
-    function weatherIcon(weatherType = getState(context, entity)) {
-      switch (weatherType) {
-        case 'cloudy':
-          return "mdi:weather-cloudy";
-        case 'partlycloudy':
-          return "mdi:weather-partly-cloudy";
-        case 'rainy':
-          return "mdi:weather-rainy";
-        case 'snowy':
-          return "mdi:weather-snowy";
-        case 'sunny':
-          return "mdi:weather-sunny";
-        case 'clear-night':
-          return "mdi:weather-night";
-        case 'fog':
-          return "mdi:weather-fog";
-        case 'hail':
-          return "mdi:weather-hail";
-        case 'lightning':
-          return "mdi:weather-lightning";
-        case 'lightning-rainy':
-          return "mdi:weather-lightning-rainy";
-        case 'pouring':
-          return "mdi:weather-pouring";
-        case 'windy':
-          return "mdi:weather-windy";
-        case 'windy-variant':
-          return "mdi:weather-windy-variant";
-        case 'exceptional':
-          return "mdi:alert-circle-outline";
-        default:
-          return "mdi:weather-cloudy";
-      }
-    }
-
-    const defaultIcons = {
-        alarm_control_panel: 'mdi:shield',
-        alert: "mdi:alert",
-        automation: "mdi:playlist-play",
-        binary_sensor: binarySensorIcon(),
-        calendar: "mdi:calendar",
-        camera: "mdi:video",
-        climate: "mdi:thermostat",
-        configurator: "mdi:settings",
-        conversation: "mdi:text-to-speech",
-        cover: coverIcon(),
-        device_tracker: "mdi:account",
-        fan: "mdi:fan",
-        group: "mdi:google-circles-communities",
-        history_graph: "mdi:chart-line",
-        homeassistant: "mdi:home-assistant",
-        homekit: "mdi:home-automation",
-        image_processing: "mdi:image-filter-frames",
-        input_boolean: "mdi:drawing",
-        input_datetime: "mdi:calendar-clock",
-        input_number: "mdi:ray-vertex",
-        input_select: "mdi:format-list-bulleted",
-        input_text: "mdi:textbox",
-        light: "mdi:lightbulb",
-        lock: lockIcon(),
-        mailbox: "mdi:mailbox",
-        media_player: 'mdi:speaker',
-        mower: "mdi:robot-mower",
-        notify: "mdi:comment-alert",
-        person: "mdi:account",
-        plant: "mdi:flower",
-        proximity: "mdi:apple-safari",
-        remote: "mdi:remote",
-        scene: "mdi:palette",
-        script: "mdi:file-document",
-        sensor: sensorIcon(),
-        simple_alarm: "mdi:bell",
-        sun: "mdi:white-balance-sunny",
-        switch: "mdi:flash",
-        timer: "mdi:timer",
-        updater: "mdi:cloud-upload",
-        vacuum: "mdi:robot-vacuum",
-        water_heater: "mdi:thermometer",
-        weather: weatherIcon(),
-        weblink: "mdi:open-in-new"
-    };
-
-    if (configIcon) return configIcon;
-    if (entityIcon) return entityIcon;
-    if (defaultIcons[entityType]) return defaultIcons[entityType];
-    if (defaultIcons[deviceClassType]) return defaultIcons[deviceClassType];
-
-    return '';
+function requestContextUpdate(context) {
+  if (typeof context?.requestUpdate === "function") {
+    context.requestUpdate();
+    return;
+  }
+  if (typeof context?.card?.requestUpdate === "function") {
+    context.card.requestUpdate();
+  }
 }
 
-export function getWeatherIcon(weatherType) {
-    switch (weatherType) {
-        case 'cloudy':
-          return "mdi:weather-cloudy";
-        case 'partlycloudy':
-          return "mdi:weather-partly-cloudy";
-        case 'rainy':
-          return "mdi:weather-rainy";
-        case 'snowy':
-          return "mdi:weather-snowy";
-        case 'sunny':
-          return "mdi:weather-sunny";
-        case 'clear-night':
-          return "mdi:weather-night";
-        case 'fog':
-          return "mdi:weather-fog";
-        case 'hail':
-          return "mdi:weather-hail";
-        case 'lightning':
-          return "mdi:weather-lightning";
-        case 'lightning-rainy':
-          return "mdi:weather-lightning-rainy";
-        case 'pouring':
-          return "mdi:weather-pouring";
-        case 'windy':
-          return "mdi:weather-windy";
-        case 'windy-variant':
-          return "mdi:weather-windy-variant";
-        case 'exceptional':
-          return "mdi:alert-circle-outline";
-        default:
-          return "mdi:weather-cloudy";
+// Eagerly start loading component icons as soon as hass is available
+function preloadComponentIcons(hass) {
+  if (componentIconsPromise || componentIconsFailed || !hass?.callWS) return;
+  componentIconsPromise = hass.callWS({
+    type: "frontend/get_icons",
+    category: "entity_component"
+  }).then(res => {
+    componentIcons = res?.resources || {};
+    try { localStorage.setItem(ICONS_CACHE_KEY, JSON.stringify(componentIcons)); } catch (_) {}
+    // Notify all contexts waiting for icons
+    for (const ctx of pendingContexts) requestContextUpdate(ctx);
+    pendingContexts.clear();
+  }).catch(() => {
+    componentIconsPromise = null;
+    componentIconsFailed = true;
+  });
+}
+
+// Resolve icon from HA icon translation entries (state match, range match, or default)
+function getIconFromTranslations(state, translations) {
+  if (!translations) return "";
+  if (state != null && translations.state?.[state]) {
+    return translations.state[state];
+  }
+  if (state != null && translations.range && !isNaN(Number(state))) {
+    let keys = sortedRangeCache.get(translations.range);
+    if (!keys) {
+      keys = Object.keys(translations.range).map(Number).filter(k => !isNaN(k)).sort((a, b) => a - b);
+      sortedRangeCache.set(translations.range, keys);
     }
+    const num = Number(state);
+    if (keys.length && num >= keys[0]) {
+      let sel = keys[0];
+      for (const k of keys) { if (num >= k) sel = k; else break; }
+      return translations.range[String(sel)] || translations.default || "";
+    }
+  }
+  return translations.default || "";
+}
+
+// Fallback domain icons matching HA's FALLBACK_DOMAIN_ICONS (for domains without icons.json)
+const DOMAIN_FALLBACK_ICONS = {
+  ai_task: "mdi:star-four-points",
+  air_quality: "mdi:air-filter",
+  alert: "mdi:alert",
+  automation: "mdi:robot",
+  calendar: "mdi:calendar",
+  climate: "mdi:thermostat",
+  configurator: "mdi:cog",
+  conversation: "mdi:forum-outline",
+  counter: "mdi:counter",
+  date: "mdi:calendar",
+  datetime: "mdi:calendar-clock",
+  demo: "mdi:home-assistant",
+  device_tracker: "mdi:account",
+  google_assistant: "mdi:google-assistant",
+  group: "mdi:google-circles-communities",
+  homeassistant: "mdi:home-assistant",
+  homekit: "mdi:home-automation",
+  image_processing: "mdi:image-filter-frames",
+  image: "mdi:image",
+  input_boolean: "mdi:toggle-switch",
+  input_button: "mdi:button-pointer",
+  input_datetime: "mdi:calendar-clock",
+  input_number: "mdi:ray-vertex",
+  input_select: "mdi:format-list-bulleted",
+  input_text: "mdi:form-textbox",
+  lawn_mower: "mdi:robot-mower",
+  light: "mdi:lightbulb",
+  notify: "mdi:comment-alert",
+  number: "mdi:ray-vertex",
+  persistent_notification: "mdi:bell",
+  person: "mdi:account",
+  plant: "mdi:flower",
+  proximity: "mdi:apple-safari",
+  remote: "mdi:remote",
+  scene: "mdi:palette",
+  schedule: "mdi:calendar-clock",
+  script: "mdi:script-text",
+  select: "mdi:format-list-bulleted",
+  sensor: "mdi:eye",
+  simple_alarm: "mdi:bell",
+  siren: "mdi:bullhorn",
+  stt: "mdi:microphone-message",
+  sun: "mdi:white-balance-sunny",
+  text: "mdi:form-textbox",
+  time: "mdi:clock",
+  timer: "mdi:timer-outline",
+  template: "mdi:code-braces",
+  todo: "mdi:clipboard-list",
+  tts: "mdi:speaker-message",
+  vacuum: "mdi:robot-vacuum",
+  wake_word: "mdi:chat-sleep",
+  weather: "mdi:weather-partly-cloudy",
+  zone: "mdi:map-marker-radius",
+};
+
+// Synchronous icon lookup from cached WS resources
+function resolveEntityIconSync(hass, entity, stateObj) {
+  const domain = entity.split('.')[0];
+  const entry = hass.entities?.[entity];
+  const deviceClass = stateObj.attributes?.device_class;
+  const state = stateObj.state;
+
+  // Platform icons (custom integrations with translation_key)
+  if (entry?.platform && entry?.translation_key) {
+    const pIcons = platformIcons[entry.platform];
+    if (pIcons) {
+      const icon = getIconFromTranslations(state, pIcons[domain]?.[entry.translation_key]);
+      if (icon) return icon;
+    }
+  }
+
+  // Component icons (domain + device_class + state)
+  if (componentIcons) {
+    const domainIcons = componentIcons[domain];
+    if (domainIcons) {
+      const translations = (deviceClass && domainIcons[deviceClass]) || domainIcons._;
+      const icon = getIconFromTranslations(state, translations);
+      if (icon) return icon;
+    }
+  }
+
+  // Fallback for domains without icons.json (mirrors HA's FALLBACK_DOMAIN_ICONS)
+  return DOMAIN_FALLBACK_ICONS[domain] || "";
+}
+
+// Load platform icons for custom integrations with translation_key
+function ensurePlatformIcons(hass, entity, context) {
+  const entry = hass.entities?.[entity];
+  const platform = entry?.platform;
+  if (!platform || !entry?.translation_key || platformIcons[platform] || !hass?.callWS) return;
+  if (!platformIconsPromises[platform]) {
+    platformIconsPromises[platform] = hass.callWS({
+      type: "frontend/get_icons",
+      category: "entity",
+      integration: platform
+    }).then(res => {
+      platformIcons[platform] = res?.resources?.[platform] || {};
+      requestContextUpdate(context);
+    }).catch(() => {
+      platformIcons[platform] = {};
+      delete platformIconsPromises[platform];
+    });
+  }
+}
+
+export function getIcon(context, entity = context.config.entity, icon = context.config.icon) {
+  const hass = context?._hass;
+
+  // Eagerly start loading icon resources (even if this card has a config icon)
+  preloadComponentIcons(hass);
+
+  if (icon) return icon;
+
+  // Entity registry icon (set via HA UI)
+  const registryIcon = hass?.entities?.[entity]?.icon;
+  if (registryIcon) return registryIcon;
+
+  // State attributes icon
+  const attrIcon = getAttribute(context, "icon", entity);
+  if (attrIcon) return attrIcon;
+
+  const stateObj = hass?.states?.[entity];
+  if (!entity || !stateObj || !hass) return "";
+
+  // Synchronous resolution from cached resources (memory or localStorage)
+  const resolved = resolveEntityIconSync(hass, entity, stateObj);
+  if (resolved) return resolved;
+
+  // Register for re-render when resources arrive
+  pendingContexts.add(context);
+  ensurePlatformIcons(hass, entity, context);
+  return "";
+}
+
+// Weather icon lookup exposed to the user template system
+const WEATHER_ICONS = {
+  "clear-night": "mdi:weather-night",
+  "cloudy": "mdi:weather-cloudy",
+  "exceptional": "mdi:alert-circle-outline",
+  "fog": "mdi:weather-fog",
+  "hail": "mdi:weather-hail",
+  "lightning": "mdi:weather-lightning",
+  "lightning-rainy": "mdi:weather-lightning-rainy",
+  "partlycloudy": "mdi:weather-partly-cloudy",
+  "pouring": "mdi:weather-pouring",
+  "rainy": "mdi:weather-rainy",
+  "snowy": "mdi:weather-snowy",
+  "snowy-rainy": "mdi:weather-snowy-rainy",
+  "sunny": "mdi:weather-sunny",
+  "windy": "mdi:weather-windy",
+  "windy-variant": "mdi:weather-windy-variant",
+};
+export function getWeatherIcon(weatherType) {
+  return WEATHER_ICONS[weatherType] || "mdi:weather-cloudy";
 }
 
 export function getIconColor(context, entity = context.config.entity, brightness = 1) {
@@ -401,34 +360,39 @@ export function updateSubButtonIconOrImage(element, options, displayedState, cal
     }
     
     return imageElement;
-  } else if (showIcon && newIcon) {
-    // No entity picture but icon available - show icon, hide image
+  } else if (showIcon) {
+    // No entity picture - show icon element (or keep it ready for template API)
     let iconElement = element.icon;
     if (!iconElement) {
       iconElement = document.createElement('ha-icon');
       iconElement.classList.add('bubble-sub-button-icon');
-      iconElement.classList.add('show-icon');
       element.appendChild(iconElement);
       element.icon = iconElement;
     }
     
-    // Allow callback to modify icon update behavior (e.g., for dropdown option icons)
-    if (beforeIconUpdate) {
-      const result = beforeIconUpdate(iconElement, options);
-      if (result !== null && result !== undefined) {
-        // Callback returned a new icon element or handled the update
-        if (result instanceof HTMLElement && result !== iconElement) {
-          element.icon = result;
-          iconElement = result;
+    if (newIcon) {
+      // Allow callback to modify icon update behavior (e.g., for dropdown option icons)
+      if (beforeIconUpdate) {
+        const result = beforeIconUpdate(iconElement, options);
+        if (result !== null && result !== undefined) {
+          // Callback returned a new icon element or handled the update
+          if (result instanceof HTMLElement && result !== iconElement) {
+            element.icon = result;
+            iconElement = result;
+          }
         }
+      } else if (iconElement.icon !== newIcon) {
+        iconElement.setAttribute('icon', newIcon);
       }
-    } else if (iconElement.icon !== newIcon) {
-      iconElement.setAttribute('icon', newIcon);
+      
+      iconElement.classList.remove('hidden');
+      iconElement.classList.add('show-icon');
+      updateIconClasses(iconElement, displayedState);
+    } else {
+      // Icon not resolved yet, keep element hidden but available for template API
+      iconElement.classList.remove('show-icon');
+      iconElement.classList.add('hidden');
     }
-    
-    iconElement.classList.remove('hidden');
-    iconElement.classList.add('bubble-sub-button-icon', 'show-icon');
-    updateIconClasses(iconElement, displayedState);
     
     // Remove full-size image classes when showing icon
     element.classList.remove('has-image-full');
