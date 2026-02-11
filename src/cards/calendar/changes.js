@@ -1,4 +1,5 @@
-import { createElement, setLayout, applyScrollingEffect } from "../../tools/utils.js";
+import { createElement, setLayout } from "../../tools/utils.js";
+import { applyScrollingEffect } from "../../tools/text-scrolling.js";
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import setupTranslation from "../../tools/localize.js";
 import { addActions } from "../../tools/tap-actions.js";

@@ -1,5 +1,4 @@
 import {
-    applyScrollingEffect,
     formatDateTime,
     getState,
     getAttribute,
@@ -12,6 +11,7 @@ import {
     startTimerInterval,
     stopTimerInterval
 } from '../../tools/utils.js';
+import { applyScrollingEffect } from '../../tools/text-scrolling.js';
 import { getIcon, getImage, getIconColor } from '../../tools/icon.js';
 import { getClimateColor } from '../../cards/climate/helpers.js';
 

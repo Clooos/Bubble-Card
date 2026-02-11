@@ -3,7 +3,8 @@ import { initializeContent } from './tools/init.js';
 import { cleanupTapActions } from './tools/tap-actions.js';
 import { preloadYAMLStyles } from './modules/registry.js';
 import { createBubbleDefaultColor } from './tools/style.js';
-import { cleanupScrollingEffects, stopTimerInterval } from './tools/utils.js';
+import { stopTimerInterval } from './tools/utils.js';
+import { cleanupScrollingEffects } from './tools/text-scrolling.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 import { handlePopUp } from './cards/pop-up/index.js';

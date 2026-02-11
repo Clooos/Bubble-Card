@@ -1,11 +1,11 @@
 import { 
-    applyScrollingEffect,
     getState,
     getAttribute,
     isStateOn,
     isEntityType,
     setLayout
 } from '../../tools/utils.js';
+import { applyScrollingEffect } from '../../tools/text-scrolling.js';
 import { updateContentContainerFixedClass } from '../../components/base-card/changes.js';
 import { computePlaybackControl, getMediaControlsSupport, hasMediaControl } from './helpers.js';
 import { getIcon, getImage, getIconColor } from '../../tools/icon.js';
