@@ -265,8 +265,26 @@ function getMediaCoverState(context) {
 function evaluateCoverState(context) {
     const coverState = getMediaCoverState(context);
     const forceIcon = Boolean(context.config.force_icon);
-    const rawCover = forceIcon ? '' : (getImage(context) || '');
+    let rawCover = forceIcon ? '' : (getImage(context) || '');
     const entityState = (getState(context) || '').toLowerCase();
+
+    // Append a media content fingerprint as a cache-busting parameter to handle
+    // proxy URLs that stay identical across different media (e.g., Apple TV).
+    // Same content produces the same hash, avoiding unnecessary re-fetches.
+    if (rawCover) {
+        const fp = (getAttribute(context, "media_content_id") || '')
+            + (getAttribute(context, "media_title") || '')
+            + (getAttribute(context, "media_artist") || '');
+        if (fp) {
+            let h = 0;
+            for (let i = 0; i < fp.length; i++) {
+                h = ((h << 5) - h) + fp.charCodeAt(i);
+                h |= 0;
+            }
+            const sep = rawCover.includes('?') ? '&' : '?';
+            rawCover = `${rawCover}${sep}v=${Math.abs(h).toString(36)}`;
+        }
+    }
     const shouldReset = forceIcon || MEDIA_COVER_RESET_STATES.has(entityState);
     const isIdle = entityState === 'idle';
 
