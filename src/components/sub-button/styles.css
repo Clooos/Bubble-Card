@@ -266,7 +266,6 @@
 /* Full-size entity picture when only the icon is displayed */
 .bubble-sub-button.has-image-full {
     padding: 0;
-    overflow: hidden;
 }
 
 .bubble-sub-button-image.image-full {
