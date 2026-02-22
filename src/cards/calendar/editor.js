@@ -65,6 +65,13 @@ export function renderCalendarEditor(editor){
                           selector: { boolean: {} },
                         },
                         {
+                          name: 'show_started_events',
+                          label: t('editor.calendar.show_started_events'),
+                          title: t('editor.calendar.show_started_events'),
+                          selector: { boolean: {} },
+                          default: true
+                        },
+                        {
                           name: 'show_place',
                           label: t('editor.calendar.show_place'),
                           title: t('editor.calendar.show_place'),
