@@ -59,3 +59,12 @@ export function sortEvents(a, b) {
   // Both are all-day events on same date - maintain original order
   return 0;
 }
+
+export function filterStartedEvents(events, now) {
+  return events.filter(event => {
+    const eventStart = parseEventDateTime(event.start);
+    const eventEnd = parseEventDateTime(event.end);
+    // Hide events that have already started but not yet ended
+    return !(eventStart < now && eventEnd > now);
+  });
+}
