@@ -137,7 +137,7 @@ export function changeMediaIcon(context) {
 
 export function changeMediaInfo(context) {
     const title = getAttribute(context, "media_title");
-    const artist = getAttribute(context, "media_artist");
+    const artist = getAttribute(context, "media_artist") || getAttribute(context, "media_series_title");
     const mediaState = title + artist;
 
     if (mediaState !== context.previousMediaState) {
@@ -159,7 +159,7 @@ export function changeMediaInfo(context) {
 export function changeDisplayedInfo(context) {
     const normalize = (value) => value === undefined || value === null ? '' : String(value).trim();
     const title = normalize(getAttribute(context, "media_title"));
-    const artist = normalize(getAttribute(context, "media_artist"));
+    const artist = normalize(getAttribute(context, "media_artist")) || normalize(getAttribute(context, "media_series_title"));
     const source = normalize(getAttribute(context, "source"));
     const isTitleSourceOnly = title !== '' && source !== '' && title === source;
     const noMediaInfo = (title + artist) === '' || isTitleSourceOnly;
