@@ -1,3 +1,8 @@
+// Detect if the new HA frontend is active (uses ha-picker-field inside ha-select).
+export function isNewHaFrontend() {
+    return !!customElements.get('ha-picker-field');
+}
+
 export function getTranslatedAttribute(context, state, attribute, option) {
     function formatString(string) {
       const formattedString = string.replace(/_/g, ' ');

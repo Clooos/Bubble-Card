@@ -1,7 +1,8 @@
 import { 
     getTranslatedAttribute, 
     getOptionIcon,
-    getSelectedAttribute
+    getSelectedAttribute,
+    isNewHaFrontend
   } from "./helpers.js";
 
 export function changeDropdownList(context, elements = context.elements, entity = context.config.entity, config) {
@@ -28,16 +29,20 @@ export function changeDropdownList(context, elements = context.elements, entity 
         elements.previousState === elements.currentState && 
         elements.previousSelectedAttribute === elements.currentSelectedAttribute) return;
   
-    // Append options to the dropdown select element
+    const newHa = isNewHaFrontend();
+    // New HA uses ha-dropdown-item; old HA uses mwc-list-item
+    const itemTag = newHa ? 'ha-dropdown-item' : 'mwc-list-item';
     let options = elements.currentList;
-    let state = elements.currentState;
   
     // If only the selected attribute changed and the list is identical, just toggle the selected item
     if (sameList && Array.isArray(elements.currentList)) {
-      const items = elements.dropdownSelect.querySelectorAll('mwc-list-item');
+      const items = elements.dropdownSelect.querySelectorAll(itemTag);
       if (items && items.length === elements.currentList.length) {
         items.forEach((item) => {
-          if (item.value === elements.currentSelectedAttribute) {
+          // Use data-bubble-value for reliable comparison (independent of webawesome internals)
+          const itemValue = newHa ? item.dataset.bubbleValue : item.value;
+          const isSelected = itemValue === elements.currentSelectedAttribute;
+          if (isSelected) {
             item.setAttribute('selected', '');
           } else {
             item.removeAttribute('selected');
@@ -57,12 +62,23 @@ export function changeDropdownList(context, elements = context.elements, entity 
     // Check if options is an array before iterating
     if (Array.isArray(options)) {
       options.forEach((option) => {
-          const opt = document.createElement('mwc-list-item');
+          const opt = document.createElement(itemTag);
           opt.value = option;
+          if (newHa) {
+            // Store value in a plain attribute for reliable comparison regardless of webawesome internals
+            opt.dataset.bubbleValue = option;
+          }
     
           const icon = getOptionIcon(context, context._hass.states[entity], config.select_attribute, option);
           if (icon) {
-            opt.graphic = 'icon';
+            if (newHa) {
+              // New HA: ha-dropdown-item uses slot="icon"; no graphic property needed
+              icon.slot = 'icon';
+            } else {
+              // Old HA: mwc-list-item uses slot="graphic" and requires graphic attribute
+              opt.graphic = 'icon';
+              icon.slot = 'graphic';
+            }
             opt.appendChild(icon);
           }
     
@@ -74,15 +90,16 @@ export function changeDropdownList(context, elements = context.elements, entity 
     
           opt.appendChild(document.createTextNode(translatedLabel));
     
+          // Use setAttribute for synchronous attribute reflection (avoids async Lit update cycle)
           if (option === elements.currentSelectedAttribute) {
-              opt.setAttribute('selected', '');
+            opt.setAttribute('selected', '');
           }
     
           elements.dropdownSelect.appendChild(opt);
       });
     } // End of Array.isArray check
     
-    // Enregistrer les valeurs actuelles pour la comparaison future
+    // Store current values for future comparison
     elements.previousList = Array.isArray(elements.currentList) ? elements.currentList.slice() : elements.currentList;
     elements.previousState = elements.currentState;
     elements.previousSelectedAttribute = elements.currentSelectedAttribute;

@@ -1,3 +1,9 @@
+/* =====================================================================
+   OLD HA frontend (mwc/MDC-based ha-select)
+   These styles are injected into ha-select's shadow DOM and the container.
+   On new HA they are no-ops (target elements that no longer exist).
+   ===================================================================== */
+
 mwc-list-item {
     border-radius: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 24px));
     margin: 0 8px;
@@ -44,6 +50,19 @@ ha-select {
     pointer-events: auto;
 }
 
+/* Hide old HA dropdown scrollbars while keeping scroll behavior */
+.mdc-menu,
+mwc-list {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.mdc-menu::-webkit-scrollbar,
+mwc-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
 .mdc-select__dropdown-icon {
     display: none !important;
 }
@@ -59,10 +78,95 @@ ha-select {
     height: 28px !important;
 }
 
+/* =====================================================================
+   NEW HA frontend (webawesome-based ha-select with ha-dropdown)
+   ha-picker-field styles are injected into ha-select's shadow DOM:
+     - hide the native trigger button that would appear behind our arrow
+     - configure ha-dropdown's menu appearance
+   ha-dropdown-item styles are applied in the container's light DOM scope.
+   On old HA these are no-ops (target elements that do not exist).
+   ===================================================================== */
+
+/* Hide the ha-picker-field trigger but keep it for popup anchor positioning */
+ha-picker-field {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Constrain ha-select host so it matches our arrow button size */
+:host(.bubble-dropdown-select) {
+    height: 36px !important;
+    overflow: visible !important;
+}
+
+/* ha-dropdown: menu background color (via webawesome surface token) */
+ha-dropdown {
+    --wa-color-surface-raised: var(--bubble-select-list-background-color, var(--bubble-select-main-background-color, var(--bubble-main-background-color, var(--card-background-color, var(--secondary-background-color)))));
+}
+
+/* ha-dropdown menu panel: match old mwc-menu appearance */
+ha-dropdown::part(menu) {
+    border: none !important;
+    border-radius: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 32px)) !important;
+    min-width: var(--bubble-select-list-width, 200px) !important;
+    padding: 8px 0 !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+ha-dropdown::part(menu)::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* ha-dropdown-item: match old mwc-list-item dimensions and spacing (light DOM scope) */
+ha-dropdown-item {
+    /* Match old mwc-list-item min-height */
+    min-height: 48px !important;
+    border-radius: var(--bubble-select-list-border-radius, var(--bubble-border-radius, 24px)) !important;
+    margin: 0 8px;
+    overflow: hidden;
+    /* Suppress any default webawesome border on items */
+    border: none !important;
+    outline: none !important;
+    /* Explicitly re-enable pointer events: the container has pointer-events:none,
+       but CSS spec allows descendants with an explicit value to still be targets */
+    pointer-events: auto;
+}
+
+/* Keep the initial programmatic focus from looking like a stuck hover state. */
+ha-dropdown-item:not([selected]):focus:not(:hover) {
+    background-color: transparent !important;
+}
+
+ha-dropdown-item[selected]:focus:not(:hover) {
+    background-color: var(--bubble-select-list-item-accent-color, var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))) !important;
+}
+
+/* ha-dropdown-item selected state: match old mwc-list-item[selected] appearance */
+ha-dropdown-item[selected] {
+    /* Override primary color (used for text/icons) to match HA primary text */
+    --primary-color: var(--primary-text-color);
+    /* Override background fill to use the Bubble Card accent color */
+    --ha-color-fill-primary-quiet-resting: var(--bubble-select-list-item-accent-color, var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--bubble-default-color))));
+    --ha-color-fill-primary-quiet-hover: var(--bubble-select-list-item-accent-color, var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--bubble-default-color))));
+}
+
+/* =====================================================================
+   Shared styles (apply to both old and new HA)
+   ===================================================================== */
+
 .bubble-dropdown-container {
     display: flex !important;
+    position: relative;
+    pointer-events: none;
     width: auto;
-    height: 100%;
+    align-self: center;
     align-items: center;
     justify-content: center;
 }

@@ -1,7 +1,7 @@
 /* 'card-type' in CSS variables is replaced with the real card type 
    in card-structure.js for easier maintenance */
 
-* {
+   * {
     -webkit-tap-highlight-color: transparent !important;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */

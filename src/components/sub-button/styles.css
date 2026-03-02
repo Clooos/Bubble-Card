@@ -312,16 +312,21 @@
 }
 
 .bubble-sub-button .bubble-dropdown-container {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    position: static;
+    width: 36px;
+    height: 36px;
 }
 
 .bubble-sub-button .bubble-dropdown-arrow {
     background: none !important;
+}
+
+.bubble-sub-button .bubble-dropdown-select {
+    position: absolute;
     inset: 0;
-    margin: auto -4px;
+    width: auto;
+    height: 36px;
+    margin: auto;
 }
 
 .bubble-sub-button.is-select.background-on {
