@@ -15,6 +15,7 @@ export default {
       "show_end": "Show end time",
       "show_progress": "Show progress",
       "show_place": "Show place",
+      "show_started_events": "Show started events",
       "text_scrolling": "Text scrolling effect",
       "name": "Calendar",
       "new_calendar": "Add another calendar",

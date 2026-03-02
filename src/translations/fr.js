@@ -15,6 +15,7 @@ export default {
       "show_end": "Voir l'heure de fin",
       "show_progress": "Voir la progression",
       "show_place": "Voir le lieu",
+      "show_started_events": "Afficher les événements en cours",
       "text_scrolling": "Effet de défilement du texte",
       "name": "Calendrier",
       "new_calendar": "Ajouter un autre calendrier",

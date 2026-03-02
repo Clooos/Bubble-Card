@@ -3,7 +3,7 @@ import { applyScrollingEffect } from "../../tools/text-scrolling.js";
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import setupTranslation from "../../tools/localize.js";
 import { addActions } from "../../tools/tap-actions.js";
-import { hashCode, intToRGB, parseEventDateTime, sortEvents } from "./helpers.js";
+import { hashCode, intToRGB, parseEventDateTime, sortEvents, filterStartedEvents } from "./helpers.js";
 
 function dateDiffInMinutes(a, b) {
   const MS_PER_MINUTES = 1000 * 60;
@@ -41,8 +41,13 @@ export async function changeEventList(context) {
 
   const events = await Promise.all(promises);
 
-  context.events = events.flat()
-    .sort(sortEvents)
+  let sortedEvents = events.flat().sort(sortEvents);
+
+  if (context.config.show_started_events === false) {
+    sortedEvents = filterStartedEvents(sortedEvents, new Date());
+  }
+
+  context.events = sortedEvents
     .slice(0, context.config.limit ?? undefined);
 }
 

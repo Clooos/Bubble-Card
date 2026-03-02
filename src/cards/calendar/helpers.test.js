@@ -1,5 +1,5 @@
 import { describe, test, expect } from '@jest/globals';
-import { parseEventDateTime, sortEvents } from './helpers.js';
+import { parseEventDateTime, sortEvents, filterStartedEvents } from './helpers.js';
 
 describe('parseEventDateTime', () => {
   test('should parse all-day event with date property', () => {
@@ -200,5 +200,82 @@ describe('sortEvents', () => {
 
       expect(events).toEqual([holiday1, holiday2, breakfast, lunch, dinner]);
     });
+  });
+});
+
+describe('filterStartedEvents', () => {
+  const now = new Date('2024-12-25T12:00:00');
+
+  test('should keep events that have not started yet', () => {
+    const futureEvent = {
+      start: { dateTime: '2024-12-25T14:00:00' },
+      end: { dateTime: '2024-12-25T15:00:00' },
+    };
+
+    const result = filterStartedEvents([futureEvent], now);
+    expect(result).toEqual([futureEvent]);
+  });
+
+  test('should keep events that have already ended', () => {
+    const pastEvent = {
+      start: { dateTime: '2024-12-25T09:00:00' },
+      end: { dateTime: '2024-12-25T10:00:00' },
+    };
+
+    const result = filterStartedEvents([pastEvent], now);
+    expect(result).toEqual([pastEvent]);
+  });
+
+  test('should remove events that are currently in progress', () => {
+    const inProgressEvent = {
+      start: { dateTime: '2024-12-25T11:00:00' },
+      end: { dateTime: '2024-12-25T13:00:00' },
+    };
+
+    const result = filterStartedEvents([inProgressEvent], now);
+    expect(result).toEqual([]);
+  });
+
+  test('should keep all-day events for a future date', () => {
+    const tomorrowAllDay = {
+      start: { date: '2024-12-26' },
+      end: { date: '2024-12-27' },
+    };
+
+    const result = filterStartedEvents([tomorrowAllDay], now);
+    expect(result).toEqual([tomorrowAllDay]);
+  });
+
+  test('should remove an in-progress all-day event', () => {
+    const todayAllDay = {
+      start: { date: '2024-12-25' },
+      end: { date: '2024-12-26' },
+    };
+
+    const result = filterStartedEvents([todayAllDay], now);
+    expect(result).toEqual([]);
+  });
+
+  test('should return an empty array when given no events', () => {
+    const result = filterStartedEvents([], now);
+    expect(result).toEqual([]);
+  });
+
+  test('should filter only in-progress events from a mixed list', () => {
+    const past = {
+      start: { dateTime: '2024-12-25T08:00:00' },
+      end: { dateTime: '2024-12-25T09:00:00' },
+    };
+    const inProgress = {
+      start: { dateTime: '2024-12-25T11:00:00' },
+      end: { dateTime: '2024-12-25T13:00:00' },
+    };
+    const future = {
+      start: { dateTime: '2024-12-25T15:00:00' },
+      end: { dateTime: '2024-12-25T16:00:00' },
+    };
+
+    const result = filterStartedEvents([past, inProgress, future], now);
+    expect(result).toEqual([past, future]);
   });
 });

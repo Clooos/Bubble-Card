@@ -14,6 +14,7 @@ export default {
       "list_of_calendars": "日历列表",
       "show_end": "显示结束时间",
       "show_progress": "显示进度",
+      "show_started_events": "显示已开始的事件",
       "text_scrolling": "文字滚动效果",
       "name": "日历",
       "new_calendar": "添加另一个日历",

@@ -14,6 +14,7 @@ export default {
       "list_of_calendars": "Kalenderliste",
       "show_end": "Endzeitpunkt anzeigen",
       "show_progress": "Fortschritt anzeigen",
+      "show_started_events": "Laufende Ereignisse anzeigen",
       "text_scrolling": "Lauftext",
       "name": "Kalender",
       "new_calendar": "Kalender hinzufügen",
