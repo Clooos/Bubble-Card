@@ -17,6 +17,7 @@
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
     overflow: auto; 
+    -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
     grid-auto-rows: min-content;
     padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);

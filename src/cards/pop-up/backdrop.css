@@ -16,7 +16,7 @@
 
 .bubble-backdrop.is-hidden {
   opacity: 0;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 .bubble-backdrop.has-blur {
