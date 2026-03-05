@@ -459,3 +459,7 @@ ul.icon-list li ha-icon {
 mwc-list-item[disabled] ha-icon {
   opacity: 0.38;
 }
+
+* {
+  line-height: 20px !important;
+}
