@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import { fireEvent } from '../tools/utils.js';
+import { fireEvent, isHomeAssistantVersionAtLeast } from '../tools/utils.js';
 import { yamlKeysMap, initializeModules } from './registry.js';
 import { getTextFromMap } from './utils.js';
 import { makeModuleStore } from './store.js';
@@ -23,6 +23,7 @@ const MODULES_SENSOR_ENTITY_ID = 'sensor.bubble_card_modules';
 const MODULE_TAB_IDS = ['modules', 'store'];
 const BCT_CHECK_RETRY_MS = 5000;
 const FORCE_UNSUPPORTED_STORAGE_KEY = 'bubble-card-force-unsupported-modules';
+const HA_MODULE_EDITOR_LAYOUT_VERSION = '2026.3';
 
 // Function to detect if sl-tab-group is available in the current HA version
 function isSlTabGroupAvailable() {
@@ -286,6 +287,10 @@ export function makeModulesEditor(context) {
   }
 
   const tabGroupId = "bubble-card-module-editor-tab-group";
+  const tabVariant = getTabImplementation();
+  const isHaTabGroupVariant = tabVariant === 'ha-tab-group';
+  const useModernHaTabGroupOffsets = isHaTabGroupVariant &&
+    isHomeAssistantVersionAtLeast(context.hass, HA_MODULE_EDITOR_LAYOUT_VERSION);
 
   // Load modules if they haven't been loaded yet
   if (!context._modulesLoaded) {
@@ -510,7 +515,6 @@ export function makeModulesEditor(context) {
 
   // Handler for tab change event
   const handleTabChange = (e) => {
-    const tabVariant = getTabImplementation();
     let selectedTab;
 
     if (tabVariant === 'sl-tab-group') {
@@ -586,7 +590,6 @@ export function makeModulesEditor(context) {
 
   // Render the appropriate tab component based on availability
   const renderTabs = () => {
-    const tabVariant = getTabImplementation();
     const selectedTab = context._selectedModuleTab || 0;
     const selectedPanel = MODULE_TAB_IDS[selectedTab] ?? selectedTab.toString();
 
@@ -600,6 +603,7 @@ export function makeModulesEditor(context) {
     if (tabVariant === 'ha-tab-group') {
       return html`
         <ha-tab-group
+          class="module-tabs module-tabs--ha-tab-group ${useModernHaTabGroupOffsets ? 'module-tabs--ha-tab-group-modern' : ''}"
           id="${tabGroupId}"
           .activePanel=${selectedPanel}
           @wa-tab-show=${handleTabChange}
@@ -631,6 +635,7 @@ export function makeModulesEditor(context) {
     if (tabVariant === 'sl-tab-group') {
       return html`
         <sl-tab-group
+          class="module-tabs module-tabs--sl-tab-group"
           id="${tabGroupId}"
           .selected=${selectedTab.toString()}
           @sl-tab-show=${handleTabChange}
@@ -651,6 +656,7 @@ export function makeModulesEditor(context) {
 
     return html`
       <ha-tabs
+        class="module-tabs module-tabs--ha-tabs"
         .selected=${selectedTab}
         @selected-changed=${handleTabChange}
       >
@@ -678,7 +684,7 @@ export function makeModulesEditor(context) {
           </span>
         ` : ''}
       </h4>
-      <div class="content" style="margin: -8px 4px 14px 4px;">
+      <div class="content module-editor-content ${isHaTabGroupVariant ? 'module-editor-content--ha-tab-group' : ''} ${useModernHaTabGroupOffsets ? 'module-editor-content--ha-tab-group-modern' : ''}" style="margin: -8px 4px 14px 4px;">
         ${!bctAvailable ? html`
             <div class="bubble-info warning">
               <h4 class="bubble-section-title">
@@ -1166,8 +1172,6 @@ export function makeModulesEditor(context) {
       </div>
     </ha-expansion-panel>
   `;
-
-  const tabVariant = getTabImplementation();
 
   if (tabVariant === 'sl-tab-group') {
     requestAnimationFrame(() => {

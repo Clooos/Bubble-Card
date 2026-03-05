@@ -481,13 +481,18 @@ ha-tabs, ha-tab-group, sl-tab-group {
   --primary-tab-color: var(--primary-color);
   --secondary-tab-color: var(--secondary-text-color);
   border-bottom: 1px solid var(--divider-color);
-  top: 0;
   position: sticky;
   background-color: var(--card-background-color);
   z-index: 6;
   padding-top: 16px;
   margin-top: -24px;
   top: -40px;
+}
+
+/* Keep legacy spacing for older versions.
+   Apply these offsets only on modern Home Assistant layouts. */
+.module-tabs--ha-tab-group.module-tabs--ha-tab-group-modern {
+  top: -16px;
 }
 
 sl-tab-group {
@@ -1182,7 +1187,11 @@ ha-formfield.apply-module-button {
   bottom: -24px;
   background-color: var(--card-background-color);
   padding: 8px 0;
-  z-index: 1;
+}
+
+.module-editor-content--ha-tab-group.module-editor-content--ha-tab-group-modern .module-editor-buttons-container {
+  bottom: -8px;
+  padding-bottom: 12px;
 }
 
 .module-toggles-container {

@@ -30,6 +30,45 @@ export const navigate = (_node, path, replace = false) => {
     })
 }
 
+function normalizeComparableVersion(version) {
+    if (version === null || version === undefined) return '';
+    const rawVersion = typeof version === 'string' || typeof version === 'number'
+        ? String(version).trim()
+        : '';
+    if (!rawVersion) return '';
+
+    // Keep only numeric chunks so tags like "2026.3.0b2" or "2026.3-dev" are comparable.
+    const parts = rawVersion.match(/\d+/g);
+    return parts ? parts.join('.') : '';
+}
+
+export function compareVersions(v1, v2) {
+    const normalizedV1 = normalizeComparableVersion(v1);
+    const normalizedV2 = normalizeComparableVersion(v2);
+    if (!normalizedV1 || !normalizedV2) return 0;
+
+    const v1Parts = normalizedV1.split('.').map(Number);
+    const v2Parts = normalizedV2.split('.').map(Number);
+    const maxLength = Math.max(v1Parts.length, v2Parts.length);
+
+    for (let i = 0; i < maxLength; i++) {
+        const part1 = v1Parts[i] || 0;
+        const part2 = v2Parts[i] || 0;
+        if (part1 > part2) return 1;
+        if (part1 < part2) return -1;
+    }
+
+    return 0;
+}
+
+export function isHomeAssistantVersionAtLeast(hass, minVersion) {
+    const currentVersion = hass?.config?.version;
+    if (!currentVersion || !minVersion) {
+        return false;
+    }
+    return compareVersions(currentVersion, minVersion) >= 0;
+}
+
 const colorCache = new Map();
 
 // Cache for getComputedStyle to avoid expensive recalculations
