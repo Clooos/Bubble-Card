@@ -206,12 +206,20 @@ export function getCurrentPercentage(context, entity = context.config.entity) {
       }
 
       if (lightSliderType === 'white_temp') {
-        const colorTempMireds = parseFloat(getAttribute(context, 'color_temp', entity));
-        const minMireds = parseFloat(getAttribute(context, 'min_mireds', entity)) || 153;
-        const maxMireds = parseFloat(getAttribute(context, 'max_mireds', entity)) || 500;
-        if (!isFinite(colorTempMireds)) return 0;
-        const value = clamp(colorTempMireds, Math.min(minMireds, maxMireds), Math.max(minMireds, maxMireds));
-        return calculateRangePercentage(value, minMireds, maxMireds);
+        const colorTempKelvin = parseFloat(getAttribute(context, 'color_temp_kelvin', entity));
+        const minKelvinRaw = parseFloat(getAttribute(context, 'min_color_temp_kelvin', entity));
+        const maxKelvinRaw = parseFloat(getAttribute(context, 'max_color_temp_kelvin', entity));
+        const minKelvin = Number.isFinite(minKelvinRaw) ? minKelvinRaw : 2000;
+        const maxKelvin = Number.isFinite(maxKelvinRaw) ? maxKelvinRaw : 6500;
+        if (!Number.isFinite(colorTempKelvin)) return 0;
+
+        const lowerKelvin = Math.min(minKelvin, maxKelvin);
+        const upperKelvin = Math.max(minKelvin, maxKelvin);
+        const range = upperKelvin - lowerKelvin;
+        if (range <= 0) return 0;
+
+        const value = clamp(colorTempKelvin, lowerKelvin, upperKelvin);
+        return clampPercentage(((upperKelvin - value) / range) * 100);
       }
 
       // Default: brightness

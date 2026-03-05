@@ -369,13 +369,22 @@ export function updateEntity(context, percentage) {
       }
 
       if (lightSliderType === 'white_temp') {
-        const minMireds = context._hass.states[context.config.entity]?.attributes?.min_mireds ?? 153;
-        const maxMireds = context._hass.states[context.config.entity]?.attributes?.max_mireds ?? 500;
-        const value = fromPercentageToValue(adjustedPercentage, minMireds, maxMireds);
-        const mireds = Math.round(getAdjustedValue(value, 1));
+        const attributes = context._hass.states[context.config.entity]?.attributes || {};
+        const minKelvinRaw = Number(attributes.min_color_temp_kelvin);
+        const maxKelvinRaw = Number(attributes.max_color_temp_kelvin);
+        const minKelvin = Number.isFinite(minKelvinRaw) ? minKelvinRaw : 2000;
+        const maxKelvin = Number.isFinite(maxKelvinRaw) ? maxKelvinRaw : 6500;
+        const lowerKelvin = Math.min(minKelvin, maxKelvin);
+        const upperKelvin = Math.max(minKelvin, maxKelvin);
+        const range = upperKelvin - lowerKelvin;
+        const rawKelvin = range > 0
+          ? upperKelvin - (adjustedPercentage / 100) * range
+          : lowerKelvin;
+        const kelvin = Math.round(getAdjustedValue(rawKelvin, 1));
+        const clampedKelvin = Math.max(lowerKelvin, Math.min(upperKelvin, kelvin));
         context._hass.callService('light', 'turn_on', {
           entity_id: context.config.entity,
-          color_temp: mireds
+          color_temp_kelvin: clampedKelvin
         });
         break;
       }
