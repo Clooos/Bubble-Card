@@ -110,7 +110,7 @@ export function createDropdownStructure(context, elements = context.elements, sh
                 root.appendChild(elements.dropdownCustomStyleElement);
             }
             // fixMenuDisplay is only needed on old HA (new HA uses ha-dropdown which handles its own display)
-            if (!isNewHaFrontend()) {
+            if (!isNewHaFrontend(context?._hass)) {
                 const menuElement = root.querySelector('ha-menu.mdc-select__menu');
                 fixMenuDisplay(menuElement);
             }
@@ -138,7 +138,7 @@ export function createDropdownActions(context, elements = context.elements, enti
 
     const card = elements === context.elements ? defaultCard : elements;
     const eventCaller = elements === context.elements ? defaultEventCaller : elements;
-    const newHa = isNewHaFrontend();
+    const newHa = isNewHaFrontend(context?._hass);
 
     // Ensure previous listeners are cleaned up before re-attaching
     if (typeof elements.dropdownCleanup === 'function') {

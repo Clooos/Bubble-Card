@@ -29,7 +29,7 @@ export function changeDropdownList(context, elements = context.elements, entity 
         elements.previousState === elements.currentState && 
         elements.previousSelectedAttribute === elements.currentSelectedAttribute) return;
   
-    const newHa = isNewHaFrontend();
+    const newHa = isNewHaFrontend(context?._hass);
     // New HA uses ha-dropdown-item; old HA uses mwc-list-item
     const itemTag = newHa ? 'ha-dropdown-item' : 'mwc-list-item';
     let options = elements.currentList;
