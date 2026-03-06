@@ -31,7 +31,7 @@ export function createStructure(context, appendTo = context.container) {
         icon: {
             tap_action: { action: "more-info" },
             double_tap_action: { action: "none" },
-            hold_action: { action: "more-info" }
+            hold_action: { action: "none" }
         },
         button: {
             tap_action: { action: "more-info" },
