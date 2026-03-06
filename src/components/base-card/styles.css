@@ -1,7 +1,7 @@
 /* 'card-type' in CSS variables is replaced with the real card type 
    in card-structure.js for easier maintenance */
 
-   * {
+* {
     -webkit-tap-highlight-color: transparent !important;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
@@ -56,7 +56,7 @@ ha-card {
     background-color: var(--bubble-card-type-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
     border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     box-shadow: var(--bubble-card-type-box-shadow, var(--bubble-box-shadow, none));
-    overflow: scroll;
+    overflow: visible;
     touch-action: auto;
     border: var(--bubble-card-type-border, var(--bubble-border, none));
     box-sizing: border-box;
@@ -73,7 +73,6 @@ ha-card {
     border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     background-color: rgba(0,0,0,0);
     overflow: visible;
-    /* z-index: 1; */
 }
 
 .bubble-wrapper.fixed-top {
