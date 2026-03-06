@@ -190,7 +190,7 @@ export function displayContent(context) {
 
 function toggleBackdrop(context, show) {
     const { showBackdrop, hideBackdrop } = getBackdrop(context);
-    show ? showBackdrop() : hideBackdrop();
+    show ? showBackdrop(context) : hideBackdrop();
 }
 
 export function appendPopup(context, append) {

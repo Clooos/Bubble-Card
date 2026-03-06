@@ -7,7 +7,6 @@ import backdropStyles from "./backdrop.css";
 import { handleCustomStyles } from "../../tools/style-processor.js";
 
 let backdrop;
-let hideBackdrop = false;
 let startTouchY;
 let lastTouchY;
 let themeColorBackground;
@@ -26,9 +25,10 @@ colorScheme.addEventListener('change', updateBackdropColor);
 updateBackdropColor();
 
 export function getBackdrop(context) {
-  const isBackdropHidden = context.config.hide_backdrop ?? false;
-
-  if (backdrop) return backdrop;
+  if (backdrop) {
+    backdrop.activeContext = context;
+    return backdrop;
+  }
 
   const backdropHostElement = createElement('div', 'bubble-backdrop-host');
   const shadowRoot = backdropHostElement.attachShadow({ mode: 'open' });
@@ -44,32 +44,48 @@ export function getBackdrop(context) {
   backdropCustomStyle.dataset.bubbleTarget = 'backdrop';
   shadowRoot.appendChild(backdropCustomStyle);
 
-  if (isBackdropHidden) {
-    backdropHostElement.style.display = 'none';
-    backdropHostElement.style.pointerEvents = 'none';
-  }
-
   document.body.appendChild(backdropHostElement);
-  
-  const backdropBlur = context.config.backdrop_blur ?? 0;
-  const hasBlur = parseFloat(backdropBlur) > 0;
-  internalBackdropElement.classList.toggle('has-blur', hasBlur);
-  if (hasBlur) {
-    internalBackdropElement.style.setProperty('--custom-backdrop-filter', `blur(${backdropBlur}px)`);
-  } else {
-    // Ensure no backdrop filter cost when blur is disabled
-    internalBackdropElement.style.removeProperty('--custom-backdrop-filter');
+
+  function applyBackdropConfig(activeContext) {
+    if (!activeContext?.config) return;
+
+    const isBackdropHidden = activeContext.config.hide_backdrop ?? false;
+    if (isBackdropHidden) {
+      backdropHostElement.style.display = 'none';
+      backdropHostElement.style.pointerEvents = 'none';
+    } else {
+      backdropHostElement.style.display = '';
+      backdropHostElement.style.pointerEvents = '';
+    }
+
+    const backdropBlur = activeContext.config.backdrop_blur ?? 0;
+    const hasBlur = parseFloat(backdropBlur) > 0;
+    internalBackdropElement.classList.toggle('has-blur', hasBlur);
+    if (hasBlur) {
+      internalBackdropElement.style.setProperty('--custom-backdrop-filter', `blur(${backdropBlur}px)`);
+    } else {
+      // Ensure no backdrop filter cost when blur is disabled
+      internalBackdropElement.style.removeProperty('--custom-backdrop-filter');
+    }
   }
 
-  // Debounced, non-blocking backdrop styles computation to avoid jank on open
+  // Debounced backdrop styles computation with latest context only
   let backdropStylesUpdateScheduled = false;
-  function scheduleBackdropStylesUpdate() {
+  let pendingBackdropContext = null;
+  function scheduleBackdropStylesUpdate(styleContext, defer = true) {
+    pendingBackdropContext = styleContext || pendingBackdropContext || backdrop?.activeContext || context;
     if (backdropStylesUpdateScheduled) return;
     backdropStylesUpdateScheduled = true;
     const run = () => {
       backdropStylesUpdateScheduled = false;
-      try { handleCustomStyles(context, backdropCustomStyle); } catch (_) {}
+      const currentContext = pendingBackdropContext || backdrop?.activeContext || context;
+      pendingBackdropContext = null;
+      try { handleCustomStyles(currentContext, backdropCustomStyle); } catch (_) {}
     };
+    if (!defer) {
+      requestAnimationFrame(run);
+      return;
+    }
     const idle = (cb) => {
       try {
         if (typeof window.requestIdleCallback === 'function') {
@@ -82,19 +98,20 @@ export function getBackdrop(context) {
     };
     idle(run);
   }
+  applyBackdropConfig(context);
   // Initial async styles apply (once)
-  scheduleBackdropStylesUpdate();
+  scheduleBackdropStylesUpdate(context, true);
 
-  function showBackdrop() {
+  function showBackdrop(styleContext) {
+    const activeContext = styleContext || backdrop?.activeContext || context;
+    applyBackdropConfig(activeContext);
+    // Keep styles aligned with the current popup while preserving smoothness.
+    scheduleBackdropStylesUpdate(activeContext, false);
     requestAnimationFrame(() => {
       if (!internalBackdropElement.classList.contains('is-visible')) {
         internalBackdropElement.classList.add('is-visible');
       }
       internalBackdropElement.classList.remove('is-hidden');
-      if (!isBackdropHidden) {
-        backdropHostElement.style.display = '';
-        backdropHostElement.style.pointerEvents = '';
-      }
     });
   }
   
@@ -110,7 +127,9 @@ export function getBackdrop(context) {
     showBackdrop, 
     backdropElement: internalBackdropElement, 
     backdropCustomStyle,
-    updateBackdropStyles: scheduleBackdropStylesUpdate
+    updateBackdropStyles: scheduleBackdropStylesUpdate,
+    applyBackdropConfig,
+    activeContext: context
   };
   return backdrop;
 }
@@ -338,8 +357,6 @@ export function prepareStructure(context) {
     getBackdrop(context);
 
     if (context.cardTitle) context.cardTitle.style.display = 'none';
-    hideBackdrop = hideBackdrop || (context.config.hide_backdrop ?? true);
-
     context.popUp.style.setProperty('--custom-height-offset-desktop', context.config.margin_top_desktop ?? '0px');
     context.popUp.style.setProperty('--custom-height-offset-mobile', context.config.margin_top_mobile ?? '0px');
     context.popUp.style.setProperty('--custom-margin', `-${context.config.margin ?? '7px'}`);
