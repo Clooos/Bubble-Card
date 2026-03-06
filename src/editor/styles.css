@@ -321,7 +321,7 @@ ha-card-conditions-editor {
 }
 
 .bubble-info * {
-  z-index: 1;
+  z-index: 0;
 }
 
 .bubble-section-title + p {
