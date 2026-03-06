@@ -388,18 +388,26 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                   }}"
                 ></ha-textfield>
                 ${button.sub_button_type !== 'slider' || !button.always_visible ? html`
-                  <ha-select
-                    label="Content layout"
-                    .value="${button.content_layout ?? 'icon-left'}"
-                    @selected="${(ev) => updateValueFn({ content_layout: ev.target.value })}"
-                    @closed="${(ev) => ev.stopPropagation()}"
-                    fixedMenuPosition
-                  >
-                    <mwc-list-item value="icon-left">Icon on left (default)</mwc-list-item>
-                    <mwc-list-item value="icon-top">Icon on top</mwc-list-item>
-                    <mwc-list-item value="icon-bottom">Icon on bottom</mwc-list-item>
-                    <mwc-list-item value="icon-right">Icon on right</mwc-list-item>
-                  </ha-select>
+                  <ha-form
+                    .hass=${editor.hass}
+                    .data=${{ content_layout: button.content_layout ?? 'icon-left' }}
+                    .schema=${[{
+                        name: 'content_layout',
+                        selector: {
+                            select: {
+                                options: [
+                                  { value: 'icon-left', label: 'Icon on left (default)' },
+                                  { value: 'icon-top', label: 'Icon on top' },
+                                  { value: 'icon-bottom', label: 'Icon on bottom' },
+                                  { value: 'icon-right', label: 'Icon on right' }
+                                ],
+                                mode: 'dropdown'
+                            }
+                        }
+                    }]}
+                    .computeLabel=${() => 'Content layout'}
+                    @value-changed=${(ev) => updateValueFn({ content_layout: ev.detail.value.content_layout })}
+                  ></ha-form>
                 ` : ''}
               `)}
             </div>
