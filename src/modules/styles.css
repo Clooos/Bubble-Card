@@ -252,7 +252,7 @@
   cursor: pointer;
   opacity: 0.8;
   transition: all 0.2s ease;
-  z-index: 5;
+  z-index: 3;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
@@ -483,7 +483,7 @@ ha-tabs, ha-tab-group, sl-tab-group {
   border-bottom: 1px solid var(--divider-color);
   position: sticky;
   background-color: var(--card-background-color);
-  z-index: 6;
+  z-index: 4;
   padding-top: 16px;
   margin-top: -24px;
   top: -40px;
@@ -630,7 +630,7 @@ sl-tab {
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   transition: all 0.2s ease;
-  z-index: 10;
+  z-index: 4;
   margin-left: auto;
   margin-top: 16px;
 }
