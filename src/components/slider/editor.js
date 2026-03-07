@@ -238,18 +238,21 @@ export function makeGenericSliderSettings({
                 Slider layout
             </h4>
             <div class="content">
-                <ha-select
-                    label="Fill orientation"
-                    .value="${data.slider_fill_orientation || 'left'}"
-                    @selected="${(ev) => callToggleChange('slider_fill_orientation', ev.target.value, meta('ha-select', 'selected'))}"
-                    @closed="${(ev) => ev.stopPropagation()}"
-                    fixedMenuPosition
-                >
-                    <mwc-list-item value="left">Fill from left (default)</mwc-list-item>
-                    <mwc-list-item value="right">Fill from right</mwc-list-item>
-                    <mwc-list-item value="top">Fill from top</mwc-list-item>
-                    <mwc-list-item value="bottom">Fill from bottom</mwc-list-item>
-                </ha-select>
+                <ha-form
+                    .hass=${hass}
+                    .data=${{ slider_fill_orientation: data.slider_fill_orientation || 'left' }}
+                    .schema=${[{
+                        name: 'slider_fill_orientation',
+                        selector: {
+                            select: {
+                                options: FILL_ORIENTATION_OPTIONS,
+                                mode: 'dropdown'
+                            }
+                        }
+                    }]}
+                    .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : 'Fill orientation')}
+                    @value-changed=${(ev) => callToggleChange('slider_fill_orientation', ev.detail.value.slider_fill_orientation, meta('ha-combo-box', 'value-changed'))}
+                ></ha-form>
                 <div class="bubble-info" style="display: ${['top', 'bottom'].includes(data.slider_fill_orientation) ? '' : 'none'}">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -260,19 +263,22 @@ export function makeGenericSliderSettings({
                     </div>
                 </div>
                 ${isLightColorMode ? '' : html`
-                    <ha-select
-                        label="Value position"
-                        .value="${forceValuePositionRight ? 'right' : (data.slider_value_position || 'right')}"
-                        .disabled=${forceValuePositionRight}
-                        @selected="${(ev) => callToggleChange('slider_value_position', ev.target.value, meta('ha-select', 'selected'))}"
-                        @closed="${(ev) => ev.stopPropagation()}"
-                        fixedMenuPosition
-                    >
-                        <mwc-list-item value="right">Right (default)</mwc-list-item>
-                        <mwc-list-item value="left">Left</mwc-list-item>
-                        <mwc-list-item value="center">Center</mwc-list-item>
-                        <mwc-list-item value="hidden">Hidden</mwc-list-item>
-                    </ha-select>
+                    <ha-form
+                        .hass=${hass}
+                        .data=${{ slider_value_position: forceValuePositionRight ? 'right' : (data.slider_value_position || 'right') }}
+                        .schema=${[{
+                            name: 'slider_value_position',
+                            disabled: forceValuePositionRight,
+                            selector: {
+                                select: {
+                                    options: VALUE_POSITION_OPTIONS,
+                                    mode: 'dropdown'
+                                }
+                            }
+                        }]}
+                        .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : 'Value position')}
+                        @value-changed=${(ev) => callToggleChange('slider_value_position', ev.detail.value.slider_value_position, meta('ha-combo-box', 'value-changed'))}
+                    ></ha-form>
                     ${forceValuePositionRight ? html`
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">
@@ -303,18 +309,26 @@ export function makeGenericSliderSettings({
                     Light options
                 </h4>
                 <div class="content">
-                    <ha-select
-                        label="Light slider mode"
-                        .value="${data.light_slider_type || 'brightness'}"
-                        @selected="${(ev) => callToggleChange('light_slider_type', ev.target.value, meta('ha-select', 'selected'))}"
-                        @closed="${(ev) => ev.stopPropagation()}"
-                        fixedMenuPosition
-                    >
-                        <mwc-list-item value="brightness">Brightness (default)</mwc-list-item>
-                        <mwc-list-item value="hue">Color (Hue)</mwc-list-item>
-                        <mwc-list-item value="saturation">Saturation</mwc-list-item>
-                        <mwc-list-item value="white_temp">White temperature</mwc-list-item>
-                    </ha-select>
+                    <ha-form
+                        .hass=${hass}
+                        .data=${{ light_slider_type: data.light_slider_type || 'brightness' }}
+                        .schema=${[{
+                            name: 'light_slider_type',
+                            selector: {
+                                select: {
+                                    options: [
+                                        { value: 'brightness', label: 'Brightness (default)' },
+                                        { value: 'hue', label: 'Color (Hue)' },
+                                        { value: 'saturation', label: 'Saturation' },
+                                        { value: 'white_temp', label: 'White temperature' }
+                                    ],
+                                    mode: 'dropdown'
+                                }
+                            }
+                        }]}
+                        .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : 'Light slider mode')}
+                        @value-changed=${(ev) => callToggleChange('light_slider_type', ev.detail.value.light_slider_type, meta('ha-combo-box', 'value-changed'))}
+                    ></ha-form>
                     ${data.light_slider_type === 'hue' ? html`
                         <ha-formfield>
                             <ha-switch
