@@ -225,31 +225,66 @@ export function generateGitHubExport(moduleData) {
   }
 }
 
-export function copyToClipboard(context, text, successMessage, updatePreviewCallback) {
+export async function copyToClipboard(context, text, successMessage, updatePreviewCallback) {
+  const notifySuccess = () => {
+    fireToast(context, successMessage, "success");
+    if (typeof updatePreviewCallback === 'function') {
+      updatePreviewCallback(text);
+    }
+  };
+
+  const notifyError = () => {
+    fireToast(context, "Could not copy to clipboard. Please copy manually from the preview below.", "error");
+    if (typeof updatePreviewCallback === 'function') {
+      updatePreviewCallback(text);
+    }
+  };
+
+  // Modern Clipboard API - preferred approach
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      notifySuccess();
+      return;
+    } catch (err) {
+      console.warn("Clipboard API failed:", err.name, err.message);
+    }
+  }
+
+  // Legacy fallback using execCommand.
+  // Append the textarea to the component's shadow root instead of document.body
+  // to work around focus trapping in HA's native <dialog> element (newer HA frontend).
   try {
+    const container = context.shadowRoot ?? document.body;
     const textarea = document.createElement('textarea');
     textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
+    Object.assign(textarea.style, {
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      width: '2em',
+      height: '2em',
+      border: 'none',
+      padding: '0',
+      margin: '0',
+      outline: 'none',
+      opacity: '0',
+      pointerEvents: 'none',
+    });
+    container.appendChild(textarea);
+    // focus() is required before select() when focus is trapped inside a <dialog>
+    textarea.focus({ preventScroll: true });
     textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
-    
-    // Use fireToast for notification
-    fireToast(context, successMessage, "success");
-    
-    // Update the preview
-    if (typeof updatePreviewCallback === 'function') {
-      updatePreviewCallback(text);
+    const copied = document.execCommand('copy');
+    container.removeChild(textarea);
+    if (copied) {
+      notifySuccess();
+    } else {
+      notifyError();
     }
   } catch (err) {
-    console.error("Clipboard copy failed:", err);
-    fireToast(context, "Could not copy to clipboard. Please copy manually from the preview below.", "error");
-    
-    if (typeof updatePreviewCallback === 'function') {
-      updatePreviewCallback(text);
-    }
+    console.error("execCommand clipboard fallback failed:", err);
+    notifyError();
   }
 }
 
