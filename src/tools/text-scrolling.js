@@ -103,7 +103,7 @@ export function applyScrollingEffect(context, element, text) {
     const { scrolling_effect: scrollingEffect = true } = context.config;
 
     if (!scrollingEffect) {
-        if (element.previousText !== text || !scrollState.has(element)) {
+        if (element.previousText !== text || scrollState.has(element)) {
             applyNonScrollingStyle(element, text);
         }
         if (resizeObs) try { resizeObs.unobserve(element); } catch (e) {}
