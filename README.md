@@ -11,7 +11,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 ## Table of contents
 
-**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Climate`](#climate)**  **[`Calendar`](#calendar)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons only`](#sub-buttons-only)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Modules`](#modules)**  **[`Help`](#help)**  **[`Donate`](#donate)**
+**[`Installation`](#installation)**  **[`Configuration`](#configuration)**  **[`Pop-up`](#pop-up)**  **[`Horizontal buttons stack`](#horizontal-buttons-stack)**  **[`Button`](#button)**  **[`Media player`](#media-player)**  **[`Cover`](#cover)**  **[`Select`](#select)**  **[`Climate`](#climate)**  **[`Calendar`](#calendar)**  **[`Separator`](#separator)**  **[`Empty column`](#empty-column)**  **[`Sub-buttons only`](#sub-buttons-only)**  **[`Sub-buttons`](#sub-buttons)**  **[`Card layouts`](#card-layouts)**  **[`Actions`](#tap-double-tap-and-hold-actions)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Modules`](#modules)**  **[`Help`](#help)**  **[`Contributing`](#contributing)**  **[`Donate`](#donate)**
 
 <br>
 
@@ -2642,6 +2642,20 @@ Got questions or thoughts about Bubble Card? Want to share your dashboards or di
 
 [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant&style=for-the-badge)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit&style=for-the-badge)](https://www.reddit.com/r/BubbleCard/) [![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-lightgrey?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/discussions)
 
+
+<br>
+
+---
+
+<br>
+
+## Contributing
+
+Contributions are welcome! Whether it's bug fixes, new features, translations, or documentation improvements, feel free to open a pull request.
+
+Before getting started, please read the [developer guide](DEVELOPERS.md) which covers how to set up your local environment, build the project, and test your changes.
+
+[![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 
 <br>
 
