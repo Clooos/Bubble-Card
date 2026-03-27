@@ -1,2 +1,4 @@
 /node_modules
 /www
+.env
+.DS_Store

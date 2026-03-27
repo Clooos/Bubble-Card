@@ -1,6 +1,8 @@
 const webpack = require ('webpack');
 const path = require('path');
-const CompressionPlugin = require("compression-webpack-plugin");
+
+// Load local environment variables from .env (not committed to git)
+try { require('fs').readFileSync('.env', 'utf8').split('\n').forEach(line => { const [k, v] = line.split('='); if (k && v) process.env[k.trim()] = v.trim(); }); } catch {}  
 
 const rules = [
   {
@@ -15,11 +17,6 @@ const performance = {
 
 module.exports = [
   {
-    plugins: [
-      new CompressionPlugin({
-                  algorithm: 'gzip'
-              }),      
-    ],
     mode: 'production',
     entry: {
       'bubble-card': './src/bubble-card.js',
@@ -48,7 +45,7 @@ module.exports = [
     },
     performance,
     output: {
-      path: path.resolve(__dirname, 'www'),
+      path: process.env.HA_PATH || path.resolve(__dirname, 'www'),
       filename: '[name].js'
     }
   }
