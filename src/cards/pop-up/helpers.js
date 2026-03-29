@@ -177,6 +177,8 @@ export function displayContent(context) {
 
     const { sectionRow, sectionRowContainer, popUp } = context;
     popUp.style.transform = '';
+    // Clear visibility:hidden set during initial load.
+    popUp.style.visibility = '';
     if (sectionRow?.tagName.toLowerCase() === 'hui-card') {
         sectionRow.hidden = false;
         sectionRow.style.display = "";
@@ -375,13 +377,18 @@ export function openPopup(context) {
         // Double-check popup is still valid and not closed
         if (!popupState.activePopups.has(context)) return;
         
+        // Make the container visible BEFORE adding the popup to the DOM.
+        // Custom elements inside (e.g. ApexCharts) fire connectedCallback synchronously
+        // during appendChild. If the parent sectionRow is still display:none at that moment,
+        // ApexCharts 2.2.3+ throws "Element not found" and ends up in a broken state.
+        displayContent(context);
+
         if (!context.verticalStack.contains(popUp)) {
             appendPopup(context, true);
         }
 
         // Start transition after DOM insertion
         updatePopupClass(popUp, true);
-        displayContent(context);
         toggleBackdrop(context, true);
         updateListeners(context, true);
 

@@ -350,7 +350,15 @@ export function prepareStructure(context) {
     context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
     context.cardTitle = context.verticalStack.querySelector('.card-header');
     if (!context.editor && !context.config.background_update) {
-      context.verticalStack.removeChild(context.popUp);
+      // Hide popup for 100ms so custom elements can finish async init with real dimensions.
+      context.popUp.style.visibility = 'hidden';
+      setTimeout(() => {
+        if (context.verticalStack?.contains(context.popUp) &&
+            !context.popUp.classList.contains('is-popup-opened')) {
+          context.popUp.style.visibility = '';
+          context.verticalStack.removeChild(context.popUp);
+        }
+      }, 100);
     }
 
     context.elements = {};
