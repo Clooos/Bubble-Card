@@ -60,6 +60,7 @@ ha-card {
     touch-action: auto;
     border: var(--bubble-card-type-border, var(--bubble-border, none));
     box-sizing: border-box;
+    -webkit-transform: translateZ(0); /* Fix slider rendering issues on Safari on older devices */
 }
 
 .bubble-wrapper {
