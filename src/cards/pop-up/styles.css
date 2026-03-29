@@ -37,6 +37,7 @@
     transition: transform 0.3s ease;
     position: fixed;
     width: 100%;
+    height: 100%;
     max-width: 100%;
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
     box-sizing: border-box;
