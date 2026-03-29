@@ -554,12 +554,16 @@
     touch-action: pan-x pinch-zoom;
 }
 
-/* When touching or dragging any inline slider, block all touch actions */
+/* When touching (pre-drag) any inline slider, allow pinch-zoom but block panning natively */
 .bubble-sub-button-slider.inline.slider-container.is-touching,
-.bubble-sub-button-slider.inline.slider-container.is-dragging,
 .bubble-sub-button-slider.inline.slider-container.is-touching .bubble-range-slider,
-.bubble-sub-button-slider.inline.slider-container.is-dragging .bubble-range-slider,
 .bubble-sub-button-slider.inline .bubble-range-slider.is-touching {
+    touch-action: pinch-zoom;
+}
+
+/* When dragging any inline slider, block all touch actions to prevent conflicts */
+.bubble-sub-button-slider.inline.slider-container.is-dragging,
+.bubble-sub-button-slider.inline.slider-container.is-dragging .bubble-range-slider {
     touch-action: none;
 }
 

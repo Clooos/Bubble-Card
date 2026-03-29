@@ -112,7 +112,7 @@
 
 /* Ensure touch drag is recognized on mobile for slider track */
 .bubble-range-slider {
-    touch-action: pan-y;
+    touch-action: pan-y pinch-zoom;
     backface-visibility: hidden;
     height: 100%;
 }
@@ -120,26 +120,27 @@
 /* Vertical sliders: allow horizontal scroll, block vertical */
 .bubble-range-slider.fill-orientation-top,
 .bubble-range-slider.fill-orientation-bottom {
-    touch-action: pan-x;
+    touch-action: pan-x pinch-zoom;
 }
 
 /* Slider container styles */
 .slider-container {
     cursor: ew-resize;
-    touch-action: pan-y;
+    touch-action: pan-y pinch-zoom;
 }
 
 /* Vertical slider containers: allow horizontal scroll, block vertical */
 .slider-container:has(.fill-orientation-top),
 .slider-container:has(.fill-orientation-bottom) {
     cursor: ns-resize;
-    touch-action: pan-x;
+    touch-action: pan-x pinch-zoom;
 }
 
+/* When touching (pre-drag), allow pinch-zoom but block panning natively */
 .slider-container.is-touching,
 .slider-container.is-touching .bubble-range-slider,
 .bubble-range-slider.is-touching {
-    touch-action: none;
+    touch-action: pinch-zoom;
 }
 
 html.bubble-slider-dragging,

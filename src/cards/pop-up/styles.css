@@ -21,7 +21,7 @@
     padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
-    touch-action: pan-y;
+    touch-action: pan-y pinch-zoom;
 }
 
 .bubble-pop-up-container > * {
