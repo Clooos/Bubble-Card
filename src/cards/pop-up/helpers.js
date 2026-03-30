@@ -383,9 +383,13 @@ export function openPopup(context) {
         // ApexCharts 2.2.3+ throws "Element not found" and ends up in a broken state.
         displayContent(context);
 
+        // Signal child cards to defer their heavy work during appendChild
+        // (connectedCallback fires synchronously for every custom element).
+        window.__bubblePopupOpening = true;
         if (!context.verticalStack.contains(popUp)) {
             appendPopup(context, true);
         }
+        window.__bubblePopupOpening = false;
 
         // Start transition after DOM insertion
         updatePopupClass(popUp, true);

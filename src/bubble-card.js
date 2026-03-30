@@ -45,7 +45,14 @@ class BubbleCard extends HTMLElement {
     createBubbleDefaultColor();
 
     if (this._hass) {
-      this.updateBubbleCard();
+      // Defer the heavy update work when a popup is being opened.
+      if (window.__bubblePopupOpening && this.config?.card_type !== 'pop-up') {
+        this._deferredUpdateTimer = setTimeout(() => {
+          if (this.isConnected) this.updateBubbleCard();
+        }, 320); // Slightly longer than the 300ms animation duration
+      } else {
+        this.updateBubbleCard();
+      }
     }
   }
 
@@ -69,6 +76,7 @@ class BubbleCard extends HTMLElement {
       }
     } catch (e) {}
     clearTimeout(this._editorUpdateTimeout);
+    clearTimeout(this._deferredUpdateTimer);
   }
 
   get detectedEditor() {
