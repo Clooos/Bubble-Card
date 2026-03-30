@@ -1,24 +1,56 @@
 function hideElementsUntilBubbleCard() {
-    const selector = "body";
-    const root = document.querySelector(selector);
+    const root = document.body || document.querySelector("body");
+
+    if (!root) {
+        return;
+    }
+
+    const loadingOverlay = document.createElement("div");
+    loadingOverlay.setAttribute("role", "status");
+    loadingOverlay.setAttribute("aria-live", "polite");
+    loadingOverlay.setAttribute("aria-atomic", "true");
+    loadingOverlay.textContent = "Loading Bubble Card…";
+    loadingOverlay.style.position = "fixed";
+    loadingOverlay.style.top = "16px";
+    loadingOverlay.style.right = "16px";
+    loadingOverlay.style.zIndex = "2147483647";
+    loadingOverlay.style.padding = "8px 12px";
+    loadingOverlay.style.borderRadius = "8px";
+    loadingOverlay.style.backgroundColor = "rgba(17, 24, 39, 0.9)";
+    loadingOverlay.style.color = "#fff";
+    loadingOverlay.style.fontFamily = "DejaVu Sans,Verdana,Geneva,sans-serif";
+    loadingOverlay.style.fontSize = "14px";
+
+    root.setAttribute("aria-busy", "true");
+    root.appendChild(loadingOverlay);
+
+    const clearLoadingState = function() {
+        if (loadingOverlay.parentNode) {
+            loadingOverlay.parentNode.removeChild(loadingOverlay);
+        }
+
+        root.removeAttribute("aria-busy");
+    };
+
     let bubbleCard = customElements.get("bubble-card");
+
+    if (bubbleCard) {
+        clearLoadingState();
+        return;
+    }
 
     const intervalId = setInterval(function() {
         bubbleCard = customElements.get("bubble-card");
 
         if (bubbleCard) {
             clearInterval(intervalId);
-            root.style.transition = "opacity 0.5s";
-            root.style.opacity = "1";
-        } else {
-            root.style.opacity = "0";
+            clearLoadingState();
         }
-    }, 0);
+    }, 50);
 
     setTimeout(function() {
         clearInterval(intervalId);
-        root.style.transition = "opacity 0.5s";
-        root.style.opacity = "1";
+        clearLoadingState();
     }, 1500);
 }
 
