@@ -1,6 +1,6 @@
 import { html, render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
-import { createElement, forwardHaptic } from "../../tools/utils.js";
+import { createElement, forwardHaptic, getCachedBodyStyles } from "../../tools/utils.js";
 import { onUrlChange, removeHash, hideContent } from "./helpers.js";
 import styles from "./styles.css";
 import backdropStyles from "./backdrop.css";
@@ -14,9 +14,10 @@ let themeColorBackground;
 const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
 
 function updateBackdropColor() {
+  const bodyStyles = getCachedBodyStyles();
   themeColorBackground = 
-    getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
-    getComputedStyle(document.body).getPropertyValue('--card-background-color');
+    bodyStyles.getPropertyValue('--ha-card-background') ||
+    bodyStyles.getPropertyValue('--card-background-color');
 
   document.body.style.setProperty('--bubble-default-backdrop-background-color', convertToRGBA(themeColorBackground, 0.8, 0.6));
 }
@@ -251,14 +252,8 @@ export function createStructure(context) {
       context.elements.customStyle = existingStyle;
     }
     
-    let themeColorBackground;
-
     function updatePopupColor() {
-      themeColorBackground = 
-        getComputedStyle(document.body).getPropertyValue('--ha-card-background') ||
-        getComputedStyle(document.body).getPropertyValue('--card-background-color');
-
-        const color = context.config.bg_color ? context.config.bg_color : themeColorBackground;
+        const color = context.config.bg_color || themeColorBackground;
         const opacity = Math.min(1, Math.max(0, (context.config.bg_opacity ?? 88) / 100));
         const rgbaColor = convertToRGBA(color, opacity, 1.02);
         const fadeOpacity = Math.min(1, opacity * 0.65);

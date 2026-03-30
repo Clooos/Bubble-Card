@@ -100,7 +100,7 @@ export function getCachedDocumentElementStyles() {
     return cachedDocumentElementStyles;
 }
 
-function getCachedBodyStyles() {
+export function getCachedBodyStyles() {
     if (!cachedBodyStyles) {
         cachedBodyStyles = getComputedStyle(document.body);
         ensureStyleCacheValid();

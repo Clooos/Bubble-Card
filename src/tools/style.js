@@ -1,4 +1,4 @@
-import { resolveCssVariable, hexToRgb, rgbStringToRgb } from './utils.js';
+import { resolveCssVariable, hexToRgb, rgbStringToRgb, getCachedDocumentElementStyles } from './utils.js';
 
 export function updateIcon(context, hass, entityId, icon, iconContainer) {
     while (iconContainer.firstChild) {
@@ -79,7 +79,7 @@ export function convertToRGBA(color, opacity, lighten = 1) {
     } else if (color.startsWith('var(--')) {
         // New code for CSS variables
         let cssVar = color.slice(4, -1);
-        let computedColor = window.getComputedStyle(document.documentElement).getPropertyValue(cssVar);
+        let computedColor = getCachedDocumentElementStyles().getPropertyValue(cssVar);
         if (computedColor && (computedColor.startsWith('#') || computedColor.startsWith('rgb'))) {
             rgbaColor = convertToRGBA(computedColor, opacity, lighten);
         }
