@@ -114,11 +114,6 @@
     z-index: 0 !important;
 }
 
-.bubble-pop-up.is-opening,
-.bubble-pop-up.is-closing {
-    will-change: transform;
-}
-
 /* Optimize performance during open/close transitions */
 .bubble-pop-up.is-opening .bubble-pop-up-container,
 .bubble-pop-up.is-closing .bubble-pop-up-container {

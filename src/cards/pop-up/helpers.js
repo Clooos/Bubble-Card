@@ -379,6 +379,8 @@ export function openPopup(context) {
     // Add to active popups set before DOM operations
     popupState.activePopups.add(context);
 
+    popUp.style.willChange = 'transform';
+
     // Batch DOM operations in requestAnimationFrame to reduce layout thrashing
     // This is critical when pop-up contains many cards (vertical stack)
     requestAnimationFrame(() => {
@@ -406,6 +408,8 @@ export function openPopup(context) {
 
         // Actions to perform after the main CSS animation is complete
         setTimeout(() => {
+            popUp.style.willChange = '';
+
             if (!popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
                 return;
             }
@@ -448,11 +452,13 @@ export function closePopup(context, force = false) {
         popupState.entityTriggeredPopup = null;
     }
     
+    context.popUp.style.willChange = 'transform';
     updatePopupClass(context.popUp, false);
     toggleBackdrop(context, false);
 
     // Use the shared animation duration constant
     context.removeDomTimeout = setTimeout(() => {
+        context.popUp.style.willChange = '';
         appendPopup(context, false);
         hideContent(context, 0);
         
