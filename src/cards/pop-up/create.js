@@ -1,7 +1,7 @@
 import { html, render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic, getCachedBodyStyles } from "../../tools/utils.js";
-import { onUrlChange, removeHash, hideContent } from "./helpers.js";
+import { registerPopupContext, removeHash, hideContent } from "./helpers.js";
 import styles from "./styles.css";
 import backdropStyles from "./backdrop.css";
 import { handleCustomStyles } from "../../tools/style-processor.js";
@@ -366,10 +366,7 @@ export function prepareStructure(context) {
     context.popUp.style.setProperty('--custom-popup-filter', !context.config.backdrop_blur || context.config.backdrop_blur === '0' ? `blur(${context.config.bg_blur ?? 10}px)` :  'none');
     context.popUp.style.setProperty('--custom-shadow-opacity', (context.config.shadow_opacity ?? 0) / 100);
 
-    context.boundOnUrlChange = onUrlChange(context);
-
-    window.addEventListener('location-changed', context.boundOnUrlChange);
-    window.addEventListener('popstate', context.boundOnUrlChange);
+    registerPopupContext(context);
 
     window.popUpError = false;
 

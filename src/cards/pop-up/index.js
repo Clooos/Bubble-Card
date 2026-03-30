@@ -1,5 +1,6 @@
 import { changeEditor, changeStyle, changeTriggered } from './changes.js';
 import { createHeader, createStructure, prepareStructure } from './create.js';
+import { registerPopupContext } from './helpers.js';
 import { handleButton } from "../../cards/button/index.js";
 import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
@@ -43,6 +44,9 @@ export async function handlePopUp(context) {
             context.headerInitialized = true;
         }
     } else if (context.popUp && context.elements) {
+        // Ensure popup is always registered in the centralized URL dispatcher.
+        registerPopupContext(context);
+
         // Update header when popup hash matches or in editor mode
         // Also update on first call when background_update is enabled to ensure initialization
         const shouldUpdateHeader = context.config.hash === location.hash || 

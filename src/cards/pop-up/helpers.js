@@ -96,6 +96,9 @@ if (!window.__bubbleDialogListenerAdded) {
 export function clickOutside(event, context) {
     if (!(context.config.close_by_clicking_outside ?? true)) return;
     
+    // Only act when the popup is fully open (not mid-animation)
+    if (!context.popUp.classList.contains('is-popup-opened')) return;
+
     // Protect popup from closing if a dialog was recently closed
     const timeSinceDialogClosed = Date.now() - dialogState.recentlyClosedTimestamp;
     if (timeSinceDialogClosed < dialogState.protectionWindow) {
@@ -109,7 +112,8 @@ export function clickOutside(event, context) {
                dialogNode.has(target.nodeName);
     });
     
-    if (!popupTarget) removeHash();
+    // direct = true: user-initiated action bypasses hashChangeProtection
+    if (!popupTarget) removeHash(true);
 }
 
 function resetCloseTimeout(context) { 
@@ -118,13 +122,17 @@ function resetCloseTimeout(context) {
     context.closeTimeout = setTimeout(removeHash, context.config.auto_close);
 }
 
-export function removeHash() {
-    if (popupState.hashRecentlyAdded || !location.hash || popupState.hashChangeProtection) {
+export function removeHash(direct = false) {
+    if (popupState.hashRecentlyAdded || !location.hash) {
+        return false;
+    }
+    // hashChangeProtection blocks programmatic calls only; direct user actions bypass it
+    if (!direct && popupState.hashChangeProtection) {
         return false;
     }
 
     setTimeout(() => {
-        if (popupState.hashChangeProtection) {
+        if (!direct && popupState.hashChangeProtection) {
             return;
         }
         const newURL = window.location.href.split('#')[0];
@@ -462,34 +470,72 @@ export function closePopup(context, force = false) {
     }
 }
 
-export function onUrlChange(context) {
-    let lastKnownHash = location.hash;
+// Centralized URL change dispatcher
+const popupRegistry = new Map(); // hash → WeakRef<context>
+let globalUrlListenerAdded = false;
+let globalLastKnownHash = location.hash;
 
-    return () => {
+export function registerPopupContext(context) {
+    const hash = context.config.hash;
+    if (!hash) return;
+
+    // If already registered with a different hash, remove old entry
+    if (context._registeredHash && context._registeredHash !== hash) {
+        const existing = popupRegistry.get(context._registeredHash);
+        if (existing?.deref() === context) {
+            popupRegistry.delete(context._registeredHash);
+        }
+    }
+
+    context._registeredHash = hash;
+    popupRegistry.set(hash, new WeakRef(context));
+    ensureGlobalUrlListener();
+}
+
+export function unregisterPopupContext(context) {
+    if (context._registeredHash) {
+        const existing = popupRegistry.get(context._registeredHash);
+        if (existing?.deref() === context) {
+            popupRegistry.delete(context._registeredHash);
+        }
+        context._registeredHash = null;
+    }
+}
+
+function ensureGlobalUrlListener() {
+    if (globalUrlListenerAdded) return;
+    globalUrlListenerAdded = true;
+
+    const handler = () => {
         const currentHash = location.hash;
-        const hashChanged = currentHash !== lastKnownHash;
-        lastKnownHash = currentHash;
+        const hashChanged = currentHash !== globalLastKnownHash;
+        globalLastKnownHash = currentHash;
 
-        // Clean up orphaned popups (open but hash doesn't match)
-        const orphanedPopups = Array.from(popupState.activePopups).filter(ctx => 
-            ctx.config.hash && 
-            ctx.config.hash !== currentHash &&
-            ctx.popUp.classList.contains('is-popup-opened')
-        );
-        orphanedPopups.forEach(ctx => closePopup(ctx));
-        
-        if (context.config.hash === currentHash) {
+        // Clean up orphaned popups in a single pass (copy Set since closePopup modifies it)
+        const activeSnapshot = new Set(popupState.activePopups);
+        for (const ctx of activeSnapshot) {
+            if (ctx.config.hash &&
+                ctx.config.hash !== currentHash &&
+                ctx.popUp.classList.contains('is-popup-opened')) {
+                closePopup(ctx);
+            }
+        }
+
+        // O(1) lookup — deref() returns undefined if the element was GC'd (removed from dashboard)
+        const ref = popupRegistry.get(currentHash);
+        const context = ref?.deref();
+        if (context) {
             const isPopupOpen = context.popUp.classList.contains('is-popup-opened');
-            
+
             // Don't toggle close if a dialog was recently closed to prevent unwanted popup closure
             const timeSinceDialogClosed = Date.now() - dialogState.recentlyClosedTimestamp;
             const dialogRecentlyClosed = timeSinceDialogClosed < dialogState.protectionWindow;
-            
+
             const shouldToggleClose = isPopupOpen && !hashChanged && !popupState.entityTriggeredPopup && !dialogRecentlyClosed;
 
             // Re-run navigate on the same hash should close the currently opened popup
             if (shouldToggleClose) {
-                removeHash();
+                removeHash(true);
                 return;
             }
 
@@ -497,16 +543,16 @@ export function onUrlChange(context) {
             if (popupState.entityTriggeredPopup) {
                 return;
             }
-            
+
             popupState.hashRecentlyAdded = true;
             popupState.currentHash = currentHash;
-            
+
             // Enable protection during hash change handling
             popupState.hashChangeProtection = true;
-            
+
             // Close any other potentially open popups (e.g., another hash popup)
             closeAllPopupsExcept(context);
-            
+
             setTimeout(() => {
                 popupState.hashRecentlyAdded = false;
                 // Keep protection for a bit longer than hashRecentlyAdded
@@ -517,16 +563,24 @@ export function onUrlChange(context) {
 
             openPopup(context);
         } else {
+            // No registered popup for this hash (or element was GC'd) — auto-clean stale entry
+            if (ref) popupRegistry.delete(currentHash);
+
+            // Close any stale open popups
             requestAnimationFrame(() => {
-                // Close this popup if it's open and hash doesn't match or was removed
-                if (context.popUp.classList.contains('is-popup-opened') && 
-                    context.config.hash && 
-                    context.config.hash !== currentHash) {
-                    closePopup(context);
+                for (const ctx of popupState.activePopups) {
+                    if (ctx.popUp.classList.contains('is-popup-opened') &&
+                        ctx.config.hash &&
+                        ctx.config.hash !== currentHash) {
+                        closePopup(ctx);
+                    }
                 }
             });
         }
     };
+
+    window.addEventListener('location-changed', handler);
+    window.addEventListener('popstate', handler);
 }
 
 export function onEditorChange(context) {
@@ -608,7 +662,7 @@ export function createTouchHandlers(context) {
                 const deltaY = currentY - startY;
                 
                 if (deltaY > 100) {
-                    removeHash();
+                    removeHash(true);
                 } else {
                     context.popUp.style.transform = '';
                 }
