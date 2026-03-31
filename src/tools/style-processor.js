@@ -299,10 +299,13 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
       );
       compiledTemplateCache.set(styles, compiledFunction);
       // Prevent unbounded growth of the compiled template cache
-      // Keep the most recent ~500 entries as a simple safeguard
-      if (compiledTemplateCache.size > 500) {
-        const oldestKey = compiledTemplateCache.keys().next().value;
-        compiledTemplateCache.delete(oldestKey);
+      // Keep the most recent ~1000 entries; evict 100 at once to amortize cost
+      if (compiledTemplateCache.size > 1000) {
+        const iterator = compiledTemplateCache.keys();
+        for (let i = 0; i < 100; i++) {
+          const key = iterator.next().value;
+          if (key !== undefined) compiledTemplateCache.delete(key);
+        }
       }
     }
     const card = context.config.card_type === 'pop-up' ? context.popUp : context.card;
