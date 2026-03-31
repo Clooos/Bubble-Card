@@ -327,28 +327,6 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
 
     return cleanedResult;
 
-    // If we get here, evaluation was successful.
-    if (context.editor) {
-      // If there was a blocking or displayed error for this card, clear it.
-      if (context.templateEvaluationBlocked || context.lastEmittedEditorError) {
-        // Signal to the editor that everything is OK for THIS context.
-        const errorContext = {
-          cardType: context.config?.card_type,
-          entityId: context.config?.entity,
-          sourceType: sourceInfo.type,
-          moduleId: sourceInfo.id
-        };
-        requestAnimationFrame(() => emitEditorError('', errorContext));
-      }
-      context.templateEvaluationBlocked = false;
-      context.lastEmittedEditorError = null;
-      if (context.templateErrorClearTimeout) {
-        clearTimeout(context.templateErrorClearTimeout);
-        context.templateErrorClearTimeout = null;
-      }
-    }
-    return result;
-
   } catch (error) {
     let sourceDescription = 'Unknown source';
     if (sourceInfo.type === 'module' && sourceInfo.id) {
