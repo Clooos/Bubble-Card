@@ -23,7 +23,7 @@ function getOrCreateStyleElement(context, element) {
   return context.styleElement;
 }
 
-export const handleCustomStyles = async (context, element = context.card) => {
+export const handleCustomStyles = (context, element = context.card) => {
   const isDirectStyleElement = element.tagName === 'STYLE';
   const targetElementForDisplayLogic = isDirectStyleElement ? null : element; 
   const isPopupRoot = context.cardType === 'pop-up' && element === context.popUp;
@@ -92,18 +92,29 @@ export const handleCustomStyles = async (context, element = context.card) => {
     loadHideTarget.dataset.bubbleStyleHideMode = loadHideMode;
   }
 
-  const styleElementToInjectInto = getOrCreateStyleElement(context, element); 
+  const styleElementToInjectInto = getOrCreateStyleElement(context, element);
 
+  if (yamlKeysMap.size > 0) {
+    // Fast synchronous path: modules already loaded, no Promise allocation needed
+    const parsedYamlModules = {};
+    yamlKeysMap.forEach((value, key) => { parsedYamlModules[key] = value; });
+    _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjectInto, isDirectStyleElement, targetElementForDisplayLogic, loadHideTarget, loadHideMode, customStyles);
+    return;
+  }
+
+  // Async fallback: modules not yet initialised (first load with legacy entity path)
+  Promise.resolve(context.stylesYAML)
+    .then(modules => _handleCustomStylesCore(context, modules || {}, styleElementToInjectInto, isDirectStyleElement, targetElementForDisplayLogic, loadHideTarget, loadHideMode, customStyles))
+    .catch(error => {
+      console.error("Error applying styles:", error);
+      if (context.initialLoad && targetElementForDisplayLogic?.style) {
+        targetElementForDisplayLogic.style.display = "";
+      }
+    });
+};
+
+function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjectInto, isDirectStyleElement, targetElementForDisplayLogic, loadHideTarget, loadHideMode, customStyles) {
   try {
-    let parsedYamlModules = {}; 
-    if (yamlKeysMap.size > 0) {
-      yamlKeysMap.forEach((value, key) => {
-        parsedYamlModules[key] = value;
-      });
-    } else {
-      parsedYamlModules = (await context.stylesYAML) || {};
-    }
-
     // Build a cheap fingerprint to avoid recomputing the active modules list every cycle.
     // The list only needs to be recomputed when:
     //   - a module is added/removed/toggled global → refreshHandler increments _moduleListVersion
@@ -251,7 +262,7 @@ export const handleCustomStyles = async (context, element = context.card) => {
         targetElementForDisplayLogic.style.display = "";
     }
   }
-};
+}
 
 export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' }, cachedSubButtonStates = null) {
   if (!styles) return "";
