@@ -96,9 +96,8 @@ export const handleCustomStyles = (context, element = context.card) => {
 
   if (yamlKeysMap.size > 0) {
     // Fast synchronous path: modules already loaded, no Promise allocation needed
-    const parsedYamlModules = {};
-    yamlKeysMap.forEach((value, key) => { parsedYamlModules[key] = value; });
-    _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjectInto, isDirectStyleElement, targetElementForDisplayLogic, loadHideTarget, loadHideMode, customStyles);
+    // Pass yamlKeysMap directly to avoid copying all entries into a new object every cycle
+    _handleCustomStylesCore(context, yamlKeysMap, styleElementToInjectInto, isDirectStyleElement, targetElementForDisplayLogic, loadHideTarget, loadHideMode, customStyles);
     return;
   }
 
@@ -205,7 +204,7 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
     if (modulesToApply.length > 0) {
       const moduleStyles = modulesToApply.map((moduleId) => {
         try {
-          let tmpl = parsedYamlModules[moduleId] ?? "";
+          let tmpl = (parsedYamlModules instanceof Map ? parsedYamlModules.get(moduleId) : parsedYamlModules[moduleId]) ?? "";
           if ((typeof tmpl === "object" && tmpl.code === "") || tmpl === "") return "{}";
           const moduleCode = typeof tmpl === "object" && tmpl.code ? tmpl.code : tmpl;
           return evalStyles(context, moduleCode, { type: 'module', id: moduleId }, cycleSubButtonStates);
