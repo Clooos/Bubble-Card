@@ -199,6 +199,7 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
     }
     
     const cycleSubButtonStates = getSubButtonsStates(context);
+    const cycleState = getState(context);
 
     const stylesParts = [];
     if (modulesToApply.length > 0) {
@@ -207,7 +208,7 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
           let tmpl = (parsedYamlModules instanceof Map ? parsedYamlModules.get(moduleId) : parsedYamlModules[moduleId]) ?? "";
           if ((typeof tmpl === "object" && tmpl.code === "") || tmpl === "") { stylesParts.push("{}"); continue; }
           const moduleCode = typeof tmpl === "object" && tmpl.code ? tmpl.code : tmpl;
-          stylesParts.push(evalStyles(context, moduleCode, { type: 'module', id: moduleId }, cycleSubButtonStates));
+          stylesParts.push(evalStyles(context, moduleCode, { type: 'module', id: moduleId }, cycleSubButtonStates, cycleState));
         } catch (moduleError) {
           console.error(`Bubble Card - Error processing module "${moduleId}" before evaluation:`, moduleError);
           stylesParts.push("{}");
@@ -216,7 +217,7 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
     }
 
     try {
-      stylesParts.push(evalStyles(context, customStyles, { type: 'custom_styles' }, cycleSubButtonStates));
+      stylesParts.push(evalStyles(context, customStyles, { type: 'custom_styles' }, cycleSubButtonStates, cycleState));
     } catch (customStyleError) {
       console.error("Bubble Card - Error processing custom styles before evaluation:", customStyleError);
     }
@@ -261,7 +262,7 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
   }
 }
 
-export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' }, cachedSubButtonStates = null) {
+export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' }, cachedSubButtonStates = null, cachedState = null) {
   if (!styles) return "";
 
   // If this card is in editor mode and its template was previously marked as temporarily failed
@@ -312,7 +313,7 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
       context,
       context._hass,
       context.config.entity,
-      getState(context),
+      cachedState ?? getState(context),
       context.elements.icon,
       cachedSubButtonStates ?? getSubButtonsStates(context),
       context.subButtonIcon,
