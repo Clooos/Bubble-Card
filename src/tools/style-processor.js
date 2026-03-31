@@ -200,30 +200,28 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
     
     const cycleSubButtonStates = getSubButtonsStates(context);
 
-    let combinedModuleStylesContent = "";
+    const stylesParts = [];
     if (modulesToApply.length > 0) {
-      const moduleStyles = modulesToApply.map((moduleId) => {
+      for (const moduleId of modulesToApply) {
         try {
           let tmpl = (parsedYamlModules instanceof Map ? parsedYamlModules.get(moduleId) : parsedYamlModules[moduleId]) ?? "";
-          if ((typeof tmpl === "object" && tmpl.code === "") || tmpl === "") return "{}";
+          if ((typeof tmpl === "object" && tmpl.code === "") || tmpl === "") { stylesParts.push("{}"); continue; }
           const moduleCode = typeof tmpl === "object" && tmpl.code ? tmpl.code : tmpl;
-          return evalStyles(context, moduleCode, { type: 'module', id: moduleId }, cycleSubButtonStates);
+          stylesParts.push(evalStyles(context, moduleCode, { type: 'module', id: moduleId }, cycleSubButtonStates));
         } catch (moduleError) {
           console.error(`Bubble Card - Error processing module "${moduleId}" before evaluation:`, moduleError);
-          return "{}";
+          stylesParts.push("{}");
         }
-      });
-      combinedModuleStylesContent = moduleStyles.join("\n");
+      }
     }
 
-    let evaluatedCustomStylesContent = "";
     try {
-      evaluatedCustomStylesContent = evalStyles(context, customStyles, { type: 'custom_styles' }, cycleSubButtonStates);
+      stylesParts.push(evalStyles(context, customStyles, { type: 'custom_styles' }, cycleSubButtonStates));
     } catch (customStyleError) {
       console.error("Bubble Card - Error processing custom styles before evaluation:", customStyleError);
     }
-    
-    const finalStylesToInject = `${combinedModuleStylesContent}\n${evaluatedCustomStylesContent}`.trim();
+
+    const finalStylesToInject = stylesParts.join("\n").trim();
     
     let stylesHaveChanged = true;
 
