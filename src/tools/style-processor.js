@@ -66,6 +66,8 @@ export const handleCustomStyles = async (context, element = context.card) => {
       const refreshHandler = () => {
         context.lastEvaluatedStyles = "";
         context.stylesYAML = null;
+        context._moduleListVersion = (context._moduleListVersion || 0) + 1;
+        context._cachedModulesToApply = null;
         yamlKeysMap.forEach((value, key) => {
           if (context._processedSchemas?.[key]) {
             delete context._processedSchemas[key];
@@ -122,68 +124,89 @@ export const handleCustomStyles = async (context, element = context.card) => {
       parsedYamlModules = (await context.stylesYAML) || {};
     }
 
-    let modulesToApply = [];
-    const activeModules = new Set();
-    const configDefinedModules = [];
-    const configExcludedModules = new Set();
+    // Build a cheap fingerprint to avoid recomputing the active modules list every cycle.
+    // The list only needs to be recomputed when:
+    //   - a module is added/removed/toggled global → refreshHandler increments _moduleListVersion
+    //   - the card's modules config changes → configModulesKey changes
+    //   - yamlKeysMap grows/shrinks → yamlKeysMap.size changes
+    //   - legacy entity sensor updates (fallback path) → sensor last_updated changes
+    const _useLegacyEntity = !isBCTAvailableSync || !isBCTAvailableSync();
+    const _configModulesKey = context.config.modules
+      ? (Array.isArray(context.config.modules) ? context.config.modules.join(',') : String(context.config.modules))
+      : '';
+    const _sensorKey = _useLegacyEntity
+      ? (context._hass?.states?.['sensor.bubble_card_modules']?.last_updated || '')
+      : '';
+    const _moduleListFingerprint = `${context._moduleListVersion || 0}-${yamlKeysMap.size}-${_configModulesKey}-${_sensorKey}`;
 
-    if (Array.isArray(context.config.modules)) {
-        context.config.modules.forEach(mod => {
-            if (typeof mod === 'string' && mod.startsWith('!')) {
-                configExcludedModules.add(mod.substring(1));
-            } else if (typeof mod === 'string') {
-                configDefinedModules.push(mod);
-            }
-        });
-    } else if (context.config.modules && typeof context.config.modules === 'string') {
-        if (context.config.modules.startsWith('!')) {
-            configExcludedModules.add(context.config.modules.substring(1));
-        } else {
-            configDefinedModules.push(context.config.modules);
-        }
+    let modulesToApply;
+    if (context._cachedModulesToApply && context._moduleListFingerprint === _moduleListFingerprint) {
+      modulesToApply = context._cachedModulesToApply;
+    } else {
+      const activeModules = new Set();
+      const configDefinedModules = [];
+      const configExcludedModules = new Set();
+
+      if (Array.isArray(context.config.modules)) {
+          context.config.modules.forEach(mod => {
+              if (typeof mod === 'string' && mod.startsWith('!')) {
+                  configExcludedModules.add(mod.substring(1));
+              } else if (typeof mod === 'string') {
+                  configDefinedModules.push(mod);
+              }
+          });
+      } else if (context.config.modules && typeof context.config.modules === 'string') {
+          if (context.config.modules.startsWith('!')) {
+              configExcludedModules.add(context.config.modules.substring(1));
+          } else {
+              configDefinedModules.push(context.config.modules);
+          }
+      }
+
+      if (yamlKeysMap.has('default') && !configExcludedModules.has('default')) {
+          activeModules.add('default');
+      }
+
+      const addGlobalModulesFromEntity = (hass) => {
+          if (!hass || !hass.states || !hass.states['sensor.bubble_card_modules']) return;
+          const globalModulesData = hass.states['sensor.bubble_card_modules'].attributes.modules;
+          if (!globalModulesData) return;
+          for (const moduleId in globalModulesData) {
+              if (globalModulesData[moduleId].is_global === true &&
+                  yamlKeysMap.has(moduleId) &&
+                  !configExcludedModules.has(moduleId)) {
+                  activeModules.add(moduleId);
+              }
+          }
+      };
+
+      const addGlobalModulesFromFiles = () => {
+          try {
+              yamlKeysMap.forEach((value, key) => {
+                  if (value && typeof value === 'object' && value.is_global === true && !configExcludedModules.has(key)) {
+                      activeModules.add(key);
+                  }
+              });
+          } catch (_) {}
+      };
+
+      // Read global flags from files only when BCT/migration is available
+      // Legacy entity is used strictly as a fallback when BCT is not available
+      addGlobalModulesFromFiles();
+      if (_useLegacyEntity && context._hass) {
+        addGlobalModulesFromEntity(context._hass);
+      }
+
+      configDefinedModules.forEach(moduleId => {
+          if (yamlKeysMap.has(moduleId) && !configExcludedModules.has(moduleId)) {
+              activeModules.add(moduleId);
+          }
+      });
+
+      modulesToApply = Array.from(activeModules);
+      context._cachedModulesToApply = modulesToApply;
+      context._moduleListFingerprint = _moduleListFingerprint;
     }
-
-    if (yamlKeysMap.has('default') && !configExcludedModules.has('default')) {
-        activeModules.add('default');
-    }
-
-    const addGlobalModulesFromEntity = (hass) => {
-        if (!hass || !hass.states || !hass.states['sensor.bubble_card_modules']) return;
-        const globalModulesData = hass.states['sensor.bubble_card_modules'].attributes.modules;
-        if (!globalModulesData) return;
-        for (const moduleId in globalModulesData) {
-            if (globalModulesData[moduleId].is_global === true &&
-                yamlKeysMap.has(moduleId) &&
-                !configExcludedModules.has(moduleId)) {
-                activeModules.add(moduleId);
-            }
-        }
-    };
-
-    const addGlobalModulesFromFiles = () => {
-        try {
-            yamlKeysMap.forEach((value, key) => {
-                if (value && typeof value === 'object' && value.is_global === true && !configExcludedModules.has(key)) {
-                    activeModules.add(key);
-                }
-            });
-        } catch (_) {}
-    };
-
-    // Read global flags from files only when BCT/migration is available
-    // Legacy entity is used strictly as a fallback when BCT is not available
-    addGlobalModulesFromFiles();
-    if ((!isBCTAvailableSync || !isBCTAvailableSync()) && context._hass) {
-      addGlobalModulesFromEntity(context._hass);
-    }
-
-    configDefinedModules.forEach(moduleId => {
-        if (yamlKeysMap.has(moduleId) && !configExcludedModules.has(moduleId)) {
-            activeModules.add(moduleId);
-        }
-    });
-
-    modulesToApply = Array.from(activeModules);
     
     const cycleSubButtonStates = getSubButtonsStates(context);
 
