@@ -526,16 +526,31 @@ export function convertOldToNewSubButtons(raw) {
   return { main, bottom: [] };
 }
 
+const _sectionedCache = new WeakMap();
+
 // Perform in-place upgrade on a config object to the new schema
 export function ensureNewSubButtonsSchemaObject(config) {
   if (!config) return { main: [], bottom: [] };
-  const raw = config.sub_button;
-  if (isNewSubButtonsSchema(raw)) {
-    return {
-      main: Array.isArray(raw.main) ? [...raw.main] : [],
-      bottom: Array.isArray(raw.bottom) ? [...raw.bottom] : []
-    };
+  const subRef = config.sub_button;
+  const mainRef = subRef?.main;
+  const bottomRef = subRef?.bottom;
+  const cached = _sectionedCache.get(config);
+  if (cached &&
+      cached.subRef === subRef &&
+      cached.mainRef === mainRef &&
+      cached.bottomRef === bottomRef) {
+    return cached.result;
   }
-  return convertOldToNewSubButtons(raw || []);
+  let result;
+  if (isNewSubButtonsSchema(subRef)) {
+    result = {
+      main: Array.isArray(subRef.main) ? [...subRef.main] : [],
+      bottom: Array.isArray(subRef.bottom) ? [...subRef.bottom] : []
+    };
+  } else {
+    result = convertOldToNewSubButtons(subRef || []);
+  }
+  _sectionedCache.set(config, { subRef, mainRef, bottomRef, result });
+  return result;
 }
 
