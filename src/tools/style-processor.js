@@ -185,6 +185,8 @@ export const handleCustomStyles = async (context, element = context.card) => {
 
     modulesToApply = Array.from(activeModules);
     
+    const cycleSubButtonStates = getSubButtonsStates(context);
+
     let combinedModuleStylesContent = "";
     if (modulesToApply.length > 0) {
       const moduleStyles = modulesToApply.map((moduleId) => {
@@ -192,7 +194,7 @@ export const handleCustomStyles = async (context, element = context.card) => {
           let tmpl = parsedYamlModules[moduleId] ?? "";
           if ((typeof tmpl === "object" && tmpl.code === "") || tmpl === "") return "{}";
           const moduleCode = typeof tmpl === "object" && tmpl.code ? tmpl.code : tmpl;
-          return evalStyles(context, moduleCode, { type: 'module', id: moduleId });
+          return evalStyles(context, moduleCode, { type: 'module', id: moduleId }, cycleSubButtonStates);
         } catch (moduleError) {
           console.error(`Bubble Card - Error processing module "${moduleId}" before evaluation:`, moduleError);
           return "{}";
@@ -203,7 +205,7 @@ export const handleCustomStyles = async (context, element = context.card) => {
 
     let evaluatedCustomStylesContent = "";
     try {
-      evaluatedCustomStylesContent = evalStyles(context, customStyles, { type: 'custom_styles' });
+      evaluatedCustomStylesContent = evalStyles(context, customStyles, { type: 'custom_styles' }, cycleSubButtonStates);
     } catch (customStyleError) {
       console.error("Bubble Card - Error processing custom styles before evaluation:", customStyleError);
     }
@@ -248,7 +250,7 @@ export const handleCustomStyles = async (context, element = context.card) => {
   }
 };
 
-export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' }) {
+export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' }, cachedSubButtonStates = null) {
   if (!styles) return "";
 
   // If this card is in editor mode and its template was previously marked as temporarily failed
@@ -298,7 +300,7 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
       context.config.entity,
       getState(context),
       context.elements.icon,
-      getSubButtonsStates(context),
+      cachedSubButtonStates ?? getSubButtonsStates(context),
       context.subButtonIcon,
       getWeatherIcon,
       card,
