@@ -2,3 +2,4 @@
 /www
 .env
 .DS_Store
+.vscode
