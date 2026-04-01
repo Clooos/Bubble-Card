@@ -64,7 +64,7 @@ export async function handlePopUp(context) {
                 }
 
                 handleButton(context, context.elements.header);
-                
+
                 // Restore original config
                 context.config.sub_button = originalSubButtons;
             }

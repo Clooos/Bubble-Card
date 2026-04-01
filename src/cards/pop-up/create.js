@@ -108,12 +108,11 @@ export function getBackdrop(context) {
     applyBackdropConfig(activeContext);
     // Keep styles aligned with the current popup while preserving smoothness.
     scheduleBackdropStylesUpdate(activeContext, false);
-    requestAnimationFrame(() => {
-      if (!internalBackdropElement.classList.contains('is-visible')) {
-        internalBackdropElement.classList.add('is-visible');
-      }
-      internalBackdropElement.classList.remove('is-hidden');
-    });
+    // Toggle classes synchronously so the backdrop paints in the current frame (INP frame).
+    if (!internalBackdropElement.classList.contains('is-visible')) {
+      internalBackdropElement.classList.add('is-visible');
+    }
+    internalBackdropElement.classList.remove('is-hidden');
   }
   
   function hideBackdropFunc() {

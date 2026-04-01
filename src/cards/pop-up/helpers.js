@@ -200,7 +200,19 @@ export function displayContent(context) {
 
 function toggleBackdrop(context, show) {
     const { showBackdrop, hideBackdrop } = getBackdrop(context);
-    show ? showBackdrop(context) : hideBackdrop();
+    if (show) {
+        showBackdrop(context);
+    } else {
+        // During popup-to-popup navigation (#a → #b) the URL has already changed
+        // by the time closePopup runs. If the new hash maps to a registered popup,
+        // that popup's openPopup() will call showBackdrop() momentarily — skip
+        // hiding now to avoid the hide→show flash.
+        const incomingHash = location.hash;
+        if (incomingHash && incomingHash !== context.config?.hash && popupRegistry.get(incomingHash)?.deref()) {
+            return;
+        }
+        hideBackdrop();
+    }
 }
 
 export function appendPopup(context, append) {
@@ -223,17 +235,22 @@ function updatePopupClass(popUp, open) {
     popupState.isAnimating = true;
 
     popUp.classList.add(open ? 'is-opening' : 'is-closing');
-    
-    requestAnimationFrame(() => {
-        popUp.classList.toggle('is-popup-opened', open);
-        popUp.classList.toggle('is-popup-closed', !open);
-        
-        // Clear animation flag after animation completes
-        setTimeout(() => {
-            popupState.isAnimating = false;
-            popUp.classList.remove('is-opening', 'is-closing');
-        }, popupState.animationDuration);
-    });
+
+    if (open) {
+        // Force the browser to compute the current style (is-popup-closed / translateY 100%)
+        // so the transition has a valid starting point. This replaces the inner rAF that
+        // previously caused a full extra frame delay before the CSS transition could start.
+        popUp.getBoundingClientRect();
+    }
+
+    popUp.classList.toggle('is-popup-opened', open);
+    popUp.classList.toggle('is-popup-closed', !open);
+
+    // Clear animation flag after animation completes
+    setTimeout(() => {
+        popupState.isAnimating = false;
+        popUp.classList.remove('is-opening', 'is-closing');
+    }, popupState.animationDuration);
 }
 
 export function updateListeners(context, add) {
@@ -381,61 +398,71 @@ export function openPopup(context) {
 
     popUp.style.willChange = 'transform';
 
-    // Batch DOM operations in requestAnimationFrame to reduce layout thrashing
-    // This is critical when pop-up contains many cards (vertical stack)
+    // rAF1 — show backdrop immediately to give visual feedback for Chrome INP.
+    // appendPopup is deferred to rAF2 so connectedCallbacks don't block this frame.
     requestAnimationFrame(() => {
         // Double-check popup is still valid and not closed
         if (!popupState.activePopups.has(context)) return;
-        
+
         // Make the container visible BEFORE adding the popup to the DOM.
         // Custom elements inside (e.g. ApexCharts) fire connectedCallback synchronously
         // during appendChild. If the parent sectionRow is still display:none at that moment,
         // ApexCharts 2.2.3+ throws "Element not found" and ends up in a broken state.
         displayContent(context);
 
-        // Signal child cards to defer their heavy work during appendChild
-        // (connectedCallback fires synchronously for every custom element).
-        window.__bubblePopupOpening = true;
-        if (!context.verticalStack.contains(popUp)) {
-            appendPopup(context, true);
-        }
-        window.__bubblePopupOpening = false;
-
-        // Start transition after DOM insertion
-        updatePopupClass(popUp, true);
+        // Show backdrop now — this is the visual change Chrome records for INP.
         toggleBackdrop(context, true);
         updateListeners(context, true);
 
-        // Actions to perform after the main CSS animation is complete
-        setTimeout(() => {
-            popUp.style.willChange = '';
+        // rAF2 — runs after the first paint (backdrop visible).
+        // appendPopup fires connectedCallbacks here, out of the INP critical path.
+        // updatePopupClass must come AFTER appendPopup so the CSS transition has an
+        // initial state (is-popup-closed / translateY 100%) to animate from.
+        requestAnimationFrame(() => {
+            if (!popupState.activePopups.has(context)) return;
 
-            if (!popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
-                return;
+            // Signal child cards to defer their heavy work during appendChild
+            // (connectedCallback fires synchronously for every custom element).
+            window.__bubblePopupOpening = true;
+            if (!context.verticalStack.contains(popUp)) {
+                appendPopup(context, true);
             }
+            window.__bubblePopupOpening = false;
 
-            // Defer body mutations to the next frame to avoid blocking the animation's last paint
-            requestAnimationFrame(() => {
-                if (!popupState.activePopups.has(context)) return;
+            // Start CSS transition now that the popup is in the DOM with is-popup-closed.
+            updatePopupClass(popUp, true);
 
-                toggleBodyScroll(true);
+            // Actions to perform after the main CSS animation is complete
+            setTimeout(() => {
+                popUp.style.willChange = '';
 
-                if (context.config.auto_close > 0) {
-                    if (context.closeTimeout) clearTimeout(context.closeTimeout);
-                    context.closeTimeout = setTimeout(() => {
-                        if (popupState.activePopups.has(context) && (context.config.hash === location.hash || !context.config.hash)) {
-                            removeHash();
-                        } else if (popupState.activePopups.has(context)) {
-                            closePopup(context);
-                        }
-                    }, context.config.auto_close);
+                if (!popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
+                    return;
                 }
 
-                if (context.config.open_action) {
-                    callAction(context.popUp, context.config, 'open_action');
-                }
-            });
-        }, popupState.animationDuration);
+                // Defer body mutations to the next frame to avoid blocking the animation's last paint
+                requestAnimationFrame(() => {
+                    if (!popupState.activePopups.has(context)) return;
+
+                    toggleBodyScroll(true);
+
+                    if (context.config.auto_close > 0) {
+                        if (context.closeTimeout) clearTimeout(context.closeTimeout);
+                        context.closeTimeout = setTimeout(() => {
+                            if (popupState.activePopups.has(context) && (context.config.hash === location.hash || !context.config.hash)) {
+                                removeHash();
+                            } else if (popupState.activePopups.has(context)) {
+                                closePopup(context);
+                            }
+                        }, context.config.auto_close);
+                    }
+
+                    if (context.config.open_action) {
+                        callAction(context.popUp, context.config, 'open_action');
+                    }
+                });
+            }, popupState.animationDuration);
+        });
     });
 }
 
