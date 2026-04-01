@@ -1,7 +1,7 @@
 import { html, render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic, getCachedBodyStyles } from "../../tools/utils.js";
-import { registerPopupContext, removeHash, hideContent } from "./helpers.js";
+import { registerPopupContext, removeHash, hideContent, openPopup } from "./helpers.js";
 import styles from "./styles.css";
 import backdropStyles from "./backdrop.css";
 import { handleCustomStyles } from "../../tools/style-processor.js";
@@ -315,11 +315,11 @@ export function createStructure(context) {
     // openPopup will properly show it via displayContent
     if (context.config.background_update) {
       context.popUp.style.display = 'none';
-    } else if (context.config.hash !== location.hash) {
+    } else if (context.config.hash === location.hash) {
+      openPopup(context, true);
+    } else {
       hideContent(context, 0);
     }
-
-    window.dispatchEvent(new Event('location-changed'));
   } catch (e) {
     console.error(e)
   }
@@ -342,6 +342,7 @@ export function prepareStructure(context) {
       throw new Error('Vertical stack not found, don\'t panic, it will be added automatically to your pop-up.');
     }
     context.popUp.classList.add('bubble-pop-up', 'pop-up', 'is-popup-closed');
+    context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing');
     context.cardTitle = context.verticalStack.querySelector('.card-header');
     if (!context.editor && !context.config.background_update) {
       // Hide popup for 100ms so custom elements can finish async init with real dimensions.

@@ -10,7 +10,7 @@ const popupState = {
   isAnimating: false,
   animationDuration: 300, // Animation duration in ms
   activePopups: new Set(), // Track active popups
-  entityTriggeredPopup: null // Reference to entity-triggered popup
+  entityTriggeredPopup: null, // Reference to entity-triggered popup
 };
 
 // Simple global de-duplication: if the same hash is pushed consecutively,
@@ -374,9 +374,13 @@ function closeAllPopupsExcept(exceptContext) {
     }
 }
 
-export function openPopup(context) {
+export function openPopup(context, instant = false) {
     // If popup is already open, return
     if (context.popUp.classList.contains('is-popup-opened')) return;
+
+    // Guard against re-entrant calls during opening animation (rAF chain hasn't
+    // set is-popup-opened yet, but the popup is already being opened).
+    if (popupState.activePopups.has(context)) return;
     
     // Check if another popup is active
     if (popupState.activePopups.size > 0) {
@@ -430,7 +434,14 @@ export function openPopup(context) {
             window.__bubblePopupOpening = false;
 
             // Start CSS transition now that the popup is in the DOM with is-popup-closed.
-            updatePopupClass(popUp, true);
+            if (instant) {
+                popUp.style.transition = 'none';
+                popUp.classList.replace('is-popup-closed', 'is-popup-opened');
+                // Re-enable transitions after the browser has painted the final state
+                requestAnimationFrame(() => { popUp.style.transition = ''; });
+            } else {
+                updatePopupClass(popUp, true);
+            }
 
             // Actions to perform after the main CSS animation is complete
             setTimeout(() => {
