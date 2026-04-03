@@ -26,12 +26,7 @@
 
 .bubble-pop-up-container > * {
     flex-shrink: 0 !important;
-    content-visibility: auto;
     contain-intrinsic-size: auto 120px;
-}
-
-.bubble-pop-up.is-opening .bubble-pop-up-container > * {
-    content-visibility: visible;
 }
 
 .bubble-pop-up.card-content {
