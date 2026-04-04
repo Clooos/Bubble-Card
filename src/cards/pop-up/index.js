@@ -25,6 +25,7 @@ export async function handlePopUp(context) {
         if (!context.popUp) return;
         createHeader(context);
         createStructure(context);
+        changeStyle(context);
 
         // Pre-initialize header content when background_update is enabled
         // This ensures the header button is ready before the popup opens
@@ -40,7 +41,6 @@ export async function handlePopUp(context) {
 
                 context.config.sub_button = originalSubButtons;
             }
-            changeStyle(context);
             context.headerInitialized = true;
         }
     } else if (context.popUp && context.elements) {
@@ -68,8 +68,6 @@ export async function handlePopUp(context) {
                 // Restore original config
                 context.config.sub_button = originalSubButtons;
             }
-
-            changeStyle(context);
 
             if (context.config.background_update) {
                 context.headerInitialized = true;
