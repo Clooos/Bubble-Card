@@ -168,6 +168,10 @@
     flex: 0 0 auto;
 }
 
+.bubble-sub-button-slider > * {
+    transform: translateZ(0) !important; /* Fixes glitches with border-radius and overflow during slider animations on some browsers */
+}
+
 /* When a slider is inline, allow it to expand to fill width when requested */
 .bubble-sub-slider-wrapper.inline.fill-width,
 .bubble-sub-button-slider.inline.fill-width {
