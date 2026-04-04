@@ -313,7 +313,7 @@ export function createStructure(context) {
     // Always hide popup initially when background_update is enabled
     // This prevents a flash when the page loads with the popup hash
     // openPopup will properly show it via displayContent
-    if (context.config.background_update) {
+    if (context.config.background_update && context.config.hash !== location.hash) {
       context.popUp.style.display = 'none';
     } else if (context.config.hash === location.hash) {
       openPopup(context, true);
