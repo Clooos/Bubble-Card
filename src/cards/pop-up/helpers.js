@@ -455,6 +455,11 @@ export function openPopup(context, instant = false) {
                 requestAnimationFrame(() => {
                     if (!popupState.activePopups.has(context)) return;
 
+                    // Trigger resize event to force gauge cards and other SVG-based cards
+                    // to recalculate their dimensions after the popup is fully visible.
+                    // This fixes issue #399 where gauge card text doesn't display in popups.
+                    window.dispatchEvent(new Event('resize'));
+
                     toggleBodyScroll(true);
 
                     if (context.config.auto_close > 0) {

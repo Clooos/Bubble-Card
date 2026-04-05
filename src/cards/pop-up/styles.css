@@ -269,6 +269,7 @@
 
 .no-header .bubble-pop-up-container {
     padding-top: 4px !important;
+    margin-top: 0 !important;
 }
 
 .no-header .bubble-pop-up-container.is-scrollable {
