@@ -25,6 +25,8 @@ export function getTranslatedAttribute(context, state, attribute, option) {
             return context._hass.formatEntityState(state, option);
         case 'swing_modes':
             return context._hass.formatEntityAttributeValue(state, "swing_mode", option);
+        case 'swing_horizontal_modes':
+            return context._hass.formatEntityAttributeValue(state, "swing_horizontal_mode", option);
         case 'preset_modes':
             return context._hass.formatEntityAttributeValue(state, "preset_mode", option);
         default:
@@ -38,6 +40,8 @@ export function getSelectedAttribute(state, attribute) {
             return state.attributes.fan_mode || null;
         case 'swing_modes':
             return state.attributes.swing_mode || null;
+        case 'swing_horizontal_modes':
+            return state.attributes.swing_horizontal_mode || null;
         case 'preset_modes':
             return state.attributes.preset_mode || null;
         case 'effect_list':
@@ -98,6 +102,14 @@ export function getOptionIcon(context, state, attribute, option) {
             icon.hass = context._hass;
             icon.stateObj = state;
             break;
+        case 'swing_horizontal_modes':
+            icon = document.createElement('ha-attribute-icon');
+            icon.slot = 'graphic';
+            icon.attribute = 'swing_horizontal_mode';
+            icon.attributeValue = option;
+            icon.hass = context._hass;
+            icon.stateObj = state;
+            break;
         case 'preset_modes':
             icon = document.createElement('ha-attribute-icon');
             icon.slot = 'graphic';
@@ -149,6 +161,12 @@ export function callSelectService(context, entity, selectedOption, config) {
                     context._hass.callService('climate', 'set_swing_mode', {
                         entity_id: entity,
                         swing_mode: selectedOption
+                    });
+                    break;
+                case 'swing_horizontal_modes':
+                    context._hass.callService('climate', 'set_swing_horizontal_mode', {
+                        entity_id: entity,
+                        swing_horizontal_mode: selectedOption
                     });
                     break;
                 case 'preset_modes':
