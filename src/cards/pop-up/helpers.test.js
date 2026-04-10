@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globa
 
 const showBackdrop = jest.fn();
 const hideBackdrop = jest.fn();
+const releaseBackdropContext = jest.fn();
 const callAction = jest.fn();
 const toggleBodyScroll = jest.fn();
 const handlePopUpCards = jest.fn();
@@ -85,6 +86,7 @@ jest.unstable_mockModule('./backdrop.js', () => ({
         showBackdrop,
         hideBackdrop,
     })),
+    releaseBackdropContext,
 }));
 
 jest.unstable_mockModule('../../tools/tap-actions.js', () => ({
