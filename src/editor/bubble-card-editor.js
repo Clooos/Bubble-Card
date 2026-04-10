@@ -230,6 +230,7 @@ class BubbleCardEditor extends LitElement {
             'hvac_modes',
             'fan_modes',
             'swing_modes',
+            'swing_horizontal_modes',
             'preset_modes',
             'effect_list'
         ];
