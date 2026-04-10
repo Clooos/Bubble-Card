@@ -8,7 +8,7 @@ import { cleanupScrollingEffects } from './tools/text-scrolling.js';
 import { registerPopupContext } from './cards/pop-up/helpers.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
-import { handlePopUp } from './cards/pop-up/index.js';
+import { cleanupPopUp, handlePopUp } from './cards/pop-up/index.js';
 import { handleButton } from './cards/button/index.js';
 import { handleSubButtons } from './cards/sub-buttons/index.js';
 import { handleSeparator } from './cards/separator/index.js';
@@ -66,6 +66,11 @@ class BubbleCard extends HTMLElement {
   disconnectedCallback() {
     this.isConnected = false;
     cleanupTapActions();
+    try {
+      if (this.config?.card_type === 'pop-up') {
+        cleanupPopUp(this);
+      }
+    } catch (e) {}
     try { if (this.content) cleanupScrollingEffects(this.content); } catch (e) {}
     try {
       // Stop timer intervals for main card
@@ -211,7 +216,7 @@ class BubbleCard extends HTMLElement {
 
   _notifyEditorContext() {
     try {
-      if (!this.config || !this.card) return;
+      if (!this.editor || !this.config || !this.card) return;
       const detail = {
         context: this,
         card: this.card,

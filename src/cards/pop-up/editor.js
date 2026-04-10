@@ -2,6 +2,7 @@ import { html } from 'lit';
 import { fireEvent } from '../../tools/utils.js';
 import { renderButtonEditor } from '../button/editor.js';
 import { registerPopUpHash, isHashOnCurrentPage } from './navigation-picker-bridge.js';
+import { renderLegacyMigrationNotice } from './migration.js';
 
 function getButtonList() {
     return [
@@ -36,6 +37,30 @@ function findSuitableEntities(hass, entityType = 'light', limit = 2) {
     });
     
     return entities;
+}
+
+function createPopUpExampleCards(hass) {
+    const suitableEntities = findSuitableEntities(hass);
+
+    return suitableEntities.length > 0
+        ? suitableEntities.map((entity) => ({
+            type: 'custom:bubble-card',
+            card_type: 'button',
+            button_type: entity.supportsBrightness ? 'slider' : 'switch',
+            entity: entity.entity,
+            show_state: true,
+            grid_options: { columns: 6 },
+        }))
+        : [
+            {
+                type: 'custom:bubble-card',
+                card_type: 'button',
+                button_type: 'name',
+                name: 'Floor lamp',
+                icon: 'mdi:floor-lamp-outline',
+                grid_options: { columns: 6 },
+            },
+        ];
 }
 
 function duplicateHashWarningTemplate() {
@@ -102,7 +127,7 @@ function updateUIForVerticalStack(editor, isInVerticalStack) {
         buttonText.textContent = isInVerticalStack ? 'Update Hash' : 'Create Pop-up';
     }
     
-    // Update the toggle and its label
+    // Update the example toggle state.
     const exampleSwitch = editor.shadowRoot.querySelector('#include-example');
     if (exampleSwitch) {
         exampleSwitch.disabled = isInVerticalStack;
@@ -117,11 +142,10 @@ function updateUIForVerticalStack(editor, isInVerticalStack) {
 
 function createPopUpConfig(editor, originalConfig) {
     try {
-        // Check if already in a vertical-stack by verifying window.popUpError is explicitly false
-        // If undefined or true, treat as not in vertical-stack
+        // Detect the legacy vertical-stack setup.
         const isInVerticalStack = window.popUpError === false;
         
-        // Get form value
+        // Read the current form value.
         const includeExample = editor.shadowRoot.querySelector("#include-example")?.checked || false;
         let hashValue = '#pop-up-name';
         const hashInput = editor.shadowRoot.querySelector('#hash-input');
@@ -141,65 +165,39 @@ function createPopUpConfig(editor, originalConfig) {
         }
         
         if (includeExample) {
-            const suitableEntities = findSuitableEntities(editor.hass);
-            
-            editor._config = {          
-                type: 'vertical-stack',
+            editor._config = {
+                type: 'custom:bubble-card',
+                card_type: 'pop-up',
+                name: 'Living room',
+                icon: 'mdi:sofa-outline',
+                hash: hashValue,
                 cards: [
-                    {
-                        type: 'custom:bubble-card',
-                        card_type: 'pop-up',
-                        name: 'Living room',
-                        icon: 'mdi:sofa-outline',
-                        hash: hashValue
-                    },
                     {   
                         type: 'custom:bubble-card',
                         card_type: 'separator',
                         name: 'Lights (example)',
                         icon: 'mdi:lightbulb-outline',
                     },
-                    {   
-                        type: 'horizontal-stack',
-                        cards: suitableEntities.length > 0 ? suitableEntities.map(entity => ({
-                                type: 'custom:bubble-card',
-                                card_type: 'button',
-                                button_type: entity.supportsBrightness ? 'slider' : 'switch',
-                                entity: entity.entity,
-                                show_state: true,
-                            })) : [
-                            {
-                                type: 'custom:bubble-card',
-                                card_type: 'button',
-                                button_type: 'name',
-                                name: 'Floor lamp',
-                                icon: 'mdi:floor-lamp-outline',
-                            }
-                        ]
-                    }
+                    ...createPopUpExampleCards(editor.hass)
                 ]
             };
         } else {
-            // Just create a basic pop-up without examples
-            editor._config = {          
-                type: 'vertical-stack',
-                cards: [
-                    {
-                        type: 'custom:bubble-card',
-                        card_type: 'pop-up',
-                        hash: hashValue
-                    }
-                ]
+            // Create an empty standalone pop-up.
+            editor._config = {
+                type: 'custom:bubble-card',
+                card_type: 'pop-up',
+                hash: hashValue,
+                cards: []
             };
 
-            // Mark as newly created to keep it visible in preview during editing
+            // Keep brand-new pop-ups visible in preview.
             window.bubbleNewlyCreatedHashes = window.bubbleNewlyCreatedHashes || new Set();
             window.bubbleNewlyCreatedHashes.add(hashValue);
         }
 
         registerPopUpHash(hashValue, {
-            name: editor._config.cards?.[0]?.name,
-            icon: editor._config.cards?.[0]?.icon
+            name: editor._config.name,
+            icon: editor._config.icon
         });
         
         fireEvent(editor, "config-changed", { config: editor._config });
@@ -220,9 +218,7 @@ export function renderPopUpEditor(editor) {
     const conditions = editor._config?.trigger ?? [];
     let button_action = editor._config.button_action || '';
 
-    // Initial configuration screen for pop-up creation
-    // A new pop-up is detected when card_type is 'pop-up' and hash is not defined
-    // This is more robust than checking the number of keys since HA may add default properties
+    // Show the creation screen for pop-ups without a hash yet.
     const isNewPopUp = editor._config.card_type === 'pop-up' && !editor._config.hash;
     if (isNewPopUp) {
 
@@ -230,8 +226,7 @@ export function renderPopUpEditor(editor) {
 
         let isInVerticalStack = false;
 
-        // Use setTimeout to correctly check if we're in a vertical stack
-        // Only consider it in a vertical-stack if window.popUpError is explicitly false
+        // Let the editor mount before checking the legacy stack state.
         setTimeout(() => {
             isInVerticalStack = window.popUpError === false;
             updateUIForVerticalStack(editor, isInVerticalStack);
@@ -295,12 +290,12 @@ export function renderPopUpEditor(editor) {
         `;
     }
 
-    // Track the original hash across editor recreations via a window-level session
+    // Keep the original hash across editor re-renders.
     const session = getEditorSession(editor._config?.hash || null);
 
     setTimeout(() => updateDuplicateHashWarning(editor, session.originalHash), 0);
 
-    // Full configuration interface for an existing pop-up
+    // Render the full editor for an existing pop-up.
     return html`
         <div class="card-config">
             ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
@@ -324,6 +319,7 @@ export function renderPopUpEditor(editor) {
                 }}"
             ></ha-textfield>
             ${duplicateHashWarningTemplate()}
+            ${renderLegacyMigrationNotice(editor, session.originalHash)}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:dock-top"></ha-icon>

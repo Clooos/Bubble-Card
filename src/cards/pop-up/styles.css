@@ -4,8 +4,6 @@
     height: 100%;
     margin-top: -50px;
     max-width: 100%;
-    padding-top: 40px;
-    padding-bottom: 80px;
     grid-gap: var(--bubble-pop-up-gap, 14px);
     gap: var(--bubble-pop-up-gap, 14px);
     column-gap: var(--bubble-pop-up-gap, 14px);
@@ -19,14 +17,18 @@
     overflow: auto; 
     grid-auto-rows: min-content;
     padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
+    touch-action: pan-y pinch-zoom;
+    overscroll-behavior: contain;
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
-    touch-action: pan-y pinch-zoom;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
 }
 
 .bubble-pop-up-container > * {
     flex-shrink: 0 !important;
-    contain-intrinsic-size: auto 120px;
 }
 
 .bubble-pop-up.card-content {
@@ -35,6 +37,11 @@
 }
 
 .bubble-pop-up {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: var(--vertical-stack-card-gap, var(--stack-card-gap, 8px));
     transition: transform 0.3s ease;
     position: fixed;
     width: 100%;
@@ -46,6 +53,10 @@
     left: 7px;
     z-index: 5 !important;
     bottom: calc(-56px - var(--custom-height-offset-mobile));
+    overflow: hidden;
+    isolation: isolate;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .bubble-pop-up-background {
@@ -62,6 +73,9 @@
     border: var(--bubble-pop-up-border, var(--bubble-border, none));
     contain: layout paint;
     pointer-events: none;
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .bubble-pop-up-container::-webkit-scrollbar {
@@ -72,12 +86,39 @@
     box-shadow: 0px 0px 50px rgba(0, 0, 0, var(--custom-shadow-opacity));
 }
 
-.is-popup-opened .bubble-pop-up-container > * {
+.bubble-pop-up.is-popup-opened,
+.bubble-pop-up.is-opening {
+    transform: translate3d(0, 0, 0);
+}
+
+.bubble-pop-up.is-opening,
+.bubble-pop-up.is-closing {
+    box-shadow: none !important;
+}
+
+.bubble-pop-up.is-closing {
+    transform: translate3d(0, 100%, 0);
+    contain: none !important;
+    background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
+    border: var(--bubble-pop-up-border, var(--bubble-border, none));
+}
+
+.bubble-pop-up.is-closing .bubble-pop-up-container {
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    overflow: hidden;
+}
+
+.bubble-pop-up.is-closing .bubble-pop-up-container > * {
+    contain: none !important;
+}
+
+.bubble-pop-up.is-popup-opened .bubble-pop-up-container > * {
     contain: style;
 }
 
 .is-popup-closed { 
-    transform: translateY(100%);
+    transform: translate3d(0, 100%, 0);
     box-shadow: none !important;
     contain: layout paint;
 }
@@ -106,13 +147,18 @@
     position: relative !important;
     top: 0;
     left: 0;
+    bottom: auto !important;
     width: 100% !important;
+    max-width: 100% !important;
     backdrop-filter: none !important;
     display: flex !important;
+    flex-direction: column !important;
     transform: none !important;
     height: auto !important;
     min-width: auto;
+    margin-left: 0 !important;
     z-index: 0 !important;
+    contain: none !important;
 }
 
 /* Optimize performance during open/close transitions */
@@ -121,28 +167,64 @@
     transform: translateZ(0);
 }
 
+/* Keep the close affordance on a stable promoted layer.
+    Some mobile/Safari paths paint or drop it late when the popup or header
+    gets re-composited around the open-transition boundary. */
+.bubble-pop-up.is-popup-opened .bubble-header-container,
+.bubble-pop-up.is-popup-opened .bubble-close-button,
+.bubble-pop-up.is-opening .bubble-header-container,
+.bubble-pop-up.is-opening .bubble-close-button,
+.bubble-pop-up.is-closing .bubble-header-container,
+.bubble-pop-up.is-closing .bubble-close-button {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.bubble-pop-up.is-opening .bubble-header-container,
+.bubble-pop-up.is-opening .bubble-close-button,
+.bubble-pop-up.is-closing .bubble-header-container,
+.bubble-pop-up.is-closing .bubble-close-button {
+    will-change: transform, opacity;
+}
+
 .bubble-pop-up.is-opening .bubble-pop-up-background,
 .bubble-pop-up.is-closing .bubble-pop-up-background {
     transform: translateZ(0);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.bubble-pop-up.is-opening .bubble-pop-up-background {
     contain: layout paint;
 }
 
+/* Safari is more reliable on exit when the moving layer is a single fixed element.
+   During close, let the root popup carry the background/border and remove the
+   dedicated popup background layer from the compositing path. */
+.bubble-pop-up.is-closing .bubble-pop-up-background {
+    display: none;
+}
+
 .bubble-header-container {
-    display: inline-flex;
-    height: 50px;
+    display: flex;
+    min-height: 50px;
+    width: 100%;
     margin: 0;
-    padding: 0;
     z-index: 3;
     padding: 18px 18px 22px;
-    position: sticky;
-    top: 0;
+    position: relative;
     background: none !important;
     overflow: visible;
+    align-items: flex-start;
+    flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .bubble-header {
-    display: inline-flex;
+    display: flex;
     flex-grow: 1;
+    min-width: 0;
     margin-right: 14px;
     color: var(--primary-text-color);
 }
@@ -159,7 +241,6 @@
     width: 50px;
     border: var(--bubble-pop-up-close-button-border, var(--bubble-pop-up-border, var(--bubble-border, none)));
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
-    z-index: 1;
     background: var(--bubble-pop-up-main-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color))));
     color: var(--primary-text-color);
     flex-shrink: 0;
@@ -167,14 +248,24 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    transition: all 0.3s ease;
+    z-index: 1;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
     box-sizing: border-box;
 }
 
 .bubble-close-icon {
-    --mdc-icon-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--primary-text-color);
     line-height: normal;
+}
+
+.bubble-close-icon svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    display: block;
 }
 
 .bubble-button-card-container {
@@ -221,10 +312,43 @@
     overflow: hidden;
 }
 
+.bubble-editor-placeholder-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
 .bubble-editor-placeholder-hash {
     font-weight: 500;
     font-size: 14px;
     color: var(--primary-text-color);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bubble-editor-placeholder .bubble-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 4px 8px;
+    border-radius: 18px;
+    white-space: nowrap;
+    background-color: var(--mdc-text-field-disabled-line-color);
+    font-size: 13px;
+}
+
+.bubble-editor-placeholder-badge {
+    color: var(--warning-color, #ff9800);
+}
+
+.bubble-editor-placeholder-badge ha-icon {
+    --mdc-icon-size: 16px;
+    line-height: 0;
+    color: inherit;
 }
 
 .bubble-editor-placeholder-hint {
@@ -234,6 +358,12 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+}
+
+/* Standalone popups lack the 0×0 legacy host element that produces one gap-unit of
+   visual space above the first card. Add it back as extra padding-top. */
+.is-standalone-pop-up > .bubble-pop-up-container {
+    padding-top: calc(18px + var(--bubble-pop-up-gap, 14px));
 }
 
 .bubble-pop-up.editor > .bubble-pop-up-container {
@@ -253,8 +383,8 @@
     position: absolute;
     background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 .editor * {
@@ -269,19 +399,15 @@
 
 .no-header .bubble-pop-up-container {
     padding-top: 4px !important;
-}
-
-.no-header .bubble-pop-up-container.is-scrollable {
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
 }
 
 .large .bubble-header-container {
-  height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
+    min-height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
 }
 
 .large .bubble-close-button {
     height: var(--row-height,56px);
     width: var(--row-height,56px);
-    --mdc-icon-size: 28px !important;
 } 

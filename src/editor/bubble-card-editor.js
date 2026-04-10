@@ -26,6 +26,7 @@ import { yamlKeysMap } from '../modules/registry.js';
 import setupTranslation from '../tools/localize.js';
 import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
+import cardsEditorStyles from '../cards/pop-up/cards/styles.css';
 import { getLazyLoadedPanelContent } from './utils.js';
 
 class BubbleCardEditor extends LitElement {
@@ -59,21 +60,32 @@ class BubbleCardEditor extends LitElement {
 
         this._config = { ...config };
         if (!previewStillConnected) {
+            this._firstRowsComputation = false;
+            this._lastMeasuredHeights = null;
             this._resetPreviewCardReference();
         } else {
             this._previewCardScore = -Infinity;
         }
 
-        // Initialize rows auto mode once per editor session.
-        if (this._rowsAutoMode === undefined) this._rowsAutoMode = true;
+        const hasExplicitRows =
+            this._config?.rows !== undefined &&
+            this._config?.rows !== null &&
+            this._config?.rows !== '';
 
-        // Track if rows are explicitly set (disables auto mode).
+        const hasManualRows =
+            typeof this._config?.rows === 'string' &&
+            this._config.rows.trim() !== '';
+
         const hasGridRows =
             this._config?.grid_options?.rows !== undefined &&
             this._config?.grid_options?.rows !== null &&
             this._config?.grid_options?.rows !== '';
 
-        if (hasGridRows) {
+        this._rowsAutoMode = true;
+
+        // Explicit string rows come from user input/YAML and must not be auto-recomputed
+        // when HA reuses the same editor instance for nested pop-up card dialogs.
+        if (hasGridRows || (hasExplicitRows && hasManualRows)) {
             this._rowsAutoMode = false;
         }
     }
@@ -1752,7 +1764,7 @@ class BubbleCardEditor extends LitElement {
 
   static get styles() {
     return css`
-        ${unsafeCSS(styles + moduleStyles)}
+        ${unsafeCSS(styles + moduleStyles + cardsEditorStyles)}
     `;
   }
 
@@ -2275,20 +2287,297 @@ class BubbleCardEditor extends LitElement {
     }
   }
 
+    _getHomeAssistantHost() {
+        try {
+            return document.querySelector("body > home-assistant") || null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    _getActiveEditCardDialog() {
+        try {
+            return this._getHomeAssistantHost()?.shadowRoot?.querySelector("hui-dialog-edit-card") || null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    _getActiveLovelace() {
+        const activeDialog = this._getActiveEditCardDialog();
+        if (activeDialog?._params?.lovelace) {
+            return activeDialog._params.lovelace;
+        }
+
+        const homeAssistant = this._getHomeAssistantHost();
+        if (!homeAssistant) {
+            return null;
+        }
+
+        try {
+            const huiRoot = this._deepQuerySelector(homeAssistant.shadowRoot, 'hui-root');
+            return huiRoot?.lovelace || null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    _getActiveLovelaceConfig() {
+        const lovelace = this._getActiveLovelace();
+        if (lovelace?.rawConfig || lovelace?.config) {
+            return lovelace.rawConfig || lovelace.config;
+        }
+
+        return this._getActiveEditCardDialog()?._params?.lovelaceConfig || null;
+    }
+
+    _captureStandaloneParentDialogParams() {
+        const dialog = this._getActiveEditCardDialog();
+        const params = dialog?._params;
+        if (!params) return null;
+
+        return {
+            ...params,
+            cardConfig: { ...(this._config || params.cardConfig || {}) },
+        };
+    }
+
+    _extractCardsFromStandaloneLovelaceConfig(lovelaceConfig) {
+        const sectionCards = lovelaceConfig?.views?.[0]?.sections?.[0]?.cards;
+        if (Array.isArray(sectionCards)) {
+            return sectionCards;
+        }
+
+        return Array.isArray(lovelaceConfig?.views?.[0]?.cards)
+            ? lovelaceConfig.views[0].cards
+            : [];
+    }
+
+    _reopenStandaloneParentDialog(parentDialogParams, cardConfig) {
+        const homeAssistant = this._getHomeAssistantHost();
+        if (!homeAssistant || !parentDialogParams || !cardConfig) return;
+
+        setTimeout(() => {
+            fireEvent(homeAssistant, "show-dialog", {
+                dialogTag: "hui-dialog-edit-card",
+                dialogImport: () => Promise.resolve(),
+                dialogParams: {
+                    ...parentDialogParams,
+                    cardConfig,
+                },
+            });
+        }, 0);
+    }
+
+    _openStandaloneChildDialogInCurrentEditor(childDialogParams, parentDialogParams, getCardConfig) {
+        const activeDialog = this._getActiveEditCardDialog();
+        if (!activeDialog || !childDialogParams) {
+            return false;
+        }
+
+        const handleClosed = (event) => {
+            if (event?.detail?.dialog !== "hui-dialog-edit-card") return;
+            window.removeEventListener("dialog-closed", handleClosed, true);
+            this._reopenStandaloneParentDialog(parentDialogParams, getCardConfig());
+        };
+
+        window.addEventListener("dialog-closed", handleClosed, true);
+
+        try {
+            activeDialog.showDialog(childDialogParams);
+            return true;
+        } catch (_) {
+            window.removeEventListener("dialog-closed", handleClosed, true);
+            return false;
+        }
+    }
+
+    async _dispatchStandaloneSectionDialog(cards, eventName, eventDetail, onSaveConfig) {
+        const homeAssistant = this._getHomeAssistantHost();
+        if (!homeAssistant) return false;
+
+        const sectionConfig = {
+            type: "grid",
+            cards: [...cards],
+        };
+
+        const proxySection = document.createElement("hui-section");
+        proxySection.style.display = "none";
+        proxySection.hass = this.hass;
+        proxySection.index = 0;
+        proxySection.viewIndex = 0;
+        proxySection.config = sectionConfig;
+        proxySection.lovelace = {
+            config: {
+                views: [
+                    {
+                        path: "bubble-card-standalone",
+                        title: "Bubble Card",
+                        sections: [sectionConfig],
+                    },
+                ],
+            },
+            editMode: true,
+            saveConfig: async (newConfig) => {
+                await onSaveConfig(newConfig);
+            },
+        };
+
+        homeAssistant.appendChild(proxySection);
+
+        try {
+            if (typeof proxySection._initializeConfig === "function") {
+                await proxySection._initializeConfig();
+            } else {
+                await proxySection.updateComplete;
+            }
+
+            const layoutElement = proxySection._layoutElement;
+            if (!layoutElement) return false;
+
+            layoutElement.dispatchEvent(new CustomEvent(eventName, {
+                bubbles: true,
+                composed: true,
+                detail: eventDetail,
+            }));
+
+            return true;
+        } catch (error) {
+            console.error("Bubble Card Editor: failed to open standalone pop-up dialog", error);
+            return false;
+        } finally {
+            setTimeout(() => proxySection.remove(), 0);
+        }
+    }
+
+    async _openStandaloneCardDialog(options) {
+        const homeAssistant = this._getHomeAssistantHost();
+        const parentDialogParams = this._captureStandaloneParentDialogParams();
+
+        if (!homeAssistant || !parentDialogParams) return false;
+
+        let nextConfig = {
+            ...this._config,
+            cards: [...(this._config?.cards || [])],
+        };
+
+        const updateStandaloneConfig = async (lovelaceConfig) => {
+            nextConfig = {
+                ...nextConfig,
+                cards: this._extractCardsFromStandaloneLovelaceConfig(lovelaceConfig),
+            };
+            this._config = nextConfig;
+        };
+
+        if (options?.type === "add") {
+            let pendingChildDialogParams = null;
+
+            const handleShowDialog = (event) => {
+                if (event?.detail?.dialogTag !== "hui-dialog-edit-card") return;
+
+                pendingChildDialogParams = event.detail?.dialogParams;
+                event.stopImmediatePropagation?.();
+                event.stopPropagation();
+            };
+
+            const handleCreateClosed = (event) => {
+                if (event?.detail?.dialog !== "hui-dialog-create-card") return;
+
+                homeAssistant.removeEventListener("show-dialog", handleShowDialog, true);
+                window.removeEventListener("dialog-closed", handleCreateClosed, true);
+
+                if (!pendingChildDialogParams) {
+                    return;
+                }
+
+                setTimeout(() => {
+                    this._openStandaloneChildDialogInCurrentEditor(
+                        pendingChildDialogParams,
+                        parentDialogParams,
+                        () => nextConfig
+                    );
+                }, 0);
+            };
+
+            homeAssistant.addEventListener("show-dialog", handleShowDialog, true);
+            window.addEventListener("dialog-closed", handleCreateClosed, true);
+
+            const opened = await this._dispatchStandaloneSectionDialog(
+                nextConfig.cards,
+                "ll-create-card",
+                undefined,
+                updateStandaloneConfig
+            );
+
+            if (!opened) {
+                homeAssistant.removeEventListener("show-dialog", handleShowDialog, true);
+                window.removeEventListener("dialog-closed", handleCreateClosed, true);
+            }
+
+            return opened;
+        }
+
+        const handleShowDialog = (event) => {
+            if (event?.detail?.dialogTag !== "hui-dialog-edit-card") return;
+
+            homeAssistant.removeEventListener("show-dialog", handleShowDialog, true);
+            event.stopImmediatePropagation?.();
+            event.stopPropagation();
+            this._openStandaloneChildDialogInCurrentEditor(
+                event.detail?.dialogParams,
+                parentDialogParams,
+                () => nextConfig
+            );
+        };
+
+        homeAssistant.addEventListener("show-dialog", handleShowDialog, true);
+
+        const opened = await this._dispatchStandaloneSectionDialog(
+            nextConfig.cards,
+            "ll-edit-card",
+            { path: [0, 0, options.index] },
+            updateStandaloneConfig
+        );
+
+        if (!opened) {
+            homeAssistant.removeEventListener("show-dialog", handleShowDialog, true);
+        }
+
+        return opened;
+    }
+
   _handleCardContext(event) {
     try {
       const detail = event?.detail;
       if (!detail) return;
-      const score = this._scoreCardContext(detail);
-      if (score <= this._previewCardScore) return;
 
-      const host = detail.context || detail.card?.closest?.('bubble-card') || detail.card?.getRootNode?.()?.host || null;
-      const root = detail.context?.shadowRoot || host?.shadowRoot || detail.card?.getRootNode?.() || null;
-      if (!root) return;
+            const host = detail.context || detail.card?.closest?.('bubble-card') || detail.card?.getRootNode?.()?.host || null;
+            const root = detail.context?.shadowRoot || host?.shadowRoot || detail.card?.getRootNode?.() || null;
+            if (!root) return;
+
+      const score = this._scoreCardContext(detail);
+            const previousHostConnected = this._previewCardHost?.isConnected;
+            const sameHost = !!host && host === this._previewCardHost;
+            if (score < this._previewCardScore) return;
+            if (score === this._previewCardScore && sameHost && previousHostConnected) return;
 
       this._previewCardScore = score;
       this._previewCardRoot = root;
       this._previewCardHost = host || root.host || null;
+
+      // Attach a callback so drag/edit/delete in the standalone pop-up preview
+      // can fire config-changed from the editor element (where HA's dialog listens).
+      const previewHost = this._previewCardHost;
+      if (Array.isArray(detail?.config?.cards) && previewHost) {
+          previewHost._standaloneCardsUpdater = (newCards) => {
+              this._config = { ...this._config, cards: newCards };
+              fireEvent(this, 'config-changed', { config: this._config });
+          };
+          previewHost._standaloneOpenCardDialog = (options) => {
+              this._openStandaloneCardDialog(options);
+          };
+      }
+
       this._setupAutoRowsObserver();
     } catch (_) {}
   }
