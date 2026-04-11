@@ -292,6 +292,11 @@ function completePopupOpen(context) {
         return;
     }
 
+    const container = context.elements?.popUpContainer;
+    if (container) {
+        container.classList.toggle('is-scrollable', container.scrollHeight > container.clientHeight);
+    }
+
     setPopupOpenSettled(context, true);
     armFreshOutsideInteractionGuard(context);
 
@@ -455,6 +460,10 @@ function startStandalonePopupTransition(context, open, onComplete) {
 }
 
 function finalizeStandalonePopupOpen(context) {
+    const container = context.elements?.popUpContainer;
+    if (container) {
+        container.classList.toggle('is-scrollable', container.scrollHeight > container.clientHeight);
+    }
     context.popUp.classList.remove('is-opening', 'is-closing');
     completePopupOpen(context);
 }

@@ -19,6 +19,17 @@
     padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
     touch-action: pan-y pinch-zoom;
     overscroll-behavior: contain;
+    /* Identity mask — keeps the layer permanently in compositor-masked mode so
+       switching to the real fade gradient is a repaint, not a re-promotion. */
+    mask-image: linear-gradient(black, black);
+    -webkit-mask-image: linear-gradient(black, black);
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+}
+
+.bubble-pop-up-container.is-scrollable {
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     mask-repeat: no-repeat;
@@ -399,8 +410,11 @@
 
 .no-header .bubble-pop-up-container {
     padding-top: 4px !important;
-    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%) !important;
+}
+
+.no-header .bubble-pop-up-container.is-scrollable {
+    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%);
 }
 
 .large .bubble-header-container {

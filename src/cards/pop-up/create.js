@@ -153,6 +153,18 @@ export function renderHeaderButton(context) {
   }
 }
 
+function _attachScrollMaskListener(container) {
+  if (!container || container._bubbleScrollMaskAdded) return;
+
+  container.addEventListener('scroll', () => {
+    if (!container.classList.contains('is-scrollable')) {
+      container.classList.add('is-scrollable');
+    }
+  }, { passive: true });
+
+  container._bubbleScrollMaskAdded = true;
+}
+
 export function createHeader(context) {
   const existingHeader = context.popUp?.querySelector(".bubble-header-container");
   if (!existingHeader) {
@@ -235,6 +247,7 @@ export function createStructure(context) {
     _setupPopupInteractionHandlers(context);
 
     context.elements.popUpContainer = _createOrReusePopUpContainer(context);
+    _attachScrollMaskListener(context.elements.popUpContainer);
     context.popUpBackground = context.popUp.querySelector(".bubble-pop-up-background") || createElement("div", "bubble-pop-up-background");
     context.popUpBackground.querySelector('.bubble-pop-up-blur-layer')?.remove();
     if (!context.popUpBackground.isConnected) {
