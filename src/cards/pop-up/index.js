@@ -1,4 +1,4 @@
-import { changeEditor, changeStyle, changeTriggered } from './changes.js';
+import { changeEditor, changeStyle, changeTriggered, syncHeaderVisibilityClasses } from './changes.js';
 import { createHeader, createStructure, prepareStructure, prepareStandaloneStructure, renderHeaderButton } from './create.js';
 import { cleanupPopupRuntime, registerPopupContext, syncPopupOpenStateWithLocation } from './helpers.js';
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
@@ -165,6 +165,8 @@ export function handlePopUp(context) {
     if (!context.popUp || !context.elements) {
         return;
     }
+
+    syncHeaderVisibilityClasses(context);
 
     // Keep the popup registered in the shared URL dispatcher.
     registerPopupContext(context);

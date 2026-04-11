@@ -109,7 +109,7 @@ jest.unstable_mockModule('./legacy.js', () => ({
     hideLegacyPopupContent: jest.fn(),
 }));
 
-const { cleanupPopupRuntime, closePopup, openPopup, registerPopupContext } = await import('./helpers.js');
+const { cleanupPopupRuntime, closePopup, navigateToPreviousPopup, openPopup, registerPopupContext } = await import('./helpers.js');
 
 function flushRafQueue() {
     const callbacks = [...global.requestAnimationFrame.mock.calls];
@@ -281,5 +281,40 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue();
 
         expect(contextB.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('navigates back to the previous popup when one opened the current popup', () => {
+        const contextA = createStandaloneContext({ hash: '#popup-a' });
+        const contextB = createStandaloneContext({ hash: '#popup-b' });
+        usedContexts.push(contextA, contextB);
+
+        registerPopupContext(contextA);
+        registerPopupContext(contextB);
+        contextB._previousPopupHash = '#popup-a';
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-b');
+        jest.clearAllMocks();
+
+        navigateToPreviousPopup(contextB);
+
+        expect(window.history.back).toHaveBeenCalledTimes(1);
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+
+    test('falls back to closing when there is no previous popup to reopen', () => {
+        const context = createStandaloneContext({ hash: '#popup-b' });
+        usedContexts.push(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-b');
+        jest.clearAllMocks();
+
+        navigateToPreviousPopup(context);
+
+        expect(window.history.back).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(50);
+
+        expect(window.history.replaceState).toHaveBeenCalledTimes(1);
+        expect(window.location.hash).toBe('');
     });
 });

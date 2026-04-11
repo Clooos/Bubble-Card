@@ -4,11 +4,12 @@ import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { handleButton } from "../../cards/button/index.js";
 import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
-import { registerPopupContext, removeHash, openPopup } from "./helpers.js";
+import { navigateToPreviousPopup, registerPopupContext, removeHash, openPopup } from "./helpers.js";
 import { hideLegacyPopupContent } from './legacy.js';
 import styles from "./styles.css";
 
 const CLOSE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><title>close</title><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>';
+const PREVIOUS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><title>previous</title><path d="M15.41,7.41L14,6L8,12L14,18L15.41,16.59L10.83,12L15.41,7.41Z" /></svg>';
 
 function _hasHeaderContent(context) {
   return !!(context.config.entity || context.config.name || context.config.icon);
@@ -20,19 +21,63 @@ function _closePopupByUser(context) {
   }
 }
 
-function _bindCloseButtonEvents(closeButton, context) {
-  const handleClose = (event) => {
+function _appendIfMissing(parent, child) {
+  if (!parent || !child || child.parentNode === parent) {
+    return;
+  }
+
+  parent.appendChild(child);
+}
+
+function _bindHeaderButtonEvents(button, handler) {
+  if (!button || button._bubbleHeaderButtonBound) {
+    return;
+  }
+
+  const handleAction = (event) => {
     event?.stopPropagation();
     event?.preventDefault();
-    _closePopupByUser(context);
+    handler();
     forwardHaptic("selection");
   };
 
-  closeButton.addEventListener("click", handleClose);
-  closeButton.addEventListener("touchend", handleClose);
-  closeButton.addEventListener("pointerdown", (event) => {
+  button.addEventListener("click", handleAction);
+  button.addEventListener("touchend", handleAction);
+  button.addEventListener("pointerdown", (event) => {
     event.stopPropagation();
   });
+
+  button._bubbleHeaderButtonBound = true;
+}
+
+function _bindCloseButtonEvents(closeButton, context) {
+  _bindHeaderButtonEvents(closeButton, () => {
+    _closePopupByUser(context);
+  });
+}
+
+function _bindPreviousButtonEvents(previousButton, context) {
+  _bindHeaderButtonEvents(previousButton, () => {
+    navigateToPreviousPopup(context);
+  });
+}
+
+function _createHeaderActionButton(buttonClassName, iconClassName, iconSvg) {
+  const button = createElement("div", `bubble-header-action-button ${buttonClassName}`);
+  const feedbackContainer = createElement("div", "bubble-feedback-container");
+  const feedback = createElement("div", "bubble-feedback-element feedback-element");
+  const icon = createElement("span", `bubble-header-action-icon ${iconClassName}`);
+
+  feedbackContainer.appendChild(feedback);
+  button.appendChild(feedbackContainer);
+
+  icon.innerHTML = iconSvg;
+  button.appendChild(icon);
+  button.feedback = feedback;
+  button.haRipple = createElement("ha-ripple");
+  button.appendChild(button.haRipple);
+
+  return { button, icon };
 }
 
 function _bindHeaderInteractions(context) {
@@ -167,46 +212,56 @@ function _attachScrollMaskListener(container) {
 
 export function createHeader(context) {
   const existingHeader = context.popUp?.querySelector(".bubble-header-container");
-  if (!existingHeader) {
-    const closeIcon = createElement("span", "bubble-close-icon");
-    const closeButton = createElement("div", "bubble-close-button close-pop-up");
-    const buttonContainer = createElement("div", "bubble-button-container");
-    const header = createElement("div", "bubble-header");
-    const headerContainer = createElement("div", "bubble-header-container");
-    const feedbackContainer = createElement("div", "bubble-feedback-container");
-    const feedback = createElement("div", "bubble-feedback-element feedback-element");
+  const headerContainer = existingHeader || createElement("div", "bubble-header-container");
+  const header = headerContainer.querySelector(".bubble-header") || createElement("div", "bubble-header");
+  const buttonContainer = header.querySelector(".bubble-button-container") || createElement("div", "bubble-button-container");
+  const headerActions = headerContainer.querySelector(".bubble-header-actions") || createElement("div", "bubble-header-actions");
 
-    feedbackContainer.appendChild(feedback);
-    closeButton.appendChild(feedbackContainer);
-  closeIcon.innerHTML = CLOSE_ICON_SVG;
-    closeButton.appendChild(closeIcon);
-    closeButton.feedback = feedback;
-    closeButton.haRipple = createElement("ha-ripple");
-    closeButton.appendChild(closeButton.haRipple);
-    _bindCloseButtonEvents(closeButton, context);
-
-    headerContainer.setAttribute("id", "header-container");
-    headerContainer.appendChild(header);
-    headerContainer.appendChild(closeButton);
-    header.appendChild(buttonContainer);
-
-    context.elements = {
-      closeIcon,
-      closeButton,
-      buttonContainer,
-      header,
-      headerContainer,
-    };
-  } else {
-    context.elements = {
-      ...context.elements,
-      headerContainer: existingHeader,
-      closeIcon: existingHeader.querySelector(".bubble-close-icon"),
-      closeButton: existingHeader.querySelector(".bubble-close-button"),
-      buttonContainer: existingHeader.querySelector(".bubble-button-container"),
-      header: existingHeader.querySelector(".bubble-header"),
-    };
+  let previousButton = headerContainer.querySelector(".bubble-previous-button");
+  let previousIcon = headerContainer.querySelector(".bubble-previous-icon");
+  if (!previousButton) {
+    const previousElements = _createHeaderActionButton(
+      "bubble-previous-button previous-pop-up",
+      "bubble-previous-icon",
+      PREVIOUS_ICON_SVG
+    );
+    previousButton = previousElements.button;
+    previousIcon = previousElements.icon;
   }
+
+  let closeButton = headerContainer.querySelector(".bubble-close-button");
+  let closeIcon = headerContainer.querySelector(".bubble-close-icon");
+  if (!closeButton) {
+    const closeElements = _createHeaderActionButton(
+      "bubble-close-button close-pop-up",
+      "bubble-close-icon",
+      CLOSE_ICON_SVG
+    );
+    closeButton = closeElements.button;
+    closeIcon = closeElements.icon;
+  }
+
+  headerContainer.setAttribute("id", "header-container");
+  _appendIfMissing(header, buttonContainer);
+  _appendIfMissing(headerContainer, header);
+  _appendIfMissing(headerActions, previousButton);
+  _appendIfMissing(headerActions, closeButton);
+  _appendIfMissing(headerContainer, headerActions);
+
+  _bindPreviousButtonEvents(previousButton, context);
+  _bindCloseButtonEvents(closeButton, context);
+
+  context.elements = {
+    ...context.elements,
+    previousIcon,
+    previousButton,
+    closeIcon,
+    closeButton,
+    buttonContainer,
+    header,
+    headerActions,
+    headerContainer,
+  };
 
   _bindHeaderInteractions(context);
 }

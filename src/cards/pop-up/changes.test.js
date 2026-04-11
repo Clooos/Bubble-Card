@@ -49,11 +49,30 @@ jest.unstable_mockModule('./cards/index.js', () => ({
     setStandalonePopUpCardsActive: jest.fn(),
 }));
 
-const { changeEditor, changeTriggered } = await import('./changes.js');
+const { changeEditor, changeStyle, changeTriggered, syncHeaderVisibilityClasses } = await import('./changes.js');
 const { handlePopUpCards } = await import('./cards/index.js');
 const { addHash, markPopupPendingTriggerOpen, removeHash, wasPopupOpenedByTrigger } = await import('./helpers.js');
 const { toggleBodyScroll } = await import('../../tools/utils.js');
 const { checkConditionsMet, ensureArray, validateConditionalConfig } = await import('../../tools/validate-condition.js');
+
+function createMockClassList(initialClasses = []) {
+    const classes = new Set(initialClasses);
+
+    return {
+        add: (...names) => names.forEach((name) => classes.add(name)),
+        remove: (...names) => names.forEach((name) => classes.delete(name)),
+        toggle: (name, force) => {
+            const shouldAdd = force === undefined ? !classes.has(name) : force;
+            if (shouldAdd) {
+                classes.add(name);
+            } else {
+                classes.delete(name);
+            }
+            return classes.has(name);
+        },
+        contains: (name) => classes.has(name),
+    };
+}
 
 describe('changeEditor', () => {
     beforeEach(() => {
@@ -78,6 +97,39 @@ describe('changeEditor', () => {
         expect(context.bubbleInstanceId).toBeUndefined();
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(toggleBodyScroll).not.toHaveBeenCalled();
+    });
+
+    test('syncs popup header action classes from config', () => {
+        const context = {
+            config: {
+                show_header: true,
+                show_previous_button: true,
+                show_close_button: false,
+            },
+            popUp: {
+                classList: createMockClassList(),
+            },
+        };
+
+        syncHeaderVisibilityClasses(context);
+
+        expect(context.popUp.classList.contains('no-header')).toBe(false);
+        expect(context.popUp.classList.contains('show-previous-button')).toBe(true);
+        expect(context.popUp.classList.contains('hide-close-button')).toBe(true);
+        expect(context.popUp.classList.contains('no-header-actions')).toBe(false);
+
+        context.config = {
+            show_header: false,
+            show_previous_button: false,
+            show_close_button: false,
+        };
+
+        changeStyle(context);
+
+        expect(context.popUp.classList.contains('no-header')).toBe(true);
+        expect(context.popUp.classList.contains('show-previous-button')).toBe(false);
+        expect(context.popUp.classList.contains('hide-close-button')).toBe(true);
+        expect(context.popUp.classList.contains('no-header-actions')).toBe(true);
     });
 
     test('caches trigger preparation while the trigger config reference stays unchanged', () => {

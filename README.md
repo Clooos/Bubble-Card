@@ -206,7 +206,9 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `trigger_close` | boolean | Optional | `true` or `false` (default) | Close the pop-up when `trigger_state` is different |
 | `open_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is opening |
 | `close_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is closing |
-| `show_header` | boolean | Optional | `true` or `false` (default) | Show/Hide the pop-up header fully |
+| `show_header` | boolean | Optional | `true` (default) or `false` | Show/Hide the pop-up header fully |
+| `show_previous_button` | boolean | Optional | `true` or `false` (default) | Show a previous button next to the close button and navigate back to the previous pop-up when available |
+| `show_close_button` | boolean | Optional | `true` (default) or `false` | Show or hide the close button while keeping the rest of the header visible |
 | You also have access to [all the button settings](#button) for the header of the pop-up. | | Optional | | If undefined no header will be shown |
 
 </details>

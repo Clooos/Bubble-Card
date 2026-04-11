@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 jest.unstable_mockModule('./changes.js', () => ({
     changeEditor: jest.fn(),
     changeStyle: jest.fn(),
+    syncHeaderVisibilityClasses: jest.fn(),
     changeTriggered: jest.fn(),
 }));
 

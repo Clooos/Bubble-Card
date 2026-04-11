@@ -6,6 +6,17 @@ import { setLayout } from "../../tools/utils.js";
 
 export { changeEditor } from './editor-mode.js';
 
+export function syncHeaderVisibilityClasses(context) {
+    const showHeader = context.config.show_header ?? true;
+    const showPreviousButton = context.config.show_previous_button ?? false;
+    const showCloseButton = context.config.show_close_button ?? true;
+
+    context.popUp.classList.toggle('no-header', !showHeader);
+    context.popUp.classList.toggle('show-previous-button', showPreviousButton);
+    context.popUp.classList.toggle('hide-close-button', !showCloseButton);
+    context.popUp.classList.toggle('no-header-actions', !(showPreviousButton || showCloseButton));
+}
+
 export function changeStyle(context) {
     const { backdropCustomStyle, updateBackdropStyles } = getBackdrop(context);
 
@@ -20,10 +31,7 @@ export function changeStyle(context) {
         requestAnimationFrame(() => handleCustomStyles(context, backdropCustomStyle));
     }
 
-    const showHeader = context.config.show_header ?? true;
-    if (context.popUp.classList.contains('no-header') === showHeader) {
-        context.popUp.classList.toggle('no-header', !showHeader);
-    }
+    syncHeaderVisibilityClasses(context);
 }
 
 function getPreparedTriggerConditions(context) {

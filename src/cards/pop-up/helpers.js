@@ -230,6 +230,26 @@ export function addHash(hash) {
     return true;
 }
 
+export function navigateToPreviousPopup(context) {
+    const currentHash = location.hash;
+    const previousHash = context?._previousPopupHash || '';
+
+    if (!currentHash || currentHash !== context?.config?.hash) {
+        return false;
+    }
+
+    if (previousHash && previousHash !== currentHash && getRegisteredPopupContext(previousHash)) {
+        try {
+            history.back();
+            return true;
+        } catch (_) {
+            // Fall back to closing the current popup if history navigation fails.
+        }
+    }
+
+    return removeHash(true);
+}
+
 function toggleBackdrop(context, show) {
     const { showBackdrop, hideBackdrop } = getBackdrop(context);
     if (show) {
@@ -1049,6 +1069,10 @@ function ensureGlobalUrlListener() {
         const ref = popupRegistry.get(currentHash);
         const context = ref?.deref();
         if (context) {
+            if (currentHash && currentHash !== previousHash) {
+                context._previousPopupHash = getRegisteredPopupContext(previousHash) ? previousHash : '';
+            }
+
             const isPopupOpen = context.popUp.classList.contains('is-popup-opened');
             const runtimeActive = popupState.activePopups.has(context);
             const isClosing = context.popUp.classList.contains('is-closing');

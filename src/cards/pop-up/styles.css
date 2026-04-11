@@ -187,20 +187,20 @@
     Some mobile/Safari paths paint or drop it late when the popup or header
     gets re-composited around the open-transition boundary. */
 .bubble-pop-up.is-popup-opened .bubble-header-container,
-.bubble-pop-up.is-popup-opened .bubble-close-button,
+.bubble-pop-up.is-popup-opened .bubble-header-action-button,
 .bubble-pop-up.is-opening .bubble-header-container,
-.bubble-pop-up.is-opening .bubble-close-button,
+.bubble-pop-up.is-opening .bubble-header-action-button,
 .bubble-pop-up.is-closing .bubble-header-container,
-.bubble-pop-up.is-closing .bubble-close-button {
+.bubble-pop-up.is-closing .bubble-header-action-button {
     transform: translateZ(0);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
 }
 
 .bubble-pop-up.is-opening .bubble-header-container,
-.bubble-pop-up.is-opening .bubble-close-button,
+.bubble-pop-up.is-opening .bubble-header-action-button,
 .bubble-pop-up.is-closing .bubble-header-container,
-.bubble-pop-up.is-closing .bubble-close-button {
+.bubble-pop-up.is-closing .bubble-header-action-button {
     will-change: transform, opacity;
 }
 
@@ -245,12 +245,19 @@
     color: var(--primary-text-color);
 }
 
+.bubble-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
 .bubble-name {
     font-size: 14px;
     font-weight: heavy;
 }
 
-.bubble-close-button {
+.bubble-header-action-button {
     display: flex;
     position: relative;
     height: 50px;
@@ -269,7 +276,7 @@
     box-sizing: border-box;
 }
 
-.bubble-close-icon {
+.bubble-header-action-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -277,11 +284,31 @@
     line-height: normal;
 }
 
-.bubble-close-icon svg {
+.bubble-header-action-icon svg {
     width: 24px;
     height: 24px;
     fill: currentColor;
     display: block;
+}
+
+.bubble-previous-button {
+    display: none;
+}
+
+.show-previous-button .bubble-previous-button {
+    display: flex;
+}
+
+.hide-close-button .bubble-close-button {
+    display: none;
+}
+
+.no-header-actions .bubble-header-actions {
+    display: none;
+}
+
+.no-header-actions .bubble-header {
+    margin-right: 0;
 }
 
 .bubble-button-card-container {
@@ -426,7 +453,7 @@
     min-height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ));
 }
 
-.large .bubble-close-button {
+.large .bubble-header-action-button {
     height: var(--row-height,56px);
     width: var(--row-height,56px);
 } 

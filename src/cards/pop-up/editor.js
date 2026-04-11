@@ -343,10 +343,33 @@ export function renderPopUpEditor(editor) {
                             Hidden header
                         </h4>
                         <div class="content">
-                            <p>You can completely hide the pop-up header, including the close button. To close it when hidden, either make a long swipe within the pop-up or click outside of it.</p>
+                            <p>You can completely hide the pop-up header, including the close and previous buttons. To close it when hidden, either make a long swipe within the pop-up or click outside of it.</p>
                         </div>
                     </div>
                     <div style="${!(editor._config?.show_header ?? true) ? 'display: none;' : ''}">
+                        <hr />
+                        <ha-formfield .label="Show previous button">
+                            <ha-switch
+                                aria-label="Show previous button"
+                                .checked=${editor._config.show_previous_button ?? false}
+                                .configValue="${"show_previous_button"}"
+                                @change=${editor._valueChanged}
+                            ></ha-switch>
+                            <div class="mdc-form-field">
+                                <label class="mdc-label">Show previous button</label>
+                            </div>
+                        </ha-formfield>
+                        <ha-formfield .label="Show close button">
+                            <ha-switch
+                                aria-label="Show close button"
+                                .checked=${editor._config.show_close_button ?? true}
+                                .configValue="${"show_close_button"}"
+                                @change=${editor._valueChanged}
+                            ></ha-switch>
+                            <div class="mdc-form-field">
+                                <label class="mdc-label">Show close button</label>
+                            </div>
+                        </ha-formfield>
                         <hr />
                         ${renderButtonEditor(editor)}
                     </div>
