@@ -16,7 +16,7 @@
     scrollbar-width: none; /* for Firefox */
     overflow: auto; 
     grid-auto-rows: min-content;
-    padding: 18px 18px calc(140px + var(--custom-height-offset-mobile)) 18px;
+    padding: 18px 18px 84px 18px;
     touch-action: pan-y pinch-zoom;
     overscroll-behavior: contain;
     /* Identity mask — keeps the layer permanently in compositor-masked mode so
@@ -56,14 +56,15 @@
     transition: transform 0.3s ease;
     position: fixed;
     width: 100%;
-    height: 100%;
+    height: auto;
     max-width: 100%;
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
     box-sizing: border-box;
     margin-left: var(--custom-margin);
     left: 7px;
     z-index: 5 !important;
-    bottom: calc(-56px - var(--custom-height-offset-mobile));
+    top: calc(56px + var(--custom-height-offset-mobile));
+    bottom: 0;
     overflow: hidden;
     isolation: isolate;
     backface-visibility: hidden;
@@ -142,13 +143,14 @@
         left: calc(50% - (var(--desktop-width, 540px) / 2));
     }
     .bubble-pop-up-container {
-        padding: 18px 18px calc(140px + var(--custom-height-offset-desktop)) 18px;
+        padding: 18px 18px 84px 18px;
     }
 }
 
 @media only screen and (min-width: 768px) {
     .bubble-pop-up {
-      bottom: calc(-56px - var(--custom-height-offset-desktop));
+            top: calc(56px + var(--custom-height-offset-desktop));
+            bottom: 0;
       left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width, 540px) / 2));
     }
 }
