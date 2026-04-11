@@ -56,19 +56,22 @@
     transition: transform 0.3s ease;
     position: fixed;
     width: 100%;
-    height: auto;
     max-width: 100%;
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
     box-sizing: border-box;
     margin-left: var(--custom-margin);
     left: 7px;
     z-index: 5 !important;
-    top: calc(56px + var(--custom-height-offset-mobile));
-    bottom: 0;
     overflow: hidden;
     isolation: isolate;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+}
+
+.bubble-pop-up:not(.editor) {
+    height: auto;
+    top: calc(56px + var(--custom-height-offset-mobile));
+    bottom: 0;
 }
 
 .bubble-pop-up-background {
@@ -148,7 +151,7 @@
 }
 
 @media only screen and (min-width: 768px) {
-    .bubble-pop-up {
+        .bubble-pop-up:not(.editor) {
             top: calc(56px + var(--custom-height-offset-desktop));
             bottom: 0;
       left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width, 540px) / 2));
@@ -158,7 +161,7 @@
 .bubble-pop-up.editor {
     transition: none !important;
     position: relative !important;
-    top: 0;
+    top: auto !important;
     left: 0;
     bottom: auto !important;
     width: 100% !important;
