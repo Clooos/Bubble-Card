@@ -88,6 +88,12 @@ const createElement = jest.fn((tag, classNames = '') => createMockElement(tag, c
 const forwardHaptic = jest.fn();
 const navigateToPreviousPopup = jest.fn();
 const removeHash = jest.fn(() => true);
+const render = jest.fn();
+
+jest.unstable_mockModule('lit', () => ({
+    html: jest.fn((strings, ...values) => ({ strings, values })),
+    render,
+}));
 
 jest.unstable_mockModule('./styles.css', () => ({
     default: '',
@@ -120,17 +126,20 @@ jest.unstable_mockModule('./helpers.js', () => ({
     openPopup: jest.fn(),
     registerPopupContext: jest.fn(),
     removeHash,
+    syncPopupModeClasses: jest.fn(),
 }));
 
 jest.unstable_mockModule('./legacy.js', () => ({
     hideLegacyPopupContent: jest.fn(),
 }));
 
-const { createHeader } = await import('./create.js');
+const { createHeader, prepareStructure } = await import('./create.js');
 
 describe('createHeader', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        global.window = global.window || {};
+        delete global.window.popUpError;
     });
 
     test('creates previous and close header buttons and wires their actions', () => {
@@ -179,5 +188,30 @@ describe('createHeader', () => {
 
         expect(navigateToPreviousPopup).toHaveBeenCalledTimes(1);
         expect(removeHash).toHaveBeenCalledTimes(1);
+    });
+
+    test('re-adds the missing hash warning after a rerender even if the global flag is already set', () => {
+        const firstContent = createMockElement('div');
+
+        prepareStructure({
+            config: {},
+            content: firstContent,
+            getRootNode: () => null,
+        });
+
+        expect(global.window.popUpError).toBe(true);
+        expect(firstContent.querySelector('.bubble-error-text')).not.toBeNull();
+        expect(render).toHaveBeenCalledTimes(1);
+
+        const secondContent = createMockElement('div');
+
+        prepareStructure({
+            config: {},
+            content: secondContent,
+            getRootNode: () => null,
+        });
+
+        expect(secondContent.querySelector('.bubble-error-text')).not.toBeNull();
+        expect(render).toHaveBeenCalledTimes(2);
     });
 });

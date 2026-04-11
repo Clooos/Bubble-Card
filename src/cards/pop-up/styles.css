@@ -1,7 +1,8 @@
 .bubble-pop-up-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
     margin-top: -50px;
     max-width: 100%;
     grid-gap: var(--bubble-pop-up-gap, 14px);
@@ -16,7 +17,8 @@
     scrollbar-width: none; /* for Firefox */
     overflow: auto; 
     grid-auto-rows: min-content;
-    padding: 18px 18px 84px 18px;
+    padding: 18px 18px var(--bubble-pop-up-bottom-padding, 84px) 18px;
+    box-sizing: border-box;
     touch-action: pan-y pinch-zoom;
     overscroll-behavior: contain;
     /* Identity mask — keeps the layer permanently in compositor-masked mode so
@@ -69,9 +71,21 @@
 }
 
 .bubble-pop-up:not(.editor) {
+    --bubble-pop-up-available-height: calc(100vh - 56px - var(--custom-height-offset-mobile));
     height: auto;
     top: calc(56px + var(--custom-height-offset-mobile));
     bottom: 0;
+}
+
+.bubble-pop-up.popup-mode-fit-content:not(.editor) {
+    --bubble-pop-up-bottom-padding: 18px;
+    top: auto;
+    bottom: 0;
+    max-height: var(--bubble-pop-up-available-height);
+}
+
+.bubble-pop-up.popup-mode-fit-content.popup-mode-with-bottom-offset:not(.editor) {
+    --bubble-pop-up-bottom-padding: 84px;
 }
 
 .bubble-pop-up-background {
@@ -146,12 +160,13 @@
         left: calc(50% - (var(--desktop-width, 540px) / 2));
     }
     .bubble-pop-up-container {
-        padding: 18px 18px 84px 18px;
+        padding: 18px 18px var(--bubble-pop-up-bottom-padding, 84px) 18px;
     }
 }
 
 @media only screen and (min-width: 768px) {
         .bubble-pop-up:not(.editor) {
+            --bubble-pop-up-available-height: calc(100vh - 56px - var(--custom-height-offset-desktop));
             top: calc(56px + var(--custom-height-offset-desktop));
             bottom: 0;
       left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width, 540px) / 2));
@@ -320,7 +335,8 @@
     min-height: 80px;
     padding-top: 18px !important;
     padding-bottom: 18px !important;
-    height: 72px !important;
+    height: auto !important;
+    flex: 0 0 auto;
 }
 
 /* Editor placeholder styling */

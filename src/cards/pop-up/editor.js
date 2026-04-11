@@ -13,6 +13,54 @@ function getButtonList() {
     ];
 }
 
+function getPopUpModeList() {
+    return [
+        { 'label': 'Default', 'value': 'default' },
+        { 'label': 'Adaptive (fit content)', 'value': 'fit-content' },
+    ];
+}
+
+function getPopUpModeValue(config) {
+    return config?.popup_mode === 'fit-content' ? 'fit-content' : 'default';
+}
+
+function renderPopUpModeDropdown(editor) {
+    return html`
+        <ha-form
+            .hass=${editor.hass}
+            .data=${{ popup_mode: getPopUpModeValue(editor._config) }}
+            .schema=${[{
+                name: 'popup_mode',
+                selector: {
+                    select: {
+                        options: getPopUpModeList(),
+                        mode: 'dropdown'
+                    }
+                }
+            }]}
+            .computeLabel=${() => 'Pop-up mode'}
+            @value-changed=${(ev) => {
+                const value = ev.detail.value.popup_mode;
+                editor._valueChanged({
+                    target: { configValue: 'popup_mode' },
+                    detail: { value }
+                });
+            }}
+        ></ha-form>
+    `;
+}
+
+function getPopUpLayoutConfig(config) {
+    if (getPopUpModeValue(config) !== 'fit-content') {
+        return {};
+    }
+
+    return {
+        popup_mode: 'fit-content',
+        ...(config?.with_bottom_offset ? { with_bottom_offset: true } : {}),
+    };
+}
+
 function findSuitableEntities(hass, entityType = 'light', limit = 2) {
     const entities = [];
     
@@ -79,6 +127,35 @@ function duplicateHashWarningTemplate() {
     `;
 }
 
+function renderBottomOffsetOption(editor) {
+    if (getPopUpModeValue(editor._config) !== 'fit-content') {
+        return html``;
+    }
+
+    return html`
+        <ha-formfield .label="With bottom offset">
+            <ha-switch
+                aria-label="With bottom offset"
+                .checked=${editor._config?.with_bottom_offset ?? false}
+                .configValue="${"with_bottom_offset"}"
+                @change=${editor._valueChanged}
+            ></ha-switch>
+            <div class="mdc-form-field">
+                <label class="mdc-label">With bottom offset</label>
+            </div>
+        </ha-formfield>
+        <div class="bubble-info">
+            <h4 class="bubble-section-title">
+                <ha-icon icon="mdi:information-outline"></ha-icon>
+                Bottom offset
+            </h4>
+            <div class="content">
+                <p>Useful when your dashboard includes a footer card and the adaptive pop-up needs extra space at the bottom.</p>
+            </div>
+        </div>
+    `;
+}
+
 function getEditorSession(configHash) {
     const session = window.__bubbleEditorSession;
     if (session) {
@@ -133,7 +210,7 @@ function updateUIForVerticalStack(editor, isInVerticalStack) {
         exampleSwitch.disabled = isInVerticalStack;
     }
     
-    const exampleLabel = editor.shadowRoot.querySelector('.mdc-form-field .mdc-label');
+    const exampleLabel = editor.shadowRoot.querySelector('#include-example-label');
     if (exampleLabel) {
         exampleLabel.textContent = 'Include example configuration' + 
             (isInVerticalStack ? ' (disabled because pop-up is already in a vertical stack)' : '');
@@ -144,6 +221,7 @@ function createPopUpConfig(editor, originalConfig) {
     try {
         // Detect the legacy vertical-stack setup.
         const isInVerticalStack = window.popUpError === false;
+        const popupLayoutConfig = getPopUpLayoutConfig(editor._config);
         
         // Read the current form value.
         const includeExample = editor.shadowRoot.querySelector("#include-example")?.checked || false;
@@ -154,6 +232,18 @@ function createPopUpConfig(editor, originalConfig) {
         }
         
         if (isInVerticalStack) {
+            if (popupLayoutConfig.popup_mode) {
+                editor._config.popup_mode = popupLayoutConfig.popup_mode;
+            } else {
+                delete editor._config.popup_mode;
+            }
+
+            if (popupLayoutConfig.with_bottom_offset) {
+                editor._config.with_bottom_offset = true;
+            } else {
+                delete editor._config.with_bottom_offset;
+            }
+
             editor._config.hash = hashValue;
             registerPopUpHash(hashValue, {
                 name: editor._config.name,
@@ -168,6 +258,7 @@ function createPopUpConfig(editor, originalConfig) {
             editor._config = {
                 type: 'custom:bubble-card',
                 card_type: 'pop-up',
+                ...popupLayoutConfig,
                 name: 'Living room',
                 icon: 'mdi:sofa-outline',
                 hash: hashValue,
@@ -186,6 +277,7 @@ function createPopUpConfig(editor, originalConfig) {
             editor._config = {
                 type: 'custom:bubble-card',
                 card_type: 'pop-up',
+                ...popupLayoutConfig,
                 hash: hashValue,
                 cards: []
             };
@@ -256,6 +348,8 @@ export function renderPopUpEditor(editor) {
                     @input="${() => updateDuplicateHashWarning(editor)}"
                 ></ha-textfield>
                 ${duplicateHashWarningTemplate()}
+                ${renderPopUpModeDropdown(editor)}
+                ${renderBottomOffsetOption(editor)}
                 <ha-formfield .label="Include example configuration">
                     <ha-switch
                         aria-label="Include example configuration"
@@ -263,7 +357,7 @@ export function renderPopUpEditor(editor) {
                         id="include-example"
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Include example configuration</label>
+                        <label id="include-example-label" class="mdc-label">Include example configuration</label>
                     </div>
                 </ha-formfield>
                 
@@ -299,6 +393,7 @@ export function renderPopUpEditor(editor) {
     return html`
         <div class="card-config">
             ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
+            ${renderLegacyMigrationNotice(editor, session.originalHash)}
             <ha-textfield
                 label="Hash (e.g. #kitchen)"
                 .value="${editor._config?.hash || '#pop-up-name'}"
@@ -319,7 +414,8 @@ export function renderPopUpEditor(editor) {
                 }}"
             ></ha-textfield>
             ${duplicateHashWarningTemplate()}
-            ${renderLegacyMigrationNotice(editor, session.originalHash)}
+            ${renderPopUpModeDropdown(editor)}
+            ${renderBottomOffsetOption(editor)}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:dock-top"></ha-icon>
@@ -518,13 +614,13 @@ export function renderPopUpEditor(editor) {
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Top margin on mobile (e.g. -56px if your header is hidden)"
+                                label="Top offset on mobile (e.g. -56px if your header is hidden)"
                                 .value="${editor._config?.margin_top_mobile || '0px'}"
                                 .configValue="${"margin_top_mobile"}"
                                 @input="${editor._valueChanged}"
                             ></ha-textfield>
                             <ha-textfield
-                                label="Top margin on desktop (e.g. 50vh for an half sized pop-up)"
+                                label="Top offset on desktop (e.g. 50vh for a half-sized pop-up)"
                                 .value="${editor._config?.margin_top_desktop || '0px'}"
                                 .configValue="${"margin_top_desktop"}"
                                 @input="${editor._valueChanged}"

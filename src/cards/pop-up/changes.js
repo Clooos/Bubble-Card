@@ -1,5 +1,5 @@
 import { getBackdrop } from "./backdrop.js";
-import { addHash, markPopupPendingTriggerOpen, removeHash, wasPopupOpenedByTrigger } from "./helpers.js";
+import { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupModeClasses, wasPopupOpenedByTrigger } from "./helpers.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import { setLayout } from "../../tools/utils.js";
@@ -31,6 +31,7 @@ export function changeStyle(context) {
         requestAnimationFrame(() => handleCustomStyles(context, backdropCustomStyle));
     }
 
+    syncPopupModeClasses(context.popUp, context.config);
     syncHeaderVisibilityClasses(context);
 }
 

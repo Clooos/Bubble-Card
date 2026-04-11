@@ -14,6 +14,12 @@ jest.unstable_mockModule('./helpers.js', () => ({
     hideContent: jest.fn(),
     onEditorChange: jest.fn(),
     removeHash: jest.fn(),
+    syncPopupModeClasses: jest.fn((popUp, config) => {
+        const isFitContent = config?.popup_mode === 'fit-content';
+        popUp?.classList?.toggle('popup-mode-fit-content', isFitContent);
+        popUp?.classList?.toggle('popup-mode-with-bottom-offset', isFitContent && Boolean(config?.with_bottom_offset));
+        return isFitContent ? 'fit-content' : 'default';
+    }),
     wasPopupOpenedByTrigger: jest.fn(),
 }));
 
@@ -130,6 +136,33 @@ describe('changeEditor', () => {
         expect(context.popUp.classList.contains('show-previous-button')).toBe(false);
         expect(context.popUp.classList.contains('hide-close-button')).toBe(true);
         expect(context.popUp.classList.contains('no-header-actions')).toBe(true);
+    });
+
+    test('syncs fit-content popup mode class from config', () => {
+        const context = {
+            config: {
+                popup_mode: 'fit-content',
+                with_bottom_offset: true,
+            },
+            popUp: {
+                classList: createMockClassList(),
+            },
+        };
+
+        changeStyle(context);
+
+        expect(context.popUp.classList.contains('popup-mode-fit-content')).toBe(true);
+        expect(context.popUp.classList.contains('popup-mode-with-bottom-offset')).toBe(true);
+
+        context.config = {
+            popup_mode: 'default',
+            with_bottom_offset: true,
+        };
+
+        changeStyle(context);
+
+        expect(context.popUp.classList.contains('popup-mode-fit-content')).toBe(false);
+        expect(context.popUp.classList.contains('popup-mode-with-bottom-offset')).toBe(false);
     });
 
     test('caches trigger preparation while the trigger config reference stays unchanged', () => {

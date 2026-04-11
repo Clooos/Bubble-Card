@@ -12,6 +12,30 @@ const popupState = {
   pendingHashRemovalHash: '',
 };
 
+export const POPUP_MODE_DEFAULT = 'default';
+export const POPUP_MODE_FIT_CONTENT = 'fit-content';
+
+export function getPopupMode(config) {
+    return config?.popup_mode === POPUP_MODE_FIT_CONTENT
+        ? POPUP_MODE_FIT_CONTENT
+        : POPUP_MODE_DEFAULT;
+}
+
+export function hasPopupBottomOffset(config) {
+    return getPopupMode(config) === POPUP_MODE_FIT_CONTENT && Boolean(config?.with_bottom_offset);
+}
+
+export function syncPopupModeClasses(popUp, config) {
+    if (!popUp?.classList) {
+        return POPUP_MODE_DEFAULT;
+    }
+
+    const popupMode = getPopupMode(config);
+    popUp.classList.toggle('popup-mode-fit-content', popupMode === POPUP_MODE_FIT_CONTENT);
+    popUp.classList.toggle('popup-mode-with-bottom-offset', hasPopupBottomOffset(config));
+    return popupMode;
+}
+
 function clearPendingHashRemoval() {
     if (popupState.pendingHashRemovalTimeout) {
         clearTimeout(popupState.pendingHashRemovalTimeout);
@@ -533,8 +557,13 @@ function openStandalonePopup(context, instant = false) {
     setStandalonePopUpCardsActive(context, true);
 
     const hasStandaloneCards = Array.isArray(context.config.cards) && context.config.cards.length > 0;
+    let contentPrimedBeforeOpen = false;
     if (hasStandaloneCards) {
-        restoreDetachedPopUpCards(context);
+        const restoredDetachedCards = restoreDetachedPopUpCards(context);
+        if (!restoredDetachedCards && !instant) {
+            syncStandalonePopupContent(context);
+            contentPrimedBeforeOpen = true;
+        }
     }
 
     if (instant) {
@@ -557,9 +586,11 @@ function openStandalonePopup(context, instant = false) {
         }
 
         startStandalonePopupTransition(context, true, () => finalizeStandalonePopupOpen(context));
-        scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
-            syncStandalonePopupContent(context);
-        });
+        if (!contentPrimedBeforeOpen) {
+            scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
+                syncStandalonePopupContent(context);
+            });
+        }
     };
 
     // Keep the interaction frame focused on the first visible response.

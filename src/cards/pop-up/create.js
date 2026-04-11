@@ -4,7 +4,7 @@ import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { handleButton } from "../../cards/button/index.js";
 import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
-import { navigateToPreviousPopup, registerPopupContext, removeHash, openPopup } from "./helpers.js";
+import { navigateToPreviousPopup, registerPopupContext, removeHash, openPopup, syncPopupModeClasses } from "./helpers.js";
 import { hideLegacyPopupContent } from './legacy.js';
 import styles from "./styles.css";
 
@@ -299,6 +299,7 @@ export function createStructure(context) {
     context.updatePopupColor();
 
     context.popUp.style.setProperty("--desktop-width", context.config.width_desktop ?? "540px");
+    syncPopupModeClasses(context.popUp, context.config);
     _setupPopupInteractionHandlers(context);
 
     context.elements.popUpContainer = _createOrReusePopUpContainer(context);
@@ -360,8 +361,10 @@ export function prepareStructure(context) {
   } catch (e) {
     console.warn(e);
 
-    if (!window.popUpError) {
-      window.popUpError = true;
+    window.popUpError = true;
+
+    const existingError = context.content?.querySelector?.('.bubble-error-text');
+    if (!existingError && context.content) {
 
       const errorText = createElement("div", "bubble-error-text");
       const template = html`

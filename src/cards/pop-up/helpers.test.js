@@ -176,17 +176,13 @@ describe('standalone popup lifecycle', () => {
         expect(showBackdrop).toHaveBeenCalledTimes(1);
         expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, true);
         expect(restoreDetachedPopUpCards).toHaveBeenCalledWith(context);
-        expect(handlePopUpCards).not.toHaveBeenCalled();
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(toggleBodyScroll).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
         flushRafQueue();
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
-        expect(handlePopUpCards).not.toHaveBeenCalled();
-
-        flushRafQueue();
-
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
 
         dispatchTransformTransitionEnd(context.popUp);
@@ -201,7 +197,6 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
 
         openPopup(context);
-        flushRafQueue();
         flushRafQueue();
 
         jest.advanceTimersByTime(359);
@@ -228,6 +223,21 @@ describe('standalone popup lifecycle', () => {
 
         flushRafQueue();
 
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+    });
+
+    test('primes cold standalone content before starting the visible open transition', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        openPopup(context);
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue();
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
     });
 
