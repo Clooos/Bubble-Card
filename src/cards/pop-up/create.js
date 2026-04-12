@@ -138,7 +138,7 @@ function _applyPopupVariables(context) {
     "--custom-popup-filter",
     !_useBackdropBlur ? `blur(${_bgBlur}px)` : "none"
   );
-  context.popUp.classList.toggle("has-bg-blur", !_useBackdropBlur && _bgBlur > 0);
+  context.popUp.classList.toggle("has-bg-blur", (context.config.hide_backdrop === true) && !_useBackdropBlur && _bgBlur > 0);
   context.popUp.style.setProperty("--custom-shadow-opacity", (context.config.shadow_opacity ?? 0) / 100);
 }
 
