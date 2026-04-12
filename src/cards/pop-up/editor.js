@@ -17,11 +17,14 @@ function getPopUpModeList() {
     return [
         { 'label': 'Default', 'value': 'default' },
         { 'label': 'Adaptive (fit content)', 'value': 'fit-content' },
+        { 'label': 'Dialog (centered)', 'value': 'centered' },
     ];
 }
 
 function getPopUpModeValue(config) {
-    return config?.popup_mode === 'fit-content' ? 'fit-content' : 'default';
+    if (config?.popup_mode === 'fit-content') return 'fit-content';
+    if (config?.popup_mode === 'centered') return 'centered';
+    return 'default';
 }
 
 function renderPopUpModeDropdown(editor) {
@@ -51,14 +54,17 @@ function renderPopUpModeDropdown(editor) {
 }
 
 function getPopUpLayoutConfig(config) {
-    if (getPopUpModeValue(config) !== 'fit-content') {
-        return {};
+    const mode = getPopUpModeValue(config);
+    if (mode === 'fit-content') {
+        return {
+            popup_mode: 'fit-content',
+            ...(config?.with_bottom_offset ? { with_bottom_offset: true } : {}),
+        };
     }
-
-    return {
-        popup_mode: 'fit-content',
-        ...(config?.with_bottom_offset ? { with_bottom_offset: true } : {}),
-    };
+    if (mode === 'centered') {
+        return { popup_mode: 'centered' };
+    }
+    return {};
 }
 
 function findSuitableEntities(hass, entityType = 'light', limit = 2) {

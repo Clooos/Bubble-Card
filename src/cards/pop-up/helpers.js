@@ -14,11 +14,12 @@ const popupState = {
 
 export const POPUP_MODE_DEFAULT = 'default';
 export const POPUP_MODE_FIT_CONTENT = 'fit-content';
+export const POPUP_MODE_CENTERED = 'centered';
 
 export function getPopupMode(config) {
-    return config?.popup_mode === POPUP_MODE_FIT_CONTENT
-        ? POPUP_MODE_FIT_CONTENT
-        : POPUP_MODE_DEFAULT;
+    if (config?.popup_mode === POPUP_MODE_FIT_CONTENT) return POPUP_MODE_FIT_CONTENT;
+    if (config?.popup_mode === POPUP_MODE_CENTERED) return POPUP_MODE_CENTERED;
+    return POPUP_MODE_DEFAULT;
 }
 
 export function hasPopupBottomOffset(config) {
@@ -32,6 +33,7 @@ export function syncPopupModeClasses(popUp, config) {
 
     const popupMode = getPopupMode(config);
     popUp.classList.toggle('popup-mode-fit-content', popupMode === POPUP_MODE_FIT_CONTENT);
+    popUp.classList.toggle('popup-mode-centered', popupMode === POPUP_MODE_CENTERED);
     popUp.classList.toggle('popup-mode-with-bottom-offset', hasPopupBottomOffset(config));
     return popupMode;
 }
