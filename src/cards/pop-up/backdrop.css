@@ -9,8 +9,6 @@
   opacity: 0;
   transition: opacity 0.3s;
   contain: paint;
-  transform: translateZ(0);
-  will-change: opacity;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
