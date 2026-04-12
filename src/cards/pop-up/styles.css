@@ -233,6 +233,13 @@
     -webkit-backdrop-filter: none;
 }
 
+/* When the backdrop is disabled the background blur is more visible;
+   keep it active from the start so it doesn't appear delayed. */
+.bubble-pop-up.has-bg-blur.is-opening .bubble-pop-up-background {
+    backdrop-filter: var(--custom-popup-filter);
+    -webkit-backdrop-filter: var(--custom-popup-filter);
+}
+
 .bubble-pop-up.is-opening .bubble-pop-up-background {
     contain: layout paint;
 }

@@ -132,12 +132,13 @@ function _applyPopupVariables(context) {
   context.popUp.style.setProperty("--custom-height-offset-desktop", context.config.margin_top_desktop ?? "0px");
   context.popUp.style.setProperty("--custom-height-offset-mobile", context.config.margin_top_mobile ?? "0px");
   context.popUp.style.setProperty("--custom-margin", `-${context.config.margin ?? "7px"}`);
+  const _useBackdropBlur = context.config.backdrop_blur && context.config.backdrop_blur !== "0";
+  const _bgBlur = parseFloat(context.config.bg_blur ?? 10);
   context.popUp.style.setProperty(
     "--custom-popup-filter",
-    !context.config.backdrop_blur || context.config.backdrop_blur === "0"
-      ? `blur(${context.config.bg_blur ?? 10}px)`
-      : "none"
+    !_useBackdropBlur ? `blur(${_bgBlur}px)` : "none"
   );
+  context.popUp.classList.toggle("has-bg-blur", !_useBackdropBlur && _bgBlur > 0);
   context.popUp.style.setProperty("--custom-shadow-opacity", (context.config.shadow_opacity ?? 0) / 100);
 }
 
