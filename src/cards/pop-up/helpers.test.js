@@ -101,6 +101,8 @@ jest.unstable_mockModule('./cards/index.js', () => ({
     handlePopUpCards,
     restoreDetachedPopUpCards,
     setStandalonePopUpCardsActive,
+    clearStandalonePopUpCardPrewarm: jest.fn(),
+    suspendStandalonePopUpCards: jest.fn(),
 }));
 
 jest.unstable_mockModule('./legacy.js', () => ({
@@ -173,17 +175,25 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
+        // Interaction frame: only the backdrop. INP-measurable work ends here.
         expect(showBackdrop).toHaveBeenCalledTimes(1);
-        expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, true);
-        expect(restoreDetachedPopUpCards).toHaveBeenCalledWith(context);
-        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(setStandalonePopUpCardsActive).not.toHaveBeenCalled();
+        expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(toggleBodyScroll).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
+        // RAF1 (phase 1): setup — listeners, color, display. No transition yet.
         flushRafQueue();
 
-        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+        expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, true);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        // RAF2 (phase 2): card restore/build + transition start.
+        flushRafQueue();
+
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
 
         dispatchTransformTransitionEnd(context.popUp);
 
@@ -197,7 +207,8 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
 
         openPopup(context);
-        flushRafQueue();
+        flushRafQueue(); // RAF1: phase 1
+        flushRafQueue(); // RAF2: phase 2, arms the transition fallback timer
 
         jest.advanceTimersByTime(359);
         expect(toggleBodyScroll).not.toHaveBeenCalled();
@@ -206,39 +217,51 @@ describe('standalone popup lifecycle', () => {
         expect(toggleBodyScroll).toHaveBeenCalledWith(true);
     });
 
-    test('restores detached cards before deferring the heavier standalone sync', () => {
+    test('defers hass sync to RAF when cards are already in the popup DOM', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
-        restoreDetachedPopUpCards.mockReturnValue(true);
+        // Simulate prewarm having already connected cards into the popup DOM.
+        context._cardsContainer = {};
 
         openPopup(context);
 
         expect(handlePopUpCards).not.toHaveBeenCalled();
 
-        flushRafQueue();
+        flushRafQueue(); // RAF1: phase 1 — setup only, no cards
 
-        expect(restoreDetachedPopUpCards).toHaveBeenCalledWith(context);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+
+        flushRafQueue(); // RAF2: phase 2 — _cardsContainer set, no fragment → deferred sync
+
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
         expect(handlePopUpCards).not.toHaveBeenCalled();
 
-        flushRafQueue();
+        flushRafQueue(); // RAF3: deferred hass sync
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
     });
 
-    test('primes cold standalone content before starting the visible open transition', () => {
+    test('primes cold standalone content in RAF2, popup animates with cards built', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
 
         openPopup(context);
 
-        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
-        flushRafQueue();
+        flushRafQueue(); // RAF1: phase 1 — setup only
 
-        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // RAF2: phase 2 — cold build + transition start
+
+        // Cards are built BEFORE the transition class is set, so popup slides up
+        // with content already in place — no empty-shell flash.
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
     });
 
     test('defers standalone close cleanup until transition end', () => {
@@ -288,7 +311,8 @@ describe('standalone popup lifecycle', () => {
         expect(toggleBodyScroll).not.toHaveBeenCalledWith(false);
         expect(hideBackdrop).not.toHaveBeenCalled();
 
-        flushRafQueue();
+        flushRafQueue(); // RAF-switch: _standaloneOpenImmediateFrame=true → phase1() runs inline, schedules phase2
+        flushRafQueue(); // phase2: card restore + is-opening
 
         expect(contextB.popUp.classList.contains('is-opening')).toBe(true);
     });

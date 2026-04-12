@@ -30,6 +30,8 @@ jest.unstable_mockModule('./navigation-picker-bridge.js', () => ({
 jest.unstable_mockModule('./cards/index.js', () => ({
     cleanupPopUpCards: jest.fn(),
     handlePopUpCards: jest.fn(),
+    scheduleStandalonePopUpCardPrewarm: jest.fn(),
+    clearStandalonePopUpCardPrewarm: jest.fn(),
 }));
 
 const { handlePopUp } = await import('./index.js');

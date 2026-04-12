@@ -2,7 +2,7 @@ import { changeEditor, changeStyle, changeTriggered, syncHeaderVisibilityClasses
 import { createHeader, createStructure, prepareStructure, prepareStandaloneStructure, renderHeaderButton } from './create.js';
 import { cleanupPopupRuntime, registerPopupContext, syncPopupOpenStateWithLocation } from './helpers.js';
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
-import { cleanupPopUpCards, handlePopUpCards } from './cards/index.js';
+import { cleanupPopUpCards, handlePopUpCards, scheduleStandalonePopUpCardPrewarm } from './cards/index.js';
 import { isStandalonePopUpConfig } from './migration.js';
 
 initPopUpHashNavigationBridge();
@@ -156,6 +156,7 @@ export function handlePopUp(context) {
 
         if (isStandalonePopUpConfig(context.config)) {
             initializeStandalonePopUp(context);
+            scheduleStandalonePopUpCardPrewarm(context);
         } else {
             initializeLegacyPopUp(context);
         }

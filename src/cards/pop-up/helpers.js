@@ -1,7 +1,7 @@
 import { getBackdrop, releaseBackdropContext } from "./backdrop.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll } from "../../tools/utils.js";
-import { handlePopUpCards, restoreDetachedPopUpCards, setStandalonePopUpCardsActive } from "./cards/index.js";
+import { handlePopUpCards, restoreDetachedPopUpCards, setStandalonePopUpCardsActive, clearStandalonePopUpCardPrewarm, suspendStandalonePopUpCards } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
 
 const popupState = {
@@ -529,6 +529,7 @@ function finalizeStandalonePopupClose(context) {
 
     setStandalonePopUpCardsActive(context, false);
     handlePopUpCards(context);
+    suspendStandalonePopUpCards(context);
 
     if (context.config.background_update) {
         popUp.style.display = 'none';
@@ -547,26 +548,23 @@ function openStandalonePopup(context, instant = false) {
 
     popUp.style.willChange = 'transform';
 
-    context.updatePopupColor?.();
-    popUp.style.display = '';
-    popUp.style.visibility = '';
-
-    updateListeners(context, true);
+    // Show the backdrop immediately — this is the first visual feedback for the
+    // interaction and the principal input for the browser's INP measurement.
+    // Everything else is split across two animation frames, mirroring what the
+    // legacy popup open path does so the browser can paint the cheapest possible
+    // first response before doing any card/layout work.
     toggleBackdrop(context, true);
 
-    setStandalonePopUpCardsActive(context, true);
-
-    const hasStandaloneCards = Array.isArray(context.config.cards) && context.config.cards.length > 0;
-    let contentPrimedBeforeOpen = false;
-    if (hasStandaloneCards) {
-        const restoredDetachedCards = restoreDetachedPopUpCards(context);
-        if (!restoredDetachedCards && !instant) {
-            syncStandalonePopupContent(context);
-            contentPrimedBeforeOpen = true;
-        }
-    }
-
     if (instant) {
+        // Synchronous instant open (hash-on-load, forced open, etc.).
+        context.updatePopupColor?.();
+        popUp.style.display = '';
+        popUp.style.visibility = '';
+        updateListeners(context, true);
+        setStandalonePopUpCardsActive(context, true);
+        if (context._detachedCardsFragment?.firstChild) {
+            restoreDetachedPopUpCards(context);
+        }
         syncStandalonePopupContent(context);
         popUp.style.transition = 'none';
         setStandalonePopupState(popUp, true);
@@ -580,27 +578,81 @@ function openStandalonePopup(context, instant = false) {
     const openOnCurrentFrame = context._standaloneOpenImmediateFrame === true;
     context._standaloneOpenImmediateFrame = false;
 
-    const startOpenTransition = () => {
-        if (!popupState.activePopups.has(context)) {
-            return;
+    // ── Phase 1 (RAF1) ────────────────────────────────────────────────────────
+    // Prepare the off-screen popup shell: color, display, visibility, listeners.
+    // No card DOM touch, no forced reflow. The browser commits a frame after this
+    // (backdrop visible, popup off-screen via is-popup-closed transform).
+    // INP is measured until that first committed frame — phase 2 is outside it.
+    const phase1 = () => {
+        if (!popupState.activePopups.has(context)) return;
+
+        context.updatePopupColor?.();
+        popUp.style.display = '';
+        popUp.style.visibility = '';
+        updateListeners(context, true);
+        setStandalonePopUpCardsActive(context, true);
+
+        // Schedule phase 2 on the next frame. _standaloneCardSyncFrame is
+        // also used for the deferred hass sync on the warm path, so both are
+        // correctly cancelled by clearStandaloneOpenFrames / clearAllTimeouts.
+        scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', phase2);
+    };
+
+    // ── Phase 2 (RAF2) ────────────────────────────────────────────────────────
+    // GBCr flush, card restore/build, then start the CSS transition.
+    // Runs AFTER the browser has already committed the first response frame
+    // (backdrop visible). Card reconnect work and the forced reflow no longer
+    // contribute to INP.
+    const phase2 = () => {
+        if (!popupState.activePopups.has(context)) return;
+
+        clearStandaloneTransitionFrame(context);
+        clearStandaloneTransitionCompletion(context);
+        if (popUp.style.transition === 'none') popUp.style.transition = '';
+
+        // Flush while popup is still empty (is-popup-closed, no cards yet) — cheap.
+        setStandalonePopupState(popUp, false);
+        popUp.getBoundingClientRect();
+
+        // Restore / build cards under __bubblePopupOpening so nested bubble-card
+        // children defer their updateBubbleCard() to setTimeout(320ms).
+        const hasStandaloneCards = Array.isArray(context.config.cards) && context.config.cards.length > 0;
+        let contentPrimedBeforeOpen = false;
+        if (hasStandaloneCards) {
+            window.__bubblePopupOpening = true;
+            if (context._detachedCardsFragment?.firstChild) {
+                restoreDetachedPopUpCards(context);
+                contentPrimedBeforeOpen = true;
+            } else if (!context._cardsContainer) {
+                syncStandalonePopupContent(context);
+                contentPrimedBeforeOpen = true;
+            }
+            window.__bubblePopupOpening = false;
         }
 
-        startStandalonePopupTransition(context, true, () => finalizeStandalonePopupOpen(context));
+        // Start the CSS transition. Cards are already in the popup DOM so the
+        // popup slides up with content visible — no empty-shell flash.
+        waitForStandalonePopupTransition(context, () => finalizeStandalonePopupOpen(context));
+        setStandalonePopupState(popUp, true, 'is-opening');
+
         if (!contentPrimedBeforeOpen) {
             scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
+                window.__bubblePopupOpening = true;
                 syncStandalonePopupContent(context);
+                window.__bubblePopupOpening = false;
             });
         }
     };
 
-    // Keep the interaction frame focused on the first visible response.
-    // The transition starts on the next frame, and nested card sync follows after that.
+    // For popup-to-popup navigation we are already inside a RAF. Run phase 1
+    // synchronously so the transition starts one frame earlier; phase 2 still
+    // lands on the following frame via scheduleStandaloneFrame inside phase 1.
     if (openOnCurrentFrame) {
-        startOpenTransition();
+        phase1();
         return;
     }
 
-    scheduleStandaloneFrame(context, '_standaloneOpenFrame', startOpenTransition);
+    scheduleStandaloneFrame(context, '_standaloneOpenFrame', phase1);
 }
 
 function closeStandalonePopup(context, force = false) {
@@ -813,6 +865,7 @@ function clearAllTimeouts(context) {
     clearStandaloneTransitionCompletion(context);
     clearStandaloneTransitionFrame(context);
     clearStandaloneOpenFrames(context);
+    clearStandalonePopUpCardPrewarm(context);
 
     if (context.popUp?._bubblePopupClassTimeout) {
         clearTimeout(context.popUp._bubblePopupClassTimeout);
@@ -913,15 +966,9 @@ export function openPopup(context, instant = false) {
             if (!popupState.activePopups.has(context)) return;
 
             window.__bubblePopupOpening = true;
-            if (!context.isStandalonePopUp && !context.verticalStack.contains(popUp)) {
+            if (!context.verticalStack.contains(popUp)) {
                 appendLegacyPopup(context, true);
             }
-
-            if (context.isStandalonePopUp) {
-                setStandalonePopUpCardsActive(context, true);
-                handlePopUpCards(context);
-            }
-
             window.__bubblePopupOpening = false;
 
             if (instant) {

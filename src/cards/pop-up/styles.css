@@ -21,8 +21,13 @@
     box-sizing: border-box;
     touch-action: pan-y pinch-zoom;
     overscroll-behavior: contain;
-    /* Identity mask — keeps the layer permanently in compositor-masked mode so
-       switching to the real fade gradient is a repaint, not a re-promotion. */
+}
+
+/* Identity mask scoped to visible states only — avoids N permanent GPU layers
+   for closed/off-screen popups. is-closing already forces mask-image:none so
+   it is not listed here. */
+.bubble-pop-up.is-opening .bubble-pop-up-container,
+.bubble-pop-up.is-popup-opened .bubble-pop-up-container {
     mask-image: linear-gradient(black, black);
     -webkit-mask-image: linear-gradient(black, black);
     mask-repeat: no-repeat;
@@ -31,7 +36,9 @@
     -webkit-mask-size: 100% 100%;
 }
 
-.bubble-pop-up-container.is-scrollable {
+/* Scrollable gradient — specificity (0-4-0) beats the identity rule (0-3-0). */
+.bubble-pop-up.is-opening .bubble-pop-up-container.is-scrollable,
+.bubble-pop-up.is-popup-opened .bubble-pop-up-container.is-scrollable {
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     mask-repeat: no-repeat;
