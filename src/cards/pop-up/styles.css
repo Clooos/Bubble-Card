@@ -258,6 +258,10 @@
     color: var(--primary-text-color) !important;
 }
 
+.popup-style-classic .name-without-icon {
+    margin-left: 4px !important;
+}
+
 .popup-style-classic .bubble-header .bubble-button-card-container {
     background: none !important;
     box-shadow: none !important;

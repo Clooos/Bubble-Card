@@ -634,7 +634,7 @@ class BubbleCardEditor extends LitElement {
                     aria-label="Prioritize icon over entity picture"
                     .checked=${context?.force_icon ?? false}
                     .configValue="${config + "force_icon"}"
-                    .disabled="${nameButton && !isSubButton}"
+                    .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { force_icon: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
