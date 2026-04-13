@@ -23,6 +23,10 @@
     overscroll-behavior: contain;
 }
 
+.bubble-pop-up.editor .bubble-pop-up-container {
+    overscroll-behavior: auto;
+}
+
 /* Identity mask scoped to visible states only — avoids N permanent GPU layers
    for closed/off-screen popups. is-closing already forces mask-image:none so
    it is not listed here. */
@@ -104,7 +108,7 @@
     max-width: var(--desktop-width, 540px) !important;
     min-width: 0 !important;
     height: auto !important;
-    max-height: calc(100vh - 112px) !important;
+    max-height: calc(100vh - 112px - 2 * var(--custom-height-offset-desktop, 0px)) !important;
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
     --bubble-pop-up-bottom-padding: 18px;
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease !important;
@@ -141,6 +145,188 @@
     }
 }
 
+.bubble-pop-up.popup-mode-adaptive-dialog:not(.editor) {
+    --bubble-pop-up-bottom-padding: 18px;
+    top: auto;
+    bottom: 0;
+    max-height: var(--bubble-pop-up-available-height);
+}
+
+@media (max-width: 870px), (max-height: 500px) {
+    .bubble-pop-up.popup-mode-adaptive-dialog.popup-mode-with-bottom-offset:not(.editor) {
+        --bubble-pop-up-bottom-padding: 84px;
+    }
+}
+
+.bubble-pop-up.popup-style-classic:not(.editor) .bubble-header-container::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--divider-color);
+    pointer-events: none;
+    z-index: 4;
+}
+
+.bubble-pop-up.popup-mode-centered.popup-style-classic:not(.editor) .bubble-header-container::before {
+    display: none;
+}
+
+.bubble-pop-up.popup-style-classic.editor:not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) .bubble-header-container::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--divider-color);
+    pointer-events: none;
+    z-index: 4;
+}
+
+@media only screen and (min-width: 871px) and (min-height: 501px) {
+    .bubble-pop-up.popup-mode-adaptive-dialog:not(.editor) {
+        top: 50%;
+        left: calc(var(--mdc-drawer-width, 0px) / 2 + 50%) !important;
+        bottom: auto !important;
+        margin-left: 0 !important;
+        width: calc(100vw - 32px) !important;
+        max-width: var(--desktop-width, 540px) !important;
+        min-width: 0 !important;
+        height: auto !important;
+        max-height: calc(100vh - 112px - 2 * var(--custom-height-offset-desktop, 0px)) !important;
+        border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
+        --bubble-pop-up-bottom-padding: 18px;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease !important;
+    }
+    .bubble-pop-up.popup-mode-adaptive-dialog .bubble-pop-up-background {
+        border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
+    }
+    .bubble-pop-up.popup-mode-adaptive-dialog.is-popup-closed:not(.editor) {
+        transform: translate(-50%, -50%) scale(0.85) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    .bubble-pop-up.popup-mode-adaptive-dialog.is-popup-opened:not(.editor),
+    .bubble-pop-up.popup-mode-adaptive-dialog.is-opening:not(.editor) {
+        transform: translate(-50%, -50%) scale(1) !important;
+        opacity: 1 !important;
+    }
+    .bubble-pop-up.popup-mode-adaptive-dialog.is-closing:not(.editor) {
+        transform: translate(-50%, -50%) scale(0.9) !important;
+        opacity: 0 !important;
+        border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
+        transition: transform 0.2s ease-in, opacity 0.2s ease-in !important;
+    }
+    .bubble-pop-up.popup-mode-adaptive-dialog.popup-style-classic:not(.editor) .bubble-header-container::before {
+        display: none;
+    }
+}
+
+.popup-style-classic .bubble-header-container {
+    align-items: center;
+    padding: 0px 18px 12px 18px;
+    min-height: 56px;
+    gap: 8px;
+}
+
+.popup-style-classic .bubble-header-actions {
+    gap: 8px;
+    flex-shrink: 0;
+    min-width: 40px;
+}
+
+.popup-style-classic .bubble-header {
+    margin-right: 0;
+    padding: 10px 0;
+    min-height: 48px;
+    align-items: center;
+}
+
+.popup-style-classic .bubble-name {
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+    color: var(--primary-text-color) !important;
+}
+
+.popup-style-classic .bubble-header .bubble-button-card-container {
+    background: none !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    cursor: default !important;
+}
+
+.popup-style-classic .bubble-header .bubble-sub-buttons-container,
+.popup-style-classic .bubble-header .bubble-sub-button {
+    pointer-events: auto !important;
+}
+
+.popup-style-classic .bubble-header .bubble-background {
+    display: none !important;
+}
+
+.popup-style-classic .bubble-header .bubble-button-card-container > ha-ripple {
+    display: none !important;
+}
+
+.popup-style-classic .bubble-header-action-button {
+    background-color: var(--bubble-sub-button-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background))))) !important;
+    border: none !important;
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 18px)) !important;
+    height: 36px !important;
+    width: 36px !important;
+    color: var(--primary-text-color) !important;
+    transition: none !important;
+    overflow: hidden !important;
+}
+
+.popup-style-classic .bubble-header .bubble-sub-button-container {
+    right: 0;
+    gap: 8px;
+}
+
+.popup-style-classic .bubble-header .bubble-icon-container {
+    background-color: transparent !important;
+    margin-left: 0 !important;
+    margin-right: 8px !important;
+    min-width: 36px;
+    min-height: 36px;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--bubble-sub-button-border-radius, var(--bubble-border-radius, 18px));
+}
+
+.popup-style-classic .bubble-header-action-icon svg {
+    fill: currentColor;
+}
+
+.popup-style-classic .bubble-content-container::after,
+.popup-style-classic .bubble-content-container::before {
+    display: none !important;
+}
+
+.popup-style-classic {
+    --bubble-sub-button-background-color: var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)));
+    --bubble-sub-slider-background-color: var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)));
+}
+
+.no-header.popup-mode-adaptive-dialog .bubble-header-container {
+    height: 20px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+.no-header.popup-mode-adaptive-dialog .bubble-header-container > * {
+    visibility: hidden !important;
+}
 .bubble-pop-up-background {
     width: 100%;
     height: 100%;
@@ -384,6 +570,19 @@
 
 .no-header-actions .bubble-header {
     margin-right: 0;
+}
+
+.close-button-left .bubble-header-actions {
+    order: -1;
+}
+
+.close-button-left .bubble-header {
+    margin-right: 0;
+    margin-left: 14px;
+}
+
+.close-button-left.no-header-actions .bubble-header {
+    margin-left: 0;
 }
 
 .bubble-button-card-container {

@@ -1,5 +1,5 @@
 import { getBackdrop } from "./backdrop.js";
-import { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupModeClasses, wasPopupOpenedByTrigger } from "./helpers.js";
+import { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupModeClasses, syncPopupStyleClasses, wasPopupOpenedByTrigger } from "./helpers.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import { setLayout } from "../../tools/utils.js";
@@ -11,10 +11,13 @@ export function syncHeaderVisibilityClasses(context) {
     const showPreviousButton = context.config.show_previous_button ?? false;
     const showCloseButton = context.config.show_close_button ?? true;
 
+    const closeButtonLeft = context.config.buttons_position === 'left';
+
     context.popUp.classList.toggle('no-header', !showHeader);
     context.popUp.classList.toggle('show-previous-button', showPreviousButton);
     context.popUp.classList.toggle('hide-close-button', !showCloseButton);
     context.popUp.classList.toggle('no-header-actions', !(showPreviousButton || showCloseButton));
+    context.popUp.classList.toggle('close-button-left', closeButtonLeft);
 }
 
 export function changeStyle(context) {
@@ -32,6 +35,7 @@ export function changeStyle(context) {
     }
 
     syncPopupModeClasses(context.popUp, context.config);
+    syncPopupStyleClasses(context.popUp, context.config);
     syncHeaderVisibilityClasses(context);
 }
 

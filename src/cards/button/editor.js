@@ -36,15 +36,17 @@ export function renderButtonEditor(editor){
 
     let button_action = editor._config.button_action || '';
     
+    const isClassicStyle = editor._config.popup_style === 'classic';
+
     if (!editor._config.button_type) {
-        editor._config.button_type = isPopUp ? 'name' : 'switch';
+        editor._config.button_type = (isPopUp && !isClassicStyle) ? 'name' : 'switch';
     }
     let button_type = editor._config.button_type;
 
     return html`
         <div class="card-config">
             ${!isPopUp ? editor.makeDropdown("Card type", "card_type", editor.cardTypeList) : ''}
-            ${editor.makeDropdown("Button type", "button_type", getButtonList() )}
+            ${!isClassicStyle ? editor.makeDropdown("Button type", "button_type", getButtonList() ) : ''}
             <ha-form
                 .hass=${editor.hass}
                 .data=${editor._config}
@@ -75,6 +77,7 @@ export function renderButtonEditor(editor){
                 </div>
             </ha-expansion-panel>
             ${makeButtonSliderPanel(editor)}
+            ${!isClassicStyle ? html`
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:gesture-tap"></ha-icon>
@@ -114,6 +117,7 @@ export function renderButtonEditor(editor){
                         'button_action')}
                 </div>
             </ha-expansion-panel>
+            ` : ''}
             ${editor.makeSubButtonPanel()}
             <ha-expansion-panel outlined>
                 <h4 slot="header">

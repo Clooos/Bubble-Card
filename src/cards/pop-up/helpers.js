@@ -15,15 +15,26 @@ const popupState = {
 export const POPUP_MODE_DEFAULT = 'default';
 export const POPUP_MODE_FIT_CONTENT = 'fit-content';
 export const POPUP_MODE_CENTERED = 'centered';
+export const POPUP_MODE_ADAPTIVE_DIALOG = 'adaptive-dialog';
+
+export const POPUP_STYLE_BUBBLE = 'bubble';
+export const POPUP_STYLE_CLASSIC = 'classic';
 
 export function getPopupMode(config) {
     if (config?.popup_mode === POPUP_MODE_FIT_CONTENT) return POPUP_MODE_FIT_CONTENT;
     if (config?.popup_mode === POPUP_MODE_CENTERED) return POPUP_MODE_CENTERED;
+    if (config?.popup_mode === POPUP_MODE_ADAPTIVE_DIALOG) return POPUP_MODE_ADAPTIVE_DIALOG;
     return POPUP_MODE_DEFAULT;
 }
 
+export function getPopupStyle(config) {
+    if (config?.popup_style === POPUP_STYLE_CLASSIC) return POPUP_STYLE_CLASSIC;
+    return POPUP_STYLE_BUBBLE;
+}
+
 export function hasPopupBottomOffset(config) {
-    return getPopupMode(config) === POPUP_MODE_FIT_CONTENT && Boolean(config?.with_bottom_offset);
+    const mode = getPopupMode(config);
+    return (mode === POPUP_MODE_FIT_CONTENT || mode === POPUP_MODE_ADAPTIVE_DIALOG) && Boolean(config?.with_bottom_offset);
 }
 
 export function syncPopupModeClasses(popUp, config) {
@@ -34,8 +45,14 @@ export function syncPopupModeClasses(popUp, config) {
     const popupMode = getPopupMode(config);
     popUp.classList.toggle('popup-mode-fit-content', popupMode === POPUP_MODE_FIT_CONTENT);
     popUp.classList.toggle('popup-mode-centered', popupMode === POPUP_MODE_CENTERED);
+    popUp.classList.toggle('popup-mode-adaptive-dialog', popupMode === POPUP_MODE_ADAPTIVE_DIALOG);
     popUp.classList.toggle('popup-mode-with-bottom-offset', hasPopupBottomOffset(config));
     return popupMode;
+}
+
+export function syncPopupStyleClasses(popUp, config) {
+    if (!popUp?.classList) return;
+    popUp.classList.toggle('popup-style-classic', getPopupStyle(config) === POPUP_STYLE_CLASSIC);
 }
 
 function clearPendingHashRemoval() {

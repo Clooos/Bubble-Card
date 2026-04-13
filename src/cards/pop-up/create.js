@@ -9,7 +9,7 @@ import { hideLegacyPopupContent } from './legacy.js';
 import styles from "./styles.css";
 
 const CLOSE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><title>close</title><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>';
-const PREVIOUS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><title>previous</title><path d="M15.41,7.41L14,6L8,12L14,18L15.41,16.59L10.83,12L15.41,7.41Z" /></svg>';
+const PREVIOUS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><title>arrow-left</title><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>';
 
 function _hasHeaderContent(context) {
   return !!(context.config.entity || context.config.name || context.config.icon);
@@ -45,6 +45,19 @@ function _bindHeaderButtonEvents(button, handler) {
   button.addEventListener("touchend", handleAction);
   button.addEventListener("pointerdown", (event) => {
     event.stopPropagation();
+    if (button.haRipple && typeof button.haRipple.startPress === 'function') {
+      button.haRipple.startPress(event);
+    }
+  });
+  button.addEventListener("pointerup", () => {
+    if (button.haRipple && typeof button.haRipple.endPress === 'function') {
+      button.haRipple.endPress();
+    }
+  });
+  button.addEventListener("pointercancel", () => {
+    if (button.haRipple && typeof button.haRipple.endPress === 'function') {
+      button.haRipple.endPress();
+    }
   });
 
   button._bubbleHeaderButtonBound = true;
@@ -186,6 +199,12 @@ export function renderHeaderButton(context) {
   }
 
   const originalSubButtons = context.config.sub_button;
+  const originalButtonType = context.config.button_type;
+  const originalTapAction = context.config.tap_action;
+  const originalDoubleTapAction = context.config.double_tap_action;
+  const originalHoldAction = context.config.hold_action;
+  const originalButtonAction = context.config.button_action;
+  const isClassicStyle = context.config.popup_style === 'classic';
 
   try {
     if (originalSubButtons) {
@@ -193,9 +212,26 @@ export function renderHeaderButton(context) {
       context.config.sub_button = { main: sectioned.main || [], bottom: [] };
     }
 
+    if (isClassicStyle) {
+      // Force switch-type: entity-based state styling, no background fill (overridden by CSS).
+      // Disable all tap actions so neither the icon nor the card are interactive.
+      context.config.button_type = 'switch';
+      context.config.tap_action = { action: 'none' };
+      context.config.double_tap_action = { action: 'none' };
+      context.config.hold_action = { action: 'none' };
+      context.config.button_action = '';
+    }
+
     handleButton(context, context.elements.header);
   } finally {
     context.config.sub_button = originalSubButtons;
+    if (isClassicStyle) {
+      context.config.button_type = originalButtonType;
+      context.config.tap_action = originalTapAction;
+      context.config.double_tap_action = originalDoubleTapAction;
+      context.config.hold_action = originalHoldAction;
+      context.config.button_action = originalButtonAction;
+    }
   }
 }
 

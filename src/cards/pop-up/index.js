@@ -167,7 +167,7 @@ export function handlePopUp(context) {
         return;
     }
 
-    syncHeaderVisibilityClasses(context);
+    changeStyle(context);
 
     // Keep the popup registered in the shared URL dispatcher.
     registerPopupContext(context);

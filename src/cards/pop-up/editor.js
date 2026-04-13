@@ -16,15 +16,52 @@ function getButtonList() {
 function getPopUpModeList() {
     return [
         { 'label': 'Default', 'value': 'default' },
-        { 'label': 'Adaptive (fit content)', 'value': 'fit-content' },
+        { 'label': 'Fit content', 'value': 'fit-content' },
         { 'label': 'Dialog (centered)', 'value': 'centered' },
+        { 'label': 'Adaptive dialog ("Fit content" on mobile)', 'value': 'adaptive-dialog' },
     ];
 }
 
 function getPopUpModeValue(config) {
     if (config?.popup_mode === 'fit-content') return 'fit-content';
     if (config?.popup_mode === 'centered') return 'centered';
+    if (config?.popup_mode === 'adaptive-dialog') return 'adaptive-dialog';
     return 'default';
+}
+
+function renderPopupStyleDropdown(editor) {
+    return html`
+        <ha-form
+            .hass=${editor.hass}
+            .data=${{ popup_style: editor._config.popup_style ?? 'bubble' }}
+            .schema=${[{
+                name: 'popup_style',
+                selector: {
+                    select: {
+                        options: [
+                            { label: 'Bubble (default)', value: 'bubble' },
+                            { label: 'Classic', value: 'classic' },
+                        ],
+                        mode: 'dropdown'
+                    }
+                }
+            }]}
+            .computeLabel=${() => 'Pop-up style'}
+            @value-changed=${(ev) => {
+                const value = ev.detail.value.popup_style;
+                if (value === 'bubble' || !value) {
+                    const newConfig = { ...editor._config };
+                    delete newConfig.popup_style;
+                    fireEvent(editor, 'config-changed', { config: newConfig });
+                } else {
+                    editor._valueChanged({
+                        target: { configValue: 'popup_style' },
+                        detail: { value }
+                    });
+                }
+            }}
+        ></ha-form>
+    `;
 }
 
 function renderPopUpModeDropdown(editor) {
@@ -63,6 +100,12 @@ function getPopUpLayoutConfig(config) {
     }
     if (mode === 'centered') {
         return { popup_mode: 'centered' };
+    }
+    if (mode === 'adaptive-dialog') {
+        return {
+            popup_mode: 'adaptive-dialog',
+            ...(config?.with_bottom_offset ? { with_bottom_offset: true } : {}),
+        };
     }
     return {};
 }
@@ -134,7 +177,8 @@ function duplicateHashWarningTemplate() {
 }
 
 function renderBottomOffsetOption(editor) {
-    if (getPopUpModeValue(editor._config) !== 'fit-content') {
+    const mode = getPopUpModeValue(editor._config);
+    if (mode !== 'fit-content' && mode !== 'adaptive-dialog') {
         return html``;
     }
 
@@ -156,7 +200,7 @@ function renderBottomOffsetOption(editor) {
                 Bottom offset
             </h4>
             <div class="content">
-                <p>Useful when your dashboard includes a footer card and the adaptive pop-up needs extra space at the bottom.</p>
+                <p>Useful when your dashboard includes a footer card and the pop-up needs extra space at the bottom.</p>
             </div>
         </div>
     `;
@@ -420,6 +464,7 @@ export function renderPopUpEditor(editor) {
                 }}"
             ></ha-textfield>
             ${duplicateHashWarningTemplate()}
+            ${renderPopupStyleDropdown(editor)}
             ${renderPopUpModeDropdown(editor)}
             ${renderBottomOffsetOption(editor)}
             <ha-expansion-panel outlined>
@@ -471,8 +516,30 @@ export function renderPopUpEditor(editor) {
                             <div class="mdc-form-field">
                                 <label class="mdc-label">Show close button</label>
                             </div>
-                        </ha-formfield>
-                        <hr />
+                        </ha-formfield>                        <ha-form
+                            .hass=${editor.hass}
+                            .data=${{ buttons_position: editor._config.buttons_position ?? 'right' }}
+                            .schema=${[{
+                                name: 'buttons_position',
+                                selector: {
+                                    select: {
+                                        options: [
+                                            { label: 'Right', value: 'right' },
+                                            { label: 'Left', value: 'left' },
+                                        ],
+                                        mode: 'dropdown'
+                                    }
+                                }
+                            }]}
+                            .computeLabel=${() => 'Buttons position'}
+                            @value-changed=${(ev) => {
+                                const value = ev.detail.value.buttons_position;
+                                editor._valueChanged({
+                                    target: { configValue: 'buttons_position' },
+                                    detail: { value }
+                                });
+                            }}
+                        ></ha-form>                        <hr />
                         ${renderButtonEditor(editor)}
                     </div>
                 </div>

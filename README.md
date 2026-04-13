@@ -188,8 +188,9 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | Name | Type | Requirement | Supported options | Description |
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Required** | Any unique hash (e.g. `'#kitchen'`) with ' ' | This is how you will open your pop-up |
-| `popup_mode` | string | Optional | `default` (default), `fit-content` or `centered` | Define the pop-up mode |
-| `with_bottom_offset` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: fit-content`. Applies a bottom offset, useful when your dashboard includes a footer card. |
+| `popup_style` | string | Optional | `bubble` (default) or `classic` | Define the pop-up visual style |
+| `popup_mode` | string | Optional | `default` (default), `fit-content`, `centered` or `adaptive-dialog` | Define the pop-up layout mode |
+| `with_bottom_offset` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: fit-content` or `adaptive-dialog`. Applies a bottom offset on mobile, useful when your dashboard includes a footer card. |
 | `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |
 | `close_on_click` | boolean | Optional | `true` or `false` (default) | Automatically close the pop-up after any interaction |
 | `close_by_clicking_outside` | boolean | Optional | `true` (default) or `false` | Close the pop-up by clicking outside of it |
@@ -211,6 +212,7 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `show_header` | boolean | Optional | `true` (default) or `false` | Show/Hide the pop-up header fully |
 | `show_previous_button` | boolean | Optional | `true` or `false` (default) | Show a previous button next to the close button and navigate back to the previous pop-up when available |
 | `show_close_button` | boolean | Optional | `true` (default) or `false` | Show or hide the close button while keeping the rest of the header visible |
+| `buttons_position` | string | Optional | `right` (default) or `left` | Position of the close and previous buttons in the header |
 | You also have access to [all the button settings](#button) for the header of the pop-up. | | Optional | | If undefined no header will be shown |
 
 </details>
