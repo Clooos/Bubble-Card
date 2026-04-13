@@ -25,6 +25,12 @@ export function changeStyle(context) {
 
     setLayout(context, context.popUp);
 
+    const currentThemes = context._hass?.themes;
+    if (currentThemes !== context._lastSeenThemes) {
+        context._lastSeenThemes = currentThemes;
+        context.updatePopupColor?.();
+    }
+
     handleCustomStyles(context, context.popUp);
     // Backdrop styles stay async to keep popup opening smooth.
     if (typeof updateBackdropStyles === 'function') {

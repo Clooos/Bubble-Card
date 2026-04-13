@@ -3,6 +3,7 @@ import { initializeContent } from './tools/init.js';
 import { cleanupTapActions } from './tools/tap-actions.js';
 import { preloadYAMLStyles } from './modules/registry.js';
 import { createBubbleDefaultColor } from './tools/style.js';
+import { updateThemeBackgroundColor } from './cards/pop-up/backdrop.js';
 import { stopTimerInterval } from './tools/utils.js';
 import { cleanupScrollingEffects } from './tools/text-scrolling.js';
 import { registerPopupContext } from './cards/pop-up/helpers.js';
@@ -19,6 +20,8 @@ import { handleCalendar } from './cards/calendar/index.js';
 import { handleMediaPlayer } from './cards/media-player/index.js';
 import { handleSelect } from './cards/select/index.js';
 import { handleClimate } from './cards/climate/index.js';
+
+let _lastSeenThemes = null;
 
 const handlers = {
   'pop-up': handlePopUp,
@@ -107,6 +110,11 @@ class BubbleCard extends HTMLElement {
   }
 
   set hass(hass) {
+    if (hass?.themes !== _lastSeenThemes) {
+      _lastSeenThemes = hass?.themes ?? null;
+      updateThemeBackgroundColor();
+      createBubbleDefaultColor();
+    }
     this._hass = hass;
     this.updateBubbleCard();
   }

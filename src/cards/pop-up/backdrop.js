@@ -9,7 +9,7 @@ const BACKDROP_TRANSITION_DURATION = 300;
 
 export const backdropColorScheme = window.matchMedia("(prefers-color-scheme: dark)");
 
-function updateThemeBackgroundColor() {
+export function updateThemeBackgroundColor() {
     const bodyStyles = getCachedBodyStyles();
     themeColorBackground =
         bodyStyles.getPropertyValue("--ha-card-background") ||
