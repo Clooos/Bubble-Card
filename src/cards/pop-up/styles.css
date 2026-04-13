@@ -43,8 +43,8 @@
 /* Scrollable gradient — specificity (0-4-0) beats the identity rule (0-3-0). */
 .bubble-pop-up.is-opening .bubble-pop-up-container.is-scrollable,
 .bubble-pop-up.is-popup-opened .bubble-pop-up-container.is-scrollable {
-    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 16px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 16px), transparent 100%);
     mask-repeat: no-repeat;
     -webkit-mask-repeat: no-repeat;
     mask-size: 100% 100%;
@@ -724,8 +724,8 @@
 }
 
 .no-header .bubble-pop-up-container.is-scrollable {
-    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 16px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 16px), transparent 100%);
 }
 
 .large .bubble-header-container {
