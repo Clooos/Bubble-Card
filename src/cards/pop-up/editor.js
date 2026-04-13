@@ -495,51 +495,60 @@ export function renderPopUpEditor(editor) {
                     </div>
                     <div style="${!(editor._config?.show_header ?? true) ? 'display: none;' : ''}">
                         <hr />
-                        <ha-formfield .label="Show previous button">
-                            <ha-switch
-                                aria-label="Show previous button"
-                                .checked=${editor._config.show_previous_button ?? false}
-                                .configValue="${"show_previous_button"}"
-                                @change=${editor._valueChanged}
-                            ></ha-switch>
-                            <div class="mdc-form-field">
-                                <label class="mdc-label">Show previous button</label>
+                        <ha-expansion-panel outlined>
+                            <h4 slot="header">
+                              <ha-icon icon="mdi:close-circle-multiple-outline"></ha-icon>
+                              Pop-up buttons settings
+                            </h4>
+                            <div class="content">
+                                <ha-formfield .label="Show previous button">
+                                    <ha-switch
+                                        aria-label="Show previous button"
+                                        .checked=${editor._config.show_previous_button ?? false}
+                                        .configValue="${"show_previous_button"}"
+                                        @change=${editor._valueChanged}
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Show previous button</label>
+                                    </div>
+                                </ha-formfield>
+                                <ha-formfield .label="Show close button">
+                                    <ha-switch
+                                        aria-label="Show close button"
+                                        .checked=${editor._config.show_close_button ?? true}
+                                        .configValue="${"show_close_button"}"
+                                        @change=${editor._valueChanged}
+                                    ></ha-switch>
+                                    <div class="mdc-form-field">
+                                        <label class="mdc-label">Show close button</label>
+                                    </div>
+                                </ha-formfield>
+                                <ha-form
+                                    .hass=${editor.hass}
+                                    .data=${{ buttons_position: editor._config.buttons_position ?? 'right' }}
+                                    .schema=${[{
+                                        name: 'buttons_position',
+                                        selector: {
+                                            select: {
+                                                options: [
+                                                    { label: 'Right', value: 'right' },
+                                                    { label: 'Left', value: 'left' },
+                                                ],
+                                                mode: 'dropdown'
+                                            }
+                                        }
+                                    }]}
+                                    .computeLabel=${() => 'Buttons position'}
+                                    @value-changed=${(ev) => {
+                                        const value = ev.detail.value.buttons_position;
+                                        editor._valueChanged({
+                                            target: { configValue: 'buttons_position' },
+                                            detail: { value }
+                                        });
+                                    }}
+                                ></ha-form>
                             </div>
-                        </ha-formfield>
-                        <ha-formfield .label="Show close button">
-                            <ha-switch
-                                aria-label="Show close button"
-                                .checked=${editor._config.show_close_button ?? true}
-                                .configValue="${"show_close_button"}"
-                                @change=${editor._valueChanged}
-                            ></ha-switch>
-                            <div class="mdc-form-field">
-                                <label class="mdc-label">Show close button</label>
-                            </div>
-                        </ha-formfield>                        <ha-form
-                            .hass=${editor.hass}
-                            .data=${{ buttons_position: editor._config.buttons_position ?? 'right' }}
-                            .schema=${[{
-                                name: 'buttons_position',
-                                selector: {
-                                    select: {
-                                        options: [
-                                            { label: 'Right', value: 'right' },
-                                            { label: 'Left', value: 'left' },
-                                        ],
-                                        mode: 'dropdown'
-                                    }
-                                }
-                            }]}
-                            .computeLabel=${() => 'Buttons position'}
-                            @value-changed=${(ev) => {
-                                const value = ev.detail.value.buttons_position;
-                                editor._valueChanged({
-                                    target: { configValue: 'buttons_position' },
-                                    detail: { value }
-                                });
-                            }}
-                        ></ha-form>                        <hr />
+                        </ha-expansion-panel>
                         ${renderButtonEditor(editor)}
                     </div>
                 </div>

@@ -541,6 +541,7 @@ class BubbleCardEditor extends LitElement {
     makeShowState(context = this._config, config = '', array = false, index) {
         const entity = context?.entity ?? this._config.entity ?? '';
         const nameButton = this._config.button_type === 'name';
+        const noEntity = !entity;
 
         const isSelectEntity = entity?.startsWith("input_select") || entity?.startsWith("select") || context.select_attribute;
         // Consider both top-level sub_button and nested group paths like "sub_button.0.buttons"
@@ -656,7 +657,7 @@ class BubbleCardEditor extends LitElement {
                     aria-label="Show entity state"
                     .checked="${context?.show_state ?? context.button_type === 'state'}"
                     .configValue="${config + "show_state"}"
-                    .disabled="${nameButton && !isSubButton}"
+                    .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_state: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -668,7 +669,7 @@ class BubbleCardEditor extends LitElement {
                     aria-label="Show last changed"
                     .checked=${context?.show_last_changed}
                     .configValue="${config + "show_last_changed"}"
-                    .disabled="${nameButton && !isSubButton}"
+                    .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_changed: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -680,7 +681,7 @@ class BubbleCardEditor extends LitElement {
                     aria-label="Show last updated"
                     .checked=${context?.show_last_updated}
                     .configValue="${config + "show_last_updated"}"
-                    .disabled="${nameButton && !isSubButton}"
+                    .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_updated: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -692,7 +693,7 @@ class BubbleCardEditor extends LitElement {
                     aria-label="Show attribute"
                     .checked=${context?.show_attribute}
                     .configValue="${config + "show_attribute"}"
-                    .disabled="${nameButton && !isSubButton}"
+                    .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_attribute: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
@@ -712,7 +713,7 @@ class BubbleCardEditor extends LitElement {
                             }
                         }
                     }]}
-                    .disabled=${nameButton && !isSubButton}
+                    .disabled=${(nameButton || noEntity) && !isSubButton}
                     .computeLabel=${() => 'Attribute to show'}
                     @value-changed=${(ev) => {
                         const value = ev.detail.value.attribute;

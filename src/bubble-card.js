@@ -130,7 +130,7 @@ class BubbleCard extends HTMLElement {
     }
 
     if (workingConfig.card_type === 'pop-up') {
-      if (workingConfig.hash && workingConfig.button_type && workingConfig.button_type !== 'name' && !workingConfig.entity && workingConfig.modules) {
+      if (workingConfig.hash && workingConfig.button_type && workingConfig.button_type !== 'name' && !workingConfig.entity && workingConfig.modules && workingConfig.popup_style !== 'classic' && workingConfig.show_header !== false) {
         throw new Error("You need to define an entity");
       }
     } else if (workingConfig.card_type === 'horizontal-buttons-stack') {
