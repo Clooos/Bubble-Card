@@ -38,8 +38,10 @@ export function renderButtonEditor(editor){
     
     const isClassicStyle = editor._config.popup_style === 'classic';
 
-    if (!editor._config.button_type) {
-        editor._config.button_type = (isPopUp && !isClassicStyle) ? 'name' : 'switch';
+    if (isClassicStyle) {
+        editor._config.button_type = 'switch';
+    } else if (!editor._config.button_type) {
+        editor._config.button_type = isPopUp ? 'name' : 'switch';
     }
     let button_type = editor._config.button_type;
 
@@ -47,6 +49,7 @@ export function renderButtonEditor(editor){
         <div class="card-config">
             ${!isPopUp ? editor.makeDropdown("Card type", "card_type", editor.cardTypeList) : ''}
             ${!isClassicStyle ? editor.makeDropdown("Button type", "button_type", getButtonList() ) : ''}
+            ${!isPopUp ? html`
             <ha-form
                 .hass=${editor.hass}
                 .data=${editor._config}
@@ -59,13 +62,27 @@ export function renderButtonEditor(editor){
                 .computeLabel=${editor._computeLabelCallback}
                 .disabled="${editor._config.button_type === 'name'}"
                 @value-changed=${editor._valueChanged}
-            ></ha-form>
+            ></ha-form>` : ''}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:cog"></ha-icon>
                 ${isPopUp ? 'Header card settings' : 'Card settings'}
                 </h4>
-                <div class="content">     
+                <div class="content">
+                    ${isPopUp ? html`
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${editor._config}
+                        .schema=${[
+                                    { name: "entity",
+                                    label: isClassicStyle ? "Optional - Entity" : (button_type !== 'slider' ? "Entity (toggle)" : "Entity (See text below for supported entities)"), 
+                                    selector: { entity: entityList },
+                                    },
+                                ]}   
+                        .computeLabel=${editor._computeLabelCallback}
+                        .disabled="${editor._config.button_type === 'name'}"
+                        @value-changed=${editor._valueChanged}
+                    ></ha-form>` : ''}
                     <ha-textfield
                         label="Optional - Name"
                         .value="${editor._config?.name || ''}"
