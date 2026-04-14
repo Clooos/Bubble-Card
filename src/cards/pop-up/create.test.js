@@ -39,9 +39,13 @@ function createMockElement(tag = 'div', classNames = '') {
         tagName: tag.toUpperCase(),
         children: [],
         parentNode: null,
+        parentElement: null,
         attributes: {},
+        hidden: false,
         listeners: {},
         style: {
+            display: '',
+            position: '',
             setProperty: jest.fn(),
         },
         classList: createMockClassList(classNames ? classNames.split(' ') : []),
@@ -50,6 +54,7 @@ function createMockElement(tag = 'div', classNames = '') {
                 child.parentNode.children = child.parentNode.children.filter((entry) => entry !== child);
             }
             child.parentNode = this;
+            child.parentElement = this;
             this.children.push(child);
             return child;
         },
@@ -122,10 +127,30 @@ jest.unstable_mockModule('./backdrop.js', () => ({
 }));
 
 jest.unstable_mockModule('./helpers.js', () => ({
+    keepPopupHostMounted: jest.fn((context) => {
+        if (context.sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+            context.sectionRow.hidden = false;
+            context.sectionRow.style.display = '';
+        }
+        if (context.sectionRowContainer?.classList?.contains?.('card')) {
+            context.sectionRowContainer.style.display = '';
+            context.sectionRowContainer.style.position = 'absolute';
+        }
+    }),
     navigateToPreviousPopup,
     openPopup: jest.fn(),
     registerPopupContext: jest.fn(),
     removeHash,
+    restorePopupHostLayout: jest.fn((context) => {
+        if (context.sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+            context.sectionRow.hidden = false;
+            context.sectionRow.style.display = '';
+        }
+        if (context.sectionRowContainer?.classList?.contains?.('card')) {
+            context.sectionRowContainer.style.display = '';
+            context.sectionRowContainer.style.position = '';
+        }
+    }),
     syncPopupModeClasses: jest.fn(),
 }));
 
@@ -133,7 +158,7 @@ jest.unstable_mockModule('./legacy.js', () => ({
     hideLegacyPopupContent: jest.fn(),
 }));
 
-const { createHeader, prepareStructure } = await import('./create.js');
+const { createHeader, prepareStandaloneStructure, prepareStructure } = await import('./create.js');
 
 describe('createHeader', () => {
     beforeEach(() => {
@@ -215,5 +240,34 @@ describe('createHeader', () => {
 
         expect(secondContent.querySelector('.bubble-error-text')).not.toBeNull();
         expect(render).toHaveBeenCalledTimes(2);
+    });
+});
+
+describe('prepareStandaloneStructure', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test('keeps the standalone host wrapper out of the dashboard flow in live mode', () => {
+        const sectionRowContainer = createMockElement('div', 'card');
+        const sectionRow = createMockElement('hui-card');
+        sectionRowContainer.appendChild(sectionRow);
+
+        const context = {
+            config: {},
+            content: createMockElement('div'),
+            popUp: createMockElement('div'),
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn((selector) => selector === 'hui-card' ? sectionRow : null),
+        };
+
+        prepareStandaloneStructure(context);
+
+        expect(context.sectionRow).toBe(sectionRow);
+        expect(context.sectionRowContainer).toBe(sectionRowContainer);
+        expect(sectionRow.hidden).toBe(false);
+        expect(sectionRowContainer.style.display).toBe('');
+        expect(sectionRowContainer.style.position).toBe('absolute');
     });
 });

@@ -10,11 +10,31 @@ jest.unstable_mockModule('./backdrop.js', () => ({
 
 jest.unstable_mockModule('./helpers.js', () => ({
     addHash: jest.fn(),
+    keepPopupHostMounted: jest.fn((context) => {
+        if (context.sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+            context.sectionRow.hidden = false;
+            context.sectionRow.style.display = '';
+        }
+        if (context.sectionRowContainer?.classList?.contains?.('card')) {
+            context.sectionRowContainer.style.display = '';
+            context.sectionRowContainer.style.position = 'absolute';
+        }
+    }),
     markPopupPendingTriggerOpen: jest.fn(),
     appendPopup: jest.fn(),
     hideContent: jest.fn(),
     onEditorChange: jest.fn(),
     removeHash: jest.fn(),
+    restorePopupHostLayout: jest.fn((context) => {
+        if (context.sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+            context.sectionRow.hidden = false;
+            context.sectionRow.style.display = '';
+        }
+        if (context.sectionRowContainer?.classList?.contains?.('card')) {
+            context.sectionRowContainer.style.display = '';
+            context.sectionRowContainer.style.position = '';
+        }
+    }),
     syncPopupModeClasses: jest.fn((popUp, config) => {
         const isFitContent = config?.popup_mode === 'fit-content';
         popUp?.classList?.toggle('popup-mode-fit-content', isFitContent);
@@ -94,6 +114,10 @@ describe('changeEditor', () => {
         global.window = {
             addEventListener: jest.fn(),
         };
+        global.IntersectionObserver = jest.fn(() => ({
+            observe: jest.fn(),
+            disconnect: jest.fn(),
+        }));
         global.location = {
             hash: '',
             pathname: '/lovelace/test',
@@ -121,6 +145,15 @@ describe('changeEditor', () => {
         const containerClassList = createMockClassList();
         const contentClassList = createMockClassList();
         const popUpClassList = createMockClassList(['is-popup-closed']);
+        const sectionRowContainer = {
+            style: {
+                display: '',
+                position: 'absolute',
+            },
+            classList: {
+                contains: jest.fn((name) => name === 'card'),
+            },
+        };
         const popUpContainer = {
             appendChild: jest.fn((child) => {
                 placeholder = child;
@@ -145,6 +178,14 @@ describe('changeEditor', () => {
                 content: { classList: contentClassList },
                 popUpContainer,
             },
+            sectionRow: {
+                tagName: 'HUI-CARD',
+                style: {
+                    display: '',
+                },
+                hidden: false,
+            },
+            sectionRowContainer,
             config: {
                 hash: '#kitchen-popup',
                 cards: [{ type: 'entities' }],
@@ -157,6 +198,7 @@ describe('changeEditor', () => {
         expect(context.popUp.style.visibility).toBe('');
         expect(context.popUp.classList.contains('editor')).toBe(true);
         expect(popUpContainer.classList.contains('has-placeholder')).toBe(true);
+        expect(sectionRowContainer.style.position).toBe('');
         expect(handlePopUpCards).toHaveBeenCalledWith(context);
         expect(appendLegacyPopup).toHaveBeenCalledWith(context, true);
     });
@@ -164,6 +206,15 @@ describe('changeEditor', () => {
     test('does not route standalone editor teardown through the legacy hide helper', () => {
         const popUpClassList = createMockClassList(['is-popup-closed', 'editor']);
         const contentClassList = createMockClassList(['popup-content-in-editor-mode']);
+        const sectionRowContainer = {
+            style: {
+                display: '',
+                position: '',
+            },
+            classList: {
+                contains: jest.fn((name) => name === 'card'),
+            },
+        };
         const context = {
             isStandalonePopUp: true,
             editor: false,
@@ -183,6 +234,14 @@ describe('changeEditor', () => {
                     classList: createMockClassList(),
                 },
             },
+            sectionRow: {
+                tagName: 'HUI-CARD',
+                style: {
+                    display: '',
+                },
+                hidden: false,
+            },
+            sectionRowContainer,
             config: {
                 hash: '#kitchen-popup',
                 cards: [{ type: 'entities' }],
@@ -195,6 +254,7 @@ describe('changeEditor', () => {
         expect(context.popUp.style.display).toBe('');
         expect(context.popUp.style.visibility).toBe('');
         expect(context.popUp.classList.contains('editor')).toBe(false);
+        expect(sectionRowContainer.style.position).toBe('absolute');
         expect(context.editorAccess).toBe(false);
     });
 

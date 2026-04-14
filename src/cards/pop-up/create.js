@@ -4,7 +4,7 @@ import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { handleButton } from "../../cards/button/index.js";
 import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
-import { navigateToPreviousPopup, registerPopupContext, removeHash, openPopup, syncPopupModeClasses } from "./helpers.js";
+import { keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, syncPopupModeClasses } from "./helpers.js";
 import { hideLegacyPopupContent } from './legacy.js';
 import styles from "./styles.css";
 
@@ -415,8 +415,8 @@ export function prepareStandaloneStructure(context) {
   context.isStandalonePopUp = true;
   context._standalonePopUpCardsActive = false;
   context.verticalStack = null;
-  context.sectionRow = null;
-  context.sectionRowContainer = null;
+  context.sectionRow = typeof context.closest === 'function' ? context.closest('hui-card') : null;
+  context.sectionRowContainer = context.sectionRow?.closest?.('.card') || context.sectionRow?.parentElement || null;
   context.cardTitle = null;
 
   if (!context.popUp) {
@@ -429,5 +429,10 @@ export function prepareStandaloneStructure(context) {
   context.elements = {};
   getBackdrop(context);
   _applyPopupVariables(context);
+  if (context.editor || context.detectedEditor) {
+    restorePopupHostLayout(context);
+  } else {
+    keepPopupHostMounted(context);
+  }
   registerPopupContext(context);
 }

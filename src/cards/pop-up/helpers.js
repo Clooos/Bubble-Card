@@ -55,6 +55,53 @@ export function syncPopupStyleClasses(popUp, config) {
     popUp.classList.toggle('popup-style-classic', getPopupStyle(config) === POPUP_STYLE_CLASSIC);
 }
 
+function resolvePopupHostElements(context) {
+    if (context.sectionRow && context.sectionRowContainer) {
+        return;
+    }
+
+    if (!context.sectionRow && typeof context.closest === 'function') {
+        context.sectionRow = context.closest('hui-card');
+    }
+
+    if (!context.sectionRowContainer) {
+        const hostContainer = context.sectionRow?.closest?.('.card') || context.sectionRow?.parentElement || null;
+        context.sectionRowContainer = hostContainer?.classList?.contains?.('card') ? hostContainer : null;
+    }
+}
+
+export function keepPopupHostMounted(context) {
+    resolvePopupHostElements(context);
+
+    const { sectionRow, sectionRowContainer } = context;
+
+    if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+        sectionRow.hidden = false;
+        sectionRow.style.display = '';
+
+        if (sectionRowContainer?.classList?.contains('card')) {
+            sectionRowContainer.style.display = '';
+            sectionRowContainer.style.position = 'absolute';
+        }
+    }
+}
+
+export function restorePopupHostLayout(context) {
+    resolvePopupHostElements(context);
+
+    const { sectionRow, sectionRowContainer } = context;
+
+    if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+        sectionRow.hidden = false;
+        sectionRow.style.display = '';
+    }
+
+    if (sectionRowContainer?.classList?.contains('card')) {
+        sectionRowContainer.style.display = '';
+        sectionRowContainer.style.position = '';
+    }
+}
+
 function clearPendingHashRemoval() {
     if (popupState.pendingHashRemovalTimeout) {
         clearTimeout(popupState.pendingHashRemovalTimeout);
@@ -1229,6 +1276,7 @@ function ensureGlobalUrlListener() {
 export function cleanupPopupRuntime(context) {
     clearAllTimeouts(context);
     updateListeners(context, false);
+    restorePopupHostLayout(context);
 
     if (context.observer) {
         context.observer.disconnect();
