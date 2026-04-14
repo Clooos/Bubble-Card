@@ -116,6 +116,7 @@ jest.unstable_mockModule('./backdrop.css', () => ({
 }));
 
 const { getBackdrop } = await import('./backdrop.js');
+const { handleCustomStyles } = await import('../../tools/style-processor.js');
 
 describe('backdrop transitions', () => {
     test('keeps the blur-active opening state separate from the blur-suppressed closing state', () => {
@@ -148,6 +149,39 @@ describe('backdrop transitions', () => {
         expect(backdropElement.classList.contains('is-opening')).toBe(false);
         expect(backdropElement.classList.contains('is-closing')).toBe(false);
         expect(backdropElement.classList.contains('is-transitioning')).toBe(false);
+
+        jest.runOnlyPendingTimers();
+
+        jest.useRealTimers();
+    });
+
+    test('does not let passive backdrop access steal the active popup styles', () => {
+        jest.useFakeTimers();
+
+        const contextA = {
+            config: {
+                hash: '#popup-a',
+            },
+        };
+        const contextB = {
+            config: {
+                hash: '#popup-b',
+            },
+        };
+
+        const sharedBackdrop = getBackdrop(contextA);
+        sharedBackdrop.showBackdrop(contextA);
+        handleCustomStyles.mockClear();
+
+        getBackdrop(contextB);
+        sharedBackdrop.updateBackdropStyles();
+
+        jest.advanceTimersByTime(350);
+
+        expect(handleCustomStyles).toHaveBeenCalledTimes(1);
+        expect(handleCustomStyles).toHaveBeenLastCalledWith(contextA, sharedBackdrop.backdropCustomStyle);
+
+        jest.runOnlyPendingTimers();
 
         jest.useRealTimers();
     });

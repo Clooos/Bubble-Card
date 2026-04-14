@@ -40,7 +40,6 @@ export function releaseBackdropContext(context) {
 
 export function getBackdrop(context) {
     if (backdrop) {
-        backdrop.activeContext = context;
         return backdrop;
     }
 
