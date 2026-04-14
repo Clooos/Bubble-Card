@@ -767,7 +767,7 @@ export function renderPopUpEditor(editor) {
                                     @change=${editor._valueChanged}
                                 ></ha-switch>
                                 <div class="mdc-form-field">
-                                    <label class="mdc-label">Hide pop-up backdrop (a refresh is needed)</label> 
+                                    <label class="mdc-label">Hide backdrop on this pop-up</label> 
                                 </div>
                             </ha-formfield>
                             <div class="bubble-info">
@@ -777,8 +777,6 @@ export function renderPopUpEditor(editor) {
                                 </h4>
                                 <div class="content">
                                     <p>This will hide the pop-up backdrop, which is a dark overlay that appears behind the pop-up.</p>
-                                    <p>You can enable this setting for all your pop-ups at once by turning it on in the first pop-up on your dashboard.</p>
-                                    <p><b>Hiding it is recommended if you encounter performance issues when opening/closing pop-ups.</b></p>
                                 </div>
                             </div>
                         </div>

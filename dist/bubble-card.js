@@ -1495,7 +1495,7 @@
                                     @change=${e._valueChanged}
                                 ></ha-switch>
                                 <div class="mdc-form-field">
-                                    <label class="mdc-label">Hide pop-up backdrop (a refresh is needed)</label> 
+                                    <label class="mdc-label">Hide backdrop on this pop-up</label> 
                                 </div>
                             </ha-formfield>
                             <div class="bubble-info">
@@ -1505,8 +1505,6 @@
                                 </h4>
                                 <div class="content">
                                     <p>This will hide the pop-up backdrop, which is a dark overlay that appears behind the pop-up.</p>
-                                    <p>You can enable this setting for all your pop-ups at once by turning it on in the first pop-up on your dashboard.</p>
-                                    <p><b>Hiding it is recommended if you encounter performance issues when opening/closing pop-ups.</b></p>
                                 </div>
                             </div>
                         </div>
@@ -1950,20 +1948,25 @@
       .computeLabel=${e._computeLabelCallback}
       @value-changed=${t=>{const o=t.detail?.value?.[n];if(!e._config.sub_button)try{e._config.sub_button={}}catch(t){e._config={...e._config,sub_button:{}}}try{e._config.sub_button[n]=o}catch(t){try{e._config.sub_button={...e._config.sub_button,[n]:o}}catch(t){e._config={...e._config,sub_button:{...e._config.sub_button,[n]:o}}}}Cn(e),e.requestUpdate()}}
     ></ha-form>
-  `}var An=n(933),Ln=n(766),En=n(937),Tn=n(868);const Mn="sensor.bubble_card_modules",Pn=["modules","store"],In="bubble-card-force-unsupported-modules";async function Bn(e,t,n){try{if(!e.hass)return!1;if(!await(0,p.ensureBCTProviderAvailable)(e.hass))return console.warn("Bubble Card Tools is required to change global status."),!1;const o={...a.Ki.get(t)||{}};return!0===n?o.is_global=!0:delete o.is_global,a.Ki.set(t,o),await(0,p.writeModuleYaml)(e.hass,t,o),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),!0}catch(e){return console.error("Error setting module global status:",e),!1}}function On(e,t){try{const n=a.Ki.get(e);if(n&&"object"==typeof n&&!0===n.is_global)return!0;if(p.Qy&&(0,p.Qy)())return!1;if(!t||!t.states||!t.states[Mn])return!1;const o=t.states[Mn];if(!o.attributes||!o.attributes.modules)return!1;const i=o.attributes.modules[e];return i&&!0===i.is_global}catch(t){return console.warn(`Error checking if module ${e} is global:`,t),!1}}function Un(e,t){const n=e._config?.modules||[],o=Array.isArray(n)?n:[n];return!o.includes(`!${t}`)&&(!!o.includes(t)||On(t,e.hass))}function qn(e){if(!a.Ki||0===a.Ki.size)return[];let t=Array.from(a.Ki.keys());const n=e._myModulesSearchQuery;if(n&&n.trim()){const e=n.toLowerCase().trim();t=t.filter(t=>{const n=(0,An.a7)(t),o=(n.name||t).toLowerCase(),i=(n.description||"").toLowerCase(),a=(n.creator||"").toLowerCase();return o.includes(e)||i.includes(e)||a.includes(e)})}if(!e._myModulesSortOrder)try{const t=localStorage.getItem("bubble-card-modules-sort-order");e._myModulesSortOrder=t||"default"}catch(t){e._myModulesSortOrder="default"}const o=e._myModulesSortOrder||"default",i=(0,p.Ef)(),r=e=>{const t=i.get(e);if(!t)return 0;const n=new Date(t).getTime();return isNaN(n)?0:n};return t.sort((t,n)=>{if("default"===t)return-1;if("default"===n)return 1;const i=(0,An.a7)(t),a=(0,An.a7)(n),s=Un(e,t),l=Un(e,n);switch(o){case"alphabetical":return(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});case"default":if(s!==l)return s?-1:1;const e=r(t),o=r(n);return e!==o&&e>0&&o>0?o-e:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});case"recent-first":const c=r(t),d=r(n);return c!==d&&c>0&&d>0?d-c:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});default:if(s!==l)return s?-1:1;const u=r(t),p=r(n);return u!==p&&u>0&&p>0?p-u:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"})}}),t}function zn(e){if(void 0===e._selectedModuleTab&&(e._selectedModuleTab=0),void 0===e._expandedPanelStates&&(e._expandedPanelStates={}),void 0===e._myModulesSortOrder)try{const t=localStorage.getItem("bubble-card-modules-sort-order");e._myModulesSortOrder=t||"default"}catch(t){e._myModulesSortOrder="default"}const t=e._myModulesSortOrder||"default";if(void 0===e._forceUnsupportedModules)try{const t=localStorage.getItem(In);e._forceUnsupportedModules="true"===t}catch(t){e._forceUnsupportedModules=!1}const n="bubble-card-module-editor-tab-group",o="undefined"!=typeof customElements&&void 0!==customElements.get("ha-tab-group")&&void 0!==customElements.get("ha-tab-group-tab")?"ha-tab-group":"undefined"!=typeof customElements&&void 0!==customElements.get("sl-tab-group")?"sl-tab-group":"ha-tabs",i="ha-tab-group"===o,r=i&&(0,s._0)(e.hass,"2026.3");e._modulesLoaded||(0,a.wv)(e).then(()=>{if(e._modulesLoaded=!0,(!p.Qy||!(0,p.Qy)())&&function(e){const t={entityFound:!1,hasAttributes:!1,hasModulesAttribute:!1,modulesIsObject:!1,hasLastUpdated:!1,isReady:!1};if(!e||!e.states)return t;const n=e.states[Mn];if(!n)return t;t.entityFound=!0;const o=n.attributes||{};return t.hasAttributes=!!n.attributes,"modules"in o&&(t.hasModulesAttribute=!0,t.modulesIsObject=null!==o.modules&&"object"==typeof o.modules),"last_updated"in o&&(t.hasLastUpdated="string"==typeof o.last_updated&&o.last_updated.length>0),t.isReady=t.entityFound&&t.hasModulesAttribute&&t.modulesIsObject&&t.hasLastUpdated,t}(e.hass).isReady){const t=e.hass.states[Mn].attributes.modules;t&&t.default&&!0!==t.default.is_global&&Bn(e,"default",!0).then(e=>{e?document.dispatchEvent(new CustomEvent("yaml-modules-updated")):console.warn(`Failed to set module 'default' to global in ${Mn}.`)})}e.requestUpdate()});const l=(0,p.Qy)();if(e._bctRetryHandle&&l&&(clearTimeout(e._bctRetryHandle),e._bctRetryHandle=null),!e.hass||l||e._bctCheckAttempted)e.hass&&l&&!e._bctCheckAttempted&&(e._bctCheckInFlight||(e._bctCheckInFlight=!0,e._bctCheckAttempted=!0,(0,p.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._bctCheckInFlight=!1,(0,p.Qy)()!==l&&e.requestUpdate()})));else{const t=Date.now(),n=e._lastBctCheckAt??0,o=n?t-n:1/0,i=n&&o<5e3;if(e._bctCheckInFlight||i){if(i&&!e._bctRetryHandle){const t=Math.max(50,5e3-o);e._bctRetryHandle=setTimeout(()=>{e._bctRetryHandle=null,e.requestUpdate()},t)}}else e._bctRetryHandle&&(clearTimeout(e._bctRetryHandle),e._bctRetryHandle=null),e._bctCheckInFlight=!0,e._bctCheckAttempted=!0,e._lastBctCheckAt=t,(0,p.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._bctCheckInFlight=!1,e.requestUpdate()})}if((0,En.kA)(e),e._workingModuleConfigs||(e._workingModuleConfigs={}),e._modulesLoaded&&!a.Ki.has("default")&&l){const t="default:\n  name: Default\n  version: ''\n  description: Empty and enabled by default. Add your custom styles and/or JS templates here to apply them to all cards by pressing the <ha-icon icon=\"mdi:pencil\"></ha-icon> button above.\n  code: ''\n  is_global: true\n  ";(0,Tn.m)(e,t).then(()=>{console.info("Default module created automatically"),e.requestUpdate()}).catch(e=>{console.error("Error creating default module:",e)})}const c=(0,Ln.Xe)(),d=t=>{let n;if("sl-tab-group"===o)n=parseInt(t?.detail?.name??t?.target?.activeTab??t?.detail?.value,10);else if("ha-tab-group"===o){const e=t?.detail??{},o=e.tab??e.target??e.item,i=o?.getAttribute?o.getAttribute("panel"):void 0,a=e.panel??e.tabId??i??e.value??t?.target?.activePanel??t?.target?.activeTab;if("number"==typeof a)n=a;else if("string"==typeof a){const e=Pn.indexOf(a);n=-1!==e?e:parseInt(a,10)}}else n=t?.detail?.value??t?.target?.selected;Number.isFinite(n)||(n=0),e._selectedModuleTab=n,e.requestUpdate(),requestAnimationFrame(()=>{(0,An.XY)(e,!1)})},u=Ze.qy`
-    <ha-expansion-panel outlined>
+  `}var An=n(933),Ln=n(766),En=n(937),Tn=n(868);const Mn="sensor.bubble_card_modules",Pn=["modules","store"],In="bubble-card-force-unsupported-modules";async function Bn(e,t,n){try{if(!e.hass)return!1;if(!await(0,p.ensureBCTProviderAvailable)(e.hass))return console.warn("Bubble Card Tools is required to change global status."),!1;const o={...a.Ki.get(t)||{}};return!0===n?o.is_global=!0:delete o.is_global,a.Ki.set(t,o),await(0,p.writeModuleYaml)(e.hass,t,o),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),!0}catch(e){return console.error("Error setting module global status:",e),!1}}function On(e,t){try{const n=a.Ki.get(e);if(n&&"object"==typeof n&&!0===n.is_global)return!0;if(p.Qy&&(0,p.Qy)())return!1;if(!t||!t.states||!t.states[Mn])return!1;const o=t.states[Mn];if(!o.attributes||!o.attributes.modules)return!1;const i=o.attributes.modules[e];return i&&!0===i.is_global}catch(t){return console.warn(`Error checking if module ${e} is global:`,t),!1}}function Un(e,t){const n=e._config?.modules||[],o=Array.isArray(n)?n:[n];return!o.includes(`!${t}`)&&(!!o.includes(t)||On(t,e.hass))}function qn(e){if(!a.Ki||0===a.Ki.size)return[];let t=Array.from(a.Ki.keys());const n=e._myModulesSearchQuery;if(n&&n.trim()){const e=n.toLowerCase().trim();t=t.filter(t=>{const n=(0,An.a7)(t),o=(n.name||t).toLowerCase(),i=(n.description||"").toLowerCase(),a=(n.creator||"").toLowerCase();return o.includes(e)||i.includes(e)||a.includes(e)})}if(!e._myModulesSortOrder)try{const t=localStorage.getItem("bubble-card-modules-sort-order");e._myModulesSortOrder=t||"default"}catch(t){e._myModulesSortOrder="default"}const o=e._myModulesSortOrder||"default",i=(0,p.Ef)(),r=e=>{const t=i.get(e);if(!t)return 0;const n=new Date(t).getTime();return isNaN(n)?0:n};return t.sort((t,n)=>{if("default"===t)return-1;if("default"===n)return 1;const i=(0,An.a7)(t),a=(0,An.a7)(n),s=Un(e,t),l=Un(e,n);switch(o){case"alphabetical":return(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});case"default":if(s!==l)return s?-1:1;const e=r(t),o=r(n);return e!==o&&e>0&&o>0?o-e:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});case"recent-first":const c=r(t),d=r(n);return c!==d&&c>0&&d>0?d-c:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});default:if(s!==l)return s?-1:1;const u=r(t),p=r(n);return u!==p&&u>0&&p>0?p-u:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"})}}),t}function zn(e){if(void 0===e._selectedModuleTab&&(e._selectedModuleTab=0),void 0===e._expandedPanelStates&&(e._expandedPanelStates={}),void 0===e._myModulesSortOrder)try{const t=localStorage.getItem("bubble-card-modules-sort-order");e._myModulesSortOrder=t||"default"}catch(t){e._myModulesSortOrder="default"}const t=e._myModulesSortOrder||"default",n="modules_editor_panel";if(void 0===e._forceUnsupportedModules)try{const t=localStorage.getItem(In);e._forceUnsupportedModules="true"===t}catch(t){e._forceUnsupportedModules=!1}const o="bubble-card-module-editor-tab-group",i="undefined"!=typeof customElements&&void 0!==customElements.get("ha-tab-group")&&void 0!==customElements.get("ha-tab-group-tab")?"ha-tab-group":"undefined"!=typeof customElements&&void 0!==customElements.get("sl-tab-group")?"sl-tab-group":"ha-tabs",r="ha-tab-group"===i,l=r&&(0,s._0)(e.hass,"2026.3");e._modulesLoaded||(0,a.wv)(e).then(()=>{if(e._modulesLoaded=!0,(!p.Qy||!(0,p.Qy)())&&function(e){const t={entityFound:!1,hasAttributes:!1,hasModulesAttribute:!1,modulesIsObject:!1,hasLastUpdated:!1,isReady:!1};if(!e||!e.states)return t;const n=e.states[Mn];if(!n)return t;t.entityFound=!0;const o=n.attributes||{};return t.hasAttributes=!!n.attributes,"modules"in o&&(t.hasModulesAttribute=!0,t.modulesIsObject=null!==o.modules&&"object"==typeof o.modules),"last_updated"in o&&(t.hasLastUpdated="string"==typeof o.last_updated&&o.last_updated.length>0),t.isReady=t.entityFound&&t.hasModulesAttribute&&t.modulesIsObject&&t.hasLastUpdated,t}(e.hass).isReady){const t=e.hass.states[Mn].attributes.modules;t&&t.default&&!0!==t.default.is_global&&Bn(e,"default",!0).then(e=>{e?document.dispatchEvent(new CustomEvent("yaml-modules-updated")):console.warn(`Failed to set module 'default' to global in ${Mn}.`)})}e.requestUpdate()});const c=(0,p.Qy)();if(e._bctRetryHandle&&c&&(clearTimeout(e._bctRetryHandle),e._bctRetryHandle=null),!e.hass||c||e._bctCheckAttempted)e.hass&&c&&!e._bctCheckAttempted&&(e._bctCheckInFlight||(e._bctCheckInFlight=!0,e._bctCheckAttempted=!0,(0,p.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._bctCheckInFlight=!1,(0,p.Qy)()!==c&&e.requestUpdate()})));else{const t=Date.now(),n=e._lastBctCheckAt??0,o=n?t-n:1/0,i=n&&o<5e3;if(e._bctCheckInFlight||i){if(i&&!e._bctRetryHandle){const t=Math.max(50,5e3-o);e._bctRetryHandle=setTimeout(()=>{e._bctRetryHandle=null,e.requestUpdate()},t)}}else e._bctRetryHandle&&(clearTimeout(e._bctRetryHandle),e._bctRetryHandle=null),e._bctCheckInFlight=!0,e._bctCheckAttempted=!0,e._lastBctCheckAt=t,(0,p.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._bctCheckInFlight=!1,e.requestUpdate()})}if((0,En.kA)(e),e._workingModuleConfigs||(e._workingModuleConfigs={}),e._modulesLoaded&&!a.Ki.has("default")&&c){const t="default:\n  name: Default\n  version: ''\n  description: Empty and enabled by default. Add your custom styles and/or JS templates here to apply them to all cards by pressing the <ha-icon icon=\"mdi:pencil\"></ha-icon> button above.\n  code: ''\n  is_global: true\n  ";(0,Tn.m)(e,t).then(()=>{console.info("Default module created automatically"),e.requestUpdate()}).catch(e=>{console.error("Error creating default module:",e)})}const d=(0,Ln.Xe)(),u=t=>{let n;if("sl-tab-group"===i)n=parseInt(t?.detail?.name??t?.target?.activeTab??t?.detail?.value,10);else if("ha-tab-group"===i){const e=t?.detail??{},o=e.tab??e.target??e.item,i=o?.getAttribute?o.getAttribute("panel"):void 0,a=e.panel??e.tabId??i??e.value??t?.target?.activePanel??t?.target?.activeTab;if("number"==typeof a)n=a;else if("string"==typeof a){const e=Pn.indexOf(a);n=-1!==e?e:parseInt(a,10)}}else n=t?.detail?.value??t?.target?.selected;Number.isFinite(n)||(n=0),e._selectedModuleTab=n,e.requestUpdate(),requestAnimationFrame(()=>{(0,An.XY)(e,!1)})},b=async()=>{try{const t=e._manualYamlContent;if(!t||""===t.trim())return void(0,s.rC)(e,"bubble-card-error",{message:"No YAML content provided"});const n=await(0,Tn.m)(e,t);e._showManualImportForm=!1,e._manualYamlContent="",n&&n.moduleId&&(e._recentlyToggledModuleId=n.moduleId,setTimeout(()=>{e._recentlyToggledModuleId=null,e.requestUpdate()},2e3)),e.requestUpdate(),n&&n.moduleId&&requestAnimationFrame(()=>{requestAnimationFrame(()=>{const t=e.shadowRoot?.querySelector(`ha-expansion-panel[data-module-id="${n.moduleId}"]`);t&&t.scrollIntoView({behavior:"smooth",block:"center"})})})}catch(e){console.error("Error installing manual module:",e)}},h=Ze.qy`
+    <ha-expansion-panel
+      outlined
+      .expanded=${!!e._expandedPanelStates[n]}
+      @expanded-changed=${t=>{t.target===t.currentTarget&&(e._expandedPanelStates[n]=t.target.expanded,e.requestUpdate())}}
+    >
       <h4 slot="header">
         <ha-icon icon="mdi:puzzle"></ha-icon>
         Modules
-        ${c.hasUpdates&&l?Ze.qy`
+        ${d.hasUpdates&&c?Ze.qy`
           <span class="bubble-badge update-badge" style="margin-left: 8px; font-size: 0.8em; vertical-align: middle; z-index: 5;">
             <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
-            ${c.updateCount} update${c.updateCount>1?"s":""} available
+            ${d.updateCount} update${d.updateCount>1?"s":""} available
           </span>
         `:""}
       </h4>
-      <div class="content module-editor-content ${i?"module-editor-content--ha-tab-group":""} ${r?"module-editor-content--ha-tab-group-modern":""}" style="margin: -8px 4px 14px 4px;">
-        ${l?"":Ze.qy`
+      <div class="content module-editor-content ${r?"module-editor-content--ha-tab-group":""} ${l?"module-editor-content--ha-tab-group-modern":""}" style="margin: -8px 4px 14px 4px;">
+        ${an(e,n,!!e._expandedPanelStates[n],()=>Ze.qy`
+        ${c?"":Ze.qy`
             <div class="bubble-info warning">
               <h4 class="bubble-section-title">
                 <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
@@ -1982,18 +1985,18 @@
 
         <div id="module-editor-top-marker"></div>
         
-        ${(()=>{const t=e._selectedModuleTab||0,i=Pn[t]??t.toString(),a=t=>{const n=Pn.indexOf(t);e._selectedModuleTab=-1!==n?n:parseInt(t,10)||0,e.requestUpdate(),requestAnimationFrame(()=>(0,An.XY)(e,!1))};return"ha-tab-group"===o?Ze.qy`
+        ${(()=>{const t=e._selectedModuleTab||0,n=Pn[t]??t.toString(),a=t=>{const n=Pn.indexOf(t);e._selectedModuleTab=-1!==n?n:parseInt(t,10)||0,e.requestUpdate(),requestAnimationFrame(()=>(0,An.XY)(e,!1))};return"ha-tab-group"===i?Ze.qy`
         <ha-tab-group
-          class="module-tabs module-tabs--ha-tab-group ${r?"module-tabs--ha-tab-group-modern":""}"
-          id="${n}"
-          .activePanel=${i}
-          @wa-tab-show=${d}
-          @active-panel-changed=${d}
+          class="module-tabs module-tabs--ha-tab-group ${l?"module-tabs--ha-tab-group-modern":""}"
+          id="${o}"
+          .activePanel=${n}
+          @wa-tab-show=${u}
+          @active-panel-changed=${u}
           >
           <ha-tab-group-tab
             slot="nav"
             panel=${Pn[0]}
-            .active=${i===Pn[0]}
+            .active=${n===Pn[0]}
             @click=${()=>a(Pn[0])}
           >
             <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
@@ -2002,26 +2005,26 @@
             <ha-tab-group-tab
             slot="nav"
             panel=${Pn[1]}
-              .active=${i===Pn[1]}
-              ?disabled=${!l}
+              .active=${n===Pn[1]}
+              ?disabled=${!c}
             @click=${()=>a(Pn[1])}
           >
             <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
             Module Store
           </ha-tab-group-tab>
         </ha-tab-group>
-      `:"sl-tab-group"===o?Ze.qy`
+      `:"sl-tab-group"===i?Ze.qy`
         <sl-tab-group
           class="module-tabs module-tabs--sl-tab-group"
-          id="${n}"
+          id="${o}"
           .selected=${t.toString()}
-          @sl-tab-show=${d}
+          @sl-tab-show=${u}
         >
           <sl-tab slot="nav" panel="0">
             <ha-icon icon="mdi:puzzle-heart-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
             My Modules
           </sl-tab>
-          <sl-tab slot="nav" panel="1" ?disabled=${!l}>
+          <sl-tab slot="nav" panel="1" ?disabled=${!c}>
             <ha-icon icon="mdi:puzzle-plus-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
             Module Store
           </sl-tab>
@@ -2032,20 +2035,20 @@
       <ha-tabs
         class="module-tabs module-tabs--ha-tabs"
         .selected=${t}
-        @selected-changed=${d}
+        @selected-changed=${u}
       >
         <paper-tab>
           <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
           My Modules
         </paper-tab>
-        <paper-tab class="${l?"":"disabled"}" ?disabled=${!l}>
+        <paper-tab class="${c?"":"disabled"}" ?disabled=${!c}>
           <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
           Module Store
         </paper-tab>
       </ha-tabs>
     `})()}
 
-        ${0!==e._selectedModuleTab&&l?(0,Ln._e)(e):Ze.qy`
+        ${0!==e._selectedModuleTab&&c?(0,Ln._e)(e):Ze.qy`
           ${e._showManualImportForm?Ze.qy`
             <div class="module-editor-form">
               <div class="card-content">
@@ -2076,7 +2079,7 @@
                   <button 
                     class="icon-button" 
                     style="flex: 1;"
-                    @click=${async()=>{try{const t=e._manualYamlContent;if(!t||""===t.trim())return void(0,s.rC)(e,"bubble-card-error",{message:"No YAML content provided"});const n=await(0,Tn.m)(e,t);e._showManualImportForm=!1,e._manualYamlContent="",n&&n.moduleId&&(e._recentlyToggledModuleId=n.moduleId,setTimeout(()=>{e._recentlyToggledModuleId=null,e.requestUpdate()},2e3)),e.requestUpdate(),n&&n.moduleId&&requestAnimationFrame(()=>{requestAnimationFrame(()=>{const t=e.shadowRoot?.querySelector(`ha-expansion-panel[data-module-id="${n.moduleId}"]`);t&&t.scrollIntoView({behavior:"smooth",block:"center"})})})}catch(e){console.error("Error installing manual module:",e)}}}
+                    @click=${b}
                   >
                     <ha-icon icon="mdi:content-save"></ha-icon>
                     Import Module
@@ -2128,7 +2131,7 @@
             </div>
             
             <!-- Installed Modules List -->
-            ${qn(e).map(t=>{const{name:n,description:o,formSchema:i,supportedCards:a,unsupportedCard:r,creator:d,moduleLink:u,moduleVersion:p}=(0,An.a7)(t),b=Un(e,t),h=On(t,e.hass),m=i&&i.length>0,g="default"===t,f=g||m,y=e._config[t];void 0===e._workingModuleConfigs[t]&&(e._workingModuleConfigs[t]=structuredClone(y??{}));const v=e._workingModuleConfigs[t],_=e._config.card_type??"";let w=!1;w=a&&Array.isArray(a)&&a.length>0?!a.includes(_):r.includes(_);const x=!0===e._forceUnsupportedModules,C=w&&!x&&!b&&!h&&!g,k=i&&i.length>0?e._getProcessedSchema(t,i,v):[],$=c.modules.some(e=>e.id===t)&&l,S=$?c.modules.find(e=>e.id===t):null,A=e._recentlyToggledModuleId===t;return Ze.qy`
+            ${qn(e).map(t=>{const{name:n,description:o,formSchema:i,supportedCards:a,unsupportedCard:r,creator:l,moduleLink:u,moduleVersion:p}=(0,An.a7)(t),b=Un(e,t),h=On(t,e.hass),m=i&&i.length>0,g="default"===t,f=g||m,y=e._config[t];void 0===e._workingModuleConfigs[t]&&(e._workingModuleConfigs[t]=structuredClone(y??{}));const v=e._workingModuleConfigs[t],_=e._config.card_type??"";let w=!1;w=a&&Array.isArray(a)&&a.length>0?!a.includes(_):r.includes(_);const x=!0===e._forceUnsupportedModules,C=w&&!x&&!b&&!h&&!g,k=i&&i.length>0?e._getProcessedSchema(t,i,v):[],$=d.modules.some(e=>e.id===t)&&c,S=$?d.modules.find(e=>e.id===t):null,A=e._recentlyToggledModuleId===t;return Ze.qy`
                 <ha-expansion-panel 
                   outlined 
                   class="${C?"disabled":""} ${A?"recently-toggled":""}"
@@ -2174,10 +2177,10 @@
                             </button>
                             
                             <button 
-                              class="bubble-badge toggle-badge ${h&&!m?"update-button":"link-button"} ${f||!l?"disabled":""}"
-                              style="cursor: pointer; ${f||!l?"opacity: 0.7; cursor: default;":""}"
+                              class="bubble-badge toggle-badge ${h&&!m?"update-button":"link-button"} ${f||!c?"disabled":""}"
+                              style="cursor: pointer; ${f||!c?"opacity: 0.7; cursor: default;":""}"
                               @click=${()=>{f||(async(t,n)=>{await Bn(e,t,n)&&(!0===n&&(e._config.modules=Array.isArray(e._config.modules)?e._config.modules.filter(e=>e!==`!${t}`):[]),(0,s.rC)(e,"config-changed",{config:e._config}),e.requestUpdate(),setTimeout(()=>e.requestUpdate(),100))})(t,!h)}}
-                              ?disabled=${f||!l}
+                              ?disabled=${f||!c}
                             >
                               <ha-icon icon="mdi:cards-outline"></ha-icon>
                               <span>${"All cards"}</span>
@@ -2208,11 +2211,11 @@
                               Update
                             </button>
                           `:""}
-                          <button class="icon-button ${l?"":"disabled"}" @click=${()=>(0,En.dK)(e,t)} title="Edit Module">
+                          <button class="icon-button ${c?"":"disabled"}" @click=${()=>(0,En.dK)(e,t)} title="Edit Module">
                             <ha-icon icon="mdi:pencil"></ha-icon>
                           </button>
                           ${Ln.dn&&(0,Ln.dn)(t)||"default"===t?"":Ze.qy`
-                              <button class="icon-button ${l?"":"disabled"}" @click=${()=>(0,En.s)(e,t)} title="Delete Module">
+                              <button class="icon-button ${c?"":"disabled"}" @click=${()=>(0,En.s)(e,t)} title="Delete Module">
                                 <ha-icon icon="mdi:delete"></ha-icon>
                               </button>
                             `}
@@ -2259,9 +2262,9 @@
                         </div>
                       </div>
 
-                      ${d||u||p?Ze.qy`
+                      ${l||u||p?Ze.qy`
                           <h4 class="version module-version">
-                            ${d?`Created by ${d}`:""}
+                            ${l?`Created by ${l}`:""}
                             <span class="version-number">
                               ${u?Ze.qy`<a href="${u}" target="_blank" rel="noopener noreferrer">Module link</a> • `:""}
                               ${p||""}
@@ -2287,7 +2290,7 @@
           `}
 
           <hr>
-          ${e._showNewModuleForm||e._showManualImportForm||e._editingModule||!l?"":Ze.qy`
+          ${e._showNewModuleForm||e._showManualImportForm||e._editingModule||!c?"":Ze.qy`
           <div class="module-editor-buttons-container" style="display: flex;">
             <button class="icon-button" style="flex: 1;" @click=${()=>{e._showNewModuleForm=!0,e._showManualImportForm=!1,e._generateUniqueModuleId&&(e._newModuleTemplate.id=e._generateUniqueModuleId("my_module")),e._editingModule={...e._newModuleTemplate},e._config.modules||(e._config.modules=e._config.style_templates||[]),e._config.modules.includes(e._editingModule.id)||(e._config.modules=[...e._config.modules,e._editingModule.id],(0,s.rC)(e,"config-changed",{config:e._config})),e.requestUpdate(),setTimeout(()=>(0,An.XY)(e),0)}}>
               <ha-icon icon="mdi:puzzle-plus"></ha-icon>
@@ -2313,9 +2316,10 @@
             <p><b>If coding isn't your thing</b>, you can also find and install modules made by the community in the <b>Module Store</b>.</p>
           </div>
         </div>
+        `)}
       </div>
     </ha-expansion-panel>
-  `;return"sl-tab-group"===o?requestAnimationFrame(()=>{const t=e.shadowRoot?.getElementById(n);if(t&&"function"==typeof t.show){const n=void 0!==e._selectedModuleTab?e._selectedModuleTab.toString():"0";t.show(n)}}):"ha-tab-group"===o&&requestAnimationFrame(()=>{const t=e.shadowRoot?.getElementById(n);if(!t)return;const o=Pn[e._selectedModuleTab??0]??(e._selectedModuleTab??0).toString();"activePanel"in t&&(t.activePanel=o),t.setAttribute("active-panel",o)}),u}class jn extends Ze.WF{_previewStyleApplied=!1;_entityCache={};_cachedAttributeList=null;_cachedAttributeListEntity=null;_expandedPanelStates={};_moduleErrorCache={};_moduleCodeEvaluating=null;_rowsAutoMode=void 0;_autoRowsComputeScheduled=!1;_previewCardRoot=null;_previewCardHost=null;_previewCardScore=-1/0;_cardContextListener=null;_lastMeasuredHeights=null;constructor(){super(),this._expandedPanelStates={},this._cardContextListener=e=>this._handleCardContext(e),window.addEventListener("bubble-card-context",this._cardContextListener)}setConfig(e){const t=this._previewCardHost||this._previewCardRoot?.host||null,n=!!t?.isConnected;this._config={...e},n?this._previewCardScore=-1/0:(this._firstRowsComputation=!1,this._lastMeasuredHeights=null,this._resetPreviewCardReference());const o=void 0!==this._config?.rows&&null!==this._config?.rows&&""!==this._config?.rows,i="string"==typeof this._config?.rows&&""!==this._config.rows.trim(),a=void 0!==this._config?.grid_options?.rows&&null!==this._config?.grid_options?.rows&&""!==this._config?.grid_options?.rows;this._rowsAutoMode=!0,(a||o&&i)&&(this._rowsAutoMode=!1)}_deepQuerySelector(e,t,n=6){try{if(!e||n<0)return null;const o=e.querySelector?.(t);if(o)return o;const i=e.querySelectorAll?.("*")||[];for(const e of i)if(e?.shadowRoot){const o=this._deepQuerySelector(e.shadowRoot,t,n-1);if(o)return o}return null}catch(e){return null}}_getEditorPreviewContainer(){try{const e=document.querySelector("body > home-assistant");return e?.shadowRoot?.querySelector("hui-dialog-edit-card")?.shadowRoot?.querySelector("ha-dialog > div.content > div.element-preview")||null}catch(e){return null}}_removeRowsOverrideAndRecalculate=()=>{try{const e={...this._config};if(e.grid_options){const{rows:t,...n}=e.grid_options;Object.keys(n).length>0?e.grid_options=n:delete e.grid_options}delete e.rows,this._rowsAutoMode=!0,this._config=e,(0,s.rC)(this,"config-changed",{config:e}),requestAnimationFrame(()=>{try{this._firstRowsComputation=!0,this._lastMeasuredHeights=null,this._setupAutoRowsObserver();const e=this._getBubbleCardFromPreview();e?this._computeAndApplyRows(e):this._waitForPreviewAndRecompute()}catch(e){}})}catch(e){console.error("Bubble Card Editor: failed to remove rows override",e)}};_waitForPreviewAndRecompute(e=0){try{const e=this._getBubbleCardFromPreview();if(e){this._setupAutoRowsObserver();const t=this._computeAndApplyRows(e);if(t?.applied)return}}catch(e){}e+1>=40||setTimeout(()=>this._waitForPreviewAndRecompute(e+1),50)}_scheduleAutoRowsCompute(){this._autoRowsComputeScheduled||(this._autoRowsComputeScheduled=!0,requestAnimationFrame(()=>{this._autoRowsComputeScheduled=!1;try{if(void 0!==this._config?.grid_options?.rows&&null!==this._config?.grid_options?.rows&&""!==this._config?.grid_options?.rows||!1===this._rowsAutoMode)return;this._setupAutoRowsObserver();const e=this._getBubbleCardFromPreview();e&&this._computeAndApplyRows(e)}catch(e){}}))}static get properties(){return{hass:{},_config:{}}}get _card_type(){return this._config?.card_type||""}get _button_type(){return this._config?.button_type||("pop-up"===this._config?.card_type?"":"switch")}get _entity(){return this._config?.entity||""}get _selectable_attributes(){return["source_list","sound_mode_list","hvac_modes","fan_modes","swing_modes","swing_horizontal_modes","preset_modes","effect_list"]}updated(e){super.updated(e),e.has("hass")&&(this.listsUpdated=!1,this._entityCache={},this._cachedAttributeList=null,this._cachedAttributeListEntity=null),this._setupAutoRowsObserver()}async firstUpdated(e){if(super.firstUpdated(e),this.hass&&this.hass.loadFragmentTranslation)try{await this.hass.loadFragmentTranslation("config")}catch(e){console.error("Bubble Card Editor: Failed to load 'config' fragment translation",e)}}disconnectedCallback(){super.disconnectedCallback?.();try{this._errorListener&&(window.removeEventListener("bubble-card-error",this._errorListener),this._errorListener=null)}catch(e){}try{this._moduleChangeHandler&&(window.removeEventListener("bubble-card-modules-changed",this._moduleChangeHandler),window.removeEventListener("bubble-card-module-updated",this._moduleChangeHandler),document.removeEventListener("yaml-modules-updated",this._moduleChangeHandler),this._moduleChangeHandler=null,this._moduleChangeListenerAdded=!1)}catch(e){}try{this._storeAutoRefreshTimer&&(clearInterval(this._storeAutoRefreshTimer),this._storeAutoRefreshTimer=null)}catch(e){}try{this._progressInterval&&(clearInterval(this._progressInterval),this._progressInterval=null)}catch(e){}try{this._editorSchemaDebounce&&(clearTimeout(this._editorSchemaDebounce),this._editorSchemaDebounce=null)}catch(e){}try{this._cardContextListener&&(window.removeEventListener("bubble-card-context",this._cardContextListener),this._cardContextListener=null)}catch(e){}jn._resizeObserver&&this._observedElements&&(this._observedElements.forEach(e=>{jn._resizeObserver.unobserve(e),jn._editorInstanceMap.delete(e)}),this._observedElements=[])}render(){if(!this.hass)return Ze.qy``;const e=Gt(this.hass);if(!this._previewStyleApplied){const e=document.querySelector("body > home-assistant"),t=e?.shadowRoot?.querySelector("hui-dialog-edit-card")?.shadowRoot?.querySelector("ha-dialog > div.content > div.element-preview");t?.style&&"sticky"!==t.style.position&&(t.style.position="sticky",t.style.top="0",t.style.height="calc(100vh - 224px)",t.style.overflowY="auto",this._previewStyleApplied=!0)}this.listsUpdated||(this._initializeLists(e),this.listsUpdated=!0);const t=this.cardTypeList;switch(this.buttonTypeList,this._config?.card_type){case"pop-up":return Vt(this);case"button":return rt(this);case"sub-buttons":return function(e){const t="pop-up"===e._config.card_type;return Ze.qy`
+  `;return"sl-tab-group"===i?requestAnimationFrame(()=>{const t=e.shadowRoot?.getElementById(o);if(t&&"function"==typeof t.show){const n=void 0!==e._selectedModuleTab?e._selectedModuleTab.toString():"0";t.show(n)}}):"ha-tab-group"===i&&requestAnimationFrame(()=>{const t=e.shadowRoot?.getElementById(o);if(!t)return;const n=Pn[e._selectedModuleTab??0]??(e._selectedModuleTab??0).toString();"activePanel"in t&&(t.activePanel=n),t.setAttribute("active-panel",n)}),h}class jn extends Ze.WF{_previewStyleApplied=!1;_entityCache={};_cachedAttributeList=null;_cachedAttributeListEntity=null;_expandedPanelStates={};_moduleErrorCache={};_moduleCodeEvaluating=null;_rowsAutoMode=void 0;_autoRowsComputeScheduled=!1;_previewCardRoot=null;_previewCardHost=null;_previewCardScore=-1/0;_cardContextListener=null;_lastMeasuredHeights=null;constructor(){super(),this._expandedPanelStates={},this._cardContextListener=e=>this._handleCardContext(e),window.addEventListener("bubble-card-context",this._cardContextListener)}setConfig(e){const t=this._previewCardHost||this._previewCardRoot?.host||null,n=!!t?.isConnected;this._config={...e},n?this._previewCardScore=-1/0:(this._firstRowsComputation=!1,this._lastMeasuredHeights=null,this._resetPreviewCardReference());const o=void 0!==this._config?.rows&&null!==this._config?.rows&&""!==this._config?.rows,i="string"==typeof this._config?.rows&&""!==this._config.rows.trim(),a=void 0!==this._config?.grid_options?.rows&&null!==this._config?.grid_options?.rows&&""!==this._config?.grid_options?.rows;this._rowsAutoMode=!0,(a||o&&i)&&(this._rowsAutoMode=!1)}_deepQuerySelector(e,t,n=6){try{if(!e||n<0)return null;const o=e.querySelector?.(t);if(o)return o;const i=e.querySelectorAll?.("*")||[];for(const e of i)if(e?.shadowRoot){const o=this._deepQuerySelector(e.shadowRoot,t,n-1);if(o)return o}return null}catch(e){return null}}_getEditorPreviewContainer(){try{const e=document.querySelector("body > home-assistant");return e?.shadowRoot?.querySelector("hui-dialog-edit-card")?.shadowRoot?.querySelector("ha-dialog > div.content > div.element-preview")||null}catch(e){return null}}_removeRowsOverrideAndRecalculate=()=>{try{const e={...this._config};if(e.grid_options){const{rows:t,...n}=e.grid_options;Object.keys(n).length>0?e.grid_options=n:delete e.grid_options}delete e.rows,this._rowsAutoMode=!0,this._config=e,(0,s.rC)(this,"config-changed",{config:e}),requestAnimationFrame(()=>{try{this._firstRowsComputation=!0,this._lastMeasuredHeights=null,this._setupAutoRowsObserver();const e=this._getBubbleCardFromPreview();e?this._computeAndApplyRows(e):this._waitForPreviewAndRecompute()}catch(e){}})}catch(e){console.error("Bubble Card Editor: failed to remove rows override",e)}};_waitForPreviewAndRecompute(e=0){try{const e=this._getBubbleCardFromPreview();if(e){this._setupAutoRowsObserver();const t=this._computeAndApplyRows(e);if(t?.applied)return}}catch(e){}e+1>=40||setTimeout(()=>this._waitForPreviewAndRecompute(e+1),50)}_scheduleAutoRowsCompute(){this._autoRowsComputeScheduled||(this._autoRowsComputeScheduled=!0,requestAnimationFrame(()=>{this._autoRowsComputeScheduled=!1;try{if(void 0!==this._config?.grid_options?.rows&&null!==this._config?.grid_options?.rows&&""!==this._config?.grid_options?.rows||!1===this._rowsAutoMode)return;this._setupAutoRowsObserver();const e=this._getBubbleCardFromPreview();e&&this._computeAndApplyRows(e)}catch(e){}}))}static get properties(){return{hass:{},_config:{}}}get _card_type(){return this._config?.card_type||""}get _button_type(){return this._config?.button_type||("pop-up"===this._config?.card_type?"":"switch")}get _entity(){return this._config?.entity||""}get _selectable_attributes(){return["source_list","sound_mode_list","hvac_modes","fan_modes","swing_modes","swing_horizontal_modes","preset_modes","effect_list"]}updated(e){super.updated(e),e.has("hass")&&(this.listsUpdated=!1,this._entityCache={},this._cachedAttributeList=null,this._cachedAttributeListEntity=null),this._setupAutoRowsObserver()}async firstUpdated(e){if(super.firstUpdated(e),this.hass&&this.hass.loadFragmentTranslation)try{await this.hass.loadFragmentTranslation("config")}catch(e){console.error("Bubble Card Editor: Failed to load 'config' fragment translation",e)}}disconnectedCallback(){super.disconnectedCallback?.();try{this._errorListener&&(window.removeEventListener("bubble-card-error",this._errorListener),this._errorListener=null)}catch(e){}try{this._moduleChangeHandler&&(window.removeEventListener("bubble-card-modules-changed",this._moduleChangeHandler),window.removeEventListener("bubble-card-module-updated",this._moduleChangeHandler),document.removeEventListener("yaml-modules-updated",this._moduleChangeHandler),this._moduleChangeHandler=null,this._moduleChangeListenerAdded=!1)}catch(e){}try{this._storeAutoRefreshTimer&&(clearInterval(this._storeAutoRefreshTimer),this._storeAutoRefreshTimer=null)}catch(e){}try{this._progressInterval&&(clearInterval(this._progressInterval),this._progressInterval=null)}catch(e){}try{this._editorSchemaDebounce&&(clearTimeout(this._editorSchemaDebounce),this._editorSchemaDebounce=null)}catch(e){}try{this._cardContextListener&&(window.removeEventListener("bubble-card-context",this._cardContextListener),this._cardContextListener=null)}catch(e){}jn._resizeObserver&&this._observedElements&&(this._observedElements.forEach(e=>{jn._resizeObserver.unobserve(e),jn._editorInstanceMap.delete(e)}),this._observedElements=[])}render(){if(!this.hass)return Ze.qy``;const e=Gt(this.hass);if(!this._previewStyleApplied){const e=document.querySelector("body > home-assistant"),t=e?.shadowRoot?.querySelector("hui-dialog-edit-card")?.shadowRoot?.querySelector("ha-dialog > div.content > div.element-preview");t?.style&&"sticky"!==t.style.position&&(t.style.position="sticky",t.style.top="0",t.style.height="calc(100vh - 224px)",t.style.overflowY="auto",this._previewStyleApplied=!0)}this.listsUpdated||(this._initializeLists(e),this.listsUpdated=!0);const t=this.cardTypeList;switch(this.buttonTypeList,this._config?.card_type){case"pop-up":return Vt(this);case"button":return rt(this);case"sub-buttons":return function(e){const t="pop-up"===e._config.card_type;return Ze.qy`
         <div class="card-config">
             ${t?"":e.makeDropdown("Card type","card_type",e.cardTypeList)}
 
