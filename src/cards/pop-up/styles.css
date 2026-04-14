@@ -631,6 +631,10 @@
     width: 100%;
 }
 
+.no-header .bubble-editor-placeholder {
+    margin-top: 0;
+}
+
 .bubble-editor-placeholder ha-icon {
     --mdc-icon-size: 24px;
     color: var(--primary-text-color);
