@@ -585,6 +585,10 @@
     margin-left: 14px;
 }
 
+.popup-style-classic.close-button-left .bubble-header {
+    margin-left: 0;
+}
+
 .close-button-left.no-header-actions .bubble-header {
     margin-left: 0;
 }
