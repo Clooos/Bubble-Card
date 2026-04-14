@@ -1,7 +1,7 @@
 import { getBackdrop, releaseBackdropContext } from "./backdrop.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll } from "../../tools/utils.js";
-import { handlePopUpCards, restoreDetachedPopUpCards, setStandalonePopUpCardsActive, clearStandalonePopUpCardPrewarm, suspendStandalonePopUpCards } from "./cards/index.js";
+import { handlePopUpCards, restoreDetachedPopUpCards, setStandalonePopUpCardsActive, suspendStandalonePopUpCards } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
 
 const popupState = {
@@ -894,7 +894,6 @@ function clearAllTimeouts(context) {
     clearStandaloneTransitionCompletion(context);
     clearStandaloneTransitionFrame(context);
     clearStandaloneOpenFrames(context);
-    clearStandalonePopUpCardPrewarm(context);
 
     if (context.popUp?._bubblePopupClassTimeout) {
         clearTimeout(context.popUp._bubblePopupClassTimeout);

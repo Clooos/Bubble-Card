@@ -104,7 +104,6 @@ jest.unstable_mockModule('./cards/index.js', () => ({
     handlePopUpCards,
     restoreDetachedPopUpCards,
     setStandalonePopUpCardsActive,
-    clearStandalonePopUpCardPrewarm: jest.fn(),
     suspendStandalonePopUpCards: jest.fn(),
 }));
 
@@ -257,7 +256,7 @@ describe('standalone popup lifecycle', () => {
     test('defers hass sync to RAF when cards are already in the popup DOM', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
-        // Simulate prewarm having already connected cards into the popup DOM.
+        // Simulate the warm path where cards are already mounted in the popup DOM.
         context._cardsContainer = {};
 
         openPopup(context);

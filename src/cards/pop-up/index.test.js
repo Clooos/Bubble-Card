@@ -30,8 +30,6 @@ jest.unstable_mockModule('./navigation-picker-bridge.js', () => ({
 jest.unstable_mockModule('./cards/index.js', () => ({
     cleanupPopUpCards: jest.fn(),
     handlePopUpCards: jest.fn(),
-    scheduleStandalonePopUpCardPrewarm: jest.fn(),
-    clearStandalonePopUpCardPrewarm: jest.fn(),
 }));
 
 const { handlePopUp } = await import('./index.js');
@@ -283,5 +281,23 @@ describe('handlePopUp performance guards', () => {
         await handlePopUp(context);
 
         expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not mount standalone child cards during popup initialization while inactive', async () => {
+        const rootNode = new global.ShadowRoot();
+        const context = createOpenPopupContext({
+            cardType: undefined,
+            isStandalonePopUp: true,
+            getRootNode: () => rootNode,
+            config: {
+                type: 'custom:bubble-card',
+                card_type: 'pop-up',
+                cards: [{ type: 'gauge', entity: 'sensor.temperature' }],
+            },
+        });
+
+        await handlePopUp(context);
+
+        expect(handlePopUpCards).not.toHaveBeenCalled();
     });
 });
