@@ -147,6 +147,17 @@ ha-textfield {
   width: 100%;
 }
 
+.bubble-pop-up-hash-prefix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 8px;
+  color: var(--secondary-text-color);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+}
+
 h3 {
   margin: 4px 0;
 }

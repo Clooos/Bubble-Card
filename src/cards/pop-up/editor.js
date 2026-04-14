@@ -4,6 +4,9 @@ import { renderButtonEditor } from '../button/editor.js';
 import { registerPopUpHash, isHashOnCurrentPage } from './navigation-picker-bridge.js';
 import { renderLegacyMigrationNotice } from './migration.js';
 
+const POPUP_HASH_PREFIX = '#';
+const POPUP_HASH_PLACEHOLDER = 'pop-up-name';
+
 function getButtonList() {
     return [
         { 'label': 'Switch', 'value': 'switch' },
@@ -176,6 +179,33 @@ function duplicateHashWarningTemplate() {
     `;
 }
 
+export function normalizePopUpHashInputValue(value) {
+    const trimmedValue = typeof value === 'string' ? value.trim() : '';
+    if (!trimmedValue) {
+        return POPUP_HASH_PREFIX;
+    }
+
+    const hashBody = trimmedValue.replace(/^#+/, '');
+    return hashBody ? `${POPUP_HASH_PREFIX}${hashBody}` : POPUP_HASH_PREFIX;
+}
+
+function getPopUpHashInputDisplayValue(value) {
+    return normalizePopUpHashInputValue(value).slice(1);
+}
+
+export function getPopUpHashInputState(value, originalHash) {
+    const normalizedValue = normalizePopUpHashInputValue(value);
+    const isEmpty = normalizedValue === POPUP_HASH_PREFIX;
+    const isDuplicate = !isEmpty && isHashOnCurrentPage(normalizedValue, originalHash);
+
+    return {
+        normalizedValue,
+        isEmpty,
+        isDuplicate,
+        isValid: !isEmpty && !isDuplicate,
+    };
+}
+
 function renderBottomOffsetOption(editor) {
     const mode = getPopUpModeValue(editor._config);
     if (mode !== 'fit-content' && mode !== 'adaptive-dialog') {
@@ -220,18 +250,40 @@ function getEditorSession(configHash) {
     return window.__bubbleEditorSession;
 }
 
-function updateDuplicateHashWarning(editor, originalHash) {
+function commitEditorSessionHash(hashValue) {
+    if (!window.__bubbleEditorSession) {
+        return;
+    }
+
+    window.__bubbleEditorSession.originalHash = hashValue;
+    window.__bubbleEditorSession.lastChangedHash = hashValue;
+    window.__bubbleEditorSession.committed = true;
+}
+
+function syncHashInputState(editor, originalHash) {
     const hashInput = editor.shadowRoot?.querySelector('#hash-input');
     const warning = editor.shadowRoot?.querySelector('#duplicate-hash-warning');
-    if (!hashInput || !warning) return;
-
-    const isDuplicate = isHashOnCurrentPage(hashInput.value, originalHash);
-    warning.style.display = isDuplicate ? '' : 'none';
-
-    const createButton = editor.shadowRoot?.querySelector('.icon-button');
-    if (createButton) {
-        createButton.classList.toggle('disabled', isDuplicate);
+    if (!hashInput) {
+        return getPopUpHashInputState('', originalHash);
     }
+
+    const hashState = getPopUpHashInputState(hashInput.value, originalHash);
+    const displayValue = getPopUpHashInputDisplayValue(hashInput.value);
+    if (hashInput.value !== displayValue) {
+        hashInput.value = displayValue;
+    }
+
+    if (warning) {
+        warning.style.display = hashState.isDuplicate ? '' : 'none';
+    }
+
+    const createButton = editor.shadowRoot?.querySelector('#create-pop-up-button');
+    if (createButton) {
+        createButton.classList.toggle('disabled', !hashState.isValid);
+        createButton.disabled = !hashState.isValid;
+    }
+
+    return hashState;
 }
 
 function updateUIForVerticalStack(editor, isInVerticalStack) {
@@ -244,7 +296,7 @@ function updateUIForVerticalStack(editor, isInVerticalStack) {
     }
     
     // Update the button icon and text
-    const buttonIcon = editor.shadowRoot.querySelector('.icon-button ha-icon');
+    const buttonIcon = editor.shadowRoot.querySelector('#create-pop-up-button ha-icon');
     if (buttonIcon) {
         buttonIcon.icon = isInVerticalStack ? 'mdi:content-save' : 'mdi:plus';
     }
@@ -275,11 +327,12 @@ function createPopUpConfig(editor, originalConfig) {
         
         // Read the current form value.
         const includeExample = editor.shadowRoot.querySelector("#include-example")?.checked || false;
-        let hashValue = '#pop-up-name';
-        const hashInput = editor.shadowRoot.querySelector('#hash-input');
-        if (hashInput && hashInput.value) {
-            hashValue = hashInput.value;
+        let hashValue = POPUP_HASH_PREFIX;
+        const hashState = syncHashInputState(editor);
+        if (!hashState.isValid) {
+            return;
         }
+        hashValue = hashState.normalizedValue;
         
         if (isInVerticalStack) {
             if (popupLayoutConfig.popup_mode) {
@@ -295,6 +348,7 @@ function createPopUpConfig(editor, originalConfig) {
             }
 
             editor._config.hash = hashValue;
+            commitEditorSessionHash(hashValue);
             registerPopUpHash(hashValue, {
                 name: editor._config.name,
                 icon: editor._config.icon
@@ -341,13 +395,15 @@ function createPopUpConfig(editor, originalConfig) {
             name: editor._config.name,
             icon: editor._config.icon
         });
+
+        commitEditorSessionHash(hashValue);
         
         fireEvent(editor, "config-changed", { config: editor._config });
     } catch (error) {
         console.error("Error creating pop-up:", error);
         // Restore original config if there's an error
         editor._config = originalConfig;
-        editor._config.hash = editor.shadowRoot.querySelector('#hash-input')?.value || '#pop-up-name';
+        editor._config.hash = normalizePopUpHashInputValue(editor.shadowRoot.querySelector('#hash-input')?.value);
         registerPopUpHash(editor._config.hash, {
             name: editor._config.name,
             icon: editor._config.icon
@@ -364,6 +420,9 @@ export function renderPopUpEditor(editor) {
     const isNewPopUp = editor._config.card_type === 'pop-up' && !editor._config.hash;
     if (isNewPopUp) {
 
+        const session = getEditorSession(editor._config?.hash || null);
+        const initialHashState = getPopUpHashInputState(session.lastChangedHash || POPUP_HASH_PREFIX, session.originalHash);
+
         const originalConfig = { ...editor._config };
 
         let isInVerticalStack = false;
@@ -372,7 +431,7 @@ export function renderPopUpEditor(editor) {
         setTimeout(() => {
             isInVerticalStack = window.popUpError === false;
             updateUIForVerticalStack(editor, isInVerticalStack);
-            updateDuplicateHashWarning(editor);
+            syncHashInputState(editor, session.originalHash);
         }, 0);
 
         editor.createPopUpConfig = () => createPopUpConfig(editor, originalConfig);
@@ -393,10 +452,19 @@ export function renderPopUpEditor(editor) {
                 </div>
                 <ha-textfield
                     label="Hash (e.g. #kitchen)"
-                    .value="${editor._config?.hash || '#pop-up-name'}"
+                    icon
+                    .value="${getPopUpHashInputDisplayValue(session.lastChangedHash || POPUP_HASH_PREFIX)}"
+                    placeholder="${POPUP_HASH_PLACEHOLDER}"
                     id="hash-input"
-                    @input="${() => updateDuplicateHashWarning(editor)}"
-                ></ha-textfield>
+                    @input="${() => {
+                        const hashState = syncHashInputState(editor, session.originalHash);
+                        if (window.__bubbleEditorSession) {
+                            window.__bubbleEditorSession.lastChangedHash = hashState.normalizedValue;
+                        }
+                    }}"
+                >
+                    <span slot="leadingIcon" class="bubble-pop-up-hash-prefix" aria-hidden="true">${POPUP_HASH_PREFIX}</span>
+                </ha-textfield>
                 ${duplicateHashWarningTemplate()}
                 ${renderPopUpModeDropdown(editor)}
                 ${renderBottomOffsetOption(editor)}
@@ -411,7 +479,12 @@ export function renderPopUpEditor(editor) {
                     </div>
                 </ha-formfield>
                 
-                <button class="icon-button" @click="${() => editor.createPopUpConfig()}">
+                <button
+                    id="create-pop-up-button"
+                    class="icon-button ${initialHashState.isValid ? '' : 'disabled'}"
+                    ?disabled=${!initialHashState.isValid}
+                    @click="${() => editor.createPopUpConfig()}"
+                >
                     <ha-icon icon="mdi:plus"></ha-icon>
                     <span id="button-text">Create pop-up</span>
                 </button>
@@ -437,7 +510,7 @@ export function renderPopUpEditor(editor) {
     // Keep the original hash across editor re-renders.
     const session = getEditorSession(editor._config?.hash || null);
 
-    setTimeout(() => updateDuplicateHashWarning(editor, session.originalHash), 0);
+    setTimeout(() => syncHashInputState(editor, session.originalHash), 0);
 
     // Render the full editor for an existing pop-up.
     return html`
@@ -446,23 +519,28 @@ export function renderPopUpEditor(editor) {
             ${renderLegacyMigrationNotice(editor, session.originalHash)}
             <ha-textfield
                 label="Hash (e.g. #kitchen)"
-                .value="${editor._config?.hash || '#pop-up-name'}"
+                icon
+                .value="${getPopUpHashInputDisplayValue(editor._config?.hash)}"
+                placeholder="${POPUP_HASH_PLACEHOLDER}"
                 .configValue="${"hash"}"
                 id="hash-input"
                 @input="${(e) => {
-                    editor._config.hash = e.target.value;
+                    const hashState = syncHashInputState(editor, session.originalHash);
+                    editor._config.hash = hashState.normalizedValue;
                     if (window.__bubbleEditorSession) {
-                        window.__bubbleEditorSession.lastChangedHash = e.target.value;
+                        window.__bubbleEditorSession.lastChangedHash = hashState.normalizedValue;
                     }
-                    updateDuplicateHashWarning(editor, session.originalHash);
                 }}"
                 @change="${(e) => {
+                    e.target.value = normalizePopUpHashInputValue(e.target.value);
                     if (window.__bubbleEditorSession) {
                         window.__bubbleEditorSession.committed = true;
                     }
                     editor._valueChanged(e);
                 }}"
-            ></ha-textfield>
+            >
+                <span slot="leadingIcon" class="bubble-pop-up-hash-prefix" aria-hidden="true">${POPUP_HASH_PREFIX}</span>
+            </ha-textfield>
             ${duplicateHashWarningTemplate()}
             ${renderPopupStyleDropdown(editor)}
             ${renderPopUpModeDropdown(editor)}

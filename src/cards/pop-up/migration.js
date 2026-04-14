@@ -304,13 +304,14 @@ function getActiveLovelaceConfig(editor) {
 
 function getCurrentMigrationConfig(editor) {
     const hashInput = editor.shadowRoot?.querySelector('#hash-input');
-    if (!hashInput?.value) {
+    const hashValue = normalizeHash(hashInput?.value);
+    if (!hashValue) {
         return editor._config;
     }
 
     return {
         ...editor._config,
-        hash: hashInput.value,
+        hash: hashValue,
     };
 }
 
