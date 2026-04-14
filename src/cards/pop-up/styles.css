@@ -265,13 +265,7 @@
 .popup-style-classic .bubble-header .bubble-button-card-container {
     background: none !important;
     box-shadow: none !important;
-    pointer-events: none !important;
     cursor: default !important;
-}
-
-.popup-style-classic .bubble-header .bubble-sub-buttons-container,
-.popup-style-classic .bubble-header .bubble-sub-button {
-    pointer-events: auto !important;
 }
 
 .popup-style-classic .bubble-header .bubble-background {
@@ -298,6 +292,14 @@
     gap: 8px;
 }
 
+.popup-style-classic .bubble-header .bubble-sub-slider-wrapper:not(.inline) {
+    width: calc(100% - 8px);
+}
+
+.popup-style-classic .bubble-header .bubble-sub-slider-wrapper.top-aligned {
+    top: calc(50% - (var(--bubble-sub-slider-height, 36px) / 2));
+}
+
 .popup-style-classic .bubble-header .bubble-icon-container {
     background-color: transparent !important;
     margin-left: 0 !important;
@@ -311,6 +313,11 @@
 
 .popup-style-classic .bubble-header-action-icon svg {
     fill: currentColor;
+}
+
+.popup-style-classic .bubble-close-button .bubble-header-action-icon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .popup-style-classic .bubble-content-container::after,
