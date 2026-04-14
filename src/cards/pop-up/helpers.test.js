@@ -326,6 +326,34 @@ describe('standalone popup lifecycle', () => {
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
     });
 
+    test('force-closes a runtime-active standalone popup when hash removal finds a stale closed class', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        registerPopupContext(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+        flushRafQueue();
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+
+        jest.clearAllMocks();
+
+        context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing');
+        context.popUp.classList.add('is-popup-closed');
+
+        removeHash(true);
+
+        expect(hideBackdrop).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-closing')).toBe(true);
+
+        dispatchTransformTransitionEnd(context.popUp);
+
+        expect(toggleBodyScroll).toHaveBeenCalledWith(false);
+        expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, false);
+    });
+
     test('delays the next standalone popup open by one frame during popup-to-popup navigation', () => {
         const contextA = createStandaloneContext({ hash: '#popup-a' });
         const contextB = createStandaloneContext({ hash: '#popup-b' });

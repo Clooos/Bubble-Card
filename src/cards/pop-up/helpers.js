@@ -1212,11 +1212,9 @@ function ensureGlobalUrlListener() {
         // Clean orphaned popups in one pass.
         const activeSnapshot = new Set(popupState.activePopups);
         for (const ctx of activeSnapshot) {
-            if (ctx.config.hash &&
-                ctx.config.hash !== currentHash &&
-                ctx.popUp.classList.contains('is-popup-opened')) {
+            if (ctx.config.hash && ctx.config.hash !== currentHash) {
                 switchedBetweenPopups = true;
-                closePopup(ctx);
+                closePopup(ctx, true);
             }
         }
 
@@ -1258,10 +1256,8 @@ function ensureGlobalUrlListener() {
 
             requestAnimationFrame(() => {
                 for (const ctx of popupState.activePopups) {
-                    if (ctx.popUp.classList.contains('is-popup-opened') &&
-                        ctx.config.hash &&
-                        ctx.config.hash !== currentHash) {
-                        closePopup(ctx);
+                    if (ctx.config.hash && ctx.config.hash !== currentHash) {
+                        closePopup(ctx, true);
                     }
                 }
             });
