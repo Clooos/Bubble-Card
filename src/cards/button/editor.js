@@ -44,11 +44,14 @@ export function renderButtonEditor(editor){
         editor._config.button_type = isPopUp ? 'name' : 'switch';
     }
     let button_type = editor._config.button_type;
+    const buttonTypeDropdown = !isClassicStyle
+        ? editor.makeDropdown("Button type", "button_type", getButtonList())
+        : '';
 
     return html`
         <div class="card-config">
             ${!isPopUp ? editor.makeDropdown("Card type", "card_type", editor.cardTypeList) : ''}
-            ${!isClassicStyle ? editor.makeDropdown("Button type", "button_type", getButtonList() ) : ''}
+            ${!isPopUp ? buttonTypeDropdown : ''}
             ${!isPopUp ? html`
             <ha-form
                 .hass=${editor.hass}
@@ -69,6 +72,7 @@ export function renderButtonEditor(editor){
                 ${isPopUp ? 'Header card settings' : 'Card settings'}
                 </h4>
                 <div class="content">
+                    ${isPopUp ? buttonTypeDropdown : ''}
                     ${isPopUp ? html`
                     <ha-form
                         .hass=${editor.hass}

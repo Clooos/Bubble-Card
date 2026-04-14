@@ -934,10 +934,10 @@
                 </div>
             </ha-expansion-panel>
         `:""}
-    `}function ot(e){let t={};"slider"!==e._config.button_type||e._disableEntityFilter||(t={filter:[{domain:["light","media_player","cover","input_number","number","climate","fan"]},{domain:"sensor",device_class:"battery"}]});const n="pop-up"===e._config.card_type;let o=e._config.button_action||"";const i="classic"===e._config.popup_style;i?e._config.button_type="switch":e._config.button_type||(e._config.button_type=n?"name":"switch");let a=e._config.button_type;return Xe.qy`
+    `}function ot(e){let t={};"slider"!==e._config.button_type||e._disableEntityFilter||(t={filter:[{domain:["light","media_player","cover","input_number","number","climate","fan"]},{domain:"sensor",device_class:"battery"}]});const n="pop-up"===e._config.card_type;let o=e._config.button_action||"";const i="classic"===e._config.popup_style;i?e._config.button_type="switch":e._config.button_type||(e._config.button_type=n?"name":"switch");let a=e._config.button_type;const r=i?"":e.makeDropdown("Button type","button_type",[{label:"Switch",value:"switch"},{label:"Slider",value:"slider"},{label:"State",value:"state"},{label:"Name / Text (No entity required)",value:"name"}]);return Xe.qy`
         <div class="card-config">
             ${n?"":e.makeDropdown("Card type","card_type",e.cardTypeList)}
-            ${i?"":e.makeDropdown("Button type","button_type",[{label:"Switch",value:"switch"},{label:"Slider",value:"slider"},{label:"State",value:"state"},{label:"Name / Text (No entity required)",value:"name"}])}
+            ${n?"":r}
             ${n?"":Xe.qy`
             <ha-form
                 .hass=${e.hass}
@@ -953,6 +953,7 @@
                 ${n?"Header card settings":"Card settings"}
                 </h4>
                 <div class="content">
+                    ${n?r:""}
                     ${n?Xe.qy`
                     <ha-form
                         .hass=${e.hass}
