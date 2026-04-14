@@ -138,9 +138,9 @@ function initializeLegacyPopUp(context) {
     createHeader(context);
     createStructure(context);
     changeStyle(context);
+    renderHeaderButton(context);
 
     if (context.config.background_update && !context.headerInitialized) {
-        renderHeaderButton(context);
         context.headerInitialized = true;
     }
 }
@@ -173,7 +173,7 @@ export function handlePopUp(context) {
     registerPopupContext(context);
 
     if (!context.editor && !context.detectedEditor) {
-        syncPopupOpenStateWithLocation(context, true);
+        syncPopupOpenStateWithLocation(context, false);
     }
 
     // Refresh the header when the popup is active or being edited.

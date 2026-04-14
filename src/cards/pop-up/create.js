@@ -16,9 +16,7 @@ function _hasHeaderContent(context) {
 }
 
 function _closePopupByUser(context) {
-  if (!removeHash()) {
-    removeHash(true);
-  }
+  removeHash(true);
 }
 
 function _appendIfMissing(parent, child) {
@@ -376,14 +374,7 @@ export function prepareStructure(context) {
     context.popUp.classList.remove("is-standalone-pop-up", "is-popup-opened", "is-opening", "is-closing");
     context.cardTitle = context.verticalStack.querySelector(".card-header");
     if (!context.editor && !context.config.background_update) {
-      // Wait for child elements to get real dimensions before detaching the popup.
       context.popUp.style.visibility = "hidden";
-      setTimeout(() => {
-        if (context.verticalStack?.contains(context.popUp) && !context.popUp.classList.contains("is-popup-opened")) {
-          context.popUp.style.visibility = "";
-          context.verticalStack.removeChild(context.popUp);
-        }
-      }, 100);
     }
 
     context.elements = {};

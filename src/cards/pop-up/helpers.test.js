@@ -8,6 +8,9 @@ const toggleBodyScroll = jest.fn();
 const handlePopUpCards = jest.fn();
 const restoreDetachedPopUpCards = jest.fn();
 const setStandalonePopUpCardsActive = jest.fn();
+const appendLegacyPopup = jest.fn();
+const displayLegacyPopupContent = jest.fn();
+const hideLegacyPopupContent = jest.fn();
 
 function updateMockLocation(locationObject, url) {
     const nextUrl = new URL(url, locationObject.href || 'http://localhost/');
@@ -106,12 +109,12 @@ jest.unstable_mockModule('./cards/index.js', () => ({
 }));
 
 jest.unstable_mockModule('./legacy.js', () => ({
-    appendLegacyPopup: jest.fn(),
-    displayLegacyPopupContent: jest.fn(),
-    hideLegacyPopupContent: jest.fn(),
+    appendLegacyPopup,
+    displayLegacyPopupContent,
+    hideLegacyPopupContent,
 }));
 
-const { cleanupPopupRuntime, closePopup, navigateToPreviousPopup, openPopup, registerPopupContext } = await import('./helpers.js');
+const { cleanupPopupRuntime, closePopup, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash } = await import('./helpers.js');
 
 function flushRafQueue() {
     const callbacks = [...global.requestAnimationFrame.mock.calls];
@@ -141,6 +144,40 @@ function createStandaloneContext(config = {}) {
         },
         elements: {
             header: createMockElement(['bubble-header']),
+        },
+        updatePopupColor: jest.fn(),
+    };
+}
+
+function createMockContainer(initialChildren = []) {
+    const children = new Set(initialChildren);
+
+    return {
+        contains: jest.fn((child) => children.has(child)),
+        appendChild: jest.fn((child) => {
+            children.add(child);
+            return child;
+        }),
+        removeChild: jest.fn((child) => {
+            children.delete(child);
+            return child;
+        }),
+    };
+}
+
+function createLegacyContext(config = {}) {
+    const popUp = createMockElement(['bubble-pop-up', 'is-popup-closed']);
+
+    return {
+        isStandalonePopUp: false,
+        popUp,
+        verticalStack: createMockContainer([popUp]),
+        editor: false,
+        config: {
+            hash: '#legacy-popup',
+            auto_close: 0,
+            background_update: false,
+            ...config,
         },
         updatePopupColor: jest.fn(),
     };
@@ -350,5 +387,115 @@ describe('standalone popup lifecycle', () => {
 
         expect(window.history.replaceState).toHaveBeenCalledTimes(1);
         expect(window.location.hash).toBe('');
+    });
+});
+
+describe('legacy popup location routing', () => {
+    const usedContexts = [];
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+
+        window.history.replaceState({}, '', 'http://localhost/lovelace/test');
+        window.__bubbleLocationDeduperAdded = true;
+        window.__bubbleDialogListenerAdded = true;
+
+        global.requestAnimationFrame = jest.fn((callback) => callback);
+        global.cancelAnimationFrame = jest.fn();
+    });
+
+    afterEach(() => {
+        usedContexts.forEach((context) => cleanupPopupRuntime(context));
+        usedContexts.length = 0;
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+    });
+
+    test('opens legacy popup on the first routed frame when switching from another popup', () => {
+        const contextA = createLegacyContext({ hash: '#popup-a' });
+        const contextB = createLegacyContext({ hash: '#popup-b' });
+        usedContexts.push(contextA, contextB);
+
+        registerPopupContext(contextA);
+        registerPopupContext(contextB);
+
+        openPopup(contextA, true);
+        flushRafQueue();
+        flushRafQueue();
+        flushRafQueue();
+
+        jest.clearAllMocks();
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-b');
+        window.dispatchEvent(new Event('location-changed'));
+
+        expect(displayLegacyPopupContent).not.toHaveBeenCalled();
+
+        flushRafQueue();
+
+        expect(displayLegacyPopupContent).toHaveBeenCalledTimes(1);
+    });
+
+    test('keeps the legacy popup shell mounted during open', () => {
+        const context = createLegacyContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        registerPopupContext(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+
+        expect(appendLegacyPopup).not.toHaveBeenCalled();
+
+        flushRafQueue();
+
+        expect(displayLegacyPopupContent).toHaveBeenCalledTimes(1);
+        expect(appendLegacyPopup).not.toHaveBeenCalled();
+    });
+
+    test('keeps the legacy popup shell mounted after close', () => {
+        const context = createLegacyContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        context.popUp.classList.remove('is-popup-closed');
+        context.popUp.classList.add('is-popup-opened');
+
+        closePopup(context);
+
+        jest.advanceTimersByTime(317);
+
+        expect(hideLegacyPopupContent).toHaveBeenCalledWith(context, 0);
+        expect(appendLegacyPopup).not.toHaveBeenCalledWith(context, false);
+    });
+
+    test('opens legacy popup when the hash changes without a location-changed event', () => {
+        const context = createLegacyContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        registerPopupContext(context);
+
+        window.location.hash = '#popup-a';
+        window.dispatchEvent(new Event('hashchange'));
+
+        expect(displayLegacyPopupContent).not.toHaveBeenCalled();
+
+        flushRafQueue();
+
+        expect(displayLegacyPopupContent).toHaveBeenCalledTimes(1);
+    });
+
+    test('removes the current hash immediately for direct closes', () => {
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        jest.clearAllMocks();
+
+        removeHash(true);
+
+        expect(window.history.replaceState).toHaveBeenCalledTimes(1);
+        expect(window.location.hash).toBe('');
+
+        jest.advanceTimersByTime(50);
+
+        expect(window.history.replaceState).toHaveBeenCalledTimes(1);
     });
 });

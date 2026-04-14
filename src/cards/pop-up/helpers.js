@@ -233,6 +233,16 @@ export function removeHash(direct = false) {
     const hashToRemove = location.hash;
     clearPendingHashRemoval();
 
+    if (direct) {
+        const newURL = window.location.href.split('#')[0];
+        history.replaceState(null, "", newURL);
+        window.dispatchEvent(createLocationChangedEvent({
+            source: 'bubble-popup-remove-hash',
+            direct: true,
+        }));
+        return true;
+    }
+
     popupState.pendingHashRemovalHash = hashToRemove;
     popupState.pendingHashRemovalTimeout = setTimeout(() => {
         popupState.pendingHashRemovalTimeout = null;
@@ -909,6 +919,9 @@ function resetPopupToClosedState(context) {
     context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing');
     context.popUp.classList.add('is-popup-closed');
     context.popUp.style.willChange = '';
+    if (!context.isStandalonePopUp && !context.editor && !context.config?.background_update) {
+        context.popUp.style.visibility = 'hidden';
+    }
     setPopupOpenSettled(context, false);
     clearFreshOutsideInteractionGuard(context);
 
@@ -978,17 +991,17 @@ export function openPopup(context, instant = false) {
 
         displayLegacyPopupContent(context);
 
+        if (!context.verticalStack.contains(popUp)) {
+            window.__bubblePopupOpening = true;
+            appendLegacyPopup(context, true);
+            window.__bubblePopupOpening = false;
+        }
+
         toggleBackdrop(context, true);
         updateListeners(context, true);
 
         requestAnimationFrame(() => {
             if (!popupState.activePopups.has(context)) return;
-
-            window.__bubblePopupOpening = true;
-            if (!context.verticalStack.contains(popUp)) {
-                appendLegacyPopup(context, true);
-            }
-            window.__bubblePopupOpening = false;
 
             if (instant) {
                 popUp.style.transition = 'none';
@@ -1055,7 +1068,6 @@ export function closePopup(context, force = false) {
 
     context.removeDomTimeout = setTimeout(() => {
         context.popUp.style.willChange = '';
-        appendLegacyPopup(context, false);
         hideLegacyPopupContent(context, 0);
         context.removeDomTimeout = null;
     }, popupState.animationDuration + 17);
@@ -1186,7 +1198,7 @@ function ensureGlobalUrlListener() {
 
             switchedBetweenPopups = closeAllPopupsExcept(context) || switchedBetweenPopups;
 
-            if (switchedBetweenPopups) {
+            if (switchedBetweenPopups && context.isStandalonePopUp) {
                 requestAnimationFrame(() => {
                     if (location.hash !== currentHash) return;
                     context._standaloneOpenImmediateFrame = true;
@@ -1212,6 +1224,7 @@ function ensureGlobalUrlListener() {
 
     window.addEventListener('location-changed', handler);
     window.addEventListener('popstate', handler);
+    window.addEventListener('hashchange', handler);
 }
 
 export function cleanupPopupRuntime(context) {

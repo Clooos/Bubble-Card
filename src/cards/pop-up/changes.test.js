@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 jest.unstable_mockModule('./backdrop.js', () => ({
     getBackdrop: jest.fn(() => ({
         backdropCustomStyle: null,
+        hideBackdrop: jest.fn(),
         updateBackdropStyles: jest.fn(),
     })),
 }));
@@ -20,7 +21,13 @@ jest.unstable_mockModule('./helpers.js', () => ({
         popUp?.classList?.toggle('popup-mode-with-bottom-offset', isFitContent && Boolean(config?.with_bottom_offset));
         return isFitContent ? 'fit-content' : 'default';
     }),
+    syncPopupStyleClasses: jest.fn(),
     wasPopupOpenedByTrigger: jest.fn(),
+}));
+
+jest.unstable_mockModule('./legacy.js', () => ({
+    appendLegacyPopup: jest.fn(),
+    hideLegacyPopupContent: jest.fn(),
 }));
 
 jest.unstable_mockModule('./migration.js', () => ({
@@ -58,6 +65,7 @@ jest.unstable_mockModule('./cards/index.js', () => ({
 const { changeEditor, changeStyle, changeTriggered, syncHeaderVisibilityClasses } = await import('./changes.js');
 const { handlePopUpCards } = await import('./cards/index.js');
 const { addHash, markPopupPendingTriggerOpen, removeHash, wasPopupOpenedByTrigger } = await import('./helpers.js');
+const { appendLegacyPopup, hideLegacyPopupContent } = await import('./legacy.js');
 const { toggleBodyScroll } = await import('../../tools/utils.js');
 const { checkConditionsMet, ensureArray, validateConditionalConfig } = await import('../../tools/validate-condition.js');
 
@@ -83,6 +91,9 @@ function createMockClassList(initialClasses = []) {
 describe('changeEditor', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        global.window = {
+            addEventListener: jest.fn(),
+        };
         global.location = {
             hash: '',
             pathname: '/lovelace/test',
@@ -103,6 +114,88 @@ describe('changeEditor', () => {
         expect(context.bubbleInstanceId).toBeUndefined();
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(toggleBodyScroll).not.toHaveBeenCalled();
+    });
+
+    test('shows a closed standalone popup shell in editor mode even if it was hidden before', () => {
+        let placeholder = null;
+        const containerClassList = createMockClassList();
+        const contentClassList = createMockClassList();
+        const popUpClassList = createMockClassList(['is-popup-closed']);
+        const popUpContainer = {
+            appendChild: jest.fn((child) => {
+                placeholder = child;
+            }),
+            querySelector: jest.fn((selector) => selector === '.bubble-editor-placeholder' ? placeholder : null),
+            classList: containerClassList,
+        };
+        const context = {
+            isStandalonePopUp: true,
+            editor: true,
+            detectedEditor: false,
+            editorAccess: false,
+            hideContentTimeout: 12,
+            popUp: {
+                classList: popUpClassList,
+                style: {
+                    display: 'none',
+                    visibility: 'hidden',
+                },
+            },
+            elements: {
+                content: { classList: contentClassList },
+                popUpContainer,
+            },
+            config: {
+                hash: '#kitchen-popup',
+                cards: [{ type: 'entities' }],
+            },
+        };
+
+        changeEditor(context);
+
+        expect(context.popUp.style.display).toBe('');
+        expect(context.popUp.style.visibility).toBe('');
+        expect(context.popUp.classList.contains('editor')).toBe(true);
+        expect(popUpContainer.classList.contains('has-placeholder')).toBe(true);
+        expect(handlePopUpCards).toHaveBeenCalledWith(context);
+        expect(appendLegacyPopup).toHaveBeenCalledWith(context, true);
+    });
+
+    test('does not route standalone editor teardown through the legacy hide helper', () => {
+        const popUpClassList = createMockClassList(['is-popup-closed', 'editor']);
+        const contentClassList = createMockClassList(['popup-content-in-editor-mode']);
+        const context = {
+            isStandalonePopUp: true,
+            editor: false,
+            detectedEditor: false,
+            editorAccess: true,
+            popUp: {
+                classList: popUpClassList,
+                style: {
+                    display: 'none',
+                    visibility: 'hidden',
+                },
+            },
+            elements: {
+                content: { classList: contentClassList },
+                popUpContainer: {
+                    querySelector: jest.fn(() => null),
+                    classList: createMockClassList(),
+                },
+            },
+            config: {
+                hash: '#kitchen-popup',
+                cards: [{ type: 'entities' }],
+            },
+        };
+
+        changeEditor(context);
+
+        expect(hideLegacyPopupContent).not.toHaveBeenCalled();
+        expect(context.popUp.style.display).toBe('');
+        expect(context.popUp.style.visibility).toBe('');
+        expect(context.popUp.classList.contains('editor')).toBe(false);
+        expect(context.editorAccess).toBe(false);
     });
 
     test('syncs popup header action classes from config', () => {

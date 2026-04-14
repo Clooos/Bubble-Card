@@ -81,6 +81,7 @@ function createOpenPopupContext(overrides = {}) {
 describe('handlePopUp performance guards', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        global.ShadowRoot = global.ShadowRoot || class ShadowRoot {};
         global.location = {
             hash: '#kitchen-popup',
             pathname: '/lovelace/test',
@@ -244,7 +245,7 @@ describe('handlePopUp performance guards', () => {
 
         await handlePopUp(context);
 
-        expect(syncPopupOpenStateWithLocation).toHaveBeenCalledWith(context, true);
+        expect(syncPopupOpenStateWithLocation).toHaveBeenCalledWith(context, false);
     });
 
     test('does not force hash-based reopen while editing', async () => {
@@ -269,5 +270,18 @@ describe('handlePopUp performance guards', () => {
         await handlePopUp(context);
 
         expect(handlePopUpCards).not.toHaveBeenCalled();
+    });
+
+    test('renders the legacy header button during popup initialization', async () => {
+        const rootNode = new global.ShadowRoot();
+        const context = createOpenPopupContext({
+            cardType: undefined,
+            isStandalonePopUp: false,
+            getRootNode: () => rootNode,
+        });
+
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(1);
     });
 });

@@ -162,6 +162,7 @@ describe('createHeader', () => {
 
         const closeClickEvent = triggerEvent(context.elements.closeButton, 'click');
 
+        expect(removeHash).toHaveBeenCalledWith(true);
         expect(removeHash).toHaveBeenCalledTimes(1);
         expect(closeClickEvent.preventDefault).toHaveBeenCalledTimes(1);
         expect(closeClickEvent.stopPropagation).toHaveBeenCalledTimes(1);
@@ -187,6 +188,7 @@ describe('createHeader', () => {
         triggerEvent(closeButton, 'click');
 
         expect(navigateToPreviousPopup).toHaveBeenCalledTimes(1);
+        expect(removeHash).toHaveBeenCalledWith(true);
         expect(removeHash).toHaveBeenCalledTimes(1);
     });
 

@@ -185,7 +185,7 @@ export function changeEditor(context) {
     }
 
     if (isHAEditorModeActive && isCard && sectionRowContainer) {
-        if (sectionRowContainer.style.display === 'none') {
+        if (sectionRowContainer.style.display === 'none' || sectionRowContainer.style.position === 'absolute') {
             sectionRowContainer.style.display = '';
             sectionRowContainer.style.position = '';
         }
@@ -193,9 +193,14 @@ export function changeEditor(context) {
 
     if (isHAEditorModeActive) {
         if (!context.editorAccess) {
+            clearTimeout(context.hideContentTimeout);
+            context.hideContentTimeout = null;
+
             toggleBodyScroll(false);
             popUp.classList.remove('is-popup-opened');
             popUp.classList.add('is-popup-closed', 'editor');
+            popUp.style.display = '';
+            popUp.style.visibility = '';
             elements?.content?.classList.add('popup-content-in-editor-mode');
 
             appendLegacyPopup(context, true);
@@ -258,9 +263,15 @@ export function changeEditor(context) {
             popUp.classList.add('is-popup-opened');
             toggleBodyScroll(true);
         } else {
-            appendLegacyPopup(context, false);
-            hideLegacyPopupContent(context, 0);
             popUp.classList.remove('editor');
+
+            if (context.isStandalonePopUp) {
+                popUp.style.display = '';
+                popUp.style.visibility = '';
+            } else {
+                appendLegacyPopup(context, false);
+                hideLegacyPopupContent(context, 0);
+            }
         }
 
         context.editorAccess = false;
