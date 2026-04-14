@@ -28,6 +28,7 @@ import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
 import cardsEditorStyles from '../cards/pop-up/cards/styles.css';
 import { getLazyLoadedPanelContent } from './utils.js';
+import { bridgeDialogCloseToParent } from './standalone-dialog-bridge.js';
 
 class BubbleCardEditor extends LitElement {
     _previewStyleApplied = false;
@@ -2355,20 +2356,49 @@ class BubbleCardEditor extends LitElement {
             : [];
     }
 
-    _reopenStandaloneParentDialog(parentDialogParams, cardConfig) {
+    _showStandaloneDialogParams(dialog, dialogParams) {
+        if (!dialog || !dialogParams || typeof dialog.showDialog !== 'function') {
+            return false;
+        }
+
+        try {
+            dialog.showDialog(dialogParams);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    _reopenStandaloneParentDialog(parentDialogParams, cardConfig, preferredDialog = null) {
+        if (!parentDialogParams || !cardConfig) return false;
+
+        const dialogParams = {
+            ...parentDialogParams,
+            cardConfig,
+        };
+
+        if (this._showStandaloneDialogParams(preferredDialog, dialogParams)) {
+            return true;
+        }
+
+        if (this._showStandaloneDialogParams(this._getActiveEditCardDialog(), dialogParams)) {
+            return true;
+        }
+
         const homeAssistant = this._getHomeAssistantHost();
-        if (!homeAssistant || !parentDialogParams || !cardConfig) return;
+        if (!homeAssistant) return false;
 
         setTimeout(() => {
             fireEvent(homeAssistant, "show-dialog", {
                 dialogTag: "hui-dialog-edit-card",
                 dialogImport: () => Promise.resolve(),
                 dialogParams: {
-                    ...parentDialogParams,
-                    cardConfig,
+                    ...dialogParams,
                 },
             });
         }, 0);
+
+        return true;
     }
 
     _openStandaloneChildDialogInCurrentEditor(childDialogParams, parentDialogParams, getCardConfig) {
@@ -2377,10 +2407,46 @@ class BubbleCardEditor extends LitElement {
             return false;
         }
 
+        let cleanupTimeout = null;
+
+        const clearCleanupTimeout = () => {
+            if (cleanupTimeout) {
+                clearTimeout(cleanupTimeout);
+                cleanupTimeout = null;
+            }
+        };
+
+        const cleanupClosedListener = () => {
+            window.removeEventListener("dialog-closed", handleClosed, true);
+        };
+
+        const cleanup = () => {
+            clearCleanupTimeout();
+            cleanupClosedListener();
+            restoreBridgedClose();
+        };
+
+        const restoreBridgedClose = bridgeDialogCloseToParent(activeDialog, () => {
+            const reopened = this._reopenStandaloneParentDialog(
+                parentDialogParams,
+                getCardConfig(),
+                activeDialog
+            );
+
+            if (reopened) {
+                clearCleanupTimeout();
+                cleanupTimeout = setTimeout(() => {
+                    cleanup();
+                }, 500);
+            }
+
+            return reopened;
+        });
+
         const handleClosed = (event) => {
             if (event?.detail?.dialog !== "hui-dialog-edit-card") return;
-            window.removeEventListener("dialog-closed", handleClosed, true);
-            this._reopenStandaloneParentDialog(parentDialogParams, getCardConfig());
+            cleanup();
+            this._reopenStandaloneParentDialog(parentDialogParams, getCardConfig(), activeDialog);
         };
 
         window.addEventListener("dialog-closed", handleClosed, true);
@@ -2389,7 +2455,7 @@ class BubbleCardEditor extends LitElement {
             activeDialog.showDialog(childDialogParams);
             return true;
         } catch (_) {
-            window.removeEventListener("dialog-closed", handleClosed, true);
+            cleanup();
             return false;
         }
     }
