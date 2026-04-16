@@ -1,1 +1,1 @@
-export let version = 'v3.2.0-beta.1';
+export let version = 'v3.2.0-beta.2';
