@@ -450,8 +450,7 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
                 Legacy pop-up detected
             </h4>
             <div class="content">
-                <p>This pop-up still uses the old vertical-stack wrapper. Migrate it to the standalone format to manage its content with the same drag-and-drop flow as a section view.</p>
-                ${hasHorizontalStacks ? html`
+                <p>This pop-up still uses the old vertical-stack wrapper. Migrate it to the standalone format to manage its content with the same drag-and-drop flow as a section view.</p>                ${hasHorizontalStacks ? html`
                     <p>Horizontal stacks were detected. Their cards will be converted so you can drag and drop them individually while keeping the same layout (this option can be disabled if needed).</p>
                     <ha-formfield>
                         <ha-switch
@@ -467,6 +466,15 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
                         </div>
                     </ha-formfield>
                 ` : ''}
+                <div class="bubble-info warning bubble-sub-warning">
+                    <h4 class="bubble-section-title">
+                        <ha-icon icon="mdi:alert-octagon-outline"></ha-icon>
+                        Beta rollback warning
+                    </h4>
+                    <div class="content">
+                        <p><b>This migration is permanent.</b> Even though it has been tested to handle all known legacy cases, I still recommend keeping a backup if you may want to roll back to v3.1.6 later.</p>
+                    </div>
+                </div>
                 ${errorMessage ? html`<p>${errorMessage}</p>` : ''}
                 <button class="icon-button ${isBusy ? 'disabled' : ''}" ?disabled=${isBusy} @click=${() => migrateLegacyPopUpToStandalone(editor, originalHash)}>
                     <ha-icon icon="mdi:swap-horizontal-bold"></ha-icon>
