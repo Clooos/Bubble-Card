@@ -34,7 +34,9 @@ jest.unstable_mockModule('./cards/index.js', () => ({
 
 const { handlePopUp } = await import('./index.js');
 const { changeEditor } = await import('./changes.js');
+const { changeStyle } = await import('./changes.js');
 const { handlePopUpCards } = await import('./cards/index.js');
+const { createHeader, createStructure } = await import('./create.js');
 const { renderHeaderButton } = await import('./create.js');
 const { syncPopupOpenStateWithLocation } = await import('./helpers.js');
 const { registerPopUpHash } = await import('./navigation-picker-bridge.js');
@@ -221,6 +223,21 @@ describe('handlePopUp performance guards', () => {
         expect(handlePopUpCards).not.toHaveBeenCalled();
     });
 
+    test('skips standalone shell/style work while the popup stays inactive', async () => {
+        global.location.hash = '';
+
+        const context = createOpenPopupContext({
+            isStandalonePopUp: true,
+            _standalonePopUpCardsActive: false,
+        });
+
+        await handlePopUp(context);
+
+        expect(changeStyle).not.toHaveBeenCalled();
+        expect(renderHeaderButton).not.toHaveBeenCalled();
+        expect(context._standaloneNeedsShellRefresh).toBe(true);
+    });
+
     test('keeps standalone child-card reconciliation when the popup is active', async () => {
         const context = createOpenPopupContext({
             isStandalonePopUp: true,
@@ -281,6 +298,32 @@ describe('handlePopUp performance guards', () => {
         await handlePopUp(context);
 
         expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+    });
+
+    test('defers standalone initialization shell work while the popup stays inactive', async () => {
+        global.location.hash = '';
+
+        const rootNode = new global.ShadowRoot();
+        const context = createOpenPopupContext({
+            cardType: undefined,
+            isStandalonePopUp: true,
+            getRootNode: () => rootNode,
+            config: {
+                type: 'custom:bubble-card',
+                card_type: 'pop-up',
+                hash: '#kitchen-popup',
+                cards: [{ type: 'gauge', entity: 'sensor.temperature' }],
+            },
+        });
+
+        await handlePopUp(context);
+
+        expect(createHeader).toHaveBeenCalledTimes(1);
+        expect(createStructure).toHaveBeenCalledTimes(1);
+        expect(changeStyle).not.toHaveBeenCalled();
+        expect(renderHeaderButton).not.toHaveBeenCalled();
+        expect(typeof context.refreshPopupShell).toBe('function');
+        expect(context._standaloneNeedsShellRefresh).toBe(true);
     });
 
     test('does not mount standalone child cards during popup initialization while inactive', async () => {

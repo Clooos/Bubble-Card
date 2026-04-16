@@ -1,6 +1,6 @@
 import { getBackdrop } from './backdrop.js';
 import { handlePopUpCards, setStandalonePopUpCardsActive } from './cards/index.js';
-import { keepPopupHostMounted, restorePopupHostLayout } from './helpers.js';
+import { restorePopupHostLayout, suspendPopupHostLayout } from './helpers.js';
 import { isLegacyPopUpConfig } from './migration.js';
 import { appendLegacyPopup, hideLegacyPopupContent } from './legacy.js';
 import { createElement, toggleBodyScroll } from '../../tools/utils.js';
@@ -266,7 +266,7 @@ export function changeEditor(context) {
             if (context.isStandalonePopUp) {
                 popUp.style.display = '';
                 popUp.style.visibility = '';
-                keepPopupHostMounted(context);
+                suspendPopupHostLayout(context);
             } else {
                 appendLegacyPopup(context, false);
                 hideLegacyPopupContent(context, 0);

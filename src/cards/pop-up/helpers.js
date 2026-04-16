@@ -102,6 +102,22 @@ export function restorePopupHostLayout(context) {
     }
 }
 
+export function suspendPopupHostLayout(context) {
+    resolvePopupHostElements(context);
+
+    const { sectionRow, sectionRowContainer } = context;
+
+    if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+        sectionRow.hidden = true;
+        sectionRow.style.display = 'none';
+    }
+
+    if (sectionRowContainer?.classList?.contains('card')) {
+        sectionRowContainer.style.display = 'none';
+        sectionRowContainer.style.position = '';
+    }
+}
+
 function clearPendingHashRemoval() {
     if (popupState.pendingHashRemovalTimeout) {
         clearTimeout(popupState.pendingHashRemovalTimeout);
@@ -611,6 +627,8 @@ function finalizeStandalonePopupClose(context) {
         popUp.style.display = 'none';
     }
 
+    suspendPopupHostLayout(context);
+
     if (context.config.close_action) {
         callAction(context, context.config, 'close_action');
     }
@@ -618,6 +636,10 @@ function finalizeStandalonePopupClose(context) {
 
 function openStandalonePopup(context, instant = false) {
     clearAllTimeouts(context);
+
+    if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
+        context.refreshPopupShell();
+    }
 
     const { popUp } = context;
     popupState.activePopups.add(context);
@@ -633,6 +655,7 @@ function openStandalonePopup(context, instant = false) {
 
     if (instant) {
         // Synchronous instant open (hash-on-load, forced open, etc.).
+        keepPopupHostMounted(context);
         context.updatePopupColor?.();
         popUp.style.display = '';
         popUp.style.visibility = '';
@@ -662,6 +685,7 @@ function openStandalonePopup(context, instant = false) {
     const phase1 = () => {
         if (!popupState.activePopups.has(context)) return;
 
+        keepPopupHostMounted(context);
         context.updatePopupColor?.();
         popUp.style.display = '';
         popUp.style.visibility = '';

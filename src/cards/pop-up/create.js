@@ -4,7 +4,7 @@ import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { handleButton } from "../../cards/button/index.js";
 import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
-import { keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, syncPopupModeClasses } from "./helpers.js";
+import { navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, suspendPopupHostLayout, syncPopupModeClasses } from "./helpers.js";
 import { hideLegacyPopupContent } from './legacy.js';
 import styles from "./styles.css";
 
@@ -432,7 +432,7 @@ export function prepareStandaloneStructure(context) {
   if (context.editor || context.detectedEditor) {
     restorePopupHostLayout(context);
   } else {
-    keepPopupHostMounted(context);
+    suspendPopupHostLayout(context);
   }
   registerPopupContext(context);
 }

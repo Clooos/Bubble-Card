@@ -35,6 +35,16 @@ jest.unstable_mockModule('./helpers.js', () => ({
             context.sectionRowContainer.style.position = '';
         }
     }),
+    suspendPopupHostLayout: jest.fn((context) => {
+        if (context.sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+            context.sectionRow.hidden = true;
+            context.sectionRow.style.display = 'none';
+        }
+        if (context.sectionRowContainer?.classList?.contains?.('card')) {
+            context.sectionRowContainer.style.display = 'none';
+            context.sectionRowContainer.style.position = '';
+        }
+    }),
     syncPopupModeClasses: jest.fn((popUp, config) => {
         const isFitContent = config?.popup_mode === 'fit-content';
         popUp?.classList?.toggle('popup-mode-fit-content', isFitContent);
@@ -254,7 +264,10 @@ describe('changeEditor', () => {
         expect(context.popUp.style.display).toBe('');
         expect(context.popUp.style.visibility).toBe('');
         expect(context.popUp.classList.contains('editor')).toBe(false);
-        expect(sectionRowContainer.style.position).toBe('absolute');
+        expect(context.sectionRow.hidden).toBe(true);
+        expect(context.sectionRow.style.display).toBe('none');
+        expect(sectionRowContainer.style.display).toBe('none');
+        expect(sectionRowContainer.style.position).toBe('');
         expect(context.editorAccess).toBe(false);
     });
 

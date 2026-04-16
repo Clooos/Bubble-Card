@@ -112,15 +112,48 @@ function shouldSyncStandalonePopUpCards(context, editorHandledStandaloneCards = 
     );
 }
 
+function isStandalonePopUpInactive(context) {
+    return !!(
+        context.isStandalonePopUp &&
+        !context.editor &&
+        !context.detectedEditor &&
+        !context.config.background_update &&
+        context.config.hash !== location.hash &&
+        !context._standalonePopUpCardsActive
+    );
+}
+
+function refreshPopupShell(context) {
+    changeStyle(context);
+
+    const shouldUpdateHeader = context.config.hash === location.hash ||
+                               context.editor ||
+                               (context.config.background_update && !context.headerInitialized);
+
+    if (shouldUpdateHeader && shouldRefreshHeader(context)) {
+        renderHeaderButton(context);
+
+        if (context.config.background_update) {
+            context.headerInitialized = true;
+        }
+    }
+}
+
 function initializeStandalonePopUp(context) {
     prepareStandaloneStructure(context);
     if (!context.popUp) return;
 
     createHeader(context);
     createStructure(context);
-    changeStyle(context);
-
-    renderHeaderButton(context);
+    context.refreshPopupShell = () => {
+        refreshPopupShell(context);
+        context._standaloneNeedsShellRefresh = false;
+    };
+    if (isStandalonePopUpInactive(context)) {
+        context._standaloneNeedsShellRefresh = true;
+    } else {
+        context.refreshPopupShell();
+    }
     const editorHandledStandaloneCards = changeEditor(context);
     if (shouldSyncStandalonePopUpCards(context, editorHandledStandaloneCards)) {
         handlePopUpCards(context);
@@ -137,8 +170,7 @@ function initializeLegacyPopUp(context) {
 
     createHeader(context);
     createStructure(context);
-    changeStyle(context);
-    renderHeaderButton(context);
+    refreshPopupShell(context);
 
     if (context.config.background_update && !context.headerInitialized) {
         context.headerInitialized = true;
@@ -166,26 +198,19 @@ export function handlePopUp(context) {
         return;
     }
 
-    changeStyle(context);
+    if (isStandalonePopUpInactive(context)) {
+        context._standaloneNeedsShellRefresh = true;
+    } else if (typeof context.refreshPopupShell === 'function') {
+        context.refreshPopupShell();
+    } else {
+        refreshPopupShell(context);
+    }
 
     // Keep the popup registered in the shared URL dispatcher.
     registerPopupContext(context);
 
     if (!context.editor && !context.detectedEditor) {
         syncPopupOpenStateWithLocation(context, false);
-    }
-
-    // Refresh the header when the popup is active or being edited.
-    const shouldUpdateHeader = context.config.hash === location.hash || 
-                               context.editor || 
-                               (context.config.background_update && !context.headerInitialized);
-
-    if (shouldUpdateHeader && shouldRefreshHeader(context)) {
-        renderHeaderButton(context);
-
-        if (context.config.background_update) {
-            context.headerInitialized = true;
-        }
     }
 
     if (!context.editor) {

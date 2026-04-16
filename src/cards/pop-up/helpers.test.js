@@ -148,6 +148,27 @@ function createStandaloneContext(config = {}) {
     };
 }
 
+function createStandaloneHost() {
+    return {
+        sectionRow: {
+            tagName: 'HUI-CARD',
+            hidden: true,
+            style: {
+                display: 'none',
+            },
+        },
+        sectionRowContainer: {
+            style: {
+                display: 'none',
+                position: '',
+            },
+            classList: {
+                contains: jest.fn((name) => name === 'card'),
+            },
+        },
+    };
+}
+
 function createMockContainer(initialChildren = []) {
     const children = new Set(initialChildren);
 
@@ -278,6 +299,37 @@ describe('standalone popup lifecycle', () => {
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
     });
 
+    test('restores a suspended standalone host on open and suspends it again on close', () => {
+        const context = {
+            ...createStandaloneContext(),
+            ...createStandaloneHost(),
+        };
+        usedContexts.push(context);
+
+        openPopup(context);
+
+        expect(context.sectionRow.hidden).toBe(true);
+        expect(context.sectionRow.style.display).toBe('none');
+
+        flushRafQueue(); // RAF1: phase 1 restores the host and makes the shell visible
+
+        expect(context.sectionRow.hidden).toBe(false);
+        expect(context.sectionRow.style.display).toBe('');
+        expect(context.sectionRowContainer.style.display).toBe('');
+        expect(context.sectionRowContainer.style.position).toBe('absolute');
+
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+
+        closePopup(context);
+        dispatchTransformTransitionEnd(context.popUp);
+
+        expect(context.sectionRow.hidden).toBe(true);
+        expect(context.sectionRow.style.display).toBe('none');
+        expect(context.sectionRowContainer.style.display).toBe('none');
+        expect(context.sectionRowContainer.style.position).toBe('');
+    });
+
     test('primes cold standalone content in RAF2, popup animates with cards built', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
@@ -298,6 +350,20 @@ describe('standalone popup lifecycle', () => {
         // with content already in place — no empty-shell flash.
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('refreshes deferred standalone shell updates before opening', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        context._standaloneNeedsShellRefresh = true;
+        context.refreshPopupShell = jest.fn(() => {
+            context._standaloneNeedsShellRefresh = false;
+        });
+
+        openPopup(context);
+
+        expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
+        expect(context._standaloneNeedsShellRefresh).toBe(false);
     });
 
     test('defers standalone close cleanup until transition end', () => {
