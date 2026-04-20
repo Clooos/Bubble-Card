@@ -259,6 +259,10 @@ describe('standalone popup lifecycle', () => {
 
         dispatchTransformTransitionEnd(context.popUp);
 
+        expect(toggleBodyScroll).not.toHaveBeenCalled();
+
+        flushRafQueue();
+
         expect(toggleBodyScroll).toHaveBeenCalledWith(true);
         expect(callAction).toHaveBeenCalledWith(context.popUp, context.config, 'open_action');
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
@@ -276,6 +280,11 @@ describe('standalone popup lifecycle', () => {
         expect(toggleBodyScroll).not.toHaveBeenCalled();
 
         jest.advanceTimersByTime(1);
+
+        expect(toggleBodyScroll).not.toHaveBeenCalled();
+
+        flushRafQueue();
+
         expect(toggleBodyScroll).toHaveBeenCalledWith(true);
     });
 

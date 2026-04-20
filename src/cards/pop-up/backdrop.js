@@ -68,16 +68,23 @@ export function getBackdrop(context) {
         backdropHideTimeout = null;
     }
 
-    function markBackdropTransition(transitionState) {
-        internalBackdropElement.classList.remove("is-opening", "is-closing");
-        if (transitionState) {
-            internalBackdropElement.classList.add(transitionState);
-        }
-        internalBackdropElement.classList.add("is-transitioning");
+    function clearBackdropTransitionState() {
+        internalBackdropElement.classList.remove("is-transitioning", "is-opening", "is-closing");
 
         if (backdropTransitionTimeout) {
             clearTimeout(backdropTransitionTimeout);
+            backdropTransitionTimeout = null;
         }
+    }
+
+    function markBackdropTransition(transitionState) {
+        clearBackdropTransitionState();
+
+        if (!transitionState) {
+            return;
+        }
+
+        internalBackdropElement.classList.add(transitionState, "is-transitioning");
 
         backdropTransitionTimeout = setTimeout(() => {
             internalBackdropElement.classList.remove("is-transitioning", "is-opening", "is-closing");
@@ -182,9 +189,10 @@ export function getBackdrop(context) {
             // Flush the hidden state once after un-hiding the host so the next class
             // toggle animates opacity instead of snapping to the visible end state.
             internalBackdropElement.getBoundingClientRect();
+            markBackdropTransition("is-opening");
+        } else {
+            clearBackdropTransitionState();
         }
-
-        markBackdropTransition("is-opening");
 
         if (!internalBackdropElement.classList.contains("is-visible")) {
             internalBackdropElement.classList.add("is-visible");

@@ -309,6 +309,9 @@ export function createStructure(context) {
       context.updatePopupColor = () => {
         const color = context.config.bg_color || getThemeBackgroundColor();
         const opacity = Math.min(1, Math.max(0, (context.config.bg_opacity ?? 88) / 100));
+        if (color === context._lastPopupBgColor && opacity === context._lastPopupBgOpacity) return;
+        context._lastPopupBgColor = color;
+        context._lastPopupBgOpacity = opacity;
         const rgbaColor = convertToRGBA(color, opacity, 1.02);
         const fadeOpacity = Math.min(1, opacity * 0.65);
         const fadeColor = convertToRGBA(color, fadeOpacity, 1.02);

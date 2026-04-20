@@ -486,7 +486,16 @@ function completePopupOpen(context) {
     setPopupOpenSettled(context, true);
     armFreshOutsideInteractionGuard(context);
 
-    toggleBodyScroll(true);
+    clearContextFrame(context, '_popupBodyScrollLockFrame');
+    context._popupBodyScrollLockFrame = requestAnimationFrame(() => {
+        context._popupBodyScrollLockFrame = null;
+
+        if (!popupState.activePopups.has(context) || !context.popUp?.classList?.contains('is-popup-opened')) {
+            return;
+        }
+
+        toggleBodyScroll(true);
+    });
     schedulePopupBackdropBlurGuardRelease(context);
 
     if (context.config.auto_close > 0) {
@@ -980,6 +989,7 @@ function clearAllTimeouts(context) {
 
     clearPopupOpenCompletion(context);
     clearPopupBackdropBlurGuardRelease(context);
+    clearContextFrame(context, '_popupBodyScrollLockFrame');
 
     clearStandaloneTransitionCompletion(context);
     clearContextFrame(context, '_standaloneCloseBackdropFrame');

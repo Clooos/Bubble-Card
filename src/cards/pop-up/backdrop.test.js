@@ -219,4 +219,48 @@ describe('backdrop transitions', () => {
         jest.runOnlyPendingTimers();
         jest.useRealTimers();
     });
+
+    test('does not restart the backdrop opening transition during a visible popup handoff', () => {
+        jest.useFakeTimers();
+
+        const contextA = {
+            config: {
+                hash: '#popup-a',
+            },
+        };
+        const contextB = {
+            config: {
+                hash: '#popup-b',
+            },
+        };
+
+        const sharedBackdrop = getBackdrop(contextA);
+        const { backdropElement } = sharedBackdrop;
+
+        sharedBackdrop.hideBackdrop();
+        jest.advanceTimersByTime(300);
+        backdropElement.getBoundingClientRect.mockClear();
+        handleCustomStyles.mockClear();
+
+        sharedBackdrop.showBackdrop(contextA);
+
+        expect(backdropElement.classList.contains('is-opening')).toBe(true);
+        expect(backdropElement.classList.contains('is-transitioning')).toBe(true);
+        expect(backdropElement.getBoundingClientRect).toHaveBeenCalledTimes(1);
+
+        sharedBackdrop.showBackdrop(contextB);
+
+        expect(handleCustomStyles).toHaveBeenLastCalledWith(contextB, sharedBackdrop.backdropCustomStyle);
+        expect(backdropElement.classList.contains('is-visible')).toBe(true);
+        expect(backdropElement.classList.contains('is-opening')).toBe(false);
+        expect(backdropElement.classList.contains('is-transitioning')).toBe(false);
+        expect(backdropElement.getBoundingClientRect).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(300);
+
+        expect(backdropElement.classList.contains('is-transitioning')).toBe(false);
+
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+    });
 });
