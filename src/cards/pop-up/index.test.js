@@ -137,6 +137,16 @@ describe('handlePopUp performance guards', () => {
         expect(registerPopUpHash).toHaveBeenCalledTimes(1);
     });
 
+    test('renders the popup header before applying popup styles', async () => {
+        const context = createOpenPopupContext();
+
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+        expect(changeStyle).toHaveBeenCalledTimes(1);
+        expect(renderHeaderButton.mock.invocationCallOrder[0]).toBeLessThan(changeStyle.mock.invocationCallOrder[0]);
+    });
+
     test('re-registers popup hash metadata when popup header metadata changes', async () => {
         const context = createOpenPopupContext();
 

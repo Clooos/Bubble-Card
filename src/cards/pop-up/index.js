@@ -124,8 +124,8 @@ function isStandalonePopUpInactive(context) {
 }
 
 function refreshPopupShell(context) {
-    changeStyle(context);
     refreshPopupHeader(context);
+    changeStyle(context);
 }
 
 function refreshPopupHeader(context) {
