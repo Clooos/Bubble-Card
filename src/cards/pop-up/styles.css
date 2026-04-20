@@ -3,7 +3,7 @@
     flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
-    margin-top: -50px;
+    margin-top: calc(-1 * var(--bubble-pop-up-header-overlap, 50px));
     max-width: 100%;
     grid-gap: var(--bubble-pop-up-gap, 14px);
     gap: var(--bubble-pop-up-gap, 14px);
@@ -205,6 +205,21 @@
     z-index: 4;
 }
 
+.bubble-pop-up.no-header:not(.popup-mode-centered):not(.editor) .bubble-header-container::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--divider-color);
+    pointer-events: none;
+    z-index: 4;
+}
+
 @media only screen and (min-width: 871px) and (min-height: 501px) {
     .bubble-pop-up.popup-mode-adaptive-dialog:not(.editor) {
         top: 50%;
@@ -341,6 +356,10 @@
 .popup-style-classic {
     --bubble-sub-button-background-color: var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)));
     --bubble-sub-slider-background-color: var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)));
+}
+
+.no-header.popup-mode-adaptive-dialog {
+    --bubble-pop-up-header-overlap: 20px;
 }
 
 .no-header.popup-mode-adaptive-dialog .bubble-header-container {
@@ -717,20 +736,32 @@
     transition: none !important;
 }
 
+.no-header {
+    --bubble-pop-up-header-overlap: 24px;
+}
+
 .no-header .bubble-header-container {
-    visibility: hidden !important;
-    height: 0px !important;
-    opacity: 0 !important;
+    visibility: visible !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    padding: 0 18px 8px !important;
+    opacity: 1 !important;
+}
+
+.no-header .bubble-header,
+.no-header .bubble-header-actions {
+    display: none !important;
 }
 
 .no-header .bubble-pop-up-container {
-    padding-top: 4px !important;
+    margin-top: calc(-1 * (var(--bubble-pop-up-header-overlap, 24px) + var(--vertical-stack-card-gap, var(--stack-card-gap, 8px)))) !important;
+    padding-top: 24px !important;
 }
 
-.no-header .bubble-pop-up-container.is-scrollable {
+.bubble-pop-up.no-header:not(.editor):not(.is-popup-closed) .bubble-pop-up-container.is-scrollable {
     --bubble-pop-up-mask-top-alpha: 0;
     --bubble-pop-up-mask-bottom-alpha: 0;
-    --bubble-pop-up-mask-top-stop: 24px;
+    --bubble-pop-up-mask-top-stop: 8px;
     --bubble-pop-up-mask-bottom-stop: 16px;
 }
 

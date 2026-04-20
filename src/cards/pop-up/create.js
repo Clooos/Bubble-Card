@@ -75,33 +75,78 @@ function _createHeaderActionButton(buttonClassName, iconClassName, iconSvg) {
   return { button, icon };
 }
 
+function _resetPopupTouchTracking(context) {
+  context._popupTouchStartY = null;
+  context._popupLastTouchY = null;
+}
+
+function _clearPopupDragTransform(context) {
+  if (context.popUp?.style) {
+    context.popUp.style.transform = "";
+  }
+}
+
 function _configurePopupInteractionHandlers(context) {
   const closePopup = () => {
     removeHash(true);
   };
 
   context.handleTouchStart = (event) => {
+    if (!event.touches?.[0]) {
+      return;
+    }
+
     context._popupTouchStartY = event.touches[0].clientY;
     context._popupLastTouchY = context._popupTouchStartY;
   };
 
   context.handleHeaderTouchMove = (event) => {
-    const touchStartY = context._popupTouchStartY ?? event.touches[0].clientY;
-    const offset = event.touches[0].clientY - touchStartY;
+    const currentTouch = event.touches?.[0];
+    if (!currentTouch) {
+      return;
+    }
+
+    const touchStartY = context._popupTouchStartY ?? currentTouch.clientY;
+    const offset = currentTouch.clientY - touchStartY;
     if (offset > 0) {
+      event.preventDefault?.();
       context.popUp.style.transform = `translateY(${offset}px)`;
     }
   };
 
   context.handleHeaderTouchEnd = (event) => {
-    const touchStartY = context._popupTouchStartY ?? event.changedTouches[0].clientY;
-    const offset = event.changedTouches[0].clientY - touchStartY;
+    const currentTouch = event.changedTouches?.[0] || event.touches?.[0];
+    if (!currentTouch) {
+      _clearPopupDragTransform(context);
+      _resetPopupTouchTracking(context);
+      return;
+    }
+
+    const touchStartY = context._popupTouchStartY ?? currentTouch.clientY;
+    const offset = currentTouch.clientY - touchStartY;
+    _resetPopupTouchTracking(context);
+
     if (offset > 50) {
-      context.popUp.style.transform = `translateY(calc(${offset}px + (100% - ${offset}px)))`;
+      context.popUp.style.transform = "translateY(100%)";
       closePopup();
       return;
     }
-    context.popUp.style.transform = "";
+
+    _clearPopupDragTransform(context);
+  };
+
+  context.handleHeaderTouchCancel = () => {
+    _clearPopupDragTransform(context);
+    _resetPopupTouchTracking(context);
+  };
+
+  context.handleTouchEnd = () => {
+    _resetPopupTouchTracking(context);
+  };
+
+  context.handleTouchCancel = () => {
+    _clearPopupDragTransform(context);
+    _resetPopupTouchTracking(context);
   };
 
   context.closeOnEscape = (event) => {

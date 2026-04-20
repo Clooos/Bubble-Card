@@ -666,6 +666,7 @@ function finalizeStandalonePopupClose(context) {
     popUp.classList.remove('is-opening', 'is-closing', 'is-switch-closing');
     popUp.classList.remove('is-popup-opened');
     popUp.classList.add('is-popup-closed');
+    clearPopupInlineTransform(context);
     popUp.style.willChange = '';
 
     if (!hasIncomingPopupNavigation(context)) {
@@ -897,6 +898,14 @@ function syncEventListeners(listeners, enabled) {
     });
 }
 
+function clearPopupInlineTransform(context) {
+    if (!context.popUp?.style) {
+        return;
+    }
+
+    context.popUp.style.transform = '';
+}
+
 function ensurePopupListenerBindings(context) {
     if (!context.boundClickOutside) {
         context.boundClickOutside = (event) => clickOutside(event, context);
@@ -916,8 +925,10 @@ function getPopupBaseListeners(context) {
         [context.popUp, 'touchstart', context.handleTouchStart, { passive: true }],
         [context.popUp, 'touchmove', context.handleTouchMove, { passive: false }],
         [context.popUp, 'touchend', context.handleTouchEnd, { passive: true }],
-        [context._popupHeaderTouchTarget, 'touchmove', context.handleHeaderTouchMove, { passive: true }],
+        [context.popUp, 'touchcancel', context.handleTouchCancel, { passive: true }],
+        [context._popupHeaderTouchTarget, 'touchmove', context.handleHeaderTouchMove, { passive: false }],
         [context._popupHeaderTouchTarget, 'touchend', context.handleHeaderTouchEnd, { passive: true }],
+        [context._popupHeaderTouchTarget, 'touchcancel', context.handleHeaderTouchCancel, { passive: true }],
         [window, 'keydown', context.closeOnEscape, { passive: true }],
     ];
 }
@@ -971,7 +982,9 @@ export function updateListeners(context, add) {
 
     const shouldAddListeners = !!(add && !context.editor && context.popUp);
     if (context.listenersAdded !== shouldAddListeners) {
-        context._popupHeaderTouchTarget = shouldAddListeners ? (context.elements?.header || null) : context._popupHeaderTouchTarget;
+        context._popupHeaderTouchTarget = shouldAddListeners
+            ? (context.elements?.headerContainer || context.elements?.header || null)
+            : context._popupHeaderTouchTarget;
         syncEventListeners(getPopupBaseListeners(context), shouldAddListeners);
         context.listenersAdded = shouldAddListeners;
 
@@ -1018,6 +1031,7 @@ function resetPopupToClosedState(context) {
 
     context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing', 'is-switch-closing');
     context.popUp.classList.add('is-popup-closed');
+    clearPopupInlineTransform(context);
     context.popUp.style.willChange = '';
     setPopupBackdropBlurGuard(context, false);
     if (!context.isStandalonePopUp && !context.editor && !context.config?.background_update) {
@@ -1065,6 +1079,7 @@ export function openPopup(context, instant = false) {
 
     if (popupState.activePopups.has(context)) return;
 
+    clearPopupInlineTransform(context);
     clearPendingHashRemoval();
     consumePendingPopupOpenSource(context);
     setPopupOpenSettled(context, false);

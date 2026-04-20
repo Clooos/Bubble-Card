@@ -67,6 +67,7 @@ function createMockElement(initialClasses = []) {
     const element = new EventTarget();
     element.style = {
         display: '',
+        transform: '',
         transition: '',
         visibility: '',
         willChange: '',
@@ -288,6 +289,19 @@ describe('standalone popup lifecycle', () => {
         expect(toggleBodyScroll).toHaveBeenCalledWith(true);
     });
 
+    test('clears stale inline drag transform before reopening a standalone popup', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        context.popUp.style.transform = 'translateY(100%)';
+
+        openPopup(context, true);
+
+        flushRafQueue();
+
+        expect(context.popUp.style.transform).toBe('');
+    });
+
     test('defers hass sync to RAF when cards are already in the popup DOM', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
@@ -507,6 +521,7 @@ describe('standalone popup lifecycle', () => {
         expect(toggleBodyScroll).toHaveBeenCalledWith(false);
         expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, false);
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(context.popUp.style.transform).toBe('');
     });
 
     test('force-closes a runtime-active standalone popup when hash removal finds a stale closed class', () => {
