@@ -123,11 +123,9 @@ function isStandalonePopUpInactive(context) {
     );
 }
 
-function refreshPopupShell(context, options = undefined) {
-    changeStyle(context, options);
-    if (!options?.skipHeaderRefresh) {
-        refreshPopupHeader(context);
-    }
+function refreshPopupShell(context) {
+    changeStyle(context);
+    refreshPopupHeader(context);
 }
 
 function refreshPopupHeader(context) {
@@ -153,8 +151,8 @@ function initializeStandalonePopUp(context) {
     context.refreshPopupHeader = () => {
         refreshPopupHeader(context);
     };
-    context.refreshPopupShell = (options) => {
-        refreshPopupShell(context, options);
+    context.refreshPopupShell = () => {
+        refreshPopupShell(context);
         context._standaloneNeedsShellRefresh = false;
     };
     if (isStandalonePopUpInactive(context)) {
@@ -223,8 +221,8 @@ export function handlePopUp(context) {
             };
         }
         if (typeof context.refreshPopupShell !== 'function') {
-            context.refreshPopupShell = (options) => {
-                refreshPopupShell(context, options);
+            context.refreshPopupShell = () => {
+                refreshPopupShell(context);
                 context._standaloneNeedsShellRefresh = false;
             };
         }

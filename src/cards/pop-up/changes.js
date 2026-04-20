@@ -19,10 +19,9 @@ export function syncHeaderVisibilityClasses(context) {
     context.popUp.classList.toggle('close-button-left', closeButtonLeft);
 }
 
-export function changeStyle(context, options = {}) {
+export function changeStyle(context) {
     const { backdropCustomStyle, updateBackdropStyles } = getBackdrop(context);
     const isTransitioning = context.popUp?.classList?.contains('is-opening') || context.popUp?.classList?.contains('is-closing');
-    const skipBackdropStyles = options.skipBackdropStyles === true;
     setLayout(context, context.popUp);
 
     const currentThemes = context._hass?.themes;
@@ -32,12 +31,10 @@ export function changeStyle(context, options = {}) {
     }
 
     handleCustomStyles(context, context.popUp);
-    if (!skipBackdropStyles) {
-        if (!isTransitioning && typeof updateBackdropStyles === 'function') {
-            updateBackdropStyles();
-        } else if (!isTransitioning) {
-            requestAnimationFrame(() => handleCustomStyles(context, backdropCustomStyle));
-        }
+    if (!isTransitioning && typeof updateBackdropStyles === 'function') {
+        updateBackdropStyles();
+    } else if (!isTransitioning) {
+        requestAnimationFrame(() => handleCustomStyles(context, backdropCustomStyle));
     }
 
     syncPopupModeClasses(context.popUp, context.config);

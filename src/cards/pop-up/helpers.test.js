@@ -506,7 +506,7 @@ describe('standalone popup lifecycle', () => {
 
         expect(toggleBodyScroll).toHaveBeenCalledWith(false);
         expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, false);
-        expect(handlePopUpCards).not.toHaveBeenCalled();
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
     });
 
     test('force-closes a runtime-active standalone popup when hash removal finds a stale closed class', () => {
@@ -582,7 +582,7 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue();
 
         expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(contextA, false);
-        expect(suspendStandalonePopUpCards).not.toHaveBeenCalledWith(contextA);
+        expect(suspendStandalonePopUpCards).toHaveBeenCalledWith(contextA);
     });
 
     test('primes the scroll mask before a long popup becomes visible during popup-to-popup navigation', () => {
