@@ -12,6 +12,10 @@ const popupState = {
   pendingHashRemovalHash: '',
 };
 
+const outsideCloseFallbackDelay = 150;
+const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout'];
+const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame'];
+
 export const POPUP_MODE_DEFAULT = 'default';
 export const POPUP_MODE_FIT_CONTENT = 'fit-content';
 export const POPUP_MODE_CENTERED = 'centered';
@@ -55,6 +59,45 @@ export function syncPopupStyleClasses(popUp, config) {
     popUp.classList.toggle('popup-style-classic', getPopupStyle(config) === POPUP_STYLE_CLASSIC);
 }
 
+function setPopupDatasetFlag(context, key, enabled) {
+    if (!context?.popUp?.dataset) {
+        return;
+    }
+
+    if (enabled) {
+        context.popUp.dataset[key] = 'true';
+        return;
+    }
+
+    delete context.popUp.dataset[key];
+}
+
+function clearContextTimeout(context, key) {
+    if (!context?.[key]) {
+        return;
+    }
+
+    clearTimeout(context[key]);
+    context[key] = null;
+}
+
+function clearContextFrame(context, key) {
+    if (!context?.[key]) {
+        return;
+    }
+
+    cancelAnimationFrame(context[key]);
+    context[key] = null;
+}
+
+function clearContextTimeouts(context, keys) {
+    keys.forEach((key) => clearContextTimeout(context, key));
+}
+
+function clearContextFrames(context, keys) {
+    keys.forEach((key) => clearContextFrame(context, key));
+}
+
 function resolvePopupHostElements(context) {
     if (context.sectionRow && context.sectionRowContainer) {
         return;
@@ -70,52 +113,36 @@ function resolvePopupHostElements(context) {
     }
 }
 
-export function keepPopupHostMounted(context) {
+function applyPopupHostLayout(context, {
+    rowHidden = false,
+    containerHidden = false,
+    containerPosition = '',
+} = {}) {
     resolvePopupHostElements(context);
 
     const { sectionRow, sectionRowContainer } = context;
 
     if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
-        sectionRow.hidden = false;
-        sectionRow.style.display = '';
-
-        if (sectionRowContainer?.classList?.contains('card')) {
-            sectionRowContainer.style.display = '';
-            sectionRowContainer.style.position = 'absolute';
-        }
+        sectionRow.hidden = rowHidden;
+        sectionRow.style.display = rowHidden ? 'none' : '';
     }
+
+    if (sectionRowContainer?.classList?.contains('card')) {
+        sectionRowContainer.style.display = containerHidden ? 'none' : '';
+        sectionRowContainer.style.position = containerPosition;
+    }
+}
+
+export function keepPopupHostMounted(context) {
+    applyPopupHostLayout(context, { containerPosition: 'absolute' });
 }
 
 export function restorePopupHostLayout(context) {
-    resolvePopupHostElements(context);
-
-    const { sectionRow, sectionRowContainer } = context;
-
-    if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
-        sectionRow.hidden = false;
-        sectionRow.style.display = '';
-    }
-
-    if (sectionRowContainer?.classList?.contains('card')) {
-        sectionRowContainer.style.display = '';
-        sectionRowContainer.style.position = '';
-    }
+    applyPopupHostLayout(context);
 }
 
 export function suspendPopupHostLayout(context) {
-    resolvePopupHostElements(context);
-
-    const { sectionRow, sectionRowContainer } = context;
-
-    if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
-        sectionRow.hidden = true;
-        sectionRow.style.display = 'none';
-    }
-
-    if (sectionRowContainer?.classList?.contains('card')) {
-        sectionRowContainer.style.display = 'none';
-        sectionRowContainer.style.position = '';
-    }
+    applyPopupHostLayout(context, { rowHidden: true, containerHidden: true });
 }
 
 function clearPendingHashRemoval() {
@@ -127,8 +154,37 @@ function clearPendingHashRemoval() {
     popupState.pendingHashRemovalHash = '';
 }
 
+function setPopupOpeningMarker(context, opening) {
+    setPopupDatasetFlag(context, 'bubblePopupOpening', opening);
+}
+
+function setPopupBackdropBlurGuard(context, enabled) {
+    setPopupDatasetFlag(context, 'bubblePopupBlurGuard', enabled);
+}
+
+function clearPopupBackdropBlurGuardRelease(context) {
+    clearContextFrame(context, '_popupBackdropBlurGuardFrame');
+}
+
+function schedulePopupBackdropBlurGuardRelease(context) {
+    clearPopupBackdropBlurGuardRelease(context);
+
+    context._popupBackdropBlurGuardFrame = requestAnimationFrame(() => {
+        context._popupBackdropBlurGuardFrame = requestAnimationFrame(() => {
+            context._popupBackdropBlurGuardFrame = null;
+
+            if (!popupState.activePopups.has(context) || !context.popUp?.classList?.contains('is-popup-opened')) {
+                return;
+            }
+
+            setPopupBackdropBlurGuard(context, false);
+        });
+    });
+}
+
 function setPopupOpenSettled(context, settled) {
     context._popupOpenSettled = settled;
+    context._popupOpenSettledAt = settled ? Date.now() : 0;
 }
 
 function isPopupOpenSettled(context) {
@@ -145,7 +201,7 @@ function clearFreshOutsideInteractionGuard(context) {
     context._allowOutsideCloseFromInteraction = false;
 }
 
-// Collapse duplicate hash entries so one Back press closes the popup.
+// Deduplicate the synthetic no-hash step used during popup close.
 if (!window.__bubbleLocationDeduperAdded) {
     try {
         let pendingHashBase = null;
@@ -168,7 +224,6 @@ if (!window.__bubbleLocationDeduperAdded) {
                 return;
             }
 
-            // Ignore the synthetic no-hash step used during close.
             if (guardNextNoHash) {
                 guardNextNoHash = false;
                 pendingHashBase = null;
@@ -183,7 +238,6 @@ if (!window.__bubbleLocationDeduperAdded) {
                 (Date.now() - pendingTimestamp) < 1500 &&
                 !pendingPreviousHash
             ) {
-                // Drop the extra history entry created by duplicate hash pushes.
                 try {
                     guardNextNoHash = true;
                     history.back();
@@ -196,24 +250,22 @@ if (!window.__bubbleLocationDeduperAdded) {
         });
         window.__bubbleLocationDeduperAdded = true;
     } catch (_) {
-        // no-op
     }
 }
 
 const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER']);
 
+// Suppress the outside click released by a just-closed HA dialog.
 const dialogState = {
     recentlyClosedTimestamp: 0,
     protectionWindow: 500 // ms to protect after dialog close
 };
 
-// Listen for dialog close events
 if (!window.__bubbleDialogListenerAdded) {
     window.addEventListener('dialog-closed', () => {
         dialogState.recentlyClosedTimestamp = Date.now();
     }, { capture: true });
     
-    // Some HA dialogs still emit iron-overlay-closed.
     window.addEventListener('iron-overlay-closed', () => {
         dialogState.recentlyClosedTimestamp = Date.now();
     }, { capture: true });
@@ -256,15 +308,12 @@ function createLocationChangedEvent(detail = undefined) {
 
 function clickOutside(event, context) {
     if (!(context.config.close_by_clicking_outside ?? true)) return;
-    
-    // Only close fully opened pop-ups.
     if (!context.popUp.classList.contains('is-popup-opened')) return;
 
     if (!isPopupOpenSettled(context)) {
         return;
     }
 
-    // Ignore the click right after a dialog closes.
     const timeSinceDialogClosed = Date.now() - dialogState.recentlyClosedTimestamp;
     if (timeSinceDialogClosed < dialogState.protectionWindow) {
         return;
@@ -275,7 +324,12 @@ function clickOutside(event, context) {
     }
 
     if (context._awaitFreshOutsideInteraction && !context._allowOutsideCloseFromInteraction) {
-        return;
+        const timeSincePopupSettled = Date.now() - (context._popupOpenSettledAt || 0);
+        if (timeSincePopupSettled < outsideCloseFallbackDelay) {
+            return;
+        }
+
+        context._allowOutsideCloseFromInteraction = true;
     }
 
     clearFreshOutsideInteractionGuard(context);
@@ -358,9 +412,7 @@ export function navigateToPreviousPopup(context) {
         try {
             history.back();
             return true;
-        } catch (_) {
-            // Fall back to closing the current popup if history navigation fails.
-        }
+        } catch (_) {}
     }
 
     return removeHash(true);
@@ -371,7 +423,6 @@ function toggleBackdrop(context, show) {
     if (show) {
         showBackdrop(context);
     } else {
-        // Keep the backdrop visible during popup-to-popup navigation.
         if (hasIncomingPopupNavigation(context)) {
             return;
         }
@@ -407,6 +458,8 @@ function clearPopupOpenSource(context) {
     context._popupOpenSource = null;
     setPopupOpenSettled(context, false);
     clearFreshOutsideInteractionGuard(context);
+    clearPopupBackdropBlurGuardRelease(context);
+    setPopupBackdropBlurGuard(context, false);
 
     if (popupState.entityTriggeredPopup === context) {
         popupState.entityTriggeredPopup = null;
@@ -428,15 +481,13 @@ function completePopupOpen(context) {
         return;
     }
 
-    const container = context.elements?.popUpContainer;
-    if (container) {
-        container.classList.toggle('is-scrollable', container.scrollHeight > container.clientHeight);
-    }
+    syncPopupScrollableState(context);
 
     setPopupOpenSettled(context, true);
     armFreshOutsideInteractionGuard(context);
 
     toggleBodyScroll(true);
+    schedulePopupBackdropBlurGuardRelease(context);
 
     if (context.config.auto_close > 0) {
         if (context.closeTimeout) clearTimeout(context.closeTimeout);
@@ -454,16 +505,18 @@ function completePopupOpen(context) {
     }
 }
 
-function clearPopupOpenCompletion(context) {
-    if (context._popupOpenCompletionTimeout) {
-        clearTimeout(context._popupOpenCompletionTimeout);
-        context._popupOpenCompletionTimeout = null;
+function syncPopupScrollableState(context) {
+    const container = context.elements?.popUpContainer;
+    if (!container) {
+        return;
     }
 
-    if (context._popupOpenCompletionFrame) {
-        cancelAnimationFrame(context._popupOpenCompletionFrame);
-        context._popupOpenCompletionFrame = null;
-    }
+    container.classList.toggle('is-scrollable', container.scrollHeight > container.clientHeight);
+}
+
+function clearPopupOpenCompletion(context) {
+    clearContextTimeout(context, '_popupOpenCompletionTimeout');
+    clearContextFrame(context, '_popupOpenCompletionFrame');
 }
 
 function schedulePopupOpenCompletion(context) {
@@ -493,26 +546,8 @@ function clearStandaloneTransitionCompletion(context) {
     }
 }
 
-function clearStandaloneTransitionFrame(context) {
-    if (context._standaloneTransitionFrame) {
-        cancelAnimationFrame(context._standaloneTransitionFrame);
-        context._standaloneTransitionFrame = null;
-    }
-}
-
-function clearStandaloneOpenFrames(context) {
-    ['_standaloneOpenFrame', '_standaloneCardSyncFrame'].forEach((frameKey) => {
-        if (context[frameKey]) {
-            cancelAnimationFrame(context[frameKey]);
-            context[frameKey] = null;
-        }
-    });
-}
-
 function scheduleStandaloneFrame(context, frameKey, callback) {
-    if (context[frameKey]) {
-        cancelAnimationFrame(context[frameKey]);
-    }
+    clearContextFrame(context, frameKey);
 
     context[frameKey] = requestAnimationFrame(() => {
         context[frameKey] = null;
@@ -560,18 +595,14 @@ function setStandalonePopupState(popUp, open, transitionClass = null) {
 }
 
 function prepareStandalonePopupCloseState(popUp) {
-    // Keep the popup in its open state during the exit animation.
-    // Applying is-popup-closed too early also applies the closed-state containment,
-    // which can suppress Safari's visual close transition.
     popUp.classList.remove('is-opening', 'is-closing');
     popUp.classList.add('is-popup-opened');
     popUp.classList.remove('is-popup-closed');
 }
 
-function startStandalonePopupTransition(context, open, onComplete) {
+function startStandalonePopupTransition(context, open, onComplete, switchClosing = false) {
     const { popUp } = context;
 
-    clearStandaloneTransitionFrame(context);
     clearStandaloneTransitionCompletion(context);
 
     if (popUp.style.transition === 'none') {
@@ -592,39 +623,24 @@ function startStandalonePopupTransition(context, open, onComplete) {
         return;
     }
 
+    popUp.classList.toggle('is-switch-closing', switchClosing);
     popUp.classList.add('is-closing');
 }
 
 function finalizeStandalonePopupOpen(context) {
-    const container = context.elements?.popUpContainer;
-    if (container) {
-        container.classList.toggle('is-scrollable', container.scrollHeight > container.clientHeight);
-    }
-    context.popUp.classList.remove('is-opening', 'is-closing');
+    syncPopupScrollableState(context);
+    setPopupOpeningMarker(context, false);
+    context.popUp.classList.remove('is-opening', 'is-closing', 'is-switch-closing');
     completePopupOpen(context);
 }
 
-function finalizeStandalonePopupClose(context) {
-    const { popUp } = context;
-
-    popUp.classList.remove('is-opening', 'is-closing');
-    popUp.classList.remove('is-popup-opened');
-    popUp.classList.add('is-popup-closed');
-    popUp.style.willChange = '';
-
-    if (!hasIncomingPopupNavigation(context)) {
-        // Releasing the body scroll lock too early forces body position/scroll
-        // restoration during the transform animation, which is costly on low-tier
-        // devices and can visually break Safari's close transition.
-        toggleBodyScroll(false);
-    }
-
+function runStandalonePostCloseCleanup(context) {
     setStandalonePopUpCardsActive(context, false);
     handlePopUpCards(context);
     suspendStandalonePopUpCards(context);
 
     if (context.config.background_update) {
-        popUp.style.display = 'none';
+        context.popUp.style.display = 'none';
     }
 
     suspendPopupHostLayout(context);
@@ -634,37 +650,69 @@ function finalizeStandalonePopupClose(context) {
     }
 }
 
+function finalizeStandalonePopupClose(context) {
+    const { popUp } = context;
+
+    setPopupOpeningMarker(context, false);
+    popUp.classList.remove('is-opening', 'is-closing', 'is-switch-closing');
+    popUp.classList.remove('is-popup-opened');
+    popUp.classList.add('is-popup-closed');
+    popUp.style.willChange = '';
+
+    if (!hasIncomingPopupNavigation(context)) {
+        toggleBodyScroll(false);
+    }
+
+    if (hasIncomingPopupNavigation(context)) {
+        clearContextFrame(context, '_standalonePostCloseCleanupFrame');
+        context._standalonePostCloseCleanupFrame = requestAnimationFrame(() => {
+            context._standalonePostCloseCleanupFrame = null;
+            runStandalonePostCloseCleanup(context);
+        });
+        return;
+    }
+
+    runStandalonePostCloseCleanup(context);
+}
+
 function openStandalonePopup(context, instant = false) {
     clearAllTimeouts(context);
-
-    if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
-        context.refreshPopupShell();
-    }
 
     const { popUp } = context;
     popupState.activePopups.add(context);
 
     popUp.style.willChange = 'transform';
 
-    // Show the backdrop immediately — this is the first visual feedback for the
-    // interaction and the principal input for the browser's INP measurement.
-    // Everything else is split across two animation frames, mirroring what the
-    // legacy popup open path does so the browser can paint the cheapest possible
-    // first response before doing any card/layout work.
-    toggleBackdrop(context, true);
+    const deferBackdropHandoffUntilPhase2 = context._standaloneOpenImmediateFrame === true;
+    context._standaloneOpenImmediateFrame = false;
+
+    if (!deferBackdropHandoffUntilPhase2) {
+        toggleBackdrop(context, true);
+    }
+
+    if (!deferBackdropHandoffUntilPhase2 && context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
+        context.refreshPopupHeader();
+    }
 
     if (instant) {
-        // Synchronous instant open (hash-on-load, forced open, etc.).
+        if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
+            context.refreshPopupShell();
+        }
         keepPopupHostMounted(context);
         context.updatePopupColor?.();
         popUp.style.display = '';
         popUp.style.visibility = '';
         updateListeners(context, true);
         setStandalonePopUpCardsActive(context, true);
-        if (context._detachedCardsFragment?.firstChild) {
-            restoreDetachedPopUpCards(context);
+        setPopupOpeningMarker(context, true);
+        try {
+            if (context._detachedCardsFragment?.firstChild) {
+                restoreDetachedPopUpCards(context);
+            }
+            syncStandalonePopupContent(context);
+        } finally {
+            setPopupOpeningMarker(context, false);
         }
-        syncStandalonePopupContent(context);
         popUp.style.transition = 'none';
         setStandalonePopupState(popUp, true);
         requestAnimationFrame(() => {
@@ -674,80 +722,74 @@ function openStandalonePopup(context, instant = false) {
         return;
     }
 
-    const openOnCurrentFrame = context._standaloneOpenImmediateFrame === true;
-    context._standaloneOpenImmediateFrame = false;
-
-    // ── Phase 1 (RAF1) ────────────────────────────────────────────────────────
-    // Prepare the off-screen popup shell: color, display, visibility, listeners.
-    // No card DOM touch, no forced reflow. The browser commits a frame after this
-    // (backdrop visible, popup off-screen via is-popup-closed transform).
-    // INP is measured until that first committed frame — phase 2 is outside it.
     const phase1 = () => {
         if (!popupState.activePopups.has(context)) return;
 
+        if (deferBackdropHandoffUntilPhase2 && context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
+            context.refreshPopupHeader();
+        }
+
         keepPopupHostMounted(context);
+        if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
+            context.refreshPopupShell();
+        }
         context.updatePopupColor?.();
         popUp.style.display = '';
         popUp.style.visibility = '';
         updateListeners(context, true);
         setStandalonePopUpCardsActive(context, true);
 
-        // Schedule phase 2 on the next frame. _standaloneCardSyncFrame is
-        // also used for the deferred hass sync on the warm path, so both are
-        // correctly cancelled by clearStandaloneOpenFrames / clearAllTimeouts.
         scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', phase2);
     };
 
-    // ── Phase 2 (RAF2) ────────────────────────────────────────────────────────
-    // GBCr flush, card restore/build, then start the CSS transition.
-    // Runs AFTER the browser has already committed the first response frame
-    // (backdrop visible). Card reconnect work and the forced reflow no longer
-    // contribute to INP.
     const phase2 = () => {
         if (!popupState.activePopups.has(context)) return;
 
-        clearStandaloneTransitionFrame(context);
+        if (deferBackdropHandoffUntilPhase2) {
+            toggleBackdrop(context, true);
+        }
+
         clearStandaloneTransitionCompletion(context);
         if (popUp.style.transition === 'none') popUp.style.transition = '';
 
-        // Flush while popup is still empty (is-popup-closed, no cards yet) — cheap.
         setStandalonePopupState(popUp, false);
         popUp.getBoundingClientRect();
 
-        // Restore / build cards under __bubblePopupOpening so nested bubble-card
-        // children defer their updateBubbleCard() to setTimeout(320ms).
         const hasStandaloneCards = Array.isArray(context.config.cards) && context.config.cards.length > 0;
         let contentPrimedBeforeOpen = false;
         if (hasStandaloneCards) {
-            window.__bubblePopupOpening = true;
-            if (context._detachedCardsFragment?.firstChild) {
-                restoreDetachedPopUpCards(context);
-                contentPrimedBeforeOpen = true;
-            } else if (!context._cardsContainer) {
-                syncStandalonePopupContent(context);
-                contentPrimedBeforeOpen = true;
+            setPopupOpeningMarker(context, true);
+            try {
+                if (context._detachedCardsFragment?.firstChild) {
+                    restoreDetachedPopUpCards(context);
+                    contentPrimedBeforeOpen = true;
+                } else if (!context._cardsContainer) {
+                    syncStandalonePopupContent(context);
+                    contentPrimedBeforeOpen = true;
+                }
+            } finally {
+                setPopupOpeningMarker(context, false);
             }
-            window.__bubblePopupOpening = false;
         }
 
-        // Start the CSS transition. Cards are already in the popup DOM so the
-        // popup slides up with content visible — no empty-shell flash.
+        syncPopupScrollableState(context);
+
         waitForStandalonePopupTransition(context, () => finalizeStandalonePopupOpen(context));
         setStandalonePopupState(popUp, true, 'is-opening');
 
         if (!contentPrimedBeforeOpen) {
             scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
-                window.__bubblePopupOpening = true;
-                syncStandalonePopupContent(context);
-                window.__bubblePopupOpening = false;
+                setPopupOpeningMarker(context, true);
+                try {
+                    syncStandalonePopupContent(context);
+                } finally {
+                    setPopupOpeningMarker(context, false);
+                }
             });
         }
     };
 
-    // For popup-to-popup navigation we are already inside a RAF. Run phase 1
-    // synchronously so the transition starts one frame earlier; phase 2 still
-    // lands on the following frame via scheduleStandaloneFrame inside phase 1.
-    if (openOnCurrentFrame) {
+    if (deferBackdropHandoffUntilPhase2) {
         phase1();
         return;
     }
@@ -760,16 +802,33 @@ function closeStandalonePopup(context, force = false) {
 
     clearAllTimeouts(context);
 
+    const incomingPopupNavigation = hasIncomingPopupNavigation(context);
+
     popupState.activePopups.delete(context);
     clearPopupOpenSource(context);
 
     updateListeners(context, false);
 
-    context.popUp.style.willChange = 'transform';
-    if (!hasIncomingPopupNavigation(context)) {
-        toggleBackdrop(context, false);
+    context.popUp.style.willChange = incomingPopupNavigation ? '' : 'transform';
+    startStandalonePopupTransition(
+        context,
+        false,
+        () => finalizeStandalonePopupClose(context),
+        incomingPopupNavigation,
+    );
+
+    if (!incomingPopupNavigation) {
+        clearContextFrame(context, '_standaloneCloseBackdropFrame');
+        context._standaloneCloseBackdropFrame = requestAnimationFrame(() => {
+            context._standaloneCloseBackdropFrame = null;
+
+            if (popupState.activePopups.has(context) || hasIncomingPopupNavigation(context)) {
+                return;
+            }
+
+            toggleBackdrop(context, false);
+        });
     }
-    startStandalonePopupTransition(context, false, () => finalizeStandalonePopupClose(context));
 }
 
 function updatePopupClass(popUp, open) {
@@ -795,7 +854,6 @@ function updatePopupClass(popUp, open) {
     };
 
     if (open) {
-        // Force a layout read on open so the transition starts from the appended closed state.
         popUp.getBoundingClientRect();
         applyPopupState();
         return;
@@ -805,8 +863,6 @@ function updatePopupClass(popUp, open) {
         popUp.style.transition = '';
     }
 
-    // Re-commit the opened state first, then close on the next frame so the browser
-    // cannot collapse both states into a single paint when timing is tight.
     popUp.classList.remove('is-opening', 'is-closing');
     popUp.classList.add('is-popup-opened');
     popUp.classList.remove('is-popup-closed');
@@ -818,153 +874,117 @@ function updatePopupClass(popUp, open) {
     });
 }
 
-export function updateListeners(context, add) {
+function toggleEventListener(target, eventName, handler, enabled, options) {
+    if (!target || !handler) {
+        return;
+    }
+
+    target[enabled ? 'addEventListener' : 'removeEventListener'](eventName, handler, options);
+}
+
+function syncEventListeners(listeners, enabled) {
+    listeners.forEach(([target, eventName, handler, options]) => {
+        toggleEventListener(target, eventName, handler, enabled, options);
+    });
+}
+
+function ensurePopupListenerBindings(context) {
     if (!context.boundClickOutside) {
-        context.boundClickOutside = event => clickOutside(event, context);
+        context.boundClickOutside = (event) => clickOutside(event, context);
     }
 
     if (!context.boundOutsideInteractionStart) {
-        context.boundOutsideInteractionStart = event => noteOutsideInteractionStart(event, context);
+        context.boundOutsideInteractionStart = (event) => noteOutsideInteractionStart(event, context);
     }
 
     if (!context.resetCloseTimeout) {
-      context.resetCloseTimeout = () => resetCloseTimeout(context);
-    }
-
-    const removeOptionalPopupListeners = () => {
-        if (!context.popUp) {
-            context.autoCloseListenersAdded = false;
-            context.closeOnClickListenerAdded = false;
-            context._popupHeaderTouchTarget = null;
-            return;
-        }
-
-        if (context.autoCloseListenersAdded) {
-            context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
-            context.popUp.removeEventListener('click', context.resetCloseTimeout);
-            context.autoCloseListenersAdded = false;
-        }
-
-        if (context.closeOnClickListenerAdded) {
-            context.popUp.removeEventListener('click', removeHash);
-            context.closeOnClickListenerAdded = false;
-        }
-
-        delete context.popUp.dataset.closeOnClick;
-    };
-
-    if (add && !context.editor) {
-        if (!context.listenersAdded) {
-            if (context.popUp) {
-                if (context.handleTouchStart) {
-                    context.popUp.addEventListener('touchstart', context.handleTouchStart, { passive: true });
-                }
-                if (context.handleTouchMove) {
-                    context.popUp.addEventListener('touchmove', context.handleTouchMove, { passive: false });
-                }
-                if (context.handleTouchEnd) {
-                    context.popUp.addEventListener('touchend', context.handleTouchEnd, { passive: true });
-                }
-                if (context.handleHeaderTouchMove && context.elements?.header) {
-                    context._popupHeaderTouchTarget = context.elements.header;
-                    context.elements.header.addEventListener('touchmove', context.handleHeaderTouchMove, { passive: true });
-                }
-                if (context.handleHeaderTouchEnd && context.elements?.header) {
-                    context._popupHeaderTouchTarget = context.elements.header;
-                    context.elements.header.addEventListener('touchend', context.handleHeaderTouchEnd, { passive: true });
-                }
-                if (context.closeOnEscape) {
-                    window.addEventListener('keydown', context.closeOnEscape, { passive: true });
-                }
-            }
-            context.listenersAdded = true;
-        }
-
-        if (context.popUp) {
-            if (context.config.auto_close) {
-                if (!context.autoCloseListenersAdded) {
-                    context.popUp.addEventListener('touchstart', context.resetCloseTimeout, { passive: true });
-                    context.popUp.addEventListener('click', context.resetCloseTimeout, { passive: true });
-                    context.autoCloseListenersAdded = true;
-                }
-            } else if (context.autoCloseListenersAdded) {
-                context.popUp.removeEventListener('touchstart', context.resetCloseTimeout);
-                context.popUp.removeEventListener('click', context.resetCloseTimeout);
-                context.autoCloseListenersAdded = false;
-            }
-
-            if (context.config.close_on_click) {
-                if (!context.closeOnClickListenerAdded) {
-                    context.popUp.addEventListener('click', removeHash, { passive: true });
-                    context.closeOnClickListenerAdded = true;
-                }
-                context.popUp.dataset.closeOnClick = 'true';
-            } else if (context.closeOnClickListenerAdded) {
-                context.popUp.removeEventListener('click', removeHash);
-                context.closeOnClickListenerAdded = false;
-                delete context.popUp.dataset.closeOnClick;
-            } else {
-                delete context.popUp.dataset.closeOnClick;
-            }
-        }
-
-        if (!context.clickOutsideListenerAdded) {
-            window.addEventListener('click', context.boundClickOutside, { passive: true });
-            window.addEventListener('pointerdown', context.boundOutsideInteractionStart, { passive: true });
-            window.addEventListener('touchstart', context.boundOutsideInteractionStart, { passive: true });
-            context.clickOutsideListenerAdded = true;
-        }
-    } else {
-        removeOptionalPopupListeners();
-
-        if (context.listenersAdded) {
-            if (context.popUp) {
-                if (context.handleTouchStart) {
-                    context.popUp.removeEventListener('touchstart', context.handleTouchStart);
-                }
-                if (context.handleTouchMove) {
-                    context.popUp.removeEventListener('touchmove', context.handleTouchMove);
-                }
-                if (context.handleTouchEnd) {
-                    context.popUp.removeEventListener('touchend', context.handleTouchEnd);
-                }
-                const headerTouchTarget = context._popupHeaderTouchTarget || context.elements?.header;
-                if (context.handleHeaderTouchMove && headerTouchTarget) {
-                    headerTouchTarget.removeEventListener('touchmove', context.handleHeaderTouchMove);
-                }
-                if (context.handleHeaderTouchEnd && headerTouchTarget) {
-                    headerTouchTarget.removeEventListener('touchend', context.handleHeaderTouchEnd);
-                }
-                context._popupHeaderTouchTarget = null;
-                if (context.closeOnEscape) {
-                    window.removeEventListener('keydown', context.closeOnEscape);
-                }
-            }
-            context.listenersAdded = false;
-        }
-        
-        if (context.clickOutsideListenerAdded) {
-            window.removeEventListener('click', context.boundClickOutside);
-            window.removeEventListener('pointerdown', context.boundOutsideInteractionStart);
-            window.removeEventListener('touchstart', context.boundOutsideInteractionStart);
-            context.clickOutsideListenerAdded = false;
-        }
+        context.resetCloseTimeout = () => resetCloseTimeout(context);
     }
 }
 
-function clearAllTimeouts(context) {
-    ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout'].forEach(timeout => {
-        if (context[timeout]) {
-            clearTimeout(context[timeout]);
-            context[timeout] = null;
+function getPopupBaseListeners(context) {
+    return [
+        [context.popUp, 'touchstart', context.handleTouchStart, { passive: true }],
+        [context.popUp, 'touchmove', context.handleTouchMove, { passive: false }],
+        [context.popUp, 'touchend', context.handleTouchEnd, { passive: true }],
+        [context._popupHeaderTouchTarget, 'touchmove', context.handleHeaderTouchMove, { passive: true }],
+        [context._popupHeaderTouchTarget, 'touchend', context.handleHeaderTouchEnd, { passive: true }],
+        [window, 'keydown', context.closeOnEscape, { passive: true }],
+    ];
+}
+
+function syncOptionalPopupListeners(context, enabled) {
+    if (!context.popUp) {
+        context.autoCloseListenersAdded = false;
+        context.closeOnClickListenerAdded = false;
+        context._popupHeaderTouchTarget = null;
+        return;
+    }
+
+    const autoCloseEnabled = enabled && !!context.config.auto_close;
+    if (context.autoCloseListenersAdded !== autoCloseEnabled) {
+        syncEventListeners([
+            [context.popUp, 'touchstart', context.resetCloseTimeout, { passive: true }],
+            [context.popUp, 'click', context.resetCloseTimeout, { passive: true }],
+        ], autoCloseEnabled);
+        context.autoCloseListenersAdded = autoCloseEnabled;
+    }
+
+    const closeOnClickEnabled = enabled && !!context.config.close_on_click;
+    if (context.closeOnClickListenerAdded !== closeOnClickEnabled) {
+        toggleEventListener(context.popUp, 'click', removeHash, closeOnClickEnabled, { passive: true });
+        context.closeOnClickListenerAdded = closeOnClickEnabled;
+    }
+
+    if (closeOnClickEnabled) {
+        context.popUp.dataset.closeOnClick = 'true';
+        return;
+    }
+
+    delete context.popUp.dataset.closeOnClick;
+}
+
+function syncOutsideInteractionListeners(context, enabled) {
+    if (context.clickOutsideListenerAdded === enabled) {
+        return;
+    }
+
+    syncEventListeners([
+        [window, 'click', context.boundClickOutside, { passive: true }],
+        [window, 'pointerdown', context.boundOutsideInteractionStart, { passive: true }],
+        [window, 'touchstart', context.boundOutsideInteractionStart, { passive: true }],
+    ], enabled);
+    context.clickOutsideListenerAdded = enabled;
+}
+
+export function updateListeners(context, add) {
+    ensurePopupListenerBindings(context);
+
+    const shouldAddListeners = !!(add && !context.editor && context.popUp);
+    if (context.listenersAdded !== shouldAddListeners) {
+        context._popupHeaderTouchTarget = shouldAddListeners ? (context.elements?.header || null) : context._popupHeaderTouchTarget;
+        syncEventListeners(getPopupBaseListeners(context), shouldAddListeners);
+        context.listenersAdded = shouldAddListeners;
+
+        if (!shouldAddListeners) {
+            context._popupHeaderTouchTarget = null;
         }
-    });
+    }
+
+    syncOptionalPopupListeners(context, shouldAddListeners);
+    syncOutsideInteractionListeners(context, shouldAddListeners);
+}
+
+function clearAllTimeouts(context) {
+    clearContextTimeouts(context, popupRuntimeTimeoutKeys);
 
     clearPopupOpenCompletion(context);
+    clearPopupBackdropBlurGuardRelease(context);
 
     clearStandaloneTransitionCompletion(context);
-    clearStandaloneTransitionFrame(context);
-    clearStandaloneOpenFrames(context);
+    clearContextFrame(context, '_standaloneCloseBackdropFrame');
+    clearContextFrame(context, '_standalonePostCloseCleanupFrame');
+    clearContextFrames(context, standaloneOpenFrameKeys);
 
     if (context.popUp?._bubblePopupClassTimeout) {
         clearTimeout(context.popUp._bubblePopupClassTimeout);
@@ -975,7 +995,6 @@ function clearAllTimeouts(context) {
         cancelAnimationFrame(context.popUp._bubblePopupClassFrame);
         context.popUp._bubblePopupClassFrame = null;
     }
-
 }
 
 function resetPopupToClosedState(context) {
@@ -985,10 +1004,12 @@ function resetPopupToClosedState(context) {
 
     clearAllTimeouts(context);
     updateListeners(context, false);
+    setPopupOpeningMarker(context, false);
 
-    context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing');
+    context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing', 'is-switch-closing');
     context.popUp.classList.add('is-popup-closed');
     context.popUp.style.willChange = '';
+    setPopupBackdropBlurGuard(context, false);
     if (!context.isStandalonePopUp && !context.editor && !context.config?.background_update) {
         context.popUp.style.visibility = 'hidden';
     }
@@ -1013,15 +1034,12 @@ function normalizePopupBeforeOpen(context) {
     return true;
 }
 
-// Close every popup except the one being opened.
 function closeAllPopupsExcept(exceptContext) {
     let closedPopup = false;
 
-    // Iterate a snapshot because closePopup mutates the Set.
     const popupsToClose = new Set(popupState.activePopups);
     for (const popupContext of popupsToClose) {
         if (popupContext !== exceptContext) {
-            // Close the popup immediately and forcefully
             closedPopup = true;
             closePopup(popupContext, true);
         }
@@ -1040,6 +1058,7 @@ export function openPopup(context, instant = false) {
     clearPendingHashRemoval();
     consumePendingPopupOpenSource(context);
     setPopupOpenSettled(context, false);
+    setPopupBackdropBlurGuard(context, true);
 
     if (context.isStandalonePopUp) {
         openStandalonePopup(context, instant);
@@ -1058,13 +1077,17 @@ export function openPopup(context, instant = false) {
         if (!popupState.activePopups.has(context)) return;
 
         context.updatePopupColor?.();
+        context.refreshPopupHeader?.();
 
         displayLegacyPopupContent(context);
 
         if (!context.verticalStack.contains(popUp)) {
-            window.__bubblePopupOpening = true;
-            appendLegacyPopup(context, true);
-            window.__bubblePopupOpening = false;
+            setPopupOpeningMarker(context, true);
+            try {
+                appendLegacyPopup(context, true);
+            } finally {
+                setPopupOpeningMarker(context, false);
+            }
         }
 
         toggleBackdrop(context, true);
@@ -1196,7 +1219,6 @@ export function registerPopupContext(context) {
     const hash = context.config.hash;
     if (!hash) return;
 
-    // Remove the old hash registration if the popup hash changed.
     if (context._registeredHash && context._registeredHash !== hash) {
         const existing = popupRegistry.get(context._registeredHash);
         if (existing?.deref() === context) {
@@ -1204,7 +1226,6 @@ export function registerPopupContext(context) {
         }
     }
 
-    // Already registered — skip WeakRef allocation.
     if (context._registeredHash === hash) {
         const existing = popupRegistry.get(hash);
         if (existing?.deref() === context) return;
@@ -1233,7 +1254,6 @@ function ensureGlobalUrlListener() {
         }
         let switchedBetweenPopups = false;
 
-        // Clean orphaned popups in one pass.
         const activeSnapshot = new Set(popupState.activePopups);
         for (const ctx of activeSnapshot) {
             if (ctx.config.hash && ctx.config.hash !== currentHash) {
@@ -1242,7 +1262,6 @@ function ensureGlobalUrlListener() {
             }
         }
 
-        // WeakRef returns undefined once HA drops the element.
         const ref = popupRegistry.get(currentHash);
         const context = ref?.deref();
         if (context) {
@@ -1296,6 +1315,7 @@ function ensureGlobalUrlListener() {
 export function cleanupPopupRuntime(context) {
     clearAllTimeouts(context);
     updateListeners(context, false);
+    setPopupOpeningMarker(context, false);
     restorePopupHostLayout(context);
 
     if (context.observer) {
@@ -1310,9 +1330,7 @@ export function cleanupPopupRuntime(context) {
         if (context.popUp?.classList?.contains('is-popup-opened')) {
             toggleBackdrop(context, false);
         }
-    } catch (_) {
-        // no-op
-    }
+    } catch (_) {}
 
     unregisterPopupContext(context);
     releaseBackdropContext(context);

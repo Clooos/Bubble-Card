@@ -110,10 +110,7 @@ export function getBackdrop(context) {
         }
 
         const backdropBlur = activeContext.config.backdrop_blur ?? 0;
-        const hasBlur = parseFloat(backdropBlur) > 0;
-        internalBackdropElement.classList.toggle("has-blur", hasBlur);
-
-        if (hasBlur) {
+        if (parseFloat(backdropBlur) > 0) {
             internalBackdropElement.style.setProperty("--custom-backdrop-filter", `blur(${backdropBlur}px)`);
         } else {
             internalBackdropElement.style.removeProperty("--custom-backdrop-filter");
@@ -148,7 +145,7 @@ export function getBackdrop(context) {
         };
 
         if (!defer) {
-            requestAnimationFrame(run);
+            run();
             return;
         }
 

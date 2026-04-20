@@ -15,10 +15,6 @@ function _hasHeaderContent(context) {
   return !!(context.config.entity || context.config.name || context.config.icon);
 }
 
-function _closePopupByUser(context) {
-  removeHash(true);
-}
-
 function _appendIfMissing(parent, child) {
   if (!parent || !child || child.parentNode === parent) {
     return;
@@ -61,18 +57,6 @@ function _bindHeaderButtonEvents(button, handler) {
   button._bubbleHeaderButtonBound = true;
 }
 
-function _bindCloseButtonEvents(closeButton, context) {
-  _bindHeaderButtonEvents(closeButton, () => {
-    _closePopupByUser(context);
-  });
-}
-
-function _bindPreviousButtonEvents(previousButton, context) {
-  _bindHeaderButtonEvents(previousButton, () => {
-    navigateToPreviousPopup(context);
-  });
-}
-
 function _createHeaderActionButton(buttonClassName, iconClassName, iconSvg) {
   const button = createElement("div", `bubble-header-action-button ${buttonClassName}`);
   const feedbackContainer = createElement("div", "bubble-feedback-container");
@@ -91,7 +75,11 @@ function _createHeaderActionButton(buttonClassName, iconClassName, iconSvg) {
   return { button, icon };
 }
 
-function _bindHeaderInteractions(context) {
+function _configurePopupInteractionHandlers(context) {
+  const closePopup = () => {
+    removeHash(true);
+  };
+
   context.handleTouchStart = (event) => {
     context._popupTouchStartY = event.touches[0].clientY;
     context._popupLastTouchY = context._popupTouchStartY;
@@ -110,17 +98,15 @@ function _bindHeaderInteractions(context) {
     const offset = event.changedTouches[0].clientY - touchStartY;
     if (offset > 50) {
       context.popUp.style.transform = `translateY(calc(${offset}px + (100% - ${offset}px)))`;
-      _closePopupByUser(context);
+      closePopup();
       return;
     }
     context.popUp.style.transform = "";
   };
-}
 
-function _setupPopupInteractionHandlers(context) {
   context.closeOnEscape = (event) => {
     if (event.key === "Escape" && context.config.hash === location.hash) {
-      _closePopupByUser(context);
+      closePopup();
     }
   };
 
@@ -132,7 +118,7 @@ function _setupPopupInteractionHandlers(context) {
     const lastTouchY = context._popupLastTouchY ?? currentTouchY;
 
     if (touchMoveDistance > slideToCloseDistance && currentTouchY > lastTouchY) {
-      _closePopupByUser(context);
+      closePopup();
     }
 
     context._popupLastTouchY = currentTouchY;
@@ -149,7 +135,6 @@ function _applyPopupVariables(context) {
     "--custom-popup-filter",
     !_useBackdropBlur ? `blur(${_bgBlur}px)` : "none"
   );
-  context.popUp.classList.toggle("has-bg-blur", (context.config.hide_backdrop === true) && !_useBackdropBlur && _bgBlur > 0);
   context.popUp.style.setProperty("--custom-shadow-opacity", (context.config.shadow_opacity ?? 0) / 100);
 }
 
@@ -283,8 +268,12 @@ export function createHeader(context) {
   _appendIfMissing(headerActions, closeButton);
   _appendIfMissing(headerContainer, headerActions);
 
-  _bindPreviousButtonEvents(previousButton, context);
-  _bindCloseButtonEvents(closeButton, context);
+  _bindHeaderButtonEvents(previousButton, () => {
+    navigateToPreviousPopup(context);
+  });
+  _bindHeaderButtonEvents(closeButton, () => {
+    removeHash(true);
+  });
 
   context.elements = {
     ...context.elements,
@@ -297,8 +286,6 @@ export function createHeader(context) {
     headerActions,
     headerContainer,
   };
-
-  _bindHeaderInteractions(context);
 }
 
 export function createStructure(context) {
@@ -335,7 +322,7 @@ export function createStructure(context) {
 
     context.popUp.style.setProperty("--desktop-width", context.config.width_desktop ?? "540px");
     syncPopupModeClasses(context.popUp, context.config);
-    _setupPopupInteractionHandlers(context);
+  _configurePopupInteractionHandlers(context);
 
     context.elements.popUpContainer = _createOrReusePopUpContainer(context);
     _attachScrollMaskListener(context.elements.popUpContainer);

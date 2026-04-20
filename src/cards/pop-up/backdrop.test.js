@@ -119,7 +119,7 @@ const { getBackdrop } = await import('./backdrop.js');
 const { handleCustomStyles } = await import('../../tools/style-processor.js');
 
 describe('backdrop transitions', () => {
-    test('keeps the blur-active opening state separate from the blur-suppressed closing state', () => {
+    test('keeps the blur-enabled opening and closing states distinct without dropping blur mid-close', () => {
         jest.useFakeTimers();
 
         const context = {
@@ -133,7 +133,7 @@ describe('backdrop transitions', () => {
         showBackdrop(context);
 
         expect(backdropElement.getBoundingClientRect).toHaveBeenCalledTimes(1);
-        expect(backdropElement.classList.contains('has-blur')).toBe(true);
+        expect(backdropElement.style.getPropertyValue('--custom-backdrop-filter')).toBe('blur(12px)');
         expect(backdropElement.classList.contains('is-opening')).toBe(true);
         expect(backdropElement.classList.contains('is-closing')).toBe(false);
         expect(backdropElement.classList.contains('is-transitioning')).toBe(true);
@@ -142,6 +142,7 @@ describe('backdrop transitions', () => {
 
         expect(backdropElement.classList.contains('is-opening')).toBe(false);
         expect(backdropElement.classList.contains('is-closing')).toBe(true);
+    expect(backdropElement.style.getPropertyValue('--custom-backdrop-filter')).toBe('blur(12px)');
         expect(backdropElement.classList.contains('is-transitioning')).toBe(true);
 
         jest.advanceTimersByTime(300);
@@ -183,6 +184,39 @@ describe('backdrop transitions', () => {
 
         jest.runOnlyPendingTimers();
 
+        jest.useRealTimers();
+    });
+
+    test('applies the active popup backdrop styles before the first visible open frame', () => {
+        jest.useFakeTimers();
+
+        const rafCallbacks = [];
+        global.requestAnimationFrame = jest.fn((callback) => {
+            rafCallbacks.push(callback);
+            return rafCallbacks.length;
+        });
+
+        const contextA = {
+            config: {
+                hash: '#popup-a',
+            },
+        };
+        const contextB = {
+            config: {
+                hash: '#popup-b',
+            },
+        };
+
+        const sharedBackdrop = getBackdrop(contextA);
+        handleCustomStyles.mockClear();
+
+        sharedBackdrop.showBackdrop(contextB);
+
+        expect(handleCustomStyles).toHaveBeenCalledTimes(1);
+        expect(handleCustomStyles).toHaveBeenLastCalledWith(contextB, sharedBackdrop.backdropCustomStyle);
+        expect(rafCallbacks).toHaveLength(0);
+
+        jest.runOnlyPendingTimers();
         jest.useRealTimers();
     });
 });

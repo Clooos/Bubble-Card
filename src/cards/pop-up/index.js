@@ -1,4 +1,4 @@
-import { changeEditor, changeStyle, changeTriggered, syncHeaderVisibilityClasses } from './changes.js';
+import { changeEditor, changeStyle, changeTriggered } from './changes.js';
 import { createHeader, createStructure, prepareStructure, prepareStandaloneStructure, renderHeaderButton } from './create.js';
 import { cleanupPopupRuntime, registerPopupContext, syncPopupOpenStateWithLocation } from './helpers.js';
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
@@ -125,7 +125,10 @@ function isStandalonePopUpInactive(context) {
 
 function refreshPopupShell(context) {
     changeStyle(context);
+    refreshPopupHeader(context);
+}
 
+function refreshPopupHeader(context) {
     const shouldUpdateHeader = context.config.hash === location.hash ||
                                context.editor ||
                                (context.config.background_update && !context.headerInitialized);
@@ -145,6 +148,9 @@ function initializeStandalonePopUp(context) {
 
     createHeader(context);
     createStructure(context);
+    context.refreshPopupHeader = () => {
+        refreshPopupHeader(context);
+    };
     context.refreshPopupShell = () => {
         refreshPopupShell(context);
         context._standaloneNeedsShellRefresh = false;
@@ -170,6 +176,9 @@ function initializeLegacyPopUp(context) {
 
     createHeader(context);
     createStructure(context);
+    context.refreshPopupHeader = () => {
+        refreshPopupHeader(context);
+    };
     refreshPopupShell(context);
 
     if (context.config.background_update && !context.headerInitialized) {
@@ -200,6 +209,23 @@ export function handlePopUp(context) {
 
     if (isStandalonePopUpInactive(context)) {
         context._standaloneNeedsShellRefresh = true;
+        // Re-establish deferred refresh callbacks if cleanupPopUp nulled them while
+        // this card instance was kept alive (e.g. an HA disconnect/reconnect cycle
+        // that skips full re-initialization because cardType is already "pop-up").
+        // Without these, openStandalonePopup phase-1 skips changeStyle entirely,
+        // so popup-style-classic and other CSS classes are never applied and the
+        // popup opens with stale/wrong header styling until the next hass update.
+        if (typeof context.refreshPopupHeader !== 'function') {
+            context.refreshPopupHeader = () => {
+                refreshPopupHeader(context);
+            };
+        }
+        if (typeof context.refreshPopupShell !== 'function') {
+            context.refreshPopupShell = () => {
+                refreshPopupShell(context);
+                context._standaloneNeedsShellRefresh = false;
+            };
+        }
     } else if (typeof context.refreshPopupShell === 'function') {
         context.refreshPopupShell();
     } else {
@@ -227,6 +253,9 @@ export function handlePopUp(context) {
 export function cleanupPopUp(context) {
     cleanupPopupRuntime(context);
     cleanupPopUpCards(context);
+    context._standaloneNeedsShellRefresh = false;
+    context.refreshPopupHeader = null;
+    context.refreshPopupShell = null;
 
     if (context.elements?.popUpContainer) {
         context.elements.popUpContainer.classList.remove('has-placeholder');

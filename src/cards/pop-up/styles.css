@@ -27,28 +27,36 @@
     overscroll-behavior: auto;
 }
 
-/* Identity mask scoped to visible states only — avoids N permanent GPU layers
-   for closed/off-screen popups. is-closing already forces mask-image:none so
-   it is not listed here. */
-.bubble-pop-up.is-opening .bubble-pop-up-container,
-.bubble-pop-up.is-popup-opened .bubble-pop-up-container {
-    mask-image: linear-gradient(black, black);
-    -webkit-mask-image: linear-gradient(black, black);
+.bubble-pop-up:not(.editor):not(.is-popup-closed) .bubble-pop-up-container {
+    --bubble-pop-up-mask-top-alpha: 1;
+    --bubble-pop-up-mask-bottom-alpha: 1;
+    --bubble-pop-up-mask-top-stop: 0px;
+    --bubble-pop-up-mask-bottom-stop: 0px;
+    mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, var(--bubble-pop-up-mask-top-alpha)) 0px,
+        black var(--bubble-pop-up-mask-top-stop),
+        black calc(100% - var(--bubble-pop-up-mask-bottom-stop)),
+        rgba(0, 0, 0, var(--bubble-pop-up-mask-bottom-alpha)) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, var(--bubble-pop-up-mask-top-alpha)) 0px,
+        black var(--bubble-pop-up-mask-top-stop),
+        black calc(100% - var(--bubble-pop-up-mask-bottom-stop)),
+        rgba(0, 0, 0, var(--bubble-pop-up-mask-bottom-alpha)) 100%
+    );
     mask-repeat: no-repeat;
     -webkit-mask-repeat: no-repeat;
     mask-size: 100% 100%;
     -webkit-mask-size: 100% 100%;
 }
 
-/* Scrollable gradient — specificity (0-4-0) beats the identity rule (0-3-0). */
-.bubble-pop-up.is-opening .bubble-pop-up-container.is-scrollable,
-.bubble-pop-up.is-popup-opened .bubble-pop-up-container.is-scrollable {
-    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 16px), transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 16px), transparent 100%);
-    mask-repeat: no-repeat;
-    -webkit-mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-    -webkit-mask-size: 100% 100%;
+.bubble-pop-up:not(.editor):not(.is-popup-closed) .bubble-pop-up-container.is-scrollable {
+    --bubble-pop-up-mask-top-alpha: 0;
+    --bubble-pop-up-mask-bottom-alpha: 0;
+    --bubble-pop-up-mask-top-stop: 24px;
+    --bubble-pop-up-mask-bottom-stop: 16px;
 }
 
 .bubble-pop-up-container > * {
@@ -79,6 +87,7 @@
     isolation: isolate;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    contain: paint;
 }
 
 .bubble-pop-up:not(.editor) {
@@ -86,6 +95,10 @@
     height: auto;
     top: calc(56px + var(--custom-height-offset-mobile));
     bottom: 0;
+}
+
+.bubble-pop-up.is-popup-closed:not(.editor) {
+    contain: layout paint;
 }
 
 .bubble-pop-up.popup-mode-fit-content:not(.editor) {
@@ -350,11 +363,13 @@
     backdrop-filter: var(--custom-popup-filter);
     -webkit-backdrop-filter: var(--custom-popup-filter);
     border: var(--bubble-pop-up-border, var(--bubble-border, none));
-    contain: layout paint;
+    contain: paint;
     pointer-events: none;
     overflow: hidden;
+    z-index: 0;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    transition: backdrop-filter 0.15s ease-out, -webkit-backdrop-filter 0.15s ease-out;
 }
 
 .bubble-pop-up-container::-webkit-scrollbar {
@@ -375,31 +390,29 @@
     box-shadow: none !important;
 }
 
-.bubble-pop-up.is-closing {
-    transform: translate3d(0, 100%, 0);
-    contain: none !important;
+.bubble-pop-up.is-opening,
+.bubble-pop-up.is-popup-opened,
+.bubble-pop-up[data-bubble-popup-blur-guard="true"] {
     background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
     border: var(--bubble-pop-up-border, var(--bubble-border, none));
 }
 
-.bubble-pop-up.is-closing .bubble-pop-up-container {
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
+.bubble-pop-up.is-closing {
+    transform: translate3d(0, 100%, 0);
+}
+
+.bubble-pop-up.is-closing:not(.is-switch-closing) {
+    background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
+    border: var(--bubble-pop-up-border, var(--bubble-border, none));
+}
+
+.bubble-pop-up.is-closing:not(.is-switch-closing) .bubble-pop-up-container {
     overflow: hidden;
-}
-
-.bubble-pop-up.is-closing .bubble-pop-up-container > * {
-    contain: none !important;
-}
-
-.bubble-pop-up.is-popup-opened .bubble-pop-up-container > * {
-    contain: style;
 }
 
 .is-popup-closed { 
     transform: translate3d(0, 100%, 0);
     box-shadow: none !important;
-    contain: layout paint;
 }
 
 @media only screen and (min-width: 600px) {
@@ -444,17 +457,12 @@
 
 /* Optimize performance during open/close transitions */
 .bubble-pop-up.is-opening .bubble-pop-up-container,
-.bubble-pop-up.is-closing .bubble-pop-up-container {
+.bubble-pop-up.is-closing:not(.is-switch-closing) .bubble-pop-up-container {
     transform: translateZ(0);
 }
 
-/* Keep the close affordance on a stable promoted layer.
-    Some mobile/Safari paths paint or drop it late when the popup or header
-    gets re-composited around the open-transition boundary. */
 .bubble-pop-up.is-popup-opened .bubble-header-container,
 .bubble-pop-up.is-popup-opened .bubble-header-action-button,
-.bubble-pop-up.is-opening .bubble-header-container,
-.bubble-pop-up.is-opening .bubble-header-action-button,
 .bubble-pop-up.is-closing .bubble-header-container,
 .bubble-pop-up.is-closing .bubble-header-action-button {
     transform: translateZ(0);
@@ -462,36 +470,20 @@
     -webkit-backface-visibility: hidden;
 }
 
-.bubble-pop-up.is-opening .bubble-header-container,
-.bubble-pop-up.is-opening .bubble-header-action-button,
-.bubble-pop-up.is-closing .bubble-header-container,
-.bubble-pop-up.is-closing .bubble-header-action-button {
+.bubble-pop-up.is-closing:not(.is-switch-closing) .bubble-header-container,
+.bubble-pop-up.is-closing:not(.is-switch-closing) .bubble-header-action-button {
     will-change: transform, opacity;
 }
 
 .bubble-pop-up.is-opening .bubble-pop-up-background,
-.bubble-pop-up.is-closing .bubble-pop-up-background {
+.bubble-pop-up.is-closing:not(.is-switch-closing) .bubble-pop-up-background {
     transform: translateZ(0);
+}
+
+.bubble-pop-up[data-bubble-popup-blur-guard="true"] .bubble-pop-up-background,
+.bubble-pop-up.is-closing.is-switch-closing .bubble-pop-up-background {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-}
-
-/* When the backdrop is disabled the background blur is more visible;
-   keep it active from the start so it doesn't appear delayed. */
-.bubble-pop-up.has-bg-blur.is-opening .bubble-pop-up-background {
-    backdrop-filter: var(--custom-popup-filter);
-    -webkit-backdrop-filter: var(--custom-popup-filter);
-}
-
-.bubble-pop-up.is-opening .bubble-pop-up-background {
-    contain: layout paint;
-}
-
-/* Safari is more reliable on exit when the moving layer is a single fixed element.
-   During close, let the root popup carry the background/border and remove the
-   dedicated popup background layer from the compositing path. */
-.bubble-pop-up.is-closing .bubble-pop-up-background {
-    display: none;
 }
 
 .bubble-header-container {
@@ -604,7 +596,6 @@
     background: var(--bubble-pop-up-main-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color))));
 }
 
-/* Container with placeholder - ensure proper sizing */
 .bubble-pop-up-container.has-placeholder {
     min-height: 80px;
     padding-top: 18px !important;
@@ -613,7 +604,6 @@
     flex: 0 0 auto;
 }
 
-/* Editor placeholder styling */
 .bubble-editor-placeholder {
     display: flex;
     align-items: center;
@@ -697,8 +687,6 @@
     overflow: hidden;
 }
 
-/* Standalone popups lack the 0×0 legacy host element that produces one gap-unit of
-   visual space above the first card. Add it back as extra padding-top. */
 .is-standalone-pop-up > .bubble-pop-up-container {
     padding-top: calc(18px + var(--bubble-pop-up-gap, 14px));
 }
@@ -722,6 +710,7 @@
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    contain: none !important;
 }
 
 .editor * {
@@ -739,8 +728,10 @@
 }
 
 .no-header .bubble-pop-up-container.is-scrollable {
-    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 16px), transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 16px), transparent 100%);
+    --bubble-pop-up-mask-top-alpha: 0;
+    --bubble-pop-up-mask-bottom-alpha: 0;
+    --bubble-pop-up-mask-top-stop: 24px;
+    --bubble-pop-up-mask-bottom-stop: 16px;
 }
 
 .large .bubble-header-container {
@@ -750,4 +741,4 @@
 .large .bubble-header-action-button {
     height: var(--row-height,56px);
     width: var(--row-height,56px);
-} 
+}

@@ -93,6 +93,7 @@ jest.unstable_mockModule('./cards/index.js', () => ({
 }));
 
 const { changeEditor, changeStyle, changeTriggered, syncHeaderVisibilityClasses } = await import('./changes.js');
+const { getBackdrop } = await import('./backdrop.js');
 const { handlePopUpCards } = await import('./cards/index.js');
 const { addHash, markPopupPendingTriggerOpen, removeHash, wasPopupOpenedByTrigger } = await import('./helpers.js');
 const { appendLegacyPopup, hideLegacyPopupContent } = await import('./legacy.js');
@@ -329,6 +330,26 @@ describe('changeEditor', () => {
 
         expect(context.popUp.classList.contains('popup-mode-fit-content')).toBe(false);
         expect(context.popUp.classList.contains('popup-mode-with-bottom-offset')).toBe(false);
+    });
+
+    test('skips backdrop style updates while the popup is transitioning', () => {
+        const updateBackdropStyles = jest.fn();
+        getBackdrop.mockReturnValueOnce({
+            backdropCustomStyle: null,
+            hideBackdrop: jest.fn(),
+            updateBackdropStyles,
+        });
+
+        const context = {
+            config: {},
+            popUp: {
+                classList: createMockClassList(['is-closing']),
+            },
+        };
+
+        changeStyle(context);
+
+        expect(updateBackdropStyles).not.toHaveBeenCalled();
     });
 
     test('caches trigger preparation while the trigger config reference stays unchanged', () => {

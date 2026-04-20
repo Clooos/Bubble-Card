@@ -23,6 +23,14 @@ import { handleClimate } from './cards/climate/index.js';
 
 let _lastSeenThemes = null;
 
+function isInsidePopupOpeningScope(element) {
+  if (typeof element?.closest !== 'function') {
+    return false;
+  }
+
+  return element.closest('.bubble-pop-up')?.dataset?.bubblePopupOpening === 'true';
+}
+
 const handlers = {
   'pop-up': handlePopUp,
   'button': handleButton,
@@ -56,7 +64,7 @@ class BubbleCard extends HTMLElement {
 
     if (this._hass) {
       // Defer the heavy update work when a popup is being opened.
-      if (window.__bubblePopupOpening && this.config?.card_type !== 'pop-up') {
+      if (isInsidePopupOpeningScope(this) && this.config?.card_type !== 'pop-up') {
         this._deferredUpdateTimer = setTimeout(() => {
           if (this.isConnected) this.updateBubbleCard();
         }, 320); // Slightly longer than the 300ms animation duration

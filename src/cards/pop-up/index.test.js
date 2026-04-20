@@ -298,6 +298,7 @@ describe('handlePopUp performance guards', () => {
         await handlePopUp(context);
 
         expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+        expect(typeof context.refreshPopupHeader).toBe('function');
     });
 
     test('defers standalone initialization shell work while the popup stays inactive', async () => {

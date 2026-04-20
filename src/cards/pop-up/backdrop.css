@@ -1,6 +1,8 @@
 .bubble-backdrop {
   position: fixed;
   background-color: var(--bubble-backdrop-background-color, var(--bubble-default-backdrop-background-color));
+  backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter, none));
+  -webkit-backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter, none));
   top: 0;
   left: 0;
   width: 100%;
@@ -20,29 +22,13 @@
 .bubble-backdrop.is-hidden {
   opacity: 0;
   pointer-events: none;
-}
-
-/* Disable expensive blur compositing while the backdrop is hidden. */
-.bubble-backdrop.is-hidden.has-blur {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-}
-
-.bubble-backdrop.has-blur {
-  backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
-  -webkit-backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter));
 }
 
 .bubble-backdrop.is-transitioning {
-  will-change: opacity;
-}
-
-.bubble-backdrop.is-opening.has-blur {
   will-change: opacity, backdrop-filter;
 }
 
-/* Keep blur alive on open so it fades in with opacity; only drop it on close. */
-.bubble-backdrop.is-closing.has-blur {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
+/* Keep blur stable during close too. Dropping it only once the backdrop becomes
+   hidden avoids visible dashboard flashes while the popup is animating out. */
