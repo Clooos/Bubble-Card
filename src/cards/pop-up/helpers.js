@@ -1,7 +1,7 @@
 import { getBackdrop, releaseBackdropContext } from "./backdrop.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll } from "../../tools/utils.js";
-import { handlePopUpCards, restoreDetachedPopUpCards, setStandalonePopUpCardsActive, suspendStandalonePopUpCards } from "./cards/index.js";
+import { handlePopUpCards, restoreDetachedPopUpCards, setStandalonePopUpCardsActive } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
 
 const popupState = {
@@ -645,8 +645,6 @@ function finalizeStandalonePopupOpen(context) {
 
 function runStandalonePostCloseCleanup(context) {
     setStandalonePopUpCardsActive(context, false);
-    handlePopUpCards(context);
-    suspendStandalonePopUpCards(context);
 
     if (context.config.background_update) {
         context.popUp.style.display = 'none';
@@ -694,18 +692,22 @@ function openStandalonePopup(context, instant = false) {
 
     const deferBackdropHandoffUntilPhase2 = context._standaloneOpenImmediateFrame === true;
     context._standaloneOpenImmediateFrame = false;
+    const primeHeaderBeforeShellRefresh = context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function';
 
     if (!deferBackdropHandoffUntilPhase2) {
         toggleBackdrop(context, true);
     }
 
-    if (!deferBackdropHandoffUntilPhase2 && context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
+    if (!deferBackdropHandoffUntilPhase2 && primeHeaderBeforeShellRefresh) {
         context.refreshPopupHeader();
     }
 
     if (instant) {
         if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
-            context.refreshPopupShell();
+            context.refreshPopupShell({
+                skipBackdropStyles: deferBackdropHandoffUntilPhase2,
+                skipHeaderRefresh: primeHeaderBeforeShellRefresh,
+            });
         }
         keepPopupHostMounted(context);
         context.updatePopupColor?.();
@@ -734,13 +736,16 @@ function openStandalonePopup(context, instant = false) {
     const phase1 = () => {
         if (!popupState.activePopups.has(context)) return;
 
-        if (deferBackdropHandoffUntilPhase2 && context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
+        if (deferBackdropHandoffUntilPhase2 && primeHeaderBeforeShellRefresh) {
             context.refreshPopupHeader();
         }
 
         keepPopupHostMounted(context);
         if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
-            context.refreshPopupShell();
+            context.refreshPopupShell({
+                skipBackdropStyles: deferBackdropHandoffUntilPhase2,
+                skipHeaderRefresh: primeHeaderBeforeShellRefresh,
+            });
         }
         context.updatePopupColor?.();
         popUp.style.display = '';
