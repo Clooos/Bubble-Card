@@ -4,6 +4,7 @@ import styles from "./styles.css";
 export function createStructure(context) {
   context.elements = {};
   context.elements.emptyColumnCard = createElement('div', 'bubble-empty-column empty-column');
+  context.elements.mainContainer = context.elements.emptyColumnCard;
 
   context.elements.style = createElement('style');
   context.elements.style.innerText = styles;
