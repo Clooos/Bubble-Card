@@ -70,6 +70,41 @@ function _haveSubButtonEntityRefsChanged(context) {
     return false;
 }
 
+function _subButtonUsesRelativeTime(subButton) {
+    if (!subButton) {
+        return false;
+    }
+
+    if (subButton.show_last_changed || subButton.show_last_updated) {
+        return true;
+    }
+
+    return Array.isArray(subButton.group)
+        ? subButton.group.some(_subButtonUsesRelativeTime)
+        : false;
+}
+
+function _headerUsesRelativeTime(config) {
+    if (!config) {
+        return false;
+    }
+
+    if (config.show_last_changed || config.show_last_updated) {
+        return true;
+    }
+
+    const sub = config.sub_button;
+    if (!sub) {
+        return false;
+    }
+
+    const sections = Array.isArray(sub)
+        ? [sub]
+        : [sub.main || [], sub.bottom || []];
+
+    return sections.some(section => Array.isArray(section) && section.some(_subButtonUsesRelativeTime));
+}
+
 function shouldRefreshHeader(context) {
     if (!context.elements?.header) {
         return false;
@@ -80,6 +115,16 @@ function shouldRefreshHeader(context) {
     const locale = context._hass?.locale;
     const unitSystem = context._hass?.config?.unit_system;
     const isEditing = !!(context.editor || context.detectedEditor);
+
+    if (_headerUsesRelativeTime(context.config)) {
+        context._lastHeaderConfigRef = context.config;
+        context._lastHeaderStateRef = entityState;
+        context._lastHeaderLocaleRef = locale;
+        context._lastHeaderUnitSystemRef = unitSystem;
+        context._lastHeaderEditMode = isEditing;
+        _snapshotSubButtonEntityRefs(context);
+        return true;
+    }
 
     if (context._lastHeaderConfigRef !== context.config ||
         context._lastHeaderStateRef !== entityState ||

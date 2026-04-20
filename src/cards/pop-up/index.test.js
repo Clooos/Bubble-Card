@@ -137,6 +137,34 @@ describe('handlePopUp performance guards', () => {
         expect(registerPopUpHash).toHaveBeenCalledTimes(1);
     });
 
+    test('keeps refreshing the header when relative time fields are displayed', async () => {
+        const sharedState = {
+            state: 'on',
+            last_changed: '2026-04-20T10:00:00.000Z',
+            last_updated: '2026-04-20T10:00:00.000Z',
+        };
+        const locale = { language: 'fr' };
+        const unitSystem = { temperature: '°C' };
+        const context = createOpenPopupContext({
+            config: {
+                show_last_changed: true,
+                show_last_updated: true,
+            },
+            hass: {
+                states: {
+                    'light.kitchen': sharedState,
+                },
+                locale,
+                config: { unit_system: unitSystem },
+            },
+        });
+
+        await handlePopUp(context);
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(2);
+    });
+
     test('renders the popup header before applying popup styles', async () => {
         const context = createOpenPopupContext();
 
