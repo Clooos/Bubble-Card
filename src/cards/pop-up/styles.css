@@ -19,7 +19,7 @@
     grid-auto-rows: min-content;
     padding: 18px 18px var(--bubble-pop-up-bottom-padding, 84px) 18px;
     box-sizing: border-box;
-    touch-action: pan-y pinch-zoom;
+    touch-action: pan-x pan-y pinch-zoom;
     overscroll-behavior: contain;
 }
 
