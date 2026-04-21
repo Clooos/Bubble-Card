@@ -4,7 +4,23 @@ const LEGACY_MODULES_BASE_PATH = '/local/bubble/';
 
 function sanitizeIncludePath(path) {
   if (!path || typeof path !== 'string') return '';
-  return path.trim().replace(/^\.\/+/, '').replace(/^\/+/, '');
+
+  const trimmedPath = path.trim();
+  if (!trimmedPath) return '';
+  if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(trimmedPath) || trimmedPath.startsWith('//')) return '';
+
+  let decodedPath = trimmedPath;
+  try {
+    decodedPath = decodeURIComponent(trimmedPath);
+  } catch (_error) {
+    return '';
+  }
+
+  const normalizedPath = decodedPath.replace(/^\.\/+/, '').replace(/^\/+/, '');
+  if (!normalizedPath || normalizedPath.includes('\\')) return '';
+  if (normalizedPath.split('/').some((segment) => segment === '..')) return '';
+
+  return normalizedPath;
 }
 
 function fetchIncludeContent(relativePath) {
@@ -16,8 +32,16 @@ function fetchIncludeContent(relativePath) {
   const sanitizedPath = sanitizeIncludePath(relativePath);
   if (!sanitizedPath) return null;
 
-  const url = `${LEGACY_MODULES_BASE_PATH}${sanitizedPath}`;
+  let url = '';
   try {
+    const baseUrl = new URL(LEGACY_MODULES_BASE_PATH, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+    const resolvedUrl = new URL(sanitizedPath, baseUrl);
+    if (!resolvedUrl.pathname.startsWith(baseUrl.pathname)) {
+      console.error(`Bubble Card - Unable to resolve !include (${relativePath}): Invalid include path.`);
+      return null;
+    }
+
+    url = `${resolvedUrl.pathname}${resolvedUrl.search}`;
     const request = new XMLHttpRequest();
     request.open('GET', url, false);
     request.send(null);
