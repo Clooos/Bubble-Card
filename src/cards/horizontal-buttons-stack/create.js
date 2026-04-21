@@ -1,9 +1,13 @@
-import { createElement, forwardHaptic } from "../../tools/utils.js";
+import { createElement, forwardHaptic, navigate } from "../../tools/utils.js";
 import { addHash, removeHash } from "../pop-up/helpers.js";
 import styles from "./styles.css";
 
 let isOpen = false;
 const BUTTON_MARGIN = 12;
+
+function isPopupHashLink(link) {
+    return typeof link === 'string' && link.startsWith('#');
+}
 
 export function createButton(context, index) {
     const name = context.config[`${index}_name`] ?? '';
@@ -28,14 +32,25 @@ export function createButton(context, index) {
     button.appendChild(backgroundColorElement);
     button.appendChild(backgroundElement);
     button.addEventListener('click', () => {
-        if (location.hash !== link) {
+                const currentLink = button.link;
+                if (!currentLink) {
+                        return;
+                }
+
+                if (!isPopupHashLink(currentLink)) {
+                        navigate(button, currentLink);
+            forwardHaptic("light");
+            return;
+        }
+
+                if (location.hash !== currentLink) {
             isOpen = false;
         }
 
         if (isOpen) {
           removeHash()
         } else {
-          addHash(link);
+                    addHash(currentLink);
         }
         isOpen = !isOpen;
 
@@ -57,7 +72,8 @@ export function createButton(context, index) {
     function handleUrlChange() {
         if (!context.config.highlight_current_view) return;
 
-        const isShown = location.pathname === link || location.hash === link;
+        const currentLink = button.link;
+        const isShown = location.pathname === currentLink || location.hash === currentLink;
         if (isShown) {
             button.classList.add("highlight");
         } else {
