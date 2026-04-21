@@ -151,9 +151,11 @@ ha-card {
     border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
     mask-image: radial-gradient(circle, rgba(0, 0, 0, 1) 100%, rgba(0, 0, 0, 0) 100%);
-    /* Optimize repaints on Safari for color transitions */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    /* Hint GPU for color transitions without creating a stacking context.
+       translateZ(0) was used here before but creates a stacking context that
+       Safari resolves incorrectly when an ancestor popup has an active transform
+       (dialog/centered modes), causing the background to paint over icons/text. */
+    will-change: background-color;
 }
 
 .bubble-icon-container {
