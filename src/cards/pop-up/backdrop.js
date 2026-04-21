@@ -38,6 +38,14 @@ export function releaseBackdropContext(context) {
     backdrop.clearPendingBackdropContext?.(context);
 }
 
+export function hideExistingBackdrop() {
+    if (!backdrop) return;
+
+    backdrop.activeContext = null;
+    backdrop.clearPendingBackdropContext?.();
+    backdrop.hideBackdrop();
+}
+
 export function getBackdrop(context) {
     if (backdrop) {
         return backdrop;

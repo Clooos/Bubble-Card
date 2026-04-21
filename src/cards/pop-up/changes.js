@@ -19,10 +19,77 @@ export function syncHeaderVisibilityClasses(context) {
     context.popUp.classList.toggle('close-button-left', closeButtonLeft);
 }
 
+function shouldApplyPopupStaticShell(context) {
+    const config = context.config || {};
+    const locationPath = location.pathname || '';
+    const isEditing = !!context.editor;
+    const detectedEditor = !!context.detectedEditor;
+    const popupMode = config.popup_mode ?? '';
+    const withBottomOffset = !!config.with_bottom_offset;
+    const popupStyle = config.popup_style ?? '';
+    const showHeader = config.show_header ?? true;
+    const showPreviousButton = config.show_previous_button ?? false;
+    const showCloseButton = config.show_close_button ?? true;
+    const buttonsPosition = config.buttons_position ?? '';
+    const cardLayout = config.card_layout ?? '';
+    const rows = config.rows ?? config.grid_options?.rows ?? '';
+    const mainButtonsPosition = config.main_buttons_position ?? 'default';
+    const mainButtonsAlignment = config.main_buttons_alignment ?? 'end';
+    const mainButtonsFullWidth = config.main_buttons_full_width ?? (mainButtonsPosition === 'bottom');
+    const subButtonRef = config.sub_button || null;
+    const gridOptionsRef = config.grid_options || null;
+
+    if (
+        context._lastPopupShellLocationPath === locationPath &&
+        context._lastPopupShellEditing === isEditing &&
+        context._lastPopupShellDetectedEditor === detectedEditor &&
+        context._lastPopupShellMode === popupMode &&
+        context._lastPopupShellBottomOffset === withBottomOffset &&
+        context._lastPopupShellStyle === popupStyle &&
+        context._lastPopupShellShowHeader === showHeader &&
+        context._lastPopupShellShowPreviousButton === showPreviousButton &&
+        context._lastPopupShellShowCloseButton === showCloseButton &&
+        context._lastPopupShellButtonsPosition === buttonsPosition &&
+        context._lastPopupShellCardLayout === cardLayout &&
+        context._lastPopupShellRows === rows &&
+        context._lastPopupShellMainButtonsPosition === mainButtonsPosition &&
+        context._lastPopupShellMainButtonsAlignment === mainButtonsAlignment &&
+        context._lastPopupShellMainButtonsFullWidth === mainButtonsFullWidth &&
+        context._lastPopupShellSubButtonRef === subButtonRef &&
+        context._lastPopupShellGridOptionsRef === gridOptionsRef
+    ) {
+        return false;
+    }
+
+    context._lastPopupShellLocationPath = locationPath;
+    context._lastPopupShellEditing = isEditing;
+    context._lastPopupShellDetectedEditor = detectedEditor;
+    context._lastPopupShellMode = popupMode;
+    context._lastPopupShellBottomOffset = withBottomOffset;
+    context._lastPopupShellStyle = popupStyle;
+    context._lastPopupShellShowHeader = showHeader;
+    context._lastPopupShellShowPreviousButton = showPreviousButton;
+    context._lastPopupShellShowCloseButton = showCloseButton;
+    context._lastPopupShellButtonsPosition = buttonsPosition;
+    context._lastPopupShellCardLayout = cardLayout;
+    context._lastPopupShellRows = rows;
+    context._lastPopupShellMainButtonsPosition = mainButtonsPosition;
+    context._lastPopupShellMainButtonsAlignment = mainButtonsAlignment;
+    context._lastPopupShellMainButtonsFullWidth = mainButtonsFullWidth;
+    context._lastPopupShellSubButtonRef = subButtonRef;
+    context._lastPopupShellGridOptionsRef = gridOptionsRef;
+
+    return true;
+}
+
 export function changeStyle(context) {
     const { backdropCustomStyle, updateBackdropStyles } = getBackdrop(context);
     const isTransitioning = context.popUp?.classList?.contains('is-opening') || context.popUp?.classList?.contains('is-closing');
-    setLayout(context, context.popUp);
+    const shouldApplyStaticShell = shouldApplyPopupStaticShell(context);
+
+    if (shouldApplyStaticShell) {
+        setLayout(context, context.popUp);
+    }
 
     const currentThemes = context._hass?.themes;
     if (currentThemes !== context._lastSeenThemes) {
@@ -37,9 +104,11 @@ export function changeStyle(context) {
         requestAnimationFrame(() => handleCustomStyles(context, backdropCustomStyle));
     }
 
-    syncPopupModeClasses(context.popUp, context.config);
-    syncPopupStyleClasses(context.popUp, context.config);
-    syncHeaderVisibilityClasses(context);
+    if (shouldApplyStaticShell) {
+        syncPopupModeClasses(context.popUp, context.config);
+        syncPopupStyleClasses(context.popUp, context.config);
+        syncHeaderVisibilityClasses(context);
+    }
 }
 
 function getPreparedTriggerConditions(context) {

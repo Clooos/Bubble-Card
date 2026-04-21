@@ -98,6 +98,8 @@ const { handlePopUpCards } = await import('./cards/index.js');
 const { addHash, markPopupPendingTriggerOpen, removeHash, wasPopupOpenedByTrigger } = await import('./helpers.js');
 const { appendLegacyPopup, hideLegacyPopupContent } = await import('./legacy.js');
 const { toggleBodyScroll } = await import('../../tools/utils.js');
+const { handleCustomStyles } = await import('../../tools/style-processor.js');
+const { setLayout } = await import('../../tools/utils.js');
 const { checkConditionsMet, ensureArray, validateConditionalConfig } = await import('../../tools/validate-condition.js');
 
 function createMockClassList(initialClasses = []) {
@@ -118,6 +120,57 @@ function createMockClassList(initialClasses = []) {
         contains: (name) => classes.has(name),
     };
 }
+
+describe('changeStyle', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        global.location = {
+            hash: '',
+            pathname: '/lovelace/test',
+        };
+    });
+
+    test('skips reapplying static popup shell work when the shell inputs are unchanged', () => {
+        const updateBackdropStyles = jest.fn();
+        getBackdrop.mockReturnValue({
+            backdropCustomStyle: null,
+            hideBackdrop: jest.fn(),
+            updateBackdropStyles,
+        });
+
+        const config = {
+            popup_mode: 'fit-content',
+            with_bottom_offset: true,
+            popup_style: 'classic',
+            show_header: true,
+            show_previous_button: true,
+            show_close_button: true,
+            buttons_position: 'left',
+            main_buttons_position: 'bottom',
+            main_buttons_alignment: 'center',
+            main_buttons_full_width: true,
+            sub_button: { main: [], bottom: [] },
+            grid_options: { rows: 'auto' },
+        };
+
+        const context = {
+            config,
+            popUp: {
+                classList: createMockClassList(),
+            },
+            _hass: {
+                themes: { default_theme: 'bubble' },
+            },
+        };
+
+        changeStyle(context);
+        changeStyle(context);
+
+        expect(setLayout).toHaveBeenCalledTimes(1);
+        expect(handleCustomStyles).toHaveBeenCalledTimes(2);
+        expect(updateBackdropStyles).toHaveBeenCalledTimes(2);
+    });
+});
 
 describe('changeEditor', () => {
     beforeEach(() => {
