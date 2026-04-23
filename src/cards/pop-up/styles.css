@@ -132,6 +132,7 @@
 }
 
 .bubble-pop-up.popup-mode-centered.is-popup-closed:not(.editor) {
+    contain: paint !important;
     transform: translate(-50%, -50%) scale(0.85) !important;
     opacity: 0 !important;
     pointer-events: none !important;
@@ -239,6 +240,7 @@
         border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
     }
     .bubble-pop-up.popup-mode-adaptive-dialog.is-popup-closed:not(.editor) {
+        contain: paint !important;
         transform: translate(-50%, -50%) scale(0.85) !important;
         opacity: 0 !important;
         pointer-events: none !important;
