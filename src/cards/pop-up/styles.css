@@ -166,6 +166,27 @@
     max-height: var(--bubble-pop-up-available-height);
 }
 
+.bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) {
+    height: 100%;
+    top: auto;
+    bottom: calc(-56px - var(--custom-height-offset-mobile));
+}
+
+.bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) .bubble-pop-up-container {
+    height: 100%;
+    margin-top: -50px;
+    padding-top: 40px;
+    padding-bottom: calc(140px + var(--custom-height-offset-mobile));
+    mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
+    touch-action: pan-y pinch-zoom;
+}
+
+.bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog).is-popup-opened .bubble-pop-up-container > * {
+    contain: style;
+    contain-intrinsic-size: auto 120px;
+}
+
 @media (max-width: 870px), (max-height: 500px) {
     .bubble-pop-up.popup-mode-adaptive-dialog.popup-mode-with-bottom-offset:not(.editor) {
         --bubble-pop-up-bottom-padding: 84px;
@@ -446,6 +467,9 @@
     .bubble-pop-up-container {
         padding: 18px 18px var(--bubble-pop-up-bottom-padding, 84px) 18px;
     }
+    .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) .bubble-pop-up-container {
+        padding: 18px 18px calc(140px + var(--custom-height-offset-desktop)) 18px;
+    }
 }
 
 @media only screen and (min-width: 768px) {
@@ -454,6 +478,10 @@
             top: calc(56px + var(--custom-height-offset-desktop));
             bottom: 0;
       left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width, 540px) / 2));
+    }
+    .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) {
+        top: auto;
+        bottom: calc(-56px - var(--custom-height-offset-desktop));
     }
 }
 

@@ -410,6 +410,13 @@ export function prepareStructure(context) {
     context.cardTitle = context.verticalStack.querySelector(".card-header");
     if (!context.editor && !context.config.background_update) {
       context.popUp.style.visibility = "hidden";
+      setTimeout(() => {
+        if (context.verticalStack?.contains(context.popUp) &&
+            !context.popUp.classList.contains('is-popup-opened')) {
+          context.popUp.style.visibility = '';
+          context.verticalStack.removeChild(context.popUp);
+        }
+      }, 100);
     }
 
     context.elements = {};

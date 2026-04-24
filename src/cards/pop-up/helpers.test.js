@@ -622,7 +622,7 @@ describe('standalone popup lifecycle', () => {
         expect(suspendWarmStandalonePopUpCards).toHaveBeenCalledWith(contextA);
         expect(suspendStandalonePopUpCards).not.toHaveBeenCalledWith(contextA);
 
-        jest.advanceTimersByTime(1199);
+        jest.advanceTimersByTime(3199);
 
         expect(suspendStandalonePopUpCards).not.toHaveBeenCalledWith(contextA);
 
@@ -880,9 +880,10 @@ describe('legacy popup location routing', () => {
         expect(displayLegacyPopupContent).toHaveBeenCalledTimes(1);
     });
 
-    test('keeps the legacy popup shell mounted during open', () => {
+    test('appends the legacy popup shell during open when it starts detached', () => {
         const context = createLegacyContext({ hash: '#popup-a' });
         usedContexts.push(context);
+        context.verticalStack = createMockContainer([]);
 
         registerPopupContext(context);
 
@@ -895,6 +896,10 @@ describe('legacy popup location routing', () => {
 
         expect(displayLegacyPopupContent).toHaveBeenCalledTimes(1);
         expect(appendLegacyPopup).not.toHaveBeenCalled();
+
+        flushRafQueue();
+
+        expect(appendLegacyPopup).toHaveBeenCalledWith(context, true);
     });
 
     test('marks only the legacy popup being appended for deferred child updates', () => {
@@ -912,12 +917,13 @@ describe('legacy popup location routing', () => {
         window.location.hash = '#popup-a';
         window.dispatchEvent(new Event('hashchange'));
         flushRafQueue();
+        flushRafQueue();
 
         expect(appendLegacyPopup).toHaveBeenCalledTimes(1);
         expect(context.popUp.dataset.bubblePopupOpening).toBeUndefined();
     });
 
-    test('keeps the legacy popup shell mounted after close', () => {
+    test('detaches the legacy popup shell after close', () => {
         const context = createLegacyContext({ hash: '#popup-a' });
         usedContexts.push(context);
 
@@ -926,10 +932,10 @@ describe('legacy popup location routing', () => {
 
         closePopup(context);
 
-        jest.advanceTimersByTime(317);
+        jest.advanceTimersByTime(300);
 
         expect(hideLegacyPopupContent).toHaveBeenCalledWith(context, 0);
-        expect(appendLegacyPopup).not.toHaveBeenCalledWith(context, false);
+        expect(appendLegacyPopup).toHaveBeenCalledWith(context, false);
     });
 
     test('opens legacy popup when the hash changes without a location-changed event', () => {

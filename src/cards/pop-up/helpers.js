@@ -1121,6 +1121,8 @@ function resetPopupToClosedState(context) {
     context.popUp.style.willChange = '';
     setPopupBackdropBlurGuard(context, false);
     if (!context.isStandalonePopUp && !context.editor && !context.config?.background_update) {
+        appendLegacyPopup(context, false);
+        hideLegacyPopupContent(context, 0);
         context.popUp.style.visibility = 'hidden';
     }
     setPopupOpenSettled(context, false);
@@ -1191,21 +1193,18 @@ export function openPopup(context, instant = false) {
         context.refreshPopupHeader?.();
 
         displayLegacyPopupContent(context);
+        toggleBackdrop(context, true);
+        updateListeners(context, true);
 
-        if (!context.verticalStack.contains(popUp)) {
+        requestAnimationFrame(() => {
+            if (!popupState.activePopups.has(context)) return;
+
             setPopupOpeningMarker(context, true);
             try {
                 appendLegacyPopup(context, true);
             } finally {
                 setPopupOpeningMarker(context, false);
             }
-        }
-
-        toggleBackdrop(context, true);
-        updateListeners(context, true);
-
-        requestAnimationFrame(() => {
-            if (!popupState.activePopups.has(context)) return;
 
             if (instant) {
                 popUp.style.transition = 'none';
@@ -1258,29 +1257,22 @@ export function closePopup(context, force = false) {
     popupState.activePopups.delete(context);
     clearPopupOpenSource(context);
 
-    updateListeners(context, false);
-    toggleBodyScroll(false);
-
     context.popUp.style.willChange = 'transform';
     updatePopupClass(context.popUp, false);
-
-    context.closeStartTimeout = setTimeout(() => {
-        toggleBackdrop(context, false);
-
-        context.closeStartTimeout = null;
-    }, 17);
+    toggleBackdrop(context, false);
 
     context.removeDomTimeout = setTimeout(() => {
         context.popUp.style.willChange = '';
+        appendLegacyPopup(context, false);
         hideLegacyPopupContent(context, 0);
         context.removeDomTimeout = null;
-    }, popupState.animationDuration + 17);
+    }, popupState.animationDuration);
+
+    updateListeners(context, false);
+    toggleBodyScroll(false);
 
     if (context.config.close_action) {
-        context.closeActionTimeout = setTimeout(() => {
-            context.closeActionTimeout = null;
-            callAction(context, context.config, 'close_action');
-        }, popupState.animationDuration + 17);
+        callAction(context, context.config, 'close_action');
     }
 }
 

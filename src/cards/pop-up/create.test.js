@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, jest, test } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
 
 function createMockClassList(initialClasses = []) {
     const classes = new Set(initialClasses);
@@ -250,6 +250,59 @@ describe('createHeader', () => {
 
         expect(secondContent.querySelector('.bubble-error-text')).not.toBeNull();
         expect(render).toHaveBeenCalledTimes(2);
+    });
+});
+
+describe('prepareStructure', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+        global.window = global.window || {};
+        delete global.window.popUpError;
+    });
+
+    afterEach(() => {
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+    });
+
+    test('detaches a closed legacy popup after the initial visibility guard window', () => {
+        const popUp = createMockElement('div');
+        const cardTitle = createMockElement('div', 'card-header');
+        const sectionRowContainer = createMockElement('div', 'card');
+        const sectionRow = createMockElement('hui-card');
+        sectionRowContainer.appendChild(sectionRow);
+
+        const verticalStack = {
+            host: { parentElement: sectionRow },
+            contains: jest.fn((child) => child === popUp),
+            removeChild: jest.fn(),
+            querySelector: jest.fn((selector) => {
+                if (selector === '#root') {
+                    return popUp;
+                }
+                if (selector === '.card-header') {
+                    return cardTitle;
+                }
+                return null;
+            }),
+        };
+
+        const context = {
+            config: {},
+            content: createMockElement('div'),
+            getRootNode: () => verticalStack,
+            editor: false,
+        };
+
+        prepareStructure(context);
+
+        expect(popUp.style.visibility).toBe('hidden');
+
+        jest.advanceTimersByTime(100);
+
+        expect(verticalStack.removeChild).toHaveBeenCalledWith(popUp);
+        expect(popUp.style.visibility).toBe('');
     });
 });
 
