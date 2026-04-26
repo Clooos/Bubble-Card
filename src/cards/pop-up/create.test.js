@@ -168,6 +168,12 @@ jest.unstable_mockModule('./legacy.js', () => ({
     hideLegacyPopupContent: jest.fn(),
 }));
 
+jest.unstable_mockModule('./editor.js', () => ({
+    renderPopupOnboarding: jest.fn((context) => ({
+        values: [context?.config?.popup_mode ?? 'default'],
+    })),
+}));
+
 const { createHeader, prepareStandaloneStructure, prepareStructure } = await import('./create.js');
 
 describe('createHeader', () => {
@@ -250,6 +256,34 @@ describe('createHeader', () => {
 
         expect(secondContent.querySelector('.bubble-error-text')).not.toBeNull();
         expect(render).toHaveBeenCalledTimes(2);
+    });
+
+    test('missing hash fallback reflects the configured popup_mode', () => {
+        const content = createMockElement('div');
+
+        prepareStructure({
+            config: { popup_mode: 'centered' },
+            content,
+            getRootNode: () => null,
+        });
+
+        expect(render).toHaveBeenCalledTimes(1);
+        const templateArg = render.mock.calls[0][0];
+        expect(templateArg.values).toContain('centered');
+    });
+
+    test('missing hash fallback defaults to "default" mode when popup_mode is not set', () => {
+        const content = createMockElement('div');
+
+        prepareStructure({
+            config: {},
+            content,
+            getRootNode: () => null,
+        });
+
+        expect(render).toHaveBeenCalledTimes(1);
+        const templateArg = render.mock.calls[0][0];
+        expect(templateArg.values).toContain('default');
     });
 });
 

@@ -1,4 +1,4 @@
-import { html, render } from "lit";
+import { render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { handleButton } from "../../cards/button/index.js";
@@ -6,6 +6,7 @@ import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/uti
 import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
 import { navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, suspendPopupHostLayout, syncPopupModeClasses } from "./helpers.js";
 import { hideLegacyPopupContent } from './legacy.js';
+import { renderPopupOnboarding } from './editor.js';
 import styles from "./styles.css";
 
 const CLOSE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><title>close</title><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>';
@@ -437,16 +438,7 @@ export function prepareStructure(context) {
     if (!existingError && context.content) {
 
       const errorText = createElement("div", "bubble-error-text");
-      const template = html`
-        <ha-alert 
-          alert-type="error"
-          .title=${"You need to define a unique hash for this pop-up"}
-        >
-          <p>Once created and saved, this pop-up will be <b>hidden by default</b> and <b>can be opened by targeting its hash</b>. You can trigger it using <a href="https://github.com/Clooos/Bubble-Card#example" target="_blank" rel="noopener noreferrer">any card</a> that supports the <code>navigate</code> <a href="https://github.com/Clooos/Bubble-Card?tab=readme-ov-file#tap-double-tap-and-hold-actions" target="_blank" rel="noopener noreferrer">action</a> (check the example), or with the included <a href="https://github.com/Clooos/Bubble-Card#horizontal-buttons-stack" target="_blank" rel="noopener noreferrer">horizontal buttons stack</a> card.</p>
-        </ha-alert>
-      `;
-      render(template, errorText);
-
+      render(renderPopupOnboarding(context), errorText);
       context.content.appendChild(errorText);
     }
   }
