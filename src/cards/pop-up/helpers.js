@@ -44,7 +44,7 @@ export function hasPopupBottomOffset(config) {
 
 export function hasPopupFullWidthOnMobile(config) {
     const mode = getPopupMode(config);
-    return (mode === POPUP_MODE_CENTERED || mode === POPUP_MODE_ADAPTIVE_DIALOG) && Boolean(config?.full_width_on_mobile);
+    return mode === POPUP_MODE_CENTERED && Boolean(config?.full_width_on_mobile);
 }
 
 export function syncPopupModeClasses(popUp, config) {

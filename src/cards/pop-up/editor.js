@@ -111,7 +111,6 @@ function getPopUpLayoutConfig(config) {
         return {
             popup_mode: 'adaptive-dialog',
             ...(config?.with_bottom_offset ? { with_bottom_offset: true } : {}),
-            ...(config?.full_width_on_mobile ? { full_width_on_mobile: true } : {}),
         };
     }
     return {};
@@ -212,7 +211,7 @@ export function getPopUpHashInputState(value, originalHash) {
 
 function renderDialogFullWidthOption(editor) {
     const mode = getPopUpModeValue(editor._config);
-    if (mode !== 'centered' && mode !== 'adaptive-dialog') {
+    if (mode !== 'centered') {
         return html``;
     }
 
@@ -927,6 +926,7 @@ export function renderPopUpEditor(editor) {
 export function renderPopupOnboarding(context) {
   const mode = context?.config?.popup_mode ?? 'default';
   const fullWidth = context?.config?.full_width_on_mobile ? 'true' : 'false';
+  const bottomOffset = context?.config?.with_bottom_offset ? 'true' : 'false';
   return html`
     <style>
       .bubble-popup-onboarding {
@@ -1036,6 +1036,12 @@ export function renderPopupOnboarding(context) {
         display: flex;
         flex-direction: column;
       }
+      .bubble-popup-onboarding[data-bottom-offset="true"] .bhp-popup-content {
+        padding-bottom: 9.52cqw;
+      }
+      .bubble-popup-onboarding[data-bottom-offset="true"] .bhp-popup {
+        height: 58.57cqw;
+      }
       .bhp-popup-row {
         flex: 1;
         border-radius: 9.52cqw;
@@ -1059,25 +1065,14 @@ export function renderPopupOnboarding(context) {
         inset: 50% 0 auto;
         border-radius: 11.43cqw;
       }
-      /* === adaptive-dialog (desktop = centered) === */
+      /* === adaptive-dialog (alternates: centered dialog → bottom sheet) === */
       .bubble-popup-onboarding[data-mode="adaptive-dialog"] .bhp-popup {
-        inset: 50% 4.76cqw auto;
-        height: 48.57cqw;
-        border-radius: 11.43cqw;
-        transform: translateY(-50%) scale(0.85);
-        opacity: 0;
-        animation: bhp-center 5s ease infinite;
+        animation: bhp-adaptive 10s ease infinite;
+      }
+      .bubble-popup-onboarding[data-mode="adaptive-dialog"][data-bottom-offset="true"] .bhp-popup {
+        animation: bhp-adaptive-offset 10s ease infinite;
       }
       @media (max-width: 767px) {
-        .bubble-popup-onboarding[data-mode="adaptive-dialog"] .bhp-popup {
-          inset: auto 0 0;
-          height: 48.57cqw;
-          border-radius: 11.43cqw 11.43cqw 0 0;
-          transform: translateY(100%);
-          opacity: 1;
-          animation: bhp-slide 5s ease infinite;
-        }
-        .bubble-popup-onboarding[data-mode="adaptive-dialog"][data-full-width="true"] .bhp-popup,
         .bubble-popup-onboarding[data-mode="centered"][data-full-width="true"] .bhp-popup {
           inset: auto 0 0;
           border-radius: 11.43cqw 11.43cqw 0 0;
@@ -1177,6 +1172,36 @@ export function renderPopupOnboarding(context) {
         28%, 55% { transform: translateY(-50%) scale(1);    opacity: 1; }
         65%, 100%{ transform: translateY(-50%) scale(0.85); opacity: 0; }
       }
+      @keyframes bhp-adaptive {
+        /* === centered dialog phase (first 5s mapped to 0-50%) === */
+        /* 0%,15% of bhp-center → 0%,7.5% */
+        0%, 7.5%   { inset: 50% 4.76cqw auto; height: 48.57cqw; border-radius: 11.43cqw; transform: translateY(-50%) scale(0.85); opacity: 0; }
+        /* 28%,55% of bhp-center → 14%,27.5% */
+        14%, 27.5% { inset: 50% 4.76cqw auto; height: 48.57cqw; border-radius: 11.43cqw; transform: translateY(-50%) scale(1);    opacity: 1; }
+        /* 65%,100% of bhp-center → 32.5%,49% */
+        32.5%, 49% { inset: 50% 4.76cqw auto; height: 48.57cqw; border-radius: 11.43cqw; transform: translateY(-50%) scale(0.85); opacity: 0; }
+        /* snap to bottom while invisible */
+        50%        { inset: auto 0 0; height: 48.57cqw; border-radius: 11.43cqw 11.43cqw 0 0; transform: translateY(100%); opacity: 0; }
+        /* === bottom-sheet phase (second 5s mapped to 50-100%) === */
+        /* 0%,15% of bhp-slide → 50%,57.5% */
+        57.5%      { inset: auto 0 0; height: 48.57cqw; border-radius: 11.43cqw 11.43cqw 0 0; transform: translateY(100%); opacity: 1; }
+        /* 28%,55% of bhp-slide → 64%,77.5% */
+        64%, 77.5% { inset: auto 0 0; height: 48.57cqw; border-radius: 11.43cqw 11.43cqw 0 0; transform: translateY(0);    opacity: 1; }
+        /* 65%,100% of bhp-slide → 82.5%,100% */
+        82.5%, 100%{ inset: auto 0 0; height: 48.57cqw; border-radius: 11.43cqw 11.43cqw 0 0; transform: translateY(100%); opacity: 1; }
+      }
+      @keyframes bhp-adaptive-offset {
+        /* === centered dialog phase — same as bhp-adaptive === */
+        0%, 7.5%   { inset: 50% 4.76cqw auto; height: 48.57cqw; border-radius: 11.43cqw; transform: translateY(-50%) scale(0.85); opacity: 0; }
+        14%, 27.5% { inset: 50% 4.76cqw auto; height: 48.57cqw; border-radius: 11.43cqw; transform: translateY(-50%) scale(1);    opacity: 1; }
+        32.5%, 49% { inset: 50% 4.76cqw auto; height: 48.57cqw; border-radius: 11.43cqw; transform: translateY(-50%) scale(0.85); opacity: 0; }
+        /* snap to bottom while invisible */
+        50%        { inset: auto 0 0; height: 58.57cqw; border-radius: 11.43cqw 11.43cqw 0 0; transform: translateY(100%); opacity: 0; }
+        /* === bottom-sheet phase — 58.57cqw to show offset === */
+        57.5%      { inset: auto 0 0; height: 58.57cqw; border-radius: 11.43cqw 11.43cqw 0 0; transform: translateY(100%); opacity: 1; }
+        64%, 77.5% { inset: auto 0 0; height: 58.57cqw; border-radius: 11.43cqw 11.43cqw 0 0; transform: translateY(0);    opacity: 1; }
+        82.5%, 100%{ inset: auto 0 0; height: 58.57cqw; border-radius: 11.43cqw 11.43cqw 0 0; transform: translateY(100%); opacity: 1; }
+      }
       @keyframes bhp-overlay {
         0%,  15% { opacity: 0; }
         28%, 55% { opacity: 1; }
@@ -1195,7 +1220,7 @@ export function renderPopupOnboarding(context) {
         100%     { opacity: 0;    transform: scale(0); }
       }
     </style>
-    <div class="bubble-popup-onboarding" data-mode="${mode}" data-full-width="${fullWidth}">
+    <div class="bubble-popup-onboarding" data-mode="${mode}" data-full-width="${fullWidth}" data-bottom-offset="${bottomOffset}">
       <div class="bhp-visual" aria-hidden="true">
         <div class="bhp-screen">
           <div class="bhp-bg">
