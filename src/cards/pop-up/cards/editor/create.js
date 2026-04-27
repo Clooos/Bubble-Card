@@ -41,7 +41,11 @@ export function createEditorCardStructure(context, cards, options) {
 function _createCardEditMode(cardEl, context, index) {
     const editModeEl = document.createElement('hui-card-edit-mode');
     editModeEl.hass = context._hass;
-    editModeEl.lovelace = { editMode: true };
+    // Fake lovelace: editMode enables the toolbar; saveConfig no-op prevents TypeError from HA resize handles.
+    editModeEl.lovelace = {
+        editMode: true,
+        saveConfig: async () => {},
+    };
     editModeEl.path = [0, 0, index];
     editModeEl.hiddenOverlay = false;
     editModeEl.appendChild(cardEl);
@@ -106,6 +110,27 @@ function _createSortable(context, actions) {
     sortable.addEventListener('ll-copy-card', (ev) => {
         ev.stopPropagation();
         actions.copyCard(ev.detail.path[2]);
+    });
+
+    // Intercept ll-change-grid-options: merge partial gridOptions into the card config, prevent bubbling to HA.
+    sortable.addEventListener('ll-change-grid-options', (ev) => {
+        ev.stopPropagation();
+        const index = ev.detail?.path?.[2];
+        const gridOptions = ev.detail?.gridOptions;
+        if (typeof index === 'number' && gridOptions) {
+            const currentCard = (context.config?.cards || [])[index];
+            if (currentCard) {
+                actions.updateCardGridOptions(index, {
+                    ...currentCard,
+                    grid_options: { ...(currentCard.grid_options || {}), ...gridOptions },
+                });
+            }
+        }
+    });
+
+    // Intercept ll-move-to-section: unsupported in pop-ups, prevent bubbling. Cut = ll-copy-card + ll-delete-card (already handled).
+    sortable.addEventListener('ll-move-to-section', (ev) => {
+        ev.stopPropagation();
     });
 
     return sortable;

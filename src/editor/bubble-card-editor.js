@@ -60,6 +60,21 @@ class BubbleCardEditor extends LitElement {
         const previewStillConnected = !!prevHost?.isConnected;
 
         this._config = { ...config };
+        // Show or hide the tab bar in hui-card-element-editor depending on card type.
+        // Must run after Lit's update cycle so the injected style isn't wiped by the first render.
+        const _cardElementEditor = this.getRootNode()?.host;
+        if (_cardElementEditor?.tagName?.toLowerCase() === 'hui-card-element-editor') {
+            const isPopup = config?.card_type === 'pop-up';
+            Promise.resolve(_cardElementEditor.updateComplete).then(() => {
+                try {
+                    if (isPopup) {
+                        this._injectHideTabsStyle(_cardElementEditor.shadowRoot);
+                    } else {
+                        _cardElementEditor.shadowRoot?.querySelector('#bubble-card-hide-tabs')?.remove();
+                    }
+                } catch (_) {}
+            });
+        }
         if (!previewStillConnected) {
             this._firstRowsComputation = false;
             this._lastMeasuredHeights = null;
@@ -2377,11 +2392,19 @@ class BubbleCardEditor extends LitElement {
             cardConfig,
         };
 
+        let shownDialog = null;
+
         if (this._showStandaloneDialogParams(preferredDialog, dialogParams)) {
-            return true;
+            shownDialog = preferredDialog;
+        } else {
+            const activeDialog = this._getActiveEditCardDialog();
+            if (this._showStandaloneDialogParams(activeDialog, dialogParams)) {
+                shownDialog = activeDialog;
+            }
         }
 
-        if (this._showStandaloneDialogParams(this._getActiveEditCardDialog(), dialogParams)) {
+        if (shownDialog) {
+            this._applyPopupEditorTabState(shownDialog);
             return true;
         }
 
@@ -2399,6 +2422,25 @@ class BubbleCardEditor extends LitElement {
         }, 0);
 
         return true;
+    }
+
+    _applyPopupEditorTabState(dialog) {
+        setTimeout(() => {
+            try {
+                const cardElementEditor = dialog?.shadowRoot?.querySelector('hui-card-element-editor');
+                if (!cardElementEditor) return;
+                if ('_currTab' in cardElementEditor) cardElementEditor._currTab = 'config';
+                this._injectHideTabsStyle(cardElementEditor.shadowRoot);
+            } catch (_) {}
+        }, 0);
+    }
+
+    _injectHideTabsStyle(shadow) {
+        if (!shadow || shadow.querySelector('#bubble-card-hide-tabs')) return;
+        const style = document.createElement('style');
+        style.id = 'bubble-card-hide-tabs';
+        style.textContent = 'ha-tab-group { display: none !important; }';
+        shadow.appendChild(style);
     }
 
     _openStandaloneChildDialogInCurrentEditor(childDialogParams, parentDialogParams, getCardConfig) {
@@ -2452,6 +2494,14 @@ class BubbleCardEditor extends LitElement {
         window.addEventListener("dialog-closed", handleClosed, true);
 
         try {
+            // Remove the popup tab-hiding style before the child editor loads,
+            // so non-bubble-card editors get their tabs back.
+            try {
+                activeDialog.shadowRoot
+                    ?.querySelector('hui-card-element-editor')
+                    ?.shadowRoot?.querySelector('#bubble-card-hide-tabs')
+                    ?.remove();
+            } catch (_) {}
             activeDialog.showDialog(childDialogParams);
             return true;
         } catch (_) {

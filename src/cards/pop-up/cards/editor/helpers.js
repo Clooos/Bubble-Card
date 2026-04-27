@@ -35,6 +35,14 @@ export function createEditorActions(context, rebuildCards) {
                 return cards;
             });
         },
+        updateCardGridOptions: (index, cardConfig) => {
+            updateCards((cards) => {
+                if (cards[index] !== undefined) {
+                    cards.splice(index, 1, cardConfig);
+                }
+                return cards;
+            });
+        },
         removeCard: (index) => {
             updateCards((cards) => {
                 cards.splice(index, 1);
