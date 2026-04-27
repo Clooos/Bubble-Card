@@ -428,6 +428,69 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.dataset.bubblePopupBlurGuard).toBeUndefined();
     });
 
+    test('reopens a standalone popup after runtime state drift leaves it active but visually closed', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        openPopup(context);
+        flushRafQueue();
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+
+        expect(context._popupOpenInProgress).toBe(false);
+
+        jest.clearAllMocks();
+
+        context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing');
+        context.popUp.classList.add('is-popup-closed');
+
+        openPopup(context);
+
+        expect(hideBackdrop).toHaveBeenCalledTimes(1);
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(false);
+
+        flushRafQueue();
+        flushRafQueue();
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('rolls back a failed standalone open and allows a later retry', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+        const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        handlePopUpCards.mockImplementationOnce(() => {
+            throw new Error('standalone open failed');
+        });
+
+        openPopup(context);
+        flushRafQueue();
+        flushRafQueue();
+
+        expect(consoleError).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-popup-opened')).toBe(false);
+        expect(context.popUp.classList.contains('is-popup-closed')).toBe(true);
+        expect(context._popupOpenInProgress).toBe(false);
+        expect(hideBackdrop).toHaveBeenCalledTimes(1);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(false);
+
+        jest.clearAllMocks();
+
+        openPopup(context);
+        flushRafQueue();
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+
+        expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
+
+        consoleError.mockRestore();
+    });
+
     test('refreshes deferred standalone shell updates before opening', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);

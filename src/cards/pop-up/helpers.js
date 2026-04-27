@@ -188,6 +188,14 @@ function setPopupOpenSettled(context, settled) {
     context._popupOpenSettledAt = settled ? Date.now() : 0;
 }
 
+function setPopupOpenInProgress(context, inProgress) {
+    context._popupOpenInProgress = inProgress === true;
+}
+
+function isPopupOpenInProgress(context) {
+    return context?._popupOpenInProgress === true;
+}
+
 function isPopupOpenSettled(context) {
     return context._popupOpenSettled === true;
 }
@@ -470,6 +478,7 @@ function consumePendingPopupOpenSource(context) {
 function clearPopupOpenSource(context) {
     context._pendingPopupOpenSource = null;
     context._popupOpenSource = null;
+    setPopupOpenInProgress(context, false);
     setPopupOpenSettled(context, false);
     clearFreshOutsideInteractionGuard(context);
     clearPopupBackdropBlurGuardRelease(context);
@@ -489,6 +498,7 @@ export function wasPopupOpenedByTrigger(context) {
 }
 
 function completePopupOpen(context) {
+    setPopupOpenInProgress(context, false);
     context.popUp.style.willChange = '';
 
     if (!context.popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
@@ -741,6 +751,30 @@ function finalizeStandalonePopupClose(context) {
     scheduleStandalonePostCloseCleanup(context, incomingPopupNavigation);
 }
 
+function rollbackStandalonePopupOpen(context, error = null) {
+    if (error) {
+        console.error(error);
+    }
+
+    const wasOnlyActivePopup = popupState.activePopups.size === 1 && popupState.activePopups.has(context);
+
+    popupState.activePopups.delete(context);
+    clearPopupOpenSource(context);
+    resetPopupToClosedState(context);
+    setStandalonePopUpCardsActive(context, false);
+
+    if (context.config.background_update) {
+        context.popUp.style.display = 'none';
+    }
+
+    suspendPopupHostLayout(context);
+
+    if (wasOnlyActivePopup) {
+        hideExistingBackdrop();
+        toggleBodyScroll(false);
+    }
+}
+
 function openStandalonePopup(context, instant = false) {
     clearAllTimeouts(context);
 
@@ -766,37 +800,132 @@ function openStandalonePopup(context, instant = false) {
 
     if (instant) {
         let warmCardsRestored = false;
-
-        if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
-            context.refreshPopupShell();
-        }
-        keepPopupHostMounted(context);
-        context.updatePopupColor?.();
-        popUp.style.display = '';
-        popUp.style.visibility = '';
-        updateListeners(context, true);
-        setStandalonePopUpCardsActive(context, true);
-        setPopupOpeningMarker(context, true);
         try {
-            if (context._detachedCardsFragment?.firstChild) {
-                restoreDetachedPopUpCards(context);
-                warmCardsRestored = restoreWarmStandalonePopUpCards(context);
-            } else if (restoreWarmStandalonePopUpCards(context)) {
-                warmCardsRestored = true;
+            if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
+                context.refreshPopupShell();
             }
+            keepPopupHostMounted(context);
+            context.updatePopupColor?.();
+            popUp.style.display = '';
+            popUp.style.visibility = '';
+            updateListeners(context, true);
+            setStandalonePopUpCardsActive(context, true);
+            setPopupOpeningMarker(context, true);
+            try {
+                if (context._detachedCardsFragment?.firstChild) {
+                    restoreDetachedPopUpCards(context);
+                    warmCardsRestored = restoreWarmStandalonePopUpCards(context);
+                } else if (restoreWarmStandalonePopUpCards(context)) {
+                    warmCardsRestored = true;
+                }
 
-            if (!warmCardsRestored) {
-                syncStandalonePopupContent(context);
+                if (!warmCardsRestored) {
+                    syncStandalonePopupContent(context);
+                }
+            } finally {
+                setPopupOpeningMarker(context, false);
             }
-        } finally {
+            popUp.style.transition = 'none';
+            setStandalonePopupState(popUp, true);
+            requestAnimationFrame(() => {
+                try {
+                    popUp.style.transition = '';
+
+                    if (warmCardsRestored) {
+                        scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
+                            setPopupOpeningMarker(context, true);
+                            try {
+                                syncStandalonePopupContent(context);
+                            } finally {
+                                setPopupOpeningMarker(context, false);
+                            }
+                        });
+                    }
+
+                    finalizeStandalonePopupOpen(context);
+                } catch (error) {
+                    rollbackStandalonePopupOpen(context, error);
+                }
+            });
+        } catch (error) {
             setPopupOpeningMarker(context, false);
+            rollbackStandalonePopupOpen(context, error);
         }
-        popUp.style.transition = 'none';
-        setStandalonePopupState(popUp, true);
-        requestAnimationFrame(() => {
-            popUp.style.transition = '';
+        return;
+    }
 
-            if (warmCardsRestored) {
+    const phase1 = () => {
+        try {
+            if (!popupState.activePopups.has(context)) return;
+
+            if (deferBackdropHandoffUntilPhase2 && context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
+                context.refreshPopupHeader();
+            }
+
+            keepPopupHostMounted(context);
+            if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
+                context.refreshPopupShell();
+            }
+            context.updatePopupColor?.();
+            popUp.style.display = '';
+            popUp.style.visibility = '';
+            updateListeners(context, true);
+            setStandalonePopUpCardsActive(context, true);
+
+            scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', phase2);
+        } catch (error) {
+            rollbackStandalonePopupOpen(context, error);
+        }
+    };
+
+    const phase2 = () => {
+        try {
+            if (!popupState.activePopups.has(context)) return;
+
+            if (deferBackdropHandoffUntilPhase2) {
+                toggleBackdrop(context, true);
+            }
+
+            clearStandaloneTransitionCompletion(context);
+            if (popUp.style.transition === 'none') popUp.style.transition = '';
+
+            setStandalonePopupState(popUp, false);
+            popUp.getBoundingClientRect();
+
+            const hasStandaloneCards = Array.isArray(context.config.cards) && context.config.cards.length > 0;
+            let contentPrimedBeforeOpen = false;
+            let warmCardsRestored = false;
+            if (hasStandaloneCards) {
+                setPopupOpeningMarker(context, true);
+                try {
+                    if (context._detachedCardsFragment?.firstChild) {
+                        restoreDetachedPopUpCards(context);
+                        warmCardsRestored = restoreWarmStandalonePopUpCards(context);
+                        contentPrimedBeforeOpen = true;
+                    } else if (restoreWarmStandalonePopUpCards(context)) {
+                        warmCardsRestored = true;
+                        contentPrimedBeforeOpen = true;
+                    } else if (!context._cardsContainer) {
+                        syncStandalonePopupContent(context);
+                        contentPrimedBeforeOpen = true;
+                    }
+                } finally {
+                    setPopupOpeningMarker(context, false);
+                }
+            }
+
+            syncPopupScrollableState(context);
+
+            waitForStandalonePopupTransition(context, () => {
+                try {
+                    finalizeStandalonePopupOpen(context);
+                } catch (error) {
+                    rollbackStandalonePopupOpen(context, error);
+                }
+            });
+            setStandalonePopupState(popUp, true, 'is-opening');
+
+            if (!contentPrimedBeforeOpen || warmCardsRestored) {
                 scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
                     setPopupOpeningMarker(context, true);
                     try {
@@ -806,81 +935,9 @@ function openStandalonePopup(context, instant = false) {
                     }
                 });
             }
-
-            finalizeStandalonePopupOpen(context);
-        });
-        return;
-    }
-
-    const phase1 = () => {
-        if (!popupState.activePopups.has(context)) return;
-
-        if (deferBackdropHandoffUntilPhase2 && context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
-            context.refreshPopupHeader();
-        }
-
-        keepPopupHostMounted(context);
-        if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
-            context.refreshPopupShell();
-        }
-        context.updatePopupColor?.();
-        popUp.style.display = '';
-        popUp.style.visibility = '';
-        updateListeners(context, true);
-        setStandalonePopUpCardsActive(context, true);
-
-        scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', phase2);
-    };
-
-    const phase2 = () => {
-        if (!popupState.activePopups.has(context)) return;
-
-        if (deferBackdropHandoffUntilPhase2) {
-            toggleBackdrop(context, true);
-        }
-
-        clearStandaloneTransitionCompletion(context);
-        if (popUp.style.transition === 'none') popUp.style.transition = '';
-
-        setStandalonePopupState(popUp, false);
-        popUp.getBoundingClientRect();
-
-        const hasStandaloneCards = Array.isArray(context.config.cards) && context.config.cards.length > 0;
-        let contentPrimedBeforeOpen = false;
-        let warmCardsRestored = false;
-        if (hasStandaloneCards) {
-            setPopupOpeningMarker(context, true);
-            try {
-                if (context._detachedCardsFragment?.firstChild) {
-                    restoreDetachedPopUpCards(context);
-                    warmCardsRestored = restoreWarmStandalonePopUpCards(context);
-                    contentPrimedBeforeOpen = true;
-                } else if (restoreWarmStandalonePopUpCards(context)) {
-                    warmCardsRestored = true;
-                    contentPrimedBeforeOpen = true;
-                } else if (!context._cardsContainer) {
-                    syncStandalonePopupContent(context);
-                    contentPrimedBeforeOpen = true;
-                }
-            } finally {
-                setPopupOpeningMarker(context, false);
-            }
-        }
-
-        syncPopupScrollableState(context);
-
-        waitForStandalonePopupTransition(context, () => finalizeStandalonePopupOpen(context));
-        setStandalonePopupState(popUp, true, 'is-opening');
-
-        if (!contentPrimedBeforeOpen || warmCardsRestored) {
-            scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
-                setPopupOpeningMarker(context, true);
-                try {
-                    syncStandalonePopupContent(context);
-                } finally {
-                    setPopupOpeningMarker(context, false);
-                }
-            });
+        } catch (error) {
+            setPopupOpeningMarker(context, false);
+            rollbackStandalonePopupOpen(context, error);
         }
     };
 
@@ -1125,6 +1182,7 @@ function resetPopupToClosedState(context) {
         hideLegacyPopupContent(context, 0);
         context.popUp.style.visibility = 'hidden';
     }
+    setPopupOpenInProgress(context, false);
     setPopupOpenSettled(context, false);
     clearFreshOutsideInteractionGuard(context);
 
@@ -1137,9 +1195,24 @@ function normalizePopupBeforeOpen(context) {
     const visuallyOpen = context.popUp?.classList?.contains('is-popup-opened');
     const isClosing = context.popUp?.classList?.contains('is-closing');
     const runtimeActive = popupState.activePopups.has(context);
+    const openInProgress = isPopupOpenInProgress(context);
 
-    if (!isClosing && !(visuallyOpen && !runtimeActive)) {
+    if (runtimeActive && !visuallyOpen && openInProgress) {
         return false;
+    }
+
+    if (!isClosing && !(visuallyOpen && !runtimeActive) && !(runtimeActive && !visuallyOpen)) {
+        return false;
+    }
+
+    if (runtimeActive && !visuallyOpen && context.isStandalonePopUp) {
+        rollbackStandalonePopupOpen(context);
+        return true;
+    }
+
+    if (runtimeActive) {
+        popupState.activePopups.delete(context);
+        clearPopupOpenSource(context);
     }
 
     resetPopupToClosedState(context);
@@ -1170,6 +1243,7 @@ export function openPopup(context, instant = false) {
     clearPopupInlineTransform(context);
     clearPendingHashRemoval();
     consumePendingPopupOpenSource(context);
+    setPopupOpenInProgress(context, true);
     setPopupOpenSettled(context, false);
     setPopupBackdropBlurGuard(context, true);
 
@@ -1227,13 +1301,10 @@ export function syncPopupOpenStateWithLocation(context, instant = true) {
 
     const runtimeActive = popupState.activePopups.has(context);
     const visuallyOpen = context.popUp?.classList?.contains('is-popup-opened');
+    const openInProgress = isPopupOpenInProgress(context);
 
-    if (runtimeActive && visuallyOpen) {
+    if (runtimeActive && (visuallyOpen || openInProgress)) {
         return false;
-    }
-
-    if (runtimeActive && !visuallyOpen) {
-        popupState.activePopups.delete(context);
     }
 
     if (!runtimeActive && visuallyOpen) {
