@@ -151,6 +151,13 @@
     transition: transform 0.2s ease-in, opacity 0.2s ease-in !important;
 }
 
+@media only screen and (max-width: 600px) {
+    .bubble-pop-up.popup-mode-centered.popup-mode-full-width-on-mobile:not(.editor) {
+        width: 100vw !important;
+        max-width: 100vw !important;
+    }
+}
+
 @media only screen and (min-width: 768px) {
     .bubble-pop-up.popup-mode-centered:not(.editor) {
         top: 50% !important;

@@ -102,12 +102,16 @@ function getPopUpLayoutConfig(config) {
         };
     }
     if (mode === 'centered') {
-        return { popup_mode: 'centered' };
+        return {
+            popup_mode: 'centered',
+            ...(config?.full_width_on_mobile ? { full_width_on_mobile: true } : {}),
+        };
     }
     if (mode === 'adaptive-dialog') {
         return {
             popup_mode: 'adaptive-dialog',
             ...(config?.with_bottom_offset ? { with_bottom_offset: true } : {}),
+            ...(config?.full_width_on_mobile ? { full_width_on_mobile: true } : {}),
         };
     }
     return {};
@@ -204,6 +208,27 @@ export function getPopUpHashInputState(value, originalHash) {
         isDuplicate,
         isValid: !isEmpty && !isDuplicate,
     };
+}
+
+function renderDialogFullWidthOption(editor) {
+    const mode = getPopUpModeValue(editor._config);
+    if (mode !== 'centered' && mode !== 'adaptive-dialog') {
+        return html``;
+    }
+
+    return html`
+        <ha-formfield .label="Full width on mobile">
+            <ha-switch
+                aria-label="Full width on mobile"
+                .checked=${editor._config?.full_width_on_mobile ?? false}
+                .configValue=${"full_width_on_mobile"}
+                @change=${editor._valueChanged}
+            ></ha-switch>
+            <div class="mdc-form-field">
+                <label class="mdc-label">Full width on mobile</label>
+            </div>
+        </ha-formfield>
+    `;
 }
 
 function renderBottomOffsetOption(editor) {
@@ -347,6 +372,12 @@ function createPopUpConfig(editor, originalConfig) {
                 delete editor._config.with_bottom_offset;
             }
 
+            if (popupLayoutConfig.full_width_on_mobile) {
+                editor._config.full_width_on_mobile = true;
+            } else {
+                delete editor._config.full_width_on_mobile;
+            }
+
             editor._config.hash = hashValue;
             commitEditorSessionHash(hashValue);
             registerPopUpHash(hashValue, {
@@ -468,6 +499,7 @@ export function renderPopUpEditor(editor) {
                 ${duplicateHashWarningTemplate()}
                 ${renderPopUpModeDropdown(editor)}
                 ${renderBottomOffsetOption(editor)}
+                ${renderDialogFullWidthOption(editor)}
                 <ha-formfield .label="Include example configuration">
                     <ha-switch
                         aria-label="Include example configuration"
@@ -545,6 +577,7 @@ export function renderPopUpEditor(editor) {
             ${renderPopupStyleDropdown(editor)}
             ${renderPopUpModeDropdown(editor)}
             ${renderBottomOffsetOption(editor)}
+            ${renderDialogFullWidthOption(editor)}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:dock-top"></ha-icon>
@@ -893,6 +926,7 @@ export function renderPopUpEditor(editor) {
 
 export function renderPopupOnboarding(context) {
   const mode = context?.config?.popup_mode ?? 'default';
+  const fullWidth = context?.config?.full_width_on_mobile ? 'true' : 'false';
   return html`
     <style>
       .bubble-popup-onboarding {
@@ -1021,6 +1055,10 @@ export function renderPopupOnboarding(context) {
         opacity: 0;
         animation: bhp-center 5s ease infinite;
       }
+      .bubble-popup-onboarding[data-mode="centered"][data-full-width="true"] .bhp-popup {
+        inset: 50% 0 auto;
+        border-radius: 11.43cqw;
+      }
       /* === adaptive-dialog (desktop = centered) === */
       .bubble-popup-onboarding[data-mode="adaptive-dialog"] .bhp-popup {
         inset: 50% 4.76cqw auto;
@@ -1038,6 +1076,11 @@ export function renderPopupOnboarding(context) {
           transform: translateY(100%);
           opacity: 1;
           animation: bhp-slide 5s ease infinite;
+        }
+        .bubble-popup-onboarding[data-mode="adaptive-dialog"][data-full-width="true"] .bhp-popup,
+        .bubble-popup-onboarding[data-mode="centered"][data-full-width="true"] .bhp-popup {
+          inset: auto 0 0;
+          border-radius: 11.43cqw 11.43cqw 0 0;
         }
       }
       /* === trigger button === */
@@ -1152,7 +1195,7 @@ export function renderPopupOnboarding(context) {
         100%     { opacity: 0;    transform: scale(0); }
       }
     </style>
-    <div class="bubble-popup-onboarding" data-mode="${mode}">
+    <div class="bubble-popup-onboarding" data-mode="${mode}" data-full-width="${fullWidth}">
       <div class="bhp-visual" aria-hidden="true">
         <div class="bhp-screen">
           <div class="bhp-bg">

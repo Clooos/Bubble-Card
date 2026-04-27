@@ -42,6 +42,11 @@ export function hasPopupBottomOffset(config) {
     return (mode === POPUP_MODE_FIT_CONTENT || mode === POPUP_MODE_ADAPTIVE_DIALOG) && Boolean(config?.with_bottom_offset);
 }
 
+export function hasPopupFullWidthOnMobile(config) {
+    const mode = getPopupMode(config);
+    return (mode === POPUP_MODE_CENTERED || mode === POPUP_MODE_ADAPTIVE_DIALOG) && Boolean(config?.full_width_on_mobile);
+}
+
 export function syncPopupModeClasses(popUp, config) {
     if (!popUp?.classList) {
         return POPUP_MODE_DEFAULT;
@@ -52,6 +57,7 @@ export function syncPopupModeClasses(popUp, config) {
     popUp.classList.toggle('popup-mode-centered', popupMode === POPUP_MODE_CENTERED);
     popUp.classList.toggle('popup-mode-adaptive-dialog', popupMode === POPUP_MODE_ADAPTIVE_DIALOG);
     popUp.classList.toggle('popup-mode-with-bottom-offset', hasPopupBottomOffset(config));
+    popUp.classList.toggle('popup-mode-full-width-on-mobile', hasPopupFullWidthOnMobile(config));
     return popupMode;
 }
 
