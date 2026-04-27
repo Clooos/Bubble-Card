@@ -402,8 +402,6 @@
     position: absolute;
     background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) 0 0;
-    backdrop-filter: var(--custom-popup-filter);
-    -webkit-backdrop-filter: var(--custom-popup-filter);
     border: var(--bubble-pop-up-border, var(--bubble-border, none));
     contain: paint;
     pointer-events: none;
@@ -411,7 +409,6 @@
     z-index: 0;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    transition: backdrop-filter 0.15s ease-out, -webkit-backdrop-filter 0.15s ease-out;
 }
 
 .bubble-pop-up-container::-webkit-scrollbar {
@@ -437,6 +434,13 @@
 .bubble-pop-up[data-bubble-popup-blur-guard="true"] {
     background-color: var(--bubble-pop-up-main-background-color, var(--bubble-pop-up-background-color, var(--bubble-secondary-background-color, var(--background-color, var(--secondary-background-color)))));
     border: var(--bubble-pop-up-border, var(--bubble-border, none));
+}
+
+.bubble-pop-up.is-opening:not(.editor),
+.bubble-pop-up.is-popup-opened:not(.editor),
+.bubble-pop-up.is-closing:not(.editor) {
+    backdrop-filter: var(--custom-popup-filter);
+    -webkit-backdrop-filter: var(--custom-popup-filter);
 }
 
 .bubble-pop-up.is-closing {
@@ -529,10 +533,9 @@
     transform: translateZ(0);
 }
 
-.bubble-pop-up[data-bubble-popup-blur-guard="true"] .bubble-pop-up-background,
-.bubble-pop-up.is-closing.is-switch-closing .bubble-pop-up-background {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+.bubble-pop-up.is-closing.is-switch-closing {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
 }
 
 .bubble-header-container {
