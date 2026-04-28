@@ -113,14 +113,15 @@
 }
 
 .bubble-pop-up.popup-mode-centered:not(.editor) {
-    top: 50%;
-    left: 50% !important;
-    bottom: auto !important;
-    margin-left: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    margin: auto !important;
     width: calc(100vw - 32px) !important;
     max-width: var(--desktop-width, 540px) !important;
     min-width: 0 !important;
-    height: auto !important;
+    height: fit-content !important;
     max-height: calc(100vh - 112px - 2 * var(--custom-height-offset-desktop, 0px)) !important;
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
     --bubble-pop-up-bottom-padding: 18px;
@@ -133,19 +134,19 @@
 
 .bubble-pop-up.popup-mode-centered.is-popup-closed:not(.editor) {
     contain: paint !important;
-    transform: translate(-50%, -50%) scale(0.85) !important;
+    transform: scale(0.85) !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
 
 .bubble-pop-up.popup-mode-centered.is-popup-opened:not(.editor),
 .bubble-pop-up.popup-mode-centered.is-opening:not(.editor) {
-    transform: translate(-50%, -50%) scale(1) !important;
+    transform: scale(1) !important;
     opacity: 1 !important;
 }
 
 .bubble-pop-up.popup-mode-centered.is-closing:not(.editor) {
-    transform: translate(-50%, -50%) scale(0.9) !important;
+    transform: scale(0.9) !important;
     opacity: 0 !important;
     border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
     transition: transform 0.2s ease-in, opacity 0.2s ease-in !important;
@@ -160,9 +161,7 @@
 
 @media only screen and (min-width: 768px) {
     .bubble-pop-up.popup-mode-centered:not(.editor) {
-        top: 50% !important;
-        left: calc(var(--mdc-drawer-width, 0px) / 2 + 50%) !important;
-        bottom: auto !important;
+        left: var(--mdc-drawer-width, 0px) !important;
     }
 }
 
@@ -251,14 +250,15 @@
 
 @media only screen and (min-width: 871px) and (min-height: 501px) {
     .bubble-pop-up.popup-mode-adaptive-dialog:not(.editor) {
-        top: 50%;
-        left: calc(var(--mdc-drawer-width, 0px) / 2 + 50%) !important;
-        bottom: auto !important;
-        margin-left: 0 !important;
+        top: 0 !important;
+        left: var(--mdc-drawer-width, 0px) !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        margin: auto !important;
         width: calc(100vw - 32px) !important;
         max-width: var(--desktop-width, 540px) !important;
         min-width: 0 !important;
-        height: auto !important;
+        height: fit-content !important;
         max-height: calc(100vh - 112px - 2 * var(--custom-height-offset-desktop, 0px)) !important;
         border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
         --bubble-pop-up-bottom-padding: 18px;
@@ -269,17 +269,17 @@
     }
     .bubble-pop-up.popup-mode-adaptive-dialog.is-popup-closed:not(.editor) {
         contain: paint !important;
-        transform: translate(-50%, -50%) scale(0.85) !important;
+        transform: scale(0.85) !important;
         opacity: 0 !important;
         pointer-events: none !important;
     }
     .bubble-pop-up.popup-mode-adaptive-dialog.is-popup-opened:not(.editor),
     .bubble-pop-up.popup-mode-adaptive-dialog.is-opening:not(.editor) {
-        transform: translate(-50%, -50%) scale(1) !important;
+        transform: scale(1) !important;
         opacity: 1 !important;
     }
     .bubble-pop-up.popup-mode-adaptive-dialog.is-closing:not(.editor) {
-        transform: translate(-50%, -50%) scale(0.9) !important;
+        transform: scale(0.9) !important;
         opacity: 0 !important;
         border-radius: var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) !important;
         transition: transform 0.2s ease-in, opacity 0.2s ease-in !important;
