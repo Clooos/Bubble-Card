@@ -224,7 +224,19 @@ function initializeLegacyPopUp(context) {
     context.refreshPopupHeader = () => {
         refreshPopupHeader(context);
     };
-    refreshPopupShell(context);
+    context.refreshPopupShell = () => {
+        // Skip for legacy popups that are closed (DOM is detached, evaluation is wasted work).
+        if (!context.editor && !context.config.background_update && context.config.hash !== location.hash) {
+            return;
+        }
+        refreshPopupShell(context);
+    };
+    const isActiveAtInit = context.config.hash === location.hash ||
+                           context.editor ||
+                           !!context.config.background_update;
+    if (isActiveAtInit) {
+        refreshPopupShell(context);
+    }
 
     if (context.config.background_update && !context.headerInitialized) {
         context.headerInitialized = true;
@@ -274,7 +286,12 @@ export function handlePopUp(context) {
     } else if (typeof context.refreshPopupShell === 'function') {
         context.refreshPopupShell();
     } else {
-        refreshPopupShell(context);
+        // Fallback for contexts where refreshPopupShell was not stored.
+        // Still guard against useless evaluation for closed legacy popups.
+        if (context.isStandalonePopUp || context.editor || context.config.background_update ||
+            context.config.hash === location.hash) {
+            refreshPopupShell(context);
+        }
     }
 
     // Keep the popup registered in the shared URL dispatcher.

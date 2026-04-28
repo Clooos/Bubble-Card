@@ -1270,7 +1270,9 @@ export function openPopup(context, instant = false) {
         if (!popupState.activePopups.has(context)) return;
 
         context.updatePopupColor?.();
-        context.refreshPopupHeader?.();
+        // refreshPopupShell includes header refresh + changeStyle so custom styles
+        // are applied immediately on open rather than waiting for the next hass update.
+        (context.refreshPopupShell ?? context.refreshPopupHeader)?.();
 
         displayLegacyPopupContent(context);
         toggleBackdrop(context, true);

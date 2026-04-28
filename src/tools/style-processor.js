@@ -9,6 +9,34 @@ import { cleanCSS } from './clean-css.js';
 
 const compiledTemplateCache = new Map();
 
+// Null-safe stub for DOM element references passed to user style templates.
+// Used when context.elements.icon is not yet initialized (e.g. a popup whose
+// header button hasn't been rendered yet).  The Proxy absorbs any property
+// access, method call, or property assignment so that templates like
+// `${icon.setAttribute("icon", ...)}` or `${icon.style.background = "red"}`
+// do not throw, and subsequent template expressions continue to execute.
+function _makeNullElementStub() {
+  return new Proxy(function _noop() {}, {
+    get: () => _makeNullElementStub(),
+    set: () => true,
+    apply: () => undefined,
+  });
+}
+const _nullElementStub = _makeNullElementStub();
+
+// Wrap a single DOM element reference: returns the element when present,
+// or a null-safe stub when undefined/null (absorbs any method call or property access).
+function _safeRef(value) {
+  return value ?? _makeNullElementStub();
+}
+
+// Wrap an array of DOM element references: each slot that is undefined/null
+// returns a null-safe stub instead of throwing on method calls.
+function _safeArray(arr) {
+  if (!arr) return _makeNullElementStub();
+  return new Proxy(arr, { get: (t, k) => _safeRef(t[k]) });
+}
+
 function getOrCreateStyleElement(context, element) {
   if (element.tagName === 'STYLE') {
     return element;
@@ -306,22 +334,21 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
         }
       }
     }
-    const card = context.config.card_type === 'pop-up' ? context.popUp : context.card;
-    
+    const card = _safeRef(context.config.card_type === 'pop-up' ? context.popUp : context.card);
+
     // Execute the compiled function to get the raw string result
-    const rawResult = compiledFunction.call(
-      context,
+    const rawResult = compiledFunction.apply(context, [
       context._hass,
       context.config.entity,
       cachedState ?? getState(context),
-      context.elements.icon,
+      _safeRef(context.elements?.icon),
       cachedSubButtonStates ?? getSubButtonsStates(context),
-      context.subButtonIcon,
+      _safeArray(context.subButtonIcon),
       getWeatherIcon,
       card,
       card.name,
-      checkConditionsMet
-    );
+      checkConditionsMet,
+    ]);
 
     // Optimization: Local cache to avoid re-cleaning CSS if the raw output hasn't changed.
     // This significantly reduces CPU usage on dashboards with many cards/modules.
