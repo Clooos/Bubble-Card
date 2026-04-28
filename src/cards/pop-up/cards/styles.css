@@ -65,11 +65,6 @@
     display: none;
 }
 
-.bubble-pop-up-container > ha-sortable > .bubble-cards-editor-container > .card > hui-card-edit-mode {
-    display: block;
-    position: relative;
-}
-
 /* ============================================
    Pop-up Cards — Add card button (on preview)
    ============================================ */
