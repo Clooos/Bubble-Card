@@ -58,6 +58,14 @@ function createMockElement(tag = 'div', classNames = '') {
             this.children.push(child);
             return child;
         },
+        removeChild(child) {
+            this.children = this.children.filter((entry) => entry !== child);
+            if (child.parentNode === this) {
+                child.parentNode = null;
+                child.parentElement = null;
+            }
+            return child;
+        },
         querySelector(selector) {
             if (!selector.startsWith('.')) {
                 return null;
@@ -353,6 +361,7 @@ describe('prepareStandaloneStructure', () => {
         const context = {
             config: {},
             content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
             popUp: createMockElement('div'),
             editor: false,
             detectedEditor: false,
@@ -367,5 +376,31 @@ describe('prepareStandaloneStructure', () => {
         expect(sectionRow.style.display).toBe('none');
         expect(sectionRowContainer.style.display).toBe('none');
         expect(sectionRowContainer.style.position).toBe('');
+    });
+
+    test('mounts popUp on shadowRoot (not content/ha-card) so card-mod backdrop-filter cannot trap fixed positioning', () => {
+        const shadowRoot = createMockElement('div');
+        const content = createMockElement('div');
+        const card = createMockElement('ha-card');
+        shadowRoot.appendChild(card); // simulate what initializeContent does
+
+        const context = {
+            config: {},
+            content,
+            shadowRoot,
+            card,
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        prepareStandaloneStructure(context);
+
+        expect(context.popUp).toBeDefined();
+        expect(shadowRoot.children).toContain(context.popUp);
+        expect(content.children).not.toContain(context.popUp);
+        // ha-card shell must be detached so card-mod styles on it have zero DOM effect
+        expect(card.parentNode).toBeNull();
+        expect(shadowRoot.children).not.toContain(card);
     });
 });

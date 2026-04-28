@@ -455,7 +455,14 @@ export function prepareStandaloneStructure(context) {
 
   if (!context.popUp) {
     context.popUp = createElement("div");
-    context.content.appendChild(context.popUp);
+    (context.shadowRoot ?? context.content).appendChild(context.popUp);
+  }
+
+  // The ha-card shell is not used by standalone popups – the popup lives in
+  // context.popUp at the shadow-root level. Detach it so card-mod styles
+  // injected into ha-card have zero stacking-context or layout effect.
+  if (context.card?.parentNode) {
+    context.card.parentNode.removeChild(context.card);
   }
 
   context.popUp.classList.add("bubble-pop-up", "pop-up", "is-popup-closed", "is-standalone-pop-up");
