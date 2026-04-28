@@ -25,8 +25,8 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant 
 
 <br>
 
-1. Download these files: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js) and [bubble-pop-up-fix.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-pop-up-fix.js)
-2. Add these files to your `<config>/www` folder
+1. Download this file: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Add this file to your `<config>/www` folder
 3. On your dashboard click on the icon at the right top corner then on `Edit dashboard`
 4. Click again on that icon and then click on `Manage resources`
 5. Click on `Add resource`
@@ -159,25 +159,7 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 > ### Different ways to close a pop-up 
 > They are many ways to close a pop-up. For instance, you can swipe from the pop-up header to the bottom, by doing a long swipe inside the pop-up to the bottom, by pressing Escape on desktop, by removing the hash in the URL or by simply pressing the close button.
 >
-> ### Pop-up initialization fix
-> If you notice that pop-up content appears upon page load, consider installing this fix as an additional module.
-> <details>
-> <summary>Installation</summary>
-> <br>
->
-> You can do this by adding `bubble-pop-up-fix.js` to your `configuration.yaml` like so:
-> ```yaml
-> frontend:
->   extra_module_url:
->     - /hacsfiles/Bubble-Card/bubble-pop-up-fix.js
-> ```
-> If you didn't install it with HACS, change the path accordingly. Then, clear your browser cache.
-> 
-> For Android Home Assistant Companion App users, you can close the app, then clear the app cache. If it's still not working, you can close and restart the app again.
-> 
-> For iOS Home Assistant Companion App users, you can go to your Home Assistant settings, then navigate to Companion App > Debug > Clear Frontend Cache (or something similar), then refresh the page or restart the app.
-> 
-> </details>
+
 
 ### Pop-up options
 
