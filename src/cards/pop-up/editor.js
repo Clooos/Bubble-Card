@@ -55,6 +55,9 @@ function renderPopupStyleDropdown(editor) {
                 if (value === 'bubble' || !value) {
                     const newConfig = { ...editor._config };
                     delete newConfig.popup_style;
+                    if (editor._config.popup_style === 'classic') {
+                        delete newConfig.button_type;
+                    }
                     fireEvent(editor, 'config-changed', { config: newConfig });
                 } else {
                     editor._valueChanged({

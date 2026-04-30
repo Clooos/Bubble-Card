@@ -38,12 +38,15 @@ export function renderButtonEditor(editor){
     
     const isClassicStyle = editor._config.popup_style === 'classic';
 
+    let button_type;
     if (isClassicStyle) {
-        editor._config.button_type = 'switch';
-    } else if (!editor._config.button_type) {
-        editor._config.button_type = isPopUp ? 'name' : 'switch';
+        button_type = 'switch';
+    } else {
+        if (!editor._config.button_type) {
+            editor._config.button_type = isPopUp ? 'name' : 'switch';
+        }
+        button_type = editor._config.button_type;
     }
-    let button_type = editor._config.button_type;
     const buttonTypeDropdown = !isClassicStyle
         ? editor.makeDropdown("Button type", "button_type", getButtonList())
         : '';

@@ -934,7 +934,7 @@
                 </div>
             </ha-expansion-panel>
         `:""}
-    `}function At(e){let t={};"slider"!==e._config.button_type||e._disableEntityFilter||(t={filter:[{domain:["light","media_player","cover","input_number","number","climate","fan"]},{domain:"sensor",device_class:"battery"}]});const n="pop-up"===e._config.card_type;let o=e._config.button_action||"";const i="classic"===e._config.popup_style;i?e._config.button_type="switch":e._config.button_type||(e._config.button_type=n?"name":"switch");let a=e._config.button_type;const r=i?"":e.makeDropdown("Button type","button_type",[{label:"Switch",value:"switch"},{label:"Slider",value:"slider"},{label:"State",value:"state"},{label:"Name / Text (No entity required)",value:"name"}]);return _t.qy`
+    `}function At(e){let t={};"slider"!==e._config.button_type||e._disableEntityFilter||(t={filter:[{domain:["light","media_player","cover","input_number","number","climate","fan"]},{domain:"sensor",device_class:"battery"}]});const n="pop-up"===e._config.card_type;let o=e._config.button_action||"";const i="classic"===e._config.popup_style;let a;i?a="switch":(e._config.button_type||(e._config.button_type=n?"name":"switch"),a=e._config.button_type);const r=i?"":e.makeDropdown("Button type","button_type",[{label:"Switch",value:"switch"},{label:"Slider",value:"slider"},{label:"State",value:"state"},{label:"Name / Text (No entity required)",value:"name"}]);return _t.qy`
         <div class="card-config">
             ${n?"":e.makeDropdown("Card type","card_type",e.cardTypeList)}
             ${n?"":r}
@@ -1241,7 +1241,7 @@
             .data=${{popup_style:e._config.popup_style??"bubble"}}
             .schema=${[{name:"popup_style",selector:{select:{options:[{label:"Bubble (default)",value:"bubble"},{label:"Classic",value:"classic"}],mode:"dropdown"}}}]}
             .computeLabel=${()=>"Pop-up style"}
-            @value-changed=${t=>{const n=t.detail.value.popup_style;if("bubble"!==n&&n)e._valueChanged({target:{configValue:"popup_style"},detail:{value:n}});else{const t={...e._config};delete t.popup_style,(0,s.rC)(e,"config-changed",{config:t})}}}
+            @value-changed=${t=>{const n=t.detail.value.popup_style;if("bubble"!==n&&n)e._valueChanged({target:{configValue:"popup_style"},detail:{value:n}});else{const t={...e._config};delete t.popup_style,"classic"===e._config.popup_style&&delete t.button_type,(0,s.rC)(e,"config-changed",{config:t})}}}
         ></ha-form>
     `}(e)}
             ${dn(e)}
