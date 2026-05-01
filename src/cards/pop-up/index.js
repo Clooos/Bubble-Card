@@ -7,6 +7,109 @@ import { isStandalonePopUpConfig } from './migration.js';
 
 initPopUpHashNavigationBridge();
 
+const wakeSyncContextRefs = [];
+let wakeSyncFrame = null;
+let wakeSyncDeferredTimeout = null;
+
+function pruneWakeSyncContextRefs() {
+    for (let i = wakeSyncContextRefs.length - 1; i >= 0; i--) {
+        if (!wakeSyncContextRefs[i]?.deref?.()) {
+            wakeSyncContextRefs.splice(i, 1);
+        }
+    }
+}
+
+function registerWakeSyncContext(context) {
+    if (!context) {
+        return;
+    }
+
+    for (let i = wakeSyncContextRefs.length - 1; i >= 0; i--) {
+        const existing = wakeSyncContextRefs[i]?.deref?.();
+        if (!existing) {
+            wakeSyncContextRefs.splice(i, 1);
+            continue;
+        }
+        if (existing === context) {
+            return;
+        }
+    }
+
+    wakeSyncContextRefs.push(new WeakRef(context));
+}
+
+function getWakeSyncContexts() {
+    pruneWakeSyncContextRefs();
+
+    const contexts = [];
+    for (const ref of wakeSyncContextRefs) {
+        const context = ref?.deref?.();
+        if (!context || context.isConnected === false) {
+            continue;
+        }
+        if (!context.popUp || !context.elements || context.editor || context.detectedEditor) {
+            continue;
+        }
+        contexts.push(context);
+    }
+
+    return contexts;
+}
+
+function syncWakeResumedPopups() {
+    const contexts = getWakeSyncContexts();
+    for (const context of contexts) {
+        syncPopupOpenStateWithLocation(context, false);
+        changeTriggered(context);
+    }
+}
+
+function scheduleWakeResumedPopupsSync() {
+    if (wakeSyncFrame !== null) {
+        cancelAnimationFrame(wakeSyncFrame);
+        wakeSyncFrame = null;
+    }
+
+    if (wakeSyncDeferredTimeout) {
+        clearTimeout(wakeSyncDeferredTimeout);
+        wakeSyncDeferredTimeout = null;
+    }
+
+    if (typeof requestAnimationFrame !== 'function') {
+        syncWakeResumedPopups();
+        return;
+    }
+
+    wakeSyncFrame = requestAnimationFrame(() => {
+        wakeSyncFrame = null;
+        syncWakeResumedPopups();
+
+        wakeSyncDeferredTimeout = setTimeout(() => {
+            wakeSyncDeferredTimeout = null;
+            syncWakeResumedPopups();
+        }, 800);
+    });
+}
+
+function ensureWakeSyncListeners() {
+    if (typeof window === 'undefined' || window.__bubbleWakeSyncListenersAdded) {
+        return;
+    }
+
+    window.__bubbleWakeSyncListenersAdded = true;
+
+    window.addEventListener('focus', scheduleWakeResumedPopupsSync);
+    window.addEventListener('pageshow', scheduleWakeResumedPopupsSync);
+
+    if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                scheduleWakeResumedPopupsSync();
+            }
+        });
+    }
+}
+
 function syncPopUpHashRegistration(context) {
     const registrationKey = [
         location.pathname || '',
@@ -263,6 +366,9 @@ export function handlePopUp(context) {
     if (!context.popUp || !context.elements) {
         return;
     }
+
+    ensureWakeSyncListeners();
+    registerWakeSyncContext(context);
 
     if (isStandalonePopUpInactive(context)) {
         context._standaloneNeedsShellRefresh = true;

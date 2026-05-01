@@ -35,6 +35,7 @@ jest.unstable_mockModule('./cards/index.js', () => ({
 const { handlePopUp } = await import('./index.js');
 const { changeEditor } = await import('./changes.js');
 const { changeStyle } = await import('./changes.js');
+const { changeTriggered } = await import('./changes.js');
 const { handlePopUpCards } = await import('./cards/index.js');
 const { createHeader, createStructure } = await import('./create.js');
 const { renderHeaderButton } = await import('./create.js');
@@ -299,6 +300,28 @@ describe('handlePopUp performance guards', () => {
         await handlePopUp(context);
 
         expect(syncPopupOpenStateWithLocation).toHaveBeenCalledWith(context, false);
+    });
+
+    test('re-evaluates trigger state when the app regains focus', async () => {
+        const previousWindow = global.window;
+        const mockWindow = new EventTarget();
+        delete mockWindow.__bubbleWakeSyncListenersAdded;
+        global.window = mockWindow;
+        jest.useFakeTimers();
+
+        const context = createOpenPopupContext();
+
+        await handlePopUp(context);
+        jest.clearAllMocks();
+
+        mockWindow.dispatchEvent(new Event('focus'));
+
+        expect(syncPopupOpenStateWithLocation).toHaveBeenCalledWith(context, false);
+        expect(changeTriggered).toHaveBeenCalledWith(context);
+
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+        global.window = previousWindow;
     });
 
     test('does not force hash-based reopen while editing', async () => {
