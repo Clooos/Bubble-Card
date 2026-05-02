@@ -152,6 +152,37 @@
     transition: transform 0.2s ease-in, opacity 0.2s ease-in;
 }
 
+@keyframes bubble-popup-fast-open-bottom-sheet {
+    from {
+        transform: translateY(14px);
+        opacity: 0.84;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes bubble-popup-fast-open-dialog {
+    from {
+        transform: translateY(8px) scale(0.985);
+        opacity: 0.88;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.bubble-pop-up.is-fast-opening:not(.editor):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) {
+    animation: bubble-popup-fast-open-bottom-sheet 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bubble-pop-up.is-fast-opening.popup-mode-centered:not(.editor),
+.bubble-pop-up.is-fast-opening.popup-mode-adaptive-dialog:not(.editor) {
+    animation: bubble-popup-fast-open-dialog 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @media only screen and (max-width: 600px) {
     .bubble-pop-up.popup-mode-centered.popup-mode-full-width-on-mobile:not(.editor) {
         width: 100vw;

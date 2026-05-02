@@ -20,19 +20,8 @@ function setManagedCardVisibility(cardElement, visible) {
         cardElement.toggleAttribute('hidden', !visible);
     }
 
-    if (!managedElement) {
-        return false;
-    }
-
-    if (visible) {
-        if (!managedElement.parentElement && typeof cardElement.appendChild === 'function') {
-            cardElement.appendChild(managedElement);
-        }
-        return true;
-    }
-
-    if (managedElement.parentElement === cardElement && typeof cardElement.removeChild === 'function') {
-        cardElement.removeChild(managedElement);
+    if (managedElement?.style) {
+        managedElement.style.display = visible ? '' : 'none';
     }
 
     return true;
