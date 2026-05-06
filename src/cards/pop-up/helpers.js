@@ -826,7 +826,12 @@ function completePopupOpen(context) {
         return;
     }
 
-    syncPopupScrollableState(context);
+    // Try cached scrollable state first to avoid a forced layout here.
+    // Phase 1 already computed the authoritative value; only re-measure if we
+    // have no cache (cold open without phase 1, or stale state).
+    if (!syncCachedPopupScrollableState(context)) {
+        syncPopupScrollableState(context);
+    }
 
     setPopupOpenSettled(context, true);
     armFreshOutsideInteractionGuard(context);

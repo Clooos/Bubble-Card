@@ -707,13 +707,19 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
 
         cardWrapper.classList.add('has-bottom-buttons');
         
-        // Only add with-main-buttons-bottom if main buttons are actually visible
-        const isMainButtonsVisible = !buttonsContainer.classList.contains('hidden') && 
-                                     buttonsContainer.style.display !== 'none' &&
-                                     getComputedStyle(buttonsContainer).display !== 'none';
-        
-        if (isMainButtonsVisible) {
-            bottomSubButtonContainer?.classList.add('with-main-buttons-bottom');
+        // Only add with-main-buttons-bottom if main buttons are actually visible.
+        // Skip the forced-layout getComputedStyle call while a popup is opening
+        // (data-bubblePopupOpening marker is set) to avoid blocking the interaction frame.
+        const popupOpening = context?.popUp?.dataset?.bubblePopupOpening === 'true';
+
+        if (!popupOpening) {
+            const isMainButtonsVisible = !buttonsContainer.classList.contains('hidden') && 
+                                         buttonsContainer.style.display !== 'none' &&
+                                         getComputedStyle(buttonsContainer).display !== 'none';
+            
+            if (isMainButtonsVisible) {
+                bottomSubButtonContainer?.classList.add('with-main-buttons-bottom');
+            }
         }
     };
 
