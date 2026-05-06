@@ -1176,6 +1176,54 @@ describe('standalone popup lifecycle', () => {
 
         expect(hideBackdrop).toHaveBeenCalledTimes(1);
     });
+
+    test('opens popup on second tap from a third-party card when globalLastKnownHash is stale', () => {
+        // Regression: #2386 — ring-tile-card (or any third-party) uses HA navigate() which calls
+        // history.pushState() and fires a bare `location-changed` (no event.detail).
+        // After a previous close the global last-known hash is still '#popup-test', so
+        // currentHash === previousHash. The old history-length branch incorrectly treated
+        // pushState-driven same-hash events as toggle-close requests → popup never opened.
+        const context = createStandaloneContext({ hash: '#popup-test' });
+        usedContexts.push(context);
+
+        registerPopupContext(context);
+
+        // First open (normal path) → open + fully settle the popup.
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-test');
+        window.dispatchEvent(new Event('location-changed'));
+        flushRafQueue();
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+
+        expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
+
+        // Close the popup (hash removed). globalLastKnownHash stays '#popup-test'.
+        window.history.replaceState({}, '', 'http://localhost/lovelace/test');
+        window.dispatchEvent(new Event('location-changed'));
+
+        expect(context.popUp.classList.contains('is-closing')).toBe(true);
+
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+
+        jest.clearAllMocks();
+
+        // Second tap: HA navigate() pushes '#popup-test' again — bare event, no detail.
+        // globalLastKnownHash is still '#popup-test' (stale from the first session),
+        // and history.length increases because it is a pushState call.
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-test');
+        window.dispatchEvent(new Event('location-changed')); // no detail — HA native navigate
+
+        // The popup must start opening, not be toggled closed.
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+        expect(context.popUp.classList.contains('is-closing')).toBe(false);
+
+        flushRafQueue(); // phase 1
+        flushRafQueue(); // phase 2
+
+        expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
+    });
 });
 
 describe('legacy popup location routing', () => {

@@ -1583,17 +1583,13 @@ let globalUrlListenerAdded = false;
 let globalLastKnownHash = location.hash;
 let globalLastHistoryLength = typeof history?.length === 'number' ? history.length : 0;
 
-function isExplicitSameHashNavigationEvent(event, currentHash, previousHash, currentHistoryLength, previousHistoryLength) {
+function isExplicitSameHashNavigationEvent(event, currentHash, previousHash) {
     if (!currentHash || currentHash !== previousHash) {
         return false;
     }
 
     if (event?.type !== 'location-changed') {
         return false;
-    }
-
-    if (currentHistoryLength > previousHistoryLength) {
-        return true;
     }
 
     if (event?.detail?.replace === false) {
@@ -1695,7 +1691,7 @@ function ensureGlobalUrlListener() {
                 const timeSinceDialogClosed = Date.now() - dialogState.recentlyClosedTimestamp;
                 const dialogRecentlyClosed = timeSinceDialogClosed < dialogState.protectionWindow;
 
-                if (!dialogRecentlyClosed && isExplicitSameHashNavigationEvent(event, currentHash, previousHash, currentHistoryLength, previousHistoryLength)) {
+                if (!dialogRecentlyClosed && isExplicitSameHashNavigationEvent(event, currentHash, previousHash)) {
                     removeHash(true);
                     return;
                 }
