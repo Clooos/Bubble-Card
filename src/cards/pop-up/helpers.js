@@ -1240,7 +1240,6 @@ function updatePopupClass(popUp, open) {
     };
 
     if (open) {
-        popUp.getBoundingClientRect();
         applyPopupState();
         return;
     }
