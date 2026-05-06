@@ -328,7 +328,10 @@ function startStandalonePopupTransition(context, open, onComplete, switchClosing
     }
 
     if (open || !isAlreadyOpenForClose) {
-        popUp.getBoundingClientRect();
+        // Defer layout read to next frame to avoid reflow during the CSS transition
+        requestAnimationFrame(() => {
+            popUp.getBoundingClientRect();
+        });
     }
 
     waitForStandalonePopupTransition(context, onComplete);

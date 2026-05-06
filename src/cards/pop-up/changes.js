@@ -97,7 +97,13 @@ export function changeStyle(context) {
         context.updatePopupColor?.();
     }
 
-    handleCustomStyles(context, context.popUp);
+    if (isTransitioning) {
+        // Defer style parsing to the next frame to avoid layout thrashing
+        // during the popup animation's paint phase.
+        requestAnimationFrame(() => handleCustomStyles(context, context.popUp));
+    } else {
+        handleCustomStyles(context, context.popUp);
+    }
     if (!isTransitioning && typeof updateBackdropStyles === 'function') {
         updateBackdropStyles();
     } else if (!isTransitioning) {

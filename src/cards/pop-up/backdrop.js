@@ -194,10 +194,12 @@ export function getBackdrop(context) {
         }
 
         if (shouldAnimateOpen) {
-            // Flush the hidden state once after un-hiding the host so the next class
-            // toggle animates opacity instead of snapping to the visible end state.
-            internalBackdropElement.getBoundingClientRect();
-            markBackdropTransition("is-opening");
+            // Defer the layout read to the next frame so it doesn't force a reflow
+            // during the popup animation's paint phase.
+            requestAnimationFrame(() => {
+                internalBackdropElement.getBoundingClientRect();
+                markBackdropTransition("is-opening");
+            });
         } else {
             clearBackdropTransitionState();
         }
