@@ -312,14 +312,25 @@ function startStandalonePopupTransition(context, open, onComplete, switchClosing
     const { popUp } = context;
     clearStandaloneTransitionCompletion(context);
     if (popUp.style.transition === 'none') popUp.style.transition = '';
+
+    const isAlreadyOpenForClose = !open &&
+        popUp.classList.contains('is-popup-opened') &&
+        !popUp.classList.contains('is-popup-closed') &&
+        !popUp.classList.contains('is-closing') &&
+        !popUp.classList.contains('is-opening');
+
     if (open) {
         setStandalonePopupState(popUp, false);
-    } else {
+    } else if (!isAlreadyOpenForClose) {
         popUp.classList.remove('is-opening', 'is-closing');
         popUp.classList.add('is-popup-opened');
         popUp.classList.remove('is-popup-closed');
     }
-    popUp.getBoundingClientRect();
+
+    if (open || !isAlreadyOpenForClose) {
+        popUp.getBoundingClientRect();
+    }
+
     waitForStandalonePopupTransition(context, onComplete);
     if (open) {
         setStandalonePopupState(popUp, true, 'is-opening');

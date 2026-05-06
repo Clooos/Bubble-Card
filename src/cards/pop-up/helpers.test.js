@@ -763,6 +763,34 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.style.transform).toBe('');
     });
 
+    test('does not force a standalone close reflow when the popup is already visibly open', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        context.popUp.classList.remove('is-popup-closed');
+        context.popUp.classList.add('is-popup-opened');
+        context.popUp.getBoundingClientRect.mockClear();
+
+        closePopup(context);
+
+        expect(context.popUp.getBoundingClientRect).not.toHaveBeenCalled();
+        expect(context.popUp.classList.contains('is-closing')).toBe(true);
+    });
+
+    test('still forces a standalone close reflow when the popup visual state is stale', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        context.popUp.classList.remove('is-popup-closed');
+        context.popUp.classList.add('is-popup-opened', 'is-opening');
+        context.popUp.getBoundingClientRect.mockClear();
+
+        closePopup(context);
+
+        expect(context.popUp.getBoundingClientRect).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-closing')).toBe(true);
+    });
+
     test('force-closes a runtime-active standalone popup when hash removal finds a stale closed class', () => {
         const context = createStandaloneContext({ hash: '#popup-a' });
         usedContexts.push(context);
