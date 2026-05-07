@@ -1251,6 +1251,7 @@ function openStandalonePopup(context, instant = false) {
         try {
             if (!popupState.activePopups.has(context)) return;
 
+            updateListeners(context, true);
             toggleBackdrop(context, true);
 
             if (!phase1ContentPrimed || phase1WarmCardsRestored) {
