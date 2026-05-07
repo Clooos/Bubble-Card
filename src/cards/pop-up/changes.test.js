@@ -124,6 +124,7 @@ function createMockClassList(initialClasses = []) {
 describe('changeStyle', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        global.requestAnimationFrame = jest.fn((callback) => callback());
         global.location = {
             hash: '',
             pathname: '/lovelace/test',
