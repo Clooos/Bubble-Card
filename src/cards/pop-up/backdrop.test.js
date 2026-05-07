@@ -187,7 +187,7 @@ describe('backdrop transitions', () => {
         jest.useRealTimers();
     });
 
-    test('applies the active popup backdrop styles before the first visible open frame', () => {
+    test('defers active popup backdrop styles on the first visible open frame', () => {
         jest.useFakeTimers();
 
         const rafCallbacks = [];
@@ -208,13 +208,14 @@ describe('backdrop transitions', () => {
         };
 
         const sharedBackdrop = getBackdrop(contextA);
+        sharedBackdrop.hideBackdrop();
+        jest.advanceTimersByTime(300);
         handleCustomStyles.mockClear();
 
         sharedBackdrop.showBackdrop(contextB);
 
-        expect(handleCustomStyles).toHaveBeenCalledTimes(1);
-        expect(handleCustomStyles).toHaveBeenLastCalledWith(contextB, sharedBackdrop.backdropCustomStyle);
-        expect(rafCallbacks).toHaveLength(0);
+        expect(handleCustomStyles).not.toHaveBeenCalled();
+        expect(rafCallbacks).toHaveLength(1);
 
         jest.runOnlyPendingTimers();
         jest.useRealTimers();
@@ -222,6 +223,10 @@ describe('backdrop transitions', () => {
 
     test('does not restart the backdrop opening transition during a visible popup handoff', () => {
         jest.useFakeTimers();
+        global.requestAnimationFrame = jest.fn((callback) => {
+            callback();
+            return 1;
+        });
 
         const contextA = {
             config: {

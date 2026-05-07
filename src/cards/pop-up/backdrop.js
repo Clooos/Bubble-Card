@@ -190,7 +190,13 @@ export function getBackdrop(context) {
 
         if (activeContext) {
             applyBackdropConfig(activeContext);
-            scheduleBackdropStylesUpdate(activeContext, false);
+            if (shouldAnimateOpen) {
+                // Keep the first visible cold-open frame focused on the backdrop fade.
+                // Popup shell refresh will queue the style update immediately after.
+                pendingBackdropContext = activeContext;
+            } else {
+                scheduleBackdropStylesUpdate(activeContext, false);
+            }
         }
 
         if (shouldAnimateOpen) {

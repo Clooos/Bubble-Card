@@ -787,6 +787,8 @@ describe('standalone popup lifecycle', () => {
 
         closePopup(context);
 
+        flushRafQueue();
+
         expect(context.popUp.getBoundingClientRect).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-closing')).toBe(true);
     });
