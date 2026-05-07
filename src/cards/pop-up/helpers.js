@@ -15,6 +15,7 @@ const popupState = {
 const outsideCloseFallbackDelay = 150;
 const popupQuickOpenAnimationDurationMs = 140;
 const standaloneWarmCardRetentionMs = 3200;
+const visibleTriggerPrewarmBackstopMs = 96;
 const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout'];
 const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame'];
 
@@ -123,20 +124,83 @@ function canPrewarmContext(context) {
         !hasPrimedStandalonePopupContent(context)
     );
 }
-function getNextPrewarmContext() {
-    const currentPath = syncPrewarmPathState();
-    if (!currentPath) return null;
-    for (const entry of readPrewarmEntries()) {
-        if (entry.path !== currentPath) continue;
-        const ctx = getRegisteredPopupContext(entry.hash);
-        if (canPrewarmContext(ctx)) return ctx;
+function getPrewarmContextFromVisibleTrigger() {
+    if (typeof document === 'undefined' || typeof document.querySelectorAll !== 'function') {
+        return null;
     }
+
+    const viewportWidth = typeof window?.innerWidth === 'number' ? window.innerWidth : Number.POSITIVE_INFINITY;
+    const viewportHeight = typeof window?.innerHeight === 'number' ? window.innerHeight : Number.POSITIVE_INFINITY;
+
+    const triggers = Array.from(document.querySelectorAll('.bubble-button, .bubble-sub-button'));
+    for (const trigger of triggers) {
+        if (!trigger?.dataset?.tapAction || !trigger?.classList?.contains) {
+            continue;
+        }
+
+        if (!trigger.classList.contains('bubble-button') && !trigger.classList.contains('bubble-sub-button')) {
+            continue;
+        }
+
+        if (trigger.hidden || trigger.style?.display === 'none' || trigger.style?.visibility === 'hidden') {
+            continue;
+        }
+
+        const rect = typeof trigger.getBoundingClientRect === 'function' ? trigger.getBoundingClientRect() : null;
+        if (!rect || rect.width <= 0 || rect.height <= 0 || rect.bottom <= 0 || rect.right <= 0 || rect.top >= viewportHeight || rect.left >= viewportWidth) {
+            continue;
+        }
+
+        let tapAction = null;
+        try {
+            tapAction = JSON.parse(trigger.dataset.tapAction);
+        } catch (_) {
+            tapAction = null;
+        }
+
+        const hash = typeof tapAction?.navigation_path === 'string' ? tapAction.navigation_path.trim() : '';
+        if (!hash || !hash.startsWith('#')) {
+            continue;
+        }
+
+        const context = getRegisteredPopupContext(hash);
+        if (canPrewarmContext(context)) {
+            return context;
+        }
+    }
+
     return null;
+}
+
+function getNextPrewarmCandidate() {
+    const currentPath = syncPrewarmPathState();
+    if (!currentPath) return { context: null, source: 'none' };
+
+    const entries = readPrewarmEntries();
+    let hasCurrentPathHistory = false;
+    for (const entry of entries) {
+        if (entry.path !== currentPath) continue;
+        hasCurrentPathHistory = true;
+        const ctx = getRegisteredPopupContext(entry.hash);
+        if (canPrewarmContext(ctx)) return { context: ctx, source: 'history' };
+    }
+
+    if (!hasCurrentPathHistory) {
+        const visibleTriggerContext = getPrewarmContextFromVisibleTrigger();
+        if (visibleTriggerContext) {
+            return { context: visibleTriggerContext, source: 'visible-trigger' };
+        }
+    }
+
+    return { context: null, source: 'none' };
 }
 function primeStandaloneContext(context) {
     if (!canPrewarmContext(context)) return false;
     context._popupPrewarmInProgress = true;
     try {
+        if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
+            context.refreshPopupShell();
+        }
         setStandalonePopUpCardsActive(context, true);
         handlePopUpCards(context);
         syncPopupScrollableState(context);
@@ -163,7 +227,7 @@ function runPrewarm(deadline) {
     if (prewarmState.remainingBudget === null) prewarmState.remainingBudget = getPopupPrewarmBudget();
     if (prewarmState.remainingBudget <= 0) { removePrewarmAbortListeners(); return; }
     if (deadline?.timeRemaining?.() < 8 && !deadline.didTimeout) { schedulePrewarm(); return; }
-    const ctx = getNextPrewarmContext();
+    const { context: ctx } = getNextPrewarmCandidate();
     if (!ctx) return;
     if (primeStandaloneContext(ctx)) prewarmState.remainingBudget -= 1;
     if (prewarmState.remainingBudget > 0) schedulePrewarm();
@@ -173,14 +237,18 @@ function schedulePrewarm() {
     syncPrewarmPathState();
     if (prewarmState.aborted || prewarmState.scheduled) return;
     if (prewarmState.remainingBudget === null) prewarmState.remainingBudget = getPopupPrewarmBudget();
-    if (prewarmState.remainingBudget <= 0 || !getNextPrewarmContext()) return;
+    const { context: nextContext, source } = getNextPrewarmCandidate();
+    if (prewarmState.remainingBudget <= 0 || !nextContext) return;
     ensurePrewarmAbortListeners();
     prewarmState.scheduled = true;
     if (typeof window?.requestIdleCallback === 'function') {
         prewarmState.idleCallbackId = window.requestIdleCallback(runPrewarm, { timeout: 1200 });
+        if (source === 'visible-trigger') {
+            prewarmState.fallbackTimeout = setTimeout(() => runPrewarm({ didTimeout: true, timeRemaining: () => 50 }), visibleTriggerPrewarmBackstopMs);
+        }
         return;
     }
-    prewarmState.fallbackTimeout = setTimeout(() => runPrewarm(), 350);
+    prewarmState.fallbackTimeout = setTimeout(() => runPrewarm(), source === 'visible-trigger' ? visibleTriggerPrewarmBackstopMs : 350);
 }
 function pruneWarmCacheRefs() {
     for (let i = warmCacheState.refs.length - 1; i >= 0; i--) {
@@ -287,6 +355,7 @@ function scheduleStandaloneCardSync(context) {
         }
     });
 }
+
 function waitForStandalonePopupTransition(context, callback) {
     clearStandaloneTransitionCompletion(context);
     const handleTransitionEnd = (event) => {
@@ -1061,17 +1130,17 @@ function openStandalonePopup(context, instant = false) {
         instant = true;
     }
 
-    if (!deferBackdropHandoffUntilPhase2) {
-        toggleBackdrop(context, true);
-    }
-
-    if (!deferBackdropHandoffUntilPhase2 && context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
-        context.refreshPopupHeader();
-    }
-
     if (instant) {
         let warmCardsRestored = false;
         try {
+            if (!deferBackdropHandoffUntilPhase2) {
+                toggleBackdrop(context, true);
+            }
+
+            if (!deferBackdropHandoffUntilPhase2 && context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
+                context.refreshPopupHeader();
+            }
+
             if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
                 context.refreshPopupShell();
             }
@@ -1123,7 +1192,7 @@ function openStandalonePopup(context, instant = false) {
         try {
             if (!popupState.activePopups.has(context)) return;
 
-            if (deferBackdropHandoffUntilPhase2 && context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
+            if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
                 context.refreshPopupHeader();
             }
 
@@ -1134,7 +1203,6 @@ function openStandalonePopup(context, instant = false) {
             context.updatePopupColor?.();
             popUp.style.display = '';
             popUp.style.visibility = '';
-            updateListeners(context, true);
             setStandalonePopUpCardsActive(context, true);
 
             // Restore or prime content one frame before the animation so Lit microtask
@@ -1160,8 +1228,10 @@ function openStandalonePopup(context, instant = false) {
             }
 
             // Read scrollable state one frame early so phase 2 has no layout reads
-            // competing with the CSS transition start.
-            if (!syncCachedPopupScrollableState(context)) {
+            // competing with the CSS transition start. Skip the read for cold
+            // default-mode opens where content is still deferred — the container
+            // is empty and the forced reflow would be expensive and misleading.
+            if (!syncCachedPopupScrollableState(context) && phase1ContentPrimed) {
                 syncPopupScrollableState(context);
             }
 
@@ -1181,9 +1251,7 @@ function openStandalonePopup(context, instant = false) {
         try {
             if (!popupState.activePopups.has(context)) return;
 
-            if (deferBackdropHandoffUntilPhase2) {
-                toggleBackdrop(context, true);
-            }
+            toggleBackdrop(context, true);
 
             if (!phase1ContentPrimed || phase1WarmCardsRestored) {
                 context._pendingPostOpenCardSync = true;
@@ -1203,12 +1271,7 @@ function openStandalonePopup(context, instant = false) {
         }
     };
 
-    if (deferBackdropHandoffUntilPhase2) {
-        phase1();
-        return;
-    }
-
-    scheduleStandaloneFrame(context, '_standaloneOpenFrame', phase1);
+    phase1();
 }
 
 function closeStandalonePopup(context, force = false) {

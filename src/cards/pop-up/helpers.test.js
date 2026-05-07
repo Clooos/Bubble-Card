@@ -86,6 +86,9 @@ const mockWindow = createMockWindow();
 global.window = mockWindow;
 global.location = mockWindow.location;
 global.history = mockWindow.history;
+global.document = {
+    querySelectorAll: jest.fn(() => []),
+};
 global.localStorage = {
     getItem: jest.fn(() => null),
     setItem: jest.fn(),
@@ -254,6 +257,9 @@ describe('standalone popup lifecycle', () => {
         window.cancelIdleCallback = jest.fn((id) => {
             idleCallbacks.delete(id);
         });
+        window.innerWidth = 1280;
+        window.innerHeight = 720;
+        document.querySelectorAll.mockReturnValue([]);
         global.localStorage.getItem.mockReturnValue(null);
     });
 
@@ -281,22 +287,18 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        // Interaction frame: only the backdrop. INP-measurable work ends here.
-        expect(showBackdrop).toHaveBeenCalledTimes(1);
-        expect(setStandalonePopUpCardsActive).not.toHaveBeenCalled();
+        // Interaction frame: phase 1 inline — setup (listeners, color, display).
+        // Backdrop is deferred to phase 2 so the interaction task stays short.
+        expect(showBackdrop).not.toHaveBeenCalled();
+        expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, true);
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(toggleBodyScroll).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
-        // RAF1 (phase 1): setup — listeners, color, display. No transition yet.
+        // RAF1 (phase 2): backdrop + transition start. Card sync is deferred until after the transition.
         flushRafQueue();
 
-        expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, true);
-        expect(handlePopUpCards).not.toHaveBeenCalled();
-        expect(context.popUp.classList.contains('is-opening')).toBe(false);
-
-        // RAF2 (phase 2): transition start. Card sync is deferred until after the transition.
-        flushRafQueue();
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
 
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
@@ -326,8 +328,7 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
 
         openPopup(context);
-        flushRafQueue(); // RAF1: phase 1
-        flushRafQueue(); // RAF2: phase 2, arms the transition fallback timer
+        flushRafQueue(); // phase 2, arms the transition fallback timer
 
         jest.advanceTimersByTime(359);
         expect(toggleBodyScroll).not.toHaveBeenCalled();
@@ -366,14 +367,11 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
+        // Phase 1 runs inline — setup only, no cards (deferred sync).
         expect(handlePopUpCards).not.toHaveBeenCalled();
-
-        flushRafQueue(); // RAF1: phase 1 — setup only, no cards
-
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
-        expect(handlePopUpCards).not.toHaveBeenCalled();
 
-        flushRafQueue(); // RAF2: phase 2 — _cardsContainer set, no fragment → deferred sync
+        flushRafQueue(); // phase 2 — _cardsContainer set, no fragment → deferred sync
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
         expect(handlePopUpCards).not.toHaveBeenCalled();
@@ -382,7 +380,7 @@ describe('standalone popup lifecycle', () => {
         dispatchTransformTransitionEnd(context.popUp);
         expect(handlePopUpCards).not.toHaveBeenCalled();
 
-        flushRafQueue(); // RAF3: post-transition hass sync
+        flushRafQueue(); // post-transition hass sync
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
     });
@@ -396,17 +394,13 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        expect(context.sectionRow.hidden).toBe(true);
-        expect(context.sectionRow.style.display).toBe('none');
-
-        flushRafQueue(); // RAF1: phase 1 restores the host and makes the shell visible
-
+        // Phase 1 runs inline — host is restored in the interaction frame.
         expect(context.sectionRow.hidden).toBe(false);
         expect(context.sectionRow.style.display).toBe('');
         expect(context.sectionRowContainer.style.display).toBe('');
         expect(context.sectionRowContainer.style.position).toBe('absolute');
 
-        flushRafQueue();
+        flushRafQueue(); // phase 2 — animation start
         dispatchTransformTransitionEnd(context.popUp);
 
         closePopup(context);
@@ -429,15 +423,11 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
+        // Phase 1 runs inline — setup only, animation not started yet.
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
-        flushRafQueue(); // RAF1: phase 1 — setup only
-
-        expect(handlePopUpCards).not.toHaveBeenCalled();
-        expect(context.popUp.classList.contains('is-opening')).toBe(false);
-
-        flushRafQueue(); // RAF2: phase 2 — transition start; card sync deferred until after
+        flushRafQueue(); // phase 2 — transition start; card sync deferred until after
 
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
@@ -446,7 +436,7 @@ describe('standalone popup lifecycle', () => {
         dispatchTransformTransitionEnd(context.popUp);
         expect(handlePopUpCards).not.toHaveBeenCalled();
 
-        flushRafQueue(); // RAF3: post-transition card sync
+        flushRafQueue(); // post-transition card sync
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
     });
@@ -457,12 +447,11 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        flushRafQueue(); // RAF1: phase 1 — setup + cold sync (before animation)
-
+        // Phase 1 runs inline — non-default mode primes content before scheduling phase 2.
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
-        flushRafQueue(); // RAF2: phase 2 — animation starts
+        flushRafQueue(); // phase 2 — animation starts
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
     });
@@ -506,6 +495,27 @@ describe('standalone popup lifecycle', () => {
         expect(suspendStandalonePopUpCards).not.toHaveBeenCalledWith(context);
     });
 
+    test('idle prewarm also refreshes a hidden standalone shell before first open', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        global.localStorage.getItem.mockReturnValue(JSON.stringify([
+            { path: '/lovelace/test', hash: '#popup-a', openedAt: 10 },
+        ]));
+
+        context._standaloneNeedsShellRefresh = true;
+        context.refreshPopupShell = jest.fn(() => {
+            context._standaloneNeedsShellRefresh = false;
+        });
+
+        registerPopupContext(context);
+        flushIdleCallback();
+
+        expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
+        expect(context._standaloneNeedsShellRefresh).toBe(false);
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+    });
+
     test('cancels scheduled popup prewarm after the first user interaction', () => {
         const context = createStandaloneContext({ hash: '#popup-a' });
         usedContexts.push(context);
@@ -526,6 +536,43 @@ describe('standalone popup lifecycle', () => {
 
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(suspendStandalonePopUpCards).not.toHaveBeenCalled();
+    });
+
+    test('deterministically prewarms a visible standalone popup when no usage history exists yet', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        document.querySelectorAll.mockReturnValue([
+            {
+                hidden: false,
+                dataset: {
+                    tapAction: JSON.stringify({ action: 'navigate', navigation_path: '#popup-a' }),
+                },
+                style: {
+                    display: '',
+                    visibility: '',
+                },
+                classList: {
+                    contains: (name) => name === 'bubble-button' || name === 'bubble-action',
+                },
+                getBoundingClientRect: () => ({ top: 12, left: 12, right: 112, bottom: 56, width: 100, height: 44 }),
+            },
+        ]);
+
+        registerPopupContext(context);
+
+        expect(window.requestIdleCallback).toHaveBeenCalledTimes(1);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(95);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(1);
+
+        expect(setStandalonePopUpCardsActive).toHaveBeenNthCalledWith(1, context, true);
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(setStandalonePopUpCardsActive).toHaveBeenNthCalledWith(2, context, false);
+        expect(suspendStandalonePopUpCards).toHaveBeenCalledWith(context);
     });
 
     test('records successful standalone opens for future prewarm prioritization', () => {
@@ -614,13 +661,14 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
+        // Normalization rollback fires hideBackdrop immediately; showBackdrop is deferred to phase 2.
         expect(hideBackdrop).toHaveBeenCalledTimes(1);
-        expect(showBackdrop).toHaveBeenCalledTimes(1);
+        expect(showBackdrop).not.toHaveBeenCalled();
         expect(toggleBodyScroll).toHaveBeenCalledWith(false);
 
-        flushRafQueue();
-        flushRafQueue();
+        flushRafQueue(); // phase 2 — backdrop + animation start (phase 1 runs inline)
 
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
     });
 
@@ -634,8 +682,7 @@ describe('standalone popup lifecycle', () => {
         });
 
         openPopup(context);
-        flushRafQueue(); // RAF1: phase 1
-        flushRafQueue(); // RAF2: phase 2 — starts transition, card sync deferred
+        flushRafQueue(); // phase 2 — starts transition, card sync deferred (phase 1 inline)
         dispatchTransformTransitionEnd(context.popUp); // finalize → schedules card sync
         flushRafQueue(); // card sync runs → handlePopUpCards throws → rollback
 
@@ -649,8 +696,7 @@ describe('standalone popup lifecycle', () => {
         jest.clearAllMocks();
 
         openPopup(context);
-        flushRafQueue(); // RAF1
-        flushRafQueue(); // RAF2 — transition starts
+        flushRafQueue(); // phase 2 — transition starts (phase 1 inline)
         dispatchTransformTransitionEnd(context.popUp); // finalize → schedules card sync
         flushRafQueue(); // card sync (no throw)
         flushRafQueue(); // deferred body scroll
@@ -671,10 +717,7 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        expect(context.refreshPopupShell).not.toHaveBeenCalled();
-
-        flushRafQueue();
-
+        // Phase 1 is inline — shell refresh runs immediately in the interaction frame.
         expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
         expect(context._standaloneNeedsShellRefresh).toBe(false);
     });
@@ -689,13 +732,14 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        expect(showBackdrop).toHaveBeenCalledTimes(1);
-        expect(context.refreshPopupShell).not.toHaveBeenCalled();
-
-        flushRafQueue();
-
+        // Phase 1 is inline — shell refresh runs in the interaction frame, backdrop deferred to phase 2.
+        expect(showBackdrop).not.toHaveBeenCalled();
         expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
-        expect(showBackdrop.mock.invocationCallOrder[0]).toBeLessThan(context.refreshPopupShell.mock.invocationCallOrder[0]);
+
+        flushRafQueue(); // phase 2 — backdrop
+
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
+        expect(context.refreshPopupShell.mock.invocationCallOrder[0]).toBeLessThan(showBackdrop.mock.invocationCallOrder[0]);
     });
 
     test('primes the standalone popup header before deferred shell refresh work', () => {
@@ -709,15 +753,16 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        expect(showBackdrop).toHaveBeenCalledTimes(1);
+        // Phase 1 is inline — header then shell refresh in interaction frame, backdrop deferred to phase 2.
+        expect(showBackdrop).not.toHaveBeenCalled();
         expect(context.refreshPopupHeader).toHaveBeenCalledTimes(1);
-        expect(context.refreshPopupShell).not.toHaveBeenCalled();
-        expect(showBackdrop.mock.invocationCallOrder[0]).toBeLessThan(context.refreshPopupHeader.mock.invocationCallOrder[0]);
-
-        flushRafQueue();
-
         expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
         expect(context.refreshPopupHeader.mock.invocationCallOrder[0]).toBeLessThan(context.refreshPopupShell.mock.invocationCallOrder[0]);
+
+        flushRafQueue(); // phase 2 — backdrop
+
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
+        expect(context.refreshPopupShell.mock.invocationCallOrder[0]).toBeLessThan(showBackdrop.mock.invocationCallOrder[0]);
     });
 
     test('refreshes the legacy popup header before showing popup content', () => {
@@ -1058,6 +1103,30 @@ describe('standalone popup lifecycle', () => {
         expect(layoutReads).toBe(0);
     });
 
+    test('does not read scrollability for a cold default-mode open before content is present', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        let layoutReads = 0;
+        Object.defineProperty(context.elements.popUpContainer, 'scrollHeight', {
+            configurable: true,
+            get() { layoutReads += 1; return 0; },
+        });
+        Object.defineProperty(context.elements.popUpContainer, 'clientHeight', {
+            configurable: true,
+            get() { layoutReads += 1; return 0; },
+        });
+
+        // Phase 1 runs inline — cold default mode defers content, so no scrollability reflow.
+        openPopup(context);
+        expect(layoutReads).toBe(0);
+
+        // Phase 2 starts the animation — still no layout read before the paint.
+        flushRafQueue();
+        expect(layoutReads).toBe(0);
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
     test('keeps bottom-sheet standalone opening animation during popup-to-popup navigation even when content is primed', () => {
         const contextA = createStandaloneContext({ hash: '#popup-a' });
         const contextB = createStandaloneContext({ hash: '#popup-b' });
@@ -1093,6 +1162,9 @@ describe('standalone popup lifecycle', () => {
         const contextB = createStandaloneContext({ hash: '#popup-b' });
         usedContexts.push(contextA, contextB);
 
+        // Popup B is warm (suspended cards) so phase 1 primes content and measures scrollability.
+        contextB._standaloneWarmCardsSuspended = true;
+        restoreWarmStandalonePopUpCards.mockImplementation((activeContext) => activeContext === contextB);
         contextB.elements.popUpContainer.scrollHeight = 900;
         contextB.elements.popUpContainer.clientHeight = 400;
 
@@ -1105,7 +1177,7 @@ describe('standalone popup lifecycle', () => {
         window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-b');
         window.dispatchEvent(new Event('location-changed'));
 
-        flushRafQueue(); // phase 1 — scroll state read here, before animation
+        flushRafQueue(); // switch handoff RAF — phase 1 inline, scroll state read with warm content
 
         expect(contextB.elements.popUpContainer.classList.contains('is-scrollable')).toBe(true);
         expect(contextB.popUp.classList.contains('is-opening')).toBe(false);
