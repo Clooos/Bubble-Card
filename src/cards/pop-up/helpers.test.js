@@ -301,16 +301,21 @@ describe('standalone popup lifecycle', () => {
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
 
-        // Transition ends: finalizeStandalonePopupOpen schedules card sync + body scroll.
+        // Transition ends: finalizeStandalonePopupOpen schedules card sync + deferred body scroll.
         dispatchTransformTransitionEnd(context.popUp);
 
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(toggleBodyScroll).not.toHaveBeenCalled();
 
-        // RAF3: post-transition card sync + body scroll lock.
+        // RAF3: post-transition card sync only.
         flushRafQueue();
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(toggleBodyScroll).not.toHaveBeenCalled();
+
+        // RAF4: global body scroll lock after standalone content has settled.
+        flushRafQueue();
+
         expect(toggleBodyScroll).toHaveBeenCalledWith(true);
         expect(callAction).toHaveBeenCalledWith(context.popUp, context.config, 'open_action');
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
@@ -328,6 +333,10 @@ describe('standalone popup lifecycle', () => {
         expect(toggleBodyScroll).not.toHaveBeenCalled();
 
         jest.advanceTimersByTime(1);
+
+        expect(toggleBodyScroll).not.toHaveBeenCalled();
+
+        flushRafQueue();
 
         expect(toggleBodyScroll).not.toHaveBeenCalled();
 
@@ -643,7 +652,8 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue(); // RAF1
         flushRafQueue(); // RAF2 — transition starts
         dispatchTransformTransitionEnd(context.popUp); // finalize → schedules card sync
-        flushRafQueue(); // card sync (no throw) + body scroll
+        flushRafQueue(); // card sync (no throw)
+        flushRafQueue(); // deferred body scroll
 
         expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
         expect(toggleBodyScroll).toHaveBeenCalledWith(true);
@@ -972,6 +982,10 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue(); // deferred warm hass sync
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(toggleBodyScroll).not.toHaveBeenCalledWith(true);
+
+        flushRafQueue(); // deferred body scroll lock
+
         expect(toggleBodyScroll).toHaveBeenCalledWith(true);
     });
 

@@ -841,16 +841,7 @@ function completePopupOpen(context) {
     context._popupPrewarmPrimed = false;
     recordPrewarmUsage(context);
 
-    clearContextFrame(context, '_popupBodyScrollLockFrame');
-    context._popupBodyScrollLockFrame = requestAnimationFrame(() => {
-        context._popupBodyScrollLockFrame = null;
-
-        if (!popupState.activePopups.has(context) || !context.popUp?.classList?.contains('is-popup-opened')) {
-            return;
-        }
-
-        toggleBodyScroll(true);
-    });
+    schedulePopupBodyScrollLock(context);
     schedulePopupBackdropBlurGuardRelease(context);
 
     if (context.config.auto_close > 0) {
@@ -867,6 +858,35 @@ function completePopupOpen(context) {
     if (context.config.open_action) {
         callAction(context.popUp, context.config, 'open_action');
     }
+}
+
+function schedulePopupBodyScrollLock(context) {
+    clearContextFrame(context, '_popupBodyScrollLockFrame');
+
+    // Popup-to-popup navigation keeps body scroll locked, so there is no global
+    // body mutation competing with the first visible post-open frame. Cold opens
+    // still pay that cost; keep it one extra frame later than standalone card
+    // sync so the shell/content can settle first.
+    const deferredFrames = context?.isStandalonePopUp ? 2 : 1;
+
+    const scheduleLock = (remainingFrames) => {
+        context._popupBodyScrollLockFrame = requestAnimationFrame(() => {
+            if (remainingFrames > 1) {
+                scheduleLock(remainingFrames - 1);
+                return;
+            }
+
+            context._popupBodyScrollLockFrame = null;
+
+            if (!popupState.activePopups.has(context) || !context.popUp?.classList?.contains('is-popup-opened')) {
+                return;
+            }
+
+            toggleBodyScroll(true);
+        });
+    };
+
+    scheduleLock(deferredFrames);
 }
 
 function syncPopupScrollableState(context) {
