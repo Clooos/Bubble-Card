@@ -1169,6 +1169,10 @@ function openStandalonePopup(context, instant = false) {
             triggerQuickOpenAnimation(context);
             requestAnimationFrame(() => {
                 try {
+                    if (deferBackdropHandoffUntilPhase2 && popupState.activePopups.has(context)) {
+                        toggleBackdrop(context, true);
+                    }
+
                     if (warmCardsRestored) {
                         scheduleStandaloneCardSync(context);
                     }

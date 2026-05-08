@@ -1022,6 +1022,7 @@ describe('standalone popup lifecycle', () => {
 
         flushRafQueue(); // instant-open settle frame
 
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
         expect(toggleBodyScroll).not.toHaveBeenCalledWith(true);
 
         flushRafQueue(); // deferred warm hass sync
