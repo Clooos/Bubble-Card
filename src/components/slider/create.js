@@ -507,8 +507,6 @@ export function createSliderStructure(context, config = {}) {
       e.preventDefault();
     }
 
-    if (e.target.closest('.bubble-action')) return;
-
     window.isScrolling = true;
 
     const rangedPercentage = onSliderChange(context, calculateMoveCoordinate(e), false, getSliderRect());
@@ -779,6 +777,7 @@ export function createSliderStructure(context, config = {}) {
     const longPressDuration = 200;
     const immediateDragThreshold = 6;
     let preDragMoveHandler = null;
+    let preDragTouchMoveHandler = null;
     let preDragCancelHandler = null;
     let dragInitiated = false;
 
@@ -786,6 +785,10 @@ export function createSliderStructure(context, config = {}) {
       if (preDragMoveHandler) {
         options.targetElement.removeEventListener('pointermove', preDragMoveHandler);
         preDragMoveHandler = null;
+      }
+      if (preDragTouchMoveHandler) {
+        options.targetElement.removeEventListener('touchmove', preDragTouchMoveHandler);
+        preDragTouchMoveHandler = null;
       }
       if (preDragCancelHandler) {
         options.targetElement.removeEventListener('pointerup', preDragCancelHandler);
@@ -861,9 +864,13 @@ export function createSliderStructure(context, config = {}) {
       };
 
       preDragMoveHandler = detectImmediateDrag;
+      preDragTouchMoveHandler = detectImmediateDrag;
       preDragCancelHandler = cancelPreDrag;
 
       options.targetElement.addEventListener('pointermove', detectImmediateDrag, { passive: false });
+      // Android Chrome may not fire pointermove reliably before setPointerCapture
+      // Add touchmove listener to ensure immediate drag detection works on Android
+      options.targetElement.addEventListener('touchmove', detectImmediateDrag, { passive: false });
       options.targetElement.addEventListener('pointerup', cancelPreDrag);
       options.targetElement.addEventListener('pointercancel', cancelPreDrag);
 
@@ -887,6 +894,25 @@ export function createSliderStructure(context, config = {}) {
         clearTimeout(longPressTimer);
         clearPreDragHandlers();
         // Reset scroll intent state
+        isScrollIntent = false;
+        unlockTouchActions();
+      }
+    });
+
+    // Android Chrome may fire touchend/touchcancel without pointerup/pointercancel
+    options.targetElement.addEventListener('touchend', () => {
+      if (!dragInitiated) {
+        clearTimeout(longPressTimer);
+        clearPreDragHandlers();
+        isScrollIntent = false;
+        unlockTouchActions();
+      }
+    });
+
+    options.targetElement.addEventListener('touchcancel', () => {
+      if (!dragInitiated) {
+        clearTimeout(longPressTimer);
+        clearPreDragHandlers();
         isScrollIntent = false;
         unlockTouchActions();
       }
