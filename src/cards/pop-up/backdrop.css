@@ -22,12 +22,10 @@
 .bubble-backdrop.is-hidden {
   opacity: 0;
   pointer-events: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .bubble-backdrop.is-transitioning {
-  will-change: opacity, backdrop-filter;
+  will-change: opacity;
 }
 
 /* Keep blur stable during close too. Dropping it only once the backdrop becomes
