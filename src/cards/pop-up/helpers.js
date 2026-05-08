@@ -4,6 +4,13 @@ import { toggleBodyScroll } from "../../tools/utils.js";
 import { handlePopUpCards, restoreDetachedPopUpCards, restoreWarmStandalonePopUpCards, setStandalonePopUpCardsActive, suspendStandalonePopUpCards, suspendWarmStandalonePopUpCards } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
 
+function resetPopupScroll(context) {
+    const container = context.elements?.popUpContainer;
+    if (container) {
+        container.scrollTop = 0;
+    }
+}
+
 const popupState = {
   animationDuration: 300,
   activePopups: new Set(),
@@ -1082,6 +1089,8 @@ function finalizeStandalonePopupClose(context) {
     clearPopupInlineTransform(context);
     popUp.style.willChange = '';
 
+    resetPopupScroll(context);
+
     if (!incomingPopupNavigation) {
         toggleBodyScroll(false);
     }
@@ -1564,6 +1573,9 @@ export function openPopup(context, instant = false) {
     if (context.popUp.classList.contains('is-popup-opened')) return;
 
     if (popupState.activePopups.has(context)) return;
+
+    // Reset scroll position when reopening the popup
+    resetPopupScroll(context);
 
     clearPopupInlineTransform(context);
     clearPendingHashRemoval();
