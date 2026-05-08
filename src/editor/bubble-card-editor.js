@@ -2354,9 +2354,13 @@ class BubbleCardEditor extends LitElement {
         const params = dialog?._params;
         if (!params) return null;
 
+        const cardConfig = { ...(this._config || params.cardConfig || {}) };
         return {
             ...params,
-            cardConfig: { ...(this._config || params.cardConfig || {}) },
+            cardConfig,
+            // Cache the original cardConfig to restore if the nested editor
+            // replaces it with a non-popup config.
+            _originalCardConfig: { ...cardConfig },
         };
     }
 
@@ -2385,7 +2389,15 @@ class BubbleCardEditor extends LitElement {
     }
 
     _reopenStandaloneParentDialog(parentDialogParams, cardConfig, preferredDialog = null) {
-        if (!parentDialogParams || !cardConfig) return false;
+        if (!parentDialogParams) return false;
+
+        // If the cardConfig lost popup-specific properties (e.g., card_type, cards array),
+        // fall back to the original cached config. This handles the case where a nested
+        // child card's saveConfig replaces the parent config with just the child's config.
+        const originalConfig = parentDialogParams._originalCardConfig;
+        if (originalConfig && cardConfig && originalConfig.card_type && !cardConfig.card_type) {
+            cardConfig = { ...originalConfig, ...cardConfig };
+        }
 
         const dialogParams = {
             ...parentDialogParams,
