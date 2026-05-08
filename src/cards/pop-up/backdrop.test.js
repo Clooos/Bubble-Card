@@ -132,7 +132,7 @@ describe('backdrop transitions', () => {
 
         showBackdrop(context);
 
-        expect(backdropElement.getBoundingClientRect).toHaveBeenCalledTimes(1);
+        expect(backdropElement.getBoundingClientRect).not.toHaveBeenCalled();
         expect(backdropElement.style.getPropertyValue('--custom-backdrop-filter')).toBe('blur(12px)');
         expect(backdropElement.classList.contains('is-opening')).toBe(true);
         expect(backdropElement.classList.contains('is-closing')).toBe(false);
@@ -251,7 +251,7 @@ describe('backdrop transitions', () => {
 
         expect(backdropElement.classList.contains('is-opening')).toBe(true);
         expect(backdropElement.classList.contains('is-transitioning')).toBe(true);
-        expect(backdropElement.getBoundingClientRect).toHaveBeenCalledTimes(1);
+        expect(backdropElement.getBoundingClientRect).not.toHaveBeenCalled();
 
         sharedBackdrop.showBackdrop(contextB);
 
@@ -259,7 +259,7 @@ describe('backdrop transitions', () => {
         expect(backdropElement.classList.contains('is-visible')).toBe(true);
         expect(backdropElement.classList.contains('is-opening')).toBe(false);
         expect(backdropElement.classList.contains('is-transitioning')).toBe(false);
-        expect(backdropElement.getBoundingClientRect).toHaveBeenCalledTimes(1);
+        expect(backdropElement.getBoundingClientRect).not.toHaveBeenCalled();
 
         jest.advanceTimersByTime(300);
 

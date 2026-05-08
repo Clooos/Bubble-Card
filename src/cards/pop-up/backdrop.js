@@ -200,10 +200,7 @@ export function getBackdrop(context) {
         }
 
         if (shouldAnimateOpen) {
-            // Defer the layout read to the next frame so it doesn't force a reflow
-            // during the popup animation's paint phase.
             requestAnimationFrame(() => {
-                internalBackdropElement.getBoundingClientRect();
                 markBackdropTransition("is-opening");
             });
         } else {
