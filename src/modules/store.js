@@ -281,19 +281,16 @@ export function makeModuleStore(context) {
           </div>
         </div>
         <div class="store-search">
-          <ha-textfield
-            label="Search for a module"
-            icon
-            .value=${context._storeSearchQuery || ''}
-            @input=${(e) => {
-              context._storeSearchQuery = e.target.value;
+          <ha-form
+            .hass=${context.hass}
+            .data=${{ search: context._storeSearchQuery || '' }}
+            .schema=${[{ name: 'search', selector: { text: { type: 'search' } } }]}
+            .computeLabel=${() => 'Search for a module'}
+            @value-changed=${(ev) => {
+              context._storeSearchQuery = ev.detail.value.search;
               context.requestUpdate();
             }}
-          >
-            <slot name="prefix" slot="leadingIcon">
-              <ha-icon slot="prefix" icon="mdi:magnify"></ha-icon>
-            </slot>
-          </ha-textfield>
+          ></ha-form>
         </div>
         <div class="store-filters">
 

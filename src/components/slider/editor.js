@@ -147,39 +147,39 @@ export function makeGenericSliderSettings({
                     </div>
                 ` : ''}
                 <div class="range-inputs" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                    <ha-textfield
-                        label="Min value"
-                        type="number"
-                        step="any"
-                        .value="${data.min_value ?? ''}"
+                    <ha-form
+                        .hass=${hass}
+                        .data=${{ min_value: data.min_value ?? '' }}
+                        .schema=${[{ name: 'min_value', selector: { text: { type: 'number' } }, options: { step: 'any' } }]}
                         .disabled=${rangeFormDisabled}
-                        @input="${(ev) => {
-                            const value = ev.target.value;
-                            callToggleChange('min_value', value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
-                        }}"
-                    ></ha-textfield>
-                    <ha-textfield
-                        label="Max value"
-                        type="number"
-                        step="any"
-                        .value="${data.max_value ?? ''}"
+                        .computeLabel=${() => 'Min value'}
+                        @value-changed=${(ev) => {
+                            const value = ev.detail.value.min_value;
+                            callToggleChange('min_value', value === undefined || value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
+                        }}
+                    ></ha-form>
+                    <ha-form
+                        .hass=${hass}
+                        .data=${{ max_value: data.max_value ?? '' }}
+                        .schema=${[{ name: 'max_value', selector: { text: { type: 'number' } }, options: { step: 'any' } }]}
                         .disabled=${rangeFormDisabled}
-                        @input="${(ev) => {
-                            const value = ev.target.value;
-                            callToggleChange('max_value', value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
-                        }}"
-                    ></ha-textfield>
-                    <ha-textfield
-                        label="Step"
-                        type="number"
-                        step="any"
-                        .value="${data.step ?? ''}"
+                        .computeLabel=${() => 'Max value'}
+                        @value-changed=${(ev) => {
+                            const value = ev.detail.value.max_value;
+                            callToggleChange('max_value', value === undefined || value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
+                        }}
+                    ></ha-form>
+                    <ha-form
+                        .hass=${hass}
+                        .data=${{ step: data.step ?? '' }}
+                        .schema=${[{ name: 'step', selector: { text: { type: 'number' } }, options: { step: 'any' } }]}
                         .disabled=${rangeFormDisabled}
-                        @input="${(ev) => {
-                            const value = ev.target.value;
-                            callToggleChange('step', value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
-                        }}"
-                    ></ha-textfield>
+                        .computeLabel=${() => 'Step'}
+                        @value-changed=${(ev) => {
+                            const value = ev.detail.value.step;
+                            callToggleChange('step', value === undefined || value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
+                        }}
+                    ></ha-form>
                 </div>
                 <ha-formfield>
                     <ha-switch
@@ -340,14 +340,13 @@ export function makeGenericSliderSettings({
                             </div>
                         </ha-formfield>
                         ${(data.hue_force_saturation ?? false) ? html`
-                            <ha-textfield
-                                label="Forced saturation value (0-100)"
-                                type="number"
-                                min="0"
-                                max="100"
-                                .value=${String(data.hue_force_saturation_value ?? 100)}
-                                @input=${(ev) => callToggleChange('hue_force_saturation_value', ev.target.value, meta('ha-textfield', 'input'))}
-                            ></ha-textfield>
+                            <ha-form
+                                .hass=${hass}
+                                .data=${{ hue_force_saturation_value: String(data.hue_force_saturation_value ?? 100) }}
+                                .schema=${[{ name: 'hue_force_saturation_value', selector: { text: { type: 'number' } }, options: { min: 0, max: 100 } }]}
+                                .computeLabel=${() => 'Forced saturation value (0-100)'}
+                                @value-changed=${(ev) => callToggleChange('hue_force_saturation_value', ev.detail.value.hue_force_saturation_value, meta('ha-textfield', 'input'))}
+                            ></ha-form>
                         ` : ''}
                     ` : ''}
                     ${['hue', 'saturation', 'white_temp'].includes(data.light_slider_type) ? html`` : html`
@@ -393,14 +392,13 @@ export function makeGenericSliderSettings({
                                 <p>Enabling this for lights that do not support transitions will unfortunately have no effect. Defaults to 500ms unless overridden below.</p>
                             </div>
                         </div>
-                        <ha-textfield
-                            label="Transition time (ms)"
-                            type="number"
-                            min="1"
-                            max="100000"
-                            .value=${data.light_transition_time}
-                            @input=${(ev) => callToggleChange('light_transition_time', ev.target.value, meta('ha-textfield', 'input'))}
-                        ></ha-textfield>
+                        <ha-form
+                            .hass=${hass}
+                            .data=${{ light_transition_time: data.light_transition_time ?? '' }}
+                            .schema=${[{ name: 'light_transition_time', selector: { text: { type: 'number' } }, options: { min: 1, max: 100000 } }]}
+                            .computeLabel=${() => 'Transition time (ms)'}
+                            @value-changed=${(ev) => callToggleChange('light_transition_time', ev.detail.value.light_transition_time, meta('ha-textfield', 'input'))}
+                        ></ha-form>
                     ` : ''}
                 </div>
             </ha-expansion-panel>

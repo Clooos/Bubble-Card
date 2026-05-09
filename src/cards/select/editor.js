@@ -57,12 +57,18 @@ export function renderSelectEditor(editor){
                   Card settings
                 </h4>
                 <div class="content">                   
-                    <ha-textfield
-                        label="Optional - Name"
-                        .value="${editor._config?.name || ''}"
-                        .configValue="${"name"}"
-                        @input="${editor._valueChanged}"
-                    ></ha-textfield>
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${{ name: editor._config?.name || '' }}
+                        .schema=${[{ name: 'name', selector: { text: {} } }]}
+                        .computeLabel=${() => 'Optional - Name'}
+                        @value-changed=${(ev) => {
+                            editor._valueChanged({
+                                target: { configValue: 'name' },
+                                detail: { value: ev.detail.value.name }
+                            });
+                        }}
+                    ></ha-form>
                     ${editor.makeDropdown("Optional - Icon", "icon")}
                     ${editor.makeShowState()}
                 </div>

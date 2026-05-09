@@ -52,33 +52,35 @@ export function renderSubButtonsEditor(editor) {
                             </ha-formfield>
 
                             ${!editor._config?.footer_full_width ? html`
-                                <ha-textfield
-                                    label="Custom footer width (px)"
-                                    type="number"
-                                    value="${editor._config?.footer_width || 500}"
-                                    .configValue="${"footer_width"}"
-                                    @input="${editor._valueChanged}"
-                                    min="200"
-                                    max="1200"
-                                    step="10"
-                                    style="margin-top: 8px;"
-                                ></ha-textfield>
+                                <ha-form
+                                    .hass=${editor.hass}
+                                    .data=${{ footer_width: editor._config?.footer_width || 500 }}
+                                    .schema=${[{ name: 'footer_width', selector: { text: { type: 'number' } }, options: { min: 200, max: 1200, step: 10 } }]}
+                                    .computeLabel=${() => 'Custom footer width (px)'}
+                                    @value-changed=${(ev) => {
+                                        editor._valueChanged({
+                                            target: { configValue: 'footer_width' },
+                                            detail: { value: ev.detail.value.footer_width }
+                                        });
+                                    }}
+                                ></ha-form>
                                 <div style="font-size: 0.8em; color: var(--secondary-text-color); margin-top: 4px;">
                                     Footer will be centered on the page
                                 </div>
                             ` : ''}
 
-                            <ha-textfield
-                                label="Footer bottom distance (px)"
-                                type="number"
-                                value="${editor._config?.footer_bottom_offset || 16}"
-                                .configValue="${"footer_bottom_offset"}"
-                                @input="${editor._valueChanged}"
-                                min="0"
-                                max="100"
-                                step="1"
-                                style="margin-top: 16px;"
-                            ></ha-textfield>
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ footer_bottom_offset: editor._config?.footer_bottom_offset || 16 }}
+                                .schema=${[{ name: 'footer_bottom_offset', selector: { text: { type: 'number' } }, options: { min: 0, max: 100, step: 1 } }]}
+                                .computeLabel=${() => 'Footer bottom distance (px)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'footer_bottom_offset' },
+                                        detail: { value: ev.detail.value.footer_bottom_offset }
+                                    });
+                                }}
+                            ></ha-form>
                             <div style="font-size: 0.8em; color: var(--secondary-text-color); margin-top: 4px;">
                                 Distance from the bottom of the page (default: 16px)
                             </div>

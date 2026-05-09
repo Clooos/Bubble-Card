@@ -74,8 +74,11 @@
   overflow: hidden;
 }
 
-.store-search ha-textfield {
+.store-search ha-textfield,
+.store-search ha-input,
+.store-search ha-form {
   flex-grow: 1;
+  width: 100%;
 }
 
 .store-filters {
@@ -1281,7 +1284,9 @@ ha-formfield.apply-module-button {
   overflow: hidden;
 }
 
-.my-modules-search ha-textfield {
+.my-modules-search ha-textfield,
+.my-modules-search ha-input,
+.my-modules-search ha-form {
   flex-grow: 1;
   width: 100%;
 }

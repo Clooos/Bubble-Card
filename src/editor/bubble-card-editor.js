@@ -490,17 +490,24 @@ class BubbleCardEditor extends LitElement {
                 </div>
             `)}
             ${this._renderConditionalContent(showRowsOption, html`
-                <ha-textfield
-                    label="Rows (Card height)"
-                    type="number"
-                    inputMode="numeric"
-                    min="0"
-                    step="0.1"
-                    .disabled="${this._config.grid_options?.rows}"
-                    .value="${this._config.rows || this._config.grid_options?.rows || defaultRows}"
-                    .configValue="${"rows"}"
-                    @input="${this._valueChanged}"
-                ></ha-textfield>
+                <ha-form
+                    .hass=${this.hass}
+                    .data=${{ rows: this._config.rows ?? this._config.grid_options?.rows ?? defaultRows ?? '' }}
+                    .schema=${[{
+                        name: 'rows',
+                        selector: { text: { type: 'number' } },
+                        options: { min: 0, step: 0.1 },
+                    }]}
+                    .disabled=${this._config.grid_options?.rows}
+                    .computeLabel=${() => 'Rows (Card height)'}
+                    @value-changed=${(ev) => {
+                        const value = ev.detail.value.rows;
+                        this._valueChanged({
+                            target: { configValue: 'rows' },
+                            detail: { value }
+                        });
+                    }}
+                ></ha-form>
                 <br>
             `)}
             <div class="bubble-info warning">
@@ -839,6 +846,34 @@ class BubbleCardEditor extends LitElement {
                 ></ha-form>
           `;
         }
+    }
+
+    makeTextField(label, configValue, options = {}) {
+        const { type = 'text', disabled, min, max, step, inputMode, placeholder } = options;
+        const selector = { text: {} };
+        if (type === 'number') {
+            selector.text = { type: 'number' };
+        }
+        return html`
+            <ha-form
+                .hass=${this.hass}
+                .data=${{ [configValue]: this._config[configValue] ?? '' }}
+                .schema=${[{
+                    name: configValue,
+                    selector,
+                    ...((type === 'number') ? { options: { min, max, step } } : {}),
+                }]}
+                .disabled=${disabled}
+                .computeLabel=${() => label}
+                @value-changed=${(ev) => {
+                    const value = ev.detail.value[configValue];
+                    this._valueChanged({
+                        target: { configValue },
+                        detail: { value }
+                    });
+                }}
+            ></ha-form>
+        `;
     }
 
     _renderConditionalContent(condition, content) {

@@ -256,48 +256,52 @@ export function renderModuleEditorForm(context) {
               </div>
             ` : ''}
             
-            <ha-textfield
-              label="Module ID"
-              .value=${context._editingModule.id || ''}
-              @input=${(e) => { 
-                // Store old ID before changing
+            <ha-form
+              .hass=${context.hass}
+              .data=${{ id: context._editingModule.id || '' }}
+              .schema=${[{ name: 'id', selector: { text: {} } }]}
+              .computeLabel=${() => 'Module ID'}
+              .disabled=${!context._showNewModuleForm || isFromYamlFile}
+              @value-changed=${(ev) => {
                 const oldId = context._editingModule.id;
-                
-                // Update module ID
-                context._editingModule.id = e.target.value; 
-                
-                // Update config modules list if creating new module
+                const newId = ev.detail.value.id;
+                context._editingModule.id = newId;
                 if (context._showNewModuleForm && context._config.modules) {
-                  updateModuleInConfig(context, e.target.value, oldId);
+                  updateModuleInConfig(context, newId, oldId);
                   fireEvent(context, "config-changed", { config: context._config });
                 }
               }}
-              ?disabled=${!context._showNewModuleForm || isFromYamlFile}
-            ></ha-textfield>
+            ></ha-form>
             <span class="helper-text">
               Must be unique and cannot be changed after the Module is created.
             </span>
             
-            <ha-textfield
-              label="Module Name"
-              .value=${context._editingModule.name || ''}
-              @input=${(e) => { context._editingModule.name = e.target.value; }}
-              ?disabled=${isFromYamlFile}
-            ></ha-textfield>
+            <ha-form
+              .hass=${context.hass}
+              .data=${{ name: context._editingModule.name || '' }}
+              .schema=${[{ name: 'name', selector: { text: {} } }]}
+              .computeLabel=${() => 'Module Name'}
+              .disabled=${isFromYamlFile}
+              @value-changed=${(ev) => { context._editingModule.name = ev.detail.value.name; }}
+            ></ha-form>
             
-            <ha-textfield
-              label="Version"
-              .value=${context._editingModule.version || '1.0'}
-              @input=${(e) => { context._editingModule.version = e.target.value; }}
-              ?disabled=${isFromYamlFile}
-            ></ha-textfield>
+            <ha-form
+              .hass=${context.hass}
+              .data=${{ version: context._editingModule.version || '1.0' }}
+              .schema=${[{ name: 'version', selector: { text: {} } }]}
+              .computeLabel=${() => 'Version'}
+              .disabled=${isFromYamlFile}
+              @value-changed=${(ev) => { context._editingModule.version = ev.detail.value.version; }}
+            ></ha-form>
             
-            <ha-textfield
-              label="Creator"
-              .value=${context._editingModule.creator || ''}
-              @input=${(e) => { context._editingModule.creator = e.target.value; }}
-              ?disabled=${isFromYamlFile}
-            ></ha-textfield>
+            <ha-form
+              .hass=${context.hass}
+              .data=${{ creator: context._editingModule.creator || '' }}
+              .schema=${[{ name: 'creator', selector: { text: {} } }]}
+              .computeLabel=${() => 'Creator'}
+              .disabled=${isFromYamlFile}
+              @value-changed=${(ev) => { context._editingModule.creator = ev.detail.value.creator; }}
+            ></ha-form>
             
             <ha-expansion-panel 
               .header=${html`

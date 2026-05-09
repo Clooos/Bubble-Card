@@ -6,12 +6,21 @@ export function renderSeparatorEditor(editor){
     return html`
     <div class="card-config">
         ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
-        <ha-textfield
-            label="Name"
-            .value="${editor._config?.name || ''}"
-            .configValue="${"name"}"
-            @input="${editor._valueChanged}"
-        ></ha-textfield>
+        <ha-form
+            .hass=${editor.hass}
+            .data=${{ name: editor._config?.name || '' }}
+            .schema=${[{
+                name: 'name',
+                selector: { text: {} },
+            }]}
+            .computeLabel=${() => 'Name'}
+            @value-changed=${(ev) => {
+                editor._valueChanged({
+                    target: { configValue: 'name' },
+                    detail: { value: ev.detail.value.name }
+                });
+            }}
+        ></ha-form>
         ${editor.makeDropdown("Icon", "icon")}
         ${editor.makeSubButtonPanel()}
         <ha-expansion-panel outlined>

@@ -51,18 +51,30 @@ export function renderHorButtonStackEditor(editor){
                           Horizontal buttons stack styling
                         </h4>
                         <div class="content"> 
-                            <ha-textfield
-                                label="Optional - Margin (fix centering on some themes) (e.g. 13px)"
-                                .value="${editor._config?.margin || '7px'}"
-                                .configValue="${"margin"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Optional - Width on desktop (100% by default on mobile)"
-                                .value="${editor._config?.width_desktop || '540px'}"
-                                .configValue="${"width_desktop"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ margin: editor._config?.margin || '7px' }}
+                                .schema=${[{ name: 'margin', selector: { text: {} } }]}
+                                .computeLabel=${() => 'Optional - Margin (fix centering on some themes) (e.g. 13px)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'margin' },
+                                        detail: { value: ev.detail.value.margin }
+                                    });
+                                }}
+                            ></ha-form>
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ width_desktop: editor._config?.width_desktop || '540px' }}
+                                .schema=${[{ name: 'width_desktop', selector: { text: {} } }]}
+                                .computeLabel=${() => 'Optional - Width on desktop (100% by default on mobile)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'width_desktop' },
+                                        detail: { value: ev.detail.value.width_desktop }
+                                    });
+                                }}
+                            ></ha-form>
                             <ha-formfield .label="Optional - Rise animation (Displays an animation once the page has loaded)">
                                 <ha-switch
                                     aria-label="Optional - Rise animation (Displays an animation once the page has loaded)"
@@ -132,18 +144,30 @@ function makeButton(editor) {
                         </div>
                     </h4>
                     <div class="content">
-                        <ha-textfield
-                            label="Link / Hash to pop-up (e.g. #kitchen)"
-                            .value="${editor._config[i + '_link'] || ''}"
-                            .configValue="${i}_link"
-                            @input="${editor._valueChanged}"
-                        ></ha-textfield>
-                        <ha-textfield
-                            label="Optional - Name"
-                            .value="${editor._config[i + '_name'] || ''}"
-                            .configValue="${i}_name"
-                            @input="${editor._valueChanged}"
-                        ></ha-textfield>
+                        <ha-form
+                            .hass=${editor.hass}
+                            .data=${{ [i + '_link']: editor._config[i + '_link'] || '' }}
+                            .schema=${[{ name: i + '_link', selector: { text: {} } }]}
+                            .computeLabel=${() => 'Link / Hash to pop-up (e.g. #kitchen)'}
+                            @value-changed=${(ev) => {
+                                editor._valueChanged({
+                                    target: { configValue: i + '_link' },
+                                    detail: { value: ev.detail.value[i + '_link'] }
+                                });
+                            }}
+                        ></ha-form>
+                        <ha-form
+                            .hass=${editor.hass}
+                            .data=${{ [i + '_name']: editor._config[i + '_name'] || '' }}
+                            .schema=${[{ name: i + '_name', selector: { text: {} } }]}
+                            .computeLabel=${() => 'Optional - Name'}
+                            @value-changed=${(ev) => {
+                                editor._valueChanged({
+                                    target: { configValue: i + '_name' },
+                                    detail: { value: ev.detail.value[i + '_name'] }
+                                });
+                            }}
+                        ></ha-form>
                         <ha-icon-picker
                             label="Optional - Icon"
                             .value="${editor._config[i + '_icon'] || ''}"

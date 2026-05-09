@@ -209,11 +209,13 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                   ></ha-form>
                 ` : ''}
                 <div class="ha-textfield">
-                  <ha-textfield
-                    label="Optional - Name"
-                    .value="${button.name ?? ''}"
-                    @input="${(ev) => updateValueFn({ name: ev.target.value })}"
-                  ></ha-textfield>
+                  <ha-form
+                    .hass=${editor.hass}
+                    .data=${{ name: button.name ?? '' }}
+                    .schema=${[{ name: 'name', selector: { text: {} } }]}
+                    .computeLabel=${() => 'Optional - Name'}
+                    @value-changed=${(ev) => updateValueFn({ name: ev.detail.value.name })}
+                  ></ha-form>
                 </div>
                 <div class="ha-icon-picker">
                   <ha-icon-picker
@@ -364,29 +366,38 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                     ></ha-switch>
                   </ha-formfield>
                 ` : ''}
-                <ha-textfield
-                  label="${(isBottomSection && !hasNonFillAlignment) ? 'Custom button width (%)' : 'Custom button width (px)'}"
-                  type="number"
-                  min="${(isBottomSection && !hasNonFillAlignment) ? 0 : (button.sub_button_type === 'slider' && button.always_visible ? 68 : 36)}"
-                  max="${(isBottomSection && !hasNonFillAlignment) ? 100 : 600}"
-                  .value="${button.width ?? ''}"
+                <ha-form
+                  .hass=${editor.hass}
+                  .data=${{ width: button.width ?? '' }}
+                  .schema=${[{
+                      name: 'width',
+                      selector: { text: { type: 'number' } },
+                      options: {
+                          min: (isBottomSection && !hasNonFillAlignment) ? 0 : (button.sub_button_type === 'slider' && button.always_visible ? 68 : 36),
+                          max: (isBottomSection && !hasNonFillAlignment) ? 100 : 600,
+                      }
+                  }]}
                   .disabled=${effectiveFillWidth === true}
-                  @input="${(ev) => {
-                    const value = ev.target.value;
-                    updateValueFn({ width: value === '' ? undefined : Number(value) });
-                  }}"
-                ></ha-textfield>
-                <ha-textfield
-                  label="Custom button height (px)"
-                  type="number"
-                  min="20"
-                  max="600"
-                  .value="${button.custom_height ?? ''}"
-                  @input="${(ev) => {
-                    const value = ev.target.value;
-                    updateValueFn({ custom_height: value === '' ? undefined : Number(value) });
-                  }}"
-                ></ha-textfield>
+                  .computeLabel=${() => (isBottomSection && !hasNonFillAlignment) ? 'Custom button width (%)' : 'Custom button width (px)'}
+                  @value-changed=${(ev) => {
+                    const value = ev.detail.value.width;
+                    updateValueFn({ width: value === undefined || value === '' ? undefined : Number(value) });
+                  }}
+                ></ha-form>
+                <ha-form
+                  .hass=${editor.hass}
+                  .data=${{ custom_height: button.custom_height ?? '' }}
+                  .schema=${[{
+                      name: 'custom_height',
+                      selector: { text: { type: 'number' } },
+                      options: { min: 20, max: 600 },
+                  }]}
+                  .computeLabel=${() => 'Custom button height (px)'}
+                  @value-changed=${(ev) => {
+                    const value = ev.detail.value.custom_height;
+                    updateValueFn({ custom_height: value === undefined || value === '' ? undefined : Number(value) });
+                  }}
+                ></ha-form>
                 ${button.sub_button_type !== 'slider' || !button.always_visible ? html`
                   <ha-form
                     .hass=${editor.hass}

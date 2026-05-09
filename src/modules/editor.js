@@ -770,19 +770,16 @@ export function makeModulesEditor(context) {
             <div class="my-modules-controls">
               <div class="my-modules-top-row">
                 <div class="my-modules-search">
-                  <ha-textfield
-                    label="Search modules"
-                    icon
-                    .value=${context._myModulesSearchQuery || ''}
-                    @input=${(e) => {
-                      context._myModulesSearchQuery = e.target.value;
+                  <ha-form
+                    .hass=${context.hass}
+                    .data=${{ search: context._myModulesSearchQuery || '' }}
+                    .schema=${[{ name: 'search', selector: { text: { type: 'search' } } }]}
+                    .computeLabel=${() => 'Search modules'}
+                    @value-changed=${(ev) => {
+                      context._myModulesSearchQuery = ev.detail.value.search;
                       context.requestUpdate();
                     }}
-                  >
-                    <slot name="prefix" slot="leadingIcon">
-                      <ha-icon slot="prefix" icon="mdi:magnify"></ha-icon>
-                    </slot>
-                  </ha-textfield>
+                  ></ha-form>
                 </div>
                 <div class="my-modules-sort-menu">
                   ${renderDropdown({

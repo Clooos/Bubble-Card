@@ -287,17 +287,17 @@ function commitEditorSessionHash(hashValue) {
     window.__bubbleEditorSession.committed = true;
 }
 
-function syncHashInputState(editor, originalHash) {
+function syncHashInputState(editor, originalHash, rawValue) {
     const hashInput = editor.shadowRoot?.querySelector('#hash-input');
     const warning = editor.shadowRoot?.querySelector('#duplicate-hash-warning');
-    if (!hashInput) {
-        return getPopUpHashInputState('', originalHash);
-    }
+    const currentRawValue = rawValue ?? hashInput?.value ?? window.__bubbleEditorSession?.lastChangedHash ?? '';
 
-    const hashState = getPopUpHashInputState(hashInput.value, originalHash);
-    const displayValue = getPopUpHashInputDisplayValue(hashInput.value);
-    if (hashInput.value !== displayValue) {
-        hashInput.value = displayValue;
+    const hashState = getPopUpHashInputState(currentRawValue, originalHash);
+    if (hashInput) {
+        const displayValue = getPopUpHashInputDisplayValue(currentRawValue);
+        if (hashInput.value !== displayValue) {
+            hashInput.value = displayValue;
+        }
     }
 
     if (warning) {
@@ -436,7 +436,7 @@ function createPopUpConfig(editor, originalConfig) {
         console.error("Error creating pop-up:", error);
         // Restore original config if there's an error
         editor._config = originalConfig;
-        editor._config.hash = normalizePopUpHashInputValue(editor.shadowRoot.querySelector('#hash-input')?.value);
+        editor._config.hash = normalizePopUpHashInputValue(window.__bubbleEditorSession?.lastChangedHash || '');
         registerPopUpHash(editor._config.hash, {
             name: editor._config.name,
             icon: editor._config.icon
@@ -483,21 +483,22 @@ export function renderPopUpEditor(editor) {
                         </div>
                     </div>
                 </div>
-                <ha-textfield
-                    label="Hash (e.g. #kitchen)"
-                    icon
-                    .value="${getPopUpHashInputDisplayValue(session.lastChangedHash || POPUP_HASH_PREFIX)}"
-                    placeholder="${POPUP_HASH_PLACEHOLDER}"
-                    id="hash-input"
-                    @input="${() => {
-                        const hashState = syncHashInputState(editor, session.originalHash);
+                <ha-form
+                    .hass=${editor.hass}
+                    .data=${{ hash: getPopUpHashInputDisplayValue(session.lastChangedHash || POPUP_HASH_PREFIX) }}
+                    .schema=${[{
+                        name: 'hash',
+                        selector: { text: { prefix: POPUP_HASH_PREFIX } },
+                    }]}
+                    .computeLabel=${() => `Hash (e.g. #kitchen)`}
+                    @value-changed=${(ev) => {
+                        const rawValue = ev.detail.value.hash ?? '';
+                        const hashState = syncHashInputState(editor, session.originalHash, rawValue);
                         if (window.__bubbleEditorSession) {
                             window.__bubbleEditorSession.lastChangedHash = hashState.normalizedValue;
                         }
-                    }}"
-                >
-                    <span slot="leadingIcon" class="bubble-pop-up-hash-prefix" aria-hidden="true">${POPUP_HASH_PREFIX}</span>
-                </ha-textfield>
+                    }}
+                ></ha-form>
                 ${duplicateHashWarningTemplate()}
                 ${renderPopUpModeDropdown(editor)}
                 ${renderBottomOffsetOption(editor)}
@@ -551,30 +552,26 @@ export function renderPopUpEditor(editor) {
         <div class="card-config">
             ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
             ${renderLegacyMigrationNotice(editor, session.originalHash)}
-            <ha-textfield
-                label="Hash (e.g. #kitchen)"
-                icon
-                .value="${getPopUpHashInputDisplayValue(editor._config?.hash)}"
-                placeholder="${POPUP_HASH_PLACEHOLDER}"
-                .configValue="${"hash"}"
-                id="hash-input"
-                @input="${(e) => {
-                    const hashState = syncHashInputState(editor, session.originalHash);
+            <ha-form
+                .hass=${editor.hass}
+                .data=${{ hash: getPopUpHashInputDisplayValue(editor._config?.hash) || '' }}
+                .schema=${[{
+                    name: 'hash',
+                    selector: { text: { prefix: POPUP_HASH_PREFIX } },
+                }]}
+                .computeLabel=${() => 'Hash (e.g. #kitchen)'}
+                @value-changed=${(ev) => {
+                    const rawValue = ev.detail.value.hash ?? '';
+                    const hashState = getPopUpHashInputState(rawValue, session.originalHash);
+                    const displayValue = getPopUpHashInputDisplayValue(rawValue);
                     editor._config.hash = hashState.normalizedValue;
                     if (window.__bubbleEditorSession) {
                         window.__bubbleEditorSession.lastChangedHash = hashState.normalizedValue;
-                    }
-                }}"
-                @change="${(e) => {
-                    e.target.value = normalizePopUpHashInputValue(e.target.value);
-                    if (window.__bubbleEditorSession) {
                         window.__bubbleEditorSession.committed = true;
                     }
-                    editor._valueChanged(e);
-                }}"
-            >
-                <span slot="leadingIcon" class="bubble-pop-up-hash-prefix" aria-hidden="true">${POPUP_HASH_PREFIX}</span>
-            </ha-textfield>
+                    fireEvent(editor, 'config-changed', { config: editor._config });
+                }}
+            ></ha-form>
             ${duplicateHashWarningTemplate()}
             ${renderPopupStyleDropdown(editor)}
             ${renderPopUpModeDropdown(editor)}
@@ -672,26 +669,38 @@ export function renderPopUpEditor(editor) {
                   Pop-up settings
                 </h4>
                 <div class="content">
-                    <ha-textfield
-                        label="Auto close in milliseconds (e.g. 15000)"
-                        type="number"
-                        inputMode="numeric"
-                        min="0"
-                        step="1000"
-                        .value="${editor._config?.auto_close || ''}"
-                        .configValue="${"auto_close"}"
-                        @input="${editor._valueChanged}"
-                    ></ha-textfield>
-                    <ha-textfield
-                        label="Slide to close distance (default to 400)"
-                        type="number"
-                        inputMode="numeric"
-                        min="0"
-                        step="10"
-                        .value="${editor._config.slide_to_close_distance ?? 400}"
-                        .configValue="${"slide_to_close_distance"}"
-                        @input="${editor._valueChanged}"
-                    ></ha-textfield>
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${{ auto_close: editor._config?.auto_close ?? '' }}
+                        .schema=${[{
+                            name: 'auto_close',
+                            selector: { text: { type: 'number' } },
+                            options: { min: 0, step: 1000 },
+                        }]}
+                        .computeLabel=${() => 'Auto close in milliseconds (e.g. 15000)'}
+                        @value-changed=${(ev) => {
+                            editor._valueChanged({
+                                target: { configValue: 'auto_close' },
+                                detail: { value: ev.detail.value.auto_close }
+                            });
+                        }}
+                    ></ha-form>
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${{ slide_to_close_distance: editor._config.slide_to_close_distance ?? 400 }}
+                        .schema=${[{
+                            name: 'slide_to_close_distance',
+                            selector: { text: { type: 'number' } },
+                            options: { min: 0, step: 10 },
+                        }]}
+                        .computeLabel=${() => 'Slide to close distance (default to 400)'}
+                        @value-changed=${(ev) => {
+                            editor._valueChanged({
+                                target: { configValue: 'slide_to_close_distance' },
+                                detail: { value: ev.detail.value.slide_to_close_distance }
+                            });
+                        }}
+                    ></ha-form>
                     <ha-formfield .label="Close the pop-up by clicking outside of it (a refresh is needed)">
                         <ha-switch
                             aria-label="Close the pop-up by clicking outside of it (a refresh is needed)"
@@ -802,76 +811,123 @@ export function renderPopUpEditor(editor) {
                           Pop-up styling
                         </h4>
                         <div class="content"> 
-                            <ha-textfield
-                                label="Margin (fix centering on some themes) (e.g. 13px)"
-                                .value="${editor._config?.margin || '7px'}"
-                                .configValue="${"margin"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Top offset on mobile (e.g. -56px if your header is hidden)"
-                                .value="${editor._config?.margin_top_mobile || '0px'}"
-                                .configValue="${"margin_top_mobile"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Top offset on desktop (e.g. 50vh for a half-sized pop-up)"
-                                .value="${editor._config?.margin_top_desktop || '0px'}"
-                                .configValue="${"margin_top_desktop"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Width on desktop (100% by default on mobile)"
-                                .value="${editor._config?.width_desktop || '540px'}"
-                                .configValue="${"width_desktop"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Background color (any var, hex, rgb or rgba value)"
-                                .value="${editor._config?.bg_color || ''}"
-                                .configValue="${"bg_color"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Background opacity (0-100 range)"
-                                type="number"
-                                inputMode="numeric"
-                                min="0"
-                                max="100"
-                                .value="${editor._config?.bg_opacity !== undefined ? editor._config?.bg_opacity : '88'}"
-                                .configValue="${"bg_opacity"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Background blur (0-100 range)"
-                                type="number"
-                                inputMode="numeric"
-                                min="0"
-                                max="100"
-                                .value="${editor._config?.bg_blur !== undefined ? editor._config?.bg_blur : '10'}"
-                                .configValue="${"bg_blur"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Backdrop blur (0-100 range)"
-                                type="number"
-                                inputMode="numeric"
-                                min="0"
-                                max="100"
-                                .value="${editor._config?.backdrop_blur !== undefined ? editor._config?.backdrop_blur : '0'}"
-                                .configValue="${"backdrop_blur"}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
-                            <ha-textfield
-                                label="Shadow opacity (0-100 range)"
-                                type="number"
-                                inputMode="numeric"
-                                min="0"
-                                max="100"
-                                .configValue="${"shadow_opacity"}"
-                                .value="${editor._config?.shadow_opacity !== undefined ? editor._config?.shadow_opacity : '0'}"
-                                @input="${editor._valueChanged}"
-                            ></ha-textfield>
+                            <!-- Margin -->
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ margin: editor._config?.margin || '7px' }}
+                                .schema=${[{ name: 'margin', selector: { text: {} } }]}
+                                .computeLabel=${() => 'Margin (fix centering on some themes) (e.g. 13px)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'margin' },
+                                        detail: { value: ev.detail.value.margin }
+                                    });
+                                }}
+                            ></ha-form>
+                            <!-- Top offset mobile -->
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ margin_top_mobile: editor._config?.margin_top_mobile || '0px' }}
+                                .schema=${[{ name: 'margin_top_mobile', selector: { text: {} } }]}
+                                .computeLabel=${() => 'Top offset on mobile (e.g. -56px if your header is hidden)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'margin_top_mobile' },
+                                        detail: { value: ev.detail.value.margin_top_mobile }
+                                    });
+                                }}
+                            ></ha-form>
+                            <!-- Top offset desktop -->
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ margin_top_desktop: editor._config?.margin_top_desktop || '0px' }}
+                                .schema=${[{ name: 'margin_top_desktop', selector: { text: {} } }]}
+                                .computeLabel=${() => 'Top offset on desktop (e.g. 50vh for a half-sized pop-up)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'margin_top_desktop' },
+                                        detail: { value: ev.detail.value.margin_top_desktop }
+                                    });
+                                }}
+                            ></ha-form>
+                            <!-- Width desktop -->
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ width_desktop: editor._config?.width_desktop || '540px' }}
+                                .schema=${[{ name: 'width_desktop', selector: { text: {} } }]}
+                                .computeLabel=${() => 'Width on desktop (100% by default on mobile)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'width_desktop' },
+                                        detail: { value: ev.detail.value.width_desktop }
+                                    });
+                                }}
+                            ></ha-form>
+                            <!-- Background color -->
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ bg_color: editor._config?.bg_color || '' }}
+                                .schema=${[{ name: 'bg_color', selector: { text: {} } }]}
+                                .computeLabel=${() => 'Background color (any var, hex, rgb or rgba value)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'bg_color' },
+                                        detail: { value: ev.detail.value.bg_color }
+                                    });
+                                }}
+                            ></ha-form>
+                            <!-- Background opacity -->
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ bg_opacity: editor._config?.bg_opacity !== undefined ? editor._config?.bg_opacity : '88' }}
+                                .schema=${[{ name: 'bg_opacity', selector: { text: { type: 'number' } }, options: { min: 0, max: 100 } }]}
+                                .computeLabel=${() => 'Background opacity (0-100 range)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'bg_opacity' },
+                                        detail: { value: ev.detail.value.bg_opacity }
+                                    });
+                                }}
+                            ></ha-form>
+                            <!-- Background blur -->
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ bg_blur: editor._config?.bg_blur !== undefined ? editor._config?.bg_blur : '10' }}
+                                .schema=${[{ name: 'bg_blur', selector: { text: { type: 'number' } }, options: { min: 0, max: 100 } }]}
+                                .computeLabel=${() => 'Background blur (0-100 range)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'bg_blur' },
+                                        detail: { value: ev.detail.value.bg_blur }
+                                    });
+                                }}
+                            ></ha-form>
+                            <!-- Backdrop blur -->
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ backdrop_blur: editor._config?.backdrop_blur !== undefined ? editor._config?.backdrop_blur : '0' }}
+                                .schema=${[{ name: 'backdrop_blur', selector: { text: { type: 'number' } }, options: { min: 0, max: 100 } }]}
+                                .computeLabel=${() => 'Backdrop blur (0-100 range)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'backdrop_blur' },
+                                        detail: { value: ev.detail.value.backdrop_blur }
+                                    });
+                                }}
+                            ></ha-form>
+                            <!-- Shadow opacity -->
+                            <ha-form
+                                .hass=${editor.hass}
+                                .data=${{ shadow_opacity: editor._config?.shadow_opacity !== undefined ? editor._config?.shadow_opacity : '0' }}
+                                .schema=${[{ name: 'shadow_opacity', selector: { text: { type: 'number' } }, options: { min: 0, max: 100 } }]}
+                                .computeLabel=${() => 'Shadow opacity (0-100 range)'}
+                                @value-changed=${(ev) => {
+                                    editor._valueChanged({
+                                        target: { configValue: 'shadow_opacity' },
+                                        detail: { value: ev.detail.value.shadow_opacity }
+                                    });
+                                }}
+                            ></ha-form>
                             <ha-formfield .label="Hide pop-up backdrop (a refresh is needed)">
                                 <ha-switch
                                     aria-label="Hide pop-up backdrop (a refresh is needed)"
