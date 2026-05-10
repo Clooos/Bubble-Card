@@ -770,16 +770,29 @@ export function makeModulesEditor(context) {
             <div class="my-modules-controls">
               <div class="my-modules-top-row">
                 <div class="my-modules-search">
-                  <ha-form
-                    .hass=${context.hass}
-                    .data=${{ search: context._myModulesSearchQuery || '' }}
-                    .schema=${[{ name: 'search', selector: { text: { type: 'search' } } }]}
-                    .computeLabel=${() => 'Search modules'}
-                    @value-changed=${(ev) => {
-                      context._myModulesSearchQuery = ev.detail.value.search;
-                      context.requestUpdate();
-                    }}
-                  ></ha-form>
+                  ${isHomeAssistantVersionAtLeast(context.hass, '2026.5')
+                    ? html`<ha-input-search
+                        .value=${context._myModulesSearchQuery || ''}
+                        placeholder="Search modules"
+                        @input=${(ev) => {
+                          context._myModulesSearchQuery = ev.target.value;
+                          context.requestUpdate();
+                        }}
+                      ></ha-input-search>`
+                    : html`<ha-textfield
+                        label="Search modules"
+                        icon
+                        .value=${context._myModulesSearchQuery || ''}
+                        @input=${(e) => {
+                          context._myModulesSearchQuery = e.target.value;
+                          context.requestUpdate();
+                        }}
+                      >
+                        <slot name="prefix" slot="leadingIcon">
+                          <ha-icon slot="prefix" icon="mdi:magnify"></ha-icon>
+                        </slot>
+                      </ha-textfield>`
+                  }
                 </div>
                 <div class="my-modules-sort-menu">
                   ${renderDropdown({

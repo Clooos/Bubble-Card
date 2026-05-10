@@ -76,9 +76,20 @@
 
 .store-search ha-textfield,
 .store-search ha-input,
-.store-search ha-form {
+.store-search ha-form,
+.store-search ha-input-search {
   flex-grow: 1;
   width: 100%;
+  --ha-input-padding-bottom: 0;
+}
+
+/* Legacy search icon styling (pre-2026.5) */
+.store-search ha-textfield::part(prefix) {
+  padding-left: 8px;
+}
+
+.store-search ha-textfield .leading-icon {
+  color: var(--primary-text-color);
 }
 
 .store-filters {
@@ -1286,9 +1297,20 @@ ha-formfield.apply-module-button {
 
 .my-modules-search ha-textfield,
 .my-modules-search ha-input,
-.my-modules-search ha-form {
+.my-modules-search ha-form,
+.my-modules-search ha-input-search {
   flex-grow: 1;
   width: 100%;
+  --ha-input-padding-bottom: 0;
+}
+
+/* Legacy search icon styling (pre-2026.5) */
+.my-modules-search ha-textfield::part(prefix) {
+  padding-left: 8px;
+}
+
+.my-modules-search ha-textfield .leading-icon {
+  color: var(--primary-text-color);
 }
 
 .my-modules-sort-menu {

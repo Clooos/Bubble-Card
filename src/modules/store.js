@@ -6,9 +6,11 @@ import { getCachedModuleData, saveCachedModuleData } from './cache.js';
 import { installOrUpdateModule } from './install.js';
 import jsyaml from 'js-yaml';
 import { ensureBCTProviderAvailable, isBCTAvailableSync } from './bct-provider.js';
+import { isHomeAssistantVersionAtLeast } from '../tools/utils.js';
 
 const BCT_CHECK_RETRY_MS = 5000;
 const RATE_LIMIT_WARNING_STORAGE_KEY = 'bubble-card-rate-limit-warning';
+const HA_INPUT_SEARCH_MIN_VERSION = '2026.5';
 
 function _persistRateLimitWarning(resetTimeMs) {
   try {
@@ -27,6 +29,10 @@ function _clearPersistedRateLimitWarning() {
   } catch (e) {
     console.warn('Failed to clear rate limit warning from localStorage', e);
   }
+}
+
+function _supportsHaInputSearch(hass) {
+  return hass && isHomeAssistantVersionAtLeast(hass, HA_INPUT_SEARCH_MIN_VERSION);
 }
 
 function _readPersistedRateLimitWarning() {
@@ -281,16 +287,29 @@ export function makeModuleStore(context) {
           </div>
         </div>
         <div class="store-search">
-          <ha-form
-            .hass=${context.hass}
-            .data=${{ search: context._storeSearchQuery || '' }}
-            .schema=${[{ name: 'search', selector: { text: { type: 'search' } } }]}
-            .computeLabel=${() => 'Search for a module'}
-            @value-changed=${(ev) => {
-              context._storeSearchQuery = ev.detail.value.search;
-              context.requestUpdate();
-            }}
-          ></ha-form>
+          ${_supportsHaInputSearch(context.hass)
+            ? html`<ha-input-search
+                .value=${context._storeSearchQuery || ''}
+                placeholder="Search modules"
+                @input=${(ev) => {
+                  context._storeSearchQuery = ev.target.value;
+                  context.requestUpdate();
+                }}
+              ></ha-input-search>`
+            : html`<ha-textfield
+                label="Search modules"
+                icon
+                .value=${context._storeSearchQuery || ''}
+                @input=${(e) => {
+                  context._storeSearchQuery = e.target.value;
+                  context.requestUpdate();
+                }}
+              >
+                <slot name="prefix" slot="leadingIcon">
+                  <ha-icon slot="prefix" icon="mdi:magnify"></ha-icon>
+                </slot>
+              </ha-textfield>`
+          }
         </div>
         <div class="store-filters">
 
