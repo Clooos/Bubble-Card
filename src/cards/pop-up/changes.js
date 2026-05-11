@@ -1,5 +1,5 @@
 import { getBackdrop } from "./backdrop.js";
-import { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupModeClasses, syncPopupStyleClasses, wasPopupOpenedByTrigger } from "./helpers.js";
+import { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupModeClasses, syncPopupStyleClasses } from "./helpers.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import { setLayout } from "../../tools/utils.js";
@@ -144,7 +144,7 @@ function markTriggerEvaluation(context) {
 
 function syncTriggeredPopupHash(context, trigger, triggerClose, isInitialLoad) {
     if (context.config.hash === location.hash) {
-        if (!trigger && triggerClose && wasPopupOpenedByTrigger(context) && !isInitialLoad) {
+        if (!trigger && triggerClose && !isInitialLoad) {
             removeHash();
         }
         return;

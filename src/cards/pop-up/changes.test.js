@@ -52,7 +52,6 @@ jest.unstable_mockModule('./helpers.js', () => ({
         return isFitContent ? 'fit-content' : 'default';
     }),
     syncPopupStyleClasses: jest.fn(),
-    wasPopupOpenedByTrigger: jest.fn(),
 }));
 
 jest.unstable_mockModule('./legacy.js', () => ({
@@ -95,7 +94,7 @@ jest.unstable_mockModule('./cards/index.js', () => ({
 const { changeEditor, changeStyle, changeTriggered, syncHeaderVisibilityClasses } = await import('./changes.js');
 const { getBackdrop } = await import('./backdrop.js');
 const { handlePopUpCards } = await import('./cards/index.js');
-const { addHash, markPopupPendingTriggerOpen, removeHash, wasPopupOpenedByTrigger } = await import('./helpers.js');
+const { addHash, markPopupPendingTriggerOpen, removeHash } = await import('./helpers.js');
 const { appendLegacyPopup, hideLegacyPopupContent } = await import('./legacy.js');
 const { toggleBodyScroll } = await import('../../tools/utils.js');
 const { handleCustomStyles } = await import('../../tools/style-processor.js');
@@ -464,10 +463,9 @@ describe('changeEditor', () => {
         expect(validateConditionalConfig).toHaveBeenCalledTimes(2);
     });
 
-    test('does not auto-close a manually opened conditional-trigger popup when conditions drop', () => {
+    test('closes a conditional-trigger popup when conditions drop (regardless of open source)', () => {
         validateConditionalConfig.mockReturnValue(true);
         checkConditionsMet.mockReturnValue(false);
-        wasPopupOpenedByTrigger.mockReturnValue(false);
         global.location.hash = '#kitchen-popup';
 
         const context = {
@@ -487,7 +485,7 @@ describe('changeEditor', () => {
 
         changeTriggered(context);
 
-        expect(removeHash).not.toHaveBeenCalled();
+        expect(removeHash).toHaveBeenCalledWith();
         expect(context.previousTrigger).toBe(false);
     });
 
@@ -516,8 +514,7 @@ describe('changeEditor', () => {
         expect(addHash).toHaveBeenCalledWith('#kitchen-popup');
     });
 
-    test('does not auto-close a manually opened entity-trigger popup when the entity changes away', () => {
-        wasPopupOpenedByTrigger.mockReturnValue(false);
+    test('closes an entity-trigger popup when the entity changes away (regardless of open source)', () => {
         global.location.hash = '#kitchen-popup';
 
         const context = {
@@ -538,7 +535,7 @@ describe('changeEditor', () => {
 
         changeTriggered(context);
 
-        expect(removeHash).not.toHaveBeenCalled();
+        expect(removeHash).toHaveBeenCalledWith();
         expect(context.oldTriggerEntityState).toBe('off');
     });
 
