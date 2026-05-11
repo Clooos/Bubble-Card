@@ -3,6 +3,10 @@
 // Cache to store the unsubscribe functions and current results
 const templateCache = new Map();
 
+// Cache to store active subscriptions per template string to avoid duplicate subscribeMessage calls
+// Key: template string, Value: { result, unsubscribed }
+const activeSubscriptions = new Map();
+
 // Subscribers for template changes
 const subscribers = new Set();
 let pendingUpdate = false;
@@ -66,6 +70,19 @@ export function getRenderedTemplate(hass, template, variables = {}) {
         return cached.result;
     }
 
+    // Check if there's already an active subscription for this template string
+    // to avoid duplicate subscribeMessage calls that trigger _handleMessage
+    const activeSub = activeSubscriptions.get(template);
+    if (activeSub && !activeSub.unsubscribed) {
+        // Reuse existing subscription, just update the cache entry
+        templateCache.set(key, {
+            result: activeSub.result,
+            unsubscribe: undefined,
+            lastAccess: Date.now(),
+        });
+        return activeSub.result;
+    }
+
     // Initialize the cache entry
     templateCache.set(key, {
         result: undefined,
@@ -77,6 +94,10 @@ export function getRenderedTemplate(hass, template, variables = {}) {
     subscribeRenderTemplate(
         hass.connection,
         (response) => {
+            // Update the active subscription's result (shared across all callers)
+            if (!activeSubscriptions.has(template)) {
+                activeSubscriptions.set(template, { result: undefined, unsubscribed: false });
+            }
             const current = templateCache.get(key);
             if (!current) return;
 
@@ -85,8 +106,10 @@ export function getRenderedTemplate(hass, template, variables = {}) {
             if (response.error) {
                 console.error("Bubble Card - Template Error:", response.error);
                 current.result = undefined;
+                activeSubscriptions.get(template).result = undefined;
             } else {
                 current.result = response.result;
+                activeSubscriptions.get(template).result = response.result;
             }
 
             // Notify components when template result changes
