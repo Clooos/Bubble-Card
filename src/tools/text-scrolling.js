@@ -7,6 +7,7 @@ const SEPARATOR = '<span class="bubble-scroll-separator"> | </span>';
 // Batched measurement via requestAnimationFrame
 const pending = new Set();
 let rafId = 0;
+let flushScheduled = false;
 
 // Lazy singleton observers (module-scoped, shared across all cards)
 let resizeObs = null;
@@ -46,7 +47,12 @@ function getIntersectionObserver() {
 }
 
 function scheduleFlush() {
-    if (!rafId) rafId = requestAnimationFrame(flush);
+    if (rafId) return;
+    flushScheduled = true;
+    rafId = requestAnimationFrame(() => {
+        flushScheduled = false;
+        flush();
+    });
 }
 
 // Single batched update: read phase then write phase to avoid layout thrashing
@@ -74,10 +80,11 @@ function flush() {
                 // Text now fits — disable scrolling
                 el.removeAttribute('data-animated');
                 el.innerHTML = state.text;
+                if (state.pendingInnerHTML) state.pendingInnerHTML = false;
                 state.animated = false;
                 state.span = null;
                 if (intersectionObs) try { intersectionObs.unobserve(el); } catch (e) {}
-            } else if (state.span) {
+            } else if (state.span && state.span.isConnected) {
                 state.span.style.animationDuration = formatDuration(content);
             }
         } else if (needsScroll) {
@@ -121,11 +128,17 @@ export function applyScrollingEffect(context, element, text) {
 
     // Text changed on tracked element — update in place
     if (state) {
+        const oldText = state.text;
         state.text = text;
         if (state.animated && state.span) {
             state.span.innerHTML = `${text}${SEPARATOR}${text}${SEPARATOR}`;
         } else {
-            element.innerHTML = text;
+            // Defer innerHTML during active flush window to batch DOM writes
+            if (flushScheduled) {
+                state.pendingInnerHTML = true;
+            } else {
+                element.innerHTML = text;
+            }
             state.animated = false;
             state.span = null;
         }
