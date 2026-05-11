@@ -365,17 +365,30 @@ function scheduleStandaloneCardSync(context) {
 
 function waitForStandalonePopupTransition(context, callback) {
     clearStandaloneTransitionCompletion(context);
+    let callbackDone = false;
+
     const handleTransitionEnd = (event) => {
         if (event.target !== context.popUp) return;
         if (event.propertyName && event.propertyName !== 'transform') return;
         clearStandaloneTransitionCompletion(context);
-        callback();
+        // Defer callback to next frame so expensive work (scrollHeight read,
+        // style recalc) happens after the transition paint — avoids the ~40ms
+        // synchronous cost that blocks the transition frame.
+        requestAnimationFrame(() => {
+            if (!callbackDone) {
+                callbackDone = true;
+                callback();
+            }
+        });
     };
     context._standaloneTransitionEndHandler = handleTransitionEnd;
     context.popUp.addEventListener('transitionend', handleTransitionEnd);
     context._standaloneTransitionFallback = setTimeout(() => {
         clearStandaloneTransitionCompletion(context);
-        callback();
+        if (!callbackDone) {
+            callbackDone = true;
+            callback();
+        }
     }, popupState.animationDuration + 60);
 }
 function setStandalonePopupState(popUp, open, transitionClass = null) {
