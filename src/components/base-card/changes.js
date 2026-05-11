@@ -360,9 +360,14 @@ export function updateContentContainerFixedClass(context) {
   if (bottomSubButtonContainer && hasBottomMainButtons) {
     const buttonsContainer = context?.elements?.buttonsContainer;
     if (buttonsContainer) {
+      // Cache getComputedStyle result to avoid forced reflow
       const isMainButtonsVisible = !buttonsContainer.classList.contains('hidden') && 
                                    buttonsContainer.style.display !== 'none' &&
-                                   getComputedStyle(buttonsContainer).display !== 'none';
+                                   (buttonsContainer._cachedDisplay || getComputedStyle(buttonsContainer).display) !== 'none';
+      
+      if (!buttonsContainer._cachedDisplay) {
+        buttonsContainer._cachedDisplay = getComputedStyle(buttonsContainer).display;
+      }
       
       if (isMainButtonsVisible) {
         bottomSubButtonContainer.classList.add('with-main-buttons-bottom');

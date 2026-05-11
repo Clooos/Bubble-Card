@@ -299,6 +299,19 @@ export function createSliderStructure(context, config = {}) {
     sliderRectCache = null;
   }
 
+  // Reset slider rect cache on DOM mutations (e.g., when slider resizes).
+  if (typeof MutationObserver !== 'undefined' && context.elements?.rangeSlider) {
+    let sliderResizeTimeout = null;
+    const sliderResizeObserver = new MutationObserver(() => {
+      if (sliderResizeTimeout) clearTimeout(sliderResizeTimeout);
+      sliderResizeTimeout = setTimeout(resetSliderRectCache, 100);
+    });
+    sliderResizeObserver.observe(context.elements.rangeSlider, {
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+    });
+  }
+
   function resetGestureIntent() {
     isScrollIntent = false;
     hasPrimaryAxisIntent = false;

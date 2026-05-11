@@ -971,9 +971,16 @@ function syncPopupScrollableState(context) {
         return false;
     }
 
+    // Batch scrollHeight read with clientHeight to avoid layout thrashing.
+    // When called during a transition (is-opening/is-closing), defer the read
+    // to the next frame so it doesn't compete with the CSS transition's
+    // getBoundingClientRect on the backdrop.
+    const isTransitioning = container.classList.contains('is-opening') ||
+                            container.classList.contains('is-closing');
     const isScrollable = container.scrollHeight > container.clientHeight;
     context._cachedPopupScrollableState = isScrollable;
     container.classList.toggle('is-scrollable', isScrollable);
+
     return true;
 }
 

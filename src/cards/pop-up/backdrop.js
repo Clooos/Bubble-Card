@@ -202,6 +202,9 @@ export function getBackdrop(context) {
         if (shouldAnimateOpen) {
             requestAnimationFrame(() => {
                 markBackdropTransition("is-opening");
+                // Batch layout read with the CSS transition start
+                // to avoid forcing a reflow before the paint.
+                backdropHostElement.getBoundingClientRect();
             });
         } else {
             clearBackdropTransitionState();

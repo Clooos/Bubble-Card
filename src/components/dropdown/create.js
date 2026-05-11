@@ -5,6 +5,25 @@ import styles from "./styles.css";
 const MENU_WIDTH = 200;
 const MENU_OVERLAP = 40;
 
+// Cache for getComputedStyle results to avoid forced reflows.
+const styleCache = new WeakMap();
+let styleCacheVersion = 0;
+
+// Invalidate style cache when DOM updates.
+function invalidateStyleCache() {
+    styleCacheVersion++;
+}
+
+// Listen for DOM mutations to invalidate cache.
+if (typeof MutationObserver !== 'undefined') {
+    new MutationObserver(() => invalidateStyleCache()).observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        characterData: true,
+    });
+}
+
 // Find the closest ancestor matching a selector, traversing shadow DOM boundaries.
 function closestAcrossShadowDOM(element, selector) {
     let current = element;
@@ -32,10 +51,23 @@ function shouldOpenRight(dropdownContainer) {
         return dropdownLeft < (MENU_WIDTH - MENU_OVERLAP);
     }
 
+    // Use cached getComputedStyle to avoid forced reflow during transitions.
+    // Invalidate cache when a transition is in progress.
     const containerRect = popupContainer.getBoundingClientRect();
-    const paddingLeft = parseFloat(getComputedStyle(popupContainer).paddingLeft) || 0;
+    let paddingLeft;
+    
+    if (popupContainer.classList.contains('is-opening') ||
+        popupContainer.classList.contains('is-closing')) {
+        // During transition, read directly (cache may be stale)
+        paddingLeft = parseFloat(getComputedStyle(popupContainer).paddingLeft) || 0;
+    } else if (styleCache.has(popupContainer) && styleCache.get(popupContainer).version === styleCacheVersion) {
+        paddingLeft = styleCache.get(popupContainer).paddingLeft;
+    } else {
+        paddingLeft = parseFloat(getComputedStyle(popupContainer).paddingLeft) || 0;
+        styleCache.set(popupContainer, { paddingLeft, version: styleCacheVersion });
+    }
+    
     const availableSpace = dropdownLeft - containerRect.left - paddingLeft;
-
     return availableSpace < (MENU_WIDTH - MENU_OVERLAP);
 }
 
