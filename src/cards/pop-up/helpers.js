@@ -1158,6 +1158,12 @@ function openStandalonePopup(context, instant = false) {
             popUp.style.display = '';
             popUp.style.visibility = '';
             updateListeners(context, true);
+            // Defer updateListeners for instant opens to the next frame.
+            scheduleStandaloneFrame(context, '_popupListenersFrame', () => {
+                if (!popupState.activePopups.has(context)) return;
+                updateListeners(context, true);
+            });
+
             setStandalonePopUpCardsActive(context, true);
             setPopupOpeningMarker(context, true);
             try {
@@ -1240,6 +1246,21 @@ function openStandalonePopup(context, instant = false) {
                 }
             }
 
+            if (hasStandaloneCards && !phase1WarmCardsRestored) {
+                scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
+                    if (!popupState.activePopups.has(context)) return;
+                    setPopupOpeningMarker(context, true);
+                    try {
+                        handlePopUpCards(context);
+                    } catch (error) {
+                        rollbackStandalonePopupOpen(context, error);
+                        return;
+                    } finally {
+                        setPopupOpeningMarker(context, false);
+                    }
+                });
+            }
+
             // Read scrollable state one frame early so phase 2 has no layout reads
             // competing with the CSS transition start. Skip the read for cold
             // default-mode opens where content is still deferred — the container
@@ -1264,7 +1285,14 @@ function openStandalonePopup(context, instant = false) {
         try {
             if (!popupState.activePopups.has(context)) return;
 
-            updateListeners(context, true);
+            // Defer updateListeners to the next frame to avoid layout reads during
+            // the CSS transition. Adding/removing listeners is cheap but can trigger
+            // reflows on some devices.
+            scheduleStandaloneFrame(context, '_popupListenersFrame', () => {
+                if (!popupState.activePopups.has(context)) return;
+                updateListeners(context, true);
+            });
+
             toggleBackdrop(context, true);
 
             if (!phase1ContentPrimed || phase1WarmCardsRestored) {
