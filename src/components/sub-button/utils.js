@@ -469,11 +469,15 @@ export function applyWidthStyles(element, subButton, section = 'main', groupCont
 export function applyHeightStyles(element, subButton) {
   try {
     const heightVal = subButton.custom_height;
-    if (heightVal != null && heightVal !== '') {
-      const heightNum = Number(heightVal);
-      if (!Number.isNaN(heightNum) && heightNum > 0) {
-        element.style.setProperty('--bubble-sub-button-height', `${heightNum}px`);
-      }
+    const expectedHeight = (heightVal != null && heightVal !== '')
+      ? `${Number(heightVal)}px`
+      : '';
+
+    if (element._bubbleSubButtonHeight === expectedHeight) return;
+    element._bubbleSubButtonHeight = expectedHeight;
+
+    if (expectedHeight) {
+      element.style.setProperty('--bubble-sub-button-height', expectedHeight);
     } else {
       element.style.removeProperty('--bubble-sub-button-height');
     }
