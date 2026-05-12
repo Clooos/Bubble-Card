@@ -182,7 +182,34 @@ jest.unstable_mockModule('./editor.js', () => ({
     })),
 }));
 
-const { createHeader, prepareStandaloneStructure, prepareStructure } = await import('./create.js');
+const { createHeader, createStructure, prepareStandaloneStructure, prepareStructure } = await import('./create.js');
+
+function buildStandalonePopupContext({ scrollHeight = 100, clientHeight = 100, cachedScrollableState } = {}) {
+    const shadowRoot = createMockElement('div');
+    const context = {
+        config: {},
+        content: createMockElement('div'),
+        shadowRoot,
+        popUp: createMockElement('div'),
+        editor: false,
+        detectedEditor: false,
+        closest: jest.fn(() => null),
+        elements: {},
+    };
+
+    prepareStandaloneStructure(context);
+    createHeader(context);
+    createStructure(context);
+
+    context.elements.popUpContainer.scrollHeight = scrollHeight;
+    context.elements.popUpContainer.clientHeight = clientHeight;
+
+    if (cachedScrollableState !== undefined) {
+        context._cachedPopupScrollableState = cachedScrollableState;
+    }
+
+    return context;
+}
 
 describe('createHeader', () => {
     beforeEach(() => {
@@ -351,6 +378,10 @@ describe('prepareStructure', () => {
 describe('prepareStandaloneStructure', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        Object.defineProperty(global, 'location', {
+            value: { hash: '' },
+            configurable: true,
+        });
     });
 
     test('suspends the standalone host wrapper in live mode until the popup opens', () => {
@@ -402,5 +433,66 @@ describe('prepareStandaloneStructure', () => {
         // ha-card shell must be detached so card-mod styles on it have zero DOM effect
         expect(card.parentNode).toBeNull();
         expect(shadowRoot.children).not.toContain(card);
+    });
+
+    test('prevents native page drag when popup content is not scrollable', () => {
+        const context = buildStandalonePopupContext({ scrollHeight: 100, clientHeight: 100 });
+
+        context.handleTouchStart({
+            touches: [{ clientY: 120 }],
+        });
+
+        const moveEvent = {
+            touches: [{ clientY: 170 }],
+            cancelable: true,
+            preventDefault: jest.fn(),
+        };
+
+        context.handleTouchMove(moveEvent);
+
+        expect(moveEvent.preventDefault).toHaveBeenCalledTimes(1);
+        expect(removeHash).not.toHaveBeenCalled();
+    });
+
+    test('keeps native touch scrolling when popup content is scrollable', () => {
+        const context = buildStandalonePopupContext({ scrollHeight: 280, clientHeight: 100 });
+
+        context.handleTouchStart({
+            touches: [{ clientY: 120 }],
+        });
+
+        const moveEvent = {
+            touches: [{ clientY: 170 }],
+            cancelable: true,
+            preventDefault: jest.fn(),
+        };
+
+        context.handleTouchMove(moveEvent);
+
+        expect(moveEvent.preventDefault).not.toHaveBeenCalled();
+        expect(removeHash).not.toHaveBeenCalled();
+    });
+
+    test('keeps native touch scrolling when live content is scrollable even if cached state is stale false', () => {
+        const context = buildStandalonePopupContext({
+            scrollHeight: 280,
+            clientHeight: 100,
+            cachedScrollableState: false,
+        });
+
+        context.handleTouchStart({
+            touches: [{ clientY: 120 }],
+        });
+
+        const moveEvent = {
+            touches: [{ clientY: 170 }],
+            cancelable: true,
+            preventDefault: jest.fn(),
+        };
+
+        context.handleTouchMove(moveEvent);
+
+        expect(moveEvent.preventDefault).not.toHaveBeenCalled();
+        expect(removeHash).not.toHaveBeenCalled();
     });
 });

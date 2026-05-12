@@ -87,6 +87,27 @@ function _clearPopupDragTransform(context) {
   }
 }
 
+function _isPopupContentScrollable(context) {
+  if (context?._cachedPopupScrollableState === true) {
+    return true;
+  }
+
+  const popUpContainer = context.elements?.popUpContainer;
+  if (!popUpContainer) {
+    return false;
+  }
+
+  if (popUpContainer.classList?.contains?.('is-scrollable')) {
+    return true;
+  }
+
+  if (typeof popUpContainer.scrollHeight === 'number' && typeof popUpContainer.clientHeight === 'number') {
+    return popUpContainer.scrollHeight - popUpContainer.clientHeight > 1;
+  }
+
+  return false;
+}
+
 function _configurePopupInteractionHandlers(context) {
   const closePopup = () => {
     removeHash(true);
@@ -158,7 +179,16 @@ function _configurePopupInteractionHandlers(context) {
 
   const slideToCloseDistance = context.config.slide_to_close_distance ?? 400;
   context.handleTouchMove = (event) => {
-    const currentTouchY = event.touches[0].clientY;
+    const currentTouch = event.touches?.[0];
+    if (!currentTouch) {
+      return;
+    }
+
+    if (!_isPopupContentScrollable(context) && event.cancelable !== false) {
+      event.preventDefault?.();
+    }
+
+    const currentTouchY = currentTouch.clientY;
     const touchStartY = context._popupTouchStartY ?? currentTouchY;
     const touchMoveDistance = currentTouchY - touchStartY;
     const lastTouchY = context._popupLastTouchY ?? currentTouchY;
