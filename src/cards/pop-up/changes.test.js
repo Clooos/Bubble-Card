@@ -51,6 +51,12 @@ jest.unstable_mockModule('./helpers.js', () => ({
         popUp?.classList?.toggle('popup-mode-with-bottom-offset', isFitContent && Boolean(config?.with_bottom_offset));
         return isFitContent ? 'fit-content' : 'default';
     }),
+    syncPopupPerformanceModeClasses: jest.fn((popUp, config) => {
+        const isPerformance = config?.performance_mode === 'performance';
+        popUp?.classList?.toggle('popup-performance-default', !isPerformance);
+        popUp?.classList?.toggle('popup-performance-performance', isPerformance);
+        return isPerformance ? 'performance' : 'default';
+    }),
     syncPopupStyleClasses: jest.fn(),
 }));
 
@@ -94,7 +100,7 @@ jest.unstable_mockModule('./cards/index.js', () => ({
 const { changeEditor, changeStyle, changeTriggered, syncHeaderVisibilityClasses } = await import('./changes.js');
 const { getBackdrop } = await import('./backdrop.js');
 const { handlePopUpCards } = await import('./cards/index.js');
-const { addHash, markPopupPendingTriggerOpen, removeHash } = await import('./helpers.js');
+const { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupPerformanceModeClasses } = await import('./helpers.js');
 const { appendLegacyPopup, hideLegacyPopupContent } = await import('./legacy.js');
 const { toggleBodyScroll } = await import('../../tools/utils.js');
 const { handleCustomStyles } = await import('../../tools/style-processor.js');
@@ -169,6 +175,33 @@ describe('changeStyle', () => {
         expect(setLayout).toHaveBeenCalledTimes(1);
         expect(handleCustomStyles).toHaveBeenCalledTimes(2);
         expect(updateBackdropStyles).toHaveBeenCalledTimes(2);
+    });
+
+    test('reapplies static popup shell work when the performance mode changes', () => {
+        const context = {
+            config: {},
+            popUp: {
+                classList: createMockClassList(),
+            },
+            _hass: {
+                themes: { default_theme: 'bubble' },
+            },
+        };
+
+        changeStyle(context);
+
+        expect(setLayout).toHaveBeenCalledTimes(1);
+        expect(syncPopupPerformanceModeClasses).toHaveBeenLastCalledWith(context.popUp, context.config);
+        expect(context.popUp.classList.contains('popup-performance-default')).toBe(true);
+
+        context.config = { performance_mode: 'performance' };
+
+        changeStyle(context);
+
+        expect(setLayout).toHaveBeenCalledTimes(2);
+        expect(syncPopupPerformanceModeClasses).toHaveBeenLastCalledWith(context.popUp, context.config);
+        expect(context.popUp.classList.contains('popup-performance-default')).toBe(false);
+        expect(context.popUp.classList.contains('popup-performance-performance')).toBe(true);
     });
 });
 

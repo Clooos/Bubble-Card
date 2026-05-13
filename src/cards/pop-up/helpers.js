@@ -33,6 +33,8 @@ export const POPUP_MODE_ADAPTIVE_DIALOG = 'adaptive-dialog';
 
 export const POPUP_STYLE_BUBBLE = 'bubble';
 export const POPUP_STYLE_CLASSIC = 'classic';
+export const POPUP_PERFORMANCE_MODE_DEFAULT = 'default';
+export const POPUP_PERFORMANCE_MODE_PERFORMANCE = 'performance';
 
 // Prewarm + warm-cache runtime
 const popupPrewarmStorageKey = 'bubble-card-popup-prewarm-v1';
@@ -346,7 +348,8 @@ function scheduleStandaloneFrame(context, frameKey, callback) {
     });
 }
 function shouldDeferColdStandaloneContentUntilAfterOpen(context) {
-    return getPopupMode(context?.config) === POPUP_MODE_DEFAULT;
+    return getPopupMode(context?.config) === POPUP_MODE_DEFAULT &&
+        getPopupPerformanceMode(context?.config) === POPUP_PERFORMANCE_MODE_PERFORMANCE;
 }
 function scheduleStandaloneCardSync(context) {
     scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
@@ -444,6 +447,14 @@ export function getPopupStyle(config) {
     return POPUP_STYLE_BUBBLE;
 }
 
+export function getPopupPerformanceMode(config) {
+    if (config?.performance_mode === POPUP_PERFORMANCE_MODE_PERFORMANCE) {
+        return POPUP_PERFORMANCE_MODE_PERFORMANCE;
+    }
+
+    return POPUP_PERFORMANCE_MODE_DEFAULT;
+}
+
 export function hasPopupBottomOffset(config) {
     const mode = getPopupMode(config);
     return (mode === POPUP_MODE_FIT_CONTENT || mode === POPUP_MODE_ADAPTIVE_DIALOG) && Boolean(config?.with_bottom_offset);
@@ -471,6 +482,17 @@ export function syncPopupModeClasses(popUp, config) {
 export function syncPopupStyleClasses(popUp, config) {
     if (!popUp?.classList) return;
     popUp.classList.toggle('popup-style-classic', getPopupStyle(config) === POPUP_STYLE_CLASSIC);
+}
+
+export function syncPopupPerformanceModeClasses(popUp, config) {
+    if (!popUp?.classList) {
+        return POPUP_PERFORMANCE_MODE_DEFAULT;
+    }
+
+    const performanceMode = getPopupPerformanceMode(config);
+    popUp.classList.toggle('popup-performance-default', performanceMode === POPUP_PERFORMANCE_MODE_DEFAULT);
+    popUp.classList.toggle('popup-performance-performance', performanceMode === POPUP_PERFORMANCE_MODE_PERFORMANCE);
+    return performanceMode;
 }
 
 function setPopupDatasetFlag(context, key, enabled) {

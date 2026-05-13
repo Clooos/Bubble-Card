@@ -137,10 +137,13 @@ jest.unstable_mockModule('./legacy.js', () => ({
 
 const { cleanupPopupRuntime, closePopup, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash } = await import('./helpers.js');
 
+let rafCallbacks;
+let nextRafId;
+
 function flushRafQueue() {
-    const callbacks = [...global.requestAnimationFrame.mock.calls];
-    global.requestAnimationFrame.mockClear();
-    callbacks.forEach(([callback]) => callback());
+    const callbacks = [...rafCallbacks.values()];
+    rafCallbacks.clear();
+    callbacks.forEach((callback) => callback());
 }
 
 function dispatchTransformTransitionEnd(element) {
@@ -245,8 +248,16 @@ describe('standalone popup lifecycle', () => {
         window.__bubbleLocationDeduperAdded = true;
         window.__bubbleDialogListenerAdded = true;
 
-        global.requestAnimationFrame = jest.fn((callback) => callback);
-        global.cancelAnimationFrame = jest.fn();
+        rafCallbacks = new Map();
+        nextRafId = 1;
+        global.requestAnimationFrame = jest.fn((callback) => {
+            const id = nextRafId++;
+            rafCallbacks.set(id, callback);
+            return id;
+        });
+        global.cancelAnimationFrame = jest.fn((id) => {
+            rafCallbacks.delete(id);
+        });
         idleCallbacks = new Map();
         nextIdleCallbackId = 1;
         window.requestIdleCallback = jest.fn((callback) => {
@@ -282,7 +293,10 @@ describe('standalone popup lifecycle', () => {
     }
 
     test('completes standalone open on transition end instead of a fixed timer', () => {
-        const context = createStandaloneContext({ open_action: { action: 'none' } });
+        const context = createStandaloneContext({
+            open_action: { action: 'none' },
+            performance_mode: 'performance',
+        });
         usedContexts.push(context);
 
         openPopup(context);
@@ -309,13 +323,19 @@ describe('standalone popup lifecycle', () => {
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(toggleBodyScroll).not.toHaveBeenCalled();
 
-        // RAF3: post-transition card sync only.
+        // RAF3: transition-end callback finalizes the shell and schedules card sync.
+        flushRafQueue();
+
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+        expect(toggleBodyScroll).not.toHaveBeenCalled();
+
+        // RAF4: post-transition card sync only.
         flushRafQueue();
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(toggleBodyScroll).not.toHaveBeenCalled();
 
-        // RAF4: global body scroll lock after standalone content has settled.
+        // RAF5: global body scroll lock after standalone content has settled.
         flushRafQueue();
 
         expect(toggleBodyScroll).toHaveBeenCalledWith(true);
@@ -380,6 +400,9 @@ describe('standalone popup lifecycle', () => {
         dispatchTransformTransitionEnd(context.popUp);
         expect(handlePopUpCards).not.toHaveBeenCalled();
 
+        flushRafQueue(); // transition-end callback
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+
         flushRafQueue(); // post-transition hass sync
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
@@ -411,19 +434,43 @@ describe('standalone popup lifecycle', () => {
 
         flushRafQueue();
 
+        expect(context.sectionRow.hidden).toBe(false);
+
+        flushRafQueue();
+
         expect(context.sectionRow.hidden).toBe(true);
         expect(context.sectionRow.style.display).toBe('none');
         expect(context.sectionRowContainer.style.display).toBe('none');
         expect(context.sectionRowContainer.style.position).toBe('');
     });
 
-    test('starts the default-mode cold standalone animation before child-card sync runs', () => {
+    test('primes cold default-mode standalone content before opening in the default performance mode', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
 
         openPopup(context);
 
-        // Phase 1 runs inline — setup only, animation not started yet.
+        // Phase 1 runs inline — default mode restores beta.4 behavior and primes content before open.
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // phase 2 — transition start
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // transition-end callback + deferred listeners/body-scroll setup
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+    });
+
+    test('defers cold default-mode standalone content until after opening in performance mode', () => {
+        const context = createStandaloneContext({ performance_mode: 'performance' });
+        usedContexts.push(context);
+
+        openPopup(context);
+
+        // Phase 1 runs inline — performance mode keeps the beta.5 deferred cold-open path.
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
@@ -432,8 +479,10 @@ describe('standalone popup lifecycle', () => {
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
 
-        // Card sync runs after the transition to avoid competing with the CSS animation.
         dispatchTransformTransitionEnd(context.popUp);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+
+        flushRafQueue(); // transition-end callback
         expect(handlePopUpCards).not.toHaveBeenCalled();
 
         flushRafQueue(); // post-transition card sync
@@ -673,7 +722,10 @@ describe('standalone popup lifecycle', () => {
     });
 
     test('rolls back a failed standalone open and allows a later retry', () => {
-        const context = createStandaloneContext({ hash: '#popup-a' });
+        const context = createStandaloneContext({
+            hash: '#popup-a',
+            performance_mode: 'performance',
+        });
         usedContexts.push(context);
         const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -684,6 +736,7 @@ describe('standalone popup lifecycle', () => {
         openPopup(context);
         flushRafQueue(); // phase 2 — starts transition, card sync deferred (phase 1 inline)
         dispatchTransformTransitionEnd(context.popUp); // finalize → schedules card sync
+        flushRafQueue(); // transition-end callback
         flushRafQueue(); // card sync runs → handlePopUpCards throws → rollback
 
         expect(consoleError).toHaveBeenCalledTimes(1);
@@ -698,6 +751,7 @@ describe('standalone popup lifecycle', () => {
         openPopup(context);
         flushRafQueue(); // phase 2 — transition starts (phase 1 inline)
         dispatchTransformTransitionEnd(context.popUp); // finalize → schedules card sync
+        flushRafQueue(); // transition-end callback
         flushRafQueue(); // card sync (no throw)
         flushRafQueue(); // deferred body scroll
 
@@ -808,6 +862,11 @@ describe('standalone popup lifecycle', () => {
 
         dispatchTransformTransitionEnd(context.popUp);
 
+        expect(toggleBodyScroll).not.toHaveBeenCalledWith(false);
+        expect(setStandalonePopUpCardsActive).not.toHaveBeenCalledWith(context, false);
+
+        flushRafQueue();
+
         expect(toggleBodyScroll).toHaveBeenCalledWith(false);
         expect(setStandalonePopUpCardsActive).not.toHaveBeenCalledWith(context, false);
 
@@ -876,6 +935,11 @@ describe('standalone popup lifecycle', () => {
 
         dispatchTransformTransitionEnd(context.popUp);
 
+        expect(toggleBodyScroll).not.toHaveBeenCalledWith(false);
+        expect(setStandalonePopUpCardsActive).not.toHaveBeenCalledWith(context, false);
+
+        flushRafQueue();
+
         expect(toggleBodyScroll).toHaveBeenCalledWith(false);
         expect(setStandalonePopUpCardsActive).not.toHaveBeenCalledWith(context, false);
 
@@ -934,6 +998,10 @@ describe('standalone popup lifecycle', () => {
 
         flushRafQueue();
 
+        expect(setStandalonePopUpCardsActive).not.toHaveBeenCalledWith(contextA, false);
+
+        flushRafQueue();
+
         expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(contextA, false);
         expect(suspendWarmStandalonePopUpCards).toHaveBeenCalledWith(contextA);
         expect(suspendStandalonePopUpCards).not.toHaveBeenCalledWith(contextA);
@@ -950,6 +1018,7 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue();
         flushRafQueue();
         dispatchTransformTransitionEnd(contextB.popUp);
+        flushRafQueue();
         flushRafQueue();
 
         expect(suspendWarmStandalonePopUpCards).toHaveBeenCalledWith(contextB);
@@ -1104,8 +1173,8 @@ describe('standalone popup lifecycle', () => {
         expect(layoutReads).toBe(0);
     });
 
-    test('does not read scrollability for a cold default-mode open before content is present', () => {
-        const context = createStandaloneContext();
+    test('does not read scrollability for a cold default-mode open before content is present in performance mode', () => {
+        const context = createStandaloneContext({ performance_mode: 'performance' });
         usedContexts.push(context);
 
         let layoutReads = 0;
@@ -1326,8 +1395,16 @@ describe('legacy popup location routing', () => {
         window.__bubbleLocationDeduperAdded = true;
         window.__bubbleDialogListenerAdded = true;
 
-        global.requestAnimationFrame = jest.fn((callback) => callback);
-        global.cancelAnimationFrame = jest.fn();
+        rafCallbacks = new Map();
+        nextRafId = 1;
+        global.requestAnimationFrame = jest.fn((callback) => {
+            const id = nextRafId++;
+            rafCallbacks.set(id, callback);
+            return id;
+        });
+        global.cancelAnimationFrame = jest.fn((id) => {
+            rafCallbacks.delete(id);
+        });
     });
 
     afterEach(() => {

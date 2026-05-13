@@ -1,5 +1,5 @@
 import { getBackdrop } from "./backdrop.js";
-import { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupModeClasses, syncPopupStyleClasses } from "./helpers.js";
+import { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupModeClasses, syncPopupPerformanceModeClasses, syncPopupStyleClasses } from "./helpers.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import { setLayout } from "../../tools/utils.js";
@@ -25,6 +25,7 @@ function shouldApplyPopupStaticShell(context) {
     const isEditing = !!context.editor;
     const detectedEditor = !!context.detectedEditor;
     const popupMode = config.popup_mode ?? '';
+    const performanceMode = config.performance_mode ?? '';
     const withBottomOffset = !!config.with_bottom_offset;
     const popupStyle = config.popup_style ?? '';
     const showHeader = config.show_header ?? true;
@@ -44,6 +45,7 @@ function shouldApplyPopupStaticShell(context) {
         context._lastPopupShellEditing === isEditing &&
         context._lastPopupShellDetectedEditor === detectedEditor &&
         context._lastPopupShellMode === popupMode &&
+        context._lastPopupShellPerformanceMode === performanceMode &&
         context._lastPopupShellBottomOffset === withBottomOffset &&
         context._lastPopupShellStyle === popupStyle &&
         context._lastPopupShellShowHeader === showHeader &&
@@ -65,6 +67,7 @@ function shouldApplyPopupStaticShell(context) {
     context._lastPopupShellEditing = isEditing;
     context._lastPopupShellDetectedEditor = detectedEditor;
     context._lastPopupShellMode = popupMode;
+    context._lastPopupShellPerformanceMode = performanceMode;
     context._lastPopupShellBottomOffset = withBottomOffset;
     context._lastPopupShellStyle = popupStyle;
     context._lastPopupShellShowHeader = showHeader;
@@ -112,6 +115,7 @@ export function changeStyle(context) {
 
     if (shouldApplyStaticShell) {
         syncPopupModeClasses(context.popUp, context.config);
+        syncPopupPerformanceModeClasses(context.popUp, context.config);
         syncPopupStyleClasses(context.popUp, context.config);
         syncHeaderVisibilityClasses(context);
     }

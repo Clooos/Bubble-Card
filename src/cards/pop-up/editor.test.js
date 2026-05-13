@@ -24,6 +24,7 @@ jest.unstable_mockModule('./migration.js', () => ({
 }));
 
 const {
+    getPopupPerformanceModeValue,
     getPopUpHashInputState,
     normalizePopUpHashInputValue,
 } = await import('./editor.js');
@@ -75,5 +76,13 @@ describe('pop-up editor hash input helpers', () => {
             isDuplicate: false,
             isValid: true,
         });
+    });
+
+    test('defaults the popup performance mode to default when unset', () => {
+        expect(getPopupPerformanceModeValue({})).toBe('default');
+    });
+
+    test('returns the explicit popup performance mode when configured', () => {
+        expect(getPopupPerformanceModeValue({ performance_mode: 'performance' })).toBe('performance');
     });
 });

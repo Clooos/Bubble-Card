@@ -170,6 +170,7 @@ jest.unstable_mockModule('./helpers.js', () => ({
         }
     }),
     syncPopupModeClasses: jest.fn(),
+    syncPopupPerformanceModeClasses: jest.fn(),
 }));
 
 jest.unstable_mockModule('./legacy.js', () => ({

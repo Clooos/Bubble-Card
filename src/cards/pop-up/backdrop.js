@@ -125,7 +125,8 @@ export function getBackdrop(context) {
         }
 
         const backdropBlur = activeContext.config.backdrop_blur ?? 0;
-        if (parseFloat(backdropBlur) > 0) {
+        const isPerformanceMode = activeContext.config?.performance_mode === 'performance';
+        if (parseFloat(backdropBlur) > 0 && !isPerformanceMode) {
             internalBackdropElement.style.setProperty("--custom-backdrop-filter", `blur(${backdropBlur}px)`);
         } else {
             internalBackdropElement.style.removeProperty("--custom-backdrop-filter");

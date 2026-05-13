@@ -25,10 +25,25 @@ function getPopUpModeList() {
     ];
 }
 
+function getPopupPerformanceModeList() {
+    return [
+        { 'label': 'Default', 'value': 'default' },
+        { 'label': 'Performance', 'value': 'performance' },
+    ];
+}
+
 function getPopUpModeValue(config) {
     if (config?.popup_mode === 'fit-content') return 'fit-content';
     if (config?.popup_mode === 'centered') return 'centered';
     if (config?.popup_mode === 'adaptive-dialog') return 'adaptive-dialog';
+    return 'default';
+}
+
+export function getPopupPerformanceModeValue(config) {
+    if (config?.performance_mode === 'performance') {
+        return 'performance';
+    }
+
     return 'default';
 }
 
@@ -96,6 +111,53 @@ function renderPopUpModeDropdown(editor) {
     `;
 }
 
+function renderPopupPerformanceModeDropdown(editor) {
+    const isPerformance = getPopupPerformanceModeValue(editor._config) === 'performance';
+
+    return html`
+        <ha-form
+            .hass=${editor.hass}
+            .data=${{ performance_mode: getPopupPerformanceModeValue(editor._config) }}
+            .schema=${[{
+                name: 'performance_mode',
+                selector: {
+                    select: {
+                        options: getPopupPerformanceModeList(),
+                        mode: 'dropdown'
+                    }
+                }
+            }]}
+            .computeLabel=${() => 'Performance mode'}
+            @value-changed=${(ev) => {
+                const value = ev.detail.value.performance_mode;
+
+                if (value === 'performance') {
+                    editor._valueChanged({
+                        target: { configValue: 'performance_mode' },
+                        detail: { value }
+                    });
+                    return;
+                }
+
+                const newConfig = { ...editor._config };
+                delete newConfig.performance_mode;
+                fireEvent(editor, 'config-changed', { config: newConfig });
+            }}
+        ></ha-form>
+        ${isPerformance ? html`
+            <div class="bubble-info">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:information-outline"></ha-icon>
+                    Performance mode
+                </h4>
+                <div class="content">
+                    <p>Slightly delays content rendering and background blur, also disables backdrop blur if set.</p>
+                </div>
+            </div>
+        ` : html``}
+    `;
+}
+
 function getPopUpLayoutConfig(config) {
     const mode = getPopUpModeValue(config);
     if (mode === 'fit-content') {
@@ -117,6 +179,19 @@ function getPopUpLayoutConfig(config) {
         };
     }
     return {};
+}
+
+function getPopUpPerformanceConfig(config) {
+    return getPopupPerformanceModeValue(config) === 'performance'
+        ? { performance_mode: 'performance' }
+        : {};
+}
+
+function getPopUpBehaviorConfig(config) {
+    return {
+        ...getPopUpLayoutConfig(config),
+        ...getPopUpPerformanceConfig(config),
+    };
 }
 
 function findSuitableEntities(hass, entityType = 'light', limit = 2) {
@@ -350,7 +425,7 @@ function createPopUpConfig(editor, originalConfig) {
     try {
         // Detect the legacy vertical-stack setup.
         const isInVerticalStack = window.popUpError === false;
-        const popupLayoutConfig = getPopUpLayoutConfig(editor._config);
+        const popupBehaviorConfig = getPopUpBehaviorConfig(editor._config);
         
         // Read the current form value.
         const includeExample = editor.shadowRoot.querySelector("#include-example")?.checked || false;
@@ -362,19 +437,25 @@ function createPopUpConfig(editor, originalConfig) {
         hashValue = hashState.normalizedValue;
         
         if (isInVerticalStack) {
-            if (popupLayoutConfig.popup_mode) {
-                editor._config.popup_mode = popupLayoutConfig.popup_mode;
+            if (popupBehaviorConfig.popup_mode) {
+                editor._config.popup_mode = popupBehaviorConfig.popup_mode;
             } else {
                 delete editor._config.popup_mode;
             }
 
-            if (popupLayoutConfig.with_bottom_offset) {
+            if (popupBehaviorConfig.performance_mode) {
+                editor._config.performance_mode = popupBehaviorConfig.performance_mode;
+            } else {
+                delete editor._config.performance_mode;
+            }
+
+            if (popupBehaviorConfig.with_bottom_offset) {
                 editor._config.with_bottom_offset = true;
             } else {
                 delete editor._config.with_bottom_offset;
             }
 
-            if (popupLayoutConfig.full_width_on_mobile) {
+            if (popupBehaviorConfig.full_width_on_mobile) {
                 editor._config.full_width_on_mobile = true;
             } else {
                 delete editor._config.full_width_on_mobile;
@@ -395,7 +476,7 @@ function createPopUpConfig(editor, originalConfig) {
             editor._config = {
                 type: 'custom:bubble-card',
                 card_type: 'pop-up',
-                ...popupLayoutConfig,
+                ...popupBehaviorConfig,
                 name: 'Living room',
                 icon: 'mdi:sofa-outline',
                 hash: hashValue,
@@ -414,7 +495,7 @@ function createPopUpConfig(editor, originalConfig) {
             editor._config = {
                 type: 'custom:bubble-card',
                 card_type: 'pop-up',
-                ...popupLayoutConfig,
+                ...popupBehaviorConfig,
                 hash: hashValue,
                 cards: []
             };
@@ -669,6 +750,7 @@ export function renderPopUpEditor(editor) {
                   Pop-up settings
                 </h4>
                 <div class="content">
+                    ${renderPopupPerformanceModeDropdown(editor)}
                     <ha-form
                         .hass=${editor.hass}
                         .data=${{ auto_close: editor._config?.auto_close ?? '' }}

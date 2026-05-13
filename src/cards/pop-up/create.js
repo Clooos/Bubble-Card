@@ -4,7 +4,7 @@ import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { handleButton } from "../../cards/button/index.js";
 import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
-import { navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, suspendPopupHostLayout, syncPopupModeClasses } from "./helpers.js";
+import { navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, suspendPopupHostLayout, syncPopupModeClasses, syncPopupPerformanceModeClasses } from "./helpers.js";
 import { hideLegacyPopupContent } from './legacy.js';
 import { renderPopupOnboarding } from './editor.js';
 import styles from "./styles.css";
@@ -401,7 +401,8 @@ export function createStructure(context) {
 
     context.popUp.style.setProperty("--desktop-width", context.config.width_desktop ?? "540px");
     syncPopupModeClasses(context.popUp, context.config);
-  _configurePopupInteractionHandlers(context);
+    syncPopupPerformanceModeClasses(context.popUp, context.config);
+    _configurePopupInteractionHandlers(context);
 
     context.elements.popUpContainer = _createOrReusePopUpContainer(context);
     _attachScrollMaskListener(context.elements.popUpContainer);
