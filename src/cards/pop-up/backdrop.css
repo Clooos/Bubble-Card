@@ -1,8 +1,8 @@
 .bubble-backdrop {
   position: fixed;
   background-color: var(--bubble-backdrop-background-color, var(--bubble-default-backdrop-background-color));
-  backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter, none));
-  -webkit-backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter, none));
+  backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter, unset));
+  -webkit-backdrop-filter: var(--bubble-backdrop-filter, var(--custom-backdrop-filter, unset));
   top: 0;
   left: 0;
   width: 100%;

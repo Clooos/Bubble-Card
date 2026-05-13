@@ -187,7 +187,6 @@ export function getBackdrop(context) {
         const shouldAnimateOpen = internalBackdropElement.classList.contains("is-hidden");
 
         clearBackdropHideTimeout();
-        backdropHostElement.style.display = "";
 
         if (activeContext) {
             applyBackdropConfig(activeContext);
@@ -203,9 +202,6 @@ export function getBackdrop(context) {
         if (shouldAnimateOpen) {
             requestAnimationFrame(() => {
                 markBackdropTransition("is-opening");
-                // Batch layout read with the CSS transition start
-                // to avoid forcing a reflow before the paint.
-                backdropHostElement.getBoundingClientRect();
             });
         } else {
             clearBackdropTransitionState();
