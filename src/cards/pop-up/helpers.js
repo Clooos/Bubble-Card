@@ -940,11 +940,13 @@ function completePopupOpen(context) {
         return;
     }
 
-    // Try cached scrollable state first to avoid a forced layout here.
-    // Phase 1 already computed the authoritative value; only re-measure if we
-    // have no cache (cold open without phase 1, or stale state).
-    if (!syncCachedPopupScrollableState(context)) {
-        syncPopupScrollableState(context);
+    if (!syncCachedPopupScrollableState(context) && !context._popupScrollableSyncFrame) {
+        context._popupScrollableSyncFrame = requestAnimationFrame(() => {
+            context._popupScrollableSyncFrame = null;
+            if (popupState.activePopups.has(context)) {
+                syncPopupScrollableState(context);
+            }
+        });
     }
 
     setPopupOpenSettled(context, true);
@@ -1555,6 +1557,8 @@ function clearAllTimeouts(context) {
     clearContextFrame(context, '_standaloneCloseBackdropFrame');
     clearContextFrame(context, '_standalonePostCloseCleanupFrame');
     clearContextFrames(context, standaloneOpenFrameKeys);
+
+    clearContextFrame(context, '_popupScrollableSyncFrame');
 
     if (context.popUp?._bubblePopupClassTimeout) {
         clearTimeout(context.popUp._bubblePopupClassTimeout);
