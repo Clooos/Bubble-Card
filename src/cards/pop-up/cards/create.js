@@ -5,24 +5,6 @@ import { createEditorCardElements } from './editor/index.js';
 const GRID_COLUMN_MULTIPLIER = 3;
 const DEFAULT_GRID_SIZE = { columns: 12, rows: 'auto' };
 
-export function restoreCardElements(context) {
-    if (!context.elements?.popUpContainer || !context._detachedCardsFragment?.firstChild) return;
-
-    context.elements.popUpContainer.appendChild(context._detachedCardsFragment);
-}
-
-export function detachCardElements(context) {
-    if (!Array.isArray(context._renderedItems) || context._renderedItems.length === 0) return;
-
-    context._detachedCardsFragment = context._detachedCardsFragment || document.createDocumentFragment();
-
-    context._renderedItems.forEach((element) => {
-        if (element?.isConnected) {
-            context._detachedCardsFragment.appendChild(element);
-        }
-    });
-}
-
 // Create popup child cards inside the popup container.
 export function createCardElements(context) {
     const cards = context.config.cards;
@@ -100,8 +82,6 @@ export function updateCardElements(context) {
     const cards = context.config.cards;
     if (!Array.isArray(cards) || !context.elements?.popUpContainer) return;
 
-    restoreCardElements(context);
-
     const managed = context._managedCards || [];
     const wrappers = context._cardWrappers || [];
     const previousCardConfigs = context._lastCardConfigRefs || [];
@@ -172,7 +152,6 @@ export function removeCardElements(context) {
     context._cardWrappers = [];
     context._lastCardConfigRefs = [];
     context._lastRenderedCardConfigs = [];
-    context._detachedCardsFragment = null;
 }
 
 // Create a hui-card from a popup child config.

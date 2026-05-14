@@ -1,70 +1,72 @@
 import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 
+const createCardElements = jest.fn();
+const removeCardElements = jest.fn();
+const updateCardElements = jest.fn();
+
 jest.unstable_mockModule('./create.js', () => ({
-    createCardElements: jest.fn(),
-    detachCardElements: jest.fn(),
-    removeCardElements: jest.fn(),
-    restoreCardElements: jest.fn(),
-    updateCardElements: jest.fn(),
+    createCardElements,
+    removeCardElements,
+    updateCardElements,
 }));
 
 const {
-    restoreWarmStandalonePopUpCards,
-    suspendWarmStandalonePopUpCards,
+    handlePopUpCards,
+    suspendStandalonePopUpCards,
 } = await import('./index.js');
 
-function createManagedCardElement() {
-    const managedElement = {
-        style: { display: '' },
-    };
-
-    return {
-        _element: managedElement,
-        style: { display: '' },
-        toggleAttribute: jest.fn(),
-        appendChild: jest.fn(),
-        removeChild: jest.fn(),
-    };
-}
-
-describe('warm standalone popup cards', () => {
+describe('standalone popup cards', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
-    test('keeps managed elements attached while warm-suspending them', () => {
-        const cardElement = createManagedCardElement();
+    test('cold-removes standalone cards when suspending an inactive popup', () => {
         const context = {
             isStandalonePopUp: true,
             _standalonePopUpCardsActive: false,
-            _managedCards: [cardElement],
+            _cachedPopupScrollableState: true,
         };
 
-        const changed = suspendWarmStandalonePopUpCards(context);
+        suspendStandalonePopUpCards(context);
 
-        expect(changed).toBe(true);
-        expect(context._standaloneWarmCardsSuspended).toBe(true);
-        expect(cardElement.style.display).toBe('none');
-        expect(cardElement._element.style.display).toBe('none');
-        expect(cardElement.toggleAttribute).toHaveBeenCalledWith('hidden', true);
-        expect(cardElement.removeChild).not.toHaveBeenCalled();
+        expect(removeCardElements).toHaveBeenCalledWith(context);
+        expect(context._cachedPopupScrollableState).toBeUndefined();
     });
 
-    test('restores warm-suspended cards without re-appending managed elements', () => {
-        const cardElement = createManagedCardElement();
+    test('does not remove standalone cards while the popup is still active', () => {
         const context = {
             isStandalonePopUp: true,
-            _standaloneWarmCardsSuspended: true,
-            _managedCards: [cardElement],
+            _standalonePopUpCardsActive: true,
+            _cachedPopupScrollableState: true,
         };
 
-        const changed = restoreWarmStandalonePopUpCards(context);
+        suspendStandalonePopUpCards(context);
 
-        expect(changed).toBe(true);
-        expect(context._standaloneWarmCardsSuspended).toBe(false);
-        expect(cardElement.style.display).toBe('');
-        expect(cardElement._element.style.display).toBe('');
-        expect(cardElement.toggleAttribute).toHaveBeenCalledWith('hidden', false);
-        expect(cardElement.appendChild).not.toHaveBeenCalled();
+        expect(removeCardElements).not.toHaveBeenCalled();
+        expect(context._cachedPopupScrollableState).toBe(true);
+    });
+
+    test('creates popup cards on first active render and updates them afterwards', () => {
+        const context = {
+            isStandalonePopUp: true,
+            _standalonePopUpCardsActive: true,
+            config: {
+                cards: [{ type: 'custom:bubble-card' }],
+            },
+        };
+
+        handlePopUpCards(context);
+
+        expect(createCardElements).toHaveBeenCalledWith(context);
+        expect(updateCardElements).not.toHaveBeenCalled();
+
+        jest.clearAllMocks();
+
+        context._cardsContainer = {};
+
+        handlePopUpCards(context);
+
+        expect(updateCardElements).toHaveBeenCalledWith(context);
+        expect(createCardElements).not.toHaveBeenCalled();
     });
 });
