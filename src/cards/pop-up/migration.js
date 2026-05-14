@@ -552,11 +552,16 @@ function _show() {
         </p>
         <hr>
         <h3 style="margin: 24px 0 4px;">What does it change?</h3>
-        <p style="margin: 0 0 24px;">
+        <p>
             Standalone pop-ups render much faster, work more reliably, and no longer 
             need to live inside a <em>vertical-stack</em> card (finally!). You also get access to 
             a new editor based on the Home Assistant section editor, with the exact same 
-            drag-and-drop approach for easier and faster editing!
+            drag-and-drop approach for easier and faster editing! 
+        </p>
+        <p style="margin: 0 0 24px;">
+            Pop-ups now have new features has well,
+            with new modes (like a centered one), a new optional classic style and a performance mode for 
+            smoother animations on lower-end devices.
         </p>
         <hr>
         <h3 style="margin: 24px 0 4px;">How to migrate from the editor?</h3>
