@@ -53,6 +53,15 @@ export function createStructure(context, appendTo = context.container) {
         }
     };
 
+    // For slider buttons, override hold_action to 'none' to prevent conflicts
+    // with the slider drag gesture, unless the slider is read-only (no dragging).
+    if (isSlider && !context.config.read_only_slider && context.config.button_action?.hold_action?.action && context.config.button_action.hold_action.action !== 'none') {
+        context.config = {
+            ...context.config,
+            button_action: { ...context.config.button_action, hold_action: { action: "none" } }
+        };
+    }
+
     const elements = createBaseStructure(context, {
         type: cardType,
         appendTo: appendTo,

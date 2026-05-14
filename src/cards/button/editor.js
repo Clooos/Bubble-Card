@@ -143,11 +143,22 @@ export function renderButtonEditor(editor){
                             'toggle', 
                         'button_action')}
                     ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
-                    ${editor.makeActionPanel("Hold action", button_action, 
-                        editor._config.button_type === 'name' ? 'none' :
-                        editor._config.button_type === 'slider' ? 'none' :
-                        'more-info', 
-                        'button_action')}
+                    ${editor._config.button_type === 'slider' && !editor._config.read_only_slider ? html`
+                        <div class="bubble-info">
+                            <h4 class="bubble-section-title">
+                                <ha-icon icon="mdi:information-outline"></ha-icon>
+                                Hold action disabled
+                            </h4>
+                            <div class="content">
+                                <p>Hold action is disabled on slider buttons to prevent conflicts with the slider drag gesture.</p>
+                            </div>
+                        </div>
+                    ` : html`
+                        ${editor.makeActionPanel("Hold action", button_action, 
+                            editor._config.button_type === 'name' ? 'none' :
+                            'more-info', 
+                            'button_action')}
+                    `}
                 </div>
             </ha-expansion-panel>
             ` : ''}
