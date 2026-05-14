@@ -469,7 +469,7 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
                 <div class="bubble-info warning bubble-sub-warning">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:alert-octagon-outline"></ha-icon>
-                        Beta rollback warning
+                        Rollback warning
                     </h4>
                     <div class="content">
                         <p><b>This migration is permanent.</b> Even though it has been tested to handle all known legacy cases, I still recommend keeping a backup if you may want to roll back to v3.1.6 later.</p>
@@ -483,4 +483,143 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
             </div>
         </div>
     `;
+}
+
+// Migration Notice: one-shot dialog for unmigrated legacy pop-ups
+
+function getCurrentView() {
+    const path = location.pathname;
+    // Match /lovelace/... paths
+    const match = path.match(/^\/lovelace(\/.*)?$/);
+    if (!match) return 'lovelace';
+    const rest = match[1] || '';
+    // Split remaining path segments
+    const segments = rest ? rest.split('/').filter(Boolean) : [];
+    // segments[0] = dashboard, segments[1+] = view
+    if (segments.length === 0) return 'lovelace';
+    if (segments.length === 1) return `lovelace/${segments[0]}`;
+    return `lovelace/${segments.slice(0, 2).join('/')}`;
+}
+
+const STORAGE_KEY = `bubble-card-legacy-popup-notice-${getCurrentView()}`;
+
+let _pending = false;
+
+/**
+ * Call once per legacy (non-standalone) pop-up card encountered.
+ * Shows a dismissible dialog the first time, then never again (localStorage).
+ */
+export function maybeShowMigrationNotice() {
+    if (_pending) return;
+    try {
+        if (localStorage.getItem(STORAGE_KEY)) return;
+    } catch (_) {}
+
+    _pending = true;
+    // Defer so card rendering is not blocked and the HA UI is fully settled.
+    setTimeout(_show, 2000);
+}
+
+function _show() {
+    // Recheck in case the user dismissed it from another tab before the timer fired.
+    try {
+        if (localStorage.getItem(STORAGE_KEY)) { _pending = false; return; }
+    } catch (_) {}
+
+    // Wait for ha-dialog to be defined.
+    if (!customElements.get('ha-dialog')) {
+        customElements.whenDefined('ha-dialog').then(_show);
+        return;
+    }
+
+    const host = document.createElement('div');
+    host.id = 'bubble-card-migration-notice-host';
+    document.body.appendChild(host);
+
+    /* ── Dialog element ──────────────────────────────────────────────────── */
+    const dialog = document.createElement('ha-dialog');
+    dialog.setAttribute('header-title', 'Important');
+
+    /* ── Body content ────────────────────────────────────────────────────── */
+    const content = document.createElement('div');
+    content.style.lineHeight = '1.6';
+
+    content.innerHTML = `
+        <h3 style="margin: 0 0 4px;">Your pop-ups need to be migrated</h3>
+        <p style="margin: 0 0 24px;">
+            Since Bubble Card v3.2.0, <strong>your pop-ups must be migrated to the new
+            standalone format.</strong> It's easy and only takes a few clicks!
+        </p>
+        <hr>
+        <h3 style="margin: 24px 0 4px;">What does it change?</h3>
+        <p style="margin: 0 0 24px;">
+            Standalone pop-ups render much faster, work more reliably, and no longer 
+            need to live inside a <em>vertical-stack</em> card (finally!). You also get access to 
+            a new editor based on the Home Assistant section editor, with the exact same 
+            drag-and-drop approach for easier and faster editing!
+        </p>
+        <hr>
+        <h3 style="margin: 24px 0 4px;">How to migrate from the editor?</h3>
+        <p style="margin: 0 0 24px;">
+            Open the editor for each pop-up showing <strong>Migration available</strong>, 
+            then just click <strong>Migrate to standalone</strong>.
+        </p>
+        <hr>
+        <h3 style="margin: 24px 0 4px;">Using YAML?</h3>
+        <p style="margin: 0 0 24px;">
+            Replace the legacy pop-up config with the standalone format:
+        </p>
+        <pre style="margin: 0 0 12px; padding: 12px; background: var(--secondary-background-color); border-radius: 8px; overflow-x: auto; font-size: 0.85em;">
+- type: custom:bubble-card
+  card_type: pop-up
+  name: My Pop-up
+  icon: mdi:home
+  hash: "#my-popup"
+  cards:
+    - type: custom:bubble-card
+      card_type: button
+      entity: light.living_room
+      name: Living Room
+    # more cards...</pre>
+        <p style="margin: 0 0 24px;">
+            <strong>Pro tip:</strong> Honestly, if you're still using YAML for Bubble Card at this point, you might want to give the new editor a try, it makes creating and editing pop-ups a breeze! You also get access to the Module Store. I've put so much love into this editor ❤️
+        </p>
+        <hr>
+        <p style="margin: 24px 0 0;">
+            <em>Enjoy this update! Cheers! 🍻</em>
+        </p>
+    `;
+    dialog.appendChild(content);
+
+    /* ── Footer / action buttons ─────────────────────────────────────────── */
+    const footer = document.createElement('ha-dialog-footer');
+    footer.setAttribute('slot', 'footer');
+
+    const dismissBtn = document.createElement('ha-button');
+    dismissBtn.textContent = "Got it, don't show again on this view";
+    dismissBtn.setAttribute('slot', 'secondaryAction');
+    dismissBtn.setAttribute('appearance', 'plain');
+    dismissBtn.addEventListener('click', () => {
+        try { localStorage.setItem(STORAGE_KEY, '1'); } catch (_) {}
+        dialog.open = false;
+    });
+    footer.appendChild(dismissBtn);
+
+    const remindBtn = document.createElement('ha-button');
+    remindBtn.textContent = "Remind me later";
+    remindBtn.setAttribute('slot', 'primaryAction');
+    remindBtn.setAttribute('appearance', 'filled');
+    remindBtn.setAttribute('variant', 'brand');
+    remindBtn.addEventListener('click', () => { dialog.open = false; });
+    footer.appendChild(remindBtn);
+
+    dialog.appendChild(footer);
+
+    /* ── Close via scrim/cross does NOT persist — dialog reappears next load ─ */
+    dialog.addEventListener('closed', () => {
+        setTimeout(() => { if (host?.isConnected) host.remove(); }, 400);
+    });
+
+    host.appendChild(dialog);
+    dialog.open = true;
 }

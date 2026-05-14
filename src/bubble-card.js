@@ -7,6 +7,7 @@ import { updateThemeBackgroundColor } from './cards/pop-up/backdrop.js';
 import { stopTimerInterval } from './tools/utils.js';
 import { cleanupScrollingEffects } from './tools/text-scrolling.js';
 import { registerPopupContext } from './cards/pop-up/helpers.js';
+import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 import { cleanupPopUp, handlePopUp } from './cards/pop-up/index.js';
@@ -60,6 +61,11 @@ class BubbleCard extends HTMLElement {
     // always has a fresh reference, without waiting for the next set hass call.
     if (this.config?.card_type === 'pop-up' && this.config?.hash) {
       registerPopupContext(this);
+    }
+
+    // Notify the user if this pop-up has not been migrated to standalone mode yet.
+    if (this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {
+      maybeShowMigrationNotice();
     }
 
     if (this._hass) {
