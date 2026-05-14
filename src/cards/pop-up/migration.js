@@ -450,7 +450,7 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
                 Legacy pop-up detected
             </h4>
             <div class="content">
-                <p>This pop-up still uses the old vertical-stack wrapper. Migrate it to the standalone format to manage its content with the same drag-and-drop flow as a section view.</p>                ${hasHorizontalStacks ? html`
+                <p>This pop-up still uses the old vertical-stack wrapper. Migrate it to the standalone format for much better performance and to manage its content with the same drag-and-drop flow as a section view.</p>                ${hasHorizontalStacks ? html`
                     <p>Horizontal stacks were detected. Their cards will be converted so you can drag and drop them individually while keeping the same layout (this option can be disabled if needed).</p>
                     <ha-formfield>
                         <ha-switch
