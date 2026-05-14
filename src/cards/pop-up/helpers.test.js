@@ -490,7 +490,7 @@ describe('standalone popup lifecycle', () => {
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
     });
 
-    test('still primes cold non-default standalone content before opening', () => {
+    test('still primes cold fit-content standalone content before opening', () => {
         const context = createStandaloneContext({ popup_mode: 'fit-content' });
         usedContexts.push(context);
 
@@ -503,6 +503,48 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue(); // phase 2 — animation starts
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('still primes cold adaptive-dialog standalone content before opening while rendered as a bottom-sheet', () => {
+        const context = createStandaloneContext({ popup_mode: 'adaptive-dialog' });
+        usedContexts.push(context);
+        window.innerWidth = 390;
+        window.innerHeight = 844;
+
+        openPopup(context);
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // phase 2 — transition start
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('still primes cold adaptive-dialog standalone content before opening when rendered as a centered dialog', () => {
+        const context = createStandaloneContext({ popup_mode: 'adaptive-dialog' });
+        usedContexts.push(context);
+
+        openPopup(context);
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // phase 2 — animation starts
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('uses transform and opacity will-change for centered-style standalone popups', () => {
+        const centeredContext = createStandaloneContext({ popup_mode: 'centered' });
+        const adaptiveDialogContext = createStandaloneContext({ popup_mode: 'adaptive-dialog' });
+        usedContexts.push(centeredContext, adaptiveDialogContext);
+
+        openPopup(centeredContext);
+        openPopup(adaptiveDialogContext);
+
+        expect(centeredContext.popUp.style.willChange).toBe('transform, opacity');
+        expect(adaptiveDialogContext.popUp.style.willChange).toBe('transform, opacity');
     });
 
     test('idle-prewarms the most recent standalone popup on low-tier devices after registration', () => {
@@ -670,25 +712,35 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.dataset.bubblePopupOpening).toBeUndefined();
     });
 
-    test('keeps popup background blur disabled for two frames after open settles', () => {
+    test('arms blur will-change only while releasing the popup blur guard after open', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
 
         openPopup(context, true);
 
         expect(context.popUp.dataset.bubblePopupBlurGuard).toBe('true');
+        expect(context.popUp.dataset.bubblePopupBlurWillChange).toBeUndefined();
 
         flushRafQueue();
 
         expect(context.popUp.dataset.bubblePopupBlurGuard).toBe('true');
+        expect(context.popUp.dataset.bubblePopupBlurWillChange).toBeUndefined();
 
         flushRafQueue();
 
         expect(context.popUp.dataset.bubblePopupBlurGuard).toBe('true');
+        expect(context.popUp.dataset.bubblePopupBlurWillChange).toBeUndefined();
 
         flushRafQueue();
 
         expect(context.popUp.dataset.bubblePopupBlurGuard).toBeUndefined();
+        expect(context.popUp.dataset.bubblePopupBlurWillChange).toBe('true');
+
+        jest.advanceTimersByTime(449);
+        expect(context.popUp.dataset.bubblePopupBlurWillChange).toBe('true');
+
+        jest.advanceTimersByTime(1);
+        expect(context.popUp.dataset.bubblePopupBlurWillChange).toBeUndefined();
     });
 
     test('reopens a standalone popup after runtime state drift leaves it active but visually closed', () => {
@@ -774,6 +826,139 @@ describe('standalone popup lifecycle', () => {
         // Phase 1 is inline — shell refresh runs immediately in the interaction frame.
         expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
         expect(context._standaloneNeedsShellRefresh).toBe(false);
+    });
+
+    test('waits an extra routed frame before animating a cold default bottom-sheet standalone open', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+        context._standaloneNeedsShellRefresh = true;
+        context.refreshPopupShell = jest.fn(() => {
+            context._standaloneNeedsShellRefresh = false;
+        });
+
+        registerPopupContext(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+
+        expect(context.refreshPopupShell).not.toHaveBeenCalled();
+        expect(setStandalonePopUpCardsActive).not.toHaveBeenCalledWith(context, true);
+        expect(showBackdrop).not.toHaveBeenCalled();
+        expect(context._popupOpenInProgress).not.toBe(true);
+
+        flushRafQueue(); // routed open callback — phase 1 now runs here
+
+        expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
+        expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, true);
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(showBackdrop).not.toHaveBeenCalled();
+        expect(context._popupOpenInProgress).toBe(true);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // settle frame — popup remains closed while cold content settles
+
+        expect(showBackdrop).not.toHaveBeenCalled();
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // phase 2 — backdrop + transition start
+
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('pre-arms will-change while a cold routed standalone open is waiting for its first frame', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        registerPopupContext(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+
+        expect(context.popUp.style.willChange).toBe('transform');
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+        expect(showBackdrop).not.toHaveBeenCalled();
+    });
+
+    test('clears pre-armed will-change when a routed standalone open is canceled before the first frame', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        registerPopupContext(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+
+        expect(context.popUp.style.willChange).toBe('transform');
+
+        window.history.replaceState({}, '', 'http://localhost/lovelace/test');
+
+        flushRafQueue();
+
+        expect(context.popUp.style.willChange).toBe('');
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+        expect(showBackdrop).not.toHaveBeenCalled();
+    });
+
+    test('waits an extra routed frame before animating an adaptive-dialog bottom-sheet open', () => {
+        const context = createStandaloneContext({ hash: '#popup-a', popup_mode: 'adaptive-dialog' });
+        usedContexts.push(context);
+        window.innerWidth = 390;
+        window.innerHeight = 844;
+
+        registerPopupContext(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+
+        flushRafQueue(); // routed open callback — phase 1 now runs here
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(showBackdrop).not.toHaveBeenCalled();
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // settle frame
+
+        expect(showBackdrop).not.toHaveBeenCalled();
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // phase 2
+
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('waits one more frame when a routed cold bottom-sheet layout is still settling', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+        context.elements.popUpContainer.scrollHeight = 10;
+        context.elements.popUpContainer.clientHeight = 10;
+
+        registerPopupContext(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+
+        flushRafQueue(); // routed open callback — phase 1
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+        expect(showBackdrop).not.toHaveBeenCalled();
+
+        context.elements.popUpContainer.scrollHeight = 100;
+        flushRafQueue(); // settle frame 1 — signature changed, keep waiting
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+        expect(showBackdrop).not.toHaveBeenCalled();
+
+        flushRafQueue(); // settle frame 2 — minimum wait satisfied, extra settle frame scheduled
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+        expect(showBackdrop).not.toHaveBeenCalled();
+
+        flushRafQueue(); // phase 2 — backdrop + transition start
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
     });
 
     test('shows the backdrop before running deferred standalone shell refresh work', () => {
@@ -1378,6 +1563,7 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.classList.contains('is-closing')).toBe(false);
 
         flushRafQueue(); // phase 1
+        flushRafQueue(); // settle frame for a cold routed bottom-sheet open
         flushRafQueue(); // phase 2
 
         expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);

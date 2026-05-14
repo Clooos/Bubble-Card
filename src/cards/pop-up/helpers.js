@@ -21,9 +21,10 @@ const popupState = {
 
 const outsideCloseFallbackDelay = 150;
 const popupQuickOpenAnimationDurationMs = 140;
+const popupBlurWillChangeDurationMs = 450;
 const standaloneWarmCardRetentionMs = 3200;
 const visibleTriggerPrewarmBackstopMs = 96;
-const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout'];
+const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout'];
 const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame'];
 
 export const POPUP_MODE_DEFAULT = 'default';
@@ -347,10 +348,115 @@ function scheduleStandaloneFrame(context, frameKey, callback) {
         callback();
     });
 }
+
+function isAdaptiveDialogRenderedAsBottomSheet() {
+    const viewportWidth = typeof window?.innerWidth === 'number' ? window.innerWidth : Number.POSITIVE_INFINITY;
+    const viewportHeight = typeof window?.innerHeight === 'number' ? window.innerHeight : Number.POSITIVE_INFINITY;
+    return !(viewportWidth >= 871 && viewportHeight >= 501);
+}
+
+function shouldDelayHashRoutedStandaloneBottomSheetOpen(context) {
+    const popupMode = getPopupMode(context?.config);
+
+    if (popupMode === POPUP_MODE_DEFAULT) {
+        return true;
+    }
+
+    if (popupMode === POPUP_MODE_ADAPTIVE_DIALOG) {
+        return isAdaptiveDialogRenderedAsBottomSheet();
+    }
+
+    return false;
+}
+
 function shouldDeferColdStandaloneContentUntilAfterOpen(context) {
     return getPopupMode(context?.config) === POPUP_MODE_DEFAULT &&
         getPopupPerformanceMode(context?.config) === POPUP_PERFORMANCE_MODE_PERFORMANCE;
 }
+
+function shouldPopupWillChangeIncludeOpacity(context) {
+    const popupMode = getPopupMode(context?.config);
+
+    if (popupMode === POPUP_MODE_CENTERED) {
+        return true;
+    }
+
+    if (popupMode === POPUP_MODE_ADAPTIVE_DIALOG) {
+        return !isAdaptiveDialogRenderedAsBottomSheet();
+    }
+
+    return false;
+}
+
+function armPopupWillChange(context) {
+    const popUp = context?.popUp;
+    if (!popUp?.style) {
+        return;
+    }
+
+    popUp.style.willChange = shouldPopupWillChangeIncludeOpacity(context)
+        ? 'transform, opacity'
+        : 'transform';
+}
+
+function clearPopupWillChange(context) {
+    if (!context?.popUp?.style) {
+        return;
+    }
+
+    context.popUp.style.willChange = '';
+}
+
+function getStandalonePhase2SettleSignature(context) {
+    const container = context?.elements?.popUpContainer;
+    if (!container) {
+        return '';
+    }
+
+    const scrollHeight = typeof container.scrollHeight === 'number' ? container.scrollHeight : 0;
+    const clientHeight = typeof container.clientHeight === 'number' ? container.clientHeight : 0;
+    const hasCardsContainer = context?._cardsContainer ? 1 : 0;
+
+    return `${scrollHeight}:${clientHeight}:${hasCardsContainer}`;
+}
+
+function scheduleStandalonePhase2(context, callback, options = {}) {
+    const minimumFrames = Math.max(1, options?.minimumFrames ?? 1);
+    let remainingUnstableExtraFrames = Math.max(0, options?.unstableExtraFrames ?? 0);
+    let previousSignature = typeof options?.initialSignature === 'string'
+        ? options.initialSignature
+        : null;
+    let sawInstability = false;
+
+    const run = (remainingFrames) => {
+        scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
+            if (previousSignature !== null || remainingUnstableExtraFrames > 0) {
+                const nextSignature = getStandalonePhase2SettleSignature(context);
+                if (previousSignature !== null && nextSignature !== previousSignature) {
+                    sawInstability = true;
+                }
+                previousSignature = nextSignature;
+            }
+
+            if (remainingFrames > 1) {
+                run(remainingFrames - 1);
+                return;
+            }
+
+            if (sawInstability && remainingUnstableExtraFrames > 0) {
+                sawInstability = false;
+                remainingUnstableExtraFrames -= 1;
+                run(1);
+                return;
+            }
+
+            callback();
+        });
+    };
+
+    run(minimumFrames);
+}
+
 function scheduleStandaloneCardSync(context) {
     scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', () => {
         if (!popupState.activePopups.has(context)) return;
@@ -598,6 +704,29 @@ function setPopupBackdropBlurGuard(context, enabled) {
     setPopupDatasetFlag(context, 'bubblePopupBlurGuard', enabled);
 }
 
+function setPopupBackdropBlurWillChange(context, enabled) {
+    setPopupDatasetFlag(context, 'bubblePopupBlurWillChange', enabled);
+}
+
+function clearPopupBackdropBlurWillChange(context) {
+    clearContextTimeout(context, '_popupBlurWillChangeTimeout');
+    setPopupBackdropBlurWillChange(context, false);
+}
+
+function armPopupBackdropBlurWillChange(context) {
+    if (!context?.popUp) {
+        return;
+    }
+
+    clearPopupBackdropBlurWillChange(context);
+    setPopupBackdropBlurWillChange(context, true);
+
+    context._popupBlurWillChangeTimeout = setTimeout(() => {
+        context._popupBlurWillChangeTimeout = null;
+        setPopupBackdropBlurWillChange(context, false);
+    }, popupBlurWillChangeDurationMs);
+}
+
 function clearPopupBackdropBlurGuardRelease(context) {
     clearContextFrame(context, '_popupBackdropBlurGuardFrame');
 }
@@ -613,6 +742,7 @@ function schedulePopupBackdropBlurGuardRelease(context) {
                 return;
             }
 
+            armPopupBackdropBlurWillChange(context);
             setPopupBackdropBlurGuard(context, false);
         });
     });
@@ -934,7 +1064,7 @@ export function wasPopupOpenedByTrigger(context) {
 
 function completePopupOpen(context) {
     setPopupOpenInProgress(context, false);
-    context.popUp.style.willChange = '';
+    clearPopupWillChange(context);
 
     if (!context.popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
         return;
@@ -1127,11 +1257,12 @@ function finalizeStandalonePopupClose(context) {
     const incomingPopupNavigation = hasIncomingPopupNavigation(context);
 
     setPopupOpeningMarker(context, false);
+    clearPopupBackdropBlurWillChange(context);
     popUp.classList.remove('is-opening', 'is-closing', 'is-switch-closing');
     popUp.classList.remove('is-popup-opened');
     popUp.classList.add('is-popup-closed');
     clearPopupInlineTransform(context);
-    popUp.style.willChange = '';
+    clearPopupWillChange(context);
 
     resetPopupScroll(context);
 
@@ -1152,6 +1283,7 @@ function rollbackStandalonePopupOpen(context, error = null) {
     context._pendingPostOpenCardSync = false;
     popupState.activePopups.delete(context);
     clearPopupOpenSource(context);
+    clearPopupBackdropBlurWillChange(context);
     resetPopupToClosedState(context);
     setStandalonePopUpCardsActive(context, false);
 
@@ -1174,10 +1306,15 @@ function openStandalonePopup(context, instant = false) {
     const { popUp } = context;
     popupState.activePopups.add(context);
 
-    popUp.style.willChange = 'transform';
+    armPopupWillChange(context);
 
     const deferBackdropHandoffUntilPhase2 = context._standaloneOpenImmediateFrame === true;
+    const delayHashRoutedAnimationUntilSettled = context._standaloneHashRoutedColdOpen === true &&
+        !deferBackdropHandoffUntilPhase2 &&
+        shouldDelayHashRoutedStandaloneBottomSheetOpen(context);
+
     context._standaloneOpenImmediateFrame = false;
+    context._standaloneHashRoutedColdOpen = false;
 
     if (!instant && deferBackdropHandoffUntilPhase2 && canUseInstantStandaloneSwitch(context) && hasPrimedStandalonePopupContent(context)) {
         instant = true;
@@ -1319,7 +1456,14 @@ function openStandalonePopup(context, instant = false) {
             if (popUp.style.transition === 'none') popUp.style.transition = '';
             setStandalonePopupState(popUp, false);
 
-            scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', phase2);
+            const shouldTrackSettleInstability = delayHashRoutedAnimationUntilSettled && phase1ContentPrimed;
+            scheduleStandalonePhase2(context, phase2, {
+                minimumFrames: delayHashRoutedAnimationUntilSettled ? 2 : 1,
+                unstableExtraFrames: shouldTrackSettleInstability ? 1 : 0,
+                initialSignature: shouldTrackSettleInstability
+                    ? getStandalonePhase2SettleSignature(context)
+                    : null,
+            });
         } catch (error) {
             rollbackStandalonePopupOpen(context, error);
         }
@@ -1372,7 +1516,11 @@ function closeStandalonePopup(context, force = false) {
 
     updateListeners(context, false);
 
-    context.popUp.style.willChange = incomingPopupNavigation ? '' : 'transform';
+    if (incomingPopupNavigation) {
+        clearPopupWillChange(context);
+    } else {
+        armPopupWillChange(context);
+    }
     startStandalonePopupTransition(context, false, () => finalizeStandalonePopupClose(context), incomingPopupNavigation);
 
     if (!incomingPopupNavigation) {
@@ -1579,11 +1727,12 @@ function resetPopupToClosedState(context) {
     clearAllTimeouts(context);
     updateListeners(context, false);
     setPopupOpeningMarker(context, false);
+    clearPopupBackdropBlurWillChange(context);
 
     context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing', 'is-switch-closing');
     context.popUp.classList.add('is-popup-closed');
     clearPopupInlineTransform(context);
-    context.popUp.style.willChange = '';
+    clearPopupWillChange(context);
     setPopupBackdropBlurGuard(context, false);
     if (!context.isStandalonePopUp && !context.editor && !context.config?.background_update) {
         appendLegacyPopup(context, false);
@@ -1644,9 +1793,17 @@ function closeAllPopupsExcept(exceptContext) {
 export function openPopup(context, instant = false) {
     normalizePopupBeforeOpen(context);
 
-    if (context.popUp.classList.contains('is-popup-opened')) return;
+    if (context.popUp.classList.contains('is-popup-opened')) {
+        context._standaloneHashRoutedColdOpen = false;
+        clearPopupWillChange(context);
+        return;
+    }
 
-    if (popupState.activePopups.has(context)) return;
+    if (popupState.activePopups.has(context)) {
+        context._standaloneHashRoutedColdOpen = false;
+        clearPopupWillChange(context);
+        return;
+    }
 
     // Reset scroll position when reopening the popup
     resetPopupScroll(context);
@@ -1669,7 +1826,7 @@ export function openPopup(context, instant = false) {
         recordPrewarmUsage(context);
     popupState.activePopups.add(context);
 
-    popUp.style.willChange = 'transform';
+    armPopupWillChange(context);
 
     requestAnimationFrame(() => {
         if (!popupState.activePopups.has(context)) return;
@@ -1740,12 +1897,12 @@ export function closePopup(context, force = false) {
     popupState.activePopups.delete(context);
     clearPopupOpenSource(context);
 
-    context.popUp.style.willChange = 'transform';
+    armPopupWillChange(context);
     updatePopupClass(context.popUp, false);
     toggleBackdrop(context, false);
 
     context.removeDomTimeout = setTimeout(() => {
-        context.popUp.style.willChange = '';
+        clearPopupWillChange(context);
         appendLegacyPopup(context, false);
         hideLegacyPopupContent(context, 0);
         context.removeDomTimeout = null;
@@ -1784,6 +1941,31 @@ function getRegisteredPopupContext(hash) {
     if (!hash) return null;
     const ref = popupRegistry.get(hash);
     return ref?.deref() || null;
+}
+
+function scheduleHashRoutedStandaloneOpen(context, currentHash, switchedBetweenPopups) {
+    if (!switchedBetweenPopups) {
+        armPopupWillChange(context);
+    }
+
+    requestAnimationFrame(() => {
+        if (location.hash !== currentHash) {
+            context._standaloneHashRoutedColdOpen = false;
+            clearPopupWillChange(context);
+            return;
+        }
+
+        context._standaloneHashRoutedColdOpen = !switchedBetweenPopups;
+
+        if (switchedBetweenPopups) {
+            context._standaloneOpenImmediateFrame = true;
+        }
+
+        openPopup(
+            context,
+            switchedBetweenPopups && canUseInstantStandaloneSwitch(context) && hasPrimedStandalonePopupContent(context)
+        );
+    });
 }
 
 export function unregisterPopupContext(context) {
@@ -1880,12 +2062,8 @@ function ensureGlobalUrlListener() {
 
             switchedBetweenPopups = closeAllPopupsExcept(context) || switchedBetweenPopups;
 
-            if (switchedBetweenPopups && context.isStandalonePopUp) {
-                requestAnimationFrame(() => {
-                    if (location.hash !== currentHash) return;
-                    context._standaloneOpenImmediateFrame = true;
-                    openPopup(context, canUseInstantStandaloneSwitch(context) && hasPrimedStandalonePopupContent(context));
-                });
+            if (context.isStandalonePopUp) {
+                scheduleHashRoutedStandaloneOpen(context, currentHash, switchedBetweenPopups);
             } else {
                 openPopup(context);
             }

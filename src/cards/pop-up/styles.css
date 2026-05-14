@@ -100,7 +100,10 @@
     backdrop-filter: var(--custom-popup-filter);
     -webkit-backdrop-filter: var(--custom-popup-filter);
     transition: opacity 0.4s ease;
-    will-change: backdrop-filter, opacity;
+}
+
+.bubble-pop-up[data-bubble-popup-blur-will-change="true"]:not(.editor)::before {
+    will-change: opacity;
 }
 
 .bubble-pop-up.is-popup-opened:not(.editor):not([data-bubble-popup-blur-guard="true"])::before,
