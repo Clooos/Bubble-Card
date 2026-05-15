@@ -17,10 +17,21 @@
     scrollbar-width: none; /* for Firefox */
     overflow: auto; 
     grid-auto-rows: min-content;
-    padding: 18px 18px var(--bubble-pop-up-bottom-padding, 84px) 18px;
+    --bubble-pop-up-visible-bottom-padding: 18px;
+    --bubble-pop-up-extra-bottom-space: max(0px, calc(var(--bubble-pop-up-bottom-padding, 84px) - var(--bubble-pop-up-visible-bottom-padding, 18px)));
+    padding: 18px 18px var(--bubble-pop-up-visible-bottom-padding, 18px) 18px;
     box-sizing: border-box;
     touch-action: pan-x pan-y pinch-zoom;
     overscroll-behavior: contain;
+}
+
+.bubble-pop-up.popup-mode-with-bottom-offset:not(.editor) > .bubble-pop-up-container::after {
+    content: "";
+    display: block;
+    width: 100%;
+    flex: 0 0 var(--bubble-pop-up-extra-bottom-space, 0px);
+    min-height: var(--bubble-pop-up-extra-bottom-space, 0px);
+    pointer-events: none;
 }
 
 .bubble-pop-up.editor .bubble-pop-up-container {
@@ -538,10 +549,10 @@
         left: calc(50% - (var(--desktop-width, 540px) / 2));
     }
     .bubble-pop-up-container {
-        padding: 18px 18px var(--bubble-pop-up-bottom-padding, 84px) 18px;
+        padding: 18px 18px var(--bubble-pop-up-visible-bottom-padding, 18px) 18px;
     }
     .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) .bubble-pop-up-container {
-        padding: 18px 18px calc(140px + var(--custom-height-offset-desktop)) 18px;
+        padding-bottom: calc(140px + var(--custom-height-offset-desktop));
     }
 }
 
@@ -716,6 +727,7 @@
     min-height: 80px;
     padding-top: 18px !important;
     padding-bottom: 18px !important;
+    --bubble-pop-up-extra-bottom-space: 0px;
     height: auto !important;
     flex: 0 0 auto;
 }
@@ -809,6 +821,7 @@
 
 .bubble-pop-up.editor > .bubble-pop-up-container {
     padding-bottom: 18px !important;
+    --bubble-pop-up-extra-bottom-space: 0px;
     mask-image: none;
     -webkit-mask-image: none;  
     overflow: hidden;  
