@@ -488,6 +488,7 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
 // Migration Notice: one-shot dialog for unmigrated legacy pop-ups
 
 function getCurrentView() {
+    if (typeof location === 'undefined') return 'lovelace';
     const path = location.pathname;
     // Match /lovelace/... paths
     const match = path.match(/^\/lovelace(\/.*)?$/);
