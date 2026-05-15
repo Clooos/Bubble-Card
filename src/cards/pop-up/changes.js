@@ -85,6 +85,34 @@ function shouldApplyPopupStaticShell(context) {
     return true;
 }
 
+export function clearStyleUpdateFrame(context) {
+    if (context?._styleUpdateFrame == null) {
+        return;
+    }
+
+    if (typeof cancelAnimationFrame === 'function') {
+        cancelAnimationFrame(context._styleUpdateFrame);
+    }
+
+    context._styleUpdateFrame = null;
+}
+
+function scheduleStyleUpdate(context, applyFn) {
+    clearStyleUpdateFrame(context);
+
+    if (typeof requestAnimationFrame !== 'function') {
+        if (context.isConnected === false) return;
+        applyFn();
+        return;
+    }
+
+    context._styleUpdateFrame = requestAnimationFrame(() => {
+        context._styleUpdateFrame = null;
+        if (context.isConnected === false) return;
+        applyFn();
+    });
+}
+
 export function changeStyle(context) {
     const { backdropCustomStyle, updateBackdropStyles } = getBackdrop(context);
     const isTransitioning = context.popUp?.classList?.contains('is-opening') || context.popUp?.classList?.contains('is-closing');
@@ -103,14 +131,15 @@ export function changeStyle(context) {
     if (isTransitioning) {
         // Defer style parsing to the next frame to avoid layout thrashing
         // during the popup animation's paint phase.
-        requestAnimationFrame(() => handleCustomStyles(context, context.popUp));
+        scheduleStyleUpdate(context, () => handleCustomStyles(context, context.popUp));
     } else {
+        clearStyleUpdateFrame(context);
         handleCustomStyles(context, context.popUp);
     }
     if (!isTransitioning && typeof updateBackdropStyles === 'function') {
         updateBackdropStyles();
     } else if (!isTransitioning) {
-        requestAnimationFrame(() => handleCustomStyles(context, backdropCustomStyle));
+        scheduleStyleUpdate(context, () => handleCustomStyles(context, backdropCustomStyle));
     }
 
     if (shouldApplyStaticShell) {

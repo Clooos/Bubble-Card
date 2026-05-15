@@ -130,6 +130,7 @@ describe('changeStyle', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         global.requestAnimationFrame = jest.fn((callback) => callback());
+        global.cancelAnimationFrame = jest.fn();
         global.location = {
             hash: '',
             pathname: '/lovelace/test',
@@ -202,6 +203,87 @@ describe('changeStyle', () => {
         expect(syncPopupPerformanceModeClasses).toHaveBeenLastCalledWith(context.popUp, context.config);
         expect(context.popUp.classList.contains('popup-performance-default')).toBe(false);
         expect(context.popUp.classList.contains('popup-performance-performance')).toBe(true);
+    });
+
+    test('deduplicates transition style updates to a single RAF callback', () => {
+        const updateBackdropStyles = jest.fn();
+        getBackdrop.mockReturnValue({
+            backdropCustomStyle: null,
+            hideBackdrop: jest.fn(),
+            updateBackdropStyles,
+        });
+
+        let nextFrameId = 0;
+        const queuedFrames = new Map();
+        global.requestAnimationFrame = jest.fn((callback) => {
+            const frameId = ++nextFrameId;
+            queuedFrames.set(frameId, callback);
+            return frameId;
+        });
+        global.cancelAnimationFrame = jest.fn((frameId) => {
+            queuedFrames.delete(frameId);
+        });
+
+        const context = {
+            config: {},
+            isConnected: true,
+            popUp: {
+                classList: createMockClassList(['is-opening']),
+            },
+        };
+
+        changeStyle(context);
+        changeStyle(context);
+
+        expect(handleCustomStyles).not.toHaveBeenCalled();
+        expect(global.cancelAnimationFrame).toHaveBeenCalledTimes(1);
+        expect(global.cancelAnimationFrame).toHaveBeenCalledWith(1);
+        expect(queuedFrames.size).toBe(1);
+
+        queuedFrames.forEach((callback) => callback());
+
+        expect(handleCustomStyles).toHaveBeenCalledTimes(1);
+        expect(handleCustomStyles).toHaveBeenCalledWith(context, context.popUp);
+        expect(updateBackdropStyles).not.toHaveBeenCalled();
+    });
+
+    test('cancels pending transition RAF work when style updates become synchronous again', () => {
+        const updateBackdropStyles = jest.fn();
+        getBackdrop.mockReturnValue({
+            backdropCustomStyle: null,
+            hideBackdrop: jest.fn(),
+            updateBackdropStyles,
+        });
+
+        let nextFrameId = 0;
+        const queuedFrames = new Map();
+        global.requestAnimationFrame = jest.fn((callback) => {
+            const frameId = ++nextFrameId;
+            queuedFrames.set(frameId, callback);
+            return frameId;
+        });
+        global.cancelAnimationFrame = jest.fn((frameId) => {
+            queuedFrames.delete(frameId);
+        });
+
+        const classList = createMockClassList(['is-opening']);
+        const context = {
+            config: {},
+            isConnected: true,
+            popUp: {
+                classList,
+            },
+        };
+
+        changeStyle(context);
+        classList.remove('is-opening');
+        changeStyle(context);
+
+        expect(global.cancelAnimationFrame).toHaveBeenCalledWith(1);
+        expect(queuedFrames.size).toBe(0);
+        expect(handleCustomStyles).toHaveBeenCalledTimes(1);
+        expect(handleCustomStyles).toHaveBeenCalledWith(context, context.popUp);
+        expect(updateBackdropStyles).toHaveBeenCalledTimes(1);
     });
 });
 

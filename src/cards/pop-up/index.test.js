@@ -3,6 +3,14 @@ import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 jest.unstable_mockModule('./changes.js', () => ({
     changeEditor: jest.fn(),
     changeStyle: jest.fn(),
+    clearStyleUpdateFrame: jest.fn((context) => {
+        if (context?._styleUpdateFrame == null) {
+            return;
+        }
+
+        global.cancelAnimationFrame?.(context._styleUpdateFrame);
+        context._styleUpdateFrame = null;
+    }),
     syncHeaderVisibilityClasses: jest.fn(),
     changeTriggered: jest.fn(),
 }));
@@ -27,19 +35,28 @@ jest.unstable_mockModule('./navigation-picker-bridge.js', () => ({
     registerPopUpHash: jest.fn(),
 }));
 
+jest.unstable_mockModule('./migration.js', () => ({
+    isStandalonePopUpConfig: jest.fn((config) => !!(
+        config &&
+        config.type === 'custom:bubble-card' &&
+        config.card_type === 'pop-up' &&
+        Array.isArray(config.cards)
+    )),
+}));
+
 jest.unstable_mockModule('./cards/index.js', () => ({
     cleanupPopUpCards: jest.fn(),
     handlePopUpCards: jest.fn(),
 }));
 
-const { handlePopUp } = await import('./index.js');
+const { cleanupPopUp, handlePopUp } = await import('./index.js');
 const { changeEditor } = await import('./changes.js');
 const { changeStyle } = await import('./changes.js');
 const { changeTriggered } = await import('./changes.js');
-const { handlePopUpCards } = await import('./cards/index.js');
+const { cleanupPopUpCards, handlePopUpCards } = await import('./cards/index.js');
 const { createHeader, createStructure } = await import('./create.js');
 const { renderHeaderButton } = await import('./create.js');
-const { syncPopupOpenStateWithLocation } = await import('./helpers.js');
+const { cleanupPopupRuntime, syncPopupOpenStateWithLocation } = await import('./helpers.js');
 const { registerPopUpHash } = await import('./navigation-picker-bridge.js');
 
 function createOpenPopupContext(overrides = {}) {
@@ -404,5 +421,37 @@ describe('handlePopUp performance guards', () => {
         await handlePopUp(context);
 
         expect(handlePopUpCards).not.toHaveBeenCalled();
+    });
+});
+
+describe('cleanupPopUp', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        global.cancelAnimationFrame = jest.fn();
+    });
+
+    test('cancels any pending style update frame during cleanup', () => {
+        const popUpContainer = {
+            classList: {
+                remove: jest.fn(),
+            },
+            querySelector: jest.fn(() => null),
+        };
+        const context = {
+            _styleUpdateFrame: 42,
+            elements: {
+                popUpContainer,
+            },
+            storedContent: {},
+        };
+
+        cleanupPopUp(context);
+
+        expect(cleanupPopupRuntime).toHaveBeenCalledWith(context);
+        expect(cleanupPopUpCards).toHaveBeenCalledWith(context);
+        expect(global.cancelAnimationFrame).toHaveBeenCalledWith(42);
+        expect(context._styleUpdateFrame).toBeNull();
+        expect(popUpContainer.classList.remove).toHaveBeenCalledWith('has-placeholder');
+        expect(context.storedContent).toBeNull();
     });
 });

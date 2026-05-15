@@ -1,4 +1,4 @@
-import { changeEditor, changeStyle, changeTriggered } from './changes.js';
+import { changeEditor, changeStyle, changeTriggered, clearStyleUpdateFrame } from './changes.js';
 import { createHeader, createStructure, prepareStructure, prepareStandaloneStructure, renderHeaderButton } from './create.js';
 import { cleanupPopupRuntime, registerPopupContext, syncPopupOpenStateWithLocation } from './helpers.js';
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
@@ -424,6 +424,8 @@ export function cleanupPopUp(context) {
     context._standaloneNeedsShellRefresh = false;
     context.refreshPopupHeader = null;
     context.refreshPopupShell = null;
+
+    clearStyleUpdateFrame(context);
 
     if (context.elements?.popUpContainer) {
         context.elements.popUpContainer.classList.remove('has-placeholder');
