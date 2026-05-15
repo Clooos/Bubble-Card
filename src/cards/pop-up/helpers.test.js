@@ -1123,6 +1123,39 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
     });
 
+    test('defers scrollability measurement by one frame when the popup shell is already transitioning', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        let layoutReads = 0;
+        Object.defineProperty(context.elements.popUpContainer, 'scrollHeight', {
+            configurable: true,
+            get() {
+                layoutReads += 1;
+                return 900;
+            },
+        });
+        Object.defineProperty(context.elements.popUpContainer, 'clientHeight', {
+            configurable: true,
+            get() {
+                layoutReads += 1;
+                return 400;
+            },
+        });
+
+        context.popUp.classList.add('is-opening');
+
+        openPopup(context);
+
+        expect(layoutReads).toBe(0);
+        expect(context.elements.popUpContainer.classList.contains('is-scrollable')).toBe(false);
+
+        flushRafQueue();
+
+        expect(layoutReads).toBe(2);
+        expect(context.elements.popUpContainer.classList.contains('is-scrollable')).toBe(true);
+    });
+
     test('keeps bottom-sheet standalone opening animation during popup-to-popup navigation without retained content', () => {
         const contextA = createStandaloneContext({ hash: '#popup-a' });
         const contextB = createStandaloneContext({ hash: '#popup-b' });
