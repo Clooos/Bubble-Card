@@ -108,6 +108,15 @@ function _isPopupContentScrollable(context) {
   return false;
 }
 
+function _preventPopupScrollChaining(context, event) {
+  if (_isPopupContentScrollable(context) || event?.cancelable === false) {
+    return false;
+  }
+
+  event.preventDefault?.();
+  return true;
+}
+
 function _configurePopupInteractionHandlers(context) {
   const closePopup = () => {
     removeHash(true);
@@ -184,9 +193,7 @@ function _configurePopupInteractionHandlers(context) {
       return;
     }
 
-    if (!_isPopupContentScrollable(context) && event.cancelable !== false) {
-      event.preventDefault?.();
-    }
+    _preventPopupScrollChaining(context, event);
 
     const currentTouchY = currentTouch.clientY;
     const touchStartY = context._popupTouchStartY ?? currentTouchY;
@@ -198,6 +205,10 @@ function _configurePopupInteractionHandlers(context) {
     }
 
     context._popupLastTouchY = currentTouchY;
+  };
+
+  context.handleWheel = (event) => {
+    _preventPopupScrollChaining(context, event);
   };
 }
 

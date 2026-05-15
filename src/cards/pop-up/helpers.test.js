@@ -603,6 +603,23 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
     });
 
+    test('registers the popup wheel listener so non-scrollable Safari gestures can be blocked', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        context.handleWheel = jest.fn((event) => {
+            event.preventDefault();
+        });
+
+        openPopup(context, true);
+
+        const wheelEvent = new Event('wheel', { cancelable: true });
+        context.popUp.dispatchEvent(wheelEvent);
+
+        expect(context.handleWheel).toHaveBeenCalledTimes(1);
+        expect(wheelEvent.defaultPrevented).toBe(true);
+    });
+
     test('rolls back a failed standalone open and allows a later retry', () => {
         const context = createStandaloneContext({
             hash: '#popup-a',

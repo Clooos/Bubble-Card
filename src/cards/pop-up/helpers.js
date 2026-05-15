@@ -1307,6 +1307,7 @@ function getPopupBaseListeners(context) {
     return [
         [context.popUp, 'touchstart', context.handleTouchStart, { passive: true }],
         [context.popUp, 'touchmove', context.handleTouchMove, { passive: false }],
+        [context.popUp, 'wheel', context.handleWheel, { passive: false }],
         [context.popUp, 'touchend', context.handleTouchEnd, { passive: true }],
         [context.popUp, 'touchcancel', context.handleTouchCancel, { passive: true }],
         [context._popupHeaderTouchTarget, 'touchmove', context.handleHeaderTouchMove, { passive: false }],

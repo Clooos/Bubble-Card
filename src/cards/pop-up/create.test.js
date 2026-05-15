@@ -496,4 +496,47 @@ describe('prepareStandaloneStructure', () => {
         expect(moveEvent.preventDefault).not.toHaveBeenCalled();
         expect(removeHash).not.toHaveBeenCalled();
     });
+
+    test('prevents wheel scroll chaining when popup content is not scrollable', () => {
+        const context = buildStandalonePopupContext({ scrollHeight: 100, clientHeight: 100 });
+
+        const wheelEvent = {
+            cancelable: true,
+            preventDefault: jest.fn(),
+        };
+
+        context.handleWheel(wheelEvent);
+
+        expect(wheelEvent.preventDefault).toHaveBeenCalledTimes(1);
+    });
+
+    test('keeps native wheel scrolling when popup content is scrollable', () => {
+        const context = buildStandalonePopupContext({ scrollHeight: 280, clientHeight: 100 });
+
+        const wheelEvent = {
+            cancelable: true,
+            preventDefault: jest.fn(),
+        };
+
+        context.handleWheel(wheelEvent);
+
+        expect(wheelEvent.preventDefault).not.toHaveBeenCalled();
+    });
+
+    test('keeps native wheel scrolling when live content is scrollable even if cached state is stale false', () => {
+        const context = buildStandalonePopupContext({
+            scrollHeight: 280,
+            clientHeight: 100,
+            cachedScrollableState: false,
+        });
+
+        const wheelEvent = {
+            cancelable: true,
+            preventDefault: jest.fn(),
+        };
+
+        context.handleWheel(wheelEvent);
+
+        expect(wheelEvent.preventDefault).not.toHaveBeenCalled();
+    });
 });
