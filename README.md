@@ -127,14 +127,7 @@ All options can be configured in the Home Assistant editor. But you can find mor
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
 
-This card allows you to convert any vertical stack into a pop-up. Each pop-up is **hidden by default** and can be opened by targeting its link (e.g. `'#pop-up-name'`), with any card that supports the `navigate` [action](#tap-double-tap-and-hold-actions), or with the [horizontal buttons stack](#horizontal-buttons-stack) that is included.
-
-> [!IMPORTANT]  
-> To avoid misalignment with your view, place this card after all other dashboard cards. You can't trigger it from a different view.
->
-> **For YAML only users:** This card must be placed within a [vertical stack](https://www.home-assistant.io/dashboards/vertical-stack/) card at the topmost position to function properly. See example below.
->
-> **You can also watch [this step by step video](https://www.youtube.com/watch?v=7mOV7BfWoFc).** This video is bit outdated, you don't need to create a vertical stack anymore, it will be added automatically.
+This card allows you to create a pop-up with any content. Each pop-up is **hidden by default** and can be opened by targeting its link (e.g. `'#pop-up-name'`), with any card that supports the `navigate` [action](#tap-double-tap-and-hold-actions), or with the [horizontal buttons stack](#horizontal-buttons-stack) that is included.
 
 > [!TIP]
 > ### Pop-up trigger 
@@ -197,6 +190,7 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 | `show_previous_button` | boolean | Optional | `true` or `false` (default) | Show a previous button next to the close button and navigate back to the previous pop-up when available |
 | `show_close_button` | boolean | Optional | `true` (default) or `false` | Show or hide the close button while keeping the rest of the header visible |
 | `buttons_position` | string | Optional | `right` (default) or `left` | Position of the close and previous buttons in the header |
+| `cards` | list | Optional | Any Bubble Card, Home Assistant card or custom card | Define the content of your pop-up. See the pop-up example below. |
 | You also have access to [all the button settings](#button) for the header of the pop-up. | | Optional | | If undefined no header will be shown |
 
 </details>
@@ -216,23 +210,31 @@ This card allows you to convert any vertical stack into a pop-up. Each pop-up is
 </details>
 
 
+### Standalone pop-up format (v3.2.0+)
+
+Since v3.2.0, pop-ups use a new standalone format where content cards are defined directly inside the pop-up using the `cards` option. This provides better performance and a new section based drag-and-drop editing experience.
+
+
 #### Examples
 
 <details>
 
-<summary>A pop-up</summary>
+<summary>A pop-up (standalone format)</summary>
 
 <br>
 
 ```yaml
-type: vertical-stack
+type: custom:bubble-card
+card_type: pop-up
+hash: '#kitchen'
+name: Kitchen
+icon: mdi:fridge
+entity: light.kitchen
 cards:
   - type: custom:bubble-card
-    card_type: pop-up
-    hash: '#kitchen'
-    name: Kitchen
-    icon: mdi:fridge
+    card_type: button
     entity: light.kitchen
+  # More cards...
 ```
 
 </details>
@@ -252,29 +254,6 @@ button_action:
   tap_action:
     action: navigate
     navigation_path: '#kitchen'
-```
-
-</details>
-
-<details>
-
-<summary>A pop-up with a fixed height</summary>
-
-<br>
-
-Replace `400px` with the size you need.
-
-```yaml
-type: vertical-stack
-cards:
-  - type: custom:bubble-card
-    card_type: pop-up
-    hash: '#kitchen'
-    name: Kitchen
-    icon: mdi:fridge
-    entity: light.kitchen
-    margin_top_mobile: calc(100vh - 400px)
-    margin_top_desktop: calc(100vh - 400px)
 ```
 
 </details>
