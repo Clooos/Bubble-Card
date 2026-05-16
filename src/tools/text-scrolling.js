@@ -98,6 +98,10 @@ function flush() {
                 span.style.animationDuration = formatDuration(content);
             }
             getIntersectionObserver().observe(el);
+        } else if (state.pendingInnerHTML) {
+            // Text changed while not animated — apply the pending text update
+            el.innerHTML = state.text;
+            state.pendingInnerHTML = false;
         }
     }
 }
