@@ -508,7 +508,7 @@ function clearFreshOutsideInteractionGuard(context) {
     context._allowOutsideCloseFromInteraction = false;
 }
 
-// Deduplicate the synthetic no-hash step used during popup close.
+// Deduplicate Bubble Card's own synthetic no-hash step used during popup close.
 if (!window.__bubbleLocationDeduperAdded) {
     try {
         let pendingHashBase = null;
@@ -517,10 +517,11 @@ if (!window.__bubbleLocationDeduperAdded) {
         let pendingPreviousHash = "";
         let lastKnownHash = window.location.hash || "";
 
-        window.addEventListener('location-changed', () => {
+        window.addEventListener('location-changed', (event) => {
             const href = window.location.href;
             const hasHash = !!window.location.hash;
             const base = href.split('#')[0];
+            const source = event?.detail?.source || '';
 
             if (hasHash) {
                 pendingHashBase = base;
@@ -540,6 +541,7 @@ if (!window.__bubbleLocationDeduperAdded) {
             }
 
             if (
+                source === 'bubble-popup-remove-hash' &&
                 pendingHashBase &&
                 base === pendingHashBase &&
                 (Date.now() - pendingTimestamp) < 1500 &&
