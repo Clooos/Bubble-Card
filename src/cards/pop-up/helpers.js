@@ -1759,8 +1759,13 @@ export function cleanupPopupRuntime(context) {
     clearAllTimeouts(context);
     updateListeners(context, false);
     setPopupOpeningMarker(context, false);
-    restorePopupHostLayout(context);
     const visuallyOpen = context.popUp?.classList?.contains('is-popup-opened');
+
+    if (visuallyOpen) {
+        restorePopupHostLayout(context);
+    } else {
+        suspendPopupHostLayout(context);
+    }
 
     if (context.observer) {
         context.observer.disconnect();
