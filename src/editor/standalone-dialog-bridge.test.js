@@ -1,6 +1,10 @@
 import { describe, expect, jest, test } from '@jest/globals';
 
-import { bridgeDialogCloseToParent } from './standalone-dialog-bridge.js';
+import {
+    bridgeDialogCloseToParent,
+    createReopenedStandaloneParentDialogParams,
+    createStandaloneParentDialogParams,
+} from './standalone-dialog-bridge.js';
 
 describe('bridgeDialogCloseToParent', () => {
     test('reopens the parent in place after the original closeDialog accepts closing', () => {
@@ -41,5 +45,81 @@ describe('bridgeDialogCloseToParent', () => {
         expect(reopenParent).toHaveBeenCalledTimes(1);
         expect(originalCloseDialog).toHaveBeenCalledWith('reason');
         expect(Object.prototype.hasOwnProperty.call(dialog, 'closeDialog')).toBe(false);
+    });
+});
+
+describe('standalone popup dialog params', () => {
+    const standalonePopup = {
+        type: 'custom:bubble-card',
+        card_type: 'pop-up',
+        hash: '#kitchen',
+        cards: [
+            {
+                type: 'button',
+                entity: 'light.kitchen',
+            },
+        ],
+    };
+
+    test('reopens a nested standalone popup edit flow on the containing stack config', () => {
+        const siblingStack = {
+            type: 'vertical-stack',
+            cards: [
+                {
+                    type: 'custom:bubble-card',
+                    card_type: 'pop-up',
+                    hash: '#bedroom',
+                    cards: [],
+                },
+            ],
+        };
+        const commonStack = {
+            type: 'vertical-stack',
+            cards: [standalonePopup, siblingStack],
+        };
+        const saveCardConfig = jest.fn();
+
+        const parentParams = createStandaloneParentDialogParams(
+            {
+                cardConfig: commonStack,
+                saveCardConfig,
+            },
+            standalonePopup
+        );
+        const editedPopup = {
+            ...standalonePopup,
+            cards: [
+                {
+                    type: 'button',
+                    entity: 'light.kitchen',
+                    name: 'Hiiii',
+                },
+            ],
+        };
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, editedPopup);
+
+        expect(parentParams.cardConfig).toEqual(commonStack);
+        expect(reopenedParams.cardConfig).toEqual({
+            type: 'vertical-stack',
+            cards: [editedPopup, siblingStack],
+        });
+        expect(reopenedParams.saveCardConfig).toBe(saveCardConfig);
+    });
+
+    test('keeps direct standalone popup edit flows scoped to the popup itself', () => {
+        const parentParams = createStandaloneParentDialogParams(
+            {
+                cardConfig: standalonePopup,
+            },
+            standalonePopup
+        );
+        const editedPopup = {
+            ...standalonePopup,
+            name: 'Kitchen popup',
+        };
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, editedPopup);
+
+        expect(parentParams.cardConfig).toEqual(standalonePopup);
+        expect(reopenedParams.cardConfig).toEqual(editedPopup);
     });
 });

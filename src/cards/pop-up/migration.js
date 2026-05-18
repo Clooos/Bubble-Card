@@ -1,4 +1,5 @@
 import { html } from 'lit';
+import { findConfigPath, getConfigAtPath } from '../../editor/standalone-dialog-bridge.js';
 import { isHashOnCurrentPage } from './navigation-picker-bridge.js';
 
 const POPUP_GRID_COLUMN_COUNT = 12;
@@ -342,20 +343,78 @@ function getLegacyStandaloneMigration(editor, originalHash) {
 
 function createStandaloneSaveCardConfig(editor, popupPath, fallbackConfig, fallbackLovelace) {
     return async (newCardConfig) => {
-        const lovelace = getActiveLovelace(editor) || fallbackLovelace;
+        const lovelace = fallbackLovelace || getActiveLovelace(editor);
         if (!lovelace || typeof lovelace.saveConfig !== 'function') {
             return;
         }
 
-        const sourceConfig = lovelace.rawConfig || lovelace.config || fallbackConfig;
+        const activeDialogConfig = getActiveEditCardDialog(editor)?._params?.lovelaceConfig;
+        const sourceConfig = [activeDialogConfig, fallbackConfig, lovelace.rawConfig, lovelace.config]
+            .find((config) => config && getConfigAtPath(config, popupPath) !== undefined)
+            || fallbackConfig
+            || lovelace.rawConfig
+            || lovelace.config;
         const updatedConfig = replaceConfigAtPath(sourceConfig, popupPath, newCardConfig);
         await lovelace.saveConfig(updatedConfig);
     };
 }
 
+function isPathPrefix(prefixPath, path) {
+    if (!Array.isArray(prefixPath) || !Array.isArray(path) || prefixPath.length > path.length) {
+        return false;
+    }
+
+    return prefixPath.every((segment, index) => segment === path[index]);
+}
+
+export function createPostMigrationDialogParams(activeDialogParams, previousLovelaceConfig, migration, lovelace) {
+    if (!activeDialogParams?.cardConfig || !previousLovelaceConfig || !migration?.config) {
+        return null;
+    }
+
+    const activeCardPath = findConfigPath(previousLovelaceConfig, activeDialogParams.cardConfig);
+    if (!isPathPrefix(activeCardPath, migration.stackPath)) {
+        return null;
+    }
+
+    const cardConfig = getConfigAtPath(migration.config, activeCardPath);
+    if (!cardConfig?.type) {
+        return null;
+    }
+
+    return {
+        ...activeDialogParams,
+        lovelace: activeDialogParams.lovelace || lovelace,
+        lovelaceConfig: migration.config,
+        cardConfig,
+    };
+}
+
+function refreshActiveMigrationDialog(editor, migrationContext, migration, lovelace) {
+    const activeDialog = getActiveEditCardDialog(editor);
+    if (!activeDialog || typeof activeDialog.showDialog !== 'function') {
+        return false;
+    }
+
+    const dialogParams = createPostMigrationDialogParams(
+        activeDialog._params,
+        migrationContext.lovelaceConfig,
+        migration,
+        lovelace
+    );
+
+    if (!dialogParams) {
+        return false;
+    }
+
+    activeDialog.showDialog(dialogParams);
+    return true;
+}
+
 function reopenStandalonePopUpEditor(editor, migration, lovelace) {
     const activeDialog = getActiveEditCardDialog(editor);
     const dialogParams = {
+        lovelace,
         lovelaceConfig: migration.config,
         cardConfig: migration.popupConfig,
         saveCardConfig: createStandaloneSaveCardConfig(editor, migration.popupPath, migration.config, lovelace),
@@ -422,7 +481,9 @@ async function migrateLegacyPopUpToStandalone(editor, originalHash) {
             lovelace.showToast({ message: 'Pop-up migrated to standalone.' });
         }
 
-        reopenStandalonePopUpEditor(editor, migration, lovelace);
+        if (!refreshActiveMigrationDialog(editor, migrationContext, migration, lovelace)) {
+            reopenStandalonePopUpEditor(editor, migration, lovelace);
+        }
     } catch (error) {
         editor._legacyStandaloneMigrationError = error?.message || 'Failed to migrate this pop-up.';
         console.error('Bubble Card: failed to migrate legacy pop-up', error);

@@ -28,7 +28,7 @@ import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
 import cardsEditorStyles from '../cards/pop-up/cards/styles.css';
 import { getLazyLoadedPanelContent } from './utils.js';
-import { bridgeDialogCloseToParent } from './standalone-dialog-bridge.js';
+import { bridgeDialogCloseToParent, createReopenedStandaloneParentDialogParams, createStandaloneParentDialogParams } from './standalone-dialog-bridge.js';
 
 class BubbleCardEditor extends LitElement {
     _previewStyleApplied = false;
@@ -2389,14 +2389,7 @@ class BubbleCardEditor extends LitElement {
         const params = dialog?._params;
         if (!params) return null;
 
-        const cardConfig = { ...(this._config || params.cardConfig || {}) };
-        return {
-            ...params,
-            cardConfig,
-            // Cache the original cardConfig to restore if the nested editor
-            // replaces it with a non-popup config.
-            _originalCardConfig: { ...cardConfig },
-        };
+        return createStandaloneParentDialogParams(params, this._config);
     }
 
     _extractCardsFromStandaloneLovelaceConfig(lovelaceConfig) {
@@ -2426,18 +2419,8 @@ class BubbleCardEditor extends LitElement {
     _reopenStandaloneParentDialog(parentDialogParams, cardConfig, preferredDialog = null) {
         if (!parentDialogParams) return false;
 
-        // If the cardConfig lost popup-specific properties (e.g., card_type, cards array),
-        // fall back to the original cached config. This handles the case where a nested
-        // child card's saveConfig replaces the parent config with just the child's config.
-        const originalConfig = parentDialogParams._originalCardConfig;
-        if (originalConfig && cardConfig && originalConfig.card_type && !cardConfig.card_type) {
-            cardConfig = { ...originalConfig, ...cardConfig };
-        }
-
-        const dialogParams = {
-            ...parentDialogParams,
-            cardConfig,
-        };
+        const dialogParams = createReopenedStandaloneParentDialogParams(parentDialogParams, cardConfig);
+        if (!dialogParams) return false;
 
         let shownDialog = null;
 

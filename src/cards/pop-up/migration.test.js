@@ -1,5 +1,6 @@
-import { describe, test, expect } from '@jest/globals';
+import { describe, expect, jest, test } from '@jest/globals';
 import {
+    createPostMigrationDialogParams,
     createStandalonePopUpConfig,
     findLegacyPopUpStack,
     hasLegacyHorizontalStacks,
@@ -77,6 +78,7 @@ describe('isLegacyPopUpConfig', () => {
         expect(isLegacyPopUpConfig({ ...legacyPopupConfig, cards: [] })).toBe(false);
     });
 });
+
 
 describe('createStandalonePopUpConfig', () => {
     test('copies the legacy config and injects standalone cards', () => {
@@ -297,5 +299,138 @@ describe('migrateLegacyPopUpLovelaceConfig', () => {
                 grid_options: { rows: 1.4, columns: 6 },
             },
         ]);
+    });
+
+    test('migrates one nested legacy stack inside a common vertical-stack without removing siblings', () => {
+        const secondLegacyPopupConfig = {
+            ...legacyPopupConfig,
+            hash: '#bedroom',
+            name: 'Bedroom',
+        };
+        const secondButtonCard = {
+            ...buttonCard,
+            entity: 'light.bedroom',
+        };
+        const lovelaceConfig = {
+            views: [
+                {
+                    cards: [
+                        {
+                            type: 'vertical-stack',
+                            cards: [
+                                {
+                                    type: 'vertical-stack',
+                                    title: 'Kitchen stack',
+                                    cards: [legacyPopupConfig, buttonCard],
+                                },
+                                {
+                                    type: 'vertical-stack',
+                                    title: 'Bedroom stack',
+                                    cards: [secondLegacyPopupConfig, secondButtonCard],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        };
+
+        const result = migrateLegacyPopUpLovelaceConfig(lovelaceConfig, legacyPopupConfig);
+
+        expect(result.stackPath).toEqual(['views', 0, 'cards', 0, 'cards', 0]);
+        expect(result.config.views[0].cards[0]).toEqual({
+            type: 'vertical-stack',
+            cards: [
+                {
+                    ...legacyPopupConfig,
+                    cards: [buttonCard],
+                },
+                {
+                    type: 'vertical-stack',
+                    title: 'Bedroom stack',
+                    cards: [secondLegacyPopupConfig, secondButtonCard],
+                },
+            ],
+        });
+    });
+});
+
+describe('createPostMigrationDialogParams', () => {
+    test('keeps the common stack editor open after migrating a nested legacy stack', () => {
+        const secondLegacyPopupConfig = {
+            ...legacyPopupConfig,
+            hash: '#bedroom',
+            name: 'Bedroom',
+        };
+        const commonStack = {
+            type: 'vertical-stack',
+            cards: [
+                {
+                    type: 'vertical-stack',
+                    title: 'Kitchen stack',
+                    cards: [legacyPopupConfig, buttonCard],
+                },
+                {
+                    type: 'vertical-stack',
+                    title: 'Bedroom stack',
+                    cards: [secondLegacyPopupConfig, separatorCard],
+                },
+            ],
+        };
+        const lovelaceConfig = {
+            views: [
+                {
+                    cards: [commonStack],
+                },
+            ],
+        };
+        const migration = migrateLegacyPopUpLovelaceConfig(lovelaceConfig, legacyPopupConfig);
+        const saveCardConfig = jest.fn();
+        const lovelace = { saveConfig: jest.fn() };
+
+        const dialogParams = createPostMigrationDialogParams(
+            {
+                cardConfig: commonStack,
+                saveCardConfig,
+            },
+            lovelaceConfig,
+            migration,
+            lovelace
+        );
+
+        expect(dialogParams).toMatchObject({
+            lovelace,
+            lovelaceConfig: migration.config,
+            cardConfig: migration.config.views[0].cards[0],
+        });
+        expect(dialogParams.cardConfig.cards).toHaveLength(2);
+        expect(dialogParams.cardConfig.cards[0]).toEqual(migration.popupConfig);
+        expect(dialogParams.cardConfig.cards[1]).toEqual(commonStack.cards[1]);
+        expect(dialogParams.saveCardConfig).toBe(saveCardConfig);
+    });
+
+    test('does not claim a parent stack when the active dialog edits the legacy popup itself', () => {
+        const lovelaceConfig = {
+            views: [
+                {
+                    cards: [
+                        {
+                            type: 'vertical-stack',
+                            cards: [legacyPopupConfig, buttonCard],
+                        },
+                    ],
+                },
+            ],
+        };
+        const migration = migrateLegacyPopUpLovelaceConfig(lovelaceConfig, legacyPopupConfig);
+
+        const dialogParams = createPostMigrationDialogParams(
+            { cardConfig: legacyPopupConfig },
+            lovelaceConfig,
+            migration,
+            { saveConfig: jest.fn() }
+        );
+
+        expect(dialogParams).toBeNull();
     });
 });
