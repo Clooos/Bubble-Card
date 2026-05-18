@@ -54,6 +54,14 @@ class BubbleCardEditor extends LitElement {
         window.addEventListener('bubble-card-context', this._cardContextListener);
     }
 
+    connectedCallback() {
+        super.connectedCallback?.();
+        try {
+            window.__bubbleCardEditorInstances = window.__bubbleCardEditorInstances || new Set();
+            window.__bubbleCardEditorInstances.add(this);
+        } catch (_) {}
+    }
+
     setConfig(config) {
         // Keep existing preview reference if still connected.
         const prevHost = this._previewCardHost || this._previewCardRoot?.host || null;
@@ -280,6 +288,7 @@ class BubbleCardEditor extends LitElement {
 
     disconnectedCallback() {
         super.disconnectedCallback?.();
+        try { window.__bubbleCardEditorInstances?.delete(this); } catch (e) {}
         try { if (this._errorListener) { window.removeEventListener('bubble-card-error', this._errorListener); this._errorListener = null; } } catch (e) {}
         try {
             if (this._moduleChangeHandler) {

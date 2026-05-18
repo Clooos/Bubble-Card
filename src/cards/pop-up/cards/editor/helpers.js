@@ -139,7 +139,7 @@ function _editCardDialog(context, index) {
         return;
     }
 
-    standaloneDialogOpener({ type: 'edit', index });
+    return standaloneDialogOpener({ type: 'edit', index });
 }
 
 function _addCardDialog(context) {
@@ -149,25 +149,135 @@ function _addCardDialog(context) {
         return;
     }
 
-    standaloneDialogOpener({ type: 'add' });
+    return standaloneDialogOpener({ type: 'add' });
 }
 
 function _getStandaloneDialogOpener(context) {
-    if (typeof context._standaloneOpenCardDialog === 'function') {
+    if (context?.isConnected === false) {
+        return null;
+    }
+
+    if (context?.isConnected !== false && typeof context._standaloneOpenCardDialog === 'function') {
         return context._standaloneOpenCardDialog.bind(context);
+    }
+
+    const registeredOpener = _getRegisteredStandaloneDialogOpener(context);
+    if (registeredOpener) {
+        return registeredOpener;
     }
 
     try {
         const dialog = document.querySelector('body > home-assistant')
             ?.shadowRoot?.querySelector('hui-dialog-edit-card');
-        const cardElementEditor = dialog?.shadowRoot?.querySelector('hui-card-element-editor');
-        const standaloneEditor = cardElementEditor?.shadowRoot?.querySelector('bubble-card-editor');
+        const standaloneEditor = _deepQuerySelector(dialog?.shadowRoot, 'bubble-card-editor');
 
-        if (typeof standaloneEditor?._openStandaloneCardDialog === 'function') {
+        if (_scoreStandaloneEditor(standaloneEditor, context) >= 0) {
             return standaloneEditor._openStandaloneCardDialog.bind(standaloneEditor);
         }
     } catch (_) {
         // no-op
+    }
+
+    return null;
+}
+
+function _getRegisteredStandaloneDialogOpener(context) {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const editors = window.__bubbleCardEditorInstances;
+    if (!editors || typeof editors[Symbol.iterator] !== 'function') {
+        return null;
+    }
+
+    let bestEditor = null;
+    let bestScore = -1;
+
+    for (const editor of editors) {
+        const score = _scoreStandaloneEditor(editor, context);
+        if (score > bestScore) {
+            bestScore = score;
+            bestEditor = editor;
+        }
+    }
+
+    return bestEditor && bestScore >= 0
+        ? bestEditor._openStandaloneCardDialog.bind(bestEditor)
+        : null;
+}
+
+function _scoreStandaloneEditor(editor, context) {
+    if (!editor || editor.isConnected === false || typeof editor._openStandaloneCardDialog !== 'function') {
+        return -1;
+    }
+
+    const editorConfig = editor._config || {};
+    const popupConfig = context?.config || {};
+    if (editorConfig.card_type !== 'pop-up' || !Array.isArray(editorConfig.cards)) {
+        return -1;
+    }
+
+    let score = 1;
+    if (editor._previewCardHost && editor._previewCardHost === context) {
+        score += 50;
+    }
+
+    const editorHash = _normalizeHash(editorConfig.hash);
+    const popupHash = _normalizeHash(popupConfig.hash);
+    if (editorHash && popupHash) {
+        if (editorHash !== popupHash) {
+            return -1;
+        }
+        score += 100;
+    }
+
+    if (editorConfig.cards === popupConfig.cards) {
+        score += 20;
+    }
+
+    if (editorConfig.name && editorConfig.name === popupConfig.name) {
+        score += 4;
+    }
+
+    if (editorConfig.icon && editorConfig.icon === popupConfig.icon) {
+        score += 2;
+    }
+
+    return score;
+}
+
+function _normalizeHash(value) {
+    if (typeof value !== 'string') {
+        return '';
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+        return '';
+    }
+
+    return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
+}
+
+function _deepQuerySelector(root, selector, maxDepth = 6) {
+    if (!root || maxDepth < 0) {
+        return null;
+    }
+
+    const direct = root.querySelector?.(selector);
+    if (direct) {
+        return direct;
+    }
+
+    const all = root.querySelectorAll?.('*') || [];
+    for (const el of all) {
+        if (el?.shadowRoot) {
+            const found = _deepQuerySelector(el.shadowRoot, selector, maxDepth - 1);
+            if (found) {
+                return found;
+            }
+        }
     }
 
     return null;
