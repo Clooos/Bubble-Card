@@ -567,34 +567,60 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
 
 // Migration Notice: one-shot dialog for unmigrated legacy pop-ups
 
-function getCurrentView() {
-    if (typeof location === 'undefined') return 'lovelace';
-    const path = location.pathname;
-    // Match /lovelace/... paths
-    const match = path.match(/^\/lovelace(\/.*)?$/);
-    if (!match) return 'lovelace';
-    const rest = match[1] || '';
-    // Split remaining path segments
-    const segments = rest ? rest.split('/').filter(Boolean) : [];
-    // segments[0] = dashboard, segments[1+] = view
-    if (segments.length === 0) return 'lovelace';
-    if (segments.length === 1) return `lovelace/${segments[0]}`;
-    return `lovelace/${segments.slice(0, 2).join('/')}`;
+function getPathSegments() {
+    const pathname = typeof location !== 'undefined' && typeof location.pathname === 'string' ? location.pathname : '';
+    return pathname.split('/').filter(Boolean).map((segment) => {
+        try {
+            return decodeURI(segment);
+        } catch (_) {
+            return segment;
+        }
+    });
 }
 
-const STORAGE_KEY = `bubble-card-legacy-popup-notice-${getCurrentView()}`;
+function normalizePanelUrl(panelUrl) {
+    return typeof panelUrl === 'string' ? panelUrl.trim().replace(/^\/+|\/+$/g, '') : '';
+}
+
+export function getCurrentView(hass = null) {
+    const segments = getPathSegments();
+    const panelUrl = normalizePanelUrl(hass?.panelUrl) || segments[0] || 'lovelace';
+    const panelIndex = segments.indexOf(panelUrl);
+    const viewPath = panelIndex >= 0
+        ? segments[panelIndex + 1]
+        : segments[1];
+
+    return viewPath ? `${panelUrl}/${viewPath}` : panelUrl;
+}
+
+export function getMigrationNoticeStorageKey(hass = null) {
+    return `bubble-card-legacy-popup-notice-${getCurrentView(hass)}`;
+}
 
 let _pending = false;
+let _latestMigrationNoticeHass = null;
+const _shownMigrationNoticeKeys = new Set();
+
+function isMigrationNoticeDismissed(storageKey) {
+    try {
+        return !!localStorage.getItem(storageKey);
+    } catch (_) {
+        return false;
+    }
+}
 
 /**
  * Call once per legacy (non-standalone) pop-up card encountered.
  * Shows a dismissible dialog the first time, then never again (localStorage).
  */
-export function maybeShowMigrationNotice() {
-    if (_pending) return;
-    try {
-        if (localStorage.getItem(STORAGE_KEY)) return;
-    } catch (_) {}
+export function maybeShowMigrationNotice(hass = null) {
+    if (hass) {
+        _latestMigrationNoticeHass = hass;
+    }
+
+    const storageKey = getMigrationNoticeStorageKey(_latestMigrationNoticeHass);
+
+    if (_pending || _shownMigrationNoticeKeys.has(storageKey) || isMigrationNoticeDismissed(storageKey)) return;
 
     _pending = true;
     // Defer so card rendering is not blocked and the HA UI is fully settled.
@@ -603,15 +629,19 @@ export function maybeShowMigrationNotice() {
 
 function _show() {
     // Recheck in case the user dismissed it from another tab before the timer fired.
-    try {
-        if (localStorage.getItem(STORAGE_KEY)) { _pending = false; return; }
-    } catch (_) {}
+    const storageKey = getMigrationNoticeStorageKey(_latestMigrationNoticeHass);
+    if (_shownMigrationNoticeKeys.has(storageKey) || isMigrationNoticeDismissed(storageKey)) {
+        _pending = false;
+        return;
+    }
 
     // Wait for ha-dialog to be defined.
     if (!customElements.get('ha-dialog')) {
         customElements.whenDefined('ha-dialog').then(_show);
         return;
     }
+
+    _shownMigrationNoticeKeys.add(storageKey);
 
     const host = document.createElement('div');
     host.id = 'bubble-card-migration-notice-host';
@@ -683,16 +713,27 @@ function _show() {
 
     const dismissBtn = document.createElement('ha-button');
     dismissBtn.textContent = "Got it, don't show again on this view";
+    dismissBtn.setAttribute('data-dialog', 'close');
     dismissBtn.setAttribute('slot', 'secondaryAction');
     dismissBtn.setAttribute('appearance', 'plain');
-    dismissBtn.addEventListener('click', () => {
-        try { localStorage.setItem(STORAGE_KEY, '1'); } catch (_) {}
+    let dismissHandled = false;
+    const dismissNotice = () => {
+        if (dismissHandled) return;
+        dismissHandled = true;
+        try {
+            localStorage.setItem(getMigrationNoticeStorageKey(_latestMigrationNoticeHass), '1');
+        } catch (_) {}
+        _pending = false;
         dialog.open = false;
-    });
+    };
+    dismissBtn.addEventListener('pointerup', dismissNotice);
+    dismissBtn.addEventListener('touchend', dismissNotice);
+    dismissBtn.addEventListener('click', dismissNotice);
     footer.appendChild(dismissBtn);
 
     const remindBtn = document.createElement('ha-button');
     remindBtn.textContent = "Remind me later";
+    remindBtn.setAttribute('data-dialog', 'close');
     remindBtn.setAttribute('slot', 'primaryAction');
     remindBtn.setAttribute('appearance', 'filled');
     remindBtn.setAttribute('variant', 'brand');
@@ -703,6 +744,7 @@ function _show() {
 
     /* ── Close via scrim/cross does NOT persist — dialog reappears next load ─ */
     dialog.addEventListener('closed', () => {
+        _pending = false;
         setTimeout(() => { if (host?.isConnected) host.remove(); }, 400);
     });
 

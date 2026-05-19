@@ -1,13 +1,129 @@
-import { describe, expect, jest, test } from '@jest/globals';
+import { afterEach, describe, expect, jest, test } from '@jest/globals';
 import {
     createPostMigrationDialogParams,
     createStandalonePopUpConfig,
     findLegacyPopUpStack,
+    getMigrationNoticeStorageKey,
     hasLegacyHorizontalStacks,
     isLegacyPopUpConfig,
+    maybeShowMigrationNotice,
     migrateLegacyPopUpLovelaceConfig,
     replaceConfigAtPath,
 } from './migration.js';
+
+const originalGlobalDescriptors = {
+    customElements: Object.getOwnPropertyDescriptor(globalThis, 'customElements'),
+    document: Object.getOwnPropertyDescriptor(globalThis, 'document'),
+    localStorage: Object.getOwnPropertyDescriptor(globalThis, 'localStorage'),
+    location: Object.getOwnPropertyDescriptor(globalThis, 'location'),
+    setTimeout: Object.getOwnPropertyDescriptor(globalThis, 'setTimeout'),
+};
+
+function restoreGlobalProperty(name, descriptor) {
+    if (descriptor) {
+        Object.defineProperty(globalThis, name, descriptor);
+        return;
+    }
+
+    delete globalThis[name];
+}
+
+function setLocationPathname(pathname) {
+    Object.defineProperty(globalThis, 'location', {
+        configurable: true,
+        value: { pathname },
+    });
+}
+
+function createFakeElement(tagName) {
+    const listeners = {};
+
+    return {
+        tagName: tagName.toUpperCase(),
+        attributes: {},
+        children: [],
+        style: {},
+        textContent: '',
+        innerHTML: '',
+        id: '',
+        isConnected: false,
+        open: false,
+        setAttribute(name, value) {
+            this.attributes[name] = String(value);
+        },
+        appendChild(child) {
+            this.children.push(child);
+            child.parentNode = this;
+            child.isConnected = this.isConnected;
+            return child;
+        },
+        remove() {
+            this.isConnected = false;
+            this.removed = true;
+        },
+        addEventListener(type, handler) {
+            listeners[type] = listeners[type] || [];
+            listeners[type].push(handler);
+        },
+        dispatchFakeEvent(type) {
+            (listeners[type] || []).forEach((handler) => handler({ type }));
+        },
+        _listeners: listeners,
+    };
+}
+
+function installMigrationNoticeHarness() {
+    const storage = new Map();
+    const createdElements = [];
+    const body = createFakeElement('body');
+    body.isConnected = true;
+    let deferredCallback = null;
+
+    Object.defineProperty(globalThis, 'localStorage', {
+        configurable: true,
+        value: {
+            getItem: jest.fn((key) => storage.get(key) ?? null),
+            setItem: jest.fn((key, value) => storage.set(key, String(value))),
+        },
+    });
+    Object.defineProperty(globalThis, 'customElements', {
+        configurable: true,
+        value: {
+            get: jest.fn(() => true),
+            whenDefined: jest.fn(() => Promise.resolve()),
+        },
+    });
+    Object.defineProperty(globalThis, 'document', {
+        configurable: true,
+        value: {
+            body,
+            createElement: jest.fn((tagName) => {
+                const element = createFakeElement(tagName);
+                createdElements.push(element);
+                return element;
+            }),
+        },
+    });
+    Object.defineProperty(globalThis, 'setTimeout', {
+        configurable: true,
+        value: jest.fn((callback) => {
+            deferredCallback = deferredCallback || callback;
+            return 1;
+        }),
+    });
+
+    return {
+        createdElements,
+        storage,
+        runDeferredCallback: () => deferredCallback?.(),
+    };
+}
+
+afterEach(() => {
+    Object.entries(originalGlobalDescriptors).forEach(([name, descriptor]) => {
+        restoreGlobalProperty(name, descriptor);
+    });
+});
 
 const legacyPopupConfig = {
     type: 'custom:bubble-card',
@@ -86,6 +202,47 @@ const mixedHorizontalStackCard = {
     type: 'horizontal-stack',
     cards: [buttonCard, mushroomAlarmPanelCard],
 };
+
+describe('getMigrationNoticeStorageKey', () => {
+    test.each([
+        ['/home/lights', { panelUrl: 'home' }, 'bubble-card-legacy-popup-notice-home/lights'],
+        ['/lovelace/kitchen', { panelUrl: 'lovelace' }, 'bubble-card-legacy-popup-notice-lovelace/kitchen'],
+        ['/ha/mobile/home/overview', { panelUrl: 'home' }, 'bubble-card-legacy-popup-notice-home/overview'],
+    ])('uses hass.panelUrl to scope %s to the current view', (pathname, hass, expectedKey) => {
+        setLocationPathname(pathname);
+
+        expect(getMigrationNoticeStorageKey(hass)).toBe(expectedKey);
+    });
+});
+
+describe('maybeShowMigrationNotice', () => {
+    test('stores dismissal on the settled view and handles touch before synthesized click', () => {
+        const harness = installMigrationNoticeHarness();
+        setLocationPathname('/lovelace');
+
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' });
+
+        setLocationPathname('/lovelace/kitchen');
+        harness.runDeferredCallback();
+
+        const dismissButton = harness.createdElements.find((element) => (
+            element.tagName === 'HA-BUTTON' && element.textContent.includes("don't show again")
+        ));
+        const remindButton = harness.createdElements.find((element) => (
+            element.tagName === 'HA-BUTTON' && element.textContent === 'Remind me later'
+        ));
+
+        expect(dismissButton.attributes['data-dialog']).toBe('close');
+        expect(remindButton.attributes['data-dialog']).toBe('close');
+
+        dismissButton.dispatchFakeEvent('pointerup');
+        dismissButton.dispatchFakeEvent('click');
+
+        expect(globalThis.localStorage.setItem).toHaveBeenCalledTimes(1);
+        expect(harness.storage.get('bubble-card-legacy-popup-notice-lovelace/kitchen')).toBe('1');
+        expect(harness.storage.has('bubble-card-legacy-popup-notice-lovelace')).toBe(false);
+    });
+});
 
 describe('isLegacyPopUpConfig', () => {
     test('detects legacy pop-up configs without standalone cards', () => {

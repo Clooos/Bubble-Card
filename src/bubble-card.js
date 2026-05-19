@@ -65,7 +65,7 @@ class BubbleCard extends HTMLElement {
 
     // Notify the user if this pop-up has not been migrated to standalone mode yet.
     if (this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {
-      maybeShowMigrationNotice();
+      maybeShowMigrationNotice(this._hass);
     }
 
     if (this._hass) {
@@ -131,6 +131,10 @@ class BubbleCard extends HTMLElement {
     }
     this._hass = hass;
     this.updateBubbleCard();
+
+    if (this.isConnected && this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {
+      maybeShowMigrationNotice(hass);
+    }
   }
 
   updateBubbleCard() {
