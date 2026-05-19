@@ -29,6 +29,22 @@ function normalizeHash(value) {
     return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
 }
 
+function pathsAreEqual(leftPath, rightPath) {
+    if (!Array.isArray(leftPath) || !Array.isArray(rightPath) || leftPath.length !== rightPath.length) {
+        return false;
+    }
+
+    return leftPath.every((segment, index) => segment === rightPath[index]);
+}
+
+function isPathPrefix(prefixPath, path) {
+    if (!Array.isArray(prefixPath) || !Array.isArray(path) || prefixPath.length > path.length) {
+        return false;
+    }
+
+    return prefixPath.every((segment, index) => segment === path[index]);
+}
+
 function getPopupMatchScore(candidate, popupConfig, preferredHash) {
     if (!candidate || typeof candidate !== 'object') {
         return -1;
@@ -66,19 +82,16 @@ function getPopupMatchScore(candidate, popupConfig, preferredHash) {
     return score > 0 ? score : -1;
 }
 
-function findLegacyPopUpStackEntry(node, popupConfig, preferredHash, path = []) {
+function findLegacyPopUpStackEntries(node, popupConfig, preferredHash, path = [], entries = []) {
     if (!node || typeof node !== 'object') {
-        return null;
+        return entries;
     }
 
     if (Array.isArray(node)) {
         for (let index = 0; index < node.length; index += 1) {
-            const match = findLegacyPopUpStackEntry(node[index], popupConfig, preferredHash, [...path, index]);
-            if (match) {
-                return match;
-            }
+            findLegacyPopUpStackEntries(node[index], popupConfig, preferredHash, [...path, index], entries);
         }
-        return null;
+        return entries;
     }
 
     if (node.type === 'vertical-stack' && Array.isArray(node.cards)) {
@@ -94,11 +107,12 @@ function findLegacyPopUpStackEntry(node, popupConfig, preferredHash, path = []) 
         });
 
         if (bestIndex !== -1) {
-            return {
+            entries.push({
                 stackConfig: node,
                 stackPath: path,
                 popupIndex: bestIndex,
-            };
+                popupPath: [...path, 'cards', bestIndex],
+            });
         }
     }
 
@@ -107,13 +121,36 @@ function findLegacyPopUpStackEntry(node, popupConfig, preferredHash, path = []) 
             continue;
         }
 
-        const match = findLegacyPopUpStackEntry(value, popupConfig, preferredHash, [...path, key]);
-        if (match) {
-            return match;
+        findLegacyPopUpStackEntries(value, popupConfig, preferredHash, [...path, key], entries);
+    }
+
+    return entries;
+}
+
+function isLegacyEntryInActiveScope(entry, activeCardPath) {
+    return pathsAreEqual(entry.popupPath, activeCardPath)
+        || pathsAreEqual(entry.stackPath, activeCardPath)
+        || isPathPrefix(activeCardPath, entry.stackPath)
+        || isPathPrefix(entry.stackPath, activeCardPath);
+}
+
+function selectLegacyPopUpStackEntry(entries, options = {}) {
+    if (!Array.isArray(entries) || entries.length === 0) {
+        return null;
+    }
+
+    if (Array.isArray(options.activeCardPath)) {
+        const activeScopedEntry = entries.find((entry) => isLegacyEntryInActiveScope(entry, options.activeCardPath));
+        if (activeScopedEntry) {
+            return activeScopedEntry;
         }
     }
 
-    return null;
+    if (Array.isArray(options.currentViewPath)) {
+        return entries.find((entry) => isPathPrefix(options.currentViewPath, entry.stackPath)) || null;
+    }
+
+    return entries[0];
 }
 
 export function isLegacyPopUpConfig(config) {
@@ -231,11 +268,11 @@ export function findLegacyPopUpStack(lovelaceConfig, popupConfig, options = {}) 
         return null;
     }
 
-    const legacyEntry = findLegacyPopUpStackEntry(
+    const legacyEntry = selectLegacyPopUpStackEntry(findLegacyPopUpStackEntries(
         lovelaceConfig,
         popupConfig,
         options.matchHash || null
-    );
+    ), options);
 
     if (!legacyEntry) {
         return null;
@@ -322,6 +359,28 @@ function getActiveLovelaceConfig(editor) {
         : null;
 }
 
+function getActiveLovelaceViewIndex(editor) {
+    return typeof editor?._getActiveLovelaceViewIndex === 'function'
+        ? editor._getActiveLovelaceViewIndex()
+        : null;
+}
+
+function findConfigPathInScope(lovelaceConfig, targetConfig, scopePath) {
+    if (!targetConfig) {
+        return null;
+    }
+
+    if (Array.isArray(scopePath)) {
+        const scopedConfig = getConfigAtPath(lovelaceConfig, scopePath);
+        const scopedPath = findConfigPath(scopedConfig, targetConfig);
+        if (scopedPath) {
+            return [...scopePath, ...scopedPath];
+        }
+    }
+
+    return findConfigPath(lovelaceConfig, targetConfig);
+}
+
 function getCurrentMigrationConfig(editor) {
     const hashInput = editor.shadowRoot?.querySelector('#hash-input');
     const hashValue = normalizeHash(hashInput?.value);
@@ -338,6 +397,9 @@ function getCurrentMigrationConfig(editor) {
 function getLegacyStandaloneMigration(editor, originalHash) {
     const lovelaceConfig = getActiveLovelaceConfig(editor);
     const popupConfig = getCurrentMigrationConfig(editor);
+    const activeDialogParams = getActiveEditCardDialog(editor)?._params || null;
+    const currentViewPath = getCurrentLovelaceViewPath(lovelaceConfig, editor.hass, getActiveLovelaceViewIndex(editor));
+    const activeCardPath = findConfigPathInScope(lovelaceConfig, activeDialogParams?.cardConfig, currentViewPath);
 
     if (!lovelaceConfig || !isLegacyPopUpConfig(popupConfig)) {
         return null;
@@ -345,6 +407,8 @@ function getLegacyStandaloneMigration(editor, originalHash) {
 
     const legacyStack = findLegacyPopUpStack(lovelaceConfig, popupConfig, {
         matchHash: originalHash,
+        currentViewPath,
+        activeCardPath,
     });
 
     if (!legacyStack) {
@@ -357,6 +421,8 @@ function getLegacyStandaloneMigration(editor, originalHash) {
         popupPath: legacyStack.standalonePath,
         stackPath: legacyStack.stackPath,
         contentCards: legacyStack.contentCards,
+        currentViewPath,
+        activeCardPath,
     };
 }
 
@@ -378,20 +444,12 @@ function createStandaloneSaveCardConfig(editor, popupPath, fallbackConfig, fallb
     };
 }
 
-function isPathPrefix(prefixPath, path) {
-    if (!Array.isArray(prefixPath) || !Array.isArray(path) || prefixPath.length > path.length) {
-        return false;
-    }
-
-    return prefixPath.every((segment, index) => segment === path[index]);
-}
-
-export function createPostMigrationDialogParams(activeDialogParams, previousLovelaceConfig, migration, lovelace) {
+export function createPostMigrationDialogParams(activeDialogParams, previousLovelaceConfig, migration, lovelace, options = {}) {
     if (!activeDialogParams?.cardConfig || !previousLovelaceConfig || !migration?.config) {
         return null;
     }
 
-    const activeCardPath = findConfigPath(previousLovelaceConfig, activeDialogParams.cardConfig);
+    const activeCardPath = findConfigPathInScope(previousLovelaceConfig, activeDialogParams.cardConfig, options.currentViewPath);
     if (!isPathPrefix(activeCardPath, migration.stackPath)) {
         return null;
     }
@@ -419,7 +477,8 @@ function refreshActiveMigrationDialog(editor, migrationContext, migration, lovel
         activeDialog._params,
         migrationContext.lovelaceConfig,
         migration,
-        lovelace
+        lovelace,
+        { currentViewPath: migrationContext.currentViewPath }
     );
 
     if (!dialogParams) {
@@ -479,6 +538,8 @@ async function migrateLegacyPopUpToStandalone(editor, originalHash) {
 
     const migration = migrateLegacyPopUpLovelaceConfig(migrationContext.lovelaceConfig, migrationContext.popupConfig, {
         matchHash: originalHash,
+        currentViewPath: migrationContext.currentViewPath,
+        activeCardPath: migrationContext.activeCardPath,
         convertHorizontalStacks: editor._legacyStandaloneFlattenHorizontalStacks !== false,
     });
 
@@ -582,7 +643,7 @@ function normalizePanelUrl(panelUrl) {
     return typeof panelUrl === 'string' ? panelUrl.trim().replace(/^\/+|\/+$/g, '') : '';
 }
 
-export function getCurrentView(hass = null) {
+function getCurrentPanelAndView(hass = null) {
     const segments = getPathSegments();
     const panelUrl = normalizePanelUrl(hass?.panelUrl) || segments[0] || 'lovelace';
     const panelIndex = segments.indexOf(panelUrl);
@@ -590,7 +651,74 @@ export function getCurrentView(hass = null) {
         ? segments[panelIndex + 1]
         : segments[1];
 
+    return { panelUrl, viewPath: viewPath || '' };
+}
+
+function normalizeRouteValue(value) {
+    return typeof value === 'string' ? value.trim().replace(/^\/+|\/+$/g, '') : '';
+}
+
+function getTitleRouteFallback(title) {
+    return normalizeRouteValue(title)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+function parseViewIndex(value, views) {
+    if (value === null || value === undefined || value === '') {
+        return -1;
+    }
+
+    if (typeof value !== 'number' && typeof value !== 'string') {
+        return -1;
+    }
+
+    const index = typeof value === 'number' ? value : Number(value);
+    return Number.isInteger(index) && index >= 0 && index < views.length ? index : -1;
+}
+
+export function getCurrentView(hass = null) {
+    const { panelUrl, viewPath } = getCurrentPanelAndView(hass);
+
     return viewPath ? `${panelUrl}/${viewPath}` : panelUrl;
+}
+
+export function getCurrentLovelaceViewPath(lovelaceConfig, hass = null, explicitViewIndex = null) {
+    const views = lovelaceConfig?.views;
+    if (!Array.isArray(views) || views.length === 0) {
+        return null;
+    }
+
+    const resolvedExplicitIndex = parseViewIndex(explicitViewIndex, views);
+    if (resolvedExplicitIndex !== -1) {
+        return ['views', resolvedExplicitIndex];
+    }
+
+    const { viewPath } = getCurrentPanelAndView(hass);
+    const normalizedViewPath = normalizeRouteValue(viewPath);
+
+    if (!normalizedViewPath) {
+        return ['views', 0];
+    }
+
+    const numericIndex = parseViewIndex(normalizedViewPath, views);
+    if (numericIndex !== -1) {
+        return ['views', numericIndex];
+    }
+
+    const matchingIndex = views.findIndex((view) => {
+        const configuredPath = normalizeRouteValue(view?.path);
+        if (configuredPath) {
+            return configuredPath === normalizedViewPath;
+        }
+
+        return getTitleRouteFallback(view?.title) === normalizedViewPath;
+    });
+
+    return matchingIndex !== -1 ? ['views', matchingIndex] : null;
 }
 
 export function getMigrationNoticeStorageKey(hass = null) {

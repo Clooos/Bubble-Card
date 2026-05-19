@@ -2384,6 +2384,42 @@ class BubbleCardEditor extends LitElement {
         }
     }
 
+    _getActiveLovelaceViewIndex() {
+        const normalizeViewIndex = (value) => {
+            if (value === null || value === undefined || value === '') {
+                return null;
+            }
+
+            const index = typeof value === 'number' ? value : Number(value);
+            return Number.isInteger(index) && index >= 0 ? index : null;
+        };
+
+        const activeDialogViewIndex = normalizeViewIndex(this._getActiveEditCardDialog()?._params?.viewIndex);
+        if (activeDialogViewIndex !== null) {
+            return activeDialogViewIndex;
+        }
+
+        const homeAssistant = this._getHomeAssistantHost();
+        if (!homeAssistant) {
+            return null;
+        }
+
+        try {
+            const huiRoot = this._deepQuerySelector(homeAssistant.shadowRoot, 'hui-root');
+            const candidates = [
+                huiRoot?._viewIndex,
+                huiRoot?.viewIndex,
+                huiRoot?._selectedView,
+                huiRoot?.selectedView,
+                huiRoot?.lovelace?.current_view,
+            ];
+
+            return candidates.map(normalizeViewIndex).find((candidate) => candidate !== null) ?? null;
+        } catch (_) {
+            return null;
+        }
+    }
+
     _getActiveLovelaceConfig() {
         const lovelace = this._getActiveLovelace();
         if (lovelace?.rawConfig || lovelace?.config) {

@@ -3,6 +3,7 @@ import {
     createPostMigrationDialogParams,
     createStandalonePopUpConfig,
     findLegacyPopUpStack,
+    getCurrentLovelaceViewPath,
     getMigrationNoticeStorageKey,
     hasLegacyHorizontalStacks,
     isLegacyPopUpConfig,
@@ -215,6 +216,27 @@ describe('getMigrationNoticeStorageKey', () => {
     });
 });
 
+describe('getCurrentLovelaceViewPath', () => {
+    test('resolves the current view path from the dashboard URL', () => {
+        setLocationPathname('/lovelace/current-room');
+
+        const lovelaceConfig = {
+            views: [
+                { path: 'other-room', cards: [] },
+                { path: 'current-room', cards: [] },
+            ],
+        };
+
+        expect(getCurrentLovelaceViewPath(lovelaceConfig, { panelUrl: 'lovelace' })).toEqual(['views', 1]);
+    });
+
+    test('falls back to the first view when the dashboard URL has no view segment', () => {
+        setLocationPathname('/lovelace');
+
+        expect(getCurrentLovelaceViewPath({ views: [{ cards: [] }, { cards: [] }] }, { panelUrl: 'lovelace' })).toEqual(['views', 0]);
+    });
+});
+
 describe('maybeShowMigrationNotice', () => {
     test('stores dismissal on the settled view and handles touch before synthesized click', () => {
         const harness = installMigrationNoticeHarness();
@@ -368,6 +390,80 @@ describe('findLegacyPopUpStack', () => {
             popupIndex: 0,
             contentCards: [buttonCard],
         });
+    });
+
+    test('prefers the active card path when another view has the same hash first', () => {
+        const otherPopupConfig = {
+            ...legacyPopupConfig,
+            name: 'Other view header',
+            entity: 'light.other_view',
+        };
+        const otherButtonCard = {
+            ...buttonCard,
+            entity: 'light.other_view_content',
+        };
+        const currentButtonCard = {
+            ...buttonCard,
+            entity: 'light.current_view_content',
+        };
+        const lovelaceConfig = {
+            views: [
+                {
+                    path: 'other',
+                    cards: [
+                        {
+                            type: 'vertical-stack',
+                            cards: [otherPopupConfig, otherButtonCard],
+                        },
+                    ],
+                },
+                {
+                    path: 'current',
+                    cards: [
+                        {
+                            type: 'vertical-stack',
+                            cards: [legacyPopupConfig, currentButtonCard],
+                        },
+                    ],
+                },
+            ],
+        };
+
+        const result = findLegacyPopUpStack(lovelaceConfig, legacyPopupConfig, {
+            matchHash: legacyPopupConfig.hash,
+            activeCardPath: ['views', 1, 'cards', 0, 'cards', 0],
+        });
+
+        expect(result).toMatchObject({
+            stackPath: ['views', 1, 'cards', 0],
+            popupIndex: 0,
+            contentCards: [currentButtonCard],
+        });
+    });
+
+    test('does not fall back to another view when scoped to the current view', () => {
+        const lovelaceConfig = {
+            views: [
+                {
+                    path: 'other',
+                    cards: [
+                        {
+                            type: 'vertical-stack',
+                            cards: [legacyPopupConfig, buttonCard],
+                        },
+                    ],
+                },
+                {
+                    path: 'current',
+                    cards: [separatorCard],
+                },
+            ],
+        };
+
+        expect(findLegacyPopUpStack(lovelaceConfig, legacyPopupConfig, {
+            matchHash: legacyPopupConfig.hash,
+            currentViewPath: ['views', 1],
+        })).toBeNull();
     });
 });
 
@@ -595,6 +691,68 @@ describe('migrateLegacyPopUpLovelaceConfig', () => {
                     cards: [secondLegacyPopupConfig, secondButtonCard],
                 },
             ],
+        });
+    });
+
+    test('migrates the scoped view when another view uses the same hash', () => {
+        const otherPopupConfig = {
+            ...legacyPopupConfig,
+            name: 'Other view header',
+            entity: 'light.other_header',
+        };
+        const otherButtonCard = {
+            ...buttonCard,
+            entity: 'light.other_content',
+        };
+        const currentButtonCard = {
+            ...buttonCard,
+            entity: 'light.current_content',
+        };
+        const editedCurrentPopupConfig = {
+            ...legacyPopupConfig,
+            name: 'Edited current header',
+            icon: 'mdi:chef-hat',
+        };
+        const lovelaceConfig = {
+            views: [
+                {
+                    path: 'other',
+                    cards: [
+                        {
+                            type: 'vertical-stack',
+                            cards: [otherPopupConfig, otherButtonCard],
+                        },
+                    ],
+                },
+                {
+                    path: 'current',
+                    cards: [
+                        {
+                            type: 'vertical-stack',
+                            cards: [legacyPopupConfig, currentButtonCard],
+                        },
+                    ],
+                },
+            ],
+        };
+
+        const result = migrateLegacyPopUpLovelaceConfig(lovelaceConfig, editedCurrentPopupConfig, {
+            matchHash: legacyPopupConfig.hash,
+            currentViewPath: ['views', 1],
+        });
+
+        expect(result.popupPath).toEqual(['views', 1, 'cards', 0]);
+        expect(result.popupConfig).toEqual({
+            ...editedCurrentPopupConfig,
+            cards: [{
+                ...currentButtonCard,
+                grid_options: { columns: 12 },
+            }],
+        });
+        expect(result.config.views[1].cards[0]).toEqual(result.popupConfig);
+        expect(result.config.views[0].cards[0]).toEqual({
+            type: 'vertical-stack',
+            cards: [otherPopupConfig, otherButtonCard],
         });
     });
 });
