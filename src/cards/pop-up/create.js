@@ -464,6 +464,12 @@ export function prepareStandaloneStructure(context) {
     (context.shadowRoot ?? context.content).appendChild(context.popUp);
   }
 
+  // Standalone pop-ups still need to match legacy module/custom-style snippets
+  // that target `#root` (the old vertical-stack popup shell in v3.1.x).
+  // Keeping the same id on the real popup shell preserves those selectors
+  // without requiring module authors or users to update existing YAML.
+  context.popUp.id = "root";
+
   // The ha-card shell is not used by standalone popups – the popup lives in
   // context.popUp at the shadow-root level. Detach it so card-mod styles
   // injected into ha-card have zero stacking-context or layout effect.

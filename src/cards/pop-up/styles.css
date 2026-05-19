@@ -20,6 +20,9 @@
     --bubble-pop-up-visible-bottom-padding: 18px;
     --bubble-pop-up-extra-bottom-space: max(0px, calc(var(--bubble-pop-up-bottom-padding, 84px) - var(--bubble-pop-up-visible-bottom-padding, 18px)));
     padding: 18px 18px var(--bubble-pop-up-visible-bottom-padding, 18px) 18px;
+    border-radius: var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)));
+    -webkit-clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))));
+    clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))));
     box-sizing: border-box;
     touch-action: pan-x pan-y pinch-zoom;
     overscroll-behavior: contain;
@@ -94,11 +97,9 @@
     margin-left: var(--custom-margin);
     left: 7px;
     z-index: 5 !important;
-    overflow: hidden;
     isolation: isolate;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    contain: paint;
 }
 
 .bubble-pop-up:not(.editor)::before {
@@ -254,7 +255,7 @@
 .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) .bubble-pop-up-container {
     height: 100%;
     margin-top: -50px;
-    padding-top: 40px;
+    padding-top: 18px;
     padding-bottom: calc(140px + var(--custom-height-offset-mobile));
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
@@ -809,7 +810,9 @@
 }
 
 .is-standalone-pop-up > .bubble-pop-up-container {
-    padding-top: calc(18px + var(--bubble-pop-up-gap, 14px));
+    --bubble-pop-up-header-gap-reserve: var(--bubble-pop-up-header-gap, 8px);
+    margin-top: calc(-1 * var(--bubble-pop-up-header-overlap, 50px) + var(--bubble-pop-up-header-gap-reserve));
+    padding-top: max(18px, calc(18px + var(--bubble-pop-up-gap, 14px) - var(--bubble-pop-up-header-gap-reserve)));
 }
 
 .bubble-pop-up.editor > .bubble-pop-up-container {

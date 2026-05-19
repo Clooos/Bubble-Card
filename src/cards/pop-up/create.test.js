@@ -431,9 +431,28 @@ describe('prepareStandaloneStructure', () => {
         expect(context.popUp).toBeDefined();
         expect(shadowRoot.children).toContain(context.popUp);
         expect(content.children).not.toContain(context.popUp);
+        expect(context.popUp.id).toBe('root');
         // ha-card shell must be detached so card-mod styles on it have zero DOM effect
         expect(card.parentNode).toBeNull();
         expect(shadowRoot.children).not.toContain(card);
+    });
+
+    test('keeps the legacy #root selector target on reused standalone popup shells', () => {
+        const popUp = createMockElement('div');
+        const context = {
+            config: {},
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp,
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        prepareStandaloneStructure(context);
+
+        expect(context.popUp).toBe(popUp);
+        expect(context.popUp.id).toBe('root');
     });
 
     test('does not cancel touch movement when popup content is not scrollable', () => {

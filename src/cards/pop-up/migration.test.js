@@ -48,6 +48,19 @@ const separatorCard = {
     name: 'Lights',
 };
 
+const mushroomAlarmPanelCard = {
+    type: 'custom:mushroom-alarm-control-panel-card',
+    entity: 'alarm_control_panel.security_panel',
+    name: 'Security Panel',
+};
+
+const gridCard = {
+    type: 'grid',
+    square: false,
+    columns: 2,
+    cards: [buttonCard, { ...buttonCard, entity: 'light.second' }],
+};
+
 const horizontalStackCard = {
     type: 'horizontal-stack',
     cards: [
@@ -69,6 +82,11 @@ const horizontalStackCard = {
     ],
 };
 
+const mixedHorizontalStackCard = {
+    type: 'horizontal-stack',
+    cards: [buttonCard, mushroomAlarmPanelCard],
+};
+
 describe('isLegacyPopUpConfig', () => {
     test('detects legacy pop-up configs without standalone cards', () => {
         expect(isLegacyPopUpConfig(legacyPopupConfig)).toBe(true);
@@ -86,19 +104,44 @@ describe('createStandalonePopUpConfig', () => {
 
         expect(standaloneConfig).toEqual({
             ...legacyPopupConfig,
-            cards: [buttonCard],
+            cards: [{
+                ...buttonCard,
+                grid_options: { columns: 12 },
+            }],
         });
         expect(standaloneConfig).not.toBe(legacyPopupConfig);
         expect(standaloneConfig.cards[0]).not.toBe(buttonCard);
     });
 
-    test('removes inherited width and layout settings from migrated popup cards', () => {
+    test('forces full-width legacy stack layout while removing inherited width bounds', () => {
         const standaloneConfig = createStandalonePopUpConfig(legacyPopupConfig, [widthConfiguredButtonCard]);
 
         expect(standaloneConfig.cards).toEqual([
             {
                 ...buttonCard,
-                grid_options: { rows: 1.5 },
+                grid_options: { rows: 1.5, columns: 12 },
+            },
+        ]);
+    });
+
+    test('keeps non-Bubble legacy stack cards full-width and auto-height', () => {
+        const standaloneConfig = createStandalonePopUpConfig(legacyPopupConfig, [mushroomAlarmPanelCard]);
+
+        expect(standaloneConfig.cards).toEqual([
+            {
+                ...mushroomAlarmPanelCard,
+                grid_options: { columns: 12, rows: 'auto' },
+            },
+        ]);
+    });
+
+    test('preserves HA grid card columns while making the grid card itself full-width', () => {
+        const standaloneConfig = createStandalonePopUpConfig(legacyPopupConfig, [gridCard]);
+
+        expect(standaloneConfig.cards).toEqual([
+            {
+                ...gridCard,
+                grid_options: { columns: 12, rows: 'auto' },
             },
         ]);
     });
@@ -129,7 +172,16 @@ describe('findLegacyPopUpStack', () => {
         });
         expect(result.standaloneConfig).toEqual({
             ...legacyPopupConfig,
-            cards: [buttonCard, separatorCard],
+            cards: [
+                {
+                    ...buttonCard,
+                    grid_options: { columns: 12 },
+                },
+                {
+                    ...separatorCard,
+                    grid_options: { columns: 12 },
+                },
+            ],
         });
     });
 
@@ -215,7 +267,16 @@ describe('migrateLegacyPopUpLovelaceConfig', () => {
         expect(result.popupPath).toEqual(['views', 0, 'cards', 0]);
         expect(result.popupConfig).toEqual({
             ...legacyPopupConfig,
-            cards: [buttonCard, separatorCard],
+            cards: [
+                {
+                    ...buttonCard,
+                    grid_options: { columns: 12 },
+                },
+                {
+                    ...separatorCard,
+                    grid_options: { columns: 12 },
+                },
+            ],
         });
         expect(result.config.views[0].cards[0]).toEqual(result.popupConfig);
     });
@@ -246,7 +307,10 @@ describe('migrateLegacyPopUpLovelaceConfig', () => {
 
         expect(result.popupConfig).toEqual({
             ...editedPopupConfig,
-            cards: [buttonCard],
+            cards: [{
+                ...buttonCard,
+                grid_options: { columns: 12 },
+            }],
         });
     });
 
@@ -283,7 +347,10 @@ describe('migrateLegacyPopUpLovelaceConfig', () => {
         });
 
         expect(result.popupConfig.cards).toEqual([
-            separatorCard,
+            {
+                ...separatorCard,
+                grid_options: { columns: 12 },
+            },
             {
                 type: 'custom:bubble-card',
                 card_type: 'button',
@@ -297,6 +364,23 @@ describe('migrateLegacyPopUpLovelaceConfig', () => {
                 button_type: 'name',
                 name: 'Right',
                 grid_options: { rows: 1.4, columns: 6 },
+            },
+        ]);
+    });
+
+    test('keeps flattened non-Bubble horizontal-stack cards auto-height', () => {
+        const standaloneConfig = createStandalonePopUpConfig(legacyPopupConfig, [mixedHorizontalStackCard], {
+            convertHorizontalStacks: true,
+        });
+
+        expect(standaloneConfig.cards).toEqual([
+            {
+                ...buttonCard,
+                grid_options: { columns: 6 },
+            },
+            {
+                ...mushroomAlarmPanelCard,
+                grid_options: { columns: 6, rows: 'auto' },
             },
         ]);
     });
@@ -343,7 +427,10 @@ describe('migrateLegacyPopUpLovelaceConfig', () => {
             cards: [
                 {
                     ...legacyPopupConfig,
-                    cards: [buttonCard],
+                    cards: [{
+                        ...buttonCard,
+                        grid_options: { columns: 12 },
+                    }],
                 },
                 {
                     type: 'vertical-stack',

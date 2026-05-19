@@ -141,7 +141,9 @@ function isHorizontalStackCard(cardConfig) {
 function stripMigratedCardColumns(cardConfig) {
     const nextCardConfig = cloneConfig(cardConfig) || {};
 
-    delete nextCardConfig.columns;
+    if (nextCardConfig.type === 'custom:bubble-card') {
+        delete nextCardConfig.columns;
+    }
 
     if (nextCardConfig.grid_options) {
         delete nextCardConfig.grid_options.columns;
@@ -160,6 +162,30 @@ function stripMigratedCardColumns(cardConfig) {
     return nextCardConfig;
 }
 
+function shouldKeepMigratedCardAutoHeight(cardConfig) {
+    return cardConfig?.type !== 'custom:bubble-card';
+}
+
+function applyMigratedLegacyGridLayout(cardConfig, columns = POPUP_GRID_COLUMN_COUNT) {
+    const nextCardConfig = stripMigratedCardColumns(cardConfig);
+    const gridOptions = {
+        ...(nextCardConfig.grid_options || {}),
+        columns,
+    };
+
+    // Legacy pop-up content lived in a vertical-stack where third-party/HA cards
+    // sized themselves naturally. In the standalone grid, those cards can report
+    // compact section defaults (often half-width or fixed row heights), which
+    // squashes panels after migration. Make migrated non-Bubble cards full-width
+    // and auto-height explicitly while keeping Bubble Card's own row semantics.
+    if (shouldKeepMigratedCardAutoHeight(nextCardConfig)) {
+        gridOptions.rows = 'auto';
+    }
+
+    nextCardConfig.grid_options = gridOptions;
+    return nextCardConfig;
+}
+
 function distributeHorizontalStackColumns(cardCount) {
     if (!Number.isInteger(cardCount) || cardCount <= 0 || cardCount > POPUP_GRID_COLUMN_COUNT) {
         return null;
@@ -172,25 +198,18 @@ function distributeHorizontalStackColumns(cardCount) {
 }
 
 function applyHorizontalStackGridColumns(cardConfig, columns) {
-    const nextCardConfig = stripMigratedCardColumns(cardConfig);
-
-    nextCardConfig.grid_options = {
-        ...(nextCardConfig.grid_options || {}),
-        columns,
-    };
-
-    return nextCardConfig;
+    return applyMigratedLegacyGridLayout(cardConfig, columns);
 }
 
 function normalizeLegacyContentCards(cards = [], options = {}) {
     return cards.flatMap((cardConfig) => {
         if (!options.convertHorizontalStacks || !isHorizontalStackCard(cardConfig)) {
-            return [stripMigratedCardColumns(cardConfig)];
+            return [applyMigratedLegacyGridLayout(cardConfig)];
         }
 
         const assignedColumns = distributeHorizontalStackColumns(cardConfig.cards.length);
         if (!assignedColumns) {
-            return [stripMigratedCardColumns(cardConfig)];
+            return [applyMigratedLegacyGridLayout(cardConfig)];
         }
 
         return cardConfig.cards.map((childCardConfig, index) => applyHorizontalStackGridColumns(childCardConfig, assignedColumns[index]));
