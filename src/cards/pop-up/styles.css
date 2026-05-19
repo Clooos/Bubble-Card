@@ -506,7 +506,7 @@
     transform: translate3d(0, 0, 0);
 }
 
-.bubble-pop-up.is-opening,
+.bubble-pop-up.is-opening:not(.has-popup-shadow),
 .bubble-pop-up.is-closing {
     box-shadow: none !important;
 }

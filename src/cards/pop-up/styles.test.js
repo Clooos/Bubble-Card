@@ -26,6 +26,11 @@ function getLegacyDefaultContainerRule() {
   return match?.[1] ?? '';
 }
 
+function getOpeningShadowSuppressionRule() {
+  const match = styles.match(/\.bubble-pop-up\.is-opening:not\(\.has-popup-shadow\),\s*\.bubble-pop-up\.is-closing\s*\{([^}]*)\}/);
+  return match?.[1] ?? '';
+}
+
 describe('pop-up styles', () => {
   test('clips foreground content without clipping the popup background shell', () => {
     const popUpRule = getBasePopUpRule();
@@ -53,5 +58,13 @@ describe('pop-up styles', () => {
 
     expect(rule).toContain('padding-top: 18px');
     expect(rule).not.toContain('padding-top: 40px');
+  });
+
+  test('keeps configured popup shadow visible during the opening transition', () => {
+    const rule = getOpeningShadowSuppressionRule();
+
+    expect(rule).toContain('box-shadow: none !important');
+    expect(styles).toMatch(/\.is-popup-opened\s*\{[^}]*box-shadow: 0px 0px 50px rgba\(0, 0, 0, var\(--custom-shadow-opacity\)\);/);
+    expect(styles).not.toMatch(/\.bubble-pop-up\.is-opening\s*,\s*\.bubble-pop-up\.is-closing\s*\{[^}]*box-shadow:\s*none\s*!important/);
   });
 });

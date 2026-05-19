@@ -186,7 +186,10 @@ function _applyPopupVariables(context) {
     "--custom-popup-filter",
     !_useBackdropBlur ? `blur(${_bgBlur}px)` : "none"
   );
-  context.popUp.style.setProperty("--custom-shadow-opacity", (context.config.shadow_opacity ?? 0) / 100);
+  const shadowOpacity = Number(context.config.shadow_opacity ?? 0) / 100;
+  const normalizedShadowOpacity = Number.isFinite(shadowOpacity) ? shadowOpacity : 0;
+  context.popUp.style.setProperty("--custom-shadow-opacity", normalizedShadowOpacity);
+  context.popUp.classList.toggle("has-popup-shadow", normalizedShadowOpacity > 0);
 }
 
 function _createOrReusePopUpContainer(context) {

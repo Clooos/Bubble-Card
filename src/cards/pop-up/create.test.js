@@ -455,6 +455,40 @@ describe('prepareStandaloneStructure', () => {
         expect(context.popUp.id).toBe('root');
     });
 
+    test('marks popups with configured shadow for the opening CSS state', () => {
+        const context = {
+            config: { shadow_opacity: '100' },
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp: createMockElement('div'),
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        prepareStandaloneStructure(context);
+
+        expect(context.popUp.style.setProperty).toHaveBeenCalledWith('--custom-shadow-opacity', 1);
+        expect(context.popUp.classList.contains('has-popup-shadow')).toBe(true);
+    });
+
+    test('clears the opening shadow marker when shadow opacity is zero', () => {
+        const context = {
+            config: { shadow_opacity: '0' },
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp: createMockElement('div', 'has-popup-shadow'),
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        prepareStandaloneStructure(context);
+
+        expect(context.popUp.style.setProperty).toHaveBeenCalledWith('--custom-shadow-opacity', 0);
+        expect(context.popUp.classList.contains('has-popup-shadow')).toBe(false);
+    });
+
     test('does not cancel touch movement when popup content is not scrollable', () => {
         const context = buildStandalonePopupContext({ scrollHeight: 100, clientHeight: 100 });
 
