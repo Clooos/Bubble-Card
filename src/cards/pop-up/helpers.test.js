@@ -303,7 +303,7 @@ describe('standalone popup lifecycle', () => {
         // RAF5: global body scroll lock after standalone content has settled.
         flushRafQueue();
 
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true, context.popUp);
         expect(callAction).toHaveBeenCalledWith(context.popUp, context.config, 'open_action');
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
     });
@@ -328,7 +328,7 @@ describe('standalone popup lifecycle', () => {
 
         flushRafQueue();
 
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true, context.popUp);
     });
 
     test('clears stale inline drag transform before reopening a standalone popup', () => {
@@ -342,6 +342,18 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue();
 
         expect(context.popUp.style.transform).toBe('');
+    });
+
+    test('locks body scroll immediately for instant standalone opens from an existing hash', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        window.location.hash = '#popup-a';
+
+        openPopup(context, true);
+
+        expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true, context.popUp);
     });
 
     test('syncs already-mounted popup cards inline when they are still present in the popup DOM', () => {
@@ -603,7 +615,7 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
     });
 
-    test('registers the popup wheel listener so non-scrollable Safari gestures can be blocked', () => {
+    test('does not register a popup wheel listener so nested scrollables keep native wheel behavior', () => {
         const context = createStandaloneContext({ hash: '#popup-a' });
         usedContexts.push(context);
 
@@ -616,8 +628,8 @@ describe('standalone popup lifecycle', () => {
         const wheelEvent = new Event('wheel', { cancelable: true });
         context.popUp.dispatchEvent(wheelEvent);
 
-        expect(context.handleWheel).toHaveBeenCalledTimes(1);
-        expect(wheelEvent.defaultPrevented).toBe(true);
+        expect(context.handleWheel).not.toHaveBeenCalled();
+        expect(wheelEvent.defaultPrevented).toBe(false);
     });
 
     test('rolls back a failed standalone open and allows a later retry', () => {
@@ -655,7 +667,7 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue(); // deferred body scroll
 
         expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true, context.popUp);
 
         consoleError.mockRestore();
     });

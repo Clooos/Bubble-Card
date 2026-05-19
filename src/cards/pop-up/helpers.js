@@ -858,7 +858,7 @@ function schedulePopupBodyScrollLock(context) {
                 return;
             }
 
-            toggleBodyScroll(true);
+            toggleBodyScroll(true, context.popUp);
         });
     };
 
@@ -1079,6 +1079,7 @@ function openStandalonePopup(context, instant = false) {
                 setPopupOpeningMarker(context, false);
             }
             setStandalonePopupState(popUp, true);
+            toggleBodyScroll(true, context.popUp);
             triggerQuickOpenAnimation(context);
             requestAnimationFrame(() => {
                 try {
@@ -1308,8 +1309,7 @@ function ensurePopupListenerBindings(context) {
 function getPopupBaseListeners(context) {
     return [
         [context.popUp, 'touchstart', context.handleTouchStart, { passive: true }],
-        [context.popUp, 'touchmove', context.handleTouchMove, { passive: false }],
-        [context.popUp, 'wheel', context.handleWheel, { passive: false }],
+        [context.popUp, 'touchmove', context.handleTouchMove, { passive: true }],
         [context.popUp, 'touchend', context.handleTouchEnd, { passive: true }],
         [context.popUp, 'touchcancel', context.handleTouchCancel, { passive: true }],
         [context._popupHeaderTouchTarget, 'touchmove', context.handleHeaderTouchMove, { passive: false }],

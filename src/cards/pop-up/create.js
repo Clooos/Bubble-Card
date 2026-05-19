@@ -87,36 +87,6 @@ function _clearPopupDragTransform(context) {
   }
 }
 
-function _isPopupContentScrollable(context) {
-  if (context?._cachedPopupScrollableState === true) {
-    return true;
-  }
-
-  const popUpContainer = context.elements?.popUpContainer;
-  if (!popUpContainer) {
-    return false;
-  }
-
-  if (popUpContainer.classList?.contains?.('is-scrollable')) {
-    return true;
-  }
-
-  if (typeof popUpContainer.scrollHeight === 'number' && typeof popUpContainer.clientHeight === 'number') {
-    return popUpContainer.scrollHeight - popUpContainer.clientHeight > 1;
-  }
-
-  return false;
-}
-
-function _preventPopupScrollChaining(context, event) {
-  if (_isPopupContentScrollable(context) || event?.cancelable === false) {
-    return false;
-  }
-
-  event.preventDefault?.();
-  return true;
-}
-
 function _configurePopupInteractionHandlers(context) {
   const closePopup = () => {
     removeHash(true);
@@ -193,8 +163,6 @@ function _configurePopupInteractionHandlers(context) {
       return;
     }
 
-    _preventPopupScrollChaining(context, event);
-
     const currentTouchY = currentTouch.clientY;
     const touchStartY = context._popupTouchStartY ?? currentTouchY;
     const touchMoveDistance = currentTouchY - touchStartY;
@@ -205,10 +173,6 @@ function _configurePopupInteractionHandlers(context) {
     }
 
     context._popupLastTouchY = currentTouchY;
-  };
-
-  context.handleWheel = (event) => {
-    _preventPopupScrollChaining(context, event);
   };
 }
 

@@ -847,6 +847,12 @@ const scrollLockBodyClass = 'bubble-body-scroll-locked';
 const scrollLockLayerId = 'bubble-card-scroll-lock-layer';
 const scrollLockLayerClass = 'bubble-scroll-lock-layer';
 const scrollLockLayerActiveClass = 'is-active';
+const activeScrollLockTargets = new Set();
+let scrollLockGlobalListenersAdded = false;
+let scrollLockOverflowCache = new WeakMap();
+let scrollLockOverflowCacheFrame = null;
+let lastScrollLockTouchX = null;
+let lastScrollLockTouchY = null;
 
 const hasPassiveScrollLockEvents = (() => {
     if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') {
@@ -871,6 +877,8 @@ const hasPassiveScrollLockEvents = (() => {
 })();
 
 const activeScrollLockEventOptions = hasPassiveScrollLockEvents ? { passive: false } : undefined;
+const globalScrollLockEventOptions = hasPassiveScrollLockEvents ? { passive: false, capture: true } : true;
+const passiveGlobalScrollLockEventOptions = hasPassiveScrollLockEvents ? { passive: true, capture: true } : true;
 
 function injectNoScrollStyles() {
     const styleId = 'bubble-card-no-scroll-styles';
@@ -947,7 +955,273 @@ function getScrollLockLayer() {
     return layer;
 }
 
-export function toggleBodyScroll(disable) {
+function getComposedParent(element) {
+    if (!element) {
+        return null;
+    }
+
+    if (element.parentElement) {
+        return element.parentElement;
+    }
+
+    const rootNode = typeof element.getRootNode === 'function'
+        ? element.getRootNode()
+        : null;
+
+    return rootNode?.host || null;
+}
+
+function getEventPath(event) {
+    if (typeof event?.composedPath === 'function') {
+        return event.composedPath();
+    }
+
+    const path = [];
+    let current = event?.target || null;
+
+    while (current) {
+        path.push(current);
+        current = getComposedParent(current);
+    }
+
+    return path;
+}
+
+function hasClass(element, className) {
+    return !!element?.classList?.contains?.(className);
+}
+
+function isHorizontalButtonsStackElement(element) {
+    return hasClass(element, 'horizontal-buttons-stack-card') ||
+        hasClass(element, 'horizontal-buttons-stack-container') ||
+        hasClass(element, 'bubble-horizontal-buttons-stack-card-container');
+}
+
+function clearScrollLockOverflowCache() {
+    scrollLockOverflowCache = new WeakMap();
+    scrollLockOverflowCacheFrame = null;
+}
+
+function scheduleScrollLockOverflowCacheClear() {
+    if (scrollLockOverflowCacheFrame !== null) {
+        return;
+    }
+
+    if (typeof requestAnimationFrame === 'function') {
+        scrollLockOverflowCacheFrame = requestAnimationFrame(clearScrollLockOverflowCache);
+        return;
+    }
+
+    scrollLockOverflowCacheFrame = setTimeout(clearScrollLockOverflowCache, 16);
+}
+
+function getScrollLockOverflow(element) {
+    const cachedOverflow = scrollLockOverflowCache.get(element);
+    if (cachedOverflow) {
+        return cachedOverflow;
+    }
+
+    let overflowX = element?.style?.overflowX || '';
+    let overflowY = element?.style?.overflowY || '';
+
+    try {
+        if (typeof getComputedStyle === 'function') {
+            const computedStyle = getComputedStyle(element);
+            overflowX = computedStyle?.overflowX || overflowX;
+            overflowY = computedStyle?.overflowY || overflowY;
+        }
+    } catch (_) {}
+
+    const overflow = { x: overflowX, y: overflowY };
+    scrollLockOverflowCache.set(element, overflow);
+    scheduleScrollLockOverflowCacheClear();
+
+    return overflow;
+}
+
+function isOverflowScrollable(overflowValue) {
+    return !overflowValue || !['hidden', 'clip', 'visible'].includes(overflowValue);
+}
+
+function isScrollableElementOnAxis(element, axis) {
+    if (!element || typeof element !== 'object') {
+        return false;
+    }
+
+    const isHorizontal = axis === 'x';
+    const scrollSize = Number(isHorizontal ? element.scrollWidth : element.scrollHeight) || 0;
+    const clientSize = Number(isHorizontal ? element.clientWidth : element.clientHeight) || 0;
+
+    if (scrollSize - clientSize <= 1) {
+        return false;
+    }
+
+    const overflow = getScrollLockOverflow(element);
+    return isOverflowScrollable(isHorizontal ? overflow.x : overflow.y);
+}
+
+function canScrollElementOnAxis(element, axis, delta) {
+    if (!isScrollableElementOnAxis(element, axis)) {
+        return false;
+    }
+
+    if (!delta) {
+        return true;
+    }
+
+    const isHorizontal = axis === 'x';
+    const scrollPosition = Number(isHorizontal ? element.scrollLeft : element.scrollTop) || 0;
+    const scrollSize = Number(isHorizontal ? element.scrollWidth : element.scrollHeight) || 0;
+    const clientSize = Number(isHorizontal ? element.clientWidth : element.clientHeight) || 0;
+    const maxScroll = scrollSize - clientSize;
+
+    if (delta < 0) {
+        return scrollPosition > 0;
+    }
+
+    return scrollPosition < maxScroll - 1;
+}
+
+function canScrollElementInDirection(element, deltaX = 0, deltaY = 0) {
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (!absX && !absY) {
+        return canScrollElementOnAxis(element, 'x', 0) || canScrollElementOnAxis(element, 'y', 0);
+    }
+
+    if (absX > absY) {
+        return canScrollElementOnAxis(element, 'x', deltaX) || canScrollElementOnAxis(element, 'y', deltaY);
+    }
+
+    return canScrollElementOnAxis(element, 'y', deltaY) || canScrollElementOnAxis(element, 'x', deltaX);
+}
+
+function canScrollWithinPath(path, lockTarget, deltaX, deltaY, stopAtLockTarget = true) {
+    for (const element of path) {
+        if (stopAtLockTarget && lockTarget && element === lockTarget) {
+            break;
+        }
+
+        if (canScrollElementInDirection(element, deltaX, deltaY)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function shouldPreventGlobalScrollEvent(event, deltaX = 0, deltaY = 0) {
+    if (event?.cancelable === false) {
+        return false;
+    }
+
+    if (event?.touches?.length > 1 || event?.targetTouches?.length > 1) {
+        return false;
+    }
+
+    const path = getEventPath(event);
+
+    // Single pass over the event path to detect: the active lock target (if
+    // any), an external allowance (HA sidebar always-allow, HBS scroll if
+    // scrollable), and scrollables above the lock target.
+    let lockTarget = null;
+    let hasSidebarAllowance = false;
+    let hasHorizontalButtonsStack = false;
+    let canScrollAboveLockTarget = false;
+
+    for (const element of path) {
+        if (!hasSidebarAllowance && element?.tagName?.toLowerCase?.() === 'ha-sidebar') {
+            hasSidebarAllowance = true;
+        }
+
+        if (!hasHorizontalButtonsStack && isHorizontalButtonsStackElement(element)) {
+            hasHorizontalButtonsStack = true;
+        }
+
+        if (!lockTarget && activeScrollLockTargets.has(element)) {
+            lockTarget = element;
+            // Once we hit the lock target, scrollables below it (background)
+            // must not unlock the page, so stop checking scrollability.
+            continue;
+        }
+
+        if (!lockTarget && !canScrollAboveLockTarget &&
+            canScrollElementInDirection(element, deltaX, deltaY)) {
+            canScrollAboveLockTarget = true;
+        }
+    }
+
+    if (hasSidebarAllowance) {
+        return false;
+    }
+
+    if (lockTarget) {
+        return !canScrollAboveLockTarget;
+    }
+
+    if (hasHorizontalButtonsStack) {
+        // HBS sits outside the popup: allow its own scroll, block dashboard
+        // scroll-chain when it reaches its edges.
+        return !canScrollWithinPath(path, null, deltaX, deltaY, false);
+    }
+
+    return true;
+}
+
+function preventGlobalScrollEvent(event, deltaX = 0, deltaY = 0) {
+    if (!shouldPreventGlobalScrollEvent(event, deltaX, deltaY)) {
+        return;
+    }
+
+    event.preventDefault?.();
+}
+
+function handleGlobalScrollLockWheel(event) {
+    preventGlobalScrollEvent(event, Number(event?.deltaX) || 0, Number(event?.deltaY) || 0);
+}
+
+function handleGlobalScrollLockTouchStart(event) {
+    lastScrollLockTouchX = event?.touches?.[0]?.clientX ?? null;
+    lastScrollLockTouchY = event?.touches?.[0]?.clientY ?? null;
+}
+
+function handleGlobalScrollLockTouchMove(event) {
+    const currentTouchX = event?.touches?.[0]?.clientX;
+    const currentTouchY = event?.touches?.[0]?.clientY;
+    const deltaX = typeof currentTouchX === 'number' && typeof lastScrollLockTouchX === 'number'
+        ? lastScrollLockTouchX - currentTouchX
+        : 0;
+    const deltaY = typeof currentTouchY === 'number' && typeof lastScrollLockTouchY === 'number'
+        ? lastScrollLockTouchY - currentTouchY
+        : 0;
+
+    preventGlobalScrollEvent(event, deltaX, deltaY);
+    lastScrollLockTouchX = typeof currentTouchX === 'number' ? currentTouchX : null;
+    lastScrollLockTouchY = typeof currentTouchY === 'number' ? currentTouchY : null;
+}
+
+function clearGlobalScrollLockTouch() {
+    lastScrollLockTouchX = null;
+    lastScrollLockTouchY = null;
+}
+
+function toggleGlobalScrollLockListeners(enable) {
+    if (scrollLockGlobalListenersAdded === enable || typeof window === 'undefined' || typeof window.addEventListener !== 'function') {
+        return;
+    }
+
+    const method = enable ? 'addEventListener' : 'removeEventListener';
+
+    window[method]('wheel', handleGlobalScrollLockWheel, globalScrollLockEventOptions);
+    window[method]('touchstart', handleGlobalScrollLockTouchStart, passiveGlobalScrollLockEventOptions);
+    window[method]('touchmove', handleGlobalScrollLockTouchMove, globalScrollLockEventOptions);
+    window[method]('touchend', clearGlobalScrollLockTouch, passiveGlobalScrollLockEventOptions);
+    window[method]('touchcancel', clearGlobalScrollLockTouch, passiveGlobalScrollLockEventOptions);
+    scrollLockGlobalListenersAdded = enable;
+}
+
+export function toggleBodyScroll(disable, lockTarget = null) {
     injectNoScrollStyles();
 
     const body = document.body;
@@ -956,20 +1230,20 @@ export function toggleBodyScroll(disable) {
     const scrollLockLayer = getScrollLockLayer();
 
     if (disable) {
-        if (body.classList.contains(scrollLockBodyClass)) {
-            return;
-        }
-
         body.classList.add(scrollLockBodyClass);
+        if (lockTarget) {
+            activeScrollLockTargets.add(lockTarget);
+        }
+        toggleGlobalScrollLockListeners(true);
         scrollLockLayer?.classList.add(scrollLockLayerActiveClass);
         return;
     }
 
-    if (!body.classList.contains(scrollLockBodyClass)) {
-        return;
-    }
-
     body.classList.remove(scrollLockBodyClass);
+    activeScrollLockTargets.clear();
+    clearGlobalScrollLockTouch();
+    clearScrollLockOverflowCache();
+    toggleGlobalScrollLockListeners(false);
     scrollLockLayer?.classList.remove(scrollLockLayerActiveClass);
 }
 
