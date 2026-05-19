@@ -161,6 +161,11 @@ function _getStandaloneDialogOpener(context) {
         return context._standaloneOpenCardDialog.bind(context);
     }
 
+    const rememberedOpener = _getRememberedStandaloneDialogOpener(context);
+    if (rememberedOpener) {
+        return rememberedOpener;
+    }
+
     const registeredOpener = _getRegisteredStandaloneDialogOpener(context);
     if (registeredOpener) {
         return registeredOpener;
@@ -179,6 +184,20 @@ function _getStandaloneDialogOpener(context) {
     }
 
     return null;
+}
+
+function _getRememberedStandaloneDialogOpener(context) {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const popupHash = _normalizeHash(context?.config?.hash);
+    if (!popupHash) {
+        return null;
+    }
+
+    const opener = window.__bubbleStandalonePopupEditorOpeners?.get?.(popupHash);
+    return typeof opener === 'function' ? opener : null;
 }
 
 function _getRegisteredStandaloneDialogOpener(context) {

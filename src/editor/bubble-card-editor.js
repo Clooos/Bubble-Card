@@ -28,7 +28,7 @@ import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
 import cardsEditorStyles from '../cards/pop-up/cards/styles.css';
 import { getLazyLoadedPanelContent } from './utils.js';
-import { bridgeDialogCloseToParent, createReopenedStandaloneParentDialogParams, createStandaloneParentDialogParams } from './standalone-dialog-bridge.js';
+import { bridgeDialogCloseToParent, createReopenedStandaloneParentDialogParams, createStandaloneParentDialogParams, getDialogCardElementEditor, restoreDialogCardEditorVisualState } from './standalone-dialog-bridge.js';
 
 class BubbleCardEditor extends LitElement {
     _previewStyleApplied = false;
@@ -2418,6 +2418,7 @@ class BubbleCardEditor extends LitElement {
         }
 
         try {
+            restoreDialogCardEditorVisualState(dialog);
             dialog.showDialog(dialogParams);
             return true;
         } catch (_) {
@@ -2464,14 +2465,17 @@ class BubbleCardEditor extends LitElement {
     }
 
     _applyPopupEditorTabState(dialog) {
-        setTimeout(() => {
+        const applyState = () => {
             try {
-                const cardElementEditor = dialog?.shadowRoot?.querySelector('hui-card-element-editor');
+                restoreDialogCardEditorVisualState(dialog);
+                const cardElementEditor = getDialogCardElementEditor(dialog);
                 if (!cardElementEditor) return;
-                if ('_currTab' in cardElementEditor) cardElementEditor._currTab = 'config';
                 this._injectHideTabsStyle(cardElementEditor.shadowRoot);
             } catch (_) {}
-        }, 0);
+        };
+
+        applyState();
+        setTimeout(applyState, 0);
     }
 
     _injectHideTabsStyle(shadow) {
@@ -2533,6 +2537,7 @@ class BubbleCardEditor extends LitElement {
         window.addEventListener("dialog-closed", handleClosed, true);
 
         try {
+            restoreDialogCardEditorVisualState(activeDialog);
             // Remove the popup tab-hiding style before the child editor loads,
             // so non-bubble-card editors get their tabs back.
             try {
@@ -2609,6 +2614,7 @@ class BubbleCardEditor extends LitElement {
 
     async _openStandaloneCardDialog(options) {
         const homeAssistant = this._getHomeAssistantHost();
+        restoreDialogCardEditorVisualState(this._getActiveEditCardDialog());
         const parentDialogParams = this._captureStandaloneParentDialogParams();
 
         if (!homeAssistant || !parentDialogParams) return false;
@@ -2726,13 +2732,15 @@ class BubbleCardEditor extends LitElement {
       // can fire config-changed from the editor element (where HA's dialog listens).
       const previewHost = this._previewCardHost;
       if (Array.isArray(detail?.config?.cards) && previewHost) {
+          const standaloneOpenCardDialog = (options) => {
+              this._openStandaloneCardDialog(options);
+          };
           previewHost._standaloneCardsUpdater = (newCards) => {
               this._config = { ...this._config, cards: newCards };
               fireEvent(this, 'config-changed', { config: this._config });
           };
-          previewHost._standaloneOpenCardDialog = (options) => {
-              this._openStandaloneCardDialog(options);
-          };
+          previewHost._standaloneOpenCardDialog = standaloneOpenCardDialog;
+          this._rememberStandaloneOpenCardDialog(detail.config, standaloneOpenCardDialog);
       }
 
       this._setupAutoRowsObserver();
@@ -2750,6 +2758,23 @@ class BubbleCardEditor extends LitElement {
     if (cfg.button_type && cfg.button_type === target.button_type) score += 1;
     return score;
   }
+
+    _rememberStandaloneOpenCardDialog(config, opener) {
+        try {
+            if (typeof window === 'undefined' || typeof opener !== 'function') return;
+            const hash = this._normalizePopupHash(config?.hash || this._config?.hash);
+            if (!hash) return;
+            window.__bubbleStandalonePopupEditorOpeners = window.__bubbleStandalonePopupEditorOpeners || new Map();
+            window.__bubbleStandalonePopupEditorOpeners.set(hash, opener);
+        } catch (_) {}
+    }
+
+    _normalizePopupHash(value) {
+        if (typeof value !== 'string') return '';
+        const trimmed = value.trim();
+        if (!trimmed) return '';
+        return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
+    }
 
   _resetPreviewCardReference() {
     this._previewCardRoot = null;

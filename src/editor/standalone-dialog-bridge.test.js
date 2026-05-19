@@ -4,6 +4,7 @@ import {
     bridgeDialogCloseToParent,
     createReopenedStandaloneParentDialogParams,
     createStandaloneParentDialogParams,
+    restoreDialogCardEditorVisualState,
 } from './standalone-dialog-bridge.js';
 
 describe('bridgeDialogCloseToParent', () => {
@@ -121,5 +122,41 @@ describe('standalone popup dialog params', () => {
 
         expect(parentParams.cardConfig).toEqual(standalonePopup);
         expect(reopenedParams.cardConfig).toEqual(editedPopup);
+    });
+});
+
+describe('standalone parent editor visual state', () => {
+    test('forces a reused hui-card-element-editor back to GUI config mode', () => {
+        const requestUpdate = jest.fn();
+        const cardElementEditor = {
+            _GUImode: false,
+            GUImode: false,
+            _guiMode: false,
+            guiMode: false,
+            _yamlError: 'Invalid YAML',
+            _subElementEditorConfig: { type: 'button' },
+            _currTab: 'visibility',
+            requestUpdate,
+        };
+        const dialog = {
+            shadowRoot: {
+                querySelector: jest.fn((selector) => selector === 'hui-card-element-editor' ? cardElementEditor : null),
+            },
+        };
+
+        expect(restoreDialogCardEditorVisualState(dialog)).toBe(true);
+        expect(cardElementEditor._GUImode).toBe(true);
+        expect(cardElementEditor.GUImode).toBe(true);
+        expect(cardElementEditor._guiMode).toBe(true);
+        expect(cardElementEditor.guiMode).toBe(true);
+        expect(cardElementEditor._yamlError).toBeUndefined();
+        expect(cardElementEditor._subElementEditorConfig).toBeUndefined();
+        expect(cardElementEditor._currTab).toBe('config');
+        expect(requestUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    test('returns false when no card element editor is available', () => {
+        expect(restoreDialogCardEditorVisualState({ shadowRoot: { querySelector: jest.fn(() => null) } })).toBe(false);
+        expect(restoreDialogCardEditorVisualState(null)).toBe(false);
     });
 });

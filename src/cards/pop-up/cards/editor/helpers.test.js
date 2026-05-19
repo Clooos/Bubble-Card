@@ -45,6 +45,7 @@ describe('standalone popup card editor actions', () => {
         originalDocument = global.document;
         global.window = {
             __bubbleCardEditorInstances: new Set(),
+            __bubbleStandalonePopupEditorOpeners: new Map(),
         };
         delete global.document;
         warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -85,6 +86,17 @@ describe('standalone popup card editor actions', () => {
         actions.addCard();
 
         expect(openDialog).toHaveBeenCalledWith({ type: 'add' });
+        expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    test('opens nested card edit from the remembered popup opener when the editor UI is hidden', () => {
+        const openDialog = jest.fn();
+        window.__bubbleStandalonePopupEditorOpeners.set('#kitchen', openDialog);
+        const actions = createEditorActions(createPopupContext(), jest.fn());
+
+        actions.editCard(0);
+
+        expect(openDialog).toHaveBeenCalledWith({ type: 'edit', index: 0 });
         expect(warnSpy).not.toHaveBeenCalled();
     });
 

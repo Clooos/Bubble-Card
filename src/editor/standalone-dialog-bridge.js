@@ -42,6 +42,77 @@ export function bridgeDialogCloseToParent(dialog, reopenParent) {
     return restoreOriginalCloseDialog;
 }
 
+export function getDialogCardElementEditor(dialog) {
+    if (!dialog) {
+        return null;
+    }
+
+    try {
+        if (dialog.tagName?.toLowerCase?.() === 'hui-card-element-editor') {
+            return dialog;
+        }
+
+        return dialog.shadowRoot?.querySelector?.('hui-card-element-editor')
+            || dialog.querySelector?.('hui-card-element-editor')
+            || null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function setEditorProperty(editor, property, value) {
+    try {
+        if (editor[property] === value) {
+            return false;
+        }
+
+        editor[property] = value;
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+function clearEditorProperty(editor, property) {
+    try {
+        if (!(property in editor) && !Object.prototype.hasOwnProperty.call(editor, property)) {
+            return false;
+        }
+
+        return setEditorProperty(editor, property, undefined);
+    } catch (_) {
+        return false;
+    }
+}
+
+export function restoreCardElementEditorVisualState(cardElementEditor) {
+    if (!cardElementEditor) {
+        return false;
+    }
+
+    let changed = false;
+
+    changed = setEditorProperty(cardElementEditor, '_GUImode', true) || changed;
+    changed = setEditorProperty(cardElementEditor, 'GUImode', true) || changed;
+    changed = setEditorProperty(cardElementEditor, '_guiMode', true) || changed;
+    changed = setEditorProperty(cardElementEditor, 'guiMode', true) || changed;
+    changed = clearEditorProperty(cardElementEditor, '_yamlError') || changed;
+    changed = clearEditorProperty(cardElementEditor, '_subElementEditorConfig') || changed;
+    changed = setEditorProperty(cardElementEditor, '_currTab', 'config') || changed;
+
+    if (changed && typeof cardElementEditor.requestUpdate === 'function') {
+        try {
+            cardElementEditor.requestUpdate();
+        } catch (_) {}
+    }
+
+    return true;
+}
+
+export function restoreDialogCardEditorVisualState(dialog) {
+    return restoreCardElementEditorVisualState(getDialogCardElementEditor(dialog));
+}
+
 function cloneConfig(value) {
     if (value === undefined) {
         return undefined;
