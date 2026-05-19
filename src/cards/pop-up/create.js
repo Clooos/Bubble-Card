@@ -13,7 +13,14 @@ const CLOSE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 
 const PREVIOUS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><title>arrow-left</title><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>';
 
 function _hasHeaderContent(context) {
-  return !!(context.config.entity || context.config.name || context.config.icon);
+  if (context.config.entity || context.config.name || context.config.icon) return true;
+  const sub = context.config.sub_button;
+  if (sub) {
+    if (Array.isArray(sub)) return sub.length > 0;
+    if (sub.main && sub.main.length > 0) return true;
+    if (sub.bottom && sub.bottom.length > 0) return true;
+  }
+  return false;
 }
 
 function _appendIfMissing(parent, child) {
