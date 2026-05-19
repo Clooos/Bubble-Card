@@ -669,6 +669,14 @@ function _show() {
             a new editor based on the Home Assistant section editor, with the exact same 
             drag-and-drop approach for easier and faster editing! 
         </p>
+        <details style="margin: 0 0 16px; border-radius: 8px; overflow: hidden; background: var(--primary-background-color);">
+            <summary style="padding: 12px 16px; cursor: pointer; font-weight: 500; user-select: none;">
+                <span style="margin-right: 4px;"></span> Watch how it works (click to expand)
+            </summary>
+            <video preload="metadata" autoplay muted loop playsinline style="width: 100%; display: block; aspect-ratio: 1059 / 720;">
+                <source src="https://github.com/Clooos/Bubble-Card/raw/main/img/bubble_card_new_pop_up_editor.mp4" type="video/mp4">
+            </video>
+        </details>
         <p style="margin: 0 0 24px;">
             Pop-ups now have new features has well,
             with new modes (like a centered one), a new optional classic style and a performance mode for 
@@ -676,7 +684,7 @@ function _show() {
         </p>
         <hr>
         <h3 style="margin: 24px 0 4px;">How to migrate from the editor?</h3>
-        <p style="margin: 0 0 24px;">
+        <p style="margin: 0 0 16px;">
             Open the editor for each pop-up showing <strong>Migration available</strong>, 
             then just click <strong>Migrate to standalone</strong>.
         </p>
