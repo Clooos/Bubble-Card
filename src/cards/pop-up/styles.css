@@ -922,7 +922,7 @@
 .bubble-pop-up.no-header:not(.editor):not(.is-popup-closed) > .bubble-pop-up-container.is-scrollable {
     --bubble-pop-up-mask-top-alpha: 0;
     --bubble-pop-up-mask-bottom-alpha: 0;
-    --bubble-pop-up-mask-top-stop: 8px;
+    --bubble-pop-up-mask-top-stop: 18px;
     --bubble-pop-up-mask-bottom-stop: 16px;
 }
 
