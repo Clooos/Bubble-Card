@@ -11,6 +11,42 @@ const activeSubscriptions = new Map();
 const subscribers = new Set();
 let pendingUpdate = false;
 
+function getSubscriptionErrorMessage(error) {
+    if (error instanceof Error) {
+        const errorName = error.name || 'Error';
+        return error.message ? `${errorName}: ${error.message}` : errorName;
+    }
+
+    if (error && typeof error === 'object') {
+        const errorName = typeof error.name === 'string' ? error.name : '';
+        const errorMessage = typeof error.message === 'string' ? error.message : '';
+        const errorCode = error.code !== undefined ? String(error.code) : '';
+        const details = errorMessage || errorCode;
+
+        if (errorName || details) {
+            return [errorName, details].filter(Boolean).join(': ');
+        }
+
+        try {
+            return JSON.stringify(error);
+        } catch (_) {
+            return Object.prototype.toString.call(error);
+        }
+    }
+
+    return String(error);
+}
+
+function isAbortSubscriptionError(error, message) {
+    return error?.name === 'AbortError' || /AbortError|Transition was skipped/i.test(message);
+}
+
+function logTemplateSubscriptionError(error) {
+    const message = getSubscriptionErrorMessage(error);
+    const status = isAbortSubscriptionError(error, message) ? 'aborted' : 'failed';
+    console.warn(`Bubble Card - Template subscription ${status}: ${message}`);
+}
+
 function notifySubscribers() {
     if (!pendingUpdate) {
         pendingUpdate = true;
@@ -129,6 +165,19 @@ export function getRenderedTemplate(hass, template, variables = {}) {
         } else {
             unsub();
         }
+    }).catch((error) => {
+        const current = templateCache.get(key);
+        if (current && current.unsubscribe === undefined) {
+            templateCache.delete(key);
+        }
+
+        const activeSub = activeSubscriptions.get(template);
+        if (activeSub && activeSub.unsubscribed !== true) {
+            activeSub.unsubscribed = true;
+            activeSubscriptions.delete(template);
+        }
+
+        logTemplateSubscriptionError(error);
     });
 
     // Return undefined for the first render
