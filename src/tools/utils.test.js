@@ -182,4 +182,12 @@ describe('toggleBodyScroll', () => {
 
         expect(scrollLockLayers).toHaveLength(1);
     });
+
+    test('keeps unlock no-op cheap when the body is already unlocked', () => {
+        utilsModule.toggleBodyScroll(false);
+
+        expect(document.getElementById('bubble-card-no-scroll-styles')).toBeNull();
+        expect(document.getElementById('bubble-card-scroll-lock-layer')).toBeNull();
+        expect(document.body.classList.contains('bubble-body-scroll-locked')).toBe(false);
+    });
 });

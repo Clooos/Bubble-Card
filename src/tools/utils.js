@@ -847,6 +847,26 @@ const scrollLockBodyClass = 'bubble-body-scroll-locked';
 const scrollLockLayerId = 'bubble-card-scroll-lock-layer';
 const scrollLockLayerClass = 'bubble-scroll-lock-layer';
 const scrollLockLayerActiveClass = 'is-active';
+const scrollLockStyleId = 'bubble-card-no-scroll-styles';
+const scrollLockCssContent = `
+        .${scrollLockLayerClass} {
+            position: fixed;
+            inset: 0;
+            z-index: 4;
+            display: none;
+            background: transparent;
+            pointer-events: none;
+            touch-action: none;
+            overscroll-behavior: none;
+        }
+
+        .${scrollLockLayerClass}.${scrollLockLayerActiveClass} {
+            display: block;
+            pointer-events: auto;
+        }
+    `;
+let scrollLockStyleElement = null;
+let scrollLockLayerElement = null;
 
 const hasPassiveScrollLockEvents = (() => {
     if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') {
@@ -873,33 +893,27 @@ const hasPassiveScrollLockEvents = (() => {
 const activeScrollLockEventOptions = hasPassiveScrollLockEvents ? { passive: false } : undefined;
 
 function injectNoScrollStyles() {
-    const styleId = 'bubble-card-no-scroll-styles';
-    const cssContent = `
-        .${scrollLockLayerClass} {
-            position: fixed;
-            inset: 0;
-            z-index: 4;
-            display: none;
-            background: transparent;
-            pointer-events: none;
-            touch-action: none;
-            overscroll-behavior: none;
-        }
+    if (!document?.head) {
+        return;
+    }
 
-        .${scrollLockLayerClass}.${scrollLockLayerActiveClass} {
-            display: block;
-            pointer-events: auto;
+    if (scrollLockStyleElement?.parentNode) {
+        if (scrollLockStyleElement.textContent !== scrollLockCssContent) {
+            scrollLockStyleElement.textContent = scrollLockCssContent;
         }
-    `;
-    let styleElement = document.getElementById(styleId);
+        return;
+    }
+
+    let styleElement = document.getElementById(scrollLockStyleId);
     if (!styleElement) {
         styleElement = document.createElement('style');
-        styleElement.id = styleId;
+        styleElement.id = scrollLockStyleId;
         document.head.appendChild(styleElement);
     }
-    if (styleElement.textContent !== cssContent) {
-        styleElement.textContent = cssContent;
+    if (styleElement.textContent !== scrollLockCssContent) {
+        styleElement.textContent = scrollLockCssContent;
     }
+    scrollLockStyleElement = styleElement;
 }
 
 function preventScrollLockEvent(event) {
@@ -925,6 +939,10 @@ function getScrollLockLayer() {
         return null;
     }
 
+    if (scrollLockLayerElement?.parentNode === document.body) {
+        return scrollLockLayerElement;
+    }
+
     let layer = document.getElementById(scrollLockLayerId);
     if (!layer) {
         layer = document.createElement('div');
@@ -944,33 +962,44 @@ function getScrollLockLayer() {
         layer._bubbleScrollLockListenersAdded = true;
     }
 
+    scrollLockLayerElement = layer;
     return layer;
 }
 
-export function toggleBodyScroll(disable) {
-    injectNoScrollStyles();
+function getExistingScrollLockLayer() {
+    if (scrollLockLayerElement?.parentNode === document.body) {
+        return scrollLockLayerElement;
+    }
 
+    scrollLockLayerElement = document.getElementById(scrollLockLayerId);
+    return scrollLockLayerElement;
+}
+
+export function toggleBodyScroll(disable) {
     const body = document.body;
     if (!body) return;
 
-    const scrollLockLayer = getScrollLockLayer();
+    const isLocked = body.classList.contains(scrollLockBodyClass);
 
     if (disable) {
-        if (body.classList.contains(scrollLockBodyClass)) {
+        if (isLocked) {
             return;
         }
+
+        injectNoScrollStyles();
+        const scrollLockLayer = getScrollLockLayer();
 
         body.classList.add(scrollLockBodyClass);
         scrollLockLayer?.classList.add(scrollLockLayerActiveClass);
         return;
     }
 
-    if (!body.classList.contains(scrollLockBodyClass)) {
+    if (!isLocked) {
         return;
     }
 
     body.classList.remove(scrollLockBodyClass);
-    scrollLockLayer?.classList.remove(scrollLockLayerActiveClass);
+    getExistingScrollLockLayer()?.classList.remove(scrollLockLayerActiveClass);
 }
 
 export function formatNumericValue(value, decimals = 0, unit = '', locale = 'en-US') {
