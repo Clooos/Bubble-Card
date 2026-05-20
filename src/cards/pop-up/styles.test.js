@@ -60,6 +60,13 @@ describe('pop-up styles', () => {
     expect(rule).not.toContain('padding-top: 40px');
   });
 
+  test('only creates the bottom-offset spacer for bottom-sheet layouts', () => {
+    expect(styles).toContain('.bubble-pop-up.popup-mode-fit-content.popup-mode-with-bottom-offset:not(.editor) > .bubble-pop-up-container::after');
+    expect(styles).toMatch(/@media \(max-width: 870px\), \(max-height: 500px\) \{[\s\S]*\.bubble-pop-up\.popup-mode-adaptive-dialog\.popup-mode-with-bottom-offset:not\(\.editor\) > \.bubble-pop-up-container::after\s*\{[^}]*content: "";/);
+    expect(styles).not.toMatch(/^\s*\.bubble-pop-up\.popup-mode-with-bottom-offset:not\(\.editor\) > \.bubble-pop-up-container::after/m);
+    expect(styles).not.toMatch(/^\s*\.bubble-pop-up\.popup-mode-centered[^,{]*> \.bubble-pop-up-container::after/m);
+  });
+
   test('keeps configured popup shadow visible during the opening transition', () => {
     const rule = getOpeningShadowSuppressionRule();
 

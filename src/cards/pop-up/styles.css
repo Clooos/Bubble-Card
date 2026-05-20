@@ -28,7 +28,7 @@
     overscroll-behavior: contain;
 }
 
-.bubble-pop-up.popup-mode-with-bottom-offset:not(.editor) > .bubble-pop-up-container::after {
+.bubble-pop-up.popup-mode-fit-content.popup-mode-with-bottom-offset:not(.editor) > .bubble-pop-up-container::after {
     content: "";
     display: block;
     width: 100%;
@@ -254,6 +254,19 @@
     bottom: calc(-56px - var(--custom-height-offset-mobile));
 }
 
+.bubble-pop-up.is-standalone-pop-up:not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog):not(.editor) {
+    --bubble-pop-up-bottom-padding: 84px;
+}
+
+.bubble-pop-up.is-standalone-pop-up:not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog):not(.editor) > .bubble-pop-up-container::after {
+    content: "";
+    display: block;
+    width: 100%;
+    flex: 0 0 var(--bubble-pop-up-extra-bottom-space, 0px);
+    min-height: var(--bubble-pop-up-extra-bottom-space, 0px);
+    pointer-events: none;
+}
+
 .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) .bubble-pop-up-container {
     height: 100%;
     margin-top: -50px;
@@ -272,6 +285,15 @@
 @media (max-width: 870px), (max-height: 500px) {
     .bubble-pop-up.popup-mode-adaptive-dialog.popup-mode-with-bottom-offset:not(.editor) {
         --bubble-pop-up-bottom-padding: 84px;
+    }
+
+    .bubble-pop-up.popup-mode-adaptive-dialog.popup-mode-with-bottom-offset:not(.editor) > .bubble-pop-up-container::after {
+        content: "";
+        display: block;
+        width: 100%;
+        flex: 0 0 var(--bubble-pop-up-extra-bottom-space, 0px);
+        min-height: var(--bubble-pop-up-extra-bottom-space, 0px);
+        pointer-events: none;
     }
 }
 
