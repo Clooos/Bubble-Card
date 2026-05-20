@@ -75,6 +75,11 @@ export function createCardElements(context) {
     popUpContainer.appendChild(cardsContainer);
     context._cardsContainer = cardsContainer;
     context._renderedItems.push(cardsContainer);
+
+    // Observe each wrapper for viewport intersection inside the popup scroll
+    // container. Off-screen cards skip subsequent `hass` assignments in
+    // updateCardElements and have a pending hass flushed when they scroll in.
+    _setupCardVisibilityObserver(context);
 }
 
 // Sync rendered popup child cards with hass and config.
@@ -106,7 +111,12 @@ export function updateCardElements(context) {
         if (!cardEl) continue;
 
         if (context._hass) {
-            cardEl.hass = context._hass;
+            if (context._offscreenPopupCards && context._offscreenPopupCards.has(cardEl)) {
+                // Defer: card is below the popup fold. Flushed when it scrolls in.
+                cardEl._bubbleHassPending = true;
+            } else {
+                cardEl.hass = context._hass;
+            }
         }
 
         const cardConfigChanged = previousCardConfigs[i] !== cards[i];
@@ -137,6 +147,7 @@ export function updateCardElements(context) {
 
 // Remove previously rendered popup child cards.
 export function removeCardElements(context) {
+    _teardownCardVisibilityObserver(context);
     if (Array.isArray(context._renderedItems)) {
         context._renderedItems.forEach((element) => {
             element?.remove();
@@ -278,4 +289,90 @@ function _bindCardLayoutUpdates(cardEl, cardWrapper, context, index) {
         const cardConfig = context.config?.cards?.[index] || cardEl.config || {};
         _applyCardWrapperLayout(cardEl, cardWrapper, cardConfig);
     });
+}
+
+// ---------------------------------------------------------------------------
+// Lazy hass propagation via IntersectionObserver.
+//
+// The popup container is the scroll viewport for child cards. Cards below the
+// fold receive `cardEl.hass = context._hass` on every HA state update, which
+// triggers their internal render work even though they are invisible. We
+// observe each wrapper relative to the popup container and:
+//   - Mark cards that are not intersecting as off-screen.
+//   - In updateCardElements, defer `hass` assignment for off-screen cards
+//     (setting `_bubbleHassPending` so we know to flush on entry).
+//   - When a card scrolls into view, immediately assign the latest `hass`
+//     so it renders fresh content before the user can perceive it.
+//
+// Cards always receive `hass` at creation time (see `_createHuiCard`), so the
+// initial paint is unaffected. Without IntersectionObserver support, or when
+// observation hasn't started yet, cards default to being treated as visible.
+function _setupCardVisibilityObserver(context) {
+    _teardownCardVisibilityObserver(context);
+
+    if (typeof IntersectionObserver !== 'function') return;
+
+    const popUpContainer = context.elements?.popUpContainer;
+    const wrappers = context._cardWrappers;
+    if (!popUpContainer || !Array.isArray(wrappers) || wrappers.length === 0) return;
+    // Only observe real DOM nodes (skip jsdom test stubs).
+    if (typeof popUpContainer.appendChild !== 'function') return;
+
+    const offscreen = new Set();
+    const wrapperToCard = new WeakMap();
+
+    let observer;
+    try {
+        observer = new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+                const cardEl = wrapperToCard.get(entry.target);
+                if (!cardEl) continue;
+                if (entry.isIntersecting) {
+                    offscreen.delete(cardEl);
+                    if (cardEl._bubbleHassPending && context._hass) {
+                        cardEl._bubbleHassPending = false;
+                        cardEl.hass = context._hass;
+                    }
+                } else {
+                    offscreen.add(cardEl);
+                }
+            }
+        }, {
+            root: popUpContainer,
+            // Prewarm slightly outside the viewport so cards are fresh before
+            // they become visible (e.g. during scroll momentum).
+            rootMargin: '50px',
+            threshold: 0.01,
+        });
+    } catch (_) {
+        return;
+    }
+
+    const managed = context._managedCards || [];
+    for (let i = 0; i < wrappers.length; i++) {
+        const wrapper = wrappers[i];
+        const cardEl = managed[i];
+        if (!wrapper || !cardEl || typeof wrapper.appendChild !== 'function') continue;
+        wrapperToCard.set(wrapper, cardEl);
+        try {
+            observer.observe(wrapper);
+        } catch (_) {
+            // Ignore observation errors on detached wrappers.
+        }
+    }
+
+    context._cardVisibilityObserver = observer;
+    context._offscreenPopupCards = offscreen;
+}
+
+function _teardownCardVisibilityObserver(context) {
+    if (context._cardVisibilityObserver) {
+        try {
+            context._cardVisibilityObserver.disconnect();
+        } catch (_) {
+            // Ignore.
+        }
+        context._cardVisibilityObserver = null;
+    }
+    context._offscreenPopupCards = null;
 }
