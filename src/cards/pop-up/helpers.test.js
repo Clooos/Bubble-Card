@@ -303,7 +303,7 @@ describe('standalone popup lifecycle', () => {
         // RAF5: global body scroll lock after standalone content has settled.
         flushRafQueue();
 
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true, context.popUp);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
         expect(callAction).toHaveBeenCalledWith(context.popUp, context.config, 'open_action');
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
     });
@@ -328,7 +328,7 @@ describe('standalone popup lifecycle', () => {
 
         flushRafQueue();
 
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true, context.popUp);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
     });
 
     test('clears stale inline drag transform before reopening a standalone popup', () => {
@@ -353,7 +353,7 @@ describe('standalone popup lifecycle', () => {
         openPopup(context, true);
 
         expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true, context.popUp);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
     });
 
     test('syncs already-mounted popup cards inline when they are still present in the popup DOM', () => {
@@ -667,7 +667,7 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue(); // deferred body scroll
 
         expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true, context.popUp);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
 
         consoleError.mockRestore();
     });

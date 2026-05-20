@@ -858,7 +858,7 @@ function schedulePopupBodyScrollLock(context) {
                 return;
             }
 
-            toggleBodyScroll(true, context.popUp);
+            toggleBodyScroll(true);
         });
     };
 
@@ -1079,7 +1079,7 @@ function openStandalonePopup(context, instant = false) {
                 setPopupOpeningMarker(context, false);
             }
             setStandalonePopupState(popUp, true);
-            toggleBodyScroll(true, context.popUp);
+            toggleBodyScroll(true);
             triggerQuickOpenAnimation(context);
             requestAnimationFrame(() => {
                 try {
