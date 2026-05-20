@@ -142,6 +142,8 @@
 
 .bubble-pop-up.is-popup-closed:not(.editor) {
     contain: layout paint;
+    contain-intrinsic-size: 0 0;
+    pointer-events: none;
 }
 
 .bubble-pop-up.popup-mode-fit-content:not(.editor) {
