@@ -187,12 +187,21 @@ function _applyPopupVariables(context) {
   context.popUp.style.setProperty("--custom-height-offset-desktop", context.config.margin_top_desktop ?? "0px");
   context.popUp.style.setProperty("--custom-height-offset-mobile", context.config.margin_top_mobile ?? "0px");
   context.popUp.style.setProperty("--custom-margin", `-${context.config.margin ?? "7px"}`);
-  const _useBackdropBlur = context.config.backdrop_blur && context.config.backdrop_blur !== "0";
+
+  const _isBackdropHidden = context.config.hide_backdrop;
+  const _hasBackdropBlur = context.config.backdrop_blur && context.config.backdrop_blur !== "0";
   const _bgBlur = parseFloat(context.config.bg_blur ?? 10);
-  context.popUp.style.setProperty(
-    "--custom-popup-filter",
-    !_useBackdropBlur ? `blur(${_bgBlur}px)` : "none"
-  );
+
+  // Avoids double backdrop-filter for performance
+  let _popupBlurValue;
+  if (!_isBackdropHidden && _hasBackdropBlur) {
+    _popupBlurValue = "none";
+  } else {
+    _popupBlurValue = `blur(${_bgBlur}px)`;
+  }
+
+  context.popUp.style.setProperty("--custom-popup-filter", _popupBlurValue);
+
   const shadowOpacity = Number(context.config.shadow_opacity ?? 0) / 100;
   const normalizedShadowOpacity = Number.isFinite(shadowOpacity) ? shadowOpacity : 0;
   context.popUp.style.setProperty("--custom-shadow-opacity", normalizedShadowOpacity);
