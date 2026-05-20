@@ -28,6 +28,25 @@
     overscroll-behavior: contain;
 }
 
+.bubble-pop-up:not(.no-header):not(.editor) > .bubble-pop-up-container {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    -webkit-clip-path: inset(0 round 0 0 var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))));
+    clip-path: inset(0 round 0 0 var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))));
+}
+
+.bubble-pop-up:not(.editor):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) > .bubble-pop-up-container {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    -webkit-clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) 0 0);
+    clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) 0 0);
+}
+
+.bubble-pop-up:not(.no-header):not(.editor):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) > .bubble-pop-up-container {
+    -webkit-clip-path: inset(0 round 0);
+    clip-path: inset(0 round 0);
+}
+
 .bubble-pop-up.popup-mode-fit-content.popup-mode-with-bottom-offset:not(.editor) > .bubble-pop-up-container::after {
     content: "";
     display: block;
@@ -283,6 +302,18 @@
 }
 
 @media (max-width: 870px), (max-height: 500px) {
+    .bubble-pop-up.popup-mode-adaptive-dialog:not(.editor) > .bubble-pop-up-container {
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+        -webkit-clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) 0 0);
+        clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) 0 0);
+    }
+
+    .bubble-pop-up.popup-mode-adaptive-dialog:not(.no-header):not(.editor) > .bubble-pop-up-container {
+        -webkit-clip-path: inset(0 round 0);
+        clip-path: inset(0 round 0);
+    }
+
     .bubble-pop-up.popup-mode-adaptive-dialog.popup-mode-with-bottom-offset:not(.editor) {
         --bubble-pop-up-bottom-padding: 84px;
     }
@@ -867,7 +898,7 @@
 }
 
 .no-header {
-    --bubble-pop-up-header-overlap: 24px;
+    --bubble-pop-up-header-overlap: 32px;
 }
 
 .bubble-pop-up.no-header > .bubble-header-container {
@@ -884,8 +915,8 @@
 }
 
 .bubble-pop-up.no-header > .bubble-pop-up-container {
-    margin-top: calc(-1 * (var(--bubble-pop-up-header-overlap, 24px) + var(--vertical-stack-card-gap, var(--stack-card-gap, 8px)))) !important;
-    padding-top: 24px !important;
+    margin-top: calc(-1 * var(--bubble-pop-up-header-overlap, 24px)) !important;
+    padding-top: max(18px, calc(18px + var(--vertical-stack-card-gap, var(--stack-card-gap, 8px)) - var(--bubble-pop-up-header-overlap, 24px))) !important;
 }
 
 .bubble-pop-up.no-header:not(.editor):not(.is-popup-closed) > .bubble-pop-up-container.is-scrollable {

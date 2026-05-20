@@ -26,6 +26,26 @@ function getLegacyDefaultContainerRule() {
   return match?.[1] ?? '';
 }
 
+function getHeaderContainerRule() {
+  const match = styles.match(/\.bubble-pop-up:not\(\.no-header\):not\(\.editor\) > \.bubble-pop-up-container\s*\{([^}]*)\}/);
+  return match?.[1] ?? '';
+}
+
+function getBottomSheetContainerRule() {
+  const match = styles.match(/\.bubble-pop-up:not\(\.editor\):not\(\.popup-mode-centered\):not\(\.popup-mode-adaptive-dialog\) > \.bubble-pop-up-container\s*\{([^}]*)\}/);
+  return match?.[1] ?? '';
+}
+
+function getHeaderBottomSheetContainerRule() {
+  const match = styles.match(/\.bubble-pop-up:not\(\.no-header\):not\(\.editor\):not\(\.popup-mode-centered\):not\(\.popup-mode-adaptive-dialog\) > \.bubble-pop-up-container\s*\{([^}]*)\}/);
+  return match?.[1] ?? '';
+}
+
+function getNoHeaderContainerRule() {
+  const match = styles.match(/\.bubble-pop-up\.no-header > \.bubble-pop-up-container\s*\{([^}]*)\}/);
+  return match?.[1] ?? '';
+}
+
 function getOpeningShadowSuppressionRule() {
   const match = styles.match(/\.bubble-pop-up\.is-opening:not\(\.has-popup-shadow\),\s*\.bubble-pop-up\.is-closing\s*\{([^}]*)\}/);
   return match?.[1] ?? '';
@@ -42,6 +62,37 @@ describe('pop-up styles', () => {
     expect(containerRule).toContain('border-radius: var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)))');
     expect(containerRule).toContain('-webkit-clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))))');
     expect(containerRule).toContain('clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))))');
+  });
+
+  test('clips only the lower foreground corners when a header is visible', () => {
+    const rule = getHeaderContainerRule();
+
+    expect(rule).toContain('border-top-left-radius: 0');
+    expect(rule).toContain('border-top-right-radius: 0');
+    expect(rule).toContain('-webkit-clip-path: inset(0 round 0 0 var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))))');
+    expect(rule).toContain('clip-path: inset(0 round 0 0 var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))))');
+  });
+
+  test('removes lower foreground rounding for bottom-sheet layouts', () => {
+    const bottomSheetRule = getBottomSheetContainerRule();
+    const headerBottomSheetRule = getHeaderBottomSheetContainerRule();
+
+    expect(bottomSheetRule).toContain('border-bottom-right-radius: 0');
+    expect(bottomSheetRule).toContain('border-bottom-left-radius: 0');
+    expect(bottomSheetRule).toContain('-webkit-clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) 0 0)');
+    expect(bottomSheetRule).toContain('clip-path: inset(0 round var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px))) 0 0)');
+    expect(headerBottomSheetRule).toContain('-webkit-clip-path: inset(0 round 0)');
+    expect(headerBottomSheetRule).toContain('clip-path: inset(0 round 0)');
+    expect(styles).toMatch(/@media \(max-width: 870px\), \(max-height: 500px\) \{[\s\S]*\.bubble-pop-up\.popup-mode-adaptive-dialog:not\(\.editor\) > \.bubble-pop-up-container\s*\{[^}]*border-bottom-right-radius: 0;[^}]*border-bottom-left-radius: 0;[^}]*clip-path: inset\(0 round var\(--bubble-pop-up-content-border-radius, var\(--bubble-pop-up-border-radius, var\(--bubble-border-radius, 42px\)\)\) var\(--bubble-pop-up-content-border-radius, var\(--bubble-pop-up-border-radius, var\(--bubble-border-radius, 42px\)\)\) 0 0\);/);
+    expect(styles).toMatch(/@media \(max-width: 870px\), \(max-height: 500px\) \{[\s\S]*\.bubble-pop-up\.popup-mode-adaptive-dialog:not\(\.no-header\):not\(\.editor\) > \.bubble-pop-up-container\s*\{[^}]*clip-path: inset\(0 round 0\);/);
+  });
+
+  test('keeps no-header scroll clipping below the reserved top handle area', () => {
+    const rule = getNoHeaderContainerRule();
+
+    expect(rule).toContain('margin-top: calc(-1 * var(--bubble-pop-up-header-overlap, 24px))');
+    expect(rule).toContain('padding-top: max(18px, calc(18px + var(--vertical-stack-card-gap, var(--stack-card-gap, 8px)) - var(--bubble-pop-up-header-overlap, 24px)))');
+    expect(rule).not.toContain('padding-top: 24px');
   });
 
   test('keeps standalone header gap resilient without double-adding the full card gap', () => {
