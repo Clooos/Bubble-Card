@@ -785,9 +785,12 @@ function _show() {
 
     content.innerHTML = `
         <h3 style="margin: 0 0 4px;">Your pop-ups need to be migrated</h3>
-        <p style="margin: 0 0 24px;">
+        <p>
             Since Bubble Card v3.2.0, <strong>your pop-ups must be migrated to the new
             standalone format.</strong> It's easy and only takes a few clicks!
+        </p>
+        <p style="margin: 0 0 24px;">
+            If you missed it, check out the <a href="https://github.com/Clooos/Bubble-Card/releases/tag/v3.2.0" target="_blank" rel="noopener" style="color: var(--primary-color); text-decoration: underline;">v3.2.0 release announcement</a> (it took me about 10 hours to write it!) to see all the new features and changes.
         </p>
         <hr>
         <h3 style="margin: 24px 0 4px;">What does it change?</h3>
@@ -798,8 +801,8 @@ function _show() {
             drag-and-drop approach for easier and faster editing! 
         </p>
         <details style="margin: 0 0 16px; border-radius: 8px; overflow: hidden; background: var(--primary-background-color);">
-            <summary style="padding: 12px 16px; cursor: pointer; font-weight: 500; user-select: none;">
-                <span style="margin-right: 4px;"></span> Watch how it works (click to expand)
+            <summary style="padding: 12px 16px; cursor: pointer; user-select: none;">
+                <span style="margin-right: 4px;"></span> <strong>Watch how the new editor works</strong> (click to expand)
             </summary>
             <video preload="metadata" autoplay muted loop playsinline style="width: 100%; display: block; aspect-ratio: 1059 / 720;">
                 <source src="https://github.com/Clooos/Bubble-Card/raw/main/img/bubble_card_new_pop_up_editor.mp4" type="video/mp4">
@@ -812,13 +815,13 @@ function _show() {
         </p>
         <hr>
         <h3 style="margin: 24px 0 4px;">How to migrate from the editor?</h3>
-        <p style="margin: 0 0 16px;">
+        <p style="margin: 14px 0 24px;">
             Open the editor for each pop-up showing <strong>Migration available</strong>, 
             then just click <strong>Migrate to standalone</strong>.
         </p>
         <hr>
         <h3 style="margin: 24px 0 4px;">Using YAML?</h3>
-        <p style="margin: 0 0 24px;">
+        <p style="margin: 14px 0 24px;">
             Replace the legacy pop-up config with the standalone format:
         </p>
         <pre style="margin: 0 0 12px; padding: 12px; background: var(--secondary-background-color); border-radius: 8px; overflow-x: auto; font-size: 0.85em;">
@@ -839,6 +842,11 @@ function _show() {
         <hr>
         <p style="margin: 24px 0 0;">
             <em>Enjoy this update! Cheers! 🍻</em>
+        </p>
+        <p style="margin: 24px 0 0;">
+            <a href="https://www.buymeacoffee.com/clooos" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?style=for-the-badge&logo=buy-me-a-coffee" alt="Buy me a beer"></a>&nbsp;
+            <a href="https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/Donate-PayPal-blue?style=for-the-badge&logo=paypal" alt="PayPal"></a>&nbsp;
+            <a href="https://www.patreon.com/Clooos" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/Donate-Patreon-orange?style=for-the-badge&logo=patreon" alt="Patreon"></a>
         </p>
     `;
     dialog.appendChild(content);
