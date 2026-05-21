@@ -23,7 +23,8 @@ const outsideCloseFallbackDelay = 150;
 const popupQuickOpenAnimationDurationMs = 140;
 const popupBlurWillChangeDurationMs = 450;
 const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout'];
-const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame'];
+const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame', '_standalonePostOpenContentWakeFrame'];
+const maxPostOpenContentWakeTargets = 32;
 
 export const POPUP_MODE_DEFAULT = 'default';
 export const POPUP_MODE_FIT_CONTENT = 'fit-content';
@@ -508,6 +509,105 @@ function clearFreshOutsideInteractionGuard(context) {
     context._allowOutsideCloseFromInteraction = false;
 }
 
+function isScrollableWakeTarget(element) {
+    if (!element || typeof element.dispatchEvent !== 'function') {
+        return false;
+    }
+
+    try {
+        return (typeof element.scrollHeight === 'number' && typeof element.clientHeight === 'number' && element.scrollHeight > element.clientHeight) ||
+            (typeof element.scrollWidth === 'number' && typeof element.clientWidth === 'number' && element.scrollWidth > element.clientWidth);
+    } catch (_) {
+        return false;
+    }
+}
+
+function addUniqueContentWakeTarget(targets, element) {
+    if (!isScrollableWakeTarget(element) || targets.includes(element)) {
+        return;
+    }
+
+    targets.push(element);
+}
+
+function collectScrollableContentWakeTargets(root, targets = [], visited = new Set()) {
+    if (!root || visited.has(root) || targets.length >= maxPostOpenContentWakeTargets) {
+        return targets;
+    }
+
+    visited.add(root);
+    addUniqueContentWakeTarget(targets, root);
+
+    if (root.shadowRoot) {
+        collectScrollableContentWakeTargets(root.shadowRoot, targets, visited);
+    }
+
+    if (typeof root.querySelectorAll !== 'function') {
+        return targets;
+    }
+
+    try {
+        root.querySelectorAll('*').forEach((element) => {
+            if (targets.length >= maxPostOpenContentWakeTargets) {
+                return;
+            }
+
+            addUniqueContentWakeTarget(targets, element);
+
+            if (element?.shadowRoot) {
+                collectScrollableContentWakeTargets(element.shadowRoot, targets, visited);
+            }
+        });
+    } catch (_) {}
+
+    return targets;
+}
+
+function wakeStandalonePopupScrollableContent(context) {
+    if (!context?.isStandalonePopUp || !popupState.activePopups.has(context)) {
+        return;
+    }
+
+    context._standalonePostOpenContentWakeNeeded = false;
+
+    if (!Array.isArray(context.config?.cards) || context.config.cards.length === 0) {
+        return;
+    }
+
+    const roots = [context.elements?.popUpContainer];
+    if (Array.isArray(context._managedCards)) {
+        roots.push(...context._managedCards);
+    } else {
+        roots.push(context.popUp);
+    }
+
+    const targets = [];
+    roots.forEach((root) => collectScrollableContentWakeTargets(root, targets));
+
+    targets.forEach((target) => {
+        try {
+            target.dispatchEvent(new Event('scroll'));
+        } catch (_) {}
+    });
+}
+
+function scheduleStandalonePostOpenContentWake(context) {
+    if (!context?.isStandalonePopUp) {
+        return;
+    }
+
+    clearContextFrame(context, '_standalonePostOpenContentWakeFrame');
+    context._standalonePostOpenContentWakeFrame = requestAnimationFrame(() => {
+        context._standalonePostOpenContentWakeFrame = null;
+
+        if (!popupState.activePopups.has(context) || !context.popUp?.classList?.contains('is-popup-opened')) {
+            return;
+        }
+
+        wakeStandalonePopupScrollableContent(context);
+    });
+}
+
 // Deduplicate Bubble Card's own synthetic no-hash step used during popup close.
 if (!window.__bubbleLocationDeduperAdded) {
     try {
@@ -820,6 +920,10 @@ function completePopupOpen(context) {
     schedulePopupBodyScrollLock(context);
     schedulePopupBackdropBlurGuardRelease(context);
 
+    if (context.isStandalonePopUp && !context._pendingPostOpenCardSync && context._standalonePostOpenContentWakeNeeded) {
+        scheduleStandalonePostOpenContentWake(context);
+    }
+
     if (context.config.auto_close > 0) {
         if (context.closeTimeout) clearTimeout(context.closeTimeout);
         context.closeTimeout = setTimeout(() => {
@@ -1004,6 +1108,7 @@ function rollbackStandalonePopupOpen(context, error = null) {
     const wasOnlyActivePopup = popupState.activePopups.size === 1 && popupState.activePopups.has(context);
 
     context._pendingPostOpenCardSync = false;
+    context._standalonePostOpenContentWakeNeeded = false;
     popupState.activePopups.delete(context);
     clearPopupOpenSource(context);
     clearPopupBackdropBlurWillChange(context);
@@ -1029,6 +1134,8 @@ function openStandalonePopup(context, instant = false) {
     popupState.activePopups.add(context);
 
     const hadPrimedStandaloneContent = hasPrimedStandalonePopupContent(context);
+    const hasStandaloneCards = Array.isArray(context.config.cards) && context.config.cards.length > 0;
+    context._standalonePostOpenContentWakeNeeded = false;
     if (!hadPrimedStandaloneContent) {
         context._cachedPopupScrollableState = undefined;
     }
@@ -1075,6 +1182,9 @@ function openStandalonePopup(context, instant = false) {
             setPopupOpeningMarker(context, true);
             try {
                 syncStandalonePopupContent(context);
+                if (!hadPrimedStandaloneContent && hasStandaloneCards) {
+                    context._standalonePostOpenContentWakeNeeded = true;
+                }
             } finally {
                 setPopupOpeningMarker(context, false);
             }
@@ -1120,13 +1230,15 @@ function openStandalonePopup(context, instant = false) {
 
             // Restore or prime content one frame before the animation so Lit microtask
             // updates settle before the transition frame starts.
-            const hasStandaloneCards = Array.isArray(context.config.cards) && context.config.cards.length > 0;
             if (hasStandaloneCards) {
                 setPopupOpeningMarker(context, true);
                 try {
                     if (!shouldDeferColdStandaloneContentUntilAfterOpen(context)) {
                         syncStandalonePopupContent(context);
                         phase1ContentPrimed = true;
+                        if (!hadPrimedStandaloneContent) {
+                            context._standalonePostOpenContentWakeNeeded = true;
+                        }
                     }
                 } finally {
                     setPopupOpeningMarker(context, false);

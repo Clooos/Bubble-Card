@@ -207,6 +207,17 @@ function createMockContainer(initialChildren = []) {
     };
 }
 
+function createSearchNode({ children = [], shadowRoot = null, scrollHeight = 0, clientHeight = 0, scrollWidth = 0, clientWidth = 0 } = {}) {
+    const node = new EventTarget();
+    node.shadowRoot = shadowRoot;
+    node.scrollHeight = scrollHeight;
+    node.clientHeight = clientHeight;
+    node.scrollWidth = scrollWidth;
+    node.clientWidth = clientWidth;
+    node.querySelectorAll = jest.fn((selector) => selector === '*' ? children : []);
+    return node;
+}
+
 function createLegacyContext(config = {}) {
     const popUp = createMockElement(['bubble-pop-up', 'is-popup-closed']);
 
@@ -439,6 +450,81 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue(); // transition-end callback + deferred listeners/body-scroll setup
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+    });
+
+    test('wakes scrollable standalone content after the popup is open', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const scrollableContent = createSearchNode({ scrollHeight: 200, clientHeight: 80 });
+        const scrollSpy = jest.fn();
+        scrollableContent.addEventListener('scroll', scrollSpy);
+        const cardShadowRoot = createSearchNode({ children: [scrollableContent] });
+        context._managedCards = [createSearchNode({ shadowRoot: cardShadowRoot })];
+
+        openPopup(context);
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(scrollSpy).not.toHaveBeenCalled();
+
+        flushRafQueue(); // phase 2 — transition start
+
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // transition-end callback — schedules the post-open content wake
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(scrollSpy).not.toHaveBeenCalled();
+
+        flushRafQueue(); // post-open content wake
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(scrollSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not wake non-scrollable standalone content after the popup is open', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const nonScrollableContent = createSearchNode({ scrollHeight: 80, clientHeight: 80 });
+        const scrollSpy = jest.fn();
+        nonScrollableContent.addEventListener('scroll', scrollSpy);
+        context._managedCards = [createSearchNode({ children: [nonScrollableContent] })];
+
+        openPopup(context);
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        flushRafQueue();
+
+        expect(scrollSpy).not.toHaveBeenCalled();
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not add a content wake when cards are already synced after open', () => {
+        const context = createStandaloneContext({ performance_mode: 'performance' });
+        usedContexts.push(context);
+        const scrollableContent = createSearchNode({ scrollHeight: 200, clientHeight: 80 });
+        const scrollSpy = jest.fn();
+        scrollableContent.addEventListener('scroll', scrollSpy);
+        context._managedCards = [createSearchNode({ children: [scrollableContent] })];
+
+        openPopup(context);
+
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+
+        flushRafQueue();
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(scrollSpy).not.toHaveBeenCalled();
+
+        flushRafQueue();
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(scrollSpy).not.toHaveBeenCalled();
     });
 
     test('defers cold default-mode standalone content until after opening in performance mode', () => {
