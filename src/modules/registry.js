@@ -13,6 +13,20 @@ export let yamlKeysMap = new Map();     // Module id -> module object
 
 // Local caches
 let yamlCache = new Map();
+let legacyYaml404WarningShown = false;
+
+function warnAboutMissingLegacyYaml(fullUrl) {
+  if (legacyYaml404WarningShown) return;
+  legacyYaml404WarningShown = true;
+
+  console.warn(
+    "Bubble Card - The legacy modules file '/local/bubble/bubble-modules.yaml' was not found (404). " +
+    "This check happens when Bubble Card Tools is not installed or not available. " +
+    "Install Bubble Card Tools to manage modules and stop seeing this 404 in the console: " +
+    "https://github.com/Clooos/Bubble-Card-Tools",
+    { url: fullUrl }
+  );
+}
 
 // Invalidate and broadcast when YAML-backed modules change
 document.addEventListener('yaml-modules-updated', () => {
@@ -41,6 +55,9 @@ export const loadYAML = async (urls) => {
     try {
       const response = await fetch(fullUrl, { cache: 'no-store' });
       if (!response.ok) {
+        if (response.status === 404 && url === '/local/bubble/bubble-modules.yaml') {
+          warnAboutMissingLegacyYaml(fullUrl);
+        }
         try { window.bubbleYamlWarning = true; } catch (_) {}
         continue;
       }
