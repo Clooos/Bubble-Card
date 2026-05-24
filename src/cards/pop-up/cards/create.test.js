@@ -128,4 +128,107 @@ describe('updateCardElements', () => {
             ['full-width', false],
         ]);
     });
+
+    test('forwards reused hass references to the mounted popup child card', () => {
+        const cardConfig = {
+            type: 'entities',
+            entities: ['light.kitchen'],
+        };
+        const cardWrapper = createWrapper();
+        const hass = { states: { 'light.kitchen': { state: 'on' } } };
+        const mountedCard = {
+            hass,
+            requestUpdate: jest.fn(),
+        };
+        const cardElement = {
+            config: cardConfig,
+            hass,
+            _element: mountedCard,
+            requestUpdate: jest.fn(),
+            getGridOptions: jest.fn(() => ({ rows: 2, columns: 6 })),
+        };
+        const context = createContext(cardConfig, cardElement, cardWrapper, hass);
+
+        updateCardElements(context);
+
+        expect(cardElement.hass).toBe(hass);
+        expect(cardElement.requestUpdate).toHaveBeenCalledWith('hass', null);
+        expect(mountedCard.hass).toBe(hass);
+        expect(mountedCard.requestUpdate).toHaveBeenCalledWith('hass', null);
+    });
+
+    test.each([
+        {
+            label: 'conditional cards',
+            cardConfig: {
+                type: 'conditional',
+                conditions: [{ condition: 'state', entity: 'input_select.mode', state: 'On' }],
+                card: {
+                    type: 'entities',
+                    entities: ['light.kitchen'],
+                },
+            },
+        },
+        {
+            label: 'cards with native visibility',
+            cardConfig: {
+                type: 'vertical-stack',
+                cards: [{
+                    type: 'entities',
+                    visibility: [{ condition: 'state', entity: 'input_select.mode', state: 'On' }],
+                    entities: ['light.kitchen'],
+                }],
+            },
+        },
+    ])('does not defer offscreen hass updates for $label', ({ cardConfig }) => {
+        const cardWrapper = createWrapper();
+        const hass = { states: { 'light.kitchen': { state: 'on' } } };
+        const mountedCard = {
+            hass,
+            requestUpdate: jest.fn(),
+        };
+        const cardElement = {
+            config: cardConfig,
+            hass,
+            _element: mountedCard,
+            requestUpdate: jest.fn(),
+            getGridOptions: jest.fn(() => ({ rows: 2, columns: 6 })),
+        };
+        const context = createContext(cardConfig, cardElement, cardWrapper, hass);
+        context._offscreenPopupCards = new Set([cardElement]);
+
+        updateCardElements(context);
+
+        expect(cardElement._bubbleHassPending).toBe(false);
+        expect(cardElement.requestUpdate).toHaveBeenCalledWith('hass', null);
+        expect(mountedCard.requestUpdate).toHaveBeenCalledWith('hass', null);
+    });
+
+    test('keeps deferring offscreen hass updates for non-visibility cards', () => {
+        const cardConfig = {
+            type: 'entities',
+            entities: ['light.kitchen'],
+        };
+        const cardWrapper = createWrapper();
+        const hass = { states: { 'light.kitchen': { state: 'on' } } };
+        const mountedCard = {
+            hass,
+            requestUpdate: jest.fn(),
+        };
+        const cardElement = {
+            config: cardConfig,
+            hass,
+            _element: mountedCard,
+            requestUpdate: jest.fn(),
+            getGridOptions: jest.fn(() => ({ rows: 2, columns: 6 })),
+        };
+        const context = createContext(cardConfig, cardElement, cardWrapper, hass);
+        context._offscreenPopupCards = new Set([cardElement]);
+
+        updateCardElements(context);
+
+        expect(cardElement._bubbleHassPending).toBe(true);
+        expect(cardElement.requestUpdate).not.toHaveBeenCalled();
+        expect(mountedCard.requestUpdate).not.toHaveBeenCalled();
+    });
 });

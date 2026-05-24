@@ -5,6 +5,67 @@ import { createEditorCardElements } from './editor/index.js';
 const GRID_COLUMN_MULTIPLIER = 3;
 const DEFAULT_GRID_SIZE = { columns: 12, rows: 'auto' };
 
+function _hasStateDrivenVisibility(cardConfig, visited = new Set()) {
+    if (!cardConfig || typeof cardConfig !== 'object' || visited.has(cardConfig)) {
+        return false;
+    }
+
+    visited.add(cardConfig);
+
+    if (cardConfig.type === 'conditional' || Object.prototype.hasOwnProperty.call(cardConfig, 'visibility')) {
+        return true;
+    }
+
+    const nestedValues = Array.isArray(cardConfig)
+        ? cardConfig
+        : Object.values(cardConfig);
+
+    return nestedValues.some((value) => _hasStateDrivenVisibility(value, visited));
+}
+
+function _getMountedCardElement(cardEl) {
+    const mountedCard = cardEl?._element;
+    return mountedCard && typeof mountedCard === 'object'
+        ? mountedCard
+        : null;
+}
+
+function _applyHassToCardElement(cardEl, hass) {
+    if (!cardEl || !hass) {
+        return;
+    }
+
+    const wrapperHadSameHassRef = cardEl.hass === hass;
+    cardEl.hass = hass;
+
+    const mountedCard = _getMountedCardElement(cardEl);
+    if (mountedCard) {
+        const mountedCardHadSameHassRef = mountedCard.hass === hass;
+
+        if (!mountedCardHadSameHassRef || wrapperHadSameHassRef) {
+            mountedCard.hass = hass;
+        }
+
+        if (mountedCardHadSameHassRef && typeof mountedCard.requestUpdate === 'function') {
+            try {
+                mountedCard.requestUpdate('hass', null);
+            } catch (_) {
+                // Ignore child-card requestUpdate failures from non-Lit elements.
+            }
+        }
+    }
+
+    if (wrapperHadSameHassRef && typeof cardEl.requestUpdate === 'function') {
+        try {
+            cardEl.requestUpdate('hass', null);
+        } catch (_) {
+            // Ignore wrapper requestUpdate failures from non-Lit elements.
+        }
+    }
+
+    cardEl._bubbleHassPending = false;
+}
+
 // Create popup child cards inside the popup container.
 export function createCardElements(context) {
     const cards = context.config.cards;
@@ -111,11 +172,15 @@ export function updateCardElements(context) {
         if (!cardEl) continue;
 
         if (context._hass) {
-            if (context._offscreenPopupCards && context._offscreenPopupCards.has(cardEl)) {
+            const shouldDeferOffscreenHassUpdate = context._offscreenPopupCards &&
+                context._offscreenPopupCards.has(cardEl) &&
+                !_hasStateDrivenVisibility(cards[i]);
+
+            if (shouldDeferOffscreenHassUpdate) {
                 // Defer: card is below the popup fold. Flushed when it scrolls in.
                 cardEl._bubbleHassPending = true;
             } else {
-                cardEl.hass = context._hass;
+                _applyHassToCardElement(cardEl, context._hass);
             }
         }
 
@@ -330,8 +395,7 @@ function _setupCardVisibilityObserver(context) {
                 if (entry.isIntersecting) {
                     offscreen.delete(cardEl);
                     if (cardEl._bubbleHassPending && context._hass) {
-                        cardEl._bubbleHassPending = false;
-                        cardEl.hass = context._hass;
+                        _applyHassToCardElement(cardEl, context._hass);
                     }
                 } else {
                     offscreen.add(cardEl);
