@@ -6,6 +6,7 @@ import { createBubbleDefaultColor } from './tools/style.js';
 import { updateThemeBackgroundColor } from './cards/pop-up/backdrop.js';
 import { stopTimerInterval } from './tools/utils.js';
 import { cleanupScrollingEffects } from './tools/text-scrolling.js';
+import { getEntitySuggestion } from './tools/entity-suggestion.js';
 import { registerPopupContext } from './cards/pop-up/helpers.js';
 import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
@@ -268,7 +269,8 @@ window.customCards.push({
   name: "Bubble Card",
   preview: false,
   description: "A minimalist card collection with a nice pop-up touch.",
-  documentationURL: "https://github.com/Clooos/Bubble-Card/"
+  documentationURL: "https://github.com/Clooos/Bubble-Card/",
+  getEntitySuggestion,
 });
 
 console.info(
