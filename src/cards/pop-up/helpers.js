@@ -381,6 +381,25 @@ function resolvePopupHostElements(context) {
 
     if (!context.sectionRow && typeof context.closest === 'function') {
         context.sectionRow = context.closest('hui-card');
+
+        // Fallback for environments where closest() cannot traverse shadow DOM
+        // boundaries (e.g. iOS WebKit on HA 2026.5.x sections layout).
+        if (!context.sectionRow) {
+            let node = context;
+            while (node) {
+                if (node.tagName?.toLowerCase() === 'hui-card') {
+                    context.sectionRow = node;
+                    break;
+                }
+                if (node.parentElement) {
+                    node = node.parentElement;
+                } else {
+                    const root = node.getRootNode?.();
+                    // Duck-type shadow root: has a `host` property, is not the document.
+                    node = (root && root !== document && 'host' in root) ? root.host : null;
+                }
+            }
+        }
     }
 
     if (!context.sectionRowContainer) {

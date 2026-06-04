@@ -1454,6 +1454,72 @@ describe('standalone popup lifecycle', () => {
     });
 });
 
+describe('resolvePopupHostElements shadow DOM fallback', () => {
+    const usedContexts = [];
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+        window.history.replaceState({}, '', 'http://localhost/lovelace/test');
+        window.__bubbleLocationDeduperAdded = true;
+        window.__bubbleDialogListenerAdded = true;
+        rafCallbacks = new Map();
+        nextRafId = 1;
+    });
+
+    afterEach(() => {
+        usedContexts.forEach((context) => cleanupPopupRuntime(context));
+        usedContexts.length = 0;
+        jest.useRealTimers();
+    });
+
+    test('finds hui-card via shadow DOM boundary walk when closest() returns null', () => {
+        const huiCard = {
+            tagName: 'HUI-CARD',
+            hidden: false,
+            style: { display: '' },
+            parentElement: null,
+        };
+        // Mock a shadow root (duck-typed: has host, not document)
+        const mockShadowRoot = { host: huiCard };
+
+        const context = {
+            ...createStandaloneContext(),
+            sectionRow: null,
+            sectionRowContainer: null,
+            // Simulate iOS WebKit: closest() fails to find hui-card
+            closest: () => null,
+            // Shadow DOM boundary: getRootNode() returns mock shadow root whose host is hui-card
+            parentElement: null,
+            getRootNode: () => mockShadowRoot,
+        };
+        usedContexts.push(context);
+
+        openPopup(context);
+
+        // The shadow DOM walk should have resolved sectionRow to huiCard
+        expect(context.sectionRow).toBe(huiCard);
+        expect(huiCard.hidden).toBe(false);
+        expect(huiCard.style.display).toBe('');
+    });
+
+    test('does not throw and leaves sectionRow null when no hui-card exists in ancestor chain', () => {
+        const context = {
+            ...createStandaloneContext(),
+            sectionRow: null,
+            sectionRowContainer: null,
+            closest: () => null,
+            parentElement: null,
+            // getRootNode returns something without a host (e.g. document)
+            getRootNode: () => ({ nodeType: 9 }), // document-like, no host property
+        };
+        usedContexts.push(context);
+
+        expect(() => openPopup(context)).not.toThrow();
+        expect(context.sectionRow).toBeNull();
+    });
+});
+
 describe('legacy popup location routing', () => {
     const usedContexts = [];
 

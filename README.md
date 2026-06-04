@@ -2234,6 +2234,12 @@ This one is changing a button name/state with "It's currently sunny" depending o
 styles: |
   ${card.querySelector('.bubble-name').innerText = "It's currently " + hass.states['weather.home'].state}
 ```
+or when applied for sub-buttons:
+```yaml
+styles: |
+ ${card.querySelector('.bubble-sub-button-1 .bubble-sub-button-name-container').innerText = "It's currently " + hass.states['weather.home'].state}
+```
+
 
 If you want to template the state (`.bubble-state`) don't toggle `show_state: true` just toggle `show_attribute: true` without any attribute.
 
