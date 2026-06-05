@@ -256,7 +256,7 @@
 
 @media only screen and (min-width: 768px) {
     .bubble-pop-up.popup-mode-centered:not(.editor) {
-        left: var(--mdc-drawer-width, 0px) !important;
+        left: var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) !important;
     }
 }
 
@@ -380,7 +380,7 @@
 @media only screen and (min-width: 871px) and (min-height: 501px) {
     .bubble-pop-up.popup-mode-adaptive-dialog:not(.editor) {
         top: 0 !important;
-        left: var(--mdc-drawer-width, 0px) !important;
+        left: var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) !important;
         right: 0 !important;
         bottom: 0 !important;
         margin: auto !important;
@@ -610,7 +610,7 @@
             --bubble-pop-up-available-height: calc(100vh - 56px - var(--custom-height-offset-desktop));
             top: calc(56px + var(--custom-height-offset-desktop));
             bottom: 0;
-      left: calc(var(--mdc-drawer-width, 0px) / 2 + 50% - (var(--desktop-width, 540px) / 2));
+      left: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) / 2 + 50% - (var(--desktop-width, 540px) / 2));
     }
     .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) {
         top: auto;

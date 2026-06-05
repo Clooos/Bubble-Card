@@ -27,14 +27,14 @@ ha-card.footer-mode {
   height: auto;
   margin-top: 0;
   position: fixed;
-  width: calc(100% - var(--mdc-drawer-width, 0px) - 8px);
-  left: calc(var(--mdc-drawer-width, 0px) + 4px);
+  width: calc(100% - var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) - 8px);
+  left: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) + 4px);
   z-index: 5;
 }
 
 ha-card.footer-mode:not(.footer-full-width) {
   width: var(--bubble-footer-width, 500px);
-  left: calc(var(--mdc-drawer-width, 0px) + (100% - var(--mdc-drawer-width, 0px) - var(--bubble-footer-width, 500px)) / 2);
+  left: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) + (100% - var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) - var(--bubble-footer-width, 500px)) / 2);
 }
 
 @media only screen and (max-width: 600px) {
