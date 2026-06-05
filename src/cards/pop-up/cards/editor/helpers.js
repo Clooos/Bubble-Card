@@ -210,6 +210,22 @@ function _getRegisteredStandaloneDialogOpener(context) {
         return null;
     }
 
+    const popupHash = _normalizeHash(context?.config?.hash);
+
+    // Fast path: find an editor with the exact same hash first.
+    if (popupHash) {
+        for (const editor of editors) {
+            if (!editor || editor.isConnected === false || typeof editor._openStandaloneCardDialog !== 'function') {
+                continue;
+            }
+            const eHash = _normalizeHash(editor._config?.hash);
+            if (eHash === popupHash && editor._config?.card_type === 'pop-up') {
+                return editor._openStandaloneCardDialog.bind(editor);
+            }
+        }
+    }
+
+    // Fallback: score all editors (only when popup has no hash).
     let bestEditor = null;
     let bestScore = -1;
 

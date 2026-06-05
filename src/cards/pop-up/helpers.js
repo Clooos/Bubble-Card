@@ -24,7 +24,7 @@ const popupQuickOpenAnimationDurationMs = 140;
 const popupBlurWillChangeDurationMs = 450;
 const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout'];
 const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame', '_standalonePostOpenContentWakeFrame'];
-const maxPostOpenContentWakeTargets = 32;
+const maxPostOpenContentWakeTargets = 16;
 
 export const POPUP_MODE_DEFAULT = 'default';
 export const POPUP_MODE_FIT_CONTENT = 'fit-content';

@@ -143,6 +143,13 @@ function configsAreEqual(left, right) {
         return true;
     }
 
+    // Quick rejection: if both have a hash, they must match.
+    const leftHash = normalizeHash(left?.hash);
+    const rightHash = normalizeHash(right?.hash);
+    if (leftHash && rightHash && leftHash !== rightHash) {
+        return false;
+    }
+
     try {
         return JSON.stringify(left) === JSON.stringify(right);
     } catch (_) {
@@ -229,12 +236,55 @@ export function replaceConfigAtPath(config, path, nextValue) {
 }
 
 export function findConfigPath(rootConfig, targetConfig) {
+    // Fast path: if the root IS the target (same reference or same hash), no traversal needed.
+    if (rootConfig === targetConfig) return null;
+    if (rootConfig?.card_type === targetConfig?.card_type && rootConfig?.card_type === 'pop-up') {
+        const rHash = normalizeHash(rootConfig.hash);
+        const tHash = normalizeHash(targetConfig.hash);
+        if (rHash && tHash && rHash === tHash) return null;
+    }
+
     let bestPath = null;
     let bestScore = -1;
 
-    const visit = (node, path = []) => {
+    // Target hash for O(1) rejection during traversal.
+    const targetHash = normalizeHash(targetConfig?.hash);
+    const targetCardType = targetConfig?.card_type || targetConfig?.type;
+
+    const visit = (node, path) => {
         if (!node || typeof node !== 'object') {
             return;
+        }
+
+        // Hash-based fast match: if node has the same hash as target, it's a direct hit.
+        if (targetHash) {
+            const nodeHash = normalizeHash(node.hash);
+            if (nodeHash && nodeHash === targetHash) {
+                // Same hash = same popup. Check card_type too for safety.
+                if (!targetCardType || node.card_type === targetCardType || node.type === targetCardType) {
+                    const s = 1000;
+                    if (s > bestScore) {
+                        bestScore = s;
+                        bestPath = path;
+                    }
+                    return; // Early termination - hash match is definitive.
+                }
+            }
+            // If node has a different hash, skip deep scoring.
+            if (nodeHash && nodeHash !== targetHash) {
+                // Still need to visit children (target could be nested inside).
+            }
+        }
+
+        // Quick rejection: if target has a known card_type/type, skip nodes that can't match.
+        if (targetCardType && node.type !== targetCardType && node.card_type !== targetCardType) {
+            // Only skip leaf-like nodes; still traverse containers.
+            const isContainer = Array.isArray(node) ||
+                (typeof node.cards === 'object') ||
+                (typeof node.card === 'object') ||
+                (typeof node.view === 'object') ||
+                (typeof node.views === 'object');
+            if (!isContainer) return;
         }
 
         const score = getConfigMatchScore(node, targetConfig);
@@ -244,18 +294,28 @@ export function findConfigPath(rootConfig, targetConfig) {
         }
 
         if (Array.isArray(node)) {
-            node.forEach((child, index) => visit(child, [...path, index]));
+            const newPath = path ? path.concat([node.length]) : [node.length];
+            // Use index-based path properly.
+            for (let i = 0; i < node.length; i++) {
+                const childPath = path ? path.slice() : [];
+                childPath.push(i);
+                visit(node[i], childPath);
+            }
             return;
         }
 
-        Object.entries(node).forEach(([key, value]) => {
+        const entries = Object.entries(node);
+        for (let i = 0; i < entries.length; i++) {
+            const [key, value] = entries[i];
             if (value && typeof value === 'object') {
-                visit(value, [...path, key]);
+                const childPath = path ? path.slice() : [];
+                childPath.push(key);
+                visit(value, childPath);
             }
-        });
+        }
     };
 
-    visit(rootConfig);
+    visit(rootConfig, []);
 
     return bestScore >= 0 ? bestPath : null;
 }
@@ -264,12 +324,12 @@ function mergeWithOriginalPopupConfig(parentDialogParams, popupConfig) {
     const originalPopupConfig = parentDialogParams?._standalonePopupConfig;
     if (originalPopupConfig && popupConfig && originalPopupConfig.card_type && !popupConfig.card_type) {
         return {
-            ...cloneConfig(originalPopupConfig),
-            ...cloneConfig(popupConfig),
+            ...originalPopupConfig,
+            ...popupConfig,
         };
     }
 
-    return cloneConfig(popupConfig);
+    return popupConfig;
 }
 
 export function createStandaloneParentDialogParams(dialogParams, popupConfig) {
@@ -277,17 +337,42 @@ export function createStandaloneParentDialogParams(dialogParams, popupConfig) {
         return null;
     }
 
-    const popupCardConfig = cloneConfig(popupConfig || dialogParams.cardConfig || {});
+    const popupCardConfig = popupConfig || dialogParams.cardConfig || {};
     const dialogCardConfig = dialogParams.cardConfig || popupCardConfig;
-    const popupPathInDialog = findConfigPath(dialogCardConfig, popupCardConfig) || [];
-    const isNestedPopup = popupPathInDialog.length > 0;
-    const cardConfig = cloneConfig(isNestedPopup ? dialogCardConfig : popupCardConfig);
 
+    // Fast path: popup IS the dialog's top-level card (most common case).
+    // No clone needed - reuse references; HA dialog won't mutate these in place.
+    if (dialogCardConfig === popupCardConfig || dialogCardConfig.card_type === 'pop-up') {
+        return {
+            ...dialogParams,
+            cardConfig: popupCardConfig,
+            _originalCardConfig: popupCardConfig,
+            _standalonePopupConfig: popupCardConfig,
+            _standalonePopupPathInDialog: [],
+        };
+    }
+
+    // Popup is nested inside another card (e.g., stack). Find its path.
+    const popupPathInDialog = findConfigPath(dialogCardConfig, popupCardConfig) || [];
+
+    if (popupPathInDialog.length === 0) {
+        // Path not found - fall back to popup config directly.
+        return {
+            ...dialogParams,
+            cardConfig: popupCardConfig,
+            _originalCardConfig: popupCardConfig,
+            _standalonePopupConfig: popupCardConfig,
+            _standalonePopupPathInDialog: [],
+        };
+    }
+
+    // Nested popup: clone the popup config for the cached reference.
+    // The dialogCardConfig is kept as-is (no clone) - it's read-only.
     return {
         ...dialogParams,
-        cardConfig,
-        _originalCardConfig: cloneConfig(cardConfig),
-        _standalonePopupConfig: popupCardConfig,
+        cardConfig: dialogCardConfig,
+        _originalCardConfig: dialogCardConfig,
+        _standalonePopupConfig: cloneConfig(popupCardConfig),
         _standalonePopupPathInDialog: popupPathInDialog,
     };
 }
@@ -299,12 +384,18 @@ export function createReopenedStandaloneParentDialogParams(parentDialogParams, p
 
     const popupPathInDialog = parentDialogParams._standalonePopupPathInDialog;
     const nextPopupConfig = mergeWithOriginalPopupConfig(parentDialogParams, popupConfig || parentDialogParams.cardConfig || {});
-    let cardConfig = nextPopupConfig;
 
-    if (Array.isArray(popupPathInDialog) && popupPathInDialog.length > 0) {
-        const rootCardConfig = parentDialogParams.cardConfig || parentDialogParams._originalCardConfig || {};
-        cardConfig = replaceConfigAtPath(rootCardConfig, popupPathInDialog, nextPopupConfig);
+    // Fast path: popup is the top-level card - no clone needed.
+    if (!Array.isArray(popupPathInDialog) || popupPathInDialog.length === 0) {
+        return {
+            ...parentDialogParams,
+            cardConfig: nextPopupConfig,
+        };
     }
+
+    // Nested popup: clone root config only once, then replace at path.
+    const rootCardConfig = parentDialogParams.cardConfig || parentDialogParams._originalCardConfig || {};
+    const cardConfig = replaceConfigAtPath(rootCardConfig, popupPathInDialog, nextPopupConfig);
 
     return {
         ...parentDialogParams,

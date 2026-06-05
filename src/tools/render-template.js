@@ -7,6 +7,12 @@ const templateCache = new Map();
 // Key: template string, Value: { result, unsubscribed }
 const activeSubscriptions = new Map();
 
+// Cooldown tracking for failed template subscriptions to prevent subscribe → error → re-subscribe loops
+// Key: template string, Value: { failCount, cooldownUntil }
+const subscriptionCooldowns = new Map();
+const maxSubscriptionFailures = 3;
+const subscriptionCooldownMs = 10000;
+
 // Subscribers for template changes
 const subscribers = new Set();
 let pendingUpdate = false;
@@ -119,6 +125,14 @@ export function getRenderedTemplate(hass, template, variables = {}) {
         return activeSub.result;
     }
 
+    // Check cooldown — skip re-subscription if this template has failed recently
+    const cooldown = subscriptionCooldowns.get(template);
+    if (cooldown && cooldown.failCount >= maxSubscriptionFailures && Date.now() < cooldown.cooldownUntil) {
+        const remaining = Math.ceil((cooldown.cooldownUntil - Date.now()) / 1000);
+        console.warn(`Bubble Card - Template subscription on cooldown (${remaining}s remaining): ${template?.substring(0, 50)}...`);
+        return cooldown.result; // Return last known result if available
+    }
+
     // Initialize the cache entry
     templateCache.set(key, {
         result: undefined,
@@ -177,7 +191,21 @@ export function getRenderedTemplate(hass, template, variables = {}) {
             activeSubscriptions.delete(template);
         }
 
-        logTemplateSubscriptionError(error);
+        // Track failures and apply cooldown after N consecutive errors
+        let cooldown = subscriptionCooldowns.get(template);
+        if (!cooldown) {
+            cooldown = { failCount: 0, cooldownUntil: 0 };
+            subscriptionCooldowns.set(template, cooldown);
+        }
+        cooldown.failCount++;
+        cooldown.result = current?.result; // Save last known result
+
+        if (cooldown.failCount >= maxSubscriptionFailures) {
+            cooldown.cooldownUntil = Date.now() + subscriptionCooldownMs;
+            console.warn(`Bubble Card - Template subscription failed ${cooldown.failCount} times, applying ${subscriptionCooldownMs/1000}s cooldown: ${template?.substring(0, 80)}...`);
+        } else {
+            logTemplateSubscriptionError(error);
+        }
     });
 
     // Return undefined for the first render

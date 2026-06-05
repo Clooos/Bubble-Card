@@ -229,9 +229,42 @@ class BubbleCardEditor extends LitElement {
 
     static get properties() {
         return {
-            hass: {},
+            _renderHass: {},
             _config: {}
         };
+    }
+
+    /**
+     * Throttled hass setter.
+     * First (synchronous) assignment is applied immediately — no throttle at startup.
+     * Subsequent assignments are throttled to avoid re-renders on every HA state tick.
+     */
+    set hass(value) {
+        // Always keep the latest reference for synchronous reads (render(), helpers, etc.)
+        this._hass = value;
+        if (this._hass === undefined) return;
+
+        // First assignment: apply immediately (no throttle at startup)
+        if (this._renderHass === undefined) {
+            this._renderHass = value;
+            return;
+        }
+
+        // Subsequent assignments: throttle reactive updates
+        if (this._hassThrottleTimer) {
+            clearTimeout(this._hassThrottleTimer);
+        }
+        this._hassThrottleTimer = setTimeout(() => {
+            this._hassThrottleTimer = null;
+            // Only trigger a re-render if the reference still differs
+            if (this._renderHass !== this._hass) {
+                this._renderHass = this._hass;
+            }
+        }, 500);
+    }
+
+    get hass() {
+        return this._hass;
     }
 
     get _card_type() {
@@ -262,7 +295,7 @@ class BubbleCardEditor extends LitElement {
 
     updated(changedProperties) {
         super.updated(changedProperties);
-        if (changedProperties.has('hass')) {
+        if (changedProperties.has('_renderHass')) {
             // If hass changes, entity lists might be stale
             this.listsUpdated = false;
             // Clear entity cache when hass changes
@@ -302,6 +335,7 @@ class BubbleCardEditor extends LitElement {
         try { if (this._storeAutoRefreshTimer) { clearInterval(this._storeAutoRefreshTimer); this._storeAutoRefreshTimer = null; } } catch (e) {}
         try { if (this._progressInterval) { clearInterval(this._progressInterval); this._progressInterval = null; } } catch (e) {}
         try { if (this._editorSchemaDebounce) { clearTimeout(this._editorSchemaDebounce); this._editorSchemaDebounce = null; } } catch (e) {}
+        try { if (this._hassThrottleTimer) { clearTimeout(this._hassThrottleTimer); this._hassThrottleTimer = null; } } catch (e) {}
         try { if (this._cardContextListener) { window.removeEventListener('bubble-card-context', this._cardContextListener); this._cardContextListener = null; } } catch (e) {}
     
         if (BubbleCardEditor._resizeObserver && this._observedElements) {
