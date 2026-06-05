@@ -2719,17 +2719,25 @@ class BubbleCardEditor extends LitElement {
                 homeAssistant.removeEventListener("show-dialog", handleShowDialog, true);
                 window.removeEventListener("dialog-closed", handleCreateClosed, true);
 
-                if (!pendingChildDialogParams) {
-                    return;
+                if (pendingChildDialogParams) {
+                    setTimeout(() => {
+                        this._openStandaloneChildDialogInCurrentEditor(
+                            pendingChildDialogParams,
+                            parentDialogParams,
+                            () => nextConfig
+                        );
+                    }, 0);
+                } else {
+                    // Entity suggestion path: card was added directly via addCard + saveConfig,
+                    // but no edit dialog was shown so pendingChildDialogParams is null.
+                    // Reopen the parent dialog to refresh the popup editor with the updated config.
+                    setTimeout(() => {
+                        this._reopenStandaloneParentDialog(
+                            parentDialogParams,
+                            nextConfig
+                        );
+                    }, 0);
                 }
-
-                setTimeout(() => {
-                    this._openStandaloneChildDialogInCurrentEditor(
-                        pendingChildDialogParams,
-                        parentDialogParams,
-                        () => nextConfig
-                    );
-                }, 0);
             };
 
             homeAssistant.addEventListener("show-dialog", handleShowDialog, true);
