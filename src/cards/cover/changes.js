@@ -12,6 +12,7 @@ export const coverEntityFeature = {
 };
 
 export function supportsFeature(stateObj, feature) {
+  if (!stateObj) return false;
   return supportsFeatureFromAttributes(stateObj.attributes, feature);
 }
 
@@ -23,6 +24,7 @@ export function supportsFeatureFromAttributes(attributes, feature) {
 }
 
 export function isFullyOpen(stateObj) {
+  if (!stateObj) return false;
   if (stateObj.attributes.current_position !== undefined) {
     return stateObj.attributes.current_position === 100;
   }
@@ -30,6 +32,7 @@ export function isFullyOpen(stateObj) {
 }
 
 export function isFullyClosed(stateObj) {
+  if (!stateObj) return false;
   if (stateObj.attributes.current_position !== undefined) {
     return stateObj.attributes.current_position === 0;
   }
@@ -37,7 +40,8 @@ export function isFullyClosed(stateObj) {
 }
 
 export function changeCoverIcons(context) {
-  const stateObj = context._hass.states[context.config.entity];
+  const stateObj = context._hass?.states?.[context.config.entity];
+  if (!stateObj?.attributes) return;
   const { current_position: currentPosition, assumed_state: assumedState } = stateObj.attributes;
 
   const supportsOpen = supportsFeature(stateObj, coverEntityFeature.OPEN);

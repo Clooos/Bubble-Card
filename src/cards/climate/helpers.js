@@ -9,7 +9,8 @@ import {
 export function getClimateColor(context) {
     let overlayColor = '';
 
-    const stateObj = context._hass.states[context.config.entity];
+    const stateObj = context._hass?.states?.[context.config.entity];
+    if (!stateObj?.attributes) return '';
     const hvacAction = stateObj.attributes.hvac_action;
     const state = stateObj.state;
     const isHeating = hvacAction === 'heating' || (state === "heat" && context.config.state_color);

@@ -66,7 +66,7 @@ export function changeEditor(context) {
 }
 export function changeLight(context) {
     context.elements.buttons.forEach((button) => {
-        const entityData = context._hass.states[button.lightEntity];
+        const entityData = context._hass?.states?.[button.lightEntity];
         const rgbColor = entityData?.attributes.rgb_color;
         const state = entityData?.state;
 

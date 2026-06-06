@@ -142,9 +142,13 @@ class BubbleCard extends HTMLElement {
     if (!this.isConnected && this.config.card_type !== 'pop-up') return;
     const type = this.config.card_type;
     if (handlers[type]) {
-      handlers[type](this);
-      this._notifyEditorContext();
+      try {
+        handlers[type](this);
+      } catch (e) {
+        console.error(`Bubble Card: Error in handler for card_type '${type}'`, e);
+      }
     }
+    try { this._notifyEditorContext(); } catch (e) {}
   }
 
   setConfig(config) {

@@ -103,8 +103,8 @@ export function createStructure(context) {
 
         function adjustTemperature(change) {
             syncTemp();
-            
-            const stateNow = context._hass.states[context.config.entity];
+
+            const stateNow = context._hass?.states?.[context.config.entity];
             const minTemp = context.config.min_temp ?? (stateNow?.attributes?.min_temp ?? 0);
             const maxTemp = context.config.max_temp ?? (stateNow?.attributes?.max_temp ?? 1000);
             let newTemp = parseFloat((currentTemp + change).toFixed(decimals));
@@ -136,9 +136,9 @@ export function createStructure(context) {
         plusButton.addEventListener('click', () => adjustTemperature(step));
     }
 
-    const state = context._hass.states[context.config.entity];
+    const state = context._hass?.states?.[context.config.entity];
     const isCelcius = context._hass.config.unit_system.temperature === '°C';
-    const defaultStep = context.config.step ?? (state.attributes.target_temp_step ? state.attributes.target_temp_step : isCelcius ? 0.5 : 1);
+    const defaultStep = context.config.step ?? (state?.attributes?.target_temp_step ?? (isCelcius ? 0.5 : 1));
 
     createTemperatureControls(elements.temperatureContainer, 'temperature', defaultStep);
 

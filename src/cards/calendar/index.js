@@ -8,7 +8,7 @@ export function handleCalendar(context) {
     createStructure(context);
   }
 
-  const cacheKey = JSON.stringify(context.config.entities.map(e => context._hass.states[e.entity])); 
+  const cacheKey = JSON.stringify(context.config.entities.map(e => context._hass?.states?.[e.entity])); 
 
   if (context.cacheKey !== cacheKey) {
     context.cacheKey = cacheKey;
