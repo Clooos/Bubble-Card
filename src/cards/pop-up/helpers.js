@@ -1079,7 +1079,7 @@ function runStandalonePostCloseCleanup(context) {
 
     suspendPopupHostLayout(context);
 
-    if (context.config.close_action) {
+    if (context.config.close_action && !hasIncomingPopupNavigation(context)) {
         callAction(context, context.config, 'close_action');
     }
 }
@@ -1731,7 +1731,7 @@ export function closePopup(context, force = false) {
     updateListeners(context, false);
     toggleBodyScroll(false);
 
-    if (context.config.close_action) {
+    if (context.config.close_action && !hasIncomingPopupNavigation(context)) {
         callAction(context, context.config, 'close_action');
     }
 }

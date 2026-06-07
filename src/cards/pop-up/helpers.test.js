@@ -1007,6 +1007,63 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.style.transform).toBe('');
     });
 
+    test('does not fire close_action when closing due to popup-to-popup navigation', () => {
+        const context1 = createStandaloneContext({
+            hash: '#popup-1',
+            close_action: { action: 'none' },
+        });
+        usedContexts.push(context1);
+
+        const context2 = createStandaloneContext({
+            hash: '#popup-2',
+        });
+        usedContexts.push(context2);
+
+        context1.popUp.classList.remove('is-popup-closed');
+        context1.popUp.classList.add('is-popup-opened');
+
+        registerPopupContext(context1);
+        registerPopupContext(context2);
+
+        mockWindow.location.hash = '#popup-2';
+
+        callAction.mockClear();
+
+        closePopup(context1);
+
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context1.popUp);
+        flushRafQueue();
+        flushRafQueue();
+
+        expect(callAction).not.toHaveBeenCalled();
+    });
+
+    test('fires close_action on manual close when no incoming popup navigation', () => {
+        const context = createStandaloneContext({
+            close_action: { action: 'none' },
+        });
+        usedContexts.push(context);
+
+        context.popUp.classList.remove('is-popup-closed');
+        context.popUp.classList.add('is-popup-opened');
+
+        registerPopupContext(context);
+
+        mockWindow.location.hash = '';
+
+        callAction.mockClear();
+
+        closePopup(context);
+
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        flushRafQueue();
+
+        expect(callAction).toHaveBeenCalledWith(context, context.config, 'close_action');
+    });
+
     test('does not force a standalone close reflow when the popup is already visibly open', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
