@@ -7,7 +7,7 @@ export function createStructure(context) {
   context.elements.mainContainer = context.elements.emptyColumnCard;
 
   context.elements.style = createElement('style');
-  context.elements.style.innerText = styles;
+  context.elements.style.textContent = styles;
   context.elements.customStyle = createElement('style');
 
   context.content.innerHTML = '';

@@ -58,7 +58,7 @@ export function getBackdrop(context) {
     shadowRoot.appendChild(internalBackdropElement);
 
     const defaultStylesTag = createElement("style");
-    defaultStylesTag.innerHTML = backdropStyles;
+    defaultStylesTag.textContent = backdropStyles;
     shadowRoot.appendChild(defaultStylesTag);
 
     const backdropCustomStyle = createElement("style");

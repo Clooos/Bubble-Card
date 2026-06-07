@@ -363,7 +363,7 @@ export function createStructure(context) {
     if (!context.popUp) return;
 
     context.elements.style = createElement("style");
-    context.elements.style.innerText = styles;
+    context.elements.style.textContent = styles;
 
     const existingStyle = context.popUp.querySelector("style");
     if (!context.stylesAdded || !existingStyle) {

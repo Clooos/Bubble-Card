@@ -87,7 +87,7 @@ export function createBaseStructure(context, config = {}) {
       }
 
       context.elements.style = createElement('style');
-      context.elements.style.innerText = processedStylesCache[options.type] + options.styles;
+      context.elements.style.textContent = processedStylesCache[options.type] + options.styles;
       context.elements.mainContainer.appendChild(context.elements.style);
     }
     
