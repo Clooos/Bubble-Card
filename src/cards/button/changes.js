@@ -18,7 +18,7 @@ function applyColorChange(context, newButtonColor, newOpacity, cardType) {
   const background = context.elements?.background;
   if (!background) return;
   
-  const target = cardType === 'button' ? context.card : context.popUp;
+  const target = cardType === 'button' ? context.card : context.popUp?.querySelector?.('.bubble-header');
   if (!target) return;
   
   // Apply the color change
@@ -36,7 +36,7 @@ export function changeButton(context) {
 
   const currentButtonColor = cardType === 'button'
       ? context.card.style.getPropertyValue('--bubble-button-background-color')
-      : context.popUp.style.getPropertyValue('--bubble-button-background-color');
+      : context.popUp.querySelector('.bubble-header').style.getPropertyValue('--bubble-button-background-color');
   const currentOpacity = context.elements.background?.style.opacity;
 
   let newButtonColor = '';
