@@ -9,7 +9,8 @@ glow_rules:
     Adds a colored glow to the icon when an entity matches a state.
     Demo module for the object-selector editor features: groups,
     visible_if, warn_if, arms, attribute fallback, reorder/duplicate,
-    and a custom selector registered via editor_code.
+    and a custom selector registered via editor_code that reads the
+    rule's color through a per-field context mapping.
   editor_code: |
     if (!customElements.get('ha-selector-glow_size_picker')) {
       customElements.define('ha-selector-glow_size_picker', class extends HTMLElement {
@@ -18,6 +19,9 @@ glow_rules:
         set label(l) { this._label = l; if (this._built) this._render(); }
         set value(v) { this._value = v; if (this._built) this._render(); }
         get value() { return this._value; }
+        // The field's `context` mapping hands us sibling values from the same
+        // rule — here the chosen glow color, so the preview dot glows in it.
+        set context(c) { this._ctx = c; if (this._built) this._render(); }
         connectedCallback() { this._render(); }
         _render() {
           if (!this._built) {
@@ -41,8 +45,10 @@ glow_rules:
             });
           }
           const v = Number(this._value) || 12;
+          let color = this._ctx?.color || 'var(--primary-color)';
+          if (!/[(#]/.test(String(color))) color = `var(--${color}-color, ${color})`;
           this.querySelector('.lbl').textContent = this._label || '';
-          this.querySelector('.dot').style.boxShadow = `0 0 ${v}px 2px var(--primary-color)`;
+          this.querySelector('.dot').style.boxShadow = `0 0 ${v}px 2px ${color}`;
           this.querySelector('input').value = v;
           this.querySelector('.val').textContent = `${v} px`;
         }
@@ -125,6 +131,8 @@ glow_rules:
               group: Appearance
               selector:
                 glow_size_picker: {}
+              context:
+                color: color
             pulse:
               label: Pulse
               group: Appearance

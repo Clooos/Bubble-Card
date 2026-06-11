@@ -1077,7 +1077,9 @@ my_module:
 
 Errors in an `editor_code` block are caught and logged per module — a broken block never prevents other modules from loading.
 
-For a complete working module using `editor_code` together with object-selector groups, `visible_if`, `warn_if` and arms, see [`examples/glow-rules.yaml`](../../examples/glow-rules.yaml).
+Inside an object selector, a custom selector can read sibling values of the same item (the entry's entity, a chosen color, ...) by declaring a `context` mapping on the field — see the `fields.*.context` row in the object selector options above. The element receives the resolved values via its `context` property.
+
+For a complete working module using `editor_code` together with object-selector groups, `visible_if`, `warn_if`, arms and a `context`-aware custom selector, see [`examples/glow-rules.yaml`](../../examples/glow-rules.yaml).
 
 ## Best practices
 
