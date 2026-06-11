@@ -9,8 +9,9 @@ glow_rules:
     Adds a colored glow to the icon when an entity matches a state.
     Demo module for the object-selector editor features: groups,
     visible_if, warn_if, arms, attribute fallback, reorder/duplicate,
-    and a custom selector registered via editor_code that reads the
-    rule's color through a per-field context mapping.
+    a custom selector registered via editor_code that reads the
+    rule's color through a per-field context mapping, and a schema
+    field generated from editor_code instead of YAML.
   editor_code: |
     if (!customElements.get('ha-selector-glow_size_picker')) {
       customElements.define('ha-selector-glow_size_picker', class extends HTMLElement {
@@ -54,6 +55,19 @@ glow_rules:
         }
       });
     }
+    // editor_code also receives the module definition; the editor reads
+    // module.editor live, so repetitive schema can be generated in JS
+    // instead of hand-written YAML — here the JS-expression arm of the
+    // color field.
+    module.editor[0].selector.object.fields.color_js = {
+      label: 'Glow color (JS)',
+      description: "A JS expression returning a color, e.g. " +
+        "hass.states['sun.sun'].state === 'above_horizon' ? 'amber' : 'blue'",
+      group: 'Appearance',
+      arm_of: 'color',
+      arm: 'JS expression',
+      selector: { text: { multiline: true } },
+    };
   code: |
     ${(() => {
       const rules = this.config.glow_rules?.rules || [];
@@ -115,17 +129,6 @@ glow_rules:
               group_icon: mdi:palette
               selector:
                 ui_color: {}
-            color_js:
-              label: Glow color (JS)
-              description: >-
-                A JS expression returning a color, e.g.
-                hass.states['sun.sun'].state === 'above_horizon' ? 'amber' : 'blue'
-              group: Appearance
-              arm_of: color
-              arm: JS expression
-              selector:
-                text:
-                  multiline: true
             glow_size:
               label: Glow size
               group: Appearance
