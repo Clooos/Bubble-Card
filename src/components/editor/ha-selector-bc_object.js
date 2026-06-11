@@ -149,9 +149,18 @@ export class HaBcObjectSelector extends LitElement {
       };
       // Add context for attribute selectors to link to entity field; when
       // the item has no entity of its own, link to the synthetic
-      // __card_entity key (the card's entity) instead.
+      // __card_entity key (the card's entity) instead. The selector is
+      // re-built per item with the item's OWN entity: the shared field
+      // definition may carry an entity_id baked in by the editor's
+      // inherited-entities pass (resolved from one representative item of
+      // the whole list), and a baked entity_id overrides the per-item
+      // context inside ha-selector-attribute.
       if (field.selector && field.selector.attribute && entityFieldName) {
-        const useCard = !itemData?.[entityFieldName] && itemData?.__card_entity;
+        const own = itemData?.[entityFieldName];
+        schemaItem.selector = {
+          attribute: { ...field.selector.attribute, entity_id: own || undefined },
+        };
+        const useCard = !own && itemData?.__card_entity;
         schemaItem.context = { filter_entity: useCard ? "__card_entity" : entityFieldName };
       }
       const warn = this._fieldWarning(field, itemData);
