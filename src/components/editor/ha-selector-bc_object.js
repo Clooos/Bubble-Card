@@ -41,6 +41,41 @@ export class HaBcObjectSelector extends LitElement {
     }
   }
 
+  // Fields with `arm_of: <base>` are alternative representations ("arms") of
+  // the base field (e.g. a static color vs. a state->color map vs. a JS
+  // expression). The form shows one mode dropdown per family plus only the
+  // active arm's input, instead of every arm as its own field. The dropdown
+  // is a synthetic `__<base>_mode` key that lives in per-item UI state and is
+  // stripped from the emitted value, so the stored config never changes shape.
+  _armFamilies(fields) {
+    const fieldEntries = Array.isArray(fields)
+      ? fields.map((f, i) => [f.name || i, f])
+      : Object.entries(fields || {});
+    const fams = {};
+    for (const [key, field] of fieldEntries) {
+      if (field.arm_of && fields[field.arm_of]) {
+        (fams[field.arm_of] = fams[field.arm_of] || []).push({ key, field });
+      }
+    }
+    return fams;
+  }
+
+  _armHasData(itemData, key) {
+    const v = itemData?.[key];
+    return v !== undefined && v !== null && v !== "" &&
+      !(typeof v === "object" && Object.keys(v).length === 0);
+  }
+
+  // Default mode per family: the first declared arm that has data, else Static.
+  _armDefaults(fields, itemData) {
+    const out = {};
+    for (const [base, arms] of Object.entries(this._armFamilies(fields))) {
+      const withData = arms.find((a) => this._armHasData(itemData, a.key));
+      out[`__${base}_mode`] = withData ? (withData.field.arm || withData.key) : "Static";
+    }
+    return out;
+  }
+
   // Generate schema from selector fields, including context for entity-attribute linking
   _generateSchema(fields, itemData) {
     if (!fields) return [];
@@ -58,32 +93,34 @@ export class HaBcObjectSelector extends LitElement {
       }
     }
 
+    const families = this._armFamilies(fields);
+    this._armMeta = {};
+
+    const makeItem = (key, field) => {
+      const schemaItem = {
+        name: key,
+        selector: field.selector,
+        required: field.required ?? false,
+      };
+      // Add context for attribute selectors to link to entity field
+      if (field.selector && field.selector.attribute && entityFieldName) {
+        schemaItem.context = { filter_entity: entityFieldName };
+      }
+      return schemaItem;
+    };
+
     // Fields sharing a `group` are wrapped in a collapsible expandable section
     // (flattened, so the stored config keys stay top-level). Fields without a
     // group render flat, exactly as before.
     const schema = [];
     const groups = new Map();
 
-    for (const [key, field] of fieldEntries) {
-      if (!this._fieldVisible(field, itemData)) continue;
-
-      const schemaItem = {
-        name: key,
-        selector: field.selector,
-        required: field.required ?? false,
-      };
-
-      // Add context for attribute selectors to link to entity field
-      if (field.selector && field.selector.attribute && entityFieldName) {
-        schemaItem.context = { filter_entity: entityFieldName };
-      }
-
+    const place = (field, schemaItems) => {
       const group = field.group;
       if (!group) {
-        schema.push(schemaItem);
-        continue;
+        schema.push(...schemaItems);
+        return;
       }
-
       let section = groups.get(group);
       if (!section) {
         section = {
@@ -100,13 +137,59 @@ export class HaBcObjectSelector extends LitElement {
       } else if (!section.icon && field.group_icon) {
         section.icon = field.group_icon;
       }
-      section.schema.push(schemaItem);
+      section.schema.push(...schemaItems);
+    };
+
+    for (const [key, field] of fieldEntries) {
+      // Arm fields render through their base family, never on their own
+      if (field.arm_of && fields[field.arm_of]) continue;
+      if (!this._fieldVisible(field, itemData)) continue;
+
+      const arms = families[key];
+      if (!arms) {
+        place(field, [makeItem(key, field)]);
+        continue;
+      }
+
+      const modeKey = `__${key}_mode`;
+      const options = ["Static", ...arms.map((a) => a.field.arm || a.key)];
+      const mode = options.includes(itemData?.[modeKey]) ? itemData[modeKey] : "Static";
+      const activeArm = arms.find((a) => (a.field.arm || a.key) === mode);
+
+      // Warn when an inactive arm still has data — the module's priority
+      // rules decide which one wins, which is invisible otherwise.
+      const othersWithData = arms
+        .filter((a) => a !== activeArm && this._armHasData(itemData, a.key))
+        .map((a) => a.field.arm || a.key);
+      if (mode !== "Static" && this._armHasData(itemData, key)) {
+        othersWithData.unshift("Static");
+      }
+      this._armMeta[modeKey] = {
+        label: field.label || key,
+        helper: othersWithData.length
+          ? `Other modes also set: ${othersWithData.join(", ")} — the module's priority decides which wins.`
+          : "",
+      };
+
+      const modeItem = {
+        name: modeKey,
+        selector: {
+          select: { options, multiple: false, custom_value: false, mode: "dropdown" },
+        },
+        required: false,
+      };
+      const activeItem = activeArm
+        ? makeItem(activeArm.key, activeArm.field)
+        : makeItem(key, field);
+      place(field, [modeItem, activeItem]);
     }
 
     return schema;
   }
 
   _computeLabel(schema) {
+    if (this._armMeta?.[schema.name]) return this._armMeta[schema.name].label;
+
     const field = this.selector?.bc_object?.fields?.[schema.name];
     if (field?.label) return field.label;
 
@@ -120,6 +203,8 @@ export class HaBcObjectSelector extends LitElement {
   }
 
   _computeHelper(schema) {
+    if (this._armMeta?.[schema.name]) return this._armMeta[schema.name].helper;
+
     const field = this.selector?.bc_object?.fields?.[schema.name];
     if (field?.description) return field.description;
 
@@ -218,10 +303,23 @@ export class HaBcObjectSelector extends LitElement {
     `;
   }
 
+  // Item data extended with synthetic `__*` UI-only keys (arm mode dropdowns):
+  // defaults derived from which keys hold data, overridden by this item's
+  // transient UI state. Never part of the emitted value.
+  _itemFormData(item, index) {
+    const fields = this.selector?.bc_object?.fields;
+    return {
+      ...item,
+      ...this._armDefaults(fields, item),
+      ...(this._uiState?.[index] || {}),
+    };
+  }
+
   _renderItem(item, index) {
     const label = this._formatValue(item, this.selector) || `Item ${index + 1}`;
     const description = this._getDescription(item);
     const isMultiple = this.selector?.bc_object?.multiple || false;
+    const formData = this._itemFormData(item, index);
 
     return html`
       <ha-expansion-panel outlined class="bc-object-item">
@@ -244,8 +342,8 @@ export class HaBcObjectSelector extends LitElement {
         <div class="bc-object-item-content">
           <ha-form
             .hass=${this.hass}
-            .data=${item}
-            .schema=${this._generateSchema(this.selector?.bc_object?.fields, item)}
+            .data=${formData}
+            .schema=${this._generateSchema(this.selector?.bc_object?.fields, formData)}
             .disabled=${this.disabled}
             .computeLabel=${(schema) => this._computeLabel(schema)}
             .computeHelper=${(schema) => this._computeHelper(schema)}
@@ -271,6 +369,16 @@ export class HaBcObjectSelector extends LitElement {
   _deleteItem(index) {
     const isMultiple = this.selector?.bc_object?.multiple || false;
 
+    if (this._uiState) {
+      const shifted = {};
+      for (const [i, state] of Object.entries(this._uiState)) {
+        const n = Number(i);
+        if (n < index) shifted[n] = state;
+        else if (n > index) shifted[n - 1] = state;
+      }
+      this._uiState = shifted;
+    }
+
     if (isMultiple) {
       const newValue = [...(this.value || [])];
       newValue.splice(index, 1);
@@ -284,12 +392,23 @@ export class HaBcObjectSelector extends LitElement {
     ev.stopPropagation();
     const isMultiple = this.selector?.bc_object?.multiple || false;
 
+    // Split synthetic `__*` UI keys (arm mode dropdowns) out of the form
+    // value: they stay in per-item element state, never in the stored config.
+    const clean = {};
+    const ui = {};
+    for (const [k, v] of Object.entries(ev.detail.value || {})) {
+      (k.startsWith("__") ? ui : clean)[k] = v;
+    }
+    this._uiState = { ...(this._uiState || {}) };
+    this._uiState[index] = { ...(this._uiState[index] || {}), ...ui };
+    this.requestUpdate();
+
     if (isMultiple) {
       const newValue = [...(this.value || [])];
-      newValue[index] = ev.detail.value;
+      newValue[index] = clean;
       fireEvent(this, "value-changed", { value: newValue });
     } else {
-      fireEvent(this, "value-changed", { value: ev.detail.value });
+      fireEvent(this, "value-changed", { value: clean });
     }
   }
 

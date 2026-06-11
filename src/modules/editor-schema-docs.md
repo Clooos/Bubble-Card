@@ -733,6 +733,8 @@ without a `group` render at the top level as usual:
 | `fields.*.group` | string | Renders the field inside a collapsible section with this title. Fields sharing the same `group` end up in the same section. UI-only: the stored value stays flat. |
 | `fields.*.group_icon` | string | Optional icon (Material Design Icons) for the field's group section. |
 | `fields.*.visible_if` | string | JS expression evaluated against the item's current data as `item` (e.g. `item.target === 'card'`). The field only renders while the expression is truthy; sections whose fields are all hidden disappear. Re-evaluated live on every change. Broken expressions fail open (field stays visible). |
+| `fields.*.arm_of` | string | Marks this field as an alternative representation ("arm") of the named base field — e.g. a state→color map or a JS expression next to a static color. The form collapses the family into one mode dropdown (Static + each arm's `arm` label) plus only the active arm's input. The dropdown is UI-only: stored values keep their original keys, and opening an existing config selects whichever arm already has data. If an inactive arm also has data, a helper line warns that the module's priority rules decide which wins. |
+| `fields.*.arm` | string | Display label of this arm in the family's mode dropdown (e.g. `"State map"`, `"JS"`). Defaults to the field key. |
 | `label_field` | string | Property key used as the item label in the UI (useful when `multiple` is `true`). |
 | `description_field` | string | Property key used as an optional item description in the UI. |
 | `multiple` | boolean | Allow entering a list of objects. If `true`, the resulting value is a list. |
