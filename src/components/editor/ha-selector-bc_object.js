@@ -169,6 +169,13 @@ export class HaBcObjectSelector extends LitElement {
         const useCard = !own && itemData?.__card_entity;
         schemaItem.context = { filter_entity: useCard ? "__card_entity" : entityFieldName };
       }
+      // A field may declare its own context mapping (contextKey -> sibling
+      // field name); ha-form resolves it against the item's data, so custom
+      // selectors registered via editor_code can read sibling values (e.g.
+      // the entry's entity). The synthetic __card_entity key works here too.
+      if (field.context && !schemaItem.context) {
+        schemaItem.context = { ...field.context };
+      }
       const warn = this._fieldWarning(field, itemData);
       if (warn && !field.group) {
         this._warnTop[index][key] = warn;
