@@ -92,18 +92,23 @@ export function preloadYAMLStyles(context) {
 
 // Modules can extend the editor itself: a module's `editor_code` block runs
 // once when modules load — same trust level as the module's `code` block,
-// which already executes arbitrary JS in every card render. Typical use:
+// which already executes arbitrary JS in every card render. Typical uses:
 // customElements.define('ha-selector-<name>', ...) so the module's editor
 // schema can use selectors that neither HA nor Bubble Card ship (ha-form
-// resolves any registered ha-selector-* element).
-const editorCodeRan = new Set();
+// resolves any registered ha-selector-* element), and mutating the passed
+// `module` definition — the editor reads `module.editor` live on every
+// render, so repetitive schema can be generated in JS instead of YAML.
+// Guarded per module OBJECT (not key): a background refresh replaces the
+// objects, and the code must re-run to reapply schema mutations — element
+// definitions are expected to guard with customElements.get().
+const editorCodeRan = new WeakSet();
 export function runEditorCode(modules) {
   Object.entries(modules || {}).forEach(([key, mod]) => {
     if (!mod || typeof mod !== 'object' || !mod.editor_code) return;
-    if (editorCodeRan.has(key)) return;
-    editorCodeRan.add(key);
+    if (editorCodeRan.has(mod)) return;
+    editorCodeRan.add(mod);
     try {
-      new Function('module_id', String(mod.editor_code))(key);
+      new Function('module_id', 'module', String(mod.editor_code))(key, mod);
     } catch (e) {
       console.error(`[bubble-card] editor_code of module '${key}' failed:`, e);
     }

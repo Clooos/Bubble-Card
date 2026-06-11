@@ -1043,7 +1043,7 @@ You can create collapsible sections:
 
 ## Extending the editor with JavaScript (`editor_code`)
 
-A module can ship an `editor_code` block next to its `code` block. It runs **once** when the modules load (not per render), with the module's id available as `module_id`. It has the same trust level as the module's `code` block, which already executes arbitrary JavaScript in every card render.
+A module can ship an `editor_code` block next to its `code` block. It runs **once** when the modules load (not per render), with the module's id available as `module_id` and the module's own definition object as `module`. It has the same trust level as the module's `code` block, which already executes arbitrary JavaScript in every card render.
 
 The main use case is registering custom `ha-selector-*` elements that the module's editor schema can then reference — `ha-form` resolves any registered `ha-selector-<name>` element, including ones neither Home Assistant nor Bubble Card ship:
 
@@ -1076,6 +1076,31 @@ my_module:
 ```
 
 Errors in an `editor_code` block are caught and logged per module — a broken block never prevents other modules from loading.
+
+### Generating schema from JavaScript
+
+The `module` argument is the live module definition: the editor reads `module.editor` on every render, so `editor_code` can build or post-process the schema programmatically instead of hand-writing repetitive YAML — generate one `_js` twin per field, stamp a shared `context` mapping on a family of fields, or assemble the whole `editor` array from data:
+
+```yaml
+my_module:
+  name: "My module"
+  editor_code: |
+    // Generate a field per channel instead of repeating YAML blocks
+    module.editor = ['red', 'green', 'blue'].map((ch) => ({
+      name: ch,
+      label: `${ch} level`,
+      selector: { number: { min: 0, max: 255, mode: 'slider' } },
+    }));
+```
+
+Two rules follow from how this is wired:
+
+- The block re-runs whenever the module definitions are re-fetched (e.g. a background cache refresh replaces the objects), so schema mutations are never lost — guard `customElements.define` calls with `customElements.get()` since those *do* persist across re-runs.
+- The schema must stay plain data (it is `structuredClone`d per render) — no functions inside schema items. Custom behavior belongs in registered `ha-selector-*` elements.
+
+The block runs once per load, not per render, so the generated schema is static. Config-reactive behavior stays where it already lives: `visible_if`, `warn_if`, arms, and custom selectors.
+
+A module does not need a `code` block at all — a module consisting only of `editor_code` works, which allows pure editor-extension modules: e.g. a shared library that registers a set of custom selectors for other modules' schemas to use.
 
 Inside an object selector, a custom selector can read sibling values of the same item (the entry's entity, a chosen color, ...) by declaring a `context` mapping on the field — see the `fields.*.context` row in the object selector options above. The element receives the resolved values via its `context` property.
 
