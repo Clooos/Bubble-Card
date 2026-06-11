@@ -743,7 +743,7 @@ without a `group` render at the top level as usual:
 | `fields.*.arm` | string | Display label of this arm in the family's mode dropdown (e.g. `"State map"`, `"JS"`). Defaults to the field key. On the *base* field it instead renames the base mode's dropdown label (default `"Static"`) — e.g. `arm: Single` next to a `"Multiple"` arm. |
 | `fields.*.context` | object | Context mapping (`contextKey: siblingFieldName`) resolved by ha-form against the item's current data and passed to the field's selector as `context`. Lets custom selectors registered via `editor_code` read sibling values — e.g. `{entity: entity, card_entity: __card_entity}` gives the selector the entry's entity (the synthetic `__card_entity` key holds the card's entity). Ignored on attribute selectors, which manage their own context. |
 | `label_field` | string | Property key used as the item label in the UI (useful when `multiple` is `true`). |
-| `description_field` | string | Property key used as an optional item description in the UI. |
+| `description_field` | string \| list | Property key used as an optional item description in the UI. A list of keys falls back to the first one with a value; list values render comma-separated. |
 | `multiple` | boolean | Allow entering a list of objects. If `true`, the resulting value is a list. |
 </details>
 

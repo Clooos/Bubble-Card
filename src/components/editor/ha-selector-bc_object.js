@@ -330,10 +330,16 @@ export class HaBcObjectSelector extends LitElement {
     return String(value);
   }
 
+  // description_field may be a single key or a list of keys (first with a
+  // value wins); list values join with ", " instead of lit's bare concat.
   _getDescription(item) {
     const descField = this.selector?.bc_object?.description_field;
     if (!descField || !item) return "";
-    return item[descField] || "";
+    for (const key of Array.isArray(descField) ? descField : [descField]) {
+      const v = item[key];
+      if (Array.isArray(v) ? v.length : v) return Array.isArray(v) ? v.join(", ") : v;
+    }
+    return "";
   }
 
   render() {
