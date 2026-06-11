@@ -25,33 +25,36 @@ export class HaBcObjectSelector extends LitElement {
   }
 
   // A field's optional `visible_if` is a JS expression evaluated against the
-  // item's current data (`item`). The schema is regenerated on every change,
-  // so fields show/hide live. Fails open: a broken expression keeps the field
-  // visible rather than making it unreachable.
+  // item's current data (`item`) and the live `hass` object (entity-aware
+  // conditions). The schema is regenerated on every change, so fields
+  // show/hide live. Fails open: a broken expression keeps the field visible
+  // rather than making it unreachable.
   _fieldVisible(field, itemData) {
     if (!field.visible_if) return true;
     try {
       this._visibleIfCache = this._visibleIfCache || {};
       const fn = this._visibleIfCache[field.visible_if] ||
         (this._visibleIfCache[field.visible_if] =
-          new Function("item", `return !!(${field.visible_if});`));
-      return fn(itemData || {});
+          new Function("item", "hass", `return !!(${field.visible_if});`));
+      return fn(itemData || {}, this.hass);
     } catch (e) {
       return true;
     }
   }
 
   // A field's optional `warn_if` is a JS expression evaluated against the
-  // item's current data (`item`). When true, `warn_text` is shown as the
-  // field's helper. Fails silent: a broken expression never warns.
+  // item's current data (`item`) and the live `hass` object (entity-aware
+  // warnings: missing entities, unknown attributes). When true, `warn_text`
+  // is shown as the field's helper. Fails silent: a broken expression never
+  // warns.
   _fieldWarning(field, itemData) {
     if (!field.warn_if) return "";
     try {
       this._warnIfCache = this._warnIfCache || {};
       const fn = this._warnIfCache[field.warn_if] ||
         (this._warnIfCache[field.warn_if] =
-          new Function("item", `return !!(${field.warn_if});`));
-      return fn(itemData || {}) ? (field.warn_text || "Check this value") : "";
+          new Function("item", "hass", `return !!(${field.warn_if});`));
+      return fn(itemData || {}, this.hass) ? (field.warn_text || "Check this value") : "";
     } catch (e) {
       return "";
     }
@@ -116,9 +119,16 @@ export class HaBcObjectSelector extends LitElement {
     this._warnMeta = this._warnMeta || {};
 
     const makeItem = (key, field) => {
+      // A declared default surfaces as the text input's placeholder, so an
+      // empty field shows what value it falls back to.
+      let selector = field.selector;
+      if (field.default !== undefined && selector?.text &&
+          selector.text.placeholder === undefined) {
+        selector = { text: { ...selector.text, placeholder: String(field.default) } };
+      }
       const schemaItem = {
         name: key,
-        selector: field.selector,
+        selector,
         required: field.required ?? false,
       };
       // Add context for attribute selectors to link to entity field

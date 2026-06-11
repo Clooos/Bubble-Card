@@ -90,6 +90,26 @@ export function preloadYAMLStyles(context) {
   }
 }
 
+// Modules can extend the editor itself: a module's `editor_code` block runs
+// once when modules load — same trust level as the module's `code` block,
+// which already executes arbitrary JS in every card render. Typical use:
+// customElements.define('ha-selector-<name>', ...) so the module's editor
+// schema can use selectors that neither HA nor Bubble Card ship (ha-form
+// resolves any registered ha-selector-* element).
+const editorCodeRan = new Set();
+export function runEditorCode(modules) {
+  Object.entries(modules || {}).forEach(([key, mod]) => {
+    if (!mod || typeof mod !== 'object' || !mod.editor_code) return;
+    if (editorCodeRan.has(key)) return;
+    editorCodeRan.add(key);
+    try {
+      new Function('module_id', String(mod.editor_code))(key);
+    } catch (e) {
+      console.error(`[bubble-card] editor_code of module '${key}' failed:`, e);
+    }
+  });
+}
+
 export async function initializeModules(context) {
   if (modulesInitialized && allModules) return allModules;
   if (initPromise) return initPromise;
@@ -134,6 +154,7 @@ export async function initializeModules(context) {
                 yamlKeysMap.set(id, fresh[id]);
                 moduleSourceMap.set(id, 'file');
               });
+              runEditorCode(allModules);
               try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
             }
           } catch (_) {}
@@ -182,6 +203,7 @@ export async function initializeModules(context) {
                 yamlKeysMap.set(id, fresh[id]);
                 moduleSourceMap.set(id, 'file');
               });
+              runEditorCode(allModules);
               try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
             }
           } catch (_) {}
@@ -240,7 +262,10 @@ export async function initializeModules(context) {
 
     modulesInitialized = true;
     return allModules;
-  })();
+  })().then((mods) => {
+    runEditorCode(mods);
+    return mods;
+  });
 
   return initPromise;
 }
