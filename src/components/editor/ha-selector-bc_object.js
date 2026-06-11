@@ -101,12 +101,19 @@ export class HaBcObjectSelector extends LitElement {
       !(typeof v === "object" && Object.keys(v).length === 0);
   }
 
-  // Default mode per family: the first declared arm that has data, else Static.
+  // The base field's own mode label in the dropdown; the base field may
+  // rename it via its own `arm` key (e.g. "Single" vs a "Multiple" arm).
+  _armBaseLabel(field) {
+    return field?.arm || "Static";
+  }
+
+  // Default mode per family: the first declared arm that has data, else the base mode.
   _armDefaults(fields, itemData) {
     const out = {};
     for (const [base, arms] of Object.entries(this._armFamilies(fields))) {
       const withData = arms.find((a) => this._armHasData(itemData, a.key));
-      out[`__${base}_mode`] = withData ? (withData.field.arm || withData.key) : "Static";
+      out[`__${base}_mode`] =
+        withData ? (withData.field.arm || withData.key) : this._armBaseLabel(fields[base]);
     }
     return out;
   }
@@ -231,8 +238,9 @@ export class HaBcObjectSelector extends LitElement {
       }
 
       const modeKey = `__${key}_mode`;
-      const options = ["Static", ...arms.map((a) => a.field.arm || a.key)];
-      const mode = options.includes(itemData?.[modeKey]) ? itemData[modeKey] : "Static";
+      const baseLabel = this._armBaseLabel(field);
+      const options = [baseLabel, ...arms.map((a) => a.field.arm || a.key)];
+      const mode = options.includes(itemData?.[modeKey]) ? itemData[modeKey] : baseLabel;
       const activeArm = arms.find((a) => (a.field.arm || a.key) === mode);
 
       // Warn when an inactive arm still has data — the module's priority
@@ -240,8 +248,8 @@ export class HaBcObjectSelector extends LitElement {
       const othersWithData = arms
         .filter((a) => a !== activeArm && this._armHasData(itemData, a.key))
         .map((a) => a.field.arm || a.key);
-      if (mode !== "Static" && this._armHasData(itemData, key)) {
-        othersWithData.unshift("Static");
+      if (mode !== baseLabel && this._armHasData(itemData, key)) {
+        othersWithData.unshift(baseLabel);
       }
       this._armMeta[`${index}:${modeKey}`] = {
         label: field.label || key,
