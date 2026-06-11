@@ -1076,6 +1076,8 @@ my_module:
 
 Errors in an `editor_code` block are caught and logged per module — a broken block never prevents other modules from loading.
 
+For a complete working module using `editor_code` together with object-selector groups, `visible_if`, `warn_if` and arms, see [`examples/glow-rules.yaml`](../../examples/glow-rules.yaml).
+
 ## Best practices
 
 1. **Keep it simple**: Only include fields that users actually need to configure
