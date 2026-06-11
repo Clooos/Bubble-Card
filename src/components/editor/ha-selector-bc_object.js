@@ -133,6 +133,12 @@ export class HaBcObjectSelector extends LitElement {
     const families = this._armFamilies(fields);
     this._armMeta = this._armMeta || {};
     this._warnMeta = this._warnMeta || {};
+    // Active warnings for top-level fields, fed to ha-form's native
+    // `warning` prop (amber ha-alert above the field). Grouped fields fall
+    // back to a ⚠️ helper line instead: ha-form-expandable does not forward
+    // the warning prop to its nested form.
+    this._warnTop = this._warnTop || {};
+    this._warnTop[index] = {};
 
     const makeItem = (key, field) => {
       // A declared default surfaces as the text input's placeholder, so an
@@ -164,8 +170,14 @@ export class HaBcObjectSelector extends LitElement {
         schemaItem.context = { filter_entity: useCard ? "__card_entity" : entityFieldName };
       }
       const warn = this._fieldWarning(field, itemData);
-      if (warn) this._warnMeta[`${index}:${key}`] = warn;
-      else delete this._warnMeta[`${index}:${key}`];
+      if (warn && !field.group) {
+        this._warnTop[index][key] = warn;
+        delete this._warnMeta[`${index}:${key}`];
+      } else if (warn) {
+        this._warnMeta[`${index}:${key}`] = warn;
+      } else {
+        delete this._warnMeta[`${index}:${key}`];
+      }
       return schemaItem;
     };
 
@@ -438,6 +450,8 @@ export class HaBcObjectSelector extends LitElement {
             .hass=${this.hass}
             .data=${formData}
             .schema=${this._generateSchema(this.selector?.bc_object?.fields, formData, index)}
+            .warning=${this._warnTop?.[index] || {}}
+            .computeWarning=${(warning) => warning}
             .disabled=${this.disabled}
             .computeLabel=${(schema) => this._computeLabel(schema, index)}
             .computeHelper=${(schema) => this._computeHelper(schema, index)}
