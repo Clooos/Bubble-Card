@@ -24,6 +24,22 @@ export class HaBcObjectSelector extends LitElement {
     this.required = false;
   }
 
+  // The card's own config, found by walking up the shadow-root host chain
+  // to the editor element. Entity-linked fields (attribute pickers,
+  // visible_if/warn_if expressions) fall back to the card's entity when an
+  // item doesn't set its own — mirroring how cards resolve entities at
+  // render time.
+  get _cardConfig() {
+    let node = this;
+    for (let i = 0; node && i < 20; i++) {
+      const host = node.getRootNode?.()?.host;
+      if (!host) return undefined;
+      if (host._config && typeof host._config === "object") return host._config;
+      node = host;
+    }
+    return undefined;
+  }
+
   // A field's optional `visible_if` is a JS expression evaluated against the
   // item's current data (`item`) and the live `hass` object (entity-aware
   // conditions). The schema is regenerated on every change, so fields
@@ -35,8 +51,8 @@ export class HaBcObjectSelector extends LitElement {
       this._visibleIfCache = this._visibleIfCache || {};
       const fn = this._visibleIfCache[field.visible_if] ||
         (this._visibleIfCache[field.visible_if] =
-          new Function("item", "hass", `return !!(${field.visible_if});`));
-      return fn(itemData || {}, this.hass);
+          new Function("item", "hass", "card", `return !!(${field.visible_if});`));
+      return fn(itemData || {}, this.hass, this._cardConfig);
     } catch (e) {
       return true;
     }
@@ -53,8 +69,8 @@ export class HaBcObjectSelector extends LitElement {
       this._warnIfCache = this._warnIfCache || {};
       const fn = this._warnIfCache[field.warn_if] ||
         (this._warnIfCache[field.warn_if] =
-          new Function("item", "hass", `return !!(${field.warn_if});`));
-      return fn(itemData || {}, this.hass) ? (field.warn_text || "Check this value") : "";
+          new Function("item", "hass", "card", `return !!(${field.warn_if});`));
+      return fn(itemData || {}, this.hass, this._cardConfig) ? (field.warn_text || "Check this value") : "";
     } catch (e) {
       return "";
     }
@@ -131,9 +147,12 @@ export class HaBcObjectSelector extends LitElement {
         selector,
         required: field.required ?? false,
       };
-      // Add context for attribute selectors to link to entity field
+      // Add context for attribute selectors to link to entity field; when
+      // the item has no entity of its own, link to the synthetic
+      // __card_entity key (the card's entity) instead.
       if (field.selector && field.selector.attribute && entityFieldName) {
-        schemaItem.context = { filter_entity: entityFieldName };
+        const useCard = !itemData?.[entityFieldName] && itemData?.__card_entity;
+        schemaItem.context = { filter_entity: useCard ? "__card_entity" : entityFieldName };
       }
       const warn = this._fieldWarning(field, itemData);
       if (warn) this._warnMeta[`${index}:${key}`] = warn;
@@ -356,6 +375,9 @@ export class HaBcObjectSelector extends LitElement {
       ...item,
       ...this._armDefaults(fields, item),
       ...(this._uiState?.[index] || {}),
+      // Always fresh — the card's entity, for attribute pickers on items
+      // that inherit it (synthetic key, stripped from the emitted value).
+      __card_entity: this._cardConfig?.entity,
     };
   }
 
