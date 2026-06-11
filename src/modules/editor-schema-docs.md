@@ -694,12 +694,44 @@ The object selector lets users enter structured objects defined by a set of sub-
       multiple: true
 ```
 
+Fields that share a `group` are rendered together inside a collapsible section
+(the group name becomes the section title, `group_icon` its optional icon).
+The stored configuration stays flat — grouping only affects the editor UI, so
+adding groups to an existing module is fully backward compatible. Fields
+without a `group` render at the top level as usual:
+
+```yaml
+- name: items
+  label: "Items"
+  selector:
+    object:
+      fields:
+        name:
+          label: "Name"
+          selector:
+            text: {}
+        background_color:
+          label: "Background color"
+          group: "Appearance"
+          group_icon: "mdi:palette"
+          selector:
+            ui_color: {}
+        text_color:
+          label: "Text color"
+          group: "Appearance"
+          selector:
+            ui_color: {}
+      multiple: true
+```
+
 <details>
 <summary><b>Options</b></summary>
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `fields` | object | Map of field keys to field schemas. Each field supports a `label` and a nested `selector` (any selector type). |
+| `fields` | object | Map of field keys to field schemas. Each field supports a `label`, a `description`, a nested `selector` (any selector type), and an optional `group`. |
+| `fields.*.group` | string | Renders the field inside a collapsible section with this title. Fields sharing the same `group` end up in the same section. UI-only: the stored value stays flat. |
+| `fields.*.group_icon` | string | Optional icon (Material Design Icons) for the field's group section. |
 | `label_field` | string | Property key used as the item label in the UI (useful when `multiple` is `true`). |
 | `description_field` | string | Property key used as an optional item description in the UI. |
 | `multiple` | boolean | Allow entering a list of objects. If `true`, the resulting value is a list. |

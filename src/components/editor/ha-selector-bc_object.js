@@ -41,7 +41,13 @@ export class HaBcObjectSelector extends LitElement {
       }
     }
 
-    return fieldEntries.map(([key, field]) => {
+    // Fields sharing a `group` are wrapped in a collapsible expandable section
+    // (flattened, so the stored config keys stay top-level). Fields without a
+    // group render flat, exactly as before.
+    const schema = [];
+    const groups = new Map();
+
+    for (const [key, field] of fieldEntries) {
       const schemaItem = {
         name: key,
         selector: field.selector,
@@ -53,8 +59,32 @@ export class HaBcObjectSelector extends LitElement {
         schemaItem.context = { filter_entity: entityFieldName };
       }
 
-      return schemaItem;
-    });
+      const group = field.group;
+      if (!group) {
+        schema.push(schemaItem);
+        continue;
+      }
+
+      let section = groups.get(group);
+      if (!section) {
+        section = {
+          name: `bc_group_${groups.size}`,
+          type: "expandable",
+          flatten: true,
+          title: group,
+          expanded: false,
+          schema: [],
+        };
+        if (field.group_icon) section.icon = field.group_icon;
+        groups.set(group, section);
+        schema.push(section);
+      } else if (!section.icon && field.group_icon) {
+        section.icon = field.group_icon;
+      }
+      section.schema.push(schemaItem);
+    }
+
+    return schema;
   }
 
   _computeLabel(schema) {
