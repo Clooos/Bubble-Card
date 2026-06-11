@@ -732,6 +732,7 @@ without a `group` render at the top level as usual:
 | `fields` | object | Map of field keys to field schemas. Each field supports a `label`, a `description`, a nested `selector` (any selector type), and an optional `group`. |
 | `fields.*.group` | string | Renders the field inside a collapsible section with this title. Fields sharing the same `group` end up in the same section. UI-only: the stored value stays flat. |
 | `fields.*.group_icon` | string | Optional icon (Material Design Icons) for the field's group section. |
+| `fields.*.visible_if` | string | JS expression evaluated against the item's current data as `item` (e.g. `item.target === 'card'`). The field only renders while the expression is truthy; sections whose fields are all hidden disappear. Re-evaluated live on every change. Broken expressions fail open (field stays visible). |
 | `label_field` | string | Property key used as the item label in the UI (useful when `multiple` is `true`). |
 | `description_field` | string | Property key used as an optional item description in the UI. |
 | `multiple` | boolean | Allow entering a list of objects. If `true`, the resulting value is a list. |

@@ -24,6 +24,23 @@ export class HaBcObjectSelector extends LitElement {
     this.required = false;
   }
 
+  // A field's optional `visible_if` is a JS expression evaluated against the
+  // item's current data (`item`). The schema is regenerated on every change,
+  // so fields show/hide live. Fails open: a broken expression keeps the field
+  // visible rather than making it unreachable.
+  _fieldVisible(field, itemData) {
+    if (!field.visible_if) return true;
+    try {
+      this._visibleIfCache = this._visibleIfCache || {};
+      const fn = this._visibleIfCache[field.visible_if] ||
+        (this._visibleIfCache[field.visible_if] =
+          new Function("item", `return !!(${field.visible_if});`));
+      return fn(itemData || {});
+    } catch (e) {
+      return true;
+    }
+  }
+
   // Generate schema from selector fields, including context for entity-attribute linking
   _generateSchema(fields, itemData) {
     if (!fields) return [];
@@ -48,6 +65,8 @@ export class HaBcObjectSelector extends LitElement {
     const groups = new Map();
 
     for (const [key, field] of fieldEntries) {
+      if (!this._fieldVisible(field, itemData)) continue;
+
       const schemaItem = {
         name: key,
         selector: field.selector,
