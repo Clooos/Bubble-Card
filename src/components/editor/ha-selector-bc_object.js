@@ -41,6 +41,22 @@ export class HaBcObjectSelector extends LitElement {
     }
   }
 
+  // A field's optional `warn_if` is a JS expression evaluated against the
+  // item's current data (`item`). When true, `warn_text` is shown as the
+  // field's helper. Fails silent: a broken expression never warns.
+  _fieldWarning(field, itemData) {
+    if (!field.warn_if) return "";
+    try {
+      this._warnIfCache = this._warnIfCache || {};
+      const fn = this._warnIfCache[field.warn_if] ||
+        (this._warnIfCache[field.warn_if] =
+          new Function("item", `return !!(${field.warn_if});`));
+      return fn(itemData || {}) ? (field.warn_text || "Check this value") : "";
+    } catch (e) {
+      return "";
+    }
+  }
+
   // Fields with `arm_of: <base>` are alternative representations ("arms") of
   // the base field (e.g. a static color vs. a state->color map vs. a JS
   // expression). The form shows one mode dropdown per family plus only the
@@ -76,8 +92,10 @@ export class HaBcObjectSelector extends LitElement {
     return out;
   }
 
-  // Generate schema from selector fields, including context for entity-attribute linking
-  _generateSchema(fields, itemData) {
+  // Generate schema from selector fields, including context for entity-attribute linking.
+  // Per-field metadata (arm helpers, warnings) is keyed by item index so that
+  // forms of different items in the same list never read each other's state.
+  _generateSchema(fields, itemData, index = 0) {
     if (!fields) return [];
 
     const fieldEntries = Array.isArray(fields)
@@ -94,7 +112,8 @@ export class HaBcObjectSelector extends LitElement {
     }
 
     const families = this._armFamilies(fields);
-    this._armMeta = {};
+    this._armMeta = this._armMeta || {};
+    this._warnMeta = this._warnMeta || {};
 
     const makeItem = (key, field) => {
       const schemaItem = {
@@ -106,6 +125,9 @@ export class HaBcObjectSelector extends LitElement {
       if (field.selector && field.selector.attribute && entityFieldName) {
         schemaItem.context = { filter_entity: entityFieldName };
       }
+      const warn = this._fieldWarning(field, itemData);
+      if (warn) this._warnMeta[`${index}:${key}`] = warn;
+      else delete this._warnMeta[`${index}:${key}`];
       return schemaItem;
     };
 
@@ -164,7 +186,7 @@ export class HaBcObjectSelector extends LitElement {
       if (mode !== "Static" && this._armHasData(itemData, key)) {
         othersWithData.unshift("Static");
       }
-      this._armMeta[modeKey] = {
+      this._armMeta[`${index}:${modeKey}`] = {
         label: field.label || key,
         helper: othersWithData.length
           ? `Other modes also set: ${othersWithData.join(", ")} — the module's priority decides which wins.`
@@ -187,8 +209,8 @@ export class HaBcObjectSelector extends LitElement {
     return schema;
   }
 
-  _computeLabel(schema) {
-    if (this._armMeta?.[schema.name]) return this._armMeta[schema.name].label;
+  _computeLabel(schema, index = 0) {
+    if (this._armMeta?.[`${index}:${schema.name}`]) return this._armMeta[`${index}:${schema.name}`].label;
 
     const field = this.selector?.bc_object?.fields?.[schema.name];
     if (field?.label) return field.label;
@@ -202,8 +224,13 @@ export class HaBcObjectSelector extends LitElement {
     return schema.name;
   }
 
-  _computeHelper(schema) {
-    if (this._armMeta?.[schema.name]) return this._armMeta[schema.name].helper;
+  _computeHelper(schema, index = 0) {
+    // An active warning replaces the regular helper — it's the thing the
+    // user needs to read right now.
+    const warn = this._warnMeta?.[`${index}:${schema.name}`];
+    if (warn) return `⚠️ ${warn}`;
+
+    if (this._armMeta?.[`${index}:${schema.name}`]) return this._armMeta[`${index}:${schema.name}`].helper;
 
     const field = this.selector?.bc_object?.fields?.[schema.name];
     if (field?.description) return field.description;
@@ -263,17 +290,24 @@ export class HaBcObjectSelector extends LitElement {
 
     return html`
       ${this.label ? html`<label class="bc-object-label">${this.label}</label>` : nothing}
-      <div class="bc-object-items">
-        ${items.map((item, index) => this._renderItem(item, index))}
-        <ha-button 
-          class="bc-object-add-button"
-          @click=${this._addItem}
-          ?disabled=${this.disabled}
-        >
-          <ha-icon icon="mdi:plus"></ha-icon>
-          ${this.hass?.localize?.("ui.common.add") || "Add"}
-        </ha-button>
-      </div>
+      <ha-sortable
+        handle-selector=".reorder-handle"
+        draggable-selector=".bc-object-item"
+        .disabled=${this.disabled}
+        @item-moved=${this._itemMoved}
+      >
+        <div class="bc-object-items">
+          ${items.map((item, index) => this._renderItem(item, index))}
+          <ha-button
+            class="bc-object-add-button"
+            @click=${this._addItem}
+            ?disabled=${this.disabled}
+          >
+            <ha-icon icon="mdi:plus"></ha-icon>
+            ${this.hass?.localize?.("ui.common.add") || "Add"}
+          </ha-button>
+        </div>
+      </ha-sortable>
       ${this.helper ? html`<ha-input-helper-text>${this.helper}</ha-input-helper-text>` : nothing}
     `;
   }
@@ -324,11 +358,30 @@ export class HaBcObjectSelector extends LitElement {
     return html`
       <ha-expansion-panel outlined class="bc-object-item">
         <h4 slot="header" class="bc-object-item-header">
+          ${isMultiple ? html`
+            <ha-icon-button
+              class="reorder-handle"
+              @click=${(e) => e.stopPropagation()}
+              .label="${this.hass?.localize?.("ui.common.move") || "Move"}"
+            >
+              <ha-icon icon="mdi:drag"></ha-icon>
+            </ha-icon-button>
+          ` : nothing}
           <div class="bc-object-item-title-container">
             <span class="bc-object-item-label">${label}</span>
             ${description ? html`<span class="bc-object-item-description">${description}</span>` : nothing}
           </div>
           <div class="button-container" @click=${(e) => e.stopPropagation()} @mousedown=${(e) => e.stopPropagation()} @touchstart=${(e) => e.stopPropagation()}>
+            ${isMultiple ? html`
+              <ha-icon-button
+                class="duplicate-icon"
+                @click=${() => this._duplicateItem(index)}
+                ?disabled=${this.disabled}
+                .label="${this.hass?.localize?.("ui.common.duplicate") || "Duplicate"}"
+              >
+                <ha-icon icon="mdi:content-copy"></ha-icon>
+              </ha-icon-button>
+            ` : nothing}
             <ha-icon-button
               class="delete-icon"
               @click=${() => this._deleteItem(index)}
@@ -343,10 +396,10 @@ export class HaBcObjectSelector extends LitElement {
           <ha-form
             .hass=${this.hass}
             .data=${formData}
-            .schema=${this._generateSchema(this.selector?.bc_object?.fields, formData)}
+            .schema=${this._generateSchema(this.selector?.bc_object?.fields, formData, index)}
             .disabled=${this.disabled}
-            .computeLabel=${(schema) => this._computeLabel(schema)}
-            .computeHelper=${(schema) => this._computeHelper(schema)}
+            .computeLabel=${(schema) => this._computeLabel(schema, index)}
+            .computeHelper=${(schema) => this._computeHelper(schema, index)}
             .localizeValue=${this.localizeValue}
             @value-changed=${(ev) => this._itemChanged(ev, index)}
           ></ha-form>
@@ -364,6 +417,52 @@ export class HaBcObjectSelector extends LitElement {
     } else {
       fireEvent(this, "value-changed", { value: {} });
     }
+  }
+
+  _duplicateItem(index) {
+    const items = Array.isArray(this.value) ? this.value : [];
+    const copy = JSON.parse(JSON.stringify(items[index] || {}));
+
+    if (this._uiState) {
+      const shifted = {};
+      for (const [i, state] of Object.entries(this._uiState)) {
+        const n = Number(i);
+        shifted[n > index ? n + 1 : n] = state;
+      }
+      shifted[index + 1] = { ...(this._uiState[index] || {}) };
+      this._uiState = shifted;
+    }
+
+    const newValue = [...items];
+    newValue.splice(index + 1, 0, copy);
+    fireEvent(this, "value-changed", { value: newValue });
+  }
+
+  // ha-sortable reports the DOM move; mirror it in the value array and remap
+  // per-item UI state (arm mode dropdowns) so each item keeps its own state.
+  _itemMoved(ev) {
+    ev.stopPropagation();
+    const { oldIndex, newIndex } = ev.detail;
+    if (oldIndex === newIndex) return;
+
+    const newValue = [...(Array.isArray(this.value) ? this.value : [])];
+    const [moved] = newValue.splice(oldIndex, 1);
+    newValue.splice(newIndex, 0, moved);
+
+    if (this._uiState) {
+      const remap = (n) => {
+        if (n === oldIndex) return newIndex;
+        if (oldIndex < newIndex) return n > oldIndex && n <= newIndex ? n - 1 : n;
+        return n >= newIndex && n < oldIndex ? n + 1 : n;
+      };
+      const shifted = {};
+      for (const [i, state] of Object.entries(this._uiState)) {
+        shifted[remap(Number(i))] = state;
+      }
+      this._uiState = shifted;
+    }
+
+    fireEvent(this, "value-changed", { value: newValue });
   }
 
   _deleteItem(index) {
@@ -479,8 +578,22 @@ export class HaBcObjectSelector extends LitElement {
       margin-left: 8px;
     }
 
-    .delete-icon {
+    .delete-icon,
+    .duplicate-icon {
       color: var(--secondary-text-color);
+    }
+
+    .reorder-handle {
+      color: var(--secondary-text-color);
+      cursor: grab;
+      margin-right: 4px;
+    }
+
+    .reorder-handle ha-icon,
+    .duplicate-icon ha-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .delete-icon ha-icon {
