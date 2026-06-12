@@ -329,8 +329,10 @@ export class HaBcObjectSelector extends LitElement {
     
     if (!labelField) return "";
     
+    // 0 is a real label (e.g. a threshold row's `from: 0`) — only blank-ish
+    // values fall through to the "Item N" placeholder.
     const value = item[labelField];
-    if (!value) return "";
+    if (value === undefined || value === null || value === "") return "";
 
     // Try to format entity names nicely
     if (this.selector?.bc_object?.fields?.[labelField]?.selector?.entity) {
@@ -350,7 +352,7 @@ export class HaBcObjectSelector extends LitElement {
     if (!descField || !item) return "";
     for (const key of Array.isArray(descField) ? descField : [descField]) {
       const v = item[key];
-      if (Array.isArray(v) ? v.length : v) return Array.isArray(v) ? v.join(", ") : v;
+      if (Array.isArray(v) ? v.length : (v || v === 0)) return Array.isArray(v) ? v.join(", ") : v;
     }
     return "";
   }
