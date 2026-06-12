@@ -1,0 +1,152 @@
+glow_rules:
+  name: 'Example: Icon glow rules'
+  version: v1.0
+  creator: szsolt
+  link: https://github.com/Clooos/Bubble-Card/pull/2489
+  supported:
+    - button
+  description: |
+    Adds a colored glow to the icon when an entity matches a state.
+    Demo module for the object-selector editor features: groups,
+    visible_if, warn_if, variants, attribute fallback, reorder/duplicate,
+    a custom selector registered via editor_code that reads the
+    rule's color through a per-field context mapping, and a schema
+    field generated from editor_code instead of YAML.
+  editor_code: |
+    if (!customElements.get('ha-selector-glow_size_picker')) {
+      customElements.define('ha-selector-glow_size_picker', class extends HTMLElement {
+        set hass(h) { this._hass = h; }
+        set selector(s) { this._selector = s; }
+        set label(l) { this._label = l; if (this._built) this._render(); }
+        set value(v) { this._value = v; if (this._built) this._render(); }
+        get value() { return this._value; }
+        // The field's `context` mapping hands us sibling values from the same
+        // rule — here the chosen glow color, so the preview dot glows in it.
+        set context(c) { this._ctx = c; if (this._built) this._render(); }
+        connectedCallback() { this._render(); }
+        _render() {
+          if (!this._built) {
+            this.innerHTML = `
+              <div style="padding: 4px;">
+                <div class="lbl" style="font-size: 12px; color: var(--secondary-text-color);"></div>
+                <div style="display: flex; align-items: center; gap: 16px; padding: 12px 4px;">
+                  <span class="dot" style="width: 24px; height: 24px; border-radius: 50%;
+                    background: var(--primary-color); flex: none;"></span>
+                  <input type="range" min="4" max="40" style="flex: 1;">
+                  <span class="val" style="width: 48px; text-align: right;"></span>
+                </div>
+              </div>`;
+            this._built = true;
+            this.querySelector('input').addEventListener('input', (e) => {
+              this._value = Number(e.target.value);
+              this._render();
+              this.dispatchEvent(new CustomEvent('value-changed', {
+                detail: { value: this._value }, bubbles: true, composed: true,
+              }));
+            });
+          }
+          const v = Number(this._value) || 12;
+          let color = this._ctx?.color || 'var(--primary-color)';
+          if (!/[(#]/.test(String(color))) color = `var(--${color}-color, ${color})`;
+          this.querySelector('.lbl').textContent = this._label || '';
+          this.querySelector('.dot').style.boxShadow = `0 0 ${v}px 2px ${color}`;
+          this.querySelector('input').value = v;
+          this.querySelector('.val').textContent = `${v} px`;
+        }
+      });
+    }
+    // Schema generated in JS instead of repeating YAML — the editor reads
+    // module.editor live, so this adds the JS-expression variant of the
+    // color field.
+    module.editor[0].selector.object.fields.color_js = {
+      label: 'Glow color (JS)',
+      description: "A JS expression returning a color, e.g. " +
+        "hass.states['sun.sun'].state === 'above_horizon' ? 'amber' : 'blue'",
+      group: 'Appearance',
+      variant_of: 'color',
+      variant: 'JS expression',
+      selector: { text: { multiline: true } },
+    };
+  code: |
+    ${(() => {
+      const rules = this.config.glow_rules?.rules || [];
+      const active = rules.find((r) => {
+        const st = hass.states[r.entity || this.config.entity];
+        if (!st) return false;
+        const v = r.attribute ? st.attributes[r.attribute] : st.state;
+        return String(v) === String(r.state ?? 'on');
+      });
+      if (!active) return '';
+      let color = active.color_js ? eval(active.color_js) : active.color;
+      if (!color) return '';
+      if (!/[(#]/.test(String(color))) color = `var(--${color}-color, ${color})`;
+      const size = active.glow_size || 12;
+      const anim = active.pulse
+        ? `animation: bc-glow-pulse ${active.pulse_speed || 2}s ease-in-out infinite;`
+        : '';
+      return `.bubble-icon-container { box-shadow: 0 0 ${size}px 2px ${color}; ${anim} }
+        @keyframes bc-glow-pulse { 50% { box-shadow: 0 0 2px 0 ${color}; } }`;
+    })()}
+  editor:
+    - name: rules
+      label: Glow rules
+      selector:
+        object:
+          multiple: true
+          label_field: name
+          description_field: entity
+          fields:
+            name:
+              label: Name
+              selector:
+                text: {}
+            entity:
+              label: Entity
+              description: Leave empty to use the card's entity.
+              selector:
+                entity: {}
+              warn_if: "item.entity && hass && !hass.states[item.entity]"
+              warn_text: This entity does not exist.
+            attribute:
+              label: Attribute
+              description: Leave empty to match against the state.
+              selector:
+                attribute: {}
+              warn_if: >-
+                item.attribute && hass &&
+                hass.states[item.entity || (card && card.entity)] &&
+                !(item.attribute in hass.states[item.entity || (card && card.entity)].attributes)
+              warn_text: This attribute does not exist on the resolved entity.
+            state:
+              label: State
+              default: 'on'
+              selector:
+                text: {}
+            color:
+              label: Glow color
+              group: Appearance
+              group_icon: mdi:palette
+              selector:
+                ui_color: {}
+            glow_size:
+              label: Glow size
+              group: Appearance
+              selector:
+                glow_size_picker: {}
+              context:
+                color: color
+            pulse:
+              label: Pulse
+              group: Appearance
+              selector:
+                boolean: {}
+            pulse_speed:
+              label: Pulse speed
+              group: Appearance
+              visible_if: item.pulse
+              selector:
+                number:
+                  min: 0.5
+                  max: 10
+                  step: 0.5
+                  unit_of_measurement: s

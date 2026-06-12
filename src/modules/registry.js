@@ -6,6 +6,12 @@ import { parseYamlWithIncludes } from './yaml-schema.js';
 let allModules = null;
 let modulesInitialized = false;
 let initPromise = null;
+// JSON snapshot of allModules as built from its source, BEFORE runEditorCode
+// mutates the live objects (modules may extend their own `editor` schema).
+// Background refreshes diff fresh fetches against this, never against the
+// mutated allModules — otherwise an editor_code mutation reads as a perpetual
+// "file changed" and re-init loops forever.
+let cleanModulesJson = null;
 
 // Public maps used across the app
 export let moduleSourceMap = new Map(); // Tracks source: 'file' | 'yaml' | 'entity' | 'editor'
@@ -33,6 +39,7 @@ document.addEventListener('yaml-modules-updated', () => {
   modulesInitialized = false;
   allModules = null;
   initPromise = null;
+  cleanModulesJson = null;
   try { window.dispatchEvent(new CustomEvent('bubble-card-modules-changed')); } catch (_) {}
 });
 
@@ -90,6 +97,31 @@ export function preloadYAMLStyles(context) {
   }
 }
 
+// Modules can extend the editor itself: a module's `editor_code` block runs
+// once when modules load — same trust level as the module's `code` block,
+// which already executes arbitrary JS in every card render. Typical uses:
+// customElements.define('ha-selector-<name>', ...) so the module's editor
+// schema can use selectors that neither HA nor Bubble Card ship (ha-form
+// resolves any registered ha-selector-* element), and mutating the passed
+// `module` definition — the editor reads `module.editor` live on every
+// render, so repetitive schema can be generated in JS instead of YAML.
+// Guarded per module OBJECT (not key): a background refresh replaces the
+// objects, and the code must re-run to reapply schema mutations — element
+// definitions are expected to guard with customElements.get().
+const editorCodeRan = new WeakSet();
+export function runEditorCode(modules) {
+  Object.entries(modules || {}).forEach(([key, mod]) => {
+    if (!mod || typeof mod !== 'object' || !mod.editor_code) return;
+    if (editorCodeRan.has(mod)) return;
+    editorCodeRan.add(mod);
+    try {
+      new Function('module_id', 'module', String(mod.editor_code))(key, mod);
+    } catch (e) {
+      console.error(`[bubble-card] editor_code of module '${key}' failed:`, e);
+    }
+  });
+}
+
 export async function initializeModules(context) {
   if (modulesInitialized && allModules) return allModules;
   if (initPromise) return initPromise;
@@ -109,6 +141,7 @@ export async function initializeModules(context) {
             moduleSourceMap.set(id, 'file');
           }
         });
+        cleanModulesJson = JSON.stringify(allModules);
         modulesInitialized = true;
 
         // Background refresh
@@ -124,7 +157,8 @@ export async function initializeModules(context) {
                 fresh[key] = value;
               }
             });
-            const changed = JSON.stringify(fresh) !== JSON.stringify(allModules);
+            const freshJson = JSON.stringify(fresh);
+            const changed = freshJson !== cleanModulesJson;
             if (changed) {
               moduleSourceMap.clear();
               yamlKeysMap.clear();
@@ -134,6 +168,8 @@ export async function initializeModules(context) {
                 yamlKeysMap.set(id, fresh[id]);
                 moduleSourceMap.set(id, 'file');
               });
+              cleanModulesJson = freshJson;
+              runEditorCode(allModules);
               try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
             }
           } catch (_) {}
@@ -161,6 +197,7 @@ export async function initializeModules(context) {
             moduleSourceMap.set(id, 'file');
           }
         });
+        cleanModulesJson = JSON.stringify(allModules);
         modulesInitialized = true;
 
         (async () => {
@@ -172,7 +209,8 @@ export async function initializeModules(context) {
                 fresh[key] = value;
               }
             });
-            const changed = JSON.stringify(fresh) !== JSON.stringify(allModules);
+            const freshJson = JSON.stringify(fresh);
+            const changed = freshJson !== cleanModulesJson;
             if (changed) {
               moduleSourceMap.clear();
               yamlKeysMap.clear();
@@ -182,6 +220,8 @@ export async function initializeModules(context) {
                 yamlKeysMap.set(id, fresh[id]);
                 moduleSourceMap.set(id, 'file');
               });
+              cleanModulesJson = freshJson;
+              runEditorCode(allModules);
               try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
             }
           } catch (_) {}
@@ -202,6 +242,7 @@ export async function initializeModules(context) {
           moduleSourceMap.set(key, 'file');
         }
       });
+      cleanModulesJson = JSON.stringify(allModules);
       modulesInitialized = true;
       return allModules;
     }
@@ -238,9 +279,13 @@ export async function initializeModules(context) {
       }
     });
 
+    cleanModulesJson = JSON.stringify(allModules);
     modulesInitialized = true;
     return allModules;
-  })();
+  })().then((mods) => {
+    runEditorCode(mods);
+    return mods;
+  });
 
   return initPromise;
 }
