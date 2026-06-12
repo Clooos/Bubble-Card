@@ -1,6 +1,7 @@
 import { html, css, LitElement, nothing } from "lit";
 import { fireEvent } from "../../tools/utils.js";
 import "./ha-form-bc_cluster.js";
+import "./ha-form-bc_group.js";
 
 /**
  * Custom object selector for Bubble Card that supports dynamic context
@@ -140,11 +141,10 @@ export class HaBcObjectSelector extends LitElement {
 
     const families = this._armFamilies(fields);
     this._armMeta = this._armMeta || {};
-    this._warnMeta = this._warnMeta || {};
-    // Active warnings for top-level fields, fed to ha-form's native
-    // `warning` prop (amber ha-alert above the field). Grouped fields fall
-    // back to a ⚠️ helper line instead: ha-form-expandable does not forward
-    // the warning prop to its nested form.
+    // Active warnings per field, fed to ha-form's native `warning` prop
+    // (amber ha-alert above the field). ha-form doesn't forward the prop
+    // into nested forms, so bc_group and bc_cluster carry the map on their
+    // schema item and re-apply it themselves.
     this._warnTop = this._warnTop || {};
     this._warnTop[index] = {};
 
@@ -185,20 +185,14 @@ export class HaBcObjectSelector extends LitElement {
         schemaItem.context = { ...field.context };
       }
       const warn = this._fieldWarning(field, itemData);
-      if (warn && !field.group) {
-        this._warnTop[index][key] = warn;
-        delete this._warnMeta[`${index}:${key}`];
-      } else if (warn) {
-        this._warnMeta[`${index}:${key}`] = warn;
-      } else {
-        delete this._warnMeta[`${index}:${key}`];
-      }
+      if (warn) this._warnTop[index][key] = warn;
       return schemaItem;
     };
 
-    // Fields sharing a `group` are wrapped in a collapsible expandable section
-    // (flattened, so the stored config keys stay top-level). Fields without a
-    // group render flat, exactly as before.
+    // Fields sharing a `group` are wrapped in a collapsible section
+    // (flattened, so the stored config keys stay top-level). bc_group is a
+    // warning-forwarding stand-in for ha-form's `expandable`. Fields without
+    // a group render flat, exactly as before.
     const schema = [];
     const groups = new Map();
 
@@ -212,11 +206,12 @@ export class HaBcObjectSelector extends LitElement {
       if (!section) {
         section = {
           name: `bc_group_${groups.size}`,
-          type: "expandable",
+          type: "bc_group",
           flatten: true,
           title: group,
           expanded: false,
           schema: [],
+          warnings: this._warnTop[index],
         };
         if (field.group_icon) section.icon = field.group_icon;
         groups.set(group, section);
@@ -303,11 +298,6 @@ export class HaBcObjectSelector extends LitElement {
   }
 
   _computeHelper(schema, index = 0) {
-    // An active warning replaces the regular helper — it's the thing the
-    // user needs to read right now.
-    const warn = this._warnMeta?.[`${index}:${schema.name}`];
-    if (warn) return `⚠️ ${warn}`;
-
     if (this._armMeta?.[`${index}:${schema.name}`]) return this._armMeta[`${index}:${schema.name}`].helper;
 
     const field = this.selector?.bc_object?.fields?.[schema.name];
