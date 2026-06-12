@@ -103,8 +103,10 @@ export function preloadYAMLStyles(context) {
 // a module can build real LitElement-based custom selectors without bundling
 // its own copy of lit (unreachable from a `new Function` body). These are
 // core's own already-loaded references — passing them grants no capability
-// the module's `code` block doesn't already have.
-const BC_EDITOR_API = { LitElement, html, css, nothing, fireEvent };
+// the module's `code` block doesn't already have. Frozen so one module can't
+// swap an entry (e.g. fireEvent) out from under modules that load after it;
+// apiVersion lets modules feature-detect across Bubble Card releases.
+const BC_EDITOR_API = Object.freeze({ apiVersion: 1, LitElement, html, css, nothing, fireEvent });
 
 // Modules can extend the editor itself: a module's `editor_code` block runs
 // once when modules load — same trust level as the module's `code` block,
@@ -125,7 +127,11 @@ export function runEditorCode(modules) {
     if (editorCodeRan.has(mod)) return;
     editorCodeRan.add(mod);
     try {
-      new Function('module_id', 'module', 'bc', String(mod.editor_code))(key, mod, BC_EDITOR_API);
+      // sourceURL names the evaluated block in devtools and stack traces
+      // (instead of an anonymous eval), so module authors can debug it.
+      const code = String(mod.editor_code) +
+        `\n//# sourceURL=bubble-module-${key}.editor_code.js`;
+      new Function('module_id', 'module', 'bc', code)(key, mod, BC_EDITOR_API);
     } catch (e) {
       console.error(`[bubble-card] editor_code of module '${key}' failed:`, e);
     }

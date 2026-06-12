@@ -44,6 +44,27 @@ describe('runEditorCode', () => {
         expect(mod.api).toEqual({ hasLit: true, hasFire: true });
     });
 
+    test('the bc API is versioned and frozen, so one module cannot poison it for the next', () => {
+        const tamper = { editor_code: 'module.version = bc.apiVersion; try { bc.fireEvent = "poisoned"; } catch (_) {}' };
+        const victim = { editor_code: 'module.fireIntact = typeof bc.fireEvent === "function";' };
+
+        runEditorCode({ tamper, victim });
+
+        expect(tamper.version).toBe(1);
+        expect(victim.fireIntact).toBe(true);
+    });
+
+    test('errors carry the module-named sourceURL so authors can locate the failing block', () => {
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const mod = { editor_code: 'throw new Error("boom");' };
+
+        runEditorCode({ my_module: mod });
+
+        const err = errorSpy.mock.calls[0][1];
+        expect(err.stack).toContain('bubble-module-my_module.editor_code.js');
+        errorSpy.mockRestore();
+    });
+
     test('does not re-run editor_code for the same module object', () => {
         const mod = { editor_code: 'module.runs = (module.runs || 0) + 1;' };
 

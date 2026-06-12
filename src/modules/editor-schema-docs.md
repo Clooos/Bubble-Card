@@ -1034,9 +1034,11 @@ my_module:
 |---|---|
 | `module_id` | This module's key (e.g. `my_module`). |
 | `module` | The live module definition object. Assigning `module.editor` changes the schema the editor renders — it is read live on every render, so JS-generated schema works. |
-| `bc` | An API object of Bubble Card's own building blocks: `{ LitElement, html, css, nothing, fireEvent }`. Use these to build LitElement-based custom selectors without bundling your own copy of `lit`. |
+| `bc` | A frozen API object of Bubble Card's own building blocks: `{ apiVersion, LitElement, html, css, nothing, fireEvent }`. Use these to build LitElement-based custom selectors without bundling your own copy of `lit`. `apiVersion` (currently `1`) lets a module feature-detect across Bubble Card releases. |
 
 **Custom selectors.** `ha-form` resolves a field's selector name to an `ha-selector-<name>` custom element, so a module that registers `ha-selector-my_input` can use `selector: { my_input: {} }` in its schema. Always guard the registration with `customElements.get(...)` — `editor_code` re-runs when a background refresh replaces the module definitions, and `customElements.define` throws on a duplicate name. The element receives `hass` and its `value` as properties from `ha-form` (the standard selector contract); emit changes with `bc.fireEvent(this, 'value-changed', { value })`.
+
+**Debugging.** Each block is evaluated with a `//# sourceURL=bubble-module-<id>.editor_code.js` tag, so it appears under that name in browser devtools and in error stack traces — set breakpoints in it like any other source file. A throwing `editor_code` is caught and logged with the module id; it never blocks other modules or the editor.
 
 **Per-field `context`.** A schema item may carry a `context` map (`{ contextKey: 'siblingFieldName' }`); `ha-form` resolves it against the surrounding form's data and sets it as a property on the custom selector, so a selector can read sibling field values (e.g. an expression editor that needs the entry's entity for a live preview).
 
