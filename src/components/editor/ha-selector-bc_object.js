@@ -408,6 +408,26 @@ export class HaBcObjectSelector extends LitElement {
     `;
   }
 
+  // Unset single-select fields with a declared default render the default as
+  // the selected value (display only — _itemChanged strips it back out), so a
+  // cleared dropdown shows the value in force instead of an empty box. Text
+  // inputs get the same affordance via placeholder in _generateSchema;
+  // dropdowns have no placeholder, hence the injection.
+  _selectDefaults(fields, item) {
+    const out = {};
+    const entries = Array.isArray(fields)
+      ? fields.map((f, i) => [f.name || i, f])
+      : Object.entries(fields || {});
+    for (const [key, field] of entries) {
+      if (field?.default !== undefined && field?.selector?.select &&
+          !field.selector.select.multiple &&
+          (item?.[key] === undefined || item?.[key] === null || item?.[key] === "")) {
+        out[key] = field.default;
+      }
+    }
+    return out;
+  }
+
   // Item data extended with synthetic `__*` UI-only keys (arm mode dropdowns):
   // defaults derived from which keys hold data, overridden by this item's
   // transient UI state. Never part of the emitted value.
@@ -415,6 +435,7 @@ export class HaBcObjectSelector extends LitElement {
     const fields = this.selector?.bc_object?.fields;
     return {
       ...item,
+      ...this._selectDefaults(fields, item),
       ...this._armDefaults(fields, item),
       ...(this._uiState?.[index] || {}),
       // Always fresh — the card's entity, for attribute pickers on items
@@ -573,6 +594,16 @@ export class HaBcObjectSelector extends LitElement {
     const ui = {};
     for (const [k, v] of Object.entries(ev.detail.value || {})) {
       (k.startsWith("__") ? ui : clean)[k] = v;
+    }
+    // Drop display-only injected select defaults (_selectDefaults): a value
+    // equal to the field default on a key the stored item never had stays
+    // unstored — explicitly picking the default and leaving it unset are the
+    // same config, and the clear (✕) keeps meaning "back to default".
+    const stored = isMultiple ? (this.value || [])[index] : this.value;
+    for (const [key, dflt] of Object.entries(
+      this._selectDefaults(this.selector?.bc_object?.fields, stored)
+    )) {
+      if (clean[key] === dflt) delete clean[key];
     }
     this._uiState = { ...(this._uiState || {}) };
     this._uiState[index] = { ...(this._uiState[index] || {}), ...ui };
