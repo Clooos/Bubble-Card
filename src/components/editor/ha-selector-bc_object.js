@@ -97,6 +97,26 @@ export class HaBcObjectSelector extends LitElement {
     return fams;
   }
 
+  // Fields with `cluster_of: <base>` render inside the base field's visual
+  // cluster (the same thin-left-rail box arm families use) instead of as
+  // standalone rows — purely visual grouping for fields that form one
+  // logical unit (e.g. a mode select plus its parameters). Unlike arms,
+  // nothing is synthetic or swapped: every member is a real stored field,
+  // shown/hidden by its own visible_if. A hidden base hides the whole
+  // cluster. Composes with arms: members append after the arm rows.
+  _clusterFamilies(fields) {
+    const fieldEntries = Array.isArray(fields)
+      ? fields.map((f, i) => [f.name || i, f])
+      : Object.entries(fields || {});
+    const fams = {};
+    for (const [key, field] of fieldEntries) {
+      if (field.cluster_of && fields[field.cluster_of]) {
+        (fams[field.cluster_of] = fams[field.cluster_of] || []).push({ key, field });
+      }
+    }
+    return fams;
+  }
+
   _armHasData(itemData, key) {
     const v = itemData?.[key];
     return v !== undefined && v !== null && v !== "" &&
@@ -140,6 +160,7 @@ export class HaBcObjectSelector extends LitElement {
     }
 
     const families = this._armFamilies(fields);
+    const clusters = this._clusterFamilies(fields);
     this._armMeta = this._armMeta || {};
     // Active warnings per field, fed to ha-form's native `warning` prop
     // (amber ha-alert above the field). ha-form doesn't forward the prop
@@ -223,13 +244,31 @@ export class HaBcObjectSelector extends LitElement {
     };
 
     for (const [key, field] of fieldEntries) {
-      // Arm fields render through their base family, never on their own
+      // Arm and cluster-member fields render through their base, never on their own
       if (field.arm_of && fields[field.arm_of]) continue;
+      if (field.cluster_of && fields[field.cluster_of]) continue;
       if (!this._fieldVisible(field, itemData)) continue;
+
+      // Visible cluster members, in declaration order, appended after the
+      // base (or after the arm rows when the base also has arms).
+      const memberItems = (clusters[key] || [])
+        .filter((m) => this._fieldVisible(m.field, itemData))
+        .map((m) => makeItem(m.key, m.field));
 
       const arms = families[key];
       if (!arms) {
-        place(field, [makeItem(key, field)]);
+        if (!memberItems.length) {
+          // No visible members — render flat, no rail around a lone field.
+          place(field, [makeItem(key, field)]);
+          continue;
+        }
+        place(field, [{
+          type: "bc_cluster",
+          name: `__cluster_${key}`,
+          flatten: true,
+          schema: [makeItem(key, field), ...memberItems],
+          warnings: this._warnTop[index],
+        }]);
         continue;
       }
 
@@ -274,7 +313,7 @@ export class HaBcObjectSelector extends LitElement {
         type: "bc_cluster",
         name: `__cluster_${key}`,
         flatten: true,
-        schema: [modeItem, activeItem],
+        schema: [modeItem, activeItem, ...memberItems],
         warnings: this._warnTop[index],
       }]);
     }
