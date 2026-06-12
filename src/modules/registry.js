@@ -6,6 +6,12 @@ import { parseYamlWithIncludes } from './yaml-schema.js';
 let allModules = null;
 let modulesInitialized = false;
 let initPromise = null;
+// JSON snapshot of allModules as built from its source, BEFORE runEditorCode
+// mutates the live objects (modules may extend their own `editor` schema).
+// Background refreshes diff fresh fetches against this, never against the
+// mutated allModules — otherwise an editor_code mutation reads as a perpetual
+// "file changed" and re-init loops forever.
+let cleanModulesJson = null;
 
 // Public maps used across the app
 export let moduleSourceMap = new Map(); // Tracks source: 'file' | 'yaml' | 'entity' | 'editor'
@@ -33,6 +39,7 @@ document.addEventListener('yaml-modules-updated', () => {
   modulesInitialized = false;
   allModules = null;
   initPromise = null;
+  cleanModulesJson = null;
   try { window.dispatchEvent(new CustomEvent('bubble-card-modules-changed')); } catch (_) {}
 });
 
@@ -134,6 +141,7 @@ export async function initializeModules(context) {
             moduleSourceMap.set(id, 'file');
           }
         });
+        cleanModulesJson = JSON.stringify(allModules);
         modulesInitialized = true;
 
         // Background refresh
@@ -149,7 +157,8 @@ export async function initializeModules(context) {
                 fresh[key] = value;
               }
             });
-            const changed = JSON.stringify(fresh) !== JSON.stringify(allModules);
+            const freshJson = JSON.stringify(fresh);
+            const changed = freshJson !== cleanModulesJson;
             if (changed) {
               moduleSourceMap.clear();
               yamlKeysMap.clear();
@@ -159,6 +168,7 @@ export async function initializeModules(context) {
                 yamlKeysMap.set(id, fresh[id]);
                 moduleSourceMap.set(id, 'file');
               });
+              cleanModulesJson = freshJson;
               runEditorCode(allModules);
               try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
             }
@@ -187,6 +197,7 @@ export async function initializeModules(context) {
             moduleSourceMap.set(id, 'file');
           }
         });
+        cleanModulesJson = JSON.stringify(allModules);
         modulesInitialized = true;
 
         (async () => {
@@ -198,7 +209,8 @@ export async function initializeModules(context) {
                 fresh[key] = value;
               }
             });
-            const changed = JSON.stringify(fresh) !== JSON.stringify(allModules);
+            const freshJson = JSON.stringify(fresh);
+            const changed = freshJson !== cleanModulesJson;
             if (changed) {
               moduleSourceMap.clear();
               yamlKeysMap.clear();
@@ -208,6 +220,7 @@ export async function initializeModules(context) {
                 yamlKeysMap.set(id, fresh[id]);
                 moduleSourceMap.set(id, 'file');
               });
+              cleanModulesJson = freshJson;
               runEditorCode(allModules);
               try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
             }
@@ -229,6 +242,7 @@ export async function initializeModules(context) {
           moduleSourceMap.set(key, 'file');
         }
       });
+      cleanModulesJson = JSON.stringify(allModules);
       modulesInitialized = true;
       return allModules;
     }
@@ -265,6 +279,7 @@ export async function initializeModules(context) {
       }
     });
 
+    cleanModulesJson = JSON.stringify(allModules);
     modulesInitialized = true;
     return allModules;
   })().then((mods) => {
