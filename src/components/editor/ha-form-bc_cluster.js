@@ -1,9 +1,10 @@
 import { html, css, LitElement } from "lit";
 
 /**
- * Visual-only container for an arm family (mode dropdown + active value
- * field): always open, no chevron — a thin left rail marks the rows as one
- * unit, guiding the eye without the weight of an expandable group.
+ * Visual-only container for a variant family (mode dropdown + active value
+ * field) or a cluster_of group: always open, no chevron — a thin left rail
+ * marks the rows as one unit, guiding the eye without the weight of an
+ * expandable group.
  *
  * ha-form resolves it through its dynamic `ha-form-${type}` lookup, and
  * `flatten: true` on the schema item keeps the stored keys top-level —

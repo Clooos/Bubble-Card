@@ -8,7 +8,7 @@ glow_rules:
   description: |
     Adds a colored glow to the icon when an entity matches a state.
     Demo module for the object-selector editor features: groups,
-    visible_if, warn_if, arms, attribute fallback, reorder/duplicate,
+    visible_if, warn_if, variants, attribute fallback, reorder/duplicate,
     a custom selector registered via editor_code that reads the
     rule's color through a per-field context mapping, and a schema
     field generated from editor_code instead of YAML.
@@ -55,17 +55,16 @@ glow_rules:
         }
       });
     }
-    // editor_code also receives the module definition; the editor reads
-    // module.editor live, so repetitive schema can be generated in JS
-    // instead of hand-written YAML — here the JS-expression arm of the
+    // Schema generated in JS instead of repeating YAML — the editor reads
+    // module.editor live, so this adds the JS-expression variant of the
     // color field.
     module.editor[0].selector.object.fields.color_js = {
       label: 'Glow color (JS)',
       description: "A JS expression returning a color, e.g. " +
         "hass.states['sun.sun'].state === 'above_horizon' ? 'amber' : 'blue'",
       group: 'Appearance',
-      arm_of: 'color',
-      arm: 'JS expression',
+      variant_of: 'color',
+      variant: 'JS expression',
       selector: { text: { multiline: true } },
     };
   code: |

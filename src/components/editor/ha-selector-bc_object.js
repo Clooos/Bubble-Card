@@ -78,71 +78,77 @@ export class HaBcObjectSelector extends LitElement {
     }
   }
 
-  // Fields with `arm_of: <base>` are alternative representations ("arms") of
-  // the base field (e.g. a static color vs. a state->color map vs. a JS
-  // expression). The form shows one mode dropdown per family plus only the
-  // active arm's input, instead of every arm as its own field. The dropdown
-  // is a synthetic `__<base>_mode` key that lives in per-item UI state and is
-  // stripped from the emitted value, so the stored config never changes shape.
-  _armFamilies(fields) {
+  // Group fields by a `<relKey>: <base>` reference to another field:
+  // base key -> [{key, field}, ...] in declaration order. References to
+  // unknown bases are ignored, so a typo degrades to a standalone field.
+  _familiesBy(fields, relKey) {
     const fieldEntries = Array.isArray(fields)
       ? fields.map((f, i) => [f.name || i, f])
       : Object.entries(fields || {});
     const fams = {};
     for (const [key, field] of fieldEntries) {
-      if (field.arm_of && fields[field.arm_of]) {
-        (fams[field.arm_of] = fams[field.arm_of] || []).push({ key, field });
+      if (field[relKey] && fields[field[relKey]]) {
+        (fams[field[relKey]] = fams[field[relKey]] || []).push({ key, field });
       }
     }
     return fams;
+  }
+
+  // Fields with `variant_of: <base>` are alternative representations
+  // ("variants") of the base field (e.g. a static color vs. a state->color
+  // map vs. a JS expression). The form shows one mode dropdown per family
+  // plus only the active variant's input, instead of every variant as its
+  // own field. The dropdown is a synthetic `__<base>_mode` key that lives in
+  // per-item UI state and is stripped from the emitted value, so the stored
+  // config never changes shape.
+  _variantFamilies(fields) {
+    return this._familiesBy(fields, "variant_of");
   }
 
   // Fields with `cluster_of: <base>` render inside the base field's visual
-  // cluster (the same thin-left-rail box arm families use) instead of as
+  // cluster (the same thin-left-rail box variant families use) instead of as
   // standalone rows — purely visual grouping for fields that form one
-  // logical unit (e.g. a mode select plus its parameters). Unlike arms,
+  // logical unit (e.g. a mode select plus its parameters). Unlike variants,
   // nothing is synthetic or swapped: every member is a real stored field,
   // shown/hidden by its own visible_if. A hidden base hides the whole
-  // cluster. Composes with arms: members append after the arm rows.
+  // cluster. Composes with variants: members append after the variant rows.
   _clusterFamilies(fields) {
-    const fieldEntries = Array.isArray(fields)
-      ? fields.map((f, i) => [f.name || i, f])
-      : Object.entries(fields || {});
-    const fams = {};
-    for (const [key, field] of fieldEntries) {
-      if (field.cluster_of && fields[field.cluster_of]) {
-        (fams[field.cluster_of] = fams[field.cluster_of] || []).push({ key, field });
-      }
-    }
-    return fams;
+    return this._familiesBy(fields, "cluster_of");
   }
 
-  _armHasData(itemData, key) {
+  _variantHasData(itemData, key) {
     const v = itemData?.[key];
     return v !== undefined && v !== null && v !== "" &&
       !(typeof v === "object" && Object.keys(v).length === 0);
   }
 
   // The base field's own mode label in the dropdown; the base field may
-  // rename it via its own `arm` key (e.g. "Single" vs a "Multiple" arm).
-  _armBaseLabel(field) {
-    return field?.arm || "Static";
+  // rename it via its own `variant` key (e.g. "Single" vs a "Multiple"
+  // variant).
+  _variantBaseLabel(field) {
+    return field?.variant || "Static";
   }
 
-  // Default mode per family: the first declared arm that has data, else the base mode.
-  _armDefaults(fields, itemData) {
+  // Default mode per family: the first declared variant that has data, else the base mode.
+  _variantDefaults(fields, itemData) {
     const out = {};
-    for (const [base, arms] of Object.entries(this._armFamilies(fields))) {
-      const withData = arms.find((a) => this._armHasData(itemData, a.key));
+    for (const [base, variants] of Object.entries(this._variantFamilies(fields))) {
+      const withData = variants.find((v) => this._variantHasData(itemData, v.key));
       out[`__${base}_mode`] =
-        withData ? (withData.field.arm || withData.key) : this._armBaseLabel(fields[base]);
+        withData ? (withData.field.variant || withData.key) : this._variantBaseLabel(fields[base]);
     }
     return out;
   }
 
   // Generate schema from selector fields, including context for entity-attribute linking.
-  // Per-field metadata (arm helpers, warnings) is keyed by item index so that
-  // forms of different items in the same list never read each other's state.
+  // Per-field metadata (variant helpers, warnings) is keyed by item index so
+  // that forms of different items in the same list never read each other's
+  // state.
+  //
+  // Synthetic schema item names share the flat namespace with real field
+  // keys: `__*` (mode dropdowns, cluster wrappers, card entity) and
+  // `bc_group_*` (group sections) are reserved — module field keys must not
+  // use either prefix.
   _generateSchema(fields, itemData, index = 0) {
     if (!fields) return [];
 
@@ -159,9 +165,9 @@ export class HaBcObjectSelector extends LitElement {
       }
     }
 
-    const families = this._armFamilies(fields);
+    const families = this._variantFamilies(fields);
     const clusters = this._clusterFamilies(fields);
-    this._armMeta = this._armMeta || {};
+    this._variantMeta = this._variantMeta || {};
     // Active warnings per field, fed to ha-form's native `warning` prop
     // (amber ha-alert above the field). ha-form doesn't forward the prop
     // into nested forms, so bc_group and bc_cluster carry the map on their
@@ -244,19 +250,19 @@ export class HaBcObjectSelector extends LitElement {
     };
 
     for (const [key, field] of fieldEntries) {
-      // Arm and cluster-member fields render through their base, never on their own
-      if (field.arm_of && fields[field.arm_of]) continue;
+      // Variant and cluster-member fields render through their base, never on their own
+      if (field.variant_of && fields[field.variant_of]) continue;
       if (field.cluster_of && fields[field.cluster_of]) continue;
       if (!this._fieldVisible(field, itemData)) continue;
 
       // Visible cluster members, in declaration order, appended after the
-      // base (or after the arm rows when the base also has arms).
+      // base (or after the variant rows when the base also has variants).
       const memberItems = (clusters[key] || [])
         .filter((m) => this._fieldVisible(m.field, itemData))
         .map((m) => makeItem(m.key, m.field));
 
-      const arms = families[key];
-      if (!arms) {
+      const variants = families[key];
+      if (!variants) {
         if (!memberItems.length) {
           // No visible members — render flat, no rail around a lone field.
           place(field, [makeItem(key, field)]);
@@ -273,20 +279,20 @@ export class HaBcObjectSelector extends LitElement {
       }
 
       const modeKey = `__${key}_mode`;
-      const baseLabel = this._armBaseLabel(field);
-      const options = [baseLabel, ...arms.map((a) => a.field.arm || a.key)];
+      const baseLabel = this._variantBaseLabel(field);
+      const options = [baseLabel, ...variants.map((v) => v.field.variant || v.key)];
       const mode = options.includes(itemData?.[modeKey]) ? itemData[modeKey] : baseLabel;
-      const activeArm = arms.find((a) => (a.field.arm || a.key) === mode);
+      const activeVariant = variants.find((v) => (v.field.variant || v.key) === mode);
 
-      // Warn when an inactive arm still has data — the module's priority
+      // Warn when an inactive variant still has data — the module's priority
       // rules decide which one wins, which is invisible otherwise.
-      const othersWithData = arms
-        .filter((a) => a !== activeArm && this._armHasData(itemData, a.key))
-        .map((a) => a.field.arm || a.key);
-      if (mode !== baseLabel && this._armHasData(itemData, key)) {
+      const othersWithData = variants
+        .filter((v) => v !== activeVariant && this._variantHasData(itemData, v.key))
+        .map((v) => v.field.variant || v.key);
+      if (mode !== baseLabel && this._variantHasData(itemData, key)) {
         othersWithData.unshift(baseLabel);
       }
-      this._armMeta[`${index}:${modeKey}`] = {
+      this._variantMeta[`${index}:${modeKey}`] = {
         label: field.label || key,
         helper: othersWithData.length
           ? `Other modes also set: ${othersWithData.join(", ")} — the module's priority decides which wins.`
@@ -302,8 +308,8 @@ export class HaBcObjectSelector extends LitElement {
         // rendering a clear (✕) that would only blank the dropdown's display.
         required: true,
       };
-      const activeItem = activeArm
-        ? makeItem(activeArm.key, activeArm.field)
+      const activeItem = activeVariant
+        ? makeItem(activeVariant.key, activeVariant.field)
         : makeItem(key, field);
       // The family renders inside a light visual cluster (thin left rail) so
       // the mode dropdown and its value field read as one unit. The cluster
@@ -322,7 +328,7 @@ export class HaBcObjectSelector extends LitElement {
   }
 
   _computeLabel(schema, index = 0) {
-    if (this._armMeta?.[`${index}:${schema.name}`]) return this._armMeta[`${index}:${schema.name}`].label;
+    if (this._variantMeta?.[`${index}:${schema.name}`]) return this._variantMeta[`${index}:${schema.name}`].label;
 
     const field = this.selector?.bc_object?.fields?.[schema.name];
     if (field?.label) return field.label;
@@ -337,7 +343,7 @@ export class HaBcObjectSelector extends LitElement {
   }
 
   _computeHelper(schema, index = 0) {
-    if (this._armMeta?.[`${index}:${schema.name}`]) return this._armMeta[`${index}:${schema.name}`].helper;
+    if (this._variantMeta?.[`${index}:${schema.name}`]) return this._variantMeta[`${index}:${schema.name}`].helper;
 
     const field = this.selector?.bc_object?.fields?.[schema.name];
     if (field?.description) return field.description;
@@ -472,9 +478,9 @@ export class HaBcObjectSelector extends LitElement {
     return out;
   }
 
-  // Item data extended with synthetic `__*` UI-only keys (arm mode dropdowns):
-  // defaults derived from which keys hold data, overridden by this item's
-  // transient UI state. Never part of the emitted value.
+  // Item data extended with synthetic `__*` UI-only keys (variant mode
+  // dropdowns): defaults derived from which keys hold data, overridden by
+  // this item's transient UI state. Never part of the emitted value.
   _itemFormData(item, index) {
     const fields = this.selector?.bc_object?.fields;
     // Cleared synthetic keys (mode dropdown ✕) leave empty entries in UI
@@ -486,7 +492,7 @@ export class HaBcObjectSelector extends LitElement {
     return {
       ...item,
       ...this._selectDefaults(fields, item),
-      ...this._armDefaults(fields, item),
+      ...this._variantDefaults(fields, item),
       ...ui,
       // Always fresh — the card's entity, for attribute pickers on items
       // that inherit it (synthetic key, stripped from the emitted value).
@@ -586,7 +592,7 @@ export class HaBcObjectSelector extends LitElement {
   }
 
   // ha-sortable reports the DOM move; mirror it in the value array and remap
-  // per-item UI state (arm mode dropdowns) so each item keeps its own state.
+  // per-item UI state (variant mode dropdowns) so each item keeps its own state.
   _itemMoved(ev) {
     ev.stopPropagation();
     const { oldIndex, newIndex } = ev.detail;
@@ -638,7 +644,7 @@ export class HaBcObjectSelector extends LitElement {
     ev.stopPropagation();
     const isMultiple = this.selector?.bc_object?.multiple || false;
 
-    // Split synthetic `__*` UI keys (arm mode dropdowns) out of the form
+    // Split synthetic `__*` UI keys (variant mode dropdowns) out of the form
     // value: they stay in per-item element state, never in the stored config.
     const clean = {};
     const ui = {};
