@@ -1,5 +1,6 @@
 import { html, css, LitElement, nothing } from "lit";
 import { fireEvent } from "../../tools/utils.js";
+import "./ha-form-bc_cluster.js";
 
 /**
  * Custom object selector for Bubble Card that supports dynamic context
@@ -270,7 +271,17 @@ export class HaBcObjectSelector extends LitElement {
       const activeItem = activeArm
         ? makeItem(activeArm.key, activeArm.field)
         : makeItem(key, field);
-      place(field, [modeItem, activeItem]);
+      // The family renders inside a light visual cluster (thin left rail) so
+      // the mode dropdown and its value field read as one unit. The cluster
+      // carries the item's warning map: ha-form doesn't forward `warning`
+      // into nested forms, so the element re-applies it itself.
+      place(field, [{
+        type: "bc_cluster",
+        name: `__cluster_${key}`,
+        flatten: true,
+        schema: [modeItem, activeItem],
+        warnings: this._warnTop[index],
+      }]);
     }
 
     return schema;
