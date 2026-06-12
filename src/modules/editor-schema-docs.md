@@ -59,6 +59,7 @@ This documentation covers all available options for creating editor schemas in B
 - [Advanced structure](#advanced-structure)
   - [Grid layout](#grid-layout)
   - [Expandable sections](#expandable-sections)
+- [Extending the editor with JavaScript (editor_code)](#extending-the-editor-with-javascript-editor_code)
 - [Best practices](#best-practices)
 - [Example: Complete module editor schema](#example-complete-module-editor-schema)
 - [References](#references)
@@ -998,6 +999,48 @@ You can create collapsible sections:
 | `expanded` | boolean | Initially expanded |
 | `schema` | array | Fields in the section |
 </details>
+
+## Extending the editor with JavaScript (`editor_code`)
+
+A module may declare an `editor_code:` block alongside `code:`. It runs **once when the module loads** (not per render) and lets a module shape its own editor in JavaScript — for repetitive schema that would be tedious in YAML, or for custom field selectors that neither Home Assistant nor Bubble Card ship.
+
+```yaml
+my_module:
+  name: My Module
+  editor_code: |
+    // Register a custom selector this module's editor schema can use.
+    if (!customElements.get('ha-selector-my_input')) {
+      class MyInput extends bc.LitElement {
+        static properties = { value: {}, hass: { attribute: false } };
+        render() { return bc.html`...`; }
+        _changed(e) { bc.fireEvent(this, 'value-changed', { value: e.target.value }); }
+      }
+      customElements.define('ha-selector-my_input', MyInput);
+    }
+    // Generate schema in JS instead of repeating YAML — the editor reads
+    // module.editor live on every render.
+    module.editor = [
+      { name: 'title', selector: { text: {} } },
+      { name: 'expr', selector: { my_input: {} } },
+    ];
+  editor: []
+  code: |
+    ...
+```
+
+**Arguments.** The block is invoked as a function with three parameters:
+
+| Argument | Description |
+|---|---|
+| `module_id` | This module's key (e.g. `my_module`). |
+| `module` | The live module definition object. Assigning `module.editor` changes the schema the editor renders — it is read live on every render, so JS-generated schema works. |
+| `bc` | An API object of Bubble Card's own building blocks: `{ LitElement, html, css, nothing, fireEvent }`. Use these to build LitElement-based custom selectors without bundling your own copy of `lit`. |
+
+**Custom selectors.** `ha-form` resolves a field's selector name to an `ha-selector-<name>` custom element, so a module that registers `ha-selector-my_input` can use `selector: { my_input: {} }` in its schema. Always guard the registration with `customElements.get(...)` — `editor_code` re-runs when a background refresh replaces the module definitions, and `customElements.define` throws on a duplicate name. The element receives `hass` and its `value` as properties from `ha-form` (the standard selector contract); emit changes with `bc.fireEvent(this, 'value-changed', { value })`.
+
+**Per-field `context`.** A schema item may carry a `context` map (`{ contextKey: 'siblingFieldName' }`); `ha-form` resolves it against the surrounding form's data and sets it as a property on the custom selector, so a selector can read sibling field values (e.g. an expression editor that needs the entry's entity for a live preview).
+
+**Security.** `editor_code` runs arbitrary module JavaScript — the same trust level as the `code:` block, which already executes module JS in every card render. Installing a module is the point of consent for both. `editor_code` runs in a narrower window (once, at editor load, without `hass`); its one genuinely new effect is that `customElements.define` registers globally and persists for the page, hence the `customElements.get` guard convention. On a build of Bubble Card without `editor_code` support the block is ignored and the editor falls back to the plain schema.
 
 ## Best practices
 
