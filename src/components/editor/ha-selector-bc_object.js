@@ -263,7 +263,9 @@ export class HaBcObjectSelector extends LitElement {
         selector: {
           select: { options, multiple: false, custom_value: false, mode: "dropdown" },
         },
-        required: false,
+        // Required: a mode is always in force, and it keeps ha-select from
+        // rendering a clear (✕) that would only blank the dropdown's display.
+        required: true,
       };
       const activeItem = activeArm
         ? makeItem(activeArm.key, activeArm.field)
@@ -433,11 +435,17 @@ export class HaBcObjectSelector extends LitElement {
   // transient UI state. Never part of the emitted value.
   _itemFormData(item, index) {
     const fields = this.selector?.bc_object?.fields;
+    // Cleared synthetic keys (mode dropdown ✕) leave empty entries in UI
+    // state; drop them so the derived defaults below stay visible.
+    const ui = {};
+    for (const [k, v] of Object.entries(this._uiState?.[index] || {})) {
+      if (v !== undefined && v !== null && v !== "") ui[k] = v;
+    }
     return {
       ...item,
       ...this._selectDefaults(fields, item),
       ...this._armDefaults(fields, item),
-      ...(this._uiState?.[index] || {}),
+      ...ui,
       // Always fresh — the card's entity, for attribute pickers on items
       // that inherit it (synthetic key, stripped from the emitted value).
       __card_entity: this._cardConfig?.entity,
