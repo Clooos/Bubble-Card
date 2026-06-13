@@ -23,9 +23,13 @@ export function getLightColorSignature(state, entity) {
 
 // HA icon resources loaded via WebSocket and persisted in localStorage
 const ICONS_CACHE_KEY = 'bubble-card-icons-cache';
+const ICONS_CACHE_TIMESTAMP_KEY = 'bubble-card-icons-cache-timestamp';
+const ICONS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL for cached icons
 let componentIcons = null;
 let componentIconsPromise = null;
 let componentIconsFailed = false;
+let componentIconsRetryTimer = null;
+const RETRY_COOLDOWN_MS = 100; // Wait 100ms before retrying after a failure
 const platformIcons = {};
 const platformIconsPromises = {};
 const sortedRangeCache = new WeakMap();
@@ -34,7 +38,10 @@ const pendingContexts = new Set();
 // Restore component icons from previous session for instant first render
 try {
   const cached = localStorage.getItem(ICONS_CACHE_KEY);
-  if (cached) componentIcons = JSON.parse(cached);
+  const timestamp = localStorage.getItem(ICONS_CACHE_TIMESTAMP_KEY);
+  if (cached && (!timestamp || Date.now() - Number(timestamp) < ICONS_CACHE_TTL_MS)) {
+    componentIcons = JSON.parse(cached);
+  }
 } catch (_) {}
 
 function requestContextUpdate(context) {
@@ -47,21 +54,78 @@ function requestContextUpdate(context) {
   }
 }
 
+function notifyPendingContexts() {
+  // Notify all contexts waiting for icons
+  for (const ctx of pendingContexts) requestContextUpdate(ctx);
+  pendingContexts.clear();
+}
+
 // Eagerly start loading component icons as soon as hass is available
 function preloadComponentIcons(hass) {
-  if (componentIconsPromise || componentIconsFailed || !hass?.callWS) return;
+  if (componentIconsPromise || !hass?.callWS) return;
+
+  // If we have cached icons already (from localStorage), no need to fetch again
+  // unless the fetch previously failed (in which case we retry after cooldown)
+  if (componentIcons && !componentIconsFailed) return;
+
   componentIconsPromise = hass.callWS({
     type: "frontend/get_icons",
     category: "entity_component"
   }).then(res => {
-    componentIcons = res?.resources || {};
-    try { localStorage.setItem(ICONS_CACHE_KEY, JSON.stringify(componentIcons)); } catch (_) {}
+    const resources = res?.resources || {};
+    // Only update if we got meaningful data
+    if (Object.keys(resources).length > 0) {
+      componentIcons = resources;
+      try {
+        localStorage.setItem(ICONS_CACHE_KEY, JSON.stringify(componentIcons));
+        localStorage.setItem(ICONS_CACHE_TIMESTAMP_KEY, String(Date.now()));
+      } catch (_) {}
+    }
+    componentIconsPromise = null;
+    componentIconsFailed = false;
+    if (componentIconsRetryTimer) {
+      clearTimeout(componentIconsRetryTimer);
+      componentIconsRetryTimer = null;
+    }
     // Notify all contexts waiting for icons
-    for (const ctx of pendingContexts) requestContextUpdate(ctx);
-    pendingContexts.clear();
+    notifyPendingContexts();
   }).catch(() => {
     componentIconsPromise = null;
     componentIconsFailed = true;
+    // Schedule a retry after cooldown instead of blocking forever
+    if (!componentIconsRetryTimer) {
+      componentIconsRetryTimer = setTimeout(() => {
+        componentIconsRetryTimer = null;
+        componentIconsFailed = false;
+        // Retry will be triggered on next set hass call or visibility change
+        notifyPendingContexts();
+      }, RETRY_COOLDOWN_MS);
+    }
+  });
+}
+
+// Re-fetch icon resources when the page becomes visible again
+// This handles iOS app background/foreground transitions
+function refreshComponentIcons(hass) {
+  if (!hass?.callWS || componentIconsPromise) return;
+  // Clear stale cache to force a fresh fetch
+  componentIconsFailed = false;
+  if (componentIconsRetryTimer) {
+    clearTimeout(componentIconsRetryTimer);
+    componentIconsRetryTimer = null;
+  }
+  preloadComponentIcons(hass);
+}
+
+// Last hass reference for visibility-change re-fetch
+let _lastHassForVisibilityRefresh = null;
+
+// Listen for visibility changes to re-fetch icons after app background/foreground
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && _lastHassForVisibilityRefresh) {
+      refreshComponentIcons(_lastHassForVisibilityRefresh);
+    }
   });
 }
 
@@ -196,6 +260,11 @@ function ensurePlatformIcons(hass, entity, context) {
 
 export function getIcon(context, entity = context.config.entity, icon = context.config.icon) {
   const hass = context?._hass;
+
+  // Store last hass reference for visibility-change re-fetch
+  if (hass) {
+    _lastHassForVisibilityRefresh = hass;
+  }
 
   // Eagerly start loading icon resources (even if this card has a config icon)
   preloadComponentIcons(hass);
