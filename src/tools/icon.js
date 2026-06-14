@@ -21,10 +21,7 @@ export function getLightColorSignature(state, entity) {
   return parts.join('|');
 }
 
-// HA icon resources loaded via WebSocket and persisted in localStorage
-const ICONS_CACHE_KEY = 'bubble-card-icons-cache';
-const ICONS_CACHE_TIMESTAMP_KEY = 'bubble-card-icons-cache-timestamp';
-const ICONS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL for cached icons
+// HA icon resources loaded via WebSocket (in-memory cache, session lifetime)
 let componentIcons = null;
 let componentIconsPromise = null;
 let componentIconsFailed = false;
@@ -32,41 +29,34 @@ let componentIconsRetryTimer = null;
 const RETRY_COOLDOWN_MS = 100; // Wait 100ms before retrying after a failure
 const platformIcons = {};
 const platformIconsPromises = {};
+const platformIconsFailed = {};
+
 const sortedRangeCache = new WeakMap();
-const pendingContexts = new Set();
 
-// Restore component icons from previous session for instant first render
-try {
-  const cached = localStorage.getItem(ICONS_CACHE_KEY);
-  const timestamp = localStorage.getItem(ICONS_CACHE_TIMESTAMP_KEY);
-  if (cached && (!timestamp || Date.now() - Number(timestamp) < ICONS_CACHE_TTL_MS)) {
-    componentIcons = JSON.parse(cached);
-  }
-} catch (_) {}
+// Direct registry for cards that need re-rendering when icon data loads
+const iconRefreshRegistry = new Set();
 
-function requestContextUpdate(context) {
-  if (typeof context?.requestUpdate === "function") {
-    context.requestUpdate();
-    return;
-  }
-  if (typeof context?.card?.requestUpdate === "function") {
-    context.card.requestUpdate();
+export function registerForIconRefresh(card) {
+  if (card && card.updateBubbleCard) {
+    iconRefreshRegistry.add(card);
   }
 }
 
-function notifyPendingContexts() {
-  // Notify all contexts waiting for icons
-  for (const ctx of pendingContexts) requestContextUpdate(ctx);
-  pendingContexts.clear();
+export function unregisterForIconRefresh(card) {
+  if (card) {
+    iconRefreshRegistry.delete(card);
+  }
 }
 
-// Eagerly start loading component icons as soon as hass is available
+function notifyIconRefresh() {
+  for (const card of iconRefreshRegistry) {
+    if (card.isConnected && card._hass && card.updateBubbleCard) {
+      card.updateBubbleCard();
+    }
+  }
+}
 function preloadComponentIcons(hass) {
-  if (componentIconsPromise || !hass?.callWS) return;
-
-  // If we have cached icons already (from localStorage), no need to fetch again
-  // unless the fetch previously failed (in which case we retry after cooldown)
-  if (componentIcons && !componentIconsFailed) return;
+  if (componentIconsPromise || componentIcons || !hass?.callWS) return;
 
   componentIconsPromise = hass.callWS({
     type: "frontend/get_icons",
@@ -76,10 +66,6 @@ function preloadComponentIcons(hass) {
     // Only update if we got meaningful data
     if (Object.keys(resources).length > 0) {
       componentIcons = resources;
-      try {
-        localStorage.setItem(ICONS_CACHE_KEY, JSON.stringify(componentIcons));
-        localStorage.setItem(ICONS_CACHE_TIMESTAMP_KEY, String(Date.now()));
-      } catch (_) {}
     }
     componentIconsPromise = null;
     componentIconsFailed = false;
@@ -87,8 +73,8 @@ function preloadComponentIcons(hass) {
       clearTimeout(componentIconsRetryTimer);
       componentIconsRetryTimer = null;
     }
-    // Notify all contexts waiting for icons
-    notifyPendingContexts();
+    // Notify all rendered cards to re-resolve icons from the fresh cache
+    notifyIconRefresh();
   }).catch(() => {
     componentIconsPromise = null;
     componentIconsFailed = true;
@@ -98,40 +84,15 @@ function preloadComponentIcons(hass) {
         componentIconsRetryTimer = null;
         componentIconsFailed = false;
         // Retry will be triggered on next set hass call or visibility change
-        notifyPendingContexts();
       }, RETRY_COOLDOWN_MS);
     }
   });
 }
 
-// Re-fetch icon resources when the page becomes visible again
-// This handles iOS app background/foreground transitions
-function refreshComponentIcons(hass) {
-  if (!hass?.callWS || componentIconsPromise) return;
-  // Clear stale cache to force a fresh fetch
-  componentIconsFailed = false;
-  if (componentIconsRetryTimer) {
-    clearTimeout(componentIconsRetryTimer);
-    componentIconsRetryTimer = null;
-  }
-  preloadComponentIcons(hass);
-}
-
-// Last hass reference for visibility-change re-fetch
-let _lastHassForVisibilityRefresh = null;
-
-// Listen for visibility changes to re-fetch icons after app background/foreground
-if (typeof document !== 'undefined') {
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && _lastHassForVisibilityRefresh) {
-      refreshComponentIcons(_lastHassForVisibilityRefresh);
-    }
-  });
-}
-
 // Resolve icon from HA icon translation entries (state match, range match, or default)
+// Returns undefined if no icon found, allowing resolution chain to continue
 function getIconFromTranslations(state, translations) {
-  if (!translations) return "";
+  if (!translations) return undefined;
   if (state != null && translations.state?.[state]) {
     return translations.state[state];
   }
@@ -145,10 +106,10 @@ function getIconFromTranslations(state, translations) {
     if (keys.length && num >= keys[0]) {
       let sel = keys[0];
       for (const k of keys) { if (num >= k) sel = k; else break; }
-      return translations.range[String(sel)] || translations.default || "";
+      return translations.range[String(sel)] || translations.default;
     }
   }
-  return translations.default || "";
+  return translations.default;
 }
 
 // Fallback domain icons matching HA's FALLBACK_DOMAIN_ICONS (for domains without icons.json)
@@ -208,14 +169,43 @@ const DOMAIN_FALLBACK_ICONS = {
   zone: "mdi:map-marker-radius",
 };
 
+// Hardcoded state-based icons mirroring HA's stateIcon()
+// These take precedence over platform/component icons for specific domains
+function stateIcon(domain, stateObj) {
+  const state = stateObj.state;
+  const attrs = stateObj.attributes || {};
+  switch (domain) {
+    case "sun":
+      return state === "above_horizon" ? "mdi:white-balance-sunny" : "mdi:weather-night";
+    case "device_tracker":
+      if (attrs.source_type === "router")
+        return state === "home" ? "mdi:lan-connect" : "mdi:lan-disconnect";
+      if (["bluetooth", "bluetooth_le"].includes(attrs.source_type))
+        return state === "home" ? "mdi:bluetooth-connect" : "mdi:bluetooth";
+      return state === "not_home" ? "mdi:account-arrow-right" : "mdi:account";
+    case "input_datetime":
+      if (!attrs.has_date && attrs.has_time) return "mdi:clock";
+      if (attrs.has_date && !attrs.has_time) return "mdi:calendar";
+      return "mdi:calendar-clock";
+    case "update":
+      return state === "on" ? "mdi:package-up" : "mdi:package-down";
+  }
+  return undefined;
+}
+
 // Synchronous icon lookup from cached WS resources
+// Resolution order matches HA's getEntityIcon():
+// 1. Platform icons (if translation_key + platform)
+// 2. Domain-level state icons (stateIcon)
+// 3. Component icons (device_class-based)
+// 4. Fallback domain icons
 function resolveEntityIconSync(hass, entity, stateObj) {
   const domain = entity.split('.')[0];
   const entry = hass.entities?.[entity];
   const deviceClass = stateObj.attributes?.device_class;
   const state = stateObj.state;
 
-  // Platform icons (custom integrations with translation_key)
+  // 1. Platform icons (custom integrations with translation_key) - matches HA priority
   if (entry?.platform && entry?.translation_key) {
     const pIcons = platformIcons[entry.platform];
     if (pIcons) {
@@ -224,7 +214,11 @@ function resolveEntityIconSync(hass, entity, stateObj) {
     }
   }
 
-  // Component icons (domain + device_class + state)
+  // 2. Hardcoded state-based icons (mirrors HA's stateIcon())
+  const sIcon = stateIcon(domain, stateObj);
+  if (sIcon) return sIcon;
+
+  // 3. Component icons (domain + device_class + state)
   if (componentIcons) {
     const domainIcons = componentIcons[domain];
     if (domainIcons) {
@@ -234,37 +228,47 @@ function resolveEntityIconSync(hass, entity, stateObj) {
     }
   }
 
-  // Fallback for domains without icons.json (mirrors HA's FALLBACK_DOMAIN_ICONS)
-  return DOMAIN_FALLBACK_ICONS[domain] || "";
+  // 4. Fallback for domains without icons.json (mirrors HA's FALLBACK_DOMAIN_ICONS)
+  // If component icons are still loading, defer fallback to avoid showing the wrong icon
+  // (e.g. mdi:eye for sensor) before the correct WS-resolved icon appears.
+  // The registry will trigger a re-render once icons are cached.
+  if (componentIconsPromise && !componentIcons) return undefined;
+  return DOMAIN_FALLBACK_ICONS[domain];
 }
 
 // Load platform icons for custom integrations with translation_key
-function ensurePlatformIcons(hass, entity, context) {
+function ensurePlatformIcons(hass, entity) {
   const entry = hass.entities?.[entity];
   const platform = entry?.platform;
-  if (!platform || !entry?.translation_key || platformIcons[platform] || !hass?.callWS) return;
+  if (!platform || !entry?.translation_key || platformIconsFailed[platform] || !hass?.callWS) {
+    return;
+  }
   if (!platformIconsPromises[platform]) {
     platformIconsPromises[platform] = hass.callWS({
       type: "frontend/get_icons",
       category: "entity",
       integration: platform
     }).then(res => {
-      platformIcons[platform] = res?.resources?.[platform] || {};
-      requestContextUpdate(context);
-    }).catch(() => {
-      platformIcons[platform] = {};
+      const data = res?.resources?.[platform];
+      if (data) {
+        platformIcons[platform] = data;
+      }
       delete platformIconsPromises[platform];
+      // Notify all rendered cards to re-resolve icons from the fresh cache
+      notifyIconRefresh();
+    }).catch(() => {
+      platformIconsFailed[platform] = true;
+      delete platformIconsPromises[platform];
+      // Schedule retry after cooldown
+      setTimeout(() => {
+        delete platformIconsFailed[platform];
+      }, RETRY_COOLDOWN_MS);
     });
   }
 }
 
 export function getIcon(context, entity = context.config.entity, icon = context.config.icon) {
   const hass = context?._hass;
-
-  // Store last hass reference for visibility-change re-fetch
-  if (hass) {
-    _lastHassForVisibilityRefresh = hass;
-  }
 
   // Eagerly start loading icon resources (even if this card has a config icon)
   preloadComponentIcons(hass);
@@ -282,13 +286,14 @@ export function getIcon(context, entity = context.config.entity, icon = context.
   const stateObj = hass?.states?.[entity];
   if (!entity || !stateObj || !hass) return "";
 
-  // Synchronous resolution from cached resources (memory or localStorage)
+  // Ensure platform icons are loaded BEFORE resolution attempt
+  // This triggers the fetch if not yet cached, so next render will have the data
+  ensurePlatformIcons(hass, entity);
+
+  // Synchronous resolution from cached resources (in-memory)
   const resolved = resolveEntityIconSync(hass, entity, stateObj);
   if (resolved) return resolved;
 
-  // Register for re-render when resources arrive
-  pendingContexts.add(context);
-  ensurePlatformIcons(hass, entity, context);
   return "";
 }
 
