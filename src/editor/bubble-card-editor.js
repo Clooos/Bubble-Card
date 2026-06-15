@@ -2550,7 +2550,7 @@ class BubbleCardEditor extends LitElement {
             restoreBridgedClose();
         };
 
-        const restoreBridgedClose = bridgeDialogCloseToParent(activeDialog, () => {
+        const reopenParent = () => {
             const reopened = this._reopenStandaloneParentDialog(
                 parentDialogParams,
                 getCardConfig(),
@@ -2565,10 +2565,24 @@ class BubbleCardEditor extends LitElement {
             }
 
             return reopened;
-        });
+        };
 
+        const restoreBridgedClose = bridgeDialogCloseToParent(activeDialog, reopenParent);
+
+        // Only react to the direct child dialog closing, not to grandchild dialogs
+        // created by third-party cards (e.g. actions-card opening its "Wrapped Card" editor).
         const handleClosed = (event) => {
             if (event?.detail?.dialog !== "hui-dialog-edit-card") return;
+
+            // Some cards create a new hui-dialog-edit-card element instead of reusing the
+            // existing one. When that grandchild closes, dialog-closed fires but our
+            // child dialog (activeDialog) is still open in the DOM.
+            // Check if activeDialog is still present, if so, ignore this event.
+            const host = this._getHomeAssistantHost()?.shadowRoot;
+            if (host?.contains(activeDialog)) {
+                return;
+            }
+
             cleanup();
             this._reopenStandaloneParentDialog(parentDialogParams, getCardConfig(), activeDialog);
         };
