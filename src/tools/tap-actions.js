@@ -543,7 +543,7 @@ export function sendActionEvent(element, config, action) {
 
   const updateAction = (actionConfig) => {
     if (
-      actionConfig.service &&
+      (actionConfig.service || actionConfig.perform_action) &&
       actionConfig.target?.entity_id === "entity" &&
       entity
     ) {
