@@ -557,7 +557,7 @@ if (!elementConfig?.condition || checkConditionsMet([].concat(elementConfig.cond
 
 #### Attribute selector
 
-This selector works only if combined to an entity selector at the same level.
+This selector works only if combined to an entity selector at the same level. Inside an [object selector](#object-selector) item, if the entity field next to it is empty the attribute list falls back to the card's configured `entity`, matching the common runtime pattern where items inherit the card entity.
 
 ```yaml
 - name: attribute
@@ -675,6 +675,8 @@ This selector works only if combined to an entity selector at the same level.
 
 The object selector lets users enter structured objects defined by a set of sub-fields. Each sub-field uses its own selector (e.g., text, number, icon). It can capture a single object or a list when `multiple` is `true`. Use `label_field` and `description_field` to control the label and secondary text displayed for each item. The output is an object or a list of objects.
 
+When `multiple` is `true`, each item row has a drag handle to reorder the list and a duplicate button that inserts a deep copy of the item right below it.
+
 ```yaml
 - name: main_item
   label: "Main item"
@@ -694,14 +696,53 @@ The object selector lets users enter structured objects defined by a set of sub-
       multiple: true
 ```
 
+Fields that share a `group` are rendered together inside a collapsible section
+(the group name becomes the section title, `group_icon` its optional icon).
+The stored configuration stays flat — grouping only affects the editor UI, so
+adding groups to an existing module is fully backward compatible. Fields
+without a `group` render at the top level as usual:
+
+```yaml
+- name: items
+  label: "Items"
+  selector:
+    object:
+      fields:
+        name:
+          label: "Name"
+          selector:
+            text: {}
+        background_color:
+          label: "Background color"
+          group: "Appearance"
+          group_icon: "mdi:palette"
+          selector:
+            ui_color: {}
+        text_color:
+          label: "Text color"
+          group: "Appearance"
+          selector:
+            ui_color: {}
+      multiple: true
+```
+
 <details>
 <summary><b>Options</b></summary>
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `fields` | object | Map of field keys to field schemas. Each field supports a `label` and a nested `selector` (any selector type). |
+| `fields` | object | Map of field keys to field schemas. Each field supports a `label`, a `description`, a nested `selector` (any selector type), and an optional `group`. Keys starting with `__` or `bc_group_` are reserved for the editor's internal UI state. |
+| `fields.*.group` | string | Renders the field inside a collapsible section with this title. Fields sharing the same `group` end up in the same section. UI-only: the stored value stays flat. |
+| `fields.*.group_icon` | string | Optional icon (Material Design Icons) for the field's group section. |
+| `fields.*.visible_if` | string | JS expression evaluated against the item's current data as `item`, the live `hass` object and the card's config as `card` (e.g. `item.target === 'card'`). `hass` and `card` may be `undefined` (early renders, dialogs the card config can't be found from) — guard them (`card && card.entity`). The field only renders while the expression is truthy; sections whose fields are all hidden disappear. Re-evaluated live on every change. Broken expressions fail open (field stays visible). |
+| `fields.*.warn_if` | string | JS expression with the same `item` / `hass` / `card` arguments as `visible_if`, including the same need to guard `hass` and `card`. While truthy, the field shows `warn_text` — e.g. warn about a missing entity (`item.entity && hass && !hass.states[item.entity]`) or an option that has no effect without another one. Broken expressions fail silent (no warning). |
+| `fields.*.warn_text` | string | The warning message displayed while `warn_if` is truthy, rendered as an amber warning alert above the field. |
+| `fields.*.default` | any | For text-based sub-fields, the declared default is shown as the input's placeholder so users can see what applies when the field is left empty. Single-select dropdowns render the default as the selected value while the key is unset (display only — picking the default or clearing the dropdown stores nothing, so unset and default stay the same config). |
+| `fields.*.variant_of` | string | Marks this field as an alternative representation ("variant") of the named base field — e.g. a state→color map or a JS expression next to a static color. The form collapses the family into one mode dropdown (the base mode — labelled `Static` unless the base field sets its own `variant` — plus each variant's `variant` label) and only the active variant's input. The dropdown is UI-only: stored values keep their original keys, and opening an existing config selects whichever variant already has data. If an inactive variant also has data, a helper line warns that the module's priority rules decide which wins. The family renders inside a light visual cluster (thin left rail), so the mode dropdown and its value field read as one unit. |
+| `fields.*.variant` | string | Display label of this variant in the family's mode dropdown (e.g. `"State map"`, `"JS"`). Defaults to the field key. On the *base* field it instead renames the base mode's dropdown label (default `"Static"`) — e.g. `variant: Single` next to a `"Multiple"` variant. |
+| `fields.*.cluster_of` | string | Renders this field inside the named base field's visual cluster (the same thin-left-rail box variant families use) instead of as a standalone row — purely visual grouping for fields that form one logical unit, e.g. a mode select plus its parameters. Rule of thumb: variants swap which key is stored, clusters only group real fields visually. Nothing is synthetic or swapped: every member is a real stored field and keeps its own `visible_if`. A hidden base hides the whole cluster; while no member is visible the base renders flat (no rail). Composes with variants — members append after the variant rows. |
 | `label_field` | string | Property key used as the item label in the UI (useful when `multiple` is `true`). |
-| `description_field` | string | Property key used as an optional item description in the UI. |
+| `description_field` | string \| list | Property key used as an optional item description in the UI. A list of keys falls back to the first one with a value; list values render comma-separated. |
 | `multiple` | boolean | Allow entering a list of objects. If `true`, the resulting value is a list. |
 </details>
 
