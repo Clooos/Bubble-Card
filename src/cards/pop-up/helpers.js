@@ -1077,7 +1077,16 @@ function runStandalonePostCloseCleanup(context) {
         context.popUp.style.display = 'none';
     }
 
-    suspendPopupHostLayout(context);
+    // Detach popup shell from DOM to match legacy pop-up behavior.
+    // The shell is fully recreated on next open via phase 1 content priming.
+    if (context.popUp?.parentNode) {
+        context._standalonePopUpParent = context.popUp.parentNode;
+        context.popUp.parentNode.removeChild(context.popUp);
+    }
+
+    if (!context._standalonePopUpParent) {
+        suspendPopupHostLayout(context);
+    }
 
     if (context.config.close_action && !hasIncomingPopupNavigation(context)) {
         callAction(context, context.config, 'close_action');
@@ -1138,7 +1147,10 @@ function rollbackStandalonePopupOpen(context, error = null) {
         context.popUp.style.display = 'none';
     }
 
-    suspendPopupHostLayout(context);
+    // Skip host layout suspension if the shell was already detached on close.
+    if (!context._standalonePopUpParent) {
+        suspendPopupHostLayout(context);
+    }
 
     if (wasOnlyActivePopup) {
         hideExistingBackdrop();
@@ -1148,6 +1160,12 @@ function rollbackStandalonePopupOpen(context, error = null) {
 
 function openStandalonePopup(context, instant = false) {
     clearAllTimeouts(context);
+
+    // Re-attach popup shell to DOM if it was detached on close.
+    if (context._standalonePopUpParent && context.popUp && !context.popUp.parentNode) {
+        context._standalonePopUpParent.appendChild(context.popUp);
+    }
+    context._standalonePopUpParent = null;
 
     const { popUp } = context;
     popupState.activePopups.add(context);
@@ -1894,10 +1912,11 @@ export function cleanupPopupRuntime(context) {
     setPopupOpeningMarker(context, false);
     const visuallyOpen = context.popUp?.classList?.contains('is-popup-opened');
     const inEditor = !!context.editor;
+    const isDetached = context._standalonePopUpParent != null;
 
     if (visuallyOpen || inEditor) {
         restorePopupHostLayout(context);
-    } else {
+    } else if (!isDetached) {
         suspendPopupHostLayout(context);
     }
 
