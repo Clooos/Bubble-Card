@@ -1644,8 +1644,14 @@ export function openPopup(context, instant = false) {
         return;
     }
 
-    // Reset scroll position when reopening the popup
-    resetPopupScroll(context);
+    // Defer scroll reset to next frame to avoid forced reflow during open transition.
+    // Reading scrollTop triggers layout; batching it with other post-open work is cheaper.
+    if (!context._popupScrollResetFrame) {
+        context._popupScrollResetFrame = requestAnimationFrame(() => {
+            context._popupScrollResetFrame = null;
+            resetPopupScroll(context);
+        });
+    }
 
     clearPopupInlineTransform(context);
     clearPendingHashRemoval();

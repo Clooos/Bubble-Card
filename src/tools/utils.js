@@ -71,55 +71,60 @@ export function isHomeAssistantVersionAtLeast(hass, minVersion) {
 
 const colorCache = new Map();
 
-// Cache for getComputedStyle to avoid expensive recalculations
-// Cache is invalidated on each animation frame to ensure accuracy
+// Cache for getComputedStyle to avoid expensive recalculations.
+// Instead of invalidating every frame, we keep the cache alive and only
+// invalidate when a theme change is detected. This dramatically reduces
+// forced reflows during popup open/close transitions.
 let cachedDocumentElementStyles = null;
 let cachedBodyStyles = null;
-let stylesCacheFrameId = 0;
-let rafScheduled = false;
+let cachedThemeId = null;
 
-function invalidateStyleCache() {
+function getCurrentThemeId() {
+    // Theme changes are rare; use a combination of common theme variables as a fingerprint.
+    const root = document.documentElement;
+    const bg = root.style.getPropertyValue('--primary-background-color').trim();
+    const fg = root.style.getPropertyValue('--primary-text-color').trim();
+    return bg + '|' + fg;
+}
+
+export function invalidateStyleCache() {
     cachedDocumentElementStyles = null;
     cachedBodyStyles = null;
-    stylesCacheFrameId++;
-    rafScheduled = false;
+    cachedThemeId = null;
+    cssVariableCache.clear();
 }
 
 function ensureStyleCacheValid() {
-    if (!rafScheduled) {
-        requestAnimationFrame(invalidateStyleCache);
-        rafScheduled = true;
+    const currentTheme = getCurrentThemeId();
+    if (cachedThemeId !== currentTheme) {
+        cachedDocumentElementStyles = null;
+        cachedBodyStyles = null;
+        cssVariableCache.clear();
+        cachedThemeId = currentTheme;
     }
 }
 
 export function getCachedDocumentElementStyles() {
+    ensureStyleCacheValid();
     if (!cachedDocumentElementStyles) {
         cachedDocumentElementStyles = getComputedStyle(document.documentElement);
-        ensureStyleCacheValid();
     }
     return cachedDocumentElementStyles;
 }
 
 export function getCachedBodyStyles() {
+    ensureStyleCacheValid();
     if (!cachedBodyStyles) {
         cachedBodyStyles = getComputedStyle(document.body);
-        ensureStyleCacheValid();
     }
     return cachedBodyStyles;
 }
 
-// Cache for resolved CSS variables - cleared each frame
+// Cache for resolved CSS variables - persists across frames, invalidated on theme change
 const cssVariableCache = new Map();
-let cssVariableCacheFrameId = -1;
 
 export function resolveCssVariable(cssVariable) {
     if (!cssVariable) return '';
-    
-    // Clear cache if frame changed
-    if (cssVariableCacheFrameId !== stylesCacheFrameId) {
-        cssVariableCache.clear();
-        cssVariableCacheFrameId = stylesCacheFrameId;
-    }
     
     // Check cache first
     if (cssVariableCache.has(cssVariable)) {
