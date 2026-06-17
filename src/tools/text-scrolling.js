@@ -61,15 +61,25 @@ function flush() {
     const batch = [...pending];
     pending.clear();
 
-    // Read phase — gather all measurements in one pass (single forced layout)
+    // Read phase — use getBoundingClientRect() for batched geometry reads
+    // This triggers a single forced layout instead of one per property per element
     const updates = [];
     for (const el of batch) {
         const state = scrollState.get(el);
         if (!state || !el.isConnected) continue;
-        const available = el.clientWidth;
-        const content = (state.animated && state.span?.isConnected)
-            ? state.span.scrollWidth / 2
-            : el.scrollWidth;
+
+        // Batch all geometry reads into a single getBoundingClientRect() call
+        const elRect = el.getBoundingClientRect();
+        const available = elRect.width;
+
+        let content;
+        if (state.animated && state.span?.isConnected) {
+            const spanRect = state.span.getBoundingClientRect();
+            content = spanRect.width / 2;
+        } else {
+            content = elRect.width + (el.scrollWidth - el.clientWidth);
+        }
+
         updates.push({ el, state, content, needsScroll: content > available + SCROLL_TOLERANCE });
     }
 
