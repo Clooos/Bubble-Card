@@ -994,8 +994,17 @@ function applyPopupScrollableState(context) {
         return false;
     }
 
+    // Use cached state if available and container hasn't changed
+    if (context._cachedPopupScrollableState !== undefined && context._scrollableContainer === container) {
+        container.classList.toggle('is-scrollable', context._cachedPopupScrollableState);
+        return true;
+    }
+
+    // Batch scrollHeight read with clientHeight to avoid layout thrashing.
+    // Both properties trigger the same layout, so reading them together is optimal.
     const isScrollable = container.scrollHeight > container.clientHeight;
     context._cachedPopupScrollableState = isScrollable;
+    context._scrollableContainer = container;
     container.classList.toggle('is-scrollable', isScrollable);
 
     return true;
@@ -1005,6 +1014,12 @@ function syncPopupScrollableState(context) {
     const container = context.elements?.popUpContainer;
     if (!container) {
         return false;
+    }
+
+    // If we have a valid cached state for this container, use it immediately
+    if (context._cachedPopupScrollableState !== undefined && context._scrollableContainer === container) {
+        container.classList.toggle('is-scrollable', context._cachedPopupScrollableState);
+        return true;
     }
 
     // Batch scrollHeight read with clientHeight to avoid layout thrashing.
@@ -1643,6 +1658,11 @@ export function openPopup(context, instant = false) {
         clearPopupWillChange(context);
         return;
     }
+
+    // Invalidate scrollable state cache on cold open - the container may have
+    // changed content, so we must re-measure rather than reusing stale cached values.
+    context._cachedPopupScrollableState = undefined;
+    context._scrollableContainer = null;
 
     // Defer scroll reset to next frame to avoid forced reflow during open transition.
     // Reading scrollTop triggers layout; batching it with other post-open work is cheaper.
