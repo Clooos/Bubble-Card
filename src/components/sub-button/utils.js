@@ -1,4 +1,4 @@
-import { getAttribute, isStateOn, isStateRequiringAttention, formatDateTime, createElement, getStateSurfaceColor, getState, isTimerEntity, timerTimeRemaining, computeDisplayTimer, startElementTimerInterval, stopElementTimerInterval, formatNumericValue, getTemperatureUnit } from "../../tools/utils.js";
+import { getAttribute, isStateOn, isStateRequiringAttention, formatDateTime, createElement, getStateSurfaceColor, isColorLight, getState, isTimerEntity, timerTimeRemaining, computeDisplayTimer, startElementTimerInterval, stopElementTimerInterval, formatNumericValue, getTemperatureUnit } from "../../tools/utils.js";
 import { applyScrollingEffect } from "../../tools/text-scrolling.js";
 import { getIcon, getLightColorSignature, getImage } from "../../tools/icon.js";
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
@@ -188,7 +188,7 @@ export function updateBackground(element, options) {
 
   if (!showBackground) {
     if (element.classList.contains('background-on') || element.classList.contains('background-off')) {
-      element.classList.remove('background-on', 'background-off');
+      element.classList.remove('background-on', 'background-off', 'bright-background');
     }
     if (element.style.getPropertyValue('--bubble-sub-button-light-background-color')) {
       element.style.removeProperty('--bubble-sub-button-light-background-color');
@@ -237,6 +237,9 @@ export function updateBackground(element, options) {
       element.style.setProperty('--bubble-sub-button-light-background-color', newColor);
     }
 
+    // Use dark text on bright state backgrounds so the label stays readable (#2450)
+    element.classList.toggle('bright-background', isColorLight(newColor, 0.5));
+
     if (!element.classList.contains('background-on')) {
       element.classList.add('background-on');
       element.classList.remove('background-off');
@@ -246,6 +249,7 @@ export function updateBackground(element, options) {
       element.classList.add('background-off');
       element.classList.remove('background-on');
     }
+    element.classList.remove('bright-background');
     if (element.style.getPropertyValue('--bubble-sub-button-light-background-color')) {
       element.style.removeProperty('--bubble-sub-button-light-background-color');
     }
