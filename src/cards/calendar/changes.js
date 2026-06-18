@@ -182,23 +182,38 @@ export async function changeEvents(context) {
   setTimeout(() => updateScrollMasks(context), 0);
 }
 
+let scrollMaskRafId = null;
+
 function updateScrollMasks(context) {
   const content = context.elements.calendarCardContent;
   if (!content) {
     return;
   }
 
-  const canScrollTop = content.scrollTop > 0;
-  const canScrollBottom = content.scrollHeight > content.clientHeight &&
-                          content.scrollTop < content.scrollHeight - content.clientHeight - 1;
+  // Batch all geometry reads into a single getBoundingClientRect() call
+  const rect = content.getBoundingClientRect();
+  const scrollHeight = content.scrollHeight;
+  const scrollTop = content.scrollTop;
+  const height = rect.height;
+
+  const canScrollTop = scrollTop > 0;
+  const canScrollBottom = scrollHeight > height &&
+                          scrollTop < scrollHeight - height - 1;
 
   content.classList.toggle('can-scroll-top', canScrollTop);
   content.classList.toggle('can-scroll-bottom', canScrollBottom);
 
   // Calculate mask size based on height (16px for small, 32px for large)
-  const height = content.clientHeight;
   const maskSize = height <= 100 ? 16 : 32;
   content.style.setProperty('--bubble-calendar-mask-size', `${maskSize}px`);
+}
+
+function scheduleScrollMaskUpdate(context) {
+  if (scrollMaskRafId) return;
+  scrollMaskRafId = requestAnimationFrame(() => {
+    scrollMaskRafId = null;
+    updateScrollMasks(context);
+  });
 }
 
 export function changeStyle(context) {
@@ -208,10 +223,10 @@ export function changeStyle(context) {
     if (context.elements?.calendarCardContent) {
       updateScrollMasks(context);
 
-      // Update masks on scroll
+      // Batch scroll mask updates via RAF to avoid forced reflows on every scroll
       const content = context.elements.calendarCardContent;
       if (content && !content._scrollListener) {
-        content._scrollListener = () => updateScrollMasks(context);
+        content._scrollListener = () => scheduleScrollMaskUpdate(context);
         content.addEventListener('scroll', content._scrollListener);
       }
     }
