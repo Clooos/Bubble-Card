@@ -73,8 +73,15 @@ function getWakeSyncContexts() {
 function syncWakeResumedPopups() {
     const contexts = getWakeSyncContexts();
     for (const context of contexts) {
-        syncPopupOpenStateWithLocation(context, false);
-        changeTriggered(context);
+        // Only sync popups that are actually in a visible/transitioning state.
+        // This prevents a CPU burst when returning from sleep by ignoring dormant popups.
+        const isVisible = context.popUp?.classList?.contains('is-popup-opened') || 
+                          context.popUp?.classList?.contains('is-opening');
+        
+        if (isVisible) {
+            syncPopupOpenStateWithLocation(context, false);
+            changeTriggered(context);
+        }
     }
 }
 
