@@ -11,6 +11,14 @@ const wakeSyncContextRefs = [];
 let wakeSyncFrame = null;
 let wakeSyncDeferredTimeout = null;
 
+// Lazy cache for wake sync contexts — avoids re-scanning WeakRefs on every pageshow/visibilitychange
+let wakeSyncContextsCache = null;
+let wakeSyncContextsCacheValid = false;
+
+export function invalidateWakeSyncCache() {
+    wakeSyncContextsCacheValid = false;
+}
+
 function pruneWakeSyncContextRefs() {
     for (let i = wakeSyncContextRefs.length - 1; i >= 0; i--) {
         if (!wakeSyncContextRefs[i]?.deref?.()) {
@@ -39,6 +47,10 @@ function registerWakeSyncContext(context) {
 }
 
 function getWakeSyncContexts() {
+    if (wakeSyncContextsCacheValid) {
+        return wakeSyncContextsCache;
+    }
+
     pruneWakeSyncContextRefs();
 
     const contexts = [];
@@ -53,6 +65,8 @@ function getWakeSyncContexts() {
         contexts.push(context);
     }
 
+    wakeSyncContextsCache = contexts;
+    wakeSyncContextsCacheValid = true;
     return contexts;
 }
 

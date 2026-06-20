@@ -3,6 +3,7 @@ import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll } from "../../tools/utils.js";
 import { handlePopUpCards, setStandalonePopUpCardsActive, suspendStandalonePopUpCards } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
+import { invalidateWakeSyncCache } from "./index.js";
 
 function resetPopupScroll(context) {
     const container = context.elements?.popUpContainer;
@@ -235,10 +236,16 @@ function waitForStandalonePopupTransition(context, callback) {
     }, popupState.animationDuration + 60);
 }
 function setStandalonePopupState(popUp, open, transitionClass = null) {
+    // Batch classList mutations: remove transition classes first, then set state.
+    // Using toggle with explicit boolean is cheaper than remove/add because it
+    // avoids unnecessary DOM attribute changes when the class is already in the
+    // desired state.
     popUp.classList.remove('is-opening', 'is-closing');
-    if (transitionClass) popUp.classList.add(transitionClass);
     popUp.classList.toggle('is-popup-opened', open);
     popUp.classList.toggle('is-popup-closed', !open);
+    if (transitionClass) {
+        popUp.classList.add(transitionClass);
+    }
 }
 function startStandalonePopupTransition(context, open, onComplete, switchClosing = false) {
     const { popUp } = context;
@@ -1664,6 +1671,9 @@ export function openPopup(context, instant = false) {
     context._cachedPopupScrollableState = undefined;
     context._scrollableContainer = null;
 
+    // Invalidate wake sync cache — context state changed, cached list is stale
+    invalidateWakeSyncCache();
+
     // Defer scroll reset to next frame to avoid forced reflow during open transition.
     // Reading scrollTop triggers layout; batching it with other post-open work is cheaper.
     if (!context._popupScrollResetFrame) {
@@ -1755,6 +1765,9 @@ export function closePopup(context, force = false) {
         closeStandalonePopup(context, force);
         return;
     }
+
+    // Invalidate wake sync cache — context state changed, cached list is stale
+    invalidateWakeSyncCache();
 
     clearAllTimeouts(context);
     
