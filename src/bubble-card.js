@@ -95,6 +95,13 @@ class BubbleCard extends HTMLElement {
     } catch (e) {}
     try { if (this.content) cleanupScrollingEffects(this.content); } catch (e) {}
     try {
+      if (this.elements?._volumeOutsideHandler) {
+        document.removeEventListener('click', this.elements._volumeOutsideHandler);
+        this.elements._volumeOutsideHandler = null;
+        this.elements._volumeOutsideListenerAdded = false;
+      }
+    } catch (e) {}
+    try {
       // Stop timer intervals for main card
       if (this.context) {
         stopTimerInterval(this.context);
