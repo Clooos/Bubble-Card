@@ -9,6 +9,32 @@ import { cleanCSS } from './clean-css.js';
 
 const compiledTemplateCache = new Map();
 
+// A style template is only safe to memoize by input-fingerprint when its output
+// depends solely on (hass, resolved state, sub-button states). A template is
+// considered NON-memoizable when it either:
+//   - runs side effects that must re-execute every cycle (DOM mutations,
+//     ResizeObserver/RAF scheduling, WS calls, timers), or
+//   - reads volatile/non-deterministic sources not captured by the fingerprint
+//     (current time, randomness, live DOM/layout/env reads).
+// In those cases the compiled template is always executed, exactly like before.
+const _sideEffectCache = new Map();
+const _NON_MEMOIZABLE_RE = /=>|\bfunction\b|document|window\.|navigator|matchMedia|requestAnimationFrame|cancelAnimationFrame|appendChild|insertBefore|removeChild|\.remove\s*\(|setAttribute|removeAttribute|getAttribute|addEventListener|ResizeObserver|MutationObserver|IntersectionObserver|classList|\.style\b|innerHTML|innerText|textContent\s*=|getComputedStyle|getBoundingClientRect|callWS|callService|localStorage|setTimeout|setInterval|\bDate\b|Math\.random|performance\./;
+function _hasSideEffects(styles) {
+  let result = _sideEffectCache.get(styles);
+  if (result === undefined) {
+    result = _NON_MEMOIZABLE_RE.test(styles);
+    _sideEffectCache.set(styles, result);
+    if (_sideEffectCache.size > 1000) {
+      const iterator = _sideEffectCache.keys();
+      for (let i = 0; i < 100; i++) {
+        const key = iterator.next().value;
+        if (key !== undefined) _sideEffectCache.delete(key);
+      }
+    }
+  }
+  return result;
+}
+
 // Null-safe stub for DOM element references passed to user style templates.
 // Used when context.elements.icon is not yet initialized (e.g. a popup whose
 // header button hasn't been rendered yet).  The Proxy absorbs any property
@@ -307,6 +333,32 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
     }
   });
 
+  // Input-fingerprint memoization: skip executing the compiled template entirely
+  // when the inputs that templates can depend on are unchanged.
+  // In Home Assistant the whole `hass` object is replaced on any state change, so an
+  // identical `hass` reference guarantees every entity state is identical. Combined
+  // with the resolved `state` and sub-button states, this uniquely determines the
+  // template output, allowing us to return the previously cleaned result directly.
+  // Side-effecting templates are excluded: their imperative work must run every cycle.
+  const _cachedState = cachedState ?? getState(context);
+  const _cachedSubButtonStates = cachedSubButtonStates ?? getSubButtonsStates(context);
+  const _subButtonKey = Array.isArray(_cachedSubButtonStates)
+    ? _cachedSubButtonStates.join("\u0001")
+    : "";
+  if (!context._localStyleCache) {
+    context._localStyleCache = new Map();
+  }
+  const _canMemoizeExecution = !_hasSideEffects(styles);
+  const _fpCached = context._localStyleCache.get(styles);
+  if (_canMemoizeExecution
+    && _fpCached
+    && _fpCached.hass === context._hass
+    && _fpCached.stateKey === _cachedState
+    && _fpCached.subKey === _subButtonKey
+    && _fpCached.templateVersion === (context._templateResultVersion || 0)) {
+    return _fpCached.cleaned;
+  }
+
   try {
     let compiledFunction = compiledTemplateCache.get(styles);
     if (!compiledFunction) {
@@ -340,9 +392,9 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
     const rawResult = compiledFunction.apply(context, [
       context._hass,
       context.config.entity,
-      cachedState ?? getState(context),
+      _cachedState,
       _safeRef(context.elements?.icon),
-      cachedSubButtonStates ?? getSubButtonsStates(context),
+      _cachedSubButtonStates,
       _safeArray(context.subButtonIcon),
       getWeatherIcon,
       card,
@@ -357,16 +409,22 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
     }
 
     const cachedStyle = context._localStyleCache.get(styles);
+    let cleanedResult;
     if (cachedStyle && cachedStyle.raw === rawResult) {
-      return cachedStyle.cleaned;
+      cleanedResult = cachedStyle.cleaned;
+    } else {
+      cleanedResult = cleanCSS(rawResult);
     }
 
-    const cleanedResult = cleanCSS(rawResult);
-
-    // Store the new result in the local cache
+    // Store the new result in the local cache, including the input fingerprint so
+    // a subsequent unchanged cycle can skip template execution entirely.
     context._localStyleCache.set(styles, {
       raw: rawResult,
-      cleaned: cleanedResult
+      cleaned: cleanedResult,
+      hass: context._hass,
+      stateKey: _cachedState,
+      subKey: _subButtonKey,
+      templateVersion: context._templateResultVersion || 0,
     });
 
     return cleanedResult;
