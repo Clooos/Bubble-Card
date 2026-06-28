@@ -190,6 +190,13 @@ export function changeEditor(context) {
     }
 
     if (isHAEditorModeActive) {
+        // Re-attach popup shell to DOM if it was detached on close.
+        // Without this, the placeholder is created inside a detached shell and never visible.
+        if (context._standalonePopUpParent && context.popUp && !context.popUp.parentNode) {
+            context._standalonePopUpParent.appendChild(context.popUp);
+        }
+        context._standalonePopUpParent = null;
+
         if (!context.editorAccess) {
             clearTimeout(context.hideContentTimeout);
             context.hideContentTimeout = null;
