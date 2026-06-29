@@ -175,6 +175,8 @@ export function changeState(context) {
     // Update previous values
     context.previousState = state;
     context.previousAttribute = attribute;
+    context.previousLastChanged = lastChanged;
+    context.previousLastUpdated = lastUpdated;
     context.previousConfig = {
         showName,
         showIcon,
