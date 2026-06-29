@@ -263,7 +263,7 @@
           </div>
         </div>
     </div>
-  `}function g(){return[{id:"button",name:"Button"},{id:"calendar",name:"Calendar"},{id:"climate",name:"Climate"},{id:"cover",name:"Cover"},{id:"horizontal-buttons-stack",name:"Horizontal buttons stack"},{id:"media-player",name:"Media player"},{id:"pop-up",name:"Pop-up"},{id:"select",name:"Select"},{id:"separator",name:"Separator"},{id:"sub-buttons",name:"Sub-buttons"}]}function y(e){e._processedSchemas&&(e._processedSchemas={}),e._selectedModuleTab=0,"function"==typeof e._getProcessedSchema&&(e._schemaCache?Object.keys(e._schemaCache).forEach(t=>{delete e._schemaCache[t]}):e._schemaCache={}),e.lastEvaluatedStyles="",e.card&&"function"==typeof e.handleCustomStyles&&e.handleCustomStyles(e,e.card),(0,i.rC)(e,"editor-refresh",{}),e.requestUpdate(),setTimeout(()=>{e.card&&"function"==typeof e.handleCustomStyles&&e.handleCustomStyles(e,e.card),e.requestUpdate(),setTimeout(()=>{if(e._config){const t={...e._config};e.stylesYAML&&(e.stylesYAML=null,document.dispatchEvent(new CustomEvent("yaml-modules-updated"))),(0,i.rC)(e,"config-changed",{config:t}),e.card&&"function"==typeof e.handleCustomStyles&&e.handleCustomStyles(e,e.card)}e.requestUpdate()},100)},50)}function v(e,t){e._originalModuleState=null;const n=a.Ki.get(t);n?(e._editingModule={id:t,...n},m(!0),e._editingModule.code||(e._editingModule.code=""),e._editingModule.editor&&"string"==typeof e._editingModule.editor&&(e._editingModule.editorReference=e._editingModule.editor,e._editingModule.editor=[]),"object"==typeof e._editingModule.editor?e._editingModule.editor_raw=s.Ay.dump(e._editingModule.editor):e._editingModule.editor_raw=e._editingModule.editor||"",e.requestUpdate(),setTimeout(()=>(0,u.XY)(e),0)):console.error(`Module ${t} not found`)}async function _(e,t){if(confirm(`Are you sure you want to delete module "${t}"?`))try{a.Ki.delete(t);try{a.sq.delete(t)}catch(e){}document.dispatchEvent(new CustomEvent("yaml-modules-updated"));let n=!1;try{await(0,c.ensureBCTProviderAvailable)(e.hass)&&(await(0,c.gx)(e.hass,t),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),n=!0)}catch(e){console.warn("File-based deletion failed; keeping changes local only:",e)}e._config&&e._config.modules&&(e._config.modules=e._config.modules.filter(e=>e!==t),(0,i.rC)(e,"config-changed",{config:e._config}),b(e)),y(e),m(!1)}catch(e){console.error("Error deleting module:",e)}finally{m(!1)}}function w(e){if(!e._editingModuleInitialized){e._editingModule=null,e._showNewModuleForm=!1,e._showManualImportForm=!1,e._manualYamlContent="",e._exportContent=null,e._exportType=null,e._exportStep=0,e._schemaCache={},e._processedSchemas={},e._originalModuleState=null,e._previousModuleId=null,e._generateUniqueModuleId=(e="my_module")=>{if(!a.Ki.has(e))return e;let t=1,n=`${e}_${t}`;for(;a.Ki.has(n);)t++,n=`${e}_${t}`;return n};const t=e._generateUniqueModuleId("my_module");e._newModuleTemplate={id:t,name:"My Module",description:"",creator:"",version:"1.0",code:"",editor:""},e._editingModuleInitialized=!0}}},264(e,t,n){n.d(t,{N5:()=>d,extractYamlFromMarkdown:()=>c,oV:()=>l,tF:()=>u});var o=n(382),i=n(933),a=n(937);function r(e){if(!e||"string"!=typeof e)return null;const t=e.trim().toLowerCase().replace(/['"]/g,""),n=(0,a.n$)(),o=n.find(e=>e.id.toLowerCase()===t||e.name.toLowerCase()===t);if(o)return o.id;const i=t.replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,""),r=n.find(e=>e.id.replace(/-/g,"")===i.replace(/-/g,"")||e.name.toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"")===i);return r?r.id:t}function s(e){if(!e||"string"!=typeof e)return[];const t=[...(0,a.n$)()].sort((e,t)=>{const n=(e?.name||e?.id||"").length;return(t?.name||t?.id||"").length-n});let n=e.trim();n=n.replace(/^[\[\(\{]\s*/,"").replace(/\s*[\]\)\}]\s*$/,""),n=n.split("|")[0]||n,n=n.split("**")[0]||n;const o=[],i=(e,t)=>{if(!t)return null;const n=e.trimStart(),o=n.toLowerCase(),i=t.toLowerCase();if(!o.startsWith(i))return null;return(a=o[i.length])&&!/\s|,|;|\||\/|&|\+|\]|\)|\}/.test(a)?null:{length:e.length-n.length+i.length};var a};for(let e=0;e<10;e++){let e=null,a=null;n=n.replace(/^\s*(?:-|\*|•)\s*/g,"");for(const o of t){const t=i(n,o.name),r=i(n,o.id);if(e=t||r,e){a=o;break}}if(!e||!a)break;if(o.includes(a.id)||o.push(a.id),n=n.slice(e.length),n=n.replace(/^\s*(?:,|;|\||\/|&|\+|\band\b|\bor\b)\s*/i,""),!n.trim())break}return o}function l(e){if(!e)return null;try{const t=o.Ay.load(e);if(t&&"object"==typeof t){const e=Object.keys(t);if(e.length>0){if(t[e[0]]?.name)return e[0];for(const n of e)if(t[n]?.name)return n;return e[0]}}}catch(e){console.warn("Error during YAML parsing for key extraction:",e)}try{const t=/^([a-zA-Z0-9_-]+)(?:\s*:|:)/m,n=e.match(t);if(n&&n[1])return n[1]}catch(e){console.warn("Error during key extraction by regex:",e)}return null}function c(e,t=null){if(!e)return"";const n=[...e.matchAll(/```(?:yaml|yml)\s+([\s\S]*?)```/g)];if(n.length>0){for(const e of n){let n=e[1].trim();try{const e=o.Ay.load(n);if(e&&"object"==typeof e){const i=Object.keys(e)[0];if(e[i]?.name||e[i]?.code||e[i]?.description||e[i]?.version)return t&&"object"==typeof e[i]&&!e[i].link&&(e[i].link=t,n=o.Ay.dump(e,{indent:2,lineWidth:-1,noRefs:!0,noCompatMode:!0})),n}}catch(e){}}let e=n[0][1].trim();if(t)try{const n=o.Ay.load(e);if(n&&"object"==typeof n){const i=Object.keys(n)[0];i&&"object"==typeof n[i]&&!n[i].link&&(n[i].link=t,e=o.Ay.dump(n,{indent:2,lineWidth:-1,noRefs:!0,noCompatMode:!0}))}}catch(e){}return e}const i=[...e.matchAll(/```\s*([\s\S]*?)```/g)];if(i.length>0){let e="";for(const t of i){const n=t[1].trim();n.length>e.length&&(e=n)}if(t&&e)try{const n=o.Ay.load(e);if(n&&"object"==typeof n){const i=Object.keys(n)[0];i&&"object"==typeof n[i]&&!n[i].link&&(n[i].link=t,e=o.Ay.dump(n,{indent:2,lineWidth:-1,noRefs:!0,noCompatMode:!0}))}}catch(e){}return e}return""}function d(e){return e&&Array.isArray(e)?e.filter(e=>e&&e.title).map(e=>{try{const t=e.title.match(/\[(.*?)\]/);let n=t?(0,i.TL)(t[1]):`discussion-${e.number}`,o="",a=e.html_url;if(e.body&&(o=c(e.body,a),o)){const e=l(o);e&&(n=e)}const r=u(o,n,{bodyText:e.body,title:e.title,defaultCreator:e.user?.login||""});return{id:r.id,name:r.name,description:r.description,creator:r.creator,version:r.version,moduleLink:e.html_url,type:r.type,imageUrl:r.imageUrl,supportedCards:void 0===r.supported?void 0:Array.isArray(r.supported)?r.supported:r.supported?[r.supported]:[],unsupportedCards:Array.isArray(r.unsupported)?r.unsupported:r.unsupported?[r.unsupported]:[],createdAt:e.created_at,updated_at:e.updated_at,userAvatar:e.user?.avatar_url,comments:e.comments,reactions:e.reactions,yamlContent:o}}catch(t){return console.error(`Error parsing discussion #${e.number}:`,t),{id:`discussion-${e.number}`,name:e.title||`Discussion #${e.number}`,description:"Error parsing the discussion",creator:e.user?.login||"",version:"",moduleLink:e.html_url,type:"",supportedCards:[],unsupportedCards:[],createdAt:e.created_at,updated_at:e.updated_at,userAvatar:e.user?.avatar_url,comments:e.comments,reactions:e.reactions}}}).filter(e=>e.id&&e.name):[]}function u(e,t,n={}){const{bodyText:a,title:l,defaultCreator:c}=n;let d={id:t,name:t,version:"1.0",author:"",description:"",type:"Module",editor:[],supported:["button","climate","cover","horizontal-buttons-stack","media-player","pop-up","select","separator","sub-buttons"],unsupported:[],creator:c||"",link:"",imageUrl:"",yaml:e};const u={name:!1,version:!1,author:!1,creator:!1,description:!1,type:!1,link:!1,supported:!1,unsupported:!1,editor:!1,code:!1,imageUrl:!1,is_global:!1},p=(e,t,n=t,o=[])=>{if(void 0!==e[t])return d[n]=e[t],u[n]=!0,!0;for(const t of o)if(void 0!==e[t]&&!u[n])return d[n]=e[t],u[n]=!0,!0;return!1},b=e=>"string"==typeof e?e:Array.isArray(e)?e.join("\n"):"object"==typeof e?JSON.stringify(e):"";if(e)try{const n=o.Ay.load(e);if(n&&"object"==typeof n){if(1===Object.keys(n).length){const e=Object.keys(n)[0],o=n[e];if(d.id===t&&(d.id=e),o&&"object"==typeof o){if(p(o,"name"),p(o,"version"),p(o,"author"),p(o,"type"),p(o,"code"),p(o,"editor"),p(o,"link"),p(o,"creator"),p(o,"is_global"),p(o,"form_schema","editor"),p(o,"supported","supported",["supported_card","supported_cards"]),p(o,"unsupported","unsupported",["unsupported_card","unsupported_cards"]),o.unsupported&&!o.supported&&!u.supported){const e=["button","climate","cover","horizontal-buttons-stack","media-player","pop-up","select","separator","sub-buttons"];d.supported=e.filter(e=>!o.unsupported.includes(e)),u.supported=!0}void 0!==o.description&&(d.description=b(o.description),u.description=!0),o.info&&"object"==typeof o.info&&(p(o.info,"name"),p(o.info,"version"),p(o.info,"author"),p(o.info,"type"),p(o.info,"creator"),p(o.info,"link"),p(o.info,"supported","supported",["supported_card","supported_cards"]),p(o.info,"unsupported","unsupported",["unsupported_card","unsupported_cards"]),void 0===o.info.description||u.description||(d.description=b(o.info.description),u.description=!0))}}else{if(p(n,"name"),p(n,"version"),p(n,"author"),p(n,"type"),p(n,"code"),p(n,"editor"),p(n,"link"),p(n,"creator"),p(n,"is_global"),p(n,"form_schema","editor"),p(n,"supported","supported",["supported_card","supported_cards"]),p(n,"unsupported","unsupported",["unsupported_card","unsupported_cards"]),n.unsupported&&!n.supported&&!u.supported){const e=["button","climate","cover","horizontal-buttons-stack","media-player","pop-up","select","separator","sub-buttons"];d.supported=e.filter(e=>!n.unsupported.includes(e)),u.supported=!0}void 0!==n.description&&(d.description=b(n.description),u.description=!0)}if(!(u.editor||d.editor&&d.editor.length)){const e=JSON.stringify(n);if(e.includes('"type":')&&e.includes('"name":')&&1===Object.keys(n).length){const e=Object.keys(n)[0],t=n[e];if(t&&"object"==typeof t){const e=Object.keys(t).filter(e=>"object"==typeof t[e]&&(t[e].type||t[e].name||t[e].field));e.length>0&&(d.editor=e.map(e=>({name:e,type:t[e].type||"input",...t[e]})),u.editor=!0)}}}}}catch(e){console.error("Error during YAML analysis:",e)}if(!d.author&&d.creator?d.author=d.creator:!d.creator&&d.author&&(d.creator=d.author),a){if(!u.version){const e=[/\*\*Version:\*\*\s*(v?[\d\.]+)/i,/\|\s*(?:Version|v):\s*(v?[\d\.]+)\s*\|/i,/version\s+(v?[\d\.]+)/i];for(const t of e){const e=a.match(t);if(e&&e[1]){d.version=e[1];break}}}if(!u.description&&!d.description){const e=a.match(/\*\*Description\s*:\*\*\s*(.*?)(?=\n\s*\*\*|\n\s*#|$)/is);if(e&&e[1])d.description=(0,i.yh)(e[1].trim());else{const e=(0,i.yh)(a).split(/\n{2,}/);for(const t of e){const e=t.trim();if(e&&!e.startsWith("#")&&!e.match(/^[a-z_]+\s*:/i)&&e.length>15){d.description=e;break}}}}if(!u.supported){const e=function(e){if(!e||"string"!=typeof e)return null;const t=e.split(/\r?\n/),n=e=>{if(!e||"string"!=typeof e)return!1;const t=e.trim();return/^all(?:\s+cards?)?\b/i.test(t)},o=e=>(e||"").replace(/^\s*>\s*/g,"").trim(),i=e=>{const t=o(e);return!(!t||!/^\[!\w+\]/.test(t)&&!/^#{1,6}\s+/.test(t)&&!/^\*\*[^*]+:\*\*/.test(t))};for(let e=0;e<t.length;e++){const a=t[e],l=o(a);if(!l)continue;if(/unsupported\s*cards?/i.test(l))continue;const c=l.match(/(?:\*\*)?\s*supported\s*(?:cards|card)?\s*:\s*(?:\*\*)?\s*(.*)$/i);if(!c)continue;const d=(c[1]||"").trim();if(d){if(n(d))return;const e=s(d);if(e.length)return e;const t=d.split(",").map(e=>r(e.trim())).filter(Boolean);if(t.length)return[...new Set(t)]}const u=[];for(let a=e+1;a<t.length;a++){const e=t[a],l=o(e);if(!l){if(u.length)break;continue}if(/^\[!\w+\]/.test(l))continue;if(i(e)&&u.length)break;const c=l.match(/^(?:-|\*|•)\s+(.+)$/);if(c){u.push(c[1].trim());continue}if(u.length)break;if(n(l))return;const d=s(l);if(d.length)return d;const p=l.split(",").map(e=>r(e.trim())).filter(Boolean);if(p.length)return[...new Set(p)];break}if(u.length){if(u.some(e=>n(e)))return;const e=u.map(e=>s(e)).flat().filter(Boolean);if(e.length)return[...new Set(e)];const t=u.map(e=>r(e.trim())).filter(Boolean);if(t.length)return[...new Set(t)]}}return null}(a);if(void 0===e?(d.supported=void 0,u.supported=!0):Array.isArray(e)&&e.length>0&&(d.supported=e,u.supported=!0),!u.supported)if(a.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*(?:-\s*)?(?:All|all\s+cards?)/i))d.supported=void 0,u.supported=!0;else{const e=a.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*\[(.*?)\]/i);if(e){const t=e[1].split(",").map(e=>r(e.trim())).filter(e=>e&&e.length>0);t.length>0&&(d.supported=t,u.supported=!0)}else{const e=a.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*([^\n\r]+?)(?=\||\n|$)/i);if(e){const t=e[1].trim();if(!/^(?:All|all\s+cards?)$/i.test(t)){const e=s(t);if(e.length>0)d.supported=e,u.supported=!0;else{const e=t.split(",").map(e=>r(e.trim())).filter(e=>e&&e.length>0);e.length>0&&(d.supported=e,u.supported=!0)}}}}}}if(!(u.creator||d.creator&&d.creator!==c)){const e=a.match(/\*\*Creator\s*:\*\*\s*\[?([^\]\n\r]+)(?:\]|\n|$)/i);e&&(d.creator=e[1].trim(),d.author||(d.author=d.creator))}if(!u.imageUrl&&!d.imageUrl){const e={Screenshot:a.match(/Screenshot:([^#]*?)(?=#|\n\s*\n\s*\*\*|$)/is)?.[1]||"",GetThisModule:a.match(/Get this Module([^#]*?)(?=#|\n\s*\n\s*\*\*|$)/is)?.[1]||""},t=[{regex:/!\[.*?\]\((https:\/\/[^)]+)\)/g,isGlobal:!0},{regex:/<img[^>]*src=["'](https:\/\/[^"']+)["'][^>]*>/i,isGlobal:!1},{regex:/src="(https:\/\/github\.com\/user-attachments\/assets\/[^"]+)"/i,isGlobal:!1}];for(const n of Object.values(e))if(n){for(const e of t)if(e.isGlobal){const t=[...n.matchAll(e.regex)];if(t.length>0){d.imageUrl=t[0][1];break}}else{const t=n.match(e.regex);if(t){d.imageUrl=t[1];break}}if(d.imageUrl)break}if(!d.imageUrl){const e=[...a.matchAll(/!\[.*?\]\((https:\/\/[^)]+)\)/g)];if(e.length>0){const t=e.filter(e=>e[1].includes("user-images.githubusercontent.com")||e[1].includes("github.com/user-attachments"));d.imageUrl=t.length>0?t[0][1]:e[0][1]}else{const e=a.match(/<img[^>]*src=["'](https:\/\/[^"']+)["'][^>]*>/i);e&&(d.imageUrl=e[1])}}}}if(l){if(!u.type){const e=l.match(/\[(.*?) Module\]/i);e&&(d.type=e[1].toLowerCase())}if(!u.version&&"1.0"===d.version){const e=l.match(/(v?[\d\.]+)/);e&&(d.version=e[1])}if(!u.name){let e=l.replace(/\[.*?\]\s*/,"").trim();e=e.replace(/\s*-\s*v?[\d\.]+$/,"").trim(),d.name=e}}return d}},888(e,t,n){n.d(t,{wv:()=>x,sq:()=>m,nO:()=>w,Ki:()=>f});var o=n(134),i=n(382);let a=null;function r(){if(a)return a;const e=new i.ZU("!include",{kind:"scalar",resolve:e=>"string"==typeof e&&e.trim().length>0,construct:e=>{const t=function(e){if("undefined"==typeof XMLHttpRequest)return console.warn("Bubble Card - XMLHttpRequest is unavailable, skipping !include resolution."),null;const t=(n=e)&&"string"==typeof n?n.trim().replace(/^\.\/+/,"").replace(/^\/+/,""):"";var n;if(!t)return null;const o=`/local/bubble/${t}`;try{const e=new XMLHttpRequest;if(e.open("GET",o,!1),e.send(null),200===e.status)return e.responseText;console.error(`Bubble Card - Unable to resolve !include (${o}): HTTP ${e.status}`)}catch(e){console.error(`Bubble Card - Error while loading included YAML (${o}):`,e)}return null}(e);if(!t||!t.trim())return null;try{return i.Hh(t,{schema:r()})}catch(t){return console.error(`Bubble Card - Error parsing included YAML (${e}):`,t),null}}});return a=i.my.extend([e]),a}function s(e){if(!e||"string"!=typeof e)return null;try{return i.Hh(e,{schema:r()})}catch(e){return console.error("Bubble Card - YAML parsing error:",e),null}}const l=["modules","friendly_name","last_updated"],c=["name","code","description","editor","version","creator","link","supported","unsupported","is_global"];function d(e,t,n){var o;t&&"string"==typeof t&&n&&"object"==typeof n&&(o=n)&&"object"==typeof o&&c.some(e=>e in o)&&e.set(t,{id:t,...n})}async function u(e){try{if(!await(0,o.ensureBCTProviderAvailable)(e))return!1;if(await(0,o.rM)(e))return!1;try{if((await(0,o.CS)(e)).filter(e=>e?.name&&e.name.startsWith("modules/")&&/\.ya?ml$/i.test(e.name)).length>0)return await(0,o.rd)(e,{detected:"files_exist"}),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),!0}catch(e){}const t=await async function(e){try{const t="sensor.bubble_card_modules",n=e?.states?.[t];if(!n)return new Map;const o=n.attributes?.modules;if(!o||"object"!=typeof o)return new Map;const i=new Map;return Object.values(o).forEach(e=>{if(!e)return;const t=e.id||null;let n=null;try{if("string"==typeof e.yaml&&e.yaml.trim()){const o=s(e.yaml);if(o&&"object"==typeof o){const e=Object.keys(o);if(1===e.length){const t=e[0];n={id:t,...o[t]||{}}}else t&&o[t]&&"object"==typeof o[t]&&(n={id:t,...o[t]})}}}catch(e){}if(!n){const o={};["name","version","creator","description","supported","unsupported","code","editor","link","is_global"].forEach(t=>{t in e&&(o[t]=e[t])}),t&&(o.id=t),Object.keys(o).length>0&&(n=o)}if(n&&(n.id||t)){const e=n.id||t;i.set(e,{...n,id:e})}}),i}catch(e){return new Map}}(e),n=await async function(){try{const e=`/local/bubble/bubble-modules.yaml?v=${Date.now()}`,t=await fetch(e,{cache:"no-store"});if(!t.ok)return new Map;const n=await t.text();if(!n||!n.trim())return new Map;const o=s(n);return o&&"object"==typeof o?function(e){const t=new Map;return e&&"object"==typeof e?(Object.keys(e).forEach(n=>{l.includes(n)||d(t,n,e[n])}),e.modules&&"object"==typeof e.modules&&Object.keys(e.modules).forEach(n=>{d(t,n,e.modules[n])}),t):t}(o):new Map}catch(e){return new Map}}(),i=new Map(n);t.forEach((e,t)=>{i.set(t,e)});let a=0;for(const[t,n]of i.entries()){if(!t||"string"!=typeof t)continue;try{const n=await(0,o.TA)(e,(0,o.yZ)(t));if(n&&"string"==typeof n.content)continue}catch(e){}const i={...n};delete i.id,await(0,o.writeModuleYaml)(e,t,i),a++}return await(0,o.rd)(e,{entity_count:t.size,yaml_count:n.size,written_count:a}),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),!0}catch(e){return!1}}let p=null,b=!1,h=null,m=new Map,f=new Map,g=new Map,y=!1;function v(e){y||(y=!0,console.warn("Bubble Card - The legacy modules file '/local/bubble/bubble-modules.yaml' was not found (404). This check happens when Bubble Card Tools is not installed or not available. Install Bubble Card Tools to manage modules and stop seeing this 404 in the console: https://github.com/Clooos/Bubble-Card-Tools",{url:e}))}document.addEventListener("yaml-modules-updated",()=>{b=!1,p=null,h=null;try{window.dispatchEvent(new CustomEvent("bubble-card-modules-changed"))}catch(e){}}),window.addEventListener("bubble-card-module-updated",e=>{if(e?.detail?.moduleId&&e?.detail?.moduleData){f.set(e.detail.moduleId,e.detail.moduleData),m.has(e.detail.moduleId)||m.set(e.detail.moduleId,"editor");try{window.dispatchEvent(new CustomEvent("bubble-card-modules-changed"))}catch(e){}}});const _=e=>s(e);function w(e){e.config?.card_type&&!e.stylesYAML&&(e.stylesYAML=b&&p?Promise.resolve(p):x(e))}async function x(e){return b&&p?p:h||(h=(async()=>{try{const t=(0,o.rT)();if(t&&Object.keys(t).length>0)return m.clear(),f.clear(),p={},Object.keys(t).forEach(e=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&(p[e]=t[e],f.set(e,t[e]),m.set(e,"file"))}),b=!0,(async()=>{try{if(!await(0,o.ensureBCTProviderAvailable)(e?._hass))return;try{await u(e?._hass)}catch(e){}const t=await(0,o.Pn)(e?._hass),n={};if(t.forEach((e,t)=>{"modules"!==t&&"friendly_name"!==t&&"last_updated"!==t&&(n[t]=e)}),JSON.stringify(n)!==JSON.stringify(p)){m.clear(),f.clear(),p={},Object.keys(n).forEach(e=>{p[e]=n[e],f.set(e,n[e]),m.set(e,"file")});try{document.dispatchEvent(new CustomEvent("yaml-modules-updated"))}catch(e){}}}catch(e){}})(),p}catch(e){}if(await(0,o.ensureBCTProviderAvailable)(e?._hass)){try{await u(e?._hass)}catch(e){console.warn("Bubble Card - Migration check failed:",e)}const t=(0,o.rT)();if(t&&Object.keys(t).length>0)return m.clear(),f.clear(),p={},Object.keys(t).forEach(e=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&(p[e]=t[e],f.set(e,t[e]),m.set(e,"file"))}),b=!0,(async()=>{try{const t=await(0,o.Pn)(e?._hass),n={};if(t.forEach((e,t)=>{"modules"!==t&&"friendly_name"!==t&&"last_updated"!==t&&(n[t]=e)}),JSON.stringify(n)!==JSON.stringify(p)){m.clear(),f.clear(),p={},Object.keys(n).forEach(e=>{p[e]=n[e],f.set(e,n[e]),m.set(e,"file")});try{document.dispatchEvent(new CustomEvent("yaml-modules-updated"))}catch(e){}}}catch(e){}})(),p;const n=await(0,o.Pn)(e?._hass);return m.clear(),f.clear(),p={},n.forEach((e,t)=>{"modules"!==t&&"friendly_name"!==t&&"last_updated"!==t&&(p[t]=e,f.set(t,e),m.set(t,"file"))}),b=!0,p}const t=await(async()=>{for(const e of["/local/bubble/bubble-modules.yaml"]){const t=`${e}?v=${Date.now()}`;try{const n=await fetch(t,{cache:"no-store"});if(!n.ok){404===n.status&&"/local/bubble/bubble-modules.yaml"===e&&v(t);try{window.bubbleYamlWarning=!0}catch(e){}continue}const o=await n.text(),i=_(o);return!f.size&&i&&Object.entries(i).forEach(([e,t])=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&f.set(e,t)}),g.set(e,i),i}catch(e){console.warn(`Error fetching 'bubble-modules.yaml' from ${t}:`,e);try{window.bubbleYamlWarning=!0}catch(e){}}}return null})(),n=e?._hass?await async function(e){const t=e?.states?.["sensor.bubble_card_modules"];if(!t)return{};if(!t.attributes?.modules)return{};const n={};try{Object.values(t.attributes.modules).forEach(e=>{try{if(!e.yaml&&(e.code||e.description))return void(n[e.id]=e);if(!e.yaml)return}catch(t){console.error(`❌ YAML parsing error for module ${e.id}:`,t),"string"==typeof e.yaml?console.error("Problematic YAML content:",e.yaml.substring(0,100)+"..."):console.error("Problematic YAML content type:",typeof e.yaml)}})}catch(e){console.error("Error while processing modules from text entity:",e)}return n}(e._hass):{};return m.clear(),t&&Object.keys(t).forEach(e=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&m.set(e,"yaml")}),n&&Object.keys(n).forEach(e=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&m.set(e,"entity")}),p={...t||{},...n||{}},f.clear(),Object.entries(p).forEach(([e,t])=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&f.set(e,t)}),b=!0,p})(),h)}},766(e,t,n){n.d(t,{Xe:()=>_,_e:()=>m,dn:()=>v});var o=n(957),i=n(888),a=n(933),r=n(264),s=n(241),l=n(868),c=n(382),d=n(134),u=n(716);const p="bubble-card-rate-limit-warning";function b(e){try{const t="number"==typeof e&&Number.isFinite(e)?e:Date.now()+36e5;localStorage.setItem(p,JSON.stringify({resetTime:t}))}catch(e){console.warn("Failed to persist rate limit warning to localStorage",e)}}function h(){try{localStorage.removeItem(p)}catch(e){console.warn("Failed to clear rate limit warning from localStorage",e)}}function m(e){const t=e.hass&&e.hass.states&&e.hass.states["sensor.bubble_card_modules"];if(void 0===e._storeShowOnlyCompatible&&(e._storeShowOnlyCompatible=!0),void 0===e._rankingInfoDismissed)try{e._rankingInfoDismissed="true"===localStorage.getItem("bubble-card-ranking-info-dismissed")}catch(t){e._rankingInfoDismissed=!1}if(void 0===e._rateLimitWarning){const t=function(){try{const e=localStorage.getItem(p);if(!e)return null;const t=JSON.parse(e);return t&&"object"==typeof t?t:null}catch(e){return null}}(),n=t?.resetTime;"number"==typeof n&&n>Date.now()?(e._rateLimitWarning=!0,e._rateLimitResetTime=n):(e._rateLimitWarning=!1,t&&h())}e._dismissRankingInfo=()=>{e._rankingInfoDismissed=!0;try{localStorage.setItem("bubble-card-ranking-info-dismissed","true")}catch(e){console.warn("Failed to save ranking info dismiss state to localStorage",e)}e.requestUpdate()};const n=(0,d.Qy)();if(e._storeBctRetryHandle&&n&&(clearTimeout(e._storeBctRetryHandle),e._storeBctRetryHandle=null),!e.hass||n||e._storeBctCheckAttempted)e.hass&&n&&!e._storeBctCheckAttempted&&(e._storeBctCheckInFlight||(e._storeBctCheckInFlight=!0,e._storeBctCheckAttempted=!0,(0,d.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._storeBctCheckInFlight=!1,(0,d.Qy)()!==n&&e.requestUpdate()})));else{const t=Date.now(),n=e._storeLastBctCheckAt??0,o=n?t-n:1/0,i=n&&o<5e3;if(e._storeBctCheckInFlight||i){if(i&&!e._storeBctRetryHandle){const t=Math.max(50,5e3-o);e._storeBctRetryHandle=setTimeout(()=>{e._storeBctRetryHandle=null,e.requestUpdate()},t)}}else e._storeBctRetryHandle&&(clearTimeout(e._storeBctRetryHandle),e._storeBctRetryHandle=null),e._storeBctCheckInFlight=!0,e._storeBctCheckAttempted=!0,e._storeLastBctCheckAt=t,(0,d.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._storeBctCheckInFlight=!1,e.requestUpdate()})}if(!n){const e=i.Ki&&i.Ki.size>0||t;return o.qy`
+  `}function g(){return[{id:"button",name:"Button"},{id:"calendar",name:"Calendar"},{id:"climate",name:"Climate"},{id:"cover",name:"Cover"},{id:"horizontal-buttons-stack",name:"Horizontal buttons stack"},{id:"media-player",name:"Media player"},{id:"pop-up",name:"Pop-up"},{id:"select",name:"Select"},{id:"separator",name:"Separator"},{id:"sub-buttons",name:"Sub-buttons"}]}function y(e){e._processedSchemas&&(e._processedSchemas={}),e._selectedModuleTab=0,"function"==typeof e._getProcessedSchema&&(e._schemaCache?Object.keys(e._schemaCache).forEach(t=>{delete e._schemaCache[t]}):e._schemaCache={}),e.lastEvaluatedStyles="",e.card&&"function"==typeof e.handleCustomStyles&&e.handleCustomStyles(e,e.card),(0,i.rC)(e,"editor-refresh",{}),e.requestUpdate(),setTimeout(()=>{e.card&&"function"==typeof e.handleCustomStyles&&e.handleCustomStyles(e,e.card),e.requestUpdate(),setTimeout(()=>{if(e._config){const t={...e._config};e.stylesYAML&&(e.stylesYAML=null,document.dispatchEvent(new CustomEvent("yaml-modules-updated"))),(0,i.rC)(e,"config-changed",{config:t}),e.card&&"function"==typeof e.handleCustomStyles&&e.handleCustomStyles(e,e.card)}e.requestUpdate()},100)},50)}function v(e,t){e._originalModuleState=null;const n=a.Ki.get(t);n?(e._editingModule={id:t,...n},m(!0),e._editingModule.code||(e._editingModule.code=""),e._editingModule.editor&&"string"==typeof e._editingModule.editor&&(e._editingModule.editorReference=e._editingModule.editor,e._editingModule.editor=[]),"object"==typeof e._editingModule.editor?e._editingModule.editor_raw=s.Ay.dump(e._editingModule.editor):e._editingModule.editor_raw=e._editingModule.editor||"",e.requestUpdate(),setTimeout(()=>(0,u.XY)(e),0)):console.error(`Module ${t} not found`)}async function _(e,t){if(confirm(`Are you sure you want to delete module "${t}"?`))try{a.Ki.delete(t);try{a.sq.delete(t)}catch(e){}document.dispatchEvent(new CustomEvent("yaml-modules-updated"));let n=!1;try{await(0,c.ensureBCTProviderAvailable)(e.hass)&&(await(0,c.gx)(e.hass,t),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),n=!0)}catch(e){console.warn("File-based deletion failed; keeping changes local only:",e)}e._config&&e._config.modules&&(e._config.modules=e._config.modules.filter(e=>e!==t),(0,i.rC)(e,"config-changed",{config:e._config}),b(e)),y(e),m(!1)}catch(e){console.error("Error deleting module:",e)}finally{m(!1)}}function w(e){if(!e._editingModuleInitialized){e._editingModule=null,e._showNewModuleForm=!1,e._showManualImportForm=!1,e._manualYamlContent="",e._exportContent=null,e._exportType=null,e._exportStep=0,e._schemaCache={},e._processedSchemas={},e._originalModuleState=null,e._previousModuleId=null,e._generateUniqueModuleId=(e="my_module")=>{if(!a.Ki.has(e))return e;let t=1,n=`${e}_${t}`;for(;a.Ki.has(n);)t++,n=`${e}_${t}`;return n};const t=e._generateUniqueModuleId("my_module");e._newModuleTemplate={id:t,name:"My Module",description:"",creator:"",version:"1.0",code:"",editor:""},e._editingModuleInitialized=!0}}},264(e,t,n){n.d(t,{N5:()=>d,extractYamlFromMarkdown:()=>c,oV:()=>l,tF:()=>u});var o=n(638),i=n(933),a=n(937);function r(e){if(!e||"string"!=typeof e)return null;const t=e.trim().toLowerCase().replace(/['"]/g,""),n=(0,a.n$)(),o=n.find(e=>e.id.toLowerCase()===t||e.name.toLowerCase()===t);if(o)return o.id;const i=t.replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,""),r=n.find(e=>e.id.replace(/-/g,"")===i.replace(/-/g,"")||e.name.toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"")===i);return r?r.id:t}function s(e){if(!e||"string"!=typeof e)return[];const t=[...(0,a.n$)()].sort((e,t)=>{const n=(e?.name||e?.id||"").length;return(t?.name||t?.id||"").length-n});let n=e.trim();n=n.replace(/^[\[\(\{]\s*/,"").replace(/\s*[\]\)\}]\s*$/,""),n=n.split("|")[0]||n,n=n.split("**")[0]||n;const o=[],i=(e,t)=>{if(!t)return null;const n=e.trimStart(),o=n.toLowerCase(),i=t.toLowerCase();if(!o.startsWith(i))return null;return(a=o[i.length])&&!/\s|,|;|\||\/|&|\+|\]|\)|\}/.test(a)?null:{length:e.length-n.length+i.length};var a};for(let e=0;e<10;e++){let e=null,a=null;n=n.replace(/^\s*(?:-|\*|•)\s*/g,"");for(const o of t){const t=i(n,o.name),r=i(n,o.id);if(e=t||r,e){a=o;break}}if(!e||!a)break;if(o.includes(a.id)||o.push(a.id),n=n.slice(e.length),n=n.replace(/^\s*(?:,|;|\||\/|&|\+|\band\b|\bor\b)\s*/i,""),!n.trim())break}return o}function l(e){if(!e)return null;try{const t=o.Ay.load(e);if(t&&"object"==typeof t){const e=Object.keys(t);if(e.length>0){if(t[e[0]]?.name)return e[0];for(const n of e)if(t[n]?.name)return n;return e[0]}}}catch(e){console.warn("Error during YAML parsing for key extraction:",e)}try{const t=/^([a-zA-Z0-9_-]+)(?:\s*:|:)/m,n=e.match(t);if(n&&n[1])return n[1]}catch(e){console.warn("Error during key extraction by regex:",e)}return null}function c(e,t=null){if(!e)return"";const n=[...e.matchAll(/```(?:yaml|yml)\s+([\s\S]*?)```/g)];if(n.length>0){for(const e of n){let n=e[1].trim();try{const e=o.Ay.load(n);if(e&&"object"==typeof e){const i=Object.keys(e)[0];if(e[i]?.name||e[i]?.code||e[i]?.description||e[i]?.version)return t&&"object"==typeof e[i]&&!e[i].link&&(e[i].link=t,n=o.Ay.dump(e,{indent:2,lineWidth:-1,noRefs:!0,noCompatMode:!0})),n}}catch(e){}}let e=n[0][1].trim();if(t)try{const n=o.Ay.load(e);if(n&&"object"==typeof n){const i=Object.keys(n)[0];i&&"object"==typeof n[i]&&!n[i].link&&(n[i].link=t,e=o.Ay.dump(n,{indent:2,lineWidth:-1,noRefs:!0,noCompatMode:!0}))}}catch(e){}return e}const i=[...e.matchAll(/```\s*([\s\S]*?)```/g)];if(i.length>0){let e="";for(const t of i){const n=t[1].trim();n.length>e.length&&(e=n)}if(t&&e)try{const n=o.Ay.load(e);if(n&&"object"==typeof n){const i=Object.keys(n)[0];i&&"object"==typeof n[i]&&!n[i].link&&(n[i].link=t,e=o.Ay.dump(n,{indent:2,lineWidth:-1,noRefs:!0,noCompatMode:!0}))}}catch(e){}return e}return""}function d(e){return e&&Array.isArray(e)?e.filter(e=>e&&e.title).map(e=>{try{const t=e.title.match(/\[(.*?)\]/);let n=t?(0,i.TL)(t[1]):`discussion-${e.number}`,o="",a=e.html_url;if(e.body&&(o=c(e.body,a),o)){const e=l(o);e&&(n=e)}const r=u(o,n,{bodyText:e.body,title:e.title,defaultCreator:e.user?.login||""});return{id:r.id,name:r.name,description:r.description,creator:r.creator,version:r.version,moduleLink:e.html_url,type:r.type,imageUrl:r.imageUrl,supportedCards:void 0===r.supported?void 0:Array.isArray(r.supported)?r.supported:r.supported?[r.supported]:[],unsupportedCards:Array.isArray(r.unsupported)?r.unsupported:r.unsupported?[r.unsupported]:[],createdAt:e.created_at,updated_at:e.updated_at,userAvatar:e.user?.avatar_url,comments:e.comments,reactions:e.reactions,yamlContent:o}}catch(t){return console.error(`Error parsing discussion #${e.number}:`,t),{id:`discussion-${e.number}`,name:e.title||`Discussion #${e.number}`,description:"Error parsing the discussion",creator:e.user?.login||"",version:"",moduleLink:e.html_url,type:"",supportedCards:[],unsupportedCards:[],createdAt:e.created_at,updated_at:e.updated_at,userAvatar:e.user?.avatar_url,comments:e.comments,reactions:e.reactions}}}).filter(e=>e.id&&e.name):[]}function u(e,t,n={}){const{bodyText:a,title:l,defaultCreator:c}=n;let d={id:t,name:t,version:"1.0",author:"",description:"",type:"Module",editor:[],supported:["button","climate","cover","horizontal-buttons-stack","media-player","pop-up","select","separator","sub-buttons"],unsupported:[],creator:c||"",link:"",imageUrl:"",yaml:e};const u={name:!1,version:!1,author:!1,creator:!1,description:!1,type:!1,link:!1,supported:!1,unsupported:!1,editor:!1,code:!1,imageUrl:!1,is_global:!1},p=(e,t,n=t,o=[])=>{if(void 0!==e[t])return d[n]=e[t],u[n]=!0,!0;for(const t of o)if(void 0!==e[t]&&!u[n])return d[n]=e[t],u[n]=!0,!0;return!1},b=e=>"string"==typeof e?e:Array.isArray(e)?e.join("\n"):"object"==typeof e?JSON.stringify(e):"";if(e)try{const n=o.Ay.load(e);if(n&&"object"==typeof n){if(1===Object.keys(n).length){const e=Object.keys(n)[0],o=n[e];if(d.id===t&&(d.id=e),o&&"object"==typeof o){if(p(o,"name"),p(o,"version"),p(o,"author"),p(o,"type"),p(o,"code"),p(o,"editor"),p(o,"link"),p(o,"creator"),p(o,"is_global"),p(o,"form_schema","editor"),p(o,"supported","supported",["supported_card","supported_cards"]),p(o,"unsupported","unsupported",["unsupported_card","unsupported_cards"]),o.unsupported&&!o.supported&&!u.supported){const e=["button","climate","cover","horizontal-buttons-stack","media-player","pop-up","select","separator","sub-buttons"];d.supported=e.filter(e=>!o.unsupported.includes(e)),u.supported=!0}void 0!==o.description&&(d.description=b(o.description),u.description=!0),o.info&&"object"==typeof o.info&&(p(o.info,"name"),p(o.info,"version"),p(o.info,"author"),p(o.info,"type"),p(o.info,"creator"),p(o.info,"link"),p(o.info,"supported","supported",["supported_card","supported_cards"]),p(o.info,"unsupported","unsupported",["unsupported_card","unsupported_cards"]),void 0===o.info.description||u.description||(d.description=b(o.info.description),u.description=!0))}}else{if(p(n,"name"),p(n,"version"),p(n,"author"),p(n,"type"),p(n,"code"),p(n,"editor"),p(n,"link"),p(n,"creator"),p(n,"is_global"),p(n,"form_schema","editor"),p(n,"supported","supported",["supported_card","supported_cards"]),p(n,"unsupported","unsupported",["unsupported_card","unsupported_cards"]),n.unsupported&&!n.supported&&!u.supported){const e=["button","climate","cover","horizontal-buttons-stack","media-player","pop-up","select","separator","sub-buttons"];d.supported=e.filter(e=>!n.unsupported.includes(e)),u.supported=!0}void 0!==n.description&&(d.description=b(n.description),u.description=!0)}if(!(u.editor||d.editor&&d.editor.length)){const e=JSON.stringify(n);if(e.includes('"type":')&&e.includes('"name":')&&1===Object.keys(n).length){const e=Object.keys(n)[0],t=n[e];if(t&&"object"==typeof t){const e=Object.keys(t).filter(e=>"object"==typeof t[e]&&(t[e].type||t[e].name||t[e].field));e.length>0&&(d.editor=e.map(e=>({name:e,type:t[e].type||"input",...t[e]})),u.editor=!0)}}}}}catch(e){console.error("Error during YAML analysis:",e)}if(!d.author&&d.creator?d.author=d.creator:!d.creator&&d.author&&(d.creator=d.author),a){if(!u.version){const e=[/\*\*Version:\*\*\s*(v?[\d\.]+)/i,/\|\s*(?:Version|v):\s*(v?[\d\.]+)\s*\|/i,/version\s+(v?[\d\.]+)/i];for(const t of e){const e=a.match(t);if(e&&e[1]){d.version=e[1];break}}}if(!u.description&&!d.description){const e=a.match(/\*\*Description\s*:\*\*\s*(.*?)(?=\n\s*\*\*|\n\s*#|$)/is);if(e&&e[1])d.description=(0,i.yh)(e[1].trim());else{const e=(0,i.yh)(a).split(/\n{2,}/);for(const t of e){const e=t.trim();if(e&&!e.startsWith("#")&&!e.match(/^[a-z_]+\s*:/i)&&e.length>15){d.description=e;break}}}}if(!u.supported){const e=function(e){if(!e||"string"!=typeof e)return null;const t=e.split(/\r?\n/),n=e=>{if(!e||"string"!=typeof e)return!1;const t=e.trim();return/^all(?:\s+cards?)?\b/i.test(t)},o=e=>(e||"").replace(/^\s*>\s*/g,"").trim(),i=e=>{const t=o(e);return!(!t||!/^\[!\w+\]/.test(t)&&!/^#{1,6}\s+/.test(t)&&!/^\*\*[^*]+:\*\*/.test(t))};for(let e=0;e<t.length;e++){const a=t[e],l=o(a);if(!l)continue;if(/unsupported\s*cards?/i.test(l))continue;const c=l.match(/(?:\*\*)?\s*supported\s*(?:cards|card)?\s*:\s*(?:\*\*)?\s*(.*)$/i);if(!c)continue;const d=(c[1]||"").trim();if(d){if(n(d))return;const e=s(d);if(e.length)return e;const t=d.split(",").map(e=>r(e.trim())).filter(Boolean);if(t.length)return[...new Set(t)]}const u=[];for(let a=e+1;a<t.length;a++){const e=t[a],l=o(e);if(!l){if(u.length)break;continue}if(/^\[!\w+\]/.test(l))continue;if(i(e)&&u.length)break;const c=l.match(/^(?:-|\*|•)\s+(.+)$/);if(c){u.push(c[1].trim());continue}if(u.length)break;if(n(l))return;const d=s(l);if(d.length)return d;const p=l.split(",").map(e=>r(e.trim())).filter(Boolean);if(p.length)return[...new Set(p)];break}if(u.length){if(u.some(e=>n(e)))return;const e=u.map(e=>s(e)).flat().filter(Boolean);if(e.length)return[...new Set(e)];const t=u.map(e=>r(e.trim())).filter(Boolean);if(t.length)return[...new Set(t)]}}return null}(a);if(void 0===e?(d.supported=void 0,u.supported=!0):Array.isArray(e)&&e.length>0&&(d.supported=e,u.supported=!0),!u.supported)if(a.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*(?:-\s*)?(?:All|all\s+cards?)/i))d.supported=void 0,u.supported=!0;else{const e=a.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*\[(.*?)\]/i);if(e){const t=e[1].split(",").map(e=>r(e.trim())).filter(e=>e&&e.length>0);t.length>0&&(d.supported=t,u.supported=!0)}else{const e=a.match(/\*\*Supported\s*(?:Cards|Card)?\s*:\*\*\s*([^\n\r]+?)(?=\||\n|$)/i);if(e){const t=e[1].trim();if(!/^(?:All|all\s+cards?)$/i.test(t)){const e=s(t);if(e.length>0)d.supported=e,u.supported=!0;else{const e=t.split(",").map(e=>r(e.trim())).filter(e=>e&&e.length>0);e.length>0&&(d.supported=e,u.supported=!0)}}}}}}if(!(u.creator||d.creator&&d.creator!==c)){const e=a.match(/\*\*Creator\s*:\*\*\s*\[?([^\]\n\r]+)(?:\]|\n|$)/i);e&&(d.creator=e[1].trim(),d.author||(d.author=d.creator))}if(!u.imageUrl&&!d.imageUrl){const e={Screenshot:a.match(/Screenshot:([^#]*?)(?=#|\n\s*\n\s*\*\*|$)/is)?.[1]||"",GetThisModule:a.match(/Get this Module([^#]*?)(?=#|\n\s*\n\s*\*\*|$)/is)?.[1]||""},t=[{regex:/!\[.*?\]\((https:\/\/[^)]+)\)/g,isGlobal:!0},{regex:/<img[^>]*src=["'](https:\/\/[^"']+)["'][^>]*>/i,isGlobal:!1},{regex:/src="(https:\/\/github\.com\/user-attachments\/assets\/[^"]+)"/i,isGlobal:!1}];for(const n of Object.values(e))if(n){for(const e of t)if(e.isGlobal){const t=[...n.matchAll(e.regex)];if(t.length>0){d.imageUrl=t[0][1];break}}else{const t=n.match(e.regex);if(t){d.imageUrl=t[1];break}}if(d.imageUrl)break}if(!d.imageUrl){const e=[...a.matchAll(/!\[.*?\]\((https:\/\/[^)]+)\)/g)];if(e.length>0){const t=e.filter(e=>e[1].includes("user-images.githubusercontent.com")||e[1].includes("github.com/user-attachments"));d.imageUrl=t.length>0?t[0][1]:e[0][1]}else{const e=a.match(/<img[^>]*src=["'](https:\/\/[^"']+)["'][^>]*>/i);e&&(d.imageUrl=e[1])}}}}if(l){if(!u.type){const e=l.match(/\[(.*?) Module\]/i);e&&(d.type=e[1].toLowerCase())}if(!u.version&&"1.0"===d.version){const e=l.match(/(v?[\d\.]+)/);e&&(d.version=e[1])}if(!u.name){let e=l.replace(/\[.*?\]\s*/,"").trim();e=e.replace(/\s*-\s*v?[\d\.]+$/,"").trim(),d.name=e}}return d}},888(e,t,n){n.d(t,{wv:()=>x,sq:()=>m,nO:()=>w,Ki:()=>f});var o=n(134),i=n(638);let a=null;function r(){if(a)return a;const e=new i.ZU("!include",{kind:"scalar",resolve:e=>"string"==typeof e&&e.trim().length>0,construct:e=>{const t=function(e){if("undefined"==typeof XMLHttpRequest)return console.warn("Bubble Card - XMLHttpRequest is unavailable, skipping !include resolution."),null;const t=(n=e)&&"string"==typeof n?n.trim().replace(/^\.\/+/,"").replace(/^\/+/,""):"";var n;if(!t)return null;const o=`/local/bubble/${t}`;try{const e=new XMLHttpRequest;if(e.open("GET",o,!1),e.send(null),200===e.status)return e.responseText;console.error(`Bubble Card - Unable to resolve !include (${o}): HTTP ${e.status}`)}catch(e){console.error(`Bubble Card - Error while loading included YAML (${o}):`,e)}return null}(e);if(!t||!t.trim())return null;try{return i.Hh(t,{schema:r()})}catch(t){return console.error(`Bubble Card - Error parsing included YAML (${e}):`,t),null}}});return a=i.my.extend([e]),a}function s(e){if(!e||"string"!=typeof e)return null;try{return i.Hh(e,{schema:r()})}catch(e){return console.error("Bubble Card - YAML parsing error:",e),null}}const l=["modules","friendly_name","last_updated"],c=["name","code","description","editor","version","creator","link","supported","unsupported","is_global"];function d(e,t,n){var o;t&&"string"==typeof t&&n&&"object"==typeof n&&(o=n)&&"object"==typeof o&&c.some(e=>e in o)&&e.set(t,{id:t,...n})}async function u(e){try{if(!await(0,o.ensureBCTProviderAvailable)(e))return!1;if(await(0,o.rM)(e))return!1;try{if((await(0,o.CS)(e)).filter(e=>e?.name&&e.name.startsWith("modules/")&&/\.ya?ml$/i.test(e.name)).length>0)return await(0,o.rd)(e,{detected:"files_exist"}),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),!0}catch(e){}const t=await async function(e){try{const t="sensor.bubble_card_modules",n=e?.states?.[t];if(!n)return new Map;const o=n.attributes?.modules;if(!o||"object"!=typeof o)return new Map;const i=new Map;return Object.values(o).forEach(e=>{if(!e)return;const t=e.id||null;let n=null;try{if("string"==typeof e.yaml&&e.yaml.trim()){const o=s(e.yaml);if(o&&"object"==typeof o){const e=Object.keys(o);if(1===e.length){const t=e[0];n={id:t,...o[t]||{}}}else t&&o[t]&&"object"==typeof o[t]&&(n={id:t,...o[t]})}}}catch(e){}if(!n){const o={};["name","version","creator","description","supported","unsupported","code","editor","link","is_global"].forEach(t=>{t in e&&(o[t]=e[t])}),t&&(o.id=t),Object.keys(o).length>0&&(n=o)}if(n&&(n.id||t)){const e=n.id||t;i.set(e,{...n,id:e})}}),i}catch(e){return new Map}}(e),n=await async function(){try{const e=`/local/bubble/bubble-modules.yaml?v=${Date.now()}`,t=await fetch(e,{cache:"no-store"});if(!t.ok)return new Map;const n=await t.text();if(!n||!n.trim())return new Map;const o=s(n);return o&&"object"==typeof o?function(e){const t=new Map;return e&&"object"==typeof e?(Object.keys(e).forEach(n=>{l.includes(n)||d(t,n,e[n])}),e.modules&&"object"==typeof e.modules&&Object.keys(e.modules).forEach(n=>{d(t,n,e.modules[n])}),t):t}(o):new Map}catch(e){return new Map}}(),i=new Map(n);t.forEach((e,t)=>{i.set(t,e)});let a=0;for(const[t,n]of i.entries()){if(!t||"string"!=typeof t)continue;try{const n=await(0,o.TA)(e,(0,o.yZ)(t));if(n&&"string"==typeof n.content)continue}catch(e){}const i={...n};delete i.id,await(0,o.writeModuleYaml)(e,t,i),a++}return await(0,o.rd)(e,{entity_count:t.size,yaml_count:n.size,written_count:a}),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),!0}catch(e){return!1}}let p=null,b=!1,h=null,m=new Map,f=new Map,g=new Map,y=!1;function v(e){y||(y=!0,console.warn("Bubble Card - The legacy modules file '/local/bubble/bubble-modules.yaml' was not found (404). This check happens when Bubble Card Tools is not installed or not available. Install Bubble Card Tools to manage modules and stop seeing this 404 in the console: https://github.com/Clooos/Bubble-Card-Tools",{url:e}))}document.addEventListener("yaml-modules-updated",()=>{b=!1,p=null,h=null;try{window.dispatchEvent(new CustomEvent("bubble-card-modules-changed"))}catch(e){}}),window.addEventListener("bubble-card-module-updated",e=>{if(e?.detail?.moduleId&&e?.detail?.moduleData){f.set(e.detail.moduleId,e.detail.moduleData),m.has(e.detail.moduleId)||m.set(e.detail.moduleId,"editor");try{window.dispatchEvent(new CustomEvent("bubble-card-modules-changed"))}catch(e){}}});const _=e=>s(e);function w(e){e.config?.card_type&&!e.stylesYAML&&(e.stylesYAML=b&&p?Promise.resolve(p):x(e))}async function x(e){return b&&p?p:h||(h=(async()=>{try{const t=(0,o.rT)();if(t&&Object.keys(t).length>0)return m.clear(),f.clear(),p={},Object.keys(t).forEach(e=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&(p[e]=t[e],f.set(e,t[e]),m.set(e,"file"))}),b=!0,(async()=>{try{if(!await(0,o.ensureBCTProviderAvailable)(e?._hass))return;try{await u(e?._hass)}catch(e){}const t=await(0,o.Pn)(e?._hass),n={};if(t.forEach((e,t)=>{"modules"!==t&&"friendly_name"!==t&&"last_updated"!==t&&(n[t]=e)}),JSON.stringify(n)!==JSON.stringify(p)){m.clear(),f.clear(),p={},Object.keys(n).forEach(e=>{p[e]=n[e],f.set(e,n[e]),m.set(e,"file")});try{document.dispatchEvent(new CustomEvent("yaml-modules-updated"))}catch(e){}}}catch(e){}})(),p}catch(e){}if(await(0,o.ensureBCTProviderAvailable)(e?._hass)){try{await u(e?._hass)}catch(e){console.warn("Bubble Card - Migration check failed:",e)}const t=(0,o.rT)();if(t&&Object.keys(t).length>0)return m.clear(),f.clear(),p={},Object.keys(t).forEach(e=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&(p[e]=t[e],f.set(e,t[e]),m.set(e,"file"))}),b=!0,(async()=>{try{const t=await(0,o.Pn)(e?._hass),n={};if(t.forEach((e,t)=>{"modules"!==t&&"friendly_name"!==t&&"last_updated"!==t&&(n[t]=e)}),JSON.stringify(n)!==JSON.stringify(p)){m.clear(),f.clear(),p={},Object.keys(n).forEach(e=>{p[e]=n[e],f.set(e,n[e]),m.set(e,"file")});try{document.dispatchEvent(new CustomEvent("yaml-modules-updated"))}catch(e){}}}catch(e){}})(),p;const n=await(0,o.Pn)(e?._hass);return m.clear(),f.clear(),p={},n.forEach((e,t)=>{"modules"!==t&&"friendly_name"!==t&&"last_updated"!==t&&(p[t]=e,f.set(t,e),m.set(t,"file"))}),b=!0,p}const t=await(async()=>{for(const e of["/local/bubble/bubble-modules.yaml"]){const t=`${e}?v=${Date.now()}`;try{const n=await fetch(t,{cache:"no-store"});if(!n.ok){404===n.status&&"/local/bubble/bubble-modules.yaml"===e&&v(t);try{window.bubbleYamlWarning=!0}catch(e){}continue}const o=await n.text(),i=_(o);return!f.size&&i&&Object.entries(i).forEach(([e,t])=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&f.set(e,t)}),g.set(e,i),i}catch(e){console.warn(`Error fetching 'bubble-modules.yaml' from ${t}:`,e);try{window.bubbleYamlWarning=!0}catch(e){}}}return null})(),n=e?._hass?await async function(e){const t=e?.states?.["sensor.bubble_card_modules"];if(!t)return{};if(!t.attributes?.modules)return{};const n={};try{Object.values(t.attributes.modules).forEach(e=>{try{if(!e.yaml&&(e.code||e.description))return void(n[e.id]=e);if(!e.yaml)return}catch(t){console.error(`❌ YAML parsing error for module ${e.id}:`,t),"string"==typeof e.yaml?console.error("Problematic YAML content:",e.yaml.substring(0,100)+"..."):console.error("Problematic YAML content type:",typeof e.yaml)}})}catch(e){console.error("Error while processing modules from text entity:",e)}return n}(e._hass):{};return m.clear(),t&&Object.keys(t).forEach(e=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&m.set(e,"yaml")}),n&&Object.keys(n).forEach(e=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&m.set(e,"entity")}),p={...t||{},...n||{}},f.clear(),Object.entries(p).forEach(([e,t])=>{"modules"!==e&&"friendly_name"!==e&&"last_updated"!==e&&f.set(e,t)}),b=!0,p})(),h)}},766(e,t,n){n.d(t,{Xe:()=>_,_e:()=>m,dn:()=>v});var o=n(925),i=n(888),a=n(933),r=n(264),s=n(241),l=n(868),c=n(638),d=n(134),u=n(716);const p="bubble-card-rate-limit-warning";function b(e){try{const t="number"==typeof e&&Number.isFinite(e)?e:Date.now()+36e5;localStorage.setItem(p,JSON.stringify({resetTime:t}))}catch(e){console.warn("Failed to persist rate limit warning to localStorage",e)}}function h(){try{localStorage.removeItem(p)}catch(e){console.warn("Failed to clear rate limit warning from localStorage",e)}}function m(e){const t=e.hass&&e.hass.states&&e.hass.states["sensor.bubble_card_modules"];if(void 0===e._storeShowOnlyCompatible&&(e._storeShowOnlyCompatible=!0),void 0===e._rankingInfoDismissed)try{e._rankingInfoDismissed="true"===localStorage.getItem("bubble-card-ranking-info-dismissed")}catch(t){e._rankingInfoDismissed=!1}if(void 0===e._rateLimitWarning){const t=function(){try{const e=localStorage.getItem(p);if(!e)return null;const t=JSON.parse(e);return t&&"object"==typeof t?t:null}catch(e){return null}}(),n=t?.resetTime;"number"==typeof n&&n>Date.now()?(e._rateLimitWarning=!0,e._rateLimitResetTime=n):(e._rateLimitWarning=!1,t&&h())}e._dismissRankingInfo=()=>{e._rankingInfoDismissed=!0;try{localStorage.setItem("bubble-card-ranking-info-dismissed","true")}catch(e){console.warn("Failed to save ranking info dismiss state to localStorage",e)}e.requestUpdate()};const n=(0,d.Qy)();if(e._storeBctRetryHandle&&n&&(clearTimeout(e._storeBctRetryHandle),e._storeBctRetryHandle=null),!e.hass||n||e._storeBctCheckAttempted)e.hass&&n&&!e._storeBctCheckAttempted&&(e._storeBctCheckInFlight||(e._storeBctCheckInFlight=!0,e._storeBctCheckAttempted=!0,(0,d.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._storeBctCheckInFlight=!1,(0,d.Qy)()!==n&&e.requestUpdate()})));else{const t=Date.now(),n=e._storeLastBctCheckAt??0,o=n?t-n:1/0,i=n&&o<5e3;if(e._storeBctCheckInFlight||i){if(i&&!e._storeBctRetryHandle){const t=Math.max(50,5e3-o);e._storeBctRetryHandle=setTimeout(()=>{e._storeBctRetryHandle=null,e.requestUpdate()},t)}}else e._storeBctRetryHandle&&(clearTimeout(e._storeBctRetryHandle),e._storeBctRetryHandle=null),e._storeBctCheckInFlight=!0,e._storeBctCheckAttempted=!0,e._storeLastBctCheckAt=t,(0,d.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._storeBctCheckInFlight=!1,e.requestUpdate()})}if(!n){const e=i.Ki&&i.Ki.size>0||t;return o.qy`
       <div class="bubble-info warning">
         <h4 class="bubble-section-title">
           <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
@@ -565,9 +565,9 @@
         <div class="bc-object-items">
           ${this._renderItem(this.value,0)}
         </div>
-        ${this.helper?Ft.qy`<ha-input-helper-text>${this.helper}</ha-input-helper-text>`:Ft.s6}
-      `:Ft.qy`
-      ${this.label?Ft.qy`<label class="bc-object-label">${this.label}</label>`:Ft.s6}
+        ${this.helper?Rt.qy`<ha-input-helper-text>${this.helper}</ha-input-helper-text>`:Rt.s6}
+      `:Rt.qy`
+      ${this.label?Rt.qy`<label class="bc-object-label">${this.label}</label>`:Rt.s6}
       <ha-button 
         class="bc-object-add-button"
         @click=${this._addItem}
@@ -576,15 +576,34 @@
         <ha-icon icon="mdi:plus"></ha-icon>
         ${this.hass?.localize?.("ui.common.add")||"Add"}
       </ha-button>
-      ${this.helper?Ft.qy`<ha-input-helper-text>${this.helper}</ha-input-helper-text>`:Ft.s6}
-    `}_renderItem(e,t){const n=this._formatValue(e,this.selector)||`Item ${t+1}`,o=this._getDescription(e),i=this.selector?.bc_object?.multiple||!1;return Ft.qy`
+      ${this.helper?Rt.qy`<ha-input-helper-text>${this.helper}</ha-input-helper-text>`:Rt.s6}
+    `}_selectDefaults(e,t){const n={},o=Array.isArray(e)?e.map((e,t)=>[e.name||t,e]):Object.entries(e||{});for(const[e,i]of o)void 0===i?.default||!i?.selector?.select||i.selector.select.multiple||null!=t?.[e]&&""!==t?.[e]||(n[e]=i.default);return n}_itemFormData(e,t){const n=this.selector?.bc_object?.fields,o={};for(const[e,n]of Object.entries(this._uiState?.[t]||{}))null!=n&&""!==n&&(o[e]=n);return{...e,...this._selectDefaults(n,e),...this._variantDefaults(n,e),...o,__card_entity:this._cardConfig?.entity}}_renderItem(e,t){const n=this._formatValue(e,this.selector)||`Item ${t+1}`,o=this._getDescription(e),i=this.selector?.bc_object?.multiple||!1,a=this._itemFormData(e,t);return Rt.qy`
       <ha-expansion-panel outlined class="bc-object-item">
         <h4 slot="header" class="bc-object-item-header">
+          ${i?Rt.qy`
+            <ha-icon-button
+              class="reorder-handle"
+              @click=${e=>e.stopPropagation()}
+              .label="${this.hass?.localize?.("ui.common.move")||"Move"}"
+            >
+              <ha-icon icon="mdi:drag"></ha-icon>
+            </ha-icon-button>
+          `:Rt.s6}
           <div class="bc-object-item-title-container">
             <span class="bc-object-item-label">${n}</span>
-            ${o?Ft.qy`<span class="bc-object-item-description">${o}</span>`:Ft.s6}
+            ${o?Rt.qy`<span class="bc-object-item-description">${o}</span>`:Rt.s6}
           </div>
           <div class="button-container" @click=${e=>e.stopPropagation()} @mousedown=${e=>e.stopPropagation()} @touchstart=${e=>e.stopPropagation()}>
+            ${i?Rt.qy`
+              <ha-icon-button
+                class="duplicate-icon"
+                @click=${()=>this._duplicateItem(t)}
+                ?disabled=${this.disabled}
+                .label="${this.hass?.localize?.("ui.common.duplicate")||"Duplicate"}"
+              >
+                <ha-icon icon="mdi:content-copy"></ha-icon>
+              </ha-icon-button>
+            `:Rt.s6}
             <ha-icon-button
               class="delete-icon"
               @click=${()=>this._deleteItem(t)}
@@ -598,17 +617,19 @@
         <div class="bc-object-item-content">
           <ha-form
             .hass=${this.hass}
-            .data=${e}
-            .schema=${this._generateSchema(this.selector?.bc_object?.fields,e)}
+            .data=${a}
+            .schema=${this._generateSchema(this.selector?.bc_object?.fields,a,t)}
+            .warning=${this._warnTop?.[t]||{}}
+            .computeWarning=${e=>e}
             .disabled=${this.disabled}
-            .computeLabel=${e=>this._computeLabel(e)}
-            .computeHelper=${e=>this._computeHelper(e)}
+            .computeLabel=${e=>this._computeLabel(e,t)}
+            .computeHelper=${e=>this._computeHelper(e,t)}
             .localizeValue=${this.localizeValue}
             @value-changed=${e=>this._itemChanged(e,t)}
           ></ha-form>
         </div>
       </ha-expansion-panel>
-    `}_addItem(){if(this.selector?.bc_object?.multiple){const e=[...Array.isArray(this.value)?this.value:[],{}];(0,s.rC)(this,"value-changed",{value:e})}else(0,s.rC)(this,"value-changed",{value:{}})}_deleteItem(e){if(this.selector?.bc_object?.multiple){const t=[...this.value||[]];t.splice(e,1),(0,s.rC)(this,"value-changed",{value:t})}else(0,s.rC)(this,"value-changed",{value:void 0})}_itemChanged(e,t){if(e.stopPropagation(),this.selector?.bc_object?.multiple){const n=[...this.value||[]];n[t]=e.detail.value,(0,s.rC)(this,"value-changed",{value:n})}else(0,s.rC)(this,"value-changed",{value:e.detail.value})}static styles=Ft.AH`
+    `}_addItem(){if(this.selector?.bc_object?.multiple){const e=[...Array.isArray(this.value)?this.value:[],{}];(0,s.rC)(this,"value-changed",{value:e})}else(0,s.rC)(this,"value-changed",{value:{}})}_duplicateItem(e){const t=Array.isArray(this.value)?this.value:[],n=JSON.parse(JSON.stringify(t[e]||{}));if(this._uiState){const t={};for(const[n,o]of Object.entries(this._uiState)){const i=Number(n);t[i>e?i+1:i]=o}t[e+1]={...this._uiState[e]||{}},this._uiState=t}const o=[...t];o.splice(e+1,0,n),(0,s.rC)(this,"value-changed",{value:o})}_itemMoved(e){e.stopPropagation();const{oldIndex:t,newIndex:n}=e.detail;if(t===n)return;const o=[...Array.isArray(this.value)?this.value:[]],[i]=o.splice(t,1);if(o.splice(n,0,i),this._uiState){const e=e=>e===t?n:t<n?e>t&&e<=n?e-1:e:e>=n&&e<t?e+1:e,o={};for(const[t,n]of Object.entries(this._uiState))o[e(Number(t))]=n;this._uiState=o}(0,s.rC)(this,"value-changed",{value:o})}_deleteItem(e){const t=this.selector?.bc_object?.multiple||!1;if(this._uiState){const t={};for(const[n,o]of Object.entries(this._uiState)){const i=Number(n);i<e?t[i]=o:i>e&&(t[i-1]=o)}this._uiState=t}if(t){const t=[...this.value||[]];t.splice(e,1),(0,s.rC)(this,"value-changed",{value:t})}else(0,s.rC)(this,"value-changed",{value:void 0})}_itemChanged(e,t){e.stopPropagation();const n=this.selector?.bc_object?.multiple||!1,o={},i={};for(const[t,n]of Object.entries(e.detail.value||{}))(t.startsWith("__")?i:o)[t]=n;const a=n?(this.value||[])[t]:this.value;for(const[e,t]of Object.entries(this._selectDefaults(this.selector?.bc_object?.fields,a)))o[e]===t&&delete o[e];if(this._uiState={...this._uiState||{}},this._uiState[t]={...this._uiState[t]||{},...i},this.requestUpdate(),n){const e=[...this.value||[]];e[t]=o,(0,s.rC)(this,"value-changed",{value:e})}else(0,s.rC)(this,"value-changed",{value:o})}static styles=Rt.AH`
     :host {
       display: block;
     }
@@ -675,8 +696,22 @@
       margin-left: 8px;
     }
 
-    .delete-icon {
+    .delete-icon,
+    .duplicate-icon {
       color: var(--secondary-text-color);
+    }
+
+    .reorder-handle {
+      color: var(--secondary-text-color);
+      cursor: grab;
+      margin-right: 4px;
+    }
+
+    .reorder-handle ha-icon,
+    .duplicate-icon ha-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .delete-icon ha-icon {
@@ -698,7 +733,7 @@
       display: block;
       margin-top: 4px;
     }
-  `}customElements.define("ha-selector-bc_object",Wn);var Yn=n(371);const Kn=[{label:"Fill from left (default)",value:"left"},{label:"Fill from right",value:"right"},{label:"Fill from top",value:"top"},{label:"Fill from bottom",value:"bottom"}],Jn=[{label:"Right (default)",value:"right"},{label:"Left",value:"left"},{label:"Center",value:"center"},{label:"Hidden",value:"hidden"}];function Xn(e){const t=e._config.entity;return(0,Yn.zD)(t)}function Gn({hass:e,data:t={},entity:n,computeLabel:o,onFormChange:i,onToggleChange:a,isReadOnly:r,showEntityFilterToggle:s=!1,entityFilterValue:l=!1,onEntityFilterToggle:c,showEntityFilterInfo:d=l,rangeFormDisabled:u=!1,forceValuePositionRight:p=!1}){const b=n?.startsWith("light")&&["hue","saturation","white_temp"].includes(t.light_slider_type),h=b,m=(e,t,n={})=>{"function"==typeof a&&a(e,t,n)},f=(e,t)=>({control:e,eventType:t});return Ft.qy`
+  `}customElements.define("ha-selector-bc_object",Kn);var Jn=n(371);const Xn=[{label:"Fill from left (default)",value:"left"},{label:"Fill from right",value:"right"},{label:"Fill from top",value:"top"},{label:"Fill from bottom",value:"bottom"}],Gn=[{label:"Right (default)",value:"right"},{label:"Left",value:"left"},{label:"Center",value:"center"},{label:"Hidden",value:"hidden"}];function Qn(e){const t=e._config.entity;return(0,Jn.zD)(t)}function Zn({hass:e,data:t={},entity:n,computeLabel:o,onFormChange:i,onToggleChange:a,isReadOnly:r,showEntityFilterToggle:s=!1,entityFilterValue:l=!1,onEntityFilterToggle:c,showEntityFilterInfo:d=l,rangeFormDisabled:u=!1,forceValuePositionRight:p=!1}){const b=n?.startsWith("light")&&["hue","saturation","white_temp"].includes(t.light_slider_type),h=b,m=(e,t,n={})=>{"function"==typeof a&&a(e,t,n)},f=(e,t)=>({control:e,eventType:t});return Rt.qy`
 
         <ha-expansion-panel outlined>
             <h4 slot="header">
@@ -706,7 +741,7 @@
                 Slider behavior
             </h4>
             <div class="content">
-                ${s?Ft.qy`
+                ${s?Rt.qy`
                     <div class="checkbox-wrapper">
                         <ha-formfield label="Disable entity filter (for custom slider)">
                             <ha-switch
@@ -812,7 +847,7 @@
                 <ha-form
                     .hass=${e}
                     .data=${{slider_fill_orientation:t.slider_fill_orientation||"left"}}
-                    .schema=${[{name:"slider_fill_orientation",selector:{select:{options:Kn,mode:"dropdown"}}}]}
+                    .schema=${[{name:"slider_fill_orientation",selector:{select:{options:Xn,mode:"dropdown"}}}]}
                     .computeLabel=${e=>"function"==typeof o?o(e):"Fill orientation"}
                     @value-changed=${e=>m("slider_fill_orientation",e.detail.value.slider_fill_orientation,f("ha-combo-box","value-changed"))}
                 ></ha-form>
@@ -825,15 +860,15 @@
                         <p>When using vertical fill orientation (top or bottom), swiping over the card on mobile will activate the slider. This is because there's no way to distinguish between scrolling and slider interaction.</p>
                     </div>
                 </div>
-                ${b?"":Ft.qy`
+                ${b?"":Rt.qy`
                     <ha-form
                         .hass=${e}
                         .data=${{slider_value_position:p?"right":t.slider_value_position||"right"}}
-                        .schema=${[{name:"slider_value_position",disabled:p,selector:{select:{options:Jn,mode:"dropdown"}}}]}
+                        .schema=${[{name:"slider_value_position",disabled:p,selector:{select:{options:Gn,mode:"dropdown"}}}]}
                         .computeLabel=${e=>"function"==typeof o?o(e):"Value position"}
                         @value-changed=${e=>m("slider_value_position",e.detail.value.slider_value_position,f("ha-combo-box","value-changed"))}
                     ></ha-form>
-                    ${p?Ft.qy`
+                    ${p?Rt.qy`
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">
                                 <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -856,7 +891,7 @@
                 </ha-formfield>
             </div>
         </ha-expansion-panel>
-        ${n?.startsWith("light")?Ft.qy`
+        ${n?.startsWith("light")?Rt.qy`
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:lightbulb-outline"></ha-icon>
@@ -870,7 +905,7 @@
                         .computeLabel=${e=>"function"==typeof o?o(e):"Light slider mode"}
                         @value-changed=${e=>m("light_slider_type",e.detail.value.light_slider_type,f("ha-combo-box","value-changed"))}
                     ></ha-form>
-                    ${"hue"===t.light_slider_type?Ft.qy`
+                    ${"hue"===t.light_slider_type?Rt.qy`
                         <ha-formfield>
                             <ha-switch
                                 .checked=${t.hue_force_saturation??!1}
@@ -880,7 +915,7 @@
                                 <label class="mdc-label">Force saturation when adjusting Hue</label>
                             </div>
                         </ha-formfield>
-                        ${t.hue_force_saturation?Ft.qy`
+                        ${t.hue_force_saturation?Rt.qy`
                             <ha-form
                                 .hass=${e}
                                 .data=${{hue_force_saturation_value:String(t.hue_force_saturation_value??100)}}
@@ -890,7 +925,7 @@
                             ></ha-form>
                         `:""}
                     `:""}
-                    ${["hue","saturation","white_temp"].includes(t.light_slider_type)?Ft.qy``:Ft.qy`
+                    ${["hue","saturation","white_temp"].includes(t.light_slider_type)?Rt.qy``:Rt.qy`
                         <ha-formfield>
                             <ha-switch
                                 .checked=${t.use_accent_color??!1}
@@ -901,7 +936,7 @@
                             </div>
                         </ha-formfield>
                     `}
-                    ${t.tap_to_slide?"":Ft.qy`
+                    ${t.tap_to_slide?"":Rt.qy`
                         <ha-formfield>
                             <ha-switch
                                 .checked=${t.allow_light_slider_to_0??!1}
@@ -921,7 +956,7 @@
                             <label class="mdc-label">Enable smooth brightness transitions</label>
                         </div>
                     </ha-formfield>
-                    ${t.light_transition?Ft.qy`
+                    ${t.light_transition?Rt.qy`
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">
                                 <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -944,11 +979,11 @@
                 </div>
             </ha-expansion-panel>
         `:""}
-    `}function Qn(e){let t={};"slider"!==e._config.button_type||e._disableEntityFilter||(t={filter:[{domain:["light","media_player","cover","input_number","number","climate","fan"]},{domain:"sensor",device_class:"battery"}]});const n="pop-up"===e._config.card_type;let o=e._config.button_action||"";const i="classic"===e._config.popup_style;let a;i?a="switch":(e._config.button_type||(e._config.button_type=n?"name":"switch"),a=e._config.button_type);const r=i?"":e.makeDropdown("Button type","button_type",[{label:"Switch",value:"switch"},{label:"Slider",value:"slider"},{label:"State",value:"state"},{label:"Name / Text (No entity required)",value:"name"}]);return Ft.qy`
+    `}function eo(e){let t={};"slider"!==e._config.button_type||e._disableEntityFilter||(t={filter:[{domain:["light","media_player","cover","input_number","number","climate","fan"]},{domain:"sensor",device_class:"battery"}]});const n="pop-up"===e._config.card_type;let o=e._config.button_action||"";const i="classic"===e._config.popup_style;let a;i?a="switch":(e._config.button_type||(e._config.button_type=n?"name":"switch"),a=e._config.button_type);const r=i?"":e.makeDropdown("Button type","button_type",[{label:"Switch",value:"switch"},{label:"Slider",value:"slider"},{label:"State",value:"state"},{label:"Name / Text (No entity required)",value:"name"}]);return Rt.qy`
         <div class="card-config">
             ${n?"":e.makeDropdown("Card type","card_type",e.cardTypeList)}
             ${n?"":r}
-            ${n?"":Ft.qy`
+            ${n?"":Rt.qy`
             <ha-form
                 .hass=${e.hass}
                 .data=${e._config}
@@ -964,7 +999,7 @@
                 </h4>
                 <div class="content">
                     ${n?r:""}
-                    ${n?Ft.qy`
+                    ${n?Rt.qy`
                     <ha-form
                         .hass=${e.hass}
                         .data=${e._config}
@@ -984,18 +1019,18 @@
                     ${e.makeShowState()}
                 </div>
             </ha-expansion-panel>
-            ${function(e){void 0===e._disableEntityFilter&&(e._disableEntityFilter=!1);const t="slider"===e._config.button_type;return Ft.qy`
+            ${function(e){void 0===e._disableEntityFilter&&(e._disableEntityFilter=!1);const t="slider"===e._config.button_type;return Rt.qy`
         <ha-expansion-panel outlined style="display: ${t?"":"none"}">
             <h4 slot="header">
             <ha-icon icon="mdi:tune-variant"></ha-icon>
             Slider settings
             </h4>
             <div class="content">
-                ${Gn({hass:e.hass,data:e._config,entity:e._config.entity,computeLabel:e._computeLabelCallback,onFormChange:e._valueChanged,onToggleChange:(t,n,o={})=>{if(!t)return;const i=(o.control||"").toUpperCase(),a=o.eventType||("HA-TEXTFIELD"===i?"input":"HA-COMBO-BOX"===i?"value-changed":"change"),r={configValue:t,tagName:i||"INPUT"};"HA-SWITCH"===i?r.checked=n:r.value=n;const s={type:a,target:r,detail:"value-changed"===a||"selected"===a?{value:n}:void 0};e._valueChanged(s)},isReadOnly:Xn(e),showEntityFilterToggle:!0,entityFilterValue:e._disableEntityFilter,onEntityFilterToggle:t=>{e._disableEntityFilter=t,e.requestUpdate()},showEntityFilterInfo:e._disableEntityFilter,rangeFormDisabled:"name"===e._config.button_type})}
+                ${Zn({hass:e.hass,data:e._config,entity:e._config.entity,computeLabel:e._computeLabelCallback,onFormChange:e._valueChanged,onToggleChange:(t,n,o={})=>{if(!t)return;const i=(o.control||"").toUpperCase(),a=o.eventType||("HA-TEXTFIELD"===i?"input":"HA-COMBO-BOX"===i?"value-changed":"change"),r={configValue:t,tagName:i||"INPUT"};"HA-SWITCH"===i?r.checked=n:r.value=n;const s={type:a,target:r,detail:"value-changed"===a||"selected"===a?{value:n}:void 0};e._valueChanged(s)},isReadOnly:Qn(e),showEntityFilterToggle:!0,entityFilterValue:e._disableEntityFilter,onEntityFilterToggle:t=>{e._disableEntityFilter=t,e.requestUpdate()},showEntityFilterInfo:e._disableEntityFilter,rangeFormDisabled:"name"===e._config.button_type})}
             </div>
         </ha-expansion-panel>
     `}(e)}
-            ${i?"":Ft.qy`
+            ${i?"":Rt.qy`
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:gesture-tap"></ha-icon>
@@ -1022,9 +1057,9 @@
                     -->
                     ${e.makeActionPanel("Tap action",o,"name"===e._config.button_type?"none":"state"===e._config.button_type||"slider"===e._config.button_type&&(0,s.md)(e,"sensor",e._config.entity)?"more-info":"toggle","button_action")}
                     ${e.makeActionPanel("Double tap action",o,"none","button_action")}
-                    ${"slider"!==e._config.button_type||e._config.read_only_slider?Ft.qy`
+                    ${"slider"!==e._config.button_type||e._config.read_only_slider?Rt.qy`
                         ${e.makeActionPanel("Hold action",o,"name"===e._config.button_type?"none":"more-info","button_action")}
-                    `:Ft.qy`
+                    `:Rt.qy`
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">
                                 <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -1058,11 +1093,11 @@
                 <div class="content">
                     <p>This card is very versatile. It can be used as a <b>switch</b>, a <b>slider</b>, a <b>state</b> or a <b>name/text</b> button. Select the type of button you want to get more information about it.</p>
                     
-                    ${"switch"!==e._config.button_type&&e._config.button_type?"":Ft.qy`
+                    ${"switch"!==e._config.button_type&&e._config.button_type?"":Rt.qy`
                         <p><strong>Switch button:</strong> This is the default button type. By default, it toggles an entity and its background color changes based on the entity's state or the color of a light. You can change its action in the <b>Tap action on card</b> section.</p>
                     `}
                     
-                    ${"slider"===e._config.button_type?Ft.qy`
+                    ${"slider"===e._config.button_type?Rt.qy`
                         <p><strong>Slider button:</strong> This button type lets you control entities with adjustable ranges. It's ideal for dimming lights, and its fill color will adapt to the light's color. You can also use it to display values, such as a battery level.</p>
                         <p>Supported entities for sliders:</p>
                         <ul class="icon-list">
@@ -1077,26 +1112,26 @@
                         <p>You can also use any entity with a <b>numeric state</b> by disabling the entity filter in <b>Slider settings</b>, then define the <b>min</b> and <b>max</b> values. This option is read only.</p>
                     `:""}
                     
-                    ${"state"===e._config.button_type?Ft.qy`
+                    ${"state"===e._config.button_type?Rt.qy`
                         <p><strong>State button:</strong> Perfect for displaying information from a sensor or any entity. When you press it, it will show the "More info" panel of the entity. Its background color does not change.</p>
                     `:""}
                     
-                    ${"name"===e._config.button_type?Ft.qy`
+                    ${"name"===e._config.button_type?Rt.qy`
                         <p><strong>Name/Text button:</strong> The only button type that doesn't need an entity. It allows you to display a short text, a name or a title. You can also add actions to it. Its background color does not change.</p>
                     `:""}
                 </div>
             </div>
             ${n?"":e.makeVersion()}
         </div>
-    `}const Zn="#";function eo(e){return"fit-content"===e?.popup_mode?"fit-content":"centered"===e?.popup_mode?"centered":"adaptive-dialog"===e?.popup_mode?"adaptive-dialog":"default"}function to(e){return"performance"===e?.performance_mode?"performance":"default"}function no(e){return Ft.qy`
+    `}const to="#";function no(e){return"fit-content"===e?.popup_mode?"fit-content":"centered"===e?.popup_mode?"centered":"adaptive-dialog"===e?.popup_mode?"adaptive-dialog":"default"}function oo(e){return"performance"===e?.performance_mode?"performance":"default"}function io(e){return Rt.qy`
         <ha-form
             .hass=${e.hass}
-            .data=${{popup_mode:eo(e._config)}}
+            .data=${{popup_mode:no(e._config)}}
             .schema=${[{name:"popup_mode",selector:{select:{options:[{label:"Default",value:"default"},{label:"Fit content",value:"fit-content"},{label:"Dialog (centered)",value:"centered"},{label:'Adaptive dialog ("Fit content" on mobile)',value:"adaptive-dialog"}],mode:"dropdown"}}}]}
             .computeLabel=${()=>"Pop-up mode"}
             @value-changed=${t=>{const n=t.detail.value.popup_mode;e._valueChanged({target:{configValue:"popup_mode"},detail:{value:n}})}}
         ></ha-form>
-    `}function oo(e){const t=eo(e);return"fit-content"===t?{popup_mode:"fit-content",...e?.with_bottom_offset?{with_bottom_offset:!0}:{}}:"centered"===t?{popup_mode:"centered",...e?.full_width_on_mobile?{full_width_on_mobile:!0}:{}}:"adaptive-dialog"===t?{popup_mode:"adaptive-dialog",...e?.with_bottom_offset?{with_bottom_offset:!0}:{}}:{}}function io(e){return"performance"===to(e)?{performance_mode:"performance"}:{}}function ao(e){const t=function(e,t="light",n=2){const o=[];return e&&e.states?(Object.keys(e.states).forEach(i=>{if(!(o.length>=n)&&i.startsWith(t+".")){let t=!1;"brightness"in e.states[i].attributes&&(t=!0),o.push({entity:i,supportsBrightness:t})}}),o):o}(e);return t.length>0?t.map(e=>({type:"custom:bubble-card",card_type:"button",button_type:e.supportsBrightness?"slider":"switch",entity:e.entity,show_state:!0,grid_options:{columns:6}})):[{type:"custom:bubble-card",card_type:"button",button_type:"name",name:"Floor lamp",icon:"mdi:floor-lamp-outline",grid_options:{columns:6}}]}function ro(){return Ft.qy`
+    `}function ao(e){const t=no(e);return"fit-content"===t?{popup_mode:"fit-content",...e?.with_bottom_offset?{with_bottom_offset:!0}:{}}:"centered"===t?{popup_mode:"centered",...e?.full_width_on_mobile?{full_width_on_mobile:!0}:{}}:"adaptive-dialog"===t?{popup_mode:"adaptive-dialog",...e?.with_bottom_offset?{with_bottom_offset:!0}:{}}:{}}function ro(e){return"performance"===oo(e)?{performance_mode:"performance"}:{}}function so(e){const t=function(e,t="light",n=2){const o=[];return e&&e.states?(Object.keys(e.states).forEach(i=>{if(!(o.length>=n)&&i.startsWith(t+".")){let t=!1;"brightness"in e.states[i].attributes&&(t=!0),o.push({entity:i,supportsBrightness:t})}}),o):o}(e);return t.length>0?t.map(e=>({type:"custom:bubble-card",card_type:"button",button_type:e.supportsBrightness?"slider":"switch",entity:e.entity,show_state:!0,grid_options:{columns:6}})):[{type:"custom:bubble-card",card_type:"button",button_type:"name",name:"Floor lamp",icon:"mdi:floor-lamp-outline",grid_options:{columns:6}}]}function lo(){return Rt.qy`
         <div id="duplicate-hash-warning" style="display: none;">
             <div class="bubble-info warning">
                 <h4 class="bubble-section-title">
@@ -1108,7 +1143,7 @@
                 </div>
             </div>
         </div>
-    `}function so(e){const t="string"==typeof e?e.trim():"";if(!t)return Zn;const n=t.replace(/^#+/,"");return n?`${Zn}${n}`:Zn}function lo(e){return so(e).slice(1)}function co(e,t){const n=so(e),o=n===Zn,i=!o&&fn(n,t);return{normalizedValue:n,isEmpty:o,isDuplicate:i,isValid:!o&&!i}}function uo(e){return"centered"!==eo(e._config)?Ft.qy``:Ft.qy`
+    `}function co(e){const t="string"==typeof e?e.trim():"";if(!t)return to;const n=t.replace(/^#+/,"");return n?`${to}${n}`:to}function uo(e){return co(e).slice(1)}function po(e,t){const n=co(e),o=n===to,i=!o&&fn(n,t);return{normalizedValue:n,isEmpty:o,isDuplicate:i,isValid:!o&&!i}}function bo(e){return"centered"!==no(e._config)?Rt.qy``:Rt.qy`
         <ha-formfield .label="Full width on mobile">
             <ha-switch
                 aria-label="Full width on mobile"
@@ -1120,7 +1155,7 @@
                 <label class="mdc-label">Full width on mobile</label>
             </div>
         </ha-formfield>
-    `}function po(e){const t=eo(e._config);return"fit-content"!==t&&"adaptive-dialog"!==t?Ft.qy``:Ft.qy`
+    `}function ho(e){const t=no(e._config);return"fit-content"!==t&&"adaptive-dialog"!==t?Rt.qy``:Rt.qy`
         <ha-formfield .label="With bottom offset">
             <ha-switch
                 aria-label="With bottom offset"
@@ -1141,7 +1176,7 @@
                 <p>Useful when your dashboard includes a footer card and the pop-up needs extra space at the bottom.</p>
             </div>
         </div>
-    `}function bo(e){const t=window.__bubbleEditorSession;if(t){if(t.originalHash===e)return t;if(t.lastChangedHash===e&&!t.committed)return t}return window.__bubbleEditorSession={originalHash:e,lastChangedHash:e,committed:!1},window.__bubbleEditorSession}function ho(e){window.__bubbleEditorSession&&(window.__bubbleEditorSession.originalHash=e,window.__bubbleEditorSession.lastChangedHash=e,window.__bubbleEditorSession.committed=!0)}function mo(e,t,n){const o=e.shadowRoot?.querySelector("#hash-input"),i=e.shadowRoot?.querySelector("#duplicate-hash-warning"),a=n??o?.value??window.__bubbleEditorSession?.lastChangedHash??"",r=co(a,t);if(o){const e=lo(a);o.value!==e&&(o.value=e)}i&&(i.style.display=r.isDuplicate?"":"none");const s=e.shadowRoot?.querySelector("#create-pop-up-button");return s&&(s.classList.toggle("disabled",!r.isValid),s.disabled=!r.isValid),r}function fo(e){const t=e._config?.trigger??[];if(e._config.button_action,"pop-up"===e._config.card_type&&!e._config.hash){const t=bo(e._config?.hash||null),n=co(t.lastChangedHash||Zn,t.originalHash),o={...e._config};let i=!1;return setTimeout(()=>{i=!1===window.popUpError,function(e,t){if(!e.shadowRoot)return;const n=e.shadowRoot.querySelector("#vertical-stack-alert-container");n&&(n.style.display=t?"block":"none");const o=e.shadowRoot.querySelector("#create-pop-up-button ha-icon");o&&(o.icon=t?"mdi:content-save":"mdi:plus");const i=e.shadowRoot.querySelector("#button-text");i&&(i.textContent=t?"Update Hash":"Create Pop-up");const a=e.shadowRoot.querySelector("#include-example");a&&(a.disabled=t);const r=e.shadowRoot.querySelector("#include-example-label");r&&(r.textContent="Include example configuration"+(t?" (disabled because pop-up is already in a vertical stack)":""))}(e,i),mo(e,t.originalHash)},0),e.createPopUpConfig=()=>function(e,t){try{const t=!1===window.popUpError,o={...oo(n=e._config),...io(n)},i=e.shadowRoot.querySelector("#include-example")?.checked||!1;let a=Zn;const r=mo(e);if(!r.isValid)return;if(a=r.normalizedValue,t)return o.popup_mode?e._config.popup_mode=o.popup_mode:delete e._config.popup_mode,o.performance_mode?e._config.performance_mode=o.performance_mode:delete e._config.performance_mode,o.with_bottom_offset?e._config.with_bottom_offset=!0:delete e._config.with_bottom_offset,o.full_width_on_mobile?e._config.full_width_on_mobile=!0:delete e._config.full_width_on_mobile,e._config.hash=a,ho(a),gn(a,{name:e._config.name,icon:e._config.icon}),(0,s.rC)(e,"config-changed",{config:e._config}),void console.info("Pop-up already in a vertical stack. Hash updated. Note that manually creating a vertical stack is no longer required.");i?e._config={type:"custom:bubble-card",card_type:"pop-up",...o,name:"Living room",icon:"mdi:sofa-outline",hash:a,cards:[{type:"custom:bubble-card",card_type:"separator",name:"Lights (example)",icon:"mdi:lightbulb-outline"},...ao(e.hass)]}:(e._config={type:"custom:bubble-card",card_type:"pop-up",...o,hash:a,cards:[]},window.bubbleNewlyCreatedHashes=window.bubbleNewlyCreatedHashes||new Set,window.bubbleNewlyCreatedHashes.add(a)),gn(a,{name:e._config.name,icon:e._config.icon}),ho(a),(0,s.rC)(e,"config-changed",{config:e._config})}catch(n){console.error("Error creating pop-up:",n),e._config=t,e._config.hash=so(window.__bubbleEditorSession?.lastChangedHash||""),gn(e._config.hash,{name:e._config.name,icon:e._config.icon}),(0,s.rC)(e,"config-changed",{config:e._config})}var n}(e,o),Ft.qy`
+    `}function mo(e){const t=window.__bubbleEditorSession;if(t){if(t.originalHash===e)return t;if(t.lastChangedHash===e&&!t.committed)return t}return window.__bubbleEditorSession={originalHash:e,lastChangedHash:e,committed:!1},window.__bubbleEditorSession}function fo(e){window.__bubbleEditorSession&&(window.__bubbleEditorSession.originalHash=e,window.__bubbleEditorSession.lastChangedHash=e,window.__bubbleEditorSession.committed=!0)}function go(e,t,n){const o=e.shadowRoot?.querySelector("#hash-input"),i=e.shadowRoot?.querySelector("#duplicate-hash-warning"),a=n??o?.value??window.__bubbleEditorSession?.lastChangedHash??"",r=po(a,t);if(o){const e=uo(a);o.value!==e&&(o.value=e)}i&&(i.style.display=r.isDuplicate?"":"none");const s=e.shadowRoot?.querySelector("#create-pop-up-button");return s&&(s.classList.toggle("disabled",!r.isValid),s.disabled=!r.isValid),r}function yo(e){const t=e._config?.trigger??[];if(e._config.button_action,"pop-up"===e._config.card_type&&!e._config.hash){const t=mo(e._config?.hash||null),n=po(t.lastChangedHash||to,t.originalHash),o={...e._config};let i=!1;return setTimeout(()=>{i=!1===window.popUpError,function(e,t){if(!e.shadowRoot)return;const n=e.shadowRoot.querySelector("#vertical-stack-alert-container");n&&(n.style.display=t?"block":"none");const o=e.shadowRoot.querySelector("#create-pop-up-button ha-icon");o&&(o.icon=t?"mdi:content-save":"mdi:plus");const i=e.shadowRoot.querySelector("#button-text");i&&(i.textContent=t?"Update Hash":"Create Pop-up");const a=e.shadowRoot.querySelector("#include-example");a&&(a.disabled=t);const r=e.shadowRoot.querySelector("#include-example-label");r&&(r.textContent="Include example configuration"+(t?" (disabled because pop-up is already in a vertical stack)":""))}(e,i),go(e,t.originalHash)},0),e.createPopUpConfig=()=>function(e,t){try{const t=!1===window.popUpError,o={...ao(n=e._config),...ro(n)},i=e.shadowRoot.querySelector("#include-example")?.checked||!1;let a=to;const r=go(e);if(!r.isValid)return;if(a=r.normalizedValue,t)return o.popup_mode?e._config.popup_mode=o.popup_mode:delete e._config.popup_mode,o.performance_mode?e._config.performance_mode=o.performance_mode:delete e._config.performance_mode,o.with_bottom_offset?e._config.with_bottom_offset=!0:delete e._config.with_bottom_offset,o.full_width_on_mobile?e._config.full_width_on_mobile=!0:delete e._config.full_width_on_mobile,e._config.hash=a,fo(a),gn(a,{name:e._config.name,icon:e._config.icon}),(0,s.rC)(e,"config-changed",{config:e._config}),void console.info("Pop-up already in a vertical stack. Hash updated. Note that manually creating a vertical stack is no longer required.");i?e._config={type:"custom:bubble-card",card_type:"pop-up",...o,name:"Living room",icon:"mdi:sofa-outline",hash:a,cards:[{type:"custom:bubble-card",card_type:"separator",name:"Lights (example)",icon:"mdi:lightbulb-outline"},...so(e.hass)]}:(e._config={type:"custom:bubble-card",card_type:"pop-up",...o,hash:a,cards:[]},window.bubbleNewlyCreatedHashes=window.bubbleNewlyCreatedHashes||new Set,window.bubbleNewlyCreatedHashes.add(a)),gn(a,{name:e._config.name,icon:e._config.icon}),fo(a),(0,s.rC)(e,"config-changed",{config:e._config})}catch(n){console.error("Error creating pop-up:",n),e._config=t,e._config.hash=co(window.__bubbleEditorSession?.lastChangedHash||""),gn(e._config.hash,{name:e._config.name,icon:e._config.icon}),(0,s.rC)(e,"config-changed",{config:e._config})}var n}(e,o),Rt.qy`
             <div class="card-config">
                 ${e.makeDropdown("Card type","card_type",e.cardTypeList)}
                 <div id="vertical-stack-alert-container" style="display: none;">
@@ -1157,15 +1192,15 @@
                 </div>
                 <ha-form
                     .hass=${e.hass}
-                    .data=${{hash:lo(t.lastChangedHash||Zn)}}
-                    .schema=${[{name:"hash",selector:{text:{prefix:Zn}}}]}
+                    .data=${{hash:uo(t.lastChangedHash||to)}}
+                    .schema=${[{name:"hash",selector:{text:{prefix:to}}}]}
                     .computeLabel=${()=>"Hash (e.g. #kitchen)"}
-                    @value-changed=${n=>{const o=n.detail.value.hash??"",i=mo(e,t.originalHash,o);window.__bubbleEditorSession&&(window.__bubbleEditorSession.lastChangedHash=i.normalizedValue)}}
+                    @value-changed=${n=>{const o=n.detail.value.hash??"",i=go(e,t.originalHash,o);window.__bubbleEditorSession&&(window.__bubbleEditorSession.lastChangedHash=i.normalizedValue)}}
                 ></ha-form>
-                ${ro()}
-                ${no(e)}
-                ${po(e)}
-                ${uo(e)}
+                ${lo()}
+                ${io(e)}
+                ${ho(e)}
+                ${bo(e)}
                 <ha-formfield .label="Include example configuration">
                     <ha-switch
                         aria-label="Include example configuration"
@@ -1202,17 +1237,17 @@
                 
                 ${e.makeVersion()}
             </div>
-        `}const n=bo(e._config?.hash||null);return setTimeout(()=>mo(e,n.originalHash),0),Ft.qy`
+        `}const n=mo(e._config?.hash||null);return setTimeout(()=>go(e,n.originalHash),0),Rt.qy`
         <div class="card-config">
             ${e.makeDropdown("Card type","card_type",e.cardTypeList)}
-            ${function(e,t){const n=Bn(e,t);if(!n)return"";const o=!0===e._legacyStandaloneMigrationBusy,i=e._legacyStandaloneMigrationError||"",a=function(e=[]){return e.some(e=>kn(e))}(n.contentCards),r=!1!==e._legacyStandaloneFlattenHorizontalStacks;return Ft.qy`
+            ${function(e,t){const n=Bn(e,t);if(!n)return"";const o=!0===e._legacyStandaloneMigrationBusy,i=e._legacyStandaloneMigrationError||"",a=function(e=[]){return e.some(e=>kn(e))}(n.contentCards),r=!1!==e._legacyStandaloneFlattenHorizontalStacks;return Rt.qy`
         <div class="bubble-info warning">
             <h4 class="bubble-section-title">
                 <ha-icon icon="mdi:swap-horizontal-bold"></ha-icon>
                 Legacy pop-up detected
             </h4>
             <div class="content">
-                <p>This pop-up still uses the old vertical-stack wrapper. Migrate it to the standalone format for much better performance and to manage its content with the same drag-and-drop flow as a section view.</p>                ${a?Ft.qy`
+                <p>This pop-up still uses the old vertical-stack wrapper. Migrate it to the standalone format for much better performance and to manage its content with the same drag-and-drop flow as a section view.</p>                ${a?Rt.qy`
                     <p>Horizontal stacks were detected. Their cards will be converted so you can drag and drop them individually while keeping the same layout (this option can be disabled if needed).</p>
                     <ha-formfield>
                         <ha-switch
@@ -1234,7 +1269,7 @@
                         <p><b>This migration is permanent.</b> Even though it has been tested to handle all known legacy cases, I still recommend keeping a backup if you may want to roll back to v3.1.6 later.</p>
                     </div>
                 </div>
-                ${i?Ft.qy`<p>${i}</p>`:""}
+                ${i?Rt.qy`<p>${i}</p>`:""}
                 <button class="icon-button ${o?"disabled":""}" ?disabled=${o} @click=${()=>qn(e,t)}>
                     <ha-icon icon="mdi:swap-horizontal-bold"></ha-icon>
                     <span>${o?"Migrating...":"Migrate to standalone"}</span>
@@ -1244,13 +1279,13 @@
     `}(e,n.originalHash)}
             <ha-form
                 .hass=${e.hass}
-                .data=${{hash:lo(e._config?.hash)||""}}
-                .schema=${[{name:"hash",selector:{text:{prefix:Zn}}}]}
+                .data=${{hash:uo(e._config?.hash)||""}}
+                .schema=${[{name:"hash",selector:{text:{prefix:to}}}]}
                 .computeLabel=${()=>"Hash (e.g. #kitchen)"}
-                @value-changed=${t=>{const o=t.detail.value.hash??"",i=co(o,n.originalHash);lo(o),e._config.hash=i.normalizedValue,window.__bubbleEditorSession&&(window.__bubbleEditorSession.lastChangedHash=i.normalizedValue,window.__bubbleEditorSession.committed=!0),(0,s.rC)(e,"config-changed",{config:e._config})}}
+                @value-changed=${t=>{const o=t.detail.value.hash??"",i=po(o,n.originalHash);uo(o),e._config.hash=i.normalizedValue,window.__bubbleEditorSession&&(window.__bubbleEditorSession.lastChangedHash=i.normalizedValue,window.__bubbleEditorSession.committed=!0),(0,s.rC)(e,"config-changed",{config:e._config})}}
             ></ha-form>
-            ${ro()}
-            ${function(e){return Ft.qy`
+            ${lo()}
+            ${function(e){return Rt.qy`
         <ha-form
             .hass=${e.hass}
             .data=${{popup_style:e._config.popup_style??"bubble"}}
@@ -1259,9 +1294,9 @@
             @value-changed=${t=>{const n=t.detail.value.popup_style;if("bubble"!==n&&n)e._valueChanged({target:{configValue:"popup_style"},detail:{value:n}});else{const t={...e._config};delete t.popup_style,"classic"===e._config.popup_style&&delete t.button_type,(0,s.rC)(e,"config-changed",{config:t})}}}
         ></ha-form>
     `}(e)}
-            ${no(e)}
-            ${po(e)}
-            ${uo(e)}
+            ${io(e)}
+            ${ho(e)}
+            ${bo(e)}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:dock-top"></ha-icon>
@@ -1327,7 +1362,7 @@
                                 ></ha-form>
                             </div>
                         </ha-expansion-panel>
-                        ${Qn(e)}
+                        ${eo(e)}
                     </div>
                 </div>
             </ha-expansion-panel>
@@ -1337,15 +1372,15 @@
                   Pop-up settings
                 </h4>
                 <div class="content">
-                    ${function(e){const t="performance"===to(e._config);return Ft.qy`
+                    ${function(e){const t="performance"===oo(e._config);return Rt.qy`
         <ha-form
             .hass=${e.hass}
-            .data=${{performance_mode:to(e._config)}}
+            .data=${{performance_mode:oo(e._config)}}
             .schema=${[{name:"performance_mode",selector:{select:{options:[{label:"Default",value:"default"},{label:"Performance",value:"performance"}],mode:"dropdown"}}}]}
             .computeLabel=${()=>"Performance mode"}
             @value-changed=${t=>{const n=t.detail.value.performance_mode;if("performance"===n)return void e._valueChanged({target:{configValue:"performance_mode"},detail:{value:n}});const o={...e._config};delete o.performance_mode,(0,s.rC)(e,"config-changed",{config:o})}}
         ></ha-form>
-        ${t?Ft.qy`
+        ${t?Rt.qy`
             <div class="bubble-info">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -1355,7 +1390,7 @@
                     <p>Slightly delays content rendering and background blur, also disables backdrop blur if set.</p>
                 </div>
             </div>
-        `:Ft.qy``}
+        `:Rt.qy``}
     `}(e)}
                     <ha-form
                         .hass=${e.hass}
@@ -1592,20 +1627,20 @@
             </div>
             ${e.makeVersion()}
       </div>
-    `}function go(e,t){delete e._config[t+"_name"],delete e._config[t+"_icon"],delete e._config[t+"_link"],delete e._config[t+"_entity"],delete e._config[t+"_pir_sensor"];for(let n=t;n<e.buttonIndex;n++)e._config[n+"_name"]=e._config[n+1+"_name"],e._config[n+"_icon"]=e._config[n+1+"_icon"],e._config[n+"_link"]=e._config[n+1+"_link"],e._config[n+"_entity"]=e._config[n+1+"_entity"],e._config[n+"_pir_sensor"]=e._config[n+1+"_pir_sensor"];delete e._config[e.buttonIndex+"_name"],delete e._config[e.buttonIndex+"_icon"],delete e._config[e.buttonIndex+"_link"],delete e._config[e.buttonIndex+"_entity"],delete e._config[e.buttonIndex+"_pir_sensor"],e.buttonIndex--,(0,s.rC)(e,"config-changed",{config:e._config})}var yo=n(175);const vo={en:{cards:{calendar:{busy:"Busy",all_day:"All day"}},editor:{calendar:{entity:"Entity",color:"Color",days:"Max days",limit:"Limit",list_of_calendars:"List of calendars",show_end:"Show end time",show_progress:"Show progress",show_place:"Show place",show_started_events:"Show started events",text_scrolling:"Text scrolling effect",name:"Calendar",new_calendar:"Add another calendar",remove_calendar:"Remove this calendar",settings:"Calendar settings"}}},fr:{cards:{calendar:{busy:"Occupé",all_day:"Journée"}},editor:{calendar:{entity:"Entité",color:"Couleur",days:"Jours max.",limit:"Limite",list_of_calendars:"Liste des calendriers",show_end:"Voir l'heure de fin",show_progress:"Voir la progression",show_place:"Voir le lieu",show_started_events:"Afficher les événements en cours",text_scrolling:"Effet de défilement du texte",name:"Calendrier",new_calendar:"Ajouter un autre calendrier",remove_calendar:"Supprimer ce calendrier",settings:"Paramètres du calendrier"}}},de:{cards:{calendar:{busy:"Beschäftigt",all_day:"Ganztägig"}},editor:{calendar:{entity:"Entität",color:"Farbe",days:"Max tage",limit:"Anzeigelimit",list_of_calendars:"Kalenderliste",show_end:"Endzeitpunkt anzeigen",show_progress:"Fortschritt anzeigen",show_started_events:"Laufende Ereignisse anzeigen",text_scrolling:"Lauftext",name:"Kalender",new_calendar:"Kalender hinzufügen",remove_calendar:"Kalender entfernen",settings:"Kalendereinstellungen"}}},"zh-Hans":{cards:{calendar:{busy:"忙碌",all_day:"全天"}},editor:{calendar:{entity:"实体",color:"颜色",days:"最大天数",limit:"限制",list_of_calendars:"日历列表",show_end:"显示结束时间",show_progress:"显示进度",show_started_events:"显示已开始的事件",text_scrolling:"文字滚动效果",name:"日历",new_calendar:"添加另一个日历",remove_calendar:"删除此日历",settings:"日历设置"}}}};function _o(e,t){return e[t]}function wo(e,t){try{const n=vo[t];return e.split(".").reduce(_o,n)}catch{return}}function xo(e){return function(t){const n=function(e){return e?.locale.language??"en"}(e),o=wo(t,n);if(o)return o;return wo(t,"en")||t}}function Co(e){return Array.from(e).reduce((e,t)=>t.charCodeAt(0)+((e<<5)-e),0)}function ko(e){const t=(16777215&e).toString(16).toUpperCase();return"#"+"00000".substring(0,6-t.length)+t}function $o(e){if(e.date){const t=e.date.split("-"),n=parseInt(t[0],10),o=parseInt(t[1],10)-1,i=parseInt(t[2],10);return new Date(n,o,i)}return new Date(e.dateTime)}function So(e,t){const n=$o(e.start),o=$o(t.start),i=new Date(n.getFullYear(),n.getMonth(),n.getDate()),a=new Date(o.getFullYear(),o.getMonth(),o.getDate()),r=i.getTime()-a.getTime();if(0!==r)return r;const s=void 0!==e.start.date,l=void 0!==t.start.date;return s&&!l?-1:!s&&l?1:s||l?0:n.getTime()-o.getTime()}const Ao=e=>e.title||e.label;class Lo extends Ft.WF{getSchema(e){const t=xo(this.hass);return[{type:"expandable",name:"",title:e?this.hass.states[e].attributes.friendly_name||e:t("editor.calendar.new_calendar"),schema:[{name:"entity",title:t("editor.calendar.entity"),selector:{entity:{domain:["calendar"]}}},{name:"color",title:t("editor.calendar.color"),selector:{ui_color:{}}}]}]}static properties={hass:{},value:{type:Array},label:{}};constructor(){super(),this.value=[]}render(){const e=xo(this.hass),t=e=>()=>{const t=[...this.value||[]];t.splice(e,1),this.valueChanged({detail:{value:t}})},n=this.value??[];return Ft.qy`
+    `}function vo(e,t){delete e._config[t+"_name"],delete e._config[t+"_icon"],delete e._config[t+"_link"],delete e._config[t+"_entity"],delete e._config[t+"_pir_sensor"];for(let n=t;n<e.buttonIndex;n++)e._config[n+"_name"]=e._config[n+1+"_name"],e._config[n+"_icon"]=e._config[n+1+"_icon"],e._config[n+"_link"]=e._config[n+1+"_link"],e._config[n+"_entity"]=e._config[n+1+"_entity"],e._config[n+"_pir_sensor"]=e._config[n+1+"_pir_sensor"];delete e._config[e.buttonIndex+"_name"],delete e._config[e.buttonIndex+"_icon"],delete e._config[e.buttonIndex+"_link"],delete e._config[e.buttonIndex+"_entity"],delete e._config[e.buttonIndex+"_pir_sensor"],e.buttonIndex--,(0,s.rC)(e,"config-changed",{config:e._config})}var _o=n(175);const wo={en:{cards:{calendar:{busy:"Busy",all_day:"All day"}},editor:{calendar:{entity:"Entity",color:"Color",days:"Max days",limit:"Limit",list_of_calendars:"List of calendars",show_end:"Show end time",show_progress:"Show progress",show_place:"Show place",show_started_events:"Show started events",text_scrolling:"Text scrolling effect",name:"Calendar",new_calendar:"Add another calendar",remove_calendar:"Remove this calendar",settings:"Calendar settings"}}},fr:{cards:{calendar:{busy:"Occupé",all_day:"Journée"}},editor:{calendar:{entity:"Entité",color:"Couleur",days:"Jours max.",limit:"Limite",list_of_calendars:"Liste des calendriers",show_end:"Voir l'heure de fin",show_progress:"Voir la progression",show_place:"Voir le lieu",show_started_events:"Afficher les événements en cours",text_scrolling:"Effet de défilement du texte",name:"Calendrier",new_calendar:"Ajouter un autre calendrier",remove_calendar:"Supprimer ce calendrier",settings:"Paramètres du calendrier"}}},de:{cards:{calendar:{busy:"Beschäftigt",all_day:"Ganztägig"}},editor:{calendar:{entity:"Entität",color:"Farbe",days:"Max tage",limit:"Anzeigelimit",list_of_calendars:"Kalenderliste",show_end:"Endzeitpunkt anzeigen",show_progress:"Fortschritt anzeigen",show_started_events:"Laufende Ereignisse anzeigen",text_scrolling:"Lauftext",name:"Kalender",new_calendar:"Kalender hinzufügen",remove_calendar:"Kalender entfernen",settings:"Kalendereinstellungen"}}},"zh-Hans":{cards:{calendar:{busy:"忙碌",all_day:"全天"}},editor:{calendar:{entity:"实体",color:"颜色",days:"最大天数",limit:"限制",list_of_calendars:"日历列表",show_end:"显示结束时间",show_progress:"显示进度",show_started_events:"显示已开始的事件",text_scrolling:"文字滚动效果",name:"日历",new_calendar:"添加另一个日历",remove_calendar:"删除此日历",settings:"日历设置"}}}};function xo(e,t){return e[t]}function Co(e,t){try{const n=wo[t];return e.split(".").reduce(xo,n)}catch{return}}function ko(e){return function(t){const n=function(e){return e?.locale.language??"en"}(e),o=Co(t,n);if(o)return o;return Co(t,"en")||t}}function $o(e){return Array.from(e).reduce((e,t)=>t.charCodeAt(0)+((e<<5)-e),0)}function So(e){const t=(16777215&e).toString(16).toUpperCase();return"#"+"00000".substring(0,6-t.length)+t}function Ao(e){if(e.date){const t=e.date.split("-"),n=parseInt(t[0],10),o=parseInt(t[1],10)-1,i=parseInt(t[2],10);return new Date(n,o,i)}return new Date(e.dateTime)}function Lo(e,t){const n=Ao(e.start),o=Ao(t.start),i=new Date(n.getFullYear(),n.getMonth(),n.getDate()),a=new Date(o.getFullYear(),o.getMonth(),o.getDate()),r=i.getTime()-a.getTime();if(0!==r)return r;const s=void 0!==e.start.date,l=void 0!==t.start.date;return s&&!l?-1:!s&&l?1:s||l?0:n.getTime()-o.getTime()}const Eo=e=>e.title||e.label;class To extends Rt.WF{getSchema(e){const t=ko(this.hass);return[{type:"expandable",name:"",title:e?this.hass.states[e].attributes.friendly_name||e:t("editor.calendar.new_calendar"),schema:[{name:"entity",title:t("editor.calendar.entity"),selector:{entity:{domain:["calendar"]}}},{name:"color",title:t("editor.calendar.color"),selector:{ui_color:{}}}]}]}static properties={hass:{},value:{type:Array},label:{}};constructor(){super(),this.value=[]}render(){const e=ko(this.hass),t=e=>()=>{const t=[...this.value||[]];t.splice(e,1),this.valueChanged({detail:{value:t}})},n=this.value??[];return Rt.qy`
       <ha-expansion-panel outlined style="--expansion-panel-summary-padding: 0 8px;">
         <h4 slot="header" style="display: flex; align-items: center; margin: 10px 0;">
           <ha-icon icon="mdi:calendar" style="margin: 8px;"></ha-icon>
           &nbsp;${e("editor.calendar.list_of_calendars")}
         </h4>
         <div class="content"> 
-          ${n.map((n,o)=>Ft.qy`
+          ${n.map((n,o)=>Rt.qy`
               <div style="display: flex; align-items: center; margin: 12px 4px 14px 4px">
                 <ha-form
                   .data=${n}
                   .schema=${this.getSchema(n.entity)}
                   .hass=${this.hass}
-                  .computeLabel=${Ao}
+                  .computeLabel=${Eo}
                   @value-changed=${e=>{e.stopPropagation();const t=[...this.value||[]];t[o]=e.detail.value,this.valueChanged({detail:{value:t}})}}
                   style="flex-grow: 1;"
                 ></ha-form>
@@ -1621,7 +1656,7 @@
           </ha-button>
         </div>
       </ha-expansion-panel>
-    `}valueChanged(e){const t=e.detail.value.map(e=>{const t=e.entity?ko(Co(e.entity)):"";return{entity:e.entity,color:e.color||t}});(0,s.rC)(this,"value-changed",{value:t},void 0)}}function Eo(e,t,n,o){if(void 0===e._lazyContentLoadedFlags&&(e._lazyContentLoadedFlags={}),n&&!e._lazyContentLoadedFlags[t]&&(e._lazyContentLoadedFlags[t]=!0),e._lazyContentLoadedFlags[t])return o()}function To(){return"undefined"!=typeof customElements&&void 0!==customElements.get("ha-dropdown")}function Po({trigger:e,items:t}){const n=t.map(e=>"divider"===e.type?To()?Ft.qy`<wa-divider role="separator" aria-orientation="horizontal" orientation="horizontal"></wa-divider>`:Ft.qy`<li divider role="separator"></li>`:function({icon:e,label:t,disabled:n=!1,onClick:o,variant:i=null,type:a="item",checked:r=!1}){return To()?Ft.qy`
+    `}valueChanged(e){const t=e.detail.value.map(e=>{const t=e.entity?So($o(e.entity)):"";return{entity:e.entity,color:e.color||t}});(0,s.rC)(this,"value-changed",{value:t},void 0)}}function Mo(e,t,n,o){if(void 0===e._lazyContentLoadedFlags&&(e._lazyContentLoadedFlags={}),n&&!e._lazyContentLoadedFlags[t]&&(e._lazyContentLoadedFlags[t]=!0),e._lazyContentLoadedFlags[t])return o()}function Po(){return"undefined"!=typeof customElements&&void 0!==customElements.get("ha-dropdown")}function Bo({trigger:e,items:t}){const n=t.map(e=>"divider"===e.type?Po()?Rt.qy`<wa-divider role="separator" aria-orientation="horizontal" orientation="horizontal"></wa-divider>`:Rt.qy`<li divider role="separator"></li>`:function({icon:e,label:t,disabled:n=!1,onClick:o,variant:i=null,type:a="item",checked:r=!1}){return Po()?Rt.qy`
             <ha-dropdown-item 
                 ?disabled=${n} 
                 @click=${o} 
@@ -1629,10 +1664,10 @@
                 type=${"checkbox"===a?"checkbox":""}
                 ?checked=${"checkbox"===a&&r}
             >
-                ${e?Ft.qy`<ha-icon icon="${e}" slot="icon"></ha-icon>`:""}
+                ${e?Rt.qy`<ha-icon icon="${e}" slot="icon"></ha-icon>`:""}
                 ${t}
             </ha-dropdown-item>
-        `:Ft.qy`
+        `:Rt.qy`
             <mwc-list-item 
                 graphic="icon" 
                 ?disabled=${n} 
@@ -1640,20 +1675,20 @@
                 class=${"danger"===i?"warning":""}
                 ?selected=${"checkbox"===a&&r}
             >
-                ${e?Ft.qy`<ha-icon icon="${e}" slot="graphic"></ha-icon>`:""}
+                ${e?Rt.qy`<ha-icon icon="${e}" slot="graphic"></ha-icon>`:""}
                 ${t}
             </mwc-list-item>
-        `}(e));return To()?Ft.qy`
+        `}(e));return Po()?Rt.qy`
             <ha-dropdown>
                 ${e}
                 ${n}
             </ha-dropdown>
-        `:Ft.qy`
+        `:Rt.qy`
             <ha-button-menu corner="BOTTOM_START" menuCorner="START" fixed @closed=${e=>e.stopPropagation()} @click=${e=>e.stopPropagation()}>
                 ${e}
                 ${n}
             </ha-button-menu>
-        `}function Mo(e,t,n,o,i,a,r,s,l,c={}){const{panelKeyPrefix:d="sub_button",buttonTitle:u=`Button ${n+1}${t.name?` - ${t.name}`:""}`,arrayLength:p=null}=c;void 0===e._expandedPanelStates&&(e._expandedPanelStates={});const b=t.entity??e._config.entity,h=(0,Yn.zD)(b),m=b?.startsWith("input_select")||b?.startsWith("select")||t.select_attribute;if(!t.sub_button_type&&m)try{setTimeout(()=>i({sub_button_type:"select"}))}catch(e){}const f=e.hass.states[b]?.attributes,g=e._selectable_attributes.some(e=>f?.[e]),y=Object.keys(e.hass.states[b]?.attributes||{}).map(t=>{let n=e.hass.states[b];return{label:e.hass.formatEntityAttributeName(n,t),value:t}}).filter(t=>e._selectable_attributes.includes(t.value)),v=t.visibility??[],_=[{label:"Default (button)",value:"default"},...h?[]:[{label:"Slider",value:"slider"}],...m||g?[{label:"Dropdown / Select",value:"select"}]:[]],w=`${d}_main_${n}`,x=`${d}_settings_${n}`,C=`${d}_actions_${n}`,k=`${d}_visibility_${n}`,$=`${d}_layout_${n}`,S=`${d}_type_slider_${n}`,A="slider"===t.sub_button_type&&t.always_visible,L="select"===t.sub_button_type||!t.sub_button_type&&m||A,E="string"==typeof o&&o.startsWith("sub_button.bottom"),T=null==t.fill_width?!!E:t.fill_width;let P=!1;if("string"==typeof o&&o.includes(".group")){const t=o.match(/^sub_button\.(main|bottom)\.(\d+)\.group$/);if(t){const[,n,o]=t,i=e._config.sub_button;if(i&&i[n]){const e=i[n][parseInt(o,10)];if(e&&e.justify_content){const t=e.justify_content.toLowerCase();P=["end","start","center"].includes(t)}}}}const M=null===p||n>0,B=null===p||n<p-1;return Ft.qy`
+        `}function Io(e,t,n,o,i,a,r,s,l,c={}){const{panelKeyPrefix:d="sub_button",buttonTitle:u=`Button ${n+1}${t.name?` - ${t.name}`:""}`,arrayLength:p=null}=c;void 0===e._expandedPanelStates&&(e._expandedPanelStates={});const b=t.entity??e._config.entity,h=(0,Jn.zD)(b),m=b?.startsWith("input_select")||b?.startsWith("select")||t.select_attribute;if(!t.sub_button_type&&m)try{setTimeout(()=>i({sub_button_type:"select"}))}catch(e){}const f=e.hass.states[b]?.attributes,g=e._selectable_attributes.some(e=>f?.[e]),y=Object.keys(e.hass.states[b]?.attributes||{}).map(t=>{let n=e.hass.states[b];return{label:e.hass.formatEntityAttributeName(n,t),value:t}}).filter(t=>e._selectable_attributes.includes(t.value)),v=t.visibility??[],_=[{label:"Default (button)",value:"default"},...h?[]:[{label:"Slider",value:"slider"}],...m||g?[{label:"Dropdown / Select",value:"select"}]:[]],w=`${d}_main_${n}`,x=`${d}_settings_${n}`,C=`${d}_actions_${n}`,k=`${d}_visibility_${n}`,$=`${d}_layout_${n}`,S=`${d}_type_slider_${n}`,A="slider"===t.sub_button_type&&t.always_visible,L="select"===t.sub_button_type||!t.sub_button_type&&m||A,E="string"==typeof o&&o.startsWith("sub_button.bottom"),T=null==t.fill_width?!!E:t.fill_width;let M=!1;if("string"==typeof o&&o.includes(".group")){const t=o.match(/^sub_button\.(main|bottom)\.(\d+)\.group$/);if(t){const[,n,o]=t,i=e._config.sub_button;if(i&&i[n]){const e=i[n][parseInt(o,10)];if(e&&e.justify_content){const t=e.justify_content.toLowerCase();M=["end","start","center"].includes(t)}}}}const P=null===p||n>0,B=null===p||n<p-1;return Rt.qy`
     <ha-expansion-panel 
       outlined
       @expanded-changed=${t=>{e._expandedPanelStates[w]=t.target.expanded,e.requestUpdate()}}
@@ -1662,15 +1697,15 @@
         <ha-icon icon="mdi:border-radius"></ha-icon>
         ${u}
         <div class="button-container" @click=${e=>e.stopPropagation()} @mousedown=${e=>e.stopPropagation()} @touchstart=${e=>e.stopPropagation()}>
-          ${Po({trigger:Ft.qy`
+          ${Bo({trigger:Rt.qy`
               <mwc-icon-button slot="trigger" class="icon-button header" title="Options">
                 <ha-icon style="display: flex" icon="mdi:dots-vertical"></ha-icon>
               </mwc-icon-button>
-            `,items:[{type:"item",icon:"mdi:arrow-left",label:"Move left",disabled:!M,onClick:e=>{e.stopPropagation(),M&&r(-1)}},{type:"item",icon:"mdi:arrow-right",label:"Move right",disabled:!B,onClick:e=>{e.stopPropagation(),B&&r(1)}},{type:"divider"},{type:"item",icon:"mdi:content-copy",label:"Copy",onClick:e=>{e.stopPropagation(),s(e)}},{type:"item",icon:"mdi:content-cut",label:"Cut",onClick:e=>{e.stopPropagation(),l(e)}},{type:"divider"},{type:"item",icon:"mdi:delete",label:"Delete",variant:"danger",onClick:e=>{e.stopPropagation(),a(e)}}]})}
+            `,items:[{type:"item",icon:"mdi:arrow-left",label:"Move left",disabled:!P,onClick:e=>{e.stopPropagation(),P&&r(-1)}},{type:"item",icon:"mdi:arrow-right",label:"Move right",disabled:!B,onClick:e=>{e.stopPropagation(),B&&r(1)}},{type:"divider"},{type:"item",icon:"mdi:content-copy",label:"Copy",onClick:e=>{e.stopPropagation(),s(e)}},{type:"item",icon:"mdi:content-cut",label:"Cut",onClick:e=>{e.stopPropagation(),l(e)}},{type:"divider"},{type:"item",icon:"mdi:delete",label:"Delete",variant:"danger",onClick:e=>{e.stopPropagation(),a(e)}}]})}
         </div>
       </h4>
       <div class="content">
-        ${Eo(e,w,!!e._expandedPanelStates[w],()=>Ft.qy`
+        ${Mo(e,w,!!e._expandedPanelStates[w],()=>Rt.qy`
           <ha-expansion-panel 
             outlined
             @expanded-changed=${t=>{e._expandedPanelStates[x]=t.target.expanded,e.requestUpdate()}}
@@ -1680,7 +1715,7 @@
               Button settings
             </h4>
             <div class="content">
-              ${Eo(e,x,!!e._expandedPanelStates[x],()=>Ft.qy` 
+              ${Mo(e,x,!!e._expandedPanelStates[x],()=>Rt.qy` 
                 <ha-form
                   .hass=${e.hass}
                   .data=${t}
@@ -1695,7 +1730,7 @@
                   .computeLabel=${()=>"Sub-button type"}
                   @value-changed=${e=>i({sub_button_type:e.detail.value.sub_button_type})}
                 ></ha-form>
-                ${"slider"===t.sub_button_type?Ft.qy`
+                ${"slider"===t.sub_button_type?Rt.qy`
                   <div class="bubble-info">
                     <h4 class="bubble-section-title">
                       <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -1706,7 +1741,7 @@
                     </div>
                   </div>
                 `:""}
-                ${("select"===t.sub_button_type||!t.sub_button_type&&m)&&g?Ft.qy`
+                ${("select"===t.sub_button_type||!t.sub_button_type&&m)&&g?Rt.qy`
                   <ha-form
                     .hass=${e.hass}
                     .data=${{select_attribute:t.select_attribute}}
@@ -1738,7 +1773,7 @@
             </div>
           </ha-expansion-panel>
 
-          ${"slider"===t.sub_button_type?Ft.qy`
+          ${"slider"===t.sub_button_type?Rt.qy`
             <ha-expansion-panel 
               outlined
               @expanded-changed=${t=>{e._expandedPanelStates[S]=t.target.expanded,e.requestUpdate()}}
@@ -1748,8 +1783,8 @@
                 Slider settings
               </h4>
               <div class="content">
-                ${Eo(e,S,!!e._expandedPanelStates[S],()=>Ft.qy`
-                  ${Gn({hass:e.hass,data:t,entity:b,computeLabel:e._computeLabelCallback,onFormChange:e=>i(e.detail.value),onToggleChange:(e,t)=>i({[e]:t}),isReadOnly:h,forceValuePositionRight:!(!t.always_visible||!t.show_button_info)})}
+                ${Mo(e,S,!!e._expandedPanelStates[S],()=>Rt.qy`
+                  ${Zn({hass:e.hass,data:t,entity:b,computeLabel:e._computeLabelCallback,onFormChange:e=>i(e.detail.value),onToggleChange:(e,t)=>i({[e]:t}),isReadOnly:h,forceValuePositionRight:!(!t.always_visible||!t.show_button_info)})}
                 `)}
               </div>
             </ha-expansion-panel>
@@ -1764,8 +1799,8 @@
               Tap action on button
             </h4>
             <div class="content">
-              ${Eo(e,C,!!e._expandedPanelStates[C],()=>Ft.qy`
-                ${A?Ft.qy`
+              ${Mo(e,C,!!e._expandedPanelStates[C],()=>Rt.qy`
+                ${A?Rt.qy`
                   <div class="bubble-info">
                     <h4 class="bubble-section-title">
                       <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -1798,7 +1833,7 @@
               Visibility
             </h4>
             <div class="content">
-              ${Eo(e,k,!!e._expandedPanelStates[k],()=>Ft.qy`
+              ${Mo(e,k,!!e._expandedPanelStates[k],()=>Rt.qy`
                 <ha-formfield label="Hide when parent entity is unavailable">
                   <ha-switch
                     .checked=${t.hide_when_parent_unavailable??!1}
@@ -1827,8 +1862,8 @@
               Layout
             </h4>
             <div class="content">
-              ${Eo(e,$,!!e._expandedPanelStates[$],()=>Ft.qy`
-                ${E?Ft.qy`
+              ${Mo(e,$,!!e._expandedPanelStates[$],()=>Rt.qy`
+                ${E?Rt.qy`
                   <ha-formfield label="Fill available width">
                     <ha-switch
                       .checked=${T??!0}
@@ -1836,7 +1871,7 @@
                     ></ha-switch>
                   </ha-formfield>
                 `:""}
-                ${"slider"===t.sub_button_type?Ft.qy`
+                ${"slider"===t.sub_button_type?Rt.qy`
                   <ha-formfield label="Always show slider">
                     <ha-switch
                       .checked=${t.always_visible??!1}
@@ -1844,7 +1879,7 @@
                     ></ha-switch>
                   </ha-formfield>
                 `:""}
-                ${"slider"===t.sub_button_type&&t.always_visible?Ft.qy`
+                ${"slider"===t.sub_button_type&&t.always_visible?Rt.qy`
                   <ha-formfield label="Show button info (Icon, name, state...)">
                     <ha-switch
                       .checked=${t.show_button_info??!1}
@@ -1855,9 +1890,9 @@
                 <ha-form
                   .hass=${e.hass}
                   .data=${{width:t.width??""}}
-                  .schema=${[{name:"width",selector:{text:{type:"number"}},options:{min:E&&!P?0:"slider"===t.sub_button_type&&t.always_visible?68:36,max:E&&!P?100:600}}]}
+                  .schema=${[{name:"width",selector:{text:{type:"number"}},options:{min:E&&!M?0:"slider"===t.sub_button_type&&t.always_visible?68:36,max:E&&!M?100:600}}]}
                   .disabled=${!0===T}
-                  .computeLabel=${()=>E&&!P?"Custom button width (%)":"Custom button width (px)"}
+                  .computeLabel=${()=>E&&!M?"Custom button width (%)":"Custom button width (px)"}
                   @value-changed=${e=>{const t=e.detail.value.width;i({width:void 0===t||""===t?void 0:Number(t)})}}
                 ></ha-form>
                 <ha-form
@@ -1867,7 +1902,7 @@
                   .computeLabel=${()=>"Custom button height (px)"}
                   @value-changed=${e=>{const t=e.detail.value.custom_height;i({custom_height:void 0===t||""===t?void 0:Number(t)})}}
                 ></ha-form>
-                ${"slider"===t.sub_button_type&&t.always_visible?"":Ft.qy`
+                ${"slider"===t.sub_button_type&&t.always_visible?"":Rt.qy`
                   <ha-form
                     .hass=${e.hass}
                     .data=${{content_layout:t.content_layout??"icon-left"}}
@@ -1909,7 +1944,7 @@
         <ha-icon icon="mdi:format-list-group"></ha-icon>
         ${t.name||`Group ${n+1}`}
         <div class="button-container" @click=${e=>e.stopPropagation()} @mousedown=${e=>e.stopPropagation()} @touchstart=${e=>e.stopPropagation()}>
-          ${Po({trigger:Ft.qy`
+          ${Bo({trigger:Rt.qy`
               <mwc-icon-button slot="trigger" class="icon-button header" title="Options">
                 <ha-icon style="display: flex" icon="mdi:dots-vertical"></ha-icon>
               </mwc-icon-button>
@@ -1917,7 +1952,7 @@
         </div>
       </h4>
       <div class="content">
-        ${Eo(e,i,!!e._expandedPanelStates[i],()=>Ft.qy`
+        ${Mo(e,i,!!e._expandedPanelStates[i],()=>Rt.qy`
           <ha-form
             .hass=${e.hass}
             .data=${{name:t.name??""}}
@@ -1939,7 +1974,7 @@
                 .computeLabel=${e._computeLabelCallback}
                 @value-changed=${e=>r(e.detail.value)}
               ></ha-form>
-              ${"bottom"!==o?"":(Array.isArray(t.group)?t.group:[]).some(e=>e&&!0===e.fill_width)?Ft.qy`
+              ${"bottom"!==o?"":(Array.isArray(t.group)?t.group:[]).some(e=>e&&!0===e.fill_width)?Rt.qy`
                   <div class="bubble-info">
                     <h4 class="bubble-section-title">
                       <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -1954,16 +1989,16 @@
           </ha-expansion-panel>
 
           <h4 class="group-buttons-header">Group sub-buttons</h4>
-          ${Array.isArray(t.group)?t.group.map((i,a)=>{if(!i)return null;const r=t=>{t?.stopPropagation(),Wo(e,o,n,e=>{const t={...e},n=Array.isArray(t.group)?[...t.group]:[];return n.splice(a,1),t.group=n,t},Yo)},s=Array.isArray(t.group)?t.group[a]:null,l=Bo(e,s,Ro),c=Io(e,s,r,Ro),d=(Array.isArray(t.group)?t.group:[]).length;return Mo(e,i,a,`sub_button.${o}.${n}.group`,t=>{Wo(e,o,n,e=>{const n={...e},o=Array.isArray(n.group)?[...n.group]:[];return o[a]={...o[a]||{},...t},n.group=o,n},Yo)},r,t=>{const i=a+t,r=Fo(e,o),s=Array.isArray(r[n]?.group)?r[n].group:[];i<0||i>=s.length||Wo(e,o,n,e=>{const t={...e},n=Array.isArray(t.group)?[...t.group]:[];return[n[a],n[i]]=[n[i],n[a]],t.group=n,t},Yo)},l,c,{panelKeyPrefix:`${o}_group_${n}_button`,buttonTitle:i.name||`Button ${a+1}`,arrayLength:d})}):null}
+          ${Array.isArray(t.group)?t.group.map((i,a)=>{if(!i)return null;const r=t=>{t?.stopPropagation(),Ko(e,o,n,e=>{const t={...e},n=Array.isArray(t.group)?[...t.group]:[];return n.splice(a,1),t.group=n,t},Jo)},s=Array.isArray(t.group)?t.group[a]:null,l=qo(e,s,Vo),c=Oo(e,s,r,Vo),d=(Array.isArray(t.group)?t.group:[]).length;return Io(e,i,a,`sub_button.${o}.${n}.group`,t=>{Ko(e,o,n,e=>{const n={...e},o=Array.isArray(n.group)?[...n.group]:[];return o[a]={...o[a]||{},...t},n.group=o,n},Jo)},r,t=>{const i=a+t,r=Wo(e,o),s=Array.isArray(r[n]?.group)?r[n].group:[];i<0||i>=s.length||Ko(e,o,n,e=>{const t={...e},n=Array.isArray(t.group)?[...t.group]:[];return[n[a],n[i]]=[n[i],n[a]],t.group=n,t},Jo)},l,c,{panelKeyPrefix:`${o}_group_${n}_button`,buttonTitle:i.name||`Button ${a+1}`,arrayLength:d})}):null}
 
           <div class="element-actions">
-            <button class="icon-button paste-button no-bg ${e._clipboardButton||No()?"":"disabled"}" @click=${p}>
+            <button class="icon-button paste-button no-bg ${e._clipboardButton||Ro()?"":"disabled"}" @click=${p}>
               <ha-icon icon="mdi:content-paste"></ha-icon>
               <span class="paste-button-text">
-                ${Do(e,No)}
+                ${No(e,Ro)}
               </span>
             </button>
-            <button class="icon-button" @click=${()=>{Wo(e,o,n,t=>{const n={...t};Array.isArray(n.group)||(n.group=[]);const i="bottom"===o&&n.justify_content&&"fill"!==n.justify_content?{entity:e._config.entity,fill_width:!1}:{entity:e._config.entity};return n.group=[...n.group,i],n},Yo)}}>
+            <button class="icon-button" @click=${()=>{Ko(e,o,n,t=>{const n={...t};Array.isArray(n.group)||(n.group=[]);const i="bottom"===o&&n.justify_content&&"fill"!==n.justify_content?{entity:e._config.entity,fill_width:!1}:{entity:e._config.entity};return n.group=[...n.group,i],n},Jo)}}>
               <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
               Add sub-button
             </button>
@@ -1978,31 +2013,31 @@
           <button class="icon-button paste-button no-bg ${e._clipboardButton||No()?"":"disabled"}" @click=${o}>
             <ha-icon icon="mdi:content-paste"></ha-icon>
             <span class="paste-button-text">
-              ${Do(e,No)}
+              ${No(e,Ro)}
             </span>
           </button>
         `})()}
-      ${o?Ft.qy`
+      ${o?Rt.qy`
         <button class="icon-button" @click=${()=>{s()}}>
           <ha-icon icon="mdi:format-list-group-plus"></ha-icon>
           Add group
         </button>
-      `:Po({trigger:Ft.qy`
+      `:Bo({trigger:Rt.qy`
           <button slot="trigger" class="icon-button add-menu-trigger">
             <ha-icon icon="mdi:plus"></ha-icon>
             Add
           </button>
-        `,items:[{type:"item",icon:"mdi:shape-square-rounded-plus",label:"Add sub-button",onClick:()=>{Vo(e,t,t=>[...t,{entity:e._config.entity}],Yo)}},{type:"item",icon:"mdi:format-list-group-plus",label:"Add group",onClick:()=>{s()}}]})}
+        `,items:[{type:"item",icon:"mdi:shape-square-rounded-plus",label:"Add sub-button",onClick:()=>{Yo(e,t,t=>[...t,{entity:e._config.entity}],Jo)}},{type:"item",icon:"mdi:format-list-group-plus",label:"Add group",onClick:()=>{s()}}]})}
     </div>
-  `}function Xo(e,t){if(!Ko(e,t).hasGroups)return"";const n=`${t}_layout`,o=e._config?.sub_button?.[n]??"inline";return Ft.qy`
+  `}function Qo(e,t){if(!Xo(e,t).hasGroups)return"";const n=`${t}_layout`,o=e._config?.sub_button?.[n]??"inline";return Rt.qy`
     <ha-form
       .hass=${e.hass}
       .data=${{[n]:o}}
       .schema=${[{name:n,label:"Groups placement",selector:{select:{options:[{value:"inline",label:"Inline"},{value:"rows",label:"Rows (stack groups vertically)"}],mode:"dropdown"}}}]}
       .computeLabel=${e._computeLabelCallback}
-      @value-changed=${t=>{const o=t.detail?.value?.[n];if(!e._config.sub_button)try{e._config.sub_button={}}catch(t){e._config={...e._config,sub_button:{}}}try{e._config.sub_button[n]=o}catch(t){try{e._config.sub_button={...e._config.sub_button,[n]:o}}catch(t){e._config={...e._config,sub_button:{...e._config.sub_button,[n]:o}}}}Yo(e),e.requestUpdate()}}
+      @value-changed=${t=>{const o=t.detail?.value?.[n];if(!e._config.sub_button)try{e._config.sub_button={}}catch(t){e._config={...e._config,sub_button:{}}}try{e._config.sub_button[n]=o}catch(t){try{e._config.sub_button={...e._config.sub_button,[n]:o}}catch(t){e._config={...e._config,sub_button:{...e._config.sub_button,[n]:o}}}}Jo(e),e.requestUpdate()}}
     ></ha-form>
-  `}var Go=n(933),Qo=n(766),Zo=n(937),ei=n(868);const ti="sensor.bubble_card_modules",ni=["modules","store"],oi="bubble-card-force-unsupported-modules";async function ii(e,t,n){try{if(!e.hass)return!1;if(!await(0,p.ensureBCTProviderAvailable)(e.hass))return console.warn("Bubble Card Tools is required to change global status."),!1;const o={...a.Ki.get(t)||{}};return!0===n?o.is_global=!0:delete o.is_global,a.Ki.set(t,o),await(0,p.writeModuleYaml)(e.hass,t,o),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),!0}catch(e){return console.error("Error setting module global status:",e),!1}}function ai(e,t){try{const n=a.Ki.get(e);if(n&&"object"==typeof n&&!0===n.is_global)return!0;if(p.Qy&&(0,p.Qy)())return!1;if(!t||!t.states||!t.states[ti])return!1;const o=t.states[ti];if(!o.attributes||!o.attributes.modules)return!1;const i=o.attributes.modules[e];return i&&!0===i.is_global}catch(t){return console.warn(`Error checking if module ${e} is global:`,t),!1}}function ri(e,t){const n=e._config?.modules||[],o=Array.isArray(n)?n:[n];return!o.includes(`!${t}`)&&(!!o.includes(t)||ai(t,e.hass))}function si(e){if(!a.Ki||0===a.Ki.size)return[];let t=Array.from(a.Ki.keys());const n=e._myModulesSearchQuery;if(n&&n.trim()){const e=n.toLowerCase().trim();t=t.filter(t=>{const n=(0,Go.a7)(t),o=(n.name||t).toLowerCase(),i=(n.description||"").toLowerCase(),a=(n.creator||"").toLowerCase();return o.includes(e)||i.includes(e)||a.includes(e)})}if(!e._myModulesSortOrder)try{const t=localStorage.getItem("bubble-card-modules-sort-order");e._myModulesSortOrder=t||"default"}catch(t){e._myModulesSortOrder="default"}const o=e._myModulesSortOrder||"default",i=(0,p.Ef)(),r=e=>{const t=i.get(e);if(!t)return 0;const n=new Date(t).getTime();return isNaN(n)?0:n};return t.sort((t,n)=>{if("default"===t)return-1;if("default"===n)return 1;const i=(0,Go.a7)(t),a=(0,Go.a7)(n),s=ri(e,t),l=ri(e,n);switch(o){case"alphabetical":return(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});case"default":if(s!==l)return s?-1:1;const e=r(t),o=r(n);return e!==o&&e>0&&o>0?o-e:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});case"recent-first":const c=r(t),d=r(n);return c!==d&&c>0&&d>0?d-c:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});default:if(s!==l)return s?-1:1;const u=r(t),p=r(n);return u!==p&&u>0&&p>0?p-u:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"})}}),t}function li(e){if(void 0===e._selectedModuleTab&&(e._selectedModuleTab=0),void 0===e._expandedPanelStates&&(e._expandedPanelStates={}),void 0===e._myModulesSortOrder)try{const t=localStorage.getItem("bubble-card-modules-sort-order");e._myModulesSortOrder=t||"default"}catch(t){e._myModulesSortOrder="default"}const t=e._myModulesSortOrder||"default",n="modules_editor_panel";if(void 0===e._forceUnsupportedModules)try{const t=localStorage.getItem(oi);e._forceUnsupportedModules="true"===t}catch(t){e._forceUnsupportedModules=!1}const o="bubble-card-module-editor-tab-group",i="undefined"!=typeof customElements&&void 0!==customElements.get("ha-tab-group")&&void 0!==customElements.get("ha-tab-group-tab")?"ha-tab-group":"undefined"!=typeof customElements&&void 0!==customElements.get("sl-tab-group")?"sl-tab-group":"ha-tabs",r="ha-tab-group"===i,l=r&&(0,s._0)(e.hass,"2026.3");e._modulesLoaded||(0,a.wv)(e).then(()=>{if(e._modulesLoaded=!0,(!p.Qy||!(0,p.Qy)())&&function(e){const t={entityFound:!1,hasAttributes:!1,hasModulesAttribute:!1,modulesIsObject:!1,hasLastUpdated:!1,isReady:!1};if(!e||!e.states)return t;const n=e.states[ti];if(!n)return t;t.entityFound=!0;const o=n.attributes||{};return t.hasAttributes=!!n.attributes,"modules"in o&&(t.hasModulesAttribute=!0,t.modulesIsObject=null!==o.modules&&"object"==typeof o.modules),"last_updated"in o&&(t.hasLastUpdated="string"==typeof o.last_updated&&o.last_updated.length>0),t.isReady=t.entityFound&&t.hasModulesAttribute&&t.modulesIsObject&&t.hasLastUpdated,t}(e.hass).isReady){const t=e.hass.states[ti].attributes.modules;t&&t.default&&!0!==t.default.is_global&&ii(e,"default",!0).then(e=>{e?document.dispatchEvent(new CustomEvent("yaml-modules-updated")):console.warn(`Failed to set module 'default' to global in ${ti}.`)})}e.requestUpdate()});const c=(0,p.Qy)();if(e._bctRetryHandle&&c&&(clearTimeout(e._bctRetryHandle),e._bctRetryHandle=null),!e.hass||c||e._bctCheckAttempted)e.hass&&c&&!e._bctCheckAttempted&&(e._bctCheckInFlight||(e._bctCheckInFlight=!0,e._bctCheckAttempted=!0,(0,p.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._bctCheckInFlight=!1,(0,p.Qy)()!==c&&e.requestUpdate()})));else{const t=Date.now(),n=e._lastBctCheckAt??0,o=n?t-n:1/0,i=n&&o<5e3;if(e._bctCheckInFlight||i){if(i&&!e._bctRetryHandle){const t=Math.max(50,5e3-o);e._bctRetryHandle=setTimeout(()=>{e._bctRetryHandle=null,e.requestUpdate()},t)}}else e._bctRetryHandle&&(clearTimeout(e._bctRetryHandle),e._bctRetryHandle=null),e._bctCheckInFlight=!0,e._bctCheckAttempted=!0,e._lastBctCheckAt=t,(0,p.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._bctCheckInFlight=!1,e.requestUpdate()})}if((0,Zo.kA)(e),e._workingModuleConfigs||(e._workingModuleConfigs={}),e._modulesLoaded&&!a.Ki.has("default")&&c){const t="default:\n  name: Default\n  version: ''\n  description: Empty and enabled by default. Add your custom styles and/or JS templates here to apply them to all cards by pressing the <ha-icon icon=\"mdi:pencil\"></ha-icon> button above.\n  code: ''\n  is_global: true\n  ";(0,ei.m)(e,t).then(()=>{console.info("Default module created automatically"),e.requestUpdate()}).catch(e=>{console.error("Error creating default module:",e)})}const d=(0,Qo.Xe)(),u=t=>{let n;if("sl-tab-group"===i)n=parseInt(t?.detail?.name??t?.target?.activeTab??t?.detail?.value,10);else if("ha-tab-group"===i){const e=t?.detail??{},o=e.tab??e.target??e.item,i=o?.getAttribute?o.getAttribute("panel"):void 0,a=e.panel??e.tabId??i??e.value??t?.target?.activePanel??t?.target?.activeTab;if("number"==typeof a)n=a;else if("string"==typeof a){const e=ni.indexOf(a);n=-1!==e?e:parseInt(a,10)}}else n=t?.detail?.value??t?.target?.selected;Number.isFinite(n)||(n=0),e._selectedModuleTab=n,e.requestUpdate(),requestAnimationFrame(()=>{(0,Go.XY)(e,!1)})},b=async()=>{try{const t=e._manualYamlContent;if(!t||""===t.trim())return void(0,s.rC)(e,"bubble-card-error",{message:"No YAML content provided"});const n=await(0,ei.m)(e,t);e._showManualImportForm=!1,e._manualYamlContent="",n&&n.moduleId&&(e._recentlyToggledModuleId=n.moduleId,setTimeout(()=>{e._recentlyToggledModuleId=null,e.requestUpdate()},2e3)),e.requestUpdate(),n&&n.moduleId&&requestAnimationFrame(()=>{requestAnimationFrame(()=>{const t=e.shadowRoot?.querySelector(`ha-expansion-panel[data-module-id="${n.moduleId}"]`);t&&t.scrollIntoView({behavior:"smooth",block:"center"})})})}catch(e){console.error("Error installing manual module:",e)}},h=Ft.qy`
+  `}var Zo=n(933),ei=n(766),ti=n(937),ni=n(868);const oi="sensor.bubble_card_modules",ii=["modules","store"],ai="bubble-card-force-unsupported-modules";async function ri(e,t,n){try{if(!e.hass)return!1;if(!await(0,p.ensureBCTProviderAvailable)(e.hass))return console.warn("Bubble Card Tools is required to change global status."),!1;const o={...a.Ki.get(t)||{}};return!0===n?o.is_global=!0:delete o.is_global,a.Ki.set(t,o),await(0,p.writeModuleYaml)(e.hass,t,o),document.dispatchEvent(new CustomEvent("yaml-modules-updated")),!0}catch(e){return console.error("Error setting module global status:",e),!1}}function si(e,t){try{const n=a.Ki.get(e);if(n&&"object"==typeof n&&!0===n.is_global)return!0;if(p.Qy&&(0,p.Qy)())return!1;if(!t||!t.states||!t.states[oi])return!1;const o=t.states[oi];if(!o.attributes||!o.attributes.modules)return!1;const i=o.attributes.modules[e];return i&&!0===i.is_global}catch(t){return console.warn(`Error checking if module ${e} is global:`,t),!1}}function li(e,t){const n=e._config?.modules||[],o=Array.isArray(n)?n:[n];return!o.includes(`!${t}`)&&(!!o.includes(t)||si(t,e.hass))}function ci(e){if(!a.Ki||0===a.Ki.size)return[];let t=Array.from(a.Ki.keys());const n=e._myModulesSearchQuery;if(n&&n.trim()){const e=n.toLowerCase().trim();t=t.filter(t=>{const n=(0,Zo.a7)(t),o=(n.name||t).toLowerCase(),i=(n.description||"").toLowerCase(),a=(n.creator||"").toLowerCase();return o.includes(e)||i.includes(e)||a.includes(e)})}if(!e._myModulesSortOrder)try{const t=localStorage.getItem("bubble-card-modules-sort-order");e._myModulesSortOrder=t||"default"}catch(t){e._myModulesSortOrder="default"}const o=e._myModulesSortOrder||"default",i=(0,p.Ef)(),r=e=>{const t=i.get(e);if(!t)return 0;const n=new Date(t).getTime();return isNaN(n)?0:n};return t.sort((t,n)=>{if("default"===t)return-1;if("default"===n)return 1;const i=(0,Zo.a7)(t),a=(0,Zo.a7)(n),s=li(e,t),l=li(e,n);switch(o){case"alphabetical":return(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});case"default":if(s!==l)return s?-1:1;const e=r(t),o=r(n);return e!==o&&e>0&&o>0?o-e:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});case"recent-first":const c=r(t),d=r(n);return c!==d&&c>0&&d>0?d-c:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"});default:if(s!==l)return s?-1:1;const u=r(t),p=r(n);return u!==p&&u>0&&p>0?p-u:(i.name||t).localeCompare(a.name||n,void 0,{sensitivity:"base"})}}),t}function di(e){if(void 0===e._selectedModuleTab&&(e._selectedModuleTab=0),void 0===e._expandedPanelStates&&(e._expandedPanelStates={}),void 0===e._myModulesSortOrder)try{const t=localStorage.getItem("bubble-card-modules-sort-order");e._myModulesSortOrder=t||"default"}catch(t){e._myModulesSortOrder="default"}const t=e._myModulesSortOrder||"default",n="modules_editor_panel";if(void 0===e._forceUnsupportedModules)try{const t=localStorage.getItem(ai);e._forceUnsupportedModules="true"===t}catch(t){e._forceUnsupportedModules=!1}const o="bubble-card-module-editor-tab-group",i="undefined"!=typeof customElements&&void 0!==customElements.get("ha-tab-group")&&void 0!==customElements.get("ha-tab-group-tab")?"ha-tab-group":"undefined"!=typeof customElements&&void 0!==customElements.get("sl-tab-group")?"sl-tab-group":"ha-tabs",r="ha-tab-group"===i,l=r&&(0,s._0)(e.hass,"2026.3");e._modulesLoaded||(0,a.wv)(e).then(()=>{if(e._modulesLoaded=!0,(!p.Qy||!(0,p.Qy)())&&function(e){const t={entityFound:!1,hasAttributes:!1,hasModulesAttribute:!1,modulesIsObject:!1,hasLastUpdated:!1,isReady:!1};if(!e||!e.states)return t;const n=e.states[oi];if(!n)return t;t.entityFound=!0;const o=n.attributes||{};return t.hasAttributes=!!n.attributes,"modules"in o&&(t.hasModulesAttribute=!0,t.modulesIsObject=null!==o.modules&&"object"==typeof o.modules),"last_updated"in o&&(t.hasLastUpdated="string"==typeof o.last_updated&&o.last_updated.length>0),t.isReady=t.entityFound&&t.hasModulesAttribute&&t.modulesIsObject&&t.hasLastUpdated,t}(e.hass).isReady){const t=e.hass.states[oi].attributes.modules;t&&t.default&&!0!==t.default.is_global&&ri(e,"default",!0).then(e=>{e?document.dispatchEvent(new CustomEvent("yaml-modules-updated")):console.warn(`Failed to set module 'default' to global in ${oi}.`)})}e.requestUpdate()});const c=(0,p.Qy)();if(e._bctRetryHandle&&c&&(clearTimeout(e._bctRetryHandle),e._bctRetryHandle=null),!e.hass||c||e._bctCheckAttempted)e.hass&&c&&!e._bctCheckAttempted&&(e._bctCheckInFlight||(e._bctCheckInFlight=!0,e._bctCheckAttempted=!0,(0,p.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._bctCheckInFlight=!1,(0,p.Qy)()!==c&&e.requestUpdate()})));else{const t=Date.now(),n=e._lastBctCheckAt??0,o=n?t-n:1/0,i=n&&o<5e3;if(e._bctCheckInFlight||i){if(i&&!e._bctRetryHandle){const t=Math.max(50,5e3-o);e._bctRetryHandle=setTimeout(()=>{e._bctRetryHandle=null,e.requestUpdate()},t)}}else e._bctRetryHandle&&(clearTimeout(e._bctRetryHandle),e._bctRetryHandle=null),e._bctCheckInFlight=!0,e._bctCheckAttempted=!0,e._lastBctCheckAt=t,(0,p.ensureBCTProviderAvailable)(e.hass).finally(()=>{e._bctCheckInFlight=!1,e.requestUpdate()})}if((0,ti.kA)(e),e._workingModuleConfigs||(e._workingModuleConfigs={}),e._modulesLoaded&&!a.Ki.has("default")&&c){const t="default:\n  name: Default\n  version: ''\n  description: Empty and enabled by default. Add your custom styles and/or JS templates here to apply them to all cards by pressing the <ha-icon icon=\"mdi:pencil\"></ha-icon> button above.\n  code: ''\n  is_global: true\n  ";(0,ni.m)(e,t).then(()=>{console.info("Default module created automatically"),e.requestUpdate()}).catch(e=>{console.error("Error creating default module:",e)})}const d=(0,ei.Xe)(),u=t=>{let n;if("sl-tab-group"===i)n=parseInt(t?.detail?.name??t?.target?.activeTab??t?.detail?.value,10);else if("ha-tab-group"===i){const e=t?.detail??{},o=e.tab??e.target??e.item,i=o?.getAttribute?o.getAttribute("panel"):void 0,a=e.panel??e.tabId??i??e.value??t?.target?.activePanel??t?.target?.activeTab;if("number"==typeof a)n=a;else if("string"==typeof a){const e=ii.indexOf(a);n=-1!==e?e:parseInt(a,10)}}else n=t?.detail?.value??t?.target?.selected;Number.isFinite(n)||(n=0),e._selectedModuleTab=n,e.requestUpdate(),requestAnimationFrame(()=>{(0,Zo.XY)(e,!1)})},b=async()=>{try{const t=e._manualYamlContent;if(!t||""===t.trim())return void(0,s.rC)(e,"bubble-card-error",{message:"No YAML content provided"});const n=await(0,ni.m)(e,t);e._showManualImportForm=!1,e._manualYamlContent="",n&&n.moduleId&&(e._recentlyToggledModuleId=n.moduleId,setTimeout(()=>{e._recentlyToggledModuleId=null,e.requestUpdate()},2e3)),e.requestUpdate(),n&&n.moduleId&&requestAnimationFrame(()=>{requestAnimationFrame(()=>{const t=e.shadowRoot?.querySelector(`ha-expansion-panel[data-module-id="${n.moduleId}"]`);t&&t.scrollIntoView({behavior:"smooth",block:"center"})})})}catch(e){console.error("Error installing manual module:",e)}},h=Rt.qy`
     <ha-expansion-panel
       outlined
       .expanded=${!!e._expandedPanelStates[n]}
@@ -2011,7 +2046,7 @@
       <h4 slot="header">
         <ha-icon icon="mdi:puzzle"></ha-icon>
         Modules
-        ${d.hasUpdates&&c?Ft.qy`
+        ${d.hasUpdates&&c?Rt.qy`
           <span class="bubble-badge update-badge" style="margin-left: 8px; font-size: 0.8em; vertical-align: middle; z-index: 5;">
             <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
             ${d.updateCount} update${d.updateCount>1?"s":""} available
@@ -2019,18 +2054,18 @@
         `:""}
       </h4>
       <div class="content module-editor-content ${r?"module-editor-content--ha-tab-group":""} ${l?"module-editor-content--ha-tab-group-modern":""}" style="margin: -8px 4px 14px 4px;">
-        ${Eo(e,n,!!e._expandedPanelStates[n],()=>Ft.qy`
-        ${c?"":Ft.qy`
+        ${Mo(e,n,!!e._expandedPanelStates[n],()=>Rt.qy`
+        ${c?"":Rt.qy`
             <div class="bubble-info warning">
               <h4 class="bubble-section-title">
                 <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
                 Bubble Card Tools required
               </h4>
               <div class="content">
-                ${a.Ki&&a.Ki.size>0||e.hass&&e.hass.states&&e.hass.states[ti]?Ft.qy`
+                ${a.Ki&&a.Ki.size>0||e.hass&&e.hass.states&&e.hass.states[oi]?Rt.qy`
                   <p><b>Since v3.1.0, to install, edit or delete modules, and to use the Module Store, please install <a href="https://github.com/Clooos/Bubble-Card-Tools" target="_blank" rel="noopener noreferrer">Bubble Card Tools</a> (everything is explained there).</b></p>
                   <p>Your existing modules will be automatically migrated once Bubble Card Tools is installed.</p>
-                `:Ft.qy`
+                `:Rt.qy`
                   <p><b>No modules detected yet.</b> To create and manage modules and to use the Module Store, please install <a href="https://github.com/Clooos/Bubble-Card-Tools" target="_blank" rel="noopener noreferrer">Bubble Card Tools</a> (everything is explained there).</p>
                 `}
               </div>
@@ -2039,7 +2074,7 @@
 
         <div id="module-editor-top-marker"></div>
         
-        ${(()=>{const t=e._selectedModuleTab||0,n=ni[t]??t.toString(),a=t=>{const n=ni.indexOf(t);e._selectedModuleTab=-1!==n?n:parseInt(t,10)||0,e.requestUpdate(),requestAnimationFrame(()=>(0,Go.XY)(e,!1))};return"ha-tab-group"===i?Ft.qy`
+        ${(()=>{const t=e._selectedModuleTab||0,n=ii[t]??t.toString(),a=t=>{const n=ii.indexOf(t);e._selectedModuleTab=-1!==n?n:parseInt(t,10)||0,e.requestUpdate(),requestAnimationFrame(()=>(0,Zo.XY)(e,!1))};return"ha-tab-group"===i?Rt.qy`
         <ha-tab-group
           class="module-tabs module-tabs--ha-tab-group ${l?"module-tabs--ha-tab-group-modern":""}"
           id="${o}"
@@ -2049,25 +2084,25 @@
           >
           <ha-tab-group-tab
             slot="nav"
-            panel=${ni[0]}
-            .active=${n===ni[0]}
-            @click=${()=>a(ni[0])}
+            panel=${ii[0]}
+            .active=${n===ii[0]}
+            @click=${()=>a(ii[0])}
           >
             <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
             My Modules
           </ha-tab-group-tab>
             <ha-tab-group-tab
             slot="nav"
-            panel=${ni[1]}
-              .active=${n===ni[1]}
+            panel=${ii[1]}
+              .active=${n===ii[1]}
               ?disabled=${!c}
-            @click=${()=>a(ni[1])}
+            @click=${()=>a(ii[1])}
           >
             <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
             Module Store
           </ha-tab-group-tab>
         </ha-tab-group>
-      `:"sl-tab-group"===i?Ft.qy`
+      `:"sl-tab-group"===i?Rt.qy`
         <sl-tab-group
           class="module-tabs module-tabs--sl-tab-group"
           id="${o}"
@@ -2085,7 +2120,7 @@
           <sl-tab-panel name="0"></sl-tab-panel>
           <sl-tab-panel name="1"></sl-tab-panel>
         </sl-tab-group>
-      `:Ft.qy`
+      `:Rt.qy`
       <ha-tabs
         class="module-tabs module-tabs--ha-tabs"
         .selected=${t}
@@ -2102,8 +2137,8 @@
       </ha-tabs>
     `})()}
 
-        ${0!==e._selectedModuleTab&&c?(0,Qo._e)(e):Ft.qy`
-          ${e._showManualImportForm?Ft.qy`
+        ${0!==e._selectedModuleTab&&c?(0,ei._e)(e):Rt.qy`
+          ${e._showManualImportForm?Rt.qy`
             <div class="module-editor-form">
               <div class="card-content">
                 <h3>
@@ -2141,16 +2176,16 @@
                 </div>
               </div>
             </div>
-          `:e._showNewModuleForm||e._editingModule?(0,Zo.cu)(e):Ft.qy`
+          `:e._showNewModuleForm||e._editingModule?(0,ti.cu)(e):Rt.qy`
             <!-- Search and Sort Controls -->
             <div class="my-modules-controls">
               <div class="my-modules-top-row">
                 <div class="my-modules-search">
-                  ${(0,s._0)(e.hass,"2026.5")?Ft.qy`<ha-input-search
+                  ${(0,s._0)(e.hass,"2026.5")?Rt.qy`<ha-input-search
                         .value=${e._myModulesSearchQuery||""}
                         placeholder="Search modules"
                         @input=${t=>{e._myModulesSearchQuery=t.target.value,e.requestUpdate()}}
-                      ></ha-input-search>`:Ft.qy`<ha-textfield
+                      ></ha-input-search>`:Rt.qy`<ha-textfield
                         label="Search modules"
                         icon
                         .value=${e._myModulesSearchQuery||""}
@@ -2162,7 +2197,7 @@
                       </ha-textfield>`}
                 </div>
                 <div class="my-modules-sort-menu">
-                  ${Po({trigger:Ft.qy`
+                  ${Bo({trigger:Rt.qy`
                       <mwc-icon-button slot="trigger" class="icon-button header sort-trigger" title="Sort modules">
                         <ha-icon icon="mdi:sort"></ha-icon>
                       </mwc-icon-button>
@@ -2172,10 +2207,10 @@
               <ha-formfield label="Enable unsupported modules">
                 <ha-switch
                   .checked=${!!e._forceUnsupportedModules}
-                  @change=${t=>{const n=t.target.checked;e._forceUnsupportedModules=n;try{localStorage.setItem(oi,n?"true":"false")}catch(e){}e.requestUpdate()}}
+                  @change=${t=>{const n=t.target.checked;e._forceUnsupportedModules=n;try{localStorage.setItem(ai,n?"true":"false")}catch(e){}e.requestUpdate()}}
                 ></ha-switch>
               </ha-formfield>
-              ${e._forceUnsupportedModules?Ft.qy`
+              ${e._forceUnsupportedModules?Rt.qy`
                 <div class="bubble-info warning unsupported-modules-warning">
                   <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
@@ -2189,7 +2224,7 @@
             </div>
             
             <!-- Installed Modules List -->
-            ${si(e).map(t=>{const{name:n,description:o,formSchema:i,supportedCards:a,unsupportedCard:r,creator:l,moduleLink:u,moduleVersion:p}=(0,Go.a7)(t),b=ri(e,t),h=ai(t,e.hass),m=i&&i.length>0,f="default"===t,g=f||m,y=e._config[t];void 0===e._workingModuleConfigs[t]&&(e._workingModuleConfigs[t]=structuredClone(y??{}));const v=e._workingModuleConfigs[t],_=e._config.card_type??"";let w=!1;w=a&&Array.isArray(a)&&a.length>0?!a.includes(_):r.includes(_);const x=!0===e._forceUnsupportedModules,C=w&&!x&&!b&&!h&&!f,k=i&&i.length>0?e._getProcessedSchema(t,i,v):[],$=d.modules.some(e=>e.id===t)&&c,S=$?d.modules.find(e=>e.id===t):null,A=e._recentlyToggledModuleId===t;return Ft.qy`
+            ${ci(e).map(t=>{const{name:n,description:o,formSchema:i,supportedCards:a,unsupportedCard:r,creator:l,moduleLink:u,moduleVersion:p}=(0,Zo.a7)(t),b=li(e,t),h=si(t,e.hass),m=i&&i.length>0,f="default"===t,g=f||m,y=e._config[t];void 0===e._workingModuleConfigs[t]&&(e._workingModuleConfigs[t]=structuredClone(y??{}));const v=e._workingModuleConfigs[t],_=e._config.card_type??"";let w=!1;w=a&&Array.isArray(a)&&a.length>0?!a.includes(_):r.includes(_);const x=!0===e._forceUnsupportedModules,C=w&&!x&&!b&&!h&&!f,k=i&&i.length>0?e._getProcessedSchema(t,i,v):[],$=d.modules.some(e=>e.id===t)&&c,S=$?d.modules.find(e=>e.id===t):null,A=e._recentlyToggledModuleId===t;return Rt.qy`
                 <ha-expansion-panel 
                   outlined 
                   class="${C?"disabled":""} ${A?"recently-toggled":""}"
@@ -2204,13 +2239,13 @@
                     ></ha-icon>
                     ${n}
                     <span class="module-badges" style="display: inline-flex; margin-left: auto;">
-                      ${$?Ft.qy`
+                      ${$?Rt.qy`
                         <span class="bubble-badge update-badge">
                           <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
                           Update: ${S.newVersion}
                         </span>
                       `:""}
-                      ${h?Ft.qy`
+                      ${h?Rt.qy`
                         <span class="bubble-badge update-badge global-badge">
                           <ha-icon icon="mdi:cards-outline" style="color: var(--primary-text-color) !important;"></ha-icon>
                         </span>
@@ -2218,7 +2253,7 @@
                     </span>
                   </h4>
                   <div class="content" style="margin-top: 4px;">
-                    ${Eo(e,t,!!e._expandedPanelStates[t],()=>Ft.qy`
+                    ${Mo(e,t,!!e._expandedPanelStates[t],()=>Rt.qy`
                       <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="module-toggles-container">
                           <span class="module-toggles-label">
@@ -2228,7 +2263,7 @@
                             <button 
                               class="bubble-badge toggle-badge ${b?"install-button":"link-button"}"
                               style="${"default"===t&&b?"cursor: default;":""} cursor: pointer;"
-                              @click=${()=>{(t=>{const n=t.target,o=n.configValue,i=n.checked;e._config.modules=Array.isArray(e._config.modules)?e._config.modules:[];const a=ai(o,e.hass);i?(e._config.modules=e._config.modules.filter(e=>e!==`!${o}`),a||e._config.modules.includes(o)||(e._config.modules=[...e._config.modules,o])):a?(e._config.modules.includes(`!${o}`)||(e._config.modules=[...e._config.modules,`!${o}`]),e._config.modules=e._config.modules.filter(e=>e!==o)):e._config.modules=e._config.modules.filter(e=>e!==o);const r=e._myModulesSortOrder||"default",l=!0===e._expandedPanelStates?.[o];"default"===r&&(e._recentlyToggledModuleId=o,l&&(e._expandedPanelStates=e._expandedPanelStates||{},e._expandedPanelStates[o]=!0),setTimeout(()=>{e._recentlyToggledModuleId=null,e.requestUpdate()},2e3)),(0,s.rC)(e,"config-changed",{config:e._config}),e.requestUpdate(),"default"===r&&i&&requestAnimationFrame(()=>{requestAnimationFrame(()=>{const t=e.shadowRoot?.querySelector(`ha-expansion-panel[data-module-id="${o}"]`);if(t){l&&!t.expanded&&(t.expanded=!0);const e=t.getBoundingClientRect();e.top>=0&&e.bottom<=window.innerHeight||t.scrollIntoView({behavior:"smooth",block:"start"})}})})})({target:{checked:!b,configValue:t}})}}
+                              @click=${()=>{(t=>{const n=t.target,o=n.configValue,i=n.checked;e._config.modules=Array.isArray(e._config.modules)?e._config.modules:[];const a=si(o,e.hass);i?(e._config.modules=e._config.modules.filter(e=>e!==`!${o}`),a||e._config.modules.includes(o)||(e._config.modules=[...e._config.modules,o])):a?(e._config.modules.includes(`!${o}`)||(e._config.modules=[...e._config.modules,`!${o}`]),e._config.modules=e._config.modules.filter(e=>e!==o)):e._config.modules=e._config.modules.filter(e=>e!==o);const r=e._myModulesSortOrder||"default",l=!0===e._expandedPanelStates?.[o];"default"===r&&(e._recentlyToggledModuleId=o,l&&(e._expandedPanelStates=e._expandedPanelStates||{},e._expandedPanelStates[o]=!0),setTimeout(()=>{e._recentlyToggledModuleId=null,e.requestUpdate()},2e3)),(0,s.rC)(e,"config-changed",{config:e._config}),e.requestUpdate(),"default"===r&&i&&requestAnimationFrame(()=>{requestAnimationFrame(()=>{const t=e.shadowRoot?.querySelector(`ha-expansion-panel[data-module-id="${o}"]`);if(t){l&&!t.expanded&&(t.expanded=!0);const e=t.getBoundingClientRect();e.top>=0&&e.bottom<=window.innerHeight||t.scrollIntoView({behavior:"smooth",block:"start"})}})})})({target:{checked:!b,configValue:t}})}}
                             >
                               <ha-icon icon="mdi:card-outline"></ha-icon>
                               <span>This card</span>
@@ -2237,13 +2272,13 @@
                             <button 
                               class="bubble-badge toggle-badge ${h&&!m?"update-button":"link-button"} ${g||!c?"disabled":""}"
                               style="cursor: pointer; ${g||!c?"opacity: 0.7; cursor: default;":""}"
-                              @click=${()=>{g||(async(t,n)=>{await ii(e,t,n)&&(!0===n&&(e._config.modules=Array.isArray(e._config.modules)?e._config.modules.filter(e=>e!==`!${t}`):[]),(0,s.rC)(e,"config-changed",{config:e._config}),e.requestUpdate(),setTimeout(()=>e.requestUpdate(),100))})(t,!h)}}
+                              @click=${()=>{g||(async(t,n)=>{await ri(e,t,n)&&(!0===n&&(e._config.modules=Array.isArray(e._config.modules)?e._config.modules.filter(e=>e!==`!${t}`):[]),(0,s.rC)(e,"config-changed",{config:e._config}),e.requestUpdate(),setTimeout(()=>e.requestUpdate(),100))})(t,!h)}}
                               ?disabled=${g||!c}
                             >
                               <ha-icon icon="mdi:cards-outline"></ha-icon>
                               <span>${"All cards"}</span>
                             </button>
-                            ${g&&!f?Ft.qy`
+                            ${g&&!f?Rt.qy`
                               <button 
                                 class="bubble-badge toggle-badge"
                                 style="padding: 4px;"
@@ -2258,7 +2293,7 @@
                         
                         <!-- Module Action Buttons -->
                         <div class="module-actions">
-                          ${$?Ft.qy`
+                          ${$?Rt.qy`
                             <button 
                               class="icon-button update-button" 
                               style="margin: 0 24px;"
@@ -2269,11 +2304,11 @@
                               Update
                             </button>
                           `:""}
-                          <button class="icon-button ${c?"":"disabled"}" @click=${()=>(0,Zo.dK)(e,t)} title="Edit Module">
+                          <button class="icon-button ${c?"":"disabled"}" @click=${()=>(0,ti.dK)(e,t)} title="Edit Module">
                             <ha-icon icon="mdi:pencil"></ha-icon>
                           </button>
-                          ${Qo.dn&&(0,Qo.dn)(t)||"default"===t?"":Ft.qy`
-                              <button class="icon-button ${c?"":"disabled"}" @click=${()=>(0,Zo.s)(e,t)} title="Delete Module">
+                          ${ei.dn&&(0,ei.dn)(t)||"default"===t?"":Rt.qy`
+                              <button class="icon-button ${c?"":"disabled"}" @click=${()=>(0,ti.s)(e,t)} title="Delete Module">
                                 <ha-icon icon="mdi:delete"></ha-icon>
                               </button>
                             `}
@@ -2281,7 +2316,7 @@
                       </div>
                       <hr>
 
-                      ${e._helpModuleId===t?Ft.qy`
+                      ${e._helpModuleId===t?Rt.qy`
                         <div class="bubble-info">
                           <h4 class="bubble-section-title">
                             <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -2293,7 +2328,7 @@
                         </div>
                       `:""}
 
-                      ${i.length>0?Ft.qy`
+                      ${i.length>0?Rt.qy`
                           <h4 class="${b?"":"disabled"}">
                             <ha-icon icon="mdi:cog"></ha-icon>
                             Configuration
@@ -2316,15 +2351,15 @@
                             About this module
                         </h4>
                         <div class="content">
-                          ${Ft.qy`<span .innerHTML=${o}></span>`}
+                          ${Rt.qy`<span .innerHTML=${o}></span>`}
                         </div>
                       </div>
 
-                      ${l||u||p?Ft.qy`
+                      ${l||u||p?Rt.qy`
                           <h4 class="version module-version">
                             ${l?`Created by ${l}`:""}
                             <span class="version-number">
-                              ${u?Ft.qy`<a href="${u}" target="_blank" rel="noopener noreferrer">Module link</a> • `:""}
+                              ${u?Rt.qy`<a href="${u}" target="_blank" rel="noopener noreferrer">Module link</a> • `:""}
                               ${p||""}
                             </span>
                           </h4>
@@ -2334,7 +2369,7 @@
                 </ha-expansion-panel>
               `})}
             
-            ${0===si(e).length?Ft.qy`
+            ${0===ci(e).length?Rt.qy`
               <div class="bubble-info">
                 <h4 class="bubble-section-title">
                   <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -2348,14 +2383,14 @@
           `}
 
           <hr>
-          ${e._showNewModuleForm||e._showManualImportForm||e._editingModule||!c?"":Ft.qy`
+          ${e._showNewModuleForm||e._showManualImportForm||e._editingModule||!c?"":Rt.qy`
           <div class="module-editor-buttons-container" style="display: flex;">
-            <button class="icon-button" style="flex: 1;" @click=${()=>{e._showNewModuleForm=!0,e._showManualImportForm=!1,e._generateUniqueModuleId&&(e._newModuleTemplate.id=e._generateUniqueModuleId("my_module")),e._editingModule={...e._newModuleTemplate},e._config.modules||(e._config.modules=e._config.style_templates||[]),e._config.modules.includes(e._editingModule.id)||(e._config.modules=[...e._config.modules,e._editingModule.id],(0,s.rC)(e,"config-changed",{config:e._config})),e.requestUpdate(),setTimeout(()=>(0,Go.XY)(e),0)}}>
+            <button class="icon-button" style="flex: 1;" @click=${()=>{e._showNewModuleForm=!0,e._showManualImportForm=!1,e._generateUniqueModuleId&&(e._newModuleTemplate.id=e._generateUniqueModuleId("my_module")),e._editingModule={...e._newModuleTemplate},e._config.modules||(e._config.modules=e._config.style_templates||[]),e._config.modules.includes(e._editingModule.id)||(e._config.modules=[...e._config.modules,e._editingModule.id],(0,s.rC)(e,"config-changed",{config:e._config})),e.requestUpdate(),setTimeout(()=>(0,Zo.XY)(e),0)}}>
               <ha-icon icon="mdi:puzzle-plus"></ha-icon>
               Create new Module
             </button>
             
-            <button class="icon-button" style="flex: 1;" @click=${()=>{e._showManualImportForm=!0,e._showNewModuleForm=!1,e._manualYamlContent="",e.requestUpdate(),setTimeout(()=>(0,Go.XY)(e),0)}}>
+            <button class="icon-button" style="flex: 1;" @click=${()=>{e._showManualImportForm=!0,e._showNewModuleForm=!1,e._manualYamlContent="",e.requestUpdate(),setTimeout(()=>(0,Zo.XY)(e),0)}}>
               <ha-icon icon="mdi:code-json"></ha-icon>
               Import from YAML
             </button>
@@ -2377,7 +2412,7 @@
         `)}
       </div>
     </ha-expansion-panel>
-  `;return"sl-tab-group"===i?requestAnimationFrame(()=>{const t=e.shadowRoot?.getElementById(o);if(t&&"function"==typeof t.show){const n=void 0!==e._selectedModuleTab?e._selectedModuleTab.toString():"0";t.show(n)}}):"ha-tab-group"===i&&requestAnimationFrame(()=>{const t=e.shadowRoot?.getElementById(o);if(!t)return;const n=ni[e._selectedModuleTab??0]??(e._selectedModuleTab??0).toString();"activePanel"in t&&(t.activePanel=n),t.setAttribute("active-panel",n)}),h}class ci extends Ft.WF{_previewStyleApplied=!1;_entityCache={};_cachedAttributeList=null;_cachedAttributeListEntity=null;_expandedPanelStates={};_moduleErrorCache={};_moduleCodeEvaluating=null;_rowsAutoMode=void 0;_autoRowsComputeScheduled=!1;_previewCardRoot=null;_previewCardHost=null;_previewCardScore=-1/0;_cardContextListener=null;_lastMeasuredHeights=null;constructor(){super(),this._expandedPanelStates={},this._cardContextListener=e=>this._handleCardContext(e),window.addEventListener("bubble-card-context",this._cardContextListener)}connectedCallback(){super.connectedCallback?.();try{window.__bubbleCardEditorInstances=window.__bubbleCardEditorInstances||new Set,window.__bubbleCardEditorInstances.add(this)}catch(e){}}setConfig(e){const t=this._previewCardHost||this._previewCardRoot?.host||null,n=!!t?.isConnected;this._config={...e};const o=this.getRootNode()?.host;if("hui-card-element-editor"===o?.tagName?.toLowerCase()){const t="pop-up"===e?.card_type;Promise.resolve(o.updateComplete).then(()=>{try{t?this._injectHideTabsStyle(o.shadowRoot):o.shadowRoot?.querySelector("#bubble-card-hide-tabs")?.remove()}catch(e){}})}n?this._previewCardScore=-1/0:(this._firstRowsComputation=!1,this._lastMeasuredHeights=null,this._resetPreviewCardReference());const i=void 0!==this._config?.rows&&null!==this._config?.rows&&""!==this._config?.rows,a="string"==typeof this._config?.rows&&""!==this._config.rows.trim(),r=void 0!==this._config?.grid_options?.rows&&null!==this._config?.grid_options?.rows&&""!==this._config?.grid_options?.rows;this._rowsAutoMode=!0,(r||i&&a)&&(this._rowsAutoMode=!1)}_deepQuerySelector(e,t,n=6){try{if(!e||n<0)return null;const o=e.querySelector?.(t);if(o)return o;const i=e.querySelectorAll?.("*")||[];for(const e of i)if(e?.shadowRoot){const o=this._deepQuerySelector(e.shadowRoot,t,n-1);if(o)return o}return null}catch(e){return null}}_getEditorPreviewContainer(){try{const e=document.querySelector("body > home-assistant");return e?.shadowRoot?.querySelector("hui-dialog-edit-card")?.shadowRoot?.querySelector("ha-dialog > div.content > div.element-preview")||null}catch(e){return null}}_removeRowsOverrideAndRecalculate=()=>{try{const e={...this._config};if(e.grid_options){const{rows:t,...n}=e.grid_options;Object.keys(n).length>0?e.grid_options=n:delete e.grid_options}delete e.rows,this._rowsAutoMode=!0,this._config=e,(0,s.rC)(this,"config-changed",{config:e}),requestAnimationFrame(()=>{try{this._firstRowsComputation=!0,this._lastMeasuredHeights=null,this._setupAutoRowsObserver();const e=this._getBubbleCardFromPreview();e?this._computeAndApplyRows(e):this._waitForPreviewAndRecompute()}catch(e){}})}catch(e){console.error("Bubble Card Editor: failed to remove rows override",e)}};_waitForPreviewAndRecompute(e=0){try{const e=this._getBubbleCardFromPreview();if(e){this._setupAutoRowsObserver();const t=this._computeAndApplyRows(e);if(t?.applied)return}}catch(e){}e+1>=40||setTimeout(()=>this._waitForPreviewAndRecompute(e+1),50)}_scheduleAutoRowsCompute(){this._autoRowsComputeScheduled||(this._autoRowsComputeScheduled=!0,requestAnimationFrame(()=>{this._autoRowsComputeScheduled=!1;try{if(void 0!==this._config?.grid_options?.rows&&null!==this._config?.grid_options?.rows&&""!==this._config?.grid_options?.rows||!1===this._rowsAutoMode)return;this._setupAutoRowsObserver();const e=this._getBubbleCardFromPreview();e&&this._computeAndApplyRows(e)}catch(e){}}))}static get properties(){return{_renderHass:{},_config:{}}}set hass(e){this._hass=e,void 0!==this._hass&&(void 0!==this._renderHass?(this._hassThrottleTimer&&clearTimeout(this._hassThrottleTimer),this._hassThrottleTimer=setTimeout(()=>{this._hassThrottleTimer=null,this._renderHass!==this._hass&&(this._renderHass=this._hass)},500)):this._renderHass=e)}get hass(){return this._hass}get _card_type(){return this._config?.card_type||""}get _button_type(){return this._config?.button_type||("pop-up"===this._config?.card_type?"":"switch")}get _entity(){return this._config?.entity||""}get _selectable_attributes(){return["source_list","sound_mode_list","hvac_modes","fan_modes","swing_modes","swing_horizontal_modes","preset_modes","effect_list"]}updated(e){super.updated(e),e.has("_renderHass")&&(this.listsUpdated=!1,this._entityCache={},this._cachedAttributeList=null,this._cachedAttributeListEntity=null),this._setupAutoRowsObserver()}async firstUpdated(e){if(super.firstUpdated(e),this.hass&&this.hass.loadFragmentTranslation)try{await this.hass.loadFragmentTranslation("config")}catch(e){console.error("Bubble Card Editor: Failed to load 'config' fragment translation",e)}}disconnectedCallback(){super.disconnectedCallback?.();try{window.__bubbleCardEditorInstances?.delete(this)}catch(e){}try{this._errorListener&&(window.removeEventListener("bubble-card-error",this._errorListener),this._errorListener=null)}catch(e){}try{this._moduleChangeHandler&&(window.removeEventListener("bubble-card-modules-changed",this._moduleChangeHandler),window.removeEventListener("bubble-card-module-updated",this._moduleChangeHandler),document.removeEventListener("yaml-modules-updated",this._moduleChangeHandler),this._moduleChangeHandler=null,this._moduleChangeListenerAdded=!1)}catch(e){}try{this._storeAutoRefreshTimer&&(clearInterval(this._storeAutoRefreshTimer),this._storeAutoRefreshTimer=null)}catch(e){}try{this._progressInterval&&(clearInterval(this._progressInterval),this._progressInterval=null)}catch(e){}try{this._editorSchemaDebounce&&(clearTimeout(this._editorSchemaDebounce),this._editorSchemaDebounce=null)}catch(e){}try{this._hassThrottleTimer&&(clearTimeout(this._hassThrottleTimer),this._hassThrottleTimer=null)}catch(e){}try{this._cardContextListener&&(window.removeEventListener("bubble-card-context",this._cardContextListener),this._cardContextListener=null)}catch(e){}ci._resizeObserver&&this._observedElements&&(this._observedElements.forEach(e=>{ci._resizeObserver.unobserve(e),ci._editorInstanceMap.delete(e)}),this._observedElements=[])}render(){if(!this.hass)return Ft.qy``;const e=xo(this.hass);if(!this._previewStyleApplied){const e=document.querySelector("body > home-assistant"),t=e?.shadowRoot?.querySelector("hui-dialog-edit-card")?.shadowRoot?.querySelector("ha-dialog > div.content > div.element-preview");t?.style&&"sticky"!==t.style.position&&(t.style.position="sticky",t.style.top="0",t.style.height="calc(100vh - 224px)",t.style.overflowY="auto",this._previewStyleApplied=!0)}this.listsUpdated||(this._initializeLists(e),this.listsUpdated=!0);const t=this.cardTypeList;switch(this.buttonTypeList,this._config?.card_type){case"pop-up":return fo(this);case"button":return Qn(this);case"sub-buttons":return function(e){const t="pop-up"===e._config.card_type;return Ft.qy`
+  `;return"sl-tab-group"===i?requestAnimationFrame(()=>{const t=e.shadowRoot?.getElementById(o);if(t&&"function"==typeof t.show){const n=void 0!==e._selectedModuleTab?e._selectedModuleTab.toString():"0";t.show(n)}}):"ha-tab-group"===i&&requestAnimationFrame(()=>{const t=e.shadowRoot?.getElementById(o);if(!t)return;const n=ii[e._selectedModuleTab??0]??(e._selectedModuleTab??0).toString();"activePanel"in t&&(t.activePanel=n),t.setAttribute("active-panel",n)}),h}class ui extends Rt.WF{_previewStyleApplied=!1;_entityCache={};_cachedAttributeList=null;_cachedAttributeListEntity=null;_expandedPanelStates={};_moduleErrorCache={};_moduleCodeEvaluating=null;_rowsAutoMode=void 0;_autoRowsComputeScheduled=!1;_previewCardRoot=null;_previewCardHost=null;_previewCardScore=-1/0;_cardContextListener=null;_lastMeasuredHeights=null;constructor(){super(),this._expandedPanelStates={},this._cardContextListener=e=>this._handleCardContext(e),window.addEventListener("bubble-card-context",this._cardContextListener)}connectedCallback(){super.connectedCallback?.();try{window.__bubbleCardEditorInstances=window.__bubbleCardEditorInstances||new Set,window.__bubbleCardEditorInstances.add(this)}catch(e){}}setConfig(e){const t=this._previewCardHost||this._previewCardRoot?.host||null,n=!!t?.isConnected;this._config={...e};const o=this.getRootNode()?.host;if("hui-card-element-editor"===o?.tagName?.toLowerCase()){const t="pop-up"===e?.card_type;Promise.resolve(o.updateComplete).then(()=>{try{t?this._injectHideTabsStyle(o.shadowRoot):o.shadowRoot?.querySelector("#bubble-card-hide-tabs")?.remove()}catch(e){}})}n?this._previewCardScore=-1/0:(this._firstRowsComputation=!1,this._lastMeasuredHeights=null,this._resetPreviewCardReference());const i=void 0!==this._config?.rows&&null!==this._config?.rows&&""!==this._config?.rows,a="string"==typeof this._config?.rows&&""!==this._config.rows.trim(),r=void 0!==this._config?.grid_options?.rows&&null!==this._config?.grid_options?.rows&&""!==this._config?.grid_options?.rows;this._rowsAutoMode=!0,(r||i&&a)&&(this._rowsAutoMode=!1)}_deepQuerySelector(e,t,n=6){try{if(!e||n<0)return null;const o=e.querySelector?.(t);if(o)return o;const i=e.querySelectorAll?.("*")||[];for(const e of i)if(e?.shadowRoot){const o=this._deepQuerySelector(e.shadowRoot,t,n-1);if(o)return o}return null}catch(e){return null}}_getEditorPreviewContainer(){try{const e=document.querySelector("body > home-assistant");return e?.shadowRoot?.querySelector("hui-dialog-edit-card")?.shadowRoot?.querySelector("ha-dialog > div.content > div.element-preview")||null}catch(e){return null}}_removeRowsOverrideAndRecalculate=()=>{try{const e={...this._config};if(e.grid_options){const{rows:t,...n}=e.grid_options;Object.keys(n).length>0?e.grid_options=n:delete e.grid_options}delete e.rows,this._rowsAutoMode=!0,this._config=e,(0,s.rC)(this,"config-changed",{config:e}),requestAnimationFrame(()=>{try{this._firstRowsComputation=!0,this._lastMeasuredHeights=null,this._setupAutoRowsObserver();const e=this._getBubbleCardFromPreview();e?this._computeAndApplyRows(e):this._waitForPreviewAndRecompute()}catch(e){}})}catch(e){console.error("Bubble Card Editor: failed to remove rows override",e)}};_waitForPreviewAndRecompute(e=0){try{const e=this._getBubbleCardFromPreview();if(e){this._setupAutoRowsObserver();const t=this._computeAndApplyRows(e);if(t?.applied)return}}catch(e){}e+1>=40||setTimeout(()=>this._waitForPreviewAndRecompute(e+1),50)}_scheduleAutoRowsCompute(){this._autoRowsComputeScheduled||(this._autoRowsComputeScheduled=!0,requestAnimationFrame(()=>{this._autoRowsComputeScheduled=!1;try{if(void 0!==this._config?.grid_options?.rows&&null!==this._config?.grid_options?.rows&&""!==this._config?.grid_options?.rows||!1===this._rowsAutoMode)return;this._setupAutoRowsObserver();const e=this._getBubbleCardFromPreview();e&&this._computeAndApplyRows(e)}catch(e){}}))}static get properties(){return{_renderHass:{},_config:{}}}set hass(e){this._hass=e,void 0!==this._hass&&(void 0!==this._renderHass?(this._hassThrottleTimer&&clearTimeout(this._hassThrottleTimer),this._hassThrottleTimer=setTimeout(()=>{this._hassThrottleTimer=null,this._renderHass!==this._hass&&(this._renderHass=this._hass)},500)):this._renderHass=e)}get hass(){return this._hass}get _card_type(){return this._config?.card_type||""}get _button_type(){return this._config?.button_type||("pop-up"===this._config?.card_type?"":"switch")}get _entity(){return this._config?.entity||""}get _selectable_attributes(){return["source_list","sound_mode_list","hvac_modes","fan_modes","swing_modes","swing_horizontal_modes","preset_modes","effect_list"]}updated(e){super.updated(e),e.has("_renderHass")&&(this.listsUpdated=!1,this._entityCache={},this._cachedAttributeList=null,this._cachedAttributeListEntity=null),this._setupAutoRowsObserver()}async firstUpdated(e){if(super.firstUpdated(e),this.hass&&this.hass.loadFragmentTranslation)try{await this.hass.loadFragmentTranslation("config")}catch(e){console.error("Bubble Card Editor: Failed to load 'config' fragment translation",e)}}disconnectedCallback(){super.disconnectedCallback?.();try{window.__bubbleCardEditorInstances?.delete(this)}catch(e){}try{this._errorListener&&(window.removeEventListener("bubble-card-error",this._errorListener),this._errorListener=null)}catch(e){}try{this._moduleChangeHandler&&(window.removeEventListener("bubble-card-modules-changed",this._moduleChangeHandler),window.removeEventListener("bubble-card-module-updated",this._moduleChangeHandler),document.removeEventListener("yaml-modules-updated",this._moduleChangeHandler),this._moduleChangeHandler=null,this._moduleChangeListenerAdded=!1)}catch(e){}try{this._storeAutoRefreshTimer&&(clearInterval(this._storeAutoRefreshTimer),this._storeAutoRefreshTimer=null)}catch(e){}try{this._progressInterval&&(clearInterval(this._progressInterval),this._progressInterval=null)}catch(e){}try{this._editorSchemaDebounce&&(clearTimeout(this._editorSchemaDebounce),this._editorSchemaDebounce=null)}catch(e){}try{this._hassThrottleTimer&&(clearTimeout(this._hassThrottleTimer),this._hassThrottleTimer=null)}catch(e){}try{this._cardContextListener&&(window.removeEventListener("bubble-card-context",this._cardContextListener),this._cardContextListener=null)}catch(e){}ui._resizeObserver&&this._observedElements&&(this._observedElements.forEach(e=>{ui._resizeObserver.unobserve(e),ui._editorInstanceMap.delete(e)}),this._observedElements=[])}render(){if(!this.hass)return Rt.qy``;const e=ko(this.hass);if(!this._previewStyleApplied){const e=document.querySelector("body > home-assistant"),t=e?.shadowRoot?.querySelector("hui-dialog-edit-card")?.shadowRoot?.querySelector("ha-dialog > div.content > div.element-preview");t?.style&&"sticky"!==t.style.position&&(t.style.position="sticky",t.style.top="0",t.style.height="calc(100vh - 224px)",t.style.overflowY="auto",this._previewStyleApplied=!0)}this.listsUpdated||(this._initializeLists(e),this.listsUpdated=!0);const t=this.cardTypeList;switch(this.buttonTypeList,this._config?.card_type){case"pop-up":return yo(this);case"button":return eo(this);case"sub-buttons":return function(e){const t="pop-up"===e._config.card_type;return Rt.qy`
         <div class="card-config">
             ${t?"":e.makeDropdown("Card type","card_type",e.cardTypeList)}
 
@@ -2411,7 +2446,7 @@
                         </div>
                     </ha-formfield>
 
-                    ${e._config?.footer_mode?Ft.qy`
+                    ${e._config?.footer_mode?Rt.qy`
                         <div style="margin-top: 16px; padding-left: 16px; border-left: 2px solid var(--divider-color);">
                             <ha-formfield>
                                 <ha-switch
@@ -2425,7 +2460,7 @@
                                 </div>
                             </ha-formfield>
 
-                            ${e._config?.footer_full_width?"":Ft.qy`
+                            ${e._config?.footer_full_width?"":Rt.qy`
                                 <ha-form
                                     .hass=${e.hass}
                                     .data=${{footer_width:e._config?.footer_width||500}}
@@ -2480,7 +2515,7 @@
 
             ${t?"":e.makeVersion()}
         </div>
-    `}(this);case"separator":return n=this,Ft.qy`
+    `}(this);case"separator":return n=this,Rt.qy`
     <div class="card-config">
         ${n.makeDropdown("Card type","card_type",n.cardTypeList)}
         <ha-form
@@ -2514,18 +2549,18 @@
         </div>
         ${n.makeVersion()}
   </div>
-`;case"horizontal-buttons-stack":return function(e){if(!e.buttonAdded)for(e.buttonAdded=!0,e.buttonIndex=0;e._config[e.buttonIndex+1+"_link"];)e.buttonIndex++;return Ft.qy`
+`;case"horizontal-buttons-stack":return function(e){if(!e.buttonAdded)for(e.buttonAdded=!0,e.buttonIndex=0;e._config[e.buttonIndex+1+"_link"];)e.buttonIndex++;return Rt.qy`
         <div class="card-config">
             ${e.makeDropdown("Card type","card_type",e.cardTypeList)}
             <div id="buttons-container">
-                ${function(e){let t=[];for(let n=1;n<=e.buttonIndex;n++)t.push(Ft.qy`
+                ${function(e){let t=[];for(let n=1;n<=e.buttonIndex;n++)t.push(Rt.qy`
             <div class="${n}_button">
                 <ha-expansion-panel outlined>
                     <h4 slot="header">
                         <ha-icon icon="mdi:border-radius"></ha-icon>
                         Button ${n} ${e._config[n+"_name"]?"- "+e._config[n+"_name"]:""}
                         <div class="button-container">
-                            <button class="icon-button header" @click="${()=>go(e,n)}">
+                            <button class="icon-button header" @click="${()=>vo(e,n)}">
                               <ha-icon icon="mdi:delete"></ha-icon>
                             </button>
                         </div>
@@ -2666,7 +2701,7 @@
             </div>
             ${e.makeVersion()}
         </div>
-    `}(this);case"cover":return function(e){let t=e._config.button_action||"";return Ft.qy`
+    `}(this);case"cover":return function(e){let t=e._config.button_action||"";return Rt.qy`
         <div class="card-config">
             ${e.makeDropdown("Card type","card_type",e.cardTypeList)}
             <ha-form
@@ -2778,7 +2813,7 @@
             </div>
             ${e.makeVersion()}
         </div>
-    `}(this);case"media-player":return function(e){let t=e._config.button_action||"";return Ft.qy`
+    `}(this);case"media-player":return function(e){let t=e._config.button_action||"";return Rt.qy`
         <div class="card-config">
             ${e.makeDropdown("Card type","card_type",e.cardTypeList)}
             <ha-form
@@ -2948,7 +2983,7 @@
             </div>
             ${e.makeVersion()}
         </div>
-    `}(this);case"empty-column":return function(e){return Ft.qy`
+    `}(this);case"empty-column":return function(e){return Rt.qy`
         <div class="card-config">
             ${e.makeDropdown("Card type","card_type",e.cardTypeList)}
             <ha-expansion-panel outlined>
@@ -2971,7 +3006,7 @@
             </div>
             ${e.makeVersion()}
         </div>
-    `}(this);case"select":return function(e){const t=e._config.entity,n=t?.startsWith("input_select")||t?.startsWith("select")||e._config.select_attribute,o=e.hass.states[t]?.attributes,i=e._selectable_attributes.some(e=>o?.[e]),a=Object.keys(e.hass.states[t]?.attributes||{}).map(n=>{let o=e.hass.states[t];return{label:e.hass.formatEntityAttributeName(o,n),value:n}}).filter(t=>e._selectable_attributes.includes(t.value));let r=e._config.button_action||"";return Ft.qy`
+    `}(this);case"select":return function(e){const t=e._config.entity,n=t?.startsWith("input_select")||t?.startsWith("select")||e._config.select_attribute,o=e.hass.states[t]?.attributes,i=e._selectable_attributes.some(e=>o?.[e]),a=Object.keys(e.hass.states[t]?.attributes||{}).map(n=>{let o=e.hass.states[t];return{label:e.hass.formatEntityAttributeName(o,n),value:n}}).filter(t=>e._selectable_attributes.includes(t.value));let r=e._config.button_action||"";return Rt.qy`
         <div class="card-config">
             ${e.makeDropdown("Card type","card_type",e.cardTypeList)}
             <ha-form
@@ -2981,7 +3016,7 @@
                 .computeLabel=${e._computeLabelCallback}
                 @value-changed=${e._valueChanged}
             ></ha-form>
-            ${i?Ft.qy`
+            ${i?Rt.qy`
                 <ha-form
                     .hass=${e.hass}
                     .data=${{select_attribute:e._config.select_attribute}}
@@ -3065,7 +3100,7 @@
             </div>
             ${e.makeVersion()}
         </div>
-    `}(this);case"climate":return function(e){let t=e._config.button_action||"";if("climate"===e._config.card_type&&!e.climateSubButtonsAdded&&e._config.entity){const t=e.hass.states[e._config.entity]?.attributes?.hvac_modes;if(t){const t=(0,yo.mg)(e._config);if(!(Array.isArray(t.main)&&t.main.length>0)){const n={name:"HVAC modes menu",select_attribute:"hvac_modes",state_background:!1,show_arrow:!1};t.main.push(n),e._config.sub_button=t,e._firstRowsComputation=!0}}e.climateSubButtonsAdded=!0}return Ft.qy`
+    `}(this);case"climate":return function(e){let t=e._config.button_action||"";if("climate"===e._config.card_type&&!e.climateSubButtonsAdded&&e._config.entity){const t=e.hass.states[e._config.entity]?.attributes?.hvac_modes;if(t){const t=(0,_o.mg)(e._config);if(!(Array.isArray(t.main)&&t.main.length>0)){const n={name:"HVAC modes menu",select_attribute:"hvac_modes",state_background:!1,show_arrow:!1};t.main.push(n),e._config.sub_button=t,e._firstRowsComputation=!0}}e.climateSubButtonsAdded=!0}return Rt.qy`
         <div class="card-config">
         ${e.makeDropdown("Card type","card_type",e.cardTypeList)}
         <ha-form
@@ -3106,7 +3141,7 @@
                         .disabled="${"name"===e._config.button_type}"
                         @value-changed=${e._valueChanged}
                     ></ha-form>
-                    ${e.hass.states[e._config.entity]?.attributes?.target_temp_low?Ft.qy`
+                    ${e.hass.states[e._config.entity]?.attributes?.target_temp_low?Rt.qy`
                         <ha-formfield .label="Optional - Hide target temp low">
                             <ha-switch
                                 aria-label="Optional - Hide target temp low"
@@ -3119,7 +3154,7 @@
                             </div>
                         </ha-formfield>
                     `:""}
-                    ${e.hass.states[e._config.entity]?.attributes?.target_temp_high?Ft.qy`
+                    ${e.hass.states[e._config.entity]?.attributes?.target_temp_high?Rt.qy`
                         <ha-formfield .label="Optional - Hide target temp high">
                             <ha-switch
                                 aria-label="Optional - Hide target temp high"
@@ -3201,7 +3236,7 @@
             </div>
             ${e.makeVersion()}
         </div>
-    `}(this);case"calendar":return function(e){const t=xo(e.hass);return e._config.event_action||(e._config.event_action={tap_action:{action:"more-info"},double_tap_action:{action:"none"},hold_action:{action:"none"}}),Ft.qy`
+    `}(this);case"calendar":return function(e){const t=ko(e.hass);return e._config.event_action||(e._config.event_action={tap_action:{action:"more-info"},double_tap_action:{action:"none"},hold_action:{action:"none"}}),Rt.qy`
         <div class="card-config">
             ${e.makeDropdown("Card type","card_type",e.cardTypeList)}
             <ha-form
@@ -3271,7 +3306,7 @@
             </div>
             ${e.makeVersion()}
         </div>
-    `}(this);case void 0:return Ft.qy`
+    `}(this);case void 0:return Rt.qy`
                     <div class="card-config">
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">
@@ -3378,8 +3413,8 @@
                             ${this.makeVersion()}
                         </div>
                     </div>
-                `}var n}makeLayoutOptions(){const e=window.isSectionView?"large":"normal",t="separator"===this._config.card_type?"0.8":"1",n="pop-up"!==this._config.card_type&&(this._config.card_layout?.includes("large")||window.isSectionView&&!this._config.card_layout);return Ft.qy`
-            ${this._renderConditionalContent(this._config.grid_options?.rows,Ft.qy`
+                `}var n}makeLayoutOptions(){const e=window.isSectionView?"large":"normal",t="separator"===this._config.card_type?"0.8":"1",n="pop-up"!==this._config.card_type&&(this._config.card_layout?.includes("large")||window.isSectionView&&!this._config.card_layout);return Rt.qy`
+            ${this._renderConditionalContent(this._config.grid_options?.rows,Rt.qy`
                 <div class="bubble-info warning">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:alert-outline"></ha-icon>
@@ -3390,7 +3425,7 @@
                     </div>
                 </div>
             `)}
-            ${this._renderConditionalContent(n,Ft.qy`
+            ${this._renderConditionalContent(n,Rt.qy`
                 <ha-form
                     .hass=${this.hass}
                     .data=${{rows:this._config.rows??this._config.grid_options?.rows??t??""}}
@@ -3417,7 +3452,7 @@
                 .computeLabel=${()=>"pop-up"===this._config.card_type?"Header card layout":"Card layout"}
                 @value-changed=${e=>{this._valueChanged({target:{configValue:"card_layout"},detail:{value:e.detail.value.card_layout}})}}
             ></ha-form>
-        `}makeLayoutPanel(){return Ft.qy`
+        `}makeLayoutPanel(){return Rt.qy`
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:view-grid"></ha-icon>
@@ -3427,7 +3462,7 @@
                     ${this.makeLayoutOptions()}
                 </div>
             </ha-expansion-panel>
-        `}makeShowState(e=this._config,t="",n=!1,o){const i=e?.entity??this._config.entity??"",a="name"===this._config.button_type,r=!i,s=i?.startsWith("input_select")||i?.startsWith("select")||e.select_attribute,l="sub_button"===n||"string"==typeof n&&n.startsWith("sub_button"),c=l&&("select"===e?.sub_button_type||!e?.sub_button_type&&s),d=e?.show_attribute?Object.keys(this.hass.states[i]?.attributes||{}).map(e=>{let t=this.hass.states[i];return{label:this.hass.formatEntityAttributeName(t,e),value:e}}):[];return Ft.qy`
+        `}makeShowState(e=this._config,t="",n=!1,o){const i=e?.entity??this._config.entity??"",a="name"===this._config.button_type,r=!i,s=i?.startsWith("input_select")||i?.startsWith("select")||e.select_attribute,l="sub_button"===n||"string"==typeof n&&n.startsWith("sub_button"),c=l&&("select"===e?.sub_button_type||!e?.sub_button_type&&s),d=e?.show_attribute?Object.keys(this.hass.states[i]?.attributes||{}).map(e=>{let t=this.hass.states[i];return{label:this.hass.formatEntityAttributeName(t,e),value:e}}):[];return Rt.qy`
 
             <ha-formfield .label="Text scrolling effect">
                 <ha-switch
@@ -3440,7 +3475,7 @@
                     <label class="mdc-label">Text scrolling effect</label> 
                 </div>
             </ha-formfield>
-            ${this._renderConditionalContent(l,Ft.qy`
+            ${this._renderConditionalContent(l,Rt.qy`
                 <ha-formfield .label="Show background">
                     <ha-switch
                         aria-label="Show background when entity is on"
@@ -3452,7 +3487,7 @@
                     </div>
                 </ha-formfield>
             `)}
-            ${this._renderConditionalContent(l&&(e?.show_background??!0),Ft.qy`
+            ${this._renderConditionalContent(l&&(e?.show_background??!0),Rt.qy`
                 <ha-formfield .label="Background color based on state">
                     <ha-switch
                         aria-label="Background color based on state"
@@ -3464,7 +3499,7 @@
                     </div>
                 </ha-formfield>
             `)}
-            ${this._renderConditionalContent(l&&(e?.state_background??!0)&&i.startsWith("light"),Ft.qy`
+            ${this._renderConditionalContent(l&&(e?.state_background??!0)&&i.startsWith("light"),Rt.qy`
                 <ha-formfield .label="Background color based on light color">
                     <ha-switch
                         aria-label="Background color based on light color"
@@ -3476,7 +3511,7 @@
                     </div>
                 </ha-formfield>
             `)}
-            ${this._renderConditionalContent(!l&&i.startsWith("light"),Ft.qy`
+            ${this._renderConditionalContent(!l&&i.startsWith("light"),Rt.qy`
                 <ha-formfield .label="Use accent color instead of light color">
                     <ha-switch
                         aria-label="Use accent color instead of light color"
@@ -3571,7 +3606,7 @@
                     <label class="mdc-label">Show attribute</label> 
                 </div>
             </ha-formfield>
-            ${this._renderConditionalContent(e?.show_attribute,Ft.qy`
+            ${this._renderConditionalContent(e?.show_attribute,Rt.qy`
                 <ha-form
                     .hass=${this.hass}
                     .data=${{attribute:e?.attribute}}
@@ -3581,7 +3616,7 @@
                     @value-changed=${e=>{const i=e.detail.value.attribute;n?this._arrayValueChange(o,{attribute:i},n):this._valueChanged({target:{configValue:t+"attribute"},detail:{value:i}})}}
                 ></ha-form>
             `)}
-            ${this._renderConditionalContent(c,Ft.qy`
+            ${this._renderConditionalContent(c,Rt.qy`
                 <ha-formfield .label="Show arrow (Select entities only)">
                     <ha-switch
                         aria-label="Show arrow (Select entities only)"
@@ -3594,7 +3629,7 @@
                     </div>
                 </ha-formfield>
             `)}
-        `}makeDropdown(e,t,n,o,i){if(e.includes("icon")||e.includes("Icon"))return Ft.qy`
+        `}makeDropdown(e,t,n,o,i){if(e.includes("icon")||e.includes("Icon"))return Rt.qy`
                 <div class="ha-icon-picker">
                     <ha-icon-picker
                         label="${e}"
@@ -3605,7 +3640,7 @@
                         @value-changed="${this._valueChanged}"
                     ></ha-icon-picker>
                 </div>
-            `;if(e.includes("Entity")||e.includes("entity")){let n=[],i=[];switch(this._config.card_type){case"button":default:break;case"cover":n=["cover"];break;case"climate":n=["climate"];break;case"media-player":n=["media_player"];break;case"select":n=["input_select","select"],this._config.select_attribute&&(n=[])}return Ft.qy`
+            `;if(e.includes("Entity")||e.includes("entity")){let n=[],i=[];switch(this._config.card_type){case"button":default:break;case"cover":n=["cover"];break;case"climate":n=["climate"];break;case"media-player":n=["media_player"];break;case"select":n=["input_select","select"],this._config.select_attribute&&(n=[])}return Rt.qy`
                 <ha-entity-picker
                     label="${e}"
                     .hass="${this.hass}"
@@ -3617,7 +3652,7 @@
                     allow-custom-entity
                     @value-changed="${this._valueChanged}"
                 ></ha-entity-picker>
-            `}return Ft.qy`
+            `}return Rt.qy`
                 <ha-form
                     .hass=${this.hass}
                     .data=${{[t]:this["_"+t]}}
@@ -3626,7 +3661,7 @@
                     .computeLabel=${()=>e}
                     @value-changed=${e=>{const n=e.detail.value[t];this._valueChanged({target:{configValue:t},detail:{value:n}})}}
                 ></ha-form>
-          `}makeTextField(e,t,n={}){const{type:o="text",disabled:i,min:a,max:r,step:s,inputMode:l,placeholder:c}=n,d={text:{}};return"number"===o&&(d.text={type:"number"}),Ft.qy`
+          `}makeTextField(e,t,n={}){const{type:o="text",disabled:i,min:a,max:r,step:s,inputMode:l,placeholder:c}=n,d={text:{}};return"number"===o&&(d.text={type:"number"}),Rt.qy`
             <ha-form
                 .hass=${this.hass}
                 .data=${{[t]:this._config[t]??""}}
@@ -3635,7 +3670,7 @@
                 .computeLabel=${()=>e}
                 @value-changed=${e=>{const n=e.detail.value[t];this._valueChanged({target:{configValue:t},detail:{value:n}})}}
             ></ha-form>
-        `}_renderConditionalContent(e,t){return e?t:Ft.qy``}makeActionPanel(e,t=this._config,n,o,i=this._config){const a="Tap action"===e?"mdi:gesture-tap":"Double tap action"===e?"mdi:gesture-double-tap":"Hold action"===e?"mdi:gesture-tap-hold":"mdi:gesture-tap",r="Tap action"===e?"tap_action":"Double tap action"===e?"double_tap_action":"Hold action"===e?"hold_action":"Open action"===e?"open_action":"close_action",s=o?`action_panel_${o}_${i}_${r}`:`action_panel_config_${r}`;let l;try{l="Tap action"===e?t.tap_action:"Double tap action"===e?t.double_tap_action:"Hold action"===e?t.hold_action:"Open action"===e?t.open_action:t.close_action}catch{}const c=t===this._config;return n||(n=c&&"Tap action"===e?"name"!==this._config.button_type?"more-info":"none":c?"none":""),Ft.qy`
+        `}_renderConditionalContent(e,t){return e?t:Rt.qy``}makeActionPanel(e,t=this._config,n,o,i=this._config){const a="Tap action"===e?"mdi:gesture-tap":"Double tap action"===e?"mdi:gesture-double-tap":"Hold action"===e?"mdi:gesture-tap-hold":"mdi:gesture-tap",r="Tap action"===e?"tap_action":"Double tap action"===e?"double_tap_action":"Hold action"===e?"hold_action":"Open action"===e?"open_action":"close_action",s=o?`action_panel_${o}_${i}_${r}`:`action_panel_config_${r}`;let l;try{l="Tap action"===e?t.tap_action:"Double tap action"===e?t.double_tap_action:"Hold action"===e?t.hold_action:"Open action"===e?t.open_action:t.close_action}catch{}const c=t===this._config;return n||(n=c&&"Tap action"===e?"name"!==this._config.button_type?"more-info":"none":c?"none":""),Rt.qy`
             <ha-expansion-panel 
                 outlined
                 @expanded-changed=${e=>{this._expandedPanelStates[s]=e.target.expanded,this.requestUpdate()}}
@@ -3645,7 +3680,7 @@
                     ${e}
                 </h4>
                 <div class="content"> 
-                    ${Eo(this,s,!!this._expandedPanelStates[s],()=>Ft.qy`
+                    ${Mo(this,s,!!this._expandedPanelStates[s],()=>Rt.qy`
                         <ha-form
                             .hass=${this.hass}
                             .data=${t}
@@ -3654,7 +3689,7 @@
                             .computeLabel=${this._computeLabelCallback}
                             @value-changed=${e=>this._ActionChanged(e,o,i)}
                         ></ha-form>
-                        ${"call-service"===l?.action||"perform-action"===l?.action?Ft.qy`
+                        ${"call-service"===l?.action||"perform-action"===l?.action?Rt.qy`
                             <ha-formfield .label="Use default entity">
                                 <ha-switch
                                     aria-label="Use default entity"
@@ -3670,14 +3705,14 @@
                     `)}
                 </div>
             </ha-expansion-panel>
-        `}makeSubButtonPanel(){return void 0===(e=this)._expandedPanelStates&&(e._expandedPanelStates={}),void 0!==e._clipboardButton&&null!==e._clipboardButton||(e._clipboardButton=No()||null),function(e){if(Array.isArray(e._config.sub_button)){const t=(0,yo.zD)(e._config.sub_button);try{e._config.sub_button=t}catch(n){e._config={...e._config,sub_button:t}}}else if(!e._config.sub_button||!(0,yo.lc)(e._config.sub_button)){const t=(0,yo.mg)(e._config);try{e._config.sub_button=t}catch(n){e._config={...e._config,sub_button:t}}}const t=(0,yo.mg)(e._config);void 0===e._expandedPanelStates&&(e._expandedPanelStates={}),void 0!==e._clipboardButton&&null!==e._clipboardButton||(e._clipboardButton=No()||null);const n="sub-buttons"===e._config.card_type,o="pop-up"===e._config.card_type,i=["cover","media-player","climate"].includes(e._config.card_type),a=e._config.main_buttons_position||"default",r=e._config.main_buttons_alignment||"end",s="bottom"===a,l=e._config.main_buttons_full_width??!!s,c=Boolean(window.isSectionView),d=(e._config.card_layout||"").includes("large"),u=Object.prototype.hasOwnProperty.call(e._config,"card_layout"),p=u&&"normal"===e._config.card_layout,b=Array.isArray(t.bottom)&&t.bottom.some(e=>!!e),h=void 0!==e._config.rows&&null!==e._config.rows&&""!==e._config.rows,m=void 0!==e._config.grid_options?.rows&&null!==e._config.grid_options?.rows&&""!==e._config.grid_options?.rows,f=h&&!1===e._rowsAutoMode,g=m||f;return Ft.qy`
+        `}makeSubButtonPanel(){return void 0===(e=this)._expandedPanelStates&&(e._expandedPanelStates={}),void 0!==e._clipboardButton&&null!==e._clipboardButton||(e._clipboardButton=Ro()||null),function(e){if(Array.isArray(e._config.sub_button)){const t=(0,_o.zD)(e._config.sub_button);try{e._config.sub_button=t}catch(n){e._config={...e._config,sub_button:t}}}else if(!e._config.sub_button||!(0,_o.lc)(e._config.sub_button)){const t=(0,_o.mg)(e._config);try{e._config.sub_button=t}catch(n){e._config={...e._config,sub_button:t}}}const t=(0,_o.mg)(e._config);void 0===e._expandedPanelStates&&(e._expandedPanelStates={}),void 0!==e._clipboardButton&&null!==e._clipboardButton||(e._clipboardButton=Ro()||null);const n="sub-buttons"===e._config.card_type,o="pop-up"===e._config.card_type,i=["cover","media-player","climate"].includes(e._config.card_type),a=e._config.main_buttons_position||"default",r=e._config.main_buttons_alignment||"end",s="bottom"===a,l=e._config.main_buttons_full_width??!!s,c=Boolean(window.isSectionView),d=(e._config.card_layout||"").includes("large"),u=Object.prototype.hasOwnProperty.call(e._config,"card_layout"),p=u&&"normal"===e._config.card_layout,b=Array.isArray(t.bottom)&&t.bottom.some(e=>!!e),h=void 0!==e._config.rows&&null!==e._config.rows&&""!==e._config.rows,m=void 0!==e._config.grid_options?.rows&&null!==e._config.grid_options?.rows&&""!==e._config.grid_options?.rows,f=h&&!1===e._rowsAutoMode,g=m||f;return Rt.qy`
     <ha-expansion-panel outlined>
       <h4 slot="header">
         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
         Sub-buttons editor
       </h4>
       <div class="content">
-        ${g?Ft.qy`
+        ${g?Rt.qy`
           <div class="bubble-info warning">
             <h4 class="bubble-section-title">
               <ha-icon icon="mdi:alert-outline"></ha-icon>
@@ -3692,7 +3727,7 @@
             </div>
           </div>
         `:""}
-        ${i?Ft.qy`
+        ${i?Rt.qy`
           <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:circle-outline"></ha-icon>
@@ -3706,7 +3741,7 @@
                   .computeLabel=${()=>"Main buttons position"}
                   @value-changed=${t=>{e._valueChanged({target:{configValue:"main_buttons_position"},detail:{value:t.detail.value.main_buttons_position}})}}
               ></ha-form>
-              ${e._renderConditionalContent(s,Ft.qy`
+              ${e._renderConditionalContent(s,Rt.qy`
                   <ha-formfield .label="Full width action buttons">
                       <ha-switch
                           aria-label="Full width action buttons"
@@ -3718,7 +3753,7 @@
                           <label class="mdc-label">Full width action buttons</label> 
                       </div>
                   </ha-formfield>
-                  ${e._renderConditionalContent(!l,Ft.qy`
+                  ${e._renderConditionalContent(!l,Rt.qy`
                       <ha-form
                           .hass=${e.hass}
                           .data=${{main_buttons_alignment:r}}
@@ -3732,34 +3767,34 @@
           </ha-expansion-panel>
         `:""}
         
-        ${o?Ft.qy`
-          ${Xo(e,"main")}
-          ${Jo(e,"main")}
-        `:n?"":Ft.qy`
+        ${o?Rt.qy`
+          ${Qo(e,"main")}
+          ${Go(e,"main")}
+        `:n?"":Rt.qy`
           <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
               Main sub-buttons (top)
             </h4>
             <div class="content">
-              ${Xo(e,"main")}
-              ${Jo(e,"main")}
+              ${Qo(e,"main")}
+              ${Go(e,"main")}
             </div>
           </ha-expansion-panel>
         `}
 
-        ${n?Ft.qy`
-          ${Xo(e,"bottom")}
-          ${Jo(e,"bottom")}
-        `:o?"":Ft.qy`
+        ${n?Rt.qy`
+          ${Qo(e,"bottom")}
+          ${Go(e,"bottom")}
+        `:o?"":Rt.qy`
           <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:arrow-down-circle-outline"></ha-icon>
               Bottom sub-buttons
             </h4>
             <div class="content">
-              ${Xo(e,"bottom")}
-              ${e._renderConditionalContent(!d&&!b&&(p||!c&&!u),Ft.qy`
+              ${Qo(e,"bottom")}
+              ${e._renderConditionalContent(!d&&!b&&(p||!c&&!u),Rt.qy`
                 <div class="bubble-info warning">
                   <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-outline"></ha-icon>
@@ -3770,12 +3805,12 @@
                   </div>
                 </div>
               `)}
-              ${Jo(e,"bottom")}
+              ${Go(e,"bottom")}
             </div>
           </ha-expansion-panel>
         `}
 
-        ${Ft.qy`
+        ${Rt.qy`
     <div class="bubble-info">
       <h4 class="bubble-section-title">
         <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -3795,14 +3830,14 @@
   `}
       </div>
     </ha-expansion-panel>
-  `}(e);var e}makeVersion(){return Ft.qy`
+  `}(e);var e}makeVersion(){return Rt.qy`
             <h4 class="version">
                 Bubble Card 
                 <span class="version-number">
                     ${o}
                 </span>
             </h4>
-        `}makeStyleEditor(){const e="style_editor_panel";return Ft.qy`
+        `}makeStyleEditor(){const e="style_editor_panel";return Rt.qy`
             <ha-expansion-panel 
                 outlined
                 @expanded-changed="${t=>{this._expandedPanelStates[e]=t.target.expanded,this.requestUpdate()}}"
@@ -3812,7 +3847,7 @@
                     Custom styles & JS templates
                 </h4>
                 <div class="content">
-                    ${Eo(this,e,!!this._expandedPanelStates[e],()=>Ft.qy`
+                    ${Mo(this,e,!!this._expandedPanelStates[e],()=>Rt.qy`
                         <div class="code-editor">
                             <ha-code-editor
                                 mode="yaml"
@@ -3839,7 +3874,7 @@
                     </div>
                 </div>
             </ha-expansion-panel>
-        `}_clearCurrentCardError(){if(!window.bubbleCardErrorRegistry)return;const e=this._config?.card_type,t=this._config?.entity;if(!e||!t)return;const n=`${e}_${t}`;window.bubbleCardErrorRegistry[n]&&(delete window.bubbleCardErrorRegistry[n],this.errorMessage="",this.errorSource="",this.requestUpdate())}_clearCurrentModuleError(e){this._moduleCodeEvaluating=e;try{window.bubbleCardErrorRegistry&&e&&Object.keys(window.bubbleCardErrorRegistry).forEach(t=>{window.bubbleCardErrorRegistry[t]?.moduleId===e&&delete window.bubbleCardErrorRegistry[t]})}catch(e){}this.errorMessage="",this.errorSource="",this.requestUpdate()}createErrorConsole(e=this){window.bubbleCardErrorRegistry||(window.bubbleCardErrorRegistry={});const t=()=>{if(void 0!==e._editingModule&&e._editingModule){const t=e._editingModule.id;if(!t)return e.errorMessage="",void(e.errorSource="");let n=!1;window.bubbleCardErrorRegistry&&Object.values(window.bubbleCardErrorRegistry).forEach(o=>{o.moduleId===t&&(e.errorMessage=o.message,e.errorSource=o.source,n=!0)}),n||(e.errorMessage="",e.errorSource="")}else{const t=e._config?.card_type,n=e._config?.entity;if(!t||!n)return e.errorMessage="",void(e.errorSource="");const o=`${t}_${n}`;if(window.bubbleCardErrorRegistry&&window.bubbleCardErrorRegistry[o]){const t=window.bubbleCardErrorRegistry[o];e.errorMessage=t.message,e.errorSource=t.source}else e.errorMessage="",e.errorSource=""}e.requestUpdate()};return e._errorListener||(e._errorListener=e=>{const n=e.detail;if(n&&"object"==typeof n&&n.context){const{message:e,context:t}=n;if(e){if(t.cardType&&t.entityId){const n=`${t.cardType}_${t.entityId}`;window.bubbleCardErrorRegistry[n]={message:e,source:"module"===t.sourceType?`Module ('${t.moduleId}')`:"Card Configuration (styles section)",cardType:t.cardType,entityId:t.entityId,moduleId:"module"===t.sourceType?t.moduleId:null}}}else if("module"===t.sourceType&&t.moduleId)Object.keys(window.bubbleCardErrorRegistry).forEach(e=>{window.bubbleCardErrorRegistry[e]?.moduleId===t.moduleId&&delete window.bubbleCardErrorRegistry[e]});else if(t.cardType&&t.entityId){const e=`${t.cardType}_${t.entityId}`;window.bubbleCardErrorRegistry[e]&&delete window.bubbleCardErrorRegistry[e]}}t()},window.addEventListener("bubble-card-error",e._errorListener)),t(),Ft.qy`
+        `}_clearCurrentCardError(){if(!window.bubbleCardErrorRegistry)return;const e=this._config?.card_type,t=this._config?.entity;if(!e||!t)return;const n=`${e}_${t}`;window.bubbleCardErrorRegistry[n]&&(delete window.bubbleCardErrorRegistry[n],this.errorMessage="",this.errorSource="",this.requestUpdate())}_clearCurrentModuleError(e){this._moduleCodeEvaluating=e;try{window.bubbleCardErrorRegistry&&e&&Object.keys(window.bubbleCardErrorRegistry).forEach(t=>{window.bubbleCardErrorRegistry[t]?.moduleId===e&&delete window.bubbleCardErrorRegistry[t]})}catch(e){}this.errorMessage="",this.errorSource="",this.requestUpdate()}createErrorConsole(e=this){window.bubbleCardErrorRegistry||(window.bubbleCardErrorRegistry={});const t=()=>{if(void 0!==e._editingModule&&e._editingModule){const t=e._editingModule.id;if(!t)return e.errorMessage="",void(e.errorSource="");let n=!1;window.bubbleCardErrorRegistry&&Object.values(window.bubbleCardErrorRegistry).forEach(o=>{o.moduleId===t&&(e.errorMessage=o.message,e.errorSource=o.source,n=!0)}),n||(e.errorMessage="",e.errorSource="")}else{const t=e._config?.card_type,n=e._config?.entity;if(!t||!n)return e.errorMessage="",void(e.errorSource="");const o=`${t}_${n}`;if(window.bubbleCardErrorRegistry&&window.bubbleCardErrorRegistry[o]){const t=window.bubbleCardErrorRegistry[o];e.errorMessage=t.message,e.errorSource=t.source}else e.errorMessage="",e.errorSource=""}e.requestUpdate()};return e._errorListener||(e._errorListener=e=>{const n=e.detail;if(n&&"object"==typeof n&&n.context){const{message:e,context:t}=n;if(e){if(t.cardType&&t.entityId){const n=`${t.cardType}_${t.entityId}`;window.bubbleCardErrorRegistry[n]={message:e,source:"module"===t.sourceType?`Module ('${t.moduleId}')`:"Card Configuration (styles section)",cardType:t.cardType,entityId:t.entityId,moduleId:"module"===t.sourceType?t.moduleId:null}}}else if("module"===t.sourceType&&t.moduleId)Object.keys(window.bubbleCardErrorRegistry).forEach(e=>{window.bubbleCardErrorRegistry[e]?.moduleId===t.moduleId&&delete window.bubbleCardErrorRegistry[e]});else if(t.cardType&&t.entityId){const e=`${t.cardType}_${t.entityId}`;window.bubbleCardErrorRegistry[e]&&delete window.bubbleCardErrorRegistry[e]}}t()},window.addEventListener("bubble-card-error",e._errorListener)),t(),Rt.qy`
             <div class="bubble-info error" 
                 style="display: ${e.errorMessage?"":"none"}; margin-bottom: 8px;">
                 <h4 class="bubble-section-title">
@@ -3848,7 +3883,7 @@
                 </h4>
                 <div class="content">
                     <p>${e.errorMessage}</p>
-                    ${e._editingModule&&"object"==typeof e._editingModule&&e._editingModule.id?Ft.qy`<hr><span class="helper-text" style="margin: 0;">
+                    ${e._editingModule&&"object"==typeof e._editingModule&&e._editingModule.id?Rt.qy`<hr><span class="helper-text" style="margin: 0;">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
                         JS template errors can sometimes be delayed in the Module Editor.
                     </span>`:""}
