@@ -240,7 +240,9 @@ function resolveEntityIconSync(hass, entity, stateObj) {
 function ensurePlatformIcons(hass, entity) {
   const entry = hass.entities?.[entity];
   const platform = entry?.platform;
-  if (!platform || !entry?.translation_key || platformIconsFailed[platform] || !hass?.callWS) {
+  // Skip when already cached (platformIcons[platform]) to avoid re-firing the
+  // WS request on every render/sub-button once the data is loaded.
+  if (!platform || !entry?.translation_key || platformIcons[platform] || platformIconsFailed[platform] || !hass?.callWS) {
     return;
   }
   if (!platformIconsPromises[platform]) {
@@ -250,9 +252,10 @@ function ensurePlatformIcons(hass, entity) {
       integration: platform
     }).then(res => {
       const data = res?.resources?.[platform];
-      if (data) {
-        platformIcons[platform] = data;
-      }
+      // Always cache the result (even when empty) so the guard in
+      // ensurePlatformIcons short-circuits and we never re-fetch a platform
+      // that simply has no custom icon translations.
+      platformIcons[platform] = data || {};
       delete platformIconsPromises[platform];
       // Notify all rendered cards to re-resolve icons from the fresh cache
       notifyIconRefresh();
@@ -270,14 +273,15 @@ function ensurePlatformIcons(hass, entity) {
 export function getIcon(context, entity = context.config.entity, icon = context.config.icon) {
   const hass = context?._hass;
 
-  // Eagerly start loading icon resources (even if this card has a config icon)
-  preloadComponentIcons(hass);
-
+  // Static config icon: return immediately, no resource loading needed.
   if (icon) return icon;
 
   // Entity registry icon (set via HA UI)
   const registryIcon = hass?.entities?.[entity]?.icon;
   if (registryIcon) return registryIcon;
+
+  // Eagerly start loading icon resources (no-op once cached/pending).
+  preloadComponentIcons(hass);
 
   // State attributes icon
   const attrIcon = getAttribute(context, "icon", entity);
