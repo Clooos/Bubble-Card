@@ -9,6 +9,7 @@ import { cleanupScrollingEffects } from './tools/text-scrolling.js';
 import { getEntitySuggestion } from './tools/entity-suggestion.js';
 import { registerPopupContext } from './cards/pop-up/helpers.js';
 import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
+import { registerForIconRefresh, unregisterForIconRefresh } from './tools/icon.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 import { cleanupPopUp, handlePopUp } from './cards/pop-up/index.js';
@@ -69,6 +70,9 @@ class BubbleCard extends HTMLElement {
       maybeShowMigrationNotice(this._hass);
     }
 
+    // Register for icon refresh so cards re-render when icon data loads from WebSocket
+    registerForIconRefresh(this);
+
     if (this._hass) {
       // Defer the heavy update work when a popup is being opened.
       if (isInsidePopupOpeningScope(this) && this.config?.card_type !== 'pop-up') {
@@ -104,6 +108,9 @@ class BubbleCard extends HTMLElement {
         this._moduleChangeHandler = null;
         this._moduleChangeListenerAdded = false;
       }
+    } catch (e) {}
+    try {
+      unregisterForIconRefresh(this);
     } catch (e) {}
     clearTimeout(this._editorUpdateTimeout);
     clearTimeout(this._deferredUpdateTimer);

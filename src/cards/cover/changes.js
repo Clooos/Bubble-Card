@@ -39,14 +39,40 @@ export function isFullyClosed(stateObj) {
   return stateObj.state === "closed";
 }
 
+export function isOpening(stateObj) {
+  if (!stateObj) return false;
+  return stateObj.state === "opening";
+}
+
+export function isClosing(stateObj) {
+  if (!stateObj) return false;
+  return stateObj.state === "closing";
+}
+
+export function canOpen(stateObj) {
+  if (!stateObj) return false;
+  if (stateObj.state === "unavailable") return false;
+  const assumedState = stateObj.attributes.assumed_state === true;
+  return assumedState || (!isFullyOpen(stateObj) && !isOpening(stateObj));
+}
+
+export function canClose(stateObj) {
+  if (!stateObj) return false;
+  if (stateObj.state === "unavailable") return false;
+  const assumedState = stateObj.attributes.assumed_state === true;
+  return assumedState || (!isFullyClosed(stateObj) && !isClosing(stateObj));
+}
+
 export function changeCoverIcons(context) {
   const stateObj = context._hass?.states?.[context.config.entity];
   if (!stateObj?.attributes) return;
-  const { current_position: currentPosition, assumed_state: assumedState } = stateObj.attributes;
 
   const supportsOpen = supportsFeature(stateObj, coverEntityFeature.OPEN);
   const supportsClose = supportsFeature(stateObj, coverEntityFeature.CLOSE);
   const supportsStop = supportsFeature(stateObj, coverEntityFeature.STOP);
+
+  const canOpenCover = canOpen(stateObj);
+  const canCloseCover = canClose(stateObj);
 
   const fullyOpen = isFullyOpen(stateObj);
   const fullyClosed = isFullyClosed(stateObj);
@@ -62,21 +88,24 @@ export function changeCoverIcons(context) {
   context.elements.buttonOpen.icon.setAttribute("icon", iconUpName);
   context.elements.buttonClose.icon.setAttribute("icon", iconDownName);
 
-  if (currentPosition !== undefined) {
-    if (fullyOpen) {
-      context.elements.buttonOpen.classList.add("disabled");
-    } else if (supportsOpen) {
+  if (supportsOpen) {
+    if (canOpenCover) {
       context.elements.buttonOpen.classList.remove("disabled");
-    }
-
-    if (fullyClosed) {
-      context.elements.buttonClose.classList.add("disabled");
-    } else if (supportsClose) {
-      context.elements.buttonClose.classList.remove("disabled");
+    } else {
+      context.elements.buttonOpen.classList.add("disabled");
     }
   } else {
-    context.elements.buttonOpen.classList.remove("disabled");
-    context.elements.buttonClose.classList.remove("disabled");
+    context.elements.buttonOpen.classList.add("disabled");
+  }
+
+  if (supportsClose) {
+    if (canCloseCover) {
+      context.elements.buttonClose.classList.remove("disabled");
+    } else {
+      context.elements.buttonClose.classList.add("disabled");
+    }
+  } else {
+    context.elements.buttonClose.classList.add("disabled");
   }
 
   if (!supportsStop) {

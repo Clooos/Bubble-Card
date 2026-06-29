@@ -292,10 +292,9 @@ export function registerPopUpHash(hash, { name, icon, isConnected = true, elemen
 
         const existing = popUpRegistrations.find(reg => reg.ref.deref() === element);
         if (existing) {
-            if (existing.hash !== normalizedHash || existing.path !== currentPath) {
+            if (existing.hash !== normalizedHash) {
                 const oldHash = existing.hash;
                 existing.hash = normalizedHash;
-                existing.path = currentPath;
                 removeHashIfOrphaned(oldHash);
                 changed = true;
             }
@@ -309,7 +308,8 @@ export function registerPopUpHash(hash, { name, icon, isConnected = true, elemen
 
     const hashMap = getGlobalPopUpHashMap();
     const existingMeta = hashMap.get(normalizedHash);
-    const newMeta = { name: name || null, icon: icon || null, path: currentPath };
+    const preservedPath = existingMeta?.path ?? currentPath;
+    const newMeta = { name: name || null, icon: icon || null, path: preservedPath };
 
     const metaChanged = !existingMeta ||
         existingMeta.name !== newMeta.name ||

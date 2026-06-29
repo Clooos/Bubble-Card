@@ -262,7 +262,7 @@ export function changeIcon(context) {
 
 export function changeName(context, textScrolling = true) {
     const buttonType = context.config.button_type;
-    const name = buttonType !== 'name' ? getName(context) : context.config.name;
+    const name = (buttonType !== 'name' ? getName(context) : context.config.name) ?? '';
     
     if (!context.elements.name) return;
     

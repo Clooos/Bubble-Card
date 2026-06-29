@@ -27,6 +27,8 @@ ha-card {
     -webkit-mask-image: linear-gradient(to right, transparent, black 8px, black calc(100% - 8px), transparent);
     overflow: hidden;
     contain: content;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .scrolling-container span {
@@ -36,6 +38,8 @@ ha-card {
     animation-iteration-count: infinite;
     animation-play-state: paused;
     will-change: transform;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .bubble-scroll-separator {

@@ -1685,43 +1685,6 @@ class BubbleCardEditor extends LitElement {
   }
 
   _ActionChanged(ev, array, index) {
-    var hasDefaultEntity = false;
-    try { 
-      if (ev.currentTarget && 
-          ev.currentTarget.__schema && 
-          ev.currentTarget.__schema[0] && 
-          ev.detail.value[ev.currentTarget.__schema[0].name] &&
-          ev.detail.value[ev.currentTarget.__schema[0].name]['target'] &&
-          ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'] &&
-          ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'][0] === 'entity') {
-        hasDefaultEntity = true;
-      }
-    }
-    catch { }
-    try { 
-      if (ev.currentTarget && 
-          ev.currentTarget.__schema && 
-          ev.currentTarget.__schema[0] && 
-          ev.detail.value[ev.currentTarget.__schema[0].name] &&
-          ev.detail.value[ev.currentTarget.__schema[0].name]['target'] &&
-          ev.detail.value[ev.currentTarget.__schema[0].name]['target']['entity_id'] === 'entity') {
-        hasDefaultEntity = true;
-      }
-    }
-    catch { }
-    if (hasDefaultEntity) {
-      if (ev.currentTarget && 
-          ev.currentTarget.__schema && 
-          ev.currentTarget.__schema[0] &&
-          ev.detail.value[ev.currentTarget.__schema[0].name]) {
-        ev.detail.value[ev.currentTarget.__schema[0].name]['action'] = 'call-service';
-        if (ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'] != undefined) {
-          ev.detail.value[ev.currentTarget.__schema[0].name]['service'] = "" + ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'];
-          delete ev.detail.value[ev.currentTarget.__schema[0].name]['perform_action'];
-        }
-      }
-    }
-
     // Update config with support for nested sub_button paths
     if (array === 'button_action' || array === 'event_action') {
       // Simple action containers
@@ -1809,7 +1772,13 @@ class BubbleCardEditor extends LitElement {
     // Derive the correct array path and index for nested sub-buttons
     let arrayPath = null;
     let idx = null;
-    if (configKeys[0] === 'button_action' || configKeys[0] === 'event_action') {
+    if (configKeys.length === 2) {
+      // Top-level action (e.g., tap_action.default_entity)
+      // Update directly to avoid _ActionChanged replacing the entire config
+      this._config = { ...this._config, [actionName]: actionObject };
+      fireEvent(this, "config-changed", { config: this._config });
+      return;
+    } else if (configKeys[0] === 'button_action' || configKeys[0] === 'event_action') {
       arrayPath = configKeys[0];
     } else if (configKeys.length >= 4) {
       // Handles: sub_button.0.tap_action.default_entity (top-level sub_button)
@@ -2581,7 +2550,7 @@ class BubbleCardEditor extends LitElement {
             restoreBridgedClose();
         };
 
-        const restoreBridgedClose = bridgeDialogCloseToParent(activeDialog, () => {
+        const reopenParent = () => {
             const reopened = this._reopenStandaloneParentDialog(
                 parentDialogParams,
                 getCardConfig(),
@@ -2596,10 +2565,24 @@ class BubbleCardEditor extends LitElement {
             }
 
             return reopened;
-        });
+        };
 
+        const restoreBridgedClose = bridgeDialogCloseToParent(activeDialog, reopenParent);
+
+        // Only react to the direct child dialog closing, not to grandchild dialogs
+        // created by third-party cards (e.g. actions-card opening its "Wrapped Card" editor).
         const handleClosed = (event) => {
             if (event?.detail?.dialog !== "hui-dialog-edit-card") return;
+
+            // Some cards create a new hui-dialog-edit-card element instead of reusing the
+            // existing one. When that grandchild closes, dialog-closed fires but our
+            // child dialog (activeDialog) is still open in the DOM.
+            // Check if activeDialog is still present, if so, ignore this event.
+            const host = this._getHomeAssistantHost()?.shadowRoot;
+            if (host?.contains(activeDialog)) {
+                return;
+            }
+
             cleanup();
             this._reopenStandaloneParentDialog(parentDialogParams, getCardConfig(), activeDialog);
         };
