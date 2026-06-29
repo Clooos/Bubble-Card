@@ -478,9 +478,10 @@ export function prepareStandaloneStructure(context) {
   context.sectionRowContainer = context.sectionRow?.closest?.('.card') || context.sectionRow?.parentElement || null;
   context.cardTitle = null;
 
+  const popUpParent = context.shadowRoot ?? context.content;
+
   if (!context.popUp) {
     context.popUp = createElement("div");
-    (context.shadowRoot ?? context.content).appendChild(context.popUp);
   }
 
   // Standalone pop-ups still need to match legacy module/custom-style snippets
@@ -501,9 +502,18 @@ export function prepareStandaloneStructure(context) {
   context.elements = {};
   getBackdrop(context);
   _applyPopupVariables(context);
-  if (context.editor || context.detectedEditor) {
+
+  if (context.editor || context.detectedEditor || context.config.background_update) {
+    // Editor or background_update needs the shell mounted immediately.
+    if (!context.popUp.parentNode) {
+      popUpParent.appendChild(context.popUp);
+    }
     restorePopupHostLayout(context);
   } else {
+    // Defer DOM attachment until first open. Reuse the same mechanism
+    // (_standalonePopUpParent) that closeStandalonePopup uses for detachment.
+    // `openStandalonePopup` will re-attach the shell before starting the animation.
+    context._standalonePopUpParent = popUpParent;
     suspendPopupHostLayout(context);
   }
   registerPopupContext(context);
