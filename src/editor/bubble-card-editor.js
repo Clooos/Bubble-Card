@@ -1591,6 +1591,14 @@ class BubbleCardEditor extends LitElement {
                 newConfig.rows = 1;
             }
         }
+        // When card_type changes to pop-up, mark it as standalone with an empty
+        // cards array so the editor preview shows the onboarding flow instead of
+        // the legacy vertical-stack pop-up.
+        if (target?.configValue === 'card_type' && detail?.value === 'pop-up') {
+            if (!Array.isArray(newConfig.cards)) {
+                newConfig.cards = [];
+            }
+        }
     } catch (e) {}
 
     // Update this._config with the new config

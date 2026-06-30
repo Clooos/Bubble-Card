@@ -423,8 +423,6 @@ function updateUIForVerticalStack(editor, isInVerticalStack) {
 
 function createPopUpConfig(editor, originalConfig) {
     try {
-        // Detect the legacy vertical-stack setup.
-        const isInVerticalStack = window.popUpError === false;
         const popupBehaviorConfig = getPopUpBehaviorConfig(editor._config);
         
         // Read the current form value.
@@ -435,42 +433,6 @@ function createPopUpConfig(editor, originalConfig) {
             return;
         }
         hashValue = hashState.normalizedValue;
-        
-        if (isInVerticalStack) {
-            if (popupBehaviorConfig.popup_mode) {
-                editor._config.popup_mode = popupBehaviorConfig.popup_mode;
-            } else {
-                delete editor._config.popup_mode;
-            }
-
-            if (popupBehaviorConfig.performance_mode) {
-                editor._config.performance_mode = popupBehaviorConfig.performance_mode;
-            } else {
-                delete editor._config.performance_mode;
-            }
-
-            if (popupBehaviorConfig.with_bottom_offset) {
-                editor._config.with_bottom_offset = true;
-            } else {
-                delete editor._config.with_bottom_offset;
-            }
-
-            if (popupBehaviorConfig.full_width_on_mobile) {
-                editor._config.full_width_on_mobile = true;
-            } else {
-                delete editor._config.full_width_on_mobile;
-            }
-
-            editor._config.hash = hashValue;
-            commitEditorSessionHash(hashValue);
-            registerPopUpHash(hashValue, {
-                name: editor._config.name,
-                icon: editor._config.icon
-            });
-            fireEvent(editor, "config-changed", { config: editor._config });
-            console.info("Pop-up already in a vertical stack. Hash updated. Note that manually creating a vertical stack is no longer required.");
-            return;
-        }
         
         if (includeExample) {
             editor._config = {
@@ -539,31 +501,11 @@ export function renderPopUpEditor(editor) {
 
         const originalConfig = { ...editor._config };
 
-        let isInVerticalStack = false;
-
-        // Let the editor mount before checking the legacy stack state.
-        setTimeout(() => {
-            isInVerticalStack = window.popUpError === false;
-            updateUIForVerticalStack(editor, isInVerticalStack);
-            syncHashInputState(editor, session.originalHash);
-        }, 0);
-
         editor.createPopUpConfig = () => createPopUpConfig(editor, originalConfig);
 
         return html`
             <div class="card-config">
                 ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
-                <div id="vertical-stack-alert-container" style="display: none;">
-                    <div class="bubble-info warning">
-                        <h4 class="bubble-section-title">
-                            <ha-icon icon="mdi:alert-outline"></ha-icon>
-                            Old configuration detected
-                        </h4>
-                        <div class="content">
-                            <p>This pop-up is already inside a vertical stack (old method). This is no longer required, but it will work fine. You can simply update the hash below.</p>
-                        </div>
-                    </div>
-                </div>
                 <ha-form
                     .hass=${editor.hass}
                     .data=${{ hash: getPopUpHashInputDisplayValue(session.lastChangedHash || POPUP_HASH_PREFIX) }}

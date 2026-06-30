@@ -1,5 +1,5 @@
 import { changeEditor, changeStyle, changeTriggered, clearStyleUpdateFrame } from './changes.js';
-import { createHeader, createStructure, prepareStructure, prepareStandaloneStructure, renderHeaderButton } from './create.js';
+import { createHeader, createStructure, prepareStructure, prepareStandaloneStructure, renderHeaderButton, renderStandaloneOnboarding, clearStandaloneOnboarding } from './create.js';
 import { cleanupPopupRuntime, registerPopupContext, syncPopupOpenStateWithLocation } from './helpers.js';
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
 import { cleanupPopUpCards, handlePopUpCards } from './cards/index.js';
@@ -370,11 +370,21 @@ function initializeLegacyPopUp(context) {
 export function handlePopUp(context) {
     syncPopUpHashRegistration(context);
 
+    // Brand-new standalone pop-up being created in the editor: show the
+    // onboarding animation until a hash is set ("Create pop-up" clicked).
+    if (isStandalonePopUpConfig(context.config) && !context.config.hash &&
+        (context.editor || context.detectedEditor)) {
+        renderStandaloneOnboarding(context);
+        return;
+    }
+
     if (context.cardType !== "pop-up") {
         if ((context.getRootNode() instanceof ShadowRoot) === false) {
             // Skip detached cards.
             return;
         }
+
+        clearStandaloneOnboarding(context);
 
         if (isStandalonePopUpConfig(context.config)) {
             initializeStandalonePopUp(context);

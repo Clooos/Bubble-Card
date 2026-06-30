@@ -469,6 +469,22 @@ export function prepareStructure(context) {
   }
 }
 
+// Show the animated onboarding preview for a brand-new standalone pop-up
+// (no hash yet) while it is being created in the editor. Mirrors the legacy
+// onboarding that the vertical-stack path renders in its catch block.
+export function renderStandaloneOnboarding(context) {
+  const existingError = context.content?.querySelector?.('.bubble-error-text');
+  if (!existingError && context.content) {
+    const errorText = createElement("div", "bubble-error-text");
+    render(renderPopupOnboarding(context), errorText);
+    context.content.appendChild(errorText);
+  }
+}
+
+export function clearStandaloneOnboarding(context) {
+  context.content?.querySelector?.('.bubble-error-text')?.remove();
+}
+
 export function prepareStandaloneStructure(context) {
   context.cardType = "pop-up";
   context.isStandalonePopUp = true;
