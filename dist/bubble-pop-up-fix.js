@@ -1,1 +1,13 @@
-(()=>{"use strict";!function(){const e=document.querySelector("body");let t=customElements.get("bubble-card");const a=setInterval(function(){t=customElements.get("bubble-card"),t?(clearInterval(a),e.style.transition="opacity 0.5s",e.style.opacity="1"):e.style.opacity="0"},0);setTimeout(function(){clearInterval(a),e.style.transition="opacity 0.5s",e.style.opacity="1"},1500)}(),console.info("%c Bubble Card %c Pop-up fix ","background-color: #555;color: #fff;padding: 3px 2px 3px 3px;border-radius: 14px 0 0 14px;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)","background-color: #506eac;color: #fff;padding: 3px 3px 3px 2px;border-radius: 0 14px 14px 0;font-family: DejaVu Sans,Verdana,Geneva,sans-serif;text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3)")})();
+// Since v3.2.0, Bubble Card Pop-up fix isn't required anymore, but this file is still included in the build to exclude 404 errors in the console.
+if (typeof window !== 'undefined' && !window.__bubblePopupFixNotified) {
+  window.__bubblePopupFixNotified = true
+  console.warn(
+    '%c[Bubble Card] %cbubble-pop-up-fix.js',
+    'color:#ff9800;font-weight:bold',
+    'color:#ff9800;font-weight:bold;font-family:monospace',
+    'is no longer needed since v3.2.0. You can safely remove it from your configuration.yaml:\n\n'
+    + '  frontend:\n'
+    + '    extra_module_url:\n'
+    + '      - /some_path/bubble-pop-up-fix.js  ← remove this line'
+  )
+}
