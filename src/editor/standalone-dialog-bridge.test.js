@@ -4,6 +4,8 @@ import {
     bridgeDialogCloseToParent,
     createReopenedStandaloneParentDialogParams,
     createStandaloneParentDialogParams,
+    createStandaloneParentDialogParamsFromDialog,
+    getDialogLiveCardConfig,
     restoreDialogCardEditorVisualState,
 } from './standalone-dialog-bridge.js';
 
@@ -121,6 +123,77 @@ describe('standalone popup dialog params', () => {
         const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, editedPopup);
 
         expect(parentParams.cardConfig).toEqual(standalonePopup);
+        expect(reopenedParams.cardConfig).toEqual(editedPopup);
+    });
+
+    test('uses the live dialog editor config when an unsaved stack wrapper contains the popup', () => {
+        const unsavedStack = {
+            type: 'vertical-stack',
+            cards: [standalonePopup],
+        };
+        const saveCardConfig = jest.fn();
+        const cardElementEditor = {
+            _config: unsavedStack,
+        };
+        const dialog = {
+            _params: {
+                // HA can still expose the freshly-created nested popup as the
+                // active cardConfig until the containing stack has been saved.
+                cardConfig: standalonePopup,
+                saveCardConfig,
+            },
+            shadowRoot: {
+                querySelector: jest.fn((selector) => selector === 'hui-card-element-editor' ? cardElementEditor : null),
+                querySelectorAll: jest.fn(() => []),
+            },
+            querySelectorAll: jest.fn(() => []),
+        };
+
+        const liveConfig = getDialogLiveCardConfig(dialog, standalonePopup);
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, standalonePopup);
+        const editedPopup = {
+            ...standalonePopup,
+            cards: [
+                ...standalonePopup.cards,
+                {
+                    type: 'button',
+                    entity: 'light.sink',
+                },
+            ],
+        };
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, editedPopup);
+
+        expect(liveConfig).toBe(unsavedStack);
+        expect(parentParams.cardConfig).toBe(unsavedStack);
+        expect(parentParams._standalonePopupPathInDialog).toEqual(['cards', 0]);
+        expect(reopenedParams.cardConfig).toEqual({
+            type: 'vertical-stack',
+            cards: [editedPopup],
+        });
+        expect(reopenedParams.saveCardConfig).toBe(saveCardConfig);
+    });
+
+    test('keeps the popup as root when no live parent config contains it', () => {
+        const dialog = {
+            _params: {
+                cardConfig: standalonePopup,
+            },
+            shadowRoot: {
+                querySelector: jest.fn(() => null),
+                querySelectorAll: jest.fn(() => []),
+            },
+            querySelectorAll: jest.fn(() => []),
+        };
+
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, standalonePopup);
+        const editedPopup = {
+            ...standalonePopup,
+            name: 'Kitchen popup',
+        };
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, editedPopup);
+
+        expect(parentParams.cardConfig).toEqual(standalonePopup);
+        expect(parentParams._standalonePopupPathInDialog).toEqual([]);
         expect(reopenedParams.cardConfig).toEqual(editedPopup);
     });
 });

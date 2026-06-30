@@ -28,7 +28,7 @@ import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
 import cardsEditorStyles from '../cards/pop-up/cards/styles.css';
 import { getLazyLoadedPanelContent } from './utils.js';
-import { bridgeDialogCloseToParent, createReopenedStandaloneParentDialogParams, createStandaloneParentDialogParams, getDialogCardElementEditor, restoreDialogCardEditorVisualState } from './standalone-dialog-bridge.js';
+import { bridgeDialogCloseToParent, createReopenedStandaloneParentDialogParams, createStandaloneParentDialogParamsFromDialog, getDialogCardElementEditor, restoreDialogCardEditorVisualState } from './standalone-dialog-bridge.js';
 
 class BubbleCardEditor extends LitElement {
     _previewStyleApplied = false;
@@ -2442,10 +2442,7 @@ class BubbleCardEditor extends LitElement {
 
     _captureStandaloneParentDialogParams() {
         const dialog = this._getActiveEditCardDialog();
-        const params = dialog?._params;
-        if (!params) return null;
-
-        return createStandaloneParentDialogParams(params, this._config);
+        return createStandaloneParentDialogParamsFromDialog(dialog, this._config);
     }
 
     _extractCardsFromStandaloneLovelaceConfig(lovelaceConfig) {

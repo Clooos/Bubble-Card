@@ -113,6 +113,136 @@ export function restoreDialogCardEditorVisualState(dialog) {
     return restoreCardElementEditorVisualState(getDialogCardElementEditor(dialog));
 }
 
+function getCandidateConfig(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        return null;
+    }
+
+    return value;
+}
+
+function addConfigCandidate(candidates, value) {
+    const config = getCandidateConfig(value);
+    if (config && !candidates.includes(config)) {
+        candidates.push(config);
+    }
+}
+
+function addElementConfigCandidates(candidates, element) {
+    if (!element) {
+        return;
+    }
+
+    addConfigCandidate(candidates, element._config);
+    addConfigCandidate(candidates, element.config);
+    addConfigCandidate(candidates, element._cardConfig);
+    addConfigCandidate(candidates, element.cardConfig);
+    addConfigCandidate(candidates, element.value);
+}
+
+function collectCardElementEditors(root, editors, maxDepth = 6) {
+    if (!root || maxDepth < 0) {
+        return;
+    }
+
+    try {
+        const direct = root.querySelectorAll?.('hui-card-element-editor') || [];
+        for (const editor of direct) {
+            if (!editors.includes(editor)) {
+                editors.push(editor);
+            }
+        }
+
+        const all = root.querySelectorAll?.('*') || [];
+        for (const element of all) {
+            if (element?.shadowRoot) {
+                collectCardElementEditors(element.shadowRoot, editors, maxDepth - 1);
+            }
+        }
+    } catch (_) {}
+}
+
+function rootMatchesPopupConfig(rootConfig, popupConfig) {
+    if (!rootConfig || !popupConfig || typeof rootConfig !== 'object' || typeof popupConfig !== 'object') {
+        return false;
+    }
+
+    if (rootConfig === popupConfig || configsAreEqual(rootConfig, popupConfig)) {
+        return true;
+    }
+
+    const rootHash = normalizeHash(rootConfig.hash);
+    const popupHash = normalizeHash(popupConfig.hash);
+    return Boolean(
+        rootHash &&
+        popupHash &&
+        rootHash === popupHash &&
+        rootConfig.card_type === popupConfig.card_type &&
+        rootConfig.card_type === 'pop-up'
+    );
+}
+
+function scoreDialogConfigCandidate(candidate, popupConfig) {
+    if (!candidate || typeof candidate !== 'object') {
+        return -1;
+    }
+
+    if (!popupConfig) {
+        return 1;
+    }
+
+    const popupPath = findConfigPath(candidate, popupConfig);
+    if (Array.isArray(popupPath)) {
+        // Prefer the live containing card (vertical-stack, grid, etc.) over the
+        // popup itself so unsaved parent wrappers are not lost when reopening.
+        return popupPath.length > 0 ? 1000 + popupPath.length : 100;
+    }
+
+    return rootMatchesPopupConfig(candidate, popupConfig) ? 100 : -1;
+}
+
+export function getDialogLiveCardConfig(dialog, popupConfig) {
+    const candidates = [];
+
+    addConfigCandidate(candidates, dialog?._params?.cardConfig);
+    addElementConfigCandidates(candidates, dialog);
+    addElementConfigCandidates(candidates, getDialogCardElementEditor(dialog));
+
+    const editors = [];
+    collectCardElementEditors(dialog?.shadowRoot, editors);
+    collectCardElementEditors(dialog, editors);
+    for (const editor of editors) {
+        addElementConfigCandidates(candidates, editor);
+    }
+
+    let bestCandidate = null;
+    let bestScore = -1;
+
+    for (const candidate of candidates) {
+        const score = scoreDialogConfigCandidate(candidate, popupConfig);
+        if (score > bestScore) {
+            bestScore = score;
+            bestCandidate = candidate;
+        }
+    }
+
+    return bestScore >= 0 ? bestCandidate : null;
+}
+
+export function createStandaloneParentDialogParamsFromDialog(dialog, popupConfig) {
+    const params = dialog?._params;
+    if (!params) {
+        return null;
+    }
+
+    const liveCardConfig = getDialogLiveCardConfig(dialog, popupConfig);
+    const dialogParams = liveCardConfig && liveCardConfig !== params.cardConfig
+        ? { ...params, cardConfig: liveCardConfig }
+        : params;
+
+    return createStandaloneParentDialogParams(dialogParams, popupConfig);
+}
+
 function cloneConfig(value) {
     if (value === undefined) {
         return undefined;
