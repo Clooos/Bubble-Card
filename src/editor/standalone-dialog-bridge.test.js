@@ -109,6 +109,46 @@ describe('standalone popup dialog params', () => {
         expect(reopenedParams.saveCardConfig).toBe(saveCardConfig);
     });
 
+    test('reopens the second standalone popup in a stack with similar hashes on the correct path', () => {
+        const firstPopup = {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#alooo',
+            cards: [{ type: 'button', entity: 'light.shelly' }],
+        };
+        const secondPopup = {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#alooooo',
+            cards: [{ type: 'calendar', entities: ['calendar.recycle'] }],
+        };
+        const commonStack = {
+            type: 'vertical-stack',
+            cards: [firstPopup, secondPopup],
+        };
+
+        const parentParams = createStandaloneParentDialogParams(
+            {
+                cardConfig: commonStack,
+            },
+            secondPopup
+        );
+        const editedSecondPopup = {
+            ...secondPopup,
+            cards: [
+                ...secondPopup.cards,
+                { type: 'button', entity: 'light.second' },
+            ],
+        };
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, editedSecondPopup);
+
+        expect(parentParams._standalonePopupPathInDialog).toEqual(['cards', 1]);
+        expect(reopenedParams.cardConfig).toEqual({
+            type: 'vertical-stack',
+            cards: [firstPopup, editedSecondPopup],
+        });
+    });
+
     test('keeps direct standalone popup edit flows scoped to the popup itself', () => {
         const parentParams = createStandaloneParentDialogParams(
             {

@@ -2440,9 +2440,9 @@ class BubbleCardEditor extends LitElement {
         return this._getActiveEditCardDialog()?._params?.lovelaceConfig || null;
     }
 
-    _captureStandaloneParentDialogParams() {
+    _captureStandaloneParentDialogParams(popupConfig = this._config) {
         const dialog = this._getActiveEditCardDialog();
-        return createStandaloneParentDialogParamsFromDialog(dialog, this._config);
+        return createStandaloneParentDialogParamsFromDialog(dialog, popupConfig);
     }
 
     _extractCardsFromStandaloneLovelaceConfig(lovelaceConfig) {
@@ -2670,16 +2670,24 @@ class BubbleCardEditor extends LitElement {
         }
     }
 
+    async _openStandaloneCardDialogForPopup(popupConfig, options) {
+        return this._openStandaloneCardDialog({ ...options, popupConfig });
+    }
+
     async _openStandaloneCardDialog(options) {
         const homeAssistant = this._getHomeAssistantHost();
         restoreDialogCardEditorVisualState(this._getActiveEditCardDialog());
-        const parentDialogParams = this._captureStandaloneParentDialogParams();
+        const popupConfig = options?.popupConfig || this._config;
+        const parentDialogParams = this._captureStandaloneParentDialogParams(popupConfig);
 
         if (!homeAssistant || !parentDialogParams) return false;
 
+        const ownsPopupConfig = !options?.popupConfig
+            || this._normalizePopupHash(options.popupConfig?.hash) === this._normalizePopupHash(this._config?.hash);
+
         let nextConfig = {
-            ...this._config,
-            cards: [...(this._config?.cards || [])],
+            ...popupConfig,
+            cards: [...(popupConfig?.cards || [])],
         };
 
         const updateStandaloneConfig = async (lovelaceConfig) => {
@@ -2687,7 +2695,9 @@ class BubbleCardEditor extends LitElement {
                 ...nextConfig,
                 cards: this._extractCardsFromStandaloneLovelaceConfig(lovelaceConfig),
             };
-            this._config = nextConfig;
+            if (ownsPopupConfig) {
+                this._config = nextConfig;
+            }
         };
 
         if (options?.type === "add") {

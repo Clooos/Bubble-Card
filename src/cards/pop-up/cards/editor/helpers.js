@@ -223,6 +223,11 @@ function _getRegisteredStandaloneDialogOpener(context) {
                 return editor._openStandaloneCardDialog.bind(editor);
             }
         }
+
+        const bridgeOpener = _getRegisteredStandaloneBridgeOpener(editors, context);
+        if (bridgeOpener) {
+            return bridgeOpener;
+        }
     }
 
     // Fallback: score all editors (only when popup has no hash).
@@ -240,6 +245,30 @@ function _getRegisteredStandaloneDialogOpener(context) {
     return bestEditor && bestScore >= 0
         ? bestEditor._openStandaloneCardDialog.bind(bestEditor)
         : null;
+}
+
+function _getRegisteredStandaloneBridgeOpener(editors, context) {
+    for (const editor of editors) {
+        const opener = _getStandaloneBridgeOpener(editor, context);
+        if (opener) {
+            return opener;
+        }
+    }
+
+    return null;
+}
+
+function _getStandaloneBridgeOpener(editor, context) {
+    if (!editor || editor.isConnected === false || typeof editor._openStandaloneCardDialogForPopup !== 'function') {
+        return null;
+    }
+
+    const popupConfig = context?.config;
+    if (!popupConfig || popupConfig.card_type !== 'pop-up' || !Array.isArray(popupConfig.cards)) {
+        return null;
+    }
+
+    return (options) => editor._openStandaloneCardDialogForPopup(popupConfig, options);
 }
 
 function _scoreStandaloneEditor(editor, context) {
