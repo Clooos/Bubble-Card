@@ -12,7 +12,27 @@ jest.unstable_mockModule('../../../tools/utils.js', () => ({
     createElement: jest.fn(),
 }));
 
-const { updateCardElements } = await import('./create.js');
+const { _isStandalonePopupCardConfig, updateCardElements } = await import('./create.js');
+
+describe('_isStandalonePopupCardConfig', () => {
+    test('detects standalone bubble pop-up child configs', () => {
+        expect(_isStandalonePopupCardConfig({
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            cards: [],
+        })).toBe(true);
+    });
+
+    test('ignores other bubble card types and non-bubble cards', () => {
+        expect(_isStandalonePopupCardConfig({
+            type: 'custom:bubble-card',
+            card_type: 'button',
+        })).toBe(false);
+        expect(_isStandalonePopupCardConfig({
+            type: 'entities',
+        })).toBe(false);
+    });
+});
 
 function createStyleRecorder() {
     return {

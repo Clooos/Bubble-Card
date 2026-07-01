@@ -4,6 +4,8 @@ import { createEditorCardElements } from './editor/index.js';
 
 const GRID_COLUMN_MULTIPLIER = 3;
 const DEFAULT_GRID_SIZE = { columns: 12, rows: 'auto' };
+const NESTED_POPUP_WARNING_TITLE = 'Nested pop-ups are not supported';
+const NESTED_POPUP_WARNING_MESSAGE = 'Adding a standalone pop-up inside another standalone pop-up is not supported. Please create this pop-up outside of the current pop-up instead.';
 
 function _hasStateDrivenVisibility(cardConfig, visited = new Set()) {
     if (!cardConfig || typeof cardConfig !== 'object' || visited.has(cardConfig)) {
@@ -103,7 +105,9 @@ export function createCardElements(context) {
 
     if (isEditMode) {
         createEditorCardElements(context, cards, {
-            createCard: (cardConfig) => _createHuiCard(cardConfig, context, true),
+            createCard: (cardConfig) => _isStandalonePopupCardConfig(cardConfig)
+                ? _createNestedPopupWarningCard()
+                : _createHuiCard(cardConfig, context, true),
             applyCardWrapperLayout: _applyCardWrapperLayout,
             bindCardLayoutUpdates: _bindCardLayoutUpdates,
             rebuildCards: () => {
@@ -246,6 +250,31 @@ function _createHuiCard(cardConfig, context, preview) {
         console.warn('Bubble Card: Failed to create card element', e);
         return null;
     }
+}
+
+export function _isStandalonePopupCardConfig(cardConfig) {
+    return Boolean(
+        cardConfig?.type === 'custom:bubble-card' &&
+        cardConfig?.card_type === 'pop-up'
+    );
+}
+
+function _createNestedPopupWarningCard() {
+    const warning = createElement('div', 'bubble-nested-popup-warning-card');
+    warning.setAttribute('role', 'alert');
+
+    const title = createElement('h4', 'bubble-nested-popup-warning-title');
+    const icon = document.createElement('ha-icon');
+    icon.setAttribute('icon', 'mdi:alert-outline');
+    title.appendChild(icon);
+    title.appendChild(document.createTextNode(NESTED_POPUP_WARNING_TITLE));
+
+    const message = createElement('p', 'bubble-nested-popup-warning-message');
+    message.textContent = NESTED_POPUP_WARNING_MESSAGE;
+
+    warning.appendChild(title);
+    warning.appendChild(message);
+    return warning;
 }
 
 function _conditionalClamp(value, minValue, maxValue) {

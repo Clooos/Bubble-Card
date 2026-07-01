@@ -98,3 +98,39 @@
 .bubble-cards-add-button ha-svg-icon {
     --mdc-icon-size: 24px;
 }
+
+/* ============================================
+   Pop-up Cards — Unsupported nested pop-up warning
+   ============================================ */
+
+.bubble-nested-popup-warning-card {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--row-height);
+    padding: 12px 16px;
+    border: 1px solid var(--warning-color, #ffa600);
+    border-radius: var(--ha-card-border-radius, 12px);
+    background: color-mix(in srgb, var(--warning-color, #ffa600) 12%, var(--card-background-color, #fff));
+    color: var(--primary-text-color);
+}
+
+.bubble-nested-popup-warning-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.bubble-nested-popup-warning-title ha-icon {
+    color: var(--warning-color, #ffa600);
+}
+
+.bubble-nested-popup-warning-message {
+    margin: 0;
+    color: var(--secondary-text-color);
+    font-size: 13px;
+    line-height: 1.35;
+}

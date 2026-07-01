@@ -44,6 +44,7 @@ class BubbleCardEditor extends LitElement {
     _previewCardHost = null;
     _previewCardScore = -Infinity;
     _cardContextListener = null;
+    _disallowStandalonePopup = false;
     // Stabilization for auto-rows calculation to prevent loops from micro layout changes
     _lastMeasuredHeights = null;
 
@@ -68,6 +69,7 @@ class BubbleCardEditor extends LitElement {
         const previewStillConnected = !!prevHost?.isConnected;
 
         this._config = { ...config };
+        this._disallowStandalonePopup = this._isStandalonePopupDisallowedInCurrentDialog();
         // Show or hide the tab bar in hui-card-element-editor depending on card type.
         // Must run after Lit's update cycle so the injected style isn't wiped by the first render.
         const _cardElementEditor = this.getRootNode()?.host;
@@ -378,6 +380,15 @@ class BubbleCardEditor extends LitElement {
 
         const cardTypeList = this.cardTypeList;
         const buttonTypeList = this.buttonTypeList;
+
+        if (this._isNestedStandalonePopupConfig()) {
+            return html`
+                <div class="card-config">
+                    ${this._renderNestedStandalonePopupWarning()}
+                    ${this.makeDropdown("Card type", "card_type", cardTypeList)}
+                </div>
+            `;
+        }
 
         switch (this._config?.card_type) {
             case 'pop-up':
@@ -921,6 +932,20 @@ class BubbleCardEditor extends LitElement {
 
     _renderConditionalContent(condition, content) {
         return condition ? content : html``;
+    }
+
+    _renderNestedStandalonePopupWarning() {
+        return html`
+            <div class="bubble-info warning">
+                <h4 class="bubble-section-title">
+                    <ha-icon icon="mdi:alert-outline"></ha-icon>
+                    Nested pop-ups are not supported
+                </h4>
+                <div class="content">
+                    <p>Adding a standalone pop-up inside another standalone pop-up is not supported. Please create this pop-up outside of the current pop-up instead.</p>
+                </div>
+            </div>
+        `;
     }
 
     makeActionPanel(label, context = this._config, defaultAction, array, index = this._config) {
@@ -1570,6 +1595,11 @@ class BubbleCardEditor extends LitElement {
         } else {
             return;
         }
+    }
+
+    if (target?.configValue === 'card_type' && detail?.value === 'pop-up' && this._isStandalonePopupDisallowedInCurrentDialog()) {
+        console.warn('Bubble Card: nested standalone pop-ups are not supported');
+        return;
     }
 
     // Update auto/manual mode when user edits rows
@@ -2310,7 +2340,10 @@ class BubbleCardEditor extends LitElement {
 
     // Only recreate cardTypeList if it doesn't exist or if translation might have changed
     const calendarLabel = t('editor.calendar.name');
-    if (!this.cardTypeList || (this._cachedCalendarLabel && this._cachedCalendarLabel !== calendarLabel)) {
+    const disallowStandalonePopup = this._isStandalonePopupDisallowedInCurrentDialog();
+    if (!this.cardTypeList ||
+        this._cachedStandalonePopupDisallowed !== disallowStandalonePopup ||
+        (this._cachedCalendarLabel && this._cachedCalendarLabel !== calendarLabel)) {
         this.cardTypeList = [{
                 'label': 'Button (Switch, slider, ...)',
                 'value': 'button'
@@ -2339,10 +2372,10 @@ class BubbleCardEditor extends LitElement {
                 'label': 'Media player',
                 'value': 'media-player'
             },
-            {
+            ...(!disallowStandalonePopup ? [{
                 'label': 'Pop-up',
                 'value': 'pop-up'
-            },
+            }] : []),
             {
                 'label': 'Select',
                 'value': 'select'
@@ -2357,8 +2390,25 @@ class BubbleCardEditor extends LitElement {
             }
         ];
         this._cachedCalendarLabel = calendarLabel;
+        this._cachedStandalonePopupDisallowed = disallowStandalonePopup;
     }
   }
+
+    _isStandalonePopupDisallowedInCurrentDialog() {
+        try {
+            return Boolean(this._getActiveEditCardDialog()?._params?._bubbleDisallowStandalonePopup);
+        } catch (_) {
+            return false;
+        }
+    }
+
+    _isNestedStandalonePopupConfig(config = this._config) {
+        return Boolean(
+            this._disallowStandalonePopup &&
+            config?.type === 'custom:bubble-card' &&
+            config?.card_type === 'pop-up'
+        );
+    }
 
     _getHomeAssistantHost() {
         try {
@@ -2604,7 +2654,10 @@ class BubbleCardEditor extends LitElement {
                     ?.shadowRoot?.querySelector('#bubble-card-hide-tabs')
                     ?.remove();
             } catch (_) {}
-            activeDialog.showDialog(childDialogParams);
+            activeDialog.showDialog({
+                ...childDialogParams,
+                _bubbleDisallowStandalonePopup: true,
+            });
             return true;
         } catch (_) {
             cleanup();
