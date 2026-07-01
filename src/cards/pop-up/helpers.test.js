@@ -128,7 +128,15 @@ jest.unstable_mockModule('./legacy.js', () => ({
     hideLegacyPopupContent,
 }));
 
-const { cleanupPopupRuntime, closePopup, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash } = await import('./helpers.js');
+jest.unstable_mockModule('./index.js', () => ({
+    invalidateWakeSyncCache: jest.fn(),
+}));
+
+jest.unstable_mockModule('./styles.css', () => ({
+    default: '',
+}));
+
+const { cleanupPopupRuntime, closePopup, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, suspendPopupHostLayout } = await import('./helpers.js');
 
 let rafCallbacks;
 let nextRafId;
@@ -1574,6 +1582,50 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
 
         expect(() => openPopup(context)).not.toThrow();
         expect(context.sectionRow).toBeNull();
+    });
+
+    test('does not hide the shared custom vertical-stack-in-card hui-card wrapper', () => {
+        const stackHuiCard = {
+            tagName: 'HUI-CARD',
+            hidden: false,
+            style: { display: '' },
+            parentElement: null,
+        };
+        const stackHost = {
+            tagName: 'VERTICAL-STACK-IN-CARD',
+            parentElement: stackHuiCard,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+        const stackShadowRoot = { host: stackHost };
+        const stackHaCard = {
+            tagName: 'HA-CARD',
+            parentElement: null,
+            getRootNode: () => stackShadowRoot,
+        };
+        const stackContent = {
+            parentElement: stackHaCard,
+        };
+        const context = {
+            ...createStandaloneContext(),
+            sectionRow: null,
+            sectionRowContainer: null,
+            closest: () => null,
+            parentElement: stackContent,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+        usedContexts.push(context);
+
+        suspendPopupHostLayout(context);
+
+        expect(context.sectionRow).toBeNull();
+        expect(context._popupHostLayoutSharedCustomStack).toBe(true);
+        expect(stackHuiCard.hidden).toBe(false);
+        expect(stackHuiCard.style.display).toBe('');
+
+        suspendPopupHostLayout(context);
+
+        expect(stackHuiCard.hidden).toBe(false);
+        expect(stackHuiCard.style.display).toBe('');
     });
 });
 

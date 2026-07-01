@@ -172,6 +172,11 @@ function _getStandaloneDialogOpener(context) {
         return registeredOpener;
     }
 
+    const transientOpener = _getTransientStandaloneDialogOpener(context);
+    if (transientOpener) {
+        return transientOpener;
+    }
+
     try {
         const dialog = document.querySelector('body > home-assistant')
             ?.shadowRoot?.querySelector('hui-dialog-edit-card');
@@ -196,7 +201,7 @@ function _getStandaloneCardsUpdater(context) {
         return context._standaloneCardsUpdater.bind(context);
     }
 
-    return _getRegisteredStandaloneCardsUpdater(context);
+    return _getRegisteredStandaloneCardsUpdater(context) || _getTransientStandaloneCardsUpdater(context);
 }
 
 function _getRememberedStandaloneDialogOpener(context) {
@@ -318,6 +323,65 @@ function _getStandaloneBridgeOpener(editor, context) {
     }
 
     return (options) => editor._openStandaloneCardDialogForPopup(popupConfig, options);
+}
+
+function _getTransientStandaloneEditorBridge(context) {
+    if (typeof window === 'undefined' || typeof document === 'undefined' || typeof customElements === 'undefined') {
+        return null;
+    }
+
+    const popupConfig = context?.config;
+    if (!popupConfig || popupConfig.card_type !== 'pop-up' || !Array.isArray(popupConfig.cards)) {
+        return null;
+    }
+
+    try {
+        if (!customElements.get?.('bubble-card-editor')) {
+            return null;
+        }
+
+        let bridge = window.__bubbleTransientStandalonePopupEditorBridge;
+        if (!bridge || typeof bridge._openStandaloneCardDialogForPopup !== 'function') {
+            bridge = document.createElement('bubble-card-editor');
+            window.__bubbleTransientStandalonePopupEditorBridge = bridge;
+        }
+
+        if (!bridge || typeof bridge._openStandaloneCardDialogForPopup !== 'function') {
+            return null;
+        }
+
+        try {
+            bridge.hass = context._hass;
+        } catch (_) {}
+
+        try {
+            if (typeof bridge.setConfig === 'function') {
+                bridge.setConfig(popupConfig);
+            } else {
+                bridge._config = popupConfig;
+            }
+        } catch (_) {
+            bridge._config = popupConfig;
+        }
+
+        return bridge;
+    } catch (_) {
+        return null;
+    }
+}
+
+function _getTransientStandaloneDialogOpener(context) {
+    const bridge = _getTransientStandaloneEditorBridge(context);
+    return bridge && typeof bridge._openStandaloneCardDialogForPopup === 'function'
+        ? (options) => bridge._openStandaloneCardDialogForPopup(context.config, options)
+        : null;
+}
+
+function _getTransientStandaloneCardsUpdater(context) {
+    const bridge = _getTransientStandaloneEditorBridge(context);
+    return bridge && typeof bridge._updateStandaloneCardsForPopup === 'function'
+        ? (newCards) => bridge._updateStandaloneCardsForPopup(context.config, newCards)
+        : null;
 }
 
 function _scoreStandaloneEditor(editor, context) {

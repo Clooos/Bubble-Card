@@ -300,6 +300,7 @@ function refreshPopupShell(context) {
 function refreshPopupHeader(context) {
     const shouldUpdateHeader = context.config.hash === location.hash ||
                                context.editor ||
+                               context.detectedEditor ||
                                (context.config.background_update && !context.headerInitialized);
 
     if (shouldUpdateHeader && shouldRefreshHeader(context)) {

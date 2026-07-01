@@ -18,9 +18,11 @@ jest.unstable_mockModule('./changes.js', () => ({
 jest.unstable_mockModule('./create.js', () => ({
     createHeader: jest.fn(),
     createStructure: jest.fn(),
+    clearStandaloneOnboarding: jest.fn(),
     prepareStructure: jest.fn(),
     prepareStandaloneStructure: jest.fn(),
     renderHeaderButton: jest.fn(),
+    renderStandaloneOnboarding: jest.fn(),
 }));
 
 jest.unstable_mockModule('./helpers.js', () => ({
@@ -349,6 +351,20 @@ describe('handlePopUp performance guards', () => {
         await handlePopUp(context);
 
         expect(syncPopupOpenStateWithLocation).not.toHaveBeenCalled();
+    });
+
+    test('refreshes standalone popup headers in detected editor previews', async () => {
+        global.location.hash = '';
+        const context = createOpenPopupContext({
+            detectedEditor: true,
+            isStandalonePopUp: true,
+            _standalonePopUpCardsActive: false,
+        });
+
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+        expect(changeStyle).toHaveBeenCalledTimes(1);
     });
 
     test('avoids duplicate standalone reconciliation when changeEditor already handled it', async () => {

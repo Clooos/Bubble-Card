@@ -260,6 +260,136 @@ describe('standalone popup dialog params', () => {
         });
     });
 
+    test('uses a custom stack editor config carrier when the native card editor points at the child popup', () => {
+        const customStack = {
+            type: 'custom:vertical-stack-in-card',
+            cards: [
+                { type: 'entities', entities: ['light.counter'] },
+                standalonePopup,
+            ],
+        };
+        const customStackEditor = {
+            _config: customStack,
+        };
+        const dialog = {
+            _params: {
+                cardConfig: standalonePopup,
+            },
+            shadowRoot: {
+                querySelector: jest.fn(() => null),
+                querySelectorAll: jest.fn(() => [customStackEditor]),
+            },
+            querySelectorAll: jest.fn(() => []),
+        };
+
+        const liveConfig = getDialogLiveCardConfig(dialog, standalonePopup);
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, standalonePopup);
+        const editedPopup = {
+            ...standalonePopup,
+            name: 'Kitchen popup',
+        };
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, editedPopup);
+
+        expect(liveConfig).toBe(customStack);
+        expect(parentParams.cardConfig).toBe(customStack);
+        expect(parentParams._standalonePopupPathInDialog).toEqual(['cards', 1]);
+        expect(reopenedParams.cardConfig).toEqual({
+            type: 'custom:vertical-stack-in-card',
+            cards: [
+                { type: 'entities', entities: ['light.counter'] },
+                editedPopup,
+            ],
+        });
+    });
+
+    test('prefers the nearest custom stack over a temporary grid wrapper', () => {
+        const customStack = {
+            type: 'custom:vertical-stack-in-card',
+            cards: [
+                { type: 'button', entity: 'switch.tondeuse_custom_mowing_direction_enabled' },
+                standalonePopup,
+            ],
+        };
+        const temporaryGridWrapper = {
+            type: 'grid',
+            cards: [customStack],
+        };
+        const customStackEditor = {
+            _config: customStack,
+        };
+        const gridCarrier = {
+            _config: temporaryGridWrapper,
+        };
+        const dialog = {
+            _params: {
+                cardConfig: standalonePopup,
+            },
+            shadowRoot: {
+                querySelector: jest.fn(() => null),
+                querySelectorAll: jest.fn(() => [gridCarrier, customStackEditor]),
+            },
+            querySelectorAll: jest.fn(() => []),
+        };
+
+        const liveConfig = getDialogLiveCardConfig(dialog, standalonePopup);
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, standalonePopup);
+        const editedPopup = {
+            ...standalonePopup,
+            cards: [
+                ...standalonePopup.cards,
+                { type: 'button', entity: 'light.ambilight' },
+            ],
+        };
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, editedPopup);
+
+        expect(liveConfig).toBe(customStack);
+        expect(parentParams.cardConfig).toBe(customStack);
+        expect(parentParams._standalonePopupPathInDialog).toEqual(['cards', 1]);
+        expect(reopenedParams.cardConfig).toEqual({
+            type: 'custom:vertical-stack-in-card',
+            cards: [
+                { type: 'button', entity: 'switch.tondeuse_custom_mowing_direction_enabled' },
+                editedPopup,
+            ],
+        });
+    });
+
+    test('keeps a top-level standalone popup as root over a temporary single-card grid wrapper', () => {
+        const temporaryGridWrapper = {
+            type: 'grid',
+            cards: [standalonePopup],
+        };
+        const gridCarrier = {
+            _config: temporaryGridWrapper,
+        };
+        const dialog = {
+            _params: {
+                cardConfig: standalonePopup,
+            },
+            shadowRoot: {
+                querySelector: jest.fn(() => null),
+                querySelectorAll: jest.fn(() => [gridCarrier]),
+            },
+            querySelectorAll: jest.fn(() => []),
+        };
+
+        const liveConfig = getDialogLiveCardConfig(dialog, standalonePopup);
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, standalonePopup);
+        const editedPopup = {
+            ...standalonePopup,
+            cards: [
+                ...standalonePopup.cards,
+                { type: 'button', entity: 'light.ambilight' },
+            ],
+        };
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, editedPopup);
+
+        expect(liveConfig).toBe(standalonePopup);
+        expect(parentParams.cardConfig).toBe(standalonePopup);
+        expect(parentParams._standalonePopupPathInDialog).toEqual([]);
+        expect(reopenedParams.cardConfig).toEqual(editedPopup);
+    });
+
     test('keeps the popup as root when no live parent config contains it', () => {
         const dialog = {
             _params: {

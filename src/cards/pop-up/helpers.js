@@ -381,6 +381,41 @@ function clearContextFrames(context, keys) {
     keys.forEach((key) => clearContextFrame(context, key));
 }
 
+function getParentOrShadowHost(node) {
+    if (!node) {
+        return null;
+    }
+
+    if (node.parentElement) {
+        return node.parentElement;
+    }
+
+    const root = node.getRootNode?.();
+    return root && root !== document && 'host' in root ? root.host : null;
+}
+
+function isSharedCustomStackHost(node) {
+    const tagName = node?.tagName?.toLowerCase?.();
+    return tagName === 'vertical-stack-in-card' ||
+        tagName === 'nested-lovelace-card' ||
+        node?._config?.type === 'custom:vertical-stack-in-card' ||
+        node?.config?.type === 'custom:vertical-stack-in-card';
+}
+
+function crossesSharedCustomStackHost(context, target) {
+    let node = context;
+
+    while (node && node !== target) {
+        if (isSharedCustomStackHost(node)) {
+            return true;
+        }
+
+        node = getParentOrShadowHost(node);
+    }
+
+    return false;
+}
+
 function resolvePopupHostElements(context) {
     if (context.sectionRow && context.sectionRowContainer) {
         return;
@@ -388,23 +423,31 @@ function resolvePopupHostElements(context) {
 
     if (!context.sectionRow && typeof context.closest === 'function') {
         context.sectionRow = context.closest('hui-card');
+        if (context.sectionRow && crossesSharedCustomStackHost(context, context.sectionRow)) {
+            context._popupHostLayoutSharedCustomStack = true;
+            context.sectionRow = null;
+        }
 
         // Fallback for environments where closest() cannot traverse shadow DOM
         // boundaries (e.g. iOS WebKit on HA 2026.5.x sections layout).
         if (!context.sectionRow) {
             let node = context;
+            let crossedSharedCustomStack = false;
             while (node) {
+                if (isSharedCustomStackHost(node)) {
+                    crossedSharedCustomStack = true;
+                }
+
                 if (node.tagName?.toLowerCase() === 'hui-card') {
+                    if (crossedSharedCustomStack) {
+                        context._popupHostLayoutSharedCustomStack = true;
+                        break;
+                    }
                     context.sectionRow = node;
                     break;
                 }
-                if (node.parentElement) {
-                    node = node.parentElement;
-                } else {
-                    const root = node.getRootNode?.();
-                    // Duck-type shadow root: has a `host` property, is not the document.
-                    node = (root && root !== document && 'host' in root) ? root.host : null;
-                }
+
+                node = getParentOrShadowHost(node);
             }
         }
     }

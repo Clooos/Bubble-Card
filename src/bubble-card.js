@@ -124,10 +124,56 @@ class BubbleCard extends HTMLElement {
   }
 
   get detectedEditor() {
-    if (this.editor) {
-      return window.history?.state?.dialog === "hui-dialog-edit-card";
+    if (this.editor && window.history?.state?.dialog === "hui-dialog-edit-card") {
+      return true;
     }
-    return false;
+
+    return this._isInsideCardEditor();
+  }
+
+  _isInsideCardEditor() {
+    const editorTags = new Set([
+      'hui-card-preview',
+      'hui-section-preview',
+      'hui-card-element-editor',
+      'hui-dialog-edit-card',
+      'nested-lovelace-card-editor',
+    ]);
+
+    try {
+      let element = this;
+      while (element) {
+        const tagName = element.tagName?.toLowerCase?.();
+        if (tagName && editorTags.has(tagName)) {
+          return true;
+        }
+
+        if (element.classList?.contains?.('element-preview')) {
+          return true;
+        }
+
+        if (element.parentNode) {
+          element = element.parentNode;
+          continue;
+        }
+
+        const root = element.getRootNode?.();
+        if (root instanceof ShadowRoot && root.host) {
+          element = root.host;
+          continue;
+        }
+
+        break;
+      }
+
+      const dialog = document.querySelector('body > home-assistant')
+        ?.shadowRoot
+        ?.querySelector('hui-dialog-edit-card');
+
+      return Boolean(dialog?.contains?.(this));
+    } catch (_) {
+      return false;
+    }
   }
 
   set editMode(editMode) {
@@ -210,7 +256,7 @@ class BubbleCard extends HTMLElement {
 
   getCardSize() {
     switch (this.config.card_type) {
-      case 'pop-up': return -100000;
+      case 'pop-up': return Array.isArray(this.config?.cards) ? 0 : -100000;
       case 'button':
       case 'sub-buttons':
       case 'separator':
@@ -261,7 +307,8 @@ class BubbleCard extends HTMLElement {
 
   _notifyEditorContext() {
     try {
-      if (!this.editor || !this.config || !this.card) return;
+      const detectedEditor = this.detectedEditor;
+      if ((!this.editor && !detectedEditor) || !this.config || !this.card) return;
       const detail = {
         context: this,
         card: this.card,
@@ -269,8 +316,8 @@ class BubbleCard extends HTMLElement {
         card_type: this.config.card_type,
         entity: this.config.entity,
         hash: this.config.hash,
-        isEditor: this.detectedEditor,
-        editMode: this.editor
+        isEditor: detectedEditor,
+        editMode: this.editor || detectedEditor
       };
       window.dispatchEvent(new CustomEvent('bubble-card-context', { detail }));
     } catch (_) {

@@ -59,16 +59,19 @@ describe('standalone popup card editor actions', () => {
     let warnSpy;
     let originalWindow;
     let originalDocument;
+    let originalCustomElements;
 
     beforeEach(() => {
         jest.clearAllMocks();
         originalWindow = global.window;
         originalDocument = global.document;
+        originalCustomElements = global.customElements;
         global.window = {
             __bubbleCardEditorInstances: new Set(),
             __bubbleStandalonePopupEditorOpeners: new Map(),
         };
         delete global.document;
+        delete global.customElements;
         warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
@@ -83,6 +86,11 @@ describe('standalone popup card editor actions', () => {
             delete global.document;
         } else {
             global.document = originalDocument;
+        }
+        if (originalCustomElements === undefined) {
+            delete global.customElements;
+        } else {
+            global.customElements = originalCustomElements;
         }
     });
 
@@ -175,6 +183,33 @@ describe('standalone popup card editor actions', () => {
         expect(warnSpy).not.toHaveBeenCalled();
     });
 
+    test('creates a transient editor bridge for nested card edit after a saved custom stack refresh', () => {
+        const openDialogForPopup = jest.fn();
+        const transientBridge = {
+            setConfig: jest.fn(function setConfig(config) {
+                this._config = config;
+            }),
+            _openStandaloneCardDialogForPopup: openDialogForPopup,
+        };
+        global.customElements = {
+            get: jest.fn((tagName) => tagName === 'bubble-card-editor' ? function BubbleCardEditor() {} : undefined),
+        };
+        global.document = {
+            createElement: jest.fn((tagName) => tagName === 'bubble-card-editor' ? transientBridge : {}),
+        };
+        const context = createPopupContext({
+            _hass: { states: {} },
+        });
+        const actions = createEditorActions(context, jest.fn());
+
+        actions.editCard(0);
+
+        expect(document.createElement).toHaveBeenCalledWith('bubble-card-editor');
+        expect(transientBridge.setConfig).toHaveBeenCalledWith(context.config);
+        expect(openDialogForPopup).toHaveBeenCalledWith(context.config, { type: 'edit', index: 0 });
+        expect(warnSpy).not.toHaveBeenCalled();
+    });
+
     test('routes direct card removal through the standalone updater when attached', () => {
         const standaloneCardsUpdater = jest.fn();
         const rebuildCards = jest.fn();
@@ -197,6 +232,35 @@ describe('standalone popup card editor actions', () => {
         window.__bubbleCardEditorInstances.add(editor);
         const rebuildCards = jest.fn();
         const context = createPopupContext();
+        const actions = createEditorActions(context, rebuildCards);
+
+        actions.removeCard(0);
+
+        expect(context.config.cards).toEqual([]);
+        expect(updateCardsForPopup).toHaveBeenCalledWith(context.config, []);
+        expect(fireEvent).not.toHaveBeenCalled();
+        expect(rebuildCards).toHaveBeenCalled();
+    });
+
+    test('routes direct card removal through a transient editor bridge after a saved custom stack refresh', () => {
+        const updateCardsForPopup = jest.fn(() => true);
+        const transientBridge = {
+            setConfig: jest.fn(function setConfig(config) {
+                this._config = config;
+            }),
+            _openStandaloneCardDialogForPopup: jest.fn(),
+            _updateStandaloneCardsForPopup: updateCardsForPopup,
+        };
+        global.customElements = {
+            get: jest.fn((tagName) => tagName === 'bubble-card-editor' ? function BubbleCardEditor() {} : undefined),
+        };
+        global.document = {
+            createElement: jest.fn((tagName) => tagName === 'bubble-card-editor' ? transientBridge : {}),
+        };
+        const rebuildCards = jest.fn();
+        const context = createPopupContext({
+            _hass: { states: {} },
+        });
         const actions = createEditorActions(context, rebuildCards);
 
         actions.removeCard(0);

@@ -162,6 +162,29 @@ function collectCardElementEditors(root, editors, maxDepth = 6) {
     } catch (_) {}
 }
 
+function collectConfigCarrierElements(root, carriers, maxDepth = 6) {
+    if (!root || maxDepth < 0) {
+        return;
+    }
+
+    try {
+        if (root.nodeType === 1 && !carriers.includes(root)) {
+            carriers.push(root);
+        }
+
+        const all = root.querySelectorAll?.('*') || [];
+        for (const element of all) {
+            if (!carriers.includes(element)) {
+                carriers.push(element);
+            }
+
+            if (element?.shadowRoot) {
+                collectConfigCarrierElements(element.shadowRoot, carriers, maxDepth - 1);
+            }
+        }
+    } catch (_) {}
+}
+
 function rootMatchesPopupConfig(rootConfig, popupConfig) {
     if (!rootConfig || !popupConfig || typeof rootConfig !== 'object' || typeof popupConfig !== 'object') {
         return false;
@@ -182,6 +205,19 @@ function rootMatchesPopupConfig(rootConfig, popupConfig) {
     );
 }
 
+function isTransientSinglePopupGridWrapper(candidate, popupConfig, popupPath) {
+    return Boolean(
+        candidate?.type === 'grid' &&
+        Array.isArray(candidate.cards) &&
+        candidate.cards.length === 1 &&
+        Array.isArray(popupPath) &&
+        popupPath.length === 2 &&
+        popupPath[0] === 'cards' &&
+        popupPath[1] === 0 &&
+        rootMatchesPopupConfig(candidate.cards[0], popupConfig)
+    );
+}
+
 function scoreDialogConfigCandidate(candidate, popupConfig) {
     if (!candidate || typeof candidate !== 'object') {
         return -1;
@@ -193,9 +229,18 @@ function scoreDialogConfigCandidate(candidate, popupConfig) {
 
     const popupPath = findConfigPath(candidate, popupConfig);
     if (Array.isArray(popupPath)) {
-        // Prefer the live containing card (vertical-stack, grid, etc.) over the
-        // popup itself so unsaved parent wrappers are not lost when reopening.
-        return popupPath.length > 0 ? 1000 + popupPath.length : 100;
+        if (isTransientSinglePopupGridWrapper(candidate, popupConfig, popupPath)) {
+            // HA's standalone child-card proxy uses a temporary single-card grid.
+            // When the popup itself is the dialog root, selecting that wrapper
+            // would persist `type: grid` around the popup on every add/edit.
+            return 50;
+        }
+
+        // Prefer the nearest live containing card over higher wrappers.
+        // Some custom stack editors expose both the real stack config and a
+        // temporary HA grid/section wrapper; picking the deepest root would
+        // persist that wrapper and nest another grid on every child edit.
+        return popupPath.length > 0 ? 1000 - popupPath.length : 100;
     }
 
     return rootMatchesPopupConfig(candidate, popupConfig) ? 100 : -1;
@@ -213,6 +258,13 @@ export function getDialogLiveCardConfig(dialog, popupConfig) {
     collectCardElementEditors(dialog, editors);
     for (const editor of editors) {
         addElementConfigCandidates(candidates, editor);
+    }
+
+    const configCarriers = [];
+    collectConfigCarrierElements(dialog?.shadowRoot, configCarriers);
+    collectConfigCarrierElements(dialog, configCarriers);
+    for (const element of configCarriers) {
+        addElementConfigCandidates(candidates, element);
     }
 
     let bestCandidate = null;
