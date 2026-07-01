@@ -34,6 +34,13 @@ function createPopupEditor(hash, openDialog = jest.fn()) {
     };
 }
 
+function createPopupEditorWithUpdater(hash, updateCardsForPopup = jest.fn()) {
+    return {
+        ...createPopupEditor(hash),
+        _updateStandaloneCardsForPopup: updateCardsForPopup,
+    };
+}
+
 function createPopupBridgeEditor(openDialogForPopup = jest.fn()) {
     return {
         isConnected: true,
@@ -166,6 +173,38 @@ describe('standalone popup card editor actions', () => {
 
         expect(openDialogForPopup).toHaveBeenCalledWith(secondPopupContext.config, { type: 'edit', index: 0 });
         expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    test('routes direct card removal through the standalone updater when attached', () => {
+        const standaloneCardsUpdater = jest.fn();
+        const rebuildCards = jest.fn();
+        const context = createPopupContext({
+            _standaloneCardsUpdater: standaloneCardsUpdater,
+        });
+        const actions = createEditorActions(context, rebuildCards);
+
+        actions.removeCard(0);
+
+        expect(context.config.cards).toEqual([]);
+        expect(standaloneCardsUpdater).toHaveBeenCalledWith([]);
+        expect(fireEvent).not.toHaveBeenCalled();
+        expect(rebuildCards).toHaveBeenCalled();
+    });
+
+    test('routes direct card removal through the registered editor when the preview updater was not attached yet', () => {
+        const updateCardsForPopup = jest.fn(() => true);
+        const editor = createPopupEditorWithUpdater('#kitchen', updateCardsForPopup);
+        window.__bubbleCardEditorInstances.add(editor);
+        const rebuildCards = jest.fn();
+        const context = createPopupContext();
+        const actions = createEditorActions(context, rebuildCards);
+
+        actions.removeCard(0);
+
+        expect(context.config.cards).toEqual([]);
+        expect(updateCardsForPopup).toHaveBeenCalledWith(context.config, []);
+        expect(fireEvent).not.toHaveBeenCalled();
+        expect(rebuildCards).toHaveBeenCalled();
     });
 
     test('warns immediately when no standalone dialog opener is available for nested card edit', () => {

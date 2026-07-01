@@ -213,6 +213,53 @@ describe('standalone popup dialog params', () => {
         expect(reopenedParams.saveCardConfig).toBe(saveCardConfig);
     });
 
+    test('matches a freshly mutated standalone popup back to its unsaved stack wrapper by hash', () => {
+        const secondPopup = {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#pantry',
+            cards: [
+                {
+                    type: 'calendar',
+                    entities: ['calendar.recycle'],
+                },
+            ],
+        };
+        const unsavedStack = {
+            type: 'vertical-stack',
+            cards: [standalonePopup, secondPopup],
+        };
+        const freshlyMutatedSecondPopup = {
+            ...secondPopup,
+            cards: [],
+        };
+        const cardElementEditor = {
+            _config: unsavedStack,
+        };
+        const dialog = {
+            _params: {
+                // Fresh HA dialogs can still point at the child popup while the
+                // live editor state already contains the unsaved stack wrapper.
+                cardConfig: freshlyMutatedSecondPopup,
+            },
+            shadowRoot: {
+                querySelector: jest.fn((selector) => selector === 'hui-card-element-editor' ? cardElementEditor : null),
+                querySelectorAll: jest.fn(() => []),
+            },
+            querySelectorAll: jest.fn(() => []),
+        };
+
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, freshlyMutatedSecondPopup);
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, freshlyMutatedSecondPopup);
+
+        expect(parentParams.cardConfig).toBe(unsavedStack);
+        expect(parentParams._standalonePopupPathInDialog).toEqual(['cards', 1]);
+        expect(reopenedParams.cardConfig).toEqual({
+            type: 'vertical-stack',
+            cards: [standalonePopup, freshlyMutatedSecondPopup],
+        });
+    });
+
     test('keeps the popup as root when no live parent config contains it', () => {
         const dialog = {
             _params: {

@@ -6,8 +6,9 @@ export function createEditorActions(context, rebuildCards) {
         const updated = updater(cards);
 
         context.config = { ...context.config, cards: updated };
-        if (typeof context._standaloneCardsUpdater === 'function') {
-            context._standaloneCardsUpdater(updated);
+        const standaloneCardsUpdater = _getStandaloneCardsUpdater(context);
+        if (standaloneCardsUpdater) {
+            standaloneCardsUpdater(updated);
         } else {
             fireEvent(context, 'config-changed', { config: context.config });
         }
@@ -186,6 +187,18 @@ function _getStandaloneDialogOpener(context) {
     return null;
 }
 
+function _getStandaloneCardsUpdater(context) {
+    if (context?.isConnected === false) {
+        return null;
+    }
+
+    if (typeof context?._standaloneCardsUpdater === 'function') {
+        return context._standaloneCardsUpdater.bind(context);
+    }
+
+    return _getRegisteredStandaloneCardsUpdater(context);
+}
+
 function _getRememberedStandaloneDialogOpener(context) {
     if (typeof window === 'undefined') {
         return null;
@@ -245,6 +258,42 @@ function _getRegisteredStandaloneDialogOpener(context) {
     return bestEditor && bestScore >= 0
         ? bestEditor._openStandaloneCardDialog.bind(bestEditor)
         : null;
+}
+
+function _getRegisteredStandaloneCardsUpdater(context) {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const editors = window.__bubbleCardEditorInstances;
+    if (!editors || typeof editors[Symbol.iterator] !== 'function') {
+        return null;
+    }
+
+    const popupHash = _normalizeHash(context?.config?.hash);
+
+    if (popupHash) {
+        for (const editor of editors) {
+            if (!editor || editor.isConnected === false || typeof editor._updateStandaloneCardsForPopup !== 'function') {
+                continue;
+            }
+
+            const editorHash = _normalizeHash(editor._config?.hash);
+            if (editorHash === popupHash && editor._config?.card_type === 'pop-up') {
+                return (newCards) => editor._updateStandaloneCardsForPopup(context.config, newCards);
+            }
+        }
+    }
+
+    for (const editor of editors) {
+        if (!editor || editor.isConnected === false || typeof editor._updateStandaloneCardsForPopup !== 'function') {
+            continue;
+        }
+
+        return (newCards) => editor._updateStandaloneCardsForPopup(context.config, newCards);
+    }
+
+    return null;
 }
 
 function _getRegisteredStandaloneBridgeOpener(editors, context) {

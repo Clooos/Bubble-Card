@@ -2794,6 +2794,10 @@ class BubbleCardEditor extends LitElement {
             const root = detail.context?.shadowRoot || host?.shadowRoot || detail.card?.getRootNode?.() || null;
             if (!root) return;
 
+        if (Array.isArray(detail?.config?.cards) && host) {
+            this._attachStandalonePopupPreviewBridge(host, detail.config);
+        }
+
       const score = this._scoreCardContext(detail);
             const previousHostConnected = this._previewCardHost?.isConnected;
             const sameHost = !!host && host === this._previewCardHost;
@@ -2804,24 +2808,74 @@ class BubbleCardEditor extends LitElement {
       this._previewCardRoot = root;
       this._previewCardHost = host || root.host || null;
 
-      // Attach a callback so drag/edit/delete in the standalone pop-up preview
-      // can fire config-changed from the editor element (where HA's dialog listens).
-      const previewHost = this._previewCardHost;
-      if (Array.isArray(detail?.config?.cards) && previewHost) {
-          const standaloneOpenCardDialog = (options) => {
-              this._openStandaloneCardDialog(options);
-          };
-          previewHost._standaloneCardsUpdater = (newCards) => {
-              this._config = { ...this._config, cards: newCards };
-              fireEvent(this, 'config-changed', { config: this._config });
-          };
-          previewHost._standaloneOpenCardDialog = standaloneOpenCardDialog;
-          this._rememberStandaloneOpenCardDialog(detail.config, standaloneOpenCardDialog);
-      }
-
       this._setupAutoRowsObserver();
     } catch (_) {}
   }
+
+    _attachStandalonePopupPreviewBridge(previewHost, popupConfig) {
+        if (!previewHost || !popupConfig || popupConfig.card_type !== 'pop-up' || !Array.isArray(popupConfig.cards)) {
+            return;
+        }
+
+        const popupHash = this._normalizePopupHash(popupConfig.hash);
+        const editorHash = this._normalizePopupHash(this._config?.hash);
+        const ownsPopupConfig = popupConfig === this._config || (popupHash && editorHash && popupHash === editorHash);
+
+        const standaloneOpenCardDialog = (options) => {
+            if (ownsPopupConfig) {
+                return this._openStandaloneCardDialog(options);
+            }
+
+            return this._openStandaloneCardDialogForPopup(popupConfig, options);
+        };
+
+        previewHost._standaloneCardsUpdater = (newCards) => {
+            if (!this._updateStandaloneCardsForPopup(popupConfig, newCards)) {
+                fireEvent(previewHost, 'config-changed', { config: { ...popupConfig, cards: newCards } });
+            }
+        };
+
+        previewHost._standaloneOpenCardDialog = standaloneOpenCardDialog;
+        this._rememberStandaloneOpenCardDialog(popupConfig, standaloneOpenCardDialog);
+    }
+
+    _updateStandaloneCardsForPopup(popupConfig, newCards) {
+        if (!popupConfig || popupConfig.card_type !== 'pop-up' || !Array.isArray(newCards)) {
+            return false;
+        }
+
+        const popupHash = this._normalizePopupHash(popupConfig.hash);
+        const editorHash = this._normalizePopupHash(this._config?.hash);
+        const ownsPopupConfig = popupConfig === this._config || (popupHash && editorHash && popupHash === editorHash);
+        const parentDialogParams = this._captureStandaloneParentDialogParams(popupConfig);
+        const basePopupConfig = parentDialogParams?._standalonePopupConfig || popupConfig;
+        const nextPopupConfig = { ...basePopupConfig, cards: newCards };
+
+        if (ownsPopupConfig) {
+            this._config = nextPopupConfig;
+        }
+
+        const popupPathInDialog = parentDialogParams?._standalonePopupPathInDialog;
+        const shouldUpdateParentDialog = Array.isArray(popupPathInDialog) && popupPathInDialog.length > 0;
+        if (shouldUpdateParentDialog && this._reopenStandaloneParentDialog(
+            parentDialogParams,
+            nextPopupConfig,
+            this._getActiveEditCardDialog()
+        )) {
+            return true;
+        }
+
+        if (ownsPopupConfig) {
+            fireEvent(this, 'config-changed', { config: this._config });
+            return true;
+        }
+
+        return this._reopenStandaloneParentDialog(
+            parentDialogParams,
+            nextPopupConfig,
+            this._getActiveEditCardDialog()
+        );
+    }
 
   _scoreCardContext(detail) {
     const cfg = detail?.config || {};
