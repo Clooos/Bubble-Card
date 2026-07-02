@@ -46,17 +46,17 @@ If it's not working, just try to clear your browser cache.`
 
 <br>
 
-This method allows you to get updates directly on the HACS main page
+This method allows you to get updates directly on the Home Assistant Community Store
 
 1. If HACS is not installed yet, download it following the instructions on [https://hacs.xyz/docs/setup/download/](https://hacs.xyz/docs/use/download/download/)
 2. Proceed to the HACS initial configuration following the instructions on [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
-3. On your sidebar go to `HACS` > `Frontend`
-4. Click on the `+` button at the bottom right corner
-5. Now search for `Bubble Card` and then click on the button at the bottom right corner to download it
+3. On your sidebar go to "HACS"
+4. Search for "Bubble Card", or click on the blue button below
+5. Click on "Download"
 6. Go back on your dashboard and click on the icon at the right top corner then on `Edit dashboard`
 7. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
 
-If it's not working, try to clear your browser cache.
+If it's not working, try to clear your browser/app cache (on all your devices if needed).
 
 #### Videos
 
