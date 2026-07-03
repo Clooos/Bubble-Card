@@ -28,7 +28,7 @@ import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
 import cardsEditorStyles from '../cards/pop-up/cards/styles.css';
 import { getLazyLoadedPanelContent } from './utils.js';
-import { bridgeDialogCloseToParent, createReopenedStandaloneParentDialogParams, createStandaloneParentDialogParamsFromDialog, getDialogCardElementEditor, restoreDialogCardEditorVisualState } from './standalone-dialog-bridge.js';
+import { bridgeDialogCloseToParent, createReopenedStandaloneParentDialogParams, createStandaloneParentDialogParamsFromDialog, forceDialogDirtyState, getDialogCardElementEditor, restoreDialogCardEditorVisualState } from './standalone-dialog-bridge.js';
 
 class BubbleCardEditor extends LitElement {
     _previewStyleApplied = false;
@@ -2513,10 +2513,54 @@ class BubbleCardEditor extends LitElement {
 
         try {
             restoreDialogCardEditorVisualState(dialog);
-            dialog.showDialog(dialogParams);
-            return true;
+            return dialog.showDialog(dialogParams) || true;
         } catch (_) {
             return false;
+        }
+    }
+
+    _scheduleStandaloneParentDirtyState(dialog, dialogParams, showResult = null) {
+        const originalConfig = dialogParams?._originalCardConfig;
+        const expectedConfig = dialogParams?.cardConfig;
+        if (!dialog || !originalConfig) return;
+
+        const isExpectedConfig = (config) => {
+            if (!config || !expectedConfig) return false;
+            if (config === expectedConfig) return true;
+
+            const expectedHash = expectedConfig.hash;
+            const configHash = config.hash;
+            if (expectedHash && configHash && expectedHash === configHash) {
+                return expectedConfig.card_type
+                    ? config.card_type === expectedConfig.card_type
+                    : config.type === expectedConfig.type;
+            }
+
+            return config.type === expectedConfig.type
+                && config.card_type === expectedConfig.card_type;
+        };
+
+        const applyWhenReady = (attempt = 0) => {
+            const sliceCurrent = dialog._dirtySlices?.get?.('__default__')?.current;
+            const paramsConfig = dialog._params?.cardConfig;
+
+            if (isExpectedConfig(paramsConfig) || isExpectedConfig(sliceCurrent)) {
+                forceDialogDirtyState(dialog, originalConfig);
+                this._applyPopupEditorTabState(dialog);
+                return;
+            }
+
+            if (attempt < 10) {
+                requestAnimationFrame(() => applyWhenReady(attempt + 1));
+            }
+        };
+
+        const schedule = () => requestAnimationFrame(() => applyWhenReady());
+
+        if (showResult && typeof showResult.then === 'function') {
+            showResult.then(schedule).catch(schedule);
+        } else {
+            Promise.resolve().then(schedule);
         }
     }
 
@@ -2527,18 +2571,21 @@ class BubbleCardEditor extends LitElement {
         if (!dialogParams) return false;
 
         let shownDialog = null;
+        let showResult = false;
 
-        if (this._showStandaloneDialogParams(preferredDialog, dialogParams)) {
+        showResult = this._showStandaloneDialogParams(preferredDialog, dialogParams);
+        if (showResult) {
             shownDialog = preferredDialog;
         } else {
             const activeDialog = this._getActiveEditCardDialog();
-            if (this._showStandaloneDialogParams(activeDialog, dialogParams)) {
+            showResult = this._showStandaloneDialogParams(activeDialog, dialogParams);
+            if (showResult) {
                 shownDialog = activeDialog;
             }
         }
 
         if (shownDialog) {
-            this._applyPopupEditorTabState(shownDialog);
+            this._scheduleStandaloneParentDirtyState(shownDialog, dialogParams, showResult);
             return true;
         }
 
@@ -2552,6 +2599,13 @@ class BubbleCardEditor extends LitElement {
                 dialogParams: {
                     ...dialogParams,
                 },
+            });
+
+            requestAnimationFrame(() => {
+                this._scheduleStandaloneParentDirtyState(
+                    this._getActiveEditCardDialog(),
+                    dialogParams
+                );
             });
         }, 0);
 
@@ -2606,9 +2660,10 @@ class BubbleCardEditor extends LitElement {
         };
 
         const reopenParent = () => {
+            const cardConfig = getCardConfig();
             const reopened = this._reopenStandaloneParentDialog(
                 parentDialogParams,
-                getCardConfig(),
+                cardConfig,
                 activeDialog
             );
 
@@ -2639,7 +2694,8 @@ class BubbleCardEditor extends LitElement {
             }
 
             cleanup();
-            this._reopenStandaloneParentDialog(parentDialogParams, getCardConfig(), activeDialog);
+            const cardConfig = getCardConfig();
+            this._reopenStandaloneParentDialog(parentDialogParams, cardConfig, activeDialog);
         };
 
         window.addEventListener("dialog-closed", handleClosed, true);
@@ -2900,6 +2956,7 @@ class BubbleCardEditor extends LitElement {
         const popupHash = this._normalizePopupHash(popupConfig.hash);
         const editorHash = this._normalizePopupHash(this._config?.hash);
         const ownsPopupConfig = popupConfig === this._config || (popupHash && editorHash && popupHash === editorHash);
+
         const parentDialogParams = this._captureStandaloneParentDialogParams(popupConfig);
         const basePopupConfig = parentDialogParams?._standalonePopupConfig || popupConfig;
         const nextPopupConfig = { ...basePopupConfig, cards: newCards };
@@ -2910,6 +2967,7 @@ class BubbleCardEditor extends LitElement {
 
         const popupPathInDialog = parentDialogParams?._standalonePopupPathInDialog;
         const shouldUpdateParentDialog = Array.isArray(popupPathInDialog) && popupPathInDialog.length > 0;
+
         if (shouldUpdateParentDialog && this._reopenStandaloneParentDialog(
             parentDialogParams,
             nextPopupConfig,

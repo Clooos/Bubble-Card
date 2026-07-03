@@ -1,3 +1,32 @@
+export function forceDialogDirtyState(dialog, originalConfig) {
+    if (!dialog || !originalConfig) {
+        return false;
+    }
+
+    try {
+        const slices = dialog._dirtySlices;
+        if (!(slices instanceof Map)) {
+            return false;
+        }
+
+        const slice = slices.get('__default__');
+        if (!slice) {
+            return false;
+        }
+
+        slice.initial = JSON.parse(JSON.stringify(originalConfig));
+        slice.normalizedInitial = JSON.parse(JSON.stringify(originalConfig));
+
+        if (typeof dialog._publishContext === 'function') {
+            dialog._publishContext();
+        }
+
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
 export function bridgeDialogCloseToParent(dialog, reopenParent) {
     if (!dialog || typeof reopenParent !== 'function') {
         return () => {};
@@ -523,13 +552,14 @@ export function createStandaloneParentDialogParams(dialogParams, popupConfig) {
     const dialogCardConfig = dialogParams.cardConfig || popupCardConfig;
 
     // Fast path: popup IS the dialog's top-level card (most common case).
-    // No clone needed - reuse references; HA dialog won't mutate these in place.
+    // Clone the original config snapshot so it survives in-place mutations
+    // from child card editors.
     if (dialogCardConfig === popupCardConfig || dialogCardConfig.card_type === 'pop-up') {
         return {
             ...dialogParams,
             cardConfig: popupCardConfig,
-            _originalCardConfig: popupCardConfig,
-            _standalonePopupConfig: popupCardConfig,
+            _originalCardConfig: cloneConfig(popupCardConfig),
+            _standalonePopupConfig: cloneConfig(popupCardConfig),
             _standalonePopupPathInDialog: [],
         };
     }
@@ -542,8 +572,8 @@ export function createStandaloneParentDialogParams(dialogParams, popupConfig) {
         return {
             ...dialogParams,
             cardConfig: popupCardConfig,
-            _originalCardConfig: popupCardConfig,
-            _standalonePopupConfig: popupCardConfig,
+            _originalCardConfig: cloneConfig(popupCardConfig),
+            _standalonePopupConfig: cloneConfig(popupCardConfig),
             _standalonePopupPathInDialog: [],
         };
     }
@@ -553,7 +583,7 @@ export function createStandaloneParentDialogParams(dialogParams, popupConfig) {
     return {
         ...dialogParams,
         cardConfig: dialogCardConfig,
-        _originalCardConfig: dialogCardConfig,
+        _originalCardConfig: cloneConfig(dialogCardConfig),
         _standalonePopupConfig: cloneConfig(popupCardConfig),
         _standalonePopupPathInDialog: popupPathInDialog,
     };

@@ -5,6 +5,7 @@ import {
     createReopenedStandaloneParentDialogParams,
     createStandaloneParentDialogParams,
     createStandaloneParentDialogParamsFromDialog,
+    forceDialogDirtyState,
     getDialogLiveCardConfig,
     restoreDialogCardEditorVisualState,
 } from './standalone-dialog-bridge.js';
@@ -448,5 +449,203 @@ describe('standalone parent editor visual state', () => {
     test('returns false when no card element editor is available', () => {
         expect(restoreDialogCardEditorVisualState({ shadowRoot: { querySelector: jest.fn(() => null) } })).toBe(false);
         expect(restoreDialogCardEditorVisualState(null)).toBe(false);
+    });
+});
+
+describe('forceDialogDirtyState', () => {
+    const originalConfig = {
+        type: 'custom:bubble-card',
+        card_type: 'pop-up',
+        hash: '#test',
+        cards: [],
+    };
+
+    const editedConfig = {
+        type: 'custom:bubble-card',
+        card_type: 'pop-up',
+        hash: '#test',
+        cards: [{ type: 'button', entity: 'light.kitchen' }],
+    };
+
+    function createMockDialog(initialConfig, currentConfig) {
+        const publishContextSpy = jest.fn();
+        const slice = {
+            initial: JSON.parse(JSON.stringify(initialConfig)),
+            current: JSON.parse(JSON.stringify(currentConfig)),
+            normalizedInitial: JSON.parse(JSON.stringify(initialConfig)),
+        };
+        const slices = new Map();
+        slices.set('__default__', slice);
+
+        const dialog = {
+            _dirtySlices: slices,
+            _publishContext: publishContextSpy,
+            slice,
+            publishContextSpy,
+        };
+
+        // Simulate HA's isDirtyState getter: dirty when initial !== current
+        Object.defineProperty(dialog, 'isDirtyState', {
+            get() {
+                const s = this._dirtySlices.get('__default__');
+                if (!s) return false;
+                return JSON.stringify(s.initial) !== JSON.stringify(s.current);
+            },
+        });
+
+        return dialog;
+    }
+
+    test('replaces the initial baseline with the original config to make the dialog dirty', () => {
+        // Simulate HA showDialog: both initial and current are set to the edited config
+        const mockDialog = createMockDialog(editedConfig, editedConfig);
+
+        // Before fix: initial === current → not dirty
+        expect(mockDialog.isDirtyState).toBe(false);
+
+        const result = forceDialogDirtyState(mockDialog, originalConfig);
+
+        expect(result).toBe(true);
+        expect(mockDialog.slice.initial).toEqual(originalConfig);
+        expect(mockDialog.slice.initial).not.toBe(editedConfig);
+        expect(mockDialog.slice.normalizedInitial).toEqual(originalConfig);
+        expect(mockDialog.publishContextSpy).toHaveBeenCalledTimes(1);
+        // After fix: initial !== current → dirty
+        expect(mockDialog.isDirtyState).toBe(true);
+    });
+
+    test('returns false when dialog is missing', () => {
+        expect(forceDialogDirtyState(null, originalConfig)).toBe(false);
+        expect(forceDialogDirtyState(undefined, originalConfig)).toBe(false);
+    });
+
+    test('returns false when originalConfig is missing', () => {
+        const mockDialog = createMockDialog(originalConfig, editedConfig);
+        expect(forceDialogDirtyState(mockDialog, null)).toBe(false);
+        expect(forceDialogDirtyState(mockDialog, undefined)).toBe(false);
+    });
+
+    test('returns false when _dirtySlices is not a Map', () => {
+        const mockDialog = {
+            _dirtySlices: {},
+            _publishContext: jest.fn(),
+        };
+        expect(forceDialogDirtyState(mockDialog, originalConfig)).toBe(false);
+    });
+
+    test('returns false when __default__ slice is missing', () => {
+        const slices = new Map();
+        slices.set('some_other_key', { initial: {}, current: {} });
+        const mockDialog = {
+            _dirtySlices: slices,
+            _publishContext: jest.fn(),
+        };
+        expect(forceDialogDirtyState(mockDialog, originalConfig)).toBe(false);
+    });
+
+    test('does not mutate the original config reference', () => {
+        const mockDialog = createMockDialog(editedConfig, editedConfig);
+        const originalCopy = JSON.parse(JSON.stringify(originalConfig));
+
+        forceDialogDirtyState(mockDialog, originalConfig);
+
+        // originalConfig should not be mutated
+        expect(originalConfig).toEqual(originalCopy);
+        // slice.initial should be a deep clone, not the same reference
+        expect(mockDialog.slice.initial).not.toBe(originalConfig);
+    });
+
+    test('works without _publishContext on the dialog', () => {
+        const slices = new Map();
+        const slice = {
+            initial: editedConfig,
+            current: editedConfig,
+        };
+        slices.set('__default__', slice);
+        const mockDialog = {
+            _dirtySlices: slices,
+            // no _publishContext
+        };
+
+        const result = forceDialogDirtyState(mockDialog, originalConfig);
+
+        expect(result).toBe(true);
+        expect(slice.initial).toEqual(originalConfig);
+    });
+});
+
+describe('createStandaloneParentDialogParams original config isolation', () => {
+    test('clones _originalCardConfig so it survives in-place mutations', () => {
+        const popupConfig = {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#kitchen',
+            cards: [{ type: 'button', entity: 'light.kitchen' }],
+        };
+
+        const parentParams = createStandaloneParentDialogParams(
+            { cardConfig: popupConfig },
+            popupConfig
+        );
+
+        // _originalCardConfig should NOT be the same reference as cardConfig
+        expect(parentParams._originalCardConfig).not.toBe(parentParams.cardConfig);
+        expect(parentParams._originalCardConfig).toEqual(parentParams.cardConfig);
+
+        // Mutate the cardConfig in place (simulating what a child editor does)
+        parentParams.cardConfig.cards.push({ type: 'button', entity: 'light.new' });
+
+        // _originalCardConfig should remain unchanged
+        expect(parentParams._originalCardConfig.cards.length).toBe(1);
+        expect(parentParams._originalCardConfig.cards[0].entity).toBe('light.kitchen');
+        expect(parentParams.cardConfig.cards.length).toBe(2);
+    });
+
+    test('clones _standalonePopupConfig independently from cardConfig', () => {
+        const popupConfig = {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#test',
+            cards: [],
+        };
+
+        const parentParams = createStandaloneParentDialogParams(
+            { cardConfig: popupConfig },
+            popupConfig
+        );
+
+        expect(parentParams._standalonePopupConfig).not.toBe(parentParams.cardConfig);
+        expect(parentParams._standalonePopupConfig).not.toBe(parentParams._originalCardConfig);
+    });
+
+    test('clones original config for nested popups inside stacks', () => {
+        const nestedPopup = {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#nested',
+            cards: [{ type: 'button', entity: 'light.bedroom' }],
+        };
+        const stackConfig = {
+            type: 'vertical-stack',
+            cards: [
+                { type: 'button', entity: 'light.hall' },
+                nestedPopup,
+            ],
+        };
+
+        const parentParams = createStandaloneParentDialogParams(
+            { cardConfig: stackConfig },
+            nestedPopup
+        );
+
+        // _originalCardConfig should be a clone of the stack config
+        expect(parentParams._originalCardConfig).not.toBe(stackConfig);
+        expect(parentParams._originalCardConfig).toEqual(stackConfig);
+
+        // Mutate the stack config in place
+        stackConfig.cards[0].entity = 'light.changed';
+
+        // _originalCardConfig should remain unchanged
+        expect(parentParams._originalCardConfig.cards[0].entity).toBe('light.hall');
     });
 });
