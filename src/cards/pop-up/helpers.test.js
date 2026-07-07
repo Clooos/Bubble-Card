@@ -1627,6 +1627,49 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
         expect(stackHuiCard.hidden).toBe(false);
         expect(stackHuiCard.style.display).toBe('');
     });
+
+    test('does not hide the shared view-level hui-card when hosted inside a layout-card grid', () => {
+        // Structure (bottom → top): bubble-card → div (grid) → grid-layout →
+        // layout-card → hui-card (wraps the whole view). The nearest hui-card
+        // belongs to the view, not this pop-up's cell, so it must not be hidden.
+        const viewHuiCard = {
+            tagName: 'HUI-CARD',
+            hidden: false,
+            style: { display: '' },
+            parentElement: null,
+        };
+        const layoutCard = {
+            tagName: 'LAYOUT-CARD',
+            parentElement: viewHuiCard,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+        const gridLayout = {
+            tagName: 'GRID-LAYOUT',
+            parentElement: layoutCard,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+        const gridShadowRoot = { host: gridLayout };
+        const gridDiv = {
+            tagName: 'DIV',
+            parentElement: null,
+            getRootNode: () => gridShadowRoot,
+        };
+        const context = {
+            ...createStandaloneContext(),
+            sectionRow: null,
+            sectionRowContainer: null,
+            closest: () => null,
+            parentElement: gridDiv,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+        usedContexts.push(context);
+
+        suspendPopupHostLayout(context);
+
+        expect(context.sectionRow).toBeNull();
+        expect(viewHuiCard.hidden).toBe(false);
+        expect(viewHuiCard.style.display).toBe('');
+    });
 });
 
 describe('legacy popup location routing', () => {

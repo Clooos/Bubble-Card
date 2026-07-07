@@ -416,6 +416,23 @@ function crossesSharedCustomStackHost(context, target) {
     return false;
 }
 
+// A pop-up hosted directly inside a layout (grid/masonry/custom layout-card) has
+// no per-card `hui-card` cell of its own. The nearest `hui-card` reached by the
+// shadow-DOM walk in that case wraps the whole view, so hiding it would collapse
+// every card. Treat these layout/view hosts as a boundary: if the walk crosses
+// one before finding a `hui-card`, the pop-up has no own cell to suspend.
+function isPopupHostLayoutBoundary(node) {
+    const tagName = node?.tagName?.toLowerCase?.();
+    if (!tagName) {
+        return false;
+    }
+
+    return tagName === 'layout-card' ||
+        tagName === 'grid-layout' ||
+        tagName === 'masonry-layout' ||
+        tagName.endsWith('-view');
+}
+
 function resolvePopupHostElements(context) {
     if (context.sectionRow && context.sectionRowContainer) {
         return;
@@ -444,6 +461,12 @@ function resolvePopupHostElements(context) {
                         break;
                     }
                     context.sectionRow = node;
+                    break;
+                }
+
+                // Stop before over-reaching into a shared layout/view host: the
+                // hui-card beyond it wraps the whole view, not this pop-up's cell.
+                if (node !== context && isPopupHostLayoutBoundary(node)) {
                     break;
                 }
 
