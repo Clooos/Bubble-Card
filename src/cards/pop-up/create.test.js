@@ -417,7 +417,7 @@ describe('prepareStandaloneStructure', () => {
         shadowRoot.appendChild(card); // simulate what initializeContent does
 
         const context = {
-            config: {},
+            config: { background_update: true },
             content,
             shadowRoot,
             card,
