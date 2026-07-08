@@ -73,6 +73,13 @@ function getWakeSyncContexts() {
 function syncWakeResumedPopups() {
     const contexts = getWakeSyncContexts();
     for (const context of contexts) {
+        // Skip detached shells — a closed standalone pop-up has no parentNode.
+        // Checking parentNode prevents re-opening a closed pop-up whose stale
+        // class state (is-popup-opened) was not yet cleared before detachment.
+        if (context.isStandalonePopUp && !context.popUp?.parentNode) {
+            continue;
+        }
+
         // Only sync popups that are actually in a visible/transitioning state.
         // This prevents a CPU burst when returning from sleep by ignoring dormant popups.
         const isVisible = context.popUp?.classList?.contains('is-popup-opened') || 
@@ -316,8 +323,8 @@ function initializeStandalonePopUp(context) {
     prepareStandaloneStructure(context);
     if (!context.popUp) return;
 
-    createHeader(context);
-    createStructure(context);
+    const inactive = isStandalonePopUpInactive(context);
+
     context.refreshPopupHeader = () => {
         refreshPopupHeader(context);
     };
@@ -325,11 +332,23 @@ function initializeStandalonePopUp(context) {
         refreshPopupShell(context);
         context._standaloneNeedsShellRefresh = false;
     };
-    if (isStandalonePopUpInactive(context)) {
+
+    if (inactive) {
+        // Defer shell creation (header + structure) until first open.
+        // This keeps the shadow-root empty while the pop-up is closed.
+        context._standaloneShellCreated = false;
         context._standaloneNeedsShellRefresh = true;
+        context.createStandaloneShell = () => {
+            createHeader(context);
+            createStructure(context);
+        };
     } else {
+        createHeader(context);
+        createStructure(context);
+        context._standaloneShellCreated = true;
         context.refreshPopupShell();
     }
+
     const editorHandledStandaloneCards = changeEditor(context);
     if (shouldSyncStandalonePopUpCards(context, editorHandledStandaloneCards)) {
         handlePopUpCards(context);
@@ -401,6 +420,15 @@ export function handlePopUp(context) {
 
     ensureWakeSyncListeners();
     registerWakeSyncContext(context);
+
+    // If the shell was deferred (never opened) and we are now in editor mode,
+    // create it now so the placeholder can be displayed.
+    const inEditor = !!(context.editor || context.detectedEditor);
+    if (context.isStandalonePopUp && !context._standaloneShellCreated && inEditor) {
+        createHeader(context);
+        createStructure(context);
+        context._standaloneShellCreated = true;
+    }
 
     if (isStandalonePopUpInactive(context)) {
         context._standaloneNeedsShellRefresh = true;

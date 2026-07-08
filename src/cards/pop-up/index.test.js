@@ -413,12 +413,16 @@ describe('handlePopUp performance guards', () => {
 
         await handlePopUp(context);
 
-        expect(createHeader).toHaveBeenCalledTimes(1);
-        expect(createStructure).toHaveBeenCalledTimes(1);
+        // Shell creation (header + structure) is deferred until first open
+        // for inactive pop-ups — keeps the shadow-root empty while closed.
+        expect(createHeader).not.toHaveBeenCalled();
+        expect(createStructure).not.toHaveBeenCalled();
         expect(changeStyle).not.toHaveBeenCalled();
         expect(renderHeaderButton).not.toHaveBeenCalled();
         expect(typeof context.refreshPopupShell).toBe('function');
         expect(context._standaloneNeedsShellRefresh).toBe(true);
+        expect(context._standaloneShellCreated).toBe(false);
+        expect(typeof context.createStandaloneShell).toBe('function');
     });
 
     test('does not mount standalone child cards during popup initialization while inactive', async () => {

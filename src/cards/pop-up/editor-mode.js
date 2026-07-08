@@ -271,8 +271,15 @@ export function changeEditor(context) {
             popUp.classList.remove('editor');
 
             if (context.isStandalonePopUp) {
-                popUp.style.display = '';
-                popUp.style.visibility = '';
+                // Detach popup shell from DOM when leaving editor, same as
+                // closeStandalonePopup — keeps shadow-root empty while closed.
+                if (context.popUp?.parentNode) {
+                    context._standalonePopUpParent = context.popUp.parentNode;
+                    context.popUp.parentNode.removeChild(context.popUp);
+                }
+                // Always suspend host layout to hide the hui-card wrapper.
+                // Shell detachment (shadow DOM) and host layout suspension (light DOM)
+                // are independent — detaching the shell does not hide sectionRow.
                 suspendPopupHostLayout(context);
             } else {
                 appendLegacyPopup(context, false);

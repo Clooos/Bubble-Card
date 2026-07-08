@@ -1165,16 +1165,22 @@ function runStandalonePostCloseCleanup(context) {
         context.popUp.style.display = 'none';
     }
 
-    // Detach popup shell from DOM to match legacy pop-up behavior.
-    // The shell is fully recreated on next open via phase 1 content priming.
+    // Clear visual open classes before detachment so that wake sync
+    // (visibilitychange/pageshow) does not see a stale "opened" state
+    // and attempt to re-open a closed, detached pop-up.
+    context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing', 'is-switch-closing');
+    context.popUp.classList.add('is-popup-closed');
+
+    // Detach popup shell from DOM to keep shadow-root empty while closed.
     if (context.popUp?.parentNode) {
         context._standalonePopUpParent = context.popUp.parentNode;
         context.popUp.parentNode.removeChild(context.popUp);
     }
 
-    if (!context._standalonePopUpParent) {
-        suspendPopupHostLayout(context);
-    }
+    // Always suspend host layout to hide the hui-card wrapper.
+    // Shell detachment (shadow DOM) and host layout suspension (light DOM)
+    // are independent — detaching the shell does not hide sectionRow.
+    suspendPopupHostLayout(context);
 
     if (context.config.close_action && !hasIncomingPopupNavigation(context)) {
         callAction(context, context.config, 'close_action');
@@ -1757,6 +1763,26 @@ export function openPopup(context, instant = false) {
     setPopupBackdropBlurGuard(context, true);
 
     if (context.isStandalonePopUp) {
+        // Create deferred shell (header + structure) on first open.
+        // Must happen here (before openStandalonePopup) to avoid a recursive
+        // loop: openStandalonePopup → createStructure → _setInitialVisibility
+        // → openPopup → openStandalonePopup → ...
+        // Set _standaloneShellCreated = true BEFORE calling createStandaloneShell
+        // so that a re-entrant openPopup call from _setInitialVisibility (when
+        // hash === location.hash) does not attempt to create the shell again.
+        // Also set _standaloneShellCreating so _setInitialVisibility skips the
+        // re-entrant openPopup call and lets the outer call handle the animation.
+        if (!context._standaloneShellCreated && context.createStandaloneShell) {
+            context._standaloneShellCreated = true;
+            context._standaloneShellCreating = true;
+            const createShell = context.createStandaloneShell;
+            context.createStandaloneShell = null;
+            try {
+                createShell();
+            } finally {
+                context._standaloneShellCreating = false;
+            }
+        }
         openStandalonePopup(context, instant);
         return;
     }

@@ -233,6 +233,12 @@ function _setInitialVisibility(context) {
   }
 
   if (context.config.hash === location.hash) {
+    // Skip re-entrant openPopup call when shell is being created on-demand
+    // during an open sequence (e.g. deferred standalone shell creation).
+    // The outer openPopup call is already handling the open animation.
+    if (context._standaloneShellCreating) {
+      return;
+    }
     openPopup(context, true);
     return;
   }

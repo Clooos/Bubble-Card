@@ -385,6 +385,9 @@ describe('changeEditor', () => {
     test('does not route standalone editor teardown through the legacy hide helper', () => {
         const popUpClassList = createMockClassList(['is-popup-closed', 'editor']);
         const contentClassList = createMockClassList(['popup-content-in-editor-mode']);
+        const mockParent = {
+            removeChild: jest.fn(),
+        };
         const sectionRowContainer = {
             style: {
                 display: '',
@@ -405,6 +408,7 @@ describe('changeEditor', () => {
                     display: 'none',
                     visibility: 'hidden',
                 },
+                parentNode: mockParent,
             },
             elements: {
                 content: { classList: contentClassList },
@@ -430,13 +434,15 @@ describe('changeEditor', () => {
         changeEditor(context);
 
         expect(hideLegacyPopupContent).not.toHaveBeenCalled();
-        expect(context.popUp.style.display).toBe('');
-        expect(context.popUp.style.visibility).toBe('');
         expect(context.popUp.classList.contains('editor')).toBe(false);
+        expect(mockParent.removeChild).toHaveBeenCalledWith(context.popUp);
+        expect(context._standalonePopUpParent).toBe(mockParent);
+        // Host layout is always suspended on editor exit to hide the hui-card
+        // wrapper — shell detachment (shadow DOM) and host layout suspension
+        // (light DOM) are independent operations.
         expect(context.sectionRow.hidden).toBe(true);
         expect(context.sectionRow.style.display).toBe('none');
-        expect(sectionRowContainer.style.display).toBe('none');
-        expect(sectionRowContainer.style.position).toBe('');
+        expect(context.sectionRowContainer.style.display).toBe('none');
         expect(context.editorAccess).toBe(false);
     });
 
