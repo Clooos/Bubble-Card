@@ -61,9 +61,13 @@ export function createSubButtonStructure(context, options = {}) {
     }
     context.elements.bottomSubButtonContainer = bottomSubButtonContainer;
   } else if (bottomSubButtonContainer && bottomItems.length === 0) {
-    bottomSubButtonContainer.remove();
-    delete context.elements.bottomSubButtonContainer;
-    delete context.elements.bottomAlignmentLanes;
+    // Keep container if tilt buttons are using it (cover card)
+    const tiltNeedsBottom = context.config?.tilt_buttons === 'bottom';
+    if (!tiltNeedsBottom) {
+      bottomSubButtonContainer.remove();
+      delete context.elements.bottomSubButtonContainer;
+      delete context.elements.bottomAlignmentLanes;
+    }
   }
 
   // Update content container fixed position based on group placement

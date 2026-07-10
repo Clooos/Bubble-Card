@@ -1,8 +1,20 @@
 import { html } from "lit";
+import { coverEntityFeature } from "./changes.js";
 
 export function renderCoverEditor(editor){
 
     let button_action = editor._config.button_action || '';
+    
+    // Check if the selected cover entity supports tilt
+    const entity_id = editor._config?.entity;
+    const stateObj = entity_id ? editor.hass?.states?.[entity_id] : null;
+    const coverSupportedFeatures = stateObj?.attributes?.supported_features ?? 0;
+    const hasTiltSupport = !!(coverSupportedFeatures & (
+        coverEntityFeature.OPEN_TILT |
+        coverEntityFeature.CLOSE_TILT |
+        coverEntityFeature.SET_TILT_POSITION
+    ));
+
     return html`
         <div class="card-config">
             ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
@@ -85,6 +97,48 @@ export function renderCoverEditor(editor){
                     ></ha-form>
                 </div>
             </ha-expansion-panel>
+            ${hasTiltSupport ? html`
+            <ha-expansion-panel outlined>
+                <h4 slot="header">
+                  <ha-icon icon="mdi:swap-horizontal"></ha-icon>
+                  Tilt buttons
+                </h4>
+                <div class="content">
+                    ${editor.makeDropdown("Tilt buttons position", "tilt_buttons", [
+                        { value: 'top', label: 'Top (default)' },
+                        { value: 'bottom', label: 'Bottom' },
+                        { value: 'left', label: 'Left' },
+                        { value: 'right', label: 'Right' },
+                        { value: 'hidden', label: 'Hidden' },
+                    ])}
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${{ open_tilt_service: editor._config?.open_tilt_service || 'cover.open_cover_tilt' }}
+                        .schema=${[{ name: 'open_tilt_service', selector: { text: {} } }]}
+                        .computeLabel=${() => 'Optional - Open tilt service (cover.open_cover_tilt by default)'}
+                        @value-changed=${(ev) => {
+                            editor._valueChanged({
+                                target: { configValue: 'open_tilt_service' },
+                                detail: { value: ev.detail.value.open_tilt_service }
+                            });
+                        }}
+                    ></ha-form>
+
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${{ close_tilt_service: editor._config?.close_tilt_service || 'cover.close_cover_tilt' }}
+                        .schema=${[{ name: 'close_tilt_service', selector: { text: {} } }]}
+                        .computeLabel=${() => 'Optional - Close tilt service (cover.close_cover_tilt by default)'}
+                        @value-changed=${(ev) => {
+                            editor._valueChanged({
+                                target: { configValue: 'close_tilt_service' },
+                                detail: { value: ev.detail.value.close_tilt_service }
+                            });
+                        }}
+                    ></ha-form>
+                </div>
+            </ha-expansion-panel>
+            ` : ''}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:gesture-tap"></ha-icon>

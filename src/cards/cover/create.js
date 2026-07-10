@@ -38,6 +38,7 @@ export function createStructure(context) {
         return button;
     }
 
+    // Position buttons (open/stop/close)
     elements.buttonOpen = createCoverButton("mdi:arrow-up", 'bubble-button bubble-open button open', 'bubble-icon-open');
     elements.buttonStop = createCoverButton("mdi:stop", 'bubble-button bubble-stop button stop', 'bubble-icon-stop');
     elements.buttonClose = createCoverButton("mdi:arrow-down", 'bubble-button bubble-close button close', 'bubble-icon-close');
@@ -48,6 +49,19 @@ export function createStructure(context) {
         elements.buttonClose
     );
 
+    // Tilt buttons container
+    elements.tiltButtonsContainer = createElement('div', 'bubble-tilt-buttons-container');
+    elements.tiltButtonsContainer.style.display = 'none';
+
+    elements.buttonTiltOpen = createCoverButton("mdi:arrow-top-right", 'bubble-button bubble-tilt-open button tilt-open', 'bubble-icon-tilt-open');
+    elements.buttonTiltClose = createCoverButton("mdi:arrow-bottom-left", 'bubble-button bubble-tilt-close button tilt-close', 'bubble-icon-tilt-close');
+
+    elements.tiltButtonsContainer.append(
+        elements.buttonTiltOpen,
+        elements.buttonTiltClose
+    );
+
+    // Position buttons click handlers
     elements.buttonOpen.addEventListener('click', () => {
         forwardHaptic("selection");
         const openCover = context.config.open_service ?? 'cover.open_cover';
@@ -70,6 +84,25 @@ export function createStructure(context) {
         forwardHaptic("selection");
         const closeCover = context.config.close_service ?? 'cover.close_cover';
         const [domain, action] = closeCover.split('.');
+        context._hass.callService(domain, action, {
+            entity_id: context.config.entity
+        });
+    });
+
+    // Tilt buttons click handlers
+    elements.buttonTiltOpen.addEventListener('click', () => {
+        forwardHaptic("selection");
+        const openTilt = context.config.open_tilt_service ?? 'cover.open_cover_tilt';
+        const [domain, action] = openTilt.split('.');
+        context._hass.callService(domain, action, {
+            entity_id: context.config.entity
+        });
+    });
+
+    elements.buttonTiltClose.addEventListener('click', () => {
+        forwardHaptic("selection");
+        const closeTilt = context.config.close_tilt_service ?? 'cover.close_cover_tilt';
+        const [domain, action] = closeTilt.split('.');
         context._hass.callService(domain, action, {
             entity_id: context.config.entity
         });

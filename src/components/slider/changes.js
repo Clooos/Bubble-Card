@@ -431,20 +431,28 @@ export function updateEntity(context, percentage) {
     }
 
     case 'cover': {
+      const coverSliderType = context?.config?.cover_slider_type || 'position';
       // Handle custom min/max for covers
-      let position;
+      let positionValue;
       if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
         // Use the adjusted value directly when custom min/max are set
-        position = Math.round(adjustedValue);
+        positionValue = Math.round(adjustedValue);
       } else {
         // Standard cover position (percentage is already 0-100)
-        position = Math.round(adjustedPercentage);
+        positionValue = Math.round(adjustedPercentage);
       }
-      
-      context._hass.callService('cover', 'set_cover_position', {
-        entity_id: context.config.entity,
-        position: position
-      });
+
+      if (coverSliderType === 'tilt_position') {
+        context._hass.callService('cover', 'set_cover_tilt_position', {
+          entity_id: context.config.entity,
+          tilt_position: positionValue
+        });
+      } else {
+        context._hass.callService('cover', 'set_cover_position', {
+          entity_id: context.config.entity,
+          position: positionValue
+        });
+      }
       break;
     }
 

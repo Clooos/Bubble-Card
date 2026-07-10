@@ -442,6 +442,7 @@ These options are only available when `button_type` is set to `slider`.
 | `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Position of the value display |
 | `invert_slider_value` | boolean | Optional (`false` default) | Invert slider direction (100% fill equals minimum). Not available for color sliders. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **For lights only.** Choose the slider mode |
+| `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **For covers only.** Choose the slider mode (position or tilt) |
 | `hue_force_saturation` | boolean | Optional (`false` default) | **For lights only (Hue mode).** Force saturation when adjusting Hue |
 | `hue_force_saturation_value` | number | Optional (`100` default) | **For lights only (Hue mode).** Forced saturation value (0-100) |
 | `use_accent_color` | boolean | Optional (`false` default) | **For lights only (Brightness mode).** Use the theme accent color instead of the light color |
@@ -675,6 +676,10 @@ This card allows you to control your `cover` entities.
 | `open_service` | string | Optional | Any service or script | A service to open your cover, default to `cover.open_cover` |
 | `stop_service` | string | Optional | Any service or script | A service to stop your cover, default to `cover.stop_cover` |
 | `close_service` | string | Optional | Any service or script | A service to close your cover, default to `cover.close_cover` |
+| `tilt_buttons` | string | Optional | `top` (default), `bottom`, `left`, `right`, `hidden` | Position of tilt control buttons (only shown if cover supports tilt) |
+| `open_tilt_service` | string | Optional | Any service or script | A service to open tilt, default to `cover.open_cover_tilt` |
+
+| `close_tilt_service` | string | Optional | Any service or script | A service to close tilt, default to `cover.close_cover_tilt` |
 | `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#tap-double-tap-and-hold-actions) | Allow to change the default actions on button click. |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `none` will be used. |
@@ -1306,7 +1311,7 @@ sub_button:
 <br>
 
 Slider sub-buttons support the same slider options as button sliders, including:
-`min_value`, `max_value`, `step`, `tap_to_slide`, `relative_slide`, `read_only_slider`, `slider_live_update`, `slider_fill_orientation`, `slider_value_position`, `invert_slider_value`, `light_slider_type`, `hue_force_saturation`, `hue_force_saturation_value`, `use_accent_color`, `allow_light_slider_to_0`, `light_transition`, `light_transition_time`.
+`min_value`, `max_value`, `step`, `tap_to_slide`, `relative_slide`, `read_only_slider`, `slider_live_update`, `slider_fill_orientation`, `slider_value_position`, `invert_slider_value`, `light_slider_type`, `cover_slider_type`, `hue_force_saturation`, `hue_force_saturation_value`, `use_accent_color`, `allow_light_slider_to_0`, `light_transition`, `light_transition_time`.
 
 </details>
 

@@ -231,9 +231,20 @@ class BubbleCardEditor extends LitElement {
 
     static get properties() {
         return {
-            _renderHass: {},
             _config: {}
         };
+    }
+
+    // Private backing field for the throttled hass reference.
+    // Not in properties() — we manage reactivity manually via requestUpdate().
+    __renderHass = undefined;
+
+    /**
+     * Returns the throttled hass reference for use in render() and template helpers.
+     * Falls back to the latest raw reference if the throttled one hasn't been set yet.
+     */
+    get _hassRender() {
+        return this.__renderHass ?? this._hass;
     }
 
     /**
@@ -242,13 +253,16 @@ class BubbleCardEditor extends LitElement {
      * Subsequent assignments are throttled to avoid re-renders on every HA state tick.
      */
     set hass(value) {
-        // Always keep the latest reference for synchronous reads (render(), helpers, etc.)
+        // Always keep the latest reference for synchronous reads (helpers, API calls, etc.)
         this._hass = value;
-        if (this._hass === undefined) return;
+        if (this._hass === undefined) {
+            this.__renderHass = undefined;
+            return;
+        }
 
         // First assignment: apply immediately (no throttle at startup)
-        if (this._renderHass === undefined) {
-            this._renderHass = value;
+        if (this.__renderHass === undefined) {
+            this.__renderHass = value;
             return;
         }
 
@@ -259,10 +273,16 @@ class BubbleCardEditor extends LitElement {
         this._hassThrottleTimer = setTimeout(() => {
             this._hassThrottleTimer = null;
             // Only trigger a re-render if the reference still differs
-            if (this._renderHass !== this._hass) {
-                this._renderHass = this._hass;
+            if (this.__renderHass !== this._hass) {
+                this.__renderHass = this._hass;
+                // Invalidate caches so the next render picks up new entity lists
+                this.listsUpdated = false;
+                this._entityCache = {};
+                this._cachedAttributeList = null;
+                this._cachedAttributeListEntity = null;
+                this.requestUpdate();
             }
-        }, 500);
+        }, 1000);
     }
 
     get hass() {
@@ -297,15 +317,8 @@ class BubbleCardEditor extends LitElement {
 
     updated(changedProperties) {
         super.updated(changedProperties);
-        if (changedProperties.has('_renderHass')) {
-            // If hass changes, entity lists might be stale
-            this.listsUpdated = false;
-            // Clear entity cache when hass changes
-            this._entityCache = {};
-            // Clear attribute list cache as well
-            this._cachedAttributeList = null;
-            this._cachedAttributeListEntity = null;
-        }
+        // Note: _renderHass cache invalidation moved to the hass setter (throttled callback)
+        // since _renderHass is no longer a reactive property.
     
         this._setupAutoRowsObserver();
     }
@@ -350,11 +363,11 @@ class BubbleCardEditor extends LitElement {
     }
 
     render() {
-        if (!this.hass) {
+        if (!this._hassRender) {
             return html``;
         }
 
-        const t = setupTranslation(this.hass);
+        const t = setupTranslation(this._hassRender);
         
         // Apply preview style only once
         if (!this._previewStyleApplied) {
@@ -545,7 +558,7 @@ class BubbleCardEditor extends LitElement {
             `)}
             ${this._renderConditionalContent(showRowsOption, html`
                 <ha-form
-                    .hass=${this.hass}
+                    .hass=${this._hassRender}
                     .data=${{ rows: this._config.rows ?? this._config.grid_options?.rows ?? defaultRows ?? '' }}
                     .schema=${[{
                         name: 'rows',
@@ -574,7 +587,7 @@ class BubbleCardEditor extends LitElement {
                 </div>
             </div>
             <ha-form
-                .hass=${this.hass}
+                .hass=${this._hassRender}
                 .data=${{ card_layout: this._config.card_layout || defaultLayout }}
                 .schema=${[{
                     name: 'card_layout',
@@ -626,9 +639,9 @@ class BubbleCardEditor extends LitElement {
         const showSelectUi = isSubButton && (context?.sub_button_type === 'select' || (!context?.sub_button_type && isSelectEntity));
 
         const attributeList = context?.show_attribute 
-            ? Object.keys(this.hass.states[entity]?.attributes || {}).map((attributeName) => {
-                let state = this.hass.states[entity];
-                let formattedName = this.hass.formatEntityAttributeName(state, attributeName);
+            ? Object.keys(this._hassRender.states[entity]?.attributes || {}).map((attributeName) => {
+                let state = this._hassRender.states[entity];
+                let formattedName = this._hassRender.formatEntityAttributeName(state, attributeName);
                 return { label: formattedName, value: attributeName };
               })
             : [];
@@ -779,7 +792,7 @@ class BubbleCardEditor extends LitElement {
             </ha-formfield>
             ${this._renderConditionalContent(context?.show_attribute, html`
                 <ha-form
-                    .hass=${this.hass}
+                    .hass=${this._hassRender}
                     .data=${{ attribute: context?.attribute }}
                     .schema=${[{
                         name: 'attribute',
@@ -864,7 +877,7 @@ class BubbleCardEditor extends LitElement {
             return html`
                 <ha-entity-picker
                     label="${label}"
-                    .hass="${this.hass}"
+                    .hass="${this._hassRender}"
                     .value="${this._config[configValue]}"
                     .configValue="${configValue}"
                     .includeDomains="${includeDomains.length ? includeDomains : undefined}"
@@ -877,8 +890,8 @@ class BubbleCardEditor extends LitElement {
         } else {
             return html`
                 <ha-form
-                    .hass=${this.hass}
-                    .data=${{ [configValue]: this['_' + configValue] }}
+                    .hass=${this._hassRender}
+                    .data=${{ [configValue]: this._config[configValue] }}
                     .schema=${[{
                         name: configValue,
                         selector: {
@@ -910,7 +923,7 @@ class BubbleCardEditor extends LitElement {
         }
         return html`
             <ha-form
-                .hass=${this.hass}
+                .hass=${this._hassRender}
                 .data=${{ [configValue]: this._config[configValue] ?? '' }}
                 .schema=${[{
                     name: configValue,
@@ -1009,7 +1022,7 @@ class BubbleCardEditor extends LitElement {
                 <div class="content"> 
                     ${getLazyLoadedPanelContent(this, panelKey, !!this._expandedPanelStates[panelKey], () => html`
                         <ha-form
-                            .hass=${this.hass}
+                            .hass=${this._hassRender}
                             .data=${context}
                             .configValue="${
                                           (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType}" 
@@ -1079,7 +1092,7 @@ class BubbleCardEditor extends LitElement {
                                 autofocus
                                 autocomplete-entities
                                 autocomplete-icons
-                                .hass=${this.hass}
+                                .hass=${this._hassRender}
                                 .value=${this._config.styles}
                                 .configValue="${"styles"}"
                                 @value-changed=${(e) => {
@@ -1918,6 +1931,10 @@ class BubbleCardEditor extends LitElement {
 
     const elementsToObserve = [
       bubbleCard.querySelector('.bubble-sub-button-bottom-container'),
+      // When cover tilt buttons are in the 'bottom' position with main buttons
+      // also at the bottom, the column wrapper (not the inner bottom-fixed
+      // container) spans both rows, so observe it to reserve height for both.
+      bubbleCard.querySelector('.bubble-wrapper.has-bottom-buttons .bubble-buttons-column-wrapper'),
       bubbleCard.querySelector('.bubble-buttons-container.bottom-fixed'),
       bubbleCard.querySelector('.bubble-sub-button-container')
     ].filter(Boolean);
@@ -2061,7 +2078,12 @@ class BubbleCardEditor extends LitElement {
       const isCalendar = this._config.card_type === 'calendar';
       const isSeparator = this._config.card_type === 'separator';
       const bottomSubButtons = bubbleCard.querySelector('.bubble-sub-button-bottom-container');
-      const bottomMainButtons = bubbleCard.querySelector('.bubble-buttons-container.bottom-fixed');
+      // Prefer the cover tilt column wrapper when it is the bottom-fixed element
+      // (tilt_buttons: 'bottom' + main_buttons_position: 'bottom'): it spans both
+      // the main buttons row and the tilt row, so measuring it reserves height for
+      // both. Falls back to the standard bottom-fixed container in every other case.
+      const bottomMainButtons = bubbleCard.querySelector('.bubble-wrapper.has-bottom-buttons .bubble-buttons-column-wrapper')
+        || bubbleCard.querySelector('.bubble-buttons-container.bottom-fixed');
       const mainSubButtons = bubbleCard.querySelector('.bubble-sub-button-container');
       const contentContainer = bubbleCard.querySelector('.bubble-content-container');
 
@@ -2261,8 +2283,8 @@ class BubbleCardEditor extends LitElement {
 
     if (Object.keys(this._entityCache).length === 0) {
         // Populate _entityCache and identify selectEntities in a single pass
-        Object.keys(this.hass.states).forEach(entityId => {
-            const entity = this.hass.states[entityId];
+        Object.keys(this._hassRender.states).forEach(entityId => {
+            const entity = this._hassRender.states[entityId];
             const domain = entityId.split('.')[0];
             
             if (!this._entityCache[domain]) {
@@ -2285,8 +2307,8 @@ class BubbleCardEditor extends LitElement {
             }
         });
         // Still need to check for other entities with selectable attributes not in input_select/select domains
-        Object.keys(this.hass.states).forEach(entityId => {
-            const entity = this.hass.states[entityId];
+        Object.keys(this._hassRender.states).forEach(entityId => {
+            const entity = this._hassRender.states[entityId];
             if (this._selectable_attributes.some(attr => entity.attributes?.[attr])) {
                 if (!selectEntities.includes(entityId)) { // Avoid duplicates
                     selectEntities.push(entityId);
@@ -2311,12 +2333,12 @@ class BubbleCardEditor extends LitElement {
 
     const filteredStates = {};
     selectEntities.forEach(entityId => {
-        if (this.hass.states[entityId]) {
-            filteredStates[entityId] = this.hass.states[entityId];
+        if (this._hassRender.states[entityId]) {
+            filteredStates[entityId] = this._hassRender.states[entityId];
         }
     });
 
-    this.inputSelectList = { ...this.hass };
+    this.inputSelectList = { ...this._hassRender };
     this.inputSelectList.states = filteredStates;
 
     // Cache attributeList
@@ -2324,9 +2346,9 @@ class BubbleCardEditor extends LitElement {
         if (this._entity === this._cachedAttributeListEntity && this._cachedAttributeList) {
             this.attributeList = this._cachedAttributeList;
         } else {
-            this.attributeList = Object.keys(this.hass.states[this._entity]?.attributes || {}).map((attributeName) => {
-                let entity = this.hass.states[this._entity];
-                let formattedName = this.hass.formatEntityAttributeName(entity, attributeName);
+            this.attributeList = Object.keys(this._hassRender.states[this._entity]?.attributes || {}).map((attributeName) => {
+                let entity = this._hassRender.states[this._entity];
+                let formattedName = this._hassRender.formatEntityAttributeName(entity, attributeName);
                 return { label: formattedName, value: attributeName };
             });
             this._cachedAttributeList = this.attributeList;

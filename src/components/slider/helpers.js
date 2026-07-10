@@ -240,7 +240,11 @@ export function getCurrentPercentage(context, entity = context.config.entity) {
       return clampPercentage(volumePercentage);
     }
     case 'cover': {
-      const position = getAttribute(context, 'current_position', entity);
+      const coverSliderType = context?.config?.cover_slider_type || 'position';
+      const attribute = coverSliderType === 'tilt_position'
+        ? 'current_tilt_position'
+        : 'current_position';
+      const position = getAttribute(context, attribute, entity);
       const coverPosition = position !== undefined && position !== null ? position : 0;
       if (context.config.min_value !== undefined || context.config.max_value !== undefined) {
         return calculateRangePercentage(coverPosition, minValue, maxValue);
@@ -360,7 +364,11 @@ export function formatDisplayValueFromEntity(context) {
       break;
     }
     case 'cover': {
-      const position = getAttribute(context, 'current_position', entityId);
+      const coverSliderType = context?.config?.cover_slider_type || 'position';
+      const attribute = coverSliderType === 'tilt_position'
+        ? 'current_tilt_position'
+        : 'current_position';
+      const position = getAttribute(context, attribute, entityId);
       actualValue = position !== undefined && position !== null ? position : 0;
       break;
     }

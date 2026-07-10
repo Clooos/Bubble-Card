@@ -24,6 +24,72 @@
   gap: 8px;
 }
 
+.bubble-tilt-buttons-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Column wrapper for bottom position: main buttons above, tilt buttons below.
+   Use the same 8px gap as the main buttons row and the sub-button containers so
+   both rows share consistent spacing. */
+.bubble-buttons-column-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+}
+
+/* When tilt buttons are in bottom position, make them full width and match the
+   inter-button spacing of the main buttons / sub-buttons (8px, not 4px). */
+.bubble-buttons-column-wrapper > .bubble-tilt-buttons-container {
+  width: 100%;
+  gap: 8px;
+}
+
+.bubble-buttons-column-wrapper > .bubble-tilt-buttons-container .bubble-cover-button {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+/* When main buttons are also in bottom position, the wrapper itself becomes the
+   bottom-fixed full-width column. This keeps the main + tilt rows stacked
+   together instead of the main container escaping through its own absolute
+   `.bottom-fixed` positioning (which would leave the wrapper shrink-wrapped to
+   the tilt content in the top-right corner). Mirrors the media-player's
+   `.bubble-wrapper.has-bottom-buttons` volume-slider handling. */
+.bubble-wrapper.has-bottom-buttons .bubble-buttons-column-wrapper {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  width: 100%;
+  margin-right: 0;
+  padding: 0 8px;
+  box-sizing: border-box;
+  align-items: stretch;
+}
+
+/* Keep the inner main buttons container in the wrapper's flow. setLayout still
+   stamps `.bottom-fixed` (position: absolute) on it, so neutralize that here —
+   the wrapper above owns the bottom-fixed placement now. `.full-width` on the
+   main container is preserved so its buttons keep their background pill. */
+.bubble-buttons-column-wrapper > .bubble-buttons-container.bottom-fixed {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  padding: 0;
+  /* In the absolute (non-column-wrapper) layout the `.fixed-top` `margin-top: 10px`
+     is ignored because the container is positioned via `bottom`. Here the container
+     becomes a static flex child, which would re-honor that margin and add an extra
+     10px above the bottom buttons only when tilt buttons are at the bottom. Reset it
+     so the spacing above the bottom buttons is identical in both cases. */
+  margin-top: 0;
+}
+
 .bubble-button.disabled {
   opacity: 0.3 !important;
   pointer-events: none !important;
@@ -32,4 +98,16 @@
 
 .large .bubble-cover-button-icon {
   --mdc-icon-size: 24px;
+}
+
+/* When tilt buttons are in left/right position, give them the same pill
+   background as the main buttons (matching the bottom position behaviour).
+   The top position intentionally remains transparent. */
+.bubble-tilt-buttons-container.has-background > .bubble-cover-button {
+  background-color: var(--bubble-main-buttons-background-color,
+    var(--bubble-sub-button-background-color,
+      var(--bubble-icon-background-color,
+        var(--bubble-secondary-background-color,
+          var(--card-background-color,
+            var(--ha-card-background))))));
 }

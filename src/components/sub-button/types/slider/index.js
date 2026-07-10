@@ -29,6 +29,7 @@ function buildSubSliderConfig(context, options) {
     ...(options.subButton?.light_transition !== undefined ? { light_transition: options.subButton.light_transition } : {}),
     ...(options.subButton?.light_transition_time !== undefined ? { light_transition_time: options.subButton.light_transition_time } : {}),
     ...(options.subButton?.light_slider_type !== undefined ? { light_slider_type: options.subButton.light_slider_type } : {}),
+    ...(options.subButton?.cover_slider_type !== undefined ? { cover_slider_type: options.subButton.cover_slider_type } : {}),
     ...(options.subButton?.hue_force_saturation !== undefined ? { hue_force_saturation: options.subButton.hue_force_saturation } : {}),
     ...(options.subButton?.hue_force_saturation_value !== undefined ? { hue_force_saturation_value: options.subButton.hue_force_saturation_value } : {}),
   };
@@ -164,7 +165,15 @@ export function setCardElementsHidden(context, hidden) {
   setHidden(context.elements?.nameContainer);
   setHidden(context.elements?.iconContainer);
   setHidden(context.elements?.image);
-  setHidden(context.elements?.buttonsContainer);
+  const buttonsContainer = context.elements?.buttonsContainer;
+  if (buttonsContainer) {
+    // Bottom-fixed main buttons (e.g. cover card with main_buttons_position: bottom)
+    // sit far below the top-row overlay — never hide them. Always allow un-hiding.
+    const isBottomFixed = buttonsContainer.classList?.contains('bottom-fixed');
+    if (!hidden || !isBottomFixed) {
+      setHidden(buttonsContainer);
+    }
+  }
   if (context.elements?.subButtonContainer) {
     context.elements.subButtonContainer.style.opacity = hidden ? '0' : '';
     context.elements.subButtonContainer.style.pointerEvents = hidden ? 'none' : '';

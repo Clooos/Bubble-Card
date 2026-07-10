@@ -86,7 +86,9 @@ export function updateSubButtons(context, subButtons) {
         return;
       }
 
-      updateSubButtonContent(context, element, { ...options, subButton, groupContainer: null, section: 'main' });
+      // Main-section sub-buttons behave like a 'top' group: card-level slider overlay
+      const overlayAtCardLevel = options.subButtonType === 'slider' && !options.alwaysVisible;
+      updateSubButtonContent(context, element, { ...options, subButton, groupContainer: null, overlayAtCardLevel, section: 'main' });
       handleVisibilityConditions(element, subButton, context._hass, context);
       visibleIndex++;
     });

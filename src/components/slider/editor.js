@@ -403,5 +403,33 @@ export function makeGenericSliderSettings({
                 </div>
             </ha-expansion-panel>
         ` : ''}
+        ${entity?.startsWith("cover") ? html`
+            <ha-expansion-panel outlined>
+                <h4 slot="header">
+                    <ha-icon icon="mdi:window-shutter"></ha-icon>
+                    Cover options
+                </h4>
+                <div class="content">
+                    <ha-form
+                        .hass=${hass}
+                        .data=${{ cover_slider_type: data.cover_slider_type || 'position' }}
+                        .schema=${[{
+                            name: 'cover_slider_type',
+                            selector: {
+                                select: {
+                                    options: [
+                                        { value: 'position', label: 'Position (default)' },
+                                        { value: 'tilt_position', label: 'Tilt position' }
+                                    ],
+                                    mode: 'dropdown'
+                                }
+                            }
+                        }]}
+                        .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : 'Cover slider mode')}
+                        @value-changed=${(ev) => callToggleChange('cover_slider_type', ev.detail.value.cover_slider_type, meta('ha-combo-box', 'value-changed'))}
+                    ></ha-form>
+                </div>
+            </ha-expansion-panel>
+        ` : ''}
     `;
 }
