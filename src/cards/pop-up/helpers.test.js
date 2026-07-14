@@ -136,7 +136,7 @@ jest.unstable_mockModule('./styles.css', () => ({
     default: '',
 }));
 
-const { cleanupPopupRuntime, closePopup, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, suspendPopupHostLayout } = await import('./helpers.js');
+const { cleanupPopupRuntime, closePopup, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, suspendPopupHostLayout } = await import('./helpers.js');
 
 let rafCallbacks;
 let nextRafId;
@@ -408,8 +408,12 @@ describe('standalone popup lifecycle', () => {
         const context = {
             ...createStandaloneContext(),
             ...createStandaloneHost(),
+            style: { display: 'flex' },
         };
         usedContexts.push(context);
+
+        suspendPopupHostLayout(context);
+        expect(context.style.display).toBe('none');
 
         openPopup(context);
 
@@ -418,6 +422,7 @@ describe('standalone popup lifecycle', () => {
         expect(context.sectionRow.style.display).toBe('');
         expect(context.sectionRowContainer.style.display).toBe('');
         expect(context.sectionRowContainer.style.position).toBe('absolute');
+        expect(context.style.display).toBe('flex');
 
         flushRafQueue(); // phase 2 — animation start
         dispatchTransformTransitionEnd(context.popUp);
@@ -438,6 +443,7 @@ describe('standalone popup lifecycle', () => {
         expect(context.sectionRow.style.display).toBe('none');
         expect(context.sectionRowContainer.style.display).toBe('none');
         expect(context.sectionRowContainer.style.position).toBe('');
+        expect(context.style.display).toBe('none');
     });
 
     test('primes cold default-mode standalone content before opening in the default performance mode', () => {
@@ -1568,6 +1574,50 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
         expect(huiCard.style.display).toBe('');
     });
 
+    test('keeps a native Masonry column hui-card out of the dashboard flow while the popup is open', () => {
+        const masonryColumn = {
+            classList: { contains: (className) => className === 'column' },
+            style: { display: 'flex', position: '' },
+        };
+        const huiCard = {
+            tagName: 'HUI-CARD',
+            hidden: false,
+            style: { display: '', position: 'relative' },
+            parentElement: masonryColumn,
+        };
+        const context = {
+            ...createStandaloneContext(),
+            sectionRow: huiCard,
+            sectionRowContainer: masonryColumn,
+            style: { display: 'grid' },
+        };
+        usedContexts.push(context);
+
+        suspendPopupHostLayout(context);
+
+        expect(huiCard.hidden).toBe(true);
+        expect(huiCard.style.display).toBe('none');
+        expect(context.style.display).toBe('none');
+
+        // hui-card recomputes its own visibility on Home Assistant state updates.
+        // The popup element must remain collapsed when that makes the wrapper visible again.
+        huiCard.hidden = false;
+        huiCard.style.display = '';
+
+        expect(context.style.display).toBe('none');
+
+        keepPopupHostMounted(context);
+
+        expect(context.style.display).toBe('grid');
+        expect(huiCard.style.position).toBe('absolute');
+        expect(masonryColumn.style).toEqual({ display: 'flex', position: '' });
+
+        restorePopupHostLayout(context);
+
+        expect(huiCard.style.position).toBe('relative');
+        expect(masonryColumn.style).toEqual({ display: 'flex', position: '' });
+    });
+
     test('does not throw and leaves sectionRow null when no hui-card exists in ancestor chain', () => {
         const context = {
             ...createStandaloneContext(),
@@ -1628,48 +1678,73 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
         expect(stackHuiCard.style.display).toBe('');
     });
 
-    test('does not hide the shared view-level hui-card when hosted inside a layout-card grid', () => {
-        // Structure (bottom → top): bubble-card → div (grid) → grid-layout →
-        // layout-card → hui-card (wraps the whole view). The nearest hui-card
-        // belongs to the view, not this pop-up's cell, so it must not be hidden.
-        const viewHuiCard = {
-            tagName: 'HUI-CARD',
-            hidden: false,
-            style: { display: '' },
-            parentElement: null,
-        };
-        const layoutCard = {
-            tagName: 'LAYOUT-CARD',
-            parentElement: viewHuiCard,
-            getRootNode: () => ({ nodeType: 9 }),
-        };
-        const gridLayout = {
-            tagName: 'GRID-LAYOUT',
-            parentElement: layoutCard,
-            getRootNode: () => ({ nodeType: 9 }),
-        };
-        const gridShadowRoot = { host: gridLayout };
-        const gridDiv = {
-            tagName: 'DIV',
-            parentElement: null,
-            getRootNode: () => gridShadowRoot,
-        };
-        const context = {
-            ...createStandaloneContext(),
-            sectionRow: null,
-            sectionRowContainer: null,
-            closest: () => null,
-            parentElement: gridDiv,
-            getRootNode: () => ({ nodeType: 9 }),
-        };
-        usedContexts.push(context);
+    test.each(['GRID-LAYOUT', 'MASONRY-LAYOUT'])(
+        'collapses only the popup host when hosted inside a layout-card %s',
+        (layoutTagName) => {
+            // Structure (bottom → top): bubble-card → div (layout item) → layout host →
+            // layout-card → hui-card (wraps the whole view). The nearest hui-card
+            // belongs to the view, not this pop-up's cell, so it must not be hidden.
+            const viewHuiCard = {
+                tagName: 'HUI-CARD',
+                hidden: false,
+                style: { display: '' },
+                parentElement: null,
+            };
+            const layoutCard = {
+                tagName: 'LAYOUT-CARD',
+                parentElement: viewHuiCard,
+                getRootNode: () => ({ nodeType: 9 }),
+            };
+            const layoutHost = {
+                tagName: layoutTagName,
+                parentElement: layoutCard,
+                getRootNode: () => ({ nodeType: 9 }),
+            };
+            const layoutShadowRoot = { host: layoutHost };
+            const layoutItem = {
+                tagName: 'DIV',
+                parentElement: null,
+                getRootNode: () => layoutShadowRoot,
+            };
+            const context = {
+                ...createStandaloneContext(),
+                sectionRow: null,
+                sectionRowContainer: null,
+                style: { display: 'grid', position: 'relative' },
+                closest: () => null,
+                parentElement: layoutItem,
+                getRootNode: () => ({ nodeType: 9 }),
+            };
+            usedContexts.push(context);
 
-        suspendPopupHostLayout(context);
+            suspendPopupHostLayout(context);
 
-        expect(context.sectionRow).toBeNull();
-        expect(viewHuiCard.hidden).toBe(false);
-        expect(viewHuiCard.style.display).toBe('');
-    });
+            expect(context.sectionRow).toBeNull();
+            expect(viewHuiCard.hidden).toBe(false);
+            expect(viewHuiCard.style.display).toBe('');
+            expect(context.style.display).toBe('none');
+            expect(context.style.position).toBe('relative');
+
+            keepPopupHostMounted(context);
+
+            expect(context.style.display).toBe('grid');
+            expect(context.style.position).toBe('relative');
+            expect(viewHuiCard.hidden).toBe(false);
+            expect(viewHuiCard.style.display).toBe('');
+
+            suspendPopupHostLayout(context);
+
+            expect(context.style.display).toBe('none');
+            expect(context.style.position).toBe('relative');
+
+            restorePopupHostLayout(context);
+
+            expect(context.style.display).toBe('grid');
+            expect(context.style.position).toBe('relative');
+            expect(viewHuiCard.hidden).toBe(false);
+            expect(viewHuiCard.style.display).toBe('');
+        },
+    );
 });
 
 describe('legacy popup location routing', () => {

@@ -483,26 +483,58 @@ function resolvePopupHostElements(context) {
 
 function applyPopupHostLayout(context, {
     rowHidden = false,
+    rowPosition = '',
     containerHidden = false,
     containerPosition = '',
 } = {}) {
     resolvePopupHostElements(context);
 
     const { sectionRow, sectionRowContainer } = context;
+    const hasManagedContainer = sectionRowContainer?.classList?.contains('card');
 
     if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
         sectionRow.hidden = rowHidden;
         sectionRow.style.display = rowHidden ? 'none' : '';
+
+        const hasPreviousPosition = Object.prototype.hasOwnProperty.call(context, '_popupHostPreviousRowPosition');
+        if (!hasManagedContainer && rowPosition) {
+            if (!hasPreviousPosition) {
+                context._popupHostPreviousRowPosition = sectionRow.style.position ?? '';
+            }
+            sectionRow.style.position = rowPosition;
+        } else if (hasPreviousPosition) {
+            sectionRow.style.position = context._popupHostPreviousRowPosition;
+            delete context._popupHostPreviousRowPosition;
+        }
     }
 
-    if (sectionRowContainer?.classList?.contains('card')) {
+    if (hasManagedContainer) {
         sectionRowContainer.style.display = containerHidden ? 'none' : '';
         sectionRowContainer.style.position = containerPosition;
+    }
+
+    // Home Assistant can recompute a hui-card's visibility after a state update.
+    // Keep the popup element itself collapsed as well so a detached standalone
+    // shell cannot leave an inline line box behind when its wrapper is restored.
+    if (context?.style) {
+        const hasPreviousDisplay = Object.prototype.hasOwnProperty.call(context, '_popupHostPreviousDisplay');
+        if (rowHidden) {
+            if (!hasPreviousDisplay) {
+                context._popupHostPreviousDisplay = context.style.display ?? '';
+            }
+            context.style.display = 'none';
+        } else if (hasPreviousDisplay) {
+            context.style.display = context._popupHostPreviousDisplay;
+            delete context._popupHostPreviousDisplay;
+        }
     }
 }
 
 export function keepPopupHostMounted(context) {
-    applyPopupHostLayout(context, { containerPosition: 'absolute' });
+    applyPopupHostLayout(context, {
+        rowPosition: 'absolute',
+        containerPosition: 'absolute',
+    });
 }
 
 export function restorePopupHostLayout(context) {
