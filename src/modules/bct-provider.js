@@ -88,7 +88,13 @@ export async function ensureBCTProviderAvailable(hass) {
       const isAdmin = hass?.user?.is_admin || hass?.user?.is_owner;
       if (ok && typeof hass?.connection?.subscribeEvents === 'function' && !eventsSubscribed && isAdmin) {
         try {
-          hass.connection.subscribeEvents(() => {
+          hass.connection.subscribeEvents((ev) => {
+            // config.yaml is the shared DATA channel (module options,
+            // recents/covers stores...), not a module: its frequent small
+            // writes must not trigger a full module refresh — that path
+            // re-fetches and re-parses every module YAML on every card,
+            // hundreds of ms per write on mobile.
+            if (ev?.data?.name === 'config.yaml') return;
             clearBCTCache();
             try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
           }, 'bubble_card_tools.updated');

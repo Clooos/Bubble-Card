@@ -835,12 +835,14 @@ class BubbleCardEditor extends LitElement {
     }
 
     makeDropdown(label, configValue, items, disabled, default_value) {
+        if (!this._config) return html``;
+
         if (label.includes('icon') || label.includes('Icon')) {
             return html`
                 <div class="ha-icon-picker">
                     <ha-icon-picker
                         label="${label}"
-                        .value="${this._config[configValue] || default_value}"
+                        .value="${this._config?.[configValue] || default_value}"
                         .configValue="${configValue}"
                         item-value-path="icon"
                         item-label-path="icon"
@@ -852,7 +854,7 @@ class BubbleCardEditor extends LitElement {
             let includeDomains = [];
             let excludeDomains = [];
             
-            switch(this._config.card_type) {
+            switch(this._config?.card_type) {
                 case 'button':
                     break;
                 case 'cover':
@@ -866,7 +868,7 @@ class BubbleCardEditor extends LitElement {
                     break;
                 case 'select':
                     includeDomains = ['input_select', 'select'];
-                    if (this._config.select_attribute) {
+                    if (this._config?.select_attribute) {
                         includeDomains = [];
                     }
                     break;
@@ -878,7 +880,7 @@ class BubbleCardEditor extends LitElement {
                 <ha-entity-picker
                     label="${label}"
                     .hass="${this._hassRender}"
-                    .value="${this._config[configValue]}"
+                    .value="${this._config?.[configValue]}"
                     .configValue="${configValue}"
                     .includeDomains="${includeDomains.length ? includeDomains : undefined}"
                     .excludeDomains="${excludeDomains.length ? excludeDomains : undefined}"
@@ -891,7 +893,7 @@ class BubbleCardEditor extends LitElement {
             return html`
                 <ha-form
                     .hass=${this._hassRender}
-                    .data=${{ [configValue]: this._config[configValue] }}
+                    .data=${{ [configValue]: this._config?.[configValue] }}
                     .schema=${[{
                         name: configValue,
                         selector: {
@@ -2662,21 +2664,11 @@ class BubbleCardEditor extends LitElement {
             return false;
         }
 
-        let cleanupTimeout = null;
-
-        const clearCleanupTimeout = () => {
-            if (cleanupTimeout) {
-                clearTimeout(cleanupTimeout);
-                cleanupTimeout = null;
-            }
-        };
-
         const cleanupClosedListener = () => {
             window.removeEventListener("dialog-closed", handleClosed, true);
         };
 
         const cleanup = () => {
-            clearCleanupTimeout();
             cleanupClosedListener();
             restoreBridgedClose();
         };
@@ -2690,10 +2682,7 @@ class BubbleCardEditor extends LitElement {
             );
 
             if (reopened) {
-                clearCleanupTimeout();
-                cleanupTimeout = setTimeout(() => {
-                    cleanup();
-                }, 500);
+                cleanup();
             }
 
             return reopened;

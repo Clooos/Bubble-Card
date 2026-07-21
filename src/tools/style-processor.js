@@ -288,6 +288,15 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
       if (finalStylesToInject === context.lastEvaluatedStyles) {
         stylesHaveChanged = false;
       } else {
+        // A module refresh clears lastEvaluatedStyles to force this
+        // re-evaluation, but the produced CSS is usually IDENTICAL:
+        // re-setting textContent with the same string still invalidates
+        // the whole subtree's styles (full recalc, filter re-raster — a
+        // visible background/poster blink on mobile). Check the live DOM
+        // before writing.
+        if (finalStylesToInject === styleElementToInjectInto.textContent) {
+          stylesHaveChanged = false;
+        }
         context.lastEvaluatedStyles = finalStylesToInject;
       }
     }
