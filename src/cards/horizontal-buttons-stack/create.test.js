@@ -131,4 +131,28 @@ describe('horizontal buttons stack navigation', () => {
         expect(navigate).toHaveBeenCalledWith(button, '/lovelace/');
         expect(addHash).not.toHaveBeenCalled();
     });
+
+    test('clears the highlight when the popup is closed with the browser back button', () => {
+        const context = buildContext('#kitchen');
+        context.config.highlight_current_view = true;
+        const button = createButton(context, 1);
+
+        const getHandler = (type) => global.window.addEventListener.mock.calls
+            .find(([eventType]) => eventType === type)?.[1];
+
+        const hashchangeHandler = getHandler('hashchange');
+        const popstateHandler = getHandler('popstate');
+        expect(hashchangeHandler).toBeDefined();
+        expect(popstateHandler).toBeDefined();
+
+        global.location.hash = '#kitchen';
+        getHandler('location-changed')();
+        expect(button.classList.contains('highlight')).toBe(true);
+
+        // Browser back/forward fires popstate/hashchange without location-changed
+        global.location.hash = '';
+        popstateHandler();
+        hashchangeHandler();
+        expect(button.classList.contains('highlight')).toBe(false);
+    });
 });
