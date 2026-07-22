@@ -405,54 +405,70 @@ function fadeOutCovers(context) {
     }
 }
 
-function crossfadeTo(layerState, imageUrl, onComplete) {
+// Exported: the Bubble Dashboard module reuses this exact crossfade for its
+// media card cover layers (two layers, image preloaded before the fade).
+export function crossfadeTo(layerState, imageUrl, onComplete) {
     if (!layerState) return;
+
+    // Preload token: covers can change in quick succession (fallback poster
+    // -> banner -> native artwork) and each call preloads asynchronously.
+    // Only the LATEST call may apply its image — without this, a slower
+    // earlier preload lands AFTER a newer one and the displayed cover goes
+    // stale (or swaps with no fade).
+    const token = (layerState.pendingToken || 0) + 1;
+    layerState.pendingToken = token;
+
+    const nextIndex = layerState.visibleIndex === 0 ? 1 : 0;
+    const nextLayer = layerState.layers[nextIndex];
+
+    // A superseded call may have left the back layer mid-fade (visible but
+    // never committed): revert it, otherwise BOTH layers stay on screen and
+    // the next image lands on an already-visible layer — a hard swap with
+    // no fade. Must happen before the early return too, or a call back to
+    // the current value would leave that stale layer up forever.
+    nextLayer.classList.remove('is-visible');
+
     if (layerState.currentValue === imageUrl) {
         if (onComplete) onComplete();
         return;
     }
 
-    const nextIndex = layerState.visibleIndex === 0 ? 1 : 0;
     const currentLayer = layerState.layers[layerState.visibleIndex];
-    const nextLayer = layerState.layers[nextIndex];
 
     const startTransition = () => {
         nextLayer.classList.add('is-visible');
+        const commit = () => {
+            if (layerState.pendingToken !== token) return; // superseded
+            currentLayer.classList.remove('is-visible');
+            layerState.visibleIndex = nextIndex;
+            layerState.currentValue = imageUrl;
+            if (onComplete) {
+                setTimeout(onComplete, 1000);
+            }
+        };
         if (typeof requestAnimationFrame === 'function') {
             requestAnimationFrame(() => {
-                setTimeout(() => {
-                    currentLayer.classList.remove('is-visible');
-                    layerState.visibleIndex = nextIndex;
-                    layerState.currentValue = imageUrl;
-                    if (onComplete) {
-                        setTimeout(onComplete, 1000);
-                    }
-                }, 50);
+                setTimeout(commit, 50);
             });
         } else {
-            setTimeout(() => {
-                currentLayer.classList.remove('is-visible');
-                layerState.visibleIndex = nextIndex;
-                layerState.currentValue = imageUrl;
-                if (onComplete) {
-                    setTimeout(onComplete, 1000);
-                }
-            }, 50);
+            setTimeout(commit, 50);
         }
     };
 
     if (imageUrl) {
         const normalized = `url(${imageUrl})`;
         const isAlreadySet = nextLayer.style.backgroundImage === normalized;
-        
+
         if (!isAlreadySet) {
             const img = new Image();
             img.onload = () => {
+                if (layerState.pendingToken !== token) return; // superseded
                 nextLayer.style.backgroundImage = normalized;
                 nextLayer.classList.remove('is-empty');
                 startTransition();
             };
             img.onerror = () => {
+                if (layerState.pendingToken !== token) return; // superseded
                 nextLayer.style.backgroundImage = '';
                 nextLayer.classList.add('is-empty');
                 layerState.currentValue = '';
