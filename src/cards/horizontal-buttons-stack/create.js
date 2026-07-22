@@ -82,7 +82,9 @@ export function createButton(context, index) {
     }
 
     window.addEventListener('location-changed', handleUrlChange);
-    
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+
     context.elements.buttons.push(button);
 
     return button;
