@@ -465,28 +465,52 @@ function getBCTCacheKey() {
   }
 }
 
+// In-memory memo of the parsed cache. loadBCTCache is called several times per
+// boot (fast path, per-module timestamp lookups, readAllModules), and the
+// stored blob carries every module's `code` — parsing it runs to hundreds of
+// KB each call, measurable on low-tier devices. We keep the last parsed object
+// keyed by the exact raw string: a cheap getItem + string compare skips the
+// expensive JSON.parse whenever the blob is unchanged, while still re-parsing
+// the instant anything (even an external writer) changes it.
+let _memRaw = null;
+let _memKey = null;
+let _memObj = null;
+
 function loadBCTCache() {
   try {
-    const raw = localStorage.getItem(getBCTCacheKey());
-    if (!raw) return null;
+    const key = getBCTCacheKey();
+    const raw = localStorage.getItem(key);
+    if (!raw) { _memRaw = null; _memKey = key; _memObj = null; return null; }
+    if (key === _memKey && raw === _memRaw && _memObj) return _memObj;
     const obj = JSON.parse(raw);
-    if (!obj || typeof obj !== 'object') return null;
-    return obj;
+    _memObj = (obj && typeof obj === 'object') ? obj : null;
+    _memRaw = raw;
+    _memKey = key;
+    return _memObj;
   } catch (_) {
+    _memRaw = null; _memObj = null;
     return null;
   }
 }
 
 function saveBCTCache(data) {
   try {
-    localStorage.setItem(getBCTCacheKey(), JSON.stringify(data));
-  } catch (_) {}
+    const key = getBCTCacheKey();
+    const raw = JSON.stringify(data);
+    localStorage.setItem(key, raw);
+    // Prime the memo with exactly what we just wrote, so the next load skips
+    // both the getItem round-trip cost and the parse.
+    _memRaw = raw; _memKey = key; _memObj = data;
+  } catch (_) {
+    _memRaw = null; _memObj = null;
+  }
 }
 
 function clearBCTCache() {
   try {
     localStorage.removeItem(getBCTCacheKey());
   } catch (_) {}
+  _memRaw = null; _memObj = null;
 }
 
 // Targeted invalidation: drop a single file's entry so readAllModules re-reads
