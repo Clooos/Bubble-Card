@@ -190,6 +190,27 @@ export async function readFile(hass, name) {
   }
 }
 
+// Bulk read: one WS round-trip for many files (read_all_modules). Returns an
+// array of { name, content, parsed } or null when the endpoint is unsupported
+// (older integration) so callers fall back to per-file reads. The support flag
+// is cached per session to avoid retrying the bulk call once it is known
+// missing.
+let bulkReadSupported = null; // null unknown, true, false
+export async function readFiles(hass, names) {
+  if (bulkReadSupported === false) return null;
+  const available = await ensureBCTProviderAvailable(hass);
+  if (!available) return null;
+  try {
+    const res = await hass.callWS({ type: 'bubble_card_tools/read_all_modules', names });
+    bulkReadSupported = true;
+    return Array.isArray(res?.modules) ? res.modules : [];
+  } catch (e) {
+    // unknown_command / older integration → never try again this session.
+    bulkReadSupported = false;
+    return null;
+  }
+}
+
 export async function writeFile(hass, name, content) {
   const available = await ensureBCTProviderAvailable(hass);
   if (!available) return { status: 'unavailable' };
@@ -299,6 +320,21 @@ function normalizeModuleFromParsed(id, obj) {
   return normalized;
 }
 
+// A parsed module file is `{ <id>: { name?, code?, ... } }` (usually one id per
+// file). Shared by the per-file and bulk read paths.
+function parsedToModules(parsed) {
+  const modules = {};
+  if (parsed && typeof parsed === 'object') {
+    for (const id of Object.keys(parsed)) {
+      const obj = parsed[id];
+      if (obj && typeof obj === 'object' && (obj.name || obj.code)) {
+        modules[id] = normalizeModuleFromParsed(id, obj);
+      }
+    }
+  }
+  return modules;
+}
+
 export async function readAllModules(hass) {
   const files = await listFiles(hass);
   if (!files || files.length === 0) return new Map();
@@ -325,42 +361,33 @@ export async function readAllModules(hass) {
     }
   });
 
-  // Read changed files in parallel
-  const readPromises = toRead.map(async (entry) => {
-    const data = await readFile(hass, entry.name);
+  // Read the changed files. Prefer a SINGLE bulk round-trip: a cold boot
+  // re-reads every module file, and one WS call each was measured at ~2s on a
+  // ~50-module install (Safari, cold cache — one read_module per file). The
+  // bulk endpoint returns every requested file's content (and server-parsed
+  // YAML) in one message. Older integrations without it fall back to per-file
+  // reads, so nothing breaks if the component is not updated.
+  const entryToResult = (entry, data) => {
     if (!data || !data.content) {
       return { name: entry.name, updated_at: entry.updated_at, modules: {} };
     }
-    let parsed = null;
-    try {
-      parsed = jsyaml.load(data.content);
-    } catch (_) {
-      parsed = null;
+    let parsed = data.parsed;
+    if (parsed == null) {
+      try { parsed = jsyaml.load(data.content); } catch (_) { parsed = null; }
     }
-    const modules = {};
-    if (parsed && typeof parsed === 'object') {
-      const keys = Object.keys(parsed);
-      if (keys.length === 1) {
-        const id = keys[0];
-        const obj = parsed[id];
-        if (obj && (obj.name || obj.code)) {
-          const normalized = normalizeModuleFromParsed(id, obj);
-          modules[id] = normalized;
-        }
-      } else {
-        for (const id of keys) {
-          const obj = parsed[id];
-          if (obj && typeof obj === 'object' && (obj.name || obj.code)) {
-            const normalized = normalizeModuleFromParsed(id, obj);
-            modules[id] = normalized;
-          }
-        }
-      }
-    }
-    return { name: entry.name, updated_at: entry.updated_at, modules };
-  });
+    return { name: entry.name, updated_at: entry.updated_at, modules: parsedToModules(parsed) };
+  };
 
-  const readResults = await Promise.all(readPromises);
+  let readResults;
+  const bulk = toRead.length ? await readFiles(hass, toRead.map((e) => e.name)) : [];
+  if (bulk) {
+    const byNameData = new Map(bulk.map((m) => [m && m.name, m]));
+    readResults = toRead.map((entry) => entryToResult(entry, byNameData.get(entry.name)));
+  } else {
+    readResults = await Promise.all(
+      toRead.map(async (entry) => entryToResult(entry, await readFile(hass, entry.name)))
+    );
+  }
 
   // Build updated cache: only keep files that still exist
   const updatedFilesCache = {};
