@@ -124,7 +124,11 @@ export async function initializeModules(context) {
                 fresh[key] = value;
               }
             });
-            const changed = JSON.stringify(fresh) !== JSON.stringify(allModules);
+            // readAllModules already knows whether the on-disk files differ
+            // from the cache that seeded `allModules`; trust its flag instead
+            // of stringifying both module maps (the module `code` fields make
+            // that a multi-hundred-KB serialization on every boot).
+            const changed = freshMap.__cacheChanged === true;
             if (changed) {
               moduleSourceMap.clear();
               yamlKeysMap.clear();
@@ -172,7 +176,11 @@ export async function initializeModules(context) {
                 fresh[key] = value;
               }
             });
-            const changed = JSON.stringify(fresh) !== JSON.stringify(allModules);
+            // readAllModules already knows whether the on-disk files differ
+            // from the cache that seeded `allModules`; trust its flag instead
+            // of stringifying both module maps (the module `code` fields make
+            // that a multi-hundred-KB serialization on every boot).
+            const changed = freshMap.__cacheChanged === true;
             if (changed) {
               moduleSourceMap.clear();
               yamlKeysMap.clear();

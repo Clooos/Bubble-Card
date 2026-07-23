@@ -89,13 +89,26 @@ export async function ensureBCTProviderAvailable(hass) {
       if (ok && typeof hass?.connection?.subscribeEvents === 'function' && !eventsSubscribed && isAdmin) {
         try {
           hass.connection.subscribeEvents((ev) => {
+            const changedName = ev?.data?.name;
             // config.yaml is the shared DATA channel (module options,
             // recents/covers stores...), not a module: its frequent small
             // writes must not trigger a full module refresh — that path
             // re-fetches and re-parses every module YAML on every card,
             // hundreds of ms per write on mobile.
-            if (ev?.data?.name === 'config.yaml') return;
-            clearBCTCache();
+            if (changedName === 'config.yaml') return;
+            // A nameless event carries no evidence that any module changed —
+            // the integration emits a generic `updated` on every page
+            // boot/connect. Clearing the whole cache here forced a full cold
+            // re-read of EVERY module file on the next boot; on the companion
+            // app this event fired every boot and kept the BCT cache
+            // permanently empty (fast path dead, ~5MB of boot-time JSON churn
+            // re-reading 50+ module files). Ignore it.
+            if (!changedName) return;
+            // A real module file changed: drop just that file's cache entry so
+            // readAllModules re-reads exactly it (regardless of updated_at
+            // granularity) and leaves every other module warm — instead of
+            // nuking the whole aggregate.
+            invalidateBCTCacheFile(changedName);
             try { document.dispatchEvent(new CustomEvent('yaml-modules-updated')); } catch (_) {}
           }, 'bubble_card_tools.updated');
           eventsSubscribed = true;
@@ -367,10 +380,25 @@ export async function readAllModules(hass) {
     });
   });
 
-  // Persist cache for next fast load
-  const aggregatedModules = {};
-  modulesMap.forEach((val, key) => { aggregatedModules[key] = val; });
-  saveBCTCache({ version: CACHE_VERSION, files: updatedFilesCache, aggregatedModules, updatedAt: new Date().toISOString() });
+  // Persist cache for next fast load — but ONLY when something actually
+  // changed. On a warm boot where every file matched the cache, the blob we
+  // would write is identical to what is already stored, and re-stringifying it
+  // is far from free: a large module's `code` field (hundreds of KB) is
+  // serialized on every page load, dominating boot CPU on low-tier devices
+  // (measured ~60% of boot JS time on an A10 iPad). `cacheChanged` is true iff
+  // a file was added/changed (toRead) or a cached file disappeared (so the
+  // pruned blob differs). It doubles as the "did anything change?" answer for
+  // callers, letting registry.js skip its own stringify-based diff.
+  const filesDisappeared = unchanged.length !== Object.keys(cachedFiles).length;
+  const cacheChanged = toRead.length > 0 || filesDisappeared;
+  if (cacheChanged) {
+    const aggregatedModules = {};
+    modulesMap.forEach((val, key) => { aggregatedModules[key] = val; });
+    saveBCTCache({ version: CACHE_VERSION, files: updatedFilesCache, aggregatedModules, updatedAt: new Date().toISOString() });
+  }
+  try {
+    Object.defineProperty(modulesMap, '__cacheChanged', { value: cacheChanged, enumerable: false, configurable: true });
+  } catch (_) { /* Map is extensible everywhere we run; best effort */ }
 
   return modulesMap;
 }
@@ -458,6 +486,26 @@ function saveBCTCache(data) {
 function clearBCTCache() {
   try {
     localStorage.removeItem(getBCTCacheKey());
+  } catch (_) {}
+}
+
+// Targeted invalidation: drop a single file's entry so readAllModules re-reads
+// exactly that file, keeping every other module warm. Used instead of the
+// full-cache nuke on module-change events. The aggregate is rebuilt from the
+// surviving files so a stale copy of the edited module is not served before
+// the re-read lands.
+function invalidateBCTCacheFile(name) {
+  try {
+    const cache = loadBCTCache();
+    if (!cache || !cache.files || !cache.files[name]) return;
+    delete cache.files[name];
+    const aggregatedModules = {};
+    Object.values(cache.files).forEach((entry) => {
+      const mods = (entry && entry.modules) || {};
+      Object.keys(mods).forEach((id) => { aggregatedModules[id] = mods[id]; });
+    });
+    cache.aggregatedModules = aggregatedModules;
+    saveBCTCache(cache);
   } catch (_) {}
 }
 
