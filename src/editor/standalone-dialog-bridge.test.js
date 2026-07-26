@@ -574,6 +574,209 @@ describe('forceDialogDirtyState', () => {
     });
 });
 
+describe('reopened pop-up dialog close flow', () => {
+    // Faithful mock of Home Assistant's hui-dialog-edit-card dirty tracking
+    // (frontend: mixins/dirty-state-provider-mixin.ts + common/util/strip-defaults.ts).
+    //
+    // The key detail is that HA keeps two baselines per slice: `initial` (raw)
+    // and `normalizedInitial` (= effectiveNormalize(initial)). `isDirtyState`
+    // (Save button) compares initial/current, while `isEffectiveDirtyState`
+    // (unsaved changes prompt) compares normalizedInitial with
+    // effectiveNormalize(current). Cancel only restores `current` from
+    // `initial`, so both baselines must stay consistent.
+
+    const DEFAULT_KEY = '__default__';
+
+    const clone = (value) => (value === undefined ? undefined : JSON.parse(JSON.stringify(value)));
+
+    function deepEqual(left, right) {
+        if (left === right) return true;
+        if (typeof left !== 'object' || typeof right !== 'object' || !left || !right) return false;
+        if (Array.isArray(left) !== Array.isArray(right)) return false;
+
+        const leftKeys = Object.keys(left);
+        const rightKeys = Object.keys(right);
+        if (leftKeys.length !== rightKeys.length) return false;
+
+        return leftKeys.every((key) => rightKeys.includes(key) && deepEqual(left[key], right[key]));
+    }
+
+    // HA strips every top-level key left at its default. Without a
+    // `getDefaultConfig` on the card class (the case for every custom card,
+    // Bubble Card included) that default is `false`.
+    function stripDefaults(value, defaults) {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+
+        const result = {};
+        for (const [key, val] of Object.entries(value)) {
+            const defaultValue = defaults && key in defaults ? defaults[key] : false;
+            if (val === undefined || val === defaultValue) continue;
+            result[key] = val;
+        }
+        return result;
+    }
+
+    function createEditCardDialogMock(cardDefaults) {
+        const normalize = (config) => stripDefaults(config, cardDefaults);
+
+        return {
+            _dirtySlices: new Map(),
+            _effectiveNormalize: normalize,
+            _dirtyStateContext: { isDirty: false, isEffectiveDirty: false },
+            open: false,
+            unsavedChangesPrompts: 0,
+            savedConfig: undefined,
+
+            _publishContext() {
+                const slices = Array.from(this._dirtySlices.values());
+                this._dirtyStateContext = {
+                    isDirty: slices.some(({ initial, current }) => !deepEqual(initial, current)),
+                    isEffectiveDirty: slices.some(({ normalizedInitial, current }) =>
+                        !deepEqual(normalizedInitial, normalize(current))),
+                };
+            },
+
+            get isDirtyState() {
+                return this._dirtyStateContext.isDirty;
+            },
+
+            get isEffectiveDirtyState() {
+                return this._dirtyStateContext.isEffectiveDirty;
+            },
+
+            showDialog(cardConfig) {
+                this.open = true;
+                this._dirtySlices.clear();
+                const initial = clone(cardConfig);
+                this._dirtySlices.set(DEFAULT_KEY, {
+                    initial,
+                    current: cardConfig,
+                    normalizedInitial: normalize(initial),
+                });
+                this._publishContext();
+            },
+
+            closeDialog() {
+                if (this.isEffectiveDirtyState) {
+                    this.unsavedChangesPrompts += 1;
+                    return false;
+                }
+                this.open = false;
+                return true;
+            },
+
+            // "Leave" in the unsaved changes prompt.
+            leave() {
+                for (const slice of this._dirtySlices.values()) {
+                    slice.current = clone(slice.initial);
+                }
+                this._publishContext();
+                return this.closeDialog();
+            },
+
+            save() {
+                if (!this.isDirtyState) return this.closeDialog();
+
+                this.savedConfig = clone(this._dirtySlices.get(DEFAULT_KEY).current);
+                for (const slice of this._dirtySlices.values()) {
+                    slice.initial = clone(slice.current);
+                    slice.normalizedInitial = normalize(slice.initial);
+                }
+                this._publishContext();
+                return this.closeDialog();
+            },
+        };
+    }
+
+    // A pop-up whose owner turned off one of the default-on toggles. Any
+    // top-level `false` is enough to make HA's normalizer differ from the raw
+    // config, which is why this only reproduces on some setups.
+    const originalPopup = {
+        type: 'custom:bubble-card',
+        card_type: 'pop-up',
+        hash: '#kitchen',
+        close_by_clicking_outside: false,
+        cards: [],
+    };
+
+    const popupWithChildCard = {
+        ...originalPopup,
+        cards: [{ type: 'button', entity: 'light.kitchen' }],
+    };
+
+    test('lets the user leave the pop-up editor reopened after adding a child card', () => {
+        const dialog = createEditCardDialogMock();
+        dialog.showDialog(popupWithChildCard);
+
+        expect(forceDialogDirtyState(dialog, originalPopup)).toBe(true);
+        // The Save button must be enabled, the child card is not persisted yet.
+        expect(dialog.isDirtyState).toBe(true);
+
+        // Cancel (or the close button) asks for confirmation.
+        expect(dialog.closeDialog()).toBe(false);
+        expect(dialog.unsavedChangesPrompts).toBe(1);
+
+        // "Leave" must actually close the dialog instead of prompting again.
+        expect(dialog.leave()).toBe(true);
+        expect(dialog.open).toBe(false);
+        expect(dialog.unsavedChangesPrompts).toBe(1);
+    });
+
+    test('closes the pop-up editor after saving the added child card', () => {
+        const dialog = createEditCardDialogMock();
+        dialog.showDialog(popupWithChildCard);
+
+        forceDialogDirtyState(dialog, originalPopup);
+
+        expect(dialog.save()).toBe(true);
+        expect(dialog.open).toBe(false);
+        expect(dialog.savedConfig).toEqual(popupWithChildCard);
+        expect(dialog.unsavedChangesPrompts).toBe(0);
+    });
+
+    test('keeps the forced baseline consistent with the dialog normalizer', () => {
+        const dialog = createEditCardDialogMock({ card_type: 'pop-up' });
+        dialog.showDialog(popupWithChildCard);
+
+        forceDialogDirtyState(dialog, originalPopup);
+
+        const slice = dialog._dirtySlices.get(DEFAULT_KEY);
+        expect(slice.initial).toEqual(originalPopup);
+        expect(slice.normalizedInitial).toEqual({
+            type: 'custom:bubble-card',
+            hash: '#kitchen',
+            cards: [],
+        });
+        expect(slice.normalizedInitial).not.toBe(slice.initial);
+    });
+
+    test('falls back to the raw baseline when the dialog exposes no normalizer', () => {
+        const dialog = createEditCardDialogMock();
+        dialog.showDialog(popupWithChildCard);
+        delete dialog._effectiveNormalize;
+
+        expect(forceDialogDirtyState(dialog, originalPopup)).toBe(true);
+
+        const slice = dialog._dirtySlices.get(DEFAULT_KEY);
+        expect(slice.normalizedInitial).toEqual(originalPopup);
+        expect(slice.normalizedInitial).not.toBe(slice.initial);
+    });
+
+    test('still forces the dirty state when the normalizer throws', () => {
+        const dialog = createEditCardDialogMock();
+        dialog.showDialog(popupWithChildCard);
+        dialog._effectiveNormalize = () => {
+            throw new Error('unexpected config');
+        };
+
+        expect(forceDialogDirtyState(dialog, originalPopup)).toBe(true);
+
+        const slice = dialog._dirtySlices.get(DEFAULT_KEY);
+        expect(slice.initial).toEqual(originalPopup);
+        expect(slice.normalizedInitial).toEqual(originalPopup);
+    });
+});
+
 describe('createStandaloneParentDialogParams original config isolation', () => {
     test('clones _originalCardConfig so it survives in-place mutations', () => {
         const popupConfig = {

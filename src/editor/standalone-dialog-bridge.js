@@ -1,3 +1,17 @@
+// Mirrors HA's `_normalizeEffective` from its dirty state provider mixin: the
+// dialog compares `normalizedInitial` with `effectiveNormalize(current)` to
+// decide whether closing needs the "unsaved changes" prompt. A raw baseline
+// would never match its own normalized form, so cancelling would prompt again
+// on every "Leave" and trap the user in the pop-up editor.
+function normalizeDialogBaseline(dialog, config) {
+    try {
+        const normalize = dialog?._effectiveNormalize;
+        return typeof normalize === 'function' ? normalize(config) : config;
+    } catch (_) {
+        return config;
+    }
+}
+
 export function forceDialogDirtyState(dialog, originalConfig) {
     if (!dialog || !originalConfig) {
         return false;
@@ -15,7 +29,11 @@ export function forceDialogDirtyState(dialog, originalConfig) {
         }
 
         slice.initial = JSON.parse(JSON.stringify(originalConfig));
-        slice.normalizedInitial = JSON.parse(JSON.stringify(originalConfig));
+        // Normalize a separate clone so the two baselines never share references.
+        slice.normalizedInitial = normalizeDialogBaseline(
+            dialog,
+            JSON.parse(JSON.stringify(originalConfig))
+        );
 
         if (typeof dialog._publishContext === 'function') {
             dialog._publishContext();
