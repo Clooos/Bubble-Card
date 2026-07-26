@@ -4,7 +4,7 @@ import { createElement, forwardHaptic } from "../../tools/utils.js";
 import { handleButton } from "../../cards/button/index.js";
 import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
-import { navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, suspendPopupHostLayout, syncPopupModeClasses, syncPopupPerformanceModeClasses } from "./helpers.js";
+import { navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, resolvePopupHostElements, restorePopupHostLayout, suspendPopupHostLayout, syncPopupModeClasses, syncPopupPerformanceModeClasses } from "./helpers.js";
 import { hideLegacyPopupContent } from './legacy.js';
 import { renderPopupOnboarding } from './editor.js';
 import styles from "./styles.css";
@@ -496,8 +496,12 @@ export function prepareStandaloneStructure(context) {
   context.isStandalonePopUp = true;
   context._standalonePopUpCardsActive = false;
   context.verticalStack = null;
-  context.sectionRow = typeof context.closest === 'function' ? context.closest('hui-card') : null;
-  context.sectionRowContainer = context.sectionRow?.closest?.('.card') || context.sectionRow?.parentElement || null;
+  // closest() stops at shadow boundaries, so it never reaches the hui-card cell of
+  // a pop-up wrapped in a custom stack. Use the shared shadow-aware walk instead.
+  context.sectionRow = null;
+  context.sectionRowContainer = null;
+  delete context._popupHostChainIncomplete;
+  resolvePopupHostElements(context);
   context.cardTitle = null;
 
   const popUpParent = context.shadowRoot ?? context.content;

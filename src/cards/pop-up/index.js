@@ -1,6 +1,6 @@
 import { changeEditor, changeStyle, changeTriggered, clearStyleUpdateFrame } from './changes.js';
 import { createHeader, createStructure, prepareStructure, prepareStandaloneStructure, renderHeaderButton, renderStandaloneOnboarding, clearStandaloneOnboarding } from './create.js';
-import { cleanupPopupRuntime, registerPopupContext, syncPopupOpenStateWithLocation } from './helpers.js';
+import { cleanupPopupRuntime, registerPopupContext, syncDeferredPopupHostLayout, syncPopupOpenStateWithLocation } from './helpers.js';
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
 import { cleanupPopUpCards, handlePopUpCards } from './cards/index.js';
 import { isStandalonePopUpConfig } from './migration.js';
@@ -417,6 +417,10 @@ export function handlePopUp(context) {
     if (!context.popUp || !context.elements) {
         return;
     }
+
+    // A pop-up wrapped in a custom stack is initialized before that stack is
+    // inserted in the view, so its hui-card cell only becomes reachable later.
+    syncDeferredPopupHostLayout(context);
 
     ensureWakeSyncListeners();
     registerWakeSyncContext(context);

@@ -136,7 +136,7 @@ jest.unstable_mockModule('./styles.css', () => ({
     default: '',
 }));
 
-const { cleanupPopupRuntime, closePopup, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, suspendPopupHostLayout } = await import('./helpers.js');
+const { cleanupPopupRuntime, closePopup, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
 
 let rafCallbacks;
 let nextRafId;
@@ -1616,6 +1616,155 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
 
         expect(huiCard.style.position).toBe('relative');
         expect(masonryColumn.style).toEqual({ display: 'flex', position: '' });
+    });
+
+    // #2532 #2533 #2544 #2552: a pop-up wrapped in a custom stack that owns a shadow
+    // root (decluttering-card, streamline-card, layout-card, vertical-stack) must
+    // still reach its hui-card cell, otherwise the cell keeps reserving its height.
+    function createHuiCard(parentElement = null) {
+        return {
+            tagName: 'HUI-CARD',
+            hidden: false,
+            style: { display: '' },
+            parentElement,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+    }
+
+    function createWrappedPopupContext(getRootNode) {
+        return {
+            ...createStandaloneContext(),
+            sectionRow: null,
+            sectionRowContainer: null,
+            style: { display: 'grid' },
+            // closest() cannot cross the wrapper's shadow boundary
+            closest: () => null,
+            parentElement: null,
+            getRootNode,
+        };
+    }
+
+    test('reaches the hui-card cell through a decluttering-card shadow root', () => {
+        const huiCard = createHuiCard();
+        const declutteringCard = {
+            tagName: 'DECLUTTERING-CARD',
+            parentElement: null,
+            getRootNode: () => ({ host: huiCard }),
+        };
+        const context = createWrappedPopupContext(() => ({ host: declutteringCard }));
+        usedContexts.push(context);
+
+        suspendPopupHostLayout(context);
+
+        expect(context.sectionRow).toBe(huiCard);
+        expect(huiCard.hidden).toBe(true);
+        expect(huiCard.style.display).toBe('none');
+        expect(context._popupHostChainIncomplete).toBe(false);
+    });
+
+    test('hides only its own hui-card cell inside a custom:grid-layout view', () => {
+        const viewHuiCard = createHuiCard();
+        const layoutCard = {
+            tagName: 'LAYOUT-CARD',
+            parentElement: viewHuiCard,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+        const gridLayout = {
+            tagName: 'GRID-LAYOUT',
+            parentElement: layoutCard,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+        const layoutItem = {
+            tagName: 'DIV',
+            parentElement: null,
+            getRootNode: () => ({ host: gridLayout }),
+        };
+        // Since v3.2.5 Home Assistant wraps each laid out card in its own hui-card.
+        const ownHuiCard = createHuiCard(layoutItem);
+        const context = createWrappedPopupContext(() => ({ host: ownHuiCard }));
+        usedContexts.push(context);
+
+        suspendPopupHostLayout(context);
+
+        expect(context.sectionRow).toBe(ownHuiCard);
+        expect(ownHuiCard.hidden).toBe(true);
+        expect(viewHuiCard.hidden).toBe(false);
+        expect(viewHuiCard.style.display).toBe('');
+    });
+
+    test('resolves the hui-card cell once a detached wrapper reaches the view', () => {
+        const huiCard = createHuiCard();
+        const declutteringCard = {
+            tagName: 'DECLUTTERING-CARD',
+            parentElement: null,
+            // Custom stacks build their shadow subtree before inserting it in the
+            // view: at init the walk cannot go past the wrapper itself.
+            getRootNode() { return this; },
+        };
+        const context = createWrappedPopupContext(() => ({ host: declutteringCard }));
+        usedContexts.push(context);
+
+        suspendPopupHostLayout(context);
+
+        expect(context.sectionRow).toBeNull();
+        expect(context._popupHostChainIncomplete).toBe(true);
+        expect(huiCard.hidden).toBe(false);
+
+        declutteringCard.getRootNode = () => ({ host: huiCard });
+        syncDeferredPopupHostLayout(context);
+
+        expect(context.sectionRow).toBe(huiCard);
+        expect(huiCard.hidden).toBe(true);
+        expect(huiCard.style.display).toBe('none');
+        expect(context.style.display).toBe('none');
+    });
+
+    test('keeps a deferred host mounted when the wrapper lands while the popup is open', () => {
+        const huiCard = createHuiCard();
+        const declutteringCard = {
+            tagName: 'DECLUTTERING-CARD',
+            parentElement: null,
+            getRootNode() { return this; },
+        };
+        const context = createWrappedPopupContext(() => ({ host: declutteringCard }));
+        usedContexts.push(context);
+
+        suspendPopupHostLayout(context);
+        expect(context._popupHostChainIncomplete).toBe(true);
+
+        context.popUp.classList.remove('is-popup-closed');
+        context.popUp.classList.add('is-popup-opened');
+        declutteringCard.getRootNode = () => ({ host: huiCard });
+        syncDeferredPopupHostLayout(context);
+
+        expect(context.sectionRow).toBe(huiCard);
+        expect(huiCard.hidden).toBe(false);
+        expect(huiCard.style.position).toBe('absolute');
+        expect(context.style.display).toBe('grid');
+    });
+
+    test('does not retry the walk when it deliberately stopped on a layout boundary', () => {
+        const layoutCard = {
+            tagName: 'LAYOUT-CARD',
+            parentElement: null,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+        const gridLayout = {
+            tagName: 'GRID-LAYOUT',
+            parentElement: layoutCard,
+            getRootNode: () => ({ nodeType: 9 }),
+        };
+        const context = createWrappedPopupContext(() => ({ host: gridLayout }));
+        usedContexts.push(context);
+
+        suspendPopupHostLayout(context);
+
+        expect(context.sectionRow).toBeNull();
+        expect(context._popupHostChainIncomplete).toBe(false);
+
+        syncDeferredPopupHostLayout(context);
+
+        expect(context.sectionRow).toBeNull();
     });
 
     test('does not throw and leaves sectionRow null when no hui-card exists in ancestor chain', () => {

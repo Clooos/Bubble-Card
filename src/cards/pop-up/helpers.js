@@ -433,7 +433,7 @@ function isPopupHostLayoutBoundary(node) {
         tagName.endsWith('-view');
 }
 
-function resolvePopupHostElements(context) {
+export function resolvePopupHostElements(context) {
     if (context.sectionRow && context.sectionRowContainer) {
         return;
     }
@@ -446,16 +446,21 @@ function resolvePopupHostElements(context) {
         }
 
         // Fallback for environments where closest() cannot traverse shadow DOM
-        // boundaries (e.g. iOS WebKit on HA 2026.5.x sections layout).
+        // boundaries (e.g. iOS WebKit on HA 2026.5.x sections layout), and for
+        // every pop-up wrapped in a custom stack that has its own shadow root
+        // (decluttering-card, streamline-card, layout-card, vertical-stack…).
         if (!context.sectionRow) {
             let node = context;
             let crossedSharedCustomStack = false;
+            let chainComplete = false;
+
             while (node) {
                 if (isSharedCustomStackHost(node)) {
                     crossedSharedCustomStack = true;
                 }
 
                 if (node.tagName?.toLowerCase() === 'hui-card') {
+                    chainComplete = true;
                     if (crossedSharedCustomStack) {
                         context._popupHostLayoutSharedCustomStack = true;
                         break;
@@ -467,17 +472,55 @@ function resolvePopupHostElements(context) {
                 // Stop before over-reaching into a shared layout/view host: the
                 // hui-card beyond it wraps the whole view, not this pop-up's cell.
                 if (node !== context && isPopupHostLayoutBoundary(node)) {
+                    chainComplete = true;
                     break;
                 }
 
-                node = getParentOrShadowHost(node);
+                const parent = getParentOrShadowHost(node);
+                if (!parent) {
+                    // The walk ran out of ancestors: only trust that result when it
+                    // reached the document. Custom stacks build their shadow subtree
+                    // before inserting it in the view, so a pop-up hosted in one is
+                    // initialized while its hui-card cell is still out of reach.
+                    chainComplete = node.getRootNode?.() === document;
+                }
+
+                node = parent;
             }
+
+            context._popupHostChainIncomplete = !chainComplete;
         }
     }
 
     if (!context.sectionRowContainer) {
         const hostContainer = context.sectionRow?.closest?.('.card') || context.sectionRow?.parentElement || null;
         context.sectionRowContainer = hostContainer?.classList?.contains?.('card') ? hostContainer : null;
+    }
+}
+
+// Retry the host walk for a pop-up that was initialized before its wrapper chain
+// reached the view, then re-apply the layout state it is currently in. Without
+// this the hui-card cell of a wrapped pop-up keeps reserving its height until the
+// pop-up is opened once. See #2532 #2533 #2544 #2552.
+export function syncDeferredPopupHostLayout(context) {
+    if (!context?._popupHostChainIncomplete) {
+        return;
+    }
+
+    resolvePopupHostElements(context);
+
+    if (!context.sectionRow) {
+        return;
+    }
+
+    // Anything but a settled closed state (opening, opened, closing) still needs the
+    // host mounted, otherwise the wrapper would collapse mid-animation.
+    if (context.popUp?.classList && !context.popUp.classList.contains('is-popup-closed')) {
+        keepPopupHostMounted(context);
+    } else if (context.editor || context.detectedEditor || context.config?.background_update) {
+        restorePopupHostLayout(context);
+    } else {
+        suspendPopupHostLayout(context);
     }
 }
 

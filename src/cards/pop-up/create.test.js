@@ -149,6 +149,15 @@ jest.unstable_mockModule('./helpers.js', () => ({
     openPopup: jest.fn(),
     registerPopupContext: jest.fn(),
     removeHash,
+    resolvePopupHostElements: jest.fn((context) => {
+        if (!context.sectionRow && typeof context.closest === 'function') {
+            context.sectionRow = context.closest('hui-card');
+        }
+        if (!context.sectionRowContainer) {
+            const hostContainer = context.sectionRow?.closest?.('.card') || context.sectionRow?.parentElement || null;
+            context.sectionRowContainer = hostContainer?.classList?.contains?.('card') ? hostContainer : null;
+        }
+    }),
     restorePopupHostLayout: jest.fn((context) => {
         if (context.sectionRow?.tagName?.toLowerCase() === 'hui-card') {
             context.sectionRow.hidden = false;

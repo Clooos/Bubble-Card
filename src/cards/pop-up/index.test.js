@@ -28,6 +28,7 @@ jest.unstable_mockModule('./create.js', () => ({
 jest.unstable_mockModule('./helpers.js', () => ({
     cleanupPopupRuntime: jest.fn(),
     registerPopupContext: jest.fn(),
+    syncDeferredPopupHostLayout: jest.fn(),
     syncPopupOpenStateWithLocation: jest.fn(),
 }));
 
