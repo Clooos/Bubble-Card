@@ -315,9 +315,11 @@ describe('progressive card work', () => {
         createElementMock.mockImplementation((tag, className) => createFakeElement(tag, className));
         global.document = {
             createElement: jest.fn(() => {
-                // Each card "costs" more than the step budget, so the
-                // progressive build splits at every card boundary.
-                jest.setSystemTime(Date.now() + 30);
+                // Each card "costs" more than the covered build budget
+                // (300ms), so the progressive build splits at every card
+                // boundary. (Hydration and teardown budgets are smaller, so
+                // they split too.)
+                jest.setSystemTime(Date.now() + 310);
                 const el = createFakeElement('hui-card');
                 el.load = jest.fn();
                 return el;
@@ -442,11 +444,11 @@ describe('progressive card work', () => {
 
         // Completion is reported with only the head hydrated. With the 800px
         // viewport fallback and full-width one-row cards, the row-coverage
-        // head is ceil(800/64) + 4 margin rows = 17 cards.
+        // head is ceil(800/64) + 1 margin row = 14 cards.
         expect(onDone).toHaveBeenCalledTimes(1);
         expect(context._cardWrappers).toHaveLength(30);
-        expect(context._managedCards.filter(Boolean)).toHaveLength(17);
-        expect(context._pendingCardHydration).toHaveLength(13);
+        expect(context._managedCards.filter(Boolean)).toHaveLength(14);
+        expect(context._pendingCardHydration).toHaveLength(16);
         expect(context._progressiveCardWork).toBeNull();
 
         // Post-open resume hydrates the rest, one budgeted step at a time.
@@ -455,7 +457,7 @@ describe('progressive card work', () => {
         expect(hydrated).not.toHaveBeenCalled();
 
         jest.advanceTimersToNextTimer();
-        expect(context._managedCards.filter(Boolean).length).toBeGreaterThan(17);
+        expect(context._managedCards.filter(Boolean).length).toBeGreaterThan(14);
         expect(hydrated).not.toHaveBeenCalled();
 
         jest.runAllTimers();
@@ -576,7 +578,7 @@ describe('progressive card work', () => {
             jest.runAllTimers();
 
             expect(typeof observerCallback).toBe('function');
-            expect(context._managedCards.filter(Boolean)).toHaveLength(17);
+            expect(context._managedCards.filter(Boolean)).toHaveLength(14);
 
             // Several placeholders intersect at once (head not covering the fold).
             observerCallback([
@@ -587,7 +589,7 @@ describe('progressive card work', () => {
 
             // Only one hydrated synchronously (the first delivered), the rest
             // moved to the front of the queue in delivery order.
-            expect(context._managedCards.filter(Boolean)).toHaveLength(18);
+            expect(context._managedCards.filter(Boolean)).toHaveLength(15);
             expect(context._managedCards[20]).toBeTruthy();
             const frontConfigIndexes = context._pendingCardHydration.slice(0, 2).map((entry) => entry.configIndex);
             expect(frontConfigIndexes).toEqual([21, 22]);
@@ -744,7 +746,7 @@ describe('progressive card work', () => {
 
     test('extends the head until multi-column cards cover the fold', () => {
         // Half-width cards: 0.5 estimated rows each, so covering the
-        // 17-row fold target takes 34 cards instead of 17.
+        // 14-row fold target takes 28 cards instead of 14.
         const context = createProgressiveContext(40);
         context.config.cards = context.config.cards.map((card) => ({
             ...card,
@@ -754,21 +756,21 @@ describe('progressive card work', () => {
         createCardElementsProgressively(context, () => {});
         jest.runAllTimers();
 
-        expect(context._managedCards.filter(Boolean)).toHaveLength(34);
-        expect(context._pendingCardHydration).toHaveLength(6);
+        expect(context._managedCards.filter(Boolean)).toHaveLength(28);
+        expect(context._pendingCardHydration).toHaveLength(12);
     });
 
     test('shrinks the row-coverage head on small viewports', () => {
-        // The fold needs ceil(320/64) + 4 margin rows = 9 rows, so the head
-        // stops at 9 full-width cards instead of the 17 of an 800px viewport.
+        // The fold needs ceil(320/64) + 1 margin row = 6 rows, so the head
+        // stops at 6 full-width cards instead of the 14 of an 800px viewport.
         global.window = { innerHeight: 320 };
         try {
             const context = createProgressiveContext(30);
             createCardElementsProgressively(context, () => {});
             jest.runAllTimers();
 
-            expect(context._managedCards.filter(Boolean)).toHaveLength(9);
-            expect(context._pendingCardHydration).toHaveLength(21);
+            expect(context._managedCards.filter(Boolean)).toHaveLength(6);
+            expect(context._pendingCardHydration).toHaveLength(24);
         } finally {
             delete global.window;
         }

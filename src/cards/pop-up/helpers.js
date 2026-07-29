@@ -39,7 +39,7 @@ const outsideCloseFallbackDelay = 150;
 const popupQuickOpenAnimationDurationMs = 140;
 const popupBlurWillChangeDurationMs = 450;
 const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout', '_standaloneHeavyOpenTimeout', '_standalonePostOpenContentWakeTimeout'];
-const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame'];
+const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame', '_standaloneClosedPaintCountFrame'];
 const maxPostOpenContentWakeTargets = 16;
 
 export const POPUP_MODE_DEFAULT = 'default';
@@ -1608,8 +1608,13 @@ function openStandalonePopup(context, instant = false) {
         // first one only runs animation-frame callbacks, the closed state is
         // resolved and painted at the end of it. Flipping to is-popup-opened
         // before that resolution cancels the transition entirely (#2548).
-        const closedStatePaintFrames = needsClosedStatePaint ? 2 : 1;
-        const shouldTrackSettleInstability = delayHashRoutedAnimationUntilSettled && phase1ContentPrimed;
+        // When the deferred build already spanned several painted frames
+        // (phase 1 armed a counter), the closed state is provably on screen
+        // and the priming has already happened: a single frame suffices.
+        clearContextFrame(context, '_standaloneClosedPaintCountFrame');
+        const closedStateAlreadyPainted = (context._standaloneClosedPaintCount || 0) >= 3;
+        const closedStatePaintFrames = (needsClosedStatePaint && !closedStateAlreadyPainted) ? 2 : 1;
+        const shouldTrackSettleInstability = delayHashRoutedAnimationUntilSettled && phase1ContentPrimed && !closedStateAlreadyPainted;
         // Older WebKit only starts a transition if it was enabled at the
         // previous style resolution: restore one frame before the flip, never
         // in the same frame as it. The shell height is stable by now, so the
@@ -1619,7 +1624,7 @@ function openStandalonePopup(context, instant = false) {
             scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', phase2);
         };
         scheduleStandalonePhase2(context, phase2AfterTransitionRestore, {
-            minimumFrames: Math.max(delayHashRoutedAnimationUntilSettled ? 2 : 1, closedStatePaintFrames),
+            minimumFrames: Math.max((delayHashRoutedAnimationUntilSettled && !closedStateAlreadyPainted) ? 2 : 1, closedStatePaintFrames),
             unstableExtraFrames: shouldTrackSettleInstability ? 1 : 0,
             initialSignature: shouldTrackSettleInstability
                 ? getStandalonePhase2SettleSignature(context)
@@ -1713,6 +1718,22 @@ function openStandalonePopup(context, instant = false) {
             // transitions for the whole build; finishBeforePhase2 restores
             // them once the height is stable, before the prime frames.
             popUp.style.transition = 'none';
+
+            // Count frames rendered while the closed state is current: when
+            // the deferred build spans several painted frames, the post-build
+            // prime frames become redundant and finishBeforePhase2 skips
+            // them (the slide starts one frame chain earlier).
+            context._standaloneClosedPaintCount = 0;
+            clearContextFrame(context, '_standaloneClosedPaintCountFrame');
+            const countClosedPaintFrame = () => {
+                context._standaloneClosedPaintCount += 1;
+                if (context._standaloneClosedPaintCount < 4) {
+                    context._standaloneClosedPaintCountFrame = requestAnimationFrame(countClosedPaintFrame);
+                } else {
+                    context._standaloneClosedPaintCountFrame = null;
+                }
+            };
+            context._standaloneClosedPaintCountFrame = requestAnimationFrame(countClosedPaintFrame);
 
             // Editor previews keep the historical synchronous sequence.
             if (context.editor) {

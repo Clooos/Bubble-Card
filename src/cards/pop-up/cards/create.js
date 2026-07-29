@@ -198,10 +198,21 @@ function _shouldTeardownYield() {
         (popupOpenActivityProbe?.() === true);
 }
 
-// Per-macrotask time budget: fast devices fit the whole job in one or two
-// tasks (no added latency), slow devices split at card boundaries so no task
-// exceeds roughly one card's cost beyond the budget.
+// Per-macrotask time budget for work that runs while the pop-up is VISIBLE
+// (post-open hydration) or while the page is interactive (close teardown):
+// slow devices split at card boundaries so no task exceeds roughly one
+// card's cost beyond the budget, and scroll stays fluid.
 const progressiveStepBudgetMs = 24;
+
+// Per-macrotask budget for the pre-open build: the pop-up is painted closed
+// and the dashboard sits frozen behind the compositor-driven backdrop fade,
+// so nothing visible needs main-thread frames. Splitting finely there only
+// multiplies the total cost (one Lit flush per card instead of one batched
+// flush, v3.2.4 style) and delays the slide. A large budget keeps the
+// batching win; isInputPending (and the budget itself as a WebKit fallback)
+// caps how long a cancel tap can wait — still far below the fully
+// synchronous block v3.2.4 held for the whole build.
+const coveredBuildStepBudgetMs = 300;
 
 // Fold-first hydration: large pop-ups render only enough leading cards to
 // cover the first viewport (estimated from config grid spans, no layout
@@ -213,7 +224,10 @@ const progressiveStepBudgetMs = 24;
 // its time allowance on a slow device.
 const foldFirstMinPlaceholderTail = 6;
 const estimatedRowHeightPx = 64; // --row-height (56px) + row gap (8px)
-const foldCoverageMarginRows = 4;
+// One margin row: enough that a slightly-underestimated fold does not show
+// an empty cell at the very bottom edge, without inflating the pre-open
+// build (the first hydration step lands ~35ms after the transition ends).
+const foldCoverageMarginRows = 1;
 const assumedGridColumnCount = 12;
 
 // Approximate the vertical footprint of one card in grid rows: a full-width
@@ -454,7 +468,7 @@ export function createCardElementsProgressively(context, onDone) {
                 context._lastRenderedCardConfigs.push(cardEl.config);
                 cardsContainer.appendChild(cardWrapper);
             }
-        } while (index < hydratedHead && (monotonicNow() - stepStart) < progressiveStepBudgetMs && !_isInputPending());
+        } while (index < hydratedHead && (monotonicNow() - stepStart) < coveredBuildStepBudgetMs && !_isInputPending());
 
         _scheduleWorkStep(work, step, 0, 'user-visible');
     };
