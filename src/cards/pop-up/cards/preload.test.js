@@ -21,15 +21,16 @@ describe('popup card module preload', () => {
         delete global.window;
     });
 
-    test('preloads each unique card type once, one idle slice at a time', async () => {
+    test('preloads each unique built-in type once with its real config, skipping custom cards', async () => {
+        const lightConfig = { type: 'light', entity: 'light.kitchen' };
         const context = {
             config: {
                 cards: [
-                    { type: 'light' },
+                    lightConfig,
                     { type: 'custom:some-card' },
-                    { type: 'light' },
-                    { type: 'vertical-stack', cards: [{ type: 'thermostat' }] },
-                    { type: 'conditional', card: { type: 'media-control' } },
+                    { type: 'light', entity: 'light.desk' },
+                    { type: 'vertical-stack', cards: [{ type: 'thermostat', entity: 'climate.a' }] },
+                    { type: 'conditional', card: { type: 'media-control', entity: 'media_player.tv' } },
                 ],
             },
         };
@@ -45,7 +46,12 @@ describe('popup card module preload', () => {
         }
 
         const preloadedTypes = createCardElement.mock.calls.map(([config]) => config.type).sort();
-        expect(preloadedTypes).toEqual(['conditional', 'custom:some-card', 'light', 'media-control', 'thermostat', 'vertical-stack']);
+        expect(preloadedTypes).toEqual(['conditional', 'light', 'media-control', 'thermostat', 'vertical-stack']);
+
+        // The real config is passed, so setConfig validation passes silently
+        // instead of throwing on a minimal {type} stub.
+        const lightCall = createCardElement.mock.calls.find(([config]) => config.type === 'light');
+        expect(lightCall[0]).toBe(lightConfig);
     });
 
     test('never preloads the same type twice across pop-ups', async () => {

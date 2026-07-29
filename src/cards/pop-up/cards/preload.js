@@ -1,38 +1,42 @@
 // Idle-time preload of the card modules a pop-up's content will need.
 //
 // The dominant cost of a cold pop-up open is not the DOM: Home Assistant
-// lazy-imports each hui-*-card module the first time a type is used. A type
-// that only appears inside a pop-up pays that import (network + parse +
-// upgrade) INSIDE a build step, where the time budget cannot split it, and
-// the element upgrades visibly late. Creating one throwaway card per unique
-// type at idle time pulls those imports forward at zero visual risk: only
-// the modules stay loaded, the elements are discarded.
+// lazy-imports each built-in hui-*-card module the first time a type is
+// used. A type that only appears inside a pop-up pays that import (network +
+// parse + upgrade) INSIDE a build step, where the time budget cannot split
+// it, and the element upgrades visibly late. Creating one throwaway card per
+// unique built-in type at idle time pulls those imports forward at zero
+// visual risk: only the modules stay loaded, the elements are discarded.
+//
+// custom:* types are skipped entirely: their resources are loaded up-front
+// by lovelace, there is nothing to import, and instantiating them with a
+// config they were not opened with can throw or run arbitrary side effects.
 const preloadedCardTypes = new Set();
 const preloadQueue = [];
 let preloadScheduled = false;
 
-function _collectCardTypes(config, types, depth = 0) {
+function _collectCardConfigsByType(config, byType, depth = 0) {
     if (!config || typeof config !== 'object' || depth > 6) {
         return;
     }
 
     if (Array.isArray(config)) {
-        config.forEach((item) => _collectCardTypes(item, types, depth + 1));
+        config.forEach((item) => _collectCardConfigsByType(item, byType, depth + 1));
         return;
     }
 
-    if (typeof config.type === 'string' && config.type) {
-        types.add(config.type);
+    if (typeof config.type === 'string' && config.type && !config.type.startsWith('custom:') && !byType.has(config.type)) {
+        byType.set(config.type, config);
     }
     if (Array.isArray(config.cards)) {
-        _collectCardTypes(config.cards, types, depth + 1);
+        _collectCardConfigsByType(config.cards, byType, depth + 1);
     }
     if (config.card && typeof config.card === 'object') {
-        _collectCardTypes(config.card, types, depth + 1);
+        _collectCardConfigsByType(config.card, byType, depth + 1);
     }
 }
 
-async function _preloadOneType(type) {
+async function _preloadOneType(cardConfig) {
     try {
         const loadCardHelpers = typeof window !== 'undefined' ? window.loadCardHelpers : undefined;
         if (typeof loadCardHelpers !== 'function') {
@@ -45,8 +49,9 @@ async function _preloadOneType(type) {
         }
 
         // The element is never attached and immediately discarded: the module
-        // import triggered by its creation is the whole point.
-        helpers.createCardElement({ type });
+        // import triggered by its creation is the whole point. The card's
+        // real config is used so setConfig validation passes silently.
+        helpers.createCardElement(cardConfig);
     } catch (_) {
         // Preloading is best-effort: a failing type simply loads on first use.
     }
@@ -60,9 +65,9 @@ function _pumpPreloadQueue() {
     preloadScheduled = true;
     const run = () => {
         preloadScheduled = false;
-        const type = preloadQueue.shift();
-        if (type) {
-            _preloadOneType(type);
+        const cardConfig = preloadQueue.shift();
+        if (cardConfig) {
+            _preloadOneType(cardConfig);
         }
         _pumpPreloadQueue();
     };
@@ -82,13 +87,13 @@ export function schedulePopupCardModulePreload(context) {
         return;
     }
 
-    const types = new Set();
-    _collectCardTypes(cards, types, 0);
+    const byType = new Map();
+    _collectCardConfigsByType(cards, byType, 0);
 
-    for (const type of types) {
+    for (const [type, cardConfig] of byType) {
         if (!preloadedCardTypes.has(type)) {
             preloadedCardTypes.add(type);
-            preloadQueue.push(type);
+            preloadQueue.push(cardConfig);
         }
     }
 

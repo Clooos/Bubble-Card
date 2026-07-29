@@ -364,22 +364,42 @@ export function createHeader(context) {
   };
 }
 
+// Inject the popup shell stylesheet (plus the empty custom-style tag) into
+// the shell, once. This MUST run as soon as the shell element exists, even
+// while shell creation itself is deferred: a shell that reaches the DOM
+// without its stylesheet resolves unstyled (no fixed position, opacity 1),
+// and the mode transitions then visibly animate it to its closed state when
+// the styles finally land (raw flash, then "close", then open).
+export function ensurePopupShellStyles(context) {
+  if (!context.popUp) return;
+  // Skip bare test stubs (real shell elements always have both).
+  if (typeof context.popUp.querySelectorAll !== "function" || typeof context.popUp.appendChild !== "function") {
+    return;
+  }
+  if (!context.elements) context.elements = {};
+
+  const styleTags = context.popUp.querySelectorAll("style");
+  if (!context.stylesAdded || styleTags.length === 0) {
+    context.elements.customStyle = createElement("style");
+    context.elements.style = createElement("style");
+    context.elements.style.textContent = styles;
+    context.popUp.appendChild(context.elements.customStyle);
+    context.popUp.appendChild(context.elements.style);
+    context.stylesAdded = true;
+    return;
+  }
+
+  // Styles already in the shell (injected at boot or by a previous run):
+  // keep the live nodes. Order is customStyle first, shell styles second.
+  context.elements.customStyle = styleTags[0];
+  context.elements.style = styleTags.length > 1 ? styleTags[1] : styleTags[0];
+}
+
 export function createStructure(context) {
   try {
     if (!context.popUp) return;
 
-    context.elements.style = createElement("style");
-    context.elements.style.textContent = styles;
-
-    const existingStyle = context.popUp.querySelector("style");
-    if (!context.stylesAdded || !existingStyle) {
-      context.elements.customStyle = createElement("style");
-      context.popUp.appendChild(context.elements.customStyle);
-      context.popUp.appendChild(context.elements.style);
-      context.stylesAdded = true;
-    } else {
-      context.elements.customStyle = existingStyle;
-    }
+    ensurePopupShellStyles(context);
 
     if (!context.updatePopupColor) {
       context.updatePopupColor = () => {
@@ -526,6 +546,10 @@ export function prepareStandaloneStructure(context) {
   context.popUp.classList.add("bubble-pop-up", "pop-up", "is-popup-closed", "is-standalone-pop-up");
   context.popUp.classList.remove("is-popup-opened", "is-opening", "is-closing");
   context.elements = {};
+  // The shell's stylesheet travels with the shell from day one: the rest of
+  // its creation is deferred, but an unstyled shell must never reach a paint
+  // (see ensurePopupShellStyles).
+  ensurePopupShellStyles(context);
   getBackdrop(context);
   _applyPopupVariables(context);
 
