@@ -1,7 +1,7 @@
 import { getBackdrop, hideExistingBackdrop, releaseBackdropContext } from "./backdrop.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll } from "../../tools/utils.js";
-import { handlePopUpCards, setStandalonePopUpCardsActive, suspendStandalonePopUpCards } from "./cards/index.js";
+import { buildStandalonePopUpCardsProgressively, handlePopUpCards, resumeStandaloneCardHydration, setStandalonePopUpCardsActive, settleStandaloneCardWork, suspendStandalonePopUpCardsProgressively } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
 import { invalidateWakeSyncCache } from "./index.js";
 
@@ -10,6 +10,92 @@ function resetPopupScroll(context) {
     if (container) {
         container.scrollTop = 0;
     }
+}
+
+// While a standalone pop-up open is in flight behind a covering backdrop,
+// bubble cards outside any pop-up hold their hass updates: they are about to
+// be covered, and their re-renders are exactly what starves the open
+// transition frames on low-end devices. Updates flush one card per macrotask
+// once the open settles. The gate auto-expires as a safety net, and is never
+// armed for hide_backdrop pop-ups (the dashboard stays visible there, a held
+// update could be noticed).
+const popupOpenHassGate = {
+    until: 0,
+    queue: new Set(),
+    draining: false,
+};
+
+function drainPopupOpenHassGateQueue() {
+    if (popupOpenHassGate.draining || popupOpenHassGate.queue.size === 0) {
+        return;
+    }
+
+    popupOpenHassGate.draining = true;
+    const step = () => {
+        // A new open re-armed the gate: pause, the next release resumes.
+        if (Date.now() < popupOpenHassGate.until) {
+            popupOpenHassGate.draining = false;
+            return;
+        }
+
+        const { value } = popupOpenHassGate.queue.values().next();
+        if (value === undefined) {
+            popupOpenHassGate.draining = false;
+            return;
+        }
+
+        popupOpenHassGate.queue.delete(value);
+        try {
+            if (value.isConnected) {
+                value.updateBubbleCard();
+            }
+        } catch (_) {}
+
+        if (popupOpenHassGate.queue.size > 0) {
+            setTimeout(step, 0);
+        } else {
+            popupOpenHassGate.draining = false;
+        }
+    };
+    setTimeout(step, 0);
+}
+
+function beginPopupOpenHassGate(context) {
+    if (context?.config?.hide_backdrop || context?.editor) {
+        return;
+    }
+
+    popupOpenHassGate.until = Date.now() + 1600;
+}
+
+function releasePopupOpenHassGate() {
+    popupOpenHassGate.until = 0;
+    drainPopupOpenHassGateQueue();
+}
+
+// Called by the bubble-card hass setter. The element stores the fresh hass
+// before asking, so a queued card always renders the latest state on flush.
+export function shouldHoldDashboardHassUpdate(element) {
+    if (Date.now() >= popupOpenHassGate.until) {
+        // Self-healing: a gate that expired without release still drains.
+        if (popupOpenHassGate.queue.size > 0) {
+            drainPopupOpenHassGateQueue();
+        }
+        return false;
+    }
+
+    if (element?.config?.card_type === 'pop-up' || element?.editor) {
+        return false;
+    }
+
+    // Cards inside a pop-up must keep updating; closest() stays inside the
+    // shadow root, which is exactly the boundary we want.
+    if (typeof element?.closest === 'function' && element.closest('.bubble-pop-up')) {
+        return false;
+    }
+
+    popupOpenHassGate.queue.add(element);
+    return true;
 }
 
 const popupState = {
@@ -23,8 +109,8 @@ const popupState = {
 const outsideCloseFallbackDelay = 150;
 const popupQuickOpenAnimationDurationMs = 140;
 const popupBlurWillChangeDurationMs = 450;
-const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout'];
-const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame', '_standalonePostOpenContentWakeFrame'];
+const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout', '_standaloneHeavyOpenTimeout', '_standalonePostOpenContentWakeTimeout'];
+const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame'];
 const maxPostOpenContentWakeTargets = 16;
 
 export const POPUP_MODE_DEFAULT = 'default';
@@ -142,6 +228,23 @@ function clearPopupWillChange(context) {
     context.popUp.style.willChange = '';
 }
 
+// A closed standalone pop-up keeps no rendered shell: it is detached from the
+// DOM and its host layout is suspended. A shell in that state has no computed
+// "closed" style for the browser to transition from, so phase 2 must let it go
+// through a style change event of its own before flipping it to is-popup-opened.
+// Without it both states collapse into a single style resolution and no
+// transition is started at all — the pop-up just appears fully open (#2548).
+function standaloneShellNeedsClosedStatePaint(context) {
+    const popUp = context?.popUp;
+    if (!popUp) {
+        return false;
+    }
+
+    return !popUp.parentNode ||
+        context._popupHostLayoutSuspended === true ||
+        popUp.style?.display === 'none';
+}
+
 function getStandalonePhase2SettleSignature(context) {
     const container = context?.elements?.popUpContainer;
     if (!container) {
@@ -235,6 +338,34 @@ function waitForStandalonePopupTransition(context, callback) {
         }
     }, popupState.animationDuration + 60);
 }
+// The `transition` shorthand does not read back as the exact keyword it was
+// assigned on every engine (older WebKit expands it), so the inline
+// kill-switch must be detected through the longhand, which is stable
+// everywhere. Test mocks fall back to the plain string comparison.
+function isShellTransitionDisabled(popUp) {
+    const style = popUp?.style;
+    if (!style) {
+        return false;
+    }
+
+    if (typeof style.getPropertyValue === 'function' && style.getPropertyValue('transition-property') === 'none') {
+        return true;
+    }
+
+    return style.transition === 'none';
+}
+
+function restoreShellTransition(popUp) {
+    if (!isShellTransitionDisabled(popUp)) {
+        return;
+    }
+
+    if (typeof popUp.style.removeProperty === 'function') {
+        popUp.style.removeProperty('transition');
+    }
+    popUp.style.transition = '';
+}
+
 function setStandalonePopupState(popUp, open, transitionClass = null) {
     // Batch classList mutations: remove transition classes first, then set state.
     // Using toggle with explicit boolean is cheaper than remove/add because it
@@ -250,7 +381,7 @@ function setStandalonePopupState(popUp, open, transitionClass = null) {
 function startStandalonePopupTransition(context, open, onComplete, switchClosing = false) {
     const { popUp } = context;
     clearStandaloneTransitionCompletion(context);
-    if (popUp.style.transition === 'none') popUp.style.transition = '';
+    restoreShellTransition(popUp);
 
     const isAlreadyOpenForClose = !open &&
         popUp.classList.contains('is-popup-opened') &&
@@ -264,13 +395,6 @@ function startStandalonePopupTransition(context, open, onComplete, switchClosing
         popUp.classList.remove('is-opening', 'is-closing');
         popUp.classList.add('is-popup-opened');
         popUp.classList.remove('is-popup-closed');
-    }
-
-    if (open || !isAlreadyOpenForClose) {
-        // Defer layout read to next frame to avoid reflow during the CSS transition
-        requestAnimationFrame(() => {
-            popUp.getBoundingClientRect();
-        });
     }
 
     waitForStandalonePopupTransition(context, onComplete);
@@ -532,6 +656,11 @@ function applyPopupHostLayout(context, {
 } = {}) {
     resolvePopupHostElements(context);
 
+    // Remember whether the shell is currently rendered, so the open sequence can
+    // tell if it still needs a painted closed state (see #2548). Tracking it here
+    // keeps that check free of any layout read.
+    context._popupHostLayoutSuspended = rowHidden === true;
+
     const { sectionRow, sectionRowContainer } = context;
     const hasManagedContainer = sectionRowContainer?.classList?.contains('card');
 
@@ -758,21 +887,41 @@ function wakeStandalonePopupScrollableContent(context) {
     });
 }
 
+function cancelStandalonePostOpenContentWake(context) {
+    if (context._standalonePostOpenContentWakeIdle && typeof cancelIdleCallback === 'function') {
+        cancelIdleCallback(context._standalonePostOpenContentWakeIdle);
+    }
+    context._standalonePostOpenContentWakeIdle = null;
+    clearContextTimeout(context, '_standalonePostOpenContentWakeTimeout');
+}
+
 function scheduleStandalonePostOpenContentWake(context) {
     if (!context?.isStandalonePopUp) {
         return;
     }
 
-    clearContextFrame(context, '_standalonePostOpenContentWakeFrame');
-    context._standalonePostOpenContentWakeFrame = requestAnimationFrame(() => {
-        context._standalonePostOpenContentWakeFrame = null;
+    cancelStandalonePostOpenContentWake(context);
+
+    // The wake dispatches synthetic scroll events over up to 16 scrollable
+    // descendants, each read forcing layout. Run it at idle time so it never
+    // competes with the open transition tail (Safari has no idle callback,
+    // a short timeout keeps it off the transition frames there too).
+    const run = () => {
+        context._standalonePostOpenContentWakeIdle = null;
+        context._standalonePostOpenContentWakeTimeout = null;
 
         if (!popupState.activePopups.has(context) || !context.popUp?.classList?.contains('is-popup-opened')) {
             return;
         }
 
         wakeStandalonePopupScrollableContent(context);
-    });
+    };
+
+    if (typeof requestIdleCallback === 'function') {
+        context._standalonePostOpenContentWakeIdle = requestIdleCallback(run, { timeout: 600 });
+    } else {
+        context._standalonePostOpenContentWakeTimeout = setTimeout(run, 250);
+    }
 }
 
 // Deduplicate Bubble Card's own synthetic no-hash step used during popup close.
@@ -1067,6 +1216,7 @@ export function wasPopupOpenedByTrigger(context) {
 function completePopupOpen(context) {
     setPopupOpenInProgress(context, false);
     clearPopupWillChange(context);
+    releasePopupOpenHassGate();
 
     if (!context.popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
         return;
@@ -1229,12 +1379,25 @@ function finalizeStandalonePopupOpen(context) {
         context._pendingPostOpenCardSync = false;
         scheduleStandaloneCardSync(context);
     }
+
+    // Fold-first builds left placeholder cells below the fold: hydrate them
+    // now that the transition is over, one budgeted step per macrotask. The
+    // pre-slide scrollability was measured against partial content, so it is
+    // re-synced once the real cards are all in place.
+    resumeStandaloneCardHydration(context, () => {
+        if (!popupState.activePopups.has(context)) {
+            return;
+        }
+
+        // Do not trust any state cached against the partial content.
+        context._cachedPopupScrollableState = undefined;
+        syncPopupScrollableState(context);
+    });
 }
 
 function runStandalonePostCloseCleanup(context) {
     setStandalonePopUpCardsActive(context, false);
     handlePopUpCards(context);
-    suspendStandalonePopUpCards(context);
 
     if (context.config.background_update) {
         context.popUp.style.display = 'none';
@@ -1246,20 +1409,31 @@ function runStandalonePostCloseCleanup(context) {
     context.popUp.classList.remove('is-popup-opened', 'is-opening', 'is-closing', 'is-switch-closing');
     context.popUp.classList.add('is-popup-closed');
 
-    // Detach popup shell from DOM to keep shadow-root empty while closed.
-    if (context.popUp?.parentNode) {
-        context._standalonePopUpParent = context.popUp.parentNode;
-        context.popUp.parentNode.removeChild(context.popUp);
-    }
-
     // Always suspend host layout to hide the hui-card wrapper.
     // Shell detachment (shadow DOM) and host layout suspension (light DOM)
     // are independent — detaching the shell does not hide sectionRow.
+    // Suspending BEFORE the card teardown below also means the removals run
+    // against a hidden subtree and never trigger layout of visible content.
     suspendPopupHostLayout(context);
 
     if (context.config.close_action && !hasIncomingPopupNavigation(context)) {
         callAction(context, context.config, 'close_action');
     }
+
+    // Tear the child cards down one per macrotask (the disconnect callbacks
+    // are the expensive part), then detach the shell to keep the shadow-root
+    // empty while closed. A reopen meanwhile settles the teardown
+    // synchronously through clearAllTimeouts and skips the detach here.
+    suspendStandalonePopUpCardsProgressively(context, () => {
+        if (popupState.activePopups.has(context)) {
+            return;
+        }
+
+        if (context.popUp?.parentNode) {
+            context._standalonePopUpParent = context.popUp.parentNode;
+            context.popUp.parentNode.removeChild(context.popUp);
+        }
+    });
 }
 
 function scheduleStandalonePostCloseCleanup(context) {
@@ -1302,6 +1476,8 @@ function rollbackStandalonePopupOpen(context, error = null) {
         console.error(error);
     }
 
+    releasePopupOpenHassGate();
+
     const wasOnlyActivePopup = popupState.activePopups.size === 1 && popupState.activePopups.has(context);
 
     context._pendingPostOpenCardSync = false;
@@ -1327,8 +1503,34 @@ function rollbackStandalonePopupOpen(context, error = null) {
     }
 }
 
+// Create the deferred standalone shell (header + structure) now. See the
+// comment in openPopup for why the flags must flip before createShell runs
+// (re-entrancy through _setInitialVisibility) and only when it actually runs.
+function runDeferredStandaloneShellCreate(context) {
+    context._standaloneShellCreatePending = false;
+
+    if (context._standaloneShellCreated || typeof context.createStandaloneShell !== 'function') {
+        return;
+    }
+
+    context._standaloneShellCreated = true;
+    context._standaloneShellCreating = true;
+    const createShell = context.createStandaloneShell;
+    context.createStandaloneShell = null;
+    try {
+        createShell();
+    } finally {
+        context._standaloneShellCreating = false;
+    }
+}
+
 function openStandalonePopup(context, instant = false) {
     clearAllTimeouts(context);
+    beginPopupOpenHassGate(context);
+
+    // Must be read before the shell is re-attached and before phase 1 restores
+    // the host layout, while the closed state is still the unrendered one.
+    const needsClosedStatePaint = standaloneShellNeedsClosedStatePaint(context);
 
     // Re-attach popup shell to DOM if it was detached on close.
     if (context._standalonePopUpParent && context.popUp && !context.popUp.parentNode) {
@@ -1362,6 +1564,8 @@ function openStandalonePopup(context, instant = false) {
 
     if (instant) {
         try {
+            runDeferredStandaloneShellCreate(context);
+
             if (!deferBackdropHandoffUntilPhase2) {
                 toggleBackdrop(context, true);
             }
@@ -1417,62 +1621,137 @@ function openStandalonePopup(context, instant = false) {
 
     let phase1ContentPrimed = false;
 
-    const phase1 = () => {
+    // Everything the transition start depends on but the user cannot see runs
+    // here, off the interaction frame: shell creation, style refresh and the
+    // card work. The pop-up is painted closed the whole time, so the visual
+    // result is identical — the slide still starts with the full content.
+    const finishBeforePhase2 = () => {
+        if (!popupState.activePopups.has(context)) return;
+
+        // Read scrollable state before phase 2 so it has no layout reads
+        // competing with the CSS transition start. Skip the read for cold
+        // default-mode opens where content is still deferred — the container
+        // is empty and the forced reflow would be expensive and misleading.
+        if (!syncCachedPopupScrollableState(context) && phase1ContentPrimed) {
+            syncPopupScrollableState(context);
+        }
+
+        // A shell that was not rendered while closed needs a second frame: the
+        // first one only runs animation-frame callbacks, the closed state is
+        // resolved and painted at the end of it. Flipping to is-popup-opened
+        // before that resolution cancels the transition entirely (#2548).
+        const closedStatePaintFrames = needsClosedStatePaint ? 2 : 1;
+        const shouldTrackSettleInstability = delayHashRoutedAnimationUntilSettled && phase1ContentPrimed;
+        // Older WebKit only starts a transition if it was enabled at the
+        // previous style resolution: restore one frame before the flip, never
+        // in the same frame as it. The shell height is stable by now, so the
+        // restore frame itself cannot animate anything.
+        const phase2AfterTransitionRestore = () => {
+            restoreShellTransition(popUp);
+            scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', phase2);
+        };
+        scheduleStandalonePhase2(context, phase2AfterTransitionRestore, {
+            minimumFrames: Math.max(delayHashRoutedAnimationUntilSettled ? 2 : 1, closedStatePaintFrames),
+            unstableExtraFrames: shouldTrackSettleInstability ? 1 : 0,
+            initialSignature: shouldTrackSettleInstability
+                ? getStandalonePhase2SettleSignature(context)
+                : null,
+        });
+    };
+
+    let backdropShownEarly = false;
+
+    const heavyOpen = () => {
         try {
             if (!popupState.activePopups.has(context)) return;
 
-            if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupHeader === 'function') {
-                context.refreshPopupHeader();
+            // First visual feedback: the backdrop starts fading as soon as the
+            // deferred open work begins, well before the slide. Popup-to-popup
+            // switches keep the phase-2 handoff (their backdrop is already up).
+            if (!deferBackdropHandoffUntilPhase2) {
+                toggleBackdrop(context, true);
+                backdropShownEarly = true;
             }
 
-            keepPopupHostMounted(context);
+            runDeferredStandaloneShellCreate(context);
+
+            // The header is cheap and hass-driven: refresh it on every open so
+            // it never shows stale content while post-open work catches up.
+            // The full shell refresh (custom styles) stays gated on the flag.
+            if (typeof context.refreshPopupHeader === 'function') {
+                context.refreshPopupHeader();
+            }
             if (context._standaloneNeedsShellRefresh && typeof context.refreshPopupShell === 'function') {
                 context.refreshPopupShell();
             }
             context.updatePopupColor?.();
-            popUp.style.display = '';
-            popUp.style.visibility = '';
             setStandalonePopUpCardsActive(context, true);
 
-            // Restore or prime content one frame before the animation so Lit microtask
-            // updates settle before the transition frame starts.
-            if (hasStandaloneCards) {
+            if (hasStandaloneCards && !shouldDeferColdStandaloneContentUntilAfterOpen(context)) {
+                if (!hadPrimedStandaloneContent) {
+                    // Cold content: build one card per macrotask so no single
+                    // task exceeds roughly one card's cost, then start phase 2.
+                    // The opening marker stays OFF on purpose: each nested card
+                    // renders fully inside its own build step (the pop-up is
+                    // painted closed, nothing is visible), instead of arming
+                    // 320ms deferred updates that would land mid-transition.
+                    phase1ContentPrimed = true;
+                    context._standalonePostOpenContentWakeNeeded = true;
+                    buildStandalonePopUpCardsProgressively(context, finishBeforePhase2);
+                    return;
+                }
+
+                // Retained content (background_update): reconcile it inline.
                 setPopupOpeningMarker(context, true);
                 try {
-                    if (!shouldDeferColdStandaloneContentUntilAfterOpen(context)) {
-                        syncStandalonePopupContent(context);
-                        phase1ContentPrimed = true;
-                        if (!hadPrimedStandaloneContent) {
-                            context._standalonePostOpenContentWakeNeeded = true;
-                        }
-                    }
+                    syncStandalonePopupContent(context);
+                    phase1ContentPrimed = true;
                 } finally {
                     setPopupOpeningMarker(context, false);
                 }
             }
 
-            // Read scrollable state one frame early so phase 2 has no layout reads
-            // competing with the CSS transition start. Skip the read for cold
-            // default-mode opens where content is still deferred — the container
-            // is empty and the forced reflow would be expensive and misleading.
-            if (!syncCachedPopupScrollableState(context) && phase1ContentPrimed) {
-                syncPopupScrollableState(context);
-            }
+            finishBeforePhase2();
+        } catch (error) {
+            setPopupOpeningMarker(context, false);
+            rollbackStandalonePopupOpen(context, error);
+        }
+    };
 
-            // Set the popup to its closed position so the browser paints this frame
-            // before phase 2 flips it to is-popup-opened (no getBoundingClientRect needed).
+    // Interaction frame: only what must be visible or painted right away —
+    // host un-hidden and the closed position painted so the tap feedback and
+    // the transition start state cost nothing on the tap task (#2548).
+    const phase1 = () => {
+        try {
+            if (!popupState.activePopups.has(context)) return;
+
+            keepPopupHostMounted(context);
+            popUp.style.display = '';
+            popUp.style.visibility = '';
+
             clearStandaloneTransitionCompletion(context);
-            if (popUp.style.transition === 'none') popUp.style.transition = '';
             setStandalonePopupState(popUp, false);
 
-            const shouldTrackSettleInstability = delayHashRoutedAnimationUntilSettled && phase1ContentPrimed;
-            scheduleStandalonePhase2(context, phase2, {
-                minimumFrames: delayHashRoutedAnimationUntilSettled ? 2 : 1,
-                unstableExtraFrames: shouldTrackSettleInstability ? 1 : 0,
-                initialSignature: shouldTrackSettleInstability
-                    ? getStandalonePhase2SettleSignature(context)
-                    : null,
-            });
+            // The closed bottom-sheet transform is a percentage of the shell
+            // height, which the computed style resolves to pixels. The
+            // progressive build grows that height card by card, and each
+            // growth would otherwise ANIMATE the closed transform (0.3s),
+            // peeking the top of the pop-up above the screen edge. Disable
+            // transitions for the whole build; finishBeforePhase2 restores
+            // them once the height is stable, before the prime frames.
+            popUp.style.transition = 'none';
+
+            // Editor previews keep the historical synchronous sequence.
+            if (context.editor) {
+                heavyOpen();
+                return;
+            }
+
+            clearContextTimeout(context, '_standaloneHeavyOpenTimeout');
+            context._standaloneHeavyOpenTimeout = setTimeout(() => {
+                context._standaloneHeavyOpenTimeout = null;
+                heavyOpen();
+            }, 0);
         } catch (error) {
             rollbackStandalonePopupOpen(context, error);
         }
@@ -1490,7 +1769,9 @@ function openStandalonePopup(context, instant = false) {
                 updateListeners(context, true);
             });
 
-            toggleBackdrop(context, true);
+            if (!backdropShownEarly) {
+                toggleBackdrop(context, true);
+            }
 
             if (!phase1ContentPrimed) {
                 context._pendingPostOpenCardSync = true;
@@ -1503,6 +1784,9 @@ function openStandalonePopup(context, instant = false) {
                     rollbackStandalonePopupOpen(context, error);
                 }
             });
+            // Safety net: transitions were restored one frame earlier by
+            // phase2AfterTransitionRestore; make sure no path left them off.
+            restoreShellTransition(popUp);
             setStandalonePopupState(popUp, true, 'is-opening');
         } catch (error) {
             setPopupOpeningMarker(context, false);
@@ -1517,6 +1801,7 @@ function closeStandalonePopup(context, force = false) {
     if ((!context.popUp.classList.contains('is-popup-opened') && !force)) return;
 
     clearAllTimeouts(context);
+    releasePopupOpenHassGate();
 
     const incomingPopupNavigation = hasIncomingPopupNavigation(context);
 
@@ -1573,9 +1858,7 @@ function updatePopupClass(popUp, open) {
         return;
     }
 
-    if (popUp.style.transition === 'none') {
-        popUp.style.transition = '';
-    }
+    restoreShellTransition(popUp);
 
     popUp.classList.remove('is-opening', 'is-closing');
     popUp.classList.add('is-popup-opened');
@@ -1704,6 +1987,11 @@ export function updateListeners(context, add) {
 function clearAllTimeouts(context) {
     clearContextTimeouts(context, popupRuntimeTimeoutKeys);
     clearQuickOpenAnimation(context);
+    cancelStandalonePostOpenContentWake(context);
+
+    // A progressive card build/teardown in flight is settled synchronously so
+    // whoever takes over (open, close, cleanup) starts from a clean state.
+    settleStandaloneCardWork(context);
 
     clearPopupOpenCompletion(context);
     clearPopupBackdropBlurGuardRelease(context);
@@ -1751,9 +2039,7 @@ function resetPopupToClosedState(context) {
     setPopupOpenSettled(context, false);
     clearFreshOutsideInteractionGuard(context);
 
-    if (context.popUp.style.transition === 'none') {
-        context.popUp.style.transition = '';
-    }
+    restoreShellTransition(context.popUp);
 }
 
 function normalizePopupBeforeOpen(context) {
@@ -1823,7 +2109,10 @@ export function openPopup(context, instant = false) {
 
     // Defer scroll reset to next frame to avoid forced reflow during open transition.
     // Reading scrollTop triggers layout; batching it with other post-open work is cheaper.
-    if (!context._popupScrollResetFrame) {
+    // Cold standalone opens rebuild their content from scratch, so the container
+    // scroll position is already 0 — the reset would only force a useless layout.
+    const coldStandaloneOpen = context.isStandalonePopUp && !context._cardsContainer;
+    if (!coldStandaloneOpen && !context._popupScrollResetFrame) {
         context._popupScrollResetFrame = requestAnimationFrame(() => {
             context._popupScrollResetFrame = null;
             resetPopupScroll(context);
@@ -1848,14 +2137,15 @@ export function openPopup(context, instant = false) {
         // Also set _standaloneShellCreating so _setInitialVisibility skips the
         // re-entrant openPopup call and lets the outer call handle the animation.
         if (!context._standaloneShellCreated && context.createStandaloneShell) {
-            context._standaloneShellCreated = true;
-            context._standaloneShellCreating = true;
-            const createShell = context.createStandaloneShell;
-            context.createStandaloneShell = null;
-            try {
-                createShell();
-            } finally {
-                context._standaloneShellCreating = false;
+            // Instant opens and centered switches need the shell synchronously;
+            // phased opens create it in the deferred open task so the header
+            // and structure build never runs inside the interaction frame. The
+            // flags are only flipped once the shell is actually created, so a
+            // canceled open leaves createStandaloneShell intact for the next one.
+            if (instant || context.editor || canUseInstantStandaloneSwitch(context)) {
+                runDeferredStandaloneShellCreate(context);
+            } else {
+                context._standaloneShellCreatePending = true;
             }
         }
         openStandalonePopup(context, instant);

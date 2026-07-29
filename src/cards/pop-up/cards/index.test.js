@@ -3,11 +3,27 @@ import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 const createCardElements = jest.fn();
 const removeCardElements = jest.fn();
 const updateCardElements = jest.fn();
+const createCardElementsProgressively = jest.fn((context, onDone) => {
+    createCardElements(context);
+    onDone();
+});
+const removeCardElementsProgressively = jest.fn((context, onDone) => {
+    removeCardElements(context);
+    onDone();
+});
+const settleProgressiveCardWork = jest.fn();
+const resumeCardHydrationProgressively = jest.fn((context, onDone) => {
+    if (typeof onDone === 'function') onDone();
+});
 
 jest.unstable_mockModule('./create.js', () => ({
     createCardElements,
     removeCardElements,
     updateCardElements,
+    createCardElementsProgressively,
+    removeCardElementsProgressively,
+    resumeCardHydrationProgressively,
+    settleProgressiveCardWork,
 }));
 
 const {

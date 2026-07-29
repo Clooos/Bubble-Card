@@ -7,7 +7,7 @@ import { updateThemeBackgroundColor } from './cards/pop-up/backdrop.js';
 import { stopTimerInterval } from './tools/utils.js';
 import { cleanupScrollingEffects } from './tools/text-scrolling.js';
 import { getEntitySuggestion } from './tools/entity-suggestion.js';
-import { registerPopupContext } from './cards/pop-up/helpers.js';
+import { registerPopupContext, shouldHoldDashboardHassUpdate } from './cards/pop-up/helpers.js';
 import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
 import { registerForIconRefresh, unregisterForIconRefresh } from './tools/icon.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
@@ -191,6 +191,14 @@ class BubbleCard extends HTMLElement {
       createBubbleDefaultColor();
     }
     this._hass = hass;
+
+    // While a pop-up open is in flight behind a covering backdrop, dashboard
+    // cards hold their update (the fresh hass is already stored above) and
+    // flush progressively once the open settles.
+    if (shouldHoldDashboardHassUpdate(this)) {
+      return;
+    }
+
     this.updateBubbleCard();
 
     if (this.isConnected && this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {

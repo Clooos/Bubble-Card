@@ -8,6 +8,18 @@ const toggleBodyScroll = jest.fn();
 const handlePopUpCards = jest.fn();
 const setStandalonePopUpCardsActive = jest.fn();
 const suspendStandalonePopUpCards = jest.fn();
+// Default progressive mocks behave synchronously: the build/teardown timing
+// itself is covered by dedicated tests that override these per-test.
+const buildStandalonePopUpCardsProgressively = jest.fn((context, onDone) => {
+    handlePopUpCards(context);
+    onDone();
+});
+const suspendStandalonePopUpCardsProgressively = jest.fn((context, onDone) => {
+    suspendStandalonePopUpCards(context);
+    onDone();
+});
+const settleStandaloneCardWork = jest.fn();
+const resumeStandaloneCardHydration = jest.fn();
 const appendLegacyPopup = jest.fn();
 const displayLegacyPopupContent = jest.fn();
 const hideLegacyPopupContent = jest.fn();
@@ -120,6 +132,10 @@ jest.unstable_mockModule('./cards/index.js', () => ({
     handlePopUpCards,
     setStandalonePopUpCardsActive,
     suspendStandalonePopUpCards,
+    buildStandalonePopUpCardsProgressively,
+    suspendStandalonePopUpCardsProgressively,
+    settleStandaloneCardWork,
+    resumeStandaloneCardHydration,
 }));
 
 jest.unstable_mockModule('./legacy.js', () => ({
@@ -136,15 +152,34 @@ jest.unstable_mockModule('./styles.css', () => ({
     default: '',
 }));
 
-const { cleanupPopupRuntime, closePopup, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
+const { cleanupPopupRuntime, closePopup, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
 
 let rafCallbacks;
 let nextRafId;
 
 function flushRafQueue() {
+    // Browser-faithful ordering: 0ms macrotasks queued before the next frame
+    // (the deferred heavy-open task, progressive card steps) run before that
+    // frame's animation-frame callbacks.
+    jest.advanceTimersByTime(0);
     const callbacks = [...rafCallbacks.values()];
     rafCallbacks.clear();
     callbacks.forEach((callback) => callback());
+}
+
+// A closed standalone shell is detached from the DOM, so the open sequence
+// paints the closed state during prime frames (#2548), then re-enables shell
+// transitions one frame before the flip (older WebKit requires the transition
+// to be active at the previous style resolution).
+function flushStandaloneClosedStatePrimeFrame() {
+    flushRafQueue(); // closed-state paint frame
+    flushRafQueue(); // transition-restore frame
+}
+
+// The heavy open work (shell creation/refresh, card build) runs in a 0ms
+// macrotask after the tap task painted the closed state.
+function flushHeavyOpenTask() {
+    jest.advanceTimersByTime(0);
 }
 
 function dispatchTransformTransitionEnd(element) {
@@ -285,15 +320,30 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        // Interaction frame: phase 1 inline — setup (listeners, color, display).
-        // Backdrop is deferred to phase 2 so the interaction task stays short.
+        // Interaction frame: only the closed-state paint. All heavy work is
+        // deferred so the tap task stays minimal.
         expect(showBackdrop).not.toHaveBeenCalled();
-        expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, true);
+        expect(setStandalonePopUpCardsActive).not.toHaveBeenCalled();
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(toggleBodyScroll).not.toHaveBeenCalled();
+        expect(context.popUp.classList.contains('is-popup-closed')).toBe(true);
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
-        // RAF1 (phase 2): backdrop + transition start. Card sync is deferred until after the transition.
+        // Deferred heavy-open task: backdrop feedback first, then shell
+        // refresh + card work, all off the tap task.
+        flushHeavyOpenTask();
+
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
+        expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, true);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        // RAF1: prime frame, the browser paints the closed state.
+        flushStandaloneClosedStatePrimeFrame();
+
+        expect(context.popUp.classList.contains('is-popup-closed')).toBe(true);
+
+        // RAF2 (phase 2): transition start; the backdrop is not re-shown.
         flushRafQueue();
 
         expect(showBackdrop).toHaveBeenCalledTimes(1);
@@ -332,6 +382,7 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
 
         openPopup(context);
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2, arms the transition fallback timer
 
         jest.advanceTimersByTime(359);
@@ -382,11 +433,13 @@ describe('standalone popup lifecycle', () => {
         context._cardsContainer = {};
 
         openPopup(context);
+        flushHeavyOpenTask();
 
-        // Phase 1 runs inline and reconciles the existing DOM immediately.
+        // The deferred open task reconciles the existing DOM before phase 2.
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — animation starts
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
@@ -424,6 +477,7 @@ describe('standalone popup lifecycle', () => {
         expect(context.sectionRowContainer.style.position).toBe('absolute');
         expect(context.style.display).toBe('flex');
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — animation start
         dispatchTransformTransitionEnd(context.popUp);
 
@@ -451,11 +505,13 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
 
         openPopup(context);
+        flushHeavyOpenTask();
 
-        // Phase 1 runs inline — default mode restores beta.4 behavior and primes content before open.
+        // Default mode still primes content before the open transition.
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — transition start
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
@@ -476,10 +532,12 @@ describe('standalone popup lifecycle', () => {
         context._managedCards = [createSearchNode({ shadowRoot: cardShadowRoot })];
 
         openPopup(context);
+        flushHeavyOpenTask();
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(scrollSpy).not.toHaveBeenCalled();
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — transition start
 
         dispatchTransformTransitionEnd(context.popUp);
@@ -488,7 +546,8 @@ describe('standalone popup lifecycle', () => {
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(scrollSpy).not.toHaveBeenCalled();
 
-        flushRafQueue(); // post-open content wake
+        // The wake runs at idle time (timeout fallback without requestIdleCallback).
+        jest.advanceTimersByTime(250);
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(scrollSpy).toHaveBeenCalledTimes(1);
@@ -524,6 +583,7 @@ describe('standalone popup lifecycle', () => {
 
         expect(handlePopUpCards).not.toHaveBeenCalled();
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue();
         dispatchTransformTransitionEnd(context.popUp);
         flushRafQueue();
@@ -551,6 +611,7 @@ describe('standalone popup lifecycle', () => {
         expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — transition start; card sync deferred until after
 
         expect(handlePopUpCards).not.toHaveBeenCalled();
@@ -572,11 +633,13 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
 
         openPopup(context);
+        flushHeavyOpenTask();
 
-        // Phase 1 runs inline — non-default mode primes content before scheduling phase 2.
+        // Non-default mode still primes content before scheduling phase 2.
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — animation starts
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
@@ -589,10 +652,12 @@ describe('standalone popup lifecycle', () => {
         window.innerHeight = 844;
 
         openPopup(context);
+        flushHeavyOpenTask();
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — transition start
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
@@ -603,10 +668,12 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
 
         openPopup(context);
+        flushHeavyOpenTask();
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — animation starts
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
@@ -692,6 +759,7 @@ describe('standalone popup lifecycle', () => {
         openPopup(context);
         flushRafQueue();
         flushRafQueue();
+        flushRafQueue(); // transition-restore frame, then phase 2
         dispatchTransformTransitionEnd(context.popUp);
         flushRafQueue();
 
@@ -709,7 +777,8 @@ describe('standalone popup lifecycle', () => {
         expect(showBackdrop).not.toHaveBeenCalled();
         expect(toggleBodyScroll).toHaveBeenCalledWith(false);
 
-        flushRafQueue(); // phase 2 — backdrop + animation start (phase 1 runs inline)
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2 — backdrop + animation start
 
         expect(showBackdrop).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
@@ -745,6 +814,7 @@ describe('standalone popup lifecycle', () => {
         });
 
         openPopup(context);
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — starts transition, card sync deferred (phase 1 inline)
         dispatchTransformTransitionEnd(context.popUp); // finalize → schedules card sync
         flushRafQueue(); // transition-end callback
@@ -760,6 +830,7 @@ describe('standalone popup lifecycle', () => {
         jest.clearAllMocks();
 
         openPopup(context);
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — transition starts (phase 1 inline)
         dispatchTransformTransitionEnd(context.popUp); // finalize → schedules card sync
         flushRafQueue(); // transition-end callback
@@ -782,9 +853,355 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        // Phase 1 is inline — shell refresh runs immediately in the interaction frame.
+        // The shell refresh is deferred off the interaction frame.
+        expect(context.refreshPopupShell).not.toHaveBeenCalled();
+
+        flushHeavyOpenTask();
+
         expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
         expect(context._standaloneNeedsShellRefresh).toBe(false);
+    });
+
+    // #2548 — a re-attached shell has no rendered closed state to transition from.
+    test('paints the closed state for a frame before flipping a re-attached shell open', () => {
+        const context = createStandaloneContext({ popup_mode: 'fit-content' });
+        usedContexts.push(context);
+
+        const parent = createMockContainer();
+        context._standalonePopUpParent = parent;
+
+        openPopup(context);
+
+        // Phase 1 re-attaches the shell and leaves it in its closed position.
+        expect(parent.appendChild).toHaveBeenCalledWith(context.popUp);
+        expect(context.popUp.classList.contains('is-popup-closed')).toBe(true);
+        expect(context.popUp.classList.contains('is-popup-opened')).toBe(false);
+
+        // Prime frame: the closed state is still the one the browser resolves.
+        flushRafQueue();
+
+        expect(context.popUp.classList.contains('is-popup-closed')).toBe(true);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        // Transition-restore frame: still closed, transitions re-enabled.
+        flushRafQueue();
+
+        expect(context.popUp.classList.contains('is-popup-closed')).toBe(true);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        // Phase 2 only now flips it open, so the transition has a start value.
+        flushRafQueue();
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+        expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
+    });
+
+    test('opens on the first frame when the shell is already rendered closed', () => {
+        const context = createStandaloneContext({ popup_mode: 'fit-content' });
+        usedContexts.push(context);
+
+        context.popUp.parentNode = createMockContainer([context.popUp]);
+        context._popupHostLayoutSuspended = false;
+
+        openPopup(context);
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // prime frame + transition restore (single-frame prime)
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // phase 2
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('paints the closed state for a frame when the host layout was suspended', () => {
+        const context = {
+            ...createStandaloneContext({ popup_mode: 'fit-content' }),
+            ...createStandaloneHost(),
+            style: { display: 'flex' },
+        };
+        usedContexts.push(context);
+
+        // Attached shell, but the hui-card wrapper is hidden: nothing was rendered.
+        context.popUp.parentNode = createMockContainer([context.popUp]);
+        suspendPopupHostLayout(context);
+
+        openPopup(context);
+        flushRafQueue();
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // second prime frame + restore scheduling
+        flushRafQueue(); // phase 2
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('primes the closed state without reading layout from the popup shell', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        context._standalonePopUpParent = createMockContainer();
+        context.popUp.getBoundingClientRect.mockClear();
+
+        openPopup(context);
+        flushRafQueue();
+        flushRafQueue();
+        flushRafQueue();
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+        expect(context.popUp.getBoundingClientRect).not.toHaveBeenCalled();
+    });
+
+    function createDashboardCard() {
+        return {
+            config: { card_type: 'button' },
+            editor: false,
+            isConnected: true,
+            closest: jest.fn(() => null),
+            updateBubbleCard: jest.fn(),
+        };
+    }
+
+    test('holds dashboard hass updates while a backdrop-covered open is in flight, then flushes one card per task', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const cardA = createDashboardCard();
+        const cardB = createDashboardCard();
+
+        openPopup(context);
+
+        // Gate armed: dashboard cards hold, pop-ups and popup content do not.
+        expect(shouldHoldDashboardHassUpdate(cardA)).toBe(true);
+        expect(shouldHoldDashboardHassUpdate(cardB)).toBe(true);
+        expect(shouldHoldDashboardHassUpdate({ ...createDashboardCard(), config: { card_type: 'pop-up' } })).toBe(false);
+        const insidePopupCard = createDashboardCard();
+        insidePopupCard.closest = jest.fn(() => context.popUp);
+        expect(shouldHoldDashboardHassUpdate(insidePopupCard)).toBe(false);
+
+        // Open completes: transition end → finalize → gate released.
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // finalize → completePopupOpen → release
+
+        expect(cardA.updateBubbleCard).not.toHaveBeenCalled();
+
+        // Flush drains one card per macrotask.
+        jest.advanceTimersToNextTimer();
+        const drainedAfterOneTick = cardA.updateBubbleCard.mock.calls.length + cardB.updateBubbleCard.mock.calls.length;
+        expect(drainedAfterOneTick).toBe(1);
+
+        jest.advanceTimersToNextTimer();
+        expect(cardA.updateBubbleCard).toHaveBeenCalledTimes(1);
+        expect(cardB.updateBubbleCard).toHaveBeenCalledTimes(1);
+    });
+
+    test('never arms the hass gate for hide_backdrop pop-ups', () => {
+        const context = createStandaloneContext({ hide_backdrop: true });
+        usedContexts.push(context);
+        const card = createDashboardCard();
+
+        openPopup(context);
+
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+        expect(card.updateBubbleCard).not.toHaveBeenCalled();
+    });
+
+    test('releases the hass gate when the popup closes before the open settles', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const card = createDashboardCard();
+
+        openPopup(context);
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
+
+        closePopup(context, true);
+
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+        jest.advanceTimersToNextTimer();
+        expect(card.updateBubbleCard).toHaveBeenCalledTimes(1);
+    });
+
+    test('disables shell transitions during the progressive build and restores them before phase 2', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        let buildDone = null;
+        buildStandalonePopUpCardsProgressively.mockImplementationOnce((ctx, onDone) => {
+            buildDone = onDone;
+        });
+
+        openPopup(context);
+
+        // Tap task: transitions off so the growing build never animates the
+        // percentage-based closed transform (visible top-edge peek otherwise).
+        expect(context.popUp.style.transition).toBe('none');
+
+        flushHeavyOpenTask();
+        expect(buildDone).not.toBeNull();
+        expect(context.popUp.style.transition).toBe('none');
+
+        buildDone();
+
+        // Transitions stay off through the prime frames: the closed state is
+        // painted at its final height with no animation possible.
+        expect(context.popUp.style.transition).toBe('none');
+
+        flushRafQueue(); // prime frame 1 — still off
+        expect(context.popUp.style.transition).toBe('none');
+
+        // Restore frame: transitions re-enabled one frame BEFORE the flip
+        // (older WebKit needs them active at the previous style resolution).
+        flushRafQueue();
+        expect(context.popUp.style.transition).toBe('');
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // phase 2 — the flip animates
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+    });
+
+    test('resumes fold-first card hydration once the open transition finishes', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2
+
+        expect(resumeStandaloneCardHydration).not.toHaveBeenCalled();
+
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // finalize
+
+        expect(resumeStandaloneCardHydration).toHaveBeenCalledWith(context, expect.any(Function));
+
+        // Hydration completion re-measures scrollability against full content.
+        context.elements.popUpContainer.scrollHeight = 900;
+        context.elements.popUpContainer.clientHeight = 400;
+        const onHydrationDone = resumeStandaloneCardHydration.mock.calls[0][1];
+        onHydrationDone();
+
+        expect(context.elements.popUpContainer.classList.contains('is-scrollable')).toBe(true);
+    });
+
+    test('refreshes the header on every open even without a pending shell refresh', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        context._standaloneNeedsShellRefresh = false;
+        context.refreshPopupHeader = jest.fn();
+        context.refreshPopupShell = jest.fn();
+
+        openPopup(context);
+        flushHeavyOpenTask();
+
+        expect(context.refreshPopupHeader).toHaveBeenCalledTimes(1);
+        expect(context.refreshPopupShell).not.toHaveBeenCalled();
+    });
+
+    test('keeps the deferred shell factory intact when an open is canceled before the heavy task', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const createShell = jest.fn();
+        context._standaloneShellCreated = false;
+        context.createStandaloneShell = createShell;
+
+        openPopup(context);
+
+        // Tap task: shell creation deferred, factory untouched.
+        expect(createShell).not.toHaveBeenCalled();
+        expect(context.createStandaloneShell).toBe(createShell);
+        expect(context._standaloneShellCreated).toBe(false);
+
+        // The open is canceled before the heavy task ran (e.g. instant close).
+        closePopup(context, true);
+        jest.advanceTimersByTime(1);
+
+        expect(createShell).not.toHaveBeenCalled();
+        expect(context.createStandaloneShell).toBe(createShell);
+        expect(context._standaloneShellCreated).toBe(false);
+
+        // The next open can still create the shell.
+        openPopup(context);
+        flushHeavyOpenTask();
+
+        expect(createShell).toHaveBeenCalledTimes(1);
+        expect(context._standaloneShellCreated).toBe(true);
+        expect(context.createStandaloneShell).toBeNull();
+    });
+
+    test('skips the shell detach when the popup reopens during the progressive close teardown', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const parent = createMockContainer([context.popUp]);
+        context.popUp.parentNode = parent;
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // finalize
+
+        // Capture the teardown completion instead of running it synchronously.
+        let teardownDone = null;
+        suspendStandalonePopUpCardsProgressively.mockImplementationOnce((ctx, onDone) => {
+            teardownDone = onDone;
+        });
+
+        closePopup(context);
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // finalize close
+        flushRafQueue(); // post-close cleanup starts the progressive teardown
+
+        expect(teardownDone).not.toBeNull();
+        expect(parent.removeChild).not.toHaveBeenCalled();
+
+        // Reopen while the teardown is still in flight: clearAllTimeouts must
+        // settle the in-flight card work synchronously.
+        settleStandaloneCardWork.mockClear();
+        openPopup(context);
+
+        expect(settleStandaloneCardWork).toHaveBeenCalledWith(context);
+
+        // The late teardown completion must not detach the reopened shell.
+        teardownDone();
+        expect(parent.removeChild).not.toHaveBeenCalled();
+    });
+
+    test('skips the deferred scroll reset on cold standalone opens', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        let scrollWrites = 0;
+        Object.defineProperty(context.elements.popUpContainer, 'scrollTop', {
+            configurable: true,
+            get() { return 0; },
+            set() { scrollWrites += 1; },
+        });
+
+        // Cold open: content is rebuilt from scratch, scroll is already 0.
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushRafQueue();
+        flushRafQueue();
+        expect(scrollWrites).toBe(0);
+
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        closePopup(context, true);
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        flushRafQueue();
+
+        // Retained content (background_update-style): the reset still runs.
+        context._cardsContainer = {};
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushRafQueue();
+        expect(scrollWrites).toBeGreaterThan(0);
     });
 
     test('waits an extra routed frame before animating a cold default bottom-sheet standalone open', () => {
@@ -805,21 +1222,25 @@ describe('standalone popup lifecycle', () => {
         expect(showBackdrop).not.toHaveBeenCalled();
         expect(context._popupOpenInProgress).not.toBe(true);
 
-        flushRafQueue(); // routed open callback — phase 1 now runs here
+        flushRafQueue(); // routed open callback — the tap frame only paints the closed state
+
+        expect(context.refreshPopupShell).not.toHaveBeenCalled();
+        expect(context._popupOpenInProgress).toBe(true);
+        expect(context.popUp.classList.contains('is-popup-closed')).toBe(true);
+
+        flushRafQueue(); // deferred heavy-open task + first settle frame
 
         expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
         expect(setStandalonePopUpCardsActive).toHaveBeenCalledWith(context, true);
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
-        expect(showBackdrop).not.toHaveBeenCalled();
-        expect(context._popupOpenInProgress).toBe(true);
+        expect(showBackdrop).toHaveBeenCalledTimes(1); // early feedback
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
-        flushRafQueue(); // settle frame — popup remains closed while cold content settles
+        flushRafQueue(); // transition-restore frame
 
-        expect(showBackdrop).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
-        flushRafQueue(); // phase 2 — backdrop + transition start
+        flushRafQueue(); // phase 2 — transition start, backdrop not re-shown
 
         expect(showBackdrop).toHaveBeenCalledTimes(1);
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
@@ -870,15 +1291,20 @@ describe('standalone popup lifecycle', () => {
         window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
         window.dispatchEvent(new Event('location-changed'));
 
-        flushRafQueue(); // routed open callback — phase 1 now runs here
+        flushRafQueue(); // routed open callback — closed-state paint only
 
-        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
         expect(showBackdrop).not.toHaveBeenCalled();
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
-        flushRafQueue(); // settle frame
+        flushRafQueue(); // deferred heavy-open task + first settle frame
 
-        expect(showBackdrop).not.toHaveBeenCalled();
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(showBackdrop).toHaveBeenCalledTimes(1); // early feedback
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        flushRafQueue(); // transition-restore frame
+
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
         flushRafQueue(); // phase 2
@@ -898,29 +1324,32 @@ describe('standalone popup lifecycle', () => {
         window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
         window.dispatchEvent(new Event('location-changed'));
 
-        flushRafQueue(); // routed open callback — phase 1
+        flushRafQueue(); // routed open callback — closed-state paint only
 
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
         expect(showBackdrop).not.toHaveBeenCalled();
+
+        flushRafQueue(); // heavy-open task + settle frame 1
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+        expect(showBackdrop).toHaveBeenCalledTimes(1); // early feedback
 
         context.elements.popUpContainer.scrollHeight = 100;
-        flushRafQueue(); // settle frame 1 — signature changed, keep waiting
+        flushRafQueue(); // settle frame 2 — signature changed, extra settle frame scheduled
 
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
-        expect(showBackdrop).not.toHaveBeenCalled();
 
-        flushRafQueue(); // settle frame 2 — minimum wait satisfied, extra settle frame scheduled
+        flushRafQueue(); // extra settle frame stable
 
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
-        expect(showBackdrop).not.toHaveBeenCalled();
 
-        flushRafQueue(); // phase 2 — backdrop + transition start
+        flushRafQueue(); // transition-restore frame, then phase 2
 
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
         expect(showBackdrop).toHaveBeenCalledTimes(1);
     });
 
-    test('shows the backdrop before running deferred standalone shell refresh work', () => {
+    test('shows the backdrop as first feedback, before deferred shell refresh work', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
         context._standaloneNeedsShellRefresh = true;
@@ -930,14 +1359,20 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        // Phase 1 is inline — shell refresh runs in the interaction frame, backdrop deferred to phase 2.
+        // Tap task: nothing yet — feedback comes with the deferred task.
         expect(showBackdrop).not.toHaveBeenCalled();
-        expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
 
-        flushRafQueue(); // phase 2 — backdrop
+        flushHeavyOpenTask();
+
+        // Backdrop first (instant perceived response), then the shell refresh.
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
+        expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
+        expect(showBackdrop.mock.invocationCallOrder[0]).toBeLessThan(context.refreshPopupShell.mock.invocationCallOrder[0]);
+
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2 — backdrop is not re-shown
 
         expect(showBackdrop).toHaveBeenCalledTimes(1);
-        expect(context.refreshPopupShell.mock.invocationCallOrder[0]).toBeLessThan(showBackdrop.mock.invocationCallOrder[0]);
     });
 
     test('primes the standalone popup header before deferred shell refresh work', () => {
@@ -950,17 +1385,18 @@ describe('standalone popup lifecycle', () => {
         });
 
         openPopup(context);
+        flushHeavyOpenTask();
 
-        // Phase 1 is inline — header then shell refresh in interaction frame, backdrop deferred to phase 2.
-        expect(showBackdrop).not.toHaveBeenCalled();
+        // Backdrop feedback first, then header, then shell refresh.
+        expect(showBackdrop).toHaveBeenCalledTimes(1);
         expect(context.refreshPopupHeader).toHaveBeenCalledTimes(1);
         expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
         expect(context.refreshPopupHeader.mock.invocationCallOrder[0]).toBeLessThan(context.refreshPopupShell.mock.invocationCallOrder[0]);
 
-        flushRafQueue(); // phase 2 — backdrop
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2 — backdrop is not re-shown
 
         expect(showBackdrop).toHaveBeenCalledTimes(1);
-        expect(context.refreshPopupShell.mock.invocationCallOrder[0]).toBeLessThan(showBackdrop.mock.invocationCallOrder[0]);
     });
 
     test('refreshes the legacy popup header before showing popup content', () => {
@@ -1092,7 +1528,7 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.classList.contains('is-closing')).toBe(true);
     });
 
-    test('still forces a standalone close reflow when the popup visual state is stale', () => {
+    test('re-asserts the open base state without a reflow when the popup visual state is stale', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
 
@@ -1102,10 +1538,17 @@ describe('standalone popup lifecycle', () => {
 
         closePopup(context);
 
+        expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
+        expect(context.popUp.classList.contains('is-popup-closed')).toBe(false);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+        expect(context.popUp.classList.contains('is-closing')).toBe(true);
+
+        // The stale-state branch used to schedule a getBoundingClientRect() one frame
+        // later. It ran after the class flip, so it could not prime anything — it only
+        // forced a layout in the first frame of the close transition.
         flushRafQueue();
 
-        expect(context.popUp.getBoundingClientRect).toHaveBeenCalledTimes(1);
-        expect(context.popUp.classList.contains('is-closing')).toBe(true);
+        expect(context.popUp.getBoundingClientRect).not.toHaveBeenCalled();
     });
 
     test('force-closes a runtime-active standalone popup when hash removal finds a stale closed class', () => {
@@ -1177,6 +1620,7 @@ describe('standalone popup lifecycle', () => {
 
         expect(showBackdrop).toHaveBeenCalledTimes(1);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase2: card restore + is-opening
 
         expect(contextB.popUp.classList.contains('is-opening')).toBe(true);
@@ -1222,6 +1666,7 @@ describe('standalone popup lifecycle', () => {
         window.dispatchEvent(new Event('location-changed'));
 
         flushRafQueue();
+        flushHeavyOpenTask();
 
         expect(handlePopUpCards).toHaveBeenCalledWith(contextA);
         expect(suspendStandalonePopUpCards).not.toHaveBeenCalledWith(contextA);
@@ -1243,7 +1688,8 @@ describe('standalone popup lifecycle', () => {
         window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-b');
         window.dispatchEvent(new Event('location-changed'));
 
-        flushRafQueue(); // switch handoff frame
+        flushRafQueue(); // switch handoff frame — closed-state paint only
+        flushHeavyOpenTask();
 
         expect(contextB.popUp.classList.contains('is-popup-opened')).toBe(false);
         expect(contextB.popUp.classList.contains('is-opening')).toBe(false);
@@ -1251,6 +1697,7 @@ describe('standalone popup lifecycle', () => {
         expect(showBackdrop).not.toHaveBeenCalled();
         expect(handlePopUpCards).toHaveBeenCalledWith(contextB);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2
 
         expect(showBackdrop).toHaveBeenCalledTimes(1);
@@ -1280,6 +1727,7 @@ describe('standalone popup lifecycle', () => {
         context._cachedPopupScrollableState = true;
 
         openPopup(context);
+        flushHeavyOpenTask();
 
         expect(layoutReads).toBe(2);
         expect(context.elements.popUpContainer.classList.contains('is-scrollable')).toBe(true);
@@ -1301,6 +1749,10 @@ describe('standalone popup lifecycle', () => {
 
         // Phase 1 runs inline — cold default mode defers content, so no scrollability reflow.
         openPopup(context);
+        expect(layoutReads).toBe(0);
+
+        // The prime frame paints the closed state — still no layout read.
+        flushStandaloneClosedStatePrimeFrame();
         expect(layoutReads).toBe(0);
 
         // Phase 2 starts the animation — still no layout read before the paint.
@@ -1363,6 +1815,7 @@ describe('standalone popup lifecycle', () => {
         expect(contextB.popUp.classList.contains('is-popup-opened')).toBe(false);
         expect(contextB.popUp.classList.contains('is-opening')).toBe(false);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase2
 
         expect(contextB.popUp.classList.contains('is-opening')).toBe(true);
@@ -1387,11 +1840,13 @@ describe('standalone popup lifecycle', () => {
         window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-b');
         window.dispatchEvent(new Event('location-changed'));
 
-        flushRafQueue(); // switch handoff RAF — phase 1 inline, scroll state read with warm content
+        flushRafQueue(); // switch handoff RAF — closed-state paint
+        flushHeavyOpenTask(); // heavy-open task reads the scroll state with warm content
 
         expect(contextB.elements.popUpContainer.classList.contains('is-scrollable')).toBe(true);
         expect(contextB.popUp.classList.contains('is-opening')).toBe(false);
 
+        flushStandaloneClosedStatePrimeFrame();
         flushRafQueue(); // phase 2 — animation starts
 
         expect(contextB.popUp.classList.contains('is-opening')).toBe(true);
@@ -1491,6 +1946,7 @@ describe('standalone popup lifecycle', () => {
         window.dispatchEvent(new Event('location-changed'));
         flushRafQueue();
         flushRafQueue();
+        flushRafQueue(); // transition-restore frame, then phase 2
         dispatchTransformTransitionEnd(context.popUp);
         flushRafQueue();
 
@@ -1519,6 +1975,7 @@ describe('standalone popup lifecycle', () => {
 
         flushRafQueue(); // phase 1
         flushRafQueue(); // settle frame for a cold routed bottom-sheet open
+        flushRafQueue(); // transition-restore frame
         flushRafQueue(); // phase 2
 
         expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);

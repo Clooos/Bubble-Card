@@ -147,6 +147,300 @@ export function createCardElements(context) {
     _setupCardVisibilityObserver(context);
 }
 
+// Progressive card work: a pop-up open builds its child cards one per
+// macrotask, and a pop-up close tears them down the same way, so no single
+// task holds the main thread for more than roughly one card's cost. Only one
+// progressive job can be in flight per context; `settleProgressiveCardWork`
+// cancels it and settles the card state to clean-cold synchronously.
+// Number of progressive builds currently in flight (module-wide): an open's
+// build takes priority over any close teardown running at the same time.
+let activeProgressiveBuilds = 0;
+
+// Per-macrotask time budget: fast devices fit the whole job in one or two
+// tasks (no added latency), slow devices split at card boundaries so no task
+// exceeds roughly one card's cost beyond the budget.
+const progressiveStepBudgetMs = 24;
+
+// Fold-first hydration: pop-ups at least this big render only the first
+// `foldFirstHydratedHead` cards before the open transition. The rest start as
+// placeholder cells carrying their grid spans from config (no layout read),
+// then hydrate one budgeted step at a time after the transition — or
+// immediately when one scrolls into view. The threshold is high enough that
+// eligible pop-ups always exceed their max height, so the shell geometry
+// never visibly changes as placeholders fill in.
+const foldFirstHydrationThreshold = 24;
+const foldFirstHydratedHead = 14;
+
+// Post-open hydration pacing: a gap between steps keeps every frame breathable
+// (scroll must stay fluid on low-end devices), and any interaction with the
+// pop-up holds the next step until the user is quiet again.
+const hydrationStepGapMs = 34;
+const hydrationInteractionHoldMs = 280;
+
+function _clearProgressiveCardWork(context) {
+    const work = context._progressiveCardWork;
+    if (!work) {
+        return;
+    }
+
+    clearTimeout(work.timeout);
+    work.cleanup?.();
+    context._progressiveCardWork = null;
+}
+
+export function settleProgressiveCardWork(context) {
+    if (!context?._progressiveCardWork) {
+        return;
+    }
+
+    const workType = context._progressiveCardWork.type;
+    _clearProgressiveCardWork(context);
+
+    // Hydration is additive work on a live pop-up: canceling it must not
+    // destroy the rendered content. Remaining placeholders hydrate on
+    // visibility, on the next resume, or fall with the close teardown.
+    if (workType === 'hydrate') {
+        return;
+    }
+
+    if (workType === 'build') {
+        activeProgressiveBuilds = Math.max(0, activeProgressiveBuilds - 1);
+    }
+    removeCardElements(context);
+}
+
+// Build popup child cards one per macrotask. The pop-up shell is painted in
+// its closed state during the build, so nothing is visible until the open
+// transition starts with the full content in place.
+export function createCardElementsProgressively(context, onDone) {
+    settleProgressiveCardWork(context);
+
+    const cards = context.config.cards;
+    const popUpContainer = context.elements?.popUpContainer;
+    const isEditMode = context.editor || context.detectedEditor;
+
+    // Anything unusual falls back to the synchronous builder.
+    if (!Array.isArray(cards) || !popUpContainer || isEditMode || context._cardsContainer || context._sortableEl) {
+        createCardElements(context);
+        onDone();
+        return;
+    }
+
+    if (!context._cardsStyleTag) {
+        context._cardsStyleTag = createElement('style');
+        context._cardsStyleTag.textContent = cardsStyles;
+        context.popUp.appendChild(context._cardsStyleTag);
+    }
+
+    context._managedCards = [];
+    context._cardWrappers = [];
+    context._renderedItems = [];
+    context._lastCardConfigRefs = [];
+    context._lastRenderedCardConfigs = [];
+    context._lastCardsEditMode = false;
+
+    popUpContainer.querySelector('.bubble-cards-container')?.remove();
+    popUpContainer.querySelector('.bubble-cards-editor-container')?.remove();
+
+    const cardsContainer = createElement('div', 'bubble-cards-container bubble-cards-grid-container');
+    popUpContainer.appendChild(cardsContainer);
+    context._cardsContainer = cardsContainer;
+    context._renderedItems.push(cardsContainer);
+
+    const work = { type: 'build', timeout: null };
+    context._progressiveCardWork = work;
+    activeProgressiveBuilds += 1;
+
+    const hydratedHead = cards.length >= foldFirstHydrationThreshold ? foldFirstHydratedHead : cards.length;
+
+    let index = 0;
+    const step = () => {
+        if (context._progressiveCardWork !== work) {
+            return;
+        }
+
+        if (index >= hydratedHead) {
+            // Below-the-fold cards start as placeholder cells: grid spans come
+            // from config, so the scroll geometry is roughly right at no cost.
+            const pendingHydration = [];
+            for (; index < cards.length; index++) {
+                const cardConfig = cards[index];
+                const cardWrapper = createElement('div', 'card');
+                _applyCardWrapperLayout(null, cardWrapper, cardConfig);
+
+                context._managedCards.push(null);
+                context._cardWrappers.push(cardWrapper);
+                context._lastCardConfigRefs.push(cardConfig);
+                context._lastRenderedCardConfigs.push(null);
+                cardsContainer.appendChild(cardWrapper);
+                pendingHydration.push(context._cardWrappers.length - 1);
+            }
+            context._pendingCardHydration = pendingHydration.length > 0 ? pendingHydration : null;
+
+            context._progressiveCardWork = null;
+            activeProgressiveBuilds = Math.max(0, activeProgressiveBuilds - 1);
+            _setupCardVisibilityObserver(context);
+            onDone();
+            return;
+        }
+
+        const stepStart = Date.now();
+        do {
+            const cardConfig = cards[index];
+            index += 1;
+
+            const cardEl = _createHuiCard(cardConfig, context, false);
+            if (cardEl) {
+                const cardWrapper = createElement('div', 'card');
+                cardWrapper.appendChild(cardEl);
+                _applyCardWrapperLayout(cardEl, cardWrapper, cardConfig);
+                _bindCardLayoutUpdates(cardEl, cardWrapper, context, context._managedCards.length);
+
+                context._managedCards.push(cardEl);
+                context._cardWrappers.push(cardWrapper);
+                context._lastCardConfigRefs.push(cardConfig);
+                context._lastRenderedCardConfigs.push(cardEl.config);
+                cardsContainer.appendChild(cardWrapper);
+            }
+        } while (index < hydratedHead && (Date.now() - stepStart) < progressiveStepBudgetMs);
+
+        work.timeout = setTimeout(step, 0);
+    };
+
+    work.timeout = setTimeout(step, 0);
+}
+
+// Fill one placeholder cell with its real card.
+function _hydrateCardAt(context, index) {
+    const cards = context.config?.cards;
+    const cardWrapper = context._cardWrappers?.[index];
+    if (!Array.isArray(cards) || !cardWrapper || context._managedCards?.[index]) {
+        return false;
+    }
+
+    const cardConfig = cards[index];
+    const cardEl = _createHuiCard(cardConfig, context, false);
+    if (!cardEl) {
+        return false;
+    }
+
+    cardWrapper.appendChild(cardEl);
+    _applyCardWrapperLayout(cardEl, cardWrapper, cardConfig);
+    _bindCardLayoutUpdates(cardEl, cardWrapper, context, index);
+    context._managedCards[index] = cardEl;
+    context._lastRenderedCardConfigs[index] = cardEl.config;
+    context._registerCardVisibility?.(cardWrapper, cardEl);
+    return true;
+}
+
+// Hydrate the remaining placeholder cells, one budgeted step per macrotask.
+// Called once the open transition has finished.
+export function resumeCardHydrationProgressively(context, onDone) {
+    const done = typeof onDone === 'function' ? onDone : () => {};
+    const pending = context._pendingCardHydration;
+    if (!Array.isArray(pending) || pending.length === 0 || context._progressiveCardWork) {
+        done();
+        return;
+    }
+
+    const work = { type: 'hydrate', timeout: null };
+    context._progressiveCardWork = work;
+
+    // Any interaction with the pop-up wins over hydration: hold the next step
+    // until the user has been quiet for a moment.
+    let holdUntil = 0;
+    const noteInteraction = () => {
+        holdUntil = Date.now() + hydrationInteractionHoldMs;
+    };
+    const container = context.elements?.popUpContainer;
+    const interactionEvents = ['touchstart', 'wheel', 'scroll'];
+    if (container && typeof container.addEventListener === 'function') {
+        interactionEvents.forEach((type) => container.addEventListener(type, noteInteraction, { passive: true }));
+        work.cleanup = () => {
+            interactionEvents.forEach((type) => container.removeEventListener(type, noteInteraction));
+        };
+    }
+
+    const step = () => {
+        if (context._progressiveCardWork !== work) {
+            return;
+        }
+
+        if (Date.now() < holdUntil) {
+            work.timeout = setTimeout(step, hydrationInteractionHoldMs);
+            return;
+        }
+
+        const stepStart = Date.now();
+        while (pending.length > 0 && (Date.now() - stepStart) < progressiveStepBudgetMs) {
+            _hydrateCardAt(context, pending.shift());
+        }
+
+        if (pending.length === 0) {
+            work.cleanup?.();
+            context._progressiveCardWork = null;
+            context._pendingCardHydration = null;
+            // The content height changed: any measured scrollability is stale.
+            context._cachedPopupScrollableState = undefined;
+            done();
+            return;
+        }
+
+        work.timeout = setTimeout(step, hydrationStepGapMs);
+    };
+
+    work.timeout = setTimeout(step, hydrationStepGapMs);
+}
+
+// Remove popup child cards one per macrotask, last to first. Call with the
+// host layout already suspended so the removals never relayout visible
+// content; the disconnect callbacks are what this spreads out.
+export function removeCardElementsProgressively(context, onDone) {
+    settleProgressiveCardWork(context);
+    _teardownCardVisibilityObserver(context);
+
+    const wrappers = Array.isArray(context._cardWrappers) ? [...context._cardWrappers] : [];
+    if (wrappers.length === 0) {
+        removeCardElements(context);
+        onDone();
+        return;
+    }
+
+    const work = { type: 'teardown', timeout: null };
+    context._progressiveCardWork = work;
+
+    let index = wrappers.length - 1;
+    const step = () => {
+        if (context._progressiveCardWork !== work) {
+            return;
+        }
+
+        // An open is building its content right now: yield, the teardown is
+        // invisible (suspended host) and nothing depends on its pace.
+        if (activeProgressiveBuilds > 0) {
+            work.timeout = setTimeout(step, 120);
+            return;
+        }
+
+        if (index < 0) {
+            context._progressiveCardWork = null;
+            removeCardElements(context);
+            onDone();
+            return;
+        }
+
+        const stepStart = Date.now();
+        do {
+            wrappers[index]?.remove?.();
+            index -= 1;
+        } while (index >= 0 && (Date.now() - stepStart) < progressiveStepBudgetMs);
+
+        work.timeout = setTimeout(step, 0);
+    };
+
+    work.timeout = setTimeout(step, 0);
+}
+
 // Sync rendered popup child cards with hass and config.
 export function updateCardElements(context) {
     const cards = context.config.cards;
@@ -232,6 +526,7 @@ export function removeCardElements(context) {
     context._cardWrappers = [];
     context._lastCardConfigRefs = [];
     context._lastRenderedCardConfigs = [];
+    context._pendingCardHydration = null;
 }
 
 // Create a hui-card from a popup child config.
@@ -414,13 +709,30 @@ function _setupCardVisibilityObserver(context) {
 
     const offscreen = new Set();
     const wrapperToCard = new WeakMap();
+    const wrapperToIndex = new WeakMap();
 
     let observer;
     try {
         observer = new IntersectionObserver((entries) => {
             for (const entry of entries) {
                 const cardEl = wrapperToCard.get(entry.target);
-                if (!cardEl) continue;
+                if (!cardEl) {
+                    // Placeholder cell scrolled into view: hydrate it right
+                    // away instead of waiting for the post-open pass.
+                    const pending = context._pendingCardHydration;
+                    const index = wrapperToIndex.get(entry.target);
+                    if (entry.isIntersecting && Array.isArray(pending) && typeof index === 'number') {
+                        const at = pending.indexOf(index);
+                        if (at !== -1) {
+                            pending.splice(at, 1);
+                            _hydrateCardAt(context, index);
+                            if (pending.length === 0) {
+                                context._pendingCardHydration = null;
+                            }
+                        }
+                    }
+                    continue;
+                }
                 if (entry.isIntersecting) {
                     offscreen.delete(cardEl);
                     if (cardEl._bubbleHassPending && context._hass) {
@@ -445,8 +757,11 @@ function _setupCardVisibilityObserver(context) {
     for (let i = 0; i < wrappers.length; i++) {
         const wrapper = wrappers[i];
         const cardEl = managed[i];
-        if (!wrapper || !cardEl || typeof wrapper.appendChild !== 'function') continue;
-        wrapperToCard.set(wrapper, cardEl);
+        if (!wrapper || typeof wrapper.appendChild !== 'function') continue;
+        wrapperToIndex.set(wrapper, i);
+        if (cardEl) {
+            wrapperToCard.set(wrapper, cardEl);
+        }
         try {
             observer.observe(wrapper);
         } catch (_) {
@@ -456,6 +771,10 @@ function _setupCardVisibilityObserver(context) {
 
     context._cardVisibilityObserver = observer;
     context._offscreenPopupCards = offscreen;
+    // Late registration hook for cards hydrated after this setup ran.
+    context._registerCardVisibility = (wrapper, cardEl) => {
+        wrapperToCard.set(wrapper, cardEl);
+    };
 }
 
 function _teardownCardVisibilityObserver(context) {
@@ -468,4 +787,5 @@ function _teardownCardVisibilityObserver(context) {
         context._cardVisibilityObserver = null;
     }
     context._offscreenPopupCards = null;
+    context._registerCardVisibility = null;
 }

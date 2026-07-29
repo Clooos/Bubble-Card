@@ -8,11 +8,12 @@ jest.unstable_mockModule('./editor/index.js', () => ({
     createEditorCardElements: jest.fn(),
 }));
 
+const createElementMock = jest.fn();
 jest.unstable_mockModule('../../../tools/utils.js', () => ({
-    createElement: jest.fn(),
+    createElement: createElementMock,
 }));
 
-const { _isStandalonePopupCardConfig, updateCardElements } = await import('./create.js');
+const { _isStandalonePopupCardConfig, createCardElementsProgressively, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } = await import('./create.js');
 
 describe('_isStandalonePopupCardConfig', () => {
     test('detects standalone bubble pop-up child configs', () => {
@@ -250,5 +251,282 @@ describe('updateCardElements', () => {
         expect(cardElement._bubbleHassPending).toBe(true);
         expect(cardElement.requestUpdate).not.toHaveBeenCalled();
         expect(mountedCard.requestUpdate).not.toHaveBeenCalled();
+    });
+});
+
+describe('progressive card work', () => {
+    function createFakeElement(tag, className = '') {
+        const children = [];
+        const el = {
+            tag,
+            className,
+            children,
+            removed: false,
+            appendChild: jest.fn((child) => {
+                children.push(child);
+                return child;
+            }),
+            remove: jest.fn(() => {
+                el.removed = true;
+                // Each removal "costs" more than the step budget, so the
+                // progressive teardown splits at every card boundary.
+                jest.setSystemTime(Date.now() + 30);
+            }),
+            querySelector: jest.fn(() => null),
+            style: {
+                setProperty: jest.fn(),
+                removeProperty: jest.fn(),
+            },
+            classList: {
+                add: jest.fn(),
+                remove: jest.fn(),
+                toggle: jest.fn(),
+                contains: jest.fn(() => false),
+            },
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+        };
+        return el;
+    }
+
+    function createProgressiveContext(cardCount) {
+        return {
+            editor: false,
+            detectedEditor: false,
+            isStandalonePopUp: true,
+            _hass: { states: {} },
+            popUp: createFakeElement('div', 'bubble-pop-up'),
+            elements: { popUpContainer: createFakeElement('div', 'bubble-pop-up-container') },
+            config: {
+                cards: Array.from({ length: cardCount }, (_, i) => ({ type: 'button', entity: 'light.l' + i })),
+            },
+        };
+    }
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+        createElementMock.mockImplementation((tag, className) => createFakeElement(tag, className));
+        global.document = {
+            createElement: jest.fn(() => {
+                // Each card "costs" more than the step budget, so the
+                // progressive build splits at every card boundary.
+                jest.setSystemTime(Date.now() + 30);
+                const el = createFakeElement('hui-card');
+                el.load = jest.fn();
+                return el;
+            }),
+        };
+    });
+
+    afterEach(() => {
+        jest.useRealTimers();
+        delete global.document;
+    });
+
+    test('builds one card per macrotask and only then reports completion', () => {
+        const context = createProgressiveContext(3);
+        const onDone = jest.fn();
+
+        createCardElementsProgressively(context, onDone);
+
+        // The container exists immediately so the open sequence sees primed
+        // content, but no card has been built in the calling task.
+        expect(context._cardsContainer).toBeTruthy();
+        expect(context._cardWrappers).toHaveLength(0);
+        expect(onDone).not.toHaveBeenCalled();
+
+        jest.advanceTimersToNextTimer();
+        expect(context._cardWrappers).toHaveLength(1);
+        expect(onDone).not.toHaveBeenCalled();
+
+        jest.advanceTimersToNextTimer();
+        expect(context._cardWrappers).toHaveLength(2);
+
+        jest.advanceTimersToNextTimer();
+        expect(context._cardWrappers).toHaveLength(3);
+        expect(onDone).not.toHaveBeenCalled();
+
+        // Final step: bookkeeping completes and the caller is notified.
+        jest.advanceTimersToNextTimer();
+        expect(onDone).toHaveBeenCalledTimes(1);
+        expect(context._progressiveCardWork).toBeNull();
+        expect(context._managedCards).toHaveLength(3);
+    });
+
+    test('settling an in-flight build clears the partial content and never completes it', () => {
+        const context = createProgressiveContext(3);
+        const onDone = jest.fn();
+
+        createCardElementsProgressively(context, onDone);
+        jest.advanceTimersToNextTimer();
+        expect(context._cardWrappers).toHaveLength(1);
+
+        settleProgressiveCardWork(context);
+
+        expect(context._progressiveCardWork).toBeNull();
+        expect(context._cardsContainer).toBeNull();
+        expect(context._cardWrappers).toHaveLength(0);
+        expect(context._managedCards).toHaveLength(0);
+
+        jest.runOnlyPendingTimers();
+        expect(onDone).not.toHaveBeenCalled();
+        expect(context._cardWrappers).toHaveLength(0);
+    });
+
+    test('removes cards one per macrotask, last to first, then detaches the container', () => {
+        const context = createProgressiveContext(0);
+        const wrappers = [createFakeElement('div', 'card'), createFakeElement('div', 'card'), createFakeElement('div', 'card')];
+        const container = createFakeElement('div', 'bubble-cards-container');
+        context._cardWrappers = wrappers;
+        context._managedCards = wrappers.map(() => createFakeElement('hui-card'));
+        context._cardsContainer = container;
+        context._renderedItems = [container];
+        const onDone = jest.fn();
+
+        removeCardElementsProgressively(context, onDone);
+        expect(onDone).not.toHaveBeenCalled();
+
+        jest.advanceTimersToNextTimer();
+        expect(wrappers[2].removed).toBe(true);
+        expect(wrappers[0].removed).toBe(false);
+
+        jest.advanceTimersToNextTimer();
+        jest.advanceTimersToNextTimer();
+        expect(wrappers[0].removed).toBe(true);
+        expect(onDone).not.toHaveBeenCalled();
+
+        jest.advanceTimersToNextTimer();
+        expect(container.removed).toBe(true);
+        expect(onDone).toHaveBeenCalledTimes(1);
+        expect(context._cardsContainer).toBeNull();
+        expect(context._progressiveCardWork).toBeNull();
+    });
+
+    test('settling an in-flight teardown finishes it synchronously', () => {
+        const context = createProgressiveContext(0);
+        const wrappers = [createFakeElement('div', 'card'), createFakeElement('div', 'card')];
+        const container = createFakeElement('div', 'bubble-cards-container');
+        context._cardWrappers = wrappers;
+        context._managedCards = [];
+        context._cardsContainer = container;
+        context._renderedItems = [container];
+        const onDone = jest.fn();
+
+        removeCardElementsProgressively(context, onDone);
+        jest.advanceTimersToNextTimer();
+        expect(wrappers[1].removed).toBe(true);
+
+        settleProgressiveCardWork(context);
+
+        expect(container.removed).toBe(true);
+        expect(context._cardsContainer).toBeNull();
+        expect(context._progressiveCardWork).toBeNull();
+
+        jest.runOnlyPendingTimers();
+        expect(onDone).not.toHaveBeenCalled();
+    });
+
+    test('fold-first: builds the head, leaves placeholders, then hydrates after the open', () => {
+        const context = createProgressiveContext(30);
+        const onDone = jest.fn();
+
+        createCardElementsProgressively(context, onDone);
+        jest.runAllTimers(); // head build steps (1 card per step here)
+
+        // Completion is reported with only the head hydrated.
+        expect(onDone).toHaveBeenCalledTimes(1);
+        expect(context._cardWrappers).toHaveLength(30);
+        expect(context._managedCards.filter(Boolean)).toHaveLength(14);
+        expect(context._pendingCardHydration).toHaveLength(16);
+        expect(context._progressiveCardWork).toBeNull();
+
+        // Post-open resume hydrates the rest, one budgeted step at a time.
+        const hydrated = jest.fn();
+        resumeCardHydrationProgressively(context, hydrated);
+        expect(hydrated).not.toHaveBeenCalled();
+
+        jest.advanceTimersToNextTimer();
+        expect(context._managedCards.filter(Boolean).length).toBeGreaterThan(14);
+        expect(hydrated).not.toHaveBeenCalled();
+
+        jest.runAllTimers();
+        expect(context._managedCards.filter(Boolean)).toHaveLength(30);
+        expect(context._pendingCardHydration).toBeNull();
+        expect(hydrated).toHaveBeenCalledTimes(1);
+        // Hydration invalidates any scrollability measured on partial content.
+        expect(context._cachedPopupScrollableState).toBeUndefined();
+    });
+
+    test('fold-first: small pop-ups are fully hydrated before completion', () => {
+        const context = createProgressiveContext(10);
+        const onDone = jest.fn();
+
+        createCardElementsProgressively(context, onDone);
+        jest.runAllTimers();
+
+        expect(onDone).toHaveBeenCalledTimes(1);
+        expect(context._managedCards.filter(Boolean)).toHaveLength(10);
+        expect(context._pendingCardHydration ?? null).toBeNull();
+    });
+
+    test('hydration pauses while the user interacts with the pop-up', () => {
+        const context = createProgressiveContext(30);
+        createCardElementsProgressively(context, () => {});
+        jest.runAllTimers();
+
+        const container = context.elements.popUpContainer;
+        resumeCardHydrationProgressively(context, () => {});
+
+        // The interaction listeners were installed on the scroll container.
+        const scrollHandler = container.addEventListener.mock.calls.find(([type]) => type === 'scroll')?.[1];
+        expect(typeof scrollHandler).toBe('function');
+
+        jest.advanceTimersToNextTimer();
+        const afterFirstStep = context._managedCards.filter(Boolean).length;
+        expect(afterFirstStep).toBeGreaterThan(14);
+
+        // User scrolls: the next step waits for quiet instead of hydrating.
+        scrollHandler();
+        jest.advanceTimersToNextTimer();
+        expect(context._managedCards.filter(Boolean)).toHaveLength(afterFirstStep);
+
+        // Quiet again: hydration resumes and finishes.
+        jest.runAllTimers();
+        expect(context._managedCards.filter(Boolean)).toHaveLength(30);
+        expect(container.removeEventListener).toHaveBeenCalled();
+    });
+
+    test('settling an in-flight hydration keeps the rendered content', () => {
+        const context = createProgressiveContext(30);
+        createCardElementsProgressively(context, () => {});
+        jest.runAllTimers();
+
+        resumeCardHydrationProgressively(context, () => {});
+        jest.advanceTimersToNextTimer();
+        const hydratedCount = context._managedCards.filter(Boolean).length;
+        expect(hydratedCount).toBeGreaterThan(14);
+
+        settleProgressiveCardWork(context);
+
+        // Additive work: cancel must not clear the live pop-up content.
+        expect(context._cardsContainer).not.toBeNull();
+        expect(context._managedCards.filter(Boolean)).toHaveLength(hydratedCount);
+        expect(context._progressiveCardWork).toBeNull();
+
+        jest.runAllTimers();
+        expect(context._managedCards.filter(Boolean)).toHaveLength(hydratedCount);
+    });
+
+    test('falls back to the synchronous builder in edit mode', () => {
+        const context = createProgressiveContext(2);
+        context.editor = true;
+        const onDone = jest.fn();
+
+        createCardElementsProgressively(context, onDone);
+
+        // Synchronous path: completion reported before any timer runs.
+        expect(onDone).toHaveBeenCalledTimes(1);
+        expect(context._progressiveCardWork ?? null).toBeNull();
     });
 });
