@@ -20,6 +20,7 @@ const suspendStandalonePopUpCardsProgressively = jest.fn((context, onDone) => {
 });
 const settleStandaloneCardWork = jest.fn();
 const resumeStandaloneCardHydration = jest.fn();
+const registerPopupOpenActivityProbe = jest.fn();
 const appendLegacyPopup = jest.fn();
 const displayLegacyPopupContent = jest.fn();
 const hideLegacyPopupContent = jest.fn();
@@ -131,11 +132,17 @@ jest.unstable_mockModule('../../tools/utils.js', () => ({
 jest.unstable_mockModule('./cards/index.js', () => ({
     handlePopUpCards,
     setStandalonePopUpCardsActive,
-    suspendStandalonePopUpCards,
     buildStandalonePopUpCardsProgressively,
     suspendStandalonePopUpCardsProgressively,
     settleStandaloneCardWork,
     resumeStandaloneCardHydration,
+    registerPopupOpenActivityProbe,
+}));
+
+// Budgets, holds and gate deadlines use the monotonic clock in production;
+// tests simulate cost with jest.setSystemTime, which only moves Date.now.
+jest.unstable_mockModule('../../tools/monotonic-time.js', () => ({
+    monotonicNow: () => Date.now(),
 }));
 
 jest.unstable_mockModule('./legacy.js', () => ({
@@ -964,7 +971,7 @@ describe('standalone popup lifecycle', () => {
         };
     }
 
-    test('holds dashboard hass updates while a backdrop-covered open is in flight, then flushes one card per task', () => {
+    test('holds dashboard hass updates while a backdrop-covered open is in flight, then flushes them in budgeted batches', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
         const cardA = createDashboardCard();
@@ -989,7 +996,27 @@ describe('standalone popup lifecycle', () => {
 
         expect(cardA.updateBubbleCard).not.toHaveBeenCalled();
 
-        // Flush drains one card per macrotask.
+        // Cheap updates drain together within one budgeted macrotask.
+        jest.advanceTimersToNextTimer();
+        expect(cardA.updateBubbleCard).toHaveBeenCalledTimes(1);
+        expect(cardB.updateBubbleCard).toHaveBeenCalledTimes(1);
+    });
+
+    test('splits the gate drain at the budget when updates are expensive', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const cardA = createDashboardCard();
+        const cardB = createDashboardCard();
+        // Each flush costs more than the drain budget, forcing a task split.
+        cardA.updateBubbleCard.mockImplementation(() => jest.setSystemTime(Date.now() + 10));
+        cardB.updateBubbleCard.mockImplementation(() => jest.setSystemTime(Date.now() + 10));
+
+        openPopup(context);
+        expect(shouldHoldDashboardHassUpdate(cardA)).toBe(true);
+        expect(shouldHoldDashboardHassUpdate(cardB)).toBe(true);
+
+        closePopup(context, true);
+
         jest.advanceTimersToNextTimer();
         const drainedAfterOneTick = cardA.updateBubbleCard.mock.calls.length + cardB.updateBubbleCard.mock.calls.length;
         expect(drainedAfterOneTick).toBe(1);
@@ -997,6 +1024,23 @@ describe('standalone popup lifecycle', () => {
         jest.advanceTimersToNextTimer();
         expect(cardA.updateBubbleCard).toHaveBeenCalledTimes(1);
         expect(cardB.updateBubbleCard).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not queue a card twice when its next update arrives after release', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const card = createDashboardCard();
+
+        openPopup(context);
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
+
+        closePopup(context, true);
+
+        // Fresh update after release: the card renders now, so the stale
+        // queue entry must not trigger a redundant second render.
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+        jest.runOnlyPendingTimers();
+        expect(card.updateBubbleCard).not.toHaveBeenCalled();
     });
 
     test('never arms the hass gate for hide_backdrop pop-ups', () => {
@@ -1020,9 +1064,12 @@ describe('standalone popup lifecycle', () => {
 
         closePopup(context, true);
 
-        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+        // The queued card drains on its own after the release; a fresh update
+        // arriving later is not held (and would be deduplicated, see the
+        // dedicated test).
         jest.advanceTimersToNextTimer();
         expect(card.updateBubbleCard).toHaveBeenCalledTimes(1);
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
     });
 
     test('disables shell transitions during the progressive build and restores them before phase 2', () => {
@@ -1160,16 +1207,79 @@ describe('standalone popup lifecycle', () => {
         expect(teardownDone).not.toBeNull();
         expect(parent.removeChild).not.toHaveBeenCalled();
 
-        // Reopen while the teardown is still in flight: clearAllTimeouts must
-        // settle the in-flight card work synchronously.
+        // Reopen while the teardown is still in flight: the settle must NOT
+        // run on the interaction frame (it folds every remaining disconnect
+        // into one task) — it belongs to the deferred heavy-open task.
         settleStandaloneCardWork.mockClear();
         openPopup(context);
 
+        expect(settleStandaloneCardWork).not.toHaveBeenCalled();
+
+        flushHeavyOpenTask();
         expect(settleStandaloneCardWork).toHaveBeenCalledWith(context);
 
         // The late teardown completion must not detach the reopened shell.
         teardownDone();
         expect(parent.removeChild).not.toHaveBeenCalled();
+    });
+
+    test('never suspends the host layout from a deferred sync while an open is in flight', () => {
+        const context = {
+            ...createStandaloneContext(),
+            ...createStandaloneHost(),
+            style: { display: 'flex' },
+        };
+        usedContexts.push(context);
+        context._popupHostChainIncomplete = true;
+
+        openPopup(context);
+
+        // The shell is painted is-popup-closed during the whole build: a hass
+        // tick resolving the host chain now must not hide the host mid-open.
+        syncDeferredPopupHostLayout(context);
+
+        expect(context.style.display).toBe('flex');
+        expect(context.sectionRow.style.display).not.toBe('none');
+    });
+
+    test('releases the hass gate when the popup element is torn down mid-open', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const card = createDashboardCard();
+
+        openPopup(context);
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
+
+        // Lovelace re-render mid-open: the element is cleaned up without any
+        // close, and the queued dashboard cards must still drain.
+        cleanupPopupRuntime(context);
+
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+    });
+
+    test('does not promote the instant switch path while a teardown owns the content', () => {
+        const contextA = createStandaloneContext({ hash: '#popup-a', popup_mode: 'centered' });
+        const contextB = createStandaloneContext({ hash: '#popup-b', popup_mode: 'centered' });
+        usedContexts.push(contextA, contextB);
+
+        // B was open before and its content is being torn down progressively.
+        contextB._cardsContainer = {};
+        contextB._progressiveCardWork = { type: 'teardown' };
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue();
+
+        // Switch to B: its container exists but is doomed — the open must take
+        // the phased path (no synchronous full rebuild on the switch frame).
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-b');
+        window.dispatchEvent(new Event('location-changed'));
+
+        flushRafQueue(); // switch handoff frame
+
+        expect(contextB.popUp.classList.contains('is-popup-opened')).toBe(false);
+        expect(contextB.popUp.classList.contains('is-opening')).toBe(false);
     });
 
     test('skips the deferred scroll reset on cold standalone opens', () => {

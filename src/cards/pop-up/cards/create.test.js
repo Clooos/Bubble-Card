@@ -13,7 +13,13 @@ jest.unstable_mockModule('../../../tools/utils.js', () => ({
     createElement: createElementMock,
 }));
 
-const { _isStandalonePopupCardConfig, createCardElementsProgressively, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } = await import('./create.js');
+// Budgets and holds use the monotonic clock in production; tests simulate
+// cost with jest.setSystemTime, which only moves Date.now.
+jest.unstable_mockModule('../../../tools/monotonic-time.js', () => ({
+    monotonicNow: () => Date.now(),
+}));
+
+const { _isStandalonePopupCardConfig, createCardElementsProgressively, registerPopupOpenActivityProbe, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } = await import('./create.js');
 
 describe('_isStandalonePopupCardConfig', () => {
     test('detects standalone bubble pop-up child configs', () => {
@@ -647,6 +653,91 @@ describe('progressive card work', () => {
 
         jest.runAllTimers();
         expect(context._managedCards.filter(Boolean)).toHaveLength(5);
+    });
+
+    test('teardown yields while a pop-up open is in flight, then proceeds', () => {
+        let openInFlight = true;
+        registerPopupOpenActivityProbe(() => openInFlight);
+
+        try {
+            const context = createProgressiveContext(0);
+            const wrappers = [createFakeElement('div', 'card'), createFakeElement('div', 'card')];
+            const container = createFakeElement('div', 'bubble-cards-container');
+            context._cardWrappers = wrappers;
+            context._managedCards = [];
+            context._cardsContainer = container;
+            context._renderedItems = [container];
+            const onDone = jest.fn();
+
+            removeCardElementsProgressively(context, onDone);
+
+            // Another pop-up is opening: the teardown reschedules untouched.
+            jest.advanceTimersToNextTimer();
+            jest.advanceTimersToNextTimer();
+            expect(wrappers[1].removed).toBe(false);
+            expect(onDone).not.toHaveBeenCalled();
+
+            // The open settled: the teardown resumes.
+            openInFlight = false;
+            jest.runAllTimers();
+            expect(wrappers[0].removed).toBe(true);
+            expect(wrappers[1].removed).toBe(true);
+            expect(onDone).toHaveBeenCalledTimes(1);
+        } finally {
+            registerPopupOpenActivityProbe(null);
+        }
+    });
+
+    test('teardown yields to an in-flight hydration stepper on another pop-up', () => {
+        const hydratingContext = createProgressiveContext(30);
+        createCardElementsProgressively(hydratingContext, () => {});
+        jest.runAllTimers();
+        resumeCardHydrationProgressively(hydratingContext, () => {});
+        expect(hydratingContext._progressiveCardWork?.type).toBe('hydrate');
+
+        const closingContext = createProgressiveContext(0);
+        const wrappers = [createFakeElement('div', 'card')];
+        const container = createFakeElement('div', 'bubble-cards-container');
+        closingContext._cardWrappers = wrappers;
+        closingContext._managedCards = [];
+        closingContext._cardsContainer = container;
+        closingContext._renderedItems = [container];
+
+        removeCardElementsProgressively(closingContext, () => {});
+
+        // First teardown tick lands while the hydration stepper is alive: it
+        // must yield. (Timers are shared, so hydration steps run too.)
+        jest.advanceTimersToNextTimer();
+        expect(wrappers[0].removed).toBe(false);
+
+        // Once hydration completes, the teardown proceeds.
+        jest.runAllTimers();
+        expect(hydratingContext._managedCards.filter(Boolean)).toHaveLength(30);
+        expect(wrappers[0].removed).toBe(true);
+    });
+
+    test('synthetic wake scrolls do not trip the hydration interaction hold', () => {
+        const context = createProgressiveContext(30);
+        createCardElementsProgressively(context, () => {});
+        jest.runAllTimers();
+
+        const container = context.elements.popUpContainer;
+        resumeCardHydrationProgressively(context, () => {});
+        const scrollHandler = container.addEventListener.mock.calls.find(([type]) => type === 'scroll')?.[1];
+
+        jest.advanceTimersToNextTimer();
+        const afterFirstStep = context._managedCards.filter(Boolean).length;
+        expect(afterFirstStep).toBeGreaterThan(14);
+
+        // The post-open wake dispatches synthetic scrolls under this marker:
+        // the next step must run on time instead of holding for a phantom
+        // interaction.
+        context._suppressHydrationInteractionHold = true;
+        scrollHandler();
+        context._suppressHydrationInteractionHold = false;
+
+        jest.advanceTimersToNextTimer();
+        expect(context._managedCards.filter(Boolean).length).toBeGreaterThan(afterFirstStep);
     });
 
     test('falls back to the synchronous builder in edit mode', () => {

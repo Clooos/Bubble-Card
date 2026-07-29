@@ -1,11 +1,6 @@
 import { createCardElements, createCardElementsProgressively, removeCardElements, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } from './create.js';
 
-export function suspendStandalonePopUpCards(context) {
-    if (!context?.isStandalonePopUp) return;
-    if (context._standalonePopUpCardsActive) return;
-    removeCardElements(context);
-    context._cachedPopupScrollableState = undefined;
-}
+export { registerPopupOpenActivityProbe } from './create.js';
 
 // Progressive variant used by the post-close cleanup: removes one card per
 // macrotask so the disconnect callbacks never pile up into a single long task.
@@ -30,10 +25,15 @@ export function buildStandalonePopUpCardsProgressively(context, onDone) {
 }
 
 // Hydrate the placeholder cells a fold-first build left below the fold.
-// Called once the open transition has finished.
+// Called once the open transition has finished. The completion callback runs
+// on every path, including the not-applicable early return.
 export function resumeStandaloneCardHydration(context, onDone) {
-    if (!context?.isStandalonePopUp || !shouldRenderPopUpCards(context)) return;
-    resumeCardHydrationProgressively(context, onDone);
+    const done = typeof onDone === 'function' ? onDone : () => {};
+    if (!context?.isStandalonePopUp || !shouldRenderPopUpCards(context)) {
+        done();
+        return;
+    }
+    resumeCardHydrationProgressively(context, done);
 }
 
 // Cancel any in-flight progressive build/teardown and settle the card state

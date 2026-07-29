@@ -1,8 +1,9 @@
 import { getBackdrop, hideExistingBackdrop, releaseBackdropContext } from "./backdrop.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll } from "../../tools/utils.js";
-import { buildStandalonePopUpCardsProgressively, handlePopUpCards, resumeStandaloneCardHydration, setStandalonePopUpCardsActive, settleStandaloneCardWork, suspendStandalonePopUpCardsProgressively } from "./cards/index.js";
+import { buildStandalonePopUpCardsProgressively, handlePopUpCards, registerPopupOpenActivityProbe, resumeStandaloneCardHydration, setStandalonePopUpCardsActive, settleStandaloneCardWork, suspendStandalonePopUpCardsProgressively } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
+import { beginPopupOpenHassGate, releasePopupOpenHassGate } from './hass-gate.js';
 import { invalidateWakeSyncCache } from "./index.js";
 
 function resetPopupScroll(context) {
@@ -12,91 +13,7 @@ function resetPopupScroll(context) {
     }
 }
 
-// While a standalone pop-up open is in flight behind a covering backdrop,
-// bubble cards outside any pop-up hold their hass updates: they are about to
-// be covered, and their re-renders are exactly what starves the open
-// transition frames on low-end devices. Updates flush one card per macrotask
-// once the open settles. The gate auto-expires as a safety net, and is never
-// armed for hide_backdrop pop-ups (the dashboard stays visible there, a held
-// update could be noticed).
-const popupOpenHassGate = {
-    until: 0,
-    queue: new Set(),
-    draining: false,
-};
-
-function drainPopupOpenHassGateQueue() {
-    if (popupOpenHassGate.draining || popupOpenHassGate.queue.size === 0) {
-        return;
-    }
-
-    popupOpenHassGate.draining = true;
-    const step = () => {
-        // A new open re-armed the gate: pause, the next release resumes.
-        if (Date.now() < popupOpenHassGate.until) {
-            popupOpenHassGate.draining = false;
-            return;
-        }
-
-        const { value } = popupOpenHassGate.queue.values().next();
-        if (value === undefined) {
-            popupOpenHassGate.draining = false;
-            return;
-        }
-
-        popupOpenHassGate.queue.delete(value);
-        try {
-            if (value.isConnected) {
-                value.updateBubbleCard();
-            }
-        } catch (_) {}
-
-        if (popupOpenHassGate.queue.size > 0) {
-            setTimeout(step, 0);
-        } else {
-            popupOpenHassGate.draining = false;
-        }
-    };
-    setTimeout(step, 0);
-}
-
-function beginPopupOpenHassGate(context) {
-    if (context?.config?.hide_backdrop || context?.editor) {
-        return;
-    }
-
-    popupOpenHassGate.until = Date.now() + 1600;
-}
-
-function releasePopupOpenHassGate() {
-    popupOpenHassGate.until = 0;
-    drainPopupOpenHassGateQueue();
-}
-
-// Called by the bubble-card hass setter. The element stores the fresh hass
-// before asking, so a queued card always renders the latest state on flush.
-export function shouldHoldDashboardHassUpdate(element) {
-    if (Date.now() >= popupOpenHassGate.until) {
-        // Self-healing: a gate that expired without release still drains.
-        if (popupOpenHassGate.queue.size > 0) {
-            drainPopupOpenHassGateQueue();
-        }
-        return false;
-    }
-
-    if (element?.config?.card_type === 'pop-up' || element?.editor) {
-        return false;
-    }
-
-    // Cards inside a pop-up must keep updating; closest() stays inside the
-    // shadow root, which is exactly the boundary we want.
-    if (typeof element?.closest === 'function' && element.closest('.bubble-pop-up')) {
-        return false;
-    }
-
-    popupOpenHassGate.queue.add(element);
-    return true;
-}
+export { shouldHoldDashboardHassUpdate } from './hass-gate.js';
 
 const popupState = {
   animationDuration: 300,
@@ -105,6 +22,17 @@ const popupState = {
   pendingHashRemovalTimeout: null,
   pendingHashRemovalHash: '',
 };
+
+// Progressive teardowns yield while any pop-up open is still in flight (the
+// probe lives here because create.js cannot import helpers without a cycle).
+registerPopupOpenActivityProbe(() => {
+    for (const activeContext of popupState.activePopups) {
+        if (activeContext._popupOpenInProgress) {
+            return true;
+        }
+    }
+    return false;
+});
 
 const outsideCloseFallbackDelay = 150;
 const popupQuickOpenAnimationDurationMs = 140;
@@ -631,6 +559,15 @@ export function syncDeferredPopupHostLayout(context) {
         return;
     }
 
+    // An open is in flight (or the pop-up is active): phase 1 already mounted
+    // the host, and the shell is painted is-popup-closed for the whole
+    // progressive build. Deriving the layout from that class here would
+    // suspend the host mid-open and leave the pop-up invisible behind its
+    // backdrop, with nothing left to re-mount it.
+    if (popupState.activePopups.has(context) || isPopupOpenInProgress(context)) {
+        return;
+    }
+
     resolvePopupHostElements(context);
 
     if (!context.sectionRow) {
@@ -880,11 +817,19 @@ function wakeStandalonePopupScrollableContent(context) {
     const targets = [];
     roots.forEach((root) => collectScrollableContentWakeTargets(root, targets));
 
-    targets.forEach((target) => {
-        try {
-            target.dispatchEvent(new Event('scroll'));
-        } catch (_) {}
-    });
+    // These synthetic scrolls are not user interaction: without the marker
+    // they would trip the hydration interaction hold and freeze the fold-first
+    // hydration for a phantom gesture on every cold open.
+    context._suppressHydrationInteractionHold = true;
+    try {
+        targets.forEach((target) => {
+            try {
+                target.dispatchEvent(new Event('scroll'));
+            } catch (_) {}
+        });
+    } finally {
+        context._suppressHydrationInteractionHold = false;
+    }
 }
 
 function cancelStandalonePostOpenContentWake(context) {
@@ -1361,8 +1306,12 @@ function syncStandalonePopupContent(context) {
 }
 
 function hasPrimedStandalonePopupContent(context) {
+    // A container owned by an in-flight progressive teardown is doomed
+    // content: treating it as primed would promote instant paths that then
+    // rebuild everything synchronously.
     return !!(
-        context?._cardsContainer
+        context?._cardsContainer &&
+        context?._progressiveCardWork?.type !== 'teardown'
     );
 }
 
@@ -1507,8 +1456,6 @@ function rollbackStandalonePopupOpen(context, error = null) {
 // comment in openPopup for why the flags must flip before createShell runs
 // (re-entrancy through _setInitialVisibility) and only when it actually runs.
 function runDeferredStandaloneShellCreate(context) {
-    context._standaloneShellCreatePending = false;
-
     if (context._standaloneShellCreated || typeof context.createStandaloneShell !== 'function') {
         return;
     }
@@ -1525,7 +1472,13 @@ function runDeferredStandaloneShellCreate(context) {
 }
 
 function openStandalonePopup(context, instant = false) {
-    clearAllTimeouts(context);
+    // Phased opens settle any in-flight progressive card work in their
+    // deferred heavy-open task instead of here: settling a close teardown
+    // synchronously would run all remaining disconnectedCallbacks on the
+    // interaction frame. Instant and editor opens reconcile content
+    // synchronously below, so they still need the settled state now.
+    const deferCardWorkSettle = !instant && !context.editor;
+    clearAllTimeouts(context, { settleCardWork: !deferCardWorkSettle });
     beginPopupOpenHassGate(context);
 
     // Must be read before the shell is re-attached and before phase 1 restores
@@ -1664,6 +1617,11 @@ function openStandalonePopup(context, instant = false) {
     const heavyOpen = () => {
         try {
             if (!popupState.activePopups.has(context)) return;
+
+            // The card-work settle deferred off the interaction frame (see
+            // the top of this function): a leftover close teardown folds up
+            // here, while the shell is still painted closed.
+            settleStandaloneCardWork(context);
 
             // First visual feedback: the backdrop starts fading as soon as the
             // deferred open work begins, well before the slide. Popup-to-popup
@@ -1984,14 +1942,19 @@ export function updateListeners(context, add) {
     syncOutsideInteractionListeners(context, shouldAddListeners);
 }
 
-function clearAllTimeouts(context) {
+function clearAllTimeouts(context, { settleCardWork = true } = {}) {
     clearContextTimeouts(context, popupRuntimeTimeoutKeys);
     clearQuickOpenAnimation(context);
     cancelStandalonePostOpenContentWake(context);
 
     // A progressive card build/teardown in flight is settled synchronously so
     // whoever takes over (open, close, cleanup) starts from a clean state.
-    settleStandaloneCardWork(context);
+    // Phased opens defer this to their heavy-open macrotask: settling a
+    // teardown runs every remaining disconnectedCallback in one task, which
+    // must not land on the interaction frame.
+    if (settleCardWork) {
+        settleStandaloneCardWork(context);
+    }
 
     clearPopupOpenCompletion(context);
     clearPopupBackdropBlurGuardRelease(context);
@@ -2144,8 +2107,6 @@ export function openPopup(context, instant = false) {
             // canceled open leaves createStandaloneShell intact for the next one.
             if (instant || context.editor || canUseInstantStandaloneSwitch(context)) {
                 runDeferredStandaloneShellCreate(context);
-            } else {
-                context._standaloneShellCreatePending = true;
             }
         }
         openStandalonePopup(context, instant);
@@ -2404,6 +2365,10 @@ function ensureGlobalUrlListener() {
 
 export function cleanupPopupRuntime(context) {
     clearAllTimeouts(context);
+    // The element can be torn down mid-open (lovelace re-render, editor
+    // re-creation): every other open-termination path releases the gate, and
+    // clearAllTimeouts just cancelled the completion that would have.
+    releasePopupOpenHassGate();
     updateListeners(context, false);
     setPopupOpeningMarker(context, false);
     const visuallyOpen = context.popUp?.classList?.contains('is-popup-opened');

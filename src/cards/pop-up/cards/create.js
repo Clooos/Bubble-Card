@@ -1,4 +1,6 @@
 import { createElement } from '../../../tools/utils.js';
+import { monotonicNow } from '../../../tools/monotonic-time.js';
+import { extendPopupOpenHassGate } from '../hass-gate.js';
 import cardsStyles from './styles.css';
 import { createEditorCardElements } from './editor/index.js';
 
@@ -156,6 +158,25 @@ export function createCardElements(context) {
 // build takes priority over any close teardown running at the same time.
 let activeProgressiveBuilds = 0;
 
+// Number of hydration steppers currently in flight (module-wide): a close
+// teardown also yields to them, so a switch's outgoing pop-up never competes
+// with the incoming pop-up filling its below-the-fold cells.
+let activeHydrationSteppers = 0;
+
+// Probe registered by helpers.js (importing it here would be a cycle):
+// reports whether any pop-up open is in flight, so teardowns also yield
+// during the open transition frames, between the build and the hydration.
+let popupOpenActivityProbe = null;
+export function registerPopupOpenActivityProbe(probe) {
+    popupOpenActivityProbe = typeof probe === 'function' ? probe : null;
+}
+
+function _shouldTeardownYield() {
+    return activeProgressiveBuilds > 0 ||
+        activeHydrationSteppers > 0 ||
+        (popupOpenActivityProbe?.() === true);
+}
+
 // Per-macrotask time budget: fast devices fit the whole job in one or two
 // tasks (no added latency), slow devices split at card boundaries so no task
 // exceeds roughly one card's cost beyond the budget.
@@ -299,7 +320,12 @@ export function createCardElementsProgressively(context, onDone) {
             return;
         }
 
-        const stepStart = Date.now();
+        // The build still owns the main thread: slide the dashboard hass-gate
+        // deadline so it cannot lapse mid-open on slow devices (it works as a
+        // watchdog, not a fixed window).
+        extendPopupOpenHassGate();
+
+        const stepStart = monotonicNow();
         do {
             const cardConfig = cards[index];
             index += 1;
@@ -309,7 +335,10 @@ export function createCardElementsProgressively(context, onDone) {
                 const cardWrapper = createElement('div', 'card');
                 cardWrapper.appendChild(cardEl);
                 _applyCardWrapperLayout(cardEl, cardWrapper, cardConfig);
-                _bindCardLayoutUpdates(cardEl, cardWrapper, context, context._managedCards.length);
+                // Bind to the CONFIG index: a failed earlier card compacts the
+                // wrapper arrays, and layout updates must keep reading the
+                // right config entry.
+                _bindCardLayoutUpdates(cardEl, cardWrapper, context, index - 1);
 
                 context._managedCards.push(cardEl);
                 context._cardWrappers.push(cardWrapper);
@@ -317,7 +346,7 @@ export function createCardElementsProgressively(context, onDone) {
                 context._lastRenderedCardConfigs.push(cardEl.config);
                 cardsContainer.appendChild(cardWrapper);
             }
-        } while (index < hydratedHead && (Date.now() - stepStart) < progressiveStepBudgetMs);
+        } while (index < hydratedHead && (monotonicNow() - stepStart) < progressiveStepBudgetMs);
 
         work.timeout = setTimeout(step, 0);
     };
@@ -368,34 +397,50 @@ function _startHydrationStepper(context) {
 
     const work = { type: 'hydrate', timeout: null, onDone: null };
     context._progressiveCardWork = work;
+    activeHydrationSteppers += 1;
 
     // Any interaction with the pop-up wins over hydration: hold the next step
-    // until the user has been quiet for a moment.
+    // until the user has been quiet for a moment. The post-open content wake
+    // dispatches synthetic scrolls that must not count as interaction.
     let holdUntil = 0;
     const noteInteraction = () => {
-        holdUntil = Date.now() + hydrationInteractionHoldMs;
+        if (context._suppressHydrationInteractionHold) {
+            return;
+        }
+        holdUntil = monotonicNow() + hydrationInteractionHoldMs;
     };
     const container = context.elements?.popUpContainer;
     const interactionEvents = ['touchstart', 'wheel', 'scroll'];
-    if (container && typeof container.addEventListener === 'function') {
+    const hasInteractionListeners = container && typeof container.addEventListener === 'function';
+    if (hasInteractionListeners) {
         interactionEvents.forEach((type) => container.addEventListener(type, noteInteraction, { passive: true }));
-        work.cleanup = () => {
-            interactionEvents.forEach((type) => container.removeEventListener(type, noteInteraction));
-        };
     }
+
+    // Runs exactly once, from the completion path or from a settle/cancel.
+    let workReleased = false;
+    work.cleanup = () => {
+        if (workReleased) {
+            return;
+        }
+        workReleased = true;
+        activeHydrationSteppers = Math.max(0, activeHydrationSteppers - 1);
+        if (hasInteractionListeners) {
+            interactionEvents.forEach((type) => container.removeEventListener(type, noteInteraction));
+        }
+    };
 
     const step = () => {
         if (context._progressiveCardWork !== work) {
             return;
         }
 
-        if (Date.now() < holdUntil) {
+        if (monotonicNow() < holdUntil) {
             work.timeout = setTimeout(step, hydrationInteractionHoldMs);
             return;
         }
 
-        const stepStart = Date.now();
-        while (pending.length > 0 && (Date.now() - stepStart) < progressiveStepBudgetMs) {
+        const stepStart = monotonicNow();
+        while (pending.length > 0 && (monotonicNow() - stepStart) < progressiveStepBudgetMs) {
             _hydrateCardAt(context, pending.shift());
         }
 
@@ -463,9 +508,10 @@ export function removeCardElementsProgressively(context, onDone) {
             return;
         }
 
-        // An open is building its content right now: yield, the teardown is
-        // invisible (suspended host) and nothing depends on its pace.
-        if (activeProgressiveBuilds > 0) {
+        // An open is building, transitioning or hydrating right now: yield,
+        // the teardown is invisible (suspended host) and nothing depends on
+        // its pace.
+        if (_shouldTeardownYield()) {
             work.timeout = setTimeout(step, 120);
             return;
         }
@@ -477,11 +523,11 @@ export function removeCardElementsProgressively(context, onDone) {
             return;
         }
 
-        const stepStart = Date.now();
+        const stepStart = monotonicNow();
         do {
             wrappers[index]?.remove?.();
             index -= 1;
-        } while (index >= 0 && (Date.now() - stepStart) < progressiveStepBudgetMs);
+        } while (index >= 0 && (monotonicNow() - stepStart) < progressiveStepBudgetMs);
 
         work.timeout = setTimeout(step, 0);
     };

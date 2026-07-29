@@ -24,11 +24,13 @@ jest.unstable_mockModule('./create.js', () => ({
     removeCardElementsProgressively,
     resumeCardHydrationProgressively,
     settleProgressiveCardWork,
+    registerPopupOpenActivityProbe: jest.fn(),
 }));
 
 const {
     handlePopUpCards,
-    suspendStandalonePopUpCards,
+    resumeStandaloneCardHydration,
+    suspendStandalonePopUpCardsProgressively,
 } = await import('./index.js');
 
 describe('standalone popup cards', () => {
@@ -36,17 +38,19 @@ describe('standalone popup cards', () => {
         jest.clearAllMocks();
     });
 
-    test('cold-removes standalone cards when suspending an inactive popup', () => {
+    test('progressively removes standalone cards when suspending an inactive popup', () => {
         const context = {
             isStandalonePopUp: true,
             _standalonePopUpCardsActive: false,
             _cachedPopupScrollableState: true,
         };
+        const onDone = jest.fn();
 
-        suspendStandalonePopUpCards(context);
+        suspendStandalonePopUpCardsProgressively(context, onDone);
 
-        expect(removeCardElements).toHaveBeenCalledWith(context);
+        expect(removeCardElementsProgressively).toHaveBeenCalledWith(context, onDone);
         expect(context._cachedPopupScrollableState).toBeUndefined();
+        expect(onDone).toHaveBeenCalledTimes(1);
     });
 
     test('does not remove standalone cards while the popup is still active', () => {
@@ -55,11 +59,26 @@ describe('standalone popup cards', () => {
             _standalonePopUpCardsActive: true,
             _cachedPopupScrollableState: true,
         };
+        const onDone = jest.fn();
 
-        suspendStandalonePopUpCards(context);
+        suspendStandalonePopUpCardsProgressively(context, onDone);
 
-        expect(removeCardElements).not.toHaveBeenCalled();
+        expect(removeCardElementsProgressively).not.toHaveBeenCalled();
         expect(context._cachedPopupScrollableState).toBe(true);
+        expect(onDone).toHaveBeenCalledTimes(1);
+    });
+
+    test('always reports hydration completion, including on the not-applicable early return', () => {
+        const inactive = {
+            isStandalonePopUp: true,
+            _standalonePopUpCardsActive: false,
+        };
+        const onDone = jest.fn();
+
+        resumeStandaloneCardHydration(inactive, onDone);
+
+        expect(resumeCardHydrationProgressively).not.toHaveBeenCalled();
+        expect(onDone).toHaveBeenCalledTimes(1);
     });
 
     test('creates popup cards on first active render and updates them afterwards', () => {
