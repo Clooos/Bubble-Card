@@ -60,8 +60,10 @@ export function handlePopUpCards(context) {
     if (!Array.isArray(cards)) return;
 
     // A progressive build or teardown owns the container; reconciling against
-    // its partial state would trigger a full synchronous rebuild.
-    if (context._progressiveCardWork) return;
+    // its partial state would trigger a full synchronous rebuild. Post-open
+    // hydration is additive on a live pop-up: hass and config syncs must keep
+    // flowing to the already-mounted cards (placeholder cells are skipped).
+    if (context._progressiveCardWork && context._progressiveCardWork.type !== 'hydrate') return;
 
     if (!shouldRenderPopUpCards(context)) {
         // Cards remain in the popup's DOM when inactive (popup closed).

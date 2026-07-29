@@ -518,6 +518,137 @@ describe('progressive card work', () => {
         expect(context._managedCards.filter(Boolean)).toHaveLength(hydratedCount);
     });
 
+    test('replays one card sync when a hass tick lands mid-build', () => {
+        const context = createProgressiveContext(3);
+        const hassAtStart = context._hass;
+
+        createCardElementsProgressively(context, () => {});
+        jest.advanceTimersToNextTimer();
+        expect(context._managedCards).toHaveLength(1);
+        expect(context._managedCards[0].hass).toBe(hassAtStart);
+
+        // A state update arrives while the build is still splitting steps.
+        const freshHass = { states: { 'light.l0': { state: 'on' } } };
+        context._hass = freshHass;
+
+        jest.runAllTimers();
+
+        // The completion pass re-applied the latest hass to the early cards.
+        expect(context._managedCards[0].hass).toBe(freshHass);
+        expect(context._managedCards[2].hass).toBe(freshHass);
+    });
+
+    test('marks placeholder cells and unmarks them at hydration', () => {
+        const context = createProgressiveContext(30);
+        createCardElementsProgressively(context, () => {});
+        jest.runAllTimers();
+
+        const placeholderWrapper = context._cardWrappers[20];
+        expect(placeholderWrapper.className).toContain('is-placeholder');
+
+        resumeCardHydrationProgressively(context, () => {});
+        jest.runAllTimers();
+
+        expect(placeholderWrapper.classList.remove).toHaveBeenCalledWith('is-placeholder');
+    });
+
+    test('hydrates at most one placeholder per visibility delivery, then drains the rest in budgeted steps', () => {
+        let observerCallback = null;
+        global.IntersectionObserver = class {
+            constructor(callback) {
+                observerCallback = callback;
+            }
+            observe() {}
+            disconnect() {}
+        };
+
+        try {
+            const context = createProgressiveContext(30);
+            createCardElementsProgressively(context, () => {});
+            jest.runAllTimers();
+
+            expect(typeof observerCallback).toBe('function');
+            expect(context._managedCards.filter(Boolean)).toHaveLength(14);
+
+            // Several placeholders intersect at once (head not covering the fold).
+            observerCallback([
+                { target: context._cardWrappers[20], isIntersecting: true },
+                { target: context._cardWrappers[21], isIntersecting: true },
+                { target: context._cardWrappers[22], isIntersecting: true },
+            ]);
+
+            // Only one hydrated synchronously (the first delivered), the rest
+            // moved to the front of the queue in delivery order.
+            expect(context._managedCards.filter(Boolean)).toHaveLength(15);
+            expect(context._managedCards[20]).toBeTruthy();
+            const frontConfigIndexes = context._pendingCardHydration.slice(0, 2).map((entry) => entry.configIndex);
+            expect(frontConfigIndexes).toEqual([21, 22]);
+
+            // A budgeted stepper took over for the remainder.
+            expect(context._progressiveCardWork?.type).toBe('hydrate');
+
+            jest.runAllTimers();
+            expect(context._managedCards.filter(Boolean)).toHaveLength(30);
+            expect(context._pendingCardHydration).toBeNull();
+        } finally {
+            delete global.IntersectionObserver;
+        }
+    });
+
+    test('hands the completion callback to a visibility-started stepper instead of dropping it', () => {
+        let observerCallback = null;
+        global.IntersectionObserver = class {
+            constructor(callback) {
+                observerCallback = callback;
+            }
+            observe() {}
+            disconnect() {}
+        };
+
+        try {
+            const context = createProgressiveContext(30);
+            createCardElementsProgressively(context, () => {});
+            jest.runAllTimers();
+
+            observerCallback([
+                { target: context._cardWrappers[20], isIntersecting: true },
+                { target: context._cardWrappers[21], isIntersecting: true },
+            ]);
+            expect(context._progressiveCardWork?.type).toBe('hydrate');
+
+            // The post-open resume arrives while the IO stepper is running.
+            const onDone = jest.fn();
+            resumeCardHydrationProgressively(context, onDone);
+            expect(onDone).not.toHaveBeenCalled();
+
+            jest.runAllTimers();
+            expect(context._managedCards.filter(Boolean)).toHaveLength(30);
+            expect(onDone).toHaveBeenCalledTimes(1);
+        } finally {
+            delete global.IntersectionObserver;
+        }
+    });
+
+    test('settles an in-flight hydration before a full rebuild in updateCardElements', () => {
+        const context = createProgressiveContext(30);
+        createCardElementsProgressively(context, () => {});
+        jest.runAllTimers();
+
+        resumeCardHydrationProgressively(context, () => {});
+        expect(context._progressiveCardWork?.type).toBe('hydrate');
+
+        // The card list changes while hydration is in flight: the rebuild
+        // must not leave the stale stepper running over the new content.
+        context.config.cards = context.config.cards.slice(0, 5);
+        updateCardElements(context);
+
+        expect(context._progressiveCardWork).toBeNull();
+        expect(context._managedCards.filter(Boolean)).toHaveLength(5);
+
+        jest.runAllTimers();
+        expect(context._managedCards.filter(Boolean)).toHaveLength(5);
+    });
+
     test('falls back to the synchronous builder in edit mode', () => {
         const context = createProgressiveContext(2);
         context.editor = true;

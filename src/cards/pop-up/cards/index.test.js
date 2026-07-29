@@ -85,4 +85,36 @@ describe('standalone popup cards', () => {
         expect(updateCardElements).toHaveBeenCalledWith(context);
         expect(createCardElements).not.toHaveBeenCalled();
     });
+
+    test('skips reconciliation while a progressive build or teardown owns the container', () => {
+        const context = {
+            isStandalonePopUp: true,
+            _standalonePopUpCardsActive: true,
+            _cardsContainer: {},
+            config: { cards: [{ type: 'button' }] },
+        };
+
+        for (const type of ['build', 'teardown']) {
+            context._progressiveCardWork = { type };
+            handlePopUpCards(context);
+        }
+
+        expect(createCardElements).not.toHaveBeenCalled();
+        expect(updateCardElements).not.toHaveBeenCalled();
+    });
+
+    test('keeps hass syncs flowing to mounted cards while hydration is in flight', () => {
+        const context = {
+            isStandalonePopUp: true,
+            _standalonePopUpCardsActive: true,
+            _cardsContainer: {},
+            _progressiveCardWork: { type: 'hydrate' },
+            config: { cards: [{ type: 'button' }] },
+        };
+
+        handlePopUpCards(context);
+
+        expect(updateCardElements).toHaveBeenCalledWith(context);
+        expect(createCardElements).not.toHaveBeenCalled();
+    });
 });

@@ -38,6 +38,13 @@
     min-height: calc((var(--row-height) - var(--row-gap)) / 2);
 }
 
+/* A pending fold-first cell: reserve roughly one grid row so the scroll
+   geometry stays sane (and the cell stays out of the visibility observer's
+   fold) until the real card hydrates. */
+.bubble-cards-grid-container > .card.is-placeholder {
+    min-height: var(--row-height, 56px);
+}
+
 .bubble-cards-grid-container > .card.fit-rows {
     height: calc((var(--row-size, 1) * (var(--row-height) + var(--row-gap))) - var(--row-gap));
 }

@@ -251,6 +251,10 @@ export function createCardElementsProgressively(context, onDone) {
     context._progressiveCardWork = work;
     activeProgressiveBuilds += 1;
 
+    // Cards created before a mid-build hass tick carry the older reference;
+    // the completion step replays one sync when that happened.
+    const hassAtBuildStart = context._hass;
+
     const hydratedHead = cards.length >= foldFirstHydrationThreshold ? foldFirstHydratedHead : cards.length;
 
     let index = 0;
@@ -262,10 +266,13 @@ export function createCardElementsProgressively(context, onDone) {
         if (index >= hydratedHead) {
             // Below-the-fold cards start as placeholder cells: grid spans come
             // from config, so the scroll geometry is roughly right at no cost.
+            // Entries carry both positions so a failed head card (compacted
+            // out of the wrapper arrays) cannot shift hydration onto the
+            // wrong config.
             const pendingHydration = [];
             for (; index < cards.length; index++) {
                 const cardConfig = cards[index];
-                const cardWrapper = createElement('div', 'card');
+                const cardWrapper = createElement('div', 'card is-placeholder');
                 _applyCardWrapperLayout(null, cardWrapper, cardConfig);
 
                 context._managedCards.push(null);
@@ -273,13 +280,21 @@ export function createCardElementsProgressively(context, onDone) {
                 context._lastCardConfigRefs.push(cardConfig);
                 context._lastRenderedCardConfigs.push(null);
                 cardsContainer.appendChild(cardWrapper);
-                pendingHydration.push(context._cardWrappers.length - 1);
+                pendingHydration.push({ wrapperIndex: context._cardWrappers.length - 1, configIndex: index });
             }
             context._pendingCardHydration = pendingHydration.length > 0 ? pendingHydration : null;
 
             context._progressiveCardWork = null;
             activeProgressiveBuilds = Math.max(0, activeProgressiveBuilds - 1);
             _setupCardVisibilityObserver(context);
+
+            // A hass tick landed mid-build: replay one sync so every card
+            // renders the latest state before the open transition starts.
+            // (Skipped when a card creation failed and compacted the arrays;
+            // the length-mismatch rebuild self-heals on the next hass tick.)
+            if (context._hass !== hassAtBuildStart && context._managedCards.length === cards.length) {
+                updateCardElements(context);
+            }
             onDone();
             return;
         }
@@ -311,14 +326,23 @@ export function createCardElementsProgressively(context, onDone) {
 }
 
 // Fill one placeholder cell with its real card.
-function _hydrateCardAt(context, index) {
+function _hydrateCardAt(context, entry) {
     const cards = context.config?.cards;
-    const cardWrapper = context._cardWrappers?.[index];
-    if (!Array.isArray(cards) || !cardWrapper || context._managedCards?.[index]) {
+    const cardWrapper = context._cardWrappers?.[entry?.wrapperIndex];
+    if (!Array.isArray(cards) || !cardWrapper || context._managedCards?.[entry.wrapperIndex]) {
         return false;
     }
 
-    const cardConfig = cards[index];
+    const cardConfig = cards[entry.configIndex];
+    if (!cardConfig) {
+        return false;
+    }
+
+    // The cell stops being a placeholder either way: a failed creation must
+    // collapse like the synchronous builder's skipped cards, not keep
+    // reserving a row.
+    cardWrapper.classList.remove('is-placeholder');
+
     const cardEl = _createHuiCard(cardConfig, context, false);
     if (!cardEl) {
         return false;
@@ -326,24 +350,23 @@ function _hydrateCardAt(context, index) {
 
     cardWrapper.appendChild(cardEl);
     _applyCardWrapperLayout(cardEl, cardWrapper, cardConfig);
-    _bindCardLayoutUpdates(cardEl, cardWrapper, context, index);
-    context._managedCards[index] = cardEl;
-    context._lastRenderedCardConfigs[index] = cardEl.config;
+    _bindCardLayoutUpdates(cardEl, cardWrapper, context, entry.configIndex);
+    context._managedCards[entry.wrapperIndex] = cardEl;
+    context._lastRenderedCardConfigs[entry.wrapperIndex] = cardEl.config;
     context._registerCardVisibility?.(cardWrapper, cardEl);
     return true;
 }
 
-// Hydrate the remaining placeholder cells, one budgeted step per macrotask.
-// Called once the open transition has finished.
-export function resumeCardHydrationProgressively(context, onDone) {
-    const done = typeof onDone === 'function' ? onDone : () => {};
+// Start the budgeted hydration stepper over context._pendingCardHydration.
+// Returns the work object, or null when there is nothing to do or another
+// progressive job is already in flight.
+function _startHydrationStepper(context) {
     const pending = context._pendingCardHydration;
     if (!Array.isArray(pending) || pending.length === 0 || context._progressiveCardWork) {
-        done();
-        return;
+        return null;
     }
 
-    const work = { type: 'hydrate', timeout: null };
+    const work = { type: 'hydrate', timeout: null, onDone: null };
     context._progressiveCardWork = work;
 
     // Any interaction with the pop-up wins over hydration: hold the next step
@@ -378,11 +401,12 @@ export function resumeCardHydrationProgressively(context, onDone) {
 
         if (pending.length === 0) {
             work.cleanup?.();
+            work.cleanup = null;
             context._progressiveCardWork = null;
             context._pendingCardHydration = null;
             // The content height changed: any measured scrollability is stale.
             context._cachedPopupScrollableState = undefined;
-            done();
+            work.onDone?.();
             return;
         }
 
@@ -390,6 +414,30 @@ export function resumeCardHydrationProgressively(context, onDone) {
     };
 
     work.timeout = setTimeout(step, hydrationStepGapMs);
+    return work;
+}
+
+// Hydrate the remaining placeholder cells, one budgeted step per macrotask.
+// Called once the open transition has finished.
+export function resumeCardHydrationProgressively(context, onDone) {
+    const done = typeof onDone === 'function' ? onDone : () => {};
+
+    // A visibility-triggered stepper may already be running (a placeholder
+    // scrolled into view before the transition finished): hand it the
+    // completion callback instead of dropping it.
+    const existing = context._progressiveCardWork;
+    if (existing?.type === 'hydrate') {
+        const previousDone = existing.onDone;
+        existing.onDone = previousDone ? () => { previousDone(); done(); } : done;
+        return;
+    }
+
+    const work = _startHydrationStepper(context);
+    if (!work) {
+        done();
+        return;
+    }
+    work.onDone = done;
 }
 
 // Remove popup child cards one per macrotask, last to first. Call with the
@@ -456,6 +504,8 @@ export function updateCardElements(context) {
     const editModeChanged = (context._lastCardsEditMode ?? false) !== isEditMode;
     if (managed.length !== cards.length || editModeChanged) {
         context._lastCardsEditMode = isEditMode;
+        // An in-flight hydration must not outlive the content it belongs to.
+        settleProgressiveCardWork(context);
         removeCardElements(context);
         createCardElements(context);
         return;
@@ -709,27 +759,19 @@ function _setupCardVisibilityObserver(context) {
 
     const offscreen = new Set();
     const wrapperToCard = new WeakMap();
-    const wrapperToIndex = new WeakMap();
+    const wrapperToPendingEntry = new WeakMap();
 
     let observer;
     try {
         observer = new IntersectionObserver((entries) => {
+            const visiblePlaceholders = [];
             for (const entry of entries) {
                 const cardEl = wrapperToCard.get(entry.target);
                 if (!cardEl) {
-                    // Placeholder cell scrolled into view: hydrate it right
-                    // away instead of waiting for the post-open pass.
                     const pending = context._pendingCardHydration;
-                    const index = wrapperToIndex.get(entry.target);
-                    if (entry.isIntersecting && Array.isArray(pending) && typeof index === 'number') {
-                        const at = pending.indexOf(index);
-                        if (at !== -1) {
-                            pending.splice(at, 1);
-                            _hydrateCardAt(context, index);
-                            if (pending.length === 0) {
-                                context._pendingCardHydration = null;
-                            }
-                        }
+                    const pendingEntry = wrapperToPendingEntry.get(entry.target);
+                    if (entry.isIntersecting && Array.isArray(pending) && pendingEntry && pending.includes(pendingEntry)) {
+                        visiblePlaceholders.push(pendingEntry);
                     }
                     continue;
                 }
@@ -740,6 +782,34 @@ function _setupCardVisibilityObserver(context) {
                     }
                 } else {
                     offscreen.add(cardEl);
+                }
+            }
+
+            // Placeholder cells scrolled into view: move them to the front of
+            // the hydration queue in delivery order. At most one hydrates
+            // synchronously per delivery — the rest drain through the
+            // budgeted stepper, so a burst of visible placeholders never
+            // turns into one long task.
+            if (visiblePlaceholders.length > 0) {
+                const pending = context._pendingCardHydration;
+                for (let v = visiblePlaceholders.length - 1; v >= 0; v--) {
+                    const pendingEntry = visiblePlaceholders[v];
+                    const at = pending.indexOf(pendingEntry);
+                    if (at > 0) {
+                        pending.splice(at, 1);
+                        pending.unshift(pendingEntry);
+                    }
+                }
+
+                _hydrateCardAt(context, pending.shift());
+                if (pending.length === 0) {
+                    context._pendingCardHydration = null;
+                    context._cachedPopupScrollableState = undefined;
+                } else if (!context._progressiveCardWork) {
+                    // Placeholders became visible before the post-open resume
+                    // (the head does not cover the fold): drain the queue in
+                    // budgeted steps starting now.
+                    _startHydrationStepper(context);
                 }
             }
         }, {
@@ -753,14 +823,22 @@ function _setupCardVisibilityObserver(context) {
         return;
     }
 
+    const pendingByWrapperIndex = new Map();
+    if (Array.isArray(context._pendingCardHydration)) {
+        for (const pendingEntry of context._pendingCardHydration) {
+            pendingByWrapperIndex.set(pendingEntry.wrapperIndex, pendingEntry);
+        }
+    }
+
     const managed = context._managedCards || [];
     for (let i = 0; i < wrappers.length; i++) {
         const wrapper = wrappers[i];
         const cardEl = managed[i];
         if (!wrapper || typeof wrapper.appendChild !== 'function') continue;
-        wrapperToIndex.set(wrapper, i);
         if (cardEl) {
             wrapperToCard.set(wrapper, cardEl);
+        } else if (pendingByWrapperIndex.has(i)) {
+            wrapperToPendingEntry.set(wrapper, pendingByWrapperIndex.get(i));
         }
         try {
             observer.observe(wrapper);
