@@ -440,11 +440,13 @@ describe('progressive card work', () => {
         createCardElementsProgressively(context, onDone);
         jest.runAllTimers(); // head build steps (1 card per step here)
 
-        // Completion is reported with only the head hydrated.
+        // Completion is reported with only the head hydrated. With the 800px
+        // viewport fallback and full-width one-row cards, the row-coverage
+        // head is ceil(800/64) + 4 margin rows = 17 cards.
         expect(onDone).toHaveBeenCalledTimes(1);
         expect(context._cardWrappers).toHaveLength(30);
-        expect(context._managedCards.filter(Boolean)).toHaveLength(14);
-        expect(context._pendingCardHydration).toHaveLength(16);
+        expect(context._managedCards.filter(Boolean)).toHaveLength(17);
+        expect(context._pendingCardHydration).toHaveLength(13);
         expect(context._progressiveCardWork).toBeNull();
 
         // Post-open resume hydrates the rest, one budgeted step at a time.
@@ -453,7 +455,7 @@ describe('progressive card work', () => {
         expect(hydrated).not.toHaveBeenCalled();
 
         jest.advanceTimersToNextTimer();
-        expect(context._managedCards.filter(Boolean).length).toBeGreaterThan(14);
+        expect(context._managedCards.filter(Boolean).length).toBeGreaterThan(17);
         expect(hydrated).not.toHaveBeenCalled();
 
         jest.runAllTimers();
@@ -574,7 +576,7 @@ describe('progressive card work', () => {
             jest.runAllTimers();
 
             expect(typeof observerCallback).toBe('function');
-            expect(context._managedCards.filter(Boolean)).toHaveLength(14);
+            expect(context._managedCards.filter(Boolean)).toHaveLength(17);
 
             // Several placeholders intersect at once (head not covering the fold).
             observerCallback([
@@ -585,7 +587,7 @@ describe('progressive card work', () => {
 
             // Only one hydrated synchronously (the first delivered), the rest
             // moved to the front of the queue in delivery order.
-            expect(context._managedCards.filter(Boolean)).toHaveLength(15);
+            expect(context._managedCards.filter(Boolean)).toHaveLength(18);
             expect(context._managedCards[20]).toBeTruthy();
             const frontConfigIndexes = context._pendingCardHydration.slice(0, 2).map((entry) => entry.configIndex);
             expect(frontConfigIndexes).toEqual([21, 22]);
@@ -738,6 +740,72 @@ describe('progressive card work', () => {
 
         jest.advanceTimersToNextTimer();
         expect(context._managedCards.filter(Boolean).length).toBeGreaterThan(afterFirstStep);
+    });
+
+    test('extends the head until multi-column cards cover the fold', () => {
+        // Half-width cards: 0.5 estimated rows each, so covering the
+        // 17-row fold target takes 34 cards instead of 17.
+        const context = createProgressiveContext(40);
+        context.config.cards = context.config.cards.map((card) => ({
+            ...card,
+            grid_options: { columns: 6 },
+        }));
+
+        createCardElementsProgressively(context, () => {});
+        jest.runAllTimers();
+
+        expect(context._managedCards.filter(Boolean)).toHaveLength(34);
+        expect(context._pendingCardHydration).toHaveLength(6);
+    });
+
+    test('cuts over to placeholders once the fold is covered and the build spent its time allowance', () => {
+        // Small viewport: the fold needs ceil(320/64) + 4 = 9 rows. Each card
+        // costs 30ms (see the createElement mock), so by card 9 the build has
+        // spent ~270ms > 200ms allowance while the static head wanted more.
+        global.window = { innerHeight: 320 };
+        try {
+            const context = createProgressiveContext(30);
+            createCardElementsProgressively(context, () => {});
+            jest.runAllTimers();
+
+            expect(context._managedCards.filter(Boolean)).toHaveLength(9);
+            expect(context._pendingCardHydration).toHaveLength(21);
+        } finally {
+            delete global.window;
+        }
+    });
+
+    test('schedules zero-delay steps through scheduler.postTask and aborts them on settle', () => {
+        const postedTasks = [];
+        global.scheduler = {
+            postTask: jest.fn((fn, options) => {
+                postedTasks.push({ fn, signal: options?.signal, priority: options?.priority });
+                return { catch: () => {} };
+            }),
+        };
+
+        try {
+            const context = createProgressiveContext(3);
+            const onDone = jest.fn();
+            createCardElementsProgressively(context, onDone);
+
+            // Steps go through the scheduler at user-visible priority.
+            expect(postedTasks).toHaveLength(1);
+            expect(postedTasks[0].priority).toBe('user-visible');
+
+            postedTasks.shift().fn();
+            expect(context._cardWrappers).toHaveLength(1);
+
+            // Settling aborts the pending step: the build never completes.
+            const pending = postedTasks.shift();
+            settleProgressiveCardWork(context);
+            expect(pending.signal.aborted).toBe(true);
+
+            expect(onDone).not.toHaveBeenCalled();
+            expect(context._cardWrappers).toHaveLength(0);
+        } finally {
+            delete global.scheduler;
+        }
     });
 
     test('falls back to the synchronous builder in edit mode', () => {

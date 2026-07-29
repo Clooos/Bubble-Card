@@ -9,7 +9,28 @@ const DEFAULT_GRID_SIZE = { columns: 12, rows: 'auto' };
 const NESTED_POPUP_WARNING_TITLE = 'Nested pop-ups are not supported';
 const NESTED_POPUP_WARNING_MESSAGE = 'Adding a standalone pop-up inside another standalone pop-up is not supported. Please create this pop-up outside of the current pop-up instead.';
 
-function _hasStateDrivenVisibility(cardConfig, visited = new Set()) {
+// The deep config walk below runs for every off-screen card on every hass
+// dispatch while a pop-up is open. Config references are stable (reconciling
+// relies on `previousCardConfigs[i] !== cards[i]`), so the answer is cached
+// per config object.
+const stateDrivenVisibilityCache = new WeakMap();
+
+function _hasStateDrivenVisibility(cardConfig) {
+    if (!cardConfig || typeof cardConfig !== 'object') {
+        return false;
+    }
+
+    const cached = stateDrivenVisibilityCache.get(cardConfig);
+    if (cached !== undefined) {
+        return cached;
+    }
+
+    const result = _computeStateDrivenVisibility(cardConfig, new Set());
+    stateDrivenVisibilityCache.set(cardConfig, result);
+    return result;
+}
+
+function _computeStateDrivenVisibility(cardConfig, visited) {
     if (!cardConfig || typeof cardConfig !== 'object' || visited.has(cardConfig)) {
         return false;
     }
@@ -24,7 +45,7 @@ function _hasStateDrivenVisibility(cardConfig, visited = new Set()) {
         ? cardConfig
         : Object.values(cardConfig);
 
-    return nestedValues.some((value) => _hasStateDrivenVisibility(value, visited));
+    return nestedValues.some((value) => _computeStateDrivenVisibility(value, visited));
 }
 
 function _getMountedCardElement(cardEl) {
@@ -182,15 +203,50 @@ function _shouldTeardownYield() {
 // exceeds roughly one card's cost beyond the budget.
 const progressiveStepBudgetMs = 24;
 
-// Fold-first hydration: pop-ups at least this big render only the first
-// `foldFirstHydratedHead` cards before the open transition. The rest start as
-// placeholder cells carrying their grid spans from config (no layout read),
-// then hydrate one budgeted step at a time after the transition — or
-// immediately when one scrolls into view. The threshold is high enough that
-// eligible pop-ups always exceed their max height, so the shell geometry
-// never visibly changes as placeholders fill in.
-const foldFirstHydrationThreshold = 24;
-const foldFirstHydratedHead = 14;
+// Fold-first hydration: large pop-ups render only enough leading cards to
+// cover the first viewport (estimated from config grid spans, no layout
+// read) before the open transition. The rest start as placeholder cells,
+// then hydrate one budgeted step at a time after the transition — or when
+// one scrolls into view. The head is a row-coverage estimate rather than a
+// card count, so multi-column layouts still fill their fold, and a build
+// that already covered the fold cuts over to placeholders once it has spent
+// its time allowance on a slow device.
+const foldFirstMinPlaceholderTail = 6;
+const foldFirstMaxBuildTimeMs = 200;
+const estimatedRowHeightPx = 64; // --row-height (56px) + row gap (8px)
+const foldCoverageMarginRows = 4;
+const assumedGridColumnCount = 12;
+
+// Approximate the vertical footprint of one card in grid rows: a full-width
+// one-row card counts 1, a half-width card counts 0.5, and so on. Cheap and
+// config-only — precision does not matter, only fold coverage does.
+function _estimateCardRowArea(cardConfig) {
+    const gridOptions = _getConfigGridOptions(cardConfig);
+    const columnsRaw = gridOptions.columns ?? DEFAULT_GRID_SIZE.columns;
+    const span = columnsRaw === 'full'
+        ? assumedGridColumnCount
+        : Math.min(typeof columnsRaw === 'number' && columnsRaw > 0 ? columnsRaw : assumedGridColumnCount, assumedGridColumnCount);
+    const rows = typeof gridOptions.rows === 'number' && gridOptions.rows > 0 ? gridOptions.rows : 1;
+    return (span / assumedGridColumnCount) * rows;
+}
+
+function _estimateFoldRowsTarget() {
+    const viewportHeight = (typeof window !== 'undefined' && window.innerHeight > 0)
+        ? window.innerHeight
+        : 800;
+    return Math.ceil(viewportHeight / estimatedRowHeightPx) + foldCoverageMarginRows;
+}
+
+function _computeFoldFirstHead(cards, foldRowsTarget) {
+    let rowsUsed = 0;
+    for (let i = 0; i < cards.length; i++) {
+        rowsUsed += _estimateCardRowArea(cards[i]);
+        if (rowsUsed >= foldRowsTarget && (cards.length - (i + 1)) >= foldFirstMinPlaceholderTail) {
+            return i + 1;
+        }
+    }
+    return cards.length;
+}
 
 // Post-open hydration pacing: a gap between steps keeps every frame breathable
 // (scroll must stay fluid on low-end devices), and any interaction with the
@@ -198,13 +254,51 @@ const foldFirstHydratedHead = 14;
 const hydrationStepGapMs = 34;
 const hydrationInteractionHoldMs = 280;
 
+// Schedule the next progressive step. Zero-delay steps prefer
+// scheduler.postTask when available (Chromium): no nested-setTimeout clamp
+// and an explicit priority lane ('background' keeps teardowns out of the
+// way of everything else). setTimeout stays the fallback (WebKit).
+function _scheduleWorkStep(work, fn, delayMs, priority) {
+    work.cancelStep?.();
+
+    if (delayMs === 0 &&
+        typeof scheduler !== 'undefined' && typeof scheduler.postTask === 'function' &&
+        typeof AbortController === 'function') {
+        try {
+            const stepController = new AbortController();
+            const task = scheduler.postTask(fn, { priority, signal: stepController.signal });
+            task?.catch?.(() => {});
+            work.cancelStep = () => stepController.abort();
+            return;
+        } catch (_) {
+            // Fall through to setTimeout on any scheduler quirk.
+        }
+    }
+
+    const timeout = setTimeout(fn, delayMs);
+    work.cancelStep = () => clearTimeout(timeout);
+}
+
+// Ends a budgeted step early when the user is interacting: the pending input
+// handler runs one card sooner. Chromium only; elsewhere the time budget
+// alone bounds the step.
+function _isInputPending() {
+    try {
+        return typeof navigator !== 'undefined' &&
+            typeof navigator.scheduling?.isInputPending === 'function' &&
+            navigator.scheduling.isInputPending() === true;
+    } catch (_) {
+        return false;
+    }
+}
+
 function _clearProgressiveCardWork(context) {
     const work = context._progressiveCardWork;
     if (!work) {
         return;
     }
 
-    clearTimeout(work.timeout);
+    work.cancelStep?.();
     work.cleanup?.();
     context._progressiveCardWork = null;
 }
@@ -276,7 +370,10 @@ export function createCardElementsProgressively(context, onDone) {
     // the completion step replays one sync when that happened.
     const hassAtBuildStart = context._hass;
 
-    const hydratedHead = cards.length >= foldFirstHydrationThreshold ? foldFirstHydratedHead : cards.length;
+    const foldRowsTarget = _estimateFoldRowsTarget();
+    let hydratedHead = _computeFoldFirstHead(cards, foldRowsTarget);
+    const buildStart = monotonicNow();
+    let builtRowsEstimate = 0;
 
     let index = 0;
     const step = () => {
@@ -329,6 +426,7 @@ export function createCardElementsProgressively(context, onDone) {
         do {
             const cardConfig = cards[index];
             index += 1;
+            builtRowsEstimate += _estimateCardRowArea(cardConfig);
 
             const cardEl = _createHuiCard(cardConfig, context, false);
             if (cardEl) {
@@ -346,12 +444,22 @@ export function createCardElementsProgressively(context, onDone) {
                 context._lastRenderedCardConfigs.push(cardEl.config);
                 cardsContainer.appendChild(cardWrapper);
             }
-        } while (index < hydratedHead && (monotonicNow() - stepStart) < progressiveStepBudgetMs);
+        } while (index < hydratedHead && (monotonicNow() - stepStart) < progressiveStepBudgetMs && !_isInputPending());
 
-        work.timeout = setTimeout(step, 0);
+        // Adaptive cutoff: on a very slow device, once the fold is covered
+        // and the build has spent its time allowance, the remaining cards
+        // become placeholders even though the static head allowed more.
+        if (index < hydratedHead &&
+            (monotonicNow() - buildStart) > foldFirstMaxBuildTimeMs &&
+            builtRowsEstimate >= foldRowsTarget &&
+            (cards.length - index) >= foldFirstMinPlaceholderTail) {
+            hydratedHead = index;
+        }
+
+        _scheduleWorkStep(work, step, 0, 'user-visible');
     };
 
-    work.timeout = setTimeout(step, 0);
+    _scheduleWorkStep(work, step, 0, 'user-visible');
 }
 
 // Fill one placeholder cell with its real card.
@@ -435,7 +543,7 @@ function _startHydrationStepper(context) {
         }
 
         if (monotonicNow() < holdUntil) {
-            work.timeout = setTimeout(step, hydrationInteractionHoldMs);
+            _scheduleWorkStep(work, step, hydrationInteractionHoldMs);
             return;
         }
 
@@ -455,10 +563,10 @@ function _startHydrationStepper(context) {
             return;
         }
 
-        work.timeout = setTimeout(step, hydrationStepGapMs);
+        _scheduleWorkStep(work, step, hydrationStepGapMs);
     };
 
-    work.timeout = setTimeout(step, hydrationStepGapMs);
+    _scheduleWorkStep(work, step, hydrationStepGapMs);
     return work;
 }
 
@@ -512,7 +620,7 @@ export function removeCardElementsProgressively(context, onDone) {
         // the teardown is invisible (suspended host) and nothing depends on
         // its pace.
         if (_shouldTeardownYield()) {
-            work.timeout = setTimeout(step, 120);
+            _scheduleWorkStep(work, step, 120);
             return;
         }
 
@@ -529,10 +637,10 @@ export function removeCardElementsProgressively(context, onDone) {
             index -= 1;
         } while (index >= 0 && (monotonicNow() - stepStart) < progressiveStepBudgetMs);
 
-        work.timeout = setTimeout(step, 0);
+        _scheduleWorkStep(work, step, 0, 'background');
     };
 
-    work.timeout = setTimeout(step, 0);
+    _scheduleWorkStep(work, step, 0, 'background');
 }
 
 // Sync rendered popup child cards with hass and config.

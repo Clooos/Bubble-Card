@@ -151,6 +151,11 @@ jest.unstable_mockModule('./legacy.js', () => ({
     hideLegacyPopupContent,
 }));
 
+const schedulePopupCardModulePreload = jest.fn();
+jest.unstable_mockModule('./cards/preload.js', () => ({
+    schedulePopupCardModulePreload,
+}));
+
 jest.unstable_mockModule('./index.js', () => ({
     invalidateWakeSyncCache: jest.fn(),
 }));
@@ -1255,6 +1260,40 @@ describe('standalone popup lifecycle', () => {
         cleanupPopupRuntime(context);
 
         expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+    });
+
+    test('warms up the standalone shell at idle after registration', () => {
+        const context = createStandaloneContext({ hash: '#warmup-a' });
+        usedContexts.push(context);
+        const createShell = jest.fn();
+        context._standaloneShellCreated = false;
+        context.createStandaloneShell = createShell;
+
+        registerPopupContext(context);
+        expect(createShell).not.toHaveBeenCalled();
+        expect(schedulePopupCardModulePreload).toHaveBeenCalledWith(context);
+
+        // Idle fallback slice (no requestIdleCallback in the test env).
+        jest.advanceTimersByTime(2500);
+
+        expect(createShell).toHaveBeenCalledTimes(1);
+        expect(context._standaloneShellCreated).toBe(true);
+    });
+
+    test('the idle shell warm-up never doubles a shell an open already created', () => {
+        const context = createStandaloneContext({ hash: '#warmup-b' });
+        usedContexts.push(context);
+        const createShell = jest.fn();
+        context._standaloneShellCreated = false;
+        context.createStandaloneShell = createShell;
+
+        registerPopupContext(context);
+        openPopup(context);
+        flushHeavyOpenTask();
+        expect(createShell).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(2500);
+        expect(createShell).toHaveBeenCalledTimes(1);
     });
 
     test('does not promote the instant switch path while a teardown owns the content', () => {

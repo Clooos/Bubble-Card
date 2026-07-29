@@ -19,6 +19,16 @@ const popupOpenHassGate = {
     draining: false,
 };
 
+function _isInputPending() {
+    try {
+        return typeof navigator !== 'undefined' &&
+            typeof navigator.scheduling?.isInputPending === 'function' &&
+            navigator.scheduling.isInputPending() === true;
+    } catch (_) {
+        return false;
+    }
+}
+
 function drainPopupOpenHassGateQueue() {
     if (popupOpenHassGate.draining || popupOpenHassGate.queue.size === 0) {
         return;
@@ -46,7 +56,7 @@ function drainPopupOpenHassGateQueue() {
                     value.updateBubbleCard();
                 }
             } catch (_) {}
-        } while (popupOpenHassGate.queue.size > 0 && (monotonicNow() - stepStart) < popupOpenHassGateDrainBudgetMs);
+        } while (popupOpenHassGate.queue.size > 0 && (monotonicNow() - stepStart) < popupOpenHassGateDrainBudgetMs && !_isInputPending());
 
         if (popupOpenHassGate.queue.size > 0) {
             setTimeout(step, 0);

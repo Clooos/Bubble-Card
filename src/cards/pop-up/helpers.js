@@ -4,6 +4,7 @@ import { toggleBodyScroll } from "../../tools/utils.js";
 import { buildStandalonePopUpCardsProgressively, handlePopUpCards, registerPopupOpenActivityProbe, resumeStandaloneCardHydration, setStandalonePopUpCardsActive, settleStandaloneCardWork, suspendStandalonePopUpCardsProgressively } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
 import { beginPopupOpenHassGate, releasePopupOpenHassGate } from './hass-gate.js';
+import { schedulePopupCardModulePreload } from './cards/preload.js';
 import { invalidateWakeSyncCache } from "./index.js";
 
 function resetPopupScroll(context) {
@@ -817,19 +818,33 @@ function wakeStandalonePopupScrollableContent(context) {
     const targets = [];
     roots.forEach((root) => collectScrollableContentWakeTargets(root, targets));
 
-    // These synthetic scrolls are not user interaction: without the marker
-    // they would trip the hydration interaction hold and freeze the fold-first
-    // hydration for a phantom gesture on every cold open.
-    context._suppressHydrationInteractionHold = true;
-    try {
-        targets.forEach((target) => {
-            try {
-                target.dispatchEvent(new Event('scroll'));
-            } catch (_) {}
-        });
-    } finally {
-        context._suppressHydrationInteractionHold = false;
-    }
+    // Each synthetic scroll can force a layout in the receiving card: chunk
+    // the dispatches so up to 16 targets never fold into one long task. The
+    // suppression marker keeps these from tripping the hydration interaction
+    // hold (they are not user gestures).
+    const wakeChunkSize = 4;
+    const dispatchWakeChunk = () => {
+        if (!popupState.activePopups.has(context)) {
+            return;
+        }
+
+        context._suppressHydrationInteractionHold = true;
+        try {
+            for (let i = 0; i < wakeChunkSize && targets.length > 0; i++) {
+                const target = targets.shift();
+                try {
+                    target.dispatchEvent(new Event('scroll'));
+                } catch (_) {}
+            }
+        } finally {
+            context._suppressHydrationInteractionHold = false;
+        }
+
+        if (targets.length > 0) {
+            context._standalonePostOpenContentWakeTimeout = setTimeout(dispatchWakeChunk, 0);
+        }
+    };
+    dispatchWakeChunk();
 }
 
 function cancelStandalonePostOpenContentWake(context) {
@@ -2273,9 +2288,69 @@ export function unregisterPopupContext(context) {
     context._registeredHash = null;
 }
 
+// Speculative shell warm-up: build each registered pop-up's shell (header +
+// structure only, no cards) at idle time after the dashboard has loaded, so a
+// first open no longer pays that construction in its critical window. Memory
+// stays bounded (a few elements per pop-up), the host is suspended and the
+// shell painted closed, so nothing is visible. One shell per idle slice.
+const pendingShellWarmups = [];
+let shellWarmupScheduled = false;
+
+function scheduleIdleStandaloneShellWarmup(context) {
+    if (context._standaloneShellWarmupQueued || typeof context.createStandaloneShell !== 'function') {
+        return;
+    }
+
+    context._standaloneShellWarmupQueued = true;
+    pendingShellWarmups.push(new WeakRef(context));
+    pumpShellWarmupQueue();
+}
+
+function pumpShellWarmupQueue() {
+    if (shellWarmupScheduled || pendingShellWarmups.length === 0) {
+        return;
+    }
+
+    shellWarmupScheduled = true;
+    const run = () => {
+        shellWarmupScheduled = false;
+        const contextRef = pendingShellWarmups.shift();
+        const context = contextRef?.deref?.();
+
+        // An open may have consumed the factory meanwhile, or the element may
+        // be gone: every condition is re-checked at run time.
+        if (context &&
+            !context.editor && !context.detectedEditor &&
+            !context._standaloneShellCreated &&
+            typeof context.createStandaloneShell === 'function' &&
+            !popupState.activePopups.has(context) &&
+            !isPopupOpenInProgress(context)) {
+            try {
+                runDeferredStandaloneShellCreate(context);
+            } catch (_) {}
+        }
+
+        pumpShellWarmupQueue();
+    };
+
+    if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(run, { timeout: 8000 });
+    } else {
+        setTimeout(run, 2500);
+    }
+}
+
 export function registerPopupContext(context) {
     const hash = context.config.hash;
     if (!hash) return;
+
+    // Idle-time warm-ups (once per context): the card modules this pop-up
+    // will need, and the standalone shell itself.
+    if (!context._popupCardTypesPreloadQueued && !context.editor && !context.detectedEditor) {
+        context._popupCardTypesPreloadQueued = true;
+        schedulePopupCardModulePreload(context);
+    }
+    scheduleIdleStandaloneShellWarmup(context);
 
     if (context._registeredHash && context._registeredHash !== hash) {
         const existing = popupRegistry.get(context._registeredHash);
