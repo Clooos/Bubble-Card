@@ -17,6 +17,10 @@ const popupOpenHassGate = {
     until: 0,
     queue: new Set(),
     draining: false,
+    // The context whose open armed the gate: releases are owner-scoped, so an
+    // unrelated pop-up element being torn down (lovelace re-render, hidden
+    // section) can never kill the gate of an open still in flight.
+    owner: null,
 };
 
 function _isInputPending() {
@@ -73,6 +77,7 @@ export function beginPopupOpenHassGate(context) {
     }
 
     popupOpenHassGate.until = monotonicNow() + popupOpenHassGateWindowMs;
+    popupOpenHassGate.owner = context ? new WeakRef(context) : null;
 }
 
 // Slide the deadline while the open sequence is still making progress (called
@@ -84,8 +89,19 @@ export function extendPopupOpenHassGate() {
     }
 }
 
-export function releasePopupOpenHassGate() {
+// Owner-scoped: a context can only release a gate it armed (or an orphaned
+// one). Without this, ANY pop-up element's teardown — cleanupPopupRuntime
+// runs from every disconnectedCallback — would kill the gate of another
+// pop-up's open still in flight and reintroduce the very contention the gate
+// prevents.
+export function releasePopupOpenHassGate(context) {
+    const owner = popupOpenHassGate.owner?.deref?.();
+    if (owner && context && owner !== context) {
+        return;
+    }
+
     popupOpenHassGate.until = 0;
+    popupOpenHassGate.owner = null;
     drainPopupOpenHassGateQueue();
 }
 

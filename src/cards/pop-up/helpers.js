@@ -1176,7 +1176,7 @@ export function wasPopupOpenedByTrigger(context) {
 function completePopupOpen(context) {
     setPopupOpenInProgress(context, false);
     clearPopupWillChange(context);
-    releasePopupOpenHassGate();
+    releasePopupOpenHassGate(context);
 
     if (!context.popUp.classList.contains('is-popup-opened') || !popupState.activePopups.has(context)) {
         return;
@@ -1440,7 +1440,7 @@ function rollbackStandalonePopupOpen(context, error = null) {
         console.error(error);
     }
 
-    releasePopupOpenHassGate();
+    releasePopupOpenHassGate(context);
 
     const wasOnlyActivePopup = popupState.activePopups.size === 1 && popupState.activePopups.has(context);
 
@@ -1774,7 +1774,7 @@ function closeStandalonePopup(context, force = false) {
     if ((!context.popUp.classList.contains('is-popup-opened') && !force)) return;
 
     clearAllTimeouts(context);
-    releasePopupOpenHassGate();
+    releasePopupOpenHassGate(context);
 
     const incomingPopupNavigation = hasIncomingPopupNavigation(context);
 
@@ -2443,7 +2443,7 @@ export function cleanupPopupRuntime(context) {
     // The element can be torn down mid-open (lovelace re-render, editor
     // re-creation): every other open-termination path releases the gate, and
     // clearAllTimeouts just cancelled the completion that would have.
-    releasePopupOpenHassGate();
+    releasePopupOpenHassGate(context);
     updateListeners(context, false);
     setPopupOpeningMarker(context, false);
     const visuallyOpen = context.popUp?.classList?.contains('is-popup-opened');

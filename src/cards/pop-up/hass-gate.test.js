@@ -165,6 +165,25 @@ describe('popup open hass gate', () => {
         expect(cardB.updateBubbleCard).toHaveBeenCalledTimes(1);
     });
 
+    test('an unrelated context cannot release a gate it never armed', () => {
+        const opener = { config: {} };
+        const stranger = { config: {} };
+        const card = createDashboardCard();
+
+        beginPopupOpenHassGate(opener);
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
+
+        // Another pop-up element is torn down mid-open (lovelace re-render):
+        // its cleanup must not kill the opener's gate.
+        releasePopupOpenHassGate(stranger);
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
+
+        // The owner's release works.
+        releasePopupOpenHassGate(opener);
+        jest.runOnlyPendingTimers();
+        expect(card.updateBubbleCard).toHaveBeenCalledTimes(1);
+    });
+
     test('never arms for hide_backdrop pop-ups or editor previews', () => {
         beginPopupOpenHassGate({ config: { hide_backdrop: true } });
         expect(shouldHoldDashboardHassUpdate(createDashboardCard())).toBe(false);

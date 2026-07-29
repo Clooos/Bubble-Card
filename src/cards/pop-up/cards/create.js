@@ -212,7 +212,6 @@ const progressiveStepBudgetMs = 24;
 // that already covered the fold cuts over to placeholders once it has spent
 // its time allowance on a slow device.
 const foldFirstMinPlaceholderTail = 6;
-const foldFirstMaxBuildTimeMs = 200;
 const estimatedRowHeightPx = 64; // --row-height (56px) + row gap (8px)
 const foldCoverageMarginRows = 4;
 const assumedGridColumnCount = 12;
@@ -221,6 +220,13 @@ const assumedGridColumnCount = 12;
 // one-row card counts 1, a half-width card counts 0.5, and so on. Cheap and
 // config-only — precision does not matter, only fold coverage does.
 function _estimateCardRowArea(cardConfig) {
+    // A card whose visibility is state-driven may render 0px (the CSS
+    // collapses hidden cells): counting it toward fold coverage could leave
+    // visible placeholders. Zero rows errs toward building more up-front.
+    if (_hasStateDrivenVisibility(cardConfig)) {
+        return 0;
+    }
+
     const gridOptions = _getConfigGridOptions(cardConfig);
     const columnsRaw = gridOptions.columns ?? DEFAULT_GRID_SIZE.columns;
     const span = columnsRaw === 'full'
@@ -362,7 +368,7 @@ export function createCardElementsProgressively(context, onDone) {
     context._cardsContainer = cardsContainer;
     context._renderedItems.push(cardsContainer);
 
-    const work = { type: 'build', timeout: null };
+    const work = { type: 'build', cancelStep: null };
     context._progressiveCardWork = work;
     activeProgressiveBuilds += 1;
 
@@ -370,10 +376,11 @@ export function createCardElementsProgressively(context, onDone) {
     // the completion step replays one sync when that happened.
     const hassAtBuildStart = context._hass;
 
+    // The row-coverage head IS the minimal fold-coverage cut: by the time the
+    // build reaches it, adding a time-based cutoff could only cut below fold
+    // coverage, which would show placeholders. So there is none.
     const foldRowsTarget = _estimateFoldRowsTarget();
-    let hydratedHead = _computeFoldFirstHead(cards, foldRowsTarget);
-    const buildStart = monotonicNow();
-    let builtRowsEstimate = 0;
+    const hydratedHead = _computeFoldFirstHead(cards, foldRowsTarget);
 
     let index = 0;
     const step = () => {
@@ -406,12 +413,16 @@ export function createCardElementsProgressively(context, onDone) {
             activeProgressiveBuilds = Math.max(0, activeProgressiveBuilds - 1);
             _setupCardVisibilityObserver(context);
 
-            // A hass tick landed mid-build: replay one sync so every card
-            // renders the latest state before the open transition starts.
-            // (Skipped when a card creation failed and compacted the arrays;
-            // the length-mismatch rebuild self-heals on the next hass tick.)
-            if (context._hass !== hassAtBuildStart && context._managedCards.length === cards.length) {
-                updateCardElements(context);
+            // A hass tick landed mid-build: cards created before it carry the
+            // older reference. Replay only those — cards created after the
+            // tick already hold the current hass, and re-forcing them would
+            // schedule redundant Lit re-renders right before the transition.
+            if (context._hass !== hassAtBuildStart) {
+                for (const managedCard of context._managedCards) {
+                    if (managedCard && managedCard.hass !== context._hass) {
+                        _applyHassToCardElement(managedCard, context._hass);
+                    }
+                }
             }
             onDone();
             return;
@@ -426,7 +437,6 @@ export function createCardElementsProgressively(context, onDone) {
         do {
             const cardConfig = cards[index];
             index += 1;
-            builtRowsEstimate += _estimateCardRowArea(cardConfig);
 
             const cardEl = _createHuiCard(cardConfig, context, false);
             if (cardEl) {
@@ -445,16 +455,6 @@ export function createCardElementsProgressively(context, onDone) {
                 cardsContainer.appendChild(cardWrapper);
             }
         } while (index < hydratedHead && (monotonicNow() - stepStart) < progressiveStepBudgetMs && !_isInputPending());
-
-        // Adaptive cutoff: on a very slow device, once the fold is covered
-        // and the build has spent its time allowance, the remaining cards
-        // become placeholders even though the static head allowed more.
-        if (index < hydratedHead &&
-            (monotonicNow() - buildStart) > foldFirstMaxBuildTimeMs &&
-            builtRowsEstimate >= foldRowsTarget &&
-            (cards.length - index) >= foldFirstMinPlaceholderTail) {
-            hydratedHead = index;
-        }
 
         _scheduleWorkStep(work, step, 0, 'user-visible');
     };
@@ -482,6 +482,10 @@ function _hydrateCardAt(context, entry) {
 
     const cardEl = _createHuiCard(cardConfig, context, false);
     if (!cardEl) {
+        // Match the synchronous builder, which renders nothing for a failed
+        // card: drop the configured row reservation too.
+        cardWrapper.classList.remove('fit-rows');
+        cardWrapper.style?.removeProperty?.('--row-size');
         return false;
     }
 
@@ -503,7 +507,7 @@ function _startHydrationStepper(context) {
         return null;
     }
 
-    const work = { type: 'hydrate', timeout: null, onDone: null };
+    const work = { type: 'hydrate', cancelStep: null, onDone: null };
     context._progressiveCardWork = work;
     activeHydrationSteppers += 1;
 
@@ -548,7 +552,7 @@ function _startHydrationStepper(context) {
         }
 
         const stepStart = monotonicNow();
-        while (pending.length > 0 && (monotonicNow() - stepStart) < progressiveStepBudgetMs) {
+        while (pending.length > 0 && (monotonicNow() - stepStart) < progressiveStepBudgetMs && !_isInputPending()) {
             _hydrateCardAt(context, pending.shift());
         }
 
@@ -607,7 +611,7 @@ export function removeCardElementsProgressively(context, onDone) {
         return;
     }
 
-    const work = { type: 'teardown', timeout: null };
+    const work = { type: 'teardown', cancelStep: null };
     context._progressiveCardWork = work;
 
     let index = wrappers.length - 1;

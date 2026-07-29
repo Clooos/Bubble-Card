@@ -758,10 +758,9 @@ describe('progressive card work', () => {
         expect(context._pendingCardHydration).toHaveLength(6);
     });
 
-    test('cuts over to placeholders once the fold is covered and the build spent its time allowance', () => {
-        // Small viewport: the fold needs ceil(320/64) + 4 = 9 rows. Each card
-        // costs 30ms (see the createElement mock), so by card 9 the build has
-        // spent ~270ms > 200ms allowance while the static head wanted more.
+    test('shrinks the row-coverage head on small viewports', () => {
+        // The fold needs ceil(320/64) + 4 margin rows = 9 rows, so the head
+        // stops at 9 full-width cards instead of the 17 of an 800px viewport.
         global.window = { innerHeight: 320 };
         try {
             const context = createProgressiveContext(30);
@@ -773,6 +772,23 @@ describe('progressive card work', () => {
         } finally {
             delete global.window;
         }
+    });
+
+    test('state-driven visibility cards never count toward fold coverage', () => {
+        // 17 conditional cards would nominally cover the 17-row fold, but any
+        // of them can render 0px: the head must extend past them.
+        const context = createProgressiveContext(30);
+        context.config.cards = context.config.cards.map((card, i) => (
+            i < 17 ? { ...card, visibility: [{ condition: 'state' }] } : card
+        ));
+
+        createCardElementsProgressively(context, () => {});
+        jest.runAllTimers();
+
+        // 17 zero-area cards + 17 regular rows land past card 34 > 30: no
+        // fold-first at all, everything builds up-front.
+        expect(context._managedCards.filter(Boolean)).toHaveLength(30);
+        expect(context._pendingCardHydration ?? null).toBeNull();
     });
 
     test('schedules zero-delay steps through scheduler.postTask and aborts them on settle', () => {
