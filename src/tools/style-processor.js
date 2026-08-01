@@ -101,6 +101,16 @@ export const handleCustomStyles = (context, element = context.card) => {
   // removes them and resets the flag, and HA re-attaches cached view elements,
   // so a card can come back long after its initial load with cardLoaded set.
   if (!isDirectStyleElement && !context._moduleChangeListenerAdded) {
+    // A reconnect re-enters here with caches from before the detached window:
+    // module/YAML changes dispatched meanwhile were never heard, so resync
+    // once instead of trusting a stale fingerprint.
+    if (typeof context.cardLoaded !== "undefined") {
+      context.lastEvaluatedStyles = "";
+      context.stylesYAML = null;
+      context._moduleListVersion = (context._moduleListVersion || 0) + 1;
+      context._cachedModulesToApply = null;
+    }
+
     const refreshHandler = () => {
       context.lastEvaluatedStyles = "";
       context.stylesYAML = null;

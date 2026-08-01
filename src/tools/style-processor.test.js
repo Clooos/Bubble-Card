@@ -132,6 +132,22 @@ describe('handleCustomStyles refresh listener registration', () => {
         expect(context._templateChangeUnsubscribe).toBe(templateChangeUnsubscribe);
     });
 
+    test('resyncs module caches on reconnect so changes missed while detached apply', () => {
+        const element = createCardElement();
+        const context = createContext(element);
+
+        handleCustomStyles(context, element);
+        // First load takes the fresh path: no resync bump.
+        expect(context._moduleListVersion).toBeUndefined();
+
+        simulateDisconnect(context);
+        // While detached, module events were not heard: the fingerprint must
+        // be invalidated on reconnect or stale caches would keep applying.
+        handleCustomStyles(context, element);
+
+        expect(context._moduleListVersion).toBe(1);
+    });
+
     test('does not register twice while the listeners are still wired', () => {
         const element = createCardElement();
         const context = createContext(element);
