@@ -184,7 +184,10 @@ function decodeEntities(value) {
 // Google-independent fallback (free, CORS-enabled, modest daily quota):
 // useful when the primary endpoint is rate limited. Its per-request limit is
 // ~500 bytes, so chunks are re-split.
+let myMemoryCooldownUntil = 0;
+
 async function translateChunkWithMyMemory(chunk, targetLang) {
+  if (Date.now() < myMemoryCooldownUntil) return null;
   const parts = [];
   let rest = chunk;
   while (rest.length > 450) {
@@ -204,7 +207,12 @@ async function translateChunkWithMyMemory(chunk, targetLang) {
         if (!response.ok) return null;
         const data = await response.json();
         const text = data?.responseData?.translatedText;
-        if (typeof text !== 'string' || !text || /MYMEMORY WARNING/i.test(text)) return null;
+        if (typeof text === 'string' && /MYMEMORY WARNING/i.test(text)) {
+          // Daily quota exhausted: stop asking for a good while.
+          myMemoryCooldownUntil = Date.now() + 60 * 60 * 1000;
+          return null;
+        }
+        if (typeof text !== 'string' || !text) return null;
         return decodeEntities(text);
       } catch (_) {
         return null;
