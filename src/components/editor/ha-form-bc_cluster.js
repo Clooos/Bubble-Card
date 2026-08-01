@@ -42,8 +42,8 @@ export class HaFormBcCluster extends LitElement {
   static styles = css`
     :host {
       display: block;
-      border-left: 2px solid var(--divider-color, rgba(127, 127, 127, 0.4));
-      padding-left: 12px;
+      border-inline-start: 2px solid var(--divider-color, rgba(127, 127, 127, 0.4));
+      padding-inline-start: 12px;
     }
   `;
 }

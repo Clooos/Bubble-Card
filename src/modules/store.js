@@ -303,7 +303,7 @@ export function makeModuleStore(context) {
         <div class="content">
           <p>${t('editor.store.loading_error_body').replace('{error}', context._storeError)}</p>
           <mwc-button @click=${() => _fetchModuleStore(context)}>
-            <ha-icon icon="mdi:refresh" style="margin-right: 8px;"></ha-icon>
+            <ha-icon icon="mdi:refresh" style="margin-inline-end: 8px;"></ha-icon>
             ${t('editor.store.retry')}
           </mwc-button>
         </div>
@@ -430,7 +430,7 @@ export function makeModuleStore(context) {
                   display: inline-flex;
                   align-items: center;
                   position: absolute;
-                  right: 16px;
+                  inset-inline-end: 16px;
                   padding: 0 8px;
                   cursor: pointer;"
               >
@@ -457,7 +457,7 @@ export function makeModuleStore(context) {
                   display: inline-flex;
                   align-items: center;
                   position: absolute;
-                  right: 16px;
+                  inset-inline-end: 16px;
                   padding: 0 8px;
                   cursor: pointer;"
               >

@@ -33,7 +33,7 @@ p {
 
 ul {
   margin: 0px 14px !important;
-  padding-left: 0px !important;
+  padding-inline-start: 0px !important;
 }
 
 ha-icon, a, p, button, h4 {
@@ -124,7 +124,8 @@ img.example {
 }
 
 h4 > ha-icon {
-  margin: 8px 12px 8px 8px;
+  margin: 8px;
+  margin-inline-end: 12px;
 }
 
 ha-expansion-panel h4:not(.version) {
@@ -201,7 +202,7 @@ h3 {
 
 .button-container {
   display: flex;
-  margin-left: auto !important;
+  margin-inline-start: auto !important;
 }
 
 ha-card-conditions-editor {
@@ -230,8 +231,8 @@ ha-card-conditions-editor {
   background: rgba(0,120,180,1);
   padding: 0px 8px;
   border-radius: 12px;
-  margin-right: -6px;
-  float: right;
+  margin-inline-end: -6px;
+  float: inline-end;
   color: white;
 }
 
@@ -252,19 +253,20 @@ ha-card-conditions-editor {
   display: flex;
   align-items: center;
   position: relative;
-  padding-left: 4px;
+  padding-inline-start: 4px;
 }
 
 .bubble-section-title ha-icon {
   color: var(--info-color) !important;
-  margin: 8px 8px 8px 0;
+  margin: 8px;
+  margin-inline-start: 0;
   line-height: normal !important;
 }
 
 .bubble-section-title::before {
   content: "";
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   top: 0;
   bottom: 0;
   width: 3px;
@@ -430,8 +432,8 @@ ha-card-conditions-editor {
 
 ul.icon-list {
   list-style-type: none;
-  padding-left: 0 !important;
-  margin-left: 0 !important;
+  padding-inline-start: 0 !important;
+  margin-inline-start: 0 !important;
 }
 
 ul.icon-list li {
@@ -443,7 +445,7 @@ ul.icon-list li {
 
 ul.icon-list li ha-icon {
   min-width: 24px;
-  margin-right: 8px;
+  margin-inline-end: 8px;
   --mdc-icon-size: 18px;
 }
 
@@ -463,7 +465,7 @@ ul.icon-list li ha-icon {
 }
 
 .layout-subtitle ha-icon {
-  margin-right: 8px;
+  margin-inline-end: 8px;
   --mdc-icon-size: 18px;
 }
 
@@ -488,8 +490,8 @@ mwc-list-item[disabled] ha-icon {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  float: right;
-  margin-right: 8px;
+  float: inline-end;
+  margin-inline-end: 8px;
   font-size: 10px;
   opacity: 0.8;
   cursor: pointer;
@@ -503,5 +505,6 @@ mwc-list-item[disabled] ha-icon {
 .version-language ha-switch {
   --mdc-switch-track-width: 28px;
   transform: scale(0.65);
-  margin: -6px -4px -6px -2px;
+  margin-block: -6px;
+  margin-inline: -2px -4px;
 }

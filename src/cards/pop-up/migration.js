@@ -812,7 +812,7 @@ function _show() {
         </p>
         <details style="margin: 0 0 16px; border-radius: 8px; overflow: hidden; background: var(--primary-background-color);">
             <summary style="padding: 12px 16px; cursor: pointer; user-select: none;">
-                <span style="margin-right: 4px;"></span> <strong>${t('editor.migration.notice_video_summary')}</strong> ${t('editor.migration.notice_video_hint')}
+                <span style="margin-inline-end: 4px;"></span> <strong>${t('editor.migration.notice_video_summary')}</strong> ${t('editor.migration.notice_video_hint')}
             </summary>
             <video preload="metadata" autoplay muted loop playsinline style="width: 100%; display: block; aspect-ratio: 1059 / 720;">
                 <source src="https://github.com/Clooos/Bubble-Card/raw/main/img/bubble_card_new_pop_up_editor.mp4" type="video/mp4">

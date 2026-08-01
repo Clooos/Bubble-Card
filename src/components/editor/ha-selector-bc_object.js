@@ -732,7 +732,7 @@ export class HaBcObjectSelector extends LitElement {
     .button-container {
       display: flex;
       align-items: center;
-      margin-left: 8px;
+      margin-inline-start: 8px;
     }
 
     .delete-icon,
@@ -743,7 +743,7 @@ export class HaBcObjectSelector extends LitElement {
     .reorder-handle {
       color: var(--secondary-text-color);
       cursor: grab;
-      margin-right: 4px;
+      margin-inline-end: 4px;
     }
 
     .reorder-handle ha-icon,

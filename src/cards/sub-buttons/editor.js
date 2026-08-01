@@ -40,7 +40,7 @@ export function renderSubButtonsEditor(editor) {
                     </ha-formfield>
 
                     ${editor._config?.footer_mode ? html`
-                        <div style="margin-top: 16px; padding-left: 16px; border-left: 2px solid var(--divider-color);">
+                        <div style="margin-top: 16px; padding-inline-start: 16px; border-inline-start: 2px solid var(--divider-color);">
                             <ha-formfield>
                                 <ha-switch
                                     label="${t('editor.sub_buttons_card.full_width_footer')}"

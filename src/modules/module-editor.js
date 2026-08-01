@@ -308,7 +308,7 @@ export function renderModuleEditorForm(context) {
             
             <ha-expansion-panel 
               .header=${html`
-                <ha-icon icon="mdi:filter-check-outline" style="margin-right: 8px;"></ha-icon>
+                <ha-icon icon="mdi:filter-check-outline" style="margin-inline-end: 8px;"></ha-icon>
                 ${t('editor.module_editor.supported_cards')}
               `}
               @expanded-changed=${(e) => e.stopPropagation()}
@@ -320,7 +320,7 @@ export function renderModuleEditorForm(context) {
 
             <ha-expansion-panel 
               .header=${html`
-                <ha-icon icon="mdi:file-document-outline" style="margin-right: 8px;"></ha-icon>
+                <ha-icon icon="mdi:file-document-outline" style="margin-inline-end: 8px;"></ha-icon>
                 ${t('editor.module_editor.description')}
               `}
               @expanded-changed=${(e) => e.stopPropagation()}
@@ -341,7 +341,7 @@ export function renderModuleEditorForm(context) {
 
           <ha-expansion-panel 
             .header=${html`
-              <ha-icon icon="mdi:code-json" style="margin-right: 8px;"></ha-icon>
+              <ha-icon icon="mdi:code-json" style="margin-inline-end: 8px;"></ha-icon>
               ${t('editor.module_editor.code_title')}
             `}
             @expanded-changed=${(e) => e.stopPropagation()}
@@ -363,7 +363,7 @@ export function renderModuleEditorForm(context) {
           <ha-expansion-panel 
             style="display: ${context._editingModule.id === 'default' ? 'none' : ''}" 
             .header=${html`
-              <ha-icon icon="mdi:form-select" style="margin-right: 8px;"></ha-icon>
+              <ha-icon icon="mdi:form-select" style="margin-inline-end: 8px;"></ha-icon>
               ${t('editor.module_editor.editor_schema_title')}
             `}
             @expanded-changed=${(e) => e.stopPropagation()}
@@ -455,7 +455,7 @@ export function renderModuleEditorForm(context) {
 
           <ha-expansion-panel 
             .header=${html`
-              <ha-icon icon="mdi:export" style="margin-right: 8px;"></ha-icon>
+              <ha-icon icon="mdi:export" style="margin-inline-end: 8px;"></ha-icon>
               ${t('editor.module_editor.export_title')}
             `}
             @expanded-changed=${(e) => e.stopPropagation()}

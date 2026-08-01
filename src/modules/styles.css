@@ -85,7 +85,7 @@
 
 /* Legacy search icon styling (pre-2026.5) */
 .store-search ha-textfield::part(prefix) {
-  padding-left: 8px;
+  padding-inline-start: 8px;
 }
 
 .store-search ha-textfield .leading-icon {
@@ -130,7 +130,8 @@
 
 .store-module-header {
   position: relative;
-  padding: 16px 16px 0 0;
+  padding-block: 16px 0;
+  padding-inline: 0 16px;
   margin: 0;
   border-radius: 0;
   border-bottom: 1px solid var(--divider-color);
@@ -158,7 +159,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-left: 0;
+  padding-inline-start: 0;
   margin-bottom: 0px !important;
   position: relative;
 }
@@ -166,12 +167,13 @@
 .store-module-header .bubble-section-title::before {
   content: "";
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   top: 0;
   bottom: 0;
   width: 3px;
   background: var(--primary-color);
-  border-radius: 0 2px 2px 0;
+  border-start-end-radius: 2px;
+  border-end-end-radius: 2px;
 }
 
 .store-module-header.warning .bubble-section-title::before {
@@ -179,7 +181,8 @@
 }
 
 .store-module-header .bubble-section-title ha-icon {
-  margin: 0 0 0 19px;
+  margin: 0;
+  margin-inline-start: 19px;
   color: var(--info-color) !important;
 }
 
@@ -197,7 +200,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0 4px 18px;
+  padding: 0;
+  padding-bottom: 4px;
+  padding-inline-start: 18px;
   margin-bottom: 0;
 }
 
@@ -254,7 +259,7 @@
 .module-preview-zoom-btn {
   position: absolute;
   bottom: 8px;
-  right: 8px;
+  inset-inline-end: 8px;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -419,7 +424,7 @@
   font-size: 11px;
   padding: 2px 8px;
   height: 20px;
-  margin-left: auto !important;
+  margin-inline-start: auto !important;
   color: rgba(0, 0, 0, 0.8);
 }
 
@@ -485,7 +490,7 @@
 .version-container {
   display: flex;
   align-items: center;
-  margin-left: auto;
+  margin-inline-start: auto;
   gap: 8px;
 }
 
@@ -563,7 +568,7 @@ paper-tab[disabled] {
 }
 
 paper-tab ha-icon {
-  margin-right: 8px;
+  margin-inline-end: 8px;
   color: var(--secondary-tab-color);
 }
 
@@ -633,7 +638,7 @@ sl-tab {
 .back-to-top-button {
   position: sticky;
   bottom: 0px;
-  right: 20px;
+  inset-inline-end: 20px;
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -645,7 +650,7 @@ sl-tab {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   transition: all 0.2s ease;
   z-index: 4;
-  margin-left: auto;
+  margin-inline-start: auto;
   margin-top: 16px;
 }
 
@@ -878,7 +883,7 @@ sl-tab {
 .module-actions {
   display: flex;
   gap: 8px;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .module-editor-form .card-content {
@@ -1218,7 +1223,7 @@ ha-formfield.apply-module-button {
   font-size: 0.85em;
   font-weight: 500;
   color: var(--secondary-text-color);
-  padding-left: 4px;
+  padding-inline-start: 4px;
   margin-bottom: -4px;
 }
 
@@ -1231,7 +1236,7 @@ ha-formfield.apply-module-button {
 
 .module-badges {
   display: inline-flex;
-  margin-left: auto;
+  margin-inline-start: auto;
   gap: 4px;
 }
 
@@ -1250,7 +1255,7 @@ ha-formfield.apply-module-button {
 }
 
 .module-badges .update-badge {
-  margin-left: 0 !important;
+  margin-inline-start: 0 !important;
 }
 
 .global-badge {
@@ -1260,7 +1265,7 @@ ha-formfield.apply-module-button {
 }
 
 .update-badge + .global-badge {
-  margin-left: 4px !important;
+  margin-inline-start: 4px !important;
 }
 
 .toggle-badge {
@@ -1306,7 +1311,7 @@ ha-formfield.apply-module-button {
 
 /* Legacy search icon styling (pre-2026.5) */
 .my-modules-search ha-textfield::part(prefix) {
-  padding-left: 8px;
+  padding-inline-start: 8px;
 }
 
 .my-modules-search ha-textfield .leading-icon {

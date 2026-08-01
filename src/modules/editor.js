@@ -621,7 +621,7 @@ export function makeModulesEditor(context) {
             .active=${selectedPanel === MODULE_TAB_IDS[0]}
             @click=${() => handleHaTabNavClick(MODULE_TAB_IDS[0])}
           >
-            <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
+            <ha-icon icon="mdi:puzzle-heart-outline" style="margin-inline-end: 8px;"></ha-icon>
             ${t('editor.modules.my_modules')}
           </ha-tab-group-tab>
             <ha-tab-group-tab
@@ -631,7 +631,7 @@ export function makeModulesEditor(context) {
               ?disabled=${!bctAvailable}
             @click=${() => handleHaTabNavClick(MODULE_TAB_IDS[1])}
           >
-            <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
+            <ha-icon icon="mdi:puzzle-plus-outline" style="margin-inline-end: 8px;"></ha-icon>
             ${t('editor.modules.module_store')}
           </ha-tab-group-tab>
         </ha-tab-group>
@@ -647,11 +647,11 @@ export function makeModulesEditor(context) {
           @sl-tab-show=${handleTabChange}
         >
           <sl-tab slot="nav" panel="0">
-            <ha-icon icon="mdi:puzzle-heart-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
+            <ha-icon icon="mdi:puzzle-heart-outline" style="color: inherit !important; margin-inline-end: 8px;"></ha-icon>
             ${t('editor.modules.my_modules')}
           </sl-tab>
           <sl-tab slot="nav" panel="1" ?disabled=${!bctAvailable}>
-            <ha-icon icon="mdi:puzzle-plus-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
+            <ha-icon icon="mdi:puzzle-plus-outline" style="color: inherit !important; margin-inline-end: 8px;"></ha-icon>
             ${t('editor.modules.module_store')}
           </sl-tab>
           <sl-tab-panel name="0"></sl-tab-panel>
@@ -667,11 +667,11 @@ export function makeModulesEditor(context) {
         @selected-changed=${handleTabChange}
       >
         <paper-tab>
-          <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
+          <ha-icon icon="mdi:puzzle-heart-outline" style="margin-inline-end: 8px;"></ha-icon>
           ${t('editor.modules.my_modules')}
         </paper-tab>
         <paper-tab class="${!bctAvailable ? 'disabled' : ''}" ?disabled=${!bctAvailable}>
-          <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
+          <ha-icon icon="mdi:puzzle-plus-outline" style="margin-inline-end: 8px;"></ha-icon>
           ${t('editor.modules.module_store')}
         </paper-tab>
       </ha-tabs>
@@ -695,7 +695,7 @@ export function makeModulesEditor(context) {
         <ha-icon icon="mdi:puzzle"></ha-icon>
         ${t('editor.modules.title')}
         ${moduleUpdates.hasUpdates && bctAvailable ? html`
-          <span class="bubble-badge update-badge" style="margin-left: 8px; font-size: 0.8em; vertical-align: middle; z-index: 5;">
+          <span class="bubble-badge update-badge" style="margin-inline-start: 8px; font-size: 0.8em; vertical-align: middle; z-index: 5;">
             <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
             ${t(moduleUpdates.updateCount > 1 ? 'editor.modules.updates_available' : 'editor.modules.update_available').replace('{count}', moduleUpdates.updateCount)}
           </span>
@@ -982,7 +982,7 @@ export function makeModulesEditor(context) {
                       style="${isChecked ? 'opacity: 1; color: var(--info-color) !important;' : 'opacity: 0.3;'}"
                     ></ha-icon>
                     ${label}
-                    <span class="module-badges" style="display: inline-flex; margin-left: auto;">
+                    <span class="module-badges" style="display: inline-flex; margin-inline-start: auto;">
                       ${hasUpdate ? html`
                         <span class="bubble-badge update-badge">
                           <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
