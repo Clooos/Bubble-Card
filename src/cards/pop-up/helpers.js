@@ -2314,7 +2314,11 @@ export function closePopup(context, force = false) {
     }
 
     clearAllTimeouts(context);
-    
+    // clearAllTimeouts cancelled the open completion, which is the only path
+    // that would have released the gate armed by the legacy open. Owner-scoped,
+    // so it cannot kill another pop-up's in-flight open.
+    releasePopupOpenHassGate(context);
+
     popupState.activePopups.delete(context);
     clearPopupOpenSource(context);
 
@@ -2392,6 +2396,14 @@ function scheduleHashRoutedStandaloneOpen(context, currentHash, switchedBetweenP
             context,
             switchedBetweenPopups && canUseInstantStandaloneSwitch(context) && hasPrimedStandalonePopupContent(context)
         );
+
+        // openPopup early-returns when the pop-up is already open or already
+        // active (a duplicate URL event, or a re-tap on the current hash):
+        // nothing would then schedule a completion, so the gate armed above
+        // would hold every dashboard card until the watchdog lapses.
+        if (!isPopupOpenSequenceActive(context)) {
+            releasePopupOpenHassGate(context);
+        }
     });
 }
 

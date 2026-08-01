@@ -29,11 +29,21 @@ jest.unstable_mockModule('../components/sub-button/editor/index.js', () => ({ ma
 jest.unstable_mockModule('../modules/editor.js', () => ({ makeModulesEditor: jest.fn() }));
 jest.unstable_mockModule('../modules/store.js', () => ({ makeModuleStore: jest.fn(), _fetchModuleStore: jest.fn() }));
 jest.unstable_mockModule('../modules/registry.js', () => ({ yamlKeysMap: new Map() }));
-jest.unstable_mockModule('../tools/localize.js', () => ({ default: jest.fn(() => (key) => key) }));
+jest.unstable_mockModule('../tools/localize.js', () => ({
+    default: jest.fn(() => (key) => key),
+    ensureEditorTranslations: jest.fn(() => Promise.resolve(false)),
+}));
 jest.unstable_mockModule('./styles.css', () => ({ default: '' }));
 jest.unstable_mockModule('../modules/styles.css', () => ({ default: '' }));
 jest.unstable_mockModule('../cards/pop-up/cards/styles.css', () => ({ default: '' }));
-jest.unstable_mockModule('./utils.js', () => ({ getLazyLoadedPanelContent: jest.fn() }));
+// Mirror every named export of the real module: a partial mock breaks the
+// suite as soon as the editor starts importing another helper from it.
+jest.unstable_mockModule('./utils.js', () => ({
+    tTemplate: jest.fn((text) => text),
+    getLazyLoadedPanelContent: jest.fn(),
+    supportsHaDropdown: jest.fn(() => false),
+    renderDropdown: jest.fn(),
+}));
 jest.unstable_mockModule('./standalone-dialog-bridge.js', () => ({
     bridgeDialogCloseToParent: jest.fn(),
     createReopenedStandaloneParentDialogParams: jest.fn(),

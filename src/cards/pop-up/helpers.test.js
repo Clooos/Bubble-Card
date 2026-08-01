@@ -1470,6 +1470,47 @@ describe('standalone popup lifecycle', () => {
         expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
     });
 
+    test('releases the gate when a legacy popup closes inside its open window', () => {
+        const context = createLegacyContext({ background_update: true });
+        usedContexts.push(context);
+        const card = createDashboardCard();
+
+        openPopup(context);
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
+
+        // The close cancels the open completion, which was the only path that
+        // would have released the gate: the dashboard is visible again and
+        // must not stay frozen until the watchdog lapses.
+        closePopup(context, true);
+
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+    });
+
+    test('releases the gate when a routed open lands on an already-open popup', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+        registerPopupContext(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+        flushRafQueue();
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // finalize releases the gate
+
+        const card = createDashboardCard();
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+
+        // Re-navigating to the hash of an already-open pop-up arms the gate
+        // for an open that never starts.
+        window.dispatchEvent(new Event('hashchange'));
+        flushRafQueue();
+
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+    });
+
     test('refuses to hand a hash registration to a disconnected context', () => {
         const live = createStandaloneContext({ hash: '#shared' });
         const stale = createStandaloneContext({ hash: '#shared' });
