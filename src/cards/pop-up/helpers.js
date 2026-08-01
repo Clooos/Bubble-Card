@@ -119,9 +119,18 @@ function shouldDelayHashRoutedStandaloneBottomSheetOpen(context) {
     return false;
 }
 
+// Performance mode promises "delays content rendering", and the editor offers
+// it for every pop-up mode — but only the default mode honoured it, so the
+// option was silently inert exactly where it matters most: an adaptive-dialog
+// holding heavy third-party cards (camera streams) whose asynchronous
+// start-up lands in the middle of the open transition.
 function shouldDeferColdStandaloneContentUntilAfterOpen(context) {
-    return getPopupMode(context?.config) === POPUP_MODE_DEFAULT &&
-        getPopupPerformanceMode(context?.config) === POPUP_PERFORMANCE_MODE_PERFORMANCE;
+    if (getPopupPerformanceMode(context?.config) !== POPUP_PERFORMANCE_MODE_PERFORMANCE) {
+        return false;
+    }
+
+    const popupMode = getPopupMode(context?.config);
+    return popupMode === POPUP_MODE_DEFAULT || popupMode === POPUP_MODE_ADAPTIVE_DIALOG;
 }
 
 function shouldPopupWillChangeIncludeOpacity(context) {
@@ -241,6 +250,12 @@ function scheduleStandaloneCardSync(context) {
         } finally {
             setPopupOpeningMarker(context, false);
         }
+
+        // The open measured scrollability against the still-empty container
+        // and cached it: the content just landed, so that answer is stale and
+        // the scroll mask would stay wrong until the user physically scrolls.
+        context._cachedPopupScrollableState = undefined;
+        syncPopupScrollableState(context);
     });
 }
 

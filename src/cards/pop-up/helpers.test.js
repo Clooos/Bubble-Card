@@ -658,6 +658,72 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
     });
 
+    test('defers cold adaptive-dialog content until after opening in performance mode', () => {
+        const context = createStandaloneContext({
+            popup_mode: 'adaptive-dialog',
+            performance_mode: 'performance',
+        });
+        usedContexts.push(context);
+        window.innerWidth = 390;
+        window.innerHeight = 844;
+
+        openPopup(context);
+        flushHeavyOpenTask();
+
+        // The whole point: the slide no longer shares the main thread with the
+        // content build (heavy third-party cards start up asynchronously).
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2
+
+        expect(context.popUp.classList.contains('is-opening')).toBe(true);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // finalize
+        flushRafQueue(); // post-open card sync
+
+        expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+    });
+
+    test('re-measures scrollability after the deferred content lands', () => {
+        const context = createStandaloneContext({
+            popup_mode: 'adaptive-dialog',
+            performance_mode: 'performance',
+        });
+        usedContexts.push(context);
+        window.innerWidth = 390;
+        window.innerHeight = 844;
+
+        const container = context.elements.popUpContainer;
+        // Empty while opening, filled once the deferred content lands.
+        let filled = false;
+        Object.defineProperty(container, 'scrollHeight', {
+            configurable: true,
+            get: () => (filled ? 900 : 0),
+        });
+        Object.defineProperty(container, 'clientHeight', {
+            configurable: true,
+            get: () => (filled ? 400 : 0),
+        });
+        handlePopUpCards.mockImplementation(() => { filled = true; });
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // finalize measures the still-empty container
+        flushRafQueue(); // post-open card sync fills it
+
+        // Without the re-measure the mask would stay wrong until the user
+        // physically scrolls.
+        expect(container.classList.contains('is-scrollable')).toBe(true);
+
+        handlePopUpCards.mockImplementation(() => {});
+    });
+
     test('still primes cold adaptive-dialog standalone content before opening while rendered as a bottom-sheet', () => {
         const context = createStandaloneContext({ popup_mode: 'adaptive-dialog' });
         usedContexts.push(context);
