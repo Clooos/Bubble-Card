@@ -20,25 +20,28 @@ const DESC_RETRY_MS = 15 * 1000;
 
 function _getStoreDescription(context, module, order) {
   const id = module.id ?? module.moduleLink ?? module.name;
+  // Translate what is actually displayed: the description extracted from the
+  // GitHub discussion post, never the raw post (headers, YAML, checklists...).
+  const displayed = _formatModuleDescription(module.description);
   const wantsTranslation = context._storeTranslateDescriptions &&
     !!getTranslationTargetLang(context.hass) &&
     !context._storeDescOriginal?.has(id) &&
     !!module.description;
-  if (!wantsTranslation) return { id, text: module.description, translated: false };
+  if (!wantsTranslation) return { id, html: displayed, translated: false };
 
   context._storeDescCache = context._storeDescCache || new Map();
   if (context._storeDescCache.has(id)) {
-    return { id, text: context._storeDescCache.get(id), translated: true };
+    return { id, html: context._storeDescCache.get(id), translated: true };
   }
 
   // Register (or refresh) this module's display position for the scheduler.
   context._storeDescWanted = context._storeDescWanted || new Map();
   const failedAt = context._storeDescFailed?.get(id);
   if (!failedAt || Date.now() - failedAt > DESC_RETRY_MS) {
-    context._storeDescWanted.set(id, { text: module.description, order });
+    context._storeDescWanted.set(id, { text: displayed, order });
     _drainStoreDescriptions(context);
   }
-  return { id, text: module.description, translated: false };
+  return { id, html: displayed, translated: false };
 }
 
 function _drainStoreDescriptions(context) {
@@ -524,7 +527,7 @@ export function makeModuleStore(context) {
                       !!getTranslationTargetLang(context.hass) &&
                       context._storeDescOriginal?.has(desc.id);
                     return html`
-                    <p class="module-description" .innerHTML=${_formatModuleDescription(desc.text)}></p>
+                    <p class="module-description" .innerHTML=${desc.html}></p>
                     ${desc.translated ? html`
                       <p class="module-translation-note" style="opacity: 0.7; font-size: 0.85em; display: flex; align-items: center; gap: 4px;">
                         <ha-icon icon="mdi:translate" style="--mdc-icon-size: 14px;"></ha-icon>
