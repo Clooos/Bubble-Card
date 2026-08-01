@@ -27,6 +27,17 @@ import { handleClimate } from './cards/climate/index.js';
 
 let _lastSeenThemes = null;
 
+// Cards re-render themselves when the editor's language switch flips: their
+// content (placeholders, onboarding, errors) is built outside the editor.
+const connectedCards = new Set();
+try {
+  window.addEventListener('bubble-card-language-changed', () => {
+    connectedCards.forEach((card) => {
+      try { card.updateBubbleCard(); } catch (_) {}
+    });
+  });
+} catch (_) {}
+
 function isInsidePopupOpeningScope(element) {
   if (typeof element?.closest !== 'function') {
     return false;
@@ -57,6 +68,7 @@ class BubbleCard extends HTMLElement {
 
   connectedCallback() {
     this.isConnected = true;
+    connectedCards.add(this);
     // Editor detection depends on the ancestor chain, which only changes
     // through a DOM move: both lifecycle callbacks reset the memo.
     this._detectedEditorMemo = undefined;
@@ -92,6 +104,7 @@ class BubbleCard extends HTMLElement {
 
   disconnectedCallback() {
     this.isConnected = false;
+    connectedCards.delete(this);
     this._detectedEditorMemo = undefined;
     cleanupTapActions();
     try {

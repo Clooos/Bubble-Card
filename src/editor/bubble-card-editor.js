@@ -1153,6 +1153,8 @@ class BubbleCardEditor extends LitElement {
                 editor.listsUpdated = false;
                 editor.requestUpdate();
             });
+            // Cards render their own text (previews, placeholders, errors).
+            window.dispatchEvent(new CustomEvent('bubble-card-language-changed'));
         } catch (_) {}
     }
 
