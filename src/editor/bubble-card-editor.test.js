@@ -32,6 +32,9 @@ jest.unstable_mockModule('../modules/registry.js', () => ({ yamlKeysMap: new Map
 jest.unstable_mockModule('../tools/localize.js', () => ({
     default: jest.fn(() => (key) => key),
     ensureEditorTranslations: jest.fn(() => Promise.resolve(false)),
+    isEditorEnglishForced: jest.fn(() => false),
+    setEditorEnglishForced: jest.fn(),
+    getCurrentLocale: jest.fn(() => 'en'),
 }));
 jest.unstable_mockModule('./styles.css', () => ({ default: '' }));
 jest.unstable_mockModule('../modules/styles.css', () => ({ default: '' }));
