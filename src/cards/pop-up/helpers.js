@@ -119,18 +119,15 @@ function shouldDelayHashRoutedStandaloneBottomSheetOpen(context) {
     return false;
 }
 
-// Performance mode promises "delays content rendering", and the editor offers
-// it for every pop-up mode — but only the default mode honoured it, so the
-// option was silently inert exactly where it matters most: an adaptive-dialog
-// holding heavy third-party cards (camera streams) whose asynchronous
-// start-up lands in the middle of the open transition.
+// Content deferral stays limited to the default mode ON PURPOSE. Extending it
+// to adaptive-dialog was tried and reverted: measured on an iPad 6 (iOS 17),
+// performance mode already produced a clean transition there through its other
+// effects (no backdrop blur, lighter opening CSS), while deferring the content
+// pushed it 120ms past the end of the slide — a visible delay on every open,
+// for no measured gain. The other modes keep those effects without the delay.
 function shouldDeferColdStandaloneContentUntilAfterOpen(context) {
-    if (getPopupPerformanceMode(context?.config) !== POPUP_PERFORMANCE_MODE_PERFORMANCE) {
-        return false;
-    }
-
-    const popupMode = getPopupMode(context?.config);
-    return popupMode === POPUP_MODE_DEFAULT || popupMode === POPUP_MODE_ADAPTIVE_DIALOG;
+    return getPopupMode(context?.config) === POPUP_MODE_DEFAULT &&
+        getPopupPerformanceMode(context?.config) === POPUP_PERFORMANCE_MODE_PERFORMANCE;
 }
 
 function shouldPopupWillChangeIncludeOpacity(context) {

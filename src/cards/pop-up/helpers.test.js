@@ -658,7 +658,7 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
     });
 
-    test('defers cold adaptive-dialog content until after opening in performance mode', () => {
+    test('keeps adaptive-dialog content primed before opening even in performance mode', () => {
         const context = createStandaloneContext({
             popup_mode: 'adaptive-dialog',
             performance_mode: 'performance',
@@ -670,31 +670,15 @@ describe('standalone popup lifecycle', () => {
         openPopup(context);
         flushHeavyOpenTask();
 
-        // The whole point: the slide no longer shares the main thread with the
-        // content build (heavy third-party cards start up asynchronously).
-        expect(handlePopUpCards).not.toHaveBeenCalled();
-
-        flushStandaloneClosedStatePrimeFrame();
-        flushRafQueue(); // phase 2
-
-        expect(context.popUp.classList.contains('is-opening')).toBe(true);
-        expect(handlePopUpCards).not.toHaveBeenCalled();
-
-        dispatchTransformTransitionEnd(context.popUp);
-        flushRafQueue(); // finalize
-        flushRafQueue(); // post-open card sync
-
+        // Deferring the content here was measured as a net loss: performance
+        // mode already gives this mode a clean transition through its other
+        // effects, so the content stays built before the slide.
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
     });
 
     test('re-measures scrollability after the deferred content lands', () => {
-        const context = createStandaloneContext({
-            popup_mode: 'adaptive-dialog',
-            performance_mode: 'performance',
-        });
+        const context = createStandaloneContext({ performance_mode: 'performance' });
         usedContexts.push(context);
-        window.innerWidth = 390;
-        window.innerHeight = 844;
 
         const container = context.elements.popUpContainer;
         // Empty while opening, filled once the deferred content lands.
