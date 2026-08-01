@@ -1,4 +1,5 @@
 import { version } from './var/version.js';
+import setupTranslation, { ensureEditorTranslations } from './tools/localize.js';
 import { initializeContent } from './tools/init.js';
 import { cleanupTapActions } from './tools/tap-actions.js';
 import { preloadYAMLStyles } from './modules/registry.js';
@@ -362,7 +363,13 @@ window.customCards.push({
   type: "bubble-card",
   name: "Bubble Card",
   preview: false,
-  description: "A minimalist card collection with a nice pop-up touch.",
+  // Resolved when Home Assistant renders the card picker rather than at
+  // registration time: `hass` (and the fetched dictionary) only exist later.
+  get description() {
+    const hass = document.querySelector('home-assistant')?.hass;
+    ensureEditorTranslations(hass);
+    return setupTranslation(hass)('editor.card_picker.description');
+  },
   documentationURL: "https://github.com/Clooos/Bubble-Card/",
   getEntitySuggestion,
 });

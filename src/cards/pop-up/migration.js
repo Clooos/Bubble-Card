@@ -787,53 +787,52 @@ function _show() {
     document.body.appendChild(host);
 
     /* ── Dialog element ──────────────────────────────────────────────────── */
+    const t = setupTranslation(_latestMigrationNoticeHass);
+    const fill = (key, replacements) => String(t(key)).replace(/\{([a-z0-9_]+)\}/g, (_, token) => replacements[token] ?? '');
+
     const dialog = document.createElement('ha-dialog');
-    dialog.setAttribute('header-title', 'Important');
+    dialog.setAttribute('header-title', t('editor.migration.notice_header'));
 
     /* ── Body content ────────────────────────────────────────────────────── */
     const content = document.createElement('div');
     content.style.lineHeight = '1.6';
 
     content.innerHTML = `
-        <h3 style="margin: 0 0 4px;">Your pop-ups need to be migrated</h3>
+        <h3 style="margin: 0 0 4px;">${t('editor.migration.notice_title')}</h3>
         <p>
-            Since Bubble Card v3.2.0, <strong>your pop-ups must be migrated to the new
-            standalone format.</strong> It's easy and only takes a few clicks!
+            ${fill('editor.migration.notice_intro', { bold: `<strong>${t('editor.migration.notice_intro_bold')}</strong>` })}
         </p>
         <p style="margin: 0 0 24px;">
-            If you missed it, check out the <a href="https://github.com/Clooos/Bubble-Card/releases/tag/v3.2.0" target="_blank" rel="noopener" style="color: var(--primary-color); text-decoration: underline;">v3.2.0 release announcement</a> (it took me about 10 hours to write it!) to see all the new features and changes.
+            ${fill('editor.migration.notice_announcement', { link: `<a href="https://github.com/Clooos/Bubble-Card/releases/tag/v3.2.0" target="_blank" rel="noopener" style="color: var(--primary-color); text-decoration: underline;">${t('editor.migration.notice_announcement_link')}</a>` })}
         </p>
         <hr>
-        <h3 style="margin: 24px 0 4px;">What does it change?</h3>
+        <h3 style="margin: 24px 0 4px;">${t('editor.migration.notice_change_title')}</h3>
         <p>
-            Standalone pop-ups render much faster, work more reliably, and no longer 
-            need to live inside a <em>vertical-stack</em> card (finally!). You also get access to 
-            a new editor based on the Home Assistant section editor, with the exact same 
-            drag-and-drop approach for easier and faster editing! 
+            ${fill('editor.migration.notice_change_body', { stack: '<em>vertical-stack</em>' })}
         </p>
         <details style="margin: 0 0 16px; border-radius: 8px; overflow: hidden; background: var(--primary-background-color);">
             <summary style="padding: 12px 16px; cursor: pointer; user-select: none;">
-                <span style="margin-right: 4px;"></span> <strong>Watch how the new editor works</strong> (click to expand)
+                <span style="margin-right: 4px;"></span> <strong>${t('editor.migration.notice_video_summary')}</strong> ${t('editor.migration.notice_video_hint')}
             </summary>
             <video preload="metadata" autoplay muted loop playsinline style="width: 100%; display: block; aspect-ratio: 1059 / 720;">
                 <source src="https://github.com/Clooos/Bubble-Card/raw/main/img/bubble_card_new_pop_up_editor.mp4" type="video/mp4">
             </video>
         </details>
         <p style="margin: 0 0 24px;">
-            Pop-ups now have new features has well,
-            with new modes (like a centered one), a new optional classic style and a performance mode for 
-            smoother animations on lower-end devices.
+            ${t('editor.migration.notice_features')}
         </p>
         <hr>
-        <h3 style="margin: 24px 0 4px;">How to migrate from the editor?</h3>
+        <h3 style="margin: 24px 0 4px;">${t('editor.migration.notice_how_title')}</h3>
         <p style="margin: 14px 0 24px;">
-            Open the editor for each pop-up showing <strong>Migration available</strong>, 
-            then just click <strong>Migrate to standalone</strong>.
+            ${fill('editor.migration.notice_how_body', {
+                available: `<strong>${t('editor.migration.notice_available')}</strong>`,
+                migrate: `<strong>${t('editor.migration.migrate')}</strong>`
+            })}
         </p>
         <hr>
-        <h3 style="margin: 24px 0 4px;">Using YAML?</h3>
+        <h3 style="margin: 24px 0 4px;">${t('editor.migration.notice_yaml_title')}</h3>
         <p style="margin: 14px 0 24px;">
-            Replace the legacy pop-up config with the standalone format:
+            ${t('editor.migration.notice_yaml_body')}
         </p>
         <pre style="margin: 0 0 12px; padding: 12px; background: var(--secondary-background-color); border-radius: 8px; overflow-x: auto; font-size: 0.85em;">
 - type: custom:bubble-card
@@ -848,11 +847,11 @@ function _show() {
       name: Living Room
     # more cards...</pre>
         <p style="margin: 0 0 24px;">
-            <strong>Pro tip:</strong> Honestly, if you're still using YAML for Bubble Card at this point, you might want to give the new editor a try, it makes creating and editing pop-ups a breeze! You also get access to the Module Store. I've put so much love into this editor ❤️
+            <strong>${t('editor.migration.notice_protip')}</strong> ${t('editor.migration.notice_protip_body')}
         </p>
         <hr>
         <p style="margin: 24px 0 0;">
-            <em>Enjoy this update! Cheers! 🍻</em>
+            <em>${t('editor.migration.notice_enjoy')}</em>
         </p>
         <p style="margin: 24px 0 0;">
             <a href="https://www.buymeacoffee.com/clooos" target="_blank" rel="noopener"><img src="https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?style=for-the-badge&logo=buy-me-a-coffee" alt="Buy me a beer"></a>&nbsp;
@@ -867,7 +866,7 @@ function _show() {
     footer.setAttribute('slot', 'footer');
 
     const dismissBtn = document.createElement('ha-button');
-    dismissBtn.textContent = "Got it, don't show again on this view";
+    dismissBtn.textContent = t('editor.migration.notice_dismiss');
     dismissBtn.setAttribute('data-dialog', 'close');
     dismissBtn.setAttribute('slot', 'secondaryAction');
     dismissBtn.setAttribute('appearance', 'plain');
@@ -887,7 +886,7 @@ function _show() {
     footer.appendChild(dismissBtn);
 
     const remindBtn = document.createElement('ha-button');
-    remindBtn.textContent = "Remind me later";
+    remindBtn.textContent = t('editor.migration.notice_remind');
     remindBtn.setAttribute('data-dialog', 'close');
     remindBtn.setAttribute('slot', 'primaryAction');
     remindBtn.setAttribute('appearance', 'filled');
