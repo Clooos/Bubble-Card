@@ -14,6 +14,7 @@ import { checkModuleUpdates } from './store.js';
 import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
 import { getLazyLoadedPanelContent, renderDropdown, tTemplate } from '../editor/utils.js';
+import { translateUiText } from './translate.js';
 import { ensureBCTProviderAvailable, isBCTAvailableSync, writeModuleYaml, getAllModulesLastModified } from './bct-provider.js';
 import setupTranslation from '../tools/localize.js';
 
@@ -880,8 +881,8 @@ export function makeModulesEditor(context) {
             <!-- Installed Modules List -->
             ${_getFilteredAndSortedModules(context).map((key) => {
               const {
-                name: label,
-                description,
+                name: rawLabel,
+                description: rawDescription,
                 formSchema,
                 supportedCards,
                 unsupportedCard,
@@ -889,7 +890,17 @@ export function makeModulesEditor(context) {
                 moduleLink,
                 moduleVersion
               } = getTextFromMap(key);
-              
+
+              // Module-authored text (English by convention) is machine
+              // translated like Module Store descriptions.
+              const reRender = () => context.requestUpdate();
+              const label = context._storeTranslateDescriptions !== false
+                ? translateUiText(rawLabel, context.hass, reRender)
+                : rawLabel;
+              const description = context._storeTranslateDescriptions !== false
+                ? translateUiText(rawDescription, context.hass, reRender)
+                : rawDescription;
+
               // Check if the module should be applied to this card
               const isChecked = shouldApplyModule(context, key);
               

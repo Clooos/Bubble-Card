@@ -24,6 +24,7 @@ import { makeModulesEditor } from '../modules/editor.js';
 import { makeModuleStore, _fetchModuleStore } from '../modules/store.js';
 import { yamlKeysMap } from '../modules/registry.js';
 import setupTranslation, { ensureEditorTranslations } from '../tools/localize.js';
+import { translateUiText } from '../modules/translate.js';
 import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
 import cardsEditorStyles from '../cards/pop-up/cards/styles.css';
@@ -1908,7 +1909,12 @@ class BubbleCardEditor extends LitElement {
   }
 
   _computeLabelCallback = (schema) => {
-    return schema.label;
+    // Module editor schemas are authored in English: machine translate their
+    // labels like the rest of the module-provided text.
+    if (schema?.label && this._storeTranslateDescriptions !== false) {
+      return translateUiText(schema.label, this._hassRender, () => this.requestUpdate());
+    }
+    return schema?.label;
   }
 
   _conditionChanged(ev, index, array) {

@@ -256,6 +256,41 @@ async function translateChunkWithEndpoint(chunk, targetLang) {
 }
 
 /**
+ * Synchronous accessor for module-authored text (names, descriptions, editor
+ * schema labels): returns the cached translation when there is one, otherwise
+ * the original text, and schedules the translation. `onReady` is invoked once
+ * a new translation lands so the caller can re-render.
+ *
+ * Requests are queued globally and processed in registration order, so
+ * whatever is rendered first is translated first.
+ */
+const pendingUiTranslations = new Map(); // cacheKey -> true (in flight)
+let uiQueue = Promise.resolve();
+
+export function translateUiText(text, hass, onReady) {
+  const lang = getTranslationTargetLang(hass);
+  if (!lang || !text || typeof text !== 'string' || !/[a-zA-Z]{3}/.test(text)) return text;
+
+  const cacheKey = `${lang} ${textHash(text)}`;
+  if (memCache.has(cacheKey)) return memCache.get(cacheKey);
+  const stored = loadStorageCache().get(cacheKey);
+  if (stored) {
+    memCache.set(cacheKey, stored);
+    return stored;
+  }
+
+  if (!pendingUiTranslations.has(cacheKey)) {
+    pendingUiTranslations.set(cacheKey, true);
+    uiQueue = uiQueue.then(async () => {
+      const translated = await translateText(text, hass).catch(() => null);
+      pendingUiTranslations.delete(cacheKey);
+      if (translated && typeof onReady === 'function') onReady();
+    });
+  }
+  return text;
+}
+
+/**
  * Translates English text to the user's language. Returns null when
  * translation is unavailable (offline, unsupported language, altered
  * placeholders, ...): callers fall back to the original text.
