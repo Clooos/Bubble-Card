@@ -1,4 +1,5 @@
 import { isColorCloseToWhite } from "../../tools/style.js";
+import { isDocumentRTL } from "../../tools/utils.js";
 import { createButton } from './create.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
 
@@ -32,6 +33,8 @@ export function sortButtons(context) {
 }
 export function placeButtons(context) {
     let position = 0;
+    // Buttons are anchored at the inline start, so in RTL they grow leftward
+    const directionFactor = isDocumentRTL() ? -1 : 1;
     for (let i = 0; i < context.elements.buttons.length; ++i) {
         let buttonWidth = localStorage.getItem(`bubbleButtonWidth-${context.elements.buttons[i].link}`);
 
@@ -45,7 +48,7 @@ export function placeButtons(context) {
         }
 
         if (buttonWidth !== null) {
-          context.elements.buttons[i].style.transform = `translateX(${position}px)`;
+          context.elements.buttons[i].style.transform = `translateX(${directionFactor * position}px)`;
           context.elements.buttons[i].style.width = '';
           position += +buttonWidth + BUTTON_MARGIN;
         }

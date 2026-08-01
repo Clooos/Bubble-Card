@@ -1,7 +1,8 @@
-import { 
-    getAttribute, 
+import {
+    getAttribute,
     setLayout,
-    createElement
+    createElement,
+    isDocumentRTL
 } from "../../tools/utils.js";
 import { getIcon } from '../../tools/icon.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
@@ -275,28 +276,23 @@ export function positionTiltButtons(context) {
     // longer transparent and visually match the main open/stop/close buttons.
     tilt.classList.add('full-width');
     context.elements.tiltButtonsWrapper = wrapper;
-  } else if (tiltButtonsPosition === 'left') {
-    // Insert tilt buttons at the start of buttonsContainer (left of main buttons)
+  } else if (tiltButtonsPosition === 'left' || tiltButtonsPosition === 'right') {
+    // Explicit left/right stays physical: in RTL the flex row renders DOM-first
+    // on the physical right, so the insertion side is mirrored to compensate
     const buttons = context.elements.buttonsContainer;
     if (!buttons) {
       tilt.style.display = 'none';
       return;
     }
     tilt.classList.add('has-background');
-    if (buttons.firstChild) {
+    const insertFirst = isDocumentRTL()
+      ? tiltButtonsPosition === 'right'
+      : tiltButtonsPosition === 'left';
+    if (insertFirst && buttons.firstChild) {
       buttons.insertBefore(tilt, buttons.firstChild);
     } else {
       buttons.appendChild(tilt);
     }
-  } else if (tiltButtonsPosition === 'right') {
-    // Append tilt buttons to buttonsContainer (right of main buttons)
-    const buttons = context.elements.buttonsContainer;
-    if (!buttons) {
-      tilt.style.display = 'none';
-      return;
-    }
-    tilt.classList.add('has-background');
-    buttons.appendChild(tilt);
   } else {
     // 'top' (default): append to subButtonContainer
     const subButtons = context.elements.subButtonContainer;

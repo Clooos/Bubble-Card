@@ -10,10 +10,12 @@
     display: inline-flex;
     height: auto;
     width: auto;
-    margin: 0 22px 0 8px;
+    margin-block: 0;
+    margin-inline: 8px 22px;
 }
 .bubble-name {
-    margin: 0 30px 0 0;
+    margin-block: 0;
+    margin-inline: 0 30px;
     font-size: 16px;
     white-space: nowrap;
     overflow: hidden;
@@ -25,7 +27,7 @@
 
 .bubble-line {
     border-radius: 6px;
-    margin-right: 14px;
+    margin-inline-end: 14px;
     opacity: 0.6;
     flex-grow: 1;
     height: 6px;
@@ -33,11 +35,11 @@
 }
 
 .bubble-sub-button-container {
-    margin-left: 8px;
+    margin-inline-start: 8px;
 }
 
 .rows-2 .bubble-sub-button-container {
-    margin-left: 14px;
+    margin-inline-start: 14px;
 }
 
 .large .bubble-container {

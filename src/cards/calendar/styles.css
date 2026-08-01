@@ -44,7 +44,8 @@
   justify-content: center;
   width: 100%;
   gap: 8px;
-  padding: 7px 16px 7px 8px;
+  padding-block: 7px;
+  padding-inline: 8px 16px;
   position: relative;
   box-sizing: border-box;
 }
@@ -52,8 +53,8 @@
   content: "";
   position: absolute;
   top: -1px;
-  left: 62px;
-  right: 16px;
+  inset-inline-start: 62px;
+  inset-inline-end: 16px;
   height: 2px;
   background-color: var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
 }
@@ -103,7 +104,7 @@
   gap: 8px;
   padding: 4px 6px;
   border-radius: var(--bubble-calendar-border-radius, var(--bubble-border-radius, 32px));
-  margin-left: -6px;
+  margin-inline-start: -6px;
   position: relative;
   line-height: 1em;
 }
@@ -153,7 +154,7 @@
 .bubble-event-place-icon {
   display: inline-flex;
   --mdc-icon-size: 12px;
-  margin-right: 4px;
+  margin-inline-end: 4px;
 }
 
 .bubble-sub-button-container.fixed-top  {

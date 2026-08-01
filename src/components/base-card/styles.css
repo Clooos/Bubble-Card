@@ -44,12 +44,23 @@ ha-card {
 
 .bubble-scroll-separator {
     opacity: .3;
-    margin: 0 6px 0 8px;
+    margin-block: 0;
+    margin-inline: 8px 6px;
 }
 
 @keyframes bubble-scroll {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
+}
+
+/* Mirrored marquee: in RTL the text overflows on the left, so it scrolls to the right */
+.scrolling-container span:dir(rtl) {
+    animation-name: bubble-scroll-rtl;
+}
+
+@keyframes bubble-scroll-rtl {
+    from { transform: translateX(0); }
+    to { transform: translateX(50%); }
 }
 /* End of scrolling styles */
 
@@ -106,7 +117,7 @@ ha-card {
 .bubble-buttons-container {
     --icon-primary-color: var(--primary-text-color);
     display: flex;
-    margin-right: 8px;
+    margin-inline-end: 8px;
     gap: 4px;
 }
 
@@ -209,7 +220,8 @@ ha-card {
     flex-direction: column;
     justify-content: center;
     flex-grow: 1;
-    margin: 0 16px 0 4px;
+    margin-block: 0;
+    margin-inline: 4px 16px;
     pointer-events: none;
     position: relative;
     overflow: hidden;
@@ -248,7 +260,7 @@ ha-card {
 }
 
 .name-without-icon {
-    margin-left: 16px;
+    margin-inline-start: 16px;
 }
 
 .display-state {
@@ -268,5 +280,5 @@ ha-card {
     --mdc-icon-size: 24px;
     min-width: 42px;
     min-height: 42px;
-    margin-left: 8px;
-} 
+    margin-inline-start: 8px;
+}

@@ -1,4 +1,4 @@
-import { createElement, setLayout } from "../../tools/utils.js";
+import { createElement, setLayout, isDocumentRTL } from "../../tools/utils.js";
 import { applyScrollingEffect } from "../../tools/text-scrolling.js";
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import setupTranslation from "../../tools/localize.js";
@@ -158,7 +158,9 @@ export async function changeEvents(context) {
         const startDiff = dateDiffInMinutes(eventStart, now);
         const percentage = 100 * startDiff / durationDiff;
 
-        eventLine.style.setProperty('--bubble-event-background-image', `linear-gradient(to right, ${activeColor} ${percentage}%, transparent ${percentage}%)`);
+        // The progress fill starts from the reading start, so it grows leftward in RTL
+        const fillDirection = isDocumentRTL() ? 'to left' : 'to right';
+        eventLine.style.setProperty('--bubble-event-background-image', `linear-gradient(${fillDirection}, ${activeColor} ${percentage}%, transparent ${percentage}%)`);
       }
       
       dayEvents.appendChild(eventLine);

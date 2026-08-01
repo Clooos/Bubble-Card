@@ -40,34 +40,44 @@ function closestAcrossShadowDOM(element, selector) {
     return null;
 }
 
-// Check if the dropdown should open to the right instead of left (old HA only).
+// Check if the dropdown should open toward the inline end instead of the
+// inline start (old HA only). The menu extends toward the inline start by
+// default, so the available space is measured on that side in both directions.
 function shouldOpenRight(dropdownContainer) {
     if (!dropdownContainer) return false;
 
-    const dropdownLeft = dropdownContainer.getBoundingClientRect().left;
+    const isRTL = getComputedStyle(dropdownContainer).direction === 'rtl';
+    const dropdownRect = dropdownContainer.getBoundingClientRect();
     const popupContainer = closestAcrossShadowDOM(dropdownContainer, '.bubble-pop-up-container');
 
     if (!popupContainer) {
-        return dropdownLeft < (MENU_WIDTH - MENU_OVERLAP);
+        if (isRTL) {
+            const spaceTowardStart = document.documentElement.clientWidth - dropdownRect.right;
+            return spaceTowardStart < (MENU_WIDTH - MENU_OVERLAP);
+        }
+        return dropdownRect.left < (MENU_WIDTH - MENU_OVERLAP);
     }
 
     // Use cached getComputedStyle to avoid forced reflow during transitions.
     // Invalidate cache when a transition is in progress.
     const containerRect = popupContainer.getBoundingClientRect();
-    let paddingLeft;
-    
+    const paddingSide = isRTL ? 'paddingRight' : 'paddingLeft';
+    let startPadding;
+
     if (popupContainer.classList.contains('is-opening') ||
         popupContainer.classList.contains('is-closing')) {
         // During transition, read directly (cache may be stale)
-        paddingLeft = parseFloat(getComputedStyle(popupContainer).paddingLeft) || 0;
+        startPadding = parseFloat(getComputedStyle(popupContainer)[paddingSide]) || 0;
     } else if (styleCache.has(popupContainer) && styleCache.get(popupContainer).version === styleCacheVersion) {
-        paddingLeft = styleCache.get(popupContainer).paddingLeft;
+        startPadding = styleCache.get(popupContainer).startPadding;
     } else {
-        paddingLeft = parseFloat(getComputedStyle(popupContainer).paddingLeft) || 0;
-        styleCache.set(popupContainer, { paddingLeft, version: styleCacheVersion });
+        startPadding = parseFloat(getComputedStyle(popupContainer)[paddingSide]) || 0;
+        styleCache.set(popupContainer, { startPadding, version: styleCacheVersion });
     }
-    
-    const availableSpace = dropdownLeft - containerRect.left - paddingLeft;
+
+    const availableSpace = isRTL
+        ? containerRect.right - dropdownRect.right - startPadding
+        : dropdownRect.left - containerRect.left - startPadding;
     return availableSpace < (MENU_WIDTH - MENU_OVERLAP);
 }
 

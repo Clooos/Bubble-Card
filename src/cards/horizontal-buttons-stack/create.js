@@ -105,7 +105,7 @@ export function createStructure(context) {
     context.elements.customStyle = createElement('style');
 
     context.card.classList.add('horizontal-buttons-stack-card');
-    context.card.style.marginLeft = context.config.margin ?? '';
+    context.card.style.marginInlineStart = context.config.margin ?? '';
     if (!context.config.hide_gradient) {
       context.card.classList.add('has-gradient');
     }
@@ -115,13 +115,15 @@ export function createStructure(context) {
     context.content.appendChild(context.elements.cardContainer);
 
     context.content.addEventListener('scroll', () => {
-        if (context.content.scrollLeft > 0) {
+        // scrollLeft goes negative in RTL, the magnitude works for both directions
+        const scrolled = Math.abs(context.content.scrollLeft);
+        if (scrolled > 0) {
             context.content.classList.add('is-scrolled');
         } else {
             context.content.classList.remove('is-scrolled');
         }
 
-        if (context.content.scrollWidth - BUTTON_MARGIN < context.content.offsetWidth + context.content.scrollLeft) {
+        if (context.content.scrollWidth - BUTTON_MARGIN < context.content.offsetWidth + scrolled) {
             context.content.classList.add('is-maxed-scroll');
         } else {
             context.content.classList.remove('is-maxed-scroll');

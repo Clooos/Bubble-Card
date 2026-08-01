@@ -20,6 +20,7 @@ import {
   getFillOrientation,
   getSliderValuePosition,
   setRangeFillTransform,
+  isDocumentRTL,
   SLIDER_VALUE_POSITIONS
 } from './helpers.js';
 
@@ -495,8 +496,12 @@ export function createSliderStructure(context, config = {}) {
       }
     }
     const isTouch = (e.pointerType === 'touch') || !!e.touches || !!e.changedTouches;
-    const NEAR_LEFT_EDGE_PX = 30;
-    return isTouch && clientX <= NEAR_LEFT_EDGE_PX;
+    const NEAR_EDGE_PX = 30;
+    // The HA sidebar (and its edge-swipe gesture) sits on the right in RTL
+    if (isDocumentRTL()) {
+      return isTouch && clientX >= (document.documentElement.clientWidth - NEAR_EDGE_PX);
+    }
+    return isTouch && clientX <= NEAR_EDGE_PX;
   }
 
   function onPointerMove(e) {
@@ -703,7 +708,10 @@ export function createSliderStructure(context, config = {}) {
       return initialSliderY;
     }
 
-    initialSliderX = sliderRect.left + (sliderRect.width * initialPercentage / 100);
+    const axisPercentage = fillOrientation === 'right'
+      ? 100 - initialPercentage
+      : initialPercentage;
+    initialSliderX = sliderRect.left + (sliderRect.width * axisPercentage / 100);
     return initialSliderX;
   }
 
@@ -962,7 +970,10 @@ export function createSliderStructure(context, config = {}) {
             : initialPercentage;
           initialSliderY = sliderRect.top + (sliderRect.height * axisPercentage / 100);
         } else {
-        initialSliderX = sliderRect.left + (sliderRect.width * initialPercentage / 100);
+          const axisPercentage = fillOrientation === 'right'
+            ? 100 - initialPercentage
+            : initialPercentage;
+          initialSliderX = sliderRect.left + (sliderRect.width * axisPercentage / 100);
         }
       } else {
         getSliderRect();

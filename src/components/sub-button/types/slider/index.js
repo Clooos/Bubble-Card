@@ -22,8 +22,13 @@ function buildSubSliderConfig(context, options) {
     ...(options.subButton?.slider_live_update !== undefined ? { slider_live_update: options.subButton.slider_live_update } : {}),
     ...(options.subButton?.invert_slider_value !== undefined ? { invert_slider_value: options.subButton.invert_slider_value } : {}),
     ...(options.subButton?.slider_fill_orientation !== undefined ? { slider_fill_orientation: options.subButton.slider_fill_orientation } : {}),
-    // Force 'right' position when show_button_info is enabled, otherwise use configured value
-    slider_value_position: forceValuePositionRight ? 'right' : (options.subButton?.slider_value_position ?? 'right'),
+    // Force 'right' position when show_button_info is enabled, otherwise pass the configured
+    // value through only when set, so the direction-aware default (RTL) can apply
+    ...(forceValuePositionRight
+      ? { slider_value_position: 'right' }
+      : (options.subButton?.slider_value_position !== undefined
+        ? { slider_value_position: options.subButton.slider_value_position }
+        : {})),
     ...(options.subButton?.use_accent_color !== undefined ? { use_accent_color: options.subButton.use_accent_color } : {}),
     ...(options.subButton?.allow_light_slider_to_0 !== undefined ? { allow_light_slider_to_0: options.subButton.allow_light_slider_to_0 } : {}),
     ...(options.subButton?.light_transition !== undefined ? { light_transition: options.subButton.light_transition } : {}),

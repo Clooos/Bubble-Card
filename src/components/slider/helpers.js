@@ -1,21 +1,23 @@
-import { 
+import {
   getAttribute,
   getState,
   isStateOn,
   formatNumericValue,
-  getTemperatureUnit
+  getTemperatureUnit,
+  isDocumentRTL
 } from '../../tools/utils.js';
+
+export { isDocumentRTL };
 
 const FILL_ORIENTATION_VALUES = ['left', 'right', 'top', 'bottom'];
 export const SLIDER_VALUE_POSITIONS = ['right', 'left', 'center'];
 
-const LEGACY_SLIDER_VALUE_POSITIONS = {
-  'inline-end': 'right',
-  'inline-start': 'left'
-};
+// Defaults mirror like native ha-control-slider: they follow the document
+// direction, while explicit left/right values from YAML stay physical.
 const RECOGNIZED_SLIDER_VALUE_POSITIONS = new Set([
   ...SLIDER_VALUE_POSITIONS,
-  ...Object.keys(LEGACY_SLIDER_VALUE_POSITIONS)
+  'inline-end',
+  'inline-start'
 ]);
 
 // Generic helpers
@@ -59,20 +61,20 @@ export function toActualPercentage(context, visualPercentage) {
 
 export function getFillOrientation(context) {
   const orientation = context?.config?.slider_fill_orientation;
-  return FILL_ORIENTATION_VALUES.includes(orientation) ? orientation : 'left';
+  if (FILL_ORIENTATION_VALUES.includes(orientation)) return orientation;
+  return isDocumentRTL() ? 'right' : 'left';
 }
 
 export function getSliderValuePosition(context) {
   const rawValue = context?.config?.slider_value_position;
   if (rawValue === 'hidden') return 'hidden';
-  if (!rawValue) return 'right';
-  if (LEGACY_SLIDER_VALUE_POSITIONS[rawValue]) {
-    return LEGACY_SLIDER_VALUE_POSITIONS[rawValue];
-  }
+  if (!rawValue) return isDocumentRTL() ? 'left' : 'right';
+  if (rawValue === 'inline-end') return isDocumentRTL() ? 'left' : 'right';
+  if (rawValue === 'inline-start') return isDocumentRTL() ? 'right' : 'left';
   if (RECOGNIZED_SLIDER_VALUE_POSITIONS.has(rawValue)) {
     return rawValue;
   }
-  return 'right';
+  return isDocumentRTL() ? 'left' : 'right';
 }
 
 function buildFillTransform(orientation, visualPercentage) {

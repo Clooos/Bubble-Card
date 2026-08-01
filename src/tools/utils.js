@@ -42,6 +42,12 @@ function normalizeComparableVersion(version) {
     return parts ? parts.join('.') : '';
 }
 
+// Home Assistant stamps dir="rtl" on the document for RTL languages;
+// logical CSS follows it automatically, JS math has to ask explicitly.
+export function isDocumentRTL() {
+    return (document.documentElement.dir || document.dir) === 'rtl';
+}
+
 export function compareVersions(v1, v2) {
     const normalizedV1 = normalizeComparableVersion(v1);
     const normalizedV2 = normalizeComparableVersion(v2);

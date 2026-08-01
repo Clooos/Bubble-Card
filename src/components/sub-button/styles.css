@@ -2,7 +2,7 @@
     position: relative;
     display: flex;
     justify-content: var(--bubble-sub-button-justify-content, end);
-    right: 8px;
+    inset-inline-end: 8px;
     align-content: center;
     gap: 8px;
     align-items: center;
@@ -80,7 +80,7 @@
 
 .bubble-sub-button-alignment-lane.lane-end {
     justify-content: flex-end;
-    margin-left: auto;
+    margin-inline-start: auto;
 }
 
 .bubble-sub-button-alignment-lane.lane-expand {
@@ -145,7 +145,7 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    right: 0;
+    inset-inline-end: 0;
     box-sizing: border-box;
     width: max-content;
     min-width: 36px;
@@ -229,7 +229,8 @@
 }
 
 .content-icon-right .icon-with-state {
-    margin: 0 0 0 4px;
+    margin: 0;
+    margin-inline-start: 4px;
 }
 
 .content-icon-top .icon-with-state,
@@ -254,7 +255,7 @@
 }
 
 .bubble-sub-button-image.icon-with-state {
-    margin-right: 4px;
+    margin-inline-end: 4px;
 }
 
 .bubble-sub-button-image.icon-without-state,
@@ -264,7 +265,8 @@
 }
 
 .content-icon-right .bubble-sub-button-image.icon-with-state {
-    margin: 0 0 0 4px;
+    margin: 0;
+    margin-inline-start: 4px;
 }
 
 /* Full-size entity picture when only the icon is displayed */
@@ -296,12 +298,12 @@
 }
 
 .icon-with-state {
-    margin-right: 4px;
+    margin-inline-end: 4px;
     --mdc-icon-size: 16px;
 }
 
 .icon-without-state {
-    margin-right: 0;
+    margin-inline-end: 0;
     --mdc-icon-size: 20px;
 }
 
@@ -363,7 +365,7 @@
 
 .rows-2 .bubble-sub-button {
     height: 20px;
-    justify-content: left;
+    justify-content: start;
 }
 
 .large.rows-2 .bubble-sub-button-container:has(> :last-child:nth-child(2)) :nth-child(2) {
@@ -407,14 +409,14 @@
 /* Specific positioning for bottom containers to maintain existing behavior */
 .bubble-sub-button-bottom-container .bubble-sub-slider-wrapper {
     width: 100%;
-    left: 0;
-    right: auto;
+    inset-inline-start: 0;
+    inset-inline-end: auto;
 }
 
 .bubble-sub-slider-close {
     display: flex;
     position: relative;
-    right: auto;
+    inset-inline-end: auto;
     height: 36px;
     width: 36px;
     justify-content: center;
@@ -453,6 +455,10 @@
     transform: translateX(14px);
 }
 
+.is-hidden:dir(rtl) {
+    transform: translateX(-14px);
+}
+
 .bubble-icon-container.is-hidden,
 .bubble-main-icon-container.is-hidden,
 .bubble-sub-slider-close.is-hidden {
@@ -466,7 +472,7 @@
 
 /* Allow overlay sliders to translate out without extending card width */
 .bubble-sub-slider-wrapper:not(.inline).is-hidden {
-    right: calc(8px + 14px);
+    inset-inline-end: calc(8px + 14px);
 }
 
 /* Bottom-aligned overlays rely on explicit width instead of right offsets */
@@ -498,7 +504,7 @@
 /* Inline sub-slider mode (alwaysVisible): wrapper + slider sit inside sub-buttons row */
 .bubble-sub-slider-wrapper.inline {
     position: relative;
-    left: 0;
+    inset-inline-start: 0;
     width: auto;
     height: var(--bubble-sub-slider-height, 36px);
     transform: none;
@@ -522,7 +528,7 @@
 /* Slider container inline styles */
 .bubble-sub-button-slider.inline {
     position: relative;
-    left: 0;
+    inset-inline-start: 0;
     width: auto;
     min-width: var(--slider-container-min-width, 96px);
     height: var(--bubble-sub-slider-height, 36px);
@@ -617,16 +623,16 @@
     justify-content: flex-start;
 }
 
-/* When with-button-info is active, value should always be on the right (forced) */
+/* When with-button-info is active, value should always be at the inline end (forced) */
 .bubble-sub-button-slider.inline.with-button-info .bubble-sub-button-info-wrapper .bubble-range-value.in-info-wrapper {
-    margin-left: auto;
+    margin-inline-start: auto;
 }
 
 .bubble-sub-button-info-wrapper .bubble-sub-button-name-container {
     overflow: auto;
     min-width: 0;
     flex-shrink: 1;
-    margin-right: 16px;
+    margin-inline-end: 16px;
 }
 
 .bubble-sub-button-info-wrapper .bubble-sub-button-icon {
@@ -634,11 +640,11 @@
 }
 
 .bubble-sub-button-info-wrapper .bubble-sub-button-icon.icon-with-state {
-    margin-right: 4px;
+    margin-inline-end: 4px;
 }
 
 .bubble-sub-button-info-wrapper .bubble-sub-button-icon.icon-without-state {
-    margin-right: 0;
+    margin-inline-end: 0;
 }
 
 .bubble-sub-button-info-wrapper .bubble-range-value.in-info-wrapper {
@@ -666,9 +672,19 @@
     justify-content: center;
 }
 
-/* Reset margin-left for all value positions except when with-button-info is active */
+/* The value-position classes are resolved to physical sides (getSliderValuePosition),
+   so in RTL the flow-relative flex keywords must be swapped to stay physical */
+.bubble-sub-button-slider.inline:dir(rtl):not(.with-button-info):has(.bubble-range-slider.value-position-right) .bubble-sub-button-info-wrapper {
+    justify-content: flex-start;
+}
+
+.bubble-sub-button-slider.inline:dir(rtl):not(.with-button-info):has(.bubble-range-slider.value-position-left) .bubble-sub-button-info-wrapper {
+    justify-content: flex-end;
+}
+
+/* Reset the inline-start margin for all value positions except when with-button-info is active */
 .bubble-sub-button-slider.inline:not(.with-button-info) .bubble-sub-button-info-wrapper .bubble-range-value.in-info-wrapper {
-    margin-left: 0;
+    margin-inline-start: 0;
 }
 
 /* Hidden value position works for both modes */

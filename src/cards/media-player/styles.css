@@ -84,8 +84,8 @@
     gap: 8px;
     height: 38px;
     width: calc(100% - 16px);
-    left: 8px;
-    right: 8px;
+    inset-inline-start: 8px;
+    inset-inline-end: 8px;
     z-index: 1;
     opacity: 1;
     transition: opacity .2s, transform .2s;
@@ -124,9 +124,13 @@
     transform: translateX(14px);
 }
 
+.is-hidden:dir(rtl) {
+    transform: translateX(-14px);
+}
+
 /* Keep hidden volume slider overlays inside card width */
 .bubble-volume-slider-wrapper.is-hidden {
-    right: calc(8px + 14px);
+    inset-inline-end: calc(8px + 14px);
 }
 
 /* Position volume slider at bottom when buttons are in bottom-fixed mode */
@@ -134,8 +138,8 @@
     bottom: 8px;
     top: auto;
     width: 100%;
-    left: 0;
-    right: auto;
+    inset-inline-start: 0;
+    inset-inline-end: auto;
     padding: 0px 8px;
     box-sizing: border-box;
 }
@@ -203,7 +207,8 @@
     flex-direction: column;
     justify-content: center;
     flex-grow: 1;
-    margin: 0 16px 0 4px;
+    margin-block: 0;
+    margin-inline: 4px 16px;
     pointer-events: none;
     position: relative;
     overflow: hidden;
@@ -229,7 +234,7 @@
 }
 
 .bubble-media-info-container.name-without-icon {
-    margin-left: 16px;
+    margin-inline-start: 16px;
 }
 
 @media screen and (max-width: 250px) {

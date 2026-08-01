@@ -9,7 +9,7 @@
 }
 
 .no-background .bubble-sub-button-container {
-  right: 0;
+  inset-inline-end: 0;
 }
 
 .bubble-sub-button-container.space-between-justify {
@@ -28,24 +28,24 @@ ha-card.footer-mode {
   margin-top: 0;
   position: fixed;
   width: calc(100% - var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) - 8px);
-  left: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) + 4px);
+  inset-inline-start: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) + 4px);
   z-index: 5;
 }
 
 ha-card.footer-mode:not(.footer-full-width) {
   width: var(--bubble-footer-width, 500px);
-  left: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) + (100% - var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) - var(--bubble-footer-width, 500px)) / 2);
+  inset-inline-start: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) + (100% - var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) - var(--bubble-footer-width, 500px)) / 2);
 }
 
 @media only screen and (max-width: 600px) {
   ha-card.footer-mode {
     width: calc(100% - 16px);
-    left: 8px;
+    inset-inline-start: 8px;
   }
-  
+
   ha-card.footer-mode:not(.footer-full-width) {
     width: calc(100% - 16px);
-    left: 8px;
+    inset-inline-start: 8px;
   }
 }
 
@@ -68,7 +68,7 @@ ha-card.footer-mode .bubble-container::before {
 ha-card.footer-mode.editor {
   position: relative;
   width: 100%;
-  left: 0;
+  inset-inline-start: 0;
   bottom: 0;
 }
 

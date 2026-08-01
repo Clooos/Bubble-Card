@@ -69,8 +69,8 @@
     position: absolute;
     display: none;
     top: 50%;
-    right: 14px;
-    left: auto;
+    inset-inline-end: 14px;
+    inset-inline-start: auto;
     transform: translateY(-50%);
     padding: 0 6px;
     pointer-events: none;
