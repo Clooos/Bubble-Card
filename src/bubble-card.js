@@ -117,6 +117,15 @@ class BubbleCard extends HTMLElement {
       }
     } catch (e) {}
     try {
+      // Remove the template-change subscriber from the module-level Set, it
+      // would otherwise retain this element (and its last hass) forever.
+      if (this._templateChangeUnsubscribe) {
+        this._templateChangeUnsubscribe();
+        this._templateChangeUnsubscribe = null;
+        this._templateChangeHandler = null;
+      }
+    } catch (e) {}
+    try {
       unregisterForIconRefresh(this);
     } catch (e) {}
     clearTimeout(this._editorUpdateTimeout);

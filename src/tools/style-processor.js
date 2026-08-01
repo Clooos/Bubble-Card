@@ -95,47 +95,51 @@ export const handleCustomStyles = (context, element = context.card) => {
   if (typeof context.cardLoaded === "undefined" && !isDirectStyleElement) {
     context.lastEvaluatedStyles = "";
     context.initialLoad = true;
-    
-    if (!context._moduleChangeListenerAdded) {
-      const refreshHandler = () => {
-        context.lastEvaluatedStyles = "";
-        context.stylesYAML = null;
-        context._moduleListVersion = (context._moduleListVersion || 0) + 1;
-        context._cachedModulesToApply = null;
-        yamlKeysMap.forEach((value, key) => {
-          if (context._processedSchemas?.[key]) {
-            delete context._processedSchemas[key];
-          }
-        });
-        // Use popUp element for pop-up cards, otherwise use card element
-        const targetElement = context.cardType === 'pop-up' && context.popUp ? context.popUp : context.card;
-        handleCustomStyles(context, targetElement); 
-      };
-
-      // Light refresh for template result changes (no need to clear module caches)
-      const templateRefreshHandler = () => {
-        context.lastEvaluatedStyles = "";
-        // Increment template version counter for modules that track template changes
-        context._templateResultVersion = (context._templateResultVersion || 0) + 1;
-        // Invalidate bubble_badges module cache to force re-evaluation
-        if (context._bb_cache) {
-          context._bb_cache.lastStateSignature = '';
-        }
-        const targetElement = context.cardType === 'pop-up' && context.popUp ? context.popUp : context.card;
-        handleCustomStyles(context, targetElement);
-      };
-      
-      window.addEventListener('bubble-card-modules-changed', refreshHandler);
-      window.addEventListener('bubble-card-module-updated', refreshHandler);
-      // Subscribe to template changes
-      onTemplateChange(templateRefreshHandler);
-      document.addEventListener('yaml-modules-updated', refreshHandler);
-      context._moduleChangeListenerAdded = true;
-      context._moduleChangeHandler = refreshHandler;
-      context._templateChangeHandler = templateRefreshHandler;
-    }
   }
-  
+
+  // (Re-)register the refresh listeners whenever they are missing: disconnect
+  // removes them and resets the flag, and HA re-attaches cached view elements,
+  // so a card can come back long after its initial load with cardLoaded set.
+  if (!isDirectStyleElement && !context._moduleChangeListenerAdded) {
+    const refreshHandler = () => {
+      context.lastEvaluatedStyles = "";
+      context.stylesYAML = null;
+      context._moduleListVersion = (context._moduleListVersion || 0) + 1;
+      context._cachedModulesToApply = null;
+      yamlKeysMap.forEach((value, key) => {
+        if (context._processedSchemas?.[key]) {
+          delete context._processedSchemas[key];
+        }
+      });
+      // Use popUp element for pop-up cards, otherwise use card element
+      const targetElement = context.cardType === 'pop-up' && context.popUp ? context.popUp : context.card;
+      handleCustomStyles(context, targetElement);
+    };
+
+    // Light refresh for template result changes (no need to clear module caches)
+    const templateRefreshHandler = () => {
+      context.lastEvaluatedStyles = "";
+      // Increment template version counter for modules that track template changes
+      context._templateResultVersion = (context._templateResultVersion || 0) + 1;
+      // Invalidate bubble_badges module cache to force re-evaluation
+      if (context._bb_cache) {
+        context._bb_cache.lastStateSignature = '';
+      }
+      const targetElement = context.cardType === 'pop-up' && context.popUp ? context.popUp : context.card;
+      handleCustomStyles(context, targetElement);
+    };
+
+    window.addEventListener('bubble-card-modules-changed', refreshHandler);
+    window.addEventListener('bubble-card-module-updated', refreshHandler);
+    // Subscribe to template changes, keeping the deleter: without it the
+    // module-level subscriber Set retains every card ever rendered.
+    context._templateChangeUnsubscribe = onTemplateChange(templateRefreshHandler);
+    document.addEventListener('yaml-modules-updated', refreshHandler);
+    context._moduleChangeListenerAdded = true;
+    context._moduleChangeHandler = refreshHandler;
+    context._templateChangeHandler = templateRefreshHandler;
+  }
+
   // Hide the card during the initial loading only
   if (context.initialLoad && loadHideTarget?.style && !loadHideTarget.dataset.bubbleStyleHideMode) {
     if (loadHideMode === 'visibility') {
