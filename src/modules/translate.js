@@ -173,57 +173,6 @@ async function translateChunkWithEndpoint(chunk, targetLang) {
   });
 }
 
-// Basic HTML entity decoding: MyMemory escapes its output.
-function decodeEntities(value) {
-  return value
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-    .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
-    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-}
-
-// Google-independent fallback (free, CORS-enabled, modest daily quota):
-// useful when the primary endpoint is rate limited. Its per-request limit is
-// ~500 bytes, so chunks are re-split.
-let myMemoryCooldownUntil = 0;
-
-async function translateChunkWithMyMemory(chunk, targetLang) {
-  if (Date.now() < myMemoryCooldownUntil) return null;
-  const parts = [];
-  let rest = chunk;
-  while (rest.length > 450) {
-    let cut = rest.lastIndexOf(' ', 450);
-    if (cut < 200) cut = 450;
-    parts.push(rest.slice(0, cut));
-    rest = rest.slice(cut);
-  }
-  if (rest) parts.push(rest);
-
-  const out = [];
-  for (const part of parts) {
-    const result = await enqueueEndpointCall(async () => {
-      try {
-        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(part)}&langpair=en|${encodeURIComponent(targetLang)}`;
-        const response = await fetch(url);
-        if (!response.ok) return null;
-        const data = await response.json();
-        const text = data?.responseData?.translatedText;
-        if (typeof text === 'string' && /MYMEMORY WARNING/i.test(text)) {
-          // Daily quota exhausted: stop asking for a good while.
-          myMemoryCooldownUntil = Date.now() + 60 * 60 * 1000;
-          return null;
-        }
-        if (typeof text !== 'string' || !text) return null;
-        return decodeEntities(text);
-      } catch (_) {
-        return null;
-      }
-    });
-    if (!result) return null;
-    out.push(result);
-  }
-  return out.join('');
-}
-
 /**
  * Translates English text to the user's language. Returns null when
  * translation is unavailable (offline, unsupported language, altered
@@ -266,9 +215,6 @@ export async function translateText(text, hass) {
     let translated = await translateChunkWithBrowserApi(chunk, serviceLang);
     if (!translated || !looksComplete(chunk, translated)) {
       translated = await translateChunkWithEndpoint(chunk, serviceLang);
-    }
-    if (!translated || !looksComplete(chunk, translated)) {
-      translated = await translateChunkWithMyMemory(chunk, serviceLang);
     }
     if (!translated || !looksComplete(chunk, translated)) return null;
     translatedChunks.push(translated);

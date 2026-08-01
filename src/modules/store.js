@@ -290,12 +290,13 @@ export function makeModuleStore(context) {
     context._zoomedImage = null;
   }
 
-  // Machine-translated descriptions: restore the user's last choice.
+  // Machine-translated descriptions: enabled by default for non-English
+  // languages (zero setup), the toggle stores an explicit opt-out.
   if (context._storeTranslateDescriptions === undefined) {
     try {
-      context._storeTranslateDescriptions = localStorage.getItem('bubble-card-store-translate') === '1';
+      context._storeTranslateDescriptions = localStorage.getItem('bubble-card-store-translate') !== '0';
     } catch (_) {
-      context._storeTranslateDescriptions = false;
+      context._storeTranslateDescriptions = true;
     }
   }
   
