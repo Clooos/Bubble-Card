@@ -2420,10 +2420,14 @@ class BubbleCardEditor extends LitElement {
 
     // Only recreate cardTypeList if it doesn't exist or if translation might have changed
     const calendarLabel = t('editor.calendar.name');
+    // Sentinel for cache invalidation: must come from the fetched dictionary
+    // (not a natively resolved key, which never changes) so the list is
+    // rebuilt once the translations for this language arrive.
+    const translationSentinel = t('editor.card_names.button');
     const disallowStandalonePopup = this._isStandalonePopupDisallowedInCurrentDialog();
     if (!this.cardTypeList ||
         this._cachedStandalonePopupDisallowed !== disallowStandalonePopup ||
-        (this._cachedCalendarLabel && this._cachedCalendarLabel !== calendarLabel)) {
+        (this._cachedTranslationSentinel && this._cachedTranslationSentinel !== translationSentinel)) {
         this.cardTypeList = [{
                 'label': t('editor.card_names.button'),
                 'value': 'button'
@@ -2469,7 +2473,7 @@ class BubbleCardEditor extends LitElement {
                 'value': 'sub-buttons'
             }
         ];
-        this._cachedCalendarLabel = calendarLabel;
+        this._cachedTranslationSentinel = translationSentinel;
         this._cachedStandalonePopupDisallowed = disallowStandalonePopup;
     }
   }
