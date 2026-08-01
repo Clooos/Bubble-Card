@@ -4296,16 +4296,16 @@
                         class="version-language"
                         role="button"
                         tabindex="0"
-                        title="${e?"Bubble Card is in English":"Switch Bubble Card to English"}"
+                        title="${e?"Bubble Card is in English, turn Auto back on to follow the Home Assistant language":"Bubble Card follows the Home Assistant language, turn Auto off for English"}"
                         @click=${()=>this._toggleEditorEnglish()}
                         @keydown=${e=>{"Enter"!==e.key&&" "!==e.key||(e.preventDefault(),this._toggleEditorEnglish())}}
                     >
                         <ha-icon icon="mdi:translate"></ha-icon>
-                        English
+                        Auto
                         <ha-switch
-                            .checked=${e}
+                            .checked=${!e}
                             @click=${e=>e.stopPropagation()}
-                            @change=${e=>this._toggleEditorEnglish(e.target.checked)}
+                            @change=${e=>this._toggleEditorEnglish(!e.target.checked)}
                         ></ha-switch>
                     </span>
                 `)}
