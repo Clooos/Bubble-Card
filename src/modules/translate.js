@@ -236,6 +236,7 @@ async function translateChunkWithBrowserApi(chunk, targetLang) {
 // a disk cache shared by every browser. Older BCT versions without the
 // command fail fast with unknown_command and the next engine takes over.
 let bctTranslateUnavailable = false;
+let bctTranslateSeen = false;
 
 async function translateChunkWithBCT(chunk, targetLang, hass) {
   if (bctTranslateUnavailable || !hass?.connection?.sendMessagePromise) return null;
@@ -245,6 +246,10 @@ async function translateChunkWithBCT(chunk, targetLang, hass) {
       text: chunk,
       target: targetLang
     });
+    // The command exists: the server is now the only egress point, with its
+    // own engines, backoff and shared cache. The browser must not keep
+    // poking rate-limited endpoints directly on top of it.
+    bctTranslateSeen = true;
     return typeof response?.translated === 'string' && response.translated ? response.translated : null;
   } catch (error) {
     if (error?.code === 'unknown_command') bctTranslateUnavailable = true;
@@ -355,7 +360,7 @@ export async function translateText(text, hass) {
     if (!translated || !looksComplete(chunk, translated)) {
       translated = await translateChunkWithBCT(chunk, serviceLang, hass);
     }
-    if (!translated || !looksComplete(chunk, translated)) {
+    if ((!translated || !looksComplete(chunk, translated)) && !bctTranslateSeen) {
       translated = await translateChunkWithEndpoint(chunk, serviceLang);
     }
     if (!translated || !looksComplete(chunk, translated)) return null;
