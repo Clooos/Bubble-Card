@@ -11,10 +11,14 @@ import { tTemplate } from '../editor/utils.js';
 import setupTranslation from '../tools/localize.js';
 import { translateText, getTranslationTargetLang, warmupBrowserTranslator } from './translate.js';
 
-// Kicks off (once) and returns the machine translation of a module
-// description. Falls back to the original text until/unless a translation is
-// available. Per-module opt-out via context._storeDescOriginal.
-function _getStoreDescription(context, module) {
+// Returns the machine translation of a module description, falling back to
+// the original text until one is available. Translation requests go through a
+// scheduler that always processes the topmost displayed module first (ranking
+// order, and whatever filter/search is active), one module at a time.
+// Per-module opt-out via context._storeDescOriginal.
+const DESC_RETRY_MS = 5 * 60 * 1000;
+
+function _getStoreDescription(context, module, order) {
   const id = module.id ?? module.moduleLink ?? module.name;
   const wantsTranslation = context._storeTranslateDescriptions &&
     !!getTranslationTargetLang(context.hass) &&
@@ -27,18 +31,43 @@ function _getStoreDescription(context, module) {
     return { id, text: context._storeDescCache.get(id), translated: true };
   }
 
-  context._storeDescPending = context._storeDescPending || new Set();
-  if (!context._storeDescPending.has(id)) {
-    context._storeDescPending.add(id);
-    translateText(module.description, context.hass).then((translated) => {
-      context._storeDescPending.delete(id);
-      if (translated) {
-        context._storeDescCache.set(id, translated);
-        context.requestUpdate();
-      }
-    });
+  // Register (or refresh) this module's display position for the scheduler.
+  context._storeDescWanted = context._storeDescWanted || new Map();
+  const failedAt = context._storeDescFailed?.get(id);
+  if (!failedAt || Date.now() - failedAt > DESC_RETRY_MS) {
+    context._storeDescWanted.set(id, { text: module.description, order });
+    _drainStoreDescriptions(context);
   }
   return { id, text: module.description, translated: false };
+}
+
+function _drainStoreDescriptions(context) {
+  if (context._storeDescDraining) return;
+
+  // Lowest display order first.
+  let nextId = null;
+  let nextEntry = null;
+  for (const [id, entry] of context._storeDescWanted || []) {
+    if (nextEntry === null || entry.order < nextEntry.order) {
+      nextId = id;
+      nextEntry = entry;
+    }
+  }
+  if (nextId === null || !context._storeTranslateDescriptions) return;
+
+  context._storeDescDraining = true;
+  translateText(nextEntry.text, context.hass).then((translated) => {
+    context._storeDescDraining = false;
+    context._storeDescWanted.delete(nextId);
+    if (translated) {
+      context._storeDescCache.set(nextId, translated);
+    } else {
+      context._storeDescFailed = context._storeDescFailed || new Map();
+      context._storeDescFailed.set(nextId, Date.now());
+    }
+    context.requestUpdate();
+    _drainStoreDescriptions(context);
+  });
 }
 
 const BCT_CHECK_RETRY_MS = 5000;
@@ -444,7 +473,7 @@ export function makeModuleStore(context) {
       ` : ''}
 
       <div class="store-modules">
-        ${_getFilteredStoreModules(context).map(module => {
+        ${_getFilteredStoreModules(context).map((module, displayOrder) => {
           const isInstalled = _isModuleInstalled(module.id);
           const isInstalledViaYaml = _isModuleInstalledViaYaml(module.id);
           const hasUpdate = _hasModuleUpdate(module.id, module.version);
@@ -490,7 +519,7 @@ export function makeModuleStore(context) {
               <div class="store-module-content">
                 <div class="store-module-description">
                   ${module.description ? (() => {
-                    const desc = _getStoreDescription(context, module);
+                    const desc = _getStoreDescription(context, module, displayOrder);
                     const showingOriginalByChoice = context._storeTranslateDescriptions &&
                       !!getTranslationTargetLang(context.hass) &&
                       context._storeDescOriginal?.has(desc.id);
