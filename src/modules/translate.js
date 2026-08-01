@@ -7,6 +7,8 @@
 // translation and restored afterwards: they must never be sent to (or altered
 // by) a translation engine. If restoration fails, the original text is kept.
 
+import setupTranslation from '../tools/localize.js';
+
 const memCache = new Map(); // `${lang} ${hash}` -> translated string
 
 const CHUNK_MAX = 1200;   // per-request payload cap (keeps GET URLs well under limits)
@@ -73,8 +75,57 @@ export function getTranslationTargetLang(hass) {
 }
 
 // Segments that must never be translated: fenced/inline code, code-ish
-// elements, any HTML tag, URLs, and brand/product names.
+// elements, any HTML tag, URLs, brand/product names, and Bubble Card's own
+// vocabulary, so descriptions keep the wording used by the editor itself
+// (e.g. "pop-up", never a translation engine's synonym).
 const PROTECT_RE = /(```[\s\S]*?```|<code-block>[\s\S]*?<\/code-block>|<pre>[\s\S]*?<\/pre>|<code>[\s\S]*?<\/code>|`[^`\n]*`|<[^>\n]+>|https?:\/\/\S+|Bubble Card Tools|Bubble Card|Module Store|Home Assistant|GitHub|Patreon|YAML)/g;
+
+// Engines render "pop-up" with their own synonyms ("fenêtre contextuelle",
+// "ventana emergente", ...). Descriptions must use the same word as the
+// editor itself, so those renderings are rewritten afterwards with the
+// canonical term from our own dictionary. Tokens can't do this: an opaque
+// placeholder prevents the engine from inflecting the surrounding grammar.
+const POPUP_RENDERINGS = {
+  fr: /fen[êe]tres?\s+contextuelles?|fen[êe]tres?\s+surgissantes?/gi,
+  es: /ventanas?\s+emergentes?/gi,
+  'es-419': /ventanas?\s+emergentes?/gi,
+  pt: /janelas?\s+(?:emergentes?|de\s+contexto)/gi,
+  'pt-BR': /janelas?\s+(?:emergentes?|de\s+contexto)/gi,
+  ca: /finestres?\s+emergents?/gi,
+  gl: /xanelas?\s+emerxentes?/gi,
+  it: /finestre?\s+(?:a\s+comparsa|di\s+dialogo)|finestrell[ae]/gi,
+  ro: /ferestre?\s+pop-?up|ferestre?\s+contextuale?/gi,
+  de: /Pop-?up-Fenstern?|Kontextfenstern?/gi,
+  nl: /pop-?upvensters?|contextvensters?/gi,
+  da: /pop-?op-?vinduer?/gi,
+  sv: /pop-?up-?f[öo]nster/gi,
+  nb: /pop-?up-?vinduer?/gi,
+  nn: /pop-?up-?vindaug[ae]?/gi,
+  fi: /ponnahdusikkunoita|ponnahdusikkunat?|ponnahdusikkunan?/gi,
+  pl: /wyskakuj[ąa]ce?\s+okna?|okna?\s+wyskakuj[ąa]ce?/gi,
+  cs: /vyskakovac[íi]\s+okna?|vyskakovac[íi]ch\s+oken/gi,
+  sk: /vyskakovacie\s+okn[áa]|vyskakovacieho\s+okna/gi,
+  ru: /всплывающи[ех]\s+окн[ао]\w*|всплывающее\s+окно/gi,
+  uk: /спливн[іе]\s+вікн[ао]\w*/gi,
+  tr: /a[çc][ıi]l[ıi]r\s+pencerelere?|a[çc][ıi]l[ıi]r\s+pencere\w*/gi
+};
+
+function applyGlossary(text, lang, canonical) {
+  const pattern = POPUP_RENDERINGS[lang] ?? POPUP_RENDERINGS[lang?.split('-')[0]];
+  if (!pattern || !canonical) return text;
+  const isAscii = /^[\x20-\x7E]+$/.test(canonical);
+  return text.replace(pattern, (match) => {
+    // Keep a plural marker when the engine used one (Latin-script languages).
+    const plural = isAscii && /s$/i.test(match.trim());
+    const base = plural ? `${canonical}s` : canonical;
+    // Follow the replaced text's own capitalization: the canonical term comes
+    // from a picker label, so it is capitalized even mid-sentence.
+    const first = match.charAt(0);
+    return first !== first.toLowerCase()
+      ? base.charAt(0).toUpperCase() + base.slice(1)
+      : base.charAt(0).toLowerCase() + base.slice(1);
+  });
+}
 
 function protectText(text) {
   const tokens = [];
@@ -251,7 +302,8 @@ export async function translateText(text, hass) {
     translatedChunks.push(translated);
   }
 
-  const restored = restoreText(translatedChunks.join('') + untranslatedTail, tokens);
+  const glossed = applyGlossary(translatedChunks.join(''), lang, setupTranslation(hass)('editor.card_names.popup'));
+  const restored = restoreText(glossed + untranslatedTail, tokens);
   if (!restored) return null;
 
   memCache.set(cacheKey, restored);
