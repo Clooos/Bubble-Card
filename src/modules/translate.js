@@ -340,6 +340,15 @@ export function translateModuleSchema(schema, hass, onReady) {
       return;
     }
     if (!node || typeof node !== 'object') return;
+    // `constant` entries are pure display text: their `value` is shown, never
+    // stored. Both shapes exist: {type: 'constant', value} and
+    // selector: {constant: {value}}.
+    if (node.type === 'constant' && typeof node.value === 'string') {
+      node.value = translateUiText(node.value, hass, onReady);
+    }
+    if (node.constant && typeof node.constant === 'object' && typeof node.constant.value === 'string') {
+      node.constant.value = translateUiText(node.constant.value, hass, onReady);
+    }
     for (const [key, value] of Object.entries(node)) {
       if (typeof value === 'string' && SCHEMA_TEXT_KEYS.has(key)) {
         node[key] = translateUiText(value, hass, onReady);
