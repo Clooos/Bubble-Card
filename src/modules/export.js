@@ -1,6 +1,7 @@
 import jsyaml from 'js-yaml';
 import { fireToast } from './cache.js';
 import { getAvailableCardTypes } from './module-editor.js';
+import setupTranslation from '../tools/localize.js';
 
 function getCleanExportData(moduleData) {
   // Destructure to extract only the desired properties.
@@ -226,6 +227,8 @@ export function generateGitHubExport(moduleData) {
 }
 
 export async function copyToClipboard(context, text, successMessage, updatePreviewCallback) {
+  const t = setupTranslation(context.hass);
+
   const notifySuccess = () => {
     fireToast(context, successMessage, "success");
     if (typeof updatePreviewCallback === 'function') {
@@ -234,7 +237,7 @@ export async function copyToClipboard(context, text, successMessage, updatePrevi
   };
 
   const notifyError = () => {
-    fireToast(context, "Could not copy to clipboard. Please copy manually from the preview below.", "error");
+    fireToast(context, t('editor.module_editor.copy_error'), "error");
     if (typeof updatePreviewCallback === 'function') {
       updatePreviewCallback(text);
     }
@@ -289,6 +292,8 @@ export async function copyToClipboard(context, text, successMessage, updatePrevi
 }
 
 export function downloadModuleAsYaml(context, moduleData, updatePreviewCallback) {
+  const t = setupTranslation(context.hass);
+
   try {
     const yamlExport = generateYamlExport(moduleData);
     const blob = new Blob([yamlExport], { type: 'text/yaml' });
@@ -302,7 +307,7 @@ export function downloadModuleAsYaml(context, moduleData, updatePreviewCallback)
     URL.revokeObjectURL(url);
     
     // Use fireToast for notification
-    fireToast(context, "Module downloaded as YAML file!", "success");
+    fireToast(context, t('editor.module_editor.download_success'), "success");
     
     // Update the preview
     if (typeof updatePreviewCallback === 'function') {
@@ -312,7 +317,7 @@ export function downloadModuleAsYaml(context, moduleData, updatePreviewCallback)
     return true;
   } catch (error) {
     console.error("Error downloading module:", error);
-    fireToast(context, "Error downloading module: " + error.message, "error");
+    fireToast(context, t('editor.module_editor.download_error').replace('{error}', error.message), "error");
     return false;
   }
 } 

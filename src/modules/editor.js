@@ -13,8 +13,9 @@ import { installManualModule } from './install.js';
 import { checkModuleUpdates } from './store.js';
 import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
-import { getLazyLoadedPanelContent, renderDropdown } from '../editor/utils.js';
+import { getLazyLoadedPanelContent, renderDropdown, tTemplate } from '../editor/utils.js';
 import { ensureBCTProviderAvailable, isBCTAvailableSync, writeModuleYaml, getAllModulesLastModified } from './bct-provider.js';
+import setupTranslation from '../tools/localize.js';
 
 // Storage sensor entity ID for Bubble Card modules
 const MODULES_SENSOR_ENTITY_ID = 'sensor.bubble_card_modules';
@@ -255,6 +256,8 @@ function _getFilteredAndSortedModules(context) {
 }
 
 export function makeModulesEditor(context) {
+  const t = setupTranslation(context._hassRender ?? context.hass);
+
   if (typeof context._selectedModuleTab === 'undefined') {
     context._selectedModuleTab = 0;
   }
@@ -553,7 +556,7 @@ export function makeModulesEditor(context) {
     try {
       const yamlContent = context._manualYamlContent;
       if (!yamlContent || yamlContent.trim() === '') {
-        fireEvent(context, "bubble-card-error", { message: "No YAML content provided" });
+        fireEvent(context, "bubble-card-error", { message: t('editor.modules.no_yaml_content') });
         return;
       }
       
@@ -617,7 +620,7 @@ export function makeModulesEditor(context) {
             @click=${() => handleHaTabNavClick(MODULE_TAB_IDS[0])}
           >
             <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
-            My Modules
+            ${t('editor.modules.my_modules')}
           </ha-tab-group-tab>
             <ha-tab-group-tab
             slot="nav"
@@ -627,7 +630,7 @@ export function makeModulesEditor(context) {
             @click=${() => handleHaTabNavClick(MODULE_TAB_IDS[1])}
           >
             <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
-            Module Store
+            ${t('editor.modules.module_store')}
           </ha-tab-group-tab>
         </ha-tab-group>
       `;
@@ -643,11 +646,11 @@ export function makeModulesEditor(context) {
         >
           <sl-tab slot="nav" panel="0">
             <ha-icon icon="mdi:puzzle-heart-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
-            My Modules
+            ${t('editor.modules.my_modules')}
           </sl-tab>
           <sl-tab slot="nav" panel="1" ?disabled=${!bctAvailable}>
             <ha-icon icon="mdi:puzzle-plus-outline" style="color: inherit !important; margin-right: 8px;"></ha-icon>
-            Module Store
+            ${t('editor.modules.module_store')}
           </sl-tab>
           <sl-tab-panel name="0"></sl-tab-panel>
           <sl-tab-panel name="1"></sl-tab-panel>
@@ -663,11 +666,11 @@ export function makeModulesEditor(context) {
       >
         <paper-tab>
           <ha-icon icon="mdi:puzzle-heart-outline" style="margin-right: 8px;"></ha-icon>
-          My Modules
+          ${t('editor.modules.my_modules')}
         </paper-tab>
         <paper-tab class="${!bctAvailable ? 'disabled' : ''}" ?disabled=${!bctAvailable}>
           <ha-icon icon="mdi:puzzle-plus-outline" style="margin-right: 8px;"></ha-icon>
-          Module Store
+          ${t('editor.modules.module_store')}
         </paper-tab>
       </ha-tabs>
     `;
@@ -688,11 +691,11 @@ export function makeModulesEditor(context) {
     >
       <h4 slot="header">
         <ha-icon icon="mdi:puzzle"></ha-icon>
-        Modules
+        ${t('editor.modules.title')}
         ${moduleUpdates.hasUpdates && bctAvailable ? html`
           <span class="bubble-badge update-badge" style="margin-left: 8px; font-size: 0.8em; vertical-align: middle; z-index: 5;">
             <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
-            ${moduleUpdates.updateCount} update${moduleUpdates.updateCount > 1 ? 's' : ''} available
+            ${t(moduleUpdates.updateCount > 1 ? 'editor.modules.updates_available' : 'editor.modules.update_available').replace('{count}', moduleUpdates.updateCount)}
           </span>
         ` : ''}
       </h4>
@@ -702,14 +705,14 @@ export function makeModulesEditor(context) {
             <div class="bubble-info warning">
               <h4 class="bubble-section-title">
                 <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-                Bubble Card Tools required
+                ${t('editor.modules.bct_required_title')}
               </h4>
               <div class="content">
                 ${ (yamlKeysMap && yamlKeysMap.size > 0) || (context.hass && context.hass.states && context.hass.states[MODULES_SENSOR_ENTITY_ID]) ? html`
-                  <p><b>Since v3.1.0, to install, edit or delete modules, and to use the Module Store, please install <a href="https://github.com/Clooos/Bubble-Card-Tools" target="_blank" rel="noopener noreferrer">Bubble Card Tools</a> (everything is explained there).</b></p>
-                  <p>Your existing modules will be automatically migrated once Bubble Card Tools is installed.</p>
+                  <p><b>${tTemplate(t('editor.modules.bct_required_body1'), { link: html`<a href="https://github.com/Clooos/Bubble-Card-Tools" target="_blank" rel="noopener noreferrer">Bubble Card Tools</a>` })}</b></p>
+                  <p>${t('editor.modules.bct_required_body2')}</p>
                 ` : html`
-                  <p><b>No modules detected yet.</b> To create and manage modules and to use the Module Store, please install <a href="https://github.com/Clooos/Bubble-Card-Tools" target="_blank" rel="noopener noreferrer">Bubble Card Tools</a> (everything is explained there).</p>
+                  <p>${tTemplate(t('editor.modules.bct_required_body3'), { no_modules: html`<b>${t('editor.modules.no_modules_detected')}</b>`, link: html`<a href="https://github.com/Clooos/Bubble-Card-Tools" target="_blank" rel="noopener noreferrer">Bubble Card Tools</a>` })}</p>
                 `}
               </div>
             </div>
@@ -725,9 +728,9 @@ export function makeModulesEditor(context) {
               <div class="card-content">
                 <h3>
                     <ha-icon icon="mdi:code-json" style="margin: 8px;"></ha-icon>
-                    Import Module from YAML
+                    ${t('editor.modules.import_yaml_title')}
                 </h3>
-                <p style="margin-top: 0;">Paste the complete YAML code of the module:</p>
+                <p style="margin-top: 0;">${t('editor.modules.import_yaml_hint')}</p>
                 
                 <div class="css-editor-container">
                   <ha-code-editor
@@ -750,15 +753,15 @@ export function makeModulesEditor(context) {
                     }}
                   >
                     <ha-icon icon="mdi:close"></ha-icon>
-                    Cancel
+                    ${t('editor.common.cancel')}
                   </button>
-                  <button 
-                    class="icon-button" 
+                  <button
+                    class="icon-button"
                     style="flex: 1;"
                     @click=${handleManualImport}
                   >
                     <ha-icon icon="mdi:content-save"></ha-icon>
-                    Import Module
+                    ${t('editor.modules.import_module')}
                   </button>
                 </div>
               </div>
@@ -773,14 +776,14 @@ export function makeModulesEditor(context) {
                   ${isHomeAssistantVersionAtLeast(context.hass, '2026.5')
                     ? html`<ha-input-search
                         .value=${context._myModulesSearchQuery || ''}
-                        placeholder="Search modules"
+                        placeholder="${t('editor.modules.search_modules')}"
                         @input=${(ev) => {
                           context._myModulesSearchQuery = ev.target.value;
                           context.requestUpdate();
                         }}
                       ></ha-input-search>`
                     : html`<ha-textfield
-                        label="Search modules"
+                        label="${t('editor.modules.search_modules')}"
                         icon
                         .value=${context._myModulesSearchQuery || ''}
                         @input=${(e) => {
@@ -797,15 +800,15 @@ export function makeModulesEditor(context) {
                 <div class="my-modules-sort-menu">
                   ${renderDropdown({
                     trigger: html`
-                      <mwc-icon-button slot="trigger" class="icon-button header sort-trigger" title="Sort modules">
+                      <mwc-icon-button slot="trigger" class="icon-button header sort-trigger" title="${t('editor.modules.sort_modules')}">
                         <ha-icon icon="mdi:sort"></ha-icon>
                       </mwc-icon-button>
                     `,
                     items: [
                       { 
                         type: 'checkbox',
-                        icon: 'mdi:check-circle', 
-                        label: 'Active and recent first',
+                        icon: 'mdi:check-circle',
+                        label: t('editor.modules.sort_active_recent'),
                         checked: currentSortOrder === 'default',
                         onClick: (e) => {
                           e.stopPropagation();
@@ -818,8 +821,8 @@ export function makeModulesEditor(context) {
                       },
                       { 
                         type: 'checkbox',
-                        icon: 'mdi:sort-alphabetical-ascending', 
-                        label: 'Alphabetical',
+                        icon: 'mdi:sort-alphabetical-ascending',
+                        label: t('editor.modules.sort_alphabetical'),
                         checked: currentSortOrder === 'alphabetical',
                         onClick: (e) => {
                           e.stopPropagation();
@@ -832,8 +835,8 @@ export function makeModulesEditor(context) {
                       },
                       { 
                         type: 'checkbox',
-                        icon: 'mdi:clock-outline', 
-                        label: 'Recent first',
+                        icon: 'mdi:clock-outline',
+                        label: t('editor.modules.sort_recent'),
                         checked: currentSortOrder === 'recent-first',
                         onClick: (e) => {
                           e.stopPropagation();
@@ -848,7 +851,7 @@ export function makeModulesEditor(context) {
                   })}
                 </div>
               </div>
-              <ha-formfield label="Enable unsupported modules">
+              <ha-formfield label="${t('editor.modules.enable_unsupported')}">
                 <ha-switch
                   .checked=${!!context._forceUnsupportedModules}
                   @change=${(e) => {
@@ -865,10 +868,10 @@ export function makeModulesEditor(context) {
                 <div class="bubble-info warning unsupported-modules-warning">
                   <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-                    Use carefully
+                    ${t('editor.modules.use_carefully_title')}
                   </h4>
                   <div class="content">
-                    <p>Some modules may work despite being marked as unsupported, while others can fail entirely.</p>
+                    <p>${t('editor.modules.use_carefully_body')}</p>
                   </div>
                 </div>
               ` : ''}
@@ -897,7 +900,7 @@ export function makeModulesEditor(context) {
               const hasEditor = formSchema && formSchema.length > 0;
               const isDefaultModule = key === 'default';
               const allCardsDisabled = isDefaultModule || hasEditor;
-              let allCardsButtonText = "All cards";
+              let allCardsButtonText = t('editor.modules.all_cards');
               
               // Get the current configuration for the module key
               const currentConfig = context._config[key];
@@ -957,7 +960,7 @@ export function makeModulesEditor(context) {
                       ${hasUpdate ? html`
                         <span class="bubble-badge update-badge">
                           <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
-                          Update: ${moduleUpdate.newVersion}
+                          ${t('editor.modules.update_badge').replace('{version}', moduleUpdate.newVersion)}
                         </span>
                       ` : ''}
                       ${isGlobal ? html`
@@ -972,7 +975,7 @@ export function makeModulesEditor(context) {
                       <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="module-toggles-container">
                           <span class="module-toggles-label">
-                            APPLY TO
+                            ${t('editor.modules.apply_to')}
                           </span>
                           <div class="module-toggles">
                             <button 
@@ -989,7 +992,7 @@ export function makeModulesEditor(context) {
                               }}
                             >
                               <ha-icon icon="mdi:card-outline"></ha-icon>
-                              <span>This card</span>
+                              <span>${t('editor.modules.this_card')}</span>
                             </button>
                             
                             <button 
@@ -1014,7 +1017,7 @@ export function makeModulesEditor(context) {
                                   context._helpModuleId = context._helpModuleId === key ? null : key;
                                   context.requestUpdate();
                                 }}
-                                title="Show help"
+                                title="${t('editor.modules.show_help')}"
                               >
                                 <ha-icon icon="mdi:help"></ha-icon>
                               </button>
@@ -1033,21 +1036,21 @@ export function makeModulesEditor(context) {
                                 context._selectedModuleTab = 1;
                                 context._storeSearchQuery = label;
                                 context.requestUpdate();
-                              }} 
-                              title="Update Module"
+                              }}
+                              title="${t('editor.modules.update_module')}"
                             >
                               <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
-                              Update
+                              ${t('editor.common.update')}
                             </button>
                           ` : ''}
-                          <button class="icon-button ${!bctAvailable ? 'disabled' : ''}" @click=${() => editModule(context, key)} title="Edit Module">
+                          <button class="icon-button ${!bctAvailable ? 'disabled' : ''}" @click=${() => editModule(context, key)} title="${t('editor.modules.edit_module')}">
                             <ha-icon icon="mdi:pencil"></ha-icon>
                           </button>
                           ${(() => {
                             const isFromYamlFile = _isModuleInstalledViaYaml ? _isModuleInstalledViaYaml(key) : false;
                             // Do not display the delete button for YAML modules or the default module
                             return !isFromYamlFile && key !== 'default' ? html`
-                              <button class="icon-button ${!bctAvailable ? 'disabled' : ''}" @click=${() => deleteModule(context, key)} title="Delete Module">
+                              <button class="icon-button ${!bctAvailable ? 'disabled' : ''}" @click=${() => deleteModule(context, key)} title="${t('editor.modules.delete_module')}">
                                 <ha-icon icon="mdi:delete"></ha-icon>
                               </button>
                             ` : '';
@@ -1060,10 +1063,10 @@ export function makeModulesEditor(context) {
                         <div class="bubble-info">
                           <h4 class="bubble-section-title">
                             <ha-icon icon="mdi:information-outline"></ha-icon>
-                            Why "All cards" is disabled?
+                            ${t('editor.modules.all_cards_help_title')}
                           </h4>
                           <div class="content">
-                            <p>Modules with custom editors cannot be applied globally. This feature is reserved for modules that only apply styles.</p>
+                            <p>${t('editor.modules.all_cards_help_body')}</p>
                           </div>
                         </div>
                       ` : ''}
@@ -1072,7 +1075,7 @@ export function makeModulesEditor(context) {
                         ? html`
                           <h4 class="${!isChecked ? 'disabled' : ''}">
                             <ha-icon icon="mdi:cog"></ha-icon>
-                            Configuration
+                            ${t('editor.modules.configuration')}
                           </h4>
                           <ha-form
                             class="${!isChecked ? 'disabled' : ''}"
@@ -1092,7 +1095,7 @@ export function makeModulesEditor(context) {
                       <div class="bubble-info" style="display: ${!description ? 'none' : ''}">
                         <h4 class="bubble-section-title">
                           <ha-icon icon="mdi:information-outline"></ha-icon>
-                            About this module
+                            ${t('editor.modules.about_module')}
                         </h4>
                         <div class="content">
                           ${html`<span .innerHTML=${description}></span>`}
@@ -1102,9 +1105,9 @@ export function makeModulesEditor(context) {
                       ${creator || moduleLink || moduleVersion
                         ? html`
                           <h4 class="version module-version">
-                            ${creator ? `Created by ${creator}` : ''}
+                            ${creator ? t('editor.modules.created_by').replace('{creator}', creator) : ''}
                             <span class="version-number">
-                              ${moduleLink ? html`<a href="${moduleLink}" target="_blank" rel="noopener noreferrer">Module link</a> • ` : ''}
+                              ${moduleLink ? html`<a href="${moduleLink}" target="_blank" rel="noopener noreferrer">${t('editor.modules.module_link')}</a> • ` : ''}
                               ${moduleVersion || ''}
                             </span>
                           </h4>
@@ -1120,10 +1123,10 @@ export function makeModulesEditor(context) {
               <div class="bubble-info">
                 <h4 class="bubble-section-title">
                   <ha-icon icon="mdi:information-outline"></ha-icon>
-                  No modules found
+                  ${t('editor.modules.no_modules_found')}
                 </h4>
                 <div class="content">
-                  <p>No modules match your search criteria. Try modifying your search or sort order.</p>
+                  <p>${t('editor.modules.no_modules_match')}</p>
                 </div>
               </div>
             ` : ''}
@@ -1163,7 +1166,7 @@ export function makeModulesEditor(context) {
               setTimeout(() => scrollToModuleForm(context), 0);
             }}>
               <ha-icon icon="mdi:puzzle-plus"></ha-icon>
-              Create new Module
+              ${t('editor.modules.create_module')}
             </button>
             
             <button class="icon-button" style="flex: 1;" @click=${() => {
@@ -1175,7 +1178,7 @@ export function makeModulesEditor(context) {
               setTimeout(() => scrollToModuleForm(context), 0);
             }}>
               <ha-icon icon="mdi:code-json"></ha-icon>
-              Import from YAML
+              ${t('editor.modules.import_from_yaml')}
             </button>
           </div>
           ` : ''}
@@ -1184,12 +1187,18 @@ export function makeModulesEditor(context) {
         <div class="bubble-info">
           <h4 class="bubble-section-title">
             <ha-icon icon="mdi:information-outline"></ha-icon>
-            Modules
+            ${t('editor.modules.title')}
           </h4>
           <div class="content">
-            <p>Modules are really powerful and the best way to apply <a href="https://github.com/Clooos/Bubble-Card#styling" target="_blank" rel="noopener noreferrer">custom styles</a> and/or <a href="https://github.com/Clooos/Bubble-Card#templates" target="_blank" rel="noopener noreferrer">JS templates</a> to your cards, without having to copy/paste the same code over and over again.</p>
-            <p>This makes it easy to change things like the styles of all your cards, and for advanced users, to modify or add features with a real editor.</p>
-            <p><b>If coding isn't your thing</b>, you can also find and install modules made by the community in the <b>Module Store</b>.</p>
+            <p>${tTemplate(t('editor.modules.info_body1'), {
+              styles_link: html`<a href="https://github.com/Clooos/Bubble-Card#styling" target="_blank" rel="noopener noreferrer">${t('editor.modules.custom_styles')}</a>`,
+              templates_link: html`<a href="https://github.com/Clooos/Bubble-Card#templates" target="_blank" rel="noopener noreferrer">${t('editor.styles.js_templates')}</a>`
+            })}</p>
+            <p>${t('editor.modules.info_body2')}</p>
+            <p>${tTemplate(t('editor.modules.info_body3'), {
+              coding: html`<b>${t('editor.modules.coding_not_your_thing')}</b>`,
+              store: html`<b>${t('editor.modules.module_store')}</b>`
+            })}</p>
           </div>
         </div>
         `)}

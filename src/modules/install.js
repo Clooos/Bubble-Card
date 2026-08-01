@@ -3,6 +3,7 @@ import { fireToast } from './cache.js';
 import { extractFirstKeyFromYaml, extractYamlFromMarkdown, extractModuleMetadata } from './parser.js';
 import { fireEvent } from '../tools/utils.js';
 import jsyaml from 'js-yaml';
+import setupTranslation from '../tools/localize.js';
 
 // Broadcast a focused module update event so listeners can refresh fast
 function broadcastModuleUpdate(moduleId, moduleData) {
@@ -71,6 +72,8 @@ function forceEditorUIRefresh(context) {
 }
 
 export async function installOrUpdateModule(context, module) {
+  const t = setupTranslation(context.hass);
+
   try {
     let yamlContent = "";
 
@@ -264,9 +267,9 @@ export async function installOrUpdateModule(context, module) {
         // Persist to modules/<id>.yaml using the provider with the final YAML string
         await bct.writeModuleYaml(context.hass, moduleId, formattedYaml);
         document.dispatchEvent(new CustomEvent('yaml-modules-updated'));
-        fireToast(context, "Module installed successfully");
+        fireToast(context, t('editor.module_editor.install_success'));
       } else {
-        fireToast(context, "Install Bubble Card Tools to save modules persistently", "warning");
+        fireToast(context, t('editor.module_editor.install_bct_warning'), "warning");
       }
 
       fireEvent(context, "config-changed", { config: context._config });
@@ -275,18 +278,20 @@ export async function installOrUpdateModule(context, module) {
       return { success: true, moduleId };
     } catch (apiError) {
       console.error("Persistence error:", apiError);
-      fireToast(context, "Module saved locally only", "warning");
+      fireToast(context, t('editor.module_editor.saved_locally'), "warning");
       forceEditorUIRefresh(context);
       return { success: true, storage: "local_only", moduleId };
     }
   } catch (err) {
     console.error("Installation error:", err);
-    fireToast(context, "Installation error: " + err.message, "error");
+    fireToast(context, t('editor.module_editor.install_error').replace('{error}', err.message), "error");
     throw err;
   }
 }
 
 export async function installManualModule(context, yamlContent, moduleLink) {
+  const t = setupTranslation(context.hass);
+
   try {
     if (!yamlContent || yamlContent.trim() === '') {
       throw new Error("No YAML content provided");
@@ -320,7 +325,7 @@ export async function installManualModule(context, yamlContent, moduleLink) {
     return await installOrUpdateModule(context, mockModule);
   } catch (error) {
     console.error("Manual module installation error:", error);
-    fireToast(context, "Installation error: " + error.message, "error");
+    fireToast(context, t('editor.module_editor.install_error').replace('{error}', error.message), "error");
     throw error;
   }
 } 

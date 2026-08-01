@@ -12,6 +12,8 @@ import {
 import { ensureBCTProviderAvailable, writeModuleYaml, deleteModuleFile } from './bct-provider.js';
 import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
+import { tTemplate } from '../editor/utils.js';
+import setupTranslation from '../tools/localize.js';
 
 // Helper functions
 function updateModuleInConfig(context, moduleId, oldId = null) {
@@ -93,6 +95,8 @@ function setHAEditorButtonsDisabled(disabled) {
 
 // Renders the module editor form
 export function renderModuleEditorForm(context) {
+  const t = setupTranslation(context._hassRender ?? context.hass);
+
   if (!context._editingModule) {
     // Ensure the button is enabled if the editor is not shown
     setHAEditorButtonsDisabled(false); 
@@ -239,7 +243,7 @@ export function renderModuleEditorForm(context) {
         <div class="form-content">
           <h3>
             <ha-icon style="margin: 8px;" icon="${context._showNewModuleForm ? 'mdi:puzzle-plus-outline' : 'mdi:puzzle-edit-outline'}"></ha-icon>
-            ${context._showNewModuleForm ? 'Create new Module' : context._editingModule.id === 'default' ? 'Edit Default Module' : 'Edit Module'}
+            ${context._showNewModuleForm ? t('editor.module_editor.create_module') : context._editingModule.id === 'default' ? t('editor.module_editor.edit_default_module') : t('editor.module_editor.edit_module')}
           </h3>
           
           <div class="module-editor-not-default" style="display: ${context._editingModule.id === 'default' ? 'none' : ''}">
@@ -247,11 +251,10 @@ export function renderModuleEditorForm(context) {
               <div class="bubble-info warning">
                 <h4 class="bubble-section-title">
                   <ha-icon icon="mdi:file-document-alert"></ha-icon>
-                  Read-only Module
+                  ${t('editor.module_editor.readonly_title')}
                 </h4>
                 <div class="content">
-                  <p>This Module is installed from a YAML file. You need to modify the <code>bubble-modules.yaml</code> 
-                  file directly, or remove it from your YAML file then import it here.</p>
+                  <p>${tTemplate(t('editor.module_editor.readonly_body'), { file: html`<code>bubble-modules.yaml</code>` })}</p>
                 </div>
               </div>
             ` : ''}
@@ -260,7 +263,7 @@ export function renderModuleEditorForm(context) {
               .hass=${context.hass}
               .data=${{ id: context._editingModule.id || '' }}
               .schema=${[{ name: 'id', selector: { text: {} } }]}
-              .computeLabel=${() => 'Module ID'}
+              .computeLabel=${() => t('editor.module_editor.module_id')}
               .disabled=${!context._showNewModuleForm || isFromYamlFile}
               @value-changed=${(ev) => {
                 const oldId = context._editingModule.id;
@@ -273,14 +276,14 @@ export function renderModuleEditorForm(context) {
               }}
             ></ha-form>
             <span class="helper-text">
-              Must be unique and cannot be changed after the Module is created.
+              ${t('editor.module_editor.module_id_helper')}
             </span>
             
             <ha-form
               .hass=${context.hass}
               .data=${{ name: context._editingModule.name || '' }}
               .schema=${[{ name: 'name', selector: { text: {} } }]}
-              .computeLabel=${() => 'Module Name'}
+              .computeLabel=${() => t('editor.module_editor.module_name')}
               .disabled=${isFromYamlFile}
               @value-changed=${(ev) => { context._editingModule.name = ev.detail.value.name; }}
             ></ha-form>
@@ -289,7 +292,7 @@ export function renderModuleEditorForm(context) {
               .hass=${context.hass}
               .data=${{ version: context._editingModule.version || '1.0' }}
               .schema=${[{ name: 'version', selector: { text: {} } }]}
-              .computeLabel=${() => 'Version'}
+              .computeLabel=${() => t('editor.module_editor.version')}
               .disabled=${isFromYamlFile}
               @value-changed=${(ev) => { context._editingModule.version = ev.detail.value.version; }}
             ></ha-form>
@@ -298,7 +301,7 @@ export function renderModuleEditorForm(context) {
               .hass=${context.hass}
               .data=${{ creator: context._editingModule.creator || '' }}
               .schema=${[{ name: 'creator', selector: { text: {} } }]}
-              .computeLabel=${() => 'Creator'}
+              .computeLabel=${() => t('editor.module_editor.creator')}
               .disabled=${isFromYamlFile}
               @value-changed=${(ev) => { context._editingModule.creator = ev.detail.value.creator; }}
             ></ha-form>
@@ -306,7 +309,7 @@ export function renderModuleEditorForm(context) {
             <ha-expansion-panel 
               .header=${html`
                 <ha-icon icon="mdi:filter-check-outline" style="margin-right: 8px;"></ha-icon>
-                Supported cards
+                ${t('editor.module_editor.supported_cards')}
               `}
               @expanded-changed=${(e) => e.stopPropagation()}
             >
@@ -318,7 +321,7 @@ export function renderModuleEditorForm(context) {
             <ha-expansion-panel 
               .header=${html`
                 <ha-icon icon="mdi:file-document-outline" style="margin-right: 8px;"></ha-icon>
-                Description
+                ${t('editor.module_editor.description')}
               `}
               @expanded-changed=${(e) => e.stopPropagation()}
             >
@@ -331,7 +334,7 @@ export function renderModuleEditorForm(context) {
                 ></ha-code-editor>
               </div>
               <span class="helper-text">
-                This description appears in your module and in the Module Store (if you share it), so make sure it's clear and concise. <b>You can use HTML and inline CSS</b>, but note that it will only be rendered in your module, the Module Store will not display it.            
+                ${tTemplate(t('editor.module_editor.description_helper'), { bold: html`<b>${t('editor.module_editor.description_helper_bold')}</b>` })}
               </span>
             </ha-expansion-panel>
           </div>
@@ -339,7 +342,7 @@ export function renderModuleEditorForm(context) {
           <ha-expansion-panel 
             .header=${html`
               <ha-icon icon="mdi:code-json" style="margin-right: 8px;"></ha-icon>
-              Code (CSS/JS template)
+              ${t('editor.module_editor.code_title')}
             `}
             @expanded-changed=${(e) => e.stopPropagation()}
           >
@@ -353,7 +356,7 @@ export function renderModuleEditorForm(context) {
             </div>
             ${context.createErrorConsole(context)}
             <span class="helper-text">
-              More information and examples about the CSS and JS template possibilities can be found in the <a href="https://github.com/Clooos/Bubble-Card?tab=readme-ov-file#styling" target="_blank">Styling and Templates documentation</a>. Tip: You can enlarge the editor by clicking on the panel title (Bubble Card configuration).
+              ${tTemplate(t('editor.module_editor.code_helper'), { link: html`<a href="https://github.com/Clooos/Bubble-Card?tab=readme-ov-file#styling" target="_blank">${t('editor.module_editor.styling_docs')}</a>` })}
             </span>
           </ha-expansion-panel>
           
@@ -361,7 +364,7 @@ export function renderModuleEditorForm(context) {
             style="display: ${context._editingModule.id === 'default' ? 'none' : ''}" 
             .header=${html`
               <ha-icon icon="mdi:form-select" style="margin-right: 8px;"></ha-icon>
-              Optional: Editor schema (YAML)
+              ${t('editor.module_editor.editor_schema_title')}
             `}
             @expanded-changed=${(e) => e.stopPropagation()}
           >
@@ -407,19 +410,19 @@ export function renderModuleEditorForm(context) {
                 style="display: ${!context._yamlErrorMessage ? 'none' : ''}">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-                    Error in YAML schema
+                    ${t('editor.module_editor.yaml_error_title')}
                 </h4>
                 <div class="content">
                     <pre style="margin: 0; white-space: pre-wrap; font-size: 12px;">${context._yamlErrorMessage ? context._yamlErrorMessage.charAt(0).toUpperCase() + context._yamlErrorMessage.slice(1) : ''}</pre>
                 </div>
             </div>
             <span class="helper-text">
-              This allows you to add a visual editor to your module. Learn about all available editor schema options in the <a href="https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md" target="_blank">editor schema documentation</a>.
+              ${tTemplate(t('editor.module_editor.editor_schema_helper'), { link: html`<a href="https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md" target="_blank">${t('editor.module_editor.schema_docs')}</a>` })}
             </span>
 
             ${context._editingModule.editor && Array.isArray(context._editingModule.editor) && context._editingModule.editor.length > 0 ? html`
               <div class="form-preview">
-                <h4>Editor preview</h4>
+                <h4>${t('editor.module_editor.editor_preview')}</h4>
                 <div class="form-preview-container">
                   <ha-form
                     .hass=${context.hass}
@@ -436,13 +439,13 @@ export function renderModuleEditorForm(context) {
             <div class="bubble-info warning" style="margin-top: 8px;">
               <h4 class="bubble-section-title">
                 <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-                Save disabled
+                ${t('editor.module_editor.save_disabled_title')}
               </h4>
               <div class="content">
                 <p style="margin: 0;">
-                  ${hasYamlError ? html`Fix the error(s) in the Editor schema (YAML) above to enable saving.` : ''}
+                  ${hasYamlError ? t('editor.module_editor.fix_yaml_error') : ''}
                   ${hasYamlError && hasTemplateError ? html`<br>` : ''}
-                  ${hasTemplateError ? html`Fix the error(s) in the CSS/JS template above to enable saving.` : ''}
+                  ${hasTemplateError ? t('editor.module_editor.fix_template_error') : ''}
                 </p>
               </div>
             </div>
@@ -453,7 +456,7 @@ export function renderModuleEditorForm(context) {
           <ha-expansion-panel 
             .header=${html`
               <ha-icon icon="mdi:export" style="margin-right: 8px;"></ha-icon>
-              Export Module
+              ${t('editor.module_editor.export_title')}
             `}
             @expanded-changed=${(e) => e.stopPropagation()}
           >
@@ -462,47 +465,53 @@ export function renderModuleEditorForm(context) {
                     <div class="export-buttons">
                         <button class="icon-button" @click=${() => {
                         const yamlExport = generateYamlExport(context._editingModule);
-                        copyToClipboard(context, yamlExport, "YAML format copied to clipboard!", updateExportPreview);
+                        copyToClipboard(context, yamlExport, t('editor.module_editor.yaml_copied'), updateExportPreview);
                         }}>
                         <ha-icon icon="mdi:content-copy"></ha-icon>
-                        Copy YAML
+                        ${t('editor.module_editor.copy_yaml')}
                         </button>
-                        
+
                         <button class="icon-button" @click=${() => {
                         const githubExport = generateGitHubExport(context._editingModule);
-                        copyToClipboard(context, githubExport, "GitHub Discussion format copied to clipboard!", updateExportPreview);
+                        copyToClipboard(context, githubExport, t('editor.module_editor.github_copied'), updateExportPreview);
                         }}>
                         <ha-icon icon="mdi:content-copy"></ha-icon>
-                        Copy for GitHub
+                        ${t('editor.module_editor.copy_github')}
                         </button>
-                        
+
                         <button class="icon-button" @click=${() => {
                         downloadModuleAsYaml(context, context._editingModule, updateExportPreview);
                         }}>
                         <ha-icon icon="mdi:file-download"></ha-icon>
-                        Download YAML
+                        ${t('editor.module_editor.download_yaml')}
                         </button>
                     </div>
                     
                     <div class="export-preview">
-                        <ha-expansion-panel 
-                          .header=${"Export preview"}
+                        <ha-expansion-panel
+                          .header=${t('editor.module_editor.export_preview')}
                           @expanded-changed=${(e) => e.stopPropagation()}
                         >
-                        <pre id="export-preview-content">Click on a button above to generate the preview</pre>
+                        <pre id="export-preview-content">${t('editor.module_editor.export_preview_hint')}</pre>
                         </ha-expansion-panel>
                     </div>
 
                     <div class="bubble-info">
                       <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
-                        Sharing your Module to the Store
+                        ${t('editor.module_editor.sharing_title')}
                       </h4>
                       <div class="content">
-                        <p>To share your Module to the Module Store, click on <strong>Copy for GitHub</strong> and paste the content in a new discussion in the
-                        <a href="https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules" target="_blank">Share your Modules</a> category.
-                        <strong>Edit the description</strong> (if needed), <strong>the example</strong> (for YAML users), and remember to <strong>include at least one screenshot</strong> for the Module Store.</p>
-                        <p><strong>Your Module becomes available right after that</strong> (after a Store refresh), so double-check that everything is correctly written and the Module is working as expected. You can of course edit/update the Module after it is shared.</p>
+                        <p>${tTemplate(t('editor.module_editor.sharing_body1'), {
+                          copy: html`<strong>${t('editor.module_editor.copy_github')}</strong>`,
+                          category: html`<a href="https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules" target="_blank">Share your Modules</a>`,
+                          edit_description: html`<strong>${t('editor.module_editor.sharing_edit_description')}</strong>`,
+                          example: html`<strong>${t('editor.module_editor.sharing_example')}</strong>`,
+                          screenshot: html`<strong>${t('editor.module_editor.sharing_screenshot')}</strong>`
+                        })}</p>
+                        <p>${tTemplate(t('editor.module_editor.sharing_body2'), {
+                          available: html`<strong>${t('editor.module_editor.sharing_available')}</strong>`
+                        })}</p>
                       </div>
                     </div>
                 </div>
@@ -549,7 +558,7 @@ export function renderModuleEditorForm(context) {
               }
             }}>
               <ha-icon icon="mdi:close"></ha-icon>
-              Cancel
+              ${t('editor.common.cancel')}
             </button>
             
             <button class="icon-button ${isFromYamlFile || hasBlockingErrors ? 'disabled' : ''}" ?disabled=${isFromYamlFile || hasBlockingErrors} style="flex: 1;" @click=${() => {              
@@ -562,7 +571,7 @@ export function renderModuleEditorForm(context) {
               setTimeout(() => scrollToModuleForm(context), 0);
             }}>
               <ha-icon icon="mdi:content-save"></ha-icon>
-              Save Module
+              ${t('editor.module_editor.save_module')}
             </button>
           </div>
         </div>
@@ -588,8 +597,24 @@ export function getAvailableCardTypes() {
 
 // Function to render checkboxes for supported cards
 function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
+  const t = setupTranslation(context._hassRender ?? context.hass);
   const availableCardTypes = getAvailableCardTypes();
   const allCardIds = availableCardTypes.map(card => card.id);
+
+  // Display labels only: getAvailableCardTypes() names stay in English because
+  // the store parser matches them against GitHub discussion content.
+  const cardTypeLabels = {
+    'button': t('editor.module_editor.card_button'),
+    'calendar': t('editor.module_editor.card_calendar'),
+    'climate': t('editor.module_editor.card_climate'),
+    'cover': t('editor.module_editor.card_cover'),
+    'horizontal-buttons-stack': t('editor.module_editor.card_horizontal_buttons_stack'),
+    'media-player': t('editor.module_editor.card_media_player'),
+    'pop-up': t('editor.module_editor.card_pop_up'),
+    'select': t('editor.module_editor.card_select'),
+    'separator': t('editor.module_editor.card_separator'),
+    'sub-buttons': t('editor.module_editor.card_sub_buttons'),
+  };
   
   // Initialize supported array if not exists
   if (context._editingModule.supported === undefined) {
@@ -614,7 +639,7 @@ function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
   
   return html`
     <div class="checkbox-grid">
-      <ha-formfield label="All cards" style="grid-column: 1 / -1; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--divider-color);">
+      <ha-formfield label="${t('editor.module_editor.all_cards')}" style="grid-column: 1 / -1; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--divider-color);">
         <ha-checkbox
           .checked=${allCardsSelected}
           @change=${(e) => {
@@ -632,7 +657,7 @@ function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
         ></ha-checkbox>
       </ha-formfield>
       ${availableCardTypes.map(card => html`
-        <ha-formfield label="${card.name}">
+        <ha-formfield label="${cardTypeLabels[card.id] ?? card.name}">
           <ha-checkbox
             .checked=${!context._editingModule.supported || context._editingModule.supported.includes(card.id)}
             @change=${(e) => {
@@ -663,7 +688,7 @@ function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
       `)}
     </div>
     <div class="helper-text">
-      Select the card types that this module supports.
+      ${t('editor.module_editor.supported_helper')}
     </div>
   `;
 }
@@ -927,8 +952,10 @@ export function editModule(context, moduleId) {
 
 // Delete a module
 export async function deleteModule(context, moduleId) {
+  const t = setupTranslation(context.hass);
+
   // Confirm deletion
-  if (!confirm(`Are you sure you want to delete module "${moduleId}"?`)) {
+  if (!confirm(t('editor.module_editor.delete_confirm').replace('{id}', moduleId))) {
     return;
   }
   
