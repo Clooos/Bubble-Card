@@ -51,8 +51,6 @@ class BubbleCardEditor extends LitElement {
     constructor() {
         super();
         this._expandedPanelStates = {};
-        this._cardContextListener = (event) => this._handleCardContext(event);
-        window.addEventListener('bubble-card-context', this._cardContextListener);
     }
 
     connectedCallback() {
@@ -61,6 +59,14 @@ class BubbleCardEditor extends LitElement {
             window.__bubbleCardEditorInstances = window.__bubbleCardEditorInstances || new Set();
             window.__bubbleCardEditorInstances.add(this);
         } catch (_) {}
+        // Registered here rather than in the constructor: disconnect removes
+        // the listener and a re-attached editor must re-wire it, while
+        // detached helper instances (the transient standalone bridge) must
+        // never process context events at all.
+        if (!this._cardContextListener) {
+            this._cardContextListener = (event) => this._handleCardContext(event);
+            window.addEventListener('bubble-card-context', this._cardContextListener);
+        }
     }
 
     setConfig(config) {
@@ -352,7 +358,21 @@ class BubbleCardEditor extends LitElement {
         try { if (this._editorSchemaDebounce) { clearTimeout(this._editorSchemaDebounce); this._editorSchemaDebounce = null; } } catch (e) {}
         try { if (this._hassThrottleTimer) { clearTimeout(this._hassThrottleTimer); this._hassThrottleTimer = null; } } catch (e) {}
         try { if (this._cardContextListener) { window.removeEventListener('bubble-card-context', this._cardContextListener); this._cardContextListener = null; } } catch (e) {}
-    
+        try {
+            // Drop the standalone dialog openers this instance registered: the
+            // closures pin the whole editor (and its preview DOM) forever, and
+            // a connected editor or the transient bridge can always take over.
+            const openers = window.__bubbleStandalonePopupEditorOpeners;
+            if (openers && this._rememberedStandaloneOpenerHashes) {
+                this._rememberedStandaloneOpenerHashes.forEach((opener, hash) => {
+                    if (openers.get(hash) === opener) {
+                        openers.delete(hash);
+                    }
+                });
+                this._rememberedStandaloneOpenerHashes.clear();
+            }
+        } catch (e) {}
+
         if (BubbleCardEditor._resizeObserver && this._observedElements) {
             this._observedElements.forEach(el => {
                 BubbleCardEditor._resizeObserver.unobserve(el);
@@ -3018,6 +3038,9 @@ class BubbleCardEditor extends LitElement {
             if (!hash) return;
             window.__bubbleStandalonePopupEditorOpeners = window.__bubbleStandalonePopupEditorOpeners || new Map();
             window.__bubbleStandalonePopupEditorOpeners.set(hash, opener);
+            // Track ownership so disconnect can delete the entry above.
+            this._rememberedStandaloneOpenerHashes = this._rememberedStandaloneOpenerHashes || new Map();
+            this._rememberedStandaloneOpenerHashes.set(hash, opener);
         } catch (_) {}
     }
 
