@@ -36,6 +36,14 @@ function registerWakeSyncContext(context) {
         return;
     }
 
+    // Called for every pop-up on every hass tick: the membership answer is
+    // kept on the element so the common case costs a property read instead of
+    // a full deref scan of the registry (which was quadratic per tick across
+    // a dashboard's pop-ups).
+    if (context._wakeSyncRegistered) {
+        return;
+    }
+
     for (let i = wakeSyncContextRefs.length - 1; i >= 0; i--) {
         const existing = wakeSyncContextRefs[i]?.deref?.();
         if (!existing) {
@@ -43,10 +51,12 @@ function registerWakeSyncContext(context) {
             continue;
         }
         if (existing === context) {
+            context._wakeSyncRegistered = true;
             return;
         }
     }
 
+    context._wakeSyncRegistered = true;
     wakeSyncContextRefs.push(new WeakRef(context));
     // A context registered after the cache was built would otherwise be
     // invisible to wake syncs until an open/close invalidates the cache.

@@ -1429,6 +1429,70 @@ describe('standalone popup lifecycle', () => {
         expect(context.updateBubbleCard).not.toHaveBeenCalled();
     });
 
+    test('arms the dashboard hass gate before the routed open frame', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+        registerPopupContext(context);
+        const card = createDashboardCard();
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+
+        // The open itself starts one frame later: a tick delivered in this
+        // window used to re-render the whole dashboard as the open began.
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
+    });
+
+    test('releases the gate when a routed open is cancelled before its frame', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+        registerPopupContext(context);
+        const card = createDashboardCard();
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
+
+        window.history.replaceState({}, '', 'http://localhost/lovelace/test');
+        flushRafQueue();
+
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+    });
+
+    test('arms the dashboard hass gate for legacy popup opens too', () => {
+        const context = createLegacyContext();
+        usedContexts.push(context);
+        const card = createDashboardCard();
+
+        openPopup(context);
+
+        // Legacy pop-ups open behind the same covering backdrop.
+        expect(shouldHoldDashboardHassUpdate(card)).toBe(true);
+    });
+
+    test('refuses to hand a hash registration to a disconnected context', () => {
+        const live = createStandaloneContext({ hash: '#shared' });
+        const stale = createStandaloneContext({ hash: '#shared' });
+        usedContexts.push(live, stale);
+
+        live.isConnected = true;
+        registerPopupContext(live);
+
+        // A lovelace re-render keeps feeding hass to the replaced element, so
+        // its per-tick pipeline re-registers it. It must not take the hash.
+        stale.isConnected = false;
+        registerPopupContext(stale);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#shared');
+        window.dispatchEvent(new Event('location-changed'));
+        flushRafQueue();
+
+        // Navigation must reach the live element, never the detached one
+        // (which would show a backdrop over an invisible pop-up).
+        expect(isPopupOpenSequenceActive(live)).toBe(true);
+        expect(isPopupOpenSequenceActive(stale)).toBe(false);
+    });
+
     test('invalidates the wake-sync cache when a standalone popup closes', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);

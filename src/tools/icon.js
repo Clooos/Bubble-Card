@@ -1,5 +1,10 @@
 import { getAttribute, isColorLight, isEntityType, adjustColor } from "./utils.js";
 import { isColorCloseToWhite } from "./style.js";
+import { monotonicNow } from "./monotonic-time.js";
+
+// Same budget as the pop-up open hass gate drain: short enough to leave room
+// for a transition frame, long enough to keep the batch cheap.
+const iconRefreshDrainBudgetMs = 8;
 
 // Generate a signature string from light entity attributes that affect color
 // Used to detect color changes without state changes (e.g., light stays "on" but color changes)
@@ -49,11 +54,38 @@ export function unregisterForIconRefresh(card) {
 }
 
 function notifyIconRefresh() {
+  // Icon data arrives once from the WebSocket and every registered card wants
+  // to re-render. Doing that in one pass is a long task that also ignores the
+  // pop-up open gate, so it can land in the middle of an open transition:
+  // spread it over macrotasks with the same budget the gate drain uses.
+  const cards = [];
   for (const card of iconRefreshRegistry) {
     if (card.isConnected && card._hass && card.updateBubbleCard) {
-      card.updateBubbleCard();
+      cards.push(card);
     }
   }
+
+  if (cards.length === 0) return;
+
+  let index = 0;
+  const step = () => {
+    const stepStart = monotonicNow();
+    do {
+      const card = cards[index];
+      index += 1;
+      try {
+        if (card.isConnected) {
+          card.updateBubbleCard();
+        }
+      } catch (_) {}
+    } while (index < cards.length && (monotonicNow() - stepStart) < iconRefreshDrainBudgetMs);
+
+    if (index < cards.length) {
+      setTimeout(step, 0);
+    }
+  };
+
+  step();
 }
 function preloadComponentIcons(hass) {
   if (componentIconsPromise || componentIcons || !hass?.callWS) return;

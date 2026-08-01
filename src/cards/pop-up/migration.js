@@ -748,7 +748,15 @@ export function maybeShowMigrationNotice(hass = null) {
 
     const storageKey = getMigrationNoticeStorageKey(_latestMigrationNoticeHass);
 
-    if (_pending || _shownMigrationNoticeKeys.has(storageKey) || isMigrationNoticeDismissed(storageKey)) return;
+    if (_pending || _shownMigrationNoticeKeys.has(storageKey)) return;
+
+    if (isMigrationNoticeDismissed(storageKey)) {
+        // The hass setter calls this on every state update of every legacy
+        // pop-up: without this the dismissed case re-parsed the URL and hit
+        // localStorage (synchronous, disk-backed) on every tick, forever.
+        _shownMigrationNoticeKeys.add(storageKey);
+        return;
+    }
 
     _pending = true;
     // Defer so card rendering is not blocked and the HA UI is fully settled.

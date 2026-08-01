@@ -2233,7 +2233,12 @@ export function openPopup(context, instant = false) {
     }
 
     clearAllTimeouts(context);
-    
+
+    // Legacy pop-ups open behind the same covering backdrop as standalone
+    // ones, so dashboard cards re-rendering during that window starve the
+    // very same transition frames.
+    beginPopupOpenHassGate(context);
+
     const { popUp } = context;
     popupState.activePopups.add(context);
 
@@ -2363,10 +2368,17 @@ function scheduleHashRoutedStandaloneOpen(context, currentHash, switchedBetweenP
         armPopupWillChange(context);
     }
 
+    // The open itself starts one frame later: without arming the gate here, a
+    // hass tick delivered in between re-renders the whole dashboard right as
+    // the open begins — exactly the contention the gate exists to remove.
+    // A cancelled open releases it in the branch below.
+    beginPopupOpenHassGate(context);
+
     requestAnimationFrame(() => {
         if (location.hash !== currentHash) {
             context._standaloneHashRoutedColdOpen = false;
             clearPopupWillChange(context);
+            releasePopupOpenHassGate(context);
             return;
         }
 
@@ -2468,6 +2480,19 @@ export function registerPopupContext(context) {
     if (context._registeredHash === hash) {
         const existing = popupRegistry.get(hash);
         if (existing?.deref() === context) return;
+    }
+
+    // A lovelace re-render can leave the replaced element receiving hass for a
+    // while, and its per-tick pipeline re-registers it. Never let a
+    // disconnected context take the hash away from a live one: navigation
+    // would then open a detached pop-up (backdrop up, nothing visible).
+    // Detached-but-registered stays supported — that is how a closed legacy
+    // pop-up keeps being reachable — it just cannot displace a connected one.
+    if (context.isConnected === false) {
+        const current = popupRegistry.get(hash)?.deref();
+        if (current && current !== context && current.isConnected !== false) {
+            return;
+        }
     }
 
     context._registeredHash = hash;
