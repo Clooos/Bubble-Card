@@ -516,7 +516,8 @@
       "info_body2": "이를 통해 모든 카드의 스타일 같은 것을 쉽게 바꿀 수 있고, 고급 사용자는 진짜 편집기로 기능을 수정하거나 추가할 수 있어요.",
       "info_body3": "{coding} 커뮤니티에서 만든 모듈을 {store}에서 찾아 설치할 수도 있어요.",
       "coding_not_your_thing": "코딩이 어렵게 느껴진다면",
-      "no_description_available": "사용할 수 있는 설명이 없어요"
+      "no_description_available": "사용할 수 있는 설명이 없어요",
+      "default_module_description": "기본적으로 비어 있고 활성화되어 있어요. 사용자 지정 스타일 및/또는 JS 템플릿을 여기에 추가하고 위의 {icon} 버튼을 눌러 모든 카드에 적용해 보세요."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools 필요",

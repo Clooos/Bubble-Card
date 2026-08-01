@@ -516,7 +516,8 @@
       "info_body2": "Näin on helppo muuttaa esimerkiksi kaikkien korttiesi tyylejä ja edistyneille käyttäjille muokata tai lisätä ominaisuuksia oikealla editorilla.",
       "info_body3": "{coding}, voit myös löytää ja asentaa yhteisön tekemiä moduuleja {store}.",
       "coding_not_your_thing": "Jos koodaaminen ei ole sinun juttusi",
-      "no_description_available": "Kuvausta ei ole saatavilla"
+      "no_description_available": "Kuvausta ei ole saatavilla",
+      "default_module_description": "Oletuksena tyhjä ja käytössä. Lisää tähän mukautetut tyylisi ja/tai JS-mallisi ja käytä niitä kaikissa korteissa painamalla yllä olevaa {icon}-painiketta."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools vaaditaan",

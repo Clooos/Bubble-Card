@@ -516,7 +516,8 @@
       "info_body2": "Így könnyen módosíthatja például az összes kártyája stílusát, haladó felhasználóként pedig valódi szerkesztővel módosíthat vagy adhat hozzá funkciókat.",
       "info_body3": "{coding}, a közösség által készített modulokat is találhat és telepíthet a {store}.",
       "coding_not_your_thing": "Ha a kódolás nem az Ön világa",
-      "no_description_available": "Nincs elérhető leírás"
+      "no_description_available": "Nincs elérhető leírás",
+      "default_module_description": "Alapértelmezés szerint üres és engedélyezett. Adja hozzá itt egyéni stílusait és/vagy JS sablonjait, majd a fenti {icon} gomb megnyomásával alkalmazza őket az összes kártyára."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools szükséges",

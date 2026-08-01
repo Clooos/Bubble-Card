@@ -516,7 +516,8 @@
       "info_body2": "Tio faciligas ŝanĝi aferojn kiel la stilojn de ĉiuj viaj kartoj, kaj por spertaj uzantoj, modifi aŭ aldoni funkciojn per vera redaktilo.",
       "info_body3": "{coding}, vi ankaŭ povas trovi kaj instali modulojn faritajn de la komunumo en la {store}.",
       "coding_not_your_thing": "Se programado ne estas via afero",
-      "no_description_available": "Neniu priskribo disponebla"
+      "no_description_available": "Neniu priskribo disponebla",
+      "default_module_description": "Malplena kaj defaŭlte ebligita. Aldonu ĉi tie viajn proprajn stilojn kaj/aŭ JS-ŝablonojn por apliki ilin al ĉiuj kartoj premante la butonon {icon} supre."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools necesa",

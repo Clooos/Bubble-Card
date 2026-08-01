@@ -516,7 +516,8 @@
       "info_body2": "So chasch zum Bispil ganz eifach d Styles vo allne dine Charte ändere, und fortgschritteni Nutzer chönd mit eme richtige Editor Funktione aapasse oder hinzuefüege.",
       "info_body3": "{coding}, chasch au vo de Community erstellti Modul im {store} finde und installiere.",
       "coding_not_your_thing": "Wänn Programmiere nöd dis Ding isch",
-      "no_description_available": "Kei Beschriibig verfüegbar"
+      "no_description_available": "Kei Beschriibig verfüegbar",
+      "default_module_description": "Läär und standardmässig aktiviert. Füeg dini eigene Styles und/oder JS-Templates do dezue und druck obe uf de {icon}-Knopf, zum si uf alli Charte aawände."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools nötig",

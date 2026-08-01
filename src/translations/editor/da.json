@@ -516,7 +516,8 @@
       "info_body2": "Dette gør det nemt at ændre ting som stilarterne på alle dine kort, og for avancerede brugere at ændre eller tilføje funktioner med en rigtig editor.",
       "info_body3": "{coding}, du kan også finde og installere moduler lavet af fællesskabet i {store}.",
       "coding_not_your_thing": "Hvis kodning ikke er noget for dig",
-      "no_description_available": "Ingen beskrivelse tilgængelig"
+      "no_description_available": "Ingen beskrivelse tilgængelig",
+      "default_module_description": "Tom og aktiveret som standard. Tilføj dine brugerdefinerede stilarter og/eller JS-skabeloner her for at anvende dem på alle kort ved at trykke på {icon}-knappen ovenfor."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools kræves",

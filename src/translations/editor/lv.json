@@ -516,7 +516,8 @@
       "info_body2": "Tas ļauj viegli mainīt, piemēram, visu jūsu kartīšu stilus, bet pieredzējušiem lietotājiem - mainīt vai pievienot funkcijas īstā redaktorā.",
       "info_body3": "{coding}, kopienas veidotus moduļus varat atrast un instalēt arī {store}.",
       "coding_not_your_thing": "Ja programmēšana nav jūsu lieta",
-      "no_description_available": "Apraksts nav pieejams"
+      "no_description_available": "Apraksts nav pieejams",
+      "default_module_description": "Tukšs un pēc noklusējuma iespējots. Pievienojiet šeit savus pielāgotos stilus un/vai JS veidnes, lai tos piemērotu visām kartītēm, nospiežot pogu {icon} augšpusē."
     },
     "store": {
       "bct_required_title": "Nepieciešams Bubble Card Tools",

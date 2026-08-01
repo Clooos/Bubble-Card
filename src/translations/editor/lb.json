@@ -516,7 +516,8 @@
       "info_body2": "Sou kënnt Dir einfach Saache wéi d'Stiler vun all Äre Kaarten änneren, a fortgeschratt Notzer kënne mat engem richtegen Editeur Fonktiounen upassen oder dobäisetzen.",
       "info_body3": "{coding}, kënnt Dir och vun der Communautéit erstallte Moduler am {store} fannen an installéieren.",
       "coding_not_your_thing": "Wa Programméieren net Äert Dénge ass",
-      "no_description_available": "Keng Beschreiwung verfügbar"
+      "no_description_available": "Keng Beschreiwung verfügbar",
+      "default_module_description": "Eidel a standardméisseg aktivéiert. Setzt hei Är personaliséiert Stiler an/oder JS-Templates derbäi, fir se op all Kaarten unzewenden, andeem Dir uewen op den {icon}-Knäppchen dréckt."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools néideg",

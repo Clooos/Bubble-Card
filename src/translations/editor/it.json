@@ -516,7 +516,8 @@
       "info_body2": "Questo rende facile cambiare, ad esempio, gli stili di tutte le tue schede e, per gli utenti avanzati, modificare o aggiungere funzionalità con un vero editor.",
       "info_body3": "{coding}, puoi anche trovare e installare moduli creati dalla community nello {store}.",
       "coding_not_your_thing": "Se programmare non fa per te",
-      "no_description_available": "Nessuna descrizione disponibile"
+      "no_description_available": "Nessuna descrizione disponibile",
+      "default_module_description": "Vuoto e attivo per impostazione predefinita. Aggiungi qui i tuoi stili personalizzati e/o template JS per applicarli a tutte le schede premendo il pulsante {icon} qui sopra."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools richiesto",

@@ -516,7 +516,8 @@
       "info_body2": "Ini memudahkan mengubah hal-hal seperti gaya semua kartu Anda, dan bagi pengguna tingkat lanjut, memodifikasi atau menambahkan fitur dengan editor sungguhan.",
       "info_body3": "{coding}, Anda juga dapat menemukan dan memasang modul buatan komunitas di {store}.",
       "coding_not_your_thing": "Jika membuat kode bukan keahlian Anda",
-      "no_description_available": "Tidak ada deskripsi yang tersedia"
+      "no_description_available": "Tidak ada deskripsi yang tersedia",
+      "default_module_description": "Kosong dan diaktifkan secara default. Tambahkan gaya kustom dan/atau templat JS Anda di sini untuk menerapkannya ke semua kartu dengan menekan tombol {icon} di atas."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools diperlukan",

@@ -516,7 +516,8 @@
       "info_body2": "Acest lucru facilitează schimbarea unor lucruri precum stilurile tuturor cardurilor și, pentru utilizatorii avansați, modificarea sau adăugarea de funcții cu un editor adevărat.",
       "info_body3": "{coding}, puteți găsi și instala și module create de comunitate în {store}.",
       "coding_not_your_thing": "Dacă programarea nu este punctul dvs. forte",
-      "no_description_available": "Nicio descriere disponibilă"
+      "no_description_available": "Nicio descriere disponibilă",
+      "default_module_description": "Gol și activat implicit. Adăugați aici stilurile personalizate și/sau șabloanele JS pentru a le aplica pe toate cardurile apăsând butonul {icon} de mai sus."
     },
     "store": {
       "bct_required_title": "Este necesar Bubble Card Tools",

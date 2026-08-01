@@ -516,7 +516,8 @@
       "info_body2": "这样可以轻松地更改所有卡片的样式等内容；对高级用户而言，还能用真正的编辑器修改或添加功能。",
       "info_body3": "{coding}，你也可以在{store}中找到并安装社区制作的模块。",
       "coding_not_your_thing": "如果你不喜欢写代码",
-      "no_description_available": "暂无描述"
+      "no_description_available": "暂无描述",
+      "default_module_description": "默认情况下为空且已启用。在此添加自定义样式和/或 JS 模板，然后按上方的{icon}按钮将其应用到所有卡片。"
     },
     "store": {
       "bct_required_title": "需要 Bubble Card Tools",

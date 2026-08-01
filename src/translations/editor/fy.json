@@ -516,7 +516,8 @@
       "info_body2": "Sa kinst maklik saken as de stilen fan al dyn kaarten feroarje, en avansearre brûkers kinne mei in echte bewurker funksjes oanpasse of tafoegje.",
       "info_body3": "{coding}, dan kinst ek troch de mienskip makke modules fine en ynstallearje yn de {store}.",
       "coding_not_your_thing": "As programmearjen neat foar dy is",
-      "no_description_available": "Gjin beskriuwing beskikber"
+      "no_description_available": "Gjin beskriuwing beskikber",
+      "default_module_description": "Leech en standert ynskeakele. Foegje hjir dyn oanpaste stilen en/of JS-sjabloanen ta om se op alle kaarten ta te passen troch op de {icon}-knop hjirboppe te drukken."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools fereaske",

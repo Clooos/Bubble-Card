@@ -516,7 +516,8 @@
       "info_body2": "Nii on lihtne muuta näiteks kõigi oma kaartide stiile ja edasijõudnud kasutajatel funktsioone päris redaktoriga muuta või lisada.",
       "info_body3": "{coding}, saad kogukonna tehtud mooduleid leida ja paigaldada ka {store}.",
       "coding_not_your_thing": "Kui programmeerimine pole sinu ala",
-      "no_description_available": "Kirjeldust pole saadaval"
+      "no_description_available": "Kirjeldust pole saadaval",
+      "default_module_description": "Vaikimisi tühi ja lubatud. Lisa siia oma kohandatud stiilid ja/või JS-mallid, et rakendada need kõigile kaartidele, vajutades ülal olevat nuppu {icon}."
     },
     "store": {
       "bct_required_title": "Vajalik on Bubble Card Tools",

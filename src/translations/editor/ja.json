@@ -516,7 +516,8 @@
       "info_body2": "これにより、すべてのカードのスタイルなどを簡単に変更でき、上級者は本格的なエディターで機能を変更したり追加したりできます。",
       "info_body3": "{coding}場合は、コミュニティが作成したモジュールを{store}で見つけてインストールすることもできます。",
       "coding_not_your_thing": "コーディングが得意でない",
-      "no_description_available": "説明はありません"
+      "no_description_available": "説明はありません",
+      "default_module_description": "デフォルトでは空で有効になっています。カスタムスタイルやJSテンプレートをここに追加し、上の{icon}ボタンを押すとすべてのカードに適用できます。"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools が必要です",

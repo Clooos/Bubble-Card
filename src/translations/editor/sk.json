@@ -516,7 +516,8 @@
       "info_body2": "Vďaka tomu ľahko zmeníte napríklad štýly všetkých svojich kariet a pokročilí používatelia môžu upravovať alebo pridávať funkcie v skutočnom editore.",
       "info_body3": "{coding}, môžete tiež nájsť a nainštalovať moduly vytvorené komunitou v {store}.",
       "coding_not_your_thing": "Ak programovanie nie je nič pre vás",
-      "no_description_available": "Popis nie je k dispozícii"
+      "no_description_available": "Popis nie je k dispozícii",
+      "default_module_description": "Prázdny a predvolene povolený. Pridajte sem svoje vlastné štýly a/alebo šablóny JS a stlačením tlačidla {icon} vyššie ich aplikujte na všetky karty."
     },
     "store": {
       "bct_required_title": "Vyžaduje sa Bubble Card Tools",

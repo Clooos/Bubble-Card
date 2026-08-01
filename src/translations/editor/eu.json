@@ -516,7 +516,8 @@
       "info_body2": "Honi esker, erraza da zure txartel guztien estiloak eta antzekoak aldatzea, eta, erabiltzaile aurreratuentzat, ezaugarriak aldatzea edo gehitzea benetako editore batekin.",
       "info_body3": "{coding}, komunitateak sortutako moduluak ere aurkitu eta instala ditzakezu {store} dendan.",
       "coding_not_your_thing": "Programazioa zure kontua ez bada",
-      "no_description_available": "Ez dago deskribapenik erabilgarri"
+      "no_description_available": "Ez dago deskribapenik erabilgarri",
+      "default_module_description": "Hutsik eta lehenespenez gaituta. Gehitu hemen zure estilo pertsonalizatuak eta/edo JS txantiloiak txartel guztietan aplikatzeko, goiko {icon} botoia sakatuz."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools behar da",

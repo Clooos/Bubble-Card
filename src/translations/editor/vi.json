@@ -516,7 +516,8 @@
       "info_body2": "Điều này giúp dễ dàng thay đổi những thứ như kiểu dáng của tất cả các thẻ, và với người dùng nâng cao, sửa đổi hoặc thêm tính năng bằng một trình chỉnh sửa thực thụ.",
       "info_body3": "{coding}, bạn cũng có thể tìm và cài đặt các mô-đun do cộng đồng tạo ra trong {store}.",
       "coding_not_your_thing": "Nếu lập trình không phải sở trường của bạn",
-      "no_description_available": "Không có mô tả"
+      "no_description_available": "Không có mô tả",
+      "default_module_description": "Trống và được bật theo mặc định. Thêm kiểu dáng tùy chỉnh và/hoặc mẫu JS của bạn vào đây để áp dụng chúng cho tất cả các thẻ bằng cách nhấn nút {icon} ở trên."
     },
     "store": {
       "bct_required_title": "Yêu cầu Bubble Card Tools",

@@ -516,7 +516,8 @@
       "info_body2": "Mae hyn yn ei gwneud yn hawdd newid pethau fel arddulliau eich holl gardiau, ac i ddefnyddwyr uwch, addasu neu ychwanegu nodweddion gyda golygydd go iawn.",
       "info_body3": "{coding}, gallwch hefyd ddod o hyd i fodiwlau a wnaed gan y gymuned a'u gosod yn y {store}.",
       "coding_not_your_thing": "Os nad yw codio at eich dant",
-      "no_description_available": "Dim disgrifiad ar gael"
+      "no_description_available": "Dim disgrifiad ar gael",
+      "default_module_description": "Gwag ac wedi'i alluogi yn ddiofyn. Ychwanegwch eich arddulliau wedi'u haddasu a/neu dempledi JS yma i'w gweithredu ar bob cerdyn drwy wasgu'r botwm {icon} uchod."
     },
     "store": {
       "bct_required_title": "Mae angen Bubble Card Tools",

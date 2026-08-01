@@ -516,7 +516,8 @@
       "info_body2": "Ovo olakšava promjenu stvari poput stilova svih vaših kartica, a naprednim korisnicima omogućava da izmijene ili dodaju funkcije u pravom uređivaču.",
       "info_body3": "{coding}, također možete pronaći i instalirati module koje je napravila zajednica u {store}.",
       "coding_not_your_thing": "Ako programiranje nije za vas",
-      "no_description_available": "Opis nije dostupan"
+      "no_description_available": "Opis nije dostupan",
+      "default_module_description": "Prazan i podrazumijevano omogućen. Dodajte ovdje svoje prilagođene stilove i/ili JS šablone da ih primijenite na sve kartice pritiskom na dugme {icon} iznad."
     },
     "store": {
       "bct_required_title": "Potreban je Bubble Card Tools",

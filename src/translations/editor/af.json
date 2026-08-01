@@ -516,7 +516,8 @@
       "info_body2": "Dit maak dit maklik om dinge soos die style van al jou kaarte te verander, en vir gevorderde gebruikers om funksies met 'n regte redigeerder aan te pas of by te voeg.",
       "info_body3": "{coding}, kan jy ook modules wat deur die gemeenskap gemaak is in die {store} vind en installeer.",
       "coding_not_your_thing": "As programmering nie jou ding is nie",
-      "no_description_available": "Geen beskrywing beskikbaar nie"
+      "no_description_available": "Geen beskrywing beskikbaar nie",
+      "default_module_description": "Leeg en by verstek geaktiveer. Voeg jou pasgemaakte style en/of JS-sjablone hier by om dit op alle kaarte toe te pas deur op die {icon}-knoppie hierbo te druk."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools benodig",

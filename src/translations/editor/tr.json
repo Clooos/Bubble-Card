@@ -516,7 +516,8 @@
       "info_body2": "Bu, örneğin tüm kartlarınızın stillerini değiştirmeyi ve ileri düzey kullanıcılar için gerçek bir düzenleyiciyle özellikleri değiştirmeyi veya eklemeyi kolaylaştırır.",
       "info_body3": "{coding}, topluluk tarafından yapılmış modülleri de {store} bulup yükleyebilirsiniz.",
       "coding_not_your_thing": "Kod yazmak size göre değilse",
-      "no_description_available": "Açıklama mevcut değil"
+      "no_description_available": "Açıklama mevcut değil",
+      "default_module_description": "Varsayılan olarak boş ve etkin. Özel stillerinizi ve/veya JS şablonlarınızı buraya ekleyin ve yukarıdaki {icon} düğmesine basarak tüm kartlara uygulayın."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools gerekli",

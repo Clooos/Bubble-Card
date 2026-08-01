@@ -516,7 +516,8 @@
       "info_body2": "So kannst du zum Beispiel ganz einfach die Styles all deiner Karten ändern, und fortgeschrittene Nutzer können mit einem echten Editor Funktionen anpassen oder hinzufügen.",
       "info_body3": "{coding}, kannst du auch von der Community erstellte Module im {store} finden und installieren.",
       "coding_not_your_thing": "Wenn Programmieren nicht dein Ding ist",
-      "no_description_available": "Keine Beschreibung verfügbar"
+      "no_description_available": "Keine Beschreibung verfügbar",
+      "default_module_description": "Leer und standardmäßig aktiviert. Füge hier deine benutzerdefinierten Styles und/oder JS-Templates hinzu, um sie auf alle Karten anzuwenden, indem du oben auf den {icon}-Button drückst."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools erforderlich",

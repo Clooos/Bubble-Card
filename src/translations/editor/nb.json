@@ -516,7 +516,8 @@
       "info_body2": "Dette gjør det enkelt å endre ting som stilene på alle kortene dine, og for avanserte brukere å endre eller legge til funksjoner med en ekte redigerer.",
       "info_body3": "{coding}, du kan også finne og installere moduler laget av fellesskapet i {store}.",
       "coding_not_your_thing": "Hvis koding ikke er din greie",
-      "no_description_available": "Ingen beskrivelse tilgjengelig"
+      "no_description_available": "Ingen beskrivelse tilgjengelig",
+      "default_module_description": "Tom og aktivert som standard. Legg til dine egendefinerte stiler og/eller JS-maler her for å bruke dem på alle kort ved å trykke på {icon}-knappen ovenfor."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools kreves",

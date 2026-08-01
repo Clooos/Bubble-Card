@@ -516,7 +516,8 @@
       "info_body2": "Tai leidžia lengvai keisti, pavyzdžiui, visų jūsų kortelių stilius, o pažengusiems naudotojams - keisti ar pridėti funkcijų tikrame redaktoriuje.",
       "info_body3": "{coding}, bendruomenės sukurtų modulių taip pat galite rasti ir įdiegti {store}.",
       "coding_not_your_thing": "Jei programavimas ne jums",
-      "no_description_available": "Aprašymo nėra"
+      "no_description_available": "Aprašymo nėra",
+      "default_module_description": "Tuščias ir įjungtas pagal numatytuosius nustatymus. Pridėkite čia savo pasirinktinius stilius ir/arba JS šablonus, kad paspausdami mygtuką {icon} viršuje pritaikytumėte juos visoms kortelėms."
     },
     "store": {
       "bct_required_title": "Reikalingas Bubble Card Tools",

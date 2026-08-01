@@ -516,7 +516,8 @@
       "info_body2": "Éascaíonn sé seo rudaí a athrú ar nós stíleanna do chártaí uile, agus d'úsáideoirí ardleibhéil, gnéithe a mhodhnú nó a chur leis le fíor-eagarthóir.",
       "info_body3": "{coding}, is féidir leat modúil a rinne an pobal a aimsiú agus a shuiteáil sa {store} freisin.",
       "coding_not_your_thing": "Mura bhfuil dúil agat sa chódú",
-      "no_description_available": "Níl cur síos ar fáil"
+      "no_description_available": "Níl cur síos ar fáil",
+      "default_module_description": "Folamh agus cumasaithe de réir réamhshocraithe. Cuir do stíleanna saincheaptha agus/nó do theimpléid JS leis anseo chun iad a chur i bhfeidhm ar gach cárta tríd an gcnaipe {icon} thuas a bhrú."
     },
     "store": {
       "bct_required_title": "Tá Bubble Card Tools de dhíth",

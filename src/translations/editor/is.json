@@ -516,7 +516,8 @@
       "info_body2": "Þetta gerir auðvelt að breyta hlutum eins og stílum allra kortanna þinna, og fyrir lengra komna notendur að breyta eða bæta við eiginleikum með alvöru ritli.",
       "info_body3": "{coding}, þá geturðu líka fundið og sett upp einingar frá samfélaginu í {store}.",
       "coding_not_your_thing": "Ef forritun er ekki þitt fag",
-      "no_description_available": "Engin lýsing tiltæk"
+      "no_description_available": "Engin lýsing tiltæk",
+      "default_module_description": "Tómt og virkjað sjálfgefið. Bættu hér við sérsniðnum stílum og/eða JS-sniðmátum til að beita þeim á öll kort með því að ýta á hnappinn {icon} fyrir ofan."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools er nauðsynlegt",

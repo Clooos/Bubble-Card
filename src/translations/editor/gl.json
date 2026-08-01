@@ -516,7 +516,8 @@
       "info_body2": "Isto facilita cambiar cousas como os estilos de todas as súas tarxetas e, para os usuarios avanzados, modificar ou engadir funcións cun editor de verdade.",
       "info_body3": "{coding}, tamén pode atopar e instalar módulos feitos pola comunidade no {store}.",
       "coding_not_your_thing": "Se programar non é o seu",
-      "no_description_available": "Non hai ningunha descrición dispoñible"
+      "no_description_available": "Non hai ningunha descrición dispoñible",
+      "default_module_description": "Baleiro e activado por defecto. Engada aquí os seus estilos personalizados e/ou modelos JS para aplicalos a todas as tarxetas premendo o botón {icon} de arriba."
     },
     "store": {
       "bct_required_title": "Requírese Bubble Card Tools",
