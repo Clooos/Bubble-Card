@@ -15,6 +15,7 @@ import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
 import { getLazyLoadedPanelContent, renderDropdown, tTemplate } from '../editor/utils.js';
 import { translateUiText } from './translate.js';
+import { renderTranslationNote, isShowingOriginal } from './translation-note.js';
 import { ensureBCTProviderAvailable, isBCTAvailableSync, writeModuleYaml, getAllModulesLastModified } from './bct-provider.js';
 import setupTranslation from '../tools/localize.js';
 
@@ -891,15 +892,16 @@ export function makeModulesEditor(context) {
                 moduleVersion
               } = getTextFromMap(key);
 
-              // Module-authored text (English by convention) is machine
-              // translated like Module Store descriptions.
-              const reRender = () => context.requestUpdate();
-              const label = context._storeTranslateDescriptions !== false
-                ? translateUiText(rawLabel, context.hass, reRender)
-                : rawLabel;
-              const description = context._storeTranslateDescriptions !== false
-                ? translateUiText(rawDescription, context.hass, reRender)
+              // Module names stay as authored (like in the Module Store); the
+              // description and the editor labels are machine translated,
+              // unless this module is showing its original text.
+              const label = rawLabel;
+              const translateThisModule = context._storeTranslateDescriptions !== false &&
+                !isShowingOriginal(context, key);
+              const description = translateThisModule
+                ? translateUiText(rawDescription, context.hass, () => context.requestUpdate())
                 : rawDescription;
+              const descriptionTranslated = translateThisModule && description !== rawDescription;
 
               // Check if the module should be applied to this card
               const isChecked = shouldApplyModule(context, key);
@@ -1093,7 +1095,9 @@ export function makeModulesEditor(context) {
                             .hass=${context.hass}
                             .data=${workingConfig}
                             .schema=${processedFormSchema}
-                            .computeLabel=${context._computeLabelCallback}
+                            .computeLabel=${(schema) => (translateThisModule && schema?.label)
+                              ? translateUiText(schema.label, context.hass, () => context.requestUpdate())
+                              : schema?.label}
                             .disabled=${!isChecked}
                             @value-changed=${(e) =>
                               context._valueChangedInHaForm(e, key, formSchema)
@@ -1110,6 +1114,7 @@ export function makeModulesEditor(context) {
                         </h4>
                         <div class="content">
                           ${html`<span .innerHTML=${description}></span>`}
+                          ${renderTranslationNote(context, key, descriptionTranslated)}
                         </div>
                       </div>
 

@@ -10,6 +10,7 @@ import { isHomeAssistantVersionAtLeast } from '../tools/utils.js';
 import { tTemplate } from '../editor/utils.js';
 import setupTranslation from '../tools/localize.js';
 import { translateText, getTranslationTargetLang, warmupBrowserTranslator } from './translate.js';
+import { renderTranslationNote } from './translation-note.js';
 
 // Returns the machine translation of a module description, falling back to
 // the original text until one is available. Translation requests go through a
@@ -528,28 +529,9 @@ export function makeModuleStore(context) {
                       context._storeDescOriginal?.has(desc.id);
                     return html`
                     <p class="module-description" .innerHTML=${desc.html}></p>
-                    ${desc.translated ? html`
-                      <p class="module-translation-note" style="opacity: 0.7; font-size: 0.85em; display: flex; align-items: center; gap: 4px;">
-                        <ha-icon icon="mdi:translate" style="--mdc-icon-size: 14px;"></ha-icon>
-                        <em>${t('editor.store.machine_translated')}</em>
-                        <a href="#" style="color: var(--primary-color);" @click=${(e) => {
-                          e.preventDefault();
-                          context._storeDescOriginal = context._storeDescOriginal || new Set();
-                          context._storeDescOriginal.add(desc.id);
-                          context.requestUpdate();
-                        }}>${t('editor.store.show_original')}</a>
-                      </p>
-                    ` : ''}
-                    ${showingOriginalByChoice ? html`
-                      <p class="module-translation-note" style="opacity: 0.7; font-size: 0.85em; display: flex; align-items: center; gap: 4px;">
-                        <ha-icon icon="mdi:translate" style="--mdc-icon-size: 14px;"></ha-icon>
-                        <a href="#" style="color: var(--primary-color);" @click=${(e) => {
-                          e.preventDefault();
-                          context._storeDescOriginal.delete(desc.id);
-                          context.requestUpdate();
-                        }}>${t('editor.store.show_translation')}</a>
-                      </p>
-                    ` : ''}
+                    ${desc.translated || showingOriginalByChoice
+                      ? renderTranslationNote(context, desc.id, desc.translated)
+                      : ''}
                   `;
                   })() : html`
                     <p><em>${t('editor.store.no_description')}</em></p>
