@@ -1,7 +1,8 @@
+import { tGlobal } from '../../tools/localize.js';
 const POPUP_HASH_STORAGE_KEY = 'bubble-card-popup-hashes';
 const POPUP_HASH_UPDATE_EVENT = 'bubble-popup-hashes-updated';
 const POPUP_NAVIGATION_SECTION_ID = 'bubble_popups';
-const POPUP_NAVIGATION_GROUP_LABEL = 'Bubble Card pop-ups';
+const getNavigationGroupLabel = () => tGlobal('editor.navigation.group');
 const NAVIGATION_GROUP_KEYS = ['related', 'dashboards', 'views', 'other_routes'];
 
 function getCurrentPagePath() {
@@ -136,7 +137,7 @@ function injectPopUpHashes(picker) {
         bubbleItems.push({
             id: hash,
             primary: meta.name || hash,
-            secondary: meta.name ? hash : 'Bubble Card pop-up hash',
+            secondary: meta.name ? hash : tGlobal('editor.navigation.hash_hint'),
             icon: meta.icon || 'mdi:pound',
             sorting_label: `zzz_bubble_pop_up_${hash}`
         });
@@ -161,7 +162,7 @@ function updatePickerSections(picker) {
     if (hasBubbleItems) {
         genericPicker.sections = [
             ...filtered,
-            { id: POPUP_NAVIGATION_SECTION_ID, label: POPUP_NAVIGATION_GROUP_LABEL }
+            { id: POPUP_NAVIGATION_SECTION_ID, label: getNavigationGroupLabel() }
         ];
     } else if (filtered.length !== sections.length) {
         genericPicker.sections = filtered;
@@ -194,7 +195,7 @@ function patchInstanceGetItems(instance) {
 
         const items = originalGetItems.call(instance, searchString, section);
         if (section || !bubbleItems.length) return items;
-        return [...items, POPUP_NAVIGATION_GROUP_LABEL, ...bubbleItems];
+        return [...items, getNavigationGroupLabel(), ...bubbleItems];
     };
     instance.__bubbleGetItemsPatched = true;
 }

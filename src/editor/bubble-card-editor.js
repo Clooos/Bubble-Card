@@ -1327,9 +1327,9 @@ class BubbleCardEditor extends LitElement {
                             // Store the error in the registry with source info
                             window.bubbleCardErrorRegistry[errorKey] = {
                                 message: message,
-                                source: errorContext.sourceType === 'module' 
-                                    ? `Module ('${errorContext.moduleId}')` 
-                                    : 'Card Configuration (styles section)',
+                                source: errorContext.sourceType === 'module'
+                                    ? setupTranslation(this._hassRender)('editor.errors.source_module').replace('{id}', `'${errorContext.moduleId}'`)
+                                    : setupTranslation(this._hassRender)('editor.errors.source_card'),
                                 cardType: errorContext.cardType,
                                 entityId: errorContext.entityId,
                                 moduleId: errorContext.sourceType === 'module' ? errorContext.moduleId : null

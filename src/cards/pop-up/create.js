@@ -1,3 +1,4 @@
+import { tGlobal } from '../../tools/localize.js';
 import { render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
@@ -448,14 +449,14 @@ export function prepareStructure(context) {
     context.verticalStack = context.getRootNode();
 
     if (!context.verticalStack || !context.verticalStack.host) {
-      throw new Error("Vertical stack not found, don't panic, it will be added automatically to your pop-up.");
+      throw new Error(tGlobal('editor.errors.vertical_stack'));
     }
 
     context.sectionRow = context.verticalStack.host.parentElement;
     context.sectionRowContainer = context.sectionRow?.parentElement;
     context.popUp = resolveLegacyStackRoot(context.verticalStack);
     if (!context.popUp) {
-      throw new Error("Vertical stack not found, don't panic, it will be added automatically to your pop-up.");
+      throw new Error(tGlobal('editor.errors.vertical_stack'));
     }
 
     context.popUp.classList.add("bubble-pop-up", "pop-up", "is-popup-closed");

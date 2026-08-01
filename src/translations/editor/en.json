@@ -554,7 +554,8 @@
       "custom_styles": "custom styles",
       "info_body2": "This makes it easy to change things like the styles of all your cards, and for advanced users, to modify or add features with a real editor.",
       "info_body3": "{coding}, you can also find and install modules made by the community in the {store}.",
-      "coding_not_your_thing": "If coding isn't your thing"
+      "coding_not_your_thing": "If coding isn't your thing",
+      "no_description_available": "No description available"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools required",
@@ -679,6 +680,26 @@
     },
     "card_picker": {
       "description": "Bubble Card is a minimalist and customizable card collection"
+    },
+    "errors": {
+      "card_type_required": "You need to define a card type",
+      "entity_required": "You need to define an entity",
+      "entity_list_required": "You need to define an entity list",
+      "link_required": "You need to define {key}",
+      "duplicate_link": "You can't use {value} twice",
+      "select_menu_missing": "\"{option}\" missing",
+      "vertical_stack": "Vertical stack not found, don't panic, it will be added automatically to your pop-up.",
+      "check_value": "Check this value",
+      "source_card": "Card Configuration (styles section)",
+      "source_module": "Module ({id})"
+    },
+    "placeholder": {
+      "no_hash": "No hash defined",
+      "hidden_content": "Content hidden in edit mode for performance"
+    },
+    "navigation": {
+      "group": "Bubble Card pop-ups",
+      "hash_hint": "Bubble Card pop-up hash"
     }
   }
 }

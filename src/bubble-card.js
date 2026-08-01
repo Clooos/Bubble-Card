@@ -1,5 +1,5 @@
 import { version } from './var/version.js';
-import setupTranslation, { ensureEditorTranslations } from './tools/localize.js';
+import setupTranslation, { ensureEditorTranslations, tGlobal } from './tools/localize.js';
 import { initializeContent } from './tools/init.js';
 import { cleanupTapActions } from './tools/tap-actions.js';
 import { preloadYAMLStyles } from './modules/registry.js';
@@ -245,14 +245,14 @@ class BubbleCard extends HTMLElement {
     if (config.error) throw new Error(config.error);
     const workingConfig = { ...config };
 
-    if (!workingConfig.card_type) throw new Error("You need to define a card type");
+    if (!workingConfig.card_type) throw new Error(tGlobal('editor.errors.card_type_required'));
     if (workingConfig.grid_options?.rows !== undefined) {
       workingConfig.rows = workingConfig.grid_options.rows;
     }
 
     if (workingConfig.card_type === 'pop-up') {
       if (workingConfig.hash && workingConfig.button_type && workingConfig.button_type !== 'name' && !workingConfig.entity && workingConfig.modules && workingConfig.popup_style !== 'classic' && workingConfig.show_header !== false) {
-        throw new Error("You need to define an entity");
+        throw new Error(tGlobal('editor.errors.entity_required'));
       }
     } else if (workingConfig.card_type === 'horizontal-buttons-stack') {
       const definedLinks = {};
@@ -260,25 +260,25 @@ class BubbleCard extends HTMLElement {
         if (/^\d+_icon$/.test(key)) {
           const linkKey = key.replace('_icon', '_link');
           if (workingConfig[linkKey] === undefined) {
-            throw new Error("You need to define " + linkKey);
+            throw new Error(tGlobal('editor.errors.link_required').replace('{key}', linkKey));
           }
           if (definedLinks[workingConfig[linkKey]]) {
-            throw new Error("You can't use " + workingConfig[linkKey] + " twice");
+            throw new Error(tGlobal('editor.errors.duplicate_link').replace('{value}', workingConfig[linkKey]));
           }
           definedLinks[workingConfig[linkKey]] = true;
         }
       }
     } else if (['button', 'cover', 'climate', 'select', 'media-player'].includes(workingConfig.card_type)) {
       if (!workingConfig.entity && workingConfig.button_type !== 'name') {
-        throw new Error("You need to define an entity");
+        throw new Error(tGlobal('editor.errors.entity_required'));
       }
     } else if (workingConfig.card_type === 'calendar') {
-      if (!workingConfig.entities) throw new Error("You need to define an entity list");
+      if (!workingConfig.entities) throw new Error(tGlobal('editor.errors.entity_list_required'));
     }
 
     if (workingConfig.card_type === 'select' && workingConfig.entity && !workingConfig.select_attribute) {
       const isSelectEntity = workingConfig.entity.startsWith("input_select") || workingConfig.entity.startsWith("select");
-      if (!isSelectEntity) throw new Error('"Select menu (from attributes)" missing');
+      if (!isSelectEntity) throw new Error(tGlobal('editor.errors.select_menu_missing').replace('{option}', tGlobal('editor.select.select_menu')));
     }
 
     this.config = workingConfig;

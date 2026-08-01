@@ -73,7 +73,7 @@ export class HaBcObjectSelector extends LitElement {
       const fn = this._warnIfCache[field.warn_if] ||
         (this._warnIfCache[field.warn_if] =
           new Function("item", "hass", "card", `return !!(${field.warn_if});`));
-      return fn(itemData || {}, this.hass, this._cardConfig) ? (field.warn_text || "Check this value") : "";
+      return fn(itemData || {}, this.hass, this._cardConfig) ? (field.warn_text || setupTranslation(this.hass)('editor.errors.check_value')) : "";
     } catch (e) {
       return "";
     }

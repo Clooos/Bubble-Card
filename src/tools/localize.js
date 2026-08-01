@@ -59,6 +59,23 @@ function getScriptBaseUrl() {
     return null;
 }
 
+// Some strings are produced where no hass reference is at hand (setConfig
+// errors, the card picker entry, DOM placeholders): read the live one.
+export function getGlobalHass() {
+  try {
+    return document.querySelector('home-assistant')?.hass;
+  } catch (_) {
+    return undefined;
+  }
+}
+
+/** setupTranslation bound to the live hass, for those contexts. */
+export function tGlobal(key) {
+  const hass = getGlobalHass();
+  ensureEditorTranslations(hass);
+  return setupTranslation(hass)(key);
+}
+
 export function getCurrentLocale(hass) {
   if (isEditorEnglishForced()) return DEFAULT_LANG;
   return hass?.locale?.language ?? DEFAULT_LANG;

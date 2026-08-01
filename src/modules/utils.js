@@ -1,3 +1,4 @@
+import { tGlobal } from '../tools/localize.js';
 import { yamlKeysMap } from './registry.js';
 
 // Gets text data from the yamlKeysMap for a module key
@@ -40,7 +41,7 @@ export function getTextFromMap(key) {
 
 // Formats a module description to be more readable
 export function _formatModuleDescription(description) {
-  if (!description) return "No description available";
+  if (!description) return tGlobal('editor.modules.no_description_available');
 
   try {
     // 1. Search directly after "Description:" if present
@@ -143,10 +144,10 @@ export function _formatModuleDescription(description) {
     }
 
     // If everything fails, return a default message
-    return "No description available";
+    return tGlobal('editor.modules.no_description_available');
   } catch (error) {
     console.warn("Error during description formatting:", error);
-    return "No description available";
+    return tGlobal('editor.modules.no_description_available');
   }
 }
 

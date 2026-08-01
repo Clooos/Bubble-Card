@@ -1,4 +1,5 @@
 import { getBackdrop } from './backdrop.js';
+import setupTranslation, { getGlobalHass } from '../../tools/localize.js';
 import { isHaCardWrapper } from '../../tools/ha-boundary.js';
 import { handlePopUpCards, setStandalonePopUpCardsActive } from './cards/index.js';
 import { restorePopupHostLayout, suspendPopupHostLayout } from './helpers.js';
@@ -40,8 +41,10 @@ function createEditorPlaceholder(context) {
     const info = createElement('div', 'bubble-editor-placeholder-info');
     const header = createElement('div', 'bubble-editor-placeholder-header');
 
+    const t = setupTranslation(context._hass ?? getGlobalHass());
+
     const hashText = createElement('div', 'bubble-editor-placeholder-hash');
-    hashText.textContent = context.config.hash || 'No hash defined';
+    hashText.textContent = context.config.hash || t('editor.placeholder.no_hash');
     header.appendChild(hashText);
 
     if (isLegacyPopUp) {
@@ -49,13 +52,13 @@ function createEditorPlaceholder(context) {
         const badgeIcon = createElement('ha-icon');
         badgeIcon.icon = 'mdi:swap-horizontal-bold';
         badge.appendChild(badgeIcon);
-        badge.appendChild(document.createTextNode('Migration available'));
-        badge.title = 'Migration available';
+        badge.appendChild(document.createTextNode(t('editor.migration.notice_available')));
+        badge.title = t('editor.migration.notice_available');
         header.appendChild(badge);
     }
 
     const hint = createElement('div', 'bubble-editor-placeholder-hint');
-    hint.textContent = 'Content hidden in edit mode for performance';
+    hint.textContent = t('editor.placeholder.hidden_content');
 
     info.appendChild(header);
     info.appendChild(hint);
