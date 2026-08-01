@@ -317,6 +317,41 @@ export function translateUiText(text, hass, onReady) {
   return text;
 }
 
+// Schema keys whose values are user-visible text. Everything else (name,
+// value, variant, icons, units, JS expressions) is structural and must never
+// be altered. Plain-string select options double as stored values, so only
+// object options with an explicit `label` are covered (through that key).
+const SCHEMA_TEXT_KEYS = new Set(['label', 'title', 'helper', 'description', 'warn_text', 'group']);
+
+/**
+ * Translates every visible label of a module editor schema in place, through
+ * the same per-string cache as the rest of the module text. Call it on a
+ * per-render clone: strings resolve from cache when known, stay English
+ * otherwise, and `onReady` fires once new translations land so the caller
+ * re-renders. `group` doubles as the grouping key, but identical sources
+ * translate identically so fields stay grouped.
+ */
+export function translateModuleSchema(schema, hass, onReady) {
+  if (!getTranslationTargetLang(hass)) return schema;
+
+  const walk = (node) => {
+    if (Array.isArray(node)) {
+      node.forEach(walk);
+      return;
+    }
+    if (!node || typeof node !== 'object') return;
+    for (const [key, value] of Object.entries(node)) {
+      if (typeof value === 'string' && SCHEMA_TEXT_KEYS.has(key)) {
+        node[key] = translateUiText(value, hass, onReady);
+      } else if (value && typeof value === 'object') {
+        walk(value);
+      }
+    }
+  };
+  walk(schema);
+  return schema;
+}
+
 /**
  * Translates English text to the user's language. Returns null when
  * translation is unavailable (offline, unsupported language, altered

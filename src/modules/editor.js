@@ -14,7 +14,7 @@ import { checkModuleUpdates } from './store.js';
 import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
 import { getLazyLoadedPanelContent, renderDropdown, tTemplate } from '../editor/utils.js';
-import { translateUiText } from './translate.js';
+import { translateUiText, translateModuleSchema } from './translate.js';
 import { renderTranslationNote, isShowingOriginal } from './translation-note.js';
 import { ensureBCTProviderAvailable, isBCTAvailableSync, writeModuleYaml, getAllModulesLastModified } from './bct-provider.js';
 import setupTranslation from '../tools/localize.js';
@@ -946,9 +946,15 @@ export function makeModulesEditor(context) {
               const shouldShowDisabledState = unsupported && !forceUnsupportedModules && !isChecked && !isGlobal && !isDefaultModule;
               
               // Get processed schema based on the *current* config for dependency evaluation
-              const processedFormSchema = (formSchema && formSchema.length > 0)
+              const rawProcessedSchema = (formSchema && formSchema.length > 0)
                 ? context._getProcessedSchema(key, formSchema, workingConfig) // Schema depends on WORKING config
                 : [];
+              // The processed schema is a per-render clone: safe to translate
+              // every visible label in place (section titles, option labels,
+              // helpers...), sharing the module text cache.
+              const processedFormSchema = translateThisModule
+                ? translateModuleSchema(rawProcessedSchema, context.hass, () => context.requestUpdate())
+                : rawProcessedSchema;
               
               // Check if this module has an update
               const hasUpdate = moduleUpdates.modules.some(m => m.id === key) && bctAvailable;
