@@ -964,7 +964,35 @@ if (!window.__bubbleLocationDeduperAdded) {
     }
 }
 
+// Home Assistant keeps renaming and adding dialog elements (the ha-md-dialog
+// migration being the current one), and an unrecognised dialog makes a click
+// INSIDE it count as a click outside, closing the pop-up underneath. The
+// exact-tag list below only survives as a fast path: recognise the SHAPE of a
+// dialog instead of maintaining a list that has to be patched every release.
 const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER']);
+
+// Matches DIALOG, HA-DIALOG, HA-MD-DIALOG, HA-DIALOG-DATE-PICKER, MWC-DIALOG…
+const dialogTagPattern = /(^|-)DIALOG(-|$)/;
+
+export function isDialogNode(node) {
+    const tag = node?.nodeName;
+    if (typeof tag !== 'string') {
+        return false;
+    }
+
+    if (dialogNode.has(tag) || dialogTagPattern.test(tag)) {
+        return true;
+    }
+
+    // Whatever the tag is, the platform's own accessibility contract marks
+    // dialog content — HA sets it on its dialog surfaces.
+    try {
+        const role = typeof node.getAttribute === 'function' ? node.getAttribute('role') : null;
+        return role === 'dialog' || role === 'alertdialog';
+    } catch (_) {
+        return false;
+    }
+}
 
 // Suppress the outside click released by a just-closed HA dialog.
 const dialogState = {
@@ -989,7 +1017,7 @@ function isEventInsidePopupOrDialog(event) {
     return targets.find(target => {
         if (!target.classList && !target.nodeName) return false;
         return target.classList?.contains('bubble-pop-up') ||
-               dialogNode.has(target.nodeName);
+               isDialogNode(target);
     });
 }
 

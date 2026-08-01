@@ -281,3 +281,89 @@ describe('timer intervals', () => {
         expect(jest.getTimerCount()).toBe(0);
     });
 });
+// Contract test for the Home Assistant view-type probe. It exists so a HA
+// release that restructures hui-root fails here instead of silently switching
+// every masonry dashboard to the large layout.
+describe('view type probe contract', () => {
+    let utilsModule;
+
+    function buildHuiRoot(viewMarkup) {
+        // Minimal stand-in for the hui-root shadow root: only querySelector is
+        // exercised by the probe.
+        return {
+            isConnected: true,
+            shadowRoot: {
+                querySelector: (selector) => {
+                    if (selector === 'hui-masonry-view') return viewMarkup.masonry ? {} : null;
+                    if (selector === 'hui-sections-view, hui-view hui-section') return viewMarkup.sections ? {} : null;
+                    return null;
+                },
+            },
+        };
+    }
+
+    function mountDashboard(viewMarkup) {
+        const huiRoot = buildHuiRoot(viewMarkup);
+        const panel = { shadowRoot: { querySelector: () => huiRoot } };
+        const main = { shadowRoot: { querySelector: () => panel } };
+        const ha = { shadowRoot: { querySelector: () => main } };
+        global.document = {
+            querySelector: (selector) => (selector === 'body > home-assistant' ? ha : null),
+        };
+    }
+
+    function createCardContext() {
+        const classes = new Set();
+        return {
+            config: {},
+            content: {
+                classList: {
+                    toggle: (name, force) => {
+                        if (force) classes.add(name); else classes.delete(name);
+                        return classes.has(name);
+                    },
+                    contains: (name) => classes.has(name),
+                    add: (name) => classes.add(name),
+                    remove: (name) => classes.delete(name),
+                },
+                querySelector: () => null,
+            },
+            elements: {},
+        };
+    }
+
+    beforeEach(async () => {
+        jest.resetModules();
+        global.window = { isSectionView: undefined };
+        utilsModule = await import('./utils.js');
+    });
+
+    afterEach(() => {
+        delete global.window;
+        delete global.document;
+    });
+
+    test('reports masonry dashboards as not section view', () => {
+        mountDashboard({ masonry: true, sections: false });
+        utilsModule.setLayout(createCardContext());
+        expect(window.isSectionView).toBe(false);
+    });
+
+    test('reports sections dashboards as section view', () => {
+        mountDashboard({ masonry: false, sections: true });
+        utilsModule.setLayout(createCardContext());
+        expect(window.isSectionView).toBe(true);
+    });
+
+    test('keeps the last known answer when HA restructures both probes away', () => {
+        mountDashboard({ masonry: true, sections: false });
+        utilsModule.setLayout(createCardContext());
+        expect(window.isSectionView).toBe(false);
+
+        // A HA release moves the view elements: asserting "section view" here
+        // would silently switch every masonry dashboard to the large layout.
+        mountDashboard({ masonry: false, sections: false });
+        utilsModule.setLayout(createCardContext());
+        expect(window.isSectionView).toBe(false);
+    });
+});

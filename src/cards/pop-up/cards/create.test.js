@@ -19,7 +19,7 @@ jest.unstable_mockModule('../../../tools/monotonic-time.js', () => ({
     monotonicNow: () => Date.now(),
 }));
 
-const { _isStandalonePopupCardConfig, createCardElementsProgressively, registerPopupOpenActivityProbe, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } = await import('./create.js');
+const { _createHuiCard, _isStandalonePopupCardConfig, createCardElementsProgressively, registerPopupOpenActivityProbe, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } = await import('./create.js');
 
 describe('_isStandalonePopupCardConfig', () => {
     test('detects standalone bubble pop-up child configs', () => {
@@ -836,5 +836,72 @@ describe('progressive card work', () => {
         // Synchronous path: completion reported before any timer runs.
         expect(onDone).toHaveBeenCalledTimes(1);
         expect(context._progressiveCardWork ?? null).toBeNull();
+    });
+});
+
+// Contract test for the Home Assistant element every pop-up child card is
+// built with. It exists so a HA release that renames or drops hui-card fails
+// here, during an upgrade, instead of rendering empty pop-ups for users.
+describe('hui-card creation contract', () => {
+    const originalCustomElements = global.customElements;
+    const originalDocument = global.document;
+    const originalWindow = global.window;
+
+    function installRegistry({ huiCardDefined }) {
+        global.customElements = { get: (tag) => (tag === 'hui-card' && huiCardDefined ? class {} : undefined) };
+        global.document = {
+            createElement: jest.fn((tag) => ({ tagName: tag.toUpperCase(), load: jest.fn() })),
+        };
+    }
+
+    afterEach(() => {
+        global.customElements = originalCustomElements;
+        global.document = originalDocument;
+        global.window = originalWindow;
+        jest.restoreAllMocks();
+    });
+
+    test('builds through hui-card and its property contract when HA provides it', () => {
+        installRegistry({ huiCardDefined: true });
+        global.window = {};
+        const context = { _hass: { states: {} } };
+
+        const el = _createHuiCard({ type: 'markdown' }, context, false);
+
+        expect(document.createElement).toHaveBeenCalledWith('hui-card');
+        expect(el.hass).toBe(context._hass);
+        expect(el.layout).toBe('grid');
+        expect(el.config).toEqual({ type: 'markdown' });
+        expect(el.load).toHaveBeenCalledTimes(1);
+    });
+
+    test('falls back to the public card helpers when HA no longer provides hui-card', async () => {
+        // Fresh module instance: the one-shot warning flag is module-level, so
+        // the assertion below must not depend on what earlier tests did.
+        jest.resetModules();
+        installRegistry({ huiCardDefined: false });
+        const fallbackEl = {};
+        const helpers = { createCardElement: jest.fn(() => fallbackEl) };
+        global.window = { loadCardHelpers: jest.fn(() => Promise.resolve(helpers)) };
+        jest.spyOn(console, 'warn').mockImplementation(() => {});
+        const context = { _hass: { states: {} } };
+        const { _createHuiCard: createFresh } = await import('./create.js');
+
+        // First call kicks off the (async) helper resolution and has nothing
+        // to fall back on yet.
+        createFresh({ type: 'markdown' }, context, false);
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const el = createFresh({ type: 'markdown' }, context, false);
+
+        expect(helpers.createCardElement).toHaveBeenCalledWith({ type: 'markdown' });
+        expect(el).toBe(fallbackEl);
+        expect(el.hass).toBe(context._hass);
+        // Warned once, naming the drift, so a user report is diagnosable.
+        // Warned exactly once across both calls, naming the drift, so a user
+        // report is diagnosable without spamming the console.
+        expect(console.warn).toHaveBeenCalledTimes(1);
+        expect(String(console.warn.mock.calls[0][0])).toContain('hui-card');
     });
 });

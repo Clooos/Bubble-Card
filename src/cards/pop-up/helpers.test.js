@@ -164,7 +164,7 @@ jest.unstable_mockModule('./styles.css', () => ({
     default: '',
 }));
 
-const { cleanupPopupRuntime, closePopup, isPopupOpenSequenceActive, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
+const { cleanupPopupRuntime, closePopup, isDialogNode, isPopupOpenSequenceActive, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
 const { invalidateWakeSyncCache } = await import('./index.js');
 
 let rafCallbacks;
@@ -2974,5 +2974,45 @@ describe('legacy popup location routing', () => {
         jest.advanceTimersByTime(50);
 
         expect(window.history.replaceState).toHaveBeenCalledTimes(1);
+    });
+});
+
+// Contract tests for the Home Assistant surfaces the pop-up runtime depends
+// on. They exist so a HA release that moves one of these fails here, during
+// an upgrade, instead of silently degrading on users' dashboards.
+describe('HA dialog recognition contract', () => {
+    function node(nodeName, role = null) {
+        return {
+            nodeName,
+            getAttribute: (name) => (name === 'role' ? role : null),
+        };
+    }
+
+    test('recognises the dialog tags HA ships today', () => {
+        expect(isDialogNode(node('HA-DIALOG'))).toBe(true);
+        expect(isDialogNode(node('HA-MORE-INFO-DIALOG'))).toBe(true);
+        expect(isDialogNode(node('HA-DIALOG-DATE-PICKER'))).toBe(true);
+    });
+
+    test('recognises dialog tags HA has not shipped yet', () => {
+        // The ha-md-dialog migration is the current one; the point is that a
+        // new name must not need a code change here.
+        expect(isDialogNode(node('HA-MD-DIALOG'))).toBe(true);
+        expect(isDialogNode(node('DIALOG'))).toBe(true);
+        expect(isDialogNode(node('MWC-DIALOG'))).toBe(true);
+        expect(isDialogNode(node('HA-DIALOG-SOMETHING-NEW'))).toBe(true);
+    });
+
+    test('recognises dialog content through the accessibility role', () => {
+        expect(isDialogNode(node('SOME-OVERLAY', 'dialog'))).toBe(true);
+        expect(isDialogNode(node('SOME-OVERLAY', 'alertdialog'))).toBe(true);
+    });
+
+    test('does not mistake ordinary dashboard elements for dialogs', () => {
+        expect(isDialogNode(node('HUI-VIEW'))).toBe(false);
+        expect(isDialogNode(node('HA-CARD'))).toBe(false);
+        expect(isDialogNode(node('DIV', 'button'))).toBe(false);
+        expect(isDialogNode(null)).toBe(false);
+        expect(isDialogNode({})).toBe(false);
     });
 });

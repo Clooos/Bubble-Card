@@ -766,8 +766,23 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
         
         let defaultViewLayout = "normal";
         if (cachedHuiRoot?.shadowRoot) {
-            const masonryView = cachedHuiRoot.shadowRoot.querySelector("#view > hui-view > hui-masonry-view");
-            window.isSectionView = !masonryView;
+            // Probe BOTH view kinds, with descendant selectors so an extra
+            // wrapper element in hui-root does not break the chain. Deciding
+            // "section view" from the mere absence of a masonry view made a
+            // single HA restructuring silently switch every masonry dashboard
+            // to the large layout — a visual change users would blame on
+            // Bubble Card. When neither is recognised, keep the last known
+            // answer instead of asserting one.
+            const root = cachedHuiRoot.shadowRoot;
+            const masonryView = root.querySelector("hui-masonry-view");
+            const sectionsView = masonryView ? null : root.querySelector("hui-sections-view, hui-view hui-section");
+
+            if (masonryView) {
+                window.isSectionView = false;
+            } else if (sectionsView) {
+                window.isSectionView = true;
+            }
+
             defaultViewLayout = window.isSectionView ? "large" : "normal";
         }
         determinedLayoutClass = context.config.card_layout ?? defaultViewLayout;

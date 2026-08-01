@@ -752,13 +752,86 @@ export function removeCardElements(context) {
 }
 
 // Create a hui-card from a popup child config.
-function _createHuiCard(cardConfig, context, preview) {
+// Every pop-up child card is built through HA's hui-card wrapper and its
+// property contract. That element is internal to the frontend: if a release
+// renames or drops it, pop-ups would silently render nothing at all. Keep a
+// resolved copy of the PUBLIC card-helpers API around so there is something
+// to fall back on, and warn once so the breakage is diagnosable from a user
+// report instead of looking like an empty pop-up.
+let _cardHelpers = null;
+let _cardHelpersRequested = false;
+let _warnedAboutMissingHuiCard = false;
+
+function _ensureCardHelpers() {
+    if (_cardHelpers || _cardHelpersRequested) {
+        return;
+    }
+
+    const loadCardHelpers = typeof window !== 'undefined' ? window.loadCardHelpers : undefined;
+    if (typeof loadCardHelpers !== 'function') {
+        return;
+    }
+
+    _cardHelpersRequested = true;
+    try {
+        Promise.resolve(loadCardHelpers())
+            .then((helpers) => { _cardHelpers = helpers || null; })
+            .catch(() => { _cardHelpersRequested = false; });
+    } catch (_) {
+        _cardHelpersRequested = false;
+    }
+}
+
+function _isHuiCardAvailable() {
+    try {
+        if (typeof customElements === 'undefined' || typeof customElements.get !== 'function') {
+            // No registry to ask: assume the normal path rather than warning
+            // about a drift we cannot actually observe.
+            return true;
+        }
+        return !!customElements.get('hui-card');
+    } catch (_) {
+        // A throwing registry is not a reason to abandon the normal path.
+        return true;
+    }
+}
+
+export function _createHuiCard(cardConfig, context, preview) {
+    // Resolved in the background: the fallback below can only be synchronous
+    // if the helpers are already in hand.
+    _ensureCardHelpers();
+
+    const renderedConfig = _getRenderedCardConfig(cardConfig);
+
+    if (!_isHuiCardAvailable()) {
+        if (!_warnedAboutMissingHuiCard) {
+            _warnedAboutMissingHuiCard = true;
+            console.warn(
+                'Bubble Card: Home Assistant no longer provides the "hui-card" element this version builds ' +
+                'pop-up content with. Falling back to the public card helpers; please report this so Bubble Card can be updated.'
+            );
+        }
+
+        if (typeof _cardHelpers?.createCardElement === 'function') {
+            try {
+                const fallbackEl = _cardHelpers.createCardElement(renderedConfig);
+                if (fallbackEl) {
+                    fallbackEl.hass = context._hass;
+                }
+                return fallbackEl || null;
+            } catch (e) {
+                console.warn('Bubble Card: Failed to create card element', e);
+                return null;
+            }
+        }
+    }
+
     try {
         const cardEl = document.createElement('hui-card');
         cardEl.hass = context._hass;
         cardEl.layout = 'grid';
         cardEl.preview = preview;
-        cardEl.config = _getRenderedCardConfig(cardConfig);
+        cardEl.config = renderedConfig;
         if (typeof cardEl.load === 'function') {
             cardEl.load();
         }
