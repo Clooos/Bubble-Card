@@ -343,6 +343,19 @@ export function translateModuleSchema(schema, hass, onReady) {
     for (const [key, value] of Object.entries(node)) {
       if (typeof value === 'string' && SCHEMA_TEXT_KEYS.has(key)) {
         node[key] = translateUiText(value, hass, onReady);
+      } else if (key === 'options' && Array.isArray(value)) {
+        // Plain-string options double as stored values: displayed through a
+        // {value, label} pair so the translation never touches the config.
+        // [value, label] pairs translate their label half.
+        value.forEach((option, index) => {
+          if (typeof option === 'string') {
+            value[index] = { value: option, label: translateUiText(option, hass, onReady) };
+          } else if (Array.isArray(option) && typeof option[1] === 'string') {
+            option[1] = translateUiText(option[1], hass, onReady);
+          } else {
+            walk(option);
+          }
+        });
       } else if (value && typeof value === 'object') {
         walk(value);
       }
