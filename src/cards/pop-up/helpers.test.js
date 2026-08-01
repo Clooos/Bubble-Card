@@ -1468,6 +1468,25 @@ describe('standalone popup lifecycle', () => {
         expect(showBackdrop).not.toHaveBeenCalled();
     });
 
+    test('keeps will-change armed when duplicate URL events land mid-open', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        registerPopupContext(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+        // The same navigation also fires popstate: the duplicate schedules a
+        // second routed open that hits openPopup's already-active early
+        // return while the first open is still in flight.
+        window.dispatchEvent(new Event('popstate'));
+
+        flushRafQueue(); // both scheduled open callbacks run
+
+        expect(context._popupOpenInProgress).toBe(true);
+        expect(context.popUp.style.willChange).toBe('transform');
+    });
+
     test('clears pre-armed will-change when a routed standalone open is canceled before the first frame', () => {
         const context = createStandaloneContext({ hash: '#popup-a' });
         usedContexts.push(context);

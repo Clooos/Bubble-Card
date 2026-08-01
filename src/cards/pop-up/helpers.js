@@ -2098,13 +2098,22 @@ export function openPopup(context, instant = false) {
 
     if (context.popUp.classList.contains('is-popup-opened')) {
         context._standaloneHashRoutedColdOpen = false;
-        clearPopupWillChange(context);
+        // One navigation fires location-changed, popstate AND hashchange: the
+        // duplicate invocations land here while the first open is still in
+        // flight, and clearing the hint now would drop the layer promotion
+        // right before (or during) the slide. completePopupOpen clears it
+        // once the open settles.
+        if (!isPopupOpenInProgress(context)) {
+            clearPopupWillChange(context);
+        }
         return;
     }
 
     if (popupState.activePopups.has(context)) {
         context._standaloneHashRoutedColdOpen = false;
-        clearPopupWillChange(context);
+        if (!isPopupOpenInProgress(context)) {
+            clearPopupWillChange(context);
+        }
         return;
     }
 
