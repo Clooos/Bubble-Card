@@ -131,8 +131,13 @@ function getBrowserTranslator(targetLang) {
       } catch (_) {
         return null;
       }
-    })();
-    browserTranslators.set(targetLang, promise.catch(() => null));
+    })().catch(() => null).then((translator) => {
+      // A failed creation (gesture requirement, transient state) must not be
+      // remembered for the whole session: retry on the next request.
+      if (!translator) browserTranslators.delete(targetLang);
+      return translator;
+    });
+    browserTranslators.set(targetLang, promise);
   }
   return browserTranslators.get(targetLang);
 }
