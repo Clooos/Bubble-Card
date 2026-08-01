@@ -18,6 +18,29 @@ import runtime from '../translations/runtime.js';
 
 const DEFAULT_LANG = 'en';
 const FETCH_TIMEOUT_MS = 10000;
+const ENGLISH_STORAGE_KEY = 'bubble-card-editor-english';
+
+// Global opt-out: keeps the whole editor in English (bundled values and the
+// English fallback of natively resolved keys), and disables the machine
+// translation of module-authored text. Persisted per browser.
+let englishForced;
+export function isEditorEnglishForced() {
+  if (englishForced === undefined) {
+    try {
+      englishForced = localStorage.getItem(ENGLISH_STORAGE_KEY) === '1';
+    } catch (_) {
+      englishForced = false;
+    }
+  }
+  return englishForced;
+}
+
+export function setEditorEnglishForced(forced) {
+  englishForced = !!forced;
+  try {
+    localStorage.setItem(ENGLISH_STORAGE_KEY, forced ? '1' : '0');
+  } catch (_) {}
+}
 
 // In-memory dictionaries: lang -> object (null = fetch failed, promise = loading)
 const editorDicts = Object.create(null);
@@ -37,6 +60,7 @@ function getScriptBaseUrl() {
 }
 
 export function getCurrentLocale(hass) {
+  if (isEditorEnglishForced()) return DEFAULT_LANG;
   return hass?.locale?.language ?? DEFAULT_LANG;
 }
 
@@ -58,7 +82,9 @@ function resolveValue(value, hass) {
   const sep = value.indexOf('|');
   const haKey = sep === -1 ? value.slice(1) : value.slice(1, sep);
   const fallback = sep === -1 ? undefined : value.slice(sep + 1);
-  const native = hass?.localize?.(haKey);
+  // Forced English keeps the bundled fallback instead of Home Assistant's
+  // localized value.
+  const native = isEditorEnglishForced() ? undefined : hass?.localize?.(haKey);
   return native || fallback || haKey;
 }
 

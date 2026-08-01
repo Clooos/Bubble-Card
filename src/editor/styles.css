@@ -484,3 +484,24 @@ mwc-list-item[disabled] ha-icon {
 * {
   line-height: 20px !important;
 }
+.version-language {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  float: right;
+  margin-right: 8px;
+  font-size: 10px;
+  opacity: 0.8;
+  cursor: pointer;
+  user-select: none;
+}
+
+.version-language ha-icon {
+  --mdc-icon-size: 14px;
+}
+
+.version-language ha-switch {
+  --mdc-switch-track-width: 28px;
+  transform: scale(0.65);
+  margin: -6px -4px -6px -2px;
+}

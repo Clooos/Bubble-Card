@@ -7,7 +7,7 @@
 // translation and restored afterwards: they must never be sent to (or altered
 // by) a translation engine. If restoration fails, the original text is kept.
 
-import setupTranslation from '../tools/localize.js';
+import setupTranslation, { isEditorEnglishForced } from '../tools/localize.js';
 
 const memCache = new Map(); // `${lang} ${hash}` -> translated string
 
@@ -16,7 +16,7 @@ const TOTAL_MAX = 8000;   // beyond this, the remainder stays untranslated
 const REQUEST_SPACING_MS = 350;      // serial queue spacing between endpoint calls
 const RATE_LIMIT_COOLDOWN_MS = 5 * 60 * 1000; // back off after a 429
 const STORAGE_KEY = 'bubble-card-translations-cache';
-const STORAGE_MAX_ENTRIES = 300;
+const STORAGE_MAX_ENTRIES = 1000; // store descriptions + module labels
 
 // Persistent cache: module descriptions are stable, so a translation is only
 // ever requested once per (language, text) even across sessions.
@@ -69,6 +69,7 @@ const SERVICE_LANG = {
 };
 
 export function getTranslationTargetLang(hass) {
+  if (isEditorEnglishForced()) return null;
   const lang = hass?.locale?.language ?? 'en';
   if (lang === 'en' || lang === 'en-GB') return null;
   return lang;

@@ -23,7 +23,7 @@ import { makeSubButtonPanel } from '../components/sub-button/editor/index.js';
 import { makeModulesEditor } from '../modules/editor.js';
 import { makeModuleStore, _fetchModuleStore } from '../modules/store.js';
 import { yamlKeysMap } from '../modules/registry.js';
-import setupTranslation, { ensureEditorTranslations } from '../tools/localize.js';
+import setupTranslation, { ensureEditorTranslations, isEditorEnglishForced, setEditorEnglishForced, getCurrentLocale } from '../tools/localize.js';
 import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
 import cardsEditorStyles from '../cards/pop-up/cards/styles.css';
@@ -1109,14 +1109,49 @@ class BubbleCardEditor extends LitElement {
     }
 
     makeVersion() {
+        const englishForced = isEditorEnglishForced();
+        const hasLocalization = getCurrentLocale(this._hassRender) !== 'en' || englishForced;
+
         return html`
             <h4 class="version">
-                Bubble Card 
+                Bubble Card
                 <span class="version-number">
                     ${version}
                 </span>
+                ${this._renderConditionalContent(hasLocalization, html`
+                    <span
+                        class="version-language"
+                        role="button"
+                        tabindex="0"
+                        title="${englishForced ? 'Bubble Card is in English' : 'Switch Bubble Card to English'}"
+                        @click=${() => this._toggleEditorEnglish()}
+                        @keydown=${(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this._toggleEditorEnglish(); } }}
+                    >
+                        <ha-icon icon="mdi:translate"></ha-icon>
+                        English
+                        <ha-switch
+                            .checked=${englishForced}
+                            @click=${(e) => e.stopPropagation()}
+                            @change=${(e) => this._toggleEditorEnglish(e.target.checked)}
+                        ></ha-switch>
+                    </span>
+                `)}
             </h4>
         `;
+    }
+
+    // Global opt-out from every translation: the editor's own strings, Home
+    // Assistant's native labels and the machine-translated module text.
+    _toggleEditorEnglish(forced = !isEditorEnglishForced()) {
+        setEditorEnglishForced(forced);
+        this.listsUpdated = false;
+        this.requestUpdate();
+        try {
+            window.__bubbleCardEditorInstances?.forEach((editor) => {
+                editor.listsUpdated = false;
+                editor.requestUpdate();
+            });
+        } catch (_) {}
     }
 
     makeStyleEditor() {
