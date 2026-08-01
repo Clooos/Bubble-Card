@@ -4,11 +4,13 @@ import { isReadOnlyEntityId } from '../../slider/helpers.js';
 import { makeGenericSliderSettings } from '../../slider/editor.js';
 import { getLazyLoadedPanelContent, renderDropdown } from '../../../editor/utils.js';
 import { loadSubButtonClipboard } from './clipboard.js';
+import setupTranslation from '../../../tools/localize.js';
 
 export function makeUnifiedSubButtonEditor(editor, button, index, path, updateValueFn, deleteFn, moveFn, copyFn, cutFn, options = {}) {
+  const t = setupTranslation(editor.hass);
   const {
     panelKeyPrefix = 'sub_button',
-    buttonTitle = `Button ${index + 1}${button.name ? ` - ${button.name}` : ''}`,
+    buttonTitle = `${t('editor.sub_button.button_n').replace('{n}', index + 1)}${button.name ? ` - ${button.name}` : ''}`,
     arrayLength = null
   } = options;
 
@@ -39,9 +41,9 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
   const sliderSupported = !isReadOnly;
   const selectSupported = isSelect || hasSelectAttributeList;
   const typeItems = [
-    { label: 'Default (button)', value: 'default' },
-    ...(sliderSupported ? [{ label: 'Slider', value: 'slider' }] : []),
-    ...(selectSupported ? [{ label: 'Dropdown / Select', value: 'select' }] : [])
+    { label: t('editor.sub_button.type_default'), value: 'default' },
+    ...(sliderSupported ? [{ label: t('editor.button.type_slider'), value: 'slider' }] : []),
+    ...(selectSupported ? [{ label: t('editor.sub_button.type_dropdown'), value: 'select' }] : [])
   ];
 
   const mainPanelKey = `${panelKeyPrefix}_main_${index}`;
@@ -93,43 +95,43 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
         <div class="button-container" @click=${(e) => e.stopPropagation()} @mousedown=${(e) => e.stopPropagation()} @touchstart=${(e) => e.stopPropagation()}>
           ${renderDropdown({
             trigger: html`
-              <mwc-icon-button slot="trigger" class="icon-button header" title="Options">
+              <mwc-icon-button slot="trigger" class="icon-button header" title="${t('editor.common.options')}">
                 <ha-icon style="display: flex" icon="mdi:dots-vertical"></ha-icon>
               </mwc-icon-button>
             `,
             items: [
               { 
                 type: 'item',
-                icon: 'mdi:arrow-left', 
-                label: 'Move left',
+                icon: 'mdi:arrow-left',
+                label: t('editor.sub_button.move_left'),
                 disabled: !canMoveLeft,
                 onClick: (e) => { e.stopPropagation(); if (canMoveLeft) moveFn(-1); }
               },
               { 
                 type: 'item',
-                icon: 'mdi:arrow-right', 
-                label: 'Move right',
+                icon: 'mdi:arrow-right',
+                label: t('editor.sub_button.move_right'),
                 disabled: !canMoveRight,
                 onClick: (e) => { e.stopPropagation(); if (canMoveRight) moveFn(1); }
               },
               { type: 'divider' },
               { 
                 type: 'item',
-                icon: 'mdi:content-copy', 
-                label: 'Copy',
+                icon: 'mdi:content-copy',
+                label: t('editor.common.copy'),
                 onClick: (e) => { e.stopPropagation(); copyFn(e); }
               },
               { 
                 type: 'item',
-                icon: 'mdi:content-cut', 
-                label: 'Cut',
+                icon: 'mdi:content-cut',
+                label: t('editor.common.cut'),
                 onClick: (e) => { e.stopPropagation(); cutFn(e); }
               },
               { type: 'divider' },
               { 
                 type: 'item',
-                icon: 'mdi:delete', 
-                label: 'Delete',
+                icon: 'mdi:delete',
+                label: t('editor.common.delete'),
                 variant: 'danger',
                 onClick: (e) => { e.stopPropagation(); deleteFn(e); }
               }
@@ -148,7 +150,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
           >
             <h4 slot="header">
               <ha-icon icon="mdi:cog"></ha-icon>
-              Button settings
+              ${t('editor.sub_button.button_settings')}
             </h4>
             <div class="content">
               ${getLazyLoadedPanelContent(editor, settingsPanelKey, !!editor._expandedPanelStates[settingsPanelKey], () => html` 
@@ -158,7 +160,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                   .schema=${[
                     { 
                       name: "entity",
-                      label: "Optional - Entity (default to card entity)", 
+                      label: editor._optionalLabel(t('editor.sub_button.entity_default')),
                       selector: { entity: {} }
                     }
                   ]}   
@@ -177,17 +179,17 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                           }
                       }
                   }]}
-                  .computeLabel=${() => 'Sub-button type'}
+                  .computeLabel=${() => t('editor.sub_button.type')}
                   @value-changed=${(ev) => updateValueFn({ sub_button_type: ev.detail.value.sub_button_type })}
                 ></ha-form>
                 ${button.sub_button_type === 'slider' ? html`
                   <div class="bubble-info">
                     <h4 class="bubble-section-title">
                       <ha-icon icon="mdi:information-outline"></ha-icon>
-                      Slider behavior
+                      ${t('editor.slider.behavior_title')}
                     </h4>
                     <div class="content">
-                      <p>By default, you need to tap the sub-button to reveal the slider. To make the slider always visible, enable the "Always show slider" option in the Layout section below.</p>
+                      <p>${t('editor.sub_button.behavior_body')}</p>
                     </div>
                   </div>
                 ` : ''}
@@ -204,7 +206,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                             }
                         }
                     }]}
-                    .computeLabel=${() => 'Optional - Select menu (from attributes)'}
+                    .computeLabel=${() => editor._optionalLabel(t('editor.select.select_menu'))}
                     @value-changed=${(ev) => updateValueFn({ select_attribute: ev.detail.value.select_attribute })}
                   ></ha-form>
                 ` : ''}
@@ -213,13 +215,13 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                     .hass=${editor.hass}
                     .data=${{ name: button.name ?? '' }}
                     .schema=${[{ name: 'name', selector: { text: {} } }]}
-                    .computeLabel=${() => 'Optional - Name'}
+                    .computeLabel=${() => editor._optionalLabel(t('editor.common.name'))}
                     @value-changed=${(ev) => updateValueFn({ name: ev.detail.value.name })}
                   ></ha-form>
                 </div>
                 <div class="ha-icon-picker">
                   <ha-icon-picker
-                    label="Optional - Icon"
+                    label="${editor._optionalLabel(t('editor.common.icon'))}"
                     .value="${button.icon}"
                     item-label-path="label"
                     item-value-path="value"
@@ -241,7 +243,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
             >
               <h4 slot="header">
                 <ha-icon icon="mdi:tune-variant"></ha-icon>
-                Slider settings
+                ${t('editor.button.slider_settings')}
               </h4>
               <div class="content">
                 ${getLazyLoadedPanelContent(editor, sliderTypePanelKey, !!editor._expandedPanelStates[sliderTypePanelKey], () => html`
@@ -269,7 +271,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
           >
             <h4 slot="header">
               <ha-icon icon="mdi:gesture-tap"></ha-icon>
-              Tap action on button
+              ${t('editor.actions.on_button')}
             </h4>
             <div class="content">
               ${getLazyLoadedPanelContent(editor, actionsPanelKey, !!editor._expandedPanelStates[actionsPanelKey], () => html`
@@ -277,21 +279,21 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                   <div class="bubble-info">
                     <h4 class="bubble-section-title">
                       <ha-icon icon="mdi:information-outline"></ha-icon>
-                      Actions disabled
+                      ${t('editor.sub_button.actions_disabled_title')}
                     </h4>
                     <div class="content">
-                      <p>Tap, double tap, and hold actions are disabled on this sub-button because "Always show slider" is enabled.</p>
+                      <p>${t('editor.sub_button.actions_disabled_body')}</p>
                     </div>
                   </div>
                 ` : ''}
                 <div style="${disableActions ? 'opacity: 0.5; pointer-events: none;' : ''}">
-                  ${editor.makeActionPanel("Tap action", button, 'more-info', path, index)}
+                  ${editor.makeActionPanel('tap', button, 'more-info', path, index)}
                 </div>
                 <div style="${disableActions ? 'opacity: 0.5; pointer-events: none;' : ''}">
-                  ${editor.makeActionPanel("Double tap action", button, 'none', path, index)}
+                  ${editor.makeActionPanel('double_tap', button, 'none', path, index)}
                 </div>
                 <div style="${disableActions ? 'opacity: 0.5; pointer-events: none;' : ''}">
-                  ${editor.makeActionPanel("Hold action", button, 'none', path, index)}
+                  ${editor.makeActionPanel('hold', button, 'none', path, index)}
                 </div>
               `)}
             </div>
@@ -306,11 +308,11 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
           >
             <h4 slot="header">
               <ha-icon icon="mdi:eye"></ha-icon>
-              Visibility
+              ${t('editor.common.visibility')}
             </h4>
             <div class="content">
               ${getLazyLoadedPanelContent(editor, visibilityPanelKey, !!editor._expandedPanelStates[visibilityPanelKey], () => html`
-                <ha-formfield label="Hide when parent entity is unavailable">
+                <ha-formfield label="${t('editor.sub_button.hide_unavailable')}">
                   <ha-switch
                     .checked=${button.hide_when_parent_unavailable ?? false}
                     @change=${(ev) => updateValueFn({ hide_when_parent_unavailable: ev.target.checked })}
@@ -323,7 +325,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                 >
                 </ha-card-conditions-editor>
                 <ha-alert alert-type="info">
-                  The sub-button will be shown when ALL conditions are fulfilled. If no conditions are set, the sub-button will always be shown.
+                  ${t('editor.sub_button.visibility_body')}
                 </ha-alert>
               `)}
             </div>
@@ -338,12 +340,12 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
           >
             <h4 slot="header">
               <ha-icon icon="mdi:view-grid"></ha-icon>
-              Layout
+              ${t('editor.common.layout')}
             </h4>
             <div class="content">
               ${getLazyLoadedPanelContent(editor, layoutPanelKey, !!editor._expandedPanelStates[layoutPanelKey], () => html`
                 ${isBottomSection ? html`
-                  <ha-formfield label="Fill available width">
+                  <ha-formfield label="${t('editor.sub_button.fill_width')}">
                     <ha-switch
                       .checked=${effectiveFillWidth ?? true}
                       @change=${(ev) => updateValueFn({ fill_width: ev.target.checked })}
@@ -351,7 +353,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                   </ha-formfield>
                 ` : ''}
                 ${button.sub_button_type === 'slider' ? html`
-                  <ha-formfield label="Always show slider">
+                  <ha-formfield label="${t('editor.sub_button.always_slider')}">
                     <ha-switch
                       .checked=${button.always_visible ?? false}
                       @change=${(ev) => updateValueFn({ always_visible: ev.target.checked })}
@@ -359,7 +361,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                   </ha-formfield>
                 ` : ''}
                 ${button.sub_button_type === 'slider' && button.always_visible ? html`
-                  <ha-formfield label="Show button info (Icon, name, state...)">
+                  <ha-formfield label="${t('editor.sub_button.show_info')}">
                     <ha-switch
                       .checked=${button.show_button_info ?? false}
                       @change=${(ev) => updateValueFn({ show_button_info: ev.target.checked })}
@@ -378,7 +380,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                       }
                   }]}
                   .disabled=${effectiveFillWidth === true}
-                  .computeLabel=${() => (isBottomSection && !hasNonFillAlignment) ? 'Custom button width (%)' : 'Custom button width (px)'}
+                  .computeLabel=${() => (isBottomSection && !hasNonFillAlignment) ? t('editor.sub_button.custom_width_pct') : t('editor.sub_button.custom_width_px')}
                   @value-changed=${(ev) => {
                     const value = ev.detail.value.width;
                     updateValueFn({ width: value === undefined || value === '' ? undefined : Number(value) });
@@ -392,7 +394,7 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                       selector: { text: { type: 'number' } },
                       options: { min: 20, max: 600 },
                   }]}
-                  .computeLabel=${() => 'Custom button height (px)'}
+                  .computeLabel=${() => t('editor.sub_button.custom_height')}
                   @value-changed=${(ev) => {
                     const value = ev.detail.value.custom_height;
                     updateValueFn({ custom_height: value === undefined || value === '' ? undefined : Number(value) });
@@ -407,16 +409,16 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                         selector: {
                             select: {
                                 options: [
-                                  { value: 'icon-left', label: 'Icon on left (default)' },
-                                  { value: 'icon-top', label: 'Icon on top' },
-                                  { value: 'icon-bottom', label: 'Icon on bottom' },
-                                  { value: 'icon-right', label: 'Icon on right' }
+                                  { value: 'icon-left', label: t('editor.sub_button.icon_left') + t('editor.common.default_suffix') },
+                                  { value: 'icon-top', label: t('editor.sub_button.icon_top') },
+                                  { value: 'icon-bottom', label: t('editor.sub_button.icon_bottom') },
+                                  { value: 'icon-right', label: t('editor.sub_button.icon_right') }
                                 ],
                                 mode: 'dropdown'
                             }
                         }
                     }]}
-                    .computeLabel=${() => 'Content layout'}
+                    .computeLabel=${() => t('editor.sub_button.content_layout')}
                     @value-changed=${(ev) => updateValueFn({ content_layout: ev.detail.value.content_layout })}
                   ></ha-form>
                 ` : ''}
@@ -521,14 +523,15 @@ export function createMoveHandler(editor, targetArray, index, onValueChanged) {
   };
 }
 
-// Convert individual buttons to a group, preserving existing groups
-export function convertIndividualButtonsToGroup(arr) {
+// Convert individual buttons to a group, preserving existing groups.
+// `t` is optional so config-mutating callers can localize the generated name.
+export function convertIndividualButtonsToGroup(arr, t) {
   const individuals = arr.filter(item => item && !Array.isArray(item.group));
   if (individuals.length === 0) return [...arr];
-  
+
   const groups = arr.filter(item => item && Array.isArray(item.group));
   return [
-    { name: 'Automatically grouped', buttons_layout: 'inline', group: individuals },
+    { name: t ? t('editor.sub_button.auto_grouped') : 'Automatically grouped', buttons_layout: 'inline', group: individuals },
     ...groups
   ];
 }
@@ -538,14 +541,14 @@ export function createPasteHandler(editor, targetArray, onValueChanged, getClipb
   return () => {
     const stored = editor._clipboardButton || (getClipboardFn ? getClipboardFn() : null);
     if (!stored) return;
-    
+
     editor._clipboardButton = stored;
     const clone = JSON.parse(JSON.stringify(stored));
     const sectionKey = findSectionKey(editor, targetArray);
     const isPastingGroup = Array.isArray(clone.buttons) || Array.isArray(clone.group);
-    
+
     const sourceArr = sectionKey ? editor._config.sub_button[sectionKey] : targetArray;
-    let result = isPastingGroup ? convertIndividualButtonsToGroup(sourceArr) : [...sourceArr];
+    let result = isPastingGroup ? convertIndividualButtonsToGroup(sourceArr, setupTranslation(editor.hass)) : [...sourceArr];
     
     if (isPastingGroup) {
       result.push({ 
@@ -608,7 +611,8 @@ export function createGroupButtonPasteHandler(editor, targetArray, groupIndex, o
 
 // Get paste button text
 export function getPasteButtonText(editor, getClipboardFn) {
+  const t = setupTranslation(editor.hass);
   const c = editor._clipboardButton || (getClipboardFn ? getClipboardFn() : null);
-  return c ? `Paste "${c.name || 'sub-button'}"` : 'Paste';
+  return c ? t('editor.sub_button.paste_named').replace('{name}', c.name || t('editor.sub_button.default_name')) : t('editor.sub_button.paste');
 }
 

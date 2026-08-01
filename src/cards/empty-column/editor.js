@@ -1,14 +1,16 @@
 import { html } from 'lit';
+import setupTranslation from '../../tools/localize.js';
 
 export function renderEmptyColumnEditor(editor){
+    const t = setupTranslation(editor.hass);
 
     return html`
         <div class="card-config">
-            ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
+            ${editor.makeDropdown(t('editor.common.card_type'), "card_type", editor.cardTypeList)}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
-                  Styling and layout options
+                  ${t('editor.common.styling_layout_options')}
                 </h4>
                 <div class="content">
                     ${editor.makeLayoutPanel()}
@@ -17,10 +19,10 @@ export function renderEmptyColumnEditor(editor){
             <div class="bubble-info">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:information-outline"></ha-icon>
-                    Empty column card
+                    ${t('editor.empty_column.info_title')}
                 </h4>
                 <div class="content">
-                    <p>Just an empty card to fill any empty column.</p>
+                    <p>${t('editor.empty_column.info_body')}</p>
                 </div>
             </div>
             ${editor.makeVersion()}

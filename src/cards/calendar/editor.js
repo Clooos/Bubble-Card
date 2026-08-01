@@ -16,7 +16,7 @@ export function renderCalendarEditor(editor){
 
     return html`
         <div class="card-config">
-            ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
+            ${editor.makeDropdown(t('editor.common.card_type'), "card_type", editor.cardTypeList)}
             <ha-form
                 .hass=${editor.hass}
                 .data=${editor._config}
@@ -93,30 +93,30 @@ export function renderCalendarEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                  Tap action on day
+                  ${t('editor.actions.on_day')}
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel("Tap action", editor._config, 'none')}
-                    ${editor.makeActionPanel("Double tap action")}
-                    ${editor.makeActionPanel("Hold action")}
+                    ${editor.makeActionPanel('tap', editor._config, 'none')}
+                    ${editor.makeActionPanel('double_tap')}
+                    ${editor.makeActionPanel('hold')}
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:gesture-tap-button"></ha-icon>
-                  Tap action on event
+                  ${t('editor.actions.on_event')}
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel("Tap action", editor._config.event_action, 'none', 'event_action')}
-                    ${editor.makeActionPanel("Double tap action", editor._config.event_action, 'none', 'event_action')}
-                    ${editor.makeActionPanel("Hold action", editor._config.event_action, 'none', 'event_action')}
+                    ${editor.makeActionPanel('tap', editor._config.event_action, 'none', 'event_action')}
+                    ${editor.makeActionPanel('double_tap', editor._config.event_action, 'none', 'event_action')}
+                    ${editor.makeActionPanel('hold', editor._config.event_action, 'none', 'event_action')}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
-                  Styling options
+                  ${t('editor.common.styling_options')}
                 </h4>
                 <div class="content">
                     ${editor.makeLayoutOptions()}
@@ -127,13 +127,13 @@ export function renderCalendarEditor(editor){
             <div class="bubble-info">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:information-outline"></ha-icon>
-                    Calendar card
+                    ${t('editor.calendar.info_title')}
                 </h4>
                 <div class="content">
-                    <p>This card allows you to display a calendar and is scrollable, so you can view additional events.</p>
+                    <p>${t('editor.calendar.info_body')}</p>
                 </div>
             </div>
             ${editor.makeVersion()}
         </div>
-    `;    
+    `;
 }

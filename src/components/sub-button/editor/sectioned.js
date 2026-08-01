@@ -1,5 +1,6 @@
 import { html } from 'lit';
-import { getLazyLoadedPanelContent, renderDropdown } from '../../../editor/utils.js';
+import { getLazyLoadedPanelContent, renderDropdown, tTemplate } from '../../../editor/utils.js';
+import setupTranslation from '../../../tools/localize.js';
 import { 
   makeUnifiedSubButtonEditor, 
   createCopyHandler, 
@@ -151,6 +152,7 @@ function subButtonsValueChanged(editor) {
 }
 
 function makeGroupEditor(editor, group, groupIndex, sectionKey) {
+  const t = setupTranslation(editor.hass);
   const panelKey = `${sectionKey}_group_${groupIndex}`;
   const targetArr = sectionKey === 'main' ? editor._config.sub_button.main : editor._config.sub_button.bottom;
 
@@ -236,47 +238,47 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
     >
       <h4 slot="header">
         <ha-icon icon="mdi:format-list-group"></ha-icon>
-        ${group.name || `Group ${groupIndex + 1}`}
+        ${group.name || t('editor.sub_button.group_n').replace('{n}', groupIndex + 1)}
         <div class="button-container" @click=${(e) => e.stopPropagation()} @mousedown=${(e) => e.stopPropagation()} @touchstart=${(e) => e.stopPropagation()}>
           ${renderDropdown({
             trigger: html`
-              <mwc-icon-button slot="trigger" class="icon-button header" title="Options">
+              <mwc-icon-button slot="trigger" class="icon-button header" title="${t('editor.common.options')}">
                 <ha-icon style="display: flex" icon="mdi:dots-vertical"></ha-icon>
               </mwc-icon-button>
             `,
             items: [
               { 
                 type: 'item',
-                icon: 'mdi:arrow-up', 
-                label: 'Move up', 
+                icon: 'mdi:arrow-up',
+                label: t('editor.common.move_up'),
                 disabled: !canMoveUp,
                 onClick: (e) => { e.stopPropagation(); if (canMoveUp) moveGroup(-1); }
               },
               { 
                 type: 'item',
-                icon: 'mdi:arrow-down', 
-                label: 'Move down',
+                icon: 'mdi:arrow-down',
+                label: t('editor.common.move_down'),
                 disabled: !canMoveDown,
                 onClick: (e) => { e.stopPropagation(); if (canMoveDown) moveGroup(1); }
               },
               { type: 'divider' },
               { 
                 type: 'item',
-                icon: 'mdi:content-copy', 
-                label: 'Copy group',
+                icon: 'mdi:content-copy',
+                label: t('editor.sub_button.copy_group'),
                 onClick: (e) => { e.stopPropagation(); copyGroup(e); }
               },
               { 
                 type: 'item',
-                icon: 'mdi:content-cut', 
-                label: 'Cut group',
+                icon: 'mdi:content-cut',
+                label: t('editor.sub_button.cut_group'),
                 onClick: (e) => { e.stopPropagation(); cutGroup(e); }
               },
               { type: 'divider' },
               { 
                 type: 'item',
-                icon: 'mdi:delete', 
-                label: 'Delete',
+                icon: 'mdi:delete',
+                label: t('editor.common.delete'),
                 variant: 'danger',
                 onClick: (e) => { e.stopPropagation(); removeGroup(e); }
               }
@@ -290,7 +292,7 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
             .hass=${editor.hass}
             .data=${{ name: group.name ?? '' }}
             .schema=${[
-              { name: 'name', label: 'Group name', selector: { text: {} } }
+              { name: 'name', label: t('editor.sub_button.group_name'), selector: { text: {} } }
             ]}
             .computeLabel=${editor._computeLabelCallback}
             @value-changed=${(ev) => updateGroupValues(ev.detail.value)}
@@ -299,7 +301,7 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
           <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:view-grid"></ha-icon>
-              Group layout
+              ${t('editor.sub_button.group_layout')}
             </h4>
             <div class="content">
               <ha-form
@@ -314,13 +316,13 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
                   const groupButtons = Array.isArray(group.group) ? group.group : [];
                   const hasExplicitFill = groupButtons.some((b) => b && b.fill_width === true);
                   let justifyContentOptions = [
-                    { value: 'fill', label: 'Fill available width (default)' },
-                    { value: 'end', label: 'Right' },
-                    { value: 'start', label: 'Left' },
-                    { value: 'center', label: 'Center' },
-                    { value: 'space-between', label: 'Space between' },
-                    { value: 'space-around', label: 'Space around' },
-                    { value: 'space-evenly', label: 'Space evenly' }
+                    { value: 'fill', label: t('editor.sub_button.fill_width') + t('editor.common.default_suffix') },
+                    { value: 'end', label: t('editor.common.right') },
+                    { value: 'start', label: t('editor.common.left') },
+                    { value: 'center', label: t('editor.common.center') },
+                    { value: 'space-between', label: t('editor.sub_button.space_between') },
+                    { value: 'space-around', label: t('editor.sub_button.space_around') },
+                    { value: 'space-evenly', label: t('editor.sub_button.space_evenly') }
                   ];
 
                   if (group.buttons_layout === 'column') {
@@ -332,12 +334,12 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
                   const schema = [
                     {
                       name: 'buttons_layout',
-                      label: 'Buttons layout',
+                      label: t('editor.sub_button.buttons_layout'),
                       selector: {
                         select: {
                           options: [
-                            { value: 'inline', label: 'Inline' },
-                            { value: 'column', label: 'Column' },
+                            { value: 'inline', label: t('editor.common.inline') },
+                            { value: 'column', label: t('editor.sub_button.column') },
                           ],
                           mode: 'dropdown'
                         }
@@ -349,7 +351,7 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
                   if (sectionKey === 'bottom') {
                     schema.push({
                       name: 'justify_content',
-                      label: 'Buttons alignment',
+                      label: t('editor.sub_button.buttons_alignment'),
                       selector: {
                         select: {
                           options: justifyContentOptions,
@@ -373,10 +375,10 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
                   <div class="bubble-info">
                     <h4 class="bubble-section-title">
                       <ha-icon icon="mdi:information-outline"></ha-icon>
-                      Buttons alignment locked by sub-button settings
+                      ${t('editor.sub_button.alignment_locked_title')}
                     </h4>
                     <div class="content">
-                      <p>One or more sub-buttons explicitly enable "Fill available width". To change alignment, first disable "Fill available width" in those sub-buttons.</p>
+                      <p>${t('editor.sub_button.alignment_locked_body')}</p>
                     </div>
                   </div>
                 ` : '';
@@ -384,7 +386,7 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
             </div>
           </ha-expansion-panel>
 
-          <h4 class="group-buttons-header">Group sub-buttons</h4>
+          <h4 class="group-buttons-header">${t('editor.sub_button.group_sub_buttons')}</h4>
           ${Array.isArray(group.group) ? group.group.map((button, buttonIndex) => {
             if (!button) return null;
 
@@ -440,7 +442,7 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
               moveButton,
               copyButton,
               cutButton,
-              { panelKeyPrefix: `${sectionKey}_group_${groupIndex}_button`, buttonTitle: button.name || `Button ${buttonIndex + 1}`, arrayLength: buttonsLength }
+              { panelKeyPrefix: `${sectionKey}_group_${groupIndex}_button`, buttonTitle: button.name || t('editor.sub_button.button_n').replace('{n}', buttonIndex + 1), arrayLength: buttonsLength }
             );
           }) : null}
 
@@ -465,7 +467,7 @@ function makeGroupEditor(editor, group, groupIndex, sectionKey) {
               }, subButtonsValueChanged);
             }}>
               <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-              Add sub-button
+              ${t('editor.sub_button.add_sub_button')}
             </button>
           </div>
         `)}
@@ -504,11 +506,12 @@ function getGroupsInfoDismissState(editor, sectionKey) {
 }
 
 function makeSectionList(editor, sectionKey) {
+  const t = setupTranslation(editor.hass);
   let { items, hasGroups, hasIndividualButtons } = getSectionState(editor, sectionKey);
   
   // Auto-migrate mixed configurations on editor load
   if (hasGroups && hasIndividualButtons) {
-    items = convertIndividualButtonsToGroup(items);
+    items = convertIndividualButtonsToGroup(items, t);
     updateSectionArray(editor, sectionKey, () => items, subButtonsValueChanged);
   }
   
@@ -520,9 +523,9 @@ function makeSectionList(editor, sectionKey) {
 
   const addGroup = () => {
     updateSectionArray(editor, sectionKey, (arr) => {
-      const converted = convertIndividualButtonsToGroup(arr);
+      const converted = convertIndividualButtonsToGroup(arr, t);
       const groupCount = converted.filter(i => i && Array.isArray(i.group)).length;
-      return [...converted, { name: `Group ${groupCount + 1}`, buttons_layout: 'inline', group: [] }];
+      return [...converted, { name: t('editor.sub_button.group_n').replace('{n}', groupCount + 1), buttons_layout: 'inline', group: [] }];
     }, subButtonsValueChanged);
   };
 
@@ -531,15 +534,15 @@ function makeSectionList(editor, sectionKey) {
       <div class="bubble-info">
         <h4 class="bubble-section-title">
           <ha-icon icon="mdi:information-outline"></ha-icon>
-          Groups mode
-          <div class="bubble-info-dismiss bubble-badge" @click=${dismiss} title="Dismiss" 
+          ${t('editor.sub_button.groups_mode_title')}
+          <div class="bubble-info-dismiss bubble-badge" @click=${dismiss} title="${t('editor.common.dismiss')}"
             style="display: inline-flex; align-items: center; position: absolute; right: 16px; padding: 0 8px; cursor: pointer;">
             <ha-icon icon="mdi:close" style="margin: 0;"></ha-icon>
-            Dismiss
+            ${t('editor.common.dismiss')}
           </div>
         </h4>
         <div class="content">
-          <p>You are now in <b>groups mode</b>. All sub-buttons must be inside a group to ensure consistent ordering. You can rename, reorder, or delete groups as needed.</p>
+          <p>${tTemplate(t('editor.sub_button.groups_mode_body'), { mode_bold: html`<b>${t('editor.sub_button.groups_mode_bold')}</b>` })}</p>
         </div>
       </div>
     ` : ''}
@@ -577,7 +580,7 @@ function makeSectionList(editor, sectionKey) {
         moveButton,
         copyButton,
         cutButton,
-        { panelKeyPrefix: `${sectionKey}_button`, buttonTitle: `Button ${index + 1}${item.name ? ` - ${item.name}` : ''}`, arrayLength: targetArrLength }
+        { panelKeyPrefix: `${sectionKey}_button`, buttonTitle: `${t('editor.sub_button.button_n').replace('{n}', index + 1)}${item.name ? ` - ${item.name}` : ''}`, arrayLength: targetArrLength }
       );
     })}
 
@@ -597,26 +600,26 @@ function makeSectionList(editor, sectionKey) {
       ${hasGroups ? html`
         <button class="icon-button" @click=${() => { addGroup(); }}>
           <ha-icon icon="mdi:format-list-group-plus"></ha-icon>
-          Add group
+          ${t('editor.sub_button.add_group')}
         </button>
       ` : renderDropdown({
         trigger: html`
           <button slot="trigger" class="icon-button add-menu-trigger">
             <ha-icon icon="mdi:plus"></ha-icon>
-            Add
+            ${t('editor.common.add')}
           </button>
         `,
         items: [
           { 
             type: 'item',
-            icon: 'mdi:shape-square-rounded-plus', 
-            label: 'Add sub-button',
+            icon: 'mdi:shape-square-rounded-plus',
+            label: t('editor.sub_button.add_sub_button'),
             onClick: () => { addButton(); }
           },
           { 
             type: 'item',
-            icon: 'mdi:format-list-group-plus', 
-            label: 'Add group',
+            icon: 'mdi:format-list-group-plus',
+            label: t('editor.sub_button.add_group'),
             onClick: () => { addGroup(); }
           }
         ]
@@ -627,7 +630,8 @@ function makeSectionList(editor, sectionKey) {
 
 function makeLayoutForm(editor, sectionKey) {
   if (!getSectionState(editor, sectionKey).hasGroups) return '';
-  
+
+  const t = setupTranslation(editor.hass);
   const layoutKey = `${sectionKey}_layout`;
   const layoutValue = editor._config?.sub_button?.[layoutKey] ?? 'inline';
   
@@ -638,12 +642,12 @@ function makeLayoutForm(editor, sectionKey) {
       .schema=${[
         {
           name: layoutKey,
-          label: 'Groups placement',
+          label: t('editor.sub_button.groups_placement'),
           selector: {
             select: {
               options: [
-                { value: 'inline', label: 'Inline' },
-                { value: 'rows', label: 'Rows (stack groups vertically)' }
+                { value: 'inline', label: t('editor.common.inline') },
+                { value: 'rows', label: t('editor.sub_button.rows_stack') }
               ],
               mode: 'dropdown'
             }
@@ -679,28 +683,33 @@ function makeLayoutForm(editor, sectionKey) {
   `;
 }
 
-function makeInfoSection() {
+function makeInfoSection(t) {
   return html`
     <div class="bubble-info">
       <h4 class="bubble-section-title">
         <ha-icon icon="mdi:information-outline"></ha-icon>
-        Sub-buttons
+        ${t('editor.sub_button.panel_title')}
       </h4>
       <div class="content">
-        <p>This editor allows you to add customized sub-buttons to your card. Sub-buttons support three types:</p>
+        <p>${t('editor.sub_button.info_body')}</p>
         <ul class="icon-list">
-          <li><ha-icon icon="mdi:gesture-tap"></ha-icon><p><b>Default (button)</b> - Standard button with tap actions</p></li>
-          <li><ha-icon icon="mdi:tune-variant"></ha-icon><p><b>Slider</b> - Control or display numeric values (brightness, volume, temperature, etc.)</p></li>
-          <li><ha-icon icon="mdi:form-dropdown"></ha-icon><p><b>Dropdown / Select</b> - Dropdown menu for selectable entities</p></li>
+          <li><ha-icon icon="mdi:gesture-tap"></ha-icon><p><b>${t('editor.sub_button.type_default')}</b> - ${t('editor.sub_button.desc_default')}</p></li>
+          <li><ha-icon icon="mdi:tune-variant"></ha-icon><p><b>${t('editor.button.type_slider')}</b> - ${t('editor.sub_button.desc_slider')}</p></li>
+          <li><ha-icon icon="mdi:form-dropdown"></ha-icon><p><b>${t('editor.sub_button.type_dropdown')}</b> - ${t('editor.sub_button.desc_dropdown')}</p></li>
         </ul>
-        <p>Use <b>Slider</b> sub-buttons to control light brightness, media player volume, or climate temperature. Use <b>Dropdown</b> sub-buttons to select media sources, HVAC modes, or light effects. Use <b>Default</b> buttons for simple on/off controls or custom actions.</p>
-        <p>You can organize sub-buttons individually or group them together. Groups can be arranged inline (side by side) or in rows (stacked vertically), and buttons within groups can be displayed inline or in a column layout.</p>
+        <p>${tTemplate(t('editor.sub_button.info_usage'), {
+          slider: html`<b>${t('editor.button.type_slider')}</b>`,
+          dropdown: html`<b>${t('editor.sub_button.type_dropdown')}</b>`,
+          default: html`<b>${t('editor.sub_button.type_default')}</b>`
+        })}</p>
+        <p>${t('editor.sub_button.info_organize')}</p>
       </div>
     </div>
   `;
 }
 
 export function makeSectionedSubButtonsPanel(editor) {
+  const t = setupTranslation(editor.hass);
   // Migrate old config format to new schema format if needed
   // This ensures that editor._config.sub_button is always in the new format
   // before any update functions try to access .main or .bottom properties
@@ -757,20 +766,20 @@ export function makeSectionedSubButtonsPanel(editor) {
     <ha-expansion-panel outlined>
       <h4 slot="header">
         <ha-icon icon="mdi:shape-square-rounded-plus"></ha-icon>
-        Sub-buttons editor
+        ${t('editor.sub_button.editor_title')}
       </h4>
       <div class="content">
         ${shouldShowRowsWarning ? html`
           <div class="bubble-info warning">
             <h4 class="bubble-section-title">
               <ha-icon icon="mdi:alert-outline"></ha-icon>
-              Rows configuration detected
+              ${t('editor.sub_button.rows_detected_title')}
             </h4>
             <div class="content">
-              <p>The card height (rows) is explicitly set in your configuration. This will prevent automatic row adjustments when sub-buttons are added (for example, when adding bottom sub-buttons). Click the button below to remove the override and let Bubble Card auto-calculate the rows.</p>
+              <p>${t('editor.sub_button.rows_detected_body')}</p>
               <button class="icon-button" @click="${editor._removeRowsOverrideAndRecalculate}">
                 <ha-icon icon="mdi:autorenew"></ha-icon>
-                Remove override and auto-calculate
+                ${t('editor.sub_button.remove_override')}
               </button>
             </div>
           </div>
@@ -779,7 +788,7 @@ export function makeSectionedSubButtonsPanel(editor) {
           <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:circle-outline"></ha-icon>
-              Card specific buttons
+              ${t('editor.sub_button.card_specific')}
             </h4>
             <div class="content">
               <ha-form
@@ -790,14 +799,14 @@ export function makeSectionedSubButtonsPanel(editor) {
                       selector: {
                           select: {
                               options: [
-                                  { label: 'Default', value: 'default' },
-                                  { label: 'Bottom (fixed)', value: 'bottom' }
+                                  { label: t('editor.common.default'), value: 'default' },
+                                  { label: t('editor.sub_button.bottom_fixed'), value: 'bottom' }
                               ],
                               mode: 'dropdown'
                           }
                       }
                   }]}
-                  .computeLabel=${() => 'Main buttons position'}
+                  .computeLabel=${() => t('editor.sub_button.main_position')}
                   @value-changed=${(ev) => {
                       editor._valueChanged({
                           target: { configValue: 'main_buttons_position' },
@@ -806,15 +815,15 @@ export function makeSectionedSubButtonsPanel(editor) {
                   }}
               ></ha-form>
               ${editor._renderConditionalContent(isMainButtonsBottom, html`
-                  <ha-formfield .label="Full width action buttons">
+                  <ha-formfield>
                       <ha-switch
-                          aria-label="Full width action buttons"
+                          aria-label="${t('editor.sub_button.full_width_actions')}"
                           .checked="${mainButtonsFullWidth}"
                           .configValue="${"main_buttons_full_width"}"
                           @change="${editor._valueChanged}"
                       ></ha-switch>
                       <div class="mdc-form-field">
-                          <label class="mdc-label">Full width action buttons</label> 
+                          <label class="mdc-label">${t('editor.sub_button.full_width_actions')}</label>
                       </div>
                   </ha-formfield>
                   ${editor._renderConditionalContent(!mainButtonsFullWidth, html`
@@ -826,16 +835,16 @@ export function makeSectionedSubButtonsPanel(editor) {
                               selector: {
                                   select: {
                                       options: [
-                                          { label: 'Right (default)', value: 'end' },
-                                          { label: 'Center', value: 'center' },
-                                          { label: 'Left', value: 'start' },
-                                          { label: 'Space between', value: 'space-between' }
+                                          { label: t('editor.common.right') + t('editor.common.default_suffix'), value: 'end' },
+                                          { label: t('editor.common.center'), value: 'center' },
+                                          { label: t('editor.common.left'), value: 'start' },
+                                          { label: t('editor.sub_button.space_between'), value: 'space-between' }
                                       ],
                                       mode: 'dropdown'
                                   }
                               }
                           }]}
-                          .computeLabel=${() => 'Main buttons alignment'}
+                          .computeLabel=${() => t('editor.sub_button.main_alignment')}
                           @value-changed=${(ev) => {
                               editor._valueChanged({
                                   target: { configValue: 'main_buttons_alignment' },
@@ -856,7 +865,7 @@ export function makeSectionedSubButtonsPanel(editor) {
           <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
-              Main sub-buttons (top)
+              ${t('editor.sub_button.main_top')}
             </h4>
             <div class="content">
               ${makeLayoutForm(editor, 'main')}
@@ -872,7 +881,7 @@ export function makeSectionedSubButtonsPanel(editor) {
           <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:arrow-down-circle-outline"></ha-icon>
-              Bottom sub-buttons
+              ${t('editor.sub_button.bottom')}
             </h4>
             <div class="content">
               ${makeLayoutForm(editor, 'bottom')}
@@ -880,10 +889,10 @@ export function makeSectionedSubButtonsPanel(editor) {
                 <div class="bubble-info warning">
                   <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-outline"></ha-icon>
-                    Bottom sub-buttons and layout
+                    ${t('editor.sub_button.bottom_layout_title')}
                   </h4>
                   <div class="content">
-                    <p>Adding bottom sub-buttons will automatically switch this card to the "Large" layout (this is the new recommended layout). This notice will disappear once you add bottom sub-buttons.</p>
+                    <p>${t('editor.sub_button.bottom_layout_body')}</p>
                   </div>
                 </div>
               `)}
@@ -892,7 +901,7 @@ export function makeSectionedSubButtonsPanel(editor) {
           </ha-expansion-panel>
         ` : ''}
 
-        ${makeInfoSection()}
+        ${makeInfoSection(t)}
       </div>
     </ha-expansion-panel>
   `;

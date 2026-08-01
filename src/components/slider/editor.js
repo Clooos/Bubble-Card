@@ -1,18 +1,20 @@
 import { html } from 'lit';
 import { isReadOnlyEntityId } from './helpers.js';
+import setupTranslation from '../../tools/localize.js';
+import { tTemplate } from '../../editor/utils.js';
 
-const FILL_ORIENTATION_OPTIONS = [
-    { label: 'Fill from left (default)', value: 'left' },
-    { label: 'Fill from right', value: 'right' },
-    { label: 'Fill from top', value: 'top' },
-    { label: 'Fill from bottom', value: 'bottom' },
+const getFillOrientationOptions = (t) => [
+    { label: t('editor.slider.fill_left') + t('editor.common.default_suffix'), value: 'left' },
+    { label: t('editor.slider.fill_right'), value: 'right' },
+    { label: t('editor.slider.fill_top'), value: 'top' },
+    { label: t('editor.slider.fill_bottom'), value: 'bottom' },
 ];
 
-const VALUE_POSITION_OPTIONS = [
-    { label: 'Right (default)', value: 'right' },
-    { label: 'Left', value: 'left' },
-    { label: 'Center', value: 'center' },
-    { label: 'Hidden', value: 'hidden' }
+const getValuePositionOptions = (t) => [
+    { label: t('editor.common.right') + t('editor.common.default_suffix'), value: 'right' },
+    { label: t('editor.common.left'), value: 'left' },
+    { label: t('editor.common.center'), value: 'center' },
+    { label: t('editor.common.hidden'), value: 'hidden' }
 ];
 
 export function isReadOnlyEntity(editor) {
@@ -21,6 +23,7 @@ export function isReadOnlyEntity(editor) {
 }
 
 export function makeButtonSliderPanel(editor) {
+    const t = setupTranslation(editor.hass);
     if (editor._disableEntityFilter === undefined) {
         editor._disableEntityFilter = false;
     }
@@ -63,7 +66,7 @@ export function makeButtonSliderPanel(editor) {
         <ha-expansion-panel outlined style="display: ${sliderVisible ? '' : 'none'}">
             <h4 slot="header">
             <ha-icon icon="mdi:tune-variant"></ha-icon>
-            Slider settings
+            ${t('editor.button.slider_settings')}
             </h4>
             <div class="content">
                 ${makeGenericSliderSettings({
@@ -104,6 +107,7 @@ export function makeGenericSliderSettings({
     rangeFormDisabled = false,
     forceValuePositionRight = false
 }) {
+    const t = setupTranslation(hass);
     const isLightColorMode = entity?.startsWith("light") && ['hue', 'saturation', 'white_temp'].includes(data.light_slider_type);
     const hideInvertSliderToggle = isLightColorMode;
     const callToggleChange = (key, value, meta = {}) => {
@@ -123,12 +127,12 @@ export function makeGenericSliderSettings({
         <ha-expansion-panel outlined>
             <h4 slot="header">
                 <ha-icon icon="mdi:gesture-swipe-horizontal"></ha-icon>
-                Slider behavior
+                ${t('editor.slider.behavior_title')}
             </h4>
             <div class="content">
                 ${showEntityFilterToggle ? html`
                     <div class="checkbox-wrapper">
-                        <ha-formfield label="Disable entity filter (for custom slider)">
+                        <ha-formfield label="${t('editor.slider.disable_filter')}">
                             <ha-switch
                                 .checked=${entityFilterValue}
                                 @change=${(ev) => handleEntityFilterToggle(ev.target.checked)}
@@ -138,11 +142,15 @@ export function makeGenericSliderSettings({
                     <div class="bubble-info" style="display: ${showEntityFilterInfo ? '' : 'none'}">
                         <h4 class="bubble-section-title">
                             <ha-icon icon="mdi:information-outline"></ha-icon>
-                            Custom slider
+                            ${t('editor.slider.custom_title')}
                         </h4>
                         <div class="content">
-                            <p>To create a custom slider (read only), select an <b>entity with a numeric state</b> above, then define the <b>min</b> and <b>max</b> values below.</p>
-                            <p>For example, this allows you to display your solar production within a specific range.</p>
+                            <p>${tTemplate(t('editor.slider.custom_body'), {
+                                entity: html`<b>${t('editor.slider.custom_entity')}</b>`,
+                                min: html`<b>min</b>`,
+                                max: html`<b>max</b>`
+                            })}</p>
+                            <p>${t('editor.slider.custom_example')}</p>
                         </div>
                     </div>
                 ` : ''}
@@ -152,7 +160,7 @@ export function makeGenericSliderSettings({
                         .data=${{ min_value: data.min_value ?? '' }}
                         .schema=${[{ name: 'min_value', selector: { text: { type: 'number' } }, options: { step: 'any' } }]}
                         .disabled=${rangeFormDisabled}
-                        .computeLabel=${() => 'Min value'}
+                        .computeLabel=${() => t('editor.slider.min_value')}
                         @value-changed=${(ev) => {
                             const value = ev.detail.value.min_value;
                             callToggleChange('min_value', value === undefined || value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
@@ -163,7 +171,7 @@ export function makeGenericSliderSettings({
                         .data=${{ max_value: data.max_value ?? '' }}
                         .schema=${[{ name: 'max_value', selector: { text: { type: 'number' } }, options: { step: 'any' } }]}
                         .disabled=${rangeFormDisabled}
-                        .computeLabel=${() => 'Max value'}
+                        .computeLabel=${() => t('editor.slider.max_value')}
                         @value-changed=${(ev) => {
                             const value = ev.detail.value.max_value;
                             callToggleChange('max_value', value === undefined || value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
@@ -174,7 +182,7 @@ export function makeGenericSliderSettings({
                         .data=${{ step: data.step ?? '' }}
                         .schema=${[{ name: 'step', selector: { text: { type: 'number' } }, options: { step: 'any' } }]}
                         .disabled=${rangeFormDisabled}
-                        .computeLabel=${() => 'Step'}
+                        .computeLabel=${() => t('editor.common.step')}
                         @value-changed=${(ev) => {
                             const value = ev.detail.value.step;
                             callToggleChange('step', value === undefined || value === '' ? undefined : Number(value), meta('ha-textfield', 'input'));
@@ -188,7 +196,7 @@ export function makeGenericSliderSettings({
                         .disabled=${data.relative_slide || isReadOnly}
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Tap to slide (previous behavior)</label>
+                        <label class="mdc-label">${t('editor.slider.tap_to_slide')}</label>
                     </div>
                 </ha-formfield>
                 <ha-formfield>
@@ -198,7 +206,7 @@ export function makeGenericSliderSettings({
                         .disabled=${data.tap_to_slide || isReadOnly}
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Relative slide (incompatible with tap to slide)</label>
+                        <label class="mdc-label">${t('editor.slider.relative_slide')}</label>
                     </div>
                 </ha-formfield>
                 <ha-formfield>
@@ -208,7 +216,7 @@ export function makeGenericSliderSettings({
                         .disabled=${isReadOnly}
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Read only slider</label>
+                        <label class="mdc-label">${t('editor.slider.read_only')}</label>
                     </div>
                 </ha-formfield>
                 <ha-formfield>
@@ -218,16 +226,16 @@ export function makeGenericSliderSettings({
                         .disabled=${isReadOnly}
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Slider live update</label>
+                        <label class="mdc-label">${t('editor.slider.live_update')}</label>
                     </div>
                 </ha-formfield>
                 <div class="bubble-info" style="display: ${(data.slider_live_update ?? false) ? '' : 'none'}">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
-                        Slider live update
+                        ${t('editor.slider.live_update')}
                     </h4>
                     <div class="content">
-                        <p>By default, sliders are updated only on release. When this option is enabled, the slider will update the entity state while sliding. <b>This feature is not recommended for all entities, disable it if you encounter issues.</b></p>
+                        <p>${t('editor.slider.live_update_body1')} <b>${t('editor.slider.live_update_body2')}</b></p>
                     </div>
                 </div>
             </div>
@@ -235,7 +243,7 @@ export function makeGenericSliderSettings({
         <ha-expansion-panel outlined>
             <h4 slot="header">
                 <ha-icon icon="mdi:view-grid"></ha-icon>
-                Slider layout
+                ${t('editor.slider.layout_title')}
             </h4>
             <div class="content">
                 <ha-form
@@ -245,21 +253,21 @@ export function makeGenericSliderSettings({
                         name: 'slider_fill_orientation',
                         selector: {
                             select: {
-                                options: FILL_ORIENTATION_OPTIONS,
+                                options: getFillOrientationOptions(t),
                                 mode: 'dropdown'
                             }
                         }
                     }]}
-                    .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : 'Fill orientation')}
+                    .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : t('editor.slider.fill_orientation'))}
                     @value-changed=${(ev) => callToggleChange('slider_fill_orientation', ev.detail.value.slider_fill_orientation, meta('ha-combo-box', 'value-changed'))}
                 ></ha-form>
                 <div class="bubble-info" style="display: ${['top', 'bottom'].includes(data.slider_fill_orientation) ? '' : 'none'}">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
-                        Vertical slider behavior
+                        ${t('editor.slider.vertical_title')}
                     </h4>
                     <div class="content">
-                        <p>When using vertical fill orientation (top or bottom), swiping over the card on mobile will activate the slider. This is because there's no way to distinguish between scrolling and slider interaction.</p>
+                        <p>${t('editor.slider.vertical_body')}</p>
                     </div>
                 </div>
                 ${isLightColorMode ? '' : html`
@@ -271,22 +279,22 @@ export function makeGenericSliderSettings({
                             disabled: forceValuePositionRight,
                             selector: {
                                 select: {
-                                    options: VALUE_POSITION_OPTIONS,
+                                    options: getValuePositionOptions(t),
                                     mode: 'dropdown'
                                 }
                             }
                         }]}
-                        .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : 'Value position')}
+                        .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : t('editor.slider.value_position'))}
                         @value-changed=${(ev) => callToggleChange('slider_value_position', ev.detail.value.slider_value_position, meta('ha-combo-box', 'value-changed'))}
                     ></ha-form>
                     ${forceValuePositionRight ? html`
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">
                                 <ha-icon icon="mdi:information-outline"></ha-icon>
-                                Value position locked
+                                ${t('editor.slider.value_locked_title')}
                             </h4>
                             <div class="content">
-                                <p>Value position is forced to "Right" because "Show button info" is enabled. Disable it to change this setting.</p>
+                                <p>${t('editor.slider.value_locked_body')}</p>
                             </div>
                         </div>
                     ` : ''}
@@ -297,7 +305,7 @@ export function makeGenericSliderSettings({
                         @change=${(ev) => callToggleChange('invert_slider_value', ev.target.checked, meta('ha-switch', 'change'))}
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Invert slider direction (100% fill equals minimum)</label>
+                        <label class="mdc-label">${t('editor.slider.invert')}</label>
                     </div>
                 </ha-formfield>
             </div>
@@ -306,7 +314,7 @@ export function makeGenericSliderSettings({
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:lightbulb-outline"></ha-icon>
-                    Light options
+                    ${t('editor.slider.light_title')}
                 </h4>
                 <div class="content">
                     <ha-form
@@ -317,16 +325,16 @@ export function makeGenericSliderSettings({
                             selector: {
                                 select: {
                                     options: [
-                                        { value: 'brightness', label: 'Brightness (default)' },
-                                        { value: 'hue', label: 'Color (Hue)' },
-                                        { value: 'saturation', label: 'Saturation' },
-                                        { value: 'white_temp', label: 'White temperature' }
+                                        { value: 'brightness', label: t('editor.slider.mode_brightness') + t('editor.common.default_suffix') },
+                                        { value: 'hue', label: t('editor.slider.mode_color') },
+                                        { value: 'saturation', label: t('editor.slider.mode_saturation') },
+                                        { value: 'white_temp', label: t('editor.slider.mode_white') }
                                     ],
                                     mode: 'dropdown'
                                 }
                             }
                         }]}
-                        .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : 'Light slider mode')}
+                        .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : t('editor.slider.light_mode'))}
                         @value-changed=${(ev) => callToggleChange('light_slider_type', ev.detail.value.light_slider_type, meta('ha-combo-box', 'value-changed'))}
                     ></ha-form>
                     ${data.light_slider_type === 'hue' ? html`
@@ -336,7 +344,7 @@ export function makeGenericSliderSettings({
                                 @change=${(ev) => callToggleChange('hue_force_saturation', ev.target.checked, meta('ha-switch', 'change'))}
                             ></ha-switch>
                             <div class="mdc-form-field">
-                                <label class="mdc-label">Force saturation when adjusting Hue</label>
+                                <label class="mdc-label">${t('editor.slider.force_saturation')}</label>
                             </div>
                         </ha-formfield>
                         ${(data.hue_force_saturation ?? false) ? html`
@@ -344,7 +352,7 @@ export function makeGenericSliderSettings({
                                 .hass=${hass}
                                 .data=${{ hue_force_saturation_value: String(data.hue_force_saturation_value ?? 100) }}
                                 .schema=${[{ name: 'hue_force_saturation_value', selector: { text: { type: 'number' } }, options: { min: 0, max: 100 } }]}
-                                .computeLabel=${() => 'Forced saturation value (0-100)'}
+                                .computeLabel=${() => t('editor.slider.forced_saturation_value')}
                                 @value-changed=${(ev) => callToggleChange('hue_force_saturation_value', ev.detail.value.hue_force_saturation_value, meta('ha-textfield', 'input'))}
                             ></ha-form>
                         ` : ''}
@@ -356,7 +364,7 @@ export function makeGenericSliderSettings({
                                 @change=${(ev) => callToggleChange('use_accent_color', ev.target.checked, meta('ha-switch', 'change'))}
                             ></ha-switch>
                             <div class="mdc-form-field">
-                                <label class="mdc-label">Use accent color instead of light color</label>
+                                <label class="mdc-label">${t('editor.show.accent_color')}</label>
                             </div>
                         </ha-formfield>
                     `}
@@ -367,7 +375,7 @@ export function makeGenericSliderSettings({
                                 @change=${(ev) => callToggleChange('allow_light_slider_to_0', ev.target.checked, meta('ha-switch', 'change'))}
                             ></ha-switch>
                             <div class="mdc-form-field">
-                                <label class="mdc-label">Allow slider to turn off light (reach 0%)</label>
+                                <label class="mdc-label">${t('editor.slider.allow_off')}</label>
                             </div>
                         </ha-formfield>
                     ` : ''}
@@ -377,26 +385,27 @@ export function makeGenericSliderSettings({
                             @change=${(ev) => callToggleChange('light_transition', ev.target.checked, meta('ha-switch', 'change'))}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Enable smooth brightness transitions</label>
+                            <label class="mdc-label">${t('editor.slider.smooth_transitions')}</label>
                         </div>
                     </ha-formfield>
                     ${(data.light_transition ?? false) ? html`
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">
                                 <ha-icon icon="mdi:information-outline"></ha-icon>
-                                Light transition
+                                ${t('editor.slider.transition_title')}
                             </h4>
                             <div class="content">
-                                <p><b>Important:</b> This feature only works for lights that support the 
-                                <a target="_blank" rel="noopener noreferrer" href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">light.turn_on</a> transition attribute.</p>
-                                <p>Enabling this for lights that do not support transitions will unfortunately have no effect. Defaults to 500ms unless overridden below.</p>
+                                <p><b>${t('editor.slider.transition_important')}</b> ${tTemplate(t('editor.slider.transition_body1'), {
+                                    attr: html`<a target="_blank" rel="noopener noreferrer" href="https://www.home-assistant.io/integrations/light/#action-lightturn_on">light.turn_on</a> ${t('editor.slider.transition_attr')}`
+                                })}</p>
+                                <p>${t('editor.slider.transition_body2')}</p>
                             </div>
                         </div>
                         <ha-form
                             .hass=${hass}
                             .data=${{ light_transition_time: data.light_transition_time ?? '' }}
                             .schema=${[{ name: 'light_transition_time', selector: { text: { type: 'number' } }, options: { min: 1, max: 100000 } }]}
-                            .computeLabel=${() => 'Transition time (ms)'}
+                            .computeLabel=${() => t('editor.slider.transition_time')}
                             @value-changed=${(ev) => callToggleChange('light_transition_time', ev.detail.value.light_transition_time, meta('ha-textfield', 'input'))}
                         ></ha-form>
                     ` : ''}
@@ -407,7 +416,7 @@ export function makeGenericSliderSettings({
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:window-shutter"></ha-icon>
-                    Cover options
+                    ${t('editor.slider.cover_title')}
                 </h4>
                 <div class="content">
                     <ha-form
@@ -418,14 +427,14 @@ export function makeGenericSliderSettings({
                             selector: {
                                 select: {
                                     options: [
-                                        { value: 'position', label: 'Position (default)' },
-                                        { value: 'tilt_position', label: 'Tilt position' }
+                                        { value: 'position', label: t('editor.slider.cover_position') + t('editor.common.default_suffix') },
+                                        { value: 'tilt_position', label: t('editor.slider.cover_tilt') }
                                     ],
                                     mode: 'dropdown'
                                 }
                             }
                         }]}
-                        .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : 'Cover slider mode')}
+                        .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : t('editor.slider.cover_mode'))}
                         @value-changed=${(ev) => callToggleChange('cover_slider_type', ev.detail.value.cover_slider_type, meta('ha-combo-box', 'value-changed'))}
                     ></ha-form>
                 </div>

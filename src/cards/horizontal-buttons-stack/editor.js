@@ -1,7 +1,9 @@
 import { html } from "lit";
 import { fireEvent } from '../../tools/utils.js';
+import setupTranslation from '../../tools/localize.js';
 
 export function renderHorButtonStackEditor(editor){
+    const t = setupTranslation(editor.hass);
     if (!editor.buttonAdded) {
         editor.buttonAdded = true;
         editor.buttonIndex = 0;
@@ -18,44 +20,44 @@ export function renderHorButtonStackEditor(editor){
 
     return html`
         <div class="card-config">
-            ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
+            ${editor.makeDropdown(t('editor.common.card_type'), "card_type", editor.cardTypeList)}
             <div id="buttons-container">
                 ${makeButton(editor)}
             </div>
             <button class="icon-button" @click="${addButton}">
                 <ha-icon icon="mdi:plus"></ha-icon>
-                New button
+                ${t('editor.hbs.new_button')}
             </button>
             <hr>
-            <ha-formfield .label="Auto order">
+            <ha-formfield>
                 <ha-switch
-                    aria-label="Toggle auto order"
+                    aria-label="${editor._optionalLabel(t('editor.hbs.auto_order'))}"
                     .checked=${editor._config?.auto_order || false}
                     .configValue="${"auto_order"}"
                     @change=${editor._valueChanged}
                 ></ha-switch>
                 <div class="mdc-form-field">
-                    <label class="mdc-label">Optional - Auto order (Presence/occupancy sensors needed)</label> 
+                    <label class="mdc-label">${editor._optionalLabel(t('editor.hbs.auto_order'))}</label>
                 </div>
             </ha-formfield>
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
-                  Styling and layout options
+                  ${t('editor.common.styling_layout_options')}
                 </h4>
-                <div class="content">  
+                <div class="content">
                     ${editor.makeLayoutPanel()}
                     <ha-expansion-panel outlined>
                         <h4 slot="header">
                           <ha-icon icon="mdi:palette"></ha-icon>
-                          Horizontal buttons stack styling
+                          ${t('editor.hbs.styling_title')}
                         </h4>
-                        <div class="content"> 
+                        <div class="content">
                             <ha-form
                                 .hass=${editor.hass}
                                 .data=${{ margin: editor._config?.margin || '7px' }}
                                 .schema=${[{ name: 'margin', selector: { text: {} } }]}
-                                .computeLabel=${() => 'Optional - Margin (fix centering on some themes) (e.g. 13px)'}
+                                .computeLabel=${() => editor._optionalLabel(t('editor.hbs.margin'))}
                                 @value-changed=${(ev) => {
                                     editor._valueChanged({
                                         target: { configValue: 'margin' },
@@ -67,7 +69,7 @@ export function renderHorButtonStackEditor(editor){
                                 .hass=${editor.hass}
                                 .data=${{ width_desktop: editor._config?.width_desktop || '540px' }}
                                 .schema=${[{ name: 'width_desktop', selector: { text: {} } }]}
-                                .computeLabel=${() => 'Optional - Width on desktop (100% by default on mobile)'}
+                                .computeLabel=${() => editor._optionalLabel(t('editor.hbs.width_desktop'))}
                                 @value-changed=${(ev) => {
                                     editor._valueChanged({
                                         target: { configValue: 'width_desktop' },
@@ -75,37 +77,37 @@ export function renderHorButtonStackEditor(editor){
                                     });
                                 }}
                             ></ha-form>
-                            <ha-formfield .label="Optional - Rise animation (Displays an animation once the page has loaded)">
+                            <ha-formfield>
                                 <ha-switch
-                                    aria-label="Optional - Rise animation (Displays an animation once the page has loaded)"
+                                    aria-label="${editor._optionalLabel(t('editor.hbs.rise_animation'))}"
                                     .checked=${editor._config?.rise_animation !== undefined ? editor._config?.rise_animation : true}
                                     .configValue="${"rise_animation"}"
                                     @change=${editor._valueChanged}
                                 ></ha-switch>
                                 <div class="mdc-form-field">
-                                    <label class="mdc-label">Optional - Rise animation (Displays an animation once the page has loaded)</label> 
+                                    <label class="mdc-label">${editor._optionalLabel(t('editor.hbs.rise_animation'))}</label>
                                 </div>
                             </ha-formfield>
-                            <ha-formfield .label="Optional - Highlight current hash / view">
+                            <ha-formfield>
                                 <ha-switch
-                                    aria-label="Optional - Highlight current hash / view"
+                                    aria-label="${editor._optionalLabel(t('editor.hbs.highlight_current'))}"
                                     .checked=${editor._config?.highlight_current_view || false}
                                     .configValue="${"highlight_current_view"}"
                                     @change=${editor._valueChanged}
                                 ></ha-switch>
                                 <div class="mdc-form-field">
-                                    <label class="mdc-label">Optional - Highlight current hash / view</label> 
+                                    <label class="mdc-label">${editor._optionalLabel(t('editor.hbs.highlight_current'))}</label>
                                 </div>
                             </ha-formfield>
-                            <ha-formfield .label="Optional - Hide gradient">
+                            <ha-formfield>
                                 <ha-switch
-                                    aria-label="Optional - Hide gradient"
+                                    aria-label="${editor._optionalLabel(t('editor.hbs.hide_gradient'))}"
                                     .checked=${editor._config.hide_gradient || false}
                                     .configValue="${"hide_gradient"}"
                                     @change=${editor._valueChanged}
                                 ></ha-switch>
                                 <div class="mdc-form-field">
-                                    <label class="mdc-label">Optional - Hide gradient</label> 
+                                    <label class="mdc-label">${editor._optionalLabel(t('editor.hbs.hide_gradient'))}</label>
                                 </div>
                             </ha-formfield>
                         </div>
@@ -117,10 +119,10 @@ export function renderHorButtonStackEditor(editor){
             <div class="bubble-info">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:information-outline"></ha-icon>
-                    Horizontal buttons stack card
+                    ${t('editor.hbs.info_title')}
                 </h4>
                 <div class="content">
-                    <p>This card is a good companion to the pop-up card, allowing you to open pop-ups or any page of your dashboard. In addition, you can add your motion sensors so that the order of the buttons adapts according to the room you just entered. This card is scrollable, remains visible and acts as a footer.</p>
+                    <p>${t('editor.hbs.info_body')}</p>
                 </div>
             </div>
             ${editor.makeVersion()}
@@ -129,6 +131,7 @@ export function renderHorButtonStackEditor(editor){
 }
 
 function makeButton(editor) {
+    const t = setupTranslation(editor.hass);
     let buttons = [];
     for (let i = 1; i <= editor.buttonIndex; i++) {
         buttons.push(html`
@@ -136,7 +139,7 @@ function makeButton(editor) {
                 <ha-expansion-panel outlined>
                     <h4 slot="header">
                         <ha-icon icon="mdi:border-radius"></ha-icon>
-                        Button ${i} ${editor._config[i + '_name'] ? ("- " + editor._config[i + '_name']) : ""}
+                        ${t('editor.hbs.button_label')} ${i} ${editor._config[i + '_name'] ? ("- " + editor._config[i + '_name']) : ""}
                         <div class="button-container">
                             <button class="icon-button header" @click="${() => removeButton(editor,i)}">
                               <ha-icon icon="mdi:delete"></ha-icon>
@@ -148,7 +151,7 @@ function makeButton(editor) {
                             .hass=${editor.hass}
                             .data=${{ [i + '_link']: editor._config[i + '_link'] || '' }}
                             .schema=${[{ name: i + '_link', selector: { text: {} } }]}
-                            .computeLabel=${() => 'Link / Hash to pop-up (e.g. #kitchen)'}
+                            .computeLabel=${() => t('editor.hbs.link_hash')}
                             @value-changed=${(ev) => {
                                 editor._valueChanged({
                                     target: { configValue: i + '_link' },
@@ -160,7 +163,7 @@ function makeButton(editor) {
                             .hass=${editor.hass}
                             .data=${{ [i + '_name']: editor._config[i + '_name'] || '' }}
                             .schema=${[{ name: i + '_name', selector: { text: {} } }]}
-                            .computeLabel=${() => 'Optional - Name'}
+                            .computeLabel=${() => editor._optionalLabel(t('editor.common.name'))}
                             @value-changed=${(ev) => {
                                 editor._valueChanged({
                                     target: { configValue: i + '_name' },
@@ -169,7 +172,7 @@ function makeButton(editor) {
                             }}
                         ></ha-form>
                         <ha-icon-picker
-                            label="Optional - Icon"
+                            label="${editor._optionalLabel(t('editor.common.icon'))}"
                             .value="${editor._config[i + '_icon'] || ''}"
                             .configValue="${i}_icon"
                             item-label-path="label"
@@ -181,10 +184,10 @@ function makeButton(editor) {
                             .data=${editor._config}
                             .schema=${[
                                         { name: i+"_entity",
-                                        label: "Optional - Light / Light group (For background color)", 
+                                        label: editor._optionalLabel(t('editor.hbs.light_group')),
                                         selector: { entity: {} },
                                         },
-                                    ]}   
+                                    ]}
                             .computeLabel=${editor._computeLabelCallback}
                             @value-changed=${editor._valueChanged}
                         ></ha-form>
@@ -193,14 +196,14 @@ function makeButton(editor) {
                             .data=${editor._config}
                             .schema=${[
                                         { name: i+"_pir_sensor",
-                                        label: "Optional - Presence / Occupancy sensor (For button auto order)", 
+                                        label: editor._optionalLabel(t('editor.hbs.presence_sensor')),
                                         selector: { entity: {} },
                                         },
-                                    ]}   
+                                    ]}
                             .computeLabel=${editor._computeLabelCallback}
                             @value-changed=${editor._valueChanged}
                         ></ha-form>
-                        <ha-alert alert-type="info">In fact you can also get the auto order with any entity type, for example you can add light groups to these fields and the order will change based on the last changed states.</ha-alert>
+                        <ha-alert alert-type="info">${t('editor.hbs.info_auto_order')}</ha-alert>
                     </div>
                 </ha-expansion-panel>
             </div>

@@ -23,11 +23,11 @@ import { makeSubButtonPanel } from '../components/sub-button/editor/index.js';
 import { makeModulesEditor } from '../modules/editor.js';
 import { makeModuleStore, _fetchModuleStore } from '../modules/store.js';
 import { yamlKeysMap } from '../modules/registry.js';
-import setupTranslation from '../tools/localize.js';
+import setupTranslation, { ensureEditorTranslations } from '../tools/localize.js';
 import styles from './styles.css';
 import moduleStyles from '../modules/styles.css';
 import cardsEditorStyles from '../cards/pop-up/cards/styles.css';
-import { getLazyLoadedPanelContent } from './utils.js';
+import { getLazyLoadedPanelContent, tTemplate } from './utils.js';
 import { bridgeDialogCloseToParent, createReopenedStandaloneParentDialogParams, createStandaloneParentDialogParamsFromDialog, forceDialogDirtyState, getDialogCardElementEditor, restoreDialogCardEditorVisualState } from './standalone-dialog-bridge.js';
 
 class BubbleCardEditor extends LitElement {
@@ -334,10 +334,19 @@ class BubbleCardEditor extends LitElement {
         if (this.hass && this.hass.loadFragmentTranslation) {
             try {
                 await this.hass.loadFragmentTranslation("config");
+                await this.hass.loadFragmentTranslation("lovelace");
             } catch (e) {
-                console.error("Bubble Card Editor: Failed to load 'config' fragment translation", e);
+                console.error("Bubble Card Editor: Failed to load fragment translations", e);
             }
         }
+        // Editor dictionaries for non-English languages are fetched on demand;
+        // re-render once they become available.
+        ensureEditorTranslations(this.hass).then((loaded) => {
+            if (loaded) {
+                this.listsUpdated = false;
+                this.requestUpdate();
+            }
+        }).catch(() => {});
     }
 
     disconnectedCallback() {
@@ -418,7 +427,7 @@ class BubbleCardEditor extends LitElement {
             return html`
                 <div class="card-config">
                     ${this._renderNestedStandalonePopupWarning()}
-                    ${this.makeDropdown("Card type", "card_type", cardTypeList)}
+                    ${this.makeDropdown(t('editor.common.card_type'), "card_type", cardTypeList)}
                 </div>
             `;
         }
@@ -452,10 +461,10 @@ class BubbleCardEditor extends LitElement {
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">
                                 <ha-icon icon="mdi:information-outline"></ha-icon>
-                                You need to add a card type first
+                                ${t('editor.home.add_type_first')}
                             </h4>
                         </div>
-                        ${this.makeDropdown("Card type", "card_type", cardTypeList)}
+                        ${this.makeDropdown(t('editor.common.card_type'), "card_type", cardTypeList)}
                         <img style="width: 100%; height: auto; border-radius: 24px;" src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif">
                         
                         <div class="bubble-info-container">
@@ -465,33 +474,35 @@ class BubbleCardEditor extends LitElement {
                                     Bubble Card ${version}
                                 </h4>
                                 <div class="content">
-                                    <p>If you want to know what's new in this version, you can check the changelog <a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}" target="_blank" rel="noopener noreferrer"><b>here</b></a>.</p>
+                                    <p>${tTemplate(t('editor.home.changelog_intro'), {
+                                        link: html`<a href="https://github.com/Clooos/Bubble-Card/releases/tag/${version}" target="_blank" rel="noopener noreferrer"><b>${t('editor.home.here')}</b></a>`
+                                    })}</p>
                                 </div>
                             </div>
-                            
+
                             <div class="bubble-info">
                                 <h4 class="bubble-section-title">
                                     <ha-icon icon="mdi:help-circle-outline"></ha-icon>
-                                    Resources & Help
+                                    ${t('editor.home.resources_title')}
                                 </h4>
                                 <div class="content">
-                                    <p>If you have an issue or a question you can find more details in the GitHub documentation. You can also find useful resources and help in these links.</p>
+                                    <p>${t('editor.home.resources_body')}</p>
                                     <div class="bubble-badges">
                                         <a href="https://github.com/Clooos/Bubble-Card" target="_blank" rel="noopener noreferrer" class="bubble-badge">
                                             <ha-icon icon="mdi:github"></ha-icon>
-                                            <span>Documentation</span>
+                                            <span>${t('editor.home.badge_docs')}</span>
                                         </a>
                                         <a href="https://github.com/Clooos/Bubble-Card/issues" target="_blank" rel="noopener noreferrer" class="bubble-badge">
                                             <ha-icon icon="mdi:bug"></ha-icon>
-                                            <span>Issues</span>
+                                            <span>${t('editor.home.badge_issues')}</span>
                                         </a>
                                         <a href="https://github.com/Clooos/Bubble-Card/discussions/categories/questions-about-config-custom-styles-and-templates" target="_blank" rel="noopener noreferrer" class="bubble-badge">
                                             <ha-icon icon="mdi:help"></ha-icon>
-                                            <span>Config Help</span>
+                                            <span>${t('editor.home.badge_config_help')}</span>
                                         </a>
                                         <a href="https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-custom-styles-templates-and-dashboards" target="_blank" rel="noopener noreferrer" class="bubble-badge">
                                             <ha-icon icon="mdi:wrench"></ha-icon>
-                                            <span>Shared Examples</span>
+                                            <span>${t('editor.home.badge_examples')}</span>
                                         </a>
                                         <a href="https://www.youtube.com/@cloooos" target="_blank" rel="noopener noreferrer" class="bubble-badge">
                                             <ha-icon icon="mdi:youtube"></ha-icon>
@@ -503,7 +514,7 @@ class BubbleCardEditor extends LitElement {
                                         </a>
                                         <a href="https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678" target="_blank" rel="noopener noreferrer" class="bubble-badge">
                                             <ha-icon icon="mdi:home-assistant"></ha-icon>
-                                            <span>HA Forum</span>
+                                            <span>${t('editor.home.badge_forum')}</span>
                                         </a>
                                     </div>
                                 </div>
@@ -512,11 +523,11 @@ class BubbleCardEditor extends LitElement {
                             <div class="bubble-info">
                                 <h4 class="bubble-section-title">
                                     <ha-icon icon="mdi:heart-outline"></ha-icon>
-                                    Support the Project
+                                    ${t('editor.home.support_title')}
                                 </h4>
                                 <div class="content">
-                                    <p>Hi I'm Clooos the Bubble Card developer. I dedicate most of my spare time to making this project the best it can be. So if you appreciate my work, any donation would be a great way to show your support.</p>
-                                    <p>Also, check out my Patreon for exclusive custom styles, templates, and modules. Subscribing is probably the best way to support me and keep this project going.</p>
+                                    <p>${t('editor.home.support_body1')}</p>
+                                    <p>${t('editor.home.support_body2')}</p>
                                     <div class="bubble-badges">
                                         <a href="https://www.buymeacoffee.com/clooos" target="_blank" rel="noopener noreferrer" class="bubble-badge">
                                             <div class="bmc-icon">
@@ -524,7 +535,7 @@ class BubbleCardEditor extends LitElement {
                                                     <path d="M20.216 6.415l-.132-.666c-.119-.598-.388-1.163-1.001-1.379-.197-.069-.42-.098-.57-.241-.152-.143-.196-.366-.231-.572-.065-.378-.125-.756-.192-1.133-.057-.325-.102-.69-.25-.987-.195-.4-.597-.634-.996-.788a5.723 5.723 0 00-.626-.194c-1-.263-2.05-.36-3.077-.416a25.834 25.834 0 00-3.7.062c-.915.083-1.88.184-2.75.5-.318.116-.646.256-.888.501-.297.302-.393.77-.177 1.146.154.267.415.456.692.58.36.162.737.284 1.123.366 1.075.238 2.189.331 3.287.37 1.218.05 2.437.01 3.65-.118.299-.033.598-.073.896-.119.352-.054.578-.513.474-.834-.124-.383-.457-.531-.834-.473-.466.074-.96.108-1.382.146-1.177.08-2.358.082-3.536.006a22.228 22.228 0 01-1.157-.107c-.086-.01-.18-.025-.258-.036-.243-.036-.484-.08-.724-.13-.111-.027-.111-.185 0-.212h.005c.277-.06.557-.108.838-.147h.002c.131-.009.263-.032.394-.048a25.076 25.076 0 013.426-.12c.674.019 1.347.067 2.017.144l.228.031c.267.04.533.088.798.145.392.085.895.113 1.07.542.055.137.08.288.111.431l.319 1.484a.237.237 0 01-.199.284h-.003c-.037.006-.075.01-.112.015a36.704 36.704 0 01-4.743.295 37.059 37.059 0 01-4.699-.304c-.14-.017-.293-.042-.417-.06-.326-.048-.649-.108-.973-.161-.393-.065-.768-.032-1.123.161-.29.16-.527.404-.675.701-.154.316-.199.66-.267 1-.069.34-.176.707-.135 1.056.087.753.613 1.365 1.37 1.502a39.69 39.69 0 0011.343.376.483.483 0 01.535.53l-.071.697-1.018 9.907c-.041.41-.047.832-.125 1.237-.122.637-.553 1.028-1.182 1.171-.577.131-1.165.2-1.756.205-.656.004-1.31-.025-1.966-.022-.699.004-1.556-.06-2.095-.58-.475-.458-.54-1.174-.605-1.793l-.731-7.013-.322-3.094c-.037-.351-.286-.695-.678-.678-.336.015-.718.3-.678.679l.228 2.185.949 9.112c.147 1.344 1.174 2.068 2.446 2.272.742.12 1.503.144 2.257.156.966.016 1.942.053 2.892-.122 1.408-.258 2.465-1.198 2.616-2.657.34-3.332.683-6.663 1.024-9.995l.215-2.087a.484.484 0 01.39-.426c.402-.078.787-.212 1.074-.518.455-.488.546-1.124.385-1.766zm-1.478.772c-.145.137-.363.201-.578.233-2.416.359-4.866.54-7.308.46-1.748-.06-3.477-.254-5.207-.498-.17-.024-.353-.055-.47-.18-.22-.236-.111-.71-.054-.995.052-.26.152-.609.463-.646.484-.057 1.046.148 1.526.22.577.088 1.156.159 1.737.212 2.48.226 5.002.19 7.472-.14.45-.06.899-.13 1.345-.21.399-.072.84-.206 1.08.206.166.281.188.657.162.974a.544.544 0 01-.169.364zm-6.159 3.9c-.862.37-1.84.788-3.109.788a5.884 5.884 0 01-1.569-.217l.877 9.004c.065.78.717 1.38 1.5 1.38 0 0 1.243.065 1.658.065.447 0 1.786-.065 1.786-.065.783 0 1.434-.6 1.499-1.38l.94-9.95a3.996 3.996 0 00-1.322-.238c-.826 0-1.491.284-2.26.613z"/>
                                                 </svg>
                                             </div>
-                                            <span>Buy me a beer</span>
+                                            <span>${t('editor.home.badge_beer')}</span>
                                         </a>
                                         <a href="https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR" target="_blank" rel="noopener noreferrer" class="bubble-badge support-badge">
                                             <div class="paypal-icon">
@@ -547,7 +558,7 @@ class BubbleCardEditor extends LitElement {
                                         <a href="https://www.reddit.com/user/Clooooos/" target="_blank" rel="noopener noreferrer">
                                             <img src="https://avatars.githubusercontent.com/u/36499953" alt="Clooos" class="creator-avatar">
                                         </a>
-                                        <p class="bubble-thank-you">Thank you for being part of this awesome community! Cheers from Belgium! 🍻</p>
+                                        <p class="bubble-thank-you">${t('editor.home.thanks')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -559,9 +570,10 @@ class BubbleCardEditor extends LitElement {
     }
 
     makeLayoutOptions() {
+        const t = setupTranslation(this._hassRender);
         const defaultLayout = window.isSectionView ? 'large' : 'normal';
         const defaultRows = this._config.card_type === "separator" ? '0.8' : '1';
-        const showRowsOption = this._config.card_type !== "pop-up" && 
+        const showRowsOption = this._config.card_type !== "pop-up" &&
             (this._config.card_layout?.includes("large") || (window.isSectionView && !this._config.card_layout));
 
         return html`
@@ -569,10 +581,10 @@ class BubbleCardEditor extends LitElement {
                 <div class="bubble-info warning">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:alert-outline"></ha-icon>
-                        Rows are already set in the "Layout" options
+                        ${t('editor.layout.rows_set_title')}
                     </h4>
                     <div class="content">
-                        <p>If you want to change the rows, you can do it in the "Layout" options at the top of this editor. Or remove it from your config in YAML to enable this option.</p>
+                        <p>${t('editor.layout.rows_set_body')}</p>
                     </div>
                 </div>
             `)}
@@ -586,7 +598,7 @@ class BubbleCardEditor extends LitElement {
                         options: { min: 0, step: 0.1 },
                     }]}
                     .disabled=${this._config.grid_options?.rows}
-                    .computeLabel=${() => 'Rows (Card height)'}
+                    .computeLabel=${() => t('editor.layout.rows')}
                     @value-changed=${(ev) => {
                         const value = ev.detail.value.rows;
                         this._valueChanged({
@@ -600,10 +612,10 @@ class BubbleCardEditor extends LitElement {
             <div class="bubble-info warning">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-outline"></ha-icon>
-                    Card layout deprecation
+                    ${t('editor.layout.deprecated_title')}
                 </h4>
                 <div class="content">
-                    <p><b>The card layout options are deprecated, but still available for backwards compatibility.</b> Please use the new sub-button groups and layout options instead for better flexibility.</p>
+                    <p><b>${t('editor.layout.deprecated_bold')}</b> ${t('editor.layout.deprecated_body')}</p>
                 </div>
             </div>
             <ha-form
@@ -614,16 +626,16 @@ class BubbleCardEditor extends LitElement {
                     selector: {
                         select: {
                             options: [
-                                { label: 'Normal (previous default)', value: 'normal' },
-                                { label: 'Large', value: 'large' },
-                                { label: 'Large with 2 sub-buttons rows', value: 'large-2-rows' },
-                                { label: 'Large with sub-buttons in a grid (Layout: min. 2 rows)', value: 'large-sub-buttons-grid' }
+                                { label: t('editor.layout.normal'), value: 'normal' },
+                                { label: t('editor.layout.large'), value: 'large' },
+                                { label: t('editor.layout.large_2_rows'), value: 'large-2-rows' },
+                                { label: t('editor.layout.large_grid'), value: 'large-sub-buttons-grid' }
                             ],
                             mode: 'dropdown'
                         }
                     }
                 }]}
-                .computeLabel=${() => this._config.card_type === "pop-up" ? 'Header card layout' : 'Card layout'}
+                .computeLabel=${() => this._config.card_type === "pop-up" ? t('editor.layout.header_card_layout') : t('editor.layout.card_layout')}
                 @value-changed=${(ev) => {
                     this._valueChanged({
                         target: { configValue: 'card_layout' },
@@ -635,11 +647,12 @@ class BubbleCardEditor extends LitElement {
     }
 
     makeLayoutPanel() {
+        const t = setupTranslation(this._hassRender);
         return html`
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:view-grid"></ha-icon>
-                    Layout
+                    ${t('editor.common.layout')}
                 </h4>
                 <div class="content">
                     ${this.makeLayoutOptions()}
@@ -658,7 +671,7 @@ class BubbleCardEditor extends LitElement {
         const isSubButton = array === 'sub_button' || (typeof array === 'string' && array.startsWith('sub_button'));
         const showSelectUi = isSubButton && (context?.sub_button_type === 'select' || (!context?.sub_button_type && isSelectEntity));
 
-        const attributeList = context?.show_attribute 
+        const attributeList = context?.show_attribute
             ? Object.keys(this._hassRender.states[entity]?.attributes || {}).map((attributeName) => {
                 let state = this._hassRender.states[entity];
                 let formattedName = this._hassRender.formatEntityAttributeName(state, attributeName);
@@ -666,148 +679,150 @@ class BubbleCardEditor extends LitElement {
               })
             : [];
 
+        const t = setupTranslation(this._hassRender);
+
         return html`
 
-            <ha-formfield .label="Text scrolling effect">
+            <ha-formfield>
                 <ha-switch
-                    aria-label="Text scrolling effect"
+                    aria-label="${t('editor.show.scrolling_effect')}"
                     .checked=${context?.scrolling_effect ?? true}
                     .configValue="${config + "scrolling_effect"}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { scrolling_effect: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
-                    <label class="mdc-label">Text scrolling effect</label> 
+                    <label class="mdc-label">${t('editor.show.scrolling_effect')}</label>
                 </div>
             </ha-formfield>
             ${this._renderConditionalContent(isSubButton, html`
-                <ha-formfield .label="Show background">
+                <ha-formfield>
                     <ha-switch
-                        aria-label="Show background when entity is on"
+                        aria-label="${t('editor.show.background')}"
                         .checked=${context?.show_background ?? true}
                         @change="${(ev) => this._arrayValueChange(index, { show_background: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Show background when entity is on</label> 
+                        <label class="mdc-label">${t('editor.show.background')}</label>
                     </div>
                 </ha-formfield>
             `)}
             ${this._renderConditionalContent(isSubButton && (context?.show_background ?? true), html`
-                <ha-formfield .label="Background color based on state">
+                <ha-formfield>
                     <ha-switch
-                        aria-label="Background color based on state"
+                        aria-label="${t('editor.show.state_background')}"
                         .checked=${context?.state_background ?? true}
                         @change="${(ev) => this._arrayValueChange(index, { state_background: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Background color based on state</label> 
+                        <label class="mdc-label">${t('editor.show.state_background')}</label>
                     </div>
                 </ha-formfield>
             `)}
             ${this._renderConditionalContent(isSubButton && (context?.state_background ?? true) && entity.startsWith("light"), html`
-                <ha-formfield .label="Background color based on light color">
+                <ha-formfield>
                     <ha-switch
-                        aria-label="Background color based on light color"
+                        aria-label="${t('editor.show.light_background')}"
                         .checked=${context?.light_background ?? true}
                         @change="${(ev) => this._arrayValueChange(index, { light_background: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Background color based on light color</label> 
+                        <label class="mdc-label">${t('editor.show.light_background')}</label>
                     </div>
                 </ha-formfield>
             `)}
             ${this._renderConditionalContent(!isSubButton && entity.startsWith("light"), html`
-                <ha-formfield .label="Use accent color instead of light color">
+                <ha-formfield>
                     <ha-switch
-                        aria-label="Use accent color instead of light color"
+                        aria-label="${t('editor.show.accent_color')}"
                         .checked=${context?.use_accent_color ?? false}
                         .configValue="${config + "use_accent_color"}"
                         @change="${this._valueChanged}"
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Use accent color instead of light color</label> 
+                        <label class="mdc-label">${t('editor.show.accent_color')}</label>
                     </div>
                 </ha-formfield>
             `)}
-            <ha-formfield .label="Show icon">
+            <ha-formfield>
                 <ha-switch
-                    aria-label="Show icon"
+                    aria-label="${t('editor.show.icon')}"
                     .checked=${context?.show_icon ?? true}
                     .configValue="${config + "show_icon"}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_icon: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
-                    <label class="mdc-label">Show icon</label> 
+                    <label class="mdc-label">${t('editor.show.icon')}</label>
                 </div>
             </ha-formfield>
-            <ha-formfield .label="Prioritize icon over entity picture">
+            <ha-formfield>
                 <ha-switch
-                    aria-label="Prioritize icon over entity picture"
+                    aria-label="${t('editor.show.force_icon')}"
                     .checked=${context?.force_icon ?? false}
                     .configValue="${config + "force_icon"}"
                     .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { force_icon: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
-                    <label class="mdc-label">Prioritize icon over entity picture</label> 
+                    <label class="mdc-label">${t('editor.show.force_icon')}</label>
                 </div>
             </ha-formfield>
-            <ha-formfield .label="Show name">
+            <ha-formfield>
                 <ha-switch
-                    aria-label="Show name"
+                    aria-label="${t('editor.show.name')}"
                     .checked=${ context?.show_name ?? (!isSubButton ? true : false) }
                     .configValue="${config + "show_name"}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_name: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
-                    <label class="mdc-label">Show name</label> 
+                    <label class="mdc-label">${t('editor.show.name')}</label>
                 </div>
             </ha-formfield>
-            <ha-formfield .label="Show entity state">
+            <ha-formfield>
                 <ha-switch
-                    aria-label="Show entity state"
+                    aria-label="${t('editor.show.state')}"
                     .checked="${context?.show_state ?? context.button_type === 'state'}"
                     .configValue="${config + "show_state"}"
                     .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_state: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
-                    <label class="mdc-label">Show entity state</label> 
+                    <label class="mdc-label">${t('editor.show.state')}</label>
                 </div>
             </ha-formfield>
-            <ha-formfield .label="Show last changed">
+            <ha-formfield>
                 <ha-switch
-                    aria-label="Show last changed"
+                    aria-label="${t('editor.show.last_changed')}"
                     .checked=${context?.show_last_changed}
                     .configValue="${config + "show_last_changed"}"
                     .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_changed: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
-                    <label class="mdc-label">Show last changed</label> 
+                    <label class="mdc-label">${t('editor.show.last_changed')}</label>
                 </div>
             </ha-formfield>
-            <ha-formfield .label="Show last updated">
+            <ha-formfield>
                 <ha-switch
-                    aria-label="Show last updated"
+                    aria-label="${t('editor.show.last_updated')}"
                     .checked=${context?.show_last_updated}
                     .configValue="${config + "show_last_updated"}"
                     .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_last_updated: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
-                    <label class="mdc-label">Show last updated</label> 
+                    <label class="mdc-label">${t('editor.show.last_updated')}</label>
                 </div>
             </ha-formfield>
-            <ha-formfield .label="Show attribute">
+            <ha-formfield>
                 <ha-switch
-                    aria-label="Show attribute"
+                    aria-label="${t('editor.show.attribute')}"
                     .checked=${context?.show_attribute}
                     .configValue="${config + "show_attribute"}"
                     .disabled="${(nameButton || noEntity) && !isSubButton}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_attribute: ev.target.checked }, array)}"
                 ></ha-switch>
                 <div class="mdc-form-field">
-                    <label class="mdc-label">Show attribute</label> 
+                    <label class="mdc-label">${t('editor.show.attribute')}</label>
                 </div>
             </ha-formfield>
             ${this._renderConditionalContent(context?.show_attribute, html`
@@ -824,7 +839,7 @@ class BubbleCardEditor extends LitElement {
                         }
                     }]}
                     .disabled=${(nameButton || noEntity) && !isSubButton}
-                    .computeLabel=${() => 'Attribute to show'}
+                    .computeLabel=${() => t('editor.common.attribute_to_show')}
                     @value-changed=${(ev) => {
                         const value = ev.detail.value.attribute;
                         if (!array) {
@@ -839,15 +854,15 @@ class BubbleCardEditor extends LitElement {
                 ></ha-form>
             `)}
             ${this._renderConditionalContent(showSelectUi, html`
-                <ha-formfield .label="Show arrow (Select entities only)">
+                <ha-formfield>
                     <ha-switch
-                        aria-label="Show arrow (Select entities only)"
+                        aria-label="${t('editor.show.arrow')}"
                         .checked=${context?.show_arrow ?? true}
                         .configValue="${config + "show_arrow"}"
                         @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_arrow: ev.target.checked }, array)}"
                     ></ha-switch>
                     <div class="mdc-form-field">
-                        <label class="mdc-label">Show arrow (Select menu only)</label> 
+                        <label class="mdc-label">${t('editor.show.arrow')}</label>
                     </div>
                 </ha-formfield>
             `)}
@@ -857,7 +872,10 @@ class BubbleCardEditor extends LitElement {
     makeDropdown(label, configValue, items, disabled, default_value) {
         if (!this._config) return html``;
 
-        if (label.includes('icon') || label.includes('Icon')) {
+        // Labels are translated, so the field kind is derived from configValue.
+        const configKey = String(configValue ?? '').split('.').pop();
+
+        if (configKey.includes('icon')) {
             return html`
                 <div class="ha-icon-picker">
                     <ha-icon-picker
@@ -870,7 +888,7 @@ class BubbleCardEditor extends LitElement {
                     ></ha-icon-picker>
                 </div>
             `;
-        } else if (label.includes('Entity') || label.includes('entity')) {
+        } else if (configKey === 'entity' || configKey.endsWith('_entity')) {
             let includeDomains = [];
             let excludeDomains = [];
             
@@ -969,60 +987,70 @@ class BubbleCardEditor extends LitElement {
         return condition ? content : html``;
     }
 
+    // "Optional - <label>" prefix, reusing Home Assistant's translated "optional".
+    _optionalLabel(label) {
+        const t = setupTranslation(this._hassRender);
+        const tag = t('editor.common.optional');
+        return `${tag.charAt(0).toUpperCase()}${tag.slice(1)} - ${label}`;
+    }
+
     _renderNestedStandalonePopupWarning() {
+        const t = setupTranslation(this._hassRender);
         return html`
             <div class="bubble-info warning">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-outline"></ha-icon>
-                    Nested pop-ups are not supported
+                    ${t('editor.nested.title')}
                 </h4>
                 <div class="content">
-                    <p>Adding a standalone pop-up inside another standalone pop-up is not supported. Please create this pop-up outside of the current pop-up instead.</p>
+                    <p>${t('editor.nested.body')}</p>
                 </div>
             </div>
         `;
     }
 
-    makeActionPanel(label, context = this._config, defaultAction, array, index = this._config) {
-        const icon = label === "Tap action" 
-            ? "mdi:gesture-tap" 
-            : label === "Double tap action" 
-            ? "mdi:gesture-double-tap"
-            : label === "Hold action" 
-            ? "mdi:gesture-tap-hold"
-            : "mdi:gesture-tap";
-        const configValueType = label === "Tap action" 
-            ? "tap_action"
-            : label === "Double tap action" 
-            ? "double_tap_action"
-            : label === "Hold action" 
-            ? "hold_action"
-            : label === "Open action"
-            ? "open_action"
-            : "close_action";
-        
+    // Accepts a stable action type ('tap', 'double_tap', 'hold', 'open',
+    // 'close'); legacy English labels are still recognized for compatibility.
+    static _actionPanelTypes = {
+        'tap': { icon: 'mdi:gesture-tap', configValue: 'tap_action', labelKey: 'editor.actions.tap' },
+        'double_tap': { icon: 'mdi:gesture-double-tap', configValue: 'double_tap_action', labelKey: 'editor.actions.double_tap' },
+        'hold': { icon: 'mdi:gesture-tap-hold', configValue: 'hold_action', labelKey: 'editor.actions.hold' },
+        'open': { icon: 'mdi:gesture-tap', configValue: 'open_action', labelKey: 'editor.actions.open' },
+        'close': { icon: 'mdi:gesture-tap', configValue: 'close_action', labelKey: 'editor.actions.close' }
+    };
+
+    static _legacyActionPanelLabels = {
+        'Tap action': 'tap',
+        'Double tap action': 'double_tap',
+        'Hold action': 'hold',
+        'Open action': 'open',
+        'Close action': 'close'
+    };
+
+    makeActionPanel(type, context = this._config, defaultAction, array, index = this._config) {
+        const t = setupTranslation(this._hassRender);
+        const token = BubbleCardEditor._actionPanelTypes[type]
+            ? type
+            : (BubbleCardEditor._legacyActionPanelLabels[type] ?? 'tap');
+        const spec = BubbleCardEditor._actionPanelTypes[token];
+        const icon = spec.icon;
+        const configValueType = spec.configValue;
+        const label = t(spec.labelKey);
+
         // Create a unique key for the panel
-        const panelKey = array 
-            ? `action_panel_${array}_${index}_${configValueType}` 
+        const panelKey = array
+            ? `action_panel_${array}_${index}_${configValueType}`
             : `action_panel_config_${configValueType}`;
 
         let value;
         try{
-           value = label === "Tap action" 
-                ? context.tap_action
-                : label === "Double tap action" 
-                ? context.double_tap_action
-                : label === "Hold action" 
-                ? context.hold_action
-                : label === "Open action"
-                ? context.open_action
-                : context.close_action;
+           value = context[configValueType];
         }catch{}
 
         const isDefault = context === this._config;
 
         if (!defaultAction) {
-            defaultAction = isDefault && label === "Tap action" 
+            defaultAction = isDefault && token === 'tap'
             ? this._config.button_type !== "name" ? "more-info" : "none"
             : isDefault
             ? "none"
@@ -1057,16 +1085,16 @@ class BubbleCardEditor extends LitElement {
                             @value-changed=${(ev) => this._ActionChanged(ev,array,index)}
                         ></ha-form>
                         ${ value?.action  === 'call-service' || value?.action === 'perform-action' ? html`
-                            <ha-formfield .label="Use default entity">
+                            <ha-formfield>
                                 <ha-switch
-                                    aria-label="Use default entity"
+                                    aria-label="${t('editor.actions.use_default_entity')}"
                                     .configValue="${
-                                                  (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType+".default_entity"}" 
+                                                  (array ? array+".":"") + (parseInt(index) == index ? index+".":"") +  configValueType+".default_entity"}"
                                     .checked=${value?.target?.entity_id === "entity"}
                                      @change=${this._updateActionsEntity}
                                 ></ha-switch>
                                 <div class="mdc-form-field">
-                                    <label class="mdc-label">Use default entity</label> 
+                                    <label class="mdc-label">${t('editor.actions.use_default_entity')}</label>
                                 </div>
                             </ha-formfield>
                         ` : ''}
@@ -1092,19 +1120,20 @@ class BubbleCardEditor extends LitElement {
     }
 
     makeStyleEditor() {
+        const t = setupTranslation(this._hassRender);
         const panelKey = 'style_editor_panel'; // Unique key for this panel
 
         return html`
-            <ha-expansion-panel 
+            <ha-expansion-panel
                 outlined
-                @expanded-changed="${(e) => { 
-                    this._expandedPanelStates[panelKey] = e.target.expanded; 
-                    this.requestUpdate(); 
+                @expanded-changed="${(e) => {
+                    this._expandedPanelStates[panelKey] = e.target.expanded;
+                    this.requestUpdate();
                 }}"
             >
                 <h4 slot="header">
                     <ha-icon icon="mdi:code-braces"></ha-icon>
-                    Custom styles & JS templates
+                    ${t('editor.styles.title')}
                 </h4>
                 <div class="content">
                     ${getLazyLoadedPanelContent(this, panelKey, !!this._expandedPanelStates[panelKey], () => html`
@@ -1129,11 +1158,17 @@ class BubbleCardEditor extends LitElement {
                     <div class="bubble-info">
                         <h4 class="bubble-section-title">
                             <ha-icon icon="mdi:information-outline"></ha-icon>
-                            Custom styles & JS templates
+                            ${t('editor.styles.title')}
                         </h4>
                         <div class="content">
-                            <p>For advanced users, you can edit the CSS style of this card in the above code editor. More information and examples <a href="https://github.com/Clooos/Bubble-Card#styling" target="_blank" rel="noopener noreferrer">here</a>. You don't need to add <code>styles: |</code> (only used in YAML mode). You can also add <a href="https://github.com/Clooos/Bubble-Card#templates" target="_blank" rel="noopener noreferrer">JS templates</a> (Jinja is not supported).</p>
-                            <p><b>Check out my <a href="https://www.patreon.com/Clooos" target="_blank" rel="noopener noreferrer">Patreon</a></b> for more custom styles, templates, and modules. This is also the best way to show your support to my project.</p>
+                            <p>${tTemplate(t('editor.styles.body1'), {
+                                examples_link: html`<a href="https://github.com/Clooos/Bubble-Card#styling" target="_blank" rel="noopener noreferrer">${t('editor.home.here')}</a>`,
+                                code: html`<code>styles: |</code>`,
+                                templates_link: html`<a href="https://github.com/Clooos/Bubble-Card#templates" target="_blank" rel="noopener noreferrer">${t('editor.styles.js_templates')}</a>`
+                            })}</p>
+                            <p>${tTemplate(t('editor.styles.body2'), {
+                                patreon_link: html`<b><a href="https://www.patreon.com/Clooos" target="_blank" rel="noopener noreferrer">Patreon</a></b>`
+                            })}</p>
                         </div>
                     </div>
                 </div>
@@ -1292,18 +1327,19 @@ class BubbleCardEditor extends LitElement {
         // This ensures we show the correct error when switching between cards/modules
         updateDisplayedError();
 
+        const t = setupTranslation(context._hassRender ?? context.hass);
         return html`
-            <div class="bubble-info error" 
+            <div class="bubble-info error"
                 style="display: ${!context.errorMessage ? 'none' : ''}; margin-bottom: 8px;">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-                    Error in JS template
+                    ${t('editor.styles.error_title')}
                 </h4>
                 <div class="content">
                     <p>${context.errorMessage}</p>
                     ${context._editingModule && typeof context._editingModule === 'object' && context._editingModule.id ? html`<hr><span class="helper-text" style="margin: 0;">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
-                        JS template errors can sometimes be delayed in the Module Editor.
+                        ${t('editor.styles.error_delayed')}
                     </span>` : ''}
                 </div>
             </div>
@@ -2389,7 +2425,7 @@ class BubbleCardEditor extends LitElement {
         this._cachedStandalonePopupDisallowed !== disallowStandalonePopup ||
         (this._cachedCalendarLabel && this._cachedCalendarLabel !== calendarLabel)) {
         this.cardTypeList = [{
-                'label': 'Button (Switch, slider, ...)',
+                'label': t('editor.card_names.button'),
                 'value': 'button'
             },
             {
@@ -2397,39 +2433,39 @@ class BubbleCardEditor extends LitElement {
                 'value': 'calendar'
             },
             {
-                'label': 'Cover',
+                'label': t('editor.card_names.cover'),
                 'value': 'cover'
             },
             {
-                'label': 'Climate',
+                'label': t('editor.card_names.climate'),
                 'value': 'climate'
             },
             {
-                'label': 'Empty column',
+                'label': t('editor.card_names.empty_column'),
                 'value': 'empty-column'
             },
             {
-                'label': 'Horizontal buttons stack',
+                'label': t('editor.card_names.hbs'),
                 'value': 'horizontal-buttons-stack'
             },
             {
-                'label': 'Media player',
+                'label': t('editor.card_names.media_player'),
                 'value': 'media-player'
             },
             ...(!disallowStandalonePopup ? [{
-                'label': 'Pop-up',
+                'label': t('editor.card_names.popup'),
                 'value': 'pop-up'
             }] : []),
             {
-                'label': 'Select',
+                'label': t('editor.card_names.select'),
                 'value': 'select'
             },
             {
-                'label': 'Separator',
+                'label': t('editor.card_names.separator'),
                 'value': 'separator'
             },
             {
-                'label': 'Sub-buttons only',
+                'label': t('editor.card_names.sub_buttons'),
                 'value': 'sub-buttons'
             }
         ];

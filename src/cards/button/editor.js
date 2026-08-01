@@ -1,29 +1,32 @@
 import { html } from 'lit';
 import { isEntityType } from "../../tools/utils.js";
+import setupTranslation from '../../tools/localize.js';
+import { tTemplate } from '../../editor/utils.js';
 import { makeButtonSliderPanel } from '../../components/slider/editor.js';
-function getButtonList(){
+function getButtonList(t){
     return [{
-        'label': 'Switch',
+        'label': t('editor.button.type_switch'),
         'value': 'switch'
     },
     {
-        'label': 'Slider',
+        'label': t('editor.button.type_slider'),
         'value': 'slider'
     },
     {
-        'label': 'State',
+        'label': t('editor.button.type_state'),
         'value': 'state'
     },
     {
-        'label': 'Name / Text (No entity required)',
+        'label': t('editor.button.type_name_long'),
         'value': 'name'
     }
 ];
 }
 
-export function renderButtonEditor(editor){    
+export function renderButtonEditor(editor){
+    const t = setupTranslation(editor.hass);
     let entityList = {};
-    if (editor._config.button_type === 'slider' && !editor._disableEntityFilter) {        
+    if (editor._config.button_type === 'slider' && !editor._disableEntityFilter) {
         entityList = {
             filter: [
                 { domain: ["light", "media_player", "cover", "input_number", "number", "climate", "fan"] },
@@ -35,7 +38,7 @@ export function renderButtonEditor(editor){
     const isPopUp = editor._config.card_type === 'pop-up';
 
     let button_action = editor._config.button_action || '';
-    
+
     const isClassicStyle = editor._config.popup_style === 'classic';
 
     let button_type;
@@ -48,12 +51,12 @@ export function renderButtonEditor(editor){
         button_type = editor._config.button_type;
     }
     const buttonTypeDropdown = !isClassicStyle
-        ? editor.makeDropdown("Button type", "button_type", getButtonList())
+        ? editor.makeDropdown(t('editor.common.button_type'), "button_type", getButtonList(t))
         : '';
 
     return html`
         <div class="card-config">
-            ${!isPopUp ? editor.makeDropdown("Card type", "card_type", editor.cardTypeList) : ''}
+            ${!isPopUp ? editor.makeDropdown(t('editor.common.card_type'), "card_type", editor.cardTypeList) : ''}
             ${!isPopUp ? buttonTypeDropdown : ''}
             ${!isPopUp ? html`
             <ha-form
@@ -61,10 +64,10 @@ export function renderButtonEditor(editor){
                 .data=${editor._config}
                 .schema=${[
                             { name: "entity",
-                            label: button_type !== 'slider' ? "Entity (toggle)" : "Entity (See text below for supported entities)", 
+                            label: button_type !== 'slider' ? t('editor.button.entity_toggle') : t('editor.button.entity_slider'),
                             selector: { entity: entityList },
                             },
-                        ]}   
+                        ]}
                 .computeLabel=${editor._computeLabelCallback}
                 .disabled="${editor._config.button_type === 'name'}"
                 @value-changed=${editor._valueChanged}
@@ -72,7 +75,7 @@ export function renderButtonEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:cog"></ha-icon>
-                ${isPopUp ? 'Header card settings' : 'Card settings'}
+                ${isPopUp ? t('editor.button.header_card_settings') : t('editor.common.card_settings')}
                 </h4>
                 <div class="content">
                     ${isPopUp ? buttonTypeDropdown : ''}
@@ -82,10 +85,10 @@ export function renderButtonEditor(editor){
                         .data=${editor._config}
                         .schema=${[
                                     { name: "entity",
-                                    label: isClassicStyle ? "Optional - Entity" : (button_type !== 'slider' ? "Entity (toggle)" : "Entity (See text below for supported entities)"), 
+                                    label: isClassicStyle ? editor._optionalLabel(t('editor.common.entity')) : (button_type !== 'slider' ? t('editor.button.entity_toggle') : t('editor.button.entity_slider')),
                                     selector: { entity: entityList },
                                     },
-                                ]}   
+                                ]}
                         .computeLabel=${editor._computeLabelCallback}
                         .disabled="${editor._config.button_type === 'name'}"
                         @value-changed=${editor._valueChanged}
@@ -97,7 +100,7 @@ export function renderButtonEditor(editor){
                             name: 'name',
                             selector: { text: {} },
                         }]}
-                        .computeLabel=${() => 'Optional - Name'}
+                        .computeLabel=${() => editor._optionalLabel(t('editor.common.name'))}
                         @value-changed=${(ev) => {
                             editor._valueChanged({
                                 target: { configValue: 'name' },
@@ -105,7 +108,7 @@ export function renderButtonEditor(editor){
                             });
                         }}
                     ></ha-form>
-                    ${editor.makeDropdown("Optional - Icon", "icon")}
+                    ${editor.makeDropdown(editor._optionalLabel(t('editor.common.icon')), "icon")}
                     ${editor.makeShowState()}
                 </div>
             </ha-expansion-panel>
@@ -114,49 +117,49 @@ export function renderButtonEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                Tap action on icon
+                ${t('editor.actions.on_icon')}
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel("Tap action")}
-                    ${editor.makeActionPanel("Double tap action")}
-                    ${editor.makeActionPanel("Hold action")}
+                    ${editor.makeActionPanel('tap')}
+                    ${editor.makeActionPanel('double_tap')}
+                    ${editor.makeActionPanel('hold')}
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined style="display: ${editor._config.button_type === 'slider' && editor._config.tap_to_slide ? 'none' : ''}">
                 <h4 slot="header">
                 <ha-icon icon="mdi:gesture-tap-button"></ha-icon>
-                Tap action on card
+                ${t('editor.actions.on_card')}
                 </h4>
                 <div class="content">
-                    <!-- 
+                    <!--
                       Default button action mapping to match create.js defaults:
                       - name: tap="none", double="none", hold="none"
-                      - state: tap="more-info", double="none", hold="more-info" 
+                      - state: tap="more-info", double="none", hold="more-info"
                       - slider: tap="more-info"(sensor)/"toggle"(others), double="none", hold="none"
                       - switch: tap="toggle", double="none", hold="more-info"
                     -->
-                    ${editor.makeActionPanel("Tap action", button_action, 
-                        editor._config.button_type === 'name' ? 'none' : 
-                        editor._config.button_type === 'state' ? 'more-info' : 
-                        editor._config.button_type === 'slider' ? 
-                            (isEntityType(editor, "sensor", editor._config.entity) ? 'more-info' : 'toggle') : 
-                            'toggle', 
+                    ${editor.makeActionPanel('tap', button_action,
+                        editor._config.button_type === 'name' ? 'none' :
+                        editor._config.button_type === 'state' ? 'more-info' :
+                        editor._config.button_type === 'slider' ?
+                            (isEntityType(editor, "sensor", editor._config.entity) ? 'more-info' : 'toggle') :
+                            'toggle',
                         'button_action')}
-                    ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
+                    ${editor.makeActionPanel('double_tap', button_action, 'none', 'button_action')}
                     ${editor._config.button_type === 'slider' && !editor._config.read_only_slider ? html`
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">
                                 <ha-icon icon="mdi:information-outline"></ha-icon>
-                                Hold action disabled
+                                ${t('editor.actions.hold_disabled_title')}
                             </h4>
                             <div class="content">
-                                <p>Hold action is disabled on slider buttons to prevent conflicts with the slider drag gesture.</p>
+                                <p>${t('editor.actions.hold_disabled_body')}</p>
                             </div>
                         </div>
                     ` : html`
-                        ${editor.makeActionPanel("Hold action", button_action, 
+                        ${editor.makeActionPanel('hold', button_action,
                             editor._config.button_type === 'name' ? 'none' :
-                            'more-info', 
+                            'more-info',
                             'button_action')}
                     `}
                 </div>
@@ -166,7 +169,7 @@ export function renderButtonEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:palette"></ha-icon>
-                Styling and layout options
+                ${t('editor.common.styling_layout_options')}
                 </h4>
                 <div class="content">
                     ${editor.makeLayoutPanel()}
@@ -177,36 +180,48 @@ export function renderButtonEditor(editor){
             <div class="bubble-info">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:information-outline"></ha-icon>
-                    Button card ${isPopUp ? '(as pop-up header)' : ''}
+                    ${t('editor.button.info_title')} ${isPopUp ? t('editor.button.info_title_popup_suffix') : ''}
                 </h4>
                 <div class="content">
-                    <p>This card is very versatile. It can be used as a <b>switch</b>, a <b>slider</b>, a <b>state</b> or a <b>name/text</b> button. Select the type of button you want to get more information about it.</p>
-                    
+                    <p>${tTemplate(t('editor.button.info_intro'), {
+                        switch: html`<b>${t('editor.button.intro_switch')}</b>`,
+                        slider: html`<b>${t('editor.button.intro_slider')}</b>`,
+                        state: html`<b>${t('editor.button.intro_state')}</b>`,
+                        name: html`<b>${t('editor.button.intro_name')}</b>`
+                    })}</p>
+
                     ${editor._config.button_type === 'switch' || !editor._config.button_type ? html`
-                        <p><strong>Switch button:</strong> This is the default button type. By default, it toggles an entity and its background color changes based on the entity's state or the color of a light. You can change its action in the <b>Tap action on card</b> section.</p>
+                        <p><strong>${t('editor.button.switch_title')}</strong> ${tTemplate(t('editor.button.switch_body'), {
+                            section: html`<b>${t('editor.actions.on_card')}</b>`
+                        })}</p>
                     ` : ''}
-                    
+
                     ${editor._config.button_type === 'slider' ? html`
-                        <p><strong>Slider button:</strong> This button type lets you control entities with adjustable ranges. It's ideal for dimming lights, and its fill color will adapt to the light's color. You can also use it to display values, such as a battery level.</p>
-                        <p>Supported entities for sliders:</p>
+                        <p><strong>${t('editor.button.slider_title')}</strong> ${t('editor.button.slider_body')}</p>
+                        <p>${t('editor.button.slider_supported')}</p>
                         <ul class="icon-list">
-                            <li><ha-icon icon="mdi:lightbulb-outline"></ha-icon>Light (brightness)</li>
-                            <li><ha-icon icon="mdi:speaker"></ha-icon>Media player (volume)</li>
-                            <li><ha-icon icon="mdi:window-shutter"></ha-icon>Cover (position)</li>
-                            <li><ha-icon icon="mdi:fan"></ha-icon>Fan (percentage)</li>
-                            <li><ha-icon icon="mdi:thermometer"></ha-icon>Climate (temperature)</li>
-                            <li><ha-icon icon="mdi:numeric"></ha-icon>Input number and number (value)</li>
-                            <li><ha-icon icon="mdi:battery-50"></ha-icon>Battery sensor (percentage, read only)</li>
+                            <li><ha-icon icon="mdi:lightbulb-outline"></ha-icon>${t('editor.button.slider_light')}</li>
+                            <li><ha-icon icon="mdi:speaker"></ha-icon>${t('editor.button.slider_media')}</li>
+                            <li><ha-icon icon="mdi:window-shutter"></ha-icon>${t('editor.button.slider_cover')}</li>
+                            <li><ha-icon icon="mdi:fan"></ha-icon>${t('editor.button.slider_fan')}</li>
+                            <li><ha-icon icon="mdi:thermometer"></ha-icon>${t('editor.button.slider_climate')}</li>
+                            <li><ha-icon icon="mdi:numeric"></ha-icon>${t('editor.button.slider_number')}</li>
+                            <li><ha-icon icon="mdi:battery-50"></ha-icon>${t('editor.button.slider_battery')}</li>
                         </ul>
-                        <p>You can also use any entity with a <b>numeric state</b> by disabling the entity filter in <b>Slider settings</b>, then define the <b>min</b> and <b>max</b> values. This option is read only.</p>
+                        <p>${tTemplate(t('editor.button.slider_any'), {
+                            numeric: html`<b>${t('editor.button.numeric_state')}</b>`,
+                            settings: html`<b>${t('editor.button.slider_settings')}</b>`,
+                            min: html`<b>min</b>`,
+                            max: html`<b>max</b>`
+                        })}</p>
                     ` : ''}
-                    
+
                     ${editor._config.button_type === 'state' ? html`
-                        <p><strong>State button:</strong> Perfect for displaying information from a sensor or any entity. When you press it, it will show the "More info" panel of the entity. Its background color does not change.</p>
+                        <p><strong>${t('editor.button.state_title')}</strong> ${t('editor.button.state_body')}</p>
                     ` : ''}
-                    
+
                     ${editor._config.button_type === 'name' ? html`
-                        <p><strong>Name/Text button:</strong> The only button type that doesn't need an entity. It allows you to display a short text, a name or a title. You can also add actions to it. Its background color does not change.</p>
+                        <p><strong>${t('editor.button.name_title')}</strong> ${t('editor.button.name_body')}</p>
                     ` : ''}
                 </div>
             </div>

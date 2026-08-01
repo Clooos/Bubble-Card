@@ -2,6 +2,7 @@
   "name": "Bubble Card",
   "content_in_root": false,
   "render_readme": true,
-  "filename": "bubble-card.js",
+  "filename": "bubble-card.zip",
+  "zip_release": true,
   "homeassistant": "2023.9.0"
 }

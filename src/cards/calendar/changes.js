@@ -67,7 +67,7 @@ export async function changeEvents(context) {
     eventsGroupedByDay[today] = [{
       start: { date: today },
       end: { date: today },
-      summary: 'No events',
+      summary: t('cards.calendar.no_events'),
       entity: { color: 'transparent' }
     }];
   }

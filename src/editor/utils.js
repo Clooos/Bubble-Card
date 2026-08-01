@@ -1,5 +1,14 @@
 import { html } from 'lit';
 
+// Interleaves a translated string containing {placeholder} tokens with lit
+// templates (links, inline code, ...). Returns an array lit can render.
+export function tTemplate(text, replacements) {
+  return String(text).split(/(\{[a-z0-9_]+\})/g).map((part) => {
+    const token = /^\{([a-z0-9_]+)\}$/.exec(part);
+    return token ? (replacements[token[1]] ?? '') : part;
+  });
+}
+
 export function getLazyLoadedPanelContent(context, contentKey, isExpanded, renderContentCallback) {
   // Initialize storage for loaded flags if it doesn't exist on the context
   if (typeof context._lazyContentLoadedFlags === 'undefined') {

@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { findConfigPath, getConfigAtPath } from '../../editor/standalone-dialog-bridge.js';
 import { isHashOnCurrentPage } from './navigation-picker-bridge.js';
+import setupTranslation from '../../tools/localize.js';
 
 const POPUP_GRID_COLUMN_COUNT = 12;
 
@@ -520,9 +521,10 @@ async function migrateLegacyPopUpToStandalone(editor, originalHash) {
         return;
     }
 
+    const t = setupTranslation(editor.hass);
     const popupConfig = getCurrentMigrationConfig(editor);
     if (isHashOnCurrentPage(popupConfig?.hash, originalHash)) {
-        editor._legacyStandaloneMigrationError = 'Choose a unique hash before migrating this pop-up.';
+        editor._legacyStandaloneMigrationError = t('editor.migration.unique_hash_error');
         editor.requestUpdate();
         return;
     }
@@ -531,7 +533,7 @@ async function migrateLegacyPopUpToStandalone(editor, originalHash) {
     const migrationContext = getLegacyStandaloneMigration(editor, originalHash);
 
     if (!migrationContext) {
-        editor._legacyStandaloneMigrationError = 'Unable to migrate this pop-up from the current dashboard editor.';
+        editor._legacyStandaloneMigrationError = t('editor.migration.unable_error');
         editor.requestUpdate();
         return;
     }
@@ -544,7 +546,7 @@ async function migrateLegacyPopUpToStandalone(editor, originalHash) {
     });
 
     if (!lovelace || typeof lovelace.saveConfig !== 'function' || !migration) {
-        editor._legacyStandaloneMigrationError = 'Unable to migrate this pop-up from the current dashboard editor.';
+        editor._legacyStandaloneMigrationError = t('editor.migration.unable_error');
         editor.requestUpdate();
         return;
     }
@@ -558,14 +560,14 @@ async function migrateLegacyPopUpToStandalone(editor, originalHash) {
         editor._config = migration.popupConfig;
 
         if (typeof lovelace.showToast === 'function') {
-            lovelace.showToast({ message: 'Pop-up migrated to standalone.' });
+            lovelace.showToast({ message: t('editor.migration.migrated_toast') });
         }
 
         if (!refreshActiveMigrationDialog(editor, migrationContext, migration, lovelace)) {
             reopenStandalonePopUpEditor(editor, migration, lovelace);
         }
     } catch (error) {
-        editor._legacyStandaloneMigrationError = error?.message || 'Failed to migrate this pop-up.';
+        editor._legacyStandaloneMigrationError = error?.message || t('editor.migration.failed_error');
         console.error('Bubble Card: failed to migrate legacy pop-up', error);
     } finally {
         editor._legacyStandaloneMigrationBusy = false;
@@ -579,6 +581,7 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
         return '';
     }
 
+    const t = setupTranslation(editor.hass);
     const isBusy = editor._legacyStandaloneMigrationBusy === true;
     const errorMessage = editor._legacyStandaloneMigrationError || '';
     const hasHorizontalStacks = hasLegacyHorizontalStacks(migration.contentCards);
@@ -588,14 +591,14 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
         <div class="bubble-info warning">
             <h4 class="bubble-section-title">
                 <ha-icon icon="mdi:swap-horizontal-bold"></ha-icon>
-                Legacy pop-up detected
+                ${t('editor.migration.notice_title')}
             </h4>
             <div class="content">
-                <p>This pop-up still uses the old vertical-stack wrapper. Migrate it to the standalone format for much better performance and to manage its content with the same drag-and-drop flow as a section view.</p>                ${hasHorizontalStacks ? html`
-                    <p>Horizontal stacks were detected. Their cards will be converted so you can drag and drop them individually while keeping the same layout (this option can be disabled if needed).</p>
+                <p>${t('editor.migration.notice_body')}</p>                ${hasHorizontalStacks ? html`
+                    <p>${t('editor.migration.horizontal_body')}</p>
                     <ha-formfield>
                         <ha-switch
-                            aria-label="Convert horizontal stacks to grid cards"
+                            aria-label="${t('editor.migration.convert_stacks')}"
                             .checked=${flattenHorizontalStacks}
                             @change=${(event) => {
                                 editor._legacyStandaloneFlattenHorizontalStacks = event.target.checked;
@@ -603,23 +606,23 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
                             }}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Convert horizontal stacks to grid cards</label>
+                            <label class="mdc-label">${t('editor.migration.convert_stacks')}</label>
                         </div>
                     </ha-formfield>
                 ` : ''}
                 <div class="bubble-info warning bubble-sub-warning">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:alert-octagon-outline"></ha-icon>
-                        Rollback warning
+                        ${t('editor.migration.rollback_title')}
                     </h4>
                     <div class="content">
-                        <p><b>This migration is permanent.</b> Even though it has been tested to handle all known legacy cases, I still recommend keeping a backup if you may want to roll back to v3.1.6 later.</p>
+                        <p><b>${t('editor.migration.rollback_bold')}</b> ${t('editor.migration.rollback_body')}</p>
                     </div>
                 </div>
                 ${errorMessage ? html`<p>${errorMessage}</p>` : ''}
                 <button class="icon-button ${isBusy ? 'disabled' : ''}" ?disabled=${isBusy} @click=${() => migrateLegacyPopUpToStandalone(editor, originalHash)}>
                     <ha-icon icon="mdi:swap-horizontal-bold"></ha-icon>
-                    <span>${isBusy ? 'Migrating...' : 'Migrate to standalone'}</span>
+                    <span>${isBusy ? t('editor.migration.migrating') : t('editor.migration.migrate')}</span>
                 </button>
             </div>
         </div>

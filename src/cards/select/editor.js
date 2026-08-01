@@ -1,7 +1,9 @@
 import { html } from "lit";
+import setupTranslation from '../../tools/localize.js';
 
 
 export function renderSelectEditor(editor){
+    const t = setupTranslation(editor.hass);
     const entity = editor._config.entity;
     const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || editor._config.select_attribute;
     const entityAttribute = editor.hass.states[entity]?.attributes;
@@ -16,13 +18,13 @@ export function renderSelectEditor(editor){
 
     return html`
         <div class="card-config">
-            ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
+            ${editor.makeDropdown(t('editor.common.card_type'), "card_type", editor.cardTypeList)}
             <ha-form
                 .hass=${editor.inputSelectList}
                 .data=${editor._config}
                 .schema=${[
                             { name: "entity",
-                            label: "Entity", 
+                            label: t('editor.common.entity'),
                             selector: { entity: {}},
                             },
                         ]}   
@@ -42,7 +44,7 @@ export function renderSelectEditor(editor){
                             }
                         }
                     }]}
-                    .computeLabel=${() => 'Select menu (from attributes)'}
+                    .computeLabel=${() => t('editor.select.select_menu')}
                     @value-changed=${(ev) => {
                         editor._valueChanged({
                             target: { configValue: 'select_attribute' },
@@ -54,14 +56,14 @@ export function renderSelectEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:cog"></ha-icon>
-                  Card settings
+                  ${t('editor.common.card_settings')}
                 </h4>
                 <div class="content">                   
                     <ha-form
                         .hass=${editor.hass}
                         .data=${{ name: editor._config?.name || '' }}
                         .schema=${[{ name: 'name', selector: { text: {} } }]}
-                        .computeLabel=${() => 'Optional - Name'}
+                        .computeLabel=${() => editor._optionalLabel(t('editor.common.name'))}
                         @value-changed=${(ev) => {
                             editor._valueChanged({
                                 target: { configValue: 'name' },
@@ -69,39 +71,39 @@ export function renderSelectEditor(editor){
                             });
                         }}
                     ></ha-form>
-                    ${editor.makeDropdown("Optional - Icon", "icon")}
+                    ${editor.makeDropdown(editor._optionalLabel(t('editor.common.icon')), "icon")}
                     ${editor.makeShowState()}
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                  Tap action on icon
+                  ${t('editor.actions.on_icon')}
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel("Tap action")}
-                    ${editor.makeActionPanel("Double tap action")}
-                    ${editor.makeActionPanel("Hold action")}
+                    ${editor.makeActionPanel('tap')}
+                    ${editor.makeActionPanel('double_tap')}
+                    ${editor.makeActionPanel('hold')}
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:gesture-tap-button"></ha-icon>
-                  Tap action on button
+                  ${t('editor.actions.on_button')}
                 </h4>
                 <div class="content">
                     <div style="${isSelect ? 'opacity: 0.5; pointer-events: none;' : ''}">
-                        ${editor.makeActionPanel("Tap action", button_action, 'none', 'button_action')}
+                        ${editor.makeActionPanel('tap', button_action, 'none', 'button_action')}
                     </div>
-                    ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
-                    ${editor.makeActionPanel("Hold action", button_action, 'none', 'button_action')}
+                    ${editor.makeActionPanel('double_tap', button_action, 'none', 'button_action')}
+                    ${editor.makeActionPanel('hold', button_action, 'none', 'button_action')}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
-                  Styling and layout options
+                  ${t('editor.common.styling_layout_options')}
                 </h4>
                 <div class="content">
                     ${editor.makeLayoutPanel()}
@@ -112,20 +114,20 @@ export function renderSelectEditor(editor){
             <div class="bubble-info">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:information-outline"></ha-icon>
-                    Select card
+                    ${t('editor.select.info_title')}
                 </h4>
                 <div class="content">
-                    <p>This card allows you to have a select menu for your entities with selectable options:</p>
+                    <p>${t('editor.select.info_body')}</p>
                     <ul class="icon-list">
-                        <li><ha-icon icon="mdi:format-list-bulleted"></ha-icon>Input Select entities</li>
-                        <li><ha-icon icon="mdi:form-dropdown"></ha-icon>Select entities</li>
-                        <li><ha-icon icon="mdi:playlist-music"></ha-icon>Media players with&nbsp;<b>source list</b></li>
-                        <li><ha-icon icon="mdi:speaker"></ha-icon>Media players with&nbsp;<b>sound mode list</b></li>
-                        <li><ha-icon icon="mdi:thermostat"></ha-icon>Climate entities with&nbsp;<b>hvac modes</b></li>
-                        <li><ha-icon icon="mdi:fan"></ha-icon>Climate/Fan entities with&nbsp;<b>fan modes</b></li>
-                        <li><ha-icon icon="mdi:air-conditioner"></ha-icon>Climate entities with&nbsp;<b>swing modes</b></li>
-                        <li><ha-icon icon="mdi:thermostat-auto"></ha-icon>Climate entities with&nbsp;<b>preset modes</b></li>
-                        <li><ha-icon icon="mdi:lightbulb-group"></ha-icon>Light entities with&nbsp;<b>effect list</b></li>
+                        <li><ha-icon icon="mdi:format-list-bulleted"></ha-icon>${t('editor.select.supported_input_select')}</li>
+                        <li><ha-icon icon="mdi:form-dropdown"></ha-icon>${t('editor.select.supported_select')}</li>
+                        <li><ha-icon icon="mdi:playlist-music"></ha-icon>${t('editor.select.supported_media')}&nbsp;<b>${t('editor.select.attr_source_list')}</b></li>
+                        <li><ha-icon icon="mdi:speaker"></ha-icon>${t('editor.select.supported_media')}&nbsp;<b>${t('editor.select.attr_sound_mode_list')}</b></li>
+                        <li><ha-icon icon="mdi:thermostat"></ha-icon>${t('editor.select.supported_climate')}&nbsp;<b>${t('editor.select.attr_hvac_modes')}</b></li>
+                        <li><ha-icon icon="mdi:fan"></ha-icon>${t('editor.select.supported_climate_fan')}&nbsp;<b>${t('editor.select.attr_fan_modes')}</b></li>
+                        <li><ha-icon icon="mdi:air-conditioner"></ha-icon>${t('editor.select.supported_climate')}&nbsp;<b>${t('editor.select.attr_swing_modes')}</b></li>
+                        <li><ha-icon icon="mdi:thermostat-auto"></ha-icon>${t('editor.select.supported_climate')}&nbsp;<b>${t('editor.select.attr_preset_modes')}</b></li>
+                        <li><ha-icon icon="mdi:lightbulb-group"></ha-icon>${t('editor.select.supported_light')}&nbsp;<b>${t('editor.select.attr_effect_list')}</b></li>
                     </ul>
                 </div>
             </div>

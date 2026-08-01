@@ -3,7 +3,8 @@
   "name": "bubble-card",
   "version": "0.0.0",
   "scripts": {
-    "dist": "webpack",
+    "dist": "webpack && npm run dist:zip",
+    "dist:zip": "cd dist && rm -f bubble-card.zip && zip -qr bubble-card.zip bubble-card.js bubble-card.js.LICENSE.txt bubble-pop-up-fix.js translations",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
   },

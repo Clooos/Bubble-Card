@@ -1,13 +1,12 @@
 import { createElement } from '../../../tools/utils.js';
 import { monotonicNow } from '../../../tools/monotonic-time.js';
+import setupTranslation from '../../../tools/localize.js';
 import { extendPopupOpenHassGate } from '../hass-gate.js';
 import cardsStyles from './styles.css';
 import { createEditorCardElements } from './editor/index.js';
 
 const GRID_COLUMN_MULTIPLIER = 3;
 const DEFAULT_GRID_SIZE = { columns: 12, rows: 'auto' };
-const NESTED_POPUP_WARNING_TITLE = 'Nested pop-ups are not supported';
-const NESTED_POPUP_WARNING_MESSAGE = 'Adding a standalone pop-up inside another standalone pop-up is not supported. Please create this pop-up outside of the current pop-up instead.';
 
 // The deep config walk below runs for every off-screen card on every hass
 // dispatch while a pop-up is open. Config references are stable (reconciling
@@ -129,7 +128,7 @@ export function createCardElements(context) {
     if (isEditMode) {
         createEditorCardElements(context, cards, {
             createCard: (cardConfig) => _isStandalonePopupCardConfig(cardConfig)
-                ? _createNestedPopupWarningCard()
+                ? _createNestedPopupWarningCard(context)
                 : _createHuiCard(cardConfig, context, true),
             applyCardWrapperLayout: _applyCardWrapperLayout,
             bindCardLayoutUpdates: _bindCardLayoutUpdates,
@@ -849,7 +848,8 @@ export function _isStandalonePopupCardConfig(cardConfig) {
     );
 }
 
-function _createNestedPopupWarningCard() {
+function _createNestedPopupWarningCard(context) {
+    const t = setupTranslation(context?._hass ?? context?.hass);
     const warning = createElement('div', 'bubble-nested-popup-warning-card');
     warning.setAttribute('role', 'alert');
 
@@ -857,10 +857,10 @@ function _createNestedPopupWarningCard() {
     const icon = document.createElement('ha-icon');
     icon.setAttribute('icon', 'mdi:alert-outline');
     title.appendChild(icon);
-    title.appendChild(document.createTextNode(NESTED_POPUP_WARNING_TITLE));
+    title.appendChild(document.createTextNode(t('editor.nested.title')));
 
     const message = createElement('p', 'bubble-nested-popup-warning-message');
-    message.textContent = NESTED_POPUP_WARNING_MESSAGE;
+    message.textContent = t('editor.nested.body');
 
     warning.appendChild(title);
     warning.appendChild(message);

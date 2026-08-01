@@ -15,6 +15,34 @@ const performance = {
   hints: false,
 }
 
+// Ships the per-language editor dictionaries (src/translations/editor/*.json)
+// as translations/<lang>.json next to the bundle. They are fetched locally by
+// src/tools/localize.js when the editor opens; en.json is bundled so it is
+// not emitted, and _-prefixed files are tooling artifacts.
+class EmitTranslationsPlugin {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap('EmitTranslations', (compilation) => {
+      compilation.hooks.processAssets.tap(
+        { name: 'EmitTranslations', stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL },
+        () => {
+          const fs = require('fs');
+          const dir = path.resolve(__dirname, 'src/translations/editor');
+          for (const file of fs.readdirSync(dir)) {
+            if (!file.endsWith('.json') || file.startsWith('_') || file === 'en.json') continue;
+            const minified = JSON.stringify(JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8')));
+            compilation.emitAsset(
+              `translations/${file}`,
+              new compiler.webpack.sources.RawSource(minified)
+            );
+          }
+        }
+      );
+    });
+  }
+}
+
+const plugins = [new EmitTranslationsPlugin()];
+
 module.exports = [
   {
     mode: 'production',
@@ -25,6 +53,7 @@ module.exports = [
       rules,
     },
     performance,
+    plugins,
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: '[name].js'
@@ -42,6 +71,7 @@ module.exports = [
       rules,
     },
     performance,
+    plugins,
     output: {
       path: process.env.HA_PATH || path.resolve(__dirname, 'www'),
       filename: '[name].js'

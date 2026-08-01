@@ -1,5 +1,6 @@
 import { html, css, LitElement, nothing } from "lit";
 import { fireEvent } from "../../tools/utils.js";
+import setupTranslation from "../../tools/localize.js";
 import "./ha-form-bc_cluster.js";
 import "./ha-form-bc_group.js";
 
@@ -390,7 +391,7 @@ export class HaBcObjectSelector extends LitElement {
     const fields = this.selector?.bc_object?.fields;
 
     if (!fields) {
-      return html`<div>No fields defined</div>`;
+      return html`<div>${setupTranslation(this.hass)('editor.common.no_fields')}</div>`;
     }
 
     if (isMultiple) {

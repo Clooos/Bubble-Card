@@ -1,39 +1,41 @@
 import { html } from 'lit';
+import setupTranslation from '../../tools/localize.js';
 
 export function renderSubButtonsEditor(editor) {
+    const t = setupTranslation(editor.hass);
     const isPopUp = editor._config.card_type === 'pop-up';
 
     return html`
         <div class="card-config">
-            ${!isPopUp ? editor.makeDropdown("Card type", "card_type", editor.cardTypeList) : ''}
+            ${!isPopUp ? editor.makeDropdown(t('editor.common.card_type'), "card_type", editor.cardTypeList) : ''}
 
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:cog"></ha-icon>
-                    Card settings
+                    ${t('editor.common.card_settings')}
                 </h4>
                 <div class="content">
                     <ha-formfield>
                         <ha-switch
-                            label="Hide main background"
+                            label="${t('editor.sub_buttons_card.hide_main_background')}"
                             .checked="${editor._config?.hide_main_background || false}"
                             .configValue="${"hide_main_background"}"
                             @change="${editor._valueChanged}"
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Hide main background</label> 
+                            <label class="mdc-label">${t('editor.sub_buttons_card.hide_main_background')}</label>
                         </div>
                     </ha-formfield>
 
                     <ha-formfield>
                         <ha-switch
-                            label="Footer mode (Fixed position at bottom)"
+                            label="${t('editor.sub_buttons_card.footer_mode')}"
                             .checked="${editor._config?.footer_mode || false}"
                             .configValue="${"footer_mode"}"
                             @change="${editor._valueChanged}"
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Footer mode (Fixed position at bottom)</label> 
+                            <label class="mdc-label">${t('editor.sub_buttons_card.footer_mode')}</label>
                         </div>
                     </ha-formfield>
 
@@ -41,13 +43,13 @@ export function renderSubButtonsEditor(editor) {
                         <div style="margin-top: 16px; padding-left: 16px; border-left: 2px solid var(--divider-color);">
                             <ha-formfield>
                                 <ha-switch
-                                    label="Full width footer"
+                                    label="${t('editor.sub_buttons_card.full_width_footer')}"
                                     .checked="${editor._config?.footer_full_width || false}"
                                     .configValue="${"footer_full_width"}"
                                     @change="${editor._valueChanged}"
                                 ></ha-switch>
                                 <div class="mdc-form-field">
-                                    <label class="mdc-label">Full width footer (100% width)</label> 
+                                    <label class="mdc-label">${t('editor.sub_buttons_card.full_width_footer')}</label>
                                 </div>
                             </ha-formfield>
 
@@ -56,7 +58,7 @@ export function renderSubButtonsEditor(editor) {
                                     .hass=${editor.hass}
                                     .data=${{ footer_width: editor._config?.footer_width || 500 }}
                                     .schema=${[{ name: 'footer_width', selector: { text: { type: 'number' } }, options: { min: 200, max: 1200, step: 10 } }]}
-                                    .computeLabel=${() => 'Custom footer width (px)'}
+                                    .computeLabel=${() => t('editor.sub_buttons_card.footer_width')}
                                     @value-changed=${(ev) => {
                                         editor._valueChanged({
                                             target: { configValue: 'footer_width' },
@@ -65,7 +67,7 @@ export function renderSubButtonsEditor(editor) {
                                     }}
                                 ></ha-form>
                                 <div style="font-size: 0.8em; color: var(--secondary-text-color); margin-top: 4px;">
-                                    Footer will be centered on the page
+                                    ${t('editor.sub_buttons_card.footer_centered')}
                                 </div>
                             ` : ''}
 
@@ -73,7 +75,7 @@ export function renderSubButtonsEditor(editor) {
                                 .hass=${editor.hass}
                                 .data=${{ footer_bottom_offset: editor._config?.footer_bottom_offset || 16 }}
                                 .schema=${[{ name: 'footer_bottom_offset', selector: { text: { type: 'number' } }, options: { min: 0, max: 100, step: 1 } }]}
-                                .computeLabel=${() => 'Footer bottom distance (px)'}
+                                .computeLabel=${() => t('editor.sub_buttons_card.footer_distance')}
                                 @value-changed=${(ev) => {
                                     editor._valueChanged({
                                         target: { configValue: 'footer_bottom_offset' },
@@ -82,7 +84,7 @@ export function renderSubButtonsEditor(editor) {
                                 }}
                             ></ha-form>
                             <div style="font-size: 0.8em; color: var(--secondary-text-color); margin-top: 4px;">
-                                Distance from the bottom of the page (default: 16px)
+                                ${t('editor.sub_buttons_card.footer_distance_helper')}
                             </div>
                         </div>
                     ` : ''}
@@ -94,7 +96,7 @@ export function renderSubButtonsEditor(editor) {
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                     <ha-icon icon="mdi:palette"></ha-icon>
-                    Styling and layout options
+                    ${t('editor.common.styling_layout_options')}
                 </h4>
                 <div class="content">
                     ${editor.makeLayoutPanel()}
@@ -107,10 +109,10 @@ export function renderSubButtonsEditor(editor) {
             <div class="bubble-info">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:information-outline"></ha-icon>
-                    Sub-buttons card
+                    ${t('editor.sub_buttons_card.info_title')}
                 </h4>
                 <div class="content">
-                    <p>This card can only contain sub-buttons, perfect for displaying information, creating menus, and even a fixed footer menu at the bottom of the page.</p>
+                    <p>${t('editor.sub_buttons_card.info_body')}</p>
                 </div>
             </div>
 

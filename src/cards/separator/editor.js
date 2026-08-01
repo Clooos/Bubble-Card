@@ -1,11 +1,13 @@
 import { html } from 'lit';
+import setupTranslation from '../../tools/localize.js';
 
 
 export function renderSeparatorEditor(editor){
+    const t = setupTranslation(editor.hass);
 
     return html`
     <div class="card-config">
-        ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
+        ${editor.makeDropdown(t('editor.common.card_type'), "card_type", editor.cardTypeList)}
         <ha-form
             .hass=${editor.hass}
             .data=${{ name: editor._config?.name || '' }}
@@ -13,7 +15,7 @@ export function renderSeparatorEditor(editor){
                 name: 'name',
                 selector: { text: {} },
             }]}
-            .computeLabel=${() => 'Name'}
+            .computeLabel=${() => t('editor.common.name')}
             @value-changed=${(ev) => {
                 editor._valueChanged({
                     target: { configValue: 'name' },
@@ -21,12 +23,12 @@ export function renderSeparatorEditor(editor){
                 });
             }}
         ></ha-form>
-        ${editor.makeDropdown("Icon", "icon")}
+        ${editor.makeDropdown(t('editor.common.icon'), "icon")}
         ${editor.makeSubButtonPanel()}
         <ha-expansion-panel outlined>
             <h4 slot="header">
               <ha-icon icon="mdi:palette"></ha-icon>
-              Styling and layout options
+              ${t('editor.common.styling_layout_options')}
             </h4>
             <div class="content">
                 ${editor.makeLayoutPanel()}
@@ -37,10 +39,10 @@ export function renderSeparatorEditor(editor){
         <div class="bubble-info">
             <h4 class="bubble-section-title">
                 <ha-icon icon="mdi:information-outline"></ha-icon>
-                Separator card
+                ${t('editor.separator.info_title')}
             </h4>
             <div class="content">
-                <p>This card is a simple separator for dividing your pop-up/dashboard into categories or sections. e.g. Lights, Devices, Covers, Settings, Automations...</p>
+                <p>${t('editor.separator.info_body')}</p>
             </div>
         </div>
         ${editor.makeVersion()}

@@ -1,19 +1,21 @@
 import { html } from "lit";
+import setupTranslation from '../../tools/localize.js';
 
 
 export function renderMediaPlayerEditor(editor){
+    const t = setupTranslation(editor.hass);
 
     let button_action = editor._config.button_action || '';
 
     return html`
         <div class="card-config">
-            ${editor.makeDropdown("Card type", "card_type", editor.cardTypeList)}
+            ${editor.makeDropdown(t('editor.common.card_type'), "card_type", editor.cardTypeList)}
             <ha-form
                 .hass=${editor.hass}
                 .data=${editor._config}
                 .schema=${[
                             { name: "entity",
-                            label: "Entity", 
+                            label: t('editor.common.entity'),
                             selector: { entity: {domain:["media_player"]}  },
                             },
                         ]}   
@@ -23,14 +25,14 @@ export function renderMediaPlayerEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:cog"></ha-icon>
-                  Card settings
+                  ${t('editor.common.card_settings')}
                 </h4>
                 <div class="content"> 
                     <ha-form
                         .hass=${editor.hass}
                         .data=${{ name: editor._config?.name || '' }}
                         .schema=${[{ name: 'name', selector: { text: {} } }]}
-                        .computeLabel=${() => 'Optional - Name'}
+                        .computeLabel=${() => editor._optionalLabel(t('editor.common.name'))}
                         @value-changed=${(ev) => {
                             editor._valueChanged({
                                 target: { configValue: 'name' },
@@ -38,14 +40,14 @@ export function renderMediaPlayerEditor(editor){
                             });
                         }}
                     ></ha-form>
-                    ${editor.makeDropdown("Optional - Icon", "icon")}
+                    ${editor.makeDropdown(editor._optionalLabel(t('editor.common.icon')), "icon")}
                     ${editor.makeShowState()}
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:tune-variant"></ha-icon>
-                Media player settings
+                ${t('editor.media_player.settings_title')}
                 </h4>
                 <div class="content">
                     <ha-form
@@ -58,14 +60,14 @@ export function renderMediaPlayerEditor(editor){
                                 schema: [
                                     {
                                         name: "min_volume",
-                                        label: "Min volume",
+                                        label: t('editor.media_player.min_volume'),
                                         selector: { number: {
                                             step: "any"
                                         } },
                                     },
                                     {
                                         name: "max_volume",
-                                        label: "Max volume",
+                                        label: t('editor.media_player.max_volume'),
                                         selector: { number: {
                                             step: "any"
                                         } },
@@ -76,68 +78,68 @@ export function renderMediaPlayerEditor(editor){
                         .computeLabel=${editor._computeLabelCallback}
                         @value-changed=${editor._valueChanged}
                     ></ha-form>
-                    <ha-formfield .label="Optional - Hide play/pause button">
+                    <ha-formfield>
                         <ha-switch
-                            aria-label="Optional - Hide play/pause button"
+                            aria-label="${editor._optionalLabel(t('editor.media_player.hide_play_pause'))}"
                             .checked=${editor._config.hide?.play_pause_button || false}
                             .configValue="${"hide.play_pause_button"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Hide play/pause button</label> 
+                            <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_play_pause'))}</label> 
                         </div>
                     </ha-formfield>
-                    <ha-formfield .label="Optional - Hide volume button">
+                    <ha-formfield>
                         <ha-switch
-                            aria-label="Optional - Hide volume button"
+                            aria-label="${editor._optionalLabel(t('editor.media_player.hide_volume'))}"
                             .checked=${editor._config.hide?.volume_button || false}
                             .configValue="${"hide.volume_button"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Hide volume button</label>
+                            <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_volume'))}</label>
                         </div>
                     </ha-formfield>
-                    <ha-formfield .label="Optional - Hide next button">
+                    <ha-formfield>
                         <ha-switch
-                            aria-label="Optional - Hide next button"
+                            aria-label="${editor._optionalLabel(t('editor.media_player.hide_next'))}"
                             .checked=${editor._config.hide?.next_button || false}
                             .configValue="${"hide.next_button"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Hide next button</label>
+                            <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_next'))}</label>
                         </div>
                     </ha-formfield>
-                    <ha-formfield .label="Optional - Hide previous button">
+                    <ha-formfield>
                         <ha-switch
-                            aria-label="Optional - Hide previous button"
+                            aria-label="${editor._optionalLabel(t('editor.media_player.hide_previous'))}"
                             .checked=${editor._config.hide?.previous_button || false}
                             .configValue="${"hide.previous_button"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Hide previous button</label>
+                            <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_previous'))}</label>
                         </div>
                     </ha-formfield>
-                    <ha-formfield .label="Optional - Hide power button">
+                    <ha-formfield>
                         <ha-switch
-                            aria-label="Optional - Hide power button"
+                            aria-label="${editor._optionalLabel(t('editor.media_player.hide_power'))}"
                             .checked=${editor._config.hide?.power_button}
                             .configValue="${"hide.power_button"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">Optional - Hide power button</label>
+                            <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_power'))}</label>
                         </div>
                     </ha-formfield>
                     <div class="bubble-info">
                         <h4 class="bubble-section-title">
                             <ha-icon icon="mdi:information-outline"></ha-icon>
-                            Buttons default behavior
+                            ${t('editor.media_player.behavior_title')}
                         </h4>
                         <div class="content">
-                            <p>Outside of the editor, buttons other than the power button only appear if the media player is turned on.</p>
+                            <p>${t('editor.media_player.behavior_body')}</p>
                         </div>
                     </div>
                 </div>
@@ -145,48 +147,48 @@ export function renderMediaPlayerEditor(editor){
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:gesture-tap"></ha-icon>
-                  Tap action on icon
+                  ${t('editor.actions.on_icon')}
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel("Tap action")}
-                    ${editor.makeActionPanel("Double tap action")}
-                    ${editor.makeActionPanel("Hold action")}
+                    ${editor.makeActionPanel('tap')}
+                    ${editor.makeActionPanel('double_tap')}
+                    ${editor.makeActionPanel('hold')}
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                 <ha-icon icon="mdi:gesture-tap-button"></ha-icon>
-                Tap action on card
+                ${t('editor.actions.on_card')}
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel("Tap action", button_action, 'none', 'button_action')}
-                    ${editor.makeActionPanel("Double tap action", button_action, 'none', 'button_action')}
-                    ${editor.makeActionPanel("Hold action", button_action, 'none', 'button_action')}
+                    ${editor.makeActionPanel('tap', button_action, 'none', 'button_action')}
+                    ${editor.makeActionPanel('double_tap', button_action, 'none', 'button_action')}
+                    ${editor.makeActionPanel('hold', button_action, 'none', 'button_action')}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
-                  Styling and layout options
+                  ${t('editor.common.styling_layout_options')}
                 </h4>
                 <div class="content">
                     ${editor.makeLayoutPanel()}
                     <ha-expansion-panel outlined>
                         <h4 slot="header">
                           <ha-icon icon="mdi:palette"></ha-icon>
-                          Media player styling
+                          ${t('editor.media_player.styling_title')}
                         </h4>
                         <div class="content"> 
-                            <ha-formfield .label="Optional - Blurred media cover in background">
+                            <ha-formfield>
                                 <ha-switch
-                                    aria-label="Optional - Blurred media cover in background"
+                                    aria-label="${editor._optionalLabel(t('editor.media_player.blurred_cover'))}"
                                     .checked=${editor._config.cover_background ?? false}
                                     .configValue="${"cover_background"}"
                                     @change=${editor._valueChanged}
                                 ></ha-switch>
                                 <div class="mdc-form-field">
-                                    <label class="mdc-label">Optional - Blurred media cover in background</label> 
+                                    <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.blurred_cover'))}</label> 
                                 </div>
                             </ha-formfield>
                         </div>
@@ -198,10 +200,10 @@ export function renderMediaPlayerEditor(editor){
             <div class="bubble-info">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:information-outline"></ha-icon>
-                    Media player card
+                    ${t('editor.media_player.info_title')}
                 </h4>
                 <div class="content">
-                    <p>This card allows you to control a media player entity.</p>
+                    <p>${t('editor.media_player.info_body')}</p>
                 </div>
             </div>
             ${editor.makeVersion()}
