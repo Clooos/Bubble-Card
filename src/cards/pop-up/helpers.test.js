@@ -1263,6 +1263,40 @@ describe('standalone popup lifecycle', () => {
         expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
     });
 
+    test('flushes updates held during the open once it settles', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        context.updateBubbleCard = jest.fn();
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2
+
+        // A hass tick landed mid-slide: handlePopUp marked it pending.
+        context._pendingOpenSettledUpdate = true;
+
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // finalize
+
+        expect(context.updateBubbleCard).toHaveBeenCalledTimes(1);
+        expect(context._pendingOpenSettledUpdate).toBe(false);
+    });
+
+    test('drops a held update when the open is canceled by a close', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        context.updateBubbleCard = jest.fn();
+
+        openPopup(context);
+        context._pendingOpenSettledUpdate = true;
+
+        closePopup(context, true);
+
+        expect(context._pendingOpenSettledUpdate).toBe(false);
+        expect(context.updateBubbleCard).not.toHaveBeenCalled();
+    });
+
     test('invalidates the wake-sync cache when a standalone popup closes', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);

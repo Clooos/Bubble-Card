@@ -1,6 +1,6 @@
 import { changeEditor, changeStyle, changeTriggered, clearStyleUpdateFrame } from './changes.js';
 import { createHeader, createStructure, prepareStructure, prepareStandaloneStructure, renderHeaderButton, renderStandaloneOnboarding, clearStandaloneOnboarding } from './create.js';
-import { cleanupPopupRuntime, registerPopupContext, syncDeferredPopupHostLayout, syncPopupOpenStateWithLocation } from './helpers.js';
+import { cleanupPopupRuntime, isPopupOpenInProgress, registerPopupContext, syncDeferredPopupHostLayout, syncPopupOpenStateWithLocation } from './helpers.js';
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
 import { cleanupPopUpCards, handlePopUpCards } from './cards/index.js';
 import { isStandalonePopUpConfig } from './migration.js';
@@ -422,6 +422,17 @@ export function handlePopUp(context) {
     }
 
     if (!context.popUp || !context.elements) {
+        return;
+    }
+
+    // The whole open sequence is timing-critical: during the covered build the
+    // main thread belongs to the build steps, and during the slide any shell
+    // or child render re-rasters the moving layer (visible frame drops on
+    // mobile). Hold per-tick updates until the open settles and flush them as
+    // one pass in finalize; the fresh hass is already stored on the context.
+    if (context.isStandalonePopUp && isPopupOpenInProgress(context) &&
+        !context.editor && !context.detectedEditor) {
+        context._pendingOpenSettledUpdate = true;
         return;
     }
 

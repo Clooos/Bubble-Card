@@ -27,6 +27,7 @@ jest.unstable_mockModule('./create.js', () => ({
 
 jest.unstable_mockModule('./helpers.js', () => ({
     cleanupPopupRuntime: jest.fn(),
+    isPopupOpenInProgress: jest.fn(() => false),
     registerPopupContext: jest.fn(),
     syncDeferredPopupHostLayout: jest.fn(),
     syncPopupOpenStateWithLocation: jest.fn(),
@@ -59,7 +60,7 @@ const { changeTriggered } = await import('./changes.js');
 const { cleanupPopUpCards, handlePopUpCards } = await import('./cards/index.js');
 const { createHeader, createStructure } = await import('./create.js');
 const { renderHeaderButton } = await import('./create.js');
-const { cleanupPopupRuntime, syncPopupOpenStateWithLocation } = await import('./helpers.js');
+const { cleanupPopupRuntime, isPopupOpenInProgress, syncPopupOpenStateWithLocation } = await import('./helpers.js');
 const { registerPopUpHash } = await import('./navigation-picker-bridge.js');
 
 function createOpenPopupContext(overrides = {}) {
@@ -295,6 +296,36 @@ describe('handlePopUp performance guards', () => {
         expect(changeStyle).not.toHaveBeenCalled();
         expect(renderHeaderButton).not.toHaveBeenCalled();
         expect(context._standaloneNeedsShellRefresh).toBe(true);
+    });
+
+    test('holds per-tick updates while a standalone open is in flight', async () => {
+        isPopupOpenInProgress.mockReturnValueOnce(true);
+        const context = createOpenPopupContext({
+            isStandalonePopUp: true,
+            _standalonePopUpCardsActive: true,
+        });
+
+        await handlePopUp(context);
+
+        // Any render during the covered build or the slide re-rasters the
+        // moving layer: the tick is held and flushed once the open settles.
+        expect(context._pendingOpenSettledUpdate).toBe(true);
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+        expect(changeTriggered).not.toHaveBeenCalled();
+        expect(renderHeaderButton).not.toHaveBeenCalled();
+    });
+
+    test('keeps editor previews updating while an open is in flight', async () => {
+        isPopupOpenInProgress.mockReturnValueOnce(true);
+        const context = createOpenPopupContext({
+            isStandalonePopUp: true,
+            _standalonePopUpCardsActive: true,
+            editor: true,
+        });
+
+        await handlePopUp(context);
+
+        expect(context._pendingOpenSettledUpdate).toBeUndefined();
     });
 
     test('keeps standalone child-card reconciliation when the popup is active', async () => {

@@ -725,7 +725,7 @@ function setPopupOpenInProgress(context, inProgress) {
     context._popupOpenInProgress = inProgress === true;
 }
 
-function isPopupOpenInProgress(context) {
+export function isPopupOpenInProgress(context) {
     return context?._popupOpenInProgress === true;
 }
 
@@ -1154,6 +1154,7 @@ function consumePendingPopupOpenSource(context) {
 function clearPopupOpenSource(context) {
     context._pendingPopupOpenSource = null;
     context._popupOpenSource = null;
+    context._pendingOpenSettledUpdate = false;
     setPopupOpenInProgress(context, false);
     setPopupOpenSettled(context, false);
     clearFreshOutsideInteractionGuard(context);
@@ -1338,6 +1339,15 @@ function finalizeStandalonePopupOpen(context) {
     setPopupOpeningMarker(context, false);
     context.popUp.classList.remove('is-opening', 'is-closing', 'is-switch-closing');
     completePopupOpen(context);
+
+    // Per-tick updates held during the open sequence flush as one pass on the
+    // settled pop-up: the fresh hass was stored on the context all along.
+    if (context._pendingOpenSettledUpdate) {
+        context._pendingOpenSettledUpdate = false;
+        try {
+            context.updateBubbleCard?.();
+        } catch (_) {}
+    }
 
     if (context._pendingPostOpenCardSync) {
         context._pendingPostOpenCardSync = false;
