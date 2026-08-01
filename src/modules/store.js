@@ -9,7 +9,7 @@ import { ensureBCTProviderAvailable, isBCTAvailableSync } from './bct-provider.j
 import { isHomeAssistantVersionAtLeast } from '../tools/utils.js';
 import { tTemplate } from '../editor/utils.js';
 import setupTranslation from '../tools/localize.js';
-import { translateText, getTranslationTargetLang } from './translate.js';
+import { translateText, getTranslationTargetLang, warmupBrowserTranslator } from './translate.js';
 
 // Kicks off (once) and returns the machine translation of a module
 // description. Falls back to the original text until/unless a translation is
@@ -298,6 +298,9 @@ export function makeModuleStore(context) {
     } catch (_) {
       context._storeTranslateDescriptions = true;
     }
+  }
+  if (context._storeTranslateDescriptions) {
+    warmupBrowserTranslator(context.hass);
   }
   
   // Add a function to handle zooming in/out

@@ -137,6 +137,23 @@ function getBrowserTranslator(targetLang) {
   return browserTranslators.get(targetLang);
 }
 
+// Chrome only starts a language pack download from within a user gesture.
+// This arms a one-shot listener so the first click anywhere warms the
+// translator up transparently; afterwards everything runs on-device.
+let warmupInstalled = false;
+export function warmupBrowserTranslator(hass) {
+  if (warmupInstalled) return;
+  const lang = getTranslationTargetLang(hass);
+  if (!lang || typeof Translator === 'undefined' || typeof Translator.create !== 'function') return;
+  warmupInstalled = true;
+  const serviceLang = SERVICE_LANG[lang] ?? lang.split('-')[0];
+  const handler = () => {
+    window.removeEventListener('pointerdown', handler, true);
+    getBrowserTranslator(serviceLang);
+  };
+  window.addEventListener('pointerdown', handler, true);
+}
+
 async function translateChunkWithBrowserApi(chunk, targetLang) {
   try {
     const translator = await getBrowserTranslator(targetLang);
