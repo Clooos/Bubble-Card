@@ -584,25 +584,33 @@ export function startTimerInterval(context, entity, updateCallback) {
     
     // Create interval that updates every second
     const intervalId = setInterval(() => {
+        // Check if the card is still in the DOM: a removed card keeps its
+        // last hass snapshot, in which an active timer stays 'active'
+        // forever, so the state checks below could never stop the interval.
+        if (context.isConnected === false) {
+            stopTimerInterval(context);
+            return;
+        }
+
         // Check if context is still valid and entity still exists
         if (!context._hass?.states?.[entity]) {
             stopTimerInterval(context);
             return;
         }
-        
+
         const currentState = context._hass.states[entity];
         // Stop interval if timer is no longer active
         if (!currentState || currentState.state !== 'active') {
             stopTimerInterval(context);
             return;
         }
-        
+
         // Call the update callback
         if (updateCallback) {
             updateCallback();
         }
     }, 1000);
-    
+
     timerIntervals.set(context, intervalId);
 }
 

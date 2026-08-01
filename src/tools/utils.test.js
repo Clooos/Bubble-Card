@@ -191,3 +191,93 @@ describe('toggleBodyScroll', () => {
         expect(document.body.classList.contains('bubble-body-scroll-locked')).toBe(false);
     });
 });
+
+describe('timer intervals', () => {
+    let utilsModule;
+
+    function createTimerContext(entityState = 'active') {
+        return {
+            isConnected: true,
+            _hass: {
+                states: {
+                    'timer.test': { state: entityState },
+                },
+            },
+        };
+    }
+
+    beforeEach(async () => {
+        jest.resetModules();
+        jest.useFakeTimers();
+        utilsModule = await import('./utils.js');
+    });
+
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
+    test('runs the update callback every second while the timer is active', () => {
+        const context = createTimerContext();
+        const updateCallback = jest.fn();
+
+        utilsModule.startTimerInterval(context, 'timer.test', updateCallback);
+        jest.advanceTimersByTime(3000);
+
+        expect(updateCallback).toHaveBeenCalledTimes(3);
+    });
+
+    test('self-stops when the card left the DOM despite a frozen active snapshot', () => {
+        const context = createTimerContext();
+        const updateCallback = jest.fn();
+
+        utilsModule.startTimerInterval(context, 'timer.test', updateCallback);
+        jest.advanceTimersByTime(1000);
+        expect(updateCallback).toHaveBeenCalledTimes(1);
+
+        // Removing the card freezes its last hass snapshot: the timer entity
+        // stays 'active' in it forever, so only the connectivity check can
+        // stop the interval.
+        context.isConnected = false;
+        jest.advanceTimersByTime(5000);
+
+        expect(updateCallback).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    test('keeps running for contexts without a connectivity flag', () => {
+        const context = createTimerContext();
+        delete context.isConnected;
+        const updateCallback = jest.fn();
+
+        utilsModule.startTimerInterval(context, 'timer.test', updateCallback);
+        jest.advanceTimersByTime(2000);
+
+        expect(updateCallback).toHaveBeenCalledTimes(2);
+    });
+
+    test('stopTimerInterval with the element as key clears the interval', () => {
+        const context = createTimerContext();
+        const updateCallback = jest.fn();
+
+        utilsModule.startTimerInterval(context, 'timer.test', updateCallback);
+        utilsModule.stopTimerInterval(context);
+        jest.advanceTimersByTime(3000);
+
+        expect(updateCallback).not.toHaveBeenCalled();
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    test('stops itself once the timer entity is no longer active', () => {
+        const context = createTimerContext();
+        const updateCallback = jest.fn();
+
+        utilsModule.startTimerInterval(context, 'timer.test', updateCallback);
+        jest.advanceTimersByTime(1000);
+
+        context._hass.states['timer.test'].state = 'idle';
+        jest.advanceTimersByTime(3000);
+
+        expect(updateCallback).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+    });
+});

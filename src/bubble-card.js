@@ -102,10 +102,10 @@ class BubbleCard extends HTMLElement {
       }
     } catch (e) {}
     try {
-      // Stop timer intervals for main card
-      if (this.context) {
-        stopTimerInterval(this.context);
-      }
+      // The element itself is the context keyed into the timer registry
+      // (base-card changes.js passes the bubble-card element to
+      // startTimerInterval), so it must be the key used to stop it.
+      stopTimerInterval(this);
     } catch (e) {}
     try {
       if (this._moduleChangeHandler) {
