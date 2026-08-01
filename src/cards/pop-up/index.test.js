@@ -344,6 +344,35 @@ describe('handlePopUp performance guards', () => {
         global.window = previousWindow;
     });
 
+    test('wake sync sees popups registered after the cache was built', async () => {
+        const previousWindow = global.window;
+        const mockWindow = new EventTarget();
+        delete mockWindow.__bubbleWakeSyncListenersAdded;
+        global.window = mockWindow;
+        jest.useFakeTimers();
+
+        const contextA = createOpenPopupContext();
+        await handlePopUp(contextA);
+
+        // First wake builds the strong-reference context cache.
+        mockWindow.dispatchEvent(new Event('focus'));
+
+        // A popup registered afterwards must invalidate that cache, or every
+        // later wake keeps syncing the stale list without it.
+        const contextB = createOpenPopupContext({ config: { hash: '#second-popup' } });
+        await handlePopUp(contextB);
+        jest.clearAllMocks();
+
+        mockWindow.dispatchEvent(new Event('focus'));
+
+        expect(syncPopupOpenStateWithLocation).toHaveBeenCalledWith(contextA, false);
+        expect(syncPopupOpenStateWithLocation).toHaveBeenCalledWith(contextB, false);
+
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+        global.window = previousWindow;
+    });
+
     test('does not force hash-based reopen while editing', async () => {
         const context = createOpenPopupContext({
             editor: true,

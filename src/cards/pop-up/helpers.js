@@ -2215,13 +2215,15 @@ export function syncPopupOpenStateWithLocation(context, instant = true) {
 export function closePopup(context, force = false) {
     if ((!context.popUp.classList.contains('is-popup-opened') && !force)) return;
 
+    // Invalidate wake sync cache — context state changed, cached list is
+    // stale. Must run before the standalone branch: standalone closes return
+    // early and would otherwise leave the cache pinning this context.
+    invalidateWakeSyncCache();
+
     if (context.isStandalonePopUp) {
         closeStandalonePopup(context, force);
         return;
     }
-
-    // Invalidate wake sync cache — context state changed, cached list is stale
-    invalidateWakeSyncCache();
 
     clearAllTimeouts(context);
     
@@ -2484,6 +2486,9 @@ export function cleanupPopupRuntime(context) {
 
     popupState.activePopups.delete(context);
     clearPopupOpenSource(context);
+    // The element is being torn down: the wake-sync cache may hold a strong
+    // reference to this context and must not outlive it.
+    invalidateWakeSyncCache();
 
     try {
         if (visuallyOpen) {

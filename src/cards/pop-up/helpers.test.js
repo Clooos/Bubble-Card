@@ -165,6 +165,7 @@ jest.unstable_mockModule('./styles.css', () => ({
 }));
 
 const { cleanupPopupRuntime, closePopup, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
+const { invalidateWakeSyncCache } = await import('./index.js');
 
 let rafCallbacks;
 let nextRafId;
@@ -1260,6 +1261,30 @@ describe('standalone popup lifecycle', () => {
         cleanupPopupRuntime(context);
 
         expect(shouldHoldDashboardHassUpdate(card)).toBe(false);
+    });
+
+    test('invalidates the wake-sync cache when a standalone popup closes', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        openPopup(context);
+        invalidateWakeSyncCache.mockClear();
+
+        // Standalone closes return early from closePopup: the invalidation
+        // must happen before that branch or the cache keeps this context.
+        closePopup(context, true);
+
+        expect(invalidateWakeSyncCache).toHaveBeenCalled();
+    });
+
+    test('invalidates the wake-sync cache when the popup element is torn down', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        invalidateWakeSyncCache.mockClear();
+        cleanupPopupRuntime(context);
+
+        expect(invalidateWakeSyncCache).toHaveBeenCalled();
     });
 
     test('warms up the standalone shell at idle after registration', () => {

@@ -17,6 +17,10 @@ let wakeSyncContextsCacheValid = false;
 
 export function invalidateWakeSyncCache() {
     wakeSyncContextsCacheValid = false;
+    // Drop the strong references too: with only the flag flipped, the cached
+    // array would keep the previous generation of popup contexts (shell DOM,
+    // config, last hass) reachable until the next focus/pageshow rebuild.
+    wakeSyncContextsCache = null;
 }
 
 function pruneWakeSyncContextRefs() {
@@ -44,6 +48,9 @@ function registerWakeSyncContext(context) {
     }
 
     wakeSyncContextRefs.push(new WeakRef(context));
+    // A context registered after the cache was built would otherwise be
+    // invisible to wake syncs until an open/close invalidates the cache.
+    invalidateWakeSyncCache();
 }
 
 function getWakeSyncContexts() {
