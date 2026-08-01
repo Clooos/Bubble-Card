@@ -515,7 +515,8 @@
       "custom_styles": "styles personnalisés",
       "info_body2": "Cela facilite par exemple la modification des styles de toutes vos cartes, et pour les utilisateurs avancés, la modification ou l'ajout de fonctionnalités avec un véritable éditeur.",
       "info_body3": "{coding}, vous pouvez aussi trouver et installer des modules créés par la communauté dans la {store}.",
-      "coding_not_your_thing": "Si le code n'est pas votre truc"
+      "coding_not_your_thing": "Si le code n'est pas votre truc",
+      "no_description_available": "Aucune description disponible"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools requis",
@@ -629,6 +630,29 @@
       "copy_error": "Impossible de copier dans le presse-papiers. Veuillez copier manuellement depuis l'aperçu ci-dessous.",
       "download_success": "Module téléchargé en fichier YAML !",
       "download_error": "Erreur lors du téléchargement du module : {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card est une collection de cartes minimaliste et personnalisable"
+    },
+    "errors": {
+      "card_type_required": "Vous devez définir un type de carte",
+      "entity_required": "Vous devez définir une entité",
+      "entity_list_required": "Vous devez définir une liste d'entités",
+      "link_required": "Vous devez définir {key}",
+      "duplicate_link": "Vous ne pouvez pas utiliser {value} deux fois",
+      "select_menu_missing": "« {option} » manquant",
+      "vertical_stack": "Pile verticale introuvable, pas de panique, elle sera ajoutée automatiquement à votre pop-up.",
+      "check_value": "Vérifiez cette valeur",
+      "source_card": "Configuration de la carte (section styles)",
+      "source_module": "Module ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Aucun hash défini",
+      "hidden_content": "Contenu masqué en mode édition pour les performances"
+    },
+    "navigation": {
+      "group": "Pop-ups Bubble Card",
+      "hash_hint": "Hash de pop-up Bubble Card"
     }
   }
 }

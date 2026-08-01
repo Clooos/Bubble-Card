@@ -515,7 +515,8 @@
       "custom_styles": "mukautettuja tyylejä",
       "info_body2": "Näin on helppo muuttaa esimerkiksi kaikkien korttiesi tyylejä ja edistyneille käyttäjille muokata tai lisätä ominaisuuksia oikealla editorilla.",
       "info_body3": "{coding}, voit myös löytää ja asentaa yhteisön tekemiä moduuleja {store}.",
-      "coding_not_your_thing": "Jos koodaaminen ei ole sinun juttusi"
+      "coding_not_your_thing": "Jos koodaaminen ei ole sinun juttusi",
+      "no_description_available": "Kuvausta ei ole saatavilla"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools vaaditaan",
@@ -629,6 +630,29 @@
       "copy_error": "Kopiointi leikepöydälle epäonnistui. Kopioi manuaalisesti alla olevasta esikatselusta.",
       "download_success": "Moduuli ladattu YAML-tiedostona!",
       "download_error": "Virhe moduulia ladattaessa: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card on minimalistinen ja mukautettava korttikokoelma"
+    },
+    "errors": {
+      "card_type_required": "Sinun täytyy määrittää kortin tyyppi",
+      "entity_required": "Sinun täytyy määrittää entiteetti",
+      "entity_list_required": "Sinun täytyy määrittää entiteettiluettelo",
+      "link_required": "Sinun täytyy määrittää {key}",
+      "duplicate_link": "Et voi käyttää arvoa {value} kahdesti",
+      "select_menu_missing": "\"{option}\" puuttuu",
+      "vertical_stack": "vertical-stack-korttia ei löytynyt, ei hätää, se lisätään ponnahdusikkunaasi automaattisesti.",
+      "check_value": "Tarkista tämä arvo",
+      "source_card": "Kortin määritys (tyylit-osio)",
+      "source_module": "Moduuli ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Hashia ei ole määritetty",
+      "hidden_content": "Sisältö on piilotettu muokkaustilassa suorituskyvyn vuoksi"
+    },
+    "navigation": {
+      "group": "Bubble Cardin ponnahdusikkunat",
+      "hash_hint": "Bubble Card -ponnahdusikkunan hash"
     }
   }
 }

@@ -176,7 +176,7 @@
       "unable_error": "Unable to migrate this pop-up from the current dashboard editor.",
       "failed_error": "Failed to migrate this pop-up.",
       "migrated_toast": "Pop-up migrated to standalone.",
-      "notice_title": "Legacy pop-up detected",
+      "notice_title": "Your pop-ups need to be migrated",
       "notice_body": "This pop-up still uses the old vertical-stack wrapper. Migrate it to the standalone format for much better performance and to manage its content with the same drag-and-drop flow as a section view.",
       "horizontal_body": "Horizontal stacks were detected. Their cards will be converted so you can drag and drop them individually while keeping the same layout (this option can be disabled if needed).",
       "convert_stacks": "Convert horizontal stacks to grid cards",
@@ -184,7 +184,27 @@
       "rollback_bold": "This migration is permanent.",
       "rollback_body": "Even though it has been tested to handle all known legacy cases, I still recommend keeping a backup if you may want to roll back to v3.1.6 later.",
       "migrating": "Migrating...",
-      "migrate": "Migrate to standalone"
+      "migrate": "Migrate to standalone",
+      "notice_header": "Important",
+      "notice_intro": "Since Bubble Card v3.2.0, {bold} It's easy and only takes a few clicks!",
+      "notice_intro_bold": "your pop-ups must be migrated to the new standalone format.",
+      "notice_announcement": "If you missed it, check out the {link} (it took me about 10 hours to write it!) to see all the new features and changes.",
+      "notice_announcement_link": "v3.2.0 release announcement",
+      "notice_change_title": "What does it change?",
+      "notice_change_body": "Standalone pop-ups render much faster, work more reliably, and no longer need to live inside a {stack} card (finally!). You also get access to a new editor based on the Home Assistant section editor, with the exact same drag-and-drop approach for easier and faster editing!",
+      "notice_video_summary": "Watch how the new editor works",
+      "notice_video_hint": "(click to expand)",
+      "notice_features": "Pop-ups now have new features as well, with new modes (like a centred one), a new optional classic style and a performance mode for smoother animations on lower-end devices.",
+      "notice_how_title": "How to migrate from the editor?",
+      "notice_how_body": "Open the editor for each pop-up showing {available}, then just click {migrate}.",
+      "notice_available": "Migration available",
+      "notice_yaml_title": "Using YAML?",
+      "notice_yaml_body": "Replace the legacy pop-up config with the standalone format:",
+      "notice_protip": "Pro tip:",
+      "notice_protip_body": "Honestly, if you're still using YAML for Bubble Card at this point, you might want to give the new editor a try, it makes creating and editing pop-ups a breeze! You also get access to the Module Store. I've put so much love into this editor ❤️",
+      "notice_enjoy": "Enjoy this update! Cheers! 🍻",
+      "notice_dismiss": "Got it, don't show again on this view",
+      "notice_remind": "Remind me later"
     },
     "card_names": {
       "button": "Button (Switch, slider, ...)",
@@ -495,7 +515,8 @@
       "custom_styles": "custom styles",
       "info_body2": "This makes it easy to change things like the styles of all your cards, and for advanced users, to modify or add features with a real editor.",
       "info_body3": "{coding}, you can also find and install modules made by the community in the {store}.",
-      "coding_not_your_thing": "If coding isn't your thing"
+      "coding_not_your_thing": "If coding isn't your thing",
+      "no_description_available": "No description available"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools required",
@@ -609,6 +630,29 @@
       "copy_error": "Could not copy to clipboard. Please copy manually from the preview below.",
       "download_success": "Module downloaded as YAML file!",
       "download_error": "Error downloading module: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card is a minimalist and customisable card collection"
+    },
+    "errors": {
+      "card_type_required": "You need to define a card type",
+      "entity_required": "You need to define an entity",
+      "entity_list_required": "You need to define an entity list",
+      "link_required": "You need to define {key}",
+      "duplicate_link": "You can't use {value} twice",
+      "select_menu_missing": "\"{option}\" missing",
+      "vertical_stack": "Vertical stack not found, don't panic, it will be added automatically to your pop-up.",
+      "check_value": "Check this value",
+      "source_card": "Card Configuration (styles section)",
+      "source_module": "Module ({id})"
+    },
+    "placeholder": {
+      "no_hash": "No hash defined",
+      "hidden_content": "Content hidden in edit mode for performance"
+    },
+    "navigation": {
+      "group": "Bubble Card pop-ups",
+      "hash_hint": "Bubble Card pop-up hash"
     }
   }
 }

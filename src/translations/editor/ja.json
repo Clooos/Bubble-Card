@@ -176,7 +176,7 @@
       "unable_error": "現在のダッシュボードエディターからは、このポップアップを移行できません。",
       "failed_error": "このポップアップの移行に失敗しました。",
       "migrated_toast": "ポップアップをスタンドアロンに移行しました。",
-      "notice_title": "レガシーポップアップを検出しました",
+      "notice_title": "ポップアップの移行が必要です",
       "notice_body": "このポップアップは、まだ古い vertical-stack ラッパーを使用しています。スタンドアロン形式に移行すると、パフォーマンスが大幅に向上し、セクションビューと同じドラッグ&ドロップ操作でコンテンツを管理できます。",
       "horizontal_body": "水平スタックが検出されました。同じレイアウトを保ったまま個別にドラッグ&ドロップできるように、それらのカードは変換されます (このオプションは必要に応じて無効にできます)。",
       "convert_stacks": "水平スタックをグリッドカードに変換",
@@ -184,7 +184,27 @@
       "rollback_bold": "この移行は元に戻せません。",
       "rollback_body": "既知のレガシーケースをすべて処理できることはテスト済みですが、後で v3.1.6 に戻す可能性がある場合は、バックアップを保管しておくことをお勧めします。",
       "migrating": "移行中...",
-      "migrate": "スタンドアロンに移行"
+      "migrate": "スタンドアロンに移行",
+      "notice_header": "重要",
+      "notice_intro": "Bubble Card v3.2.0 以降、{bold} 簡単で、数回のクリックで完了します！",
+      "notice_intro_bold": "ポップアップは新しいスタンドアロン形式に移行する必要があります。",
+      "notice_announcement": "まだご覧になっていない場合は、{link} をチェックして、新機能と変更点をすべて確認してください (書くのに10時間ほどかかりました！)。",
+      "notice_announcement_link": "v3.2.0 リリースのお知らせ",
+      "notice_change_title": "何が変わるの？",
+      "notice_change_body": "スタンドアロンのポップアップは表示がはるかに速く、動作もより安定していて、{stack} カードの中に置く必要もなくなりました (ついに！)。さらに、Home Assistant のセクションエディターをベースにした新しいエディターも使えるようになり、まったく同じドラッグ&ドロップ操作で、より簡単かつ素早く編集できます！",
+      "notice_video_summary": "新しいエディターの動作を見る",
+      "notice_video_hint": "(クリックで展開)",
+      "notice_features": "ポップアップには新機能も追加されました。新しいモード (中央に表示するモードなど)、任意で選べる新しいクラシックスタイル、そして低スペックのデバイスでもアニメーションを滑らかにするパフォーマンスモードがあります。",
+      "notice_how_title": "エディターから移行するには？",
+      "notice_how_body": "{available} と表示されている各ポップアップのエディターを開き、{migrate} をクリックするだけです。",
+      "notice_available": "移行可能",
+      "notice_yaml_title": "YAML を使っていますか？",
+      "notice_yaml_body": "レガシーのポップアップ設定をスタンドアロン形式に置き換えてください:",
+      "notice_protip": "プロのヒント:",
+      "notice_protip_body": "正直なところ、今も Bubble Card を YAML で書いているなら、ぜひ新しいエディターを試してみてください。ポップアップの作成も編集もぐっと快適になります！ Module Store も利用できます。このエディターにはたっぷり愛情を注ぎました ❤️",
+      "notice_enjoy": "このアップデートをお楽しみください！乾杯！🍻",
+      "notice_dismiss": "了解しました。このビューでは今後表示しない",
+      "notice_remind": "後で通知する"
     },
     "card_names": {
       "button": "ボタン (スイッチ、スライダーなど)",
@@ -495,7 +515,8 @@
       "custom_styles": "カスタムスタイル",
       "info_body2": "これにより、すべてのカードのスタイルなどを簡単に変更でき、上級者は本格的なエディターで機能を変更したり追加したりできます。",
       "info_body3": "{coding}場合は、コミュニティが作成したモジュールを{store}で見つけてインストールすることもできます。",
-      "coding_not_your_thing": "コーディングが得意でない"
+      "coding_not_your_thing": "コーディングが得意でない",
+      "no_description_available": "説明はありません"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools が必要です",
@@ -609,6 +630,29 @@
       "copy_error": "クリップボードにコピーできませんでした。下のプレビューから手動でコピーしてください。",
       "download_success": "モジュールをYAMLファイルとしてダウンロードしました！",
       "download_error": "モジュールのダウンロードエラー：{error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card はミニマルでカスタマイズ可能なカードコレクションです"
+    },
+    "errors": {
+      "card_type_required": "カードタイプを指定してください",
+      "entity_required": "エンティティを指定してください",
+      "entity_list_required": "エンティティリストを指定してください",
+      "link_required": "{key} を指定してください",
+      "duplicate_link": "{value} は 2 回使用できません",
+      "select_menu_missing": "「{option}」がありません",
+      "vertical_stack": "vertical-stack が見つかりません。ご心配なく、ポップアップに自動的に追加されます。",
+      "check_value": "この値を確認してください",
+      "source_card": "カード設定 (スタイルセクション)",
+      "source_module": "モジュール ({id})"
+    },
+    "placeholder": {
+      "no_hash": "ハッシュが未設定です",
+      "hidden_content": "パフォーマンスのため、編集モードではコンテンツを非表示にしています"
+    },
+    "navigation": {
+      "group": "Bubble Card のポップアップ",
+      "hash_hint": "Bubble Card のポップアップのハッシュ"
     }
   }
 }

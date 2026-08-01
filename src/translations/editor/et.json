@@ -515,7 +515,8 @@
       "custom_styles": "kohandatud stiile",
       "info_body2": "Nii on lihtne muuta näiteks kõigi oma kaartide stiile ja edasijõudnud kasutajatel funktsioone päris redaktoriga muuta või lisada.",
       "info_body3": "{coding}, saad kogukonna tehtud mooduleid leida ja paigaldada ka {store}.",
-      "coding_not_your_thing": "Kui programmeerimine pole sinu ala"
+      "coding_not_your_thing": "Kui programmeerimine pole sinu ala",
+      "no_description_available": "Kirjeldust pole saadaval"
     },
     "store": {
       "bct_required_title": "Vajalik on Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Lõikelauale kopeerimine ebaõnnestus. Kopeeri käsitsi allolevast eelvaatest.",
       "download_success": "Moodul laaditi alla YAML-failina!",
       "download_error": "Viga mooduli allalaadimisel: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card on minimalistlik ja kohandatav kaardikogu"
+    },
+    "errors": {
+      "card_type_required": "Pead määrama kaardi tüübi",
+      "entity_required": "Pead määrama olemi",
+      "entity_list_required": "Pead määrama olemite loendi",
+      "link_required": "Pead määrama {key}",
+      "duplicate_link": "Sa ei saa väärtust {value} kaks korda kasutada",
+      "select_menu_missing": "\"{option}\" puudub",
+      "vertical_stack": "vertical-stack ei leitud, ära muretse, see lisatakse sinu hüpikaknasse automaatselt.",
+      "check_value": "Kontrolli seda väärtust",
+      "source_card": "Kaardi seadistus (stiilide jaotis)",
+      "source_module": "Moodul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Räsi pole määratud",
+      "hidden_content": "Sisu on jõudluse huvides redigeerimisrežiimis peidetud"
+    },
+    "navigation": {
+      "group": "Bubble Cardi hüpikaknad",
+      "hash_hint": "Bubble Cardi hüpikakna räsi"
     }
   }
 }

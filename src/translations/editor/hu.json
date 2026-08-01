@@ -515,7 +515,8 @@
       "custom_styles": "egyéni stílusokat",
       "info_body2": "Így könnyen módosíthatja például az összes kártyája stílusát, haladó felhasználóként pedig valódi szerkesztővel módosíthat vagy adhat hozzá funkciókat.",
       "info_body3": "{coding}, a közösség által készített modulokat is találhat és telepíthet a {store}.",
-      "coding_not_your_thing": "Ha a kódolás nem az Ön világa"
+      "coding_not_your_thing": "Ha a kódolás nem az Ön világa",
+      "no_description_available": "Nincs elérhető leírás"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools szükséges",
@@ -629,6 +630,29 @@
       "copy_error": "Nem sikerült a vágólapra másolni. Kérjük, másolja kézzel a lenti előnézetből.",
       "download_success": "A modul letöltve YAML fájlként!",
       "download_error": "Hiba a modul letöltésekor: {error}"
+    },
+    "card_picker": {
+      "description": "A Bubble Card egy minimalista és testreszabható kártyagyűjtemény"
+    },
+    "errors": {
+      "card_type_required": "Meg kell adnia egy kártyatípust",
+      "entity_required": "Meg kell adnia egy entitást",
+      "entity_list_required": "Meg kell adnia egy entitáslistát",
+      "link_required": "Meg kell adnia: {key}",
+      "duplicate_link": "A(z) {value} nem használható kétszer",
+      "select_menu_missing": "\"{option}\" hiányzik",
+      "vertical_stack": "A vertical-stack nem található, semmi gond, automatikusan hozzáadódik a pop-uphoz.",
+      "check_value": "Ellenőrizze ezt az értéket",
+      "source_card": "Kártyakonfiguráció (stílusok szakasz)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Nincs hash megadva",
+      "hidden_content": "A tartalom rejtve van szerkesztési módban a teljesítmény érdekében"
+    },
+    "navigation": {
+      "group": "Bubble Card pop-upok",
+      "hash_hint": "Bubble Card pop-up hash"
     }
   }
 }

@@ -515,7 +515,8 @@
       "custom_styles": "sérsniðnum stílum",
       "info_body2": "Þetta gerir auðvelt að breyta hlutum eins og stílum allra kortanna þinna, og fyrir lengra komna notendur að breyta eða bæta við eiginleikum með alvöru ritli.",
       "info_body3": "{coding}, þá geturðu líka fundið og sett upp einingar frá samfélaginu í {store}.",
-      "coding_not_your_thing": "Ef forritun er ekki þitt fag"
+      "coding_not_your_thing": "Ef forritun er ekki þitt fag",
+      "no_description_available": "Engin lýsing tiltæk"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools er nauðsynlegt",
@@ -629,6 +630,29 @@
       "copy_error": "Ekki tókst að afrita á klippispjaldið. Afritaðu handvirkt úr forskoðuninni hér fyrir neðan.",
       "download_success": "Einingin var sótt sem YAML-skrá!",
       "download_error": "Villa við að sækja eininguna: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card er einfalt og sérsníðanlegt safn af kortum"
+    },
+    "errors": {
+      "card_type_required": "Þú þarft að skilgreina tegund korts",
+      "entity_required": "Þú þarft að skilgreina einingu",
+      "entity_list_required": "Þú þarft að skilgreina lista yfir einingar",
+      "link_required": "Þú þarft að skilgreina {key}",
+      "duplicate_link": "Þú getur ekki notað {value} tvisvar",
+      "select_menu_missing": "\"{option}\" vantar",
+      "vertical_stack": "Lóðréttur stafli fannst ekki, engar áhyggjur, honum verður bætt sjálfkrafa við sprettigluggann þinn.",
+      "check_value": "Athugaðu þetta gildi",
+      "source_card": "Stillingar korts (hluti fyrir stíla)",
+      "source_module": "Eining ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Ekkert kviss (hash) skilgreint",
+      "hidden_content": "Efni falið í breytingaham vegna afkasta"
+    },
+    "navigation": {
+      "group": "Bubble Card sprettigluggar",
+      "hash_hint": "Kviss (hash) fyrir Bubble Card sprettiglugga"
     }
   }
 }

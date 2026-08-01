@@ -515,7 +515,8 @@
       "custom_styles": "stiluri personalizate",
       "info_body2": "Acest lucru facilitează schimbarea unor lucruri precum stilurile tuturor cardurilor și, pentru utilizatorii avansați, modificarea sau adăugarea de funcții cu un editor adevărat.",
       "info_body3": "{coding}, puteți găsi și instala și module create de comunitate în {store}.",
-      "coding_not_your_thing": "Dacă programarea nu este punctul dvs. forte"
+      "coding_not_your_thing": "Dacă programarea nu este punctul dvs. forte",
+      "no_description_available": "Nicio descriere disponibilă"
     },
     "store": {
       "bct_required_title": "Este necesar Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Nu s-a putut copia în clipboard. Copiați manual din previzualizarea de mai jos.",
       "download_success": "Modul descărcat ca fișier YAML!",
       "download_error": "Eroare la descărcarea modulului: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card este o colecție de carduri minimalistă și personalizabilă"
+    },
+    "errors": {
+      "card_type_required": "Trebuie să definiți un tip de card",
+      "entity_required": "Trebuie să definiți o entitate",
+      "entity_list_required": "Trebuie să definiți o listă de entități",
+      "link_required": "Trebuie să definiți {key}",
+      "duplicate_link": "Nu puteți folosi {value} de două ori",
+      "select_menu_missing": "\"{option}\" lipsește",
+      "vertical_stack": "Stiva verticală nu a fost găsită, nicio grijă, va fi adăugată automat la pop-upul dumneavoastră.",
+      "check_value": "Verificați această valoare",
+      "source_card": "Configurația cardului (secțiunea stiluri)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Niciun hash definit",
+      "hidden_content": "Conținut ascuns în modul de editare pentru performanță"
+    },
+    "navigation": {
+      "group": "Pop-upuri Bubble Card",
+      "hash_hint": "Hash de pop-up Bubble Card"
     }
   }
 }

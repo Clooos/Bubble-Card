@@ -515,7 +515,8 @@
       "custom_styles": "estilos personalizados",
       "info_body2": "Isto facilita cambiar cousas como os estilos de todas as súas tarxetas e, para os usuarios avanzados, modificar ou engadir funcións cun editor de verdade.",
       "info_body3": "{coding}, tamén pode atopar e instalar módulos feitos pola comunidade no {store}.",
-      "coding_not_your_thing": "Se programar non é o seu"
+      "coding_not_your_thing": "Se programar non é o seu",
+      "no_description_available": "Non hai ningunha descrición dispoñible"
     },
     "store": {
       "bct_required_title": "Requírese Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Non se puido copiar no portapapeis. Cópieo manualmente desde a vista previa de abaixo.",
       "download_success": "Módulo descargado como ficheiro YAML!",
       "download_error": "Erro ao descargar o módulo: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card é unha colección de tarxetas minimalista e personalizable"
+    },
+    "errors": {
+      "card_type_required": "Debe definir un tipo de tarxeta",
+      "entity_required": "Debe definir unha entidade",
+      "entity_list_required": "Debe definir unha lista de entidades",
+      "link_required": "Debe definir {key}",
+      "duplicate_link": "Non pode usar {value} dúas veces",
+      "select_menu_missing": "Falta \"{option}\"",
+      "vertical_stack": "Non se atopou a pila vertical, non se preocupe, engadirase automaticamente ao seu pop-up.",
+      "check_value": "Comprobe este valor",
+      "source_card": "Configuración da tarxeta (sección de estilos)",
+      "source_module": "Módulo ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Ningún hash definido",
+      "hidden_content": "Contido agochado no modo de edición por rendemento"
+    },
+    "navigation": {
+      "group": "Pop-ups de Bubble Card",
+      "hash_hint": "Hash do pop-up de Bubble Card"
     }
   }
 }

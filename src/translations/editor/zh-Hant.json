@@ -176,7 +176,7 @@
       "unable_error": "無法從目前的儀表板編輯器遷移此彈出視窗。",
       "failed_error": "此彈出視窗遷移失敗。",
       "migrated_toast": "彈出視窗已遷移為獨立格式。",
-      "notice_title": "偵測到舊版彈出視窗",
+      "notice_title": "您的彈出視窗需要遷移",
       "notice_body": "此彈出視窗仍在使用舊的 vertical-stack 包裝方式。將它遷移為獨立格式可大幅提升效能，並能像區段檢視一樣以拖放方式管理其內容。",
       "horizontal_body": "偵測到水平堆疊。其中的卡片將被轉換，以便在保持相同版面配置的情況下逐一拖放 (如有需要可停用此選項)。",
       "convert_stacks": "將水平堆疊轉換為格線卡片",
@@ -184,7 +184,27 @@
       "rollback_bold": "此遷移是永久性的。",
       "rollback_body": "雖然它已經過測試，可處理所有已知的舊版情況，但如果您日後可能想退回 v3.1.6，仍建議保留備份。",
       "migrating": "遷移中...",
-      "migrate": "遷移為獨立格式"
+      "migrate": "遷移為獨立格式",
+      "notice_header": "重要",
+      "notice_intro": "自 Bubble Card v3.2.0 起，{bold} 這很簡單，只要點幾下就好！",
+      "notice_intro_bold": "您的彈出視窗必須遷移為新的獨立格式。",
+      "notice_announcement": "如果您還沒看過，可以查看 {link} (我大約花了 10 小時來寫它！)，了解所有新功能與變更。",
+      "notice_announcement_link": "v3.2.0 版本發布公告",
+      "notice_change_title": "這會有什麼改變？",
+      "notice_change_body": "獨立彈出視窗的算繪速度快得多、運作更穩定，而且不再需要放在 {stack} 卡片裡 (終於！)。您還能使用以 Home Assistant 區段編輯器為基礎的全新編輯器，採用完全相同的拖放方式，編輯更輕鬆、更快速！",
+      "notice_video_summary": "看看新編輯器如何運作",
+      "notice_video_hint": "(點擊展開)",
+      "notice_features": "彈出視窗也有了新功能，包括新的模式 (例如置中模式)、可選用的全新經典樣式，以及讓低階裝置動畫更流暢的效能模式。",
+      "notice_how_title": "如何從編輯器遷移？",
+      "notice_how_body": "開啟每個顯示 {available} 的彈出視窗編輯器，然後點擊 {migrate} 即可。",
+      "notice_available": "可遷移",
+      "notice_yaml_title": "使用 YAML 嗎？",
+      "notice_yaml_body": "將舊版彈出視窗設定換成獨立格式:",
+      "notice_protip": "專業提示:",
+      "notice_protip_body": "老實說，如果您到現在還在用 YAML 撰寫 Bubble Card，不妨試試新的編輯器，建立與編輯彈出視窗變得輕而易舉！您也能使用 Module Store。我在這個編輯器上投入了滿滿的心血 ❤️",
+      "notice_enjoy": "祝您使用愉快！乾杯！🍻",
+      "notice_dismiss": "知道了，不要在此檢視中再顯示",
+      "notice_remind": "稍後提醒我"
     },
     "card_names": {
       "button": "按鈕 (開關、滑桿...)",
@@ -495,7 +515,8 @@
       "custom_styles": "自訂樣式",
       "info_body2": "這樣可以輕鬆變更所有卡片的樣式等內容；對進階使用者而言，還能用真正的編輯器修改或新增功能。",
       "info_body3": "{coding}，您也可以在{store}中找到並安裝社群製作的模組。",
-      "coding_not_your_thing": "如果您不喜歡寫程式"
+      "coding_not_your_thing": "如果您不喜歡寫程式",
+      "no_description_available": "沒有可用的描述"
     },
     "store": {
       "bct_required_title": "需要 Bubble Card Tools",
@@ -609,6 +630,29 @@
       "copy_error": "無法複製到剪貼簿。請從下方預覽手動複製。",
       "download_success": "模組已下載為 YAML 檔案！",
       "download_error": "下載模組時發生錯誤：{error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card 是一套極簡且可自訂的卡片集合"
+    },
+    "errors": {
+      "card_type_required": "需要指定卡片類型",
+      "entity_required": "需要指定實體",
+      "entity_list_required": "需要指定實體清單",
+      "link_required": "需要指定 {key}",
+      "duplicate_link": "{value} 不能使用兩次",
+      "select_menu_missing": "缺少「{option}」",
+      "vertical_stack": "找不到 vertical-stack，別擔心，它會自動加入你的彈出視窗。",
+      "check_value": "請檢查此值",
+      "source_card": "卡片設定 (樣式區段)",
+      "source_module": "模組 ({id})"
+    },
+    "placeholder": {
+      "no_hash": "未定義雜湊",
+      "hidden_content": "為了效能，編輯模式下已隱藏內容"
+    },
+    "navigation": {
+      "group": "Bubble Card 彈出視窗",
+      "hash_hint": "Bubble Card 彈出視窗雜湊"
     }
   }
 }

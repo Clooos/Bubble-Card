@@ -515,7 +515,8 @@
       "custom_styles": "estilo pertsonalizatuak",
       "info_body2": "Honi esker, erraza da zure txartel guztien estiloak eta antzekoak aldatzea, eta, erabiltzaile aurreratuentzat, ezaugarriak aldatzea edo gehitzea benetako editore batekin.",
       "info_body3": "{coding}, komunitateak sortutako moduluak ere aurkitu eta instala ditzakezu {store} dendan.",
-      "coding_not_your_thing": "Programazioa zure kontua ez bada"
+      "coding_not_your_thing": "Programazioa zure kontua ez bada",
+      "no_description_available": "Ez dago deskribapenik erabilgarri"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools behar da",
@@ -629,6 +630,29 @@
       "copy_error": "Ezin izan da arbelean kopiatu. Kopiatu eskuz beheko aurrebistatik.",
       "download_success": "Modulua YAML fitxategi gisa deskargatu da!",
       "download_error": "Errorea modulua deskargatzean: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card txartel bilduma minimalista eta pertsonalizagarria da"
+    },
+    "errors": {
+      "card_type_required": "Txartel mota bat zehaztu behar duzu",
+      "entity_required": "Entitate bat zehaztu behar duzu",
+      "entity_list_required": "Entitate zerrenda bat zehaztu behar duzu",
+      "link_required": "{key} zehaztu behar duzu",
+      "duplicate_link": "Ezin duzu {value} bi aldiz erabili",
+      "select_menu_missing": "\"{option}\" falta da",
+      "vertical_stack": "Ez da vertical-stack aurkitu, lasai, automatikoki gehituko zaio zure laster-leihoari.",
+      "check_value": "Egiaztatu balio hau",
+      "source_card": "Txartelaren konfigurazioa (estiloen atala)",
+      "source_module": "Modulua ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Ez da hash-ik zehaztu",
+      "hidden_content": "Edukia ezkutatuta dago edizio moduan errendimendua hobetzeko"
+    },
+    "navigation": {
+      "group": "Bubble Card-en laster-leihoak",
+      "hash_hint": "Bubble Card-en laster-leihoaren hash-a"
     }
   }
 }

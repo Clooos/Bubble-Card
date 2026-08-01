@@ -176,7 +176,7 @@
       "unable_error": "현재 대시보드 편집기에서는 이 팝업을 마이그레이션할 수 없어요.",
       "failed_error": "이 팝업의 마이그레이션에 실패했어요.",
       "migrated_toast": "팝업이 독립형으로 마이그레이션되었어요.",
-      "notice_title": "레거시 팝업이 감지되었어요",
+      "notice_title": "팝업을 마이그레이션해야 해요",
       "notice_body": "이 팝업은 아직 이전 방식의 vertical-stack 래퍼를 사용하고 있어요. 독립형 형식으로 마이그레이션하면 성능이 훨씬 좋아지고, 섹션 보기와 동일한 드래그 앤 드롭 방식으로 콘텐츠를 관리할 수 있어요.",
       "horizontal_body": "가로 스택이 감지되었어요. 동일한 레이아웃을 유지하면서 개별적으로 드래그 앤 드롭할 수 있도록 해당 카드들이 변환돼요(필요하면 이 옵션을 비활성화할 수 있어요).",
       "convert_stacks": "가로 스택을 그리드 카드로 변환",
@@ -184,7 +184,27 @@
       "rollback_bold": "이 마이그레이션은 되돌릴 수 없어요.",
       "rollback_body": "알려진 모든 레거시 사례를 처리할 수 있도록 테스트되었지만, 나중에 v3.1.6으로 되돌릴 가능성이 있다면 백업을 보관해 두시길 권해요.",
       "migrating": "마이그레이션 중...",
-      "migrate": "독립형으로 마이그레이션"
+      "migrate": "독립형으로 마이그레이션",
+      "notice_header": "중요",
+      "notice_intro": "Bubble Card v3.2.0부터 {bold} 어렵지 않고 몇 번의 클릭이면 끝나요!",
+      "notice_intro_bold": "팝업을 새로운 독립형 형식으로 마이그레이션해야 해요.",
+      "notice_announcement": "아직 못 보셨다면 {link}에서 모든 새 기능과 변경 사항을 확인해 보세요 (쓰는 데 10시간 정도 걸렸어요!).",
+      "notice_announcement_link": "v3.2.0 릴리스 공지",
+      "notice_change_title": "무엇이 달라지나요?",
+      "notice_change_body": "독립형 팝업은 훨씬 빠르게 렌더링되고 더 안정적으로 동작하며, 더 이상 {stack} 카드 안에 있을 필요가 없어요 (드디어!). 또한 Home Assistant 섹션 편집기를 기반으로 한 새 편집기를 사용할 수 있어서, 완전히 똑같은 드래그 앤 드롭 방식으로 더 쉽고 빠르게 편집할 수 있어요!",
+      "notice_video_summary": "새 편집기가 어떻게 작동하는지 보기",
+      "notice_video_hint": "(클릭하여 펼치기)",
+      "notice_features": "팝업에는 새로운 기능도 생겼어요. 새로운 모드(가운데 정렬 모드 등), 선택할 수 있는 새 클래식 스타일, 그리고 사양이 낮은 기기에서도 애니메이션을 부드럽게 해 주는 성능 모드가 있어요.",
+      "notice_how_title": "편집기에서 마이그레이션하려면?",
+      "notice_how_body": "{available}이 표시된 각 팝업의 편집기를 열고 {migrate}를 클릭하기만 하면 돼요.",
+      "notice_available": "마이그레이션 가능",
+      "notice_yaml_title": "YAML을 사용하시나요?",
+      "notice_yaml_body": "레거시 팝업 구성을 독립형 형식으로 바꿔 주세요:",
+      "notice_protip": "유용한 팁:",
+      "notice_protip_body": "솔직히 지금도 Bubble Card를 YAML로 작성하고 있다면 새 편집기를 한번 써 보세요. 팝업을 만들고 편집하는 게 훨씬 수월해져요! Module Store도 사용할 수 있고요. 이 편집기에 정말 많은 애정을 쏟았어요 ❤️",
+      "notice_enjoy": "이번 업데이트를 즐겨 주세요! 건배! 🍻",
+      "notice_dismiss": "알겠어요, 이 뷰에서는 다시 표시하지 않기",
+      "notice_remind": "나중에 알림"
     },
     "card_names": {
       "button": "버튼 (스위치, 슬라이더 등)",
@@ -495,7 +515,8 @@
       "custom_styles": "사용자 지정 스타일",
       "info_body2": "이를 통해 모든 카드의 스타일 같은 것을 쉽게 바꿀 수 있고, 고급 사용자는 진짜 편집기로 기능을 수정하거나 추가할 수 있어요.",
       "info_body3": "{coding} 커뮤니티에서 만든 모듈을 {store}에서 찾아 설치할 수도 있어요.",
-      "coding_not_your_thing": "코딩이 어렵게 느껴진다면"
+      "coding_not_your_thing": "코딩이 어렵게 느껴진다면",
+      "no_description_available": "사용할 수 있는 설명이 없어요"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools 필요",
@@ -609,6 +630,29 @@
       "copy_error": "클립보드에 복사할 수 없었어요. 아래 미리보기에서 직접 복사해 주세요.",
       "download_success": "모듈이 YAML 파일로 다운로드되었어요!",
       "download_error": "모듈 다운로드 오류: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card는 미니멀하고 자유롭게 꾸밀 수 있는 카드 모음이에요"
+    },
+    "errors": {
+      "card_type_required": "카드 유형을 지정해야 해요",
+      "entity_required": "엔티티를 지정해야 해요",
+      "entity_list_required": "엔티티 목록을 지정해야 해요",
+      "link_required": "{key}을(를) 지정해야 해요",
+      "duplicate_link": "{value}을(를) 두 번 사용할 수 없어요",
+      "select_menu_missing": "\"{option}\" 없음",
+      "vertical_stack": "vertical-stack을 찾을 수 없어요. 걱정하지 마세요, 팝업에 자동으로 추가돼요.",
+      "check_value": "이 값을 확인해 주세요",
+      "source_card": "카드 구성 (스타일 섹션)",
+      "source_module": "모듈 ({id})"
+    },
+    "placeholder": {
+      "no_hash": "해시가 지정되지 않았어요",
+      "hidden_content": "성능을 위해 편집 모드에서 콘텐츠를 숨겼어요"
+    },
+    "navigation": {
+      "group": "Bubble Card 팝업",
+      "hash_hint": "Bubble Card 팝업 해시"
     }
   }
 }

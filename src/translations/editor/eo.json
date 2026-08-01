@@ -515,7 +515,8 @@
       "custom_styles": "proprajn stilojn",
       "info_body2": "Tio faciligas ŝanĝi aferojn kiel la stilojn de ĉiuj viaj kartoj, kaj por spertaj uzantoj, modifi aŭ aldoni funkciojn per vera redaktilo.",
       "info_body3": "{coding}, vi ankaŭ povas trovi kaj instali modulojn faritajn de la komunumo en la {store}.",
-      "coding_not_your_thing": "Se programado ne estas via afero"
+      "coding_not_your_thing": "Se programado ne estas via afero",
+      "no_description_available": "Neniu priskribo disponebla"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools necesa",
@@ -629,6 +630,29 @@
       "copy_error": "Ne eblis kopii al la tondujo. Bonvolu kopii permane el la suba antaŭrigardo.",
       "download_success": "Modulo elŝutita kiel YAML-dosiero!",
       "download_error": "Eraro dum elŝuto de la modulo: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card estas minimalisma kaj agordebla kolekto de kartoj"
+    },
+    "errors": {
+      "card_type_required": "Vi devas difini tipon de karto",
+      "entity_required": "Vi devas difini enton",
+      "entity_list_required": "Vi devas difini liston de entoj",
+      "link_required": "Vi devas difini {key}",
+      "duplicate_link": "Vi ne povas uzi {value} dufoje",
+      "select_menu_missing": "\"{option}\" mankas",
+      "vertical_stack": "Vertikala stako ne trovita, ne paniku, ĝi estos aŭtomate aldonita al via ŝprucfenestro.",
+      "check_value": "Kontrolu ĉi tiun valoron",
+      "source_card": "Agordo de la karto (sekcio de stiloj)",
+      "source_module": "Modulo ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Neniu haketo difinita",
+      "hidden_content": "Enhavo kaŝita en redakta reĝimo pro rapideco"
+    },
+    "navigation": {
+      "group": "Ŝprucfenestroj de Bubble Card",
+      "hash_hint": "Haketo de ŝprucfenestro de Bubble Card"
     }
   }
 }

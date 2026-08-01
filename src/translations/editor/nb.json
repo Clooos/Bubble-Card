@@ -515,7 +515,8 @@
       "custom_styles": "egendefinerte stiler",
       "info_body2": "Dette gjør det enkelt å endre ting som stilene på alle kortene dine, og for avanserte brukere å endre eller legge til funksjoner med en ekte redigerer.",
       "info_body3": "{coding}, du kan også finne og installere moduler laget av fellesskapet i {store}.",
-      "coding_not_your_thing": "Hvis koding ikke er din greie"
+      "coding_not_your_thing": "Hvis koding ikke er din greie",
+      "no_description_available": "Ingen beskrivelse tilgjengelig"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools kreves",
@@ -629,6 +630,29 @@
       "copy_error": "Kunne ikke kopiere til utklippstavlen. Kopier manuelt fra forhåndsvisningen nedenfor.",
       "download_success": "Modulen er lastet ned som YAML-fil!",
       "download_error": "Feil ved nedlasting av modulen: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card er en minimalistisk og tilpassbar kortsamling"
+    },
+    "errors": {
+      "card_type_required": "Du må angi en korttype",
+      "entity_required": "Du må angi en entitet",
+      "entity_list_required": "Du må angi en entitetsliste",
+      "link_required": "Du må angi {key}",
+      "duplicate_link": "Du kan ikke bruke {value} to ganger",
+      "select_menu_missing": "\"{option}\" mangler",
+      "vertical_stack": "Vertikal stabel ble ikke funnet, ingen panikk, den legges automatisk til i pop-upen din.",
+      "check_value": "Kontroller denne verdien",
+      "source_card": "Kortkonfigurasjon (delen stiler)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Ingen hash definert",
+      "hidden_content": "Innhold skjult i redigeringsmodus av ytelseshensyn"
+    },
+    "navigation": {
+      "group": "Bubble Card-pop-uper",
+      "hash_hint": "Hash for Bubble Card-pop-up"
     }
   }
 }

@@ -515,7 +515,8 @@
       "custom_styles": "brugerdefinerede stilarter",
       "info_body2": "Dette gør det nemt at ændre ting som stilarterne på alle dine kort, og for avancerede brugere at ændre eller tilføje funktioner med en rigtig editor.",
       "info_body3": "{coding}, du kan også finde og installere moduler lavet af fællesskabet i {store}.",
-      "coding_not_your_thing": "Hvis kodning ikke er noget for dig"
+      "coding_not_your_thing": "Hvis kodning ikke er noget for dig",
+      "no_description_available": "Ingen beskrivelse tilgængelig"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools kræves",
@@ -629,6 +630,29 @@
       "copy_error": "Kunne ikke kopiere til udklipsholderen. Kopier venligst manuelt fra forhåndsvisningen nedenfor.",
       "download_success": "Modulet er downloadet som YAML-fil!",
       "download_error": "Fejl ved download af modulet: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card er en minimalistisk og tilpasselig kortsamling"
+    },
+    "errors": {
+      "card_type_required": "Du skal angive en korttype",
+      "entity_required": "Du skal angive en entitet",
+      "entity_list_required": "Du skal angive en entitetsliste",
+      "link_required": "Du skal angive {key}",
+      "duplicate_link": "Du kan ikke bruge {value} to gange",
+      "select_menu_missing": "\"{option}\" mangler",
+      "vertical_stack": "Lodret stak blev ikke fundet, bare rolig, den bliver automatisk tilføjet til din pop-up.",
+      "check_value": "Kontrollér denne værdi",
+      "source_card": "Kortkonfiguration (afsnittet stilarter)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Ingen hash defineret",
+      "hidden_content": "Indhold skjult i redigeringstilstand af hensyn til ydeevnen"
+    },
+    "navigation": {
+      "group": "Bubble Card-pop-ups",
+      "hash_hint": "Hash til Bubble Card-pop-up"
     }
   }
 }

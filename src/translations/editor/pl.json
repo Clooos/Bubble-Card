@@ -515,7 +515,8 @@
       "custom_styles": "niestandardowe style",
       "info_body2": "Dzięki temu łatwo zmienisz na przykład style wszystkich swoich kart, a zaawansowani użytkownicy mogą modyfikować lub dodawać funkcje w prawdziwym edytorze.",
       "info_body3": "{coding}, możesz też znaleźć i zainstalować moduły stworzone przez społeczność w {store}.",
-      "coding_not_your_thing": "Jeśli programowanie to nie Twoja bajka"
+      "coding_not_your_thing": "Jeśli programowanie to nie Twoja bajka",
+      "no_description_available": "Brak dostępnego opisu"
     },
     "store": {
       "bct_required_title": "Wymagane Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Nie można skopiować do schowka. Skopiuj ręcznie z podglądu poniżej.",
       "download_success": "Moduł pobrany jako plik YAML!",
       "download_error": "Błąd podczas pobierania modułu: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card to minimalistyczna i konfigurowalna kolekcja kart"
+    },
+    "errors": {
+      "card_type_required": "Musisz zdefiniować typ karty",
+      "entity_required": "Musisz zdefiniować encję",
+      "entity_list_required": "Musisz zdefiniować listę encji",
+      "link_required": "Musisz zdefiniować {key}",
+      "duplicate_link": "Nie możesz użyć {value} dwa razy",
+      "select_menu_missing": "Brak „{option}”",
+      "vertical_stack": "Nie znaleziono vertical-stack, bez paniki, zostanie on automatycznie dodany do twojego pop-upa.",
+      "check_value": "Sprawdź tę wartość",
+      "source_card": "Konfiguracja karty (sekcja stylów)",
+      "source_module": "Moduł ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Nie zdefiniowano hasha",
+      "hidden_content": "Treść ukryta w trybie edycji ze względu na wydajność"
+    },
+    "navigation": {
+      "group": "Pop-upy Bubble Card",
+      "hash_hint": "Hash pop-upa Bubble Card"
     }
   }
 }

@@ -515,7 +515,8 @@
       "custom_styles": "prilagođene stilove",
       "info_body2": "Ovo olakšava promjenu stvari poput stilova svih vaših kartica, a naprednim korisnicima omogućava da izmijene ili dodaju funkcije u pravom uređivaču.",
       "info_body3": "{coding}, također možete pronaći i instalirati module koje je napravila zajednica u {store}.",
-      "coding_not_your_thing": "Ako programiranje nije za vas"
+      "coding_not_your_thing": "Ako programiranje nije za vas",
+      "no_description_available": "Opis nije dostupan"
     },
     "store": {
       "bct_required_title": "Potreban je Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Nije moguće kopirati u međuspremnik. Kopirajte ručno iz pregleda ispod.",
       "download_success": "Modul je preuzet kao YAML datoteka!",
       "download_error": "Greška pri preuzimanju modula: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card je minimalistička i prilagodljiva kolekcija kartica"
+    },
+    "errors": {
+      "card_type_required": "Morate definisati tip kartice",
+      "entity_required": "Morate definisati entitet",
+      "entity_list_required": "Morate definisati listu entiteta",
+      "link_required": "Morate definisati {key}",
+      "duplicate_link": "Ne možete koristiti {value} dvaput",
+      "select_menu_missing": "Nedostaje \"{option}\"",
+      "vertical_stack": "Vertical stack nije pronađen, bez panike, bit će automatski dodat u vaš skočni prozor.",
+      "check_value": "Provjerite ovu vrijednost",
+      "source_card": "Konfiguracija kartice (odjeljak stilova)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Hash nije definisan",
+      "hidden_content": "Sadržaj je sakriven u načinu uređivanja radi performansi"
+    },
+    "navigation": {
+      "group": "Bubble Card skočni prozori",
+      "hash_hint": "Hash Bubble Card skočnog prozora"
     }
   }
 }

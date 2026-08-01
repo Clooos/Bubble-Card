@@ -515,7 +515,8 @@
       "custom_styles": "stili personalizzati",
       "info_body2": "Questo rende facile cambiare, ad esempio, gli stili di tutte le tue schede e, per gli utenti avanzati, modificare o aggiungere funzionalità con un vero editor.",
       "info_body3": "{coding}, puoi anche trovare e installare moduli creati dalla community nello {store}.",
-      "coding_not_your_thing": "Se programmare non fa per te"
+      "coding_not_your_thing": "Se programmare non fa per te",
+      "no_description_available": "Nessuna descrizione disponibile"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools richiesto",
@@ -629,6 +630,29 @@
       "copy_error": "Impossibile copiare negli appunti. Copia manualmente dall'anteprima qui sotto.",
       "download_success": "Modulo scaricato come file YAML!",
       "download_error": "Errore durante il download del modulo: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card è una collezione di schede minimalista e personalizzabile"
+    },
+    "errors": {
+      "card_type_required": "Devi definire un tipo di scheda",
+      "entity_required": "Devi definire un'entità",
+      "entity_list_required": "Devi definire un elenco di entità",
+      "link_required": "Devi definire {key}",
+      "duplicate_link": "Non puoi usare {value} due volte",
+      "select_menu_missing": "\"{option}\" mancante",
+      "vertical_stack": "Pila verticale non trovata, niente panico, verrà aggiunta automaticamente al tuo pop-up.",
+      "check_value": "Controlla questo valore",
+      "source_card": "Configurazione della scheda (sezione stili)",
+      "source_module": "Modulo ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Nessun hash definito",
+      "hidden_content": "Contenuto nascosto in modalità modifica per le prestazioni"
+    },
+    "navigation": {
+      "group": "Pop-up di Bubble Card",
+      "hash_hint": "Hash del pop-up di Bubble Card"
     }
   }
 }

@@ -515,7 +515,8 @@
       "custom_styles": "stile të personalizuara",
       "info_body2": "Kjo e bën të lehtë ndryshimin e gjërave si stilet e të gjitha kartave tuaja dhe, për përdoruesit e avancuar, modifikimin ose shtimin e veçorive me një editor të vërtetë.",
       "info_body3": "{coding}, mund të gjeni dhe instaloni gjithashtu module të krijuara nga komuniteti në {store}.",
-      "coding_not_your_thing": "Nëse programimi nuk është për ju"
+      "coding_not_your_thing": "Nëse programimi nuk është për ju",
+      "no_description_available": "Nuk ka përshkrim të disponueshëm"
     },
     "store": {
       "bct_required_title": "Kërkohet Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Kopjimi në clipboard dështoi. Ju lutemi kopjojeni manualisht nga pamja paraprake më poshtë.",
       "download_success": "Moduli u shkarkua si skedar YAML!",
       "download_error": "Gabim gjatë shkarkimit të modulit: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card është një koleksion kartash minimalist dhe i personalizueshëm"
+    },
+    "errors": {
+      "card_type_required": "Duhet të përcaktoni një lloj karte",
+      "entity_required": "Duhet të përcaktoni një entitet",
+      "entity_list_required": "Duhet të përcaktoni një listë entitetesh",
+      "link_required": "Duhet të përcaktoni {key}",
+      "duplicate_link": "Nuk mund ta përdorni {value} dy herë",
+      "select_menu_missing": "\"{option}\" mungon",
+      "vertical_stack": "vertical-stack nuk u gjet, mos u shqetësoni, do të shtohet automatikisht te pop-up-i juaj.",
+      "check_value": "Kontrolloni këtë vlerë",
+      "source_card": "Konfigurimi i kartës (seksioni i stileve)",
+      "source_module": "Moduli ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Nuk është përcaktuar asnjë hash",
+      "hidden_content": "Përmbajtja është e fshehur në modalitetin e redaktimit për performancë"
+    },
+    "navigation": {
+      "group": "Pop-up-et e Bubble Card",
+      "hash_hint": "Hash-i i pop-up-it të Bubble Card"
     }
   }
 }

@@ -515,7 +515,8 @@
       "custom_styles": "estils personalitzats",
       "info_body2": "Això facilita canviar coses com els estils de totes les vostres targetes i, per als usuaris avançats, modificar o afegir funcions amb un editor de debò.",
       "info_body3": "{coding}, també podeu trobar i instal·lar mòduls fets per la comunitat al {store}.",
-      "coding_not_your_thing": "Si programar no és el vostre fort"
+      "coding_not_your_thing": "Si programar no és el vostre fort",
+      "no_description_available": "No hi ha cap descripció disponible"
     },
     "store": {
       "bct_required_title": "Cal Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "No s'ha pogut copiar al porta-retalls. Copieu-ho manualment des de la previsualització de sota.",
       "download_success": "Mòdul baixat com a fitxer YAML!",
       "download_error": "Error en baixar el mòdul: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card és una col·lecció de targetes minimalista i personalitzable"
+    },
+    "errors": {
+      "card_type_required": "Heu de definir un tipus de targeta",
+      "entity_required": "Heu de definir una entitat",
+      "entity_list_required": "Heu de definir una llista d'entitats",
+      "link_required": "Heu de definir {key}",
+      "duplicate_link": "No podeu utilitzar {value} dues vegades",
+      "select_menu_missing": "Falta \"{option}\"",
+      "vertical_stack": "No s'ha trobat la pila vertical, no patiu, s'afegirà automàticament al vostre pop-up.",
+      "check_value": "Comproveu aquest valor",
+      "source_card": "Configuració de la targeta (secció d'estils)",
+      "source_module": "Mòdul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Cap hash definit",
+      "hidden_content": "Contingut ocult en mode d'edició per rendiment"
+    },
+    "navigation": {
+      "group": "Pop-ups de Bubble Card",
+      "hash_hint": "Hash del pop-up de Bubble Card"
     }
   }
 }

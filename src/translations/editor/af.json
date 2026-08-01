@@ -515,7 +515,8 @@
       "custom_styles": "pasgemaakte style",
       "info_body2": "Dit maak dit maklik om dinge soos die style van al jou kaarte te verander, en vir gevorderde gebruikers om funksies met 'n regte redigeerder aan te pas of by te voeg.",
       "info_body3": "{coding}, kan jy ook modules wat deur die gemeenskap gemaak is in die {store} vind en installeer.",
-      "coding_not_your_thing": "As programmering nie jou ding is nie"
+      "coding_not_your_thing": "As programmering nie jou ding is nie",
+      "no_description_available": "Geen beskrywing beskikbaar nie"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools benodig",
@@ -629,6 +630,29 @@
       "copy_error": "Kon nie na die knipbord kopieer nie. Kopieer asseblief handmatig uit die voorskou hieronder.",
       "download_success": "Module afgelaai as YAML-lêer!",
       "download_error": "Fout met die aflaai van die module: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card is 'n minimalistiese en aanpasbare kaartversameling"
+    },
+    "errors": {
+      "card_type_required": "Jy moet 'n kaarttipe definieer",
+      "entity_required": "Jy moet 'n entiteit definieer",
+      "entity_list_required": "Jy moet 'n entiteitlys definieer",
+      "link_required": "Jy moet {key} definieer",
+      "duplicate_link": "Jy kan {value} nie twee keer gebruik nie",
+      "select_menu_missing": "\"{option}\" ontbreek",
+      "vertical_stack": "Vertikale stapel nie gevind nie, moenie paniek nie, dit sal outomaties by jou opspringer gevoeg word.",
+      "check_value": "Kontroleer hierdie waarde",
+      "source_card": "Kaartkonfigurasie (stylafdeling)",
+      "source_module": "Module ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Geen hutswaarde gedefinieer nie",
+      "hidden_content": "Inhoud in wysigmodus versteek vir beter werkverrigting"
+    },
+    "navigation": {
+      "group": "Bubble Card-opspringers",
+      "hash_hint": "Bubble Card-opspringer se hutswaarde"
     }
   }
 }

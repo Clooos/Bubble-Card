@@ -515,7 +515,8 @@
       "custom_styles": "benutzerdefinierte Styles",
       "info_body2": "So kannst du zum Beispiel ganz einfach die Styles all deiner Karten ändern, und fortgeschrittene Nutzer können mit einem echten Editor Funktionen anpassen oder hinzufügen.",
       "info_body3": "{coding}, kannst du auch von der Community erstellte Module im {store} finden und installieren.",
-      "coding_not_your_thing": "Wenn Programmieren nicht dein Ding ist"
+      "coding_not_your_thing": "Wenn Programmieren nicht dein Ding ist",
+      "no_description_available": "Keine Beschreibung verfügbar"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools erforderlich",
@@ -629,6 +630,29 @@
       "copy_error": "Kopieren in die Zwischenablage nicht möglich. Bitte kopiere manuell aus der Vorschau unten.",
       "download_success": "Modul als YAML-Datei heruntergeladen!",
       "download_error": "Fehler beim Herunterladen des Moduls: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card ist eine minimalistische und anpassbare Kartensammlung"
+    },
+    "errors": {
+      "card_type_required": "Du musst einen Kartentyp festlegen",
+      "entity_required": "Du musst eine Entität festlegen",
+      "entity_list_required": "Du musst eine Entitätenliste festlegen",
+      "link_required": "Du musst {key} festlegen",
+      "duplicate_link": "Du kannst {value} nicht zweimal verwenden",
+      "select_menu_missing": "„{option}“ fehlt",
+      "vertical_stack": "Vertikaler Stapel nicht gefunden, keine Sorge, er wird deinem Pop-up automatisch hinzugefügt.",
+      "check_value": "Prüfe diesen Wert",
+      "source_card": "Kartenkonfiguration (Bereich Styles)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Kein Hash definiert",
+      "hidden_content": "Inhalt im Bearbeitungsmodus aus Performance-Gründen ausgeblendet"
+    },
+    "navigation": {
+      "group": "Bubble Card Pop-ups",
+      "hash_hint": "Bubble Card Pop-up-Hash"
     }
   }
 }

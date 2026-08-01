@@ -515,7 +515,8 @@
       "custom_styles": "προσαρμοσμένα στυλ",
       "info_body2": "Αυτό διευκολύνει την αλλαγή, για παράδειγμα, των στυλ όλων των καρτών σας και, για προχωρημένους χρήστες, την τροποποίηση ή προσθήκη λειτουργιών με έναν πραγματικό επεξεργαστή.",
       "info_body3": "{coding}, μπορείτε επίσης να βρείτε και να εγκαταστήσετε modules φτιαγμένα από την κοινότητα στο {store}.",
-      "coding_not_your_thing": "Αν ο προγραμματισμός δεν είναι το φόρτε σας"
+      "coding_not_your_thing": "Αν ο προγραμματισμός δεν είναι το φόρτε σας",
+      "no_description_available": "Δεν υπάρχει διαθέσιμη περιγραφή"
     },
     "store": {
       "bct_required_title": "Απαιτείται το Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Δεν ήταν δυνατή η αντιγραφή στο πρόχειρο. Αντιγράψτε χειροκίνητα από την παρακάτω προεπισκόπηση.",
       "download_success": "Το module λήφθηκε ως αρχείο YAML!",
       "download_error": "Σφάλμα κατά τη λήψη του module: {error}"
+    },
+    "card_picker": {
+      "description": "Το Bubble Card είναι μια μινιμαλιστική και προσαρμόσιμη συλλογή καρτών"
+    },
+    "errors": {
+      "card_type_required": "Πρέπει να ορίσετε έναν τύπο κάρτας",
+      "entity_required": "Πρέπει να ορίσετε μια οντότητα",
+      "entity_list_required": "Πρέπει να ορίσετε μια λίστα οντοτήτων",
+      "link_required": "Πρέπει να ορίσετε {key}",
+      "duplicate_link": "Δεν μπορείτε να χρησιμοποιήσετε το {value} δύο φορές",
+      "select_menu_missing": "Λείπει το \"{option}\"",
+      "vertical_stack": "Δεν βρέθηκε vertical-stack, μην ανησυχείτε, θα προστεθεί αυτόματα στο pop-up σας.",
+      "check_value": "Ελέγξτε αυτήν την τιμή",
+      "source_card": "Διαμόρφωση κάρτας (ενότητα στυλ)",
+      "source_module": "Module ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Δεν έχει οριστεί hash",
+      "hidden_content": "Το περιεχόμενο είναι κρυμμένο στη λειτουργία επεξεργασίας για λόγους επιδόσεων"
+    },
+    "navigation": {
+      "group": "Pop-ups του Bubble Card",
+      "hash_hint": "Hash pop-up του Bubble Card"
     }
   }
 }

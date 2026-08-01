@@ -515,7 +515,8 @@
       "custom_styles": "özel stiller",
       "info_body2": "Bu, örneğin tüm kartlarınızın stillerini değiştirmeyi ve ileri düzey kullanıcılar için gerçek bir düzenleyiciyle özellikleri değiştirmeyi veya eklemeyi kolaylaştırır.",
       "info_body3": "{coding}, topluluk tarafından yapılmış modülleri de {store} bulup yükleyebilirsiniz.",
-      "coding_not_your_thing": "Kod yazmak size göre değilse"
+      "coding_not_your_thing": "Kod yazmak size göre değilse",
+      "no_description_available": "Açıklama mevcut değil"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools gerekli",
@@ -629,6 +630,29 @@
       "copy_error": "Panoya kopyalanamadı. Lütfen aşağıdaki önizlemeden manuel olarak kopyalayın.",
       "download_success": "Modül YAML dosyası olarak indirildi!",
       "download_error": "Modül indirilirken hata oluştu: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card, minimalist ve özelleştirilebilir bir kart koleksiyonudur"
+    },
+    "errors": {
+      "card_type_required": "Bir kart türü tanımlamanız gerekiyor",
+      "entity_required": "Bir varlık tanımlamanız gerekiyor",
+      "entity_list_required": "Bir varlık listesi tanımlamanız gerekiyor",
+      "link_required": "{key} tanımlamanız gerekiyor",
+      "duplicate_link": "{value} değerini iki kez kullanamazsınız",
+      "select_menu_missing": "\"{option}\" eksik",
+      "vertical_stack": "vertical-stack bulunamadı, endişelenmeyin, pop-up'ınıza otomatik olarak eklenecek.",
+      "check_value": "Bu değeri kontrol edin",
+      "source_card": "Kart yapılandırması (stiller bölümü)",
+      "source_module": "Modül ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Hash tanımlanmadı",
+      "hidden_content": "İçerik, performans için düzenleme modunda gizlendi"
+    },
+    "navigation": {
+      "group": "Bubble Card pop-up'ları",
+      "hash_hint": "Bubble Card pop-up hash'i"
     }
   }
 }

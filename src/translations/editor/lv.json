@@ -515,7 +515,8 @@
       "custom_styles": "pielāgotus stilus",
       "info_body2": "Tas ļauj viegli mainīt, piemēram, visu jūsu kartīšu stilus, bet pieredzējušiem lietotājiem - mainīt vai pievienot funkcijas īstā redaktorā.",
       "info_body3": "{coding}, kopienas veidotus moduļus varat atrast un instalēt arī {store}.",
-      "coding_not_your_thing": "Ja programmēšana nav jūsu lieta"
+      "coding_not_your_thing": "Ja programmēšana nav jūsu lieta",
+      "no_description_available": "Apraksts nav pieejams"
     },
     "store": {
       "bct_required_title": "Nepieciešams Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Neizdevās nokopēt starpliktuvē. Lūdzu, nokopējiet manuāli no priekšskatījuma zemāk.",
       "download_success": "Modulis lejupielādēts kā YAML fails!",
       "download_error": "Kļūda, lejupielādējot moduli: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card ir minimālistiska un pielāgojama kartīšu kolekcija"
+    },
+    "errors": {
+      "card_type_required": "Jānorāda kartītes tips",
+      "entity_required": "Jānorāda entītija",
+      "entity_list_required": "Jānorāda entītiju saraksts",
+      "link_required": "Jānorāda {key}",
+      "duplicate_link": "{value} nevar izmantot divreiz",
+      "select_menu_missing": "Trūkst \"{option}\"",
+      "vertical_stack": "Vertical stack netika atrasts, bez panikas, tas tiks automātiski pievienots jūsu uznirstošajam logam.",
+      "check_value": "Pārbaudiet šo vērtību",
+      "source_card": "Kartītes konfigurācija (stilu sadaļa)",
+      "source_module": "Modulis ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Jaucējkods nav norādīts",
+      "hidden_content": "Saturs rediģēšanas režīmā paslēpts veiktspējas dēļ"
+    },
+    "navigation": {
+      "group": "Bubble Card uznirstošie logi",
+      "hash_hint": "Bubble Card uznirstošā loga jaucējkods"
     }
   }
 }

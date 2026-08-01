@@ -515,7 +515,8 @@
       "custom_styles": "oanpaste stilen",
       "info_body2": "Sa kinst maklik saken as de stilen fan al dyn kaarten feroarje, en avansearre brûkers kinne mei in echte bewurker funksjes oanpasse of tafoegje.",
       "info_body3": "{coding}, dan kinst ek troch de mienskip makke modules fine en ynstallearje yn de {store}.",
-      "coding_not_your_thing": "As programmearjen neat foar dy is"
+      "coding_not_your_thing": "As programmearjen neat foar dy is",
+      "no_description_available": "Gjin beskriuwing beskikber"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools fereaske",
@@ -629,6 +630,29 @@
       "copy_error": "Koe net nei it klamboerd kopiearje. Kopiearje hânmjittich út it foarbyld hjirûnder.",
       "download_success": "Module ynladen as YAML-bestân!",
       "download_error": "Flater by it ynladen fan de module: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card is in minimalistyske en oanpasbere kaartenkolleksje"
+    },
+    "errors": {
+      "card_type_required": "Do moatst in kaarttype opjaan",
+      "entity_required": "Do moatst in entiteit opjaan",
+      "entity_list_required": "Do moatst in entiteitelist opjaan",
+      "link_required": "Do moatst {key} opjaan",
+      "duplicate_link": "Do kinst {value} net twa kear brûke",
+      "select_menu_missing": "\"{option}\" ûntbrekt",
+      "vertical_stack": "Fertikale stack net fûn, gjin panyk, dy wurdt automatysk oan dyn pop-up tafoege.",
+      "check_value": "Kontrolearje dizze wearde",
+      "source_card": "Kaartkonfiguraasje (seksje stilen)",
+      "source_module": "Module ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Gjin hash definiearre",
+      "hidden_content": "Ynhâld ferburgen yn bewurkingsmodus foar bettere prestaasjes"
+    },
+    "navigation": {
+      "group": "Bubble Card pop-ups",
+      "hash_hint": "Bubble Card pop-up-hash"
     }
   }
 }

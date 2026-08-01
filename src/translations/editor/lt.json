@@ -515,7 +515,8 @@
       "custom_styles": "pasirinktinius stilius",
       "info_body2": "Tai leidžia lengvai keisti, pavyzdžiui, visų jūsų kortelių stilius, o pažengusiems naudotojams - keisti ar pridėti funkcijų tikrame redaktoriuje.",
       "info_body3": "{coding}, bendruomenės sukurtų modulių taip pat galite rasti ir įdiegti {store}.",
-      "coding_not_your_thing": "Jei programavimas ne jums"
+      "coding_not_your_thing": "Jei programavimas ne jums",
+      "no_description_available": "Aprašymo nėra"
     },
     "store": {
       "bct_required_title": "Reikalingas Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Nepavyko nukopijuoti į iškarpinę. Nukopijuokite rankiniu būdu iš žemiau esančios peržiūros.",
       "download_success": "Modulis atsisiųstas kaip YAML failas!",
       "download_error": "Klaida atsisiunčiant modulį: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card yra minimalistinė ir pritaikoma kortelių kolekcija"
+    },
+    "errors": {
+      "card_type_required": "Turite nurodyti kortelės tipą",
+      "entity_required": "Turite nurodyti esybę",
+      "entity_list_required": "Turite nurodyti esybių sąrašą",
+      "link_required": "Turite nurodyti {key}",
+      "duplicate_link": "Negalite naudoti {value} du kartus",
+      "select_menu_missing": "Trūksta „{option}“",
+      "vertical_stack": "Vertical stack nerastas, nepanikuokite, jis bus automatiškai pridėtas prie jūsų iškylančiojo lango.",
+      "check_value": "Patikrinkite šią reikšmę",
+      "source_card": "Kortelės konfigūracija (stilių skiltis)",
+      "source_module": "Modulis ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Maiša nenurodyta",
+      "hidden_content": "Turinys paslėptas redagavimo režimu dėl našumo"
+    },
+    "navigation": {
+      "group": "Bubble Card iškylantieji langai",
+      "hash_hint": "Bubble Card iškylančiojo lango maiša"
     }
   }
 }

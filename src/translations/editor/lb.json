@@ -515,7 +515,8 @@
       "custom_styles": "personaliséiert Stiler",
       "info_body2": "Sou kënnt Dir einfach Saache wéi d'Stiler vun all Äre Kaarten änneren, a fortgeschratt Notzer kënne mat engem richtegen Editeur Fonktiounen upassen oder dobäisetzen.",
       "info_body3": "{coding}, kënnt Dir och vun der Communautéit erstallte Moduler am {store} fannen an installéieren.",
-      "coding_not_your_thing": "Wa Programméieren net Äert Dénge ass"
+      "coding_not_your_thing": "Wa Programméieren net Äert Dénge ass",
+      "no_description_available": "Keng Beschreiwung verfügbar"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools néideg",
@@ -629,6 +630,29 @@
       "copy_error": "Konnt net an de Clipboard kopéieren. Kopéiert w.e.g. manuell aus der Virschau ënnen.",
       "download_success": "Modul als YAML-Datei erofgelueden!",
       "download_error": "Feeler beim Erofluede vum Modul: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card ass eng minimalistesch a personaliséierbar Kaarte-Sammlung"
+    },
+    "errors": {
+      "card_type_required": "Dir musst e Kaartentyp definéieren",
+      "entity_required": "Dir musst eng Entitéit definéieren",
+      "entity_list_required": "Dir musst eng Lëscht vun Entitéiten definéieren",
+      "link_required": "Dir musst {key} definéieren",
+      "duplicate_link": "Dir kënnt {value} net zweemol benotzen",
+      "select_menu_missing": "\"{option}\" feelt",
+      "vertical_stack": "Vertikale Stapel net fonnt, keng Panik, e gëtt automatesch bei Äre Pop-up dobäigesat.",
+      "check_value": "Iwwerpréift dëse Wäert",
+      "source_card": "Kaartekonfiguratioun (Sektioun Stiler)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Keen Hash definéiert",
+      "hidden_content": "Inhalt am Editiounsmodus aus Performancegrënn verstoppt"
+    },
+    "navigation": {
+      "group": "Bubble Card Pop-ups",
+      "hash_hint": "Bubble Card Pop-up-Hash"
     }
   }
 }

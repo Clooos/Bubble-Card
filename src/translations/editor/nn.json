@@ -515,7 +515,8 @@
       "custom_styles": "eigendefinerte stilar",
       "info_body2": "Dette gjer det enkelt å endre ting som stilane på alle korta dine, og for avanserte brukarar å endre eller leggje til funksjonar med ein ekte redigerar.",
       "info_body3": "{coding}, du kan også finne og installere modular laga av fellesskapet i {store}.",
-      "coding_not_your_thing": "Om koding ikkje er greia di"
+      "coding_not_your_thing": "Om koding ikkje er greia di",
+      "no_description_available": "Inga skildring tilgjengeleg"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools krevst",
@@ -629,6 +630,29 @@
       "copy_error": "Kunne ikkje kopiere til utklippstavla. Kopier manuelt frå førehandsvisinga nedanfor.",
       "download_success": "Modulen er lasta ned som YAML-fil!",
       "download_error": "Feil ved nedlasting av modulen: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card er ei minimalistisk og tilpassbar kortsamling"
+    },
+    "errors": {
+      "card_type_required": "Du må oppgi ein korttype",
+      "entity_required": "Du må oppgi ein entitet",
+      "entity_list_required": "Du må oppgi ei entitetsliste",
+      "link_required": "Du må oppgi {key}",
+      "duplicate_link": "Du kan ikkje bruke {value} to gonger",
+      "select_menu_missing": "\"{option}\" manglar",
+      "vertical_stack": "Vertikal stabel vart ikkje funnen, ingen panikk, han vert lagd til automatisk i pop-upen din.",
+      "check_value": "Kontroller denne verdien",
+      "source_card": "Kortkonfigurasjon (delen stilar)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Ingen hash definert",
+      "hidden_content": "Innhald skjult i redigeringsmodus av omsyn til yting"
+    },
+    "navigation": {
+      "group": "Bubble Card-pop-upar",
+      "hash_hint": "Hash for Bubble Card-pop-up"
     }
   }
 }

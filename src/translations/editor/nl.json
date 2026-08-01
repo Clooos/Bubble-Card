@@ -515,7 +515,8 @@
       "custom_styles": "aangepaste stijlen",
       "info_body2": "Zo kun je eenvoudig zaken als de stijlen van al je kaarten wijzigen, en gevorderde gebruikers kunnen met een echte editor functies aanpassen of toevoegen.",
       "info_body3": "{coding}, dan kun je ook door de community gemaakte modules vinden en installeren in de {store}.",
-      "coding_not_your_thing": "Als programmeren niets voor jou is"
+      "coding_not_your_thing": "Als programmeren niets voor jou is",
+      "no_description_available": "Geen beschrijving beschikbaar"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools vereist",
@@ -629,6 +630,29 @@
       "copy_error": "Kon niet naar het klembord kopiëren. Kopieer handmatig uit het voorbeeld hieronder.",
       "download_success": "Module gedownload als YAML-bestand!",
       "download_error": "Fout bij het downloaden van de module: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card is een minimalistische en aanpasbare kaartencollectie"
+    },
+    "errors": {
+      "card_type_required": "Je moet een kaarttype opgeven",
+      "entity_required": "Je moet een entiteit opgeven",
+      "entity_list_required": "Je moet een entiteitenlijst opgeven",
+      "link_required": "Je moet {key} opgeven",
+      "duplicate_link": "Je kunt {value} niet twee keer gebruiken",
+      "select_menu_missing": "\"{option}\" ontbreekt",
+      "vertical_stack": "Verticale stack niet gevonden, geen paniek, deze wordt automatisch aan je pop-up toegevoegd.",
+      "check_value": "Controleer deze waarde",
+      "source_card": "Kaartconfiguratie (sectie stijlen)",
+      "source_module": "Module ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Geen hash gedefinieerd",
+      "hidden_content": "Inhoud verborgen in bewerkmodus voor betere prestaties"
+    },
+    "navigation": {
+      "group": "Bubble Card pop-ups",
+      "hash_hint": "Bubble Card pop-up-hash"
     }
   }
 }

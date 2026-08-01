@@ -515,7 +515,8 @@
       "custom_styles": "estilos personalizados",
       "info_body2": "Isto facilita a alteração de coisas como os estilos de todos os seus cartões e, para utilizadores avançados, a modificação ou adição de funcionalidades com um verdadeiro editor.",
       "info_body3": "{coding}, também pode encontrar e instalar módulos criados pela comunidade na {store}.",
-      "coding_not_your_thing": "Se programar não é para si"
+      "coding_not_your_thing": "Se programar não é para si",
+      "no_description_available": "Nenhuma descrição disponível"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools necessário",
@@ -629,6 +630,29 @@
       "copy_error": "Não foi possível copiar para a área de transferência. Copie manualmente a partir da pré-visualização abaixo.",
       "download_success": "Módulo transferido como ficheiro YAML!",
       "download_error": "Erro ao transferir o módulo: {error}"
+    },
+    "card_picker": {
+      "description": "O Bubble Card é uma coleção de cartões minimalista e personalizável"
+    },
+    "errors": {
+      "card_type_required": "Precisa de definir um tipo de cartão",
+      "entity_required": "Precisa de definir uma entidade",
+      "entity_list_required": "Precisa de definir uma lista de entidades",
+      "link_required": "Precisa de definir {key}",
+      "duplicate_link": "Não pode utilizar {value} duas vezes",
+      "select_menu_missing": "Falta \"{option}\"",
+      "vertical_stack": "Pilha vertical não encontrada, não entre em pânico, será adicionada automaticamente ao seu pop-up.",
+      "check_value": "Verifique este valor",
+      "source_card": "Configuração do cartão (secção de estilos)",
+      "source_module": "Módulo ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Nenhum hash definido",
+      "hidden_content": "Conteúdo oculto no modo de edição por questões de desempenho"
+    },
+    "navigation": {
+      "group": "Pop-ups do Bubble Card",
+      "hash_hint": "Hash do pop-up do Bubble Card"
     }
   }
 }

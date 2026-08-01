@@ -176,7 +176,7 @@
       "unable_error": "无法从当前仪表盘编辑器迁移此弹窗。",
       "failed_error": "此弹窗迁移失败。",
       "migrated_toast": "弹窗已迁移为独立弹窗。",
-      "notice_title": "检测到旧版弹窗",
+      "notice_title": "你的弹窗需要迁移",
       "notice_body": "此弹窗仍在使用旧的 vertical-stack 包装方式。将它迁移为独立格式可大幅提升性能，并能像分区视图一样通过拖放来管理其内容。",
       "horizontal_body": "检测到水平堆叠。其中的卡片将被转换，以便在保持相同布局的同时逐个拖放它们 (如有需要可禁用此选项)。",
       "convert_stacks": "将水平堆叠转换为网格卡片",
@@ -184,7 +184,27 @@
       "rollback_bold": "此迁移是永久性的。",
       "rollback_body": "尽管它已经过测试，可处理所有已知的旧版情况，但如果你以后可能想回退到 v3.1.6，仍建议保留备份。",
       "migrating": "正在迁移...",
-      "migrate": "迁移为独立弹窗"
+      "migrate": "迁移为独立弹窗",
+      "notice_header": "重要",
+      "notice_intro": "从 Bubble Card v3.2.0 起，{bold} 这很简单，只需点击几下！",
+      "notice_intro_bold": "你的弹窗必须迁移为新的独立格式。",
+      "notice_announcement": "如果你还没看过，可以查看 {link} (我大约花了 10 小时来写它！)，了解所有新功能和变化。",
+      "notice_announcement_link": "v3.2.0 版本发布公告",
+      "notice_change_title": "这会带来什么变化？",
+      "notice_change_body": "独立弹窗渲染速度快得多，运行更可靠，而且不再需要放在 {stack} 卡片里 (终于！)。你还可以使用基于 Home Assistant 分区编辑器的全新编辑器，采用完全相同的拖放方式，编辑更轻松、更快捷！",
+      "notice_video_summary": "看看新编辑器如何工作",
+      "notice_video_hint": "(点击展开)",
+      "notice_features": "弹窗现在也有了新功能，包括新的模式 (例如居中模式)、可选的全新经典样式，以及让低端设备动画更流畅的性能模式。",
+      "notice_how_title": "如何从编辑器迁移？",
+      "notice_how_body": "打开每个显示 {available} 的弹窗编辑器，然后点击 {migrate} 即可。",
+      "notice_available": "可迁移",
+      "notice_yaml_title": "在使用 YAML 吗？",
+      "notice_yaml_body": "将旧版弹窗配置替换为独立格式:",
+      "notice_protip": "专业提示:",
+      "notice_protip_body": "老实说，如果你到现在还在用 YAML 写 Bubble Card，不妨试试新的编辑器，创建和编辑弹窗会变得轻而易举！你还可以使用 Module Store。我在这个编辑器上倾注了满满的心血 ❤️",
+      "notice_enjoy": "祝你使用愉快！干杯！🍻",
+      "notice_dismiss": "知道了，不要在此视图中再显示",
+      "notice_remind": "稍后提醒我"
     },
     "card_names": {
       "button": "按钮 (开关、滑块...)",
@@ -495,7 +515,8 @@
       "custom_styles": "自定义样式",
       "info_body2": "这样可以轻松地更改所有卡片的样式等内容；对高级用户而言，还能用真正的编辑器修改或添加功能。",
       "info_body3": "{coding}，你也可以在{store}中找到并安装社区制作的模块。",
-      "coding_not_your_thing": "如果你不喜欢写代码"
+      "coding_not_your_thing": "如果你不喜欢写代码",
+      "no_description_available": "暂无描述"
     },
     "store": {
       "bct_required_title": "需要 Bubble Card Tools",
@@ -609,6 +630,29 @@
       "copy_error": "无法复制到剪贴板。请从下方预览中手动复制。",
       "download_success": "模块已下载为 YAML 文件！",
       "download_error": "下载模块出错：{error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card 是一套极简且可自定义的卡片集合"
+    },
+    "errors": {
+      "card_type_required": "需要指定卡片类型",
+      "entity_required": "需要指定实体",
+      "entity_list_required": "需要指定实体列表",
+      "link_required": "需要指定 {key}",
+      "duplicate_link": "{value} 不能使用两次",
+      "select_menu_missing": "缺少“{option}”",
+      "vertical_stack": "未找到 vertical-stack，别担心，它会自动添加到你的弹窗中。",
+      "check_value": "请检查此值",
+      "source_card": "卡片配置 (样式部分)",
+      "source_module": "模块 ({id})"
+    },
+    "placeholder": {
+      "no_hash": "未定义哈希",
+      "hidden_content": "为提升性能，编辑模式下已隐藏内容"
+    },
+    "navigation": {
+      "group": "Bubble Card 弹窗",
+      "hash_hint": "Bubble Card 弹窗哈希"
     }
   }
 }

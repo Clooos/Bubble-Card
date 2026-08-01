@@ -176,7 +176,7 @@
       "unable_error": "Tidak dapat memigrasikan pop-up ini dari editor dasbor saat ini.",
       "failed_error": "Gagal memigrasikan pop-up ini.",
       "migrated_toast": "Pop-up dimigrasikan ke format mandiri.",
-      "notice_title": "Pop-up lama terdeteksi",
+      "notice_title": "Pop-up Anda perlu dimigrasikan",
       "notice_body": "Pop-up ini masih menggunakan pembungkus vertical-stack lama. Migrasikan ke format mandiri untuk kinerja yang jauh lebih baik dan untuk mengelola isinya dengan alur seret dan lepas yang sama seperti tampilan seksi.",
       "horizontal_body": "Tumpukan horizontal terdeteksi. Kartunya akan dikonversi sehingga Anda dapat menyeret dan melepasnya satu per satu sambil mempertahankan tata letak yang sama (opsi ini dapat dinonaktifkan jika perlu).",
       "convert_stacks": "Konversi tumpukan horizontal menjadi kartu kisi",
@@ -184,7 +184,27 @@
       "rollback_bold": "Migrasi ini bersifat permanen.",
       "rollback_body": "Meskipun sudah diuji untuk menangani semua kasus lama yang diketahui, saya tetap menyarankan untuk menyimpan cadangan jika nanti Anda ingin kembali ke v3.1.6.",
       "migrating": "Memigrasikan...",
-      "migrate": "Migrasikan ke format mandiri"
+      "migrate": "Migrasikan ke format mandiri",
+      "notice_header": "Penting",
+      "notice_intro": "Sejak Bubble Card v3.2.0, {bold} Mudah dan hanya butuh beberapa klik!",
+      "notice_intro_bold": "pop-up Anda harus dimigrasikan ke format mandiri yang baru.",
+      "notice_announcement": "Jika terlewat, lihat {link} (saya butuh sekitar 10 jam untuk menulisnya!) untuk melihat semua fitur baru dan perubahannya.",
+      "notice_announcement_link": "pengumuman rilis v3.2.0",
+      "notice_change_title": "Apa yang berubah?",
+      "notice_change_body": "Pop-up mandiri dirender jauh lebih cepat, bekerja lebih andal, dan tidak perlu lagi berada di dalam kartu {stack} (akhirnya!). Anda juga mendapat editor baru yang berbasis editor seksi Home Assistant, dengan pendekatan seret dan lepas yang persis sama agar pengeditan lebih mudah dan cepat!",
+      "notice_video_summary": "Lihat cara kerja editor baru",
+      "notice_video_hint": "(klik untuk memperluas)",
+      "notice_features": "Pop-up kini juga punya fitur baru, dengan mode baru (seperti mode terpusat), gaya klasik baru yang opsional, dan mode kinerja untuk animasi yang lebih mulus di perangkat berspesifikasi rendah.",
+      "notice_how_title": "Bagaimana cara migrasi dari editor?",
+      "notice_how_body": "Buka editor untuk setiap pop-up yang menampilkan {available}, lalu cukup klik {migrate}.",
+      "notice_available": "Migrasi tersedia",
+      "notice_yaml_title": "Menggunakan YAML?",
+      "notice_yaml_body": "Ganti konfigurasi pop-up lama dengan format mandiri:",
+      "notice_protip": "Tips:",
+      "notice_protip_body": "Sejujurnya, jika Anda masih memakai YAML untuk Bubble Card sampai sekarang, coba saja editor barunya, membuat dan mengedit pop-up jadi sangat mudah! Anda juga bisa mengakses Module Store. Saya menuangkan begitu banyak cinta ke editor ini ❤️",
+      "notice_enjoy": "Selamat menikmati pembaruan ini! Salam! 🍻",
+      "notice_dismiss": "Mengerti, jangan tampilkan lagi di tampilan ini",
+      "notice_remind": "Ingatkan saya nanti"
     },
     "card_names": {
       "button": "Tombol (Sakelar, slider, ...)",
@@ -495,7 +515,8 @@
       "custom_styles": "gaya kustom",
       "info_body2": "Ini memudahkan mengubah hal-hal seperti gaya semua kartu Anda, dan bagi pengguna tingkat lanjut, memodifikasi atau menambahkan fitur dengan editor sungguhan.",
       "info_body3": "{coding}, Anda juga dapat menemukan dan memasang modul buatan komunitas di {store}.",
-      "coding_not_your_thing": "Jika membuat kode bukan keahlian Anda"
+      "coding_not_your_thing": "Jika membuat kode bukan keahlian Anda",
+      "no_description_available": "Tidak ada deskripsi yang tersedia"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools diperlukan",
@@ -609,6 +630,29 @@
       "copy_error": "Tidak dapat menyalin ke papan klip. Silakan salin secara manual dari pratinjau di bawah.",
       "download_success": "Modul diunduh sebagai file YAML!",
       "download_error": "Kesalahan saat mengunduh modul: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card adalah koleksi kartu minimalis dan dapat disesuaikan"
+    },
+    "errors": {
+      "card_type_required": "Anda perlu menentukan jenis kartu",
+      "entity_required": "Anda perlu menentukan entitas",
+      "entity_list_required": "Anda perlu menentukan daftar entitas",
+      "link_required": "Anda perlu menentukan {key}",
+      "duplicate_link": "Anda tidak bisa menggunakan {value} dua kali",
+      "select_menu_missing": "\"{option}\" tidak ada",
+      "vertical_stack": "vertical-stack tidak ditemukan, jangan panik, ini akan ditambahkan secara otomatis ke pop-up Anda.",
+      "check_value": "Periksa nilai ini",
+      "source_card": "Konfigurasi kartu (bagian gaya)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Tidak ada hash yang ditentukan",
+      "hidden_content": "Konten disembunyikan dalam mode edit demi performa"
+    },
+    "navigation": {
+      "group": "Pop-up Bubble Card",
+      "hash_hint": "Hash pop-up Bubble Card"
     }
   }
 }

@@ -176,7 +176,7 @@
       "unable_error": "Không thể di chuyển pop-up này từ trình chỉnh sửa bảng điều khiển hiện tại.",
       "failed_error": "Di chuyển pop-up này thất bại.",
       "migrated_toast": "Đã di chuyển pop-up sang dạng độc lập.",
-      "notice_title": "Phát hiện pop-up kiểu cũ",
+      "notice_title": "Các pop-up của bạn cần được di chuyển",
       "notice_body": "Pop-up này vẫn dùng lớp bọc vertical-stack cũ. Hãy di chuyển nó sang định dạng độc lập để có hiệu năng tốt hơn nhiều và quản lý nội dung với cùng thao tác kéo thả như một khung nhìn dạng phần.",
       "horizontal_body": "Đã phát hiện các ngăn xếp ngang. Các thẻ của chúng sẽ được chuyển đổi để bạn có thể kéo thả từng thẻ riêng lẻ mà vẫn giữ nguyên bố cục (tùy chọn này có thể tắt nếu cần).",
       "convert_stacks": "Chuyển ngăn xếp ngang thành thẻ lưới",
@@ -184,7 +184,27 @@
       "rollback_bold": "Việc di chuyển này là vĩnh viễn.",
       "rollback_body": "Dù đã được kiểm tra để xử lý mọi trường hợp cũ đã biết, tôi vẫn khuyên bạn giữ một bản sao lưu nếu sau này muốn quay về v3.1.6.",
       "migrating": "Đang di chuyển...",
-      "migrate": "Di chuyển sang dạng độc lập"
+      "migrate": "Di chuyển sang dạng độc lập",
+      "notice_header": "Quan trọng",
+      "notice_intro": "Kể từ Bubble Card v3.2.0, {bold} Rất dễ và chỉ mất vài cú nhấp!",
+      "notice_intro_bold": "các pop-up của bạn phải được di chuyển sang định dạng độc lập mới.",
+      "notice_announcement": "Nếu bạn chưa xem, hãy đọc {link} (tôi mất khoảng 10 giờ để viết nó!) để biết tất cả tính năng mới và thay đổi.",
+      "notice_announcement_link": "thông báo phát hành v3.2.0",
+      "notice_change_title": "Nó thay đổi điều gì?",
+      "notice_change_body": "Pop-up độc lập hiển thị nhanh hơn nhiều, hoạt động ổn định hơn và không còn cần nằm trong thẻ {stack} nữa (cuối cùng cũng được!). Bạn cũng có một trình chỉnh sửa mới dựa trên trình chỉnh sửa khung nhìn dạng phần của Home Assistant, với cách kéo thả y hệt để chỉnh sửa dễ dàng và nhanh hơn!",
+      "notice_video_summary": "Xem trình chỉnh sửa mới hoạt động thế nào",
+      "notice_video_hint": "(nhấp để mở rộng)",
+      "notice_features": "Pop-up giờ cũng có thêm tính năng mới, với các chế độ mới (như chế độ căn giữa), một kiểu cổ điển mới tùy chọn và chế độ hiệu năng giúp hoạt ảnh mượt hơn trên thiết bị cấu hình thấp.",
+      "notice_how_title": "Di chuyển từ trình chỉnh sửa bằng cách nào?",
+      "notice_how_body": "Mở trình chỉnh sửa của từng pop-up có hiển thị {available}, rồi chỉ cần nhấp {migrate}.",
+      "notice_available": "Có thể di chuyển",
+      "notice_yaml_title": "Đang dùng YAML?",
+      "notice_yaml_body": "Thay cấu hình pop-up kiểu cũ bằng định dạng độc lập:",
+      "notice_protip": "Mẹo hay:",
+      "notice_protip_body": "Thành thật mà nói, nếu đến giờ bạn vẫn dùng YAML cho Bubble Card, hãy thử trình chỉnh sửa mới, việc tạo và chỉnh sửa pop-up trở nên cực kỳ nhẹ nhàng! Bạn cũng sẽ dùng được Module Store. Tôi đã đặt rất nhiều tâm huyết vào trình chỉnh sửa này ❤️",
+      "notice_enjoy": "Chúc bạn vui với bản cập nhật này! Cạn ly! 🍻",
+      "notice_dismiss": "Đã hiểu, không hiện lại trên khung nhìn này",
+      "notice_remind": "Nhắc tôi sau"
     },
     "card_names": {
       "button": "Nút (Công tắc, thanh trượt, ...)",
@@ -495,7 +515,8 @@
       "custom_styles": "kiểu dáng tùy chỉnh",
       "info_body2": "Điều này giúp dễ dàng thay đổi những thứ như kiểu dáng của tất cả các thẻ, và với người dùng nâng cao, sửa đổi hoặc thêm tính năng bằng một trình chỉnh sửa thực thụ.",
       "info_body3": "{coding}, bạn cũng có thể tìm và cài đặt các mô-đun do cộng đồng tạo ra trong {store}.",
-      "coding_not_your_thing": "Nếu lập trình không phải sở trường của bạn"
+      "coding_not_your_thing": "Nếu lập trình không phải sở trường của bạn",
+      "no_description_available": "Không có mô tả"
     },
     "store": {
       "bct_required_title": "Yêu cầu Bubble Card Tools",
@@ -609,6 +630,29 @@
       "copy_error": "Không thể sao chép vào bộ nhớ tạm. Vui lòng sao chép thủ công từ bản xem trước bên dưới.",
       "download_success": "Đã tải mô-đun xuống dưới dạng tệp YAML!",
       "download_error": "Lỗi khi tải mô-đun xuống: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card là bộ sưu tập thẻ tối giản và có thể tùy chỉnh"
+    },
+    "errors": {
+      "card_type_required": "Bạn cần xác định loại thẻ",
+      "entity_required": "Bạn cần xác định một thực thể",
+      "entity_list_required": "Bạn cần xác định danh sách thực thể",
+      "link_required": "Bạn cần xác định {key}",
+      "duplicate_link": "Bạn không thể dùng {value} hai lần",
+      "select_menu_missing": "Thiếu \"{option}\"",
+      "vertical_stack": "Không tìm thấy vertical-stack, đừng lo, nó sẽ được thêm tự động vào pop-up của bạn.",
+      "check_value": "Hãy kiểm tra giá trị này",
+      "source_card": "Cấu hình thẻ (mục kiểu dáng)",
+      "source_module": "Mô-đun ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Chưa xác định hash",
+      "hidden_content": "Nội dung được ẩn ở chế độ chỉnh sửa để tăng hiệu năng"
+    },
+    "navigation": {
+      "group": "Pop-up của Bubble Card",
+      "hash_hint": "Hash pop-up của Bubble Card"
     }
   }
 }

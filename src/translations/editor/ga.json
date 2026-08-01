@@ -176,7 +176,7 @@
       "unable_error": "Ní féidir an phreabfhuinneog seo a aistriú ó eagarthóir reatha an deais.",
       "failed_error": "Theip ar aistriú na preabfhuinneoige seo.",
       "migrated_toast": "Aistríodh an phreabfhuinneog go formáid neamhspleách.",
-      "notice_title": "Seanphreabfhuinneog aimsithe",
+      "notice_title": "Ní mór do phreabfhuinneoga a aistriú",
       "notice_body": "Úsáideann an phreabfhuinneog seo an sean-chumhdach vertical-stack fós. Aistrigh í go dtí an fhormáid neamhspleách le haghaidh feidhmíochta i bhfad níos fearr agus chun a hábhar a bhainistiú leis an sreabhadh céanna tarraing agus scaoil is atá ag amharc rannán.",
       "horizontal_body": "Aimsíodh cruacha cothrománacha. Tiontófar a gcuid cártaí ionas gur féidir leat iad a tharraingt agus a scaoileadh ina n-aonar agus an leagan amach céanna a choinneáil (is féidir an rogha seo a dhíchumasú más gá).",
       "convert_stacks": "Tiontaigh cruacha cothrománacha go cártaí greille",
@@ -184,7 +184,27 @@
       "rollback_bold": "Tá an t-aistriú seo buan.",
       "rollback_body": "Cé gur tástáladh é chun gach cás oidhreachta aitheanta a láimhseáil, molaim fós cúltaca a choinneáil ar eagla gur mhaith leat filleadh ar v3.1.6 níos déanaí.",
       "migrating": "Á aistriú...",
-      "migrate": "Aistrigh go formáid neamhspleách"
+      "migrate": "Aistrigh go formáid neamhspleách",
+      "notice_header": "Tábhachtach",
+      "notice_intro": "Ó Bubble Card v3.2.0 i leith, {bold} Tá sé éasca agus ní thógann sé ach cúpla cliceáil!",
+      "notice_intro_bold": "ní mór do phreabfhuinneoga a aistriú go dtí an fhormáid neamhspleách nua.",
+      "notice_announcement": "Má chaill tú é, féach ar an {link} (thóg sé thart ar 10 n-uair an chloig orm é a scríobh!) chun na gnéithe nua agus na hathruithe go léir a fheiceáil.",
+      "notice_announcement_link": "fógra eisiúna v3.2.0",
+      "notice_change_title": "Cad a athraíonn sé?",
+      "notice_change_body": "Rindreáiltear preabfhuinneoga neamhspleácha i bhfad níos tapúla, oibríonn siad níos iontaofa, agus ní gá dóibh a bheith istigh i gcárta {stack} a thuilleadh (faoi dheireadh!). Faigheann tú eagarthóir nua freisin atá bunaithe ar eagarthóir rannán Home Assistant, leis an gcur chuige tarraing agus scaoil céanna go díreach le heagarthóireacht níos éasca agus níos tapúla!",
+      "notice_video_summary": "Féach conas a oibríonn an t-eagarthóir nua",
+      "notice_video_hint": "(cliceáil chun leathnú)",
+      "notice_features": "Tá gnéithe nua ag preabfhuinneoga anois freisin, le móid nua (ceann láraithe mar shampla), stíl chlasaiceach nua roghnach agus mód feidhmíochta le haghaidh beochana níos míne ar ghléasanna níos laige.",
+      "notice_how_title": "Conas aistriú ón eagarthóir?",
+      "notice_how_body": "Oscail an t-eagarthóir do gach preabfhuinneog a thaispeánann {available}, ansin níl le déanamh ach {migrate} a chliceáil.",
+      "notice_available": "Aistriú ar fáil",
+      "notice_yaml_title": "YAML á úsáid agat?",
+      "notice_yaml_body": "Cuir an fhormáid neamhspleách in ionad sheanchumraíocht na preabfhuinneoige:",
+      "notice_protip": "Leid:",
+      "notice_protip_body": "Le fírinne, má tá YAML fós in úsáid agat le haghaidh Bubble Card ag an bpointe seo, b'fhiú duit triail a bhaint as an eagarthóir nua, déanann sé cruthú agus eagarthóireacht preabfhuinneog an-simplí! Faigheann tú rochtain ar an Module Store freisin. Chuir mé an oiread sin grá isteach san eagarthóir seo ❤️",
+      "notice_enjoy": "Bain sult as an nuashonrú seo! Sláinte! 🍻",
+      "notice_dismiss": "Tuigim, ná taispeáin arís san amharc seo",
+      "notice_remind": "Cuir i gcuimhne dom níos déanaí"
     },
     "card_names": {
       "button": "Cnaipe (lasc, sleamhnán, ...)",
@@ -495,7 +515,8 @@
       "custom_styles": "stíleanna saincheaptha",
       "info_body2": "Éascaíonn sé seo rudaí a athrú ar nós stíleanna do chártaí uile, agus d'úsáideoirí ardleibhéil, gnéithe a mhodhnú nó a chur leis le fíor-eagarthóir.",
       "info_body3": "{coding}, is féidir leat modúil a rinne an pobal a aimsiú agus a shuiteáil sa {store} freisin.",
-      "coding_not_your_thing": "Mura bhfuil dúil agat sa chódú"
+      "coding_not_your_thing": "Mura bhfuil dúil agat sa chódú",
+      "no_description_available": "Níl cur síos ar fáil"
     },
     "store": {
       "bct_required_title": "Tá Bubble Card Tools de dhíth",
@@ -609,6 +630,29 @@
       "copy_error": "Níorbh fhéidir cóipeáil chuig an ngearrthaisce. Cóipeáil de láimh ón réamhamharc thíos le do thoil.",
       "download_success": "Íoslódáladh an modúl mar chomhad YAML!",
       "download_error": "Earráid agus an modúl á íoslódáil: {error}"
+    },
+    "card_picker": {
+      "description": "Is bailiúchán cártaí íostach agus inoiriúnaithe é Bubble Card"
+    },
+    "errors": {
+      "card_type_required": "Ní mór duit cineál cárta a shainiú",
+      "entity_required": "Ní mór duit aonán a shainiú",
+      "entity_list_required": "Ní mór duit liosta aonán a shainiú",
+      "link_required": "Ní mór duit {key} a shainiú",
+      "duplicate_link": "Ní féidir leat {value} a úsáid faoi dhó",
+      "select_menu_missing": "\"{option}\" ar iarraidh",
+      "vertical_stack": "Níor aimsíodh vertical-stack, ná bíodh imní ort, cuirfear leis an bpreabfhuinneog go huathoibríoch é.",
+      "check_value": "Seiceáil an luach seo",
+      "source_card": "Cumraíocht an chárta (rannán na stíleanna)",
+      "source_module": "Modúl ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Níl aon haiseáil sainithe",
+      "hidden_content": "Tá an t-inneachar folaithe sa mhód eagarthóireachta ar mhaithe le feidhmíocht"
+    },
+    "navigation": {
+      "group": "Preabfhuinneoga Bubble Card",
+      "hash_hint": "Haiseáil preabfhuinneoige Bubble Card"
     }
   }
 }

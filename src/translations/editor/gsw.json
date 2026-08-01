@@ -515,7 +515,8 @@
       "custom_styles": "eigeni Styles",
       "info_body2": "So chasch zum Bispil ganz eifach d Styles vo allne dine Charte ändere, und fortgschritteni Nutzer chönd mit eme richtige Editor Funktione aapasse oder hinzuefüege.",
       "info_body3": "{coding}, chasch au vo de Community erstellti Modul im {store} finde und installiere.",
-      "coding_not_your_thing": "Wänn Programmiere nöd dis Ding isch"
+      "coding_not_your_thing": "Wänn Programmiere nöd dis Ding isch",
+      "no_description_available": "Kei Beschriibig verfüegbar"
     },
     "store": {
       "bct_required_title": "Bubble Card Tools nötig",
@@ -629,6 +630,29 @@
       "copy_error": "Kopiere i d Zwüscheablag isch nöd gange. Kopier bitte manuell us de Vorschau unde.",
       "download_success": "Modul als YAML-Datei abeglade!",
       "download_error": "Fehler bim Abelade vom Modul: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card isch e minimalistischi und aapassbari Charte-Sammlig"
+    },
+    "errors": {
+      "card_type_required": "Du muesch en Charte-Typ definiere",
+      "entity_required": "Du muesch e Entität definiere",
+      "entity_list_required": "Du muesch e Entitäte-Lischte definiere",
+      "link_required": "Du muesch {key} definiere",
+      "duplicate_link": "Du chasch {value} nid zweimal bruche",
+      "select_menu_missing": "„{option}“ fählt",
+      "vertical_stack": "Vertikale Stapel nid gfunde, kei Panik, er wird dim Pop-up automatisch hinzuegfüegt.",
+      "check_value": "Prüef de Wert",
+      "source_card": "Charte-Konfiguration (Bereich Styles)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Kei Hash definiert",
+      "hidden_content": "Inhalt im Bearbeitigsmodus us Performance-Gründ usblendet"
+    },
+    "navigation": {
+      "group": "Bubble Card Pop-ups",
+      "hash_hint": "Bubble Card Pop-up-Hash"
     }
   }
 }

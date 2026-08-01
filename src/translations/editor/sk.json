@@ -515,7 +515,8 @@
       "custom_styles": "vlastné štýly",
       "info_body2": "Vďaka tomu ľahko zmeníte napríklad štýly všetkých svojich kariet a pokročilí používatelia môžu upravovať alebo pridávať funkcie v skutočnom editore.",
       "info_body3": "{coding}, môžete tiež nájsť a nainštalovať moduly vytvorené komunitou v {store}.",
-      "coding_not_your_thing": "Ak programovanie nie je nič pre vás"
+      "coding_not_your_thing": "Ak programovanie nie je nič pre vás",
+      "no_description_available": "Popis nie je k dispozícii"
     },
     "store": {
       "bct_required_title": "Vyžaduje sa Bubble Card Tools",
@@ -629,6 +630,29 @@
       "copy_error": "Nepodarilo sa skopírovať do schránky. Skopírujte prosím ručne z náhľadu nižšie.",
       "download_success": "Modul stiahnutý ako súbor YAML!",
       "download_error": "Chyba pri sťahovaní modulu: {error}"
+    },
+    "card_picker": {
+      "description": "Bubble Card je minimalistická a prispôsobiteľná kolekcia kariet"
+    },
+    "errors": {
+      "card_type_required": "Musíte definovať typ karty",
+      "entity_required": "Musíte definovať entitu",
+      "entity_list_required": "Musíte definovať zoznam entít",
+      "link_required": "Musíte definovať {key}",
+      "duplicate_link": "Nemôžete použiť {value} dvakrát",
+      "select_menu_missing": "Chýba „{option}“",
+      "vertical_stack": "Vertical-stack sa nenašiel, žiadna panika, do vášho pop-upu sa pridá automaticky.",
+      "check_value": "Skontrolujte túto hodnotu",
+      "source_card": "Konfigurácia karty (sekcia štýlov)",
+      "source_module": "Modul ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Nie je definovaný žiadny hash",
+      "hidden_content": "Obsah skrytý v režime úprav z dôvodu výkonu"
+    },
+    "navigation": {
+      "group": "Pop-upy Bubble Card",
+      "hash_hint": "Hash pop-upu Bubble Card"
     }
   }
 }

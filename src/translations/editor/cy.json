@@ -176,7 +176,7 @@
       "unable_error": "Nid oes modd mudo'r naidlen hon o olygydd presennol y dangosfwrdd.",
       "failed_error": "Methwyd â mudo'r naidlen hon.",
       "migrated_toast": "Naidlen wedi'i mudo i fformat annibynnol.",
-      "notice_title": "Canfuwyd naidlen hen fformat",
+      "notice_title": "Mae angen mudo eich naidlenni",
       "notice_body": "Mae'r naidlen hon yn dal i ddefnyddio'r hen amlapiwr vertical-stack. Mudwch hi i'r fformat annibynnol i gael perfformiad llawer gwell ac i reoli ei chynnwys gyda'r un llif llusgo a gollwng ag golwg adrannau.",
       "horizontal_body": "Canfuwyd horizontal stacks. Bydd eu cardiau'n cael eu trosi fel y gallwch eu llusgo a'u gollwng yn unigol gan gadw'r un cynllun (gellir analluogi'r opsiwn hwn os oes angen).",
       "convert_stacks": "Trosi horizontal stacks yn gardiau grid",
@@ -184,7 +184,27 @@
       "rollback_bold": "Mae'r mudo hwn yn barhaol.",
       "rollback_body": "Er ei fod wedi'i brofi i drin pob achos hysbys o'r hen fformat, rwy'n dal i argymell cadw copi wrth gefn os hoffech ddychwelyd i v3.1.6 yn nes ymlaen.",
       "migrating": "Wrthi'n mudo...",
-      "migrate": "Mudo i fformat annibynnol"
+      "migrate": "Mudo i fformat annibynnol",
+      "notice_header": "Pwysig",
+      "notice_intro": "Ers Bubble Card v3.2.0, {bold} Mae'n hawdd ac yn cymryd dim ond ychydig o gliciau!",
+      "notice_intro_bold": "rhaid mudo eich naidlenni i'r fformat annibynnol newydd.",
+      "notice_announcement": "Os gwnaethoch ei golli, edrychwch ar y {link} (cymerodd tua 10 awr i mi ei ysgrifennu!) i weld yr holl nodweddion newydd a'r newidiadau.",
+      "notice_announcement_link": "cyhoeddiad rhyddhau v3.2.0",
+      "notice_change_title": "Beth mae'n ei newid?",
+      "notice_change_body": "Mae naidlenni annibynnol yn rendro'n llawer cyflymach, yn gweithio'n fwy dibynadwy, ac nid oes angen iddynt fyw y tu mewn i gerdyn {stack} bellach (o'r diwedd!). Rydych hefyd yn cael golygydd newydd sy'n seiliedig ar olygydd adrannau Home Assistant, gyda'r un dull llusgo a gollwng yn union ar gyfer golygu haws a chyflymach!",
+      "notice_video_summary": "Gwyliwch sut mae'r golygydd newydd yn gweithio",
+      "notice_video_hint": "(cliciwch i ehangu)",
+      "notice_features": "Mae gan naidlenni nodweddion newydd hefyd bellach, gyda moddau newydd (fel un wedi'i ganoli), arddull glasurol newydd ddewisol a modd perfformiad ar gyfer animeiddiadau llyfnach ar ddyfeisiau llai pwerus.",
+      "notice_how_title": "Sut i fudo o'r golygydd?",
+      "notice_how_body": "Agorwch y golygydd ar gyfer pob naidlen sy'n dangos {available}, yna cliciwch {migrate}.",
+      "notice_available": "Mudo ar gael",
+      "notice_yaml_title": "Defnyddio YAML?",
+      "notice_yaml_body": "Rhowch y fformat annibynnol yn lle hen gyfluniad y naidlen:",
+      "notice_protip": "Awgrym:",
+      "notice_protip_body": "A dweud y gwir, os ydych yn dal i ddefnyddio YAML ar gyfer Bubble Card erbyn hyn, mae'n werth rhoi cynnig ar y golygydd newydd, mae'n gwneud creu a golygu naidlenni'n hawdd iawn! Rydych hefyd yn cael mynediad i'r Module Store. Rwyf wedi rhoi cymaint o gariad yn y golygydd hwn ❤️",
+      "notice_enjoy": "Mwynhewch y diweddariad hwn! Iechyd da! 🍻",
+      "notice_dismiss": "Iawn, peidiwch â dangos eto ar y golwg hwn",
+      "notice_remind": "Atgoffwch fi'n hwyrach"
     },
     "card_names": {
       "button": "Botwm (swits, llithrydd, ...)",
@@ -495,7 +515,8 @@
       "custom_styles": "arddulliau wedi'u haddasu",
       "info_body2": "Mae hyn yn ei gwneud yn hawdd newid pethau fel arddulliau eich holl gardiau, ac i ddefnyddwyr uwch, addasu neu ychwanegu nodweddion gyda golygydd go iawn.",
       "info_body3": "{coding}, gallwch hefyd ddod o hyd i fodiwlau a wnaed gan y gymuned a'u gosod yn y {store}.",
-      "coding_not_your_thing": "Os nad yw codio at eich dant"
+      "coding_not_your_thing": "Os nad yw codio at eich dant",
+      "no_description_available": "Dim disgrifiad ar gael"
     },
     "store": {
       "bct_required_title": "Mae angen Bubble Card Tools",
@@ -609,6 +630,29 @@
       "copy_error": "Methwyd â chopïo i'r clipfwrdd. Copïwch â llaw o'r rhagolwg isod.",
       "download_success": "Llwythwyd y modiwl i lawr fel ffeil YAML!",
       "download_error": "Gwall wrth lwytho'r modiwl i lawr: {error}"
+    },
+    "card_picker": {
+      "description": "Casgliad cardiau minimalaidd y gellir ei addasu yw Bubble Card"
+    },
+    "errors": {
+      "card_type_required": "Mae angen i chi ddiffinio math o gerdyn",
+      "entity_required": "Mae angen i chi ddiffinio endid",
+      "entity_list_required": "Mae angen i chi ddiffinio rhestr endidau",
+      "link_required": "Mae angen i chi ddiffinio {key}",
+      "duplicate_link": "Allwch chi ddim defnyddio {value} ddwywaith",
+      "select_menu_missing": "\"{option}\" ar goll",
+      "vertical_stack": "Heb ddod o hyd i vertical-stack, peidiwch â phoeni, caiff ei ychwanegu at eich naidlen yn awtomatig.",
+      "check_value": "Gwiriwch y gwerth hwn",
+      "source_card": "Cyfluniad y cerdyn (adran arddulliau)",
+      "source_module": "Modiwl ({id})"
+    },
+    "placeholder": {
+      "no_hash": "Dim hash wedi'i ddiffinio",
+      "hidden_content": "Mae'r cynnwys wedi'i guddio yn y modd golygu er mwyn perfformiad"
+    },
+    "navigation": {
+      "group": "Naidlenni Bubble Card",
+      "hash_hint": "Hash naidlen Bubble Card"
     }
   }
 }
