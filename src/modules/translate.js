@@ -85,16 +85,25 @@ function protectText(text) {
   return { protectedText, tokens };
 }
 
+// Code blocks carry meaning that must survive intact; brand names and inline
+// tags are cosmetic. Engines occasionally drop a token, so only a missing
+// structural one invalidates the translation.
+function isStructuralToken(token) {
+  return /^(```|<pre>|<code-block>|<code>|`)/.test(token);
+}
+
 function restoreText(text, tokens) {
-  let missing = false;
+  let unknownIndex = false;
   const seen = new Set();
   const restored = text.replace(/⟦\s*(\d+)\s*⟧/g, (_, index) => {
     const token = tokens[Number(index)];
-    if (token === undefined) { missing = true; return ''; }
+    if (token === undefined) { unknownIndex = true; return ''; }
     seen.add(Number(index));
     return token;
   });
-  if (missing || seen.size !== tokens.length) return null;
+  if (unknownIndex) return null;
+  const lostStructural = tokens.some((token, index) => !seen.has(index) && isStructuralToken(token));
+  if (lostStructural) return null;
   return restored;
 }
 

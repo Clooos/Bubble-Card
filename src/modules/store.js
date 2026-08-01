@@ -16,7 +16,7 @@ import { translateText, getTranslationTargetLang, warmupBrowserTranslator } from
 // scheduler that always processes the topmost displayed module first (ranking
 // order, and whatever filter/search is active), one module at a time.
 // Per-module opt-out via context._storeDescOriginal.
-const DESC_RETRY_MS = 5 * 60 * 1000;
+const DESC_RETRY_MS = 15 * 1000;
 
 function _getStoreDescription(context, module, order) {
   const id = module.id ?? module.moduleLink ?? module.name;
