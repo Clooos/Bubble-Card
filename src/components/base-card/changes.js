@@ -9,11 +9,38 @@ import {
     timerTimeRemaining,
     computeDisplayTimer,
     startTimerInterval,
-    stopTimerInterval
+    stopTimerInterval,
+    hasTimerInterval
 } from '../../tools/utils.js';
 import { applyScrollingEffect } from '../../tools/text-scrolling.js';
 import { getIcon, getImage, getIconColor } from '../../tools/icon.js';
 import { getClimateColor } from '../../cards/climate/helpers.js';
+
+function startTimerCountdown(context, entity) {
+    startTimerInterval(context, entity, () => {
+        // Force update by calling changeState again
+        const currentState = context._hass.states[entity];
+        if (currentState && currentState.state === 'active') {
+            // Temporarily mark as changed to force update
+            context.previousState = null;
+            changeState(context);
+        } else {
+            stopTimerInterval(context);
+        }
+    });
+}
+
+// A disconnect (view switch, pop-up close/reopen) clears the countdown
+// interval while the memoized comparison fields stay unchanged, so the render
+// path below would never restart it and the visible countdown would freeze.
+export function ensureTimerCountdown(context) {
+    const entity = context.config?.entity;
+    const showState = context.config?.show_state ?? (context.config?.button_type === 'state');
+    if (!entity || !showState || !isTimerEntity(entity)) return;
+    if (context._hass?.states?.[entity]?.state !== 'active') return;
+    if (hasTimerInterval(context)) return;
+    startTimerCountdown(context, entity);
+}
 
 export function changeState(context) {
     const entity = context.config?.entity;
@@ -49,7 +76,10 @@ export function changeState(context) {
         previousConfig.scrollingEffect !== scrollingEffect
     );
 
-    if (!configChanged) return;
+    if (!configChanged) {
+        ensureTimerCountdown(context);
+        return;
+    }
 
     // Check if entity is a timer and format accordingly
     const isTimer = isTimerEntity(entity);
@@ -58,20 +88,10 @@ export function changeState(context) {
         if (isTimer) {
             const timeRemaining = timerTimeRemaining(state);
             formattedState = computeDisplayTimer(context._hass, state, timeRemaining) || '';
-            
+
             // Start/stop interval for active timers
             if (state.state === 'active') {
-                startTimerInterval(context, entity, () => {
-                    // Force update by calling changeState again
-                    const currentState = context._hass.states[entity];
-                    if (currentState && currentState.state === 'active') {
-                        // Temporarily mark as changed to force update
-                        context.previousState = null;
-                        changeState(context);
-                    } else {
-                        stopTimerInterval(context);
-                    }
-                });
+                startTimerCountdown(context, entity);
             } else {
                 stopTimerInterval(context);
             }

@@ -622,6 +622,10 @@ export function stopTimerInterval(context) {
     }
 }
 
+export function hasTimerInterval(context) {
+    return timerIntervals.has(context);
+}
+
 // Timer interval management for sub-button elements
 export function startElementTimerInterval(element, context, entity, updateCallback) {
     // Stop any existing interval for this element
