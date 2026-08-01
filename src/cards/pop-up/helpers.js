@@ -38,7 +38,7 @@ registerPopupOpenActivityProbe(() => {
 const outsideCloseFallbackDelay = 150;
 const popupQuickOpenAnimationDurationMs = 140;
 const popupBlurWillChangeDurationMs = 450;
-const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout', '_standaloneHeavyOpenTimeout', '_standalonePostOpenContentWakeTimeout'];
+const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout', '_standaloneHeavyOpenTimeout', '_standalonePostOpenContentWakeTimeout', '_pendingOpenSettledUpdateTimeout'];
 const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame', '_standaloneClosedPaintCountFrame'];
 const maxPostOpenContentWakeTargets = 16;
 
@@ -1347,11 +1347,21 @@ function finalizeStandalonePopupOpen(context) {
 
     // Per-tick updates held during the open sequence flush as one pass on the
     // settled pop-up: the fresh hass was stored on the context all along.
+    // The flush gets its own macrotask: this one already carries the gate
+    // release, the scrollable sync and the hydration resume, and the last
+    // frames of the slide are still being presented.
     if (context._pendingOpenSettledUpdate) {
-        context._pendingOpenSettledUpdate = false;
-        try {
-            context.updateBubbleCard?.();
-        } catch (_) {}
+        clearContextTimeout(context, '_pendingOpenSettledUpdateTimeout');
+        context._pendingOpenSettledUpdateTimeout = setTimeout(() => {
+            context._pendingOpenSettledUpdateTimeout = null;
+            if (!context._pendingOpenSettledUpdate || !popupState.activePopups.has(context)) {
+                return;
+            }
+            context._pendingOpenSettledUpdate = false;
+            try {
+                context.updateBubbleCard?.();
+            } catch (_) {}
+        }, 0);
     }
 
     if (context._pendingPostOpenCardSync) {

@@ -1279,8 +1279,33 @@ describe('standalone popup lifecycle', () => {
         dispatchTransformTransitionEnd(context.popUp);
         flushRafQueue(); // finalize
 
+        // The finalize task already carries the gate release, the scrollable
+        // sync and the hydration resume: the flush takes the next macrotask.
+        expect(context.updateBubbleCard).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(0);
+
         expect(context.updateBubbleCard).toHaveBeenCalledTimes(1);
         expect(context._pendingOpenSettledUpdate).toBe(false);
+    });
+
+    test('drops the deferred flush when the popup closes before it runs', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        context.updateBubbleCard = jest.fn();
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2
+        context._pendingOpenSettledUpdate = true;
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue(); // finalize schedules the flush
+
+        closePopup(context, true);
+        jest.advanceTimersByTime(0);
+
+        expect(context.updateBubbleCard).not.toHaveBeenCalled();
     });
 
     test('drops a held update when the open is canceled by a close', () => {
