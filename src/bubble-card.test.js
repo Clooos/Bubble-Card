@@ -59,6 +59,34 @@ function createCard(config = { card_type: 'button' }) {
     return card;
 }
 
+describe('BubbleCard editor detection memoization', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test('memoizes the editor-detection walk per connected lifetime', () => {
+        const card = createCard();
+        card._isInsideCardEditor = jest.fn(() => false);
+
+        expect(card.detectedEditor).toBe(false);
+        expect(card.detectedEditor).toBe(false);
+        expect(card._isInsideCardEditor).toHaveBeenCalledTimes(1);
+
+        // A DOM move fires the lifecycle callbacks: the memo must reset so a
+        // card moved into an editor preview is detected again.
+        card.connectedCallback();
+        expect(card.detectedEditor).toBe(false);
+        expect(card._isInsideCardEditor).toHaveBeenCalledTimes(2);
+
+        card.disconnectedCallback();
+        card._isInsideCardEditor.mockReturnValue(true);
+        expect(card.detectedEditor).toBe(true);
+        expect(card._isInsideCardEditor).toHaveBeenCalledTimes(3);
+        expect(card.detectedEditor).toBe(true);
+        expect(card._isInsideCardEditor).toHaveBeenCalledTimes(3);
+    });
+});
+
 describe('BubbleCard disconnect contract', () => {
     beforeEach(() => {
         jest.clearAllMocks();

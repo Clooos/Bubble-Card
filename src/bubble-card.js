@@ -52,9 +52,13 @@ class BubbleCard extends HTMLElement {
   editor = false;
   isConnected = false;
   _editorUpdateTimeout = null;
+  _detectedEditorMemo = undefined;
 
   connectedCallback() {
     this.isConnected = true;
+    // Editor detection depends on the ancestor chain, which only changes
+    // through a DOM move: both lifecycle callbacks reset the memo.
+    this._detectedEditorMemo = undefined;
     initializeContent(this);
     preloadYAMLStyles(this);
     createBubbleDefaultColor();
@@ -87,6 +91,7 @@ class BubbleCard extends HTMLElement {
 
   disconnectedCallback() {
     this.isConnected = false;
+    this._detectedEditorMemo = undefined;
     cleanupTapActions();
     try {
       if (this.config?.card_type === 'pop-up') {
@@ -137,7 +142,14 @@ class BubbleCard extends HTMLElement {
       return true;
     }
 
-    return this._isInsideCardEditor();
+    // The full shadow-piercing ancestor walk plus two document probes ran on
+    // every update of every card. The result can only change through a DOM
+    // move, and any move fires the lifecycle callbacks that reset this memo.
+    if (this._detectedEditorMemo === undefined) {
+      this._detectedEditorMemo = this._isInsideCardEditor();
+    }
+
+    return this._detectedEditorMemo;
   }
 
   _isInsideCardEditor() {
