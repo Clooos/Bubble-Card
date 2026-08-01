@@ -7,6 +7,39 @@ import { installOrUpdateModule } from './install.js';
 import jsyaml from 'js-yaml';
 import { ensureBCTProviderAvailable, isBCTAvailableSync } from './bct-provider.js';
 import { isHomeAssistantVersionAtLeast } from '../tools/utils.js';
+import { tTemplate } from '../editor/utils.js';
+import setupTranslation from '../tools/localize.js';
+import { translateText, getTranslationTargetLang } from './translate.js';
+
+// Kicks off (once) and returns the machine translation of a module
+// description. Falls back to the original text until/unless a translation is
+// available. Per-module opt-out via context._storeDescOriginal.
+function _getStoreDescription(context, module) {
+  const id = module.id ?? module.moduleLink ?? module.name;
+  const wantsTranslation = context._storeTranslateDescriptions &&
+    !!getTranslationTargetLang(context.hass) &&
+    !context._storeDescOriginal?.has(id) &&
+    !!module.description;
+  if (!wantsTranslation) return { id, text: module.description, translated: false };
+
+  context._storeDescCache = context._storeDescCache || new Map();
+  if (context._storeDescCache.has(id)) {
+    return { id, text: context._storeDescCache.get(id), translated: true };
+  }
+
+  context._storeDescPending = context._storeDescPending || new Set();
+  if (!context._storeDescPending.has(id)) {
+    context._storeDescPending.add(id);
+    translateText(module.description, context.hass).then((translated) => {
+      context._storeDescPending.delete(id);
+      if (translated) {
+        context._storeDescCache.set(id, translated);
+        context.requestUpdate();
+      }
+    });
+  }
+  return { id, text: module.description, translated: false };
+}
 
 const BCT_CHECK_RETRY_MS = 5000;
 const RATE_LIMIT_WARNING_STORAGE_KEY = 'bubble-card-rate-limit-warning';
@@ -48,6 +81,8 @@ function _readPersistedRateLimitWarning() {
 }
 
 export function makeModuleStore(context) {
+  const t = setupTranslation(context._hassRender ?? context.hass);
+
   // Check if the persistent entity exists
   const entityId = 'sensor.bubble_card_modules';
   const entityExists = context.hass && context.hass.states && context.hass.states[entityId];
@@ -148,14 +183,14 @@ export function makeModuleStore(context) {
       <div class="bubble-info warning">
         <h4 class="bubble-section-title">
           <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-          Bubble Card Tools required
+          ${t('editor.store.bct_required_title')}
         </h4>
         <div class="content">
           ${hasAnyModules ? html`
-            <p><b>To use the Module Store and to install/edit modules, install <code>Bubble Card Tools</code>.</b></p>
-            <p>Existing modules will still be read from legacy sources for compatibility.</p>
+            <p><b>${tTemplate(t('editor.store.bct_required_body1'), { tools: html`<code>Bubble Card Tools</code>` })}</b></p>
+            <p>${t('editor.store.bct_required_body2')}</p>
           ` : html`
-            <p><b>No modules detected yet.</b> To install or edit modules and use the Module Store, install <code>Bubble Card Tools</code>.</p>
+            <p>${tTemplate(t('editor.store.bct_required_body3'), { no_modules: html`<b>${t('editor.store.no_modules_detected')}</b>`, tools: html`<code>Bubble Card Tools</code>` })}</p>
           `}
         </div>
       </div>
@@ -198,7 +233,7 @@ export function makeModuleStore(context) {
   if (context._isLoadingStore) {
     // Calculate progress percentage width based on current progress
     const progressWidth = context._loadingProgress || 0;
-    const loadingText = context._loadingStatus || "Loading modules";
+    const loadingText = context._loadingStatus || t('editor.store.loading_modules');
     
     return html`
       <div class="store-loading">
@@ -230,13 +265,13 @@ export function makeModuleStore(context) {
       <div class="bubble-info error">
         <h4 class="bubble-section-title">
           <ha-icon icon="mdi:alert-circle-outline"></ha-icon>
-          Loading error
+          ${t('editor.store.loading_error_title')}
         </h4>
         <div class="content">
-          <p>Could not load modules from GitHub: ${context._storeError}</p>
+          <p>${t('editor.store.loading_error_body').replace('{error}', context._storeError)}</p>
           <mwc-button @click=${() => _fetchModuleStore(context)}>
             <ha-icon icon="mdi:refresh" style="margin-right: 8px;"></ha-icon>
-            Retry
+            ${t('editor.store.retry')}
           </mwc-button>
         </div>
       </div>
@@ -253,6 +288,15 @@ export function makeModuleStore(context) {
   // Add a state property for the currently zoomed image
   if (context._zoomedImage === undefined) {
     context._zoomedImage = null;
+  }
+
+  // Machine-translated descriptions: restore the user's last choice.
+  if (context._storeTranslateDescriptions === undefined) {
+    try {
+      context._storeTranslateDescriptions = localStorage.getItem('bubble-card-store-translate') === '1';
+    } catch (_) {
+      context._storeTranslateDescriptions = false;
+    }
   }
   
   // Add a function to handle zooming in/out
@@ -272,7 +316,7 @@ export function makeModuleStore(context) {
         <div class="store-header-top">
           <div class="store-header-title">
             <ha-icon icon="mdi:puzzle-plus-outline"></ha-icon>
-            <span>Module Store</span>
+            <span>${t('editor.store.title')}</span>
           </div>
           <div 
             class="store-refresh-button" 
@@ -281,7 +325,7 @@ export function makeModuleStore(context) {
               context._isApiCallInProgress = false;
               _fetchModuleStore(context, false);
             }}
-            title="Refresh module list"
+            title="${t('editor.store.refresh_list')}"
           >
             <ha-icon icon="mdi:refresh"></ha-icon>
           </div>
@@ -290,14 +334,14 @@ export function makeModuleStore(context) {
           ${_supportsHaInputSearch(context.hass)
             ? html`<ha-input-search
                 .value=${context._storeSearchQuery || ''}
-                placeholder="Search modules"
+                placeholder="${t('editor.store.search_modules')}"
                 @input=${(ev) => {
                   context._storeSearchQuery = ev.target.value;
                   context.requestUpdate();
                 }}
               ></ha-input-search>`
             : html`<ha-textfield
-                label="Search modules"
+                label="${t('editor.store.search_modules')}"
                 icon
                 .value=${context._storeSearchQuery || ''}
                 @input=${(e) => {
@@ -313,7 +357,8 @@ export function makeModuleStore(context) {
         </div>
         <div class="store-filters">
 
-          <ha-formfield label="Show only modules compatible with this card">
+          <ha-formfield label="${t('editor.store.only_compatible').replace('{card_type}',
+            t('editor.module_editor.card_' + String(context._config?.card_type ?? '').replace(/-/g, '_')))}">
             <ha-switch
               .checked=${context._storeShowOnlyCompatible ?? true}
               @change=${(e) => {
@@ -322,6 +367,18 @@ export function makeModuleStore(context) {
               }}
             ></ha-switch>
           </ha-formfield>
+          ${getTranslationTargetLang(context.hass) ? html`
+            <ha-formfield label="${t('editor.store.translate_descriptions')}">
+              <ha-switch
+                .checked=${context._storeTranslateDescriptions ?? false}
+                @change=${(e) => {
+                  context._storeTranslateDescriptions = e.target.checked;
+                  try { localStorage.setItem('bubble-card-store-translate', e.target.checked ? '1' : '0'); } catch (_) {}
+                  context.requestUpdate();
+                }}
+              ></ha-switch>
+            </ha-formfield>
+          ` : ''}
         </div>
       </div>
 
@@ -330,8 +387,8 @@ export function makeModuleStore(context) {
           <div class="bubble-info-header">
             <h4 class="bubble-section-title">
               <ha-icon icon="mdi:information-outline"></ha-icon>
-              How modules are ranked
-              <div class="bubble-info-dismiss bubble-badge" @click=${context._dismissRankingInfo} title="Dismiss" 
+              ${t('editor.store.ranking_title')}
+              <div class="bubble-info-dismiss bubble-badge" @click=${context._dismissRankingInfo} title="${t('editor.common.dismiss')}"
                 style="
                   display: inline-flex;
                   align-items: center;
@@ -341,13 +398,13 @@ export function makeModuleStore(context) {
                   cursor: pointer;"
               >
                 <ha-icon icon="mdi:close" style="margin: 0;"></ha-icon>
-                Dismiss
+                ${t('editor.common.dismiss')}
               </div>
             </h4>
           </div>
           <div class="content">
-            <p>Due to a limitation in GitHub's API, only top-level reactions like ❤️ 👍 🚀 on the main discussion post are counted for popularity, along with other factors like recent activity, number of comments, updates...</p>
-            <p><b>Click the "More info" button and show some love there if you find a module useful!</b></p>
+            <p>${t('editor.store.ranking_body1')}</p>
+            <p><b>${t('editor.store.ranking_body2')}</b></p>
           </div>
         </div>
       ` : ''}
@@ -357,8 +414,8 @@ export function makeModuleStore(context) {
           <div class="bubble-info-header">
             <h4 class="bubble-section-title">
               <ha-icon icon="mdi:alert-outline"></ha-icon>
-              API rate limit reached
-              <div class="bubble-info-dismiss bubble-badge" @click=${() => { context._rateLimitWarning = false; _clearPersistedRateLimitWarning(); context.requestUpdate(); }} title="Dismiss" 
+              ${t('editor.store.rate_limit_title')}
+              <div class="bubble-info-dismiss bubble-badge" @click=${() => { context._rateLimitWarning = false; _clearPersistedRateLimitWarning(); context.requestUpdate(); }} title="${t('editor.common.dismiss')}"
                 style="
                   display: inline-flex;
                   align-items: center;
@@ -368,15 +425,15 @@ export function makeModuleStore(context) {
                   cursor: pointer;"
               >
                 <ha-icon icon="mdi:close" style="margin: 0;"></ha-icon>
-                Dismiss
+                ${t('editor.common.dismiss')}
               </div>
             </h4>
           </div>
           <div class="content">
-            <p>GitHub API rate limit was reached. The module list is loaded from cache. ${
-              context._rateLimitResetTime 
-                ? `Please try again in ${_formatTimeRemaining(context._rateLimitResetTime)}.`
-                : 'Please try again later.'
+            <p>${t('editor.store.rate_limit_body')} ${
+              context._rateLimitResetTime
+                ? t('editor.store.try_again_in').replace('{time}', _formatTimeRemaining(context._rateLimitResetTime, t))
+                : t('editor.store.try_again_later')
             }</p>
           </div>
         </div>
@@ -409,14 +466,14 @@ export function makeModuleStore(context) {
                 <div class="store-module-meta">
                   <div class="store-module-author">
                     ${module.userAvatar ? html`
-                      <img src="${module.userAvatar}" alt="${module.creator || 'Anonymous'}" class="author-avatar">
+                      <img src="${module.userAvatar}" alt="${module.creator || t('editor.store.anonymous')}" class="author-avatar">
                     ` : ''}
-                    <span>by ${module.creator || 'Anonymous'}</span>
+                    <span>${t('editor.store.by_creator').replace('{creator}', module.creator || t('editor.store.anonymous'))}</span>
                   </div>
                   <div class="version-container">
-                    ${_isNewModule(module) ? html`<span class="bubble-badge new-badge"><ha-icon icon="mdi:bell-outline"></ha-icon> New</span>` : ''}
-                    ${!isCompatible ? html`<span class="bubble-badge incompatible-badge">Incompatible</span>` : ''}
-                    ${hasUpdate ? html`<span class="bubble-badge update-badge">Update available</span>` : ''}
+                    ${_isNewModule(module) ? html`<span class="bubble-badge new-badge"><ha-icon icon="mdi:bell-outline"></ha-icon> ${t('editor.store.new_badge')}</span>` : ''}
+                    ${!isCompatible ? html`<span class="bubble-badge incompatible-badge">${t('editor.store.incompatible_badge')}</span>` : ''}
+                    ${hasUpdate ? html`<span class="bubble-badge update-badge">${t('editor.store.update_available_badge')}</span>` : ''}
                     ${isInstalledViaYaml ? html`<span class="bubble-badge yaml-badge">YAML</span>` : ''}
                     <span class="bubble-badge version-badge">${module.version || ''}</span>
                   </div>
@@ -428,10 +485,38 @@ export function makeModuleStore(context) {
 
               <div class="store-module-content">
                 <div class="store-module-description">
-                  ${module.description ? html`
-                    <p class="module-description" .innerHTML=${_formatModuleDescription(module.description)}></p>
-                  ` : html`
-                    <p><em>No description</em></p>
+                  ${module.description ? (() => {
+                    const desc = _getStoreDescription(context, module);
+                    const showingOriginalByChoice = context._storeTranslateDescriptions &&
+                      !!getTranslationTargetLang(context.hass) &&
+                      context._storeDescOriginal?.has(desc.id);
+                    return html`
+                    <p class="module-description" .innerHTML=${_formatModuleDescription(desc.text)}></p>
+                    ${desc.translated ? html`
+                      <p class="module-translation-note" style="opacity: 0.7; font-size: 0.85em; display: flex; align-items: center; gap: 4px;">
+                        <ha-icon icon="mdi:translate" style="--mdc-icon-size: 14px;"></ha-icon>
+                        <em>${t('editor.store.machine_translated')}</em>
+                        <a href="#" style="color: var(--primary-color);" @click=${(e) => {
+                          e.preventDefault();
+                          context._storeDescOriginal = context._storeDescOriginal || new Set();
+                          context._storeDescOriginal.add(desc.id);
+                          context.requestUpdate();
+                        }}>${t('editor.store.show_original')}</a>
+                      </p>
+                    ` : ''}
+                    ${showingOriginalByChoice ? html`
+                      <p class="module-translation-note" style="opacity: 0.7; font-size: 0.85em; display: flex; align-items: center; gap: 4px;">
+                        <ha-icon icon="mdi:translate" style="--mdc-icon-size: 14px;"></ha-icon>
+                        <a href="#" style="color: var(--primary-color);" @click=${(e) => {
+                          e.preventDefault();
+                          context._storeDescOriginal.delete(desc.id);
+                          context.requestUpdate();
+                        }}>${t('editor.store.show_translation')}</a>
+                      </p>
+                    ` : ''}
+                  `;
+                  })() : html`
+                    <p><em>${t('editor.store.no_description')}</em></p>
                   `}
                   ${module.imageUrl ? html`
                     <div class="module-preview-container">
@@ -458,7 +543,7 @@ export function makeModuleStore(context) {
                                 style="cursor: pointer;"
                               >
                                 <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
-                                <span>Update (Manual install)</span>
+                                <span>${t('editor.store.update_manual')}</span>
                               </a>
                             `
                             : html`
@@ -468,7 +553,7 @@ export function makeModuleStore(context) {
                                 style="cursor: pointer;"
                               >
                                 <ha-icon icon="mdi:arrow-up-circle-outline"></ha-icon>
-                                <span>Update</span>
+                                <span>${t('editor.common.update')}</span>
                               </div>
                             `
                           }
@@ -476,7 +561,7 @@ export function makeModuleStore(context) {
                         : html`
                           <div class="bubble-badge installed-button">
                             <ha-icon icon="mdi:check"></ha-icon>
-                            <span>${isInstalledViaYaml ? 'Installed via YAML' : 'Installed'}</span>
+                            <span>${isInstalledViaYaml ? t('editor.store.installed_via_yaml') : t('editor.store.installed')}</span>
                           </div>
                         `
                       }
@@ -492,7 +577,7 @@ export function makeModuleStore(context) {
                             style="cursor: pointer;"
                           >
                             <ha-icon icon="mdi:github"></ha-icon>
-                            <span>Manual install</span>
+                            <span>${t('editor.store.manual_install')}</span>
                           </a>
                         `
                         : html`
@@ -502,7 +587,7 @@ export function makeModuleStore(context) {
                             style="cursor: pointer;"
                           >
                             <ha-icon icon="mdi:download"></ha-icon>
-                            <span>Install</span>
+                            <span>${t('editor.store.install')}</span>
                           </div>
                         `
                       }
@@ -514,7 +599,7 @@ export function makeModuleStore(context) {
                     class="bubble-badge link-button"
                   >
                     <ha-icon icon="mdi:github"></ha-icon>
-                    More info / Issue report
+                    ${t('editor.store.more_info')}
                   </a>
                 </div>
               </div>
@@ -527,10 +612,10 @@ export function makeModuleStore(context) {
         <div class="bubble-info">
           <h4 class="bubble-section-title">
             <ha-icon icon="mdi:information-outline"></ha-icon>
-            No modules found
+            ${t('editor.store.no_modules_found')}
           </h4>
           <div class="content">
-            <p>No modules match your search criteria. Try modifying your search or filters.</p>
+            <p>${t('editor.store.no_modules_match')}</p>
           </div>
         </div>
       ` : ''}
@@ -542,32 +627,39 @@ export function makeModuleStore(context) {
 
     ${context._zoomedImage ? html`
       <div class="module-preview-fullscreen" @click=${() => context._toggleImageZoom(null)}>
-        <img src="${context._zoomedImage}" alt="Fullscreen preview">
+        <img src="${context._zoomedImage}" alt="${t('editor.store.fullscreen_preview')}">
       </div>
     ` : ''}
   `;
 }
 
-function _formatTimeRemaining(resetTimestamp) {
+function _formatTimeRemaining(resetTimestamp, t) {
   const now = Date.now();
   const diff = resetTimestamp - now;
-  
-  if (diff <= 0) return 'now';
-  
+
+  if (diff <= 0) return t('editor.store.time_now');
+
+  const formatMinutes = (count) =>
+    t(count > 1 ? 'editor.store.time_minutes' : 'editor.store.time_minute').replace('{count}', count);
+  const formatHours = (count) =>
+    t(count > 1 ? 'editor.store.time_hours' : 'editor.store.time_hour').replace('{count}', count);
+
   const minutes = Math.ceil(diff / 60000);
-  
+
   if (minutes < 60) {
-    return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    return formatMinutes(minutes);
   }
-  
+
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
-  
+
   if (remainingMinutes === 0) {
-    return `${hours} hour${hours > 1 ? 's' : ''}`;
+    return formatHours(hours);
   }
-  
-  return `${hours} hour${hours > 1 ? 's' : ''} and ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}`;
+
+  return t('editor.store.time_hours_minutes')
+    .replace('{hours}', formatHours(hours))
+    .replace('{minutes}', formatMinutes(remainingMinutes));
 }
 
 function _getFilteredStoreModules(context) {
@@ -888,6 +980,8 @@ function _requiresManualInstallation(module) {
 }
 
 export async function _fetchModuleStore(context, isBackgroundFetch = false) {
+  const t = setupTranslation(context._hassRender ?? context.hass);
+
   // Check if an API call is already in progress
   if (context._isApiCallInProgress) {
     return;
@@ -903,7 +997,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     context._isLoadingStore = true;
     context._storeError = null;
     context._loadingProgress = 5;
-    context._loadingStatus = "Connecting to GitHub";
+    context._loadingStatus = t('editor.store.status_connecting');
     context.requestUpdate();
     
     // Start progress animation
@@ -955,7 +1049,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
           }
           
           if (!isBackgroundFetch) {
-            context._loadingStatus = "Loading from cache";
+            context._loadingStatus = t('editor.store.status_loading_cache');
             context._loadingProgress = 100;
             context.requestUpdate();
             
@@ -981,7 +1075,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
     let rateLimitReached = false;
 
     if (!isBackgroundFetch) {
-      context._loadingStatus = "Downloading module data";
+      context._loadingStatus = t('editor.store.status_downloading');
       context._loadingProgress = Math.max(context._loadingProgress, 50);
       context.requestUpdate();
     }
@@ -1043,7 +1137,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       }
 
       if (!isBackgroundFetch) {
-        context._loadingStatus = `Processing page ${page}`;
+        context._loadingStatus = t('editor.store.status_processing_page').replace('{page}', page);
         // Gradually increase progress as pages load
         context._loadingProgress = Math.max(context._loadingProgress, Math.min(50 + (page * 5), 80));
         context.requestUpdate();
@@ -1109,7 +1203,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
 
     // Update loading status
     if (!isBackgroundFetch) {
-      context._loadingStatus = "Filtering modules";
+      context._loadingStatus = t('editor.store.status_filtering');
       context._loadingProgress = Math.max(context._loadingProgress, 85);
       context.requestUpdate();
     }
@@ -1138,7 +1232,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       context._rateLimitWarning = true;
       _persistRateLimitWarning(context._rateLimitResetTime);
       if (!isBackgroundFetch) {
-        context._loadingStatus = "Rate limit reached - Using cached data";
+        context._loadingStatus = t('editor.store.status_rate_limited');
         context._loadingProgress = Math.max(context._loadingProgress, 95);
         context.requestUpdate();
       }
@@ -1148,7 +1242,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       
       if (!isBackgroundFetch) {
         context._loadingProgress = 100;
-        context._loadingStatus = "Loaded from cache (API limit reached)";
+        context._loadingStatus = t('editor.store.status_cache_rate_limited');
         context.requestUpdate();
       }
 
@@ -1170,7 +1264,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
 
     // Update loading status
     if (!isBackgroundFetch) {
-      context._loadingStatus = "Saving to cache";
+      context._loadingStatus = t('editor.store.status_saving');
       context._loadingProgress = Math.max(context._loadingProgress, 95);
       context.requestUpdate();
     }
@@ -1185,7 +1279,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
       // Short pause to show progress at 95% before reaching 100%
       await new Promise(resolve => setTimeout(resolve, 300));
       context._loadingProgress = 100;
-      context._loadingStatus = "Complete";
+      context._loadingStatus = t('editor.store.status_complete');
       context.requestUpdate();
     }
 
@@ -1213,7 +1307,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
 
     // In case of error, use cached data if available
     if (!isBackgroundFetch) {
-      context._loadingStatus = "Error - Loading from cache";
+      context._loadingStatus = t('editor.store.status_error_cache');
       context._loadingProgress = Math.max(context._loadingProgress, 85);
       context.requestUpdate();
       
@@ -1225,7 +1319,7 @@ export async function _fetchModuleStore(context, isBackgroundFetch = false) {
         context._storeModules = cachedData.modules;
         context._isLoadingStore = false;
         context._loadingProgress = 100;
-        context._loadingStatus = "Loaded from cache";
+        context._loadingStatus = t('editor.store.status_loaded_cache');
         context.requestUpdate();
       } else {
         context._storeError = error.message;
