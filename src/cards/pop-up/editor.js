@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { fireEvent } from '../../tools/utils.js';
-import setupTranslation from '../../tools/localize.js';
+import setupTranslation, { ensureEditorTranslations } from '../../tools/localize.js';
 import { tTemplate } from '../../editor/utils.js';
 import { renderButtonEditor } from '../button/editor.js';
 import { registerPopUpHash, isHashOnCurrentPage } from './navigation-picker-bridge.js';
@@ -1012,7 +1012,9 @@ export function renderPopUpEditor(editor) {
 }
 
 export function renderPopupOnboarding(context) {
-  const t = setupTranslation(context?._hass ?? context?.hass);
+  const hass = context?._hass ?? context?.hass;
+  ensureEditorTranslations(hass);
+  const t = setupTranslation(hass);
   const mode = context?.config?.popup_mode ?? 'default';
   const fullWidth = context?.config?.full_width_on_mobile ? 'true' : 'false';
   const bottomOffset = context?.config?.with_bottom_offset ? 'true' : 'false';

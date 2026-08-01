@@ -40,6 +40,16 @@ export function setEditorEnglishForced(forced) {
   try {
     localStorage.setItem(ENGLISH_STORAGE_KEY, forced ? '1' : '0');
   } catch (_) {}
+  notifyLanguageChanged();
+}
+
+// Central signal for every consumer of translated text: fired when the user
+// flips the language switch AND when a fetched dictionary becomes available.
+// Cards and editors listen to it and re-render whatever they built earlier.
+function notifyLanguageChanged() {
+  try {
+    window.dispatchEvent(new CustomEvent('bubble-card-language-changed'));
+  } catch (_) {}
 }
 
 // In-memory dictionaries: lang -> object (null = fetch failed, promise = loading)
@@ -179,6 +189,7 @@ export function ensureEditorTranslations(hass) {
   pendingFetches[lang] = fetchDict(lang).then((dict) => {
     delete pendingFetches[lang];
     editorDicts[lang] = dict; // null on failure: remembered to avoid refetch loops
+    if (dict) notifyLanguageChanged();
     return !!dict;
   });
   return pendingFetches[lang];

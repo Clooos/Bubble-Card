@@ -1,5 +1,5 @@
 import { getBackdrop } from './backdrop.js';
-import setupTranslation, { getGlobalHass } from '../../tools/localize.js';
+import setupTranslation, { getGlobalHass, ensureEditorTranslations } from '../../tools/localize.js';
 import { isHaCardWrapper } from '../../tools/ha-boundary.js';
 import { handlePopUpCards, setStandalonePopUpCardsActive } from './cards/index.js';
 import { restorePopupHostLayout, suspendPopupHostLayout } from './helpers.js';
@@ -41,7 +41,12 @@ function createEditorPlaceholder(context) {
     const info = createElement('div', 'bubble-editor-placeholder-info');
     const header = createElement('div', 'bubble-editor-placeholder-header');
 
-    const t = setupTranslation(context._hass ?? getGlobalHass());
+    const hass = context._hass ?? getGlobalHass();
+    // Dashboard edit mode can show this placeholder before any editor dialog
+    // opened, so the dictionary fetch must be triggered from here too; its
+    // arrival fires bubble-card-language-changed, which rebuilds this DOM.
+    ensureEditorTranslations(hass);
+    const t = setupTranslation(hass);
 
     const hashText = createElement('div', 'bubble-editor-placeholder-hash');
     hashText.textContent = context.config.hash || t('editor.placeholder.no_hash');
@@ -72,9 +77,10 @@ function showEditorPlaceholder(context) {
     const container = context.elements?.popUpContainer;
     if (!container) return;
 
-    if (!container.querySelector('.bubble-editor-placeholder')) {
-        container.appendChild(createEditorPlaceholder(context));
-    }
+    // Rebuilt on every pass: its text follows the active language, which can
+    // change after the first render (switch flip, dictionary arriving).
+    container.querySelector('.bubble-editor-placeholder')?.remove();
+    container.appendChild(createEditorPlaceholder(context));
 
     container.classList.add('has-placeholder');
 }

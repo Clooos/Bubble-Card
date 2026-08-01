@@ -487,26 +487,28 @@ export function prepareStructure(context) {
 
     window.popUpError = true;
 
-    const existingError = context.content?.querySelector?.('.bubble-error-text');
-    if (!existingError && context.content) {
-
-      const errorText = createElement("div", "bubble-error-text");
-      render(renderPopupOnboarding(context), errorText);
-      context.content.appendChild(errorText);
-    }
+    mountPopupOnboarding(context);
   }
+}
+
+// Renders (or re-renders in place) the onboarding preview: lit keeps its part
+// cache on the container, so repeated calls refresh the text when the active
+// language changes instead of freezing the first render forever.
+function mountPopupOnboarding(context) {
+  if (!context.content) return;
+  let errorText = context.content.querySelector?.('.bubble-error-text');
+  if (!errorText) {
+    errorText = createElement("div", "bubble-error-text");
+    context.content.appendChild(errorText);
+  }
+  render(renderPopupOnboarding(context), errorText);
 }
 
 // Show the animated onboarding preview for a brand-new standalone pop-up
 // (no hash yet) while it is being created in the editor. Mirrors the legacy
 // onboarding that the vertical-stack path renders in its catch block.
 export function renderStandaloneOnboarding(context) {
-  const existingError = context.content?.querySelector?.('.bubble-error-text');
-  if (!existingError && context.content) {
-    const errorText = createElement("div", "bubble-error-text");
-    render(renderPopupOnboarding(context), errorText);
-    context.content.appendChild(errorText);
-  }
+  mountPopupOnboarding(context);
 }
 
 export function clearStandaloneOnboarding(context) {
