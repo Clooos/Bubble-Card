@@ -894,14 +894,21 @@ export function makeModulesEditor(context) {
 
               // Module names stay as authored (like in the Module Store); the
               // description and the editor labels are machine translated,
-              // unless this module is showing its original text.
+              // unless this module is showing its original text. The built-in
+              // default module ships its own dictionary translation and never
+              // goes through machine translation.
               const label = rawLabel;
+              const isDefaultDescription = typeof rawDescription === 'string' &&
+                rawDescription.startsWith('Empty and enabled by default.');
               const translateThisModule = context._storeTranslateDescriptions !== false &&
                 !isShowingOriginal(context, key);
-              const description = translateThisModule
-                ? translateUiText(rawDescription, context.hass, () => context.requestUpdate())
-                : rawDescription;
-              const descriptionTranslated = translateThisModule && description !== rawDescription;
+              const description = isDefaultDescription
+                ? t('editor.modules.default_module_description').replace('{icon}', '<ha-icon icon="mdi:pencil"></ha-icon>')
+                : (translateThisModule
+                    ? translateUiText(rawDescription, context.hass, () => context.requestUpdate())
+                    : rawDescription);
+              const descriptionTranslated = !isDefaultDescription &&
+                translateThisModule && description !== rawDescription;
 
               // Check if the module should be applied to this card
               const isChecked = shouldApplyModule(context, key);

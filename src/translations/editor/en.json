@@ -555,7 +555,8 @@
       "info_body2": "This makes it easy to change things like the styles of all your cards, and for advanced users, to modify or add features with a real editor.",
       "info_body3": "{coding}, you can also find and install modules made by the community in the {store}.",
       "coding_not_your_thing": "If coding isn't your thing",
-      "no_description_available": "No description available"
+      "no_description_available": "No description available",
+      "default_module_description": "Empty and enabled by default. Add your custom styles and/or JS templates here to apply them to all cards by pressing the {icon} button above."
     },
     "store": {
       "bct_required_title": "Bubble Card Tools required",

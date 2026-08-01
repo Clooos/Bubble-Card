@@ -231,6 +231,27 @@ async function translateChunkWithBrowserApi(chunk, targetLang) {
   }
 }
 
+// Bubble Card Tools relays the request over the local WebSocket and performs
+// the outbound call server-side: no CORS, no secure-context requirement, and
+// a disk cache shared by every browser. Older BCT versions without the
+// command fail fast with unknown_command and the next engine takes over.
+let bctTranslateUnavailable = false;
+
+async function translateChunkWithBCT(chunk, targetLang, hass) {
+  if (bctTranslateUnavailable || !hass?.connection?.sendMessagePromise) return null;
+  try {
+    const response = await hass.connection.sendMessagePromise({
+      type: 'bubble_card_tools/translate',
+      text: chunk,
+      target: targetLang
+    });
+    return typeof response?.translated === 'string' && response.translated ? response.translated : null;
+  } catch (error) {
+    if (error?.code === 'unknown_command') bctTranslateUnavailable = true;
+    return null;
+  }
+}
+
 async function translateChunkWithEndpoint(chunk, targetLang) {
   if (Date.now() < rateLimitedUntil) return null;
   return enqueueEndpointCall(async () => {
@@ -331,6 +352,9 @@ export async function translateText(text, hass) {
       continue;
     }
     let translated = await translateChunkWithBrowserApi(chunk, serviceLang);
+    if (!translated || !looksComplete(chunk, translated)) {
+      translated = await translateChunkWithBCT(chunk, serviceLang, hass);
+    }
     if (!translated || !looksComplete(chunk, translated)) {
       translated = await translateChunkWithEndpoint(chunk, serviceLang);
     }
