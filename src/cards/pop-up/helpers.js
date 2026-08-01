@@ -6,6 +6,10 @@ import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } 
 import { beginPopupOpenHassGate, releasePopupOpenHassGate } from './hass-gate.js';
 import { schedulePopupCardModulePreload } from './cards/preload.js';
 import { invalidateWakeSyncCache } from "./index.js";
+import { HA_CARD_WRAPPER_TAG, isDialogNode, isHaCardWrapper } from '../../tools/ha-boundary.js';
+
+// Re-exported so the pop-up runtime keeps one import surface for its callers.
+export { isDialogNode };
 
 function resetPopupScroll(context) {
     const container = context.elements?.popUpContainer;
@@ -509,7 +513,7 @@ export function resolvePopupHostElements(context) {
     }
 
     if (!context.sectionRow && typeof context.closest === 'function') {
-        context.sectionRow = context.closest('hui-card');
+        context.sectionRow = context.closest(HA_CARD_WRAPPER_TAG);
         if (context.sectionRow && crossesSharedCustomStackHost(context, context.sectionRow)) {
             context._popupHostLayoutSharedCustomStack = true;
             context.sectionRow = null;
@@ -529,7 +533,7 @@ export function resolvePopupHostElements(context) {
                     crossedSharedCustomStack = true;
                 }
 
-                if (node.tagName?.toLowerCase() === 'hui-card') {
+                if (isHaCardWrapper(node)) {
                     chainComplete = true;
                     if (crossedSharedCustomStack) {
                         context._popupHostLayoutSharedCustomStack = true;
@@ -619,7 +623,7 @@ function applyPopupHostLayout(context, {
     const { sectionRow, sectionRowContainer } = context;
     const hasManagedContainer = sectionRowContainer?.classList?.contains('card');
 
-    if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+    if (isHaCardWrapper(sectionRow)) {
         sectionRow.hidden = rowHidden;
         sectionRow.style.display = rowHidden ? 'none' : '';
 
@@ -964,36 +968,6 @@ if (!window.__bubbleLocationDeduperAdded) {
     }
 }
 
-// Home Assistant keeps renaming and adding dialog elements (the ha-md-dialog
-// migration being the current one), and an unrecognised dialog makes a click
-// INSIDE it count as a click outside, closing the pop-up underneath. The
-// exact-tag list below only survives as a fast path: recognise the SHAPE of a
-// dialog instead of maintaining a list that has to be patched every release.
-const dialogNode = new Set(['HA-DIALOG', 'HA-MORE-INFO-DIALOG', 'HA-DIALOG-DATE-PICKER']);
-
-// Matches DIALOG, HA-DIALOG, HA-MD-DIALOG, HA-DIALOG-DATE-PICKER, MWC-DIALOG…
-const dialogTagPattern = /(^|-)DIALOG(-|$)/;
-
-export function isDialogNode(node) {
-    const tag = node?.nodeName;
-    if (typeof tag !== 'string') {
-        return false;
-    }
-
-    if (dialogNode.has(tag) || dialogTagPattern.test(tag)) {
-        return true;
-    }
-
-    // Whatever the tag is, the platform's own accessibility contract marks
-    // dialog content — HA sets it on its dialog surfaces.
-    try {
-        const role = typeof node.getAttribute === 'function' ? node.getAttribute('role') : null;
-        return role === 'dialog' || role === 'alertdialog';
-    } catch (_) {
-        return false;
-    }
-}
-
 // Suppress the outside click released by a just-closed HA dialog.
 const dialogState = {
     recentlyClosedTimestamp: 0,
@@ -1005,10 +979,6 @@ if (!window.__bubbleDialogListenerAdded) {
         dialogState.recentlyClosedTimestamp = Date.now();
     }, { capture: true });
     
-    window.addEventListener('iron-overlay-closed', () => {
-        dialogState.recentlyClosedTimestamp = Date.now();
-    }, { capture: true });
-
     window.__bubbleDialogListenerAdded = true;
 }
 

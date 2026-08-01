@@ -1,4 +1,5 @@
 import { getBackdrop } from './backdrop.js';
+import { isHaCardWrapper } from '../../tools/ha-boundary.js';
 import { handlePopUpCards, setStandalonePopUpCardsActive } from './cards/index.js';
 import { restorePopupHostLayout, suspendPopupHostLayout } from './helpers.js';
 import { isLegacyPopUpConfig } from './migration.js';
@@ -172,7 +173,7 @@ export function changeEditor(context) {
 
     const { popUp, sectionRow, sectionRowContainer, elements, config } = context;
     const isInPreview = isCardBeingEdited(context);
-    const isCard = sectionRow?.tagName?.toLowerCase() === 'hui-card';
+    const isCard = isHaCardWrapper(sectionRow);
 
     context.bubbleInstanceId = context.bubbleInstanceId || Math.random().toString(36).slice(2, 15);
 

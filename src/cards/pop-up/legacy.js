@@ -1,3 +1,5 @@
+import { isHaCardWrapper } from '../../tools/ha-boundary.js';
+
 export function hideLegacyPopupContent(context, delay) {
     if (context.config.background_update) {
         context.popUp.style.display = 'none';
@@ -11,7 +13,7 @@ export function hideLegacyPopupContent(context, delay) {
     context.hideContentTimeout = setTimeout(() => {
         const { sectionRow, sectionRowContainer } = context;
 
-        if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+        if (isHaCardWrapper(sectionRow)) {
             sectionRow.hidden = true;
             sectionRow.style.display = 'none';
 
@@ -34,7 +36,7 @@ export function displayLegacyPopupContent(context) {
     popUp.style.visibility = '';
 
     const { sectionRow, sectionRowContainer } = context;
-    if (sectionRow?.tagName?.toLowerCase() === 'hui-card') {
+    if (isHaCardWrapper(sectionRow)) {
         sectionRow.hidden = false;
         sectionRow.style.display = '';
 

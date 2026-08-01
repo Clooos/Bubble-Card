@@ -1,4 +1,5 @@
 import { createElement, forwardHaptic, navigate } from "../../tools/utils.js";
+import { isHaCardWrapper } from '../../tools/ha-boundary.js';
 import { addHash, removeHash } from "../pop-up/helpers.js";
 import styles from "./styles.css";
 
@@ -138,7 +139,7 @@ export function createStructure(context) {
 
     // Fix for the last cards that are hidden by the HBS
     let parentElement = context.card.parentNode.host;
-    if (parentElement?.parentElement && !context.editor && parentElement?.parentElement?.tagName.toLowerCase() === 'hui-card') {
+    if (parentElement?.parentElement && !context.editor && isHaCardWrapper(parentElement?.parentElement)) {
         parentElement.parentElement.style.padding = '0 0 80px';
     }
 

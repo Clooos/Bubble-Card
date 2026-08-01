@@ -1,6 +1,7 @@
 import { render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
+import { resolveLegacyStackRoot } from "../../tools/ha-boundary.js";
 import { handleButton } from "../../cards/button/index.js";
 import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
@@ -452,7 +453,7 @@ export function prepareStructure(context) {
 
     context.sectionRow = context.verticalStack.host.parentElement;
     context.sectionRowContainer = context.sectionRow?.parentElement;
-    context.popUp = context.verticalStack.querySelector("#root");
+    context.popUp = resolveLegacyStackRoot(context.verticalStack);
     if (!context.popUp) {
       throw new Error("Vertical stack not found, don't panic, it will be added automatically to your pop-up.");
     }
