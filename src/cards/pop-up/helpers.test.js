@@ -164,7 +164,7 @@ jest.unstable_mockModule('./styles.css', () => ({
     default: '',
 }));
 
-const { cleanupPopupRuntime, closePopup, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
+const { cleanupPopupRuntime, closePopup, isPopupOpenSequenceActive, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
 const { invalidateWakeSyncCache } = await import('./index.js');
 
 let rafCallbacks;
@@ -1153,6 +1153,47 @@ describe('standalone popup lifecycle', () => {
 
         expect(context.refreshPopupHeader).toHaveBeenCalledTimes(1);
         expect(context.refreshPopupShell).not.toHaveBeenCalled();
+    });
+
+    test('never reports an open sequence as active after the shell build throws', () => {
+        const context = createStandaloneContext({ popup_mode: 'centered' });
+        usedContexts.push(context);
+        context._standaloneShellCreated = false;
+        // Centered opens build the shell synchronously, before the open can
+        // schedule any completion: a throw here used to strand the
+        // in-progress flag with no path left to clear it, and anything gated
+        // on that flag (the mid-open update hold) would hold forever.
+        context.createStandaloneShell = jest.fn(() => {
+            throw new Error('malformed config');
+        });
+
+        expect(() => openPopup(context)).not.toThrow();
+
+        expect(isPopupOpenSequenceActive(context)).toBe(false);
+        expect(context.popUp.classList.contains('is-popup-opened')).toBe(false);
+
+        // The card recovers: a later open still works.
+        context.createStandaloneShell = jest.fn();
+        context._standaloneShellCreated = false;
+        openPopup(context);
+        flushHeavyOpenTask();
+
+        expect(isPopupOpenSequenceActive(context)).toBe(true);
+    });
+
+    test('reports no active open sequence for a stranded in-progress flag', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+
+        openPopup(context);
+        expect(isPopupOpenSequenceActive(context)).toBe(true);
+
+        // Runtime membership is the liveness proof: a flag left behind by a
+        // failed open must never gate work on its own.
+        closePopup(context, true);
+        context._popupOpenInProgress = true;
+
+        expect(isPopupOpenSequenceActive(context)).toBe(false);
     });
 
     test('keeps the deferred shell factory intact when an open is canceled before the heavy task', () => {

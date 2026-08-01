@@ -1,6 +1,6 @@
 import { changeEditor, changeStyle, changeTriggered, clearStyleUpdateFrame } from './changes.js';
 import { createHeader, createStructure, prepareStructure, prepareStandaloneStructure, renderHeaderButton, renderStandaloneOnboarding, clearStandaloneOnboarding } from './create.js';
-import { cleanupPopupRuntime, isPopupOpenInProgress, registerPopupContext, syncDeferredPopupHostLayout, syncPopupOpenStateWithLocation } from './helpers.js';
+import { cleanupPopupRuntime, isPopupOpenSequenceActive, registerPopupContext, syncDeferredPopupHostLayout, syncPopupOpenStateWithLocation } from './helpers.js';
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
 import { cleanupPopUpCards, handlePopUpCards } from './cards/index.js';
 import { isStandalonePopUpConfig } from './migration.js';
@@ -428,11 +428,15 @@ export function handlePopUp(context) {
     // The whole open sequence is timing-critical: during the covered build the
     // main thread belongs to the build steps, and during the slide any shell
     // or child render re-rasters the moving layer (visible frame drops on
-    // mobile). Hold per-tick updates until the open settles and flush them as
+    // mobile). Hold the rendering work until the open settles and flush it as
     // one pass in finalize; the fresh hass is already stored on the context.
-    if (context.isStandalonePopUp && isPopupOpenInProgress(context) &&
+    if (context.isStandalonePopUp && isPopupOpenSequenceActive(context) &&
         !context.editor && !context.detectedEditor) {
         context._pendingOpenSettledUpdate = true;
+        // Triggers keep being evaluated: this is config-versus-hass work with
+        // no DOM cost, and holding it would swallow a condition that pulses
+        // within the open window (the pop-up would miss its own trigger_close).
+        changeTriggered(context);
         return;
     }
 

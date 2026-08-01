@@ -730,7 +730,16 @@ function setPopupOpenInProgress(context, inProgress) {
     context._popupOpenInProgress = inProgress === true;
 }
 
-export function isPopupOpenInProgress(context) {
+// True only while an open sequence is genuinely running. The in-progress flag
+// alone is not enough to gate work on: it is set before the open can schedule
+// any completion, so a failure in that window would strand it and anything
+// keyed on it would stay held forever. Runtime membership is the liveness
+// proof, and it is dropped by every close, rollback and cleanup path.
+export function isPopupOpenSequenceActive(context) {
+    return isPopupOpenInProgress(context) && popupState.activePopups.has(context);
+}
+
+function isPopupOpenInProgress(context) {
     return context?._popupOpenInProgress === true;
 }
 
@@ -2187,17 +2196,24 @@ export function openPopup(context, instant = false) {
         // hash === location.hash) does not attempt to create the shell again.
         // Also set _standaloneShellCreating so _setInitialVisibility skips the
         // re-entrant openPopup call and lets the outer call handle the animation.
-        if (!context._standaloneShellCreated && context.createStandaloneShell) {
-            // Instant opens and centered switches need the shell synchronously;
-            // phased opens create it in the deferred open task so the header
-            // and structure build never runs inside the interaction frame. The
-            // flags are only flipped once the shell is actually created, so a
-            // canceled open leaves createStandaloneShell intact for the next one.
-            if (instant || context.editor || canUseInstantStandaloneSwitch(context)) {
-                runDeferredStandaloneShellCreate(context);
+        // Everything from here to the guarded phases runs before the open can
+        // schedule any completion: a throw would otherwise strand the
+        // in-progress flag with no path left to clear it.
+        try {
+            if (!context._standaloneShellCreated && context.createStandaloneShell) {
+                // Instant opens and centered switches need the shell synchronously;
+                // phased opens create it in the deferred open task so the header
+                // and structure build never runs inside the interaction frame. The
+                // flags are only flipped once the shell is actually created, so a
+                // canceled open leaves createStandaloneShell intact for the next one.
+                if (instant || context.editor || canUseInstantStandaloneSwitch(context)) {
+                    runDeferredStandaloneShellCreate(context);
+                }
             }
+            openStandalonePopup(context, instant);
+        } catch (error) {
+            rollbackStandalonePopupOpen(context, error);
         }
-        openStandalonePopup(context, instant);
         return;
     }
 

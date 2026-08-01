@@ -27,7 +27,7 @@ jest.unstable_mockModule('./create.js', () => ({
 
 jest.unstable_mockModule('./helpers.js', () => ({
     cleanupPopupRuntime: jest.fn(),
-    isPopupOpenInProgress: jest.fn(() => false),
+    isPopupOpenSequenceActive: jest.fn(() => false),
     registerPopupContext: jest.fn(),
     syncDeferredPopupHostLayout: jest.fn(),
     syncPopupOpenStateWithLocation: jest.fn(),
@@ -60,7 +60,7 @@ const { changeTriggered } = await import('./changes.js');
 const { cleanupPopUpCards, handlePopUpCards } = await import('./cards/index.js');
 const { createHeader, createStructure } = await import('./create.js');
 const { renderHeaderButton } = await import('./create.js');
-const { cleanupPopupRuntime, isPopupOpenInProgress, syncPopupOpenStateWithLocation } = await import('./helpers.js');
+const { cleanupPopupRuntime, isPopupOpenSequenceActive, syncPopupOpenStateWithLocation } = await import('./helpers.js');
 const { registerPopUpHash } = await import('./navigation-picker-bridge.js');
 
 function createOpenPopupContext(overrides = {}) {
@@ -298,8 +298,8 @@ describe('handlePopUp performance guards', () => {
         expect(context._standaloneNeedsShellRefresh).toBe(true);
     });
 
-    test('holds per-tick updates while a standalone open is in flight', async () => {
-        isPopupOpenInProgress.mockReturnValueOnce(true);
+    test('holds rendering work while a standalone open is in flight', async () => {
+        isPopupOpenSequenceActive.mockReturnValueOnce(true);
         const context = createOpenPopupContext({
             isStandalonePopUp: true,
             _standalonePopUpCardsActive: true,
@@ -311,12 +311,25 @@ describe('handlePopUp performance guards', () => {
         // moving layer: the tick is held and flushed once the open settles.
         expect(context._pendingOpenSettledUpdate).toBe(true);
         expect(handlePopUpCards).not.toHaveBeenCalled();
-        expect(changeTriggered).not.toHaveBeenCalled();
         expect(renderHeaderButton).not.toHaveBeenCalled();
     });
 
+    test('keeps evaluating triggers while an open is in flight', async () => {
+        isPopupOpenSequenceActive.mockReturnValueOnce(true);
+        const context = createOpenPopupContext({
+            isStandalonePopUp: true,
+            _standalonePopUpCardsActive: true,
+        });
+
+        await handlePopUp(context);
+
+        // A condition that pulses within the open window must still be seen:
+        // holding this would make the pop-up miss its own trigger_close.
+        expect(changeTriggered).toHaveBeenCalledWith(context);
+    });
+
     test('keeps editor previews updating while an open is in flight', async () => {
-        isPopupOpenInProgress.mockReturnValueOnce(true);
+        isPopupOpenSequenceActive.mockReturnValueOnce(true);
         const context = createOpenPopupContext({
             isStandalonePopUp: true,
             _standalonePopUpCardsActive: true,
