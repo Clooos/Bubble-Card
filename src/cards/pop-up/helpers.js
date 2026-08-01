@@ -174,14 +174,19 @@ function standaloneShellNeedsClosedStatePaint(context) {
         popUp.style?.display === 'none';
 }
 
-function getStandalonePhase2SettleSignature(context) {
+function getStandalonePhase2SettleSignature(context, measured = null) {
     const container = context?.elements?.popUpContainer;
     if (!container) {
         return '';
     }
 
-    const scrollHeight = typeof container.scrollHeight === 'number' ? container.scrollHeight : 0;
-    const clientHeight = typeof container.clientHeight === 'number' ? container.clientHeight : 0;
+    // A caller that already read the container geometry in the same task can
+    // pass it in, so the signature never forces a second layout pass. The
+    // properties are read once into locals: the typeof-then-read shorthand
+    // would hit each layout-forcing getter twice.
+    let { scrollHeight, clientHeight } = measured || container;
+    scrollHeight = typeof scrollHeight === 'number' ? scrollHeight : 0;
+    clientHeight = typeof clientHeight === 'number' ? clientHeight : 0;
     const hasCardsContainer = context?._cardsContainer ? 1 : 0;
 
     return `${scrollHeight}:${clientHeight}:${hasCardsContainer}`;
@@ -1610,8 +1615,26 @@ function openStandalonePopup(context, instant = false) {
         // competing with the CSS transition start. Skip the read for cold
         // default-mode opens where content is still deferred — the container
         // is empty and the forced reflow would be expensive and misleading.
+        // The single geometry read below also feeds the settle signature:
+        // reading again after the is-scrollable write would force a second
+        // style/layout pass in the pre-slide critical path.
+        let measuredContainerGeometry = null;
         if (!syncCachedPopupScrollableState(context) && phase1ContentPrimed) {
-            syncPopupScrollableState(context);
+            const container = context.elements?.popUpContainer;
+            if (container) {
+                // One read per property: the layout-forcing getters must not
+                // be hit twice by a typeof-then-read shorthand.
+                const scrollHeight = container.scrollHeight;
+                const clientHeight = container.clientHeight;
+                measuredContainerGeometry = {
+                    scrollHeight: typeof scrollHeight === 'number' ? scrollHeight : 0,
+                    clientHeight: typeof clientHeight === 'number' ? clientHeight : 0,
+                };
+                context._cachedPopupScrollableState =
+                    measuredContainerGeometry.scrollHeight > measuredContainerGeometry.clientHeight;
+                context._scrollableContainer = container;
+                container.classList.toggle('is-scrollable', context._cachedPopupScrollableState);
+            }
         }
 
         // A shell that was not rendered while closed needs a second frame: the
@@ -1637,7 +1660,7 @@ function openStandalonePopup(context, instant = false) {
             minimumFrames: Math.max((delayHashRoutedAnimationUntilSettled && !closedStateAlreadyPainted) ? 2 : 1, closedStatePaintFrames),
             unstableExtraFrames: shouldTrackSettleInstability ? 1 : 0,
             initialSignature: shouldTrackSettleInstability
-                ? getStandalonePhase2SettleSignature(context)
+                ? getStandalonePhase2SettleSignature(context, measuredContainerGeometry)
                 : null,
         });
     };

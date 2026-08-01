@@ -1468,6 +1468,38 @@ describe('standalone popup lifecycle', () => {
         expect(showBackdrop).not.toHaveBeenCalled();
     });
 
+    test('feeds the settle signature from the single pre-slide geometry read', () => {
+        const context = createStandaloneContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+        registerPopupContext(context);
+
+        const container = context.elements.popUpContainer;
+        let geometryReads = 0;
+        Object.defineProperty(container, 'scrollHeight', {
+            configurable: true,
+            get: () => { geometryReads += 1; return 400; },
+        });
+        Object.defineProperty(container, 'clientHeight', {
+            configurable: true,
+            get: () => { geometryReads += 1; return 300; },
+        });
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+
+        flushRafQueue(); // routed open callback: phase 1 is write-only
+
+        expect(geometryReads).toBe(0);
+
+        flushHeavyOpenTask(); // covered build + pre-slide measurement
+
+        // One scrollHeight read plus one clientHeight read: the is-scrollable
+        // state and the settle signature share the same measurement instead of
+        // forcing a second style/layout pass after the class write.
+        expect(geometryReads).toBe(2);
+        expect(container.classList.contains('is-scrollable')).toBe(true);
+    });
+
     test('keeps will-change armed when duplicate URL events land mid-open', () => {
         const context = createStandaloneContext({ hash: '#popup-a' });
         usedContexts.push(context);
