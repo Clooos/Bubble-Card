@@ -28,7 +28,7 @@
     "switcher": "🌐 **[Číst tuto stránku v jiném jazyce]({index})**"
   },
   "cy": {
-    "notice": "Mae'r dudalen hon yn gyfieithiad awtomatig. Os oes amheuaeth, y [ddogfennaeth Saesneg wreiddiol]({original}) sy'n cael blaenoriaeth. Oes brawddeg sy'n darllen yn chwithig? Mae croeso i unrhyw help, ac nid yw [trwsio'r dudalen hon]({edit}) ond yn cymryd munud: mae GitHub yn gofalu am y fforc a'r pull request. Diolch ymlaen llaw! 🍻",
+    "notice": "Cyfieithiad awtomatig yw'r dudalen hon. Os oes amheuaeth, y [ddogfennaeth Saesneg wreiddiol]({original}) sy'n cael y gair olaf. Ydy brawddeg yn darllen yn chwithig? Mae croeso i unrhyw help, ac nid yw [cywiro'r dudalen hon]({edit}) ond yn cymryd munud: bydd GitHub yn gofalu am y fforc a'r pull request. Diolch yn fawr ymlaen llaw! 🍻",
     "switcher": "🌐 **[Darllenwch hyn mewn iaith arall]({index})**"
   },
   "da": {
@@ -47,7 +47,7 @@
     "switcher": "🌐 **[Read this in your language]({index})** (Français, Deutsch, Español, 简体中文, 日本語... and much more)"
   },
   "eo": {
-    "notice": "Ĉi tiu paĝo estas aŭtomata traduko. En kazo de dubo, la [originala angla dokumentaro]({original}) superregas. Ĉu iu frazo aspektas malĝusta? Ĉia helpo estas bonvena, kaj [korekti ĉi tiun paĝon]({edit}) daŭras nur unu minuton: GitHub prizorgas la forkon kaj la kunfand-peton. Antaŭdankon! 🍻",
+    "notice": "Ĉi tiu paĝo estas aŭtomata traduko. En dubo, la [originala angla dokumentaro]({original}) superregas. Ĉu iu frazo aspektas malĝusta? Ĉia helpo estas bonvena, kaj [korekti ĉi tiun paĝon]({edit}) daŭras nur unu minuton: GitHub prizorgas la forkon kaj la tirpeton. Antaŭdankon! 🍻",
     "switcher": "🌐 **[Legi ĉi tion en alia lingvo]({index})**"
   },
   "es": {
@@ -63,7 +63,7 @@
     "switcher": "🌐 **[Loe seda mõnes muus keeles]({index})**"
   },
   "eu": {
-    "notice": "Orri hau itzulpen automatikoa da. Zalantzarik izanez gero, [ingelesezko jatorrizko dokumentazioak]({original}) balio du. Esaldiren bat gaizki irakurtzen da? Laguntza oro ongi etorria da, eta [orri hau zuzentzeak]({edit}) minutu bat besterik ez du eskatzen: GitHubek fork-az eta pull request-az arduratzen da. Eskerrik asko aldez aurretik! 🍻",
+    "notice": "Orri hau itzulpen automatikoa da. Zalantzarik izanez gero, [ingelesezko jatorrizko dokumentazioak]({original}) du lehentasuna. Esaldiren bat gaizki irakurtzen da? Laguntza oro ongi etorria da, eta [orri hau zuzentzeak]({edit}) minutu bat baino ez du behar: GitHubek fork-az eta pull request-az arduratzen da. Eskerrik asko aldez aurretik! 🍻",
     "switcher": "🌐 **[Irakurri hau beste hizkuntza batean]({index})**"
   },
   "fa": {
@@ -79,11 +79,11 @@
     "switcher": "🌐 **[Lire dans une autre langue]({index})**"
   },
   "fy": {
-    "notice": "Dizze side is in automatyske oersetting. By twivel jildt de [orizjinele Ingelske dokumintaasje]({original}). Liket in sin net te doogjen? Alle help is wolkom, en [dizze side ferbetterje]({edit}) kostet mar in minút: GitHub soarget foar de fork en de pull request. Tank alfêst! 🍻",
+    "notice": "Dizze side is in automatyske oersetting. By twivel jildt de [oarspronklike Ingelske dokumintaasje]({original}). Liket in sin net te kloppen? Alle help is wolkom, en [dizze side ferbetterje]({edit}) kostet mar in minút: GitHub soarget foar de fork en de pull request. Alfêst tank! 🍻",
     "switcher": "🌐 **[Lês dit yn in oare taal]({index})**"
   },
   "ga": {
-    "notice": "Is aistriúchán uathoibríoch é an leathanach seo. Má bhíonn amhras ort, is é an [doiciméadú bunaidh Béarla]({original}) atá i réim. An bhfuil abairt mícheart? Tá fáilte roimh gach cabhair, agus ní thógann [ceartú an leathanaigh seo]({edit}) ach nóiméad: tugann GitHub aire don fhorc agus don iarratas tarraingthe. Go raibh maith agat roimh ré! 🍻",
+    "notice": "Is aistriúchán uathoibríoch é an leathanach seo. I gcás amhrais, is é an [doiciméadú bunaidh i mBéarla]({original}) a bhíonn i réim. An bhfuil abairt mícheart? Tá fáilte roimh chabhair ar bith, agus ní thógann sé ach nóiméad [an leathanach seo a cheartú]({edit}): tugann GitHub aire don fhorc agus don iarratas tarraingthe. Go raibh maith agat roimh ré! 🍻",
     "switcher": "🌐 **[Léigh é seo i dteanga eile]({index})**"
   },
   "gl": {
@@ -91,8 +91,8 @@
     "switcher": "🌐 **[Ler isto noutro idioma]({index})**"
   },
   "gsw": {
-    "notice": "Die Site isch en automatischi Übersetzig. Im Zwiifelsfall gilt d [original änglisch Dokumentation]({original}). Tönt en Satz komisch? Jedi Hilf isch willkomme, und [die Site z verbessere]({edit}) duuret nur e Minute: GitHub übernimmt de Fork und de Pull Request. Merci vielmal im Voruus! 🍻",
-    "switcher": "🌐 **[Das i ere andere Sprach lääse]({index})**"
+    "notice": "Die Siite isch en automatischi Übersetzig. Im Zwiifelsfall gilt d [originali änglischi Dokumentation]({original}). Tönt en Satz komisch? Jedi Hilf isch willkomme, und [die Siite verbessere]({edit}) duuret nur e Minute: GitHub kümmeret sich um de Fork und de Pull Request. Merci im Voruus! 🍻",
+    "switcher": "🌐 **[Lueg das inere andere Sprach a]({index})**"
   },
   "he": {
     "notice": "עמוד זה הוא תרגום אוטומטי. במקרה של ספק, [התיעוד המקורי באנגלית]({original}) גובר. משפט כלשהו נשמע שגוי? כל עזרה תתקבל בברכה, [תיקון העמוד הזה]({edit}) לוקח רק דקה: GitHub מטפל בפיצול (fork) ובבקשת המשיכה (pull request). תודה מראש! 🍻",
@@ -111,7 +111,7 @@
     "switcher": "🌐 **[Olvassa el más nyelven]({index})**"
   },
   "hy": {
-    "notice": "Այս էջը ավտոմատ թարգմանություն է։ Կասկածի դեպքում գերակայում է [անգլերեն բնօրինակ փաստաթղթավորումը]({original})։ Որևէ նախադասություն սխա՞լ է հնչում։ Ցանկացած օգնություն ողջունելի է, և [այս էջը շտկելը]({edit}) ընդամենը մեկ րոպե է տևում. GitHub-ը հոգ է տանում fork-ի և pull request-ի մասին։ Նախապես շնորհակալություն։ 🍻",
+    "notice": "Այս էջը ավտոմատ թարգմանություն է։ Կասկածի դեպքում գերակայում է [անգլերեն բնօրինակ փաստաթուղթը]({original})։ Ինչ-որ նախադասություն սխա՞լ է հնչում։ Ցանկացած օգնություն ողջունելի է, և [այս էջը ուղղելը]({edit}) ընդամենը մեկ րոպե է տևում. GitHub-ն ինքն է հոգում fork-ը և pull request-ը։ Կանխավ շնորհակալություն։ 🍻",
     "switcher": "🌐 **[Կարդալ սա այլ լեզվով]({index})**"
   },
   "id": {
@@ -131,7 +131,7 @@
     "switcher": "🌐 **[他の言語で読む]({index})**"
   },
   "ka": {
-    "notice": "ეს გვერდი ავტომატურად არის ნათარგმნი. ეჭვის შემთხვევაში უპირატესობა ენიჭება [ორიგინალ ინგლისურ დოკუმენტაციას]({original}). რომელიმე წინადადება უხერხულად იკითხება? ნებისმიერი დახმარება მისასალმებელია და [ამ გვერდის გასწორებას]({edit}) სულ ერთი წუთი სჭირდება: ფორკსა და pull request-ს GitHub თავად მოაგვარებს. წინასწარ გმადლობთ! 🍻",
+    "notice": "ეს გვერდი ავტომატური თარგმანია. ეჭვის შემთხვევაში უპირატესობა ენიჭება [ინგლისურ ორიგინალ დოკუმენტაციას]({original}). რომელიმე წინადადება უცნაურად იკითხება? ნებისმიერი დახმარება მისასალმებელია და [ამ გვერდის გასწორება]({edit}) სულ ერთ წუთს იღებს: GitHub თავად იზრუნებს ფორკსა და pull request-ზე. წინასწარ გმადლობთ! 🍻",
     "switcher": "🌐 **[წაიკითხეთ ეს სხვა ენაზე]({index})**"
   },
   "ko": {
@@ -139,8 +139,8 @@
     "switcher": "🌐 **[다른 언어로 읽기]({index})**"
   },
   "lb": {
-    "notice": "Dës Säit ass eng automatesch Iwwersetzung. Am Zweifelsfall gëllt déi [original englesch Dokumentatioun]({original}). Liest sech e Saz komesch? All Hëllef ass wëllkomm, an [dës Säit ze verbesseren]({edit}) dauert nëmmen eng Minutt: GitHub këmmert sech ëm de Fork an de Pull Request. Merci am Viraus! 🍻",
-    "switcher": "🌐 **[Liest dat an enger anerer Sprooch]({index})**"
+    "notice": "Dës Säit ass eng automatesch Iwwersetzung. Am Zweiwelsfall gëllt déi [originell englesch Dokumentatioun]({original}). Liest sech e Saz komesch? All Hëllef ass wëllkomm, an [dës Säit ze verbesseren]({edit}) dauert nëmmen eng Minutt: GitHub këmmert sech ëm de Fork an de Pull Request. Merci am Viraus! 🍻",
+    "switcher": "🌐 **[Dat hei an enger anerer Sprooch liesen]({index})**"
   },
   "lt": {
     "notice": "Šis puslapis yra automatinis vertimas. Kilus abejonių, pirmenybė teikiama [originaliai dokumentacijai anglų kalba]({original}). Ar koks nors sakinys skamba netaisyklingai? Bet kokia pagalba laukiama, o [šio puslapio pataisymas]({edit}) užtruks vos minutę: GitHub pasirūpins šakute (fork) ir sujungimo prašymu (pull request). Iš anksto dėkojame! 🍻",
