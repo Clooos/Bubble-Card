@@ -1,8 +1,9 @@
 # Bubble Card in your language
 
-The English [README](../README.md) is the reference documentation and is always up to date.
-The translations below started as automatic translations, so a sentence may read oddly or
-lag behind the English version.
+> [!IMPORTANT]
+> The English [README](../README.md) is the reference documentation and is always up to date.
+> The translations below started as automatic translations, so a sentence may read oddly or
+> lag behind the English version.
 
 **Any help improving them is more than welcome.** If a sentence reads wrong, click the ✏️
 next to your language: GitHub opens the file in its web editor, and saving it creates the
