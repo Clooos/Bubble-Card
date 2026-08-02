@@ -59,16 +59,16 @@
     "switcher": "🌐 **[Léelo en otro idioma]({index})**"
   },
   "et": {
-    "notice": "See leht on automaatne tõlge. Kahtluse korral kehtib [ingliskeelne originaaldokumentatsioon]({original}). Kas mõni lause kõlab valesti? Igasugune abi on teretulnud ja [selle lehe parandamine]({edit}) võtab vaid minuti: GitHub hoolitseb forki ja pull requesti eest. Juba ette aitäh! 🍻",
-    "switcher": "🌐 **[Loe seda mõnes teises keeles]({index})**"
+    "notice": "See leht on automaatne tõlge. Kahtluse korral kehtib [ingliskeelne originaaldokumentatsioon]({original}). Kas mõni lause tundub vale? Iga abi on teretulnud ja [selle lehe parandamine]({edit}) võtab vaid minuti: GitHub hoolitseb forki ja pull requesti eest. Suur tänu juba ette! 🍻",
+    "switcher": "🌐 **[Loe seda mõnes muus keeles]({index})**"
   },
   "eu": {
     "notice": "Orri hau itzulpen automatiko bat da. Zalantzarik izanez gero, [ingelesezko jatorrizko dokumentazioa]({original}) da nagusi. Esaldiren bat gaizki irakurtzen da? Edozein laguntza ongi etorria da, eta [orri hau konpontzeak]({edit}) minutu bat besterik ez du behar: GitHub-ek fork-a eta pull request-a kudeatzen ditu. Eskerrik asko aldez aurretik! 🍻",
     "switcher": "🌐 **[Irakurri hau beste hizkuntza batean]({index})**"
   },
   "fa": {
-    "notice": "این صفحه یک ترجمه خودکار است. در صورت تردید، [مستندات اصلی انگلیسی]({original}) ملاک است. جمله‌ای درست به نظر نمی‌رسد؟ هر کمکی خوش‌آمد است و [اصلاح این صفحه]({edit}) فقط یک دقیقه وقت می‌گیرد: GitHub خودش فورک و pull request را انجام می‌دهد. پیشاپیش ممنون! 🍻",
-    "switcher": "🌐 **[این صفحه را به زبان دیگری بخوانید]({index})**"
+    "notice": "این صفحه یک ترجمه خودکار است. در صورت تردید، [مستندات اصلی انگلیسی]({original}) معتبر است. جمله‌ای نادرست به نظر می‌رسد؟ هر کمکی خوش‌آمد است و [اصلاح این صفحه]({edit}) تنها یک دقیقه وقت می‌برد: GitHub خودش fork و pull request را انجام می‌دهد. پیشاپیش سپاسگزارم! 🍻",
+    "switcher": "🌐 **[این را به زبان دیگری بخوانید]({index})**"
   },
   "fi": {
     "notice": "Tämä sivu on automaattinen käännös. Epäselvissä tapauksissa [alkuperäinen englanninkielinen dokumentaatio]({original}) on ratkaiseva. Kuulostaako jokin lause oudolta? Kaikki apu on tervetullutta, ja [tämän sivun korjaaminen]({edit}) vie vain hetken: GitHub hoitaa forkin ja pull requestin puolestasi. Kiitos jo etukäteen! 🍻",
@@ -99,11 +99,11 @@
     "switcher": "🌐 **[קריאה בשפה אחרת]({index})**"
   },
   "hi": {
-    "notice": "यह पेज एक स्वचालित अनुवाद है। संदेह होने पर [मूल अंग्रेज़ी दस्तावेज़]({original}) ही मान्य है। कोई वाक्य अटपटा लगे? हर मदद का स्वागत है, और [इस पेज को ठीक करने]({edit}) में बस एक मिनट लगता है: फ़ोर्क और पुल रिक्वेस्ट का ध्यान GitHub खुद रख लेता है। अग्रिम धन्यवाद! 🍻",
-    "switcher": "🌐 **[इसे किसी दूसरी भाषा में पढ़ें]({index})**"
+    "notice": "यह पेज एक स्वचालित अनुवाद है। संदेह होने पर [मूल अंग्रेज़ी दस्तावेज़]({original}) ही मान्य है। क्या कोई वाक्य गलत लग रहा है? हर मदद का स्वागत है, और [इस पेज को ठीक करने]({edit}) में सिर्फ़ एक मिनट लगता है: फ़ोर्क और पुल रिक्वेस्ट का काम GitHub खुद संभाल लेता है। आपका पहले से धन्यवाद! 🍻",
+    "switcher": "🌐 **[इसे किसी अन्य भाषा में पढ़ें]({index})**"
   },
   "hr": {
-    "notice": "Ova stranica je automatski prijevod. U slučaju dvojbe, mjerodavna je [izvorna engleska dokumentacija]({original}). Zvuči li vam neka rečenica čudno? Svaka pomoć je dobrodošla, a [ispravak ove stranice]({edit}) traje samo minutu: GitHub se brine za fork i pull request. Unaprijed hvala! 🍻",
+    "notice": "Ova stranica je automatski prijevod. U slučaju dvojbe, mjerodavna je [izvorna dokumentacija na engleskom]({original}). Neka vam rečenica zvuči pogrešno? Svaka pomoć je dobrodošla, a [ispravak ove stranice]({edit}) traje samo minutu: GitHub se pobrine za fork i pull request. Hvala unaprijed! 🍻",
     "switcher": "🌐 **[Pročitajte ovo na drugom jeziku]({index})**"
   },
   "hu": {
@@ -133,6 +133,22 @@
   "ko": {
     "notice": "이 페이지는 자동 번역된 문서예요. 내용이 모호할 때는 [원본 영어 문서]({original})가 우선해요. 어색하게 읽히는 문장이 있나요? 어떤 도움이든 환영해요. [이 페이지를 수정]({edit})하는 데는 1분이면 충분하고, 포크와 풀 리퀘스트는 GitHub가 알아서 처리해 줘요. 미리 감사드려요! 🍻",
     "switcher": "🌐 **[다른 언어로 읽기]({index})**"
+  },
+  "lt": {
+    "notice": "Šis puslapis yra automatinis vertimas. Kilus abejonių, pirmenybė teikiama [originaliai dokumentacijai anglų kalba]({original}). Ar koks nors sakinys skamba netaisyklingai? Bet kokia pagalba laukiama, o [šio puslapio pataisymas]({edit}) užtruks vos minutę: GitHub pasirūpins šakute (fork) ir sujungimo prašymu (pull request). Iš anksto dėkojame! 🍻",
+    "switcher": "🌐 **[Skaitykite tai kita kalba]({index})**"
+  },
+  "lv": {
+    "notice": "Šī lapa ir automātisks tulkojums. Šaubu gadījumā noteicošā ir [oriģinālā angļu dokumentācija]({original}). Vai kāds teikums izklausās nepareizi? Jebkura palīdzība ir apsveicama, un [šīs lapas labošana]({edit}) aizņem tikai minūti: GitHub parūpēsies par fork un pull request. Paldies jau iepriekš! 🍻",
+    "switcher": "🌐 **[Lasīt citā valodā]({index})**"
+  },
+  "mk": {
+    "notice": "Оваа страница е автоматски превод. Во случај на двоумење, важи [оригиналната документација на англиски]({original}). Дали некоја реченица звучи погрешно? Секоја помош е добредојдена, а [поправањето на оваа страница]({edit}) одзема само една минута: GitHub се грижи за форкот и барањето за придонес. Однапред ви благодариме! 🍻",
+    "switcher": "🌐 **[Прочитајте го ова на друг јазик]({index})**"
+  },
+  "ml": {
+    "notice": "ഈ പേജ് ഒരു യാന്ത്രിക പരിഭാഷയാണ്. സംശയമുണ്ടെങ്കിൽ, [ഒറിജിനൽ ഇംഗ്ലീഷ് ഡോക്യുമെന്റേഷൻ]({original}) ആണ് ആധികാരികം. ഏതെങ്കിലും വാക്യം തെറ്റായി തോന്നുന്നുണ്ടോ? എല്ലാ സഹായവും സ്വാഗതം ചെയ്യുന്നു, [ഈ പേജ് ശരിയാക്കാൻ]({edit}) ഒരു മിനിറ്റ് മാത്രം മതി: ഫോർക്കും പുൾ റിക്വസ്റ്റും GitHub തന്നെ കൈകാര്യം ചെയ്യും. മുൻകൂട്ടി നന്ദി! 🍻",
+    "switcher": "🌐 **[ഇത് മറ്റൊരു ഭാഷയിൽ വായിക്കുക]({index})**"
   },
   "nb": {
     "notice": "Denne siden er en automatisk oversettelse. Ved tvil er det den [originale engelske dokumentasjonen]({original}) som gjelder. Er det en setning som leses feil? All hjelp er velkommen, og å [rette denne siden]({edit}) tar bare ett minutt: GitHub tar seg av forken og pull-forespørselen. Tusen takk på forhånd! 🍻",
@@ -166,9 +182,33 @@
     "notice": "Táto stránka je automatický preklad. V prípade pochybností platí [pôvodná anglická dokumentácia]({original}). Znie niektorá veta zvláštne? Každá pomoc je vítaná a [oprava tejto stránky]({edit}) zaberie len minútu: GitHub sa postará o fork aj o pull request. Vopred ďakujeme! 🍻",
     "switcher": "🌐 **[Čítať v inom jazyku]({index})**"
   },
+  "sl": {
+    "notice": "Ta stran je samodejni prevod. V primeru dvoma velja [izvirna angleška dokumentacija]({original}). Se vam kakšen stavek zdi napačen? Vsaka pomoč je dobrodošla, [popravek te strani]({edit}) pa vzame le minuto: GitHub poskrbi za fork in pull request. Hvala vnaprej! 🍻",
+    "switcher": "🌐 **[Preberite to v drugem jeziku]({index})**"
+  },
+  "sq": {
+    "notice": "Kjo faqe është një përkthim automatik. Në rast dyshimi, mbizotëron [dokumentacioni origjinal në anglisht]({original}). A ju duket ndonjë fjali e gabuar? Çdo ndihmë është e mirëpritur dhe [rregullimi i kësaj faqeje]({edit}) zgjat vetëm një minutë: GitHub kujdeset për fork-un dhe pull request-in. Faleminderit paraprakisht! 🍻",
+    "switcher": "🌐 **[Lexojeni këtë në një gjuhë tjetër]({index})**"
+  },
+  "sr": {
+    "notice": "Ова страница је аутоматски превод. У случају недоумице, важи [оригинална документација на енглеском]({original}). Нека реченица звучи погрешно? Свака помоћ је добродошла, а [исправљање ове странице]({edit}) траје само минут: GitHub се брине о форку и pull request-у. Хвала унапред! 🍻",
+    "switcher": "🌐 **[Прочитајте ово на другом језику]({index})**"
+  },
+  "sr-Latn": {
+    "notice": "Ova stranica je automatski prevedena. U slučaju nedoumice, prednost ima [originalna dokumentacija na engleskom]({original}). Da li neka rečenica zvuči pogrešno? Svaka pomoć je dobrodošla, a [ispravljanje ove stranice]({edit}) traje samo minut: GitHub se brine o forku i pull requestu. Hvala unapred! 🍻",
+    "switcher": "🌐 **[Pročitajte ovo na drugom jeziku]({index})**"
+  },
   "sv": {
     "notice": "Den här sidan är en automatisk översättning. Vid tveksamhet gäller den [engelska originaldokumentationen]({original}). Låter en mening fel? All hjälp är välkommen, och att [rätta den här sidan]({edit}) tar bara en minut: GitHub sköter forken och pull-begäran. Tack på förhand! 🍻",
     "switcher": "🌐 **[Läs detta på ett annat språk]({index})**"
+  },
+  "ta": {
+    "notice": "இந்தப் பக்கம் ஒரு தானியங்கி மொழிபெயர்ப்பு. சந்தேகம் இருந்தால், [ஆங்கிலத்தில் உள்ள மூல ஆவணம்]({original}) செல்லுபடியாகும். ஏதேனும் ஒரு வாக்கியம் தவறாக இருக்கிறதா? எந்த உதவியும் வரவேற்கத்தக்கது, [இந்தப் பக்கத்தைச் சரிசெய்ய]({edit}) ஒரு நிமிடம் மட்டுமே போதும்: fork மற்றும் pull request ஆகியவற்றை GitHub பார்த்துக்கொள்ளும். முன்கூட்டியே நன்றி! 🍻",
+    "switcher": "🌐 **[இதை வேறொரு மொழியில் படிக்கவும்]({index})**"
+  },
+  "te": {
+    "notice": "ఈ పేజీ ఒక స్వయంచాలక అనువాదం. సందేహం ఉంటే, [అసలైన ఆంగ్ల డాక్యుమెంటేషన్]({original}) ప్రామాణికం. ఏదైనా వాక్యం సరిగా అనిపించలేదా? ఏ సహాయమైనా స్వాగతం, మరియు [ఈ పేజీని సరిచేయడానికి]({edit}) ఒక నిమిషం చాలు: ఫోర్క్ మరియు పుల్ రిక్వెస్ట్‌ను GitHub చూసుకుంటుంది. ముందుగానే ధన్యవాదాలు! 🍻",
+    "switcher": "🌐 **[దీన్ని మరో భాషలో చదవండి]({index})**"
   },
   "th": {
     "notice": "หน้านี้เป็นการแปลอัตโนมัติ หากมีข้อสงสัย ให้ยึดตาม[เอกสารต้นฉบับภาษาอังกฤษ]({original}) เป็นหลัก พบประโยคที่อ่านแล้วไม่ถูกต้องหรือไม่? ยินดีรับความช่วยเหลือทุกรูปแบบ และการ[แก้ไขหน้านี้]({edit}) ใช้เวลาเพียงนาทีเดียว โดย GitHub จะจัดการการ fork และ pull request ให้เอง ขอขอบคุณล่วงหน้า! 🍻",
@@ -181,6 +221,10 @@
   "uk": {
     "notice": "Ця сторінка є автоматичним перекладом. У разі сумнівів переважає [оригінальна англійська документація]({original}). Якесь речення звучить неправильно? Будь-яка допомога вітається, і [виправлення цієї сторінки]({edit}) забере лише хвилину: GitHub подбає про форк і запит на злиття. Заздалегідь дякую! 🍻",
     "switcher": "🌐 **[Читати іншою мовою]({index})**"
+  },
+  "ur": {
+    "notice": "یہ صفحہ ایک خودکار ترجمہ ہے۔ شک کی صورت میں [اصل انگریزی دستاویزات]({original}) کو ترجیح دی جائے گی۔ کیا کوئی جملہ درست نہیں لگ رہا؟ ہر مدد قابل قدر ہے، اور [اس صفحے کی درستی]({edit}) میں صرف ایک منٹ لگتا ہے: فورک اور پل ریکویسٹ کا کام GitHub خود سنبھال لیتا ہے۔ پیشگی شکریہ! 🍻",
+    "switcher": "🌐 **[اسے کسی دوسری زبان میں پڑھیں]({index})**"
   },
   "vi": {
     "notice": "Trang này là bản dịch tự động. Khi có nghi ngờ, [tài liệu gốc tiếng Anh]({original}) là bản chuẩn. Có câu nào đọc chưa xuôi? Mọi sự giúp đỡ đều được hoan nghênh, và [sửa trang này]({edit}) chỉ mất một phút: GitHub sẽ lo phần fork và pull request. Xin cảm ơn trước! 🍻",
