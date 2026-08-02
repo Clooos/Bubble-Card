@@ -2453,6 +2453,28 @@ function scheduleIdleStandaloneShellWarmup(context) {
     pumpShellWarmupQueue();
 }
 
+// The shell warm-up builds the DOM but leaves the style pipeline cold, so the
+// first open of a session still compiled every style module and evaluated it
+// inside the very task that unhides the backdrop — delaying the first visible
+// feedback by that whole cost. Running one style pass here fills the compiled
+// template, cleanCSS and evaluated-style caches while the shell is still
+// hidden and detached, so nothing is visible and the open finds warm caches.
+function primeStandaloneShellStyles(context) {
+    if (typeof context.refreshPopupShell !== 'function') {
+        return;
+    }
+
+    try {
+        context.refreshPopupShell();
+    } catch (_) {
+        // A failed prime must never stop the open from doing the real work.
+    } finally {
+        // The open decides for itself whether the shell needs refreshing; the
+        // prime must not make it skip that.
+        context._standaloneNeedsShellRefresh = true;
+    }
+}
+
 function pumpShellWarmupQueue() {
     if (shellWarmupScheduled || pendingShellWarmups.length === 0) {
         return;
@@ -2474,6 +2496,7 @@ function pumpShellWarmupQueue() {
             !isPopupOpenInProgress(context)) {
             try {
                 runDeferredStandaloneShellCreate(context);
+                primeStandaloneShellStyles(context);
             } catch (_) {}
         }
 

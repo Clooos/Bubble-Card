@@ -1560,6 +1560,40 @@ describe('standalone popup lifecycle', () => {
         expect(context._standaloneShellCreated).toBe(true);
     });
 
+    test('primes the style pipeline at idle so the first open finds warm caches', () => {
+        const context = createStandaloneContext({ hash: '#warmup-styles' });
+        usedContexts.push(context);
+        context._standaloneShellCreated = false;
+        context.createStandaloneShell = jest.fn();
+        context.refreshPopupShell = jest.fn(() => {
+            context._standaloneNeedsShellRefresh = false;
+        });
+
+        registerPopupContext(context);
+        jest.advanceTimersByTime(2500);
+
+        // The style pass ran while the shell was still hidden and detached.
+        expect(context.refreshPopupShell).toHaveBeenCalledTimes(1);
+        // ...and the open still decides for itself whether to refresh, so the
+        // prime cannot make it skip the real one.
+        expect(context._standaloneNeedsShellRefresh).toBe(true);
+    });
+
+    test('a failing style prime never blocks the shell warm-up', () => {
+        const context = createStandaloneContext({ hash: '#warmup-styles-fail' });
+        usedContexts.push(context);
+        const createShell = jest.fn();
+        context._standaloneShellCreated = false;
+        context.createStandaloneShell = createShell;
+        context.refreshPopupShell = jest.fn(() => { throw new Error('style module boom'); });
+
+        registerPopupContext(context);
+        expect(() => jest.advanceTimersByTime(2500)).not.toThrow();
+
+        expect(createShell).toHaveBeenCalledTimes(1);
+        expect(context._standaloneNeedsShellRefresh).toBe(true);
+    });
+
     test('the idle shell warm-up never doubles a shell an open already created', () => {
         const context = createStandaloneContext({ hash: '#warmup-b' });
         usedContexts.push(context);
