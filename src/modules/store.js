@@ -355,16 +355,33 @@ export function makeModuleStore(context) {
             <ha-icon icon="mdi:puzzle-plus-outline"></ha-icon>
             <span>${t('editor.store.title')}</span>
           </div>
-          <div 
-            class="store-refresh-button" 
-            @click=${() => {
-              // Reset the API call in progress flag to ensure refresh works
-              context._isApiCallInProgress = false;
-              _fetchModuleStore(context, false);
-            }}
-            title="${t('editor.store.refresh_list')}"
-          >
-            <ha-icon icon="mdi:refresh"></ha-icon>
+          <div class="store-header-actions">
+            ${getTranslationTargetLang(context.hass) ? html`
+              <div
+                class="bubble-badge hoverable translate-badge ${context._storeTranslateDescriptions ? 'active' : ''}"
+                @click=${() => {
+                  const enabled = !context._storeTranslateDescriptions;
+                  context._storeTranslateDescriptions = enabled;
+                  try { localStorage.setItem('bubble-card-store-translate', enabled ? '1' : '0'); } catch (_) {}
+                  context.requestUpdate();
+                }}
+                title="${t('editor.store.translate_descriptions')}"
+              >
+                <ha-icon icon="${context._storeTranslateDescriptions ? 'mdi:translate' : 'mdi:translate-off'}"></ha-icon>
+                <span>${t('editor.common.auto')}</span>
+              </div>
+            ` : ''}
+            <div
+              class="store-refresh-button"
+              @click=${() => {
+                // Reset the API call in progress flag to ensure refresh works
+                context._isApiCallInProgress = false;
+                _fetchModuleStore(context, false);
+              }}
+              title="${t('editor.store.refresh_list')}"
+            >
+              <ha-icon icon="mdi:refresh"></ha-icon>
+            </div>
           </div>
         </div>
         <div class="store-search">
@@ -404,18 +421,6 @@ export function makeModuleStore(context) {
               }}
             ></ha-switch>
           </ha-formfield>
-          ${getTranslationTargetLang(context.hass) ? html`
-            <ha-formfield label="${t('editor.store.translate_descriptions')}">
-              <ha-switch
-                .checked=${context._storeTranslateDescriptions ?? false}
-                @change=${(e) => {
-                  context._storeTranslateDescriptions = e.target.checked;
-                  try { localStorage.setItem('bubble-card-store-translate', e.target.checked ? '1' : '0'); } catch (_) {}
-                  context.requestUpdate();
-                }}
-              ></ha-switch>
-            </ha-formfield>
-          ` : ''}
         </div>
       </div>
 

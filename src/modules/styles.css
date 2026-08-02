@@ -48,6 +48,42 @@
   color: var(--info-color) !important;
 }
 
+.store-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bubble-badge.translate-badge {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: var(--secondary-text-color);
+  font-weight: 500;
+  font-size: 11px;
+  padding: 2px 8px;
+  height: 20px;
+  opacity: 0.8;
+}
+
+.bubble-badge.translate-badge ha-icon {
+  color: inherit !important;
+  --mdc-icon-size: 14px;
+}
+
+.bubble-badge.translate-badge:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+  opacity: 1;
+}
+
+.bubble-badge.translate-badge.active {
+  background-color: rgba(var(--rgb-info-color), 0.12);
+  color: var(--info-color);
+  opacity: 1;
+}
+
+.bubble-badge.translate-badge.active:hover {
+  background-color: rgba(var(--rgb-info-color), 0.2);
+}
+
 .store-refresh-button {
   color: var(--primary-text-color);
   border-radius: 50%;
