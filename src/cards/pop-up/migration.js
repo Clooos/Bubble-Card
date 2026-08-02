@@ -396,15 +396,23 @@ function getCurrentMigrationConfig(editor) {
 }
 
 function getLegacyStandaloneMigration(editor, originalHash) {
-    const lovelaceConfig = getActiveLovelaceConfig(editor);
+    // The notice re-renders on every editor update, so the cheapest and most
+    // selective test runs first: four field comparisons against the pop-up's
+    // own config. Only a legacy config earns the walks below, one of which
+    // searches the entire dashboard for the card being edited.
     const popupConfig = getCurrentMigrationConfig(editor);
+    if (!isLegacyPopUpConfig(popupConfig)) {
+        return null;
+    }
+
+    const lovelaceConfig = getActiveLovelaceConfig(editor);
+    if (!lovelaceConfig) {
+        return null;
+    }
+
     const activeDialogParams = getActiveEditCardDialog(editor)?._params || null;
     const currentViewPath = getCurrentLovelaceViewPath(lovelaceConfig, editor.hass, getActiveLovelaceViewIndex(editor));
     const activeCardPath = findConfigPathInScope(lovelaceConfig, activeDialogParams?.cardConfig, currentViewPath);
-
-    if (!lovelaceConfig || !isLegacyPopUpConfig(popupConfig)) {
-        return null;
-    }
 
     const legacyStack = findLegacyPopUpStack(lovelaceConfig, popupConfig, {
         matchHash: originalHash,

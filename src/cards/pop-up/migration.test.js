@@ -9,6 +9,7 @@ import {
     isLegacyPopUpConfig,
     maybeShowMigrationNotice,
     migrateLegacyPopUpLovelaceConfig,
+    renderLegacyMigrationNotice,
     replaceConfigAtPath,
 } from './migration.js';
 
@@ -834,5 +835,46 @@ describe('createPostMigrationDialogParams', () => {
         );
 
         expect(dialogParams).toBeNull();
+    });
+});
+describe('renderLegacyMigrationNotice cost on modern configs', () => {
+    function createEditor(config) {
+        return {
+            _config: config,
+            hass: { states: {} },
+            shadowRoot: null,
+            _getActiveLovelaceConfig: jest.fn(() => ({ views: [] })),
+            _getActiveLovelaceViewIndex: jest.fn(() => 0),
+        };
+    }
+
+    test('does not reach for the dashboard config when the pop-up is not legacy', () => {
+        const editor = createEditor({
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#kitchen',
+            cards: [],
+        });
+
+        expect(renderLegacyMigrationNotice(editor, '#kitchen')).toBe('');
+        expect(editor._getActiveLovelaceConfig).not.toHaveBeenCalled();
+    });
+
+    test('does not reach for the dashboard config for a card that is not a pop-up', () => {
+        const editor = createEditor({ type: 'custom:bubble-card', card_type: 'button' });
+
+        expect(renderLegacyMigrationNotice(editor, '#kitchen')).toBe('');
+        expect(editor._getActiveLovelaceConfig).not.toHaveBeenCalled();
+    });
+
+    test('still inspects the dashboard for a legacy pop-up config', () => {
+        const editor = createEditor({
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#kitchen',
+        });
+
+        renderLegacyMigrationNotice(editor, '#kitchen');
+        expect(editor._getActiveLovelaceConfig).toHaveBeenCalled();
     });
 });
