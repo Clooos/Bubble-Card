@@ -2286,6 +2286,14 @@ export function openPopup(context, instant = false) {
                 popUp.classList.replace('is-popup-closed', 'is-popup-opened');
                 triggerQuickOpenAnimation(context);
             } else {
+                // A legacy pop-up is detached while closed and re-inserted just
+                // above, in this very task. Resolve style once while it is
+                // still closed: without it the browser's first computation is
+                // already the open state, so there is nothing to transition
+                // from and the pop-up snaps open. Standalone pop-ups paint
+                // their closed state in a phase of their own and need no such
+                // read, which is why only the legacy path pays for it.
+                popUp.getBoundingClientRect();
                 updatePopupClass(popUp, true);
             }
 

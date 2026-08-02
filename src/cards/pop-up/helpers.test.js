@@ -2925,6 +2925,41 @@ describe('legacy popup location routing', () => {
         expect(displayLegacyPopupContent).toHaveBeenCalledTimes(1);
     });
 
+    test('resolves the closed state before flipping a re-inserted legacy pop-up open', () => {
+        const context = createLegacyContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+        context.verticalStack = createMockContainer([]);
+
+        registerPopupContext(context);
+
+        let sequence = [];
+        const measure = context.popUp.getBoundingClientRect;
+        context.popUp.getBoundingClientRect = jest.fn((...args) => {
+            sequence.push('measure');
+            return measure(...args);
+        });
+        const addClass = context.popUp.classList.add;
+        context.popUp.classList.add = jest.fn((...classes) => {
+            if (classes.includes('is-opening')) sequence.push('flip');
+            return addClass.apply(context.popUp.classList, classes);
+        });
+        appendLegacyPopup.mockImplementation((_ctx, append) => {
+            if (append) sequence.push('append');
+        });
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+        flushRafQueue();
+
+        // Only the frame that re-inserts the shell and opens it matters here.
+        sequence = [];
+        flushRafQueue();
+
+        // Without the measurement between the two, the shell's first resolved
+        // style is already the open one and the pop-up snaps open.
+        expect(sequence).toEqual(['append', 'measure', 'flip']);
+    });
+
     test('appends the legacy popup shell during open when it starts detached', () => {
         const context = createLegacyContext({ hash: '#popup-a' });
         usedContexts.push(context);
