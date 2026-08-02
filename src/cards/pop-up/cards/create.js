@@ -710,7 +710,19 @@ export function updateCardElements(context) {
             previousCardConfigs[i] = cards[i];
 
             if (cardEl.config !== renderedCardConfig) {
-                cardEl.config = renderedCardConfig;
+                // The hui-card wrapper exposes a reactive `config` property;
+                // a raw card (the fallback path, when HA no longer provides
+                // hui-card) only implements the public setConfig contract, so
+                // assigning `config` there would silently freeze it on the
+                // configuration it was created with.
+                if (!('config' in cardEl) && typeof cardEl.setConfig === 'function') {
+                    try {
+                        cardEl.setConfig(renderedCardConfig);
+                    } catch (_) {}
+                    cardEl.config = renderedCardConfig;
+                } else {
+                    cardEl.config = renderedCardConfig;
+                }
             }
 
             _applyCardWrapperLayout(cardEl, cardWrapper, cards[i]);
@@ -808,15 +820,25 @@ export function _createHuiCard(cardConfig, context, preview) {
     const renderedConfig = _getRenderedCardConfig(cardConfig);
 
     if (!_isHuiCardAvailable()) {
+        const canFallBack = typeof _cardHelpers?.createCardElement === 'function';
+
+        // The whole point of this warning is that a user report is
+        // diagnosable, so it must say what actually happened: claiming a
+        // fallback that did not occur would send the reader looking in the
+        // wrong place.
         if (!_warnedAboutMissingHuiCard) {
             _warnedAboutMissingHuiCard = true;
             console.warn(
                 'Bubble Card: Home Assistant no longer provides the "hui-card" element this version builds ' +
-                'pop-up content with. Falling back to the public card helpers; please report this so Bubble Card can be updated.'
+                'pop-up content with. ' +
+                (canFallBack
+                    ? 'Falling back to the public card helpers'
+                    : 'The public card helpers are not available either, so this pop-up will render empty') +
+                '; please report this so Bubble Card can be updated.'
             );
         }
 
-        if (typeof _cardHelpers?.createCardElement === 'function') {
+        if (canFallBack) {
             try {
                 const fallbackEl = _cardHelpers.createCardElement(renderedConfig);
                 if (fallbackEl) {
