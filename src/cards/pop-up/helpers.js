@@ -771,6 +771,7 @@ function armFreshOutsideInteractionGuard(context) {
 function clearFreshOutsideInteractionGuard(context) {
     context._awaitFreshOutsideInteraction = false;
     context._allowOutsideCloseFromInteraction = false;
+    context._interactionStartedInsidePopup = false;
 }
 
 function isScrollableWakeTarget(element) {
@@ -992,15 +993,24 @@ function isEventInsidePopupOrDialog(event) {
 }
 
 function noteOutsideInteractionStart(event, context) {
-    if (!context._awaitFreshOutsideInteraction) {
+    if (!context.popUp?.classList.contains('is-popup-opened')) {
         return;
     }
 
-    if (!context.popUp?.classList.contains('is-popup-opened') || !isPopupOpenSettled(context)) {
+    // Where a press STARTS decides whether the click it produces may close the
+    // pop-up. A press that began inside and was released outside — dragging off
+    // a slider, panning a map, swiping a card — produces a click whose target
+    // is the common ancestor of both, i.e. outside, and used to close the
+    // pop-up. Native HA dialogs only close when the whole gesture happened
+    // outside, and that is what users expect here too (#2554). Recorded for
+    // every press, not only the first one after opening.
+    context._interactionStartedInsidePopup = !!isEventInsidePopupOrDialog(event);
+
+    if (!context._awaitFreshOutsideInteraction || !isPopupOpenSettled(context)) {
         return;
     }
 
-    if (isEventInsidePopupOrDialog(event)) {
+    if (context._interactionStartedInsidePopup) {
         return;
     }
 
@@ -1016,6 +1026,12 @@ function createLocationChangedEvent(detail = undefined) {
 }
 
 function clickOutside(event, context) {
+    // Consumed by this click whatever happens next: the flag describes the
+    // press that produced it, so it must never leak into a later click (a
+    // keyboard-activated one, for instance, has no press of its own).
+    const startedInsidePopup = context._interactionStartedInsidePopup === true;
+    context._interactionStartedInsidePopup = false;
+
     if (!(context.config.close_by_clicking_outside ?? true)) return;
     if (!context.popUp.classList.contains('is-popup-opened')) return;
 
@@ -1029,6 +1045,12 @@ function clickOutside(event, context) {
     }
 
     if (isEventInsidePopupOrDialog(event)) {
+        return;
+    }
+
+    // The gesture began inside the pop-up and merely ended outside it: that is
+    // a drag, not a click outside, and it must leave the pop-up open (#2554).
+    if (startedInsidePopup) {
         return;
     }
 

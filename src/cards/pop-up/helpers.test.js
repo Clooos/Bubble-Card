@@ -164,7 +164,7 @@ jest.unstable_mockModule('./styles.css', () => ({
     default: '',
 }));
 
-const { cleanupPopupRuntime, closePopup, isDialogNode, isPopupOpenSequenceActive, keepPopupHostMounted, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
+const { cleanupPopupRuntime, closePopup, isDialogNode, isPopupOpenSequenceActive, keepPopupHostMounted, updateListeners, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
 const { invalidateWakeSyncCache } = await import('./index.js');
 
 let rafCallbacks;
@@ -3014,5 +3014,97 @@ describe('HA dialog recognition contract', () => {
         expect(isDialogNode(node('DIV', 'button'))).toBe(false);
         expect(isDialogNode(null)).toBe(false);
         expect(isDialogNode({})).toBe(false);
+    });
+});
+
+// Issue #2554: a click-drag-release that begins INSIDE the pop-up and ends
+// outside used to close it, because the resulting click targets the common
+// ancestor of both points — i.e. something outside. Native HA dialogs only
+// close when the whole gesture happened outside, and that is what users
+// expect here. The reported inconsistency (sliders, map cards and cards with
+// a tap action kept it open) came from those elements swallowing the click
+// entirely, so the outcome depended on where the drag started.
+describe('outside-click gesture handling', () => {
+    const usedContexts = [];
+    let popUp;
+    let outsideNode;
+
+    function fire(type, chain) {
+        const event = new Event(type);
+        Object.defineProperty(event, 'composedPath', { value: () => chain });
+        window.dispatchEvent(event);
+    }
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+        window.history.replaceState({}, '', 'http://localhost/lovelace/test#standalone-popup');
+        window.location.hash = '#standalone-popup';
+        window.history.replaceState.mockClear();
+        popUp = createMockElement(['bubble-pop-up', 'is-popup-opened']);
+        outsideNode = createMockElement(['some-dashboard-card']);
+    });
+
+    afterEach(() => {
+        usedContexts.forEach((context) => updateListeners(context, false));
+        usedContexts.length = 0;
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+    });
+
+    // A pop-up in the state it is in while the user actually interacts with
+    // it: open, settled, past the fresh-interaction guard.
+    function createInteractiveContext() {
+        const context = createStandaloneContext();
+        context.popUp = popUp;
+        context._popupOpenSettled = true;
+        context._popupOpenSettledAt = Date.now();
+        context._awaitFreshOutsideInteraction = false;
+        context._allowOutsideCloseFromInteraction = true;
+        usedContexts.push(context);
+        updateListeners(context, true);
+        return context;
+    }
+
+    test('keeps the pop-up open when the gesture starts inside and ends outside', () => {
+        createInteractiveContext();
+
+        // Press on a card inside the pop-up, release outside: the click lands
+        // on the common ancestor of both, which is outside the pop-up.
+        fire('pointerdown', [createMockElement(['card']), popUp, outsideNode]);
+        fire('click', [outsideNode]);
+
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+
+    test('still closes when the whole gesture happens outside', () => {
+        createInteractiveContext();
+
+        fire('pointerdown', [outsideNode]);
+        fire('click', [outsideNode]);
+
+        expect(window.history.replaceState).toHaveBeenCalled();
+    });
+
+    test('treats a touch gesture the same way as a pointer one', () => {
+        createInteractiveContext();
+
+        fire('touchstart', [createMockElement(['card']), popUp, outsideNode]);
+        fire('click', [outsideNode]);
+
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+
+    test('does not let one gesture decide the next click', () => {
+        createInteractiveContext();
+
+        fire('pointerdown', [createMockElement(['card']), popUp, outsideNode]);
+        fire('click', [outsideNode]);
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+
+        // A genuine outside click right after must still close it.
+        fire('pointerdown', [outsideNode]);
+        fire('click', [outsideNode]);
+        expect(window.history.replaceState).toHaveBeenCalled();
     });
 });
