@@ -566,8 +566,16 @@
     box-shadow: none !important;
 }
 
-.bubble-pop-up.popup-performance-default.is-opening:not(.editor),
-.bubble-pop-up.popup-performance-default.is-popup-opened:not(.editor),
+/* The blur is suspended while the pop-up slides in. A backdrop-filter on a
+   MOVING element forces the engine to re-sample and re-blur what is behind it
+   on every frame, which is what starved the opening transition on low-end
+   devices (measured on an iPad 6 / iOS 17: 2-4 frames presented instead of
+   ~20). Performance mode already avoided this by carrying the filter on a
+   pseudo-element it fades out during the opening; the default mode paints it
+   straight onto the shell, so it needs the same exclusion. The blur lands
+   with the pop-up instead of travelling with it — the closing transition
+   keeps it, exactly as performance mode does. */
+.bubble-pop-up.popup-performance-default.is-popup-opened:not(.is-opening):not(.editor),
 .bubble-pop-up.popup-performance-default.is-closing:not(.editor):not(.is-switch-closing) {
     backdrop-filter: var(--custom-popup-filter);
     -webkit-backdrop-filter: var(--custom-popup-filter);

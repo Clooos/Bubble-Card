@@ -126,3 +126,36 @@ describe('pop-up styles', () => {
     expect(styles).not.toMatch(/\.bubble-pop-up\.is-opening\s*,\s*\.bubble-pop-up\.is-closing\s*\{[^}]*box-shadow:\s*none\s*!important/);
   });
 });
+
+describe('backdrop blur during the opening transition', () => {
+  // A backdrop-filter on a MOVING element forces the engine to re-sample and
+  // re-blur what is behind it on every frame. Measured on an iPad 6 / iOS 17,
+  // that is what starved the opening slide: 2-4 frames presented instead of
+  // about 20. These pin the exclusion so it cannot silently come back.
+  function getDefaultModeFilterSelectors() {
+    return styles
+      .split('}')
+      .map((block) => block.split('{')[0].trim())
+      .filter((selector, index, all) => {
+        const body = styles.split('}')[index]?.split('{')[1] ?? '';
+        return selector.includes('popup-performance-default') && body.includes('backdrop-filter');
+      });
+  }
+
+  test('never applies the shell blur while the pop-up is sliding in', () => {
+    const selectors = getDefaultModeFilterSelectors().join(' ');
+
+    expect(selectors).toContain('popup-performance-default');
+    // Both classes are present during the slide, so the opened rule must
+    // explicitly exclude the opening state.
+    expect(selectors).toContain('.is-popup-opened:not(.is-opening)');
+    expect(selectors).not.toMatch(/\.popup-performance-default\.is-opening[^:]/);
+  });
+
+  test('still applies the shell blur once the pop-up has landed and while closing', () => {
+    const selectors = getDefaultModeFilterSelectors().join(' ');
+
+    expect(selectors).toContain('.is-popup-opened');
+    expect(selectors).toContain('.is-closing');
+  });
+});
