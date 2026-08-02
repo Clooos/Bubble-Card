@@ -1,11 +1,11 @@
 <!-- First generated from README.md, then improved by contributors.
      Wording fixes are welcome here. Content changes belong in README.md. -->
 > [!NOTE]
-> Aquesta pàgina és una traducció automàtica. En cas de dubte, preval la [documentació original en anglès](../README.md). Hi ha alguna frase que sona estranya? Qualsevol ajuda és benvinguda, i [corregir aquesta pàgina](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.ca.md) només porta un minut: GitHub s'encarrega del fork i de la pull request. Gràcies per endavant! 🍻
+> Aquesta pàgina és una traducció automàtica. En cas de dubte, preval la [documentació original en anglès](../README.md). Hi ha alguna frase que no sona bé? Tota ajuda és benvinguda, i [corregir aquesta pàgina](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.ca.md) només us portarà un minut: GitHub s'encarrega del fork i de la pull request. Moltes gràcies per endavant! 🍻
 
 # Bubble Card
 
-🌐 **[Llegiu això en un altre idioma](languages.md)**
+🌐 **[Llegiu-ho en un altre idioma](languages.md)**
 
 ![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
 
@@ -1012,7 +1012,7 @@ show_progress: true
 
 ![readme-separator](https://github.com/Clooos/Bubble-Card/assets/36499953/7e416a34-b95e-4a03-a200-4b3aa04f560d)
 
-Aquesta targeta és un separador senzill per dividir el vostre pop-up en categories / seccions. P. ex. Llums, Dispositius, Cobertes, Configuració, Automatitzacions...
+Aquesta targeta és un simple separador per dividir el vostre pop-up en categories / seccions. Per exemple: Llums, Dispositius, Cobertes, Configuració, Automatitzacions...
 
 ### Opcions del separador
 
@@ -1020,19 +1020,19 @@ Aquesta targeta és un separador senzill per dividir el vostre pop-up en categor
 
 <summary><b>Opcions (YAML + descripcions)</b></summary>
 
-| Nom | Tipus | Requisit | Opcions admeses | Descripció |
+| Nom | Tipus | Requeriment | Opcions admeses | Descripció |
 | --- | --- | --- | --- | --- |
 | `name` | string | Opcional però recomanat | Qualsevol cadena | Un nom per al vostre separador |
 | `icon` | string | Opcional però recomanat | Qualsevol icona `mdi:` | Una icona per al vostre separador |
-| `card_layout` | string | Opcional | `normal` (per defecte fora de la vista de seccions), `large` (per defecte a la vista de seccions), `large-2-rows`, `large-sub-buttons-grid` | Disposició d'estil de la targeta, vegeu [disposicions de la targeta](#disposicions-de-la-targeta) |
-| `rows` | number | Opcional | Qualsevol nombre | Nombre de files (alçada) (p. ex. `2`) |
+| `card_layout` | string | Opcional | `normal` (per defecte si no és en vista de secció), `large` (per defecte si és en vista de secció), `large-2-rows`, `large-sub-buttons-grid` | Disposició d'estil de la targeta, vegeu [disposicions de targeta](#disposicions-de-la-targeta) |
+| `rows` | number | Opcional | Qualsevol número | Nombre de files (alçada) (p. ex. `2`) |
 | `sub_button` | object | Opcional | Vegeu [subbotons](#subbotons) | Afegiu botons personalitzats fixats a la dreta |
 
 </details>
 
 <details>
 
-<summary><b>Variables CSS (vegeu <a href="#estils">Estils</a>)</b></summary>
+<summary><b>Variables CSS (vegeu <a href="#estil">Estil</a>)</b></summary>
 
 | Variable | Valor esperat | Descripció |
 | --- | --- | --- |
@@ -1044,7 +1044,7 @@ Aquesta targeta és un separador senzill per dividir el vostre pop-up en categor
 
 <details>
 
-<summary>Un separador/divisor per a una secció "Cobertes"</summary>
+<summary>Un separador/divisor per a una secció de "Cobertes"</summary>
 
 <br>
 
@@ -1071,7 +1071,7 @@ Aquesta targeta serveix per omplir una columna buida. És útil si teniu un `hor
 
 ### Opcions de la columna buida
 
-Aquesta targeta no té opcions i no admet [estils](#estils), tot i que sí que admet les opcions de disposició de les seccions de HA.
+Aquesta targeta no té opcions i no admet [estil](#estils), tot i que sí que admet les opcions de disposició de les seccions de Home Assistant.
 
 #### Exemple
 

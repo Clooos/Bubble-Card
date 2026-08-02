@@ -32,6 +32,7 @@ A huge thank you to everyone who takes the time 🍻
 | Estonian | Eesti | [README.et.md](README.et.md) | [✏️](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.et.md) |
 | Finnish | Suomi | [README.fi.md](README.fi.md) | [✏️](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.fi.md) |
 | French | Français | [README.fr.md](README.fr.md) | [✏️](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.fr.md) |
+| Galician | Galego | [README.gl.md](README.gl.md) | [✏️](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.gl.md) |
 | German | Deutsch | [README.de.md](README.de.md) | [✏️](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.de.md) |
 | Greek | Ελληνικά | [README.el.md](README.el.md) | [✏️](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.el.md) |
 | Hebrew | עברית | [README.he.md](README.he.md) | [✏️](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.he.md) |
