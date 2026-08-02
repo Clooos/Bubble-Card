@@ -159,7 +159,7 @@ export function makeGenericSliderSettings({
                         </div>
                     </div>
                 ` : ''}
-                <div class="range-inputs" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                <div class="range-inputs">
                     <ha-form
                         .hass=${hass}
                         .data=${{ min_value: data.min_value ?? '' }}

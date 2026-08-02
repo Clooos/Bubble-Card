@@ -148,6 +148,19 @@ ha-textfield {
   width: 100%;
 }
 
+/* Min/max/step row: the columns must be free to shrink below the intrinsic
+   width of a text field, otherwise they overflow the panel. They wrap to a
+   second row rather than being crushed in a narrow editor. */
+.range-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  gap: 8px;
+}
+
+.range-inputs > * {
+  min-width: 0;
+}
+
 .bubble-pop-up-hash-prefix {
   display: inline-flex;
   align-items: center;
