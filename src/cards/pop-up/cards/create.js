@@ -781,6 +781,11 @@ function _ensureCardHelpers() {
     }
 }
 
+// Kick the resolution as soon as this module loads: every consumer builds
+// cards synchronously, so helpers requested at the moment of need arrive too
+// late to serve the very build that needed them.
+_ensureCardHelpers();
+
 function _isHuiCardAvailable() {
     try {
         if (typeof customElements === 'undefined' || typeof customElements.get !== 'function') {
@@ -796,8 +801,8 @@ function _isHuiCardAvailable() {
 }
 
 export function _createHuiCard(cardConfig, context, preview) {
-    // Resolved in the background: the fallback below can only be synchronous
-    // if the helpers are already in hand.
+    // Normally already resolved by the module-load warm-up below; this covers
+    // the case where loadCardHelpers only appeared after that.
     _ensureCardHelpers();
 
     const renderedConfig = _getRenderedCardConfig(cardConfig);
@@ -815,7 +820,11 @@ export function _createHuiCard(cardConfig, context, preview) {
             try {
                 const fallbackEl = _cardHelpers.createCardElement(renderedConfig);
                 if (fallbackEl) {
+                    // Mirror what the hui-card wrapper forwards to the card it
+                    // mounts, so the fallback renders like the normal path.
                     fallbackEl.hass = context._hass;
+                    fallbackEl.layout = 'grid';
+                    fallbackEl.preview = preview;
                 }
                 return fallbackEl || null;
             } catch (e) {

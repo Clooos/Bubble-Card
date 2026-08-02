@@ -772,22 +772,28 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
         
         let defaultViewLayout = "normal";
         if (cachedHuiRoot?.shadowRoot) {
-            // Probe BOTH view kinds, with descendant selectors so an extra
-            // wrapper element in hui-root does not break the chain. Deciding
-            // "section view" from the mere absence of a masonry view made a
-            // single HA restructuring silently switch every masonry dashboard
-            // to the large layout — a visual change users would blame on
-            // Bubble Card. When neither is recognised, keep the last known
-            // answer instead of asserting one.
+            // Masonry is the only layout that takes the "normal" default;
+            // sections, panel, sidebar and custom views all take "large".
+            // So the question is really "is this a masonry view?", and the
+            // answer must only be asserted when a view is actually rendered:
+            // deciding from the mere absence of a masonry element meant a
+            // single HA restructuring of hui-root would silently switch every
+            // masonry dashboard to the large layout — a visual change users
+            // would blame on Bubble Card. Descendant selectors so an extra
+            // wrapper element cannot break the chain.
             const root = cachedHuiRoot.shadowRoot;
             const masonryView = root.querySelector("hui-masonry-view");
-            const sectionsView = masonryView ? null : root.querySelector("hui-sections-view, hui-view hui-section");
+            const anyViewRendered = masonryView || root.querySelector(
+                "#view, hui-view, hui-sections-view, hui-panel-view, hui-sidebar-view"
+            );
 
             if (masonryView) {
                 window.isSectionView = false;
-            } else if (sectionsView) {
+            } else if (anyViewRendered) {
                 window.isSectionView = true;
             }
+            // Nothing recognisable at all: hui-root has been restructured, so
+            // keep the last known answer rather than flipping every card.
 
             defaultViewLayout = window.isSectionView ? "large" : "normal";
         }

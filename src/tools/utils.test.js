@@ -295,7 +295,7 @@ describe('view type probe contract', () => {
             shadowRoot: {
                 querySelector: (selector) => {
                     if (selector === 'hui-masonry-view') return viewMarkup.masonry ? {} : null;
-                    if (selector === 'hui-sections-view, hui-view hui-section') return viewMarkup.sections ? {} : null;
+                    if (selector.startsWith('#view')) return viewMarkup.anyView ? {} : null;
                     return null;
                 },
             },
@@ -344,25 +344,28 @@ describe('view type probe contract', () => {
     });
 
     test('reports masonry dashboards as not section view', () => {
-        mountDashboard({ masonry: true, sections: false });
+        mountDashboard({ masonry: true, anyView: true });
         utilsModule.setLayout(createCardContext());
         expect(window.isSectionView).toBe(false);
     });
 
-    test('reports sections dashboards as section view', () => {
-        mountDashboard({ masonry: false, sections: true });
+    test('reports every non-masonry rendered view as section view', () => {
+        // Sections, panel, sidebar and custom views all take the large
+        // default: only masonry takes the normal one.
+        mountDashboard({ masonry: false, anyView: true });
         utilsModule.setLayout(createCardContext());
         expect(window.isSectionView).toBe(true);
     });
 
-    test('keeps the last known answer when HA restructures both probes away', () => {
-        mountDashboard({ masonry: true, sections: false });
+    test('keeps the last known answer when no view element is recognisable', () => {
+        mountDashboard({ masonry: true, anyView: true });
         utilsModule.setLayout(createCardContext());
         expect(window.isSectionView).toBe(false);
 
-        // A HA release moves the view elements: asserting "section view" here
-        // would silently switch every masonry dashboard to the large layout.
-        mountDashboard({ masonry: false, sections: false });
+        // A HA release restructures hui-root so nothing is recognisable:
+        // asserting "section view" here would silently switch every masonry
+        // dashboard to the large layout.
+        mountDashboard({ masonry: false, anyView: false });
         utilsModule.setLayout(createCardContext());
         expect(window.isSectionView).toBe(false);
     });
