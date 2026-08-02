@@ -3,10 +3,13 @@ import en from '../translations/editor/en.json';
 import runtime from '../translations/runtime.js';
 
 // Editor translations for languages other than English are not bundled: they
-// are loaded on demand (editor only) from the local `translations/` folder
-// shipped next to bubble-card.js, so the bundle stays small while every
+// are loaded from the local `translations/` folder shipped next to
+// bubble-card.js (never from a CDN), so the bundle stays small while every
 // language supported by Home Assistant is covered, entirely offline. English
-// is bundled as the fallback dictionary.
+// is bundled as the fallback dictionary. Fetched dictionaries persist in a
+// per-version localStorage cache hydrated synchronously before the first
+// render, prefetched as soon as any card sees hass, and revalidated silently
+// once per session so they are available instantly everywhere.
 //
 // Resolution order for editor.* keys:
 //   1. Local dictionary for the active language (Bubble-specific wording)
@@ -55,6 +58,48 @@ function notifyLanguageChanged() {
 // In-memory dictionaries: lang -> object (null = fetch failed, promise = loading)
 const editorDicts = Object.create(null);
 const pendingFetches = Object.create(null);
+
+// Per-version localStorage cache of the fetched dictionaries: hydrated
+// synchronously before the first render so translations are available
+// instantly everywhere, then revalidated silently once per session.
+const CACHE_PREFIX = 'bubble-card-i18n:';
+const cacheKey = (lang) => `${CACHE_PREFIX}${version}:${lang}`;
+const hydratedLangs = new Set();
+const revalidatedLangs = new Set();
+
+let cachePurged = false;
+function purgeStaleCache() {
+  if (cachePurged) return;
+  cachePurged = true;
+  try {
+    const currentPrefix = `${CACHE_PREFIX}${version}:`;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(CACHE_PREFIX) && !key.startsWith(currentPrefix)) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch (_) {}
+}
+
+function hydrateFromCache(lang) {
+  if (hydratedLangs.has(lang)) return;
+  hydratedLangs.add(lang);
+  purgeStaleCache();
+  if (editorDicts[lang] !== undefined) return;
+  try {
+    const raw = localStorage.getItem(cacheKey(lang));
+    if (!raw) return;
+    const dict = JSON.parse(raw);
+    if (dict && typeof dict === 'object') editorDicts[lang] = dict;
+  } catch (_) {}
+}
+
+function storeInCache(lang, dict) {
+  try {
+    localStorage.setItem(cacheKey(lang), JSON.stringify(dict));
+  } catch (_) {}
+}
 
 // Base URL of the script serving this bundle, captured at evaluation time when
 // possible (classic script). Module scripts fall back to a DOM scan.
@@ -124,6 +169,14 @@ function resolveRuntime(key, lang) {
 
 export default function setupTranslation(hass) {
   const lang = getCurrentLocale(hass);
+  if (lang !== DEFAULT_LANG) {
+    hydrateFromCache(lang);
+    // Fire-and-forget prefetch: any card seeing hass warms the dictionary up
+    // before the first editor or dialog needs it. O(1) once warmed.
+    if (editorDicts[lang] === undefined || !revalidatedLangs.has(lang)) {
+      ensureEditorTranslations(hass);
+    }
+  }
   const fetched = lang === DEFAULT_LANG ? undefined : editorDicts[lang];
 
   return function t(key) {
@@ -177,20 +230,37 @@ async function fetchDict(lang) {
 
 /**
  * Makes sure the editor dictionary for the active language is available.
- * Resolves to true when a dictionary was newly loaded (callers should
- * re-render), false when nothing changed (English, already loaded, or failed).
+ * Resolves to true when the visible strings changed (callers should
+ * re-render), false when nothing changed (English, already loaded from the
+ * cache with no difference, or failed).
  */
 export function ensureEditorTranslations(hass) {
   const lang = getCurrentLocale(hass);
   if (lang === DEFAULT_LANG) return Promise.resolve(false);
-  if (editorDicts[lang] !== undefined) return Promise.resolve(false);
-  if (pendingFetches[lang]) return pendingFetches[lang];
+  hydrateFromCache(lang);
+  const hasDict = editorDicts[lang] !== undefined;
+  if (hasDict && revalidatedLangs.has(lang)) return Promise.resolve(false);
+  if (pendingFetches[lang]) return hasDict ? Promise.resolve(false) : pendingFetches[lang];
 
+  revalidatedLangs.add(lang);
+  const previous = editorDicts[lang];
   pendingFetches[lang] = fetchDict(lang).then((dict) => {
     delete pendingFetches[lang];
-    editorDicts[lang] = dict; // null on failure: remembered to avoid refetch loops
-    if (dict) notifyLanguageChanged();
-    return !!dict;
+    if (!dict) {
+      // null on failure: remembered to avoid refetch loops, but a cached
+      // dictionary hydrated earlier is kept as is
+      if (previous === undefined) editorDicts[lang] = null;
+      return false;
+    }
+    const changed = JSON.stringify(dict) !== JSON.stringify(previous ?? null);
+    editorDicts[lang] = dict;
+    if (changed) {
+      storeInCache(lang, dict);
+      notifyLanguageChanged();
+    }
+    return changed;
   });
-  return pendingFetches[lang];
+  // With a cached dictionary already in place the refresh is silent: callers
+  // have nothing to wait for.
+  return hasDict ? Promise.resolve(false) : pendingFetches[lang];
 }
