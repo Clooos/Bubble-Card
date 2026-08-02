@@ -2925,6 +2925,44 @@ describe('legacy popup location routing', () => {
         expect(displayLegacyPopupContent).toHaveBeenCalledTimes(1);
     });
 
+    test('stays reachable by its hash while parked out of its stack', () => {
+        const context = createLegacyContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        // Closing a legacy pop-up removes the stack root that holds the card,
+        // so the element disconnects and Home Assistant runs its teardown.
+        const stack = createMockContainer([]);
+        stack.host = { isConnected: true };
+        context.verticalStack = stack;
+
+        registerPopupContext(context);
+        cleanupPopupRuntime(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+        flushRafQueue();
+
+        expect(displayLegacyPopupContent).toHaveBeenCalledTimes(1);
+    });
+
+    test('lets go of its hash when the stack card itself leaves the document', () => {
+        const context = createLegacyContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        const stack = createMockContainer([]);
+        stack.host = { isConnected: false };
+        context.verticalStack = stack;
+
+        registerPopupContext(context);
+        cleanupPopupRuntime(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#popup-a');
+        window.dispatchEvent(new Event('location-changed'));
+        flushRafQueue();
+
+        expect(displayLegacyPopupContent).not.toHaveBeenCalled();
+    });
+
     test('resolves the closed state before flipping a re-inserted legacy pop-up open', () => {
         const context = createLegacyContext({ hash: '#popup-a' });
         usedContexts.push(context);

@@ -2663,7 +2663,20 @@ export function cleanupPopupRuntime(context) {
         }
     } catch (_) {}
 
-    unregisterPopupContext(context);
+    // Closing a legacy pop-up parks its shell out of the stack, and that shell
+    // holds the card itself, so the close disconnects the element and lands
+    // here. Unregistering then takes the hash out of the URL dispatcher: the
+    // next navigation to it finds nobody and the pop-up only opens once a
+    // later hass tick re-registers it. A real teardown takes the stack card
+    // itself out of the document, which is what tells the two apart.
+    const parkedLegacyShell = !context.isStandalonePopUp &&
+        !!context.popUp &&
+        context.verticalStack?.host?.isConnected === true &&
+        !context.verticalStack.contains(context.popUp);
+
+    if (!parkedLegacyShell) {
+        unregisterPopupContext(context);
+    }
     releaseBackdropContext(context);
 
     if (!visuallyOpen && shouldHideOrphanedBackdrop()) {
