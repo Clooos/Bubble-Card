@@ -19,7 +19,8 @@ jest.unstable_mockModule('../../../tools/monotonic-time.js', () => ({
     monotonicNow: () => Date.now(),
 }));
 
-const { _createHuiCard, _isStandalonePopupCardConfig, createCardElementsProgressively, registerPopupOpenActivityProbe, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } = await import('./create.js');
+const { createEditorCardElements } = await import('./editor/index.js');
+const { _createHuiCard, _isStandalonePopupCardConfig, createCardElements, createCardElementsProgressively, registerPopupOpenActivityProbe, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } = await import('./create.js');
 
 describe('_isStandalonePopupCardConfig', () => {
     test('detects standalone bubble pop-up child configs', () => {
@@ -903,5 +904,122 @@ describe('hui-card creation contract', () => {
         // report is diagnosable without spamming the console.
         expect(console.warn).toHaveBeenCalledTimes(1);
         expect(String(console.warn.mock.calls[0][0])).toContain('hui-card');
+    });
+});
+
+describe('editor preview rebuilds', () => {
+    const originalCustomElements = global.customElements;
+    const originalDocument = global.document;
+    const originalWindow = global.window;
+
+    function installRegistry() {
+        global.customElements = { get: (tag) => (tag === 'hui-card' ? class {} : undefined) };
+        global.document = {
+            createElement: jest.fn((tag) => ({
+                tagName: tag.toUpperCase(),
+                load: jest.fn(),
+                listeners: {},
+                addEventListener(type, handler) {
+                    (this.listeners[type] ||= []).push(handler);
+                },
+                removeEventListener(type, handler) {
+                    this.listeners[type] = (this.listeners[type] || []).filter((entry) => entry !== handler);
+                },
+            })),
+        };
+        global.window = {};
+        createElementMock.mockImplementation(() => ({
+            classList: { add: jest.fn(), remove: jest.fn(), toggle: jest.fn() },
+            style: {},
+            appendChild: jest.fn(),
+            remove: jest.fn(),
+        }));
+    }
+
+    function createEditorContext(cards) {
+        return {
+            editor: true,
+            _hass: { states: {} },
+            config: { cards },
+            popUp: { appendChild: jest.fn() },
+            elements: { popUpContainer: { appendChild: jest.fn(), querySelector: () => null } },
+        };
+    }
+
+    // Drive one preview build the way the editor list does: the structure
+    // builder asks for a card per config, and the cards it gets back are what
+    // ends up in `_managedCards`.
+    function runBuild(context) {
+        const options = createEditorCardElements.mock.calls.at(-1)[2];
+        const cards = createEditorCardElements.mock.calls.at(-1)[1];
+        context._managedCards = cards.map((cardConfig) => options.createCard(cardConfig)).filter(Boolean);
+        context._cardWrappers = context._managedCards.map(() => ({ classList: { toggle: jest.fn() }, style: {} }));
+        context._managedCards.forEach((cardEl, index) => {
+            options.bindCardLayoutUpdates(cardEl, context._cardWrappers[index], context, index);
+        });
+        return options;
+    }
+
+    afterEach(() => {
+        global.customElements = originalCustomElements;
+        global.document = originalDocument;
+        global.window = originalWindow;
+        createEditorCardElements.mockReset();
+        createElementMock.mockReset();
+    });
+
+    test('reuses the cards whose config the interaction did not touch', () => {
+        installRegistry();
+        const first = { type: 'tile', entity: 'light.a' };
+        const second = { type: 'tile', entity: 'light.b' };
+        const third = { type: 'tile', entity: 'light.c' };
+        const context = createEditorContext([first, second, third]);
+
+        createCardElements(context);
+        const options = runBuild(context);
+        const built = context._managedCards;
+
+        // A reorder keeps every config object, only their order changes.
+        context.config = { ...context.config, cards: [third, first, second] };
+        options.rebuildCards();
+        const rebuilt = runBuild(context);
+
+        expect(context._managedCards).toEqual([built[2], built[0], built[1]]);
+        expect(rebuilt).toBeDefined();
+    });
+
+    test('builds a fresh card for a config the interaction replaced', () => {
+        installRegistry();
+        const kept = { type: 'tile', entity: 'light.a' };
+        const replaced = { type: 'tile', entity: 'light.b' };
+        const context = createEditorContext([kept, replaced]);
+
+        createCardElements(context);
+        const options = runBuild(context);
+        const built = context._managedCards;
+
+        context.config = { ...context.config, cards: [kept, { type: 'tile', entity: 'light.b', grid_options: { columns: 6 } }] };
+        options.rebuildCards();
+        runBuild(context);
+
+        expect(context._managedCards[0]).toBe(built[0]);
+        expect(context._managedCards[1]).not.toBe(built[1]);
+    });
+
+    test('does not stack a card-updated listener on a reused card', () => {
+        installRegistry();
+        const first = { type: 'tile', entity: 'light.a' };
+        const second = { type: 'tile', entity: 'light.b' };
+        const context = createEditorContext([first, second]);
+
+        createCardElements(context);
+        const options = runBuild(context);
+        const reusedCard = context._managedCards[0];
+
+        context.config = { ...context.config, cards: [second, first] };
+        options.rebuildCards();
+        runBuild(context);
+
+        expect(reusedCard.listeners['card-updated']).toHaveLength(1);
     });
 });

@@ -90,8 +90,32 @@ function _applyHassToCardElement(cardEl, hass) {
     cardEl._bubbleHassPending = false;
 }
 
+// Which config each editor preview card was built from. Reordering, deleting
+// or duplicating a card rebuilds the whole preview list, and rebuilding a card
+// whose config object never changed costs an element construction, a setConfig
+// and possibly a lazy module load for nothing. Keyed by the config reference,
+// which the editor actions preserve for every card they did not touch.
+const editorCardSourceConfigs = new WeakMap();
+
+function collectReusableEditorCards(context) {
+    const reusable = new Map();
+    if (!Array.isArray(context?._managedCards)) {
+        return reusable;
+    }
+
+    for (const cardEl of context._managedCards) {
+        const sourceConfig = cardEl ? editorCardSourceConfigs.get(cardEl) : undefined;
+        if (!sourceConfig || reusable.has(sourceConfig)) {
+            continue;
+        }
+        reusable.set(sourceConfig, cardEl);
+    }
+
+    return reusable;
+}
+
 // Create popup child cards inside the popup container.
-export function createCardElements(context) {
+export function createCardElements(context, options) {
     const cards = context.config.cards;
     if (!Array.isArray(cards) || !context.elements?.popUpContainer) return;
 
@@ -126,15 +150,31 @@ export function createCardElements(context) {
     popUpContainer.querySelector('.bubble-cards-editor-container')?.remove();
 
     if (isEditMode) {
+        const reusableCards = options?.reusableCards instanceof Map ? options.reusableCards : null;
+
         createEditorCardElements(context, cards, {
-            createCard: (cardConfig) => _isStandalonePopupCardConfig(cardConfig)
-                ? _createNestedPopupWarningCard(context)
-                : _createHuiCard(cardConfig, context, true),
+            createCard: (cardConfig) => {
+                const reused = reusableCards?.get(cardConfig);
+                if (reused) {
+                    // One card per config: a duplicate carries a fresh object.
+                    reusableCards.delete(cardConfig);
+                    return reused;
+                }
+
+                const cardEl = _isStandalonePopupCardConfig(cardConfig)
+                    ? _createNestedPopupWarningCard(context)
+                    : _createHuiCard(cardConfig, context, true);
+                if (cardEl && cardConfig) {
+                    editorCardSourceConfigs.set(cardEl, cardConfig);
+                }
+                return cardEl;
+            },
             applyCardWrapperLayout: _applyCardWrapperLayout,
             bindCardLayoutUpdates: _bindCardLayoutUpdates,
             rebuildCards: () => {
+                const reusable = collectReusableEditorCards(context);
                 removeCardElements(context);
-                createCardElements(context);
+                createCardElements(context, { reusableCards: reusable });
             },
         });
         return;
@@ -998,12 +1038,25 @@ function _applyCardWrapperLayout(cardEl, cardWrapper, cardConfig) {
     cardWrapper.classList.toggle('full-width', columns === 'full');
 }
 
+const cardLayoutUpdateHandlers = new WeakMap();
+
 function _bindCardLayoutUpdates(cardEl, cardWrapper, context, index) {
-    cardEl.addEventListener('card-updated', (event) => {
+    // A reused editor card is re-bound on every preview rebuild, against a new
+    // wrapper and a new index: drop the previous binding, or listeners pile up
+    // on the same element and the stale ones write to a detached wrapper.
+    const previousHandler = cardLayoutUpdateHandlers.get(cardEl);
+    if (previousHandler) {
+        cardEl.removeEventListener('card-updated', previousHandler);
+    }
+
+    const handler = (event) => {
         event.stopPropagation();
         const cardConfig = context.config?.cards?.[index] || cardEl.config || {};
         _applyCardWrapperLayout(cardEl, cardWrapper, cardConfig);
-    });
+    };
+
+    cardLayoutUpdateHandlers.set(cardEl, handler);
+    cardEl.addEventListener('card-updated', handler);
 }
 
 // ---------------------------------------------------------------------------
