@@ -367,31 +367,78 @@ function normalizeHash(value) {
     return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
 }
 
+function serializeConfig(value) {
+    try {
+        return JSON.stringify(value);
+    } catch (_) {
+        return null;
+    }
+}
+
+// A traversal compares every node it visits against the same target, and the
+// target is usually the largest config in play. Serializing it once per search
+// instead of once per node is what keeps a deep dashboard walk affordable.
+// The rejections below are all implied by string equality, so gating the
+// candidate's own serialization on them changes no answer.
+function createConfigComparator(target) {
+    const targetIsArray = Array.isArray(target);
+    const targetHash = normalizeHash(target?.hash);
+    const targetType = typeof target?.type === 'string' ? target.type : null;
+    const targetCardType = typeof target?.card_type === 'string' ? target.card_type : null;
+
+    let targetJson;
+    let targetJsonReady = false;
+
+    return (candidate) => {
+        if (candidate === target) {
+            return true;
+        }
+
+        if (Array.isArray(candidate) !== targetIsArray) {
+            return false;
+        }
+
+        const candidateHash = normalizeHash(candidate?.hash);
+        if (candidateHash && targetHash && candidateHash !== targetHash) {
+            return false;
+        }
+
+        if (targetType !== null && candidate?.type !== targetType) {
+            return false;
+        }
+
+        if (targetCardType !== null && candidate?.card_type !== targetCardType) {
+            return false;
+        }
+
+        if (!targetJsonReady) {
+            targetJson = serializeConfig(target);
+            targetJsonReady = true;
+        }
+
+        if (targetJson === null) {
+            return false;
+        }
+
+        return serializeConfig(candidate) === targetJson;
+    };
+}
+
 function configsAreEqual(left, right) {
     if (left === right) {
         return true;
     }
 
-    // Quick rejection: if both have a hash, they must match.
-    const leftHash = normalizeHash(left?.hash);
-    const rightHash = normalizeHash(right?.hash);
-    if (leftHash && rightHash && leftHash !== rightHash) {
-        return false;
-    }
-
-    try {
-        return JSON.stringify(left) === JSON.stringify(right);
-    } catch (_) {
-        return false;
-    }
+    return createConfigComparator(right)(left);
 }
 
-function getConfigMatchScore(candidate, target) {
+function getConfigMatchScore(candidate, target, isEqualToTarget) {
     if (!candidate || !target || typeof candidate !== 'object' || typeof target !== 'object') {
         return -1;
     }
 
-    if (configsAreEqual(candidate, target)) {
+    const equals = isEqualToTarget || ((value) => configsAreEqual(value, target));
+    if (equals(candidate)) {
         return 1000;
     }
 
@@ -479,6 +526,7 @@ export function findConfigPath(rootConfig, targetConfig) {
     // Target hash for O(1) rejection during traversal.
     const targetHash = normalizeHash(targetConfig?.hash);
     const targetCardType = targetConfig?.card_type || targetConfig?.type;
+    const isEqualToTarget = createConfigComparator(targetConfig);
 
     const visit = (node, path) => {
         if (!node || typeof node !== 'object') {
@@ -516,7 +564,7 @@ export function findConfigPath(rootConfig, targetConfig) {
             if (!isContainer) return;
         }
 
-        const score = getConfigMatchScore(node, targetConfig);
+        const score = getConfigMatchScore(node, targetConfig, isEqualToTarget);
         if (score > bestScore) {
             bestScore = score;
             bestPath = path;

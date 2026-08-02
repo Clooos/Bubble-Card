@@ -5,6 +5,7 @@ import {
     createReopenedStandaloneParentDialogParams,
     createStandaloneParentDialogParams,
     createStandaloneParentDialogParamsFromDialog,
+    findConfigPath,
     forceDialogDirtyState,
     getDialogLiveCardConfig,
     restoreDialogCardEditorVisualState,
@@ -850,5 +851,75 @@ describe('createStandaloneParentDialogParams original config isolation', () => {
 
         // _originalCardConfig should remain unchanged
         expect(parentParams._originalCardConfig.cards[0].entity).toBe('light.hall');
+    });
+});
+describe('findConfigPath serialization cost', () => {
+    function buildDashboard(cardCount) {
+        return {
+            views: [{
+                cards: Array.from({ length: cardCount }, (_, index) => ({
+                    type: 'custom:bubble-card',
+                    card_type: 'pop-up',
+                    hash: `#room-${index}`,
+                    name: `Room ${index}`,
+                })),
+            }],
+        };
+    }
+
+    // The card being edited inside a pop-up carries no hash, so none of the
+    // cheap hash rejections apply and every same-shaped node reaches the
+    // serializing comparison.
+    function buildPopupWithChildCards(cardCount) {
+        return {
+            views: [{
+                cards: [{
+                    type: 'custom:bubble-card',
+                    card_type: 'pop-up',
+                    hash: '#kitchen',
+                    cards: Array.from({ length: cardCount }, (_, index) => ({
+                        type: 'tile',
+                        entity: `light.lamp_${index}`,
+                    })),
+                }],
+            }],
+        };
+    }
+
+    test('serializes the target once per search instead of once per visited node', () => {
+        const dashboard = buildPopupWithChildCards(40);
+        let targetSerializations = 0;
+        const target = {
+            type: 'tile',
+            entity: 'light.lamp_37',
+            toJSON() {
+                targetSerializations += 1;
+                const { toJSON, ...rest } = this;
+                return rest;
+            },
+        };
+
+        findConfigPath(dashboard, target);
+
+        expect(targetSerializations).toBeLessThanOrEqual(1);
+    });
+
+    test('still finds the containing path', () => {
+        const dashboard = buildDashboard(5);
+
+        expect(findConfigPath(dashboard, dashboard.views[0].cards[3])).toEqual(['views', 0, 'cards', 3]);
+    });
+
+    test('still reports no path when the target is the root itself', () => {
+        const popup = { type: 'custom:bubble-card', card_type: 'pop-up', hash: '#kitchen' };
+
+        expect(findConfigPath(popup, popup)).toBe(null);
+    });
+
+    test('does not match a card that only shares its type', () => {
+        const dashboard = buildDashboard(3);
+        const target = { type: 'custom:bubble-card', card_type: 'pop-up', hash: '#absent' };
+
+        expect(findConfigPath(dashboard, target)).toBe(null);
     });
 });
