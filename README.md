@@ -1,5 +1,7 @@
 # Bubble Card
 
+🌐 **[Read this in your language](i18n/languages.md)**
+
 ![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
 
 Bubble Card is a minimalist and customizable card collection for Home Assistant, featuring modern pop-ups and an integrated Module Store with over 100 community-made modules.
@@ -36,7 +38,7 @@ Bubble Card is a minimalist and customizable card collection for Home Assistant,
 9. You can now click on `Add card` in the bottom right corner and search for `Bubble Card`
 10. After any update of the file you will have to edit `/local/bubble-card.js?v=1` and change the version to any higher number
 
-If it's not working, just try to clear your browser cache.`
+If it's not working, just try to clear your browser cache.
 
 </details>
 
