@@ -55,11 +55,16 @@ def inline_code(text):
     return sorted(t for t in re.findall(r'`([^`\n]+)`', strip_fences(text)) if CODEY.search(t))
 
 def strip_generated_header(text):
-    """Drop the generated comment and notice block that sits above the H1."""
+    """Drop what the generator adds around the body: the comment and notice block
+    above the H1, and the closing tag of the RTL wrapper at the very end."""
     if not text.startswith('<!--'):
         return text
     idx = text.find('\n# ')
-    return text[idx + 1:] if idx != -1 else text
+    if idx != -1:
+        text = text[idx + 1:]
+    if text.rstrip().endswith('</div>'):
+        text = text.rstrip()[:-len('</div>')].rstrip() + '\n'
+    return text
 
 def report(en_path, fr_path):
     en = open(en_path, encoding='utf-8').read()

@@ -8,7 +8,11 @@ def slug(text):
     t = re.sub(r'`([^`]*)`', r'\1', t)            # inline code keeps its text
     t = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', t)  # links keep their label
     t = re.sub(r'<[^>]+>', '', t)                  # drop html
-    t = re.sub(r'[^\w\s\-]', '', t, flags=re.UNICODE)  # drop punctuation, keep accents
+    # Drop punctuation and symbols, keep letters, combining marks and digits.
+    # \w is not enough: it excludes the combining marks used by Indic, Thai and
+    # other scripts, which GitHub keeps in its anchors.
+    t = ''.join(c for c in t
+                if unicodedata.category(c)[0] in 'LMN' or c in ' -_')
     t = t.replace(' ', '-')
     return t
 

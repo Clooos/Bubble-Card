@@ -11,11 +11,12 @@ I18N = os.path.join(REPO, 'i18n')
 
 HEADER = """# Bubble Card in your language
 
-The English [README](../README.md) is the reference documentation and is always up to date.
-The translations below started as automatic translations, so a sentence may read oddly or
-lag behind the English version.
+> [!IMPORTANT]
+> The English [README](../README.md) is the reference documentation and is always up to date.
+> The translations below started as automatic translations, so a sentence may read oddly or
+> lag behind the English version.
 
-**Any help improving them is more than welcome.** If a sentence reads wrong, click the ✏️
+**Any help improving the translations is more than welcome.** If a sentence reads wrong, click the ✏️
 next to your language: GitHub opens the file in its web editor, and saving it creates the
 copy of the project and the pull request for you. No git, no clone, no setup, about a
 minute of your time. Changes about the product itself belong in the English
@@ -26,8 +27,7 @@ A huge thank you to everyone who takes the time 🍻
 """
 
 FOOTER = """
-> Missing your language? Home Assistant supports {total} languages and Bubble Card follows
-> that list, so it is probably on its way. Feel free to ask for it in an
+> Missing your language? Feel free to ask for it in an
 > [issue](https://github.com/Clooos/Bubble-Card/issues/new).
 """
 
@@ -50,7 +50,7 @@ def build():
         rows.append(f'| {english} | {native} | [README.{code}.md]({available[code]}) | '
                     f'[✏️]({edit.format(code=code)}) |')
 
-    out = HEADER + '\n'.join(rows) + '\n' + FOOTER.format(total=len(LANGUAGES))
+    out = HEADER + '\n'.join(rows) + '\n' + FOOTER
     dest = os.path.join(I18N, 'languages.md')
     open(dest, 'w', encoding='utf-8').write(out)
     return dest, len(available)

@@ -1,6 +1,6 @@
 # Bubble Card
 
-🌐 **[Read this in your language](i18n/languages.md)**
+🌐 **[Read this in your language](i18n/languages.md)** (Français, Deutsch, Español, 简体中文, 日本語... and much more)
 
 ![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
 

@@ -1,0 +1,2663 @@
+<!-- First generated from README.md, then improved by contributors.
+     Wording fixes are welcome here. Content changes belong in README.md. -->
+> [!NOTE]
+> Эта страница переведена автоматически. В случае сомнений преимущество имеет [оригинальная документация на английском](../README.md). Какая-то фраза звучит криво? Любая помощь приветствуется, а [исправление этой страницы](https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.ru.md) займёт всего минуту: GitHub сам позаботится о форке и pull request. Заранее спасибо! 🍻
+
+# Bubble Card
+
+🌐 **[Читать на другом языке](languages.md)**
+
+![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+
+Bubble Card это минималистичная и настраиваемая коллекция карточек для Home Assistant с современными всплывающими окнами и встроенным Module Store, включающим более 100 модулей от сообщества.
+
+[![Stars](https://img.shields.io/github/stars/clooos/Bubble-Card?style=for-the-badge)](#) [![Last commit](https://img.shields.io/github/last-commit/clooos/Bubble-Card?style=for-the-badge)](#) [![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube&style=for-the-badge)](https://www.youtube.com/@cloooos) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit&style=for-the-badge)](https://www.reddit.com/r/BubbleCard/) [![Reddit Profile](https://img.shields.io/badge/Reddit-My%20stuff-orange?logo=reddit&style=for-the-badge)](https://www.reddit.com/user/Clooooos/submitted/) [![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant&style=for-the-badge)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?style=for-the-badge&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal&style=for-the-badge)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR) [![Patreon Clooos](https://img.shields.io/badge/Patreon-Clooos-orange?logo=patreon&style=for-the-badge)](https://www.patreon.com/Clooos)
+
+
+<br>
+
+## Содержание
+
+**[`Установка`](#установка)**  **[`Конфигурация`](#конфигурация)**  **[`Pop-up`](#pop-up)**  **[`Горизонтальный стек кнопок`](#горизонтальный-стек-кнопок)**  **[`Кнопка`](#кнопка)**  **[`Медиаплеер`](#медиаплеер)**  **[`Шторы`](#шторы)**  **[`Выбор`](#выбор)**  **[`Климат`](#климат)**  **[`Календарь`](#календарь)**  **[`Разделитель`](#разделитель)**  **[`Пустой столбец`](#пустой-столбец)**  **[`Только дополнительные кнопки`](#только-дополнительные-кнопки)**  **[`Дополнительные кнопки`](#дополнительные-кнопки)**  **[`Компоновки карточки`](#компоновки-карточки)**  **[`Действия`](#действия-при-нажатии-двойном-нажатии-и-удержании)**  **[`Оформление`](#оформление)**  **[`Шаблоны`](#шаблоны)**  **[`Modules`](#modules)**  **[`Помощь`](#помощь)**  **[`Участие в проекте`](#участие-в-проекте)**  **[`Поддержать проект`](#поддержать-проект)**
+
+<br>
+
+## Установка
+
+**Минимальная поддерживаемая версия Home Assistant:** 2023.9.0
+
+<details>
+
+<summary>Без HACS</summary>
+
+<br>
+
+1. Скачайте этот файл: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Добавьте этот файл в папку `<config>/www`
+3. На вашей панели нажмите на значок в правом верхнем углу, затем на `Edit dashboard`
+4. Снова нажмите на этот значок, затем на `Manage resources`
+5. Нажмите на `Add resource`
+6. Скопируйте и вставьте это: `/local/bubble-card.js?v=1`
+7. Нажмите на `JavaScript Module`, затем на `Create`
+8. Вернитесь назад и обновите страницу
+9. Теперь вы можете нажать на `Add card` в правом нижнем углу и найти `Bubble Card`
+10. После каждого обновления файла вам нужно будет отредактировать `/local/bubble-card.js?v=1` и увеличить номер версии
+
+Если это не работает, просто попробуйте очистить кэш браузера.
+
+</details>
+
+<details>
+
+<summary>С HACS (рекомендуется)</summary>
+
+<br>
+
+Этот способ позволяет получать обновления напрямую через Home Assistant Community Store
+
+1. Если HACS ещё не установлен, скачайте его, следуя инструкциям на [https://hacs.xyz/docs/setup/download/](https://hacs.xyz/docs/use/download/download/)
+2. Выполните начальную настройку HACS, следуя инструкциям на [https://hacs.xyz/docs/configuration/basic](https://hacs.xyz/docs/configuration/basic)
+3. На боковой панели перейдите в "HACS"
+4. Найдите "Bubble Card" или нажмите на синюю кнопку ниже
+5. Нажмите на "Download"
+6. Вернитесь на вашу панель и нажмите на значок в правом верхнем углу, затем на `Edit dashboard`
+7. Теперь вы можете нажать на `Add card` в правом нижнем углу и найти `Bubble Card`
+
+Если это не работает, попробуйте очистить кэш браузера или приложения (на всех ваших устройствах, если нужно).
+
+#### Видео
+
+Вы также можете заглянуть на мой YouTube канал, там есть пошаговые видео.
+
+[![YouTube](https://img.shields.io/badge/YouTube-My%20channel-red?logo=youtube&style=for-the-badge)](https://www.youtube.com/@cloooos)
+
+</details>
+
+<br>
+
+[![Open Bubble Card on Home Assistant Community Store (HACS).](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=clooos&repository=Bubble-Card&category=frontend)
+
+<br>
+
+## Конфигурация
+
+Все настройки можно задать в редакторе Home Assistant. Но вы можете найти больше деталей и YAML в документации ниже.
+
+<details>
+
+<summary><b>Основные настройки (YAML + описание)</b></summary>
+
+| Название | Тип | Требование | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- | --- |
+| `type` | string | **Обязательно** | `custom:bubble-card` | Тип карточки |
+| `card_type` | string | **Обязательно** | `button`, `calendar`, `climate`, `cover`, `empty-column`, `horizontal-buttons-stack`, `media-player`, `pop-up`, `select`, `separator` или `sub-buttons` | Тип карточки Bubble Card, см. ниже |
+| `styles` | object list | Опционально | Любые CSS стили | Позволяет настроить CSS вашей карточки Bubble Card, см. [оформление](#оформление) |
+
+</details>
+
+<details>
+
+<summary><b>Глобальные CSS переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-border-radius` | `px` | Радиус скругления для всех поддерживаемых элементов |
+| `--bubble-main-background-color` | `color` | Основной цвет фона для всех поддерживаемых элементов |
+| `--bubble-secondary-background-color` | `color` | Вторичный цвет фона для всех поддерживаемых элементов |
+| `--bubble-accent-color` | `color` | Акцентный цвет для всех поддерживаемых элементов |
+| `--bubble-icon-border-radius` | `px` | Радиус скругления значка для всех поддерживаемых элементов |
+| `--bubble-icon-background-color` | `color` | Цвет фона значка для всех поддерживаемых элементов |
+| `--bubble-sub-button-border-radius` | `px` | Радиус скругления для всех дополнительных кнопок |
+| `--bubble-sub-button-background-color` | `color` | Цвет фона для всех дополнительных кнопок |
+| `--bubble-box-shadow` | см. [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Тень для всех поддерживаемых элементов |
+| `--bubble-border` | см. [border](https://developer.mozilla.org/fr/docs/Web/CSS/border) | Граница для всех поддерживаемых карточек |
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+[![Bubble-Card---Youtube-github](https://github.com/user-attachments/assets/643aa16a-3fc9-4770-8269-62ec01db49b3)](https://www.youtube.com/watch?v=0hSQOlBxKKI)
+
+**Посмотрите это [видео](https://www.youtube.com/watch?v=0hSQOlBxKKI), чтобы узнать о Bubble Card и её возможностях.** Мой YouTube канал совсем новый и посвящён обучающим видео по Home Assistant и Bubble Card. Не стесняйтесь подписаться, это поможет увеличить видимость моего канала. Заранее спасибо!
+
+<br>
+
+---
+
+<br>
+
+## Pop-up
+
+![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
+
+Эта карточка позволяет создать всплывающее окно с любым содержимым. Каждое всплывающее окно **скрыто по умолчанию** и может быть открыто по ссылке на него (например, `'#pop-up-name'`), с помощью любой карточки, поддерживающей [действие](#действия-при-нажатии-двойном-нажатии-и-удержании) `navigate`, или с помощью встроенного [горизонтального стека кнопок](#горизонтальный-стек-кнопок).
+
+> [!TIP]
+> ### Триггер всплывающего окна 
+> Эта функция позволяет открывать всплывающее окно на основе состояния любой сущности, например, вы можете открывать всплывающее окно "Безопасность" с камерой, когда человек находится перед вашим домом. Вы также можете создать переключатель помощника (input_boolean) и запускать его открытие/закрытие в автоматизации.
+> <details>
+> <summary>Открытие всплывающего окна, когда <code>binary_sensor</code> в состоянии <code>on</code></summary>
+> <br>
+>
+> ```yaml
+> type: custom:bubble-card
+> card_type: pop-up
+> hash: '#kitchen'
+> name: Security
+> icon: mdi:video
+> trigger_entity: binary_sensor.front_door_motion
+> trigger_state: 'on'
+> trigger_close: true
+> ```
+> 
+> </details>
+>
+> ### Разные способы закрыть всплывающее окно 
+> Существует много способов закрыть всплывающее окно. Например, вы можете провести от заголовка всплывающего окна вниз, сделать длинное проведение внутри всплывающего окна вниз, нажать Escape на компьютере, убрать хеш из URL или просто нажать кнопку закрытия.
+>
+
+
+### Настройки всплывающего окна
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Название | Тип | Требование | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- | --- |
+| `hash` | string | **Обязательно** | Любой уникальный хеш (например, `'#kitchen'`) с ' ' | Так вы будете открывать своё всплывающее окно |
+| `popup_style` | string | Опционально | `bubble` (по умолчанию) или `classic` | Определяет визуальный стиль всплывающего окна |
+| `popup_mode` | string | Опционально | `default` (по умолчанию), `fit-content`, `centered` или `adaptive-dialog` | Определяет режим компоновки всплывающего окна |
+| `with_bottom_offset` | boolean | Опционально | `true` или `false` (по умолчанию) | Используется только с `popup_mode: fit-content` или `adaptive-dialog`. Применяет нижний отступ на мобильных устройствах, полезно, если ваша панель содержит карточку подвала. |
+| `full_width_on_mobile` | boolean | Опционально | `true` или `false` (по умолчанию) | Используется только с `popup_mode: centered`. Расширяет всплывающее окно на всю ширину экрана на мобильных устройствах, полезно на маленьких экранах. |
+| `performance_mode` | string | Опционально | `default` (по умолчанию) или `performance` | Оптимизирует анимацию открытия всплывающего окна. `performance` слегка задерживает отрисовку содержимого и размытие фона, а также отключает размытие подложки, если оно задано. |
+| `auto_close` | string | Опционально | Тайм-аут в миллисекундах (например, `10000` для 10с) | Автоматически закрывает всплывающее окно после тайм-аута |
+| `close_on_click` | boolean | Опционально | `true` или `false` (по умолчанию) | Автоматически закрывает всплывающее окно после любого взаимодействия |
+| `close_by_clicking_outside` | boolean | Опционально | `true` (по умолчанию) или `false` | Закрывает всплывающее окно нажатием за его пределами |
+| `width_desktop` | string | Опционально | Любое значение CSS | Ширина на компьютере (`100%` по умолчанию на мобильных устройствах) |
+| `margin` | string | Опционально | Любое значение CSS | Используйте это **только** если ваше всплывающее окно плохо центрировано на мобильных устройствах (например, `13px`) |
+| `margin_top_mobile` | string | Опционально | Любое значение CSS | Верхний отступ на мобильных устройствах (например, `-56px`, если ваш заголовок скрыт) |
+| `margin_top_desktop` | string | Опционально | Любое значение CSS | Верхний отступ на компьютере (например, `50vh` для всплывающего окна половинного размера или `calc(100vh - 400px)` для фиксированной высоты `400px`) |
+| `bg_color` | string | Опционально | Любое значение hex, rgb или rgba | Цвет фона вашего всплывающего окна (например, `#ffffff` для белого фона) |
+| `bg_opacity` | string | Опционально | Любое значение от `0` до `100` | Непрозрачность фона вашего всплывающего окна (например, `100` для отсутствия прозрачности) |
+| `bg_blur` | string | Опционально | Любое значение от `0` до `100` | Эффект размытия фона вашего всплывающего окна, **работает только если `bg_opacity` не равно `100`** (например, `0` для отсутствия размытия)|
+| `shadow_opacity` | string | Опционально | Любое значение от `0` до `100` | Непрозрачность тени вашего всплывающего окна (например, `0`, чтобы скрыть её) |
+| `hide_backdrop` | boolean | Опционально | `true` или `false` (по умолчанию) | Установите true на первом всплывающем окне вашей главной панели, чтобы отключить подложку на всех всплывающих окнах. |
+| `background_update` | boolean | Опционально | `true` или `false` (по умолчанию) | Обновлять содержимое всплывающего окна в фоне (не рекомендуется) |
+| `trigger_entity` | string | Опционально | Любая сущность | Открывает это всплывающее окно на основе состояния любой сущности |
+| `trigger_state` | string | Опционально (**Обязательно**, если задана `trigger_entity`) | Любое состояние сущности | Состояние сущности для открытия всплывающего окна |
+| `trigger_close` | boolean | Опционально | `true` или `false` (по умолчанию) | Закрывает всплывающее окно, когда `trigger_state` отличается |
+| `open_action` | object | Опционально | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Запускает действие при открытии всплывающего окна |
+| `close_action` | object | Опционально | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Запускает действие при закрытии всплывающего окна |
+| `show_header` | boolean | Опционально | `true` (по умолчанию) или `false` | Показывает/скрывает заголовок всплывающего окна полностью |
+| `show_previous_button` | boolean | Опционально | `true` или `false` (по умолчанию) | Показывает кнопку "назад" рядом с кнопкой закрытия и возвращает к предыдущему всплывающему окну, если оно доступно |
+| `show_close_button` | boolean | Опционально | `true` (по умолчанию) или `false` | Показывает или скрывает кнопку закрытия, оставляя остальную часть заголовка видимой |
+| `buttons_position` | string | Опционально | `right` (по умолчанию) или `left` | Положение кнопок закрытия и "назад" в заголовке |
+| `cards` | list | Опционально | Любая карточка Bubble Card, Home Assistant или пользовательская карточка | Определяет содержимое вашего всплывающего окна. См. пример всплывающего окна ниже. |
+| Вам также доступны [все настройки кнопки](#кнопка) для заголовка всплывающего окна. | | Опционально | | Если не задано, заголовок показан не будет |
+
+</details>
+
+<details>
+
+<summary><b>CSS переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-pop-up-border-radius` | `px` | Радиус скругления для всплывающего окна |
+| `--bubble-pop-up-main-background-color` | `color` | Основной цвет фона для поддерживаемых элементов всплывающего окна |
+| `--bubble-pop-up-background-color` | `color` | Цвет фона всплывающего окна |
+| `--bubble-backdrop-background-color` | `color` | Цвет фона подложки |
+| Вам также доступны [все CSS переменные кнопки](#настройки-кнопки) для заголовка всплывающего окна. | | |
+
+</details>
+
+
+### Автономный формат всплывающего окна (v3.2.0+)
+
+Начиная с v3.2.0 всплывающие окна используют новый автономный формат, где карточки содержимого задаются напрямую внутри всплывающего окна с помощью параметра `cards`. Это обеспечивает более высокую производительность и новый способ редактирования на основе секций с drag-and-drop.
+
+
+#### Примеры
+
+<details>
+
+<summary>Всплывающее окно (автономный формат)</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: pop-up
+hash: '#kitchen'
+name: Kitchen
+icon: mdi:fridge
+entity: light.kitchen
+cards:
+  - type: custom:bubble-card
+    card_type: button
+    entity: light.kitchen
+  # More cards...
+```
+
+</details>
+<details>
+
+<summary>Кнопка для открытия всплывающего окна</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: name
+name: Kitchen
+icon: mdi:fridge
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#kitchen'
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Горизонтальный стек кнопок
+
+![readme-horizontal-buttons-stack](https://github.com/Clooos/Bubble-Card/assets/36499953/8fe89ade-c77a-469b-891f-577e0bb2f46b)
+
+Эта карточка отлично дополняет карточку pop-up, позволяя открывать соответствующие всплывающие окна. Она также позволяет открыть любую страницу вашей панели. Кроме того, вы можете добавить датчики движения/присутствия, чтобы порядок кнопок менялся в зависимости от того, в какую комнату вы только что вошли. Эта карточка прокручиваемая, остаётся видимой и работает как подвал.
+
+> [!IMPORTANT]  
+> Эта карточка должна быть последней в вашем представлении (после всех карточек и pop-up). Она не может находиться внутри стека.
+
+### Настройки горизонтального стека кнопок
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Имя | Тип | Требование | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- | --- |
+| `1_link` | string | **Обязательно** | Хеш всплывающего окна (например, `'#kitchen'`) с ' ' или любая ссылка | Ссылка для открытия |
+| `1_name` | string | Опционально | Любая строка | Имя для вашей кнопки |
+| `1_icon` | string | Опционально | Любой значок `mdi:` | Значок для вашей кнопки |
+| `1_entity` | string | Опционально | Любой свет или группа света | Отображение цвета этого света в фоне |
+| `1_pir_sensor` | string | Опционально | Любой бинарный датчик | Хотя бы один датчик движения или больше для `auto_order`, на самом деле это работает с любым типом сущности, например, вы можете добавить группы света, и порядок будет меняться в зависимости от времени последнего изменения состояний. |
+| `auto_order` | boolean | Опционально | `true` или `false` (по умолчанию) | Изменяет порядок кнопок в зависимости от времени последнего изменения `_pir_sensor`, **должно быть `false`, если у вас нет `_pir_sensor` в коде** |
+| `margin` | string | Опционально | Любое значение CSS | Используйте это **только** если ваш `horizontal-buttons-stack` плохо центрирован на мобильном устройстве (например, `13px`) |
+| `width_desktop` | string | Опционально | Любое значение CSS | Ширина на компьютере (`100%` по умолчанию на мобильных) |
+| `is_sidebar_hidden` | boolean | Опционально | `true` или `false` (по умолчанию) | Исправляет положение горизонтального стека кнопок, если боковая панель скрыта на компьютере (только если вы сами внесли изменение, чтобы скрыть её) |
+| `rise_animation` | boolean | Опционально | `true` (по умолчанию) или `false` | Установите `false`, чтобы отключить анимацию, которая активируется после загрузки страницы |
+| `highlight_current_view` | boolean | Опционально | `true` или `false` (по умолчанию) | Подсвечивает текущий хеш / представление плавной анимацией |
+| `hide_gradient` | boolean | Опционально | `true` или `false` (по умолчанию) | Установите `false`, чтобы скрыть градиент |
+
+> [!IMPORTANT]  
+> Переменные, начинающиеся с цифры, определяют ваши кнопки, просто измените эту цифру, чтобы добавить больше кнопок (см. пример ниже).
+
+</details>
+
+<details>
+
+<summary><b>CSS переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-horizontal-buttons-stack-border-radius` | `px` | Радиус скругления для кнопок горизонтального стека кнопок |
+| `--bubble-horizontal-buttons-stack-background-color` | `color` | Цвет фона для кнопок горизонтального стека кнопок |
+
+</details>
+
+
+#### Пример
+
+<details>
+
+<summary>Горизонтальный стек кнопок, который перестраивается сам в зависимости от датчиков присутствия</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: horizontal-buttons-stack
+auto_order: true
+1_name: Living room
+1_icon: mdi:sofa
+1_link: '#living-room'
+1_entity: light.living_room
+1_pir_sensor: binary_sensor.living_room_motion
+2_name: Kitchen
+2_icon: mdi:fridge
+2_link: '#kitchen'
+2_entity: light.kitchen
+2_pir_sensor: binary_sensor.kitchen_motion
+3_name: Dining room
+3_icon: mdi:silverware-fork-knife
+3_link: '#dining-room'
+3_entity: light.dining_room
+3_pir_sensor: binary_sensor.dining_room_motion
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Кнопка
+
+![readme-button-without-sub-buttons](https://github.com/Clooos/Bubble-Card/assets/36499953/790cbe3c-bdcc-4242-81ac-48e6ca2f1d46)
+
+Эта карточка очень универсальна. Её можно использовать как **переключатель**, **ползунок**, **состояние** или кнопку **имя/текст**.
+
+> [!TIP]
+> ### В чём разница между всеми типами кнопок?
+>
+> - **Кнопка-переключатель:** это тип кнопки по умолчанию. По умолчанию она переключает сущность, и цвет её фона меняется в зависимости от состояния сущности или цвета света. Вы можете изменить её действие в разделе **Действие при нажатии на карточку**.
+>
+> - **Кнопка-ползунок:** этот тип кнопки позволяет управлять сущностями с настраиваемыми диапазонами. Она идеально подходит для регулировки яркости света, а цвет её заполнения будет адаптироваться к цвету света. Вы также можете использовать её для отображения значений, например уровня заряда батареи.
+>   Поддерживаемые сущности для ползунков:
+>   - Свет (яркость)
+>   - Медиаплеер (громкость)
+>   - Шторы (положение)
+>   - Вентилятор (процент)
+>   - Климат (температура)
+>   - Числовое поле ввода и число (значение)
+>   - Датчик батареи (процент, только для чтения)
+>
+>   Вы также можете использовать любую сущность с числовым состоянием, отключив фильтр сущностей в **Настройках ползунка**, а затем задать значения `min` и `max`. Эта опция доступна только для чтения.
+>
+> - **Кнопка состояния:** отлично подходит для отображения информации от датчика или любой сущности. При нажатии на неё откроется панель «Подробная информация» этой сущности. Цвет её фона не меняется.
+>
+> - **Кнопка имя/текст:** единственный тип кнопки, для которого не нужна сущность. Она позволяет отображать короткий текст, имя или заголовок. Вы также можете добавить к ней действия. Цвет её фона не меняется.
+
+### Настройки кнопки
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Имя | Тип | Требование | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Обязательно** | Любая сущность | Сущность для управления |
+| `button_type` | string | Опционально | `switch` (по умолчанию), `slider`, `state` или `name` | Поведение вашей кнопки |
+| `name` | string | Опционально | Любая строка | Имя для вашей кнопки, если не задано, будет отображаться имя сущности |
+| `icon` | string | Опционально | Любой значок `mdi:` | Значок для вашей кнопки, если не задан, будет отображаться значок сущности или `entity-picture` |
+| `force_icon` | boolean | Опционально | `true` или `false` (по умолчанию) | Отдать приоритет значку вместо `entity-picture` |
+| `use_accent_color` | boolean | Опционально (по умолчанию `false`) | **Только для света.** Использовать акцентный цвет темы вместо цвета света.                         |
+| `show_state` | boolean | Опционально | `true` или `false` (по умолчанию) | Показать или скрыть состояние вашей `entity` |
+| `show_name` | boolean | Опционально | `true` (по умолчанию) или `false` | Показать или скрыть имя |
+| `show_icon` | boolean | Опционально | `true` (по умолчанию) или `false` | Показать или скрыть значок |
+| `show_last_changed` | boolean | Опционально | `true` или `false` (по умолчанию) | Показать время последнего изменения вашей `entity` |
+| `show_last_updated` | boolean | Опционально | `true` или `false` (по умолчанию) | Показать время последнего обновления вашей `entity` |
+| `show_attribute` | boolean | Опционально | `true` или `false` (по умолчанию) | Показать атрибут вашей `entity` под её `name` |
+| `attribute` | string | Опционально (обязательно, если `show_attribute` установлен в `true`) | Атрибут вашей `entity` | Отображаемый атрибут (например, `brightness`) |
+| `scrolling_effect` | boolean | Опционально | `true` (по умолчанию) или `false` | Позволяет тексту прокручиваться, когда содержимое превышает размер контейнера |
+| `button_action` | object | Опционально | `tap_action`, `double_tap_action` или `hold_action`, см. ниже | Позволяет изменить действия по умолчанию при нажатии на кнопку. |
+| `tap_action` | object | Опционально | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при нажатии на значок, если не задано, будет использовано `more-info` |
+| `double_tap_action` | object | Опционально | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при двойном нажатии на значок, если не задано, будет использовано `none` |
+| `hold_action` | object | Опционально | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при удержании значка, если не задано, будет использовано `more-info` |
+| `card_layout` | string | Опционально | `normal` (по умолчанию вне представления секций), `large` (по умолчанию в представлении секций), `large-2-rows`, `large-sub-buttons-grid` | Компоновка оформления карточки, см. [компоновки карточки](#компоновки-карточки) |
+| `rows` | number | Опционально | Любое число | Количество строк (высота) (например, `2`) |
+| `sub_button` | object | Опционально | См. [дополнительные кнопки](#дополнительные-кнопки) | Добавляет настраиваемые кнопки, закреплённые справа |
+
+</details>
+
+<details>
+
+<summary><b>CSS переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-button-main-background-color` | `color` | Основной цвет фона для поддерживаемых элементов в кнопке |
+| `--bubble-button-border-radius` | `px` | Радиус скругления кнопки |
+| `--bubble-button-icon-border-radius` | `px` | Радиус скругления контейнера значка кнопки |
+| `--bubble-button-icon-background-color` | `color` | Цвет фона контейнера значка кнопки |
+| `--bubble-light-white-color` | `color` | Заменяет стандартный белый цвет кнопок/ползунков света |
+| `--bubble-light-color` | `color` | Заменяет цвет кнопок/ползунков света (даже RGB-света) |
+| `--bubble-button-box-shadow` | См. [тень](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Тень кнопки |
+
+</details>
+
+Эти настройки доступны только когда `button_type` установлен в `slider`.
+
+<details>
+
+<summary><b>Настройки ползунка (YAML + описания)</b></summary>
+
+| Имя                  | Тип    | Требование                     | Описание                                                                                             |
+| --------------------- | ------- | ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `min_value`             | number  | Опционально                        | Минимальное значение ползунка. Для пользовательских ползунков.                                                    |
+| `max_value`             | number  | Опционально                        | Максимальное значение ползунка. Для пользовательских ползунков.                                                    |
+| `step`                  | number  | Опционально                        | Шаг значения ползунка.                                                                           |
+| `tap_to_slide`          | boolean | Опционально (по умолчанию `false`)      | Включает прежнее поведение ползунка, при котором для активации ползунка нужно нажать, а не удерживать.        |
+| `relative_slide`        | boolean | Опционально (по умолчанию `false` )     | Обновляет значение относительно начального значения, а не начальной точки касания.                      |
+| `read_only_slider`      | boolean | Опционально (по умолчанию `false`)      | Делает ползунок доступным только для чтения. Автоматически включается для некоторых сущностей, например датчиков.                        |
+| `slider_live_update`    | boolean | Опционально (по умолчанию `false`)      | Состояние сущности обновляется во время перемещения ползунка. **Эта функция рекомендуется не для всех сущностей.**        |
+| `slider_fill_orientation` | string | Опционально | `left` (по умолчанию), `right`, `top`, `bottom` | Изменяет направление заполнения ползунка |
+| `slider_value_position` | string | Опционально | `right` (по умолчанию), `left`, `center`, `hidden` | Положение отображения значения |
+| `invert_slider_value` | boolean | Опционально (по умолчанию `false`) | Инвертирует направление ползунка (100% заполнения соответствует минимуму). Недоступно для цветовых ползунков. |
+| `light_slider_type` | string | Опционально | `brightness` (по умолчанию), `hue`, `saturation`, `white_temp` | **Только для света.** Выбор режима ползунка |
+| `cover_slider_type` | string | Опционально | `position` (по умолчанию), `tilt_position` | **Только для штор.** Выбор режима ползунка (положение или наклон) |
+| `hue_force_saturation` | boolean | Опционально (по умолчанию `false`) | **Только для света (режим Hue).** Принудительная насыщенность при настройке оттенка |
+| `hue_force_saturation_value` | number | Опционально (по умолчанию `100`) | **Только для света (режим Hue).** Принудительное значение насыщенности (0-100) |
+| `use_accent_color` | boolean | Опционально (по умолчанию `false`) | **Только для света (режим яркости).** Использовать акцентный цвет темы вместо цвета света |
+| `allow_light_slider_to_0` | boolean | Опционально (по умолчанию `false`)    | **Только для света.** Позволяет ползунку достигать 0%, что выключает свет. Недоступно с `tap_to_slide`. |
+| `light_transition`      | boolean | Опционально (по умолчанию `false`)      | **Только для света.** Включает плавные переходы яркости для поддерживаемых источников света.                           |
+| `light_transition_time` | number  | Опционально (по умолчанию `500`)        | **Только для света.** Время перехода в миллисекундах. Требует `light_transition: true`.            |
+
+</details>
+
+#### Примеры
+
+<details>
+
+<summary>Кнопка-ползунок, которая может управлять яркостью света</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+entity: light.kitchen_led
+name: Kitchen LED
+icon: mdi:led-strip-variant
+```
+
+</details>
+
+<details>
+
+<summary>Кнопка с большим количеством настроек</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.your_light
+button_type: switch
+show_icon: true
+force_icon: true
+show_name: true
+show_last_changed: true
+show_state: true
+show_last_updated: true
+show_attribute: true
+attribute: brightness
+scrolling_effect: true
+card_layout: large
+button_action:
+  tap_action:
+    action: toggle
+tap_action:
+  action: more-info
+sub_button:
+  - entity: light.your_light
+    icon: ''
+    show_state: false
+    show_attribute: true
+    attribute: brightness
+    show_icon: false
+    show_background: false
+    show_name: false
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Медиаплеер
+
+![readme-media-player](https://github.com/Clooos/Bubble-Card/assets/36499953/c7ee0752-00e3-4edf-8e1c-983fbd29b5f3)
+
+Эта карточка позволяет управлять сущностью медиаплеера.
+
+### Настройки медиаплеера
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Имя | Тип | Требование | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Обязательно** | Любой медиаплеер | Медиаплеер для управления |
+| `name` | string | Опционально | Любая строка | Имя для вашего медиаплеера, если не задано, будет отображаться имя сущности |
+| `icon` | string | Опционально | Любой значок `mdi:` | Значок для вашего медиаплеера, если не задан, будет отображаться значок сущности или `entity-picture` |
+| `force_icon` | boolean | Опционально | `true` или `false` (по умолчанию) | Отдать приоритет значку вместо `entity-picture` |
+| `show_state` | boolean | Опционально | `true` или `false` (по умолчанию) | Показать или скрыть состояние вашей `entity` |
+| `show_name` | boolean | Опционально | `true` (по умолчанию) или `false` | Показать или скрыть имя |
+| `show_icon` | boolean | Опционально | `true` (по умолчанию) или `false` | Показать или скрыть значок |
+| `show_last_changed` | boolean | Опционально | `true` или `false` (по умолчанию) | Показать время последнего изменения вашей `entity` |
+| `show_last_updated` | boolean | Опционально | `true` или `false` (по умолчанию) | Показать время последнего обновления вашей `entity` |
+| `show_attribute` | boolean | Опционально | `true` или `false` (по умолчанию) | Показать атрибут вашей `entity` под её `name` |
+| `attribute` | string | Опционально (обязательно, если `show_attribute` установлен в `true`) | Атрибут вашей `entity` | Отображаемый атрибут (например, `brightness`) |
+| `scrolling_effect` | boolean | Опционально | `true` (по умолчанию) или `false` | Позволяет тексту прокручиваться, когда содержимое превышает размер контейнера |
+| `min_volume` | number | Опционально | Любое число | Минимальное значение ползунка громкости. |
+| `max_volume` | number | Опционально | Любое число | Максимальное значение ползунка громкости. |
+| `cover_background` | boolean | Опционально | `true` или `false` (по умолчанию) | Использует размытую обложку медиа в качестве фона карточки. |
+| `button_action` | object | Опционально | `tap_action`, `double_tap_action` или `hold_action`, см. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Позволяет изменить действия по умолчанию при нажатии на кнопку. |
+| `tap_action` | object | Опционально | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при нажатии на значок, если не задано, будет использовано `more-info`. |
+| `double_tap_action` | object | Опционально | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при двойном нажатии на значок, если не задано, будет использовано `none`. |
+| `hold_action` | object | Опционально | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при удержании значка, если не задано, будет использовано `more-info`. |
+| `main_buttons_position` | string | Опционально | `default` или `bottom` | Перемещает кнопки действий обложки вниз (фиксированно) |
+| `main_buttons_full_width` | boolean | Опционально | `true` или `false` | Делает нижние кнопки действий на всю ширину (по умолчанию: `true`, когда положение `bottom`) |
+| `main_buttons_alignment` | string | Опционально | `end` (по умолчанию), `center`, `start`, `space-between` | Выравнивание нижних кнопок действий, когда они не на всю ширину |
+| `card_layout` | string | Опционально | `normal` (по умолчанию вне представления секций), `large` (по умолчанию в представлении секций), `large-2-rows`, `large-sub-buttons-grid` | Компоновка оформления карточки, см. [компоновки карточки](#компоновки-карточки) |
+| `rows` | number | Опционально | Любое число | Количество строк (высота) (например, `2`) |
+| `sub_button` | object | Опционально | См. [дополнительные кнопки](#дополнительные-кнопки) | Добавляет настраиваемые кнопки, закреплённые справа |
+| `hide` | object | Опционально | См. ниже | Скрывает кнопки карточки |
+
+#### Настройки скрытия
+
+| Имя | Тип | Требование | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- | --- |
+| `play_pause_button` | boolean | Опционально | `true` или `false` (по умолчанию) | Скрыть кнопку воспроизведения/паузы |
+| `volume_button` | boolean | Опционально | `true` или `false` (по умолчанию) | Скрыть кнопку громкости |
+| `previous_button` | boolean | Опционально | `true` или `false` (по умолчанию) | Скрыть кнопку «Назад» |
+| `next_button` | boolean | Опционально | `true` или `false` (по умолчанию) | Скрыть кнопку «Далее» |
+| `power_button` | boolean | Опционально | `true` или `false` (по умолчанию) | Скрыть кнопку питания |
+
+</details>
+
+<details>
+
+<summary><b>CSS переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-media-player-main-background-color` | `color` | Основной цвет фона медиаплеера |
+| `--bubble-media-player-border-radius` | `px` | Радиус скругления медиаплеера |
+| `--bubble-media-player-buttons-border-radius` | `px` | Радиус скругления кнопок медиаплеера |
+| `--bubble-media-player-slider-background-color` | `color` | Цвет фона ползунка громкости |
+| `--bubble-media-player-icon-border-radius` | `px` | Радиус скругления контейнера значка медиаплеера |
+| `--bubble-media-player-icon-background-color` | `color` | Цвет фона контейнера значка медиаплеера |
+| `--bubble-media-player-box-shadow` | См. [тень](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Тень медиаплеера |
+
+</details>
+
+
+#### Примеры
+
+<details>
+
+<summary>Медиаплеер со всеми настройками</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: media-player
+name: Media player
+entity: media_player.your_media_player
+show_state: true
+show_last_updated: true
+show_attribute: true
+attribute: assumed_state
+card_layout: large
+scrolling_effect: false
+show_icon: false
+force_icon: true
+show_name: false
+show_last_changed: true
+columns: 2
+rows: 1
+min_volume: 10
+max_volume: 80
+cover_background: true
+tap_action:
+  action: toggle
+hide:
+  play_pause_button: true
+  volume_button: true
+  previous_button: true
+  next_button: true
+  power_button: true
+sub_button:
+  - entity: media_player.salon_2
+    icon: mdi:volume-high
+    name: Volume level
+    tap_action:
+      action: more-info
+    show_name: false
+    show_state: false
+    show_last_updated: false
+    show_attribute: true
+    show_background: false
+    attribute: volume_level
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Шторы
+
+![readme-cover-bubble-card](https://github.com/user-attachments/assets/9eb46c69-ee40-4dc7-88c7-9073f9deda12)
+
+Эта карточка позволяет управлять вашими сущностями `cover`.
+
+### Настройки штор
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Название | Тип | Требование | Поддерживаемые опции | Описание |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Обязательно** | Любые шторы | Шторы для управления |
+| `name` | string | Необязательно | Любая строка | Имя для ваших штор, если не задано, будет отображаться имя сущности |
+| `force_icon` | boolean | Необязательно | `true` или `false` (по умолчанию) | Отдать приоритет значку вместо `entity-picture` |
+| `show_state` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показать или скрыть состояние вашей `entity` |
+| `show_name` | boolean | Необязательно | `true` (по умолчанию) или `false` | Показать или скрыть имя |
+| `show_icon` | boolean | Необязательно | `true` (по умолчанию) или `false` | Показать или скрыть значок |
+| `show_last_changed` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показать время последнего изменения вашей `entity` |
+| `show_last_updated` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показать время последнего обновления вашей `entity` |
+| `show_attribute` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показать атрибут вашей `entity` под её `name` |
+| `attribute` | string | Необязательно (обязательно, если `show_attribute` установлено в `true`) | Атрибут вашей `entity` | Атрибут для отображения (например, `brightness`) |
+| `scrolling_effect` | boolean | Необязательно | `true` (по умолчанию) или `false` | Разрешить прокрутку текста, когда содержимое превышает размер контейнера |
+| `icon_open` | string | Необязательно | Любой значок `mdi:` | Значок для открытых штор, если не задан, будет отображаться значок открытых штор по умолчанию |
+| `icon_close` | string | Необязательно | Любой значок `mdi:` | Значок для закрытых штор, если не задан, будет отображаться значок закрытых штор по умолчанию |
+| `icon_up` | string | Необязательно | Любой значок `mdi:` | Значок для кнопки открытия штор, если не задан, будет отображаться значок открытых штор по умолчанию |
+| `icon_down` | string | Необязательно | Любой значок `mdi:` | Значок для кнопки закрытия штор, если не задан, будет отображаться значок закрытых штор по умолчанию |
+| `open_service` | string | Необязательно | Любая служба или сценарий | Служба для открытия штор, по умолчанию `cover.open_cover` |
+| `stop_service` | string | Необязательно | Любая служба или сценарий | Служба для остановки штор, по умолчанию `cover.stop_cover` |
+| `close_service` | string | Необязательно | Любая служба или сценарий | Служба для закрытия штор, по умолчанию `cover.close_cover` |
+| `tilt_buttons` | string | Необязательно | `top` (по умолчанию), `bottom`, `left`, `right`, `hidden` | Положение кнопок управления наклоном (отображаются только если шторы поддерживают наклон) |
+| `open_tilt_service` | string | Необязательно | Любая служба или сценарий | Служба для открытия наклона, по умолчанию `cover.open_cover_tilt` |
+
+| `close_tilt_service` | string | Необязательно | Любая служба или сценарий | Служба для закрытия наклона, по умолчанию `cover.close_cover_tilt` |
+| `button_action` | object | Необязательно | `tap_action`, `double_tap_action` или `hold_action`, см. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Позволяет изменить действия по умолчанию при нажатии на кнопку. |
+| `tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при нажатии на значок, если не задано, будет использовано `more-info`. |
+| `double_tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при двойном нажатии на значок, если не задано, будет использовано `none`. |
+| `hold_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при удержании значка, если не задано, будет использовано `more-info`. |
+| `main_buttons_position` | string | Необязательно | `default` или `bottom` | Переместить элементы управления медиа вниз (фиксировано) |
+| `main_buttons_full_width` | boolean | Необязательно | `true` или `false` | Сделать нижние элементы управления на всю ширину (по умолчанию: `true`, когда положение `bottom`) |
+| `main_buttons_alignment` | string | Необязательно | `end` (по умолчанию), `center`, `start`, `space-between` | Выравнивание нижних элементов управления, когда они не на всю ширину |
+| `card_layout` | string | Необязательно | `normal` (по умолчанию, если не в виде секций), `large` (по умолчанию, если в виде секций), `large-2-rows`, `large-sub-buttons-grid` | Компоновка оформления карточки, см. [компоновки карточки](#компоновки-карточки) |
+| `rows` | number | Необязательно | Любое число | Количество строк (высота) (например, `2`) |
+| `sub_button` | object | Необязательно | См. [дополнительные кнопки](#дополнительные-кнопки) | Добавить настраиваемые кнопки, закреплённые справа |
+
+</details>
+
+<details>
+
+<summary><b>CSS-переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-cover-main-background-color` | `color` | Основной цвет фона поддерживаемых элементов карточки штор |
+| `--bubble-cover-border-radius` | `px` | Радиус скругления карточки штор |
+| `--bubble-cover-icon-border-radius` | `px` | Радиус скругления контейнера значка карточки штор |
+| `--bubble-cover-icon-background-color` | `color` | Цвет фона контейнера значка карточки штор |
+| `--bubble-cover-box-shadow` | См. [тень](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Тень карточки штор |
+| `--bubble-button-box-shadow` | См. [тень](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Тень кнопок в карточке штор |
+
+</details>
+
+
+#### Пример
+
+<details>
+
+<summary>Карточка, управляющая рулонными шторами</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: cover
+entity: cover.kitchen
+name: Kitchen
+icon_open: mdi:roller-shade
+icon_close: mdi:roller-shade-closed
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Выбор
+
+![readme-select-card](https://github.com/user-attachments/assets/f1220aaf-da5a-4ec0-b74e-31905264ae0a)
+
+Эта карточка позволяет добавить выпадающее меню для ваших сущностей `input_select` / `select`. Эта карточка также поддерживает дополнительные кнопки и все общие возможности Bubble Card.
+
+> [!TIP]
+> Вы также можете использовать дополнительные кнопки типа "выбор", если хотите, эта функция доступна во всех карточках, поддерживающих дополнительные кнопки.
+
+### Настройки выбора
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Название | Тип | Требование | Поддерживаемые опции | Описание |
+| --- | --- | --- | --- | --- |
+| `entity` | string | **Обязательно** | Любая сущность | Сущность для управления |
+| `name` | string | Необязательно | Любая строка | Имя для вашей карточки выбора, если не задано, будет отображаться имя сущности |
+| `icon` | string | Необязательно | Любой значок `mdi:` | Значок для вашей карточки выбора, если не задан, будет отображаться значок сущности или `entity-picture` |
+| `force_icon` | boolean | Необязательно | `true` или `false` (по умолчанию) | Отдать приоритет значку вместо `entity-picture` |
+| `show_state` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показать или скрыть состояние вашей `entity` |
+| `show_name` | boolean | Необязательно | `true` (по умолчанию) или `false` | Показать или скрыть имя |
+| `show_icon` | boolean | Необязательно | `true` (по умолчанию) или `false` | Показать или скрыть значок |
+| `show_last_changed` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показать время последнего изменения вашей `entity` |
+| `show_last_updated` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показать время последнего обновления вашей `entity` |
+| `show_attribute` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показать атрибут вашей `entity` под её `name` |
+| `attribute` | string | Необязательно (обязательно, если `show_attribute` установлено в `true`) | Атрибут вашей `entity` | Атрибут для отображения (например, `brightness`) |
+| `scrolling_effect` | boolean | Необязательно | `true` (по умолчанию) или `false` | Разрешить прокрутку текста, когда содержимое превышает размер контейнера |
+| `tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при нажатии на значок, если не задано, будет использовано `more-info`. |
+| `double_tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при двойном нажатии на значок, если не задано, будет использовано `none`. |
+| `hold_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при удержании значка, если не задано, будет использовано `more-info`. |
+| `card_layout` | string | Необязательно | `normal` (по умолчанию, если не в виде секций), `large` (по умолчанию, если в виде секций), `large-2-rows`, `large-sub-buttons-grid` | Компоновка оформления карточки, см. [компоновки карточки](#компоновки-карточки) |
+| `rows` | number | Необязательно | Любое число | Количество строк (высота) (например, `2`) |
+| `sub_button` | object | Необязательно | См. [дополнительные кнопки](#дополнительные-кнопки) | Добавить настраиваемые кнопки, закреплённые справа |
+
+</details>
+
+<details>
+
+<summary><b>CSS-переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-select-main-background-color` | `color` | Основной цвет фона поддерживаемых элементов карточки выбора |
+| `--bubble-select-background-color` | `color` | Цвет фона карточки выбора |
+| `--bubble-select-list-border-radius` | `px` | Радиус скругления выпадающего меню карточки |
+| `--bubble-select-list-item-accent-color` | `color` | Акцентный цвет выбранного элемента |
+| `--bubble-select-list-background-color` | `color` | Цвет фона выпадающего меню карточки |
+| `--bubble-select-list-width` | `px` | Ширина выпадающего меню карточки |
+| `--bubble-select-arrow-background-color` | `color` | Цвет фона стрелки выпадающего меню |
+| `--bubble-select-button-border-radius` | `px` | Радиус скругления кнопки выбора |
+| `--bubble-select-border-radius` | `px` | Радиус скругления карточки выбора |
+| `--bubble-select-icon-border-radius` | `px` | Радиус скругления контейнера значка карточки выбора |
+| `--bubble-select-icon-background-color` | `color` | Цвет фона контейнера значка карточки выбора |
+| `--bubble-select-box-shadow` | См. [тень](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Тень карточки выбора |
+
+</details>
+
+
+#### Примеры
+
+<details>
+
+<summary>Карточка выбора со списком сцен</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: select
+name: Scene
+entity: input_select.scenes
+icon: mdi:brightness-4
+show_state: true
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Климат
+
+![readme-climate-card](https://github.com/user-attachments/assets/59145c69-2f85-4ee7-a290-e848971e1925)
+
+Эта карточка позволяет управлять вашими сущностями `climate`.
+
+> [!TIP]
+> Меню выбора режима - это [дополнительная кнопка](#дополнительные-кнопки), которая добавляется автоматически при создании карточки. Затем вы можете изменить или удалить её по своему усмотрению.
+
+### Настройки климата
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Название                     | Тип    | Требование                         | Поддерживаемые опции                                  | Описание                                                                                                     |
+|--------------------------|---------|-------------------------------------|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `entity`                | string  | **Обязательно**                        | Сущность климата                                   | Сущность для управления (например, `climate.living_room`).                                                            |
+| `name`                  | string  | Необязательно                            | Любая строка                                       | Пользовательское имя для карточки. Если не задано, будет отображаться имя сущности.                                    |
+| `icon`                  | string  | Необязательно                            | Любой значок `mdi:`                                  | Пользовательский значок для карточки. Если не задан, будет использован значок сущности или `entity-picture`.                   |
+| `force_icon`            | boolean | Необязательно                            | `true` или `false` (по умолчанию)                     | Отдаёт приоритет значку вместо `entity-picture`.                                                           |
+| `show_state`            | boolean | Необязательно                            | `true` или `false` (по умолчанию)                     | Показать или скрыть текущее состояние `entity`.                                                                 |
+| `show_name`             | boolean | Необязательно                            | `true` (по умолчанию) или `false`                     | Показать или скрыть имя сущности.                                                                            |
+| `show_icon`             | boolean | Необязательно                            | `true` (по умолчанию) или `false`                     | Показать или скрыть значок.                                                                                          |
+| `hide_target_temp_low`  | boolean | Необязательно (только для сущностей, поддерживающих `target_temp_low`) | `true` или `false` (по умолчанию) | Скрывает управление нижней целевой температурой, если оно поддерживается `entity`.                                          |
+| `hide_target_temp_high` | boolean | Необязательно (только для сущностей, поддерживающих `target_temp_high`)| `true` или `false` (по умолчанию) | Скрывает управление верхней целевой температурой, если оно поддерживается `entity`.                                         |
+| `state_color`           | boolean | Необязательно                            | `true` или `false` (по умолчанию)                     | Применяет постоянный цвет фона, когда сущность климата включена.                                              |
+| `step` | number | Необязательно | Любое число | Шаг изменения температуры. |
+| `min_temp` | number | Необязательно | Любое число | Минимальная температура. |
+| `max_temp` | number | Необязательно | Любое число | Максимальная температура. |
+| `button_action` | object | Необязательно | `tap_action`, `double_tap_action` или `hold_action`, см. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Позволяет изменить действия по умолчанию при нажатии на кнопку. |
+| `tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при нажатии на значок, если не задано, будет использовано `more-info`. |
+| `double_tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при двойном нажатии на значок, если не задано, будет использовано `none`. |
+| `hold_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при удержании значка, если не задано, будет использовано `more-info`. |                              |
+| `main_buttons_position` | string | Необязательно | `default` или `bottom` | Переместить кнопки действий климата вниз (фиксировано) |
+| `main_buttons_full_width` | boolean | Необязательно | `true` или `false` | Сделать нижние кнопки действий на всю ширину (по умолчанию: `true`, когда положение `bottom`) |
+| `main_buttons_alignment` | string | Необязательно | `end` (по умолчанию), `center`, `start`, `space-between` | Выравнивание нижних кнопок действий, когда они не на всю ширину |
+| `card_layout` | string | Необязательно | `normal` (по умолчанию, если не в виде секций), `large` (по умолчанию, если в виде секций), `large-2-rows`, `large-sub-buttons-grid` | Компоновка оформления карточки, см. [компоновки карточки](#компоновки-карточки) |
+| `rows` | number | Необязательно | Любое число | Количество строк (высота) (например, `2`) |
+| `sub_button`            | object  | Необязательно                            | См. [дополнительные кнопки](#дополнительные-кнопки)                | Добавляет пользовательские кнопки, закреплённые справа. Полезно для меню выбора режима климата.                                  |
+
+</details>
+
+<details>
+
+<summary><b>CSS-переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-climate-main-background-color` | `color` | Основной цвет фона поддерживаемых элементов карточки климата |
+| `--bubble-climate-border-radius` | `px` | Радиус скругления поддерживаемых элементов карточки климата |
+| `--bubble-climate-button-background-color` | `color` | Цвет фона кнопок карточки климата |
+| `--bubble-climate-icon-border-radius` | `px` | Радиус скругления контейнера значка карточки климата |
+| `--bubble-state-climate-fan-only-color` | `color` | Цвет наложения для состояния "только вентилятор" |
+| `--bubble-state-climate-dry-color` | `color` | Цвет наложения для состояния осушения |
+| `--bubble-state-climate-cool-color` | `color` | Цвет наложения для состояния охлаждения |
+| `--bubble-state-climate-heat-color` | `color` | Цвет наложения для состояния обогрева |
+| `--bubble-state-climate-auto-color` | `color` | Цвет наложения для автоматического состояния |
+| `--bubble-state-climate-heat-cool-color` | `color` | Цвет наложения для состояния обогрева/охлаждения |
+| `--bubble-climate-accent-color` | `color` | Акцентный цвет карточки климата |
+| `--bubble-climate-box-shadow` | См. [тень](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Тень контейнера климата. |
+
+</details>
+
+
+#### Примеры
+
+<details>
+
+<summary>Карточка климата с выпадающим меню режимов HVAC</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: climate
+entity: climate.test_climate
+sub_button:
+  - name: HVAC modes menu
+    select_attribute: hvac_modes
+    show_arrow: false
+    state_background: false
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Календарь
+
+![readme-calendar-bubble-card](https://github.com/user-attachments/assets/8b6a231c-c99b-4d7a-8197-b7fd49952f62)
+
+Эта карточка позволяет отображать ваши сущности календаря. Её содержимое прокручивается, так что вы можете легко просматривать предстоящие события.
+
+### Настройки календаря
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Название                | Тип    | Требование  | Поддерживаемые опции                               | Описание                                                                             |
+|---------------------|---------|--------------|-------------------------------------------------|-------------------------------------------------------------------------------------|
+| `days`              | number  | Необязательно     | Любое число (минимум: 1)                        | Количество дней календаря, за которые нужно получить события, от текущего момента до конца N-го дня (по умолчанию: 7) |
+| `entities`          | object  | **Обязательно** | Объект сущности календаря (см. ниже)            | Сущность для управления (например, `calendar.main_calendar`).                                 |
+| `entities.entity`   | string  | **Обязательно** | Сущность календаря                               | Сущность календаря для отображения                                                          |
+| `entities.color`    | string  | Необязательно     | Цвет                                         | Пользовательский цвет метки календаря. Если не задан, будет выбран автоматический цвет |
+| `days`              | number  | Необязательно     | Любое число (минимум: 1)                         | Количество дней календаря, за которые нужно получить события, от текущего момента до конца N-го дня (по умолчанию: 7) |
+| `limit`             | number  | Необязательно     | Число                                        | Количество событий, которые будут отображены на карточке                                  |
+| `show_end`          | boolean | Необязательно     | `true` или `false` (по умолчанию)                     | Показать или скрыть время окончания событий                                                    |
+| `show_progress`     | boolean | Необязательно     | `true` (по умолчанию) или `false`                     | Показать или скрыть индикатор прогресса события                                                     |
+| `show_started_events`| boolean | Необязательно     | `true` (по умолчанию) или `false`                     | Показать или скрыть события, которые сейчас идут                                                 |
+| `scrolling_effect`  | boolean | Необязательно | `true` (по умолчанию) или `false` | Разрешить прокрутку текста, когда содержимое превышает размер контейнера |
+| `event_action` | object | Необязательно | `tap_action`, `double_tap_action` или `hold_action`, см. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Позволяет добавить действия при нажатии на событие. |
+| `tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при нажатии на день, если не задано, будет использовано `none`. |
+| `double_tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при двойном нажатии на день, если не задано, будет использовано `none`. |
+| `hold_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определяет тип действия при удержании дня, если не задано, будет использовано `none`. |
+| `card_layout` | string | Необязательно | `normal` (по умолчанию, если не в виде секций), `large` (по умолчанию, если в виде секций), `large-2-rows`, `large-sub-buttons-grid` | Компоновка оформления карточки, см. [компоновки карточки](#компоновки-карточки) |
+| `rows` | number | Необязательно | Любое число | Количество строк (высота) (например, `2`) |
+| `sub_button` | object | Необязательно | См. [дополнительные кнопки](#дополнительные-кнопки) | Добавить настраиваемые кнопки, закреплённые справа |
+
+</details>
+
+<details>
+
+<summary><b>CSS-переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная                                  | Ожидаемое значение | Описание                                                        |
+| ----------------------------------------- | -------------- | ------------------------------------------------------------------ |
+| `--bubble-calendar-main-background-color` | `color`        | Основной цвет фона поддерживаемых элементов карточки календаря  |
+| `--bubble-calendar-border-radius`         | `px`           | Радиус скругления поддерживаемых элементов карточки календаря |
+| `--bubble-calendar-height`                | `px`           | Высота карточки календаря                                        |
+
+</details>
+
+#### Примеры
+
+<details>
+
+<summary>Карточка календаря с ограниченным количеством событий</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: calendar
+entities:
+  - entity: calendar.main_calendar
+    color: '#ffb010'
+limit: 1
+```
+
+</details>
+
+<details>
+
+<summary>Карточка календаря со временем окончания и индикатором прогресса</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: calendar
+entities:
+  - entity: calendar.main_calendar
+    color: '#ffb010'
+show_end: true
+show_progress: true
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+
+## Разделитель
+
+![readme-separator](https://github.com/Clooos/Bubble-Card/assets/36499953/7e416a34-b95e-4a03-a200-4b3aa04f560d)
+
+Эта карточка - простой разделитель для деления всплывающего окна на категории / секции. Например: Свет, Устройства, Шторы, Настройки, Автоматизации...
+
+### Настройки разделителя
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Название | Тип | Обязательность | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- | --- |
+| `name` | string | Необязательно, но рекомендуется | Любая строка | Название вашего разделителя |
+| `icon` | string | Необязательно, но рекомендуется | Любой значок `mdi:` | Значок вашего разделителя |
+| `card_layout` | string | Необязательно | `normal` (по умолчанию вне вида секций), `large` (по умолчанию в виде секций), `large-2-rows`, `large-sub-buttons-grid` | Компоновка оформления карточки, см. [компоновки карточки](#компоновки-карточки) |
+| `rows` | number | Необязательно | Любое число | Количество строк (высота) (например, `2`) |
+| `sub_button` | object | Необязательно | См. [дополнительные кнопки](#дополнительные-кнопки) | Добавить настраиваемые кнопки, закреплённые справа |
+
+</details>
+
+<details>
+
+<summary><b>CSS переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-line-background-color` | `color` | Цвет фона линии разделителя |
+
+</details>
+
+#### Пример
+
+<details>
+
+<summary>Разделитель для секции "Шторы"</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: separator
+name: Covers
+icon: mdi:window-shutter
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Пустой столбец
+
+![readme-empty-column](https://github.com/Clooos/Bubble-Card/assets/36499953/a97fa8df-8360-4613-8bb7-e8a269cb1913)
+
+Эта карточка нужна для заполнения пустого столбца. Это полезно, если у вас есть `horizontal-stack` во всплывающем окне только с одной карточкой. Взгляните на нижний правый угол этого скриншота, чтобы (не) увидеть её.
+
+### Настройки пустого столбца
+
+Эта карточка не имеет настроек и не поддерживает [оформление](#оформление), хотя поддерживает параметры компоновки для секций HA.
+
+#### Пример
+
+<details>
+
+<summary>Пустой столбец в горизонтальном стеке</summary>
+
+<br>
+
+```yaml
+type: horizontal-stack
+cards:
+  - type: custom:bubble-card
+    card_type: button
+    ...
+  - type: custom:bubble-card
+    card_type: empty-column
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Только дополнительные кнопки
+
+![bubble-card-sub-buttons-only-card](https://github.com/user-attachments/assets/89d420e0-6ec0-4aa0-a1c9-3b515678beaa)
+
+Эта карточка предназначена только для дополнительных кнопок. Она идеально подходит для меню, быстрых действий, информационных чипов или фиксированного подвала внизу страницы.
+
+> [!IMPORTANT]  
+> Эта карточка использует новую схему дополнительных кнопок. Используйте `sub_button.bottom` для определения ваших кнопок. Раздел `sub_button.main` игнорируется.
+
+### Настройки карточки только с дополнительными кнопками
+
+<details>
+
+<summary><b>Настройки (YAML + описания)</b></summary>
+
+| Название | Тип | Обязательность | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- | --- |
+| `sub_button` | object | **Обязательно** | См. [дополнительные кнопки](#дополнительные-кнопки) | Определите ваши дополнительные кнопки, используя раздел `bottom` |
+| `hide_main_background` | boolean | Необязательно | `true` или `false` (по умолчанию) | Убрать фон карточки |
+| `footer_mode` | boolean | Необязательно | `true` или `false` (по умолчанию) | Закрепить карточку внизу страницы |
+| `footer_full_width` | boolean | Необязательно | `true` или `false` (по умолчанию) | Сделать подвал на всю ширину (100%) |
+| `footer_width` | number | Необязательно | Любое число | Ширина подвала в пикселях, когда `footer_full_width` равно `false` |
+| `footer_bottom_offset` | number | Необязательно | Любое число | Расстояние от нижнего края страницы в пикселях (по умолчанию: `16`) |
+| `card_layout` | string | Необязательно | `normal` (по умолчанию вне вида секций), `large` (по умолчанию в виде секций), `large-2-rows`, `large-sub-buttons-grid` | Компоновка оформления карточки, см. [компоновки карточки](#компоновки-карточки) |
+| `rows` | number | Необязательно | Любое число | Количество строк (высота) (например, `2`) |
+
+</details>
+
+<details>
+
+<summary><b>CSS переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-footer-width` | `px` | Ширина подвала, когда `footer_full_width` равно `false` |
+| `--bubble-footer-bottom` | `px` | Отступ подвала от нижнего края |
+| `--bubble-footer-box-shadow` | см. [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Тень для контейнера подвала |
+
+</details>
+
+#### Примеры
+
+<details>
+
+<summary>Чипы (как на скриншоте)</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+hide_main_background: true
+sub_button:
+  main: []
+  bottom:
+    - name: Chips
+      buttons_layout: inline
+      group:
+        - entity: person.quentin
+          show_name: true
+          fill_width: false
+        - entity: sensor.geraldine_presence
+          show_name: true
+          fill_width: false
+        - entity: input_boolean.alarme
+          fill_width: false
+          name: Alarm
+          show_name: true
+          tap_action:
+            action: toggle
+        - entity: sensor.salle_de_bain_temperature
+          fill_width: false
+          show_state: true
+          state_background: false
+        - entity: input_select.test
+          fill_width: false
+          sub_button_type: select
+          name: Scene
+          icon: mdi:weather-sunny
+          show_state: true
+      justify_content: center
+rows: 0.941
+```
+
+</details>
+
+<details>
+
+<summary>Фиксированное меню-подвал</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: sub-buttons
+footer_mode: true
+footer_full_width: true
+sub_button:
+  bottom:
+    - name: Home
+      icon: mdi:home
+      tap_action:
+        action: navigate
+        navigation_path: '#home'
+    - name: Lights
+      icon: mdi:lightbulb
+      tap_action:
+        action: navigate
+        navigation_path: '#lights'
+    - name: Settings
+      icon: mdi:cog
+      tap_action:
+        action: navigate
+        navigation_path: '#config'
+rows: 0.941
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Дополнительные кнопки
+
+![readme-button](https://github.com/Clooos/Bubble-Card/assets/36499953/c7bfda91-943e-42f3-a963-4847e57c6b97)
+
+В каждой карточке, которая поддерживает эту опцию, вы можете добавить дополнительные кнопки для ещё большей настройки ваших карточек. Вы можете, например, создать кнопку, управляющую пылесосом, карточку погоды или почти что угодно, что придёт вам в голову. Эти дополнительные кнопки поддерживают действия при нажатии и большинство настроек кнопки.
+
+Дополнительные кнопки теперь поддерживают три типа: **По умолчанию (кнопка)**, **Ползунок** и **Выпадающий список / Выбор**. Вы можете сочетать типы в одной карточке, размещать дополнительные кнопки сверху или снизу и организовывать их в группы для более сложных компоновок.
+
+#### Размещение и группы дополнительных кнопок
+
+<details>
+
+<summary><b>Структура дополнительных кнопок (main / bottom + группы)</b></summary>
+
+<br>
+
+```yaml
+sub_button:
+  main:
+    - group:
+        - entity: sensor.temperature
+          show_state: true
+          show_background: false
+        - entity: sensor.humidity
+          show_state: true
+          show_background: false
+      buttons_layout: column
+  bottom:
+    - group:
+        - entity: light.living_room
+        - entity: light.bedroom
+      buttons_layout: inline
+      justify_content: center
+  main_layout: inline
+  bottom_layout: rows
+```
+
+**Примечания:**
+- `main` и `bottom` - два независимых раздела. Нижние дополнительные кнопки закреплены внизу карточки.
+- `main_layout` и `bottom_layout` принимают значения `inline` (по умолчанию) или `rows` для вертикального расположения групп.
+- Группы - это объекты с массивом `group` и необязательным `buttons_layout` (`inline` или `column`).
+- `justify_content` доступен **только для нижних групп** (`start`, `center`, `end`, `fill`).
+- Когда присутствуют нижние дополнительные кнопки, карточка автоматически переключается на компоновку `large`, если явно не задана другая компоновка.
+- Устаревшие массивы `sub_button` по-прежнему поддерживаются и обрабатываются как раздел `main`.
+
+</details>
+
+### Настройки дополнительных кнопок
+
+<details>
+
+<summary><b>Настройки (YAML + описание)</b></summary>
+
+| Название | Тип | Обязательность | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- | --- |
+| `entity` | string | Необязательно | Любая сущность | Сущность для управления |
+| `name` | string | Необязательно | Любая строка | Название вашей дополнительной кнопки, если не задано, будет отображаться имя сущности |
+| `icon` | string | Необязательно | Любой значок `mdi:` | Значок вашей дополнительной кнопки, если не задан, будет отображаться значок сущности или изображение сущности |
+| `force_icon` | boolean | Необязательно | `true` или `false` (по умолчанию) | Принудительно показать значок, даже если доступно изображение сущности |
+| `sub_button_type` | string | Необязательно | `default`, `slider` или `select` | Выберите тип дополнительной кнопки |
+| `show_background` | boolean | Необязательно | `true` (по умолчанию) или `false` | Показывать фон дополнительной кнопки, его цвет будет меняться в зависимости от состояния сущности |
+| `state_background` | boolean | Необязательно | `true` (по умолчанию) или `false` | Использовать цвет состояния, когда сущность `on` |
+| `light_background` | boolean | Необязательно | `true` (по умолчанию) или `false` | Использовать цвет света для фона, когда он доступен |
+| `show_state` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показывать или скрывать состояние вашей `entity` |
+| `show_name` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показывать или скрывать имя |
+| `show_icon` | boolean | Необязательно | `true` (по умолчанию) или `false` | Показывать или скрывать значок |
+| `show_last_changed` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показывать время последнего изменения вашей `entity` |
+| `show_last_updated` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показывать время последнего обновления вашей `entity` |
+| `show_attribute` | boolean | Необязательно | `true` или `false` (по умолчанию) | Показывать атрибут вашей `entity` под её `name` |
+| `attribute` | string | Необязательно (обязательно, если `show_attribute` установлено в `true`) | Атрибут вашей `entity` | Атрибут для отображения (например, `brightness`) |
+| `select_attribute` | string | Необязательно | Список атрибутов вашей `entity` (см. поддерживаемые значения выше) | Этот список атрибутов откроет выпадающий список при нажатии (например, `effect_list`) |
+| `show_arrow` | boolean | Необязательно | `true` (по умолчанию) или `false` | Показывать или скрывать стрелку выпадающего списка для дополнительных кнопок типа select |
+| `scrolling_effect` | boolean | Необязательно | `true` (по умолчанию) или `false` | Разрешить прокрутку текста, когда содержимое превышает размер контейнера |
+| `tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определите тип действия при нажатии на дополнительную кнопку, если не задано, будет использовано `more-info`. |
+| `double_tap_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определите тип действия при двойном нажатии на дополнительную кнопку, если не задано, будет использовано `none`. |
+| `hold_action` | object | Необязательно | См. [действия](#действия-при-нажатии-двойном-нажатии-и-удержании) | Определите тип действия при удержании дополнительной кнопки, если не задано, будет использовано `more-info`. |
+| `fill_width` | boolean | Необязательно | `true` или `false` | Заполнять доступную ширину (по умолчанию: `false` для main, `true` для bottom) |
+| `width` | number or string | Необязательно | Любое число или значение длины CSS | Пользовательская ширина (`px` для раздела main, `%` для раздела bottom по умолчанию) |
+| `custom_height` | number | Необязательно | Любое число | Пользовательская высота в пикселях |
+| `content_layout` | string | Необязательно | `icon-left` (по умолчанию), `icon-top`, `icon-bottom`, `icon-right` | Расположение значка внутри дополнительной кнопки |
+| `always_visible` | boolean | Необязательно | `true` или `false` (по умолчанию) | **Только для ползунка.** Всегда показывать ползунок вместо его открытия по нажатию |
+| `show_button_info` | boolean | Необязательно | `true` или `false` (по умолчанию) | **Только для ползунка.** Показывать значок/имя/состояние, когда включено `always_visible` |
+| `visibility` | object or list | Необязательно | См. [условия](https://www.home-assistant.io/docs/scripts/conditions/) | Показывать или скрывать дополнительную кнопку на основе условий |
+| `hide_when_parent_unavailable` | boolean | Необязательно | `true` или `false` (по умолчанию) | Скрыть дополнительную кнопку, если родительская сущность карточки недоступна |
+
+</details>
+
+<details>
+
+<summary><b>Настройки ползунка дополнительной кнопки (аналогично ползункам кнопки)</b></summary>
+
+<br>
+
+Дополнительные кнопки-ползунки поддерживают те же настройки ползунка, что и ползунки кнопки, включая:
+`min_value`, `max_value`, `step`, `tap_to_slide`, `relative_slide`, `read_only_slider`, `slider_live_update`, `slider_fill_orientation`, `slider_value_position`, `invert_slider_value`, `light_slider_type`, `cover_slider_type`, `hue_force_saturation`, `hue_force_saturation_value`, `use_accent_color`, `allow_light_slider_to_0`, `light_transition`, `light_transition_time`.
+
+</details>
+
+<details>
+
+<summary><b>CSS переменные (см. <a href="#оформление">Оформление</a>)</b></summary>
+
+| Переменная | Ожидаемое значение | Описание |
+| --- | --- | --- |
+| `--bubble-sub-button-border-radius` | `px` | Радиус скругления дополнительных кнопок |
+| `--bubble-sub-button-background-color` | `color` | Цвет фона дополнительных кнопок |
+| `--bubble-sub-slider-border-radius` | `px` | Радиус скругления дополнительных кнопок-ползунков |
+| `--bubble-sub-slider-background-color` | `color` | Цвет фона дополнительных кнопок-ползунков |
+| `--bubble-sub-slider-height` | `px` | Высота всегда видимых дополнительных кнопок-ползунков |
+| `--bubble-sub-button-dark-text-color` | `color` | Цвет текста на ярком фоне дополнительной кнопки |
+
+</details>
+
+#### Примеры
+
+<details>
+
+<summary>Кнопка с несколькими дополнительными кнопками для создания карточки пылесоса (как на скриншоте)</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: switch
+name: Vacuum
+entity: vacuum.downstairs
+icon: mdi:robot-vacuum
+show_state: true
+show_last_changed: true
+tap_action:
+  action: more-info
+button_action:
+  tap_action:
+    action: more-info
+sub_button:
+  - name: Battery
+    icon: mdi:battery
+    show_name: false
+    show_icon: true
+    show_background: false
+    show_attribute: true
+    attribute: battery_level
+  - name: Return to dock
+    icon: mdi:home
+    show_background: false
+    tap_action:
+      action: call-service
+      service: vacuum.return_to_base
+      target:
+        entity_id: vacuum.downstairs
+  - name: Pause
+    icon: mdi:pause
+    show_background: false
+    tap_action:
+      action: call-service
+      service: vacuum.pause
+      target:
+        entity_id: vacuum.downstairs
+  - name: Start
+    icon: mdi:play
+    tap_action:
+      action: call-service
+      service: vacuum.start
+      target:
+        entity_id: vacuum.downstairs
+styles: >-
+  .bubble-button-card-container {
+    /* Change the background color when the vacuum get an error (optional), more details in the styles template section */
+    background: ${state === 'error' ? 'rgb(200, 80, 40)' : ''} !important;
+  }
+  /* Change the first sub-button battery icon based on the battery_icon attribute, more details in the styles template section */
+  ${subButtonIcon[0].setAttribute("icon", hass.states['vacuum.downstairs'].attributes.battery_icon)}
+```
+
+</details>
+
+<details>
+
+<summary>Кнопка-ползунок с дополнительной кнопкой, показывающей яркость, и кнопкой, переключающей свет (как на скриншоте)</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: slider
+name: Kitchen
+entity: light.kitchen
+icon: mdi:fridge-outline
+show_last_updated: true
+sub_button:
+  - name: Brightness
+    icon: mdi:fridge-outline
+    show_icon: false
+    show_background: false
+    show_attribute: true
+    attribute: brightness
+  - name: Toggle button
+    icon: mdi:lightbulb
+    tap_action:
+      action: toggle
+```
+
+</details>
+
+<details>
+
+<summary>Кнопка, показывающая температуру внутри и снаружи, а также погоду на сегодня и завтра (со скриншотом)</summary>
+
+<br>
+
+<img width="591" alt="image" src="https://github.com/Clooos/Bubble-Card/assets/36499953/360312de-db08-47bf-9b46-92afeb435edd">
+
+> Мне не повезло, у меня постоянно облачно, но все значки меняются в зависимости от погоды.
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+entity: weather.openweathermap
+name: Weather
+show_state: true
+card_layout: large-2-rows
+sub_button:
+  - name: Home temperature
+    icon: mdi:home-thermometer-outline
+    entity: sensor.home_temperature
+    show_state: true
+    show_icon: true
+    show_background: false
+  - name: Outside temperature
+    entity: sensor.outside_temperature
+    show_state: true
+    show_background: false
+  - name: Today
+    entity: sensor.home_realfeel_temperature_max_0d
+    show_name: true
+    show_state: true
+    tap_action:
+      action: more-info
+  - name: Tomorrow
+    entity: sensor.home_realfeel_temperature_max_1d
+    show_name: true
+    show_state: true
+    show_background: false
+styles: >-
+  /* Change the third and fourth sub-button icon based on the forecast.condition attribute, more details in the styles template section */
+  ${subButtonIcon[2].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[0]?.condition))}
+  ${subButtonIcon[3].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[1]?.condition))}
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Компоновки карточки
+
+![My-Bubble-Card-dashboard](https://github.com/Clooos/Bubble-Card/assets/36499953/0c049498-969b-4939-959e-fc49fb08d0a1)
+
+Bubble Card полностью поддерживает секционное представление Home Assistant, вы можете изменить компоновку карточки, чтобы сделать её больше, а также изменить количество столбцов или строк, которые карточка должна занимать в секционном представлении (только для карточек, поддерживающих эту опцию). Эти компоновки также поддерживаются во всех остальных типах представлений.
+
+<details>
+
+<summary><b>Доступные компоновки карточки</b></summary>
+
+| Компоновка | Описание |
+| --- | --- |
+| `normal` | Обычная компоновка (не оптимизирована для секционного представления) |
+| `large` | Большая компоновка, которая изменит размер согласно выбранным строкам в секционном представлении (оптимизирована для секционного представления) |
+| `large-2-rows` | Большая компоновка с 2 строками дополнительных кнопок, которая изменит размер согласно выбранным строкам в секционном представлении (оптимизирована для секционного представления) |
+| `large-sub-buttons-grid` | Эта компоновка отображает дополнительные кнопки в виде сетки, `rows` должно быть задано минимум как `2`.
+
+</details>
+
+#### Примеры
+
+<details>
+
+<summary>Большая кнопка, показывающая статистику энергопотребления с 2 строками дополнительных кнопок (со скриншотом)</summary>
+
+<br>
+
+<img width="547" alt="image" src="https://github.com/Clooos/Bubble-Card/assets/36499953/faa643d5-5d1e-488d-b4a5-6bedd043c747">
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+card_layout: large-2-rows
+name: Energy
+entity: sensor.current_power_production
+icon: mdi:home-lightning-bolt-outline
+show_state: true
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#energy'
+sub_button:
+  - entity: sensor.electricity_counter
+    icon: mdi:counter
+    show_background: false
+    show_state: true
+    tap_action:
+      action: more-info
+  - entity: sensor.today_s_energy_production
+    show_state: true
+    show_background: false
+  - entity: sensor.average_daily_consumption
+    show_background: false
+    show_state: true
+  - entity: sensor.this_week_production
+    show_state: true
+    show_background: false
+    icon: mdi:calendar-week
+```
+
+</details>
+
+<details>
+
+<summary>Большая кнопка с несколькими строками и 12 дополнительными кнопками</summary>
+
+<br>
+
+<img width="547" alt="image" src="/img/Example_Layout_Large_multi-row.png">
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: state
+entity: sun.sun
+card_layout: large-sub-buttons-grid
+grid_options:
+  rows: 3
+sub_button:
+  - entity: sun.sun
+    icon: mdi:numeric-0
+  - entity: sun.sun
+    icon: mdi:numeric-1
+  - entity: sun.sun
+    icon: mdi:numeric-2
+  - entity: sun.sun
+    icon: mdi:numeric-3
+  - entity: sun.sun
+    icon: mdi:numeric-4
+  - entity: sun.sun
+    icon: mdi:numeric-5
+  - entity: sun.sun
+    icon: mdi:numeric-6
+  - entity: sun.sun
+    icon: mdi:numeric-7
+  - entity: sun.sun
+    icon: mdi:numeric-8
+  - entity: sun.sun
+    icon: mdi:numeric-9
+  - entity: sun.sun
+    icon: mdi:numeric-10
+  - entity: sun.sun
+    icon: mdi:numeric-negative-1
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Действия при нажатии, двойном нажатии и удержании
+
+Вы также можете использовать стандартные действия при нажатии, двойном нажатии и удержании Home Assistant на карточках, которые поддерживают эту опцию. Например, это позволяет показывать окно “подробнее” при удержании значка кнопки или запускать службу при нажатии на дополнительную кнопку.
+
+**Примечание: когда задан `double_tap_action`, обычное действие `tap_action` будет выполняться с задержкой 200 мс, чтобы можно было распознать двойное нажатие.
+Если эта задержка нежелательна, установите `double_tap_action` в значение `none`, чтобы отключить обработку двойного нажатия.**
+
+### Настройки действия
+
+<details>
+
+<summary><b>Настройки (YAML + описание)</b></summary>
+
+| Название | Тип | Поддерживаемые значения | Описание |
+| --- | --- | --- | --- |
+| `action` | string | `more-info`, `toggle`, `call-service`, `navigate`, `url`, `fire-dom-event`, `none` | Действие, которое нужно выполнить |
+| `target` | object |  | Работает только с `call-service`. Следует [синтаксису home-assistant](https://www.home-assistant.io/docs/scripts/service-calls/#targeting-areas-and-devices) |
+| `navigation_path` | string | Любой путь вашего дашборда | Путь для перехода (например, `'#kitchen'` для открытия всплывающего окна), когда действие задано как navigate |
+| `url_path` | string | Любая ссылка | URL, который откроется по нажатию (например, `https://www.google.com`), когда `action` задан как url |
+| `service` | string | Любая служба | Служба, которую нужно вызвать (например, `media_player.media_play_pause`), когда `action` задан как call-service |
+| `data` или `service_data` | object | Любые данные службы | Данные службы, которые нужно передать (например, `entity_id: media_player.kitchen`), когда `action` задан как call-service |
+| `confirmation` | object | См. [confirmation](https://www.home-assistant.io/dashboards/actions/#options-for-confirmation) | Показать всплывающее окно подтверждения (не окно Bubble Card), переопределяет объект `confirmation` по умолчанию |
+
+</details>
+
+#### Пример
+
+<details>
+
+<summary>Кнопка для открытия всплывающего окна</summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+button_type: name
+name: Kitchen
+icon: mdi:fridge
+button_action:
+  tap_action:
+    action: navigate
+    navigation_path: '#kitchen'
+```
+
+</details>
+
+<br>
+
+---
+
+<br>
+
+## Оформление
+
+Вы можете добавлять пользовательские стили для изменения CSS всех карточек **без использования card-mod** четырьмя способами:
+
+- В редакторе перейдите к карточке, которую хотите изменить, затем откройте раздел _Настройки оформления > Пользовательские стили и JS-шаблоны_ и добавьте свои стили (см. советы и примеры ниже).
+- В редакторе (или в [YAML](#modules)) перейдите к карточке, которую хотите изменить, затем откройте раздел _Modules_, затем создайте новый модуль (он будет доступен всем карточкам), или перейдите в **Module Store**, чтобы установить любой доступный модуль (подробнее о модулях можно узнать [ниже](#modules)).
+- В файле [темы](https://www.home-assistant.io/integrations/frontend/#defining-themes), добавив CSS-переменные в YAML (они указаны в документации каждой карточки выше). Это позволяет вносить изменения глобально.
+
+  <details>
+  
+  <summary>Пример</a></summary>
+  
+  <br>
+
+  Не копируйте строку `Bubble:`, это название темы, которую вы используете. Также нужно убрать `--` из названий переменных.
+
+  Вам нужно выполнить действие [`frontend.reload_themes`](https://www.home-assistant.io/integrations/frontend/#setting-themes), чтобы обновить тему после любых изменений.
+
+  ```yaml
+  Bubble:  
+    # Bubble Card variables test
+    bubble-border-radius: "8px"
+    bubble-main-background-color: "rgb(50,70,90)"
+    bubble-secondary-background-color: "rgb(0,70,90)"
+    bubble-pop-up-main-background-color: "rgba(200,200,200,0.5)"
+    bubble-accent-color: "rgb(100,140,180)"
+    bubble-icon-background-color: "rgb(50,80,100)"
+    bubble-select-list-width: "200px"
+    bubble-select-list-background-color: "rgb(100,140,180)"
+  ```
+  
+  </details>
+  
+- В YAML, добавив `styles: |`, а после него свои пользовательские стили (см. советы и примеры ниже).
+
+> [!TIP]  
+> **Чтобы понять, какие классы стилей можно изменять**, загляните в папку [`src/cards`](https://github.com/Clooos/Bubble-Card/tree/main/src/cards) этого репозитория. В папке каждой карточки вы найдёте файл с именем `styles.css`. Эти файлы содержат все применяемые стили. Это открывает намного больше возможностей, чем CSS-переменные, но их нужно добавлять отдельно для каждой карточки.
+> 
+> Также можно найти много [примеров от сообщества](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-custom-styles-templates-and-dashboards) или некоторые с [форума Home Assistant](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/), немного поискав.
+>
+> Тему Bubble для Home Assistant (как на скриншотах) можно найти [здесь](https://github.com/Clooos/Bubble).
+>
+> Скоро на моём [YouTube-канале](https://www.youtube.com/@cloooos) выйдет обучающее видео!
+
+> [!IMPORTANT]  
+> Обратите внимание, что вам может понадобиться добавить `!important;` к некоторым CSS-стилям, которые уже определены (см. примеры ниже).
+
+> [!TIP]  
+> Дополнительные кнопки можно указывать через классы на основе их имени. Например, дополнительная кнопка с именем "My sub-button" может быть оформлена через `.my-sub-button`. Дополнительные кнопки-ползунки также предоставляют `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` и т. д.
+
+#### Примеры
+
+<details>
+
+<summary>Изменение размера шрифта в любой карточке Bubble Card</summary>
+
+<br>
+
+```yaml
+styles: |
+  * { 
+    font-size: 16px !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Изменение цвета фона одной кнопки в горизонтальном стеке кнопок</summary>
+
+<br>
+
+```yaml
+styles: >
+  /* Selector for the '#kitchen' button */
+  .kitchen > .bubble-background-color {
+    background-color: blue !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Изменение цвета фона карточки</summary>
+
+<br>
+
+Этот вариант работает для всех типов карточек Bubble Card (кроме всплывающих окон):
+
+```yaml
+styles: | 
+  ha-card {
+    --bubble-main-background-color: rgba(12,120,50,0.5) !important;
+  }
+```
+
+Этот вариант делает то же самое только в карточке-кнопке (работает и для заголовка всплывающего окна): 
+
+```yaml
+styles: | 
+  .bubble-button-card-container {
+    background: rgba(12,120,50,0.5) !important;
+  }
+```
+
+Чтобы изменить цвет, когда состояние `on`, посмотрите шаблоны стилей ниже.
+
+</details>
+
+<details>
+
+<summary>Изменение цвета ползунка кнопки</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-range-fill { 
+    background: rgba(79, 69, 87, 1) !important;
+    opacity: 1 !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Изменение цвета линии разделителя</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-line {
+    background: var(--primary-text-color);
+    opacity: 0.1;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Изменение цвета значка</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-icon {
+    color: white !important;
+  }
+```
+
+Для значка горизонтального стека кнопок.
+```yaml
+.kitchen > .bubble-icon {
+  color: grey !important
+}
+```
+
+</details>
+
+<details>
+
+<summary>Изменение цвета фона контейнера значка</summary>
+
+<br>
+
+Этот вариант работает для всех типов карточек Bubble Card (кроме всплывающих окон):
+
+```yaml
+styles: | 
+  ha-card {
+    --bubble-icon-background-color: rgb(230, 128, 41) !important;
+  }
+```
+
+Этот вариант делает то же самое для заголовка всплывающего окна: 
+
+```yaml
+styles: |
+  .bubble-icon-container {
+    background: rgb(230, 128, 41) !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Изменение размера дополнительных кнопок (отлично подходит для большой компоновки)</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-sub-button {
+    height: 48px !important;
+    min-width: 48px !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Изменение цвета фона второй дополнительной кнопки</summary>
+
+<br>
+
+```yaml
+styles: |
+  .bubble-sub-button-2 {
+    background-color: blue !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Изменение размера значка</summary>
+
+<br>
+
+Для основного значка.
+
+```yaml
+styles: |
+  .bubble-icon {
+    --mdc-icon-size: 26px !important;
+  }
+```
+
+Для значков дополнительных кнопок.
+
+```yaml
+styles: |
+  .bubble-sub-button-icon {
+    --mdc-icon-size: 26px !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Использование изображения вместо значка в дополнительной кнопке</summary>
+
+<br>
+
+```yaml
+sub_button:
+  - icon: none
+styles: |-
+  .bubble-sub-button-1 {
+    background-image: url("/local/pictures/your_picture.jpg");
+    background-size: cover;
+  }
+```
+
+Просто загрузите это изображение в папку “pictures” (или как вы её назовёте) в папке “www” Home Assistant.
+
+</details>
+
+<details>
+
+<summary>Продвинутый пример: создание горизонтального ряда дополнительных кнопок (со скриншотом)</summary>
+
+<br>
+
+<img width="556" alt="image" src="https://github.com/Clooos/Bubble-Card/assets/36499953/b9be2bcf-93fc-4b06-8eae-ecac97dfb5e2">
+
+> Мне очень нравится этот вариант, я использую его как заголовок на своём дашборде.
+
+```yaml
+type: custom:bubble-card
+card_type: button
+card_layout: large
+button_type: name
+show_icon: false
+show_name: false
+sub_button:
+  - name: Mute
+    icon: mdi:volume-off
+    tap_action:
+      action: toggle
+      service: input_boolean.toggle
+    entity: input_boolean.silent_mode
+  - name: Covers
+    entity: cover.all_group
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#cover'
+  - name: Shopping list
+    icon: mdi:cart-outline
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#shopping-list'
+  - name: Security
+    icon: mdi:video-outline
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#security'
+  - name: Settings
+    icon: mdi:cog
+    show_background: false
+    tap_action:
+      action: navigate
+      navigation_path: '#configuration'
+styles: |
+  .card-content {
+    width: 100%;
+    margin: 0 !important;
+  }
+  .bubble-button-card-container {
+    background: none;
+    border: none;
+  }
+  .bubble-sub-button {
+    height: 46px !important;
+    width: 46px !important;
+  }
+  .bubble-sub-button-container {
+    display: flex !important;
+    width: 100%;
+    justify-content: space-between !important;
+  }
+  .bubble-sub-button-icon {
+    --mdc-icon-size: inherit !important;
+  }
+  .bubble-name-container {
+    margin-right: 0px !important;
+  }
+```
+
+![Sub-buttons-everywhere](https://github.com/Clooos/Bubble-Card/assets/36499953/3bf04969-e00d-4755-89df-481e8f7d73b2)
+
+</details>
+
+<br>
+
+## Шаблоны
+
+**Bubble Card не поддерживает шаблоны Jinja**, но опытные пользователи могут добавлять шаблоны на JS прямо в своих [пользовательских стилях](#оформление). Например, это позволяет динамически менять значок, тексты или цвета элемента, показывать или скрывать элемент по условию (например, дополнительную кнопку), или делать практически что угодно на основе состояния, атрибута и многого другого.
+
+> [!TIP]  
+> Подробнее о JS-шаблонах [здесь](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). Мой совет: **всегда заглядывайте в консоль браузера**, чтобы убедиться, что всё работает правильно.
+
+> [!IMPORTANT]  
+> **Все шаблоны, которые не изменяют CSS-свойство, должны находиться в конце! Например, изменение значка, текста или любого другого элемента.**
+
+#### Доступные переменные и функции
+
+<details>
+
+<summary>Переменные</summary>
+
+<br>
+
+В большинстве карточек вам доступны следующие переменные:
+
+- `state` вернёт состояние вашей заданной `entity`.
+  
+- `entity` вернёт сущность, которую вы указали, например `switch.test` в этом примере.
+
+- `icon` можно использовать так, чтобы изменить значок: `icon.setAttribute("icon", "mdi:lightbulb")`.
+
+- `subButtonState[0]` вернёт состояние `entity`, заданной для первой дополнительной кнопки, `[0]` это состояние первой дополнительной кнопки, `[1]` второй...
+  
+- `subButtonIcon[0]` можно использовать так, чтобы изменить значок первой дополнительной кнопки: `subButtonIcon[0].setAttribute("icon", "mdi:lightbulb")`, `[0]` это значок первой дополнительной кнопки, `[1]` второй...
+
+- `card` вернёт элемент карточки в DOM.
+  
+- `hass` это продвинутая переменная, дающая ещё больше контроля, например вы можете получить состояние `light.kitchen` вот так: `hass.states['light.kitchen'].state`, или атрибут вот так: `hass.states[entity].attributes.brightness`.
+
+- `this` вернёт много полезной информации о вашей конфигурации и дашборде, используйте её, только если знаете, что делаете.
+
+</details>
+
+<details>
+
+<summary>Функции</summary>
+
+<br>
+
+Вам доступны все глобальные функции JS, а также:
+
+- `getWeatherIcon` можно использовать, чтобы получить значок погоды на основе состояния, которое возвращает погоду. Например, вы можете сделать так: `${subButtonIcon[2].setAttribute("icon", getWeatherIcon(hass.states['sensor.weather_forecast_daily'].attributes.forecast[0]?.condition))}`, чтобы изменить значок третьей дополнительной кнопки на сегодняшний значок погоды, `.forecast[1]?.condition` для завтрашнего дня...
+
+  Для этого вам нужно будет создать сенсор-шаблон. Вот что можно добавить в ваш `configuration.yaml`:
+  ```yaml
+    - trigger:
+        - platform: time_pattern
+          hours: /2
+      action:
+        - service: weather.get_forecasts
+          data:
+            type: daily
+          target:
+            entity_id: weather.home
+          response_variable: daily
+      sensor:
+        - name: Weather Forecast Daily
+          unique_id: weather_forecast_daily
+          state: "{{ now().isoformat() }}"
+          attributes:
+            forecast: "{{ daily['weather.home'].forecast }}"
+  ```
+- `hass.formatEntityState(state)` можно использовать, чтобы перевести состояние (также можно получить единицу измерения состояния, без необходимости добавлять её вручную).
+- `hass.formatEntityAttributeValue(state, "attribute")` можно использовать, чтобы перевести атрибут (также можно получить единицу измерения состояния, без необходимости добавлять её вручную).
+
+</details>
+
+#### Примеры
+
+Ниже вы найдёте множество примеров, но также можно найти очень продвинутые шаблоны на моей [странице Patreon](https://www.patreon.com/c/Clooos), например один (мой любимый), который позволяет разместить до четырёх условных значков вокруг иконок карточки. Это также отличный способ узнать обо всех возможностях пользовательских стилей и шаблонов Bubble Card!
+
+<details>
+<summary>Примеры с моей страницы Patreon</summary>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/e95ab7f8-f5a3-4fca-b3fd-61479540b723" alt="Example 2" />
+    <br>
+    <a href="https://www.patreon.com/posts/adding-home-like-116764324">Добавление значков в стиле Home Assistant на любую карточку</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/24ad619b-2a98-49c0-bc9d-a59f00541731" alt="Example 4" />
+    <br>
+    <a href="https://www.patreon.com/posts/showing-date-and-116766943">Отображение отформатированной даты и времени в разделителе без использования сущности</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/0c8891a8-ca96-45a9-ada6-fc91268cb815" alt="Example 1" />
+    <br>
+    <a href="https://www.patreon.com/posts/showing-sub-on-116808854">Отображение состояния дополнительной кнопки в две строки</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/c90d561c-ab6a-4e4e-bd00-fe8676c2bf5b" alt="Example 3" />
+    <br>
+    <a href="https://www.patreon.com/posts/customizing-and-116753941">Настройка подписей и значков внутри дополнительной кнопки выбора</a>
+</p>
+
+<p align="center"><br>
+    <img src="https://github.com/user-attachments/assets/02782c6b-12e7-40bf-ad23-2bacf8016392" alt="Example 5" />
+    <br>
+    <a href="https://www.patreon.com/posts/119701174">Добавление постоянного всплывающего окна-напоминания, которое появляется только когда нужно</a>
+</p>
+
+<br>
+
+</details>
+
+<details>
+
+<summary>Изменение цвета фона кнопки, который становится красным, когда она в состоянии <code>off</code>, и синим, когда в состоянии <code>on</code></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: switch.test
+name: Test
+styles: |
+  .bubble-button-background {
+    opacity: 1 !important;
+    background-color: ${state === 'on' ? 'blue' : 'red'} !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Изменение цвета фона кнопки на основе сущности для горизонтального стека кнопок</summary>
+
+<br>
+
+```yaml
+styles: |
+  .kitchen > .color-background {
+    background-color: ${hass.states['light.kitchen'].state === 'on' ? 'blue' : 'red'} !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Показ/скрытие дополнительной кнопки по условию</summary>
+
+<br>
+
+Этот пример показывает первую дополнительную кнопку только когда мой пылесос застрял.
+```yaml
+styles: |
+  .bubble-sub-button-1 {
+    display: ${hass.states['vacuum.downstairs'].state === 'error' ? '' : 'none'} !important;
+  }
+```
+
+Этот пример показывает дополнительную кнопку, когда заряд батареи ниже 10%. Полезно для дополнительной кнопки, отображающей "Низкий заряд батареи".
+```yaml
+styles: |
+  .bubble-sub-button-1 {
+    display: ${hass.states['vacuum.downstairs'].attributes.battery_level <= 10 ? '' : 'none'} !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Изменение значка или значка дополнительной кнопки по условию</summary>
+
+<br>
+
+Этот пример меняет значок кнопки только когда пылесос застрял.
+```yaml
+styles: |
+  ${icon.setAttribute("icon", hass.states['vacuum.downstairs'].state === 'error' ? 'mdi:alert' : 'mdi:robot-vacuum')}
+```
+
+Этот пример меняет значок первой дополнительной кнопки только когда пылесос застрял.
+```yaml
+styles: |
+  ${subButtonIcon[0].setAttribute("icon", hass.states['vacuum.downstairs'].state === 'error' ? 'mdi:alert' : 'mdi:robot-vacuum')}
+```
+
+</details>
+
+<details>
+
+<summary>Изменение цвета значка или значка дополнительной кнопки по условию</summary>
+
+<br>
+
+Этот пример меняет цвет значка кнопки в зависимости от её состояния.
+```yaml
+styles: |
+  .bubble-icon {
+    color: ${hass.states['light.your_light'].state === 'on' ? 'green' : 'red'} !important;
+  }
+```
+
+Этот пример меняет цвет значка дополнительной кнопки в зависимости от её состояния. `.bubble-sub-button-1` это первая дополнительная кнопка, замените `1`, если хотите изменить значок другой дополнительной кнопки.
+```yaml
+styles: |
+  .bubble-sub-button-1 > ha-icon {
+    color: ${hass.states['light.your_light'].state === 'on' ? 'green' : 'red'} !important;
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Анимация значка вентилятора по условию</summary>
+
+<br>
+
+Этот пример вращает значок кнопки, когда вентилятор в состоянии `on`.
+```yaml
+styles: |-
+  .bubble-icon {
+    animation: ${hass.states['fan.you_fan'].state === 'on' ? 'slow-rotate 2s linear infinite' : ''};
+  }
+  @keyframes slow-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+```
+
+</details>
+
+<details>
+
+<summary>Шаблонизация текстов (например, имени или состояния)</summary>
+
+<br>
+
+Этот пример меняет имя/состояние кнопки на "Сейчас солнечно" в зависимости от вашей погоды.
+```yaml
+styles: |
+  ${card.querySelector('.bubble-name').innerText = "It's currently " + hass.states['weather.home'].state}
+```
+или при применении к дополнительным кнопкам:
+```yaml
+styles: |
+ ${card.querySelector('.bubble-sub-button-1 .bubble-sub-button-name-container').innerText = "It's currently " + hass.states['weather.home'].state}
+```
+
+
+Если вы хотите шаблонизировать состояние (`.bubble-state`), не включайте `show_state: true`, а просто включите `show_attribute: true` без указания атрибута.
+
+</details>
+
+<details>
+
+<summary>Продвинутый пример: изменение цвета дополнительной кнопки, когда открыто всплывающее окно</summary>
+
+<br>
+
+```yaml
+styles: |
+  ${window.addEventListener('location-changed', () => { 
+  card.querySelector('.bubble-sub-button-1').style.backgroundColor = this.location.href.includes('#kitchen') ? 'blue' : '';
+  })}
+```
+
+</details>
+
+<details>
+
+<summary>Продвинутый пример: шаблонизация имени разделителя на основе состояния, переведённого на ваш язык</summary>
+
+<br>
+
+Вы можете использовать `hass.formatEntityState(state)`, чтобы перевести состояние, и `hass.formatEntityAttributeValue(state, "attribute")`, чтобы перевести атрибут.
+
+Этот пример меняет имя и значок в зависимости от погоды, "Nuageux" означает "Облачно" на французском.
+
+![image](https://github.com/Clooos/Bubble-Card/assets/36499953/35ac9d0f-c3b8-4c09-9c15-fe6954011d55)
+
+```yaml
+type: custom:bubble-card
+card_type: separator
+icon: mdi:weather-cloudy
+sub_button:
+  - entity: sensor.outside_temperature
+    icon: mdi:thermometer
+    name: Temperature
+    show_state: true
+    show_background: false
+styles: >
+  .bubble-line {
+    background: white;
+    opacity: 1;
+  }
+
+  ${card.querySelector('.bubble-name').innerText =
+  hass.formatEntityState(hass.states['weather.maison'])}
+
+  ${icon.setAttribute("icon",
+  getWeatherIcon(hass.states['weather.maison'].state))}
+```
+
+</details>
+
+<br>
+
+## Modules
+
+Модули представляют собой мощную функцию, которая позволяет сохранять, повторно использовать и делиться вашими пользовательскими стилями и шаблонами между всеми карточками Bubble Card. Вместо того чтобы копировать и вставлять один и тот же код в несколько карточек, вы можете создать Модуль и применить его там, где он нужен. Это значительно упрощает управление внешним видом вашего дашборда и делает его более эффективным.
+
+Но эта функция намного мощнее, чем кажется: она позволяет вам самостоятельно добавлять настоящие функции в редактор Bubble Card, используя все стандартные опции [формы Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Селектор объектов был улучшен для отображения изменений в реальном времени и корректной поддержки атрибутов.
+
+Вы также можете просматривать **Module Store**, чтобы находить и устанавливать [модули, созданные сообществом](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), или делиться своими собственными разработками!
+
+> [!TIP]
+> Код Модуля работает точно так же, как код в разделе `styles` карточки. Доступны все те же переменные и функции из раздела [Шаблоны](#шаблоны).
+
+<br>
+
+### Первоначальная настройка
+
+> [!IMPORTANT]
+> Начиная с v3.1.0, Bubble Card Tools является рекомендуемым хранилищем для модулей. Устаревший метод с сенсором-шаблоном по-прежнему работает для существующих конфигураций, но новые модули и функции Module Store лучше всего поддерживаются через Bubble Card Tools.
+
+Интеграция Bubble Card Tools включает редактор модулей и Module Store, а также хранит модули в виде отдельных YAML-файлов. Существующие модули мигрируются автоматически.
+
+Шаги по установке и настройке описаны здесь:
+
+[![GitHub - Bubble Card Tools](https://img.shields.io/badge/GitHub-Bubble%20Card%20Tools-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card-Tools)
+
+
+
+<br>
+
+### Редактор модулей
+
+Редактор модулей доступен из настроек любой карточки, в разделе **Модули**. Редактор предоставляет две основные вкладки:
+
+#### Вкладка "Мои модули"
+
+![module-editor-preview](https://github.com/user-attachments/assets/94b4b481-2d51-4f7b-8c02-1a65391d78ca)
+
+Эта вкладка показывает все установленные вами модули и позволяет:
+
+- **Применять** существующие модули к текущей карточке
+- **Создавать** новый модуль с нуля
+- **Редактировать** существующие модули с предпросмотром в реальном времени
+- **Удалять** модули, которые вам больше не нужны
+- **Искать** и **сортировать** модули (по алфавиту, по недавним, сначала активные)
+- **Устанавливать глобальный статус**, чтобы модуль применялся ко всем карточкам автоматически
+- **Импортировать/экспортировать** модули для резервного копирования или обмена
+
+#### Вкладка Module Store
+
+![update-module-store-s](https://github.com/user-attachments/assets/c7249c0c-8f8c-4ffc-835f-701c9dfcadaf)
+
+Эта вкладка отображает [все доступные модули сообщества](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) и позволяет:
+
+- **Просматривать** все модули, созданные сообществом
+- **Искать** и фильтровать модули по названию, совместимости или ключевым словам
+- **Устанавливать** модули в один клик
+- **Обновлять** установленные модули при выходе новых версий
+
+> [!TIP]
+> В редакторе можно включить неподдерживаемые модули, чтобы протестировать модули, которые ещё не отмечены как совместимые с определённым типом карточки.
+
+<br>
+
+### Как использовать модули
+
+#### Создание нового модуля
+
+<details>
+
+<summary>Нажмите, чтобы развернуть</summary>
+
+<br>
+
+![module-preview](https://github.com/user-attachments/assets/4670b486-5a48-4476-a868-2ec4d42226a5)
+
+1. Перейдите в редактор любой карточки и разверните раздел **Модули**.
+2. Нажмите **Создать новый модуль**.
+3. Заполните информацию о модуле.
+4. Напишите код вашего CSS- и/или JS-шаблона в редакторе **Код**.
+5. (Необязательно) Создайте пользовательский интерфейс конфигурации в разделе **Редактор** (например, выбор цвета на скриншоте выше, полная документация доступна [здесь](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+6. Нажмите **Сохранить**.
+
+Теперь ваш модуль доступен для использования на любой из ваших карточек!
+
+<br>
+
+</details>
+
+#### Применение модуля к карточке
+
+<details>
+
+<summary>Нажмите, чтобы развернуть</summary>
+
+<br>
+
+- **Через редактор:**
+
+  - Перейдите в редактор карточки, к которой хотите применить модуль.
+  - Разверните раздел **Модули**.
+  - Нажмите на модуль, который хотите применить, из списка.
+  - В разделе "Применить к" нажмите на "Эта карточка". Модуль теперь активен. Вы можете применить несколько модулей к одной карточке.
+
+- **Через YAML:**
+
+  ```yaml
+  type: custom:bubble-card
+  card_type: button
+  entity: light.example
+  modules:
+    - module_id_1
+    - module_id_2
+  ```
+
+<br>
+
+</details>
+
+#### Глобальное применение модуля
+
+<details>
+
+<summary>Нажмите, чтобы развернуть</summary>
+
+<br>
+
+Вы можете настроить модуль так, чтобы он применялся автоматически ко всем карточкам Bubble Card:
+
+**Это недоступно для модулей с редактором, поскольку они требуют определённой конфигурации для работы.**
+
+- **Через редактор:**
+
+  - В редакторе модулей найдите свой модуль на вкладке **Мои модули**.
+  - Переключите кнопку **Все карточки** рядом с названием модуля.
+  - Теперь модуль будет автоматически применяться ко всем карточкам.
+ 
+- **Через YAML:**
+
+  В вашей YAML-конфигурации модуля (в `bubble-modules.yaml`) просто добавьте `is_global: true`.
+
+<br>
+
+</details>
+
+#### Исключение отдельной карточки из глобального модуля
+
+<details>
+
+<summary>Нажмите, чтобы развернуть</summary>
+
+<br>
+
+Если у вас есть глобальный модуль, но вы хотите исключить его для конкретной карточки:
+
+- **Через редактор:**
+  
+  - В разделе **Модули** карточки вы увидите список глобальных модулей.
+  - Нажмите на глобальный модуль, отключите "Эта карточка", чтобы исключить его для этой конкретной карточки.
+
+- **Через YAML:**
+  
+  ```yaml
+  type: custom:bubble-card
+  card_type: button
+  entity: light.example
+  modules:
+    - !global_module_id  # The ! prefix excludes this global module
+  ```
+
+<br>
+
+</details>
+
+#### Публикация вашего модуля в Module Store
+
+<details>
+
+<summary>Нажмите, чтобы развернуть</summary>
+
+<br>
+
+Чтобы поделиться вашим Модулем в Module Store, в редакторе модулей внизу, в разделе "Экспорт модуля", нажмите "Копировать для GitHub" и вставьте содержимое в новое обсуждение в категории [Share your Modules](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules). **Отредактируйте описание** (при необходимости), **пример** (для пользователей YAML), и не забудьте **приложить хотя бы один скриншот** для Module Store.
+
+**Ваш Модуль становится доступным сразу после этого** (после обновления Store), поэтому обязательно перепроверьте, что всё написано верно и Модуль работает как ожидается. Разумеется, вы можете редактировать/обновлять Модуль после публикации.
+
+<br>
+
+</details>
+
+#### Управление версиями
+
+<details>
+
+<summary>Нажмите, чтобы развернуть</summary>
+
+<br>
+
+Module Store автоматически проверяет наличие обновлений для установленных модулей. Когда доступны обновления:
+
+1. Вы увидите индикатор обновления на вкладке **Module Store**.
+2. Нажмите **Обновить** у модулей с доступными обновлениями.
+3. Подтвердите обновление в Module Store.
+
+<br>
+
+</details>
+
+#### Указание поддерживаемых типов карточек
+
+<details>
+
+<summary>Нажмите, чтобы развернуть</summary>
+
+<br>
+
+Некоторые модули могут быть несовместимы со всеми типами карточек. Вы можете указать, какие карточки поддерживает модуль.  
+Если вы хотите, чтобы модуль был совместим со **всеми карточками**, просто не указывайте поле `supported` (или используйте опцию **Все карточки** в редакторе).
+
+```yaml
+my_module:
+  name: "Button Only Module"
+  supported:
+    - button
+  code: |
+    /* Your module code here */
+```
+
+</details>
+
+<br>
+
+### Примеры
+
+<details>
+<summary>Базовый модуль оформления</summary>
+
+<br>
+
+```yaml
+blue_cards:
+  name: "Blue Cards Theme"
+  version: "1.0"
+  creator: "Your Name"
+  description: "Makes all cards backgrounds blue"
+  code: |
+    ha-card {
+      --bubble-main-background-color: #007acc;
+    }
+```
+
+<br>
+
+</details>
+
+<details>
+<summary>Модуль с пользовательской конфигурацией</summary>
+
+<br>
+
+Этот модуль доступен [здесь](https://github.com/Clooos/Bubble-Card/discussions/1231).
+
+```yaml
+icon_container_color:
+  name: 'Example: Customize the icon container color'
+  version: v1.2
+  creator: Clooos
+  supported:
+    - calendar
+    - pop-up
+    - cover
+    - button
+    - media-player
+    - climate
+    - select
+  description: |
+    A list of predefined colors to customize the icon container color.
+    Configure this module via the editor or in YAML, for example:
+    <br><br>
+    <code-block><pre>
+    icon_container_color: 
+        color: light-blue
+    </pre></code-block>
+  code: |
+    .bubble-icon-container,
+    .bubble-day-chip {
+      opacity: 1 !important;
+      --bubble-icon-background-color: var(--${this.config.icon_container_color?.color}-color) !important;
+    }
+  editor:
+    - name: color
+      label: Color
+      selector:
+        ui_color:
+          include_none: true
+```
+
+<br>
+
+</details>
+
+Больше примеров можно найти в Module Store, или [здесь](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Помощь
+
+Не стесняйтесь открывать issue, если что-то работает не так, как ожидалось. 
+
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Issues-green?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/issues)
+
+Есть вопросы или идеи о Bubble Card? Хотите поделиться своим дашбордом или находками? Вы можете зайти на форум Home Assistant, на сабреддит Bubble Card или в раздел GitHub Discussions.
+
+[![Home Assistant Community Forum](https://img.shields.io/badge/Home%20Assistant-Community%20Forum-blue?logo=home-assistant&style=for-the-badge)](https://community.home-assistant.io/t/bubble-card-a-minimalist-card-collection-for-home-assistant-with-a-nice-pop-up-touch/609678) [![Reddit Page](https://img.shields.io/badge/Reddit-r/BubbleCard-orange?logo=reddit&style=for-the-badge)](https://www.reddit.com/r/BubbleCard/) [![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-lightgrey?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/discussions)
+
+
+<br>
+
+---
+
+<br>
+
+## Участие в проекте
+
+Вклад в проект приветствуется! Будь то исправление ошибок, новые функции, переводы или улучшения документации, не стесняйтесь открывать pull request.
+
+Прежде чем начать, пожалуйста, прочитайте [руководство разработчика](DEVELOPERS.md), в котором рассказывается, как настроить локальное окружение, собрать проект и протестировать свои изменения.
+
+[![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
+
+<br>
+
+---
+
+<br>
+
+## Поддержать проект
+
+Я посвящаю большую часть своего свободного времени тому, чтобы сделать этот проект как можно лучше. Так что, если вы цените мою работу, любое пожертвование станет отличным способом выразить поддержку 🍻
+
+[![Buy me a beer](https://img.shields.io/badge/Donate-Buy%20me%20a%20beer-yellow?style=for-the-badge&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/clooos) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal&style=for-the-badge)](https://www.paypal.com/donate/?business=MRVBV9PLT9ZPL&no_recurring=0&item_name=Hi%2C+I%27m+Clooos+the+creator+of+Bubble+Card.+Thank+you+for+supporting+me+and+my+passion.+You+are+awesome%21+%F0%9F%8D%BB&currency_code=EUR) [![Patreon Clooos](https://img.shields.io/badge/Patreon-Clooos-orange?logo=patreon&style=for-the-badge)](https://www.patreon.com/Clooos)
+
+<br>
+
+Спасибо всем за вашу поддержку, вы моя главная мотивация!
+
+<p align="right"><a href="#top"><img src="https://cdn-icons-png.flaticon.com/512/892/892692.png" height="50px"></a></p>

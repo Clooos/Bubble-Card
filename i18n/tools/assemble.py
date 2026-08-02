@@ -8,23 +8,14 @@ from languages import LANGUAGES, RTL
 
 REPO = os.path.dirname(os.path.dirname(SP))  # repo root, this file lives in i18n/tools/
 
-# Header notice, per language. Only the languages already produced need an entry;
-# the generator for the remaining languages will fill this in as they are built.
-NOTICE = {
-    'fr': (
-        'Cette page est une traduction automatique. En cas de doute, la '
-        '[documentation originale en anglais]({original}) fait foi. '
-        'Une formulation vous semble maladroite ? Toute aide est la bienvenue et '
-        '[corriger cette page]({edit}) ne prend qu\'une minute : GitHub se charge de la '
-        'copie du projet et de la pull request. Merci d\'avance ! 🍻'
-    ),
-}
-
-# Language switcher line, inserted right under the H1 so it sits at the very top.
-SWITCHER = {
-    'en': '🌐 **[Read this in your language]({index})**',
-    'fr': '🌐 **[Lire dans une autre langue]({index})**',
-}
+# Per-language notice (top of every translated page) and switcher line (under the H1),
+# translated once per language, stored next to this script.
+_NOTICES = json.load(open(os.path.join(SP, 'notices.json'), encoding='utf-8'))
+NOTICE = {code: v['notice'] for code, v in _NOTICES.items() if 'notice' in v}
+SWITCHER = {code: v['switcher'] for code, v in _NOTICES.items() if 'switcher' in v}
+# Sample of languages shown in the English switcher line, to make it obvious at a
+# glance that the documentation exists in other languages.
+SWITCHER_SAMPLE = 'Français, Deutsch, Español, 简体中文, 日本語'
 
 # Post-translation harmonisation, applied after the slices are joined so that
 # regenerating a language always yields the same wording. Terms come from the
