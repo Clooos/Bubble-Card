@@ -4,6 +4,7 @@
       "card_type": "Typ karty",
       "button_type": "Typ przycisku",
       "attribute_to_show": "Atrybut do wyświetlenia",
+      "auto": "Automatycznie",
       "default_suffix": " (domyślnie)",
       "card_settings": "Ustawienia karty",
       "styling_options": "Opcje stylu",

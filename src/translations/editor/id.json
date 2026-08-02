@@ -4,6 +4,7 @@
       "card_type": "Jenis kartu",
       "button_type": "Jenis tombol",
       "attribute_to_show": "Atribut yang ditampilkan",
+      "auto": "Otomatis",
       "default_suffix": " (bawaan)",
       "card_settings": "Pengaturan kartu",
       "styling_options": "Opsi gaya",

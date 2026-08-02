@@ -4,6 +4,7 @@
       "card_type": "Kortin tyyppi",
       "button_type": "Painikkeen tyyppi",
       "attribute_to_show": "Näytettävä attribuutti",
+      "auto": "Automaattinen",
       "default_suffix": " (oletus)",
       "card_settings": "Kortin asetukset",
       "styling_options": "Tyyliasetukset",

@@ -4,6 +4,7 @@
       "card_type": "Korttyp",
       "button_type": "Knapptyp",
       "attribute_to_show": "Attribut att visa",
+      "auto": "Automatisk",
       "default_suffix": " (standard)",
       "card_settings": "Kortinställningar",
       "styling_options": "Stilalternativ",

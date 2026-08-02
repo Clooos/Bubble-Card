@@ -4,6 +4,7 @@
       "card_type": "Kaarttype",
       "button_type": "Knoptype",
       "attribute_to_show": "Attribút om sjen te litten",
+      "auto": "Automatysk",
       "default_suffix": " (standert)",
       "card_settings": "Kaartynstellingen",
       "styling_options": "Stylopsjes",

@@ -4,6 +4,7 @@
       "card_type": "Тип карточки",
       "button_type": "Тип кнопки",
       "attribute_to_show": "Отображаемый атрибут",
+      "auto": "Авто",
       "default_suffix": " (по умолчанию)",
       "card_settings": "Настройки карточки",
       "styling_options": "Настройки оформления",

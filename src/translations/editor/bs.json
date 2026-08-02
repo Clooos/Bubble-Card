@@ -4,6 +4,7 @@
       "card_type": "Tip kartice",
       "button_type": "Tip dugmeta",
       "attribute_to_show": "Atribut za prikaz",
+      "auto": "Automatski",
       "default_suffix": " (zadano)",
       "card_settings": "Postavke kartice",
       "styling_options": "Opcije stila",

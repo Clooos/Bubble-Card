@@ -4,6 +4,7 @@
       "card_type": "カードタイプ",
       "button_type": "ボタンタイプ",
       "attribute_to_show": "表示する属性",
+      "auto": "自動",
       "default_suffix": " (デフォルト)",
       "card_settings": "カード設定",
       "styling_options": "スタイルオプション",

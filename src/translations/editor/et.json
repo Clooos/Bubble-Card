@@ -4,6 +4,7 @@
       "card_type": "Kaardi tüüp",
       "button_type": "Nupu tüüp",
       "attribute_to_show": "Kuvatav atribuut",
+      "auto": "Automaatne",
       "default_suffix": " (vaikimisi)",
       "card_settings": "Kaardi seaded",
       "styling_options": "Stiilivalikud",

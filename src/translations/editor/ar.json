@@ -4,6 +4,7 @@
       "card_type": "نوع البطاقة",
       "button_type": "نوع الزر",
       "attribute_to_show": "السمة المراد عرضها",
+      "auto": "تلقائي",
       "default_suffix": " (افتراضي)",
       "card_settings": "إعدادات البطاقة",
       "styling_options": "خيارات التنسيق",

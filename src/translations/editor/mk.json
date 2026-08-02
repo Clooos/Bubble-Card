@@ -4,6 +4,7 @@
       "card_type": "Тип на картичка",
       "button_type": "Тип на копче",
       "attribute_to_show": "Атрибут за прикажување",
+      "auto": "Автоматски",
       "default_suffix": " (стандардно)",
       "card_settings": "Поставки на картичката",
       "styling_options": "Поставки за изглед",

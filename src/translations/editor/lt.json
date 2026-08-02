@@ -4,6 +4,7 @@
       "card_type": "Kortelės tipas",
       "button_type": "Mygtuko tipas",
       "attribute_to_show": "Rodomas atributas",
+      "auto": "Automatinis",
       "default_suffix": " (numatytasis)",
       "card_settings": "Kortelės nustatymai",
       "styling_options": "Stiliaus parinktys",

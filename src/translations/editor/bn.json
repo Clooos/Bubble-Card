@@ -4,6 +4,7 @@
       "card_type": "কার্ডের ধরন",
       "button_type": "বাটনের ধরন",
       "attribute_to_show": "যে অ্যাট্রিবিউট দেখানো হবে",
+      "auto": "স্বয়ংক্রিয়",
       "default_suffix": " (ডিফল্ট)",
       "card_settings": "কার্ড সেটিংস",
       "styling_options": "স্টাইলিং অপশন",

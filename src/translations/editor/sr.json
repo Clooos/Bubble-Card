@@ -4,6 +4,7 @@
       "card_type": "Тип картице",
       "button_type": "Тип дугмета",
       "attribute_to_show": "Атрибут за приказ",
+      "auto": "Аутоматски",
       "default_suffix": " (подразумевано)",
       "card_settings": "Подешавања картице",
       "styling_options": "Опције стила",

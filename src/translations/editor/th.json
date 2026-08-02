@@ -4,6 +4,7 @@
       "card_type": "ประเภทการ์ด",
       "button_type": "ประเภทปุ่ม",
       "attribute_to_show": "แอตทริบิวต์ที่จะแสดง",
+      "auto": "อัตโนมัติ",
       "default_suffix": " (ค่าเริ่มต้น)",
       "card_settings": "การตั้งค่าการ์ด",
       "styling_options": "ตัวเลือกการจัดสไตล์",

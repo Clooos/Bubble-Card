@@ -4,6 +4,7 @@
       "card_type": "Kaarttipe",
       "button_type": "Knoppietipe",
       "attribute_to_show": "Attribuut om te wys",
+      "auto": "Outomaties",
       "default_suffix": " (verstek)",
       "card_settings": "Kaartinstellings",
       "styling_options": "Stylopsies",

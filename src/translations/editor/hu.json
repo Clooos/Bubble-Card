@@ -4,6 +4,7 @@
       "card_type": "Kártyatípus",
       "button_type": "Gomb típusa",
       "attribute_to_show": "Megjelenítendő attribútum",
+      "auto": "Automatikus",
       "default_suffix": " (alapértelmezett)",
       "card_settings": "Kártya beállításai",
       "styling_options": "Stílusbeállítások",

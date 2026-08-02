@@ -4,6 +4,7 @@
       "card_type": "Vrsta kartice",
       "button_type": "Vrsta gumba",
       "attribute_to_show": "Atribut za prikaz",
+      "auto": "Automatski",
       "default_suffix": " (zadano)",
       "card_settings": "Postavke kartice",
       "styling_options": "Opcije stila",

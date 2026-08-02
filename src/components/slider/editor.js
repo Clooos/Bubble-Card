@@ -3,15 +3,20 @@ import { isReadOnlyEntityId } from './helpers.js';
 import setupTranslation from '../../tools/localize.js';
 import { tTemplate } from '../../editor/utils.js';
 
+// The 'default' entry maps to an absent YAML key: the runtime then follows the
+// document direction (left fill and right value in LTR, mirrored in RTL),
+// while an explicit left/right choice stays physical
 const getFillOrientationOptions = (t) => [
-    { label: t('editor.slider.fill_left') + t('editor.common.default_suffix'), value: 'left' },
+    { label: t('editor.common.auto') + t('editor.common.default_suffix'), value: 'default' },
+    { label: t('editor.slider.fill_left'), value: 'left' },
     { label: t('editor.slider.fill_right'), value: 'right' },
     { label: t('editor.slider.fill_top'), value: 'top' },
     { label: t('editor.slider.fill_bottom'), value: 'bottom' },
 ];
 
 const getValuePositionOptions = (t) => [
-    { label: t('editor.common.right') + t('editor.common.default_suffix'), value: 'right' },
+    { label: t('editor.common.auto') + t('editor.common.default_suffix'), value: 'default' },
+    { label: t('editor.common.right'), value: 'right' },
     { label: t('editor.common.left'), value: 'left' },
     { label: t('editor.common.center'), value: 'center' },
     { label: t('editor.common.hidden'), value: 'hidden' }
@@ -248,7 +253,7 @@ export function makeGenericSliderSettings({
             <div class="content">
                 <ha-form
                     .hass=${hass}
-                    .data=${{ slider_fill_orientation: data.slider_fill_orientation || 'left' }}
+                    .data=${{ slider_fill_orientation: data.slider_fill_orientation || 'default' }}
                     .schema=${[{
                         name: 'slider_fill_orientation',
                         selector: {
@@ -259,7 +264,10 @@ export function makeGenericSliderSettings({
                         }
                     }]}
                     .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : t('editor.slider.fill_orientation'))}
-                    @value-changed=${(ev) => callToggleChange('slider_fill_orientation', ev.detail.value.slider_fill_orientation, meta('ha-combo-box', 'value-changed'))}
+                    @value-changed=${(ev) => {
+                        const value = ev.detail.value.slider_fill_orientation;
+                        callToggleChange('slider_fill_orientation', value === 'default' ? undefined : value, meta('ha-combo-box', 'value-changed'));
+                    }}
                 ></ha-form>
                 <div class="bubble-info" style="display: ${['top', 'bottom'].includes(data.slider_fill_orientation) ? '' : 'none'}">
                     <h4 class="bubble-section-title">
@@ -273,7 +281,7 @@ export function makeGenericSliderSettings({
                 ${isLightColorMode ? '' : html`
                     <ha-form
                         .hass=${hass}
-                        .data=${{ slider_value_position: forceValuePositionRight ? 'right' : (data.slider_value_position || 'right') }}
+                        .data=${{ slider_value_position: forceValuePositionRight ? 'right' : (data.slider_value_position || 'default') }}
                         .schema=${[{
                             name: 'slider_value_position',
                             disabled: forceValuePositionRight,
@@ -285,7 +293,10 @@ export function makeGenericSliderSettings({
                             }
                         }]}
                         .computeLabel=${(schema) => (typeof computeLabel === 'function' ? computeLabel(schema) : t('editor.slider.value_position'))}
-                        @value-changed=${(ev) => callToggleChange('slider_value_position', ev.detail.value.slider_value_position, meta('ha-combo-box', 'value-changed'))}
+                        @value-changed=${(ev) => {
+                            const value = ev.detail.value.slider_value_position;
+                            callToggleChange('slider_value_position', value === 'default' ? undefined : value, meta('ha-combo-box', 'value-changed'));
+                        }}
                     ></ha-form>
                     ${forceValuePositionRight ? html`
                         <div class="bubble-info">

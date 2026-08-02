@@ -4,6 +4,7 @@
       "card_type": "Card type",
       "button_type": "Button type",
       "attribute_to_show": "Attribute to show",
+      "auto": "Auto",
       "default_suffix": " (default)",
       "card_settings": "Card settings",
       "styling_options": "Styling options",

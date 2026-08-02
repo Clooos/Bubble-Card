@@ -4,6 +4,7 @@
       "card_type": "Type de carte",
       "button_type": "Type de bouton",
       "attribute_to_show": "Attribut à afficher",
+      "auto": "Auto",
       "default_suffix": " (par défaut)",
       "card_settings": "Paramètres de la carte",
       "styling_options": "Options de mise en forme",

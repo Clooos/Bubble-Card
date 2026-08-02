@@ -4,6 +4,7 @@
       "card_type": "Kaarttype",
       "button_type": "Knoptype",
       "attribute_to_show": "Weer te geven attribuut",
+      "auto": "Automatisch",
       "default_suffix": " (standaard)",
       "card_settings": "Kaartinstellingen",
       "styling_options": "Stijlopties",

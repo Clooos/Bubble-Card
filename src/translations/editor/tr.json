@@ -4,6 +4,7 @@
       "card_type": "Kart türü",
       "button_type": "Düğme türü",
       "attribute_to_show": "Gösterilecek öznitelik",
+      "auto": "Otomatik",
       "default_suffix": " (varsayılan)",
       "card_settings": "Kart ayarları",
       "styling_options": "Stil seçenekleri",

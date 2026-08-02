@@ -4,6 +4,7 @@
       "card_type": "Tipus de targeta",
       "button_type": "Tipus de botó",
       "attribute_to_show": "Atribut a mostrar",
+      "auto": "Automàtic",
       "default_suffix": " (per defecte)",
       "card_settings": "Configuració de la targeta",
       "styling_options": "Opcions d'estil",

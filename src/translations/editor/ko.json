@@ -4,6 +4,7 @@
       "card_type": "카드 유형",
       "button_type": "버튼 유형",
       "attribute_to_show": "표시할 속성",
+      "auto": "자동",
       "default_suffix": " (기본값)",
       "card_settings": "카드 설정",
       "styling_options": "스타일 옵션",

@@ -4,6 +4,7 @@
       "card_type": "Tegund korts",
       "button_type": "Tegund hnapps",
       "attribute_to_show": "Eigindi sem á að sýna",
+      "auto": "Sjálfvirkt",
       "default_suffix": " (sjálfgefið)",
       "card_settings": "Stillingar korts",
       "styling_options": "Stílvalkostir",

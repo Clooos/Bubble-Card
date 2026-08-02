@@ -4,6 +4,7 @@
       "card_type": "Тип карта",
       "button_type": "Тип бутон",
       "attribute_to_show": "Атрибут за показване",
+      "auto": "Автоматично",
       "default_suffix": " (по подразбиране)",
       "card_settings": "Настройки на картата",
       "styling_options": "Настройки на оформлението",

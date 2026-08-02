@@ -4,6 +4,7 @@
       "card_type": "Korttype",
       "button_type": "Knaptype",
       "attribute_to_show": "Attribut der skal vises",
+      "auto": "Automatisk",
       "default_suffix": " (standard)",
       "card_settings": "Kortindstillinger",
       "styling_options": "Stilindstillinger",

@@ -4,6 +4,7 @@
       "card_type": "卡片類型",
       "button_type": "按鈕類型",
       "attribute_to_show": "要顯示的屬性",
+      "auto": "自動",
       "default_suffix": " (預設)",
       "card_settings": "卡片設定",
       "styling_options": "樣式選項",

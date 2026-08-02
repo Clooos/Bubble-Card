@@ -7,6 +7,7 @@
       "icon": "@ui.components.selectors.selector.types.icon|Icon",
       "entity": "@ui.components.selectors.selector.types.entity|Entity",
       "attribute_to_show": "Attribute to show",
+      "auto": "Auto",
       "optional": "@ui.panel.lovelace.editor.card.config.optional|optional",
       "default_suffix": " (default)",
       "card_settings": "Card settings",

@@ -4,6 +4,7 @@
       "card_type": "Tipo di scheda",
       "button_type": "Tipo di pulsante",
       "attribute_to_show": "Attributo da mostrare",
+      "auto": "Automatico",
       "default_suffix": " (predefinito)",
       "card_settings": "Impostazioni della scheda",
       "styling_options": "Opzioni di stile",

@@ -4,6 +4,7 @@
       "card_type": "Tipo de tarxeta",
       "button_type": "Tipo de botón",
       "attribute_to_show": "Atributo a mostrar",
+      "auto": "Automático",
       "default_suffix": " (predeterminado)",
       "card_settings": "Axustes da tarxeta",
       "styling_options": "Opcións de estilo",

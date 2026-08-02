@@ -4,6 +4,7 @@
       "card_type": "Vrsta kartice",
       "button_type": "Vrsta gumba",
       "attribute_to_show": "Atribut za prikaz",
+      "auto": "Samodejno",
       "default_suffix": " (privzeto)",
       "card_settings": "Nastavitve kartice",
       "styling_options": "Možnosti sloga",
