@@ -327,6 +327,42 @@ describe('standalone popup lifecycle', () => {
         jest.useRealTimers();
     });
 
+    // The settle re-arms the fresh-interaction guard. It must not discard a
+    // press the user already made during the transition, or the click that
+    // press produces is swallowed and the pop-up needs a second click.
+    test('honours an outside press made during the opening transition', () => {
+        const context = createStandaloneContext({ open_action: { action: 'none' } });
+        usedContexts.push(context);
+
+        window.history.pushState({}, '', 'http://localhost/lovelace/test#standalone-popup');
+        window.location.hash = '#standalone-popup';
+        window.history.replaceState.mockClear();
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue();
+        // Phase 2 defers the listener wiring by one frame.
+        flushRafQueue();
+
+        // The pop-up is visible and sliding: the user presses outside now.
+        const outside = createMockElement(['some-dashboard-card']);
+        const press = new Event('pointerdown');
+        Object.defineProperty(press, 'composedPath', { value: () => [outside] });
+        window.dispatchEvent(press);
+
+        // The open finishes, then the click of that same press lands.
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        flushRafQueue();
+
+        const click = new Event('click');
+        Object.defineProperty(click, 'composedPath', { value: () => [outside] });
+        window.dispatchEvent(click);
+
+        expect(window.history.replaceState).toHaveBeenCalled();
+    });
+
     test('completes standalone open on transition end instead of a fixed timer', () => {
         const context = createStandaloneContext({
             open_action: { action: 'none' },
@@ -3175,6 +3211,40 @@ describe('outside-click gesture handling', () => {
         updateListeners(context, true);
         return context;
     }
+
+    // A pop-up that is visibly open but whose opening transition has not
+    // finished: on a loaded low-end device this window stretches, and it used
+    // to swallow every click outside.
+    function createOpeningContext() {
+        const context = createStandaloneContext();
+        context.popUp = popUp;
+        context._popupOpenSettled = false;
+        context._popupOpenSettledAt = 0;
+        context._awaitFreshOutsideInteraction = true;
+        context._allowOutsideCloseFromInteraction = false;
+        usedContexts.push(context);
+        updateListeners(context, true);
+        return context;
+    }
+
+    test('closes on a click outside made before the open has settled', () => {
+        createOpeningContext();
+
+        fire('pointerdown', [outsideNode]);
+        fire('click', [outsideNode]);
+
+        expect(window.history.replaceState).toHaveBeenCalled();
+    });
+
+    test('ignores a click during the opening that has no press of its own', () => {
+        createOpeningContext();
+
+        // The gesture that opened the pop-up: its press happened before the
+        // pop-up existed, so only the click reaches the handler.
+        fire('click', [outsideNode]);
+
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
 
     test('keeps the pop-up open when the gesture starts inside and ends outside', () => {
         createInteractiveContext();

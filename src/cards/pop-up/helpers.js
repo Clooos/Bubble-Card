@@ -768,6 +768,13 @@ function isPopupOpenSettled(context) {
 }
 
 function armFreshOutsideInteractionGuard(context) {
+    // Armed once per open, when the sequence starts. Re-arming at settle would
+    // discard a press that already happened during the transition, which is
+    // the whole point of arming this early.
+    if (context._awaitFreshOutsideInteraction) {
+        return;
+    }
+
     context._awaitFreshOutsideInteraction = true;
     context._allowOutsideCloseFromInteraction = false;
 }
@@ -1010,13 +1017,19 @@ function noteOutsideInteractionStart(event, context) {
     // every press, not only the first one after opening.
     context._interactionStartedInsidePopup = !!isEventInsidePopupOrDialog(event);
 
-    if (!context._awaitFreshOutsideInteraction || !isPopupOpenSettled(context)) {
+    if (!context._awaitFreshOutsideInteraction) {
         return;
     }
 
     if (context._interactionStartedInsidePopup) {
         return;
     }
+
+    // A press that starts outside a pop-up the user can already see is a
+    // deliberate press, whether or not the open has finished settling. Waiting
+    // for the settle made the whole transition a dead zone, and that zone
+    // stretches with the device: on a loaded low-end device the first click
+    // outside was swallowed and only the second one closed the pop-up.
 
     context._allowOutsideCloseFromInteraction = true;
 }
@@ -1039,7 +1052,11 @@ function clickOutside(event, context) {
     if (!(context.config.close_by_clicking_outside ?? true)) return;
     if (!context.popUp.classList.contains('is-popup-opened')) return;
 
-    if (!isPopupOpenSettled(context)) {
+    // Still opening, and no press of this click's own started outside: the
+    // click belongs to the gesture that opened the pop-up, so it must not
+    // close it again. A click that does have its own outside press is honoured
+    // right away instead of waiting for the transition to end.
+    if (!isPopupOpenSettled(context) && !context._allowOutsideCloseFromInteraction) {
         return;
     }
 
@@ -2215,6 +2232,10 @@ export function openPopup(context, instant = false) {
     consumePendingPopupOpenSource(context);
     setPopupOpenInProgress(context, true);
     setPopupOpenSettled(context, false);
+    // Armed from the first moment of the open, not from the settle: it is what
+    // tells the gesture that opened the pop-up apart from a later one, and
+    // that distinction has to hold during the transition too.
+    armFreshOutsideInteractionGuard(context);
     setPopupBackdropBlurGuard(context, true);
 
     if (context.isStandalonePopUp) {
