@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
+import { readFileSync, readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const showBackdrop = jest.fn();
 const hideBackdrop = jest.fn();
@@ -3140,5 +3143,65 @@ describe('outside-click gesture handling', () => {
         fire('pointerdown', [outsideNode]);
         fire('click', [outsideNode]);
         expect(window.history.replaceState).toHaveBeenCalled();
+    });
+});
+
+describe('scheduled work cancellation contract', () => {
+    const popupDir = dirname(fileURLToPath(import.meta.url));
+
+    function readRuntimeSources() {
+        const files = [];
+        const walk = (dir) => {
+            for (const entry of readdirSync(dir, { withFileTypes: true })) {
+                const path = join(dir, entry.name);
+                if (entry.isDirectory()) walk(path);
+                else if (entry.name.endsWith('.js') && !entry.name.endsWith('.test.js')) files.push(path);
+            }
+        };
+        walk(popupDir);
+        return files.map((path) => readFileSync(path, 'utf8')).join('\n');
+    }
+
+    function matchAll(source, pattern) {
+        return new Set([...source.matchAll(pattern)].map((match) => match[1]));
+    }
+
+    const source = readRuntimeSources();
+
+    // Every timer and frame stored on the context must be cancelled by some
+    // lifecycle boundary, or it survives the close that was supposed to kill
+    // it and fires against a torn-down pop-up.
+    const scheduled = new Set([
+        ...matchAll(source, /context\.([A-Za-z_$][\w$]*)\s*=\s*setTimeout/g),
+        ...matchAll(source, /context\.([A-Za-z_$][\w$]*)\s*=\s*requestAnimationFrame/g),
+        ...matchAll(source, /scheduleStandaloneFrame\(context,\s*'([^']+)'/g),
+    ]);
+
+    const cancelled = new Set([
+        ...matchAll(source, /clearContextTimeout\(context,\s*'([^']+)'/g),
+        ...matchAll(source, /clearContextFrame\(context,\s*'([^']+)'/g),
+        ...matchAll(source, /clearTimeout\(context\.([A-Za-z_$][\w$]*)\)/g),
+        ...matchAll(source, /cancelAnimationFrame\(context\.([A-Za-z_$][\w$]*)\)/g),
+        ...matchAll(source, /const popupRuntimeTimeoutKeys = \[([^\]]*)\]/g)
+            .values().next().value?.match(/'([^']+)'/g)?.map((key) => key.slice(1, -1)) ?? [],
+        ...matchAll(source, /const standaloneOpenFrameKeys = \[([^\]]*)\]/g)
+            .values().next().value?.match(/'([^']+)'/g)?.map((key) => key.slice(1, -1)) ?? [],
+    ]);
+
+    test('finds the scheduled work it is meant to audit', () => {
+        expect(scheduled.size).toBeGreaterThan(8);
+    });
+
+    test('cancels every timer and frame the pop-up runtime schedules', () => {
+        expect([...scheduled].filter((key) => !cancelled.has(key)).sort()).toEqual([]);
+    });
+
+    test('keeps no dead keys in the cancellation registries', () => {
+        const registryKeys = [
+            ...(source.match(/const popupRuntimeTimeoutKeys = \[([^\]]*)\]/)?.[1].match(/'([^']+)'/g) ?? []),
+            ...(source.match(/const standaloneOpenFrameKeys = \[([^\]]*)\]/)?.[1].match(/'([^']+)'/g) ?? []),
+        ].map((key) => key.slice(1, -1));
+
+        expect(registryKeys.filter((key) => !scheduled.has(key)).sort()).toEqual([]);
     });
 });

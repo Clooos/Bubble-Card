@@ -42,8 +42,12 @@ registerPopupOpenActivityProbe(() => {
 const outsideCloseFallbackDelay = 150;
 const popupQuickOpenAnimationDurationMs = 140;
 const popupBlurWillChangeDurationMs = 450;
-const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', 'closeStartTimeout', 'closeActionTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout', '_standaloneHeavyOpenTimeout', '_standalonePostOpenContentWakeTimeout', '_pendingOpenSettledUpdateTimeout'];
-const standaloneOpenFrameKeys = ['_standaloneOpenFrame', '_standaloneCardSyncFrame', '_standaloneClosedPaintCountFrame'];
+// Every timer and frame the pop-up runtime schedules must be listed here, or
+// it survives the lifecycle boundary that was supposed to cancel it. The
+// lists had drifted both ways: three keys nothing ever assigned, and two
+// genuinely live frames nobody cancelled.
+const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout', '_standaloneHeavyOpenTimeout', '_standalonePostOpenContentWakeTimeout', '_pendingOpenSettledUpdateTimeout'];
+const standaloneOpenFrameKeys = ['_standaloneCardSyncFrame', '_standaloneClosedPaintCountFrame', '_popupListenersFrame', '_popupScrollResetFrame'];
 const maxPostOpenContentWakeTargets = 16;
 
 export const POPUP_MODE_DEFAULT = 'default';
@@ -1616,11 +1620,6 @@ function openStandalonePopup(context, instant = false) {
             popUp.style.display = '';
             popUp.style.visibility = '';
             updateListeners(context, true);
-            // Defer updateListeners for instant opens to the next frame.
-            scheduleStandaloneFrame(context, '_popupListenersFrame', () => {
-                if (!popupState.activePopups.has(context)) return;
-                updateListeners(context, true);
-            });
 
             setStandalonePopUpCardsActive(context, true);
             setPopupOpeningMarker(context, true);
