@@ -5,7 +5,7 @@ import { cleanupTapActions } from './tools/tap-actions.js';
 import { preloadYAMLStyles } from './modules/registry.js';
 import { createBubbleDefaultColor } from './tools/style.js';
 import { updateThemeBackgroundColor } from './cards/pop-up/backdrop.js';
-import { stopTimerInterval } from './tools/utils.js';
+import { invalidateStyleCache, stopTimerInterval } from './tools/utils.js';
 import { cleanupScrollingEffects } from './tools/text-scrolling.js';
 import { getEntitySuggestion } from './tools/entity-suggestion.js';
 import { registerPopupContext, shouldHoldDashboardHassUpdate } from './cards/pop-up/helpers.js';
@@ -222,6 +222,10 @@ class BubbleCard extends HTMLElement {
   set hass(hass) {
     if (hass?.themes !== _lastSeenThemes) {
       _lastSeenThemes = hass?.themes ?? null;
+      // Home Assistant is the only reliable signal that the theme changed: drop the
+      // resolved variables before recomputing, otherwise both colors below are
+      // rebuilt from the previous theme's cached values.
+      invalidateStyleCache();
       updateThemeBackgroundColor();
       createBubbleDefaultColor();
     }

@@ -1,4 +1,4 @@
-import { resolveCssVariable, hexToRgb, rgbStringToRgb, getCachedDocumentElementStyles } from './utils.js';
+import { resolveCssVariable, hexToRgb, rgbStringToRgb, calculateLuminance, getCachedDocumentElementStyles } from './utils.js';
 
 export function updateIcon(context, hass, entityId, icon, iconContainer) {
     while (iconContainer.firstChild) {
@@ -89,16 +89,37 @@ export function convertToRGBA(color, opacity, lighten = 1) {
     return rgbaColor ?? `rgba(0, 0, 0, ${opacity})`;
 }
 
+// Home Assistant's own default backgrounds. They are only used when the theme
+// exposes no readable background: falling back to white washed the active state
+// out on every dark theme.
+const FALLBACK_LIGHT_BACKGROUND = [250, 250, 250];
+const FALLBACK_DARK_BACKGROUND = [17, 17, 17];
+
+function getPrimaryBackgroundRgb() {
+    const primaryBgColor = resolveCssVariable('var(--primary-background-color)');
+    const bgColorRgb = hexToRgb(primaryBgColor) || rgbStringToRgb(primaryBgColor);
+    if (bgColorRgb) return bgColorRgb;
+
+    // The text color tells a dark theme from a light one far better than a
+    // hardcoded white, and the browser color scheme takes over only when the
+    // theme has not been applied at all yet.
+    const textColor = resolveCssVariable('var(--primary-text-color)');
+    const textRgb = hexToRgb(textColor) || rgbStringToRgb(textColor);
+    if (textRgb) {
+        return calculateLuminance(...textRgb) > 0.5 ? FALLBACK_DARK_BACKGROUND : FALLBACK_LIGHT_BACKGROUND;
+    }
+
+    return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches
+        ? FALLBACK_DARK_BACKGROUND
+        : FALLBACK_LIGHT_BACKGROUND;
+}
+
 export function createBubbleDefaultColor(applyImmediately = true) {
     // Default bubble blue color
     const bubbleBlue = [0, 145, 255];
-    
-    // Get primary background color with fallback to white
-    const primaryBgColor = resolveCssVariable('var(--primary-background-color, #ffffff)');
-    
-    // Parse the background color
-    let bgColorRgb = hexToRgb(primaryBgColor) || rgbStringToRgb(primaryBgColor) || [255, 255, 255];
-    
+
+    const bgColorRgb = getPrimaryBackgroundRgb();
+
     // Mix colors: 70% bubbleBlue + 30% background color
     const mixedColor = bubbleBlue.map((channel, i) => 
         Math.round((channel * 0.7) + (bgColorRgb[i] * 0.3))

@@ -84,23 +84,41 @@ const colorCache = new Map();
 let cachedDocumentElementStyles = null;
 let cachedBodyStyles = null;
 let cachedThemeId = null;
+let styleCacheNeedsThemeCheck = true;
 
 function getCurrentThemeId() {
-    // Theme changes are rare; use a combination of common theme variables as a fingerprint.
-    const root = document.documentElement;
-    const bg = root.style.getPropertyValue('--primary-background-color').trim();
-    const fg = root.style.getPropertyValue('--primary-text-color').trim();
-    return bg + '|' + fg;
+    // Home Assistant applies a theme by writing every token inline on <html>, so the
+    // number of inline declarations plus the two colors Bubble Card reads identifies
+    // it. The count matters: themes sharing a background and a text color still
+    // differ by it, and the default light theme, which writes no token at all, no
+    // longer looks like a page whose theme has simply not been applied yet.
+    const rootStyle = document.documentElement.style;
+    const bg = rootStyle.getPropertyValue('--primary-background-color').trim();
+    const fg = rootStyle.getPropertyValue('--primary-text-color').trim();
+    return rootStyle.length + '|' + bg + '|' + fg;
+}
+
+// That same inline write is also the signal that a theme changed at all. Watching
+// the attribute keeps the check below down to a boolean on a path walked for every
+// color of every card, and it stays silent while the dashboard merely updates.
+if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined' && document.documentElement) {
+    new MutationObserver(() => {
+        styleCacheNeedsThemeCheck = true;
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
 }
 
 export function invalidateStyleCache() {
     cachedDocumentElementStyles = null;
     cachedBodyStyles = null;
     cachedThemeId = null;
+    styleCacheNeedsThemeCheck = true;
     cssVariableCache.clear();
 }
 
 function ensureStyleCacheValid() {
+    if (!styleCacheNeedsThemeCheck) return;
+    styleCacheNeedsThemeCheck = false;
+
     const currentTheme = getCurrentThemeId();
     if (cachedThemeId !== currentTheme) {
         cachedDocumentElementStyles = null;
@@ -131,20 +149,24 @@ const cssVariableCache = new Map();
 
 export function resolveCssVariable(cssVariable) {
     if (!cssVariable) return '';
-    
-    // Check cache first
+
+    // Before the cache, never after: the theme check used to sit behind the lookup
+    // below, in getCachedBodyStyles, so a hit returned the previous theme's color
+    // forever and only a miss on another variable could ever clear it.
+    ensureStyleCacheValid();
+
     if (cssVariableCache.has(cssVariable)) {
         return cssVariableCache.get(cssVariable);
     }
-    
+
     let value = cssVariable;
-    
+
     // Fast path: if not a CSS variable, return as-is
     if (!value.startsWith('var(')) {
         cssVariableCache.set(cssVariable, value);
         return value;
     }
-    
+
     const bodyStyles = getCachedBodyStyles();
     let iterations = 0;
     const maxIterations = 10; // Prevent infinite loops
@@ -163,13 +185,32 @@ export function resolveCssVariable(cssVariable) {
 }
 
 export function hexToRgb(hex) {
-    const match = hex.match(/^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-    return match ? [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16)] : null;
+    // Themes use every hex form, including the shorthand Home Assistant ships in
+    // its own default themes (`#111` dark background, `#fff` light card): parsing
+    // only the six digit form made those colors silently unreadable.
+    const match = typeof hex === 'string' ? hex.trim().match(/^#([a-f\d]{3,8})$/i) : null;
+    if (!match) return null;
+
+    const digits = match[1];
+    if (digits.length === 3 || digits.length === 4) {
+        return [0, 1, 2].map(i => parseInt(digits[i] + digits[i], 16));
+    }
+    if (digits.length === 6 || digits.length === 8) {
+        return [0, 2, 4].map(i => parseInt(digits.slice(i, i + 2), 16));
+    }
+    return null;
 }
 
 export function rgbStringToRgb(rgbString) {
-    const match = rgbString.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-    return match ? [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10)] : null;
+    if (typeof rgbString !== 'string') return null;
+
+    // Both the legacy comma form and the modern space separated one are valid
+    // theme values, and computed colors can carry decimals. Percentage channels
+    // are turned down on purpose since they are not on a 0-255 scale, while a
+    // percentage alpha stays fine: only the three channels are guarded.
+    const match = rgbString.trim()
+        .match(/^rgba?\(\s*(\d+(?:\.\d+)?)(?!%)[\s,]+(\d+(?:\.\d+)?)(?!%)[\s,]+(\d+(?:\.\d+)?)(?!%)/i);
+    return match ? [Math.round(+match[1]), Math.round(+match[2]), Math.round(+match[3])] : null;
 }
 
 export function calculateLuminance(r, g, b) {
