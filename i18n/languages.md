@@ -1,4 +1,4 @@
-# Bubble Card in your language
+# <img src="../img/translate.svg" width="28" height="28" align="absmiddle" alt=""> Bubble Card in your language
 
 > [!IMPORTANT]
 > The English [README](../README.md) is the reference documentation and is always up to date.

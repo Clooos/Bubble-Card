@@ -5,7 +5,7 @@
 
 # Bubble Card
 
-🌐 **[Llegiu-ho en un altre idioma](languages.md)**
+[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Llegiu-ho en un altre idioma](languages.md)**
 
 ![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
 
