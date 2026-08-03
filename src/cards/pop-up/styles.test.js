@@ -118,6 +118,44 @@ describe('pop-up styles', () => {
     expect(styles).not.toMatch(/^\s*\.bubble-pop-up\.popup-mode-centered[^,{]*> \.bubble-pop-up-container::after/m);
   });
 
+  // #2537: pop-ups are position:fixed, so they offset themselves to stay
+  // centred on the dashboard rather than on the viewport. That offset used to
+  // be read from var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)): width
+  // tokens, which say nothing about whether the sidebar is on screen. HA hides
+  // the sidebar by dropping --ha-sidebar-width, the chain then fell through to
+  // the legacy --mdc-drawer-width, and the pop-up was pushed sideways by a
+  // sidebar nobody could see (off screen entirely on a phone).
+  test('offsets pop-ups by the measured content area, never by a stale sidebar token', () => {
+    expect(getBasePopUpRule()).toContain(
+      '--bubble-pop-up-content-inline-start: var(--bubble-content-inline-start, var(--ha-sidebar-width, 0px))'
+    );
+    expect(styles).not.toMatch(/var\(\s*--mdc-drawer-width/);
+  });
+
+  test('routes every pop-up mode through the measured offset', () => {
+    // Centered mode.
+    expect(styles).toMatch(
+      /@media only screen and \(min-width: 768px\) \{\s*\.bubble-pop-up\.popup-mode-centered:not\(\.editor\) \{\s*inset-inline-start: var\(--bubble-pop-up-content-inline-start\) !important;/
+    );
+    // Adaptive dialog, in its dialog-sized window.
+    expect(styles).toMatch(
+      /@media only screen and \(min-width: 871px\) and \(min-height: 501px\) \{[\s\S]*?\.bubble-pop-up\.popup-mode-adaptive-dialog:not\(\.editor\) \{[^}]*inset-inline-start: var\(--bubble-pop-up-content-inline-start\) !important;/
+    );
+    // Default bottom-sheet mode, which centres itself with the half-offset.
+    expect(styles).toMatch(
+      /@media only screen and \(min-width: 768px\) \{\s*\.bubble-pop-up:not\(\.editor\) \{[^}]*inset-inline-start: calc\(var\(--bubble-pop-up-content-inline-start\) \/ 2 \+ 50% - \(var\(--desktop-width, 540px\) \/ 2\)\);/
+    );
+  });
+
+  // The offset is published as a logical inline-start value, so RTL dashboards
+  // keep working through the same declarations.
+  test('keeps the horizontal placement logical', () => {
+    const placementSites = styles.match(/^[^\S\n]*inset-inline-start:.*--bubble-pop-up-content-inline-start.*$/gm) ?? [];
+
+    expect(placementSites).toHaveLength(3);
+    expect(styles).not.toMatch(/^[^\S\n]*left:.*--bubble-pop-up-content-inline-start/m);
+  });
+
   test('keeps configured popup shadow visible during the opening transition', () => {
     const rule = getOpeningShadowSuppressionRule();
 

@@ -102,6 +102,12 @@
 }
 
 .bubble-pop-up {
+    /* Where the dashboard content starts, measured from HA's own rendered
+       panel (tools/content-inset.js). --mdc-drawer-width is deliberately gone
+       from this chain: HA drops --ha-sidebar-width when the sidebar is hidden,
+       and the legacy token then re-adds a sidebar that is not on screen,
+       pushing the pop-up off to the side (#2537). */
+    --bubble-pop-up-content-inline-start: var(--bubble-content-inline-start, var(--ha-sidebar-width, 0px));
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -256,7 +262,7 @@
 
 @media only screen and (min-width: 768px) {
     .bubble-pop-up.popup-mode-centered:not(.editor) {
-        inset-inline-start: var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) !important;
+        inset-inline-start: var(--bubble-pop-up-content-inline-start) !important;
     }
 }
 
@@ -380,7 +386,7 @@
 @media only screen and (min-width: 871px) and (min-height: 501px) {
     .bubble-pop-up.popup-mode-adaptive-dialog:not(.editor) {
         top: 0 !important;
-        inset-inline-start: var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) !important;
+        inset-inline-start: var(--bubble-pop-up-content-inline-start) !important;
         inset-inline-end: 0 !important;
         bottom: 0 !important;
         margin: auto !important;
@@ -610,7 +616,7 @@
             --bubble-pop-up-available-height: calc(100vh - 56px - var(--custom-height-offset-desktop));
             top: calc(56px + var(--custom-height-offset-desktop));
             bottom: 0;
-      inset-inline-start: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) / 2 + 50% - (var(--desktop-width, 540px) / 2));
+      inset-inline-start: calc(var(--bubble-pop-up-content-inline-start) / 2 + 50% - (var(--desktop-width, 540px) / 2));
     }
     .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) {
         top: auto;

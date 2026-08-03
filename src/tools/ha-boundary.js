@@ -49,6 +49,31 @@ export function isDialogNode(node) {
     }
 }
 
+// The element HA renders the active panel into. Bubble Card measures its rect
+// to know where the dashboard content really starts on screen, because
+// pop-ups are position:fixed and are therefore laid out against the viewport
+// while the dashboard itself sits inset behind the sidebar.
+// `slot="appContent"` is the role the drawer gives that element and
+// `partial-panel-resolver` its current tag name: recognise the role first, so
+// a rename leaves the measurement working.
+export function resolveContentSurface() {
+    if (typeof document === 'undefined') {
+        return null;
+    }
+
+    const main = document
+        .querySelector('home-assistant')
+        ?.shadowRoot?.querySelector('home-assistant-main');
+    const shell = main?.shadowRoot;
+    if (!shell) {
+        return null;
+    }
+
+    return shell.querySelector('[slot="appContent"]')
+        || shell.querySelector('partial-panel-resolver')
+        || null;
+}
+
 // The legacy (pre-standalone) pop-up shell is HA's vertical-stack card render
 // root. '#root' is an internal id of hui-vertical-stack-card; when it moves,
 // fall back to the first element child so the pop-up still has a shell to work

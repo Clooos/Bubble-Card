@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, jest, test } from '@jest/globals';
 
-const { HA_CARD_WRAPPER_TAG, isDialogNode, isHaCardWrapper, resolveLegacyStackRoot } = await import('./ha-boundary.js');
+const { HA_CARD_WRAPPER_TAG, isDialogNode, isHaCardWrapper, resolveContentSurface, resolveLegacyStackRoot } = await import('./ha-boundary.js');
 
 // Contract tests for the Home Assistant DOM assumptions the pop-up runtime
 // makes. They exist so a HA release that moves one of these fails here, during
@@ -81,5 +81,52 @@ describe('legacy vertical-stack root contract', () => {
         expect(resolveLegacyStackRoot(null)).toBeNull();
         expect(resolveLegacyStackRoot({})).toBeNull();
         expect(resolveLegacyStackRoot({ querySelector: () => null, firstElementChild: null })).toBeNull();
+    });
+});
+
+describe('HA content surface contract', () => {
+    afterEach(() => {
+        delete global.document;
+    });
+
+    function installShell(mainShadowRoot) {
+        global.document = {
+            querySelector: (selector) => (selector === 'home-assistant'
+                ? {
+                    shadowRoot: {
+                        querySelector: (inner) => (inner === 'home-assistant-main'
+                            ? { shadowRoot: mainShadowRoot }
+                            : null),
+                    },
+                }
+                : null),
+        };
+    }
+
+    test('recognises the panel by the slot the drawer gives it', () => {
+        const panel = { slot: 'appContent' };
+        installShell({ querySelector: (sel) => (sel === '[slot="appContent"]' ? panel : null) });
+
+        expect(resolveContentSurface()).toBe(panel);
+    });
+
+    test('falls back to the tag name HA uses today', () => {
+        const panel = { tag: 'partial-panel-resolver' };
+        installShell({ querySelector: (sel) => (sel === 'partial-panel-resolver' ? panel : null) });
+
+        expect(resolveContentSurface()).toBe(panel);
+    });
+
+    // No panel means no measurement: pop-ups then keep their CSS fallback
+    // instead of being positioned against a guess.
+    test('reports nothing rather than throwing when HA\'s shell is not there', () => {
+        installShell({ querySelector: () => null });
+        expect(resolveContentSurface()).toBeNull();
+
+        global.document = { querySelector: () => null };
+        expect(resolveContentSurface()).toBeNull();
+
+        global.document = { querySelector: () => ({ shadowRoot: null }) };
+        expect(resolveContentSurface()).toBeNull();
     });
 });

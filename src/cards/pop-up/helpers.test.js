@@ -159,6 +159,11 @@ jest.unstable_mockModule('./cards/preload.js', () => ({
     schedulePopupCardModulePreload,
 }));
 
+const startContentInsetSync = jest.fn();
+jest.unstable_mockModule('../../tools/content-inset.js', () => ({
+    startContentInsetSync,
+}));
+
 jest.unstable_mockModule('./index.js', () => ({
     invalidateWakeSyncCache: jest.fn(),
 }));
@@ -1579,6 +1584,19 @@ describe('standalone popup lifecycle', () => {
         cleanupPopupRuntime(context);
 
         expect(invalidateWakeSyncCache).toHaveBeenCalled();
+    });
+
+    // #2537: the horizontal placement of a pop-up comes from a measurement of
+    // HA's rendered panel, not from a sidebar-width token that survives a
+    // hidden sidebar. Registration is what keeps that measurement running.
+    test('keeps the content inset measurement alive on registration', () => {
+        const context = createStandaloneContext({ hash: '#content-inset-a' });
+        usedContexts.push(context);
+
+        startContentInsetSync.mockClear();
+        registerPopupContext(context);
+
+        expect(startContentInsetSync).toHaveBeenCalled();
     });
 
     test('warms up the standalone shell at idle after registration', () => {

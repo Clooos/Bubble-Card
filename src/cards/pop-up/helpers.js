@@ -7,6 +7,7 @@ import { beginPopupOpenHassGate, releasePopupOpenHassGate } from './hass-gate.js
 import { schedulePopupCardModulePreload } from './cards/preload.js';
 import { invalidateWakeSyncCache } from "./index.js";
 import { HA_CARD_WRAPPER_TAG, isDialogNode, isHaCardWrapper } from '../../tools/ha-boundary.js';
+import { startContentInsetSync } from '../../tools/content-inset.js';
 
 // Re-exported so the pop-up runtime keeps one import surface for its callers.
 export { isDialogNode };
@@ -2541,6 +2542,12 @@ function pumpShellWarmupQueue() {
 export function registerPopupContext(context) {
     const hash = context.config.hash;
     if (!hash) return;
+
+    // Keep publishing where the dashboard content starts, so pop-ups centre on
+    // the area HA actually renders into instead of on a sidebar-width token
+    // that outlives the sidebar. Idempotent, and re-entered on every tick so a
+    // dashboard swap or a late boot is picked up.
+    startContentInsetSync();
 
     // Idle-time warm-ups (once per context): the card modules this pop-up
     // will need, and the standalone shell itself.
