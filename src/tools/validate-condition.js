@@ -1,4 +1,31 @@
 import { getRenderedTemplate } from "./render-template.js";
+import {
+  checkPlatformCondition,
+  extractPlatformConditionEntityIds,
+  getLocalParts,
+  getPlatformCondition,
+  validatePlatformCondition,
+} from "./ha-conditions.js";
+
+// Condition types Home Assistant knows but Bubble Card cannot evaluate get
+// reported once each, instead of quietly reading as false on every render.
+const warnedConditionTypes = new Set();
+
+function warnUnsupportedCondition(type) {
+  if (warnedConditionTypes.has(type)) return;
+  warnedConditionTypes.add(type);
+  console.warn(
+    `Bubble Card - Unsupported condition type "${type}", it will always evaluate to false. `
+    + "Please report it so it can be added: https://github.com/Clooos/Bubble-Card/issues",
+  );
+}
+
+// The former catch-all routed every unknown type to a state comparison, so a
+// condition still shaped like one keeps working while the type is reported.
+function isStateShapedCondition(condition) {
+  const entityId = condition.entity_id || condition.entity;
+  return entityId != null && (condition.state != null || condition.state_not != null);
+}
 
 function getValueFromEntityId(hass,value){
   try{
@@ -34,12 +61,19 @@ function checkStateCondition(condition, hass) {
   }
 
   if (condition.state != null) {
-    return ensureArray(value).includes(current);
+    return matchesStateValue(value, current);
   } else if (condition.state_not != null) {
-    return !ensureArray(value).includes(current);
+    return !matchesStateValue(value, current);
   }
 
   return false;
+}
+
+// Attributes hold raw values where the YAML holds strings, so compare both
+// forms instead of only the raw one.
+function matchesStateValue(values, current) {
+  const list = ensureArray(values) ?? [];
+  return list.includes(current) || (current != null && list.includes(String(current)));
 }
 
 export function ensureArray(value) {
@@ -127,6 +161,58 @@ function checkUserCondition(condition, hass) {
     : false;
 }
 
+const WEEKDAYS_SHORT = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+function parseTimeToSeconds(value) {
+  if (typeof value !== "string" || value === "") return null;
+  const parts = value.split(":");
+  if (parts.length < 2 || parts.length > 3) return null;
+  if (!parts.every((part) => /^\d+$/.test(part))) return null;
+  const [hours, minutes, seconds = "0"] = parts;
+  const total = Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+  return Number.isNaN(total) ? null : total;
+}
+
+function checkTimeCondition(condition, hass) {
+  const now = getLocalParts(hass);
+
+  if (condition.weekdays?.length && !condition.weekdays.includes(now.weekday)) {
+    return false;
+  }
+
+  const after = parseTimeToSeconds(condition.after);
+  const before = parseTimeToSeconds(condition.before);
+
+  if (after === null && before === null) return true;
+  if (after !== null && before !== null) {
+    return before < after
+      // Crosses midnight, for example 22:00 to 06:00
+      ? now.seconds >= after || now.seconds <= before
+      : now.seconds >= after && now.seconds <= before;
+  }
+  return after !== null ? now.seconds >= after : now.seconds <= before;
+}
+
+// The person entity of the logged in user, the one the location condition reads
+function getUserPersonState(hass) {
+  if (!hass?.user?.id || !hass.states) return undefined;
+  return Object.values(hass.states).find(
+    (stateObj) => stateObj.entity_id.startsWith("person.")
+      && stateObj.attributes?.user_id === hass.user.id,
+  );
+}
+
+function checkLocationCondition(condition, hass) {
+  const stateObj = getUserPersonState(hass);
+  return stateObj ? condition.locations?.includes(stateObj.state) === true : false;
+}
+
+// Bubble Card is never the one laying out the view columns, so this condition
+// can only be neutral, like Home Assistant is without a column context.
+function checkViewColumnsCondition() {
+  return true;
+}
+
 function checkAndCondition(condition, hass) {
   if (!condition.conditions) return true;
   return checkConditionsMet(condition.conditions, hass);
@@ -162,10 +248,18 @@ export function checkConditionsMet(conditions,hass) {
     }
     if ("condition" in c) {
       switch (c.condition) {
+        case "state":
+          return checkStateCondition(c, hass);
         case "screen":
           return checkScreenCondition(c);
         case "user":
           return checkUserCondition(c, hass);
+        case "time":
+          return checkTimeCondition(c, hass);
+        case "location":
+          return checkLocationCondition(c, hass);
+        case "view_columns":
+          return checkViewColumnsCondition();
         case "numeric_state":
           return checkStateNumericCondition(c, hass);
         case "template":
@@ -177,16 +271,38 @@ export function checkConditionsMet(conditions,hass) {
         case "not":
           return checkNotCondition(c, hass);
         default:
-          return checkStateCondition(c, hass);
+          return checkUnknownCondition(c, hass);
       }
     }
+    // Legacy conditional card condition, without a condition key
     return checkStateCondition(c, hass);
   });
 }
 
-export function extractConditionEntityIds(conditions) {
+function checkUnknownCondition(condition, hass) {
+  const platformCondition = getPlatformCondition(condition.condition);
+  if (platformCondition) {
+    return checkPlatformCondition(platformCondition, condition, hass);
+  }
+
+  warnUnsupportedCondition(condition.condition);
+  return isStateShapedCondition(condition) ? checkStateCondition(condition, hass) : false;
+}
+
+// Entity ids a set of conditions depends on, so a change on any of them
+// re-evaluates the conditions. `hass` is optional and only needed to expand
+// device, area, floor and label targets of the Home Assistant conditions.
+export function extractConditionEntityIds(conditions, hass) {
   const entityIds = new Set([]);
   for (const condition of conditions) {
+    if (!condition) continue;
+
+    for (const entityId of ensureArray(condition.entity_id ?? condition.entity) ?? []) {
+      if (typeof entityId === "string" && isValidEntityId(entityId)) {
+        entityIds.add(entityId);
+      }
+    }
+
     if (condition.condition === "numeric_state") {
       if (
         typeof condition.above === "string" &&
@@ -200,7 +316,7 @@ export function extractConditionEntityIds(conditions) {
       ) {
         entityIds.add(condition.below);
       }
-    } else if (condition.condition === "state") {
+    } else if (condition.condition === "state" || !("condition" in condition)) {
       [
         ...(ensureArray(condition.state) ?? []),
         ...(ensureArray(condition.state_not) ?? []),
@@ -209,11 +325,21 @@ export function extractConditionEntityIds(conditions) {
           entityIds.add(state);
         }
       });
-    } else if ("conditions" in condition && condition.conditions) {
-      return new Set([
-        ...entityIds,
-        ...extractConditionEntityIds(condition.conditions),
-      ]);
+    } else if (condition.condition === "location") {
+      const personState = getUserPersonState(hass);
+      if (personState) entityIds.add(personState.entity_id);
+    } else {
+      const platformCondition = getPlatformCondition(condition.condition);
+      if (platformCondition) {
+        extractPlatformConditionEntityIds(platformCondition, condition, hass, entityIds);
+      }
+    }
+
+    // Nested and/or/not conditions, walked without cutting the loop short
+    if (condition.conditions) {
+      for (const entityId of extractConditionEntityIds(condition.conditions, hass)) {
+        entityIds.add(entityId);
+      }
     }
   }
   return entityIds;
@@ -229,6 +355,29 @@ function validateStateCondition(condition) {
 
 function validateScreenCondition(condition) {
   return condition.media_query != null;
+}
+
+function validateTimeCondition(condition) {
+  const hasAfter = condition.after != null && condition.after !== "";
+  const hasBefore = condition.before != null && condition.before !== "";
+  const hasWeekdays = condition.weekdays != null && condition.weekdays.length > 0;
+
+  if (!hasAfter && !hasBefore && !hasWeekdays) return false;
+  if (hasWeekdays && !condition.weekdays.every((day) => WEEKDAYS_SHORT.includes(day))) {
+    return false;
+  }
+  if (hasAfter && parseTimeToSeconds(condition.after) === null) return false;
+  if (hasBefore && parseTimeToSeconds(condition.before) === null) return false;
+  // An identical after and before describes a zero length interval
+  return !hasAfter || !hasBefore || condition.after !== condition.before;
+}
+
+function validateLocationCondition(condition) {
+  return condition.locations != null;
+}
+
+function validateViewColumnsCondition(condition) {
+  return condition.min != null || condition.max != null;
 }
 
 function validateUserCondition(condition) {
@@ -271,10 +420,18 @@ export function validateConditionalConfig(conditions){
     }
     if ("condition" in c) {
       switch (c.condition) {
+        case "state":
+          return validateStateCondition(c);
         case "screen":
           return validateScreenCondition(c);
         case "user":
           return validateUserCondition(c);
+        case "time":
+          return validateTimeCondition(c);
+        case "location":
+          return validateLocationCondition(c);
+        case "view_columns":
+          return validateViewColumnsCondition(c);
         case "numeric_state":
           return validateNumericStateCondition(c);
         case "template":
@@ -286,11 +443,21 @@ export function validateConditionalConfig(conditions){
         case "not":
           return validateNotCondition(c);
         default:
-          return validateStateCondition(c);
+          return validateUnknownCondition(c);
       }
     }
     return validateStateCondition(c);
   });
+}
+
+function validateUnknownCondition(condition) {
+  const platformCondition = getPlatformCondition(condition.condition);
+  if (platformCondition) {
+    return validatePlatformCondition(platformCondition, condition);
+  }
+
+  warnUnsupportedCondition(condition.condition);
+  return validateStateCondition(condition);
 }
 
 export function addEntityToCondition(condition,  entityId) {

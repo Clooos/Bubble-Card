@@ -383,6 +383,34 @@ if (!elementConfig?.condition || checkConditionsMet([].concat(elementConfig.cond
 
 </details>
 
+<details>
+<summary><b>Supported condition types</b></summary>
+
+`checkConditionsMet` evaluates conditions in the browser, where Home Assistant
+normally evaluates them on the server. Every condition type the native condition
+builder offers is supported: the Lovelace ones (`state`, `numeric_state`,
+`screen`, `user`, `time`, `location`, `view_columns`, `and`, `or`, `not`, plus
+the Bubble Card `template` one) and the ones the integrations provide
+(`sun.is_up`, `light.is_on`, `select.is_option_selected`, `climate.is_heating`,
+`moon.is_phase`, ...) with their `target`, `behavior` and `for` options. The
+legacy `sun` and `zone` conditions, which the builder no longer offers but which
+remain valid in hand written YAML, are supported too.
+
+Two of them are approximated, since the browser has neither the recorder nor the
+astral library Home Assistant uses:
+
+- `for:` is measured from the last state change, without replaying the history,
+  so a condition that was already true beforehand can read as shorter.
+- the legacy `sun` condition derives today's sunrise and sunset from the next
+  ones published by `sun.sun`. It is exact until the event has passed, then off
+  by the few minutes the event drifts in a day.
+
+A condition type Home Assistant adds after a Bubble Card release reads as false
+and logs a warning in the browser console naming the type, so a condition that
+never matches is never silent.
+
+</details>
+
 *No additional selector options.*
 
 #### Entity selector
