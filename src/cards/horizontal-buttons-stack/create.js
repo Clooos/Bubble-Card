@@ -1,5 +1,6 @@
 import { createElement, forwardHaptic, navigate } from "../../tools/utils.js";
 import { isHaCardWrapper } from '../../tools/ha-boundary.js';
+import { startContentInsetSync } from '../../tools/content-inset.js';
 import { addHash, removeHash } from "../pop-up/helpers.js";
 import styles from "./styles.css";
 
@@ -105,6 +106,10 @@ export function createStructure(context) {
     context.elements.customStyle = createElement('style');
 
     context.card.classList.add('horizontal-buttons-stack-card');
+    // The bar is position:fixed, so it offsets itself by where the dashboard
+    // content starts. Start measuring that: a dashboard with a buttons stack
+    // and no pop-up would otherwise never publish the value.
+    startContentInsetSync();
     context.card.style.marginInlineStart = context.config.margin ?? '';
     if (!context.config.hide_gradient) {
       context.card.classList.add('has-gradient');

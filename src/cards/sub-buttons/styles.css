@@ -23,18 +23,24 @@
 }
 
 ha-card.footer-mode {
+  /* Where the dashboard content starts, measured from HA's own rendered panel
+     (tools/content-inset.js). --mdc-drawer-width is deliberately gone from
+     this chain: HA drops --ha-sidebar-width when the sidebar is hidden, and
+     the legacy token then re-adds a sidebar that is not on screen, pushing
+     this fixed footer off to the side (same defect as #2537). */
+  --bubble-sub-buttons-content-inline-start: var(--bubble-content-inline-start, var(--ha-sidebar-width, 0px));
   bottom: var(--bubble-footer-bottom, 16px);
   height: auto;
   margin-top: 0;
   position: fixed;
-  width: calc(100% - var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) - 8px);
-  inset-inline-start: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) + 4px);
+  width: calc(100% - var(--bubble-sub-buttons-content-inline-start) - 8px);
+  inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + 4px);
   z-index: 5;
 }
 
 ha-card.footer-mode:not(.footer-full-width) {
   width: var(--bubble-footer-width, 500px);
-  inset-inline-start: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) + (100% - var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) - var(--bubble-footer-width, 500px)) / 2);
+  inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + (100% - var(--bubble-sub-buttons-content-inline-start) - var(--bubble-footer-width, 500px)) / 2);
 }
 
 @media only screen and (max-width: 600px) {

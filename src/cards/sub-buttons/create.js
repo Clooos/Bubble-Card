@@ -1,4 +1,5 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
+import { startContentInsetSync } from "../../tools/content-inset.js";
 import styles from "./styles.css";
 
 export function createStructure(context, appendTo = context.container) {
@@ -40,7 +41,12 @@ export function createStructure(context, appendTo = context.container) {
 
     if (context.config.footer_mode) {
         context.card.classList.add('footer-mode');
-        
+
+        // The footer is position:fixed, so it offsets itself by where the
+        // dashboard content starts. Start measuring that: a dashboard with a
+        // footer and no pop-up would otherwise never publish the value.
+        startContentInsetSync();
+
         if (context.config.footer_full_width) {
             context.card.classList.add('footer-full-width');
         } else if (context.config.footer_width) {

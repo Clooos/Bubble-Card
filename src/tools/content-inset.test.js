@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
+import { readFileSync, readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 let documentRTL = false;
 
@@ -214,5 +217,34 @@ describe('content inset publication', () => {
         expect(startContentInsetSync()).toBe(true);
         expect(published()).toBe('56px');
         expect(global.window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
+    });
+});
+
+// The contract this module exists to enforce, checked across the whole
+// codebase: nothing may fall back on --mdc-drawer-width. HA stopped defining
+// it (frontend 20260527 renamed it to --ha-sidebar-width) and hides the
+// sidebar by dropping --ha-sidebar-width entirely, so a fallback to the legacy
+// token hands the layout to whatever stale definition a theme, an older HA or
+// a sidebar/kiosk mod still exposes. Issue #2537 is what that costs.
+describe('legacy sidebar token contract', () => {
+    function collectStylesheets(directory, found = []) {
+        for (const entry of readdirSync(directory, { withFileTypes: true })) {
+            const path = join(directory, entry.name);
+            if (entry.isDirectory()) {
+                collectStylesheets(path, found);
+            } else if (entry.name.endsWith('.css')) {
+                found.push(path);
+            }
+        }
+        return found;
+    }
+
+    test('no stylesheet reads the legacy drawer-width token', () => {
+        const src = join(dirname(fileURLToPath(import.meta.url)), '..');
+        const offenders = collectStylesheets(src)
+            .filter((path) => /var\(\s*--mdc-drawer-width/.test(readFileSync(path, 'utf8')))
+            .map((path) => path.slice(src.length + 1));
+
+        expect(offenders).toEqual([]);
     });
 });

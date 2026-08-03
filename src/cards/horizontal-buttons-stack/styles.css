@@ -14,12 +14,18 @@ ha-card {
     border-radius: 0;
 }
 .horizontal-buttons-stack-card {
+    /* Where the dashboard content starts, measured from HA's own rendered
+       panel (tools/content-inset.js). --mdc-drawer-width is deliberately gone
+       from this chain: HA drops --ha-sidebar-width when the sidebar is hidden,
+       and the legacy token then re-adds a sidebar that is not on screen,
+       pushing this fixed bar off to the side (same defect as #2537). */
+    --bubble-horizontal-buttons-stack-content-inline-start: var(--bubble-content-inline-start, var(--ha-sidebar-width, 0px));
     bottom: 16px;
     height: 51px;
     margin-top: 0;
     position: fixed;
-    width: calc(100% - var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) - 8px);
-    inset-inline-start: calc(var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)) + 4px);
+    width: calc(100% - var(--bubble-horizontal-buttons-stack-content-inline-start) - 8px);
+    inset-inline-start: calc(var(--bubble-horizontal-buttons-stack-content-inline-start) + 4px);
     z-index: 6; /* Higher value hide the more-info panel */
 }
 @media only screen and (max-width: 870px) {

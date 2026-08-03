@@ -60,6 +60,11 @@ jest.unstable_mockModule('../pop-up/helpers.js', () => ({
     removeHash,
 }));
 
+const startContentInsetSync = jest.fn();
+jest.unstable_mockModule('../../tools/content-inset.js', () => ({
+    startContentInsetSync,
+}));
+
 const { createButton } = await import('./create.js');
 
 function buildContext(link) {
