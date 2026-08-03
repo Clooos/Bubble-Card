@@ -499,6 +499,56 @@ describe('handlePopUp performance guards', () => {
         expect(typeof context.createStandaloneShell).toBe('function');
     });
 
+    test('initializes a pop-up mounted in light DOM, where the root is the document', async () => {
+        // The attachment guard used to test "is my root a ShadowRoot", which is
+        // not the same question as "am I attached": a card mounted straight into
+        // light DOM is connected and has the document as its root, and was
+        // silently skipped forever (no shell, no error, never opens).
+        const context = createOpenPopupContext({
+            cardType: undefined,
+            isStandalonePopUp: false,
+            isConnected: true,
+            getRootNode: () => ({ nodeType: 9 }),
+        });
+
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+        expect(typeof context.refreshPopupHeader).toBe('function');
+    });
+
+    test('still initializes a pop-up whose shadow subtree is not in the document yet', async () => {
+        // Custom stacks (decluttering-card, streamline-card, layout-card…) build
+        // their shadow subtree before inserting it in the view, so the pop-up is
+        // initialized while it is not connected. See #2552.
+        const rootNode = new global.ShadowRoot();
+        const context = createOpenPopupContext({
+            cardType: undefined,
+            isStandalonePopUp: false,
+            isConnected: false,
+            getRootNode: () => rootNode,
+        });
+
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+    });
+
+    test('skips a card that is neither in a shadow tree nor connected', async () => {
+        const context = createOpenPopupContext({
+            cardType: undefined,
+            isStandalonePopUp: false,
+            isConnected: false,
+            getRootNode: () => ({ nodeType: 11 }),
+        });
+
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).not.toHaveBeenCalled();
+        expect(createStructure).not.toHaveBeenCalled();
+        expect(context.refreshPopupHeader).toBe(undefined);
+    });
+
     test('does not mount standalone child cards during popup initialization while inactive', async () => {
         const rootNode = new global.ShadowRoot();
         const context = createOpenPopupContext({

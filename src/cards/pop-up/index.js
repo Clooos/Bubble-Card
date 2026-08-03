@@ -416,8 +416,13 @@ export function handlePopUp(context) {
     }
 
     if (context.cardType !== "pop-up") {
-        if ((context.getRootNode() instanceof ShadowRoot) === false) {
-            // Skip detached cards.
+        // Skip detached cards. "Detached" is not the same as "outside a shadow
+        // tree": a pop-up hosted in a custom stack is initialized while its
+        // shadow subtree is still out of the document (#2552), and one mounted
+        // straight into light DOM has the document as its root. Skip only a card
+        // that is in neither tree, otherwise the shell is never built and the
+        // pop-up silently never opens.
+        if ((context.getRootNode() instanceof ShadowRoot) === false && !context.isConnected) {
             return;
         }
 
