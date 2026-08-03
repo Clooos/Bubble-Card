@@ -419,9 +419,7 @@ export async function readAllModules(hass) {
   const filesDisappeared = unchanged.length !== Object.keys(cachedFiles).length;
   const cacheChanged = toRead.length > 0 || filesDisappeared;
   if (cacheChanged) {
-    const aggregatedModules = {};
-    modulesMap.forEach((val, key) => { aggregatedModules[key] = val; });
-    saveBCTCache({ version: CACHE_VERSION, files: updatedFilesCache, aggregatedModules, updatedAt: new Date().toISOString() });
+    saveBCTCache({ version: CACHE_VERSION, files: updatedFilesCache, updatedAt: new Date().toISOString() });
   }
   try {
     Object.defineProperty(modulesMap, '__cacheChanged', { value: cacheChanged, enumerable: false, configurable: true });
@@ -480,16 +478,54 @@ export async function deleteModuleFile(hass, moduleId) {
 
 
 // --- Local cache helpers (localStorage) ---
-const CACHE_VERSION = 1;
+// v2 dropped the persisted `aggregatedModules` map: it was a flat view of every
+// module across every file, so the blob carried each module's `code` field
+// twice. On a ~50-module install that was 2.2 MB of a 4.5 MB blob, enough on its
+// own to saturate the origin quota — at which point every localStorage write on
+// the dashboard fails, including this cache's own (silently, so the cache can
+// never refresh again). The aggregate is rebuilt from `files` on read instead.
+const CACHE_VERSION = 2;
+const CACHE_PREFIX = 'bubble-card-bct-cache-v';
 let eventsSubscribed = false;
 
 function getBCTCacheKey() {
   try {
     const host = typeof location !== 'undefined' ? location.host : 'default';
-    return `bubble-card-bct-cache-v${CACHE_VERSION}:${host}`;
+    return `${CACHE_PREFIX}${CACHE_VERSION}:${host}`;
   } catch (_) {
-    return `bubble-card-bct-cache-v${CACHE_VERSION}:default`;
+    return `${CACHE_PREFIX}${CACHE_VERSION}:default`;
   }
+}
+
+// Blobs from earlier cache versions are dead weight, and the v1 one is the
+// single largest entry this origin ever wrote. Drop them on first access so the
+// version bump reclaims that quota instead of stranding it.
+let stalePurged = false;
+function purgeStaleBCTCaches() {
+  if (stalePurged) return;
+  stalePurged = true;
+  try {
+    const currentPrefix = `${CACHE_PREFIX}${CACHE_VERSION}:`;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(CACHE_PREFIX) && !key.startsWith(currentPrefix)) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch (_) {}
+}
+
+// Flat id -> module view over every cached file. Derived, never stored.
+// Rebuilding it walks the file entries and copies object references, so it
+// costs a few hundred property writes against the megabytes of duplicated
+// `code` that persisting it used to add to the blob.
+function aggregateModulesFromFiles(files) {
+  const aggregated = {};
+  Object.values(files || {}).forEach((entry) => {
+    const mods = (entry && entry.modules) || {};
+    Object.keys(mods).forEach((id) => { aggregated[id] = mods[id]; });
+  });
+  return aggregated;
 }
 
 // In-memory memo of the parsed cache. loadBCTCache is called several times per
@@ -503,8 +539,21 @@ let _memRaw = null;
 let _memKey = null;
 let _memObj = null;
 
+// Memo of the aggregate derived from _memObj. Keyed on the parsed cache object
+// identity, so it must be dropped by every writer: invalidateBCTCacheFile
+// mutates the cache in place and saves it back under the same identity, which
+// an identity check alone would read as unchanged.
+let _memAggSource = null;
+let _memAgg = null;
+
+function invalidateAggregateMemo() {
+  _memAggSource = null;
+  _memAgg = null;
+}
+
 function loadBCTCache() {
   try {
+    purgeStaleBCTCaches();
     const key = getBCTCacheKey();
     const raw = localStorage.getItem(key);
     if (!raw) { _memRaw = null; _memKey = key; _memObj = null; return null; }
@@ -521,6 +570,7 @@ function loadBCTCache() {
 }
 
 function saveBCTCache(data) {
+  invalidateAggregateMemo();
   try {
     const key = getBCTCacheKey();
     const raw = JSON.stringify(data);
@@ -534,6 +584,7 @@ function saveBCTCache(data) {
 }
 
 function clearBCTCache() {
+  invalidateAggregateMemo();
   try {
     localStorage.removeItem(getBCTCacheKey());
   } catch (_) {}
@@ -542,31 +593,35 @@ function clearBCTCache() {
 
 // Targeted invalidation: drop a single file's entry so readAllModules re-reads
 // exactly that file, keeping every other module warm. Used instead of the
-// full-cache nuke on module-change events. The aggregate is rebuilt from the
-// surviving files so a stale copy of the edited module is not served before
+// full-cache nuke on module-change events. The aggregate derives from the
+// surviving files, so a stale copy of the edited module is not served before
 // the re-read lands.
 function invalidateBCTCacheFile(name) {
   try {
     const cache = loadBCTCache();
     if (!cache || !cache.files || !cache.files[name]) return;
     delete cache.files[name];
-    const aggregatedModules = {};
-    Object.values(cache.files).forEach((entry) => {
-      const mods = (entry && entry.modules) || {};
-      Object.keys(mods).forEach((id) => { aggregatedModules[id] = mods[id]; });
-    });
-    cache.aggregatedModules = aggregatedModules;
     saveBCTCache(cache);
   } catch (_) {}
 }
 
+// The derived aggregate is memoized against the parsed cache it came from
+// (itself memoized in loadBCTCache), so the boot fast path builds it once even
+// though registry.js asks for it more than once.
 export function getCachedAggregatedModules() {
   const cache = loadBCTCache();
-  const aggregated = cache?.aggregatedModules;
-  if (aggregated && typeof aggregated === 'object' && Object.keys(aggregated).length > 0) {
-    return aggregated;
+  const files = cache?.files;
+  if (!files) {
+    invalidateAggregateMemo();
+    return null;
   }
-  return null;
+
+  if (cache !== _memAggSource) {
+    _memAggSource = cache;
+    _memAgg = aggregateModulesFromFiles(files);
+  }
+
+  return Object.keys(_memAgg).length > 0 ? _memAgg : null;
 }
 
 export function getModuleLastModified(moduleId) {
