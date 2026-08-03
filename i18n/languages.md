@@ -7,8 +7,7 @@
 
 **Any help improving the translations is more than welcome.** If a sentence reads wrong, click the ✏️
 next to your language: GitHub opens the file in its web editor, and saving it creates the
-copy of the project and the pull request for you. No git, no clone, no setup, about a
-minute of your time. Changes about the product itself belong in the English
+copy of the project and the pull request for you. Changes about the product itself belong in the English
 [README](../README.md) instead, so that every language gets them.
 
 A huge thank you to everyone who takes the time 🍻
