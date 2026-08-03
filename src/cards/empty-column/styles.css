@@ -5,6 +5,9 @@
     box-sizing: border-box;
 }
 
-.large .empty-column {
-    height: calc( var(--row-height,0px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ) );
+/* Only an explicitly configured row count gives the column a height, and the
+   class that carries it comes from the config, not from the view type: the
+   previous rule keyed on .large, which nothing but a section view ever adds. */
+.empty-column.has-rows {
+    height: calc( var(--row-height,56px) * var(--row-size,1) + var(--row-gap,8px) * ( var(--row-size,1) - 1 ) );
 }

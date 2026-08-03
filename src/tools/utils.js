@@ -835,6 +835,8 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
         } catch (_) {}
     }
 
+    applyRowSize(context, targetElement);
+
     if (context.previousLayout === determinedLayoutClass) {
         return;
     }
@@ -850,19 +852,34 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
 
     applyMainButtonsLayout();
     updateContentContainerFixedClass(context);
+}
 
-    if (targetElement === context.content &&
-        context.elements?.mainContainer && 
-        (context.config.rows || context.config.grid_options?.rows)) {
-        
-        if (context.config.rows === 'auto' || context.config.grid_options?.rows === 'auto') {
-            // context.elements.mainContainer.style.removeProperty('--row-size');
-        } else {
-            context.elements.mainContainer.style.setProperty('--row-size', context.config.rows || context.config.grid_options?.rows);
-        }
+// --row-size mirrors the configured row count, it is not a property of the
+// layout class. It used to be applied at the end of setLayout, behind the
+// early return above: a call that only reconfirmed the current layout left it
+// untouched, so a card kept the row count of its previous config and every
+// height calc fell back to its one row default (#2523).
+export function applyRowSize(context, targetElement) {
+    const mainContainer = context.elements?.mainContainer;
+    if (!mainContainer) return;
+
+    const configuredRows = context.config.rows || context.config.grid_options?.rows;
+    let rowSize;
+
+    if (targetElement === context.content && configuredRows) {
+        // 'auto' means "size the card from its content": leave the variable as is.
+        if (configuredRows === 'auto') return;
+        rowSize = configuredRows;
     } else if (context.config.card_type === 'separator') {
-        context.elements.mainContainer.style.setProperty('--row-size', 0.8);
+        rowSize = 0.8;
+    } else {
+        return;
     }
+
+    // Reading an inline custom property back costs nothing (no style flush) and
+    // makes the call idempotent, so running it on every update stays free.
+    if (mainContainer.style.getPropertyValue('--row-size') === String(rowSize)) return;
+    mainContainer.style.setProperty('--row-size', rowSize);
 }
 
 export function throttle(mainFunction, delay = 300) {

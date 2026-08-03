@@ -370,3 +370,137 @@ describe('view type probe contract', () => {
         expect(window.isSectionView).toBe(false);
     });
 });
+
+// --row-size used to be written at the very end of setLayout, after the early
+// return that skips a reconfirmed layout. Anything that changed the row count
+// without changing the layout class was therefore never applied (#2523).
+describe('row size application', () => {
+    let utilsModule;
+
+    function createStyle() {
+        const properties = new Map();
+        return {
+            properties,
+            setProperty: jest.fn((name, value) => properties.set(name, String(value))),
+            getPropertyValue: jest.fn((name) => properties.get(name) ?? ''),
+            removeProperty: jest.fn((name) => properties.delete(name)),
+        };
+    }
+
+    function createContext(config = {}) {
+        const mainContainer = { style: createStyle(), classList: createMockClassList() };
+        const content = { classList: createMockClassList(), querySelector: () => null };
+        return { config, content, elements: { mainContainer } };
+    }
+
+    const rowSizeOf = (context) => context.elements.mainContainer.style.getPropertyValue('--row-size');
+
+    beforeEach(async () => {
+        jest.resetModules();
+        global.window = { isSectionView: true };
+        utilsModule = await import('./utils.js');
+    });
+
+    afterEach(() => {
+        delete global.window;
+    });
+
+    test('applies the configured rows on the first layout pass', () => {
+        const context = createContext({ rows: 1.676 });
+        utilsModule.setLayout(context, null, 'large');
+        expect(rowSizeOf(context)).toBe('1.676');
+    });
+
+    test('refreshes the row size when only the rows change', () => {
+        const context = createContext({ card_layout: 'large', rows: 3 });
+        utilsModule.setLayout(context, null, 'large');
+        expect(rowSizeOf(context)).toBe('3');
+
+        // Same layout class, new row count: the early return must not swallow it.
+        context.config.rows = 2;
+        utilsModule.setLayout(context, null, 'large');
+        expect(rowSizeOf(context)).toBe('2');
+    });
+
+    test('reads the row count from grid_options as well', () => {
+        const context = createContext({ grid_options: { rows: 4 } });
+        utilsModule.setLayout(context, null, 'large');
+        expect(rowSizeOf(context)).toBe('4');
+    });
+
+    test('leaves the row size alone for an auto height card', () => {
+        const context = createContext({ rows: 'auto' });
+        utilsModule.setLayout(context, null, 'large');
+        expect(rowSizeOf(context)).toBe('');
+        expect(context.elements.mainContainer.style.setProperty).not.toHaveBeenCalled();
+    });
+
+    test('keeps the separator default of 0.8 rows', () => {
+        const context = createContext({ card_type: 'separator' });
+        utilsModule.setLayout(context, null, 'large');
+        expect(rowSizeOf(context)).toBe('0.8');
+    });
+
+    test('lets a separator with explicit rows override the default', () => {
+        const context = createContext({ card_type: 'separator', rows: 2 });
+        utilsModule.setLayout(context, null, 'large');
+        expect(rowSizeOf(context)).toBe('2');
+    });
+
+    test('skips the style write when the row size is unchanged', () => {
+        const context = createContext({ card_layout: 'large', rows: 2 });
+        utilsModule.setLayout(context, null, 'large');
+        utilsModule.setLayout(context, null, 'large');
+        utilsModule.setLayout(context, null, 'large');
+        expect(context.elements.mainContainer.style.setProperty).toHaveBeenCalledTimes(1);
+    });
+
+    test('does nothing when the card has no main container yet', () => {
+        const context = createContext({ rows: 2 });
+        context.elements = {};
+        expect(() => utilsModule.setLayout(context, null, 'large')).not.toThrow();
+    });
+});
+
+describe('theme color parsing', () => {
+    let utilsModule;
+
+    beforeEach(async () => {
+        jest.resetModules();
+        utilsModule = await import('./utils.js');
+    });
+
+    test('reads the shorthand hex Home Assistant ships in its default themes', () => {
+        // #111 is the dark default background and #fff the light default card:
+        // leaving them unparsed is what washed the active state out (#2536).
+        expect(utilsModule.hexToRgb('#111')).toEqual([17, 17, 17]);
+        expect(utilsModule.hexToRgb('#fff')).toEqual([255, 255, 255]);
+        expect(utilsModule.hexToRgb('#E1E1E1')).toEqual([225, 225, 225]);
+    });
+
+    test('reads the hex forms carrying an alpha channel', () => {
+        expect(utilsModule.hexToRgb('#1112')).toEqual([17, 17, 17]);
+        expect(utilsModule.hexToRgb('#11223380')).toEqual([17, 34, 51]);
+    });
+
+    test('rejects what is not a hex color instead of guessing', () => {
+        expect(utilsModule.hexToRgb('#11')).toBeNull();
+        expect(utilsModule.hexToRgb('#12345')).toBeNull();
+        expect(utilsModule.hexToRgb('#zzzzzz')).toBeNull();
+        expect(utilsModule.hexToRgb('rgb(1, 2, 3)')).toBeNull();
+        expect(utilsModule.hexToRgb(undefined)).toBeNull();
+    });
+
+    test('reads both the comma and the space separated rgb syntax', () => {
+        expect(utilsModule.rgbStringToRgb('rgb(0, 145, 255)')).toEqual([0, 145, 255]);
+        expect(utilsModule.rgbStringToRgb('rgba(57, 54, 70, 1)')).toEqual([57, 54, 70]);
+        expect(utilsModule.rgbStringToRgb('rgb(0 145 255 / 50%)')).toEqual([0, 145, 255]);
+        expect(utilsModule.rgbStringToRgb('rgb(0.5 145.4 254.6)')).toEqual([1, 145, 255]);
+    });
+
+    test('rejects percentage channels rather than reading them as 0-255', () => {
+        expect(utilsModule.rgbStringToRgb('rgb(100%, 0%, 0%)')).toBeNull();
+        expect(utilsModule.rgbStringToRgb('oklch(0.5 0.1 250)')).toBeNull();
+        expect(utilsModule.rgbStringToRgb(null)).toBeNull();
+    });
+});
