@@ -2,6 +2,7 @@ import { createElement, forwardHaptic, navigate } from "../../tools/utils.js";
 import { isHaCardWrapper } from '../../tools/ha-boundary.js';
 import { startContentInsetSync } from '../../tools/content-inset.js';
 import { addHash, removeHash } from "../pop-up/helpers.js";
+import { getStoredButtonWidth } from './button-width-storage.js';
 import styles from "./styles.css";
 
 let isOpen = false;
@@ -26,7 +27,7 @@ export function createButton(context, index) {
     const backgroundColorElement = createElement('div', 'bubble-background-color background-color');
     const backgroundElement = createElement('div', 'bubble-background background');
     const button = createElement('div', `bubble-button bubble-button-${index} button ${link.substring(1)}`);
-    let buttonWidth = localStorage.getItem(`bubbleButtonWidth-${link}`);
+    let buttonWidth = getStoredButtonWidth(link);
     button.style.width = `${buttonWidth}px`;
 
     button.appendChild(iconElement);
