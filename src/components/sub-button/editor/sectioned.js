@@ -100,6 +100,15 @@ function updateGroupInSection(editor, sectionKey, groupIndex, updater, onValueCh
   editor.requestUpdate();
 }
 
+// What an emptied sub-button list must leave in the config. Climate cards seed
+// a default HVAC modes menu when they have no sub_button key at all, so they
+// keep an explicit empty list: without it, emptying the list looks exactly like
+// a brand new card and the menu comes back on every edit (#2176, #2456).
+// Other card types keep dropping the key entirely.
+export function getEmptySubButtonValue(cardType) {
+  return cardType === 'climate' ? { main: [] } : undefined;
+}
+
 // Commit minimal sub_button to config: remove empty sections and drop the property when empty
 function subButtonsValueChanged(editor) {
   const sb = editor._config.sub_button;
@@ -118,11 +127,16 @@ function subButtonsValueChanged(editor) {
 
   const hasGlobalLayouts = !!(sb && (typeof sb.main_layout !== 'undefined' || typeof sb.bottom_layout !== 'undefined'));
   if (!hasMain && !hasBottom && !hasGlobalLayouts) {
-    try { delete editor._config.sub_button; } catch (_) {
+    const emptyValue = getEmptySubButtonValue(editor._config.card_type);
+    try {
+      if (emptyValue) editor._config.sub_button = emptyValue;
+      else delete editor._config.sub_button;
+    } catch (_) {
       editor._config = { ...editor._config };
-      delete editor._config.sub_button;
+      if (emptyValue) editor._config.sub_button = emptyValue;
+      else delete editor._config.sub_button;
     }
-    editor._valueChanged({ target: { configValue: 'sub_button', value: undefined } });
+    editor._valueChanged({ target: { configValue: 'sub_button', value: emptyValue } });
     return;
   }
 
@@ -586,8 +600,12 @@ function makeSectionList(editor, sectionKey) {
 
     <div class="element-actions">
       ${(() => {
-        const targetArr = sectionKey === 'main' ? getOrInitSectionArray(editor, 'main') : getOrInitSectionArray(editor, 'bottom');
-        const pasteSection = createPasteHandler(editor, targetArr, subButtonsValueChanged, loadSubButtonClipboard);
+        // The section array is created when the user pastes, not while
+        // rendering: rendering must leave the config alone (#2176, #2456)
+        const pasteSection = () => {
+          const targetArr = getOrInitSectionArray(editor, sectionKey);
+          createPasteHandler(editor, targetArr, subButtonsValueChanged, loadSubButtonClipboard)();
+        };
         return html`
           <button class="icon-button paste-button no-bg ${!(editor._clipboardButton || loadSubButtonClipboard()) ? 'disabled' : ''}" @click=${pasteSection}>
             <ha-icon icon="mdi:content-paste"></ha-icon>
@@ -721,8 +739,12 @@ export function makeSectionedSubButtonsPanel(editor) {
       // If config is frozen/non-extensible, replace it with a cloned one
       editor._config = { ...editor._config, sub_button: converted };
     }
-  } else if (!editor._config.sub_button || !isNewSubButtonsSchema(editor._config.sub_button)) {
-    // Ensure sub_button exists and is in the new format
+  } else if (editor._config.sub_button && !isNewSubButtonsSchema(editor._config.sub_button)) {
+    // Normalize an existing sub_button to the new format. A missing one is left
+    // missing: writing an empty schema here would make every card look like it
+    // once had sub-buttons, which is how the climate card lost its way to tell
+    // a new card from a list emptied on purpose (#2176, #2456). Section arrays
+    // are created on demand by getOrInitSectionArray when the user adds one.
     const sectionedView = ensureNewSubButtonsSchemaObject(editor._config);
     try {
       editor._config.sub_button = sectionedView;

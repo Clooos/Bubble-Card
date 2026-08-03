@@ -1,38 +1,34 @@
 import { html } from "lit";
 import setupTranslation from '../../tools/localize.js';
-import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/utils.js";
 
+
+// Add the default "HVAC modes menu" sub-button to a card that was never
+// configured. The test is on the raw sub_button key, before any normalization:
+// the sub-button editor keeps an explicit empty list on climate cards, so a
+// list emptied on purpose is told apart from a brand new card and the menu
+// stops coming back on every edit (#2176, #2456). No editor-instance flag
+// here: a new instance is created every time the card is opened.
+function seedDefaultSubButton(editor, t) {
+    if (editor._config.sub_button !== undefined || !editor._config.entity) return;
+    if (!editor.hass.states[editor._config.entity]?.attributes?.hvac_modes) return;
+
+    editor._config.sub_button = {
+        main: [{
+            name: t('editor.climate.hvac_menu_name'),
+            select_attribute: 'hvac_modes',
+            state_background: false,
+            show_arrow: false
+        }]
+    };
+    editor._firstRowsComputation = true;
+}
 
 export function renderClimateEditor(editor){
     const t = setupTranslation(editor.hass);
     let button_action = editor._config.button_action || '';
 
-    if (
-        editor._config.card_type === "climate" && 
-        !editor.climateSubButtonsAdded &&
-        editor._config.entity
-    ) {
-        const shouldAddHVACModes = editor.hass.states[editor._config.entity]?.attributes?.hvac_modes;
-
-        if (shouldAddHVACModes) {
-            const sectioned = ensureNewSubButtonsSchemaObject(editor._config);
-            const hasMainButtons = Array.isArray(sectioned.main) && sectioned.main.length > 0;
-            
-            if (!hasMainButtons) {
-                const newSubButton = {
-                    name: t('editor.climate.hvac_menu_name'),
-                    select_attribute: 'hvac_modes',
-                    state_background: false,
-                    show_arrow: false
-                };
-                
-                sectioned.main.push(newSubButton);
-                editor._config.sub_button = sectioned;
-                editor._firstRowsComputation = true;
-            }
-        }
-
-        editor.climateSubButtonsAdded = true;
+    if (editor._config.card_type === "climate") {
+        seedDefaultSubButton(editor, t);
     }
 
     return html`
