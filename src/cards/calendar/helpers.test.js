@@ -1,5 +1,5 @@
 import { describe, test, expect } from '@jest/globals';
-import { parseEventDateTime, sortEvents, filterStartedEvents } from './helpers.js';
+import { parseEventDateTime, sortEvents, filterStartedEvents, expandMultiDayEvents, getDayKey } from './helpers.js';
 
 describe('parseEventDateTime', () => {
   test('should parse all-day event with date property', () => {
@@ -200,6 +200,240 @@ describe('sortEvents', () => {
 
       expect(events).toEqual([holiday1, holiday2, breakfast, lunch, dinner]);
     });
+  });
+});
+
+describe('expandMultiDayEvents', () => {
+  // A week wide enough to hold every span used below
+  const windowStart = new Date('2024-12-23T09:30:00');
+  const windowEnd = new Date('2024-12-29T23:59:59.999');
+
+  const daysOf = (occurrences) => occurrences.map(o => getDayKey(parseEventDateTime(o.start)));
+
+  describe('all-day events', () => {
+    test('should leave a single-day all-day event untouched', () => {
+      const event = { start: { date: '2024-12-25' }, end: { date: '2024-12-26' }, summary: 'Christmas' };
+
+      const result = expandMultiDayEvents([event], windowStart, windowEnd);
+
+      expect(result).toEqual([event]);
+      expect(result[0]).toBe(event);
+    });
+
+    test('should treat the all-day end date as exclusive', () => {
+      // A holiday from the 25th to the 27th ends on the 28th at midnight
+      const holiday = { start: { date: '2024-12-25' }, end: { date: '2024-12-28' }, summary: 'Holiday' };
+
+      const result = expandMultiDayEvents([holiday], windowStart, windowEnd);
+
+      expect(daysOf(result)).toEqual(['2024-12-25', '2024-12-26', '2024-12-27']);
+      expect(result.every(o => o.summary === 'Holiday')).toBe(true);
+    });
+
+    test('should give each occurrence the boundaries of its own day', () => {
+      const holiday = { start: { date: '2024-12-25' }, end: { date: '2024-12-28' } };
+
+      const result = expandMultiDayEvents([holiday], windowStart, windowEnd);
+
+      expect(result.map(o => [o.start, o.end])).toEqual([
+        [{ date: '2024-12-25' }, { date: '2024-12-26' }],
+        [{ date: '2024-12-26' }, { date: '2024-12-27' }],
+        [{ date: '2024-12-27' }, { date: '2024-12-28' }],
+      ]);
+    });
+
+    test('should flag the first and the last day of the span', () => {
+      const holiday = { start: { date: '2024-12-25' }, end: { date: '2024-12-28' } };
+
+      const result = expandMultiDayEvents([holiday], windowStart, windowEnd);
+
+      expect(result.map(o => [o.isMultiDay, o.isFirstDay, o.isLastDay])).toEqual([
+        [true, true, false],
+        [true, false, false],
+        [true, false, true],
+      ]);
+    });
+
+    test('should keep a malformed all-day event with an end before its start', () => {
+      const event = { start: { date: '2024-12-25' }, end: { date: '2024-12-25' } };
+
+      const result = expandMultiDayEvents([event], windowStart, windowEnd);
+
+      expect(result).toEqual([event]);
+    });
+  });
+
+  describe('timed events', () => {
+    test('should leave a same-day timed event untouched', () => {
+      const event = { start: { dateTime: '2024-12-25T10:00:00' }, end: { dateTime: '2024-12-25T11:00:00' } };
+
+      const result = expandMultiDayEvents([event], windowStart, windowEnd);
+
+      expect(result).toEqual([event]);
+      expect(result[0]).toBe(event);
+    });
+
+    test('should keep an event ending exactly at midnight on its starting day', () => {
+      const event = { start: { dateTime: '2024-12-25T22:00:00' }, end: { dateTime: '2024-12-26T00:00:00' } };
+
+      const result = expandMultiDayEvents([event], windowStart, windowEnd);
+
+      expect(result).toEqual([event]);
+    });
+
+    test('should split an event crossing midnight over both days', () => {
+      const event = { start: { dateTime: '2024-12-25T22:00:00' }, end: { dateTime: '2024-12-26T02:00:00' } };
+
+      const result = expandMultiDayEvents([event], windowStart, windowEnd);
+
+      expect(daysOf(result)).toEqual(['2024-12-25', '2024-12-26']);
+      expect(result[0].start).toEqual({ dateTime: '2024-12-25T22:00:00' });
+      expect(parseEventDateTime(result[0].end)).toEqual(new Date(2024, 11, 26));
+      expect(parseEventDateTime(result[1].start)).toEqual(new Date(2024, 11, 26));
+      expect(result[1].end).toEqual({ dateTime: '2024-12-26T02:00:00' });
+    });
+
+    test('should give a middle day the full midnight to midnight span', () => {
+      const event = { start: { dateTime: '2024-12-25T22:00:00' }, end: { dateTime: '2024-12-27T02:00:00' } };
+
+      const result = expandMultiDayEvents([event], windowStart, windowEnd);
+
+      expect(daysOf(result)).toEqual(['2024-12-25', '2024-12-26', '2024-12-27']);
+      expect(parseEventDateTime(result[1].start)).toEqual(new Date(2024, 11, 26));
+      expect(parseEventDateTime(result[1].end)).toEqual(new Date(2024, 11, 27));
+      expect([result[1].isFirstDay, result[1].isLastDay]).toEqual([false, false]);
+    });
+  });
+
+  describe('window boundaries', () => {
+    test('should drop the days before the start of the window', () => {
+      // Already under way when the card is rendered, like a holiday started last week
+      const holiday = { start: { date: '2024-12-20' }, end: { date: '2024-12-26' } };
+
+      const result = expandMultiDayEvents([holiday], windowStart, windowEnd);
+
+      expect(daysOf(result)).toEqual(['2024-12-23', '2024-12-24', '2024-12-25']);
+      expect(result[0].isFirstDay).toBe(false);
+    });
+
+    test('should drop the days after the end of the window', () => {
+      const holiday = { start: { date: '2024-12-28' }, end: { date: '2025-01-06' } };
+
+      const result = expandMultiDayEvents([holiday], windowStart, windowEnd);
+
+      expect(daysOf(result)).toEqual(['2024-12-28', '2024-12-29']);
+      expect(result[result.length - 1].isLastDay).toBe(false);
+    });
+
+    test('should never produce more occurrences than there are days on screen', () => {
+      const wholeYear = { start: { date: '2024-01-01' }, end: { date: '2025-01-01' } };
+
+      const result = expandMultiDayEvents([wholeYear], windowStart, windowEnd);
+
+      expect(result).toHaveLength(7);
+    });
+
+    test('should produce a single occurrence for a one day window', () => {
+      const holiday = { start: { date: '2024-12-20' }, end: { date: '2024-12-31' } };
+      const singleDayEnd = new Date('2024-12-23T23:59:59.999');
+
+      const result = expandMultiDayEvents([holiday], windowStart, singleDayEnd);
+
+      expect(daysOf(result)).toEqual(['2024-12-23']);
+    });
+  });
+
+  describe('robustness', () => {
+    test('should pass an event with no end through untouched', () => {
+      const event = { start: { date: '2024-12-25' } };
+
+      expect(expandMultiDayEvents([event], windowStart, windowEnd)).toEqual([event]);
+    });
+
+    test('should pass an event with an unparsable date through untouched', () => {
+      const event = { start: { dateTime: 'not a date' }, end: { dateTime: 'not a date either' } };
+
+      expect(expandMultiDayEvents([event], windowStart, windowEnd)).toEqual([event]);
+    });
+
+    test('should return an empty array when given no events', () => {
+      expect(expandMultiDayEvents([], windowStart, windowEnd)).toEqual([]);
+    });
+
+    test('should keep every other property of the source event', () => {
+      const holiday = {
+        start: { date: '2024-12-25' },
+        end: { date: '2024-12-27' },
+        summary: 'Holiday',
+        location: 'Somewhere',
+        entity: { entity: 'calendar.personal', color: 'blue' },
+      };
+
+      const result = expandMultiDayEvents([holiday], windowStart, windowEnd);
+
+      expect(result).toHaveLength(2);
+      expect(result[1]).toMatchObject({
+        summary: 'Holiday',
+        location: 'Somewhere',
+        entity: { entity: 'calendar.personal', color: 'blue' },
+      });
+    });
+  });
+
+  describe('sorting expanded occurrences', () => {
+    test('should place each occurrence on its own day, all-day ones first', () => {
+      const holiday = { start: { date: '2024-12-25' }, end: { date: '2024-12-28' }, summary: 'Holiday' };
+      const meeting = { start: { dateTime: '2024-12-26T09:00:00' }, end: { dateTime: '2024-12-26T10:00:00' }, summary: 'Meeting' };
+      const dinner = { start: { dateTime: '2024-12-25T20:00:00' }, end: { dateTime: '2024-12-25T22:00:00' }, summary: 'Dinner' };
+
+      const result = expandMultiDayEvents([meeting, holiday, dinner], windowStart, windowEnd).sort(sortEvents);
+
+      expect(result.map(o => [getDayKey(parseEventDateTime(o.start)), o.summary])).toEqual([
+        ['2024-12-25', 'Holiday'],
+        ['2024-12-25', 'Dinner'],
+        ['2024-12-26', 'Holiday'],
+        ['2024-12-26', 'Meeting'],
+        ['2024-12-27', 'Holiday'],
+      ]);
+    });
+
+    test('should place the midnight part of a crossing event before the timed ones', () => {
+      const overnight = { start: { dateTime: '2024-12-25T22:00:00' }, end: { dateTime: '2024-12-26T02:00:00' }, summary: 'Overnight' };
+      const breakfast = { start: { dateTime: '2024-12-26T08:00:00' }, end: { dateTime: '2024-12-26T09:00:00' }, summary: 'Breakfast' };
+
+      const result = expandMultiDayEvents([breakfast, overnight], windowStart, windowEnd).sort(sortEvents);
+
+      expect(result.map(o => o.summary)).toEqual(['Overnight', 'Overnight', 'Breakfast']);
+    });
+  });
+});
+
+describe('expandMultiDayEvents then filterStartedEvents', () => {
+  // The card runs the expansion first so show_started_events judges the day
+  // at hand and not the whole span
+  const windowStart = new Date('2024-12-25T12:00:00');
+  const windowEnd = new Date('2024-12-31T23:59:59.999');
+
+  test('should only hide the day under way of a running multi-day event', () => {
+    const holiday = { start: { date: '2024-12-23' }, end: { date: '2024-12-29' }, summary: 'Holiday' };
+
+    const expanded = expandMultiDayEvents([holiday], windowStart, windowEnd);
+    const result = filterStartedEvents(expanded, windowStart);
+
+    expect(result.map(o => getDayKey(parseEventDateTime(o.start)))).toEqual([
+      '2024-12-26',
+      '2024-12-27',
+      '2024-12-28',
+    ]);
+  });
+
+  test('should keep every day of a multi-day event that has not started yet', () => {
+    const holiday = { start: { date: '2024-12-27' }, end: { date: '2024-12-30' } };
+
+    const expanded = expandMultiDayEvents([holiday], windowStart, windowEnd);
+    const result = filterStartedEvents(expanded, windowStart);
+
+    expect(result).toHaveLength(3);
   });
 });
 

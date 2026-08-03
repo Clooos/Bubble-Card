@@ -935,7 +935,7 @@ This card allows you to display your calendar entities. Its content is scrollabl
 | `limit`             | number  | Optional     | A number                                        | The amont of events that will be displayed on the card                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Show or hide the end time for events                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Show or hide the event progress bar                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Show or hide events that are currently in progress                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Show or hide events that are currently in progress. Multi-day events are judged one day at a time, so only the day under way is hidden and the days to come stay visible |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#tap-double-tap-and-hold-actions) | Allow to add actions on event click. |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on day click, if undefined, `none` will be used. |

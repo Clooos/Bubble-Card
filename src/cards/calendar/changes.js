@@ -3,7 +3,7 @@ import { applyScrollingEffect } from "../../tools/text-scrolling.js";
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import setupTranslation from "../../tools/localize.js";
 import { addActions } from "../../tools/tap-actions.js";
-import { hashCode, intToRGB, parseEventDateTime, sortEvents, filterStartedEvents } from "./helpers.js";
+import { hashCode, intToRGB, parseEventDateTime, sortEvents, filterStartedEvents, expandMultiDayEvents, getDayKey } from "./helpers.js";
 
 function dateDiffInMinutes(a, b) {
   const MS_PER_MINUTES = 1000 * 60;
@@ -11,13 +11,7 @@ function dateDiffInMinutes(a, b) {
   return Math.floor((b - a) / MS_PER_MINUTES);
 }
 
-const getEventDateKey = (eventStart) => {
-  const d = parseEventDateTime(eventStart);
-  const year = d.getFullYear();
-  const month = (d.getMonth() + 1).toString().padStart(2, '0');
-  const dayOfMonth = d.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${dayOfMonth}`;
-};
+const getEventDateKey = (eventStart) => getDayKey(parseEventDateTime(eventStart));
 
 export async function changeEventList(context) {
   const daysOfEvents = Math.max(1, context.config.days ?? 7);
@@ -41,7 +35,9 @@ export async function changeEventList(context) {
 
   const events = await Promise.all(promises);
 
-  let sortedEvents = events.flat().sort(sortEvents);
+  // Expansion first: every following step then works on the occurrence of the
+  // day, so a multi-day event lands on each of its days and never on the past
+  let sortedEvents = expandMultiDayEvents(events.flat(), now, end).sort(sortEvents);
 
   if (context.config.show_started_events === false) {
     sortedEvents = filterStartedEvents(sortedEvents, new Date());
@@ -100,13 +96,16 @@ export async function changeEvents(context) {
 
     eventsGroupedByDay[day].forEach((event) => {
       const isAllDay = event.start.date !== undefined;
+      // A timed event running through the whole day reads as all day, like in
+      // the Home Assistant agenda: only its first and last day show a time
+      const spansWholeDay = isAllDay || (event.isMultiDay && !event.isFirstDay && !event.isLastDay);
       const now = new Date();
       const eventStart = parseEventDateTime(event.start);
       const eventEnd = parseEventDateTime(event.end);
 
       const eventTime = createElement('div', 'bubble-event-time');
-      eventTime.innerHTML = isAllDay ? t("cards.calendar.all_day") : eventStart.toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric', hour12: getCurrentLocaleTimeFormat === "12" });
-      if (!isAllDay && context.config.show_end === true) {
+      eventTime.innerHTML = spansWholeDay ? t("cards.calendar.all_day") : eventStart.toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric', hour12: getCurrentLocaleTimeFormat === "12" });
+      if (!spansWholeDay && context.config.show_end === true) {
         eventTime.innerHTML += ` – ${eventEnd.toLocaleTimeString(getCurrentLocale, { hour: 'numeric', minute: 'numeric', hour12: getCurrentLocaleTimeFormat === "12" })}`;
       }
 
@@ -151,9 +150,9 @@ export async function changeEvents(context) {
 
       const activeColor = 'var(--bubble-event-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))';
 
-      if (context.config.show_progress === true && isAllDay && eventStart < now) {
+      if (context.config.show_progress === true && spansWholeDay && eventStart < now) {
         eventLine.style.setProperty('--bubble-event-background-color', activeColor);
-      } else if (context.config.show_progress === true && !isAllDay && eventStart < now) {
+      } else if (context.config.show_progress === true && !spansWholeDay && eventStart < now) {
         const durationDiff = dateDiffInMinutes(eventStart, eventEnd);
         const startDiff = dateDiffInMinutes(eventStart, now);
         const percentage = 100 * startDiff / durationDiff;
