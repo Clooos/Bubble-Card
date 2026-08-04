@@ -79,15 +79,43 @@ function createMockClassList(initialClasses = []) {
     };
 }
 
-function createMockElement(initialClasses = []) {
-    const element = new EventTarget();
-    element.style = {
+// Enough of a CSSStyleDeclaration for the shell's transition kill-switch: it
+// has to be readable back through the longhand and to carry its priority, since
+// the whole point is outranking the !important transitions the dialog modes
+// declare in the stylesheet.
+function createMockStyle() {
+    const priorities = new Map();
+    const style = {
         display: '',
         transform: '',
         transition: '',
         visibility: '',
         willChange: '',
+        setProperty(name, value, priority = '') {
+            style[name] = value;
+            if (priority) priorities.set(name, priority);
+            else priorities.delete(name);
+        },
+        getPropertyValue(name) {
+            if (name === 'transition-property') {
+                return style.transition === 'none' ? 'none' : '';
+            }
+            return style[name] ?? '';
+        },
+        getPropertyPriority(name) {
+            return priorities.get(name) || '';
+        },
+        removeProperty(name) {
+            style[name] = '';
+            priorities.delete(name);
+        },
     };
+    return style;
+}
+
+function createMockElement(initialClasses = []) {
+    const element = new EventTarget();
+    element.style = createMockStyle();
     element.dataset = {};
     element.classList = createMockClassList(initialClasses);
     element.getBoundingClientRect = jest.fn(() => ({ height: 0, width: 0 }));
@@ -1183,6 +1211,11 @@ describe('standalone popup lifecycle', () => {
         // Tap task: transitions off so the growing build never animates the
         // percentage-based closed transform (visible top-edge peek otherwise).
         expect(context.popUp.style.transition).toBe('none');
+        // The centered and adaptive-dialog blocks declare their transition with
+        // !important, which beats a plain inline one: without the same priority
+        // the switch is inert there and the shell animates from the bottom-sheet
+        // closed transform to the dialog one, in full view.
+        expect(context.popUp.style.getPropertyPriority('transition')).toBe('important');
 
         flushHeavyOpenTask();
         expect(buildDone).not.toBeNull();
@@ -1201,6 +1234,7 @@ describe('standalone popup lifecycle', () => {
         // (older WebKit needs them active at the previous style resolution).
         flushRafQueue();
         expect(context.popUp.style.transition).toBe('');
+        expect(context.popUp.style.getPropertyPriority('transition')).toBe('');
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
         flushRafQueue(); // phase 2 — the flip animates

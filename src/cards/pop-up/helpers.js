@@ -310,6 +310,27 @@ function isShellTransitionDisabled(popUp) {
     return style.transition === 'none';
 }
 
+// The kill-switch has to carry `!important`: the centered and adaptive-dialog
+// blocks declare their own transition that way, and an author !important
+// outranks a plain inline declaration. Without the priority the switch is inert
+// in exactly the two modes whose closed state is a different transform from the
+// bottom sheet's, so the shell animated all the way from `translate3d(0,100%,0)`
+// to `scale(0.85)` while it was supposed to be painted still — the pop-up rose
+// from the bottom of the screen on its first open.
+function disableShellTransition(popUp) {
+    const style = popUp?.style;
+    if (!style) {
+        return;
+    }
+
+    if (typeof style.setProperty === 'function') {
+        style.setProperty('transition', 'none', 'important');
+        return;
+    }
+
+    style.transition = 'none';
+}
+
 function restoreShellTransition(popUp) {
     if (!isShellTransitionDisabled(popUp)) {
         return;
@@ -1830,10 +1851,12 @@ function openStandalonePopup(context, instant = false) {
             // height, which the computed style resolves to pixels. The
             // progressive build grows that height card by card, and each
             // growth would otherwise ANIMATE the closed transform (0.3s),
-            // peeking the top of the pop-up above the screen edge. Disable
-            // transitions for the whole build; finishBeforePhase2 restores
-            // them once the height is stable, before the prime frames.
-            popUp.style.transition = 'none';
+            // peeking the top of the pop-up above the screen edge. The same
+            // frames are also where a dialog-mode shell settles onto its own
+            // closed transform. Disable transitions for the whole build;
+            // finishBeforePhase2 restores them once the height is stable,
+            // before the prime frames.
+            disableShellTransition(popUp);
 
             // Count frames rendered while the closed state is current: when
             // the deferred build spans several painted frames, the post-build
