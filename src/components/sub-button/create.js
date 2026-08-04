@@ -82,47 +82,71 @@ export function createSubButtonStructure(context, options = {}) {
     }
   }
 
-  // Build group containers from sectioned config (inline groups)
-  const mainExplicitGroups = mainItems
-    .map((item, idx) => ({ key: `g_main_${idx}`, item, idx, position: 'top' }))
-    .filter(({ item }) => item && Array.isArray(item.group) && item.group.length > 0);
-  const bottomGroups = bottomItems
-    .map((item, idx) => ({ key: `g_bottom_${idx}`, item, idx, position: 'bottom' }))
-    .filter(({ item }) => item && Array.isArray(item.group) && item.group.length > 0);
-  const inlineGroups = [...mainExplicitGroups, ...bottomGroups];
-
-  // Handle main non-group buttons: create auto group when using rows layout or when mixed with explicit groups
+  // Build group containers from sectioned config (inline groups).
+  // Each section is walked in declaration order so the list mirrors the YAML:
+  // the containers are then inserted at that position instead of being pushed
+  // to the end of their parent, which used to make a group appear wherever its
+  // container happened to be created (#2517).
   const mainNonGroupItems = mainItems.filter(item => item && !Array.isArray(item.group));
-  const hasMainExplicitGroups = mainExplicitGroups.length > 0;
+  const hasMainExplicitGroups = mainItems.some(item => item && Array.isArray(item.group) && item.group.length > 0);
   const needsMainAutoGroup = globalMainLayout === 'rows' || hasMainExplicitGroups || bottomItems.length > 0;
-  
-  if (mainNonGroupItems.length > 0 && needsMainAutoGroup) {
-    // Always use single auto group to keep individual buttons on the same line
-    inlineGroups.push({
-      key: 'g_main_auto',
-      item: { group: mainNonGroupItems, buttons_layout: 'inline' },
-      idx: -1,
-      position: 'top'
-    });
-  }
+  const wantsMainAutoGroup = mainNonGroupItems.length > 0 && needsMainAutoGroup;
+
+  const inlineGroups = [];
+  let mainAutoGroupAdded = false;
+
+  mainItems.forEach((item, idx) => {
+    if (!item) return;
+    if (Array.isArray(item.group)) {
+      if (item.group.length > 0) {
+        inlineGroups.push({ key: `g_main_${idx}`, item, idx, position: 'top' });
+      }
+      return;
+    }
+    // Always use single auto group to keep individual buttons on the same line.
+    // It takes the place of the first of them, which is where the editor puts
+    // them too when it converts a mixed section (convertIndividualButtonsToGroup).
+    if (wantsMainAutoGroup && !mainAutoGroupAdded) {
+      mainAutoGroupAdded = true;
+      inlineGroups.push({
+        key: 'g_main_auto',
+        item: { group: mainNonGroupItems, buttons_layout: 'inline' },
+        idx: -1,
+        position: 'top'
+      });
+    }
+  });
 
   // Handle bottom non-group buttons: create individual groups when mixed with explicit groups
   const bottomNonGroupItems = bottomItems.filter(item => item && !Array.isArray(item.group));
-  const bottomExplicitGroups = bottomItems.filter(item => item && Array.isArray(item.group) && item.group.length > 0);
-  
-  if (bottomNonGroupItems.length > 0) {
-    if (bottomExplicitGroups.length > 0) {
-      // Mixed case: create individual groups for each non-group button to maintain YAML order
-      bottomNonGroupItems.forEach((item, idx) => {
-        inlineGroups.push({
-          key: `g_bottom_individual_${idx}`,
-          item: { group: [item], buttons_layout: 'inline' },
-          idx: -1,
-          position: 'bottom'
-        });
+  const hasBottomExplicitGroups = bottomItems.some(item => item && Array.isArray(item.group) && item.group.length > 0);
+  let bottomAutoGroupAdded = false;
+  let bottomIndividualIndex = 0;
+
+  bottomItems.forEach((item, idx) => {
+    if (!item) return;
+    if (Array.isArray(item.group)) {
+      if (item.group.length > 0) {
+        inlineGroups.push({ key: `g_bottom_${idx}`, item, idx, position: 'bottom' });
+      }
+      return;
+    }
+    if (hasBottomExplicitGroups) {
+      // Mixed case: create individual groups for each non-group button to maintain YAML order.
+      // The key numbers the button within the non-group items, exactly as
+      // updateGroupButtons does, so both sides address the same container.
+      inlineGroups.push({
+        key: `g_bottom_individual_${bottomIndividualIndex}`,
+        item: { group: [item], buttons_layout: 'inline' },
+        idx: -1,
+        position: 'bottom'
       });
-    } else {
-      // All individual buttons: use single auto group for efficiency
+      bottomIndividualIndex++;
+      return;
+    }
+    // All individual buttons: use single auto group for efficiency
+    if (!bottomAutoGroupAdded) {
+      bottomAutoGroupAdded = true;
       inlineGroups.push({
         key: 'g_bottom_auto',
         item: { group: bottomNonGroupItems, buttons_layout: 'inline' },
@@ -130,7 +154,10 @@ export function createSubButtonStructure(context, options = {}) {
         position: 'bottom'
       });
     }
-  }
+  });
+
+  // Rank shared by both parents: each one only ever sees a subsequence of it
+  const groupOrder = new Map(inlineGroups.map(({ key }, rank) => [key, rank]));
 
   if (inlineGroups.length > 0) {
     // Clean up containers that no longer exist
@@ -166,7 +193,7 @@ export function createSubButtonStructure(context, options = {}) {
           setGroupAlignmentClass(groupContainer, nextAlignmentKey);
         }
 
-        appendGroupContainer(context, groupContainer, position, desiredLayout, nextAlignmentKey);
+        placeGroupContainer(context, groupContainer, position, desiredLayout, nextAlignmentKey, key, groupOrder);
         context.elements.groups[key].container = groupContainer;
         context.elements.groups[key].alignmentKey = nextAlignmentKey;
       } else {
@@ -193,7 +220,7 @@ export function createSubButtonStructure(context, options = {}) {
           setGroupAlignmentClass(groupContainer, nextAlignmentKey);
         }
 
-        appendGroupContainer(context, groupContainer, position, desiredLayout, nextAlignmentKey);
+        placeGroupContainer(context, groupContainer, position, desiredLayout, nextAlignmentKey, key, groupOrder);
         context.elements.groups[key].alignmentKey = nextAlignmentKey;
       }
     });
@@ -213,35 +240,61 @@ export function createSubButtonStructure(context, options = {}) {
   return subButtonContainer;
 }
 
-function appendGroupContainer(context, groupContainer, position, layout, alignmentKey) {
+function placeGroupContainer(context, groupContainer, position, layout, alignmentKey, key, groupOrder) {
   if (position === 'bottom') {
-    moveGroupToBottomParent(context, groupContainer, layout, alignmentKey);
+    moveGroupToBottomParent(context, groupContainer, layout, alignmentKey, key, groupOrder);
     return;
   }
-  const subButtonContainer = context.elements.subButtonContainer;
-  if (subButtonContainer && groupContainer.parentElement !== subButtonContainer) {
-    subButtonContainer.appendChild(groupContainer);
-  }
+  insertGroupInParent(context.elements.subButtonContainer, groupContainer, key, groupOrder);
 }
 
-function moveGroupToBottomParent(context, groupContainer, layout, alignmentKey) {
+function moveGroupToBottomParent(context, groupContainer, layout, alignmentKey, key, groupOrder) {
   const bottomSubButtonContainer = context.elements.bottomSubButtonContainer;
   if (!bottomSubButtonContainer) return;
 
   if (layout !== 'inline') {
     clearLaneFillRequirement(groupContainer);
-    if (groupContainer.parentElement !== bottomSubButtonContainer) {
-      bottomSubButtonContainer.appendChild(groupContainer);
-    }
+    insertGroupInParent(bottomSubButtonContainer, groupContainer, key, groupOrder);
     return;
   }
 
   const laneKey = alignmentKey || 'fill';
   const lane = ensureBottomAlignmentLane(context, laneKey);
-  if (lane && groupContainer.parentElement !== lane) {
-    lane.appendChild(groupContainer);
-  }
+  insertGroupInParent(lane, groupContainer, key, groupOrder);
   setLaneFillRequirement(groupContainer, false);
+}
+
+// A group belongs where its section declares it, not where its container
+// happened to be created. Appending to the parent tied the on-screen order to
+// the creation history: a container built later than its neighbours (a group
+// whose buttons only exist under some conditions, or one re-created after a
+// config change) landed last and shifted every row after it (#2517).
+// The insertion point is the first sibling that outranks it, so an already
+// well-placed container is left untouched.
+function insertGroupInParent(parent, groupContainer, key, groupOrder) {
+  if (!parent) return;
+
+  const rank = groupOrder?.get(key);
+  const children = Array.from(parent.children || []);
+  let reference = null;
+
+  if (rank != null) {
+    reference = children.find((child) => {
+      if (child === groupContainer) return false;
+      const childKey = child.getAttribute?.('data-group-id');
+      if (!childKey) return false;
+      const childRank = groupOrder.get(childKey);
+      return childRank != null && childRank > rank;
+    }) ?? null;
+  }
+
+  if (groupContainer.parentElement === parent) {
+    const currentIndex = children.indexOf(groupContainer);
+    const referenceIndex = reference ? children.indexOf(reference) : children.length;
+    if (referenceIndex === currentIndex + 1) return;
+  }
+
+  parent.insertBefore(groupContainer, reference);
 }
 
 function ensureBottomAlignmentLane(context, laneKey) {
@@ -362,6 +415,17 @@ export function syncLaneFillStateForGroup(groupContainer) {
   groupContainer.classList.toggle('alignment-fill-auto', shouldForceFillWidth);
   groupContainer.dataset.laneNeedsFill = requiresFill ? 'true' : 'false';
   updateLaneExpandClass(lane);
+  updateLaneVisibility(lane);
+}
+
+// A lane holding none but hidden groups still takes its share of the bottom
+// row: it kept the gap of a row that has nothing left to show (#2241). Every
+// group of a lane is synced in the same pass, so the last one settles the lane.
+function updateLaneVisibility(lane) {
+  if (!lane) return;
+  const groups = Array.from(lane.children || []);
+  const allHidden = groups.length === 0 || groups.every(group => group.classList?.contains('hidden'));
+  lane.classList.toggle('hidden', allHidden);
 }
 
 function updateLaneExpandClass(lane) {
