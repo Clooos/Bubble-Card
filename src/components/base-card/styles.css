@@ -75,7 +75,20 @@ ha-card {
     touch-action: auto;
     border: var(--bubble-card-type-border, var(--bubble-border, none));
     box-sizing: border-box;
-    -webkit-transform: translateZ(0); /* Fix slider rendering issues on Safari on older devices */
+}
+
+/* Older WebKit does not clip the animating slider fill against the card's
+   rounded corners, and promoting the card to its own layer is what fixes it
+   (#2286). The promotion also turns the card into a stacking context and into
+   the containing block of everything positioned fixed inside it, which is what
+   used to bury an open menu, a module overlay or a wheel under the cards that
+   follow (#2334). overflow: clip landed in Safari 16, Chrome 90 and Firefox 81,
+   well after the devices that need the promotion, so it tells the two apart:
+   the engines that need the fix keep it, every other one carries no trap. */
+@supports not (overflow: clip) {
+    .bubble-container {
+        -webkit-transform: translateZ(0);
+    }
 }
 
 .bubble-wrapper {
