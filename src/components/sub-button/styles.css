@@ -400,10 +400,17 @@
     background-color: var(--bubble-sub-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
 }
 
-/* Align wrapper vertically when overlay is card-level at top */
+/* Align wrapper vertically when overlay is card-level at top.
+   The sub-buttons are centered in the card wrapper, so the overlay follows the
+   same center whatever the card height (row size, large layout, modules...) */
 .bubble-sub-slider-wrapper.top-aligned {
-    top: 7px;
+    top: calc(50% - (var(--bubble-sub-slider-height, 36px) / 2));
     bottom: auto;
+}
+
+/* Pinned layouts keep the sub-buttons at the top, so the overlay follows them */
+.bubble-wrapper.fixed-top .bubble-sub-slider-wrapper.top-aligned {
+    top: calc(10px + (36px - var(--bubble-sub-slider-height, 36px)) / 2);
 }
 
 /* Specific positioning for bottom containers to maintain existing behavior */
