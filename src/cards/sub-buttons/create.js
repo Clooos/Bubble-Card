@@ -1,5 +1,6 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
 import { startContentInsetSync } from "../../tools/content-inset.js";
+import { isInsidePopupShell } from "../../tools/popup-dom.js";
 import styles from "./styles.css";
 
 export function createStructure(context, appendTo = context.container) {
@@ -57,11 +58,15 @@ export function createStructure(context, appendTo = context.container) {
         context.card.style.setProperty('--bubble-footer-bottom', `${bottomOffset}px`);
     }
 
-    // Fix for the last cards that are hidden in footer mode
-    if (context.config.footer_mode && !context.editor) {
-        context.cardContainer = context.card.parentNode.host?.parentNode?.parentNode;
-        let haContainer = context.cardContainer?.parentNode;
-        if (context.cardContainer.classList.contains('card')) {
+    // Fix for the last cards that are hidden in footer mode. The target is the
+    // Home Assistant dashboard cell hosting the card: taking it out of the flow
+    // is what frees the space the fixed footer no longer occupies. Inside a
+    // pop-up the very same `.card` lookup lands on the pop-up's own card
+    // wrapper, and collapsing that one to zero width makes the pop-up treat the
+    // card as off-screen content, which freezes its hass updates (#2528).
+    if (context.config.footer_mode && !context.editor && !isInsidePopupShell(context.card)) {
+        context.cardContainer = context.card.parentNode?.host?.parentNode?.parentNode;
+        if (context.cardContainer?.classList.contains('card')) {
             context.cardContainer.style.position = 'absolute';
         }
     }

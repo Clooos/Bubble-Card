@@ -606,6 +606,72 @@ describe('progressive card work', () => {
         }
     });
 
+    test('keeps feeding hass to a mounted card whose wrapper has no box of its own', () => {
+        let observerCallback = null;
+        global.IntersectionObserver = class {
+            constructor(callback) {
+                observerCallback = callback;
+            }
+            observe() {}
+            disconnect() {}
+        };
+
+        try {
+            const context = createProgressiveContext(30);
+            createCardElementsProgressively(context, () => {});
+            jest.runAllTimers();
+
+            const cardElement = context._managedCards[0];
+            cardElement._bubbleHassPending = true;
+
+            // A footer-mode card is position:fixed: it stays on screen while
+            // its wrapper collapses to a zero-width box (#2528).
+            observerCallback([
+                {
+                    target: context._cardWrappers[0],
+                    isIntersecting: false,
+                    boundingClientRect: { width: 0, height: 22 },
+                },
+            ]);
+
+            expect(context._offscreenPopupCards.has(cardElement)).toBe(false);
+            expect(cardElement._bubbleHassPending).toBe(false);
+        } finally {
+            delete global.IntersectionObserver;
+        }
+    });
+
+    test('still defers hass for a mounted card that has a box and is off-screen', () => {
+        let observerCallback = null;
+        global.IntersectionObserver = class {
+            constructor(callback) {
+                observerCallback = callback;
+            }
+            observe() {}
+            disconnect() {}
+        };
+
+        try {
+            const context = createProgressiveContext(30);
+            createCardElementsProgressively(context, () => {});
+            jest.runAllTimers();
+
+            const cardElement = context._managedCards[0];
+
+            observerCallback([
+                {
+                    target: context._cardWrappers[0],
+                    isIntersecting: false,
+                    boundingClientRect: { width: 320, height: 120 },
+                },
+            ]);
+
+            expect(context._offscreenPopupCards.has(cardElement)).toBe(true);
+        } finally {
+            delete global.IntersectionObserver;
+        }
+    });
+
     test('hands the completion callback to a visibility-started stepper instead of dropping it', () => {
         let observerCallback = null;
         global.IntersectionObserver = class {

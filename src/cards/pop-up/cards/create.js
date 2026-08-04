@@ -1104,7 +1104,15 @@ function _setupCardVisibilityObserver(context) {
                     }
                     continue;
                 }
-                if (entry.isIntersecting) {
+                // A wrapper with no box of its own is not proof that the card
+                // is off-screen: content that escapes the flow (a footer-mode
+                // sub-buttons card is position:fixed) stays on screen while
+                // its wrapper collapses. Holding hass there freezes a card the
+                // user is looking at (#2528).
+                const box = entry.boundingClientRect;
+                const hasNoBox = !box || box.width === 0 || box.height === 0;
+
+                if (entry.isIntersecting || hasNoBox) {
                     offscreen.delete(cardEl);
                     if (cardEl._bubbleHassPending && context._hass) {
                         _applyHassToCardElement(cardEl, context._hass);

@@ -1,6 +1,7 @@
-import { 
+import {
   setLayout
 } from '../../tools/utils.js';
+import { isInsidePopupShell } from '../../tools/popup-dom.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
 
 const DEFAULT_BOTTOM_OFFSET = 16;
@@ -47,6 +48,13 @@ function updateFooterBottomOffset(context) {
 }
 
 function applyFooterPadding(context) {
+    // The padding reserves room at the end of the dashboard for the fixed
+    // footer. A footer living in a pop-up is not part of that flow, and the
+    // lookup below would resolve to the dashboard behind the pop-up.
+    if (isInsidePopupShell(context.card)) {
+        return;
+    }
+
     const cardContainer = getCardContainer(context);
     const haContainer = getHomeAssistantContainer(cardContainer);
 
@@ -64,8 +72,14 @@ function setCardContainerPosition(context, position) {
 }
 
 function applyFooterModePositioning(context) {
+    // Same reason as in create.js: the dashboard cell is the only legitimate
+    // target, a pop-up card wrapper must keep its own box (#2528).
+    if (isInsidePopupShell(context.card)) {
+        return;
+    }
+
     const cardContainer = getCardContainer(context);
-    
+
     if (!cardContainer || cardContainer.style.position === '') {
         setCardContainerPosition(context, 'absolute');
     }
