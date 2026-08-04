@@ -90,6 +90,8 @@ describe('dropdown layering', () => {
         // the menu painted below the cards that follow it in the view (#2334).
         expect(mainContainer.style.overflow).toBe('visible');
         expect(Number(mainContainer.style.zIndex)).toBeGreaterThan(0);
+        // The same transform is also the containing block of a fixed menu panel.
+        expect(mainContainer.style.transform).toBe('none');
     });
 
     test('gives the layering back when the menu closes', () => {
@@ -102,6 +104,7 @@ describe('dropdown layering', () => {
 
         expect(mainContainer.style.overflow).toBe('');
         expect(mainContainer.style.zIndex).toBe('');
+        expect(mainContainer.style.transform).toBe('');
         expect(mainContainer.openDropdowns).toBe(0);
     });
 
@@ -140,6 +143,7 @@ describe('dropdown layering', () => {
 
         expect(mainContainer.style.overflow).toBe('');
         expect(mainContainer.style.zIndex).toBe('');
+        expect(mainContainer.style.transform).toBe('');
         expect(mainContainer.openDropdowns).toBe(0);
     });
 });

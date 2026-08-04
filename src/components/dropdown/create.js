@@ -14,11 +14,27 @@ const MENU_OVERLAP = 40;
 // (4), the pop-up shell (5) and the horizontal buttons stack (6).
 const OPEN_MENU_Z_INDEX = '3';
 
+// Let the card carry an open menu: no clipping, a layer of its own, and no
+// transform. Dropping the transform matters on its own, because it also makes
+// the container the containing block of anything positioned fixed inside it,
+// which is how ha-dropdown places its panel when the popover stays out of the
+// top layer. Nothing is animating a slider while a menu is open, so the Safari
+// workaround the transform exists for is not needed for that stretch.
+function holdMainContainer(mainContainer) {
+    if (!mainContainer) return;
+    mainContainer.style.overflow = 'visible';
+    mainContainer.style.zIndex = OPEN_MENU_Z_INDEX;
+    mainContainer.style.transform = 'none';
+    mainContainer.style.webkitTransform = 'none';
+}
+
 // Give the card back its default layering once its last menu is closed.
 function releaseMainContainer(mainContainer) {
     if (!mainContainer || mainContainer.openDropdowns > 0) return;
     mainContainer.style.overflow = '';
     mainContainer.style.zIndex = '';
+    mainContainer.style.transform = '';
+    mainContainer.style.webkitTransform = '';
 }
 
 // Cache for getComputedStyle results to avoid forced reflows.
@@ -254,8 +270,7 @@ export function createDropdownActions(context, elements = context.elements, enti
                     mainContainer.openDropdowns++;
                 }
             }
-            context.elements.mainContainer.style.overflow = 'visible';
-            context.elements.mainContainer.style.zIndex = OPEN_MENU_Z_INDEX;
+            holdMainContainer(context.elements.mainContainer);
         }
     };
 
