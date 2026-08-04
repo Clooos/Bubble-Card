@@ -26,6 +26,7 @@ jest.unstable_mockModule('../cards/calendar/editor.js', () => ({ renderCalendarE
 jest.unstable_mockModule('../cards/media-player/editor.js', () => ({ renderMediaPlayerEditor: jest.fn() }));
 jest.unstable_mockModule('../cards/empty-column/editor.js', () => ({ renderEmptyColumnEditor: jest.fn() }));
 jest.unstable_mockModule('../components/sub-button/editor/index.js', () => ({ makeSubButtonPanel: jest.fn() }));
+jest.unstable_mockModule('../components/sub-button/utils.js', () => ({ revealConditionalSubButtons: jest.fn(() => () => {}) }));
 jest.unstable_mockModule('../modules/editor.js', () => ({ makeModulesEditor: jest.fn() }));
 jest.unstable_mockModule('../modules/store.js', () => ({ makeModuleStore: jest.fn(), _fetchModuleStore: jest.fn() }));
 jest.unstable_mockModule('../modules/registry.js', () => ({ yamlKeysMap: new Map() }));

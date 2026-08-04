@@ -391,6 +391,51 @@ export function handleVisibilityConditions(element, subButton, hass, context = n
   }
 }
 
+// Temporarily show every sub-button that only its visibility conditions keep
+// hidden, along with the group and the alignment lane collapsed around it, and
+// return the undo. Measuring a card in that state gives the tallest layout it
+// can take, which is the height its rows have to reserve: a row that shows up
+// later has nowhere to go and grows over the card header instead (#2517).
+// Reveal and undo belong to the same synchronous block, so nothing ever paints
+// in between.
+export function revealConditionalSubButtons(root) {
+  const undo = [];
+  if (!root?.querySelectorAll) return () => {};
+
+  const reveal = (element) => {
+    if (!element?.classList?.contains('hidden')) return;
+    element.classList.remove('hidden');
+    undo.push(() => element.classList.add('hidden'));
+  };
+
+  try {
+    root.querySelectorAll('.bubble-sub-button').forEach((element) => {
+      if (!element._hasVisibilityConditions || element._previousVisibilityState !== false) return;
+
+      reveal(element);
+
+      // An always visible slider replaces its host button, so it carries the
+      // height of the row and is hidden through an inline display instead
+      const wrapper = element.sliderWrapper;
+      if (wrapper?.style?.display === 'none') {
+        wrapper.style.removeProperty('display');
+        undo.push(() => { wrapper.style.display = 'none'; });
+      }
+
+      let parent = element.parentElement;
+      while (parent && parent !== root) {
+        if (parent.classList?.contains('bubble-sub-button-group') ||
+            parent.classList?.contains('bubble-sub-button-alignment-lane')) {
+          reveal(parent);
+        }
+        parent = parent.parentElement;
+      }
+    });
+  } catch (_) {}
+
+  return () => undo.forEach((restore) => { try { restore(); } catch (_) {} });
+}
+
 // Apply width styles to an element
 export function applyWidthStyles(element, subButton, section = 'main', groupContainer = null) {
   try {

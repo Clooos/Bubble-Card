@@ -20,6 +20,7 @@ import { renderCalendarEditor } from '../cards/calendar/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
 import { renderEmptyColumnEditor } from '../cards/empty-column/editor.js';
 import { makeSubButtonPanel } from '../components/sub-button/editor/index.js';
+import { revealConditionalSubButtons } from '../components/sub-button/utils.js';
 import { makeModulesEditor } from '../modules/editor.js';
 import { makeModuleStore, _fetchModuleStore } from '../modules/store.js';
 import { yamlKeysMap } from '../modules/registry.js';
@@ -2183,11 +2184,72 @@ class BubbleCardEditor extends LitElement {
         || bubbleCard.querySelector('.bubble-buttons-container.bottom-fixed');
       const mainSubButtons = bubbleCard.querySelector('.bubble-sub-button-container');
       const contentContainer = bubbleCard.querySelector('.bubble-content-container');
+      const container = bubbleCard.querySelector('.bubble-container');
 
-      // Measure heights once to avoid multiple reflows
-      const bottomSubButtonsHeight = bottomSubButtons ? bottomSubButtons.getBoundingClientRect().height : 0;
-      const bottomMainButtonsHeight = bottomMainButtons ? bottomMainButtons.getBoundingClientRect().height : 0;
-      const mainSubButtonsHeight = mainSubButtons ? mainSubButtons.getBoundingClientRect().height : 0;
+      const computeBottomOffset = (element) => {
+        if (!element) return 0;
+        try {
+          const style = getComputedStyle(element);
+          const offset = parseFloat(style.bottom);
+          return Number.isFinite(offset) ? Math.max(0, offset) : 0;
+        } catch (_) {
+          return 0;
+        }
+      };
+
+      // Rows have to reserve the tallest layout the card can take, not the one
+      // its entities happen to draw right now: a conditional row appearing later
+      // has nowhere to go and grows over the header instead (#2517). Every read
+      // sits in one block so a single restore puts the preview back untouched.
+      const restoreConditionalRows = revealConditionalSubButtons(bubbleCard);
+      let bottomSubButtonsHeight = 0;
+      let bottomMainButtonsHeight = 0;
+      let mainSubButtonsHeight = 0;
+      let bottomMainButtonsOffset = 0;
+      let mainSubButtonsSpacing = 0;
+      let hasVisibleContent = false;
+      let rowHeight = 56;
+      let rowGap = 8;
+
+      try {
+        // Measure heights once to avoid multiple reflows
+        bottomSubButtonsHeight = bottomSubButtons ? bottomSubButtons.getBoundingClientRect().height : 0;
+        bottomMainButtonsHeight = bottomMainButtons ? bottomMainButtons.getBoundingClientRect().height : 0;
+        mainSubButtonsHeight = mainSubButtons ? mainSubButtons.getBoundingClientRect().height : 0;
+
+        // Only add bottom offset for main buttons when there are also bottom sub-buttons
+        // The 8px CSS bottom offset is aesthetic spacing that doesn't require extra rows
+        // when main buttons are alone at the bottom
+        if (bottomMainButtons && bottomSubButtonsHeight > 0) {
+          bottomMainButtonsOffset = computeBottomOffset(bottomMainButtons);
+        }
+
+        // Padding and margins of the main sub-buttons row, from its computed styles
+        if (mainSubButtonsHeight > 0) {
+          const mainComputed = getComputedStyle(mainSubButtons);
+          mainSubButtonsSpacing =
+            (parseFloat(mainComputed.marginTop) || 0) +
+            (parseFloat(mainComputed.marginBottom) || 0) +
+            (parseFloat(mainComputed.paddingTop) || 0) +
+            (parseFloat(mainComputed.paddingBottom) || 0);
+        }
+
+        // Check if content container is visible and has content
+        if (contentContainer) {
+          const children = Array.from(contentContainer.children || []);
+          hasVisibleContent = children.some(child => {
+            const rect = child.getBoundingClientRect();
+            const style = getComputedStyle(child);
+            return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+          });
+        }
+
+        const computed = getComputedStyle(container || bubbleCard);
+        rowHeight = parseFloat(computed.getPropertyValue('--row-height')) || 56;
+        rowGap = parseFloat(computed.getPropertyValue('--row-gap')) || 8;
+      } finally {
+        restoreConditionalRows();
+      }
 
       // Stabilization: ignore micro layout changes (< 2px) to prevent infinite loops
       // caused by modules with dynamic JS expressions that trigger small reflows
@@ -2222,20 +2284,6 @@ class BubbleCardEditor extends LitElement {
         }
       }
 
-      const container = bubbleCard.querySelector('.bubble-container');
-      const containerRect = container ? container.getBoundingClientRect() : null;
-
-      // Check if content container is visible and has content
-      let hasVisibleContent = false;
-      if (contentContainer) {
-        const children = Array.from(contentContainer.children || []);
-        hasVisibleContent = children.some(child => {
-          const rect = child.getBoundingClientRect();
-          const style = getComputedStyle(child);
-          return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-        });
-      }
-
       // Check if there are main sub-buttons (use already measured height)
       const hasMainSubButtons = mainSubButtonsHeight > 0;
 
@@ -2251,22 +2299,7 @@ class BubbleCardEditor extends LitElement {
       if (reservedFromBottom <= 0 && hasBottomConfigured) {
         reservedFromBottom = 46;
       }
-      const computeBottomOffset = (element) => {
-        if (!element) return 0;
-        try {
-          const style = getComputedStyle(element);
-          const offset = parseFloat(style.bottom);
-          return Number.isFinite(offset) ? Math.max(0, offset) : 0;
-        } catch (_) {
-          return 0;
-        }
-      };
-      // Only add bottom offset for main buttons when there are also bottom sub-buttons
-      // The 8px CSS bottom offset is aesthetic spacing that doesn't require extra rows
-      // when main buttons are alone at the bottom
-      if (bottomMainButtons && bottomSubButtonsHeight > 0) {
-        reservedFromBottom += computeBottomOffset(bottomMainButtons);
-      }
+      reservedFromBottom += bottomMainButtonsOffset;
 
       // Calculate height reserved by main sub-buttons (in the main area)
       // Only count this if there are actual main sub-buttons present
@@ -2274,16 +2307,7 @@ class BubbleCardEditor extends LitElement {
       if (hasMainSubButtons) {
         // Main sub-buttons take space in the main content area
         // We need to account for their height in the overall card height calculation
-        reservedFromMain = mainSubButtonsHeight;
-
-        // Add padding based on the actual computed styles
-        const mainComputed = getComputedStyle(mainSubButtons);
-        const marginTop = parseFloat(mainComputed.marginTop) || 0;
-        const marginBottom = parseFloat(mainComputed.marginBottom) || 0;
-        const paddingTop = parseFloat(mainComputed.paddingTop) || 0;
-        const paddingBottom = parseFloat(mainComputed.paddingBottom) || 0;
-
-        reservedFromMain += marginTop + marginBottom + paddingTop + paddingBottom;
+        reservedFromMain = mainSubButtonsHeight + mainSubButtonsSpacing;
       }
 
       // Ensure reservedFromMain doesn't go below overshoot value
@@ -2294,11 +2318,6 @@ class BubbleCardEditor extends LitElement {
         reservedFromMain = Math.max(reservedFromMain, minOvershootValue);
       }
       
-      const computed = (container || bubbleCard) ? getComputedStyle(container || bubbleCard) : null;
-      const rowHeightVar = computed ? computed.getPropertyValue('--row-height') : '';
-      const rowHeight = parseFloat(rowHeightVar) || 56;
-      const rowGapVar = computed ? computed.getPropertyValue('--row-gap') : '';
-      const rowGap = parseFloat(rowGapVar) || 8;
       const effectiveRowStep = rowHeight + rowGap;
 
       const defaultRows = this._config.card_type === 'separator' ? 0.8 : 1;
