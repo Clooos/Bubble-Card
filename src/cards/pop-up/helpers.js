@@ -1758,6 +1758,9 @@ function openStandalonePopup(context, instant = false) {
         // restore frame itself cannot animate anything.
         const phase2AfterTransitionRestore = () => {
             restoreShellTransition(popUp);
+            // Reveal on the same frame: the height is final, so the closed
+            // transform now really does park the shell off screen.
+            popUp.style.visibility = '';
             scheduleStandaloneFrame(context, '_standaloneCardSyncFrame', phase2);
         };
         scheduleStandalonePhase2(context, phase2AfterTransitionRestore, {
@@ -1842,7 +1845,17 @@ function openStandalonePopup(context, instant = false) {
 
             keepPopupHostMounted(context);
             popUp.style.display = '';
-            popUp.style.visibility = '';
+            // The closed bottom-sheet transform is `translate3d(0, 100%, 0)`:
+            // it only clears the viewport once the shell is as tall as the
+            // distance it has to travel. A shell that starts empty is barely
+            // 100px high, so those first frames park it in plain sight, empty,
+            // until the build makes it tall enough to fall off screen — the
+            // shell flashed on screen and vanished before the pop-up opened.
+            // Keep it out of sight for the whole build instead; the restore
+            // frame reveals it one frame before the flip, still off screen.
+            // Visibility does not stop the closed state from being resolved and
+            // painted, which the transition start depends on (#2548).
+            popUp.style.visibility = needsClosedStatePaint ? 'hidden' : '';
 
             clearStandaloneTransitionCompletion(context);
             setStandalonePopupState(popUp, false);

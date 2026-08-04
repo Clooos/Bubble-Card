@@ -1209,7 +1209,11 @@ describe('standalone popup lifecycle', () => {
         openPopup(context);
 
         // Tap task: transitions off so the growing build never animates the
-        // percentage-based closed transform (visible top-edge peek otherwise).
+        // percentage-based closed transform (visible top-edge peek otherwise),
+        // and the shell kept out of sight — until the build gives it its final
+        // height, `translate3d(0, 100%, 0)` is too short to clear the viewport
+        // and would park the empty shell on screen.
+        expect(context.popUp.style.visibility).toBe('hidden');
         expect(context.popUp.style.transition).toBe('none');
         // The centered and adaptive-dialog blocks declare their transition with
         // !important, which beats a plain inline one: without the same priority
@@ -1235,6 +1239,9 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue();
         expect(context.popUp.style.transition).toBe('');
         expect(context.popUp.style.getPropertyPriority('transition')).toBe('');
+        // Revealed on the same frame: the height is final, so the closed
+        // transform really does park the shell off screen now.
+        expect(context.popUp.style.visibility).toBe('');
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
 
         flushRafQueue(); // phase 2 — the flip animates
