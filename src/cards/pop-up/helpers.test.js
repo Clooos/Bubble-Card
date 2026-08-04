@@ -527,8 +527,7 @@ describe('standalone popup lifecycle', () => {
 
         openPopup(context);
 
-        // Phase 1 runs inline — host is restored in the interaction frame.
-        expect(context.sectionRow.hidden).toBe(false);
+        // Phase 1 runs inline — host is rendered again in the interaction frame.
         expect(context.sectionRow.style.display).toBe('');
         expect(context.sectionRowContainer.style.display).toBe('');
         expect(context.sectionRowContainer.style.position).toBe('absolute');
@@ -541,16 +540,14 @@ describe('standalone popup lifecycle', () => {
         closePopup(context);
         dispatchTransformTransitionEnd(context.popUp);
 
-        expect(context.sectionRow.hidden).toBe(false);
         expect(context.sectionRow.style.display).toBe('');
 
         flushRafQueue();
 
-        expect(context.sectionRow.hidden).toBe(false);
+        expect(context.sectionRow.style.display).toBe('');
 
         flushRafQueue();
 
-        expect(context.sectionRow.hidden).toBe(true);
         expect(context.sectionRow.style.display).toBe('none');
         expect(context.sectionRowContainer.style.display).toBe('none');
         expect(context.sectionRowContainer.style.position).toBe('');
@@ -2598,7 +2595,6 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
 
         // The shadow DOM walk should have resolved sectionRow to huiCard
         expect(context.sectionRow).toBe(huiCard);
-        expect(huiCard.hidden).toBe(false);
         expect(huiCard.style.display).toBe('');
     });
 
@@ -2623,13 +2619,11 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
 
         suspendPopupHostLayout(context);
 
-        expect(huiCard.hidden).toBe(true);
         expect(huiCard.style.display).toBe('none');
         expect(context.style.display).toBe('none');
 
         // hui-card recomputes its own visibility on Home Assistant state updates.
         // The popup element must remain collapsed when that makes the wrapper visible again.
-        huiCard.hidden = false;
         huiCard.style.display = '';
 
         expect(context.style.display).toBe('none');
@@ -2640,10 +2634,55 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
         expect(huiCard.style.position).toBe('absolute');
         expect(masonryColumn.style).toEqual({ display: 'flex', position: '' });
 
+        // Both view layouts size a cell from the `hidden` attribute, so the
+        // pop-up must never write it: flipping it on open and off on close
+        // resized every other card of the view.
+        expect(huiCard.hidden).toBe(false);
+        expect(huiCard.style.display).toBe('');
+        // Nor is the element itself ever marked: a pop-up hosted in another
+        // card's shadow root has no cell, and Bubble Dashboard's sentinel
+        // relies on the hui-card / .card guards being the only writers here.
+        expect(context.hidden).toBeUndefined();
+
         restorePopupHostLayout(context);
 
+        expect(huiCard.hidden).toBe(false);
+        expect(huiCard.style.display).toBe('');
         expect(huiCard.style.position).toBe('relative');
         expect(masonryColumn.style).toEqual({ display: 'flex', position: '' });
+    });
+
+    // Bubble Dashboard mounts its pop-ups inside another card's shadow root and
+    // neutralises the host resolution with a detached <div>. Only a `hui-card`
+    // sectionRow and a `.card` container may ever be written to, otherwise that
+    // sentinel is bypassed and the pop-up collapses to nothing.
+    test('leaves a sentinel host untouched, element included', () => {
+        // Same shape as the module's sentinel: a detached DIV, so neither the
+        // `hui-card` tag guard nor the `.card` class guard can match.
+        const sentinel = {
+            tagName: 'DIV',
+            classList: { contains: () => false },
+            style: { display: '', position: '' },
+        };
+        const context = {
+            ...createStandaloneContext(),
+            sectionRow: sentinel,
+            sectionRowContainer: sentinel,
+            style: { display: '' },
+        };
+        usedContexts.push(context);
+
+        keepPopupHostMounted(context);
+
+        expect(context.hidden).toBeUndefined();
+        expect(sentinel.hidden).toBeUndefined();
+        expect(sentinel.style).toEqual({ display: '', position: '' });
+
+        suspendPopupHostLayout(context);
+
+        expect(context.hidden).toBeUndefined();
+        expect(sentinel.hidden).toBeUndefined();
+        expect(sentinel.style).toEqual({ display: '', position: '' });
     });
 
     // #2532 #2533 #2544 #2552: a pop-up wrapped in a custom stack that owns a shadow
@@ -2685,7 +2724,6 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
         suspendPopupHostLayout(context);
 
         expect(context.sectionRow).toBe(huiCard);
-        expect(huiCard.hidden).toBe(true);
         expect(huiCard.style.display).toBe('none');
         expect(context._popupHostChainIncomplete).toBe(false);
     });
@@ -2715,8 +2753,7 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
         suspendPopupHostLayout(context);
 
         expect(context.sectionRow).toBe(ownHuiCard);
-        expect(ownHuiCard.hidden).toBe(true);
-        expect(viewHuiCard.hidden).toBe(false);
+        expect(ownHuiCard.style.display).toBe('none');
         expect(viewHuiCard.style.display).toBe('');
     });
 
@@ -2736,13 +2773,12 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
 
         expect(context.sectionRow).toBeNull();
         expect(context._popupHostChainIncomplete).toBe(true);
-        expect(huiCard.hidden).toBe(false);
+        expect(huiCard.style.display).toBe('');
 
         declutteringCard.getRootNode = () => ({ host: huiCard });
         syncDeferredPopupHostLayout(context);
 
         expect(context.sectionRow).toBe(huiCard);
-        expect(huiCard.hidden).toBe(true);
         expect(huiCard.style.display).toBe('none');
         expect(context.style.display).toBe('none');
     });
@@ -2767,6 +2803,7 @@ describe('resolvePopupHostElements shadow DOM fallback', () => {
 
         expect(context.sectionRow).toBe(huiCard);
         expect(huiCard.hidden).toBe(false);
+        expect(huiCard.style.display).toBe('');
         expect(huiCard.style.position).toBe('absolute');
         expect(context.style.display).toBe('grid');
     });

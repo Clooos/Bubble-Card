@@ -629,7 +629,15 @@ function applyPopupHostLayout(context, {
     const hasManagedContainer = sectionRowContainer?.classList?.contains('card');
 
     if (isHaCardWrapper(sectionRow)) {
-        sectionRow.hidden = rowHidden;
+        // The inline display is the only thing that collapses the cell. The
+        // `hidden` attribute must stay out of it: both view layouts size a cell
+        // from it — masonry drops a column's flex-grow through
+        // `.column:not(:has(> :not([hidden])))`, sections hide the whole
+        // container through `.card:has(> [hidden])` — so a pop-up alone in its
+        // column resized every other card each time the attribute went on or
+        // off. It cannot be pinned either way: hui-card recomputes its own
+        // visibility on hass updates and clears it, which turned the flip into
+        // an open/close oscillation of the whole dashboard.
         sectionRow.style.display = rowHidden ? 'none' : '';
 
         const hasPreviousPosition = Object.prototype.hasOwnProperty.call(context, '_popupHostPreviousRowPosition');
@@ -649,7 +657,14 @@ function applyPopupHostLayout(context, {
         sectionRowContainer.style.position = containerPosition;
     }
 
-    // Home Assistant can recompute a hui-card's visibility after a state update.
+    // Nothing outside those two guards is ever written to. A pop-up hosted in
+    // another card's shadow root owns no cell, and Bubble Dashboard relies on
+    // that: it swaps sectionRow/sectionRowContainer for a detached <div> so
+    // every keep/suspend/restore cycle is a no-op on a host it does not own.
+    // Marking the element itself `hidden` escapes both guards and collapses
+    // such a pop-up to nothing, since it has no `:host` display to outrank the
+    // user-agent rule.
+
     // Keep the popup element itself collapsed as well so a detached standalone
     // shell cannot leave an inline line box behind when its wrapper is restored.
     if (context?.style) {
