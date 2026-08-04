@@ -187,6 +187,173 @@ describe('handlePopUp performance guards', () => {
         expect(renderHeaderButton).toHaveBeenCalledTimes(2);
     });
 
+    test('refreshes the header when a sub-button visibility condition entity changes', async () => {
+        const locale = { language: 'fr' };
+        const unitSystem = { temperature: '°C' };
+        const sharedKitchen = { state: 'on' };
+        const sharedTemperature = { state: '21.5' };
+        const context = createOpenPopupContext({
+            config: {
+                sub_button: [
+                    {
+                        entity: 'sensor.temperature',
+                        visibility: [
+                            { condition: 'state', entity: 'input_boolean.show_humidity', state: 'off' },
+                        ],
+                    },
+                ],
+            },
+            hass: {
+                states: {
+                    'light.kitchen': sharedKitchen,
+                    'sensor.temperature': sharedTemperature,
+                    'input_boolean.show_humidity': { state: 'off' },
+                },
+                locale,
+                config: { unit_system: unitSystem },
+            },
+        });
+
+        await handlePopUp(context);
+        expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+
+        // Only the helper driving the conditional visibility changed: the
+        // sub-button entities themselves are untouched.
+        context._hass = {
+            states: {
+                'light.kitchen': sharedKitchen,
+                'sensor.temperature': sharedTemperature,
+                'input_boolean.show_humidity': { state: 'on' },
+            },
+            locale,
+            config: { unit_system: unitSystem },
+        };
+
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(2);
+    });
+
+    test('refreshes the header when a grouped sub-button visibility entity changes', async () => {
+        const locale = { language: 'fr' };
+        const unitSystem = { temperature: '°C' };
+        const sharedKitchen = { state: 'on' };
+        const context = createOpenPopupContext({
+            config: {
+                sub_button: {
+                    main: [
+                        {
+                            group: [
+                                {
+                                    entity: 'sensor.temperature',
+                                    visibility: [
+                                        { condition: 'state', entity: 'input_boolean.show_humidity', state: 'off' },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                    bottom: [],
+                },
+            },
+            hass: {
+                states: {
+                    'light.kitchen': sharedKitchen,
+                    'sensor.temperature': { state: '21.5' },
+                    'input_boolean.show_humidity': { state: 'off' },
+                },
+                locale,
+                config: { unit_system: unitSystem },
+            },
+        });
+
+        await handlePopUp(context);
+        expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+
+        context._hass = {
+            states: {
+                'light.kitchen': sharedKitchen,
+                'sensor.temperature': context._hass.states['sensor.temperature'],
+                'input_boolean.show_humidity': { state: 'on' },
+            },
+            locale,
+            config: { unit_system: unitSystem },
+        };
+
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(2);
+    });
+
+    test('keeps refreshing the header when a condition cannot be tracked by entity', async () => {
+        const sharedKitchen = { state: 'on' };
+        const locale = { language: 'fr' };
+        const unitSystem = { temperature: '°C' };
+        const hass = {
+            states: { 'light.kitchen': sharedKitchen },
+            locale,
+            config: { unit_system: unitSystem },
+        };
+        const context = createOpenPopupContext({
+            config: {
+                sub_button: [
+                    {
+                        entity: 'light.kitchen',
+                        visibility: [
+                            { condition: 'time', after: '22:00:00' },
+                        ],
+                    },
+                ],
+            },
+            hass,
+        });
+
+        await handlePopUp(context);
+        // Nothing changed at all, yet a time condition can flip on its own.
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(2);
+    });
+
+    test('still skips the header refresh when nothing the header depends on changed', async () => {
+        const sharedKitchen = { state: 'on' };
+        const sharedTemperature = { state: '21.5' };
+        const sharedHelper = { state: 'off' };
+        const locale = { language: 'fr' };
+        const unitSystem = { temperature: '°C' };
+        const states = {
+            'light.kitchen': sharedKitchen,
+            'sensor.temperature': sharedTemperature,
+            'input_boolean.show_humidity': sharedHelper,
+            'light.unrelated': { state: 'off' },
+        };
+        const context = createOpenPopupContext({
+            config: {
+                sub_button: [
+                    {
+                        entity: 'sensor.temperature',
+                        visibility: [
+                            { condition: 'state', entity: 'input_boolean.show_humidity', state: 'off' },
+                        ],
+                    },
+                ],
+            },
+            hass: { states, locale, config: { unit_system: unitSystem } },
+        });
+
+        await handlePopUp(context);
+
+        context._hass = {
+            states: { ...states, 'light.unrelated': { state: 'on' } },
+            locale,
+            config: { unit_system: unitSystem },
+        };
+
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+    });
+
     test('renders the popup header before applying popup styles', async () => {
         const context = createOpenPopupContext();
 

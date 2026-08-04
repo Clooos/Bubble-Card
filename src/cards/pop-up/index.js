@@ -4,6 +4,7 @@ import { cleanupPopupRuntime, isPopupOpenSequenceActive, registerPopupContext, s
 import { initPopUpHashNavigationBridge, registerPopUpHash } from "./navigation-picker-bridge.js";
 import { cleanupPopUpCards, handlePopUpCards } from './cards/index.js';
 import { isStandalonePopUpConfig } from './migration.js';
+import { ensureArray, extractConditionEntityIds } from '../../tools/validate-condition.js';
 
 initPopUpHashNavigationBridge();
 
@@ -178,30 +179,85 @@ function syncPopUpHashRegistration(context) {
     });
 }
 
-function _collectSubButtonEntities(config) {
+function _headerSubButtonSections(config) {
     const sub = config?.sub_button;
     if (!sub) return [];
-    const mainEntity = config?.entity || '';
-    const entities = [];
-    const sections = Array.isArray(sub) ? [sub] : [sub.main || [], sub.bottom || []];
-    for (const section of sections) {
+    return Array.isArray(sub) ? [sub] : [sub.main || [], sub.bottom || []];
+}
+
+// Every sub-button of the header, group members included, flattened.
+function _eachHeaderSubButton(config, visit) {
+    for (const section of _headerSubButtonSections(config)) {
         if (!Array.isArray(section)) continue;
         for (const btn of section) {
             if (!btn) continue;
             if (Array.isArray(btn.group)) {
                 for (const gb of btn.group) {
-                    if (gb) entities.push(gb.entity || mainEntity);
+                    if (gb) visit(gb);
                 }
             } else {
-                entities.push(btn.entity || mainEntity);
+                visit(btn);
             }
         }
     }
+}
+
+function _collectSubButtonEntities(config, hass) {
+    if (!config?.sub_button) return [];
+    const mainEntity = config?.entity || '';
+    const entities = [];
+
+    _eachHeaderSubButton(config, (btn) => {
+        entities.push(btn.entity || mainEntity);
+
+        // A conditional sub-button is driven by the entities of its own
+        // conditions, which are usually NOT the entity it displays (a helper
+        // toggling between a temperature and a humidity reading, #2550).
+        // Without them the header memo never sees the change and freezes.
+        const conditions = ensureArray(btn.visibility) ?? [];
+        if (conditions.length > 0) {
+            for (const entityId of extractConditionEntityIds(conditions, hass)) {
+                entities.push(entityId);
+            }
+        }
+    });
+
     return entities;
 }
 
+// Conditions whose truth is not a function of an entity state: the entity-ref
+// memo below cannot see them change, so the header must simply keep
+// refreshing, exactly like it does for relative time fields.
+function _conditionsAreStateOnly(conditions) {
+    return conditions.every((condition) => {
+        if (!condition || condition.enabled === false) {
+            return true;
+        }
+
+        if (condition.condition === 'time' || condition.condition === 'template') {
+            return false;
+        }
+
+        return !Array.isArray(condition.conditions) || _conditionsAreStateOnly(condition.conditions);
+    });
+}
+
+function _headerUsesUntrackableConditions(config) {
+    let untrackable = false;
+
+    _eachHeaderSubButton(config, (btn) => {
+        if (untrackable) return;
+        const conditions = ensureArray(btn.visibility) ?? [];
+        if (conditions.length > 0 && !_conditionsAreStateOnly(conditions)) {
+            untrackable = true;
+        }
+    });
+
+    return untrackable;
+}
+
 function _snapshotSubButtonEntityRefs(context) {
-    const entities = _collectSubButtonEntities(context.config);
+    const entities = _collectSubButtonEntities(context.config, context._hass);
     const states = context._hass?.states;
     context._lastSubBtnEntityKeys = entities;
     context._lastSubBtnEntityRefs = entities.map(e => states?.[e] ?? null);
@@ -253,6 +309,25 @@ function _headerUsesRelativeTime(config) {
     return sections.some(section => Array.isArray(section) && section.some(_subButtonUsesRelativeTime));
 }
 
+// Answered on every hass tick, from a config reference that is stable between
+// two config changes: the walk is done once per config object.
+const headerUnconditionalRefreshCache = new WeakMap();
+
+function _headerNeedsUnconditionalRefresh(config) {
+    if (!config) {
+        return false;
+    }
+
+    const cached = headerUnconditionalRefreshCache.get(config);
+    if (cached !== undefined) {
+        return cached;
+    }
+
+    const result = _headerUsesRelativeTime(config) || _headerUsesUntrackableConditions(config);
+    headerUnconditionalRefreshCache.set(config, result);
+    return result;
+}
+
 function shouldRefreshHeader(context) {
     if (!context.elements?.header) {
         return false;
@@ -264,7 +339,7 @@ function shouldRefreshHeader(context) {
     const unitSystem = context._hass?.config?.unit_system;
     const isEditing = !!(context.editor || context.detectedEditor);
 
-    if (_headerUsesRelativeTime(context.config)) {
+    if (_headerNeedsUnconditionalRefresh(context.config)) {
         context._lastHeaderConfigRef = context.config;
         context._lastHeaderStateRef = entityState;
         context._lastHeaderLocaleRef = locale;
