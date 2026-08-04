@@ -5,6 +5,22 @@ import styles from "./styles.css";
 const MENU_WIDTH = 200;
 const MENU_OVERLAP = 40;
 
+// The card container is transformed (Safari slider workaround), so it is a
+// stacking context: a menu painted inside it lands below every card that follows
+// in the view. That is the mwc menu always, and ha-dropdown wherever its popover
+// does not reach the browser top layer. Lifting the container while a menu is
+// open is what lets the menu pass over its neighbours, and it is a no-op for a
+// menu that is already in the top layer. Stays below the Home Assistant toolbar
+// (4), the pop-up shell (5) and the horizontal buttons stack (6).
+const OPEN_MENU_Z_INDEX = '3';
+
+// Give the card back its default layering once its last menu is closed.
+function releaseMainContainer(mainContainer) {
+    if (!mainContainer || mainContainer.openDropdowns > 0) return;
+    mainContainer.style.overflow = '';
+    mainContainer.style.zIndex = '';
+}
+
 // Cache for getComputedStyle results to avoid forced reflows.
 const styleCache = new WeakMap();
 let styleCacheVersion = 0;
@@ -239,6 +255,7 @@ export function createDropdownActions(context, elements = context.elements, enti
                 }
             }
             context.elements.mainContainer.style.overflow = 'visible';
+            context.elements.mainContainer.style.zIndex = OPEN_MENU_Z_INDEX;
         }
     };
 
@@ -347,9 +364,7 @@ export function createDropdownActions(context, elements = context.elements, enti
                     mainContainer.openDropdowns--;
                 }
             }
-            if (mainContainer && mainContainer.openDropdowns === 0) {
-                context.elements.mainContainer.style.overflow = '';
-            }
+            releaseMainContainer(mainContainer);
         }
     };
 
@@ -419,6 +434,9 @@ export function createDropdownActions(context, elements = context.elements, enti
         if (mainContainer && typeof mainContainer.openDropdowns === 'number' && isMenuOpen) {
             mainContainer.openDropdowns = Math.max(0, mainContainer.openDropdowns - 1);
             isMenuOpen = false;
+            // A re-render that tears the dropdown down never fires 'closed', so
+            // the card would otherwise keep the layering of an open menu.
+            releaseMainContainer(mainContainer);
         }
     };
 }
