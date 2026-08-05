@@ -55,6 +55,29 @@
     pointer-events: auto;
 }
 
+/* A group is a layout box, never an interaction target. It stretches to the
+   full container width in rows layout (see .groups-layout-rows below) and an
+   alignment-fill group stretches too, so re-enabling the pointer on the group
+   itself makes it swallow clicks meant for whatever the main area draws
+   underneath, typically the icon column of a tall card, whose lower icons then
+   look clickable but are not. Only the buttons inside a group need events. */
+.bubble-sub-button-bottom-container .bubble-sub-button-group {
+    pointer-events: none;
+}
+
+.bubble-sub-button-bottom-container .bubble-sub-button-group > * {
+    pointer-events: auto;
+}
+
+/* Same reasoning for a sub-button carrying no action at all: it only reserves
+   width (a spacer holding a column open), so it must let the pointer through to
+   what sits below instead of absorbing it. Sliders and dropdowns are untouched:
+   they are action targets without being action-enabled, and setupActions gives
+   them an inline pointer-events that outranks this rule. */
+.bubble-sub-button-bottom-container .bubble-sub-button.bubble-action:not(.bubble-action-enabled):not(.is-select) {
+    pointer-events: none;
+}
+
 .bubble-sub-button-alignment-lane {
     display: flex;
     flex-wrap: nowrap;
