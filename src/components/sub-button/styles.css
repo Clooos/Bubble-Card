@@ -69,6 +69,16 @@
     pointer-events: auto;
 }
 
+/* ...but never something already taken out of hit testing. A collapsed slider
+   overlay keeps its full width so it can slide in, and .is-hidden is what stops
+   it catching the pointer. The rule right above re-enables the pointer with a
+   higher specificity than .is-hidden, which put that invisible overlay back in
+   front of the buttons it spans. Restore it, wrapper and inner container alike. */
+.bubble-sub-button-bottom-container .bubble-sub-button-group > .is-hidden,
+.bubble-sub-button-bottom-container .is-hidden .bubble-sub-button-slider {
+    pointer-events: none;
+}
+
 /* Same reasoning for a sub-button carrying no action at all: it only reserves
    width (a spacer holding a column open), so it must let the pointer through to
    what sits below instead of absorbing it. Sliders and dropdowns are untouched:

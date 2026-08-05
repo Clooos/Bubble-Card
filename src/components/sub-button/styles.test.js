@@ -38,6 +38,15 @@ describe('bottom sub-button container hit testing', () => {
     ).toContain('pointer-events: none');
   });
 
+  // Regression from the rule above: re-enabling the pointer on every group child
+  // outranks .is-hidden, so a collapsed slider overlay — laid out at full width
+  // so it can slide in — went back to catching clicks meant for the buttons it
+  // spans, with an ew-resize cursor over them.
+  test('keeps a hidden overlay out of hit testing inside a group', () => {
+    expect(getRule('.bubble-sub-button-bottom-container .bubble-sub-button-group > .is-hidden,\n.bubble-sub-button-bottom-container .is-hidden .bubble-sub-button-slider'))
+      .toContain('pointer-events: none');
+  });
+
   // Dropdowns are action targets without being action-enabled, so the rule
   // above must not reach them.
   test('excludes dropdowns from the no-action rule', () => {
