@@ -1325,9 +1325,11 @@ Slider sub-buttons support the same slider options as button sliders, including:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Border radius for the sub-buttons |
 | `--bubble-sub-button-background-color` | `color` | Background color for the sub-buttons |
+| `--bubble-sub-button-outline` | `box-shadow` | Outline added to a sub-button or a slider only when it paints the same color as the card behind it, which would make it invisible (set it to `none` to remove it) |
 | `--bubble-sub-slider-border-radius` | `px` | Border radius for slider sub-buttons |
 | `--bubble-sub-slider-background-color` | `color` | Background color for slider sub-buttons |
 | `--bubble-sub-slider-height` | `px` | Height for always-visible slider sub-buttons |
+| `--bubble-sub-slider-outline` | `box-shadow` | Outline of the slider sub-buttons only, falls back to `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Text color on bright sub-button backgrounds |
 
 </details>

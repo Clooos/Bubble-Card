@@ -6,6 +6,7 @@ import { handleDefaultSubButton } from "./types/default/index.js";
 import { handleDropdownSubButton } from "./types/dropdown/index.js";
 import { handleSliderSubButton } from "./types/slider/index.js";
 import { updateSlider } from "../slider/changes.js";
+import { scheduleSubButtonOutlines } from "./outline.js";
 
 export function updateSubButtons(context, subButtons) {
   if (!subButtons) return;
@@ -99,6 +100,10 @@ export function updateSubButtons(context, subButtons) {
 
   // Ensure content container is pinned appropriately based on group positions
   updateContentContainerFixedClass(context);
+
+  // Colors and layout have just been settled, decide which sub-buttons blend
+  // into the card behind them and need an outline to stay readable
+  scheduleSubButtonOutlines(context);
 }
 
 function updateSubButtonContent(context, element, options) {

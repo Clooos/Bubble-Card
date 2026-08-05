@@ -400,6 +400,29 @@
     background-color: var(--bubble-sub-slider-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
 }
 
+/* A sub-button or a slider can end up painting exactly the color of what sits
+   behind it (accent color on both, same light color on both, or a card slider
+   fill grown under it), and nothing separates them anymore. Only those elements
+   get this hairline, outline.js compares the painted colors and adds the class.
+   It is drawn above the content, so it survives slider fills, entity pictures
+   and ripples, and it is shared by every kind of sub-button (plain, dropdown,
+   inline slider and opened slider) to keep them consistent */
+.bubble-sub-button.needs-outline::after,
+.bubble-sub-button-slider.needs-outline::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: var(--bubble-sub-button-outline, inset 0 0 0 1px rgba(var(--rgb-primary-text-color, 0, 0, 0), 0.2));
+}
+
+/* Sliders can be tuned apart from the other sub-buttons */
+.bubble-sub-button-slider.needs-outline::after {
+    box-shadow: var(--bubble-sub-slider-outline, var(--bubble-sub-button-outline, inset 0 0 0 1px rgba(var(--rgb-primary-text-color, 0, 0, 0), 0.2)));
+}
+
 /* Align wrapper vertically when overlay is card-level at top.
    The sub-buttons are centered in the card wrapper, so the overlay follows the
    same center whatever the card height (row size, large layout, modules...) */

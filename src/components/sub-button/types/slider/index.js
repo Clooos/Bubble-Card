@@ -4,6 +4,7 @@ import { createSliderStructure } from "../../../slider/index.js";
 import { updateSlider } from "../../../slider/changes.js";
 import { updateIconClasses } from "../../../../tools/icon.js";
 import { updateBackground, setupActions, buildDisplayedState, updateElementVisibility, applySubButtonScrollingEffect } from "../../utils.js";
+import { scheduleSubButtonOutlines } from "../../outline.js";
 
 // Build a normalized slider config from context and sub-button options
 // This avoids duplicating merge logic between initial creation and updates
@@ -201,6 +202,9 @@ export function showSubSlider(context, element) {
   element.sliderWrapper.classList.remove('is-hidden');
   element.sliderOpen = true;
   updateOverlayVisibility(element, true);
+  // The overlay now stands in front of the card, its own colors decide whether
+  // it needs an outline to stay visible
+  scheduleSubButtonOutlines(context);
   // Ensure global interactions are blocked outside the slider
   enableGlobalInteractionBlocker(context, element);
 }
@@ -219,6 +223,7 @@ export function hideSubSlider(context, element) {
   }
   element.sliderOpen = false;
   updateOverlayVisibility(element, false);
+  scheduleSubButtonOutlines(context);
   // Restore global interactions
   disableGlobalInteractionBlocker(element);
   try { element._blockerPointerDownInside = false; } catch (_) {}

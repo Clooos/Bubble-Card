@@ -6,6 +6,7 @@ import {
   getTemperatureUnit,
   isDocumentRTL
 } from '../../tools/utils.js';
+import { scheduleSubButtonOutlines } from '../sub-button/outline.js';
 
 export { isDocumentRTL };
 
@@ -102,6 +103,11 @@ export function setRangeFillTransform(context, percentage) {
   }
   context._lastVisualFillPercentage = visualPercentage;
   context._lastFillOrientation = orientation;
+
+  // The fill is a background for whatever stands in front of it: a sub-button
+  // the fill just reached may now share its color (no-op for slider contexts,
+  // they own no sub-button)
+  scheduleSubButtonOutlines(context);
 }
 
 export function getAdjustedValue(value, step) {
