@@ -176,3 +176,68 @@ describe('handleCustomStyles refresh listener registration', () => {
         expect(context._moduleChangeListenerAdded).toBeUndefined();
     });
 });
+
+describe('template target detection', () => {
+    const WRITES_STATE = "${card.querySelector('.bubble-state').innerText = 'x'}";
+
+    beforeEach(() => {
+        global.window = {
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+        };
+        global.document = {
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            createElement: jest.fn(() => ({
+                tagName: 'STYLE',
+                textContent: '',
+                id: '',
+                parentElement: null,
+            })),
+        };
+    });
+
+    afterEach(() => {
+        delete global.window;
+        delete global.document;
+    });
+
+    function createTargetContext(styles) {
+        const element = createCardElement();
+        const context = createContext(element);
+        context.config = { ...context.config, styles };
+        context.elements = { state: {}, name: {} };
+        return { context, element };
+    }
+
+    test('marks the element a template writes into, and only that one', () => {
+        const { context, element } = createTargetContext(WRITES_STATE);
+
+        handleCustomStyles(context, element);
+
+        expect(context.elements.state.templateDetected).toBe(true);
+        expect(context.elements.name.templateDetected).toBeUndefined();
+    });
+
+    test('leaves both unmarked when the template writes into neither', () => {
+        const { context, element } = createTargetContext('.bubble-state { color: red; }');
+
+        handleCustomStyles(context, element);
+
+        expect(context.elements.state.templateDetected).toBeUndefined();
+        expect(context.elements.name.templateDetected).toBeUndefined();
+    });
+
+    // The scan verdict is cached per template string, shared across every card:
+    // a second card using the same template must still get marked.
+    test('marks a second card using the same template string', () => {
+        const first = createTargetContext(WRITES_STATE);
+        handleCustomStyles(first.context, first.element);
+        expect(first.context.elements.state.templateDetected).toBe(true);
+
+        const second = createTargetContext(WRITES_STATE);
+        handleCustomStyles(second.context, second.element);
+
+        expect(second.context.elements.state.templateDetected).toBe(true);
+    });
+});

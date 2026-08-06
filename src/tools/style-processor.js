@@ -35,6 +35,35 @@ function _hasSideEffects(styles) {
   return result;
 }
 
+// Which of the .bubble-state / .bubble-name elements a template writes into.
+// The answer depends on the template string alone, yet the scan is six substring
+// searches over a template that can be tens of kilobytes, and evalStyles runs it
+// on every evaluation of every card, before its memo can short-circuit anything.
+// Measured at 315 ms of a throttled page load on a 88-card dashboard, for a
+// verdict that never changes. Cached per string, exactly like _hasSideEffects.
+const _TEMPLATE_TARGET_TYPES = ["state", "name"];
+const _TEMPLATE_TARGET_SELECTORS = _TEMPLATE_TARGET_TYPES.map((type) =>
+  ["innerText", "textContent", "innerHTML"].map((prop) => `card.querySelector('.bubble-${type}').${prop} =`)
+);
+const _detectedTypesCache = new Map();
+function _detectedTemplateTypes(styles) {
+  let result = _detectedTypesCache.get(styles);
+  if (result === undefined) {
+    result = _TEMPLATE_TARGET_TYPES.filter((type, index) =>
+      _TEMPLATE_TARGET_SELECTORS[index].some((selector) => styles.includes(selector))
+    );
+    _detectedTypesCache.set(styles, result);
+    if (_detectedTypesCache.size > 1000) {
+      const iterator = _detectedTypesCache.keys();
+      for (let i = 0; i < 100; i++) {
+        const key = iterator.next().value;
+        if (key !== undefined) _detectedTypesCache.delete(key);
+      }
+    }
+  }
+  return result;
+}
+
 // Null-safe stub for DOM element references passed to user style templates.
 // Used when context.elements.icon is not yet initialized (e.g. a popup whose
 // header button hasn't been rendered yet).  The Proxy absorbs any property
@@ -347,14 +376,11 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
     return ""; // Prevents re-evaluation and flickering
   }
 
-  const elementTypes = ["state", "name"];
-  const propertyNames = ["innerText", "textContent", "innerHTML"];
-  elementTypes.forEach(type => {
-    const selectors = propertyNames.map(prop => `card.querySelector('.bubble-${type}').${prop} =`);
-    if (selectors.some(selector => styles.includes(selector)) && !context.elements[type].templateDetected) {
+  for (const type of _detectedTemplateTypes(styles)) {
+    if (!context.elements[type].templateDetected) {
       context.elements[type].templateDetected = true;
     }
-  });
+  }
 
   // Input-fingerprint memoization: skip executing the compiled template entirely
   // when the inputs that templates can depend on are unchanged.
