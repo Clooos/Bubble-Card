@@ -7,26 +7,60 @@ const SEPARATOR = '<span class="bubble-scroll-separator"> | </span>';
 // Batched measurement via requestAnimationFrame
 const pending = new Set();
 let rafId = 0;
-let flushScheduled = false;
+
+// Every element currently measured, so a font finishing its load can send them all
+// back through the flush. Held weakly where WeakRef exists, so an element dropped
+// from the DOM without going through cleanupScrollingEffects (a sub-button rebuilt
+// in place, for instance) still gets collected.
+const tracked = new Set();
+const supportsWeakRef = typeof WeakRef === 'function';
+const makeRef = (el) => supportsWeakRef ? new WeakRef(el) : el;
+const readRef = (ref) => supportsWeakRef ? ref.deref() : ref;
 
 // Lazy singleton observers (module-scoped, shared across all cards)
 let resizeObs = null;
 let intersectionObs = null;
+let fontsHooked = false;
+
+// Marks the elements this module owns, so the lifecycle sweeps below can find
+// them without walking every node of the card.
+const MARKER = 'data-bubble-scroll';
+
+function unobserve(el) {
+    if (resizeObs) try { resizeObs.unobserve(el); } catch (e) {}
+    if (intersectionObs) try { intersectionObs.unobserve(el); } catch (e) {}
+    pending.delete(el);
+}
+
+function release(el, state) {
+    unobserve(el);
+    if (state?.ref) tracked.delete(state.ref);
+    scrollState.delete(el);
+    el.removeAttribute(MARKER);
+}
 
 function getResizeObserver() {
     if (!resizeObs) {
         resizeObs = new ResizeObserver(entries => {
             for (const entry of entries) {
                 const el = entry.target;
-                if (!el.isConnected) {
-                    resizeObs.unobserve(el);
-                    if (intersectionObs) try { intersectionObs.unobserve(el); } catch (e) {}
-                    scrollState.delete(el);
+                const state = scrollState.get(el);
+                if (!state) {
+                    try { resizeObs.unobserve(el); } catch (e) {}
                     continue;
                 }
-                if (scrollState.has(el)) pending.add(el);
+                if (!el.isConnected) {
+                    // Home Assistant builds a card off-document and attaches it
+                    // afterwards, so an element that has never been measured is on
+                    // its way in, not gone. Releasing it here left it unobserved for
+                    // good, and the effect stayed off until some later update
+                    // happened to rebuild the element from scratch.
+                    if (state.measured) release(el, state);
+                    continue;
+                }
+                pending.add(el);
             }
-            scheduleFlush();
+            if (pending.size) scheduleFlush();
         });
     }
     return resizeObs;
@@ -39,6 +73,10 @@ function getIntersectionObserver() {
                 const state = scrollState.get(entry.target);
                 if (state?.span) {
                     state.span.style.animationPlayState = entry.isIntersecting ? 'running' : 'paused';
+                    // A composited layer only pays for itself while the animation
+                    // actually runs, and a dashboard holds far more marquees off
+                    // screen than on it.
+                    state.span.style.willChange = entry.isIntersecting ? 'transform' : 'auto';
                 }
             }
         }, { threshold: 0.1 });
@@ -46,13 +84,36 @@ function getIntersectionObserver() {
     return intersectionObs;
 }
 
+// A webfont swapping in changes how wide the text renders without changing the box
+// of the element holding it, so ResizeObserver never fires. That is what left a
+// name that only overflows once Roboto has loaded silently truncated for the rest
+// of the session: re-measure everything whenever a font finishes loading.
+function hookFontLoading() {
+    if (fontsHooked) return;
+    fontsHooked = true;
+
+    const fonts = typeof document !== 'undefined' ? document.fonts : null;
+    if (!fonts) return;
+
+    const remeasureAll = () => {
+        for (const ref of tracked) {
+            const el = readRef(ref);
+            if (el && scrollState.has(el)) {
+                pending.add(el);
+            } else {
+                tracked.delete(ref);
+            }
+        }
+        if (pending.size) scheduleFlush();
+    };
+
+    try { fonts.ready.then(remeasureAll); } catch (e) {}
+    try { fonts.addEventListener('loadingdone', remeasureAll); } catch (e) {}
+}
+
 function scheduleFlush() {
     if (rafId) return;
-    flushScheduled = true;
-    rafId = requestAnimationFrame(() => {
-        flushScheduled = false;
-        flush();
-    });
+    rafId = requestAnimationFrame(flush);
 }
 
 // Single batched update: read phase then write phase to avoid layout thrashing
@@ -66,7 +127,12 @@ function flush() {
     const updates = [];
     for (const el of batch) {
         const state = scrollState.get(el);
-        if (!state || !el.isConnected) continue;
+        if (!state) continue;
+        // Not attached yet: leave it observed rather than dropping it, the resize
+        // observer sends it back through as soon as it has a box.
+        if (!el.isConnected) continue;
+
+        state.measured = true;
 
         // Batch all geometry reads into a single getBoundingClientRect() call
         const elRect = el.getBoundingClientRect();
@@ -77,7 +143,7 @@ function flush() {
             const spanRect = state.span.getBoundingClientRect();
             content = spanRect.width / 2;
         } else {
-            content = elRect.width + (el.scrollWidth - el.clientWidth);
+            content = available + (el.scrollWidth - el.clientWidth);
         }
 
         updates.push({ el, state, content, needsScroll: content > available + SCROLL_TOLERANCE });
@@ -90,12 +156,16 @@ function flush() {
                 // Text now fits — disable scrolling
                 el.removeAttribute('data-animated');
                 el.innerHTML = state.text;
-                if (state.pendingInnerHTML) state.pendingInnerHTML = false;
                 state.animated = false;
                 state.span = null;
+                state.duration = '';
                 if (intersectionObs) try { intersectionObs.unobserve(el); } catch (e) {}
             } else if (state.span && state.span.isConnected) {
-                state.span.style.animationDuration = formatDuration(content);
+                const duration = formatDuration(content);
+                if (duration !== state.duration) {
+                    state.span.style.animationDuration = duration;
+                    state.duration = duration;
+                }
             }
         } else if (needsScroll) {
             // Enable scrolling — duplicate text with separators
@@ -105,13 +175,10 @@ function flush() {
             state.animated = true;
             state.span = span;
             if (span) {
-                span.style.animationDuration = formatDuration(content);
+                state.duration = formatDuration(content);
+                span.style.animationDuration = state.duration;
             }
             getIntersectionObserver().observe(el);
-        } else if (state.pendingInnerHTML) {
-            // Text changed while not animated — apply the pending text update
-            el.innerHTML = state.text;
-            state.pendingInnerHTML = false;
         }
     }
 }
@@ -120,16 +187,27 @@ function formatDuration(contentWidth) {
     return `${Math.max(1, contentWidth / SCROLL_SPEED).toFixed(2)}s`;
 }
 
-export function applyScrollingEffect(context, element, text) {
-    const { scrolling_effect: scrollingEffect = true } = context.config;
+export function applyScrollingEffect(context, element, text, scrollingEffectOverride) {
+    const scrollingEffect = scrollingEffectOverride ?? context.config?.scrolling_effect ?? true;
+
+    // No text at all: take the element right out of the pipeline. Callers used to
+    // clear it themselves and return early, which left the state behind and let
+    // the next measurement put the old label back into an element the card had
+    // deliberately emptied.
+    if (!text) {
+        if (element.previousText === '' && !scrollState.has(element)) return;
+        element.removeAttribute('data-animated');
+        element.innerHTML = '';
+        element.previousText = '';
+        release(element, scrollState.get(element));
+        return;
+    }
 
     if (!scrollingEffect) {
         if (element.previousText !== text || scrollState.has(element)) {
             applyNonScrollingStyle(element, text);
         }
-        if (resizeObs) try { resizeObs.unobserve(element); } catch (e) {}
-        if (intersectionObs) try { intersectionObs.unobserve(element); } catch (e) {}
-        scrollState.delete(element);
+        release(element, scrollState.get(element));
         return;
     }
 
@@ -142,17 +220,16 @@ export function applyScrollingEffect(context, element, text) {
 
     // Text changed on tracked element — update in place
     if (state) {
-        const oldText = state.text;
         state.text = text;
         if (state.animated && state.span) {
             state.span.innerHTML = `${text}${SEPARATOR}${text}${SEPARATOR}`;
         } else {
-            // Defer innerHTML during active flush window to batch DOM writes
-            if (flushScheduled) {
-                state.pendingInnerHTML = true;
-            } else {
-                element.innerHTML = text;
-            }
+            // The write has to land now, not on the next frame. Deferring it meant
+            // the flush measured the text being replaced, so the second element
+            // updated in a task — changeState right after changeName, the artist
+            // right after the title — was sized against the previous string and
+            // stayed unscrolled with nothing left to bring it back.
+            element.innerHTML = text;
             state.animated = false;
             state.span = null;
         }
@@ -166,15 +243,24 @@ export function applyScrollingEffect(context, element, text) {
         element.removeAttribute('data-animated');
     }
 
-    scrollState.set(element, {
+    const fresh = {
         text,
         animated: false,
         span: null,
-    });
+        measured: false,
+        suspended: false,
+        duration: '',
+        ref: null,
+    };
+    fresh.ref = makeRef(element);
+    tracked.add(fresh.ref);
+    scrollState.set(element, fresh);
 
+    element.setAttribute(MARKER, '');
     element.innerHTML = text;
     element.style.cssText = '';
 
+    hookFontLoading();
     getResizeObserver().observe(element);
     pending.add(element);
     scheduleFlush();
@@ -193,25 +279,41 @@ function applyNonScrollingStyle(element, text) {
     });
 }
 
+// A card leaving the document is usually on its way back: Home Assistant rebuilds
+// a view's columns on a sidebar toggle, a breakpoint change or an edit mode flip
+// and re-appends the very same elements. Drop the observations, which are what
+// actually holds memory, but keep the measurement state and the marquee itself.
+// Tearing all of it down used to leave the card clipped on the way back, because
+// only changeName re-registers unconditionally: changeState and the sub-buttons
+// sit behind a "nothing changed" memo and never call in again.
 export function cleanupScrollingEffects(root) {
     try {
-        const elements = root.querySelectorAll('*');
-        for (const el of elements) {
-            if (!scrollState.has(el) && el.previousText === undefined) continue;
-
-            if (resizeObs) try { resizeObs.unobserve(el); } catch (e) {}
-            if (intersectionObs) try { intersectionObs.unobserve(el); } catch (e) {}
-
+        for (const el of root.querySelectorAll(`[${MARKER}]`)) {
             const state = scrollState.get(el);
-            if (state) {
-                if (el.getAttribute('data-animated') === 'true') {
-                    el.removeAttribute('data-animated');
-                    el.innerHTML = state.text || el.textContent || '';
-                }
-                scrollState.delete(el);
+            if (!state) {
+                el.removeAttribute(MARKER);
+                continue;
             }
-
-            delete el.previousText;
+            unobserve(el);
+            state.suspended = true;
+            if (state.span) {
+                state.span.style.animationPlayState = 'paused';
+                state.span.style.willChange = 'auto';
+            }
         }
+    } catch (e) {}
+}
+
+export function resumeScrollingEffects(root) {
+    try {
+        for (const el of root.querySelectorAll(`[${MARKER}]`)) {
+            const state = scrollState.get(el);
+            if (!state?.suspended) continue;
+            state.suspended = false;
+            getResizeObserver().observe(el);
+            if (state.animated) getIntersectionObserver().observe(el);
+            pending.add(el);
+        }
+        if (pending.size) scheduleFlush();
     } catch (e) {}
 }

@@ -20,24 +20,38 @@ ha-card {
     opacity: 1;
 }
 
+/* The overflow below clips to the padding box while the mask covers the border
+   box. When the left edge lands on a fractional device pixel, which page zoom and
+   non-integer device pixel ratios both produce, the two round in opposite
+   directions and one column of text escapes the fade: a thin unfaded line against
+   the left edge. The transparent border, pulled straight back out with a negative
+   margin so the content box stays exactly where it was, gives the mask a pixel of
+   slack on each side to absorb the disagreement. The gradient stops are shifted by
+   the same pixel, so the visible fade is still 8px from the same place. */
 .scrolling-container {
     width: 100%;
     white-space: nowrap;
-    mask-image: linear-gradient(to right, transparent, black 8px, black calc(100% - 8px), transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 8px, black calc(100% - 8px), transparent);
+    /* the border has to sit outside the declared width for the content box to
+       stay put, so this must not inherit a border-box from a user style */
+    box-sizing: content-box;
+    border-inline: 1px solid transparent;
+    margin-inline: -1px;
+    mask-image: linear-gradient(to right, transparent 1px, black 9px, black calc(100% - 9px), transparent calc(100% - 1px));
+    -webkit-mask-image: linear-gradient(to right, transparent 1px, black 9px, black calc(100% - 9px), transparent calc(100% - 1px));
     overflow: hidden;
     contain: content;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
 }
 
+/* will-change is set from the visibility observer instead of here, so only the
+   marquees actually on screen hold a composited layer. */
 .scrolling-container span {
     display: inline-block;
     animation-name: bubble-scroll;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
     animation-play-state: paused;
-    will-change: transform;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
 }

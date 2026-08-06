@@ -58,23 +58,15 @@ export function getSubButtonOptions(context, subButton, index) {
 // Uses sub-button's scrolling_effect config, falling back to card's config
 export function applySubButtonScrollingEffect(context, element, text, subButton) {
   if (!element) return;
-  if (!text) {
-    element.textContent = '';
-    element.previousText = '';
-    return;
-  }
-  
-  // Create a temporary context with scrolling_effect from sub-button or card config
+
+  // The sub-button's own setting wins over the card's. It is passed through
+  // rather than baked into a cloned context: that clone copied the whole custom
+  // element and its config on every sub-button update, once a second for timers.
+  // Empty text goes through the module too, so it can drop its own state instead
+  // of being emptied behind its back.
   const scrollingEffect = subButton?.scrolling_effect ?? context.config?.scrolling_effect ?? true;
-  const tempContext = {
-    ...context,
-    config: {
-      ...context.config,
-      scrolling_effect: scrollingEffect
-    }
-  };
-  
-  applyScrollingEffect(tempContext, element, text);
+
+  applyScrollingEffect(context, element, text, scrollingEffect);
 }
 
 // Build the text content for the sub-button state/name/attribute line

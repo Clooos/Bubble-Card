@@ -6,7 +6,7 @@ import { preloadYAMLStyles } from './modules/registry.js';
 import { createBubbleDefaultColor } from './tools/style.js';
 import { updateThemeBackgroundColor } from './cards/pop-up/backdrop.js';
 import { invalidateStyleCache, stopTimerInterval } from './tools/utils.js';
-import { cleanupScrollingEffects } from './tools/text-scrolling.js';
+import { cleanupScrollingEffects, resumeScrollingEffects } from './tools/text-scrolling.js';
 import { cancelSubButtonOutlines } from './components/sub-button/outline.js';
 import { getEntitySuggestion } from './tools/entity-suggestion.js';
 import { registerPopupContext, shouldHoldDashboardHassUpdate } from './cards/pop-up/helpers.js';
@@ -90,6 +90,11 @@ class BubbleCard extends HTMLElement {
 
     // Register for icon refresh so cards re-render when icon data loads from WebSocket
     registerForIconRefresh(this);
+
+    // Re-observe the scrolling texts suspended on the way out. The update below
+    // cannot be relied on for this: everything except the name sits behind a
+    // "nothing changed" memo, and a re-parented view changes nothing.
+    try { if (this.content) resumeScrollingEffects(this.content); } catch (e) {}
 
     if (this._hass) {
       // Defer the heavy update work when a popup is being opened.
