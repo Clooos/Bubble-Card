@@ -9,7 +9,7 @@ import { invalidateStyleCache, stopTimerInterval } from './tools/utils.js';
 import { cleanupScrollingEffects, resumeScrollingEffects } from './tools/text-scrolling.js';
 import { cancelSubButtonOutlines } from './components/sub-button/outline.js';
 import { cancelDeferredCardUpdate, deferCardUpdate } from './tools/deferred-card-updates.js';
-import { getEntitySuggestion } from './tools/entity-suggestion.js';
+import { getEntitySuggestion } from './modules/suggestions.js';
 import { registerPopupContext, shouldHoldDashboardHassUpdate } from './cards/pop-up/helpers.js';
 import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
 import { registerForIconRefresh, unregisterForIconRefresh } from './tools/icon.js';

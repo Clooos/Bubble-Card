@@ -16,7 +16,7 @@ jest.unstable_mockModule('./components/sub-button/outline.js', () => ({
     cancelSubButtonOutlines: jest.fn(),
     scheduleSubButtonOutlines: jest.fn(),
 }));
-jest.unstable_mockModule('./tools/entity-suggestion.js', () => ({ getEntitySuggestion: jest.fn() }));
+jest.unstable_mockModule('./modules/suggestions.js', () => ({ getEntitySuggestion: jest.fn() }));
 jest.unstable_mockModule('./cards/pop-up/helpers.js', () => ({
     registerPopupContext: jest.fn(),
     shouldHoldDashboardHassUpdate: jest.fn(() => false),

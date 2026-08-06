@@ -59,6 +59,7 @@ This documentation covers all available options for creating editor schemas in B
 - [Advanced structure](#advanced-structure)
   - [Grid layout](#grid-layout)
   - [Expandable sections](#expandable-sections)
+- [Entity suggestions](#entity-suggestions)
 - [Best practices](#best-practices)
 - [Example: Complete module editor schema](#example-complete-module-editor-schema)
 - [References](#references)
@@ -1067,6 +1068,55 @@ You can create collapsible sections:
 | `expanded` | boolean | Initially expanded |
 | `schema` | array | Fields in the section |
 </details>
+
+## Entity suggestions
+
+Home Assistant (2026.6+) suggests cards when a user picks an entity in the card picker, and
+Bubble Card answers with a set of built-in tile recipes. Your module can join that list by
+declaring a `suggestions:` key next to `name`, `code` and `editor`. Suggested cards appear
+in the **Community** section of the picker, rendered as live previews.
+
+```yaml
+my_module:
+  name: My Module
+  version: "1.0"
+  supported:
+    - button
+  suggestions:
+    # Variant 1: twin every built-in suggestion, with your module applied.
+    - extends: native
+
+    # Variant 2: standalone suggestion, fully authored by the module.
+    - label: Weather + forecast
+      domains: [weather]
+      config:
+        card_type: button
+        button_type: state
+        entity: ${entity}
+        weather_forecast:
+          card_layout: background_only
+```
+
+Each entry of `suggestions:` accepts:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `extends` | string | `native` clones every built-in suggestion offered for the picked entity, adds your module to its `modules` list, and applies the optional `config` patch on top (shallow merge, key by key) |
+| `config` | object | Standalone card configuration, or the patch applied over each clone when `extends: native` is set. Standalone configurations must include `card_type`; `${entity}` anywhere in a string is replaced by the picked entity id, and `entity`/`modules` are filled in automatically when missing |
+| `domains` | list | Only offer the suggestion for these entity domains (`light`, `switch`, ...). Without it the rule applies to every entity that has suggestions |
+| `condition` | string | JavaScript expression evaluated with `hass`, `entity` (the id), `state`, `attributes`, `stateObj` and `domain` in scope. The suggestion is skipped when it is falsy or throws |
+| `label` | string | Text shown next to the card name in the picker. Defaults to the module `name` |
+
+Good to know:
+
+- The picker asks synchronously, so suggestions are read from the module registry once a
+  dashboard has rendered (or from the Bubble Card Tools cache). On a brand new browser
+  profile only the built-in suggestions show up until then.
+- `supported:` is honored: a clone or a standalone configuration whose `card_type` your
+  module does not support is dropped automatically.
+- The whole list (built-in + modules) is deduplicated and capped, so keep your rules
+  focused with `domains` and `condition` instead of suggesting everywhere.
+- A rule that throws is ignored and logged once, it never breaks the picker.
 
 ## Best practices
 

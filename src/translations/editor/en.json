@@ -681,7 +681,15 @@
       "download_error": "Error downloading module: {error}"
     },
     "card_picker": {
-      "description": "Bubble Card is a minimalist and customizable card collection"
+      "description": "Bubble Card is a minimalist and customizable card collection",
+      "suggestions": {
+        "color_temperature": "@ui.card.light.color_temperature|Color temperature",
+        "effect": "@ui.card.light.effect|Effect",
+        "tilt_position": "@ui.card.cover.tilt_position|Tilt position",
+        "preset_mode": "@ui.card.fan.preset_mode|Preset mode",
+        "source": "@ui.card.media_player.source|Source",
+        "humidity": "@ui.card.weather.attributes.humidity|Humidity"
+      }
     },
     "errors": {
       "card_type_required": "You need to define a card type",
