@@ -19,20 +19,29 @@ const compiledTemplateCache = new Map();
 // In those cases the compiled template is always executed, exactly like before.
 const _sideEffectCache = new Map();
 const _NON_MEMOIZABLE_RE = /=>|\bfunction\b|document|window\.|navigator|matchMedia|requestAnimationFrame|cancelAnimationFrame|appendChild|insertBefore|removeChild|\.remove\s*\(|setAttribute|removeAttribute|getAttribute|addEventListener|ResizeObserver|MutationObserver|IntersectionObserver|classList|\.style\b|innerHTML|innerText|textContent\s*=|getComputedStyle|getBoundingClientRect|callWS|callService|localStorage|setTimeout|setInterval|\bDate\b|Math\.random|performance\./;
-function _hasSideEffects(styles) {
-  let result = _sideEffectCache.get(styles);
-  if (result === undefined) {
-    result = _NON_MEMOIZABLE_RE.test(styles);
-    _sideEffectCache.set(styles, result);
-    if (_sideEffectCache.size > 1000) {
-      const iterator = _sideEffectCache.keys();
-      for (let i = 0; i < 100; i++) {
-        const key = iterator.next().value;
-        if (key !== undefined) _sideEffectCache.delete(key);
-      }
+
+// Everything below keyed by the template string shares one shape: computed once
+// per distinct template, the most recent ~1000 kept, 100 evicted at a time to
+// amortize the cost.
+function _rememberByTemplate(cache, styles, value) {
+  cache.set(styles, value);
+  if (cache.size > 1000) {
+    const iterator = cache.keys();
+    for (let i = 0; i < 100; i++) {
+      const key = iterator.next().value;
+      if (key !== undefined) cache.delete(key);
     }
   }
-  return result;
+  return value;
+}
+
+function _memoByTemplate(cache, styles, compute) {
+  const cached = cache.get(styles);
+  return cached !== undefined ? cached : _rememberByTemplate(cache, styles, compute(styles));
+}
+
+function _hasSideEffects(styles) {
+  return _memoByTemplate(_sideEffectCache, styles, (s) => _NON_MEMOIZABLE_RE.test(s));
 }
 
 // Which of the .bubble-state / .bubble-name elements a template writes into.
@@ -40,29 +49,34 @@ function _hasSideEffects(styles) {
 // searches over a template that can be tens of kilobytes, and evalStyles runs it
 // on every evaluation of every card, before its memo can short-circuit anything.
 // Measured at 315 ms of a throttled page load on a 88-card dashboard, for a
-// verdict that never changes. Cached per string, exactly like _hasSideEffects.
+// verdict that never changes.
 const _TEMPLATE_TARGET_TYPES = ["state", "name"];
 const _TEMPLATE_TARGET_SELECTORS = _TEMPLATE_TARGET_TYPES.map((type) =>
   ["innerText", "textContent", "innerHTML"].map((prop) => `card.querySelector('.bubble-${type}').${prop} =`)
 );
 const _detectedTypesCache = new Map();
 function _detectedTemplateTypes(styles) {
-  let result = _detectedTypesCache.get(styles);
-  if (result === undefined) {
-    result = _TEMPLATE_TARGET_TYPES.filter((type, index) =>
-      _TEMPLATE_TARGET_SELECTORS[index].some((selector) => styles.includes(selector))
-    );
-    _detectedTypesCache.set(styles, result);
-    if (_detectedTypesCache.size > 1000) {
-      const iterator = _detectedTypesCache.keys();
-      for (let i = 0; i < 100; i++) {
-        const key = iterator.next().value;
-        if (key !== undefined) _detectedTypesCache.delete(key);
-      }
-    }
-  }
-  return result;
+  return _memoByTemplate(_detectedTypesCache, styles, (s) =>
+    _TEMPLATE_TARGET_TYPES.filter((type, index) =>
+      _TEMPLATE_TARGET_SELECTORS[index].some((selector) => s.includes(selector))
+    )
+  );
 }
+
+// A template with no ${} placeholder has nothing to interpolate, so it resolves
+// to the same CSS for every card, every hass and every state. Jinja cannot make
+// it vary either: a {{ }} template only reaches the styles through
+// checkConditionsMet, which is callable from inside a ${} expression and nowhere
+// else. Its cleaned output is therefore a constant of the template string, and
+// worth caching globally rather than per card: the fingerprint memo further down
+// keys on the identity of hass, which Home Assistant replaces on every state
+// change of the whole installation, so it misses for every card at once several
+// times per page load.
+const _staticTemplateCache = new Map();
+function _isStaticTemplate(styles) {
+  return _memoByTemplate(_staticTemplateCache, styles, (s) => !s.includes("${"));
+}
+const _staticResultCache = new Map();
 
 // Null-safe stub for DOM element references passed to user style templates.
 // Used when context.elements.icon is not yet initialized (e.g. a popup whose
@@ -386,6 +400,17 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
     }
   }
 
+  // A template that interpolates nothing was resolved once, for every card at
+  // once: serve it before the fingerprint below is even built. The first call
+  // still goes the long way, because the template literal processes escape
+  // sequences (\n, \\, → in CSS content) and the source string is therefore
+  // not the output.
+  const _isStatic = _isStaticTemplate(styles);
+  if (_isStatic) {
+    const _staticCached = _staticResultCache.get(styles);
+    if (_staticCached !== undefined) return _staticCached;
+  }
+
   // Input-fingerprint memoization: skip executing the compiled template entirely
   // when the inputs that templates can depend on are unchanged.
   // In Home Assistant the whole `hass` object is replaced on any state change, so an
@@ -413,9 +438,8 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
   }
 
   try {
-    let compiledFunction = compiledTemplateCache.get(styles);
-    if (!compiledFunction) {
-      compiledFunction = Function(
+    const compiledFunction = _memoByTemplate(compiledTemplateCache, styles, (s) =>
+      Function(
         "hass",
         "entity",
         "state",
@@ -426,19 +450,16 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
         "card",
         "name",
         "checkConditionsMet",
-        `return \`${styles}\`;`
-      );
-      compiledTemplateCache.set(styles, compiledFunction);
-      // Prevent unbounded growth of the compiled template cache
-      // Keep the most recent ~1000 entries; evict 100 at once to amortize cost
-      if (compiledTemplateCache.size > 1000) {
-        const iterator = compiledTemplateCache.keys();
-        for (let i = 0; i < 100; i++) {
-          const key = iterator.next().value;
-          if (key !== undefined) compiledTemplateCache.delete(key);
-        }
-      }
+        `return \`${s}\`;`
+      )
+    );
+
+    // Nothing to interpolate: the arguments are never read, so none of them are
+    // built, and the result is kept for every other card using this template.
+    if (_isStatic) {
+      return _rememberByTemplate(_staticResultCache, styles, cleanCSS(compiledFunction()));
     }
+
     const card = _safeRef(context.config.card_type === 'pop-up' ? context.popUp : context.card);
 
     // Execute the compiled function to get the raw string result

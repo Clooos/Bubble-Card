@@ -33,11 +33,12 @@ jest.unstable_mockModule('../modules/bct-provider.js', () => ({
     isBCTAvailableSync: jest.fn(() => true),
 }));
 
+const cleanCSS = jest.fn((css) => css);
 jest.unstable_mockModule('./clean-css.js', () => ({
-    cleanCSS: jest.fn((css) => css),
+    cleanCSS,
 }));
 
-const { handleCustomStyles } = await import('./style-processor.js');
+const { handleCustomStyles, evalStyles } = await import('./style-processor.js');
 
 function createCardElement() {
     const element = {
@@ -249,5 +250,66 @@ describe('template target detection', () => {
         context.elements = {};
 
         expect(() => handleCustomStyles(context, element)).not.toThrow();
+    });
+});
+
+describe('static style templates', () => {
+    beforeEach(() => {
+        global.window = {
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+        };
+        global.document = {
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            createElement: jest.fn(() => ({
+                tagName: 'STYLE',
+                textContent: '',
+                id: '',
+                parentElement: null,
+            })),
+        };
+        cleanCSS.mockClear();
+    });
+
+    afterEach(() => {
+        delete global.window;
+        delete global.document;
+    });
+
+    function createStyleContext() {
+        const context = createContext(createCardElement());
+        context.elements = {};
+        return context;
+    }
+
+    // The source string is not the output: a template literal resolves its escape
+    // sequences, and CSS is full of them (content: "\2192" and friends). The
+    // static path must still run the template once instead of shortcutting to the
+    // text it was written from.
+    test('resolves escape sequences instead of returning the source string', () => {
+        const result = evalStyles(createStyleContext(), '.arrow::after { content: "\\u2192"; }');
+
+        expect(result).toBe('.arrow::after { content: "→"; }');
+    });
+
+    test('resolves a static template once for every card that uses it', () => {
+        const styles = '.resolved-once { color: red; }';
+
+        const first = evalStyles(createStyleContext(), styles);
+        const second = evalStyles(createStyleContext(), styles);
+
+        expect(second).toBe(first);
+        expect(cleanCSS).toHaveBeenCalledTimes(1);
+    });
+
+    // The global cache must never swallow a template that interpolates: those
+    // still depend on the card and on hass.
+    test('keeps re-evaluating a template that interpolates', () => {
+        const context = createStyleContext();
+        const styles = '.card { --resolved-state: ${state}; }';
+
+        expect(evalStyles(context, styles, undefined, null, 'on')).toBe('.card { --resolved-state: on; }');
+        expect(evalStyles(context, styles, undefined, null, 'off')).toBe('.card { --resolved-state: off; }');
     });
 });
