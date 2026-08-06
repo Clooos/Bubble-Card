@@ -1462,6 +1462,66 @@ describe('standalone popup lifecycle', () => {
         expect(context._pendingOpenSettledUpdate).toBe(false);
     });
 
+    test('hands a held tick to the cards on the reveal frame, before the flip', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        context.updateBubbleCard = jest.fn();
+
+        openPopup(context);
+        flushHeavyOpenTask();
+
+        // A tick landed after the build replay: handlePopUp only marked it
+        // pending, so the cards still carry the state they were built with.
+        context._pendingOpenSettledUpdate = true;
+        handlePopUpCards.mockClear();
+
+        flushStandaloneClosedStatePrimeFrame();
+
+        // Applied while nothing is on screen yet, instead of once the pop-up
+        // has stopped moving: a slider fill that would otherwise land after
+        // its own card, on an already opened pop-up.
+        expect(handlePopUpCards).toHaveBeenCalledWith(context);
+        expect(context.popUp.style.visibility).toBe('');
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+    });
+
+    test('leaves the reveal frame alone when no tick was held', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        context.updateBubbleCard = jest.fn();
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        handlePopUpCards.mockClear();
+
+        flushStandaloneClosedStatePrimeFrame();
+
+        // The gate exists to keep these frames free: a pop-up that saw no tick
+        // during its open pays nothing for the catch-up.
+        expect(handlePopUpCards).not.toHaveBeenCalled();
+    });
+
+    test('still flushes on settle for a tick that lands during the slide itself', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        context.updateBubbleCard = jest.fn();
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue(); // phase 2
+
+        // Nothing was held before the reveal, the tick arrives mid-slide.
+        context._pendingOpenSettledUpdate = true;
+
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        jest.advanceTimersByTime(0);
+
+        expect(context.updateBubbleCard).toHaveBeenCalledTimes(1);
+        expect(context._pendingOpenSettledUpdate).toBe(false);
+    });
+
     test('drops the deferred flush when the popup closes before it runs', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);

@@ -1762,6 +1762,21 @@ function openStandalonePopup(context, instant = false) {
         // in the same frame as it. The shell height is stable by now, so the
         // restore frame itself cannot animate anything.
         const phase2AfterTransitionRestore = () => {
+            // A tick that landed after the build replay is still held, and the
+            // flush that picks it up only runs on transitionend: the pop-up is
+            // revealed carrying the state it was built with and catches up once
+            // it has stopped moving. This frame paints nothing and is the last
+            // one before the flip, so the held work costs the same as it would
+            // 600ms later while buying a pop-up that opens already current.
+            // Held ticks only, so a pop-up that saw none pays nothing, and
+            // through syncStandalonePopupContent rather than updateBubbleCard,
+            // which the open-sequence gate would send straight back to the
+            // pending flag. finalizeStandalonePopupOpen still runs its own pass
+            // for anything that lands during the slide itself.
+            if (context._pendingOpenSettledUpdate) {
+                runWithInstantSliderWrites(() => syncStandalonePopupContent(context));
+            }
+
             restoreShellTransition(popUp);
             // Reveal on the same frame: the height is final, so the closed
             // transform now really does park the shell off screen.
