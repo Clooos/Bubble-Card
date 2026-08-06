@@ -391,3 +391,95 @@ describe('disconnect and reconnect', () => {
         expect(resizeObservers.length).toBe(0);
     });
 });
+
+// style-processor.js sets templateDetected on .bubble-state and .bubble-name when
+// a style template assigns to them. Its only reader used to be applyScrollingEffect,
+// and the April 2025 rewrite dropped it: the marquee then rebuilt itself out of the
+// card's own text and threw the template's content away.
+describe('elements a style template has taken over', () => {
+    test('never writes into one that is already claimed', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 100, contentWidth: 300 });
+        element.templateDetected = true;
+        element.innerHTML = 'written by the template';
+
+        applyScrollingEffect(context, element, 'a very long name');
+        runFrame();
+
+        expect(element.innerHTML).toBe('written by the template');
+        expect(isAnimated(element)).toBe(false);
+        expect(resizeObservers.length).toBe(0);
+    });
+
+    // The card sets its name and its state before it evaluates its styles, so the
+    // very first measurement is already queued when the template claims the
+    // element. That flush is the one that used to overwrite it.
+    test('hands back one claimed after the measurement was queued', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 100, contentWidth: 300 });
+
+        applyScrollingEffect(context, element, 'a very long name');
+        element.templateDetected = true;
+        element.innerHTML = 'written by the template';
+        runFrame();
+
+        expect(element.innerHTML).toBe('written by the template');
+        expect(isAnimated(element)).toBe(false);
+        expect(resizeObservers[0].targets.has(element)).toBe(false);
+    });
+
+    // A card narrowing on a sidebar toggle or a breakpoint change measures again
+    // with no update from the card, so the template gets no chance to write back.
+    test('does not rebuild a marquee over one when the card is resized', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 400, contentWidth: 300 });
+
+        applyScrollingEffect(context, element, 'Allume 75%');
+        runFrame();
+        expect(isAnimated(element)).toBe(false);
+
+        element.templateDetected = true;
+        element.innerHTML = 'written by the template';
+
+        const [resizeObserver] = resizeObservers;
+        element.boxWidth = 100;
+        resizeObserver.fire([element]);
+        runFrame();
+
+        expect(element.innerHTML).toBe('written by the template');
+        expect(isAnimated(element)).toBe(false);
+    });
+
+    test('does not put the card text back over one when the state changes', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 100, contentWidth: 300 });
+
+        applyScrollingEffect(context, element, 'Allume 75% • Temperature 21.5 C');
+        runFrame();
+        expect(isAnimated(element)).toBe(true);
+
+        element.templateDetected = true;
+        element.innerHTML = 'written by the template';
+
+        applyScrollingEffect(context, element, 'Eteint 0% • Temperature 19.0 C');
+        runFrame();
+
+        expect(element.innerHTML).toBe('written by the template');
+    });
+
+    // The non-scrolling mode wrapped the line onto two, and a template-fed line
+    // has no reason to lose that just because its text is off limits.
+    test('still applies the non-scrolling layout without touching the text', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 100, contentWidth: 300 });
+        element.templateDetected = true;
+        element.innerHTML = 'written by the template';
+
+        applyScrollingEffect(context, element, 'a very long name', false);
+        runFrame();
+
+        expect(element.innerHTML).toBe('written by the template');
+        expect(element.style.display).toBe('-webkit-box');
+        expect(element.style.WebkitLineClamp).toBe('2');
+    });
+});

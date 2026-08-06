@@ -39,6 +39,24 @@ function release(el, state) {
     el.removeAttribute(MARKER);
 }
 
+// A style template assigning to .bubble-state or .bubble-name owns what that
+// element shows from then on, so nothing here may write its text again: the card's
+// own label is no longer what is meant to be visible there. Hand the element back
+// and drop it from the pipeline entirely, because a measurement is enough to lose
+// the template's content: the flush rebuilds the marquee out of state.text, which
+// still holds the card's own text.
+//
+// applyScrollingEffect carried this guard as `if (element.templateDetected) return`
+// until the scrolling rewrite of April 2025 removed it, while style-processor.js
+// went on setting the flag with nothing left to read it.
+function handOverToTemplate(el) {
+    const state = scrollState.get(el);
+    if (!state && el.previousText === undefined) return;
+    el.removeAttribute('data-animated');
+    delete el.previousText;
+    if (state) release(el, state);
+}
+
 function getResizeObserver() {
     if (!resizeObs) {
         resizeObs = new ResizeObserver(entries => {
@@ -128,6 +146,10 @@ function flush() {
     for (const el of batch) {
         const state = scrollState.get(el);
         if (!state) continue;
+        // The card evaluates its styles after it has set its name and its state, so
+        // a template only claims the element once the measurement is already
+        // queued. This is the frame that would overwrite it.
+        if (el.templateDetected) { handOverToTemplate(el); continue; }
         // Not attached yet: leave it observed rather than dropping it, the resize
         // observer sends it back through as soon as it has a box.
         if (!el.isConnected) continue;
@@ -189,6 +211,15 @@ function formatDuration(contentWidth) {
 
 export function applyScrollingEffect(context, element, text, scrollingEffectOverride) {
     const scrollingEffect = scrollingEffectOverride ?? context.config?.scrolling_effect ?? true;
+
+    // Claimed by a style template: leave its content alone. The layout the
+    // non-scrolling mode applies is still worth keeping, so a template-fed line
+    // goes on wrapping onto two lines the way it did before.
+    if (element.templateDetected) {
+        handOverToTemplate(element);
+        if (!scrollingEffect) applyNonScrollingLayout(element);
+        return;
+    }
 
     // No text at all: take the element right out of the pipeline. Callers used to
     // clear it themselves and return early, which left the state behind and let
@@ -269,6 +300,10 @@ export function applyScrollingEffect(context, element, text, scrollingEffectOver
 function applyNonScrollingStyle(element, text) {
     element.innerHTML = text;
     element.previousText = text;
+    applyNonScrollingLayout(element);
+}
+
+function applyNonScrollingLayout(element) {
     Object.assign(element.style, {
         whiteSpace: 'normal',
         display: '-webkit-box',

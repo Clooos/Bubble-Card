@@ -376,9 +376,13 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
     return ""; // Prevents re-evaluation and flickering
   }
 
+  // A calendar, a separator and a sub-buttons card are built without the base
+  // elements, so a global module writing into .bubble-state reached here with
+  // nothing to mark and threw its whole module's styles away on those cards.
   for (const type of _detectedTemplateTypes(styles)) {
-    if (!context.elements[type].templateDetected) {
-      context.elements[type].templateDetected = true;
+    const target = context.elements?.[type];
+    if (target && !target.templateDetected) {
+      target.templateDetected = true;
     }
   }
 

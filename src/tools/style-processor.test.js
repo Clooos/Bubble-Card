@@ -240,4 +240,14 @@ describe('template target detection', () => {
 
         expect(second.context.elements.state.templateDetected).toBe(true);
     });
+
+    // A calendar, a separator and a sub-buttons card are built without the base
+    // elements. A global module writing into .bubble-state reaches them too, and
+    // marking an element that is not there threw the module's styles away.
+    test('survives a card that has no state and no name element', () => {
+        const { context, element } = createTargetContext(WRITES_STATE);
+        context.elements = {};
+
+        expect(() => handleCustomStyles(context, element)).not.toThrow();
+    });
 });
