@@ -54,6 +54,12 @@ export function updateSubButtons(context, subButtons) {
               classes.push(nameClass);
             }
           }
+          if (subButton?.css_class) {
+            const configuredClass = normalizeNameToClass(subButton.css_class);
+            if (configuredClass) {
+              classes.push(configuredClass);
+            }
+          }
           element = createElement('div', classes.join(' '));
         }
         element.classList.add('hidden');

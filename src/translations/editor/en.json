@@ -688,7 +688,24 @@
         "tilt_position": "@ui.card.cover.tilt_position|Tilt position",
         "preset_mode": "@ui.card.fan.preset_mode|Preset mode",
         "source": "@ui.card.media_player.source|Source",
-        "humidity": "@ui.card.weather.attributes.humidity|Humidity"
+        "humidity": "@ui.card.weather.attributes.humidity|Humidity",
+        "controls": "@ui.panel.lovelace.editor.features.types.area-controls.controls|Controls",
+        "more_info": "@ui.panel.lovelace.editor.action-editor.actions.more-info|More info",
+        "toggle": "@ui.card.common.toggle|Toggle",
+        "mode": "@ui.card.climate.mode|Mode",
+        "fan_speed": "@ui.panel.lovelace.editor.features.types.fan-speed.label|Fan speed",
+        "activate": "@ui.card.scene.activate|Activate",
+        "press": "@ui.card.button.press|Press",
+        "start": "@ui.dialogs.more_info_control.vacuum.start|Start",
+        "start_mowing": "@ui.card.lawn_mower.actions.start_mowing|Start mowing",
+        "pause": "@ui.dialogs.more_info_control.vacuum.pause|Pause",
+        "dock": "@ui.card.vacuum.actions.return_to_base|Return to dock",
+        "cancel": "@ui.common.cancel|Cancel",
+        "install": "@ui.dialogs.more_info_control.update.install|Install",
+        "lock": "@ui.card.lock.lock|Lock",
+        "unlock": "@ui.card.lock.unlock|Unlock",
+        "state": "@ui.components.entity.entity-state-picker.state|State",
+        "temperature": "@ui.card.weather.attributes.temperature|Temperature"
       }
     },
     "errors": {

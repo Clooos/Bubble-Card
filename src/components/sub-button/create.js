@@ -469,7 +469,16 @@ export function createSubButtonElement(context, index, isSelect, showArrow, enti
       classes.push(nameClass);
     }
   }
-  
+
+  // Explicit stable class: unlike the name-based one it survives renames and
+  // localized names (generated suggestions anchor their styles on it).
+  if (subButton?.css_class) {
+    const configuredClass = normalizeNameToClass(subButton.css_class);
+    if (configuredClass) {
+      classes.push(configuredClass);
+    }
+  }
+
   const subButtonElement = createElement('div', classes.join(' '));
   subButtonElement.nameContainer = createElement('div', 'bubble-sub-button-name-container');
   subButtonElement.feedbackContainer = createElement('div', 'bubble-feedback-container');

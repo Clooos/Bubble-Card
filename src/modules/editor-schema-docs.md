@@ -1101,7 +1101,7 @@ Each entry of `suggestions:` accepts:
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `extends` | string | `native` clones every built-in suggestion offered for the picked entity, adds your module to its `modules` list, and applies the optional `config` patch on top (shallow merge, key by key) |
+| `extends` | string | `native` clones every built-in tile suggestion offered for the picked entity (the classic dedicated card, Button and Slider shortcuts are not cloned), adds your module to its `modules` list, and applies the optional `config` patch on top (shallow merge, key by key) |
 | `config` | object | Standalone card configuration, or the patch applied over each clone when `extends: native` is set. Standalone configurations must include `card_type`; `${entity}` anywhere in a string is replaced by the picked entity id, and `entity`/`modules` are filled in automatically when missing |
 | `domains` | list | Only offer the suggestion for these entity domains (`light`, `switch`, ...). Without it the rule applies to every entity that has suggestions |
 | `condition` | string | JavaScript expression evaluated with `hass`, `entity` (the id), `state`, `attributes`, `stateObj` and `domain` in scope. The suggestion is skipped when it is falsy or throws |

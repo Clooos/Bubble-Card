@@ -111,7 +111,9 @@ function buildRuleSuggestions(moduleId, module, rule, hass, entityId, stateObj, 
 
   if (rule.extends === 'native') {
     return nativeSuggestions
-      .filter((native) => supportsCardType(module, native.config?.card_type))
+      // The classic suggestions (dedicated card, plain Button and Slider) are
+      // legacy shortcuts: only the tile recipes are worth twinning.
+      .filter((native) => !native.classic && supportsCardType(module, native.config?.card_type))
       .map((native) => {
         const patch = rule.config && typeof rule.config === 'object' ? deepClone(rule.config) : {};
         const config = { ...deepClone(native.config), ...patch };
@@ -167,5 +169,10 @@ export function getEntitySuggestion(hass, entityId) {
     return true;
   });
 
-  return unique.length ? unique.slice(0, MAX_SUGGESTIONS) : null;
+  if (!unique.length) return null;
+  // `classic` is an internal marker (see entity-suggestion.js), Home
+  // Assistant only knows about label and config.
+  return unique.slice(0, MAX_SUGGESTIONS).map(({ label, config }) =>
+    label === undefined ? { config } : { label, config },
+  );
 }

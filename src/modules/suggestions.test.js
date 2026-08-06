@@ -186,6 +186,23 @@ describe('module entity suggestions', () => {
         expect(getEntitySuggestion(hass, ENTITY)).toHaveLength(8);
     });
 
+    test('classic suggestions are never twinned and the marker never leaks', () => {
+        getNativeEntitySuggestion.mockReturnValue([
+            { config: { card_type: 'button', entity: ENTITY } },
+            { label: 'Button', classic: true, config: { card_type: 'button', entity: ENTITY, button_type: 'state' } },
+        ]);
+        yamlKeysMap.set('bubble_light_card', {
+            name: 'Bubble Light Card',
+            suggestions: [{ extends: 'native' }],
+        });
+
+        const suggestions = getEntitySuggestion(hass, ENTITY);
+
+        expect(suggestions).toHaveLength(3);
+        expect(suggestions[2].label).toBe('Bubble Light Card');
+        expect(suggestions.every((suggestion) => !('classic' in suggestion))).toBe(true);
+    });
+
     test('falls back to the aggregated BCT cache when the registry is empty', () => {
         getCachedAggregatedModules.mockReturnValue({
             bubble_light_card: { name: 'Bubble Light Card', suggestions: [{ extends: 'native' }] },

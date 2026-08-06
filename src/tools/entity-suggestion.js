@@ -2,15 +2,21 @@ import setupTranslation, { ensureEditorTranslations } from './localize.js';
 
 // Suggestions offered by the Home Assistant entity card picker through the
 // `getEntitySuggestion` entry of `window.customCards` (HA 2026.6+). Every
-// recipe below is a configuration validated on the Compare view of the
-// bc-suggestions test dashboard: only the entity id is parameterized, the
-// rest ships exactly as validated there. Labels are only set on the extra
-// variants, the base suggestion is displayed under the card name alone.
+// tile recipe below is a configuration validated on the Compare view of the
+// bc-suggestions test dashboard: only the entity id is parameterized and the
+// embedded sub-button names are localized, the rest ships as validated.
+//
+// Each domain returns, in order: the validated tile (no label), its gated
+// variants (labeled), then the classic suggestions of the original picker
+// (dedicated card, Button, Slider). Classic entries carry `classic: true` so
+// the module layer can skip them when twinning (`extends: native`); the flag
+// is stripped before the list reaches Home Assistant.
 
 const TILE_GRID_OPTIONS = { rows: '1.656', columns: 6 };
 
-// Shared by every recipe that surfaces a value through the `.highlight`
+// Shared by every recipe that surfaces a value through the `highlight`
 // sub-button: enlarges its text so the value reads as the tile's content.
+// The class is anchored by `css_class`, never by the localized name.
 const HIGHLIGHT_STYLES =
   '.highlight .bubble-sub-button-name-container,\n' +
   '.highlight .scrolling-container,\n' +
@@ -21,18 +27,22 @@ const HIGHLIGHT_STYLES =
   '  overflow: hidden !important;\n' +
   '}';
 
-const moreInfoSubButton = (extra = {}) => ({
+const moreInfoSubButton = (t, extra = {}) => ({
   ...extra,
-  name: 'More info',
+  name: t('editor.card_picker.suggestions.more_info'),
   icon: 'mdi:chevron-right',
   show_background: false,
   state_background: false,
   fill_width: false,
 });
 
-const controlsRow = (group, extra = {}) => ({ name: 'Controls', ...extra, group });
+const controlsRow = (t, group, extra = {}) => ({
+  name: t('editor.card_picker.suggestions.controls'),
+  ...extra,
+  group,
+});
 
-const bottomControls = (group, extra = {}) => ({ bottom: [controlsRow(group, extra)] });
+const bottomControls = (t, group, extra = {}) => ({ bottom: [controlsRow(t, group, extra)] });
 
 const tile = (config) => ({
   type: 'custom:bubble-card',
@@ -49,9 +59,11 @@ const performAction = (action, entityId) => ({
 
 const stateCondition = (entityId, state) => [{ entity: entityId, condition: 'state', ...state }];
 
-// The value shown big inside the tile (state or attribute), see HIGHLIGHT_STYLES.
-const highlightSubButton = (extra = {}) => ({
-  name: 'Highlight',
+// The value shown big inside the tile (state or attribute), see
+// HIGHLIGHT_STYLES. `css_class` keeps the styles bound whatever the language.
+const highlightSubButton = (name, extra = {}) => ({
+  name,
+  css_class: 'highlight',
   ...extra,
   show_icon: false,
   ...(extra.attribute ? { show_attribute: true } : { show_state: true }),
@@ -70,44 +82,44 @@ const spacerSubButton = () => ({
   tap_action: { action: 'none' },
 });
 
-const toggleTile = (entityId) =>
+const toggleTile = (entityId, t) =>
   tile({
     entity: entityId,
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
-        name: 'Power',
+        name: t('editor.card_picker.suggestions.toggle'),
         icon: 'mdi:power',
         state_background: false,
         tap_action: { action: 'toggle' },
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
-const brightnessSlider = () => ({
+const brightnessSlider = (t) => ({
   sub_button_type: 'slider',
-  name: 'Brightness',
+  name: t('editor.slider.mode_brightness'),
   show_background: false,
   always_visible: true,
   light_background: false,
   hide_when_parent_unavailable: true,
 });
 
-const brightnessTile = (entityId) =>
+const brightnessTile = (entityId, t) =>
   tile({
     entity: entityId,
-    sub_button: bottomControls([brightnessSlider(), moreInfoSubButton()]),
+    sub_button: bottomControls(t, [brightnessSlider(t), moreInfoSubButton(t)]),
   });
 
-const colorTempTile = (entityId) =>
+const colorTempTile = (entityId, t) =>
   tile({
     entity: entityId,
-    sub_button: bottomControls([
-      brightnessSlider(),
+    sub_button: bottomControls(t, [
+      brightnessSlider(t),
       {
         sub_button_type: 'slider',
-        name: 'Color temperature',
+        name: t('editor.card_picker.suggestions.color_temperature'),
         icon: 'mdi:thermometer',
         show_background: false,
         state_background: false,
@@ -116,43 +128,43 @@ const colorTempTile = (entityId) =>
         light_slider_type: 'white_temp',
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
-const effectsTile = (entityId) =>
+const effectsTile = (entityId, t) =>
   tile({
     entity: entityId,
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
         sub_button_type: 'select',
-        name: 'Effect',
+        name: t('editor.card_picker.suggestions.effect'),
         show_attribute: true,
         attribute: 'effect',
         show_arrow: false,
         select_attribute: 'effect_list',
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
-const fanSpeedTile = (entityId) =>
+const fanSpeedTile = (entityId, t) =>
   tile({
     entity: entityId,
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
         sub_button_type: 'slider',
-        name: 'Speed',
+        name: t('editor.card_picker.suggestions.fan_speed'),
         show_background: false,
         always_visible: true,
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
-const coverCard = (entityId, { position }) => ({
+const coverCard = (entityId, t, { position }) => ({
   type: 'custom:bubble-card',
   card_type: 'cover',
   entity: entityId,
@@ -162,11 +174,11 @@ const coverCard = (entityId, { position }) => ({
         sub_button: {
           main: [
             {
-              name: 'Extra',
+              name: t('editor.slider.cover_position'),
               group: [
                 {
                   sub_button_type: 'slider',
-                  name: 'Position',
+                  name: t('editor.slider.cover_position'),
                   icon: 'mdi:arrow-up-down',
                   show_background: false,
                   state_background: false,
@@ -182,7 +194,7 @@ const coverCard = (entityId, { position }) => ({
   grid_options: { ...TILE_GRID_OPTIONS },
 });
 
-const coverTiltCard = (entityId) => ({
+const coverTiltCard = (entityId, t) => ({
   type: 'custom:bubble-card',
   card_type: 'cover',
   entity: entityId,
@@ -191,11 +203,11 @@ const coverTiltCard = (entityId) => ({
   sub_button: {
     main: [
       {
-        name: 'Extra',
+        name: t('editor.card_picker.suggestions.tilt_position'),
         group: [
           {
             sub_button_type: 'slider',
-            name: 'Tilt',
+            name: t('editor.card_picker.suggestions.tilt_position'),
             icon: 'mdi:angle-acute',
             show_background: false,
             state_background: false,
@@ -210,19 +222,19 @@ const coverTiltCard = (entityId) => ({
   grid_options: { ...TILE_GRID_OPTIONS },
 });
 
-const climateTile = (entityId, modeSelect) =>
+const climateTile = (entityId, t, modeSelect) =>
   tile({
     entity: entityId,
     show_state: false,
     show_attribute: true,
     attribute: 'temperature',
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       { sub_button_type: 'select', ...modeSelect, show_arrow: false, hide_when_parent_unavailable: true },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
-const mediaPlayerCard = (entityId) => ({
+const mediaPlayerCard = (entityId, t) => ({
   type: 'custom:bubble-card',
   card_type: 'media-player',
   entity: entityId,
@@ -232,8 +244,9 @@ const mediaPlayerCard = (entityId) => ({
   main_buttons_full_width: true,
   hide: { next_button: true, power_button: true, previous_button: true },
   sub_button: bottomControls(
+    t,
     [
-      moreInfoSubButton({
+      moreInfoSubButton(t, {
         visibility: stateCondition(entityId, {
           state: ['off', 'unavailable', 'unknown', 'idle', 'standby'],
         }),
@@ -244,7 +257,7 @@ const mediaPlayerCard = (entityId) => ({
   grid_options: { ...TILE_GRID_OPTIONS },
 });
 
-const mediaPlayerSourceCard = (entityId) => ({
+const mediaPlayerSourceCard = (entityId, t) => ({
   type: 'custom:bubble-card',
   card_type: 'media-player',
   entity: entityId,
@@ -257,10 +270,10 @@ const mediaPlayerSourceCard = (entityId) => ({
     previous_button: true,
     volume_button: true,
   },
-  sub_button: bottomControls([
+  sub_button: bottomControls(t, [
     {
       sub_button_type: 'select',
-      name: 'Source',
+      name: t('editor.card_picker.suggestions.source'),
       show_icon: false,
       show_attribute: true,
       attribute: 'source',
@@ -268,176 +281,184 @@ const mediaPlayerSourceCard = (entityId) => ({
       select_attribute: 'source_list',
       hide_when_parent_unavailable: true,
     },
-    moreInfoSubButton(),
+    moreInfoSubButton(t),
   ]),
   grid_options: { ...TILE_GRID_OPTIONS },
 });
 
-const numberTile = (entityId) =>
+const numberTile = (entityId, t) =>
   tile({
     entity: entityId,
     button_type: 'state',
     show_state: false,
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
         sub_button_type: 'slider',
-        name: 'Value',
+        name: t('editor.button.type_slider'),
         show_background: false,
         always_visible: true,
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
-const selectTile = (entityId) =>
+const selectTile = (entityId, t) =>
   tile({
     entity: entityId,
     button_type: 'state',
     show_state: false,
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
         sub_button_type: 'select',
-        name: 'Options',
+        name: t('editor.common.options'),
         show_state: true,
         show_arrow: false,
         select_attribute: 'options',
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton({ sub_button_type: 'default' }),
+      moreInfoSubButton(t, { sub_button_type: 'default' }),
     ]),
   });
 
-const actionTile = (entityId, name, action) =>
+const actionTile = (entityId, t, nameKey, action) =>
   tile({
     entity: entityId,
     button_type: 'state',
     show_state: false,
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
-        name,
+        name: t(nameKey),
         icon: 'mdi:play',
         state_background: false,
         tap_action: performAction(action, entityId),
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
 // Vacuums and lawn mowers share the same three contextual actions, only the
 // service names and active state differ.
-const roverTile = (entityId, { start, activeState, dock }) =>
+const roverTile = (entityId, t, { start, activeState, dock }) =>
   tile({
     entity: entityId,
     button_type: 'state',
     ...(start.batteryLevel !== undefined ? { attribute: 'battery_level' } : {}),
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
-        name: start.name,
+        name: t(start.nameKey),
         icon: 'mdi:play',
         tap_action: performAction(start.action, entityId),
         visibility: stateCondition(entityId, { state_not: activeState }),
         hide_when_parent_unavailable: true,
       },
       {
-        name: 'Pause',
+        name: t('editor.card_picker.suggestions.pause'),
         icon: 'mdi:pause',
         tap_action: performAction(start.pauseAction, entityId),
         visibility: stateCondition(entityId, { state: activeState }),
         hide_when_parent_unavailable: true,
       },
       {
-        name: 'Dock',
+        name: t('editor.card_picker.suggestions.dock'),
         icon: 'mdi:home-import-outline',
         tap_action: performAction(dock, entityId),
         visibility: stateCondition(entityId, { state_not: 'docked' }),
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
-const timerTile = (entityId) =>
+const timerTile = (entityId, t) =>
   tile({
     entity: entityId,
     button_type: 'state',
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
-        name: 'Start',
+        name: t('editor.card_picker.suggestions.start'),
         icon: 'mdi:play',
         tap_action: performAction('timer.start', entityId),
         visibility: stateCondition(entityId, { state_not: 'active' }),
         hide_when_parent_unavailable: true,
       },
       {
-        name: 'Cancel',
+        name: t('editor.card_picker.suggestions.cancel'),
         icon: 'mdi:stop',
         tap_action: performAction('timer.cancel', entityId),
         visibility: stateCondition(entityId, { state: 'active' }),
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
-const updateTile = (entityId) =>
+const updateTile = (entityId, t) =>
   tile({
     entity: entityId,
     button_type: 'state',
     show_state: false,
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
-        name: 'Install',
+        name: t('editor.card_picker.suggestions.install'),
         icon: 'mdi:download',
         state_background: false,
         tap_action: performAction('update.install', entityId),
         visibility: stateCondition(entityId, { state: 'on' }),
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
-const stateTile = (entityId) =>
+const stateTile = (entityId, t) =>
   tile({
     entity: entityId,
     button_type: 'state',
     show_state: false,
     show_last_changed: false,
-    sub_button: bottomControls([highlightSubButton(), moreInfoSubButton()], {
-      justify_content: 'space-between',
-    }),
+    sub_button: bottomControls(
+      t,
+      [highlightSubButton(t('editor.card_picker.suggestions.state')), moreInfoSubButton(t)],
+      { justify_content: 'space-between' },
+    ),
     styles: HIGHLIGHT_STYLES,
   });
 
-const lastChangedTile = (entityId) =>
+const lastChangedTile = (entityId, t) =>
   tile({
     entity: entityId,
     show_last_changed: true,
     tap_action: { action: 'more-info' },
     sub_button: bottomControls(
-      [highlightSubButton(), spacerSubButton(), moreInfoSubButton()],
+      t,
+      [
+        highlightSubButton(t('editor.card_picker.suggestions.state')),
+        spacerSubButton(),
+        moreInfoSubButton(t),
+      ],
       { justify_content: 'space-between' },
     ),
     styles: HIGHLIGHT_STYLES,
   });
 
-const textTile = (entityId, { spacer } = {}) =>
+const textTile = (entityId, t, { spacer } = {}) =>
   tile({
     entity: entityId,
     button_type: 'state',
     show_state: false,
     sub_button: bottomControls(
+      t,
       spacer
-        ? [highlightSubButton(), spacerSubButton(), moreInfoSubButton()]
-        : [highlightSubButton(), moreInfoSubButton()],
+        ? [highlightSubButton(t('editor.card_picker.suggestions.state')), spacerSubButton(), moreInfoSubButton(t)]
+        : [highlightSubButton(t('editor.card_picker.suggestions.state')), moreInfoSubButton(t)],
       { justify_content: 'space-between' },
     ),
     styles: HIGHLIGHT_STYLES,
   });
 
-const weatherTile = (entityId, { humidity }) =>
+const weatherTile = (entityId, t, { humidity }) =>
   tile({
     entity: entityId,
     button_type: 'state',
@@ -445,9 +466,13 @@ const weatherTile = (entityId, { humidity }) =>
     show_last_changed: false,
     sub_button: {
       ...bottomControls(
+        t,
         [
-          highlightSubButton({ icon: 'mdi:thermometer', attribute: 'temperature' }),
-          moreInfoSubButton(),
+          highlightSubButton(t('editor.card_picker.suggestions.temperature'), {
+            icon: 'mdi:thermometer',
+            attribute: 'temperature',
+          }),
+          moreInfoSubButton(t),
         ],
         { justify_content: 'space-between' },
       ),
@@ -455,10 +480,10 @@ const weatherTile = (entityId, { humidity }) =>
         ? {
             main: [
               {
-                name: 'Extra',
+                name: t('editor.card_picker.suggestions.humidity'),
                 group: [
                   {
-                    name: 'Humidity',
+                    name: t('editor.card_picker.suggestions.humidity'),
                     icon: 'mdi:water-percent',
                     show_attribute: true,
                     attribute: 'humidity',
@@ -474,26 +499,26 @@ const weatherTile = (entityId, { humidity }) =>
     styles: HIGHLIGHT_STYLES,
   });
 
-const lockTile = (entityId) =>
+const lockTile = (entityId, t) =>
   tile({
     entity: entityId,
     tap_action: { action: 'more-info' },
-    sub_button: bottomControls([
+    sub_button: bottomControls(t, [
       {
-        name: 'Lock',
+        name: t('editor.card_picker.suggestions.lock'),
         icon: 'mdi:lock',
         tap_action: performAction('lock.lock', entityId),
         visibility: stateCondition(entityId, { state: 'unlocked' }),
         hide_when_parent_unavailable: true,
       },
       {
-        name: 'Unlock',
+        name: t('editor.card_picker.suggestions.unlock'),
         icon: 'mdi:lock-open-variant',
         tap_action: performAction('lock.unlock', entityId),
         visibility: stateCondition(entityId, { state: 'locked' }),
         hide_when_parent_unavailable: true,
       },
-      moreInfoSubButton(),
+      moreInfoSubButton(t),
     ]),
   });
 
@@ -512,6 +537,66 @@ const calendarCard = (entityId) => ({
   grid_options: { ...TILE_GRID_OPTIONS },
 });
 
+// The suggestions of the original picker, kept alongside the tile recipes:
+// the dedicated card of the domain, the plain Button and the plain Slider.
+const CLASSIC_DEDICATED = {
+  cover: { labelKey: 'editor.module_editor.card_cover', config: (entityId) => ({ card_type: 'cover', entity: entityId }) },
+  climate: { labelKey: 'editor.module_editor.card_climate', config: (entityId) => ({ card_type: 'climate', entity: entityId }) },
+  media_player: { labelKey: 'editor.module_editor.card_media_player', config: (entityId) => ({ card_type: 'media-player', entity: entityId }) },
+  select: { labelKey: 'editor.module_editor.card_select', config: (entityId) => ({ card_type: 'select', entity: entityId }) },
+  input_select: { labelKey: 'editor.module_editor.card_select', config: (entityId) => ({ card_type: 'select', entity: entityId }) },
+  calendar: { labelKey: 'editor.module_editor.card_calendar', config: (entityId) => ({ card_type: 'calendar', entities: [{ entity: entityId }] }) },
+};
+
+const CLASSIC_TOGGLE_DOMAINS = new Set([
+  'light', 'switch', 'fan', 'input_boolean', 'lock', 'siren', 'remote',
+  'humidifier', 'vacuum', 'lawn_mower', 'script', 'scene', 'automation',
+  'cover', 'climate', 'media_player',
+]);
+
+const CLASSIC_STATE_DOMAINS = new Set(['sensor', 'binary_sensor']);
+
+const CLASSIC_SLIDER_DOMAINS = new Set([
+  'light', 'media_player', 'cover', 'input_number', 'number', 'climate', 'fan',
+]);
+
+function classicSuggestions(entityId, domain, t) {
+  const suggestions = [];
+
+  const dedicated = CLASSIC_DEDICATED[domain];
+  if (dedicated) {
+    suggestions.push({
+      label: t(dedicated.labelKey),
+      classic: true,
+      config: { type: 'custom:bubble-card', ...dedicated.config(entityId) },
+    });
+  }
+
+  if (CLASSIC_TOGGLE_DOMAINS.has(domain)) {
+    suggestions.push({
+      label: t('editor.module_editor.card_button'),
+      classic: true,
+      config: { type: 'custom:bubble-card', card_type: 'button', entity: entityId },
+    });
+  } else if (CLASSIC_STATE_DOMAINS.has(domain)) {
+    suggestions.push({
+      label: t('editor.module_editor.card_button'),
+      classic: true,
+      config: { type: 'custom:bubble-card', card_type: 'button', entity: entityId, button_type: 'state' },
+    });
+  }
+
+  if (CLASSIC_SLIDER_DOMAINS.has(domain)) {
+    suggestions.push({
+      label: t('editor.button.type_slider'),
+      classic: true,
+      config: { type: 'custom:bubble-card', card_type: 'button', entity: entityId, button_type: 'slider' },
+    });
+  }
+
+  return suggestions;
+}
+
 // Feature bits, straight from the Home Assistant entity components.
 const FAN_SUPPORTS_SET_SPEED = 1;
 const COVER_SUPPORTS_SET_POSITION = 4;
@@ -528,40 +613,40 @@ const lightSupportsBrightness = (stateObj) => {
 const DOMAIN_BUILDERS = {
   light: (entityId, stateObj, t) => {
     const suggestions = [
-      { config: lightSupportsBrightness(stateObj) ? brightnessTile(entityId) : toggleTile(entityId) },
+      { config: lightSupportsBrightness(stateObj) ? brightnessTile(entityId, t) : toggleTile(entityId, t) },
     ];
     const modes = stateObj.attributes.supported_color_modes || [];
     if (modes.includes('color_temp')) {
       suggestions.push({
         label: t('editor.card_picker.suggestions.color_temperature'),
-        config: colorTempTile(entityId),
+        config: colorTempTile(entityId, t),
       });
     }
     if (stateObj.attributes.effect_list?.length) {
       suggestions.push({
         label: t('editor.card_picker.suggestions.effect'),
-        config: effectsTile(entityId),
+        config: effectsTile(entityId, t),
       });
     }
     return suggestions;
   },
-  switch: (entityId) => [{ config: toggleTile(entityId) }],
-  input_boolean: (entityId) => [{ config: toggleTile(entityId) }],
-  automation: (entityId) => [{ config: toggleTile(entityId) }],
-  remote: (entityId) => [{ config: toggleTile(entityId) }],
-  siren: (entityId) => [{ config: toggleTile(entityId) }],
-  humidifier: (entityId) => [{ config: toggleTile(entityId) }],
-  fan: (entityId, stateObj) => [
-    { config: supportsFeature(stateObj, FAN_SUPPORTS_SET_SPEED) ? fanSpeedTile(entityId) : toggleTile(entityId) },
+  switch: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
+  input_boolean: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
+  automation: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
+  remote: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
+  siren: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
+  humidifier: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
+  fan: (entityId, stateObj, t) => [
+    { config: supportsFeature(stateObj, FAN_SUPPORTS_SET_SPEED) ? fanSpeedTile(entityId, t) : toggleTile(entityId, t) },
   ],
   cover: (entityId, stateObj, t) => {
     const suggestions = [
-      { config: coverCard(entityId, { position: supportsFeature(stateObj, COVER_SUPPORTS_SET_POSITION) }) },
+      { config: coverCard(entityId, t, { position: supportsFeature(stateObj, COVER_SUPPORTS_SET_POSITION) }) },
     ];
     if (supportsFeature(stateObj, COVER_SUPPORTS_SET_TILT_POSITION)) {
       suggestions.push({
         label: t('editor.card_picker.suggestions.tilt_position'),
-        config: coverTiltCard(entityId),
+        config: coverTiltCard(entityId, t),
       });
     }
     return suggestions;
@@ -569,8 +654,8 @@ const DOMAIN_BUILDERS = {
   climate: (entityId, stateObj, t) => {
     const suggestions = [
       {
-        config: climateTile(entityId, {
-          name: 'Mode',
+        config: climateTile(entityId, t, {
+          name: t('editor.card_picker.suggestions.mode'),
           show_state: true,
           select_attribute: 'hvac_modes',
         }),
@@ -579,8 +664,8 @@ const DOMAIN_BUILDERS = {
     if (stateObj.attributes.preset_modes?.length) {
       suggestions.push({
         label: t('editor.card_picker.suggestions.preset_mode'),
-        config: climateTile(entityId, {
-          name: 'Preset',
+        config: climateTile(entityId, t, {
+          name: t('editor.card_picker.suggestions.preset_mode'),
           show_attribute: true,
           attribute: 'preset_mode',
           select_attribute: 'preset_modes',
@@ -590,28 +675,36 @@ const DOMAIN_BUILDERS = {
     return suggestions;
   },
   media_player: (entityId, stateObj, t) => {
-    const suggestions = [{ config: mediaPlayerCard(entityId) }];
+    const suggestions = [{ config: mediaPlayerCard(entityId, t) }];
     if (stateObj.attributes.source_list?.length) {
       suggestions.push({
         label: t('editor.card_picker.suggestions.source'),
-        config: mediaPlayerSourceCard(entityId),
+        config: mediaPlayerSourceCard(entityId, t),
       });
     }
     return suggestions;
   },
-  input_number: (entityId) => [{ config: numberTile(entityId) }],
-  number: (entityId) => [{ config: numberTile(entityId) }],
-  input_select: (entityId) => [{ config: selectTile(entityId) }],
-  select: (entityId) => [{ config: selectTile(entityId) }],
-  scene: (entityId) => [{ config: actionTile(entityId, 'Activate', 'scene.turn_on') }],
-  script: (entityId) => [{ config: actionTile(entityId, 'Activate', 'script.turn_on') }],
-  button: (entityId) => [{ config: actionTile(entityId, 'Press', 'button.press') }],
-  input_button: (entityId) => [{ config: actionTile(entityId, 'Press', 'input_button.press') }],
-  vacuum: (entityId, stateObj) => [
+  input_number: (entityId, stateObj, t) => [{ config: numberTile(entityId, t) }],
+  number: (entityId, stateObj, t) => [{ config: numberTile(entityId, t) }],
+  input_select: (entityId, stateObj, t) => [{ config: selectTile(entityId, t) }],
+  select: (entityId, stateObj, t) => [{ config: selectTile(entityId, t) }],
+  scene: (entityId, stateObj, t) => [
+    { config: actionTile(entityId, t, 'editor.card_picker.suggestions.activate', 'scene.turn_on') },
+  ],
+  script: (entityId, stateObj, t) => [
+    { config: actionTile(entityId, t, 'editor.card_picker.suggestions.activate', 'script.turn_on') },
+  ],
+  button: (entityId, stateObj, t) => [
+    { config: actionTile(entityId, t, 'editor.card_picker.suggestions.press', 'button.press') },
+  ],
+  input_button: (entityId, stateObj, t) => [
+    { config: actionTile(entityId, t, 'editor.card_picker.suggestions.press', 'input_button.press') },
+  ],
+  vacuum: (entityId, stateObj, t) => [
     {
-      config: roverTile(entityId, {
+      config: roverTile(entityId, t, {
         start: {
-          name: 'Start',
+          nameKey: 'editor.card_picker.suggestions.start',
           action: 'vacuum.start',
           pauseAction: 'vacuum.pause',
           batteryLevel: stateObj.attributes.battery_level,
@@ -621,11 +714,11 @@ const DOMAIN_BUILDERS = {
       }),
     },
   ],
-  lawn_mower: (entityId, stateObj) => [
+  lawn_mower: (entityId, stateObj, t) => [
     {
-      config: roverTile(entityId, {
+      config: roverTile(entityId, t, {
         start: {
-          name: 'Mow',
+          nameKey: 'editor.card_picker.suggestions.start_mowing',
           action: 'lawn_mower.start_mowing',
           pauseAction: 'lawn_mower.pause',
           batteryLevel: stateObj.attributes.battery_level,
@@ -635,28 +728,28 @@ const DOMAIN_BUILDERS = {
       }),
     },
   ],
-  timer: (entityId) => [{ config: timerTile(entityId) }],
-  update: (entityId, stateObj) => [
-    { config: supportsFeature(stateObj, UPDATE_SUPPORTS_INSTALL) ? updateTile(entityId) : stateTile(entityId) },
+  timer: (entityId, stateObj, t) => [{ config: timerTile(entityId, t) }],
+  update: (entityId, stateObj, t) => [
+    { config: supportsFeature(stateObj, UPDATE_SUPPORTS_INSTALL) ? updateTile(entityId, t) : stateTile(entityId, t) },
   ],
-  sensor: (entityId) => [{ config: stateTile(entityId) }],
-  binary_sensor: (entityId) => [{ config: lastChangedTile(entityId) }],
-  person: (entityId) => [{ config: lastChangedTile(entityId) }],
-  device_tracker: (entityId) => [{ config: lastChangedTile(entityId) }],
-  input_text: (entityId) => [{ config: textTile(entityId, { spacer: true }) }],
-  input_datetime: (entityId) => [{ config: textTile(entityId) }],
-  todo: (entityId) => [{ config: textTile(entityId) }],
+  sensor: (entityId, stateObj, t) => [{ config: stateTile(entityId, t) }],
+  binary_sensor: (entityId, stateObj, t) => [{ config: lastChangedTile(entityId, t) }],
+  person: (entityId, stateObj, t) => [{ config: lastChangedTile(entityId, t) }],
+  device_tracker: (entityId, stateObj, t) => [{ config: lastChangedTile(entityId, t) }],
+  input_text: (entityId, stateObj, t) => [{ config: textTile(entityId, t, { spacer: true }) }],
+  input_datetime: (entityId, stateObj, t) => [{ config: textTile(entityId, t) }],
+  todo: (entityId, stateObj, t) => [{ config: textTile(entityId, t) }],
   weather: (entityId, stateObj, t) => {
-    const suggestions = [{ config: weatherTile(entityId, { humidity: false }) }];
+    const suggestions = [{ config: weatherTile(entityId, t, { humidity: false }) }];
     if (stateObj.attributes.humidity !== undefined) {
       suggestions.push({
         label: t('editor.card_picker.suggestions.humidity'),
-        config: weatherTile(entityId, { humidity: true }),
+        config: weatherTile(entityId, t, { humidity: true }),
       });
     }
     return suggestions;
   },
-  lock: (entityId) => [{ config: lockTile(entityId) }],
+  lock: (entityId, stateObj, t) => [{ config: lockTile(entityId, t) }],
   calendar: (entityId) => [{ config: calendarCard(entityId) }],
 };
 
@@ -664,10 +757,15 @@ export function getEntitySuggestion(hass, entityId) {
   const stateObj = hass?.states?.[entityId];
   if (!stateObj) return null;
 
-  const builder = DOMAIN_BUILDERS[entityId.split('.')[0]];
-  if (!builder) return null;
+  const domain = entityId.split('.')[0];
+  const builder = DOMAIN_BUILDERS[domain];
 
   ensureEditorTranslations(hass);
-  const suggestions = builder(entityId, stateObj, setupTranslation(hass));
+  const t = setupTranslation(hass);
+
+  const suggestions = [
+    ...(builder ? builder(entityId, stateObj, t) : []),
+    ...classicSuggestions(entityId, domain, t),
+  ];
   return suggestions.length ? suggestions : null;
 }

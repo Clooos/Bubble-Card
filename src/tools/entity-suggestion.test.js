@@ -162,16 +162,21 @@ describe('getEntitySuggestion', () => {
         }
     });
 
-    test('every suggestion ships the validated tile grid size', () => {
+    test('every tile suggestion ships the validated grid size, classics stay bare', () => {
         for (const entityId of Object.keys(STATES)) {
-            for (const { config } of suggestionsFor(entityId)) {
-                expect(config.grid_options).toEqual({ rows: '1.656', columns: 6 });
-                expect(config.type).toBe('custom:bubble-card');
+            for (const suggestion of suggestionsFor(entityId)) {
+                expect(suggestion.config.type).toBe('custom:bubble-card');
+                if (suggestion.classic) {
+                    expect(suggestion.config.grid_options).toBeUndefined();
+                    expect(suggestion.config.styles).toBeUndefined();
+                } else {
+                    expect(suggestion.config.grid_options).toEqual({ rows: '1.656', columns: 6 });
+                }
             }
         }
     });
 
-    test('base suggestions carry no label, variants carry one', () => {
+    test('base suggestions carry no label, variants and classics carry one', () => {
         for (const entityId of Object.keys(STATES)) {
             const suggestions = suggestionsFor(entityId);
             expect(suggestions[0].label).toBeUndefined();
@@ -179,48 +184,97 @@ describe('getEntitySuggestion', () => {
         }
     });
 
+    test('the classic picker suggestions are still offered after the tiles', () => {
+        const light = suggestionsFor('light.dimmable');
+        expect(light.map((s) => s.label)).toEqual([undefined, 'Button', 'Slider']);
+        expect(light[1].classic).toBe(true);
+        expect(light[1].config).toEqual({ type: 'custom:bubble-card', card_type: 'button', entity: 'light.dimmable' });
+        expect(light[2].config.button_type).toBe('slider');
+
+        const climate = suggestionsFor('climate.preset');
+        expect(climate.map((s) => s.label)).toEqual([undefined, 'Preset mode', 'Climate', 'Button', 'Slider']);
+        expect(climate[2].config).toEqual({ type: 'custom:bubble-card', card_type: 'climate', entity: 'climate.preset' });
+
+        const select = suggestionsFor('input_select.a');
+        expect(select.map((s) => s.label)).toEqual([undefined, 'Select']);
+        expect(select[1].config.card_type).toBe('select');
+
+        const sensor = suggestionsFor('sensor.a');
+        expect(sensor.map((s) => s.label)).toEqual([undefined, 'Button']);
+        expect(sensor[1].config.button_type).toBe('state');
+
+        const calendar = suggestionsFor('calendar.a');
+        expect(calendar[1].config).toEqual({
+            type: 'custom:bubble-card',
+            card_type: 'calendar',
+            entities: [{ entity: 'calendar.a' }],
+        });
+    });
+
+    test('sub-button names resolve through the translator with English fallbacks', () => {
+        const localized = {
+            'ui.card.common.toggle': 'Basculer',
+            'ui.panel.lovelace.editor.action-editor.actions.more-info': "Plus d'infos",
+            'ui.panel.lovelace.editor.features.types.area-controls.controls': 'Commandes',
+        };
+        const frenchHass = { states: STATES, localize: (key) => localized[key] || '' };
+        const [{ config }] = getEntitySuggestion(frenchHass, 'switch.a');
+        const row = config.sub_button.bottom[0];
+        expect(row.name).toBe('Commandes');
+        expect(row.group[0].name).toBe('Basculer');
+        expect(row.group[1].name).toBe("Plus d'infos");
+    });
+
+    test('highlight tiles anchor their styles on css_class, not on the name', () => {
+        const [{ config }] = suggestionsFor('sensor.a');
+        const highlight = config.sub_button.bottom[0].group[0];
+        expect(highlight.css_class).toBe('highlight');
+        expect(highlight.name).toBe('State');
+        expect(config.styles).toContain('.highlight');
+    });
+
     test('lights follow their capabilities', () => {
         const dimmable = suggestionsFor('light.dimmable');
-        expect(dimmable).toHaveLength(1);
+        expect(dimmable).toHaveLength(3);
         expect(dimmable[0].config.sub_button.bottom[0].group[0].sub_button_type).toBe('slider');
 
         const onoff = suggestionsFor('light.onoff');
-        expect(onoff).toHaveLength(1);
-        expect(onoff[0].config.sub_button.bottom[0].group[0].name).toBe('Power');
+        expect(onoff).toHaveLength(3);
+        expect(onoff[0].config.sub_button.bottom[0].group[0].name).toBe('Toggle');
 
         const full = suggestionsFor('light.full');
-        expect(full).toHaveLength(3);
-        expect(full.map((s) => s.label)).toEqual([undefined, 'Color temperature', 'Effect']);
+        expect(full).toHaveLength(5);
+        expect(full.map((s) => s.label)).toEqual([undefined, 'Color temperature', 'Effect', 'Button', 'Slider']);
         expect(full[1].config.sub_button.bottom[0].group[1].light_slider_type).toBe('white_temp');
         expect(full[2].config.sub_button.bottom[0].group[0].select_attribute).toBe('effect_list');
     });
 
     test('covers expose position and tilt only when supported', () => {
         const basic = suggestionsFor('cover.basic');
-        expect(basic).toHaveLength(1);
+        expect(basic.map((s) => s.label)).toEqual([undefined, 'Cover', 'Button', 'Slider']);
         expect(basic[0].config.sub_button).toBeUndefined();
 
         const position = suggestionsFor('cover.position');
-        expect(position).toHaveLength(1);
         expect(position[0].config.sub_button.main[0].group[0].name).toBe('Position');
 
         const tilt = suggestionsFor('cover.tilt');
-        expect(tilt).toHaveLength(2);
+        expect(tilt).toHaveLength(5);
         expect(tilt[1].label).toBe('Tilt position');
         expect(tilt[1].config.tilt_buttons).toBe('hidden');
         expect(tilt[1].config.sub_button.main[0].group[0].cover_slider_type).toBe('tilt_position');
     });
 
     test('climate, media player and weather gate their variants on attributes', () => {
-        expect(suggestionsFor('climate.basic')).toHaveLength(1);
+        expect(suggestionsFor('climate.basic')).toHaveLength(4);
         const preset = suggestionsFor('climate.preset');
-        expect(preset).toHaveLength(2);
+        expect(preset).toHaveLength(5);
         expect(preset[1].label).toBe('Preset mode');
         expect(preset[1].config.sub_button.bottom[0].group[0].select_attribute).toBe('preset_modes');
 
-        expect(suggestionsFor('media_player.basic')).toHaveLength(1);
+        const media = suggestionsFor('media_player.basic');
+        expect(media.map((s) => s.label)).toEqual([undefined, 'Media player', 'Button', 'Slider']);
         const source = suggestionsFor('media_player.source');
-        expect(source).toHaveLength(2);
+        expect(source).toHaveLength(5);
         expect(source[1].label).toBe('Source');
         expect(source[1].config.hide.volume_button).toBe(true);
 
@@ -233,10 +287,10 @@ describe('getEntitySuggestion', () => {
 
     test('fans and updates degrade gracefully without the feature bit', () => {
         expect(suggestionsFor('fan.speed')[0].config.sub_button.bottom[0].group[0].sub_button_type).toBe('slider');
-        expect(suggestionsFor('fan.basic')[0].config.sub_button.bottom[0].group[0].name).toBe('Power');
+        expect(suggestionsFor('fan.basic')[0].config.sub_button.bottom[0].group[0].name).toBe('Toggle');
 
         expect(suggestionsFor('update.installable')[0].config.sub_button.bottom[0].group[0].name).toBe('Install');
-        expect(suggestionsFor('update.readonly')[0].config.sub_button.bottom[0].group[0].name).toBe('Highlight');
+        expect(suggestionsFor('update.readonly')[0].config.sub_button.bottom[0].group[0].name).toBe('State');
     });
 
     test('vacuums only show the battery attribute when they report one', () => {
