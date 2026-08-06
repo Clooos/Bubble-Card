@@ -8,6 +8,7 @@ import { schedulePopupCardModulePreload } from './cards/preload.js';
 import { invalidateWakeSyncCache } from "./index.js";
 import { HA_CARD_WRAPPER_TAG, isDialogNode, isHaCardWrapper } from '../../tools/ha-boundary.js';
 import { startContentInsetSync } from '../../tools/content-inset.js';
+import { runWithInstantSliderWrites } from '../../components/slider/instant-writes.js';
 
 // Re-exported so the pop-up runtime keeps one import surface for its callers.
 export { isDialogNode };
@@ -1458,7 +1459,11 @@ function finalizeStandalonePopupOpen(context) {
             }
             context._pendingOpenSettledUpdate = false;
             try {
-                context.updateBubbleCard?.();
+                // The pop-up is open and motionless here, so every position a
+                // slider catches up on would otherwise travel to it under its
+                // own 0.5s transition while the rest of the card is already
+                // current: the fill visibly arriving after the content.
+                runWithInstantSliderWrites(() => context.updateBubbleCard?.());
             } catch (_) {}
         }, 0);
     }

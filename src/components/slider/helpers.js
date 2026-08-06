@@ -7,8 +7,10 @@ import {
   isDocumentRTL
 } from '../../tools/utils.js';
 import { scheduleSubButtonOutlines } from '../sub-button/outline.js';
+import { isInstantSliderWrite, keepSliderWriteInstant } from './instant-writes.js';
 
-export { isDocumentRTL };
+// Re-exported so the slider component keeps one import surface for its callers.
+export { isDocumentRTL, isInstantSliderWrite, keepSliderWriteInstant };
 
 const FILL_ORIENTATION_VALUES = ['left', 'right', 'top', 'bottom'];
 export const SLIDER_VALUE_POSITIONS = ['right', 'left', 'center'];
@@ -99,6 +101,7 @@ export function setRangeFillTransform(context, percentage) {
   const transformValue = buildFillTransform(orientation, visualPercentage);
   const currentTransform = context.elements.rangeFill.style.transform;
   if (currentTransform !== transformValue) {
+    keepSliderWriteInstant(context.elements.rangeFill);
     context.elements.rangeFill.style.transform = transformValue;
   }
   context._lastVisualFillPercentage = visualPercentage;

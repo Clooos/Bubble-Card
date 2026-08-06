@@ -16,7 +16,8 @@ import {
   toVisualPercentage,
   toActualPercentage,
   getFillOrientation,
-  setRangeFillTransform
+  setRangeFillTransform,
+  isInstantSliderWrite
 } from './helpers.js';
 
 // Smoothly animate slider position for external updates
@@ -63,8 +64,16 @@ function animateToPercentage(context, targetPercentage) {
   const to = clampPercentage(Math.round(targetPercentage));
   const from = getDisplayedPercentage(context);
 
-  // If small delta, snap immediately
-  if (!Number.isFinite(from) || Math.abs(from - to) < 0.5) {
+  // Cancel any existing animation on this context. Before the snap and not
+  // after: a ramp left running would keep writing its own target over the
+  // position settled below, on its own frames.
+  try { if (context._sliderAnimRaf) cancelAnimationFrame(context._sliderAnimRaf); } catch (_) {}
+  context._sliderAnimRaf = null;
+
+  // If small delta, snap immediately. A settle flush snaps whatever the delta
+  // is: the pop-up is open and motionless by then, so a ramp starting there is
+  // exactly the late travel the instant window exists to prevent.
+  if (!Number.isFinite(from) || Math.abs(from - to) < 0.5 || isInstantSliderWrite()) {
     setVisual(to);
     updateValue(to, true); // Use entity value for accurate display
     // Keep color track visuals in sync for hue/sat
@@ -73,9 +82,6 @@ function animateToPercentage(context, targetPercentage) {
     }
     return;
   }
-
-  // Cancel any existing animation on this context
-  try { if (context._sliderAnimRaf) cancelAnimationFrame(context._sliderAnimRaf); } catch (_) {}
 
   const durationMs = 250;
   const startTs = performance.now();

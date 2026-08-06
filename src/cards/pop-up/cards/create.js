@@ -2,6 +2,7 @@ import { createElement } from '../../../tools/utils.js';
 import { monotonicNow } from '../../../tools/monotonic-time.js';
 import setupTranslation from '../../../tools/localize.js';
 import { extendPopupOpenHassGate } from '../hass-gate.js';
+import { runWithInstantSliderWrites } from '../../../components/slider/instant-writes.js';
 import cardsStyles from './styles.css';
 import { createEditorCardElements } from './editor/index.js';
 
@@ -471,11 +472,17 @@ export function createCardElementsProgressively(context, onDone) {
             // tick already hold the current hass, and re-forcing them would
             // schedule redundant Lit re-renders right before the transition.
             if (context._hass !== hassAtBuildStart) {
-                for (const managedCard of context._managedCards) {
-                    if (managedCard && managedCard.hass !== context._hass) {
-                        _applyHassToCardElement(managedCard, context._hass);
+                // One to three frames before the slide starts. A slider catching
+                // up here would spend the first 300ms of its 0.5s transition
+                // travelling behind the opening pop-up and arrive well after it,
+                // so this replay settles positions rather than animating to them.
+                runWithInstantSliderWrites(() => {
+                    for (const managedCard of context._managedCards) {
+                        if (managedCard && managedCard.hass !== context._hass) {
+                            _applyHassToCardElement(managedCard, context._hass);
+                        }
                     }
-                }
+                });
             }
             onDone();
             return;

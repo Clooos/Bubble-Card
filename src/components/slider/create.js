@@ -20,6 +20,7 @@ import {
   getFillOrientation,
   getSliderValuePosition,
   setRangeFillTransform,
+  keepSliderWriteInstant,
   isDocumentRTL,
   SLIDER_VALUE_POSITIONS
 } from './helpers.js';
@@ -173,6 +174,9 @@ export function createSliderStructure(context, config = {}) {
         ? 100 - visualPercentage
         : visualPercentage;
       const cursor = context.elements.colorCursor;
+      // Same window as the fill: a color cursor caught by a settle flush would
+      // otherwise slide across the track on an already opened pop-up.
+      keepSliderWriteInstant(cursor);
       cursor.style.removeProperty('right');
       cursor.style.removeProperty('bottom');
       if (orientation === 'left' || orientation === 'right') {
