@@ -202,6 +202,7 @@ jest.unstable_mockModule('./styles.css', () => ({
 
 const { cleanupPopupRuntime, closePopup, isDialogNode, isPopupOpenSequenceActive, keepPopupHostMounted, updateListeners, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
 const { invalidateWakeSyncCache } = await import('./index.js');
+const { deferCardUpdate } = await import('../../tools/deferred-card-updates.js');
 
 let rafCallbacks;
 let nextRafId;
@@ -1483,6 +1484,33 @@ describe('standalone popup lifecycle', () => {
         expect(handlePopUpCards).toHaveBeenCalledWith(context);
         expect(context.popUp.style.visibility).toBe('');
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
+    });
+
+    test('renders a card that deferred its first pass on the reveal frame', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const card = { isConnected: true };
+        context.popUp.contains = (node) => node === card;
+
+        openPopup(context);
+        flushHeavyOpenTask();
+
+        // A card connected while the shell was marked opening: its whole first
+        // pass, sub-buttons and slider fill included, is waiting on the 320ms
+        // fallback.
+        const firstRender = jest.fn();
+        deferCardUpdate(card, firstRender, 320);
+
+        flushStandaloneClosedStatePrimeFrame();
+
+        // Rendered before anything is on screen, instead of a third of a second
+        // after the pop-up has stopped moving.
+        expect(firstRender).toHaveBeenCalledTimes(1);
+        expect(context.popUp.classList.contains('is-opening')).toBe(false);
+
+        // And the fallback must not render it a second time.
+        jest.advanceTimersByTime(1000);
+        expect(firstRender).toHaveBeenCalledTimes(1);
     });
 
     test('leaves the reveal frame alone when no tick was held', () => {

@@ -9,6 +9,7 @@ import { invalidateWakeSyncCache } from "./index.js";
 import { HA_CARD_WRAPPER_TAG, isDialogNode, isHaCardWrapper } from '../../tools/ha-boundary.js';
 import { startContentInsetSync } from '../../tools/content-inset.js';
 import { runWithInstantSliderWrites } from '../../components/slider/instant-writes.js';
+import { flushDeferredCardUpdates } from '../../tools/deferred-card-updates.js';
 
 // Re-exported so the pop-up runtime keeps one import surface for its callers.
 export { isDialogNode };
@@ -1776,6 +1777,14 @@ function openStandalonePopup(context, instant = false) {
             if (context._pendingOpenSettledUpdate) {
                 runWithInstantSliderWrites(() => syncStandalonePopupContent(context));
             }
+
+            // Same frame, same reason, for the other half of the catch-up: a
+            // card that connected while this shell was marked opening deferred
+            // its whole first render by 320ms, and that render is what creates
+            // its sub-buttons and puts its slider fill in place. Left to the
+            // timer, the pop-up is revealed carrying bare pills and fills them
+            // in a third of a second later, once it has stopped moving.
+            runWithInstantSliderWrites(() => flushDeferredCardUpdates(popUp));
 
             restoreShellTransition(popUp);
             // Reveal on the same frame: the height is final, so the closed

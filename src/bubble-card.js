@@ -8,6 +8,7 @@ import { updateThemeBackgroundColor } from './cards/pop-up/backdrop.js';
 import { invalidateStyleCache, stopTimerInterval } from './tools/utils.js';
 import { cleanupScrollingEffects, resumeScrollingEffects } from './tools/text-scrolling.js';
 import { cancelSubButtonOutlines } from './components/sub-button/outline.js';
+import { cancelDeferredCardUpdate, deferCardUpdate } from './tools/deferred-card-updates.js';
 import { getEntitySuggestion } from './tools/entity-suggestion.js';
 import { registerPopupContext, shouldHoldDashboardHassUpdate } from './cards/pop-up/helpers.js';
 import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
@@ -97,9 +98,14 @@ class BubbleCard extends HTMLElement {
     try { if (this.content) resumeScrollingEffects(this.content); } catch (e) {}
 
     if (this._hass) {
-      // Defer the heavy update work when a popup is being opened.
+      // Defer the heavy update work when a popup is being opened. The pop-up
+      // flushes this on its reveal frame, before anything is on screen: this
+      // first pass is what creates the sub-buttons and puts the slider fill in
+      // place, so waiting out the delay reveals bare pills and fills them in
+      // once the pop-up has stopped moving. The delay only stands for a card
+      // whose pop-up never reaches that frame.
       if (isInsidePopupOpeningScope(this) && this.config?.card_type !== 'pop-up') {
-        this._deferredUpdateTimer = setTimeout(() => {
+        deferCardUpdate(this, () => {
           if (this.isConnected) this.updateBubbleCard();
         }, 320); // Slightly longer than the 300ms animation duration
       } else {
@@ -155,7 +161,7 @@ class BubbleCard extends HTMLElement {
       unregisterForIconRefresh(this);
     } catch (e) {}
     clearTimeout(this._editorUpdateTimeout);
-    clearTimeout(this._deferredUpdateTimer);
+    cancelDeferredCardUpdate(this);
   }
 
   get detectedEditor() {
