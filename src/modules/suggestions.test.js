@@ -97,6 +97,32 @@ describe('module entity suggestions', () => {
         expect(suggestions[2].config.modules).toEqual(['weather_forecast']);
     });
 
+    test('a patch names the picked entity through ${entity}, like a standalone config', () => {
+        yamlKeysMap.set('bubble_badges', {
+            name: 'Bubble Badges 2',
+            suggestions: [
+                {
+                    extends: 'base',
+                    config: {
+                        bubble_badges: {
+                            badges: [
+                                {
+                                    target: 'main_icon',
+                                    icon: 'mdi:battery-alert',
+                                    condition: [{ condition: 'numeric_state', entity_id: '${entity}', below: 20 }],
+                                },
+                            ],
+                        },
+                    },
+                },
+            ],
+        });
+
+        const [badge] = getEntitySuggestion(hass, ENTITY).slice(2);
+
+        expect(badge.config.bubble_badges.badges[0].condition[0].entity_id).toBe(ENTITY);
+    });
+
     test('domains and condition gate the rule', () => {
         yamlKeysMap.set('a', { name: 'A', suggestions: [{ extends: 'native', domains: ['weather'] }] });
         yamlKeysMap.set('b', {

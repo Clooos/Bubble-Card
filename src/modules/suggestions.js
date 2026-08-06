@@ -122,7 +122,12 @@ function buildRuleSuggestions(moduleId, module, rule, hass, entityId, stateObj, 
     );
     if (rule.extends === 'base') sources = sources.slice(0, 1);
     return sources.map((native) => {
-      const patch = rule.config && typeof rule.config === 'object' ? deepClone(rule.config) : {};
+      // Substituted like a standalone config: a patch that configures a module
+      // per entity (a badge condition watching the picked entity, for
+      // instance) has no other way to name it.
+      const patch = rule.config && typeof rule.config === 'object'
+        ? substituteEntity(deepClone(rule.config), entityId)
+        : {};
       const config = { ...deepClone(native.config), ...patch };
       config.modules = ensureModuleListed(patch.modules ?? config.modules, moduleId);
       return { label: composeLabel(moduleName, ruleLabel, native.label), config };
