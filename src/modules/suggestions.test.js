@@ -152,7 +152,7 @@ describe('module entity suggestions', () => {
         });
 
         const suggestions = getEntitySuggestion(hass, ENTITY);
-        const standalone = suggestions.find((s) => s.label === 'Fancy tile');
+        const standalone = suggestions.find((s) => s.label === 'My Module · Fancy tile');
 
         expect(standalone.config.type).toBe('custom:bubble-card');
         expect(standalone.config.entity).toBe(ENTITY);
@@ -181,9 +181,28 @@ describe('module entity suggestions', () => {
         expect(withDuplicate.filter((s) => s.config.modules === undefined)).toHaveLength(2);
 
         yamlKeysMap.clear();
-        const many = Array.from({ length: 10 }, (_, i) => ({ config: { card_type: 'button', entity: ENTITY, i } }));
+        const many = Array.from({ length: 25 }, (_, i) => ({ config: { card_type: 'button', entity: ENTITY, i } }));
         getNativeEntitySuggestion.mockReturnValue(many);
-        expect(getEntitySuggestion(hass, ENTITY)).toHaveLength(8);
+        expect(getEntitySuggestion(hass, ENTITY)).toHaveLength(20);
+    });
+
+    test('extends: base twins only the first tile, once per rule', () => {
+        yamlKeysMap.set('weather_forecast', {
+            name: 'Bubble Weather',
+            suggestions: [
+                { extends: 'base', label: 'Default', config: { weather_forecast: { card_layout: 'default' } } },
+                { extends: 'base', label: 'Square card', config: { weather_forecast: { card_layout: 'square' } } },
+            ],
+        });
+
+        const suggestions = getEntitySuggestion(hass, ENTITY);
+
+        expect(suggestions).toHaveLength(4);
+        expect(suggestions[2].label).toBe('Bubble Weather · Default');
+        expect(suggestions[2].config.weather_forecast).toEqual({ card_layout: 'default' });
+        expect(suggestions[3].label).toBe('Bubble Weather · Square card');
+        // Both clones derive from the base tile, never from the labeled variant.
+        expect(suggestions[3].config.sub_button).toBeUndefined();
     });
 
     test('classic suggestions are never twinned and the marker never leaks', () => {

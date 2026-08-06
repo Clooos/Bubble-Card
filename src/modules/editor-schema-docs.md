@@ -1101,11 +1101,11 @@ Each entry of `suggestions:` accepts:
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `extends` | string | `native` clones every built-in tile suggestion offered for the picked entity (the classic dedicated card, Button and Slider shortcuts are not cloned), adds your module to its `modules` list, and applies the optional `config` patch on top (shallow merge, key by key) |
-| `config` | object | Standalone card configuration, or the patch applied over each clone when `extends: native` is set. Standalone configurations must include `card_type`; `${entity}` anywhere in a string is replaced by the picked entity id, and `entity`/`modules` are filled in automatically when missing |
+| `extends` | string | `native` clones every built-in tile suggestion offered for the picked entity (the classic dedicated card, Button and Slider shortcuts are not cloned), adds your module to its `modules` list, and applies the optional `config` patch on top (shallow merge, key by key). `base` does the same but clones only the first tile: the right pick when a module offers one entry per layout |
+| `config` | object | Standalone card configuration, or the patch applied over each clone when `extends` is set. Standalone configurations must include `card_type`; `${entity}` anywhere in a string is replaced by the picked entity id, and `entity`/`modules` are filled in automatically when missing |
 | `domains` | list | Only offer the suggestion for these entity domains (`light`, `switch`, ...). Without it the rule applies to every entity that has suggestions |
 | `condition` | string | JavaScript expression evaluated with `hass`, `entity` (the id), `state`, `attributes`, `stateObj` and `domain` in scope. The suggestion is skipped when it is falsy or throws |
-| `label` | string | Text shown next to the card name in the picker. Defaults to the module `name` |
+| `label` | string | Variant text shown after the module `name` in the picker (e.g. `Square card` gives "My Module · Square card"). Without it the entry is labeled with the module name alone |
 
 Good to know:
 
