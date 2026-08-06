@@ -254,10 +254,17 @@ describe('getEntitySuggestion', () => {
         expect(onoff[0].config.sub_button.bottom[0].group[0].name).toBe('Toggle');
 
         const full = suggestionsFor('light.full');
-        expect(full).toHaveLength(5);
-        expect(full.map((s) => s.label)).toEqual([undefined, 'Color temperature', 'Effect', 'Button', 'Slider']);
+        expect(full).toHaveLength(7);
+        expect(full.map((s) => s.label)).toEqual([
+            undefined, 'Color temperature', 'Color', 'Saturation', 'Effect', 'Button', 'Slider',
+        ]);
         expect(full[1].config.sub_button.bottom[0].group[1].light_slider_type).toBe('white_temp');
-        expect(full[2].config.sub_button.bottom[0].group[0].select_attribute).toBe('effect_list');
+        expect(full[2].config.sub_button.bottom[0].group[1].light_slider_type).toBe('hue');
+        expect(full[3].config.sub_button.bottom[0].group[1].light_slider_type).toBe('saturation');
+        expect(full[4].config.sub_button.bottom[0].group[0].select_attribute).toBe('effect_list');
+
+        // Brightness only: no color variants offered.
+        expect(suggestionsFor('light.dimmable').map((s) => s.label)).toEqual([undefined, 'Button', 'Slider']);
     });
 
     test('covers expose position and tilt only when supported', () => {
@@ -294,6 +301,8 @@ describe('getEntitySuggestion', () => {
         expect(humidity).toHaveLength(2);
         expect(humidity[1].label).toBe('Humidity');
         expect(humidity[1].config.sub_button.main[0].group[0].attribute).toBe('humidity');
+        // The weather condition matters: every weather tile shows the state.
+        humidity.forEach((s) => expect(s.config.show_state).toBe(true));
     });
 
     test('fans and updates degrade gracefully without the feature bit', () => {

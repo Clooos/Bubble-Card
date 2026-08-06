@@ -705,7 +705,8 @@
         "lock": "@ui.card.lock.lock|Lock",
         "unlock": "@ui.card.lock.unlock|Unlock",
         "state": "@ui.components.entity.entity-state-picker.state|State",
-        "temperature": "@ui.card.weather.attributes.temperature|Temperature"
+        "temperature": "@ui.card.weather.attributes.temperature|Temperature",
+        "color": "@ui.dialogs.more_info_control.light.color|Color"
       }
     },
     "errors": {

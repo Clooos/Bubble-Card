@@ -149,6 +149,40 @@ const effectsTile = (entityId, t) =>
     ]),
   });
 
+// Same shape as the validated color temperature slider, pointed at the hue
+// and saturation modes of the light slider.
+const lightColorSlider = (t, { nameKey, icon, sliderType }) => ({
+  sub_button_type: 'slider',
+  name: t(nameKey),
+  icon,
+  show_background: false,
+  state_background: false,
+  fill_width: false,
+  use_accent_color: true,
+  light_slider_type: sliderType,
+  hide_when_parent_unavailable: true,
+});
+
+const colorTile = (entityId, t) =>
+  tile({
+    entity: entityId,
+    sub_button: bottomControls(t, [
+      brightnessSlider(t),
+      lightColorSlider(t, { nameKey: 'editor.slider.mode_color', icon: 'mdi:palette', sliderType: 'hue' }),
+      moreInfoSubButton(t),
+    ]),
+  });
+
+const saturationTile = (entityId, t) =>
+  tile({
+    entity: entityId,
+    sub_button: bottomControls(t, [
+      brightnessSlider(t),
+      lightColorSlider(t, { nameKey: 'editor.slider.mode_saturation', icon: 'mdi:contrast-circle', sliderType: 'saturation' }),
+      moreInfoSubButton(t),
+    ]),
+  });
+
 const fanSpeedTile = (entityId, t) =>
   tile({
     entity: entityId,
@@ -462,7 +496,7 @@ const weatherTile = (entityId, t, { humidity }) =>
   tile({
     entity: entityId,
     button_type: 'state',
-    show_state: false,
+    show_state: true,
     show_last_changed: false,
     sub_button: {
       ...bottomControls(
@@ -634,6 +668,11 @@ const lightSupportsBrightness = (stateObj) => {
   return modes.some((mode) => mode !== 'onoff' && mode !== 'unknown');
 };
 
+const LIGHT_COLOR_MODES = new Set(['hs', 'rgb', 'rgbw', 'rgbww', 'xy']);
+
+const lightSupportsColor = (stateObj) =>
+  (stateObj.attributes.supported_color_modes || []).some((mode) => LIGHT_COLOR_MODES.has(mode));
+
 const DOMAIN_BUILDERS = {
   light: (entityId, stateObj, t) => {
     const suggestions = [
@@ -644,6 +683,16 @@ const DOMAIN_BUILDERS = {
       suggestions.push({
         label: t('editor.card_picker.suggestions.color_temperature'),
         config: colorTempTile(entityId, t),
+      });
+    }
+    if (lightSupportsColor(stateObj)) {
+      suggestions.push({
+        label: t('editor.card_picker.suggestions.color'),
+        config: colorTile(entityId, t),
+      });
+      suggestions.push({
+        label: t('editor.slider.mode_saturation'),
+        config: saturationTile(entityId, t),
       });
     }
     if (stateObj.attributes.effect_list?.length) {
