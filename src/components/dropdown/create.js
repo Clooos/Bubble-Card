@@ -14,6 +14,19 @@ const MENU_OVERLAP = 40;
 // (4), the pop-up shell (5) and the horizontal buttons stack (6).
 const OPEN_MENU_Z_INDEX = '3';
 
+// A menu that reaches the browser top layer is painted outside every ancestor's
+// clip and stacking context, so the card needs no help to carry it. Un-clipping a
+// card that already carries its menu only lets a bottom row spill past the rounded
+// corners its overflow normally cuts it against, for as long as the menu is open.
+// ha-dropdown reaches the top layer through the popover API, so supporting that
+// API is what tells the two cases apart. The mwc menu is painted inside the card
+// either way and always needs the lift below.
+function isMenuInTopLayer(hass) {
+    const popoverSupported = typeof HTMLElement !== 'undefined'
+        && Object.prototype.hasOwnProperty.call(HTMLElement.prototype, 'popover');
+    return popoverSupported && isNewHaFrontend(hass);
+}
+
 // Let the card carry an open menu: no clipping, a layer of its own, and no
 // transform. Dropping the transform matters on its own, because it also makes
 // the container the containing block of anything positioned fixed inside it,
@@ -213,6 +226,7 @@ export function createDropdownActions(context, elements = context.elements, enti
     const card = elements === context.elements ? defaultCard : elements;
     const eventCaller = elements === context.elements ? defaultEventCaller : elements;
     const newHa = isNewHaFrontend(context?._hass);
+    const liftsContainer = !isMenuInTopLayer(context?._hass);
 
     // Ensure previous listeners are cleaned up before re-attaching
     if (typeof elements.dropdownCleanup === 'function') {
@@ -270,7 +284,9 @@ export function createDropdownActions(context, elements = context.elements, enti
                     mainContainer.openDropdowns++;
                 }
             }
-            holdMainContainer(context.elements.mainContainer);
+            if (liftsContainer) {
+                holdMainContainer(context.elements.mainContainer);
+            }
         }
     };
 

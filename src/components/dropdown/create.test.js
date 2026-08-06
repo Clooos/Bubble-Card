@@ -48,16 +48,27 @@ class StubElement {
 
 globalThis.document = { createElement: (tag) => new StubElement(tag) };
 
+// The node test environment has no HTMLElement, so the popover support that
+// decides whether a menu reaches the top layer has to be stood up here.
+class HTMLElementStub {}
+globalThis.HTMLElement = HTMLElementStub;
+
+function withPopoverSupport(supported) {
+    if (supported) HTMLElementStub.prototype.popover = null;
+    else delete HTMLElementStub.prototype.popover;
+}
+
 jest.unstable_mockModule('../../tools/utils.js', () => ({
     createElement: (tag) => new StubElement(tag),
 }));
 
-// false pins the mwc menu path. The layering matters for every menu that is
-// painted inside the card rather than in the browser top layer, which is the
-// mwc menu always and ha-dropdown wherever the popover does not reach it.
+// The layering matters for every menu that is painted inside the card rather
+// than in the browser top layer, which is the mwc menu always and ha-dropdown
+// wherever the popover does not reach it. Defaults to the mwc menu path.
+let newHaFrontend = false;
 jest.unstable_mockModule('./helpers.js', () => ({
     callSelectService: jest.fn(),
-    isNewHaFrontend: () => false,
+    isNewHaFrontend: () => newHaFrontend,
 }));
 
 jest.unstable_mockModule('./styles.css', () => ({ default: '' }));
@@ -77,6 +88,11 @@ function buildContext() {
 }
 
 describe('dropdown layering', () => {
+    beforeEach(() => {
+        newHaFrontend = false;
+        withPopoverSupport(false);
+    });
+
     test('lifts the card above its neighbours while a menu is open', () => {
         const context = buildContext();
         const { mainContainer, background } = context.elements;
@@ -131,6 +147,38 @@ describe('dropdown layering', () => {
 
         second.dropdownSelect.fire('closed');
         expect(mainContainer.style.zIndex).toBe('');
+    });
+
+    test('leaves the card clipped when the menu is painted in the top layer', () => {
+        newHaFrontend = true;
+        withPopoverSupport(true);
+
+        const context = buildContext();
+        const { mainContainer, background } = context.elements;
+
+        createDropdownActions(context, context.elements, 'input_select.test', context.config);
+        background.fire('click');
+
+        // Un-clipping a card that already carries its menu just lets a bottom
+        // row spill past the rounded corners for as long as the menu is open.
+        expect(mainContainer.style.overflow).toBeUndefined();
+        expect(mainContainer.style.zIndex).toBeUndefined();
+        expect(mainContainer.style.transform).toBeUndefined();
+        expect(mainContainer.openDropdowns).toBe(1);
+    });
+
+    test('still lifts the card when the popover does not reach the top layer', () => {
+        newHaFrontend = true;
+        withPopoverSupport(false);
+
+        const context = buildContext();
+        const { mainContainer, background } = context.elements;
+
+        createDropdownActions(context, context.elements, 'input_select.test', context.config);
+        background.fire('click');
+
+        expect(mainContainer.style.overflow).toBe('visible');
+        expect(Number(mainContainer.style.zIndex)).toBeGreaterThan(0);
     });
 
     test('does not leave a card lifted when the dropdown is torn down while open', () => {
