@@ -13,6 +13,7 @@ import { getEntitySuggestion } from './tools/entity-suggestion.js';
 import { registerPopupContext, shouldHoldDashboardHassUpdate } from './cards/pop-up/helpers.js';
 import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
 import { registerForIconRefresh, unregisterForIconRefresh } from './tools/icon.js';
+import { monotonicNow } from './tools/monotonic-time.js';
 import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 import { cleanupPopUp, handlePopUp } from './cards/pop-up/index.js';
@@ -62,11 +63,26 @@ const handlers = {
   'climate': handleClimate,
 };
 
+// Home Assistant replaces the whole hass object on every state change anywhere
+// in the installation and hands the new one to every card, so a burst of state
+// changes costs one full render pass per card per change. Measured on an 88-card
+// dashboard: six changes inside 36 ms, six full passes each, all producing the
+// same result. A card that has just rendered therefore waits out this window and
+// renders once for the whole burst. Nothing is ever dropped: `_hass` already
+// holds the newest object by the time the waiting pass reads it, so a card can
+// only ever be one window late, never stale. An isolated change, which is what a
+// user interaction produces, still renders immediately.
+const hassRenderWindowMs = 50;
+
 class BubbleCard extends HTMLElement {
   editor = false;
   isConnected = false;
   _editorUpdateTimeout = null;
   _detectedEditorMemo = undefined;
+  _hassRenderTimer = null;
+  // -Infinity, not 0: a card that has never rendered must render at once, and 0
+  // is a real reading of the monotonic clock early in a page load.
+  _lastRenderAt = -Infinity;
 
   connectedCallback() {
     this.isConnected = true;
@@ -161,6 +177,10 @@ class BubbleCard extends HTMLElement {
       unregisterForIconRefresh(this);
     } catch (e) {}
     clearTimeout(this._editorUpdateTimeout);
+    if (this._hassRenderTimer !== null) {
+      clearTimeout(this._hassRenderTimer);
+      this._hassRenderTimer = null;
+    }
     cancelDeferredCardUpdate(this);
   }
 
@@ -251,15 +271,36 @@ class BubbleCard extends HTMLElement {
       return;
     }
 
-    this.updateBubbleCard();
+    this.renderCoalesced();
 
     if (this.isConnected && this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {
       maybeShowMigrationNotice(hass);
     }
   }
 
+  // Renders now when the card has been idle for a window, otherwise waits out the
+  // rest of it and renders once. Only the hass path goes through here: every
+  // other trigger (connection, icon refresh, the pop-up open flush, the editor)
+  // calls updateBubbleCard directly and stays immediate.
+  renderCoalesced() {
+    const elapsed = monotonicNow() - this._lastRenderAt;
+    if (elapsed >= hassRenderWindowMs) {
+      this.updateBubbleCard();
+      return;
+    }
+
+    if (this._hassRenderTimer !== null) return;
+    this._hassRenderTimer = setTimeout(() => {
+      this._hassRenderTimer = null;
+      this.updateBubbleCard();
+    }, hassRenderWindowMs - elapsed);
+  }
+
   updateBubbleCard() {
     if (!this.isConnected && this.config.card_type !== 'pop-up') return;
+    // Kept below the guard above: a call that renders nothing must not start the
+    // coalescing window, or the first real render would be made to wait.
+    this._lastRenderAt = monotonicNow();
     const type = this.config.card_type;
     if (handlers[type]) {
       try {

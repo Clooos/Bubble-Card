@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, jest, test } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
 
 // The element module pulls in every card handler; everything is mocked so the
 // tests can drive the custom-element lifecycle contract in isolation.
@@ -28,7 +28,8 @@ jest.unstable_mockModule('./tools/icon.js', () => ({
 }));
 jest.unstable_mockModule('./editor/bubble-card-editor.js', () => ({ default: class {} }));
 jest.unstable_mockModule('./cards/pop-up/index.js', () => ({ cleanupPopUp: jest.fn(), handlePopUp: jest.fn() }));
-jest.unstable_mockModule('./cards/button/index.js', () => ({ handleButton: jest.fn() }));
+const handleButton = jest.fn();
+jest.unstable_mockModule('./cards/button/index.js', () => ({ handleButton }));
 jest.unstable_mockModule('./cards/sub-buttons/index.js', () => ({ handleSubButtons: jest.fn() }));
 jest.unstable_mockModule('./cards/separator/index.js', () => ({ handleSeparator: jest.fn() }));
 jest.unstable_mockModule('./cards/cover/index.js', () => ({ handleCover: jest.fn() }));
@@ -138,5 +139,87 @@ describe('BubbleCard disconnect contract', () => {
         expect(document.removeEventListener).toHaveBeenCalledWith('yaml-modules-updated', handler);
         expect(card._moduleChangeListenerAdded).toBe(false);
         expect(card._moduleChangeHandler).toBeNull();
+    });
+});
+
+describe('BubbleCard hass render coalescing', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
+    function connectedCard() {
+        const card = createCard();
+        card.isConnected = true;
+        return card;
+    }
+
+    test('renders straight away when the card has been idle', () => {
+        const card = connectedCard();
+
+        card.hass = { states: {} };
+
+        expect(handleButton).toHaveBeenCalledTimes(1);
+    });
+
+    test('renders once for a burst instead of once per state change', () => {
+        const card = connectedCard();
+
+        card.hass = { states: {} };
+        expect(handleButton).toHaveBeenCalledTimes(1);
+
+        // Five more state changes land inside the window: none of them renders.
+        for (let i = 0; i < 5; i++) {
+            jest.advanceTimersByTime(6);
+            card.hass = { states: {} };
+        }
+        expect(handleButton).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(50);
+        expect(handleButton).toHaveBeenCalledTimes(2);
+    });
+
+    // The whole safety of coalescing rests on this: the waiting pass reads the
+    // newest hass, so a card is at most one window late and never stale.
+    test('the waiting pass renders the newest hass, not the one that scheduled it', () => {
+        const card = connectedCard();
+        card.hass = { states: {}, tag: 'first' };
+
+        card.hass = { states: {}, tag: 'second' };
+        card.hass = { states: {}, tag: 'third' };
+        jest.advanceTimersByTime(50);
+
+        expect(handleButton).toHaveBeenCalledTimes(2);
+        expect(card._hass.tag).toBe('third');
+    });
+
+    test('an isolated state change still renders immediately', () => {
+        const card = connectedCard();
+        card.hass = { states: {} };
+
+        jest.advanceTimersByTime(500);
+        card.hass = { states: {} };
+
+        expect(handleButton).toHaveBeenCalledTimes(2);
+    });
+
+    // The render guard alone would keep a torn-down card from drawing, so this
+    // also checks the timer is dropped rather than left to fire on a dead card.
+    test('a card torn down while a pass waits leaves nothing pending', () => {
+        const card = connectedCard();
+        card.hass = { states: {} };
+        card.hass = { states: {} };
+        expect(handleButton).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(1);
+
+        card.disconnectedCallback();
+
+        expect(jest.getTimerCount()).toBe(0);
+        jest.advanceTimersByTime(500);
+        expect(handleButton).toHaveBeenCalledTimes(1);
     });
 });
