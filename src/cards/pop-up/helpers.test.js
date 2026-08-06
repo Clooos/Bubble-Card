@@ -1211,10 +1211,13 @@ describe('standalone popup lifecycle', () => {
 
         // Tap task: transitions off so the growing build never animates the
         // percentage-based closed transform (visible top-edge peek otherwise),
-        // and the shell kept out of sight — until the build gives it its final
+        // and the shell parked out of sight — until the build gives it its final
         // height, `translate3d(0, 100%, 0)` is too short to clear the viewport
-        // and would park the empty shell on screen.
-        expect(context.popUp.style.visibility).toBe('hidden');
+        // and would leave the empty shell on screen. Parked and not hidden:
+        // `visibility: hidden` never paints, so the content's first paint fell
+        // on the reveal frame and the pop-up opened carrying empty cards.
+        expect(context.popUp.style.visibility).toBe('');
+        expect(context.popUp.style.transform).toBe('translate3d(0, 100vh, 0)');
         expect(context.popUp.style.transition).toBe('none');
         // The centered and adaptive-dialog blocks declare their transition with
         // !important, which beats a plain inline one: without the same priority

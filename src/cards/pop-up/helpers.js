@@ -333,6 +333,50 @@ function disableShellTransition(popUp) {
     style.transition = 'none';
 }
 
+// The closed bottom-sheet transform is a percentage of the shell height, so a
+// shell built empty is far too short for it to clear the viewport (d97995d).
+// Hiding it for the whole build fixed that flash but stopped the browser
+// painting the content at all: `visibility: hidden` never paints, so every
+// card's first paint became due on the reveal frame, one frame before the
+// slide, on a main thread that is saturated by then. Bisected at a 20x throttle
+// on a 17-card pop-up: 32ms of catch-up before d97995d, 113ms after.
+//
+// Parked rather than hidden. A viewport-height translation clears the screen
+// whatever the shell measures, so the flash stays fixed while the content is
+// painted throughout the build, as it was before. `vh` and not `dvh`: it is the
+// larger of the two on mobile, so it always clears, and it exists on the older
+// WebKit this path is written for.
+function parkShellOffScreen(popUp) {
+    const style = popUp?.style;
+    if (!style) {
+        return;
+    }
+
+    // The priority is required: the centered and adaptive-dialog blocks declare
+    // their own transform that way, the trap of 6593bbf.
+    if (typeof style.setProperty === 'function') {
+        style.setProperty('transform', 'translate3d(0, 100vh, 0)', 'important');
+        return;
+    }
+
+    style.transform = 'translate3d(0, 100vh, 0)';
+}
+
+function unparkShell(popUp) {
+    const style = popUp?.style;
+    if (!style) {
+        return;
+    }
+
+    // Both: an inline declaration set with a priority is only really gone once
+    // the property is dropped, and assigning the empty string covers hosts whose
+    // style object does not mirror removeProperty back onto the property.
+    if (typeof style.removeProperty === 'function') {
+        style.removeProperty('transform');
+    }
+    style.transform = '';
+}
+
 function restoreShellTransition(popUp) {
     if (!isShellTransitionDisabled(popUp)) {
         return;
@@ -1566,6 +1610,8 @@ function finalizeStandalonePopupClose(context) {
 }
 
 function rollbackStandalonePopupOpen(context, error = null) {
+    // An abandoned open must not leave the shell parked off screen.
+    try { unparkShell(context?.popUp); } catch (_) {}
     if (error) {
         console.error(error);
     }
@@ -1720,6 +1766,13 @@ function openStandalonePopup(context, instant = false) {
     // result is identical — the slide still starts with the full content.
     const finishBeforePhase2 = () => {
         if (!popupState.activePopups.has(context)) return;
+
+        // The build is over: the height is final, so the closed transform clears
+        // the viewport on its own and the parking translation can go. Here and
+        // not on the reveal frame on purpose, because transitions are still
+        // disabled at this point: the shell settles onto its closed transform
+        // without animating, which is what 6593bbf is about.
+        unparkShell(popUp);
 
         // Read scrollable state before phase 2 so it has no layout reads
         // competing with the CSS transition start. Skip the read for cold
@@ -1884,7 +1937,10 @@ function openStandalonePopup(context, instant = false) {
             // frame reveals it one frame before the flip, still off screen.
             // Visibility does not stop the closed state from being resolved and
             // painted, which the transition start depends on (#2548).
-            popUp.style.visibility = needsClosedStatePaint ? 'hidden' : '';
+            popUp.style.visibility = '';
+            if (needsClosedStatePaint) {
+                parkShellOffScreen(popUp);
+            }
 
             clearStandaloneTransitionCompletion(context);
             setStandalonePopupState(popUp, false);
