@@ -90,6 +90,37 @@ export function preloadYAMLStyles(context) {
   }
 }
 
+// initializeModules can run before its card ever received `hass` (first
+// connectedCallback on boot, cards created by module code, companion-app
+// WKWebView). Nothing retries the cache revalidation later in the session —
+// modulesInitialized stays true — so a refresh that gives up because hass was
+// not there yet leaves the localStorage cache serving disk-edited module files
+// stale for the whole session. Resolve hass lazily instead: the card's own,
+// else the app root's, else poll until one shows up.
+const HASS_WAIT_TIMEOUT_MS = 15000;
+const HASS_WAIT_POLL_MS = 250;
+
+function resolveHass(context) {
+  if (context?._hass) return context._hass;
+  try {
+    return document.querySelector('home-assistant')?.hass || null;
+  } catch (_) {
+    return null;
+  }
+}
+
+async function waitForHass(context) {
+  const immediate = resolveHass(context);
+  if (immediate) return immediate;
+  const deadline = Date.now() + HASS_WAIT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, HASS_WAIT_POLL_MS));
+    const hass = resolveHass(context);
+    if (hass) return hass;
+  }
+  return null;
+}
+
 export async function initializeModules(context) {
   if (modulesInitialized && allModules) return allModules;
   if (initPromise) return initPromise;
@@ -114,10 +145,12 @@ export async function initializeModules(context) {
         // Background refresh
         (async () => {
           try {
-            const available = await ensureBCTProviderAvailable(context?._hass);
+            const hass = await waitForHass(context);
+            if (!hass) return;
+            const available = await ensureBCTProviderAvailable(hass);
             if (!available) return;
-            try { await migrateIfNeeded(context?._hass); } catch (_) {}
-            const freshMap = await bctReadAllModules(context?._hass);
+            try { await migrateIfNeeded(hass); } catch (_) {}
+            const freshMap = await bctReadAllModules(hass);
             const fresh = {};
             freshMap.forEach((value, key) => {
               if (key !== 'modules' && key !== 'friendly_name' && key !== 'last_updated') {
@@ -147,10 +180,12 @@ export async function initializeModules(context) {
       }
     } catch (_) {}
 
-    // Try provider directly
-    const bctAvailable = await ensureBCTProviderAvailable(context?._hass);
+    // Try provider directly. Without the wait, a hass-less first call lands in
+    // the legacy fallback with zero modules and the session stays that way.
+    const hass = await waitForHass(context);
+    const bctAvailable = await ensureBCTProviderAvailable(hass);
     if (bctAvailable) {
-      try { await migrateIfNeeded(context?._hass); } catch (e) { console.warn('Bubble Card - Migration check failed:', e); }
+      try { await migrateIfNeeded(hass); } catch (e) { console.warn('Bubble Card - Migration check failed:', e); }
 
       // Stale-while-revalidate using aggregated cache
       const cachedAggregated = getCachedAggregatedModules();
@@ -169,7 +204,7 @@ export async function initializeModules(context) {
 
         (async () => {
           try {
-            const freshMap = await bctReadAllModules(context?._hass);
+            const freshMap = await bctReadAllModules(hass);
             const fresh = {};
             freshMap.forEach((value, key) => {
               if (key !== 'modules' && key !== 'friendly_name' && key !== 'last_updated') {
@@ -199,7 +234,7 @@ export async function initializeModules(context) {
       }
 
       // No cache → read now
-      const filesMap = await bctReadAllModules(context?._hass);
+      const filesMap = await bctReadAllModules(hass);
       moduleSourceMap.clear();
       yamlKeysMap.clear();
       allModules = {};
@@ -219,7 +254,7 @@ export async function initializeModules(context) {
       '/local/bubble/bubble-modules.yaml'
     ]);
 
-    const entityModules = context?._hass ? await loadModulesFromEntity(context._hass) : {};
+    const entityModules = hass ? await loadModulesFromEntity(hass) : {};
 
     moduleSourceMap.clear();
     if (yamlModules) {
