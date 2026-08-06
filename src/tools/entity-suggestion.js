@@ -560,6 +560,9 @@ const CLASSIC_SLIDER_DOMAINS = new Set([
   'light', 'media_player', 'cover', 'input_number', 'number', 'climate', 'fan',
 ]);
 
+// Half width like the tiles, the height stays natural.
+const CLASSIC_GRID_OPTIONS = { columns: 6 };
+
 function classicSuggestions(entityId, domain, t) {
   const suggestions = [];
 
@@ -568,7 +571,11 @@ function classicSuggestions(entityId, domain, t) {
     suggestions.push({
       label: t(dedicated.labelKey),
       classic: true,
-      config: { type: 'custom:bubble-card', ...dedicated.config(entityId) },
+      config: {
+        type: 'custom:bubble-card',
+        ...dedicated.config(entityId),
+        grid_options: { ...CLASSIC_GRID_OPTIONS },
+      },
     });
   }
 
@@ -576,13 +583,24 @@ function classicSuggestions(entityId, domain, t) {
     suggestions.push({
       label: t('editor.module_editor.card_button'),
       classic: true,
-      config: { type: 'custom:bubble-card', card_type: 'button', entity: entityId },
+      config: {
+        type: 'custom:bubble-card',
+        card_type: 'button',
+        entity: entityId,
+        grid_options: { ...CLASSIC_GRID_OPTIONS },
+      },
     });
   } else if (CLASSIC_STATE_DOMAINS.has(domain)) {
     suggestions.push({
       label: t('editor.module_editor.card_button'),
       classic: true,
-      config: { type: 'custom:bubble-card', card_type: 'button', entity: entityId, button_type: 'state' },
+      config: {
+        type: 'custom:bubble-card',
+        card_type: 'button',
+        entity: entityId,
+        button_type: 'state',
+        grid_options: { ...CLASSIC_GRID_OPTIONS },
+      },
     });
   }
 
@@ -590,7 +608,13 @@ function classicSuggestions(entityId, domain, t) {
     suggestions.push({
       label: t('editor.button.type_slider'),
       classic: true,
-      config: { type: 'custom:bubble-card', card_type: 'button', entity: entityId, button_type: 'slider' },
+      config: {
+        type: 'custom:bubble-card',
+        card_type: 'button',
+        entity: entityId,
+        button_type: 'slider',
+        grid_options: { ...CLASSIC_GRID_OPTIONS },
+      },
     });
   }
 

@@ -162,12 +162,12 @@ describe('getEntitySuggestion', () => {
         }
     });
 
-    test('every tile suggestion ships the validated grid size, classics stay bare', () => {
+    test('every suggestion is half width, tiles also pin the validated height', () => {
         for (const entityId of Object.keys(STATES)) {
             for (const suggestion of suggestionsFor(entityId)) {
                 expect(suggestion.config.type).toBe('custom:bubble-card');
                 if (suggestion.classic) {
-                    expect(suggestion.config.grid_options).toBeUndefined();
+                    expect(suggestion.config.grid_options).toEqual({ columns: 6 });
                     expect(suggestion.config.styles).toBeUndefined();
                 } else {
                     expect(suggestion.config.grid_options).toEqual({ rows: '1.656', columns: 6 });
@@ -188,12 +188,22 @@ describe('getEntitySuggestion', () => {
         const light = suggestionsFor('light.dimmable');
         expect(light.map((s) => s.label)).toEqual([undefined, 'Button', 'Slider']);
         expect(light[1].classic).toBe(true);
-        expect(light[1].config).toEqual({ type: 'custom:bubble-card', card_type: 'button', entity: 'light.dimmable' });
+        expect(light[1].config).toEqual({
+            type: 'custom:bubble-card',
+            card_type: 'button',
+            entity: 'light.dimmable',
+            grid_options: { columns: 6 },
+        });
         expect(light[2].config.button_type).toBe('slider');
 
         const climate = suggestionsFor('climate.preset');
         expect(climate.map((s) => s.label)).toEqual([undefined, 'Preset mode', 'Climate', 'Button', 'Slider']);
-        expect(climate[2].config).toEqual({ type: 'custom:bubble-card', card_type: 'climate', entity: 'climate.preset' });
+        expect(climate[2].config).toEqual({
+            type: 'custom:bubble-card',
+            card_type: 'climate',
+            entity: 'climate.preset',
+            grid_options: { columns: 6 },
+        });
 
         const select = suggestionsFor('input_select.a');
         expect(select.map((s) => s.label)).toEqual([undefined, 'Select']);
@@ -208,6 +218,7 @@ describe('getEntitySuggestion', () => {
             type: 'custom:bubble-card',
             card_type: 'calendar',
             entities: [{ entity: 'calendar.a' }],
+            grid_options: { columns: 6 },
         });
     });
 
