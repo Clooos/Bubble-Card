@@ -308,9 +308,23 @@ export function formatDisplayValue(context, percentage) {
   const entityType = getEntityTypeFromId(entityId);
   const hass = context._hass;
 
-  const rawMin = context.sliderMinValue ?? context.config?.min_value;
-  const rawMax = context.sliderMaxValue ?? context.config?.max_value;
-  const rawStep = context.sliderStep ?? context.config?.step ?? 1;
+  // Read the range from the entity's current state rather than the snapshot taken
+  // when the slider was created. Some entities narrow or widen their bounds at
+  // runtime (a climate switching to a restricted mode, an oven exposing a different
+  // temperature range per program), and the cached values go stale as soon as that
+  // happens, so the value shown while dragging was mapped against the old range.
+  // getCurrentPercentage() and updateEntity() already derive their bounds this way.
+  const currentState = hass?.states?.[entityId];
+
+  const rawMin = currentState
+    ? getEntityMinValue(context, currentState)
+    : (context.sliderMinValue ?? context.config?.min_value);
+  const rawMax = currentState
+    ? getEntityMaxValue(context, currentState)
+    : (context.sliderMaxValue ?? context.config?.max_value);
+  const rawStep = currentState
+    ? getEntityStep(context, currentState)
+    : (context.sliderStep ?? context.config?.step ?? 1);
 
   let minValue = Number(rawMin);
   let maxValue = Number(rawMax);
