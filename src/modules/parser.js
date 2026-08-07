@@ -2,6 +2,31 @@ import jsyaml from 'js-yaml';
 import { _slugify, _cleanMarkdown } from './utils.js';
 import { getAvailableCardTypes } from './module-editor.js';
 
+// The read side of the two sets getCleanExportData uses in export.js, so both
+// directions of a round-trip read the same way.
+//
+// Fields that only ever exist in memory and must never be taken from a file as
+// a declaration: `id` is the root key of the YAML document and is resolved
+// below, `yaml` and `editor_raw` are the transient copies the editor carries
+// around (normalizeModuleFromParsed in bct-provider.js strips exactly those on
+// the Bubble Card Tools path), `editorReference` is added by editModule, and
+// `imageUrl` is seeded here for the store UI and read from the discussion body,
+// never from the module itself.
+const INTERNAL_KEYS = new Set(['id', 'yaml', 'editor_raw', 'editorReference', 'imageUrl']);
+
+// Keys extractModuleMetadata resolves itself, alternative spellings included,
+// plus the legacy `info` container whose known fields it lifts. They are listed
+// here so the carry-over pass cannot undo a deliberate decision, such as the
+// processed description, the supported/unsupported backward compatibility or
+// the form_schema to editor aliasing.
+const HANDLED_KEYS = new Set([
+  'name', 'version', 'author', 'type', 'code', 'editor', 'link', 'creator',
+  'is_global', 'description', 'form_schema',
+  'supported', 'supported_card', 'supported_cards',
+  'unsupported', 'unsupported_card', 'unsupported_cards',
+  'info'
+]);
+
 // Helper function to normalize card names to IDs
 function normalizeCardNameToId(cardName) {
   if (!cardName || typeof cardName !== 'string') return null;
@@ -483,6 +508,24 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
     return false;
   };
 
+  // Carry over every declaration this function does not resolve itself, so a
+  // key it does not know about (`suggestions`, `suggestions_code`,
+  // `extra_module_url`, ...) survives a round-trip through the module editor:
+  // saveModule stores this metadata in the registry, and an allowlist made
+  // those declarations disappear from an installed module until the next page
+  // reload. getCleanExportData does the same on the way out.
+  const carryOverExtraKeys = (source) => {
+    if (!source || typeof source !== 'object') return;
+    // Same signal as parsedToModules in bct-provider.js: only a module body
+    // gets its extra declarations lifted, so a document holding several
+    // modules never copies a whole nested module into the metadata.
+    if (source.name === undefined && source.code === undefined) return;
+    Object.keys(source).forEach(key => {
+      if (HANDLED_KEYS.has(key) || INTERNAL_KEYS.has(key)) return;
+      metadata[key] = source[key];
+    });
+  };
+
   // Process descriptions with different formats
   const processDescription = (desc) => {
     if (typeof desc === 'string') {
@@ -560,6 +603,13 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
                 yamlSetProperties.description = true;
               }
             }
+
+            // The `info` block itself is never carried over, only the module
+            // body: its known fields are already lifted above, and re-emitting
+            // the block on the next save would let a stale copy of a field the
+            // user just renamed win here, since applyProperty lets info
+            // overwrite the top-level value.
+            carryOverExtraKeys(mainObj);
           }
         } else {
           // Flat structure (properties directly at the root)
@@ -591,6 +641,8 @@ export function extractModuleMetadata(yamlContent, moduleId, options = {}) {
             metadata.description = processDescription(parsedYaml.description);
             yamlSetProperties.description = true;
           }
+
+          carryOverExtraKeys(parsedYaml);
         }
 
         // Look for formSchema if not already defined
