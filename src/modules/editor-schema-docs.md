@@ -1202,6 +1202,7 @@ happens for a moment after a hard reload.
 | `t(key, params)` | Translated string for a Bubble Card translation key, in the user's language. `params` fills the `{placeholders}` of the value, e.g. `t('editor.card_picker.suggestions.controls', { area: 'Kitchen' })`. Unknown keys come back as the key itself |
 | `domainOf(entityId)` | `'light'` for `'light.salon'`, an empty string when there is no domain |
 | `friendlyName(entityId)` | `attributes.friendly_name`, falling back to a readable object id (`light.living_room_lamp` gives `living room lamp`), like Home Assistant does |
+| `hasModule(moduleId)` | Whether another module is installed. Use it to offer a variant built on someone else's module and stay silent otherwise: listing a module that is not installed is harmless at render time, but offering the variant is not, since the user would pick it and get a card identical to the plain one |
 | `areaOf(entityId)` | The area id of an entity, resolved from its registry entry first, then from its device. `null` when it has no area, and also `null` for an area that no longer exists, so a deleted or stale id never leaks into a generated title |
 | `areaName(areaId)` | The display name of an area, falling back to the id |
 | `areas()` | `[{ area_id, name, icon }]` for every area, sorted by name. `icon` is `null` when the area has none |

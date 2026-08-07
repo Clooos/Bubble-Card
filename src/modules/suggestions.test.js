@@ -657,6 +657,34 @@ describe('the helpers handed to a code hook', () => {
         expect(suggestion.config.modules).toEqual(['my_module']);
     });
 
+    test('hasModule answers from the same registry the suggestions are read from', () => {
+        // Listing an uninstalled module is harmless at render time, the style
+        // processor skips an id it has no definition for. Offering the variant
+        // is what is not: the user picks "with Bubble Weather" and gets a card
+        // that looks exactly like the plain one.
+        yamlKeysMap.set('weather_forecast', { name: 'Bubble Weather' });
+        const helpers = captureHelpers();
+
+        expect(helpers.hasModule('weather_forecast')).toBe(true);
+        expect(helpers.hasModule('bubble_calendar_enhanced')).toBe(false);
+        expect(helpers.hasModule('')).toBe(false);
+        expect(helpers.hasModule(undefined)).toBe(false);
+    });
+
+    test('hasModule sees the modules of the Bubble Card Tools cache too', () => {
+        getCachedAggregatedModules.mockReturnValue({ weather_forecast: { name: 'Bubble Weather' } });
+        yamlKeysMap.clear();
+
+        const module = { name: 'Probe', suggestions_code: CAPTURE };
+        getCachedAggregatedModules.mockReturnValue({
+            weather_forecast: { name: 'Bubble Weather' },
+            probe: module,
+        });
+        getEntitySuggestion(registryHass, ENTITY);
+
+        expect(module.captured.hasModule('weather_forecast')).toBe(true);
+    });
+
     test('a room pop-up generated from the area of the picked entity', () => {
         yamlKeysMap.set('bubble_popup_suggestions', {
             name: 'Auto Pop-up',

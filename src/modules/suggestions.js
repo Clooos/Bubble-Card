@@ -172,6 +172,23 @@ function createHelpers(hass) {
     return dot === -1 ? '' : entityId.slice(0, dot);
   };
 
+  // Whether another module is installed, so a hook can offer a variant built on
+  // it and stay silent otherwise.
+  //
+  // Listing a module that is not installed is harmless at render time, the style
+  // processor simply skips an id it has no definition for. What is NOT harmless
+  // is offering the variant: the user picks "with Bubble Weather", gets a card
+  // that looks exactly like the plain one, and has no way to know why. Reads the
+  // same registry the suggestions themselves are read from, so the answer can
+  // never disagree with what will actually be applied.
+  const hasModule = (moduleId) => {
+    if (typeof moduleId !== 'string' || !moduleId) return false;
+    for (const [id] of readModulesSync()) {
+      if (id === moduleId) return true;
+    }
+    return false;
+  };
+
   const friendlyName = (entityId) => {
     const name = hass?.states?.[entityId]?.attributes?.friendly_name;
     if (name !== undefined && name !== null && name !== '') return String(name);
@@ -234,7 +251,7 @@ function createHelpers(hass) {
   // would corrupt the picker for everybody else.
   const nativeSuggestions = (entityId) => deepClone(getNativeEntitySuggestion(hass, entityId) || []);
 
-  return { t, domainOf, friendlyName, areaOf, areaName, areas, areaEntities, nativeSuggestions };
+  return { t, domainOf, friendlyName, hasModule, areaOf, areaName, areas, areaEntities, nativeSuggestions };
 }
 
 function compileCodeHook(source) {
