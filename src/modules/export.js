@@ -3,18 +3,37 @@ import { fireToast } from './cache.js';
 import { getAvailableCardTypes } from './module-editor.js';
 import setupTranslation from '../tools/localize.js';
 
+// Fields that exist only in memory and must never be written back to the module
+// file. `id` becomes the root key of the YAML document, `yaml` and `editor_raw`
+// are the transient copies the editor carries around (normalizeModuleFromParsed
+// in bct-provider.js strips exactly those on the way in), `editorReference` is
+// added by editModule, and `type` and `imageUrl` are seeded by
+// extractModuleMetadata for the store UI. None of them ever appear in a file.
+const INTERNAL_KEYS = new Set(['id', 'yaml', 'editor_raw', 'editorReference', 'type', 'imageUrl']);
+
+// Keys the function below resolves itself. They are listed here so the
+// carry-over pass cannot undo a deliberate decision, such as dropping
+// `supported` when it covers every card type or omitting a false `is_global`.
+const HANDLED_KEYS = new Set([
+  'id', 'name', 'version', 'creator', 'link',
+  'supported', 'description', 'code', 'editor', 'is_global'
+]);
+
 function getCleanExportData(moduleData) {
-  // Destructure to extract only the desired properties.
-  // This ensures that any extra properties on moduleData are ignored.
-  const { 
-    id, 
-    name, 
-    version, 
-    creator, 
+  // The keys below are emitted first, in this order, so a module file always
+  // reads the same way. Everything else the module declares is preserved
+  // afterwards rather than dropped: an allowlist silently deleted `suggestions`
+  // (and `unsupported`, and `extra_module_url`) the first time a user opened an
+  // affected module and pressed save.
+  const {
+    id,
+    name,
+    version,
+    creator,
     link,
     supported,
-    description, 
-    code, 
+    description,
+    code,
     editor,
     is_global
   } = { ...moduleData };
@@ -46,13 +65,26 @@ function getCleanExportData(moduleData) {
   if (is_global === true) {
     cleanData.is_global = true;
   }
-  
+
   // Remove any properties that are undefined, null, or an empty link.
   Object.keys(cleanData).forEach(key => {
     const value = cleanData[key];
     if (value === undefined || value === null || (key === 'link' && value === '')) {
       delete cleanData[key];
     }
+  });
+
+  // Carry over every remaining declaration, so a key this function does not
+  // know about survives a round-trip through the editor instead of being lost.
+  // An empty value is not a declaration: extractModuleMetadata seeds a module
+  // with `author: ''` and `unsupported: []` whether or not the file said so, and
+  // that seeded object is what the editor hands back here after a save.
+  Object.keys(moduleData || {}).forEach(key => {
+    if (HANDLED_KEYS.has(key) || INTERNAL_KEYS.has(key)) return;
+    const value = moduleData[key];
+    if (value === undefined || value === null || value === '') return;
+    if (Array.isArray(value) && value.length === 0) return;
+    cleanData[key] = value;
   });
 
   return { id, cleanData };
