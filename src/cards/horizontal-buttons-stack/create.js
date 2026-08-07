@@ -85,8 +85,14 @@ export function createButton(context, index) {
     }
 
     window.addEventListener('location-changed', handleUrlChange);
-    
+
+    // createButton owns both sides of adding a button: the entry in
+    // context.elements.buttons that placeButtons walks, and the node in the
+    // card container. Callers only call it, so the list and the DOM can never
+    // disagree. A caller that registered or appended on its own used to leave
+    // the button listed twice and missing from the container.
     context.elements.buttons.push(button);
+    context.elements.cardContainer.appendChild(button);
 
     return button;
 }
@@ -98,7 +104,7 @@ export function createStructure(context) {
 
     let index = 1;
     while (context.config[index + '_link']) {
-        context.elements.cardContainer.appendChild(createButton(context, index))
+        createButton(context, index);
         index++;
     }
 

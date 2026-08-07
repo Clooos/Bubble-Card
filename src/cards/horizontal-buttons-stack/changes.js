@@ -123,13 +123,15 @@ export function changeConfig(context) {
         }
     });
 
-    // Create a new button if necessary
-    let index = context.elements.buttons.length + 1;
+    // Create a new button if necessary. Walk every configured index instead of
+    // starting past the end of the list: sortButtons reorders that list and the
+    // removal above shrinks it, so its length tells us nothing about which
+    // index is missing. createButton registers and appends the button itself.
+    let index = 1;
     while (context.config[`${index}_link`] !== undefined) {
         const existingButton = context.elements.buttons.find(button => button.index === index);
         if (!existingButton) {
-            const newButton = createButton(context, index);
-            context.elements.buttons.push(newButton);
+            createButton(context, index);
         }
         index++;
     }

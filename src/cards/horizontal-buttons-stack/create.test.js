@@ -76,6 +76,7 @@ function buildContext(link) {
         },
         elements: {
             buttons: [],
+            cardContainer: createMockElement('div'),
         },
     };
 }
