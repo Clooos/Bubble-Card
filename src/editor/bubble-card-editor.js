@@ -23,6 +23,7 @@ import { makeSubButtonPanel } from '../components/sub-button/editor/index.js';
 import { revealConditionalSubButtons } from '../components/sub-button/utils.js';
 import { makeModulesEditor } from '../modules/editor.js';
 import { makeModuleStore, _fetchModuleStore } from '../modules/store.js';
+import { dropSuggestionsPreviewIfStale, releaseSuggestionsPreview } from '../modules/module-editor.js';
 import { yamlKeysMap } from '../modules/registry.js';
 import setupTranslation, { ensureEditorTranslations, isEditorEnglishForced, setEditorEnglishForced, getCurrentLocale } from '../tools/localize.js';
 import styles from './styles.css';
@@ -76,6 +77,14 @@ class BubbleCardEditor extends LitElement {
         const previewStillConnected = !!prevHost?.isConnected;
 
         this._config = { ...config };
+        // A card type change swaps the whole form out, and the card types that
+        // offer no module editor at all would leave the suggestions preview
+        // holding Home Assistant's preview column with nothing on screen to
+        // give it back.
+        if (this._lastCardType !== undefined && this._lastCardType !== config?.card_type) {
+            releaseSuggestionsPreview(this);
+        }
+        this._lastCardType = config?.card_type;
         this._disallowStandalonePopup = this._isStandalonePopupDisallowedInCurrentDialog();
         // Show or hide the tab bar in hui-card-element-editor depending on card type.
         // Must run after Lit's update cycle so the injected style isn't wiped by the first render.
@@ -326,7 +335,12 @@ class BubbleCardEditor extends LitElement {
         super.updated(changedProperties);
         // Note: _renderHass cache invalidation moved to the hass setter (throttled callback)
         // since _renderHass is no longer a reactive property.
-    
+
+        // The module editor's suggestions preview re-asserts itself from its own
+        // render pass, so an update that did not is an update where its panel is
+        // no longer on screen and Home Assistant's preview column is owed back.
+        dropSuggestionsPreviewIfStale(this);
+
         this._setupAutoRowsObserver();
     }
 
@@ -368,6 +382,9 @@ class BubbleCardEditor extends LitElement {
         try { if (this._editorSchemaDebounce) { clearTimeout(this._editorSchemaDebounce); this._editorSchemaDebounce = null; } } catch (e) {}
         try { if (this._hassThrottleTimer) { clearTimeout(this._hassThrottleTimer); this._hassThrottleTimer = null; } } catch (e) {}
         try { if (this._cardContextListener) { window.removeEventListener('bubble-card-context', this._cardContextListener); this._cardContextListener = null; } } catch (e) {}
+        // Home Assistant reuses its edit dialog, so a preview column left hidden
+        // here would still be hidden the next time a card is edited.
+        try { releaseSuggestionsPreview(this); } catch (e) {}
         try {
             // Drop the standalone dialog openers this instance registered: the
             // closures pin the whole editor (and its preview DOM) forever, and

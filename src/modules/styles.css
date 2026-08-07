@@ -1381,3 +1381,17 @@ ha-formfield.apply-module-button {
 mwc-icon-button ha-icon {
   line-height: 100% !important;
 }
+
+/* Entity suggestions panel. Unlike the panels above it, which each hold a
+   single editor named by their own header, it holds two, so each one carries
+   its own title. */
+.module-editor-form h4.suggestions-field-title {
+  margin: 16px 0 8px !important;
+}
+
+/* The preview itself is drawn in Home Assistant's own preview column, so all
+   this panel holds is what switches it on and what it previews for. */
+.form-preview ha-formfield.suggestions-preview-toggle {
+  display: flex;
+  margin-bottom: 16px;
+}

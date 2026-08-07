@@ -6,6 +6,10 @@ jest.unstable_mockModule('lit', () => ({
     LitElement: class {
         connectedCallback() {}
         disconnectedCallback() {}
+        updated() {}
+        // Not a Lit method, but the editor reaches for it in setConfig and the
+        // mock is not an HTMLElement.
+        getRootNode() { return null; }
     },
     html: () => '',
     css: () => '',
@@ -29,6 +33,12 @@ jest.unstable_mockModule('../components/sub-button/editor/index.js', () => ({ ma
 jest.unstable_mockModule('../components/sub-button/utils.js', () => ({ revealConditionalSubButtons: jest.fn(() => () => {}) }));
 jest.unstable_mockModule('../modules/editor.js', () => ({ makeModulesEditor: jest.fn() }));
 jest.unstable_mockModule('../modules/store.js', () => ({ makeModuleStore: jest.fn(), _fetchModuleStore: jest.fn() }));
+const dropSuggestionsPreviewIfStale = jest.fn();
+const releaseSuggestionsPreview = jest.fn();
+jest.unstable_mockModule('../modules/module-editor.js', () => ({
+    dropSuggestionsPreviewIfStale,
+    releaseSuggestionsPreview,
+}));
 jest.unstable_mockModule('../modules/registry.js', () => ({ yamlKeysMap: new Map() }));
 jest.unstable_mockModule('../tools/localize.js', () => ({
     default: jest.fn(() => (key) => key),
@@ -131,5 +141,40 @@ describe('BubbleCardEditor lifecycle contract', () => {
         expect(window.__bubbleStandalonePopupEditorOpeners.has('#mine')).toBe(false);
         expect(window.__bubbleStandalonePopupEditorOpeners.get('#other')).toBe(foreignOpener);
         expect(window.__bubbleStandalonePopupEditorOpeners.get('#stolen')).toBe(newerOpener);
+    });
+
+    // Home Assistant reuses its edit dialog, and the module editor's
+    // suggestions preview hides that dialog's preview column while it is on:
+    // a path out of the editor that forgets to hand it back leaves the column
+    // hidden for the rest of the session.
+    test('hands the suggestions preview back when the editor is disconnected', () => {
+        const editor = new BubbleCardEditor();
+        editor.connectedCallback();
+
+        editor.disconnectedCallback();
+
+        expect(releaseSuggestionsPreview).toHaveBeenCalledWith(editor);
+    });
+
+    test('hands the suggestions preview back when the card type changes, and only then', () => {
+        const editor = new BubbleCardEditor();
+
+        editor.setConfig({ card_type: 'button' });
+        // Every keystroke re-enters setConfig with the same card type, and the
+        // preview must survive all of them.
+        editor.setConfig({ card_type: 'button', name: 'Lamp' });
+        expect(releaseSuggestionsPreview).not.toHaveBeenCalled();
+
+        editor.setConfig({ card_type: 'separator' });
+        expect(releaseSuggestionsPreview).toHaveBeenCalledWith(editor);
+    });
+
+    test('checks after every update that the panel still claims the preview', () => {
+        const editor = new BubbleCardEditor();
+        editor._setupAutoRowsObserver = jest.fn();
+
+        editor.updated(new Map());
+
+        expect(dropSuggestionsPreviewIfStale).toHaveBeenCalledWith(editor);
     });
 });
