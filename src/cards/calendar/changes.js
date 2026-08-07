@@ -127,7 +127,7 @@ export async function changeEvents(context) {
         eventColor.style.display = 'none';
       }
 
-      if (context.config.show_place === true && event.location !== null) {
+      if (context.config.show_place === true && event.location) {
         const eventPlace = createElement('div', 'bubble-event-place');
         applyScrollingEffect(context, eventPlace, event.location);
         eventNameWrapper.appendChild(eventPlace);
@@ -138,16 +138,20 @@ export async function changeEvents(context) {
       eventLine.appendChild(eventTime);
       eventLine.appendChild(eventNameWrapper);
 
-      addActions(
-        eventLine, 
-        context.config.event_action,
-        event.entity.entity,
-        {
-          tap_action: { action: "none" },
-          double_tap_action: { action: "none" },
-          hold_action: { action: "none" }
-        }
-      );
+      // Only wire up actions for real events; the "No events" placeholder has
+      // no entity, so a configured more-info would fail with "Invalid entity_ids".
+      if (event.entity.entity) {
+        addActions(
+          eventLine,
+          context.config.event_action,
+          event.entity.entity,
+          {
+            tap_action: { action: "none" },
+            double_tap_action: { action: "none" },
+            hold_action: { action: "none" }
+          }
+        );
+      }
 
       const activeColor = 'var(--bubble-event-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))';
 
