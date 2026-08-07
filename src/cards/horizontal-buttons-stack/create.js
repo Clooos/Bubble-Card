@@ -72,20 +72,6 @@ export function createButton(context, index) {
     button.haRipple = createElement('ha-ripple');
     button.appendChild(button.haRipple);
 
-    function handleUrlChange() {
-        if (!context.config.highlight_current_view) return;
-
-        const currentLink = button.link;
-        const isShown = location.pathname === currentLink || location.hash === currentLink;
-        if (isShown) {
-            button.classList.add("highlight");
-        } else {
-            button.classList.remove("highlight");
-        }
-    }
-
-    window.addEventListener('location-changed', handleUrlChange);
-
     // createButton owns both sides of adding a button: the entry in
     // context.elements.buttons that placeButtons walks, and the node in the
     // card container. Callers only call it, so the list and the DOM can never

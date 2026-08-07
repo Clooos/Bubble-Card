@@ -25,6 +25,7 @@ import { handleSeparator } from './cards/separator/index.js';
 import { handleCover } from './cards/cover/index.js';
 import { handleEmptyColumn } from './cards/empty-column/index.js';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack/index.js';
+import { releaseButtonHighlightListener } from './cards/horizontal-buttons-stack/highlight.js';
 import { handleCalendar } from './cards/calendar/index.js';
 import { handleMediaPlayer } from './cards/media-player/index.js';
 import { handleSelect } from './cards/select/index.js';
@@ -181,6 +182,12 @@ class BubbleCard extends HTMLElement {
         this._moduleChangeHandler = null;
         this._moduleChangeListenerAdded = false;
       }
+    } catch (e) {}
+    try {
+      // The handler closes over this element, so leaving it on window would
+      // pin the element and its last hass. handleHorizontalButtonsStack runs
+      // on every render, so a card moved in the DOM registers again by itself.
+      releaseButtonHighlightListener(this);
     } catch (e) {}
     try {
       // Remove the template-change subscriber from the module-level Set, it
