@@ -24,10 +24,15 @@ jest.unstable_mockModule('./render-template.js', () => ({
     onTemplateChange,
 }));
 
-jest.unstable_mockModule('../modules/registry.js', () => ({
-    // One inert module keeps handleCustomStyles on its synchronous path.
-    yamlKeysMap: new Map([['default', { code: '' }]]),
-}));
+// One inert module keeps handleCustomStyles on its synchronous path, plus the
+// two shapes a module can legitimately have without styling anything.
+const yamlKeysMap = new Map([
+    ['default', { code: '' }],
+    // A suggestions-only module: no `code` key at all.
+    ['suggestions_only', { name: 'Suggestions only', suggestions_code: 'return null;' }],
+    ['empty_code', { name: 'Empty', code: '' }],
+]);
+jest.unstable_mockModule('../modules/registry.js', () => ({ yamlKeysMap }));
 
 jest.unstable_mockModule('../modules/bct-provider.js', () => ({
     isBCTAvailableSync: jest.fn(() => true),
@@ -311,5 +316,66 @@ describe('static style templates', () => {
 
         expect(evalStyles(context, styles, undefined, null, 'on')).toBe('.card { --resolved-state: on; }');
         expect(evalStyles(context, styles, undefined, null, 'off')).toBe('.card { --resolved-state: off; }');
+    });
+});
+
+
+describe('a module that styles nothing', () => {
+    beforeEach(() => {
+        global.window = { addEventListener: jest.fn(), removeEventListener: jest.fn() };
+        global.document = {
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            createElement: jest.fn(() => ({ tagName: 'STYLE', textContent: '', id: '', parentElement: null })),
+        };
+        cleanCSS.mockClear();
+    });
+
+    afterEach(() => {
+        delete global.window;
+        delete global.document;
+    });
+
+    // A module is not required to carry `code`: one that only declares
+    // `suggestions:` or `suggestions_code:` has none. The whole module object
+    // used to be handed to evalStyles as if it were the style string, which
+    // threw "s.includes is not a function" on every render of every card
+    // listing it, and the card lost its custom styles with it.
+    const styleOf = (modules) => {
+        const element = createCardElement();
+        const context = createContext(element);
+        context.config = { ...context.config, modules };
+        handleCustomStyles(context);
+        return context;
+    };
+
+    test('contributes nothing instead of throwing', () => {
+        const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        expect(() => styleOf(['suggestions_only'])).not.toThrow();
+        expect(error).not.toHaveBeenCalled();
+
+        error.mockRestore();
+    });
+
+    test('an empty code is the same non-answer', () => {
+        const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        expect(() => styleOf(['empty_code'])).not.toThrow();
+        expect(error).not.toHaveBeenCalled();
+
+        error.mockRestore();
+    });
+
+    test('does not take the styles of the module next to it down with it', () => {
+        const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+        yamlKeysMap.set('real', { name: 'Real', code: '.bubble-name { color: red; }' });
+
+        const context = styleOf(['suggestions_only', 'real']);
+
+        expect(error).not.toHaveBeenCalled();
+        expect(JSON.stringify(cleanCSS.mock.calls)).toContain('color: red');
+        yamlKeysMap.delete('real');
+        error.mockRestore();
     });
 });

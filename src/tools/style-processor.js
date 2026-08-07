@@ -316,9 +316,16 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
     if (modulesToApply.length > 0) {
       for (const moduleId of modulesToApply) {
         try {
-          let tmpl = (parsedYamlModules instanceof Map ? parsedYamlModules.get(moduleId) : parsedYamlModules[moduleId]) ?? "";
-          if ((typeof tmpl === "object" && tmpl.code === "") || tmpl === "") { stylesParts.push("{}"); continue; }
-          const moduleCode = typeof tmpl === "object" && tmpl.code ? tmpl.code : tmpl;
+          const tmpl = (parsedYamlModules instanceof Map ? parsedYamlModules.get(moduleId) : parsedYamlModules[moduleId]) ?? "";
+          const moduleCode = tmpl && typeof tmpl === "object" ? tmpl.code : tmpl;
+          // A module is not required to style anything: one that only declares
+          // `suggestions:` or `suggestions_code:` has no `code` key at all, and
+          // the previous shape passed the whole module OBJECT down to
+          // evalStyles, which reads it as a string and threw
+          // "s.includes is not a function" on every render of every card
+          // listing it. Anything that is not a non-empty string contributes
+          // nothing, which is also the right answer for a code that is empty.
+          if (typeof moduleCode !== "string" || moduleCode === "") { stylesParts.push("{}"); continue; }
           stylesParts.push(evalStyles(context, moduleCode, { type: 'module', id: moduleId }, cycleSubButtonStates, cycleState));
         } catch (moduleError) {
           console.error(`Bubble Card - Error processing module "${moduleId}" before evaluation:`, moduleError);
