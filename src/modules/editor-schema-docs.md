@@ -60,6 +60,8 @@ This documentation covers all available options for creating editor schemas in B
   - [Grid layout](#grid-layout)
   - [Expandable sections](#expandable-sections)
 - [Entity suggestions](#entity-suggestions)
+  - [Computed suggestions](#computed-suggestions)
+    - [Helpers](#helpers)
 - [Best practices](#best-practices)
 - [Example: Complete module editor schema](#example-complete-module-editor-schema)
 - [References](#references)
@@ -1114,9 +1116,108 @@ Good to know:
   profile only the built-in suggestions show up until then.
 - `supported:` is honored: a clone or a standalone configuration whose `card_type` your
   module does not support is dropped automatically.
-- The whole list (built-in + modules) is deduplicated and capped, so keep your rules
-  focused with `domains` and `condition` instead of suggesting everywhere.
+- The whole list (built-in + modules) is deduplicated, and each module is limited to
+  **24 suggestions per entity**, its declarative rules and its code hook counted together.
+  There is no global cap: every installed module keeps its own share of the picker,
+  instead of the last ones being silently truncated. Keep your rules focused with
+  `domains` and `condition` anyway, nobody scrolls through 24 previews.
 - A rule that throws is ignored and logged once, it never breaks the picker.
+
+### Computed suggestions
+
+A `suggestions:` rule is declarative, so it can only describe a configuration known in
+advance. When the configuration has to be **computed** (a room pop-up built from every
+entity of the area the picked entity belongs to, for instance), declare a
+`suggestions_code:` string instead. Both keys can live on the same module, the
+declarative rules are evaluated first.
+
+```yaml
+bubble_popup_suggestions:
+  name: Bubble Pop-up Suggestions
+  version: "1.0"
+  supported:
+    - pop-up
+  suggestions_code: |-
+    const area = helpers.areaOf(entity);
+    if (!area) return null;
+
+    const ids = helpers.areaEntities(area, { domains: ['light', 'switch', 'cover'] });
+    if (ids.length < 2) return null;
+
+    return {
+      label: helpers.areaName(area),
+      config: {
+        card_type: 'pop-up',
+        hash: '#' + area,
+        name: helpers.areaName(area),
+        icon: 'mdi:sofa-outline',
+        cards: ids.map((id) => ({
+          type: 'custom:bubble-card',
+          card_type: 'button',
+          entity: id,
+          name: helpers.friendlyName(id),
+        })),
+      },
+    };
+```
+
+The string is a **function body**, compiled once with `Function(...)` and cached. It runs
+in the same sandbox as a `condition:` expression: plain function scope, no access to the
+card, no `this`. It must be synchronous, the picker asks synchronously.
+
+| Argument | Description |
+|----------|-------------|
+| `hass` | The live Home Assistant object |
+| `entity` | The picked entity id, a string (`light.salon`) |
+| `stateObj` | `hass.states[entity]`, guaranteed to exist |
+| `helpers` | The helper API described below |
+| `module` | Your own module object, as parsed from its YAML (`name`, `version`, your own keys), plus `module.id`, the id your module is registered under |
+
+Return an **array of `{ label, config }` entries**, a **single entry**, or `null` /
+`undefined` when the module has nothing to offer for that entity. Every entry is then
+normalized:
+
+- The entry is dropped unless `config` is an object carrying a truthy `card_type`.
+- `config.type` is forced to `custom:bubble-card`.
+- `supported:` and `unsupported:` are honored, exactly like a declarative rule.
+- `label` is composed as `<module name> · <label>`, so your entries read as one family in
+  the picker. Without a label, the entry is named after your module alone.
+- **Nothing else is touched.** No `entity` is filled in, no `${entity}` substitution
+  happens, and your module is **not** added to `modules:`. A code hook returns a fully
+  authored configuration: a generated card is standalone and has to keep working after
+  your module is uninstalled, so making its output silently depend on the generator would
+  be wrong. A styling module that does want itself applied simply returns
+  `modules: [module.id]` in the configuration it builds.
+- Only the **top level** of `config` is normalized. Nested `cards:` are authored content
+  and are left byte for byte as you returned them.
+
+#### Helpers
+
+Everything is synchronous, and every helper answers with an empty result instead of
+throwing when `hass.entities`, `hass.devices` or `hass.areas` are not loaded yet, which
+happens for a moment after a hard reload.
+
+| Helper | Returns |
+|--------|---------|
+| `t(key, params)` | Translated string for a Bubble Card translation key, in the user's language. `params` fills the `{placeholders}` of the value, e.g. `t('editor.card_picker.suggestions.controls', { area: 'Kitchen' })`. Unknown keys come back as the key itself |
+| `domainOf(entityId)` | `'light'` for `'light.salon'`, an empty string when there is no domain |
+| `friendlyName(entityId)` | `attributes.friendly_name`, falling back to a readable object id (`light.living_room_lamp` gives `living room lamp`), like Home Assistant does |
+| `areaOf(entityId)` | The area id of an entity, resolved from its registry entry first, then from its device. `null` when it has no area, and also `null` for an area that no longer exists, so a deleted or stale id never leaks into a generated title |
+| `areaName(areaId)` | The display name of an area, falling back to the id |
+| `areas()` | `[{ area_id, name, icon }]` for every area, sorted by name. `icon` is `null` when the area has none |
+| `areaEntities(areaId, options)` | The entity ids assigned to that area, directly or through their device, sorted by friendly name. Entities missing from `hass.states` are skipped. `options.domains` filters by domain (`{ domains: ['light'] }`), `options.includeHidden` (default `false`) keeps registry-hidden entities, `options.includeDiagnostic` (default `false`) keeps the `diagnostic` and `config` entity categories |
+| `nativeSuggestions(entityId)` | The built-in Bubble Card recipes for any entity, as a fresh copy you can freely reshape. Entries are `{ label, config }`, plus an internal `classic: true` marker on the legacy shortcuts (the dedicated card, plain Button and Slider entries) so you can filter them out with `.filter((s) => !s.classic)` |
+
+Good to know:
+
+- Write the value as a YAML **block scalar** (`suggestions_code: |-`). A plain scalar
+  loses everything after an unquoted `#`, and `suggestions_code: {a:1}` parses as a
+  mapping instead of a string.
+- `suggestions_code:` goes next to `name:` in your module, like `suggestions:`.
+- An error at run time **or** at compile time is caught and logged once, then your module
+  is skipped. The picker and the other modules are never affected.
+- Keep it cheap. The hook runs every time a user picks an entity in the card picker, for
+  every installed module.
 
 ## Best practices
 
