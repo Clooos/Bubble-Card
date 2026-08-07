@@ -117,9 +117,16 @@ export function changeConfig(context) {
         if (link === undefined) {
             button.remove();
             context.elements.buttons = context.elements.buttons.filter((btn) => btn !== button);
-            context.elements.buttons.forEach((btn, idx) => {
-                btn.index = idx + 1;
-            });
+            // Renumber by config slot, never by position in the list. index is
+            // the slot a button reads its name, icon and link from, while the
+            // list order is only what the row shows, and auto_order sorts that
+            // order by PIR activity. Numbering by position handed the buttons
+            // each other's config as soon as the two diverged.
+            [...context.elements.buttons]
+                .sort((a, b) => a.index - b.index)
+                .forEach((btn, idx) => {
+                    btn.index = idx + 1;
+                });
         }
     });
 

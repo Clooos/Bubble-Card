@@ -83,7 +83,7 @@ jest.unstable_mockModule('../../tools/style-processor.js', () => ({
 }));
 
 const { createStructure } = await import('./create.js');
-const { changeConfig, placeButtons } = await import('./changes.js');
+const { changeConfig, placeButtons, sortButtons } = await import('./changes.js');
 
 // Widths the buttons report once they are laid out, in creation order.
 const BUTTON_WIDTHS = [100, 80, 60, 40];
@@ -208,5 +208,135 @@ describe('changeConfig adding a button to a live stack', () => {
             '#bedroom',
         ]);
         expect(context.elements.cardContainer.children).toContain(context.elements.buttons[1]);
+    });
+});
+
+const BUTTON_FIELDS = ['_name', '_icon', '_link', '_entity', '_pir_sensor'];
+
+// Mirrors removeButton in editor.js: deleting a button shifts every following
+// button down a slot, so the configured slots stay contiguous.
+function removeButtonFromConfig(config, index, lastIndex) {
+    for (let i = index; i < lastIndex; i++) {
+        BUTTON_FIELDS.forEach((field) => {
+            config[i + field] = config[(i + 1) + field];
+        });
+    }
+    BUTTON_FIELDS.forEach((field) => {
+        delete config[lastIndex + field];
+    });
+}
+
+describe('changeConfig removing a button while auto_order sorts the row', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        const values = new Map();
+        global.localStorage = {
+            getItem: (key) => (values.has(key) ? values.get(key) : null),
+            setItem: (key, value) => { values.set(key, value); },
+        };
+        global.location = { hash: '', pathname: '/dashboard' };
+        global.window = { addEventListener: jest.fn(), location: global.location };
+    });
+
+    // Three rooms, and PIR activity that puts the row in an order the config
+    // does not have: living room, then office, then kitchen.
+    function buildSortedContext() {
+        const context = {
+            config: {
+                rise_animation: false,
+                auto_order: true,
+                '1_name': 'Kitchen',
+                '1_icon': 'mdi:silverware-fork-knife',
+                '1_link': '#kitchen',
+                '1_pir_sensor': 'binary_sensor.kitchen',
+                '2_name': 'Living room',
+                '2_icon': 'mdi:sofa',
+                '2_link': '#living-room',
+                '2_pir_sensor': 'binary_sensor.living_room',
+                '3_name': 'Office',
+                '3_icon': 'mdi:desk',
+                '3_link': '#office',
+                '3_pir_sensor': 'binary_sensor.office',
+            },
+            _hass: {
+                states: {
+                    'binary_sensor.kitchen': { state: 'off', last_updated: '2026-08-07T12:00:01Z' },
+                    'binary_sensor.living_room': { state: 'off', last_updated: '2026-08-07T12:00:03Z' },
+                    'binary_sensor.office': { state: 'off', last_updated: '2026-08-07T12:00:02Z' },
+                },
+            },
+            card: {
+                classList: createMockClassList(),
+                style: createMockStyle(),
+                parentNode: { host: null },
+            },
+            content: createMockElement('div', 'card-content'),
+        };
+        createStructure(context);
+        sortButtons(context);
+        return context;
+    }
+
+    function slot(context, index) {
+        return context.elements.buttons.find((button) => button.index === index);
+    }
+
+    test('leaves every remaining button on its own config slot', () => {
+        const context = buildSortedContext();
+        // The list is in PIR order now, so position no longer tells the slot.
+        expect(context.elements.buttons.map((button) => button.index)).toEqual([2, 3, 1]);
+
+        // The user deletes the living room button in the editor.
+        removeButtonFromConfig(context.config, 2, 3);
+        changeConfig(context);
+
+        expect(context.elements.buttons).toHaveLength(2);
+        expect(slot(context, 1).link).toBe('#kitchen');
+        expect(slot(context, 1).name.innerText).toBe('Kitchen');
+        expect(slot(context, 2).link).toBe('#office');
+        expect(slot(context, 2).name.innerText).toBe('Office');
+    });
+
+    test('never gives two buttons the same config slot', () => {
+        const context = buildSortedContext();
+
+        removeButtonFromConfig(context.config, 2, 3);
+        changeConfig(context);
+
+        // Numbering by list position used to hand the kitchen button the slot
+        // the office button already had, so the row showed the office twice.
+        const links = context.elements.buttons.map((button) => button.link);
+        expect(new Set(links).size).toBe(links.length);
+        expect(links).toContain('#kitchen');
+        expect(links).toContain('#office');
+    });
+
+    test('keeps the order auto_order settled on', () => {
+        const context = buildSortedContext();
+
+        removeButtonFromConfig(context.config, 2, 3);
+        changeConfig(context);
+
+        // Renumbering must not reshuffle the row back into config order.
+        expect(context.elements.buttons.map((button) => button.link)).toEqual([
+            '#office',
+            '#kitchen',
+        ]);
+    });
+
+    test('still renumbers so the next added button gets a free slot', () => {
+        const context = buildSortedContext();
+        removeButtonFromConfig(context.config, 2, 3);
+        changeConfig(context);
+
+        context.config['3_name'] = 'Garage';
+        context.config['3_icon'] = 'mdi:garage';
+        context.config['3_link'] = '#garage';
+        changeConfig(context);
+
+        expect(context.elements.buttons).toHaveLength(3);
+        expect(slot(context, 3).link).toBe('#garage');
+        expect(slot(context, 1).link).toBe('#kitchen');
+        expect(slot(context, 2).link).toBe('#office');
     });
 });
