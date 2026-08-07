@@ -6,9 +6,17 @@ import { restorePopupHostLayout, suspendPopupHostLayout } from './helpers.js';
 import { isLegacyPopUpConfig } from './migration.js';
 import { appendLegacyPopup, hideLegacyPopupContent } from './legacy.js';
 import { createElement, toggleBodyScroll } from '../../tools/utils.js';
+import { isSuggestionPickerPreview } from '../../tools/lazy-preview.js';
 
 function isCardBeingEdited(context) {
     if (!context.editor && !context.detectedEditor) return false;
+
+    // The suggestion picker is a preview too, and the one that most needs the
+    // real content: it is where a user decides whether to add the pop-up at all.
+    // Home Assistant even truncates a preview's `cards` to six and offers a
+    // "+ N more" badge for the rest, which only makes sense if they render.
+    // Its wrapper is hui-suggestion-card, none of the tags below.
+    if (isSuggestionPickerPreview(context)) return true;
 
     const previewTags = ['hui-card-preview', 'hui-section-preview', 'element-preview'];
 

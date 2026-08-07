@@ -9,6 +9,8 @@ import { invalidateStyleCache, stopTimerInterval } from './tools/utils.js';
 import { cleanupScrollingEffects, resumeScrollingEffects } from './tools/text-scrolling.js';
 import { cancelSubButtonOutlines } from './components/sub-button/outline.js';
 import { cancelDeferredCardUpdate, deferCardUpdate } from './tools/deferred-card-updates.js';
+import { awaitsPreviewHydration, notePreviewHeight, observePreviewHydration, setPreviewMode, unobservePreviewHydration } from './tools/lazy-preview.js';
+import { updatePreviewBadge } from './tools/preview-badge.js';
 import { getEntitySuggestion } from './modules/suggestions.js';
 import { registerPopupContext, shouldHoldDashboardHassUpdate } from './cards/pop-up/helpers.js';
 import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
@@ -77,15 +79,21 @@ const hassRenderWindowMs = 50;
 class BubbleCard extends HTMLElement {
   editor = false;
   isConnected = false;
+  // Home Assistant hands `hass` to an element it has not attached yet, so a
+  // pop-up — the one card type that keeps rendering while detached — would
+  // otherwise run its handler before anything knows where it is going to land.
+  _everConnected = false;
   _editorUpdateTimeout = null;
   _detectedEditorMemo = undefined;
   _hassRenderTimer = null;
   // -Infinity, not 0: a card that has never rendered must render at once, and 0
   // is a real reading of the monotonic clock early in a page load.
   _lastRenderAt = -Infinity;
+  _preview = false;
 
   connectedCallback() {
     this.isConnected = true;
+    this._everConnected = true;
     connectedCards.add(this);
     // Editor detection depends on the ancestor chain, which only changes
     // through a DOM move: both lifecycle callbacks reset the memo.
@@ -94,14 +102,24 @@ class BubbleCard extends HTMLElement {
     preloadYAMLStyles(this);
     createBubbleDefaultColor();
 
+    // Only now is it knowable whether this preview may wait for its first
+    // intersection: `preview` is assigned before the element is attached, and
+    // the answer is in the ancestors. Resolved before anything below claims a
+    // shared resource, because a held preview must claim none of them.
+    observePreviewHydration(this);
+    const held = awaitsPreviewHydration(this);
+
     // Re-register immediately on reconnect so the centralized URL dispatcher
     // always has a fresh reference, without waiting for the next set hass call.
-    if (this.config?.card_type === 'pop-up' && this.config?.hash) {
+    // A picker preview never registers: its hash is whatever the suggestion
+    // proposes, and claiming it would take the dispatcher away from the real
+    // pop-up card of the dashboard being edited, then delete it on close.
+    if (!held && this.config?.card_type === 'pop-up' && this.config?.hash) {
       registerPopupContext(this);
     }
 
     // Notify the user if this pop-up has not been migrated to standalone mode yet.
-    if (this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {
+    if (!held && this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {
       maybeShowMigrationNotice(this._hass);
     }
 
@@ -176,6 +194,11 @@ class BubbleCard extends HTMLElement {
     try {
       unregisterForIconRefresh(this);
     } catch (e) {}
+    try {
+      // The gate survives the disconnect on purpose: a card moved in the DOM is
+      // observed again by the connectedCallback that follows the move.
+      unobservePreviewHydration(this);
+    } catch (e) {}
     clearTimeout(this._editorUpdateTimeout);
     if (this._hassRenderTimer !== null) {
       clearTimeout(this._hassRenderTimer);
@@ -244,6 +267,22 @@ class BubbleCard extends HTMLElement {
     }
   }
 
+  // Home Assistant assigns `preview` on the elements it builds for the picker and
+  // the card editor before it attaches them, then assigns `editMode = preview`
+  // right after for backwards compatibility. Both setters end up calling
+  // updateBubbleCard, and both are answered by the single gate inside it, so the
+  // pair cannot double-render or fight over the flag.
+  set preview(preview) {
+    const value = Boolean(preview);
+    if (this._preview === value) return;
+    this._preview = value;
+    setPreviewMode(this, value);
+  }
+
+  get preview() {
+    return this._preview;
+  }
+
   set editMode(editMode) {
     if (this.editor === editMode) return;
     this.editor = editMode;
@@ -263,6 +302,12 @@ class BubbleCard extends HTMLElement {
       createBubbleDefaultColor();
     }
     this._hass = hass;
+
+    // An off-screen preview keeps the newest hass and pays nothing else. The
+    // picker holds every preview it built live and hands each of them a
+    // brand-new hass on every state change in the installation; hydration reads
+    // `_hass` above, so waiting here can never render a stale state.
+    if (awaitsPreviewHydration(this)) return;
 
     // While a pop-up open is in flight behind a covering backdrop, dashboard
     // cards hold their update (the fresh hass is already stored above) and
@@ -297,8 +342,16 @@ class BubbleCard extends HTMLElement {
   }
 
   updateBubbleCard() {
-    if (!this.isConnected && this.config.card_type !== 'pop-up') return;
-    // Kept below the guard above: a call that renders nothing must not start the
+    // The single answer to every entry point a preview has: hass, editMode, the
+    // icon refresh and the connection itself all end up here.
+    if (awaitsPreviewHydration(this)) return;
+    // A pop-up keeps rendering while detached — that is how a closed legacy
+    // pop-up stays reachable by hash and by trigger, its shell being parked out
+    // of the stack it lives in — but only once it has been connected at least
+    // once. Before that it has nothing to render into, and Home Assistant hands
+    // `hass` to a card element well before it puts it in the DOM.
+    if (!this.isConnected && (this.config.card_type !== 'pop-up' || !this._everConnected)) return;
+    // Kept below the guards above: a call that renders nothing must not start the
     // coalescing window, or the first real render would be made to wait.
     this._lastRenderAt = monotonicNow();
     const type = this.config.card_type;
@@ -310,6 +363,14 @@ class BubbleCard extends HTMLElement {
       }
     }
     try { this._notifyEditorContext(); } catch (e) {}
+    // A preview that drew tells the gate what its card type really measures, so
+    // the previews still waiting below the fold reserve the right box, and
+    // states the hash it answers to or navigates to, which is what makes a
+    // pop-up and its trigger button read as a pair in the picker.
+    if (this._preview) {
+      notePreviewHeight(this);
+      updatePreviewBadge(this);
+    }
   }
 
   setConfig(config) {

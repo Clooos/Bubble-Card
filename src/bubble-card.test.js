@@ -142,6 +142,101 @@ describe('BubbleCard disconnect contract', () => {
     });
 });
 
+// Same instance the element module got, so the pop-up gating below can be
+// asserted without touching the mock registrations above.
+const { handlePopUp } = await import('./cards/pop-up/index.js');
+const { registerPopupContext, shouldHoldDashboardHassUpdate } = await import('./cards/pop-up/helpers.js');
+
+describe('BubbleCard pre-connection rendering', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    // Home Assistant configures a card element and hands it `hass` well before
+    // it puts it in the DOM. A pop-up is the one card type that keeps rendering
+    // while detached, so it is the one that would render into nothing here.
+    test('a pop-up that has never been connected renders nothing', () => {
+        const card = createCard({ card_type: 'pop-up' });
+
+        card.hass = { states: {} };
+
+        expect(handlePopUp).not.toHaveBeenCalled();
+    });
+
+    test('a closed standalone pop-up still renders while detached', () => {
+        const card = createCard({ card_type: 'pop-up' });
+        card.connectedCallback();
+        card.disconnectedCallback();
+
+        card.hass = { states: {} };
+
+        expect(handlePopUp).toHaveBeenCalledTimes(1);
+    });
+
+    test('a real pop-up card claims its hash in the URL dispatcher', () => {
+        const card = createCard({ card_type: 'pop-up', hash: '#kitchen' });
+
+        card.connectedCallback();
+
+        expect(registerPopupContext).toHaveBeenCalledWith(card);
+    });
+});
+
+describe('BubbleCard held previews claim no shared resource', () => {
+    // A held preview is a card the picker built and may throw away without ever
+    // showing it. Anything global it registers itself with outlives it.
+    let observed;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        observed = [];
+        globalThis.IntersectionObserver = class {
+            constructor(callback, options) { this.callback = callback; this.options = options; observed.push(this); }
+            observe(target) { this.target = target; }
+            unobserve() {}
+            disconnect() {}
+        };
+        globalThis.getComputedStyle = () => ({ overflowY: 'visible' });
+    });
+
+    function pickerPreview(config) {
+        const card = createCard(config);
+        card.style = { setProperty() {}, removeProperty() {} };
+        card.getBoundingClientRect = () => ({ height: 0 });
+        card.parentNode = { tagName: 'HUI-CARD', parentNode: { tagName: 'HUI-SUGGESTION-CARD', parentNode: null } };
+        card.preview = true;
+        return card;
+    }
+
+    // The hash of a suggested pop-up is whatever the suggestion proposes, and a
+    // room pop-up is named after its area. Registering it would take the URL
+    // dispatcher away from the dashboard card that really owns that hash, then
+    // delete the entry outright when the picker closes.
+    test('a suggested pop-up never claims its hash', () => {
+        const card = pickerPreview({ card_type: 'pop-up', hash: '#kitchen' });
+
+        card.connectedCallback();
+
+        expect(registerPopupContext).not.toHaveBeenCalled();
+        expect(handlePopUp).not.toHaveBeenCalled();
+
+        observed[0].callback([{ target: card, isIntersecting: true }]);
+        expect(handlePopUp).toHaveBeenCalledTimes(1);
+    });
+
+    // shouldHoldDashboardHassUpdate adds the element to a module-level Set that
+    // holds a strong reference until the next drain.
+    test('a held preview is never handed to the pop-up open gate', () => {
+        const card = pickerPreview({ card_type: 'button' });
+        card.connectedCallback();
+
+        card.hass = { states: {} };
+
+        expect(shouldHoldDashboardHassUpdate).not.toHaveBeenCalled();
+        expect(handleButton).not.toHaveBeenCalled();
+    });
+});
+
 describe('BubbleCard hass render coalescing', () => {
     beforeEach(() => {
         jest.clearAllMocks();
