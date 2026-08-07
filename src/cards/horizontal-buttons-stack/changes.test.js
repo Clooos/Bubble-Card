@@ -340,3 +340,142 @@ describe('changeConfig removing a button while auto_order sorts the row', () => 
         expect(slot(context, 2).link).toBe('#office');
     });
 });
+
+// A stable merge sort, which is not the algorithm V8 runs. A comparator that
+// holds up gives the same row through either one.
+function mergeSort(items, comparator) {
+    if (items.length < 2) return items;
+
+    const middle = Math.floor(items.length / 2);
+    const left = mergeSort(items.slice(0, middle), comparator);
+    const right = mergeSort(items.slice(middle), comparator);
+    const merged = [];
+
+    while (left.length > 0 && right.length > 0) {
+        merged.push(comparator(left[0], right[0]) <= 0 ? left.shift() : right.shift());
+    }
+
+    return [...merged, ...left, ...right];
+}
+
+describe('sortButtons ordering the row by PIR activity', () => {
+    // The row from #1431: six buttons watching a room, seven without a sensor.
+    const WATCHED = ['bedroom', 'bathroom', 'kitchen', 'living_room', 'porch', 'servers'];
+    const PLAIN = ['vehicles', 'vacuum', 'music', 'vector', 'camera', 'plants', 'automation'];
+
+    function buildRow(entries, states) {
+        return {
+            config: { auto_order: true },
+            _hass: { states },
+            elements: {
+                buttons: entries.map(([link, pirSensor]) => ({ link, pirSensor })),
+            },
+        };
+    }
+
+    function buildReportedRow() {
+        const states = {};
+        WATCHED.forEach((room, i) => {
+            states[`binary_sensor.${room}`] = {
+                state: 'off',
+                last_updated: `2026-08-07T12:00:${String(10 + i).padStart(2, '0')}Z`,
+            };
+        });
+        const entries = [
+            ...WATCHED.map((room) => [room, `binary_sensor.${room}`]),
+            ...PLAIN.map((name) => [name, undefined]),
+        ];
+        return buildRow(entries, states);
+    }
+
+    // sortButtons sorts the list in place, so shadowing sort on it hands us the
+    // comparator. The resulting order alone hides the defect, because V8 does
+    // not run the algorithm Firefox runs.
+    function captureComparator(context) {
+        let comparator = null;
+        const buttons = context.elements.buttons;
+        buttons.sort = function (fn) {
+            comparator = fn;
+            return Array.prototype.sort.call(this, fn);
+        };
+        sortButtons(context);
+        delete buttons.sort;
+        return comparator;
+    }
+
+    const links = (context) => context.elements.buttons.map((button) => button.link);
+
+    test('never claims that each of two buttons comes after the other', () => {
+        const context = buildReportedRow();
+        const comparator = captureComparator(context);
+        const buttons = context.elements.buttons;
+
+        // Answering 1 to both a,b and b,a is what left the order up to the
+        // engine. Every pair has to agree with itself, reversed.
+        for (const a of buttons) {
+            for (const b of buttons) {
+                const forward = Math.sign(comparator(a, b));
+                const backward = Math.sign(comparator(b, a));
+                expect(forward + backward).toBe(0);
+            }
+        }
+    });
+
+    test('settles on the same row whatever algorithm the browser sorts with', () => {
+        const context = buildReportedRow();
+        const comparator = captureComparator(context);
+
+        const otherEngine = mergeSort(buildReportedRow().elements.buttons, comparator)
+            .map((button) => button.link);
+
+        expect(otherEngine).toEqual(links(context));
+    });
+
+    test('leaves the buttons without a sensor in their configured order', () => {
+        const context = buildReportedRow();
+
+        sortButtons(context);
+
+        expect(links(context).slice(-PLAIN.length)).toEqual(PLAIN);
+    });
+
+    test('does not reshuffle the row on the next state update', () => {
+        const context = buildReportedRow();
+        sortButtons(context);
+        const settled = links(context);
+
+        sortButtons(context);
+        sortButtons(context);
+
+        expect(links(context)).toEqual(settled);
+    });
+
+    test('puts an active sensor first, then the most recently updated', () => {
+        const context = buildRow(
+            [
+                ['plain', undefined],
+                ['kitchen', 'binary_sensor.kitchen'],
+                ['porch', 'binary_sensor.porch'],
+                ['hall', 'binary_sensor.hall'],
+            ],
+            {
+                'binary_sensor.kitchen': { state: 'off', last_updated: '2026-08-07T12:00:30Z' },
+                'binary_sensor.porch': { state: 'on', last_updated: '2026-08-07T12:00:10Z' },
+                'binary_sensor.hall': { state: 'off', last_updated: '2026-08-07T12:00:20Z' },
+            },
+        );
+
+        sortButtons(context);
+
+        expect(links(context)).toEqual(['porch', 'kitchen', 'hall', 'plain']);
+    });
+
+    test('leaves the row alone when auto_order is off', () => {
+        const context = buildReportedRow();
+        context.config.auto_order = false;
+
+        sortButtons(context);
+
+        expect(links(context)).toEqual([...WATCHED, ...PLAIN]);
+    });
+});

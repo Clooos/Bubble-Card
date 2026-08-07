@@ -12,23 +12,30 @@ export function sortButtons(context) {
     const states = context._hass.states;
 
     context.elements.buttons.sort((a, b) => {
-        if (!states[a.pirSensor]) return 1;
-        if (!states[b.pirSensor]) return -1;
+        const aState = states[a.pirSensor];
+        const bState = states[b.pirSensor];
 
-        const aTime = states[a.pirSensor]?.last_updated;
-        const bTime = states[b.pirSensor]?.last_updated;
+        // Two buttons with no sensor to order by are equal, so they keep the
+        // order they are configured in, at the end of the row. Answering 1 for
+        // both of them said that each one comes after the other, and a
+        // comparator that contradicts itself leaves the result up to the sort
+        // algorithm. Firefox does not sort with the same one as Chrome, and
+        // since this runs on every state update, the row kept reshuffling on
+        // Firefox alone (#1431).
+        if (!aState && !bState) return 0;
 
-        if (states[a.pirSensor]?.state === "on" && states[b.pirSensor]?.state === "on") {
-            return aTime > bTime ? -1 : aTime === bTime ? 0 : 1;
-        }
+        // A button with no sensor goes after one that has a reading
+        if (!aState) return 1;
+        if (!bState) return -1;
 
-        // If only a.pirSensor is "on", place a before b
-        if (states[a.pirSensor]?.state === "on") return -1;
+        // If only one PIR sensor is "on", it comes first
+        if (aState.state === "on" && bState.state !== "on") return -1;
+        if (bState.state === "on" && aState.state !== "on") return 1;
 
-        // If only b.pirSensor is "on", place b before a
-        if (states[b.pirSensor]?.state === "on") return 1;
-
-        // If neither PIR sensor is "on", arrangement based only on the state of last updated even if off
+        // Otherwise the most recently updated comes first, on or off alike.
+        // Missing timestamps compare equal so they cannot contradict either.
+        const aTime = aState.last_updated ?? '';
+        const bTime = bState.last_updated ?? '';
         return aTime > bTime ? -1 : aTime === bTime ? 0 : 1;
     });
 }
