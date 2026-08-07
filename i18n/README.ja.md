@@ -18,7 +18,7 @@ Bubble Card は、Home Assistant 向けのミニマルでカスタマイズ可�
 
 ## 目次
 
-**[`インストール`](#インストール)**  **[`設定`](#設定)**  **[`ポップアップ`](#ポップアップ)**  **[`水平ボタンスタック`](#水平ボタンスタック)**  **[`ボタン`](#ボタン)**  **[`メディアプレーヤー`](#メディアプレーヤー)**  **[`カバー`](#カバー)**  **[`セレクト`](#セレクト)**  **[`空調`](#空調)**  **[`カレンダー`](#カレンダー)**  **[`セパレーター`](#セパレーター)**  **[`空の列`](#空の列)**  **[`サブボタンのみ`](#サブボタンのみ)**  **[`サブボタン`](#サブボタン)**  **[`カードレイアウト`](#カードレイアウト)**  **[`アクション`](#タップダブルタップ長押しのアクション)**  **[`スタイル`](#スタイル)**  **[`テンプレート`](#テンプレート)**  **[`モジュール`](#モジュール)**  **[`ヘルプ`](#ヘルプ)**  **[`貢献`](#貢献)**  **[`寄付`](#寄付)**
+**[`インストール`](#インストール)**  **[`設定`](#設定)**  **[`エンティティの提案`](#エンティティの提案)**  **[`ポップアップ`](#ポップアップ)**  **[`水平ボタンスタック`](#水平ボタンスタック)**  **[`ボタン`](#ボタン)**  **[`メディアプレーヤー`](#メディアプレーヤー)**  **[`カバー`](#カバー)**  **[`セレクト`](#セレクト)**  **[`空調`](#空調)**  **[`カレンダー`](#カレンダー)**  **[`セパレーター`](#セパレーター)**  **[`空の列`](#空の列)**  **[`サブボタンのみ`](#サブボタンのみ)**  **[`サブボタン`](#サブボタン)**  **[`カードレイアウト`](#カードレイアウト)**  **[`条件`](#条件)**  **[`アクション`](#タップダブルタップ長押しのアクション)**  **[`スタイル`](#スタイル)**  **[`テンプレート`](#テンプレート)**  **[`モジュール`](#モジュール)**  **[`ローカライズ`](#ローカライズ)**  **[`ヘルプ`](#ヘルプ)**  **[`貢献`](#貢献)**  **[`寄付`](#寄付)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card は、Home Assistant 向けのミニマルでカスタマイズ可�
 
 <br>
 
-1. このファイルをダウンロードします: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. このファイルを `<config>/www` フォルダーに追加します
+1. [最新リリース](https://github.com/Clooos/Bubble-Card/releases/latest)から `bubble-card.zip` をダウンロードします
+2. それを `<config>/www` フォルダーに展開します。`bubble-card.js` と、その隣に `translations` フォルダーができるはずです (このフォルダーにはエディターの辞書が入っており、これがないとエディターは英語のままになります)
 3. ダッシュボードの右上のアイコンをクリックし、`Edit dashboard` をクリックします
 4. もう一度そのアイコンをクリックし、`Manage resources` をクリックします
 5. `Add resource` をクリックします
@@ -130,6 +130,21 @@ Bubble Card は、Home Assistant 向けのミニマルでカスタマイズ可�
 
 <br>
 
+## エンティティの提案
+
+Home Assistant 2026.6 以降、カードピッカーでエンティティを選ぶといくつかの出来合いのカードが提示されますが、Bubble Card はその問いに独自のレシピで答えます。ライトを選ぶと明るさスライダー付きのカードが提案され、さらにライトが対応していれば色温度、色、彩度のバリエーションも提案されます。カバーを選べば位置スライダーが、メディアプレーヤーを選べばソース一覧付きのバリエーションも、掃除機を選べば開始、一時停止、ドックへ戻るのボタンが得られます。どの提案も通常の Bubble Card の設定で、ライブプレビューとして表示されるため、いちばん近いものを選んでいつもどおり編集を続けられます。
+
+何が提案されるかは、そのエンティティが実際に何をできるかによって決まります。明るさチャンネルを持たないライトにはスライダーではなくトグルが、チルトできないカバーにはチルトのバリエーションが提示されず、空調エンティティはプリセットモードを持っている場合にのみそれが提示されます。従来の項目は、当てはまる場合にその下に続きます。ドメイン専用のカード、単純なボタン、そしてスライダーです。
+
+> [!TIP]
+> モジュールはその一覧に独自の提案を追加できます。[モジュール](#モジュール)を参照してください。
+
+<br>
+
+---
+
+<br>
+
 ## ポップアップ
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Bubble Card は、Home Assistant 向けのミニマルでカスタマイズ可�
 | `shadow_opacity` | string | 任意 | `0` から `100` までの任意の値 | ポップアップの影の不透明度です (例: 非表示にするなら `0`) |
 | `hide_backdrop` | boolean | 任意 | `true` または `false` (デフォルト) | メインダッシュボードの最初のポップアップでこれを true に設定すると、すべてのポップアップのバックドロップを無効にできます。 |
 | `background_update` | boolean | 任意 | `true` または `false` (デフォルト) | ポップアップのコンテンツをバックグラウンドで更新します (非推奨) |
-| `trigger_entity` | string | 任意 | 任意のエンティティ | 任意のエンティティの状態に基づいてこのポップアップを開きます |
+| `trigger` | object または list | 任意 | [条件](#条件)を参照 | 条件が満たされたときにこのポップアップを開きます |
+| `trigger_entity` | string | 任意 | 任意のエンティティ | 任意のエンティティの状態に基づいてこのポップアップを開きます。`trigger` の簡易版です |
 | `trigger_state` | string | 任意 (`trigger_entity` が定義されている場合は**必須**) | 任意のエンティティの状態 | ポップアップを開くためのエンティティの状態 |
-| `trigger_close` | boolean | 任意 | `true` または `false` (デフォルト) | `trigger_state` と異なる場合にポップアップを閉じます |
+| `trigger_close` | boolean | 任意 | `true` または `false` | 条件が満たされなくなったときにポップアップを閉じます (デフォルト: `trigger` では `true`、`trigger_state` では `false`) |
 | `open_action` | object | 任意 | [アクション](#タップダブルタップ長押しのアクション)を参照 | ポップアップが開くときにアクションをトリガーします |
 | `close_action` | object | 任意 | [アクション](#タップダブルタップ長押しのアクション)を参照 | ポップアップが閉じるときにアクションをトリガーします |
 | `show_header` | boolean | 任意 | `true` (デフォルト) または `false` | ポップアップのヘッダー全体を表示/非表示にします |
@@ -445,8 +461,8 @@ auto_order: true
 | `relative_slide`        | boolean | 任意（デフォルト `false` ）     | タップした位置ではなく、開始時の値を基準に値を更新します。                                      |
 | `read_only_slider`      | boolean | 任意（デフォルト `false`）      | スライダーを読み取り専用にします。センサーなど一部のエンティティでは自動的に有効になります。                        |
 | `slider_live_update`    | boolean | 任意（デフォルト `false`）      | スライド中にエンティティの状態が更新されます。**この機能はすべてのエンティティに推奨されるわけではありません。**        |
-| `slider_fill_orientation` | string | 任意 | `left`（デフォルト）、`right`、`top`、`bottom` | スライダーの塗りつぶし方向を変更 |
-| `slider_value_position` | string | 任意 | `right`（デフォルト）、`left`、`center`、`hidden` | 値表示の位置 |
+| `slider_fill_orientation` | string | 任意 | `left`、`right`、`top` または `bottom` | スライダーの塗りつぶし方向を変更。未指定なら左から右で、[右から左に書く言語](#ローカライズ)では左右が反転します |
+| `slider_value_position` | string | 任意 | `right`、`left`、`center` または `hidden` | 値の表示位置。未指定なら終端側、つまり[右から左に書く言語](#ローカライズ)では左側になります |
 | `invert_slider_value` | boolean | 任意（デフォルト `false`） | スライダーの方向を反転します（塗りつぶし100%が最小値になります）。カラースライダーでは使用できません。 |
 | `light_slider_type` | string | 任意 | `brightness`（デフォルト）、`hue`、`saturation`、`white_temp` | **照明専用。** スライダーモードを選択 |
 | `cover_slider_type` | string | 任意 | `position`（デフォルト）、`tilt_position` | **カバー専用。** スライダーモード（位置またはチルト）を選択 |
@@ -940,7 +956,7 @@ sub_button:
 | `limit`             | number  | 任意     | 数値                                        | カードに表示する予定の数                                  |
 | `show_end`          | boolean | 任意     | `true` または `false` (デフォルト)                     | 予定の終了時刻を表示または非表示にします                                                    |
 | `show_progress`     | boolean | 任意     | `true` (デフォルト) または `false`                     | 予定の進行状況バーを表示または非表示にします                                                     |
-| `show_started_events`| boolean | 任意     | `true` (デフォルト) または `false`                     | 現在進行中の予定を表示または非表示にします                                                 |
+| `show_started_events`| boolean | 任意     | `true` (デフォルト) または `false`                     | 現在進行中の予定を表示または非表示にします。複数日にまたがる予定は1日ずつ判定されるため、進行中の当日だけが非表示になり、これから先の日は表示されたままになります |
 | `scrolling_effect`  | boolean | 任意 | `true` (デフォルト) または `false` | コンテンツがコンテナのサイズを超えたときにテキストをスクロールさせます |
 | `event_action` | object | 任意 | `tap_action`、`double_tap_action`または`hold_action`。[アクション](#タップダブルタップ長押しのアクション)を参照 | 予定クリック時のアクションを追加できます。 |
 | `tap_action` | object | 任意 | [アクション](#タップダブルタップ長押しのアクション)を参照 | 日付クリック時のアクションタイプを定義します。未定義の場合は`none`が使用されます。 |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | 任意 | `icon-left` (デフォルト)、`icon-top`、`icon-bottom`、`icon-right` | サブボタン内のアイコンの配置 |
 | `always_visible` | boolean | 任意 | `true`または`false` (デフォルト) | **スライダーのみ。**タップで開く代わりに、常にスライダーを表示する |
 | `show_button_info` | boolean | 任意 | `true`または`false` (デフォルト) | **スライダーのみ。**`always_visible`が有効なときにアイコン/名前/状態を表示する |
-| `visibility` | object または list | 任意 | [条件](https://www.home-assistant.io/docs/scripts/conditions/)を参照 | 条件に基づいてサブボタンを表示または非表示にする |
+| `visibility` | object または list | 任意 | [条件](#条件)を参照 | 条件に基づいてサブボタンを表示または非表示にする |
 | `hide_when_parent_unavailable` | boolean | 任意 | `true`または`false` (デフォルト) | 親カードのエンティティが利用不可のときにサブボタンを非表示にする |
+| `css_class` | string | 任意 | 任意の文字列 | サブボタンに追加する CSS クラス。名前が何であっても[スタイル](#スタイル)から指定できます (例えば `My value` は `.my-value` になります) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ sub_button:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | サブボタンの角丸半径 |
 | `--bubble-sub-button-background-color` | `color` | サブボタンの背景色 |
+| `--bubble-sub-button-outline` | `box-shadow` | サブボタンやスライダーが背後のカードと同じ色になり見えなくなってしまう場合にだけ追加される輪郭 (`none` に設定すると消せます) |
 | `--bubble-sub-slider-border-radius` | `px` | スライダーサブボタンの角丸半径 |
 | `--bubble-sub-slider-background-color` | `color` | スライダーサブボタンの背景色 |
 | `--bubble-sub-slider-height` | `px` | 常時表示スライダーサブボタンの高さ |
+| `--bubble-sub-slider-outline` | `box-shadow` | スライダーのサブボタンだけの輪郭。未指定なら `--bubble-sub-button-outline` にフォールバックします |
 | `--bubble-sub-button-dark-text-color` | `color` | 明るいサブボタン背景上のテキストの色 |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## 条件
+
+一部のオプションは条件で制御され、Home Assistant の[条件付きカード](https://www.home-assistant.io/dashboards/conditional/)とまったく同じ書き方をします。
+
+- [サブボタン](#サブボタン)の `visibility`、表示または非表示にするため
+- [ポップアップ](#ポップアップ)の `trigger`、条件が満たされたときに開くため
+- [テンプレート](#テンプレート)の中の `checkConditionsMet(conditions, hass)`、自分のコードで結果が必要なとき
+
+Home Assistant のすべての条件タイプが評価されます: `state`、`numeric_state`、`screen`、`user`、`time`、`location`、`template`、および `and`、`or`、`not` のグループ。Home Assistant の条件ビルダーの条件も動作します。`sun.is_up`、`light.is_on`、`zone.in_zone`、`temperature.is_value` のようにドメイン名が付いたもので、`target`、`options`、`behavior`、`for` の設定も使えます。
+
+<details>
+
+<summary><b>例</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> 条件はブラウザー内で評価されるため、Home Assistant サーバーを必要とするごく一部の条件は厳密にはなりません。日の出と日の入りは再計算されるのではなく `sun.sun` エンティティから読み取られ、`for` の継続時間は recorder の履歴なしに、最後の状態変化からの経過で測られます。
+>
+> `view_columns` は受け付けられますが常に成立します。ビューの列を配置しているのは Bubble Card ではないからです。Bubble Card が知らない条件タイプは、黙って失敗する代わりにブラウザーのコンソールに一度だけ報告されるので、入力ミスと未対応の機能を見分けられます。
+
+<br>
+
+---
+
+<br>
+
 ## タップ、ダブルタップ、長押しのアクション
 
 このオプションに対応しているカードでは、Home Assistant 標準のタップアクション、ダブルタップアクション、長押しアクションも使用できます。例えば、ボタンのアイコンを長押しして「詳細情報」ウィンドウを表示したり、サブボタンを押したときにサービスを実行したりできます。
@@ -1700,6 +1762,8 @@ button_action:
 
 > [!TIP]  
 > サブボタンは名前に基づいたクラスで指定できます。例えば、「My sub-button」という名前のサブボタンは `.my-sub-button` でスタイルを指定できます。スライダーのサブボタンは `.bubble-sub-button-slider-1`、`.bubble-sub-button-slider-2` なども公開しています。
+>
+> 名前に基づいたクラスはサブボタンの名前を変えると変わり、名前が翻訳されればクラスも翻訳されます。サブボタンに `css_class` を設定すれば、名前が何であっても言語が何であっても変わらない、自分専用のクラスが手に入ります。
 
 #### 例
 
@@ -2066,6 +2130,7 @@ styles: |
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` は[条件](#条件)のリストが満たされたときに `true` を返します。例えば `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}` のように使います。
 - `hass.formatEntityState(state)` は状態を翻訳するために使用できます(手動で単位を追加する必要なく、状態の単位を取得する場合にも使用できます)。
 - `hass.formatEntityAttributeValue(state, "attribute")` は属性を翻訳するために使用できます(手動で単位を追加する必要なく、状態の単位を取得する場合にも使用できます)。
 
@@ -2318,6 +2383,8 @@ styles: >
 しかし、この機能はそれ以上にはるかに強力です。すべての標準の[Home Assistantフォーム](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)オプションを使って、Bubble Cardエディター内に実際の機能を自分自身で追加できるのです！
 オブジェクトセレクターも改良され、変更をリアルタイムで確認できるほか、属性にも正しく対応するようになりました。
 
+モジュールは、組み込みの[エンティティの提案](#エンティティの提案)と並んで Home Assistant のカードピッカーに応えることもできます。あらかじめ記述できるカードには `suggestions` を、選んだエンティティが属するエリアのすべてのエンティティから組み立てたポップアップのように、設置環境から計算する必要がある場合は `suggestions_code` を使います。どちらのキーも[こちら](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions)に説明があります。
+
 **Module Store**を閲覧して[コミュニティが作成したモジュール](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)を見つけてインストールしたり、自分の作品を共有したりすることもできます！
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Bubble Card Tools統合により、モジュールエディターとModule Store
 - モジュールを**検索**・**並べ替え**する(アルファベット順、新しい順、有効なものを先頭に)
 - **グローバルステータスを設定**して、モジュールをすべてのカードに自動的に適用する
 - バックアップや共有のためにモジュールを**インポート/エクスポート**する
+- モジュールエディターの **オプション：エンティティの提案** で**エンティティの提案を書く**と、Home Assistant のカードピッカーでモジュールが提案されるようになります。ルールも計算による提案も入力しながら検証され、そこにエラーがあると保存できません。プレビューでは選んだエンティティに対する提案カードが表示されます
 
 #### Module Storeタブ
 
@@ -2391,7 +2459,8 @@ Bubble Card Tools統合により、モジュールエディターとModule Store
 3. モジュールの情報を入力します。
 4. **コード**エディターにCSSやJavaScriptのテンプレートコードを記述します。
 5. (任意)**エディター**セクションでカスタム設定UIを作成します(上のスクリーンショットのカラーピッカーのように。完全なドキュメントは[こちら](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)で確認できます)。
-6. **保存**をクリックします。
+6. (任意) **エンティティの提案**を書くと、Home Assistant のカードピッカーでモジュールが提案されるようになります。このパネルは入力しながら内容を検証し、プレビューには選んだエンティティに対する提案カードそのものが表示されます。
+7. **保存**をクリックします。
 
 これでモジュールが作成され、どのカードでも使用できるようになりました！
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 さらに多くの例はModule Store、または[こちら](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)にあります。
+
+<br>
+
+---
+
+<br>
+
+## ローカライズ
+
+Bubble Card はあなたの言語を話します。エディターは Home Assistant が対応する 64 言語に翻訳されており、Home Assistant にすでに用語がある場合はその言い回しをそのまま使うため、両方の画面で同じ用語を目にすることになります。
+
+エディターの一番下、バージョン番号の隣にある **自動** スイッチは、Home Assistant の言語に従います。これをオフにするとエディター全体が英語に戻り、チュートリアルをたどるときや問題を報告するときに便利です。選択内容はブラウザーに記憶されます。
+
+このドキュメントも翻訳されています。[62 言語](languages.md)で読めます。これらのページは誰にでも開かれているので、お使いの Home Assistant と合わない言い回しは数クリックで直せます。内容そのものについては、英語版が引き続き基準となります。
 
 <br>
 

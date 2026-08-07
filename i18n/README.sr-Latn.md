@@ -18,7 +18,7 @@ Bubble Card je minimalistička i prilagodljiva kolekcija kartica za Home Assista
 
 ## Sadržaj
 
-**[`Instalacija`](#instalacija)**  **[`Konfiguracija`](#konfiguracija)**  **[`Iskačući prozor`](#iskačući-prozor)**  **[`Horizontalni niz dugmadi`](#horizontalni-niz-dugmadi)**  **[`Dugme`](#dugme)**  **[`Medija plejer`](#medija-plejer)**  **[`Roletna`](#roletna)**  **[`Izbor`](#izbor)**  **[`Klima`](#klima)**  **[`Kalendar`](#kalendar)**  **[`Razdvajač`](#razdvajač)**  **[`Prazna kolona`](#prazna-kolona)**  **[`Samo pod-dugmad`](#samo-pod-dugmad)**  **[`Pod-dugmad`](#pod-dugmad)**  **[`Rasporedi kartica`](#rasporedi-kartica)**  **[`Akcije`](#akcije-dodira-dvostrukog-dodira-i-držanja)**  **[`Stilizovanje`](#stilizovanje)**  **[`Šabloni`](#šabloni)**  **[`Moduli`](#moduli)**  **[`Pomoć`](#pomoć)**  **[`Doprinos`](#doprinos)**  **[`Donirajte`](#donirajte)**
+**[`Instalacija`](#instalacija)**  **[`Konfiguracija`](#konfiguracija)**  **[`Predlozi za entitete`](#predlozi-za-entitete)**  **[`Iskačući prozor`](#iskačući-prozor)**  **[`Horizontalni niz dugmadi`](#horizontalni-niz-dugmadi)**  **[`Dugme`](#dugme)**  **[`Medija plejer`](#medija-plejer)**  **[`Roletna`](#roletna)**  **[`Izbor`](#izbor)**  **[`Klima`](#klima)**  **[`Kalendar`](#kalendar)**  **[`Razdvajač`](#razdvajač)**  **[`Prazna kolona`](#prazna-kolona)**  **[`Samo pod-dugmad`](#samo-pod-dugmad)**  **[`Pod-dugmad`](#pod-dugmad)**  **[`Rasporedi kartica`](#rasporedi-kartica)**  **[`Uslovi`](#uslovi)**  **[`Akcije`](#akcije-dodira-dvostrukog-dodira-i-držanja)**  **[`Stilizovanje`](#stilizovanje)**  **[`Šabloni`](#šabloni)**  **[`Moduli`](#moduli)**  **[`Lokalizacija`](#lokalizacija)**  **[`Pomoć`](#pomoć)**  **[`Doprinos`](#doprinos)**  **[`Donirajte`](#donirajte)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card je minimalistička i prilagodljiva kolekcija kartica za Home Assista
 
 <br>
 
-1. Preuzmite ovu datoteku: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Dodajte ovu datoteku u folder `<config>/www`
+1. Preuzmite `bubble-card.zip` sa [poslednjeg izdanja](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Raspakujte ga u folder `<config>/www`, trebalo bi da dobijete `bubble-card.js` i folder `translations` pored njega (taj folder sadrži rečnike editora, bez njega editor ostaje na engleskom)
 3. Na svojoj tabli kliknite na ikonicu u gornjem desnom uglu, zatim na `Izmeni tablu`
 4. Ponovo kliknite na tu ikonicu, a zatim kliknite na `Upravljanje resursima`
 5. Kliknite na `Dodaj resurs`
@@ -130,6 +130,21 @@ Sve opcije mogu biti konfigurisane u Home Assistant editoru. Ali u dokumentaciji
 
 <br>
 
+## Predlozi za entitete
+
+Od Home Assistant 2026.6, biranje entiteta u biraču kartica nudi vam nekoliko gotovih kartica, a Bubble Card na to pitanje odgovara sopstvenim receptima. Izaberite svetlo i biće vam ponuđena kartica sa klizačem osvetljenja, uz varijantu sa temperaturom boje, varijantu sa bojom i varijantu sa zasićenošću kada ih vaše svetlo podržava. Izaberite roletnu i dobijate njen klizač položaja, izaberite medija plejer i dobijate i varijantu sa listom izvora, izaberite usisivač i dobijate njegovu dugmad za pokretanje, pauzu i povratak na bazu. Svaki predlog je uobičajena konfiguracija Bubble Card prikazana kao pregled uživo, tako da možete uzeti najbliži i nastaviti da ga uređujete kao i obično.
+
+Ono što vam se nudi zavisi od toga šta vaš entitet zaista može: svetlo bez kanala osvetljenja dobija prekidač umesto klizača, roletna koja ne može da se naginje ne dobija varijantu sa nagibom, a entitet klime dobija svoje unapred podešene režime samo kada ih ima. Klasične stavke slede ispod njih kada imaju smisla: namenska kartica domena, obično dugme i klizač.
+
+> [!TIP]
+> Moduli mogu da dodaju sopstvene predloge na tu listu, vidite [module](#moduli).
+
+<br>
+
+---
+
+<br>
+
 ## Iskačući prozor
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Ova kartica vam omogućava da napravite iskačući prozor sa bilo kakvim sadrža
 | `shadow_opacity` | string | Opciono | Bilo koja vrednost od `0` do `100` | Neprozirnost senke vašeg iskačućeg prozora (npr. `0` da je sakrijete) |
 | `hide_backdrop` | boolean | Opciono | `true` ili `false` (podrazumevano) | Podesite ovo na true na prvom iskačućem prozoru vaše glavne table da biste onemogućili pozadinski sloj (backdrop) na svim iskačućim prozorima. |
 | `background_update` | boolean | Opciono | `true` ili `false` (podrazumevano) | Ažurira sadržaj iskačućeg prozora u pozadini (nije preporučeno) |
-| `trigger_entity` | string | Opciono | Bilo koji entitet | Otvara ovaj iskačući prozor na osnovu stanja bilo kog entiteta |
+| `trigger` | object ili list | Opciono | Vidite [uslove](#uslovi) | Otvara ovaj iskačući prozor kada su uslovi ispunjeni |
+| `trigger_entity` | string | Opciono | Bilo koji entitet | Otvara ovaj iskačući prozor na osnovu stanja bilo kog entiteta, jednostavan oblik `trigger` |
 | `trigger_state` | string | Opciono (**Obavezno** ako je definisano `trigger_entity`) | Bilo koje stanje entiteta | Stanje entiteta za otvaranje iskačućeg prozora |
-| `trigger_close` | boolean | Opciono | `true` ili `false` (podrazumevano) | Zatvara iskačući prozor kada je `trigger_state` drugačiji |
+| `trigger_close` | boolean | Opciono | `true` ili `false` | Zatvara iskačući prozor kada uslovi više nisu ispunjeni (podrazumevano: `true` uz `trigger`, `false` uz `trigger_state`) |
 | `open_action` | object | Opciono | Vidite [akcije](#akcije-dodira-dvostrukog-dodira-i-držanja) | Pokreće akciju kada se iskačući prozor otvara |
 | `close_action` | object | Opciono | Vidite [akcije](#akcije-dodira-dvostrukog-dodira-i-držanja) | Pokreće akciju kada se iskačući prozor zatvara |
 | `show_header` | boolean | Opciono | `true` (podrazumevano) ili `false` | Prikazuje/skriva zaglavlje iskačućeg prozora u potpunosti |
@@ -445,8 +461,8 @@ Ove opcije su dostupne samo kada je `button_type` postavljen na `slider`.
 | `relative_slide`        | boolean | Optional (`false` default )     | Ažurira vrednost relativno u odnosu na početnu vrednost, a ne u odnosu na početnu tačku dodira.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Postavlja klizač samo za čitanje. Automatski se omogućava za neke entitete, poput senzora.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Stanje entiteta se ažurira tokom klizanja. **Ova funkcija se ne preporučuje za sve entitete.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Menja pravac popunjavanja klizača |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Pozicija prikaza vrednosti |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` ili `bottom` | Menja pravac popunjavanja klizača. Sleva nadesno kada nije definisano, preslikano u [jezicima koji se pišu zdesna nalevo](#lokalizacija) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` ili `hidden` | Pozicija prikaza vrednosti. Na krajnjoj strani kada nije definisano, dakle levo u [jezicima koji se pišu zdesna nalevo](#lokalizacija) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Obrće pravac klizača (popuna od 100% odgovara minimumu). Nije dostupno za klizače boje. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Samo za svetla.** Bira režim klizača |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Samo za roletne.** Bira režim klizača (pozicija ili nagib) |
@@ -940,7 +956,7 @@ Ova kartica vam omogućava da prikažete vaše entitete kalendara. Njen sadržaj
 | `limit`             | number  | Optional     | A number                                        | Broj događaja koji će biti prikazani na kartici                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Prikazuje ili sakriva vreme završetka za događaje                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Prikazuje ili sakriva traku napretka događaja                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Prikazuje ili sakriva događaje koji su trenutno u toku                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Prikazuje ili sakriva događaje koji su trenutno u toku. Višednevni događaji se procenjuju dan po dan, pa se sakriva samo dan koji je u toku, a naredni dani ostaju vidljivi |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | Omogućava klizanje teksta kada sadržaj prevazilazi veličinu njegovog kontejnera |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#akcije-dodira-dvostrukog-dodira-i-držanja) | Omogućava dodavanje akcija pri kliku na događaj. |
 | `tap_action` | object | Optional | See [actions](#akcije-dodira-dvostrukog-dodira-i-držanja) | Definiše tip akcije pri kliku na dan, ako nije definisano, koristiće se `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Opciono | `icon-left` (podrazumevano), `icon-top`, `icon-bottom`, `icon-right` | Položaj ikonice unutar pod-dugmeta |
 | `always_visible` | boolean | Opciono | `true` ili `false` (podrazumevano) | **Samo klizač.** Uvek prikaži klizač umesto otvaranja pri dodiru |
 | `show_button_info` | boolean | Opciono | `true` ili `false` (podrazumevano) | **Samo klizač.** Prikaži ikonicu/naziv/stanje kada je omogućeno `always_visible` |
-| `visibility` | object ili list | Opciono | Pogledajte [uslove](https://www.home-assistant.io/docs/scripts/conditions/) | Prikaži ili sakrij pod-dugme na osnovu uslova |
+| `visibility` | object ili list | Opciono | Pogledajte [uslove](#uslovi) | Prikaži ili sakrij pod-dugme na osnovu uslova |
 | `hide_when_parent_unavailable` | boolean | Opciono | `true` ili `false` (podrazumevano) | Sakrij pod-dugme ako je nadređeni entitet kartice nedostupan |
+| `css_class` | string | Opciono | Bilo koji tekst | Dodatna CSS klasa na pod-dugmetu, da biste ga ciljali u svom [stilizovanju](#stilizovanje) bez obzira na njegovo ime (na primer `My value` daje `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Klizači pod-dugmadi podržavaju iste opcije kao klizači dugmeta, uključujući
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Poluprečnik ivice za pod-dugmad |
 | `--bubble-sub-button-background-color` | `color` | Boja pozadine za pod-dugmad |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontura dodata pod-dugmetu ili klizaču samo kada se iscrtava istom bojom kao kartica iza njega, što bi ga učinilo nevidljivim (postavite je na `none` da je uklonite) |
 | `--bubble-sub-slider-border-radius` | `px` | Poluprečnik ivice za klizače pod-dugmadi |
 | `--bubble-sub-slider-background-color` | `color` | Boja pozadine za klizače pod-dugmadi |
 | `--bubble-sub-slider-height` | `px` | Visina za uvek vidljive klizače pod-dugmadi |
+| `--bubble-sub-slider-outline` | `box-shadow` | Kontura samo za klizače pod-dugmadi, vraća se na `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Boja teksta na svetlim pozadinama pod-dugmadi |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Uslovi
+
+Neke opcije se zasnivaju na uslovima, koji se pišu potpuno isto kao oni u [uslovnoj kartici](https://www.home-assistant.io/dashboards/conditional/) Home Assistant-a:
+
+- `visibility` na [pod-dugmetu](#pod-dugmad), da biste ga prikazali ili sakrili
+- `trigger` na [iskačućem prozoru](#iskačući-prozor), da biste ga otvorili kada su uslovi ispunjeni
+- `checkConditionsMet(conditions, hass)` unutar vaših [šablona](#šabloni), kada vam odgovor treba u sopstvenom kodu
+
+Vrednuje se svaki tip uslova Home Assistant-a: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, kao i grupe `and`, `or` i `not`. Rade i uslovi iz Home Assistant graditelja uslova, oni nazvani po svom domenu kao `sun.is_up`, `light.is_on`, `zone.in_zone` ili `temperature.is_value`, sa svojim podešavanjima `target`, `options`, `behavior` i `for`.
+
+<details>
+
+<summary><b>Primer</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Uslovi se vrednuju u vašem pregledaču, pa onih nekoliko kojima je potreban server Home Assistant-a ne mogu biti tačni: izlazak i zalazak sunca se čitaju iz entiteta `sun.sun` umesto da se ponovo izračunaju, a trajanje `for` se meri od poslednje promene stanja, bez istorije iz recorder-a.
+>
+> `view_columns` se prihvata ali uvek prolazi, pošto Bubble Card nikada ne raspoređuje kolone vašeg prikaza. Tip uslova koji Bubble Card ne poznaje jednom se prijavi u konzoli vašeg pregledača umesto da tiho zakaže, tako da možete razlikovati grešku u kucanju od funkcije koja nedostaje.
+
+<br>
+
+---
+
+<br>
+
 ## Akcije dodira, dvostrukog dodira i držanja
 
 Takođe možete koristiti podrazumevane akcije dodira, dvostrukog dodira i držanja iz Home Assistant-a na karticama koje podržavaju tu opciju. Na primer, ovo vam omogućava da prikažete prozor "više informacija" držanjem ikonice dugmeta ili da pokrenete servis kada se pritisne pod-dugme.
@@ -1700,6 +1762,8 @@ Prilagođene stilove možete dodati da izmenite CSS svih kartica **bez korišće
 
 > [!TIP]  
 > Pod-dugmad mogu biti ciljana putem klasa zasnovanih na imenu. Na primer, pod-dugme nazvano "My sub-button" može se stilizovati sa `.my-sub-button`. Klizači pod-dugmadi takođe izlažu `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, itd.
+>
+> Klasa zasnovana na imenu se menja kada preimenujete pod-dugme, i prevodi se kada se prevede ime. Postavite `css_class` na pod-dugme da biste dobili sopstvenu klasu koja se nikada ne pomera, bez obzira na ime i bez obzira na jezik.
 
 #### Primeri
 
@@ -2066,6 +2130,7 @@ Imate pristup svim globalnim JS funkcijama, ali imate pristup i sledećem:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` vraća `true` kada je lista [uslova](#uslovi) ispunjena, na primer `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` može se koristiti za prevod stanja (Takođe se može koristiti za dobijanje jedinice stanja, bez potrebe da je ručno dodajete).
 - `hass.formatEntityAttributeValue(state, "attribute")` može se koristiti za prevod atributa (Takođe se može koristiti za dobijanje jedinice stanja, bez potrebe da je ručno dodajete).
 
@@ -2318,6 +2383,8 @@ Moduli su moćna funkcija koja vam omogućava da sačuvate, ponovo koristite i d
 Ali ova funkcija je mnogo moćnija od toga, omogućava vam da sami dodate stvarne funkcije u Bubble Card editoru, koristeći sve podrazumevane opcije [Home Assistant forme](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 Birač objekata je poboljšan da prikazuje izmene uživo i da ispravno podržava atribute.
 
+Modul može da odgovori i biraču kartica Home Assistant-a uz ugrađene [predloge za entitete](#predlozi-za-entitete): koristite `suggestions` za kartice koje može da opiše unapred, i `suggestions_code` kada moraju da se izračunaju iz vaše instalacije, na primer iskačući prozor napravljen od svih entiteta prostorije kojoj pripada izabrani entitet. Oba ključa su dokumentovana [ovde](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Takođe možete pregledati **Module Store** da pronađete i instalirate [module koje je napravila zajednica](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), ili podelite svoje sopstvene kreacije!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Ovaj tab prikazuje sve vaše instalirane module i omogućava vam da:
 - **Pretražite** i **sortirate** module (po abecedi, nedavno, aktivni prvi)
 - **Postavite globalni status** kako bi se modul automatski primenjivao na sve kartice
 - **Uvezete/izvezete** module radi rezervne kopije ili deljenja
+- **Pišete predloge za entitete** u editoru modula, u odeljku **Opciono: predlozi za entitete**, da bi vaš modul bio ponuđen u biraču kartica Home Assistant-a. I pravila i izračunati predlozi se proveravaju dok pišete, greška tu sprečava čuvanje, a pregled prikazuje predložene kartice za bilo koji entitet koji izaberete
 
 #### Tab Module Store
 
@@ -2391,7 +2459,8 @@ Ovaj tab prikazuje [sve dostupne module iz zajednice](https://github.com/Clooos/
 3. Popunite informacije o modulu.
 4. Napišite svoj CSS i/ili JavaScript kod šablona u editoru **Code**.
 5. (Opciono) Napravite prilagođeni korisnički interfejs za konfiguraciju u sekciji **Editor** (poput birača boja na slici iznad, potpuna dokumentacija dostupna je [ovde](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Kliknite **Save**.
+6. (Opciono) Napišite svoje **Predloge za entitete** da bi vaš modul bio ponuđen u biraču kartica Home Assistant-a. Panel proverava ono što pišete dok kucate, a njegov pregled prikazuje same predložene kartice za entitet po vašem izboru.
+7. Kliknite **Save**.
 
 Vaš modul je sada dostupan za korišćenje na bilo kojoj od vaših kartica!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Više primera možete naći u Module Store, ili [ovde](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalizacija
+
+Bubble Card govori vašim jezikom. Njegov editor je preveden na 64 jezika koje Home Assistant podržava, a svuda gde Home Assistant već ima reč za nešto, koristi se njegova formulacija, tako da u oba interfejsa čitate iste termine.
+
+Na dnu editora, pored broja verzije, prekidač **Automatski** prati jezik vašeg Home Assistant-a. Isključite ga i ceo editor se vraća na engleski, što je zgodno kada pratite uputstvo ili prijavljujete problem. Vaš izbor se pamti u vašem pregledaču.
+
+I ova dokumentacija je prevedena, [na 62 jezika](languages.md). Te stranice su otvorene za svakoga, pa se formulacija koja ne odgovara vašem Home Assistant-u može ispraviti u nekoliko klikova. Engleska verzija ostaje referenca za sam sadržaj.
 
 <br>
 

@@ -18,7 +18,7 @@ Bubble Card ir minimālistiska un pielāgojama kartīšu kolekcija Home Assistan
 
 ## Satura rādītājs
 
-**[`Instalēšana`](#instalēšana)**  **[`Konfigurācija`](#konfigurācija)**  **[`Uznirstošais logs`](#uznirstošais-logs)**  **[`Horizontāla pogu josla`](#horizontāla-pogu-josla)**  **[`Poga`](#poga)**  **[`Multivides atskaņotājs`](#multivides-atskaņotājs)**  **[`Aizsegs`](#aizsegs)**  **[`Izvēle`](#izvēle)**  **[`Klimats`](#klimats)**  **[`Kalendārs`](#kalendārs)**  **[`Atdalītājs`](#atdalītājs)**  **[`Tukša kolonna`](#tukša-kolonna)**  **[`Tikai papildpogas`](#tikai-papildpogas)**  **[`Papildpogas`](#papildpogas)**  **[`Kartīšu izkārtojumi`](#kartīšu-izkārtojumi)**  **[`Darbības`](#pieskāriena-dubultpieskāriena-un-turēšanas-darbības)**  **[`Stils`](#stils)**  **[`Veidnes`](#veidnes)**  **[`Moduļi`](#moduļi)**  **[`Palīdzība`](#palīdzība)**  **[`Līdzdalība`](#līdzdalība)**  **[`Ziedot`](#ziedot)**
+**[`Instalēšana`](#instalēšana)**  **[`Konfigurācija`](#konfigurācija)**  **[`Entītiju ieteikumi`](#entītiju-ieteikumi)**  **[`Uznirstošais logs`](#uznirstošais-logs)**  **[`Horizontāla pogu josla`](#horizontāla-pogu-josla)**  **[`Poga`](#poga)**  **[`Multivides atskaņotājs`](#multivides-atskaņotājs)**  **[`Aizsegs`](#aizsegs)**  **[`Izvēle`](#izvēle)**  **[`Klimats`](#klimats)**  **[`Kalendārs`](#kalendārs)**  **[`Atdalītājs`](#atdalītājs)**  **[`Tukša kolonna`](#tukša-kolonna)**  **[`Tikai papildpogas`](#tikai-papildpogas)**  **[`Papildpogas`](#papildpogas)**  **[`Kartīšu izkārtojumi`](#kartīšu-izkārtojumi)**  **[`Nosacījumi`](#nosacījumi)**  **[`Darbības`](#pieskāriena-dubultpieskāriena-un-turēšanas-darbības)**  **[`Stils`](#stils)**  **[`Veidnes`](#veidnes)**  **[`Moduļi`](#moduļi)**  **[`Lokalizācija`](#lokalizācija)**  **[`Palīdzība`](#palīdzība)**  **[`Līdzdalība`](#līdzdalība)**  **[`Ziedot`](#ziedot)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card ir minimālistiska un pielāgojama kartīšu kolekcija Home Assistan
 
 <br>
 
-1. Lejupielādējiet šo failu: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Pievienojiet šo failu savai `<config>/www` mapei
+1. Lejupielādējiet `bubble-card.zip` no [jaunākā laidiena](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Izarhivējiet to savā `<config>/www` mapē, jums vajadzētu iegūt `bubble-card.js` un tam blakus mapi `translations` (šajā mapē glabājas redaktora vārdnīcas, bez tās redaktors paliek angļu valodā)
 3. Savā vadības panelī noklikšķiniet uz ikonas augšējā labajā stūrī, tad uz `Edit dashboard`
 4. Vēlreiz noklikšķiniet uz šīs ikonas un tad uz `Manage resources`
 5. Noklikšķiniet uz `Add resource`
@@ -130,6 +130,21 @@ Visas opcijas var konfigurēt Home Assistant redaktorā. Bet zemāk esošajā do
 
 <br>
 
+## Entītiju ieteikumi
+
+Kopš Home Assistant 2026.6 entītijas izvēle kartīšu atlasītājā piedāvā dažas gatavas kartītes, un Bubble Card uz šo jautājumu atbild ar savām receptēm. Izvēlieties gaismu, un jums tiek piedāvāta kartīte ar spilgtuma slīdni, kā arī krāsas temperatūras, krāsas un piesātinājuma varianti, ja jūsu gaisma tos atbalsta. Izvēlieties aizsegu, un jūs iegūstat tā pozīcijas slīdni, izvēlieties multivides atskaņotāju, un jūs iegūstat arī variantu ar tā avotu sarakstu, izvēlieties putekļsūcēju, un jūs iegūstat tā palaišanas, pauzes un doka pogas. Katrs ieteikums ir parasta Bubble Card konfigurācija, kas parādīta kā dzīvs priekšskatījums, tāpēc varat paņemt tuvāko un turpināt to rediģēt kā parasti.
+
+Piedāvātais ir atkarīgs no tā, ko jūsu entītija patiesībā spēj: gaisma bez spilgtuma kanāla saņem slēdzi slīdņa vietā, aizsegs, kas nevar sasvērties, nesaņem sasvēršanas variantu, klimata entītija saņem savus iepriekšiestatītos režīmus tikai tad, ja tādi tai ir. Zem tiem, kad tie ir piemēroti, seko klasiskie ieraksti: domēna īpašā kartīte, vienkārša poga un slīdnis.
+
+> [!TIP]
+> Moduļi var pievienot šim sarakstam savus ieteikumus, skatiet [moduļi](#moduļi).
+
+<br>
+
+---
+
+<br>
+
 ## Uznirstošais logs
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Visas opcijas var konfigurēt Home Assistant redaktorā. Bet zemāk esošajā do
 | `shadow_opacity` | string | Neobligāts | Jebkura vērtība no `0` līdz `100` | Jūsu uznirstošā loga ēnas necaurspīdīgums (piemēram, `0`, lai to paslēptu) |
 | `hide_backdrop` | boolean | Neobligāts | `true` vai `false` (noklusējums) | Iestatiet to uz true jūsu galvenā vadības paneļa pirmajam uznirstošajam logam, lai atspējotu aizmugures fonu visiem uznirstošajiem logiem. |
 | `background_update` | boolean | Neobligāts | `true` vai `false` (noklusējums) | Atjaunināt uznirstošā loga saturu fonā (nav ieteicams) |
-| `trigger_entity` | string | Neobligāts | Jebkura entītija | Atvērt šo uznirstošo logu, balstoties uz jebkuras entītijas stāvokli |
+| `trigger` | object vai list | Neobligāts | Skatiet [nosacījumus](#nosacījumi) | Atvērt šo uznirstošo logu, kad nosacījumi ir izpildīti |
+| `trigger_entity` | string | Neobligāts | Jebkura entītija | Atvērt šo uznirstošo logu, balstoties uz jebkuras entītijas stāvokli, vienkāršā `trigger` forma |
 | `trigger_state` | string | Neobligāts (**Obligāts**, ja ir definēts `trigger_entity`) | Jebkurš entītijas stāvoklis | Entītijas stāvoklis, lai atvērtu uznirstošo logu |
-| `trigger_close` | boolean | Neobligāts | `true` vai `false` (noklusējums) | Aizvērt uznirstošo logu, kad `trigger_state` atšķiras |
+| `trigger_close` | boolean | Neobligāts | `true` vai `false` | Aizvērt uznirstošo logu, kad nosacījumi vairs nav izpildīti (noklusējums: `true` ar `trigger`, `false` ar `trigger_state`) |
 | `open_action` | object | Neobligāts | Skatiet [darbības](#pieskāriena-dubultpieskāriena-un-turēšanas-darbības) | Izraisīt darbību, kad uznirstošais logs atveras |
 | `close_action` | object | Neobligāts | Skatiet [darbības](#pieskāriena-dubultpieskāriena-un-turēšanas-darbības) | Izraisīt darbību, kad uznirstošais logs aizveras |
 | `show_header` | boolean | Neobligāts | `true` (noklusējums) vai `false` | Rādīt/Paslēpt uznirstošā loga galveni pilnībā |
@@ -445,8 +461,8 @@ auto_order: true
 | `relative_slide`        | boolean | Optional (`false` default )     | Atjaunina vērtību relatīvi pret sākuma vērtību, nevis pret sākuma pieskāriena punktu.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Padara slīdni tikai lasāmu. Automātiski ieslēgts dažām entītijām, piemēram, sensoriem.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Entītijas stāvoklis tiek atjaunināts slīdēšanas laikā. **Šī funkcija nav ieteicama visām entītijām.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Maina slīdņa aizpildījuma virzienu |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Vērtības attēlojuma pozīcija |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` vai `bottom` | Maina slīdņa aizpildījuma virzienu. Ja nav norādīts, no kreisās uz labo, spoguļots [no labās uz kreiso rakstītajās valodās](#lokalizācija) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` vai `hidden` | Vērtības attēlojuma pozīcija. Ja nav norādīts, beigu pusē, tātad pa kreisi [no labās uz kreiso rakstītajās valodās](#lokalizācija) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Invertē slīdņa virzienu (100% aizpildījums atbilst minimumam). Nav pieejams krāsu slīdņiem. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Tikai gaismām.** Izvēlēties slīdņa režīmu |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Tikai aizsegiem.** Izvēlēties slīdņa režīmu (pozīcija vai sasvēruma pozīcija) |
@@ -940,7 +956,7 @@ sub_button:
 | `limit`             | number  | Optional     | A number                                        | Kartītē attēloto notikumu skaits                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Rādīt vai slēpt notikumu beigu laiku                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Rādīt vai slēpt notikuma progresa joslu                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Rādīt vai slēpt notikumus, kas pašlaik notiek                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Rādīt vai slēpt notikumus, kas pašlaik notiek. Vairāku dienu notikumi tiek vērtēti pa vienai dienai, tāpēc tiek paslēpta tikai iesāktā diena, bet nākamās dienas paliek redzamas |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | Ļauj tekstam ritināties, ja saturs pārsniedz konteinera izmēru |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#pieskāriena-dubultpieskāriena-un-turēšanas-darbības) | Ļauj pievienot darbības, klikšķinot uz notikuma. |
 | `tap_action` | object | Optional | See [actions](#pieskāriena-dubultpieskāriena-un-turēšanas-darbības) | Definē darbības veidu, klikšķinot uz dienas, ja nav definēts, tiks izmantots `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Neobligāta | `icon-left` (noklusējums), `icon-top`, `icon-bottom`, `icon-right` | Ikonas novietojums papildpogā |
 | `always_visible` | boolean | Neobligāta | `true` vai `false` (noklusējums) | **Tikai slīdnim.** Vienmēr rādīt slīdni, nevis atvērt to pieskaroties |
 | `show_button_info` | boolean | Neobligāta | `true` vai `false` (noklusējums) | **Tikai slīdnim.** Rādīt ikonu/nosaukumu/stāvokli, kad ieslēgts `always_visible` |
-| `visibility` | object vai list | Neobligāta | Skatiet [nosacījumus](https://www.home-assistant.io/docs/scripts/conditions/) | Rādīt vai slēpt papildpogu, balstoties uz nosacījumiem |
+| `visibility` | object vai list | Neobligāta | Skatiet [nosacījumus](#nosacījumi) | Rādīt vai slēpt papildpogu, balstoties uz nosacījumiem |
 | `hide_when_parent_unavailable` | boolean | Neobligāta | `true` vai `false` (noklusējums) | Slēpt papildpogu, ja vecākkartītes entītija nav pieejama |
+| `css_class` | string | Neobligāta | Jebkura virkne | Papildu CSS klase papildpogai, lai to uzrunātu savos [stilos](#stils) neatkarīgi no tās nosaukuma (piem., `My value` dod `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Slīdņa papildpogas atbalsta tādas pašas slīdņa opcijas kā pogas slīdņi,
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Apaļojuma rādiuss papildpogām |
 | `--bubble-sub-button-background-color` | `color` | Fona krāsa papildpogām |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontūra, kas papildpogai vai slīdnim tiek pievienota tikai tad, kad tas zīmējas tādā pašā krāsā kā kartīte aiz tā, kas to padarītu neredzamu (iestatiet `none`, lai to noņemtu) |
 | `--bubble-sub-slider-border-radius` | `px` | Apaļojuma rādiuss slīdņa papildpogām |
 | `--bubble-sub-slider-background-color` | `color` | Fona krāsa slīdņa papildpogām |
 | `--bubble-sub-slider-height` | `px` | Augstums pastāvīgi redzamām slīdņa papildpogām |
+| `--bubble-sub-slider-outline` | `box-shadow` | Tikai slīdņa papildpogu kontūra, ja nav norādīta, tiek izmantota `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Teksta krāsa uz spilgtiem papildpogu foniem |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Nosacījumi
+
+Dažas opcijas vada nosacījumi, kas rakstīti tieši tāpat kā Home Assistant [nosacījumu kartītes](https://www.home-assistant.io/dashboards/conditional/) nosacījumi:
+
+- `visibility` uz [papildpogas](#papildpogas), lai to rādītu vai slēptu
+- `trigger` uz [uznirstošā loga](#uznirstošais-logs), lai to atvērtu, kad nosacījumi ir izpildīti
+- `checkConditionsMet(conditions, hass)` jūsu [veidnēs](#veidnes), kad atbilde nepieciešama jūsu paša kodā
+
+Tiek izvērtēts katrs Home Assistant nosacījuma veids: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, kā arī `and`, `or` un `not` grupas. Darbojas arī Home Assistant nosacījumu veidotāja nosacījumi, tie, kas nosaukti pēc sava domēna, piemēram, `sun.is_up`, `light.is_on`, `zone.in_zone` vai `temperature.is_value`, ar saviem `target`, `options`, `behavior` un `for` iestatījumiem.
+
+<details>
+
+<summary><b>Piemērs</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Nosacījumi tiek izvērtēti jūsu pārlūkā, tāpēc tie nedaudzie, kuriem vajadzīgs Home Assistant serveris, nevar būt precīzi: saullēkts un saulriets tiek nolasīti no entītijas `sun.sun`, nevis pārrēķināti, un `for` ilgums tiek mērīts no pēdējās stāvokļa maiņas, bez recorder vēstures.
+>
+> `view_columns` tiek pieņemts, bet vienmēr izpildās, jo Bubble Card nekad nav tā, kas izkārto jūsu skata kolonnas. Nosacījuma veids, ko Bubble Card nepazīst, vienu reizi paziņo par sevi jūsu pārlūka konsolē, nevis klusi neizdodas, tāpēc varat atšķirt drukas kļūdu no trūkstošas iespējas.
+
+<br>
+
+---
+
+<br>
+
 ## Pieskāriena, dubultpieskāriena un turēšanas darbības
 
 Jūs varat izmantot arī Home Assistant noklusējuma pieskāriena darbības, dubultpieskāriena darbības un turēšanas darbības tajās kartītēs, kas atbalsta šo opciju. Piemēram, tas ļauj parādīt "vairāk informācijas" logu, turot nospiestu pogas ikonu, vai izpildīt servisu, kad tiek nospiesta papildpoga.
@@ -1700,6 +1762,8 @@ Jūs varat pievienot pielāgotus stilus, lai modificētu visu karšu CSS **neizm
 
 > [!TIP]  
 > Papildpogas var mērķēt, izmantojot uz nosaukumu balstītas klases. Piemēram, papildpogu ar nosaukumu "My sub-button" var stilizēt ar `.my-sub-button`. Slaidera papildpogas arī atklāj `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` utt.
+>
+> Uz nosaukumu balstīta klase mainās, kad pārdēvējat papildpogu, un tā tiek tulkota, kad tiek tulkots nosaukums. Iestatiet papildpogai `css_class`, lai iegūtu savu klasi, kas nekad nepārvietojas, neatkarīgi no nosaukuma un valodas.
 
 #### Piemēri
 
@@ -2066,6 +2130,7 @@ Jums ir pieejamas visas globālās JS funkcijas, taču ir pieejamas arī:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` atgriež `true`, kad [nosacījumu](#nosacījumi) saraksts ir izpildīts, piemēram `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` var izmantot, lai tulkotu stāvokli (var arī izmantot, lai iegūtu stāvokļa mērvienību, bez nepieciešamības to pievienot manuāli).
 - `hass.formatEntityAttributeValue(state, "attribute")` var izmantot, lai tulkotu atribūtu (var arī izmantot, lai iegūtu stāvokļa mērvienību, bez nepieciešamības to pievienot manuāli).
 
@@ -2318,6 +2383,8 @@ Moduļi ir jaudīga funkcija, kas ļauj saglabāt, atkārtoti izmantot un koplie
 Taču šī funkcija ir daudz jaudīgāka par to, tā ļauj jums pašiem pievienot faktiskas funkcijas Bubble Card redaktorā, izmantojot visas noklusējuma [Home Assistant formas](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) opcijas!  
 Objekta selektors ir uzlabots, lai rādītu izmaiņas reāllaikā un pareizi atbalstītu atribūtus.
 
+Modulis var arī atbildēt Home Assistant kartīšu atlasītājam blakus iebūvētajiem [entītiju ieteikumiem](#entītiju-ieteikumi): izmantojiet `suggestions` tām kartītēm, ko tas var aprakstīt iepriekš, un `suggestions_code`, kad tās jāaprēķina no jūsu iestatījumiem, piemēram, uznirstošu logu, kas veidots no visām tās zonas entītijām, kurai pieder izvēlētā entītija. Abas atslēgas ir dokumentētas [šeit](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Jūs varat arī pārlūkot **Module Store**, lai atrastu un instalētu [kopienas izveidotus moduļus](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), vai koplietot savus radījumus!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Jūs varat piekļūt Moduļa redaktoram no jebkuras kartes iestatījumiem, sada�
 - **Meklēt** un **kārtot** moduļus (alfabētiski, pēc jaunuma, aktīvie pirmie)
 - **Iestatīt globālo statusu**, lai modulis automātiski piemērotos visām kartēm
 - **Importēt/eksportēt** moduļus dublēšanai vai koplietošanai
+- **Rakstīt entītiju ieteikumus** moduļa redaktorā, sadaļā **Neobligāti: entītiju ieteikumi**, lai jūsu modulis tiktu piedāvāts Home Assistant kartīšu atlasītājā. Gan noteikumi, gan aprēķinātie ieteikumi tiek pārbaudīti rakstīšanas laikā, kļūda tur neļauj saglabāt, un priekšskatījums rāda ieteiktās kartītes jebkurai izvēlētai entītijai
 
 #### Cilne "Module Store"
 
@@ -2391,7 +2459,8 @@ Jūs varat piekļūt Moduļa redaktoram no jebkuras kartes iestatījumiem, sada�
 3. Aizpildiet moduļa informāciju.
 4. Ierakstiet savu CSS un/vai JavaScript veidnes kodu **Koda** redaktorā.
 5. (Pēc izvēles) Izveidojiet pielāgotu konfigurācijas saskarni sadaļā **Redaktors** (piemēram, krāsu izvēlni ekrānuzņēmumā augstāk, pilna dokumentācija pieejama [šeit](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Noklikšķiniet **Saglabāt**.
+6. (Pēc izvēles) Uzrakstiet savus **Entītiju ieteikumus**, lai jūsu modulis tiktu piedāvāts Home Assistant kartīšu atlasītājā. Panelis pārbauda rakstīto, kamēr rakstāt, un tā priekšskatījums rāda pašas ieteiktās kartītes jūsu izvēlētajai entītijai.
+7. Noklikšķiniet **Saglabāt**.
 
 Jūsu modulis tagad ir pieejams izmantošanai jebkurā no jūsu kartēm!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Vairāk piemēru atrodami Module Store, vai [šeit](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalizācija
+
+Bubble Card runā jūsu valodā. Tā redaktors ir iztulkots 64 valodās, ko atbalsta Home Assistant, un visur, kur Home Assistant jau ir savs vārds, tiek pārņemts tā formulējums, tāpēc abās saskarnēs lasāt vienus un tos pašus terminus.
+
+Redaktora lejasdaļā, blakus versijas numuram, slēdzis **Automātiski** seko jūsu Home Assistant valodai. Izslēdziet to, un viss redaktors atgriezīsies angļu valodā, kas noder, sekojot pamācībai vai ziņojot par problēmu. Jūsu izvēle tiek iegaumēta pārlūkā.
+
+Arī šī dokumentācija ir tulkota, [62 valodās](languages.md). Šīs lapas ir atvērtas ikvienam, tāpēc formulējumu, kas neatbilst jūsu paša Home Assistant, var izlabot pāris klikšķos. Par satura atskaites punktu paliek angļu versija.
 
 <br>
 

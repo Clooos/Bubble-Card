@@ -18,7 +18,7 @@ Bubble Card 是一套為 Home Assistant 打造的極簡且可自訂的卡片集�
 
 ## 目錄
 
-**[`安裝`](#安裝)**  **[`設定`](#設定)**  **[`彈出視窗`](#彈出視窗)**  **[`水平按鈕堆疊`](#水平按鈕堆疊)**  **[`按鈕`](#按鈕)**  **[`媒體播放器`](#媒體播放器)**  **[`窗簾`](#窗簾)**  **[`選擇`](#選擇)**  **[`空調`](#空調)**  **[`行事曆`](#行事曆)**  **[`分隔線`](#分隔線)**  **[`空白欄`](#空白欄)**  **[`純子按鈕`](#純子按鈕)**  **[`子按鈕`](#子按鈕)**  **[`卡片版面配置`](#卡片版面配置)**  **[`動作`](#點擊雙擊與長按動作)**  **[`樣式`](#樣式)**  **[`範本`](#範本)**  **[`模組`](#模組)**  **[`說明`](#說明)**  **[`貢獻`](#貢獻)**  **[`贊助`](#贊助)**
+**[`安裝`](#安裝)**  **[`設定`](#設定)**  **[`實體建議`](#實體建議)**  **[`彈出視窗`](#彈出視窗)**  **[`水平按鈕堆疊`](#水平按鈕堆疊)**  **[`按鈕`](#按鈕)**  **[`媒體播放器`](#媒體播放器)**  **[`窗簾`](#窗簾)**  **[`選擇`](#選擇)**  **[`空調`](#空調)**  **[`行事曆`](#行事曆)**  **[`分隔線`](#分隔線)**  **[`空白欄`](#空白欄)**  **[`純子按鈕`](#純子按鈕)**  **[`子按鈕`](#子按鈕)**  **[`卡片版面配置`](#卡片版面配置)**  **[`條件`](#條件)**  **[`動作`](#點擊雙擊與長按動作)**  **[`樣式`](#樣式)**  **[`範本`](#範本)**  **[`模組`](#模組)**  **[`在地化`](#在地化)**  **[`說明`](#說明)**  **[`貢獻`](#貢獻)**  **[`贊助`](#贊助)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card 是一套為 Home Assistant 打造的極簡且可自訂的卡片集�
 
 <br>
 
-1. 下載此檔案:[bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. 將此檔案加入你的 `<config>/www` 資料夾
+1. 從[最新發行版](https://github.com/Clooos/Bubble-Card/releases/latest)下載 `bubble-card.zip`
+2. 將它解壓縮到你的 `<config>/www` 資料夾，你應該會得到 `bubble-card.js` 以及旁邊的一個 `translations` 資料夾（該資料夾存放編輯器的字典，沒有它編輯器就會一直維持英文）
 3. 在你的儀表板上點擊右上角的圖示,然後點擊「編輯儀表板」
 4. 再次點擊該圖示,然後點擊「管理資源」
 5. 點擊「新增資源」
@@ -130,6 +130,21 @@ Bubble Card 是一套為 Home Assistant 打造的極簡且可自訂的卡片集�
 
 <br>
 
+## 實體建議
+
+自 Home Assistant 2026.6 起，在卡片挑選器中選擇一個實體會提供給你幾張現成的卡片，而 Bubble Card 以自己的配方回應這個問題。選擇一個燈光，你會得到一張帶亮度滑桿的卡片，若你的燈光支援，還會有色溫、顏色與飽和度的變體。選擇一個窗簾，你會得到它的位置滑桿；選擇一個媒體播放器，你還會得到一個附訊號來源清單的變體；選擇一台掃地機器人，你會得到它的啟動、暫停與回充座按鈕。每一則建議都是一份普通的 Bubble Card 設定，並以即時預覽呈現，因此你可以挑最接近的那一個，然後照常繼續編輯。
+
+你會得到什麼，取決於你的實體實際上能做什麼：沒有亮度通道的燈光得到的是開關而不是滑桿，無法傾斜的窗簾不會有傾斜變體，空調實體只有在具備預設模式時才會得到它們。適用時，經典項目會接在它們下方：該領域的專用卡片、一個單純的按鈕，以及一個滑桿。
+
+> [!TIP]
+> 模組可以把自己的建議加入該清單，參見[模組](#模組)。
+
+<br>
+
+---
+
+<br>
+
 ## 彈出視窗
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Bubble Card 是一套為 Home Assistant 打造的極簡且可自訂的卡片集�
 | `shadow_opacity` | string | 選用 | `0` 到 `100` 之間的任何值 | 彈出視窗的陰影不透明度(例如 `0` 可將其隱藏) |
 | `hide_backdrop` | boolean | 選用 | `true` 或 `false`(預設) | 在主儀表板的第一個彈出視窗上將此設為 true,可停用所有彈出視窗的背景遮罩。 |
 | `background_update` | boolean | 選用 | `true` 或 `false`(預設) | 在背景中更新彈出視窗內容(不建議) |
-| `trigger_entity` | string | 選用 | 任何實體 | 根據任何實體的狀態開啟此彈出視窗 |
+| `trigger` | object 或 list | 選用 | 參見[條件](#條件) | 當條件成立時開啟此彈出視窗 |
+| `trigger_entity` | string | 選用 | 任何實體 | 根據任何實體的狀態開啟此彈出視窗，即 `trigger` 的簡化形式 |
 | `trigger_state` | string | 選用(若已定義 `trigger_entity` 則為**必要**) | 任何實體狀態 | 開啟彈出視窗所需的實體狀態 |
-| `trigger_close` | boolean | 選用 | `true` 或 `false`(預設) | 當 `trigger_state` 不同時關閉彈出視窗 |
+| `trigger_close` | boolean | 選用 | `true` 或 `false` | 當條件不再成立時關閉彈出視窗(預設:搭配 `trigger` 時為 `true`，搭配 `trigger_state` 時為 `false`) |
 | `open_action` | object | 選用 | 參見[動作](#點擊雙擊與長按動作) | 彈出視窗開啟時觸發某個動作 |
 | `close_action` | object | 選用 | 參見[動作](#點擊雙擊與長按動作) | 彈出視窗關閉時觸發某個動作 |
 | `show_header` | boolean | 選用 | `true`(預設)或 `false` | 完整顯示/隱藏彈出視窗的標頭 |
@@ -445,8 +461,8 @@ auto_order: true
 | `relative_slide`        | boolean | 選用(預設 `false`)     | 依起始值更新數值,而非依起始觸控點更新。                      |
 | `read_only_slider`      | boolean | 選用(預設 `false`)      | 將滑桿設為唯讀,某些實體(如感測器)會自動啟用此選項。                        |
 | `slider_live_update`    | boolean | 選用(預設 `false`)      | 拖動滑桿時即時更新實體狀態。**並非所有實體都建議使用此功能。**        |
-| `slider_fill_orientation` | string | 選用 | `left`(預設)、`right`、`top`、`bottom` | 變更滑桿的填充方向 |
-| `slider_value_position` | string | 選用 | `right`(預設)、`left`、`center`、`hidden` | 數值顯示的位置 |
+| `slider_fill_orientation` | string | 選用 | `left`、`right`、`top` 或 `bottom` | 變更滑桿的填充方向。未定義時為由左至右，在[由右至左的語言](#在地化)中則會鏡像 |
+| `slider_value_position` | string | 選用 | `right`、`left`、`center` 或 `hidden` | 數值顯示的位置。未定義時位於結尾側，因此在[由右至左的語言](#在地化)中位於左側 |
 | `invert_slider_value` | boolean | 選用(預設 `false`) | 反轉滑桿方向(填滿 100% 等於最小值),不適用於顏色滑桿。 |
 | `light_slider_type` | string | 選用 | `brightness`(預設)、`hue`、`saturation`、`white_temp` | **僅適用於燈光。** 選擇滑桿模式 |
 | `cover_slider_type` | string | 選用 | `position`(預設)、`tilt_position` | **僅適用於窗簾。** 選擇滑桿模式(位置或傾斜) |
@@ -940,7 +956,7 @@ sub_button:
 | `limit`             | number  | 選用     | 一個數字                                        | 卡片上顯示的事件數量                                  |
 | `show_end`          | boolean | 選用     | `true` 或 `false`(預設)                     | 顯示或隱藏事件的結束時間                                                    |
 | `show_progress`     | boolean | 選用     | `true`(預設)或 `false`                     | 顯示或隱藏事件的進度條                                                     |
-| `show_started_events`| boolean | 選用     | `true`(預設)或 `false`                     | 顯示或隱藏正在進行中的事件                                                 |
+| `show_started_events`| boolean | 選用     | `true`(預設)或 `false`                     | 顯示或隱藏正在進行中的事件。跨多天的事件會逐日判斷，因此只有進行中的那一天會被隱藏，之後的日子仍然可見 |
 | `scrolling_effect`  | boolean | 選用 | `true`(預設)或 `false` | 當內容超出容器大小時允許文字捲動 |
 | `event_action` | object | 選用 | `tap_action`、`double_tap_action` 或 `hold_action`,見[動作](#點擊雙擊與長按動作) | 允許為事件點擊新增動作。 |
 | `tap_action` | object | 選用 | 見[動作](#點擊雙擊與長按動作) | 定義點擊日期時的動作類型,若未定義則使用 `none`。 |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | 選填 | `icon-left`(預設)、`icon-top`、`icon-bottom`、`icon-right` | 子按鈕內圖示的位置 |
 | `always_visible` | boolean | 選填 | `true` 或 `false`(預設) | **僅限滑桿。**永遠顯示滑桿,而非點擊後才開啟 |
 | `show_button_info` | boolean | 選填 | `true` 或 `false`(預設) | **僅限滑桿。**啟用 `always_visible` 時顯示圖示、名稱、狀態 |
-| `visibility` | object 或 list | 選填 | 參見[條件](https://www.home-assistant.io/docs/scripts/conditions/) | 根據條件顯示或隱藏子按鈕 |
+| `visibility` | object 或 list | 選填 | 參見[條件](#條件) | 根據條件顯示或隱藏子按鈕 |
 | `hide_when_parent_unavailable` | boolean | 選填 | `true` 或 `false`(預設) | 當父卡片實體不可用時隱藏子按鈕 |
+| `css_class` | string | 選填 | 任何字串 | 子按鈕上額外的一個 CSS 類別，讓你不論它叫什麼名字都能在[樣式](#樣式)中指定到它(例如 `My value` 會得到 `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ sub_button:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | 子按鈕的圓角半徑 |
 | `--bubble-sub-button-background-color` | `color` | 子按鈕的背景顏色 |
+| `--bubble-sub-button-outline` | `box-shadow` | 只有當子按鈕或滑桿與其後方卡片顏色相同、因而會看不見時，才會為它加上的外框(設為 `none` 即可移除) |
 | `--bubble-sub-slider-border-radius` | `px` | 滑桿子按鈕的圓角半徑 |
 | `--bubble-sub-slider-background-color` | `color` | 滑桿子按鈕的背景顏色 |
 | `--bubble-sub-slider-height` | `px` | 永久顯示滑桿子按鈕的高度 |
+| `--bubble-sub-slider-outline` | `box-shadow` | 僅滑桿子按鈕的外框，未設定時會回落到 `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | 明亮子按鈕背景上的文字顏色 |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## 條件
+
+有些選項是由條件驅動的，寫法與 Home Assistant [條件卡片](https://www.home-assistant.io/dashboards/conditional/)的條件完全相同：
+
+- [子按鈕](#子按鈕)上的 `visibility`，用來顯示或隱藏它
+- [彈出視窗](#彈出視窗)上的 `trigger`，用來在條件成立時開啟它
+- [範本](#範本)中的 `checkConditionsMet(conditions, hass)`，當你需要在自己的程式碼裡得到答案時
+
+Home Assistant 的每一種條件類型都會被求值：`state`、`numeric_state`、`screen`、`user`、`time`、`location`、`template`，以及 `and`、`or` 與 `not` 群組。Home Assistant 條件建構器中的條件同樣可用，也就是那些以其領域命名的條件，例如 `sun.is_up`、`light.is_on`、`zone.in_zone` 或 `temperature.is_value`，連同它們的 `target`、`options`、`behavior` 與 `for` 設定。
+
+<details>
+
+<summary><b>範例</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> 條件是在你的瀏覽器中求值的，因此少數需要 Home Assistant 伺服器的條件無法做到精確：日出與日落是從 `sun.sun` 實體讀取，而不是重新計算，而 `for` 的持續時間則是從最後一次狀態變化起算，沒有 recorder 的歷史紀錄。
+>
+> `view_columns` 會被接受但永遠成立，因為為你的檢視排列欄位的從來都不是 Bubble Card。Bubble Card 不認識的條件類型，會在你的瀏覽器主控台中回報一次，而不是無聲地失敗，這樣你就能分辨是打錯字還是尚未支援的功能。
+
+<br>
+
+---
+
+<br>
+
 ## 點擊、雙擊與長按動作
 
 在支援此選項的卡片上,您也可以使用 Home Assistant 預設的點擊動作、雙擊動作與長按動作。舉例來說,這樣就能透過長按按鈕圖示來顯示「更多資訊」視窗,或是在點擊子按鈕時執行某項服務。
@@ -1700,6 +1762,8 @@ button_action:
 
 > [!TIP]  
 > 子按鈕可以透過以名稱為基礎的類別來指定樣式。例如，一個名為「My sub-button」的子按鈕可以用 `.my-sub-button` 來設定樣式。滑桿子按鈕也提供了 `.bubble-sub-button-slider-1`、`.bubble-sub-button-slider-2` 等類別。
+>
+> 以名稱為基礎的類別會在你重新命名子按鈕時改變，名稱被翻譯時它也會跟著被翻譯。在子按鈕上設定 `css_class`，就能得到一個屬於你自己的類別，不論名稱是什麼、語言是什麼都不會變動。
 
 #### 範例
 
@@ -2066,6 +2130,7 @@ styles: |
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` 會在一組[條件](#條件)成立時回傳 `true`，例如 `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`。
 - `hass.formatEntityState(state)` 可以用來翻譯一個狀態（也可以用來取得狀態單位，而不需要手動加入）。
 - `hass.formatEntityAttributeValue(state, "attribute")` 可以用來翻譯一個屬性（也可以用來取得狀態單位，而不需要手動加入）。
 
@@ -2318,6 +2383,8 @@ styles: >
 但這個功能遠比這更強大，它讓你能夠透過 Bubble Card 編輯器親自加入實際的功能，使用所有預設的 [Home Assistant 表單](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)選項！
 物件選擇器已經過改進，能即時顯示變更並正確支援屬性。
 
+模組也可以在內建[實體建議](#實體建議)旁邊回應 Home Assistant 的卡片挑選器：對於可以事先描述的卡片請使用 `suggestions`，當它們必須依你的安裝環境運算時則使用 `suggestions_code`，例如由所選實體所屬區域中的所有實體組成的一個彈出視窗。這兩個鍵的說明都在[這裡](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions)。
+
 你也可以瀏覽 **Module Store**，尋找並安裝[社群建立的模組](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)，或分享你自己的創作！
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Bubble Card Tools 整合元件可啟用模組編輯器與 Module Store，並將�
 - **搜尋**與**排序**模組（依字母、最近或啟用中優先排序）
 - **設定全域狀態**，讓模組自動套用到所有卡片
 - **匯入／匯出**模組以備份或分享
+- 在模組編輯器的 **選用：實體建議** 底下**撰寫實體建議**，讓你的模組出現在 Home Assistant 的卡片挑選器中。規則與運算建議都會在你撰寫時受到檢查，其中有錯誤就無法儲存，而預覽會顯示為你所選的任何實體建議的卡片
 
 #### Module Store 分頁
 
@@ -2391,7 +2459,8 @@ Bubble Card Tools 整合元件可啟用模組編輯器與 Module Store，並將�
 3. 填寫模組資訊。
 4. 在**程式碼**編輯器中撰寫你的 CSS 和／或 JavaScript 範本程式碼。
 5. （選用）在**編輯器**區塊建立自訂設定介面（就像上方截圖中的顏色選擇器，完整文件請參考[這裡](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)）。
-6. 點擊**儲存**。
+6. （選用）撰寫你的**實體建議**，讓你的模組出現在 Home Assistant 的卡片挑選器中。此面板會在你輸入時檢查內容，而它的預覽會顯示為你所選實體建議的卡片本身。
+7. 點擊**儲存**。
 
 你的模組現在已經可以套用到任何一張卡片上了！
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 更多範例可以在 Module Store 中找到，或參考[這裡](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)。
+
+<br>
+
+---
+
+<br>
+
+## 在地化
+
+Bubble Card 說你的語言。它的編輯器已翻譯成 Home Assistant 支援的 64 種語言，凡是 Home Assistant 已經有說法的地方，都沿用它自己的用字，這樣你在兩個介面裡讀到的會是相同的術語。
+
+在編輯器底部、版本號旁邊，有一個 **自動** 開關會跟隨你的 Home Assistant 語言。把它關掉，整個編輯器就會回到英文，這在照著教學操作或回報問題時很方便。你的選擇會記在瀏覽器裡。
+
+這份文件同樣被翻譯了，[共 62 種語言](languages.md)。這些頁面對所有人開放，因此與你自己的 Home Assistant 不一致的用字，只要點幾下就能修正。英文版仍然是內容本身的依據。
 
 <br>
 

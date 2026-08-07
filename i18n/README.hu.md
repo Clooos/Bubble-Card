@@ -18,7 +18,7 @@ A Bubble Card egy minimalista és testreszabható kártyagyűjtemény a Home Ass
 
 ## Tartalomjegyzék
 
-**[`Telepítés`](#telepítés)**  **[`Konfiguráció`](#konfiguráció)**  **[`Pop-up`](#pop-up)**  **[`Vízszintes gombsor`](#vízszintes-gombsor)**  **[`Gomb`](#gomb)**  **[`Médialejátszó`](#médialejátszó)**  **[`Árnyékoló`](#árnyékoló)**  **[`Választó`](#választó)**  **[`Klíma`](#klíma)**  **[`Naptár`](#naptár)**  **[`Elválasztó`](#elválasztó)**  **[`Üres oszlop`](#üres-oszlop)**  **[`Csak algombok`](#csak-algombok)**  **[`Algombok`](#algombok)**  **[`Kártyaelrendezések`](#kártyaelrendezések)**  **[`Műveletek`](#koppintás-dupla-koppintás-és-hosszú-nyomás-műveletek)**  **[`Stílus`](#stílus)**  **[`Sablonok`](#sablonok)**  **[`Modulok`](#modulok)**  **[`Súgó`](#súgó)**  **[`Közreműködés`](#közreműködés)**  **[`Támogatás`](#támogatás)**
+**[`Telepítés`](#telepítés)**  **[`Konfiguráció`](#konfiguráció)**  **[`Entitásjavaslatok`](#entitásjavaslatok)**  **[`Pop-up`](#pop-up)**  **[`Vízszintes gombsor`](#vízszintes-gombsor)**  **[`Gomb`](#gomb)**  **[`Médialejátszó`](#médialejátszó)**  **[`Árnyékoló`](#árnyékoló)**  **[`Választó`](#választó)**  **[`Klíma`](#klíma)**  **[`Naptár`](#naptár)**  **[`Elválasztó`](#elválasztó)**  **[`Üres oszlop`](#üres-oszlop)**  **[`Csak algombok`](#csak-algombok)**  **[`Algombok`](#algombok)**  **[`Kártyaelrendezések`](#kártyaelrendezések)**  **[`Feltételek`](#feltételek)**  **[`Műveletek`](#koppintás-dupla-koppintás-és-hosszú-nyomás-műveletek)**  **[`Stílus`](#stílus)**  **[`Sablonok`](#sablonok)**  **[`Modulok`](#modulok)**  **[`Honosítás`](#honosítás)**  **[`Súgó`](#súgó)**  **[`Közreműködés`](#közreműködés)**  **[`Támogatás`](#támogatás)**
 
 <br>
 
@@ -32,8 +32,8 @@ A Bubble Card egy minimalista és testreszabható kártyagyűjtemény a Home Ass
 
 <br>
 
-1. Töltsd le ezt a fájlt: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Add hozzá ezt a fájlt a `<config>/www` mappádhoz
+1. Töltsd le a `bubble-card.zip` fájlt a [legfrissebb kiadásból](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Csomagold ki a `<config>/www` mappádba, a `bubble-card.js` fájlt és mellette egy `translations` mappát kell kapnod (ez a mappa tartalmazza a szerkesztő szótárait, nélküle a szerkesztő angolul marad)
 3. Az irányítópulton kattints a jobb felső sarokban lévő ikonra, majd a `Vezérlőpult szerkesztése` gombra
 4. Kattints újra arra az ikonra, majd az `Erőforrások kezelése` menüpontra
 5. Kattints az `Erőforrás hozzáadása` gombra
@@ -130,6 +130,21 @@ Minden beállítás elvégezhető a Home Assistant szerkesztőjében. De az alá
 
 <br>
 
+## Entitásjavaslatok
+
+A Home Assistant 2026.6 óta egy entitás kiválasztása a kártyaválasztóban néhány kész kártyát kínál fel, és a Bubble Card a saját receptjeivel válaszol erre a kérdésre. Válassz egy lámpát, és fényerő csúszkával ellátott kártyát kapsz, valamint színhőmérséklet, szín és telítettség változatot, ha a lámpád támogatja őket. Válassz egy árnyékolót, és megkapod a pozíció csúszkáját, válassz egy médialejátszót, és megkapod a forráslistájával ellátott változatot is, válassz egy robotporszívót, és megkapod az indítás, szünet és dokkolás gombjait. Minden javaslat egy szokásos Bubble Card konfiguráció, élő előnézetként megjelenítve, így kiveheted a hozzád legközelebb állót, és a megszokott módon szerkesztheted tovább.
+
+Az, hogy mit ajánl fel, attól függ, mire képes valójában az entitásod: a fényerő csatorna nélküli lámpa csúszka helyett kapcsolót kap, a dönteni nem tudó árnyékoló nem kap döntés változatot, a klíma entitás pedig csak akkor kapja meg az előre beállított módjait, ha vannak neki. A klasszikus bejegyzések alattuk következnek, ha van értelmük: az adott domain saját kártyája, egy egyszerű gomb és egy csúszka.
+
+> [!TIP]
+> A modulok saját javaslatokat adhatnak ehhez a listához, lásd [modulok](#modulok).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Ez a kártya lehetővé teszi, hogy bármilyen tartalommal pop-upot hozz létre.
 | `shadow_opacity` | string | Nem kötelező | Bármilyen érték `0`-tól `100`-ig | A pop-up árnyékának átlátszatlansága (pl. `0` az elrejtéséhez) |
 | `hide_backdrop` | boolean | Nem kötelező | `true` vagy `false` (alapértelmezett) | Állítsd ezt true-ra a fő irányítópultod első pop-upján, hogy kikapcsold a backdropot minden pop-upon. |
 | `background_update` | boolean | Nem kötelező | `true` vagy `false` (alapértelmezett) | A pop-up tartalmának frissítése a háttérben (nem ajánlott) |
-| `trigger_entity` | string | Nem kötelező | Bármilyen entitás | A pop-up megnyitása bármely entitás állapota alapján |
+| `trigger` | object vagy list | Nem kötelező | Lásd [feltételek](#feltételek) | Megnyitja ezt a pop-upot, ha a feltételek teljesülnek |
+| `trigger_entity` | string | Nem kötelező | Bármilyen entitás | A pop-up megnyitása bármely entitás állapota alapján, a `trigger` egyszerű formája |
 | `trigger_state` | string | Nem kötelező (**Kötelező**, ha a `trigger_entity` meg van adva) | Bármilyen entitásállapot | Az entitás állapota, amely megnyitja a pop-upot |
-| `trigger_close` | boolean | Nem kötelező | `true` vagy `false` (alapértelmezett) | A pop-up bezárása, ha a `trigger_state` eltérő |
+| `trigger_close` | boolean | Nem kötelező | `true` vagy `false` | A pop-up bezárása, ha a feltételek már nem teljesülnek (alapértelmezés: `true` a `trigger` mellett, `false` a `trigger_state` mellett) |
 | `open_action` | object | Nem kötelező | Lásd [műveletek](#koppintás-dupla-koppintás-és-hosszú-nyomás-műveletek) | Egy művelet indítása a pop-up megnyitásakor |
 | `close_action` | object | Nem kötelező | Lásd [műveletek](#koppintás-dupla-koppintás-és-hosszú-nyomás-műveletek) | Egy művelet indítása a pop-up bezárásakor |
 | `show_header` | boolean | Nem kötelező | `true` (alapértelmezett) vagy `false` | A pop-up fejlécének teljes megjelenítése/elrejtése |
@@ -445,8 +461,8 @@ Ezek a beállítások csak akkor érhetők el, ha a `button_type` értéke `slid
 | `relative_slide`        | boolean | Opcionális (alapértelmezett `false` )     | Az értéket a kezdőértékhez képest frissíti, nem a kezdő érintési ponthoz képest.                      |
 | `read_only_slider`      | boolean | Opcionális (alapértelmezett `false`)      | Csak olvashatóvá teszi a csúszkát. Bizonyos entitásoknál, például érzékelőknél, automatikusan bekapcsol.                        |
 | `slider_live_update`    | boolean | Opcionális (alapértelmezett `false`)      | Az entitás állapota csúsztatás közben frissül. **Ez a funkció nem ajánlott minden entitáshoz.**        |
-| `slider_fill_orientation` | string | Opcionális | `left` (alapértelmezett), `right`, `top`, `bottom` | Megváltoztatja a csúszka kitöltési irányát |
-| `slider_value_position` | string | Opcionális | `right` (alapértelmezett), `left`, `center`, `hidden` | Az érték megjelenítésének pozíciója |
+| `slider_fill_orientation` | string | Opcionális | `left`, `right`, `top` vagy `bottom` | Megváltoztatja a csúszka kitöltési irányát. Balról jobbra, ha nincs megadva, tükrözve a [jobbról balra író nyelveken](#honosítás) |
+| `slider_value_position` | string | Opcionális | `right`, `left`, `center` vagy `hidden` | Az érték megjelenítésének helye. A záró oldalon, ha nincs megadva, tehát balra a [jobbról balra író nyelveken](#honosítás) |
 | `invert_slider_value` | boolean | Opcionális (alapértelmezett `false`) | Megfordítja a csúszka irányát (100%-os kitöltés egyenlő a minimummal). Színcsúszkáknál nem elérhető. |
 | `light_slider_type` | string | Opcionális | `brightness` (alapértelmezett), `hue`, `saturation`, `white_temp` | **Csak lámpákhoz.** A csúszka módjának kiválasztása |
 | `cover_slider_type` | string | Opcionális | `position` (alapértelmezett), `tilt_position` | **Csak árnyékolókhoz.** A csúszka módjának kiválasztása (pozíció vagy dőlés) |
@@ -940,7 +956,7 @@ Ez a kártya lehetővé teszi a naptár entitásaid megjelenítését. A tartalm
 | `limit`             | number  | Opcionális     | Egy szám                                        | A kártyán megjelenítendő események száma                                  |
 | `show_end`          | boolean | Opcionális     | `true` vagy `false` (alapértelmezett)                     | Az események befejezési idejének megjelenítése vagy elrejtése                                                    |
 | `show_progress`     | boolean | Opcionális     | `true` (alapértelmezett) vagy `false`                     | Az esemény állapotjelző sávjának megjelenítése vagy elrejtése                                                     |
-| `show_started_events`| boolean | Opcionális     | `true` (alapértelmezett) vagy `false`                     | A jelenleg folyamatban lévő események megjelenítése vagy elrejtése                                                 |
+| `show_started_events`| boolean | Opcionális     | `true` (alapértelmezett) vagy `false`                     | A jelenleg folyamatban lévő események megjelenítése vagy elrejtése. A több napon átnyúló eseményeket naponként ítéli meg, így csak a folyamatban lévő nap tűnik el, az elkövetkező napok láthatók maradnak |
 | `scrolling_effect`  | boolean | Opcionális | `true` (alapértelmezett) vagy `false` | Engedélyezi a szöveg görgetését, ha a tartalom meghaladja a konténer méretét |
 | `event_action` | object | Opcionális | `tap_action`, `double_tap_action` vagy `hold_action`, lásd [műveletek](#koppintás-dupla-koppintás-és-hosszú-nyomás-műveletek) | Lehetővé teszi műveletek hozzáadását esemény kattintáskor. |
 | `tap_action` | object | Opcionális | Lásd [műveletek](#koppintás-dupla-koppintás-és-hosszú-nyomás-műveletek) | Meghatározza a napra koppintáskor végrehajtott műveletet, ha nincs megadva, a `none` lesz használva. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Opcionális | `icon-left` (alapértelmezett), `icon-top`, `icon-bottom`, `icon-right` | Az ikon elhelyezése az algombon belül |
 | `always_visible` | boolean | Opcionális | `true` vagy `false` (alapértelmezett) | **Csak csúszkánál.** A csúszka mindig látható legyen, ahelyett hogy koppintásra nyílna meg |
 | `show_button_info` | boolean | Opcionális | `true` vagy `false` (alapértelmezett) | **Csak csúszkánál.** Ikon/név/állapot megjelenítése, ha az `always_visible` engedélyezve van |
-| `visibility` | object vagy list | Opcionális | Lásd [feltételek](https://www.home-assistant.io/docs/scripts/conditions/) | Az algomb megjelenítése vagy elrejtése feltételek alapján |
+| `visibility` | object vagy list | Opcionális | Lásd [feltételek](#feltételek) | Az algomb megjelenítése vagy elrejtése feltételek alapján |
 | `hide_when_parent_unavailable` | boolean | Opcionális | `true` vagy `false` (alapértelmezett) | Az algomb elrejtése, ha a szülő kártya entitása nem elérhető |
+| `css_class` | string | Opcionális | Bármely string | Egy további CSS osztály az algombon, hogy a [stílusaidban](#stílus) megcélozhasd, bármi is a neve (például a `My value` a `.my-value` osztályt adja) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ A csúszka algombok ugyanazokat a csúszka beállításokat támogatják, mint a
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Lekerekítés az algombokhoz |
 | `--bubble-sub-button-background-color` | `color` | Háttérszín az algombokhoz |
+| `--bubble-sub-button-outline` | `box-shadow` | Körvonal, amely csak akkor kerül egy algombra vagy csúszkára, ha ugyanolyan színnel jelenik meg, mint a mögötte lévő kártya, ami láthatatlanná tenné (állítsd `none` értékre az eltávolításához) |
 | `--bubble-sub-slider-border-radius` | `px` | Lekerekítés a csúszka algombokhoz |
 | `--bubble-sub-slider-background-color` | `color` | Háttérszín a csúszka algombokhoz |
 | `--bubble-sub-slider-height` | `px` | Magasság az állandóan látható csúszka algomboknál |
+| `--bubble-sub-slider-outline` | `box-shadow` | Csak a csúszka algombok körvonala, ennek hiányában a `--bubble-sub-button-outline` értékére esik vissza |
 | `--bubble-sub-button-dark-text-color` | `color` | Szövegszín a világos algomb hátterek esetén |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Feltételek
+
+Néhány beállítást feltételek vezérelnek, pontosan úgy megírva, mint a Home Assistant [feltételes kártyájának](https://www.home-assistant.io/dashboards/conditional/) feltételei:
+
+- `visibility` egy [algombon](#algombok), a megjelenítéséhez vagy elrejtéséhez
+- `trigger` egy [pop-upon](#pop-up), a megnyitásához, ha a feltételek teljesülnek
+- `checkConditionsMet(conditions, hass)` a [sablonjaidban](#sablonok), amikor a saját kódodban van szükséged a válaszra
+
+A Home Assistant minden feltételtípusa kiértékelésre kerül: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, valamint az `and`, `or` és `not` csoportok. A Home Assistant feltételszerkesztőjének feltételei is működnek, azok, amelyek a domainjükről kapták a nevüket, mint a `sun.is_up`, `light.is_on`, `zone.in_zone` vagy `temperature.is_value`, a `target`, `options`, `behavior` és `for` beállításaikkal együtt.
+
+<details>
+
+<summary><b>Példa</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> A feltételek a böngésződben értékelődnek ki, így az a néhány, amelyiknek a Home Assistant kiszolgálójára lenne szüksége, nem lehet pontos: a napkelte és a napnyugta a `sun.sun` entitásból olvasódik ki ahelyett, hogy újraszámolódna, és a `for` időtartam az utolsó állapotváltozástól mérődik, a recorder előzményei nélkül.
+>
+> A `view_columns` elfogadott, de mindig teljesül, hiszen soha nem a Bubble Card rendezi el a nézeted oszlopait. Az olyan feltételtípus, amelyet a Bubble Card nem ismer, egyszer jelentkezik a böngésződ konzoljában ahelyett, hogy némán elbukna, így meg tudod különböztetni az elgépelést a hiányzó funkciótól.
+
+<br>
+
+---
+
+<br>
+
 ## Koppintás, dupla koppintás és hosszú nyomás műveletek
 
 A Home Assistant alapértelmezett koppintás, dupla koppintás és hosszú nyomás műveleteit is használhatod azokon a kártyákon, amelyek támogatják ezt a beállítást. Ez lehetővé teszi például a "több infó" ablak megjelenítését egy gomb ikonjának hosszú nyomva tartásával, vagy egy szolgáltatás futtatását egy algomb megnyomásakor.
@@ -1700,6 +1762,8 @@ Négyféleképpen adhatsz hozzá egyéni stílusokat az összes kártya CSS-éne
 
 > [!TIP]  
 > Az algombok név alapú osztályokkal célozhatók meg. Például egy "My sub-button" nevű algomb a `.my-sub-button` osztállyal stílusozható. A csúszka algombok is elérhetők a `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` stb. osztályokkal.
+>
+> A név alapú osztály megváltozik, amikor átnevezel egy algombot, és lefordul, amikor a név is le van fordítva. Állíts be `css_class` értéket az algombon, hogy saját osztályt kapj, amely soha nem mozdul el, bármi is a neve és bármelyik nyelvről legyen szó.
 
 #### Példák
 
@@ -2066,6 +2130,7 @@ Az összes globális JS függvényhez hozzáférsz, de emellett ezekhez is:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- a `checkConditionsMet(conditions, hass)` `true` értéket ad vissza, ha egy [feltétel](#feltételek) lista teljesül, például `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - a `hass.formatEntityState(state)` egy állapot lefordítására használható (arra is használható, hogy egy állapot mértékegységét megkapd, anélkül, hogy kézzel kellene hozzáadnod).
 - a `hass.formatEntityAttributeValue(state, "attribute")` egy attribútum lefordítására használható (arra is használható, hogy egy állapot mértékegységét megkapd, anélkül, hogy kézzel kellene hozzáadnod).
 
@@ -2318,6 +2383,8 @@ A modulok egy hatékony funkció, amellyel elmentheted, újra felhasználhatod, 
 De ez a funkció ennél sokkal erősebb, lehetővé teszi, hogy valódi funkciókat adj hozzá saját magad a Bubble Card szerkesztőjében, az összes alapértelmezett [Home Assistant űrlap](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) opció felhasználásával!  
 Az objektumválasztó fejlesztésre került, hogy élőben mutassa a változásokat, és megfelelően támogassa az attribútumokat.
 
+Egy modul a beépített [entitásjavaslatok](#entitásjavaslatok) mellett a Home Assistant kártyaválasztójának is válaszolhat: használd a `suggestions` kulcsot azokhoz a kártyákhoz, amelyeket előre le tud írni, és a `suggestions_code` kulcsot akkor, amikor a beállításodból kell kiszámolni őket, például egy pop-uphoz, amely a kiválasztott entitás területének összes entitásából épül fel. Mindkét kulcs dokumentációja [itt](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) található.
+
 Böngészhetsz a **Module Store**-ban is, hogy megtaláld és telepítsd a [közösség által készített modulokat](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), vagy megoszthasd a saját alkotásaidat!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Ez a fül megjeleníti az összes telepített modulodat, és lehetővé teszi, h
 - **Keress** és **rendezz** modulokat (ábécé szerint, legutóbbi, aktívak elöl)
 - **Globális állapotot** állíts be, hogy egy modul automatikusan minden kártyára alkalmazódjon
 - **Importálj/exportálj** modulokat biztonsági mentéshez vagy megosztáshoz
+- **Entitásjavaslatokat írni** a modulszerkesztőben, az **Opcionális: entitásjavaslatok** rész alatt, hogy a modulod felajánlásra kerüljön a Home Assistant kártyaválasztójában. A szabályok és a számított javaslatok is ellenőrzésre kerülnek írás közben, egy ottani hiba megakadályozza a mentést, az előnézet pedig bármely általad választott entitáshoz megmutatja a javasolt kártyákat
 
 #### Module Store fül
 
@@ -2391,7 +2459,8 @@ Ez a fül megjeleníti [a közösség összes elérhető moduljét](https://gith
 3. Töltsd ki a modul adatait.
 4. Írd meg a CSS és/vagy JavaScript sablonkódodat a **Kód** szerkesztőben.
 5. (Opcionális) Hozz létre egyéni konfigurációs felületet a **Szerkesztő** szekcióban (mint a fenti képernyőképen látható színválasztó, a teljes dokumentáció [itt](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) érhető el).
-6. Kattints a **Mentés** gombra.
+6. (Opcionális) Írd meg az **Entitásjavaslataidat**, hogy a modulod felajánlásra kerüljön a Home Assistant kártyaválasztójában. A panel gépelés közben ellenőrzi, amit írsz, az előnézete pedig magukat a javasolt kártyákat mutatja az általad választott entitáshoz.
+7. Kattints a **Mentés** gombra.
 
 A modulod mostantól elérhető bármelyik kártyádon!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 További példákat találhatsz a Module Store-ban, vagy [itt](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Honosítás
+
+A Bubble Card a te nyelveden beszél. A szerkesztője le van fordítva arra a 64 nyelvre, amelyet a Home Assistant támogat, és ahol a Home Assistantnak már van szava valamire, ott az ő megfogalmazása kerül átvételre, így mindkét felületen ugyanazokat a kifejezéseket olvasod.
+
+A szerkesztő alján, a verziószám mellett egy **Automatikus** kapcsoló követi a Home Assistantod nyelvét. Kapcsold ki, és az egész szerkesztő visszatér angolra, ami hasznos egy útmutató követéséhez vagy egy hiba bejelentéséhez. A választásod megjegyzésre kerül a böngésződben.
+
+Ez a dokumentáció is le van fordítva, [62 nyelvre](languages.md). Ezek az oldalak mindenki előtt nyitva állnak, így egy olyan megfogalmazás, amely nem egyezik a saját Home Assistantoddal, néhány kattintással javítható. A tartalom tekintetében az angol változat marad a referencia.
 
 <br>
 

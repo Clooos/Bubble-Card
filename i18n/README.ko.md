@@ -18,7 +18,7 @@ Bubble Card는 Home Assistant를 위한 미니멀하고 커스터마이즈 가�
 
 ## 목차
 
-**[`설치`](#설치)**  **[`구성`](#구성)**  **[`팝업`](#팝업)**  **[`가로 버튼 스택`](#가로-버튼-스택)**  **[`버튼`](#버튼)**  **[`미디어 플레이어`](#미디어-플레이어)**  **[`커버`](#커버)**  **[`선택`](#선택)**  **[`냉난방`](#냉난방)**  **[`캘린더`](#캘린더)**  **[`구분선`](#구분선)**  **[`빈 열`](#빈-열)**  **[`서브 버튼 전용`](#서브-버튼-전용)**  **[`서브 버튼`](#서브-버튼)**  **[`카드 레이아웃`](#카드-레이아웃)**  **[`동작`](#탭-더블-탭-길게-누르기-동작)**  **[`스타일링`](#스타일링)**  **[`템플릿`](#템플릿)**  **[`모듈`](#모듈)**  **[`도움말`](#도움말)**  **[`기여하기`](#기여하기)**  **[`후원하기`](#후원하기)**
+**[`설치`](#설치)**  **[`구성`](#구성)**  **[`엔티티 제안`](#엔티티-제안)**  **[`팝업`](#팝업)**  **[`가로 버튼 스택`](#가로-버튼-스택)**  **[`버튼`](#버튼)**  **[`미디어 플레이어`](#미디어-플레이어)**  **[`커버`](#커버)**  **[`선택`](#선택)**  **[`냉난방`](#냉난방)**  **[`캘린더`](#캘린더)**  **[`구분선`](#구분선)**  **[`빈 열`](#빈-열)**  **[`서브 버튼 전용`](#서브-버튼-전용)**  **[`서브 버튼`](#서브-버튼)**  **[`카드 레이아웃`](#카드-레이아웃)**  **[`조건`](#조건)**  **[`동작`](#탭-더블-탭-길게-누르기-동작)**  **[`스타일링`](#스타일링)**  **[`템플릿`](#템플릿)**  **[`모듈`](#모듈)**  **[`현지화`](#현지화)**  **[`도움말`](#도움말)**  **[`기여하기`](#기여하기)**  **[`후원하기`](#후원하기)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card는 Home Assistant를 위한 미니멀하고 커스터마이즈 가�
 
 <br>
 
-1. 이 파일을 다운로드하세요: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. 이 파일을 `<config>/www` 폴더에 추가하세요
+1. [최신 릴리스](https://github.com/Clooos/Bubble-Card/releases/latest)에서 `bubble-card.zip`을 다운로드하세요
+2. 이 파일을 `<config>/www` 폴더에 압축 해제하면 `bubble-card.js`와 그 옆에 `translations` 폴더가 생깁니다 (이 폴더에는 편집기 사전이 들어 있으며, 없으면 편집기는 영어로 표시됩니다)
 3. 대시보드에서 오른쪽 상단 아이콘을 클릭한 다음 `Edit dashboard`를 클릭하세요
 4. 그 아이콘을 다시 클릭한 다음 `Manage resources`를 클릭하세요
 5. `Add resource`를 클릭하세요
@@ -130,6 +130,21 @@ Bubble Card는 Home Assistant를 위한 미니멀하고 커스터마이즈 가�
 
 <br>
 
+## 엔티티 제안
+
+Home Assistant 2026.6부터 카드 선택기에서 엔티티를 고르면 바로 쓸 수 있는 카드가 몇 개 제안되며, Bubble Card는 자체 레시피로 여기에 답합니다. 조명을 고르면 밝기 슬라이더가 있는 카드가 제안되고, 조명이 지원하는 경우 색온도, 색상, 채도 변형도 함께 제안됩니다. 커버를 고르면 위치 슬라이더를, 미디어 플레이어를 고르면 소스 목록이 포함된 변형도 함께, 로봇청소기를 고르면 시작, 일시정지, 도킹 버튼을 받게 됩니다. 각 제안은 실시간 미리보기로 표시되는 일반적인 Bubble Card 구성이므로, 가장 가까운 것을 골라 평소처럼 계속 편집할 수 있습니다.
+
+제안되는 내용은 엔티티가 실제로 할 수 있는 것에 따라 달라집니다. 밝기 채널이 없는 조명은 슬라이더 대신 토글을 받고, 기울일 수 없는 커버는 기울기 변형을 받지 않으며, 냉난방 엔티티는 프리셋 모드가 있을 때만 그 항목을 받습니다. 해당되는 경우 그 아래에 기존 항목이 이어집니다. 도메인 전용 카드, 단순 버튼, 슬라이더입니다.
+
+> [!TIP]
+> 모듈은 이 목록에 자체 제안을 추가할 수 있습니다. [모듈](#모듈)을 참고하세요.
+
+<br>
+
+---
+
+<br>
+
 ## 팝업
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Bubble Card는 Home Assistant를 위한 미니멀하고 커스터마이즈 가�
 | `shadow_opacity` | string | Optional | `0`부터 `100`까지의 값 | 팝업의 그림자 불투명도 (예: 숨기려면 `0`) |
 | `hide_backdrop` | boolean | Optional | `true` 또는 `false` (default) | 메인 대시보드의 첫 번째 팝업에 이것을 true로 설정하면 모든 팝업의 백드롭을 비활성화합니다. |
 | `background_update` | boolean | Optional | `true` 또는 `false` (default) | 백그라운드에서 팝업 콘텐츠를 업데이트 (권장하지 않음) |
-| `trigger_entity` | string | Optional | Any entity | 어떤 엔티티의 상태를 기준으로 이 팝업을 엽니다 |
+| `trigger` | object 또는 list | Optional | [조건](#조건) 참고 | 조건이 충족되면 이 팝업을 엽니다 |
+| `trigger_entity` | string | Optional | Any entity | 어떤 엔티티의 상태를 기준으로 이 팝업을 엽니다. `trigger`의 간단한 형태입니다 |
 | `trigger_state` | string | Optional (`trigger_entity`가 정의되어 있으면 **Required**) | Any entity state | 팝업을 열기 위한 엔티티 상태 |
-| `trigger_close` | boolean | Optional | `true` 또는 `false` (default) | `trigger_state`와 다를 때 팝업을 닫음 |
+| `trigger_close` | boolean | Optional | `true` 또는 `false` | 조건이 더 이상 충족되지 않으면 팝업을 닫음 (기본값: `trigger`에서는 `true`, `trigger_state`에서는 `false`) |
 | `open_action` | object | Optional | [동작](#탭-더블-탭-길게-누르기-동작) 참고 | 팝업이 열릴 때 동작을 트리거 |
 | `close_action` | object | Optional | [동작](#탭-더블-탭-길게-누르기-동작) 참고 | 팝업이 닫힐 때 동작을 트리거 |
 | `show_header` | boolean | Optional | `true` (default) 또는 `false` | 팝업 헤더 전체를 표시/숨김 |
@@ -445,8 +461,8 @@ auto_order: true
 | `relative_slide`        | boolean | 선택 (`false` 기본값 )     | 터치 시작 지점이 아닌 시작 값을 기준으로 값을 갱신합니다.                                      |
 | `read_only_slider`      | boolean | 선택 (`false` 기본값)      | 슬라이더를 읽기 전용으로 만듭니다. 센서 등 일부 엔티티에서는 자동으로 활성화됩니다.                                        |
 | `slider_live_update`    | boolean | 선택 (`false` 기본값)      | 슬라이드 중 엔티티 상태가 갱신됩니다. **모든 엔티티에 권장되는 기능은 아닙니다.**        |
-| `slider_fill_orientation` | string | 선택 | `left` (기본값), `right`, `top`, `bottom` | 슬라이더의 채움 방향을 변경합니다 |
-| `slider_value_position` | string | 선택 | `right` (기본값), `left`, `center`, `hidden` | 값 표시 위치 |
+| `slider_fill_orientation` | string | 선택 | `left`, `right`, `top` 또는 `bottom` | 슬라이더의 채움 방향을 변경합니다. 지정하지 않으면 왼쪽에서 오른쪽이며, [오른쪽에서 왼쪽 언어](#현지화)에서는 좌우가 바뀝니다 |
+| `slider_value_position` | string | 선택 | `right`, `left`, `center` 또는 `hidden` | 값 표시 위치. 지정하지 않으면 끝쪽이므로 [오른쪽에서 왼쪽 언어](#현지화)에서는 왼쪽이 됩니다 |
 | `invert_slider_value` | boolean | 선택 (`false` 기본값) | 슬라이더 방향을 반전합니다 (100% 채움이 최솟값이 됩니다). 색상 슬라이더에서는 사용할 수 없습니다. |
 | `light_slider_type` | string | 선택 | `brightness` (기본값), `hue`, `saturation`, `white_temp` | **조명 전용.** 슬라이더 모드를 선택합니다 |
 | `cover_slider_type` | string | 선택 | `position` (기본값), `tilt_position` | **커버 전용.** 슬라이더 모드를 선택합니다 (위치 또는 틸트) |
@@ -940,7 +956,7 @@ sub_button:
 | `limit`             | number  | 선택     | 숫자                                        | 카드에 표시될 이벤트의 개수                                  |
 | `show_end`          | boolean | 선택     | `true` 또는 `false` (기본값)                     | 이벤트의 종료 시각을 표시하거나 숨깁니다                                                    |
 | `show_progress`     | boolean | 선택     | `true` (기본값) 또는 `false`                     | 이벤트 진행 표시줄을 표시하거나 숨깁니다                                                     |
-| `show_started_events`| boolean | 선택     | `true` (기본값) 또는 `false`                     | 현재 진행 중인 이벤트를 표시하거나 숨깁니다                                                 |
+| `show_started_events`| boolean | 선택     | `true` (기본값) 또는 `false`                     | 현재 진행 중인 이벤트를 표시하거나 숨깁니다. 여러 날에 걸친 이벤트는 하루 단위로 판단하므로 진행 중인 날만 숨겨지고 남은 날들은 계속 표시됩니다 |
 | `scrolling_effect`  | boolean | 선택 | `true` (기본값) 또는 `false` | 내용이 컨테이너 크기를 초과할 때 텍스트가 스크롤되도록 허용합니다 |
 | `event_action` | object | 선택 | `tap_action`, `double_tap_action` 또는 `hold_action`, [동작](#탭-더블-탭-길게-누르기-동작) 참조 | 이벤트 클릭 시 동작을 추가할 수 있습니다. |
 | `tap_action` | object | 선택 | [동작](#탭-더블-탭-길게-누르기-동작) 참조 | 날짜 클릭 시 동작 유형을 정의합니다. 정의하지 않으면 `none`이 사용됩니다. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | 선택 사항 | `icon-left`(기본값), `icon-top`, `icon-bottom`, `icon-right` | 서브 버튼 내 아이콘 배치 |
 | `always_visible` | boolean | 선택 사항 | `true` 또는 `false`(기본값) | **슬라이더 전용.** 탭으로 여는 대신 슬라이더를 항상 표시 |
 | `show_button_info` | boolean | 선택 사항 | `true` 또는 `false`(기본값) | **슬라이더 전용.** `always_visible`이 활성화됐을 때 아이콘/이름/상태를 표시 |
-| `visibility` | object 또는 list | 선택 사항 | [조건](https://www.home-assistant.io/docs/scripts/conditions/) 참고 | 조건에 따라 서브 버튼을 표시하거나 숨김 |
+| `visibility` | object 또는 list | 선택 사항 | [조건](#조건) 참고 | 조건에 따라 서브 버튼을 표시하거나 숨김 |
 | `hide_when_parent_unavailable` | boolean | 선택 사항 | `true` 또는 `false`(기본값) | 상위 카드 엔티티를 사용할 수 없을 때 서브 버튼을 숨김 |
+| `css_class` | string | 선택 사항 | 임의의 문자열 | 서브 버튼에 추가되는 CSS 클래스로, 이름과 상관없이 [스타일](#스타일링)에서 해당 서브 버튼을 지정할 수 있습니다 (예: `My value`는 `.my-value`가 됩니다) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ sub_button:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | 서브 버튼의 테두리 반경 |
 | `--bubble-sub-button-background-color` | `color` | 서브 버튼의 배경색 |
+| `--bubble-sub-button-outline` | `box-shadow` | 서브 버튼이나 슬라이더가 뒤에 있는 카드와 같은 색으로 칠해져 보이지 않게 될 때만 추가되는 외곽선 (`none`으로 설정하면 제거됩니다) |
 | `--bubble-sub-slider-border-radius` | `px` | 슬라이더 서브 버튼의 테두리 반경 |
 | `--bubble-sub-slider-background-color` | `color` | 슬라이더 서브 버튼의 배경색 |
 | `--bubble-sub-slider-height` | `px` | 항상 표시되는 슬라이더 서브 버튼의 높이 |
+| `--bubble-sub-slider-outline` | `box-shadow` | 슬라이더 서브 버튼에만 적용되는 외곽선, 지정하지 않으면 `--bubble-sub-button-outline`을 따릅니다 |
 | `--bubble-sub-button-dark-text-color` | `color` | 밝은 서브 버튼 배경에서의 텍스트 색상 |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## 조건
+
+일부 옵션은 조건으로 제어되며, Home Assistant [조건부 카드](https://www.home-assistant.io/dashboards/conditional/)의 조건과 똑같은 방식으로 작성합니다:
+
+- [서브 버튼](#서브-버튼)의 `visibility`, 표시하거나 숨기기 위해
+- [팝업](#팝업)의 `trigger`, 조건이 충족될 때 열기 위해
+- [템플릿](#템플릿) 안의 `checkConditionsMet(conditions, hass)`, 직접 작성한 코드에서 그 답이 필요할 때
+
+Home Assistant의 모든 조건 유형이 평가됩니다. `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template` 그리고 `and`, `or`, `not` 그룹입니다. Home Assistant 조건 빌더의 조건도 동작합니다. `sun.is_up`, `light.is_on`, `zone.in_zone`, `temperature.is_value`처럼 도메인 이름을 딴 조건들이며, `target`, `options`, `behavior`, `for` 설정도 함께 지원됩니다.
+
+<details>
+
+<summary><b>예시</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> 조건은 브라우저에서 평가되므로 Home Assistant 서버가 필요한 일부 조건은 정확할 수 없습니다. 일출과 일몰은 다시 계산되지 않고 `sun.sun` 엔티티에서 읽어 오며, `for` 지속 시간은 recorder 기록 없이 마지막 상태 변경 시점부터 측정됩니다.
+>
+> `view_columns`는 허용되지만 항상 통과합니다. 뷰의 열을 배치하는 것은 Bubble Card가 아니기 때문입니다. Bubble Card가 모르는 조건 유형은 조용히 실패하는 대신 브라우저 콘솔에 한 번 보고되므로, 오타인지 없는 기능인지 구분할 수 있습니다.
+
+<br>
+
+---
+
+<br>
+
 ## 탭, 더블 탭, 길게 누르기 동작
 
 이 옵션을 지원하는 카드에서는 Home Assistant의 기본 탭 동작, 더블 탭 동작, 길게 누르기 동작도 사용할 수 있습니다. 예를 들어 버튼 아이콘을 길게 눌러 "더 보기" 창을 표시하거나, 서브 버튼을 눌렀을 때 서비스를 실행할 수 있습니다.
@@ -1700,6 +1762,8 @@ button_action:
 
 > [!TIP]  
 > 서브 버튼은 이름 기반 클래스로 대상을 지정할 수 있습니다. 예를 들어 "My sub-button"이라는 이름의 서브 버튼은 `.my-sub-button`으로 스타일링할 수 있습니다. 슬라이더 서브 버튼은 `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` 등도 제공합니다.
+>
+> 이름 기반 클래스는 서브 버튼의 이름을 바꾸면 함께 바뀌고, 이름이 번역되면 클래스도 번역됩니다. 서브 버튼에 `css_class`를 설정하면 이름이나 언어와 무관하게 절대 변하지 않는 나만의 클래스를 얻을 수 있습니다.
 
 #### 예시
 
@@ -2066,6 +2130,7 @@ styles: |
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)`는 [조건](#조건) 목록이 충족되면 `true`를 반환합니다. 예: `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)`는 상태를 번역하는 데 사용할 수 있습니다(수동으로 추가할 필요 없이 상태 단위를 가져오는 데도 사용할 수 있습니다).
 - `hass.formatEntityAttributeValue(state, "attribute")`는 속성을 번역하는 데 사용할 수 있습니다(수동으로 추가할 필요 없이 상태 단위를 가져오는 데도 사용할 수 있습니다).
 
@@ -2318,6 +2383,8 @@ styles: >
 하지만 이 기능은 그보다 훨씬 더 강력해서, 기본 [Home Assistant 폼](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) 옵션을 모두 사용하여 Bubble Card 편집기에서 직접 실제 기능을 추가할 수 있게 해줍니다!  
 객체 선택기는 실시간 변경 사항을 표시하고 속성을 올바르게 지원하도록 개선되었습니다.
 
+모듈은 기본 제공 [엔티티 제안](#엔티티-제안) 옆에서 Home Assistant 카드 선택기에 응답할 수도 있습니다. 미리 설명할 수 있는 카드에는 `suggestions`를, 사용자의 설정에서 계산해야 하는 경우에는 `suggestions_code`를 사용하세요. 예를 들어 선택한 엔티티가 속한 영역의 모든 엔티티로 팝업을 만드는 경우입니다. 두 키 모두 [여기](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions)에 문서화되어 있습니다.
+
 **Module Store**를 둘러보고 [커뮤니티가 만든 모듈](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)을 찾아 설치하거나, 직접 만든 창작물을 공유할 수도 있습니다!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Bubble Card Tools 통합은 모듈 편집기와 Module Store를 활성화하며,
 - 모듈을 **검색**하고 **정렬**(가나다순, 최근순, 활성 우선)
 - 모듈이 모든 카드에 자동으로 적용되도록 **전역 상태 설정**
 - 백업이나 공유를 위해 모듈을 **가져오기/내보내기**
+- 모듈 편집기의 **선택 사항: 엔티티 제안** 아래에서 **엔티티 제안 작성**하여 모듈이 Home Assistant 카드 선택기에 제안되도록 하기. 규칙과 계산된 제안 모두 작성하는 동안 검사되며, 오류가 있으면 저장할 수 없고, 미리보기에서 원하는 엔티티에 대한 제안 카드를 확인할 수 있습니다
 
 #### Module Store 탭
 
@@ -2391,7 +2459,8 @@ Bubble Card Tools 통합은 모듈 편집기와 Module Store를 활성화하며,
 3. 모듈 정보를 입력합니다.
 4. **코드** 편집기에 CSS와/또는 JavaScript 템플릿 코드를 작성합니다.
 5. (선택 사항) **편집기** 섹션에서 커스텀 구성 UI를 만듭니다(위 스크린샷의 색상 선택기처럼, 전체 문서는 [여기](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)에서 확인할 수 있습니다).
-6. **저장**을 클릭합니다.
+6. (선택 사항) 모듈이 Home Assistant 카드 선택기에 제안되도록 **엔티티 제안**을 작성합니다. 패널은 입력하는 동안 내용을 검사하며, 미리보기에는 원하는 엔티티에 대한 제안 카드 자체가 표시됩니다.
+7. **저장**을 클릭합니다.
 
 이제 모듈을 어떤 카드에서든 사용할 수 있습니다!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 더 많은 예시는 Module Store에서, 또는 [여기](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)에서 찾을 수 있습니다.
+
+<br>
+
+---
+
+<br>
+
+## 현지화
+
+Bubble Card는 여러분의 언어로 말합니다. 편집기는 Home Assistant가 지원하는 64개 언어로 번역되어 있으며, Home Assistant에 이미 해당하는 용어가 있는 경우에는 그 표현을 그대로 사용하므로 두 인터페이스에서 같은 용어를 보게 됩니다.
+
+편집기 하단의 버전 번호 옆에 있는 **자동** 스위치는 Home Assistant 언어를 따릅니다. 이를 끄면 편집기 전체가 영어로 돌아가며, 튜토리얼을 따라 하거나 이슈를 보고할 때 유용합니다. 선택한 값은 브라우저에 기억됩니다.
+
+이 문서도 [62개 언어로](languages.md) 번역되어 있습니다. 해당 페이지는 누구에게나 열려 있으므로, 여러분의 Home Assistant와 맞지 않는 표현은 몇 번의 클릭으로 고칠 수 있습니다. 내용 자체의 기준은 영어판입니다.
 
 <br>
 

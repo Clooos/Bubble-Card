@@ -18,7 +18,7 @@ Bubble Card es una colección de tarjetas minimalista y personalizable para Home
 
 ## Tabla de contenidos
 
-**[`Instalación`](#instalación)**  **[`Configuración`](#configuración)**  **[`Pop-up`](#pop-up)**  **[`Pila de botones horizontal`](#pila-de-botones-horizontal)**  **[`Botón`](#botón)**  **[`Reproductor multimedia`](#reproductor-multimedia)**  **[`Persiana`](#persiana)**  **[`Selector`](#selector)**  **[`Clima`](#clima)**  **[`Calendario`](#calendario)**  **[`Separador`](#separador)**  **[`Columna vacía`](#columna-vacía)**  **[`Solo sub-botones`](#solo-sub-botones)**  **[`Sub-botones`](#sub-botones)**  **[`Diseños de tarjeta`](#diseños-de-tarjeta)**  **[`Acciones`](#acciones-de-toque-doble-toque-y-mantener-presionado)**  **[`Estilos`](#estilos)**  **[`Plantillas`](#plantillas)**  **[`Módulos`](#módulos)**  **[`Ayuda`](#ayuda)**  **[`Contribuir`](#contribuir)**  **[`Donar`](#donar)**
+**[`Instalación`](#instalación)**  **[`Configuración`](#configuración)**  **[`Sugerencias de entidad`](#sugerencias-de-entidad)**  **[`Pop-up`](#pop-up)**  **[`Pila de botones horizontal`](#pila-de-botones-horizontal)**  **[`Botón`](#botón)**  **[`Reproductor multimedia`](#reproductor-multimedia)**  **[`Persiana`](#persiana)**  **[`Selector`](#selector)**  **[`Clima`](#clima)**  **[`Calendario`](#calendario)**  **[`Separador`](#separador)**  **[`Columna vacía`](#columna-vacía)**  **[`Solo sub-botones`](#solo-sub-botones)**  **[`Sub-botones`](#sub-botones)**  **[`Diseños de tarjeta`](#diseños-de-tarjeta)**  **[`Condiciones`](#condiciones)**  **[`Acciones`](#acciones-de-toque-doble-toque-y-mantener-presionado)**  **[`Estilos`](#estilos)**  **[`Plantillas`](#plantillas)**  **[`Módulos`](#módulos)**  **[`Localización`](#localización)**  **[`Ayuda`](#ayuda)**  **[`Contribuir`](#contribuir)**  **[`Donar`](#donar)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card es una colección de tarjetas minimalista y personalizable para Home
 
 <br>
 
-1. Descarga este archivo: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Agrega este archivo a tu carpeta `<config>/www`
+1. Descarga `bubble-card.zip` desde la [última versión](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Descomprímelo en tu carpeta `<config>/www`, deberías obtener `bubble-card.js` y una carpeta `translations` junto a él (esa carpeta contiene los diccionarios del editor, sin ella el editor se queda en inglés)
 3. En tu dashboard haz clic en el ícono de la esquina superior derecha y luego en `Editar dashboard`
 4. Haz clic de nuevo en ese ícono y luego en `Administrar recursos`
 5. Haz clic en `Agregar recurso`
@@ -130,6 +130,21 @@ Todas las opciones se pueden configurar en el editor de Home Assistant. Pero pue
 
 <br>
 
+## Sugerencias de entidad
+
+Desde Home Assistant 2026.6, elegir una entidad en el selector de tarjetas te ofrece unas cuantas tarjetas ya listas, y Bubble Card responde a esa pregunta con sus propias recetas. Elige una luz y se te ofrece una tarjeta con un deslizador de brillo, además de una variante con temperatura de color, otra con color y otra con saturación cuando tu luz las admite. Elige una persiana y obtienes el deslizador de su posición, elige un reproductor multimedia y obtienes también una variante con su lista de fuentes, elige una aspiradora y obtienes sus botones de inicio, pausa y regreso a la base. Cada sugerencia es una configuración normal de Bubble Card mostrada como una vista previa en vivo, así que puedes tomar la más cercana y seguir editándola como siempre.
+
+Lo que se te ofrece depende de lo que tu entidad realmente puede hacer: una luz sin canal de brillo recibe un interruptor en lugar de un deslizador, una persiana que no puede inclinarse no recibe variante de inclinación, y una entidad de clima recibe sus modos preestablecidos solo cuando tiene alguno. Las entradas clásicas siguen debajo cuando corresponden: la tarjeta dedicada del dominio, un botón simple y un deslizador.
+
+> [!TIP]
+> Los módulos pueden agregar sus propias sugerencias a esa lista, ver [módulos](#módulos).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Esta tarjeta te permite crear un pop-up con cualquier contenido. Cada pop-up est
 | `shadow_opacity` | string | Opcional | Cualquier valor de `0` a `100` | La opacidad de la sombra de tu pop-up (por ejemplo, `0` para ocultarla) |
 | `hide_backdrop` | boolean | Opcional | `true` o `false` (predeterminado) | Establece esto en true en el primer pop-up de tu dashboard principal para desactivar el backdrop en todos los pop-ups. |
 | `background_update` | boolean | Opcional | `true` o `false` (predeterminado) | Actualiza el contenido del pop-up en segundo plano (no recomendado) |
-| `trigger_entity` | string | Opcional | Cualquier entidad | Abre este pop-up según el estado de cualquier entidad |
+| `trigger` | object o list | Opcional | Ver [condiciones](#condiciones) | Abre este pop-up cuando se cumplen las condiciones |
+| `trigger_entity` | string | Opcional | Cualquier entidad | Abre este pop-up según el estado de cualquier entidad, la forma simple de `trigger` |
 | `trigger_state` | string | Opcional (**Obligatorio** si `trigger_entity` está definido) | Cualquier estado de entidad | Estado de la entidad para abrir el pop-up |
-| `trigger_close` | boolean | Opcional | `true` o `false` (predeterminado) | Cierra el pop-up cuando `trigger_state` es diferente |
+| `trigger_close` | boolean | Opcional | `true` o `false` | Cierra el pop-up cuando las condiciones dejan de cumplirse (predeterminado: `true` con `trigger`, `false` con `trigger_state`) |
 | `open_action` | object | Opcional | Ver [acciones](#acciones-de-toque-doble-toque-y-mantener-presionado) | Activa una acción cuando el pop-up se está abriendo |
 | `close_action` | object | Opcional | Ver [acciones](#acciones-de-toque-doble-toque-y-mantener-presionado) | Activa una acción cuando el pop-up se está cerrando |
 | `show_header` | boolean | Opcional | `true` (predeterminado) o `false` | Muestra/oculta completamente el encabezado del pop-up |
@@ -445,8 +461,8 @@ Estas opciones solo están disponibles cuando `button_type` está en `slider`.
 | `relative_slide`        | boolean | Opcional (`false` por defecto )     | Actualiza el valor en relación con el valor inicial, en lugar del punto de toque inicial.                      |
 | `read_only_slider`      | boolean | Opcional (`false` por defecto)      | Hace que el deslizador sea de solo lectura. Se habilita automáticamente para algunas entidades como los sensores.                        |
 | `slider_live_update`    | boolean | Opcional (`false` por defecto)      | El estado de la entidad se actualiza mientras se desliza. **Esta función no se recomienda para todas las entidades.**        |
-| `slider_fill_orientation` | string | Opcional | `left` (predeterminado), `right`, `top`, `bottom` | Cambia la dirección de relleno del deslizador |
-| `slider_value_position` | string | Opcional | `right` (predeterminado), `left`, `center`, `hidden` | Posición de la visualización del valor |
+| `slider_fill_orientation` | string | Opcional | `left`, `right`, `top` o `bottom` | Cambia la dirección de relleno del deslizador. De izquierda a derecha cuando no se define, reflejada en los [idiomas que se escriben de derecha a izquierda](#localización) |
+| `slider_value_position` | string | Opcional | `right`, `left`, `center` o `hidden` | Posición de la visualización del valor. En el lado final cuando no se define, es decir a la izquierda en los [idiomas que se escriben de derecha a izquierda](#localización) |
 | `invert_slider_value` | boolean | Opcional (`false` por defecto) | Invierte la dirección del deslizador (100% de relleno equivale al mínimo). No disponible para deslizadores de color. |
 | `light_slider_type` | string | Opcional | `brightness` (predeterminado), `hue`, `saturation`, `white_temp` | **Solo para luces.** Elige el modo del deslizador |
 | `cover_slider_type` | string | Opcional | `position` (predeterminado), `tilt_position` | **Solo para persianas.** Elige el modo del deslizador (posición o inclinación) |
@@ -940,7 +956,7 @@ Esta tarjeta te permite mostrar tus entidades de calendario. Su contenido es des
 | `limit`             | number  | Opcional     | Un número                                        | La cantidad de eventos que se mostrarán en la tarjeta                                  |
 | `show_end`          | boolean | Opcional     | `true` o `false` (predeterminado)                     | Muestra u oculta la hora de finalización de los eventos                                                    |
 | `show_progress`     | boolean | Opcional     | `true` (predeterminado) o `false`                     | Muestra u oculta la barra de progreso del evento                                                     |
-| `show_started_events`| boolean | Opcional     | `true` (predeterminado) o `false`                     | Muestra u oculta los eventos que están actualmente en curso                                                 |
+| `show_started_events`| boolean | Opcional     | `true` (predeterminado) o `false`                     | Muestra u oculta los eventos que están actualmente en curso. Los eventos de varios días se evalúan día por día, así que solo se oculta el día en curso y los días siguientes permanecen visibles |
 | `scrolling_effect`  | boolean | Opcional | `true` (predeterminado) o `false` | Permite que el texto se desplace cuando el contenido excede el tamaño de su contenedor |
 | `event_action` | object | Opcional | `tap_action`, `double_tap_action` o `hold_action`, ver [acciones](#acciones-de-toque-doble-toque-y-mantener-presionado) | Permite agregar acciones al hacer clic en un evento. |
 | `tap_action` | object | Opcional | Ver [acciones](#acciones-de-toque-doble-toque-y-mantener-presionado) | Define el tipo de acción al hacer clic en el día, si no está definida, se usará `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Opcional | `icon-left` (predeterminado), `icon-top`, `icon-bottom`, `icon-right` | Ubicación del ícono dentro del sub-botón |
 | `always_visible` | boolean | Opcional | `true` o `false` (predeterminado) | **Solo deslizador.** Muestra siempre el deslizador en lugar de abrirlo al tocar |
 | `show_button_info` | boolean | Opcional | `true` o `false` (predeterminado) | **Solo deslizador.** Muestra ícono/nombre/estado cuando `always_visible` está activado |
-| `visibility` | object o list | Opcional | Ver [condiciones](https://www.home-assistant.io/docs/scripts/conditions/) | Muestra u oculta el sub-botón según condiciones |
+| `visibility` | object o list | Opcional | Ver [condiciones](#condiciones) | Muestra u oculta el sub-botón según condiciones |
 | `hide_when_parent_unavailable` | boolean | Opcional | `true` o `false` (predeterminado) | Oculta el sub-botón si la entidad de la tarjeta principal no está disponible |
+| `css_class` | string | Opcional | Cualquier cadena | Una clase CSS adicional en el sub-botón, para apuntarlo en tus [estilos](#estilos) sea cual sea su nombre (p. ej. `My value` da `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Los sub-botones de tipo deslizador admiten las mismas opciones de deslizador que
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radio de borde para los sub-botones |
 | `--bubble-sub-button-background-color` | `color` | Color de fondo para los sub-botones |
+| `--bubble-sub-button-outline` | `box-shadow` | Contorno agregado a un sub-botón o a un deslizador solo cuando se pinta del mismo color que la tarjeta que tiene detrás, lo que lo haría invisible (ponlo en `none` para quitarlo) |
 | `--bubble-sub-slider-border-radius` | `px` | Radio de borde para los sub-botones de tipo deslizador |
 | `--bubble-sub-slider-background-color` | `color` | Color de fondo para los sub-botones de tipo deslizador |
 | `--bubble-sub-slider-height` | `px` | Altura para los sub-botones de deslizador siempre visibles |
+| `--bubble-sub-slider-outline` | `box-shadow` | Contorno solo de los sub-botones de tipo deslizador, recurre a `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Color del texto en fondos claros de sub-botones |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Condiciones
+
+Algunas opciones se rigen por condiciones, escritas exactamente como las de la [tarjeta condicional](https://www.home-assistant.io/dashboards/conditional/) de Home Assistant:
+
+- `visibility` en un [sub-botón](#sub-botones), para mostrarlo u ocultarlo
+- `trigger` en un [pop-up](#pop-up), para abrirlo cuando se cumplen las condiciones
+- `checkConditionsMet(conditions, hass)` dentro de tus [plantillas](#plantillas), cuando necesitas la respuesta en tu propio código
+
+Se evalúa cada tipo de condición de Home Assistant: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, y los grupos `and`, `or` y `not`. Las condiciones del constructor de condiciones de Home Assistant también funcionan, las que llevan el nombre de su dominio como `sun.is_up`, `light.is_on`, `zone.in_zone` o `temperature.is_value`, con sus ajustes `target`, `options`, `behavior` y `for`.
+
+<details>
+
+<summary><b>Ejemplo</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Las condiciones se evalúan en tu navegador, así que las pocas que necesitan el servidor de Home Assistant no pueden ser exactas: el amanecer y el atardecer se leen de la entidad `sun.sun` en lugar de recalcularse, y una duración `for` se mide desde el último cambio de estado, sin el historial de recorder.
+>
+> `view_columns` se acepta pero siempre se cumple, ya que Bubble Card nunca es quien organiza las columnas de tu vista. Un tipo de condición que Bubble Card no conoce se anuncia una vez en la consola de tu navegador en lugar de fallar en silencio, así distingues un error de escritura de una función que falta.
+
+<br>
+
+---
+
+<br>
+
 ## Acciones de toque, doble toque y mantener presionado
 
 También puedes usar las acciones predeterminadas de Home Assistant de toque, doble toque y mantener presionado en las tarjetas que admiten esta opción. Por ejemplo, esto te permite mostrar la ventana de "más información" al mantener presionado el ícono de un botón, o ejecutar un servicio al presionar un sub-botón.
@@ -1700,6 +1762,8 @@ Puedes agregar estilos personalizados para modificar el CSS de todas las tarjeta
 
 > [!TIP]  
 > Los sub-botones pueden ser apuntados con clases basadas en el nombre. Por ejemplo, un sub-botón llamado "My sub-button" puede estilizarse con `.my-sub-button`. Los sub-botones de tipo slider también exponen `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, etc.
+>
+> Una clase basada en el nombre cambia cuando renombras un sub-botón, y se traduce cuando el nombre se traduce. Define `css_class` en el sub-botón para tener una clase propia que nunca se mueve, sea cual sea su nombre y sea cual sea el idioma.
 
 #### Ejemplos
 
@@ -2066,6 +2130,7 @@ Tienes acceso a todas las funciones globales de JS, pero también tienes acceso 
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` devuelve `true` cuando se cumple una lista de [condiciones](#condiciones), por ejemplo `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` puede usarse para traducir un estado (también puede usarse para obtener la unidad de un estado, sin necesidad de agregarla manualmente).
 - `hass.formatEntityAttributeValue(state, "attribute")` puede usarse para traducir un atributo (también puede usarse para obtener la unidad de un estado, sin necesidad de agregarla manualmente).
 
@@ -2318,6 +2383,8 @@ Los módulos son una función poderosa que te permite guardar, reutilizar y comp
 Pero esta función es mucho más poderosa que eso, te permite agregar funciones reales tú mismo en el editor de Bubble Card, ¡usando todas las opciones predeterminadas del [formulario de Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 El selector de objetos se ha mejorado para mostrar cambios en vivo y para soportar atributos correctamente.
 
+Un módulo también puede responder al selector de tarjetas de Home Assistant junto a las [sugerencias de entidad](#sugerencias-de-entidad) integradas: usa `suggestions` para las tarjetas que puede describir de antemano, y `suggestions_code` cuando tienen que calcularse a partir de tu instalación, por ejemplo un pop-up construido con todas las entidades del área a la que pertenece la entidad elegida. Ambas claves están documentadas [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 También puedes explorar el **Module Store** para encontrar e instalar [módulos creados por la comunidad](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), ¡o compartir tus propias creaciones!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Esta pestaña muestra todos tus módulos instalados y te permite:
 - **Buscar** y **ordenar** módulos (alfabético, reciente, activos primero)
 - **Establecer estado global** para que un módulo se aplique automáticamente a todas las tarjetas
 - **Importar/Exportar** módulos para respaldo o para compartir
+- **Escribir sugerencias de entidad** en el editor de módulos, en **Opcional: Sugerencias de entidad**, para que tu módulo se ofrezca en el selector de tarjetas de Home Assistant. Tanto las reglas como las sugerencias calculadas se revisan mientras escribes, un error ahí impide guardar, y la vista previa muestra las tarjetas sugeridas para cualquier entidad que elijas
 
 #### Pestaña Module Store
 
@@ -2391,7 +2459,8 @@ Esta pestaña mostrará [todos los módulos disponibles de la comunidad](https:/
 3. Completa la información del módulo.
 4. Escribe tu código de plantilla CSS y/o JavaScript en el editor de **Código**.
 5. (Opcional) Crea una interfaz de configuración personalizada en la sección **Editor** (como el selector de color en la captura de pantalla de arriba, documentación completa disponible [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Haz clic en **Guardar**.
+6. (Opcional) Escribe tus **Sugerencias de entidad** para que tu módulo se ofrezca en el selector de tarjetas de Home Assistant. El panel revisa lo que escribes mientras tecleas, y su vista previa muestra las tarjetas sugeridas mismas para la entidad que elijas.
+7. Haz clic en **Guardar**.
 
 ¡Tu módulo ya está disponible para usarse en cualquiera de tus tarjetas!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Puedes encontrar más ejemplos en el Module Store, o [aquí](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Localización
+
+Bubble Card habla tu idioma. Su editor está traducido a los 64 idiomas que admite Home Assistant, y allí donde Home Assistant ya tiene una palabra para algo, se reutiliza su propia formulación, así que lees los mismos términos en ambas interfaces.
+
+En la parte inferior del editor, junto al número de versión, un interruptor **Automático** sigue el idioma de tu Home Assistant. Desactívalo y todo el editor vuelve al inglés, algo práctico para seguir un tutorial o para reportar un problema. Tu elección se recuerda en tu navegador.
+
+Esta documentación también está traducida, [a 62 idiomas](languages.md). Esas páginas están abiertas a todos, así que una expresión que no coincide con tu propio Home Assistant se puede corregir en un par de clics. La versión en inglés sigue siendo la referencia para el contenido mismo.
 
 <br>
 

@@ -18,7 +18,7 @@ Bubble Card is in minimalistyske en oanpasbere kaartkolleksje foar Home Assistan
 
 ## Ynhâldsopjefte
 
-**[`Ynstallaasje`](#ynstallaasje)**  **[`Konfiguraasje`](#konfiguraasje)**  **[`Pop-up`](#pop-up)**  **[`Horizontale knoppenstack`](#horizontale-knoppenstack)**  **[`Knop`](#knop)**  **[`Mediaspiler`](#mediaspiler)**  **[`Sinneskerm`](#sinneskerm)**  **[`Seleksje`](#seleksje)**  **[`Klimaat`](#klimaat)**  **[`Aginda`](#aginda)**  **[`Skiedingsline`](#skiedingsline)**  **[`Lege kolom`](#lege-kolom)**  **[`Allinnich subknoppen`](#allinnich-subknoppen)**  **[`Subknoppen`](#subknoppen)**  **[`Kaartyndielingen`](#kaartyndielingen)**  **[`Aksjes`](#tik--dûbeltik--en-fêsthâldaksjes)**  **[`Styling`](#styling)**  **[`Sjabloanen`](#sjabloanen)**  **[`Modules`](#modules)**  **[`Help`](#help)**  **[`Bydrage`](#bydrage)**  **[`Donearje`](#donearje)**
+**[`Ynstallaasje`](#ynstallaasje)**  **[`Konfiguraasje`](#konfiguraasje)**  **[`Entiteitsuggestjes`](#entiteitsuggestjes)**  **[`Pop-up`](#pop-up)**  **[`Horizontale knoppenstack`](#horizontale-knoppenstack)**  **[`Knop`](#knop)**  **[`Mediaspiler`](#mediaspiler)**  **[`Sinneskerm`](#sinneskerm)**  **[`Seleksje`](#seleksje)**  **[`Klimaat`](#klimaat)**  **[`Aginda`](#aginda)**  **[`Skiedingsline`](#skiedingsline)**  **[`Lege kolom`](#lege-kolom)**  **[`Allinnich subknoppen`](#allinnich-subknoppen)**  **[`Subknoppen`](#subknoppen)**  **[`Kaartyndielingen`](#kaartyndielingen)**  **[`Betingsten`](#betingsten)**  **[`Aksjes`](#tik--dûbeltik--en-fêsthâldaksjes)**  **[`Styling`](#styling)**  **[`Sjabloanen`](#sjabloanen)**  **[`Modules`](#modules)**  **[`Lokalisaasje`](#lokalisaasje)**  **[`Help`](#help)**  **[`Bydrage`](#bydrage)**  **[`Donearje`](#donearje)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card is in minimalistyske en oanpasbere kaartkolleksje foar Home Assistan
 
 <br>
 
-1. Download dit bestân: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Foegje dit bestân ta oan dyn map `<config>/www`
+1. Download `bubble-card.zip` fan de [lêste release](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Pak it út yn dyn map `<config>/www`, dû soest `bubble-card.js` en dêrnjonken in map `translations` krije moatte (dy map befettet de wurdboeken fan de editor, sûnder dy bliuwt de editor yn it Ingelsk)
 3. Klik op dyn dashboard rjochtsboppe op it piktogram en dan op `Edit dashboard`
 4. Klik nochris op dat piktogram en dan op `Manage resources`
 5. Klik op `Add resource`
@@ -130,6 +130,21 @@ Alle opsjes kinne yn de Home Assistant-bewurker ynsteld wurde. Mar hjirûnder yn
 
 <br>
 
+## Entiteitsuggestjes
+
+Sûnt Home Assistant 2026.6 krijst by it kiezen fan in entiteit yn de kaartkiezer in pear kant-en-klare kaarten oanbean, en Bubble Card antwurdet op dy fraach mei syn eigen resepten. Kies in ljocht en dy krijst in kaart mei in helderheidsskúfregeler oanbean, plus in kleurtemperatuer-, in kleur- en in fersadigingsfariant as dyn ljocht dy stipet. Kies in sinneskerm en dû krigest de posysjeskúfregeler, kies in mediaspiler en dû krigest ek in fariant mei syn boarnelist, kies in stofsûger en dû krigest de knoppen starte, pauzearje en werom nei it dok. Elke suggestje is in gewoane Bubble Card-konfiguraasje dy't as live foarbyld toand wurdt, dus dû kinst dejinge nimme dy't it tichtst by komt en dy gewoan fierder bewurkje.
+
+Wat oanbean wurdt hinget ôf fan wat dyn entiteit werklik kin: in ljocht sûnder helderheidskanaal krijt in skeakelder ynstee fan in skúfregeler, in sinneskerm dat net kantelje kin krijt gjin kantelfariant, in klimaatentiteit krijt syn foarynstelde modi allinnich as dy der binne. De klassike opsjes folgje der ûnder as se fan tapassing binne: de eigen kaart fan it domein, in gewoane knop en in skúfregeler.
+
+> [!TIP]
+> Modules kinne har eigen suggestjes oan dy list tafoegje, sjoch [modules](#modules).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Mei dizze kaart kinst in pop-up meitsje mei elke ynhâld. Elke pop-up is **stand
 | `shadow_opacity` | string | Opsjoneel | Elke wearde fan `0` oant `100` | De transparânsje fan it skaad fan dyn pop-up (bgl. `0` om it te ferbergjen) |
 | `hide_backdrop` | boolean | Opsjoneel | `true` of `false` (standert) | Set dit op true by de earste pop-up fan dyn haaddashboard om de backdrop op alle pop-ups út te skeakeljen. |
 | `background_update` | boolean | Opsjoneel | `true` of `false` (standert) | De ynhâld fan de pop-up op de eftergrûn bywurkje (net oanrikkemandearre) |
-| `trigger_entity` | string | Opsjoneel | Elke entiteit | Dizze pop-up iepenje op basis fan de steat fan elke entiteit |
+| `trigger` | object of list | Opsjoneel | Sjoch [betingsten](#betingsten) | Iepenet dizze pop-up as oan de betingsten foldien is |
+| `trigger_entity` | string | Opsjoneel | Elke entiteit | Dizze pop-up iepenje op basis fan de steat fan elke entiteit, de ienfâldige foarm fan `trigger` |
 | `trigger_state` | string | Opsjoneel (**Fereaske** as `trigger_entity` ynsteld is) | Elke entiteitssteat | Entiteitssteat om de pop-up te iepenjen |
-| `trigger_close` | boolean | Opsjoneel | `true` of `false` (standert) | De pop-up slute as `trigger_state` oars is |
+| `trigger_close` | boolean | Opsjoneel | `true` of `false` | Slút de pop-up as net mear oan de betingsten foldien wurdt (standert: `true` mei `trigger`, `false` mei `trigger_state`) |
 | `open_action` | object | Opsjoneel | Sjoch [aksjes](#tik--dûbeltik--en-fêsthâldaksjes) | In aksje triggerje as de pop-up iepenet |
 | `close_action` | object | Opsjoneel | Sjoch [aksjes](#tik--dûbeltik--en-fêsthâldaksjes) | In aksje triggerje as de pop-up slút |
 | `show_header` | boolean | Opsjoneel | `true` (standert) of `false` | De header fan de pop-up folslein sjen litte/ferbergje |
@@ -445,8 +461,8 @@ Dizze opsjes binne allinnich beskikber as `button_type` ynsteld is op `slider`.
 | `relative_slide`        | boolean | Opsjoneel (`false` standert )     | Wurkje de wearde by relatyf oan de startwearde, ynstee fan it startpunt fan de oanraking.                      |
 | `read_only_slider`      | boolean | Opsjoneel (`false` standert)      | Meitsje de skúfregeler allinnich-lêze. Wurdt automatysk ynskeakele foar guon entiteiten lykas sensoren.                        |
 | `slider_live_update`    | boolean | Opsjoneel (`false` standert)      | De steat fan de entiteit wurdt bywurke wylst it skowen. **Dizze funksje wurdt net foar alle entiteiten oanrikkemandearre.**        |
-| `slider_fill_orientation` | string | Opsjoneel | `left` (standert), `right`, `top`, `bottom` | Feroarje de rjochting fan de folling fan de skúfregeler |
-| `slider_value_position` | string | Opsjoneel | `right` (standert), `left`, `center`, `hidden` | Posysje fan de wearde-werjefte |
+| `slider_fill_orientation` | string | Opsjoneel | `left`, `right`, `top` of `bottom` | Feroarje de rjochting fan de folling fan de skúfregeler. Fan links nei rjochts as net definiearre, spegele yn [rjochts-nei-links-talen](#lokalisaasje) |
+| `slider_value_position` | string | Opsjoneel | `right`, `left`, `center` of `hidden` | Posysje fan de weardewerjefte. Oan de einkant as net definiearre, dus links yn [rjochts-nei-links-talen](#lokalisaasje) |
 | `invert_slider_value` | boolean | Opsjoneel (`false` standert) | Kear de rjochting fan de skúfregeler om (100% folling stiet gelyk oan it minimum). Net beskikber foar kleurskúfregelers. |
 | `light_slider_type` | string | Opsjoneel | `brightness` (standert), `hue`, `saturation`, `white_temp` | **Allinnich foar ljochten.** Kies de skúfregelermodus |
 | `cover_slider_type` | string | Opsjoneel | `position` (standert), `tilt_position` | **Allinnich foar sinneskermen.** Kies de skúfregelermodus (posysje of kanteling) |
@@ -940,7 +956,7 @@ Mei dizze kaart kinne jo jo aginda-entiteiten toane. De ynhâld is skrolber, sad
 | `limit`             | number  | Opsjoneel     | In getal                                        | It oantal barrens dat op de kaart toand wurdt                                  |
 | `show_end`          | boolean | Opsjoneel     | `true` of `false` (standert)                     | Toan of ferstopje de eintiid fan barrens                                                    |
 | `show_progress`     | boolean | Opsjoneel     | `true` (standert) of `false`                     | Toan of ferstopje de foarútgongsbalke fan it barren                                                     |
-| `show_started_events`| boolean | Opsjoneel     | `true` (standert) of `false`                     | Toan of ferstopje barrens dy't op it stuit oan de gong binne                                                 |
+| `show_started_events`| boolean | Opsjoneel     | `true` (standert) of `false`                     | Toan of ferstopje barrens dy't op it stuit oan de gong binne. Meardeisige eveneminten wurde dei foar dei beoardiele, dus allinnich de rinnende dei wurdt ferburgen en de kommende dagen bliuwe sichtber |
 | `scrolling_effect`  | boolean | Opsjoneel | `true` (standert) of `false` | Lit tekst skowe as de ynhâld grutter is as de kontener |
 | `event_action` | object | Opsjoneel | `tap_action`, `double_tap_action` of `hold_action`, sjoch [aksjes](#tik--dûbeltik--en-fêsthâldaksjes) | Meitsje it mooglik aksjes ta te foegjen by in klik op in barren. |
 | `tap_action` | object | Opsjoneel | Sjoch [aksjes](#tik--dûbeltik--en-fêsthâldaksjes) | Definiearje it type aksje by in klik op de dei, as dit net definiearre is wurdt `none` brûkt. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Opsjoneel | `icon-left` (standert), `icon-top`, `icon-bottom`, `icon-right` | Pleatsing fan it ikoan binnen de subknop |
 | `always_visible` | boolean | Opsjoneel | `true` of `false` (standert) | **Allinnich foar skúfregelders.** Lit de skúfregelder altyd sjen ynstee fan dizze by in tik te iepenjen |
 | `show_button_info` | boolean | Opsjoneel | `true` of `false` (standert) | **Allinnich foar skúfregelders.** Lit ikoan/namme/steat sjen as `always_visible` ynskeakele is |
-| `visibility` | object of list | Opsjoneel | Sjoch [betingsten](https://www.home-assistant.io/docs/scripts/conditions/) | Lit de subknop sjen of ferstopje dizze op basis fan betingsten |
+| `visibility` | object of list | Opsjoneel | Sjoch [betingsten](#betingsten) | Lit de subknop sjen of ferstopje dizze op basis fan betingsten |
 | `hide_when_parent_unavailable` | boolean | Opsjoneel | `true` of `false` (standert) | Ferstopje de subknop as de entiteit fan de haadkaart net beskikber is |
+| `css_class` | string | Opsjoneel | Elke tekststring | In ekstra CSS-klasse op de subknop, om dy yn dyn [styling](#styling) oan te sprekken hokker namme dy ek hat (bygelyks `My value` jout `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Skúfregelder-subknoppen stypje deselde opsjes as knop-skúfregelders, ûnder oa
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radius fan de rânen foar de subknoppen |
 | `--bubble-sub-button-background-color` | `color` | Eftergrûnkleur foar de subknoppen |
+| `--bubble-sub-button-outline` | `box-shadow` | Omline dy't allinnich oan in subknop of in skúfregeler tafoege wurdt as dy deselde kleur krijt as de kaart derefter, wat him ûnsichtber meitsje soe (set him op `none` om him fuort te heljen) |
 | `--bubble-sub-slider-border-radius` | `px` | Radius fan de rânen foar skúfregelder-subknoppen |
 | `--bubble-sub-slider-background-color` | `color` | Eftergrûnkleur foar skúfregelder-subknoppen |
 | `--bubble-sub-slider-height` | `px` | Hichte foar altyd-sichtbere skúfregelder-subknoppen |
+| `--bubble-sub-slider-outline` | `box-shadow` | Omline fan allinnich de skúfregelder-subknoppen, falt werom op `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Tekstkleur op ljochte eftergrûnen fan subknoppen |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Betingsten
+
+Guon opsjes wurde stjoerd troch betingsten, krekt sa skreaun as dy fan de [betingstlike kaart](https://www.home-assistant.io/dashboards/conditional/) fan Home Assistant:
+
+- `visibility` op in [subknop](#subknoppen), om dy te toanen of te ferbergjen
+- `trigger` op in [pop-up](#pop-up), om dy te iepenjen as oan de betingsten foldien is
+- `checkConditionsMet(conditions, hass)` yn dyn [sjabloanen](#sjabloanen), as dû it antwurd yn dyn eigen koade nedich hast
+
+Alle betingsttypen fan Home Assistant wurde evaluearre: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, en de groepen `and`, `or` en `not`. De betingsten fan de betingstbouwer fan Home Assistant wurkje ek, dejingen dy't nei har domein neamd binne lykas `sun.is_up`, `light.is_on`, `zone.in_zone` of `temperature.is_value`, mei har ynstellingen `target`, `options`, `behavior` en `for`.
+
+<details>
+
+<summary><b>Foarbyld</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Betingsten wurde yn dyn browser evaluearre, dus dy pear dy't de Home Assistant-server nedich hawwe kinne net krekt wêze: sinneopgong en sinne-ûndergong wurde út de entiteit `sun.sun` lêzen ynstee fan opnij berekkene te wurden, en in `for`-doer wurdt fanôf de lêste steatswiziging metten, sûnder de skiednis fan de recorder.
+>
+> `view_columns` wurdt akseptearre mar slagget altyd, om't Bubble Card noait dejinge is dy't de kolommen fan dyn werjefte yndielt. In betingsttype dat Bubble Card net ken meldt himsels ien kear yn de konsole fan dyn browser ynstee fan stil te mislearjen, sadat dû in typflater fan in ûntbrekkende funksje ûnderskiede kinst.
+
+<br>
+
+---
+
+<br>
+
 ## Tik-, dûbeltik- en fêsthâldaksjes
 
 Jo kinne ek de standert tikaksjes, dûbeltikaksjes en fêsthâldaksjes fan Home Assistant brûke op de kaarten dy't dizze opsje stypje. Dit lit jo bygelyks it finster "mear ynfo" toane troch in knopikoan fêst te hâlden, of in tsjinst útfiere as der op in subknop drukt wurdt.
@@ -1700,6 +1762,8 @@ Jo kinne oanpaste stilen tafoegje om de CSS fan alle kaarten te wizigjen **sûnd
 
 > [!TIP]  
 > Subknoppen kinne oansjoen wurde mei op namme basearre klassen. In subknop mei de namme "My sub-button" kin bygelyks styld wurde mei `.my-sub-button`. Skúfregelder-subknoppen litte ek `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, ensfh. sjen.
+>
+> In op namme basearre klasse feroaret as dû in subknop in oare namme joust, en dy wurdt oerset as de namme oerset wurdt. Stel `css_class` yn op de subknop om in eigen klasse te krijen dy't noait ferpleatst, hokker namme en hokker taal ek.
 
 #### Foarbylden
 
@@ -2066,6 +2130,7 @@ Jo hawwe tagong ta alle globale JS-funksjes, mar ek ta:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` jout `true` werom as oan in list mei [betingsten](#betingsten) foldien is, bygelyks `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` kin brûkt wurde om in steat te oersetten (kin ek brûkt wurde om in stateenheid te krijen, sûnder dy hânmjittich ta te foegjen).
 - `hass.formatEntityAttributeValue(state, "attribute")` kin brûkt wurde om in attribút te oersetten (kin ek brûkt wurde om in stateenheid te krijen, sûnder dy hânmjittich ta te foegjen).
 
@@ -2318,6 +2383,8 @@ Modules binne in krêftige funksje wêrmei jo jo oanpaste stilen en sjabloanen b
 Mar dizze funksje is folle krêftiger as dat allinnich, it lit jo sels echte funksjes tafoegje yn de Bubble Card-editor, mei help fan alle standert [Home Assistant-formulier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)-opsjes!  
 De objektseleksjetool is ferbettere om libbene wizigingen te toanen en attributen korrekt te stypjen.
 
+In module kin ek antwurdzje op de kaartkiezer fan Home Assistant, njonken de ynboude [entiteitsuggestjes](#entiteitsuggestjes): brûk `suggestions` foar de kaarten dy't er fan tefoaren beskriuwe kin, en `suggestions_code` as dy út dyn opstelling berekkene wurde moatte, bygelyks in pop-up dy't opboud wurdt út alle entiteiten fan it gebiet dêr't de keazen entiteit ta heart. Beide kaaien wurde [hjir](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) beskreaun.
+
 Jo kinne ek troch de **Module Store** blêdzje om [modules fan de mienskip](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) te finen en te ynstallearjen, of jo eigen kreaasjes te dielen!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Dit tabblêd toant al jo ynstallearre modules en lit jo:
 - Modules **sykje** en **sortearje** (alfabetysk, resint, aktyf earst)
 - De **globale steat ynstelle** sadat in module automatysk op alle kaarten tapast wurdt
 - Modules **ymportearje/eksportearje** foar reservekopy of it dielen
+- **Entiteitsuggestjes skriuwe** yn de module-editor, ûnder **Opsjoneel: entiteitsuggestjes**, sadat dyn module yn de kaartkiezer fan Home Assistant oanbean wurdt. Sawol de regels as de berekkene suggestjes wurde ûnder it skriuwen kontrolearre, in flater dêryn foarkomt bewarjen, en it foarbyld toant de foarstelde kaarten foar elke entiteit dy't dû kiest
 
 #### Tabblêd Module Store
 
@@ -2391,7 +2459,8 @@ Dit tabblêd toant [alle beskikbere modules fan de mienskip](https://github.com/
 3. Folje de module-ynformaasje yn.
 4. Skriuw jo CSS- en/of JavaScript-sjabloankoade yn de **Code**-editor.
 5. (Opsjoneel) Meitsje in oanpaste konfiguraasje-UI yn de seksje **Editor** (lykas de kleurkiezer yn de skermôfbylding hjirboppe, folsleine dokumintaasje beskikber [hjir](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klik op **Save**.
+6. (Opsjoneel) Skriuw dyn **Entiteitsuggestjes** sadat dyn module yn de kaartkiezer fan Home Assistant oanbean wurdt. It paniel kontrolearret ûnder it typen wat dû skriuwst, en it foarbyld toant de foarstelde kaarten sels foar de entiteit fan dyn kar.
+7. Klik op **Save**.
 
 Jo module is no beskikber om op elk fan jo kaarten brûkt te wurden!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Mear foarbylden fine jo yn de Module Store, of [hjir](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalisaasje
+
+Bubble Card praat dyn taal. De editor is oerset yn de 64 talen dy't Home Assistant stipet, en oeral dêr't Home Assistant al in wurd foar wat hat, wurdt syn eigen formulearring oernaam, sadat dû yn beide ynterfaces deselde termen lêst.
+
+Underoan de editor, njonken it ferzjenûmer, folget in **Automatysk**-skeakelder de taal fan dyn Home Assistant. Set dy út en de hiele editor giet werom nei it Ingelsk, wat handich is om in tutorial te folgjen of in probleem te melden. Dyn kar wurdt yn dyn browser ûnthâlden.
+
+Dizze dokumintaasje is ek oerset, [yn 62 talen](languages.md). Dy siden binne foar elkenien iepen, dus in formulearring dy't net by dyn eigen Home Assistant past kin yn in pear klikken ferbettere wurde. De Ingelske ferzje bliuwt de referinsje foar de ynhâld sels.
 
 <br>
 

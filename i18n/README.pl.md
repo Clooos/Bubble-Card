@@ -18,7 +18,7 @@ Bubble Card to minimalistyczna i w pełni konfigurowalna kolekcja kart dla Home 
 
 ## Spis treści
 
-**[`Instalacja`](#instalacja)**  **[`Konfiguracja`](#konfiguracja)**  **[`Pop-up`](#pop-up)**  **[`Poziomy stos przycisków`](#poziomy-stos-przycisków)**  **[`Przycisk`](#przycisk)**  **[`Odtwarzacz mediów`](#odtwarzacz-mediów)**  **[`Rolety`](#rolety)**  **[`Select`](#select)**  **[`Klimatyzacja`](#klimatyzacja)**  **[`Kalendarz`](#kalendarz)**  **[`Separator`](#separator)**  **[`Pusta kolumna`](#pusta-kolumna)**  **[`Tylko podprzyciski`](#tylko-podprzyciski)**  **[`Podprzyciski`](#podprzyciski)**  **[`Układy kart`](#układy-kart)**  **[`Akcje`](#akcje-dotknięcia-podwójnego-dotknięcia-i-przytrzymania)**  **[`Stylizacja`](#stylizacja)**  **[`Szablony`](#szablony)**  **[`Moduły`](#moduły)**  **[`Pomoc`](#pomoc)**  **[`Współtworzenie`](#współtworzenie)**  **[`Wesprzyj projekt`](#wesprzyj-projekt)**
+**[`Instalacja`](#instalacja)**  **[`Konfiguracja`](#konfiguracja)**  **[`Sugestie encji`](#sugestie-encji)**  **[`Pop-up`](#pop-up)**  **[`Poziomy stos przycisków`](#poziomy-stos-przycisków)**  **[`Przycisk`](#przycisk)**  **[`Odtwarzacz mediów`](#odtwarzacz-mediów)**  **[`Rolety`](#rolety)**  **[`Select`](#select)**  **[`Klimatyzacja`](#klimatyzacja)**  **[`Kalendarz`](#kalendarz)**  **[`Separator`](#separator)**  **[`Pusta kolumna`](#pusta-kolumna)**  **[`Tylko podprzyciski`](#tylko-podprzyciski)**  **[`Podprzyciski`](#podprzyciski)**  **[`Układy kart`](#układy-kart)**  **[`Warunki`](#warunki)**  **[`Akcje`](#akcje-dotknięcia-podwójnego-dotknięcia-i-przytrzymania)**  **[`Stylizacja`](#stylizacja)**  **[`Szablony`](#szablony)**  **[`Moduły`](#moduły)**  **[`Lokalizacja`](#lokalizacja)**  **[`Pomoc`](#pomoc)**  **[`Współtworzenie`](#współtworzenie)**  **[`Wesprzyj projekt`](#wesprzyj-projekt)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card to minimalistyczna i w pełni konfigurowalna kolekcja kart dla Home 
 
 <br>
 
-1. Pobierz ten plik: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Dodaj ten plik do folderu `<config>/www`
+1. Pobierz `bubble-card.zip` z [najnowszego wydania](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Rozpakuj go do folderu `<config>/www`, powinieneś otrzymać `bubble-card.js` oraz obok niego folder `translations` (ten folder zawiera słowniki edytora, bez niego edytor pozostaje po angielsku)
 3. Na swoim panelu kliknij ikonę w prawym górnym rogu, a następnie `Edytuj panel`
 4. Kliknij ponownie tę ikonę, a następnie kliknij `Zarządzaj zasobami`
 5. Kliknij `Dodaj zasób`
@@ -130,6 +130,21 @@ Wszystkie opcje można skonfigurować w edytorze Home Assistant. Więcej szczeg�
 
 <br>
 
+## Sugestie encji
+
+Od Home Assistant 2026.6 wybranie encji w selektorze kart podpowiada kilka gotowych kart, a Bubble Card odpowiada na to pytanie własnymi przepisami. Wybierz światło, a otrzymasz kartę z suwakiem jasności, a także warianty temperatury barwowej, koloru i nasycenia, jeśli twoje światło je obsługuje. Wybierz roletę, a otrzymasz suwak jej pozycji, wybierz odtwarzacz mediów, a dostaniesz również wariant z listą źródeł, wybierz odkurzacz, a dostaniesz przyciski uruchomienia, pauzy i powrotu do stacji. Każda sugestia to zwykła konfiguracja Bubble Card pokazana jako podgląd na żywo, więc możesz wziąć tę najbliższą i edytować ją dalej jak zwykle.
+
+To, co zostanie zaproponowane, zależy od tego, co twoja encja naprawdę potrafi: światło bez kanału jasności dostaje przełącznik zamiast suwaka, roleta bez możliwości nachylenia nie dostaje wariantu nachylenia, a encja klimatyzacji dostaje swoje tryby predefiniowane tylko wtedy, gdy jakieś ma. Pod nimi, jeśli mają zastosowanie, znajdują się klasyczne pozycje: dedykowana karta danej domeny, zwykły przycisk i suwak.
+
+> [!TIP]
+> Moduły mogą dodawać do tej listy własne sugestie, zobacz [moduły](#moduły).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Ta karta pozwala tworzyć pop-up z dowolną zawartością. Każdy pop-up jest **
 | `shadow_opacity` | string | Opcjonalne | Dowolna wartość od `0` do `100` | Nieprzezroczystość cienia Twojego pop-upu (np. `0`, aby go ukryć) |
 | `hide_backdrop` | boolean | Opcjonalne | `true` lub `false` (domyślnie) | Ustaw to na true na pierwszym pop-upie Twojego głównego panelu, aby wyłączyć tło (backdrop) dla wszystkich pop-upów. |
 | `background_update` | boolean | Opcjonalne | `true` lub `false` (domyślnie) | Aktualizuje zawartość pop-upu w tle (niezalecane) |
-| `trigger_entity` | string | Opcjonalne | Dowolna encja | Otwiera ten pop-up na podstawie stanu dowolnej encji |
+| `trigger` | object lub list | Opcjonalne | Zobacz [warunki](#warunki) | Otwiera ten pop-up, gdy warunki są spełnione |
+| `trigger_entity` | string | Opcjonalne | Dowolna encja | Otwiera ten pop-up na podstawie stanu dowolnej encji, prosta postać `trigger` |
 | `trigger_state` | string | Opcjonalne (**Wymagane**, jeśli zdefiniowano `trigger_entity`) | Dowolny stan encji | Stan encji, przy którym pop-up ma się otworzyć |
-| `trigger_close` | boolean | Opcjonalne | `true` lub `false` (domyślnie) | Zamyka pop-up, gdy `trigger_state` jest inny |
+| `trigger_close` | boolean | Opcjonalne | `true` lub `false` | Zamyka pop-up, gdy warunki przestają być spełnione (domyślnie: `true` przy `trigger`, `false` przy `trigger_state`) |
 | `open_action` | object | Opcjonalne | Patrz [akcje](#akcje-dotknięcia-podwójnego-dotknięcia-i-przytrzymania) | Wyzwala akcję podczas otwierania pop-upu |
 | `close_action` | object | Opcjonalne | Patrz [akcje](#akcje-dotknięcia-podwójnego-dotknięcia-i-przytrzymania) | Wyzwala akcję podczas zamykania pop-upu |
 | `show_header` | boolean | Opcjonalne | `true` (domyślnie) lub `false` | Pokazuje/ukrywa nagłówek pop-upu w całości |
@@ -445,8 +461,8 @@ Te opcje są dostępne tylko wtedy, gdy `button_type` jest ustawiony na `slider`
 | `relative_slide`        | boolean | Opcjonalne (domyślnie `false` )     | Aktualizuje wartość względem wartości początkowej, a nie punktu dotknięcia startowego.                      |
 | `read_only_slider`      | boolean | Opcjonalne (domyślnie `false`)      | Ustawia suwak jako tylko do odczytu. Automatycznie włączane dla niektórych encji, takich jak czujniki.                        |
 | `slider_live_update`    | boolean | Opcjonalne (domyślnie `false`)      | Stan encji jest aktualizowany podczas przesuwania. **Ta funkcja nie jest zalecana dla wszystkich encji.**        |
-| `slider_fill_orientation` | string | Opcjonalne | `left` (domyślnie), `right`, `top`, `bottom` | Zmienia kierunek wypełnienia suwaka |
-| `slider_value_position` | string | Opcjonalne | `right` (domyślnie), `left`, `center`, `hidden` | Pozycja wyświetlania wartości |
+| `slider_fill_orientation` | string | Opcjonalne | `left`, `right`, `top` lub `bottom` | Zmienia kierunek wypełnienia suwaka. Bez podania od lewej do prawej, lustrzanie w [językach pisanych od prawej do lewej](#lokalizacja) |
+| `slider_value_position` | string | Opcjonalne | `right`, `left`, `center` lub `hidden` | Pozycja wyświetlania wartości. Bez podania po stronie końca, czyli po lewej w [językach pisanych od prawej do lewej](#lokalizacja) |
 | `invert_slider_value` | boolean | Opcjonalne (domyślnie `false`) | Odwraca kierunek suwaka (100% wypełnienia odpowiada minimum). Niedostępne dla suwaków koloru. |
 | `light_slider_type` | string | Opcjonalne | `brightness` (domyślnie), `hue`, `saturation`, `white_temp` | **Tylko dla świateł.** Wybiera tryb suwaka |
 | `cover_slider_type` | string | Opcjonalne | `position` (domyślnie), `tilt_position` | **Tylko dla rolet.** Wybiera tryb suwaka (pozycja lub nachylenie) |
@@ -940,7 +956,7 @@ Ta karta pozwala wyświetlać Twoje encje kalendarza. Jej zawartość można prz
 | `limit`             | number  | Opcjonalne     | Liczba                                        | Liczba wydarzeń, które będą wyświetlane na karcie                                  |
 | `show_end`          | boolean | Opcjonalne     | `true` lub `false` (domyślnie)                     | Pokaż lub ukryj czas zakończenia wydarzeń                                                    |
 | `show_progress`     | boolean | Opcjonalne     | `true` (domyślnie) lub `false`                     | Pokaż lub ukryj pasek postępu wydarzenia                                                     |
-| `show_started_events`| boolean | Opcjonalne     | `true` (domyślnie) lub `false`                     | Pokaż lub ukryj wydarzenia, które aktualnie trwają                                                 |
+| `show_started_events`| boolean | Opcjonalne     | `true` (domyślnie) lub `false`                     | Pokaż lub ukryj wydarzenia, które aktualnie trwają. Wydarzenia wielodniowe są oceniane dzień po dniu, więc ukrywany jest tylko trwający dzień, a kolejne dni pozostają widoczne |
 | `scrolling_effect`  | boolean | Opcjonalne | `true` (domyślnie) lub `false` | Pozwala tekstowi przewijać się, gdy zawartość przekracza rozmiar kontenera |
 | `event_action` | object | Opcjonalne | `tap_action`, `double_tap_action` lub `hold_action`, zobacz [akcje](#akcje-dotknięcia-podwójnego-dotknięcia-i-przytrzymania) | Pozwala dodać akcje po kliknięciu wydarzenia. |
 | `tap_action` | object | Opcjonalne | Zobacz [akcje](#akcje-dotknięcia-podwójnego-dotknięcia-i-przytrzymania) | Określa typ akcji po dotknięciu dnia, jeśli nie zdefiniowano, użyta zostanie `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Opcjonalne | `icon-left` (domyślnie), `icon-top`, `icon-bottom`, `icon-right` | Umiejscowienie ikony wewnątrz podprzycisku |
 | `always_visible` | boolean | Opcjonalne | `true` lub `false` (domyślnie) | **Tylko suwak.** Zawsze pokazuj suwak zamiast otwierać go po dotknięciu |
 | `show_button_info` | boolean | Opcjonalne | `true` lub `false` (domyślnie) | **Tylko suwak.** Pokaż ikonę/nazwę/stan, gdy włączone jest `always_visible` |
-| `visibility` | object lub list | Opcjonalne | Zobacz [warunki](https://www.home-assistant.io/docs/scripts/conditions/) | Pokaż lub ukryj podprzycisk na podstawie warunków |
+| `visibility` | object lub list | Opcjonalne | Zobacz [warunki](#warunki) | Pokaż lub ukryj podprzycisk na podstawie warunków |
 | `hide_when_parent_unavailable` | boolean | Opcjonalne | `true` lub `false` (domyślnie) | Ukryj podprzycisk, jeśli encja karty nadrzędnej jest niedostępna |
+| `css_class` | string | Opcjonalne | Dowolny ciąg znaków | Dodatkowa klasa CSS podprzycisku, aby wskazać go w swoich [stylach](#stylizacja) niezależnie od jego nazwy (np. `My value` daje `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Podprzyciski typu suwak obsługują te same opcje co suwaki przycisków, w tym:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Promień zaokrąglenia podprzycisków |
 | `--bubble-sub-button-background-color` | `color` | Kolor tła podprzycisków |
+| `--bubble-sub-button-outline` | `box-shadow` | Obrys dodawany do podprzycisku lub suwaka tylko wtedy, gdy przyjmuje on ten sam kolor co karta za nim, co uczyniłoby go niewidocznym (ustaw `none`, aby go usunąć) |
 | `--bubble-sub-slider-border-radius` | `px` | Promień zaokrąglenia podprzycisków typu suwak |
 | `--bubble-sub-slider-background-color` | `color` | Kolor tła podprzycisków typu suwak |
 | `--bubble-sub-slider-height` | `px` | Wysokość zawsze widocznych podprzycisków typu suwak |
+| `--bubble-sub-slider-outline` | `box-shadow` | Obrys wyłącznie podprzycisków typu suwak, w razie braku używa `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Kolor tekstu na jasnych tłach podprzycisków |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Warunki
+
+Niektóre opcje są sterowane warunkami, zapisywanymi dokładnie tak jak te w [karcie warunkowej](https://www.home-assistant.io/dashboards/conditional/) Home Assistant:
+
+- `visibility` na [podprzycisku](#podprzyciski), aby go pokazać lub ukryć
+- `trigger` na [pop-upie](#pop-up), aby otworzyć go, gdy warunki są spełnione
+- `checkConditionsMet(conditions, hass)` w twoich [szablonach](#szablony), gdy potrzebujesz odpowiedzi we własnym kodzie
+
+Oceniany jest każdy typ warunku Home Assistant: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template` oraz grupy `and`, `or` i `not`. Działają też warunki z kreatora warunków Home Assistant, te nazwane od swojej domeny, jak `sun.is_up`, `light.is_on`, `zone.in_zone` czy `temperature.is_value`, wraz z ustawieniami `target`, `options`, `behavior` i `for`.
+
+<details>
+
+<summary><b>Przykład</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Warunki są oceniane w twojej przeglądarce, więc te nieliczne, które potrzebują serwera Home Assistant, nie mogą być dokładne: wschód i zachód słońca są odczytywane z encji `sun.sun` zamiast być przeliczane, a czas trwania `for` jest mierzony od ostatniej zmiany stanu, bez historii recordera.
+>
+> `view_columns` jest przyjmowany, ale zawsze przechodzi, ponieważ to nigdy nie Bubble Card rozkłada kolumny twojego widoku. Typ warunku, którego Bubble Card nie zna, zgłasza się raz w konsoli przeglądarki, zamiast po cichu zawieść, dzięki czemu odróżnisz literówkę od brakującej funkcji.
+
+<br>
+
+---
+
+<br>
+
 ## Akcje dotknięcia, podwójnego dotknięcia i przytrzymania
 
 Możesz też używać domyślnych akcji dotknięcia, podwójnego dotknięcia i przytrzymania Home Assistant na kartach, które obsługują tę opcję. Pozwala to na przykład wyświetlić okno „Więcej informacji” po przytrzymaniu ikony przycisku lub wywołać usługę po naciśnięciu podprzycisku.
@@ -1700,6 +1762,8 @@ Możesz dodać niestandardowe style, aby zmodyfikować CSS wszystkich kart **bez
 
 > [!TIP]  
 > Podprzyciski można wskazywać za pomocą klas opartych na nazwie. Na przykład podprzycisk o nazwie „My sub-button” można stylizować za pomocą `.my-sub-button`. Podprzyciski suwaka udostępniają też `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` itd.
+>
+> Klasa oparta na nazwie zmienia się, gdy zmieniasz nazwę podprzycisku, i jest tłumaczona wraz z nazwą. Ustaw `css_class` na podprzycisku, aby uzyskać własną klasę, która nigdy się nie zmienia, niezależnie od nazwy i języka.
 
 #### Przykłady
 
@@ -2066,6 +2130,7 @@ Masz dostęp do wszystkich globalnych funkcji JS, a dodatkowo do:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` zwraca `true`, gdy lista [warunków](#warunki) jest spełniona, na przykład `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` możesz użyć do przetłumaczenia stanu (może też posłużyć do pobrania jednostki stanu, bez potrzeby dodawania jej ręcznie).
 - `hass.formatEntityAttributeValue(state, "attribute")` możesz użyć do przetłumaczenia atrybutu (może też posłużyć do pobrania jednostki stanu, bez potrzeby dodawania jej ręcznie).
 
@@ -2318,6 +2383,8 @@ Moduły to potężna funkcja, która pozwala zapisywać, ponownie wykorzystywać
 Ale ta funkcja jest o wiele potężniejsza, pozwala samodzielnie dodawać prawdziwe funkcje w edytorze Bubble Card, korzystając ze wszystkich domyślnych opcji [formularza Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 Selektor obiektów został ulepszony, aby pokazywał zmiany na żywo i poprawnie obsługiwał atrybuty.
 
+Moduł może też odpowiadać selektorowi kart Home Assistant obok wbudowanych [sugestii encji](#sugestie-encji): użyj `suggestions` dla kart, które da się opisać z góry, oraz `suggestions_code`, gdy muszą zostać wyliczone z twojej instalacji, na przykład pop-up zbudowany ze wszystkich encji obszaru, do którego należy wybrana encja. Oba klucze są udokumentowane [tutaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Możesz też przeglądać **Module Store**, aby znaleźć i zainstalować [moduły stworzone przez społeczność](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) lub udostępnić własne!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Ta zakładka pokazuje wszystkie zainstalowane moduły i pozwala:
 - **Wyszukiwać** i **sortować** moduły (alfabetycznie, ostatnio dodane, aktywne jako pierwsze)
 - **Ustawić status globalny**, aby moduł był stosowany automatycznie do wszystkich kart
 - **Importować/eksportować** moduły do kopii zapasowej lub udostępniania
+- **Pisać sugestie encji** w edytorze modułów, w sekcji **Opcjonalnie: sugestie encji**, aby twój moduł był proponowany w selektorze kart Home Assistant. Zarówno reguły, jak i obliczane sugestie są sprawdzane w trakcie pisania, błąd uniemożliwia zapis, a podgląd pokazuje proponowane karty dla dowolnie wybranej encji
 
 #### Zakładka Module Store
 
@@ -2391,7 +2459,8 @@ Ta zakładka pokazuje [wszystkie dostępne moduły od społeczności](https://gi
 3. Uzupełnij informacje o module.
 4. Wpisz swój kod szablonu CSS i/lub JavaScript w edytorze **Kod**.
 5. (Opcjonalnie) Utwórz niestandardowy interfejs konfiguracji w sekcji **Edytor** (jak selektor koloru na powyższym zrzucie ekranu, pełna dokumentacja dostępna [tutaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Kliknij **Zapisz**.
+6. (Opcjonalnie) Napisz swoje **Sugestie encji**, aby twój moduł był proponowany w selektorze kart Home Assistant. Panel sprawdza to, co piszesz, w trakcie pisania, a jego podgląd pokazuje same proponowane karty dla wybranej przez ciebie encji.
+7. Kliknij **Zapisz**.
 
 Twój moduł jest teraz dostępny do użycia w dowolnej z Twoich kart!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Więcej przykładów znajdziesz w Module Store lub [tutaj](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalizacja
+
+Bubble Card mówi w twoim języku. Jego edytor jest przetłumaczony na 64 języki obsługiwane przez Home Assistant, a wszędzie tam, gdzie Home Assistant ma już swoje słowo, używane jest jego własne sformułowanie, więc w obu interfejsach czytasz te same terminy.
+
+Na dole edytora, obok numeru wersji, przełącznik **Automatycznie** podąża za językiem twojego Home Assistant. Wyłącz go, a cały edytor wróci do angielskiego, co przydaje się przy śledzeniu poradnika lub zgłaszaniu problemu. Twój wybór jest zapamiętywany w przeglądarce.
+
+Ta dokumentacja też jest tłumaczona, [na 62 języki](languages.md). Te strony są otwarte dla wszystkich, więc sformułowanie, które nie pasuje do twojego Home Assistant, można poprawić w kilka kliknięć. Wersja angielska pozostaje odniesieniem dla samej treści.
 
 <br>
 

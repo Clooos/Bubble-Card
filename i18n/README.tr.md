@@ -18,7 +18,7 @@ Bubble Card, Home Assistant için minimalist ve özelleştirilebilir bir kart ko
 
 ## İçindekiler
 
-**[`Kurulum`](#kurulum)**  **[`Yapılandırma`](#yapılandırma)**  **[`Pop-up`](#pop-up)**  **[`Yatay düğme yığını`](#yatay-düğme-yığını)**  **[`Düğme`](#düğme)**  **[`Medya oynatıcı`](#medya-oynatıcı)**  **[`Panjur`](#panjur)**  **[`Seçim`](#seçim)**  **[`İklim`](#i̇klim)**  **[`Takvim`](#takvim)**  **[`Ayırıcı`](#ayırıcı)**  **[`Boş sütun`](#boş-sütun)**  **[`Yalnızca alt düğmeler`](#yalnızca-alt-düğmeler)**  **[`Alt düğmeler`](#alt-düğmeler)**  **[`Kart düzenleri`](#kart-düzenleri)**  **[`Eylemler`](#dokunma-çift-dokunma-ve-basılı-tutma-eylemleri)**  **[`Stil`](#stil)**  **[`Şablonlar`](#şablonlar)**  **[`Modüller`](#modüller)**  **[`Yardım`](#yardım)**  **[`Katkıda bulunma`](#katkıda-bulunma)**  **[`Bağış yapın`](#bağış-yapın)**
+**[`Kurulum`](#kurulum)**  **[`Yapılandırma`](#yapılandırma)**  **[`Varlık önerileri`](#varlık-önerileri)**  **[`Pop-up`](#pop-up)**  **[`Yatay düğme yığını`](#yatay-düğme-yığını)**  **[`Düğme`](#düğme)**  **[`Medya oynatıcı`](#medya-oynatıcı)**  **[`Panjur`](#panjur)**  **[`Seçim`](#seçim)**  **[`İklim`](#i̇klim)**  **[`Takvim`](#takvim)**  **[`Ayırıcı`](#ayırıcı)**  **[`Boş sütun`](#boş-sütun)**  **[`Yalnızca alt düğmeler`](#yalnızca-alt-düğmeler)**  **[`Alt düğmeler`](#alt-düğmeler)**  **[`Kart düzenleri`](#kart-düzenleri)**  **[`Koşullar`](#koşullar)**  **[`Eylemler`](#dokunma-çift-dokunma-ve-basılı-tutma-eylemleri)**  **[`Stil`](#stil)**  **[`Şablonlar`](#şablonlar)**  **[`Modüller`](#modüller)**  **[`Yerelleştirme`](#yerelleştirme)**  **[`Yardım`](#yardım)**  **[`Katkıda bulunma`](#katkıda-bulunma)**  **[`Bağış yapın`](#bağış-yapın)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card, Home Assistant için minimalist ve özelleştirilebilir bir kart ko
 
 <br>
 
-1. Şu dosyayı indirin: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Bu dosyayı `<config>/www` klasörünüze ekleyin
+1. [En son sürümden](https://github.com/Clooos/Bubble-Card/releases/latest) `bubble-card.zip` dosyasını indirin
+2. Dosyayı `<config>/www` klasörünüze çıkarın, yanında `bubble-card.js` ve bir `translations` klasörü elde etmelisiniz (bu klasör editörün sözlüklerini içerir, o olmadan editör İngilizce kalır)
 3. Panonuzda sağ üst köşedeki simgeye, ardından `Panoyu düzenle` seçeneğine tıklayın
 4. Aynı simgeye tekrar tıklayıp `Kaynakları yönet` seçeneğine tıklayın
 5. `Kaynak ekle` üzerine tıklayın
@@ -130,6 +130,21 @@ Tüm seçenekler Home Assistant düzenleyicisinden yapılandırılabilir. Ancak 
 
 <br>
 
+## Varlık önerileri
+
+Home Assistant 2026.6 sürümünden beri, kart seçicide bir varlık seçtiğinizde size birkaç hazır kart sunulur ve Bubble Card bu soruya kendi tarifleriyle yanıt verir. Bir ışık seçin, size parlaklık kaydırıcılı bir kart sunulur, ışığınız destekliyorsa ayrıca renk sıcaklığı, renk ve doygunluk çeşitleri de gelir. Bir panjur seçin, konum kaydırıcısını alırsınız, bir medya oynatıcı seçin, kaynak listeli bir çeşidini de alırsınız, bir süpürge seçin, başlat, duraklat ve şarj istasyonuna dön düğmelerini alırsınız. Her öneri, canlı önizleme olarak gösterilen sıradan bir Bubble Card yapılandırmasıdır, bu yüzden en yakın olanı alıp her zamanki gibi düzenlemeye devam edebilirsiniz.
+
+Size ne sunulacağı, varlığınızın gerçekte ne yapabildiğine bağlıdır: parlaklık kanalı olmayan bir ışık kaydırıcı yerine bir anahtar alır, eğilemeyen bir panjur için eğim çeşidi sunulmaz, bir iklim varlığı ön ayar modlarını yalnızca sahipse alır. Uygun olduklarında klasik girdiler bunların altında gelir: o varlık türünün özel kartı, sade bir düğme ve bir kaydırıcı.
+
+> [!TIP]
+> Modüller bu listeye kendi önerilerini ekleyebilir, bkz. [modüller](#modüller).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Bu kart, istediğiniz içerikle bir pop-up oluşturmanızı sağlar. Her pop-up 
 | `shadow_opacity` | string | İsteğe bağlı | `0` ile `100` arasında herhangi bir değer | Pop-up'ınızın gölge opaklığı (ör. gizlemek için `0`) |
 | `hide_backdrop` | boolean | İsteğe bağlı | `true` veya `false` (varsayılan) | Ana panonuzun ilk pop-up'ında bunu true olarak ayarlayarak tüm pop-up'larda arka planı devre dışı bırakın. |
 | `background_update` | boolean | İsteğe bağlı | `true` veya `false` (varsayılan) | Pop-up içeriğini arka planda günceller (önerilmez) |
-| `trigger_entity` | string | İsteğe bağlı | Herhangi bir varlık | Herhangi bir varlığın durumuna göre bu pop-up'ı açar |
+| `trigger` | object veya list | İsteğe bağlı | Bkz. [koşullar](#koşullar) | Koşullar sağlandığında bu pop-up'ı açar |
+| `trigger_entity` | string | İsteğe bağlı | Herhangi bir varlık | Herhangi bir varlığın durumuna göre bu pop-up'ı açar, `trigger` seçeneğinin basit biçimi |
 | `trigger_state` | string | İsteğe bağlı (`trigger_entity` tanımlıysa **Gerekli**) | Herhangi bir varlık durumu | Pop-up'ı açacak varlık durumu |
-| `trigger_close` | boolean | İsteğe bağlı | `true` veya `false` (varsayılan) | `trigger_state` farklı olduğunda pop-up'ı kapatır |
+| `trigger_close` | boolean | İsteğe bağlı | `true` veya `false` | Koşullar artık sağlanmadığında pop-up'ı kapatır (varsayılan: `trigger` ile `true`, `trigger_state` ile `false`) |
 | `open_action` | object | İsteğe bağlı | Bkz. [eylemler](#dokunma-çift-dokunma-ve-basılı-tutma-eylemleri) | Pop-up açılırken bir eylem tetikler |
 | `close_action` | object | İsteğe bağlı | Bkz. [eylemler](#dokunma-çift-dokunma-ve-basılı-tutma-eylemleri) | Pop-up kapanırken bir eylem tetikler |
 | `show_header` | boolean | İsteğe bağlı | `true` (varsayılan) veya `false` | Pop-up başlığını tamamen gösterir/gizler |
@@ -445,8 +461,8 @@ Bu seçenekler yalnızca `button_type`, `slider` olarak ayarlandığında kullan
 | `relative_slide`        | boolean | Optional (`false` default )     | Değeri, başlangıç dokunma noktası yerine başlangıç değerine göre güncelleyin.                                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Kaydırıcıyı salt okunur yapın. Sensörler gibi bazı varlıklar için otomatik olarak etkinleştirilir.                                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Kaydırma sırasında varlık durumu güncellenir. **Bu özellik tüm varlıklar için önerilmez.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Kaydırıcının dolgu yönünü değiştirin |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Değer görüntüsünün konumu |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` veya `bottom` | Kaydırıcının dolgu yönünü değiştirin. Belirtilmediğinde soldan sağa, [sağdan sola yazılan dillerde](#yerelleştirme) aynalanır |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` veya `hidden` | Değer görüntüsünün konumu. Belirtilmediğinde bitiş tarafında, yani [sağdan sola yazılan dillerde](#yerelleştirme) solda olur |
 | `invert_slider_value` | boolean | Optional (`false` default) | Kaydırıcı yönünü tersine çevirin (%100 dolgu, minimuma eşittir). Renk kaydırıcıları için kullanılamaz. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Yalnızca ışıklar için.** Kaydırıcı modunu seçin |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Yalnızca panjurlar için.** Kaydırıcı modunu seçin (konum veya eğim) |
@@ -940,7 +956,7 @@ Bu kart, takvim varlıklarınızı görüntülemenizi sağlar. İçeriği kaydı
 | `limit`             | number  | Optional     | A number                                        | Kartta görüntülenecek etkinlik sayısı                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Etkinlikler için bitiş saatini göster veya gizle                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Etkinlik ilerleme çubuğunu göster veya gizle                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Şu anda devam etmekte olan etkinlikleri göster veya gizle                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Şu anda devam etmekte olan etkinlikleri göster veya gizle. Birden çok güne yayılan etkinlikler gün gün değerlendirilir, bu yüzden yalnızca içinde bulunulan gün gizlenir ve gelecek günler görünür kalır |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | İçerik, kapsayıcısının boyutunu aştığında metnin kaymasına izin ver |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#dokunma-çift-dokunma-ve-basılı-tutma-eylemleri) | Etkinliğe tıklama eylemleri eklemeye izin ver. |
 | `tap_action` | object | Optional | See [actions](#dokunma-çift-dokunma-ve-basılı-tutma-eylemleri) | Güne dokunma eyleminin türünü tanımlayın, tanımlanmazsa `none` kullanılır. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | İsteğe bağlı | `icon-left` (varsayılan), `icon-top`, `icon-bottom`, `icon-right` | Alt düğme içinde simge yerleşimi |
 | `always_visible` | boolean | İsteğe bağlı | `true` veya `false` (varsayılan) | **Yalnızca kaydırıcı.** Kaydırıcıyı dokununca açmak yerine her zaman göster |
 | `show_button_info` | boolean | İsteğe bağlı | `true` veya `false` (varsayılan) | **Yalnızca kaydırıcı.** `always_visible` etkinken simge/ad/durumu göster |
-| `visibility` | object veya list | İsteğe bağlı | Bkz. [koşullar](https://www.home-assistant.io/docs/scripts/conditions/) | Koşullara göre alt düğmeyi göster veya gizle |
+| `visibility` | object veya list | İsteğe bağlı | Bkz. [koşullar](#koşullar) | Koşullara göre alt düğmeyi göster veya gizle |
 | `hide_when_parent_unavailable` | boolean | İsteğe bağlı | `true` veya `false` (varsayılan) | Üst kart varlığı kullanılamıyorsa alt düğmeyi gizle |
+| `css_class` | string | İsteğe bağlı | Herhangi bir metin | Alt düğmeye eklenen fazladan bir CSS sınıfı, adı ne olursa olsun onu [stillerinizde](#stil) hedefleyebilmeniz için (örneğin `My value` `.my-value` verir) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Kaydırıcı alt düğmeleri, düğme kaydırıcılarıyla aynı kaydırıcı se
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Alt düğmeler için kenar yuvarlaklığı |
 | `--bubble-sub-button-background-color` | `color` | Alt düğmeler için arka plan rengi |
+| `--bubble-sub-button-outline` | `box-shadow` | Bir alt düğmeye veya kaydırıcıya, yalnızca arkasındaki kartla aynı rengi alıp görünmez kalacağı durumda eklenen dış çizgi (kaldırmak için `none` olarak ayarlayın) |
 | `--bubble-sub-slider-border-radius` | `px` | Kaydırıcı alt düğmeler için kenar yuvarlaklığı |
 | `--bubble-sub-slider-background-color` | `color` | Kaydırıcı alt düğmeler için arka plan rengi |
 | `--bubble-sub-slider-height` | `px` | Her zaman görünür kaydırıcı alt düğmeler için yükseklik |
+| `--bubble-sub-slider-outline` | `box-shadow` | Yalnızca kaydırıcı alt düğmelerin dış çizgisi, `--bubble-sub-button-outline` değerine geri döner |
 | `--bubble-sub-button-dark-text-color` | `color` | Parlak alt düğme arka planlarında metin rengi |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Koşullar
+
+Bazı seçenekler koşullarla yönetilir ve tam olarak Home Assistant [koşullu kartının](https://www.home-assistant.io/dashboards/conditional/) koşulları gibi yazılır:
+
+- Göstermek veya gizlemek için bir [alt düğmede](#alt-düğmeler) `visibility`
+- Koşullar sağlandığında açmak için bir [pop-up'ta](#pop-up) `trigger`
+- Yanıta kendi kodunuzda ihtiyaç duyduğunuzda [şablonlarınızın](#şablonlar) içinde `checkConditionsMet(conditions, hass)`
+
+Home Assistant'ın her koşul türü değerlendirilir: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template` ve `and`, `or` ile `not` grupları. Home Assistant koşul oluşturucusunun koşulları da çalışır, yani `sun.is_up`, `light.is_on`, `zone.in_zone` veya `temperature.is_value` gibi alan adlarıyla anılanlar, `target`, `options`, `behavior` ve `for` ayarlarıyla birlikte.
+
+<details>
+
+<summary><b>Örnek</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Koşullar tarayıcınızda değerlendirilir, bu yüzden Home Assistant sunucusuna ihtiyaç duyan birkaç tanesi tam olarak kesin olamaz: gün doğumu ve gün batımı yeniden hesaplanmak yerine `sun.sun` varlığından okunur ve bir `for` süresi, recorder geçmişi olmadan son durum değişikliğinden itibaren ölçülür.
+>
+> `view_columns` kabul edilir ama her zaman geçer, çünkü görünümünüzün sütunlarını yerleştiren hiçbir zaman Bubble Card değildir. Bubble Card'ın bilmediği bir koşul türü, sessizce başarısız olmak yerine tarayıcı konsolunuzda kendini bir kez bildirir, böylece bir yazım hatasını eksik bir özellikten ayırt edebilirsiniz.
+
+<br>
+
+---
+
+<br>
+
 ## Dokunma, çift dokunma ve basılı tutma eylemleri
 
 Bu seçeneği destekleyen kartlarda Home Assistant'ın varsayılan dokunma eylemlerini, çift dokunma eylemlerini ve basılı tutma eylemlerini de kullanabilirsiniz. Örneğin bu, bir düğme simgesini basılı tutarak "daha fazla bilgi" penceresini görüntülemenizi veya bir alt düğmeye basıldığında bir hizmeti çalıştırmanızı sağlar.
@@ -1700,6 +1762,8 @@ Kartların tamamının CSS'ini **card-mod kullanmadan** değiştirmek için dör
 
 > [!TIP]  
 > Alt düğmeler isim tabanlı sınıflarla hedeflenebilir. Örneğin "My sub-button" adlı bir alt düğme `.my-sub-button` ile stillendirilebilir. Kaydırıcı alt düğmeleri de `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` gibi sınıfları sunar.
+>
+> Ada dayalı bir sınıf, alt düğmeyi yeniden adlandırdığınızda değişir ve ad çevrildiğinde o da çevrilir. Adı ne olursa olsun, dili ne olursa olsun asla yerinden oynamayan kendi sınıfınızı elde etmek için alt düğmede `css_class` ayarlayın.
 
 #### Örnekler
 
@@ -2066,6 +2130,7 @@ Tüm genel JS fonksiyonlarına erişiminiz vardır, ama ayrıca şunlara da eri�
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)`, bir [koşullar](#koşullar) listesi sağlandığında `true` döndürür, örneğin `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)`, bir durumu çevirmek için kullanılabilir (manuel olarak eklemenize gerek kalmadan bir durum birimi almak için de kullanılabilir).
 - `hass.formatEntityAttributeValue(state, "attribute")`, bir özniteliği çevirmek için kullanılabilir (manuel olarak eklemenize gerek kalmadan bir durum birimi almak için de kullanılabilir).
 
@@ -2318,6 +2383,8 @@ Modüller, özel stillerinizi ve şablonlarınızı tüm Bubble Card'larınızda
 Ama bu özellik bundan çok daha güçlüdür, Bubble Card editöründe tüm varsayılan [Home Assistant form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) seçeneklerini kullanarak kendi başınıza gerçek özellikler eklemenizi sağlar!  
 Nesne seçici, canlı değişiklikleri göstermek ve öznitelikleri doğru şekilde desteklemek için geliştirildi.
 
+Bir modül, yerleşik [varlık önerilerinin](#varlık-önerileri) yanında Home Assistant kart seçicisine de yanıt verebilir: önceden tanımlayabildiği kartlar için `suggestions`, kurulumunuzdan hesaplanmaları gerektiğinde ise `suggestions_code` kullanın, örneğin seçilen varlığın ait olduğu alandaki tüm varlıklardan oluşturulan bir pop-up gibi. Her iki anahtar da [burada](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) belgelenmiştir.
+
 Ayrıca [topluluk tarafından oluşturulan modülleri](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) bulup kurmak için **Module Store**'a göz atabilir veya kendi çalışmalarınızı paylaşabilirsiniz!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Bu sekme kurulu tüm modüllerinizi gösterir ve şunları yapmanızı sağlar:
 - Modülleri **Arama** ve **Sıralama** (alfabetik, en yeni, önce etkin olanlar)
 - Bir modülü tüm kartlara otomatik olarak uygulanacak şekilde **Genel durumunu ayarlama**
 - Yedekleme veya paylaşım için modülleri **İçe/Dışa aktarma**
+- Modülünüzün Home Assistant kart seçicisinde sunulması için modül düzenleyicisindeki **İsteğe bağlı: Varlık önerileri** bölümünde **Varlık önerileri yazma**. Kurallar da hesaplanan öneriler de siz yazarken denetlenir, oradaki bir hata kaydetmeyi engeller ve önizleme seçtiğiniz her varlık için önerilen kartları gösterir
 
 #### Module Store sekmesi
 
@@ -2391,7 +2459,8 @@ Bu sekme [topluluktan gelen tüm mevcut modülleri](https://github.com/Clooos/Bu
 3. Modül bilgilerini doldurun.
 4. CSS ve/veya JavaScript şablon kodunuzu **Kod** editörüne yazın.
 5. (İsteğe bağlı) **Editör** bölümünde özel bir yapılandırma arayüzü oluşturun (yukarıdaki ekran görüntüsündeki renk seçici gibi, tam belgeleri [burada](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) bulabilirsiniz).
-6. **Kaydet**'e tıklayın.
+6. (İsteğe bağlı) Modülünüzün Home Assistant kart seçicisinde sunulması için **Varlık önerilerinizi** yazın. Panel yazdıklarınızı siz yazarken denetler ve önizlemesi, seçtiğiniz varlık için önerilen kartların kendisini gösterir.
+7. **Kaydet**'e tıklayın.
 
 Modülünüz artık kartlarınızın herhangi birinde kullanılabilir!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Daha fazla örneği Module Store'da veya [burada](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) bulabilirsiniz.
+
+<br>
+
+---
+
+<br>
+
+## Yerelleştirme
+
+Bubble Card sizin dilinizi konuşur. Editörü, Home Assistant'ın desteklediği 64 dile çevrilmiştir ve Home Assistant'ın bir şey için zaten bir sözcüğü olan her yerde onun kendi ifadesi yeniden kullanılır, böylece her iki arayüzde de aynı terimleri okursunuz.
+
+Editörün altında, sürüm numarasının yanındaki bir **Otomatik** anahtarı Home Assistant dilinizi izler. Onu kapatın, tüm editör İngilizceye döner, bu da bir eğitimi takip etmek ya da bir sorun bildirmek için kullanışlıdır. Seçiminiz tarayıcınızda hatırlanır.
+
+Bu belgeler de çevrildi, [62 dilde](languages.md). Bu sayfalar herkese açıktır, bu yüzden kendi Home Assistant'ınıza uymayan bir ifade birkaç tıklamayla düzeltilebilir. İçeriğin kendisi için İngilizce sürüm başvuru kaynağı olarak kalır.
 
 <br>
 

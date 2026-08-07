@@ -18,7 +18,7 @@ Bubble Card er einfalt og sérsniðanlegt kortasafn fyrir Home Assistant, með n
 
 ## Efnisyfirlit
 
-**[`Uppsetning`](#uppsetning)**  **[`Stillingar`](#stillingar)**  **[`Sprettigluggi`](#sprettigluggi)**  **[`Lárétt hnapparöð`](#lárétt-hnapparöð)**  **[`Hnappur`](#hnappur)**  **[`Spilari`](#spilari)**  **[`Gluggatjöld`](#gluggatjöld)**  **[`Val`](#val)**  **[`Loftslag`](#loftslag)**  **[`Dagatal`](#dagatal)**  **[`Skil`](#skil)**  **[`Tómur dálkur`](#tómur-dálkur)**  **[`Aðeins undirhnappar`](#aðeins-undirhnappar)**  **[`Undirhnappar`](#undirhnappar)**  **[`Útlit korta`](#útlit-korta)**  **[`Aðgerðir`](#aðgerðir-við-ýtingu-tvíýtingu-og-að-halda-inni)**  **[`Stílun`](#stílun)**  **[`Sniðmát`](#sniðmát)**  **[`Einingar`](#einingar)**  **[`Hjálp`](#hjálp)**  **[`Framlög`](#framlög)**  **[`Styrkja`](#styrkja)**
+**[`Uppsetning`](#uppsetning)**  **[`Stillingar`](#stillingar)**  **[`Tillögur fyrir einingar`](#tillögur-fyrir-einingar)**  **[`Sprettigluggi`](#sprettigluggi)**  **[`Lárétt hnapparöð`](#lárétt-hnapparöð)**  **[`Hnappur`](#hnappur)**  **[`Spilari`](#spilari)**  **[`Gluggatjöld`](#gluggatjöld)**  **[`Val`](#val)**  **[`Loftslag`](#loftslag)**  **[`Dagatal`](#dagatal)**  **[`Skil`](#skil)**  **[`Tómur dálkur`](#tómur-dálkur)**  **[`Aðeins undirhnappar`](#aðeins-undirhnappar)**  **[`Undirhnappar`](#undirhnappar)**  **[`Útlit korta`](#útlit-korta)**  **[`Skilyrði`](#skilyrði)**  **[`Aðgerðir`](#aðgerðir-við-ýtingu-tvíýtingu-og-að-halda-inni)**  **[`Stílun`](#stílun)**  **[`Sniðmát`](#sniðmát)**  **[`Einingar`](#einingar)**  **[`Staðfærsla`](#staðfærsla)**  **[`Hjálp`](#hjálp)**  **[`Framlög`](#framlög)**  **[`Styrkja`](#styrkja)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card er einfalt og sérsniðanlegt kortasafn fyrir Home Assistant, með n
 
 <br>
 
-1. Sæktu þessa skrá: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Bættu þessari skrá við `<config>/www` möppuna þína
+1. Sæktu `bubble-card.zip` úr [nýjustu útgáfunni](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Taktu það úr pakkanum í `<config>/www` möppuna þína, þú ættir að fá `bubble-card.js` og `translations` möppu við hliðina á honum (sú mappa geymir orðabækur ritilsins, án hennar helst ritillinn á ensku)
 3. Á mælaborðinu þínu, smelltu á táknið efst í hægra horninu og svo á `Edit dashboard`
 4. Smelltu aftur á táknið og svo á `Manage resources`
 5. Smelltu á `Add resource`
@@ -130,6 +130,21 @@ Hægt er að stilla alla valkosti í Home Assistant ritlinum. En þú finnur ná
 
 <br>
 
+## Tillögur fyrir einingar
+
+Frá og með Home Assistant 2026.6 færðu nokkur tilbúin kort í boði þegar þú velur einingu í kortavalinu, og Bubble Card svarar þeirri spurningu með eigin uppskriftum. Veldu ljós og þér býðst kort með birtusleða, auk litahita-, lita- og mettunarafbrigðis þegar ljósið þitt styður þau. Veldu gluggatjöld og þú færð stöðusleðann þeirra, veldu spilara og þú færð líka afbrigði með upprunalistanum hans, veldu ryksugu og þú færð hnappana ræsa, gera hlé og fara í hleðslustöð. Hver tillaga er venjuleg Bubble Card stilling sem birtist sem lifandi forskoðun, svo þú getur tekið þá sem er næst því sem þú vilt og haldið áfram að breyta henni eins og venjulega.
+
+Það sem þér býðst fer eftir því hvað einingin þín getur í raun: ljós án birturásar fær rofa í stað sleða, gluggatjöld sem geta ekki hallað fá ekkert hallaafbrigði, og loftslagseining fær forstillingar sínar aðeins þegar hún á einhverjar. Klassísku færslurnar koma fyrir neðan þær þegar þær eiga við: sérstaka kortið fyrir lénið, venjulegur hnappur og sleði.
+
+> [!TIP]
+> Einingar geta bætt eigin tillögum við þann lista, sjá [einingar](#einingar).
+
+<br>
+
+---
+
+<br>
+
 ## Sprettigluggi
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Hægt er að stilla alla valkosti í Home Assistant ritlinum. En þú finnur ná
 | `shadow_opacity` | string | Valfrjálst | Hvaða gildi sem er frá `0` til `100` | Ógegnsæi skugga sprettigluggans þíns (t.d. `0` til að fela hann) |
 | `hide_backdrop` | boolean | Valfrjálst | `true` eða `false` (sjálfgefið) | Stilltu þetta á true á fyrsta sprettiglugganum á aðalmælaborðinu þínu til að slökkva á bakgrunni (backdrop) á öllum sprettigluggum. |
 | `background_update` | boolean | Valfrjálst | `true` eða `false` (sjálfgefið) | Uppfærir efni sprettigluggans í bakgrunni (ekki mælt með) |
-| `trigger_entity` | string | Valfrjálst | Hvaða eind sem er | Opnar þennan sprettiglugga út frá stöðu hvaða eindar sem er |
+| `trigger` | hlutur eða listi | Valfrjálst | Sjá [skilyrði](#skilyrði) | Opnar þennan sprettiglugga þegar skilyrðin eru uppfyllt |
+| `trigger_entity` | string | Valfrjálst | Hvaða eind sem er | Opnar þennan sprettiglugga út frá stöðu hvaða eindar sem er, einfalda form `trigger` |
 | `trigger_state` | string | Valfrjálst (**Skylda** ef `trigger_entity` er skilgreint) | Hvaða staða eindar sem er | Staða eindar til að opna sprettigluggann |
-| `trigger_close` | boolean | Valfrjálst | `true` eða `false` (sjálfgefið) | Lokar sprettiglugganum þegar `trigger_state` er annað |
+| `trigger_close` | boolean | Valfrjálst | `true` eða `false` | Lokar sprettiglugganum þegar skilyrðin eru ekki lengur uppfyllt (sjálfgefið: `true` með `trigger`, `false` með `trigger_state`) |
 | `open_action` | object | Valfrjálst | Sjá [aðgerðir](#aðgerðir-við-ýtingu-tvíýtingu-og-að-halda-inni) | Ræsir aðgerð þegar sprettiglugginn opnast |
 | `close_action` | object | Valfrjálst | Sjá [aðgerðir](#aðgerðir-við-ýtingu-tvíýtingu-og-að-halda-inni) | Ræsir aðgerð þegar sprettiglugginn lokast |
 | `show_header` | boolean | Valfrjálst | `true` (sjálfgefið) eða `false` | Sýnir/felur haus sprettigluggans að fullu |
@@ -445,8 +461,8 @@ auto_order: true
 | `relative_slide`        | boolean | Optional (`false` default )     | Uppfæra gildi miðað við upphafsgildið frekar en upphaflega snertipunktinn.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Gera sleðann aðeins til aflestrar. Virkjað sjálfkrafa fyrir sumar eindir eins og skynjara.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Staða eindarinnar uppfærist meðan rennt er. **Þessi eiginleiki er ekki mælt með fyrir allar eindir.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Breyta fyllingarstefnu sleðans |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Staðsetning gildisbirtingar |
+| `slider_fill_orientation` | string | Valfrjálst | `left`, `right`, `top` eða `bottom` | Breyta fyllingarstefnu sleðans. Frá vinstri til hægri þegar ekkert er skilgreint, speglað í [tungumálum sem lesast frá hægri til vinstri](#staðfærsla) |
+| `slider_value_position` | string | Valfrjálst | `right`, `left`, `center` eða `hidden` | Staðsetning gildisins. Endamegin þegar ekkert er skilgreint, sem sagt vinstra megin í [tungumálum sem lesast frá hægri til vinstri](#staðfærsla) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Snúa við stefnu sleðans (100% fylling jafngildir lágmarki). Ekki í boði fyrir litasleða. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Only for lights.** Velja hamstillingu sleðans |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Only for covers.** Velja hamstillingu sleðans (staða eða halli) |
@@ -940,7 +956,7 @@ sub_button:
 | `limit`             | number  | Optional     | A number                                        | Fjöldi viðburða sem birtist á kortinu                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Sýna eða fela lokatíma viðburða                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Sýna eða fela framvindustiku viðburðar                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Sýna eða fela viðburði sem eru þegar í gangi                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Sýna eða fela viðburði sem eru þegar í gangi. Viðburðir sem ná yfir marga daga eru metnir dag fyrir dag, svo aðeins dagurinn sem er í gangi felst og komandi dagar haldast sýnilegir |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | Leyfa texta að renna þegar innihaldið er stærra en umlykjandi svæði |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [aðgerðir](#aðgerðir-við-ýtingu-tvíýtingu-og-að-halda-inni) | Gerir kleift að bæta við aðgerðum við smell á viðburð. |
 | `tap_action` | object | Optional | See [aðgerðir](#aðgerðir-við-ýtingu-tvíýtingu-og-að-halda-inni) | Skilgreinir tegund aðgerðar við smell á dag, ef ekki skilgreint er `none` notað. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | strengur | Valfrjálst | `icon-left` (sjálfgefið), `icon-top`, `icon-bottom`, `icon-right` | Staðsetning táknmyndar innan í undirhnappnum |
 | `always_visible` | boolean | Valfrjálst | `true` eða `false` (sjálfgefið) | **Aðeins Slider.** Sýndu sleðann alltaf í stað þess að opna hann við ýtingu |
 | `show_button_info` | boolean | Valfrjálst | `true` eða `false` (sjálfgefið) | **Aðeins Slider.** Sýndu táknmynd/nafn/stöðu þegar `always_visible` er virkt |
-| `visibility` | hlutur eða listi | Valfrjálst | Sjá [skilyrði](https://www.home-assistant.io/docs/scripts/conditions/) | Sýna eða fela undirhnappinn út frá skilyrðum |
+| `visibility` | hlutur eða listi | Valfrjálst | Sjá [skilyrði](#skilyrði) | Sýna eða fela undirhnappinn út frá skilyrðum |
 | `hide_when_parent_unavailable` | boolean | Valfrjálst | `true` eða `false` (sjálfgefið) | Faldu undirhnappinn ef eind foreldurskortsins er ekki tiltæk |
+| `css_class` | string | Valfrjálst | Hvaða strengur sem er | Aukalegur CSS flokkur á undirhnappinum, til að miða á hann í [stílun](#stílun) þinni hvað sem hann heitir (til dæmis gefur `My value` `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Sleða undirhnappar (slider) styðja sömu sleðavalkosti og hnappasleðar, þar
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Hornaradíus undirhnappanna |
 | `--bubble-sub-button-background-color` | `color` | Bakgrunnslitur undirhnappanna |
+| `--bubble-sub-button-outline` | `box-shadow` | Útlína sem bætist á undirhnapp eða sleða aðeins þegar hann er málaður í sama lit og kortið á bak við hann, sem myndi gera hann ósýnilegan (settu `none` til að fjarlægja hana) |
 | `--bubble-sub-slider-border-radius` | `px` | Hornaradíus fyrir sleða undirhnappa |
 | `--bubble-sub-slider-background-color` | `color` | Bakgrunnslitur fyrir sleða undirhnappa |
 | `--bubble-sub-slider-height` | `px` | Hæð fyrir sleða undirhnappa sem eru alltaf sýnilegir |
+| `--bubble-sub-slider-outline` | `box-shadow` | Útlína aðeins fyrir sleðaundirhnappa, fellur aftur á `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Textalitur á björtum bakgrunni undirhnapps |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Skilyrði
+
+Sumir valkostir stýrast af skilyrðum, skrifuðum nákvæmlega eins og skilyrði [skilyrta kortsins](https://www.home-assistant.io/dashboards/conditional/) í Home Assistant:
+
+- `visibility` á [undirhnappi](#undirhnappar), til að sýna hann eða fela
+- `trigger` á [sprettiglugga](#sprettigluggi), til að opna hann þegar skilyrðin eru uppfyllt
+- `checkConditionsMet(conditions, hass)` inni í [sniðmátunum](#sniðmát) þínum, þegar þú þarft svarið í þínum eigin kóða
+
+Allar skilyrðategundir Home Assistant eru metnar: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, ásamt hópunum `and`, `or` og `not`. Skilyrðin úr skilyrðasmið Home Assistant virka líka, þau sem heita eftir léninu sínu eins og `sun.is_up`, `light.is_on`, `zone.in_zone` eða `temperature.is_value`, með stillingunum `target`, `options`, `behavior` og `for`.
+
+<details>
+
+<summary><b>Dæmi</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Skilyrðin eru metin í vafranum þínum, svo þau fáu sem þurfa Home Assistant þjóninn geta ekki verið nákvæm: sólarupprás og sólsetur eru lesin úr einingunni `sun.sun` í stað þess að vera reiknuð upp á nýtt, og `for` tímalengd er mæld frá síðustu stöðubreytingu, án ferilskrár recorder.
+>
+> `view_columns` er tekið gilt en stenst alltaf, því Bubble Card er aldrei það sem raðar dálkunum í sýninni þinni. Skilyrðategund sem Bubble Card þekkir ekki lætur vita af sér einu sinni í vafrakerfisskránni þinni í stað þess að bregðast hljóðlaust, svo þú getir greint innsláttarvillu frá eiginleika sem vantar.
+
+<br>
+
+---
+
+<br>
+
 ## Aðgerðir við ýtingu, tvíýtingu og að halda inni
 
 Þú getur einnig notað sjálfgefnar aðgerðir Home Assistant við ýtingu, tvíýtingu og að halda inni á kortunum sem styðja þennan valkost. Þetta gerir þér til dæmis kleift að birta "more info" gluggann með því að halda inni táknmynd hnapps eða keyra þjónustu þegar ýtt er á undirhnapp.
@@ -1700,6 +1762,8 @@ button_action:
 
 > [!TIP]  
 > Hægt er að miða á undirhnappa með nafnbundnum flokkum (classes). Til dæmis er hægt að stílsetja undirhnapp sem heitir „My sub-button" með `.my-sub-button`. Sleðaundirhnappar (slider sub-buttons) sýna líka `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, o.s.frv.
+>
+> Nafnbundinn flokkur breytist þegar þú endurnefnir undirhnapp, og hann þýðist þegar nafnið er þýtt. Stilltu `css_class` á undirhnappinn til að fá þinn eigin flokk sem hreyfist aldrei, sama hvað hann heitir og sama á hvaða tungumáli.
 
 #### Dæmi
 
@@ -2066,6 +2130,7 @@ styles: |
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` skilar `true` þegar listi af [skilyrðum](#skilyrði) er uppfylltur, til dæmis `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` má nota til að þýða stöðu (má einnig nota til að fá einingu stöðu, án þess að þurfa að bæta henni handvirkt við).
 - `hass.formatEntityAttributeValue(state, "attribute")` má nota til að þýða eigind (má einnig nota til að fá einingu stöðu, án þess að þurfa að bæta henni handvirkt við).
 
@@ -2318,6 +2383,8 @@ Einingar (Modules) eru öflugur eiginleiki sem gerir þér kleift að vista, end
 En þessi eiginleiki er miklu öflugri en það, hann gerir þér kleift að bæta raunverulegum eiginleikum sjálfur við í Bubble Card ritlinum, með því að nota alla sjálfgefna [Home Assistant valkosti](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 Hlutavalarinn (object selector) hefur verið endurbættur til að sýna lifandi breytingar og styðja eigindir rétt.
 
+Eining getur líka svarað kortavali Home Assistant við hlið innbyggðu [tillagnanna fyrir einingar](#tillögur-fyrir-einingar): notaðu `suggestions` fyrir kortin sem hún getur lýst fyrir fram, og `suggestions_code` þegar reikna þarf þau út frá uppsetningunni þinni, til dæmis sprettiglugga sem er byggður úr öllum einingum svæðisins sem valda einingin tilheyrir. Báðir lyklarnir eru skjalfestir [hér](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Þú getur líka skoðað **Module Store** til að finna og setja upp [einingar sem samfélagið hefur búið til](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), eða deilt þínum eigin sköpunum!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Uppsetningar- og stillingarskrefin eru útskýrð hér:
 - **Leita** (Search) og **raða** (sort) einingum (í stafrófsröð, nýjast fyrst, virkt fyrst)
 - **Stilla á víðvær** (Set global status) til að láta einingu notast sjálfkrafa á öll kort
 - **Flytja inn/út** (Import/Export) einingar til öryggisafritunar eða deilingar
+- **Skrifa tillögur fyrir einingar** í einingaritlinum, undir **Valfrjálst: Tillögur fyrir einingar**, svo einingin þín birtist í kortavali Home Assistant. Bæði reglurnar og reiknuðu tillögurnar eru athugaðar jafnóðum og þú skrifar, villa þar kemur í veg fyrir vistun, og forskoðunin sýnir tillögukortin fyrir hvaða einingu sem þú velur
 
 #### Module Store flipinn
 
@@ -2391,7 +2459,8 @@ Uppsetningar- og stillingarskrefin eru útskýrð hér:
 3. Fylltu út upplýsingarnar um eininguna.
 4. Skrifaðu CSS og/eða JavaScript sniðmátskóðann þinn í **Code** ritlinum.
 5. (Valfrjálst) Búðu til sérsniðið stillingarviðmót í **Editor** hlutanum (eins og litavalið á skjámyndinni hér að ofan, fullkomin skjölun tiltæk [hér](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Smelltu á **Save**.
+6. (Valfrjálst) Skrifaðu **Tillögur fyrir einingar** svo einingin þín birtist í kortavali Home Assistant. Spjaldið athugar það sem þú skrifar jafnóðum og þú slærð inn, og forskoðun þess sýnir sjálf tillögukortin fyrir þá einingu sem þú velur.
+7. Smelltu á **Save**.
 
 Núna er einingin þín tiltæk til að nota á hvaða korti sem er!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Fleiri dæmi má finna í Module Store, eða [hér](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Staðfærsla
+
+Bubble Card talar tungumálið þitt. Ritillinn er þýddur á þau 64 tungumál sem Home Assistant styður, og alls staðar þar sem Home Assistant á þegar orð yfir eitthvað er orðalag þess notað, svo þú lesir sömu hugtökin í báðum viðmótum.
+
+Neðst í ritlinum, við hliðina á útgáfunúmerinu, fylgir rofinn **Sjálfvirkt** tungumáli Home Assistant hjá þér. Slökktu á honum og allur ritillinn fer aftur á ensku, sem er þægilegt til að fylgja leiðbeiningum eða til að tilkynna vandamál. Valið þitt er munað í vafranum þínum.
+
+Þessi skjölun er líka þýdd, [á 62 tungumál](languages.md). Þessar síður eru opnar öllum, svo orðalag sem passar ekki við þitt eigið Home Assistant má laga með nokkrum smellum. Enska útgáfan er áfram viðmiðið fyrir innihaldið sjálft.
 
 <br>
 

@@ -18,7 +18,7 @@ Bubble Card ist eine minimalistische und anpassbare Kartensammlung für Home Ass
 
 ## Inhaltsverzeichnis
 
-**[`Installation`](#installation)**  **[`Konfiguration`](#konfiguration)**  **[`Pop-up`](#pop-up)**  **[`Horizontaler Button-Stapel`](#horizontaler-button-stapel)**  **[`Button`](#button)**  **[`Medienplayer`](#medienplayer)**  **[`Abdeckung`](#abdeckung)**  **[`Auswahl`](#auswahl)**  **[`Klima`](#klima)**  **[`Kalender`](#kalender)**  **[`Trennlinie`](#trennlinie)**  **[`Leere Spalte`](#leere-spalte)**  **[`Nur Sub-Buttons`](#nur-sub-buttons)**  **[`Sub-Buttons`](#sub-buttons)**  **[`Kartenlayouts`](#kartenlayouts)**  **[`Aktionen`](#tipp--doppeltipp--und-halten-aktionen)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Module`](#module)**  **[`Hilfe`](#hilfe)**  **[`Mitwirken`](#mitwirken)**  **[`Spenden`](#spenden)**
+**[`Installation`](#installation)**  **[`Konfiguration`](#konfiguration)**  **[`Entitätsvorschläge`](#entitätsvorschläge)**  **[`Pop-up`](#pop-up)**  **[`Horizontaler Button-Stapel`](#horizontaler-button-stapel)**  **[`Button`](#button)**  **[`Medienplayer`](#medienplayer)**  **[`Abdeckung`](#abdeckung)**  **[`Auswahl`](#auswahl)**  **[`Klima`](#klima)**  **[`Kalender`](#kalender)**  **[`Trennlinie`](#trennlinie)**  **[`Leere Spalte`](#leere-spalte)**  **[`Nur Sub-Buttons`](#nur-sub-buttons)**  **[`Sub-Buttons`](#sub-buttons)**  **[`Kartenlayouts`](#kartenlayouts)**  **[`Bedingungen`](#bedingungen)**  **[`Aktionen`](#tipp--doppeltipp--und-halten-aktionen)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Module`](#module)**  **[`Lokalisierung`](#lokalisierung)**  **[`Hilfe`](#hilfe)**  **[`Mitwirken`](#mitwirken)**  **[`Spenden`](#spenden)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card ist eine minimalistische und anpassbare Kartensammlung für Home Ass
 
 <br>
 
-1. Lade diese Datei herunter: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Lege diese Datei in deinem `<config>/www` Ordner ab
+1. Lade `bubble-card.zip` aus dem [neuesten Release](https://github.com/Clooos/Bubble-Card/releases/latest) herunter
+2. Entpacke es in deinem `<config>/www` Ordner, du solltest `bubble-card.js` und daneben einen Ordner `translations` erhalten (dieser Ordner enthält die Wörterbücher des Editors, ohne ihn bleibt der Editor auf Englisch)
 3. Klicke auf deinem Dashboard auf das Icon oben rechts und dann auf `Dashboard bearbeiten`
 4. Klicke erneut auf dieses Icon und dann auf `Ressourcen verwalten`
 5. Klicke auf `Ressource hinzufügen`
@@ -130,6 +130,21 @@ Alle Optionen lassen sich im Home Assistant Editor konfigurieren. In der Dokumen
 
 <br>
 
+## Entitätsvorschläge
+
+Seit Home Assistant 2026.6 bietet dir die Kartenauswahl ein paar fertige Karten an, wenn du eine Entität auswählst, und Bubble Card beantwortet diese Frage mit eigenen Rezepten. Wähle ein Licht, und du bekommst eine Karte mit einem Helligkeits-Slider angeboten, dazu eine Variante mit Farbtemperatur, eine mit Farbe und eine mit Sättigung, sofern dein Licht sie unterstützt. Wähle eine Abdeckung, und du bekommst den Slider für ihre Position, wähle einen Medienplayer, und du bekommst zusätzlich eine Variante mit seiner Quellenliste, wähle einen Staubsauger, und du bekommst seine Buttons für Start, Pause und Rückkehr zur Station. Jeder Vorschlag ist eine ganz normale Bubble Card-Konfiguration, als Live-Vorschau gezeigt, so kannst du die passendste nehmen und sie wie gewohnt weiter bearbeiten.
+
+Was dir angeboten wird, hängt davon ab, was deine Entität wirklich kann: ein Licht ohne Helligkeitskanal bekommt einen Umschalter statt eines Sliders, eine Abdeckung, die nicht neigen kann, bekommt keine Neigungsvariante, und eine Klima-Entität bekommt ihre Voreinstellungen nur dann, wenn sie welche hat. Die klassischen Einträge folgen darunter, wenn sie passen: die eigene Karte der Domain, ein einfacher Button und ein Slider.
+
+> [!TIP]
+> Module können der Liste eigene Vorschläge hinzufügen, siehe [Module](#module).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Mit dieser Karte kannst du ein Pop-up mit beliebigem Inhalt erstellen. Jedes Pop
 | `shadow_opacity` | string | Optional | Ein beliebiger Wert von `0` bis `100` | Die Schatten-Deckkraft deines Pop-ups (z. B. `0`, um ihn auszublenden) |
 | `hide_backdrop` | boolean | Optional | `true` oder `false` (Standard) | Setze dies beim ersten Pop-up deines Haupt-Dashboards auf true, um den Backdrop bei allen Pop-ups zu deaktivieren. |
 | `background_update` | boolean | Optional | `true` oder `false` (Standard) | Pop-up-Inhalt im Hintergrund aktualisieren (nicht empfohlen) |
-| `trigger_entity` | string | Optional | Eine beliebige Entität | Öffnet dieses Pop-up basierend auf dem Zustand einer beliebigen Entität |
+| `trigger` | object oder list | Optional | Siehe [Bedingungen](#bedingungen) | Öffnet dieses Pop-up, wenn die Bedingungen erfüllt sind |
+| `trigger_entity` | string | Optional | Eine beliebige Entität | Öffnet dieses Pop-up basierend auf dem Zustand einer beliebigen Entität, die einfache Form von `trigger` |
 | `trigger_state` | string | Optional (**Erforderlich**, wenn `trigger_entity` definiert ist) | Ein beliebiger Entitätszustand | Entitätszustand, der das Pop-up öffnet |
-| `trigger_close` | boolean | Optional | `true` oder `false` (Standard) | Schließt das Pop-up, wenn `trigger_state` abweicht |
+| `trigger_close` | boolean | Optional | `true` oder `false` | Schließt das Pop-up, wenn die Bedingungen nicht mehr erfüllt sind (Standard: `true` mit `trigger`, `false` mit `trigger_state`) |
 | `open_action` | object | Optional | Siehe [Aktionen](#tipp--doppeltipp--und-halten-aktionen) | Löst eine Aktion aus, wenn sich das Pop-up öffnet |
 | `close_action` | object | Optional | Siehe [Aktionen](#tipp--doppeltipp--und-halten-aktionen) | Löst eine Aktion aus, wenn sich das Pop-up schließt |
 | `show_header` | boolean | Optional | `true` (Standard) oder `false` | Blendet die Pop-up-Kopfzeile komplett ein/aus |
@@ -445,8 +461,8 @@ Diese Optionen sind nur verfügbar, wenn `button_type` auf `slider` gesetzt ist.
 | `relative_slide`        | boolean | Optional (Standard `false`)     | Aktualisiert den Wert relativ zum Startwert statt zum ersten Berührungspunkt.                      |
 | `read_only_slider`      | boolean | Optional (Standard `false`)      | Macht den Slider schreibgeschützt. Wird für einige Entitäten wie Sensoren automatisch aktiviert.                        |
 | `slider_live_update`    | boolean | Optional (Standard `false`)      | Der Entitätszustand wird während des Schiebens aktualisiert. **Diese Funktion ist nicht für alle Entitäten empfehlenswert.**        |
-| `slider_fill_orientation` | string | Optional | `left` (Standard), `right`, `top`, `bottom` | Ändert die Füllrichtung des Sliders |
-| `slider_value_position` | string | Optional | `right` (Standard), `left`, `center`, `hidden` | Position der Wertanzeige |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` oder `bottom` | Ändert die Füllrichtung des Sliders. Von links nach rechts, wenn nicht definiert, gespiegelt in [Sprachen, die von rechts nach links laufen](#lokalisierung) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` oder `hidden` | Position der Wertanzeige. Auf der Endseite, wenn nicht definiert, also links in [Sprachen, die von rechts nach links laufen](#lokalisierung) |
 | `invert_slider_value` | boolean | Optional (Standard `false`) | Kehrt die Slider-Richtung um (100 % Füllung entspricht dem Minimum). Nicht verfügbar für Farb-Slider. |
 | `light_slider_type` | string | Optional | `brightness` (Standard), `hue`, `saturation`, `white_temp` | **Nur für Lichter.** Wählt den Slider-Modus |
 | `cover_slider_type` | string | Optional | `position` (Standard), `tilt_position` | **Nur für Abdeckungen.** Wählt den Slider-Modus (Position oder Neigung) |
@@ -940,7 +956,7 @@ Mit dieser Karte kannst du deine Kalender-Entitäten anzeigen. Ihr Inhalt ist sc
 | `limit`             | number  | Optional     | Eine Zahl                                        | Die Anzahl der Termine, die auf der Karte angezeigt werden                                  |
 | `show_end`          | boolean | Optional     | `true` oder `false` (Standard)                     | Zeigt die Endzeit der Termine an oder blendet sie aus                                                    |
 | `show_progress`     | boolean | Optional     | `true` (Standard) oder `false`                     | Zeigt den Fortschrittsbalken der Termine an oder blendet ihn aus                                                     |
-| `show_started_events`| boolean | Optional     | `true` (Standard) oder `false`                     | Zeigt bereits laufende Termine an oder blendet sie aus                                                 |
+| `show_started_events`| boolean | Optional     | `true` (Standard) oder `false`                     | Zeigt bereits laufende Termine an oder blendet sie aus. Mehrtägige Termine werden Tag für Tag beurteilt, so wird nur der laufende Tag ausgeblendet und die kommenden Tage bleiben sichtbar |
 | `scrolling_effect`  | boolean | Optional | `true` (Standard) oder `false` | Lässt Text durchlaufen, wenn der Inhalt die Größe seines Containers überschreitet |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` oder `hold_action`, siehe [Aktionen](#tipp--doppeltipp--und-halten-aktionen) | Ermöglicht das Hinzufügen von Aktionen beim Klick auf einen Termin. |
 | `tap_action` | object | Optional | Siehe [Aktionen](#tipp--doppeltipp--und-halten-aktionen) | Legt die Art der Aktion beim Klick auf einen Tag fest, wenn nicht definiert, wird `none` verwendet. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Optional | `icon-left` (Standard), `icon-top`, `icon-bottom`, `icon-right` | Platzierung des Icons innerhalb des Sub-Buttons |
 | `always_visible` | boolean | Optional | `true` oder `false` (Standard) | **Nur Slider.** Zeigt den Slider immer an, statt ihn per Tippen zu öffnen |
 | `show_button_info` | boolean | Optional | `true` oder `false` (Standard) | **Nur Slider.** Zeigt Icon/Name/Zustand an, wenn `always_visible` aktiviert ist |
-| `visibility` | object oder list | Optional | Siehe [Bedingungen](https://www.home-assistant.io/docs/scripts/conditions/) | Zeigt oder verbirgt den Sub-Button anhand von Bedingungen |
+| `visibility` | object oder list | Optional | Siehe [Bedingungen](#bedingungen) | Zeigt oder verbirgt den Sub-Button anhand von Bedingungen |
 | `hide_when_parent_unavailable` | boolean | Optional | `true` oder `false` (Standard) | Verbirgt den Sub-Button, wenn die Entität der übergeordneten Karte nicht verfügbar ist |
+| `css_class` | string | Optional | Beliebiger String | Eine zusätzliche CSS-Klasse am Sub-Button, um ihn in deinem [Styling](#styling) anzusprechen, egal wie er heißt (z. B. ergibt `My value` `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Slider-Sub-Buttons unterstützen dieselben Slider-Optionen wie Button-Slider, da
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rahmenradius der Sub-Buttons |
 | `--bubble-sub-button-background-color` | `color` | Hintergrundfarbe der Sub-Buttons |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur, die einem Sub-Button oder einem Slider nur dann hinzugefügt wird, wenn er in derselben Farbe wie die Karte dahinter gezeichnet wird, was ihn unsichtbar machen würde (setze sie auf `none`, um sie zu entfernen) |
 | `--bubble-sub-slider-border-radius` | `px` | Rahmenradius der Slider-Sub-Buttons |
 | `--bubble-sub-slider-background-color` | `color` | Hintergrundfarbe der Slider-Sub-Buttons |
 | `--bubble-sub-slider-height` | `px` | Höhe der immer sichtbaren Slider-Sub-Buttons |
+| `--bubble-sub-slider-outline` | `box-shadow` | Kontur nur der Slider-Sub-Buttons, greift sonst auf `--bubble-sub-button-outline` zurück |
 | `--bubble-sub-button-dark-text-color` | `color` | Textfarbe auf hellen Sub-Button-Hintergründen |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Bedingungen
+
+Manche Optionen werden von Bedingungen gesteuert, die genauso geschrieben werden wie die der [bedingten Karte](https://www.home-assistant.io/dashboards/conditional/) von Home Assistant:
+
+- `visibility` an einem [Sub-Button](#sub-buttons), um ihn anzuzeigen oder zu verbergen
+- `trigger` an einem [Pop-up](#pop-up), um es zu öffnen, wenn die Bedingungen erfüllt sind
+- `checkConditionsMet(conditions, hass)` in deinen [Templates](#templates), wenn du die Antwort im eigenen Code brauchst
+
+Jeder Bedingungstyp von Home Assistant wird ausgewertet: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template` sowie die Gruppen `and`, `or` und `not`. Auch die Bedingungen aus dem Bedingungs-Editor von Home Assistant funktionieren, also die nach ihrer Domain benannten wie `sun.is_up`, `light.is_on`, `zone.in_zone` oder `temperature.is_value`, mit ihren Einstellungen `target`, `options`, `behavior` und `for`.
+
+<details>
+
+<summary><b>Beispiel</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Bedingungen werden in deinem Browser ausgewertet, deshalb können die wenigen, die den Home Assistant-Server brauchen, nicht exakt sein: Sonnenaufgang und Sonnenuntergang werden aus der Entität `sun.sun` gelesen, statt neu berechnet zu werden, und eine `for`-Dauer wird ab der letzten Zustandsänderung gemessen, ohne die Historie des Recorders.
+>
+> `view_columns` wird akzeptiert, ist aber immer erfüllt, denn Bubble Card ist nie diejenige, die die Spalten deiner Ansicht anordnet. Ein Bedingungstyp, den Bubble Card nicht kennt, meldet sich einmal in deiner Browser-Konsole, statt still zu scheitern, so erkennst du einen Tippfehler von einer fehlenden Funktion.
+
+<br>
+
+---
+
+<br>
+
 ## Tipp-, Doppeltipp- und Halten-Aktionen
 
 Du kannst auf den Karten, die diese Option unterstützen, auch die Standard-Tipp-, Doppeltipp- und Halten-Aktionen von Home Assistant verwenden. So kannst du zum Beispiel das „Mehr Infos“-Fenster anzeigen, indem du ein Button-Icon gedrückt hältst, oder einen Dienst ausführen, wenn ein Sub-Button gedrückt wird.
@@ -1700,6 +1762,8 @@ Du kannst benutzerdefinierte Styles hinzufügen, um das CSS aller Karten **ohne 
 
 > [!TIP]  
 > Sub-Buttons können über namensbasierte Klassen angesprochen werden. Ein Sub-Button mit dem Namen „My sub-button“ kann zum Beispiel mit `.my-sub-button` gestylt werden. Slider-Sub-Buttons stellen außerdem `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` usw. bereit.
+>
+> Eine namensbasierte Klasse ändert sich, wenn du einen Sub-Button umbenennst, und sie wird übersetzt, wenn der Name übersetzt wird. Setze `css_class` am Sub-Button, um eine eigene Klasse zu bekommen, die sich nie verschiebt, egal wie er heißt und egal in welcher Sprache.
 
 #### Beispiele
 
@@ -2066,6 +2130,7 @@ Du hast Zugriff auf alle globalen JS-Funktionen, aber zusätzlich auch auf:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` gibt `true` zurück, wenn eine Liste von [Bedingungen](#bedingungen) erfüllt ist, zum Beispiel `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` kann verwendet werden, um einen Zustand zu übersetzen (kann auch verwendet werden, um die Einheit eines Zustands zu erhalten, ohne sie manuell hinzufügen zu müssen).
 - `hass.formatEntityAttributeValue(state, "attribute")` kann verwendet werden, um ein Attribut zu übersetzen (kann auch verwendet werden, um die Einheit eines Zustands zu erhalten, ohne sie manuell hinzufügen zu müssen).
 
@@ -2318,6 +2383,8 @@ Module sind eine mächtige Funktion, mit der du deine benutzerdefinierten Styles
 Aber diese Funktion kann noch viel mehr: Sie erlaubt dir, im Bubble Card-Editor selbst richtige Funktionen hinzuzufügen, mit allen standardmäßigen [Home Assistant-Formular](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)-Optionen!  
 Der Objekt-Selektor wurde verbessert, um Änderungen live anzuzeigen und Attribute korrekt zu unterstützen.
 
+Ein Modul kann auch die Kartenauswahl von Home Assistant beantworten, neben den eingebauten [Entitätsvorschlägen](#entitätsvorschläge): nutze `suggestions` für die Karten, die es vorab beschreiben kann, und `suggestions_code`, wenn sie aus deiner Installation berechnet werden müssen, zum Beispiel ein Pop-up, das aus allen Entitäten des Bereichs gebaut wird, zu dem die gewählte Entität gehört. Beide Schlüssel sind [hier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) dokumentiert.
+
 Du kannst auch im **Module Store** stöbern, um [von der Community erstellte Module](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) zu finden und zu installieren, oder deine eigenen Kreationen teilen!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Dieser Tab zeigt alle deine installierten Module und erlaubt dir:
 - Module **suchen** und **sortieren** (alphabetisch, zuletzt verwendet, aktive zuerst)
 - Den **globalen Status setzen**, damit ein Modul automatisch auf alle Karten angewendet wird
 - Module zum Sichern oder Teilen **importieren/exportieren**
+- **Entitätsvorschläge schreiben** im Modul-Editor, unter **Optional: Entitätsvorschläge**, damit dein Modul in der Kartenauswahl von Home Assistant angeboten wird. Sowohl die Regeln als auch die berechneten Vorschläge werden beim Schreiben geprüft, ein Fehler dort verhindert das Speichern, und die Vorschau zeigt die vorgeschlagenen Karten für jede Entität, die du auswählst
 
 #### Der Tab "Module Store"
 
@@ -2391,7 +2459,8 @@ Dieser Tab zeigt [alle verfügbaren Module der Community](https://github.com/Clo
 3. Fülle die Modulinformationen aus.
 4. Schreibe deinen CSS- und/oder JavaScript-Template-Code in den **Code**-Editor.
 5. (Optional) Erstelle eine eigene Konfigurationsoberfläche im Bereich **Editor** (wie die Farbauswahl im Screenshot oben, die vollständige Dokumentation findest du [hier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klicke auf **Speichern**.
+6. (Optional) Schreibe deine **Entitätsvorschläge**, damit dein Modul in der Kartenauswahl von Home Assistant angeboten wird. Das Panel prüft schon beim Tippen, was du schreibst, und seine Vorschau zeigt die vorgeschlagenen Karten selbst für die Entität deiner Wahl.
+7. Klicke auf **Speichern**.
 
 Dein Modul steht jetzt auf allen deinen Karten zur Verfügung!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Weitere Beispiele findest du im Module Store oder [hier](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalisierung
+
+Bubble Card spricht deine Sprache. Ihr Editor ist in die 64 Sprachen übersetzt, die Home Assistant unterstützt, und überall dort, wo Home Assistant bereits ein Wort für etwas hat, wird dessen eigene Formulierung übernommen, so liest du in beiden Oberflächen dieselben Begriffe.
+
+Unten im Editor, neben der Versionsnummer, folgt ein Schalter **Automatisch** der Sprache deines Home Assistant. Schalte ihn aus, und der ganze Editor kehrt zu Englisch zurück, praktisch, um einem Tutorial zu folgen oder ein Problem zu melden. Deine Wahl wird in deinem Browser gemerkt.
+
+Auch diese Dokumentation ist übersetzt, [in 62 Sprachen](languages.md). Diese Seiten stehen allen offen, eine Formulierung, die nicht zu deinem eigenen Home Assistant passt, lässt sich also mit ein paar Klicks korrigieren. Die englische Fassung bleibt die Referenz für den Inhalt selbst.
 
 <br>
 

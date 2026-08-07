@@ -18,7 +18,7 @@ Mae Bubble Card yn gasgliad o gardiau minimalaidd a chyfaddasadwy ar gyfer Home 
 
 ## Tabl cynnwys
 
-**[`Gosod`](#gosod)**  **[`Ffurfweddu`](#ffurfweddu)**  **[`Naidlen`](#naidlen)**  **[`Pentwr botymau llorweddol`](#pentwr-botymau-llorweddol)**  **[`Botwm`](#botwm)**  **[`Chwaraeydd cyfryngau`](#chwaraeydd-cyfryngau)**  **[`Gorchudd`](#gorchudd)**  **[`Dewis`](#dewis)**  **[`Hinsawdd`](#hinsawdd)**  **[`Calendr`](#calendr)**  **[`Gwahanydd`](#gwahanydd)**  **[`Colofn wag`](#colofn-wag)**  **[`Is-fotymau yn unig`](#is-fotymau-yn-unig)**  **[`Is-fotymau`](#is-fotymau)**  **[`Cynlluniau cardiau`](#cynlluniau-cardiau)**  **[`Gweithredoedd`](#gweithredoedd-tapio-tapio-dwbl-a-dal)**  **[`Arddull`](#arddull)**  **[`Templedi`](#templedi)**  **[`Modiwlau`](#modiwlau)**  **[`Cymorth`](#cymorth)**  **[`Cyfrannu`](#cyfrannu)**  **[`Rhoi`](#rhoi)**
+**[`Gosod`](#gosod)**  **[`Ffurfweddu`](#ffurfweddu)**  **[`Awgrymiadau endid`](#awgrymiadau-endid)**  **[`Naidlen`](#naidlen)**  **[`Pentwr botymau llorweddol`](#pentwr-botymau-llorweddol)**  **[`Botwm`](#botwm)**  **[`Chwaraeydd cyfryngau`](#chwaraeydd-cyfryngau)**  **[`Gorchudd`](#gorchudd)**  **[`Dewis`](#dewis)**  **[`Hinsawdd`](#hinsawdd)**  **[`Calendr`](#calendr)**  **[`Gwahanydd`](#gwahanydd)**  **[`Colofn wag`](#colofn-wag)**  **[`Is-fotymau yn unig`](#is-fotymau-yn-unig)**  **[`Is-fotymau`](#is-fotymau)**  **[`Cynlluniau cardiau`](#cynlluniau-cardiau)**  **[`Amodau`](#amodau)**  **[`Gweithredoedd`](#gweithredoedd-tapio-tapio-dwbl-a-dal)**  **[`Arddull`](#arddull)**  **[`Templedi`](#templedi)**  **[`Modiwlau`](#modiwlau)**  **[`Lleoleiddio`](#lleoleiddio)**  **[`Cymorth`](#cymorth)**  **[`Cyfrannu`](#cyfrannu)**  **[`Rhoi`](#rhoi)**
 
 <br>
 
@@ -32,8 +32,8 @@ Mae Bubble Card yn gasgliad o gardiau minimalaidd a chyfaddasadwy ar gyfer Home 
 
 <br>
 
-1. Llwythwch y ffeil hon i lawr: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Ychwanegwch y ffeil hon i'ch ffolder `<config>/www`
+1. Llwythwch `bubble-card.zip` i lawr o'r [rhyddhad diweddaraf](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Echdynnwch ef i'ch ffolder `<config>/www`, dylech gael `bubble-card.js` a ffolder `translations` wrth ei ymyl (mae'r ffolder honno'n dal geiriaduron y golygydd, hebddi mae'r golygydd yn aros yn Saesneg)
 3. Ar eich dangosfwrdd cliciwch ar yr eicon yng nghornel dde uchaf yna ar `Edit dashboard`
 4. Cliciwch eto ar yr eicon hwnnw ac yna cliciwch ar `Manage resources`
 5. Cliciwch ar `Add resource`
@@ -130,6 +130,21 @@ Gellir ffurfweddu pob opsiwn yng ngolygydd Home Assistant. Ond gallwch ddod o hy
 
 <br>
 
+## Awgrymiadau endid
+
+Ers Home Assistant 2026.6, mae dewis endid yn y dewisydd cardiau yn cynnig ychydig o gardiau parod i chi, ac mae Bubble Card yn ateb y cwestiwn hwnnw gyda'i ryseitiau ei hun. Dewiswch olau a chynigir cerdyn i chi gyda llithrydd disgleirdeb, ynghyd ag amrywiad tymheredd lliw, un lliw ac un dirlawnder pan fydd eich golau'n eu cefnogi. Dewiswch orchudd a chewch lithrydd ei safle, dewiswch chwaraeydd cyfryngau a chewch amrywiad gyda'i restr ffynonellau hefyd, dewiswch sugnwr llwch a chewch ei fotymau cychwyn, oedi a dychwelyd i'r doc. Mae pob awgrym yn ffurfweddiad Bubble Card arferol a ddangosir fel rhagolwg byw, felly gallwch gymryd yr un agosaf a dal ati i'w olygu fel arfer.
+
+Mae'r hyn a gynigir i chi yn dibynnu ar yr hyn y gall eich endid ei wneud mewn gwirionedd: mae golau heb sianel ddisgleirdeb yn cael switsh yn lle llithrydd, nid yw gorchudd na all ogwyddo yn cael amrywiad gogwyddo, ac nid yw endid hinsawdd yn cael ei foddau rhagosodedig oni bai bod rhai ganddo. Daw'r cofnodion clasurol oddi tanynt pan fyddant yn berthnasol: cerdyn pwrpasol y parth, botwm plaen a llithrydd.
+
+> [!TIP]
+> Gall modiwlau ychwanegu eu hawgrymiadau eu hunain at y rhestr honno, gweler [modiwlau](#modiwlau).
+
+<br>
+
+---
+
+<br>
+
 ## Naidlen
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Mae'r cerdyn hwn yn caniatáu i chi greu naidlen gydag unrhyw gynnwys. Mae pob n
 | `shadow_opacity` | string | Dewisol | Unrhyw werth o `0` i `100` | Didreiddedd cysgod eich naidlen (e.e. `0` i'w guddio) |
 | `hide_backdrop` | boolean | Dewisol | `true` or `false` (diofyn) | Gosodwch hyn yn true ar naidlen gyntaf eich prif ddangosfwrdd i analluogi'r cefnlen ar bob naidlen. |
 | `background_update` | boolean | Dewisol | `true` or `false` (diofyn) | Diweddaru cynnwys y naidlen yn y cefndir (ni argymhellir) |
-| `trigger_entity` | string | Dewisol | Unrhyw endid | Agor y naidlen hon yn seiliedig ar gyflwr unrhyw endid |
+| `trigger` | object neu list | Dewisol | Gweler [amodau](#amodau) | Agor y naidlen hon pan fodlonir yr amodau |
+| `trigger_entity` | string | Dewisol | Unrhyw endid | Agor y naidlen hon yn seiliedig ar gyflwr unrhyw endid, ffurf syml `trigger` |
 | `trigger_state` | string | Dewisol (**Gofynnol** os yw `trigger_entity` wedi'i ddiffinio) | Unrhyw gyflwr endid | Cyflwr endid i agor y naidlen |
-| `trigger_close` | boolean | Dewisol | `true` or `false` (diofyn) | Cau'r naidlen pan fydd `trigger_state` yn wahanol |
+| `trigger_close` | boolean | Dewisol | `true` neu `false` | Cau'r naidlen pan na fodlonir yr amodau mwyach (diofyn: `true` gyda `trigger`, `false` gyda `trigger_state`) |
 | `open_action` | object | Dewisol | Gweler [gweithredoedd](#gweithredoedd-tapio-tapio-dwbl-a-dal) | Sbarduno gweithred wrth agor y naidlen |
 | `close_action` | object | Dewisol | Gweler [gweithredoedd](#gweithredoedd-tapio-tapio-dwbl-a-dal) | Sbarduno gweithred wrth gau'r naidlen |
 | `show_header` | boolean | Dewisol | `true` (diofyn) or `false` | Dangos/Cuddio pennyn y naidlen yn llwyr |
@@ -445,8 +461,8 @@ Mae'r opsiynau hyn ar gael dim ond pan fydd `button_type` wedi'i osod i `slider`
 | `relative_slide`        | boolean | Dewisol (`false` yn ddiofyn )     | Diweddaru gwerth yn gymharol i'r gwerth cychwynnol, yn hytrach na'r pwynt cyffwrdd cychwynnol.                      |
 | `read_only_slider`      | boolean | Dewisol (`false` yn ddiofyn)      | Gwneud y llithrydd yn ddarllen yn unig. Yn cael ei alluogi'n awtomatig ar gyfer rhai endidau fel synwyryddion.                        |
 | `slider_live_update`    | boolean | Dewisol (`false` yn ddiofyn)      | Diweddarir cyflwr yr endid wrth lithro. **Ni argymhellir y nodwedd hon ar gyfer pob endid.**        |
-| `slider_fill_orientation` | string | Dewisol | `left` (rhagosodedig), `right`, `top`, `bottom` | Newid cyfeiriad llenwi'r llithrydd |
-| `slider_value_position` | string | Dewisol | `right` (rhagosodedig), `left`, `center`, `hidden` | Safle dangos y gwerth |
+| `slider_fill_orientation` | string | Dewisol | `left`, `right`, `top` neu `bottom` | Newid cyfeiriad llenwi'r llithrydd. O'r chwith i'r dde pan nad yw wedi'i ddiffinio, wedi'i adlewyrchu mewn [ieithoedd o'r dde i'r chwith](#lleoleiddio) |
+| `slider_value_position` | string | Dewisol | `right`, `left`, `center` neu `hidden` | Safle dangos y gwerth. Ar yr ochr derfynol pan nad yw wedi'i ddiffinio, felly ar y chwith mewn [ieithoedd o'r dde i'r chwith](#lleoleiddio) |
 | `invert_slider_value` | boolean | Dewisol (`false` yn ddiofyn) | Gwrthdroi cyfeiriad y llithrydd (mae llenwad 100% yn gyfwerth â'r lleiafswm). Ddim ar gael ar gyfer llithryddion lliw. |
 | `light_slider_type` | string | Dewisol | `brightness` (rhagosodedig), `hue`, `saturation`, `white_temp` | **Ar gyfer goleuadau yn unig.** Dewis modd y llithrydd |
 | `cover_slider_type` | string | Dewisol | `position` (rhagosodedig), `tilt_position` | **Ar gyfer gorchuddion yn unig.** Dewis modd y llithrydd (safle neu ogwydd) |
@@ -940,7 +956,7 @@ Mae'r cerdyn hwn yn eich galluogi i ddangos eich endidau calendr. Gellir sgrolio
 | `limit`             | number  | Dewisol     | Rhif                                        | Nifer y digwyddiadau a fydd yn cael eu dangos ar y cerdyn                                  |
 | `show_end`          | boolean | Dewisol     | `true` neu `false` (rhagosodedig)                     | Dangos neu guddio amser gorffen digwyddiadau                                                    |
 | `show_progress`     | boolean | Dewisol     | `true` (rhagosodedig) neu `false`                     | Dangos neu guddio bar cynnydd y digwyddiad                                                     |
-| `show_started_events`| boolean | Dewisol     | `true` (rhagosodedig) neu `false`                     | Dangos neu guddio digwyddiadau sydd ar y gweill ar hyn o bryd                                                 |
+| `show_started_events`| boolean | Dewisol     | `true` (rhagosodedig) neu `false`                     | Dangos neu guddio digwyddiadau sydd ar y gweill ar hyn o bryd. Bernir digwyddiadau aml-ddydd un diwrnod ar y tro, felly dim ond y diwrnod sydd ar y gweill sy'n cael ei guddio ac mae'r dyddiau i ddod yn aros yn weladwy |
 | `scrolling_effect`  | boolean | Dewisol | `true` (rhagosodedig) neu `false` | Caniatáu i destun sgrolio pan fydd y cynnwys yn fwy na maint eu cynhwysydd |
 | `event_action` | object | Dewisol | `tap_action`, `double_tap_action` neu `hold_action`, gweler [gweithredoedd](#gweithredoedd-tapio-tapio-dwbl-a-dal) | Caniatáu ychwanegu gweithredoedd wrth glicio digwyddiad. |
 | `tap_action` | object | Dewisol | Gweler [gweithredoedd](#gweithredoedd-tapio-tapio-dwbl-a-dal) | Diffinio math y weithred wrth glicio diwrnod, os na chaiff ei ddiffinio, defnyddir `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Dewisol | `icon-left` (rhagosodiad), `icon-top`, `icon-bottom`, `icon-right` | Lleoliad yr eicon o fewn yr is-fotwm |
 | `always_visible` | boolean | Dewisol | `true` neu `false` (rhagosodiad) | **Llithrydd yn unig.** Dangos y llithrydd bob amser yn hytrach na'i agor wrth dapio |
 | `show_button_info` | boolean | Dewisol | `true` neu `false` (rhagosodiad) | **Llithrydd yn unig.** Dangos eicon/enw/cyflwr pan fo `always_visible` wedi'i alluogi |
-| `visibility` | object or list | Dewisol | Gweler [amodau](https://www.home-assistant.io/docs/scripts/conditions/) | Dangos neu guddio'r is-fotwm yn seiliedig ar amodau |
+| `visibility` | object or list | Dewisol | Gweler [amodau](#amodau) | Dangos neu guddio'r is-fotwm yn seiliedig ar amodau |
 | `hide_when_parent_unavailable` | boolean | Dewisol | `true` neu `false` (rhagosodiad) | Cuddio'r is-fotwm os yw endid y cerdyn rhiant ddim ar gael |
+| `css_class` | string | Dewisol | Unrhyw linyn | Dosbarth CSS ychwanegol ar yr is-fotwm, i'w dargedu yn eich [arddull](#arddull) beth bynnag fo'i enw (e.e. mae `My value` yn rhoi `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Mae is-fotymau llithrydd yn cefnogi'r un opsiynau llithrydd â llithryddion botw
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radiws ymyl ar gyfer yr is-fotymau |
 | `--bubble-sub-button-background-color` | `color` | Lliw cefndir ar gyfer yr is-fotymau |
+| `--bubble-sub-button-outline` | `box-shadow` | Amlinelliad a ychwanegir at is-fotwm neu lithrydd dim ond pan fydd yn cael ei baentio yn yr un lliw â'r cerdyn y tu ôl iddo, a fyddai'n ei wneud yn anweledig (gosodwch ef i `none` i'w dynnu) |
 | `--bubble-sub-slider-border-radius` | `px` | Radiws ymyl ar gyfer is-fotymau llithrydd |
 | `--bubble-sub-slider-background-color` | `color` | Lliw cefndir ar gyfer is-fotymau llithrydd |
 | `--bubble-sub-slider-height` | `px` | Uchder ar gyfer is-fotymau llithrydd gweladwy bob amser |
+| `--bubble-sub-slider-outline` | `box-shadow` | Amlinelliad yr is-fotymau llithrydd yn unig, yn syrthio'n ôl ar `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Lliw testun ar gefndiroedd is-fotwm llachar |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Amodau
+
+Mae rhai opsiynau'n cael eu gyrru gan amodau, wedi'u hysgrifennu'n union fel rhai [cerdyn amodol](https://www.home-assistant.io/dashboards/conditional/) Home Assistant:
+
+- `visibility` ar [is-fotwm](#is-fotymau), i'w ddangos neu ei guddio
+- `trigger` ar [naidlen](#naidlen), i'w hagor pan fodlonir yr amodau
+- `checkConditionsMet(conditions, hass)` y tu mewn i'ch [templedi](#templedi), pan fydd angen yr ateb arnoch yn eich cod eich hun
+
+Gwerthusir pob math o amod yn Home Assistant: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, a'r grwpiau `and`, `or` a `not`. Mae amodau adeiladwr amodau Home Assistant yn gweithio hefyd, y rhai a enwir ar ôl eu parth fel `sun.is_up`, `light.is_on`, `zone.in_zone` neu `temperature.is_value`, gyda'u gosodiadau `target`, `options`, `behavior` a `for`.
+
+<details>
+
+<summary><b>Enghraifft</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Gwerthusir amodau yn eich porwr, felly ni all yr ychydig ohonynt sydd angen gweinydd Home Assistant fod yn union: darllenir codiad a machlud haul o'r endid `sun.sun` yn lle cael eu hailgyfrifo, ac mae hyd `for` yn cael ei fesur o'r newid stad diwethaf, heb hanes y recorder.
+>
+> Derbynnir `view_columns` ond mae bob amser yn pasio, gan nad Bubble Card sy'n gosod colofnau eich golwg byth. Mae math o amod nad yw Bubble Card yn ei adnabod yn adrodd amdano'i hun unwaith yng nghonsol eich porwr yn lle methu'n dawel, felly gallwch wahaniaethu rhwng gwall teipio a nodwedd goll.
+
+<br>
+
+---
+
+<br>
+
 ## Gweithredoedd tapio, tapio dwbl a dal
 
 Gallwch hefyd ddefnyddio gweithredoedd tapio, gweithredoedd tapio dwbl a gweithredoedd dal rhagosodedig Home Assistant ar y cardiau sy'n cefnogi'r opsiwn hwn. Er enghraifft, mae hyn yn caniatáu ichi ddangos y ffenestr "mwy o wybodaeth" trwy ddal eicon botwm neu redeg gwasanaeth pan gaiff is-fotwm ei bwyso.
@@ -1700,6 +1762,8 @@ Gallwch ychwanegu arddulliau addasiedig i newid CSS pob cerdyn **heb ddefnyddio 
 
 > [!TIP]  
 > Gellir targedu is-fotymau drwy ddosbarthiadau seiliedig ar enw. Er enghraifft, gellir arddulli is-fotwm o'r enw "My sub-button" gyda `.my-sub-button`. Mae is-fotymau llithrydd hefyd yn dangos `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, ac ati.
+>
+> Mae dosbarth seiliedig ar enw yn newid pan fyddwch yn ailenwi is-fotwm, ac mae'n cael ei gyfieithu pan gyfieithir yr enw. Gosodwch `css_class` ar yr is-fotwm i gael dosbarth eich hun nad yw byth yn symud, beth bynnag fo'i enw a beth bynnag fo'r iaith.
 
 #### Enghreifftiau
 
@@ -2066,6 +2130,7 @@ Mae gennych fynediad at bob ffwythiant JS byd-eang, ond mae gennych fynediad hef
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- Mae `checkConditionsMet(conditions, hass)` yn dychwelyd `true` pan fodlonir rhestr o [amodau](#amodau), er enghraifft `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - Gellir defnyddio `hass.formatEntityState(state)` i gyfieithu stad (gellir ei ddefnyddio hefyd i gael uned stad, heb fod angen ei hychwanegu â llaw).
 - Gellir defnyddio `hass.formatEntityAttributeValue(state, "attribute")` i gyfieithu priodoledd (gellir ei ddefnyddio hefyd i gael uned stad, heb fod angen ei hychwanegu â llaw).
 
@@ -2318,6 +2383,8 @@ Mae modiwlau'n nodwedd bwerus sy'n eich galluogi i gadw, ailddefnyddio a rhannu 
 Ond mae'r nodwedd hon yn llawer mwy pwerus na hynny, mae'n gadael i chi ychwanegu nodweddion go iawn eich hun yng ngolygydd Bubble Card, gan ddefnyddio holl opsiynau'r [ffurflen ddiofyn Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 Mae'r dewisydd gwrthrych wedi'i wella i ddangos newidiadau byw ac i gefnogi priodoleddau'n gywir.
 
+Gall modiwl hefyd ateb dewisydd cardiau Home Assistant ochr yn ochr â'r [awgrymiadau endid](#awgrymiadau-endid) mewnol: defnyddiwch `suggestions` ar gyfer y cardiau y gall eu disgrifio ymlaen llaw, a `suggestions_code` pan fo'n rhaid eu cyfrifo o'ch gosodiad, er enghraifft naidlen wedi'i hadeiladu o bob endid yn yr ardal y mae'r endid a ddewiswyd yn perthyn iddi. Dogfennir y ddwy allwedd [yma](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Gallwch hefyd bori'r **Module Store** i ddod o hyd i a gosod [modiwlau a grëwyd gan y gymuned](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), neu rannu eich creadigaethau eich hun!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Mae'r tab hwn yn dangos pob un o'ch modiwlau gosodedig ac yn eich galluogi i:
 - **Chwilio** a **threfnu** modiwlau (yn nhrefn yr wyddor, diweddar, gweithredol yn gyntaf)
 - **Osod stad byd-eang** i wneud i fodiwl gael ei gymhwyso i bob cerdyn yn awtomatig
 - **Fewnforio/Allforio** modiwlau ar gyfer copi wrth gefn neu rannu
+- **Ysgrifennu awgrymiadau endid** yn y golygydd modiwlau, o dan **Dewisol: awgrymiadau endid**, fel bod eich modiwl yn cael ei gynnig yn newisydd cardiau Home Assistant. Gwirir y rheolau a'r awgrymiadau wedi'u cyfrifo wrth i chi ysgrifennu, mae gwall yno'n atal cadw, ac mae'r rhagolwg yn dangos y cardiau a awgrymir ar gyfer unrhyw endid a ddewiswch
 
 #### Tab Module Store
 
@@ -2391,7 +2459,8 @@ Bydd y tab hwn yn dangos [pob modiwl sydd ar gael gan y gymuned](https://github.
 3. Llenwch wybodaeth y modiwl.
 4. Ysgrifennwch eich cod templed CSS a/neu JavaScript yn y golygydd **Code**.
 5. (Dewisol) Crëwch UI ffurfweddu addasiedig yn yr adran **Editor** (fel y dewisydd lliw yn y sgrinlun uchod, dogfennaeth lawn ar gael [yma](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Cliciwch **Save**.
+6. (Dewisol) Ysgrifennwch eich **Awgrymiadau endid** fel bod eich modiwl yn cael ei gynnig yn newisydd cardiau Home Assistant. Mae'r panel yn gwirio'r hyn rydych yn ei ysgrifennu wrth i chi deipio, ac mae ei ragolwg yn dangos y cardiau a awgrymir eu hunain ar gyfer yr endid o'ch dewis.
+7. Cliciwch **Save**.
 
 Mae eich modiwl bellach ar gael i'w ddefnyddio ar unrhyw un o'ch cardiau!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Ceir mwy o enghreifftiau yn y Module Store, neu [yma](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lleoleiddio
+
+Mae Bubble Card yn siarad eich iaith. Mae ei olygydd wedi'i gyfieithu i'r 64 iaith y mae Home Assistant yn eu cefnogi, a lle bynnag y mae gan Home Assistant air am rywbeth eisoes, ailddefnyddir ei eiriad ei hun, felly rydych yn darllen yr un termau yn y ddau ryngwyneb.
+
+Ar waelod y golygydd, wrth ymyl rhif y fersiwn, mae switsh **Awtomatig** yn dilyn iaith eich Home Assistant. Diffoddwch ef ac mae'r golygydd cyfan yn dychwelyd i'r Saesneg, sy'n ddefnyddiol i ddilyn tiwtorial neu i adrodd am broblem. Cofir eich dewis yn eich porwr.
+
+Mae'r ddogfennaeth hon wedi'i chyfieithu hefyd, [i 62 iaith](languages.md). Mae'r tudalennau hynny'n agored i bawb, felly gellir cywiro geiriad nad yw'n cyfateb i'ch Home Assistant chi mewn ychydig o gliciau. Mae'r fersiwn Saesneg yn aros yn gyfeirnod ar gyfer y cynnwys ei hun.
 
 <br>
 

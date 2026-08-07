@@ -18,7 +18,7 @@ Bubble Card je minimalistična in prilagodljiva zbirka kartic za Home Assistant,
 
 ## Kazalo vsebine
 
-**[`Namestitev`](#namestitev)**  **[`Konfiguracija`](#konfiguracija)**  **[`Pojavno okno`](#pojavno-okno)**  **[`Vodoravni sklad gumbov`](#vodoravni-sklad-gumbov)**  **[`Gumb`](#gumb)**  **[`Predvajalnik medijev`](#predvajalnik-medijev)**  **[`Senčilo`](#senčilo)**  **[`Select`](#select)**  **[`Klimatska naprava`](#klimatska-naprava)**  **[`Koledar`](#koledar)**  **[`Ločilo`](#ločilo)**  **[`Prazen stolpec`](#prazen-stolpec)**  **[`Samo podgumbi`](#samo-podgumbi)**  **[`Podgumbi`](#podgumbi)**  **[`Postavitve kartic`](#postavitve-kartic)**  **[`Dejanja`](#dejanja-dotika-dvojnega-dotika-in-zadržanja)**  **[`Oblikovanje`](#oblikovanje)**  **[`Predloge`](#predloge)**  **[`Moduli`](#moduli)**  **[`Pomoč`](#pomoč)**  **[`Prispevanje`](#prispevanje)**  **[`Donirajte`](#donirajte)**
+**[`Namestitev`](#namestitev)**  **[`Konfiguracija`](#konfiguracija)**  **[`Predlogi za entitete`](#predlogi-za-entitete)**  **[`Pojavno okno`](#pojavno-okno)**  **[`Vodoravni sklad gumbov`](#vodoravni-sklad-gumbov)**  **[`Gumb`](#gumb)**  **[`Predvajalnik medijev`](#predvajalnik-medijev)**  **[`Senčilo`](#senčilo)**  **[`Select`](#select)**  **[`Klimatska naprava`](#klimatska-naprava)**  **[`Koledar`](#koledar)**  **[`Ločilo`](#ločilo)**  **[`Prazen stolpec`](#prazen-stolpec)**  **[`Samo podgumbi`](#samo-podgumbi)**  **[`Podgumbi`](#podgumbi)**  **[`Postavitve kartic`](#postavitve-kartic)**  **[`Pogoji`](#pogoji)**  **[`Dejanja`](#dejanja-dotika-dvojnega-dotika-in-zadržanja)**  **[`Oblikovanje`](#oblikovanje)**  **[`Predloge`](#predloge)**  **[`Moduli`](#moduli)**  **[`Lokalizacija`](#lokalizacija)**  **[`Pomoč`](#pomoč)**  **[`Prispevanje`](#prispevanje)**  **[`Donirajte`](#donirajte)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card je minimalistična in prilagodljiva zbirka kartic za Home Assistant,
 
 <br>
 
-1. Prenesite to datoteko: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Dodajte to datoteko v mapo `<config>/www`
+1. Prenesite `bubble-card.zip` iz [najnovejše izdaje](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Razširite ga v mapo `<config>/www`, dobiti bi morali `bubble-card.js` in poleg njega mapo `translations` (ta vsebuje slovarje urejevalnika, brez nje urejevalnik ostane v angleščini)
 3. Na nadzorni plošči kliknite ikono v zgornjem desnem kotu, nato `Uredi nadzorno ploščo`
 4. Znova kliknite to ikono in nato `Upravljanje virov`
 5. Kliknite `Dodaj vir`
@@ -130,6 +130,21 @@ Vse možnosti lahko nastavite v urejevalniku Home Assistant. Podrobnosti in YAML
 
 <br>
 
+## Predlogi za entitete
+
+Od Home Assistant 2026.6 vam izbira entitete v izbirniku kartic ponudi nekaj že pripravljenih kartic, Bubble Card pa na to vprašanje odgovarja s svojimi recepti. Izberite luč in ponujena vam bo kartica z drsnikom svetlosti, poleg tega pa še različica s temperaturo barve, različica z barvo in različica z nasičenostjo, kadar jih vaša luč podpira. Izberite senčilo in dobite njegov drsnik položaja, izberite predvajalnik medijev in dobite tudi različico s seznamom virov, izberite sesalnik in dobite njegove gumbe za zagon, premor in vrnitev na postajo. Vsak predlog je običajna konfiguracija Bubble Card, prikazana kot predogled v živo, tako da lahko vzamete najbližjega in ga urejate naprej kot običajno.
+
+Kaj vam je ponujeno, je odvisno od tega, kaj vaša entiteta v resnici zmore: luč brez kanala svetlosti dobi stikalo namesto drsnika, senčilo, ki se ne more nagibati, ne dobi različice z nagibom, entiteta klimatske naprave pa dobi svoje prednastavljene načine samo takrat, ko jih ima. Klasični vnosi sledijo pod njimi, kadar so smiselni: namenska kartica domene, preprost gumb in drsnik.
+
+> [!TIP]
+> Moduli lahko na ta seznam dodajo svoje predloge, glejte [module](#moduli).
+
+<br>
+
+---
+
+<br>
+
 ## Pojavno okno
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Ta kartica vam omogoča ustvarjanje pojavnega okna s poljubno vsebino. Vsako poj
 | `shadow_opacity` | string | Neobvezno | Katera koli vrednost od `0` do `100` | Prosojnost sence pojavnega okna (npr. `0`, da jo skrijete) |
 | `hide_backdrop` | boolean | Neobvezno | `true` ali `false` (privzeto) | Nastavite na true na prvem pojavnem oknu glavne nadzorne plošče, da onemogočite ozadje (backdrop) na vseh pojavnih oknih. |
 | `background_update` | boolean | Neobvezno | `true` ali `false` (privzeto) | Posodobi vsebino pojavnega okna v ozadju (ni priporočeno) |
-| `trigger_entity` | string | Neobvezno | Katera koli entiteta | Odpri to pojavno okno glede na stanje katere koli entitete |
+| `trigger` | object ali list | Neobvezno | Glejte [pogoje](#pogoji) | Odpri to pojavno okno, ko so pogoji izpolnjeni |
+| `trigger_entity` | string | Neobvezno | Katera koli entiteta | Odpri to pojavno okno glede na stanje katere koli entitete, preprosta oblika `trigger` |
 | `trigger_state` | string | Neobvezno (**Obvezno**, če je definiran `trigger_entity`) | Katero koli stanje entitete | Stanje entitete za odpiranje pojavnega okna |
-| `trigger_close` | boolean | Neobvezno | `true` ali `false` (privzeto) | Zapri pojavno okno, ko je `trigger_state` drugačen |
+| `trigger_close` | boolean | Neobvezno | `true` ali `false` | Zapri pojavno okno, ko pogoji niso več izpolnjeni (privzeto: `true` s `trigger`, `false` s `trigger_state`) |
 | `open_action` | object | Neobvezno | Glejte [dejanja](#dejanja-dotika-dvojnega-dotika-in-zadržanja) | Sproži dejanje ob odpiranju pojavnega okna |
 | `close_action` | object | Neobvezno | Glejte [dejanja](#dejanja-dotika-dvojnega-dotika-in-zadržanja) | Sproži dejanje ob zapiranju pojavnega okna |
 | `show_header` | boolean | Neobvezno | `true` (privzeto) ali `false` | Popolnoma pokaži/skrij glavo pojavnega okna |
@@ -445,8 +461,8 @@ Te možnosti so na voljo samo, kadar je `button_type` nastavljen na `slider`.
 | `relative_slide`        | boolean | Neobvezno (privzeto `false` )     | Posodobi vrednost glede na začetno vrednost, namesto glede na začetno mesto dotika.                      |
 | `read_only_slider`      | boolean | Neobvezno (privzeto `false`)      | Naredi drsnik samo za branje. Samodejno omogočeno za nekatere entitete, kot so senzorji.                                        |
 | `slider_live_update`    | boolean | Neobvezno (privzeto `false`)      | Stanje entitete se posodablja med drsenjem. **Ta funkcija ni priporočljiva za vse entitete.**        |
-| `slider_fill_orientation` | niz | Neobvezno | `left` (privzeto), `right`, `top`, `bottom` | Spremeni smer zapolnitve drsnika |
-| `slider_value_position` | niz | Neobvezno | `right` (privzeto), `left`, `center`, `hidden` | Položaj prikaza vrednosti |
+| `slider_fill_orientation` | niz | Neobvezno | `left`, `right`, `top` ali `bottom` | Spremeni smer zapolnitve drsnika. Od leve proti desni, kadar ni določeno, zrcaljeno v [jezikih od desne proti levi](#lokalizacija) |
+| `slider_value_position` | niz | Neobvezno | `right`, `left`, `center` ali `hidden` | Položaj prikaza vrednosti. Na končni strani, kadar ni določeno, torej na levi v [jezikih od desne proti levi](#lokalizacija) |
 | `invert_slider_value` | boolean | Neobvezno (privzeto `false`) | Obrne smer drsnika (100 % zapolnitve ustreza najmanjši vrednosti). Ni na voljo za barvne drsnike. |
 | `light_slider_type` | niz | Neobvezno | `brightness` (privzeto), `hue`, `saturation`, `white_temp` | **Samo za luči.** Izbira načina drsnika |
 | `cover_slider_type` | niz | Neobvezno | `position` (privzeto), `tilt_position` | **Samo za senčila.** Izbira načina drsnika (položaj ali nagib) |
@@ -940,7 +956,7 @@ Ta kartica omogoča prikaz entitet koledarja. Njena vsebina je pomikljiva, zato 
 | `limit`             | število  | Neobvezno     | Število                                        | Število dogodkov, ki bodo prikazani na kartici                                  |
 | `show_end`          | boolean | Neobvezno     | `true` ali `false` (privzeto)                     | Prikaže ali skrije čas konca dogodkov                                                    |
 | `show_progress`     | boolean | Neobvezno     | `true` (privzeto) ali `false`                     | Prikaže ali skrije vrstico napredka dogodka                                                     |
-| `show_started_events`| boolean | Neobvezno     | `true` (privzeto) ali `false`                     | Prikaže ali skrije dogodke, ki trenutno potekajo                                                 |
+| `show_started_events`| boolean | Neobvezno     | `true` (privzeto) ali `false`                     | Prikaže ali skrije dogodke, ki trenutno potekajo. Večdnevni dogodki se presojajo po posameznih dnevih, zato je skrit samo dan, ki poteka, prihodnji dnevi pa ostanejo vidni |
 | `scrolling_effect`  | boolean | Neobvezno | `true` (privzeto) ali `false` | Omogoči drsenje besedila, kadar vsebina presega velikost svojega vsebnika |
 | `event_action` | objekt | Neobvezno | `tap_action`, `double_tap_action` ali `hold_action`, glejte [dejanja](#dejanja-dotika-dvojnega-dotika-in-zadržanja) | Omogoča dodajanje dejanj ob kliku dogodka. |
 | `tap_action` | objekt | Neobvezno | Glejte [dejanja](#dejanja-dotika-dvojnega-dotika-in-zadržanja) | Določa vrsto dejanja ob kliku dneva, če ni določeno, se uporabi `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Neobvezno | `icon-left` (privzeto), `icon-top`, `icon-bottom`, `icon-right` | Postavitev ikone znotraj podgumba |
 | `always_visible` | boolean | Neobvezno | `true` ali `false` (privzeto) | **Samo drsnik.** Vedno prikaži drsnik namesto da se odpre ob dotiku |
 | `show_button_info` | boolean | Neobvezno | `true` ali `false` (privzeto) | **Samo drsnik.** Prikaži ikono/ime/stanje, kadar je omogočen `always_visible` |
-| `visibility` | object ali list | Neobvezno | Glejte [pogoje](https://www.home-assistant.io/docs/scripts/conditions/) | Prikaži ali skrij podgumb glede na pogoje |
+| `visibility` | object ali list | Neobvezno | Glejte [pogoje](#pogoji) | Prikaži ali skrij podgumb glede na pogoje |
 | `hide_when_parent_unavailable` | boolean | Neobvezno | `true` ali `false` (privzeto) | Skrij podgumb, če je entiteta nadrejene kartice nedosegljiva |
+| `css_class` | string | Neobvezno | Kateri koli niz | Dodaten razred CSS na podgumbu, da ga lahko ciljate v svojem [oblikovanju](#oblikovanje) ne glede na njegovo ime (na primer `My value` da `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Podgumbi tipa drsnik podpirajo enake možnosti kot drsniki gumbov, vključno z:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radij zaokrožitve robov za podgumbe |
 | `--bubble-sub-button-background-color` | `color` | Barva ozadja za podgumbe |
+| `--bubble-sub-button-outline` | `box-shadow` | Obroba, dodana podgumbu ali drsniku samo takrat, ko se izriše v isti barvi kot kartica za njim, kar bi ga naredilo nevidnega (nastavite jo na `none`, da jo odstranite) |
 | `--bubble-sub-slider-border-radius` | `px` | Radij zaokrožitve robov za podgumbe drsnika |
 | `--bubble-sub-slider-background-color` | `color` | Barva ozadja za podgumbe drsnika |
 | `--bubble-sub-slider-height` | `px` | Višina za vedno vidne podgumbe drsnika |
+| `--bubble-sub-slider-outline` | `box-shadow` | Obroba samo za podgumbe drsnika, povrne se na `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Barva besedila na svetlih ozadjih podgumbov |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Pogoji
+
+Nekatere možnosti delujejo s pogoji, ki so zapisani natanko tako kot tisti v [pogojni kartici](https://www.home-assistant.io/dashboards/conditional/) Home Assistant:
+
+- `visibility` na [podgumbu](#podgumbi), da ga prikažete ali skrijete
+- `trigger` na [pojavnem oknu](#pojavno-okno), da ga odprete, ko so pogoji izpolnjeni
+- `checkConditionsMet(conditions, hass)` v vaših [predlogah](#predloge), ko potrebujete odgovor v svoji kodi
+
+Ovrednoti se vsaka vrsta pogoja Home Assistant: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, pa tudi skupine `and`, `or` in `not`. Delujejo tudi pogoji iz graditelja pogojev Home Assistant, tisti, ki so poimenovani po svoji domeni, kot so `sun.is_up`, `light.is_on`, `zone.in_zone` ali `temperature.is_value`, z njihovimi nastavitvami `target`, `options`, `behavior` in `for`.
+
+<details>
+
+<summary><b>Primer</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Pogoji se ovrednotijo v vašem brskalniku, zato tistih nekaj, ki potrebujejo strežnik Home Assistant, ne more biti povsem natančnih: sončni vzhod in zahod se bereta iz entitete `sun.sun`, namesto da bi se preračunala, trajanje `for` pa se meri od zadnje spremembe stanja, brez zgodovine iz recorder.
+>
+> `view_columns` je sprejet, vendar vedno uspe, saj stolpcev vašega pogleda nikoli ne razporeja Bubble Card. Vrsta pogoja, ki je Bubble Card ne pozna, se enkrat javi v konzoli vašega brskalnika, namesto da bi tiho odpovedala, tako da lahko ločite tipkarsko napako od manjkajoče funkcije.
+
+<br>
+
+---
+
+<br>
+
 ## Dejanja dotika, dvojnega dotika in zadržanja
 
 Na karticah, ki to možnost podpirajo, lahko uporabite tudi privzeta dejanja dotika, dejanja dvojnega dotika in dejanja zadržanja iz Home Assistant. To vam na primer omogoča, da prikažete okno "več informacij" z zadržanjem ikone gumba ali zaženete storitev ob pritisku podgumba.
@@ -1700,6 +1762,8 @@ Lastne sloge lahko dodate za spremembo CSS vseh kartic **brez uporabe card-mod**
 
 > [!TIP]  
 > Podgumbe je mogoče ciljati z razredi na podlagi imena. Na primer, podgumb z imenom "My sub-button" lahko oblikujete z `.my-sub-button`. Podgumbi drsnika prav tako izpostavljajo `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` itd.
+>
+> Razred na podlagi imena se spremeni, ko podgumb preimenujete, in se prevede, ko se prevede ime. Nastavite `css_class` na podgumbu, da dobite svoj razred, ki se nikoli ne premakne, ne glede na ime in ne glede na jezik.
 
 #### Primeri
 
@@ -2066,6 +2130,7 @@ Imate dostop do vseh globalnih JS funkcij, poleg tega pa tudi do:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` vrne `true`, ko je seznam [pogojev](#pogoji) izpolnjen, na primer `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` lahko uporabite za prevod stanja (lahko se uporabi tudi za pridobitev enote stanja, brez ročnega dodajanja).
 - `hass.formatEntityAttributeValue(state, "attribute")` lahko uporabite za prevod atributa (lahko se uporabi tudi za pridobitev enote stanja, brez ročnega dodajanja).
 
@@ -2318,6 +2383,8 @@ Moduli so zmogljiva funkcija, ki vam omogoča shranjevanje, ponovno uporabo in d
 Vendar je ta funkcija veliko močnejša od tega, saj vam omogoča, da sami dodate prave funkcije v urejevalniku Bubble Card, z uporabo vseh privzetih možnosti [obrazca Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 Izbirnik objekta je bil izboljšan, da prikazuje spremembe v živo in pravilno podpira atribute.
 
+Modul lahko odgovori tudi izbirniku kartic Home Assistant poleg vgrajenih [predlogov za entitete](#predlogi-za-entitete): uporabite `suggestions` za kartice, ki jih lahko opiše vnaprej, in `suggestions_code`, kadar jih je treba izračunati iz vaše namestitve, na primer pojavno okno, sestavljeno iz vseh entitet prostora, ki mu pripada izbrana entiteta. Oba ključa sta dokumentirana [tukaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Prav tako lahko brskate po **Module Store**, kjer najdete in namestite [module, ki jih je ustvarila skupnost](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), ali delite svoje lastne stvaritve!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Ta zavihek prikazuje vse vaše nameščene module in vam omogoča:
 - **Iskanje** in **razvrščanje** modulov (po abecedi, nedavno, najprej aktivni)
 - **Nastavitev globalnega stanja**, da se modul samodejno uporabi na vseh karticah
 - **Uvoz/izvoz** modulov za varnostno kopiranje ali deljenje
+- **Pišite predloge za entitete** v urejevalniku modula, pod **Izbirno: predlogi za entitete**, da bo vaš modul ponujen v izbirniku kartic Home Assistant. Pravila in izračunani predlogi se preverjajo sproti med pisanjem, napaka tam prepreči shranjevanje, predogled pa prikaže predlagane kartice za katero koli entiteto, ki jo izberete
 
 #### Zavihek Module Store
 
@@ -2391,7 +2459,8 @@ Ta zavihek prikazuje [vse razpoložljive module skupnosti](https://github.com/Cl
 3. Izpolnite informacije o modulu.
 4. Vpišite svojo kodo predloge CSS in/ali JavaScript v urejevalniku **Koda**.
 5. (Neobvezno) Ustvarite vmesnik za konfiguracijo po meri v razdelku **Editor** (kot izbirnik barv na zgornjem posnetku zaslona, celotna dokumentacija je na voljo [tukaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Kliknite **Shrani**.
+6. (Neobvezno) Napišite svoje **Predlogi za entitete**, da bo vaš modul ponujen v izbirniku kartic Home Assistant. Plošča med tipkanjem preverja, kar pišete, njen predogled pa prikaže same predlagane kartice za entiteto po vaši izbiri.
+7. Kliknite **Shrani**.
 
 Vaš modul je zdaj na voljo za uporabo na kateri koli od vaših kartic!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Več primerov najdete v Module Store, ali [tukaj](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalizacija
+
+Bubble Card govori vaš jezik. Njegov urejevalnik je preveden v 64 jezikov, ki jih podpira Home Assistant, in povsod, kjer ima Home Assistant za nekaj že svojo besedo, je uporabljena njegova ubeseditev, tako da v obeh vmesnikih berete iste izraze.
+
+Na dnu urejevalnika, poleg številke različice, stikalo **Samodejno** sledi jeziku vašega Home Assistant. Izklopite ga in celoten urejevalnik se vrne v angleščino, kar je priročno, kadar sledite vodiču ali prijavljate težavo. Vaša izbira je shranjena v vašem brskalniku.
+
+Tudi ta dokumentacija je prevedena, [v 62 jezikov](languages.md). Te strani so odprte za vse, zato je ubeseditev, ki ne ustreza vašemu Home Assistant, mogoče popraviti v nekaj klikih. Angleška različica ostaja referenca za samo vsebino.
 
 <br>
 

@@ -18,7 +18,7 @@ Bubble Card er ei minimalistisk og tilpassbar kortsamling for Home Assistant, me
 
 ## Innhaldsliste
 
-**[`Installasjon`](#installasjon)**  **[`Konfigurasjon`](#konfigurasjon)**  **[`Pop-up`](#pop-up)**  **[`Horisontal knapperad`](#horisontal-knapperad)**  **[`Knapp`](#knapp)**  **[`Mediespelar`](#mediespelar)**  **[`Gardin`](#gardin)**  **[`Select`](#select)**  **[`Klima`](#klima)**  **[`Kalender`](#kalender)**  **[`Skiljeteikn`](#skiljeteikn)**  **[`Tom kolonne`](#tom-kolonne)**  **[`Berre underknappar`](#berre-underknappar)**  **[`Underknappar`](#underknappar)**  **[`Kortoppsett`](#kortoppsett)**  **[`Handlingar`](#trykk--dobbelttrykk--og-haldhandlingar)**  **[`Styling`](#styling)**  **[`Malar`](#malar)**  **[`Modular`](#modular)**  **[`Hjelp`](#hjelp)**  **[`Bidra`](#bidra)**  **[`Doner`](#doner)**
+**[`Installasjon`](#installasjon)**  **[`Konfigurasjon`](#konfigurasjon)**  **[`Entitetsforslag`](#entitetsforslag)**  **[`Pop-up`](#pop-up)**  **[`Horisontal knapperad`](#horisontal-knapperad)**  **[`Knapp`](#knapp)**  **[`Mediespelar`](#mediespelar)**  **[`Gardin`](#gardin)**  **[`Select`](#select)**  **[`Klima`](#klima)**  **[`Kalender`](#kalender)**  **[`Skiljeteikn`](#skiljeteikn)**  **[`Tom kolonne`](#tom-kolonne)**  **[`Berre underknappar`](#berre-underknappar)**  **[`Underknappar`](#underknappar)**  **[`Kortoppsett`](#kortoppsett)**  **[`Vilkår`](#vilkår)**  **[`Handlingar`](#trykk--dobbelttrykk--og-haldhandlingar)**  **[`Styling`](#styling)**  **[`Malar`](#malar)**  **[`Modular`](#modular)**  **[`Lokalisering`](#lokalisering)**  **[`Hjelp`](#hjelp)**  **[`Bidra`](#bidra)**  **[`Doner`](#doner)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card er ei minimalistisk og tilpassbar kortsamling for Home Assistant, me
 
 <br>
 
-1. Last ned denne fila: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Legg denne fila i mappa `<config>/www`
+1. Last ned `bubble-card.zip` frå [den nyaste utgjevinga](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Pakk ho ut i mappa `<config>/www`, du skal få `bubble-card.js` og ei `translations`-mappe ved sida av (den mappa inneheld ordlistene til redigeringsverktøyet, utan ho held redigeringsverktøyet fram på engelsk)
 3. På dashbordet ditt, klikk på ikonet oppe i høgre hjørne og deretter på `Edit dashboard`
 4. Klikk på ikonet igjen og deretter på `Manage resources`
 5. Klikk på `Add resource`
@@ -130,6 +130,21 @@ Alle val kan setjast opp i Home Assistant-editoren. Men du finn fleire detaljar 
 
 <br>
 
+## Entitetsforslag
+
+Frå og med Home Assistant 2026.6 gjev det å velje ei eining i kortveljaren deg nokre ferdige kort, og Bubble Card svarar på det spørsmålet med sine eigne oppskrifter. Vel eit lys, og du får eit kort med ein lysstyrkeglidebrytar, i tillegg til ein variant for fargetemperatur, farge og metting når lyset ditt støttar det. Vel ei gardin, og du får posisjonsglidebrytaren, vel ein mediespelar, og du får òg ein variant med kjeldelista, vel ein støvsugar, og du får knappane for start, pause og dokking. Kvart forslag er ein heilt vanleg Bubble Card-konfigurasjon vist som direkte førehandsvising, så du kan ta det som ligg nærast og redigere vidare som vanleg.
+
+Kva du får tilbode, kjem an på kva eininga di faktisk kan: eit lys utan lysstyrkekanal får ein brytar i staden for ein glidebrytar, ei gardin som ikkje kan vinklast får ingen vinkelvariant, og ei klimaeining får førehandsinnstillingane sine berre når ho har nokon. Dei klassiske oppføringane følgjer under dei når dei er aktuelle: det eigne kortet til domenet, ein enkel knapp og ein glidebrytar.
+
+> [!TIP]
+> Modular kan leggje sine eigne forslag til den lista, sjå [modular](#modular).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Dette kortet lèt deg lage ein pop-up med kva innhald du vil. Kvar pop-up er **s
 | `shadow_opacity` | string | Valfritt | Kva verdi som helst frå `0` til `100` | Skuggegjennomsikta til pop-uppen din (t.d. `0` for å skjule han) |
 | `hide_backdrop` | boolean | Valfritt | `true` eller `false` (standard) | Set denne til true på den første pop-uppen på hovuddashbordet ditt for å slå av bakteppet på alle pop-uppar. |
 | `background_update` | boolean | Valfritt | `true` eller `false` (standard) | Oppdater innhaldet i pop-uppen i bakgrunnen (ikkje anbefalt) |
-| `trigger_entity` | string | Valfritt | Kva eining som helst | Opne denne pop-uppen basert på tilstanden til ei eining |
+| `trigger` | object eller list | Valfritt | Sjå [vilkår](#vilkår) | Opne denne pop-uppen når vilkåra er oppfylte |
+| `trigger_entity` | string | Valfritt | Kva eining som helst | Opne denne pop-uppen basert på tilstanden til ei eining, den enkle forma av `trigger` |
 | `trigger_state` | string | Valfritt (**Påkravd** viss `trigger_entity` er definert) | Kva einingstilstand som helst | Einingstilstand som opnar pop-uppen |
-| `trigger_close` | boolean | Valfritt | `true` eller `false` (standard) | Lukk pop-uppen når `trigger_state` er ulik |
+| `trigger_close` | boolean | Valfritt | `true` eller `false` | Lukk pop-uppen når vilkåra ikkje lenger er oppfylte (standard: `true` med `trigger`, `false` med `trigger_state`) |
 | `open_action` | objekt | Valfritt | Sjå [handlingar](#trykk--dobbelttrykk--og-haldhandlingar) | Utløys ei handling når pop-uppen opnar |
 | `close_action` | objekt | Valfritt | Sjå [handlingar](#trykk--dobbelttrykk--og-haldhandlingar) | Utløys ei handling når pop-uppen lukkar |
 | `show_header` | boolean | Valfritt | `true` (standard) eller `false` | Vis/skjul toppteksten til pop-uppen heilt |
@@ -445,8 +461,8 @@ Desse vala er berre tilgjengelege når `button_type` er sett til `slider`.
 | `relative_slide`        | boolean | Valfritt (`false` standard )     | Oppdater verdien relativt til startverdien, i staden for startpunktet for trykket.                      |
 | `read_only_slider`      | boolean | Valfritt (`false` standard)      | Gjer glidebrytaren skriveverna. Blir automatisk slått på for enkelte entitetar, som sensorar.                                                    |
 | `slider_live_update`    | boolean | Valfritt (`false` standard)      | Tilstanden til entiteten blir oppdatert medan ein glid. **Denne funksjonen er ikkje tilrådd for alle entitetar.**        |
-| `slider_fill_orientation` | string | Valfritt | `left` (standard), `right`, `top`, `bottom` | Endrar fyllretninga til glidebrytaren |
-| `slider_value_position` | string | Valfritt | `right` (standard), `left`, `center`, `hidden` | Plassering av verdivisinga |
+| `slider_fill_orientation` | string | Valfritt | `left`, `right`, `top` eller `bottom` | Endrar fyllretninga til glidebrytaren. Frå venstre mot høgre når ho ikkje er oppgjeven, spegelvend i [høgre-til-venstre-språk](#lokalisering) |
+| `slider_value_position` | string | Valfritt | `right`, `left`, `center` eller `hidden` | Plassering av verdivisinga. På sluttsida når ho ikkje er oppgjeven, altså til venstre i [høgre-til-venstre-språk](#lokalisering) |
 | `invert_slider_value` | boolean | Valfritt (`false` standard) | Snu retninga til glidebrytaren (100 % fyll svarar til minimum). Ikkje tilgjengeleg for fargeglidebrytarar. |
 | `light_slider_type` | string | Valfritt | `brightness` (standard), `hue`, `saturation`, `white_temp` | **Berre for lys.** Vel glidebrytarmodus |
 | `cover_slider_type` | string | Valfritt | `position` (standard), `tilt_position` | **Berre for gardiner.** Vel glidebrytarmodus (posisjon eller vinkel) |
@@ -940,7 +956,7 @@ Dette kortet lèt deg vise kalenderentitetane dine. Innhaldet kan rullast, slik 
 | `limit`             | number  | Valfritt     | Eit tal                                        | Talet på hendingar som vert vist på kortet                                  |
 | `show_end`          | boolean | Valfritt     | `true` eller `false` (standard)                     | Vis eller skjul sluttidspunktet for hendingar                                                    |
 | `show_progress`     | boolean | Valfritt     | `true` (standard) eller `false`                     | Vis eller skjul framdriftslinja for hendinga                                                     |
-| `show_started_events`| boolean | Valfritt     | `true` (standard) eller `false`                     | Vis eller skjul hendingar som er i gang no                                                 |
+| `show_started_events`| boolean | Valfritt     | `true` (standard) eller `false`                     | Vis eller skjul hendingar som er i gang no. Hendingar over fleire dagar blir vurderte éin dag om gongen, så berre dagen som er i gang blir skjult, og dagane som kjem held fram med å vere synlege |
 | `scrolling_effect`  | boolean | Valfritt | `true` (standard) eller `false` | Lat tekst rulle når innhaldet overstig storleiken til behaldaren sin |
 | `event_action` | object | Valfritt | `tap_action`, `double_tap_action` eller `hold_action`, sjå [handlingar](#trykk--dobbelttrykk--og-haldhandlingar) | Lèt deg leggje til handlingar ved klikk på ei hending. |
 | `tap_action` | object | Valfritt | Sjå [handlingar](#trykk--dobbelttrykk--og-haldhandlingar) | Definer typen handling ved klikk på dagen, viss udefinert vil `none` bli brukt. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Valfritt | `icon-left` (standard), `icon-top`, `icon-bottom`, `icon-right` | Plassering av ikonet inni underknappen |
 | `always_visible` | boolean | Valfritt | `true` eller `false` (standard) | **Berre glidebrytar.** Vis alltid glidebrytaren i staden for å opne han ved trykk |
 | `show_button_info` | boolean | Valfritt | `true` eller `false` (standard) | **Berre glidebrytar.** Vis ikon/namn/tilstand når `always_visible` er slått på |
-| `visibility` | object eller list | Valfritt | Sjå [vilkår](https://www.home-assistant.io/docs/scripts/conditions/) | Vis eller skjul underknappen basert på vilkår |
+| `visibility` | object eller list | Valfritt | Sjå [vilkår](#vilkår) | Vis eller skjul underknappen basert på vilkår |
 | `hide_when_parent_unavailable` | boolean | Valfritt | `true` eller `false` (standard) | Skjul underknappen viss einingskortet til foreldrekortet er utilgjengeleg |
+| `css_class` | string | Valfritt | Kva tekst som helst | Ein ekstra CSS-klasse på underknappen, for å treffe han i [stilane](#styling) dine uansett kva han heiter (t.d. gjev `My value` `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Glidebrytar-underknappar støttar dei same glidebrytarvala som knappeglidebrytar
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rundingsradius for underknappane |
 | `--bubble-sub-button-background-color` | `color` | Bakgrunnsfarge for underknappane |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur som blir lagd til ein underknapp eller ein glidebrytar berre når han blir teikna i same farge som kortet bak, noko som ville gjort han usynleg (set han til `none` for å fjerne han) |
 | `--bubble-sub-slider-border-radius` | `px` | Rundingsradius for glidebrytar-underknappar |
 | `--bubble-sub-slider-background-color` | `color` | Bakgrunnsfarge for glidebrytar-underknappar |
 | `--bubble-sub-slider-height` | `px` | Høgd for alltid synlege glidebrytar-underknappar |
+| `--bubble-sub-slider-outline` | `box-shadow` | Kontur berre for glidebrytar-underknappane, fell tilbake på `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Tekstfarge på lyse underknapp-bakgrunnar |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Vilkår
+
+Nokre val blir styrte av vilkår, skrivne nøyaktig som vilkåra i [vilkårskortet](https://www.home-assistant.io/dashboards/conditional/) til Home Assistant:
+
+- `visibility` på ein [underknapp](#underknappar), for å vise eller skjule han
+- `trigger` på ein [pop-up](#pop-up), for å opne han når vilkåra er oppfylte
+- `checkConditionsMet(conditions, hass)` inne i [malane](#malar) dine, når du treng svaret i din eigen kode
+
+Alle vilkårstypane til Home Assistant blir evaluerte: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, og gruppene `and`, `or` og `not`. Vilkåra frå vilkårsbyggjaren i Home Assistant fungerer òg, dei som er oppkalla etter domenet sitt, som `sun.is_up`, `light.is_on`, `zone.in_zone` eller `temperature.is_value`, med innstillingane `target`, `options`, `behavior` og `for`.
+
+<details>
+
+<summary><b>Eksempel</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Vilkår blir evaluerte i nettlesaren din, så dei få som treng Home Assistant-tenaren kan ikkje vere eksakte: soloppgang og solnedgang blir lesne frå eininga `sun.sun` i staden for å bli rekna ut på nytt, og ei `for`-varigheit blir målt frå siste tilstandsendring, utan historikken til recorder.
+>
+> `view_columns` blir godteken, men går alltid gjennom, sidan Bubble Card aldri er den som legg ut kolonnane i visinga di. Ein vilkårstype som Bubble Card ikkje kjenner, melder frå om seg sjølv éin gong i nettlesarkonsollen i staden for å feile stille, slik at du kan skilje ein skrivefeil frå ein manglande funksjon.
+
+<br>
+
+---
+
+<br>
+
 ## Trykk-, dobbelttrykk- og haldhandlingar
 
 Du kan også bruke standard trykkhandlingar, dobbelttrykkhandlingar og haldhandlingar frå Home Assistant på korta som støttar dette valet. Til dømes lèt dette deg vise "meir informasjon"-vindauget ved å halde inne eit knappeikon, eller køyre ei teneste når ein underknapp blir trykt.
@@ -1700,6 +1762,8 @@ Du kan leggje til eigne stilar for å endre CSS-en til alle korta **utan å bruk
 
 > [!TIP]  
 > Underknappar kan målrettast med namnbaserte klassar. For eksempel kan ein underknapp som heiter "My sub-button" stylast med `.my-sub-button`. Underknappar for glidebrytar eksponerer også `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, osv.
+>
+> Ein namnbasert klasse endrar seg når du gjev underknappen eit nytt namn, og han blir omsett når namnet blir det. Set `css_class` på underknappen for å få din eigen klasse som aldri flyttar seg, uansett namn og uansett språk.
 
 #### Eksempel
 
@@ -2066,6 +2130,7 @@ Du har tilgang til alle globale JS-funksjonar, men også til:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` returnerer `true` når ei liste med [vilkår](#vilkår) er oppfylt, til dømes `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` kan brukast til å omsetje ein tilstand (kan også brukast for å hente ei tilstandseining, utan at du treng leggje ho til manuelt).
 - `hass.formatEntityAttributeValue(state, "attribute")` kan brukast til å omsetje ein attributt (kan også brukast for å hente ei tilstandseining, utan at du treng leggje ho til manuelt).
 
@@ -2318,6 +2383,8 @@ Modular er ein kraftig funksjon som lèt deg lagre, gjenbruke og dele dine eigne
 Men denne funksjonen er langt kraftigare enn det, han lèt deg leggje til eigne funksjonar sjølv i Bubble Card-redigeringsverktøyet, med alle dei vanlege [Home Assistant-skjema](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)-alternativa!  
 Objektveljaren er forbetra slik at han viser endringar live og støttar attributt korrekt.
 
+Ein modul kan òg svare kortveljaren i Home Assistant ved sida av dei innebygde [entitetsforslaga](#entitetsforslag): bruk `suggestions` for korta han kan skildre på førehand, og `suggestions_code` når dei må reknast ut frå oppsettet ditt, til dømes ein pop-up bygd av alle einingane i området som den valde eininga høyrer til. Begge nøklane er dokumenterte [her](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Du kan også bla gjennom **Module Store** for å finne og installere [modular laga av fellesskapet](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), eller dele dine eigne skapingar!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Denne fana viser alle dei installerte modulane dine og lèt deg:
 - **Søkje** og **sortere** modular (alfabetisk, nyleg, aktive først)
 - **Setje global status** slik at ein modul automatisk blir brukt på alle kort
 - **Importere/eksportere** modular for sikkerheitskopi eller deling
+- **Skrive entitetsforslag** i moduleditoren, under **Valfritt: Entitetsforslag**, slik at modulen din blir føreslegen i kortveljaren i Home Assistant. Både reglar og utrekna forslag blir sjekka medan du skriv, ein feil der hindrar lagring, og førehandsvisinga viser dei føreslegne korta for kva eining du enn vel
 
 #### Fana "Module Store"
 
@@ -2391,7 +2459,8 @@ Denne fana viser [alle tilgjengelege modular frå fellesskapet](https://github.c
 3. Fyll ut informasjonen om modulen.
 4. Skriv CSS- og/eller JavaScript-malkoden din i **Code**-editoren.
 5. (Valfritt) Lag eit eige konfigurasjonsgrensesnitt i **Editor**-delen (som fargeveljaren i skjermbiletet over, full dokumentasjon tilgjengeleg [her](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klikk **Save**.
+6. (Valfritt) Skriv **Entitetsforslaga** dine slik at modulen din blir føreslegen i kortveljaren i Home Assistant. Panelet sjekkar det du skriv medan du skriv, og førehandsvisinga viser sjølve dei føreslegne korta for eininga du vel.
+7. Klikk **Save**.
 
 No er modulen din tilgjengeleg for bruk på alle korta dine!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Fleire eksempel finn du i Module Store, eller [her](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalisering
+
+Bubble Card snakkar språket ditt. Redigeringsverktøyet er omsett til dei 64 språka Home Assistant støttar, og der Home Assistant alt har eit ord for noko, blir formuleringa derfrå brukt om att, slik at du les dei same omgrepa i begge grensesnitta.
+
+Nedst i redigeringsverktøyet, ved sida av versjonsnummeret, følgjer ein **Automatisk**-brytar språket i Home Assistant. Slå han av, så går heile redigeringsverktøyet tilbake til engelsk, noko som er praktisk når du følgjer ei rettleiing eller melder frå om eit problem. Valet ditt blir hugsa i nettlesaren.
+
+Denne dokumentasjonen er òg omsett, [til 62 språk](languages.md). Desse sidene er opne for alle, så ei formulering som ikkje stemmer med din eigen Home Assistant kan rettast med eit par klikk. Den engelske versjonen er framleis referansen for sjølve innhaldet.
 
 <br>
 

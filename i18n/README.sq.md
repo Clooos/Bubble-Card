@@ -18,7 +18,7 @@ Bubble Card është një koleksion kartash minimaliste dhe të personalizueshme 
 
 ## Tabela e përmbajtjes
 
-**[`Instalimi`](#instalimi)**  **[`Konfigurimi`](#konfigurimi)**  **[`Pop-up`](#pop-up)**  **[`Rresht horizontal butonash`](#rresht-horizontal-butonash)**  **[`Buton`](#buton)**  **[`Luajtës multimedial`](#luajtës-multimedial)**  **[`Grila`](#grila)**  **[`Përzgjedhje`](#përzgjedhje)**  **[`Klima`](#klima)**  **[`Kalendar`](#kalendar)**  **[`Ndarës`](#ndarës)**  **[`Kolonë bosh`](#kolonë-bosh)**  **[`Vetëm nën-butona`](#vetëm-nën-butona)**  **[`Nën-butonat`](#nën-butonat)**  **[`Faqosjet e kartës`](#faqosjet-e-kartës)**  **[`Veprimet`](#veprimet-e-prekjes-prekjes-së-dyfishtë-dhe-mbajtjes)**  **[`Stili`](#stili)**  **[`Shabllonet`](#shabllonet)**  **[`Modulet`](#modulet)**  **[`Ndihmë`](#ndihmë)**  **[`Kontributi`](#kontributi)**  **[`Dhuroni`](#dhuroni)**
+**[`Instalimi`](#instalimi)**  **[`Konfigurimi`](#konfigurimi)**  **[`Sugjerime për entitetet`](#sugjerime-për-entitetet)**  **[`Pop-up`](#pop-up)**  **[`Rresht horizontal butonash`](#rresht-horizontal-butonash)**  **[`Buton`](#buton)**  **[`Luajtës multimedial`](#luajtës-multimedial)**  **[`Grila`](#grila)**  **[`Përzgjedhje`](#përzgjedhje)**  **[`Klima`](#klima)**  **[`Kalendar`](#kalendar)**  **[`Ndarës`](#ndarës)**  **[`Kolonë bosh`](#kolonë-bosh)**  **[`Vetëm nën-butona`](#vetëm-nën-butona)**  **[`Nën-butonat`](#nën-butonat)**  **[`Faqosjet e kartës`](#faqosjet-e-kartës)**  **[`Kushtet`](#kushtet)**  **[`Veprimet`](#veprimet-e-prekjes-prekjes-së-dyfishtë-dhe-mbajtjes)**  **[`Stili`](#stili)**  **[`Shabllonet`](#shabllonet)**  **[`Modulet`](#modulet)**  **[`Lokalizimi`](#lokalizimi)**  **[`Ndihmë`](#ndihmë)**  **[`Kontributi`](#kontributi)**  **[`Dhuroni`](#dhuroni)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card është një koleksion kartash minimaliste dhe të personalizueshme 
 
 <br>
 
-1. Shkarkoni këtë skedar: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Shtoni këtë skedar në dosjen tuaj `<config>/www`
+1. Shkarkoni `bubble-card.zip` nga [lëshimi i fundit](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Shpaketojeni në dosjen tuaj `<config>/www`, duhet të merrni `bubble-card.js` dhe një dosje `translations` pranë tij (ajo dosje përmban fjalorët e editorit, pa të editori mbetet në anglisht)
 3. Në dashboard-in tuaj klikoni ikonën në cepin e sipërm djathtas, pastaj `Edit dashboard`
 4. Klikoni përsëri atë ikonë dhe pastaj klikoni `Manage resources`
 5. Klikoni `Add resource`
@@ -130,6 +130,21 @@ Të gjitha opsionet mund të konfigurohen në editorin e Home Assistant. Por më
 
 <br>
 
+## Sugjerime për entitetet
+
+Që nga Home Assistant 2026.6, zgjedhja e një entiteti në zgjedhësin e kartave ju ofron disa karta të gatshme, dhe Bubble Card i përgjigjet asaj pyetjeje me recetat e veta. Zgjidhni një dritë dhe ju ofrohet një kartë me një rrëshqitës ndriçimi, plus një variant me temperaturë ngjyre, një me ngjyrë dhe një me ngopje kur drita juaj i mbështet. Zgjidhni një grilë dhe merrni rrëshqitësin e pozicionit të saj, zgjidhni një luajtës multimedial dhe merrni gjithashtu një variant me listën e burimeve, zgjidhni një fshesë me korrent dhe merrni butonat e saj për nisje, pauzë dhe kthim në bazë. Çdo sugjerim është një konfigurim normal i Bubble Card i shfaqur si paraparje e drejtpërdrejtë, kështu që mund të merrni atë më të afërtin dhe të vazhdoni ta redaktoni si zakonisht.
+
+Ajo që ju ofrohet varet nga ajo që entiteti juaj mund të bëjë vërtet: një dritë pa kanal ndriçimi merr një çelës në vend të një rrëshqitësi, një grilë që nuk mund të pjerrësohet nuk merr variant pjerrësimi, një entitet klime merr modalitetet e tij të paracaktuara vetëm kur ka të tilla. Hyrjet klasike vijnë poshtë tyre kur janë të zbatueshme: karta e dedikuar e domenit, një buton i thjeshtë dhe një rrëshqitës.
+
+> [!TIP]
+> Modulet mund të shtojnë sugjerimet e tyre në atë listë, shihni [modulet](#modulet).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Kjo kartë ju lejon të krijoni një pop-up me çfarëdo lloj përmbajtjeje. Çd
 | `shadow_opacity` | string | Opsionale | Çdo vlerë nga `0` deri në `100` | Opaciteti i hijes së pop-up-it tuaj (p.sh. `0` për ta fshehur) |
 | `hide_backdrop` | boolean | Opsionale | `true` ose `false` (parazgjedhje) | Vendoseni këtë në true në pop-up-in e parë të dashboard-it tuaj kryesor për të çaktivizuar backdrop-in në të gjithë pop-up-et. |
 | `background_update` | boolean | Opsionale | `true` ose `false` (parazgjedhje) | Përditëson përmbajtjen e pop-up-it në sfond (nuk rekomandohet) |
-| `trigger_entity` | string | Opsionale | Çdo entitet | Hap këtë pop-up bazuar në gjendjen e çdo entiteti |
+| `trigger` | object ose list | Opsionale | Shihni [kushtet](#kushtet) | Hap këtë pop-up kur plotësohen kushtet |
+| `trigger_entity` | string | Opsionale | Çdo entitet | Hap këtë pop-up bazuar në gjendjen e çdo entiteti, forma e thjeshtë e `trigger` |
 | `trigger_state` | string | Opsionale (**E detyrueshme** nëse `trigger_entity` është përcaktuar) | Çdo gjendje entiteti | Gjendja e entitetit për të hapur pop-up-in |
-| `trigger_close` | boolean | Opsionale | `true` ose `false` (parazgjedhje) | Mbyll pop-up-in kur `trigger_state` është ndryshe |
+| `trigger_close` | boolean | Opsionale | `true` ose `false` | Mbyll pop-up-in kur kushtet nuk plotësohen më (parazgjedhje: `true` me `trigger`, `false` me `trigger_state`) |
 | `open_action` | object | Opsionale | Shihni [veprimet](#veprimet-e-prekjes-prekjes-së-dyfishtë-dhe-mbajtjes) | Aktivizon një veprim kur pop-up-i po hapet |
 | `close_action` | object | Opsionale | Shihni [veprimet](#veprimet-e-prekjes-prekjes-së-dyfishtë-dhe-mbajtjes) | Aktivizon një veprim kur pop-up-i po mbyllet |
 | `show_header` | boolean | Opsionale | `true` (parazgjedhje) ose `false` | Shfaq/Fsheh krejtësisht kokën e pop-up-it |
@@ -445,8 +461,8 @@ Këto opsione janë të disponueshme vetëm kur `button_type` është caktuar si
 | `relative_slide`        | boolean | Optional (`false` default )     | Përditëson vlerën në raport me vlerën fillestare, jo me pikën fillestare të prekjes.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | E bën rrëshqitësin vetëm për lexim. Aktivizohet automatikisht për disa entitete si sensorët.                                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Gjendja e entitetit përditësohet gjatë rrëshqitjes. **Kjo veçori nuk rekomandohet për të gjitha entitetet.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Ndryshon drejtimin e mbushjes së rrëshqitësit |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Pozicioni i shfaqjes së vlerës |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` ose `bottom` | Ndryshon drejtimin e mbushjes së rrëshqitësit. Nga e majta në të djathtë kur nuk përcaktohet, i pasqyruar në [gjuhët nga e djathta në të majtë](#lokalizimi) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` ose `hidden` | Pozicioni i shfaqjes së vlerës. Në anën e fundit kur nuk përcaktohet, pra në të majtë në [gjuhët nga e djathta në të majtë](#lokalizimi) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Përmbys drejtimin e rrëshqitësit (mbushja 100% korrespondon me minimumin). Nuk është e disponueshme për rrëshqitësit e ngjyrave. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Vetëm për dritat.** Zgjidh mënyrën e rrëshqitësit |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Vetëm për grilat.** Zgjidh mënyrën e rrëshqitësit (pozicion ose kënd) |
@@ -940,7 +956,7 @@ Kjo kartë ju lejon të shfaqni entitetet tuaja të kalendarit. Përmbajtja e sa
 | `limit`             | number  | Optional     | A number                                        | Numri i ngjarjeve që do të shfaqen në kartë                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Shfaq ose fsheh kohën e përfundimit të ngjarjeve                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Shfaq ose fsheh shiritin e progresit të ngjarjes                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Shfaq ose fsheh ngjarjet që janë aktualisht në zhvillim                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Shfaq ose fsheh ngjarjet që janë aktualisht në zhvillim. Ngjarjet shumëditore gjykohen një ditë në një kohë, kështu që fshihet vetëm dita në vazhdim dhe ditët në vijim mbeten të dukshme |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | Lejon lëvizjen e tekstit kur përmbajtja tejkalon madhësinë e kontejnerit të tij |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#veprimet-e-prekjes-prekjes-së-dyfishtë-dhe-mbajtjes) | Lejon shtimin e veprimeve në klikim të ngjarjes. |
 | `tap_action` | object | Optional | See [actions](#veprimet-e-prekjes-prekjes-së-dyfishtë-dhe-mbajtjes) | Përcakton llojin e veprimit në klikim të ditës, nëse nuk përcaktohet do të përdoret `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Opsionale | `icon-left` (parazgjedhje), `icon-top`, `icon-bottom`, `icon-right` | Vendosja e ikonës brenda nën-butonit |
 | `always_visible` | boolean | Opsionale | `true` ose `false` (parazgjedhje) | **Vetëm për rrëshqitësin.** Shfaq gjithmonë rrëshqitësin, në vend që të hapet me prekje |
 | `show_button_info` | boolean | Opsionale | `true` ose `false` (parazgjedhje) | **Vetëm për rrëshqitësin.** Shfaq ikonën/emrin/gjendjen kur `always_visible` është aktivizuar |
-| `visibility` | object ose list | Opsionale | Shihni [kushtet](https://www.home-assistant.io/docs/scripts/conditions/) | Shfaq ose fsheh nën-butonin sipas kushteve |
+| `visibility` | object ose list | Opsionale | Shihni [kushtet](#kushtet) | Shfaq ose fsheh nën-butonin sipas kushteve |
 | `hide_when_parent_unavailable` | boolean | Opsionale | `true` ose `false` (parazgjedhje) | Fshih nën-butonin nëse entiteti i kartës prind është i padisponueshëm |
+| `css_class` | string | Opsionale | Çdo varg | Një klasë CSS shtesë në nën-buton, për ta synuar atë në [stilin](#stili) tuaj pavarësisht nga emri i tij (p.sh. `My value` jep `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Nën-butonat e llojit rrëshqitës mbështesin të njëjtat opsione si rrëshqit
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rrezja e këndeve për nën-butonat |
 | `--bubble-sub-button-background-color` | `color` | Ngjyra e sfondit për nën-butonat |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur i shtuar një nën-butoni ose një rrëshqitësi vetëm kur ai ngjyroset me të njëjtën ngjyrë si karta pas tij, gjë që do ta bënte të padukshëm (vendoseni në `none` për ta hequr) |
 | `--bubble-sub-slider-border-radius` | `px` | Rrezja e këndeve për nën-butonat rrëshqitës |
 | `--bubble-sub-slider-background-color` | `color` | Ngjyra e sfondit për nën-butonat rrëshqitës |
 | `--bubble-sub-slider-height` | `px` | Lartësia për nën-butonat rrëshqitës gjithmonë të dukshëm |
+| `--bubble-sub-slider-outline` | `box-shadow` | Konturi vetëm i nën-butonave rrëshqitës, kthehet te `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Ngjyra e tekstit mbi sfonde të ndritshme të nën-butonit |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Kushtet
+
+Disa opsione funksionojnë me kushte, të shkruara saktësisht si ato të [kartës me kushte](https://www.home-assistant.io/dashboards/conditional/) të Home Assistant:
+
+- `visibility` në një [nën-buton](#nën-butonat), për ta shfaqur ose fshehur
+- `trigger` në një [pop-up](#pop-up), për ta hapur kur plotësohen kushtet
+- `checkConditionsMet(conditions, hass)` brenda [shablloneve](#shabllonet) tuaja, kur ju duhet përgjigjja në kodin tuaj
+
+Vlerësohet çdo lloj kushti i Home Assistant: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, si dhe grupet `and`, `or` dhe `not`. Funksionojnë edhe kushtet e ndërtuesit të kushteve të Home Assistant, ato që mbajnë emrin e domenit të tyre si `sun.is_up`, `light.is_on`, `zone.in_zone` ose `temperature.is_value`, me cilësimet e tyre `target`, `options`, `behavior` dhe `for`.
+
+<details>
+
+<summary><b>Shembull</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Kushtet vlerësohen në shfletuesin tuaj, prandaj ato pak që kanë nevojë për serverin e Home Assistant nuk mund të jenë të sakta: lindja dhe perëndimi i diellit lexohen nga entiteti `sun.sun` në vend që të rillogariten, dhe një kohëzgjatje `for` matet nga ndryshimi i fundit i gjendjes, pa historikun e recorder.
+>
+> `view_columns` pranohet por kalon gjithmonë, meqë Bubble Card nuk është kurrë ai që rregullon kolonat e pamjes suaj. Një lloj kushti që Bubble Card nuk e njeh raportohet një herë në konsolën e shfletuesit tuaj në vend që të dështojë në heshtje, kështu që mund të dalloni një gabim shtypi nga një funksion që mungon.
+
+<br>
+
+---
+
+<br>
+
 ## Veprimet e prekjes, prekjes së dyfishtë dhe mbajtjes
 
 Mund të përdorni gjithashtu veprimet e parazgjedhura të Home Assistant për prekjen, prekjen e dyfishtë dhe mbajtjen, tek kartat që e mbështesin këtë opsion. Për shembull, kjo ju lejon të shfaqni dritaren "më shumë informacion" duke mbajtur ikonën e një butoni, ose të nisni një shërbim kur shtypet një nën-buton.
@@ -1700,6 +1762,8 @@ Mund të shtoni stile të personalizuara për të modifikuar CSS-në e të gjith
 
 > [!TIP]  
 > Nën-butonat mund të synohen nëpërmjet klasave të bazuara në emër. Për shembull, një nën-buton i quajtur "My sub-button" mund të stilizohet me `.my-sub-button`. Nën-butonat rrëshqitës (slider) ekspozojnë gjithashtu `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, etj.
+>
+> Një klasë e bazuar në emër ndryshon kur riemërtoni një nën-buton, dhe përkthehet kur përkthehet emri. Vendosni `css_class` në nën-buton për të marrë një klasë tuajën që nuk lëviz kurrë, cilido qoftë emri dhe cilado qoftë gjuha.
 
 #### Shembuj
 
@@ -2066,6 +2130,7 @@ Keni akses te të gjitha funksionet globale JS, por gjithashtu keni akses te:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` kthen `true` kur një listë [kushtesh](#kushtet) plotësohet, për shembull `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` mund të përdoret për të përkthyer një gjendje (mund të përdoret gjithashtu për të marrë njësinë e një gjendje, pa nevojën për ta shtuar manualisht).
 - `hass.formatEntityAttributeValue(state, "attribute")` mund të përdoret për të përkthyer një atribut (mund të përdoret gjithashtu për të marrë njësinë e një gjendje, pa nevojën për ta shtuar manualisht).
 
@@ -2318,6 +2383,8 @@ Modulet janë një veçori e fuqishme që ju lejon të ruani, ripërdorni dhe nd
 Por kjo veçori është shumë më e fuqishme se kaq, ju lejon të shtoni vetë veçori të vërteta në editorin e Bubble Card, duke përdorur të gjitha opsionet standarde të [formularit Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 Zgjedhësi i objekteve është përmirësuar për të shfaqur ndryshime në kohë reale dhe për të mbështetur atributet saktë.
 
+Një modul mund t'i përgjigjet gjithashtu zgjedhësit të kartave të Home Assistant krahas [sugjerimeve për entitetet](#sugjerime-për-entitetet) të integruara: përdorni `suggestions` për kartat që mund t'i përshkruajë paraprakisht, dhe `suggestions_code` kur ato duhet të llogariten nga instalimi juaj, për shembull një pop-up i ndërtuar nga të gjitha entitetet e zonës së cilës i përket entiteti i zgjedhur. Të dy çelësat janë dokumentuar [këtu](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Mund të shfletoni gjithashtu **Module Store** për të gjetur dhe instaluar [module të krijuara nga komuniteti](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), ose të ndani krijimet tuaja!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Kjo skedë tregon të gjitha modulet tuaja të instaluara dhe ju lejon të:
 - **Kërkoni** dhe **renditni** modulet (alfabetikisht, të fundit, aktive së pari)
 - **Vendosni statusin global** për ta bërë një modul të aplikohet automatikisht te të gjitha kartat
 - **Importoni/Eksportoni** module për rezervë (backup) ose ndarje
+- **Shkruani sugjerime për entitetet** në editorin e modulit, te **Opsionale: Sugjerime për entitetet**, që moduli juaj të ofrohet në zgjedhësin e kartave të Home Assistant. Si rregullat ashtu edhe sugjerimet e llogaritura kontrollohen ndërsa shkruani, një gabim aty pengon ruajtjen, dhe paraparja tregon kartat e sugjeruara për çdo entitet që zgjidhni
 
 #### Skeda Module Store
 
@@ -2391,7 +2459,8 @@ Kjo skedë do të shfaqë [të gjitha modulet e disponueshme nga komuniteti](htt
 3. Plotësoni informacionin e modulit.
 4. Shkruani kodin tuaj CSS dhe/ose shabllon JavaScript në editorin **Code**.
 5. (Opsionale) Krijoni një ndërfaqe konfigurimi të personalizuar në seksionin **Editor** (si zgjedhësi i ngjyrave në pamjen e ekranit më sipër, dokumentacioni i plotë i disponueshëm [këtu](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klikoni **Save**.
+6. (Opsionale) Shkruani **Sugjerimet për entitetet** tuaja që moduli juaj të ofrohet në zgjedhësin e kartave të Home Assistant. Paneli kontrollon atë që shkruani ndërsa shtypni, dhe paraparja e tij tregon vetë kartat e sugjeruara për entitetin që zgjidhni.
+7. Klikoni **Save**.
 
 Moduli juaj tani është i disponueshëm për t'u përdorur në çdo kartë tuajën!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Më shumë shembuj mund të gjenden në Module Store, ose [këtu](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalizimi
+
+Bubble Card flet gjuhën tuaj. Editori i tij është përkthyer në 64 gjuhët që mbështet Home Assistant, dhe kudo që Home Assistant ka tashmë një fjalë për diçka, përdoret formulimi i tij, kështu që lexoni të njëjtat terma në të dyja ndërfaqet.
+
+Në fund të editorit, pranë numrit të versionit, një çelës **Automatik** ndjek gjuhën e Home Assistant tuaj. Fikeni dhe i gjithë editori kthehet në anglisht, gjë që është e dobishme për të ndjekur një udhëzues ose për të raportuar një problem. Zgjedhja juaj mbahet mend në shfletuesin tuaj.
+
+Edhe ky dokumentacion është përkthyer, [në 62 gjuhë](languages.md). Ato faqe janë të hapura për të gjithë, kështu që një formulim që nuk përputhet me Home Assistant tuaj mund të rregullohet me pak klikime. Versioni në anglisht mbetet referenca për vetë përmbajtjen.
 
 <br>
 

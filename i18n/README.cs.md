@@ -18,7 +18,7 @@ Bubble Card je minimalistická a přizpůsobitelná kolekce karet pro Home Assis
 
 ## Obsah
 
-**[`Instalace`](#instalace)**  **[`Konfigurace`](#konfigurace)**  **[`Pop-up`](#pop-up)**  **[`Horizontální zásobník tlačítek`](#horizontální-zásobník-tlačítek)**  **[`Tlačítko`](#tlačítko)**  **[`Přehrávač médií`](#přehrávač-médií)**  **[`Rolety`](#rolety)**  **[`Select`](#select)**  **[`Klimatizace`](#klimatizace)**  **[`Kalendář`](#kalendář)**  **[`Oddělovač`](#oddělovač)**  **[`Prázdný sloupec`](#prázdný-sloupec)**  **[`Pouze podtlačítka`](#pouze-podtlačítka)**  **[`Podtlačítka`](#podtlačítka)**  **[`Rozvržení karet`](#rozvržení-karet)**  **[`Akce`](#akce-klepnutí-dvojitého-klepnutí-a-podržení)**  **[`Styly`](#styly)**  **[`Šablony`](#šablony)**  **[`Moduly`](#moduly)**  **[`Pomoc`](#pomoc)**  **[`Přispívání`](#přispívání)**  **[`Podpořte projekt`](#podpořte-projekt)**
+**[`Instalace`](#instalace)**  **[`Konfigurace`](#konfigurace)**  **[`Návrhy entit`](#návrhy-entit)**  **[`Pop-up`](#pop-up)**  **[`Horizontální zásobník tlačítek`](#horizontální-zásobník-tlačítek)**  **[`Tlačítko`](#tlačítko)**  **[`Přehrávač médií`](#přehrávač-médií)**  **[`Rolety`](#rolety)**  **[`Select`](#select)**  **[`Klimatizace`](#klimatizace)**  **[`Kalendář`](#kalendář)**  **[`Oddělovač`](#oddělovač)**  **[`Prázdný sloupec`](#prázdný-sloupec)**  **[`Pouze podtlačítka`](#pouze-podtlačítka)**  **[`Podtlačítka`](#podtlačítka)**  **[`Rozvržení karet`](#rozvržení-karet)**  **[`Podmínky`](#podmínky)**  **[`Akce`](#akce-klepnutí-dvojitého-klepnutí-a-podržení)**  **[`Styly`](#styly)**  **[`Šablony`](#šablony)**  **[`Moduly`](#moduly)**  **[`Lokalizace`](#lokalizace)**  **[`Pomoc`](#pomoc)**  **[`Přispívání`](#přispívání)**  **[`Podpořte projekt`](#podpořte-projekt)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card je minimalistická a přizpůsobitelná kolekce karet pro Home Assis
 
 <br>
 
-1. Stáhněte si tento soubor: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Přidejte tento soubor do složky `<config>/www`
+1. Stáhněte si `bubble-card.zip` z [nejnovějšího vydání](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Rozbalte jej do složky `<config>/www`, měli byste získat `bubble-card.js` a vedle něj složku `translations` (ta složka obsahuje slovníky editoru, bez ní zůstane editor v angličtině)
 3. Na svém přehledu klikněte na ikonu vpravo nahoře a poté na `Upravit dashboard`
 4. Klikněte znovu na tuto ikonu a poté na `Spravovat zdroje`
 5. Klikněte na `Přidat zdroj`
@@ -130,6 +130,21 @@ Všechny možnosti lze nastavit v editoru Home Assistant. Více podrobností a Y
 
 <br>
 
+## Návrhy entit
+
+Od Home Assistant 2026.6 vám výběr entity ve výběru karet nabídne několik hotových karet a Bubble Card na tuto otázku odpovídá vlastními recepty. Vyberte světlo a dostanete kartu s posuvníkem jasu, k tomu variantu s teplotou barvy, s barvou a se sytostí, pokud je vaše světlo podporuje. Vyberte roletu a dostanete posuvník její polohy, vyberte přehrávač médií a dostanete i variantu se seznamem jeho zdrojů, vyberte vysavač a dostanete jeho tlačítka pro spuštění, pauzu a návrat do doku. Každý návrh je běžná konfigurace Bubble Card zobrazená jako živý náhled, takže si můžete vzít tu nejbližší a dál ji upravovat jako obvykle.
+
+Co se vám nabídne, závisí na tom, co vaše entita opravdu umí: světlo bez kanálu jasu dostane přepínač místo posuvníku, roleta, která neumí naklápět, nedostane variantu s naklopením, a entita klimatizace dostane své přednastavené režimy jen tehdy, když nějaké má. Klasické položky následují pod nimi, pokud dávají smysl: vyhrazená karta domény, obyčejné tlačítko a posuvník.
+
+> [!TIP]
+> Moduly mohou do tohoto seznamu přidat vlastní návrhy, viz [moduly](#moduly).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Tato karta umožňuje vytvořit pop-up s libovolným obsahem. Každý pop-up je 
 | `shadow_opacity` | string | Volitelné | Libovolná hodnota od `0` do `100` | Neprůhlednost stínu vašeho pop-upu (např. `0` pro jeho skrytí) |
 | `hide_backdrop` | boolean | Volitelné | `true` nebo `false` (výchozí) | Nastavte na true u prvního pop-upu na svém hlavním přehledu, čímž vypnete pozadí (backdrop) u všech pop-upů. |
 | `background_update` | boolean | Volitelné | `true` nebo `false` (výchozí) | Aktualizuje obsah pop-upu na pozadí (nedoporučeno) |
-| `trigger_entity` | string | Volitelné | Libovolná entita | Otevře tento pop-up na základě stavu libovolné entity |
+| `trigger` | object nebo list | Volitelné | Viz [podmínky](#podmínky) | Otevře tento pop-up, když jsou podmínky splněny |
+| `trigger_entity` | string | Volitelné | Libovolná entita | Otevře tento pop-up na základě stavu libovolné entity, jednoduchá podoba `trigger` |
 | `trigger_state` | string | Volitelné (**Povinné**, pokud je definováno `trigger_entity`) | Libovolný stav entity | Stav entity, který pop-up otevře |
-| `trigger_close` | boolean | Volitelné | `true` nebo `false` (výchozí) | Zavře pop-up, když se `trigger_state` liší |
+| `trigger_close` | boolean | Volitelné | `true` nebo `false` | Zavře pop-up, když podmínky přestanou být splněny (výchozí: `true` s `trigger`, `false` s `trigger_state`) |
 | `open_action` | object | Volitelné | Viz [akce](#akce-klepnutí-dvojitého-klepnutí-a-podržení) | Spustí akci při otevírání pop-upu |
 | `close_action` | object | Volitelné | Viz [akce](#akce-klepnutí-dvojitého-klepnutí-a-podržení) | Spustí akci při zavírání pop-upu |
 | `show_header` | boolean | Volitelné | `true` (výchozí) nebo `false` | Zobrazí/skryje celé záhlaví pop-upu |
@@ -445,8 +461,8 @@ Tyto možnosti jsou dostupné pouze tehdy, když je `button_type` nastaveno na `
 | `relative_slide`        | boolean | Volitelné (výchozí `false` )     | Aktualizuje hodnotu relativně k výchozí hodnotě místo výchozího bodu dotyku.                      |
 | `read_only_slider`      | boolean | Volitelné (výchozí `false`)      | Nastaví posuvník pouze pro čtení. U některých entit, například senzorů, se zapíná automaticky.                        |
 | `slider_live_update`    | boolean | Volitelné (výchozí `false`)      | Stav entity se aktualizuje už během posouvání. **Tato funkce není doporučena pro všechny entity.**        |
-| `slider_fill_orientation` | string | Volitelné | `left` (výchozí), `right`, `top`, `bottom` | Změní směr výplně posuvníku |
-| `slider_value_position` | string | Volitelné | `right` (výchozí), `left`, `center`, `hidden` | Pozice zobrazení hodnoty |
+| `slider_fill_orientation` | string | Volitelné | `left`, `right`, `top` nebo `bottom` | Změní směr výplně posuvníku. Zleva doprava, když není definováno, zrcadlově v [jazycích psaných zprava doleva](#lokalizace) |
+| `slider_value_position` | string | Volitelné | `right`, `left`, `center` nebo `hidden` | Pozice zobrazení hodnoty. Na koncové straně, když není definováno, tedy vlevo v [jazycích psaných zprava doleva](#lokalizace) |
 | `invert_slider_value` | boolean | Volitelné (výchozí `false`) | Obrátí směr posuvníku (100% výplň odpovídá minimu). Není dostupné pro barevné posuvníky. |
 | `light_slider_type` | string | Volitelné | `brightness` (výchozí), `hue`, `saturation`, `white_temp` | **Pouze pro světla.** Volba režimu posuvníku |
 | `cover_slider_type` | string | Volitelné | `position` (výchozí), `tilt_position` | **Pouze pro rolety.** Volba režimu posuvníku (pozice nebo naklopení) |
@@ -940,7 +956,7 @@ Tato karta umožňuje zobrazit vaše entity kalendáře. Její obsah lze posouva
 | `limit`             | number  | Volitelné    | Číslo                                           | Počet událostí, které se na kartě zobrazí                                               |
 | `show_end`          | boolean | Volitelné    | `true` nebo `false` (výchozí)                   | Zobrazí nebo skryje čas konce událostí                                                  |
 | `show_progress`     | boolean | Volitelné    | `true` (výchozí) nebo `false`                   | Zobrazí nebo skryje ukazatel průběhu události                                           |
-| `show_started_events`| boolean | Volitelné    | `true` (výchozí) nebo `false`                   | Zobrazí nebo skryje již probíhající události                                                       |
+| `show_started_events`| boolean | Volitelné    | `true` (výchozí) nebo `false`                   | Zobrazí nebo skryje již probíhající události. Vícedenní události se posuzují den po dni, takže se skryje jen právě probíhající den a nadcházející dny zůstanou viditelné |
 | `scrolling_effect`  | boolean | Volitelné | `true` (výchozí) nebo `false` | Umožní rolování textu, když obsah přesáhne velikost svého kontejneru |
 | `event_action` | object | Volitelné | `tap_action`, `double_tap_action` nebo `hold_action`, viz [akce](#akce-klepnutí-dvojitého-klepnutí-a-podržení) | Umožní přidat akce při kliknutí na událost. |
 | `tap_action` | object | Volitelné | Viz [akce](#akce-klepnutí-dvojitého-klepnutí-a-podržení) | Definuje typ akce při kliknutí na den, pokud není definována, použije se `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Volitelné | `icon-left` (výchozí), `icon-top`, `icon-bottom`, `icon-right` | Umístění ikony uvnitř podtlačítka |
 | `always_visible` | boolean | Volitelné | `true` nebo `false` (výchozí) | **Pouze posuvník.** Vždy zobrazí posuvník místo jeho otevírání klepnutím |
 | `show_button_info` | boolean | Volitelné | `true` nebo `false` (výchozí) | **Pouze posuvník.** Zobrazí ikonu/název/stav, když je zapnuto `always_visible` |
-| `visibility` | object nebo list | Volitelné | Viz [podmínky](https://www.home-assistant.io/docs/scripts/conditions/) | Zobrazí nebo skryje podtlačítko na základě podmínek |
+| `visibility` | object nebo list | Volitelné | Viz [podmínky](#podmínky) | Zobrazí nebo skryje podtlačítko na základě podmínek |
 | `hide_when_parent_unavailable` | boolean | Volitelné | `true` nebo `false` (výchozí) | Skryje podtlačítko, pokud je entita nadřazené karty nedostupná |
+| `css_class` | string | Volitelné | Libovolný řetězec | Doplňková CSS třída na podtlačítku, abyste jej mohli cílit ve svých [stylech](#styly) bez ohledu na jeho název (např. `My value` dá `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Posuvníková podtlačítka podporují stejné možnosti posuvníku jako posuvn�
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Zaoblení rohů podtlačítek |
 | `--bubble-sub-button-background-color` | `color` | Barva pozadí podtlačítek |
+| `--bubble-sub-button-outline` | `box-shadow` | Obrys přidaný k podtlačítku nebo posuvníku jen tehdy, když se vykreslí ve stejné barvě jako karta za ním, což by jej učinilo neviditelným (nastavte `none` pro jeho odebrání) |
 | `--bubble-sub-slider-border-radius` | `px` | Zaoblení rohů posuvníkových podtlačítek |
 | `--bubble-sub-slider-background-color` | `color` | Barva pozadí posuvníkových podtlačítek |
 | `--bubble-sub-slider-height` | `px` | Výška vždy viditelných posuvníkových podtlačítek |
+| `--bubble-sub-slider-outline` | `box-shadow` | Obrys pouze podtlačítek s posuvníkem, jinak se použije `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Barva textu na světlém pozadí podtlačítek |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Podmínky
+
+Některé možnosti se řídí podmínkami, které se zapisují přesně jako ty u [podmíněné karty](https://www.home-assistant.io/dashboards/conditional/) Home Assistant:
+
+- `visibility` na [podtlačítku](#podtlačítka), aby se zobrazilo nebo skrylo
+- `trigger` na [pop-upu](#pop-up), aby se otevřel, když jsou podmínky splněny
+- `checkConditionsMet(conditions, hass)` uvnitř vašich [šablon](#šablony), když potřebujete odpověď ve vlastním kódu
+
+Vyhodnocuje se každý typ podmínky Home Assistant: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template` a skupiny `and`, `or` a `not`. Fungují i podmínky z tvůrce podmínek Home Assistant, ty pojmenované podle své domény jako `sun.is_up`, `light.is_on`, `zone.in_zone` nebo `temperature.is_value`, s jejich nastaveními `target`, `options`, `behavior` a `for`.
+
+<details>
+
+<summary><b>Příklad</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Podmínky se vyhodnocují ve vašem prohlížeči, takže těch pár, které potřebují server Home Assistant, nemůže být přesných: východ a západ slunce se čtou z entity `sun.sun`, místo aby se přepočítávaly, a doba `for` se měří od poslední změny stavu, bez historie recorderu.
+>
+> `view_columns` je přijato, ale vždy projde, protože sloupce vašeho pohledu nikdy nerozvrhuje Bubble Card. Typ podmínky, který Bubble Card nezná, se jednou ohlásí v konzoli prohlížeče, místo aby tiše selhal, takže poznáte překlep od chybějící funkce.
+
+<br>
+
+---
+
+<br>
+
 ## Akce klepnutí, dvojitého klepnutí a podržení
 
 Na kartách, které tuto možnost podporují, můžete používat také výchozí akce Home Assistant pro klepnutí, dvojité klepnutí a podržení. Můžete tak například zobrazit okno „Více informací“ podržením ikony tlačítka nebo spustit službu při stisknutí podtlačítka.
@@ -1700,6 +1762,8 @@ Vlastní styly pro úpravu CSS všech karet **bez použití card-mod** můžete 
 
 > [!TIP]  
 > Podtlačítka lze cílit pomocí tříd odvozených z názvu. Například podtlačítko s názvem "My sub-button" lze stylovat pomocí `.my-sub-button`. Podtlačítka s posuvníkem navíc nabízejí `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` atd.
+>
+> Třída odvozená z názvu se změní, když podtlačítko přejmenujete, a přeloží se, když je přeložen jeho název. Nastavte podtlačítku `css_class`, abyste získali vlastní třídu, která se nikdy nehne, ať je jeho název jakýkoli a ať je jazyk jakýkoli.
 
 #### Příklady
 
@@ -2066,6 +2130,7 @@ Máte přístup ke všem globálním funkcím JS, ale navíc také k těmto:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` vrátí `true`, když je seznam [podmínek](#podmínky) splněn, například `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` lze použít k přeložení stavu (lze také použít k získání jednotky stavu, aniž byste ji museli přidávat ručně).
 - `hass.formatEntityAttributeValue(state, "attribute")` lze použít k přeložení atributu (lze také použít k získání jednotky stavu, aniž byste ji museli přidávat ručně).
 
@@ -2318,6 +2383,8 @@ Moduly jsou mocná funkce, která umožňuje ukládat, znovu používat a sdíle
 Ale tato funkce je mnohem mocnější než jen to, umožňuje vám do editoru Bubble Card přidávat skutečné funkce, a to s využitím všech výchozích možností [formulářů Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 Selektor objektů byl vylepšen tak, aby zobrazoval změny živě a správně podporoval atributy.
 
+Modul může také odpovídat výběru karet Home Assistant vedle vestavěných [návrhů entit](#návrhy-entit): použijte `suggestions` pro karty, které umí popsat dopředu, a `suggestions_code`, když se musí spočítat z vaší instalace, například pop-up sestavený ze všech entit oblasti, do které vybraná entita patří. Oba klíče jsou zdokumentovány [zde](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Můžete také procházet **Module Store**, najít a nainstalovat [moduly vytvořené komunitou](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), nebo sdílet své vlastní výtvory!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Tato záložka zobrazuje všechny vaše nainstalované moduly a umožňuje vám:
 - **Hledat** a **řadit** moduly (abecedně, podle novosti, aktivní první)
 - **Nastavit globální stav**, aby se modul automaticky aplikoval na všechny karty
 - **Importovat/Exportovat** moduly pro zálohu nebo sdílení
+- **Psát návrhy entit** v editoru modulů, v sekci **Volitelné: návrhy entit**, aby byl váš modul nabízen ve výběru karet Home Assistant. Pravidla i vypočítané návrhy se kontrolují už při psaní, chyba tam zabrání uložení a náhled ukáže navržené karty pro libovolnou entitu, kterou vyberete
 
 #### Záložka Module Store
 
@@ -2391,7 +2459,8 @@ Tato záložka zobrazí [všechny dostupné moduly od komunity](https://github.c
 3. Vyplňte informace o modulu.
 4. Napište kód svých CSS a/nebo JavaScript šablon do editoru **Kód**.
 5. (Volitelné) Vytvořte vlastní konfigurační rozhraní v sekci **Editor** (jako výběr barvy na snímku výše, kompletní dokumentace je k dispozici [zde](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klikněte na **Uložit**.
+6. (Volitelné) Napište své **Návrhy entit**, aby byl váš modul nabízen ve výběru karet Home Assistant. Panel kontroluje to, co píšete, přímo při psaní, a jeho náhled ukazuje samotné navržené karty pro entitu podle vaší volby.
+7. Klikněte na **Uložit**.
 
 Váš modul je nyní k dispozici pro použití na kterékoli z vašich karet!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Další příklady najdete v Module Store nebo [zde](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalizace
+
+Bubble Card mluví vaším jazykem. Její editor je přeložen do 64 jazyků, které Home Assistant podporuje, a všude, kde už Home Assistant pro něco slovo má, se použije jeho vlastní znění, takže v obou rozhraních čtete stejné pojmy.
+
+Ve spodní části editoru, vedle čísla verze, sleduje přepínač **Automaticky** jazyk vašeho Home Assistant. Vypněte jej a celý editor se vrátí do angličtiny, což se hodí při sledování návodu nebo při hlášení chyby. Vaše volba se pamatuje ve vašem prohlížeči.
+
+I tato dokumentace je přeložena, [do 62 jazyků](languages.md). Tyto stránky jsou otevřené všem, takže formulaci, která neodpovídá vašemu Home Assistant, lze opravit pár kliknutími. Anglická verze zůstává referencí pro samotný obsah.
 
 <br>
 

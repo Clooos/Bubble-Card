@@ -18,7 +18,7 @@ Bubble Card ass eng minimalistesch a personaliséierbar Kaarten-Kollektioun fir 
 
 ## Inhaltsverzeechnes
 
-**[`Installatioun`](#installatioun)**  **[`Konfiguratioun`](#konfiguratioun)**  **[`Pop-up`](#pop-up)**  **[`Horizontale Knäppchen-Stapel`](#horizontale-knäppchen-stapel)**  **[`Knäppchen`](#knäppchen)**  **[`Mediaspiller`](#mediaspiller)**  **[`Stouer`](#stouer)**  **[`Auswiel`](#auswiel)**  **[`Klima`](#klima)**  **[`Kalenner`](#kalenner)**  **[`Trennlinn`](#trennlinn)**  **[`Eidel Kolonn`](#eidel-kolonn)**  **[`Nëmme Sub-Knäppercher`](#nëmme-sub-knäppercher)**  **[`Sub-Knäppercher`](#sub-knäppercher)**  **[`Kaarten-Layouten`](#kaarten-layouten)**  **[`Aktiounen`](#tipp--duebeltipp--an-halen-aktiounen)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Moduler`](#moduler)**  **[`Hëllef`](#hëllef)**  **[`Bäidroen`](#bäidroen)**  **[`Spenden`](#spenden)**
+**[`Installatioun`](#installatioun)**  **[`Konfiguratioun`](#konfiguratioun)**  **[`Entitéite-Virschléi`](#entitéite-virschléi)**  **[`Pop-up`](#pop-up)**  **[`Horizontale Knäppchen-Stapel`](#horizontale-knäppchen-stapel)**  **[`Knäppchen`](#knäppchen)**  **[`Mediaspiller`](#mediaspiller)**  **[`Stouer`](#stouer)**  **[`Auswiel`](#auswiel)**  **[`Klima`](#klima)**  **[`Kalenner`](#kalenner)**  **[`Trennlinn`](#trennlinn)**  **[`Eidel Kolonn`](#eidel-kolonn)**  **[`Nëmme Sub-Knäppercher`](#nëmme-sub-knäppercher)**  **[`Sub-Knäppercher`](#sub-knäppercher)**  **[`Kaarten-Layouten`](#kaarten-layouten)**  **[`Konditiounen`](#konditiounen)**  **[`Aktiounen`](#tipp--duebeltipp--an-halen-aktiounen)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Moduler`](#moduler)**  **[`Lokaliséierung`](#lokaliséierung)**  **[`Hëllef`](#hëllef)**  **[`Bäidroen`](#bäidroen)**  **[`Spenden`](#spenden)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card ass eng minimalistesch a personaliséierbar Kaarten-Kollektioun fir 
 
 <br>
 
-1. Lued dëse Fichier erof: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Setz dëse Fichier an däin `<config>/www` Dossier
+1. Lued `bubble-card.zip` vun der [leschter Verëffentlechung](https://github.com/Clooos/Bubble-Card/releases/latest) erof
+2. Pack se an dengem `<config>/www` Dossier aus, du solls `bubble-card.js` an en `translations` Dossier doniewent kréien (an dësem Dossier stinn d'Wierderbicher vum Editor, ouni si bleift den Editor op Englesch)
 3. Klick op dengem Dashboard riets uewen an der Ecke op d'Ikon, dann op `Dashboard änneren`
 4. Klick nach eng Kéier op déi Ikon an dann op `Ressourcen geréieren`
 5. Klick op `Ressource dobäisetzen`
@@ -130,6 +130,21 @@ All Optiounen kënnen an den Home Assistant Editor konfiguréiert ginn. Awer hei
 
 <br>
 
+## Entitéite-Virschléi
+
+Zënter Home Assistant 2026.6 gëtt eng Entitéit, déi am Kaartewieler ausgewielt gëtt, e puer fäerdeg Kaarte proposéiert, a Bubble Card äntwert op dës Fro mat sengen eegene Rezepter. Wielt eng Luucht aus an Dir kritt eng Kaart mat engem Hellegkeetsslider, plus eng Variant fir Faarftemperatur, Faarf a Sättegung, wann Är Luucht se ënnerstëtzt. Wielt eng Stouer aus an Dir kritt hire Positiounsslider, wielt e Mediaspiller aus an Dir kritt och eng Variant mat senger Quellelëscht, wielt e Robotstaubsauger aus an Dir kritt seng Knäppercher fir Start, Paus an Dock. All Virschlag ass eng ganz normal Bubble Card Konfiguratioun, als Live-Virschau gewisen, sou datt Dir déi hëllt déi am nooste läit a se wéi gewinnt weider ännert.
+
+Wat proposéiert gëtt hänkt dovun of, wat Är Entitéit tatsächlech ka maachen: eng Luucht ouni Hellegkeetskanal kritt e Schalter amplaz vun engem Slider, eng Stouer déi net kippe kann kritt keng Kipp-Variant, eng Klima-Entitéit kritt hir Presetmoden nëmme wa se der huet. D'klassesch Entréë kommen dorënner, wa se applizéiere: déi speziell Kaart vum Domain, e simpelt Knäppchen an e Slider.
+
+> [!TIP]
+> Moduler kënnen hir eege Virschléi op dës Lëscht setzen, kuckt [Moduler](#moduler).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Dës Kaart erlaabt et der, e Pop-up mat egal wéi engem Inhalt z'erstellen. All 
 | `shadow_opacity` | string | Optional | Egal wéi e Wäert vun `0` bis `100` | D'Deckkraaft vum Schiet vun dengem Pop-up (z.B. `0` fir en ze verstoppen) |
 | `hide_backdrop` | boolean | Optional | `true` oder `false` (Standard) | Setz dëst op true fir den éischte Pop-up vun dengem Haapt-Dashboard, fir de Backdrop bei all Pop-ups ze deaktivéieren. |
 | `background_update` | boolean | Optional | `true` oder `false` (Standard) | Aktualiséiert den Inhalt vum Pop-up am Hannergrond (net recommandéiert) |
-| `trigger_entity` | string | Optional | Egal wéi eng Entitéit | Mécht dëse Pop-up op baséiert op dem Zoustand vun enger Entitéit |
+| `trigger` | object oder list | Optional | Kuckt [Konditiounen](#konditiounen) | Mécht dëse Pop-up op, wann d'Konditiounen erfëllt sinn |
+| `trigger_entity` | string | Optional | Egal wéi eng Entitéit | Mécht dëse Pop-up op baséiert op dem Zoustand vun enger Entitéit, déi einfach Form vu `trigger` |
 | `trigger_state` | string | Optional (**Obligatoresch** wann `trigger_entity` definéiert ass) | Egal wéi en Entitéits-Zoustand | Entitéits-Zoustand fir de Pop-up opzemaachen |
-| `trigger_close` | boolean | Optional | `true` oder `false` (Standard) | Mécht de Pop-up zou wann `trigger_state` anescht ass |
+| `trigger_close` | boolean | Optional | `true` oder `false` | Mécht de Pop-up zou, wann d'Konditiounen net méi erfëllt sinn (Standard: `true` mat `trigger`, `false` mat `trigger_state`) |
 | `open_action` | Objekt | Optional | Kuck [Aktiounen](#tipp--duebeltipp--an-halen-aktiounen) | Léist eng Aktioun aus wann de Pop-up opgeet |
 | `close_action` | Objekt | Optional | Kuck [Aktiounen](#tipp--duebeltipp--an-halen-aktiounen) | Léist eng Aktioun aus wann de Pop-up zougeet |
 | `show_header` | boolean | Optional | `true` (Standard) oder `false` | Weist/Verstoppt de Pop-up-Header komplett |
@@ -445,8 +461,8 @@ Dës Optioune sinn nëmme verfügbar wann `button_type` op `slider` gesat ass.
 | `relative_slide`        | boolean | Optional (`false` Standard )     | Aktualiséiert de Wäert relativ zum Ufankswäert, amplaz zum Ufankspunkt vum Fangere.                                      |
 | `read_only_slider`      | boolean | Optional (`false` Standard)      | Mécht de Slider nëmme liesbar. Automatesch aktivéiert fir e puer Entitéiten wéi Sensoren.                                        |
 | `slider_live_update`    | boolean | Optional (`false` Standard)      | Den Zoustand vun der Entitéit gëtt beim Réckelen aktualiséiert. **Dëse Feature ass net fir all Entitéiten recommandéiert.**        |
-| `slider_fill_orientation` | string | Optional | `left` (Standard), `right`, `top`, `bottom` | Ännert d'Richtung vun der Fëllung vum Slider |
-| `slider_value_position` | string | Optional | `right` (Standard), `left`, `center`, `hidden` | Positioun vun der Wäertusiicht |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` oder `bottom` | Ännert d'Richtung vun der Fëllung vum Slider. Ouni Uginn vu lénks no riets, gespigelt a [Rietslénks-Sproochen](#lokaliséierung) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` oder `hidden` | Positioun vun der Wäertusiicht. Ouni Uginn um Enn, also lénks a [Rietslénks-Sproochen](#lokaliséierung) |
 | `invert_slider_value` | boolean | Optional (`false` Standard) | Kéiert d'Richtung vum Slider ëm (100% Fëllung entsprécht dem Minimum). Net verfügbar fir Faarwsliderën. |
 | `light_slider_type` | string | Optional | `brightness` (Standard), `hue`, `saturation`, `white_temp` | **Nëmme fir Luuchten.** Wielt de Slider-Modus |
 | `cover_slider_type` | string | Optional | `position` (Standard), `tilt_position` | **Nëmme fir Stouere.** Wielt de Slider-Modus (Positioun oder Neigung) |
@@ -940,7 +956,7 @@ Dës Kaart erlaabt Iech Är Kalenner-Entitéiten unzeweisen. Hire Inhalt kann ge
 | `limit`             | number  | Optional     | Eng Zuel                                        | D'Zuel vun den Evenementer déi op der Kaart ugewise ginn                                  |
 | `show_end`          | boolean | Optional     | `true` oder `false` (Standard)                     | Weist oder verstoppt d'Endzäit fir Evenementer                                                    |
 | `show_progress`     | boolean | Optional     | `true` (Standard) oder `false`                     | Weist oder verstoppt de Fortschrëttsbalken vum Evenement                                                     |
-| `show_started_events`| boolean | Optional     | `true` (Standard) oder `false`                     | Weist oder verstoppt Evenementer déi grad amgaang sinn                                                 |
+| `show_started_events`| boolean | Optional     | `true` (Standard) oder `false`                     | Weist oder verstoppt Evenementer déi grad amgaang sinn. Evenementer iwwer méi Deeg gi Dag fir Dag bewäert, sou datt nëmmen den aktuellen Dag verstoppt gëtt an déi kommend Deeg siichtbar bleiwen |
 | `scrolling_effect`  | boolean | Optional | `true` (Standard) oder `false` | Erlaabt dem Text ze scrollen wann den Inhalt d'Gréisst vum Container iwwerschreift |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` oder `hold_action`, kuckt [Aktiounen](#tipp--duebeltipp--an-halen-aktiounen) | Erlaabt Aktiounen beim Klick op en Evenement bäizesetzen. |
 | `tap_action` | object | Optional | Kuckt [Aktiounen](#tipp--duebeltipp--an-halen-aktiounen) | Definéiert den Typ vun der Aktioun beim Klick op den Dag, wann net definéiert gëtt `none` benotzt. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Optional | `icon-left` (Standard), `icon-top`, `icon-bottom`, `icon-right` | Placement vum Symbol am Sub-Knäppchen |
 | `always_visible` | boolean | Optional | `true` oder `false` (Standard) | **Nëmme fir Slider.** Weist ëmmer de Slider, amplaz en beim Tippen opzemaachen |
 | `show_button_info` | boolean | Optional | `true` oder `false` (Standard) | **Nëmme fir Slider.** Weist Symbol/Numm/Zoustand wann `always_visible` aktivéiert ass |
-| `visibility` | object oder list | Optional | Kuckt [Konditiounen](https://www.home-assistant.io/docs/scripts/conditions/) | Weist oder verstoppt de Sub-Knäppchen baséierend op Konditiounen |
+| `visibility` | object oder list | Optional | Kuckt [Konditiounen](#konditiounen) | Weist oder verstoppt de Sub-Knäppchen baséierend op Konditiounen |
 | `hide_when_parent_unavailable` | boolean | Optional | `true` oder `false` (Standard) | Verstoppt de Sub-Knäppchen wann d'Elteren-Entitéit vun der Kaart net verfügbar ass |
+| `css_class` | string | Optional | Egal wéi eng Zeechenkette | Eng zousätzlech CSS-Klass um Sub-Knäppchen, fir en an Ären [Stiler](#styling) unzeschwätzen, egal wéi en heescht (z. B. `My value` gëtt `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Slider-Sub-Knäppercher ënnerstëtzen déiselwecht Slider-Optiounen wéi Knäpp
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rondung vun de Käerten fir d'Sub-Knäppercher |
 | `--bubble-sub-button-background-color` | `color` | Hannergrondfaarf fir d'Sub-Knäppercher |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur déi engem Sub-Knäppchen oder engem Slider nëmmen dann derbäigesat gëtt, wann en déiselwecht Faarf mécht wéi d'Kaart derhannert, wat en onsichtbar géif maachen (setzt en op `none` fir en ewechzehuelen) |
 | `--bubble-sub-slider-border-radius` | `px` | Rondung vun de Käerten fir Slider-Sub-Knäppercher |
 | `--bubble-sub-slider-background-color` | `color` | Hannergrondfaarf fir Slider-Sub-Knäppercher |
 | `--bubble-sub-slider-height` | `px` | Héicht fir ëmmer-siichtbar Slider-Sub-Knäppercher |
+| `--bubble-sub-slider-outline` | `box-shadow` | Kontur nëmme vun de Slider-Sub-Knäppercher, fällt zréck op `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Textfaarf op hellen Hannergrënn vum Sub-Knäppchen |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Konditiounen
+
+E puer Optioune ginn duerch Konditioune gesteiert, déi genee esou geschriwwe ginn wéi déi vun der [Konditiounskaart](https://www.home-assistant.io/dashboards/conditional/) vum Home Assistant:
+
+- `visibility` op engem [Sub-Knäppchen](#sub-knäppercher), fir en ze weisen oder ze verstoppen
+- `trigger` op engem [Pop-up](#pop-up), fir en opzemaachen, wann d'Konditiounen erfëllt sinn
+- `checkConditionsMet(conditions, hass)` an Ären [Templates](#templates), wann Dir d'Äntwert an Ärem eegene Code braucht
+
+All Konditiounstyp vum Home Assistant gëtt ausgewäert: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, an d'Gruppen `and`, `or` an `not`. D'Konditioune vum Konditiounsbauer vum Home Assistant funktionéieren och, déi déi no hirem Domain benannt sinn, wéi `sun.is_up`, `light.is_on`, `zone.in_zone` oder `temperature.is_value`, mat hiren Astellungen `target`, `options`, `behavior` an `for`.
+
+<details>
+
+<summary><b>Beispill</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Konditioune ginn an Ärem Browser ausgewäert, dofir kënnen déi puer, déi de Home Assistant Server brauchen, net exakt sinn: Sonnenopgang a Sonnenënnergang gi vun der Entitéit `sun.sun` gelies amplaz nei berechent ze ginn, an eng `for` Dauer gëtt vun der leschter Zoustandsännerung u gemooss, ouni d'Historique vum Recorder.
+>
+> `view_columns` gëtt ugeholl, awer passéiert ëmmer, well Bubble Card ni deen ass deen d'Kolonne vun Ärer Vue uleeë. E Konditiounstyp deen Bubble Card net kennt mellt sech eemol an Ärer Browserkonsol, amplaz roueg ze versoen, sou datt Dir en Tippfeeler vun enger feelender Fonktioun ënnerscheede kënnt.
+
+<br>
+
+---
+
+<br>
+
 ## Tipp-, Duebeltipp- an Halen-Aktiounen
 
 Dir kënnt och déi Standard Home Assistant Tipp-Aktiounen, Duebeltipp-Aktiounen an Halen-Aktiounen op de Kaarte benotzen, déi dës Optioun ënnerstëtzen. Dëst erlaabt zum Beispill d'Fenster "méi Info" ze weisen wann Dir en Symbol vun engem Knäppchen hält, oder e Service auszeféieren wann op e Sub-Knäppchen gedréckt gëtt.
@@ -1700,6 +1762,8 @@ Dir kënnt eegen Styles bäisetzen fir d'CSS vun alle Kaarten ze änneren **ouni
 
 > [!TIP]  
 > Sub-Knäppercher kënnen iwwer numm-baséiert Klassen gezielt ginn. Zum Beispill kann e Sub-Knäppchen mam Numm "My sub-button" mat `.my-sub-button` gestyled ginn. Sliderfërmeg Sub-Knäppercher weisen och `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, asw.
+>
+> Eng numm-baséiert Klass ännert sech, wann Dir e Sub-Knäppchen ëmbenennt, a se gëtt iwwersat, wann den Numm iwwersat gëtt. Setzt `css_class` um Sub-Knäppchen, fir eng eege Klass ze kréien déi sech ni beweegt, egal wéi en heescht an egal a wéi enger Sprooch.
 
 #### Beispiller
 
@@ -2066,6 +2130,7 @@ Dir hutt Zougang zu allen globalen JS-Funktiounen, awer och zu:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` gëtt `true` zréck, wann eng Lëscht vu [Konditiounen](#konditiounen) erfëllt ass, zum Beispill `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` kann benotzt ginn fir e Status ze iwwersetzen (kann och benotzt ginn fir eng Statuseenheet ze kréien, ouni se manuell bäisetzen ze mussen).
 - `hass.formatEntityAttributeValue(state, "attribute")` kann benotzt ginn fir en Attribut ze iwwersetzen (kann och benotzt ginn fir eng Statuseenheet ze kréien, ouni se manuell bäisetzen ze mussen).
 
@@ -2318,6 +2383,8 @@ Moduler si eng mächteg Funktioun déi Iech erlaabt, Är eegen Styles a Template
 Awer dës Funktioun ass nach vill méi mächteg wéi dat, se erlaabt Iech och richteg Funktiounen selwer am Bubble Card Editor bäizesetzen, mat allen [Home Assistant Form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) Optiounen!  
 De Objet-Selector gouf verbessert fir Live-Ännerungen ze weisen an Attributer korrekt z'ënnerstëtzen.
 
+E Modul kann och op de Kaartewieler vum Home Assistant äntweren, nieft den agebauten [Entitéite-Virschléi](#entitéite-virschléi): benotzt `suggestions` fir d'Kaarten déi en am viraus beschreiwe kann, an `suggestions_code`, wa se aus Ärer Installatioun berechent musse ginn, zum Beispill e Pop-up dee mat all Entitéit vum Beräich gebaut gëtt, zu deem déi gewielten Entitéit gehéiert. Béid Schlësselen sinn [hei](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) dokumentéiert.
+
 Dir kënnt och den **Module Store** duerchbliederen fir [vun der Community erstallte Moduler](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) ze fannen an z'installéieren, oder Är eegen Kreatiounen ze deelen!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Dësen Tab weist all Är installéiert Moduler an erlaabt Iech:
 - Moduler **sichen** a **sortéieren** (alphabetesch, rezent, aktiv fir d'éischt)
 - **Globalen Status setzen** fir e Modul automatesch op all Kaarten ze applizéieren
 - Moduler **importéieren/exportéieren** fir Backup oder fir se ze deelen
+- **Entitéite-Virschléi schreiwen** am Modul-Editor, ënner **Optional: Entitéite-Virschléi**, sou datt Äre Modul am Kaartewieler vum Home Assistant proposéiert gëtt. Souwuel d'Regelen ewéi och déi berechent Virschléi gi während dem Schreiwe gepréift, e Feeler do verhënnert d'Späicheren, an d'Virschau weist déi proposéiert Kaarte fir all Entitéit déi Dir wielt
 
 #### Tab "Module Store"
 
@@ -2391,7 +2459,8 @@ Dësen Tab weist [all verfügbar Moduler aus der Community](https://github.com/C
 3. Fëllt d'Modul-Informatiounen aus.
 4. Schreift Ären CSS- an/oder JavaScript-Template-Code am **Code**-Editor.
 5. (Optional) Erstellt eng eegen Konfiguratiouns-UI am **Editor**-Beräich (wéi de Faarfwieler am Screenshot hei uewen, voll Dokumentatioun verfügbar [hei](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klickt op **Save**.
+6. (Optional) Schreift Är **Entitéite-Virschléi**, sou datt Äre Modul am Kaartewieler vum Home Assistant proposéiert gëtt. De Panel préift wat Dir schreift, während Dir tippt, a seng Virschau weist déi proposéiert Kaarte selwer fir d'Entitéit vun Ärer Wiel.
+7. Klickt op **Save**.
 
 Ärt Modul ass elo verfügbar fir op all Är Kaarten benotzt ze ginn!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Méi Beispiller fannt Dir am Module Store, oder [hei](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokaliséierung
+
+Bubble Card schwätzt Är Sprooch. Säin Editor ass an déi 64 Sproochen iwwersat, déi de Home Assistant ënnerstëtzt, an iwwerall wou de Home Assistant scho e Wuert fir eppes huet, gëtt seng eege Formuléierung iwwerholl, sou datt Dir an deenen zwou Uewerflächen déiselwecht Begrëffer liest.
+
+Ënnen am Editor, nieft der Versiounsnummer, follegt e Schalter **Automatesch** der Sprooch vun Ärem Home Assistant. Schalt en aus an de ganzen Editor geet zréck op Englesch, wat praktesch ass fir engem Tutorial ze follegen oder e Problem ze mellen. Är Wiel gëtt an Ärem Browser gemierkt.
+
+Dës Dokumentatioun ass och iwwersat, [an 62 Sproochen](languages.md). Dës Säite si fir jiddereen op, sou datt eng Formuléierung déi net zu Ärem eegene Home Assistant passt a puer Klicke ka verbessert ginn. Déi englesch Versioun bleift d'Referenz fir den Inhalt selwer.
 
 <br>
 

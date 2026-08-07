@@ -18,7 +18,7 @@ Bubble Card és una col·lecció de targetes minimalista i personalitzable per a
 
 ## Taula de continguts
 
-**[`Instal·lació`](#installació)**  **[`Configuració`](#configuració)**  **[`Pop-up`](#pop-up)**  **[`Pila de botons horitzontal`](#pila-de-botons-horitzontal)**  **[`Botó`](#botó)**  **[`Reproductor multimèdia`](#reproductor-multimèdia)**  **[`Coberta`](#coberta)**  **[`Selecció`](#selecció)**  **[`Climatització`](#climatització)**  **[`Calendari`](#calendari)**  **[`Separador`](#separador)**  **[`Columna buida`](#columna-buida)**  **[`Només subbotons`](#només-subbotons)**  **[`Subbotons`](#subbotons)**  **[`Disposicions de la targeta`](#disposicions-de-la-targeta)**  **[`Accions`](#accions-de-toc-doble-toc-i-toc-llarg)**  **[`Estils`](#estils)**  **[`Plantilles`](#plantilles)**  **[`Mòduls`](#mòduls)**  **[`Ajuda`](#ajuda)**  **[`Contribuir`](#contribuir)**  **[`Donatius`](#donatius)**
+**[`Instal·lació`](#installació)**  **[`Configuració`](#configuració)**  **[`Suggeriments d'entitat`](#suggeriments-dentitat)**  **[`Pop-up`](#pop-up)**  **[`Pila de botons horitzontal`](#pila-de-botons-horitzontal)**  **[`Botó`](#botó)**  **[`Reproductor multimèdia`](#reproductor-multimèdia)**  **[`Coberta`](#coberta)**  **[`Selecció`](#selecció)**  **[`Climatització`](#climatització)**  **[`Calendari`](#calendari)**  **[`Separador`](#separador)**  **[`Columna buida`](#columna-buida)**  **[`Només subbotons`](#només-subbotons)**  **[`Subbotons`](#subbotons)**  **[`Disposicions de la targeta`](#disposicions-de-la-targeta)**  **[`Condicions`](#condicions)**  **[`Accions`](#accions-de-toc-doble-toc-i-toc-llarg)**  **[`Estils`](#estils)**  **[`Plantilles`](#plantilles)**  **[`Mòduls`](#mòduls)**  **[`Localització`](#localització)**  **[`Ajuda`](#ajuda)**  **[`Contribuir`](#contribuir)**  **[`Donatius`](#donatius)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card és una col·lecció de targetes minimalista i personalitzable per a
 
 <br>
 
-1. Descarregueu aquest fitxer: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Afegiu aquest fitxer a la vostra carpeta `<config>/www`
+1. Descarregueu `bubble-card.zip` de la [darrera versió](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Descomprimiu-lo a la vostra carpeta `<config>/www`, hauríeu d'obtenir `bubble-card.js` i una carpeta `translations` al costat (aquesta carpeta conté els diccionaris de l'editor, sense ella l'editor es queda en anglès)
 3. Al vostre tauler, feu clic a la icona de la cantonada superior dreta i després a `Edita el tauler`
 4. Torneu a fer clic a aquesta icona i després feu clic a `Gestiona els recursos`
 5. Feu clic a `Afegeix un recurs`
@@ -130,6 +130,21 @@ Totes les opcions es poden configurar a l'editor de Home Assistant. Però a la d
 
 <br>
 
+## Suggeriments d'entitat
+
+Des de Home Assistant 2026.6, escollir una entitat al selector de targetes us ofereix unes quantes targetes ja fetes, i Bubble Card respon aquesta pregunta amb les seves pròpies receptes. Trieu un llum i se us ofereix una targeta amb un control lliscant de brillantor, més una variant de temperatura de color, una de color i una de saturació quan el vostre llum les admet. Trieu una coberta i obteniu el control lliscant de la seva posició, trieu un reproductor multimèdia i obteniu també una variant amb la llista de les seves fonts, trieu un aspirador i obteniu els seus botons d'inici, pausa i retorn a la base. Cada suggeriment és una configuració normal de Bubble Card mostrada com una previsualització en directe, així podeu agafar la més propera i continuar editant-la com sempre.
+
+El que se us ofereix depèn del que la vostra entitat pot fer realment: un llum sense canal de brillantor rep un commutador en lloc d'un control lliscant, una coberta que no es pot inclinar no rep cap variant d'inclinació, i una entitat de climatització rep els seus modes preestablerts només quan en té. Les entrades clàssiques segueixen a sota quan són aplicables: la targeta dedicada del domini, un botó senzill i un control lliscant.
+
+> [!TIP]
+> Els mòduls poden afegir els seus propis suggeriments a aquesta llista, vegeu [mòduls](#mòduls).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Aquesta targeta us permet crear un pop-up amb qualsevol contingut. Cada pop-up e
 | `shadow_opacity` | string | Opcional | Qualsevol valor de `0` a `100` | L'opacitat de l'ombra del vostre pop-up (p. ex. `0` per ocultar-la) |
 | `hide_backdrop` | boolean | Opcional | `true` o `false` (per defecte) | Definiu-ho a true al primer pop-up del vostre tauler principal per desactivar el teló de fons a tots els pop-ups. |
 | `background_update` | boolean | Opcional | `true` o `false` (per defecte) | Actualitza el contingut del pop-up en segon pla (no recomanat) |
-| `trigger_entity` | string | Opcional | Qualsevol entitat | Obre aquest pop-up segons l'estat de qualsevol entitat |
+| `trigger` | object o list | Opcional | Vegeu [condicions](#condicions) | Obre aquest pop-up quan es compleixen les condicions |
+| `trigger_entity` | string | Opcional | Qualsevol entitat | Obre aquest pop-up segons l'estat de qualsevol entitat, la forma simple de `trigger` |
 | `trigger_state` | string | Opcional (**Obligatori** si `trigger_entity` està definit) | Qualsevol estat d'entitat | Estat de l'entitat per obrir el pop-up |
-| `trigger_close` | boolean | Opcional | `true` o `false` (per defecte) | Tanca el pop-up quan `trigger_state` sigui diferent |
+| `trigger_close` | boolean | Opcional | `true` o `false` | Tanca el pop-up quan les condicions deixen de complir-se (per defecte: `true` amb `trigger`, `false` amb `trigger_state`) |
 | `open_action` | object | Opcional | Vegeu [accions](#accions-de-toc-doble-toc-i-toc-llarg) | Activa una acció quan el pop-up s'obre |
 | `close_action` | object | Opcional | Vegeu [accions](#accions-de-toc-doble-toc-i-toc-llarg) | Activa una acció quan el pop-up es tanca |
 | `show_header` | boolean | Opcional | `true` (per defecte) o `false` | Mostra/Oculta completament la capçalera del pop-up |
@@ -445,8 +461,8 @@ Aquestes opcions només estan disponibles quan `button_type` està definit a `sl
 | `relative_slide`        | boolean | Opcional (`false` per defecte )     | Actualitza el valor de manera relativa al valor inicial, en lloc del punt de contacte inicial.                      |
 | `read_only_slider`      | boolean | Opcional (`false` per defecte)      | Fa que el control lliscant sigui només de lectura. S'activa automàticament per a algunes entitats com els sensors.                        |
 | `slider_live_update`    | boolean | Opcional (`false` per defecte)      | L'estat de l'entitat s'actualitza mentre llisqueu. **Aquesta funció no es recomana per a totes les entitats.**        |
-| `slider_fill_orientation` | string | Opcional | `left` (per defecte), `right`, `top`, `bottom` | Canvia la direcció d'ompliment del control lliscant |
-| `slider_value_position` | string | Opcional | `right` (per defecte), `left`, `center`, `hidden` | Posició de la visualització del valor |
+| `slider_fill_orientation` | string | Opcional | `left`, `right`, `top` o `bottom` | Canvia la direcció d'ompliment del control lliscant. D'esquerra a dreta quan no està definit, reflectit en les [llengües que s'escriuen de dreta a esquerra](#localització) |
+| `slider_value_position` | string | Opcional | `right`, `left`, `center` o `hidden` | Posició de la visualització del valor. Al costat final quan no està definit, per tant a l'esquerra en les [llengües que s'escriuen de dreta a esquerra](#localització) |
 | `invert_slider_value` | boolean | Opcional (`false` per defecte) | Inverteix la direcció del control lliscant (100% d'ompliment equival al mínim). No disponible per als controls lliscants de color. |
 | `light_slider_type` | string | Opcional | `brightness` (per defecte), `hue`, `saturation`, `white_temp` | **Només per a llums.** Trieu el mode del control lliscant |
 | `cover_slider_type` | string | Opcional | `position` (per defecte), `tilt_position` | **Només per a cobertes.** Trieu el mode del control lliscant (posició o inclinació) |
@@ -940,7 +956,7 @@ Aquesta targeta us permet mostrar les vostres entitats de calendari. El seu cont
 | `limit`             | number  | Opcional     | Un nombre                                       | La quantitat d'esdeveniments que es mostraran a la targeta                              |
 | `show_end`          | boolean | Opcional     | `true` o `false` (per defecte)                  | Mostra o oculta l'hora de finalització dels esdeveniments                               |
 | `show_progress`     | boolean | Opcional     | `true` (per defecte) o `false`                  | Mostra o oculta la barra de progrés dels esdeveniments                                  |
-| `show_started_events`| boolean | Opcional     | `true` (per defecte) o `false`                  | Mostra o oculta els esdeveniments actualment en curs                                               |
+| `show_started_events`| boolean | Opcional     | `true` (per defecte) o `false`                  | Mostra o oculta els esdeveniments actualment en curs. Els esdeveniments de diversos dies es valoren dia a dia, així només s'amaga el dia en curs i els dies vinents continuen visibles |
 | `scrolling_effect`  | boolean | Opcional | `true` (per defecte) o `false` | Permet que el text es desplaci quan el contingut supera la mida del seu contenidor |
 | `event_action` | object | Opcional | `tap_action`, `double_tap_action` o `hold_action`, vegeu les [accions](#accions-de-toc-doble-toc-i-toc-llarg) | Permet afegir accions en fer clic a un esdeveniment. |
 | `tap_action` | object | Opcional | Vegeu les [accions](#accions-de-toc-doble-toc-i-toc-llarg) | Defineix el tipus d'acció en fer clic a un dia; si no es defineix, s'utilitzarà `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Opcional | `icon-left` (per defecte), `icon-top`, `icon-bottom`, `icon-right` | Col·locació de la icona dins del subbotó |
 | `always_visible` | boolean | Opcional | `true` o `false` (per defecte) | **Només control lliscant.** Mostra sempre el control lliscant en lloc d'obrir-lo en tocar |
 | `show_button_info` | boolean | Opcional | `true` o `false` (per defecte) | **Només control lliscant.** Mostra la icona/el nom/l'estat quan `always_visible` està activat |
-| `visibility` | object o list | Opcional | Vegeu [condicions](https://www.home-assistant.io/docs/scripts/conditions/) | Mostra o oculta el subbotó segons condicions |
+| `visibility` | object o list | Opcional | Vegeu [condicions](#condicions) | Mostra o oculta el subbotó segons condicions |
 | `hide_when_parent_unavailable` | boolean | Opcional | `true` o `false` (per defecte) | Oculta el subbotó si l'entitat de la targeta principal no està disponible |
+| `css_class` | string | Opcional | Qualsevol cadena | Una classe CSS addicional al subbotó, per apuntar-hi als vostres [estils](#estils) sigui quin sigui el seu nom (p. ex. `My value` dona `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Els subbotons de control lliscant admeten les mateixes opcions de control llisca
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radi de la vora per als subbotons |
 | `--bubble-sub-button-background-color` | `color` | Color de fons per als subbotons |
+| `--bubble-sub-button-outline` | `box-shadow` | Contorn afegit a un subbotó o a un control lliscant només quan es pinta del mateix color que la targeta de darrere, cosa que el faria invisible (poseu-hi `none` per treure'l) |
 | `--bubble-sub-slider-border-radius` | `px` | Radi de la vora per als subbotons de control lliscant |
 | `--bubble-sub-slider-background-color` | `color` | Color de fons per als subbotons de control lliscant |
 | `--bubble-sub-slider-height` | `px` | Alçada per als subbotons de control lliscant sempre visibles |
+| `--bubble-sub-slider-outline` | `box-shadow` | Contorn només dels subbotons de control lliscant, recorre a `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Color del text sobre fons de subbotó clars |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Condicions
+
+Algunes opcions es regeixen per condicions, escrites exactament com les de la [targeta condicional](https://www.home-assistant.io/dashboards/conditional/) de Home Assistant:
+
+- `visibility` en un [subbotó](#subbotons), per mostrar-lo o amagar-lo
+- `trigger` en un [pop-up](#pop-up), per obrir-lo quan es compleixen les condicions
+- `checkConditionsMet(conditions, hass)` dins de les vostres [plantilles](#plantilles), quan necessiteu la resposta al vostre propi codi
+
+S'avalua cada tipus de condició de Home Assistant: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, i els grups `and`, `or` i `not`. Les condicions del constructor de condicions de Home Assistant també funcionen, les que porten el nom del seu domini com `sun.is_up`, `light.is_on`, `zone.in_zone` o `temperature.is_value`, amb els seus paràmetres `target`, `options`, `behavior` i `for`.
+
+<details>
+
+<summary><b>Exemple</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Les condicions s'avaluen al vostre navegador, així que les poques que necessiten el servidor de Home Assistant no poden ser exactes: la sortida i la posta del sol es llegeixen de l'entitat `sun.sun` en lloc de recalcular-se, i una durada `for` es mesura des de l'últim canvi d'estat, sense l'historial del recorder.
+>
+> `view_columns` s'accepta però sempre es compleix, ja que Bubble Card mai no és qui disposa les columnes de la vostra vista. Un tipus de condició que Bubble Card no coneix s'anuncia un cop a la consola del navegador en lloc de fallar en silenci, així podeu distingir una errada d'escriptura d'una funció que falta.
+
+<br>
+
+---
+
+<br>
+
 ## Accions de toc, doble toc i toc llarg
 
 També podeu utilitzar les accions de toc, de doble toc i de toc llarg per defecte de Home Assistant a les targetes que admeten aquesta opció. Per exemple, això us permet mostrar la finestra "Més informació" fent un toc llarg a la icona d'un botó, o executar un servei en prémer un subbotó.
@@ -1700,6 +1762,8 @@ Podeu afegir estils personalitzats per modificar el CSS de totes les targetes **
 
 > [!TIP]  
 > Els subbotons es poden seleccionar amb classes basades en el nom. Per exemple, un subbotó anomenat "My sub-button" es pot estilitzar amb `.my-sub-button`. Els subbotons lliscants també exposen `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, etc.
+>
+> Una classe basada en el nom canvia quan reanomeneu un subbotó, i es tradueix quan el nom es tradueix. Poseu `css_class` al subbotó per tenir una classe pròpia que no es mou mai, sigui quin sigui el seu nom i sigui quina sigui la llengua.
 
 #### Exemples
 
@@ -2066,6 +2130,7 @@ Teniu accés a totes les funcions globals de JS, però també teniu accés a:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` retorna `true` quan es compleix una llista de [condicions](#condicions), per exemple `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` es pot utilitzar per traduir un estat (també es pot utilitzar per obtenir la unitat d'un estat, sense haver d'afegir-la manualment).
 - `hass.formatEntityAttributeValue(state, "attribute")` es pot utilitzar per traduir un atribut (també es pot utilitzar per obtenir la unitat d'un estat, sense haver d'afegir-la manualment).
 
@@ -2318,6 +2383,8 @@ Els mòduls són una funció potent que us permet desar, reutilitzar i compartir
 Però aquesta funció és molt més potent que això: us permet afegir funcions de debò vosaltres mateixos a l'editor de Bubble Card, utilitzant totes les opcions per defecte dels [formularis de Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 El selector d'objectes s'ha millorat per mostrar els canvis en directe i per admetre correctament els atributs.
 
+Un mòdul també pot respondre al selector de targetes de Home Assistant al costat dels [suggeriments d'entitat](#suggeriments-dentitat) integrats: useu `suggestions` per a les targetes que pot descriure per endavant, i `suggestions_code` quan s'han de calcular a partir de la vostra instal·lació, per exemple un pop-up construït amb totes les entitats de l'àrea a la qual pertany l'entitat triada. Les dues claus estan documentades [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 També podeu explorar el **Module Store** per trobar i instal·lar [mòduls creats per la comunitat](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), o compartir les vostres pròpies creacions!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Aquesta pestanya mostra tots els mòduls que teniu instal·lats i us permet:
 - **Cercar** i **ordenar** els mòduls (alfabètic, recents, actius primer)
 - **Definir l'estat global** perquè un mòdul s'apliqui automàticament a totes les targetes
 - **Importar/Exportar** mòduls per fer còpies de seguretat o compartir-los
+- **Escriure suggeriments d'entitat** a l'editor de mòduls, a **Opcional: suggeriments d'entitat**, perquè el vostre mòdul s'ofereixi al selector de targetes de Home Assistant. Tant les regles com els suggeriments calculats es comproven mentre escriviu, un error hi impedeix desar, i la previsualització mostra les targetes suggerides per a qualsevol entitat que trieu
 
 #### Pestanya Module Store
 
@@ -2391,7 +2459,8 @@ Aquesta pestanya mostra [tots els mòduls disponibles de la comunitat](https://g
 3. Empleneu la informació del mòdul.
 4. Escriviu el codi de la vostra plantilla CSS i/o JavaScript a l'editor **Codi**.
 5. (Opcional) Creeu una interfície de configuració personalitzada a la secció **Editor** (com el selector de color de la captura de pantalla de dalt, documentació completa disponible [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Feu clic a **Desa**.
+6. (Opcional) Escriviu els vostres **Suggeriments d'entitat** perquè el vostre mòdul s'ofereixi al selector de targetes de Home Assistant. El plafó comprova el que escriviu mentre teclegeu, i la seva previsualització mostra les mateixes targetes suggerides per a l'entitat que trieu.
+7. Feu clic a **Desa**.
 
 El vostre mòdul ja està disponible per utilitzar-lo a qualsevol de les vostres targetes!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Trobareu més exemples al Module Store, o [aquí](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Localització
+
+Bubble Card parla la vostra llengua. El seu editor està traduït a les 64 llengües que Home Assistant admet, i allà on Home Assistant ja té una paraula per a alguna cosa, es reutilitza la seva formulació, així llegiu els mateixos termes a totes dues interfícies.
+
+A la part inferior de l'editor, al costat del número de versió, un interruptor **Automàtic** segueix la llengua del vostre Home Assistant. Desactiveu-lo i tot l'editor torna a l'anglès, cosa pràctica per seguir un tutorial o per informar d'un problema. La vostra tria es recorda al navegador.
+
+Aquesta documentació també està traduïda, [a 62 llengües](languages.md). Aquestes pàgines són obertes a tothom, així una expressió que no coincideix amb el vostre Home Assistant es pot corregir en un parell de clics. La versió anglesa continua sent la referència per al contingut mateix.
 
 <br>
 

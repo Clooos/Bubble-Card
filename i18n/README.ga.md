@@ -18,7 +18,7 @@ Is bailiúchán cárta íogair agus insaincheaptha é Bubble Card do Home Assist
 
 ## Clár na n-ábhar
 
-**[`Suiteáil`](#suiteáil)**  **[`Cumraíocht`](#cumraíocht)**  **[`Preabfhuinneog`](#preabfhuinneog)**  **[`Cruach chothrománach cnaipí`](#cruach-chothrománach-cnaipí)**  **[`Cnaipe`](#cnaipe)**  **[`Seinnteoir meán`](#seinnteoir-meán)**  **[`Clúdach`](#clúdach)**  **[`Roghnú`](#roghnú)**  **[`Aeráid`](#aeráid)**  **[`Féilire`](#féilire)**  **[`Deighilteoir`](#deighilteoir)**  **[`Colún folamh`](#colún-folamh)**  **[`Fochnaipí amháin`](#fochnaipí-amháin)**  **[`Fochnaipí`](#fochnaipí)**  **[`Leaganacha amach na gcártaí`](#leaganacha-amach-na-gcártaí)**  **[`Gníomhartha`](#gníomhartha-tapála-tapála-dúbailte-agus-coinneála)**  **[`Stíliú`](#stíliú)**  **[`Teimpléid`](#teimpléid)**  **[`Modúil`](#modúil)**  **[`Cabhair`](#cabhair)**  **[`Rannchuidiú`](#rannchuidiú)**  **[`Síntiús a thabhairt`](#síntiús-a-thabhairt)**
+**[`Suiteáil`](#suiteáil)**  **[`Cumraíocht`](#cumraíocht)**  **[`Moltaí aonán`](#moltaí-aonán)**  **[`Preabfhuinneog`](#preabfhuinneog)**  **[`Cruach chothrománach cnaipí`](#cruach-chothrománach-cnaipí)**  **[`Cnaipe`](#cnaipe)**  **[`Seinnteoir meán`](#seinnteoir-meán)**  **[`Clúdach`](#clúdach)**  **[`Roghnú`](#roghnú)**  **[`Aeráid`](#aeráid)**  **[`Féilire`](#féilire)**  **[`Deighilteoir`](#deighilteoir)**  **[`Colún folamh`](#colún-folamh)**  **[`Fochnaipí amháin`](#fochnaipí-amháin)**  **[`Fochnaipí`](#fochnaipí)**  **[`Leaganacha amach na gcártaí`](#leaganacha-amach-na-gcártaí)**  **[`Coinníollacha`](#coinníollacha)**  **[`Gníomhartha`](#gníomhartha-tapála-tapála-dúbailte-agus-coinneála)**  **[`Stíliú`](#stíliú)**  **[`Teimpléid`](#teimpléid)**  **[`Modúil`](#modúil)**  **[`Logánú`](#logánú)**  **[`Cabhair`](#cabhair)**  **[`Rannchuidiú`](#rannchuidiú)**  **[`Síntiús a thabhairt`](#síntiús-a-thabhairt)**
 
 <br>
 
@@ -32,8 +32,8 @@ Is bailiúchán cárta íogair agus insaincheaptha é Bubble Card do Home Assist
 
 <br>
 
-1. Íoslódáil an comhad seo: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Cuir an comhad seo isteach i d'fhillteán `<config>/www`
+1. Íoslódáil `bubble-card.zip` ón [eisiúint is déanaí](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Bain as é i d'fhillteán `<config>/www`, ba cheart go bhfaighfeá `bubble-card.js` agus fillteán `translations` lena thaobh (coinníonn an fillteán sin foclóirí an eagarthóra, gan é fanann an t-eagarthóir i mBéarla)
 3. Ar do dhaisbord, cliceáil ar an deilbhín sa chúinne thuas ar dheis agus ansin ar `Edit dashboard`
 4. Cliceáil arís ar an deilbhín sin agus ansin cliceáil ar `Manage resources`
 5. Cliceáil ar `Add resource`
@@ -130,6 +130,21 @@ Is féidir gach rogha a chumrú in eagarthóir Home Assistant. Ach gheobhaidh t�
 
 <br>
 
+## Moltaí aonán
+
+Ó Home Assistant 2026.6 i leith, nuair a roghnaíonn tú aonán i roghnóir na gcártaí cuirtear cúpla cárta réamhdhéanta ar fáil duit, agus freagraíonn Bubble Card an cheist sin lena oideas féin. Roghnaigh solas agus cuirtear cárta le sleamhnán gile ar fáil duit, chomh maith le leagan teochta datha, leagan datha agus leagan sáithithe nuair a thacaíonn do sholas leo. Roghnaigh clúdach agus gheobhaidh tú a sleamhnán suímh, roghnaigh seinnteoir meán agus gheobhaidh tú leagan lena liosta foinsí freisin, roghnaigh folúsghlantóir agus gheobhaidh tú a chnaipí tosaigh, sos agus fill ar an duga. Is gnáthchumraíocht Bubble Card gach moladh, taispeántar é mar réamhamharc beo, mar sin is féidir leat an ceann is gaire a thógáil agus leanúint ort á chur in eagar mar is gnách.
+
+Braitheann a gcuirtear ar fáil duit ar a bhfuil ar chumas d'aonáin i ndáiríre: faigheann solas gan cainéal gile scoránaí in ionad sleamhnáin, ní fhaigheann clúdach nach féidir leis claonadh aon leagan claonta, ní fhaigheann aonán aeráide a mhodhanna réamhshocraithe ach amháin nuair atá siad aige. Leanann na hiontrálacha clasaiceacha thíos fúthu nuair a bhaineann siad le hábhar: cárta tiomnaithe an fhearainn, cnaipe simplí agus sleamhnán.
+
+> [!TIP]
+> Is féidir le modúil a moltaí féin a chur leis an liosta sin, féach [modúil](#modúil).
+
+<br>
+
+---
+
+<br>
+
 ## Preabfhuinneog
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Ligeann an cárta seo duit preabfhuinneog a chruthú le hábhar ar bith. Bíonn 
 | `shadow_opacity` | string | Roghnach | Aon luach ó `0` go `100` | Teimhneacht scáile do phreabfhuinneoige (m.sh. `0` chun é a fholach) |
 | `hide_backdrop` | boolean | Roghnach | `true` nó `false` (réamhshocraithe) | Socraigh é seo go true ar an gcéad phreabfhuinneog de do phríomhdhaisbord chun an cúlbhrat a dhíchumasú ar gach preabfhuinneog. |
 | `background_update` | boolean | Roghnach | `true` nó `false` (réamhshocraithe) | Nuashonraigh ábhar na preabfhuinneoige sa chúlra (ní mholtar é) |
-| `trigger_entity` | string | Roghnach | Aon aonán | Oscail an phreabfhuinneog seo bunaithe ar staid aon aonáin |
+| `trigger` | object nó list | Roghnach | Féach [coinníollacha](#coinníollacha) | Osclaíonn sé an phreabfhuinneog seo nuair a chomhlíontar na coinníollacha |
+| `trigger_entity` | string | Roghnach | Aon aonán | Oscail an phreabfhuinneog seo bunaithe ar staid aon aonáin, an fhoirm shimplí de `trigger` |
 | `trigger_state` | string | Roghnach (**Riachtanach** má tá `trigger_entity` sainithe) | Aon staid aonáin | Staid aonáin chun an phreabfhuinneog a oscailt |
-| `trigger_close` | boolean | Roghnach | `true` nó `false` (réamhshocraithe) | Dún an phreabfhuinneog nuair atá `trigger_state` difriúil |
+| `trigger_close` | boolean | Roghnach | `true` nó `false` | Dúnann sé an phreabfhuinneog nuair nach gcomhlíontar na coinníollacha a thuilleadh (réamhshocrú: `true` le `trigger`, `false` le `trigger_state`) |
 | `open_action` | object | Roghnach | Féach [gníomhartha](#gníomhartha-tapála-tapála-dúbailte-agus-coinneála) | Spreag gníomh nuair a osclaítear an phreabfhuinneog |
 | `close_action` | object | Roghnach | Féach [gníomhartha](#gníomhartha-tapála-tapála-dúbailte-agus-coinneála) | Spreag gníomh nuair a dhúntar an phreabfhuinneog |
 | `show_header` | boolean | Roghnach | `true` (réamhshocraithe) nó `false` | Taispeáin/Folaigh ceanntásc na preabfhuinneoige go hiomlán |
@@ -445,8 +461,8 @@ Níl na roghanna seo ar fáil ach amháin nuair a shocraítear `button_type` go 
 | `relative_slide`        | boolean | Optional (`false` default )     | Nuashonraigh an luach i gcoibhneas leis an luach tosaigh, seachas leis an bpointe tadhaill tosaigh.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Déan an sleamhnán léamh amháin. Cumasaithe go huathoibríoch do roinnt eintiteas amhail braiteoirí.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Nuashonraítear staid an eintitis fad is atá tú ag sleamhnú. **Ní mholtar an ghné seo do gach eintiteas.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Athraigh treo líonta an tsleamhnáin |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Suíomh thaispeáint an luacha |
+| `slider_fill_orientation` | string | Roghnach | `left`, `right`, `top` nó `bottom` | Athraigh treo líonta an tsleamhnáin. Ó chlé go deas mura sainmhínítear é, scáthánaithe i [dteangacha a scríobhtar ó dheas go clé](#logánú) |
+| `slider_value_position` | string | Roghnach | `right`, `left`, `center` nó `hidden` | Suíomh thaispeáint an luacha. Ar thaobh an deiridh mura sainmhínítear é, mar sin ar chlé i [dteangacha a scríobhtar ó dheas go clé](#logánú) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Inbhéartaigh treo an tsleamhnáin (is ionann líonadh 100% agus an t-íosluach). Níl sé ar fáil do shleamhnáin datha. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **For lights only.** Roghnaigh mód an tsleamhnáin |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **For covers only.** Roghnaigh mód an tsleamhnáin (suíomh nó fiar) |
@@ -940,7 +956,7 @@ Ligeann an cárta seo duit d'eintitis féilire a thaispeáint. Is féidir a ábh
 | `limit`             | number  | Optional     | A number                                        | Líon na n-imeachtaí a thaispeánfar ar an gcárta                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Taispeáin nó folaigh an t-am deiridh d'imeachtaí                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Taispeáin nó folaigh barra dul chun cinn an imeachta                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Taispeáin nó folaigh imeachtaí atá ar siúl faoi láthair                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Taispeáin nó folaigh imeachtaí atá ar siúl faoi láthair. Meastar imeachtaí ilaethúla lá i ndiaidh lae, mar sin ní cheiltear ach an lá atá ar siúl agus fanann na laethanta atá le teacht le feiceáil |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | Lig don téacs scrollú nuair a shárálann an t-ábhar méid a choimeádáin |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#gníomhartha-tapála-tapála-dúbailte-agus-coinneála) | Ceadaíonn sé gníomhartha a chur le cliceáil imeachta. |
 | `tap_action` | object | Optional | See [actions](#gníomhartha-tapála-tapála-dúbailte-agus-coinneála) | Sainigh cineál an ghnímh ar chliceáil lae, mura sonraítear é úsáidfear `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Roghnach | `icon-left` (réamhshocrú), `icon-top`, `icon-bottom`, `icon-right` | Socrú an deilbhín laistigh den fhochnaipe |
 | `always_visible` | boolean | Roghnach | `true` nó `false` (réamhshocrú) | **Sleamhnán amháin.** Taispeáin an sleamhnán i gcónaí in ionad é a oscailt ar thapáil |
 | `show_button_info` | boolean | Roghnach | `true` nó `false` (réamhshocrú) | **Sleamhnán amháin.** Taispeáin deilbhín/ainm/staid nuair atá `always_visible` cumasaithe |
-| `visibility` | object nó list | Roghnach | Féach [coinníollacha](https://www.home-assistant.io/docs/scripts/conditions/) | Taispeáin nó folaigh an fhochnaipe bunaithe ar choinníollacha |
+| `visibility` | object nó list | Roghnach | Féach [coinníollacha](#coinníollacha) | Taispeáin nó folaigh an fhochnaipe bunaithe ar choinníollacha |
 | `hide_when_parent_unavailable` | boolean | Roghnach | `true` nó `false` (réamhshocrú) | Folaigh an fhochnaipe má tá aonán an chárta tuismitheora neamh-ar-fáil |
+| `css_class` | string | Roghnach | Aon teaghrán | Aicme CSS breise ar an bhfochnaipe, chun díriú air i do chuid [stíleanna](#stíliú) is cuma cén t-ainm atá air (mar shampla tugann `My value` `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Tacaíonn fochnaipí sleamhnáin leis na roghanna sleamhnáin céanna le sleamhn
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Ga chúinne do na fochnaipí |
 | `--bubble-sub-button-background-color` | `color` | Dath cúlra do na fochnaipí |
+| `--bubble-sub-button-outline` | `box-shadow` | Imlíne a chuirtear le fochnaipe nó le sleamhnán ach amháin nuair a phéinteálann sé an dath céanna leis an gcárta taobh thiar de, rud a d'fhágfadh dofheicthe é (socraigh go `none` é chun é a bhaint) |
 | `--bubble-sub-slider-border-radius` | `px` | Ga chúinne d'fhochnaipí sleamhnáin |
 | `--bubble-sub-slider-background-color` | `color` | Dath cúlra d'fhochnaipí sleamhnáin |
 | `--bubble-sub-slider-height` | `px` | Airde d'fhochnaipí sleamhnáin atá i gcónaí infheicthe |
+| `--bubble-sub-slider-outline` | `box-shadow` | Imlíne na bhfochnaipí sleamhnáin amháin, filleann sé ar `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Dath téacs ar chúlraí geala fochnaipí |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Coinníollacha
+
+Tá roinnt roghanna á stiúradh ag coinníollacha, atá scríofa díreach mar atá coinníollacha an [chárta choinníollaigh](https://www.home-assistant.io/dashboards/conditional/) de chuid Home Assistant:
+
+- `visibility` ar [fhochnaipe](#fochnaipí), chun é a thaispeáint nó a cheilt
+- `trigger` ar [phreabfhuinneog](#preabfhuinneog), chun í a oscailt nuair a chomhlíontar na coinníollacha
+- `checkConditionsMet(conditions, hass)` laistigh de do chuid [teimpléad](#teimpléid), nuair a theastaíonn an freagra uait i do chód féin
+
+Déantar gach cineál coinníll de chuid Home Assistant a mheas: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, agus na grúpaí `and`, `or` agus `not`. Oibríonn coinníollacha thógálaí coinníollacha Home Assistant freisin, na cinn atá ainmnithe as a bhfearann mar `sun.is_up`, `light.is_on`, `zone.in_zone` nó `temperature.is_value`, lena socruithe `target`, `options`, `behavior` agus `for`.
+
+<details>
+
+<summary><b>Sampla</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Meastar na coinníollacha i do bhrabhsálaí, mar sin ní féidir leis an mbeagán acu a bhfuil freastalaí Home Assistant de dhíth orthu a bheith beacht: léitear éirí agus luí na gréine ón aonán `sun.sun` in ionad iad a atomhas, agus tomhaistear ré `for` ón athrú staide deireanach, gan stair an recorder.
+>
+> Glactar le `view_columns` ach éiríonn leis i gcónaí, ós rud é nach é Bubble Card a leagann amach colúin do radhairc riamh. Cineál coinníll nach bhfuil aithne ag Bubble Card air, tuairiscíonn sé é féin uair amháin i gconsól do bhrabhsálaí in ionad teip go ciúin, ionas gur féidir leat botún cló a aithint thar ghné atá ar iarraidh.
+
+<br>
+
+---
+
+<br>
+
 ## Gníomhartha tapála, tapála dúbailte agus coinneála
 
 Is féidir leat freisin gníomhartha réamhshocraithe Home Assistant a bhaint úsáid as, mar shampla gníomhartha tapála, gníomhartha tapála dúbailte agus gníomhartha coinneála ar na cártaí a dtacaíonn leis an rogha seo. Mar shampla, ceadaíonn sé seo duit an fhuinneog "tuilleadh eolais" a thaispeáint trí choinneáil síos ar dheilbhín cnaipe nó trí sheirbhís a rith nuair a bhrúitear ar fhochnaipe.
@@ -1700,6 +1762,8 @@ Is féidir leat stíleanna saincheaptha a chur leis chun CSS gach cárta a mhodh
 
 > [!TIP]  
 > Is féidir fochnaipí a spriocdhíriú trí aicmí bunaithe ar ainm. Mar shampla, is féidir fochnaipe darb ainm "My sub-button" a stíliú le `.my-sub-button`. Nochtann fochnaipí sleamhnáin `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, srl. freisin.
+>
+> Athraíonn aicme atá bunaithe ar ainm nuair a athainmníonn tú fochnaipe, agus aistrítear í nuair a aistrítear an t-ainm. Socraigh `css_class` ar an bhfochnaipe chun aicme de do chuid féin a fháil nach mbogann riamh, is cuma cén t-ainm ná cén teanga.
 
 #### Samplaí
 
@@ -2066,6 +2130,7 @@ Tá rochtain agat ar gach feidhm dhomhanda JS, ach tá rochtain agat freisin ar:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- Tugann `checkConditionsMet(conditions, hass)` `true` ar ais nuair a chomhlíontar liosta [coinníollacha](#coinníollacha), mar shampla `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - Is féidir `hass.formatEntityState(state)` a úsáid chun staid a aistriú (Is féidir é a úsáid freisin chun aonad staide a fháil, gan gá é a chur leis de láimh).
 - Is féidir `hass.formatEntityAttributeValue(state, "attribute")` a úsáid chun aitreabúid a aistriú (Is féidir é a úsáid freisin chun aonad staide a fháil, gan gá é a chur leis de láimh).
 
@@ -2318,6 +2383,8 @@ Is gné chumhachtach iad Modúil a ligeann duit do stíleanna agus teimpléid sh
 Ach tá an ghné seo i bhfad níos cumhachtaí ná sin, ligeann sí duit gnéithe iarbhír a chur leis tú féin in eagarthóir Bubble Card, ag baint úsáide as gach rogha réamhshocraithe [foirm Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 Feabhsaíodh an roghnóir oibiachta chun athruithe beo a thaispeáint agus chun tacú i gceart le hairíonna.
 
+Is féidir le modúl freagra a thabhairt ar roghnóir cártaí Home Assistant freisin, taobh leis na [moltaí aonán](#moltaí-aonán) ionsuite: úsáid `suggestions` do na cártaí is féidir leis a chur síos roimh ré, agus `suggestions_code` nuair is gá iad a ríomh ó do chóras féin, mar shampla preabfhuinneog a thógtar ó gach aonán den limistéar lena mbaineann an t-aonán roghnaithe. Tá an dá eochair doiciméadaithe [anseo](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Is féidir leat brabhsáil freisin sa **Module Store** chun [modúil a chruthaigh an pobal](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) a aimsiú agus a shuiteáil, nó do chruthúcháin féin a roinnt!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Taispeánann an cluaisín seo do mhodúil suiteáilte go léir agus ligeann sé 
 - Modúil a **chuardach** agus a **shórtáil** (aibítreach, is déanaí, gníomhach ar dtús)
 - **Stádas domhanda a shocrú** chun modúl a chur i bhfeidhm ar gach cárta go huathoibríoch
 - Modúil a **Iompórtáil/Easpórtáil** le haghaidh cúltaca nó comhroinnte
+- **Moltaí aonán a scríobh** in eagarthóir na modúl, faoi **Roghnach: moltaí aonán**, ionas go gcuirfear do mhodúl ar fáil i roghnóir cártaí Home Assistant. Seiceáiltear na rialacha agus na moltaí ríofa araon agus tú á scríobh, cuireann earráid ann cosc ar shábháil, agus taispeánann an réamhamharc na cártaí molta d'aon aonán a roghnaíonn tú
 
 #### Cluaisín Module Store
 
@@ -2391,7 +2459,8 @@ Taispeánfaidh an cluaisín seo [na modúil go léir atá ar fáil ón bpobal](h
 3. Líon isteach faisnéis an mhodúil.
 4. Scríobh do chód teimpléid CSS agus/nó JavaScript san eagarthóir **Code**.
 5. (Roghnach) Cruthaigh comhéadan cumraíochta saincheaptha sa rannóg **Editor** (cosúil leis an roghnóir dathanna sa scáileán grianghraif thuas, tá doiciméadú iomlán le fáil [anseo](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Cliceáil **Save**.
+6. (Roghnach) Scríobh do chuid **Moltaí aonán** ionas go gcuirfear do mhodúl ar fáil i roghnóir cártaí Home Assistant. Seiceálann an painéal a bhfuil á scríobh agat agus tú ag clóscríobh, agus taispeánann a réamhamharc na cártaí molta féin don aonán is rogha leat.
+7. Cliceáil **Save**.
 
 Tá do mhodúl ar fáil anois le húsáid ar aon cheann de do chuid cártaí!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Tá tuilleadh samplaí le fáil sa Module Store, nó [anseo](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Logánú
+
+Labhraíonn Bubble Card do theanga. Tá a eagarthóir aistrithe go dtí an 64 teanga a dtacaíonn Home Assistant leo, agus gach áit a bhfuil focal ag Home Assistant cheana féin ar rud éigin, úsáidtear a fhoclaíocht féin, ionas go léifidh tú na téarmaí céanna sa dá chomhéadan.
+
+Ag bun an eagarthóra, in aice le huimhir an leagain, leanann lasc **Uathoibríoch** teanga do Home Assistant. Múch í agus fillfidh an t-eagarthóir ar fad ar an mBéarla, rud atá áisiúil chun teagaisc a leanúint nó chun fadhb a thuairisciú. Cuimhnítear ar do rogha i do bhrabhsálaí.
+
+Tá an doiciméadú seo aistrithe freisin, [go 62 teanga](languages.md). Tá na leathanaigh sin oscailte do chách, mar sin is féidir foclaíocht nach bhfuil ag teacht le do Home Assistant féin a cheartú i gcúpla cniog. Fanann an leagan Béarla mar thagairt don ábhar féin.
 
 <br>
 

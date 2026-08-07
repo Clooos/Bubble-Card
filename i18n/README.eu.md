@@ -18,7 +18,7 @@ Bubble Card Home Assistant-erako txartel-bilduma minimalista eta pertsonalizagar
 
 ## Edukien aurkibidea
 
-**[`Instalazioa`](#instalazioa)**  **[`Konfigurazioa`](#konfigurazioa)**  **[`Laster-leihoa`](#laster-leihoa)**  **[`Botoi-pila horizontala`](#botoi-pila-horizontala)**  **[`Botoia`](#botoia)**  **[`Multimedia-erreproduzigailua`](#multimedia-erreproduzigailua)**  **[`Estalkia`](#estalkia)**  **[`Hautaketa`](#hautaketa)**  **[`Klimatizazioa`](#klimatizazioa)**  **[`Egutegia`](#egutegia)**  **[`Bereizlea`](#bereizlea)**  **[`Zutabe hutsa`](#zutabe-hutsa)**  **[`Azpibotoiak soilik`](#azpibotoiak-soilik)**  **[`Azpibotoiak`](#azpibotoiak)**  **[`Txartelen diseinuak`](#txartelen-diseinuak)**  **[`Ekintzak`](#sakatze--sakatze-bikoitz--eta-luze-sakatze-ekintzak)**  **[`Estiloa`](#estiloa)**  **[`Txantiloiak`](#txantiloiak)**  **[`Moduluak`](#moduluak)**  **[`Laguntza`](#laguntza)**  **[`Ekarpenak egitea`](#ekarpenak-egitea)**  **[`Egin dohaintza`](#egin-dohaintza)**
+**[`Instalazioa`](#instalazioa)**  **[`Konfigurazioa`](#konfigurazioa)**  **[`Entitate iradokizunak`](#entitate-iradokizunak)**  **[`Laster-leihoa`](#laster-leihoa)**  **[`Botoi-pila horizontala`](#botoi-pila-horizontala)**  **[`Botoia`](#botoia)**  **[`Multimedia-erreproduzigailua`](#multimedia-erreproduzigailua)**  **[`Estalkia`](#estalkia)**  **[`Hautaketa`](#hautaketa)**  **[`Klimatizazioa`](#klimatizazioa)**  **[`Egutegia`](#egutegia)**  **[`Bereizlea`](#bereizlea)**  **[`Zutabe hutsa`](#zutabe-hutsa)**  **[`Azpibotoiak soilik`](#azpibotoiak-soilik)**  **[`Azpibotoiak`](#azpibotoiak)**  **[`Txartelen diseinuak`](#txartelen-diseinuak)**  **[`Baldintzak`](#baldintzak)**  **[`Ekintzak`](#sakatze--sakatze-bikoitz--eta-luze-sakatze-ekintzak)**  **[`Estiloa`](#estiloa)**  **[`Txantiloiak`](#txantiloiak)**  **[`Moduluak`](#moduluak)**  **[`Lokalizazioa`](#lokalizazioa)**  **[`Laguntza`](#laguntza)**  **[`Ekarpenak egitea`](#ekarpenak-egitea)**  **[`Egin dohaintza`](#egin-dohaintza)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card Home Assistant-erako txartel-bilduma minimalista eta pertsonalizagar
 
 <br>
 
-1. Deskargatu fitxategi hau: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Gehitu fitxategi hau zure `<config>/www` karpetara
+1. Deskargatu `bubble-card.zip` [azken bertsiotik](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Deskonprimitu zure `<config>/www` karpetan, `bubble-card.js` eta ondoan `translations` karpeta lortu beharko zenituzke (karpeta horrek editorearen hiztegiak ditu, hura gabe editorea ingelesez geratzen da)
 3. Zure panelean, klikatu goiko eskuineko izkinako ikonoa eta ondoren `Edit dashboard`
 4. Klikatu berriro ikono horretan eta gero `Manage resources`
 5. Klikatu `Add resource`
@@ -130,6 +130,21 @@ Aukera guztiak Home Assistant editorean konfigura daitezke. Baina xehetasun gehi
 
 <br>
 
+## Entitate iradokizunak
+
+Home Assistant 2026.6 bertsiotik aurrera, txartel-hautatzailean entitate bat aukeratzean prest dauden txartel batzuk eskaintzen zaizkizu, eta Bubble Cardek bere errezetekin erantzuten dio galdera horri. Aukeratu argi bat eta distira-graduatzailea duen txartel bat eskainiko zaizu, baita kolore-tenperatura, kolore eta saturazio aldaerak ere zure argiak onartzen dituenean. Aukeratu estalki bat eta bere posizio-graduatzailea lortuko duzu, aukeratu multimedia-erreproduzigailu bat eta bere iturri-zerrenda duen aldaera bat ere lortuko duzu, aukeratu xurgagailu bat eta abiarazteko, pausatzeko eta oinarrira itzultzeko botoiak lortuko dituzu. Iradokizun bakoitza Bubble Carden konfigurazio arrunt bat da, zuzeneko aurrebista gisa erakutsia, beraz hurbilena hartu eta ohi bezala editatzen jarrai dezakezu.
+
+Zer eskaintzen zaizun zure entitateak benetan zer egin dezakeen araberakoa da: distira-kanalik gabeko argi batek graduatzailearen ordez txandakatzailea jasotzen du, okertu ezin den estalki batek ez du okertze-aldaerarik jasotzen, eta klimatizazio-entitate batek bere aurrezarritako moduak jasotzen ditu horrelakorik badu soilik. Sarrera klasikoak haien azpitik datoz aplikagarriak direnean: domeinuaren txartel berezia, botoi soil bat eta graduatzaile bat.
+
+> [!TIP]
+> Moduluek beren iradokizunak gehi ditzakete zerrenda horretan, ikus [moduluak](#moduluak).
+
+<br>
+
+---
+
+<br>
+
 ## Laster-leihoa
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Txartel honek edukin edozein duen laster-leiho bat sortzeko aukera ematen dizu. 
 | `shadow_opacity` | string | Aukerakoa | `0`tik `100`era bitarteko edozein balio | Zure laster-leihoaren itzalaren opakotasuna (adib. `0` ezkutatzeko) |
 | `hide_backdrop` | boolean | Aukerakoa | `true` edo `false` (lehenetsia) | Ezarri hau true gisa zure panel nagusiko lehen laster-leihoan, laster-leiho guztietako backdropa desgaitzeko. |
 | `background_update` | boolean | Aukerakoa | `true` edo `false` (lehenetsia) | Laster-leihoaren edukia atzeko planoan eguneratzen du (ez da gomendagarria) |
-| `trigger_entity` | string | Aukerakoa | Edozein entitate | Laster-leiho hau edozein entitateren egoeraren arabera irekitzen du |
+| `trigger` | object edo list | Aukerakoa | Ikusi [baldintzak](#baldintzak) | Laster-leiho hau irekitzen du baldintzak betetzen direnean |
+| `trigger_entity` | string | Aukerakoa | Edozein entitate | Laster-leiho hau edozein entitateren egoeraren arabera irekitzen du, `trigger` aukeraren forma sinplea |
 | `trigger_state` | string | Aukerakoa (**Beharrezkoa** `trigger_entity` definituta badago) | Edozein entitate-egoera | Laster-leihoa irekitzeko entitate-egoera |
-| `trigger_close` | boolean | Aukerakoa | `true` edo `false` (lehenetsia) | Laster-leihoa ixten du `trigger_state` desberdina denean |
+| `trigger_close` | boolean | Aukerakoa | `true` edo `false` | Laster-leihoa ixten du baldintzak jada betetzen ez direnean (lehenetsia: `true` `trigger` erabiliz, `false` `trigger_state` erabiliz) |
 | `open_action` | object | Aukerakoa | Ikus [ekintzak](#sakatze--sakatze-bikoitz--eta-luze-sakatze-ekintzak) | Ekintza bat abiarazten du laster-leihoa irekitzean |
 | `close_action` | object | Aukerakoa | Ikus [ekintzak](#sakatze--sakatze-bikoitz--eta-luze-sakatze-ekintzak) | Ekintza bat abiarazten du laster-leihoa ixtean |
 | `show_header` | boolean | Aukerakoa | `true` (lehenetsia) edo `false` | Laster-leihoaren goiburua erakusten/ezkutatzen du erabat |
@@ -445,8 +461,8 @@ Aukera hauek soilik daude erabilgarri `button_type` `slider` gisa ezarrita dagoe
 | `relative_slide`        | boolean | Aukerakoa (`false` lehenetsia )     | Eguneratu balioa hasierako balioarekiko, hasierako ukipen-puntuarekiko ez.                                      |
 | `read_only_slider`      | boolean | Aukerakoa (`false` lehenetsia)      | Egin graduatzailea irakurtzeko soilik. Automatikoki gaituta dago sentsore bezalako entitate batzuentzat.                        |
 | `slider_live_update`    | boolean | Aukerakoa (`false` lehenetsia)      | Entitatearen egoera irristatzen ari den bitartean eguneratzen da. **Ezaugarri hau ez da gomendagarria entitate guztientzat.**        |
-| `slider_fill_orientation` | string | Aukerakoa | `left` (lehenetsia), `right`, `top`, `bottom` | Aldatu graduatzailearen betetze-norabidea |
-| `slider_value_position` | string | Aukerakoa | `right` (lehenetsia), `left`, `center`, `hidden` | Balioaren bistaratze-posizioa |
+| `slider_fill_orientation` | string | Aukerakoa | `left`, `right`, `top` edo `bottom` | Aldatu graduatzailearen betetze-norabidea. Ezkerretik eskuinera definitu gabe dagoenean, ispilatuta [eskuinetik ezkerrera idazten diren hizkuntzetan](#lokalizazioa) |
+| `slider_value_position` | string | Aukerakoa | `right`, `left`, `center` edo `hidden` | Balioaren bistaratze-posizioa. Amaierako aldean definitu gabe dagoenean, hau da, ezkerrean [eskuinetik ezkerrera idazten diren hizkuntzetan](#lokalizazioa) |
 | `invert_slider_value` | boolean | Aukerakoa (`false` lehenetsia) | Alderantzikatu graduatzailearen norabidea (%100eko betetzeak minimoa esan nahi du). Ez dago erabilgarri kolore-graduatzaileentzat. |
 | `light_slider_type` | string | Aukerakoa | `brightness` (lehenetsia), `hue`, `saturation`, `white_temp` | **Argientzat soilik.** Aukeratu graduatzaile modua |
 | `cover_slider_type` | string | Aukerakoa | `position` (lehenetsia), `tilt_position` | **Estalkientzat soilik.** Aukeratu graduatzaile modua (posizioa edo inklinazioa) |
@@ -940,7 +956,7 @@ Txartel honek zure egutegi-entitateak bistaratzeko aukera ematen dizu. Bere eduk
 | `limit`             | number  | Aukerakoa     | Zenbaki bat                                        | Txartelean bistaratuko diren gertaeren kopurua                                  |
 | `show_end`          | boolean | Aukerakoa     | `true` edo `false` (lehenetsia)                     | Erakutsi edo ezkutatu gertaeren amaiera-ordua                                                    |
 | `show_progress`     | boolean | Aukerakoa     | `true` (lehenetsia) edo `false`                     | Erakutsi edo ezkutatu gertaeraren aurrerapen-barra                                                     |
-| `show_started_events`| boolean | Aukerakoa     | `true` (lehenetsia) edo `false`                     | Erakutsi edo ezkutatu unean abian diren gertaerak                                                 |
+| `show_started_events`| boolean | Aukerakoa     | `true` (lehenetsia) edo `false`                     | Erakutsi edo ezkutatu unean abian diren gertaerak. Egun bat baino gehiagoko gertaerak egunez egun epaitzen dira, beraz abian den eguna soilik ezkutatzen da eta datozen egunak ikusgai geratzen dira |
 | `scrolling_effect`  | boolean | Aukerakoa | `true` (lehenetsia) edo `false` | Testua irristatzea baimendu edukiak edukiontziaren tamaina gainditzen duenean |
 | `event_action` | object | Aukerakoa | `tap_action`, `double_tap_action` edo `hold_action`, ikusi [ekintzak](#sakatze--sakatze-bikoitz--eta-luze-sakatze-ekintzak) | Gertaeraren klik gaineko ekintzak gehitzeko aukera ematen du. |
 | `tap_action` | object | Aukerakoa | Ikusi [ekintzak](#sakatze--sakatze-bikoitz--eta-luze-sakatze-ekintzak) | Definitu egunaren klik gaineko ekintza mota, definitu ez bada `none` erabiliko da. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Aukerakoa | `icon-left` (lehenetsia), `icon-top`, `icon-bottom`, `icon-right` | Ikonoaren kokapena azpibotoiaren barruan |
 | `always_visible` | boolean | Aukerakoa | `true` edo `false` (lehenetsia) | **Graduatzailean soilik.** Erakutsi beti graduatzailea, sakatzean irekitzen ez uztez |
 | `show_button_info` | boolean | Aukerakoa | `true` edo `false` (lehenetsia) | **Graduatzailean soilik.** Erakutsi ikonoa/izena/egoera `always_visible` gaituta dagoenean |
-| `visibility` | object edo list | Aukerakoa | Ikusi [baldintzak](https://www.home-assistant.io/docs/scripts/conditions/) | Erakutsi edo ezkutatu azpibotoia baldintzen arabera |
+| `visibility` | object edo list | Aukerakoa | Ikusi [baldintzak](#baldintzak) | Erakutsi edo ezkutatu azpibotoia baldintzen arabera |
 | `hide_when_parent_unavailable` | boolean | Aukerakoa | `true` edo `false` (lehenetsia) | Ezkutatu azpibotoia guraso-txartelaren entitatea eskuragarri ez dagoenean |
+| `css_class` | string | Aukerakoa | Edozein kate | CSS klase gehigarri bat azpibotoian, zure [estiloetan](#estiloa) hura xede hartzeko izena edozein dela ere (adib. `My value` balioak `.my-value` ematen du) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Graduatzaile motako azpibotoiek botoi-graduatzaileen aukera berak onartzen dituz
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Azpibotoien ertz-erradioa |
 | `--bubble-sub-button-background-color` | `color` | Azpibotoien atzeko planoaren kolorea |
+| `--bubble-sub-button-outline` | `box-shadow` | Azpibotoi edo graduatzaile bati gehitzen zaion ingerada, atzeko txartelaren kolore berean marrazten denean soilik, horrek ikusezin bihurtuko bailuke (ezarri `none` kentzeko) |
 | `--bubble-sub-slider-border-radius` | `px` | Graduatzaile motako azpibotoien ertz-erradioa |
 | `--bubble-sub-slider-background-color` | `color` | Graduatzaile motako azpibotoien atzeko planoaren kolorea |
 | `--bubble-sub-slider-height` | `px` | Beti ikusgai dagoen graduatzailearen altuera |
+| `--bubble-sub-slider-outline` | `box-shadow` | Graduatzaile motako azpibotoien ingerada soilik, `--bubble-sub-button-outline` erabiltzen du bestela |
 | `--bubble-sub-button-dark-text-color` | `color` | Testuaren kolorea atzeko plano argiak dituzten azpibotoietan |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Baldintzak
+
+Aukera batzuk baldintzek gidatzen dituzte, Home Assistanten [baldintzazko txartelaren](https://www.home-assistant.io/dashboards/conditional/) berdin-berdin idatzita:
+
+- `visibility` [azpibotoi](#azpibotoiak) batean, erakusteko edo ezkutatzeko
+- `trigger` [laster-leiho](#laster-leihoa) batean, baldintzak betetzen direnean irekitzeko
+- `checkConditionsMet(conditions, hass)` zure [txantiloien](#txantiloiak) barruan, erantzuna zure kodean behar duzunean
+
+Home Assistanten baldintza mota guztiak ebaluatzen dira: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, eta `and`, `or` eta `not` taldeak. Home Assistanten baldintza-eraikitzailearen baldintzek ere funtzionatzen dute, beren domeinuaren izena dutenek, hala nola `sun.is_up`, `light.is_on`, `zone.in_zone` edo `temperature.is_value`, beren `target`, `options`, `behavior` eta `for` ezarpenekin.
+
+<details>
+
+<summary><b>Adibidea</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Baldintzak zure nabigatzailean ebaluatzen dira, beraz Home Assistanten zerbitzaria behar duten gutxi horiek ezin dira zehatzak izan: eguzki-irteera eta eguzki-sarrera `sun.sun` entitatetik irakurtzen dira, berriro kalkulatu ordez, eta `for` iraupena azken egoera-aldaketatik neurtzen da, recorderren historiarik gabe.
+>
+> `view_columns` onartzen da baina beti betetzen da, Bubble Card ez baita inoiz zure ikuspegiaren zutabeak antolatzen dituena. Bubble Cardek ezagutzen ez duen baldintza mota batek behin ematen du bere berri zure nabigatzailearen kontsolan, isilean huts egin ordez, hala tekleatze-akats bat falta den funtzio batetik bereiz dezakezu.
+
+<br>
+
+---
+
+<br>
+
 ## Sakatze-, sakatze bikoitz- eta luze sakatze-ekintzak
 
 Home Assistant-en sakatze-ekintza, sakatze bikoitzeko ekintza eta luze sakatzeko ekintza lehenetsiak ere erabil ditzakezu, aukera hori onartzen duten txarteletan. Honek, adibidez, "informazio gehiago" leihoa erakustea baimentzen du botoi baten ikonoa luze sakatzean, edo zerbitzu bat exekutatzea azpibotoi bat sakatzean.
@@ -1700,6 +1762,8 @@ Txartel guztien CSSa aldatzeko estilo pertsonalizatuak gehitu ditzakezu **card-m
 
 > [!TIP]  
 > Azpibotoiak izenean oinarritutako klaseen bidez xede daitezke. Adibidez, "My sub-button" izeneko azpibotoi bat `.my-sub-button` erabiliz estiloz alda daiteke. Slider azpibotoiek ere `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, etab. erakusten dituzte.
+>
+> Izenean oinarritutako klasea aldatu egiten da azpibotoi bat berrizendatzean, eta itzuli egiten da izena itzultzen denean. Ezarri `css_class` azpibotoian inoiz mugitzen ez den zure klase bat izateko, izena edozein dela eta hizkuntza edozein dela ere.
 
 #### Adibideak
 
@@ -2066,6 +2130,7 @@ JS funtzio global guztietara sarbidea duzu, baina honakoetara ere bai:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` funtzioak `true` itzultzen du [baldintza](#baldintzak) zerrenda bat betetzen denean, adibidez `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` egoera bat itzultzeko erabil daiteke (egoera baten unitatea eskuratzeko ere erabil daiteke, eskuz gehitu beharrik gabe).
 - `hass.formatEntityAttributeValue(state, "attribute")` atributu bat itzultzeko erabil daiteke (egoera baten unitatea eskuratzeko ere erabil daiteke, eskuz gehitu beharrik gabe).
 
@@ -2318,6 +2383,8 @@ Moduluak funtzio ahaltsu bat dira, zure estilo eta txantiloi pertsonalizatuak go
 Baina funtzio hau are askoz ahaltsuagoa da, benetako funtzionalitateak zeuk gehitzeko aukera ematen baitizu Bubble Card editorean, Home Assistanteko [formulario](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) aukera lehenetsi guztiak erabiliz!  
 Objektu-hautatzailea hobetu da denbora errealeko aldaketak erakusteko eta atributuak behar bezala onartzeko.
 
+Modulu batek Home Assistanten txartel-hautatzaileari ere erantzun diezaioke, barneko [entitate iradokizunen](#entitate-iradokizunak) ondoan: erabili `suggestions` aldez aurretik deskriba ditzakeen txarteletarako, eta `suggestions_code` zure instalaziotik kalkulatu behar direnean, adibidez, aukeratutako entitatea dagoen arearen entitate guztiekin eraikitako laster-leiho bat. Bi gakoak [hemen](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) daude dokumentatuta.
+
 **Module Store**n ere nabiga dezakezu, [komunitateak sortutako moduluak](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) bilatu eta instalatzeko, edo zure sorkuntzak partekatzeko!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Fitxa honek zure modulu instalatu guztiak erakusten ditu eta honakoak egiteko au
 - **Bilatu** eta **ordenatu** moduluak (alfabetikoki, azkenak, aktiboak lehenik)
 - **Ezarri egoera globala**, modulu bat txartel guztiei automatikoki aplikatzeko
 - **Inportatu/Esportatu** moduluak babeskopietarako edo partekatzeko
+- **Idatzi entitate iradokizunak** moduluen editorean, **Aukerakoa: entitate iradokizunak** atalean, zure modulua Home Assistanten txartel-hautatzailean eskain dadin. Arauak zein kalkulatutako iradokizunak idatzi ahala egiaztatzen dira, hango errore batek gordetzea eragozten du, eta aurrebistak aukeratzen duzun edozein entitaterentzat iradokitako txartelak erakusten ditu
 
 #### Module Store fitxa
 
@@ -2391,7 +2459,8 @@ Fitxa honek [komunitateak sortutako modulu erabilgarri guztiak](https://github.c
 3. Bete moduluaren informazioa.
 4. Idatzi zure CSS eta/edo JavaScript txantiloi-kodea **Code** editorean.
 5. (Aukerakoa) Sortu konfigurazio-interfaze pertsonalizatu bat **Editor** atalean (goiko pantaila-argazkiko kolore-hautatzailea bezala, dokumentazio osoa [hemen](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) eskuragarri).
-6. Klikatu **Save**.
+6. (Aukerakoa) Idatzi zure **Entitate iradokizunak** zure modulua Home Assistanten txartel-hautatzailean eskain dadin. Panelak idazten duzuna egiaztatzen du tekleatu ahala, eta bere aurrebistak iradokitako txartelak berak erakusten ditu aukeratzen duzun entitaterako.
+7. Klikatu **Save**.
 
 Zure modulua orain eskuragarri dago zure edozein txarteletan erabiltzeko!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Adibide gehiago Module Storean aurki daitezke, edo [hemen](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalizazioa
+
+Bubble Cardek zure hizkuntza hitz egiten du. Bere editorea Home Assistantek onartzen dituen 64 hizkuntzetara itzulita dago, eta Home Assistantek zerbaitentzat jada hitz bat duen tokietan bere formulazioa berrerabiltzen da, hala termino berak irakurtzen dituzu bi interfazeetan.
+
+Editorearen behealdean, bertsio-zenbakiaren ondoan, **Automatikoa** etengailu batek zure Home Assistanten hizkuntzari jarraitzen dio. Itzali eta editore osoa ingelesera itzultzen da, tutorial bat jarraitzeko edo arazo baten berri emateko erabilgarria. Zure aukera nabigatzailean gogoratzen da.
+
+Dokumentazio hau ere itzulita dago, [62 hizkuntzatan](languages.md). Orri horiek denentzat daude irekita, beraz zure Home Assistantekin bat ez datorren esaldi bat klik pare batean zuzen daiteke. Ingelesezko bertsioak edukiaren erreferentzia izaten jarraitzen du.
 
 <br>
 

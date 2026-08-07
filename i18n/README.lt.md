@@ -18,7 +18,7 @@ Bubble Card yra minimalistinė ir individualiai pritaikoma kortelių kolekcija, 
 
 ## Turinys
 
-**[`Diegimas`](#diegimas)**  **[`Konfigūracija`](#konfigūracija)**  **[`Iškylantysis langas`](#iškylantysis-langas)**  **[`Horizontali mygtukų juosta`](#horizontali-mygtukų-juosta)**  **[`Mygtukas`](#mygtukas)**  **[`Medijos leistuvas`](#medijos-leistuvas)**  **[`Uždanga`](#uždanga)**  **[`Pasirinkimas`](#pasirinkimas)**  **[`Klimatas`](#klimatas)**  **[`Kalendorius`](#kalendorius)**  **[`Skirtukas`](#skirtukas)**  **[`Tuščias stulpelis`](#tuščias-stulpelis)**  **[`Tik papildomi mygtukai`](#tik-papildomi-mygtukai)**  **[`Papildomi mygtukai`](#papildomi-mygtukai)**  **[`Kortelės išdėstymai`](#kortelės-išdėstymai)**  **[`Veiksmai`](#bakstelėjimo-dvigubo-bakstelėjimo-ir-palaikymo-veiksmai)**  **[`Stilius`](#stilius)**  **[`Šablonai`](#šablonai)**  **[`Moduliai`](#moduliai)**  **[`Pagalba`](#pagalba)**  **[`Prisidėjimas`](#prisidėjimas)**  **[`Paremkite`](#paremkite)**
+**[`Diegimas`](#diegimas)**  **[`Konfigūracija`](#konfigūracija)**  **[`Esybių pasiūlymai`](#esybių-pasiūlymai)**  **[`Iškylantysis langas`](#iškylantysis-langas)**  **[`Horizontali mygtukų juosta`](#horizontali-mygtukų-juosta)**  **[`Mygtukas`](#mygtukas)**  **[`Medijos leistuvas`](#medijos-leistuvas)**  **[`Uždanga`](#uždanga)**  **[`Pasirinkimas`](#pasirinkimas)**  **[`Klimatas`](#klimatas)**  **[`Kalendorius`](#kalendorius)**  **[`Skirtukas`](#skirtukas)**  **[`Tuščias stulpelis`](#tuščias-stulpelis)**  **[`Tik papildomi mygtukai`](#tik-papildomi-mygtukai)**  **[`Papildomi mygtukai`](#papildomi-mygtukai)**  **[`Kortelės išdėstymai`](#kortelės-išdėstymai)**  **[`Sąlygos`](#sąlygos)**  **[`Veiksmai`](#bakstelėjimo-dvigubo-bakstelėjimo-ir-palaikymo-veiksmai)**  **[`Stilius`](#stilius)**  **[`Šablonai`](#šablonai)**  **[`Moduliai`](#moduliai)**  **[`Lokalizacija`](#lokalizacija)**  **[`Pagalba`](#pagalba)**  **[`Prisidėjimas`](#prisidėjimas)**  **[`Paremkite`](#paremkite)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card yra minimalistinė ir individualiai pritaikoma kortelių kolekcija, 
 
 <br>
 
-1. Atsisiųskite šį failą: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Įkelkite šį failą į savo `<config>/www` aplanką
+1. Atsisiųskite `bubble-card.zip` iš [naujausios laidos](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Išskleiskite jį į savo `<config>/www` aplanką, turėtumėte gauti `bubble-card.js` ir šalia jo aplanką `translations` (tame aplanke yra redaktoriaus žodynai, be jo redaktorius lieka angliškas)
 3. Savo prietaisų skydelyje spustelėkite piktogramą viršutiniame dešiniajame kampe, tada `Edit dashboard`
 4. Vėl spustelėkite tą piktogramą, tada spustelėkite `Manage resources`
 5. Spustelėkite `Add resource`
@@ -130,6 +130,21 @@ Visos parinktys gali būti sukonfigūruotos Home Assistant redaktoriuje. Tačiau
 
 <br>
 
+## Esybių pasiūlymai
+
+Nuo Home Assistant 2026.6 pasirinkus esybę kortelių parinkiklyje siūloma keletas paruoštų kortelių, o Bubble Card į šį klausimą atsako savo receptais. Pasirinkite šviestuvą ir jums bus pasiūlyta kortelė su ryškumo slankikliu, o kai jūsų šviestuvas tai palaiko, dar ir spalvos temperatūros, spalvos bei sodrumo variantai. Pasirinkite uždangą ir gausite jos padėties slankiklį, pasirinkite medijos leistuvą ir gausite dar vieną variantą su jo šaltinių sąrašu, pasirinkite dulkių siurblį ir gausite jo paleidimo, pristabdymo ir grąžinimo į stotelę mygtukus. Kiekvienas pasiūlymas yra įprasta Bubble Card konfigūracija, rodoma kaip gyva peržiūra, tad galite paimti artimiausią ir toliau ją redaguoti kaip visada.
+
+Kas jums pasiūloma, priklauso nuo to, ką jūsų esybė iš tikrųjų gali: šviestuvas be ryškumo kanalo gauna jungiklį vietoj slankiklio, uždanga, kurios negalima pakreipti, negauna pakreipimo varianto, o klimato esybė gauna savo išankstinius režimus tik tada, kai jų turi. Kai tinka, po jais eina klasikiniai įrašai: srities specialioji kortelė, paprastas mygtukas ir slankiklis.
+
+> [!TIP]
+> Moduliai gali įtraukti į šį sąrašą savo pasiūlymus, žr. [moduliai](#moduliai).
+
+<br>
+
+---
+
+<br>
+
 ## Iškylantysis langas
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Visos parinktys gali būti sukonfigūruotos Home Assistant redaktoriuje. Tačiau
 | `shadow_opacity` | string | Neprivaloma | Bet kokia reikšmė nuo `0` iki `100` | Jūsų iškylančiojo lango šešėlio skaidrumas (pvz. `0`, kad jį paslėptumėte) |
 | `hide_backdrop` | boolean | Neprivaloma | `true` arba `false` (numatyta) | Nustatykite tai į true pirmajame savo pagrindinio prietaisų skydelio iškylančiajame lange, kad išjungtumėte foną visuose iškylančiuosiuose languose. |
 | `background_update` | boolean | Neprivaloma | `true` arba `false` (numatyta) | Atnaujina iškylančiojo lango turinį fone (nerekomenduojama) |
-| `trigger_entity` | string | Neprivaloma | Bet kokia esybė | Atidaro šį iškylantįjį langą pagal bet kurios esybės būseną |
+| `trigger` | object arba list | Neprivaloma | Žr. [sąlygas](#sąlygos) | Atidaro šį iškylantįjį langą, kai sąlygos įvykdytos |
+| `trigger_entity` | string | Neprivaloma | Bet kokia esybė | Atidaro šį iškylantįjį langą pagal bet kurios esybės būseną, tai paprastoji `trigger` forma |
 | `trigger_state` | string | Neprivaloma (**Privaloma**, jei nustatyta `trigger_entity`) | Bet kokia esybės būsena | Esybės būsena, kuriai esant atidaromas iškylantysis langas |
-| `trigger_close` | boolean | Neprivaloma | `true` arba `false` (numatyta) | Uždaro iškylantįjį langą, kai `trigger_state` skiriasi |
+| `trigger_close` | boolean | Neprivaloma | `true` arba `false` | Uždaro iškylantįjį langą, kai sąlygos nebeįvykdytos (numatyta: `true` su `trigger`, `false` su `trigger_state`) |
 | `open_action` | object | Neprivaloma | Žr. [veiksmai](#bakstelėjimo-dvigubo-bakstelėjimo-ir-palaikymo-veiksmai) | Paleidžia veiksmą, kai iškylantysis langas atidaromas |
 | `close_action` | object | Neprivaloma | Žr. [veiksmai](#bakstelėjimo-dvigubo-bakstelėjimo-ir-palaikymo-veiksmai) | Paleidžia veiksmą, kai iškylantysis langas uždaromas |
 | `show_header` | boolean | Neprivaloma | `true` (numatyta) arba `false` | Rodo/slepia visą iškylančiojo lango antraštę |
@@ -445,8 +461,8 @@ auto_order: true
 | `relative_slide`        | boolean | Optional (`false` default )     | Atnaujinti reikšmę santykinai nuo pradinės reikšmės, o ne nuo pradinio lietimo taško.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Padaryti slankiklį tik skaitymui. Automatiškai įjungiama kai kuriems entitetams, pvz., jutikliams.                                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Entiteto būsena atnaujinama slenkant. **Ši funkcija nerekomenduojama visiems entitetams.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Pakeisti slankiklio užpildymo kryptį |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Reikšmės rodymo padėtis |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` arba `bottom` | Pakeisti slankiklio užpildymo kryptį. Nenurodžius, iš kairės į dešinę, o [iš dešinės į kairę rašomose kalbose](#lokalizacija) veidrodiškai |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` arba `hidden` | Reikšmės rodymo padėtis. Nenurodžius, pabaigos pusėje, tad [iš dešinės į kairę rašomose kalbose](#lokalizacija) kairėje |
 | `invert_slider_value` | boolean | Optional (`false` default) | Apversti slankiklio kryptį (100% užpildymas atitinka minimumą). Neprieinama spalvų slankikliams. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Tik šviestuvams.** Pasirinkti slankiklio režimą |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Tik uždangoms.** Pasirinkti slankiklio režimą (padėtis arba pasukimas) |
@@ -940,7 +956,7 @@ sub_button:
 | `limit`             | number  | Optional     | A number                                        | Kortelėje rodomų įvykių kiekis                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Rodyti arba slėpti įvykių pabaigos laiką                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Rodyti arba slėpti įvykio eigos juostą                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Rodyti arba slėpti šiuo metu vykstančius įvykius                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Rodyti arba slėpti šiuo metu vykstančius įvykius. Kelių dienų įvykiai vertinami po vieną dieną, tad paslepiama tik vykstanti diena, o būsimos dienos lieka matomos |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | Leisti tekstui slinkti, kai turinys viršija konteinerio dydį |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#bakstelėjimo-dvigubo-bakstelėjimo-ir-palaikymo-veiksmai) | Leidžia pridėti veiksmus paspaudus įvykį. |
 | `tap_action` | object | Optional | See [actions](#bakstelėjimo-dvigubo-bakstelėjimo-ir-palaikymo-veiksmai) | Nustato veiksmo tipą paspaudus dieną, jei nenustatyta, bus naudojama `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Neprivaloma | `icon-left` (numatytoji), `icon-top`, `icon-bottom`, `icon-right` | Piktogramos vieta papildomame mygtuke |
 | `always_visible` | boolean | Neprivaloma | `true` arba `false` (numatytoji) | **Tik slankikliui.** Visada rodo slankiklį, vietoj to, kad jį atvertų bakstelėjus |
 | `show_button_info` | boolean | Neprivaloma | `true` arba `false` (numatytoji) | **Tik slankikliui.** Rodo piktogramą / pavadinimą / būseną, kai įjungta `always_visible` |
-| `visibility` | object arba list | Neprivaloma | Žr. [sąlygas](https://www.home-assistant.io/docs/scripts/conditions/) | Rodo arba slepia papildomą mygtuką pagal sąlygas |
+| `visibility` | object arba list | Neprivaloma | Žr. [sąlygas](#sąlygos) | Rodo arba slepia papildomą mygtuką pagal sąlygas |
 | `hide_when_parent_unavailable` | boolean | Neprivaloma | `true` arba `false` (numatytoji) | Slepia papildomą mygtuką, jei pagrindinės kortelės esybė nepasiekiama |
+| `css_class` | string | Neprivaloma | Bet kokia eilutė | Papildoma CSS klasė papildomam mygtukui, kad galėtumėte jį pasiekti savo [stiliuose](#stilius) nepaisant jo pavadinimo (pvz., `My value` duoda `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Slankiklio papildomi mygtukai palaiko tas pačias slankiklio parinktis kaip mygt
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Papildomų mygtukų kraštų spindulys |
 | `--bubble-sub-button-background-color` | `color` | Papildomų mygtukų fono spalva |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontūras, pridedamas papildomam mygtukui ar slankikliui tik tada, kai jis nusipiešia ta pačia spalva kaip už jo esanti kortelė, dėl ko taptų nematomas (nustatykite `none`, kad pašalintumėte) |
 | `--bubble-sub-slider-border-radius` | `px` | Slankiklio papildomų mygtukų kraštų spindulys |
 | `--bubble-sub-slider-background-color` | `color` | Slankiklio papildomų mygtukų fono spalva |
 | `--bubble-sub-slider-height` | `px` | Visada matomo slankiklio papildomo mygtuko aukštis |
+| `--bubble-sub-slider-outline` | `box-shadow` | Tik slankiklio papildomų mygtukų kontūras, nenurodžius naudojama `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Teksto spalva ryškiuose papildomų mygtukų fonuose |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Sąlygos
+
+Kai kurias parinktis valdo sąlygos, rašomos lygiai taip pat kaip Home Assistant [sąlyginės kortelės](https://www.home-assistant.io/dashboards/conditional/) sąlygos:
+
+- `visibility` [papildomame mygtuke](#papildomi-mygtukai), kad jis būtų rodomas arba slepiamas
+- `trigger` [iškylančiajame lange](#iškylantysis-langas), kad jis atsidarytų, kai sąlygos įvykdytos
+- `checkConditionsMet(conditions, hass)` jūsų [šablonuose](#šablonai), kai atsakymo reikia savame kode
+
+Vertinamas kiekvienas Home Assistant sąlygos tipas: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, taip pat `and`, `or` ir `not` grupės. Veikia ir Home Assistant sąlygų kūriklio sąlygos, tos, kurios pavadintos pagal savo sritį, kaip `sun.is_up`, `light.is_on`, `zone.in_zone` ar `temperature.is_value`, su savo `target`, `options`, `behavior` ir `for` nuostatomis.
+
+<details>
+
+<summary><b>Pavyzdys</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Sąlygos vertinamos jūsų naršyklėje, tad tos kelios, kurioms reikia Home Assistant serverio, negali būti tikslios: saulėtekis ir saulėlydis skaitomi iš esybės `sun.sun`, o ne perskaičiuojami, o `for` trukmė matuojama nuo paskutinio būsenos pasikeitimo, be recorder istorijos.
+>
+> `view_columns` priimamas, bet visada praeina, nes ne Bubble Card išdėsto jūsų rodinio stulpelius. Sąlygos tipas, kurio Bubble Card nežino, vieną kartą praneša apie save jūsų naršyklės konsolėje, užuot tyliai nuvylęs, tad galite atskirti rašybos klaidą nuo trūkstamos funkcijos.
+
+<br>
+
+---
+
+<br>
+
 ## Bakstelėjimo, dvigubo bakstelėjimo ir palaikymo veiksmai
 
 Taip pat galite naudoti numatytuosius Home Assistant bakstelėjimo, dvigubo bakstelėjimo ir palaikymo veiksmus tose kortelėse, kurios palaiko šią parinktį. Pavyzdžiui, tai leidžia rodyti langą "daugiau informacijos" palaikant mygtuko piktogramą arba vykdyti paslaugą, kai paspaudžiamas papildomas mygtukas.
@@ -1700,6 +1762,8 @@ Galite pridėti individualius stilius, kad pakeistumėte visų kortelių CSS **n
 
 > [!TIP]  
 > Papildomus mygtukus galima pasiekti per pavadinimu paremtas klases. Pavyzdžiui, papildomas mygtukas pavadinimu "My sub-button" gali būti stilizuojamas naudojant `.my-sub-button`. Slankiklio papildomi mygtukai taip pat turi `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` ir t. t.
+>
+> Pavadinimu paremta klasė pasikeičia pervadinus papildomą mygtuką, o kai pavadinimas išverčiamas, išverčiama ir ji. Nustatykite papildomam mygtukui `css_class`, kad turėtumėte savą klasę, kuri niekada nepasikeis, nesvarbu koks pavadinimas ir nesvarbu kokia kalba.
 
 #### Pavyzdžiai
 
@@ -2066,6 +2130,7 @@ Turite prieigą prie visų globalių JS funkcijų, bet taip pat turite prieigą 
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` grąžina `true`, kai [sąlygų](#sąlygos) sąrašas įvykdytas, pavyzdžiui `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` galima naudoti norint išversti būseną (taip pat galima naudoti gauti būsenos vienetą, nereikalaujant jo pridėti rankiniu būdu).
 - `hass.formatEntityAttributeValue(state, "attribute")` galima naudoti norint išversti atributą (taip pat galima naudoti gauti būsenos vienetą, nereikalaujant jo pridėti rankiniu būdu).
 
@@ -2318,6 +2383,8 @@ Moduliai yra galinga funkcija, leidžianti išsaugoti, pakartotinai naudoti ir d
 Bet ši funkcija yra kur kas galingesnė, nei atrodo, ji leidžia jums pačiam pridėti tikras funkcijas Bubble Card redaktoriuje, naudojant visas numatytąsias [Home Assistant formos](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) parinktis!  
 Objekto parinkiklis buvo patobulintas, kad rodytų gyvus pakeitimus ir teisingai palaikytų atributus.
 
+Modulis taip pat gali atsakyti Home Assistant kortelių parinkikliui šalia integruotų [esybių pasiūlymų](#esybių-pasiūlymai): naudokite `suggestions` toms kortelėms, kurias jis gali aprašyti iš anksto, ir `suggestions_code`, kai jas reikia apskaičiuoti pagal jūsų sąranką, pavyzdžiui iškylantįjį langą, sudarytą iš visų srities, kuriai priklauso pasirinkta esybė, esybių. Abu raktai aprašyti [čia](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Taip pat galite naršyti **Module Store**, kad rastumėte ir įdiegtumėte [bendruomenės sukurtus modulius](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), arba pasidalytumėte savo kūriniais!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Modulio redaktorių galite pasiekti iš bet kurios kortelės nustatymų, skiltyj
 - **Ieškoti** ir **rūšiuoti** modulius (abėcėlės tvarka, naujausi, aktyvūs pirmi)
 - **Nustatyti globalų statusą**, kad modulis automatiškai būtų taikomas visoms kortelėms
 - **Importuoti / eksportuoti** modulius atsarginei kopijai ar dalijimuisi
+- **Rašyti esybių pasiūlymus** modulio redaktoriuje, skiltyje **Neprivaloma: esybių pasiūlymai**, kad jūsų modulis būtų siūlomas Home Assistant kortelių parinkiklyje. Ir taisyklės, ir apskaičiuojami pasiūlymai tikrinami jums rašant, klaida ten neleidžia išsaugoti, o peržiūra rodo siūlomas korteles bet kuriai pasirinktai esybei
 
 #### Skirtukas „Module Store“
 
@@ -2391,7 +2459,8 @@ Modulio redaktorių galite pasiekti iš bet kurios kortelės nustatymų, skiltyj
 3. Užpildykite modulio informaciją.
 4. Įrašykite savo CSS ir (arba) JavaScript šablono kodą **Kodo** redaktoriuje.
 5. (Neprivaloma) Sukurkite individualią konfigūracijos sąsają skiltyje **Redaktorius** (kaip spalvų parinkiklis ekrano nuotraukoje aukščiau, visa dokumentacija prieinama [čia](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Spustelėkite **Išsaugoti**.
+6. (Neprivaloma) Parašykite savo **Esybių pasiūlymus**, kad jūsų modulis būtų siūlomas Home Assistant kortelių parinkiklyje. Skydelis tikrina, ką rašote, jums bespausdinant, o jo peržiūra rodo pačias siūlomas korteles jūsų pasirinktai esybei.
+7. Spustelėkite **Išsaugoti**.
 
 Dabar jūsų modulis prieinamas naudoti bet kurioje jūsų kortelėje!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Daugiau pavyzdžių rasite Module Store, arba [čia](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalizacija
+
+Bubble Card kalba jūsų kalba. Jos redaktorius išverstas į 64 kalbas, kurias palaiko Home Assistant, ir visur, kur Home Assistant jau turi savo žodį, perimama jo formuluotė, tad abiejose sąsajose skaitote tuos pačius terminus.
+
+Redaktoriaus apačioje, šalia versijos numerio, jungiklis **Automatinis** seka jūsų Home Assistant kalbą. Išjunkite jį ir visas redaktorius grįš į anglų kalbą, o tai patogu sekant vadovą ar pranešant apie problemą. Jūsų pasirinkimas įsimenamas naršyklėje.
+
+Ši dokumentacija taip pat išversta, [į 62 kalbas](languages.md). Tie puslapiai atviri visiems, tad formuluotę, kuri neatitinka jūsų paties Home Assistant, galima pataisyti keliais spustelėjimais. Turinio atskaitos tašku lieka angliška versija.
 
 <br>
 

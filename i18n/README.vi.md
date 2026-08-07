@@ -18,7 +18,7 @@ Bubble Card là một bộ sưu tập thẻ tối giản và có thể tùy ch�
 
 ## Mục lục
 
-**[`Cài đặt`](#cài-đặt)**  **[`Cấu hình`](#cấu-hình)**  **[`Pop-up`](#pop-up)**  **[`Ngăn xếp nút ngang`](#ngăn-xếp-nút-ngang)**  **[`Nút`](#nút)**  **[`Trình phát đa phương tiện`](#trình-phát-đa-phương-tiện)**  **[`Rèm cửa`](#rèm-cửa)**  **[`Chọn`](#chọn)**  **[`Điều hòa`](#điều-hòa)**  **[`Lịch`](#lịch)**  **[`Dấu phân cách`](#dấu-phân-cách)**  **[`Cột trống`](#cột-trống)**  **[`Chỉ nút phụ`](#chỉ-nút-phụ)**  **[`Nút phụ`](#nút-phụ)**  **[`Bố cục thẻ`](#bố-cục-thẻ)**  **[`Hành động`](#hành-động-chạm-chạm-đúp-và-giữ)**  **[`Giao diện`](#giao-diện)**  **[`Mẫu`](#mẫu)**  **[`Mô-đun`](#mô-đun)**  **[`Trợ giúp`](#trợ-giúp)**  **[`Đóng góp`](#đóng-góp)**  **[`Quyên góp`](#quyên-góp)**
+**[`Cài đặt`](#cài-đặt)**  **[`Cấu hình`](#cấu-hình)**  **[`Gợi ý thực thể`](#gợi-ý-thực-thể)**  **[`Pop-up`](#pop-up)**  **[`Ngăn xếp nút ngang`](#ngăn-xếp-nút-ngang)**  **[`Nút`](#nút)**  **[`Trình phát đa phương tiện`](#trình-phát-đa-phương-tiện)**  **[`Rèm cửa`](#rèm-cửa)**  **[`Chọn`](#chọn)**  **[`Điều hòa`](#điều-hòa)**  **[`Lịch`](#lịch)**  **[`Dấu phân cách`](#dấu-phân-cách)**  **[`Cột trống`](#cột-trống)**  **[`Chỉ nút phụ`](#chỉ-nút-phụ)**  **[`Nút phụ`](#nút-phụ)**  **[`Bố cục thẻ`](#bố-cục-thẻ)**  **[`Điều kiện`](#điều-kiện)**  **[`Hành động`](#hành-động-chạm-chạm-đúp-và-giữ)**  **[`Giao diện`](#giao-diện)**  **[`Mẫu`](#mẫu)**  **[`Mô-đun`](#mô-đun)**  **[`Bản địa hóa`](#bản-địa-hóa)**  **[`Trợ giúp`](#trợ-giúp)**  **[`Đóng góp`](#đóng-góp)**  **[`Quyên góp`](#quyên-góp)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card là một bộ sưu tập thẻ tối giản và có thể tùy ch�
 
 <br>
 
-1. Tải tệp này về: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Thêm tệp này vào thư mục `<config>/www` của bạn
+1. Tải `bubble-card.zip` từ [bản phát hành mới nhất](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Giải nén nó vào thư mục `<config>/www` của bạn, bạn sẽ có `bubble-card.js` và một thư mục `translations` bên cạnh (thư mục đó chứa từ điển của trình chỉnh sửa, không có nó thì trình chỉnh sửa vẫn ở tiếng Anh)
 3. Trên dashboard của bạn, nhấp vào biểu tượng ở góc trên bên phải rồi chọn `Edit dashboard`
 4. Nhấp lại vào biểu tượng đó rồi chọn `Manage resources`
 5. Nhấp vào `Add resource`
@@ -130,6 +130,21 @@ Tất cả các tùy chọn có thể được cấu hình trong trình chỉnh 
 
 <br>
 
+## Gợi ý thực thể
+
+Kể từ Home Assistant 2026.6, việc chọn một thực thể trong bộ chọn thẻ sẽ đề xuất cho bạn vài thẻ dựng sẵn, và Bubble Card trả lời câu hỏi đó bằng những công thức của riêng nó. Chọn một đèn và bạn được đề xuất một thẻ có thanh trượt độ sáng, kèm theo các biến thể nhiệt độ màu, màu sắc và độ bão hòa khi đèn của bạn hỗ trợ. Chọn một rèm cửa và bạn có thanh trượt vị trí của nó, chọn một trình phát đa phương tiện và bạn còn có một biến thể kèm danh sách nguồn, chọn một máy hút bụi và bạn có các nút bắt đầu, tạm dừng và về dock. Mỗi gợi ý là một cấu hình Bubble Card bình thường được hiển thị dưới dạng xem trước trực tiếp, nên bạn có thể lấy cái gần nhất và tiếp tục chỉnh sửa như thường lệ.
+
+Những gì được đề xuất phụ thuộc vào việc thực thể của bạn thực sự làm được gì: một đèn không có kênh độ sáng sẽ nhận công tắc thay vì thanh trượt, một rèm cửa không nghiêng được thì không có biến thể góc nghiêng, và một thực thể điều hòa chỉ nhận các chế độ cài sẵn khi nó có. Các mục cổ điển theo sau bên dưới khi phù hợp: thẻ chuyên dụng của miền, một nút thường và một thanh trượt.
+
+> [!TIP]
+> Mô-đun có thể thêm gợi ý của riêng chúng vào danh sách đó, xem [mô-đun](#mô-đun).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Thẻ này cho phép bạn tạo một pop-up với bất kỳ nội dung nào. 
 | `shadow_opacity` | string | Tùy chọn | Bất kỳ giá trị nào từ `0` đến `100` | Độ mờ của bóng đổ pop-up của bạn (ví dụ: `0` để ẩn nó) |
 | `hide_backdrop` | boolean | Tùy chọn | `true` hoặc `false` (mặc định) | Đặt giá trị này là true trên pop-up đầu tiên của dashboard chính để tắt hậu cảnh trên tất cả các pop-up. |
 | `background_update` | boolean | Tùy chọn | `true` hoặc `false` (mặc định) | Cập nhật nội dung pop-up ở chế độ nền (không khuyến nghị) |
-| `trigger_entity` | string | Tùy chọn | Bất kỳ thực thể nào | Mở pop-up này dựa trên trạng thái của bất kỳ thực thể nào |
+| `trigger` | object hoặc list | Tùy chọn | Xem [điều kiện](#điều-kiện) | Mở pop-up này khi các điều kiện được đáp ứng |
+| `trigger_entity` | string | Tùy chọn | Bất kỳ thực thể nào | Mở pop-up này dựa trên trạng thái của bất kỳ thực thể nào, dạng đơn giản của `trigger` |
 | `trigger_state` | string | Tùy chọn (**Bắt buộc** nếu `trigger_entity` được xác định) | Bất kỳ trạng thái thực thể nào | Trạng thái thực thể để mở pop-up |
-| `trigger_close` | boolean | Tùy chọn | `true` hoặc `false` (mặc định) | Đóng pop-up khi `trigger_state` khác đi |
+| `trigger_close` | boolean | Tùy chọn | `true` hoặc `false` | Đóng pop-up khi các điều kiện không còn được đáp ứng (mặc định: `true` với `trigger`, `false` với `trigger_state`) |
 | `open_action` | object | Tùy chọn | Xem [hành động](#hành-động-chạm-chạm-đúp-và-giữ) | Kích hoạt một hành động khi pop-up đang mở |
 | `close_action` | object | Tùy chọn | Xem [hành động](#hành-động-chạm-chạm-đúp-và-giữ) | Kích hoạt một hành động khi pop-up đang đóng |
 | `show_header` | boolean | Tùy chọn | `true` (mặc định) hoặc `false` | Hiện/Ẩn hoàn toàn header của pop-up |
@@ -445,8 +461,8 @@ Các tùy chọn này chỉ khả dụng khi `button_type` được đặt thàn
 | `relative_slide`        | boolean | Optional (`false` default )     | Cập nhật giá trị tương đối so với giá trị bắt đầu, thay vì điểm chạm ban đầu.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Đặt thanh trượt ở chế độ chỉ đọc. Tự động bật cho một số thực thể như cảm biến.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Trạng thái thực thể được cập nhật trong khi trượt. **Tính năng này không được khuyến nghị cho tất cả thực thể.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Thay đổi hướng lấp đầy của thanh trượt |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Vị trí hiển thị giá trị |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` hoặc `bottom` | Thay đổi hướng lấp đầy của thanh trượt. Từ trái sang phải khi không xác định, và đảo chiều trong [các ngôn ngữ viết từ phải sang trái](#bản-địa-hóa) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` hoặc `hidden` | Vị trí hiển thị giá trị. Ở phía cuối khi không xác định, tức là bên trái trong [các ngôn ngữ viết từ phải sang trái](#bản-địa-hóa) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Đảo ngược hướng thanh trượt (lấp đầy 100% tương ứng với giá trị tối thiểu). Không khả dụng cho thanh trượt màu. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Chỉ dành cho đèn.** Chọn chế độ thanh trượt |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Chỉ dành cho rèm cửa.** Chọn chế độ thanh trượt (vị trí hoặc góc nghiêng) |
@@ -940,7 +956,7 @@ Thẻ này cho phép bạn hiển thị các thực thể lịch của bạn. N�
 | `limit`             | number  | Optional     | A number                                        | Số lượng sự kiện sẽ được hiển thị trên thẻ                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Hiện hoặc ẩn thời gian kết thúc của sự kiện                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Hiện hoặc ẩn thanh tiến trình sự kiện                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Hiện hoặc ẩn các sự kiện đang diễn ra                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Hiện hoặc ẩn các sự kiện đang diễn ra. Sự kiện kéo dài nhiều ngày được xét theo từng ngày, nên chỉ ngày đang diễn ra bị ẩn còn những ngày sắp tới vẫn hiển thị |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | Cho phép văn bản cuộn khi nội dung vượt quá kích thước của vùng chứa |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#hành-động-chạm-chạm-đúp-và-giữ) | Cho phép thêm hành động khi nhấn sự kiện. |
 | `tap_action` | object | Optional | See [actions](#hành-động-chạm-chạm-đúp-và-giữ) | Định nghĩa loại hành động khi nhấn ngày, nếu không định nghĩa, `none` sẽ được dùng. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Không bắt buộc | `icon-left` (mặc định), `icon-top`, `icon-bottom`, `icon-right` | Vị trí icon bên trong nút phụ |
 | `always_visible` | boolean | Không bắt buộc | `true` hoặc `false` (mặc định) | **Chỉ dành cho thanh trượt.** Luôn hiển thị thanh trượt thay vì mở nó khi chạm |
 | `show_button_info` | boolean | Không bắt buộc | `true` hoặc `false` (mặc định) | **Chỉ dành cho thanh trượt.** Hiển thị icon/tên/trạng thái khi `always_visible` được bật |
-| `visibility` | object hoặc list | Không bắt buộc | Xem [điều kiện](https://www.home-assistant.io/docs/scripts/conditions/) | Hiển thị hoặc ẩn nút phụ dựa trên điều kiện |
+| `visibility` | object hoặc list | Không bắt buộc | Xem [điều kiện](#điều-kiện) | Hiển thị hoặc ẩn nút phụ dựa trên điều kiện |
 | `hide_when_parent_unavailable` | boolean | Không bắt buộc | `true` hoặc `false` (mặc định) | Ẩn nút phụ nếu entity của thẻ cha không khả dụng |
+| `css_class` | string | Không bắt buộc | Bất kỳ chuỗi nào | Một lớp CSS bổ sung trên nút phụ, để nhắm đến nó trong phần [giao diện](#giao-diện) của bạn dù tên của nó là gì (ví dụ `My value` cho ra `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Nút phụ dạng thanh trượt hỗ trợ các tùy chọn thanh trượt gi�
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Bán kính bo góc cho nút phụ |
 | `--bubble-sub-button-background-color` | `color` | Màu nền cho nút phụ |
+| `--bubble-sub-button-outline` | `box-shadow` | Đường viền chỉ được thêm vào một nút phụ hoặc một thanh trượt khi nó có cùng màu với thẻ phía sau, điều sẽ khiến nó trở nên vô hình (đặt thành `none` để bỏ đi) |
 | `--bubble-sub-slider-border-radius` | `px` | Bán kính bo góc cho nút phụ dạng thanh trượt |
 | `--bubble-sub-slider-background-color` | `color` | Màu nền cho nút phụ dạng thanh trượt |
 | `--bubble-sub-slider-height` | `px` | Chiều cao cho nút phụ dạng thanh trượt luôn hiển thị |
+| `--bubble-sub-slider-outline` | `box-shadow` | Đường viền chỉ dành cho nút phụ dạng thanh trượt, quay về `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Màu chữ trên nền nút phụ sáng màu |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Điều kiện
+
+Một số tùy chọn được điều khiển bằng điều kiện, viết y hệt như điều kiện của [thẻ có điều kiện](https://www.home-assistant.io/dashboards/conditional/) của Home Assistant:
+
+- `visibility` trên một [nút phụ](#nút-phụ), để hiện hoặc ẩn nó
+- `trigger` trên một [pop-up](#pop-up), để mở nó khi các điều kiện được đáp ứng
+- `checkConditionsMet(conditions, hass)` bên trong [mẫu](#mẫu) của bạn, khi bạn cần câu trả lời trong mã của chính mình
+
+Mọi loại điều kiện của Home Assistant đều được đánh giá: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, cùng các nhóm `and`, `or` và `not`. Các điều kiện của trình tạo điều kiện Home Assistant cũng hoạt động, tức là những điều kiện được đặt tên theo miền của chúng như `sun.is_up`, `light.is_on`, `zone.in_zone` hoặc `temperature.is_value`, kèm theo các thiết lập `target`, `options`, `behavior` và `for`.
+
+<details>
+
+<summary><b>Ví dụ</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Điều kiện được đánh giá trong trình duyệt của bạn, nên số ít điều kiện cần đến máy chủ Home Assistant không thể chính xác tuyệt đối: giờ mặt trời mọc và lặn được đọc từ thực thể `sun.sun` thay vì được tính lại, và khoảng thời gian `for` được đo từ lần đổi trạng thái gần nhất, không có lịch sử của recorder.
+>
+> `view_columns` được chấp nhận nhưng luôn thỏa mãn, vì Bubble Card không bao giờ là thứ sắp xếp các cột trong chế độ xem của bạn. Một loại điều kiện mà Bubble Card không biết sẽ tự báo một lần trong bảng điều khiển trình duyệt thay vì âm thầm thất bại, nên bạn phân biệt được lỗi gõ sai với một tính năng còn thiếu.
+
+<br>
+
+---
+
+<br>
+
 ## Hành động chạm, chạm đúp và giữ
 
 Bạn cũng có thể sử dụng các hành động chạm, chạm đúp và giữ mặc định của Home Assistant trên các thẻ hỗ trợ tùy chọn này. Ví dụ, điều này cho phép hiển thị cửa sổ "more info" khi giữ icon nút, hoặc chạy một service khi nhấp vào một nút phụ.
@@ -1700,6 +1762,8 @@ Bạn có thể thêm các kiểu tùy chỉnh để sửa đổi CSS của tấ
 
 > [!TIP]  
 > Các nút phụ có thể được nhắm đến bằng các lớp dựa trên tên. Ví dụ, một nút phụ tên "My sub-button" có thể được tạo kiểu bằng `.my-sub-button`. Các nút phụ dạng thanh trượt cũng lộ ra `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, v.v.
+>
+> Lớp dựa trên tên sẽ thay đổi khi bạn đổi tên nút phụ, và nó cũng được dịch khi tên được dịch. Hãy đặt `css_class` trên nút phụ để có một lớp của riêng bạn không bao giờ xê dịch, dù tên là gì và dù ngôn ngữ nào.
 
 #### Ví dụ
 
@@ -2066,6 +2130,7 @@ Bạn có quyền truy cập tất cả các hàm JS toàn cục, nhưng bạn c
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` trả về `true` khi một danh sách [điều kiện](#điều-kiện) được đáp ứng, ví dụ `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` có thể được dùng để dịch một trạng thái (cũng có thể dùng để lấy đơn vị của trạng thái, mà không cần thêm thủ công).
 - `hass.formatEntityAttributeValue(state, "attribute")` có thể được dùng để dịch một thuộc tính (cũng có thể dùng để lấy đơn vị của trạng thái, mà không cần thêm thủ công).
 
@@ -2318,6 +2383,8 @@ Mô-đun là một tính năng mạnh mẽ cho phép bạn lưu, tái sử dụn
 Nhưng tính năng này còn mạnh mẽ hơn thế nhiều, nó cho phép bạn tự thêm các tính năng thực sự trong trình chỉnh sửa Bubble Card, bằng cách dùng tất cả các tùy chọn [form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) mặc định của Home Assistant!  
 Bộ chọn đối tượng đã được cải tiến để hiển thị các thay đổi trực tiếp và hỗ trợ thuộc tính đúng cách.
 
+Một mô-đun cũng có thể trả lời bộ chọn thẻ của Home Assistant bên cạnh [gợi ý thực thể](#gợi-ý-thực-thể) tích hợp sẵn: dùng `suggestions` cho những thẻ có thể mô tả trước, và `suggestions_code` khi chúng phải được tính từ hệ thống của bạn, ví dụ một pop-up dựng từ mọi thực thể trong khu vực mà thực thể được chọn thuộc về. Cả hai khóa đều được ghi tài liệu [tại đây](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Bạn cũng có thể duyệt qua **Module Store** để tìm và cài đặt [mô-đun do cộng đồng tạo ra](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), hoặc chia sẻ những sáng tạo của riêng bạn!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Tab này hiển thị tất cả các mô-đun đã cài đặt của bạn và 
 - **Tìm kiếm** và **sắp xếp** mô-đun (theo bảng chữ cái, gần đây, đang hoạt động trước)
 - **Đặt trạng thái toàn cục** để một mô-đun tự động áp dụng cho tất cả các thẻ
 - **Nhập/Xuất** mô-đun để sao lưu hoặc chia sẻ
+- **Viết gợi ý thực thể** trong trình chỉnh sửa mô-đun, ở mục **Tùy chọn: Gợi ý thực thể**, để mô-đun của bạn được đề xuất trong bộ chọn thẻ của Home Assistant. Cả quy tắc lẫn gợi ý được tính toán đều được kiểm tra khi bạn viết, một lỗi ở đó sẽ chặn việc lưu, và phần xem trước hiển thị các thẻ được gợi ý cho bất kỳ thực thể nào bạn chọn
 
 #### Tab Module Store
 
@@ -2391,7 +2459,8 @@ Tab này sẽ hiển thị [tất cả các mô-đun có sẵn từ cộng đồ
 3. Điền thông tin mô-đun.
 4. Viết mã kiểu CSS và/hoặc mẫu JavaScript của bạn trong trình chỉnh sửa **Code**.
 5. (Tùy chọn) Tạo giao diện cấu hình tùy chỉnh trong mục **Editor** (như bộ chọn màu trong ảnh chụp màn hình ở trên, tài liệu đầy đủ có [tại đây](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Nhấn **Save**.
+6. (Tùy chọn) Viết **Gợi ý thực thể** của bạn để mô-đun được đề xuất trong bộ chọn thẻ của Home Assistant. Bảng này kiểm tra những gì bạn viết ngay khi bạn gõ, và phần xem trước của nó hiển thị chính các thẻ được gợi ý cho thực thể bạn chọn.
+7. Nhấn **Save**.
 
 Mô-đun của bạn giờ đã sẵn sàng để dùng trên bất kỳ thẻ nào của bạn!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Có thể tìm thấy thêm nhiều ví dụ khác trong Module Store, hoặc [tại đây](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Bản địa hóa
+
+Bubble Card nói ngôn ngữ của bạn. Trình chỉnh sửa của nó được dịch sang 64 ngôn ngữ mà Home Assistant hỗ trợ, và ở đâu Home Assistant đã có sẵn một từ cho điều gì đó, cách diễn đạt của chính nó được dùng lại, nên bạn đọc thấy cùng những thuật ngữ trong cả hai giao diện.
+
+Ở cuối trình chỉnh sửa, bên cạnh số phiên bản, một công tắc **Tự động** đi theo ngôn ngữ Home Assistant của bạn. Tắt nó đi thì toàn bộ trình chỉnh sửa trở lại tiếng Anh, điều này tiện khi làm theo một hướng dẫn hoặc khi báo lỗi. Lựa chọn của bạn được ghi nhớ trong trình duyệt.
+
+Tài liệu này cũng được dịch, [sang 62 ngôn ngữ](languages.md). Những trang đó mở cho tất cả mọi người, nên một cách diễn đạt không khớp với Home Assistant của riêng bạn có thể được sửa chỉ trong vài cú nhấp. Bản tiếng Anh vẫn là tham chiếu cho chính nội dung.
 
 <br>
 

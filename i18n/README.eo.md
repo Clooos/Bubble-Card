@@ -18,7 +18,7 @@ Bubble Card estas minimalisma kaj personigebla kolekto da kartoj por Home Assist
 
 ## Enhavtabelo
 
-**[`Instalado`](#instalado)**  **[`Agordado`](#agordado)**  **[`Ŝprucfenestro`](#ŝprucfenestro)**  **[`Horizontala stako de butonoj`](#horizontala-stako-de-butonoj)**  **[`Butono`](#butono)**  **[`Plurmedia ludilo`](#plurmedia-ludilo)**  **[`Kovrilo`](#kovrilo)**  **[`Elektilo`](#elektilo)**  **[`Klimatizilo`](#klimatizilo)**  **[`Kalendaro`](#kalendaro)**  **[`Apartigilo`](#apartigilo)**  **[`Malplena kolumno`](#malplena-kolumno)**  **[`Nur subbutonoj`](#nur-subbutonoj)**  **[`Subbutonoj`](#subbutonoj)**  **[`Aranĝoj de la karto`](#aranĝoj-de-la-karto)**  **[`Agoj`](#agoj-tuŝeti-duoble-tuŝeti-kaj-longe-premi)**  **[`Stiligo`](#stiligo)**  **[`Ŝablonoj`](#ŝablonoj)**  **[`Moduloj`](#moduloj)**  **[`Helpo`](#helpo)**  **[`Kontribuado`](#kontribuado)**  **[`Donaci`](#donaci)**
+**[`Instalado`](#instalado)**  **[`Agordado`](#agordado)**  **[`Sugestoj pri entoj`](#sugestoj-pri-entoj)**  **[`Ŝprucfenestro`](#ŝprucfenestro)**  **[`Horizontala stako de butonoj`](#horizontala-stako-de-butonoj)**  **[`Butono`](#butono)**  **[`Plurmedia ludilo`](#plurmedia-ludilo)**  **[`Kovrilo`](#kovrilo)**  **[`Elektilo`](#elektilo)**  **[`Klimatizilo`](#klimatizilo)**  **[`Kalendaro`](#kalendaro)**  **[`Apartigilo`](#apartigilo)**  **[`Malplena kolumno`](#malplena-kolumno)**  **[`Nur subbutonoj`](#nur-subbutonoj)**  **[`Subbutonoj`](#subbutonoj)**  **[`Aranĝoj de la karto`](#aranĝoj-de-la-karto)**  **[`Kondiĉoj`](#kondiĉoj)**  **[`Agoj`](#agoj-tuŝeti-duoble-tuŝeti-kaj-longe-premi)**  **[`Stiligo`](#stiligo)**  **[`Ŝablonoj`](#ŝablonoj)**  **[`Moduloj`](#moduloj)**  **[`Lokalizado`](#lokalizado)**  **[`Helpo`](#helpo)**  **[`Kontribuado`](#kontribuado)**  **[`Donaci`](#donaci)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card estas minimalisma kaj personigebla kolekto da kartoj por Home Assist
 
 <br>
 
-1. Elŝutu ĉi tiun dosieron: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Aldonu ĉi tiun dosieron al via `<config>/www` dosierujo
+1. Elŝutu `bubble-card.zip` el la [plej nova eldono](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Malpaku ĝin en via dosierujo `<config>/www`, vi devus ricevi `bubble-card.js` kaj apude dosierujon `translations` (tiu dosierujo enhavas la vortarojn de la redaktilo, sen ĝi la redaktilo restas en la angla)
 3. Sur via panelo, alklaku la piktogramon en la supra dekstra angulo, poste alklaku `Edit dashboard`
 4. Alklaku denove tiun piktogramon, poste alklaku `Manage resources`
 5. Alklaku `Add resource`
@@ -130,6 +130,21 @@ Vi ankaŭ povas rigardi mian YouTube-kanalon por paŝo-post-paŝaj videoj.
 
 <br>
 
+## Sugestoj pri entoj
+
+Ekde Home Assistant 2026.6, elekti enton en la kartoelektilo proponas al vi kelkajn pretajn kartojn, kaj Bubble Card respondas tiun demandon per siaj propraj receptoj. Elektu lumon kaj oni proponas al vi karton kun heleca glitilo, plus varianton kun kolortemperaturo, unu kun koloro kaj unu kun satureco, kiam via lumo subtenas ilin. Elektu kovrilon kaj vi ricevas la glitilon de ĝia pozicio, elektu plurmedian ludilon kaj vi ricevas ankaŭ varianton kun ĝia listo de fontoj, elektu polvosuĉilon kaj vi ricevas ĝiajn butonojn por starti, paŭzi kaj reveni al la bazo. Ĉiu sugesto estas ordinara agordo de Bubble Card montrata kiel viva antaŭrigardo, do vi povas preni la plej proksiman kaj plu redakti ĝin kiel kutime.
+
+Kio estas proponata al vi dependas de tio, kion via ento vere kapablas: lumo sen heleca kanalo ricevas ŝaltilon anstataŭ glitilon, kovrilo kiu ne povas klini ne ricevas klinan varianton, kaj klimatiza ento ricevas siajn antaŭagordojn nur kiam ĝi havas iujn. La klasikaj eroj sekvas sub ili kiam ili taŭgas: la dediĉita karto de la domajno, simpla butono kaj glitilo.
+
+> [!TIP]
+> Moduloj povas aldoni siajn proprajn sugestojn al tiu listo, vidu [modulojn](#moduloj).
+
+<br>
+
+---
+
+<br>
+
 ## Ŝprucfenestro
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Vi ankaŭ povas rigardi mian YouTube-kanalon por paŝo-post-paŝaj videoj.
 | `shadow_opacity` | string | Malnepra | Ajna valoro de `0` ĝis `100` | La ombra opakeco de via ŝprucfenestro (ekz. `0` por kaŝi ĝin) |
 | `hide_backdrop` | boolean | Malnepra | `true` aŭ `false` (defaŭlta) | Agordu tion al true ĉe la unua ŝprucfenestro de via ĉefa panelo por malŝalti la fonon (backdrop) por ĉiuj ŝprucfenestroj. |
 | `background_update` | boolean | Malnepra | `true` aŭ `false` (defaŭlta) | Ĝisdatigas la enhavon de la ŝprucfenestro fone (ne rekomendata) |
-| `trigger_entity` | string | Malnepra | Ajna ento | Malfermas ĉi tiun ŝprucfenestron laŭ la stato de ajna ento |
+| `trigger` | object aŭ list | Malnepra | Vidu [kondiĉojn](#kondiĉoj) | Malfermas ĉi tiun ŝprucfenestron kiam la kondiĉoj estas plenumitaj |
+| `trigger_entity` | string | Malnepra | Ajna ento | Malfermas ĉi tiun ŝprucfenestron laŭ la stato de ajna ento, la simpla formo de `trigger` |
 | `trigger_state` | string | Malnepra (**Postulata** se `trigger_entity` estas difinita) | Ajna stato de ento | Stato de ento por malfermi la ŝprucfenestron |
-| `trigger_close` | boolean | Malnepra | `true` aŭ `false` (defaŭlta) | Fermas la ŝprucfenestron kiam `trigger_state` estas malsama |
+| `trigger_close` | boolean | Malnepra | `true` aŭ `false` | Fermas la ŝprucfenestron kiam la kondiĉoj ne plu estas plenumitaj (defaŭlte: `true` kun `trigger`, `false` kun `trigger_state`) |
 | `open_action` | object | Malnepra | Vidu [agojn](#agoj-tuŝeti-duoble-tuŝeti-kaj-longe-premi) | Ekigas agon kiam la ŝprucfenestro malfermiĝas |
 | `close_action` | object | Malnepra | Vidu [agojn](#agoj-tuŝeti-duoble-tuŝeti-kaj-longe-premi) | Ekigas agon kiam la ŝprucfenestro fermiĝas |
 | `show_header` | boolean | Malnepra | `true` (defaŭlta) aŭ `false` | Montras/Kaŝas plene la kapon de la ŝprucfenestro |
@@ -445,8 +461,8 @@ auto_order: true
 | `relative_slide`        | boolean | Nedeviga (`false` defaŭlta )     | Ĝisdatigi la valoron relative al la komenca valoro, anstataŭ la komenca tuŝpunkto.                      |
 | `read_only_slider`      | boolean | Nedeviga (`false` defaŭlta)      | Fari la glitilon nur-legebla. Aŭtomate ŝaltita por kelkaj eroj kiel sensiloj.                        |
 | `slider_live_update`    | boolean | Nedeviga (`false` defaŭlta)      | La stato de la ero ĝisdatiĝas dum glitado. **Ĉi tiu funkcio ne estas rekomendata por ĉiuj eroj.**        |
-| `slider_fill_orientation` | string | Nedeviga | `left` (defaŭlta), `right`, `top`, `bottom` | Ŝanĝi la plenigan direkton de la glitilo |
-| `slider_value_position` | string | Nedeviga | `right` (defaŭlta), `left`, `center`, `hidden` | Pozicio de la valora montrilo |
+| `slider_fill_orientation` | string | Nedeviga | `left`, `right`, `top` aŭ `bottom` | Ŝanĝi la plenigan direkton de la glitilo. De maldekstre dekstren kiam nedifinita, spegulita en [lingvoj skribataj de dekstre maldekstren](#lokalizado) |
+| `slider_value_position` | string | Nedeviga | `right`, `left`, `center` aŭ `hidden` | Pozicio de la valora montrilo. Ĉe la fina flanko kiam nedifinita, do maldekstre en [lingvoj skribataj de dekstre maldekstren](#lokalizado) |
 | `invert_slider_value` | boolean | Nedeviga (`false` defaŭlta) | Inversigi la direkton de la glitilo (100% pleniĝo egalas al la minimumo). Ne disponebla por kolorglitiloj. |
 | `light_slider_type` | string | Nedeviga | `brightness` (defaŭlta), `hue`, `saturation`, `white_temp` | **Nur por lumoj.** Elekti la reĝimon de la glitilo |
 | `cover_slider_type` | string | Nedeviga | `position` (defaŭlta), `tilt_position` | **Nur por kovriloj.** Elekti la reĝimon de la glitilo (pozicio aŭ klino) |
@@ -940,7 +956,7 @@ sub_button:
 | `limit`             | number  | Nedeviga     | Nombro                                        | La kvanto da eventoj, kiuj estos montrataj sur la karto                                  |
 | `show_end`          | boolean | Nedeviga     | `true` aŭ `false` (defaŭlta)                     | Montri aŭ kaŝi la finan tempon de eventoj                                                    |
 | `show_progress`     | boolean | Nedeviga     | `true` (defaŭlta) aŭ `false`                     | Montri aŭ kaŝi la progresbreton de la evento                                                     |
-| `show_started_events`| boolean | Nedeviga     | `true` (defaŭlta) aŭ `false`                     | Montri aŭ kaŝi eventojn, kiuj nune okazas                                                 |
+| `show_started_events`| boolean | Nedeviga     | `true` (defaŭlta) aŭ `false`                     | Montri aŭ kaŝi eventojn, kiuj nune okazas. Plurtagaj eventoj estas juĝataj tagon post tago, do nur la kuranta tago estas kaŝata kaj la venontaj tagoj restas videblaj |
 | `scrolling_effect`  | boolean | Nedeviga | `true` (defaŭlta) aŭ `false` | Permesi al teksto ruli kiam la enhavo superas la grandon de sia ujo |
 | `event_action` | object | Nedeviga | `tap_action`, `double_tap_action` aŭ `hold_action`, vidu [agojn](#agoj-tuŝeti-duoble-tuŝeti-kaj-longe-premi) | Permesi aldoni agojn ĉe klako sur evento. |
 | `tap_action` | object | Nedeviga | Vidu [agojn](#agoj-tuŝeti-duoble-tuŝeti-kaj-longe-premi) | Difini la tipon de ago ĉe klako sur tago, se nedifinita, `none` estos uzata. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Nedeviga | `icon-left` (defaŭlta), `icon-top`, `icon-bottom`, `icon-right` | Loko de la piktogramo interne de la subbutono |
 | `always_visible` | boolean | Nedeviga | `true` aŭ `false` (defaŭlta) | **Nur por ŝoviloj.** Ĉiam montri la ŝovilon anstataŭ malfermi ĝin ĉe tuŝeto |
 | `show_button_info` | boolean | Nedeviga | `true` aŭ `false` (defaŭlta) | **Nur por ŝoviloj.** Montri piktogramon/nomon/staton kiam `always_visible` estas ŝaltita |
-| `visibility` | object aŭ list | Nedeviga | Vidu [kondiĉojn](https://www.home-assistant.io/docs/scripts/conditions/) | Montri aŭ kaŝi la subbutonon laŭ kondiĉoj |
+| `visibility` | object aŭ list | Nedeviga | Vidu [kondiĉojn](#kondiĉoj) | Montri aŭ kaŝi la subbutonon laŭ kondiĉoj |
 | `hide_when_parent_unavailable` | boolean | Nedeviga | `true` aŭ `false` (defaŭlta) | Kaŝi la subbutonon se la ento de la patra karto ne haveblas |
+| `css_class` | string | Nedeviga | Ajna signoĉeno | Kroma CSS-klaso sur la subbutono, por celi ĝin en via [stiligo](#stiligo) kia ajn estu ĝia nomo (ekz. `My value` donas `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ sub_button:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rondeco de anguloj por la subbutonoj |
 | `--bubble-sub-button-background-color` | `color` | Fona koloro por la subbutonoj |
+| `--bubble-sub-button-outline` | `box-shadow` | Konturo aldonata al subbutono aŭ ŝovilo nur kiam ĝi estas pentrata en la sama koloro kiel la karto malantaŭ ĝi, kio farus ĝin nevidebla (agordu ĝin al `none` por forigi ĝin) |
 | `--bubble-sub-slider-border-radius` | `px` | Rondeco de anguloj por ŝovilaj subbutonoj |
 | `--bubble-sub-slider-background-color` | `color` | Fona koloro por ŝovilaj subbutonoj |
 | `--bubble-sub-slider-height` | `px` | Alto por ĉiam-videblaj ŝovilaj subbutonoj |
+| `--bubble-sub-slider-outline` | `box-shadow` | Konturo nur de la ŝovilaj subbutonoj, retropaŝas al `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Teksta koloro sur helaj fonoj de subbutonoj |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Kondiĉoj
+
+Kelkaj opcioj estas regataj de kondiĉoj, skribataj ekzakte kiel tiuj de la [kondiĉa karto](https://www.home-assistant.io/dashboards/conditional/) de Home Assistant:
+
+- `visibility` sur [subbutono](#subbutonoj), por montri aŭ kaŝi ĝin
+- `trigger` sur [ŝprucfenestro](#ŝprucfenestro), por malfermi ĝin kiam la kondiĉoj estas plenumitaj
+- `checkConditionsMet(conditions, hass)` ene de viaj [ŝablonoj](#ŝablonoj), kiam vi bezonas la respondon en via propra kodo
+
+Ĉiu kondiĉotipo de Home Assistant estas taksata: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, kaj la grupoj `and`, `or` kaj `not`. Ankaŭ la kondiĉoj de la kondiĉkonstruilo de Home Assistant funkcias, tiuj nomitaj laŭ sia domajno kiel `sun.is_up`, `light.is_on`, `zone.in_zone` aŭ `temperature.is_value`, kun siaj agordoj `target`, `options`, `behavior` kaj `for`.
+
+<details>
+
+<summary><b>Ekzemplo</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Kondiĉoj estas taksataj en via retumilo, do la malmultaj el ili kiuj bezonas la servilon de Home Assistant ne povas esti ekzaktaj: sunleviĝo kaj sunsubiro estas legataj el la ento `sun.sun` anstataŭ esti rekalkulataj, kaj daŭro `for` estas mezurata de la lasta ŝanĝo de stato, sen la historio de recorder.
+>
+> `view_columns` estas akceptata sed ĉiam sukcesas, ĉar Bubble Card neniam estas tiu, kiu aranĝas la kolumnojn de via vido. Kondiĉotipo, kiun Bubble Card ne konas, anoncas sin unufoje en via retumila konzolo anstataŭ silente malsukcesi, do vi povas distingi tajperaron de mankanta funkcio.
+
+<br>
+
+---
+
+<br>
+
 ## Agoj tuŝeti, duoble tuŝeti kaj longe premi
 
 Vi ankaŭ povas uzi la defaŭltajn tuŝ-agojn, duoblajn tuŝ-agojn kaj premo-agojn de Home Assistant sur la kartoj, kiuj subtenas tiun opcion. Ekzemple, tio ebligas montri la fenestron "pli da informoj" per longa premo sur butona piktogramo, aŭ ruli servon kiam subbutono estas premita.
@@ -1700,6 +1762,8 @@ Vi povas aldoni proprajn stilojn por modifi la CSS de ĉiuj kartoj **sen uzi car
 
 > [!TIP]  
 > Subbutonoj povas esti celataj per nom-bazitaj klasoj. Ekzemple, subbutono nomita "My sub-button" povas esti stiligita per `.my-sub-button`. Ŝovilaj subbutonoj ankaŭ havigas `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, ktp.
+>
+> Nom-bazita klaso ŝanĝiĝas kiam vi renomas subbutonon, kaj ĝi estas tradukata kiam la nomo estas tradukata. Agordu `css_class` sur la subbutono por havi propran klason, kiu neniam moviĝas, kia ajn estu ĝia nomo kaj kia ajn estu la lingvo.
 
 #### Ekzemploj
 
@@ -2066,6 +2130,7 @@ Vi havas aliron al ĉiuj tutmondaj JS-funkcioj, sed vi ankaŭ havas aliron al:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` redonas `true` kiam listo de [kondiĉoj](#kondiĉoj) estas plenumita, ekzemple `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` uzeblas por traduki staton (ankaŭ uzeblas por ricevi la unuon de stato, sen bezono aldoni ĝin permane).
 - `hass.formatEntityAttributeValue(state, "attribute")` uzeblas por traduki atributon (ankaŭ uzeblas por ricevi la unuon de stato, sen bezono aldoni ĝin permane).
 
@@ -2318,6 +2383,8 @@ Moduloj estas potenca funkcio, kiu ebligas al vi konservi, reuzi kaj kunhavigi v
 Sed ĉi tiu funkcio estas multe pli potenca ol tio, ĝi ebligas al vi mem aldoni verajn funkciojn en la redaktilo de Bubble Card, uzante ĉiujn defaŭltajn opciojn de [Home Assistant-formularo](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 La objekto-elektilo estis plibonigita por montri vivajn ŝanĝojn kaj por korekte subteni atributojn.
 
+Modulo povas ankaŭ respondi al la kartoelektilo de Home Assistant apud la enkonstruitaj [sugestoj pri entoj](#sugestoj-pri-entoj): uzu `suggestions` por la kartoj, kiujn ĝi povas priskribi anticipe, kaj `suggestions_code` kiam ili devas esti kalkulataj el via instalaĵo, ekzemple ŝprucfenestro konstruita el ĉiuj entoj de la areo al kiu apartenas la elektita ento. Ambaŭ ŝlosiloj estas dokumentitaj [ĉi tie](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Vi ankaŭ povas foliumi la **Module Store** por trovi kaj instali [modulojn kreitajn de la komunumo](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), aŭ kunhavigi viajn proprajn kreaĵojn!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Vi povas aliri la Module Editor el la agordoj de ajna karto, sub la sekcio **Mod
 - **Serĉi** kaj **ordigi** modulojn (alfabete, laste uzitaj, aktivaj unue)
 - **Agordi tutmondan staton** por igi modulon aŭtomate aplikita al ĉiuj kartoj
 - **Enporti/Elporti** modulojn por sekurkopio aŭ kunhavigo
+- **Skribi sugestojn pri entoj** en la modula redaktilo, sub **Nedeviga: sugestoj pri entoj**, por ke via modulo estu proponata en la kartoelektilo de Home Assistant. Kaj la reguloj kaj la kalkulitaj sugestoj estas kontrolataj dum vi skribas, eraro tie malebligas konservi, kaj la antaŭrigardo montras la sugestitajn kartojn por ajna ento, kiun vi elektas
 
 #### La langeto Module Store
 
@@ -2391,7 +2459,8 @@ Vi povas aliri la Module Editor el la agordoj de ajna karto, sub la sekcio **Mod
 3. Plenigu la informojn de la modulo.
 4. Skribu vian CSS- kaj/aŭ JavaScript-ŝablonan kodon en la redaktilo **Code**.
 5. (Malnepre) Kreu propran agordan interfacon en la sekcio **Editor** (kiel la kolorelektilo en la ekrankopio supre, plena dokumentado disponebla [ĉi tie](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klaku **Save**.
+6. (Malnepre) Skribu viajn **Sugestojn pri entoj** por ke via modulo estu proponata en la kartoelektilo de Home Assistant. La panelo kontrolas tion, kion vi skribas, dum vi tajpas, kaj ĝia antaŭrigardo montras la sugestitajn kartojn mem por la ento laŭ via elekto.
+7. Klaku **Save**.
 
 Via modulo nun disponeblas por esti uzata sur ajna el viaj kartoj!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Pli da ekzemploj troveblas en la Module Store, aŭ [ĉi tie](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalizado
+
+Bubble Card parolas vian lingvon. Ĝia redaktilo estas tradukita en la 64 lingvojn, kiujn Home Assistant subtenas, kaj ĉie kie Home Assistant jam havas vorton por io, ĝia propra formulado estas reuzata, do vi legas la samajn terminojn en ambaŭ interfacoj.
+
+Sube en la redaktilo, apud la versinumero, ŝaltilo **Aŭtomata** sekvas vian lingvon de Home Assistant. Malŝaltu ĝin kaj la tuta redaktilo revenas al la angla, kio utilas por sekvi lernilon aŭ por raporti problemon. Via elekto estas memorata en via retumilo.
+
+Ankaŭ ĉi tiu dokumentaro estas tradukita, [en 62 lingvojn](languages.md). Tiuj paĝoj estas malfermitaj al ĉiuj, do formulado, kiu ne kongruas kun via propra Home Assistant, korekteblas per kelkaj klakoj. La angla versio restas la referenco por la enhavo mem.
 
 <br>
 

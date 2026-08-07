@@ -18,7 +18,7 @@ Bubble Card este o colecție minimalistă și personalizabilă de carduri pentru
 
 ## Cuprins
 
-**[`Instalare`](#instalare)**  **[`Configurare`](#configurare)**  **[`Pop-up`](#pop-up)**  **[`Stivă orizontală de butoane`](#stivă-orizontală-de-butoane)**  **[`Buton`](#buton)**  **[`Player media`](#player-media)**  **[`Rulou`](#rulou)**  **[`Selecție`](#selecție)**  **[`Climatizare`](#climatizare)**  **[`Calendar`](#calendar)**  **[`Separator`](#separator)**  **[`Coloană goală`](#coloană-goală)**  **[`Doar sub-butoane`](#doar-sub-butoane)**  **[`Sub-butoane`](#sub-butoane)**  **[`Aspectele cardurilor`](#aspectele-cardurilor)**  **[`Acțiuni`](#acțiuni-la-atingere-atingere-dublă-și-apăsare-lungă)**  **[`Stiluri`](#stiluri)**  **[`Șabloane`](#șabloane)**  **[`Module`](#module)**  **[`Ajutor`](#ajutor)**  **[`Contribuții`](#contribuții)**  **[`Donații`](#donații)**
+**[`Instalare`](#instalare)**  **[`Configurare`](#configurare)**  **[`Sugestii de entități`](#sugestii-de-entități)**  **[`Pop-up`](#pop-up)**  **[`Stivă orizontală de butoane`](#stivă-orizontală-de-butoane)**  **[`Buton`](#buton)**  **[`Player media`](#player-media)**  **[`Rulou`](#rulou)**  **[`Selecție`](#selecție)**  **[`Climatizare`](#climatizare)**  **[`Calendar`](#calendar)**  **[`Separator`](#separator)**  **[`Coloană goală`](#coloană-goală)**  **[`Doar sub-butoane`](#doar-sub-butoane)**  **[`Sub-butoane`](#sub-butoane)**  **[`Aspectele cardurilor`](#aspectele-cardurilor)**  **[`Condiții`](#condiții)**  **[`Acțiuni`](#acțiuni-la-atingere-atingere-dublă-și-apăsare-lungă)**  **[`Stiluri`](#stiluri)**  **[`Șabloane`](#șabloane)**  **[`Module`](#module)**  **[`Localizare`](#localizare)**  **[`Ajutor`](#ajutor)**  **[`Contribuții`](#contribuții)**  **[`Donații`](#donații)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card este o colecție minimalistă și personalizabilă de carduri pentru
 
 <br>
 
-1. Descarcă acest fișier: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Adaugă acest fișier în folderul `<config>/www`
+1. Descarcă `bubble-card.zip` din [cea mai recentă versiune](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Dezarhivează-l în folderul `<config>/www`, ar trebui să obții `bubble-card.js` și un folder `translations` alături (acel folder conține dicționarele editorului, fără el editorul rămâne în engleză)
 3. Pe dashboard, apasă pe iconița din colțul din dreapta sus, apoi pe `Edit dashboard`
 4. Apasă din nou pe acea iconiță, apoi pe `Manage resources`
 5. Apasă pe `Add resource`
@@ -130,6 +130,21 @@ Toate opțiunile pot fi configurate din editorul Home Assistant. Dar poți găsi
 
 <br>
 
+## Sugestii de entități
+
+Începând cu Home Assistant 2026.6, alegerea unei entități în selectorul de carduri îți propune câteva carduri gata făcute, iar Bubble Card răspunde la această întrebare cu propriile rețete. Alege o lumină și ți se propune un card cu un cursor de luminozitate, plus variante pentru temperatura culorii, culoare și saturație atunci când lumina ta le suportă. Alege un rulou și primești cursorul de poziție, alege un player media și primești și o variantă cu lista lui de surse, alege un aspirator și primești butoanele de pornire, pauză și revenire la stație. Fiecare sugestie este o configurație obișnuită Bubble Card afișată ca previzualizare live, așa că poți lua cea mai apropiată și să o editezi mai departe ca de obicei.
+
+Ce ți se propune depinde de ceea ce poate face cu adevărat entitatea ta: o lumină fără canal de luminozitate primește un comutator în locul unui cursor, un rulou care nu se poate înclina nu primește varianta de înclinare, iar o entitate de climatizare primește modurile presetate doar dacă are vreunul. Intrările clasice urmează sub ele atunci când se aplică: cardul dedicat domeniului, un buton simplu și un cursor.
+
+> [!TIP]
+> Modulele pot adăuga propriile sugestii în acea listă, vezi [module](#module).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Acest card îți permite să creezi un pop-up cu orice conținut. Fiecare pop-up
 | `shadow_opacity` | string | Opțional | Orice valoare de la `0` la `100` | Opacitatea umbrei pop-up-ului tău (de ex. `0` pentru a o ascunde) |
 | `hide_backdrop` | boolean | Opțional | `true` sau `false` (implicit) | Setează asta la true pe primul pop-up al dashboard-ului tău principal pentru a dezactiva backdrop-ul pe toate pop-up-urile. |
 | `background_update` | boolean | Opțional | `true` sau `false` (implicit) | Actualizează conținutul pop-up-ului în fundal (nerecomandat) |
-| `trigger_entity` | string | Opțional | Orice entitate | Deschide acest pop-up pe baza stării oricărei entități |
+| `trigger` | object sau list | Opțional | Vezi [condiții](#condiții) | Deschide acest pop-up când condițiile sunt îndeplinite |
+| `trigger_entity` | string | Opțional | Orice entitate | Deschide acest pop-up pe baza stării oricărei entități, forma simplă a `trigger` |
 | `trigger_state` | string | Opțional (**Obligatoriu** dacă `trigger_entity` este definit) | Orice stare de entitate | Starea entității pentru a deschide pop-up-ul |
-| `trigger_close` | boolean | Opțional | `true` sau `false` (implicit) | Închide pop-up-ul când `trigger_state` este diferit |
+| `trigger_close` | boolean | Opțional | `true` sau `false` | Închide pop-up-ul când condițiile nu mai sunt îndeplinite (implicit: `true` cu `trigger`, `false` cu `trigger_state`) |
 | `open_action` | object | Opțional | Vezi [acțiuni](#acțiuni-la-atingere-atingere-dublă-și-apăsare-lungă) | Declanșează o acțiune la deschiderea pop-up-ului |
 | `close_action` | object | Opțional | Vezi [acțiuni](#acțiuni-la-atingere-atingere-dublă-și-apăsare-lungă) | Declanșează o acțiune la închiderea pop-up-ului |
 | `show_header` | boolean | Opțional | `true` (implicit) sau `false` | Afișează/Ascunde complet antetul pop-up-ului |
@@ -445,8 +461,8 @@ Aceste opțiuni sunt disponibile doar atunci când `button_type` este setat pe `
 | `relative_slide`        | boolean | Opțional (implicit `false` )     | Actualizează valoarea relativ la valoarea de start, în loc de punctul de atingere de start.                      |
 | `read_only_slider`      | boolean | Opțional (implicit `false`)      | Face cursorul doar pentru citire. Activat automat pentru unele entități precum senzorii.                        |
 | `slider_live_update`    | boolean | Opțional (implicit `false`)      | Starea entității este actualizată în timp ce culisezi. **Această funcție nu este recomandată pentru toate entitățile.**        |
-| `slider_fill_orientation` | string | Opțional | `left` (implicit), `right`, `top`, `bottom` | Schimbă direcția de umplere a cursorului |
-| `slider_value_position` | string | Opțional | `right` (implicit), `left`, `center`, `hidden` | Poziția afișării valorii |
+| `slider_fill_orientation` | string | Opțional | `left`, `right`, `top` sau `bottom` | Schimbă direcția de umplere a cursorului. De la stânga la dreapta când nu este definit, oglindit în [limbile de la dreapta la stânga](#localizare) |
+| `slider_value_position` | string | Opțional | `right`, `left`, `center` sau `hidden` | Poziția afișării valorii. Pe partea de final când nu este definită, deci în stânga în [limbile de la dreapta la stânga](#localizare) |
 | `invert_slider_value` | boolean | Opțional (implicit `false`) | Inversează direcția cursorului (umplerea 100% egalează minimul). Nu este disponibil pentru cursoarele de culoare. |
 | `light_slider_type` | string | Opțional | `brightness` (implicit), `hue`, `saturation`, `white_temp` | **Doar pentru lumini.** Alege modul cursorului |
 | `cover_slider_type` | string | Opțional | `position` (implicit), `tilt_position` | **Doar pentru rulouri.** Alege modul cursorului (poziție sau înclinare) |
@@ -940,7 +956,7 @@ Acest card îți permite să afișezi entitățile tale de calendar. Conținutul
 | `limit`             | number  | Opțional     | Un număr                                        | Numărul de evenimente care vor fi afișate pe card                                  |
 | `show_end`          | boolean | Opțional     | `true` sau `false` (implicit)                     | Arată sau ascunde ora de sfârșit pentru evenimente                                                    |
 | `show_progress`     | boolean | Opțional     | `true` (implicit) sau `false`                     | Arată sau ascunde bara de progres a evenimentului                                                     |
-| `show_started_events`| boolean | Opțional     | `true` (implicit) sau `false`                     | Arată sau ascunde evenimentele care sunt în desfășurare                                                 |
+| `show_started_events`| boolean | Opțional     | `true` (implicit) sau `false`                     | Arată sau ascunde evenimentele care sunt în desfășurare. Evenimentele de mai multe zile sunt evaluate zi cu zi, așa că se ascunde doar ziua în curs, iar zilele următoare rămân vizibile |
 | `scrolling_effect`  | boolean | Opțional | `true` (implicit) sau `false` | Permite textului să deruleze atunci când conținutul depășește dimensiunea containerului lor |
 | `event_action` | object | Opțional | `tap_action`, `double_tap_action` sau `hold_action`, vezi [acțiuni](#acțiuni-la-atingere-atingere-dublă-și-apăsare-lungă) | Permite adăugarea de acțiuni la clic pe eveniment. |
 | `tap_action` | object | Opțional | Vezi [acțiuni](#acțiuni-la-atingere-atingere-dublă-și-apăsare-lungă) | Definește tipul de acțiune la clic pe zi, dacă nu este definit, se va folosi `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Opțional | `icon-left` (implicit), `icon-top`, `icon-bottom`, `icon-right` | Plasarea pictogramei în interiorul sub-butonului |
 | `always_visible` | boolean | Opțional | `true` sau `false` (implicit) | **Doar pentru slider.** Afișează întotdeauna sliderul în loc să îl deschidă la atingere |
 | `show_button_info` | boolean | Opțional | `true` sau `false` (implicit) | **Doar pentru slider.** Afișează pictograma/numele/starea atunci când `always_visible` este activat |
-| `visibility` | object sau list | Opțional | Vezi [condiții](https://www.home-assistant.io/docs/scripts/conditions/) | Afișează sau ascunde sub-butonul pe baza unor condiții |
+| `visibility` | object sau list | Opțional | Vezi [condiții](#condiții) | Afișează sau ascunde sub-butonul pe baza unor condiții |
 | `hide_when_parent_unavailable` | boolean | Opțional | `true` sau `false` (implicit) | Ascunde sub-butonul dacă entitatea cardului părinte este indisponibilă |
+| `css_class` | string | Opțional | Orice text | O clasă CSS suplimentară pe sub-buton, ca să îl vizezi în [stilurile](#stiluri) tale oricare i-ar fi numele (de ex. `My value` dă `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Sub-butoanele de tip slider acceptă aceleași opțiuni de slider ca și slidere
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Raza de rotunjire pentru sub-butoane |
 | `--bubble-sub-button-background-color` | `color` | Culoarea de fundal pentru sub-butoane |
+| `--bubble-sub-button-outline` | `box-shadow` | Contur adăugat unui sub-buton sau unui cursor doar când acesta se desenează în aceeași culoare ca și cardul din spate, ceea ce l-ar face invizibil (setează-l pe `none` pentru a-l elimina) |
 | `--bubble-sub-slider-border-radius` | `px` | Raza de rotunjire pentru sub-butoanele de tip slider |
 | `--bubble-sub-slider-background-color` | `color` | Culoarea de fundal pentru sub-butoanele de tip slider |
 | `--bubble-sub-slider-height` | `px` | Înălțimea pentru sub-butoanele de tip slider mereu vizibile |
+| `--bubble-sub-slider-outline` | `box-shadow` | Conturul doar al sub-butoanelor de tip slider, revine la `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Culoarea textului pe fundaluri deschise ale sub-butonului |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Condiții
+
+Unele opțiuni sunt conduse de condiții, scrise exact ca cele ale [cardului condițional](https://www.home-assistant.io/dashboards/conditional/) din Home Assistant:
+
+- `visibility` pe un [sub-buton](#sub-butoane), pentru a-l afișa sau a-l ascunde
+- `trigger` pe un [pop-up](#pop-up), pentru a-l deschide când condițiile sunt îndeplinite
+- `checkConditionsMet(conditions, hass)` în [șabloanele](#șabloane) tale, când ai nevoie de răspuns în propriul cod
+
+Este evaluat orice tip de condiție din Home Assistant: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, precum și grupurile `and`, `or` și `not`. Funcționează și condițiile din constructorul de condiții al Home Assistant, cele numite după domeniul lor, precum `sun.is_up`, `light.is_on`, `zone.in_zone` sau `temperature.is_value`, cu setările lor `target`, `options`, `behavior` și `for`.
+
+<details>
+
+<summary><b>Exemplu</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Condițiile sunt evaluate în browserul tău, așa că acele câteva care au nevoie de serverul Home Assistant nu pot fi exacte: răsăritul și apusul sunt citite din entitatea `sun.sun` în loc să fie recalculate, iar o durată `for` este măsurată de la ultima schimbare de stare, fără istoricul din recorder.
+>
+> `view_columns` este acceptat, dar trece întotdeauna, deoarece Bubble Card nu este niciodată cel care aranjează coloanele vizualizării tale. Un tip de condiție pe care Bubble Card nu îl cunoaște se semnalează o dată în consola browserului în loc să eșueze în tăcere, ca să deosebești o greșeală de scriere de o funcție lipsă.
+
+<br>
+
+---
+
+<br>
+
 ## Acțiuni la atingere, atingere dublă și apăsare lungă
 
 Puteți folosi de asemenea acțiunile implicite ale Home Assistant pentru atingere, atingere dublă și apăsare lungă pe cardurile care acceptă această opțiune. De exemplu, acest lucru vă permite să afișați fereastra "more info" ținând apăsată pictograma unui buton sau să rulați un serviciu atunci când este apăsat un sub-buton.
@@ -1700,6 +1762,8 @@ Poți adăuga stiluri personalizate pentru a modifica CSS-ul tuturor cardurilor 
 
 > [!TIP]  
 > Sub-butoanele pot fi vizate prin clase bazate pe nume. De exemplu, un sub-buton numit "My sub-button" poate fi stilizat cu `.my-sub-button`. Sub-butoanele de tip slider expun de asemenea `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, etc.
+>
+> O clasă bazată pe nume se schimbă când redenumești un sub-buton și este tradusă odată cu numele. Setează `css_class` pe sub-buton ca să ai o clasă proprie care nu se mișcă niciodată, oricare i-ar fi numele și oricare ar fi limba.
 
 #### Exemple
 
@@ -2066,6 +2130,7 @@ Ai acces la toate funcțiile JS globale, dar ai acces și la:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` returnează `true` când o listă de [condiții](#condiții) este îndeplinită, de exemplu `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` poate fi folosit pentru a traduce o stare (poate fi folosit și pentru a obține unitatea unei stări, fără a fi nevoie să o adaugi manual).
 - `hass.formatEntityAttributeValue(state, "attribute")` poate fi folosit pentru a traduce un atribut (poate fi folosit și pentru a obține unitatea unei stări, fără a fi nevoie să o adaugi manual).
 
@@ -2318,6 +2383,8 @@ Modulele sunt o funcție puternică ce îți permite să salvezi, refolosești �
 Dar această funcție este mult mai puternică decât atât, îți permite să adaugi funcții reale chiar tu, în editorul Bubble Card, folosind toate opțiunile implicite ale [formularului Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
 Selectorul de obiecte a fost îmbunătățit pentru a afișa modificările în timp real și pentru a suporta corect atributele.
 
+Un modul poate răspunde și selectorului de carduri din Home Assistant, alături de [sugestiile de entități](#sugestii-de-entități) integrate: folosește `suggestions` pentru cardurile pe care le poate descrie dinainte și `suggestions_code` când acestea trebuie calculate din configurația ta, de exemplu un pop-up construit din toate entitățile zonei căreia îi aparține entitatea aleasă. Ambele chei sunt documentate [aici](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Poți de asemenea răsfoi **Module Store** pentru a găsi și instala [module create de comunitate](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), sau pentru a-ți distribui propriile creații!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Această filă îți arată toate modulele instalate și îți permite să:
 - **Cauți** și **sortezi** modulele (alfabetic, recente, active primele)
 - **Setezi statutul global** pentru ca un modul să se aplice automat tuturor cardurilor
 - **Imporți/exporți** module pentru backup sau distribuire
+- **Scrii sugestii de entități** în editorul de module, la **Opțional: sugestii de entități**, ca modulul tău să fie propus în selectorul de carduri din Home Assistant. Atât regulile, cât și sugestiile calculate sunt verificate pe măsură ce scrii, o eroare acolo împiedică salvarea, iar previzualizarea arată cardurile sugerate pentru orice entitate alegi
 
 #### Fila Module Store
 
@@ -2391,7 +2459,8 @@ Această filă va afișa [toate modulele disponibile din comunitate](https://git
 3. Completează informațiile modulului.
 4. Scrie codul tău CSS și/sau șablonul JavaScript în editorul **Cod**.
 5. (Opțional) Creează o interfață de configurare personalizată în secțiunea **Editor** (cum ar fi selectorul de culoare din captura de ecran de mai sus, documentația completă este disponibilă [aici](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Dă clic pe **Salvează**.
+6. (Opțional) Scrie **Sugestiile de entități** ca modulul tău să fie propus în selectorul de carduri din Home Assistant. Panoul verifică ce scrii pe măsură ce tastezi, iar previzualizarea lui arată chiar cardurile sugerate pentru entitatea aleasă de tine.
+7. Dă clic pe **Salvează**.
 
 Modulul tău este acum disponibil pentru a fi folosit pe oricare dintre cardurile tale!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Mai multe exemple pot fi găsite în Module Store, sau [aici](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Localizare
+
+Bubble Card vorbește limba ta. Editorul lui este tradus în cele 64 de limbi pe care le suportă Home Assistant, iar acolo unde Home Assistant are deja un cuvânt pentru ceva, este reluată formularea lui, ca să citești aceiași termeni în ambele interfețe.
+
+În partea de jos a editorului, lângă numărul versiunii, un comutator **Automat** urmează limba Home Assistant. Oprește-l și tot editorul revine la engleză, ceea ce este util când urmezi un tutorial sau raportezi o problemă. Alegerea ta este reținută în browser.
+
+Și această documentație este tradusă, [în 62 de limbi](languages.md). Acele pagini sunt deschise tuturor, așa că o formulare care nu se potrivește cu propriul tău Home Assistant poate fi corectată din câteva clicuri. Versiunea engleză rămâne referința pentru conținutul în sine.
 
 <br>
 

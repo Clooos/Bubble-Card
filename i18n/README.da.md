@@ -18,7 +18,7 @@ Bubble Card er en minimalistisk og tilpasselig kortsamling til Home Assistant, m
 
 ## Indholdsfortegnelse
 
-**[`Installation`](#installation)**  **[`Konfiguration`](#konfiguration)**  **[`Pop-up`](#pop-up)**  **[`Vandret knaprække`](#vandret-knaprække)**  **[`Knap`](#knap)**  **[`Medieafspiller`](#medieafspiller)**  **[`Gardin`](#gardin)**  **[`Vælg`](#vælg)**  **[`Klima`](#klima)**  **[`Kalender`](#kalender)**  **[`Separator`](#separator)**  **[`Tom kolonne`](#tom-kolonne)**  **[`Kun underknapper`](#kun-underknapper)**  **[`Underknapper`](#underknapper)**  **[`Kortlayouts`](#kortlayouts)**  **[`Handlinger`](#tryk--dobbelttryk--og-holdehandlinger)**  **[`Styling`](#styling)**  **[`Skabeloner`](#skabeloner)**  **[`Modules`](#modules)**  **[`Hjælp`](#hjælp)**  **[`Bidrag`](#bidrag)**  **[`Donér`](#donér)**
+**[`Installation`](#installation)**  **[`Konfiguration`](#konfiguration)**  **[`Entitetsforslag`](#entitetsforslag)**  **[`Pop-up`](#pop-up)**  **[`Vandret knaprække`](#vandret-knaprække)**  **[`Knap`](#knap)**  **[`Medieafspiller`](#medieafspiller)**  **[`Gardin`](#gardin)**  **[`Vælg`](#vælg)**  **[`Klima`](#klima)**  **[`Kalender`](#kalender)**  **[`Separator`](#separator)**  **[`Tom kolonne`](#tom-kolonne)**  **[`Kun underknapper`](#kun-underknapper)**  **[`Underknapper`](#underknapper)**  **[`Kortlayouts`](#kortlayouts)**  **[`Betingelser`](#betingelser)**  **[`Handlinger`](#tryk--dobbelttryk--og-holdehandlinger)**  **[`Styling`](#styling)**  **[`Skabeloner`](#skabeloner)**  **[`Modules`](#modules)**  **[`Lokalisering`](#lokalisering)**  **[`Hjælp`](#hjælp)**  **[`Bidrag`](#bidrag)**  **[`Donér`](#donér)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card er en minimalistisk og tilpasselig kortsamling til Home Assistant, m
 
 <br>
 
-1. Download denne fil: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Tilføj denne fil til din `<config>/www`-mappe
+1. Download `bubble-card.zip` fra [den seneste udgivelse](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Pak den ud i din `<config>/www`-mappe, du bør få `bubble-card.js` og en `translations`-mappe ved siden af (den mappe indeholder editorens ordbøger, uden den bliver editoren på engelsk)
 3. Klik på ikonet i øverste højre hjørne på dit dashboard, og klik derefter på `Rediger dashboard`
 4. Klik på ikonet igen, og klik derefter på `Administrer ressourcer`
 5. Klik på `Tilføj ressource`
@@ -130,6 +130,21 @@ Alle indstillinger kan konfigureres i Home Assistant-editoren. Men du kan finde 
 
 <br>
 
+## Entitetsforslag
+
+Siden Home Assistant 2026.6 tilbyder kortvælgeren dig et par færdige kort, når du vælger en entitet, og Bubble Card svarer på det spørgsmål med sine egne opskrifter. Vælg et lys, og du får tilbudt et kort med en lysstyrkeskyder, plus en variant med farvetemperatur, en med farve og en med mætning, når dit lys understøtter dem. Vælg et gardin, og du får skyderen til dets position, vælg en medieafspiller, og du får også en variant med dens kildeliste, vælg en støvsuger, og du får dens knapper til start, pause og retur til dock. Hvert forslag er en almindelig Bubble Card-konfiguration vist som en live forhåndsvisning, så du kan tage den nærmeste og redigere videre på den som sædvanlig.
+
+Hvad du får tilbudt, afhænger af, hvad din entitet faktisk kan: et lys uden lysstyrkekanal får en kontakt i stedet for en skyder, et gardin, der ikke kan vippe, får ingen vippevariant, og en klimaentitet får kun sine forudindstillinger, når den har nogle. De klassiske punkter følger nedenunder, når de giver mening: domænets dedikerede kort, en almindelig knap og en skyder.
+
+> [!TIP]
+> Modules kan tilføje deres egne forslag til den liste, se [Modules](#modules).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Dette kort giver dig mulighed for at oprette en pop-up med et vilkårligt indhol
 | `shadow_opacity` | string | Valgfrit | Enhver værdi fra `0` til `100` | Skyggens opacitet på din pop-up (f.eks. `0` for at skjule den) |
 | `hide_backdrop` | boolean | Valgfrit | `true` eller `false` (standard) | Sæt denne til true på den første pop-up på dit hoveddashboard for at deaktivere baggrundslaget på alle pop-ups. |
 | `background_update` | boolean | Valgfrit | `true` eller `false` (standard) | Opdater pop-uppens indhold i baggrunden (anbefales ikke) |
-| `trigger_entity` | string | Valgfrit | Enhver entitet | Åbn denne pop-up baseret på tilstanden af en hvilken som helst entitet |
+| `trigger` | object eller list | Valgfrit | Se [betingelser](#betingelser) | Åbn denne pop-up når betingelserne er opfyldt |
+| `trigger_entity` | string | Valgfrit | Enhver entitet | Åbn denne pop-up baseret på tilstanden af en hvilken som helst entitet, den enkle form af `trigger` |
 | `trigger_state` | string | Valgfrit (**Påkrævet** hvis `trigger_entity` er defineret) | Enhver entitetstilstand | Entitetstilstand der åbner pop-uppen |
-| `trigger_close` | boolean | Valgfrit | `true` eller `false` (standard) | Luk pop-uppen når `trigger_state` er anderledes |
+| `trigger_close` | boolean | Valgfrit | `true` eller `false` | Luk pop-uppen når betingelserne ikke længere er opfyldt (standard: `true` med `trigger`, `false` med `trigger_state`) |
 | `open_action` | object | Valgfrit | Se [handlinger](#tryk--dobbelttryk--og-holdehandlinger) | Udløs en handling når pop-uppen åbnes |
 | `close_action` | object | Valgfrit | Se [handlinger](#tryk--dobbelttryk--og-holdehandlinger) | Udløs en handling når pop-uppen lukkes |
 | `show_header` | boolean | Valgfrit | `true` (standard) eller `false` | Vis/skjul pop-uppens header helt |
@@ -445,8 +461,8 @@ Disse indstillinger er kun tilgængelige, når `button_type` er sat til `slider`
 | `relative_slide`        | boolean | Valgfri (`false` standard )     | Opdater værdien relativt til startværdien, i stedet for det oprindelige trykpunkt.                      |
 | `read_only_slider`      | boolean | Valgfri (`false` standard)      | Gør skyderen skrivebeskyttet. Aktiveres automatisk for visse entiteter som sensorer.                        |
 | `slider_live_update`    | boolean | Valgfri (`false` standard)      | Entitetens tilstand opdateres, mens du skyder. **Denne funktion anbefales ikke til alle entiteter.**        |
-| `slider_fill_orientation` | string | Valgfri | `left` (standard), `right`, `top`, `bottom` | Skift skyderens fyldretning |
-| `slider_value_position` | string | Valgfri | `right` (standard), `left`, `center`, `hidden` | Placering af værdivisningen |
+| `slider_fill_orientation` | string | Valgfri | `left`, `right`, `top` eller `bottom` | Skift skyderens fyldretning. Fra venstre mod højre når den ikke er defineret, spejlvendt i [sprog der skrives fra højre mod venstre](#lokalisering) |
+| `slider_value_position` | string | Valgfri | `right`, `left`, `center` eller `hidden` | Placering af værdivisningen. I slutsiden når den ikke er defineret, altså til venstre i [sprog der skrives fra højre mod venstre](#lokalisering) |
 | `invert_slider_value` | boolean | Valgfri (`false` standard) | Vend skyderens retning om (100 % fyldning svarer til minimum). Ikke tilgængelig for farveskydere. |
 | `light_slider_type` | string | Valgfri | `brightness` (standard), `hue`, `saturation`, `white_temp` | **Kun for lys.** Vælg skydertilstanden |
 | `cover_slider_type` | string | Valgfri | `position` (standard), `tilt_position` | **Kun for gardiner.** Vælg skydertilstanden (position eller vipning) |
@@ -940,7 +956,7 @@ Dette kort lader dig vise dine kalender-entiteter. Indholdet kan rulles, så du 
 | `limit`             | number  | Valgfri     | Et tal                                        | Antallet af begivenheder, der vises på kortet                                  |
 | `show_end`          | boolean | Valgfri     | `true` eller `false` (standard)                     | Vis eller skjul sluttidspunktet for begivenheder                                                    |
 | `show_progress`     | boolean | Valgfri     | `true` (standard) eller `false`                     | Vis eller skjul begivenhedens fremskridtslinje                                                     |
-| `show_started_events`| boolean | Valgfri     | `true` (standard) eller `false`                     | Vis eller skjul begivenheder, der er i gang                                                 |
+| `show_started_events`| boolean | Valgfri     | `true` (standard) eller `false`                     | Vis eller skjul begivenheder, der er i gang. Begivenheder over flere dage vurderes en dag ad gangen, så kun den igangværende dag skjules, og de kommende dage forbliver synlige |
 | `scrolling_effect`  | boolean | Valgfri | `true` (standard) eller `false` | Tillad teksten at rulle, når indholdet overstiger størrelsen på dens container |
 | `event_action` | object | Valgfri | `tap_action`, `double_tap_action` eller `hold_action`, se [handlinger](#tryk--dobbelttryk--og-holdehandlinger) | Gør det muligt at tilføje handlinger ved klik på en begivenhed. |
 | `tap_action` | object | Valgfri | Se [handlinger](#tryk--dobbelttryk--og-holdehandlinger) | Definer handlingstypen ved klik på en dag, hvis den ikke er angivet, bruges `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Valgfri | `icon-left` (standard), `icon-top`, `icon-bottom`, `icon-right` | Ikonets placering inde i underknappen |
 | `always_visible` | boolean | Valgfri | `true` eller `false` (standard) | **Kun skyder.** Vis altid skyderen i stedet for at åbne den ved tryk |
 | `show_button_info` | boolean | Valgfri | `true` eller `false` (standard) | **Kun skyder.** Vis ikon/navn/tilstand, når `always_visible` er aktiveret |
-| `visibility` | object eller list | Valgfri | Se [betingelser](https://www.home-assistant.io/docs/scripts/conditions/) | Vis eller skjul underknappen baseret på betingelser |
+| `visibility` | object eller list | Valgfri | Se [betingelser](#betingelser) | Vis eller skjul underknappen baseret på betingelser |
 | `hide_when_parent_unavailable` | boolean | Valgfri | `true` eller `false` (standard) | Skjul underknappen, hvis det overordnede korts entitet er utilgængelig |
+| `css_class` | string | Valgfri | Enhver streng | En ekstra CSS-klasse på underknappen, så du kan målrette den i din [styling](#styling) uanset dens navn (f.eks. giver `My value` `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Skyder-underknapper understøtter de samme skyderindstillinger som knapskydere, 
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Kantradius for underknapperne |
 | `--bubble-sub-button-background-color` | `color` | Baggrundsfarve for underknapperne |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur tilføjet til en underknap eller en skyder, kun når den tegnes i samme farve som kortet bagved, hvilket ville gøre den usynlig (sæt den til `none` for at fjerne den) |
 | `--bubble-sub-slider-border-radius` | `px` | Kantradius for skyder-underknapper |
 | `--bubble-sub-slider-background-color` | `color` | Baggrundsfarve for skyder-underknapper |
 | `--bubble-sub-slider-height` | `px` | Højde for altid synlige skyder-underknapper |
+| `--bubble-sub-slider-outline` | `box-shadow` | Kontur kun for skyder-underknapperne, falder tilbage til `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Tekstfarve på lyse underknap-baggrunde |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Betingelser
+
+Nogle indstillinger styres af betingelser, skrevet præcis som dem i Home Assistants [betingede kort](https://www.home-assistant.io/dashboards/conditional/):
+
+- `visibility` på en [underknap](#underknapper), for at vise eller skjule den
+- `trigger` på en [pop-up](#pop-up), for at åbne den når betingelserne er opfyldt
+- `checkConditionsMet(conditions, hass)` inde i dine [skabeloner](#skabeloner), når du har brug for svaret i din egen kode
+
+Alle Home Assistants betingelsestyper evalueres: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template` samt grupperne `and`, `or` og `not`. Betingelserne fra Home Assistants betingelsesbygger virker også, dem der er opkaldt efter deres domæne som `sun.is_up`, `light.is_on`, `zone.in_zone` eller `temperature.is_value`, med deres indstillinger `target`, `options`, `behavior` og `for`.
+
+<details>
+
+<summary><b>Eksempel</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Betingelser evalueres i din browser, så de få af dem, der har brug for Home Assistant-serveren, kan ikke være præcise: solopgang og solnedgang læses fra entiteten `sun.sun` i stedet for at blive genberegnet, og en `for`-varighed måles fra den seneste tilstandsændring, uden historikken fra recorder.
+>
+> `view_columns` accepteres, men er altid opfyldt, da Bubble Card aldrig er den, der placerer kolonnerne i din visning. En betingelsestype, som Bubble Card ikke kender, melder sig selv en enkelt gang i din browserkonsol i stedet for at fejle i stilhed, så du kan skelne en tastefejl fra en manglende funktion.
+
+<br>
+
+---
+
+<br>
+
 ## Tryk-, dobbelttryk- og holdehandlinger
 
 Du kan også bruge Home Assistants standard trykhandlinger, dobbelttrykhandlinger og holdehandlinger på de kort, der understøtter denne indstilling. Det giver dig for eksempel mulighed for at vise vinduet "mere info" ved at holde en knapikon nede eller køre en tjeneste, når der trykkes på en underknap.
@@ -1700,6 +1762,8 @@ Du kan tilføje brugerdefinerede stilarter for at ændre CSS'en på alle kort **
 
 > [!TIP]  
 > Underknapper kan målrettes med navnebaserede klasser. En underknap ved navn "My sub-button" kan for eksempel stilsættes med `.my-sub-button`. Skyder-underknapper eksponerer også `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` osv.
+>
+> En navnebaseret klasse ændrer sig, når du omdøber en underknap, og den oversættes, når navnet gør. Sæt `css_class` på underknappen for at få din egen klasse, der aldrig flytter sig, uanset dens navn og uanset sproget.
 
 #### Eksempler
 
@@ -2066,6 +2130,7 @@ Du har adgang til alle de globale JS-funktioner, men du har også adgang til:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` returnerer `true`, når en liste af [betingelser](#betingelser) er opfyldt, for eksempel `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` kan bruges til at oversætte en tilstand (kan også bruges til at hente en tilstandsenhed uden at skulle tilføje den manuelt).
 - `hass.formatEntityAttributeValue(state, "attribute")` kan bruges til at oversætte en attribut (kan også bruges til at hente en tilstandsenhed uden at skulle tilføje den manuelt).
 
@@ -2318,6 +2383,8 @@ Moduler er en kraftfuld funktion, der gør det muligt at gemme, genbruge og dele
 Men denne funktion er meget mere kraftfuld end det, den lader dig selv tilføje egentlige funktioner i Bubble Cards editor ved hjælp af alle de indbyggede [Home Assistant-formular](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)-indstillinger!  
 Objektvælgeren er blevet forbedret, så den viser ændringer live og understøtter attributter korrekt.
 
+Et modul kan også svare Home Assistants kortvælger ved siden af de indbyggede [entitetsforslag](#entitetsforslag): brug `suggestions` til de kort, det kan beskrive på forhånd, og `suggestions_code`, når de skal beregnes ud fra din opsætning, for eksempel en pop-up bygget af alle entiteter i det område, som den valgte entitet hører til. Begge nøgler er dokumenteret [her](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Du kan også gennemse **Module Store** for at finde og installere [moduler skabt af fællesskabet](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), eller dele dine egne kreationer!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Denne fane viser alle dine installerede moduler og giver dig mulighed for at:
 - **Søge** og **sortere** moduler (alfabetisk, seneste, aktive først)
 - **Angive global status** for at få et modul til automatisk at blive anvendt på alle kort
 - **Importere/Eksportere** moduler til sikkerhedskopiering eller deling
+- **Skrive entitetsforslag** i moduleditoren, under **Valgfrit: Entitetsforslag**, så dit modul bliver tilbudt i Home Assistants kortvælger. Både regler og beregnede forslag kontrolleres, mens du skriver, en fejl der forhindrer at gemme, og forhåndsvisningen viser de foreslåede kort for enhver entitet, du vælger
 
 #### Fanen Module Store
 
@@ -2391,7 +2459,8 @@ Denne fane viser [alle tilgængelige moduler fra fællesskabet](https://github.c
 3. Udfyld modulinformationen.
 4. Skriv din CSS- og/eller JavaScript-skabelonkode i kodeeditoren.
 5. (Valgfrit) Opret en brugerdefineret konfigurations-UI i sektionen **Editor** (som farvevælgeren på skærmbilledet ovenfor, fuld dokumentation tilgængelig [her](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klik på **Gem**.
+6. (Valgfrit) Skriv dine **Entitetsforslag**, så dit modul bliver tilbudt i Home Assistants kortvælger. Panelet kontrollerer det, du skriver, mens du taster, og dets forhåndsvisning viser selve de foreslåede kort for den entitet, du vælger.
+7. Klik på **Gem**.
 
 Dit modul er nu tilgængeligt til brug på ethvert af dine kort!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Flere eksempler kan findes i Module Store, eller [her](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalisering
+
+Bubble Card taler dit sprog. Editoren er oversat til de 64 sprog, som Home Assistant understøtter, og overalt hvor Home Assistant allerede har et ord for noget, genbruges dens egen formulering, så du læser de samme udtryk i begge grænseflader.
+
+Nederst i editoren, ved siden af versionsnummeret, følger en **Automatisk**-kontakt dit Home Assistant-sprog. Slå den fra, og hele editoren går tilbage til engelsk, hvilket er praktisk, når du følger en vejledning eller melder et problem. Dit valg huskes i din browser.
+
+Denne dokumentation er også oversat, [til 62 sprog](languages.md). De sider er åbne for alle, så en formulering, der ikke passer til dit eget Home Assistant, kan rettes med et par klik. Den engelske version er fortsat referencen for selve indholdet.
 
 <br>
 

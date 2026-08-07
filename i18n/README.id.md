@@ -18,7 +18,7 @@ Bubble Card adalah koleksi kartu yang minimalis dan dapat disesuaikan untuk Home
 
 ## Daftar isi
 
-**[`Instalasi`](#instalasi)**  **[`Konfigurasi`](#konfigurasi)**  **[`Pop-up`](#pop-up)**  **[`Tumpukan tombol horizontal`](#tumpukan-tombol-horizontal)**  **[`Tombol`](#tombol)**  **[`Pemutar media`](#pemutar-media)**  **[`Penutup`](#penutup)**  **[`Pilih`](#pilih)**  **[`Iklim`](#iklim)**  **[`Kalender`](#kalender)**  **[`Pemisah`](#pemisah)**  **[`Kolom kosong`](#kolom-kosong)**  **[`Hanya subtombol`](#hanya-subtombol)**  **[`Subtombol`](#subtombol)**  **[`Tata letak kartu`](#tata-letak-kartu)**  **[`Aksi`](#aksi-ketuk-ketuk-dua-kali-dan-tahan)**  **[`Gaya`](#gaya)**  **[`Templat`](#templat)**  **[`Modul`](#modul)**  **[`Bantuan`](#bantuan)**  **[`Kontribusi`](#kontribusi)**  **[`Donasi`](#donasi)**
+**[`Instalasi`](#instalasi)**  **[`Konfigurasi`](#konfigurasi)**  **[`Saran entitas`](#saran-entitas)**  **[`Pop-up`](#pop-up)**  **[`Tumpukan tombol horizontal`](#tumpukan-tombol-horizontal)**  **[`Tombol`](#tombol)**  **[`Pemutar media`](#pemutar-media)**  **[`Penutup`](#penutup)**  **[`Pilih`](#pilih)**  **[`Iklim`](#iklim)**  **[`Kalender`](#kalender)**  **[`Pemisah`](#pemisah)**  **[`Kolom kosong`](#kolom-kosong)**  **[`Hanya subtombol`](#hanya-subtombol)**  **[`Subtombol`](#subtombol)**  **[`Tata letak kartu`](#tata-letak-kartu)**  **[`Kondisi`](#kondisi)**  **[`Aksi`](#aksi-ketuk-ketuk-dua-kali-dan-tahan)**  **[`Gaya`](#gaya)**  **[`Templat`](#templat)**  **[`Modul`](#modul)**  **[`Lokalisasi`](#lokalisasi)**  **[`Bantuan`](#bantuan)**  **[`Kontribusi`](#kontribusi)**  **[`Donasi`](#donasi)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card adalah koleksi kartu yang minimalis dan dapat disesuaikan untuk Home
 
 <br>
 
-1. Unduh file ini: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Tambahkan file ini ke folder `<config>/www` Anda
+1. Unduh `bubble-card.zip` dari [rilis terbaru](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Ekstrak ke folder `<config>/www` Anda, Anda seharusnya mendapatkan `bubble-card.js` dan folder `translations` di sebelahnya (folder itu berisi kamus editor, tanpanya editor tetap berbahasa Inggris)
 3. Di dashboard Anda, klik ikon di pojok kanan atas lalu klik `Edit dashboard`
 4. Klik lagi ikon tersebut lalu klik `Manage resources`
 5. Klik `Add resource`
@@ -130,6 +130,21 @@ Semua opsi dapat dikonfigurasi di editor Home Assistant. Namun Anda bisa menemuk
 
 <br>
 
+## Saran entitas
+
+Sejak Home Assistant 2026.6, memilih entitas di pemilih kartu menawarkan beberapa kartu siap pakai kepada Anda, dan Bubble Card menjawab pertanyaan itu dengan resepnya sendiri. Pilih lampu dan Anda ditawari kartu dengan slider kecerahan, ditambah varian suhu warna, varian warna, dan varian saturasi bila lampu Anda mendukungnya. Pilih penutup dan Anda mendapatkan slider posisinya, pilih pemutar media dan Anda juga mendapatkan varian dengan daftar sumbernya, pilih penyedot debu dan Anda mendapatkan tombol mulai, jeda, dan kembali ke dok. Setiap saran adalah konfigurasi Bubble Card biasa yang ditampilkan sebagai pratinjau langsung, jadi Anda bisa mengambil yang paling mendekati dan terus menyuntingnya seperti biasa.
+
+Apa yang ditawarkan bergantung pada apa yang benar-benar bisa dilakukan entitas Anda: lampu tanpa kanal kecerahan mendapat sakelar alih-alih slider, penutup yang tidak bisa dimiringkan tidak mendapat varian kemiringan, dan entitas iklim mendapat mode praseteknya hanya bila memang ada. Entri klasik menyusul di bawahnya bila memang berlaku: kartu khusus untuk domain tersebut, tombol biasa, dan slider.
+
+> [!TIP]
+> Modul dapat menambahkan saran mereka sendiri ke daftar itu, lihat [modul](#modul).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Kartu ini memungkinkan Anda membuat pop-up dengan konten apa pun. Setiap pop-up 
 | `shadow_opacity` | string | Opsional | Nilai apa pun dari `0` sampai `100` | Opasitas bayangan pop-up Anda (misalnya `0` untuk menyembunyikannya) |
 | `hide_backdrop` | boolean | Opsional | `true` atau `false` (default) | Setel ini ke true pada pop-up pertama di dashboard utama Anda untuk menonaktifkan backdrop pada semua pop-up. |
 | `background_update` | boolean | Opsional | `true` atau `false` (default) | Memperbarui konten pop-up di latar belakang (tidak disarankan) |
-| `trigger_entity` | string | Opsional | Entitas apa pun | Membuka pop-up ini berdasarkan status entitas apa pun |
+| `trigger` | object atau list | Opsional | Lihat [kondisi](#kondisi) | Membuka pop-up ini saat kondisi terpenuhi |
+| `trigger_entity` | string | Opsional | Entitas apa pun | Membuka pop-up ini berdasarkan status entitas apa pun, bentuk sederhana dari `trigger` |
 | `trigger_state` | string | Opsional (**Wajib** jika `trigger_entity` ditentukan) | Status entitas apa pun | Status entitas untuk membuka pop-up |
-| `trigger_close` | boolean | Opsional | `true` atau `false` (default) | Menutup pop-up saat `trigger_state` berbeda |
+| `trigger_close` | boolean | Opsional | `true` atau `false` | Menutup pop-up saat kondisi tidak lagi terpenuhi (default: `true` dengan `trigger`, `false` dengan `trigger_state`) |
 | `open_action` | object | Opsional | Lihat [aksi](#aksi-ketuk-ketuk-dua-kali-dan-tahan) | Memicu sebuah aksi saat pop-up terbuka |
 | `close_action` | object | Opsional | Lihat [aksi](#aksi-ketuk-ketuk-dua-kali-dan-tahan) | Memicu sebuah aksi saat pop-up tertutup |
 | `show_header` | boolean | Opsional | `true` (default) atau `false` | Menampilkan/menyembunyikan header pop-up sepenuhnya |
@@ -445,8 +461,8 @@ Opsi-opsi ini hanya tersedia jika `button_type` diatur ke `slider`.
 | `relative_slide`        | boolean | Optional (`false` default )     | Memperbarui nilai relatif terhadap nilai awal, bukan titik sentuh awal.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Menjadikan slider hanya baca. Otomatis diaktifkan untuk beberapa entitas seperti sensor.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | State entitas diperbarui saat digeser. **Fitur ini tidak disarankan untuk semua entitas.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Mengubah arah isian slider |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Posisi tampilan nilai |
+| `slider_fill_orientation` | string | Opsional | `left`, `right`, `top` atau `bottom` | Mengubah arah isian slider. Dari kiri ke kanan bila tidak ditentukan, dicerminkan pada [bahasa kanan ke kiri](#lokalisasi) |
+| `slider_value_position` | string | Opsional | `right`, `left`, `center` atau `hidden` | Posisi tampilan nilai. Di sisi akhir bila tidak ditentukan, jadi di kiri pada [bahasa kanan ke kiri](#lokalisasi) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Membalik arah slider (isian 100% setara dengan minimum). Tidak tersedia untuk slider warna. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Hanya untuk lampu.** Memilih mode slider |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Hanya untuk cover.** Memilih mode slider (posisi atau tilt) |
@@ -940,7 +956,7 @@ Kartu ini memungkinkan Anda menampilkan entitas kalender Anda. Kontennya bisa di
 | `limit`             | number  | Optional     | A number                                        | Jumlah acara yang akan ditampilkan di kartu                                  |
 | `show_end`          | boolean | Optional     | `true` atau `false` (default)                     | Menampilkan atau menyembunyikan waktu selesai acara                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) atau `false`                     | Menampilkan atau menyembunyikan bilah progres acara                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) atau `false`                     | Menampilkan atau menyembunyikan acara yang sedang berlangsung                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) atau `false`                     | Menampilkan atau menyembunyikan acara yang sedang berlangsung. Acara multihari dinilai satu hari demi satu hari, jadi hanya hari yang sedang berjalan yang disembunyikan dan hari-hari berikutnya tetap terlihat |
 | `scrolling_effect`  | boolean | Optional | `true` (default) atau `false` | Memungkinkan teks bergulir saat kontennya melebihi ukuran kontainernya |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` atau `hold_action`, see [actions](#aksi-ketuk-ketuk-dua-kali-dan-tahan) | Memungkinkan menambahkan aksi saat acara diklik. |
 | `tap_action` | object | Optional | See [actions](#aksi-ketuk-ketuk-dua-kali-dan-tahan) | Menentukan jenis aksi saat hari diklik, jika tidak ditentukan, `none` akan digunakan. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Opsional | `icon-left` (default), `icon-top`, `icon-bottom`, `icon-right` | Penempatan ikon di dalam subtombol |
 | `always_visible` | boolean | Opsional | `true` atau `false` (default) | **Hanya slider.** Selalu tampilkan slider alih-alih membukanya saat diketuk |
 | `show_button_info` | boolean | Opsional | `true` atau `false` (default) | **Hanya slider.** Tampilkan ikon/nama/status saat `always_visible` diaktifkan |
-| `visibility` | object atau list | Opsional | Lihat [kondisi](https://www.home-assistant.io/docs/scripts/conditions/) | Tampilkan atau sembunyikan subtombol berdasarkan kondisi |
+| `visibility` | object atau list | Opsional | Lihat [kondisi](#kondisi) | Tampilkan atau sembunyikan subtombol berdasarkan kondisi |
 | `hide_when_parent_unavailable` | boolean | Opsional | `true` atau `false` (default) | Sembunyikan subtombol jika entitas kartu induk tidak tersedia |
+| `css_class` | string | Opsional | Sembarang string | Kelas CSS tambahan pada subtombol, untuk menargetkannya di [gaya](#gaya) Anda apa pun namanya (misalnya `My value` menghasilkan `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Subtombol slider mendukung opsi slider yang sama seperti slider tombol, termasuk
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radius sudut untuk subtombol |
 | `--bubble-sub-button-background-color` | `color` | Warna latar belakang untuk subtombol |
+| `--bubble-sub-button-outline` | `box-shadow` | Garis luar yang ditambahkan ke subtombol atau slider hanya ketika warnanya sama dengan kartu di belakangnya, yang akan membuatnya tak terlihat (setel ke `none` untuk menghapusnya) |
 | `--bubble-sub-slider-border-radius` | `px` | Radius sudut untuk subtombol slider |
 | `--bubble-sub-slider-background-color` | `color` | Warna latar belakang untuk subtombol slider |
 | `--bubble-sub-slider-height` | `px` | Tinggi untuk subtombol slider yang selalu terlihat |
+| `--bubble-sub-slider-outline` | `box-shadow` | Garis luar khusus subtombol slider, kembali ke `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Warna teks pada latar belakang subtombol yang terang |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Kondisi
+
+Sebagian opsi dikendalikan oleh kondisi, yang ditulis persis seperti kondisi pada [kartu bersyarat](https://www.home-assistant.io/dashboards/conditional/) Home Assistant:
+
+- `visibility` pada [subtombol](#subtombol), untuk menampilkan atau menyembunyikannya
+- `trigger` pada [pop-up](#pop-up), untuk membukanya saat kondisi terpenuhi
+- `checkConditionsMet(conditions, hass)` di dalam [templat](#templat) Anda, saat Anda membutuhkan jawabannya di kode Anda sendiri
+
+Setiap jenis kondisi Home Assistant dievaluasi: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, serta grup `and`, `or`, dan `not`. Kondisi dari pembangun kondisi Home Assistant juga berfungsi, yaitu yang dinamai menurut domainnya seperti `sun.is_up`, `light.is_on`, `zone.in_zone` atau `temperature.is_value`, beserta pengaturan `target`, `options`, `behavior`, dan `for` miliknya.
+
+<details>
+
+<summary><b>Contoh</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Kondisi dievaluasi di peramban Anda, jadi beberapa di antaranya yang memerlukan server Home Assistant tidak bisa tepat: matahari terbit dan terbenam dibaca dari entitas `sun.sun` alih-alih dihitung ulang, dan durasi `for` diukur dari perubahan status terakhir, tanpa riwayat recorder.
+>
+> `view_columns` diterima tetapi selalu lolos, karena Bubble Card tidak pernah menjadi pihak yang menata kolom tampilan Anda. Jenis kondisi yang tidak dikenal Bubble Card melaporkan dirinya sekali di konsol peramban Anda alih-alih gagal diam-diam, sehingga Anda bisa membedakan salah ketik dari fitur yang belum ada.
+
+<br>
+
+---
+
+<br>
+
 ## Aksi ketuk, ketuk dua kali, dan tahan
 
 Anda juga dapat menggunakan aksi ketuk, aksi ketuk dua kali, dan aksi tahan bawaan Home Assistant pada kartu yang mendukung opsi ini. Misalnya, ini memungkinkan Anda menampilkan jendela "more info" dengan menahan ikon tombol atau menjalankan sebuah service saat subtombol ditekan.
@@ -1700,6 +1762,8 @@ Anda dapat menambahkan gaya khusus untuk mengubah CSS semua kartu **tanpa menggu
 
 > [!TIP]  
 > Subtombol dapat ditarget dengan kelas berbasis nama. Misalnya, subtombol bernama "My sub-button" dapat diberi gaya dengan `.my-sub-button`. Subtombol slider juga menyediakan `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, dan seterusnya.
+>
+> Kelas berbasis nama berubah ketika Anda mengganti nama subtombol, dan ikut diterjemahkan ketika namanya diterjemahkan. Setel `css_class` pada subtombol untuk mendapatkan kelas milik Anda sendiri yang tidak pernah berpindah, apa pun namanya dan apa pun bahasanya.
 
 #### Contoh
 
@@ -2066,6 +2130,7 @@ Anda memiliki akses ke semua fungsi JS global, tetapi Anda juga memiliki akses k
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` mengembalikan `true` ketika sebuah daftar [kondisi](#kondisi) terpenuhi, misalnya `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` dapat digunakan untuk menerjemahkan status (juga bisa digunakan untuk mendapatkan satuan status, tanpa perlu menambahkannya secara manual).
 - `hass.formatEntityAttributeValue(state, "attribute")` dapat digunakan untuk menerjemahkan atribut (juga bisa digunakan untuk mendapatkan satuan status, tanpa perlu menambahkannya secara manual).
 
@@ -2318,6 +2383,8 @@ Modul adalah fitur canggih yang memungkinkan Anda menyimpan, menggunakan kembali
 Namun fitur ini jauh lebih canggih dari itu, karena memungkinkan Anda menambahkan fitur sungguhan sendiri di editor Bubble Card, menggunakan semua opsi [form Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) bawaan!  
 Pemilih objek telah ditingkatkan untuk menampilkan perubahan secara langsung dan mendukung atribut dengan benar.
 
+Sebuah modul juga bisa menjawab pemilih kartu Home Assistant bersama [saran entitas](#saran-entitas) bawaan: gunakan `suggestions` untuk kartu yang bisa dijelaskan di awal, dan `suggestions_code` ketika kartu itu harus dihitung dari penyiapan Anda, misalnya pop-up yang dibangun dari setiap entitas di area tempat entitas yang dipilih berada. Kedua kunci tersebut didokumentasikan [di sini](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Anda juga bisa menjelajahi **Module Store** untuk menemukan dan memasang [modul yang dibuat oleh komunitas](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), atau membagikan kreasi Anda sendiri!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Tab ini menampilkan semua modul yang sudah Anda pasang dan memungkinkan Anda unt
 - **Mencari** dan **mengurutkan** modul (alfabetis, terbaru, aktif lebih dulu)
 - **Mengatur status global** agar modul diterapkan ke semua kartu secara otomatis
 - **Mengimpor/Mengekspor** modul untuk cadangan atau berbagi
+- **Menulis saran entitas** di editor modul, di bawah **Opsional: Saran entitas**, agar modul Anda ditawarkan di pemilih kartu Home Assistant. Baik aturan maupun saran terhitung diperiksa sambil Anda menulis, kesalahan di sana mencegah penyimpanan, dan pratinjau menampilkan kartu yang disarankan untuk entitas mana pun yang Anda pilih
 
 #### Tab Module Store
 
@@ -2391,7 +2459,8 @@ Tab ini akan menampilkan [semua modul yang tersedia dari komunitas](https://gith
 3. Isi informasi modul.
 4. Tulis kode CSS dan/atau templat JavaScript Anda di editor **Code**.
 5. (Opsional) Buat antarmuka konfigurasi khusus di bagian **Editor** (seperti pemilih warna pada tangkapan layar di atas, dokumentasi lengkap tersedia [di sini](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klik **Save**.
+6. (Opsional) Tulis **Saran entitas** Anda agar modul Anda ditawarkan di pemilih kartu Home Assistant. Panel ini memeriksa apa yang Anda tulis sambil Anda mengetik, dan pratinjaunya menampilkan kartu yang disarankan itu sendiri untuk entitas pilihan Anda.
+7. Klik **Save**.
 
 Modul Anda kini tersedia untuk digunakan di kartu mana pun!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Lebih banyak contoh dapat ditemukan di Module Store, atau [di sini](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalisasi
+
+Bubble Card berbicara dalam bahasa Anda. Editornya diterjemahkan ke dalam 64 bahasa yang didukung Home Assistant, dan di mana pun Home Assistant sudah memiliki istilah untuk sesuatu, istilah miliknya sendiri yang dipakai, sehingga Anda membaca istilah yang sama di kedua antarmuka.
+
+Di bagian bawah editor, di sebelah nomor versi, sakelar **Otomatis** mengikuti bahasa Home Assistant Anda. Matikan dan seluruh editor kembali ke bahasa Inggris, yang praktis untuk mengikuti tutorial atau melaporkan masalah. Pilihan Anda diingat di peramban Anda.
+
+Dokumentasi ini juga diterjemahkan, [dalam 62 bahasa](languages.md). Halaman tersebut terbuka untuk semua orang, jadi istilah yang tidak cocok dengan Home Assistant Anda sendiri bisa diperbaiki dalam beberapa klik. Versi bahasa Inggris tetap menjadi acuan untuk isinya sendiri.
 
 <br>
 

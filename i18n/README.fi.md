@@ -18,7 +18,7 @@ Bubble Card on minimalistinen ja muokattava korttikokoelma Home Assistantiin, jo
 
 ## Sisällysluettelo
 
-**[`Asennus`](#asennus)**  **[`Määritykset`](#määritykset)**  **[`Ponnahdusikkuna`](#ponnahdusikkuna)**  **[`Vaakasuora painikepino`](#vaakasuora-painikepino)**  **[`Painike`](#painike)**  **[`Mediasoitin`](#mediasoitin)**  **[`Kaihdin`](#kaihdin)**  **[`Valinta`](#valinta)**  **[`Ilmastointi`](#ilmastointi)**  **[`Kalenteri`](#kalenteri)**  **[`Erotin`](#erotin)**  **[`Tyhjä sarake`](#tyhjä-sarake)**  **[`Vain alipainikkeet`](#vain-alipainikkeet)**  **[`Alipainikkeet`](#alipainikkeet)**  **[`Korttien asettelut`](#korttien-asettelut)**  **[`Napautuksen, kaksoisnapautuksen ja pitkän painalluksen toiminnot`](#napautuksen-kaksoisnapautuksen-ja-pitkän-painalluksen-toiminnot)**  **[`Tyylit`](#tyylit)**  **[`Mallit`](#mallit)**  **[`Moduulit`](#moduulit)**  **[`Ohje`](#ohje)**  **[`Osallistuminen`](#osallistuminen)**  **[`Lahjoita`](#lahjoita)**
+**[`Asennus`](#asennus)**  **[`Määritykset`](#määritykset)**  **[`Entiteettiehdotukset`](#entiteettiehdotukset)**  **[`Ponnahdusikkuna`](#ponnahdusikkuna)**  **[`Vaakasuora painikepino`](#vaakasuora-painikepino)**  **[`Painike`](#painike)**  **[`Mediasoitin`](#mediasoitin)**  **[`Kaihdin`](#kaihdin)**  **[`Valinta`](#valinta)**  **[`Ilmastointi`](#ilmastointi)**  **[`Kalenteri`](#kalenteri)**  **[`Erotin`](#erotin)**  **[`Tyhjä sarake`](#tyhjä-sarake)**  **[`Vain alipainikkeet`](#vain-alipainikkeet)**  **[`Alipainikkeet`](#alipainikkeet)**  **[`Korttien asettelut`](#korttien-asettelut)**  **[`Ehdot`](#ehdot)**  **[`Napautuksen, kaksoisnapautuksen ja pitkän painalluksen toiminnot`](#napautuksen-kaksoisnapautuksen-ja-pitkän-painalluksen-toiminnot)**  **[`Tyylit`](#tyylit)**  **[`Mallit`](#mallit)**  **[`Moduulit`](#moduulit)**  **[`Lokalisointi`](#lokalisointi)**  **[`Ohje`](#ohje)**  **[`Osallistuminen`](#osallistuminen)**  **[`Lahjoita`](#lahjoita)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card on minimalistinen ja muokattava korttikokoelma Home Assistantiin, jo
 
 <br>
 
-1. Lataa tämä tiedosto: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Lisää tämä tiedosto `<config>/www` kansioosi
+1. Lataa `bubble-card.zip` [uusimmasta julkaisusta](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Pura se `<config>/www` kansioosi, sinun pitäisi saada `bubble-card.js` ja sen viereen `translations` kansio (tuo kansio sisältää editorin sanakirjat, ilman sitä editori pysyy englanniksi)
 3. Klikkaa kojelaudallasi kuvaketta oikeassa yläkulmassa ja sitten `Muokkaa kojelautaa`
 4. Klikkaa uudelleen sitä kuvaketta ja sitten `Hallitse resursseja`
 5. Klikkaa `Lisää resurssi`
@@ -130,6 +130,21 @@ Kaikki asetukset voi määrittää Home Assistantin editorissa. Voit kuitenkin l
 
 <br>
 
+## Entiteettiehdotukset
+
+Home Assistant 2026.6:sta lähtien entiteetin valitseminen korttivalitsimessa tarjoaa sinulle muutaman valmiin kortin, ja Bubble Card vastaa tuohon kysymykseen omilla resepteillään. Valitse valaisin, niin saat kortin kirkkaudensäätimellä, sekä värilämpötila-, väri- ja kylläisyysvariantit silloin kun valaisimesi tukee niitä. Valitse kaihdin, niin saat sen sijaintiliukusäätimen, valitse mediasoitin, niin saat myös variantin sen lähdeluettelolla, valitse pölynimuri, niin saat sen käynnistys-, tauko- ja telakointipainikkeet. Jokainen ehdotus on tavallinen Bubble Card -määritys, joka näytetään live-esikatseluna, joten voit ottaa lähimmän ja jatkaa sen muokkaamista tavalliseen tapaan.
+
+Se, mitä sinulle tarjotaan, riippuu siitä, mihin entiteettisi todella pystyy: valaisin ilman kirkkauskanavaa saa kytkimen liukusäätimen sijaan, kaihdin joka ei kallistu ei saa kallistusvarianttia, ilmastointientiteetti saa esiasetetut tilansa vain jos sillä on niitä. Klassiset vaihtoehdot seuraavat niiden alapuolella silloin kun ne soveltuvat: toimialueen oma kortti, tavallinen painike ja liukusäädin.
+
+> [!TIP]
+> Moduulit voivat lisätä omat ehdotuksensa tuohon luetteloon, katso [moduulit](#moduulit).
+
+<br>
+
+---
+
+<br>
+
 ## Ponnahdusikkuna
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Tämä kortti antaa sinun luoda ponnahdusikkunan minkä tahansa sisällön kanss
 | `shadow_opacity` | string | Valinnainen | Mikä tahansa arvo väliltä `0` - `100` | Ponnahdusikkunasi varjon läpinäkyvyys (esim. `0` piilottaaksesi sen) |
 | `hide_backdrop` | boolean | Valinnainen | `true` tai `false` (oletus) | Aseta tämä arvoon true pääkojelautasi ensimmäisessä ponnahdusikkunassa poistaaksesi taustan käytöstä kaikissa ponnahdusikkunoissa. |
 | `background_update` | boolean | Valinnainen | `true` tai `false` (oletus) | Päivitä ponnahdusikkunan sisältö taustalla (ei suositella) |
-| `trigger_entity` | string | Valinnainen | Mikä tahansa entiteetti | Avaa tämä ponnahdusikkuna minkä tahansa entiteetin tilan perusteella |
+| `trigger` | object tai list | Valinnainen | Katso [ehdot](#ehdot) | Avaa tämän ponnahdusikkunan kun ehdot täyttyvät |
+| `trigger_entity` | string | Valinnainen | Mikä tahansa entiteetti | Avaa tämä ponnahdusikkuna minkä tahansa entiteetin tilan perusteella, `trigger`-asetuksen yksinkertainen muoto |
 | `trigger_state` | string | Valinnainen (**Pakollinen**, jos `trigger_entity` on määritetty) | Mikä tahansa entiteetin tila | Entiteetin tila, jolla ponnahdusikkuna avataan |
-| `trigger_close` | boolean | Valinnainen | `true` tai `false` (oletus) | Sulkee ponnahdusikkunan, kun `trigger_state` on eri |
+| `trigger_close` | boolean | Valinnainen | `true` tai `false` | Sulkee ponnahdusikkunan kun ehdot eivät enää täyty (oletus: `true` kun käytössä on `trigger`, `false` kun käytössä on `trigger_state`) |
 | `open_action` | object | Valinnainen | Katso [toiminnot](#napautuksen-kaksoisnapautuksen-ja-pitkän-painalluksen-toiminnot) | Laukaisee toiminnon, kun ponnahdusikkuna avautuu |
 | `close_action` | object | Valinnainen | Katso [toiminnot](#napautuksen-kaksoisnapautuksen-ja-pitkän-painalluksen-toiminnot) | Laukaisee toiminnon, kun ponnahdusikkuna sulkeutuu |
 | `show_header` | boolean | Valinnainen | `true` (oletus) tai `false` | Näytä/piilota ponnahdusikkunan otsikko kokonaan |
@@ -445,8 +461,8 @@ Nämä asetukset ovat käytettävissä vain, kun `button_type` on asetettu arvoo
 | `relative_slide`        | boolean | Valinnainen (`false` oletus )     | Päivitä arvo suhteessa lähtöarvoon, aloituskosketuspisteen sijaan.                                      |
 | `read_only_slider`      | boolean | Valinnainen (`false` oletus)      | Tee liukusäätimestä vain luku tila. Otetaan automaattisesti käyttöön joillekin entiteeteille, kuten antureille.                                        |
 | `slider_live_update`    | boolean | Valinnainen (`false` oletus)      | Entiteetin tila päivittyy liu'un aikana. **Tätä ominaisuutta ei suositella kaikille entiteeteille.**        |
-| `slider_fill_orientation` | string | Valinnainen | `left` (oletus), `right`, `top`, `bottom` | Muuta liukusäätimen täyttösuuntaa |
-| `slider_value_position` | string | Valinnainen | `right` (oletus), `left`, `center`, `hidden` | Arvon näyttöpaikka |
+| `slider_fill_orientation` | string | Valinnainen | `left`, `right`, `top` tai `bottom` | Muuta liukusäätimen täyttösuuntaa. Vasemmalta oikealle kun määrittelemätön, peilattuna [oikealta vasemmalle luettavissa kielissä](#lokalisointi) |
+| `slider_value_position` | string | Valinnainen | `right`, `left`, `center` tai `hidden` | Arvon näyttöpaikka. Loppupäässä kun määrittelemätön, eli vasemmalla [oikealta vasemmalle luettavissa kielissä](#lokalisointi) |
 | `invert_slider_value` | boolean | Valinnainen (`false` oletus) | Käännä liukusäätimen suunta (100 % täyttö vastaa minimiä). Ei käytettävissä väriliukusäätimille. |
 | `light_slider_type` | string | Valinnainen | `brightness` (oletus), `hue`, `saturation`, `white_temp` | **Vain valoille.** Valitse liukusäätimen tila |
 | `cover_slider_type` | string | Valinnainen | `position` (oletus), `tilt_position` | **Vain kaihtimille.** Valitse liukusäätimen tila (asento tai kallistus) |
@@ -940,7 +956,7 @@ Tämän kortin avulla voit näyttää kalenterientiteettisi. Sen sisältö on vi
 | `limit`             | number  | Valinnainen     | Luku                                        | Kortilla näytettävien tapahtumien määrä                                  |
 | `show_end`          | boolean | Valinnainen     | `true` tai `false` (oletus)                     | Näytä tai piilota tapahtumien päättymisaika                                                    |
 | `show_progress`     | boolean | Valinnainen     | `true` (oletus) tai `false`                     | Näytä tai piilota tapahtuman edistymispalkki                                                     |
-| `show_started_events`| boolean | Valinnainen     | `true` (oletus) tai `false`                     | Näytä tai piilota tapahtumat, jotka ovat parhaillaan käynnissä                                                 |
+| `show_started_events`| boolean | Valinnainen     | `true` (oletus) tai `false`                     | Näytä tai piilota tapahtumat, jotka ovat parhaillaan käynnissä. Monipäiväiset tapahtumat arvioidaan päivä kerrallaan, joten vain meneillään oleva päivä piilotetaan ja tulevat päivät pysyvät näkyvissä |
 | `scrolling_effect`  | boolean | Valinnainen | `true` (oletus) tai `false` | Salli tekstin vieriminen, kun sisältö ylittää säiliönsä koon |
 | `event_action` | object | Valinnainen | `tap_action`, `double_tap_action` tai `hold_action`, katso [toiminnot](#napautuksen-kaksoisnapautuksen-ja-pitkän-painalluksen-toiminnot) | Salli toimintojen lisääminen tapahtuman napautukseen. |
 | `tap_action` | object | Valinnainen | Katso [toiminnot](#napautuksen-kaksoisnapautuksen-ja-pitkän-painalluksen-toiminnot) | Määritä päivän napautuksen toiminto, jos määrittelemätön, käytetään `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Valinnainen | `icon-left` (oletus), `icon-top`, `icon-bottom`, `icon-right` | Kuvakkeen sijainti alipainikkeen sisällä |
 | `always_visible` | boolean | Valinnainen | `true` tai `false` (oletus) | **Vain liukusäädin.** Näytä liukusäädin aina napautuksella avaamisen sijaan |
 | `show_button_info` | boolean | Valinnainen | `true` tai `false` (oletus) | **Vain liukusäädin.** Näytä kuvake/nimi/tila, kun `always_visible` on käytössä |
-| `visibility` | object tai list | Valinnainen | Katso [ehdot](https://www.home-assistant.io/docs/scripts/conditions/) | Näytä tai piilota alipainike ehtojen perusteella |
+| `visibility` | object tai list | Valinnainen | Katso [ehdot](#ehdot) | Näytä tai piilota alipainike ehtojen perusteella |
 | `hide_when_parent_unavailable` | boolean | Valinnainen | `true` tai `false` (oletus) | Piilota alipainike, jos ylätason kortin entiteetti ei ole saatavilla |
+| `css_class` | string | Valinnainen | Mikä tahansa merkkijono | Ylimääräinen CSS-luokka alipainikkeessa, jotta voit kohdistaa siihen [tyyleissäsi](#tyylit) nimestä riippumatta (esim. `My value` antaa `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Liukusäädin-alipainikkeet tukevat samoja liukusäätimen asetuksia kuin painik
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Alipainikkeiden kulmien pyöristys |
 | `--bubble-sub-button-background-color` | `color` | Alipainikkeiden taustaväri |
+| `--bubble-sub-button-outline` | `box-shadow` | Ääriviiva joka lisätään alipainikkeeseen tai liukusäätimeen vain silloin kun se piirtyy samalla värillä kuin sen takana oleva kortti, mikä tekisi siitä näkymättömän (aseta `none` poistaaksesi sen) |
 | `--bubble-sub-slider-border-radius` | `px` | Liukusäädin-alipainikkeiden kulmien pyöristys |
 | `--bubble-sub-slider-background-color` | `color` | Liukusäädin-alipainikkeiden taustaväri |
 | `--bubble-sub-slider-height` | `px` | Aina näkyvien liukusäädin-alipainikkeiden korkeus |
+| `--bubble-sub-slider-outline` | `box-shadow` | Vain liukusäädin-alipainikkeiden ääriviiva, palautuu arvoon `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Tekstin väri vaaleilla alipainiketaustoilla |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Ehdot
+
+Osa asetuksista toimii ehdoilla, jotka kirjoitetaan täsmälleen samoin kuin Home Assistantin [ehdollisen kortin](https://www.home-assistant.io/dashboards/conditional/) ehdot:
+
+- `visibility` [alipainikkeessa](#alipainikkeet), sen näyttämiseen tai piilottamiseen
+- `trigger` [ponnahdusikkunassa](#ponnahdusikkuna), sen avaamiseen kun ehdot täyttyvät
+- `checkConditionsMet(conditions, hass)` [malliesi](#mallit) sisällä, kun tarvitset vastauksen omassa koodissasi
+
+Kaikki Home Assistantin ehtotyypit arvioidaan: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, sekä ryhmät `and`, `or` ja `not`. Myös Home Assistantin ehtojen rakentajan ehdot toimivat, ne jotka on nimetty toimialueensa mukaan kuten `sun.is_up`, `light.is_on`, `zone.in_zone` tai `temperature.is_value`, asetuksineen `target`, `options`, `behavior` ja `for`.
+
+<details>
+
+<summary><b>Esimerkki</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Ehdot arvioidaan selaimessasi, joten ne harvat jotka tarvitsevat Home Assistant -palvelinta eivät voi olla tarkkoja: auringonnousu ja auringonlasku luetaan `sun.sun`-entiteetistä sen sijaan että ne laskettaisiin uudelleen, ja `for`-kesto mitataan viimeisimmästä tilanmuutoksesta, ilman recorderin historiaa.
+>
+> `view_columns` hyväksytään mutta se läpäisee aina, koska Bubble Card ei koskaan ole se joka asettelee näkymäsi sarakkeet. Ehtotyyppi jota Bubble Card ei tunne ilmoittaa itsestään kerran selaimesi konsolissa sen sijaan että epäonnistuisi hiljaa, joten erotat kirjoitusvirheen puuttuvasta ominaisuudesta.
+
+<br>
+
+---
+
+<br>
+
 ## Napautuksen, kaksoisnapautuksen ja pitkän painalluksen toiminnot
 
 Voit myös käyttää Home Assistantin oletusarvoisia napautustoimintoja, kaksoisnapautustoimintoja ja pitkän painalluksen toimintoja korteissa, jotka tukevat tätä ominaisuutta. Tämä mahdollistaa esimerkiksi "lisätietoja"-ikkunan näyttämisen pitämällä painikkeen kuvaketta painettuna tai palvelun suorittamisen, kun alipainiketta painetaan.
@@ -1700,6 +1762,8 @@ Voit lisätä mukautettuja tyylejä muokkaamaan kaikkien korttien CSS:ää **ilm
 
 > [!TIP]  
 > Alipainikkeita voidaan kohdistaa nimipohjaisilla luokilla. Esimerkiksi alipainike nimeltä "My sub-button" voidaan tyylitellä luokalla `.my-sub-button`. Liukusäätimen alipainikkeet paljastavat myös luokat `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` jne.
+>
+> Nimipohjainen luokka muuttuu kun nimeät alipainikkeen uudelleen, ja se käännetään kun nimikin käännetään. Aseta alipainikkeeseen `css_class`, niin saat oman luokan joka ei koskaan liiku, nimestä ja kielestä riippumatta.
 
 #### Esimerkkejä
 
@@ -2066,6 +2130,7 @@ Sinulla on pääsy kaikkiin globaaleihin JS-funktioihin, mutta myös näihin:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` palauttaa `true` kun [ehtojen](#ehdot) luettelo täyttyy, esimerkiksi `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` voidaan käyttää kääntämään tila (voidaan käyttää myös hakemaan tilan yksikkö ilman että se täytyy lisätä manuaalisesti).
 - `hass.formatEntityAttributeValue(state, "attribute")` voidaan käyttää kääntämään attribuutti (voidaan käyttää myös hakemaan tilan yksikkö ilman että se täytyy lisätä manuaalisesti).
 
@@ -2318,6 +2383,8 @@ Moduulit ovat tehokas ominaisuus, joka mahdollistaa mukautettujen tyyliesi ja ma
 Mutta tämä ominaisuus on paljon tehokkaampi kuin se, se antaa sinun lisätä itse oikeita ominaisuuksia Bubble Card muokkaimeen käyttäen kaikkia oletusarvoisia [Home Assistant lomakkeen](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) vaihtoehtoja!  
 Objektivalitsinta on parannettu näyttämään live-muutokset ja tukemaan attribuutteja oikein.
 
+Moduuli voi myös vastata Home Assistantin korttivalitsimeen sisäänrakennettujen [entiteettiehdotusten](#entiteettiehdotukset) rinnalla: käytä `suggestions` niille korteille jotka se voi kuvata etukäteen, ja `suggestions_code` kun ne on laskettava kokoonpanostasi, esimerkiksi ponnahdusikkuna joka rakennetaan valitun entiteetin alueen kaikista entiteeteistä. Molemmat avaimet on dokumentoitu [täällä](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Voit myös selata **Module Storea** löytääksesi ja asentaaksesi [yhteisön luomia moduuleita](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), tai jakaa omat luomuksesi!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Tämä välilehti näyttää kaikki asennetut moduulisi ja antaa sinun:
 - **Hakea** ja **lajitella** moduuleita (aakkosjärjestys, viimeisimmät, aktiiviset ensin)
 - **Asettaa globaalin tilan** saadaksesi moduulin soveltumaan automaattisesti kaikkiin kortteihin
 - **Tuoda/viedä** moduuleita varmuuskopiointia tai jakamista varten
+- **Kirjoittaa entiteettiehdotuksia** moduulieditorissa, kohdassa **Valinnainen: Entiteettiehdotukset**, jotta moduuliasi tarjotaan Home Assistantin korttivalitsimessa. Sekä säännöt että lasketut ehdotukset tarkistetaan sitä mukaa kun kirjoitat, virhe siellä estää tallentamisen, ja esikatselu näyttää ehdotetut kortit mille tahansa valitsemallesi entiteetille
 
 #### Module Store -välilehti
 
@@ -2391,7 +2459,8 @@ Tämä välilehti näyttää [kaikki saatavilla olevat moduulit yhteisöltä](ht
 3. Täytä moduulin tiedot.
 4. Kirjoita CSS- ja/tai JavaScript-mallikoodisi **Code**-muokkaimeen.
 5. (Valinnainen) Luo mukautettu määrityskäyttöliittymä **Editor** osiossa (kuten värivalitsin yllä olevassa kuvakaappauksessa, täysi dokumentaatio saatavilla [täältä](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klikkaa **Save**.
+6. (Valinnainen) Kirjoita **Entiteettiehdotuksesi**, jotta moduuliasi tarjotaan Home Assistantin korttivalitsimessa. Paneeli tarkistaa kirjoittamasi sitä mukaa kun kirjoitat, ja sen esikatselu näyttää itse ehdotetut kortit valitsemallesi entiteetille.
+7. Klikkaa **Save**.
 
 Moduulisi on nyt käytettävissä millä tahansa kortillasi!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Lisää esimerkkejä löytyy Module Storesta, tai [täältä](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalisointi
+
+Bubble Card puhuu sinun kieltäsi. Sen editori on käännetty niille 64 kielelle joita Home Assistant tukee, ja aina kun Home Assistantilla on jo sana jollekin, käytetään sen omaa sanamuotoa, joten luet samat termit molemmissa käyttöliittymissä.
+
+Editorin alalaidassa, versionumeron vieressä, **Automaattinen**-kytkin seuraa Home Assistantisi kieltä. Kytke se pois, niin koko editori palaa englanniksi, mikä on kätevää ohjeen seuraamiseen tai ongelmasta ilmoittamiseen. Valintasi muistetaan selaimessasi.
+
+Myös tämä dokumentaatio on käännetty, [62 kielelle](languages.md). Nuo sivut ovat avoimia kaikille, joten sanamuodon joka ei vastaa omaa Home Assistantiasi voi korjata parilla klikkauksella. Englanninkielinen versio pysyy itse sisällön viitteenä.
 
 <br>
 

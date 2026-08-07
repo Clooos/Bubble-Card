@@ -18,7 +18,7 @@ Bubble Card is een minimalistische en aanpasbare kaartcollectie voor Home Assist
 
 ## Inhoudsopgave
 
-**[`Installatie`](#installatie)**  **[`Configuratie`](#configuratie)**  **[`Pop-up`](#pop-up)**  **[`Horizontale knoppenstack`](#horizontale-knoppenstack)**  **[`Knop`](#knop)**  **[`Mediaspeler`](#mediaspeler)**  **[`Zonwering`](#zonwering)**  **[`Select`](#select)**  **[`Klimaat`](#klimaat)**  **[`Agenda`](#agenda)**  **[`Scheidingslijn`](#scheidingslijn)**  **[`Lege kolom`](#lege-kolom)**  **[`Alleen subknoppen`](#alleen-subknoppen)**  **[`Subknoppen`](#subknoppen)**  **[`Kaartlay-outs`](#kaartlay-outs)**  **[`Acties`](#tik--dubbeltik--en-vasthoudacties)**  **[`Stijl`](#stijl)**  **[`Sjablonen`](#sjablonen)**  **[`Modules`](#modules)**  **[`Hulp`](#hulp)**  **[`Bijdragen`](#bijdragen)**  **[`Doneren`](#doneren)**
+**[`Installatie`](#installatie)**  **[`Configuratie`](#configuratie)**  **[`Entiteitsuggesties`](#entiteitsuggesties)**  **[`Pop-up`](#pop-up)**  **[`Horizontale knoppenstack`](#horizontale-knoppenstack)**  **[`Knop`](#knop)**  **[`Mediaspeler`](#mediaspeler)**  **[`Zonwering`](#zonwering)**  **[`Select`](#select)**  **[`Klimaat`](#klimaat)**  **[`Agenda`](#agenda)**  **[`Scheidingslijn`](#scheidingslijn)**  **[`Lege kolom`](#lege-kolom)**  **[`Alleen subknoppen`](#alleen-subknoppen)**  **[`Subknoppen`](#subknoppen)**  **[`Kaartlay-outs`](#kaartlay-outs)**  **[`Voorwaarden`](#voorwaarden)**  **[`Acties`](#tik--dubbeltik--en-vasthoudacties)**  **[`Stijl`](#stijl)**  **[`Sjablonen`](#sjablonen)**  **[`Modules`](#modules)**  **[`Lokalisatie`](#lokalisatie)**  **[`Hulp`](#hulp)**  **[`Bijdragen`](#bijdragen)**  **[`Doneren`](#doneren)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card is een minimalistische en aanpasbare kaartcollectie voor Home Assist
 
 <br>
 
-1. Download dit bestand: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Voeg dit bestand toe aan je map `<config>/www`
+1. Download `bubble-card.zip` van de [laatste release](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Pak het uit in je map `<config>/www`, je hoort `bubble-card.js` te krijgen met daarnaast een map `translations` (die map bevat de woordenlijsten van de editor, zonder die map blijft de editor in het Engels)
 3. Klik op je dashboard rechtsboven op het pictogram en dan op `Dashboard bewerken`
 4. Klik opnieuw op dat pictogram en klik dan op `Bronnen beheren`
 5. Klik op `Bron toevoegen`
@@ -130,6 +130,21 @@ Alle opties kunnen worden geconfigureerd in de editor van Home Assistant. Maar h
 
 <br>
 
+## Entiteitsuggesties
+
+Sinds Home Assistant 2026.6 krijg je bij het kiezen van een entiteit in de kaartkiezer een paar kant-en-klare kaarten voorgesteld, en Bubble Card beantwoordt die vraag met zijn eigen recepten. Kies een lamp en je krijgt een kaart met een helderheidsslider aangeboden, plus een variant voor kleurtemperatuur, kleur en verzadiging wanneer je lamp die ondersteunt. Kies een zonwering en je krijgt de positieslider, kies een mediaspeler en je krijgt ook een variant met de bronnenlijst, kies een stofzuiger en je krijgt de knoppen voor starten, pauzeren en terugkeren naar het dock. Elke suggestie is een gewone Bubble Card-configuratie die als live voorbeeld wordt getoond, dus je kunt de suggestie nemen die er het dichtst bij komt en die verder bewerken zoals gewoonlijk.
+
+Wat je krijgt aangeboden hangt af van wat je entiteit werkelijk kan: een lamp zonder helderheidskanaal krijgt een schakelaar in plaats van een slider, een zonwering die niet kan kantelen krijgt geen kantelvariant, en een klimaatentiteit krijgt haar voorkeurstanden alleen wanneer ze die heeft. De klassieke items volgen eronder wanneer ze van toepassing zijn: de eigen kaart van het domein, een gewone knop en een slider.
+
+> [!TIP]
+> Modules kunnen hun eigen suggesties aan die lijst toevoegen, zie [modules](#modules).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Met deze kaart kun je een pop-up met willekeurige inhoud maken. Elke pop-up is *
 | `shadow_opacity` | string | Optioneel | Elke waarde van `0` tot `100` | De schaduwopaciteit van je pop-up (bijv. `0` om die te verbergen) |
 | `hide_backdrop` | boolean | Optioneel | `true` of `false` (standaard) | Zet dit op true bij de eerste pop-up van je hoofddashboard om de backdrop op alle pop-ups uit te schakelen. |
 | `background_update` | boolean | Optioneel | `true` of `false` (standaard) | Werk de inhoud van de pop-up op de achtergrond bij (niet aanbevolen) |
-| `trigger_entity` | string | Optioneel | Elke entiteit | Open deze pop-up op basis van de status van elke entiteit |
+| `trigger` | object of list | Optioneel | Zie [voorwaarden](#voorwaarden) | Opent deze pop-up wanneer aan de voorwaarden is voldaan |
+| `trigger_entity` | string | Optioneel | Elke entiteit | Open deze pop-up op basis van de status van elke entiteit, de eenvoudige vorm van `trigger` |
 | `trigger_state` | string | Optioneel (**Vereist** als `trigger_entity` is ingesteld) | Elke entiteitsstatus | Entiteitsstatus om de pop-up te openen |
-| `trigger_close` | boolean | Optioneel | `true` of `false` (standaard) | Sluit de pop-up wanneer `trigger_state` afwijkt |
+| `trigger_close` | boolean | Optioneel | `true` of `false` | Sluit de pop-up wanneer niet langer aan de voorwaarden wordt voldaan (standaard: `true` bij `trigger`, `false` bij `trigger_state`) |
 | `open_action` | object | Optioneel | Zie [acties](#tik--dubbeltik--en-vasthoudacties) | Activeert een actie wanneer de pop-up wordt geopend |
 | `close_action` | object | Optioneel | Zie [acties](#tik--dubbeltik--en-vasthoudacties) | Activeert een actie wanneer de pop-up wordt gesloten |
 | `show_header` | boolean | Optioneel | `true` (standaard) of `false` | De koptekst van de pop-up volledig tonen/verbergen |
@@ -445,8 +461,8 @@ Deze opties zijn alleen beschikbaar wanneer `button_type` is ingesteld op `slide
 | `relative_slide`        | boolean | Optioneel (`false` standaard )     | Werkt de waarde bij relatief aan de startwaarde, in plaats van aan het startpunt van de aanraking.                      |
 | `read_only_slider`      | boolean | Optioneel (`false` standaard)      | Maakt de slider alleen-lezen. Wordt automatisch ingeschakeld voor sommige entiteiten zoals sensoren.                        |
 | `slider_live_update`    | boolean | Optioneel (`false` standaard)      | De status van de entiteit wordt bijgewerkt tijdens het schuiven. **Deze functie wordt niet voor alle entiteiten aanbevolen.**        |
-| `slider_fill_orientation` | string | Optioneel | `left` (standaard), `right`, `top`, `bottom` | Wijzigt de vulrichting van de slider |
-| `slider_value_position` | string | Optioneel | `right` (standaard), `left`, `center`, `hidden` | Positie van de weergegeven waarde |
+| `slider_fill_orientation` | string | Optioneel | `left`, `right`, `top` of `bottom` | Wijzigt de vulrichting van de slider. Van links naar rechts wanneer niet opgegeven, gespiegeld in [rechts-naar-links-talen](#lokalisatie) |
+| `slider_value_position` | string | Optioneel | `right`, `left`, `center` of `hidden` | Positie van de weergegeven waarde. Aan de eindzijde wanneer niet opgegeven, dus links in [rechts-naar-links-talen](#lokalisatie) |
 | `invert_slider_value` | boolean | Optioneel (`false` standaard) | Keert de sliderrichting om (100% vulling komt overeen met het minimum). Niet beschikbaar voor kleursliders. |
 | `light_slider_type` | string | Optioneel | `brightness` (standaard), `hue`, `saturation`, `white_temp` | **Alleen voor lampen.** Kiest de slidermodus |
 | `cover_slider_type` | string | Optioneel | `position` (standaard), `tilt_position` | **Alleen voor zonwering.** Kiest de slidermodus (positie of kanteling) |
@@ -940,7 +956,7 @@ Met deze kaart toon je je agenda-entiteiten. De inhoud is scrolbaar, zodat je ge
 | `limit`             | number  | Optioneel     | Een getal                                        | Het aantal evenementen dat op de kaart wordt weergegeven                                  |
 | `show_end`          | boolean | Optioneel     | `true` of `false` (standaard)                     | Toon of verberg het eindtijdstip van evenementen                                                    |
 | `show_progress`     | boolean | Optioneel     | `true` (standaard) of `false`                     | Toon of verberg de voortgangsbalk van het evenement                                                     |
-| `show_started_events`| boolean | Optioneel     | `true` (standaard) of `false`                     | Toon of verberg evenementen die momenteel bezig zijn                                                 |
+| `show_started_events`| boolean | Optioneel     | `true` (standaard) of `false`                     | Toon of verberg evenementen die momenteel bezig zijn. Meerdaagse evenementen worden per dag beoordeeld, dus alleen de lopende dag wordt verborgen en de komende dagen blijven zichtbaar |
 | `scrolling_effect`  | boolean | Optioneel | `true` (standaard) of `false` | Laat tekst scrollen wanneer de inhoud groter is dan de container |
 | `event_action` | object | Optioneel | `tap_action`, `double_tap_action` of `hold_action`, zie [acties](#tik--dubbeltik--en-vasthoudacties) | Hiermee voeg je acties toe bij het klikken op een evenement. |
 | `tap_action` | object | Optioneel | Zie [acties](#tik--dubbeltik--en-vasthoudacties) | Definieer het type actie bij het klikken op een dag, indien niet gedefinieerd wordt `none` gebruikt. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Optioneel | `icon-left` (standaard), `icon-top`, `icon-bottom`, `icon-right` | Plaatsing van het pictogram binnen de subknop |
 | `always_visible` | boolean | Optioneel | `true` of `false` (standaard) | **Alleen slider.** Toon de slider altijd in plaats van hem te openen bij een tik |
 | `show_button_info` | boolean | Optioneel | `true` of `false` (standaard) | **Alleen slider.** Toon pictogram/naam/status wanneer `always_visible` is ingeschakeld |
-| `visibility` | object of list | Optioneel | Zie [voorwaarden](https://www.home-assistant.io/docs/scripts/conditions/) | Toon of verberg de subknop op basis van voorwaarden |
+| `visibility` | object of list | Optioneel | Zie [voorwaarden](#voorwaarden) | Toon of verberg de subknop op basis van voorwaarden |
 | `hide_when_parent_unavailable` | boolean | Optioneel | `true` of `false` (standaard) | Verberg de subknop als de entiteit van de bovenliggende kaart niet beschikbaar is |
+| `css_class` | string | Optioneel | Elke tekst | Een extra CSS-klasse op de subknop, om die in je [stijlen](#stijl) aan te spreken ongeacht de naam (bijv. `My value` geeft `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Slider-subknoppen ondersteunen dezelfde slideropties als knopsliders, waaronder:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Randradius voor de subknoppen |
 | `--bubble-sub-button-background-color` | `color` | Achtergrondkleur voor de subknoppen |
+| `--bubble-sub-button-outline` | `box-shadow` | Omlijning die alleen aan een subknop of een slider wordt toegevoegd wanneer die dezelfde kleur krijgt als de kaart erachter, waardoor die onzichtbaar zou worden (zet op `none` om ze te verwijderen) |
 | `--bubble-sub-slider-border-radius` | `px` | Randradius voor slider-subknoppen |
 | `--bubble-sub-slider-background-color` | `color` | Achtergrondkleur voor slider-subknoppen |
 | `--bubble-sub-slider-height` | `px` | Hoogte voor altijd zichtbare slider-subknoppen |
+| `--bubble-sub-slider-outline` | `box-shadow` | Omlijning van uitsluitend de slider-subknoppen, valt terug op `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Tekstkleur op lichte subknopachtergronden |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Voorwaarden
+
+Sommige opties worden gestuurd door voorwaarden, precies zo geschreven als die van de [voorwaardelijke kaart](https://www.home-assistant.io/dashboards/conditional/) van Home Assistant:
+
+- `visibility` op een [subknop](#subknoppen), om die te tonen of te verbergen
+- `trigger` op een [pop-up](#pop-up), om die te openen wanneer aan de voorwaarden is voldaan
+- `checkConditionsMet(conditions, hass)` in je [sjablonen](#sjablonen), wanneer je het antwoord in je eigen code nodig hebt
+
+Elk voorwaardetype van Home Assistant wordt geëvalueerd: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, en de groepen `and`, `or` en `not`. De voorwaarden van de voorwaardebouwer van Home Assistant werken ook, die genoemd zijn naar hun domein zoals `sun.is_up`, `light.is_on`, `zone.in_zone` of `temperature.is_value`, met hun instellingen `target`, `options`, `behavior` en `for`.
+
+<details>
+
+<summary><b>Voorbeeld</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Voorwaarden worden in je browser geëvalueerd, dus de enkele die de Home Assistant-server nodig hebben kunnen niet exact zijn: zonsopgang en zonsondergang worden uit de entiteit `sun.sun` gelezen in plaats van opnieuw berekend, en een `for`-duur wordt gemeten vanaf de laatste statuswijziging, zonder de geschiedenis van recorder.
+>
+> `view_columns` wordt aanvaard maar slaagt altijd, aangezien Bubble Card nooit degene is die de kolommen van je weergave indeelt. Een voorwaardetype dat Bubble Card niet kent, meldt zichzelf één keer in je browserconsole in plaats van stilletjes te mislukken, zodat je een typfout kunt onderscheiden van een ontbrekende functie.
+
+<br>
+
+---
+
+<br>
+
 ## Tik-, dubbeltik- en vasthoudacties
 
 Je kunt ook de standaard tikacties, dubbeltikacties en vasthoudacties van Home Assistant gebruiken bij de kaarten die deze optie ondersteunen. Dit maakt het bijvoorbeeld mogelijk om het venster "meer info" te tonen door een knoppictogram vast te houden, of om een service uit te voeren wanneer op een subknop wordt getikt.
@@ -1700,6 +1762,8 @@ Je kunt op vier manieren aangepaste stijlen toevoegen om de CSS van alle kaarten
 
 > [!TIP]  
 > Subknoppen kunnen worden aangesproken via klassen op basis van hun naam. Een subknop met de naam "My sub-button" kan bijvoorbeeld gestyled worden met `.my-sub-button`. Slidersubknoppen bieden ook `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, enzovoort.
+>
+> Een klasse op basis van de naam verandert wanneer je een subknop hernoemt, en wordt vertaald wanneer de naam vertaald wordt. Stel `css_class` in op de subknop om een eigen klasse te krijgen die nooit verschuift, ongeacht de naam en ongeacht de taal.
 
 #### Voorbeelden
 
@@ -2066,6 +2130,7 @@ Je hebt toegang tot alle globale JS-functies, maar ook tot:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` geeft `true` terug wanneer aan een lijst met [voorwaarden](#voorwaarden) is voldaan, bijvoorbeeld `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` kan gebruikt worden om een status te vertalen (kan ook gebruikt worden om een eenheid van een status te krijgen, zonder deze handmatig te moeten toevoegen).
 - `hass.formatEntityAttributeValue(state, "attribute")` kan gebruikt worden om een attribuut te vertalen (kan ook gebruikt worden om een eenheid van een status te krijgen, zonder deze handmatig te moeten toevoegen).
 
@@ -2318,6 +2383,8 @@ Modules zijn een krachtige functie waarmee je je aangepaste stijlen en sjablonen
 Maar deze functie is nog veel krachtiger dan dat: hiermee kun je zelf echte functies toevoegen in de Bubble Card-editor, met gebruik van alle standaard [Home Assistant-formulier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)-opties!  
 De objectkiezer is verbeterd om live wijzigingen te tonen en attributen correct te ondersteunen.
 
+Een module kan ook antwoorden op de kaartkiezer van Home Assistant, naast de ingebouwde [entiteitsuggesties](#entiteitsuggesties): gebruik `suggestions` voor de kaarten die ze vooraf kan beschrijven, en `suggestions_code` wanneer ze uit jouw installatie berekend moeten worden, bijvoorbeeld een pop-up die opgebouwd is uit elke entiteit van het gebied waartoe de gekozen entiteit behoort. Beide sleutels zijn [hier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) gedocumenteerd.
+
 Je kunt ook door de **Module Store** bladeren om [modules gemaakt door de community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) te vinden en te installeren, of om je eigen creaties te delen!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Dit tabblad toont al je geïnstalleerde modules en biedt de mogelijkheid om:
 - Modules **te zoeken** en **te sorteren** (alfabetisch, recent, actief eerst)
 - De **globale status in te stellen** zodat een module automatisch op alle kaarten wordt toegepast
 - Modules **te importeren/exporteren** voor back-up of delen
+- **Entiteitsuggesties te schrijven** in de module-editor, onder **Optioneel: entiteitsuggesties**, zodat je module wordt aangeboden in de kaartkiezer van Home Assistant. Zowel de regels als de berekende suggesties worden gecontroleerd terwijl je schrijft, een fout daar verhindert het opslaan, en het voorbeeld toont de voorgestelde kaarten voor elke entiteit die je kiest
 
 #### Tabblad Module Store
 
@@ -2391,7 +2459,8 @@ Dit tabblad toont [alle beschikbare modules van de community](https://github.com
 3. Vul de moduleinformatie in.
 4. Schrijf je CSS- en/of JavaScript-sjabloonscode in de code-editor **Code**.
 5. (Optioneel) Maak een aangepaste configuratie-interface in de sectie **Editor** (zoals de kleurkiezer in de bovenstaande schermafbeelding, volledige documentatie beschikbaar [hier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klik op **Opslaan**.
+6. (Optioneel) Schrijf je **Entiteitsuggesties** zodat je module wordt aangeboden in de kaartkiezer van Home Assistant. Het paneel controleert wat je schrijft terwijl je typt, en het voorbeeld toont de voorgestelde kaarten zelf voor de entiteit van je keuze.
+7. Klik op **Opslaan**.
 
 Je module is nu beschikbaar om te gebruiken op elk van je kaarten!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Meer voorbeelden zijn te vinden in de Module Store, of [hier](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalisatie
+
+Bubble Card spreekt jouw taal. De editor is vertaald in de 64 talen die Home Assistant ondersteunt, en overal waar Home Assistant al een woord voor iets heeft, wordt de eigen formulering daarvan overgenomen, zodat je in beide interfaces dezelfde termen leest.
+
+Onderaan de editor, naast het versienummer, volgt een schakelaar **Automatisch** de taal van je Home Assistant. Zet die uit en de hele editor gaat terug naar het Engels, wat handig is om een tutorial te volgen of een probleem te melden. Je keuze wordt in je browser onthouden.
+
+Deze documentatie is ook vertaald, [in 62 talen](languages.md). Die pagina's staan voor iedereen open, dus een formulering die niet overeenkomt met je eigen Home Assistant kan met een paar klikken worden verbeterd. De Engelse versie blijft de referentie voor de inhoud zelf.
 
 <br>
 

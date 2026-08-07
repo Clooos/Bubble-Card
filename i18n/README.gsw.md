@@ -18,7 +18,7 @@ Bubble Card isch e minimalistischi und aapassbari Kartesammlig für Home Assista
 
 ## Inhaltsverzeichnis
 
-**[`Installation`](#installation)**  **[`Konfiguration`](#konfiguration)**  **[`Pop-up`](#pop-up)**  **[`Horizontale Button-Stapel`](#horizontale-button-stapel)**  **[`Button`](#button)**  **[`Mediaplayer`](#mediaplayer)**  **[`Storen`](#storen)**  **[`Uswahl`](#uswahl)**  **[`Klima`](#klima)**  **[`Kalender`](#kalender)**  **[`Trännlinie`](#trännlinie)**  **[`Leeri Spalte`](#leeri-spalte)**  **[`Nur Sub-Buttons`](#nur-sub-buttons)**  **[`Sub-Buttons`](#sub-buttons)**  **[`Charte-Layouts`](#charte-layouts)**  **[`Aktione`](#tippe--doppeltipp--und-halte-aktione)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Modul`](#module)**  **[`Hilf`](#hilf)**  **[`Mitmache`](#mitmache)**  **[`Spände`](#spände)**
+**[`Installation`](#installation)**  **[`Konfiguration`](#konfiguration)**  **[`Entitäte-Vorschläg`](#entitäte-vorschläg)**  **[`Pop-up`](#pop-up)**  **[`Horizontale Button-Stapel`](#horizontale-button-stapel)**  **[`Button`](#button)**  **[`Mediaplayer`](#mediaplayer)**  **[`Storen`](#storen)**  **[`Uswahl`](#uswahl)**  **[`Klima`](#klima)**  **[`Kalender`](#kalender)**  **[`Trännlinie`](#trännlinie)**  **[`Leeri Spalte`](#leeri-spalte)**  **[`Nur Sub-Buttons`](#nur-sub-buttons)**  **[`Sub-Buttons`](#sub-buttons)**  **[`Charte-Layouts`](#charte-layouts)**  **[`Bedingige`](#bedingige)**  **[`Aktione`](#tippe--doppeltipp--und-halte-aktione)**  **[`Styling`](#styling)**  **[`Templates`](#templates)**  **[`Modul`](#module)**  **[`Lokalisierig`](#lokalisierig)**  **[`Hilf`](#hilf)**  **[`Mitmache`](#mitmache)**  **[`Spände`](#spände)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card isch e minimalistischi und aapassbari Kartesammlig für Home Assista
 
 <br>
 
-1. Lad die Datei abe: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Fueg die Datei i dim `<config>/www` Ordner i
+1. Lad `bubble-card.zip` vo de [letschte Release](https://github.com/Clooos/Bubble-Card/releases/latest) abe
+2. Pack es i dim `<config>/www` Ordner us, du sötsch `bubble-card.js` und en Ordner `translations` dernäbe übercho (dä Ordner enthaltet d Wörterbüecher vom Editor, ohni ihn bliibt de Editor uf Änglisch)
 3. Klick uf dim Dashboard obe rächts uf s Symbol und denn uf `Dashboard bearbeiten`
 4. Klick nomol uf das Symbol und denn uf `Ressourcen verwalten`
 5. Klick uf `Ressource hinzufügen`
@@ -130,6 +130,21 @@ Alli Optione chasch im Home Assistant Editor konfiguriere. Aber du findsch meh D
 
 <br>
 
+## Entitäte-Vorschläg
+
+Sit Home Assistant 2026.6 wird dir bim Uswähle vo ere Entität im Charte-Uswähler es paar fertigi Charte aabote, und Bubble Card antwortet uf die Frag mit sine eigene Rezäpt. Wähl es Liecht us und du übercho es Charte mit eme Helligkeits-Schieberegler, plus e Farbtemperatur-, e Farb- und e Sättigungsvariante, wenn dis Liecht die unterstützt. Wähl e Store us und du übercho ihre Positions-Schieberegler, wähl en Mediaplayer us und du übercho au e Variante mit sinere Quelleliste, wähl en Staubsuger us und du übercho sini Buttons Start, Pause und Zrugg zur Basis. Jede Vorschlag isch e normali Bubble Card-Konfiguration, wo als Live-Vorschau azeigt wird, drum chasch de nächschti neh und wie gwohnt witer bearbeite.
+
+Was dir aabote wird, hanget dervo ab, was dini Entität würklich cha: es Liecht ohni Helligkeitskanal übercho en Schalter statt en Schieberegler, e Store wo nöd chippe cha übercho kei Chippvariante, e Klima-Entität übercho ihri voreigstellte Modi nur, wenn si sonigi het. D klassische Iiträg chömed drunter, wenn si passe: s eigene Charte vom Domain, en eifache Button und en Schieberegler.
+
+> [!TIP]
+> Module chönd ihri eigene Vorschläg zu dere Lischte hinzuefüege, lueg [Module](#module).
+
+<br>
+
+---
+
+<br>
+
 ## Pop-up
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ Mit dere Karte chasch e Pop-up mit beliebigem Inhalt erstelle. Jedes Pop-up isch
 | `shadow_opacity` | string | Optional | Jede Wert vo `0` bis `100` | D Schatte-Deckchraft vo dim Pop-up (z.B. `0` zum en verstecke) |
 | `hide_backdrop` | boolean | Optional | `true` oder `false` (Standard) | Setz das uf true bim erschte Pop-up vo dim Haupt-Dashboard, zum de Backdrop bi allne Pop-ups z deaktiviere. |
 | `background_update` | boolean | Optional | `true` oder `false` (Standard) | Aktualisiert de Inhalt vom Pop-up im Hindergrund (nid empfohle) |
-| `trigger_entity` | string | Optional | Jedi Entität | Macht das Pop-up uf, basierend uf em Zuestand vo irgendere Entität |
+| `trigger` | object oder list | Optional | Gsehsch [Bedingige](#bedingige) | Öffnet das Pop-up, wenn d Bedingige erfüllt sind |
+| `trigger_entity` | string | Optional | Jedi Entität | Macht das Pop-up uf, basierend uf em Zuestand vo irgendere Entität, die eifachi Form vo `trigger` |
 | `trigger_state` | string | Optional (**Erforderlich** falls `trigger_entity` definiert isch) | Jede Entitäts-Zuestand | Entitäts-Zuestand zum s Pop-up uufmache |
-| `trigger_close` | boolean | Optional | `true` oder `false` (Standard) | Schliesst s Pop-up wenn `trigger_state` anders isch |
+| `trigger_close` | boolean | Optional | `true` oder `false` | Schliesst s Pop-up, wenn d Bedingige nüme erfüllt sind (Standard: `true` mit `trigger`, `false` mit `trigger_state`) |
 | `open_action` | object | Optional | Gseht [Aktione](#tippe--doppeltipp--und-halte-aktione) | Löst e Aktion us, wenn s Pop-up uufgeit |
 | `close_action` | object | Optional | Gseht [Aktione](#tippe--doppeltipp--und-halte-aktione) | Löst e Aktion us, wenn s Pop-up zuegeit |
 | `show_header` | boolean | Optional | `true` (Standard) oder `false` | Zeigt/Verschteckt d Kopfziile vom Pop-up komplett |
@@ -445,8 +461,8 @@ Die Optione sind nur verfüegbar, wenn `button_type` uf `slider` gsetzt isch.
 | `relative_slide`        | boolean | Optional (`false` Standard )     | Aktualisiert de Wert relativ zum Startwert, anstatt zum Startberührigspunkt.                                      |
 | `read_only_slider`      | boolean | Optional (`false` Standard)      | Macht de Schieberegler nur läsbar. Wird automatisch aktiviert für gwüssi Entities wie Sensore.                                        |
 | `slider_live_update`    | boolean | Optional (`false` Standard)      | De Entity-Zuestand wird während em Schiebe aktualisiert. **Die Funktion wird nöd für alli Entities empfohle.**        |
-| `slider_fill_orientation` | string | Optional | `left` (Standard), `right`, `top`, `bottom` | Ändert d Füllrichtig vom Schieberegler |
-| `slider_value_position` | string | Optional | `right` (Standard), `left`, `center`, `hidden` | Position vo de Wertaazeig |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` oder `bottom` | Ändert d Füllrichtig vom Schieberegler. Vo links nach rächts, wenn nöd definiert, gspieglet i [Sprache vo rächts nach links](#lokalisierig) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` oder `hidden` | Position vo de Wärtaazeig. Uf de Ändsite, wenn nöd definiert, also links i [Sprache vo rächts nach links](#lokalisierig) |
 | `invert_slider_value` | boolean | Optional (`false` Standard) | Kehrt d Schieberegler-Richtig um (100 % Füllig entspricht em Minimum). Nöd verfüegbar für Farb-Schieberegler. |
 | `light_slider_type` | string | Optional | `brightness` (Standard), `hue`, `saturation`, `white_temp` | **Nur für Lichter.** Wähl de Schieberegler-Modus |
 | `cover_slider_type` | string | Optional | `position` (Standard), `tilt_position` | **Nur für Store.** Wähl de Schieberegler-Modus (Position oder Neigig) |
@@ -940,7 +956,7 @@ Die Charte erlaubt dir, dini Kalender-Entities azeige. De Inhalt isch scrollbar,
 | `limit`             | number  | Optional     | E Zahl                                        | D Aazahl Termin, wo uf de Charte azeigt werde                                  |
 | `show_end`          | boolean | Optional     | `true` oder `false` (Standard)                     | Zeig oder verstecke d Ändzit vo de Termin                                                    |
 | `show_progress`     | boolean | Optional     | `true` (Standard) oder `false`                     | Zeig oder verstecke de Fortschrittsbalke vom Termin                                                     |
-| `show_started_events`| boolean | Optional     | `true` (Standard) oder `false`                     | Zeig oder verstecke Termin, wo grad am Laufe sind                                                 |
+| `show_started_events`| boolean | Optional     | `true` (Standard) oder `false`                     | Zeig oder verstecke Termin, wo grad am Laufe sind. Mehrtägigi Termin werde Tag für Tag beurteilt, drum wird nur de laufend Tag verstecket und die chömende Täg bliibed sichtbar |
 | `scrolling_effect`  | boolean | Optional | `true` (Standard) oder `false` | Erlaubt em Text z scrolle, wenn de Inhalt grösser isch als de Container |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` oder `hold_action`, gseh [Aktione](#tippe--doppeltipp--und-halte-aktione) | Erlaubt, Aktione bim Termin-Klick z derfüege. |
 | `tap_action` | object | Optional | Gseh [Aktione](#tippe--doppeltipp--und-halte-aktione) | Definiert d Art vo de Aktion bim Tag-Klick, wenn nöd definiert wird `none` bruucht. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Optional | `icon-left` (Standard), `icon-top`, `icon-bottom`, `icon-right` | Platzierig vom Icon im Sub-Button |
 | `always_visible` | boolean | Optional | `true` oder `false` (Standard) | **Nur Slider.** Zeigt de Slider immer, statt en bim Tipp z'öffne |
 | `show_button_info` | boolean | Optional | `true` oder `false` (Standard) | **Nur Slider.** Zeigt Icon/Name/Status, wenn `always_visible` aktiviert isch |
-| `visibility` | object oder list | Optional | Gsehsch [Bedingige](https://www.home-assistant.io/docs/scripts/conditions/) | Zeigt oder verstecklet de Sub-Button je nach Bedingige |
+| `visibility` | object oder list | Optional | Gsehsch [Bedingige](#bedingige) | Zeigt oder verstecklet de Sub-Button je nach Bedingige |
 | `hide_when_parent_unavailable` | boolean | Optional | `true` oder `false` (Standard) | Verstecklet de Sub-Button, wenn d'Entity vo de übergeordnete Charte nid verfüegbar isch |
+| `css_class` | string | Optional | Jede String | E zuesätzlichi CSS-Klasse uf em Sub-Button, zum ihn i dim [Styling](#styling) aaziele, egal wie er heisst (zum Bispil git `My value` `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Slider-Sub-Buttons unterstütze die gliche Slider-Optione wie Button-Slider, ink
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Randradius für d'Sub-Buttons |
 | `--bubble-sub-button-background-color` | `color` | Hintergrundfarb für d'Sub-Buttons |
+| `--bubble-sub-button-outline` | `box-shadow` | Umriss, wo nur denn zu eme Sub-Button oder eme Schieberegler dezue chunnt, wenn er die gliich Farb übercho wie s Charte dehinder, was ihn unsichtbar machti (setz en uf `none`, zum en entferne) |
 | `--bubble-sub-slider-border-radius` | `px` | Randradius für Slider-Sub-Buttons |
 | `--bubble-sub-slider-background-color` | `color` | Hintergrundfarb für Slider-Sub-Buttons |
 | `--bubble-sub-slider-height` | `px` | Höchi für immer sichtbari Slider-Sub-Buttons |
+| `--bubble-sub-slider-outline` | `box-shadow` | Umriss vo nur de Slider-Sub-Buttons, fallt zrugg uf `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Textfarb uf hälle Sub-Button-Hintergründ |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Bedingige
+
+Es paar Optione werde über Bedingige gsteueret, gschriebe genau wie die vom [bedingte Charte](https://www.home-assistant.io/dashboards/conditional/) vo Home Assistant:
+
+- `visibility` uf eme [Sub-Button](#sub-buttons), zum ihn azeige oder verstecke
+- `trigger` uf eme [Pop-up](#pop-up), zum es öffne, wenn d Bedingige erfüllt sind
+- `checkConditionsMet(conditions, hass)` i dine [Templates](#templates), wenn du d Antwort i dim eigene Code bruuchsch
+
+Alli Bedingigstype vo Home Assistant werde uusgwertet: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template`, und d Gruppe `and`, `or` und `not`. D Bedingige vom Bedingigs-Buuwer vo Home Assistant funktioniere au, die wo nach ihrem Domain benennt sind wie `sun.is_up`, `light.is_on`, `zone.in_zone` oder `temperature.is_value`, mit ihrne Iistellige `target`, `options`, `behavior` und `for`.
+
+<details>
+
+<summary><b>Bispil</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> D Bedingige werde i dim Browser uusgwertet, drum chönd die weneg, wo de Home Assistant-Server bruuched, nöd exakt si: Sunnenufgang und Sunnenuntergang werde us de Entität `sun.sun` gläse statt neu brechnet, und e `for`-Duur wird ab de letschte Zuestandsänderig gmässe, ohni d Gschicht vom recorder.
+>
+> `view_columns` wird akzeptiert, gaht aber immer duure, wil Bubble Card nie die isch, wo d Spalte vo dinere Aasicht aaordnet. En Bedingigstyp, wo Bubble Card nöd kennt, meldet sich eimal i de Konsole vo dim Browser, statt lutlos z scheitere, so chasch en Tippfähler vo re fählende Funktion underscheide.
+
+<br>
+
+---
+
+<br>
+
 ## Tippe-, Doppeltipp- und Halte-Aktione
 
 Du chasch au d'Standard-Tipp-Aktione, Doppeltipp-Aktione und Halte-Aktione vo Home Assistant bruche, bi de Charte, wo die Option unterstütze. Das erlaubt dir zum Bispiel, s'"Meh-Info"-Fänschter aazeige, wenn du es Button-Icon hebsch, oder en Dienscht uszfüehre, wenn en Sub-Button drückt wird.
@@ -1700,6 +1762,8 @@ Du chasch eigeni Styles hinzuefüege, um s'CSS vo allne Charte z'ändere **ohni 
 
 > [!TIP]  
 > Sub-Buttons chönd über namebasierti Klasse azielt werde. Zum Bispiel cha en Sub-Button mit em Name "My sub-button" mit `.my-sub-button` gstyled werde. Slider-Sub-Buttons zeige au `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2`, etc.
+>
+> E namebasierti Klasse ändert, wenn du en Sub-Button umbenennsch, und si wird übersetzt, wenn de Name übersetzt wird. Setz `css_class` uf em Sub-Button, zum e eigeni Klasse z übercho, wo sich nie verschiebt, egal wie er heisst und egal i welere Sprach.
 
 #### Bispiel
 
@@ -2066,6 +2130,7 @@ Du hesch Zuegriff uf alli globale JS-Funktione, aber au uf:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` git `true` zrugg, wenn e Lischte vo [Bedingige](#bedingige) erfüllt isch, zum Bispil `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` cha bruucht werde, um en Zuestand z'übersetze (cha au bruucht werde, um en Zuestandseinheit z'übercho, ohni sie manuell hinzuefüege z'müesse).
 - `hass.formatEntityAttributeValue(state, "attribute")` cha bruucht werde, um es Attribut z'übersetze (cha au bruucht werde, um en Zuestandseinheit z'übercho, ohni sie manuell hinzuefüege z'müesse).
 
@@ -2318,6 +2383,8 @@ Module sind e mächtigi Funktion, wo dir erlaubt, dini eigene Styles und Templat
 Aber die Funktion isch no viel mächtiger als das, si erlaubt dir, echti Funktione sälber im Bubble-Card-Editor hinzuefüege, mit allne Standard-[Home-Assistant-Formular](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)-Optione!  
 Dr Objekt-Selector isch verbesseret worde, um live Änderige z'zeige und Attribut korrekt z'unterstütze.
 
+Es Modul cha au uf de Charte-Uswähler vo Home Assistant antworte, näbe de iigebaute [Entitäte-Vorschläg](#entitäte-vorschläg): bruuch `suggestions` für die Charte, wo's im Voruus cha beschriibe, und `suggestions_code`, wenn si us dinere Iirichtig müend brechnet werde, zum Bispil es Pop-up, wo us allne Entitäte vom Beriich uufbaut wird, wo die uusgwählti Entität dezue ghört. Beidi Schlüssel sind [da](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) dokumentiert.
+
 Du chasch au dr **Module Store** duresueche, um [vo dr Community erstellti Module](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) z'finde und z'installiere, oder dini eigene Kreatione teile!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ Dää Tab zeigt alli dini installierte Module und erlaubt dir:
 - Module z'**sueche** und z'**sortiere** (alphabetisch, kürzlech, aktivi zersch)
 - **Globale Status** setze, damit es Modul automatisch uf alli Charte agwandet wird
 - Module für Backup oder zum Teile z'**importiere/exportiere**
+- **Entitäte-Vorschläg schriibe** im Modul-Editor, under **Optional: Entitäte-Vorschläg**, damit dis Modul im Charte-Uswähler vo Home Assistant aabote wird. Sowohl d Regle als au die brechnete Vorschläg werde während em Schriibe prüeft, en Fähler dert verhinderet s Spichere, und d Vorschau zeigt die vorgschlagene Charte für jedi Entität, wo du uuswählsch
 
 #### Tab "Module Store"
 
@@ -2391,7 +2459,8 @@ Dää Tab zeigt [alli verfüegbare Module vo dr Community](https://github.com/Cl
 3. Füll d'Modulinformatione us.
 4. Schriib din CSS- und/oder JavaScript-Template-Code im Editor **Code**.
 5. (Optional) Erstell e eigeni Konfigurations-UI im Abschnitt **Editor** (wie dr Farbwähler im Screenshot obe, vollständigi Dokumentation verfüegbar [da](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klick uf **Speichere**.
+6. (Optional) Schriib dini **Entitäte-Vorschläg**, damit dis Modul im Charte-Uswähler vo Home Assistant aabote wird. S Panel prüeft während em Tippe, was du schriibsch, und sini Vorschau zeigt die vorgschlagene Charte sälber für die Entität vo dinere Wahl.
+7. Klick uf **Speichere**.
 
 Dis Modul isch jetzt bereit, uf jeder vo dine Charte bruucht z'werde!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Meh Bispiel findsch im Module Store, oder [da](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokalisierig
+
+Bubble Card redt dini Sprach. Sin Editor isch i die 64 Sprache übersetzt, wo Home Assistant unterstützt, und überall wo Home Assistant scho es Wort für öppis het, wird sini eigeni Formulierig übernoh, so liest du i beidne Oberflächene die gliiche Begriff.
+
+Zunterscht im Editor, näbem Versionsnummere, folgt en **Automatisch**-Schalter de Sprach vo dim Home Assistant. Schalt en ab und de ganz Editor gaht zrugg uf Änglisch, was praktisch isch zum eme Tutorial folge oder es Problem melde. Dini Wahl wird i dim Browser gmerkt.
+
+Die Dokumentation isch au übersetzt, [i 62 Sprache](languages.md). Die Site sind für alli offe, drum cha e Formulierig, wo nöd zu dim eigene Home Assistant passt, i es paar Klick korrigiert werde. D änglisch Version bliibt d Referänz für de Inhalt sälber.
 
 <br>
 

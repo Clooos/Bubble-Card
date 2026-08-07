@@ -18,7 +18,7 @@ Bubble Card on minimalistlik ja kohandatav kaartide kogu Home Assistant'i jaoks,
 
 ## Sisukord
 
-**[`Paigaldamine`](#paigaldamine)**  **[`Seadistamine`](#seadistamine)**  **[`Hüpikaken`](#hüpikaken)**  **[`Horisontaalne nuppude virn`](#horisontaalne-nuppude-virn)**  **[`Nupp`](#nupp)**  **[`Meediumipleier`](#meediumipleier)**  **[`Kate`](#kate)**  **[`Valik`](#valik)**  **[`Kliimaseade`](#kliimaseade)**  **[`Kalender`](#kalender)**  **[`Eraldaja`](#eraldaja)**  **[`Tühi veerg`](#tühi-veerg)**  **[`Ainult alamnupud`](#ainult-alamnupud)**  **[`Alamnupud`](#alamnupud)**  **[`Kaardi paigutused`](#kaardi-paigutused)**  **[`Toimingud`](#puudutuse-topeltpuudutuse-ja-pika-vajutuse-toimingud)**  **[`Stiilimine`](#stiilimine)**  **[`Mallid`](#mallid)**  **[`Moodulid`](#moodulid)**  **[`Abi`](#abi)**  **[`Panustamine`](#panustamine)**  **[`Anneta`](#anneta)**
+**[`Paigaldamine`](#paigaldamine)**  **[`Seadistamine`](#seadistamine)**  **[`Olemite soovitused`](#olemite-soovitused)**  **[`Hüpikaken`](#hüpikaken)**  **[`Horisontaalne nuppude virn`](#horisontaalne-nuppude-virn)**  **[`Nupp`](#nupp)**  **[`Meediumipleier`](#meediumipleier)**  **[`Kate`](#kate)**  **[`Valik`](#valik)**  **[`Kliimaseade`](#kliimaseade)**  **[`Kalender`](#kalender)**  **[`Eraldaja`](#eraldaja)**  **[`Tühi veerg`](#tühi-veerg)**  **[`Ainult alamnupud`](#ainult-alamnupud)**  **[`Alamnupud`](#alamnupud)**  **[`Kaardi paigutused`](#kaardi-paigutused)**  **[`Tingimused`](#tingimused)**  **[`Toimingud`](#puudutuse-topeltpuudutuse-ja-pika-vajutuse-toimingud)**  **[`Stiilimine`](#stiilimine)**  **[`Mallid`](#mallid)**  **[`Moodulid`](#moodulid)**  **[`Lokaliseerimine`](#lokaliseerimine)**  **[`Abi`](#abi)**  **[`Panustamine`](#panustamine)**  **[`Anneta`](#anneta)**
 
 <br>
 
@@ -32,8 +32,8 @@ Bubble Card on minimalistlik ja kohandatav kaartide kogu Home Assistant'i jaoks,
 
 <br>
 
-1. Laadi alla see fail: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
-2. Lisa see fail oma kausta `<config>/www`
+1. Laadi `bubble-card.zip` alla [uusimast väljalaskest](https://github.com/Clooos/Bubble-Card/releases/latest)
+2. Paki see lahti oma kausta `<config>/www`, sa peaksid saama `bubble-card.js` ja selle kõrvale kausta `translations` (see kaust hoiab redaktori sõnastikke, ilma selleta jääb redaktor inglise keelde)
 3. Klõpsa oma armatuurlaual paremas ülanurgas asuval ikoonil ja seejärel valikul `Edit dashboard`
 4. Klõpsa uuesti sellel ikoonil ja seejärel valikul `Manage resources`
 5. Klõpsa `Add resource`
@@ -130,6 +130,21 @@ Kõiki valikuid saab seadistada Home Assistant'i redaktoris. Kuid allolevast dok
 
 <br>
 
+## Olemite soovitused
+
+Alates Home Assistant 2026.6-st pakub kaardivalija sulle mõned valmis kaardid, kui valid olemi, ja Bubble Card vastab sellele küsimusele oma retseptidega. Vali valgusti ja sulle pakutakse kaarti heleduse liuguriga, lisaks värvitemperatuuri, värvi ja küllastuse variant, kui sinu valgusti neid toetab. Vali kate ja saad selle asendi liuguri, vali meediumipleier ja saad ka variandi selle allikate loendiga, vali tolmuimeja ja saad selle käivitamise, pausi ja dokki naasmise nupud. Iga soovitus on tavaline Bubble Cardi seadistus, mida näidatakse reaalajas eelvaates, nii et saad võtta lähima ja jätkata selle muutmist nagu ikka.
+
+See, mida sulle pakutakse, sõltub sellest, mida sinu olem tegelikult suudab: heleduskanalita valgusti saab liuguri asemel lüliti, kate, mis ei suuda kallutada, ei saa kaldevarianti, ja kliimaseadme olem saab oma eelseadistatud režiimid ainult siis, kui tal neid on. Klassikalised kirjed järgnevad nende all, kui need sobivad: domeeni oma kaart, tavaline nupp ja liugur.
+
+> [!TIP]
+> Moodulid võivad lisada sellesse loendisse oma soovitusi, vaata [mooduleid](#moodulid).
+
+<br>
+
+---
+
+<br>
+
 ## Hüpikaken
 
 ![readme-pop-up](https://github.com/Clooos/Bubble-Card/assets/36499953/086bdcc4-62aa-445b-b265-b57c4e38b8a0)
@@ -188,9 +203,10 @@ See kaart võimaldab luua hüpikakna suvalise sisuga. Iga hüpikaken on **vaikim
 | `shadow_opacity` | string | Valikuline | Iga väärtus vahemikus `0` kuni `100` | Sinu hüpikakna varju läbipaistmatus (nt `0`, et see peita) |
 | `hide_backdrop` | boolean | Valikuline | `true` või `false` (vaikimisi) | Määra see väärtuseks true oma peamise armatuurlaua esimesel hüpikaknal, et keelata backdrop kõigil hüpikakendel. |
 | `background_update` | boolean | Valikuline | `true` või `false` (vaikimisi) | Uuendab hüpikakna sisu taustal (ei ole soovitatav) |
-| `trigger_entity` | string | Valikuline | Iga olem | Avab selle hüpikakna suvalise olemi oleku alusel |
+| `trigger` | object või list | Valikuline | Vaata [tingimused](#tingimused) | Avab selle hüpikakna, kui tingimused on täidetud |
+| `trigger_entity` | string | Valikuline | Iga olem | Avab selle hüpikakna suvalise olemi oleku alusel, `trigger` lihtne kuju |
 | `trigger_state` | string | Valikuline (**Kohustuslik**, kui `trigger_entity` on määratud) | Iga olemi olek | Olemi olek, mis avab hüpikakna |
-| `trigger_close` | boolean | Valikuline | `true` või `false` (vaikimisi) | Sulgeb hüpikakna, kui `trigger_state` erineb |
+| `trigger_close` | boolean | Valikuline | `true` või `false` | Sulgeb hüpikakna, kui tingimused ei ole enam täidetud (vaikimisi: `true` koos `trigger`-iga, `false` koos `trigger_state`-iga) |
 | `open_action` | object | Valikuline | Vt [toimingud](#puudutuse-topeltpuudutuse-ja-pika-vajutuse-toimingud) | Käivitab tegevuse hüpikakna avanemisel |
 | `close_action` | object | Valikuline | Vt [toimingud](#puudutuse-topeltpuudutuse-ja-pika-vajutuse-toimingud) | Käivitab tegevuse hüpikakna sulgemisel |
 | `show_header` | boolean | Valikuline | `true` (vaikimisi) või `false` | Näitab/peidab hüpikakna päise täielikult |
@@ -445,8 +461,8 @@ Need valikud on saadaval ainult siis, kui `button_type` on määratud väärtuse
 | `relative_slide`        | boolean | Optional (`false` default )     | Uuenda väärtust lähtuvalt algsest väärtusest, mitte puudutuse algpunktist.                      |
 | `read_only_slider`      | boolean | Optional (`false` default)      | Muuda liugur ainult loetavaks. Lülitub automaatselt sisse mõnede olemite, nt andurite puhul.                                                    |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Olemi olekut uuendatakse liugutamise ajal. **See funktsioon ei sobi kõikidele olemitele.**        |
-| `slider_fill_orientation` | string | Optional | `left` (default), `right`, `top`, `bottom` | Muuda liuguri täitesuunda |
-| `slider_value_position` | string | Optional | `right` (default), `left`, `center`, `hidden` | Väärtuse kuva asukoht |
+| `slider_fill_orientation` | string | Optional | `left`, `right`, `top` või `bottom` | Muuda liuguri täitesuunda. Vasakult paremale, kui pole määratud, peegeldatud [paremalt vasakule kirjutatavates keeltes](#lokaliseerimine) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` või `hidden` | Väärtuse kuva asukoht. Lõpupoolsel küljel, kui pole määratud, seega vasakul [paremalt vasakule kirjutatavates keeltes](#lokaliseerimine) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Pööra liuguri suund vastupidiseks (100% täitus võrdub miinimumiga). Ei ole saadaval värviliuguritele. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Ainult valgustitele.** Vali liuguri režiim |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Ainult katetele.** Vali liuguri režiim (asend või kalle) |
@@ -940,7 +956,7 @@ See kaart võimaldab kuvada kalendriolemeid. Selle sisu on keritav, nii et eelse
 | `limit`             | number  | Optional     | A number                                        | Kaardil kuvatavate sündmuste arv                                  |
 | `show_end`          | boolean | Optional     | `true` or `false` (default)                     | Näita või peida sündmuste lõpuaeg                                                    |
 | `show_progress`     | boolean | Optional     | `true` (default) or `false`                     | Näita või peida sündmuse edenemisriba                                                     |
-| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Näita või peida sündmused, mis on parajasti käimas                                                 |
+| `show_started_events`| boolean | Optional     | `true` (default) or `false`                     | Näita või peida sündmused, mis on parajasti käimas. Mitmepäevaseid sündmusi hinnatakse päev haaval, nii et peidetakse ainult käimasolev päev ja tulevad päevad jäävad nähtavaks |
 | `scrolling_effect`  | boolean | Optional | `true` (default) or `false` | Luba teksti kerimine, kui sisu ületab konteineri suuruse |
 | `event_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [toimingud](#puudutuse-topeltpuudutuse-ja-pika-vajutuse-toimingud) | Võimaldab lisada sündmuse klõpsule toiminguid. |
 | `tap_action` | object | Optional | See [toimingud](#puudutuse-topeltpuudutuse-ja-pika-vajutuse-toimingud) | Määra päeva klõpsu toimingu tüüp, kui pole määratud, kasutatakse `none`. |
@@ -1306,8 +1322,9 @@ sub_button:
 | `content_layout` | string | Valikuline | `icon-left` (vaikimisi), `icon-top`, `icon-bottom`, `icon-right` | Ikooni paigutus alamnupu sees |
 | `always_visible` | boolean | Valikuline | `true` või `false` (vaikimisi) | **Ainult slaideri jaoks.** Näita slaiderit alati, selle asemel et see avada puudutusel |
 | `show_button_info` | boolean | Valikuline | `true` või `false` (vaikimisi) | **Ainult slaideri jaoks.** Kuva ikoon/nimi/olek, kui `always_visible` on lubatud |
-| `visibility` | object või list | Valikuline | Vaata [tingimused](https://www.home-assistant.io/docs/scripts/conditions/) | Kuva või peida alamnupp tingimuste alusel |
+| `visibility` | object või list | Valikuline | Vaata [tingimused](#tingimused) | Kuva või peida alamnupp tingimuste alusel |
 | `hide_when_parent_unavailable` | boolean | Valikuline | `true` või `false` (vaikimisi) | Peida alamnupp, kui vanemkaardi olem pole saadaval |
+| `css_class` | string | Valikuline | Suvaline string | Täiendav CSS klass alamnupul, et seda oma [stiilides](#stiilimine) sihtida olenemata selle nimest (nt `My value` annab `.my-value`) |
 
 </details>
 
@@ -1330,9 +1347,11 @@ Slaideri alamnupud toetavad samu slaideri valikuid, mis nupu slaiderid, sealhulg
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Alamnuppude joonte raadius |
 | `--bubble-sub-button-background-color` | `color` | Alamnuppude taustavärv |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontuur, mis lisatakse alamnupule või liugurile ainult siis, kui see joonistub sama värvi kui kaart selle taga, mis muudaks selle nähtamatuks (määra `none`, et see eemaldada) |
 | `--bubble-sub-slider-border-radius` | `px` | Slaideri alamnuppude joonte raadius |
 | `--bubble-sub-slider-background-color` | `color` | Slaideri alamnuppude taustavärv |
 | `--bubble-sub-slider-height` | `px` | Alati nähtavate slaideri alamnuppude kõrgus |
+| `--bubble-sub-slider-outline` | `box-shadow` | Ainult liuguriga alamnuppude kontuur, muidu kasutatakse `--bubble-sub-button-outline` |
 | `--bubble-sub-button-dark-text-color` | `color` | Teksti värv heledatel alamnupu taustadel |
 
 </details>
@@ -1598,6 +1617,49 @@ sub_button:
 
 <br>
 
+## Tingimused
+
+Mõnda valikut juhivad tingimused, mis kirjutatakse täpselt nagu Home Assistanti [tingimusliku kaardi](https://www.home-assistant.io/dashboards/conditional/) omad:
+
+- `visibility` [alamnupul](#alamnupud), et seda näidata või peita
+- `trigger` [hüpikaknal](#hüpikaken), et see avaneks, kui tingimused on täidetud
+- `checkConditionsMet(conditions, hass)` sinu [mallide](#mallid) sees, kui vajad vastust oma koodis
+
+Hinnatakse iga Home Assistanti tingimusetüüpi: `state`, `numeric_state`, `screen`, `user`, `time`, `location`, `template` ning rühmad `and`, `or` ja `not`. Töötavad ka Home Assistanti tingimusekoostaja tingimused, need, mis on nimetatud oma domeeni järgi nagu `sun.is_up`, `light.is_on`, `zone.in_zone` või `temperature.is_value`, koos oma seadetega `target`, `options`, `behavior` ja `for`.
+
+<details>
+
+<summary><b>Näide</b></summary>
+
+<br>
+
+```yaml
+type: custom:bubble-card
+card_type: button
+entity: light.kitchen
+sub_button:
+  - name: Night mode
+    icon: mdi:weather-night
+    visibility:
+      - condition: sun.is_set
+      - condition: state
+        entity: person.me
+        state: home
+```
+
+</details>
+
+> [!NOTE]
+> Tingimusi hinnatakse sinu brauseris, seega need vähesed, mis vajavad Home Assistanti serverit, ei saa olla täpsed: päikesetõus ja päikeseloojang loetakse olemist `sun.sun`, selle asemel et neid uuesti arvutada, ja `for` kestust mõõdetakse viimasest oleku muutusest, ilma recorderi ajaloota.
+>
+> `view_columns` võetakse vastu, aga läbib alati, sest Bubble Card ei ole kunagi see, kes sinu vaate veerge paigutab. Tingimusetüüp, mida Bubble Card ei tunne, annab endast brauseri konsoolis ühe korra teada, selle asemel et vaikselt ebaõnnestuda, nii et eristad kirjavea puuduvast võimalusest.
+
+<br>
+
+---
+
+<br>
+
 ## Puudutuse, topeltpuudutuse ja pika vajutuse toimingud
 
 Samuti saad kasutada Home Assistanti vaikimisi puudutustoiminguid, topeltpuudutustoiminguid ja pika vajutuse toiminguid neil kaartidel, mis seda valikut toetavad. Näiteks võimaldab see kuvada "lisainfo" akna nupuikooni all hoides või käivitada teenuse, kui alamnuppu vajutatakse.
@@ -1700,6 +1762,8 @@ Kõigi kaartide CSS-i saab muuta kohandatud stiilidega **ilma card-mod'i kasutam
 
 > [!TIP]  
 > Alamnuppe saab sihtida nimepõhiste klasside abil. Näiteks alamnuppu nimega "My sub-button" saab stiilida klassiga `.my-sub-button`. Liuguriga alamnupud pakuvad ka klasse `.bubble-sub-button-slider-1`, `.bubble-sub-button-slider-2` jne.
+>
+> Nimepõhine klass muutub, kui alamnupu ümber nimetad, ja see tõlgitakse siis, kui nimi tõlgitakse. Määra alamnupul `css_class`, et saada oma klass, mis ei liigu kunagi, olenemata selle nimest ja olenemata keelest.
 
 #### Näited
 
@@ -2066,6 +2130,7 @@ Sul on ligipääs kõigile globaalsetele JS funktsioonidele, kuid samuti:
           attributes:
             forecast: "{{ daily['weather.home'].forecast }}"
   ```
+- `checkConditionsMet(conditions, hass)` tagastab `true`, kui [tingimuste](#tingimused) loend on täidetud, näiteks `${checkConditionsMet([{condition: 'sun.is_set'}], hass) ? 'block' : 'none'}`.
 - `hass.formatEntityState(state)` võimaldab tõlkida olekut (võib kasutada ka oleku ühiku saamiseks, ilma et peaksid seda käsitsi lisama).
 - `hass.formatEntityAttributeValue(state, "attribute")` võimaldab tõlkida atribuuti (võib kasutada ka oleku ühiku saamiseks, ilma et peaksid seda käsitsi lisama).
 
@@ -2318,6 +2383,8 @@ Moodulid on võimas funktsioon, mis lubab sul salvestada, taaskasutada ja jagada
 Kuid see funktsioon on palju võimsam kui see: see lubab sul Bubble Card redaktoris ise päris funktsioone lisada, kasutades kõiki tavalisi [Home Assistanti vormi](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) valikuid!  
 Objektivalijat on täiustatud, et see näitaks reaalajas muudatusi ja toetaks atribuute korrektselt.
 
+Moodul saab vastata ka Home Assistanti kaardivalijale sisseehitatud [olemite soovituste](#olemite-soovitused) kõrval: kasuta `suggestions` kaartide jaoks, mida ta oskab ette kirjeldada, ja `suggestions_code`, kui need tuleb sinu seadistusest välja arvutada, näiteks hüpikaken, mis on ehitatud kõigist selle ala olemitest, kuhu valitud olem kuulub. Mõlemad võtmed on dokumenteeritud [siin](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+
 Samuti saad sirvida **Module Store'i**, et leida ja paigaldada [kogukonna loodud mooduleid](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) või jagada oma loominguid!
 
 > [!TIP]
@@ -2357,6 +2424,7 @@ See vahekaart näitab kõiki sinu paigaldatud mooduleid ning lubab sul:
 - **Otsida** ja **sortida** mooduleid (tähestikuliselt, hiljutised, aktiivsed enne)
 - **Määrata globaalse oleku**, et moodul rakenduks automaatselt kõigile kaartidele
 - **Importida/eksportida** mooduleid varundamiseks või jagamiseks
+- **Kirjutada olemite soovitusi** mooduli redaktoris, jaotises **Valikuline: olemite soovitused**, et sinu moodulit pakutaks Home Assistanti kaardivalijas. Nii reegleid kui ka arvutatud soovitusi kontrollitakse kirjutamise ajal, viga seal takistab salvestamist ja eelvaade näitab soovitatud kaarte iga valitud olemi kohta
 
 #### Module Store vahekaart
 
@@ -2391,7 +2459,8 @@ See vahekaart kuvab [kõiki kogukonna saadaolevaid mooduleid](https://github.com
 3. Täida mooduli info.
 4. Kirjuta oma CSS ja/või JavaScript mallikood **Koodi** redaktorisse.
 5. (Valikuline) Loo kohandatud seadistusliides **Redaktori** sektsioonis (nagu värvivalija ülaloleval ekraanipildil, täielik dokumentatsioon on saadaval [siin](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
-6. Klõpsa **Salvesta**.
+6. (Valikuline) Kirjuta oma **Olemite soovitused**, et sinu moodulit pakutaks Home Assistanti kaardivalijas. Paneel kontrollib kirjutatut juba tippimise ajal ja selle eelvaade näitab soovitatud kaarte endid sinu valitud olemi jaoks.
+7. Klõpsa **Salvesta**.
 
 Sinu moodul on nüüd saadaval kasutamiseks mis tahes sinu kaardil!
 
@@ -2612,6 +2681,20 @@ icon_container_color:
 </details>
 
 Rohkem näiteid leiad Module Store'ist või [siit](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules).
+
+<br>
+
+---
+
+<br>
+
+## Lokaliseerimine
+
+Bubble Card räägib sinu keelt. Selle redaktor on tõlgitud 64 keelde, mida Home Assistant toetab, ja kõikjal, kus Home Assistantil on millegi jaoks juba sõna olemas, kasutatakse tema enda sõnastust, nii et loed mõlemas liideses samu termineid.
+
+Redaktori allservas, versiooninumbri kõrval, järgib lüliti **Automaatne** sinu Home Assistanti keelt. Lülita see välja ja kogu redaktor läheb tagasi inglise keelde, mis on mugav õpetuse järgimiseks või probleemist teatamiseks. Sinu valik jäetakse brauseris meelde.
+
+Ka see dokumentatsioon on tõlgitud, [62 keelde](languages.md). Need lehed on kõigile avatud, nii et sõnastuse, mis sinu Home Assistantiga kokku ei lähe, saab paari klikiga parandada. Ingliskeelne versioon jääb sisu enda võrdluspunktiks.
 
 <br>
 
