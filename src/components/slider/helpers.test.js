@@ -9,7 +9,11 @@ jest.unstable_mockModule('../../tools/utils.js', () => ({
   isStateOn: () => true,
   formatNumericValue: (value, decimals, unit) =>
     `${Number(value).toFixed(decimals ?? 0)}${unit ? ` ${unit}` : ''}`,
-  getTemperatureUnit: () => '°C'
+  getTemperatureUnit: () => '°C',
+  isDocumentRTL: () => false,
+  // Not used here, but helpers.js pulls in sub-button/outline.js, which imports it
+  // from the same module: a mock missing it breaks the whole import chain.
+  getStyleGeneration: () => 0
 }));
 
 let formatDisplayValue;
@@ -37,6 +41,34 @@ function makeContext({ min, max, step = 1, cachedMin, cachedMax, cachedStep = 1 
     sliderMinValue: cachedMin,
     sliderMaxValue: cachedMax,
     sliderStep: cachedStep
+  };
+}
+
+// A climate entity, whose min_temp/max_temp follow the HVAC mode and can therefore
+// move while the user still has a finger on the slider.
+function makeClimateContext({ minTemp, maxTemp }) {
+  return {
+    config: { entity: 'climate.living_room' },
+    _hass: {
+      locale: { language: 'en-US' },
+      config: { unit_system: { temperature: '°C' } },
+      states: {
+        'climate.living_room': {
+          entity_id: 'climate.living_room',
+          state: 'heat',
+          attributes: {
+            min_temp: minTemp,
+            max_temp: maxTemp,
+            temperature: 23,
+            target_temp_step: 0.5
+          }
+        }
+      }
+    },
+    // Snapshot taken when the slider was built, left on the initial range.
+    sliderMinValue: minTemp,
+    sliderMaxValue: maxTemp,
+    sliderStep: 0.5
   };
 }
 
@@ -76,5 +108,22 @@ describe('formatDisplayValue', () => {
     context._hass.states = {};
 
     expect(numeric(formatDisplayValue(context, 100))).toBe(250);
+  });
+
+  test('the displayed value moves under a stationary finger when the bounds change mid-drag', () => {
+    // Both calls pass the same percentage, so the finger has not moved. Only the
+    // entity's own range changes in between, the way a climate does when its HVAC
+    // mode switches. Reading the range live is what makes the number jump: this
+    // pins the behaviour, it does not endorse it.
+    const context = makeClimateContext({ minTemp: 16, maxTemp: 30 });
+
+    expect(numeric(formatDisplayValue(context, 50))).toBe(23);
+
+    const state = context._hass.states['climate.living_room'];
+    state.attributes.min_temp = 7;
+    state.attributes.max_temp = 35;
+
+    // Same 50%, now read against 7-35 instead of 16-30.
+    expect(numeric(formatDisplayValue(context, 50))).toBe(21);
   });
 });
