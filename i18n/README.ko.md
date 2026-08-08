@@ -2380,10 +2380,10 @@ styles: >
 
 모듈은 커스텀 스타일과 템플릿을 모든 Bubble Card에서 저장하고, 재사용하고, 공유할 수 있게 해주는 강력한 기능입니다. 같은 코드를 여러 카드에 복사, 붙여넣기 하는 대신, 모듈을 하나 만들어 필요한 곳 어디든 적용할 수 있습니다. 이를 통해 대시보드의 외관과 느낌을 훨씬 더 쉽고 효율적으로 관리할 수 있습니다.
 
-하지만 이 기능은 그보다 훨씬 더 강력해서, 기본 [Home Assistant 폼](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) 옵션을 모두 사용하여 Bubble Card 편집기에서 직접 실제 기능을 추가할 수 있게 해줍니다!  
+하지만 이 기능은 그보다 훨씬 더 강력해서, 기본 [Home Assistant 폼](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) 옵션을 모두 사용하여 Bubble Card 편집기에서 직접 실제 기능을 추가할 수 있게 해줍니다!  
 객체 선택기는 실시간 변경 사항을 표시하고 속성을 올바르게 지원하도록 개선되었습니다.
 
-모듈은 기본 제공 [엔티티 제안](#엔티티-제안) 옆에서 Home Assistant 카드 선택기에 응답할 수도 있습니다. 미리 설명할 수 있는 카드에는 `suggestions`를, 사용자의 설정에서 계산해야 하는 경우에는 `suggestions_code`를 사용하세요. 예를 들어 선택한 엔티티가 속한 영역의 모든 엔티티로 팝업을 만드는 경우입니다. 두 키 모두 [여기](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions)에 문서화되어 있습니다.
+모듈은 기본 제공 [엔티티 제안](#엔티티-제안) 옆에서 Home Assistant 카드 선택기에 응답할 수도 있습니다. 미리 설명할 수 있는 카드에는 `suggestions`를, 사용자의 설정에서 계산해야 하는 경우에는 `suggestions_code`를 사용하세요. 예를 들어 선택한 엔티티가 속한 영역의 모든 엔티티로 팝업을 만드는 경우입니다. 두 키 모두 [여기](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions)에 문서화되어 있습니다.
 
 **Module Store**를 둘러보고 [커뮤니티가 만든 모듈](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)을 찾아 설치하거나, 직접 만든 창작물을 공유할 수도 있습니다!
 
@@ -2458,7 +2458,7 @@ Bubble Card Tools 통합은 모듈 편집기와 Module Store를 활성화하며,
 2. **새 모듈 만들기**를 클릭합니다.
 3. 모듈 정보를 입력합니다.
 4. **코드** 편집기에 CSS와/또는 JavaScript 템플릿 코드를 작성합니다.
-5. (선택 사항) **편집기** 섹션에서 커스텀 구성 UI를 만듭니다(위 스크린샷의 색상 선택기처럼, 전체 문서는 [여기](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)에서 확인할 수 있습니다).
+5. (선택 사항) **편집기** 섹션에서 커스텀 구성 UI를 만듭니다(위 스크린샷의 색상 선택기처럼, 전체 문서는 [여기](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)에서 확인할 수 있습니다).
 6. (선택 사항) 모듈이 Home Assistant 카드 선택기에 제안되도록 **엔티티 제안**을 작성합니다. 패널은 입력하는 동안 내용을 검사하며, 미리보기에는 원하는 엔티티에 대한 제안 카드 자체가 표시됩니다.
 7. **저장**을 클릭합니다.
 

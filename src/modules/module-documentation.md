@@ -1,6 +1,6 @@
-# Bubble Card Module Editor schema documentation
+# Bubble Card module documentation
 
-This documentation covers all available options for creating editor schemas in Bubble Card modules. These schemas define the user interface presented to users when configuring your module.
+This documentation covers everything you need to write a Bubble Card module: the editor schema that builds your configuration UI, how to read those values from your code, the entity suggestions you can contribute to the Home Assistant card picker, and how to keep your module fast and compatible.
 
 <img width="455" alt="image" src="https://github.com/user-attachments/assets/6c04ebef-d8f7-4816-9006-808f80a7e14e" />
 
@@ -13,7 +13,7 @@ This documentation covers all available options for creating editor schemas in B
   - [Example: Complete module with editor and code](#example-complete-module-with-editor-and-code)
 - [Field properties](#field-properties)
 - [Field types](#field-types)
-  - [Selector-based fields](#selector-based-fields-recommended)
+  - [Selector-based fields](#selector-based-fields)
     - [Text input selector](#text-input-selectors)
     - [Number selector](#number-selector)
     - [Boolean selector](#boolean-selector)
@@ -62,6 +62,10 @@ This documentation covers all available options for creating editor schemas in B
 - [Entity suggestions](#entity-suggestions)
   - [Computed suggestions](#computed-suggestions)
     - [Helpers](#helpers)
+- [How to optimize your modules](#how-to-optimize-your-modules)
+  - [Do the work only when something changed](#do-the-work-only-when-something-changed)
+  - [Release what your module started](#release-what-your-module-started)
+  - [Staying compatible with older versions](#staying-compatible-with-older-versions)
 - [Best practices](#best-practices)
 - [Example: Complete module editor schema](#example-complete-module-editor-schema)
 - [References](#references)
@@ -1220,7 +1224,70 @@ Good to know:
 - Keep it cheap. The hook runs every time a user picks an entity in the card picker, for
   every installed module.
 
-## Releasing what your module started
+## How to optimize your modules
+
+Your `code:` runs again on **every style pass** of **every card** that carries your
+module, and a pop-up rebuilds all of its cards each time it opens. A module that
+is cheap on one card can therefore be expensive on a dashboard, and the two
+sections below are what makes the difference. On one real module they took a
+pop-up from 7.2 s to 3.7 s cold on a low end iPad.
+
+### Do the work only when something changed
+
+
+A module that touches the DOM is re-executed on **every** style pass, because
+re-running it is the only way its side effects happen. A card gets roughly seven
+passes per pop-up open, so a module that writes a few custom properties writes
+them seven times per card for an identical result, and every read it makes to
+compute them is paid seven times too.
+
+`hasChanged(label, ...values)` answers `true` the first time and whenever one of
+the values has moved since, and `false` in between:
+
+```yaml
+code: |
+  ${(() => {
+    const rgb = hass.states[entity]?.attributes?.rgb_color;
+
+    // Falls back to the same answer on versions without the helper, see the
+    // section above.
+    const changed = (label, ...values) => {
+      if (typeof hasChanged === 'function') return hasChanged(label, ...values);
+      const signature = values.map(v => Array.isArray(v) ? v.join(',') : String(v)).join('|');
+      if (this['_gate_' + label] === signature) return false;
+      this['_gate_' + label] = signature;
+      return true;
+    };
+
+    if (!changed('tint', state, rgb)) return;
+
+    // Only reached when the state or the colour actually moved.
+    card.style.setProperty('--my-tint', computeTint(state, rgb));
+  })()}
+```
+
+What you can rely on:
+
+- **One memory per label per card**, so a module can gate several independent
+  pieces of work, and two modules using the same label never collide.
+- **Arrays are compared by value**, so an rgb triplet works directly, and two
+  colours differing by one unit are two different answers.
+- It **never throws**, whatever you pass it, and it answers `true` rather than
+  skipping your work if it cannot remember anything.
+- A rebuilt card starts with an empty memory, so your work runs again.
+
+Two things to keep in mind. Pass everything your work depends on, including
+values you read from the DOM or the theme: what is not in the list cannot be
+noticed. And gate only your own writes. If something outside your module can
+remove what you wrote without any of your values changing, the gate will not
+know to write it again.
+
+Measured on one real module, gating the work this way took a pop-up from 7.2 s
+to 3.7 s cold on a low end iPad, and the per-execution cost of its template from
+30.7 ms to 6.8 ms.
+
+### Release what your module started
+
 
 Your `code:` runs again on every style pass of every card that carries your module, and a
 pop-up rebuilds all of its cards every time it opens. Anything you start once per card, a
@@ -1236,11 +1303,17 @@ my_module:
   code: |
     ${(() => {
       if (!this._myTimer) {
-        this._myTimer = setInterval(() => { /* ... */ }, 5000);
-        onTeardown(() => {
-          clearInterval(this._myTimer);
-          this._myTimer = null;
-        });
+        this._myTimer = setInterval(() => {
+          // Fallback for versions without the hook, see the section above.
+          if (!this.isConnected) { clearInterval(this._myTimer); this._myTimer = null; return; }
+          /* ... */
+        }, 5000);
+        if (typeof onTeardown === 'function') {
+          onTeardown(() => {
+            clearInterval(this._myTimer);
+            this._myTimer = null;
+          });
+        }
       }
     })()}
 ```
@@ -1258,6 +1331,37 @@ What you can rely on:
   live registration.
 
 Registering from a card's own `styles:` works the same way, with its own slot.
+
+### Staying compatible with older versions
+
+
+Your `code:` is compiled with a fixed list of names in scope (`hass`, `entity`,
+`state`, `card`, and the helpers below). **Referencing a name that the installed
+version does not provide throws, and Bubble Card then skips your whole module**,
+so a card loses all of your styling rather than just that one feature. If you
+share your module, its users are on many different versions.
+
+`typeof` is the only way to test an undeclared name without throwing:
+
+```yaml
+code: |
+  ${(() => {
+    if (typeof onTeardown === 'function') {
+      onTeardown(() => clearInterval(this._myTimer));
+    }
+  })()}
+```
+
+| Helper | Available since |
+|--------|-----------------|
+| `onTeardown` | 3.3.0 |
+| `hasChanged` | 3.3.0 |
+
+Two things worth knowing. **YAML keys are safe**: an older version simply ignores
+a key it does not know, such as `suggestions:`, so only names used inside `code:`
+need this treatment. And when you write a fallback for older versions, make it do
+**the same thing** rather than something different, otherwise you are maintaining
+two behaviours and only testing one.
 
 ## Best practices
 

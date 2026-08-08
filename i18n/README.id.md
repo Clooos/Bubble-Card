@@ -2380,10 +2380,10 @@ styles: >
 
 Modul adalah fitur canggih yang memungkinkan Anda menyimpan, menggunakan kembali, dan berbagi gaya khusus serta templat Anda di semua Bubble Card. Alih-alih menyalin dan menempelkan kode yang sama ke beberapa kartu, Anda bisa membuat Module dan menerapkannya di mana pun diperlukan. Ini membuat pengelolaan tampilan dan nuansa dashboard Anda jauh lebih mudah dan efisien.
 
-Namun fitur ini jauh lebih canggih dari itu, karena memungkinkan Anda menambahkan fitur sungguhan sendiri di editor Bubble Card, menggunakan semua opsi [form Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) bawaan!  
+Namun fitur ini jauh lebih canggih dari itu, karena memungkinkan Anda menambahkan fitur sungguhan sendiri di editor Bubble Card, menggunakan semua opsi [form Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) bawaan!  
 Pemilih objek telah ditingkatkan untuk menampilkan perubahan secara langsung dan mendukung atribut dengan benar.
 
-Sebuah modul juga bisa menjawab pemilih kartu Home Assistant bersama [saran entitas](#saran-entitas) bawaan: gunakan `suggestions` untuk kartu yang bisa dijelaskan di awal, dan `suggestions_code` ketika kartu itu harus dihitung dari penyiapan Anda, misalnya pop-up yang dibangun dari setiap entitas di area tempat entitas yang dipilih berada. Kedua kunci tersebut didokumentasikan [di sini](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Sebuah modul juga bisa menjawab pemilih kartu Home Assistant bersama [saran entitas](#saran-entitas) bawaan: gunakan `suggestions` untuk kartu yang bisa dijelaskan di awal, dan `suggestions_code` ketika kartu itu harus dihitung dari penyiapan Anda, misalnya pop-up yang dibangun dari setiap entitas di area tempat entitas yang dipilih berada. Kedua kunci tersebut didokumentasikan [di sini](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Anda juga bisa menjelajahi **Module Store** untuk menemukan dan memasang [modul yang dibuat oleh komunitas](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), atau membagikan kreasi Anda sendiri!
 
@@ -2458,7 +2458,7 @@ Tab ini akan menampilkan [semua modul yang tersedia dari komunitas](https://gith
 2. Klik **Create new module**.
 3. Isi informasi modul.
 4. Tulis kode CSS dan/atau templat JavaScript Anda di editor **Code**.
-5. (Opsional) Buat antarmuka konfigurasi khusus di bagian **Editor** (seperti pemilih warna pada tangkapan layar di atas, dokumentasi lengkap tersedia [di sini](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Opsional) Buat antarmuka konfigurasi khusus di bagian **Editor** (seperti pemilih warna pada tangkapan layar di atas, dokumentasi lengkap tersedia [di sini](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Opsional) Tulis **Saran entitas** Anda agar modul Anda ditawarkan di pemilih kartu Home Assistant. Panel ini memeriksa apa yang Anda tulis sambil Anda mengetik, dan pratinjaunya menampilkan kartu yang disarankan itu sendiri untuk entitas pilihan Anda.
 7. Klik **Save**.
 

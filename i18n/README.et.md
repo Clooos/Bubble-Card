@@ -2380,10 +2380,10 @@ styles: >
 
 Moodulid on võimas funktsioon, mis lubab sul salvestada, taaskasutada ja jagada oma kohandatud stiile ja malle kõigi oma Bubble Card kaartide vahel. Selle asemel, et sama koodi mitmesse kaardi kopeerida, saad luua Mooduli ja rakendada seda seal, kus vaja. See muudab töölaua välimuse ja tunnetuse haldamise palju lihtsamaks ja tõhusamaks.
 
-Kuid see funktsioon on palju võimsam kui see: see lubab sul Bubble Card redaktoris ise päris funktsioone lisada, kasutades kõiki tavalisi [Home Assistanti vormi](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) valikuid!  
+Kuid see funktsioon on palju võimsam kui see: see lubab sul Bubble Card redaktoris ise päris funktsioone lisada, kasutades kõiki tavalisi [Home Assistanti vormi](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) valikuid!  
 Objektivalijat on täiustatud, et see näitaks reaalajas muudatusi ja toetaks atribuute korrektselt.
 
-Moodul saab vastata ka Home Assistanti kaardivalijale sisseehitatud [olemite soovituste](#olemite-soovitused) kõrval: kasuta `suggestions` kaartide jaoks, mida ta oskab ette kirjeldada, ja `suggestions_code`, kui need tuleb sinu seadistusest välja arvutada, näiteks hüpikaken, mis on ehitatud kõigist selle ala olemitest, kuhu valitud olem kuulub. Mõlemad võtmed on dokumenteeritud [siin](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Moodul saab vastata ka Home Assistanti kaardivalijale sisseehitatud [olemite soovituste](#olemite-soovitused) kõrval: kasuta `suggestions` kaartide jaoks, mida ta oskab ette kirjeldada, ja `suggestions_code`, kui need tuleb sinu seadistusest välja arvutada, näiteks hüpikaken, mis on ehitatud kõigist selle ala olemitest, kuhu valitud olem kuulub. Mõlemad võtmed on dokumenteeritud [siin](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Samuti saad sirvida **Module Store'i**, et leida ja paigaldada [kogukonna loodud mooduleid](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) või jagada oma loominguid!
 
@@ -2458,7 +2458,7 @@ See vahekaart kuvab [kõiki kogukonna saadaolevaid mooduleid](https://github.com
 2. Klõpsa **Loo uus moodul**.
 3. Täida mooduli info.
 4. Kirjuta oma CSS ja/või JavaScript mallikood **Koodi** redaktorisse.
-5. (Valikuline) Loo kohandatud seadistusliides **Redaktori** sektsioonis (nagu värvivalija ülaloleval ekraanipildil, täielik dokumentatsioon on saadaval [siin](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Valikuline) Loo kohandatud seadistusliides **Redaktori** sektsioonis (nagu värvivalija ülaloleval ekraanipildil, täielik dokumentatsioon on saadaval [siin](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Valikuline) Kirjuta oma **Olemite soovitused**, et sinu moodulit pakutaks Home Assistanti kaardivalijas. Paneel kontrollib kirjutatut juba tippimise ajal ja selle eelvaade näitab soovitatud kaarte endid sinu valitud olemi jaoks.
 7. Klõpsa **Salvesta**.
 

@@ -2380,10 +2380,10 @@ styles: >
 
 Mô-đun là một tính năng mạnh mẽ cho phép bạn lưu, tái sử dụng và chia sẻ các kiểu và mẫu tùy chỉnh của mình trên tất cả các Bubble Card. Thay vì sao chép và dán cùng một đoạn mã vào nhiều thẻ, bạn có thể tạo một Mô-đun và áp dụng nó ở bất cứ đâu bạn cần. Điều này giúp việc quản lý giao diện dashboard của bạn dễ dàng và hiệu quả hơn nhiều.
 
-Nhưng tính năng này còn mạnh mẽ hơn thế nhiều, nó cho phép bạn tự thêm các tính năng thực sự trong trình chỉnh sửa Bubble Card, bằng cách dùng tất cả các tùy chọn [form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) mặc định của Home Assistant!  
+Nhưng tính năng này còn mạnh mẽ hơn thế nhiều, nó cho phép bạn tự thêm các tính năng thực sự trong trình chỉnh sửa Bubble Card, bằng cách dùng tất cả các tùy chọn [form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) mặc định của Home Assistant!  
 Bộ chọn đối tượng đã được cải tiến để hiển thị các thay đổi trực tiếp và hỗ trợ thuộc tính đúng cách.
 
-Một mô-đun cũng có thể trả lời bộ chọn thẻ của Home Assistant bên cạnh [gợi ý thực thể](#gợi-ý-thực-thể) tích hợp sẵn: dùng `suggestions` cho những thẻ có thể mô tả trước, và `suggestions_code` khi chúng phải được tính từ hệ thống của bạn, ví dụ một pop-up dựng từ mọi thực thể trong khu vực mà thực thể được chọn thuộc về. Cả hai khóa đều được ghi tài liệu [tại đây](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Một mô-đun cũng có thể trả lời bộ chọn thẻ của Home Assistant bên cạnh [gợi ý thực thể](#gợi-ý-thực-thể) tích hợp sẵn: dùng `suggestions` cho những thẻ có thể mô tả trước, và `suggestions_code` khi chúng phải được tính từ hệ thống của bạn, ví dụ một pop-up dựng từ mọi thực thể trong khu vực mà thực thể được chọn thuộc về. Cả hai khóa đều được ghi tài liệu [tại đây](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Bạn cũng có thể duyệt qua **Module Store** để tìm và cài đặt [mô-đun do cộng đồng tạo ra](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), hoặc chia sẻ những sáng tạo của riêng bạn!
 
@@ -2458,7 +2458,7 @@ Tab này sẽ hiển thị [tất cả các mô-đun có sẵn từ cộng đồ
 2. Nhấn vào **Create new module**.
 3. Điền thông tin mô-đun.
 4. Viết mã kiểu CSS và/hoặc mẫu JavaScript của bạn trong trình chỉnh sửa **Code**.
-5. (Tùy chọn) Tạo giao diện cấu hình tùy chỉnh trong mục **Editor** (như bộ chọn màu trong ảnh chụp màn hình ở trên, tài liệu đầy đủ có [tại đây](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Tùy chọn) Tạo giao diện cấu hình tùy chỉnh trong mục **Editor** (như bộ chọn màu trong ảnh chụp màn hình ở trên, tài liệu đầy đủ có [tại đây](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Tùy chọn) Viết **Gợi ý thực thể** của bạn để mô-đun được đề xuất trong bộ chọn thẻ của Home Assistant. Bảng này kiểm tra những gì bạn viết ngay khi bạn gõ, và phần xem trước của nó hiển thị chính các thẻ được gợi ý cho thực thể bạn chọn.
 7. Nhấn **Save**.
 

@@ -2380,10 +2380,10 @@ styles: >
 
 Einingar (Modules) eru öflugur eiginleiki sem gerir þér kleift að vista, endurnýta og deila sérsniðnu stílunum og sniðmátunum þínum á öllum Bubble Cards. Í stað þess að afrita og líma sama kóðann í mörg kort, geturðu búið til einingu og notað hana hvar sem þú þarft á henni að halda. Þetta gerir umsjón með útliti mælaborðsins mun einfaldari og skilvirkari.
 
-En þessi eiginleiki er miklu öflugri en það, hann gerir þér kleift að bæta raunverulegum eiginleikum sjálfur við í Bubble Card ritlinum, með því að nota alla sjálfgefna [Home Assistant valkosti](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+En þessi eiginleiki er miklu öflugri en það, hann gerir þér kleift að bæta raunverulegum eiginleikum sjálfur við í Bubble Card ritlinum, með því að nota alla sjálfgefna [Home Assistant valkosti](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 Hlutavalarinn (object selector) hefur verið endurbættur til að sýna lifandi breytingar og styðja eigindir rétt.
 
-Eining getur líka svarað kortavali Home Assistant við hlið innbyggðu [tillagnanna fyrir einingar](#tillögur-fyrir-einingar): notaðu `suggestions` fyrir kortin sem hún getur lýst fyrir fram, og `suggestions_code` þegar reikna þarf þau út frá uppsetningunni þinni, til dæmis sprettiglugga sem er byggður úr öllum einingum svæðisins sem valda einingin tilheyrir. Báðir lyklarnir eru skjalfestir [hér](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Eining getur líka svarað kortavali Home Assistant við hlið innbyggðu [tillagnanna fyrir einingar](#tillögur-fyrir-einingar): notaðu `suggestions` fyrir kortin sem hún getur lýst fyrir fram, og `suggestions_code` þegar reikna þarf þau út frá uppsetningunni þinni, til dæmis sprettiglugga sem er byggður úr öllum einingum svæðisins sem valda einingin tilheyrir. Báðir lyklarnir eru skjalfestir [hér](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Þú getur líka skoðað **Module Store** til að finna og setja upp [einingar sem samfélagið hefur búið til](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), eða deilt þínum eigin sköpunum!
 
@@ -2458,7 +2458,7 @@ Uppsetningar- og stillingarskrefin eru útskýrð hér:
 2. Smelltu á **Create new module**.
 3. Fylltu út upplýsingarnar um eininguna.
 4. Skrifaðu CSS og/eða JavaScript sniðmátskóðann þinn í **Code** ritlinum.
-5. (Valfrjálst) Búðu til sérsniðið stillingarviðmót í **Editor** hlutanum (eins og litavalið á skjámyndinni hér að ofan, fullkomin skjölun tiltæk [hér](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Valfrjálst) Búðu til sérsniðið stillingarviðmót í **Editor** hlutanum (eins og litavalið á skjámyndinni hér að ofan, fullkomin skjölun tiltæk [hér](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Valfrjálst) Skrifaðu **Tillögur fyrir einingar** svo einingin þín birtist í kortavali Home Assistant. Spjaldið athugar það sem þú skrifar jafnóðum og þú slærð inn, og forskoðun þess sýnir sjálf tillögukortin fyrir þá einingu sem þú velur.
 7. Smelltu á **Save**.
 

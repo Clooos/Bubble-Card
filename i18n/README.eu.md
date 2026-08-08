@@ -2380,10 +2380,10 @@ styles: >
 
 Moduluak funtzio ahaltsu bat dira, zure estilo eta txantiloi pertsonalizatuak gorde, berrerabili eta zure Bubble Card guztien artean partekatzeko aukera ematen dutenak. Kode bera hainbat txarteletan kopiatu eta itsatsi beharrean, Modulu bat sortu eta behar duzun tokian aplika dezakezu. Honek zure dashboardaren itxura eta izaera kudeatzea askoz errazago eta eraginkorrago bihurtzen du.
 
-Baina funtzio hau are askoz ahaltsuagoa da, benetako funtzionalitateak zeuk gehitzeko aukera ematen baitizu Bubble Card editorean, Home Assistanteko [formulario](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) aukera lehenetsi guztiak erabiliz!  
+Baina funtzio hau are askoz ahaltsuagoa da, benetako funtzionalitateak zeuk gehitzeko aukera ematen baitizu Bubble Card editorean, Home Assistanteko [formulario](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) aukera lehenetsi guztiak erabiliz!  
 Objektu-hautatzailea hobetu da denbora errealeko aldaketak erakusteko eta atributuak behar bezala onartzeko.
 
-Modulu batek Home Assistanten txartel-hautatzaileari ere erantzun diezaioke, barneko [entitate iradokizunen](#entitate-iradokizunak) ondoan: erabili `suggestions` aldez aurretik deskriba ditzakeen txarteletarako, eta `suggestions_code` zure instalaziotik kalkulatu behar direnean, adibidez, aukeratutako entitatea dagoen arearen entitate guztiekin eraikitako laster-leiho bat. Bi gakoak [hemen](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) daude dokumentatuta.
+Modulu batek Home Assistanten txartel-hautatzaileari ere erantzun diezaioke, barneko [entitate iradokizunen](#entitate-iradokizunak) ondoan: erabili `suggestions` aldez aurretik deskriba ditzakeen txarteletarako, eta `suggestions_code` zure instalaziotik kalkulatu behar direnean, adibidez, aukeratutako entitatea dagoen arearen entitate guztiekin eraikitako laster-leiho bat. Bi gakoak [hemen](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions) daude dokumentatuta.
 
 **Module Store**n ere nabiga dezakezu, [komunitateak sortutako moduluak](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) bilatu eta instalatzeko, edo zure sorkuntzak partekatzeko!
 
@@ -2458,7 +2458,7 @@ Fitxa honek [komunitateak sortutako modulu erabilgarri guztiak](https://github.c
 2. Klikatu **Create new module**.
 3. Bete moduluaren informazioa.
 4. Idatzi zure CSS eta/edo JavaScript txantiloi-kodea **Code** editorean.
-5. (Aukerakoa) Sortu konfigurazio-interfaze pertsonalizatu bat **Editor** atalean (goiko pantaila-argazkiko kolore-hautatzailea bezala, dokumentazio osoa [hemen](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) eskuragarri).
+5. (Aukerakoa) Sortu konfigurazio-interfaze pertsonalizatu bat **Editor** atalean (goiko pantaila-argazkiko kolore-hautatzailea bezala, dokumentazio osoa [hemen](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) eskuragarri).
 6. (Aukerakoa) Idatzi zure **Entitate iradokizunak** zure modulua Home Assistanten txartel-hautatzailean eskain dadin. Panelak idazten duzuna egiaztatzen du tekleatu ahala, eta bere aurrebistak iradokitako txartelak berak erakusten ditu aukeratzen duzun entitaterako.
 7. Klikatu **Save**.
 

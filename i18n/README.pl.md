@@ -2380,10 +2380,10 @@ styles: >
 
 Moduły to potężna funkcja, która pozwala zapisywać, ponownie wykorzystywać i udostępniać niestandardowe style i szablony we wszystkich Twoich kartach Bubble Card. Zamiast kopiować i wklejać ten sam kod do wielu kart, możesz utworzyć moduł i zastosować go tam, gdzie jest potrzebny. Dzięki temu zarządzanie wyglądem pulpitu jest znacznie łatwiejsze i wydajniejsze.
 
-Ale ta funkcja jest o wiele potężniejsza, pozwala samodzielnie dodawać prawdziwe funkcje w edytorze Bubble Card, korzystając ze wszystkich domyślnych opcji [formularza Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Ale ta funkcja jest o wiele potężniejsza, pozwala samodzielnie dodawać prawdziwe funkcje w edytorze Bubble Card, korzystając ze wszystkich domyślnych opcji [formularza Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 Selektor obiektów został ulepszony, aby pokazywał zmiany na żywo i poprawnie obsługiwał atrybuty.
 
-Moduł może też odpowiadać selektorowi kart Home Assistant obok wbudowanych [sugestii encji](#sugestie-encji): użyj `suggestions` dla kart, które da się opisać z góry, oraz `suggestions_code`, gdy muszą zostać wyliczone z twojej instalacji, na przykład pop-up zbudowany ze wszystkich encji obszaru, do którego należy wybrana encja. Oba klucze są udokumentowane [tutaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Moduł może też odpowiadać selektorowi kart Home Assistant obok wbudowanych [sugestii encji](#sugestie-encji): użyj `suggestions` dla kart, które da się opisać z góry, oraz `suggestions_code`, gdy muszą zostać wyliczone z twojej instalacji, na przykład pop-up zbudowany ze wszystkich encji obszaru, do którego należy wybrana encja. Oba klucze są udokumentowane [tutaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Możesz też przeglądać **Module Store**, aby znaleźć i zainstalować [moduły stworzone przez społeczność](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) lub udostępnić własne!
 
@@ -2458,7 +2458,7 @@ Ta zakładka pokazuje [wszystkie dostępne moduły od społeczności](https://gi
 2. Kliknij **Utwórz nowy moduł**.
 3. Uzupełnij informacje o module.
 4. Wpisz swój kod szablonu CSS i/lub JavaScript w edytorze **Kod**.
-5. (Opcjonalnie) Utwórz niestandardowy interfejs konfiguracji w sekcji **Edytor** (jak selektor koloru na powyższym zrzucie ekranu, pełna dokumentacja dostępna [tutaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Opcjonalnie) Utwórz niestandardowy interfejs konfiguracji w sekcji **Edytor** (jak selektor koloru na powyższym zrzucie ekranu, pełna dokumentacja dostępna [tutaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Opcjonalnie) Napisz swoje **Sugestie encji**, aby twój moduł był proponowany w selektorze kart Home Assistant. Panel sprawdza to, co piszesz, w trakcie pisania, a jego podgląd pokazuje same proponowane karty dla wybranej przez ciebie encji.
 7. Kliknij **Zapisz**.
 

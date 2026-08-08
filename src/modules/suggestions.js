@@ -26,7 +26,7 @@ import setupTranslation, { ensureEditorTranslations } from '../tools/localize.js
 // for instance) goes through the `suggestions_code:` hook instead: a function
 // body compiled once, called with (hass, entity, stateObj, helpers, module)
 // and returning entries the module authored entirely. Both keys may coexist,
-// declarative rules first. See editor-schema-docs.md for the public contract.
+// declarative rules first. See module-documentation.md for the public contract.
 //
 // `getEntitySuggestion` must answer synchronously, so modules are read from
 // the live registry map when it is populated, from the Bubble Card Tools

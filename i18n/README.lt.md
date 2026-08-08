@@ -2380,10 +2380,10 @@ styles: >
 
 Moduliai yra galinga funkcija, leidžianti išsaugoti, pakartotinai naudoti ir dalytis savo individualiais stiliais bei šablonais tarp visų jūsų Bubble Card kortelių. Užuot kopijavę ir įklijavę tą patį kodą į kelias korteles, galite sukurti modulį ir taikyti jį ten, kur reikia. Tai gerokai palengvina ir pagreitina jūsų prietaisų skydelio išvaizdos ir jausmo valdymą.
 
-Bet ši funkcija yra kur kas galingesnė, nei atrodo, ji leidžia jums pačiam pridėti tikras funkcijas Bubble Card redaktoriuje, naudojant visas numatytąsias [Home Assistant formos](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) parinktis!  
+Bet ši funkcija yra kur kas galingesnė, nei atrodo, ji leidžia jums pačiam pridėti tikras funkcijas Bubble Card redaktoriuje, naudojant visas numatytąsias [Home Assistant formos](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) parinktis!  
 Objekto parinkiklis buvo patobulintas, kad rodytų gyvus pakeitimus ir teisingai palaikytų atributus.
 
-Modulis taip pat gali atsakyti Home Assistant kortelių parinkikliui šalia integruotų [esybių pasiūlymų](#esybių-pasiūlymai): naudokite `suggestions` toms kortelėms, kurias jis gali aprašyti iš anksto, ir `suggestions_code`, kai jas reikia apskaičiuoti pagal jūsų sąranką, pavyzdžiui iškylantįjį langą, sudarytą iš visų srities, kuriai priklauso pasirinkta esybė, esybių. Abu raktai aprašyti [čia](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Modulis taip pat gali atsakyti Home Assistant kortelių parinkikliui šalia integruotų [esybių pasiūlymų](#esybių-pasiūlymai): naudokite `suggestions` toms kortelėms, kurias jis gali aprašyti iš anksto, ir `suggestions_code`, kai jas reikia apskaičiuoti pagal jūsų sąranką, pavyzdžiui iškylantįjį langą, sudarytą iš visų srities, kuriai priklauso pasirinkta esybė, esybių. Abu raktai aprašyti [čia](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Taip pat galite naršyti **Module Store**, kad rastumėte ir įdiegtumėte [bendruomenės sukurtus modulius](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), arba pasidalytumėte savo kūriniais!
 
@@ -2458,7 +2458,7 @@ Modulio redaktorių galite pasiekti iš bet kurios kortelės nustatymų, skiltyj
 2. Spustelėkite **Sukurti naują modulį**.
 3. Užpildykite modulio informaciją.
 4. Įrašykite savo CSS ir (arba) JavaScript šablono kodą **Kodo** redaktoriuje.
-5. (Neprivaloma) Sukurkite individualią konfigūracijos sąsają skiltyje **Redaktorius** (kaip spalvų parinkiklis ekrano nuotraukoje aukščiau, visa dokumentacija prieinama [čia](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Neprivaloma) Sukurkite individualią konfigūracijos sąsają skiltyje **Redaktorius** (kaip spalvų parinkiklis ekrano nuotraukoje aukščiau, visa dokumentacija prieinama [čia](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Neprivaloma) Parašykite savo **Esybių pasiūlymus**, kad jūsų modulis būtų siūlomas Home Assistant kortelių parinkiklyje. Skydelis tikrina, ką rašote, jums bespausdinant, o jo peržiūra rodo pačias siūlomas korteles jūsų pasirinktai esybei.
 7. Spustelėkite **Išsaugoti**.
 

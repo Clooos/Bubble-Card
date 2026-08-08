@@ -2380,10 +2380,10 @@ styles: >
 
 Module sind e mächtigi Funktion, wo dir erlaubt, dini eigene Styles und Templates z'speichere, widerz'verwände und über alli dini Bubble Cards z'teile. Statt dr gliich Code i mehreri Charte z'kopiere und iizfüege, chasch es Modul erstelle und es abwände, wo au immer du's bruuchsch. Das macht d'Verwaltig vom Ussehe vo dim Dashboard viel eifacher und effizienter.
 
-Aber die Funktion isch no viel mächtiger als das, si erlaubt dir, echti Funktione sälber im Bubble-Card-Editor hinzuefüege, mit allne Standard-[Home-Assistant-Formular](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)-Optione!  
+Aber die Funktion isch no viel mächtiger als das, si erlaubt dir, echti Funktione sälber im Bubble-Card-Editor hinzuefüege, mit allne Standard-[Home-Assistant-Formular](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)-Optione!  
 Dr Objekt-Selector isch verbesseret worde, um live Änderige z'zeige und Attribut korrekt z'unterstütze.
 
-Es Modul cha au uf de Charte-Uswähler vo Home Assistant antworte, näbe de iigebaute [Entitäte-Vorschläg](#entitäte-vorschläg): bruuch `suggestions` für die Charte, wo's im Voruus cha beschriibe, und `suggestions_code`, wenn si us dinere Iirichtig müend brechnet werde, zum Bispil es Pop-up, wo us allne Entitäte vom Beriich uufbaut wird, wo die uusgwählti Entität dezue ghört. Beidi Schlüssel sind [da](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) dokumentiert.
+Es Modul cha au uf de Charte-Uswähler vo Home Assistant antworte, näbe de iigebaute [Entitäte-Vorschläg](#entitäte-vorschläg): bruuch `suggestions` für die Charte, wo's im Voruus cha beschriibe, und `suggestions_code`, wenn si us dinere Iirichtig müend brechnet werde, zum Bispil es Pop-up, wo us allne Entitäte vom Beriich uufbaut wird, wo die uusgwählti Entität dezue ghört. Beidi Schlüssel sind [da](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions) dokumentiert.
 
 Du chasch au dr **Module Store** duresueche, um [vo dr Community erstellti Module](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) z'finde und z'installiere, oder dini eigene Kreatione teile!
 
@@ -2458,7 +2458,7 @@ Dää Tab zeigt [alli verfüegbare Module vo dr Community](https://github.com/Cl
 2. Klick uf **Neus Modul erstelle**.
 3. Füll d'Modulinformatione us.
 4. Schriib din CSS- und/oder JavaScript-Template-Code im Editor **Code**.
-5. (Optional) Erstell e eigeni Konfigurations-UI im Abschnitt **Editor** (wie dr Farbwähler im Screenshot obe, vollständigi Dokumentation verfüegbar [da](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Optional) Erstell e eigeni Konfigurations-UI im Abschnitt **Editor** (wie dr Farbwähler im Screenshot obe, vollständigi Dokumentation verfüegbar [da](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Optional) Schriib dini **Entitäte-Vorschläg**, damit dis Modul im Charte-Uswähler vo Home Assistant aabote wird. S Panel prüeft während em Tippe, was du schriibsch, und sini Vorschau zeigt die vorgschlagene Charte sälber für die Entität vo dinere Wahl.
 7. Klick uf **Speichere**.
 

@@ -2380,10 +2380,10 @@ styles: >
 
 A modulok egy hatékony funkció, amellyel elmentheted, újra felhasználhatod, és megoszthatod az egyéni stílusaidat és sablonjaidat az összes Bubble Card kártyád között. Ahelyett, hogy ugyanazt a kódot másolnád be több kártyába, létrehozhatsz egy modult, és alkalmazhatod, ahol csak szükséged van rá. Ez sokkal könnyebbé és hatékonyabbá teszi az irányítópultod kinézetének kezelését.
 
-De ez a funkció ennél sokkal erősebb, lehetővé teszi, hogy valódi funkciókat adj hozzá saját magad a Bubble Card szerkesztőjében, az összes alapértelmezett [Home Assistant űrlap](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) opció felhasználásával!  
+De ez a funkció ennél sokkal erősebb, lehetővé teszi, hogy valódi funkciókat adj hozzá saját magad a Bubble Card szerkesztőjében, az összes alapértelmezett [Home Assistant űrlap](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) opció felhasználásával!  
 Az objektumválasztó fejlesztésre került, hogy élőben mutassa a változásokat, és megfelelően támogassa az attribútumokat.
 
-Egy modul a beépített [entitásjavaslatok](#entitásjavaslatok) mellett a Home Assistant kártyaválasztójának is válaszolhat: használd a `suggestions` kulcsot azokhoz a kártyákhoz, amelyeket előre le tud írni, és a `suggestions_code` kulcsot akkor, amikor a beállításodból kell kiszámolni őket, például egy pop-uphoz, amely a kiválasztott entitás területének összes entitásából épül fel. Mindkét kulcs dokumentációja [itt](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) található.
+Egy modul a beépített [entitásjavaslatok](#entitásjavaslatok) mellett a Home Assistant kártyaválasztójának is válaszolhat: használd a `suggestions` kulcsot azokhoz a kártyákhoz, amelyeket előre le tud írni, és a `suggestions_code` kulcsot akkor, amikor a beállításodból kell kiszámolni őket, például egy pop-uphoz, amely a kiválasztott entitás területének összes entitásából épül fel. Mindkét kulcs dokumentációja [itt](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions) található.
 
 Böngészhetsz a **Module Store**-ban is, hogy megtaláld és telepítsd a [közösség által készített modulokat](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), vagy megoszthasd a saját alkotásaidat!
 
@@ -2458,7 +2458,7 @@ Ez a fül megjeleníti [a közösség összes elérhető moduljét](https://gith
 2. Kattints az **Új modul létrehozása** gombra.
 3. Töltsd ki a modul adatait.
 4. Írd meg a CSS és/vagy JavaScript sablonkódodat a **Kód** szerkesztőben.
-5. (Opcionális) Hozz létre egyéni konfigurációs felületet a **Szerkesztő** szekcióban (mint a fenti képernyőképen látható színválasztó, a teljes dokumentáció [itt](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) érhető el).
+5. (Opcionális) Hozz létre egyéni konfigurációs felületet a **Szerkesztő** szekcióban (mint a fenti képernyőképen látható színválasztó, a teljes dokumentáció [itt](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) érhető el).
 6. (Opcionális) Írd meg az **Entitásjavaslataidat**, hogy a modulod felajánlásra kerüljön a Home Assistant kártyaválasztójában. A panel gépelés közben ellenőrzi, amit írsz, az előnézete pedig magukat a javasolt kártyákat mutatja az általad választott entitáshoz.
 7. Kattints a **Mentés** gombra.
 

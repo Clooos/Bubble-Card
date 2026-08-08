@@ -2380,10 +2380,10 @@ styles: >
 
 Moduļi ir jaudīga funkcija, kas ļauj saglabāt, atkārtoti izmantot un koplietot jūsu pielāgotos stilus un veidnes visās jūsu Bubble Cards. Tā vietā, lai kopētu un ielīmētu to pašu kodu vairākās kartēs, jūs varat izveidot moduli un piemērot to jebkur, kur nepieciešams. Tas padara jūsu informācijas paneļa izskata un uzvedības pārvaldību daudz vieglāku un efektīvāku.
 
-Taču šī funkcija ir daudz jaudīgāka par to, tā ļauj jums pašiem pievienot faktiskas funkcijas Bubble Card redaktorā, izmantojot visas noklusējuma [Home Assistant formas](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) opcijas!  
+Taču šī funkcija ir daudz jaudīgāka par to, tā ļauj jums pašiem pievienot faktiskas funkcijas Bubble Card redaktorā, izmantojot visas noklusējuma [Home Assistant formas](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) opcijas!  
 Objekta selektors ir uzlabots, lai rādītu izmaiņas reāllaikā un pareizi atbalstītu atribūtus.
 
-Modulis var arī atbildēt Home Assistant kartīšu atlasītājam blakus iebūvētajiem [entītiju ieteikumiem](#entītiju-ieteikumi): izmantojiet `suggestions` tām kartītēm, ko tas var aprakstīt iepriekš, un `suggestions_code`, kad tās jāaprēķina no jūsu iestatījumiem, piemēram, uznirstošu logu, kas veidots no visām tās zonas entītijām, kurai pieder izvēlētā entītija. Abas atslēgas ir dokumentētas [šeit](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Modulis var arī atbildēt Home Assistant kartīšu atlasītājam blakus iebūvētajiem [entītiju ieteikumiem](#entītiju-ieteikumi): izmantojiet `suggestions` tām kartītēm, ko tas var aprakstīt iepriekš, un `suggestions_code`, kad tās jāaprēķina no jūsu iestatījumiem, piemēram, uznirstošu logu, kas veidots no visām tās zonas entītijām, kurai pieder izvēlētā entītija. Abas atslēgas ir dokumentētas [šeit](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Jūs varat arī pārlūkot **Module Store**, lai atrastu un instalētu [kopienas izveidotus moduļus](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), vai koplietot savus radījumus!
 
@@ -2458,7 +2458,7 @@ Jūs varat piekļūt Moduļa redaktoram no jebkuras kartes iestatījumiem, sada�
 2. Noklikšķiniet uz **Izveidot jaunu moduli**.
 3. Aizpildiet moduļa informāciju.
 4. Ierakstiet savu CSS un/vai JavaScript veidnes kodu **Koda** redaktorā.
-5. (Pēc izvēles) Izveidojiet pielāgotu konfigurācijas saskarni sadaļā **Redaktors** (piemēram, krāsu izvēlni ekrānuzņēmumā augstāk, pilna dokumentācija pieejama [šeit](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Pēc izvēles) Izveidojiet pielāgotu konfigurācijas saskarni sadaļā **Redaktors** (piemēram, krāsu izvēlni ekrānuzņēmumā augstāk, pilna dokumentācija pieejama [šeit](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Pēc izvēles) Uzrakstiet savus **Entītiju ieteikumus**, lai jūsu modulis tiktu piedāvāts Home Assistant kartīšu atlasītājā. Panelis pārbauda rakstīto, kamēr rakstāt, un tā priekšskatījums rāda pašas ieteiktās kartītes jūsu izvēlētajai entītijai.
 7. Noklikšķiniet **Saglabāt**.
 

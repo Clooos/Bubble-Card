@@ -2382,10 +2382,10 @@ styles: >
 
 מודולים הם תכונה עוצמתית שמאפשרת לכם לשמור, לעשות שימוש חוזר ולשתף את העיצובים המותאמים אישית והתבניות שלכם בכל כרטיסי ה-Bubble Card שלכם. במקום להעתיק ולהדביק את אותו הקוד במספר כרטיסים, תוכלו ליצור מודול ולהחיל אותו בכל מקום שתצטרכו. זה הופך את ניהול המראה והתחושה של הדשבורד שלכם לקל ויעיל הרבה יותר.
 
-אבל התכונה הזו עוצמתית הרבה יותר מזה, היא מאפשרת לכם להוסיף תכונות ממש בעצמכם בעורך של Bubble Card, באמצעות כל אפשרויות ה[טופס הסטנדרטי של Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+אבל התכונה הזו עוצמתית הרבה יותר מזה, היא מאפשרת לכם להוסיף תכונות ממש בעצמכם בעורך של Bubble Card, באמצעות כל אפשרויות ה[טופס הסטנדרטי של Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 בורר האובייקטים שופר כדי להציג שינויים בזמן אמת ולתמוך בתכונות (attributes) כראוי.
 
-מודול יכול גם לענות לבורר הכרטיסים של Home Assistant לצד [הצעות הישויות](#הצעות-ישויות) המובנות: השתמשו ב-`suggestions` עבור הכרטיסים שהוא יכול לתאר מראש, וב-`suggestions_code` כאשר יש לחשב אותם מתוך ההתקנה שלכם, לדוגמה חלון קופץ הנבנה מכל הישויות של האזור שאליו שייכת הישות שנבחרה. שני המפתחות מתועדים [כאן](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+מודול יכול גם לענות לבורר הכרטיסים של Home Assistant לצד [הצעות הישויות](#הצעות-ישויות) המובנות: השתמשו ב-`suggestions` עבור הכרטיסים שהוא יכול לתאר מראש, וב-`suggestions_code` כאשר יש לחשב אותם מתוך ההתקנה שלכם, לדוגמה חלון קופץ הנבנה מכל הישויות של האזור שאליו שייכת הישות שנבחרה. שני המפתחות מתועדים [כאן](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 תוכלו גם לעיין ב-**Module Store** כדי למצוא ולהתקין [מודולים שנוצרו על ידי הקהילה](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), או לשתף את היצירות שלכם!
 
@@ -2460,7 +2460,7 @@ styles: >
 2. לחצו על **Create new module**.
 3. מלאו את פרטי המודול.
 4. כתבו את קוד ה-CSS ו/או תבנית ה-JavaScript שלכם בעורך ה-**Code**.
-5. (אופציונלי) צרו ממשק תצורה מותאם אישית בסעיף ה-**Editor** (כמו בורר הצבעים בצילום המסך למעלה, תיעוד מלא זמין [כאן](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (אופציונלי) צרו ממשק תצורה מותאם אישית בסעיף ה-**Editor** (כמו בורר הצבעים בצילום המסך למעלה, תיעוד מלא זמין [כאן](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (אופציונלי) כתבו את **הצעות הישויות** שלכם כך שהמודול שלכם יוצע בבורר הכרטיסים של Home Assistant. הפאנל בודק את מה שאתם כותבים תוך כדי הקלדה, והתצוגה המקדימה שלו מציגה את הכרטיסים המוצעים עצמם עבור הישות שתבחרו.
 7. לחצו **Save**.
 

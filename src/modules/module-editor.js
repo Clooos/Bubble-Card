@@ -18,7 +18,7 @@ import { tTemplate } from '../editor/utils.js';
 import setupTranslation from '../tools/localize.js';
 
 const SUGGESTIONS_DOCS_URL =
-  'https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions';
+  'https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions';
 
 // Helper functions
 function updateModuleInConfig(context, moduleId, oldId = null) {
@@ -854,7 +854,7 @@ export function renderModuleEditorForm(context) {
                 </div>
             </div>
             <span class="helper-text">
-              ${tTemplate(t('editor.module_editor.editor_schema_helper'), { link: html`<a href="https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md" target="_blank">${t('editor.module_editor.schema_docs')}</a>` })}
+              ${tTemplate(t('editor.module_editor.editor_schema_helper'), { link: html`<a href="https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md" target="_blank">${t('editor.module_editor.schema_docs')}</a>` })}
             </span>
 
             ${context._editingModule.editor && Array.isArray(context._editingModule.editor) && context._editingModule.editor.length > 0 ? html`

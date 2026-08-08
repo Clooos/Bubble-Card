@@ -2375,10 +2375,10 @@ styles: >
 
 Modules are a powerful feature that allows you to save, reuse, and share your custom styles and templates across all of your Bubble Cards. Instead of copying and pasting the same code into multiple cards, you can create a Module and apply it wherever you need it. This makes managing your dashboard's look and feel much easier and more efficient.
 
-But this feature is so much more powerful than that, it lets you add actual features yourself in the Bubble Card editor, using all the default [Home Assistant form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) options!  
+But this feature is so much more powerful than that, it lets you add actual features yourself in the Bubble Card editor, using all the default [Home Assistant form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) options!  
 The object selector has been improved to show live changes and to support attributes correctly.
 
-A module can also answer the Home Assistant card picker next to the built-in [entity suggestions](#entity-suggestions): use `suggestions` for the cards it can describe in advance, and `suggestions_code` when they have to be computed from your setup, for example a pop-up built from every entity of the area the picked entity belongs to. Both keys are documented [here](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+A module can also answer the Home Assistant card picker next to the built-in [entity suggestions](#entity-suggestions): use `suggestions` for the cards it can describe in advance, and `suggestions_code` when they have to be computed from your setup, for example a pop-up built from every entity of the area the picked entity belongs to. Both keys are documented [here](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 You can also browse the **Module Store** to find and install [modules created by the community](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), or share your own creations!
 
@@ -2453,7 +2453,7 @@ This tab will display [all available modules from the community](https://github.
 2. Click on **Create new module**.
 3. Fill in the module information.
 4. Write your CSS and/or JavaScript template code in the **Code** editor.
-5. (Optional) Create a custom configuration UI in the **Editor** section (like the color picker in the screenshot above, full documentation available [here](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Optional) Create a custom configuration UI in the **Editor** section (like the color picker in the screenshot above, full documentation available [here](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Optional) Write your **Entity suggestions** so your module is offered in the Home Assistant card picker. The panel checks what you write as you type, and its preview shows the suggested cards themselves for the entity of your choice.
 7. Click **Save**.
 

@@ -2380,10 +2380,10 @@ styles: >
 
 Mae modiwlau'n nodwedd bwerus sy'n eich galluogi i gadw, ailddefnyddio a rhannu eich arddulliau a'ch templedi addasiedig ar draws pob un o'ch Bubble Cards. Yn hytrach na chopïo a gludo'r un cod i mewn i sawl cerdyn, gallwch greu Modiwl a'i gymhwyso lle bynnag y bydd ei angen. Mae hyn yn gwneud rheoli golwg a theimlad eich dashfwrdd yn llawer haws ac yn fwy effeithlon.
 
-Ond mae'r nodwedd hon yn llawer mwy pwerus na hynny, mae'n gadael i chi ychwanegu nodweddion go iawn eich hun yng ngolygydd Bubble Card, gan ddefnyddio holl opsiynau'r [ffurflen ddiofyn Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Ond mae'r nodwedd hon yn llawer mwy pwerus na hynny, mae'n gadael i chi ychwanegu nodweddion go iawn eich hun yng ngolygydd Bubble Card, gan ddefnyddio holl opsiynau'r [ffurflen ddiofyn Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 Mae'r dewisydd gwrthrych wedi'i wella i ddangos newidiadau byw ac i gefnogi priodoleddau'n gywir.
 
-Gall modiwl hefyd ateb dewisydd cardiau Home Assistant ochr yn ochr â'r [awgrymiadau endid](#awgrymiadau-endid) mewnol: defnyddiwch `suggestions` ar gyfer y cardiau y gall eu disgrifio ymlaen llaw, a `suggestions_code` pan fo'n rhaid eu cyfrifo o'ch gosodiad, er enghraifft naidlen wedi'i hadeiladu o bob endid yn yr ardal y mae'r endid a ddewiswyd yn perthyn iddi. Dogfennir y ddwy allwedd [yma](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Gall modiwl hefyd ateb dewisydd cardiau Home Assistant ochr yn ochr â'r [awgrymiadau endid](#awgrymiadau-endid) mewnol: defnyddiwch `suggestions` ar gyfer y cardiau y gall eu disgrifio ymlaen llaw, a `suggestions_code` pan fo'n rhaid eu cyfrifo o'ch gosodiad, er enghraifft naidlen wedi'i hadeiladu o bob endid yn yr ardal y mae'r endid a ddewiswyd yn perthyn iddi. Dogfennir y ddwy allwedd [yma](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Gallwch hefyd bori'r **Module Store** i ddod o hyd i a gosod [modiwlau a grëwyd gan y gymuned](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), neu rannu eich creadigaethau eich hun!
 
@@ -2458,7 +2458,7 @@ Bydd y tab hwn yn dangos [pob modiwl sydd ar gael gan y gymuned](https://github.
 2. Cliciwch ar **Create new module**.
 3. Llenwch wybodaeth y modiwl.
 4. Ysgrifennwch eich cod templed CSS a/neu JavaScript yn y golygydd **Code**.
-5. (Dewisol) Crëwch UI ffurfweddu addasiedig yn yr adran **Editor** (fel y dewisydd lliw yn y sgrinlun uchod, dogfennaeth lawn ar gael [yma](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Dewisol) Crëwch UI ffurfweddu addasiedig yn yr adran **Editor** (fel y dewisydd lliw yn y sgrinlun uchod, dogfennaeth lawn ar gael [yma](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Dewisol) Ysgrifennwch eich **Awgrymiadau endid** fel bod eich modiwl yn cael ei gynnig yn newisydd cardiau Home Assistant. Mae'r panel yn gwirio'r hyn rydych yn ei ysgrifennu wrth i chi deipio, ac mae ei ragolwg yn dangos y cardiau a awgrymir eu hunain ar gyfer yr endid o'ch dewis.
 7. Cliciwch **Save**.
 

@@ -2380,10 +2380,10 @@ styles: >
 
 模块是一项强大的功能，可以让你保存、复用并在所有 Bubble Card 卡片之间共享你的自定义样式和模板。你不必将同样的代码反复复制粘贴到多张卡片中，而是可以创建一个模块，并在需要的地方应用它。这让管理仪表盘的外观和风格变得更轻松、更高效。
 
-但这项功能远不止于此，它还能让你在 Bubble Card 编辑器中亲手添加真正的功能，使用所有默认的 [Home Assistant 表单](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) 选项！  
+但这项功能远不止于此，它还能让你在 Bubble Card 编辑器中亲手添加真正的功能，使用所有默认的 [Home Assistant 表单](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) 选项！  
 对象选择器也已改进，可以显示实时变更并正确支持属性。
 
-模块还可以在内置[实体建议](#实体建议)旁边响应 Home Assistant 的卡片选择器：对于可以事先描述的卡片使用 `suggestions`，当它们必须根据你的安装环境计算时则使用 `suggestions_code`，例如由所选实体所属区域中的所有实体构建的一个弹窗。这两个键的说明都在[这里](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions)。
+模块还可以在内置[实体建议](#实体建议)旁边响应 Home Assistant 的卡片选择器：对于可以事先描述的卡片使用 `suggestions`，当它们必须根据你的安装环境计算时则使用 `suggestions_code`，例如由所选实体所属区域中的所有实体构建的一个弹窗。这两个键的说明都在[这里](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions)。
 
 你还可以浏览 **Module Store**，寻找并安装[由社区创建的模块](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)，或分享你自己的作品！
 
@@ -2458,7 +2458,7 @@ Bubble Card Tools 集成可启用模块编辑器和 Module Store，并将模块�
 2. 点击 **创建新模块**。
 3. 填写模块信息。
 4. 在 **代码** 编辑器中编写你的 CSS 和/或 JavaScript 模板代码。
-5. (可选) 在 **编辑器** 部分创建自定义配置界面 (就像上方截图中的颜色选择器一样，完整文档见[这里](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md))。
+5. (可选) 在 **编辑器** 部分创建自定义配置界面 (就像上方截图中的颜色选择器一样，完整文档见[这里](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md))。
 6. (可选) 编写你的**实体建议**，让你的模块出现在 Home Assistant 的卡片选择器中。该面板会在你输入时检查内容，其预览会显示为你所选实体建议的卡片本身。
 7. 点击 **保存**。
 

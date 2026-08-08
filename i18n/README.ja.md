@@ -2380,10 +2380,10 @@ styles: >
 
 モジュールは、カスタムスタイルとテンプレートを保存・再利用し、すべてのBubble Cardで共有できる強力な機能です。同じコードを複数のカードにコピー&ペーストする代わりに、モジュールを作成して必要な場所に適用できます。これにより、ダッシュボードの見た目や使い心地の管理がはるかに簡単で効率的になります。
 
-しかし、この機能はそれ以上にはるかに強力です。すべての標準の[Home Assistantフォーム](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)オプションを使って、Bubble Cardエディター内に実際の機能を自分自身で追加できるのです！
+しかし、この機能はそれ以上にはるかに強力です。すべての標準の[Home Assistantフォーム](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)オプションを使って、Bubble Cardエディター内に実際の機能を自分自身で追加できるのです！
 オブジェクトセレクターも改良され、変更をリアルタイムで確認できるほか、属性にも正しく対応するようになりました。
 
-モジュールは、組み込みの[エンティティの提案](#エンティティの提案)と並んで Home Assistant のカードピッカーに応えることもできます。あらかじめ記述できるカードには `suggestions` を、選んだエンティティが属するエリアのすべてのエンティティから組み立てたポップアップのように、設置環境から計算する必要がある場合は `suggestions_code` を使います。どちらのキーも[こちら](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions)に説明があります。
+モジュールは、組み込みの[エンティティの提案](#エンティティの提案)と並んで Home Assistant のカードピッカーに応えることもできます。あらかじめ記述できるカードには `suggestions` を、選んだエンティティが属するエリアのすべてのエンティティから組み立てたポップアップのように、設置環境から計算する必要がある場合は `suggestions_code` を使います。どちらのキーも[こちら](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions)に説明があります。
 
 **Module Store**を閲覧して[コミュニティが作成したモジュール](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)を見つけてインストールしたり、自分の作品を共有したりすることもできます！
 
@@ -2458,7 +2458,7 @@ Bubble Card Tools統合により、モジュールエディターとModule Store
 2. **新しいモジュールを作成**をクリックします。
 3. モジュールの情報を入力します。
 4. **コード**エディターにCSSやJavaScriptのテンプレートコードを記述します。
-5. (任意)**エディター**セクションでカスタム設定UIを作成します(上のスクリーンショットのカラーピッカーのように。完全なドキュメントは[こちら](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)で確認できます)。
+5. (任意)**エディター**セクションでカスタム設定UIを作成します(上のスクリーンショットのカラーピッカーのように。完全なドキュメントは[こちら](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)で確認できます)。
 6. (任意) **エンティティの提案**を書くと、Home Assistant のカードピッカーでモジュールが提案されるようになります。このパネルは入力しながら内容を検証し、プレビューには選んだエンティティに対する提案カードそのものが表示されます。
 7. **保存**をクリックします。
 

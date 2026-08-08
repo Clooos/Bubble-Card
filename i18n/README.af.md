@@ -2380,10 +2380,10 @@ styles: >
 
 Modules is 'n kragtige funksie waarmee jy jou pasgemaakte style en sjablone kan stoor, hergebruik en deel oor al jou Bubble Cards heen. In plaas daarvan om dieselfde kode in verskeie kaarte te kopieer en te plak, kan jy 'n module skep en dit toepas waar jy dit ook al nodig het. Dit maak die bestuur van jou paneelbord se voorkoms baie makliker en doeltreffender.
 
-Maar hierdie funksie is soveel kragtiger as dit, dit laat jou toe om self werklike funksies in die Bubble Card-redigeerder by te voeg, met al die verstek [Home Assistant-vorm](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)-opsies!  
+Maar hierdie funksie is soveel kragtiger as dit, dit laat jou toe om self werklike funksies in die Bubble Card-redigeerder by te voeg, met al die verstek [Home Assistant-vorm](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)-opsies!  
 Die objekkieser is verbeter om veranderinge lewendig te wys en om attribute korrek te ondersteun.
 
-'n Module kan ook op die Home Assistant-kaartkieser antwoord langs die ingeboude [entiteitvoorstelle](#entiteitvoorstelle): gebruik `suggestions` vir die kaarte wat dit vooraf kan beskryf, en `suggestions_code` wanneer hulle uit jou opstelling bereken moet word, byvoorbeeld 'n pop-up wat uit elke entiteit gebou word van die area waaraan die gekose entiteit behoort. Albei sleutels word [hier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) gedokumenteer.
+'n Module kan ook op die Home Assistant-kaartkieser antwoord langs die ingeboude [entiteitvoorstelle](#entiteitvoorstelle): gebruik `suggestions` vir die kaarte wat dit vooraf kan beskryf, en `suggestions_code` wanneer hulle uit jou opstelling bereken moet word, byvoorbeeld 'n pop-up wat uit elke entiteit gebou word van die area waaraan die gekose entiteit behoort. Albei sleutels word [hier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions) gedokumenteer.
 
 Jy kan ook deur die **Module Store** blaai om [modules wat deur die gemeenskap geskep is](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) te vind en te installeer, of jou eie skeppings deel!
 
@@ -2458,7 +2458,7 @@ Hierdie oortjie vertoon [al die beskikbare modules van die gemeenskap](https://g
 2. Klik op **Skep nuwe module**.
 3. Vul die module-inligting in.
 4. Skryf jou CSS- en/of JavaScript-sjabloonkode in die **Kode**-redigeerder.
-5. (Opsioneel) Skep 'n pasgemaakte konfigurasiekoppelvlak in die **Redigeerder**-afdeling (soos die kleurkieser in die skermkiekie hierbo, volledige dokumentasie beskikbaar [hier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Opsioneel) Skep 'n pasgemaakte konfigurasiekoppelvlak in die **Redigeerder**-afdeling (soos die kleurkieser in die skermkiekie hierbo, volledige dokumentasie beskikbaar [hier](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Opsioneel) Skryf jou **Entiteitvoorstelle** sodat jou module in die Home Assistant-kaartkieser aangebied word. Die paneel gaan na wat jy skryf terwyl jy tik, en sy voorskou wys die voorgestelde kaarte self vir die entiteit van jou keuse.
 7. Klik op **Stoor**.
 

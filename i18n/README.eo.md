@@ -2380,10 +2380,10 @@ styles: >
 
 Moduloj estas potenca funkcio, kiu ebligas al vi konservi, reuzi kaj kunhavigi viajn proprajn stilojn kaj ŝablonojn tra ĉiuj viaj Bubble Cards. Anstataŭ kopii kaj alglui la saman kodon en plurajn kartojn, vi povas krei modulon kaj apliki ĝin kie ajn vi bezonas. Tio faras la administradon de la aspekto de via panelo multe pli facila kaj efika.
 
-Sed ĉi tiu funkcio estas multe pli potenca ol tio, ĝi ebligas al vi mem aldoni verajn funkciojn en la redaktilo de Bubble Card, uzante ĉiujn defaŭltajn opciojn de [Home Assistant-formularo](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Sed ĉi tiu funkcio estas multe pli potenca ol tio, ĝi ebligas al vi mem aldoni verajn funkciojn en la redaktilo de Bubble Card, uzante ĉiujn defaŭltajn opciojn de [Home Assistant-formularo](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 La objekto-elektilo estis plibonigita por montri vivajn ŝanĝojn kaj por korekte subteni atributojn.
 
-Modulo povas ankaŭ respondi al la kartoelektilo de Home Assistant apud la enkonstruitaj [sugestoj pri entoj](#sugestoj-pri-entoj): uzu `suggestions` por la kartoj, kiujn ĝi povas priskribi anticipe, kaj `suggestions_code` kiam ili devas esti kalkulataj el via instalaĵo, ekzemple ŝprucfenestro konstruita el ĉiuj entoj de la areo al kiu apartenas la elektita ento. Ambaŭ ŝlosiloj estas dokumentitaj [ĉi tie](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Modulo povas ankaŭ respondi al la kartoelektilo de Home Assistant apud la enkonstruitaj [sugestoj pri entoj](#sugestoj-pri-entoj): uzu `suggestions` por la kartoj, kiujn ĝi povas priskribi anticipe, kaj `suggestions_code` kiam ili devas esti kalkulataj el via instalaĵo, ekzemple ŝprucfenestro konstruita el ĉiuj entoj de la areo al kiu apartenas la elektita ento. Ambaŭ ŝlosiloj estas dokumentitaj [ĉi tie](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Vi ankaŭ povas foliumi la **Module Store** por trovi kaj instali [modulojn kreitajn de la komunumo](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), aŭ kunhavigi viajn proprajn kreaĵojn!
 
@@ -2458,7 +2458,7 @@ Vi povas aliri la Module Editor el la agordoj de ajna karto, sub la sekcio **Mod
 2. Klaku sur **Create new module**.
 3. Plenigu la informojn de la modulo.
 4. Skribu vian CSS- kaj/aŭ JavaScript-ŝablonan kodon en la redaktilo **Code**.
-5. (Malnepre) Kreu propran agordan interfacon en la sekcio **Editor** (kiel la kolorelektilo en la ekrankopio supre, plena dokumentado disponebla [ĉi tie](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Malnepre) Kreu propran agordan interfacon en la sekcio **Editor** (kiel la kolorelektilo en la ekrankopio supre, plena dokumentado disponebla [ĉi tie](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Malnepre) Skribu viajn **Sugestojn pri entoj** por ke via modulo estu proponata en la kartoelektilo de Home Assistant. La panelo kontrolas tion, kion vi skribas, dum vi tajpas, kaj ĝia antaŭrigardo montras la sugestitajn kartojn mem por la ento laŭ via elekto.
 7. Klaku **Save**.
 

@@ -2380,10 +2380,10 @@ styles: >
 
 Is gné chumhachtach iad Modúil a ligeann duit do stíleanna agus teimpléid shaincheaptha a shábháil, a athúsáid agus a roinnt ar fud do chuid Cártaí Bubble go léir. In ionad an cód céanna a chóipeáil agus a ghreamú i gcártaí iolracha, is féidir leat Modúl a chruthú agus é a chur i bhfeidhm cibé áit is gá duit é. Fágann sé seo go bhfuil sé i bhfad níos éasca agus níos éifeachtaí cuma agus mothú do dhaisbord a bhainistiú.
 
-Ach tá an ghné seo i bhfad níos cumhachtaí ná sin, ligeann sí duit gnéithe iarbhír a chur leis tú féin in eagarthóir Bubble Card, ag baint úsáide as gach rogha réamhshocraithe [foirm Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Ach tá an ghné seo i bhfad níos cumhachtaí ná sin, ligeann sí duit gnéithe iarbhír a chur leis tú féin in eagarthóir Bubble Card, ag baint úsáide as gach rogha réamhshocraithe [foirm Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 Feabhsaíodh an roghnóir oibiachta chun athruithe beo a thaispeáint agus chun tacú i gceart le hairíonna.
 
-Is féidir le modúl freagra a thabhairt ar roghnóir cártaí Home Assistant freisin, taobh leis na [moltaí aonán](#moltaí-aonán) ionsuite: úsáid `suggestions` do na cártaí is féidir leis a chur síos roimh ré, agus `suggestions_code` nuair is gá iad a ríomh ó do chóras féin, mar shampla preabfhuinneog a thógtar ó gach aonán den limistéar lena mbaineann an t-aonán roghnaithe. Tá an dá eochair doiciméadaithe [anseo](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Is féidir le modúl freagra a thabhairt ar roghnóir cártaí Home Assistant freisin, taobh leis na [moltaí aonán](#moltaí-aonán) ionsuite: úsáid `suggestions` do na cártaí is féidir leis a chur síos roimh ré, agus `suggestions_code` nuair is gá iad a ríomh ó do chóras féin, mar shampla preabfhuinneog a thógtar ó gach aonán den limistéar lena mbaineann an t-aonán roghnaithe. Tá an dá eochair doiciméadaithe [anseo](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Is féidir leat brabhsáil freisin sa **Module Store** chun [modúil a chruthaigh an pobal](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) a aimsiú agus a shuiteáil, nó do chruthúcháin féin a roinnt!
 
@@ -2458,7 +2458,7 @@ Taispeánfaidh an cluaisín seo [na modúil go léir atá ar fáil ón bpobal](h
 2. Cliceáil ar **Create new module**.
 3. Líon isteach faisnéis an mhodúil.
 4. Scríobh do chód teimpléid CSS agus/nó JavaScript san eagarthóir **Code**.
-5. (Roghnach) Cruthaigh comhéadan cumraíochta saincheaptha sa rannóg **Editor** (cosúil leis an roghnóir dathanna sa scáileán grianghraif thuas, tá doiciméadú iomlán le fáil [anseo](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Roghnach) Cruthaigh comhéadan cumraíochta saincheaptha sa rannóg **Editor** (cosúil leis an roghnóir dathanna sa scáileán grianghraif thuas, tá doiciméadú iomlán le fáil [anseo](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Roghnach) Scríobh do chuid **Moltaí aonán** ionas go gcuirfear do mhodúl ar fáil i roghnóir cártaí Home Assistant. Seiceálann an painéal a bhfuil á scríobh agat agus tú ag clóscríobh, agus taispeánann a réamhamharc na cártaí molta féin don aonán is rogha leat.
 7. Cliceáil **Save**.
 

@@ -2380,10 +2380,10 @@ styles: >
 
 模組是一個強大的功能，讓你可以在所有的 Bubble Card 之間儲存、重複使用並分享你的自訂樣式和範本。你不必在多張卡片中重複複製貼上相同的程式碼，而是可以建立一個模組，然後在任何需要的地方套用它。這讓管理儀表板的外觀和風格變得更簡單、更有效率。
 
-但這個功能遠比這更強大，它讓你能夠透過 Bubble Card 編輯器親自加入實際的功能，使用所有預設的 [Home Assistant 表單](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)選項！
+但這個功能遠比這更強大，它讓你能夠透過 Bubble Card 編輯器親自加入實際的功能，使用所有預設的 [Home Assistant 表單](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)選項！
 物件選擇器已經過改進，能即時顯示變更並正確支援屬性。
 
-模組也可以在內建[實體建議](#實體建議)旁邊回應 Home Assistant 的卡片挑選器：對於可以事先描述的卡片請使用 `suggestions`，當它們必須依你的安裝環境運算時則使用 `suggestions_code`，例如由所選實體所屬區域中的所有實體組成的一個彈出視窗。這兩個鍵的說明都在[這裡](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions)。
+模組也可以在內建[實體建議](#實體建議)旁邊回應 Home Assistant 的卡片挑選器：對於可以事先描述的卡片請使用 `suggestions`，當它們必須依你的安裝環境運算時則使用 `suggestions_code`，例如由所選實體所屬區域中的所有實體組成的一個彈出視窗。這兩個鍵的說明都在[這裡](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions)。
 
 你也可以瀏覽 **Module Store**，尋找並安裝[社群建立的模組](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules)，或分享你自己的創作！
 
@@ -2458,7 +2458,7 @@ Bubble Card Tools 整合元件可啟用模組編輯器與 Module Store，並將�
 2. 點擊**建立新模組**。
 3. 填寫模組資訊。
 4. 在**程式碼**編輯器中撰寫你的 CSS 和／或 JavaScript 範本程式碼。
-5. （選用）在**編輯器**區塊建立自訂設定介面（就像上方截圖中的顏色選擇器，完整文件請參考[這裡](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)）。
+5. （選用）在**編輯器**區塊建立自訂設定介面（就像上方截圖中的顏色選擇器，完整文件請參考[這裡](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)）。
 6. （選用）撰寫你的**實體建議**，讓你的模組出現在 Home Assistant 的卡片挑選器中。此面板會在你輸入時檢查內容，而它的預覽會顯示為你所選實體建議的卡片本身。
 7. 點擊**儲存**。
 

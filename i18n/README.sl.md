@@ -2380,10 +2380,10 @@ styles: >
 
 Moduli so zmogljiva funkcija, ki vam omogoča shranjevanje, ponovno uporabo in deljenje lastnih slogov in predlog med vsemi vašimi kartic Bubble Card. Namesto kopiranja in lepljenja iste kode v več kartic lahko ustvarite modul in ga uporabite kjer koli ga potrebujete. To bistveno olajša in izboljša upravljanje videza in vzdušja vaše nadzorne plošče.
 
-Vendar je ta funkcija veliko močnejša od tega, saj vam omogoča, da sami dodate prave funkcije v urejevalniku Bubble Card, z uporabo vseh privzetih možnosti [obrazca Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Vendar je ta funkcija veliko močnejša od tega, saj vam omogoča, da sami dodate prave funkcije v urejevalniku Bubble Card, z uporabo vseh privzetih možnosti [obrazca Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 Izbirnik objekta je bil izboljšan, da prikazuje spremembe v živo in pravilno podpira atribute.
 
-Modul lahko odgovori tudi izbirniku kartic Home Assistant poleg vgrajenih [predlogov za entitete](#predlogi-za-entitete): uporabite `suggestions` za kartice, ki jih lahko opiše vnaprej, in `suggestions_code`, kadar jih je treba izračunati iz vaše namestitve, na primer pojavno okno, sestavljeno iz vseh entitet prostora, ki mu pripada izbrana entiteta. Oba ključa sta dokumentirana [tukaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Modul lahko odgovori tudi izbirniku kartic Home Assistant poleg vgrajenih [predlogov za entitete](#predlogi-za-entitete): uporabite `suggestions` za kartice, ki jih lahko opiše vnaprej, in `suggestions_code`, kadar jih je treba izračunati iz vaše namestitve, na primer pojavno okno, sestavljeno iz vseh entitet prostora, ki mu pripada izbrana entiteta. Oba ključa sta dokumentirana [tukaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Prav tako lahko brskate po **Module Store**, kjer najdete in namestite [module, ki jih je ustvarila skupnost](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), ali delite svoje lastne stvaritve!
 
@@ -2458,7 +2458,7 @@ Ta zavihek prikazuje [vse razpoložljive module skupnosti](https://github.com/Cl
 2. Kliknite na **Ustvari nov modul**.
 3. Izpolnite informacije o modulu.
 4. Vpišite svojo kodo predloge CSS in/ali JavaScript v urejevalniku **Koda**.
-5. (Neobvezno) Ustvarite vmesnik za konfiguracijo po meri v razdelku **Editor** (kot izbirnik barv na zgornjem posnetku zaslona, celotna dokumentacija je na voljo [tukaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Neobvezno) Ustvarite vmesnik za konfiguracijo po meri v razdelku **Editor** (kot izbirnik barv na zgornjem posnetku zaslona, celotna dokumentacija je na voljo [tukaj](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Neobvezno) Napišite svoje **Predlogi za entitete**, da bo vaš modul ponujen v izbirniku kartic Home Assistant. Plošča med tipkanjem preverja, kar pišete, njen predogled pa prikaže same predlagane kartice za entiteto po vaši izbiri.
 7. Kliknite **Shrani**.
 

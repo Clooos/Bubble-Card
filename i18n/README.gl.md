@@ -2380,10 +2380,10 @@ styles: >
 
 Os módulos son unha función poderosa que che permite gardar, reutilizar e compartir os teus estilos personalizados e modelos en todas as túas Bubble Cards. En vez de copiar e pegar o mesmo código en varias tarxetas, podes crear un módulo e aplicalo onde o necesites. Isto fai que xestionar o aspecto e o estilo do teu dashboard sexa moito máis doado e eficiente.
 
-Pero esta función é moito máis poderosa ca iso, permíteche engadir funcionalidades reais ti mesmo no editor de Bubble Card, usando todas as opcións de [formulario predeterminado de Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Pero esta función é moito máis poderosa ca iso, permíteche engadir funcionalidades reais ti mesmo no editor de Bubble Card, usando todas as opcións de [formulario predeterminado de Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 O selector de obxectos mellorouse para mostrar cambios en tempo real e para admitir atributos correctamente.
 
-Un módulo tamén pode responder ao selector de tarxetas de Home Assistant xunto ás [suxestións de entidades](#suxestións-de-entidades) integradas: usa `suggestions` para as tarxetas que pode describir de antemán, e `suggestions_code` cando teñen que calcularse a partir da túa instalación, por exemplo un pop-up construído con todas as entidades da área á que pertence a entidade escollida. As dúas chaves están documentadas [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Un módulo tamén pode responder ao selector de tarxetas de Home Assistant xunto ás [suxestións de entidades](#suxestións-de-entidades) integradas: usa `suggestions` para as tarxetas que pode describir de antemán, e `suggestions_code` cando teñen que calcularse a partir da túa instalación, por exemplo un pop-up construído con todas as entidades da área á que pertence a entidade escollida. As dúas chaves están documentadas [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Tamén podes explorar a **Module Store** para atopar e instalar [módulos creados pola comunidade](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), ou compartir as túas propias creacións!
 
@@ -2458,7 +2458,7 @@ Esta pestana mostrará [todos os módulos dispoñibles da comunidade](https://gi
 2. Fai clic en **Create new module**.
 3. Completa a información do módulo.
 4. Escribe o teu código CSS e/ou modelo JavaScript no editor **Code**.
-5. (Opcional) Crea unha interface de configuración personalizada na sección **Editor** (como o selector de cores da captura de pantalla de arriba, documentación completa dispoñible [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Opcional) Crea unha interface de configuración personalizada na sección **Editor** (como o selector de cores da captura de pantalla de arriba, documentación completa dispoñible [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Opcional) Escribe as túas **Suxestións de entidades** para que o teu módulo se ofreza no selector de tarxetas de Home Assistant. O panel comproba o que escribes mentres tecleas, e a súa vista previa mostra as propias tarxetas suxeridas para a entidade que ti queiras.
 7. Fai clic en **Save**.
 

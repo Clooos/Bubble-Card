@@ -2380,10 +2380,10 @@ styles: >
 
 Moduulit ovat tehokas ominaisuus, joka mahdollistaa mukautettujen tyyliesi ja mallisi tallentamisen, uudelleenkäytön ja jakamisen kaikkien Bubble Cardiesi kesken. Sen sijaan että kopioisit ja liittäisit saman koodin useisiin kortteihin, voit luoda moduulin ja soveltaa sitä missä tahansa tarvitset. Tämä tekee kojelautasi ulkoasun hallinnasta paljon helpompaa ja tehokkaampaa.
 
-Mutta tämä ominaisuus on paljon tehokkaampi kuin se, se antaa sinun lisätä itse oikeita ominaisuuksia Bubble Card muokkaimeen käyttäen kaikkia oletusarvoisia [Home Assistant lomakkeen](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) vaihtoehtoja!  
+Mutta tämä ominaisuus on paljon tehokkaampi kuin se, se antaa sinun lisätä itse oikeita ominaisuuksia Bubble Card muokkaimeen käyttäen kaikkia oletusarvoisia [Home Assistant lomakkeen](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) vaihtoehtoja!  
 Objektivalitsinta on parannettu näyttämään live-muutokset ja tukemaan attribuutteja oikein.
 
-Moduuli voi myös vastata Home Assistantin korttivalitsimeen sisäänrakennettujen [entiteettiehdotusten](#entiteettiehdotukset) rinnalla: käytä `suggestions` niille korteille jotka se voi kuvata etukäteen, ja `suggestions_code` kun ne on laskettava kokoonpanostasi, esimerkiksi ponnahdusikkuna joka rakennetaan valitun entiteetin alueen kaikista entiteeteistä. Molemmat avaimet on dokumentoitu [täällä](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Moduuli voi myös vastata Home Assistantin korttivalitsimeen sisäänrakennettujen [entiteettiehdotusten](#entiteettiehdotukset) rinnalla: käytä `suggestions` niille korteille jotka se voi kuvata etukäteen, ja `suggestions_code` kun ne on laskettava kokoonpanostasi, esimerkiksi ponnahdusikkuna joka rakennetaan valitun entiteetin alueen kaikista entiteeteistä. Molemmat avaimet on dokumentoitu [täällä](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Voit myös selata **Module Storea** löytääksesi ja asentaaksesi [yhteisön luomia moduuleita](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), tai jakaa omat luomuksesi!
 
@@ -2458,7 +2458,7 @@ Tämä välilehti näyttää [kaikki saatavilla olevat moduulit yhteisöltä](ht
 2. Klikkaa **Create new module**.
 3. Täytä moduulin tiedot.
 4. Kirjoita CSS- ja/tai JavaScript-mallikoodisi **Code**-muokkaimeen.
-5. (Valinnainen) Luo mukautettu määrityskäyttöliittymä **Editor** osiossa (kuten värivalitsin yllä olevassa kuvakaappauksessa, täysi dokumentaatio saatavilla [täältä](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Valinnainen) Luo mukautettu määrityskäyttöliittymä **Editor** osiossa (kuten värivalitsin yllä olevassa kuvakaappauksessa, täysi dokumentaatio saatavilla [täältä](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Valinnainen) Kirjoita **Entiteettiehdotuksesi**, jotta moduuliasi tarjotaan Home Assistantin korttivalitsimessa. Paneeli tarkistaa kirjoittamasi sitä mukaa kun kirjoitat, ja sen esikatselu näyttää itse ehdotetut kortit valitsemallesi entiteetille.
 7. Klikkaa **Save**.
 

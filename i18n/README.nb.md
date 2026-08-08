@@ -2380,10 +2380,10 @@ styles: >
 
 Moduler er en kraftig funksjon som lar deg lagre, gjenbruke og dele egendefinerte stiler og maler på tvers av alle Bubble Card-kortene dine. I stedet for å kopiere og lime inn den samme koden i flere kort, kan du opprette en modul og bruke den der du trenger den. Dette gjør det mye enklere og mer effektivt å administrere utseendet og følelsen til dashbordet ditt.
 
-Men denne funksjonen er så mye kraftigere enn som så. Den lar deg selv legge til ekte funksjoner i Bubble Card-redigereren, ved hjelp av alle standardvalgene fra [Home Assistant-skjemaet](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Men denne funksjonen er så mye kraftigere enn som så. Den lar deg selv legge til ekte funksjoner i Bubble Card-redigereren, ved hjelp av alle standardvalgene fra [Home Assistant-skjemaet](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 Objektvelgeren er forbedret slik at den viser endringer i sanntid og støtter attributter riktig.
 
-En modul kan også svare kortvelgeren i Home Assistant ved siden av de innebygde [entitetsforslagene](#entitetsforslag): bruk `suggestions` for kortene den kan beskrive på forhånd, og `suggestions_code` når de må regnes ut fra oppsettet ditt, for eksempel en pop-up bygget av alle entitetene i området som den valgte entiteten hører til. Begge nøklene er dokumentert [her](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+En modul kan også svare kortvelgeren i Home Assistant ved siden av de innebygde [entitetsforslagene](#entitetsforslag): bruk `suggestions` for kortene den kan beskrive på forhånd, og `suggestions_code` når de må regnes ut fra oppsettet ditt, for eksempel en pop-up bygget av alle entitetene i området som den valgte entiteten hører til. Begge nøklene er dokumentert [her](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Du kan også utforske **Module Store** for å finne og installere [moduler laget av fellesskapet](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), eller dele dine egne kreasjoner!
 
@@ -2458,7 +2458,7 @@ Denne fanen viser [alle tilgjengelige moduler fra fellesskapet](https://github.c
 2. Klikk på **Opprett ny modul**.
 3. Fyll inn informasjonen om modulen.
 4. Skriv CSS- og/eller JavaScript-malkoden din i **Kode**-redigereren.
-5. (Valgfritt) Opprett et egendefinert konfigurasjonsgrensesnitt i **Redigerer**-delen (som fargevelgeren i skjermbildet ovenfor, full dokumentasjon tilgjengelig [her](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Valgfritt) Opprett et egendefinert konfigurasjonsgrensesnitt i **Redigerer**-delen (som fargevelgeren i skjermbildet ovenfor, full dokumentasjon tilgjengelig [her](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Valgfritt) Skriv **Entitetsforslagene** dine slik at modulen din blir foreslått i kortvelgeren i Home Assistant. Panelet sjekker det du skriver mens du skriver, og forhåndsvisningen viser selve de foreslåtte kortene for entiteten du velger.
 7. Klikk på **Lagre**.
 

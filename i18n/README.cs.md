@@ -2380,10 +2380,10 @@ styles: >
 
 Moduly jsou mocná funkce, která umožňuje ukládat, znovu používat a sdílet vaše vlastní styly a šablony napříč všemi vašimi Bubble Cards. Místo kopírování stejného kódu do více karet můžete vytvořit modul a použít jej všude, kde jej potřebujete. Správa vzhledu vašeho dashboardu je tak mnohem snazší a efektivnější.
 
-Ale tato funkce je mnohem mocnější než jen to, umožňuje vám do editoru Bubble Card přidávat skutečné funkce, a to s využitím všech výchozích možností [formulářů Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Ale tato funkce je mnohem mocnější než jen to, umožňuje vám do editoru Bubble Card přidávat skutečné funkce, a to s využitím všech výchozích možností [formulářů Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 Selektor objektů byl vylepšen tak, aby zobrazoval změny živě a správně podporoval atributy.
 
-Modul může také odpovídat výběru karet Home Assistant vedle vestavěných [návrhů entit](#návrhy-entit): použijte `suggestions` pro karty, které umí popsat dopředu, a `suggestions_code`, když se musí spočítat z vaší instalace, například pop-up sestavený ze všech entit oblasti, do které vybraná entita patří. Oba klíče jsou zdokumentovány [zde](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Modul může také odpovídat výběru karet Home Assistant vedle vestavěných [návrhů entit](#návrhy-entit): použijte `suggestions` pro karty, které umí popsat dopředu, a `suggestions_code`, když se musí spočítat z vaší instalace, například pop-up sestavený ze všech entit oblasti, do které vybraná entita patří. Oba klíče jsou zdokumentovány [zde](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Můžete také procházet **Module Store**, najít a nainstalovat [moduly vytvořené komunitou](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), nebo sdílet své vlastní výtvory!
 
@@ -2458,7 +2458,7 @@ Tato záložka zobrazí [všechny dostupné moduly od komunity](https://github.c
 2. Klikněte na **Vytvořit nový modul**.
 3. Vyplňte informace o modulu.
 4. Napište kód svých CSS a/nebo JavaScript šablon do editoru **Kód**.
-5. (Volitelné) Vytvořte vlastní konfigurační rozhraní v sekci **Editor** (jako výběr barvy na snímku výše, kompletní dokumentace je k dispozici [zde](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Volitelné) Vytvořte vlastní konfigurační rozhraní v sekci **Editor** (jako výběr barvy na snímku výše, kompletní dokumentace je k dispozici [zde](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Volitelné) Napište své **Návrhy entit**, aby byl váš modul nabízen ve výběru karet Home Assistant. Panel kontroluje to, co píšete, přímo při psaní, a jeho náhled ukazuje samotné navržené karty pro entitu podle vaší volby.
 7. Klikněte na **Uložit**.
 

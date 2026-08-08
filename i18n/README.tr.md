@@ -2380,10 +2380,10 @@ styles: >
 
 Modüller, özel stillerinizi ve şablonlarınızı tüm Bubble Card'larınızda kaydetmenizi, yeniden kullanmanızı ve paylaşmanızı sağlayan güçlü bir özelliktir. Aynı kodu birden fazla karta kopyalayıp yapıştırmak yerine bir Modül oluşturabilir ve ihtiyaç duyduğunuz her yerde uygulayabilirsiniz. Bu, panonuzun görünümünü ve hissini yönetmeyi çok daha kolay ve verimli hale getirir.
 
-Ama bu özellik bundan çok daha güçlüdür, Bubble Card editöründe tüm varsayılan [Home Assistant form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) seçeneklerini kullanarak kendi başınıza gerçek özellikler eklemenizi sağlar!  
+Ama bu özellik bundan çok daha güçlüdür, Bubble Card editöründe tüm varsayılan [Home Assistant form](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) seçeneklerini kullanarak kendi başınıza gerçek özellikler eklemenizi sağlar!  
 Nesne seçici, canlı değişiklikleri göstermek ve öznitelikleri doğru şekilde desteklemek için geliştirildi.
 
-Bir modül, yerleşik [varlık önerilerinin](#varlık-önerileri) yanında Home Assistant kart seçicisine de yanıt verebilir: önceden tanımlayabildiği kartlar için `suggestions`, kurulumunuzdan hesaplanmaları gerektiğinde ise `suggestions_code` kullanın, örneğin seçilen varlığın ait olduğu alandaki tüm varlıklardan oluşturulan bir pop-up gibi. Her iki anahtar da [burada](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions) belgelenmiştir.
+Bir modül, yerleşik [varlık önerilerinin](#varlık-önerileri) yanında Home Assistant kart seçicisine de yanıt verebilir: önceden tanımlayabildiği kartlar için `suggestions`, kurulumunuzdan hesaplanmaları gerektiğinde ise `suggestions_code` kullanın, örneğin seçilen varlığın ait olduğu alandaki tüm varlıklardan oluşturulan bir pop-up gibi. Her iki anahtar da [burada](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions) belgelenmiştir.
 
 Ayrıca [topluluk tarafından oluşturulan modülleri](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules) bulup kurmak için **Module Store**'a göz atabilir veya kendi çalışmalarınızı paylaşabilirsiniz!
 
@@ -2458,7 +2458,7 @@ Bu sekme [topluluktan gelen tüm mevcut modülleri](https://github.com/Clooos/Bu
 2. **Yeni modül oluştur**'a tıklayın.
 3. Modül bilgilerini doldurun.
 4. CSS ve/veya JavaScript şablon kodunuzu **Kod** editörüne yazın.
-5. (İsteğe bağlı) **Editör** bölümünde özel bir yapılandırma arayüzü oluşturun (yukarıdaki ekran görüntüsündeki renk seçici gibi, tam belgeleri [burada](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md) bulabilirsiniz).
+5. (İsteğe bağlı) **Editör** bölümünde özel bir yapılandırma arayüzü oluşturun (yukarıdaki ekran görüntüsündeki renk seçici gibi, tam belgeleri [burada](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md) bulabilirsiniz).
 6. (İsteğe bağlı) Modülünüzün Home Assistant kart seçicisinde sunulması için **Varlık önerilerinizi** yazın. Panel yazdıklarınızı siz yazarken denetler ve önizlemesi, seçtiğiniz varlık için önerilen kartların kendisini gösterir.
 7. **Kaydet**'e tıklayın.
 

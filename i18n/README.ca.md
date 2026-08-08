@@ -2380,10 +2380,10 @@ styles: >
 
 Els mòduls són una funció potent que us permet desar, reutilitzar i compartir els vostres estils personalitzats i plantilles a totes les vostres Bubble Cards. En lloc de copiar i enganxar el mateix codi en diverses targetes, podeu crear un mòdul i aplicar-lo allà on el necessiteu. Això fa que gestionar l'aspecte del vostre tauler sigui molt més fàcil i eficient.
 
-Però aquesta funció és molt més potent que això: us permet afegir funcions de debò vosaltres mateixos a l'editor de Bubble Card, utilitzant totes les opcions per defecte dels [formularis de Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Però aquesta funció és molt més potent que això: us permet afegir funcions de debò vosaltres mateixos a l'editor de Bubble Card, utilitzant totes les opcions per defecte dels [formularis de Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 El selector d'objectes s'ha millorat per mostrar els canvis en directe i per admetre correctament els atributs.
 
-Un mòdul també pot respondre al selector de targetes de Home Assistant al costat dels [suggeriments d'entitat](#suggeriments-dentitat) integrats: useu `suggestions` per a les targetes que pot descriure per endavant, i `suggestions_code` quan s'han de calcular a partir de la vostra instal·lació, per exemple un pop-up construït amb totes les entitats de l'àrea a la qual pertany l'entitat triada. Les dues claus estan documentades [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Un mòdul també pot respondre al selector de targetes de Home Assistant al costat dels [suggeriments d'entitat](#suggeriments-dentitat) integrats: useu `suggestions` per a les targetes que pot descriure per endavant, i `suggestions_code` quan s'han de calcular a partir de la vostra instal·lació, per exemple un pop-up construït amb totes les entitats de l'àrea a la qual pertany l'entitat triada. Les dues claus estan documentades [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 També podeu explorar el **Module Store** per trobar i instal·lar [mòduls creats per la comunitat](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), o compartir les vostres pròpies creacions!
 
@@ -2458,7 +2458,7 @@ Aquesta pestanya mostra [tots els mòduls disponibles de la comunitat](https://g
 2. Feu clic a **Crea un mòdul nou**.
 3. Empleneu la informació del mòdul.
 4. Escriviu el codi de la vostra plantilla CSS i/o JavaScript a l'editor **Codi**.
-5. (Opcional) Creeu una interfície de configuració personalitzada a la secció **Editor** (com el selector de color de la captura de pantalla de dalt, documentació completa disponible [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Opcional) Creeu una interfície de configuració personalitzada a la secció **Editor** (com el selector de color de la captura de pantalla de dalt, documentació completa disponible [aquí](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Opcional) Escriviu els vostres **Suggeriments d'entitat** perquè el vostre mòdul s'ofereixi al selector de targetes de Home Assistant. El plafó comprova el que escriviu mentre teclegeu, i la seva previsualització mostra les mateixes targetes suggerides per a l'entitat que trieu.
 7. Feu clic a **Desa**.
 

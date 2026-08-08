@@ -2380,10 +2380,10 @@ styles: >
 
 Modulele sunt o funcție puternică ce îți permite să salvezi, refolosești și distribui stilurile și șabloanele tale personalizate în toate cardurile Bubble Card. În loc să copiezi și lipești același cod în mai multe carduri, poți crea un modul și îl poți aplica oriunde ai nevoie de el. Acest lucru face gestionarea aspectului dashboardului tău mult mai simplă și mai eficientă.
 
-Dar această funcție este mult mai puternică decât atât, îți permite să adaugi funcții reale chiar tu, în editorul Bubble Card, folosind toate opțiunile implicite ale [formularului Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)!  
+Dar această funcție este mult mai puternică decât atât, îți permite să adaugi funcții reale chiar tu, în editorul Bubble Card, folosind toate opțiunile implicite ale [formularului Home Assistant](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)!  
 Selectorul de obiecte a fost îmbunătățit pentru a afișa modificările în timp real și pentru a suporta corect atributele.
 
-Un modul poate răspunde și selectorului de carduri din Home Assistant, alături de [sugestiile de entități](#sugestii-de-entități) integrate: folosește `suggestions` pentru cardurile pe care le poate descrie dinainte și `suggestions_code` când acestea trebuie calculate din configurația ta, de exemplu un pop-up construit din toate entitățile zonei căreia îi aparține entitatea aleasă. Ambele chei sunt documentate [aici](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md#entity-suggestions).
+Un modul poate răspunde și selectorului de carduri din Home Assistant, alături de [sugestiile de entități](#sugestii-de-entități) integrate: folosește `suggestions` pentru cardurile pe care le poate descrie dinainte și `suggestions_code` când acestea trebuie calculate din configurația ta, de exemplu un pop-up construit din toate entitățile zonei căreia îi aparține entitatea aleasă. Ambele chei sunt documentate [aici](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md#entity-suggestions).
 
 Poți de asemenea răsfoi **Module Store** pentru a găsi și instala [module create de comunitate](https://github.com/Clooos/Bubble-Card/discussions/categories/share-your-modules), sau pentru a-ți distribui propriile creații!
 
@@ -2458,7 +2458,7 @@ Această filă va afișa [toate modulele disponibile din comunitate](https://git
 2. Dă clic pe **Creează un modul nou**.
 3. Completează informațiile modulului.
 4. Scrie codul tău CSS și/sau șablonul JavaScript în editorul **Cod**.
-5. (Opțional) Creează o interfață de configurare personalizată în secțiunea **Editor** (cum ar fi selectorul de culoare din captura de ecran de mai sus, documentația completă este disponibilă [aici](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/editor-schema-docs.md)).
+5. (Opțional) Creează o interfață de configurare personalizată în secțiunea **Editor** (cum ar fi selectorul de culoare din captura de ecran de mai sus, documentația completă este disponibilă [aici](https://github.com/Clooos/Bubble-Card/blob/main/src/modules/module-documentation.md)).
 6. (Opțional) Scrie **Sugestiile de entități** ca modulul tău să fie propus în selectorul de carduri din Home Assistant. Panoul verifică ce scrii pe măsură ce tastezi, iar previzualizarea lui arată chiar cardurile sugerate pentru entitatea aleasă de tine.
 7. Dă clic pe **Salvează**.
 
