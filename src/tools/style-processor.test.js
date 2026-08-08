@@ -446,3 +446,66 @@ describe('the onTeardown hook handed to a style template', () => {
         expect(global.window.__teardownProof).toBe(1);
     });
 });
+
+describe('the hasChanged gate handed to a style template', () => {
+    beforeEach(() => {
+        global.window = { addEventListener: jest.fn(), removeEventListener: jest.fn() };
+        global.document = { addEventListener: jest.fn(), removeEventListener: jest.fn() };
+        cleanCSS.mockClear();
+    });
+
+    afterEach(() => {
+        delete global.window;
+        delete global.document;
+    });
+
+    function createStyleContext() {
+        const context = createContext(createCardElement());
+        context.elements = {};
+        return context;
+    }
+
+    // A side-effecting template is re-executed on every pass by design, so this
+    // is the only way its imperative half can be skipped when nothing moved.
+    test('is reachable from a template and answers true then false', () => {
+        const context = createStyleContext();
+        const styles = '${hasChanged("tint", "on") ? "" : ""} .x { color: red; }';
+
+        evalStyles(context, styles, { type: 'module', id: 'light' });
+        const first = context._moduleGates.get('module:light::tint');
+
+        evalStyles(context, styles, { type: 'module', id: 'light' });
+
+        expect(first).toBeDefined();
+        expect(context._moduleGates.get('module:light::tint')).toBe(first);
+    });
+
+    test('keys by module, so two modules gating the same label do not share', () => {
+        const context = createStyleContext();
+
+        evalStyles(context, '${hasChanged("tint", "on") ? "" : ""} .a {}', { type: 'module', id: 'light' });
+        evalStyles(context, '${hasChanged("tint", "off") ? "" : ""} .b {}', { type: 'module', id: 'neon' });
+
+        expect(context._moduleGates.get('module:light::tint')).not.toBe(context._moduleGates.get('module:neon::tint'));
+    });
+
+    // The template has to carry a side effect marker, otherwise it is memoizable
+    // and the second pass never re-executes it: the gate exists precisely for the
+    // templates that are re-executed every time, and only those.
+    test('lets the template observe the answer, which is the whole point', () => {
+        const context = createStyleContext();
+        const styles = '.x { --ran: ${hasChanged("tint", "on") ? 1 : 0}; } /* document */';
+
+        expect(evalStyles(context, styles, { type: 'module', id: 'light' })).toContain('--ran: 1');
+        expect(evalStyles(context, styles, { type: 'module', id: 'light' })).toContain('--ran: 0');
+    });
+
+    test('answers true again once a value it was given moves', () => {
+        const context = createStyleContext();
+        const tpl = (state) => `.x { --ran: \${hasChanged("tint", "${state}") ? 1 : 0}; } /* document */`;
+
+        evalStyles(context, tpl('on'), { type: 'module', id: 'light' });
+
+        expect(evalStyles(context, tpl('off'), { type: 'module', id: 'light' })).toContain('--ran: 1');
+    });
+});

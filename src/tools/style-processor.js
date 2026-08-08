@@ -7,6 +7,7 @@ import { yamlKeysMap } from '../modules/registry.js';
 import { isBCTAvailableSync } from '../modules/bct-provider.js';
 import { cleanCSS } from './clean-css.js';
 import { registerModuleTeardown, teardownKey } from './module-teardown.js';
+import { hasChanged } from './module-gate.js';
 
 const compiledTemplateCache = new Map();
 
@@ -459,6 +460,7 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
         "name",
         "checkConditionsMet",
         "onTeardown",
+        "hasChanged",
         `return \`${s}\`;`
       )
     );
@@ -486,6 +488,9 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
       // Keyed by the source being evaluated, so a module that registers on each
       // of its passes replaces its own entry rather than stacking one per pass.
       (fn) => registerModuleTeardown(context, teardownKey(sourceInfo), fn),
+      // Same keying as the teardown: per module and per card, plus the module's
+      // own label, so one module can gate several independent pieces of work.
+      (label, ...values) => hasChanged(context, `${teardownKey(sourceInfo)}::${label}`, values),
     ]);
 
     // Optimization: Local cache to avoid re-cleaning CSS if the raw output hasn't changed.
