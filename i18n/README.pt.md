@@ -132,9 +132,9 @@ Todas as opções podem ser configuradas no editor do Home Assistant. Mas pode e
 
 ## Sugestões de entidades
 
-Desde o Home Assistant 2026.6, escolher uma entidade no seletor de cartões propõe-lhe alguns cartões prontos, e o Bubble Card responde a essa pergunta com as suas próprias receitas. Escolha uma luz e é-lhe proposto um cartão com um slider de brilho, além de variantes de temperatura de cor, cor e saturação quando a sua luz as suportar. Escolha um estore e obtém o slider de posição, escolha um leitor multimédia e obtém também uma variante com a lista de fontes, escolha um aspirador e obtém os botões de iniciar, pausar e regressar à base. Cada sugestão é uma configuração normal do Bubble Card apresentada como pré-visualização ao vivo, pelo que pode ficar com a mais próxima e continuar a editá-la como sempre.
+Desde o Home Assistant 2026.6, escolher uma entidade no seletor de cartões propõe-lhe alguns cartões prontos, e o Bubble Card acrescenta as suas próprias receitas a essa lista. Escolha uma luz e é-lhe proposto um cartão com um slider de brilho, além de variantes de temperatura de cor, cor e saturação quando a sua luz as suportar. Escolha um estore e obtém o slider de posição, escolha um leitor multimédia e obtém também uma variante com a lista de fontes, escolha um aspirador e obtém os botões de iniciar, pausar e regressar à base. Cada sugestão é uma configuração normal do Bubble Card apresentada como pré-visualização ao vivo, pelo que pode ficar com a mais próxima e continuar a editá-la como sempre.
 
-O que lhe é proposto depende do que a sua entidade sabe realmente fazer: uma luz sem canal de brilho recebe um interruptor em vez de um slider, um estore que não inclina não recebe a variante de inclinação, e uma entidade de climatização só recebe os seus modos predefinidos quando tem algum. As opções clássicas surgem por baixo quando se aplicam: o cartão dedicado do domínio, um botão simples e um slider.
+O que lhe é proposto depende do que a sua entidade sabe realmente fazer: uma luz sem canal de brilho recebe um interruptor em vez de um slider, um estore que não inclina não recebe a variante de inclinação, e uma entidade de climatização só recebe os seus modos predefinidos quando tem algum. As opções clássicas surgem por baixo das sugestões do Bubble Card quando se aplicam: o cartão dedicado a esse tipo de entidade, um botão simples e um slider.
 
 > [!TIP]
 > Os módulos podem acrescentar as suas próprias sugestões a essa lista, ver [módulos](#módulos).
@@ -206,7 +206,7 @@ Este cartão permite criar um pop-up com qualquer conteúdo. Cada pop-up está *
 | `trigger` | object ou list | Opcional | Ver [condições](#condições) | Abre este pop-up quando as condições são cumpridas |
 | `trigger_entity` | string | Opcional | Qualquer entidade | Abre este pop-up com base no estado de qualquer entidade, a forma simples de `trigger` |
 | `trigger_state` | string | Opcional (**Obrigatório** se `trigger_entity` estiver definido) | Qualquer estado de entidade | Estado da entidade para abrir o pop-up |
-| `trigger_close` | boolean | Opcional | `true` ou `false` | Fecha o pop-up quando as condições deixam de ser cumpridas (predefinição: `true` com `trigger`, `false` com `trigger_state`) |
+| `trigger_close` | boolean | Opcional | `true` (predefinição) ou `false` | Fecha o pop-up quando as condições deixam de ser cumpridas. A predefinição passa a ser `false` quando usa o par mais antigo `trigger_entity` e `trigger_state` |
 | `open_action` | object | Opcional | Ver [ações](#ações-de-toque-duplo-toque-e-toque-longo) | Aciona uma ação quando o pop-up está a abrir |
 | `close_action` | object | Opcional | Ver [ações](#ações-de-toque-duplo-toque-e-toque-longo) | Aciona uma ação quando o pop-up está a fechar |
 | `show_header` | boolean | Opcional | `true` (predefinição) ou `false` | Mostra/Oculta o cabeçalho do pop-up por completo |
@@ -462,7 +462,7 @@ Estas opções só estão disponíveis quando `button_type` está definido como 
 | `read_only_slider`      | boolean | Opcional (padrão `false`)      | Torna o slider apenas de leitura. Ativado automaticamente para algumas entidades, como sensores.                                                                 |
 | `slider_live_update`    | boolean | Opcional (padrão `false`)      | O estado da entidade é atualizado durante o deslizar. **Esta funcionalidade não é recomendada para todas as entidades.**        |
 | `slider_fill_orientation` | string | Opcional | `left`, `right`, `top` ou `bottom` | Altera a direção de preenchimento do slider. Da esquerda para a direita quando não definido, espelhado em [idiomas da direita para a esquerda](#localização) |
-| `slider_value_position` | string | Opcional | `right`, `left`, `center` ou `hidden` | Posição da exibição do valor. No lado final quando não definido, ou seja, à esquerda em [idiomas da direita para a esquerda](#localização) |
+| `slider_value_position` | string | Opcional | `right`, `left`, `center` ou `hidden` | Posição da exibição do valor. À direita quando não definido, e à esquerda em [idiomas da direita para a esquerda](#localização) |
 | `invert_slider_value` | boolean | Opcional (padrão `false`) | Inverte a direção do slider (preenchimento a 100% equivale ao mínimo). Não disponível para sliders de cor. |
 | `light_slider_type` | string | Opcional | `brightness` (padrão), `hue`, `saturation`, `white_temp` | **Apenas para luzes.** Escolhe o modo do slider |
 | `cover_slider_type` | string | Opcional | `position` (padrão), `tilt_position` | **Apenas para estores.** Escolhe o modo do slider (posição ou inclinação) |
@@ -1347,7 +1347,7 @@ Os sub-botões do tipo cursor suportam as mesmas opções que os cursores de bot
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Raio da borda dos sub-botões |
 | `--bubble-sub-button-background-color` | `color` | Cor de fundo dos sub-botões |
-| `--bubble-sub-button-outline` | `box-shadow` | Contorno acrescentado a um sub-botão ou a um cursor apenas quando este é pintado com a mesma cor do cartão por trás, o que o tornaria invisível (defina `none` para o remover) |
+| `--bubble-sub-button-outline` | `box-shadow` | Contorno acrescentado a um sub-botão ou a um cursor, apenas quando esse elemento é pintado com a mesma cor do cartão por trás, o que o tornaria invisível (defina `none` para o remover) |
 | `--bubble-sub-slider-border-radius` | `px` | Raio da borda dos sub-botões cursor |
 | `--bubble-sub-slider-background-color` | `color` | Cor de fundo dos sub-botões cursor |
 | `--bubble-sub-slider-height` | `px` | Altura dos sub-botões cursor sempre visíveis |
@@ -2694,7 +2694,7 @@ O Bubble Card fala a sua língua. O seu editor está traduzido nas 64 línguas q
 
 No fundo do editor, ao lado do número da versão, um seletor **Automático** segue a língua do seu Home Assistant. Desligue-o e todo o editor volta ao inglês, o que é prático para seguir um tutorial ou reportar um problema. A sua escolha fica memorizada no navegador.
 
-Esta documentação também é traduzida, [em 62 línguas](languages.md). Essas páginas estão abertas a todos, pelo que uma formulação que não corresponda ao seu próprio Home Assistant pode ser corrigida em poucos cliques. A versão inglesa continua a ser a referência para o conteúdo em si.
+Esta documentação também é traduzida, [em 62 línguas](languages.md), todas elas menos o inglês britânico, que usa o original. Essas páginas estão abertas a todos, pelo que uma formulação que não corresponda ao seu próprio Home Assistant pode ser corrigida em poucos cliques. A versão inglesa continua a ser a referência para o conteúdo em si.
 
 <br>
 

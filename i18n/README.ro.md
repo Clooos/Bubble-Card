@@ -132,9 +132,9 @@ Toate opțiunile pot fi configurate din editorul Home Assistant. Dar poți găsi
 
 ## Sugestii de entități
 
-Începând cu Home Assistant 2026.6, alegerea unei entități în selectorul de carduri îți propune câteva carduri gata făcute, iar Bubble Card răspunde la această întrebare cu propriile rețete. Alege o lumină și ți se propune un card cu un cursor de luminozitate, plus variante pentru temperatura culorii, culoare și saturație atunci când lumina ta le suportă. Alege un rulou și primești cursorul de poziție, alege un player media și primești și o variantă cu lista lui de surse, alege un aspirator și primești butoanele de pornire, pauză și revenire la stație. Fiecare sugestie este o configurație obișnuită Bubble Card afișată ca previzualizare live, așa că poți lua cea mai apropiată și să o editezi mai departe ca de obicei.
+Începând cu Home Assistant 2026.6, alegerea unei entități în selectorul de carduri îți propune câteva carduri gata făcute, iar Bubble Card adaugă propriile rețete la această listă. Alege o lumină și ți se propune un card cu un cursor de luminozitate, plus variante pentru temperatura culorii, culoare și saturație atunci când lumina ta le suportă. Alege un rulou și primești cursorul de poziție, alege un player media și primești și o variantă cu lista lui de surse, alege un aspirator și primești butoanele de pornire, pauză și revenire la stație. Fiecare sugestie este o configurație obișnuită Bubble Card afișată ca previzualizare live, așa că poți lua cea mai apropiată și să o editezi mai departe ca de obicei.
 
-Ce ți se propune depinde de ceea ce poate face cu adevărat entitatea ta: o lumină fără canal de luminozitate primește un comutator în locul unui cursor, un rulou care nu se poate înclina nu primește varianta de înclinare, iar o entitate de climatizare primește modurile presetate doar dacă are vreunul. Intrările clasice urmează sub ele atunci când se aplică: cardul dedicat domeniului, un buton simplu și un cursor.
+Ce ți se propune depinde de ceea ce poate face cu adevărat entitatea ta: o lumină fără canal de luminozitate primește un comutator în locul unui cursor, un rulou care nu se poate înclina nu primește varianta de înclinare, iar o entitate de climatizare primește modurile presetate doar dacă are vreunul. Intrările clasice urmează sub sugestiile Bubble Card atunci când se aplică: cardul dedicat acelui tip de entitate, un buton simplu și un cursor.
 
 > [!TIP]
 > Modulele pot adăuga propriile sugestii în acea listă, vezi [module](#module).
@@ -206,7 +206,7 @@ Acest card îți permite să creezi un pop-up cu orice conținut. Fiecare pop-up
 | `trigger` | object sau list | Opțional | Vezi [condiții](#condiții) | Deschide acest pop-up când condițiile sunt îndeplinite |
 | `trigger_entity` | string | Opțional | Orice entitate | Deschide acest pop-up pe baza stării oricărei entități, forma simplă a `trigger` |
 | `trigger_state` | string | Opțional (**Obligatoriu** dacă `trigger_entity` este definit) | Orice stare de entitate | Starea entității pentru a deschide pop-up-ul |
-| `trigger_close` | boolean | Opțional | `true` sau `false` | Închide pop-up-ul când condițiile nu mai sunt îndeplinite (implicit: `true` cu `trigger`, `false` cu `trigger_state`) |
+| `trigger_close` | boolean | Opțional | `true` (implicit) sau `false` | Închide pop-up-ul când condițiile nu mai sunt îndeplinite. Valoarea implicită devine `false` dacă folosești perechea mai veche `trigger_entity` și `trigger_state` |
 | `open_action` | object | Opțional | Vezi [acțiuni](#acțiuni-la-atingere-atingere-dublă-și-apăsare-lungă) | Declanșează o acțiune la deschiderea pop-up-ului |
 | `close_action` | object | Opțional | Vezi [acțiuni](#acțiuni-la-atingere-atingere-dublă-și-apăsare-lungă) | Declanșează o acțiune la închiderea pop-up-ului |
 | `show_header` | boolean | Opțional | `true` (implicit) sau `false` | Afișează/Ascunde complet antetul pop-up-ului |
@@ -462,7 +462,7 @@ Aceste opțiuni sunt disponibile doar atunci când `button_type` este setat pe `
 | `read_only_slider`      | boolean | Opțional (implicit `false`)      | Face cursorul doar pentru citire. Activat automat pentru unele entități precum senzorii.                        |
 | `slider_live_update`    | boolean | Opțional (implicit `false`)      | Starea entității este actualizată în timp ce culisezi. **Această funcție nu este recomandată pentru toate entitățile.**        |
 | `slider_fill_orientation` | string | Opțional | `left`, `right`, `top` sau `bottom` | Schimbă direcția de umplere a cursorului. De la stânga la dreapta când nu este definit, oglindit în [limbile de la dreapta la stânga](#localizare) |
-| `slider_value_position` | string | Opțional | `right`, `left`, `center` sau `hidden` | Poziția afișării valorii. Pe partea de final când nu este definită, deci în stânga în [limbile de la dreapta la stânga](#localizare) |
+| `slider_value_position` | string | Opțional | `right`, `left`, `center` sau `hidden` | Poziția afișării valorii. În dreapta când nu este definită, iar în stânga în [limbile de la dreapta la stânga](#localizare) |
 | `invert_slider_value` | boolean | Opțional (implicit `false`) | Inversează direcția cursorului (umplerea 100% egalează minimul). Nu este disponibil pentru cursoarele de culoare. |
 | `light_slider_type` | string | Opțional | `brightness` (implicit), `hue`, `saturation`, `white_temp` | **Doar pentru lumini.** Alege modul cursorului |
 | `cover_slider_type` | string | Opțional | `position` (implicit), `tilt_position` | **Doar pentru rulouri.** Alege modul cursorului (poziție sau înclinare) |
@@ -1347,7 +1347,7 @@ Sub-butoanele de tip slider acceptă aceleași opțiuni de slider ca și slidere
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Raza de rotunjire pentru sub-butoane |
 | `--bubble-sub-button-background-color` | `color` | Culoarea de fundal pentru sub-butoane |
-| `--bubble-sub-button-outline` | `box-shadow` | Contur adăugat unui sub-buton sau unui cursor doar când acesta se desenează în aceeași culoare ca și cardul din spate, ceea ce l-ar face invizibil (setează-l pe `none` pentru a-l elimina) |
+| `--bubble-sub-button-outline` | `box-shadow` | Contur adăugat unui sub-buton sau unui cursor, doar când acel element se desenează în aceeași culoare ca și cardul din spate, ceea ce l-ar face invizibil (setează-l pe `none` pentru a-l elimina) |
 | `--bubble-sub-slider-border-radius` | `px` | Raza de rotunjire pentru sub-butoanele de tip slider |
 | `--bubble-sub-slider-background-color` | `color` | Culoarea de fundal pentru sub-butoanele de tip slider |
 | `--bubble-sub-slider-height` | `px` | Înălțimea pentru sub-butoanele de tip slider mereu vizibile |
@@ -2694,7 +2694,7 @@ Bubble Card vorbește limba ta. Editorul lui este tradus în cele 64 de limbi pe
 
 În partea de jos a editorului, lângă numărul versiunii, un comutator **Automat** urmează limba Home Assistant. Oprește-l și tot editorul revine la engleză, ceea ce este util când urmezi un tutorial sau raportezi o problemă. Alegerea ta este reținută în browser.
 
-Și această documentație este tradusă, [în 62 de limbi](languages.md). Acele pagini sunt deschise tuturor, așa că o formulare care nu se potrivește cu propriul tău Home Assistant poate fi corectată din câteva clicuri. Versiunea engleză rămâne referința pentru conținutul în sine.
+Și această documentație este tradusă, [în 62 de limbi](languages.md), toate în afară de engleza britanică, care folosește originalul. Acele pagini sunt deschise tuturor, așa că o formulare care nu se potrivește cu propriul tău Home Assistant poate fi corectată din câteva clicuri. Versiunea engleză rămâne referința pentru conținutul în sine.
 
 <br>
 

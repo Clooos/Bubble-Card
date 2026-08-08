@@ -132,9 +132,9 @@ Todas as opções podem ser configuradas no editor do Home Assistant. Mas você 
 
 ## Sugestões de entidades
 
-Desde o Home Assistant 2026.6, escolher uma entidade no seletor de cartões oferece alguns cartões prontos, e o Bubble Card responde a essa pergunta com suas próprias receitas. Escolha uma luz e você recebe um cartão com um controle deslizante de brilho, além de variantes de temperatura de cor, cor e saturação quando sua luz as suportar. Escolha uma cobertura e você recebe o controle deslizante de posição, escolha um reprodutor de mídia e você também recebe uma variante com a lista de fontes, escolha um aspirador e você recebe os botões de iniciar, pausar e voltar à base. Cada sugestão é uma configuração normal do Bubble Card exibida como prévia ao vivo, então você pode pegar a mais próxima e continuar editando como de costume.
+Desde o Home Assistant 2026.6, escolher uma entidade no seletor de cartões oferece alguns cartões prontos, e o Bubble Card acrescenta suas próprias receitas a essa lista. Escolha uma luz e você recebe um cartão com um controle deslizante de brilho, além de variantes de temperatura de cor, cor e saturação quando sua luz as suportar. Escolha uma cobertura e você recebe o controle deslizante de posição, escolha um reprodutor de mídia e você também recebe uma variante com a lista de fontes, escolha um aspirador e você recebe os botões de iniciar, pausar e voltar à base. Cada sugestão é uma configuração normal do Bubble Card exibida como prévia ao vivo, então você pode pegar a mais próxima e continuar editando como de costume.
 
-O que é oferecido depende do que sua entidade realmente sabe fazer: uma luz sem canal de brilho recebe um interruptor em vez de um controle deslizante, uma cobertura que não inclina não recebe a variante de inclinação, e uma entidade de climatização só recebe seus modos predefinidos quando tem algum. As opções clássicas aparecem abaixo delas quando se aplicam: o cartão dedicado do domínio, um botão simples e um controle deslizante.
+O que é oferecido depende do que sua entidade realmente sabe fazer: uma luz sem canal de brilho recebe um interruptor em vez de um controle deslizante, uma cobertura que não inclina não recebe a variante de inclinação, e uma entidade de climatização só recebe seus modos predefinidos quando tem algum. As opções clássicas aparecem abaixo das sugestões do Bubble Card quando se aplicam: o cartão dedicado a esse tipo de entidade, um botão simples e um controle deslizante.
 
 > [!TIP]
 > Os módulos podem acrescentar suas próprias sugestões a essa lista, veja [módulos](#módulos).
@@ -206,7 +206,7 @@ Este cartão permite criar um pop-up com qualquer conteúdo. Cada pop-up fica **
 | `trigger` | object ou list | Opcional | Veja [condições](#condições) | Abre este pop-up quando as condições são atendidas |
 | `trigger_entity` | string | Opcional | Qualquer entidade | Abre este pop-up com base no estado de qualquer entidade, a forma simples de `trigger` |
 | `trigger_state` | string | Opcional (**Obrigatório** se `trigger_entity` estiver definido) | Qualquer estado de entidade | Estado da entidade para abrir o pop-up |
-| `trigger_close` | boolean | Opcional | `true` ou `false` | Fecha o pop-up quando as condições deixam de ser atendidas (padrão: `true` com `trigger`, `false` com `trigger_state`) |
+| `trigger_close` | boolean | Opcional | `true` (padrão) ou `false` | Fecha o pop-up quando as condições deixam de ser atendidas. O padrão passa a ser `false` quando você usa o par mais antigo `trigger_entity` e `trigger_state` |
 | `open_action` | object | Opcional | Veja [ações](#ações-de-toque-toque-duplo-e-toque-longo) | Dispara uma ação quando o pop-up está abrindo |
 | `close_action` | object | Opcional | Veja [ações](#ações-de-toque-toque-duplo-e-toque-longo) | Dispara uma ação quando o pop-up está fechando |
 | `show_header` | boolean | Opcional | `true` (padrão) ou `false` | Mostra/Oculta o cabeçalho do pop-up por completo |
@@ -462,7 +462,7 @@ Estas opções só estão disponíveis quando `button_type` está definido como 
 | `read_only_slider`      | boolean | Opcional (padrão `false`)      | Torna o controle deslizante somente leitura. Ativado automaticamente para algumas entidades, como sensores.                        |
 | `slider_live_update`    | boolean | Opcional (padrão `false`)      | O estado da entidade é atualizado enquanto você desliza. **Este recurso não é recomendado para todas as entidades.**        |
 | `slider_fill_orientation` | string | Opcional | `left`, `right`, `top` ou `bottom` | Muda a direção de preenchimento do controle deslizante. Da esquerda para a direita quando não definido, espelhado em [idiomas da direita para a esquerda](#localização) |
-| `slider_value_position` | string | Opcional | `right`, `left`, `center` ou `hidden` | Posição da exibição do valor. No lado final quando não definido, portanto à esquerda em [idiomas da direita para a esquerda](#localização) |
+| `slider_value_position` | string | Opcional | `right`, `left`, `center` ou `hidden` | Posição da exibição do valor. À direita quando não definido, e à esquerda em [idiomas da direita para a esquerda](#localização) |
 | `invert_slider_value` | boolean | Opcional (padrão `false`) | Inverte a direção do controle deslizante (100% de preenchimento equivale ao mínimo). Não disponível para controles deslizantes de cor. |
 | `light_slider_type` | string | Opcional | `brightness` (padrão), `hue`, `saturation`, `white_temp` | **Apenas para luzes.** Escolhe o modo do controle deslizante |
 | `cover_slider_type` | string | Opcional | `position` (padrão), `tilt_position` | **Apenas para coberturas.** Escolhe o modo do controle deslizante (posição ou inclinação) |
@@ -1347,7 +1347,7 @@ Os sub-botões de controle deslizante suportam as mesmas opções dos controles 
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Raio da borda dos sub-botões |
 | `--bubble-sub-button-background-color` | `color` | Cor de fundo dos sub-botões |
-| `--bubble-sub-button-outline` | `box-shadow` | Contorno adicionado a um sub-botão ou a um controle deslizante somente quando ele é pintado com a mesma cor do cartão atrás dele, o que o tornaria invisível (defina como `none` para removê-lo) |
+| `--bubble-sub-button-outline` | `box-shadow` | Contorno adicionado a um sub-botão ou a um controle deslizante, somente quando esse elemento é pintado com a mesma cor do cartão atrás dele, o que o tornaria invisível (defina como `none` para removê-lo) |
 | `--bubble-sub-slider-border-radius` | `px` | Raio da borda dos sub-botões de controle deslizante |
 | `--bubble-sub-slider-background-color` | `color` | Cor de fundo dos sub-botões de controle deslizante |
 | `--bubble-sub-slider-height` | `px` | Altura dos sub-botões de controle deslizante sempre visíveis |
@@ -2694,7 +2694,7 @@ O Bubble Card fala o seu idioma. Seu editor está traduzido nos 64 idiomas que o
 
 No rodapé do editor, ao lado do número da versão, um seletor **Automático** acompanha o idioma do seu Home Assistant. Desligue-o e todo o editor volta para o inglês, o que ajuda a seguir um tutorial ou a relatar um problema. Sua escolha fica memorizada no navegador.
 
-Esta documentação também é traduzida, [em 62 idiomas](languages.md). Essas páginas estão abertas a todos, então uma formulação que não combina com o seu próprio Home Assistant pode ser corrigida em alguns cliques. A versão em inglês continua sendo a referência para o conteúdo em si.
+Esta documentação também é traduzida, [em 62 idiomas](languages.md), todos eles menos o inglês britânico, que usa o original. Essas páginas estão abertas a todos, então uma formulação que não combina com o seu próprio Home Assistant pode ser corrigida em alguns cliques. A versão em inglês continua sendo a referência para o conteúdo em si.
 
 <br>
 

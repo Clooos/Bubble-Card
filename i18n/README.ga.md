@@ -132,9 +132,9 @@ Is féidir gach rogha a chumrú in eagarthóir Home Assistant. Ach gheobhaidh t�
 
 ## Moltaí aonán
 
-Ó Home Assistant 2026.6 i leith, nuair a roghnaíonn tú aonán i roghnóir na gcártaí cuirtear cúpla cárta réamhdhéanta ar fáil duit, agus freagraíonn Bubble Card an cheist sin lena oideas féin. Roghnaigh solas agus cuirtear cárta le sleamhnán gile ar fáil duit, chomh maith le leagan teochta datha, leagan datha agus leagan sáithithe nuair a thacaíonn do sholas leo. Roghnaigh clúdach agus gheobhaidh tú a sleamhnán suímh, roghnaigh seinnteoir meán agus gheobhaidh tú leagan lena liosta foinsí freisin, roghnaigh folúsghlantóir agus gheobhaidh tú a chnaipí tosaigh, sos agus fill ar an duga. Is gnáthchumraíocht Bubble Card gach moladh, taispeántar é mar réamhamharc beo, mar sin is féidir leat an ceann is gaire a thógáil agus leanúint ort á chur in eagar mar is gnách.
+Ó Home Assistant 2026.6 i leith, nuair a roghnaíonn tú aonán i roghnóir na gcártaí cuirtear cúpla cárta réamhdhéanta ar fáil duit, agus cuireann Bubble Card a oidis féin leis an liosta sin. Roghnaigh solas agus cuirtear cárta le sleamhnán gile ar fáil duit, chomh maith le leagan teochta datha, leagan datha agus leagan sáithithe nuair a thacaíonn do sholas leo. Roghnaigh clúdach agus gheobhaidh tú a sleamhnán suímh, roghnaigh seinnteoir meán agus gheobhaidh tú leagan lena liosta foinsí freisin, roghnaigh folúsghlantóir agus gheobhaidh tú a chnaipí tosaigh, sos agus fill ar an duga. Is gnáthchumraíocht Bubble Card gach moladh, taispeántar é mar réamhamharc beo, mar sin is féidir leat an ceann is gaire a thógáil agus leanúint ort á chur in eagar mar is gnách.
 
-Braitheann a gcuirtear ar fáil duit ar a bhfuil ar chumas d'aonáin i ndáiríre: faigheann solas gan cainéal gile scoránaí in ionad sleamhnáin, ní fhaigheann clúdach nach féidir leis claonadh aon leagan claonta, ní fhaigheann aonán aeráide a mhodhanna réamhshocraithe ach amháin nuair atá siad aige. Leanann na hiontrálacha clasaiceacha thíos fúthu nuair a bhaineann siad le hábhar: cárta tiomnaithe an fhearainn, cnaipe simplí agus sleamhnán.
+Braitheann a gcuirtear ar fáil duit ar a bhfuil ar chumas d'aonáin i ndáiríre: faigheann solas gan cainéal gile scoránaí in ionad sleamhnáin, ní fhaigheann clúdach nach féidir leis claonadh aon leagan claonta, ní fhaigheann aonán aeráide a mhodhanna réamhshocraithe ach amháin nuair atá siad aige. Leanann na hiontrálacha clasaiceacha faoi mholtaí Bubble Card nuair a bhaineann siad le hábhar: an cárta atá tiomnaithe don chineál aonáin sin, cnaipe simplí agus sleamhnán.
 
 > [!TIP]
 > Is féidir le modúil a moltaí féin a chur leis an liosta sin, féach [modúil](#modúil).
@@ -206,7 +206,7 @@ Ligeann an cárta seo duit preabfhuinneog a chruthú le hábhar ar bith. Bíonn 
 | `trigger` | object nó list | Roghnach | Féach [coinníollacha](#coinníollacha) | Osclaíonn sé an phreabfhuinneog seo nuair a chomhlíontar na coinníollacha |
 | `trigger_entity` | string | Roghnach | Aon aonán | Oscail an phreabfhuinneog seo bunaithe ar staid aon aonáin, an fhoirm shimplí de `trigger` |
 | `trigger_state` | string | Roghnach (**Riachtanach** má tá `trigger_entity` sainithe) | Aon staid aonáin | Staid aonáin chun an phreabfhuinneog a oscailt |
-| `trigger_close` | boolean | Roghnach | `true` nó `false` | Dúnann sé an phreabfhuinneog nuair nach gcomhlíontar na coinníollacha a thuilleadh (réamhshocrú: `true` le `trigger`, `false` le `trigger_state`) |
+| `trigger_close` | boolean | Roghnach | `true` (réamhshocraithe) nó `false` | Dúnann sé an phreabfhuinneog nuair nach gcomhlíontar na coinníollacha a thuilleadh. Is é `false` an réamhshocrú ina áit sin nuair a úsáideann tú an seanphéire `trigger_entity` agus `trigger_state` |
 | `open_action` | object | Roghnach | Féach [gníomhartha](#gníomhartha-tapála-tapála-dúbailte-agus-coinneála) | Spreag gníomh nuair a osclaítear an phreabfhuinneog |
 | `close_action` | object | Roghnach | Féach [gníomhartha](#gníomhartha-tapála-tapála-dúbailte-agus-coinneála) | Spreag gníomh nuair a dhúntar an phreabfhuinneog |
 | `show_header` | boolean | Roghnach | `true` (réamhshocraithe) nó `false` | Taispeáin/Folaigh ceanntásc na preabfhuinneoige go hiomlán |
@@ -462,7 +462,7 @@ Níl na roghanna seo ar fáil ach amháin nuair a shocraítear `button_type` go 
 | `read_only_slider`      | boolean | Optional (`false` default)      | Déan an sleamhnán léamh amháin. Cumasaithe go huathoibríoch do roinnt eintiteas amhail braiteoirí.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Nuashonraítear staid an eintitis fad is atá tú ag sleamhnú. **Ní mholtar an ghné seo do gach eintiteas.**        |
 | `slider_fill_orientation` | string | Roghnach | `left`, `right`, `top` nó `bottom` | Athraigh treo líonta an tsleamhnáin. Ó chlé go deas mura sainmhínítear é, scáthánaithe i [dteangacha a scríobhtar ó dheas go clé](#logánú) |
-| `slider_value_position` | string | Roghnach | `right`, `left`, `center` nó `hidden` | Suíomh thaispeáint an luacha. Ar thaobh an deiridh mura sainmhínítear é, mar sin ar chlé i [dteangacha a scríobhtar ó dheas go clé](#logánú) |
+| `slider_value_position` | string | Roghnach | `right`, `left`, `center` nó `hidden` | Suíomh thaispeáint an luacha. Ar dheis mura sainmhínítear é, agus ar chlé i [dteangacha a scríobhtar ó dheas go clé](#logánú) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Inbhéartaigh treo an tsleamhnáin (is ionann líonadh 100% agus an t-íosluach). Níl sé ar fáil do shleamhnáin datha. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **For lights only.** Roghnaigh mód an tsleamhnáin |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **For covers only.** Roghnaigh mód an tsleamhnáin (suíomh nó fiar) |
@@ -1347,7 +1347,7 @@ Tacaíonn fochnaipí sleamhnáin leis na roghanna sleamhnáin céanna le sleamhn
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Ga chúinne do na fochnaipí |
 | `--bubble-sub-button-background-color` | `color` | Dath cúlra do na fochnaipí |
-| `--bubble-sub-button-outline` | `box-shadow` | Imlíne a chuirtear le fochnaipe nó le sleamhnán ach amháin nuair a phéinteálann sé an dath céanna leis an gcárta taobh thiar de, rud a d'fhágfadh dofheicthe é (socraigh go `none` é chun é a bhaint) |
+| `--bubble-sub-button-outline` | `box-shadow` | Imlíne a chuirtear le fochnaipe nó le sleamhnán, ach amháin nuair a phéinteálann an eilimint sin an dath céanna leis an gcárta taobh thiar di, rud a d'fhágfadh dofheicthe í (socraigh go `none` é chun é a bhaint) |
 | `--bubble-sub-slider-border-radius` | `px` | Ga chúinne d'fhochnaipí sleamhnáin |
 | `--bubble-sub-slider-background-color` | `color` | Dath cúlra d'fhochnaipí sleamhnáin |
 | `--bubble-sub-slider-height` | `px` | Airde d'fhochnaipí sleamhnáin atá i gcónaí infheicthe |
@@ -2694,7 +2694,7 @@ Labhraíonn Bubble Card do theanga. Tá a eagarthóir aistrithe go dtí an 64 te
 
 Ag bun an eagarthóra, in aice le huimhir an leagain, leanann lasc **Uathoibríoch** teanga do Home Assistant. Múch í agus fillfidh an t-eagarthóir ar fad ar an mBéarla, rud atá áisiúil chun teagaisc a leanúint nó chun fadhb a thuairisciú. Cuimhnítear ar do rogha i do bhrabhsálaí.
 
-Tá an doiciméadú seo aistrithe freisin, [go 62 teanga](languages.md). Tá na leathanaigh sin oscailte do chách, mar sin is féidir foclaíocht nach bhfuil ag teacht le do Home Assistant féin a cheartú i gcúpla cniog. Fanann an leagan Béarla mar thagairt don ábhar féin.
+Tá an doiciméadú seo aistrithe freisin, [go 62 teanga](languages.md), gach ceann acu seachas Béarla na Breataine, a thaispeánann an bunleagan. Tá na leathanaigh sin oscailte do chách, mar sin is féidir foclaíocht nach bhfuil ag teacht le do Home Assistant féin a cheartú i gcúpla cniog. Fanann an leagan Béarla mar thagairt don ábhar féin.
 
 <br>
 

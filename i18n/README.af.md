@@ -132,9 +132,9 @@ Al die opsies kan in die Home Assistant-redigeerder gekonfigureer word. Maar jy 
 
 ## Entiteitvoorstelle
 
-Sedert Home Assistant 2026.6 bied die kaartkieser jou 'n paar klaargemaakte kaarte aan wanneer jy 'n entiteit kies, en Bubble Card antwoord daardie vraag met sy eie resepte. Kies 'n lig en jy kry 'n kaart met 'n helderheidskuifbalk, plus 'n kleurtemperatuur-, 'n kleur- en 'n versadigingsvariant wanneer jou lig hulle ondersteun. Kies 'n bedekking en jy kry sy posisieskuifbalk, kies 'n mediaspeler en jy kry ook 'n variant met sy bronlys, kies 'n stofsuier en jy kry sy begin-, wag- en dok-knoppies. Elke voorstel is 'n gewone Bubble Card-konfigurasie wat as 'n lewendige voorskou gewys word, sodat jy die naaste een kan neem en dit soos gewoonlik verder kan redigeer.
+Sedert Home Assistant 2026.6 bied die kaartkieser jou 'n paar klaargemaakte kaarte aan wanneer jy 'n entiteit kies, en Bubble Card voeg sy eie resepte by daardie lys. Kies 'n lig en jy kry 'n kaart met 'n helderheidskuifbalk, plus 'n kleurtemperatuur-, 'n kleur- en 'n versadigingsvariant wanneer jou lig hulle ondersteun. Kies 'n bedekking en jy kry sy posisieskuifbalk, kies 'n mediaspeler en jy kry ook 'n variant met sy bronlys, kies 'n stofsuier en jy kry sy begin-, wag- en dok-knoppies. Elke voorstel is 'n gewone Bubble Card-konfigurasie wat as 'n lewendige voorskou gewys word, sodat jy die naaste een kan neem en dit soos gewoonlik verder kan redigeer.
 
-Wat aangebied word, hang af van wat jou entiteit werklik kan doen: 'n lig sonder 'n helderheidskanaal kry 'n wisselaar in plaas van 'n skuifbalk, 'n bedekking wat nie kan kantel nie kry geen kantelvariant nie, en 'n klimaat-entiteit kry sy voorafinstellings net wanneer dit sommige het. Die klassieke inskrywings volg daaronder wanneer hulle van toepassing is: die toegewyde kaart van die domein, 'n gewone knoppie en 'n skuifbalk.
+Wat aangebied word, hang af van wat jou entiteit werklik kan doen: 'n lig sonder 'n helderheidskanaal kry 'n wisselaar in plaas van 'n skuifbalk, 'n bedekking wat nie kan kantel nie kry geen kantelvariant nie, en 'n klimaat-entiteit kry sy voorafinstellings net wanneer dit sommige het. Die klassieke inskrywings volg onder die Bubble Card-voorstelle wanneer hulle van toepassing is: die kaart wat aan daardie soort entiteit gewy is, 'n gewone knoppie en 'n skuifbalk.
 
 > [!TIP]
 > Modules kan hul eie voorstelle by daardie lys voeg, sien [modules](#modules).
@@ -206,7 +206,7 @@ Met hierdie kaart kan jy 'n pop-up met enige inhoud skep. Elke pop-up is **by ve
 | `trigger` | objek of lys | Opsioneel | Sien [voorwaardes](#voorwaardes) | Maak hierdie pop-up oop wanneer aan die voorwaardes voldoen word |
 | `trigger_entity` | string | Opsioneel | Enige entiteit | Maak hierdie pop-up oop op grond van die toestand van enige entiteit, die eenvoudige vorm van `trigger` |
 | `trigger_state` | string | Opsioneel (**Vereis** as `trigger_entity` gedefinieer is) | Enige entiteitstoestand | Entiteitstoestand om die pop-up oop te maak |
-| `trigger_close` | boolean | Opsioneel | `true` of `false` | Maak die pop-up toe wanneer daar nie meer aan die voorwaardes voldoen word nie (verstek: `true` met `trigger`, `false` met `trigger_state`) |
+| `trigger_close` | boolean | Opsioneel | `true` (verstek) of `false` | Maak die pop-up toe wanneer daar nie meer aan die voorwaardes voldoen word nie. Dit is eerder `false` by verstek wanneer jy die ouer paar `trigger_entity` en `trigger_state` gebruik |
 | `open_action` | object | Opsioneel | Sien [aksies](#tik--dubbeltik--en-hou-aksies) | Sneller 'n aksie wanneer die pop-up oopmaak |
 | `close_action` | object | Opsioneel | Sien [aksies](#tik--dubbeltik--en-hou-aksies) | Sneller 'n aksie wanneer die pop-up toemaak |
 | `show_header` | boolean | Opsioneel | `true` (verstek) of `false` | Wys/versteek die pop-up-opskrif volledig |
@@ -462,7 +462,7 @@ Hierdie opsies is slegs beskikbaar wanneer `button_type` op `slider` gestel is.
 | `read_only_slider`      | boolean | Opsioneel (`false` verstek)     | Maak die skuifbalk slegs-lees. Word outomaties geaktiveer vir sommige entiteite soos sensors.           |
 | `slider_live_update`    | boolean | Opsioneel (`false` verstek)     | Die entiteit se toestand word tydens die skuif bygewerk. **Hierdie funksie word nie vir alle entiteite aanbeveel nie.** |
 | `slider_fill_orientation` | string | Opsioneel | `left`, `right`, `top` of `bottom` | Verander die vulrigting van die skuifbalk. Van links na regs wanneer dit nie gedefinieer is nie, gespieël in [tale wat van regs na links loop](#lokalisering) |
-| `slider_value_position` | string | Opsioneel | `right`, `left`, `center` of `hidden` | Posisie van die waardevertoning. Aan die eindkant wanneer dit nie gedefinieer is nie, dus links in [tale wat van regs na links loop](#lokalisering) |
+| `slider_value_position` | string | Opsioneel | `right`, `left`, `center` of `hidden` | Posisie van die waardevertoning. Aan die regterkant wanneer dit nie gedefinieer is nie, en links in [tale wat van regs na links loop](#lokalisering) |
 | `invert_slider_value` | boolean | Opsioneel (`false` verstek) | Keer die skuifbalkrigting om (100% vulling stem ooreen met die minimum). Nie beskikbaar vir kleurskuifbalke nie. |
 | `light_slider_type` | string | Opsioneel | `brightness` (verstek), `hue`, `saturation`, `white_temp` | **Slegs vir ligte.** Kies die skuifbalkmodus |
 | `cover_slider_type` | string | Opsioneel | `position` (verstek), `tilt_position` | **Slegs vir bedekkings.** Kies die skuifbalkmodus (posisie of kanteling) |
@@ -1347,7 +1347,7 @@ Skuifbalk-subknoppies ondersteun dieselfde skuifbalkopsies as knoppie-skuifbalke
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Randradius van die subknoppies |
 | `--bubble-sub-button-background-color` | `color` | Agtergrondkleur van die subknoppies |
-| `--bubble-sub-button-outline` | `box-shadow` | Omlyning wat by 'n subknoppie of 'n skuifbalk gevoeg word net wanneer dit dieselfde kleur as die kaart daaragter verf, wat dit onsigbaar sou maak (stel dit op `none` om dit te verwyder) |
+| `--bubble-sub-button-outline` | `box-shadow` | Omlyning wat by 'n subknoppie of 'n skuifbalk gevoeg word, net wanneer daardie element dieselfde kleur as die kaart daaragter verf, wat dit onsigbaar sou maak (stel dit op `none` om dit te verwyder) |
 | `--bubble-sub-slider-border-radius` | `px` | Randradius van skuifbalk-subknoppies |
 | `--bubble-sub-slider-background-color` | `color` | Agtergrondkleur van skuifbalk-subknoppies |
 | `--bubble-sub-slider-height` | `px` | Hoogte van altyd sigbare skuifbalk-subknoppies |
@@ -2694,7 +2694,7 @@ Bubble Card praat jou taal. Sy redigeerder is vertaal in die 64 tale wat Home As
 
 Onderaan die redigeerder, langs die weergawenommer, volg 'n **Outomaties**-skakelaar jou Home Assistant-taal. Skakel dit af en die hele redigeerder gaan terug na Engels, wat handig is om 'n tutoriaal te volg of om 'n probleem aan te meld. Jou keuse word in jou blaaier onthou.
 
-Hierdie dokumentasie is ook vertaal, [in 62 tale](languages.md). Daardie bladsye is vir almal oop, dus kan 'n bewoording wat nie by jou eie Home Assistant pas nie in 'n paar kliks reggemaak word. Die Engelse weergawe bly die verwysing vir die inhoud self.
+Hierdie dokumentasie is ook vertaal, [in 62 tale](languages.md), almal behalwe Britse Engels, wat die oorspronklike lees. Daardie bladsye is vir almal oop, dus kan 'n bewoording wat nie by jou eie Home Assistant pas nie in 'n paar kliks reggemaak word. Die Engelse weergawe bly die verwysing vir die inhoud self.
 
 <br>
 

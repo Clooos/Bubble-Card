@@ -132,9 +132,9 @@ Të gjitha opsionet mund të konfigurohen në editorin e Home Assistant. Por më
 
 ## Sugjerime për entitetet
 
-Që nga Home Assistant 2026.6, zgjedhja e një entiteti në zgjedhësin e kartave ju ofron disa karta të gatshme, dhe Bubble Card i përgjigjet asaj pyetjeje me recetat e veta. Zgjidhni një dritë dhe ju ofrohet një kartë me një rrëshqitës ndriçimi, plus një variant me temperaturë ngjyre, një me ngjyrë dhe një me ngopje kur drita juaj i mbështet. Zgjidhni një grilë dhe merrni rrëshqitësin e pozicionit të saj, zgjidhni një luajtës multimedial dhe merrni gjithashtu një variant me listën e burimeve, zgjidhni një fshesë me korrent dhe merrni butonat e saj për nisje, pauzë dhe kthim në bazë. Çdo sugjerim është një konfigurim normal i Bubble Card i shfaqur si paraparje e drejtpërdrejtë, kështu që mund të merrni atë më të afërtin dhe të vazhdoni ta redaktoni si zakonisht.
+Që nga Home Assistant 2026.6, zgjedhja e një entiteti në zgjedhësin e kartave ju ofron disa karta të gatshme, dhe Bubble Card i shton asaj liste recetat e veta. Zgjidhni një dritë dhe ju ofrohet një kartë me një rrëshqitës ndriçimi, plus një variant me temperaturë ngjyre, një me ngjyrë dhe një me ngopje kur drita juaj i mbështet. Zgjidhni një grilë dhe merrni rrëshqitësin e pozicionit të saj, zgjidhni një luajtës multimedial dhe merrni gjithashtu një variant me listën e burimeve, zgjidhni një fshesë me korrent dhe merrni butonat e saj për nisje, pauzë dhe kthim në bazë. Çdo sugjerim është një konfigurim normal i Bubble Card i shfaqur si paraparje e drejtpërdrejtë, kështu që mund të merrni atë më të afërtin dhe të vazhdoni ta redaktoni si zakonisht.
 
-Ajo që ju ofrohet varet nga ajo që entiteti juaj mund të bëjë vërtet: një dritë pa kanal ndriçimi merr një çelës në vend të një rrëshqitësi, një grilë që nuk mund të pjerrësohet nuk merr variant pjerrësimi, një entitet klime merr modalitetet e tij të paracaktuara vetëm kur ka të tilla. Hyrjet klasike vijnë poshtë tyre kur janë të zbatueshme: karta e dedikuar e domenit, një buton i thjeshtë dhe një rrëshqitës.
+Ajo që ju ofrohet varet nga ajo që entiteti juaj mund të bëjë vërtet: një dritë pa kanal ndriçimi merr një çelës në vend të një rrëshqitësi, një grilë që nuk mund të pjerrësohet nuk merr variant pjerrësimi, një entitet klime merr modalitetet e tij të paracaktuara vetëm kur ka të tilla. Hyrjet klasike vijnë poshtë sugjerimeve të Bubble Card kur janë të zbatueshme: karta e dedikuar për atë lloj entiteti, një buton i thjeshtë dhe një rrëshqitës.
 
 > [!TIP]
 > Modulet mund të shtojnë sugjerimet e tyre në atë listë, shihni [modulet](#modulet).
@@ -206,7 +206,7 @@ Kjo kartë ju lejon të krijoni një pop-up me çfarëdo lloj përmbajtjeje. Çd
 | `trigger` | object ose list | Opsionale | Shihni [kushtet](#kushtet) | Hap këtë pop-up kur plotësohen kushtet |
 | `trigger_entity` | string | Opsionale | Çdo entitet | Hap këtë pop-up bazuar në gjendjen e çdo entiteti, forma e thjeshtë e `trigger` |
 | `trigger_state` | string | Opsionale (**E detyrueshme** nëse `trigger_entity` është përcaktuar) | Çdo gjendje entiteti | Gjendja e entitetit për të hapur pop-up-in |
-| `trigger_close` | boolean | Opsionale | `true` ose `false` | Mbyll pop-up-in kur kushtet nuk plotësohen më (parazgjedhje: `true` me `trigger`, `false` me `trigger_state`) |
+| `trigger_close` | boolean | Opsionale | `true` (parazgjedhje) ose `false` | Mbyll pop-up-in kur kushtet nuk plotësohen më. Parazgjedhja bëhet `false` kur përdorni çiftin më të vjetër `trigger_entity` dhe `trigger_state` |
 | `open_action` | object | Opsionale | Shihni [veprimet](#veprimet-e-prekjes-prekjes-së-dyfishtë-dhe-mbajtjes) | Aktivizon një veprim kur pop-up-i po hapet |
 | `close_action` | object | Opsionale | Shihni [veprimet](#veprimet-e-prekjes-prekjes-së-dyfishtë-dhe-mbajtjes) | Aktivizon një veprim kur pop-up-i po mbyllet |
 | `show_header` | boolean | Opsionale | `true` (parazgjedhje) ose `false` | Shfaq/Fsheh krejtësisht kokën e pop-up-it |
@@ -462,7 +462,7 @@ Këto opsione janë të disponueshme vetëm kur `button_type` është caktuar si
 | `read_only_slider`      | boolean | Optional (`false` default)      | E bën rrëshqitësin vetëm për lexim. Aktivizohet automatikisht për disa entitete si sensorët.                                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Gjendja e entitetit përditësohet gjatë rrëshqitjes. **Kjo veçori nuk rekomandohet për të gjitha entitetet.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` ose `bottom` | Ndryshon drejtimin e mbushjes së rrëshqitësit. Nga e majta në të djathtë kur nuk përcaktohet, i pasqyruar në [gjuhët nga e djathta në të majtë](#lokalizimi) |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` ose `hidden` | Pozicioni i shfaqjes së vlerës. Në anën e fundit kur nuk përcaktohet, pra në të majtë në [gjuhët nga e djathta në të majtë](#lokalizimi) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` ose `hidden` | Pozicioni i shfaqjes së vlerës. Në të djathtë kur nuk përcaktohet, dhe në të majtë në [gjuhët nga e djathta në të majtë](#lokalizimi) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Përmbys drejtimin e rrëshqitësit (mbushja 100% korrespondon me minimumin). Nuk është e disponueshme për rrëshqitësit e ngjyrave. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Vetëm për dritat.** Zgjidh mënyrën e rrëshqitësit |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Vetëm për grilat.** Zgjidh mënyrën e rrëshqitësit (pozicion ose kënd) |
@@ -1347,7 +1347,7 @@ Nën-butonat e llojit rrëshqitës mbështesin të njëjtat opsione si rrëshqit
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rrezja e këndeve për nën-butonat |
 | `--bubble-sub-button-background-color` | `color` | Ngjyra e sfondit për nën-butonat |
-| `--bubble-sub-button-outline` | `box-shadow` | Kontur i shtuar një nën-butoni ose një rrëshqitësi vetëm kur ai ngjyroset me të njëjtën ngjyrë si karta pas tij, gjë që do ta bënte të padukshëm (vendoseni në `none` për ta hequr) |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur i shtuar një nën-butoni ose një rrëshqitësi, vetëm kur ai element ngjyroset me të njëjtën ngjyrë si karta pas tij, gjë që do ta bënte të padukshëm (vendoseni në `none` për ta hequr) |
 | `--bubble-sub-slider-border-radius` | `px` | Rrezja e këndeve për nën-butonat rrëshqitës |
 | `--bubble-sub-slider-background-color` | `color` | Ngjyra e sfondit për nën-butonat rrëshqitës |
 | `--bubble-sub-slider-height` | `px` | Lartësia për nën-butonat rrëshqitës gjithmonë të dukshëm |
@@ -2694,7 +2694,7 @@ Bubble Card flet gjuhën tuaj. Editori i tij është përkthyer në 64 gjuhët q
 
 Në fund të editorit, pranë numrit të versionit, një çelës **Automatik** ndjek gjuhën e Home Assistant tuaj. Fikeni dhe i gjithë editori kthehet në anglisht, gjë që është e dobishme për të ndjekur një udhëzues ose për të raportuar një problem. Zgjedhja juaj mbahet mend në shfletuesin tuaj.
 
-Edhe ky dokumentacion është përkthyer, [në 62 gjuhë](languages.md). Ato faqe janë të hapura për të gjithë, kështu që një formulim që nuk përputhet me Home Assistant tuaj mund të rregullohet me pak klikime. Versioni në anglisht mbetet referenca për vetë përmbajtjen.
+Edhe ky dokumentacion është përkthyer, [në 62 gjuhë](languages.md), në të gjitha përveç anglishtes britanike, e cila përdor origjinalin. Ato faqe janë të hapura për të gjithë, kështu që një formulim që nuk përputhet me Home Assistant tuaj mund të rregullohet me pak klikime. Versioni në anglisht mbetet referenca për vetë përmbajtjen.
 
 <br>
 

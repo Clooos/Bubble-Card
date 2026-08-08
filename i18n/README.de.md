@@ -132,9 +132,9 @@ Alle Optionen lassen sich im Home Assistant Editor konfigurieren. In der Dokumen
 
 ## Entitätsvorschläge
 
-Seit Home Assistant 2026.6 bietet dir die Kartenauswahl ein paar fertige Karten an, wenn du eine Entität auswählst, und Bubble Card beantwortet diese Frage mit eigenen Rezepten. Wähle ein Licht, und du bekommst eine Karte mit einem Helligkeits-Slider angeboten, dazu eine Variante mit Farbtemperatur, eine mit Farbe und eine mit Sättigung, sofern dein Licht sie unterstützt. Wähle eine Abdeckung, und du bekommst den Slider für ihre Position, wähle einen Medienplayer, und du bekommst zusätzlich eine Variante mit seiner Quellenliste, wähle einen Staubsauger, und du bekommst seine Buttons für Start, Pause und Rückkehr zur Station. Jeder Vorschlag ist eine ganz normale Bubble Card-Konfiguration, als Live-Vorschau gezeigt, so kannst du die passendste nehmen und sie wie gewohnt weiter bearbeiten.
+Seit Home Assistant 2026.6 bietet dir die Kartenauswahl ein paar fertige Karten an, wenn du eine Entität auswählst, und Bubble Card fügt dieser Liste eigene Rezepte hinzu. Wähle ein Licht, und du bekommst eine Karte mit einem Helligkeits-Slider angeboten, dazu eine Variante mit Farbtemperatur, eine mit Farbe und eine mit Sättigung, sofern dein Licht sie unterstützt. Wähle eine Abdeckung, und du bekommst den Slider für ihre Position, wähle einen Medienplayer, und du bekommst zusätzlich eine Variante mit seiner Quellenliste, wähle einen Staubsauger, und du bekommst seine Buttons für Start, Pause und Rückkehr zur Station. Jeder Vorschlag ist eine ganz normale Bubble Card-Konfiguration, als Live-Vorschau gezeigt, so kannst du die passendste nehmen und sie wie gewohnt weiter bearbeiten.
 
-Was dir angeboten wird, hängt davon ab, was deine Entität wirklich kann: ein Licht ohne Helligkeitskanal bekommt einen Umschalter statt eines Sliders, eine Abdeckung, die nicht neigen kann, bekommt keine Neigungsvariante, und eine Klima-Entität bekommt ihre Voreinstellungen nur dann, wenn sie welche hat. Die klassischen Einträge folgen darunter, wenn sie passen: die eigene Karte der Domain, ein einfacher Button und ein Slider.
+Was dir angeboten wird, hängt davon ab, was deine Entität wirklich kann: ein Licht ohne Helligkeitskanal bekommt einen Umschalter statt eines Sliders, eine Abdeckung, die nicht neigen kann, bekommt keine Neigungsvariante, und eine Klima-Entität bekommt ihre Voreinstellungen nur dann, wenn sie welche hat. Die klassischen Einträge folgen unter den Bubble Card-Vorschlägen, wenn sie passen: die Karte für diesen Entitätstyp, ein einfacher Button und ein Slider.
 
 > [!TIP]
 > Module können der Liste eigene Vorschläge hinzufügen, siehe [Module](#module).
@@ -206,7 +206,7 @@ Mit dieser Karte kannst du ein Pop-up mit beliebigem Inhalt erstellen. Jedes Pop
 | `trigger` | object oder list | Optional | Siehe [Bedingungen](#bedingungen) | Öffnet dieses Pop-up, wenn die Bedingungen erfüllt sind |
 | `trigger_entity` | string | Optional | Eine beliebige Entität | Öffnet dieses Pop-up basierend auf dem Zustand einer beliebigen Entität, die einfache Form von `trigger` |
 | `trigger_state` | string | Optional (**Erforderlich**, wenn `trigger_entity` definiert ist) | Ein beliebiger Entitätszustand | Entitätszustand, der das Pop-up öffnet |
-| `trigger_close` | boolean | Optional | `true` oder `false` | Schließt das Pop-up, wenn die Bedingungen nicht mehr erfüllt sind (Standard: `true` mit `trigger`, `false` mit `trigger_state`) |
+| `trigger_close` | boolean | Optional | `true` (Standard) oder `false` | Schließt das Pop-up, wenn die Bedingungen nicht mehr erfüllt sind. Standard ist stattdessen `false`, wenn du das ältere Paar `trigger_entity` und `trigger_state` verwendest |
 | `open_action` | object | Optional | Siehe [Aktionen](#tipp--doppeltipp--und-halten-aktionen) | Löst eine Aktion aus, wenn sich das Pop-up öffnet |
 | `close_action` | object | Optional | Siehe [Aktionen](#tipp--doppeltipp--und-halten-aktionen) | Löst eine Aktion aus, wenn sich das Pop-up schließt |
 | `show_header` | boolean | Optional | `true` (Standard) oder `false` | Blendet die Pop-up-Kopfzeile komplett ein/aus |
@@ -462,7 +462,7 @@ Diese Optionen sind nur verfügbar, wenn `button_type` auf `slider` gesetzt ist.
 | `read_only_slider`      | boolean | Optional (Standard `false`)      | Macht den Slider schreibgeschützt. Wird für einige Entitäten wie Sensoren automatisch aktiviert.                        |
 | `slider_live_update`    | boolean | Optional (Standard `false`)      | Der Entitätszustand wird während des Schiebens aktualisiert. **Diese Funktion ist nicht für alle Entitäten empfehlenswert.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` oder `bottom` | Ändert die Füllrichtung des Sliders. Von links nach rechts, wenn nicht definiert, gespiegelt in [Sprachen, die von rechts nach links laufen](#lokalisierung) |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` oder `hidden` | Position der Wertanzeige. Auf der Endseite, wenn nicht definiert, also links in [Sprachen, die von rechts nach links laufen](#lokalisierung) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` oder `hidden` | Position der Wertanzeige. Rechts, wenn nicht definiert, und links in [Sprachen, die von rechts nach links laufen](#lokalisierung) |
 | `invert_slider_value` | boolean | Optional (Standard `false`) | Kehrt die Slider-Richtung um (100 % Füllung entspricht dem Minimum). Nicht verfügbar für Farb-Slider. |
 | `light_slider_type` | string | Optional | `brightness` (Standard), `hue`, `saturation`, `white_temp` | **Nur für Lichter.** Wählt den Slider-Modus |
 | `cover_slider_type` | string | Optional | `position` (Standard), `tilt_position` | **Nur für Abdeckungen.** Wählt den Slider-Modus (Position oder Neigung) |
@@ -1347,7 +1347,7 @@ Slider-Sub-Buttons unterstützen dieselben Slider-Optionen wie Button-Slider, da
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rahmenradius der Sub-Buttons |
 | `--bubble-sub-button-background-color` | `color` | Hintergrundfarbe der Sub-Buttons |
-| `--bubble-sub-button-outline` | `box-shadow` | Kontur, die einem Sub-Button oder einem Slider nur dann hinzugefügt wird, wenn er in derselben Farbe wie die Karte dahinter gezeichnet wird, was ihn unsichtbar machen würde (setze sie auf `none`, um sie zu entfernen) |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur, die einem Sub-Button oder einem Slider nur dann hinzugefügt wird, wenn dieses Element in derselben Farbe wie die Karte dahinter gezeichnet wird, was es unsichtbar machen würde (setze sie auf `none`, um sie zu entfernen) |
 | `--bubble-sub-slider-border-radius` | `px` | Rahmenradius der Slider-Sub-Buttons |
 | `--bubble-sub-slider-background-color` | `color` | Hintergrundfarbe der Slider-Sub-Buttons |
 | `--bubble-sub-slider-height` | `px` | Höhe der immer sichtbaren Slider-Sub-Buttons |
@@ -2694,7 +2694,7 @@ Bubble Card spricht deine Sprache. Ihr Editor ist in die 64 Sprachen übersetzt,
 
 Unten im Editor, neben der Versionsnummer, folgt ein Schalter **Automatisch** der Sprache deines Home Assistant. Schalte ihn aus, und der ganze Editor kehrt zu Englisch zurück, praktisch, um einem Tutorial zu folgen oder ein Problem zu melden. Deine Wahl wird in deinem Browser gemerkt.
 
-Auch diese Dokumentation ist übersetzt, [in 62 Sprachen](languages.md). Diese Seiten stehen allen offen, eine Formulierung, die nicht zu deinem eigenen Home Assistant passt, lässt sich also mit ein paar Klicks korrigieren. Die englische Fassung bleibt die Referenz für den Inhalt selbst.
+Auch diese Dokumentation ist übersetzt, [in 62 Sprachen](languages.md), in alle außer britischem Englisch, das das Original anzeigt. Diese Seiten stehen allen offen, eine Formulierung, die nicht zu deinem eigenen Home Assistant passt, lässt sich also mit ein paar Klicks korrigieren. Die englische Fassung bleibt die Referenz für den Inhalt selbst.
 
 <br>
 

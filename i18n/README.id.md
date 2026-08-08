@@ -132,9 +132,9 @@ Semua opsi dapat dikonfigurasi di editor Home Assistant. Namun Anda bisa menemuk
 
 ## Saran entitas
 
-Sejak Home Assistant 2026.6, memilih entitas di pemilih kartu menawarkan beberapa kartu siap pakai kepada Anda, dan Bubble Card menjawab pertanyaan itu dengan resepnya sendiri. Pilih lampu dan Anda ditawari kartu dengan slider kecerahan, ditambah varian suhu warna, varian warna, dan varian saturasi bila lampu Anda mendukungnya. Pilih penutup dan Anda mendapatkan slider posisinya, pilih pemutar media dan Anda juga mendapatkan varian dengan daftar sumbernya, pilih penyedot debu dan Anda mendapatkan tombol mulai, jeda, dan kembali ke dok. Setiap saran adalah konfigurasi Bubble Card biasa yang ditampilkan sebagai pratinjau langsung, jadi Anda bisa mengambil yang paling mendekati dan terus menyuntingnya seperti biasa.
+Sejak Home Assistant 2026.6, memilih entitas di pemilih kartu menawarkan beberapa kartu siap pakai kepada Anda, dan Bubble Card menambahkan resepnya sendiri ke daftar itu. Pilih lampu dan Anda ditawari kartu dengan slider kecerahan, ditambah varian suhu warna, varian warna, dan varian saturasi bila lampu Anda mendukungnya. Pilih penutup dan Anda mendapatkan slider posisinya, pilih pemutar media dan Anda juga mendapatkan varian dengan daftar sumbernya, pilih penyedot debu dan Anda mendapatkan tombol mulai, jeda, dan kembali ke dok. Setiap saran adalah konfigurasi Bubble Card biasa yang ditampilkan sebagai pratinjau langsung, jadi Anda bisa mengambil yang paling mendekati dan terus menyuntingnya seperti biasa.
 
-Apa yang ditawarkan bergantung pada apa yang benar-benar bisa dilakukan entitas Anda: lampu tanpa kanal kecerahan mendapat sakelar alih-alih slider, penutup yang tidak bisa dimiringkan tidak mendapat varian kemiringan, dan entitas iklim mendapat mode praseteknya hanya bila memang ada. Entri klasik menyusul di bawahnya bila memang berlaku: kartu khusus untuk domain tersebut, tombol biasa, dan slider.
+Apa yang ditawarkan bergantung pada apa yang benar-benar bisa dilakukan entitas Anda: lampu tanpa kanal kecerahan mendapat sakelar alih-alih slider, penutup yang tidak bisa dimiringkan tidak mendapat varian kemiringan, dan entitas iklim mendapat mode praseteknya hanya bila memang ada. Entri klasik menyusul di bawah saran Bubble Card bila memang berlaku: kartu khusus untuk jenis entitas tersebut, tombol biasa, dan slider.
 
 > [!TIP]
 > Modul dapat menambahkan saran mereka sendiri ke daftar itu, lihat [modul](#modul).
@@ -206,7 +206,7 @@ Kartu ini memungkinkan Anda membuat pop-up dengan konten apa pun. Setiap pop-up 
 | `trigger` | object atau list | Opsional | Lihat [kondisi](#kondisi) | Membuka pop-up ini saat kondisi terpenuhi |
 | `trigger_entity` | string | Opsional | Entitas apa pun | Membuka pop-up ini berdasarkan status entitas apa pun, bentuk sederhana dari `trigger` |
 | `trigger_state` | string | Opsional (**Wajib** jika `trigger_entity` ditentukan) | Status entitas apa pun | Status entitas untuk membuka pop-up |
-| `trigger_close` | boolean | Opsional | `true` atau `false` | Menutup pop-up saat kondisi tidak lagi terpenuhi (default: `true` dengan `trigger`, `false` dengan `trigger_state`) |
+| `trigger_close` | boolean | Opsional | `true` (default) atau `false` | Menutup pop-up saat kondisi tidak lagi terpenuhi. Defaultnya justru `false` bila Anda memakai pasangan lama `trigger_entity` dan `trigger_state` |
 | `open_action` | object | Opsional | Lihat [aksi](#aksi-ketuk-ketuk-dua-kali-dan-tahan) | Memicu sebuah aksi saat pop-up terbuka |
 | `close_action` | object | Opsional | Lihat [aksi](#aksi-ketuk-ketuk-dua-kali-dan-tahan) | Memicu sebuah aksi saat pop-up tertutup |
 | `show_header` | boolean | Opsional | `true` (default) atau `false` | Menampilkan/menyembunyikan header pop-up sepenuhnya |
@@ -462,7 +462,7 @@ Opsi-opsi ini hanya tersedia jika `button_type` diatur ke `slider`.
 | `read_only_slider`      | boolean | Optional (`false` default)      | Menjadikan slider hanya baca. Otomatis diaktifkan untuk beberapa entitas seperti sensor.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | State entitas diperbarui saat digeser. **Fitur ini tidak disarankan untuk semua entitas.**        |
 | `slider_fill_orientation` | string | Opsional | `left`, `right`, `top` atau `bottom` | Mengubah arah isian slider. Dari kiri ke kanan bila tidak ditentukan, dicerminkan pada [bahasa kanan ke kiri](#lokalisasi) |
-| `slider_value_position` | string | Opsional | `right`, `left`, `center` atau `hidden` | Posisi tampilan nilai. Di sisi akhir bila tidak ditentukan, jadi di kiri pada [bahasa kanan ke kiri](#lokalisasi) |
+| `slider_value_position` | string | Opsional | `right`, `left`, `center` atau `hidden` | Posisi tampilan nilai. Di kanan bila tidak ditentukan, dan di kiri pada [bahasa kanan ke kiri](#lokalisasi) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Membalik arah slider (isian 100% setara dengan minimum). Tidak tersedia untuk slider warna. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Hanya untuk lampu.** Memilih mode slider |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Hanya untuk cover.** Memilih mode slider (posisi atau tilt) |
@@ -1347,7 +1347,7 @@ Subtombol slider mendukung opsi slider yang sama seperti slider tombol, termasuk
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radius sudut untuk subtombol |
 | `--bubble-sub-button-background-color` | `color` | Warna latar belakang untuk subtombol |
-| `--bubble-sub-button-outline` | `box-shadow` | Garis luar yang ditambahkan ke subtombol atau slider hanya ketika warnanya sama dengan kartu di belakangnya, yang akan membuatnya tak terlihat (setel ke `none` untuk menghapusnya) |
+| `--bubble-sub-button-outline` | `box-shadow` | Garis luar yang ditambahkan ke subtombol atau slider, hanya ketika elemen itu berwarna sama dengan kartu di belakangnya, yang akan membuatnya tak terlihat (setel ke `none` untuk menghapusnya) |
 | `--bubble-sub-slider-border-radius` | `px` | Radius sudut untuk subtombol slider |
 | `--bubble-sub-slider-background-color` | `color` | Warna latar belakang untuk subtombol slider |
 | `--bubble-sub-slider-height` | `px` | Tinggi untuk subtombol slider yang selalu terlihat |
@@ -2694,7 +2694,7 @@ Bubble Card berbicara dalam bahasa Anda. Editornya diterjemahkan ke dalam 64 bah
 
 Di bagian bawah editor, di sebelah nomor versi, sakelar **Otomatis** mengikuti bahasa Home Assistant Anda. Matikan dan seluruh editor kembali ke bahasa Inggris, yang praktis untuk mengikuti tutorial atau melaporkan masalah. Pilihan Anda diingat di peramban Anda.
 
-Dokumentasi ini juga diterjemahkan, [dalam 62 bahasa](languages.md). Halaman tersebut terbuka untuk semua orang, jadi istilah yang tidak cocok dengan Home Assistant Anda sendiri bisa diperbaiki dalam beberapa klik. Versi bahasa Inggris tetap menjadi acuan untuk isinya sendiri.
+Dokumentasi ini juga diterjemahkan, [dalam 62 bahasa](languages.md), semuanya kecuali bahasa Inggris Britania, yang menampilkan naskah aslinya. Halaman tersebut terbuka untuk semua orang, jadi istilah yang tidak cocok dengan Home Assistant Anda sendiri bisa diperbaiki dalam beberapa klik. Versi bahasa Inggris tetap menjadi acuan untuk isinya sendiri.
 
 <br>
 

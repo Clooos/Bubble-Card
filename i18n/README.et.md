@@ -132,9 +132,9 @@ Kõiki valikuid saab seadistada Home Assistant'i redaktoris. Kuid allolevast dok
 
 ## Olemite soovitused
 
-Alates Home Assistant 2026.6-st pakub kaardivalija sulle mõned valmis kaardid, kui valid olemi, ja Bubble Card vastab sellele küsimusele oma retseptidega. Vali valgusti ja sulle pakutakse kaarti heleduse liuguriga, lisaks värvitemperatuuri, värvi ja küllastuse variant, kui sinu valgusti neid toetab. Vali kate ja saad selle asendi liuguri, vali meediumipleier ja saad ka variandi selle allikate loendiga, vali tolmuimeja ja saad selle käivitamise, pausi ja dokki naasmise nupud. Iga soovitus on tavaline Bubble Cardi seadistus, mida näidatakse reaalajas eelvaates, nii et saad võtta lähima ja jätkata selle muutmist nagu ikka.
+Alates Home Assistant 2026.6-st pakub kaardivalija sulle mõned valmis kaardid, kui valid olemi, ja Bubble Card lisab sellesse loendisse oma retseptid. Vali valgusti ja sulle pakutakse kaarti heleduse liuguriga, lisaks värvitemperatuuri, värvi ja küllastuse variant, kui sinu valgusti neid toetab. Vali kate ja saad selle asendi liuguri, vali meediumipleier ja saad ka variandi selle allikate loendiga, vali tolmuimeja ja saad selle käivitamise, pausi ja dokki naasmise nupud. Iga soovitus on tavaline Bubble Cardi seadistus, mida näidatakse reaalajas eelvaates, nii et saad võtta lähima ja jätkata selle muutmist nagu ikka.
 
-See, mida sulle pakutakse, sõltub sellest, mida sinu olem tegelikult suudab: heleduskanalita valgusti saab liuguri asemel lüliti, kate, mis ei suuda kallutada, ei saa kaldevarianti, ja kliimaseadme olem saab oma eelseadistatud režiimid ainult siis, kui tal neid on. Klassikalised kirjed järgnevad nende all, kui need sobivad: domeeni oma kaart, tavaline nupp ja liugur.
+See, mida sulle pakutakse, sõltub sellest, mida sinu olem tegelikult suudab: heleduskanalita valgusti saab liuguri asemel lüliti, kate, mis ei suuda kallutada, ei saa kaldevarianti, ja kliimaseadme olem saab oma eelseadistatud režiimid ainult siis, kui tal neid on. Klassikalised kirjed järgnevad Bubble Cardi soovituste all, kui need sobivad: sellele olemitüübile pühendatud kaart, tavaline nupp ja liugur.
 
 > [!TIP]
 > Moodulid võivad lisada sellesse loendisse oma soovitusi, vaata [mooduleid](#moodulid).
@@ -206,7 +206,7 @@ See kaart võimaldab luua hüpikakna suvalise sisuga. Iga hüpikaken on **vaikim
 | `trigger` | object või list | Valikuline | Vaata [tingimused](#tingimused) | Avab selle hüpikakna, kui tingimused on täidetud |
 | `trigger_entity` | string | Valikuline | Iga olem | Avab selle hüpikakna suvalise olemi oleku alusel, `trigger` lihtne kuju |
 | `trigger_state` | string | Valikuline (**Kohustuslik**, kui `trigger_entity` on määratud) | Iga olemi olek | Olemi olek, mis avab hüpikakna |
-| `trigger_close` | boolean | Valikuline | `true` või `false` | Sulgeb hüpikakna, kui tingimused ei ole enam täidetud (vaikimisi: `true` koos `trigger`-iga, `false` koos `trigger_state`-iga) |
+| `trigger_close` | boolean | Valikuline | `true` (vaikimisi) või `false` | Sulgeb hüpikakna, kui tingimused ei ole enam täidetud. Vaikimisi on hoopis `false`, kui kasutad vanemat paari `trigger_entity` ja `trigger_state` |
 | `open_action` | object | Valikuline | Vt [toimingud](#puudutuse-topeltpuudutuse-ja-pika-vajutuse-toimingud) | Käivitab tegevuse hüpikakna avanemisel |
 | `close_action` | object | Valikuline | Vt [toimingud](#puudutuse-topeltpuudutuse-ja-pika-vajutuse-toimingud) | Käivitab tegevuse hüpikakna sulgemisel |
 | `show_header` | boolean | Valikuline | `true` (vaikimisi) või `false` | Näitab/peidab hüpikakna päise täielikult |
@@ -462,7 +462,7 @@ Need valikud on saadaval ainult siis, kui `button_type` on määratud väärtuse
 | `read_only_slider`      | boolean | Optional (`false` default)      | Muuda liugur ainult loetavaks. Lülitub automaatselt sisse mõnede olemite, nt andurite puhul.                                                    |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Olemi olekut uuendatakse liugutamise ajal. **See funktsioon ei sobi kõikidele olemitele.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` või `bottom` | Muuda liuguri täitesuunda. Vasakult paremale, kui pole määratud, peegeldatud [paremalt vasakule kirjutatavates keeltes](#lokaliseerimine) |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` või `hidden` | Väärtuse kuva asukoht. Lõpupoolsel küljel, kui pole määratud, seega vasakul [paremalt vasakule kirjutatavates keeltes](#lokaliseerimine) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` või `hidden` | Väärtuse kuva asukoht. Paremal, kui pole määratud, ja vasakul [paremalt vasakule kirjutatavates keeltes](#lokaliseerimine) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Pööra liuguri suund vastupidiseks (100% täitus võrdub miinimumiga). Ei ole saadaval värviliuguritele. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Ainult valgustitele.** Vali liuguri režiim |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Ainult katetele.** Vali liuguri režiim (asend või kalle) |
@@ -1347,7 +1347,7 @@ Slaideri alamnupud toetavad samu slaideri valikuid, mis nupu slaiderid, sealhulg
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Alamnuppude joonte raadius |
 | `--bubble-sub-button-background-color` | `color` | Alamnuppude taustavärv |
-| `--bubble-sub-button-outline` | `box-shadow` | Kontuur, mis lisatakse alamnupule või liugurile ainult siis, kui see joonistub sama värvi kui kaart selle taga, mis muudaks selle nähtamatuks (määra `none`, et see eemaldada) |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontuur, mis lisatakse alamnupule või liugurile, ainult siis, kui see element joonistub sama värvi kui kaart selle taga, mis muudaks selle nähtamatuks (määra `none`, et see eemaldada) |
 | `--bubble-sub-slider-border-radius` | `px` | Slaideri alamnuppude joonte raadius |
 | `--bubble-sub-slider-background-color` | `color` | Slaideri alamnuppude taustavärv |
 | `--bubble-sub-slider-height` | `px` | Alati nähtavate slaideri alamnuppude kõrgus |
@@ -2694,7 +2694,7 @@ Bubble Card räägib sinu keelt. Selle redaktor on tõlgitud 64 keelde, mida Hom
 
 Redaktori allservas, versiooninumbri kõrval, järgib lüliti **Automaatne** sinu Home Assistanti keelt. Lülita see välja ja kogu redaktor läheb tagasi inglise keelde, mis on mugav õpetuse järgimiseks või probleemist teatamiseks. Sinu valik jäetakse brauseris meelde.
 
-Ka see dokumentatsioon on tõlgitud, [62 keelde](languages.md). Need lehed on kõigile avatud, nii et sõnastuse, mis sinu Home Assistantiga kokku ei lähe, saab paari klikiga parandada. Ingliskeelne versioon jääb sisu enda võrdluspunktiks.
+Ka see dokumentatsioon on tõlgitud, [62 keelde](languages.md), kõikidesse peale briti inglise keele, mis kuvab originaali. Need lehed on kõigile avatud, nii et sõnastuse, mis sinu Home Assistantiga kokku ei lähe, saab paari klikiga parandada. Ingliskeelne versioon jääb sisu enda võrdluspunktiks.
 
 <br>
 

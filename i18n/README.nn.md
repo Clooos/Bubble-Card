@@ -132,9 +132,9 @@ Alle val kan setjast opp i Home Assistant-editoren. Men du finn fleire detaljar 
 
 ## Entitetsforslag
 
-Frå og med Home Assistant 2026.6 gjev det å velje ei eining i kortveljaren deg nokre ferdige kort, og Bubble Card svarar på det spørsmålet med sine eigne oppskrifter. Vel eit lys, og du får eit kort med ein lysstyrkeglidebrytar, i tillegg til ein variant for fargetemperatur, farge og metting når lyset ditt støttar det. Vel ei gardin, og du får posisjonsglidebrytaren, vel ein mediespelar, og du får òg ein variant med kjeldelista, vel ein støvsugar, og du får knappane for start, pause og dokking. Kvart forslag er ein heilt vanleg Bubble Card-konfigurasjon vist som direkte førehandsvising, så du kan ta det som ligg nærast og redigere vidare som vanleg.
+Frå og med Home Assistant 2026.6 gjev det å velje ei eining i kortveljaren deg nokre ferdige kort, og Bubble Card legg sine eigne oppskrifter til i den lista. Vel eit lys, og du får eit kort med ein lysstyrkeglidebrytar, i tillegg til ein variant for fargetemperatur, farge og metting når lyset ditt støttar det. Vel ei gardin, og du får posisjonsglidebrytaren, vel ein mediespelar, og du får òg ein variant med kjeldelista, vel ein støvsugar, og du får knappane for start, pause og dokking. Kvart forslag er ein heilt vanleg Bubble Card-konfigurasjon vist som direkte førehandsvising, så du kan ta det som ligg nærast og redigere vidare som vanleg.
 
-Kva du får tilbode, kjem an på kva eininga di faktisk kan: eit lys utan lysstyrkekanal får ein brytar i staden for ein glidebrytar, ei gardin som ikkje kan vinklast får ingen vinkelvariant, og ei klimaeining får førehandsinnstillingane sine berre når ho har nokon. Dei klassiske oppføringane følgjer under dei når dei er aktuelle: det eigne kortet til domenet, ein enkel knapp og ein glidebrytar.
+Kva du får tilbode, kjem an på kva eininga di faktisk kan: eit lys utan lysstyrkekanal får ein brytar i staden for ein glidebrytar, ei gardin som ikkje kan vinklast får ingen vinkelvariant, og ei klimaeining får førehandsinnstillingane sine berre når ho har nokon. Dei klassiske oppføringane følgjer under Bubble Card-forslaga når dei er aktuelle: kortet som høyrer til den entitetstypen, ein enkel knapp og ein glidebrytar.
 
 > [!TIP]
 > Modular kan leggje sine eigne forslag til den lista, sjå [modular](#modular).
@@ -206,7 +206,7 @@ Dette kortet lèt deg lage ein pop-up med kva innhald du vil. Kvar pop-up er **s
 | `trigger` | object eller list | Valfritt | Sjå [vilkår](#vilkår) | Opne denne pop-uppen når vilkåra er oppfylte |
 | `trigger_entity` | string | Valfritt | Kva eining som helst | Opne denne pop-uppen basert på tilstanden til ei eining, den enkle forma av `trigger` |
 | `trigger_state` | string | Valfritt (**Påkravd** viss `trigger_entity` er definert) | Kva einingstilstand som helst | Einingstilstand som opnar pop-uppen |
-| `trigger_close` | boolean | Valfritt | `true` eller `false` | Lukk pop-uppen når vilkåra ikkje lenger er oppfylte (standard: `true` med `trigger`, `false` med `trigger_state`) |
+| `trigger_close` | boolean | Valfritt | `true` (standard) eller `false` | Lukk pop-uppen når vilkåra ikkje lenger er oppfylte. Standarden er i staden `false` når du brukar det eldre paret `trigger_entity` og `trigger_state` |
 | `open_action` | objekt | Valfritt | Sjå [handlingar](#trykk--dobbelttrykk--og-haldhandlingar) | Utløys ei handling når pop-uppen opnar |
 | `close_action` | objekt | Valfritt | Sjå [handlingar](#trykk--dobbelttrykk--og-haldhandlingar) | Utløys ei handling når pop-uppen lukkar |
 | `show_header` | boolean | Valfritt | `true` (standard) eller `false` | Vis/skjul toppteksten til pop-uppen heilt |
@@ -462,7 +462,7 @@ Desse vala er berre tilgjengelege når `button_type` er sett til `slider`.
 | `read_only_slider`      | boolean | Valfritt (`false` standard)      | Gjer glidebrytaren skriveverna. Blir automatisk slått på for enkelte entitetar, som sensorar.                                                    |
 | `slider_live_update`    | boolean | Valfritt (`false` standard)      | Tilstanden til entiteten blir oppdatert medan ein glid. **Denne funksjonen er ikkje tilrådd for alle entitetar.**        |
 | `slider_fill_orientation` | string | Valfritt | `left`, `right`, `top` eller `bottom` | Endrar fyllretninga til glidebrytaren. Frå venstre mot høgre når ho ikkje er oppgjeven, spegelvend i [høgre-til-venstre-språk](#lokalisering) |
-| `slider_value_position` | string | Valfritt | `right`, `left`, `center` eller `hidden` | Plassering av verdivisinga. På sluttsida når ho ikkje er oppgjeven, altså til venstre i [høgre-til-venstre-språk](#lokalisering) |
+| `slider_value_position` | string | Valfritt | `right`, `left`, `center` eller `hidden` | Plassering av verdivisinga. Til høgre når ho ikkje er oppgjeven, og til venstre i [høgre-til-venstre-språk](#lokalisering) |
 | `invert_slider_value` | boolean | Valfritt (`false` standard) | Snu retninga til glidebrytaren (100 % fyll svarar til minimum). Ikkje tilgjengeleg for fargeglidebrytarar. |
 | `light_slider_type` | string | Valfritt | `brightness` (standard), `hue`, `saturation`, `white_temp` | **Berre for lys.** Vel glidebrytarmodus |
 | `cover_slider_type` | string | Valfritt | `position` (standard), `tilt_position` | **Berre for gardiner.** Vel glidebrytarmodus (posisjon eller vinkel) |
@@ -1347,7 +1347,7 @@ Glidebrytar-underknappar støttar dei same glidebrytarvala som knappeglidebrytar
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rundingsradius for underknappane |
 | `--bubble-sub-button-background-color` | `color` | Bakgrunnsfarge for underknappane |
-| `--bubble-sub-button-outline` | `box-shadow` | Kontur som blir lagd til ein underknapp eller ein glidebrytar berre når han blir teikna i same farge som kortet bak, noko som ville gjort han usynleg (set han til `none` for å fjerne han) |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur som blir lagd til ein underknapp eller ein glidebrytar, berre når det elementet blir teikna i same farge som kortet bak, noko som ville gjort det usynleg (set han til `none` for å fjerne han) |
 | `--bubble-sub-slider-border-radius` | `px` | Rundingsradius for glidebrytar-underknappar |
 | `--bubble-sub-slider-background-color` | `color` | Bakgrunnsfarge for glidebrytar-underknappar |
 | `--bubble-sub-slider-height` | `px` | Høgd for alltid synlege glidebrytar-underknappar |
@@ -2694,7 +2694,7 @@ Bubble Card snakkar språket ditt. Redigeringsverktøyet er omsett til dei 64 sp
 
 Nedst i redigeringsverktøyet, ved sida av versjonsnummeret, følgjer ein **Automatisk**-brytar språket i Home Assistant. Slå han av, så går heile redigeringsverktøyet tilbake til engelsk, noko som er praktisk når du følgjer ei rettleiing eller melder frå om eit problem. Valet ditt blir hugsa i nettlesaren.
 
-Denne dokumentasjonen er òg omsett, [til 62 språk](languages.md). Desse sidene er opne for alle, så ei formulering som ikkje stemmer med din eigen Home Assistant kan rettast med eit par klikk. Den engelske versjonen er framleis referansen for sjølve innhaldet.
+Denne dokumentasjonen er òg omsett, [til 62 språk](languages.md), alle bortsett frå britisk engelsk, som viser originalen. Desse sidene er opne for alle, så ei formulering som ikkje stemmer med din eigen Home Assistant kan rettast med eit par klikk. Den engelske versjonen er framleis referansen for sjølve innhaldet.
 
 <br>
 

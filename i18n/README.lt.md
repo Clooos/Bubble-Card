@@ -132,9 +132,9 @@ Visos parinktys gali būti sukonfigūruotos Home Assistant redaktoriuje. Tačiau
 
 ## Esybių pasiūlymai
 
-Nuo Home Assistant 2026.6 pasirinkus esybę kortelių parinkiklyje siūloma keletas paruoštų kortelių, o Bubble Card į šį klausimą atsako savo receptais. Pasirinkite šviestuvą ir jums bus pasiūlyta kortelė su ryškumo slankikliu, o kai jūsų šviestuvas tai palaiko, dar ir spalvos temperatūros, spalvos bei sodrumo variantai. Pasirinkite uždangą ir gausite jos padėties slankiklį, pasirinkite medijos leistuvą ir gausite dar vieną variantą su jo šaltinių sąrašu, pasirinkite dulkių siurblį ir gausite jo paleidimo, pristabdymo ir grąžinimo į stotelę mygtukus. Kiekvienas pasiūlymas yra įprasta Bubble Card konfigūracija, rodoma kaip gyva peržiūra, tad galite paimti artimiausią ir toliau ją redaguoti kaip visada.
+Nuo Home Assistant 2026.6 pasirinkus esybę kortelių parinkiklyje siūloma keletas paruoštų kortelių, o Bubble Card į šį sąrašą įtraukia savo receptus. Pasirinkite šviestuvą ir jums bus pasiūlyta kortelė su ryškumo slankikliu, o kai jūsų šviestuvas tai palaiko, dar ir spalvos temperatūros, spalvos bei sodrumo variantai. Pasirinkite uždangą ir gausite jos padėties slankiklį, pasirinkite medijos leistuvą ir gausite dar vieną variantą su jo šaltinių sąrašu, pasirinkite dulkių siurblį ir gausite jo paleidimo, pristabdymo ir grąžinimo į stotelę mygtukus. Kiekvienas pasiūlymas yra įprasta Bubble Card konfigūracija, rodoma kaip gyva peržiūra, tad galite paimti artimiausią ir toliau ją redaguoti kaip visada.
 
-Kas jums pasiūloma, priklauso nuo to, ką jūsų esybė iš tikrųjų gali: šviestuvas be ryškumo kanalo gauna jungiklį vietoj slankiklio, uždanga, kurios negalima pakreipti, negauna pakreipimo varianto, o klimato esybė gauna savo išankstinius režimus tik tada, kai jų turi. Kai tinka, po jais eina klasikiniai įrašai: srities specialioji kortelė, paprastas mygtukas ir slankiklis.
+Kas jums pasiūloma, priklauso nuo to, ką jūsų esybė iš tikrųjų gali: šviestuvas be ryškumo kanalo gauna jungiklį vietoj slankiklio, uždanga, kurios negalima pakreipti, negauna pakreipimo varianto, o klimato esybė gauna savo išankstinius režimus tik tada, kai jų turi. Kai tinka, po Bubble Card pasiūlymų eina klasikiniai įrašai: tam esybės tipui skirta kortelė, paprastas mygtukas ir slankiklis.
 
 > [!TIP]
 > Moduliai gali įtraukti į šį sąrašą savo pasiūlymus, žr. [moduliai](#moduliai).
@@ -206,7 +206,7 @@ Kas jums pasiūloma, priklauso nuo to, ką jūsų esybė iš tikrųjų gali: šv
 | `trigger` | object arba list | Neprivaloma | Žr. [sąlygas](#sąlygos) | Atidaro šį iškylantįjį langą, kai sąlygos įvykdytos |
 | `trigger_entity` | string | Neprivaloma | Bet kokia esybė | Atidaro šį iškylantįjį langą pagal bet kurios esybės būseną, tai paprastoji `trigger` forma |
 | `trigger_state` | string | Neprivaloma (**Privaloma**, jei nustatyta `trigger_entity`) | Bet kokia esybės būsena | Esybės būsena, kuriai esant atidaromas iškylantysis langas |
-| `trigger_close` | boolean | Neprivaloma | `true` arba `false` | Uždaro iškylantįjį langą, kai sąlygos nebeįvykdytos (numatyta: `true` su `trigger`, `false` su `trigger_state`) |
+| `trigger_close` | boolean | Neprivaloma | `true` (numatyta) arba `false` | Uždaro iškylantįjį langą, kai sąlygos nebeįvykdytos. O jei naudojate senesnę porą `trigger_entity` ir `trigger_state`, numatytoji reikšmė yra `false` |
 | `open_action` | object | Neprivaloma | Žr. [veiksmai](#bakstelėjimo-dvigubo-bakstelėjimo-ir-palaikymo-veiksmai) | Paleidžia veiksmą, kai iškylantysis langas atidaromas |
 | `close_action` | object | Neprivaloma | Žr. [veiksmai](#bakstelėjimo-dvigubo-bakstelėjimo-ir-palaikymo-veiksmai) | Paleidžia veiksmą, kai iškylantysis langas uždaromas |
 | `show_header` | boolean | Neprivaloma | `true` (numatyta) arba `false` | Rodo/slepia visą iškylančiojo lango antraštę |
@@ -462,7 +462,7 @@ auto_order: true
 | `read_only_slider`      | boolean | Optional (`false` default)      | Padaryti slankiklį tik skaitymui. Automatiškai įjungiama kai kuriems entitetams, pvz., jutikliams.                                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Entiteto būsena atnaujinama slenkant. **Ši funkcija nerekomenduojama visiems entitetams.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` arba `bottom` | Pakeisti slankiklio užpildymo kryptį. Nenurodžius, iš kairės į dešinę, o [iš dešinės į kairę rašomose kalbose](#lokalizacija) veidrodiškai |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` arba `hidden` | Reikšmės rodymo padėtis. Nenurodžius, pabaigos pusėje, tad [iš dešinės į kairę rašomose kalbose](#lokalizacija) kairėje |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` arba `hidden` | Reikšmės rodymo padėtis. Nenurodžius, dešinėje, o [iš dešinės į kairę rašomose kalbose](#lokalizacija) kairėje |
 | `invert_slider_value` | boolean | Optional (`false` default) | Apversti slankiklio kryptį (100% užpildymas atitinka minimumą). Neprieinama spalvų slankikliams. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Tik šviestuvams.** Pasirinkti slankiklio režimą |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Tik uždangoms.** Pasirinkti slankiklio režimą (padėtis arba pasukimas) |
@@ -1347,7 +1347,7 @@ Slankiklio papildomi mygtukai palaiko tas pačias slankiklio parinktis kaip mygt
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Papildomų mygtukų kraštų spindulys |
 | `--bubble-sub-button-background-color` | `color` | Papildomų mygtukų fono spalva |
-| `--bubble-sub-button-outline` | `box-shadow` | Kontūras, pridedamas papildomam mygtukui ar slankikliui tik tada, kai jis nusipiešia ta pačia spalva kaip už jo esanti kortelė, dėl ko taptų nematomas (nustatykite `none`, kad pašalintumėte) |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontūras, pridedamas papildomam mygtukui ar slankikliui, tik tada, kai tas elementas nusipiešia ta pačia spalva kaip už jo esanti kortelė, dėl ko taptų nematomas (nustatykite `none`, kad pašalintumėte) |
 | `--bubble-sub-slider-border-radius` | `px` | Slankiklio papildomų mygtukų kraštų spindulys |
 | `--bubble-sub-slider-background-color` | `color` | Slankiklio papildomų mygtukų fono spalva |
 | `--bubble-sub-slider-height` | `px` | Visada matomo slankiklio papildomo mygtuko aukštis |
@@ -2694,7 +2694,7 @@ Bubble Card kalba jūsų kalba. Jos redaktorius išverstas į 64 kalbas, kurias 
 
 Redaktoriaus apačioje, šalia versijos numerio, jungiklis **Automatinis** seka jūsų Home Assistant kalbą. Išjunkite jį ir visas redaktorius grįš į anglų kalbą, o tai patogu sekant vadovą ar pranešant apie problemą. Jūsų pasirinkimas įsimenamas naršyklėje.
 
-Ši dokumentacija taip pat išversta, [į 62 kalbas](languages.md). Tie puslapiai atviri visiems, tad formuluotę, kuri neatitinka jūsų paties Home Assistant, galima pataisyti keliais spustelėjimais. Turinio atskaitos tašku lieka angliška versija.
+Ši dokumentacija taip pat išversta, [į 62 kalbas](languages.md), į visas, išskyrus britų anglų, kuri rodo originalą. Tie puslapiai atviri visiems, tad formuluotę, kuri neatitinka jūsų paties Home Assistant, galima pataisyti keliais spustelėjimais. Turinio atskaitos tašku lieka angliška versija.
 
 <br>
 

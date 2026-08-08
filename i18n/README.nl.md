@@ -132,9 +132,9 @@ Alle opties kunnen worden geconfigureerd in de editor van Home Assistant. Maar h
 
 ## Entiteitsuggesties
 
-Sinds Home Assistant 2026.6 krijg je bij het kiezen van een entiteit in de kaartkiezer een paar kant-en-klare kaarten voorgesteld, en Bubble Card beantwoordt die vraag met zijn eigen recepten. Kies een lamp en je krijgt een kaart met een helderheidsslider aangeboden, plus een variant voor kleurtemperatuur, kleur en verzadiging wanneer je lamp die ondersteunt. Kies een zonwering en je krijgt de positieslider, kies een mediaspeler en je krijgt ook een variant met de bronnenlijst, kies een stofzuiger en je krijgt de knoppen voor starten, pauzeren en terugkeren naar het dock. Elke suggestie is een gewone Bubble Card-configuratie die als live voorbeeld wordt getoond, dus je kunt de suggestie nemen die er het dichtst bij komt en die verder bewerken zoals gewoonlijk.
+Sinds Home Assistant 2026.6 krijg je bij het kiezen van een entiteit in de kaartkiezer een paar kant-en-klare kaarten voorgesteld, en Bubble Card voegt zijn eigen recepten aan die lijst toe. Kies een lamp en je krijgt een kaart met een helderheidsslider aangeboden, plus een variant voor kleurtemperatuur, kleur en verzadiging wanneer je lamp die ondersteunt. Kies een zonwering en je krijgt de positieslider, kies een mediaspeler en je krijgt ook een variant met de bronnenlijst, kies een stofzuiger en je krijgt de knoppen voor starten, pauzeren en terugkeren naar het dock. Elke suggestie is een gewone Bubble Card-configuratie die als live voorbeeld wordt getoond, dus je kunt de suggestie nemen die er het dichtst bij komt en die verder bewerken zoals gewoonlijk.
 
-Wat je krijgt aangeboden hangt af van wat je entiteit werkelijk kan: een lamp zonder helderheidskanaal krijgt een schakelaar in plaats van een slider, een zonwering die niet kan kantelen krijgt geen kantelvariant, en een klimaatentiteit krijgt haar voorkeurstanden alleen wanneer ze die heeft. De klassieke items volgen eronder wanneer ze van toepassing zijn: de eigen kaart van het domein, een gewone knop en een slider.
+Wat je krijgt aangeboden hangt af van wat je entiteit werkelijk kan: een lamp zonder helderheidskanaal krijgt een schakelaar in plaats van een slider, een zonwering die niet kan kantelen krijgt geen kantelvariant, en een klimaatentiteit krijgt haar voorkeurstanden alleen wanneer ze die heeft. De klassieke items volgen onder de Bubble Card-suggesties wanneer ze van toepassing zijn: de kaart die bij dat entiteitstype hoort, een gewone knop en een slider.
 
 > [!TIP]
 > Modules kunnen hun eigen suggesties aan die lijst toevoegen, zie [modules](#modules).
@@ -206,7 +206,7 @@ Met deze kaart kun je een pop-up met willekeurige inhoud maken. Elke pop-up is *
 | `trigger` | object of list | Optioneel | Zie [voorwaarden](#voorwaarden) | Opent deze pop-up wanneer aan de voorwaarden is voldaan |
 | `trigger_entity` | string | Optioneel | Elke entiteit | Open deze pop-up op basis van de status van elke entiteit, de eenvoudige vorm van `trigger` |
 | `trigger_state` | string | Optioneel (**Vereist** als `trigger_entity` is ingesteld) | Elke entiteitsstatus | Entiteitsstatus om de pop-up te openen |
-| `trigger_close` | boolean | Optioneel | `true` of `false` | Sluit de pop-up wanneer niet langer aan de voorwaarden wordt voldaan (standaard: `true` bij `trigger`, `false` bij `trigger_state`) |
+| `trigger_close` | boolean | Optioneel | `true` (standaard) of `false` | Sluit de pop-up wanneer niet langer aan de voorwaarden wordt voldaan. De standaard is juist `false` wanneer je het oudere paar `trigger_entity` en `trigger_state` gebruikt |
 | `open_action` | object | Optioneel | Zie [acties](#tik--dubbeltik--en-vasthoudacties) | Activeert een actie wanneer de pop-up wordt geopend |
 | `close_action` | object | Optioneel | Zie [acties](#tik--dubbeltik--en-vasthoudacties) | Activeert een actie wanneer de pop-up wordt gesloten |
 | `show_header` | boolean | Optioneel | `true` (standaard) of `false` | De koptekst van de pop-up volledig tonen/verbergen |
@@ -462,7 +462,7 @@ Deze opties zijn alleen beschikbaar wanneer `button_type` is ingesteld op `slide
 | `read_only_slider`      | boolean | Optioneel (`false` standaard)      | Maakt de slider alleen-lezen. Wordt automatisch ingeschakeld voor sommige entiteiten zoals sensoren.                        |
 | `slider_live_update`    | boolean | Optioneel (`false` standaard)      | De status van de entiteit wordt bijgewerkt tijdens het schuiven. **Deze functie wordt niet voor alle entiteiten aanbevolen.**        |
 | `slider_fill_orientation` | string | Optioneel | `left`, `right`, `top` of `bottom` | Wijzigt de vulrichting van de slider. Van links naar rechts wanneer niet opgegeven, gespiegeld in [rechts-naar-links-talen](#lokalisatie) |
-| `slider_value_position` | string | Optioneel | `right`, `left`, `center` of `hidden` | Positie van de weergegeven waarde. Aan de eindzijde wanneer niet opgegeven, dus links in [rechts-naar-links-talen](#lokalisatie) |
+| `slider_value_position` | string | Optioneel | `right`, `left`, `center` of `hidden` | Positie van de weergegeven waarde. Rechts wanneer niet opgegeven, en links in [rechts-naar-links-talen](#lokalisatie) |
 | `invert_slider_value` | boolean | Optioneel (`false` standaard) | Keert de sliderrichting om (100% vulling komt overeen met het minimum). Niet beschikbaar voor kleursliders. |
 | `light_slider_type` | string | Optioneel | `brightness` (standaard), `hue`, `saturation`, `white_temp` | **Alleen voor lampen.** Kiest de slidermodus |
 | `cover_slider_type` | string | Optioneel | `position` (standaard), `tilt_position` | **Alleen voor zonwering.** Kiest de slidermodus (positie of kanteling) |
@@ -1347,7 +1347,7 @@ Slider-subknoppen ondersteunen dezelfde slideropties als knopsliders, waaronder:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Randradius voor de subknoppen |
 | `--bubble-sub-button-background-color` | `color` | Achtergrondkleur voor de subknoppen |
-| `--bubble-sub-button-outline` | `box-shadow` | Omlijning die alleen aan een subknop of een slider wordt toegevoegd wanneer die dezelfde kleur krijgt als de kaart erachter, waardoor die onzichtbaar zou worden (zet op `none` om ze te verwijderen) |
+| `--bubble-sub-button-outline` | `box-shadow` | Omlijning die aan een subknop of een slider wordt toegevoegd, alleen wanneer dat element dezelfde kleur krijgt als de kaart erachter, waardoor het onzichtbaar zou worden (zet op `none` om ze te verwijderen) |
 | `--bubble-sub-slider-border-radius` | `px` | Randradius voor slider-subknoppen |
 | `--bubble-sub-slider-background-color` | `color` | Achtergrondkleur voor slider-subknoppen |
 | `--bubble-sub-slider-height` | `px` | Hoogte voor altijd zichtbare slider-subknoppen |
@@ -2694,7 +2694,7 @@ Bubble Card spreekt jouw taal. De editor is vertaald in de 64 talen die Home Ass
 
 Onderaan de editor, naast het versienummer, volgt een schakelaar **Automatisch** de taal van je Home Assistant. Zet die uit en de hele editor gaat terug naar het Engels, wat handig is om een tutorial te volgen of een probleem te melden. Je keuze wordt in je browser onthouden.
 
-Deze documentatie is ook vertaald, [in 62 talen](languages.md). Die pagina's staan voor iedereen open, dus een formulering die niet overeenkomt met je eigen Home Assistant kan met een paar klikken worden verbeterd. De Engelse versie blijft de referentie voor de inhoud zelf.
+Deze documentatie is ook vertaald, [in 62 talen](languages.md), alle behalve Brits Engels, dat het origineel toont. Die pagina's staan voor iedereen open, dus een formulering die niet overeenkomt met je eigen Home Assistant kan met een paar klikken worden verbeterd. De Engelse versie blijft de referentie voor de inhoud zelf.
 
 <br>
 

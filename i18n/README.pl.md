@@ -132,9 +132,9 @@ Wszystkie opcje można skonfigurować w edytorze Home Assistant. Więcej szczeg�
 
 ## Sugestie encji
 
-Od Home Assistant 2026.6 wybranie encji w selektorze kart podpowiada kilka gotowych kart, a Bubble Card odpowiada na to pytanie własnymi przepisami. Wybierz światło, a otrzymasz kartę z suwakiem jasności, a także warianty temperatury barwowej, koloru i nasycenia, jeśli twoje światło je obsługuje. Wybierz roletę, a otrzymasz suwak jej pozycji, wybierz odtwarzacz mediów, a dostaniesz również wariant z listą źródeł, wybierz odkurzacz, a dostaniesz przyciski uruchomienia, pauzy i powrotu do stacji. Każda sugestia to zwykła konfiguracja Bubble Card pokazana jako podgląd na żywo, więc możesz wziąć tę najbliższą i edytować ją dalej jak zwykle.
+Od Home Assistant 2026.6 wybranie encji w selektorze kart podpowiada kilka gotowych kart, a Bubble Card dodaje do tej listy własne przepisy. Wybierz światło, a otrzymasz kartę z suwakiem jasności, a także warianty temperatury barwowej, koloru i nasycenia, jeśli twoje światło je obsługuje. Wybierz roletę, a otrzymasz suwak jej pozycji, wybierz odtwarzacz mediów, a dostaniesz również wariant z listą źródeł, wybierz odkurzacz, a dostaniesz przyciski uruchomienia, pauzy i powrotu do stacji. Każda sugestia to zwykła konfiguracja Bubble Card pokazana jako podgląd na żywo, więc możesz wziąć tę najbliższą i edytować ją dalej jak zwykle.
 
-To, co zostanie zaproponowane, zależy od tego, co twoja encja naprawdę potrafi: światło bez kanału jasności dostaje przełącznik zamiast suwaka, roleta bez możliwości nachylenia nie dostaje wariantu nachylenia, a encja klimatyzacji dostaje swoje tryby predefiniowane tylko wtedy, gdy jakieś ma. Pod nimi, jeśli mają zastosowanie, znajdują się klasyczne pozycje: dedykowana karta danej domeny, zwykły przycisk i suwak.
+To, co zostanie zaproponowane, zależy od tego, co twoja encja naprawdę potrafi: światło bez kanału jasności dostaje przełącznik zamiast suwaka, roleta bez możliwości nachylenia nie dostaje wariantu nachylenia, a encja klimatyzacji dostaje swoje tryby predefiniowane tylko wtedy, gdy jakieś ma. Pod sugestiami Bubble Card, jeśli mają zastosowanie, znajdują się klasyczne pozycje: karta dedykowana temu typowi encji, zwykły przycisk i suwak.
 
 > [!TIP]
 > Moduły mogą dodawać do tej listy własne sugestie, zobacz [moduły](#moduły).
@@ -206,7 +206,7 @@ Ta karta pozwala tworzyć pop-up z dowolną zawartością. Każdy pop-up jest **
 | `trigger` | object lub list | Opcjonalne | Zobacz [warunki](#warunki) | Otwiera ten pop-up, gdy warunki są spełnione |
 | `trigger_entity` | string | Opcjonalne | Dowolna encja | Otwiera ten pop-up na podstawie stanu dowolnej encji, prosta postać `trigger` |
 | `trigger_state` | string | Opcjonalne (**Wymagane**, jeśli zdefiniowano `trigger_entity`) | Dowolny stan encji | Stan encji, przy którym pop-up ma się otworzyć |
-| `trigger_close` | boolean | Opcjonalne | `true` lub `false` | Zamyka pop-up, gdy warunki przestają być spełnione (domyślnie: `true` przy `trigger`, `false` przy `trigger_state`) |
+| `trigger_close` | boolean | Opcjonalne | `true` (domyślnie) lub `false` | Zamyka pop-up, gdy warunki przestają być spełnione. Domyślnie jest to `false`, jeśli używasz starszej pary `trigger_entity` i `trigger_state` |
 | `open_action` | object | Opcjonalne | Patrz [akcje](#akcje-dotknięcia-podwójnego-dotknięcia-i-przytrzymania) | Wyzwala akcję podczas otwierania pop-upu |
 | `close_action` | object | Opcjonalne | Patrz [akcje](#akcje-dotknięcia-podwójnego-dotknięcia-i-przytrzymania) | Wyzwala akcję podczas zamykania pop-upu |
 | `show_header` | boolean | Opcjonalne | `true` (domyślnie) lub `false` | Pokazuje/ukrywa nagłówek pop-upu w całości |
@@ -462,7 +462,7 @@ Te opcje są dostępne tylko wtedy, gdy `button_type` jest ustawiony na `slider`
 | `read_only_slider`      | boolean | Opcjonalne (domyślnie `false`)      | Ustawia suwak jako tylko do odczytu. Automatycznie włączane dla niektórych encji, takich jak czujniki.                        |
 | `slider_live_update`    | boolean | Opcjonalne (domyślnie `false`)      | Stan encji jest aktualizowany podczas przesuwania. **Ta funkcja nie jest zalecana dla wszystkich encji.**        |
 | `slider_fill_orientation` | string | Opcjonalne | `left`, `right`, `top` lub `bottom` | Zmienia kierunek wypełnienia suwaka. Bez podania od lewej do prawej, lustrzanie w [językach pisanych od prawej do lewej](#lokalizacja) |
-| `slider_value_position` | string | Opcjonalne | `right`, `left`, `center` lub `hidden` | Pozycja wyświetlania wartości. Bez podania po stronie końca, czyli po lewej w [językach pisanych od prawej do lewej](#lokalizacja) |
+| `slider_value_position` | string | Opcjonalne | `right`, `left`, `center` lub `hidden` | Pozycja wyświetlania wartości. Bez podania po prawej, a po lewej w [językach pisanych od prawej do lewej](#lokalizacja) |
 | `invert_slider_value` | boolean | Opcjonalne (domyślnie `false`) | Odwraca kierunek suwaka (100% wypełnienia odpowiada minimum). Niedostępne dla suwaków koloru. |
 | `light_slider_type` | string | Opcjonalne | `brightness` (domyślnie), `hue`, `saturation`, `white_temp` | **Tylko dla świateł.** Wybiera tryb suwaka |
 | `cover_slider_type` | string | Opcjonalne | `position` (domyślnie), `tilt_position` | **Tylko dla rolet.** Wybiera tryb suwaka (pozycja lub nachylenie) |
@@ -1347,7 +1347,7 @@ Podprzyciski typu suwak obsługują te same opcje co suwaki przycisków, w tym:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Promień zaokrąglenia podprzycisków |
 | `--bubble-sub-button-background-color` | `color` | Kolor tła podprzycisków |
-| `--bubble-sub-button-outline` | `box-shadow` | Obrys dodawany do podprzycisku lub suwaka tylko wtedy, gdy przyjmuje on ten sam kolor co karta za nim, co uczyniłoby go niewidocznym (ustaw `none`, aby go usunąć) |
+| `--bubble-sub-button-outline` | `box-shadow` | Obrys dodawany do podprzycisku lub suwaka tylko wtedy, gdy dany element przyjmuje ten sam kolor co karta za nim, co uczyniłoby go niewidocznym (ustaw `none`, aby go usunąć) |
 | `--bubble-sub-slider-border-radius` | `px` | Promień zaokrąglenia podprzycisków typu suwak |
 | `--bubble-sub-slider-background-color` | `color` | Kolor tła podprzycisków typu suwak |
 | `--bubble-sub-slider-height` | `px` | Wysokość zawsze widocznych podprzycisków typu suwak |
@@ -2694,7 +2694,7 @@ Bubble Card mówi w twoim języku. Jego edytor jest przetłumaczony na 64 język
 
 Na dole edytora, obok numeru wersji, przełącznik **Automatycznie** podąża za językiem twojego Home Assistant. Wyłącz go, a cały edytor wróci do angielskiego, co przydaje się przy śledzeniu poradnika lub zgłaszaniu problemu. Twój wybór jest zapamiętywany w przeglądarce.
 
-Ta dokumentacja też jest tłumaczona, [na 62 języki](languages.md). Te strony są otwarte dla wszystkich, więc sformułowanie, które nie pasuje do twojego Home Assistant, można poprawić w kilka kliknięć. Wersja angielska pozostaje odniesieniem dla samej treści.
+Ta dokumentacja też jest tłumaczona, [na 62 języki](languages.md), czyli na wszystkie oprócz brytyjskiego angielskiego, który korzysta z oryginału. Te strony są otwarte dla wszystkich, więc sformułowanie, które nie pasuje do twojego Home Assistant, można poprawić w kilka kliknięć. Wersja angielska pozostaje odniesieniem dla samej treści.
 
 <br>
 

@@ -132,9 +132,9 @@ Sve opcije se mogu konfigurisati u Home Assistant uređivaču. Više detalja i Y
 
 ## Prijedlozi entiteta
 
-Od Home Assistanta 2026.6, odabir entiteta u biraču kartica nudi vam nekoliko gotovih kartica, a Bubble Card na to pitanje odgovara vlastitim receptima. Odaberite svjetlo i ponuđena vam je kartica s klizačem za osvjetljenje, uz varijantu s temperaturom boje, s bojom i sa zasićenjem kada ih vaše svjetlo podržava. Odaberite roletnu i dobijate klizač njene pozicije, odaberite medija plejer i dobijate i varijantu s listom njegovih izvora, odaberite usisivač i dobijate njegovu dugmad za pokretanje, pauzu i povratak na bazu. Svaki prijedlog je obična Bubble Card konfiguracija prikazana kao pregled uživo, tako da možete uzeti najbližu i nastaviti je uređivati kao i obično.
+Od Home Assistanta 2026.6, odabir entiteta u biraču kartica nudi vam nekoliko gotovih kartica, a Bubble Card na tu listu dodaje vlastite recepte. Odaberite svjetlo i ponuđena vam je kartica s klizačem za osvjetljenje, uz varijantu s temperaturom boje, s bojom i sa zasićenjem kada ih vaše svjetlo podržava. Odaberite roletnu i dobijate klizač njene pozicije, odaberite medija plejer i dobijate i varijantu s listom njegovih izvora, odaberite usisivač i dobijate njegovu dugmad za pokretanje, pauzu i povratak na bazu. Svaki prijedlog je obična Bubble Card konfiguracija prikazana kao pregled uživo, tako da možete uzeti najbližu i nastaviti je uređivati kao i obično.
 
-Ono što vam se nudi zavisi od toga šta vaš entitet zaista može: svjetlo bez kanala za osvjetljenje dobija prekidač umjesto klizača, roletna koja se ne može nagnuti ne dobija varijantu s nagibom, a entitet klime dobija svoje unaprijed zadane režime samo kada ih ima. Klasične stavke slijede ispod njih kada su primjenjive: namjenska kartica domene, obično dugme i klizač.
+Ono što vam se nudi zavisi od toga šta vaš entitet zaista može: svjetlo bez kanala za osvjetljenje dobija prekidač umjesto klizača, roletna koja se ne može nagnuti ne dobija varijantu s nagibom, a entitet klime dobija svoje unaprijed zadane režime samo kada ih ima. Klasične stavke slijede ispod prijedloga Bubble Carda kada su primjenjive: kartica namijenjena toj vrsti entiteta, obično dugme i klizač.
 
 > [!TIP]
 > Modules mogu dodati vlastite prijedloge na tu listu, pogledajte [Modules](#modules).
@@ -206,7 +206,7 @@ Ova kartica vam omogućava da napravite skočni prozor s bilo kojim sadržajem. 
 | `trigger` | object ili lista | Opcionalno | Pogledajte [uslove](#uslovi) | Otvara ovaj skočni prozor kada su uslovi ispunjeni |
 | `trigger_entity` | string | Opcionalno | Bilo koji entitet | Otvara ovaj skočni prozor na osnovu stanja bilo kojeg entiteta, jednostavni oblik opcije `trigger` |
 | `trigger_state` | string | Opcionalno (**Obavezno** ako je `trigger_entity` definisan) | Bilo koje stanje entiteta | Stanje entiteta koje otvara skočni prozor |
-| `trigger_close` | boolean | Opcionalno | `true` ili `false` | Zatvara skočni prozor kada uslovi više nisu ispunjeni (zadano: `true` uz `trigger`, `false` uz `trigger_state`) |
+| `trigger_close` | boolean | Opcionalno | `true` (zadano) ili `false` | Zatvara skočni prozor kada uslovi više nisu ispunjeni. Zadano je `false` kada koristite stariji par `trigger_entity` i `trigger_state` |
 | `open_action` | object | Opcionalno | Pogledajte [akcije](#akcije-dodira-dvostrukog-dodira-i-držanja) | Pokreće akciju pri otvaranju skočnog prozora |
 | `close_action` | object | Opcionalno | Pogledajte [akcije](#akcije-dodira-dvostrukog-dodira-i-držanja) | Pokreće akciju pri zatvaranju skočnog prozora |
 | `show_header` | boolean | Opcionalno | `true` (zadano) ili `false` | Prikazuje/sakriva cijelo zaglavlje skočnog prozora |
@@ -462,7 +462,7 @@ Ove opcije su dostupne samo kada je `button_type` postavljen na `slider`.
 | `read_only_slider`      | boolean | Opcionalno (zadano `false`)     | Čini klizač samo za čitanje. Automatski omogućeno za neke entitete poput senzora.                       |
 | `slider_live_update`    | boolean | Opcionalno (zadano `false`)     | Stanje entiteta se ažurira tokom klizanja. **Ova funkcija se ne preporučuje za sve entitete.**          |
 | `slider_fill_orientation` | string | Opcionalno | `left`, `right`, `top` ili `bottom` | Mijenja smjer popunjavanja klizača. Slijeva nadesno kada nije definisano, zrcalno u [jezicima koji se pišu zdesna nalijevo](#lokalizacija) |
-| `slider_value_position` | string | Opcionalno | `right`, `left`, `center` ili `hidden` | Pozicija prikaza vrijednosti. Na krajnjoj strani kada nije definisano, dakle lijevo u [jezicima koji se pišu zdesna nalijevo](#lokalizacija) |
+| `slider_value_position` | string | Opcionalno | `right`, `left`, `center` ili `hidden` | Pozicija prikaza vrijednosti. Desno kada nije definisano, a lijevo u [jezicima koji se pišu zdesna nalijevo](#lokalizacija) |
 | `invert_slider_value` | boolean | Opcionalno (zadano `false`) | Obrće smjer klizača (100% popunjenosti odgovara minimumu). Nije dostupno za klizače boje. |
 | `light_slider_type` | string | Opcionalno | `brightness` (zadano), `hue`, `saturation`, `white_temp` | **Samo za svjetla.** Odaberite režim klizača |
 | `cover_slider_type` | string | Opcionalno | `position` (zadano), `tilt_position` | **Samo za roletne.** Odaberite režim klizača (pozicija ili nagib) |
@@ -1347,7 +1347,7 @@ Klizač pod-dugmad podržavaju iste opcije klizača kao i klizači dugmadi, uklj
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radijus ivica pod-dugmadi |
 | `--bubble-sub-button-background-color` | `color` | Boja pozadine pod-dugmadi |
-| `--bubble-sub-button-outline` | `box-shadow` | Obris koji se dodaje pod-dugmetu ili klizaču samo kada se iscrtava u istoj boji kao kartica iza njega, što bi ga učinilo nevidljivim (postavite na `none` da ga uklonite) |
+| `--bubble-sub-button-outline` | `box-shadow` | Obris koji se dodaje pod-dugmetu ili klizaču, samo kada se taj element iscrtava u istoj boji kao kartica iza njega, što bi ga učinilo nevidljivim (postavite na `none` da ga uklonite) |
 | `--bubble-sub-slider-border-radius` | `px` | Radijus ivica klizač pod-dugmadi |
 | `--bubble-sub-slider-background-color` | `color` | Boja pozadine klizač pod-dugmadi |
 | `--bubble-sub-slider-height` | `px` | Visina uvijek vidljivih klizač pod-dugmadi |
@@ -2694,7 +2694,7 @@ Bubble Card govori vaš jezik. Njen uređivač preveden je na 64 jezika koje Hom
 
 Na dnu uređivača, pored broja verzije, prekidač **Automatski** prati jezik vašeg Home Assistanta. Isključite ga i cijeli uređivač se vraća na engleski, što je zgodno kada pratite vodič ili prijavljujete problem. Vaš izbor se pamti u pregledniku.
 
-I ova dokumentacija je prevedena, [na 62 jezika](languages.md). Te stranice su otvorene svima, pa se formulacija koja ne odgovara vašem Home Assistantu može ispraviti u par klikova. Engleska verzija ostaje referenca za sam sadržaj.
+I ova dokumentacija je prevedena, [na 62 jezika](languages.md), na sve osim na britanski engleski, koji prikazuje original. Te stranice su otvorene svima, pa se formulacija koja ne odgovara vašem Home Assistantu može ispraviti u par klikova. Engleska verzija ostaje referenca za sam sadržaj.
 
 <br>
 

@@ -127,9 +127,9 @@ All options can be configured in the Home Assistant editor. But you can find mor
 
 ## Entity suggestions
 
-Since Home Assistant 2026.6, picking an entity in the card picker offers you a few ready made cards, and Bubble Card answers that question with its own recipes. Pick a light and you are offered a card with a brightness slider, plus a color temperature, a color and a saturation variant when your light supports them. Pick a cover and you get its position slider, pick a media player and you also get a variant with its source list, pick a vacuum and you get its start, pause and dock buttons. Each suggestion is a normal Bubble Card configuration shown as a live preview, so you can take the closest one and keep editing it as usual.
+Since Home Assistant 2026.6, picking an entity in the card picker offers you a few ready made cards, and Bubble Card adds its own recipes to that list. Pick a light and you are offered a card with a brightness slider, plus a color temperature, a color and a saturation variant when your light supports them. Pick a cover and you get its position slider, pick a media player and you also get a variant with its source list, pick a vacuum and you get its start, pause and dock buttons. Each suggestion is a normal Bubble Card configuration shown as a live preview, so you can take the closest one and keep editing it as usual.
 
-What you are offered depends on what your entity can actually do, a light without a brightness channel gets a toggle instead of a slider, a cover that cannot tilt gets no tilt variant, a climate entity gets its preset modes only when it has some. The classic entries follow below them when they apply, the dedicated card of the domain, a plain button and a slider.
+What you are offered depends on what your entity can actually do, a light without a brightness channel gets a toggle instead of a slider, a cover that cannot tilt gets no tilt variant, a climate entity gets its preset modes only when it has some. The classic entries follow below the Bubble Card suggestions when they apply: the card dedicated to that entity type, a plain button and a slider.
 
 > [!TIP]
 > Modules can add their own suggestions to that list, see [modules](#modules).
@@ -201,7 +201,7 @@ This card allows you to create a pop-up with any content. Each pop-up is **hidde
 | `trigger` | object or list | Optional | See [conditions](#conditions) | Open this pop-up when the conditions are met |
 | `trigger_entity` | string | Optional | Any entity | Open this pop-up based on the state of any entity, the simple form of `trigger` |
 | `trigger_state` | string | Optional (**Required** if `trigger_entity` is defined) | Any entity state | Entity state to open the pop-up |
-| `trigger_close` | boolean | Optional | `true` or `false` | Close the pop-up when the conditions are no longer met (default: `true` with `trigger`, `false` with `trigger_state`) |
+| `trigger_close` | boolean | Optional | `true` (default) or `false` | Close the pop-up when the conditions are no longer met. Defaults to `false` instead when you use the older `trigger_entity` and `trigger_state` pair |
 | `open_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is opening |
 | `close_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Trigger an action when the pop-up is closing |
 | `show_header` | boolean | Optional | `true` (default) or `false` | Show/Hide the pop-up header fully |
@@ -457,7 +457,7 @@ These options are only available when `button_type` is set to `slider`.
 | `read_only_slider`      | boolean | Optional (`false` default)      | Make the slider read-only. Automatically enabled for some entities like sensors.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | The entity state is updated while sliding. **This feature is not recommended for all entities.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` or `bottom` | Change the fill direction of the slider. Left to right when undefined, mirrored in [right-to-left languages](#localization) |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` or `hidden` | Position of the value display. On the end side when undefined, so on the left in [right-to-left languages](#localization) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` or `hidden` | Position of the value display. On the right when undefined, and on the left in [right-to-left languages](#localization) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Invert slider direction (100% fill equals minimum). Not available for color sliders. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **For lights only.** Choose the slider mode |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **For covers only.** Choose the slider mode (position or tilt) |
@@ -1342,7 +1342,7 @@ Slider sub-buttons support the same slider options as button sliders, including:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Border radius for the sub-buttons |
 | `--bubble-sub-button-background-color` | `color` | Background color for the sub-buttons |
-| `--bubble-sub-button-outline` | `box-shadow` | Outline added to a sub-button or a slider only when it paints the same color as the card behind it, which would make it invisible (set it to `none` to remove it) |
+| `--bubble-sub-button-outline` | `box-shadow` | Outline added to a sub-button or a slider, only when that element paints the same color as the card behind it, which would make it invisible (set it to `none` to remove it) |
 | `--bubble-sub-slider-border-radius` | `px` | Border radius for slider sub-buttons |
 | `--bubble-sub-slider-background-color` | `color` | Background color for slider sub-buttons |
 | `--bubble-sub-slider-height` | `px` | Height for always-visible slider sub-buttons |
@@ -2689,7 +2689,7 @@ Bubble Card speaks your language. Its editor is translated in the 64 languages t
 
 At the bottom of the editor, next to the version number, an **Auto** switch follows your Home Assistant language. Turn it off and the whole editor goes back to English, which is handy to follow a tutorial or to report an issue. Your choice is remembered in your browser.
 
-This documentation is translated too, [in 62 languages](i18n/languages.md). Those pages are open to everyone, so a wording that does not match your own Home Assistant can be fixed in a couple of clicks. The English version stays the reference for the content itself.
+This documentation is translated too, [in 62 languages](i18n/languages.md), every one of them but British English, which reads the original. Those pages are open to everyone, so a wording that does not match your own Home Assistant can be fixed in a couple of clicks. The English version stays the reference for the content itself.
 
 <br>
 

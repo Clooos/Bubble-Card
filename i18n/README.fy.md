@@ -132,9 +132,9 @@ Alle opsjes kinne yn de Home Assistant-bewurker ynsteld wurde. Mar hjirûnder yn
 
 ## Entiteitsuggestjes
 
-Sûnt Home Assistant 2026.6 krijst by it kiezen fan in entiteit yn de kaartkiezer in pear kant-en-klare kaarten oanbean, en Bubble Card antwurdet op dy fraach mei syn eigen resepten. Kies in ljocht en dy krijst in kaart mei in helderheidsskúfregeler oanbean, plus in kleurtemperatuer-, in kleur- en in fersadigingsfariant as dyn ljocht dy stipet. Kies in sinneskerm en dû krigest de posysjeskúfregeler, kies in mediaspiler en dû krigest ek in fariant mei syn boarnelist, kies in stofsûger en dû krigest de knoppen starte, pauzearje en werom nei it dok. Elke suggestje is in gewoane Bubble Card-konfiguraasje dy't as live foarbyld toand wurdt, dus dû kinst dejinge nimme dy't it tichtst by komt en dy gewoan fierder bewurkje.
+Sûnt Home Assistant 2026.6 krijst by it kiezen fan in entiteit yn de kaartkiezer in pear kant-en-klare kaarten oanbean, en Bubble Card foeget syn eigen resepten oan dy list ta. Kies in ljocht en dy krijst in kaart mei in helderheidsskúfregeler oanbean, plus in kleurtemperatuer-, in kleur- en in fersadigingsfariant as dyn ljocht dy stipet. Kies in sinneskerm en dû krigest de posysjeskúfregeler, kies in mediaspiler en dû krigest ek in fariant mei syn boarnelist, kies in stofsûger en dû krigest de knoppen starte, pauzearje en werom nei it dok. Elke suggestje is in gewoane Bubble Card-konfiguraasje dy't as live foarbyld toand wurdt, dus dû kinst dejinge nimme dy't it tichtst by komt en dy gewoan fierder bewurkje.
 
-Wat oanbean wurdt hinget ôf fan wat dyn entiteit werklik kin: in ljocht sûnder helderheidskanaal krijt in skeakelder ynstee fan in skúfregeler, in sinneskerm dat net kantelje kin krijt gjin kantelfariant, in klimaatentiteit krijt syn foarynstelde modi allinnich as dy der binne. De klassike opsjes folgje der ûnder as se fan tapassing binne: de eigen kaart fan it domein, in gewoane knop en in skúfregeler.
+Wat oanbean wurdt hinget ôf fan wat dyn entiteit werklik kin: in ljocht sûnder helderheidskanaal krijt in skeakelder ynstee fan in skúfregeler, in sinneskerm dat net kantelje kin krijt gjin kantelfariant, in klimaatentiteit krijt syn foarynstelde modi allinnich as dy der binne. De klassike opsjes folgje ûnder de Bubble Card-suggestjes as se fan tapassing binne: de kaart foar dat type entiteit, in gewoane knop en in skúfregeler.
 
 > [!TIP]
 > Modules kinne har eigen suggestjes oan dy list tafoegje, sjoch [modules](#modules).
@@ -206,7 +206,7 @@ Mei dizze kaart kinst in pop-up meitsje mei elke ynhâld. Elke pop-up is **stand
 | `trigger` | object of list | Opsjoneel | Sjoch [betingsten](#betingsten) | Iepenet dizze pop-up as oan de betingsten foldien is |
 | `trigger_entity` | string | Opsjoneel | Elke entiteit | Dizze pop-up iepenje op basis fan de steat fan elke entiteit, de ienfâldige foarm fan `trigger` |
 | `trigger_state` | string | Opsjoneel (**Fereaske** as `trigger_entity` ynsteld is) | Elke entiteitssteat | Entiteitssteat om de pop-up te iepenjen |
-| `trigger_close` | boolean | Opsjoneel | `true` of `false` | Slút de pop-up as net mear oan de betingsten foldien wurdt (standert: `true` mei `trigger`, `false` mei `trigger_state`) |
+| `trigger_close` | boolean | Opsjoneel | `true` (standert) of `false` | Slút de pop-up as net mear oan de betingsten foldien wurdt. De standert is ynstee `false` as dû it âldere pear `trigger_entity` en `trigger_state` brûkst |
 | `open_action` | object | Opsjoneel | Sjoch [aksjes](#tik--dûbeltik--en-fêsthâldaksjes) | In aksje triggerje as de pop-up iepenet |
 | `close_action` | object | Opsjoneel | Sjoch [aksjes](#tik--dûbeltik--en-fêsthâldaksjes) | In aksje triggerje as de pop-up slút |
 | `show_header` | boolean | Opsjoneel | `true` (standert) of `false` | De header fan de pop-up folslein sjen litte/ferbergje |
@@ -462,7 +462,7 @@ Dizze opsjes binne allinnich beskikber as `button_type` ynsteld is op `slider`.
 | `read_only_slider`      | boolean | Opsjoneel (`false` standert)      | Meitsje de skúfregeler allinnich-lêze. Wurdt automatysk ynskeakele foar guon entiteiten lykas sensoren.                        |
 | `slider_live_update`    | boolean | Opsjoneel (`false` standert)      | De steat fan de entiteit wurdt bywurke wylst it skowen. **Dizze funksje wurdt net foar alle entiteiten oanrikkemandearre.**        |
 | `slider_fill_orientation` | string | Opsjoneel | `left`, `right`, `top` of `bottom` | Feroarje de rjochting fan de folling fan de skúfregeler. Fan links nei rjochts as net definiearre, spegele yn [rjochts-nei-links-talen](#lokalisaasje) |
-| `slider_value_position` | string | Opsjoneel | `right`, `left`, `center` of `hidden` | Posysje fan de weardewerjefte. Oan de einkant as net definiearre, dus links yn [rjochts-nei-links-talen](#lokalisaasje) |
+| `slider_value_position` | string | Opsjoneel | `right`, `left`, `center` of `hidden` | Posysje fan de weardewerjefte. Rjochts as net definiearre, en links yn [rjochts-nei-links-talen](#lokalisaasje) |
 | `invert_slider_value` | boolean | Opsjoneel (`false` standert) | Kear de rjochting fan de skúfregeler om (100% folling stiet gelyk oan it minimum). Net beskikber foar kleurskúfregelers. |
 | `light_slider_type` | string | Opsjoneel | `brightness` (standert), `hue`, `saturation`, `white_temp` | **Allinnich foar ljochten.** Kies de skúfregelermodus |
 | `cover_slider_type` | string | Opsjoneel | `position` (standert), `tilt_position` | **Allinnich foar sinneskermen.** Kies de skúfregelermodus (posysje of kanteling) |
@@ -1347,7 +1347,7 @@ Skúfregelder-subknoppen stypje deselde opsjes as knop-skúfregelders, ûnder oa
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radius fan de rânen foar de subknoppen |
 | `--bubble-sub-button-background-color` | `color` | Eftergrûnkleur foar de subknoppen |
-| `--bubble-sub-button-outline` | `box-shadow` | Omline dy't allinnich oan in subknop of in skúfregeler tafoege wurdt as dy deselde kleur krijt as de kaart derefter, wat him ûnsichtber meitsje soe (set him op `none` om him fuort te heljen) |
+| `--bubble-sub-button-outline` | `box-shadow` | Omline dy't oan in subknop of in skúfregeler tafoege wurdt, allinnich as dat elemint deselde kleur krijt as de kaart derefter, wat it ûnsichtber meitsje soe (set him op `none` om him fuort te heljen) |
 | `--bubble-sub-slider-border-radius` | `px` | Radius fan de rânen foar skúfregelder-subknoppen |
 | `--bubble-sub-slider-background-color` | `color` | Eftergrûnkleur foar skúfregelder-subknoppen |
 | `--bubble-sub-slider-height` | `px` | Hichte foar altyd-sichtbere skúfregelder-subknoppen |
@@ -2694,7 +2694,7 @@ Bubble Card praat dyn taal. De editor is oerset yn de 64 talen dy't Home Assista
 
 Underoan de editor, njonken it ferzjenûmer, folget in **Automatysk**-skeakelder de taal fan dyn Home Assistant. Set dy út en de hiele editor giet werom nei it Ingelsk, wat handich is om in tutorial te folgjen of in probleem te melden. Dyn kar wurdt yn dyn browser ûnthâlden.
 
-Dizze dokumintaasje is ek oerset, [yn 62 talen](languages.md). Dy siden binne foar elkenien iepen, dus in formulearring dy't net by dyn eigen Home Assistant past kin yn in pear klikken ferbettere wurde. De Ingelske ferzje bliuwt de referinsje foar de ynhâld sels.
+Dizze dokumintaasje is ek oerset, [yn 62 talen](languages.md), allegear útsein Britsk Ingelsk, dat it orizjineel toant. Dy siden binne foar elkenien iepen, dus in formulearring dy't net by dyn eigen Home Assistant past kin yn in pear klikken ferbettere wurde. De Ingelske ferzje bliuwt de referinsje foar de ynhâld sels.
 
 <br>
 

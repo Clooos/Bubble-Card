@@ -132,9 +132,9 @@ Gellir ffurfweddu pob opsiwn yng ngolygydd Home Assistant. Ond gallwch ddod o hy
 
 ## Awgrymiadau endid
 
-Ers Home Assistant 2026.6, mae dewis endid yn y dewisydd cardiau yn cynnig ychydig o gardiau parod i chi, ac mae Bubble Card yn ateb y cwestiwn hwnnw gyda'i ryseitiau ei hun. Dewiswch olau a chynigir cerdyn i chi gyda llithrydd disgleirdeb, ynghyd ag amrywiad tymheredd lliw, un lliw ac un dirlawnder pan fydd eich golau'n eu cefnogi. Dewiswch orchudd a chewch lithrydd ei safle, dewiswch chwaraeydd cyfryngau a chewch amrywiad gyda'i restr ffynonellau hefyd, dewiswch sugnwr llwch a chewch ei fotymau cychwyn, oedi a dychwelyd i'r doc. Mae pob awgrym yn ffurfweddiad Bubble Card arferol a ddangosir fel rhagolwg byw, felly gallwch gymryd yr un agosaf a dal ati i'w olygu fel arfer.
+Ers Home Assistant 2026.6, mae dewis endid yn y dewisydd cardiau yn cynnig ychydig o gardiau parod i chi, ac mae Bubble Card yn ychwanegu ei ryseitiau ei hun at y rhestr honno. Dewiswch olau a chynigir cerdyn i chi gyda llithrydd disgleirdeb, ynghyd ag amrywiad tymheredd lliw, un lliw ac un dirlawnder pan fydd eich golau'n eu cefnogi. Dewiswch orchudd a chewch lithrydd ei safle, dewiswch chwaraeydd cyfryngau a chewch amrywiad gyda'i restr ffynonellau hefyd, dewiswch sugnwr llwch a chewch ei fotymau cychwyn, oedi a dychwelyd i'r doc. Mae pob awgrym yn ffurfweddiad Bubble Card arferol a ddangosir fel rhagolwg byw, felly gallwch gymryd yr un agosaf a dal ati i'w olygu fel arfer.
 
-Mae'r hyn a gynigir i chi yn dibynnu ar yr hyn y gall eich endid ei wneud mewn gwirionedd: mae golau heb sianel ddisgleirdeb yn cael switsh yn lle llithrydd, nid yw gorchudd na all ogwyddo yn cael amrywiad gogwyddo, ac nid yw endid hinsawdd yn cael ei foddau rhagosodedig oni bai bod rhai ganddo. Daw'r cofnodion clasurol oddi tanynt pan fyddant yn berthnasol: cerdyn pwrpasol y parth, botwm plaen a llithrydd.
+Mae'r hyn a gynigir i chi yn dibynnu ar yr hyn y gall eich endid ei wneud mewn gwirionedd: mae golau heb sianel ddisgleirdeb yn cael switsh yn lle llithrydd, nid yw gorchudd na all ogwyddo yn cael amrywiad gogwyddo, ac nid yw endid hinsawdd yn cael ei foddau rhagosodedig oni bai bod rhai ganddo. Daw'r cofnodion clasurol o dan awgrymiadau Bubble Card pan fyddant yn berthnasol: y cerdyn pwrpasol ar gyfer y math hwnnw o endid, botwm plaen a llithrydd.
 
 > [!TIP]
 > Gall modiwlau ychwanegu eu hawgrymiadau eu hunain at y rhestr honno, gweler [modiwlau](#modiwlau).
@@ -206,7 +206,7 @@ Mae'r cerdyn hwn yn caniatáu i chi greu naidlen gydag unrhyw gynnwys. Mae pob n
 | `trigger` | object neu list | Dewisol | Gweler [amodau](#amodau) | Agor y naidlen hon pan fodlonir yr amodau |
 | `trigger_entity` | string | Dewisol | Unrhyw endid | Agor y naidlen hon yn seiliedig ar gyflwr unrhyw endid, ffurf syml `trigger` |
 | `trigger_state` | string | Dewisol (**Gofynnol** os yw `trigger_entity` wedi'i ddiffinio) | Unrhyw gyflwr endid | Cyflwr endid i agor y naidlen |
-| `trigger_close` | boolean | Dewisol | `true` neu `false` | Cau'r naidlen pan na fodlonir yr amodau mwyach (diofyn: `true` gyda `trigger`, `false` gyda `trigger_state`) |
+| `trigger_close` | boolean | Dewisol | `true` (diofyn) neu `false` | Cau'r naidlen pan na fodlonir yr amodau mwyach. `false` yw'r diofyn yn lle hynny pan fyddwch yn defnyddio'r pâr hŷn `trigger_entity` a `trigger_state` |
 | `open_action` | object | Dewisol | Gweler [gweithredoedd](#gweithredoedd-tapio-tapio-dwbl-a-dal) | Sbarduno gweithred wrth agor y naidlen |
 | `close_action` | object | Dewisol | Gweler [gweithredoedd](#gweithredoedd-tapio-tapio-dwbl-a-dal) | Sbarduno gweithred wrth gau'r naidlen |
 | `show_header` | boolean | Dewisol | `true` (diofyn) or `false` | Dangos/Cuddio pennyn y naidlen yn llwyr |
@@ -462,7 +462,7 @@ Mae'r opsiynau hyn ar gael dim ond pan fydd `button_type` wedi'i osod i `slider`
 | `read_only_slider`      | boolean | Dewisol (`false` yn ddiofyn)      | Gwneud y llithrydd yn ddarllen yn unig. Yn cael ei alluogi'n awtomatig ar gyfer rhai endidau fel synwyryddion.                        |
 | `slider_live_update`    | boolean | Dewisol (`false` yn ddiofyn)      | Diweddarir cyflwr yr endid wrth lithro. **Ni argymhellir y nodwedd hon ar gyfer pob endid.**        |
 | `slider_fill_orientation` | string | Dewisol | `left`, `right`, `top` neu `bottom` | Newid cyfeiriad llenwi'r llithrydd. O'r chwith i'r dde pan nad yw wedi'i ddiffinio, wedi'i adlewyrchu mewn [ieithoedd o'r dde i'r chwith](#lleoleiddio) |
-| `slider_value_position` | string | Dewisol | `right`, `left`, `center` neu `hidden` | Safle dangos y gwerth. Ar yr ochr derfynol pan nad yw wedi'i ddiffinio, felly ar y chwith mewn [ieithoedd o'r dde i'r chwith](#lleoleiddio) |
+| `slider_value_position` | string | Dewisol | `right`, `left`, `center` neu `hidden` | Safle dangos y gwerth. Ar y dde pan nad yw wedi'i ddiffinio, ac ar y chwith mewn [ieithoedd o'r dde i'r chwith](#lleoleiddio) |
 | `invert_slider_value` | boolean | Dewisol (`false` yn ddiofyn) | Gwrthdroi cyfeiriad y llithrydd (mae llenwad 100% yn gyfwerth â'r lleiafswm). Ddim ar gael ar gyfer llithryddion lliw. |
 | `light_slider_type` | string | Dewisol | `brightness` (rhagosodedig), `hue`, `saturation`, `white_temp` | **Ar gyfer goleuadau yn unig.** Dewis modd y llithrydd |
 | `cover_slider_type` | string | Dewisol | `position` (rhagosodedig), `tilt_position` | **Ar gyfer gorchuddion yn unig.** Dewis modd y llithrydd (safle neu ogwydd) |
@@ -1347,7 +1347,7 @@ Mae is-fotymau llithrydd yn cefnogi'r un opsiynau llithrydd â llithryddion botw
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radiws ymyl ar gyfer yr is-fotymau |
 | `--bubble-sub-button-background-color` | `color` | Lliw cefndir ar gyfer yr is-fotymau |
-| `--bubble-sub-button-outline` | `box-shadow` | Amlinelliad a ychwanegir at is-fotwm neu lithrydd dim ond pan fydd yn cael ei baentio yn yr un lliw â'r cerdyn y tu ôl iddo, a fyddai'n ei wneud yn anweledig (gosodwch ef i `none` i'w dynnu) |
+| `--bubble-sub-button-outline` | `box-shadow` | Amlinelliad a ychwanegir at is-fotwm neu lithrydd, dim ond pan fydd yr elfen honno'n cael ei phaentio yn yr un lliw â'r cerdyn y tu ôl iddi, a fyddai'n ei gwneud yn anweledig (gosodwch ef i `none` i'w dynnu) |
 | `--bubble-sub-slider-border-radius` | `px` | Radiws ymyl ar gyfer is-fotymau llithrydd |
 | `--bubble-sub-slider-background-color` | `color` | Lliw cefndir ar gyfer is-fotymau llithrydd |
 | `--bubble-sub-slider-height` | `px` | Uchder ar gyfer is-fotymau llithrydd gweladwy bob amser |
@@ -2694,7 +2694,7 @@ Mae Bubble Card yn siarad eich iaith. Mae ei olygydd wedi'i gyfieithu i'r 64 iai
 
 Ar waelod y golygydd, wrth ymyl rhif y fersiwn, mae switsh **Awtomatig** yn dilyn iaith eich Home Assistant. Diffoddwch ef ac mae'r golygydd cyfan yn dychwelyd i'r Saesneg, sy'n ddefnyddiol i ddilyn tiwtorial neu i adrodd am broblem. Cofir eich dewis yn eich porwr.
 
-Mae'r ddogfennaeth hon wedi'i chyfieithu hefyd, [i 62 iaith](languages.md). Mae'r tudalennau hynny'n agored i bawb, felly gellir cywiro geiriad nad yw'n cyfateb i'ch Home Assistant chi mewn ychydig o gliciau. Mae'r fersiwn Saesneg yn aros yn gyfeirnod ar gyfer y cynnwys ei hun.
+Mae'r ddogfennaeth hon wedi'i chyfieithu hefyd, [i 62 iaith](languages.md), pob un ohonynt heblaw Saesneg Prydeinig, sy'n dangos y gwreiddiol. Mae'r tudalennau hynny'n agored i bawb, felly gellir cywiro geiriad nad yw'n cyfateb i'ch Home Assistant chi mewn ychydig o gliciau. Mae'r fersiwn Saesneg yn aros yn gyfeirnod ar gyfer y cynnwys ei hun.
 
 <br>
 

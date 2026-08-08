@@ -132,9 +132,9 @@ Všetky možnosti je možné nastaviť v editore Home Assistant. Podrobnosti a Y
 
 ## Návrhy pre entity
 
-Od Home Assistant 2026.6 vám výber entity vo výbere kariet ponúkne niekoľko hotových kariet a Bubble Card na túto otázku odpovedá vlastnými receptami. Vyberte svetlo a dostanete kartu s posuvníkom jasu, plus variant s teplotou farby, variant s farbou a variant so sýtosťou, ak ich vaše svetlo podporuje. Vyberte roletu a dostanete jej posuvník polohy, vyberte prehrávač médií a dostanete aj variant so zoznamom zdrojov, vyberte vysávač a dostanete jeho tlačidlá spustiť, pozastaviť a do doku. Každý návrh je bežná konfigurácia Bubble Card zobrazená ako živý náhľad, takže si môžete vziať ten najbližší a ďalej ho upravovať ako zvyčajne.
+Od Home Assistant 2026.6 vám výber entity vo výbere kariet ponúkne niekoľko hotových kariet a Bubble Card do tohto zoznamu pridáva vlastné recepty. Vyberte svetlo a dostanete kartu s posuvníkom jasu, plus variant s teplotou farby, variant s farbou a variant so sýtosťou, ak ich vaše svetlo podporuje. Vyberte roletu a dostanete jej posuvník polohy, vyberte prehrávač médií a dostanete aj variant so zoznamom zdrojov, vyberte vysávač a dostanete jeho tlačidlá spustiť, pozastaviť a do doku. Každý návrh je bežná konfigurácia Bubble Card zobrazená ako živý náhľad, takže si môžete vziať ten najbližší a ďalej ho upravovať ako zvyčajne.
 
-To, čo sa vám ponúkne, závisí od toho, čo vaša entita naozaj dokáže: svetlo bez kanála jasu dostane prepínač namiesto posuvníka, roleta, ktorá sa nedá nakláňať, nedostane variant s nakláňaním, a entita klimatizácie dostane svoje predvoľby len vtedy, keď nejaké má. Klasické položky nasledujú pod nimi, keď sa uplatnia: vyhradená karta danej domény, jednoduché tlačidlo a posuvník.
+To, čo sa vám ponúkne, závisí od toho, čo vaša entita naozaj dokáže: svetlo bez kanála jasu dostane prepínač namiesto posuvníka, roleta, ktorá sa nedá nakláňať, nedostane variant s nakláňaním, a entita klimatizácie dostane svoje predvoľby len vtedy, keď nejaké má. Klasické položky nasledujú pod návrhmi Bubble Card, keď sa uplatnia: karta vyhradená pre daný typ entity, jednoduché tlačidlo a posuvník.
 
 > [!TIP]
 > Moduly môžu do tohto zoznamu pridať vlastné návrhy, pozri [moduly](#moduly).
@@ -206,7 +206,7 @@ Táto karta umožňuje vytvoriť pop-up s akýmkoľvek obsahom. Každý pop-up j
 | `trigger` | object alebo list | Voliteľné | Pozri [podmienky](#podmienky) | Otvorí tento pop-up, keď sú splnené podmienky |
 | `trigger_entity` | string | Voliteľné | Akákoľvek entita | Otvorí tento pop-up na základe stavu ľubovoľnej entity, jednoduchá forma `trigger` |
 | `trigger_state` | string | Voliteľné (**Povinné**, ak je definované `trigger_entity`) | Akýkoľvek stav entity | Stav entity na otvorenie pop-upu |
-| `trigger_close` | boolean | Voliteľné | `true` alebo `false` | Zatvorí pop-up, keď už podmienky nie sú splnené (predvolené: `true` s `trigger`, `false` s `trigger_state`) |
+| `trigger_close` | boolean | Voliteľné | `true` (predvolené) alebo `false` | Zatvorí pop-up, keď už podmienky nie sú splnené. Ak použijete staršiu dvojicu `trigger_entity` a `trigger_state`, predvolená hodnota je `false` |
 | `open_action` | object | Voliteľné | Pozri [akcie](#akcie-ťuknutia-dvojitého-ťuknutia-a-podržania) | Spustí akciu pri otváraní pop-upu |
 | `close_action` | object | Voliteľné | Pozri [akcie](#akcie-ťuknutia-dvojitého-ťuknutia-a-podržania) | Spustí akciu pri zatváraní pop-upu |
 | `show_header` | boolean | Voliteľné | `true` (predvolené) alebo `false` | Zobrazí/skryje celú hlavičku pop-upu |
@@ -462,7 +462,7 @@ Tieto možnosti sú dostupné iba vtedy, keď je `button_type` nastavený na `sl
 | `read_only_slider`      | boolean | Optional (`false` default)      | Nastaví posuvník iba na čítanie. Automaticky sa zapne pre niektoré entity, napríklad senzory.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Stav entity sa aktualizuje počas posúvania. **Táto funkcia sa neodporúča pre všetky entity.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` alebo `bottom` | Zmení smer výplne posuvníka. Zľava doprava, ak nie je definované, zrkadlovo v [jazykoch písaných sprava doľava](#lokalizácia) |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` alebo `hidden` | Pozícia zobrazenia hodnoty. Na koncovej strane, ak nie je definované, teda vľavo v [jazykoch písaných sprava doľava](#lokalizácia) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` alebo `hidden` | Pozícia zobrazenia hodnoty. Vpravo, ak nie je definované, a vľavo v [jazykoch písaných sprava doľava](#lokalizácia) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Obráti smer posuvníka (100 % výplň sa rovná minimu). Nedostupné pre farebné posuvníky. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Iba pre svetlá.** Vyberie režim posuvníka |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Iba pre rolety.** Vyberie režim posuvníka (poloha alebo naklonenie) |
@@ -1347,7 +1347,7 @@ Posuvníkové podtlačidlá podporujú rovnaké možnosti posuvníka ako posuvn�
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Polomer zaoblenia rohov pre podtlačidlá |
 | `--bubble-sub-button-background-color` | `color` | Farba pozadia pre podtlačidlá |
-| `--bubble-sub-button-outline` | `box-shadow` | Obrys pridaný k podtlačidlu alebo posuvníku len vtedy, keď sa vykreslí rovnakou farbou ako karta za ním, čo by ho urobilo neviditeľným (nastavte ho na `none`, ak ho chcete odstrániť) |
+| `--bubble-sub-button-outline` | `box-shadow` | Obrys pridaný k podtlačidlu alebo posuvníku len vtedy, keď sa daný prvok vykreslí rovnakou farbou ako karta za ním, čo by ho urobilo neviditeľným (nastavte ho na `none`, ak ho chcete odstrániť) |
 | `--bubble-sub-slider-border-radius` | `px` | Polomer zaoblenia rohov pre posuvníkové podtlačidlá |
 | `--bubble-sub-slider-background-color` | `color` | Farba pozadia pre posuvníkové podtlačidlá |
 | `--bubble-sub-slider-height` | `px` | Výška pre trvalo zobrazené posuvníkové podtlačidlá |
@@ -2694,7 +2694,7 @@ Bubble Card hovorí vaším jazykom. Jeho editor je preložený do 64 jazykov, k
 
 V spodnej časti editora, vedľa čísla verzie, sleduje prepínač **Automaticky** jazyk vášho Home Assistant. Vypnite ho a celý editor sa vráti do angličtiny, čo sa hodí pri sledovaní návodu alebo pri hlásení problému. Vaša voľba sa zapamätá vo vašom prehliadači.
 
-Aj táto dokumentácia je preložená, [do 62 jazykov](languages.md). Tieto stránky sú otvorené pre každého, takže formuláciu, ktorá nezodpovedá vášmu vlastnému Home Assistant, možno opraviť niekoľkými kliknutiami. Anglická verzia zostáva referenciou pre samotný obsah.
+Aj táto dokumentácia je preložená, [do 62 jazykov](languages.md), do všetkých okrem britskej angličtiny, ktorá používa originál. Tieto stránky sú otvorené pre každého, takže formuláciu, ktorá nezodpovedá vášmu vlastnému Home Assistant, možno opraviť niekoľkými kliknutiami. Anglická verzia zostáva referenciou pre samotný obsah.
 
 <br>
 

@@ -132,9 +132,9 @@ Totes les opcions es poden configurar a l'editor de Home Assistant. Però a la d
 
 ## Suggeriments d'entitat
 
-Des de Home Assistant 2026.6, escollir una entitat al selector de targetes us ofereix unes quantes targetes ja fetes, i Bubble Card respon aquesta pregunta amb les seves pròpies receptes. Trieu un llum i se us ofereix una targeta amb un control lliscant de brillantor, més una variant de temperatura de color, una de color i una de saturació quan el vostre llum les admet. Trieu una coberta i obteniu el control lliscant de la seva posició, trieu un reproductor multimèdia i obteniu també una variant amb la llista de les seves fonts, trieu un aspirador i obteniu els seus botons d'inici, pausa i retorn a la base. Cada suggeriment és una configuració normal de Bubble Card mostrada com una previsualització en directe, així podeu agafar la més propera i continuar editant-la com sempre.
+Des de Home Assistant 2026.6, escollir una entitat al selector de targetes us ofereix unes quantes targetes ja fetes, i Bubble Card afegeix les seves pròpies receptes a aquesta llista. Trieu un llum i se us ofereix una targeta amb un control lliscant de brillantor, més una variant de temperatura de color, una de color i una de saturació quan el vostre llum les admet. Trieu una coberta i obteniu el control lliscant de la seva posició, trieu un reproductor multimèdia i obteniu també una variant amb la llista de les seves fonts, trieu un aspirador i obteniu els seus botons d'inici, pausa i retorn a la base. Cada suggeriment és una configuració normal de Bubble Card mostrada com una previsualització en directe, així podeu agafar la més propera i continuar editant-la com sempre.
 
-El que se us ofereix depèn del que la vostra entitat pot fer realment: un llum sense canal de brillantor rep un commutador en lloc d'un control lliscant, una coberta que no es pot inclinar no rep cap variant d'inclinació, i una entitat de climatització rep els seus modes preestablerts només quan en té. Les entrades clàssiques segueixen a sota quan són aplicables: la targeta dedicada del domini, un botó senzill i un control lliscant.
+El que se us ofereix depèn del que la vostra entitat pot fer realment: un llum sense canal de brillantor rep un commutador en lloc d'un control lliscant, una coberta que no es pot inclinar no rep cap variant d'inclinació, i una entitat de climatització rep els seus modes preestablerts només quan en té. Les entrades clàssiques segueixen sota els suggeriments de Bubble Card quan són aplicables: la targeta dedicada a aquest tipus d'entitat, un botó senzill i un control lliscant.
 
 > [!TIP]
 > Els mòduls poden afegir els seus propis suggeriments a aquesta llista, vegeu [mòduls](#mòduls).
@@ -206,7 +206,7 @@ Aquesta targeta us permet crear un pop-up amb qualsevol contingut. Cada pop-up e
 | `trigger` | object o list | Opcional | Vegeu [condicions](#condicions) | Obre aquest pop-up quan es compleixen les condicions |
 | `trigger_entity` | string | Opcional | Qualsevol entitat | Obre aquest pop-up segons l'estat de qualsevol entitat, la forma simple de `trigger` |
 | `trigger_state` | string | Opcional (**Obligatori** si `trigger_entity` està definit) | Qualsevol estat d'entitat | Estat de l'entitat per obrir el pop-up |
-| `trigger_close` | boolean | Opcional | `true` o `false` | Tanca el pop-up quan les condicions deixen de complir-se (per defecte: `true` amb `trigger`, `false` amb `trigger_state`) |
+| `trigger_close` | boolean | Opcional | `true` (per defecte) o `false` | Tanca el pop-up quan les condicions deixen de complir-se. Per defecte és `false` quan feu servir la parella antiga `trigger_entity` i `trigger_state` |
 | `open_action` | object | Opcional | Vegeu [accions](#accions-de-toc-doble-toc-i-toc-llarg) | Activa una acció quan el pop-up s'obre |
 | `close_action` | object | Opcional | Vegeu [accions](#accions-de-toc-doble-toc-i-toc-llarg) | Activa una acció quan el pop-up es tanca |
 | `show_header` | boolean | Opcional | `true` (per defecte) o `false` | Mostra/Oculta completament la capçalera del pop-up |
@@ -462,7 +462,7 @@ Aquestes opcions només estan disponibles quan `button_type` està definit a `sl
 | `read_only_slider`      | boolean | Opcional (`false` per defecte)      | Fa que el control lliscant sigui només de lectura. S'activa automàticament per a algunes entitats com els sensors.                        |
 | `slider_live_update`    | boolean | Opcional (`false` per defecte)      | L'estat de l'entitat s'actualitza mentre llisqueu. **Aquesta funció no es recomana per a totes les entitats.**        |
 | `slider_fill_orientation` | string | Opcional | `left`, `right`, `top` o `bottom` | Canvia la direcció d'ompliment del control lliscant. D'esquerra a dreta quan no està definit, reflectit en les [llengües que s'escriuen de dreta a esquerra](#localització) |
-| `slider_value_position` | string | Opcional | `right`, `left`, `center` o `hidden` | Posició de la visualització del valor. Al costat final quan no està definit, per tant a l'esquerra en les [llengües que s'escriuen de dreta a esquerra](#localització) |
+| `slider_value_position` | string | Opcional | `right`, `left`, `center` o `hidden` | Posició de la visualització del valor. A la dreta quan no està definit, i a l'esquerra en les [llengües que s'escriuen de dreta a esquerra](#localització) |
 | `invert_slider_value` | boolean | Opcional (`false` per defecte) | Inverteix la direcció del control lliscant (100% d'ompliment equival al mínim). No disponible per als controls lliscants de color. |
 | `light_slider_type` | string | Opcional | `brightness` (per defecte), `hue`, `saturation`, `white_temp` | **Només per a llums.** Trieu el mode del control lliscant |
 | `cover_slider_type` | string | Opcional | `position` (per defecte), `tilt_position` | **Només per a cobertes.** Trieu el mode del control lliscant (posició o inclinació) |
@@ -1347,7 +1347,7 @@ Els subbotons de control lliscant admeten les mateixes opcions de control llisca
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radi de la vora per als subbotons |
 | `--bubble-sub-button-background-color` | `color` | Color de fons per als subbotons |
-| `--bubble-sub-button-outline` | `box-shadow` | Contorn afegit a un subbotó o a un control lliscant només quan es pinta del mateix color que la targeta de darrere, cosa que el faria invisible (poseu-hi `none` per treure'l) |
+| `--bubble-sub-button-outline` | `box-shadow` | Contorn afegit a un subbotó o a un control lliscant, només quan aquest element es pinta del mateix color que la targeta de darrere, cosa que el faria invisible (poseu-hi `none` per treure'l) |
 | `--bubble-sub-slider-border-radius` | `px` | Radi de la vora per als subbotons de control lliscant |
 | `--bubble-sub-slider-background-color` | `color` | Color de fons per als subbotons de control lliscant |
 | `--bubble-sub-slider-height` | `px` | Alçada per als subbotons de control lliscant sempre visibles |
@@ -2694,7 +2694,7 @@ Bubble Card parla la vostra llengua. El seu editor està traduït a les 64 lleng
 
 A la part inferior de l'editor, al costat del número de versió, un interruptor **Automàtic** segueix la llengua del vostre Home Assistant. Desactiveu-lo i tot l'editor torna a l'anglès, cosa pràctica per seguir un tutorial o per informar d'un problema. La vostra tria es recorda al navegador.
 
-Aquesta documentació també està traduïda, [a 62 llengües](languages.md). Aquestes pàgines són obertes a tothom, així una expressió que no coincideix amb el vostre Home Assistant es pot corregir en un parell de clics. La versió anglesa continua sent la referència per al contingut mateix.
+Aquesta documentació també està traduïda, [a 62 llengües](languages.md), totes menys l'anglès britànic, que llegeix l'original. Aquestes pàgines són obertes a tothom, així una expressió que no coincideix amb el vostre Home Assistant es pot corregir en un parell de clics. La versió anglesa continua sent la referència per al contingut mateix.
 
 <br>
 

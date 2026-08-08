@@ -132,9 +132,9 @@ Alli Optione chasch im Home Assistant Editor konfiguriere. Aber du findsch meh D
 
 ## Entitäte-Vorschläg
 
-Sit Home Assistant 2026.6 wird dir bim Uswähle vo ere Entität im Charte-Uswähler es paar fertigi Charte aabote, und Bubble Card antwortet uf die Frag mit sine eigene Rezäpt. Wähl es Liecht us und du übercho es Charte mit eme Helligkeits-Schieberegler, plus e Farbtemperatur-, e Farb- und e Sättigungsvariante, wenn dis Liecht die unterstützt. Wähl e Store us und du übercho ihre Positions-Schieberegler, wähl en Mediaplayer us und du übercho au e Variante mit sinere Quelleliste, wähl en Staubsuger us und du übercho sini Buttons Start, Pause und Zrugg zur Basis. Jede Vorschlag isch e normali Bubble Card-Konfiguration, wo als Live-Vorschau azeigt wird, drum chasch de nächschti neh und wie gwohnt witer bearbeite.
+Sit Home Assistant 2026.6 wird dir bim Uswähle vo ere Entität im Charte-Uswähler es paar fertigi Charte aabote, und Bubble Card tuet sini eigene Rezäpt zu dere Lischte dezue. Wähl es Liecht us und du übercho es Charte mit eme Helligkeits-Schieberegler, plus e Farbtemperatur-, e Farb- und e Sättigungsvariante, wenn dis Liecht die unterstützt. Wähl e Store us und du übercho ihre Positions-Schieberegler, wähl en Mediaplayer us und du übercho au e Variante mit sinere Quelleliste, wähl en Staubsuger us und du übercho sini Buttons Start, Pause und Zrugg zur Basis. Jede Vorschlag isch e normali Bubble Card-Konfiguration, wo als Live-Vorschau azeigt wird, drum chasch de nächschti neh und wie gwohnt witer bearbeite.
 
-Was dir aabote wird, hanget dervo ab, was dini Entität würklich cha: es Liecht ohni Helligkeitskanal übercho en Schalter statt en Schieberegler, e Store wo nöd chippe cha übercho kei Chippvariante, e Klima-Entität übercho ihri voreigstellte Modi nur, wenn si sonigi het. D klassische Iiträg chömed drunter, wenn si passe: s eigene Charte vom Domain, en eifache Button und en Schieberegler.
+Was dir aabote wird, hanget dervo ab, was dini Entität würklich cha: es Liecht ohni Helligkeitskanal übercho en Schalter statt en Schieberegler, e Store wo nöd chippe cha übercho kei Chippvariante, e Klima-Entität übercho ihri voreigstellte Modi nur, wenn si sonigi het. D klassische Iiträg chömed under de Bubble Card-Vorschläg, wenn si passe: s eigene Charte für die Art vo Entität, en eifache Button und en Schieberegler.
 
 > [!TIP]
 > Module chönd ihri eigene Vorschläg zu dere Lischte hinzuefüege, lueg [Module](#module).
@@ -206,7 +206,7 @@ Mit dere Karte chasch e Pop-up mit beliebigem Inhalt erstelle. Jedes Pop-up isch
 | `trigger` | object oder list | Optional | Gsehsch [Bedingige](#bedingige) | Öffnet das Pop-up, wenn d Bedingige erfüllt sind |
 | `trigger_entity` | string | Optional | Jedi Entität | Macht das Pop-up uf, basierend uf em Zuestand vo irgendere Entität, die eifachi Form vo `trigger` |
 | `trigger_state` | string | Optional (**Erforderlich** falls `trigger_entity` definiert isch) | Jede Entitäts-Zuestand | Entitäts-Zuestand zum s Pop-up uufmache |
-| `trigger_close` | boolean | Optional | `true` oder `false` | Schliesst s Pop-up, wenn d Bedingige nüme erfüllt sind (Standard: `true` mit `trigger`, `false` mit `trigger_state`) |
+| `trigger_close` | boolean | Optional | `true` (Standard) oder `false` | Schliesst s Pop-up, wenn d Bedingige nüme erfüllt sind. Stattdesse isch de Standard `false`, wenn du s eltere Paar `trigger_entity` und `trigger_state` bruuchsch |
 | `open_action` | object | Optional | Gseht [Aktione](#tippe--doppeltipp--und-halte-aktione) | Löst e Aktion us, wenn s Pop-up uufgeit |
 | `close_action` | object | Optional | Gseht [Aktione](#tippe--doppeltipp--und-halte-aktione) | Löst e Aktion us, wenn s Pop-up zuegeit |
 | `show_header` | boolean | Optional | `true` (Standard) oder `false` | Zeigt/Verschteckt d Kopfziile vom Pop-up komplett |
@@ -462,7 +462,7 @@ Die Optione sind nur verfüegbar, wenn `button_type` uf `slider` gsetzt isch.
 | `read_only_slider`      | boolean | Optional (`false` Standard)      | Macht de Schieberegler nur läsbar. Wird automatisch aktiviert für gwüssi Entities wie Sensore.                                        |
 | `slider_live_update`    | boolean | Optional (`false` Standard)      | De Entity-Zuestand wird während em Schiebe aktualisiert. **Die Funktion wird nöd für alli Entities empfohle.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` oder `bottom` | Ändert d Füllrichtig vom Schieberegler. Vo links nach rächts, wenn nöd definiert, gspieglet i [Sprache vo rächts nach links](#lokalisierig) |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` oder `hidden` | Position vo de Wärtaazeig. Uf de Ändsite, wenn nöd definiert, also links i [Sprache vo rächts nach links](#lokalisierig) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` oder `hidden` | Position vo de Wärtaazeig. Rächts, wenn nöd definiert, und links i [Sprache vo rächts nach links](#lokalisierig) |
 | `invert_slider_value` | boolean | Optional (`false` Standard) | Kehrt d Schieberegler-Richtig um (100 % Füllig entspricht em Minimum). Nöd verfüegbar für Farb-Schieberegler. |
 | `light_slider_type` | string | Optional | `brightness` (Standard), `hue`, `saturation`, `white_temp` | **Nur für Lichter.** Wähl de Schieberegler-Modus |
 | `cover_slider_type` | string | Optional | `position` (Standard), `tilt_position` | **Nur für Store.** Wähl de Schieberegler-Modus (Position oder Neigig) |
@@ -1347,7 +1347,7 @@ Slider-Sub-Buttons unterstütze die gliche Slider-Optione wie Button-Slider, ink
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Randradius für d'Sub-Buttons |
 | `--bubble-sub-button-background-color` | `color` | Hintergrundfarb für d'Sub-Buttons |
-| `--bubble-sub-button-outline` | `box-shadow` | Umriss, wo nur denn zu eme Sub-Button oder eme Schieberegler dezue chunnt, wenn er die gliich Farb übercho wie s Charte dehinder, was ihn unsichtbar machti (setz en uf `none`, zum en entferne) |
+| `--bubble-sub-button-outline` | `box-shadow` | Umriss, wo zu eme Sub-Button oder eme Schieberegler dezue chunnt, aber nur denn, wenn das Element die gliich Farb übercho wie s Charte dehinder, was es unsichtbar machti (setz en uf `none`, zum en entferne) |
 | `--bubble-sub-slider-border-radius` | `px` | Randradius für Slider-Sub-Buttons |
 | `--bubble-sub-slider-background-color` | `color` | Hintergrundfarb für Slider-Sub-Buttons |
 | `--bubble-sub-slider-height` | `px` | Höchi für immer sichtbari Slider-Sub-Buttons |
@@ -2694,7 +2694,7 @@ Bubble Card redt dini Sprach. Sin Editor isch i die 64 Sprache übersetzt, wo Ho
 
 Zunterscht im Editor, näbem Versionsnummere, folgt en **Automatisch**-Schalter de Sprach vo dim Home Assistant. Schalt en ab und de ganz Editor gaht zrugg uf Änglisch, was praktisch isch zum eme Tutorial folge oder es Problem melde. Dini Wahl wird i dim Browser gmerkt.
 
-Die Dokumentation isch au übersetzt, [i 62 Sprache](languages.md). Die Site sind für alli offe, drum cha e Formulierig, wo nöd zu dim eigene Home Assistant passt, i es paar Klick korrigiert werde. D änglisch Version bliibt d Referänz für de Inhalt sälber.
+Die Dokumentation isch au übersetzt, [i 62 Sprache](languages.md), alli usser britischs Änglisch, wo s Original liest. Die Site sind für alli offe, drum cha e Formulierig, wo nöd zu dim eigene Home Assistant passt, i es paar Klick korrigiert werde. D änglisch Version bliibt d Referänz für de Inhalt sälber.
 
 <br>
 

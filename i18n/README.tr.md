@@ -132,9 +132,9 @@ Tüm seçenekler Home Assistant düzenleyicisinden yapılandırılabilir. Ancak 
 
 ## Varlık önerileri
 
-Home Assistant 2026.6 sürümünden beri, kart seçicide bir varlık seçtiğinizde size birkaç hazır kart sunulur ve Bubble Card bu soruya kendi tarifleriyle yanıt verir. Bir ışık seçin, size parlaklık kaydırıcılı bir kart sunulur, ışığınız destekliyorsa ayrıca renk sıcaklığı, renk ve doygunluk çeşitleri de gelir. Bir panjur seçin, konum kaydırıcısını alırsınız, bir medya oynatıcı seçin, kaynak listeli bir çeşidini de alırsınız, bir süpürge seçin, başlat, duraklat ve şarj istasyonuna dön düğmelerini alırsınız. Her öneri, canlı önizleme olarak gösterilen sıradan bir Bubble Card yapılandırmasıdır, bu yüzden en yakın olanı alıp her zamanki gibi düzenlemeye devam edebilirsiniz.
+Home Assistant 2026.6 sürümünden beri, kart seçicide bir varlık seçtiğinizde size birkaç hazır kart sunulur ve Bubble Card bu listeye kendi tariflerini ekler. Bir ışık seçin, size parlaklık kaydırıcılı bir kart sunulur, ışığınız destekliyorsa ayrıca renk sıcaklığı, renk ve doygunluk çeşitleri de gelir. Bir panjur seçin, konum kaydırıcısını alırsınız, bir medya oynatıcı seçin, kaynak listeli bir çeşidini de alırsınız, bir süpürge seçin, başlat, duraklat ve şarj istasyonuna dön düğmelerini alırsınız. Her öneri, canlı önizleme olarak gösterilen sıradan bir Bubble Card yapılandırmasıdır, bu yüzden en yakın olanı alıp her zamanki gibi düzenlemeye devam edebilirsiniz.
 
-Size ne sunulacağı, varlığınızın gerçekte ne yapabildiğine bağlıdır: parlaklık kanalı olmayan bir ışık kaydırıcı yerine bir anahtar alır, eğilemeyen bir panjur için eğim çeşidi sunulmaz, bir iklim varlığı ön ayar modlarını yalnızca sahipse alır. Uygun olduklarında klasik girdiler bunların altında gelir: o varlık türünün özel kartı, sade bir düğme ve bir kaydırıcı.
+Size ne sunulacağı, varlığınızın gerçekte ne yapabildiğine bağlıdır: parlaklık kanalı olmayan bir ışık kaydırıcı yerine bir anahtar alır, eğilemeyen bir panjur için eğim çeşidi sunulmaz, bir iklim varlığı ön ayar modlarını yalnızca sahipse alır. Uygun olduklarında klasik girdiler Bubble Card önerilerinin altında gelir: o varlık türünün özel kartı, sade bir düğme ve bir kaydırıcı.
 
 > [!TIP]
 > Modüller bu listeye kendi önerilerini ekleyebilir, bkz. [modüller](#modüller).
@@ -206,7 +206,7 @@ Bu kart, istediğiniz içerikle bir pop-up oluşturmanızı sağlar. Her pop-up 
 | `trigger` | object veya list | İsteğe bağlı | Bkz. [koşullar](#koşullar) | Koşullar sağlandığında bu pop-up'ı açar |
 | `trigger_entity` | string | İsteğe bağlı | Herhangi bir varlık | Herhangi bir varlığın durumuna göre bu pop-up'ı açar, `trigger` seçeneğinin basit biçimi |
 | `trigger_state` | string | İsteğe bağlı (`trigger_entity` tanımlıysa **Gerekli**) | Herhangi bir varlık durumu | Pop-up'ı açacak varlık durumu |
-| `trigger_close` | boolean | İsteğe bağlı | `true` veya `false` | Koşullar artık sağlanmadığında pop-up'ı kapatır (varsayılan: `trigger` ile `true`, `trigger_state` ile `false`) |
+| `trigger_close` | boolean | İsteğe bağlı | `true` (varsayılan) veya `false` | Koşullar artık sağlanmadığında pop-up'ı kapatır. Eski `trigger_entity` ve `trigger_state` ikilisini kullanırsanız varsayılan `false` olur |
 | `open_action` | object | İsteğe bağlı | Bkz. [eylemler](#dokunma-çift-dokunma-ve-basılı-tutma-eylemleri) | Pop-up açılırken bir eylem tetikler |
 | `close_action` | object | İsteğe bağlı | Bkz. [eylemler](#dokunma-çift-dokunma-ve-basılı-tutma-eylemleri) | Pop-up kapanırken bir eylem tetikler |
 | `show_header` | boolean | İsteğe bağlı | `true` (varsayılan) veya `false` | Pop-up başlığını tamamen gösterir/gizler |
@@ -462,7 +462,7 @@ Bu seçenekler yalnızca `button_type`, `slider` olarak ayarlandığında kullan
 | `read_only_slider`      | boolean | Optional (`false` default)      | Kaydırıcıyı salt okunur yapın. Sensörler gibi bazı varlıklar için otomatik olarak etkinleştirilir.                                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Kaydırma sırasında varlık durumu güncellenir. **Bu özellik tüm varlıklar için önerilmez.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` veya `bottom` | Kaydırıcının dolgu yönünü değiştirin. Belirtilmediğinde soldan sağa, [sağdan sola yazılan dillerde](#yerelleştirme) aynalanır |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` veya `hidden` | Değer görüntüsünün konumu. Belirtilmediğinde bitiş tarafında, yani [sağdan sola yazılan dillerde](#yerelleştirme) solda olur |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` veya `hidden` | Değer görüntüsünün konumu. Belirtilmediğinde sağda, [sağdan sola yazılan dillerde](#yerelleştirme) ise solda olur |
 | `invert_slider_value` | boolean | Optional (`false` default) | Kaydırıcı yönünü tersine çevirin (%100 dolgu, minimuma eşittir). Renk kaydırıcıları için kullanılamaz. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Yalnızca ışıklar için.** Kaydırıcı modunu seçin |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Yalnızca panjurlar için.** Kaydırıcı modunu seçin (konum veya eğim) |
@@ -1347,7 +1347,7 @@ Kaydırıcı alt düğmeleri, düğme kaydırıcılarıyla aynı kaydırıcı se
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Alt düğmeler için kenar yuvarlaklığı |
 | `--bubble-sub-button-background-color` | `color` | Alt düğmeler için arka plan rengi |
-| `--bubble-sub-button-outline` | `box-shadow` | Bir alt düğmeye veya kaydırıcıya, yalnızca arkasındaki kartla aynı rengi alıp görünmez kalacağı durumda eklenen dış çizgi (kaldırmak için `none` olarak ayarlayın) |
+| `--bubble-sub-button-outline` | `box-shadow` | Bir alt düğmeye veya kaydırıcıya, yalnızca o öğe arkasındaki kartla aynı rengi alıp görünmez kalacağı durumda eklenen dış çizgi (kaldırmak için `none` olarak ayarlayın) |
 | `--bubble-sub-slider-border-radius` | `px` | Kaydırıcı alt düğmeler için kenar yuvarlaklığı |
 | `--bubble-sub-slider-background-color` | `color` | Kaydırıcı alt düğmeler için arka plan rengi |
 | `--bubble-sub-slider-height` | `px` | Her zaman görünür kaydırıcı alt düğmeler için yükseklik |
@@ -2694,7 +2694,7 @@ Bubble Card sizin dilinizi konuşur. Editörü, Home Assistant'ın desteklediği
 
 Editörün altında, sürüm numarasının yanındaki bir **Otomatik** anahtarı Home Assistant dilinizi izler. Onu kapatın, tüm editör İngilizceye döner, bu da bir eğitimi takip etmek ya da bir sorun bildirmek için kullanışlıdır. Seçiminiz tarayıcınızda hatırlanır.
 
-Bu belgeler de çevrildi, [62 dilde](languages.md). Bu sayfalar herkese açıktır, bu yüzden kendi Home Assistant'ınıza uymayan bir ifade birkaç tıklamayla düzeltilebilir. İçeriğin kendisi için İngilizce sürüm başvuru kaynağı olarak kalır.
+Bu belgeler de çevrildi, [62 dilde](languages.md), İngiliz İngilizcesi dışında hepsinde, o da orijinali kullanır. Bu sayfalar herkese açıktır, bu yüzden kendi Home Assistant'ınıza uymayan bir ifade birkaç tıklamayla düzeltilebilir. İçeriğin kendisi için İngilizce sürüm başvuru kaynağı olarak kalır.
 
 <br>
 

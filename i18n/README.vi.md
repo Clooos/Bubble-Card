@@ -132,9 +132,9 @@ Tất cả các tùy chọn có thể được cấu hình trong trình chỉnh 
 
 ## Gợi ý thực thể
 
-Kể từ Home Assistant 2026.6, việc chọn một thực thể trong bộ chọn thẻ sẽ đề xuất cho bạn vài thẻ dựng sẵn, và Bubble Card trả lời câu hỏi đó bằng những công thức của riêng nó. Chọn một đèn và bạn được đề xuất một thẻ có thanh trượt độ sáng, kèm theo các biến thể nhiệt độ màu, màu sắc và độ bão hòa khi đèn của bạn hỗ trợ. Chọn một rèm cửa và bạn có thanh trượt vị trí của nó, chọn một trình phát đa phương tiện và bạn còn có một biến thể kèm danh sách nguồn, chọn một máy hút bụi và bạn có các nút bắt đầu, tạm dừng và về dock. Mỗi gợi ý là một cấu hình Bubble Card bình thường được hiển thị dưới dạng xem trước trực tiếp, nên bạn có thể lấy cái gần nhất và tiếp tục chỉnh sửa như thường lệ.
+Kể từ Home Assistant 2026.6, việc chọn một thực thể trong bộ chọn thẻ sẽ đề xuất cho bạn vài thẻ dựng sẵn, và Bubble Card thêm những công thức của riêng nó vào danh sách đó. Chọn một đèn và bạn được đề xuất một thẻ có thanh trượt độ sáng, kèm theo các biến thể nhiệt độ màu, màu sắc và độ bão hòa khi đèn của bạn hỗ trợ. Chọn một rèm cửa và bạn có thanh trượt vị trí của nó, chọn một trình phát đa phương tiện và bạn còn có một biến thể kèm danh sách nguồn, chọn một máy hút bụi và bạn có các nút bắt đầu, tạm dừng và về dock. Mỗi gợi ý là một cấu hình Bubble Card bình thường được hiển thị dưới dạng xem trước trực tiếp, nên bạn có thể lấy cái gần nhất và tiếp tục chỉnh sửa như thường lệ.
 
-Những gì được đề xuất phụ thuộc vào việc thực thể của bạn thực sự làm được gì: một đèn không có kênh độ sáng sẽ nhận công tắc thay vì thanh trượt, một rèm cửa không nghiêng được thì không có biến thể góc nghiêng, và một thực thể điều hòa chỉ nhận các chế độ cài sẵn khi nó có. Các mục cổ điển theo sau bên dưới khi phù hợp: thẻ chuyên dụng của miền, một nút thường và một thanh trượt.
+Những gì được đề xuất phụ thuộc vào việc thực thể của bạn thực sự làm được gì: một đèn không có kênh độ sáng sẽ nhận công tắc thay vì thanh trượt, một rèm cửa không nghiêng được thì không có biến thể góc nghiêng, và một thực thể điều hòa chỉ nhận các chế độ cài sẵn khi nó có. Các mục cổ điển theo sau bên dưới các gợi ý của Bubble Card khi phù hợp: thẻ chuyên dụng cho loại thực thể đó, một nút thường và một thanh trượt.
 
 > [!TIP]
 > Mô-đun có thể thêm gợi ý của riêng chúng vào danh sách đó, xem [mô-đun](#mô-đun).
@@ -206,7 +206,7 @@ Thẻ này cho phép bạn tạo một pop-up với bất kỳ nội dung nào. 
 | `trigger` | object hoặc list | Tùy chọn | Xem [điều kiện](#điều-kiện) | Mở pop-up này khi các điều kiện được đáp ứng |
 | `trigger_entity` | string | Tùy chọn | Bất kỳ thực thể nào | Mở pop-up này dựa trên trạng thái của bất kỳ thực thể nào, dạng đơn giản của `trigger` |
 | `trigger_state` | string | Tùy chọn (**Bắt buộc** nếu `trigger_entity` được xác định) | Bất kỳ trạng thái thực thể nào | Trạng thái thực thể để mở pop-up |
-| `trigger_close` | boolean | Tùy chọn | `true` hoặc `false` | Đóng pop-up khi các điều kiện không còn được đáp ứng (mặc định: `true` với `trigger`, `false` với `trigger_state`) |
+| `trigger_close` | boolean | Tùy chọn | `true` (mặc định) hoặc `false` | Đóng pop-up khi các điều kiện không còn được đáp ứng. Mặc định sẽ là `false` nếu bạn dùng cặp `trigger_entity` và `trigger_state` cũ |
 | `open_action` | object | Tùy chọn | Xem [hành động](#hành-động-chạm-chạm-đúp-và-giữ) | Kích hoạt một hành động khi pop-up đang mở |
 | `close_action` | object | Tùy chọn | Xem [hành động](#hành-động-chạm-chạm-đúp-và-giữ) | Kích hoạt một hành động khi pop-up đang đóng |
 | `show_header` | boolean | Tùy chọn | `true` (mặc định) hoặc `false` | Hiện/Ẩn hoàn toàn header của pop-up |
@@ -462,7 +462,7 @@ Các tùy chọn này chỉ khả dụng khi `button_type` được đặt thàn
 | `read_only_slider`      | boolean | Optional (`false` default)      | Đặt thanh trượt ở chế độ chỉ đọc. Tự động bật cho một số thực thể như cảm biến.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Trạng thái thực thể được cập nhật trong khi trượt. **Tính năng này không được khuyến nghị cho tất cả thực thể.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` hoặc `bottom` | Thay đổi hướng lấp đầy của thanh trượt. Từ trái sang phải khi không xác định, và đảo chiều trong [các ngôn ngữ viết từ phải sang trái](#bản-địa-hóa) |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` hoặc `hidden` | Vị trí hiển thị giá trị. Ở phía cuối khi không xác định, tức là bên trái trong [các ngôn ngữ viết từ phải sang trái](#bản-địa-hóa) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` hoặc `hidden` | Vị trí hiển thị giá trị. Ở bên phải khi không xác định, và ở bên trái trong [các ngôn ngữ viết từ phải sang trái](#bản-địa-hóa) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Đảo ngược hướng thanh trượt (lấp đầy 100% tương ứng với giá trị tối thiểu). Không khả dụng cho thanh trượt màu. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Chỉ dành cho đèn.** Chọn chế độ thanh trượt |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Chỉ dành cho rèm cửa.** Chọn chế độ thanh trượt (vị trí hoặc góc nghiêng) |
@@ -1347,7 +1347,7 @@ Nút phụ dạng thanh trượt hỗ trợ các tùy chọn thanh trượt gi�
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Bán kính bo góc cho nút phụ |
 | `--bubble-sub-button-background-color` | `color` | Màu nền cho nút phụ |
-| `--bubble-sub-button-outline` | `box-shadow` | Đường viền chỉ được thêm vào một nút phụ hoặc một thanh trượt khi nó có cùng màu với thẻ phía sau, điều sẽ khiến nó trở nên vô hình (đặt thành `none` để bỏ đi) |
+| `--bubble-sub-button-outline` | `box-shadow` | Đường viền chỉ được thêm vào một nút phụ hoặc một thanh trượt khi phần tử đó có cùng màu với thẻ phía sau, điều sẽ khiến nó trở nên vô hình (đặt thành `none` để bỏ đi) |
 | `--bubble-sub-slider-border-radius` | `px` | Bán kính bo góc cho nút phụ dạng thanh trượt |
 | `--bubble-sub-slider-background-color` | `color` | Màu nền cho nút phụ dạng thanh trượt |
 | `--bubble-sub-slider-height` | `px` | Chiều cao cho nút phụ dạng thanh trượt luôn hiển thị |
@@ -2694,7 +2694,7 @@ Bubble Card nói ngôn ngữ của bạn. Trình chỉnh sửa của nó đượ
 
 Ở cuối trình chỉnh sửa, bên cạnh số phiên bản, một công tắc **Tự động** đi theo ngôn ngữ Home Assistant của bạn. Tắt nó đi thì toàn bộ trình chỉnh sửa trở lại tiếng Anh, điều này tiện khi làm theo một hướng dẫn hoặc khi báo lỗi. Lựa chọn của bạn được ghi nhớ trong trình duyệt.
 
-Tài liệu này cũng được dịch, [sang 62 ngôn ngữ](languages.md). Những trang đó mở cho tất cả mọi người, nên một cách diễn đạt không khớp với Home Assistant của riêng bạn có thể được sửa chỉ trong vài cú nhấp. Bản tiếng Anh vẫn là tham chiếu cho chính nội dung.
+Tài liệu này cũng được dịch, [sang 62 ngôn ngữ](languages.md), tất cả trừ tiếng Anh Anh, vốn dùng bản gốc. Những trang đó mở cho tất cả mọi người, nên một cách diễn đạt không khớp với Home Assistant của riêng bạn có thể được sửa chỉ trong vài cú nhấp. Bản tiếng Anh vẫn là tham chiếu cho chính nội dung.
 
 <br>
 

@@ -132,9 +132,9 @@ Toutes les options peuvent être configurées dans l'éditeur de Home Assistant.
 
 ## Suggestions d'entité
 
-Depuis Home Assistant 2026.6, choisir une entité dans le sélecteur de cartes vous propose quelques cartes toutes prêtes, et Bubble Card répond à cette question avec ses propres recettes. Choisissez une lumière et on vous propose une carte avec un curseur de luminosité, plus une variante température de couleur, une variante couleur et une variante saturation quand votre lumière les prend en charge. Choisissez un ouvrant et vous obtenez son curseur de position, choisissez un lecteur multimédia et vous obtenez aussi une variante avec sa liste de sources, choisissez un aspirateur et vous obtenez ses boutons démarrer, pause et retour à la base. Chaque suggestion est une configuration Bubble Card normale affichée en aperçu en direct, donc vous pouvez prendre la plus proche et continuer à la modifier comme d'habitude.
+Depuis Home Assistant 2026.6, choisir une entité dans le sélecteur de cartes vous propose quelques cartes toutes prêtes, et Bubble Card ajoute ses propres recettes à cette liste. Choisissez une lumière et on vous propose une carte avec un curseur de luminosité, plus une variante température de couleur, une variante couleur et une variante saturation quand votre lumière les prend en charge. Choisissez un ouvrant et vous obtenez son curseur de position, choisissez un lecteur multimédia et vous obtenez aussi une variante avec sa liste de sources, choisissez un aspirateur et vous obtenez ses boutons démarrer, pause et retour à la base. Chaque suggestion est une configuration Bubble Card normale affichée en aperçu en direct, donc vous pouvez prendre la plus proche et continuer à la modifier comme d'habitude.
 
-Ce qui vous est proposé dépend de ce que votre entité sait vraiment faire : une lumière sans canal de luminosité reçoit un interrupteur plutôt qu'un curseur, un ouvrant qui ne s'incline pas n'a pas de variante inclinaison, une entité de thermostat n'a ses modes prédéfinis que lorsqu'elle en possède. Les entrées classiques suivent en dessous quand elles s'appliquent : la carte dédiée du domaine, un simple bouton et un curseur.
+Ce qui vous est proposé dépend de ce que votre entité sait vraiment faire : une lumière sans canal de luminosité reçoit un interrupteur plutôt qu'un curseur, un ouvrant qui ne s'incline pas n'a pas de variante inclinaison, une entité de thermostat n'a ses modes prédéfinis que lorsqu'elle en possède. Les entrées classiques suivent en dessous des suggestions Bubble Card quand elles s'appliquent : la carte dédiée à ce type d'entité, un simple bouton et un curseur.
 
 > [!TIP]
 > Les modules peuvent ajouter leurs propres suggestions à cette liste, voir [modules](#modules).
@@ -206,7 +206,7 @@ Cette carte vous permet de créer une pop-up avec le contenu de votre choix. Cha
 | `trigger` | object ou list | Optionnel | Voir [conditions](#conditions) | Ouvre cette pop-up lorsque les conditions sont remplies |
 | `trigger_entity` | string | Optionnel | N'importe quelle entité | Ouvre cette pop-up en fonction de l'état de n'importe quelle entité, la forme simple de `trigger` |
 | `trigger_state` | string | Optionnel (**Requis** si `trigger_entity` est défini) | N'importe quel état d'entité | État de l'entité qui ouvre la pop-up |
-| `trigger_close` | boolean | Optionnel | `true` ou `false` | Ferme la pop-up lorsque les conditions ne sont plus remplies (par défaut : `true` avec `trigger`, `false` avec `trigger_state`) |
+| `trigger_close` | boolean | Optionnel | `true` (par défaut) ou `false` | Ferme la pop-up lorsque les conditions ne sont plus remplies. La valeur par défaut est plutôt `false` lorsque vous utilisez l'ancien duo `trigger_entity` et `trigger_state` |
 | `open_action` | object | Optionnel | Voir [actions](#actions-dappui-double-appui-et-appui-long) | Déclenche une action à l'ouverture de la pop-up |
 | `close_action` | object | Optionnel | Voir [actions](#actions-dappui-double-appui-et-appui-long) | Déclenche une action à la fermeture de la pop-up |
 | `show_header` | boolean | Optionnel | `true` (par défaut) ou `false` | Affiche ou masque entièrement l'en-tête de la pop-up |
@@ -462,7 +462,7 @@ Ces options ne sont disponibles que lorsque `button_type` est défini sur `slide
 | `read_only_slider`      | boolean | Optionnel (`false` par défaut)  | Rend le curseur en lecture seule. Activé automatiquement pour certaines entités comme les capteurs.     |
 | `slider_live_update`    | boolean | Optionnel (`false` par défaut)  | L'état de l'entité est mis à jour pendant le glissement. **Cette fonction n'est pas recommandée pour toutes les entités.** |
 | `slider_fill_orientation` | string | Optionnel | `left`, `right`, `top` ou `bottom` | Change le sens de remplissage du curseur. De gauche à droite si non défini, en miroir dans les [langues de droite à gauche](#localisation) |
-| `slider_value_position` | string | Optionnel | `right`, `left`, `center` ou `hidden` | Position d'affichage de la valeur. Du côté de la fin si non défini, donc à gauche dans les [langues de droite à gauche](#localisation) |
+| `slider_value_position` | string | Optionnel | `right`, `left`, `center` ou `hidden` | Position d'affichage de la valeur. À droite si non défini, et à gauche dans les [langues de droite à gauche](#localisation) |
 | `invert_slider_value` | boolean | Optionnel (`false` par défaut) | Inverse le sens du curseur (un remplissage de 100 % correspond au minimum). Non disponible pour les curseurs de couleur. |
 | `light_slider_type` | string | Optionnel | `brightness` (par défaut), `hue`, `saturation`, `white_temp` | **Pour les lumières uniquement.** Choisir le mode du curseur |
 | `cover_slider_type` | string | Optionnel | `position` (par défaut), `tilt_position` | **Pour les ouvrants uniquement.** Choisir le mode du curseur (position ou inclinaison) |
@@ -1347,7 +1347,7 @@ Les sous-boutons curseur prennent en charge les mêmes options que les curseurs 
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Arrondi des angles des sous-boutons |
 | `--bubble-sub-button-background-color` | `color` | Couleur de fond des sous-boutons |
-| `--bubble-sub-button-outline` | `box-shadow` | Contour ajouté à un sous-bouton ou à un curseur uniquement lorsqu'il se peint de la même couleur que la carte derrière lui, ce qui le rendrait invisible (mettez-le à `none` pour l'enlever) |
+| `--bubble-sub-button-outline` | `box-shadow` | Contour ajouté à un sous-bouton ou à un curseur, uniquement lorsque cet élément se peint de la même couleur que la carte derrière lui, ce qui le rendrait invisible (mettez-le à `none` pour l'enlever) |
 | `--bubble-sub-slider-border-radius` | `px` | Arrondi des angles des sous-boutons curseur |
 | `--bubble-sub-slider-background-color` | `color` | Couleur de fond des sous-boutons curseur |
 | `--bubble-sub-slider-height` | `px` | Hauteur des sous-boutons curseur toujours visibles |
@@ -2694,7 +2694,7 @@ Bubble Card parle votre langue. Son éditeur est traduit dans les 64 langues pri
 
 En bas de l'éditeur, à côté du numéro de version, un interrupteur **Auto** suit la langue de votre Home Assistant. Désactivez-le et tout l'éditeur repasse en anglais, ce qui est pratique pour suivre un tutoriel ou pour signaler un problème. Votre choix est mémorisé dans votre navigateur.
 
-Cette documentation est traduite elle aussi, [en 62 langues](languages.md). Ces pages sont ouvertes à tout le monde, donc une formulation qui ne correspond pas à votre propre Home Assistant peut être corrigée en quelques clics. La version anglaise reste la référence pour le contenu lui-même.
+Cette documentation est traduite elle aussi, [en 62 langues](languages.md), toutes sauf l'anglais britannique, qui affiche l'original. Ces pages sont ouvertes à tout le monde, donc une formulation qui ne correspond pas à votre propre Home Assistant peut être corrigée en quelques clics. La version anglaise reste la référence pour le contenu lui-même.
 
 <br>
 

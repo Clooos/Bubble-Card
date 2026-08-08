@@ -132,9 +132,9 @@ Alle indstillinger kan konfigureres i Home Assistant-editoren. Men du kan finde 
 
 ## Entitetsforslag
 
-Siden Home Assistant 2026.6 tilbyder kortvælgeren dig et par færdige kort, når du vælger en entitet, og Bubble Card svarer på det spørgsmål med sine egne opskrifter. Vælg et lys, og du får tilbudt et kort med en lysstyrkeskyder, plus en variant med farvetemperatur, en med farve og en med mætning, når dit lys understøtter dem. Vælg et gardin, og du får skyderen til dets position, vælg en medieafspiller, og du får også en variant med dens kildeliste, vælg en støvsuger, og du får dens knapper til start, pause og retur til dock. Hvert forslag er en almindelig Bubble Card-konfiguration vist som en live forhåndsvisning, så du kan tage den nærmeste og redigere videre på den som sædvanlig.
+Siden Home Assistant 2026.6 tilbyder kortvælgeren dig et par færdige kort, når du vælger en entitet, og Bubble Card tilføjer sine egne opskrifter til den liste. Vælg et lys, og du får tilbudt et kort med en lysstyrkeskyder, plus en variant med farvetemperatur, en med farve og en med mætning, når dit lys understøtter dem. Vælg et gardin, og du får skyderen til dets position, vælg en medieafspiller, og du får også en variant med dens kildeliste, vælg en støvsuger, og du får dens knapper til start, pause og retur til dock. Hvert forslag er en almindelig Bubble Card-konfiguration vist som en live forhåndsvisning, så du kan tage den nærmeste og redigere videre på den som sædvanlig.
 
-Hvad du får tilbudt, afhænger af, hvad din entitet faktisk kan: et lys uden lysstyrkekanal får en kontakt i stedet for en skyder, et gardin, der ikke kan vippe, får ingen vippevariant, og en klimaentitet får kun sine forudindstillinger, når den har nogle. De klassiske punkter følger nedenunder, når de giver mening: domænets dedikerede kort, en almindelig knap og en skyder.
+Hvad du får tilbudt, afhænger af, hvad din entitet faktisk kan: et lys uden lysstyrkekanal får en kontakt i stedet for en skyder, et gardin, der ikke kan vippe, får ingen vippevariant, og en klimaentitet får kun sine forudindstillinger, når den har nogle. De klassiske punkter følger under Bubble Card-forslagene, når de giver mening: kortet dedikeret til den entitetstype, en almindelig knap og en skyder.
 
 > [!TIP]
 > Modules kan tilføje deres egne forslag til den liste, se [Modules](#modules).
@@ -206,7 +206,7 @@ Dette kort giver dig mulighed for at oprette en pop-up med et vilkårligt indhol
 | `trigger` | object eller list | Valgfrit | Se [betingelser](#betingelser) | Åbn denne pop-up når betingelserne er opfyldt |
 | `trigger_entity` | string | Valgfrit | Enhver entitet | Åbn denne pop-up baseret på tilstanden af en hvilken som helst entitet, den enkle form af `trigger` |
 | `trigger_state` | string | Valgfrit (**Påkrævet** hvis `trigger_entity` er defineret) | Enhver entitetstilstand | Entitetstilstand der åbner pop-uppen |
-| `trigger_close` | boolean | Valgfrit | `true` eller `false` | Luk pop-uppen når betingelserne ikke længere er opfyldt (standard: `true` med `trigger`, `false` med `trigger_state`) |
+| `trigger_close` | boolean | Valgfrit | `true` (standard) eller `false` | Luk pop-uppen når betingelserne ikke længere er opfyldt. Standarden er i stedet `false`, når du bruger det ældre par `trigger_entity` og `trigger_state` |
 | `open_action` | object | Valgfrit | Se [handlinger](#tryk--dobbelttryk--og-holdehandlinger) | Udløs en handling når pop-uppen åbnes |
 | `close_action` | object | Valgfrit | Se [handlinger](#tryk--dobbelttryk--og-holdehandlinger) | Udløs en handling når pop-uppen lukkes |
 | `show_header` | boolean | Valgfrit | `true` (standard) eller `false` | Vis/skjul pop-uppens header helt |
@@ -462,7 +462,7 @@ Disse indstillinger er kun tilgængelige, når `button_type` er sat til `slider`
 | `read_only_slider`      | boolean | Valgfri (`false` standard)      | Gør skyderen skrivebeskyttet. Aktiveres automatisk for visse entiteter som sensorer.                        |
 | `slider_live_update`    | boolean | Valgfri (`false` standard)      | Entitetens tilstand opdateres, mens du skyder. **Denne funktion anbefales ikke til alle entiteter.**        |
 | `slider_fill_orientation` | string | Valgfri | `left`, `right`, `top` eller `bottom` | Skift skyderens fyldretning. Fra venstre mod højre når den ikke er defineret, spejlvendt i [sprog der skrives fra højre mod venstre](#lokalisering) |
-| `slider_value_position` | string | Valgfri | `right`, `left`, `center` eller `hidden` | Placering af værdivisningen. I slutsiden når den ikke er defineret, altså til venstre i [sprog der skrives fra højre mod venstre](#lokalisering) |
+| `slider_value_position` | string | Valgfri | `right`, `left`, `center` eller `hidden` | Placering af værdivisningen. Til højre når den ikke er defineret, og til venstre i [sprog der skrives fra højre mod venstre](#lokalisering) |
 | `invert_slider_value` | boolean | Valgfri (`false` standard) | Vend skyderens retning om (100 % fyldning svarer til minimum). Ikke tilgængelig for farveskydere. |
 | `light_slider_type` | string | Valgfri | `brightness` (standard), `hue`, `saturation`, `white_temp` | **Kun for lys.** Vælg skydertilstanden |
 | `cover_slider_type` | string | Valgfri | `position` (standard), `tilt_position` | **Kun for gardiner.** Vælg skydertilstanden (position eller vipning) |
@@ -1347,7 +1347,7 @@ Skyder-underknapper understøtter de samme skyderindstillinger som knapskydere, 
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Kantradius for underknapperne |
 | `--bubble-sub-button-background-color` | `color` | Baggrundsfarve for underknapperne |
-| `--bubble-sub-button-outline` | `box-shadow` | Kontur tilføjet til en underknap eller en skyder, kun når den tegnes i samme farve som kortet bagved, hvilket ville gøre den usynlig (sæt den til `none` for at fjerne den) |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur tilføjet til en underknap eller en skyder, kun når elementet tegnes i samme farve som kortet bagved, hvilket ville gøre det usynligt (sæt den til `none` for at fjerne den) |
 | `--bubble-sub-slider-border-radius` | `px` | Kantradius for skyder-underknapper |
 | `--bubble-sub-slider-background-color` | `color` | Baggrundsfarve for skyder-underknapper |
 | `--bubble-sub-slider-height` | `px` | Højde for altid synlige skyder-underknapper |
@@ -2694,7 +2694,7 @@ Bubble Card taler dit sprog. Editoren er oversat til de 64 sprog, som Home Assis
 
 Nederst i editoren, ved siden af versionsnummeret, følger en **Automatisk**-kontakt dit Home Assistant-sprog. Slå den fra, og hele editoren går tilbage til engelsk, hvilket er praktisk, når du følger en vejledning eller melder et problem. Dit valg huskes i din browser.
 
-Denne dokumentation er også oversat, [til 62 sprog](languages.md). De sider er åbne for alle, så en formulering, der ikke passer til dit eget Home Assistant, kan rettes med et par klik. Den engelske version er fortsat referencen for selve indholdet.
+Denne dokumentation er også oversat, [til 62 sprog](languages.md), alle på nær britisk engelsk, som viser originalen. De sider er åbne for alle, så en formulering, der ikke passer til dit eget Home Assistant, kan rettes med et par klik. Den engelske version er fortsat referencen for selve indholdet.
 
 <br>
 

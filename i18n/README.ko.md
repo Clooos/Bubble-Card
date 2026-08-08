@@ -132,9 +132,9 @@ Bubble Card는 Home Assistant를 위한 미니멀하고 커스터마이즈 가�
 
 ## 엔티티 제안
 
-Home Assistant 2026.6부터 카드 선택기에서 엔티티를 고르면 바로 쓸 수 있는 카드가 몇 개 제안되며, Bubble Card는 자체 레시피로 여기에 답합니다. 조명을 고르면 밝기 슬라이더가 있는 카드가 제안되고, 조명이 지원하는 경우 색온도, 색상, 채도 변형도 함께 제안됩니다. 커버를 고르면 위치 슬라이더를, 미디어 플레이어를 고르면 소스 목록이 포함된 변형도 함께, 로봇청소기를 고르면 시작, 일시정지, 도킹 버튼을 받게 됩니다. 각 제안은 실시간 미리보기로 표시되는 일반적인 Bubble Card 구성이므로, 가장 가까운 것을 골라 평소처럼 계속 편집할 수 있습니다.
+Home Assistant 2026.6부터 카드 선택기에서 엔티티를 고르면 바로 쓸 수 있는 카드가 몇 개 제안되며, Bubble Card는 그 목록에 자체 레시피를 더합니다. 조명을 고르면 밝기 슬라이더가 있는 카드가 제안되고, 조명이 지원하는 경우 색온도, 색상, 채도 변형도 함께 제안됩니다. 커버를 고르면 위치 슬라이더를, 미디어 플레이어를 고르면 소스 목록이 포함된 변형도 함께, 로봇청소기를 고르면 시작, 일시정지, 도킹 버튼을 받게 됩니다. 각 제안은 실시간 미리보기로 표시되는 일반적인 Bubble Card 구성이므로, 가장 가까운 것을 골라 평소처럼 계속 편집할 수 있습니다.
 
-제안되는 내용은 엔티티가 실제로 할 수 있는 것에 따라 달라집니다. 밝기 채널이 없는 조명은 슬라이더 대신 토글을 받고, 기울일 수 없는 커버는 기울기 변형을 받지 않으며, 냉난방 엔티티는 프리셋 모드가 있을 때만 그 항목을 받습니다. 해당되는 경우 그 아래에 기존 항목이 이어집니다. 도메인 전용 카드, 단순 버튼, 슬라이더입니다.
+제안되는 내용은 엔티티가 실제로 할 수 있는 것에 따라 달라집니다. 밝기 채널이 없는 조명은 슬라이더 대신 토글을 받고, 기울일 수 없는 커버는 기울기 변형을 받지 않으며, 냉난방 엔티티는 프리셋 모드가 있을 때만 그 항목을 받습니다. 해당되는 경우 Bubble Card 제안 아래에 기존 항목이 이어집니다. 해당 엔티티 유형 전용 카드, 단순 버튼, 슬라이더입니다.
 
 > [!TIP]
 > 모듈은 이 목록에 자체 제안을 추가할 수 있습니다. [모듈](#모듈)을 참고하세요.
@@ -206,7 +206,7 @@ Home Assistant 2026.6부터 카드 선택기에서 엔티티를 고르면 바로
 | `trigger` | object 또는 list | Optional | [조건](#조건) 참고 | 조건이 충족되면 이 팝업을 엽니다 |
 | `trigger_entity` | string | Optional | Any entity | 어떤 엔티티의 상태를 기준으로 이 팝업을 엽니다. `trigger`의 간단한 형태입니다 |
 | `trigger_state` | string | Optional (`trigger_entity`가 정의되어 있으면 **Required**) | Any entity state | 팝업을 열기 위한 엔티티 상태 |
-| `trigger_close` | boolean | Optional | `true` 또는 `false` | 조건이 더 이상 충족되지 않으면 팝업을 닫음 (기본값: `trigger`에서는 `true`, `trigger_state`에서는 `false`) |
+| `trigger_close` | boolean | Optional | `true` (default) 또는 `false` | 조건이 더 이상 충족되지 않으면 팝업을 닫음. 다만 예전 방식인 `trigger_entity`와 `trigger_state` 조합을 쓰면 기본값이 `false`가 됨 |
 | `open_action` | object | Optional | [동작](#탭-더블-탭-길게-누르기-동작) 참고 | 팝업이 열릴 때 동작을 트리거 |
 | `close_action` | object | Optional | [동작](#탭-더블-탭-길게-누르기-동작) 참고 | 팝업이 닫힐 때 동작을 트리거 |
 | `show_header` | boolean | Optional | `true` (default) 또는 `false` | 팝업 헤더 전체를 표시/숨김 |
@@ -462,7 +462,7 @@ auto_order: true
 | `read_only_slider`      | boolean | 선택 (`false` 기본값)      | 슬라이더를 읽기 전용으로 만듭니다. 센서 등 일부 엔티티에서는 자동으로 활성화됩니다.                                        |
 | `slider_live_update`    | boolean | 선택 (`false` 기본값)      | 슬라이드 중 엔티티 상태가 갱신됩니다. **모든 엔티티에 권장되는 기능은 아닙니다.**        |
 | `slider_fill_orientation` | string | 선택 | `left`, `right`, `top` 또는 `bottom` | 슬라이더의 채움 방향을 변경합니다. 지정하지 않으면 왼쪽에서 오른쪽이며, [오른쪽에서 왼쪽 언어](#현지화)에서는 좌우가 바뀝니다 |
-| `slider_value_position` | string | 선택 | `right`, `left`, `center` 또는 `hidden` | 값 표시 위치. 지정하지 않으면 끝쪽이므로 [오른쪽에서 왼쪽 언어](#현지화)에서는 왼쪽이 됩니다 |
+| `slider_value_position` | string | 선택 | `right`, `left`, `center` 또는 `hidden` | 값 표시 위치. 지정하지 않으면 오른쪽이고, [오른쪽에서 왼쪽 언어](#현지화)에서는 왼쪽이 됩니다 |
 | `invert_slider_value` | boolean | 선택 (`false` 기본값) | 슬라이더 방향을 반전합니다 (100% 채움이 최솟값이 됩니다). 색상 슬라이더에서는 사용할 수 없습니다. |
 | `light_slider_type` | string | 선택 | `brightness` (기본값), `hue`, `saturation`, `white_temp` | **조명 전용.** 슬라이더 모드를 선택합니다 |
 | `cover_slider_type` | string | 선택 | `position` (기본값), `tilt_position` | **커버 전용.** 슬라이더 모드를 선택합니다 (위치 또는 틸트) |
@@ -1347,7 +1347,7 @@ sub_button:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | 서브 버튼의 테두리 반경 |
 | `--bubble-sub-button-background-color` | `color` | 서브 버튼의 배경색 |
-| `--bubble-sub-button-outline` | `box-shadow` | 서브 버튼이나 슬라이더가 뒤에 있는 카드와 같은 색으로 칠해져 보이지 않게 될 때만 추가되는 외곽선 (`none`으로 설정하면 제거됩니다) |
+| `--bubble-sub-button-outline` | `box-shadow` | 서브 버튼이나 슬라이더에, 그 요소가 뒤에 있는 카드와 같은 색으로 칠해져 보이지 않게 될 때만 추가되는 외곽선 (`none`으로 설정하면 제거됩니다) |
 | `--bubble-sub-slider-border-radius` | `px` | 슬라이더 서브 버튼의 테두리 반경 |
 | `--bubble-sub-slider-background-color` | `color` | 슬라이더 서브 버튼의 배경색 |
 | `--bubble-sub-slider-height` | `px` | 항상 표시되는 슬라이더 서브 버튼의 높이 |
@@ -2694,7 +2694,7 @@ Bubble Card는 여러분의 언어로 말합니다. 편집기는 Home Assistant�
 
 편집기 하단의 버전 번호 옆에 있는 **자동** 스위치는 Home Assistant 언어를 따릅니다. 이를 끄면 편집기 전체가 영어로 돌아가며, 튜토리얼을 따라 하거나 이슈를 보고할 때 유용합니다. 선택한 값은 브라우저에 기억됩니다.
 
-이 문서도 [62개 언어로](languages.md) 번역되어 있습니다. 해당 페이지는 누구에게나 열려 있으므로, 여러분의 Home Assistant와 맞지 않는 표현은 몇 번의 클릭으로 고칠 수 있습니다. 내용 자체의 기준은 영어판입니다.
+이 문서도 [62개 언어로](languages.md) 번역되어 있으며, 영국 영어만 원문을 그대로 보여줍니다. 해당 페이지는 누구에게나 열려 있으므로, 여러분의 Home Assistant와 맞지 않는 표현은 몇 번의 클릭으로 고칠 수 있습니다. 내용 자체의 기준은 영어판입니다.
 
 <br>
 

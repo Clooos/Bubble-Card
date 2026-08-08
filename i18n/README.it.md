@@ -132,9 +132,9 @@ Tutte le opzioni possono essere configurate nell'editor di Home Assistant. Ma qu
 
 ## Suggerimenti per entità
 
-Da Home Assistant 2026.6, scegliere un'entità nel selettore di schede ti propone alcune schede già pronte, e Bubble Card risponde a quella domanda con le sue ricette. Scegli una luce e ti viene proposta una scheda con un cursore di luminosità, più una variante temperatura di colore, una variante colore e una variante saturazione quando la tua luce le supporta. Scegli una tapparella e ottieni il suo cursore di posizione, scegli un lettore multimediale e ottieni anche una variante con il suo elenco di sorgenti, scegli un aspirapolvere e ottieni i suoi pulsanti avvia, pausa e ritorno alla base. Ogni suggerimento è una normale configurazione Bubble Card mostrata come anteprima dal vivo, così puoi prendere quella più vicina e continuare a modificarla come al solito.
+Da Home Assistant 2026.6, scegliere un'entità nel selettore di schede ti propone alcune schede già pronte, e Bubble Card aggiunge le sue ricette a quell'elenco. Scegli una luce e ti viene proposta una scheda con un cursore di luminosità, più una variante temperatura di colore, una variante colore e una variante saturazione quando la tua luce le supporta. Scegli una tapparella e ottieni il suo cursore di posizione, scegli un lettore multimediale e ottieni anche una variante con il suo elenco di sorgenti, scegli un aspirapolvere e ottieni i suoi pulsanti avvia, pausa e ritorno alla base. Ogni suggerimento è una normale configurazione Bubble Card mostrata come anteprima dal vivo, così puoi prendere quella più vicina e continuare a modificarla come al solito.
 
-Quello che ti viene proposto dipende da cosa la tua entità sa davvero fare: una luce senza canale di luminosità riceve un interruttore invece di un cursore, una tapparella che non può inclinarsi non ha la variante inclinazione, un'entità clima ottiene le sue modalità preimpostate solo quando ne ha. Le voci classiche seguono sotto di esse quando sono pertinenti: la scheda dedicata del dominio, un semplice pulsante e un cursore.
+Quello che ti viene proposto dipende da cosa la tua entità sa davvero fare: una luce senza canale di luminosità riceve un interruttore invece di un cursore, una tapparella che non può inclinarsi non ha la variante inclinazione, un'entità clima ottiene le sue modalità preimpostate solo quando ne ha. Le voci classiche seguono sotto i suggerimenti di Bubble Card quando sono pertinenti: la scheda dedicata a quel tipo di entità, un semplice pulsante e un cursore.
 
 > [!TIP]
 > I moduli possono aggiungere i propri suggerimenti a quell'elenco, vedi [moduli](#moduli).
@@ -206,7 +206,7 @@ Questa scheda ti permette di creare un pop-up con qualsiasi contenuto. Ogni pop-
 | `trigger` | object or list | Facoltativo | Vedi [condizioni](#condizioni) | Apre questo pop-up quando le condizioni sono soddisfatte |
 | `trigger_entity` | string | Facoltativo | Qualsiasi entità | Apre questo pop-up in base allo stato di qualsiasi entità, la forma semplice di `trigger` |
 | `trigger_state` | string | Facoltativo (**Obbligatorio** se `trigger_entity` è definito) | Qualsiasi stato dell'entità | Stato dell'entità per aprire il pop-up |
-| `trigger_close` | boolean | Facoltativo | `true` o `false` | Chiude il pop-up quando le condizioni non sono più soddisfatte (predefinito: `true` con `trigger`, `false` con `trigger_state`) |
+| `trigger_close` | boolean | Facoltativo | `true` (predefinito) o `false` | Chiude il pop-up quando le condizioni non sono più soddisfatte. Il valore predefinito è invece `false` quando usi la vecchia coppia `trigger_entity` e `trigger_state` |
 | `open_action` | object | Facoltativo | Vedi [azioni](#azioni-tocco-doppio-tocco-e-pressione-prolungata) | Attiva un'azione all'apertura del pop-up |
 | `close_action` | object | Facoltativo | Vedi [azioni](#azioni-tocco-doppio-tocco-e-pressione-prolungata) | Attiva un'azione alla chiusura del pop-up |
 | `show_header` | boolean | Facoltativo | `true` (predefinito) o `false` | Mostra/Nascondi completamente l'intestazione del pop-up |
@@ -462,7 +462,7 @@ Queste opzioni sono disponibili solo quando `button_type` è impostato su `slide
 | `read_only_slider`      | boolean | Opzionale (`false` predefinito)      | Rende il cursore in sola lettura. Attivato automaticamente per alcune entità come i sensori.                        |
 | `slider_live_update`    | boolean | Opzionale (`false` predefinito)      | Lo stato dell'entità viene aggiornato durante lo scorrimento. **Questa funzionalità non è consigliata per tutte le entità.**        |
 | `slider_fill_orientation` | string | Opzionale | `left`, `right`, `top` o `bottom` | Cambia la direzione di riempimento del cursore. Da sinistra a destra quando non definito, speculare nelle [lingue da destra a sinistra](#localizzazione) |
-| `slider_value_position` | string | Opzionale | `right`, `left`, `center` o `hidden` | Posizione della visualizzazione del valore. Sul lato finale quando non definito, quindi a sinistra nelle [lingue da destra a sinistra](#localizzazione) |
+| `slider_value_position` | string | Opzionale | `right`, `left`, `center` o `hidden` | Posizione della visualizzazione del valore. A destra quando non definito, e a sinistra nelle [lingue da destra a sinistra](#localizzazione) |
 | `invert_slider_value` | boolean | Opzionale (`false` predefinito) | Inverti la direzione del cursore (100% di riempimento equivale al minimo). Non disponibile per i cursori colore. |
 | `light_slider_type` | string | Opzionale | `brightness` (predefinito), `hue`, `saturation`, `white_temp` | **Solo per le luci.** Scegli la modalità del cursore |
 | `cover_slider_type` | string | Opzionale | `position` (predefinito), `tilt_position` | **Solo per le tapparelle.** Scegli la modalità del cursore (posizione o inclinazione) |
@@ -1347,7 +1347,7 @@ I sotto-pulsanti cursore supportano le stesse opzioni dei cursori dei pulsanti, 
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Raggio del bordo per i sotto-pulsanti |
 | `--bubble-sub-button-background-color` | `color` | Colore di sfondo per i sotto-pulsanti |
-| `--bubble-sub-button-outline` | `box-shadow` | Contorno aggiunto a un sotto-pulsante o a un cursore solo quando assume lo stesso colore della scheda che ha dietro, cosa che lo renderebbe invisibile (impostalo su `none` per toglierlo) |
+| `--bubble-sub-button-outline` | `box-shadow` | Contorno aggiunto a un sotto-pulsante o a un cursore, solo quando quell'elemento assume lo stesso colore della scheda che ha dietro, cosa che lo renderebbe invisibile (impostalo su `none` per toglierlo) |
 | `--bubble-sub-slider-border-radius` | `px` | Raggio del bordo per i sotto-pulsanti cursore |
 | `--bubble-sub-slider-background-color` | `color` | Colore di sfondo per i sotto-pulsanti cursore |
 | `--bubble-sub-slider-height` | `px` | Altezza per i sotto-pulsanti cursore sempre visibili |
@@ -2694,7 +2694,7 @@ Bubble Card parla la tua lingua. Il suo editor è tradotto nelle 64 lingue suppo
 
 In fondo all'editor, accanto al numero di versione, un interruttore **Automatico** segue la lingua del tuo Home Assistant. Disattivalo e tutto l'editor torna in inglese, il che è comodo per seguire un tutorial o per segnalare un problema. La tua scelta viene ricordata nel tuo browser.
 
-Anche questa documentazione è tradotta, [in 62 lingue](languages.md). Quelle pagine sono aperte a tutti, quindi una formulazione che non corrisponde al tuo Home Assistant può essere corretta in un paio di clic. La versione inglese resta il riferimento per il contenuto stesso.
+Anche questa documentazione è tradotta, [in 62 lingue](languages.md), tutte tranne l'inglese britannico, che mostra l'originale. Quelle pagine sono aperte a tutti, quindi una formulazione che non corrisponde al tuo Home Assistant può essere corretta in un paio di clic. La versione inglese resta il riferimento per il contenuto stesso.
 
 <br>
 

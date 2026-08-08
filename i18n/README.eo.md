@@ -132,9 +132,9 @@ Vi ankaŭ povas rigardi mian YouTube-kanalon por paŝo-post-paŝaj videoj.
 
 ## Sugestoj pri entoj
 
-Ekde Home Assistant 2026.6, elekti enton en la kartoelektilo proponas al vi kelkajn pretajn kartojn, kaj Bubble Card respondas tiun demandon per siaj propraj receptoj. Elektu lumon kaj oni proponas al vi karton kun heleca glitilo, plus varianton kun kolortemperaturo, unu kun koloro kaj unu kun satureco, kiam via lumo subtenas ilin. Elektu kovrilon kaj vi ricevas la glitilon de ĝia pozicio, elektu plurmedian ludilon kaj vi ricevas ankaŭ varianton kun ĝia listo de fontoj, elektu polvosuĉilon kaj vi ricevas ĝiajn butonojn por starti, paŭzi kaj reveni al la bazo. Ĉiu sugesto estas ordinara agordo de Bubble Card montrata kiel viva antaŭrigardo, do vi povas preni la plej proksiman kaj plu redakti ĝin kiel kutime.
+Ekde Home Assistant 2026.6, elekti enton en la kartoelektilo proponas al vi kelkajn pretajn kartojn, kaj Bubble Card aldonas siajn proprajn receptojn al tiu listo. Elektu lumon kaj oni proponas al vi karton kun heleca glitilo, plus varianton kun kolortemperaturo, unu kun koloro kaj unu kun satureco, kiam via lumo subtenas ilin. Elektu kovrilon kaj vi ricevas la glitilon de ĝia pozicio, elektu plurmedian ludilon kaj vi ricevas ankaŭ varianton kun ĝia listo de fontoj, elektu polvosuĉilon kaj vi ricevas ĝiajn butonojn por starti, paŭzi kaj reveni al la bazo. Ĉiu sugesto estas ordinara agordo de Bubble Card montrata kiel viva antaŭrigardo, do vi povas preni la plej proksiman kaj plu redakti ĝin kiel kutime.
 
-Kio estas proponata al vi dependas de tio, kion via ento vere kapablas: lumo sen heleca kanalo ricevas ŝaltilon anstataŭ glitilon, kovrilo kiu ne povas klini ne ricevas klinan varianton, kaj klimatiza ento ricevas siajn antaŭagordojn nur kiam ĝi havas iujn. La klasikaj eroj sekvas sub ili kiam ili taŭgas: la dediĉita karto de la domajno, simpla butono kaj glitilo.
+Kio estas proponata al vi dependas de tio, kion via ento vere kapablas: lumo sen heleca kanalo ricevas ŝaltilon anstataŭ glitilon, kovrilo kiu ne povas klini ne ricevas klinan varianton, kaj klimatiza ento ricevas siajn antaŭagordojn nur kiam ĝi havas iujn. La klasikaj eroj sekvas sub la sugestoj de Bubble Card kiam ili taŭgas: la karto dediĉita al tiu speco de ento, simpla butono kaj glitilo.
 
 > [!TIP]
 > Moduloj povas aldoni siajn proprajn sugestojn al tiu listo, vidu [modulojn](#moduloj).
@@ -206,7 +206,7 @@ Kio estas proponata al vi dependas de tio, kion via ento vere kapablas: lumo sen
 | `trigger` | object aŭ list | Malnepra | Vidu [kondiĉojn](#kondiĉoj) | Malfermas ĉi tiun ŝprucfenestron kiam la kondiĉoj estas plenumitaj |
 | `trigger_entity` | string | Malnepra | Ajna ento | Malfermas ĉi tiun ŝprucfenestron laŭ la stato de ajna ento, la simpla formo de `trigger` |
 | `trigger_state` | string | Malnepra (**Postulata** se `trigger_entity` estas difinita) | Ajna stato de ento | Stato de ento por malfermi la ŝprucfenestron |
-| `trigger_close` | boolean | Malnepra | `true` aŭ `false` | Fermas la ŝprucfenestron kiam la kondiĉoj ne plu estas plenumitaj (defaŭlte: `true` kun `trigger`, `false` kun `trigger_state`) |
+| `trigger_close` | boolean | Malnepra | `true` (defaŭlta) aŭ `false` | Fermas la ŝprucfenestron kiam la kondiĉoj ne plu estas plenumitaj. La defaŭlto estas anstataŭe `false`, kiam vi uzas la pli malnovan paron `trigger_entity` kaj `trigger_state` |
 | `open_action` | object | Malnepra | Vidu [agojn](#agoj-tuŝeti-duoble-tuŝeti-kaj-longe-premi) | Ekigas agon kiam la ŝprucfenestro malfermiĝas |
 | `close_action` | object | Malnepra | Vidu [agojn](#agoj-tuŝeti-duoble-tuŝeti-kaj-longe-premi) | Ekigas agon kiam la ŝprucfenestro fermiĝas |
 | `show_header` | boolean | Malnepra | `true` (defaŭlta) aŭ `false` | Montras/Kaŝas plene la kapon de la ŝprucfenestro |
@@ -462,7 +462,7 @@ auto_order: true
 | `read_only_slider`      | boolean | Nedeviga (`false` defaŭlta)      | Fari la glitilon nur-legebla. Aŭtomate ŝaltita por kelkaj eroj kiel sensiloj.                        |
 | `slider_live_update`    | boolean | Nedeviga (`false` defaŭlta)      | La stato de la ero ĝisdatiĝas dum glitado. **Ĉi tiu funkcio ne estas rekomendata por ĉiuj eroj.**        |
 | `slider_fill_orientation` | string | Nedeviga | `left`, `right`, `top` aŭ `bottom` | Ŝanĝi la plenigan direkton de la glitilo. De maldekstre dekstren kiam nedifinita, spegulita en [lingvoj skribataj de dekstre maldekstren](#lokalizado) |
-| `slider_value_position` | string | Nedeviga | `right`, `left`, `center` aŭ `hidden` | Pozicio de la valora montrilo. Ĉe la fina flanko kiam nedifinita, do maldekstre en [lingvoj skribataj de dekstre maldekstren](#lokalizado) |
+| `slider_value_position` | string | Nedeviga | `right`, `left`, `center` aŭ `hidden` | Pozicio de la valora montrilo. Dekstre kiam nedifinita, kaj maldekstre en [lingvoj skribataj de dekstre maldekstren](#lokalizado) |
 | `invert_slider_value` | boolean | Nedeviga (`false` defaŭlta) | Inversigi la direkton de la glitilo (100% pleniĝo egalas al la minimumo). Ne disponebla por kolorglitiloj. |
 | `light_slider_type` | string | Nedeviga | `brightness` (defaŭlta), `hue`, `saturation`, `white_temp` | **Nur por lumoj.** Elekti la reĝimon de la glitilo |
 | `cover_slider_type` | string | Nedeviga | `position` (defaŭlta), `tilt_position` | **Nur por kovriloj.** Elekti la reĝimon de la glitilo (pozicio aŭ klino) |
@@ -1347,7 +1347,7 @@ sub_button:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rondeco de anguloj por la subbutonoj |
 | `--bubble-sub-button-background-color` | `color` | Fona koloro por la subbutonoj |
-| `--bubble-sub-button-outline` | `box-shadow` | Konturo aldonata al subbutono aŭ ŝovilo nur kiam ĝi estas pentrata en la sama koloro kiel la karto malantaŭ ĝi, kio farus ĝin nevidebla (agordu ĝin al `none` por forigi ĝin) |
+| `--bubble-sub-button-outline` | `box-shadow` | Konturo aldonata al subbutono aŭ ŝovilo, nur kiam tiu elemento estas pentrata en la sama koloro kiel la karto malantaŭ ĝi, kio farus ĝin nevidebla (agordu ĝin al `none` por forigi ĝin) |
 | `--bubble-sub-slider-border-radius` | `px` | Rondeco de anguloj por ŝovilaj subbutonoj |
 | `--bubble-sub-slider-background-color` | `color` | Fona koloro por ŝovilaj subbutonoj |
 | `--bubble-sub-slider-height` | `px` | Alto por ĉiam-videblaj ŝovilaj subbutonoj |
@@ -2694,7 +2694,7 @@ Bubble Card parolas vian lingvon. Ĝia redaktilo estas tradukita en la 64 lingvo
 
 Sube en la redaktilo, apud la versinumero, ŝaltilo **Aŭtomata** sekvas vian lingvon de Home Assistant. Malŝaltu ĝin kaj la tuta redaktilo revenas al la angla, kio utilas por sekvi lernilon aŭ por raporti problemon. Via elekto estas memorata en via retumilo.
 
-Ankaŭ ĉi tiu dokumentaro estas tradukita, [en 62 lingvojn](languages.md). Tiuj paĝoj estas malfermitaj al ĉiuj, do formulado, kiu ne kongruas kun via propra Home Assistant, korekteblas per kelkaj klakoj. La angla versio restas la referenco por la enhavo mem.
+Ankaŭ ĉi tiu dokumentaro estas tradukita, [en 62 lingvojn](languages.md), en ĉiujn krom la britan anglan, kiu montras la originalon. Tiuj paĝoj estas malfermitaj al ĉiuj, do formulado, kiu ne kongruas kun via propra Home Assistant, korekteblas per kelkaj klakoj. La angla versio restas la referenco por la enhavo mem.
 
 <br>
 

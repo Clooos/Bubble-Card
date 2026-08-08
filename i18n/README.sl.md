@@ -132,9 +132,9 @@ Vse možnosti lahko nastavite v urejevalniku Home Assistant. Podrobnosti in YAML
 
 ## Predlogi za entitete
 
-Od Home Assistant 2026.6 vam izbira entitete v izbirniku kartic ponudi nekaj že pripravljenih kartic, Bubble Card pa na to vprašanje odgovarja s svojimi recepti. Izberite luč in ponujena vam bo kartica z drsnikom svetlosti, poleg tega pa še različica s temperaturo barve, različica z barvo in različica z nasičenostjo, kadar jih vaša luč podpira. Izberite senčilo in dobite njegov drsnik položaja, izberite predvajalnik medijev in dobite tudi različico s seznamom virov, izberite sesalnik in dobite njegove gumbe za zagon, premor in vrnitev na postajo. Vsak predlog je običajna konfiguracija Bubble Card, prikazana kot predogled v živo, tako da lahko vzamete najbližjega in ga urejate naprej kot običajno.
+Od Home Assistant 2026.6 vam izbira entitete v izbirniku kartic ponudi nekaj že pripravljenih kartic, Bubble Card pa temu seznamu dodaja svoje recepte. Izberite luč in ponujena vam bo kartica z drsnikom svetlosti, poleg tega pa še različica s temperaturo barve, različica z barvo in različica z nasičenostjo, kadar jih vaša luč podpira. Izberite senčilo in dobite njegov drsnik položaja, izberite predvajalnik medijev in dobite tudi različico s seznamom virov, izberite sesalnik in dobite njegove gumbe za zagon, premor in vrnitev na postajo. Vsak predlog je običajna konfiguracija Bubble Card, prikazana kot predogled v živo, tako da lahko vzamete najbližjega in ga urejate naprej kot običajno.
 
-Kaj vam je ponujeno, je odvisno od tega, kaj vaša entiteta v resnici zmore: luč brez kanala svetlosti dobi stikalo namesto drsnika, senčilo, ki se ne more nagibati, ne dobi različice z nagibom, entiteta klimatske naprave pa dobi svoje prednastavljene načine samo takrat, ko jih ima. Klasični vnosi sledijo pod njimi, kadar so smiselni: namenska kartica domene, preprost gumb in drsnik.
+Kaj vam je ponujeno, je odvisno od tega, kaj vaša entiteta v resnici zmore: luč brez kanala svetlosti dobi stikalo namesto drsnika, senčilo, ki se ne more nagibati, ne dobi različice z nagibom, entiteta klimatske naprave pa dobi svoje prednastavljene načine samo takrat, ko jih ima. Klasični vnosi sledijo pod predlogi Bubble Card, kadar so smiselni: kartica, namenjena temu tipu entitete, preprost gumb in drsnik.
 
 > [!TIP]
 > Moduli lahko na ta seznam dodajo svoje predloge, glejte [module](#moduli).
@@ -206,7 +206,7 @@ Ta kartica vam omogoča ustvarjanje pojavnega okna s poljubno vsebino. Vsako poj
 | `trigger` | object ali list | Neobvezno | Glejte [pogoje](#pogoji) | Odpri to pojavno okno, ko so pogoji izpolnjeni |
 | `trigger_entity` | string | Neobvezno | Katera koli entiteta | Odpri to pojavno okno glede na stanje katere koli entitete, preprosta oblika `trigger` |
 | `trigger_state` | string | Neobvezno (**Obvezno**, če je definiran `trigger_entity`) | Katero koli stanje entitete | Stanje entitete za odpiranje pojavnega okna |
-| `trigger_close` | boolean | Neobvezno | `true` ali `false` | Zapri pojavno okno, ko pogoji niso več izpolnjeni (privzeto: `true` s `trigger`, `false` s `trigger_state`) |
+| `trigger_close` | boolean | Neobvezno | `true` (privzeto) ali `false` | Zapri pojavno okno, ko pogoji niso več izpolnjeni. Če uporabljate starejši par `trigger_entity` in `trigger_state`, je privzeto `false` |
 | `open_action` | object | Neobvezno | Glejte [dejanja](#dejanja-dotika-dvojnega-dotika-in-zadržanja) | Sproži dejanje ob odpiranju pojavnega okna |
 | `close_action` | object | Neobvezno | Glejte [dejanja](#dejanja-dotika-dvojnega-dotika-in-zadržanja) | Sproži dejanje ob zapiranju pojavnega okna |
 | `show_header` | boolean | Neobvezno | `true` (privzeto) ali `false` | Popolnoma pokaži/skrij glavo pojavnega okna |
@@ -462,7 +462,7 @@ Te možnosti so na voljo samo, kadar je `button_type` nastavljen na `slider`.
 | `read_only_slider`      | boolean | Neobvezno (privzeto `false`)      | Naredi drsnik samo za branje. Samodejno omogočeno za nekatere entitete, kot so senzorji.                                        |
 | `slider_live_update`    | boolean | Neobvezno (privzeto `false`)      | Stanje entitete se posodablja med drsenjem. **Ta funkcija ni priporočljiva za vse entitete.**        |
 | `slider_fill_orientation` | niz | Neobvezno | `left`, `right`, `top` ali `bottom` | Spremeni smer zapolnitve drsnika. Od leve proti desni, kadar ni določeno, zrcaljeno v [jezikih od desne proti levi](#lokalizacija) |
-| `slider_value_position` | niz | Neobvezno | `right`, `left`, `center` ali `hidden` | Položaj prikaza vrednosti. Na končni strani, kadar ni določeno, torej na levi v [jezikih od desne proti levi](#lokalizacija) |
+| `slider_value_position` | niz | Neobvezno | `right`, `left`, `center` ali `hidden` | Položaj prikaza vrednosti. Na desni, kadar ni določeno, in na levi v [jezikih od desne proti levi](#lokalizacija) |
 | `invert_slider_value` | boolean | Neobvezno (privzeto `false`) | Obrne smer drsnika (100 % zapolnitve ustreza najmanjši vrednosti). Ni na voljo za barvne drsnike. |
 | `light_slider_type` | niz | Neobvezno | `brightness` (privzeto), `hue`, `saturation`, `white_temp` | **Samo za luči.** Izbira načina drsnika |
 | `cover_slider_type` | niz | Neobvezno | `position` (privzeto), `tilt_position` | **Samo za senčila.** Izbira načina drsnika (položaj ali nagib) |
@@ -1347,7 +1347,7 @@ Podgumbi tipa drsnik podpirajo enake možnosti kot drsniki gumbov, vključno z:
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Radij zaokrožitve robov za podgumbe |
 | `--bubble-sub-button-background-color` | `color` | Barva ozadja za podgumbe |
-| `--bubble-sub-button-outline` | `box-shadow` | Obroba, dodana podgumbu ali drsniku samo takrat, ko se izriše v isti barvi kot kartica za njim, kar bi ga naredilo nevidnega (nastavite jo na `none`, da jo odstranite) |
+| `--bubble-sub-button-outline` | `box-shadow` | Obroba, dodana podgumbu ali drsniku, samo takrat, ko se ta element izriše v isti barvi kot kartica za njim, kar bi ga naredilo nevidnega (nastavite jo na `none`, da jo odstranite) |
 | `--bubble-sub-slider-border-radius` | `px` | Radij zaokrožitve robov za podgumbe drsnika |
 | `--bubble-sub-slider-background-color` | `color` | Barva ozadja za podgumbe drsnika |
 | `--bubble-sub-slider-height` | `px` | Višina za vedno vidne podgumbe drsnika |
@@ -2694,7 +2694,7 @@ Bubble Card govori vaš jezik. Njegov urejevalnik je preveden v 64 jezikov, ki j
 
 Na dnu urejevalnika, poleg številke različice, stikalo **Samodejno** sledi jeziku vašega Home Assistant. Izklopite ga in celoten urejevalnik se vrne v angleščino, kar je priročno, kadar sledite vodiču ali prijavljate težavo. Vaša izbira je shranjena v vašem brskalniku.
 
-Tudi ta dokumentacija je prevedena, [v 62 jezikov](languages.md). Te strani so odprte za vse, zato je ubeseditev, ki ne ustreza vašemu Home Assistant, mogoče popraviti v nekaj klikih. Angleška različica ostaja referenca za samo vsebino.
+Tudi ta dokumentacija je prevedena, [v 62 jezikov](languages.md), v vse razen v britansko angleščino, ki uporablja izvirnik. Te strani so odprte za vse, zato je ubeseditev, ki ne ustreza vašemu Home Assistant, mogoče popraviti v nekaj klikih. Angleška različica ostaja referenca za samo vsebino.
 
 <br>
 

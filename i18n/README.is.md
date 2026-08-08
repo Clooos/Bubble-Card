@@ -132,9 +132,9 @@ Hægt er að stilla alla valkosti í Home Assistant ritlinum. En þú finnur ná
 
 ## Tillögur fyrir einingar
 
-Frá og með Home Assistant 2026.6 færðu nokkur tilbúin kort í boði þegar þú velur einingu í kortavalinu, og Bubble Card svarar þeirri spurningu með eigin uppskriftum. Veldu ljós og þér býðst kort með birtusleða, auk litahita-, lita- og mettunarafbrigðis þegar ljósið þitt styður þau. Veldu gluggatjöld og þú færð stöðusleðann þeirra, veldu spilara og þú færð líka afbrigði með upprunalistanum hans, veldu ryksugu og þú færð hnappana ræsa, gera hlé og fara í hleðslustöð. Hver tillaga er venjuleg Bubble Card stilling sem birtist sem lifandi forskoðun, svo þú getur tekið þá sem er næst því sem þú vilt og haldið áfram að breyta henni eins og venjulega.
+Frá og með Home Assistant 2026.6 færðu nokkur tilbúin kort í boði þegar þú velur einingu í kortavalinu, og Bubble Card bætir eigin uppskriftum við þann lista. Veldu ljós og þér býðst kort með birtusleða, auk litahita-, lita- og mettunarafbrigðis þegar ljósið þitt styður þau. Veldu gluggatjöld og þú færð stöðusleðann þeirra, veldu spilara og þú færð líka afbrigði með upprunalistanum hans, veldu ryksugu og þú færð hnappana ræsa, gera hlé og fara í hleðslustöð. Hver tillaga er venjuleg Bubble Card stilling sem birtist sem lifandi forskoðun, svo þú getur tekið þá sem er næst því sem þú vilt og haldið áfram að breyta henni eins og venjulega.
 
-Það sem þér býðst fer eftir því hvað einingin þín getur í raun: ljós án birturásar fær rofa í stað sleða, gluggatjöld sem geta ekki hallað fá ekkert hallaafbrigði, og loftslagseining fær forstillingar sínar aðeins þegar hún á einhverjar. Klassísku færslurnar koma fyrir neðan þær þegar þær eiga við: sérstaka kortið fyrir lénið, venjulegur hnappur og sleði.
+Það sem þér býðst fer eftir því hvað einingin þín getur í raun: ljós án birturásar fær rofa í stað sleða, gluggatjöld sem geta ekki hallað fá ekkert hallaafbrigði, og loftslagseining fær forstillingar sínar aðeins þegar hún á einhverjar. Klassísku færslurnar koma fyrir neðan tillögur Bubble Card þegar þær eiga við: kortið sem er ætlað þessari tegund einingar, venjulegur hnappur og sleði.
 
 > [!TIP]
 > Einingar geta bætt eigin tillögum við þann lista, sjá [einingar](#einingar).
@@ -206,7 +206,7 @@ Frá og með Home Assistant 2026.6 færðu nokkur tilbúin kort í boði þegar 
 | `trigger` | hlutur eða listi | Valfrjálst | Sjá [skilyrði](#skilyrði) | Opnar þennan sprettiglugga þegar skilyrðin eru uppfyllt |
 | `trigger_entity` | string | Valfrjálst | Hvaða eind sem er | Opnar þennan sprettiglugga út frá stöðu hvaða eindar sem er, einfalda form `trigger` |
 | `trigger_state` | string | Valfrjálst (**Skylda** ef `trigger_entity` er skilgreint) | Hvaða staða eindar sem er | Staða eindar til að opna sprettigluggann |
-| `trigger_close` | boolean | Valfrjálst | `true` eða `false` | Lokar sprettiglugganum þegar skilyrðin eru ekki lengur uppfyllt (sjálfgefið: `true` með `trigger`, `false` með `trigger_state`) |
+| `trigger_close` | boolean | Valfrjálst | `true` (sjálfgefið) eða `false` | Lokar sprettiglugganum þegar skilyrðin eru ekki lengur uppfyllt. Sjálfgefið er `false` í staðinn þegar þú notar eldra parið `trigger_entity` og `trigger_state` |
 | `open_action` | object | Valfrjálst | Sjá [aðgerðir](#aðgerðir-við-ýtingu-tvíýtingu-og-að-halda-inni) | Ræsir aðgerð þegar sprettiglugginn opnast |
 | `close_action` | object | Valfrjálst | Sjá [aðgerðir](#aðgerðir-við-ýtingu-tvíýtingu-og-að-halda-inni) | Ræsir aðgerð þegar sprettiglugginn lokast |
 | `show_header` | boolean | Valfrjálst | `true` (sjálfgefið) eða `false` | Sýnir/felur haus sprettigluggans að fullu |
@@ -462,7 +462,7 @@ auto_order: true
 | `read_only_slider`      | boolean | Optional (`false` default)      | Gera sleðann aðeins til aflestrar. Virkjað sjálfkrafa fyrir sumar eindir eins og skynjara.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Staða eindarinnar uppfærist meðan rennt er. **Þessi eiginleiki er ekki mælt með fyrir allar eindir.**        |
 | `slider_fill_orientation` | string | Valfrjálst | `left`, `right`, `top` eða `bottom` | Breyta fyllingarstefnu sleðans. Frá vinstri til hægri þegar ekkert er skilgreint, speglað í [tungumálum sem lesast frá hægri til vinstri](#staðfærsla) |
-| `slider_value_position` | string | Valfrjálst | `right`, `left`, `center` eða `hidden` | Staðsetning gildisins. Endamegin þegar ekkert er skilgreint, sem sagt vinstra megin í [tungumálum sem lesast frá hægri til vinstri](#staðfærsla) |
+| `slider_value_position` | string | Valfrjálst | `right`, `left`, `center` eða `hidden` | Staðsetning gildisins. Hægra megin þegar ekkert er skilgreint, og vinstra megin í [tungumálum sem lesast frá hægri til vinstri](#staðfærsla) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Snúa við stefnu sleðans (100% fylling jafngildir lágmarki). Ekki í boði fyrir litasleða. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Only for lights.** Velja hamstillingu sleðans |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Only for covers.** Velja hamstillingu sleðans (staða eða halli) |
@@ -1347,7 +1347,7 @@ Sleða undirhnappar (slider) styðja sömu sleðavalkosti og hnappasleðar, þar
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Hornaradíus undirhnappanna |
 | `--bubble-sub-button-background-color` | `color` | Bakgrunnslitur undirhnappanna |
-| `--bubble-sub-button-outline` | `box-shadow` | Útlína sem bætist á undirhnapp eða sleða aðeins þegar hann er málaður í sama lit og kortið á bak við hann, sem myndi gera hann ósýnilegan (settu `none` til að fjarlægja hana) |
+| `--bubble-sub-button-outline` | `box-shadow` | Útlína sem bætist á undirhnapp eða sleða, aðeins þegar sá hlutur er málaður í sama lit og kortið á bak við hann, sem myndi gera hann ósýnilegan (settu `none` til að fjarlægja hana) |
 | `--bubble-sub-slider-border-radius` | `px` | Hornaradíus fyrir sleða undirhnappa |
 | `--bubble-sub-slider-background-color` | `color` | Bakgrunnslitur fyrir sleða undirhnappa |
 | `--bubble-sub-slider-height` | `px` | Hæð fyrir sleða undirhnappa sem eru alltaf sýnilegir |
@@ -2694,7 +2694,7 @@ Bubble Card talar tungumálið þitt. Ritillinn er þýddur á þau 64 tungumál
 
 Neðst í ritlinum, við hliðina á útgáfunúmerinu, fylgir rofinn **Sjálfvirkt** tungumáli Home Assistant hjá þér. Slökktu á honum og allur ritillinn fer aftur á ensku, sem er þægilegt til að fylgja leiðbeiningum eða til að tilkynna vandamál. Valið þitt er munað í vafranum þínum.
 
-Þessi skjölun er líka þýdd, [á 62 tungumál](languages.md). Þessar síður eru opnar öllum, svo orðalag sem passar ekki við þitt eigið Home Assistant má laga með nokkrum smellum. Enska útgáfan er áfram viðmiðið fyrir innihaldið sjálft.
+Þessi skjölun er líka þýdd, [á 62 tungumál](languages.md), öll nema breska ensku, sem birtir frumtextann. Þessar síður eru opnar öllum, svo orðalag sem passar ekki við þitt eigið Home Assistant má laga með nokkrum smellum. Enska útgáfan er áfram viðmiðið fyrir innihaldið sjálft.
 
 <br>
 

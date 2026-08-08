@@ -132,9 +132,9 @@ Visas opcijas var konfigurēt Home Assistant redaktorā. Bet zemāk esošajā do
 
 ## Entītiju ieteikumi
 
-Kopš Home Assistant 2026.6 entītijas izvēle kartīšu atlasītājā piedāvā dažas gatavas kartītes, un Bubble Card uz šo jautājumu atbild ar savām receptēm. Izvēlieties gaismu, un jums tiek piedāvāta kartīte ar spilgtuma slīdni, kā arī krāsas temperatūras, krāsas un piesātinājuma varianti, ja jūsu gaisma tos atbalsta. Izvēlieties aizsegu, un jūs iegūstat tā pozīcijas slīdni, izvēlieties multivides atskaņotāju, un jūs iegūstat arī variantu ar tā avotu sarakstu, izvēlieties putekļsūcēju, un jūs iegūstat tā palaišanas, pauzes un doka pogas. Katrs ieteikums ir parasta Bubble Card konfigurācija, kas parādīta kā dzīvs priekšskatījums, tāpēc varat paņemt tuvāko un turpināt to rediģēt kā parasti.
+Kopš Home Assistant 2026.6 entītijas izvēle kartīšu atlasītājā piedāvā dažas gatavas kartītes, un Bubble Card šim sarakstam pievieno savas receptes. Izvēlieties gaismu, un jums tiek piedāvāta kartīte ar spilgtuma slīdni, kā arī krāsas temperatūras, krāsas un piesātinājuma varianti, ja jūsu gaisma tos atbalsta. Izvēlieties aizsegu, un jūs iegūstat tā pozīcijas slīdni, izvēlieties multivides atskaņotāju, un jūs iegūstat arī variantu ar tā avotu sarakstu, izvēlieties putekļsūcēju, un jūs iegūstat tā palaišanas, pauzes un doka pogas. Katrs ieteikums ir parasta Bubble Card konfigurācija, kas parādīta kā dzīvs priekšskatījums, tāpēc varat paņemt tuvāko un turpināt to rediģēt kā parasti.
 
-Piedāvātais ir atkarīgs no tā, ko jūsu entītija patiesībā spēj: gaisma bez spilgtuma kanāla saņem slēdzi slīdņa vietā, aizsegs, kas nevar sasvērties, nesaņem sasvēršanas variantu, klimata entītija saņem savus iepriekšiestatītos režīmus tikai tad, ja tādi tai ir. Zem tiem, kad tie ir piemēroti, seko klasiskie ieraksti: domēna īpašā kartīte, vienkārša poga un slīdnis.
+Piedāvātais ir atkarīgs no tā, ko jūsu entītija patiesībā spēj: gaisma bez spilgtuma kanāla saņem slēdzi slīdņa vietā, aizsegs, kas nevar sasvērties, nesaņem sasvēršanas variantu, klimata entītija saņem savus iepriekšiestatītos režīmus tikai tad, ja tādi tai ir. Zem Bubble Card ieteikumiem, kad tie ir piemēroti, seko klasiskie ieraksti: šim entītijas veidam paredzētā kartīte, vienkārša poga un slīdnis.
 
 > [!TIP]
 > Moduļi var pievienot šim sarakstam savus ieteikumus, skatiet [moduļi](#moduļi).
@@ -206,7 +206,7 @@ Piedāvātais ir atkarīgs no tā, ko jūsu entītija patiesībā spēj: gaisma 
 | `trigger` | object vai list | Neobligāts | Skatiet [nosacījumus](#nosacījumi) | Atvērt šo uznirstošo logu, kad nosacījumi ir izpildīti |
 | `trigger_entity` | string | Neobligāts | Jebkura entītija | Atvērt šo uznirstošo logu, balstoties uz jebkuras entītijas stāvokli, vienkāršā `trigger` forma |
 | `trigger_state` | string | Neobligāts (**Obligāts**, ja ir definēts `trigger_entity`) | Jebkurš entītijas stāvoklis | Entītijas stāvoklis, lai atvērtu uznirstošo logu |
-| `trigger_close` | boolean | Neobligāts | `true` vai `false` | Aizvērt uznirstošo logu, kad nosacījumi vairs nav izpildīti (noklusējums: `true` ar `trigger`, `false` ar `trigger_state`) |
+| `trigger_close` | boolean | Neobligāts | `true` (noklusējums) vai `false` | Aizvērt uznirstošo logu, kad nosacījumi vairs nav izpildīti. Turpretī noklusējums ir `false`, ja izmantojat veco `trigger_entity` un `trigger_state` pāri |
 | `open_action` | object | Neobligāts | Skatiet [darbības](#pieskāriena-dubultpieskāriena-un-turēšanas-darbības) | Izraisīt darbību, kad uznirstošais logs atveras |
 | `close_action` | object | Neobligāts | Skatiet [darbības](#pieskāriena-dubultpieskāriena-un-turēšanas-darbības) | Izraisīt darbību, kad uznirstošais logs aizveras |
 | `show_header` | boolean | Neobligāts | `true` (noklusējums) vai `false` | Rādīt/Paslēpt uznirstošā loga galveni pilnībā |
@@ -462,7 +462,7 @@ auto_order: true
 | `read_only_slider`      | boolean | Optional (`false` default)      | Padara slīdni tikai lasāmu. Automātiski ieslēgts dažām entītijām, piemēram, sensoriem.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | Entītijas stāvoklis tiek atjaunināts slīdēšanas laikā. **Šī funkcija nav ieteicama visām entītijām.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` vai `bottom` | Maina slīdņa aizpildījuma virzienu. Ja nav norādīts, no kreisās uz labo, spoguļots [no labās uz kreiso rakstītajās valodās](#lokalizācija) |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` vai `hidden` | Vērtības attēlojuma pozīcija. Ja nav norādīts, beigu pusē, tātad pa kreisi [no labās uz kreiso rakstītajās valodās](#lokalizācija) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` vai `hidden` | Vērtības attēlojuma pozīcija. Ja nav norādīts, pa labi, un pa kreisi [no labās uz kreiso rakstītajās valodās](#lokalizācija) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Invertē slīdņa virzienu (100% aizpildījums atbilst minimumam). Nav pieejams krāsu slīdņiem. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **Tikai gaismām.** Izvēlēties slīdņa režīmu |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **Tikai aizsegiem.** Izvēlēties slīdņa režīmu (pozīcija vai sasvēruma pozīcija) |
@@ -1347,7 +1347,7 @@ Slīdņa papildpogas atbalsta tādas pašas slīdņa opcijas kā pogas slīdņi,
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Apaļojuma rādiuss papildpogām |
 | `--bubble-sub-button-background-color` | `color` | Fona krāsa papildpogām |
-| `--bubble-sub-button-outline` | `box-shadow` | Kontūra, kas papildpogai vai slīdnim tiek pievienota tikai tad, kad tas zīmējas tādā pašā krāsā kā kartīte aiz tā, kas to padarītu neredzamu (iestatiet `none`, lai to noņemtu) |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontūra, kas papildpogai vai slīdnim tiek pievienota tikai tad, kad šis elements zīmējas tādā pašā krāsā kā kartīte aiz tā, kas to padarītu neredzamu (iestatiet `none`, lai to noņemtu) |
 | `--bubble-sub-slider-border-radius` | `px` | Apaļojuma rādiuss slīdņa papildpogām |
 | `--bubble-sub-slider-background-color` | `color` | Fona krāsa slīdņa papildpogām |
 | `--bubble-sub-slider-height` | `px` | Augstums pastāvīgi redzamām slīdņa papildpogām |
@@ -2694,7 +2694,7 @@ Bubble Card runā jūsu valodā. Tā redaktors ir iztulkots 64 valodās, ko atba
 
 Redaktora lejasdaļā, blakus versijas numuram, slēdzis **Automātiski** seko jūsu Home Assistant valodai. Izslēdziet to, un viss redaktors atgriezīsies angļu valodā, kas noder, sekojot pamācībai vai ziņojot par problēmu. Jūsu izvēle tiek iegaumēta pārlūkā.
 
-Arī šī dokumentācija ir tulkota, [62 valodās](languages.md). Šīs lapas ir atvērtas ikvienam, tāpēc formulējumu, kas neatbilst jūsu paša Home Assistant, var izlabot pāris klikšķos. Par satura atskaites punktu paliek angļu versija.
+Arī šī dokumentācija ir tulkota, [62 valodās](languages.md), visās, izņemot britu angļu, kurā redzams oriģināls. Šīs lapas ir atvērtas ikvienam, tāpēc formulējumu, kas neatbilst jūsu paša Home Assistant, var izlabot pāris klikšķos. Par satura atskaites punktu paliek angļu versija.
 
 <br>
 

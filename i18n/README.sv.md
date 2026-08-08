@@ -132,9 +132,9 @@ Alla alternativ kan konfigureras i Home Assistants redigerare. Men du hittar fle
 
 ## Entitetsförslag
 
-Sedan Home Assistant 2026.6 erbjuds du några färdiga kort när du väljer en entitet i kortväljaren, och Bubble Card svarar på den frågan med sina egna recept. Välj en lampa så erbjuds du ett kort med ett ljusstyrkereglage, plus en variant med färgtemperatur, en med färg och en med mättnad när din lampa stöder dem. Välj en persienn så får du dess positionsreglage, välj en mediaspelare så får du även en variant med dess källista, välj en dammsugare så får du dess knappar för start, paus och dockning. Varje förslag är en vanlig Bubble Card-konfiguration som visas som en förhandsvisning i realtid, så du kan ta det som ligger närmast och fortsätta redigera det som vanligt.
+Sedan Home Assistant 2026.6 erbjuds du några färdiga kort när du väljer en entitet i kortväljaren, och Bubble Card lägger till sina egna recept i den listan. Välj en lampa så erbjuds du ett kort med ett ljusstyrkereglage, plus en variant med färgtemperatur, en med färg och en med mättnad när din lampa stöder dem. Välj en persienn så får du dess positionsreglage, välj en mediaspelare så får du även en variant med dess källista, välj en dammsugare så får du dess knappar för start, paus och dockning. Varje förslag är en vanlig Bubble Card-konfiguration som visas som en förhandsvisning i realtid, så du kan ta det som ligger närmast och fortsätta redigera det som vanligt.
 
-Vad du erbjuds beror på vad din entitet faktiskt kan göra: en lampa utan ljusstyrkekanal får en strömbrytare i stället för ett skjutreglage, en persienn som inte kan vinklas får ingen vinkelvariant, och en klimatentitet får sina förinställda lägen bara när den har några. De klassiska posterna följer under dem när de är tillämpliga: domänens egna kort, en enkel knapp och ett skjutreglage.
+Vad du erbjuds beror på vad din entitet faktiskt kan göra: en lampa utan ljusstyrkekanal får en strömbrytare i stället för ett skjutreglage, en persienn som inte kan vinklas får ingen vinkelvariant, och en klimatentitet får sina förinställda lägen bara när den har några. De klassiska posterna följer under Bubble Card-förslagen när de är tillämpliga: kortet som är avsett för den entitetstypen, en enkel knapp och ett skjutreglage.
 
 > [!TIP]
 > Moduler kan lägga till sina egna förslag i den listan, se [moduler](#moduler).
@@ -206,7 +206,7 @@ Det här kortet låter dig skapa en pop-up med valfritt innehåll. Varje pop-up 
 | `trigger` | object eller list | Valfritt | Se [villkor](#villkor) | Öppnar den här pop-upen när villkoren är uppfyllda |
 | `trigger_entity` | string | Valfritt | Valfri entitet | Öppnar den här pop-upen baserat på en entitets tillstånd, den enkla formen av `trigger` |
 | `trigger_state` | string | Valfritt (**Krävs** om `trigger_entity` är angiven) | Valfritt entitetstillstånd | Entitetstillstånd för att öppna pop-upen |
-| `trigger_close` | boolean | Valfritt | `true` eller `false` | Stänger pop-upen när villkoren inte längre är uppfyllda (standard: `true` med `trigger`, `false` med `trigger_state`) |
+| `trigger_close` | boolean | Valfritt | `true` (standard) eller `false` | Stänger pop-upen när villkoren inte längre är uppfyllda. Standardvärdet blir i stället `false` när du använder det äldre paret `trigger_entity` och `trigger_state` |
 | `open_action` | object | Valfritt | Se [åtgärder](#tryck--dubbeltryck--och-hållåtgärder) | Utlöser en åtgärd när pop-upen öppnas |
 | `close_action` | object | Valfritt | Se [åtgärder](#tryck--dubbeltryck--och-hållåtgärder) | Utlöser en åtgärd när pop-upen stängs |
 | `show_header` | boolean | Valfritt | `true` (standard) eller `false` | Visar/döljer pop-upens rubrik helt |
@@ -462,7 +462,7 @@ Dessa alternativ är endast tillgängliga när `button_type` är satt till `slid
 | `read_only_slider`      | boolean | Valfritt (`false` standard)      | Gör skjutreglaget skrivskyddat. Aktiveras automatiskt för vissa entiteter som sensorer.                        |
 | `slider_live_update`    | boolean | Valfritt (`false` standard)      | Entitetens tillstånd uppdateras medan du drar i reglaget. **Den här funktionen rekommenderas inte för alla entiteter.**        |
 | `slider_fill_orientation` | string | Valfritt | `left`, `right`, `top` eller `bottom` | Ändra fyllnadsriktningen för skjutreglaget. Från vänster till höger när det inte anges, speglat i [språk som skrivs från höger till vänster](#lokalisering) |
-| `slider_value_position` | string | Valfritt | `right`, `left`, `center` eller `hidden` | Position för värdevisningen. På slutsidan när det inte anges, alltså till vänster i [språk som skrivs från höger till vänster](#lokalisering) |
+| `slider_value_position` | string | Valfritt | `right`, `left`, `center` eller `hidden` | Position för värdevisningen. Till höger när det inte anges, och till vänster i [språk som skrivs från höger till vänster](#lokalisering) |
 | `invert_slider_value` | boolean | Valfritt (`false` standard) | Invertera skjutreglagets riktning (100 % fyllnad motsvarar minimum). Inte tillgängligt för färgskjutreglage. |
 | `light_slider_type` | string | Valfritt | `brightness` (standard), `hue`, `saturation`, `white_temp` | **Endast för lampor.** Välj skjutreglagets läge |
 | `cover_slider_type` | string | Valfritt | `position` (standard), `tilt_position` | **Endast för persienner.** Välj skjutreglagets läge (position eller lutning) |
@@ -1347,7 +1347,7 @@ Skjutreglage-underknappar stöder samma skjutreglagealternativ som knappskjutreg
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Kantradie för underknapparna |
 | `--bubble-sub-button-background-color` | `color` | Bakgrundsfärg för underknapparna |
-| `--bubble-sub-button-outline` | `box-shadow` | Kontur som läggs till på en underknapp eller ett skjutreglage bara när den målas i samma färg som kortet bakom, vilket skulle göra den osynlig (sätt den till `none` för att ta bort den) |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur som läggs till på en underknapp eller ett skjutreglage, bara när det elementet målas i samma färg som kortet bakom, vilket skulle göra den osynlig (sätt den till `none` för att ta bort den) |
 | `--bubble-sub-slider-border-radius` | `px` | Kantradie för skjutreglage-underknappar |
 | `--bubble-sub-slider-background-color` | `color` | Bakgrundsfärg för skjutreglage-underknappar |
 | `--bubble-sub-slider-height` | `px` | Höjd för alltid synliga skjutreglage-underknappar |
@@ -2694,7 +2694,7 @@ Bubble Card talar ditt språk. Dess editor är översatt till de 64 språk som H
 
 Längst ned i editorn, bredvid versionsnumret, följer en **Automatisk**-brytare språket i ditt Home Assistant. Stäng av den så går hela editorn tillbaka till engelska, vilket är praktiskt för att följa en guide eller för att rapportera ett problem. Ditt val kommer ihåg i din webbläsare.
 
-Den här dokumentationen är också översatt, [till 62 språk](languages.md). De sidorna är öppna för alla, så en formulering som inte matchar ditt eget Home Assistant kan rättas med ett par klick. Den engelska versionen förblir referensen för själva innehållet.
+Den här dokumentationen är också översatt, [till 62 språk](languages.md), alla utom brittisk engelska som läser originalet. De sidorna är öppna för alla, så en formulering som inte matchar ditt eget Home Assistant kan rättas med ett par klick. Den engelska versionen förblir referensen för själva innehållet.
 
 <br>
 

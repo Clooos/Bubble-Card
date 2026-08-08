@@ -132,9 +132,9 @@ Minden beállítás elvégezhető a Home Assistant szerkesztőjében. De az alá
 
 ## Entitásjavaslatok
 
-A Home Assistant 2026.6 óta egy entitás kiválasztása a kártyaválasztóban néhány kész kártyát kínál fel, és a Bubble Card a saját receptjeivel válaszol erre a kérdésre. Válassz egy lámpát, és fényerő csúszkával ellátott kártyát kapsz, valamint színhőmérséklet, szín és telítettség változatot, ha a lámpád támogatja őket. Válassz egy árnyékolót, és megkapod a pozíció csúszkáját, válassz egy médialejátszót, és megkapod a forráslistájával ellátott változatot is, válassz egy robotporszívót, és megkapod az indítás, szünet és dokkolás gombjait. Minden javaslat egy szokásos Bubble Card konfiguráció, élő előnézetként megjelenítve, így kiveheted a hozzád legközelebb állót, és a megszokott módon szerkesztheted tovább.
+A Home Assistant 2026.6 óta egy entitás kiválasztása a kártyaválasztóban néhány kész kártyát kínál fel, és a Bubble Card hozzáadja a saját receptjeit ehhez a listához. Válassz egy lámpát, és fényerő csúszkával ellátott kártyát kapsz, valamint színhőmérséklet, szín és telítettség változatot, ha a lámpád támogatja őket. Válassz egy árnyékolót, és megkapod a pozíció csúszkáját, válassz egy médialejátszót, és megkapod a forráslistájával ellátott változatot is, válassz egy robotporszívót, és megkapod az indítás, szünet és dokkolás gombjait. Minden javaslat egy szokásos Bubble Card konfiguráció, élő előnézetként megjelenítve, így kiveheted a hozzád legközelebb állót, és a megszokott módon szerkesztheted tovább.
 
-Az, hogy mit ajánl fel, attól függ, mire képes valójában az entitásod: a fényerő csatorna nélküli lámpa csúszka helyett kapcsolót kap, a dönteni nem tudó árnyékoló nem kap döntés változatot, a klíma entitás pedig csak akkor kapja meg az előre beállított módjait, ha vannak neki. A klasszikus bejegyzések alattuk következnek, ha van értelmük: az adott domain saját kártyája, egy egyszerű gomb és egy csúszka.
+Az, hogy mit ajánl fel, attól függ, mire képes valójában az entitásod: a fényerő csatorna nélküli lámpa csúszka helyett kapcsolót kap, a dönteni nem tudó árnyékoló nem kap döntés változatot, a klíma entitás pedig csak akkor kapja meg az előre beállított módjait, ha vannak neki. A klasszikus bejegyzések a Bubble Card javaslatai alatt következnek, ha van értelmük: az adott entitástípushoz tartozó kártya, egy egyszerű gomb és egy csúszka.
 
 > [!TIP]
 > A modulok saját javaslatokat adhatnak ehhez a listához, lásd [modulok](#modulok).
@@ -206,7 +206,7 @@ Ez a kártya lehetővé teszi, hogy bármilyen tartalommal pop-upot hozz létre.
 | `trigger` | object vagy list | Nem kötelező | Lásd [feltételek](#feltételek) | Megnyitja ezt a pop-upot, ha a feltételek teljesülnek |
 | `trigger_entity` | string | Nem kötelező | Bármilyen entitás | A pop-up megnyitása bármely entitás állapota alapján, a `trigger` egyszerű formája |
 | `trigger_state` | string | Nem kötelező (**Kötelező**, ha a `trigger_entity` meg van adva) | Bármilyen entitásállapot | Az entitás állapota, amely megnyitja a pop-upot |
-| `trigger_close` | boolean | Nem kötelező | `true` vagy `false` | A pop-up bezárása, ha a feltételek már nem teljesülnek (alapértelmezés: `true` a `trigger` mellett, `false` a `trigger_state` mellett) |
+| `trigger_close` | boolean | Nem kötelező | `true` (alapértelmezett) vagy `false` | A pop-up bezárása, ha a feltételek már nem teljesülnek. Ehelyett `false` az alapértelmezés, ha a régebbi `trigger_entity` és `trigger_state` párost használod |
 | `open_action` | object | Nem kötelező | Lásd [műveletek](#koppintás-dupla-koppintás-és-hosszú-nyomás-műveletek) | Egy művelet indítása a pop-up megnyitásakor |
 | `close_action` | object | Nem kötelező | Lásd [műveletek](#koppintás-dupla-koppintás-és-hosszú-nyomás-műveletek) | Egy művelet indítása a pop-up bezárásakor |
 | `show_header` | boolean | Nem kötelező | `true` (alapértelmezett) vagy `false` | A pop-up fejlécének teljes megjelenítése/elrejtése |
@@ -462,7 +462,7 @@ Ezek a beállítások csak akkor érhetők el, ha a `button_type` értéke `slid
 | `read_only_slider`      | boolean | Opcionális (alapértelmezett `false`)      | Csak olvashatóvá teszi a csúszkát. Bizonyos entitásoknál, például érzékelőknél, automatikusan bekapcsol.                        |
 | `slider_live_update`    | boolean | Opcionális (alapértelmezett `false`)      | Az entitás állapota csúsztatás közben frissül. **Ez a funkció nem ajánlott minden entitáshoz.**        |
 | `slider_fill_orientation` | string | Opcionális | `left`, `right`, `top` vagy `bottom` | Megváltoztatja a csúszka kitöltési irányát. Balról jobbra, ha nincs megadva, tükrözve a [jobbról balra író nyelveken](#honosítás) |
-| `slider_value_position` | string | Opcionális | `right`, `left`, `center` vagy `hidden` | Az érték megjelenítésének helye. A záró oldalon, ha nincs megadva, tehát balra a [jobbról balra író nyelveken](#honosítás) |
+| `slider_value_position` | string | Opcionális | `right`, `left`, `center` vagy `hidden` | Az érték megjelenítésének helye. Jobbra, ha nincs megadva, és balra a [jobbról balra író nyelveken](#honosítás) |
 | `invert_slider_value` | boolean | Opcionális (alapértelmezett `false`) | Megfordítja a csúszka irányát (100%-os kitöltés egyenlő a minimummal). Színcsúszkáknál nem elérhető. |
 | `light_slider_type` | string | Opcionális | `brightness` (alapértelmezett), `hue`, `saturation`, `white_temp` | **Csak lámpákhoz.** A csúszka módjának kiválasztása |
 | `cover_slider_type` | string | Opcionális | `position` (alapértelmezett), `tilt_position` | **Csak árnyékolókhoz.** A csúszka módjának kiválasztása (pozíció vagy dőlés) |
@@ -1347,7 +1347,7 @@ A csúszka algombok ugyanazokat a csúszka beállításokat támogatják, mint a
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Lekerekítés az algombokhoz |
 | `--bubble-sub-button-background-color` | `color` | Háttérszín az algombokhoz |
-| `--bubble-sub-button-outline` | `box-shadow` | Körvonal, amely csak akkor kerül egy algombra vagy csúszkára, ha ugyanolyan színnel jelenik meg, mint a mögötte lévő kártya, ami láthatatlanná tenné (állítsd `none` értékre az eltávolításához) |
+| `--bubble-sub-button-outline` | `box-shadow` | Körvonal, amely csak akkor kerül egy algombra vagy csúszkára, ha az adott elem ugyanolyan színnel jelenik meg, mint a mögötte lévő kártya, ami láthatatlanná tenné (állítsd `none` értékre az eltávolításához) |
 | `--bubble-sub-slider-border-radius` | `px` | Lekerekítés a csúszka algombokhoz |
 | `--bubble-sub-slider-background-color` | `color` | Háttérszín a csúszka algombokhoz |
 | `--bubble-sub-slider-height` | `px` | Magasság az állandóan látható csúszka algomboknál |
@@ -2694,7 +2694,7 @@ A Bubble Card a te nyelveden beszél. A szerkesztője le van fordítva arra a 64
 
 A szerkesztő alján, a verziószám mellett egy **Automatikus** kapcsoló követi a Home Assistantod nyelvét. Kapcsold ki, és az egész szerkesztő visszatér angolra, ami hasznos egy útmutató követéséhez vagy egy hiba bejelentéséhez. A választásod megjegyzésre kerül a böngésződben.
 
-Ez a dokumentáció is le van fordítva, [62 nyelvre](languages.md). Ezek az oldalak mindenki előtt nyitva állnak, így egy olyan megfogalmazás, amely nem egyezik a saját Home Assistantoddal, néhány kattintással javítható. A tartalom tekintetében az angol változat marad a referencia.
+Ez a dokumentáció is le van fordítva, [62 nyelvre](languages.md), a brit angol kivételével mindegyikre, az ugyanis az eredetit mutatja. Ezek az oldalak mindenki előtt nyitva állnak, így egy olyan megfogalmazás, amely nem egyezik a saját Home Assistantoddal, néhány kattintással javítható. A tartalom tekintetében az angol változat marad a referencia.
 
 <br>
 

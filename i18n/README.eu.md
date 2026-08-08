@@ -132,9 +132,9 @@ Aukera guztiak Home Assistant editorean konfigura daitezke. Baina xehetasun gehi
 
 ## Entitate iradokizunak
 
-Home Assistant 2026.6 bertsiotik aurrera, txartel-hautatzailean entitate bat aukeratzean prest dauden txartel batzuk eskaintzen zaizkizu, eta Bubble Cardek bere errezetekin erantzuten dio galdera horri. Aukeratu argi bat eta distira-graduatzailea duen txartel bat eskainiko zaizu, baita kolore-tenperatura, kolore eta saturazio aldaerak ere zure argiak onartzen dituenean. Aukeratu estalki bat eta bere posizio-graduatzailea lortuko duzu, aukeratu multimedia-erreproduzigailu bat eta bere iturri-zerrenda duen aldaera bat ere lortuko duzu, aukeratu xurgagailu bat eta abiarazteko, pausatzeko eta oinarrira itzultzeko botoiak lortuko dituzu. Iradokizun bakoitza Bubble Carden konfigurazio arrunt bat da, zuzeneko aurrebista gisa erakutsia, beraz hurbilena hartu eta ohi bezala editatzen jarrai dezakezu.
+Home Assistant 2026.6 bertsiotik aurrera, txartel-hautatzailean entitate bat aukeratzean prest dauden txartel batzuk eskaintzen zaizkizu, eta Bubble Cardek bere errezetak gehitzen dizkio zerrenda horri. Aukeratu argi bat eta distira-graduatzailea duen txartel bat eskainiko zaizu, baita kolore-tenperatura, kolore eta saturazio aldaerak ere zure argiak onartzen dituenean. Aukeratu estalki bat eta bere posizio-graduatzailea lortuko duzu, aukeratu multimedia-erreproduzigailu bat eta bere iturri-zerrenda duen aldaera bat ere lortuko duzu, aukeratu xurgagailu bat eta abiarazteko, pausatzeko eta oinarrira itzultzeko botoiak lortuko dituzu. Iradokizun bakoitza Bubble Carden konfigurazio arrunt bat da, zuzeneko aurrebista gisa erakutsia, beraz hurbilena hartu eta ohi bezala editatzen jarrai dezakezu.
 
-Zer eskaintzen zaizun zure entitateak benetan zer egin dezakeen araberakoa da: distira-kanalik gabeko argi batek graduatzailearen ordez txandakatzailea jasotzen du, okertu ezin den estalki batek ez du okertze-aldaerarik jasotzen, eta klimatizazio-entitate batek bere aurrezarritako moduak jasotzen ditu horrelakorik badu soilik. Sarrera klasikoak haien azpitik datoz aplikagarriak direnean: domeinuaren txartel berezia, botoi soil bat eta graduatzaile bat.
+Zer eskaintzen zaizun zure entitateak benetan zer egin dezakeen araberakoa da: distira-kanalik gabeko argi batek graduatzailearen ordez txandakatzailea jasotzen du, okertu ezin den estalki batek ez du okertze-aldaerarik jasotzen, eta klimatizazio-entitate batek bere aurrezarritako moduak jasotzen ditu horrelakorik badu soilik. Sarrera klasikoak Bubble Carden iradokizunen azpitik datoz aplikagarriak direnean: entitate mota horri dagokion txartela, botoi soil bat eta graduatzaile bat.
 
 > [!TIP]
 > Moduluek beren iradokizunak gehi ditzakete zerrenda horretan, ikus [moduluak](#moduluak).
@@ -206,7 +206,7 @@ Txartel honek edukin edozein duen laster-leiho bat sortzeko aukera ematen dizu. 
 | `trigger` | object edo list | Aukerakoa | Ikusi [baldintzak](#baldintzak) | Laster-leiho hau irekitzen du baldintzak betetzen direnean |
 | `trigger_entity` | string | Aukerakoa | Edozein entitate | Laster-leiho hau edozein entitateren egoeraren arabera irekitzen du, `trigger` aukeraren forma sinplea |
 | `trigger_state` | string | Aukerakoa (**Beharrezkoa** `trigger_entity` definituta badago) | Edozein entitate-egoera | Laster-leihoa irekitzeko entitate-egoera |
-| `trigger_close` | boolean | Aukerakoa | `true` edo `false` | Laster-leihoa ixten du baldintzak jada betetzen ez direnean (lehenetsia: `true` `trigger` erabiliz, `false` `trigger_state` erabiliz) |
+| `trigger_close` | boolean | Aukerakoa | `true` (lehenetsia) edo `false` | Laster-leihoa ixten du baldintzak jada betetzen ez direnean. Lehenetsia `false` da, ordea, `trigger_entity` eta `trigger_state` bikote zaharragoa erabiltzen duzunean |
 | `open_action` | object | Aukerakoa | Ikus [ekintzak](#sakatze--sakatze-bikoitz--eta-luze-sakatze-ekintzak) | Ekintza bat abiarazten du laster-leihoa irekitzean |
 | `close_action` | object | Aukerakoa | Ikus [ekintzak](#sakatze--sakatze-bikoitz--eta-luze-sakatze-ekintzak) | Ekintza bat abiarazten du laster-leihoa ixtean |
 | `show_header` | boolean | Aukerakoa | `true` (lehenetsia) edo `false` | Laster-leihoaren goiburua erakusten/ezkutatzen du erabat |
@@ -462,7 +462,7 @@ Aukera hauek soilik daude erabilgarri `button_type` `slider` gisa ezarrita dagoe
 | `read_only_slider`      | boolean | Aukerakoa (`false` lehenetsia)      | Egin graduatzailea irakurtzeko soilik. Automatikoki gaituta dago sentsore bezalako entitate batzuentzat.                        |
 | `slider_live_update`    | boolean | Aukerakoa (`false` lehenetsia)      | Entitatearen egoera irristatzen ari den bitartean eguneratzen da. **Ezaugarri hau ez da gomendagarria entitate guztientzat.**        |
 | `slider_fill_orientation` | string | Aukerakoa | `left`, `right`, `top` edo `bottom` | Aldatu graduatzailearen betetze-norabidea. Ezkerretik eskuinera definitu gabe dagoenean, ispilatuta [eskuinetik ezkerrera idazten diren hizkuntzetan](#lokalizazioa) |
-| `slider_value_position` | string | Aukerakoa | `right`, `left`, `center` edo `hidden` | Balioaren bistaratze-posizioa. Amaierako aldean definitu gabe dagoenean, hau da, ezkerrean [eskuinetik ezkerrera idazten diren hizkuntzetan](#lokalizazioa) |
+| `slider_value_position` | string | Aukerakoa | `right`, `left`, `center` edo `hidden` | Balioaren bistaratze-posizioa. Eskuinean definitu gabe dagoenean, eta ezkerrean [eskuinetik ezkerrera idazten diren hizkuntzetan](#lokalizazioa) |
 | `invert_slider_value` | boolean | Aukerakoa (`false` lehenetsia) | Alderantzikatu graduatzailearen norabidea (%100eko betetzeak minimoa esan nahi du). Ez dago erabilgarri kolore-graduatzaileentzat. |
 | `light_slider_type` | string | Aukerakoa | `brightness` (lehenetsia), `hue`, `saturation`, `white_temp` | **Argientzat soilik.** Aukeratu graduatzaile modua |
 | `cover_slider_type` | string | Aukerakoa | `position` (lehenetsia), `tilt_position` | **Estalkientzat soilik.** Aukeratu graduatzaile modua (posizioa edo inklinazioa) |
@@ -1347,7 +1347,7 @@ Graduatzaile motako azpibotoiek botoi-graduatzaileen aukera berak onartzen dituz
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Azpibotoien ertz-erradioa |
 | `--bubble-sub-button-background-color` | `color` | Azpibotoien atzeko planoaren kolorea |
-| `--bubble-sub-button-outline` | `box-shadow` | Azpibotoi edo graduatzaile bati gehitzen zaion ingerada, atzeko txartelaren kolore berean marrazten denean soilik, horrek ikusezin bihurtuko bailuke (ezarri `none` kentzeko) |
+| `--bubble-sub-button-outline` | `box-shadow` | Azpibotoi edo graduatzaile bati gehitzen zaion ingerada, elementu hori atzeko txartelaren kolore berean marrazten denean soilik, horrek ikusezin bihurtuko bailuke (ezarri `none` kentzeko) |
 | `--bubble-sub-slider-border-radius` | `px` | Graduatzaile motako azpibotoien ertz-erradioa |
 | `--bubble-sub-slider-background-color` | `color` | Graduatzaile motako azpibotoien atzeko planoaren kolorea |
 | `--bubble-sub-slider-height` | `px` | Beti ikusgai dagoen graduatzailearen altuera |
@@ -2694,7 +2694,7 @@ Bubble Cardek zure hizkuntza hitz egiten du. Bere editorea Home Assistantek onar
 
 Editorearen behealdean, bertsio-zenbakiaren ondoan, **Automatikoa** etengailu batek zure Home Assistanten hizkuntzari jarraitzen dio. Itzali eta editore osoa ingelesera itzultzen da, tutorial bat jarraitzeko edo arazo baten berri emateko erabilgarria. Zure aukera nabigatzailean gogoratzen da.
 
-Dokumentazio hau ere itzulita dago, [62 hizkuntzatan](languages.md). Orri horiek denentzat daude irekita, beraz zure Home Assistantekin bat ez datorren esaldi bat klik pare batean zuzen daiteke. Ingelesezko bertsioak edukiaren erreferentzia izaten jarraitzen du.
+Dokumentazio hau ere itzulita dago, [62 hizkuntzatan](languages.md), britainiar ingelesa izan ezik denetan, hark jatorrizkoa erakusten baitu. Orri horiek denentzat daude irekita, beraz zure Home Assistantekin bat ez datorren esaldi bat klik pare batean zuzen daiteke. Ingelesezko bertsioak edukiaren erreferentzia izaten jarraitzen du.
 
 <br>
 

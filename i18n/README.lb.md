@@ -132,9 +132,9 @@ All Optiounen kënnen an den Home Assistant Editor konfiguréiert ginn. Awer hei
 
 ## Entitéite-Virschléi
 
-Zënter Home Assistant 2026.6 gëtt eng Entitéit, déi am Kaartewieler ausgewielt gëtt, e puer fäerdeg Kaarte proposéiert, a Bubble Card äntwert op dës Fro mat sengen eegene Rezepter. Wielt eng Luucht aus an Dir kritt eng Kaart mat engem Hellegkeetsslider, plus eng Variant fir Faarftemperatur, Faarf a Sättegung, wann Är Luucht se ënnerstëtzt. Wielt eng Stouer aus an Dir kritt hire Positiounsslider, wielt e Mediaspiller aus an Dir kritt och eng Variant mat senger Quellelëscht, wielt e Robotstaubsauger aus an Dir kritt seng Knäppercher fir Start, Paus an Dock. All Virschlag ass eng ganz normal Bubble Card Konfiguratioun, als Live-Virschau gewisen, sou datt Dir déi hëllt déi am nooste läit a se wéi gewinnt weider ännert.
+Zënter Home Assistant 2026.6 gëtt eng Entitéit, déi am Kaartewieler ausgewielt gëtt, e puer fäerdeg Kaarte proposéiert, a Bubble Card setzt seng eege Rezepter op dës Lëscht derbäi. Wielt eng Luucht aus an Dir kritt eng Kaart mat engem Hellegkeetsslider, plus eng Variant fir Faarftemperatur, Faarf a Sättegung, wann Är Luucht se ënnerstëtzt. Wielt eng Stouer aus an Dir kritt hire Positiounsslider, wielt e Mediaspiller aus an Dir kritt och eng Variant mat senger Quellelëscht, wielt e Robotstaubsauger aus an Dir kritt seng Knäppercher fir Start, Paus an Dock. All Virschlag ass eng ganz normal Bubble Card Konfiguratioun, als Live-Virschau gewisen, sou datt Dir déi hëllt déi am nooste läit a se wéi gewinnt weider ännert.
 
-Wat proposéiert gëtt hänkt dovun of, wat Är Entitéit tatsächlech ka maachen: eng Luucht ouni Hellegkeetskanal kritt e Schalter amplaz vun engem Slider, eng Stouer déi net kippe kann kritt keng Kipp-Variant, eng Klima-Entitéit kritt hir Presetmoden nëmme wa se der huet. D'klassesch Entréë kommen dorënner, wa se applizéiere: déi speziell Kaart vum Domain, e simpelt Knäppchen an e Slider.
+Wat proposéiert gëtt hänkt dovun of, wat Är Entitéit tatsächlech ka maachen: eng Luucht ouni Hellegkeetskanal kritt e Schalter amplaz vun engem Slider, eng Stouer déi net kippe kann kritt keng Kipp-Variant, eng Klima-Entitéit kritt hir Presetmoden nëmme wa se der huet. D'klassesch Entréë kommen ënner de Bubble Card Virschléi, wa se applizéiere: déi speziell Kaart fir dësen Entitéitstyp, e simpelt Knäppchen an e Slider.
 
 > [!TIP]
 > Moduler kënnen hir eege Virschléi op dës Lëscht setzen, kuckt [Moduler](#moduler).
@@ -206,7 +206,7 @@ Dës Kaart erlaabt et der, e Pop-up mat egal wéi engem Inhalt z'erstellen. All 
 | `trigger` | object oder list | Optional | Kuckt [Konditiounen](#konditiounen) | Mécht dëse Pop-up op, wann d'Konditiounen erfëllt sinn |
 | `trigger_entity` | string | Optional | Egal wéi eng Entitéit | Mécht dëse Pop-up op baséiert op dem Zoustand vun enger Entitéit, déi einfach Form vu `trigger` |
 | `trigger_state` | string | Optional (**Obligatoresch** wann `trigger_entity` definéiert ass) | Egal wéi en Entitéits-Zoustand | Entitéits-Zoustand fir de Pop-up opzemaachen |
-| `trigger_close` | boolean | Optional | `true` oder `false` | Mécht de Pop-up zou, wann d'Konditiounen net méi erfëllt sinn (Standard: `true` mat `trigger`, `false` mat `trigger_state`) |
+| `trigger_close` | boolean | Optional | `true` (Standard) oder `false` | Mécht de Pop-up zou, wann d'Konditiounen net méi erfëllt sinn. De Standard ass amplaz `false`, wann Dir dat eelert Pärchen `trigger_entity` an `trigger_state` benotzt |
 | `open_action` | Objekt | Optional | Kuck [Aktiounen](#tipp--duebeltipp--an-halen-aktiounen) | Léist eng Aktioun aus wann de Pop-up opgeet |
 | `close_action` | Objekt | Optional | Kuck [Aktiounen](#tipp--duebeltipp--an-halen-aktiounen) | Léist eng Aktioun aus wann de Pop-up zougeet |
 | `show_header` | boolean | Optional | `true` (Standard) oder `false` | Weist/Verstoppt de Pop-up-Header komplett |
@@ -462,7 +462,7 @@ Dës Optioune sinn nëmme verfügbar wann `button_type` op `slider` gesat ass.
 | `read_only_slider`      | boolean | Optional (`false` Standard)      | Mécht de Slider nëmme liesbar. Automatesch aktivéiert fir e puer Entitéiten wéi Sensoren.                                        |
 | `slider_live_update`    | boolean | Optional (`false` Standard)      | Den Zoustand vun der Entitéit gëtt beim Réckelen aktualiséiert. **Dëse Feature ass net fir all Entitéiten recommandéiert.**        |
 | `slider_fill_orientation` | string | Optional | `left`, `right`, `top` oder `bottom` | Ännert d'Richtung vun der Fëllung vum Slider. Ouni Uginn vu lénks no riets, gespigelt a [Rietslénks-Sproochen](#lokaliséierung) |
-| `slider_value_position` | string | Optional | `right`, `left`, `center` oder `hidden` | Positioun vun der Wäertusiicht. Ouni Uginn um Enn, also lénks a [Rietslénks-Sproochen](#lokaliséierung) |
+| `slider_value_position` | string | Optional | `right`, `left`, `center` oder `hidden` | Positioun vun der Wäertusiicht. Ouni Uginn riets, a lénks a [Rietslénks-Sproochen](#lokaliséierung) |
 | `invert_slider_value` | boolean | Optional (`false` Standard) | Kéiert d'Richtung vum Slider ëm (100% Fëllung entsprécht dem Minimum). Net verfügbar fir Faarwsliderën. |
 | `light_slider_type` | string | Optional | `brightness` (Standard), `hue`, `saturation`, `white_temp` | **Nëmme fir Luuchten.** Wielt de Slider-Modus |
 | `cover_slider_type` | string | Optional | `position` (Standard), `tilt_position` | **Nëmme fir Stouere.** Wielt de Slider-Modus (Positioun oder Neigung) |
@@ -1347,7 +1347,7 @@ Slider-Sub-Knäppercher ënnerstëtzen déiselwecht Slider-Optiounen wéi Knäpp
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Rondung vun de Käerten fir d'Sub-Knäppercher |
 | `--bubble-sub-button-background-color` | `color` | Hannergrondfaarf fir d'Sub-Knäppercher |
-| `--bubble-sub-button-outline` | `box-shadow` | Kontur déi engem Sub-Knäppchen oder engem Slider nëmmen dann derbäigesat gëtt, wann en déiselwecht Faarf mécht wéi d'Kaart derhannert, wat en onsichtbar géif maachen (setzt en op `none` fir en ewechzehuelen) |
+| `--bubble-sub-button-outline` | `box-shadow` | Kontur déi engem Sub-Knäppchen oder engem Slider nëmmen dann derbäigesat gëtt, wann dat Element déiselwecht Faarf mécht wéi d'Kaart derhannert, wat et onsichtbar géif maachen (setzt en op `none` fir en ewechzehuelen) |
 | `--bubble-sub-slider-border-radius` | `px` | Rondung vun de Käerten fir Slider-Sub-Knäppercher |
 | `--bubble-sub-slider-background-color` | `color` | Hannergrondfaarf fir Slider-Sub-Knäppercher |
 | `--bubble-sub-slider-height` | `px` | Héicht fir ëmmer-siichtbar Slider-Sub-Knäppercher |
@@ -2694,7 +2694,7 @@ Bubble Card schwätzt Är Sprooch. Säin Editor ass an déi 64 Sproochen iwwersa
 
 Ënnen am Editor, nieft der Versiounsnummer, follegt e Schalter **Automatesch** der Sprooch vun Ärem Home Assistant. Schalt en aus an de ganzen Editor geet zréck op Englesch, wat praktesch ass fir engem Tutorial ze follegen oder e Problem ze mellen. Är Wiel gëtt an Ärem Browser gemierkt.
 
-Dës Dokumentatioun ass och iwwersat, [an 62 Sproochen](languages.md). Dës Säite si fir jiddereen op, sou datt eng Formuléierung déi net zu Ärem eegene Home Assistant passt a puer Klicke ka verbessert ginn. Déi englesch Versioun bleift d'Referenz fir den Inhalt selwer.
+Dës Dokumentatioun ass och iwwersat, [an 62 Sproochen](languages.md), all ausser britescht Englesch, dat den Original weist. Dës Säite si fir jiddereen op, sou datt eng Formuléierung déi net zu Ärem eegene Home Assistant passt a puer Klicke ka verbessert ginn. Déi englesch Versioun bleift d'Referenz fir den Inhalt selwer.
 
 <br>
 

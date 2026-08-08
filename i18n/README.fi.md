@@ -132,9 +132,9 @@ Kaikki asetukset voi määrittää Home Assistantin editorissa. Voit kuitenkin l
 
 ## Entiteettiehdotukset
 
-Home Assistant 2026.6:sta lähtien entiteetin valitseminen korttivalitsimessa tarjoaa sinulle muutaman valmiin kortin, ja Bubble Card vastaa tuohon kysymykseen omilla resepteillään. Valitse valaisin, niin saat kortin kirkkaudensäätimellä, sekä värilämpötila-, väri- ja kylläisyysvariantit silloin kun valaisimesi tukee niitä. Valitse kaihdin, niin saat sen sijaintiliukusäätimen, valitse mediasoitin, niin saat myös variantin sen lähdeluettelolla, valitse pölynimuri, niin saat sen käynnistys-, tauko- ja telakointipainikkeet. Jokainen ehdotus on tavallinen Bubble Card -määritys, joka näytetään live-esikatseluna, joten voit ottaa lähimmän ja jatkaa sen muokkaamista tavalliseen tapaan.
+Home Assistant 2026.6:sta lähtien entiteetin valitseminen korttivalitsimessa tarjoaa sinulle muutaman valmiin kortin, ja Bubble Card lisää tuohon luetteloon omat reseptinsä. Valitse valaisin, niin saat kortin kirkkaudensäätimellä, sekä värilämpötila-, väri- ja kylläisyysvariantit silloin kun valaisimesi tukee niitä. Valitse kaihdin, niin saat sen sijaintiliukusäätimen, valitse mediasoitin, niin saat myös variantin sen lähdeluettelolla, valitse pölynimuri, niin saat sen käynnistys-, tauko- ja telakointipainikkeet. Jokainen ehdotus on tavallinen Bubble Card -määritys, joka näytetään live-esikatseluna, joten voit ottaa lähimmän ja jatkaa sen muokkaamista tavalliseen tapaan.
 
-Se, mitä sinulle tarjotaan, riippuu siitä, mihin entiteettisi todella pystyy: valaisin ilman kirkkauskanavaa saa kytkimen liukusäätimen sijaan, kaihdin joka ei kallistu ei saa kallistusvarianttia, ilmastointientiteetti saa esiasetetut tilansa vain jos sillä on niitä. Klassiset vaihtoehdot seuraavat niiden alapuolella silloin kun ne soveltuvat: toimialueen oma kortti, tavallinen painike ja liukusäädin.
+Se, mitä sinulle tarjotaan, riippuu siitä, mihin entiteettisi todella pystyy: valaisin ilman kirkkauskanavaa saa kytkimen liukusäätimen sijaan, kaihdin joka ei kallistu ei saa kallistusvarianttia, ilmastointientiteetti saa esiasetetut tilansa vain jos sillä on niitä. Klassiset vaihtoehdot seuraavat Bubble Cardin ehdotusten alapuolella silloin kun ne soveltuvat: kyseiselle entiteettityypille omistettu kortti, tavallinen painike ja liukusäädin.
 
 > [!TIP]
 > Moduulit voivat lisätä omat ehdotuksensa tuohon luetteloon, katso [moduulit](#moduulit).
@@ -206,7 +206,7 @@ Tämä kortti antaa sinun luoda ponnahdusikkunan minkä tahansa sisällön kanss
 | `trigger` | object tai list | Valinnainen | Katso [ehdot](#ehdot) | Avaa tämän ponnahdusikkunan kun ehdot täyttyvät |
 | `trigger_entity` | string | Valinnainen | Mikä tahansa entiteetti | Avaa tämä ponnahdusikkuna minkä tahansa entiteetin tilan perusteella, `trigger`-asetuksen yksinkertainen muoto |
 | `trigger_state` | string | Valinnainen (**Pakollinen**, jos `trigger_entity` on määritetty) | Mikä tahansa entiteetin tila | Entiteetin tila, jolla ponnahdusikkuna avataan |
-| `trigger_close` | boolean | Valinnainen | `true` tai `false` | Sulkee ponnahdusikkunan kun ehdot eivät enää täyty (oletus: `true` kun käytössä on `trigger`, `false` kun käytössä on `trigger_state`) |
+| `trigger_close` | boolean | Valinnainen | `true` (oletus) tai `false` | Sulkee ponnahdusikkunan kun ehdot eivät enää täyty. Oletus on sen sijaan `false`, kun käytät vanhempaa paria `trigger_entity` ja `trigger_state` |
 | `open_action` | object | Valinnainen | Katso [toiminnot](#napautuksen-kaksoisnapautuksen-ja-pitkän-painalluksen-toiminnot) | Laukaisee toiminnon, kun ponnahdusikkuna avautuu |
 | `close_action` | object | Valinnainen | Katso [toiminnot](#napautuksen-kaksoisnapautuksen-ja-pitkän-painalluksen-toiminnot) | Laukaisee toiminnon, kun ponnahdusikkuna sulkeutuu |
 | `show_header` | boolean | Valinnainen | `true` (oletus) tai `false` | Näytä/piilota ponnahdusikkunan otsikko kokonaan |
@@ -462,7 +462,7 @@ Nämä asetukset ovat käytettävissä vain, kun `button_type` on asetettu arvoo
 | `read_only_slider`      | boolean | Valinnainen (`false` oletus)      | Tee liukusäätimestä vain luku tila. Otetaan automaattisesti käyttöön joillekin entiteeteille, kuten antureille.                                        |
 | `slider_live_update`    | boolean | Valinnainen (`false` oletus)      | Entiteetin tila päivittyy liu'un aikana. **Tätä ominaisuutta ei suositella kaikille entiteeteille.**        |
 | `slider_fill_orientation` | string | Valinnainen | `left`, `right`, `top` tai `bottom` | Muuta liukusäätimen täyttösuuntaa. Vasemmalta oikealle kun määrittelemätön, peilattuna [oikealta vasemmalle luettavissa kielissä](#lokalisointi) |
-| `slider_value_position` | string | Valinnainen | `right`, `left`, `center` tai `hidden` | Arvon näyttöpaikka. Loppupäässä kun määrittelemätön, eli vasemmalla [oikealta vasemmalle luettavissa kielissä](#lokalisointi) |
+| `slider_value_position` | string | Valinnainen | `right`, `left`, `center` tai `hidden` | Arvon näyttöpaikka. Oikealla kun määrittelemätön, ja vasemmalla [oikealta vasemmalle luettavissa kielissä](#lokalisointi) |
 | `invert_slider_value` | boolean | Valinnainen (`false` oletus) | Käännä liukusäätimen suunta (100 % täyttö vastaa minimiä). Ei käytettävissä väriliukusäätimille. |
 | `light_slider_type` | string | Valinnainen | `brightness` (oletus), `hue`, `saturation`, `white_temp` | **Vain valoille.** Valitse liukusäätimen tila |
 | `cover_slider_type` | string | Valinnainen | `position` (oletus), `tilt_position` | **Vain kaihtimille.** Valitse liukusäätimen tila (asento tai kallistus) |
@@ -1347,7 +1347,7 @@ Liukusäädin-alipainikkeet tukevat samoja liukusäätimen asetuksia kuin painik
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Alipainikkeiden kulmien pyöristys |
 | `--bubble-sub-button-background-color` | `color` | Alipainikkeiden taustaväri |
-| `--bubble-sub-button-outline` | `box-shadow` | Ääriviiva joka lisätään alipainikkeeseen tai liukusäätimeen vain silloin kun se piirtyy samalla värillä kuin sen takana oleva kortti, mikä tekisi siitä näkymättömän (aseta `none` poistaaksesi sen) |
+| `--bubble-sub-button-outline` | `box-shadow` | Ääriviiva joka lisätään alipainikkeeseen tai liukusäätimeen, vain silloin kun kyseinen elementti piirtyy samalla värillä kuin sen takana oleva kortti, mikä tekisi siitä näkymättömän (aseta `none` poistaaksesi sen) |
 | `--bubble-sub-slider-border-radius` | `px` | Liukusäädin-alipainikkeiden kulmien pyöristys |
 | `--bubble-sub-slider-background-color` | `color` | Liukusäädin-alipainikkeiden taustaväri |
 | `--bubble-sub-slider-height` | `px` | Aina näkyvien liukusäädin-alipainikkeiden korkeus |
@@ -2694,7 +2694,7 @@ Bubble Card puhuu sinun kieltäsi. Sen editori on käännetty niille 64 kielelle
 
 Editorin alalaidassa, versionumeron vieressä, **Automaattinen**-kytkin seuraa Home Assistantisi kieltä. Kytke se pois, niin koko editori palaa englanniksi, mikä on kätevää ohjeen seuraamiseen tai ongelmasta ilmoittamiseen. Valintasi muistetaan selaimessasi.
 
-Myös tämä dokumentaatio on käännetty, [62 kielelle](languages.md). Nuo sivut ovat avoimia kaikille, joten sanamuodon joka ei vastaa omaa Home Assistantiasi voi korjata parilla klikkauksella. Englanninkielinen versio pysyy itse sisällön viitteenä.
+Myös tämä dokumentaatio on käännetty, [62 kielelle](languages.md), kaikille paitsi brittienglannille, joka näyttää alkuperäisen. Nuo sivut ovat avoimia kaikille, joten sanamuodon joka ei vastaa omaa Home Assistantiasi voi korjata parilla klikkauksella. Englanninkielinen versio pysyy itse sisällön viitteenä.
 
 <br>
 

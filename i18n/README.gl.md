@@ -132,9 +132,9 @@ Todas as opcións pódense configurar no editor de Home Assistant. Pero podes at
 
 ## Suxestións de entidades
 
-Desde Home Assistant 2026.6, escoller unha entidade no selector de tarxetas ofréceche unhas cantas tarxetas xa preparadas, e Bubble Card responde a esa pregunta coas súas propias receitas. Escolle unha luz e ofréceseche unha tarxeta cun control desprazable de brillo, ademais dunha variante de temperatura de cor, unha de cor e unha de saturación cando a túa luz as admite. Escolle unha cuberta e obtés o seu control de posición, escolle un reprodutor multimedia e obtés tamén unha variante coa súa lista de fontes, escolle un aspirador e obtés os seus botóns de iniciar, pausar e volver á base. Cada suxestión é unha configuración normal de Bubble Card mostrada como vista previa en directo, así que podes coller a máis próxima e seguir editándoa como sempre.
+Desde Home Assistant 2026.6, escoller unha entidade no selector de tarxetas ofréceche unhas cantas tarxetas xa preparadas, e Bubble Card engade as súas propias receitas a esa lista. Escolle unha luz e ofréceseche unha tarxeta cun control desprazable de brillo, ademais dunha variante de temperatura de cor, unha de cor e unha de saturación cando a túa luz as admite. Escolle unha cuberta e obtés o seu control de posición, escolle un reprodutor multimedia e obtés tamén unha variante coa súa lista de fontes, escolle un aspirador e obtés os seus botóns de iniciar, pausar e volver á base. Cada suxestión é unha configuración normal de Bubble Card mostrada como vista previa en directo, así que podes coller a máis próxima e seguir editándoa como sempre.
 
-O que se che ofrece depende do que a túa entidade sabe facer realmente: unha luz sen canle de brillo recibe un interruptor no canto dun control desprazable, unha cuberta que non pode inclinarse non ten variante de inclinación, unha entidade de climatización só ten os seus modos predefinidos cando os posúe. As entradas clásicas veñen debaixo cando corresponden: a tarxeta dedicada do dominio, un botón simple e un control desprazable.
+O que se che ofrece depende do que a túa entidade sabe facer realmente: unha luz sen canle de brillo recibe un interruptor no canto dun control desprazable, unha cuberta que non pode inclinarse non ten variante de inclinación, unha entidade de climatización só ten os seus modos predefinidos cando os posúe. As entradas clásicas veñen debaixo das suxestións de Bubble Card cando corresponden: a tarxeta dedicada a ese tipo de entidade, un botón simple e un control desprazable.
 
 > [!TIP]
 > Os módulos poden engadir as súas propias suxestións a esa lista, consulta [módulos](#módulos).
@@ -206,7 +206,7 @@ Esta tarxeta permíteche crear un pop-up con calquera contido. Cada pop-up está
 | `trigger` | object ou list | Opcional | Consulta [condicións](#condicións) | Abre este pop-up cando se cumpren as condicións |
 | `trigger_entity` | string | Opcional | Calquera entidade | Abre este pop-up baseándote no estado de calquera entidade, a forma simple de `trigger` |
 | `trigger_state` | string | Opcional (**Obrigatorio** se `trigger_entity` está definido) | Calquera estado de entidade | Estado da entidade para abrir o pop-up |
-| `trigger_close` | boolean | Opcional | `true` ou `false` | Pecha o pop-up cando as condicións deixan de cumprirse (por defecto: `true` con `trigger`, `false` con `trigger_state`) |
+| `trigger_close` | boolean | Opcional | `true` (por defecto) ou `false` | Pecha o pop-up cando as condicións deixan de cumprirse. En cambio, o valor por defecto é `false` cando usas o par antigo `trigger_entity` e `trigger_state` |
 | `open_action` | object | Opcional | Ver [accións](#accións-de-toque-dobre-toque-e-toque-longo) | Activa unha acción cando se abre o pop-up |
 | `close_action` | object | Opcional | Ver [accións](#accións-de-toque-dobre-toque-e-toque-longo) | Activa unha acción cando se pecha o pop-up |
 | `show_header` | boolean | Opcional | `true` (por defecto) ou `false` | Amosa/Oculta a cabeceira do pop-up por completo |
@@ -462,7 +462,7 @@ Estas opcións só están dispoñibles cando `button_type` está definido como `
 | `read_only_slider`      | boolean | Optional (`false` default)      | Make the slider read-only. Automatically enabled for some entities like sensors.                        |
 | `slider_live_update`    | boolean | Optional (`false` default)      | The entity state is updated while sliding. **This feature is not recommended for all entities.**        |
 | `slider_fill_orientation` | string | Opcional | `left`, `right`, `top` ou `bottom` | Cambia a dirección de enchido do control desprazable. De esquerda a dereita se non se define, en espello nas [linguas de dereita a esquerda](#localización) |
-| `slider_value_position` | string | Opcional | `right`, `left`, `center` ou `hidden` | Posición da visualización do valor. No lado final se non se define, é dicir á esquerda nas [linguas de dereita a esquerda](#localización) |
+| `slider_value_position` | string | Opcional | `right`, `left`, `center` ou `hidden` | Posición da visualización do valor. Á dereita se non se define, e á esquerda nas [linguas de dereita a esquerda](#localización) |
 | `invert_slider_value` | boolean | Optional (`false` default) | Invert slider direction (100% fill equals minimum). Not available for color sliders. |
 | `light_slider_type` | string | Optional | `brightness` (default), `hue`, `saturation`, `white_temp` | **For lights only.** Choose the slider mode |
 | `cover_slider_type` | string | Optional | `position` (default), `tilt_position` | **For covers only.** Choose the slider mode (position or tilt) |
@@ -1347,7 +1347,7 @@ Os subbotóns tipo slider admiten as mesmas opcións que os sliders de botón, i
 | --- | --- | --- |
 | `--bubble-sub-button-border-radius` | `px` | Raio de bordo para os subbotóns |
 | `--bubble-sub-button-background-color` | `color` | Cor de fondo para os subbotóns |
-| `--bubble-sub-button-outline` | `box-shadow` | Contorno engadido a un subbotón ou a un control desprazable só cando se pinta da mesma cor que a tarxeta que ten detrás, o que o faría invisible (ponno en `none` para quitalo) |
+| `--bubble-sub-button-outline` | `box-shadow` | Contorno engadido a un subbotón ou a un control desprazable, só cando ese elemento se pinta da mesma cor que a tarxeta que ten detrás, o que o faría invisible (ponno en `none` para quitalo) |
 | `--bubble-sub-slider-border-radius` | `px` | Raio de bordo para os subbotóns tipo slider |
 | `--bubble-sub-slider-background-color` | `color` | Cor de fondo para os subbotóns tipo slider |
 | `--bubble-sub-slider-height` | `px` | Altura para os subbotóns tipo slider sempre visibles |
@@ -2694,7 +2694,7 @@ Bubble Card fala a túa lingua. O seu editor está traducido ás 64 linguas que 
 
 Na parte inferior do editor, ao lado do número de versión, un interruptor **Automático** segue a lingua do teu Home Assistant. Desactívao e todo o editor volve ao inglés, algo práctico para seguir un titorial ou para informar dun problema. A túa escolla lémbrase no teu navegador.
 
-Esta documentación tamén está traducida, [a 62 linguas](languages.md). Esas páxinas están abertas a todo o mundo, así que unha redacción que non coincide co teu propio Home Assistant pódese corrixir nun par de clics. A versión inglesa segue a ser a referencia para o contido en si.
+Esta documentación tamén está traducida, [a 62 linguas](languages.md), todas agás o inglés británico, que le o orixinal. Esas páxinas están abertas a todo o mundo, así que unha redacción que non coincide co teu propio Home Assistant pódese corrixir nun par de clics. A versión inglesa segue a ser a referencia para o contido en si.
 
 <br>
 
