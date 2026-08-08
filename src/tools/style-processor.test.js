@@ -44,6 +44,7 @@ jest.unstable_mockModule('./clean-css.js', () => ({
 }));
 
 const { handleCustomStyles, evalStyles } = await import('./style-processor.js');
+const { runModuleTeardowns } = await import('./module-teardown.js');
 
 function createCardElement() {
     const element = {
@@ -377,5 +378,71 @@ describe('a module that styles nothing', () => {
         expect(JSON.stringify(cleanCSS.mock.calls)).toContain('color: red');
         yamlKeysMap.delete('real');
         error.mockRestore();
+    });
+});
+
+describe('the onTeardown hook handed to a style template', () => {
+    beforeEach(() => {
+        global.window = { addEventListener: jest.fn(), removeEventListener: jest.fn() };
+        global.document = { addEventListener: jest.fn(), removeEventListener: jest.fn() };
+        cleanCSS.mockClear();
+    });
+
+    afterEach(() => {
+        delete global.window;
+        delete global.document;
+    });
+
+    function createStyleContext() {
+        const context = createContext(createCardElement());
+        context.elements = {};
+        return context;
+    }
+
+    // A module cannot see its card go away, and a pop-up rebuilds every card on
+    // every open, so without this hook a timer it starts per card runs forever.
+    test('is reachable from a template and registers what it is given', () => {
+        const context = createStyleContext();
+
+        evalStyles(context, '${onTeardown(() => {})} .x { color: red; }', { type: 'module', id: 'light' });
+
+        expect(context._moduleTeardowns?.size).toBe(1);
+    });
+
+    test('keys by module, so two modules on one card keep their own slot', () => {
+        const context = createStyleContext();
+
+        evalStyles(context, '${onTeardown(() => {})} .a {}', { type: 'module', id: 'light' });
+        evalStyles(context, '${onTeardown(() => {})} .b {}', { type: 'module', id: 'neon' });
+
+        expect(context._moduleTeardowns.size).toBe(2);
+    });
+
+    test('does not stack one registration per style pass', () => {
+        const context = createStyleContext();
+        const styles = '${onTeardown(() => {})} .x { color: red; }';
+
+        for (let i = 0; i < 7; i++) evalStyles(context, styles, { type: 'module', id: 'light' });
+
+        expect(context._moduleTeardowns.size).toBe(1);
+    });
+
+    test('a template that never calls it registers nothing', () => {
+        const context = createStyleContext();
+
+        evalStyles(context, '.x { color: ${"red"}; }', { type: 'module', id: 'light' });
+
+        expect(context._moduleTeardowns?.size ?? 0).toBe(0);
+    });
+
+    test('the registered callback is the module code, run on teardown', () => {
+        const context = createStyleContext();
+        global.window.__teardownProof = 0;
+
+        evalStyles(context, '${onTeardown(() => { window.__teardownProof += 1; })} .x {}', { type: 'module', id: 'light' });
+        expect(global.window.__teardownProof).toBe(0);
+
+        runModuleTeardowns(context);
+        expect(global.window.__teardownProof).toBe(1);
     });
 });

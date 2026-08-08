@@ -1220,6 +1220,45 @@ Good to know:
 - Keep it cheap. The hook runs every time a user picks an entity in the card picker, for
   every installed module.
 
+## Releasing what your module started
+
+Your `code:` runs again on every style pass of every card that carries your module, and a
+pop-up rebuilds all of its cards every time it opens. Anything you start once per card, a
+timer, an observer, a listener on a shared target, therefore outlives the card that owns
+it, and a guard like `if (!this._timer)` does not help: the state lives on the card
+element, so each rebuilt card starts from a fresh one.
+
+`onTeardown(fn)` is called with the function to run when the card goes away:
+
+```yaml
+my_module:
+  name: My Module
+  code: |
+    ${(() => {
+      if (!this._myTimer) {
+        this._myTimer = setInterval(() => { /* ... */ }, 5000);
+        onTeardown(() => {
+          clearInterval(this._myTimer);
+          this._myTimer = null;
+        });
+      }
+    })()}
+```
+
+What you can rely on:
+
+- **One registration per module per card.** Registering on every pass replaces your own
+  entry rather than stacking one per pass, so you never need to check whether you already
+  registered.
+- **The last function you registered wins**, and it runs exactly once.
+- **Your teardown cannot break anything else.** It runs after the card is disconnected,
+  one module's throw is logged and the other modules still get their turn.
+- A card that Home Assistant merely **moved** in the DOM is torn down too. That is
+  intentional: your next style pass registers again, so you always end with exactly one
+  live registration.
+
+Registering from a card's own `styles:` works the same way, with its own slot.
+
 ## Best practices
 
 1. **Keep it simple**: Only include fields that users actually need to configure

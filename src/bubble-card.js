@@ -26,6 +26,7 @@ import { handleCover } from './cards/cover/index.js';
 import { handleEmptyColumn } from './cards/empty-column/index.js';
 import { handleHorizontalButtonsStack } from './cards/horizontal-buttons-stack/index.js';
 import { releaseButtonHighlightListener } from './cards/horizontal-buttons-stack/highlight.js';
+import { runModuleTeardowns } from './tools/module-teardown.js';
 import { handleCalendar } from './cards/calendar/index.js';
 import { handleMediaPlayer } from './cards/media-player/index.js';
 import { handleSelect } from './cards/select/index.js';
@@ -188,6 +189,12 @@ class BubbleCard extends HTMLElement {
       // pin the element and its last hass. handleHorizontalButtonsStack runs
       // on every render, so a card moved in the DOM registers again by itself.
       releaseButtonHighlightListener(this);
+    } catch (e) {}
+    try {
+      // Modules get their one chance to release what they started for this
+      // card. A pop-up rebuilds every card on every open, so without this a
+      // module's timers and observers accumulate for the life of the page.
+      runModuleTeardowns(this);
     } catch (e) {}
     try {
       // Remove the template-change subscriber from the module-level Set, it

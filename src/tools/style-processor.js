@@ -6,6 +6,7 @@ import { onTemplateChange } from './render-template.js';
 import { yamlKeysMap } from '../modules/registry.js';
 import { isBCTAvailableSync } from '../modules/bct-provider.js';
 import { cleanCSS } from './clean-css.js';
+import { registerModuleTeardown, teardownKey } from './module-teardown.js';
 
 const compiledTemplateCache = new Map();
 
@@ -457,6 +458,7 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
         "card",
         "name",
         "checkConditionsMet",
+        "onTeardown",
         `return \`${s}\`;`
       )
     );
@@ -481,6 +483,9 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
       card,
       card.name,
       checkConditionsMet,
+      // Keyed by the source being evaluated, so a module that registers on each
+      // of its passes replaces its own entry rather than stacking one per pass.
+      (fn) => registerModuleTeardown(context, teardownKey(sourceInfo), fn),
     ]);
 
     // Optimization: Local cache to avoid re-cleaning CSS if the raw output hasn't changed.
