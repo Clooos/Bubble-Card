@@ -5,7 +5,7 @@
 // only webpack can read. Nothing is imported here on purpose, so the disconnect
 // path stays free of the card's asset graph.
 
-// One navigation fires all three: navigate() and addHash() dispatch the
+// One navigation fires all three. navigate() and addHash() dispatch the
 // synthetic `location-changed`, and the browser fires `popstate` and
 // `hashchange` on its own when the back button pops the entry they pushed.
 // Listening to `location-changed` alone is why closing a pop-up with the back
@@ -26,7 +26,7 @@ function refreshButtonHighlights(context) {
 }
 
 // Registered once per card and released on disconnect, rather than once per
-// button and never: the handler closes over the context, which is the
+// button and never released. The handler closes over the context, which is the
 // bubble-card element itself, so a leaked one pins that element and its last
 // hass for the lifetime of the page. Called on every render, so switching the
 // option in the editor takes effect without rebuilding the card.

@@ -8,9 +8,9 @@
 // of them following the same pattern, because there was nothing else they could
 // have done.
 //
-// Its own module with no imports on purpose: bubble-card.js calls it from
-// disconnectedCallback, and pulling style-processor.js in there would drag the
-// whole style pipeline into that path.
+// Its own module with no imports on purpose, because bubble-card.js calls it
+// from disconnectedCallback, and pulling style-processor.js in there would drag
+// the whole style pipeline into that path.
 
 // Registrations are keyed, so the same module registering on each of the seven
 // passes of one open replaces its own entry instead of stacking seven copies.
@@ -27,9 +27,9 @@ export function registerModuleTeardown(context, key, fn) {
 }
 
 // Called once when the card is disconnected. A card that Home Assistant simply
-// moved in the DOM is torn down here too, which is correct: its next style pass
-// registers again, so the module ends up with exactly one live registration
-// either way.
+// moved in the DOM is torn down here too, which is correct, since its next
+// style pass registers again, so the module ends up with exactly one live
+// registration either way.
 export function runModuleTeardowns(context) {
   const registered = context?._moduleTeardowns;
   if (!registered || registered.size === 0) return;

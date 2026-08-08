@@ -2,7 +2,7 @@
 // has changed.
 //
 // A template that touches the DOM is re-executed on every style pass, because
-// re-running it is the only way its side effects happen: `_hasSideEffects` in
+// re-running it is the only way its side effects happen, and `_hasSideEffects` in
 // style-processor.js turns off both the fingerprint memo and the static result
 // cache. A card gets roughly seven passes per pop-up open, so a module that
 // writes a few custom properties writes them seven times per card for an
@@ -19,9 +19,9 @@
 // value that happens to contain the separator itself.
 const SEP = "\u0001";
 
-// Values are joined rather than serialized: a module can legitimately pass an
-// array (an rgb triplet), and JSON.stringify would throw on anything circular,
-// which would take the whole style pass down with it.
+// Values are joined rather than serialized, because a module can legitimately
+// pass an array (an rgb triplet), and JSON.stringify would throw on anything
+// circular, which would take the whole style pass down with it.
 function signatureOf(values) {
   let out = '';
   for (const value of values) {
@@ -33,7 +33,7 @@ function signatureOf(values) {
 }
 
 export function hasChanged(context, key, values) {
-  // No context to remember anything on: answer "changed" so the module always
+  // No context to remember anything on, so answer "changed" and the module always
   // does its work rather than silently skipping it.
   if (!context) return true;
   if (!context._moduleGates) context._moduleGates = new Map();

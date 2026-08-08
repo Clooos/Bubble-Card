@@ -1277,7 +1277,7 @@ What you can rely on:
 - A rebuilt card starts with an empty memory, so your work runs again.
 
 Two things to keep in mind. Pass everything your work depends on, including
-values you read from the DOM or the theme: what is not in the list cannot be
+values you read from the DOM or the theme, because what is not in the list cannot be
 noticed. And gate only your own writes. If something outside your module can
 remove what you wrote without any of your values changing, the gate will not
 know to write it again.
@@ -1292,7 +1292,7 @@ to 3.7 s cold on a low end iPad, and the per-execution cost of its template from
 Your `code:` runs again on every style pass of every card that carries your module, and a
 pop-up rebuilds all of its cards every time it opens. Anything you start once per card, a
 timer, an observer, a listener on a shared target, therefore outlives the card that owns
-it, and a guard like `if (!this._timer)` does not help: the state lives on the card
+it, and a guard like `if (!this._timer)` does not help, because the state lives on the card
 element, so each rebuilt card starts from a fresh one.
 
 `onTeardown(fn)` is called with the function to run when the card goes away:
@@ -1327,7 +1327,7 @@ What you can rely on:
 - **Your teardown cannot break anything else.** It runs after the card is disconnected,
   one module's throw is logged and the other modules still get their turn.
 - A card that Home Assistant merely **moved** in the DOM is torn down too. That is
-  intentional: your next style pass registers again, so you always end with exactly one
+  intentional, since your next style pass registers again, so you always end with exactly one
   live registration.
 
 Registering from a card's own `styles:` works the same way, with its own slot.
@@ -1357,7 +1357,7 @@ code: |
 | `onTeardown` | 3.3.0 |
 | `hasChanged` | 3.3.0 |
 
-Two things worth knowing. **YAML keys are safe**: an older version simply ignores
+Two things worth knowing. **YAML keys are safe**, an older version simply ignores
 a key it does not know, such as `suggestions:`, so only names used inside `code:`
 need this treatment. And when you write a fallback for older versions, make it do
 **the same thing** rather than something different, otherwise you are maintaining
