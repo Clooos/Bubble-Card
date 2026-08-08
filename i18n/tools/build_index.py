@@ -9,7 +9,13 @@ from languages import LANGUAGES, RTL
 REPO = os.path.dirname(os.path.dirname(SP))  # repo root, this file lives in i18n/tools/
 I18N = os.path.join(REPO, 'i18n')
 
-HEADER = """# Bubble Card in your language
+# The prose of i18n/languages.md lives here, so the page is rewritten from this
+# string every time the index is rebuilt. Editing that page without porting the
+# change back here means the next run silently reverts it, which is exactly what
+# happened to the translate icon and to a trimmed paragraph. Keep the two in
+# sync, and check `git diff i18n/languages.md` after a run: a rebuild that
+# changed no language should produce no diff at all.
+HEADER = """# <img src="../img/translate.svg" width="28" height="28" align="absmiddle" alt=""> Bubble Card in your language
 
 > [!IMPORTANT]
 > The English [README](../README.md) is the reference documentation and is always up to date.
@@ -18,8 +24,7 @@ HEADER = """# Bubble Card in your language
 
 **Any help improving the translations is more than welcome.** If a sentence reads wrong, click the ✏️
 next to your language: GitHub opens the file in its web editor, and saving it creates the
-copy of the project and the pull request for you. No git, no clone, no setup, about a
-minute of your time. Changes about the product itself belong in the English
+copy of the project and the pull request for you. Changes about the product itself belong in the English
 [README](../README.md) instead, so that every language gets them.
 
 A huge thank you to everyone who takes the time 🍻
