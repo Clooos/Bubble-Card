@@ -1646,7 +1646,11 @@ class BubbleCardEditor extends LitElement {
     } else if (hasExplicitUndefinedValue) {
         rawValue = target.value;
         needsUpdate = true;
-    } else if (detail?.value !== undefined) {
+    } else if (detail && Object.prototype.hasOwnProperty.call(detail, 'value')) {
+        // A field the user emptied still carries its key, only without a value:
+        // ha-selector-text turns "" into undefined before ha-form re-emits it.
+        // Reading that as "nothing changed" would strand the last typed
+        // character in the config and put it back at the next render.
         needsUpdate = true;
     }
 
@@ -1658,7 +1662,15 @@ class BubbleCardEditor extends LitElement {
 
     // Create a new config object to avoid mutating the original config
     let newConfig = { ...this._config };
-    
+
+    // An emptied field must leave nothing behind: every reader treats an empty
+    // value as absent anyway, and a leftover key would keep being written back
+    // to the YAML the user is looking at.
+    const dropWhenEmptied = (container, key) => {
+        const value = container[key];
+        if (value === undefined || value === '') delete container[key];
+    };
+
     try {
         const { configValue, checked } = target;
         if (configValue) {
@@ -1700,6 +1712,7 @@ class BubbleCardEditor extends LitElement {
                 } else if (target.tagName === 'HA-SWITCH') {
                     tempConfig[lastKey] = rawValue;
                 }
+                dropWhenEmptied(tempConfig, lastKey);
             } else {
                 // Simple case - top level key
                 const key = configKeys[0];
@@ -1710,6 +1723,7 @@ class BubbleCardEditor extends LitElement {
                 } else if (target.tagName === 'HA-SWITCH') {
                     newConfig[key] = rawValue;
                 }
+                dropWhenEmptied(newConfig, key);
             }
         } else {
             newConfig = detail.value;

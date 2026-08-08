@@ -83,6 +83,7 @@ global.document = {
 // customElements.define call it performs at load time.
 await import('./bubble-card-editor.js');
 const BubbleCardEditor = definedElements['bubble-card-editor'];
+const { fireEvent } = await import('../tools/utils.js');
 
 describe('BubbleCardEditor lifecycle contract', () => {
     beforeEach(() => {
@@ -176,5 +177,91 @@ describe('BubbleCardEditor lifecycle contract', () => {
         editor.updated(new Map());
 
         expect(dropSuggestionsPreviewIfStale).toHaveBeenCalledWith(editor);
+    });
+});
+
+// ha-selector-text turns an emptied field into `undefined` before ha-form
+// re-emits it, so a cleared field arrives as a value-changed whose detail
+// carries the key with no value. Reading that as "nothing changed" strands the
+// last typed character in the config, and every re-render puts it back in the
+// field.
+describe('BubbleCardEditor cleared fields', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    function editorWithConfig(config) {
+        const editor = new BubbleCardEditor();
+        editor._config = config;
+        return editor;
+    }
+
+    test('clearing a text field drops its key instead of keeping the last character', () => {
+        const editor = editorWithConfig({ card_type: 'separator', name: 'L' });
+
+        editor._valueChanged({ target: { configValue: 'name' }, detail: { value: undefined } });
+
+        expect(editor._config).not.toHaveProperty('name');
+        expect(editor._config.card_type).toBe('separator');
+        expect(fireEvent).toHaveBeenCalledWith(editor, 'config-changed', { config: editor._config });
+    });
+
+    test('clearing a nested text field drops the nested key only', () => {
+        const editor = editorWithConfig({ card_type: 'button', grid_options: { columns: 6, rows: 2 } });
+
+        editor._valueChanged({ target: { configValue: 'grid_options.rows' }, detail: { value: undefined } });
+
+        expect(editor._config.grid_options).not.toHaveProperty('rows');
+        expect(editor._config.grid_options.columns).toBe(6);
+    });
+
+    test('an empty string clears the key just like an undefined value', () => {
+        const editor = editorWithConfig({ card_type: 'separator', name: 'L' });
+
+        editor._valueChanged({ target: { configValue: 'name' }, detail: { value: '' } });
+
+        expect(editor._config).not.toHaveProperty('name');
+    });
+
+    test('a value-changed with no value at all is still ignored', () => {
+        const editor = editorWithConfig({ card_type: 'separator', name: 'Lamp' });
+
+        editor._valueChanged({ target: { configValue: 'name' }, detail: {} });
+
+        expect(editor._config.name).toBe('Lamp');
+        expect(fireEvent).not.toHaveBeenCalled();
+    });
+
+    test('a switch turned off keeps its false, which is a value and not an empty field', () => {
+        const editor = editorWithConfig({ card_type: 'button', scrolling_effect: true });
+
+        editor._valueChanged({ target: { tagName: 'HA-SWITCH', configValue: 'scrolling_effect', checked: false } });
+
+        expect(editor._config.scrolling_effect).toBe(false);
+    });
+
+    test('a number field set back to zero keeps the zero', () => {
+        const editor = editorWithConfig({ card_type: 'button', rows: 2 });
+
+        editor._valueChanged({ target: { configValue: 'rows' }, detail: { value: 0 } });
+
+        expect(editor._config.rows).toBe(0);
+    });
+
+    // Sub-button fields do not go through _valueChanged: they patch an array
+    // element, so clearing one has to be pinned separately.
+    test('clearing a sub-button name empties it instead of keeping the last character', async () => {
+        const editor = editorWithConfig({
+            card_type: 'button',
+            sub_button: [{ entity: 'light.lamp', name: 'L' }],
+        });
+        editor.requestUpdate = jest.fn();
+        // The first array edit of an instance is replayed 10 ms later.
+        editor.subButtonJustAdded = true;
+
+        editor._arrayValueChange(0, { name: undefined }, 'sub_button');
+
+        expect(editor._config.sub_button[0].name).toBeUndefined();
+        expect(editor._config.sub_button[0].entity).toBe('light.lamp');
     });
 });
