@@ -1013,7 +1013,7 @@ function scheduleStandalonePostOpenContentWake(context) {
 if (!window.__bubbleLocationDeduperAdded) {
     try {
         let pendingHashBase = null;
-        let pendingTimestamp = 0;
+        let pendingHashPushed = false;
         let guardNextNoHash = false;
         let pendingPreviousHash = "";
         let lastKnownHash = window.location.hash || "";
@@ -1025,8 +1025,15 @@ if (!window.__bubbleLocationDeduperAdded) {
             const source = event?.detail?.source || '';
 
             if (hasHash) {
+                // Opening pushes a history entry, closing only replaces the
+                // current one, so the pushed entry outlives the pop-up unless
+                // it is taken back here. What makes that safe is having pushed
+                // it ourselves: a replace reuses the entry already on the
+                // stack, and a page loaded straight at a hash fires no event at
+                // all, so in both cases there is nothing of ours to take back
+                // and going back would leave the dashboard entirely.
+                pendingHashPushed = event?.detail?.replace !== true;
                 pendingHashBase = base;
-                pendingTimestamp = Date.now();
                 guardNextNoHash = false;
                 pendingPreviousHash = lastKnownHash || "";
                 lastKnownHash = window.location.hash;
@@ -1036,6 +1043,7 @@ if (!window.__bubbleLocationDeduperAdded) {
             if (guardNextNoHash) {
                 guardNextNoHash = false;
                 pendingHashBase = null;
+                pendingHashPushed = false;
                 pendingPreviousHash = "";
                 lastKnownHash = window.location.hash || "";
                 return;
@@ -1045,7 +1053,7 @@ if (!window.__bubbleLocationDeduperAdded) {
                 source === 'bubble-popup-remove-hash' &&
                 pendingHashBase &&
                 base === pendingHashBase &&
-                (Date.now() - pendingTimestamp) < 1500 &&
+                pendingHashPushed &&
                 !pendingPreviousHash
             ) {
                 try {
@@ -1055,6 +1063,7 @@ if (!window.__bubbleLocationDeduperAdded) {
             }
 
             pendingHashBase = null;
+            pendingHashPushed = false;
             pendingPreviousHash = "";
             lastKnownHash = window.location.hash || "";
         });
