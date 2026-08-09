@@ -68,6 +68,11 @@ const STATES = {
         state: 'on',
         attributes: { supported_color_modes: ['color_temp', 'hs'], effect_list: ['rainbow'] },
     },
+    // Color without any effect, so the effect variants must not be offered.
+    'light.color_only': {
+        state: 'on',
+        attributes: { supported_color_modes: ['hs'] },
+    },
     'switch.a': { state: 'on', attributes: {} },
     'input_boolean.a': { state: 'on', attributes: {} },
     'automation.a': { state: 'on', attributes: {} },
@@ -254,14 +259,14 @@ describe('getEntitySuggestion', () => {
         expect(onoff[0].config.sub_button.bottom[0].group[0].name).toBe('Toggle');
 
         const full = suggestionsFor('light.full');
-        expect(full).toHaveLength(7);
+        expect(full).toHaveLength(8);
         expect(full.map((s) => s.label)).toEqual([
-            undefined, 'Color temperature', 'Color', 'Saturation', 'Effect', 'Button', 'Slider',
+            undefined, 'Color temperature', 'Color', 'Saturation', 'Color \u00b7 Effect', 'Effect', 'Button', 'Slider',
         ]);
         expect(full[1].config.sub_button.bottom[0].group[1].light_slider_type).toBe('white_temp');
         expect(full[2].config.sub_button.bottom[0].group[1].light_slider_type).toBe('hue');
         expect(full[3].config.sub_button.bottom[0].group[2].light_slider_type).toBe('saturation');
-        expect(full[4].config.sub_button.bottom[0].group[0].select_attribute).toBe('effect_list');
+        expect(full[5].config.sub_button.bottom[0].group[0].select_attribute).toBe('effect_list');
 
         // Brightness only: no color variants offered.
         expect(suggestionsFor('light.dimmable').map((s) => s.label)).toEqual([undefined, 'Button', 'Slider']);
@@ -276,6 +281,57 @@ describe('getEntitySuggestion', () => {
         expect(types).toContain('saturation');
         expect(types.indexOf('hue')).toBeGreaterThanOrEqual(0);
         expect(types.indexOf('hue')).toBeLessThan(types.indexOf('saturation'));
+    });
+
+    test('the saturation variant is three sliders and no chevron', () => {
+        // A fourth control on the same row leaves each of them too narrow to
+        // aim at on a phone, and the more-info chevron is the one to drop.
+        const group = suggestionsFor('light.full')
+            .find((s) => s.label === 'Saturation').config.sub_button.bottom[0].group;
+
+        expect(group).toHaveLength(3);
+        expect(group.map((b) => b.light_slider_type)).toEqual(['undefined', 'hue', 'saturation'].map((v) => v === 'undefined' ? undefined : v));
+        expect(group.some((b) => b.icon === 'mdi:chevron-right')).toBe(false);
+    });
+
+    test('the color and effect variant reduces the dropdown to its icon', () => {
+        const variant = suggestionsFor('light.full').find((s) => s.label === 'Color \u00b7 Effect');
+        const group = variant.config.sub_button.bottom[0].group;
+        const dropdown = group.find((b) => b.sub_button_type === 'select');
+
+        // Two sliders already fill the row, so the dropdown shows neither a name
+        // nor the current effect, and no chevron competes with them either.
+        expect(group).toHaveLength(3);
+        expect(dropdown.select_attribute).toBe('effect_list');
+        // Named so the editor lists it as Effect rather than "Button 3", but
+        // show_name defaults to false so the card still shows the icon alone.
+        expect(dropdown.name).toBe('Effect');
+        expect(dropdown.show_name).toBeUndefined();
+        expect(dropdown.show_attribute).toBe(false);
+        expect(dropdown.icon).toBe('mdi:auto-fix');
+        expect(group.some((b) => b.icon === 'mdi:chevron-right')).toBe(false);
+        expect(group.map((b) => b.light_slider_type)).toContain('hue');
+    });
+
+    test('both effect variants share the same icon, and only one is labelled', () => {
+        const byLabel = (l) => suggestionsFor('light.full')
+            .find((s) => s.label === l).config.sub_button.bottom[0].group
+            .find((b) => b.sub_button_type === 'select');
+
+        expect(byLabel('Effect').icon).toBe('mdi:auto-fix');
+        expect(byLabel('Color \u00b7 Effect').icon).toBe('mdi:auto-fix');
+        // Both carry the native Home Assistant label, so the editor names them
+        // the same way. Only the standalone one has room to render it.
+        expect(byLabel('Effect').name).toBe('Effect');
+        expect(byLabel('Color \u00b7 Effect').name).toBe('Effect');
+    });
+
+    test('a light with no effect list is offered no effect variant', () => {
+        const labels = suggestionsFor('light.color_only').map((s) => s.label);
+
+        expect(labels).not.toContain('Effect');
+        expect(labels).not.toContain('Color \u00b7 Effect');
+        expect(labels).toContain('Saturation');
     });
 
     test('no light suggestion offers a saturation slider on its own', () => {

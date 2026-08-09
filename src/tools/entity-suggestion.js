@@ -132,13 +132,20 @@ const colorTempTile = (entityId, t) =>
     ]),
   });
 
+// Home Assistant's own icon for a light effect, so the control is recognizable
+// before its name is read, and identical in both variants that offer it.
+const EFFECT_ICON = 'mdi:auto-fix';
+
 const effectsTile = (entityId, t) =>
   tile({
     entity: entityId,
     sub_button: bottomControls(t, [
       {
         sub_button_type: 'select',
+        // Native Home Assistant label, so it reads the same here as in the
+        // more-info dialog of the light.
         name: t('editor.card_picker.suggestions.effect'),
+        icon: EFFECT_ICON,
         show_attribute: true,
         attribute: 'effect',
         show_arrow: false,
@@ -173,17 +180,49 @@ const colorTile = (entityId, t) =>
     ]),
   });
 
+const hueSlider = (t) =>
+  lightColorSlider(t, { nameKey: 'editor.slider.mode_color', icon: 'mdi:palette', sliderType: 'hue' });
+
 // Saturation always travels with the hue slider. On its own it controls how
 // washed out a color is without offering any way to choose that color, which
-// reads as a broken card rather than a simpler one.
+// reads as a broken card rather than a simpler one. Three sliders and no
+// chevron, because a fourth control on the same row leaves each of them too
+// narrow to aim at on a phone.
 const saturationTile = (entityId, t) =>
   tile({
     entity: entityId,
     sub_button: bottomControls(t, [
       brightnessSlider(t),
-      lightColorSlider(t, { nameKey: 'editor.slider.mode_color', icon: 'mdi:palette', sliderType: 'hue' }),
+      hueSlider(t),
       lightColorSlider(t, { nameKey: 'editor.slider.mode_saturation', icon: 'mdi:contrast-circle', sliderType: 'saturation' }),
-      moreInfoSubButton(t),
+    ]),
+  });
+
+// Two sliders already fill the row, so the effect dropdown is reduced to its
+// icon here. No name and no value, it opens the same list and gives its width
+// back to the two controls beside it.
+const colorEffectsTile = (entityId, t) =>
+  tile({
+    entity: entityId,
+    button_type: 'switch',
+    sub_button: bottomControls(t, [
+      brightnessSlider(t),
+      hueSlider(t),
+      {
+        sub_button_type: 'select',
+        // Named for the editor, which otherwise lists it as "Button 3" with no
+        // way to tell which control it is. `show_name` is false by default, so
+        // the card still shows the icon alone.
+        name: t('editor.card_picker.suggestions.effect'),
+        show_attribute: false,
+        attribute: 'effect',
+        show_arrow: false,
+        select_attribute: 'effect_list',
+        hide_when_parent_unavailable: true,
+        icon: EFFECT_ICON,
+        show_background: false,
+        fill_width: false,
+      },
     ]),
   });
 
@@ -698,6 +737,12 @@ const DOMAIN_BUILDERS = {
         label: t('editor.slider.mode_saturation'),
         config: saturationTile(entityId, t),
       });
+      if (stateObj.attributes.effect_list?.length) {
+        suggestions.push({
+          label: `${t('editor.card_picker.suggestions.color')} \u00b7 ${t('editor.card_picker.suggestions.effect')}`,
+          config: colorEffectsTile(entityId, t),
+        });
+      }
     }
     if (stateObj.attributes.effect_list?.length) {
       suggestions.push({
