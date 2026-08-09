@@ -173,11 +173,15 @@ const colorTile = (entityId, t) =>
     ]),
   });
 
+// Saturation always travels with the hue slider. On its own it controls how
+// washed out a color is without offering any way to choose that color, which
+// reads as a broken card rather than a simpler one.
 const saturationTile = (entityId, t) =>
   tile({
     entity: entityId,
     sub_button: bottomControls(t, [
       brightnessSlider(t),
+      lightColorSlider(t, { nameKey: 'editor.slider.mode_color', icon: 'mdi:palette', sliderType: 'hue' }),
       lightColorSlider(t, { nameKey: 'editor.slider.mode_saturation', icon: 'mdi:contrast-circle', sliderType: 'saturation' }),
       moreInfoSubButton(t),
     ]),

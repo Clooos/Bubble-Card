@@ -260,11 +260,34 @@ describe('getEntitySuggestion', () => {
         ]);
         expect(full[1].config.sub_button.bottom[0].group[1].light_slider_type).toBe('white_temp');
         expect(full[2].config.sub_button.bottom[0].group[1].light_slider_type).toBe('hue');
-        expect(full[3].config.sub_button.bottom[0].group[1].light_slider_type).toBe('saturation');
+        expect(full[3].config.sub_button.bottom[0].group[2].light_slider_type).toBe('saturation');
         expect(full[4].config.sub_button.bottom[0].group[0].select_attribute).toBe('effect_list');
 
         // Brightness only: no color variants offered.
         expect(suggestionsFor('light.dimmable').map((s) => s.label)).toEqual([undefined, 'Button', 'Slider']);
+    });
+
+    test('a saturation slider never travels without the hue slider', () => {
+        // On its own it controls how washed out a color is with no way to pick
+        // that color, which reads as a broken card rather than a simpler one.
+        const saturation = suggestionsFor('light.full').find((s) => s.label === 'Saturation');
+        const types = saturation.config.sub_button.bottom[0].group.map((b) => b.light_slider_type);
+
+        expect(types).toContain('saturation');
+        expect(types.indexOf('hue')).toBeGreaterThanOrEqual(0);
+        expect(types.indexOf('hue')).toBeLessThan(types.indexOf('saturation'));
+    });
+
+    test('no light suggestion offers a saturation slider on its own', () => {
+        for (const entity of ['light.full', 'light.dimmable', 'light.onoff']) {
+            for (const suggestion of suggestionsFor(entity)) {
+                const group = suggestion.config?.sub_button?.bottom?.[0]?.group ?? [];
+                const types = group.map((b) => b.light_slider_type);
+                if (types.includes('saturation')) {
+                    expect(types).toContain('hue');
+                }
+            }
+        }
     });
 
     test('covers expose position and tilt only when supported', () => {
