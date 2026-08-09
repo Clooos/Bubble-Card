@@ -3,7 +3,7 @@ import en from '../translations/editor/en.json';
 import runtime from '../translations/runtime.js';
 
 // Editor translations for languages other than English are not bundled: they
-// are loaded from the local `translations/` folder shipped next to
+// are loaded from the bubble-card-<lang>.json files shipped next to
 // bubble-card.js (never from a CDN), so the bundle stays small while every
 // language supported by Home Assistant is covered, entirely offline. English
 // is bundled as the fallback dictionary. Fetched dictionaries persist in a
@@ -195,9 +195,9 @@ export default function setupTranslation(hass) {
   };
 }
 
-// Candidate local bases for the translations/ folder shipped next to the
-// bundle. No network host is ever contacted: these all resolve to the Home
-// Assistant instance serving bubble-card.js itself.
+// Candidate local folders holding the dictionaries shipped next to the bundle.
+// No network host is ever contacted: these all resolve to the Home Assistant
+// instance serving bubble-card.js itself.
 function localBases() {
   const bases = [];
   // Optional override for development/testing.
@@ -205,9 +205,9 @@ function localBases() {
   if (typeof custom === 'string') bases.push(custom);
   else if (Array.isArray(custom)) bases.push(...custom);
   const scriptBase = getScriptBaseUrl();
-  if (scriptBase) bases.push(`${scriptBase}translations/`);
+  if (scriptBase) bases.push(scriptBase);
   // Canonical HACS install path as a last resort.
-  bases.push('/hacsfiles/Bubble-Card/translations/');
+  bases.push('/hacsfiles/Bubble-Card/');
   return bases;
 }
 
@@ -218,7 +218,7 @@ async function fetchDict(lang) {
       const timer = controller ? setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS) : null;
       // The version query defeats stale browser caches after an update (HACS
       // only cache-busts the JS resource itself, not sibling files).
-      const response = await fetch(`${base}${lang}.json?v=${encodeURIComponent(version)}`, controller ? { signal: controller.signal } : {});
+      const response = await fetch(`${base}bubble-card-${lang}.json?v=${encodeURIComponent(version)}`, controller ? { signal: controller.signal } : {});
       if (timer) clearTimeout(timer);
       if (!response.ok) continue;
       const dict = await response.json();
