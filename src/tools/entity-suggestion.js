@@ -299,6 +299,9 @@ const coverTiltCard = (entityId, t) => ({
   grid_options: { ...TILE_GRID_OPTIONS },
 });
 
+// The original button tile, kept alongside the climate card below: it reads the
+// target temperature as the card's value, which suits a thermostat you watch
+// more than you set.
 const climateTile = (entityId, t, modeSelect) =>
   tile({
     entity: entityId,
@@ -310,6 +313,63 @@ const climateTile = (entityId, t, modeSelect) =>
       moreInfoSubButton(t),
     ]),
   });
+
+// The same button tile, with the target temperature on a slider instead of read
+// as a value. Between the reading tile and the climate card, it is the one that
+// sets the temperature without spending the whole bottom row on plus and minus.
+const climateSliderTile = (entityId, t) =>
+  tile({
+    entity: entityId,
+    show_state: false,
+    show_attribute: true,
+    attribute: 'temperature',
+    sub_button: bottomControls(t, [
+      {
+        sub_button_type: 'slider',
+        name: t('editor.card_picker.suggestions.temperature'),
+        show_background: false,
+        always_visible: true,
+        hide_when_parent_unavailable: true,
+      },
+      moreInfoSubButton(t),
+    ]),
+  });
+
+// The climate card rather than a button tile, so the target temperature can be
+// changed from the card instead of only being read. Its controls take the whole
+// bottom, so the dropdown goes inline in the main row rather than into a bottom
+// row of its own, and there is no chevron competing with the controls.
+const climateCard = (entityId, t, modeSelect) => ({
+  type: 'custom:bubble-card',
+  card_type: 'climate',
+  entity: entityId,
+  show_state: false,
+  main_buttons_position: 'bottom',
+  main_buttons_full_width: true,
+  ...(modeSelect
+    ? {
+      sub_button: {
+        main: [
+          {
+            name: t('editor.card_picker.suggestions.controls'),
+            buttons_layout: 'inline',
+            group: [
+              {
+                sub_button_type: 'select',
+                show_arrow: false,
+                hide_when_parent_unavailable: true,
+                show_state: false,
+                show_background: false,
+                ...modeSelect,
+              },
+            ],
+          },
+        ],
+      },
+    }
+    : {}),
+  grid_options: { ...TILE_GRID_OPTIONS },
+});
 
 const mediaPlayerCard = (entityId, t) => ({
   type: 'custom:bubble-card',
@@ -775,10 +835,12 @@ const DOMAIN_BUILDERS = {
   },
   climate: (entityId, stateObj, t) => {
     const suggestions = [
+      // The card on its own, for a thermostat that is only ever set by hand.
+      { config: climateCard(entityId, t) },
       {
-        config: climateTile(entityId, t, {
+        label: t('editor.card_picker.suggestions.mode'),
+        config: climateCard(entityId, t, {
           name: t('editor.card_picker.suggestions.mode'),
-          show_state: true,
           select_attribute: 'hvac_modes',
         }),
       },
@@ -786,6 +848,34 @@ const DOMAIN_BUILDERS = {
     if (stateObj.attributes.preset_modes?.length) {
       suggestions.push({
         label: t('editor.card_picker.suggestions.preset_mode'),
+        config: climateCard(entityId, t, {
+          name: t('editor.card_picker.suggestions.preset_mode'),
+          // No value rendered, same as the mode dropdown beside it. The preset
+          // icon already says which one is active, and the text pushed the
+          // temperature controls around as the preset name changed length.
+          select_attribute: 'preset_modes',
+        }),
+      });
+    }
+    // The button tiles that came first, kept after the climate card. They are
+    // labelled by the temperature they display, which is what tells them apart
+    // at a glance from the cards above that let you change it.
+    const readingLabel = t('editor.card_picker.suggestions.temperature');
+    suggestions.push({
+      label: `${readingLabel} \u00b7 ${t('editor.button.type_slider')}`,
+      config: climateSliderTile(entityId, t),
+    });
+    suggestions.push({
+      label: readingLabel,
+      config: climateTile(entityId, t, {
+        name: t('editor.card_picker.suggestions.mode'),
+        show_state: true,
+        select_attribute: 'hvac_modes',
+      }),
+    });
+    if (stateObj.attributes.preset_modes?.length) {
+      suggestions.push({
+        label: `${readingLabel} \u00b7 ${t('editor.card_picker.suggestions.preset_mode')}`,
         config: climateTile(entityId, t, {
           name: t('editor.card_picker.suggestions.preset_mode'),
           show_attribute: true,

@@ -202,8 +202,11 @@ describe('getEntitySuggestion', () => {
         expect(light[2].config.button_type).toBe('slider');
 
         const climate = suggestionsFor('climate.preset');
-        expect(climate.map((s) => s.label)).toEqual([undefined, 'Preset mode', 'Climate', 'Button', 'Slider']);
-        expect(climate[2].config).toEqual({
+        expect(climate.map((s) => s.label)).toEqual([
+            undefined, 'Mode', 'Preset mode', 'Temperature \u00b7 Slider', 'Temperature',
+            'Temperature \u00b7 Preset mode', 'Climate', 'Button', 'Slider',
+        ]);
+        expect(climate[6].config).toEqual({
             type: 'custom:bubble-card',
             card_type: 'climate',
             entity: 'climate.preset',
@@ -361,12 +364,61 @@ describe('getEntitySuggestion', () => {
         expect(tilt[1].config.sub_button.main[0].group[0].cover_slider_type).toBe('tilt_position');
     });
 
+    test('climate is offered with and without its dropdown, on the climate card', () => {
+        const [base, mode] = suggestionsFor('climate.preset');
+
+        // The card itself, so the target temperature can be changed rather than
+        // only read, which is what the button tile it replaces could not do.
+        expect(base.config.card_type).toBe('climate');
+        expect(base.config.main_buttons_position).toBe('bottom');
+        expect(base.config.sub_button).toBeUndefined();
+
+        // Its controls take the whole bottom, so the dropdown goes inline in the
+        // main row, and no chevron competes with them.
+        expect(mode.config.card_type).toBe('climate');
+        expect(mode.config.sub_button.main[0].buttons_layout).toBe('inline');
+        expect(mode.config.sub_button.main[0].group[0].select_attribute).toBe('hvac_modes');
+        expect(mode.config.sub_button.bottom).toBeUndefined();
+        expect(JSON.stringify(mode.config)).not.toContain('chevron-right');
+    });
+
+    test('the original climate button tiles are still offered after the cards', () => {
+        const byLabel = (l) => suggestionsFor('climate.preset').find((s) => s.label === l).config;
+
+        // Read on a button tile, set on the climate card, both kept.
+        expect(byLabel('Temperature').card_type).toBe('button');
+        expect(byLabel('Temperature').attribute).toBe('temperature');
+        expect(byLabel('Temperature').sub_button.bottom[0].group[0].select_attribute).toBe('hvac_modes');
+        expect(byLabel('Temperature \u00b7 Preset mode').sub_button.bottom[0].group[0].select_attribute)
+            .toBe('preset_modes');
+
+        // The slider tile sets the temperature without spending the bottom row
+        // on plus and minus, unlike the climate card.
+        const slider = byLabel('Temperature \u00b7 Slider');
+        expect(slider.card_type).toBe('button');
+        expect(slider.sub_button.bottom[0].group[0].sub_button_type).toBe('slider');
+        expect(slider.attribute).toBe('temperature');
+
+        // The preset dropdown of the climate card renders no value, its icon
+        // already says which preset is active.
+        const presetCard = suggestionsFor('climate.preset')[2].config;
+        expect(presetCard.sub_button.main[0].group[0].show_attribute).toBeUndefined();
+
+        // A climate with no preset gets neither preset variant, on either shape.
+        const basic = suggestionsFor('climate.basic').map((s) => s.label);
+        expect(basic).toContain('Temperature');
+        expect(basic).not.toContain('Preset mode');
+        expect(basic).not.toContain('Temperature \u00b7 Preset mode');
+    });
+
     test('climate, media player and weather gate their variants on attributes', () => {
-        expect(suggestionsFor('climate.basic')).toHaveLength(4);
+        // Climate card without a dropdown, with Mode, with Preset mode when it
+        // has one, then the two button tiles, then the classics.
+        expect(suggestionsFor('climate.basic')).toHaveLength(7);
         const preset = suggestionsFor('climate.preset');
-        expect(preset).toHaveLength(5);
-        expect(preset[1].label).toBe('Preset mode');
-        expect(preset[1].config.sub_button.bottom[0].group[0].select_attribute).toBe('preset_modes');
+        expect(preset).toHaveLength(9);
+        expect(preset[2].label).toBe('Preset mode');
+        expect(preset[2].config.sub_button.main[0].group[0].select_attribute).toBe('preset_modes');
 
         const media = suggestionsFor('media_player.basic');
         expect(media.map((s) => s.label)).toEqual([undefined, 'Media player', 'Button', 'Slider']);
