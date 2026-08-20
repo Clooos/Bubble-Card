@@ -563,6 +563,68 @@ describe('the entity suggestions preview takeover', () => {
     });
 });
 
+// The <pre> of the export panel holds a binding, so the export can only ever
+// reach it through a render. Writing it into the node instead ejects the lit
+// markers of that binding, and every later render of the editor throws on a
+// part that no longer has a parent, which is the whole editor frozen from the
+// first click on Copy or Download.
+describe('the export preview', () => {
+    const CONTENT = 'my_module:\n  name: My Module\n';
+    const HINT = 'editor.module_editor.export_preview_hint';
+
+    // The template modules are plain objects here, so the binding is read where
+    // the markup that carries the id ends.
+    const exportPreviewBinding = (node) => {
+        if (Array.isArray(node)) {
+            for (const child of node) {
+                const found = exportPreviewBinding(child);
+                if (found !== undefined) return found;
+            }
+            return undefined;
+        }
+        if (!node || typeof node !== 'object' || !Array.isArray(node.strings)) return undefined;
+
+        const index = node.strings.findIndex(
+            (part) => typeof part === 'string' && part.includes('id="export-preview-content"'),
+        );
+        if (index !== -1) return node.values[index];
+
+        return exportPreviewBinding(node.values);
+    };
+
+    const makeContext = (editingModule, exportPreview) => ({
+        hass,
+        _hassRender: hass,
+        _config: { modules: [] },
+        _editingModule: editingModule,
+        _exportPreview: exportPreview,
+        createErrorConsole: () => '',
+        requestUpdate: jest.fn(),
+    });
+
+    test('opens on the hint, not on an empty box', () => {
+        const context = makeContext({ id: 'my_module', name: 'My Module' });
+
+        expect(exportPreviewBinding(renderModuleEditorForm(context))).toBe(HINT);
+    });
+
+    test('draws the export the buttons produced', () => {
+        const editingModule = { id: 'my_module', name: 'My Module' };
+        const context = makeContext(editingModule, { module: editingModule, content: CONTENT });
+
+        expect(exportPreviewBinding(renderModuleEditorForm(context))).toBe(CONTENT);
+    });
+
+    test('never opens the next module on the export of the previous one', () => {
+        const context = makeContext(
+            { id: 'my_module', name: 'My Module' },
+            { module: { id: 'other_module', name: 'Other' }, content: CONTENT },
+        );
+
+        expect(exportPreviewBinding(renderModuleEditorForm(context))).toBe(HINT);
+    });
+});
+
 // What the file is written from is generateYamlExport's argument, so this is
 // where the two keys either survive the editor or are lost. What the export
 // itself then does with them is covered by export.test.js.

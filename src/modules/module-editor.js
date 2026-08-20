@@ -635,18 +635,29 @@ export function renderModuleEditorForm(context) {
     return suggestions.preview;
   };
 
+  // Read back by the form, which renders the <pre> from it. Writing the export
+  // into that node instead would eject the lit markers of the binding it holds,
+  // and every later render of the editor would throw on a part that no longer
+  // has a parent. Keyed by the module being edited, so the next one does not
+  // open on the export of the previous one.
+  const exportPreview = context._exportPreview && context._exportPreview.module === context._editingModule
+    ? context._exportPreview.content
+    : null;
+
   // Update export preview content
   const updateExportPreview = (content) => {
-    const previewContent = context.shadowRoot?.querySelector('#export-preview-content');
-    if (previewContent) {
-      previewContent.textContent = content;
-      
+    context._exportPreview = { module: context._editingModule, content };
+    context.requestUpdate();
+
+    // The panel and the animation are read from the DOM the render just wrote,
+    // so both wait for it rather than acting on the previous one.
+    Promise.resolve(context.updateComplete).then(() => {
       // Expand the preview panel if not already expanded
       const previewPanel = context.shadowRoot?.querySelector('.export-preview ha-expansion-panel');
       if (previewPanel && !previewPanel.expanded) {
         previewPanel.expanded = true;
       }
-      
+
       // Animate the preview
       const previewContainer = context.shadowRoot?.querySelector('.export-preview');
       if (previewContainer) {
@@ -655,7 +666,7 @@ export function renderModuleEditorForm(context) {
           previewContainer.style.animation = 'highlight 1s ease';
         }, 10);
       }
-    }
+    }).catch(() => {});
   };
 
   // Driven from the render pass rather than from the toggle alone, so the
@@ -1022,7 +1033,7 @@ export function renderModuleEditorForm(context) {
                           .header=${t('editor.module_editor.export_preview')}
                           @expanded-changed=${(e) => e.stopPropagation()}
                         >
-                        <pre id="export-preview-content">${t('editor.module_editor.export_preview_hint')}</pre>
+                        <pre id="export-preview-content">${exportPreview ?? t('editor.module_editor.export_preview_hint')}</pre>
                         </ha-expansion-panel>
                     </div>
 
