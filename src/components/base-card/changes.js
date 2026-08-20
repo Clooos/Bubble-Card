@@ -10,7 +10,9 @@ import {
     computeDisplayTimer,
     startTimerInterval,
     stopTimerInterval,
-    hasTimerInterval
+    hasTimerInterval,
+    startRelativeTimeInterval,
+    stopRelativeTimeInterval
 } from '../../tools/utils.js';
 import { applyScrollingEffect } from '../../tools/text-scrolling.js';
 import { getIcon, getImage, getIconColor } from '../../tools/icon.js';
@@ -42,7 +44,7 @@ export function ensureTimerCountdown(context) {
     startTimerCountdown(context, entity);
 }
 
-export function changeState(context) {
+export function changeState(context, force = false) {
     const entity = context.config?.entity;
     const card = context.card;
     const state = context._hass.states[entity];
@@ -76,7 +78,22 @@ export function changeState(context) {
         previousConfig.scrollingEffect !== scrollingEffect
     );
 
-    if (!configChanged) {
+    // The beat is armed before the guard below, because the guard exists for the
+    // exact case the beat is for: nothing about the entity changed, so the card
+    // has no other reason to come back and rewrite an ageing relative time.
+    if ((showLastChanged || showLastUpdated) && state) {
+        startRelativeTimeInterval(context, () => {
+            // changeState reads context._hass unguarded, and an interval
+            // callback that throws is caught by nobody.
+            if (context._hass) {
+                changeState(context, true);
+            }
+        });
+    } else {
+        stopRelativeTimeInterval(context);
+    }
+
+    if (!configChanged && !force) {
         ensureTimerCountdown(context);
         return;
     }

@@ -596,6 +596,47 @@ export function computeDisplayTimer(hass, stateObj, timeRemaining) {
     return display;
 }
 
+// A relative time reads "2 minutes ago" and has to be rewritten as time passes.
+// Nothing announces that: the entity is not changing, which is precisely why the
+// text is going stale. So it needs a beat of its own, and Home Assistant runs
+// exactly the same one per element in `ha-relative-time`, 60 seconds, started
+// and stopped with the element.
+const RELATIVE_TIME_BEAT_MS = 60000;
+const relativeTimeIntervals = new WeakMap();
+
+export function startRelativeTimeInterval(context, updateCallback) {
+    // Idempotent: changeState runs on every card update, and re-arming the beat
+    // each time would keep pushing the next tick further away, so a card being
+    // updated often would never refresh at all.
+    if (relativeTimeIntervals.has(context)) {
+        return;
+    }
+
+    const intervalId = setInterval(() => {
+        // A removed card keeps its last hass snapshot, so no state check here
+        // could ever notice it went away and stop the beat.
+        if (context.isConnected === false) {
+            stopRelativeTimeInterval(context);
+            return;
+        }
+        updateCallback();
+    }, RELATIVE_TIME_BEAT_MS);
+
+    relativeTimeIntervals.set(context, intervalId);
+}
+
+export function stopRelativeTimeInterval(context) {
+    const intervalId = relativeTimeIntervals.get(context);
+    if (intervalId) {
+        clearInterval(intervalId);
+        relativeTimeIntervals.delete(context);
+    }
+}
+
+export function hasRelativeTimeInterval(context) {
+    return relativeTimeIntervals.has(context);
+}
+
 // Timer interval management for active timers
 const timerIntervals = new WeakMap();
 const elementTimerIntervals = new WeakMap();

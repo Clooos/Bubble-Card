@@ -9,7 +9,7 @@ jest.unstable_mockModule('../tools/tap-actions.js', () => ({ cleanupTapActions: 
 jest.unstable_mockModule('../modules/registry.js', () => ({ preloadYAMLStyles: jest.fn() }));
 jest.unstable_mockModule('../tools/style.js', () => ({ createBubbleDefaultColor: jest.fn() }));
 jest.unstable_mockModule('../cards/pop-up/backdrop.js', () => ({ updateThemeBackgroundColor: jest.fn() }));
-jest.unstable_mockModule('../tools/utils.js', () => ({ invalidateStyleCache: jest.fn(), stopTimerInterval: jest.fn() }));
+jest.unstable_mockModule('../tools/utils.js', () => ({ invalidateStyleCache: jest.fn(), stopTimerInterval: jest.fn(), stopRelativeTimeInterval: jest.fn() }));
 jest.unstable_mockModule('../tools/text-scrolling.js', () => ({ cleanupScrollingEffects: jest.fn(), resumeScrollingEffects: jest.fn() }));
 jest.unstable_mockModule('../components/sub-button/outline.js', () => ({
     cancelSubButtonOutlines: jest.fn(),

@@ -5,7 +5,7 @@ import { cleanupTapActions } from './tools/tap-actions.js';
 import { preloadYAMLStyles } from './modules/registry.js';
 import { createBubbleDefaultColor } from './tools/style.js';
 import { updateThemeBackgroundColor } from './cards/pop-up/backdrop.js';
-import { invalidateStyleCache, stopTimerInterval } from './tools/utils.js';
+import { invalidateStyleCache, stopTimerInterval, stopRelativeTimeInterval } from './tools/utils.js';
 import { cleanupScrollingEffects, resumeScrollingEffects } from './tools/text-scrolling.js';
 import { cancelSubButtonOutlines } from './components/sub-button/outline.js';
 import { cancelDeferredCardUpdate, deferCardUpdate } from './tools/deferred-card-updates.js';
@@ -174,6 +174,7 @@ class BubbleCard extends HTMLElement {
       // (base-card changes.js passes the bubble-card element to
       // startTimerInterval), so it must be the key used to stop it.
       stopTimerInterval(this);
+      stopRelativeTimeInterval(this);
     } catch (e) {}
     try {
       if (this._moduleChangeHandler) {
