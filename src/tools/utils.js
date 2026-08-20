@@ -24,9 +24,17 @@ export const forwardHaptic = hapticType => {
     fireEvent(window, "haptic", hapticType)
 }
 
+// Home Assistant marks its first history entry with `{ root: true }` and reads
+// it back to decide whether a page shows the sidebar button or a back arrow.
+// A replace reuses the entry already on the stack, so it has to carry that mark
+// over or the frontend loses it for the rest of the session. A push creates a
+// new entry, which by definition is not the root one, so it starts empty. Both
+// rules are the ones `common/navigate.ts` follows.
+export const keptHistoryState = () => (history.state?.root ? { root: true } : null)
+
 export const navigate = (_node, path, replace = false) => {
     if (replace) {
-        history.replaceState(null, "", path)
+        history.replaceState(keptHistoryState(), "", path)
     } else {
         history.pushState(null, "", path)
     }

@@ -1,6 +1,6 @@
 import { getBackdrop, hideExistingBackdrop, releaseBackdropContext } from "./backdrop.js";
 import { callAction } from "../../tools/tap-actions.js";
-import { toggleBodyScroll } from "../../tools/utils.js";
+import { toggleBodyScroll, keptHistoryState } from "../../tools/utils.js";
 import { buildStandalonePopUpCardsProgressively, handlePopUpCards, registerPopupOpenActivityProbe, resumeStandaloneCardHydration, setStandalonePopUpCardsActive, settleStandaloneCardWork, suspendStandalonePopUpCardsProgressively } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
 import { beginPopupOpenHassGate, releasePopupOpenHassGate } from './hass-gate.js';
@@ -1196,7 +1196,7 @@ export function removeHash(direct = false) {
 
     if (direct) {
         const newURL = window.location.href.split('#')[0];
-        history.replaceState(null, "", newURL);
+        history.replaceState(keptHistoryState(), "", newURL);
         window.dispatchEvent(createLocationChangedEvent({
             source: 'bubble-popup-remove-hash',
             direct: true,
@@ -1213,7 +1213,7 @@ export function removeHash(direct = false) {
 
         popupState.pendingHashRemovalHash = '';
         const newURL = window.location.href.split('#')[0];
-        history.replaceState(null, "", newURL);
+        history.replaceState(keptHistoryState(), "", newURL);
         window.dispatchEvent(createLocationChangedEvent({ source: 'bubble-popup-remove-hash' }));
     }, 50);
 

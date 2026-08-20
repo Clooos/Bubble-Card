@@ -65,6 +65,9 @@ jest.unstable_mockModule('../../tools/tap-actions.js', () => ({
 
 jest.unstable_mockModule('../../tools/utils.js', () => ({
     toggleBodyScroll,
+    // Real implementation: the point of these tests is what actually lands in
+    // the history entry, so mocking it away would hide exactly what they check.
+    keptHistoryState: () => (history.state?.root ? { root: true } : null),
 }));
 
 jest.unstable_mockModule('./cards/index.js', () => ({

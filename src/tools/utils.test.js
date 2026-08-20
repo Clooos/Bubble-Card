@@ -504,3 +504,79 @@ describe('theme color parsing', () => {
         expect(utilsModule.rgbStringToRgb(null)).toBeNull();
     });
 });
+
+// Home Assistant stamps `{ root: true }` on its first history entry and reads it
+// back to decide whether a page carries the sidebar button or a back arrow. It
+// only ever stamps it while `history.length === 1`, so an entry that loses the
+// mark never gets it again for the rest of the session.
+describe('history state carried across a navigation', () => {
+    let utilsModule;
+    let historyObject;
+
+    beforeEach(async () => {
+        jest.resetModules();
+
+        historyObject = {
+            state: null,
+            pushState: jest.fn(function (state) { this.state = state; }),
+            replaceState: jest.fn(function (state) { this.state = state; }),
+        };
+        global.history = historyObject;
+        global.window = new EventTarget();
+        global.window.history = historyObject;
+
+        utilsModule = await import('./utils.js');
+    });
+
+    afterEach(() => {
+        delete global.history;
+        delete global.window;
+    });
+
+    test('a replace keeps the root mark, because it reuses the entry holding it', () => {
+        historyObject.state = { root: true };
+
+        utilsModule.navigate(null, '/lovelace/test', true);
+
+        expect(historyObject.replaceState).toHaveBeenCalledWith({ root: true }, '', '/lovelace/test');
+        expect(historyObject.state).toEqual({ root: true });
+    });
+
+    test('a push starts empty, since a pushed entry is never the root one', () => {
+        historyObject.state = { root: true };
+
+        utilsModule.navigate(null, '/lovelace/test#salon', false);
+
+        expect(historyObject.pushState).toHaveBeenCalledWith(null, '', '/lovelace/test#salon');
+        // The root entry keeps its mark underneath, only the new one is empty.
+        expect(historyObject.state).toBeNull();
+    });
+
+    test('a replace over an entry we pushed ourselves stays empty', () => {
+        // This is the common path: nothing to carry over, so the written value
+        // is the same null as before, and the behaviour is unchanged.
+        historyObject.state = null;
+
+        utilsModule.navigate(null, '/lovelace/test', true);
+
+        expect(historyObject.replaceState).toHaveBeenCalledWith(null, '', '/lovelace/test');
+    });
+
+    test('an entry marked with anything else is not promoted to root', () => {
+        historyObject.state = { dialog: 'more-info' };
+
+        utilsModule.navigate(null, '/lovelace/test', true);
+
+        expect(historyObject.replaceState).toHaveBeenCalledWith(null, '', '/lovelace/test');
+    });
+
+    test('keptHistoryState reads the mark rather than copying the whole entry', () => {
+        historyObject.state = { root: true, scrollPosition: 420 };
+
+        expect(utilsModule.keptHistoryState()).toEqual({ root: true });
+
+        historyObject.state = undefined;
+
+        expect(utilsModule.keptHistoryState()).toBeNull();
+    });
+});

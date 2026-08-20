@@ -158,6 +158,9 @@ jest.unstable_mockModule('../../tools/tap-actions.js', () => ({
 
 jest.unstable_mockModule('../../tools/utils.js', () => ({
     toggleBodyScroll,
+    // Real implementation: the point of these tests is what actually lands in
+    // the history entry, so mocking it away would hide exactly what they check.
+    keptHistoryState: () => (history.state?.root ? { root: true } : null),
 }));
 
 jest.unstable_mockModule('./cards/index.js', () => ({
@@ -3533,5 +3536,61 @@ describe('scheduled work cancellation contract', () => {
         ].map((key) => key.slice(1, -1));
 
         expect(registryKeys.filter((key) => !scheduled.has(key)).sort()).toEqual([]);
+    });
+});
+
+// Closing a pop-up replaces the current entry. When the pop-up was reached by a
+// tap the entry is one we pushed, so there is nothing to carry over. When the
+// page was loaded straight at the hash (a link, a bookmark, a notification) the
+// entry is Home Assistant's own, and blanking it drops the `root` mark that
+// tells HA to show the sidebar button instead of a back arrow.
+describe('history state preserved when the hash is removed', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+        updateMockLocation(window.location, 'http://localhost/lovelace/test#salon');
+    });
+
+    afterEach(() => {
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+        delete window.history.state;
+    });
+
+    test('keeps the root mark when the page was loaded straight at the hash', () => {
+        window.history.state = { root: true };
+
+        removeHash(true);
+
+        expect(window.history.replaceState).toHaveBeenCalledWith(
+            { root: true },
+            '',
+            'http://localhost/lovelace/test',
+        );
+    });
+
+    test('keeps it on the deferred path too, which is the one a normal close takes', () => {
+        window.history.state = { root: true };
+
+        removeHash();
+        jest.advanceTimersByTime(60);
+
+        expect(window.history.replaceState).toHaveBeenCalledWith(
+            { root: true },
+            '',
+            'http://localhost/lovelace/test',
+        );
+    });
+
+    test('writes nothing when the entry is one the open pushed', () => {
+        window.history.state = null;
+
+        removeHash(true);
+
+        expect(window.history.replaceState).toHaveBeenCalledWith(
+            null,
+            '',
+            'http://localhost/lovelace/test',
+        );
     });
 });
