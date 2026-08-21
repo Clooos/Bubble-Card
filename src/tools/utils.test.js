@@ -580,3 +580,59 @@ describe('history state carried across a navigation', () => {
         expect(utilsModule.keptHistoryState()).toBeNull();
     });
 });
+
+// formatDateTime runs once per card and per sub-button on every hass tick. On a
+// dashboard carrying a few dozen relative times it was the single biggest named
+// cost at idle under CPU throttling, and all of it was rebuilding a formatter
+// that depends on nothing but the locale.
+describe('relative time formatting', () => {
+    let utilsModule;
+
+    beforeEach(async () => {
+        jest.resetModules();
+        utilsModule = await import('./utils.js');
+    });
+
+    test('still reads the same as before, from seconds to days', () => {
+        const ago = (seconds) => new Date(Date.now() - seconds * 1000).toISOString();
+
+        expect(utilsModule.formatDateTime(ago(5), 'en')).toBe('6 seconds ago');
+        expect(utilsModule.formatDateTime(ago(120), 'en')).toBe('2 minutes ago');
+        expect(utilsModule.formatDateTime(ago(7200), 'en')).toBe('2 hours ago');
+        expect(utilsModule.formatDateTime(ago(172800), 'en')).toBe('2 days ago');
+    });
+
+    test('builds one formatter per locale rather than one per call', () => {
+        const Real = Intl.RelativeTimeFormat;
+        const spy = jest.spyOn(Intl, 'RelativeTimeFormat').mockImplementation((...args) => new Real(...args));
+        const stamp = new Date(Date.now() - 120000).toISOString();
+
+        for (let i = 0; i < 50; i++) {
+            utilsModule.formatDateTime(stamp, 'en');
+        }
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        spy.mockRestore();
+    });
+
+    test('keeps one formatter per locale, so a mixed page still formats correctly', () => {
+        const Real = Intl.RelativeTimeFormat;
+        const spy = jest.spyOn(Intl, 'RelativeTimeFormat').mockImplementation((...args) => new Real(...args));
+        const stamp = new Date(Date.now() - 120000).toISOString();
+
+        utilsModule.formatDateTime(stamp, 'en');
+        utilsModule.formatDateTime(stamp, 'fr');
+        utilsModule.formatDateTime(stamp, 'en');
+        utilsModule.formatDateTime(stamp, 'fr');
+
+        expect(spy).toHaveBeenCalledTimes(2);
+        expect(utilsModule.formatDateTime(stamp, 'fr')).toBe('il y a 2 minutes');
+        spy.mockRestore();
+    });
+
+    test('returns nothing for a missing or unparsable stamp', () => {
+        expect(utilsModule.formatDateTime('', 'en')).toBe('');
+        expect(utilsModule.formatDateTime(undefined, 'en')).toBe('');
+        expect(utilsModule.formatDateTime('not a date', 'en')).toBe('');
+    });
+});

@@ -469,6 +469,23 @@ export function debounce(func, wait) {
     };
 }
 
+// An Intl formatter depends on nothing but its locale, and building one is among
+// the most expensive things in the language. This runs once per sub-button per
+// hass tick, so on a dashboard carrying a few dozen relative times it was the
+// single biggest named cost at idle. One formatter per locale, kept for the life
+// of the page.
+const relativeTimeFormatters = new Map();
+
+function getRelativeTimeFormat(locale) {
+    const key = locale || 'en';
+    let formatter = relativeTimeFormatters.get(key);
+    if (!formatter) {
+        formatter = new Intl.RelativeTimeFormat(key, { numeric: 'auto' });
+        relativeTimeFormatters.set(key, formatter);
+    }
+    return formatter;
+}
+
 export function formatDateTime(datetime, locale) {
     if (!datetime) return '';
     const date = new Date(datetime);
@@ -496,8 +513,7 @@ export function formatDateTime(datetime, locale) {
         value = Math.round(diffInSeconds / 86400);
     }
 
-    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-    return rtf.format(-value, unit);
+    return getRelativeTimeFormat(locale).format(-value, unit);
 }
 
 // Timer utility functions
