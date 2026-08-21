@@ -230,3 +230,113 @@ describe('the relative time beat of #2572', () => {
         expect(hasRelativeTimeInterval(context)).toBe(false);
     });
 });
+
+// The beat is shared on purpose: fifty relative times on a wall tablet must
+// cost one wake-up a minute, not fifty. These pin that, and the fact that
+// nothing beats while the page is hidden.
+describe('the relative time beat is shared and idle-aware', () => {
+    const usedContexts = [];
+    let hidden = false;
+    let visibilityHandler = null;
+    let realDocument;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+        hidden = false;
+        visibilityHandler = null;
+        realDocument = global.document;
+        global.document = {
+            get hidden() { return hidden; },
+            addEventListener: (type, fn) => { if (type === 'visibilitychange') visibilityHandler = fn; },
+        };
+    });
+
+    afterEach(() => {
+        usedContexts.forEach((context) => stopRelativeTimeInterval(context));
+        usedContexts.length = 0;
+        global.document = realDocument;
+        jest.useRealTimers();
+    });
+
+    test('runs one interval for many cards, not one each', () => {
+        const setIntervalSpy = jest.spyOn(global, 'setInterval');
+
+        for (let i = 0; i < 10; i++) {
+            const context = createRelativeCardContext(90);
+            usedContexts.push(context);
+            changeState(context);
+        }
+
+        expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+        setIntervalSpy.mockRestore();
+    });
+
+    test('refreshes every subscriber on the one tick', () => {
+        const a = createRelativeCardContext(90);
+        const b = createRelativeCardContext(90);
+        usedContexts.push(a, b);
+        changeState(a);
+        changeState(b);
+        applyScrollingEffect.mockClear();
+
+        jest.advanceTimersByTime(60000);
+
+        const refreshed = applyScrollingEffect.mock.calls.map((c) => c[1]);
+        expect(refreshed).toContain(a.elements.state);
+        expect(refreshed).toContain(b.elements.state);
+    });
+
+    test('stops the interval once the last card drops out', () => {
+        const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+        const a = createRelativeCardContext(90);
+        const b = createRelativeCardContext(90);
+        usedContexts.push(a, b);
+        changeState(a);
+        changeState(b);
+
+        stopRelativeTimeInterval(a);
+        expect(clearIntervalSpy).not.toHaveBeenCalled();
+
+        stopRelativeTimeInterval(b);
+        expect(clearIntervalSpy).toHaveBeenCalled();
+        clearIntervalSpy.mockRestore();
+    });
+
+    test('beats not at all while the page is hidden, and catches up on return', () => {
+        const context = createRelativeCardContext(90);
+        usedContexts.push(context);
+        changeState(context);
+        expect(displayedText()).toBe('2 minutes ago');
+
+        hidden = true;
+        visibilityHandler();
+
+        // Three minutes away with nothing running.
+        applyScrollingEffect.mockClear();
+        jest.advanceTimersByTime(180000);
+        expect(applyScrollingEffect).not.toHaveBeenCalled();
+
+        hidden = false;
+        visibilityHandler();
+
+        // Back, and correct straight away rather than up to a minute later.
+        expect(displayedText()).toBe('5 minutes ago');
+    });
+
+    test('drops a card that throws instead of losing the whole page beat', () => {
+        const bad = createRelativeCardContext(90);
+        const good = createRelativeCardContext(90);
+        usedContexts.push(bad, good);
+        changeState(bad);
+        changeState(good);
+
+        // A card whose hass went away mid-flight must not stop everyone else.
+        Object.defineProperty(bad, '_hass', { get() { throw new Error('gone'); } });
+
+        jest.advanceTimersByTime(60000);
+
+        expect(hasRelativeTimeInterval(bad)).toBe(false);
+        expect(hasRelativeTimeInterval(good)).toBe(true);
+    });
+});

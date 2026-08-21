@@ -598,43 +598,113 @@ export function computeDisplayTimer(hass, stateObj, timeRemaining) {
 
 // A relative time reads "2 minutes ago" and has to be rewritten as time passes.
 // Nothing announces that: the entity is not changing, which is precisely why the
-// text is going stale. So it needs a beat of its own, and Home Assistant runs
-// exactly the same one per element in `ha-relative-time`, 60 seconds, started
-// and stopped with the element.
+// text is going stale. So it needs a beat of its own.
+//
+// Home Assistant runs one interval per `ha-relative-time` element. One beat for
+// the whole page does the same job: every subscriber wants the same 60 second
+// tick, so a dashboard with fifty relative times costs one wake-up a minute
+// instead of fifty. The beat also stops entirely while the page is hidden, and
+// catches up on the way back, which is both cheaper and more correct than
+// letting a throttled background timer decide when the text is right again.
 const RELATIVE_TIME_BEAT_MS = 60000;
-const relativeTimeIntervals = new WeakMap();
+const relativeTimeSubscribers = new Map();
+let relativeTimeBeatId = null;
+let relativeTimeVisibilityBound = false;
 
-export function startRelativeTimeInterval(context, updateCallback) {
-    // Idempotent: changeState runs on every card update, and re-arming the beat
-    // each time would keep pushing the next tick further away, so a card being
-    // updated often would never refresh at all.
-    if (relativeTimeIntervals.has(context)) {
-        return;
+const relativeTimeHidden = () => typeof document !== 'undefined' && document.hidden === true;
+
+function runRelativeTimeBeat() {
+    for (const [context, updateCallback] of relativeTimeSubscribers) {
+        // A removed card keeps its last hass snapshot, so no state check inside
+        // the callback could ever notice the element went away. Dropping it here
+        // is what keeps the map from growing with every card the page discards.
+        if (context.isConnected === false) {
+            relativeTimeSubscribers.delete(context);
+            continue;
+        }
+        try {
+            updateCallback();
+        } catch (e) {
+            // One card throwing must not take the whole page's beat down with it
+            relativeTimeSubscribers.delete(context);
+        }
     }
 
-    const intervalId = setInterval(() => {
-        // A removed card keeps its last hass snapshot, so no state check here
-        // could ever notice it went away and stop the beat.
-        if (context.isConnected === false) {
-            stopRelativeTimeInterval(context);
-            return;
-        }
-        updateCallback();
-    }, RELATIVE_TIME_BEAT_MS);
+    if (relativeTimeSubscribers.size === 0) {
+        releaseRelativeTimeBeatIfIdle();
+    }
+}
 
-    relativeTimeIntervals.set(context, intervalId);
+function stopRelativeTimeBeat() {
+    if (relativeTimeBeatId !== null) {
+        clearInterval(relativeTimeBeatId);
+        relativeTimeBeatId = null;
+    }
+}
+
+function startRelativeTimeBeat() {
+    if (relativeTimeBeatId !== null || relativeTimeSubscribers.size === 0 || relativeTimeHidden()) {
+        return;
+    }
+    relativeTimeBeatId = setInterval(runRelativeTimeBeat, RELATIVE_TIME_BEAT_MS);
+}
+
+function onRelativeTimeVisibilityChange() {
+    if (relativeTimeHidden()) {
+        stopRelativeTimeBeat();
+        return;
+    }
+    // Coming back: every text on screen is as stale as the time spent away, so
+    // it is rewritten now rather than up to a minute later.
+    runRelativeTimeBeat();
+    startRelativeTimeBeat();
+}
+
+// Bound with the first subscriber and dropped with the last, so an empty page
+// leaves nothing attached to the document.
+function bindRelativeTimeVisibility() {
+    if (relativeTimeVisibilityBound || typeof document === 'undefined' || !document.addEventListener) {
+        return;
+    }
+    relativeTimeVisibilityBound = true;
+    document.addEventListener('visibilitychange', onRelativeTimeVisibilityChange);
+}
+
+function unbindRelativeTimeVisibility() {
+    if (!relativeTimeVisibilityBound || typeof document === 'undefined' || !document.removeEventListener) {
+        relativeTimeVisibilityBound = false;
+        return;
+    }
+    document.removeEventListener('visibilitychange', onRelativeTimeVisibilityChange);
+    relativeTimeVisibilityBound = false;
+}
+
+function releaseRelativeTimeBeatIfIdle() {
+    if (relativeTimeSubscribers.size > 0) {
+        return;
+    }
+    stopRelativeTimeBeat();
+    unbindRelativeTimeVisibility();
+}
+
+export function startRelativeTimeInterval(context, updateCallback) {
+    // Idempotent: changeState runs on every card update, so re-subscribing must
+    // stay free and must not disturb the beat already running.
+    if (relativeTimeSubscribers.has(context)) {
+        return;
+    }
+    relativeTimeSubscribers.set(context, updateCallback);
+    bindRelativeTimeVisibility();
+    startRelativeTimeBeat();
 }
 
 export function stopRelativeTimeInterval(context) {
-    const intervalId = relativeTimeIntervals.get(context);
-    if (intervalId) {
-        clearInterval(intervalId);
-        relativeTimeIntervals.delete(context);
-    }
+    relativeTimeSubscribers.delete(context);
+    releaseRelativeTimeBeatIfIdle();
 }
 
 export function hasRelativeTimeInterval(context) {
-    return relativeTimeIntervals.has(context);
+    return relativeTimeSubscribers.has(context);
 }
 
 // Timer interval management for active timers
