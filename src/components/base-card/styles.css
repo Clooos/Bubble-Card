@@ -85,7 +85,16 @@ ha-card {
     background-color: var(--bubble-card-type-main-background-color, var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color))));
     border-radius: var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height,56px)/2)));
     box-shadow: var(--bubble-card-type-box-shadow, var(--bubble-box-shadow, none));
+    /* `hidden` makes this a scroll container, and anything inside that overflows
+       by a pixel then lets the browser scroll it to bring a focused element into
+       view. A select sub-button does exactly that: its panel overflows the row,
+       and picking an option moves focus back inside, which scrolled the whole
+       header up by the overflow and left its content off-centre (#2569). `clip`
+       cuts against the rounded corners the same way but creates no scroll
+       container, so there is nothing to scroll. `hidden` stays first as the
+       fallback for engines that do not know `clip`. */
     overflow: hidden;
+    overflow: clip;
     touch-action: auto;
     border: var(--bubble-card-type-border, var(--bubble-border, none));
     box-sizing: border-box;
