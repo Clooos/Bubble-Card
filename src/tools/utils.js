@@ -486,6 +486,27 @@ function getRelativeTimeFormat(locale) {
     return formatter;
 }
 
+// The rendered string is a pure function of exactly these three, so caching on
+// them cannot go stale: `value` and `unit` are still recomputed from the clock
+// on every single call, and only the formatting of an already-seen pair is
+// skipped. That is what makes this safe where memoizing on the timestamp would
+// not be, since a memo keyed on the timestamp would have to guess when the
+// answer expires and would freeze the text if it guessed wrong.
+//
+// Naturally bounded: seconds run 1 to 60, minutes 1 to 60, hours 1 to 24, and
+// a page only ever holds as many distinct ages as it has elements.
+const relativeTimeStrings = new Map();
+
+function formatRelativeValue(locale, value, unit) {
+    const key = `${locale || 'en'}|${unit}|${value}`;
+    let text = relativeTimeStrings.get(key);
+    if (text === undefined) {
+        text = getRelativeTimeFormat(locale).format(-value, unit);
+        relativeTimeStrings.set(key, text);
+    }
+    return text;
+}
+
 export function formatDateTime(datetime, locale) {
     if (!datetime) return '';
     const date = new Date(datetime);
@@ -513,7 +534,7 @@ export function formatDateTime(datetime, locale) {
         value = Math.round(diffInSeconds / 86400);
     }
 
-    return getRelativeTimeFormat(locale).format(-value, unit);
+    return formatRelativeValue(locale, value, unit);
 }
 
 // Timer utility functions

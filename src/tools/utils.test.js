@@ -636,3 +636,96 @@ describe('relative time formatting', () => {
         expect(utilsModule.formatDateTime('not a date', 'en')).toBe('');
     });
 });
+
+// The cache key is the complete input to the formatter, and value/unit are
+// recomputed from the clock on every call, so a cached string cannot be a stale
+// one. These tests exist to keep that property true: the first one is the
+// anti-regression test for #2572, the rest pin the saving.
+describe('relative time formatting is cached without going stale', () => {
+    let utilsModule;
+
+    beforeEach(async () => {
+        jest.resetModules();
+        jest.useFakeTimers();
+        utilsModule = await import('./utils.js');
+    });
+
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
+    test('the same timestamp still reads older as the clock moves on', () => {
+        const stamp = new Date(Date.now() - 120000).toISOString();
+
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('2 minutes ago');
+
+        jest.advanceTimersByTime(60000);
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('3 minutes ago');
+
+        jest.advanceTimersByTime(3600000);
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('1 hour ago');
+
+        jest.advanceTimersByTime(86400000);
+        // numeric: 'auto' words the nearest day, which is existing behaviour
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('yesterday');
+
+        jest.advanceTimersByTime(86400000);
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('2 days ago');
+    });
+
+    test('crosses every unit boundary correctly rather than sticking on the cached one', () => {
+        const stamp = new Date(Date.now()).toISOString();
+
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('1 second ago');
+
+        // Last second before the minute branch takes over
+        jest.advanceTimersByTime(59000);
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('60 seconds ago');
+
+        jest.advanceTimersByTime(1000);
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('1 minute ago');
+
+        jest.advanceTimersByTime(3540000);
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('1 hour ago');
+
+        jest.advanceTimersByTime(82800000);
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('yesterday');
+    });
+
+    test('formats once per distinct value, not once per call', () => {
+        const Real = Intl.RelativeTimeFormat;
+        let formats = 0;
+        jest.spyOn(Intl, 'RelativeTimeFormat').mockImplementation((...args) => {
+            const inst = new Real(...args);
+            const original = inst.format.bind(inst);
+            inst.format = (...f) => { formats++; return original(...f); };
+            return inst;
+        });
+
+        // A hundred cards all showing an age of two minutes, as a dashboard does
+        // on every hass tick.
+        const stamps = Array.from({ length: 100 }, (_, i) => new Date(Date.now() - 120000 - i).toISOString());
+        stamps.forEach((s) => utilsModule.formatDateTime(s, 'en'));
+
+        expect(formats).toBe(1);
+        jest.restoreAllMocks();
+    });
+
+    test('does not let one locale answer for another', () => {
+        const stamp = new Date(Date.now() - 120000).toISOString();
+
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('2 minutes ago');
+        expect(utilsModule.formatDateTime(stamp, 'fr')).toBe('il y a 2 minutes');
+        expect(utilsModule.formatDateTime(stamp, 'en')).toBe('2 minutes ago');
+    });
+
+    test('does not let one unit answer for another at the same value', () => {
+        const twoMinutes = new Date(Date.now() - 120000).toISOString();
+        const twoHours = new Date(Date.now() - 7200000).toISOString();
+        const twoDays = new Date(Date.now() - 172800000).toISOString();
+
+        expect(utilsModule.formatDateTime(twoMinutes, 'en')).toBe('2 minutes ago');
+        expect(utilsModule.formatDateTime(twoHours, 'en')).toBe('2 hours ago');
+        expect(utilsModule.formatDateTime(twoDays, 'en')).toBe('2 days ago');
+    });
+});
