@@ -179,6 +179,8 @@ function handlePointerDown(event) {
     actionElement.removeEventListener('contextmenu', contextMenuHandler);
     document.removeEventListener('pointerup', endHandler);
     document.removeEventListener('touchend', endHandler);
+    document.removeEventListener('pointercancel', endHandler);
+    document.removeEventListener('touchcancel', endHandler);
     document.removeEventListener('scroll', scrollHandler);
     // End ripple on release/cancel/scroll
     try {
@@ -206,6 +208,11 @@ function handlePointerDown(event) {
   actionElement.addEventListener('contextmenu', contextMenuHandler);
   document.addEventListener('pointerup', endHandler, { once: true });
   document.addEventListener('touchend', endHandler, { once: true });
+  // The element only sees a cancel that is dispatched to it. When the OS takes
+  // the gesture over the cancel can land higher up, so it has to be watched
+  // here too or the interaction stays armed.
+  document.addEventListener('pointercancel', endHandler, { once: true });
+  document.addEventListener('touchcancel', endHandler, { once: true });
   document.addEventListener('scroll', scrollHandler, { once: true });
 }
 
@@ -435,6 +442,16 @@ class ActionHandler {
         return;
     }
 
+    // A cancel is not a release: the OS took the gesture over, for a system
+    // navigation swipe, a scroll hand-off or an app switch. The hasMoved and
+    // isScrolling guards below cannot catch it, because the take-over happens
+    // before enough move events reach the page. Home Assistant's own
+    // action-handler bails on touchcancel the same way.
+    if (e.type === 'pointercancel' || e.type === 'touchcancel') {
+        this.handleCancel();
+        return;
+    }
+
     // Check final position for hold dead zone
     let endX, endY;
     if (e.changedTouches && e.changedTouches[0]) {
@@ -532,6 +549,22 @@ class ActionHandler {
     document.removeEventListener('pointermove', this.pointerMoveListener);
     document.removeEventListener('touchmove', this.touchMoveListener);
     this.interactionStarted = false;
+  }
+
+  // Abandon the interaction under way, and only that one. `tapTimeout` is left
+  // alone on purpose: it belongs to an earlier tap that already completed and
+  // is only waiting to see whether a double tap follows, so clearing it here
+  // would swallow a press the user did make. `lastTap` is not written either,
+  // since handleEnd returns before it: a cancelled touch must not seed the
+  // double tap of the next one.
+  handleCancel() {
+    clearTimeout(this.holdTimeout);
+    this.holdTimeout = null;
+    document.removeEventListener('pointermove', this.pointerMoveListener);
+    document.removeEventListener('touchmove', this.touchMoveListener);
+    this.interactionStarted = false;
+    this.holdFired = false;
+    stopHoldIndicator();
   }
 }
 
