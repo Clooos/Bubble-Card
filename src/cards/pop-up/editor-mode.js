@@ -203,7 +203,14 @@ export function changeEditor(context) {
         window.bubbleNewlyCreatedInstances.add(context.bubbleInstanceId);
     }
 
-    if (isHAEditorModeActive && isCard && sectionRowContainer) {
+    // A closed pop-up collapses its hui-card wrapper with an inline display,
+    // and entering edit mode has to give it back or the placeholder is built
+    // inside a hidden ancestor and never shows. This used to wait for
+    // `sectionRowContainer`, which only a sections view has, so a masonry view
+    // never restored anything and the placeholder appeared only after a reload
+    // straight into edit mode. applyPopupHostLayout already deals with the row
+    // and the container separately, so there is nothing to wait for.
+    if (isHAEditorModeActive && isCard) {
         restorePopupHostLayout(context);
     }
 
