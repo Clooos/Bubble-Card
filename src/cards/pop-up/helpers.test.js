@@ -3594,3 +3594,139 @@ describe('history state preserved when the hash is removed', () => {
         );
     });
 });
+
+// Home Assistant's own action handler calls preventDefault() on touchend, which
+// tells the browser not to synthesise the click that follows. A native HA button
+// inside a pop-up therefore never produced the click close_on_click listens for,
+// so the pop-up stayed open on touch while it closed fine with a mouse (#2573).
+describe('close_on_click when the click was suppressed', () => {
+    const usedContexts = [];
+
+    function armed(config = {}) {
+        const context = createStandaloneContext({ close_on_click: true, ...config });
+        usedContexts.push(context);
+        context.popUp.classList.add('is-popup-opened');
+        context.popUp.classList.remove('is-popup-closed');
+        updateMockLocation(window.location, 'http://localhost/lovelace/test#standalone-popup');
+        updateListeners(context, true);
+        return context;
+    }
+
+    /** A press inside the pop-up, as the window listener of #2554 records it. */
+    function pressInside(context, x = 10, y = 10) {
+        const ev = new Event('touchstart', { bubbles: true });
+        ev.touches = [{ clientX: x, clientY: y }];
+        Object.defineProperty(ev, 'composedPath', { value: () => [context.popUp] });
+        window.dispatchEvent(ev);
+    }
+
+    function release(context, x = 10, y = 10) {
+        const ev = new Event('touchend', { bubbles: true });
+        ev.changedTouches = [{ clientX: x, clientY: y }];
+        Object.defineProperty(ev, 'composedPath', { value: () => [context.popUp] });
+        context.popUp.dispatchEvent(ev);
+    }
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+        window.isScrolling = false;
+        window.__bubbleLocationDeduperAdded = true;
+        window.__bubbleDialogListenerAdded = true;
+    });
+
+    afterEach(() => {
+        usedContexts.forEach((context) => cleanupPopupRuntime(context));
+        usedContexts.length = 0;
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+    });
+
+    test('closes on a tap that produced no click', () => {
+        const context = armed();
+        window.history.replaceState.mockClear();
+
+        pressInside(context);
+        release(context);
+        jest.advanceTimersByTime(400);
+
+        expect(window.history.replaceState).toHaveBeenCalled();
+    });
+
+    test('does nothing when the click arrived and already closed the pop-up', () => {
+        // The click stays the way this works. The fallback must be a no-op
+        // whenever it did its job, or a mouse would take a second path.
+        const context = armed();
+
+        pressInside(context);
+        release(context);
+        context.popUp.classList.remove('is-popup-opened');
+        window.history.replaceState.mockClear();
+        jest.advanceTimersByTime(400);
+
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+
+    test('a scroll inside the pop-up leaves it open', () => {
+        const context = armed();
+        window.history.replaceState.mockClear();
+
+        pressInside(context, 10, 300);
+        release(context, 10, 120);
+        jest.advanceTimersByTime(400);
+
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+
+    test('a sideways drag inside the pop-up leaves it open', () => {
+        const context = armed();
+        window.history.replaceState.mockClear();
+
+        pressInside(context, 10, 100);
+        release(context, 200, 104);
+        jest.advanceTimersByTime(400);
+
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+
+    test('a release while the page is scrolling leaves it open', () => {
+        const context = armed();
+        window.history.replaceState.mockClear();
+
+        pressInside(context);
+        window.isScrolling = true;
+        release(context);
+        jest.advanceTimersByTime(400);
+
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+
+    test('a press that began outside is left to the outside-click path', () => {
+        const context = armed();
+        const outside = createMockElement(['some-dashboard-card']);
+        const start = new Event('touchstart', { bubbles: true });
+        start.touches = [{ clientX: 10, clientY: 10 }];
+        Object.defineProperty(start, 'composedPath', { value: () => [outside] });
+        window.dispatchEvent(start);
+        window.history.replaceState.mockClear();
+
+        release(context);
+        jest.advanceTimersByTime(400);
+
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+
+    test('runs no fallback at all when close_on_click is off', () => {
+        const context = createStandaloneContext({ close_on_click: false });
+        usedContexts.push(context);
+        context.popUp.classList.add('is-popup-opened');
+        updateListeners(context, true);
+        window.history.replaceState.mockClear();
+
+        pressInside(context);
+        release(context);
+        jest.advanceTimersByTime(400);
+
+        expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+});

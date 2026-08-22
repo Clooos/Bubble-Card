@@ -49,7 +49,7 @@ const popupBlurWillChangeDurationMs = 450;
 // it survives the lifecycle boundary that was supposed to cancel it. The
 // lists had drifted both ways: three keys nothing ever assigned, and two
 // genuinely live frames nobody cancelled.
-const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout', '_standaloneHeavyOpenTimeout', '_standalonePostOpenContentWakeTimeout', '_pendingOpenSettledUpdateTimeout'];
+const popupRuntimeTimeoutKeys = ['hideContentTimeout', 'removeDomTimeout', 'closeTimeout', '_popupQuickOpenAnimationTimeout', '_popupBlurWillChangeTimeout', '_standaloneHeavyOpenTimeout', '_standalonePostOpenContentWakeTimeout', '_pendingOpenSettledUpdateTimeout', '_closeOnClickFallbackTimeout'];
 const standaloneOpenFrameKeys = ['_standaloneCardSyncFrame', '_standaloneClosedPaintCountFrame', '_popupListenersFrame', '_popupScrollResetFrame'];
 const maxPostOpenContentWakeTargets = 16;
 
@@ -1109,6 +1109,12 @@ function noteOutsideInteractionStart(event, context) {
     // every press, not only the first one after opening.
     context._interactionStartedInsidePopup = !!isEventInsidePopupOrDialog(event);
 
+    // Le point de départ sert aussi au filet de close_on_click plus bas, pour
+    // distinguer un tap d'un défilement ou d'un glissement.
+    const point = event.touches?.[0] ?? event;
+    context._interactionStartX = point.clientX ?? 0;
+    context._interactionStartY = point.clientY ?? 0;
+
     if (!context._awaitFreshOutsideInteraction) {
         return;
     }
@@ -2160,6 +2166,58 @@ function getPopupBaseListeners(context) {
     ];
 }
 
+// Home Assistant's own action handler calls preventDefault() on touchend, which
+// tells the browser not to synthesise the click that would normally follow. A
+// native HA button inside a pop-up therefore never produced the click that
+// close_on_click listens for, so the pop-up stayed open on touch while it closed
+// fine with a mouse (#2573).
+//
+// The click stays the way this works. This only catches the case where it was
+// suppressed: it waits long enough for a real click to arrive and does nothing
+// if the pop-up already closed, so a mouse, and any click that does come
+// through, follow exactly the path they followed before.
+const CLOSE_ON_CLICK_GRACE_MS = 350;
+// A scroll and a drag both end in a touchend with no click. Neither may close
+// the pop-up, and the distance travelled is what tells them from a tap.
+const CLOSE_ON_CLICK_TAP_SLOP = 10;
+
+function handleCloseOnClickTouchEnd(event, context) {
+    if (!context.popUp?.classList.contains('is-popup-opened')) {
+        return;
+    }
+
+    // A press that began outside is not a tap on the pop-up's content, and the
+    // outside-click path already owns that case.
+    if (!context._interactionStartedInsidePopup) {
+        return;
+    }
+
+    if (window.isScrolling) {
+        return;
+    }
+
+    const point = event.changedTouches?.[0] ?? event;
+    const dx = (point.clientX ?? 0) - (context._interactionStartX ?? 0);
+    const dy = (point.clientY ?? 0) - (context._interactionStartY ?? 0);
+    if (Math.sqrt(dx * dx + dy * dy) > CLOSE_ON_CLICK_TAP_SLOP) {
+        return;
+    }
+
+    clearTimeout(context._closeOnClickFallbackTimeout);
+    context._closeOnClickFallbackTimeout = setTimeout(() => {
+        context._closeOnClickFallbackTimeout = null;
+        // The click arrived and did the work: the pop-up is already on its way
+        // out and there is nothing left to do.
+        if (!context.popUp?.classList.contains('is-popup-opened')) {
+            return;
+        }
+        if (context.config?.hash && location.hash !== context.config.hash) {
+            return;
+        }
+        removeHash(true);
+    }, CLOSE_ON_CLICK_GRACE_MS);
+}
+
 function syncOptionalPopupListeners(context, enabled) {
     if (!context.popUp) {
         context.autoCloseListenersAdded = false;
@@ -2179,7 +2237,17 @@ function syncOptionalPopupListeners(context, enabled) {
 
     const closeOnClickEnabled = enabled && !!context.config.close_on_click;
     if (context.closeOnClickListenerAdded !== closeOnClickEnabled) {
-        toggleEventListener(context.popUp, 'click', removeHash, closeOnClickEnabled, { passive: true });
+        if (!context.boundCloseOnClickTouchEnd) {
+            context.boundCloseOnClickTouchEnd = (event) => handleCloseOnClickTouchEnd(event, context);
+        }
+        syncEventListeners([
+            [context.popUp, 'click', removeHash, { passive: true }],
+            [context.popUp, 'touchend', context.boundCloseOnClickTouchEnd, { passive: true }],
+        ], closeOnClickEnabled);
+        if (!closeOnClickEnabled) {
+            clearTimeout(context._closeOnClickFallbackTimeout);
+            context._closeOnClickFallbackTimeout = null;
+        }
         context.closeOnClickListenerAdded = closeOnClickEnabled;
     }
 
