@@ -211,3 +211,40 @@ describe('the location deduper, and the orphaned history entry of #2563', () => 
         expect(historyObject.back).toHaveBeenCalledTimes(3);
     });
 });
+
+// Taking back the entry the open pushed is only safe while that entry is still
+// the current one. A Home Assistant dialog opened from inside the pop-up pushes
+// its own entry on top, and a back from there reclaims HA's rather than ours.
+describe('the deduper leaves an entry that is not its own alone', () => {
+    beforeEach(() => {
+        historyObject.back.mockClear();
+        historyObject.state = null;
+        updateMockLocation(locationObject, VIEW);
+    });
+
+    test('does not go back when a dialog pushed its entry over ours', () => {
+        openPopup('#salon');
+        // The more-info dialog opens from a card inside the pop-up and marks
+        // the entry it pushed.
+        historyObject.state = { dialog: 'ha-more-info-dialog' };
+        closePopup();
+
+        expect(historyObject.back).not.toHaveBeenCalled();
+    });
+
+    test('does not go back on the entry a dialog is about to open from', () => {
+        openPopup('#salon');
+        historyObject.state = { opensDialog: true };
+        closePopup();
+
+        expect(historyObject.back).not.toHaveBeenCalled();
+    });
+
+    test('still takes back its own entry when no dialog is involved', () => {
+        openPopup('#salon');
+        historyObject.state = null;
+        closePopup();
+
+        expect(historyObject.back).toHaveBeenCalledTimes(1);
+    });
+});

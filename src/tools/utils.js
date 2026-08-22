@@ -30,7 +30,24 @@ export const forwardHaptic = hapticType => {
 // over or the frontend loses it for the rest of the session. A push creates a
 // new entry, which by definition is not the root one, so it starts empty. Both
 // rules are the ones `common/navigate.ts` follows.
-export const keptHistoryState = () => (history.state?.root ? { root: true } : null)
+export const keptHistoryState = () => {
+    const state = history.state;
+    if (!state) {
+        return null;
+    }
+
+    // `dialog`, `opensDialog` and `dialogData` sit on the entry a Home Assistant
+    // dialog pushed, and are how it knows that going back should close that
+    // dialog. They are not ours to blank: a pop-up closing on a click strips its
+    // hash from whatever entry is current, and when a dialog opened in between
+    // that entry is HA's, not ours. Carrying them over leaves its bookkeeping
+    // intact, and is what lets the deduper below tell the two apart.
+    if (state.dialog || state.opensDialog || state.dialogData) {
+        return state;
+    }
+
+    return state.root ? { root: true } : null;
+}
 
 export const navigate = (_node, path, replace = false) => {
     if (replace) {

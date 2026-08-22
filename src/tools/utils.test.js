@@ -562,12 +562,36 @@ describe('history state carried across a navigation', () => {
         expect(historyObject.replaceState).toHaveBeenCalledWith(null, '', '/lovelace/test');
     });
 
-    test('an entry marked with anything else is not promoted to root', () => {
-        historyObject.state = { dialog: 'more-info' };
+    test('an entry marked with something of our own is not promoted to root', () => {
+        historyObject.state = { somethingElse: true };
 
         utilsModule.navigate(null, '/lovelace/test', true);
 
         expect(historyObject.replaceState).toHaveBeenCalledWith(null, '', '/lovelace/test');
+    });
+
+    test("carries over the marks Home Assistant puts on a dialog's entry", () => {
+        // A pop-up closing on a click strips its hash from whatever entry is
+        // current, and when a dialog opened in between that entry is HA's.
+        // Blanking these leaves it unable to tell that going back should close
+        // the dialog, and the pop-up comes back up underneath it.
+        for (const mark of [{ dialog: 'ha-more-info-dialog' }, { opensDialog: true }, { dialogData: { x: 1 } }]) {
+            historyObject.replaceState.mockClear();
+            historyObject.state = mark;
+
+            utilsModule.navigate(null, '/lovelace/test', true);
+
+            expect(historyObject.replaceState).toHaveBeenCalledWith(mark, '', '/lovelace/test');
+        }
+    });
+
+    test('keeps the dialog marks even when the entry is also the root one', () => {
+        const mark = { root: true, dialog: 'ha-more-info-dialog' };
+        historyObject.state = mark;
+
+        utilsModule.navigate(null, '/lovelace/test', true);
+
+        expect(historyObject.replaceState).toHaveBeenCalledWith(mark, '', '/lovelace/test');
     });
 
     test('keptHistoryState reads the mark rather than copying the whole entry', () => {

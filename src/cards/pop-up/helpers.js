@@ -1056,10 +1056,19 @@ if (!window.__bubbleLocationDeduperAdded) {
                 pendingHashPushed &&
                 !pendingPreviousHash
             ) {
-                try {
-                    guardNextNoHash = true;
-                    history.back();
-                } catch (_) {}
+                // Having pushed the entry ourselves only makes the back safe
+                // while it is still the current one. A Home Assistant dialog
+                // opened from inside the pop-up pushes its own entry on top,
+                // and going back from there reclaims HA's rather than ours: it
+                // lands on the entry that still carries the hash, and the
+                // pop-up comes straight back up under the open dialog.
+                const onDialogEntry = !!(history.state?.dialog || history.state?.opensDialog);
+                if (!onDialogEntry) {
+                    try {
+                        guardNextNoHash = true;
+                        history.back();
+                    } catch (_) {}
+                }
             }
 
             pendingHashBase = null;
