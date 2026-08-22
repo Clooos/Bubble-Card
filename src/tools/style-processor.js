@@ -108,6 +108,107 @@ function _safeArray(arr) {
   return new Proxy(arr, { get: (t, k) => _safeRef(t[k]) });
 }
 
+// A pop-up's stylesheet lives in the same shadow root as the cards it carries,
+// so a broad selector in a module matches those cards directly. `*` is the one
+// that hurts: it restyles the internals of every native Home Assistant card
+// inside, which is how a weather card ended up bolder and with its unit clipped
+// (#2529). A module on a pop-up is meant for the pop-up and its header, so every
+// rule it produces is confined to what sits outside the cards container.
+//
+// The rewrite goes through the CSSOM rather than the CSS text on purpose: the
+// browser has already parsed the sheet, so there is no hand-written parser to
+// get wrong on comments, strings, nesting or grouping rules.
+// The container itself is excluded along with its contents: font-family, weight
+// and colour are inherited, so a rule that only reaches the container still
+// hands its values to every card below it.
+//
+// `bubble-cards-grid-container` rather than `bubble-cards-container`, because
+// the editor swaps in `bubble-cards-editor-container` and only the grid class
+// is on every one of them. Naming the wrong one leaves the whole leak in place
+// while editing, which is exactly what happened first.
+const POPUP_CONTENT_GUARD = ':not(.bubble-cards-grid-container, .bubble-cards-grid-container *)';
+
+export function confineSelectorToPopupChrome(selectorText) {
+    return String(selectorText)
+        .split(',')
+        .map(part => part.trim())
+        .filter(Boolean)
+        .map(part => {
+            // The guard is a pseudo-class and may not follow a pseudo-element,
+            // so it goes in front of a trailing ::before, ::after and friends.
+            const pseudoElement = part.match(/(?:::[\w-]+(?:\([^()]*\))?)+$/);
+            if (!pseudoElement) {
+                return part + POPUP_CONTENT_GUARD;
+            }
+            return part.slice(0, pseudoElement.index) + POPUP_CONTENT_GUARD + pseudoElement[0];
+        })
+        .join(', ');
+}
+
+// The parse goes through a constructable stylesheet rather than the injected
+// element: a pop-up's shell is built before it is connected, and a <style> that
+// is not in a document has no `sheet` at all, so reading rules off the element
+// finds nothing exactly when the styles are first written.
+const _popupConfineCache = new Map();
+const _POPUP_CONFINE_CACHE_MAX = 32;
+
+function confineCssToPopupChrome(cssText) {
+    if (!cssText || typeof CSSStyleSheet !== 'function') {
+        return cssText;
+    }
+
+    // replaceSync drops an @import without a word, so a sheet carrying one is
+    // left exactly as it is: leaking is better than losing a font.
+    if (cssText.includes('@import')) {
+        return cssText;
+    }
+
+    const cached = _popupConfineCache.get(cssText);
+    if (cached !== undefined) {
+        return cached;
+    }
+
+    let confined = cssText;
+    try {
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync(cssText);
+
+        let changed = false;
+        const walk = (rules) => {
+            for (const rule of rules) {
+                if (rule.selectorText && !/^\s*:(host|root)\b/.test(rule.selectorText)) {
+                    const guarded = confineSelectorToPopupChrome(rule.selectorText);
+                    if (guarded !== rule.selectorText) {
+                        // A selector the engine refuses to take back is left as
+                        // it was: a rule that still leaks beats one that stopped
+                        // applying at all.
+                        try {
+                            rule.selectorText = guarded;
+                            changed = true;
+                        } catch (e) {}
+                    }
+                }
+                if (rule.cssRules) {
+                    walk(rule.cssRules);
+                }
+            }
+        };
+        walk(sheet.cssRules);
+
+        if (changed) {
+            confined = Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n');
+        }
+    } catch (e) {
+        confined = cssText;
+    }
+
+    if (_popupConfineCache.size >= _POPUP_CONFINE_CACHE_MAX) {
+        _popupConfineCache.clear();
+    }
+    _popupConfineCache.set(cssText, confined);
+    return confined;
+}
+
 function getOrCreateStyleElement(context, element) {
   if (element.tagName === 'STYLE') {
     return element;
@@ -342,7 +443,10 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
       console.error("Bubble Card - Error processing custom styles before evaluation:", customStyleError);
     }
 
-    const finalStylesToInject = stylesParts.join("\n").trim();
+    const assembledStyles = stylesParts.join("\n").trim();
+    const finalStylesToInject = context.config?.card_type === 'pop-up'
+      ? confineCssToPopupChrome(assembledStyles)
+      : assembledStyles;
     
     let stylesHaveChanged = true;
 

@@ -101,6 +101,24 @@
     padding: 0 !important;
 }
 
+/* Confining a module's selectors stops it matching the cards a pop-up carries,
+   but font-family, weight and colour are inherited: a rule that legitimately
+   styles the shell above still hands its values down to every card below. This
+   is where that stops, so an embedded Home Assistant card reads exactly as it
+   does on the dashboard (#2529). It carries no !important on purpose: once the
+   selectors are confined nothing competes for it here, and a theme still wins
+   through the tokens it sets. The grid class is the one both the normal and the
+   editor container carry. */
+.bubble-pop-up .bubble-cards-grid-container {
+    font-family: var(--ha-font-family-body, var(--mdc-typography-body1-font-family, Roboto, sans-serif));
+    font-size: var(--ha-font-size-m, 14px);
+    font-weight: var(--ha-font-weight-normal, 400);
+    font-style: normal;
+    letter-spacing: normal;
+    line-height: normal;
+    zoom: 1;
+}
+
 .bubble-pop-up {
     /* Where the dashboard content starts, measured from HA's own rendered
        panel (tools/content-inset.js). --mdc-drawer-width is deliberately gone

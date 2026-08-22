@@ -43,7 +43,7 @@ jest.unstable_mockModule('./clean-css.js', () => ({
     cleanCSS,
 }));
 
-const { handleCustomStyles, evalStyles } = await import('./style-processor.js');
+const { handleCustomStyles, evalStyles, confineSelectorToPopupChrome } = await import('./style-processor.js');
 const { runModuleTeardowns } = await import('./module-teardown.js');
 
 function createCardElement() {
@@ -508,4 +508,56 @@ describe('the hasChanged gate handed to a style template', () => {
 
         expect(evalStyles(context, tpl('off'), { type: 'module', id: 'light' })).toContain('--ran: 1');
     });
+});
+
+// A pop-up's stylesheet shares a shadow root with the cards it carries, so a
+// broad selector in a module matches those cards directly and restyles their
+// internals. A module on a pop-up is meant for the pop-up and its header (#2529).
+describe('confining a pop-up module to the pop-up chrome', () => {
+  test('guards the universal selector, the one that does the damage', () => {
+    expect(confineSelectorToPopupChrome('*')).toBe('*:not(.bubble-cards-grid-container, .bubble-cards-grid-container *)');
+  });
+
+  test('guards each selector of a list on its own', () => {
+    expect(confineSelectorToPopupChrome('.a, .b .c')).toBe(
+      '.a:not(.bubble-cards-grid-container, .bubble-cards-grid-container *), .b .c:not(.bubble-cards-grid-container, .bubble-cards-grid-container *)',
+    );
+  });
+
+  test('guards the subject, not the ancestors', () => {
+    // The rule must stop applying when its SUBJECT is inside the cards, which
+    // is what a trailing guard expresses.
+    expect(confineSelectorToPopupChrome('.bubble-header .bubble-name')).toBe(
+      '.bubble-header .bubble-name:not(.bubble-cards-grid-container, .bubble-cards-grid-container *)',
+    );
+  });
+
+  test('puts the guard in front of a pseudo-element, never after it', () => {
+    // A pseudo-class after a pseudo-element is invalid and the engine would
+    // drop the whole rule, which is worse than the leak.
+    expect(confineSelectorToPopupChrome('.a::before')).toBe('.a:not(.bubble-cards-grid-container, .bubble-cards-grid-container *)::before');
+    expect(confineSelectorToPopupChrome('.a:hover::after')).toBe('.a:hover:not(.bubble-cards-grid-container, .bubble-cards-grid-container *)::after');
+    expect(confineSelectorToPopupChrome('div > .x::first-line')).toBe('div > .x:not(.bubble-cards-grid-container, .bubble-cards-grid-container *)::first-line');
+  });
+
+  test('keeps an attribute selector that contains a comma-like value intact', () => {
+    expect(confineSelectorToPopupChrome('[class*="name"]')).toBe('[class*="name"]:not(.bubble-cards-grid-container, .bubble-cards-grid-container *)');
+  });
+
+  test('never leaves the guard after a pseudo-element, which would be invalid', () => {
+    // A pseudo-class following a pseudo-element makes the engine drop the whole
+    // rule, which is worse than the leak the guard is there to stop.
+    for (const selector of ['*', '[class*="name"]', '.a::before', '.a:hover::after', '.b::first-line', '.c::slotted(span)']) {
+      const confined = confineSelectorToPopupChrome(selector);
+      expect(confined).not.toMatch(/::[\w-]+(?:\([^()]*\))?:not\(/);
+      expect(confined).toContain(':not(.bubble-cards-grid-container, .bubble-cards-grid-container *)');
+    }
+  });
+
+  test('leaves nothing unguarded in a list', () => {
+    const confined = confineSelectorToPopupChrome('.a, .b, .c::after');
+    // The guard itself carries a comma, so the count is what tells us every
+    // selector of the list got one.
+    expect(confined.match(/:not\(\.bubble-cards-grid-container, \.bubble-cards-grid-container \*\)/g)).toHaveLength(3);
+  });
 });
