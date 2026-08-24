@@ -231,6 +231,18 @@
     background-position: center;
     filter: blur(50px);
     opacity: 0.5;
+    /* A blur paints well past the box it came from, long after border-radius
+       cut the background itself, so the ancestor has to trim the overspill.
+       WebKit does not trim a filtered layer against a rounded corner, which is
+       how the cover's square edges reappeared outside the card as soon as its
+       fade settled (#2520). In the render order a filter is applied before
+       clip-path, so clipping the element to its own rounded box cuts the blurred
+       output rather than the sharp source, and no ancestor is involved. It costs
+       nothing here: the blur already made this a composited layer, and it stays
+       a no-op on the engines that trim it correctly. The radius is the one
+       base-card gives this element, kept as the same expression so the two
+       cannot drift apart. */
+    clip-path: inset(0 round var(--bubble-card-type-border-radius, var(--bubble-border-radius, calc(var(--row-height, 56px) / 2))));
 }
 
 .bubble-media-info-container.name-without-icon {
