@@ -574,7 +574,9 @@
       "translate_descriptions": "Aŭtomate traduki la priskribojn",
       "machine_translated": "Aŭtomata traduko",
       "show_original": "Montri la originalon",
-      "show_translation": "Montri la tradukon"
+      "show_translation": "Montri la tradukon",
+      "translate_offer_title": "Traduki la tekstojn de la moduloj",
+      "translate_offer_body": "La moduloj estas publikigitaj en la angla. Bubble Card povas traduki iliajn priskribojn kaj opciojn al via lingvo, sed tio sendas tiun tekston al ekstera traduka servo. Ĝi restas malŝaltita ĝis vi mem ŝaltas ĝin."
     },
     "module_editor": {
       "create_module": "Krei novan modulon",

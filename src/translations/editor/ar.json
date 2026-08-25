@@ -574,7 +574,9 @@
       "translate_descriptions": "ترجمة الأوصاف تلقائيًا",
       "machine_translated": "ترجمة آلية",
       "show_original": "عرض النص الأصلي",
-      "show_translation": "عرض الترجمة"
+      "show_translation": "عرض الترجمة",
+      "translate_offer_title": "ترجمة نصوص الوحدات",
+      "translate_offer_body": "تُنشر الوحدات بالإنجليزية. يمكن لـ Bubble Card ترجمة أوصافها وخياراتها إلى لغتك، لكن ذلك يرسل هذا النص إلى خدمة ترجمة خارجية. تبقى الميزة متوقفة حتى تفعّلها بنفسك."
     },
     "module_editor": {
       "create_module": "إنشاء وحدة جديدة",

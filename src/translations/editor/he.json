@@ -574,7 +574,9 @@
       "translate_descriptions": "תרגום תיאורים אוטומטית",
       "machine_translated": "תרגום אוטומטי",
       "show_original": "הצגת המקור",
-      "show_translation": "הצגת התרגום"
+      "show_translation": "הצגת התרגום",
+      "translate_offer_title": "תרגום הטקסטים של המודולים",
+      "translate_offer_body": "המודולים מתפרסמים באנגלית. Bubble Card יכול לתרגם את התיאורים והאפשרויות שלהם לשפה שלכם, אבל זה שולח את הטקסט הזה לשירות תרגום חיצוני. זה נשאר כבוי עד שתפעילו את זה בעצמכם."
     },
     "module_editor": {
       "create_module": "יצירת מודול חדש",

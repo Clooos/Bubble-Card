@@ -574,7 +574,9 @@
       "translate_descriptions": "Cyfieithu disgrifiadau yn awtomatig",
       "machine_translated": "Cyfieithiad awtomatig",
       "show_original": "Dangos y gwreiddiol",
-      "show_translation": "Dangos y cyfieithiad"
+      "show_translation": "Dangos y cyfieithiad",
+      "translate_offer_title": "Cyfieithu testunau'r modiwlau",
+      "translate_offer_body": "Mae modiwlau'n cael eu cyhoeddi yn Saesneg. Gall Bubble Card gyfieithu eu disgrifiadau a'u dewisiadau i'ch iaith, ond mae hynny'n anfon y testun hwnnw at wasanaeth cyfieithu allanol. Mae'n aros i ffwrdd nes i chi ei droi ymlaen."
     },
     "module_editor": {
       "create_module": "Creu modiwl newydd",

@@ -574,7 +574,9 @@
       "translate_descriptions": "Samodejno prevedi opise",
       "machine_translated": "Samodejni prevod",
       "show_original": "Prikaži izvirnik",
-      "show_translation": "Prikaži prevod"
+      "show_translation": "Prikaži prevod",
+      "translate_offer_title": "Prevedi besedila modulov",
+      "translate_offer_body": "Moduli so objavljeni v angleščini. Bubble Card lahko njihove opise in možnosti prevede v vaš jezik, vendar to besedilo pošlje zunanji prevajalski storitvi. Ostane izklopljeno, dokler tega sami ne vklopite."
     },
     "module_editor": {
       "create_module": "Ustvari nov modul",

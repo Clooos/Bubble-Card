@@ -574,7 +574,9 @@
       "translate_descriptions": "Automātiski tulkot aprakstus",
       "machine_translated": "Automātisks tulkojums",
       "show_original": "Rādīt oriģinālu",
-      "show_translation": "Rādīt tulkojumu"
+      "show_translation": "Rādīt tulkojumu",
+      "translate_offer_title": "Tulkot moduļu tekstus",
+      "translate_offer_body": "Moduļi tiek publicēti angļu valodā. Bubble Card var pārtulkot to aprakstus un iespējas jūsu valodā, taču tad šis teksts tiek nosūtīts ārējam tulkošanas pakalpojumam. Paliek izslēgts, līdz jūs pats to ieslēdzat."
     },
     "module_editor": {
       "create_module": "Izveidot jaunu moduli",

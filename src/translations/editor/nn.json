@@ -574,7 +574,9 @@
       "translate_descriptions": "Omset beskrivingar automatisk",
       "machine_translated": "Automatisk omsetjing",
       "show_original": "Vis original",
-      "show_translation": "Vis omsetjing"
+      "show_translation": "Vis omsetjing",
+      "translate_offer_title": "Omset tekstane i modulane",
+      "translate_offer_body": "Modular blir publiserte på engelsk. Bubble Card kan omsetje beskrivingane og vala deira til ditt språk, men det sender teksten til ei ekstern omsetjingsteneste. Det er av til du slår det på sjølv."
     },
     "module_editor": {
       "create_module": "Opprett ny modul",

@@ -574,7 +574,9 @@
       "translate_descriptions": "Beskriuwingen automatysk oersette",
       "machine_translated": "Automatyske oersetting",
       "show_original": "Orizjineel sjen litte",
-      "show_translation": "Oersetting sjen litte"
+      "show_translation": "Oersetting sjen litte",
+      "translate_offer_title": "Moduleteksten oersette",
+      "translate_offer_body": "Modules wurde yn it Ingelsk publisearre. Bubble Card kin har beskriuwingen en opsjes nei dyn taal oersette, mar dat stjoert dy tekst nei in eksterne oersetsjinst. It bliuwt út oant dû it sels oansetst."
     },
     "module_editor": {
       "create_module": "Nije module meitsje",

@@ -574,7 +574,9 @@
       "translate_descriptions": "Tradu descrierile automat",
       "machine_translated": "Traducere automată",
       "show_original": "Afișează originalul",
-      "show_translation": "Afișează traducerea"
+      "show_translation": "Afișează traducerea",
+      "translate_offer_title": "Traducerea textelor modulelor",
+      "translate_offer_body": "Modulele sunt publicate în engleză. Bubble Card poate traduce descrierile și opțiunile lor în limba ta, dar asta trimite textul respectiv către un serviciu de traducere extern. Rămâne dezactivat până îl activezi tu."
     },
     "module_editor": {
       "create_module": "Creează un modul nou",

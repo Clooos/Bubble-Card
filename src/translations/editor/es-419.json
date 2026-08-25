@@ -574,7 +574,9 @@
       "translate_descriptions": "Traducir descripciones automáticamente",
       "machine_translated": "Traducción automática",
       "show_original": "Mostrar original",
-      "show_translation": "Mostrar traducción"
+      "show_translation": "Mostrar traducción",
+      "translate_offer_title": "Traducir los textos de los módulos",
+      "translate_offer_body": "Los módulos se publican en inglés. Bubble Card puede traducir sus descripciones y opciones a tu idioma, pero eso envía ese texto a un servicio de traducción externo. Permanece desactivado hasta que lo actives tú."
     },
     "module_editor": {
       "create_module": "Crear nuevo módulo",

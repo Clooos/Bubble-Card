@@ -574,7 +574,9 @@
       "translate_descriptions": "Leírások automatikus fordítása",
       "machine_translated": "Automatikus fordítás",
       "show_original": "Eredeti megjelenítése",
-      "show_translation": "Fordítás megjelenítése"
+      "show_translation": "Fordítás megjelenítése",
+      "translate_offer_title": "Modulszövegek fordítása",
+      "translate_offer_body": "A modulok angolul jelennek meg. A Bubble Card le tudja fordítani a leírásaikat és beállításaikat a te nyelvedre, de ehhez elküldi ezt a szöveget egy külső fordítószolgáltatásnak. Kikapcsolva marad, amíg te magad be nem kapcsolod."
     },
     "module_editor": {
       "create_module": "Új modul létrehozása",

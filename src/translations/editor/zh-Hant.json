@@ -574,7 +574,9 @@
       "translate_descriptions": "自動翻譯描述",
       "machine_translated": "自動翻譯",
       "show_original": "顯示原文",
-      "show_translation": "顯示翻譯"
+      "show_translation": "顯示翻譯",
+      "translate_offer_title": "翻譯模組文字",
+      "translate_offer_body": "模組以英文發布。Bubble Card 可以把它們的描述和選項翻譯成你的語言，但這會把該文字傳送到外部翻譯服務。在你自己開啟之前，它一直是關閉的。"
     },
     "module_editor": {
       "create_module": "建立新模組",

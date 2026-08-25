@@ -574,7 +574,9 @@
       "translate_descriptions": "Beschreiwungen automatesch iwwersetzen",
       "machine_translated": "Automatesch Iwwersetzung",
       "show_original": "Original uweisen",
-      "show_translation": "Iwwersetzung uweisen"
+      "show_translation": "Iwwersetzung uweisen",
+      "translate_offer_title": "Modultexter iwwersetzen",
+      "translate_offer_body": "Moduler ginn op Englesch verëffentlecht. Bubble Card kann hir Beschreiwungen an Optiounen an deng Sprooch iwwersetzen, schéckt den Text dobäi awer un en externen Iwwersetzungsdéngscht. Et bleift aus, bis du et selwer uschalts."
     },
     "module_editor": {
       "create_module": "Neie Modul erstellen",

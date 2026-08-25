@@ -574,7 +574,9 @@
       "translate_descriptions": "Automaticky překládat popisy",
       "machine_translated": "Automatický překlad",
       "show_original": "Zobrazit originál",
-      "show_translation": "Zobrazit překlad"
+      "show_translation": "Zobrazit překlad",
+      "translate_offer_title": "Přeložit texty modulů",
+      "translate_offer_body": "Moduly se publikují v angličtině. Bubble Card umí přeložit jejich popisy a možnosti do vašeho jazyka, ale odešle přitom tento text externí překladové službě. Zůstává vypnuté, dokud to sami nezapnete."
     },
     "module_editor": {
       "create_module": "Vytvořit nový modul",

@@ -574,7 +574,9 @@
       "translate_descriptions": "Terjemahkan deskripsi secara otomatis",
       "machine_translated": "Terjemahan otomatis",
       "show_original": "Tampilkan asli",
-      "show_translation": "Tampilkan terjemahan"
+      "show_translation": "Tampilkan terjemahan",
+      "translate_offer_title": "Terjemahkan teks modul",
+      "translate_offer_body": "Modul diterbitkan dalam bahasa Inggris. Bubble Card dapat menerjemahkan deskripsi dan opsinya ke bahasa Anda, tetapi ini mengirim teks tersebut ke layanan terjemahan eksternal. Tetap nonaktif sampai Anda sendiri mengaktifkannya."
     },
     "module_editor": {
       "create_module": "Buat Modul baru",

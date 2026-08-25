@@ -574,7 +574,9 @@
       "translate_descriptions": "Þýða lýsingar sjálfkrafa",
       "machine_translated": "Sjálfvirk þýðing",
       "show_original": "Sýna upprunalegt",
-      "show_translation": "Sýna þýðingu"
+      "show_translation": "Sýna þýðingu",
+      "translate_offer_title": "Þýða texta eininganna",
+      "translate_offer_body": "Einingar eru gefnar út á ensku. Bubble Card getur þýtt lýsingar þeirra og valkosti yfir á tungumálið þitt, en það sendir þann texta til utanaðkomandi þýðingarþjónustu. Það helst slökkt þar til þú kveikir á því sjálf."
     },
     "module_editor": {
       "create_module": "Búa til nýja einingu",

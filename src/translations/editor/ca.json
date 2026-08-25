@@ -574,7 +574,9 @@
       "translate_descriptions": "Tradueix les descripcions automàticament",
       "machine_translated": "Traducció automàtica",
       "show_original": "Mostra l'original",
-      "show_translation": "Mostra la traducció"
+      "show_translation": "Mostra la traducció",
+      "translate_offer_title": "Tradueix els textos dels mòduls",
+      "translate_offer_body": "Els mòduls es publiquen en anglès. Bubble Card en pot traduir les descripcions i les opcions a la vostra llengua, però això envia aquest text a un servei de traducció extern. Es manté desactivat fins que l'activeu."
     },
     "module_editor": {
       "create_module": "Crea un mòdul nou",

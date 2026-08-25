@@ -14,8 +14,8 @@ import { checkModuleUpdates } from './store.js';
 import { _isModuleInstalledViaYaml } from './store.js';
 import { scrollToModuleForm } from './utils.js';
 import { getLazyLoadedPanelContent, renderDropdown, tTemplate } from '../editor/utils.js';
-import { translateUiText, translateModuleSchema } from './translate.js';
-import { renderTranslationNote, isShowingOriginal } from './translation-note.js';
+import { translateUiText, translateModuleSchema, isModuleTranslationEnabled } from './translate.js';
+import { renderTranslationNote, isShowingOriginal, renderTranslationOffer } from './translation-note.js';
 import { ensureBCTProviderAvailable, isBCTAvailableSync, writeModuleYaml, getAllModulesLastModified } from './bct-provider.js';
 import setupTranslation from '../tools/localize.js';
 
@@ -724,6 +724,8 @@ export function makeModulesEditor(context) {
         
         ${renderTabs()}
 
+        ${renderTranslationOffer(context)}
+
         ${context._selectedModuleTab === 0 || !bctAvailable ? html`
           ${context._showManualImportForm ? html`
             <div class="module-editor-form">
@@ -900,7 +902,7 @@ export function makeModulesEditor(context) {
               const label = rawLabel;
               const isDefaultDescription = typeof rawDescription === 'string' &&
                 rawDescription.startsWith('Empty and enabled by default.');
-              const translateThisModule = context._storeTranslateDescriptions !== false &&
+              const translateThisModule = isModuleTranslationEnabled() &&
                 !isShowingOriginal(context, key);
               const description = isDefaultDescription
                 ? t('editor.modules.default_module_description').replace('{icon}', '<ha-icon icon="mdi:pencil"></ha-icon>')

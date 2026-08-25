@@ -574,7 +574,9 @@
       "translate_descriptions": "自动翻译描述",
       "machine_translated": "自动翻译",
       "show_original": "显示原文",
-      "show_translation": "显示翻译"
+      "show_translation": "显示翻译",
+      "translate_offer_title": "翻译模块文本",
+      "translate_offer_body": "模块以英文发布。Bubble Card 可以把它们的描述和选项翻译成你的语言，但这会把该文本发送到外部翻译服务。在你自己开启之前，它一直是关闭的。"
     },
     "module_editor": {
       "create_module": "创建新模块",

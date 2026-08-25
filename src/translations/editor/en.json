@@ -16,6 +16,7 @@
       "layout": "@ui.panel.lovelace.editor.edit_card.tab_layout|Layout",
       "visibility": "@ui.panel.lovelace.editor.edit_card.tab_visibility|Visibility",
       "cancel": "@ui.common.cancel|Cancel",
+      "enable": "@ui.common.enable|Enable",
       "delete": "@ui.common.delete|Delete",
       "update": "@ui.common.update|Update",
       "add": "@ui.common.add|Add",
@@ -615,7 +616,9 @@
       "translate_descriptions": "Translate descriptions automatically",
       "machine_translated": "Automatic translation",
       "show_original": "Show original",
-      "show_translation": "Show translation"
+      "show_translation": "Show translation",
+      "translate_offer_title": "Translate module texts",
+      "translate_offer_body": "Modules are published in English. Bubble Card can translate their descriptions and options into your language, but this sends that text to an external translation service. It stays off until you turn it on."
     },
     "module_editor": {
       "create_module": "Create new Module",

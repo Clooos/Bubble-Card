@@ -574,7 +574,9 @@
       "translate_descriptions": "説明を自動翻訳する",
       "machine_translated": "自動翻訳",
       "show_original": "原文を表示",
-      "show_translation": "翻訳を表示"
+      "show_translation": "翻訳を表示",
+      "translate_offer_title": "モジュールのテキストを翻訳",
+      "translate_offer_body": "モジュールは英語で公開されています。Bubble Card はその説明やオプションをあなたの言語に翻訳できますが、そのテキストは外部の翻訳サービスに送信されます。あなたが自分でオンにするまでは無効のままです。"
     },
     "module_editor": {
       "create_module": "新しいモジュールを作成",

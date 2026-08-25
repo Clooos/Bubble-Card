@@ -574,7 +574,9 @@
       "translate_descriptions": "Açıklamaları otomatik çevir",
       "machine_translated": "Otomatik çeviri",
       "show_original": "Orijinali göster",
-      "show_translation": "Çeviriyi göster"
+      "show_translation": "Çeviriyi göster",
+      "translate_offer_title": "Modül metinlerini çevir",
+      "translate_offer_body": "Modüller İngilizce yayımlanır. Bubble Card açıklamalarını ve seçeneklerini kendi dilinize çevirebilir, ancak bu metni harici bir çeviri hizmetine gönderir. Siz açana kadar kapalı kalır."
     },
     "module_editor": {
       "create_module": "Yeni modül oluştur",

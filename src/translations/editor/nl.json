@@ -574,7 +574,9 @@
       "translate_descriptions": "Beschrijvingen automatisch vertalen",
       "machine_translated": "Automatische vertaling",
       "show_original": "Origineel tonen",
-      "show_translation": "Vertaling tonen"
+      "show_translation": "Vertaling tonen",
+      "translate_offer_title": "Moduleteksten vertalen",
+      "translate_offer_body": "Modules worden in het Engels gepubliceerd. Bubble Card kan hun beschrijvingen en opties naar jouw taal vertalen, maar dat stuurt die tekst naar een externe vertaaldienst. Het blijft uit totdat je het zelf aanzet."
     },
     "module_editor": {
       "create_module": "Nieuwe module maken",

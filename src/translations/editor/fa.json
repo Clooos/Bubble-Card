@@ -574,7 +574,9 @@
       "translate_descriptions": "ترجمه خودکار توضیحات",
       "machine_translated": "ترجمه خودکار",
       "show_original": "نمایش متن اصلی",
-      "show_translation": "نمایش ترجمه"
+      "show_translation": "نمایش ترجمه",
+      "translate_offer_title": "ترجمه متن‌های ماژول‌ها",
+      "translate_offer_body": "ماژول‌ها به انگلیسی منتشر می‌شوند. Bubble Card می‌تواند توضیحات و گزینه‌های آن‌ها را به زبان شما ترجمه کند، اما این کار آن متن را به یک سرویس ترجمه بیرونی می‌فرستد. تا زمانی که خودتان روشنش نکنید خاموش می‌ماند."
     },
     "module_editor": {
       "create_module": "ایجاد ماژول جدید",

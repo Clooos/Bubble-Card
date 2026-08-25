@@ -574,7 +574,9 @@
       "translate_descriptions": "Vertaal beskrywings outomaties",
       "machine_translated": "Outomatiese vertaling",
       "show_original": "Wys oorspronklike",
-      "show_translation": "Wys vertaling"
+      "show_translation": "Wys vertaling",
+      "translate_offer_title": "Vertaal moduletekste",
+      "translate_offer_body": "Modules word in Engels gepubliseer. Bubble Card kan hul beskrywings en opsies na jou taal vertaal, maar dit stuur daardie teks na 'n eksterne vertaaldiens. Dit bly af totdat jy dit self aanskakel."
     },
     "module_editor": {
       "create_module": "Skep nuwe module",

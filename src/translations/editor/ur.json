@@ -574,7 +574,9 @@
       "translate_descriptions": "تفصیلات کا خودکار ترجمہ کریں",
       "machine_translated": "خودکار ترجمہ",
       "show_original": "اصل دکھائیں",
-      "show_translation": "ترجمہ دکھائیں"
+      "show_translation": "ترجمہ دکھائیں",
+      "translate_offer_title": "ماڈیولز کے متن کا ترجمہ کریں",
+      "translate_offer_body": "ماڈیولز انگریزی میں شائع ہوتے ہیں۔ Bubble Card ان کی تفصیلات اور اختیارات کا آپ کی زبان میں ترجمہ کر سکتا ہے، لیکن اس سے وہ متن ایک بیرونی ترجمہ سروس کو بھیجا جاتا ہے۔ جب تک آپ خود اسے آن نہ کریں یہ بند رہتا ہے۔"
     },
     "module_editor": {
       "create_module": "نیا ماڈیول بنائیں",

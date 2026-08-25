@@ -574,7 +574,9 @@
       "translate_descriptions": "แปลคำอธิบายโดยอัตโนมัติ",
       "machine_translated": "การแปลอัตโนมัติ",
       "show_original": "แสดงต้นฉบับ",
-      "show_translation": "แสดงคำแปล"
+      "show_translation": "แสดงคำแปล",
+      "translate_offer_title": "แปลข้อความของโมดูล",
+      "translate_offer_body": "โมดูลเผยแพร่เป็นภาษาอังกฤษ Bubble Card สามารถแปลคำอธิบายและตัวเลือกของโมดูลเป็นภาษาของคุณได้ แต่การทำเช่นนั้นจะส่งข้อความนั้นไปยังบริการแปลภายนอก ระบบจะปิดอยู่จนกว่าคุณจะเปิดเอง"
     },
     "module_editor": {
       "create_module": "สร้างโมดูลใหม่",

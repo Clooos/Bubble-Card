@@ -574,7 +574,9 @@
       "translate_descriptions": "Tõlgi kirjeldused automaatselt",
       "machine_translated": "Automaatne tõlge",
       "show_original": "Kuva originaal",
-      "show_translation": "Kuva tõlge"
+      "show_translation": "Kuva tõlge",
+      "translate_offer_title": "Tõlgi moodulite tekstid",
+      "translate_offer_body": "Moodulid avaldatakse inglise keeles. Bubble Card oskab nende kirjeldused ja valikud sinu keelde tõlkida, kuid saadab selle teksti välisele tõlketeenusele. See jääb välja lülitatuks, kuni sa selle ise sisse lülitad."
     },
     "module_editor": {
       "create_module": "Loo uus moodul",

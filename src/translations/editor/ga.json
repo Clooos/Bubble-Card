@@ -574,7 +574,9 @@
       "translate_descriptions": "Aistrigh na cuir síos go huathoibríoch",
       "machine_translated": "Aistriúchán uathoibríoch",
       "show_original": "Taispeáin an bunleagan",
-      "show_translation": "Taispeáin an t-aistriúchán"
+      "show_translation": "Taispeáin an t-aistriúchán",
+      "translate_offer_title": "Aistrigh téacsanna na modúl",
+      "translate_offer_body": "Foilsítear modúil i mBéarla. Is féidir le Bubble Card a gcuid cur síos agus roghanna a aistriú go dtí do theanga, ach seolann sé sin an téacs sin chuig seirbhís aistriúcháin sheachtrach. Fanann sé múchta go dtí go gcuireann tú féin air é."
     },
     "module_editor": {
       "create_module": "Cruthaigh modúl nua",

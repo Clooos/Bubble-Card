@@ -68,6 +68,36 @@ const SERVICE_LANG = {
   'nn': 'no'
 };
 
+// Machine translation is off until the user asks for it. Module text is sent
+// to a translation service outside the user's network, and a Home Assistant
+// install must never reach out on its own. The on-device engine sits behind the
+// same switch, so the user answers the question once and it covers every engine.
+//
+// A key of its own, and not the beta's bubble-card-store-translate: that one
+// switched a display preference on a feature that was already running, so an
+// account holding it cannot be read as anyone having agreed to anything. Every
+// install starts from off and is asked the question once.
+const ENABLED_STORAGE_KEY = 'bubble-card-module-translation';
+let translationEnabled;
+
+export function isModuleTranslationEnabled() {
+  if (translationEnabled === undefined) {
+    try {
+      translationEnabled = localStorage.getItem(ENABLED_STORAGE_KEY) === '1';
+    } catch (_) {
+      translationEnabled = false;
+    }
+  }
+  return translationEnabled;
+}
+
+export function setModuleTranslationEnabled(enabled) {
+  translationEnabled = !!enabled;
+  try {
+    localStorage.setItem(ENABLED_STORAGE_KEY, translationEnabled ? '1' : '0');
+  } catch (_) {}
+}
+
 export function getTranslationTargetLang(hass) {
   if (isEditorEnglishForced()) return null;
   const lang = hass?.locale?.language ?? 'en';
@@ -208,6 +238,7 @@ function getBrowserTranslator(targetLang) {
 // translator up transparently; afterwards everything runs on-device.
 let warmupInstalled = false;
 export function warmupBrowserTranslator(hass) {
+  if (!isModuleTranslationEnabled()) return;
   if (warmupInstalled) return;
   const lang = getTranslationTargetLang(hass);
   if (!lang || typeof Translator === 'undefined' || typeof Translator.create !== 'function') return;
@@ -295,6 +326,7 @@ const pendingUiTranslations = new Map(); // cacheKey -> true (in flight)
 let uiQueue = Promise.resolve();
 
 export function translateUiText(text, hass, onReady) {
+  if (!isModuleTranslationEnabled()) return text;
   const lang = getTranslationTargetLang(hass);
   if (!lang || !text || typeof text !== 'string' || !/[a-zA-Z]{3}/.test(text)) return text;
 
@@ -332,6 +364,7 @@ const SCHEMA_TEXT_KEYS = new Set(['label', 'title', 'helper', 'description', 'wa
  * translate identically so fields stay grouped.
  */
 export function translateModuleSchema(schema, hass, onReady) {
+  if (!isModuleTranslationEnabled()) return schema;
   if (!getTranslationTargetLang(hass)) return schema;
 
   const walk = (node) => {
@@ -380,6 +413,7 @@ export function translateModuleSchema(schema, hass, onReady) {
  * placeholders, ...): callers fall back to the original text.
  */
 export async function translateText(text, hass) {
+  if (!isModuleTranslationEnabled()) return null;
   const lang = getTranslationTargetLang(hass);
   if (!lang || !text || typeof text !== 'string') return null;
 

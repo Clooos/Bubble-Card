@@ -574,7 +574,9 @@
       "translate_descriptions": "Käännä kuvaukset automaattisesti",
       "machine_translated": "Automaattinen käännös",
       "show_original": "Näytä alkuperäinen",
-      "show_translation": "Näytä käännös"
+      "show_translation": "Näytä käännös",
+      "translate_offer_title": "Käännä moduulien tekstit",
+      "translate_offer_body": "Moduulit julkaistaan englanniksi. Bubble Card voi kääntää niiden kuvaukset ja asetukset omalle kielellesi, mutta se lähettää tekstin ulkoiseen käännöspalveluun. Toiminto pysyy pois päältä, kunnes otat sen itse käyttöön."
     },
     "module_editor": {
       "create_module": "Luo uusi moduuli",

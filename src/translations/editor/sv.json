@@ -574,7 +574,9 @@
       "translate_descriptions": "Översätt beskrivningar automatiskt",
       "machine_translated": "Automatisk översättning",
       "show_original": "Visa original",
-      "show_translation": "Visa översättning"
+      "show_translation": "Visa översättning",
+      "translate_offer_title": "Översätt modulernas texter",
+      "translate_offer_body": "Moduler publiceras på engelska. Bubble Card kan översätta deras beskrivningar och alternativ till ditt språk, men det skickar texten till en extern översättningstjänst. Det är avstängt tills du slår på det själv."
     },
     "module_editor": {
       "create_module": "Skapa ny modul",

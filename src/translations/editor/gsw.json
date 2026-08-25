@@ -574,7 +574,9 @@
       "translate_descriptions": "Beschriibige automatisch übersetze",
       "machine_translated": "Automatischi Übersetzig",
       "show_original": "Original azeige",
-      "show_translation": "Übersetzig azeige"
+      "show_translation": "Übersetzig azeige",
+      "translate_offer_title": "Modultäxt übersetze",
+      "translate_offer_body": "Modul wärded uf Änglisch veröffentlicht. Bubble Card cha ihri Beschriibige und Optione i dini Sprach übersetze, schickt dr Täxt debii aber an en externe Übersetzigsdienst. Es bliibt us, bis dus sälber ischaltisch."
     },
     "module_editor": {
       "create_module": "Neus Modul erstelle",

@@ -574,7 +574,9 @@
       "translate_descriptions": "Automatiškai versti aprašymus",
       "machine_translated": "Automatinis vertimas",
       "show_original": "Rodyti originalą",
-      "show_translation": "Rodyti vertimą"
+      "show_translation": "Rodyti vertimą",
+      "translate_offer_title": "Versti modulių tekstus",
+      "translate_offer_body": "Moduliai skelbiami anglų kalba. Bubble Card gali išversti jų aprašymus ir parinktis į jūsų kalbą, bet tada šis tekstas siunčiamas išorinei vertimo paslaugai. Lieka išjungta, kol patys neįjungsite."
     },
     "module_editor": {
       "create_module": "Sukurti naują modulį",

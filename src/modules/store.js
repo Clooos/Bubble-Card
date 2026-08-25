@@ -9,7 +9,7 @@ import { ensureBCTProviderAvailable, isBCTAvailableSync } from './bct-provider.j
 import { isHomeAssistantVersionAtLeast } from '../tools/utils.js';
 import { tTemplate } from '../editor/utils.js';
 import setupTranslation from '../tools/localize.js';
-import { translateText, getTranslationTargetLang, warmupBrowserTranslator } from './translate.js';
+import { translateText, getTranslationTargetLang, warmupBrowserTranslator, isModuleTranslationEnabled, setModuleTranslationEnabled } from './translate.js';
 import { renderTranslationNote } from './translation-note.js';
 
 // Returns the machine translation of a module description, falling back to
@@ -24,7 +24,7 @@ function _getStoreDescription(context, module, order) {
   // Translate what is actually displayed: the description extracted from the
   // GitHub discussion post, never the raw post (headers, YAML, checklists...).
   const displayed = _formatModuleDescription(module.description);
-  const wantsTranslation = context._storeTranslateDescriptions &&
+  const wantsTranslation = isModuleTranslationEnabled() &&
     !!getTranslationTargetLang(context.hass) &&
     !context._storeDescOriginal?.has(id) &&
     !!module.description;
@@ -57,7 +57,7 @@ function _drainStoreDescriptions(context) {
       nextEntry = entry;
     }
   }
-  if (nextId === null || !context._storeTranslateDescriptions) return;
+  if (nextId === null || !isModuleTranslationEnabled()) return;
 
   context._storeDescDraining = true;
   translateText(nextEntry.text, context.hass).then((translated) => {
@@ -323,18 +323,9 @@ export function makeModuleStore(context) {
     context._zoomedImage = null;
   }
 
-  // Machine-translated descriptions: enabled by default for non-English
-  // languages (zero setup), the toggle stores an explicit opt-out.
-  if (context._storeTranslateDescriptions === undefined) {
-    try {
-      context._storeTranslateDescriptions = localStorage.getItem('bubble-card-store-translate') !== '0';
-    } catch (_) {
-      context._storeTranslateDescriptions = true;
-    }
-  }
-  if (context._storeTranslateDescriptions) {
-    warmupBrowserTranslator(context.hass);
-  }
+  // The switch lives in translate.js, which every engine goes through, so the
+  // answer holds whether the store was ever opened or not.
+  warmupBrowserTranslator(context.hass);
   
   // Add a function to handle zooming in/out
   context._toggleImageZoom = (imageUrl) => {
@@ -358,16 +349,15 @@ export function makeModuleStore(context) {
           <div class="store-header-actions">
             ${getTranslationTargetLang(context.hass) ? html`
               <div
-                class="bubble-badge hoverable translate-badge ${context._storeTranslateDescriptions ? 'active' : ''}"
+                class="bubble-badge hoverable translate-badge ${isModuleTranslationEnabled() ? 'active' : ''}"
                 @click=${() => {
-                  const enabled = !context._storeTranslateDescriptions;
-                  context._storeTranslateDescriptions = enabled;
-                  try { localStorage.setItem('bubble-card-store-translate', enabled ? '1' : '0'); } catch (_) {}
+                  setModuleTranslationEnabled(!isModuleTranslationEnabled());
+                  if (isModuleTranslationEnabled()) warmupBrowserTranslator(context.hass);
                   context.requestUpdate();
                 }}
                 title="${t('editor.store.translate_descriptions')}"
               >
-                <ha-icon icon="${context._storeTranslateDescriptions ? 'mdi:translate' : 'mdi:translate-off'}"></ha-icon>
+                <ha-icon icon="${isModuleTranslationEnabled() ? 'mdi:translate' : 'mdi:translate-off'}"></ha-icon>
                 <span>${t('editor.common.auto')}</span>
               </div>
             ` : ''}
@@ -529,7 +519,7 @@ export function makeModuleStore(context) {
                 <div class="store-module-description">
                   ${module.description ? (() => {
                     const desc = _getStoreDescription(context, module, displayOrder);
-                    const showingOriginalByChoice = context._storeTranslateDescriptions &&
+                    const showingOriginalByChoice = isModuleTranslationEnabled() &&
                       !!getTranslationTargetLang(context.hass) &&
                       context._storeDescOriginal?.has(desc.id);
                     return html`

@@ -574,7 +574,9 @@
       "translate_descriptions": "Beschreibungen automatisch übersetzen",
       "machine_translated": "Automatische Übersetzung",
       "show_original": "Original anzeigen",
-      "show_translation": "Übersetzung anzeigen"
+      "show_translation": "Übersetzung anzeigen",
+      "translate_offer_title": "Modultexte übersetzen",
+      "translate_offer_body": "Module werden auf Englisch veröffentlicht. Bubble Card kann ihre Beschreibungen und Optionen in deine Sprache übersetzen, sendet den Text dabei aber an einen externen Übersetzungsdienst. Es bleibt aus, bis du es selbst einschaltest."
     },
     "module_editor": {
       "create_module": "Neues Modul erstellen",

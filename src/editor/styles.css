@@ -521,3 +521,15 @@ mwc-list-item[disabled] ha-icon {
   margin-block: -6px;
   margin-inline: -2px -4px;
 }
+
+.bubble-translate-offer .bubble-translate-offer-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.bubble-translate-offer .bubble-translate-offer-actions a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}

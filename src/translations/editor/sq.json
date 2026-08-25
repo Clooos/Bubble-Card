@@ -574,7 +574,9 @@
       "translate_descriptions": "Përkthe përshkrimet automatikisht",
       "machine_translated": "Përkthim automatik",
       "show_original": "Shfaq origjinalin",
-      "show_translation": "Shfaq përkthimin"
+      "show_translation": "Shfaq përkthimin",
+      "translate_offer_title": "Përkthe tekstet e moduleve",
+      "translate_offer_body": "Modulet publikohen në anglisht. Bubble Card mund t'i përkthejë përshkrimet dhe opsionet e tyre në gjuhën tuaj, por kjo e dërgon atë tekst te një shërbim i jashtëm përkthimi. Mbetet i çaktivizuar derisa ta aktivizoni vetë."
     },
     "module_editor": {
       "create_module": "Krijo modul të ri",

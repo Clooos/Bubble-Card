@@ -574,7 +574,9 @@
       "translate_descriptions": "Itzuli deskribapenak automatikoki",
       "machine_translated": "Itzulpen automatikoa",
       "show_original": "Erakutsi jatorrizkoa",
-      "show_translation": "Erakutsi itzulpena"
+      "show_translation": "Erakutsi itzulpena",
+      "translate_offer_title": "Itzuli moduluen testuak",
+      "translate_offer_body": "Moduluak ingelesez argitaratzen dira. Bubble Card-ek haien deskribapenak eta aukerak zure hizkuntzara itzul ditzake, baina horrek testu hori kanpoko itzulpen zerbitzu batera bidaltzen du. Itzalita jarraitzen du zuk piztu arte."
     },
     "module_editor": {
       "create_module": "Sortu modulu berria",
