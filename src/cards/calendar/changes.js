@@ -13,6 +13,39 @@ function dateDiffInMinutes(a, b) {
 
 const getEventDateKey = (eventStart) => getDayKey(parseEventDateTime(eventStart));
 
+/**
+ * Caps the list to the first `limit` days holding an event, instead of to a
+ * number of lines. Since a multi-day event takes one line per day it covers, a
+ * line based cap let a single week of holiday eat the whole budget and shrink
+ * the visible range. Counting days keeps that range steady whatever the events.
+ *
+ * The list is already sorted by day, so one pass over it is enough.
+ */
+function limitToDays(events, limit) {
+  // An absent limit reads as no limit, the way `?? undefined` did before
+  if (limit === undefined || limit === null) {
+    return events;
+  }
+
+  const maxDays = Number(limit);
+
+  if (!Number.isFinite(maxDays) || maxDays < 0) {
+    return events;
+  }
+
+  let days = 0;
+  let currentDay = null;
+
+  for (let index = 0; index < events.length; index++) {
+    if (events[index].dayKey === currentDay) continue;
+
+    currentDay = events[index].dayKey;
+    if (++days > maxDays) return events.slice(0, index);
+  }
+
+  return events;
+}
+
 export async function changeEventList(context) {
   const daysOfEvents = Math.max(1, context.config.days ?? 7);
 
@@ -43,14 +76,19 @@ export async function changeEventList(context) {
     sortedEvents = filterStartedEvents(sortedEvents, new Date());
   }
 
-  context.events = sortedEvents
-    .slice(0, context.config.limit ?? undefined);
+  // Computed once here: the limit needs the day of every event, then the
+  // grouping of changeEvents reads it back instead of parsing the dates again
+  for (const event of sortedEvents) {
+    event.dayKey = getEventDateKey(event.start);
+  }
+
+  context.events = limitToDays(sortedEvents, context.config.limit);
 }
 
 export async function changeEvents(context) {
   const t = setupTranslation(context._hass);
   const eventsGroupedByDay = context.events.reduce((acc, event) => {
-    const dayKey = getEventDateKey(event.start);
+    const dayKey = event.dayKey ?? getEventDateKey(event.start);
     if (!acc[dayKey]) {
       acc[dayKey] = [];
     }
