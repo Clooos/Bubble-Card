@@ -34,8 +34,8 @@ Bubble Card ایک مینیمل اور حسبِ ضرورت کارڈز کا مج�
 
 <br>
 
-1. [تازہ ترین ریلیز](https://github.com/Clooos/Bubble-Card/releases/latest) سے `bubble-card.zip` ڈاؤن لوڈ کریں
-2. اسے اپنے `<config>/www` فولڈر میں نکالیں، آپ کو `bubble-card.js` اور اس کے ساتھ ایک `translations` فولڈر ملنا چاہیے (اس فولڈر میں ایڈیٹر کی لغات ہوتی ہیں، اس کے بغیر ایڈیٹر انگریزی میں ہی رہتا ہے)
+1. یہ فائل ڈاؤن لوڈ کریں: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. اس فائل کو اپنے `<config>/www` فولڈر میں رکھیں۔ ایڈیٹر کو اپنی زبان میں پانے کے لیے [dist فولڈر](https://github.com/Clooos/Bubble-Card/tree/main/dist) سے `bubble-card-<lang>.json` بھی ڈاؤن لوڈ کریں، مثلاً `bubble-card-fr.json`، اور اسے `bubble-card.js` کے ساتھ رکھیں (اس کے بغیر ایڈیٹر انگریزی میں ہی رہتا ہے)
 3. اپنے ڈیش بورڈ پر اوپر دائیں کونے کے آئیکن پر کلک کریں، پھر `Edit dashboard` پر
 4. دوبارہ اسی آئیکن پر کلک کریں اور پھر `Manage resources` پر کلک کریں
 5. `Add resource` پر کلک کریں

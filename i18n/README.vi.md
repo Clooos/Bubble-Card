@@ -32,8 +32,8 @@ Bubble Card là một bộ sưu tập thẻ tối giản và có thể tùy ch�
 
 <br>
 
-1. Tải `bubble-card.zip` từ [bản phát hành mới nhất](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Giải nén nó vào thư mục `<config>/www` của bạn, bạn sẽ có `bubble-card.js` và một thư mục `translations` bên cạnh (thư mục đó chứa từ điển của trình chỉnh sửa, không có nó thì trình chỉnh sửa vẫn ở tiếng Anh)
+1. Tải tệp này: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Thêm tệp này vào thư mục `<config>/www` của bạn. Để có trình chỉnh sửa bằng ngôn ngữ của bạn, hãy tải thêm `bubble-card-<lang>.json` từ [thư mục dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), ví dụ `bubble-card-fr.json`, rồi đặt nó bên cạnh `bubble-card.js` (không có nó thì trình chỉnh sửa vẫn ở tiếng Anh)
 3. Trên dashboard của bạn, nhấp vào biểu tượng ở góc trên bên phải rồi chọn `Edit dashboard`
 4. Nhấp lại vào biểu tượng đó rồi chọn `Manage resources`
 5. Nhấp vào `Add resource`

@@ -32,8 +32,8 @@ Bubble Card este o colecție minimalistă și personalizabilă de carduri pentru
 
 <br>
 
-1. Descarcă `bubble-card.zip` din [cea mai recentă versiune](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Dezarhivează-l în folderul `<config>/www`, ar trebui să obții `bubble-card.js` și un folder `translations` alături (acel folder conține dicționarele editorului, fără el editorul rămâne în engleză)
+1. Descarcă acest fișier: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Adaugă acest fișier în folderul `<config>/www`. Ca să ai editorul în limba ta, descarcă și `bubble-card-<lang>.json` din [folderul dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), de exemplu `bubble-card-fr.json`, și pune-l lângă `bubble-card.js` (fără el editorul rămâne în engleză)
 3. Pe dashboard, apasă pe iconița din colțul din dreapta sus, apoi pe `Edit dashboard`
 4. Apasă din nou pe acea iconiță, apoi pe `Manage resources`
 5. Apasă pe `Add resource`

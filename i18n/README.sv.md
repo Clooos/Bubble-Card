@@ -32,8 +32,8 @@ Bubble Card är en minimalistisk och anpassningsbar samling kort för Home Assis
 
 <br>
 
-1. Ladda ner `bubble-card.zip` från [den senaste utgåvan](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Packa upp den i din `<config>/www`-mapp, du bör få `bubble-card.js` och en `translations`-mapp bredvid den (den mappen innehåller editorns ordlistor, utan den förblir editorn på engelska)
+1. Ladda ner den här filen: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Lägg den här filen i din `<config>/www`-mapp. För att få editorn på ditt språk laddar du även ner `bubble-card-<lang>.json` från [dist-mappen](https://github.com/Clooos/Bubble-Card/tree/main/dist), till exempel `bubble-card-fr.json`, och lägger den bredvid `bubble-card.js` (utan den förblir editorn på engelska)
 3. Klicka på ikonen i det övre högra hörnet på din instrumentpanel och sedan på `Edit dashboard`
 4. Klicka på ikonen igen och sedan på `Manage resources`
 5. Klicka på `Add resource`

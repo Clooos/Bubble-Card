@@ -32,8 +32,8 @@ Bubble Card është një koleksion kartash minimaliste dhe të personalizueshme 
 
 <br>
 
-1. Shkarkoni `bubble-card.zip` nga [lëshimi i fundit](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Shpaketojeni në dosjen tuaj `<config>/www`, duhet të merrni `bubble-card.js` dhe një dosje `translations` pranë tij (ajo dosje përmban fjalorët e editorit, pa të editori mbetet në anglisht)
+1. Shkarkoni këtë skedar: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Shtojeni këtë skedar në dosjen tuaj `<config>/www`. Që editori të jetë në gjuhën tuaj, shkarkoni edhe `bubble-card-<lang>.json` nga [dosja dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), për shembull `bubble-card-fr.json`, dhe vendoseni pranë `bubble-card.js` (pa të editori mbetet në anglisht)
 3. Në dashboard-in tuaj klikoni ikonën në cepin e sipërm djathtas, pastaj `Edit dashboard`
 4. Klikoni përsëri atë ikonë dhe pastaj klikoni `Manage resources`
 5. Klikoni `Add resource`

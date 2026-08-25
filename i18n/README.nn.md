@@ -32,8 +32,8 @@ Bubble Card er ei minimalistisk og tilpassbar kortsamling for Home Assistant, me
 
 <br>
 
-1. Last ned `bubble-card.zip` frå [den nyaste utgjevinga](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Pakk ho ut i mappa `<config>/www`, du skal få `bubble-card.js` og ei `translations`-mappe ved sida av (den mappa inneheld ordlistene til redigeringsverktøyet, utan ho held redigeringsverktøyet fram på engelsk)
+1. Last ned denne fila: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Legg denne fila i `<config>/www`-mappa di. For å få redigeringsverktøyet på ditt eige språk lastar du òg ned `bubble-card-<lang>.json` frå [dist-mappa](https://github.com/Clooos/Bubble-Card/tree/main/dist), til dømes `bubble-card-fr.json`, og legg ho ved sida av `bubble-card.js` (utan ho held redigeringsverktøyet fram på engelsk)
 3. På dashbordet ditt, klikk på ikonet oppe i høgre hjørne og deretter på `Edit dashboard`
 4. Klikk på ikonet igjen og deretter på `Manage resources`
 5. Klikk på `Add resource`

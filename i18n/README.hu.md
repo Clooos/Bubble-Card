@@ -32,8 +32,8 @@ A Bubble Card egy minimalista és testreszabható kártyagyűjtemény a Home Ass
 
 <br>
 
-1. Töltsd le a `bubble-card.zip` fájlt a [legfrissebb kiadásból](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Csomagold ki a `<config>/www` mappádba, a `bubble-card.js` fájlt és mellette egy `translations` mappát kell kapnod (ez a mappa tartalmazza a szerkesztő szótárait, nélküle a szerkesztő angolul marad)
+1. Töltsd le ezt a fájlt: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Tedd ezt a fájlt a `<config>/www` mappádba. Hogy a szerkesztő a te nyelveden legyen, töltsd le a [dist mappából](https://github.com/Clooos/Bubble-Card/tree/main/dist) a `bubble-card-<lang>.json` fájlt is, például `bubble-card-fr.json`, és tedd a `bubble-card.js` mellé (nélküle a szerkesztő angolul marad)
 3. Az irányítópulton kattints a jobb felső sarokban lévő ikonra, majd a `Vezérlőpult szerkesztése` gombra
 4. Kattints újra arra az ikonra, majd az `Erőforrások kezelése` menüpontra
 5. Kattints az `Erőforrás hozzáadása` gombra

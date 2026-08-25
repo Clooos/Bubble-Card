@@ -32,8 +32,8 @@ Bubble Card คือชุดการ์ดแบบมินิมอลแ�
 
 <br>
 
-1. ดาวน์โหลด `bubble-card.zip` จาก[รีลีสล่าสุด](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. แตกไฟล์ลงในโฟลเดอร์ `<config>/www` ของคุณ คุณควรได้ `bubble-card.js` และโฟลเดอร์ `translations` อยู่ข้าง ๆ (โฟลเดอร์นั้นเก็บพจนานุกรมของตัวแก้ไข ถ้าไม่มีมัน ตัวแก้ไขจะยังคงเป็นภาษาอังกฤษ)
+1. ดาวน์โหลดไฟล์นี้: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. นำไฟล์นี้ไปไว้ในโฟลเดอร์ `<config>/www` ของคุณ หากต้องการให้ตัวแก้ไขเป็นภาษาของคุณ ให้ดาวน์โหลด `bubble-card-<lang>.json` จาก[โฟลเดอร์ dist](https://github.com/Clooos/Bubble-Card/tree/main/dist) ด้วย เช่น `bubble-card-fr.json` แล้ววางไว้ข้าง ๆ `bubble-card.js` (ถ้าไม่มีมัน ตัวแก้ไขจะยังคงเป็นภาษาอังกฤษ)
 3. บนแดชบอร์ดของคุณ คลิกไอคอนที่มุมขวาบน แล้วคลิก `Edit dashboard`
 4. คลิกไอคอนนั้นอีกครั้ง แล้วคลิก `Manage resources`
 5. คลิก `Add resource`

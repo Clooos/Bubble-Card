@@ -32,8 +32,8 @@ Bubble Card je minimalistická a prispôsobiteľná kolekcia kariet pre Home Ass
 
 <br>
 
-1. Stiahnite si `bubble-card.zip` z [najnovšieho vydania](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Rozbaľte ho do priečinka `<config>/www`, mali by ste dostať `bubble-card.js` a vedľa neho priečinok `translations` (ten obsahuje slovníky editora, bez neho zostane editor v angličtine)
+1. Stiahnite si tento súbor: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Pridajte tento súbor do priečinka `<config>/www`. Ak chcete mať editor vo svojom jazyku, stiahnite si z [priečinka dist](https://github.com/Clooos/Bubble-Card/tree/main/dist) aj `bubble-card-<lang>.json`, napríklad `bubble-card-fr.json`, a umiestnite ho vedľa `bubble-card.js` (bez neho zostane editor v angličtine)
 3. Na svojom dashboarde kliknite na ikonu vpravo hore a potom na `Upraviť dashboard`
 4. Znova kliknite na túto ikonu a potom kliknite na `Spravovať zdroje`
 5. Kliknite na `Pridať zdroj`

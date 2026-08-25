@@ -32,8 +32,8 @@ Bubble Card это минималистичная и настраиваемая 
 
 <br>
 
-1. Скачайте `bubble-card.zip` из [последнего выпуска](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Распакуйте его в папку `<config>/www`, вы должны получить `bubble-card.js` и рядом папку `translations` (в этой папке лежат словари редактора, без неё редактор остаётся на английском)
+1. Скачайте этот файл: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Положите этот файл в папку `<config>/www`. Чтобы редактор был на вашем языке, скачайте из [папки dist](https://github.com/Clooos/Bubble-Card/tree/main/dist) также `bubble-card-<lang>.json`, например `bubble-card-fr.json`, и положите его рядом с `bubble-card.js` (без него редактор остаётся на английском)
 3. На вашей панели нажмите на значок в правом верхнем углу, затем на `Edit dashboard`
 4. Снова нажмите на этот значок, затем на `Manage resources`
 5. Нажмите на `Add resource`

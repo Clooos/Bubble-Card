@@ -32,8 +32,8 @@ Bubble Card estas minimalisma kaj personigebla kolekto da kartoj por Home Assist
 
 <br>
 
-1. Elŝutu `bubble-card.zip` el la [plej nova eldono](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Malpaku ĝin en via dosierujo `<config>/www`, vi devus ricevi `bubble-card.js` kaj apude dosierujon `translations` (tiu dosierujo enhavas la vortarojn de la redaktilo, sen ĝi la redaktilo restas en la angla)
+1. Elŝutu ĉi tiun dosieron: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Aldonu ĉi tiun dosieron al via dosierujo `<config>/www`. Por havi la redaktilon en via lingvo, elŝutu ankaŭ `bubble-card-<lang>.json` el la [dosierujo dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), ekzemple `bubble-card-fr.json`, kaj metu ĝin apud `bubble-card.js` (sen ĝi la redaktilo restas en la angla)
 3. Sur via panelo, alklaku la piktogramon en la supra dekstra angulo, poste alklaku `Edit dashboard`
 4. Alklaku denove tiun piktogramon, poste alklaku `Manage resources`
 5. Alklaku `Add resource`

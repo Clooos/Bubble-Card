@@ -32,8 +32,8 @@ Bubble Card je minimalistična in prilagodljiva zbirka kartic za Home Assistant,
 
 <br>
 
-1. Prenesite `bubble-card.zip` iz [najnovejše izdaje](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Razširite ga v mapo `<config>/www`, dobiti bi morali `bubble-card.js` in poleg njega mapo `translations` (ta vsebuje slovarje urejevalnika, brez nje urejevalnik ostane v angleščini)
+1. Prenesite to datoteko: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Dodajte to datoteko v mapo `<config>/www`. Da bo urejevalnik v vašem jeziku, prenesite iz [mape dist](https://github.com/Clooos/Bubble-Card/tree/main/dist) tudi `bubble-card-<lang>.json`, na primer `bubble-card-fr.json`, in ga postavite poleg `bubble-card.js` (brez njega urejevalnik ostane v angleščini)
 3. Na nadzorni plošči kliknite ikono v zgornjem desnem kotu, nato `Uredi nadzorno ploščo`
 4. Znova kliknite to ikono in nato `Upravljanje virov`
 5. Kliknite `Dodaj vir`

@@ -32,8 +32,8 @@ Bubble Card is een minimalistische en aanpasbare kaartcollectie voor Home Assist
 
 <br>
 
-1. Download `bubble-card.zip` van de [laatste release](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Pak het uit in je map `<config>/www`, je hoort `bubble-card.js` te krijgen met daarnaast een map `translations` (die map bevat de woordenlijsten van de editor, zonder die map blijft de editor in het Engels)
+1. Download dit bestand: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Zet dit bestand in je map `<config>/www`. Om de editor in je eigen taal te krijgen download je ook `bubble-card-<lang>.json` uit de [dist map](https://github.com/Clooos/Bubble-Card/tree/main/dist), bijvoorbeeld `bubble-card-fr.json`, en zet je die naast `bubble-card.js` (zonder dat bestand blijft de editor in het Engels)
 3. Klik op je dashboard rechtsboven op het pictogram en dan op `Dashboard bewerken`
 4. Klik opnieuw op dat pictogram en klik dan op `Bronnen beheren`
 5. Klik op `Bron toevoegen`

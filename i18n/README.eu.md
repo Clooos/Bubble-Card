@@ -32,8 +32,8 @@ Bubble Card Home Assistant-erako txartel-bilduma minimalista eta pertsonalizagar
 
 <br>
 
-1. Deskargatu `bubble-card.zip` [azken bertsiotik](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Deskonprimitu zure `<config>/www` karpetan, `bubble-card.js` eta ondoan `translations` karpeta lortu beharko zenituzke (karpeta horrek editorearen hiztegiak ditu, hura gabe editorea ingelesez geratzen da)
+1. Deskargatu fitxategi hau: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Gehitu fitxategi hau zure `<config>/www` karpetan. Editorea zure hizkuntzan izateko, deskargatu `bubble-card-<lang>.json` ere [dist karpetatik](https://github.com/Clooos/Bubble-Card/tree/main/dist), adibidez `bubble-card-fr.json`, eta jarri `bubble-card.js` ondoan (hura gabe editorea ingelesez geratzen da)
 3. Zure panelean, klikatu goiko eskuineko izkinako ikonoa eta ondoren `Edit dashboard`
 4. Klikatu berriro ikono horretan eta gero `Manage resources`
 5. Klikatu `Add resource`

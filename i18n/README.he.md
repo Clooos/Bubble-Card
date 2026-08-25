@@ -34,8 +34,8 @@ Bubble Card היא אוסף כרטיסים מינימליסטי וניתן לה�
 
 <br>
 
-1. הורידו את `bubble-card.zip` מ[הגרסה האחרונה](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. חלצו אותו לתיקיית `<config>/www` שלכם, אמורים להתקבל `bubble-card.js` ותיקיית `translations` לצידו (התיקייה הזו מכילה את מילוני העורך, בלעדיה העורך נשאר באנגלית)
+1. הורידו את הקובץ הזה: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. הוסיפו את הקובץ הזה לתיקיית `<config>/www` שלכם. כדי לקבל את העורך בשפה שלכם, הורידו גם את `bubble-card-<lang>.json` מ[תיקיית dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), למשל `bubble-card-fr.json`, ושימו אותו לצד `bubble-card.js` (בלעדיו העורך נשאר באנגלית)
 3. בלוח המחוונים שלכם לחצו על הסמל בפינה הימנית העליונה ואז על `Edit dashboard`
 4. לחצו שוב על הסמל הזה ואז לחצו על `Manage resources`
 5. לחצו על `Add resource`

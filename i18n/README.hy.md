@@ -32,8 +32,8 @@ Bubble Card մինիմալիստական և հարմարեցվող քարտեր�
 
 <br>
 
-1. Ներբեռնեք `bubble-card.zip`-ը [վերջին թողարկումից](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Բացեք այն ձեր `<config>/www` թղթապանակում, պետք է ստանաք `bubble-card.js`-ը և դրա կողքին `translations` թղթապանակը (այդ թղթապանակը պահում է խմբագրիչի բառարանները, առանց դրա խմբագրիչը մնում է անգլերեն)
+1. Ներբեռնեք այս ֆայլը՝ [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Ավելացրեք այս ֆայլը ձեր `<config>/www` թղթապանակում: Խմբագրիչը ձեր լեզվով ունենալու համար ներբեռնեք նաև `bubble-card-<lang>.json`-ը [dist թղթապանակից](https://github.com/Clooos/Bubble-Card/tree/main/dist), օրինակ `bubble-card-fr.json`, և դրեք այն `bubble-card.js`-ի կողքին (առանց դրա խմբագրիչը մնում է անգլերեն)
 3. Ձեր վահանակում սեղմեք վերևի աջ անկյունում գտնվող պատկերակի վրա, ապա `Edit dashboard`
 4. Կրկին սեղմեք այդ պատկերակի վրա, ապա `Manage resources`
 5. Սեղմեք `Add resource`

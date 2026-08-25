@@ -32,8 +32,8 @@ Bubble Card ir minimālistiska un pielāgojama kartīšu kolekcija Home Assistan
 
 <br>
 
-1. Lejupielādējiet `bubble-card.zip` no [jaunākā laidiena](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Izarhivējiet to savā `<config>/www` mapē, jums vajadzētu iegūt `bubble-card.js` un tam blakus mapi `translations` (šajā mapē glabājas redaktora vārdnīcas, bez tās redaktors paliek angļu valodā)
+1. Lejupielādējiet šo failu: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Pievienojiet šo failu savā `<config>/www` mapē. Lai redaktors būtu jūsu valodā, lejupielādējiet no [dist mapes](https://github.com/Clooos/Bubble-Card/tree/main/dist) arī `bubble-card-<lang>.json`, piemēram `bubble-card-fr.json`, un novietojiet to blakus `bubble-card.js` (bez tā redaktors paliek angļu valodā)
 3. Savā vadības panelī noklikšķiniet uz ikonas augšējā labajā stūrī, tad uz `Edit dashboard`
 4. Vēlreiz noklikšķiniet uz šīs ikonas un tad uz `Manage resources`
 5. Noklikšķiniet uz `Add resource`

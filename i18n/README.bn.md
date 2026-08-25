@@ -32,8 +32,8 @@ Bubble Card হলো Home Assistant-এর জন্য একটি মিন�
 
 <br>
 
-1. [সর্বশেষ রিলিজ](https://github.com/Clooos/Bubble-Card/releases/latest) থেকে `bubble-card.zip` ডাউনলোড করুন
-2. এটি আপনার `<config>/www` ফোল্ডারে এক্সট্র্যাক্ট করুন, পাশে `bubble-card.js` এবং একটি `translations` ফোল্ডার পাওয়ার কথা (ওই ফোল্ডারে এডিটরের অভিধানগুলো থাকে, সেটি ছাড়া এডিটর ইংরেজিতেই থেকে যায়)
+1. এই ফাইলটি ডাউনলোড করুন: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. এই ফাইলটি আপনার `<config>/www` ফোল্ডারে যোগ করুন। এডিটর আপনার ভাষায় পেতে [dist ফোল্ডার](https://github.com/Clooos/Bubble-Card/tree/main/dist) থেকে `bubble-card-<lang>.json` ও ডাউনলোড করুন, যেমন `bubble-card-fr.json`, এবং সেটি `bubble-card.js` এর পাশে রাখুন (সেটি ছাড়া এডিটর ইংরেজিতেই থেকে যায়)
 3. আপনার ড্যাশবোর্ডে উপরের ডান কোণের আইকনে ক্লিক করুন, তারপর `ড্যাশবোর্ড এডিট করুন`-এ ক্লিক করুন
 4. আবার সেই আইকনে ক্লিক করুন, তারপর `রিসোর্স ম্যানেজ করুন`-এ ক্লিক করুন
 5. `রিসোর্স যোগ করুন`-এ ক্লিক করুন

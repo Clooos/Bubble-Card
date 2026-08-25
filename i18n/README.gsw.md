@@ -32,8 +32,8 @@ Bubble Card isch e minimalistischi und aapassbari Kartesammlig für Home Assista
 
 <br>
 
-1. Lad `bubble-card.zip` vo de [letschte Release](https://github.com/Clooos/Bubble-Card/releases/latest) abe
-2. Pack es i dim `<config>/www` Ordner us, du sötsch `bubble-card.js` und en Ordner `translations` dernäbe übercho (dä Ordner enthaltet d Wörterbüecher vom Editor, ohni ihn bliibt de Editor uf Änglisch)
+1. Lad die Datei abe: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Leg die Datei i dim `<config>/www` Ordner ab. Damit de Editor i dinere Sprach isch, lad au `bubble-card-<lang>.json` usem [dist Ordner](https://github.com/Clooos/Bubble-Card/tree/main/dist) abe, zum Bispiel `bubble-card-fr.json`, und leg si näbe `bubble-card.js` (ohni si bliibt de Editor uf Änglisch)
 3. Klick uf dim Dashboard obe rächts uf s Symbol und denn uf `Dashboard bearbeiten`
 4. Klick nomol uf das Symbol und denn uf `Ressourcen verwalten`
 5. Klick uf `Ressource hinzufügen`

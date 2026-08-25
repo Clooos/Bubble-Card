@@ -32,8 +32,8 @@ Bubble Card és una col·lecció de targetes minimalista i personalitzable per a
 
 <br>
 
-1. Descarregueu `bubble-card.zip` de la [darrera versió](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Descomprimiu-lo a la vostra carpeta `<config>/www`, hauríeu d'obtenir `bubble-card.js` i una carpeta `translations` al costat (aquesta carpeta conté els diccionaris de l'editor, sense ella l'editor es queda en anglès)
+1. Descarregueu aquest fitxer: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Afegiu aquest fitxer a la vostra carpeta `<config>/www`. Per tenir l'editor en la vostra llengua, descarregueu també `bubble-card-<lang>.json` de la [carpeta dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), per exemple `bubble-card-fr.json`, i poseu-lo al costat de `bubble-card.js` (sense ell l'editor es queda en anglès)
 3. Al vostre tauler, feu clic a la icona de la cantonada superior dreta i després a `Edita el tauler`
 4. Torneu a fer clic a aquesta icona i després feu clic a `Gestiona els recursos`
 5. Feu clic a `Afegeix un recurs`

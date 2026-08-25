@@ -32,8 +32,8 @@
 
 <br>
 
-1. Κατεβάστε το `bubble-card.zip` από την [τελευταία έκδοση](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Αποσυμπιέστε το στον φάκελο `<config>/www`, θα πρέπει να βρείτε το `bubble-card.js` και δίπλα του έναν φάκελο `translations` (αυτός ο φάκελος περιέχει τα λεξικά του επεξεργαστή, χωρίς αυτόν ο επεξεργαστής παραμένει στα αγγλικά)
+1. Κατεβάστε αυτό το αρχείο: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Προσθέστε αυτό το αρχείο στον φάκελο `<config>/www`. Για να έχετε τον επεξεργαστή στη γλώσσα σας, κατεβάστε και το `bubble-card-<lang>.json` από τον [φάκελο dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), για παράδειγμα `bubble-card-fr.json`, και βάλτε το δίπλα στο `bubble-card.js` (χωρίς αυτό ο επεξεργαστής παραμένει στα αγγλικά)
 3. Στο dashboard σας πατήστε στο εικονίδιο πάνω δεξιά και μετά στο `Edit dashboard`
 4. Πατήστε ξανά σε αυτό το εικονίδιο και μετά πατήστε στο `Manage resources`
 5. Πατήστε στο `Add resource`

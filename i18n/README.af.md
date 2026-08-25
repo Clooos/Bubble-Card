@@ -32,8 +32,8 @@ Bubble Card is 'n minimalistiese en aanpasbare kaartversameling vir Home Assista
 
 <br>
 
-1. Laai `bubble-card.zip` af by die [nuutste vrystelling](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Pak dit uit in jou `<config>/www`-vouer, jy behoort `bubble-card.js` en 'n `translations`-vouer daarlangs te kry (daardie vouer bevat die redigeerder se woordeboeke, sonder dit bly die redigeerder in Engels)
+1. Laai hierdie lêer af: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Voeg hierdie lêer by jou `<config>/www`-vouer. Om die redigeerder in jou taal te kry, laai ook `bubble-card-<lang>.json` uit die [dist-vouer](https://github.com/Clooos/Bubble-Card/tree/main/dist) af, byvoorbeeld `bubble-card-fr.json`, en plaas dit langs `bubble-card.js` (sonder dit bly die redigeerder in Engels)
 3. Klik op jou paneelbord op die ikoon in die boonste regterhoek en dan op `Redigeer paneelbord`
 4. Klik weer op daardie ikoon en klik dan op `Bestuur hulpbronne`
 5. Klik op `Voeg hulpbron by`

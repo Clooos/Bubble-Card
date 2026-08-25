@@ -34,8 +34,8 @@ Bubble Card هي مجموعة بطاقات بسيطة وقابلة للتخصي�
 
 <br>
 
-1. نزّل `bubble-card.zip` من [أحدث إصدار](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. فُك ضغطه في مجلد `<config>/www` لديك، ينبغي أن تحصل على `bubble-card.js` ومجلد `translations` بجانبه (يحتوي هذا المجلد على قواميس المحرر، وبدونه يبقى المحرر بالإنجليزية)
+1. نزّل هذا الملف: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. أضف هذا الملف إلى مجلد `<config>/www` لديك. للحصول على المحرر بلغتك، نزّل أيضاً `bubble-card-<lang>.json` من [مجلد dist](https://github.com/Clooos/Bubble-Card/tree/main/dist)، على سبيل المثال `bubble-card-fr.json`، وضعه بجانب `bubble-card.js` (وبدونه يبقى المحرر بالإنجليزية)
 3. في لوحة التحكم، انقر على الأيقونة في الزاوية العلوية اليمنى ثم على `تعديل لوحة التحكم`
 4. انقر مجددًا على تلك الأيقونة ثم انقر على `إدارة الموارد`
 5. انقر على `إضافة مورد`

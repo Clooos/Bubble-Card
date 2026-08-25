@@ -32,8 +32,8 @@ Is bailiúchán cárta íogair agus insaincheaptha é Bubble Card do Home Assist
 
 <br>
 
-1. Íoslódáil `bubble-card.zip` ón [eisiúint is déanaí](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Bain as é i d'fhillteán `<config>/www`, ba cheart go bhfaighfeá `bubble-card.js` agus fillteán `translations` lena thaobh (coinníonn an fillteán sin foclóirí an eagarthóra, gan é fanann an t-eagarthóir i mBéarla)
+1. Íoslódáil an comhad seo: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Cuir an comhad seo i d'fhillteán `<config>/www`. Chun an t-eagarthóir a fháil i do theanga féin, íoslódáil `bubble-card-<lang>.json` ón [bhfillteán dist](https://github.com/Clooos/Bubble-Card/tree/main/dist) freisin, mar shampla `bubble-card-fr.json`, agus cuir in aice le `bubble-card.js` é (gan é fanann an t-eagarthóir i mBéarla)
 3. Ar do dhaisbord, cliceáil ar an deilbhín sa chúinne thuas ar dheis agus ansin ar `Edit dashboard`
 4. Cliceáil arís ar an deilbhín sin agus ansin cliceáil ar `Manage resources`
 5. Cliceáil ar `Add resource`

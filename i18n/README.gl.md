@@ -32,8 +32,8 @@ Bubble Card é unha colección de tarxetas minimalista e personalizable para Hom
 
 <br>
 
-1. Descarga `bubble-card.zip` desde a [última versión](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Extráeo no teu cartafol `<config>/www`, deberías obter `bubble-card.js` e un cartafol `translations` ao seu carón (ese cartafol contén os dicionarios do editor, sen el o editor queda en inglés)
+1. Descarga este ficheiro: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Engade este ficheiro ao teu cartafol `<config>/www`. Para ter o editor no teu idioma, descarga tamén `bubble-card-<lang>.json` do [cartafol dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), por exemplo `bubble-card-fr.json`, e ponlo ao carón de `bubble-card.js` (sen el o editor queda en inglés)
 3. No teu panel principal, preme na icona da esquina superior dereita e despois en `Editar panel`
 4. Preme de novo nesa icona e logo en `Xestionar recursos`
 5. Preme en `Engadir recurso`

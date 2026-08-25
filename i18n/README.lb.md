@@ -32,8 +32,8 @@ Bubble Card ass eng minimalistesch a personaliséierbar Kaarten-Kollektioun fir 
 
 <br>
 
-1. Lued `bubble-card.zip` vun der [leschter Verëffentlechung](https://github.com/Clooos/Bubble-Card/releases/latest) erof
-2. Pack se an dengem `<config>/www` Dossier aus, du solls `bubble-card.js` an en `translations` Dossier doniewent kréien (an dësem Dossier stinn d'Wierderbicher vum Editor, ouni si bleift den Editor op Englesch)
+1. Lued dës Datei erof: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Setz dës Datei an dengem `<config>/www` Dossier. Fir den Editor an denger Sprooch ze kréien, lued och `bubble-card-<lang>.json` aus dem [dist Dossier](https://github.com/Clooos/Bubble-Card/tree/main/dist) erof, zum Beispill `bubble-card-fr.json`, a setz se niewent `bubble-card.js` (ouni si bleift den Editor op Englesch)
 3. Klick op dengem Dashboard riets uewen an der Ecke op d'Ikon, dann op `Dashboard änneren`
 4. Klick nach eng Kéier op déi Ikon an dann op `Ressourcen geréieren`
 5. Klick op `Ressource dobäisetzen`

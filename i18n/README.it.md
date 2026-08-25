@@ -32,8 +32,8 @@ Bubble Card è una raccolta di schede minimaliste e personalizzabili per Home As
 
 <br>
 
-1. Scarica `bubble-card.zip` dall'[ultima release](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Estrailo nella tua cartella `<config>/www`, dovresti ottenere `bubble-card.js` e accanto una cartella `translations` (quella cartella contiene i dizionari dell'editor, senza di essa l'editor resta in inglese)
+1. Scarica questo file: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Aggiungi questo file nella tua cartella `<config>/www`. Per avere l'editor nella tua lingua, scarica anche `bubble-card-<lang>.json` dalla [cartella dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), per esempio `bubble-card-fr.json`, e mettilo accanto a `bubble-card.js` (senza di esso l'editor resta in inglese)
 3. Sulla tua dashboard clicca sull'icona in alto a destra e poi su `Modifica dashboard`
 4. Clicca di nuovo su quell'icona e poi clicca su `Gestisci risorse`
 5. Clicca su `Aggiungi risorsa`

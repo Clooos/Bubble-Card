@@ -32,8 +32,8 @@ Bubble Card എന്നത് Home Assistant-നായുള്ള ഒരു �
 
 <br>
 
-1. [ഏറ്റവും പുതിയ റിലീസിൽ](https://github.com/Clooos/Bubble-Card/releases/latest) നിന്ന് `bubble-card.zip` ഡൗൺലോഡ് ചെയ്യുക
-2. അത് നിങ്ങളുടെ `<config>/www` ഫോൾഡറിൽ എക്സ്ട്രാക്റ്റ് ചെയ്യുക, `bubble-card.js` ഉം അതിനൊപ്പം ഒരു `translations` ഫോൾഡറും ലഭിക്കണം (ആ ഫോൾഡറിലാണ് എഡിറ്ററിന്റെ നിഘണ്ടുക്കൾ, അതില്ലാതെ എഡിറ്റർ ഇംഗ്ലീഷിൽ തന്നെ തുടരും)
+1. ഈ ഫയൽ ഡൗൺലോഡ് ചെയ്യുക: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. ഈ ഫയൽ നിങ്ങളുടെ `<config>/www` ഫോൾഡറിൽ ചേർക്കുക. എഡിറ്റർ നിങ്ങളുടെ ഭാഷയിൽ ലഭിക്കാൻ [dist ഫോൾഡറിൽ](https://github.com/Clooos/Bubble-Card/tree/main/dist) നിന്ന് `bubble-card-<lang>.json` ഉം ഡൗൺലോഡ് ചെയ്യുക, ഉദാഹരണത്തിന് `bubble-card-fr.json`, എന്നിട്ട് അത് `bubble-card.js` ന്റെ അരികിൽ വയ്ക്കുക (അതില്ലാതെ എഡിറ്റർ ഇംഗ്ലീഷിൽ തന്നെ തുടരും)
 3. നിങ്ങളുടെ ഡാഷ്ബോർഡിൽ വലത് മുകൾ കോണിലുള്ള ഐക്കണിൽ ക്ലിക്ക് ചെയ്ത ശേഷം `Edit dashboard` ക്ലിക്ക് ചെയ്യുക
 4. ആ ഐക്കണിൽ വീണ്ടും ക്ലിക്ക് ചെയ്ത ശേഷം `Manage resources` ക്ലിക്ക് ചെയ്യുക
 5. `Add resource` ക്ലിക്ക് ചെയ്യുക

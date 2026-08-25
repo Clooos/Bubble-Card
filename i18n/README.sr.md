@@ -32,8 +32,8 @@ Bubble Card је минималистичка и прилагодљива кол
 
 <br>
 
-1. Преузмите `bubble-card.zip` са [последњег издања](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Распакујте га у фолдер `<config>/www`, требало би да добијете `bubble-card.js` и фолдер `translations` поред њега (тај фолдер садржи речнике едитора, без њега едитор остаје на енглеском)
+1. Преузмите ову датотеку: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Додајте ову датотеку у фолдер `<config>/www`. Да бисте добили едитор на свом језику, преузмите и `bubble-card-<lang>.json` из [фолдера dist](https://github.com/Clooos/Bubble-Card/tree/main/dist), на пример `bubble-card-fr.json`, и ставите га поред `bubble-card.js` (без њега едитор остаје на енглеском)
 3. На свом контролном панелу кликните на иконицу у горњем десном углу, а затим на `Edit dashboard`
 4. Поново кликните на ту иконицу, а затим кликните на `Manage resources`
 5. Кликните на `Add resource`

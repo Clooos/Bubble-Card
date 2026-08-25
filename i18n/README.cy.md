@@ -32,8 +32,8 @@ Mae Bubble Card yn gasgliad o gardiau minimalaidd a chyfaddasadwy ar gyfer Home 
 
 <br>
 
-1. Llwythwch `bubble-card.zip` i lawr o'r [rhyddhad diweddaraf](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Echdynnwch ef i'ch ffolder `<config>/www`, dylech gael `bubble-card.js` a ffolder `translations` wrth ei ymyl (mae'r ffolder honno'n dal geiriaduron y golygydd, hebddi mae'r golygydd yn aros yn Saesneg)
+1. Llwythwch y ffeil hon i lawr: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Ychwanegwch y ffeil hon at eich ffolder `<config>/www`. I gael y golygydd yn eich iaith, llwythwch `bubble-card-<lang>.json` i lawr o'r [ffolder dist](https://github.com/Clooos/Bubble-Card/tree/main/dist) hefyd, er enghraifft `bubble-card-fr.json`, a'i roi wrth ymyl `bubble-card.js` (hebddo mae'r golygydd yn aros yn Saesneg)
 3. Ar eich dangosfwrdd cliciwch ar yr eicon yng nghornel dde uchaf yna ar `Edit dashboard`
 4. Cliciwch eto ar yr eicon hwnnw ac yna cliciwch ar `Manage resources`
 5. Cliciwch ar `Add resource`

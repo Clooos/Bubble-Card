@@ -32,8 +32,8 @@ Bubble Card 是一套為 Home Assistant 打造的極簡且可自訂的卡片集�
 
 <br>
 
-1. 從[最新發行版](https://github.com/Clooos/Bubble-Card/releases/latest)下載 `bubble-card.zip`
-2. 將它解壓縮到你的 `<config>/www` 資料夾，你應該會得到 `bubble-card.js` 以及旁邊的一個 `translations` 資料夾（該資料夾存放編輯器的字典，沒有它編輯器就會一直維持英文）
+1. 下載這個檔案: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. 把這個檔案放到你的 `<config>/www` 資料夾。要讓編輯器顯示為你的語言，請同時從 [dist 資料夾](https://github.com/Clooos/Bubble-Card/tree/main/dist)下載 `bubble-card-<lang>.json`，例如 `bubble-card-fr.json`，並把它放在 `bubble-card.js` 旁邊（沒有它編輯器就會一直維持英文）
 3. 在你的儀表板上點擊右上角的圖示,然後點擊「編輯儀表板」
 4. 再次點擊該圖示,然後點擊「管理資源」
 5. 點擊「新增資源」

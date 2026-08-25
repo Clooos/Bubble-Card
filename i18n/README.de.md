@@ -32,8 +32,8 @@ Bubble Card ist eine minimalistische und anpassbare Kartensammlung für Home Ass
 
 <br>
 
-1. Lade `bubble-card.zip` aus dem [neuesten Release](https://github.com/Clooos/Bubble-Card/releases/latest) herunter
-2. Entpacke es in deinem `<config>/www` Ordner, du solltest `bubble-card.js` und daneben einen Ordner `translations` erhalten (dieser Ordner enthält die Wörterbücher des Editors, ohne ihn bleibt der Editor auf Englisch)
+1. Lade diese Datei herunter: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Lege diese Datei in deinen `<config>/www` Ordner. Um den Editor in deiner Sprache zu bekommen, lade auch `bubble-card-<lang>.json` aus dem [dist Ordner](https://github.com/Clooos/Bubble-Card/tree/main/dist) herunter, zum Beispiel `bubble-card-fr.json`, und lege sie neben `bubble-card.js` (ohne sie bleibt der Editor auf Englisch)
 3. Klicke auf deinem Dashboard auf das Icon oben rechts und dann auf `Dashboard bearbeiten`
 4. Klicke erneut auf dieses Icon und dann auf `Ressourcen verwalten`
 5. Klicke auf `Ressource hinzufügen`

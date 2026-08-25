@@ -32,8 +32,8 @@ Bubble Card, Home Assistant için minimalist ve özelleştirilebilir bir kart ko
 
 <br>
 
-1. [En son sürümden](https://github.com/Clooos/Bubble-Card/releases/latest) `bubble-card.zip` dosyasını indirin
-2. Dosyayı `<config>/www` klasörünüze çıkarın, yanında `bubble-card.js` ve bir `translations` klasörü elde etmelisiniz (bu klasör editörün sözlüklerini içerir, o olmadan editör İngilizce kalır)
+1. Bu dosyayı indirin: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Bu dosyayı `<config>/www` klasörünüze ekleyin. Editörü kendi dilinizde görmek için [dist klasöründen](https://github.com/Clooos/Bubble-Card/tree/main/dist) `bubble-card-<lang>.json` dosyasını da indirin, örneğin `bubble-card-fr.json`, ve onu `bubble-card.js` dosyasının yanına koyun (o olmadan editör İngilizce kalır)
 3. Panonuzda sağ üst köşedeki simgeye, ardından `Panoyu düzenle` seçeneğine tıklayın
 4. Aynı simgeye tekrar tıklayıp `Kaynakları yönet` seçeneğine tıklayın
 5. `Kaynak ekle` üzerine tıklayın

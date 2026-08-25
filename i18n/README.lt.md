@@ -32,8 +32,8 @@ Bubble Card yra minimalistinė ir individualiai pritaikoma kortelių kolekcija, 
 
 <br>
 
-1. Atsisiųskite `bubble-card.zip` iš [naujausios laidos](https://github.com/Clooos/Bubble-Card/releases/latest)
-2. Išskleiskite jį į savo `<config>/www` aplanką, turėtumėte gauti `bubble-card.js` ir šalia jo aplanką `translations` (tame aplanke yra redaktoriaus žodynai, be jo redaktorius lieka angliškas)
+1. Atsisiųskite šį failą: [bubble-card.js](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/dist/bubble-card.js)
+2. Įdėkite šį failą į savo `<config>/www` aplanką. Kad redaktorius būtų jūsų kalba, iš [dist aplanko](https://github.com/Clooos/Bubble-Card/tree/main/dist) atsisiųskite ir `bubble-card-<lang>.json`, pavyzdžiui `bubble-card-fr.json`, ir padėkite jį šalia `bubble-card.js` (be jo redaktorius lieka angliškas)
 3. Savo prietaisų skydelyje spustelėkite piktogramą viršutiniame dešiniajame kampe, tada `Edit dashboard`
 4. Vėl spustelėkite tą piktogramą, tada spustelėkite `Manage resources`
 5. Spustelėkite `Add resource`
