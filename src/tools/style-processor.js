@@ -475,7 +475,7 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
       styleElementToInjectInto.textContent = finalStylesToInject;
     }
 
-    if (context.initialLoad && loadHideTarget?.style) {
+    if (loadHideTarget?.dataset.bubbleStyleHideMode) {
       if (loadHideTarget.dataset.bubbleStyleHideMode === 'visibility') {
         loadHideTarget.style.visibility = '';
       } else {
