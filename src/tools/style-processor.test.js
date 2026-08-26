@@ -561,3 +561,55 @@ describe('confining a pop-up module to the pop-up chrome', () => {
     expect(confined.match(/:not\(\.bubble-cards-grid-container, \.bubble-cards-grid-container \*\)/g)).toHaveLength(3);
   });
 });
+
+// A pop-up auto-opened by a URL hash can hit an intermediate render cycle that
+// flips `initialLoad` to false before the first style pass un-hides the
+// content container. Un-hiding must therefore key off the hide marker set when
+// the hide was applied, not off `initialLoad`, or the container is left
+// permanently at `visibility: hidden` and the open pop-up looks blank.
+describe('the pop-up load hide / un-hide cycle', () => {
+  beforeEach(() => {
+    global.window = {
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    };
+    global.document = {
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      createElement: jest.fn(() => ({
+        tagName: 'STYLE',
+        textContent: '',
+        id: '',
+        parentElement: null,
+      })),
+    };
+    cleanCSS.mockClear();
+  });
+
+  afterEach(() => {
+    delete global.window;
+    delete global.document;
+  });
+
+  test('still un-hides the container when initialLoad is already false', () => {
+    const popupRoot = createCardElement();
+    const container = createCardElement();
+    // Reproduce the intermediate state: the initial-load pass hid the container,
+    // but a later render cycle flipped initialLoad to false before its styles
+    // pass reached the un-hide.
+    container.style.visibility = 'hidden';
+    container.dataset.bubbleStyleHideMode = 'visibility';
+
+    const context = createContext(popupRoot);
+    context.cardType = 'pop-up';
+    context.popUp = popupRoot;
+    context.elements = { popUpContainer: container };
+    context.initialLoad = false;
+    context.cardLoaded = true;
+
+    handleCustomStyles(context, popupRoot);
+
+    expect(container.dataset.bubbleStyleHideMode).toBeUndefined();
+    expect(container.style.visibility).toBe('');
+  });
+});
