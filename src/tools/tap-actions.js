@@ -108,6 +108,32 @@ if (!window.__bubbleTapActionsInitialized) {
 const actionHandler = new WeakMap();
 const activeHandlers = new Set();
 
+// An interaction whose end the page never sees stays armed, and its end handler
+// sits on document, so the next touch anywhere completes it and fires the action
+// of a button let go of long ago. The system swipe that closes the companion app
+// does exactly that: the app is suspended mid gesture, so not even a cancel
+// arrives, and the ripple stays pressed until then. Being hidden is the one
+// signal that always comes, so it is what abandons whatever is still armed.
+let suspendWatchSet = false;
+function watchForSuspend() {
+  if (suspendWatchSet) return;
+  suspendWatchSet = true;
+
+  const abandonInteractions = () => {
+    if (!activeHandlers.size) return;
+    // Copied: releasing a handler takes it out of the set being walked
+    for (const handler of [...activeHandlers]) {
+      handler.handleCancel();
+      handler.releaseListeners?.();
+    }
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) abandonInteractions();
+  }, { passive: true });
+  window.addEventListener('pagehide', abandonInteractions, { passive: true });
+}
+
 function handlePointerDown(event) {
   if (window.isScrolling) return;
   // Ignore multi-touch to allow pinch-to-zoom and system gestures
@@ -161,6 +187,7 @@ function handlePointerDown(event) {
   }
 
   activeHandlers.add(handler);
+  watchForSuspend();
 
   const contextMenuHandler = (e) => {
     // Prevent context menu if hold action is configured
@@ -189,6 +216,7 @@ function handlePointerDown(event) {
       }
     } catch (_) {}
     activeHandlers.delete(handler);
+    handler.releaseListeners = null;
   };
 
   const endHandler = (e) => {
@@ -200,6 +228,8 @@ function handlePointerDown(event) {
     handler.handleScroll();
     cleanup();
   };
+
+  handler.releaseListeners = cleanup;
 
   actionElement.addEventListener('pointerup', endHandler, { once: true });
   actionElement.addEventListener('pointercancel', endHandler, { once: true });
@@ -294,6 +324,7 @@ class ActionHandler {
     this.currentInteractionType = null;
     this.interactionStartTime = 0;
     this.preventDefaultCalled = false;
+    this.releaseListeners = null;
   }
 
   isInteractionInProgress() {

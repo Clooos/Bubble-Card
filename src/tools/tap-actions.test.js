@@ -176,3 +176,114 @@ describe('a cancelled gesture fires nothing', () => {
     expect(fired).toEqual(['double_tap']);
   });
 });
+
+// The system swipe that closes the companion app suspends the page mid gesture,
+// so not even a cancel reaches it. The interaction stays armed, its end handler
+// sits on the document, and the next touch anywhere completes it and fires the
+// action of a button let go of long ago. Reported on #2580 after the first fix.
+describe('a gesture the page never sees the end of', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    win.isScrolling = false;
+    doc.hidden = false;
+  });
+  afterEach(() => { jest.runOnlyPendingTimers(); jest.useRealTimers(); doc.hidden = false; });
+
+  const suspend = () => { doc.hidden = true; doc.dispatchEvent(new Event('visibilitychange')); };
+  const resume = () => { doc.hidden = false; doc.dispatchEvent(new Event('visibilitychange')); };
+
+  // Without this control the test below would pass on a card that never fires
+  test('a release reaching only the document does end the press, which is the control', () => {
+    const { el, fired } = makeCard();
+
+    body.dispatchEvent(press('pointerdown', el));
+    doc.dispatchEvent(press('pointerup', el));
+
+    expect(fired).toEqual(['tap']);
+  });
+
+  test('fires nothing when a release lands after the page was hidden', () => {
+    const { el, fired } = makeCard();
+
+    body.dispatchEvent(press('pointerdown', el));
+    suspend();
+    resume();
+    doc.dispatchEvent(press('pointerup', el));
+
+    expect(fired).toEqual([]);
+  });
+
+  test('fires nothing on a touch release either', () => {
+    const { el, fired } = makeCard();
+
+    body.dispatchEvent(press('touchstart', el, { touch: true }));
+    suspend();
+    doc.dispatchEvent(press('touchend', el, { touch: true }));
+
+    expect(fired).toEqual([]);
+  });
+
+  test('lets go of a hold that was recognised before the page was hidden', () => {
+    const { el, fired } = makeCard({ hold_action: { action: 'more-info' } });
+
+    body.dispatchEvent(press('pointerdown', el));
+    jest.advanceTimersByTime(600);
+    suspend();
+    doc.dispatchEvent(press('pointerup', el));
+
+    expect(fired).toEqual([]);
+  });
+
+  test('abandons the press on pagehide as well', () => {
+    const { el, fired } = makeCard();
+
+    body.dispatchEvent(press('pointerdown', el));
+    win.dispatchEvent(new Event('pagehide'));
+    doc.dispatchEvent(press('pointerup', el));
+
+    expect(fired).toEqual([]);
+  });
+
+  // The button stays visibly pressed otherwise, which is the highlight the
+  // reporter saw sitting under the navigation bar
+  test('releases the ripple the press had started', () => {
+    const { el } = makeCard();
+    el.haRipple.startPress = jest.fn();
+    el.haRipple.endPress = jest.fn();
+
+    body.dispatchEvent(press('pointerdown', el));
+    expect(el.haRipple.startPress).toHaveBeenCalled();
+
+    suspend();
+
+    expect(el.haRipple.endPress).toHaveBeenCalled();
+  });
+
+  test('the card still works once the page comes back', () => {
+    const { el, fired } = makeCard();
+
+    body.dispatchEvent(press('pointerdown', el));
+    suspend();
+    doc.dispatchEvent(press('pointerup', el));
+    resume();
+
+    body.dispatchEvent(press('pointerdown', el));
+    el.dispatchEvent(press('pointerup', el));
+
+    expect(fired).toEqual(['tap']);
+  });
+
+  // Hiding the page with nothing under way must not cost a walk of the set
+  test('does nothing at all when no press is under way', () => {
+    const { el, fired } = makeCard();
+
+    suspend();
+    resume();
+
+    body.dispatchEvent(press('pointerdown', el));
+    el.dispatchEvent(press('pointerup', el));
+
+    expect(fired).toEqual(['tap']);
+  });
+});
