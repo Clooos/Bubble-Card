@@ -660,15 +660,35 @@ export function computeDisplayTimer(hass, stateObj, timeRemaining) {
 // instead of fifty. The beat also stops entirely while the page is hidden, and
 // catches up on the way back, which is both cheaper and more correct than
 // letting a throttled background timer decide when the text is right again.
+// One page-wide beat rather than one timer per card: a wall tablet showing fifty
+// relative times would otherwise wake up fifty times for the same work.
+//
+// The period follows what is on screen. Under a minute a relative time changes
+// every second, so a card that fresh is refreshed every second; past that once
+// a minute is enough. Home Assistant's own ha-relative-time settles for a flat
+// 60 seconds, which leaves "now" sitting there for a whole minute next to a
+// sub-button counting the seconds, and that mismatch is what gets reported.
 const RELATIVE_TIME_BEAT_MS = 60000;
+const RELATIVE_TIME_FAST_MS = 1000;
 const relativeTimeSubscribers = new Map();
 let relativeTimeBeatId = null;
 let relativeTimeVisibilityBound = false;
 
 const relativeTimeHidden = () => typeof document !== 'undefined' && document.hidden === true;
 
+/** How long a relative time built from `datetime` stays true, in ms. */
+export function relativeTimeRefreshDelay(datetime) {
+    if (!datetime) return RELATIVE_TIME_BEAT_MS;
+    const age = Date.now() - new Date(datetime).getTime();
+    if (isNaN(age)) return RELATIVE_TIME_BEAT_MS;
+    return age < 60000 ? RELATIVE_TIME_FAST_MS : RELATIVE_TIME_BEAT_MS;
+}
+
 function runRelativeTimeBeat() {
-    for (const [context, updateCallback] of relativeTimeSubscribers) {
+    relativeTimeBeatId = null;
+    const now = Date.now();
+
+    for (const [context, entry] of relativeTimeSubscribers) {
         // A removed card keeps its last hass snapshot, so no state check inside
         // the callback could ever notice the element went away. Dropping it here
         // is what keeps the map from growing with every card the page discards.
@@ -676,8 +696,12 @@ function runRelativeTimeBeat() {
             relativeTimeSubscribers.delete(context);
             continue;
         }
+        if (entry.nextDue > now) {
+            continue;
+        }
         try {
-            updateCallback();
+            const asked = entry.updateCallback();
+            entry.nextDue = now + (Number.isFinite(asked) ? asked : RELATIVE_TIME_BEAT_MS);
         } catch (e) {
             // One card throwing must not take the whole page's beat down with it
             relativeTimeSubscribers.delete(context);
@@ -686,21 +710,30 @@ function runRelativeTimeBeat() {
 
     if (relativeTimeSubscribers.size === 0) {
         releaseRelativeTimeBeatIfIdle();
+        return;
     }
+    scheduleRelativeTimeBeat();
 }
 
 function stopRelativeTimeBeat() {
     if (relativeTimeBeatId !== null) {
-        clearInterval(relativeTimeBeatId);
+        clearTimeout(relativeTimeBeatId);
         relativeTimeBeatId = null;
     }
 }
 
-function startRelativeTimeBeat() {
+function scheduleRelativeTimeBeat() {
     if (relativeTimeBeatId !== null || relativeTimeSubscribers.size === 0 || relativeTimeHidden()) {
         return;
     }
-    relativeTimeBeatId = setInterval(runRelativeTimeBeat, RELATIVE_TIME_BEAT_MS);
+    // The earliest card decides, so a single fresh card does not make the whole
+    // page tick every second for longer than it has to
+    const now = Date.now();
+    let delay = RELATIVE_TIME_BEAT_MS;
+    for (const entry of relativeTimeSubscribers.values()) {
+        delay = Math.min(delay, Math.max(0, entry.nextDue - now));
+    }
+    relativeTimeBeatId = setTimeout(runRelativeTimeBeat, delay);
 }
 
 function onRelativeTimeVisibilityChange() {
@@ -709,9 +742,11 @@ function onRelativeTimeVisibilityChange() {
         return;
     }
     // Coming back: every text on screen is as stale as the time spent away, so
-    // it is rewritten now rather than up to a minute later.
+    // it is rewritten now rather than waiting for the next beat.
+    for (const entry of relativeTimeSubscribers.values()) {
+        entry.nextDue = 0;
+    }
     runRelativeTimeBeat();
-    startRelativeTimeBeat();
 }
 
 // Bound with the first subscriber and dropped with the last, so an empty page
@@ -741,15 +776,32 @@ function releaseRelativeTimeBeatIfIdle() {
     unbindRelativeTimeVisibility();
 }
 
-export function startRelativeTimeInterval(context, updateCallback) {
-    // Idempotent: changeState runs on every card update, so re-subscribing must
-    // stay free and must not disturb the beat already running.
-    if (relativeTimeSubscribers.has(context)) {
+export function startRelativeTimeInterval(context, updateCallback, initialDelay) {
+    // The caller has just rendered the card, so it knows when this one next
+    // needs rewriting. Taking it from there spares the beat a pass whose only
+    // purpose would be to ask.
+    const delay = Number.isFinite(initialDelay) ? initialDelay : RELATIVE_TIME_BEAT_MS;
+    const nextDue = Date.now() + delay;
+
+    const existing = relativeTimeSubscribers.get(context);
+    if (existing) {
+        // Re-arming happens on every card update, so it must stay free and must
+        // never push the next tick away. It may pull it closer though: a card
+        // whose entity just changed now reads in seconds and needs the fast
+        // cadence, while its subscription still holds the slow one.
+        if (nextDue < existing.nextDue) {
+            existing.nextDue = nextDue;
+            stopRelativeTimeBeat();
+            scheduleRelativeTimeBeat();
+        }
         return;
     }
-    relativeTimeSubscribers.set(context, updateCallback);
+
+    relativeTimeSubscribers.set(context, { updateCallback, nextDue });
     bindRelativeTimeVisibility();
-    startRelativeTimeBeat();
+    // A card arriving fresh may need a cadence faster than the one running
+    stopRelativeTimeBeat();
+    scheduleRelativeTimeBeat();
 }
 
 export function stopRelativeTimeInterval(context) {

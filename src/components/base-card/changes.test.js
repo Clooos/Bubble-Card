@@ -24,7 +24,7 @@ jest.unstable_mockModule('../../cards/climate/helpers.js', () => ({
 }));
 
 const { changeState, ensureTimerCountdown } = await import('./changes.js');
-const { hasTimerInterval, stopTimerInterval, hasRelativeTimeInterval, stopRelativeTimeInterval } = await import('../../tools/utils.js');
+const { hasTimerInterval, stopTimerInterval, hasRelativeTimeInterval, stopRelativeTimeInterval, relativeTimeRefreshDelay } = await import('../../tools/utils.js');
 
 function createTimerCardContext() {
     return {
@@ -205,14 +205,14 @@ describe('the relative time beat of #2572', () => {
         // the next tick away, and a card updated often would never refresh.
         const context = createRelativeCardContext(90);
         usedContexts.push(context);
-        const setIntervalSpy = jest.spyOn(global, 'setInterval');
+        const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
 
         changeState(context);
         changeState(context);
         changeState(context);
 
-        expect(setIntervalSpy).toHaveBeenCalledTimes(1);
-        setIntervalSpy.mockRestore();
+        expect(setTimeoutSpy).toHaveBeenCalledTimes(1);
+        setTimeoutSpy.mockRestore();
     });
 
     test('stops beating once the card left the DOM', () => {
@@ -259,17 +259,14 @@ describe('the relative time beat is shared and idle-aware', () => {
         jest.useRealTimers();
     });
 
-    test('runs one interval for many cards, not one each', () => {
-        const setIntervalSpy = jest.spyOn(global, 'setInterval');
-
+    test('runs one timer for many cards, not one each', () => {
         for (let i = 0; i < 10; i++) {
             const context = createRelativeCardContext(90);
             usedContexts.push(context);
             changeState(context);
         }
 
-        expect(setIntervalSpy).toHaveBeenCalledTimes(1);
-        setIntervalSpy.mockRestore();
+        expect(jest.getTimerCount()).toBe(1);
     });
 
     test('refreshes every subscriber on the one tick', () => {
@@ -287,20 +284,19 @@ describe('the relative time beat is shared and idle-aware', () => {
         expect(refreshed).toContain(b.elements.state);
     });
 
-    test('stops the interval once the last card drops out', () => {
-        const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+    test('stops the timer once the last card drops out', () => {
         const a = createRelativeCardContext(90);
         const b = createRelativeCardContext(90);
         usedContexts.push(a, b);
         changeState(a);
         changeState(b);
+        expect(jest.getTimerCount()).toBe(1);
 
         stopRelativeTimeInterval(a);
-        expect(clearIntervalSpy).not.toHaveBeenCalled();
+        expect(jest.getTimerCount()).toBe(1);
 
         stopRelativeTimeInterval(b);
-        expect(clearIntervalSpy).toHaveBeenCalled();
-        clearIntervalSpy.mockRestore();
+        expect(jest.getTimerCount()).toBe(0);
     });
 
     test('beats not at all while the page is hidden, and catches up on return', () => {
@@ -338,5 +334,145 @@ describe('the relative time beat is shared and idle-aware', () => {
 
         expect(hasRelativeTimeInterval(bad)).toBe(false);
         expect(hasRelativeTimeInterval(good)).toBe(true);
+    });
+});
+
+// A relative time under a minute changes every second, so refreshing it once a
+// minute leaves "now" sitting there while a sub-button next to it counts the
+// seconds. Home Assistant's own ha-relative-time has the same flat 60 second
+// interval, which is exactly what the report was about.
+describe('the beat follows what is on screen', () => {
+    const usedContexts = [];
+    let realDocument;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+        realDocument = global.document;
+        global.document = { hidden: false, addEventListener: () => {}, removeEventListener: () => {} };
+    });
+
+    afterEach(() => {
+        usedContexts.forEach((context) => stopRelativeTimeInterval(context));
+        usedContexts.length = 0;
+        global.document = realDocument;
+        jest.useRealTimers();
+    });
+
+    test('rewrites a card that just changed every second', () => {
+        const context = createRelativeCardContext(3);
+        usedContexts.push(context);
+        changeState(context);
+        expect(displayedText()).toBe('4 seconds ago');
+
+        jest.advanceTimersByTime(1000);
+
+        expect(displayedText()).toBe('5 seconds ago');
+    });
+
+    test('does not leave it on the same text for a whole minute', () => {
+        const context = createRelativeCardContext(0);
+        usedContexts.push(context);
+        changeState(context);
+        const atFirst = displayedText();
+
+        jest.advanceTimersByTime(5000);
+
+        expect(displayedText()).not.toBe(atFirst);
+    });
+
+    test('settles back to the minute once past the first minute', () => {
+        const context = createRelativeCardContext(90);
+        usedContexts.push(context);
+        changeState(context);
+        applyScrollingEffect.mockClear();
+
+        jest.advanceTimersByTime(30000);
+        expect(applyScrollingEffect).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(30000);
+        expect(applyScrollingEffect).toHaveBeenCalled();
+    });
+
+    // One fresh card must not be silent, and must not drag every other card
+    // into a per-second refresh either
+    test('the freshest card sets the pace without waking the others', () => {
+        const fresh = createRelativeCardContext(2);
+        const old = createRelativeCardContext(600);
+        usedContexts.push(fresh, old);
+        changeState(fresh);
+        changeState(old);
+        expect(jest.getTimerCount()).toBe(1);
+        applyScrollingEffect.mockClear();
+
+        jest.advanceTimersByTime(1000);
+
+        const refreshed = applyScrollingEffect.mock.calls.map((c) => c[1]);
+        expect(refreshed).toContain(fresh.elements.state);
+        expect(refreshed).not.toContain(old.elements.state);
+    });
+
+    test('asks for the fast pace only while the time is under a minute', () => {
+        const now = Date.now();
+        expect(relativeTimeRefreshDelay(new Date(now - 3000).toISOString())).toBe(1000);
+        expect(relativeTimeRefreshDelay(new Date(now - 59000).toISOString())).toBe(1000);
+        expect(relativeTimeRefreshDelay(new Date(now - 61000).toISOString())).toBe(60000);
+        expect(relativeTimeRefreshDelay(null)).toBe(60000);
+        expect(relativeTimeRefreshDelay('pas une date')).toBe(60000);
+    });
+});
+
+// The subscription outlives the card's own pace: a card subscribed while its
+// entity was hours old still holds the slow cadence when that entity changes,
+// and nothing else would ever tell the beat to hurry.
+describe('a card that just changed speeds the beat back up', () => {
+    const usedContexts = [];
+    let realDocument;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.useFakeTimers();
+        realDocument = global.document;
+        global.document = { hidden: false, addEventListener: () => {}, removeEventListener: () => {} };
+    });
+
+    afterEach(() => {
+        usedContexts.forEach((context) => stopRelativeTimeInterval(context));
+        usedContexts.length = 0;
+        global.document = realDocument;
+        jest.useRealTimers();
+    });
+
+    test('picks up the fast pace when the entity changes under it', () => {
+        const context = createRelativeCardContext(600);
+        usedContexts.push(context);
+        changeState(context);
+
+        // The entity changes: the card now reads in seconds
+        const now = new Date().toISOString();
+        context._hass = {
+            ...context._hass,
+            states: { 'sensor.test': { state: 'off', last_changed: now, last_updated: now, attributes: {} } },
+        };
+        changeState(context);
+        const atFirst = displayedText();
+
+        jest.advanceTimersByTime(2000);
+
+        expect(displayedText()).not.toBe(atFirst);
+    });
+
+    test('re-arming never pushes the next rewrite away', () => {
+        const context = createRelativeCardContext(3);
+        usedContexts.push(context);
+        changeState(context);
+
+        // A card updated often re-arms constantly, and must still refresh on time
+        for (let i = 0; i < 20; i++) changeState(context);
+        applyScrollingEffect.mockClear();
+
+        jest.advanceTimersByTime(1000);
+
+        expect(applyScrollingEffect).toHaveBeenCalled();
     });
 });

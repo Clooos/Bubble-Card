@@ -12,7 +12,8 @@ import {
     stopTimerInterval,
     hasTimerInterval,
     startRelativeTimeInterval,
-    stopRelativeTimeInterval
+    stopRelativeTimeInterval,
+    relativeTimeRefreshDelay
 } from '../../tools/utils.js';
 import { applyScrollingEffect } from '../../tools/text-scrolling.js';
 import { getIcon, getImage, getIconColor } from '../../tools/icon.js';
@@ -82,13 +83,25 @@ export function changeState(context, force = false) {
     // exact case the beat is for: nothing about the entity changed, so the card
     // has no other reason to come back and rewrite an ageing relative time.
     if ((showLastChanged || showLastUpdated) && state) {
+        const currentDelay = () => Math.min(
+            relativeTimeRefreshDelay(showLastChanged ? state.last_changed : null),
+            relativeTimeRefreshDelay(showLastUpdated ? state.last_updated : null)
+        );
         startRelativeTimeInterval(context, () => {
-            // changeState reads context._hass unguarded, and an interval
-            // callback that throws is caught by nobody.
-            if (context._hass) {
-                changeState(context, true);
+            // changeState reads context._hass unguarded, and a beat callback
+            // that throws is caught by nobody.
+            if (!context._hass) {
+                return null;
             }
-        });
+            changeState(context, true);
+            // Read back rather than closed over: arming is idempotent, so this
+            // callback outlives the values it was built with.
+            const current = context._hass.states[context.config.entity];
+            return Math.min(
+                relativeTimeRefreshDelay(showLastChanged ? current?.last_changed : null),
+                relativeTimeRefreshDelay(showLastUpdated ? current?.last_updated : null)
+            );
+        }, currentDelay());
     } else {
         stopRelativeTimeInterval(context);
     }
