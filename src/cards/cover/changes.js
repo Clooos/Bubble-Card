@@ -46,6 +46,24 @@ export function isFullyClosed(stateObj) {
   return stateObj.state === "closed";
 }
 
+/**
+ * Whether the cover should wear its open icon.
+ *
+ * Home Assistant reads a cover as open as soon as it leaves the closed
+ * position, so anything above 0% is open and only a fully closed one is shut.
+ * This used to key off isFullyOpen, which is a 100% test, so a cover held at
+ * 80% wore the closed icon while its state said open (#2586). A cover with no
+ * position never had the problem, since isFullyOpen falls back to the state.
+ *
+ * An unknown or unavailable cover keeps the closed icon rather than claiming to
+ * be open about a position nobody knows.
+ */
+export function showsOpenIcon(stateObj) {
+  if (!stateObj) return false;
+  if (stateObj.state === "unavailable" || stateObj.state === "unknown") return false;
+  return !isFullyClosed(stateObj);
+}
+
 export function isOpening(stateObj) {
   if (!stateObj) return false;
   return stateObj.state === "opening";
@@ -120,11 +138,10 @@ export function changeCoverIcons(context) {
   const canOpenTiltCover = canOpenTilt(stateObj);
   const canCloseTiltCover = canCloseTilt(stateObj);
 
-  const fullyOpen = isFullyOpen(stateObj);
   const fullyClosed = isFullyClosed(stateObj);
   const isCurtains = getAttribute(context, "device_class") === "curtain";
 
-  context.elements.icon.icon = fullyOpen
+  context.elements.icon.icon = showsOpenIcon(stateObj)
     ? getIcon(context, context.config.entity, context.config.icon_open)
     : getIcon(context, context.config.entity, context.config.icon_close);
 
