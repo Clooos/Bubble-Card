@@ -475,7 +475,11 @@ function _handleCustomStylesCore(context, parsedYamlModules, styleElementToInjec
       styleElementToInjectInto.textContent = finalStylesToInject;
     }
 
-    if (loadHideTarget?.dataset.bubbleStyleHideMode) {
+    // Keyed on the marker the hide itself set, not on initialLoad: that flag
+    // lives on the context while the hide target follows the element passed in,
+    // so a pass on the card takes the flag down and a pop-up pass still in
+    // flight would skip its own un-hide, leaving the container hidden for good.
+    if (loadHideTarget?.dataset?.bubbleStyleHideMode) {
       if (loadHideTarget.dataset.bubbleStyleHideMode === 'visibility') {
         loadHideTarget.style.visibility = '';
       } else {

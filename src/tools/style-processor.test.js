@@ -613,3 +613,114 @@ describe('the pop-up load hide / un-hide cycle', () => {
     expect(container.style.visibility).toBe('');
   });
 });
+// The pop-up pass hides the container and goes async. A pass on the card, which
+// shares the same context, then runs synchronously, un-hides itself and takes
+// initialLoad down with it. While the un-hide was keyed on that flag, the pop-up
+// pass skipped its own and the container was never shown again: an open pop-up
+// with a blank body. Reported and fixed in PR #2585.
+describe('a pop-up pass overtaken by a card pass', () => {
+    let saved;
+
+    beforeEach(() => {
+        saved = [...yamlKeysMap.entries()];
+        global.window = { addEventListener: jest.fn(), removeEventListener: jest.fn() };
+        global.document = {
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            createElement: jest.fn(() => ({ tagName: 'STYLE', textContent: '', id: '', parentElement: null })),
+        };
+    });
+
+    afterEach(() => {
+        yamlKeysMap.clear();
+        saved.forEach(([k, v]) => yamlKeysMap.set(k, v));
+        delete global.window;
+        delete global.document;
+    });
+
+    test('still shows the container its own pass had hidden', async () => {
+        const popupRoot = createCardElement();
+        const container = createCardElement();
+        const cardElement = createCardElement();
+
+        const context = createContext(cardElement);
+        context.cardType = 'pop-up';
+        context.config = { card_type: 'pop-up' };
+        context.popUp = popupRoot;
+        context.elements = { popUpContainer: container };
+
+        // No modules loaded yet: the pop-up pass takes the async fallback
+        yamlKeysMap.clear();
+        handleCustomStyles(context, popupRoot);
+        expect(container.style.visibility).toBe('hidden');
+        expect(container.dataset.bubbleStyleHideMode).toBe('visibility');
+
+        // Modules land, so the card pass that follows runs synchronously
+        saved.forEach(([k, v]) => yamlKeysMap.set(k, v));
+        handleCustomStyles(context, cardElement);
+        expect(context.initialLoad).toBe(false);
+
+        // The pop-up pass finally gets its turn, with initialLoad already down
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(container.style.visibility).toBe('');
+        expect(container.dataset.bubbleStyleHideMode).toBeUndefined();
+    });
+});
+
+// Nothing covered the ordinary path before, so the un-hide moving off
+// initialLoad had no guard on the case it must keep behaving for.
+describe('the load hide of an ordinary card', () => {
+    let saved;
+
+    beforeEach(() => {
+        saved = [...yamlKeysMap.entries()];
+        global.window = { addEventListener: jest.fn(), removeEventListener: jest.fn() };
+        global.document = {
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            createElement: jest.fn(() => ({ tagName: 'STYLE', textContent: '', id: '', parentElement: null })),
+        };
+    });
+
+    afterEach(() => {
+        yamlKeysMap.clear();
+        saved.forEach(([k, v]) => yamlKeysMap.set(k, v));
+        delete global.window;
+        delete global.document;
+    });
+
+    test('hides on the way in and shows again once the styles are in', async () => {
+        const element = createCardElement();
+        const context = createContext(element);
+
+        yamlKeysMap.clear();
+        handleCustomStyles(context, element);
+
+        expect(element.style.display).toBe('none');
+        expect(element.dataset.bubbleStyleHideMode).toBe('display');
+
+        saved.forEach(([k, v]) => yamlKeysMap.set(k, v));
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(element.style.display).toBe('');
+        expect(element.dataset.bubbleStyleHideMode).toBeUndefined();
+        expect(context.initialLoad).toBe(false);
+        expect(context.cardLoaded).toBe(true);
+    });
+
+    test('leaves a card alone on every pass after the first', async () => {
+        const element = createCardElement();
+        const context = createContext(element);
+
+        handleCustomStyles(context, element);
+        element.style.display = 'block';
+
+        handleCustomStyles(context, element);
+
+        expect(element.style.display).toBe('block');
+        expect(element.dataset.bubbleStyleHideMode).toBeUndefined();
+    });
+});
