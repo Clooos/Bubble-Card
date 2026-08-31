@@ -110,6 +110,36 @@ describe('dropdown layering', () => {
         expect(mainContainer.style.transform).toBe('none');
     });
 
+    test('a press that closed the menu does not let the click put it back up', () => {
+        // #2566: Home Assistant closes the menu on the press, so the click that
+        // follows finds it closed. Read as a fresh open, it put the menu straight
+        // back up and pressing the sub-button again looked like it never closed.
+        const context = buildContext();
+        const { background, dropdownSelect, dropdownArrow, mainContainer } = context.elements;
+
+        createDropdownActions(context, context.elements, 'input_select.test', context.config);
+        background.fire('click');
+        expect(dropdownArrow.style.transform).toBe('rotate(180deg)');
+
+        background.fire('pointerdown');
+        dropdownSelect.fire('closed');
+        background.fire('click');
+
+        expect(dropdownArrow.style.transform).toBe('rotate(0deg)');
+        expect(mainContainer.openDropdowns).toBe(0);
+    });
+
+    test('a press on a closed menu still opens it', () => {
+        const context = buildContext();
+        const { background, dropdownArrow } = context.elements;
+
+        createDropdownActions(context, context.elements, 'input_select.test', context.config);
+        background.fire('pointerdown');
+        background.fire('click');
+
+        expect(dropdownArrow.style.transform).toBe('rotate(180deg)');
+    });
+
     test('gives the layering back when the menu closes', () => {
         const context = buildContext();
         const { mainContainer, background, dropdownSelect } = context.elements;

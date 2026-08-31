@@ -336,12 +336,27 @@ export function createDropdownActions(context, elements = context.elements, enti
 
     card.addEventListener('hass-action', cancelOnAction, { signal });
 
+    // Home Assistant closes the menu on the press, and the click that follows it
+    // lands after that close on anything but the shortest of taps. `isMenuOpen`
+    // reads false by then, so the click was taken for a fresh open and put the
+    // menu straight back up: pressing the sub-button again looked like it never
+    // closed (#2566). A trackpad tap got away with it and a real click did not,
+    // which is the whole of the difference. What the press found is what decides.
+    let openWhenPressed = false;
+
+    const notePressedState = () => {
+        openWhenPressed = isMenuOpen;
+    };
+
     const handleEventClick = (event) => {
         // Ignore clicks originating from list items (they handle their own selection)
         if (event.target.closest?.('mwc-list-item, ha-dropdown-item')) return;
 
+        const wasOpen = isMenuOpen || openWhenPressed;
+        openWhenPressed = false;
+
         // If menu is already open, let the click close it and do not schedule a reopen
-        if (isMenuOpen) {
+        if (wasOpen) {
             if (pendingOpenTimer) {
                 clearTimeout(pendingOpenTimer);
                 pendingOpenTimer = null;
@@ -407,6 +422,7 @@ export function createDropdownActions(context, elements = context.elements, enti
         }
     };
 
+    eventCaller.addEventListener('pointerdown', notePressedState, { signal });
     eventCaller.addEventListener('click', handleEventClick, { signal });
 
     if (newHa) {
