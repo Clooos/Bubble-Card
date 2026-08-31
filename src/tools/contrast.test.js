@@ -5,9 +5,30 @@ import {
   needsSurfaceOutline,
   paintedSurfaces,
   parseSurfaceColor,
+  readSurfaceLayers,
   spansOverlap,
   stackSurfaces
 } from './contrast.js';
+
+// getComputedStyle(element, pseudo), served from a plain map of the three
+// styles an element can paint with
+function withStyles(styles, run) {
+  const original = globalThis.getComputedStyle;
+  globalThis.getComputedStyle = (element, pseudo) => styles[pseudo || 'self'] ?? null;
+  try {
+    return run();
+  } finally {
+    globalThis.getComputedStyle = original;
+  }
+}
+
+const FLAT = { backgroundColor: 'rgb(225, 225, 225)', backgroundImage: 'none', opacity: '1' };
+const PAINTING_PSEUDO = {
+  content: '""',
+  backgroundColor: 'rgba(0, 0, 0, 0)',
+  backgroundImage: 'radial-gradient(circle, rgb(45, 210, 86), rgb(200, 120, 190))',
+  opacity: '0.85'
+};
 
 describe('parseSurfaceColor', () => {
   test('reads the computed forms browsers hand back', () => {
@@ -90,6 +111,48 @@ describe('paintedSurfaces', () => {
   });
 });
 
+describe('readSurfaceLayers', () => {
+  test('an element painting nothing over its background gives its own layer alone', () => {
+    const layers = withStyles({ self: FLAT, '::before': { content: 'none' }, '::after': { content: 'normal' } },
+      () => readSurfaceLayers({}));
+
+    expect(layers).toEqual([{ rgb: [225, 225, 225], alpha: 1 }]);
+  });
+
+  test('a card dressed through a pseudo-element leaves the surface unknown', () => {
+    // #2590: a module painting a gradient over the card through
+    // .bubble-content-container::before. The flat color underneath is not what
+    // the screen shows, so nothing standing on it can be compared.
+    const layers = withStyles({ self: FLAT, '::before': PAINTING_PSEUDO, '::after': { content: 'none' } },
+      () => readSurfaceLayers({}));
+
+    expect(layers).toEqual([{ rgb: [225, 225, 225], alpha: 1 }, { patterned: true }]);
+    expect(stackSurfaces(layers)).toBeNull();
+  });
+
+  test('a pseudo-element that paints nothing visible is not a layer', () => {
+    const invisible = { ...PAINTING_PSEUDO, opacity: '0' };
+    const hidden = { ...PAINTING_PSEUDO, display: 'none' };
+    const empty = { content: '""', backgroundColor: 'rgba(0, 0, 0, 0)', backgroundImage: 'none', opacity: '1' };
+
+    expect(withStyles({ self: FLAT, '::before': invisible, '::after': empty }, () => readSurfaceLayers({})))
+      .toEqual([{ rgb: [225, 225, 225], alpha: 1 }]);
+    expect(withStyles({ self: FLAT, '::before': hidden, '::after': empty }, () => readSurfaceLayers({})))
+      .toEqual([{ rgb: [225, 225, 225], alpha: 1 }]);
+  });
+
+  test('a translucent color painted over the element counts as a layer', () => {
+    const tint = { content: '""', backgroundColor: 'rgba(0, 0, 0, 0.2)', backgroundImage: 'none', opacity: '1' };
+
+    expect(withStyles({ self: FLAT, '::before': { content: 'none' }, '::after': tint }, () => readSurfaceLayers({})))
+      .toEqual([{ rgb: [225, 225, 225], alpha: 1 }, { patterned: true }]);
+  });
+
+  test('a missing element has nothing to read', () => {
+    expect(readSurfaceLayers(null)).toEqual([null]);
+  });
+});
+
 describe('isSameSurface', () => {
   test('an identical color is the same surface', () => {
     expect(isSameSurface([75, 177, 254], [75, 177, 254])).toBe(true);
@@ -105,6 +168,18 @@ describe('isSameSurface', () => {
   test('a difference no screen shows is the same surface', () => {
     expect(isSameSurface([20, 20, 20], [22, 22, 22])).toBe(true);
     expect(isSameSurface([255, 255, 255], [251, 251, 251])).toBe(true);
+  });
+
+  test('a light theme separating its surfaces by a few levels keeps them distinct', () => {
+    // #2590: a white rail on a near-white card. The tolerance used to grow with
+    // the channel, so anything within 10 levels of white read as one surface and
+    // the rail was outlined although the edge is plainly visible.
+    expect(isSameSurface([255, 255, 255], [245, 245, 245])).toBe(false);
+    expect(isSameSurface([245, 245, 245], [240, 240, 240])).toBe(false);
+  });
+
+  test('one channel apart is enough to tell two surfaces apart', () => {
+    expect(isSameSurface([245, 245, 245], [245, 245, 255])).toBe(false);
   });
 
   test('plainly different colors are distinct surfaces', () => {

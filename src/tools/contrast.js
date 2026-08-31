@@ -1,13 +1,18 @@
 import { hexToRgb, rgbStringToRgb } from './color.js';
 
-// Two surfaces read as one when every channel is within this ratio of the other.
-// A ratio, not a fixed distance: getStateSurfaceColor separates a sub-button
-// from its card by scaling the color 8%, which is 6 levels apart on a dark blue
-// and 20 on a bright one. Anything under 4% is the same surface on both.
-export const SAME_SURFACE_RATIO = 0.04;
-// Below this many levels apart, no screen shows a difference, whatever the ratio
-// says on the very dark colors
-export const SAME_SURFACE_FLOOR = 3;
+// Two surfaces read as one when every channel is within this many levels of the
+// other. A fixed distance, not a ratio of the channel: sRGB is already
+// gamma-encoded, so a step in code space covers about the same perceived
+// distance at both ends of the range, and a tolerance that grew with the
+// channel reached +/-10 levels on the bright colors. A light theme separating a
+// slider rail from its card by less than that (an 8% scale saturates near
+// white: 245 against 255) was read as one surface and outlined, while the eye
+// sees a clean edge (#2590).
+//
+// Only false positives were ever at stake here: the cases this rescues paint
+// the very same color on both surfaces, so they sit at zero, and the 8%
+// getStateSurfaceColor applies stays well above the tolerance on any color.
+export const SAME_SURFACE_TOLERANCE = 4;
 
 // Alpha of a computed color, the channels themselves are parsed by the shared
 // helpers. Computed styles only ever hand back rgb()/rgba(), but themes and
@@ -84,6 +89,61 @@ export function readSurfaceLayer(element) {
   };
 }
 
+// A pseudo-element paints over its element's own background, and dressing a card
+// that way is what most styling modules and themes do. `getComputedStyle` of the
+// element alone never sees it, so a card wearing a gradient through
+// `.bubble-content-container::before` was compared on the flat color buried
+// under it: 40 levels away from what the screen actually showed, and a slider
+// standing plainly apart from its card was outlined (#2590).
+//
+// Reported as patterned rather than as its own color, because its geometry is
+// not knowable here: a full overlay and a corner badge read exactly the same
+// from the computed style, and claiming the badge's color as the surface behind
+// a sub-button would trade one wrong outline for another. Patterned is the
+// verdict the rest of this file already treats as "cannot be told apart, leave
+// it alone".
+const PSEUDO_LAYERS = ['::before', '::after'];
+
+function paintsAnything(styles) {
+  if (!styles) return false;
+
+  // No content, no box, nothing painted
+  const content = styles.content;
+  if (!content || content === 'none' || content === 'normal') return false;
+  if (styles.display === 'none' || styles.visibility === 'hidden') return false;
+
+  const opacity = parseFloat(styles.opacity);
+  if (Number.isFinite(opacity) && opacity <= 0) return false;
+
+  const image = styles.backgroundImage;
+  if (image && image !== 'none') return true;
+
+  const color = parseSurfaceColor(styles.backgroundColor);
+  return !!color && color.alpha > 0;
+}
+
+// What an element paints, its own background first and then a marker for the
+// pseudo-elements drawn over it
+export function readSurfaceLayers(element) {
+  const layers = [readSurfaceLayer(element)];
+  if (!element || typeof globalThis.getComputedStyle !== 'function') return layers;
+
+  for (const pseudo of PSEUDO_LAYERS) {
+    let styles;
+    try {
+      styles = globalThis.getComputedStyle(element, pseudo);
+    } catch (_) {
+      continue;
+    }
+    if (paintsAnything(styles)) {
+      layers.push({ patterned: true });
+      break;
+    }
+  }
+
+  return layers;
+}
+
 // Composite a stack of layers, bottom first. A patterned layer hides everything
 // below it and leaves the result unknown
 export function stackSurfaces(layers) {
@@ -129,11 +189,7 @@ export function paintedSurfaces(layers, behindRgb) {
 export function isSameSurface(rgb1, rgb2) {
   if (!rgb1 || !rgb2 || rgb1.length !== 3 || rgb2.length !== 3) return false;
 
-  return rgb1.every((channel, index) => {
-    const other = rgb2[index];
-    const tolerance = Math.max(SAME_SURFACE_FLOOR, Math.max(channel, other) * SAME_SURFACE_RATIO);
-    return Math.abs(channel - other) <= tolerance;
-  });
+  return rgb1.every((channel, index) => Math.abs(channel - rgb2[index]) <= SAME_SURFACE_TOLERANCE);
 }
 
 // Spans are [start, end] fractions along one axis of the card

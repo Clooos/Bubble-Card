@@ -1,4 +1,4 @@
-import { blendSurface, needsSurfaceOutline, paintedSurfaces, readSurfaceLayer, stackSurfaces } from '../../tools/contrast.js';
+import { blendSurface, needsSurfaceOutline, paintedSurfaces, readSurfaceLayer, readSurfaceLayers, stackSurfaces } from '../../tools/contrast.js';
 import { getStyleGeneration } from '../../tools/utils.js';
 
 // A sub-button (or a slider) can end up painting exactly the color of what sits
@@ -40,14 +40,20 @@ function collectTargets(scope) {
 // The flat colors behind the sub-buttons: the card itself, and the one its
 // slider fill paints where it reaches
 function readCardColors(context) {
+  // Every layer the card paints under its sub-buttons, bottom first. The
+  // content container is a sibling of the sub-buttons and paints before them,
+  // so a module dressing it covers the card background they stand on.
+  const elements = context.elements;
   const base = stackSurfaces([
-    readSurfaceLayer(context.elements?.mainContainer),
-    readSurfaceLayer(context.elements?.background)
+    ...readSurfaceLayers(elements?.mainContainer),
+    ...readSurfaceLayers(elements?.cardWrapper),
+    ...readSurfaceLayers(elements?.background),
+    ...readSurfaceLayers(elements?.contentContainer)
   ]);
 
   return {
     base,
-    fill: base ? blendSurface(readSurfaceLayer(context.elements?.rangeFill), base) : null
+    fill: base ? blendSurface(readSurfaceLayer(elements?.rangeFill), base) : null
   };
 }
 
@@ -95,7 +101,7 @@ function readTargetSurfaces(element, cache, behindRgb) {
     ? { patterned: true }
     : readSurfaceLayer(fillElement);
 
-  return paintedSurfaces([readSurfaceLayer(element), fillLayer], behindRgb);
+  return paintedSurfaces([...readSurfaceLayers(element), fillLayer], behindRgb);
 }
 
 function measureSpans(element, box) {
