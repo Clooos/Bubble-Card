@@ -24,6 +24,7 @@ import {
   isDocumentRTL,
   SLIDER_VALUE_POSITIONS
 } from './helpers.js';
+import { createDragClickSwallow } from './drag-click.js';
 
 export function createSliderStructure(context, config = {}) {
   const options = { 
@@ -418,6 +419,8 @@ export function createSliderStructure(context, config = {}) {
     } catch (_) {}
   }
 
+  const dragClickSwallow = createDragClickSwallow(options.targetElement);
+
   function detachPointerListeners() {
     options.targetElement.removeEventListener('pointermove', onPointerMove, listenerOptions);
     options.targetElement.removeEventListener('touchmove', onPointerMove, listenerOptions);
@@ -586,6 +589,7 @@ export function createSliderStructure(context, config = {}) {
 
     options.targetElement.classList.remove('is-dragging');
     detachPointerListeners();
+    dragClickSwallow.scheduleRelease();
     resetGestureIntent();
     resetSliderRectCache();
     unlockTouchActions();
@@ -643,6 +647,7 @@ export function createSliderStructure(context, config = {}) {
 
     options.targetElement.classList.remove('is-dragging');
     detachPointerListeners();
+    dragClickSwallow.scheduleRelease();
     resetGestureIntent();
     resetSliderRectCache();
     unlockTouchActions();
@@ -774,11 +779,7 @@ export function createSliderStructure(context, config = {}) {
 
     options.targetElement.classList.add('is-dragging');
     attachPointerListeners();
-    // Swallow only the immediate click on the slider itself (avoid global suppression)
-    options.targetElement.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    }, { capture: true, once: true });
+    dragClickSwallow.arm();
   }
 
   const isReadOnlyEntity = (() => {
