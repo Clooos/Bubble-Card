@@ -271,7 +271,7 @@ export function setupActions(element, options) {
       element.setAttribute("no-slide", "");
     }
 
-    addFeedback(element, element.feedback);
+    addFeedback(element);
 
     if (isSelect) {
       element.style.pointerEvents = "auto";

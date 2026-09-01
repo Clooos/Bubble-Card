@@ -1,6 +1,5 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
-import { addFeedback } from "../../tools/tap-actions.js";
 import styles from "./styles.css";
 
 export function createStructure(context) {
@@ -22,15 +21,9 @@ export function createStructure(context) {
         const icon = createElement('ha-icon', `bubble-cover-button-icon ${iconClassName}`);
         icon.setAttribute("icon", iconName);
         
-        const feedbackContainer = createElement('div', 'bubble-feedback-container');
-        const feedback = createElement('div', 'bubble-feedback-element feedback-element');
-        
-        feedbackContainer.appendChild(feedback);
-        button.appendChild(feedbackContainer);
         button.appendChild(icon);
-        
+
         button.icon = icon;
-        button.feedback = feedback;
 
         button.haRipple = createElement('ha-ripple');
         button.appendChild(button.haRipple);

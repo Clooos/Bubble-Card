@@ -154,21 +154,11 @@ export function createBaseStructure(context, config = {}) {
     }
 
     if (finalIconActions.has_action && context.elements.iconContainer) {
-        context.elements.iconFeedbackContainer = createElement('div', 'bubble-icon-feedback-container bubble-feedback-container');
-        context.elements.iconContainer.appendChild(context.elements.iconFeedbackContainer);
-        context.elements.iconFeedback = createElement('div', 'bubble-icon-feedback bubble-feedback-element feedback-element');
-        context.elements.iconFeedback.style.display = 'none';
-        context.elements.iconFeedbackContainer.appendChild(context.elements.iconFeedback);
-        addFeedback(context.elements.iconContainer, context.elements.iconFeedback);
+        addFeedback(context.elements.iconContainer);
     }
 
     if (options.withFeedback && finalButtonActions.has_action && context.elements.background) {
-        context.elements.feedbackContainer = createElement('div', 'bubble-feedback-container feedback-container');
-        context.elements.feedback = createElement('div', 'bubble-feedback-element feedback-element');
-        context.elements.feedback.style.display = 'none';
-        context.elements.feedbackContainer.append(context.elements.feedback);
-        context.elements.cardWrapper.append(context.elements.feedbackContainer);
-        addFeedback(context.elements.background, context.elements.feedback);
+        addFeedback(context.elements.background);
     }
 
     if (options.appendTo === context.content) {

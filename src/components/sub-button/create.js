@@ -481,11 +481,6 @@ export function createSubButtonElement(context, index, isSelect, showArrow, enti
 
   const subButtonElement = createElement('div', classes.join(' '));
   subButtonElement.nameContainer = createElement('div', 'bubble-sub-button-name-container');
-  subButtonElement.feedbackContainer = createElement('div', 'bubble-feedback-container');
-  subButtonElement.feedback = createElement('div', 'bubble-feedback-element feedback-element');
-
-  subButtonElement.appendChild(subButtonElement.feedbackContainer);
-  subButtonElement.feedbackContainer.appendChild(subButtonElement.feedback);
 
   if (isSelect) {
     subButtonElement.classList.add('is-select');

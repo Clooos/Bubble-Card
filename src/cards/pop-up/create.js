@@ -69,16 +69,10 @@ function _bindHeaderButtonEvents(button, handler) {
 
 function _createHeaderActionButton(buttonClassName, iconClassName, iconSvg) {
   const button = createElement("div", `bubble-header-action-button ${buttonClassName}`);
-  const feedbackContainer = createElement("div", "bubble-feedback-container");
-  const feedback = createElement("div", "bubble-feedback-element feedback-element");
   const icon = createElement("span", `bubble-header-action-icon ${iconClassName}`);
-
-  feedbackContainer.appendChild(feedback);
-  button.appendChild(feedbackContainer);
 
   icon.innerHTML = iconSvg;
   button.appendChild(icon);
-  button.feedback = feedback;
   button.haRipple = createElement("ha-ripple");
   button.appendChild(button.haRipple);
 

@@ -24,15 +24,9 @@ export function createStructure(context) {
         const icon = createElement('ha-icon', 'bubble-media-button-icon');
         icon.setAttribute("icon", iconName);
         
-        const feedbackContainer = createElement('div', 'bubble-feedback-container');
-        const feedback = createElement('div', 'bubble-feedback-element feedback-element');
-        
-        feedbackContainer.appendChild(feedback);
-        button.appendChild(feedbackContainer);
         button.appendChild(icon);
-        
+
         button.icon = icon;
-        button.feedback = feedback;
 
         button.haRipple = createElement('ha-ripple');
         button.appendChild(button.haRipple);
@@ -124,7 +118,7 @@ export function createStructure(context) {
             changeVolumeIcon(context);
         }
     });
-    addFeedback(elements.volumeButton, elements.volumeButton.feedback);
+    addFeedback(elements.volumeButton);
 
     // Close volume slider when clicking outside
     if (!elements._volumeOutsideListenerAdded) {
@@ -147,7 +141,7 @@ export function createStructure(context) {
             entity_id: context.config.entity
         });
     });
-    addFeedback(elements.powerButton, elements.powerButton.feedback);
+    addFeedback(elements.powerButton);
 
     // Setup mute button event handlers (original position)
     const setupMuteButtonEvents = (button) => {
@@ -167,7 +161,7 @@ export function createStructure(context) {
                 event.stopPropagation();
             });
         });
-        addFeedback(button, button.feedback);
+        addFeedback(button);
     };
     
     setupMuteButtonEvents(elements.muteButton);
@@ -178,14 +172,14 @@ export function createStructure(context) {
             entity_id: context.config.entity
         });
     });
-    addFeedback(elements.previousButton, elements.previousButton.feedback);
+    addFeedback(elements.previousButton);
 
     elements.nextButton.addEventListener('click', () => {
         context._hass.callService('media_player', 'media_next_track', {
             entity_id: context.config.entity
         });
     });
-    addFeedback(elements.nextButton, elements.nextButton.feedback);
+    addFeedback(elements.nextButton);
 
     elements.playPauseButton.addEventListener('click', () => {
         const { service } = computePlaybackControl(context);
@@ -194,14 +188,14 @@ export function createStructure(context) {
         });
         elements.playPauseButton.clicked = true;
     });
-    addFeedback(elements.playPauseButton, elements.playPauseButton.feedback);
+    addFeedback(elements.playPauseButton);
 
     // Setup close button event handler
     elements.volumeSliderCloseButton.addEventListener('click', (event) => {
         event.stopPropagation();
         closeVolumeSlider();
     });
-    addFeedback(elements.volumeSliderCloseButton, elements.volumeSliderCloseButton.feedback);
+    addFeedback(elements.volumeSliderCloseButton);
 
     elements.mainContainer.addEventListener('click', () => forwardHaptic("selection"));
 

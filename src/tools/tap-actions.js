@@ -649,7 +649,9 @@ export function sendActionEvent(element, config, action) {
   }, action);
 }
 
-export function addFeedback(element, feedbackElement) {
+// The visual press feedback comes from the ha-ripple every one of these
+// buttons already carries. This only adds the haptic tick that goes with it.
+export function addFeedback(element) {
   element.addEventListener('pointerup', (e) => { 
     if (e.cancelable) {
       e.preventDefault();

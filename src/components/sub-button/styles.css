@@ -222,7 +222,6 @@
 
 .bubble-sub-button.inline-slider-host > .bubble-sub-button-name-container,
 .bubble-sub-button.inline-slider-host > .bubble-sub-button-icon,
-.bubble-sub-button.inline-slider-host > .bubble-feedback-container,
 .bubble-sub-button.inline-slider-host > .bubble-dropdown-arrow {
     display: none !important;
 }

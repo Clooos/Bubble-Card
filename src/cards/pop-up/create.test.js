@@ -255,6 +255,26 @@ describe('createHeader', () => {
         expect(forwardHaptic).toHaveBeenCalledTimes(2);
     });
 
+    test('leaves the press feedback to the ripple instead of an empty box', () => {
+        const context = {
+            popUp: createMockElement('div'),
+            config: {},
+            elements: {},
+        };
+
+        createHeader(context);
+
+        // The feedback boxes these buttons used to carry had no styling and
+        // nobody read them: the visible press feedback is the ha-ripple, and
+        // the haptic tick comes from the pointerup listener.
+        for (const button of [context.elements.previousButton, context.elements.closeButton]) {
+            expect(button.haRipple).toBeTruthy();
+            expect(button.feedback).toBeUndefined();
+            const classes = button.children.map((child) => child.className || '').join(' ');
+            expect(classes).not.toContain('feedback');
+        }
+    });
+
     test('reuses an existing header without duplicating button handlers', () => {
         const context = {
             popUp: createMockElement('div'),
