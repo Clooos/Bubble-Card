@@ -44,16 +44,35 @@ function runFrame() {
     for (const cb of due) cb(0);
 }
 
+// What " | " with its margins renders at, measured in the browser. The marquee
+// carries one per copy of the text, so a scrolling element always measures wider
+// than the text on its own.
+const SEPARATOR_WIDTH = 18.57;
+
+// The module measures the text through one Range it keeps for the whole session,
+// so a single fake document backs every element of a test: whatever was selected
+// last is what the rect describes.
+let fakeDocument;
+function createFakeDocument() {
+    let selected = null;
+    const range = {
+        selectNodeContents: (node) => { selected = node; },
+        getBoundingClientRect: () => ({ width: selected?.contentWidth ?? 0 }),
+    };
+    return { documentElement: { contentWidth: 0 }, createRange: () => range };
+}
+
 // A text element the module can measure: `contentWidth` is what the text renders
 // at, `boxWidth` is the element's own box. The two move independently, which is
-// exactly what a late webfont does.
-function createElement({ connected = true, boxWidth = 100, contentWidth = 100 } = {}) {
+// exactly what a late webfont does. `rangeless` takes the float measurement away
+// so the integer fallback runs.
+function createElement({ connected = true, boxWidth = 100, contentWidth = 100, rangeless = false } = {}) {
     const attributes = new Map();
     const span = {
         isConnected: true,
         innerHTML: '',
         style: {},
-        getBoundingClientRect: () => ({ width: element.contentWidth * 2 }),
+        getBoundingClientRect: () => ({ width: (element.contentWidth + SEPARATOR_WIDTH) * 2 }),
     };
     const element = {
         isConnected: connected,
@@ -62,6 +81,7 @@ function createElement({ connected = true, boxWidth = 100, contentWidth = 100 } 
         style: { cssText: '' },
         boxWidth,
         contentWidth,
+        ownerDocument: rangeless ? undefined : fakeDocument,
         span,
         getAttribute: (name) => (attributes.has(name) ? attributes.get(name) : null),
         setAttribute: (name, value) => attributes.set(name, String(value)),
@@ -91,6 +111,7 @@ async function loadModule() {
     resizeObservers = [];
     intersectionObservers = [];
     fontListeners = [];
+    fakeDocument = createFakeDocument();
 
     let resolveFonts;
     fontsReady = new Promise((resolve) => { resolveFonts = resolve; });
@@ -309,9 +330,14 @@ describe('text scrolling weight', () => {
         runFrame();
 
         const first = element.span.style.animationDuration;
-        element.span.style.animationDuration = 'sentinel';
-
         const [resizeObserver] = resizeObservers;
+
+        // The first pass measures the bare text and every later one measures the
+        // marquee, which carries a separator too, so let that one settle first.
+        resizeObserver.fire([element]);
+        runFrame();
+
+        element.span.style.animationDuration = 'sentinel';
         resizeObserver.fire([element]);
         runFrame();
 
@@ -481,5 +507,96 @@ describe('elements a style template has taken over', () => {
         expect(element.innerHTML).toBe('written by the template');
         expect(element.style.display).toBe('-webkit-box');
         expect(element.style.WebkitLineClamp).toBe('2');
+    });
+});
+
+// scrollWidth and clientWidth are both rounded to whole pixels, so an element
+// overflowing by less than about three of them read as fitting and the text sat
+// clipped mid-character with no marquee (#2462). The figures below come from the
+// repro dashboard: the name renders at 237.94px and the cards step down by
+// 1.17px each, so two of them landed inside the blind band.
+describe('deciding on a sub-pixel overflow', () => {
+    const TEXT_WIDTH = 237.94;
+
+    test('leaves text that fills its element to the last sub-pixel alone', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: TEXT_WIDTH, contentWidth: TEXT_WIDTH });
+
+        applyScrollingEffect(context, element, 'Temperature du salon (exterieur)');
+        runFrame();
+
+        expect(isAnimated(element)).toBe(false);
+    });
+
+    test('animates text overflowing by barely more than a pixel', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 236.77, contentWidth: TEXT_WIDTH });
+
+        applyScrollingEffect(context, element, 'Temperature du salon (exterieur)');
+        runFrame();
+
+        expect(isAnimated(element)).toBe(true);
+    });
+
+    test('animates text overflowing by two pixels, where the old band ended', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 235.61, contentWidth: TEXT_WIDTH });
+
+        applyScrollingEffect(context, element, 'Temperature du salon (exterieur)');
+        runFrame();
+
+        expect(isAnimated(element)).toBe(true);
+    });
+
+    // Two float reads of the same layout still disagree in the last digits, and a
+    // marquee that only travels a fraction of a pixel is worse than the fraction
+    // it would reveal.
+    test('leaves an overflow too small to see alone', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: TEXT_WIDTH - 0.3, contentWidth: TEXT_WIDTH });
+
+        applyScrollingEffect(context, element, 'Temperature du salon (exterieur)');
+        runFrame();
+
+        expect(isAnimated(element)).toBe(false);
+    });
+
+    // A scrolling element measures one text plus one separator, so it reads wider
+    // than the text on its own. That gap is what stops an element sitting right on
+    // the edge from flipping between the two modes once the tolerance no longer
+    // covers it, and it has to hold at the exact width where the marquee started.
+    test('does not flip back the moment the box grows to fit the text again', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 236.77, contentWidth: TEXT_WIDTH });
+
+        applyScrollingEffect(context, element, 'Temperature du salon (exterieur)');
+        runFrame();
+        expect(isAnimated(element)).toBe(true);
+
+        const [resizeObserver] = resizeObservers;
+        for (const width of [TEXT_WIDTH, TEXT_WIDTH + 1, TEXT_WIDTH + 8]) {
+            element.boxWidth = width;
+            resizeObserver.fire([element]);
+            runFrame();
+            expect(isAnimated(element)).toBe(true);
+        }
+
+        // Wide enough to hold the text and the separator: now it may stop.
+        element.boxWidth = TEXT_WIDTH + SEPARATOR_WIDTH + 1;
+        resizeObserver.fire([element]);
+        runFrame();
+        expect(isAnimated(element)).toBe(false);
+    });
+
+    // Without a Range the integer readings are all there is, and they are still
+    // worth acting on: the tolerance is what changed, not the fallback.
+    test('falls back to the integer overflow when no Range can be made', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 100, contentWidth: 300, rangeless: true });
+
+        applyScrollingEffect(context, element, 'a very long name');
+        runFrame();
+
+        expect(isAnimated(element)).toBe(true);
     });
 });

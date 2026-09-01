@@ -1,7 +1,11 @@
 // Shared state for scrolling effect
 const scrollState = new WeakMap();
 const SCROLL_SPEED = 16;
-const SCROLL_TOLERANCE = 2;
+// The text is now measured in float, so this only has to swallow the noise
+// between two float reads. It used to be 2, against two integer-rounded
+// readings, which hid up to 3px of real overflow: the text sat clipped
+// mid-character and never scrolled (#2462).
+const SCROLL_TOLERANCE = 0.5;
 const SEPARATOR = '<span class="bubble-scroll-separator"> | </span>';
 
 // Batched measurement via requestAnimationFrame
@@ -134,6 +138,41 @@ function scheduleFlush() {
     rafId = requestAnimationFrame(flush);
 }
 
+// scrollWidth and clientWidth are both rounded to whole pixels, so a name
+// overflowing by less than about three of them reported no overflow at all and
+// stayed clipped mid-character with no marquee to reveal the rest (#2462). A
+// Range over the element's own content measures the text in float instead.
+// .bubble-name and .bubble-state carry neither padding nor border, so the rect
+// it returns is already the content width and needs no correction.
+let measureRange = null;
+let measureDoc = null;
+let rangeHoldsElement = false;
+
+function textWidth(el) {
+    try {
+        if (!measureRange) {
+            measureDoc = el.ownerDocument;
+            if (!measureDoc?.createRange) return null;
+            measureRange = measureDoc.createRange();
+        }
+        measureRange.selectNodeContents(el);
+        rangeHoldsElement = true;
+        const width = measureRange.getBoundingClientRect().width;
+        return width > 0 ? width : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+// The range keeps a strong reference to whatever it last selected, and an element
+// carries its whole ancestor chain with it, so a pop-up torn down right after a
+// measurement would be held alive by the last card it happened to measure.
+function releaseRange() {
+    if (!rangeHoldsElement) return;
+    rangeHoldsElement = false;
+    try { measureRange.selectNodeContents(measureDoc.documentElement); } catch (e) {}
+}
+
 // Single batched update: read phase then write phase to avoid layout thrashing
 function flush() {
     rafId = 0;
@@ -163,13 +202,18 @@ function flush() {
         let content;
         if (state.animated && state.span?.isConnected) {
             const spanRect = state.span.getBoundingClientRect();
+            // Text, separator, text, separator: half of it is one text plus one
+            // separator, so it reads wider than the text on its own. That gap is
+            // what keeps an element from flipping back and forth between the two
+            // modes now that the tolerance no longer covers it.
             content = spanRect.width / 2;
         } else {
-            content = available + (el.scrollWidth - el.clientWidth);
+            content = textWidth(el) ?? (available + (el.scrollWidth - el.clientWidth));
         }
 
         updates.push({ el, state, content, needsScroll: content > available + SCROLL_TOLERANCE });
     }
+    releaseRange();
 
     // Write phase — apply all DOM changes without interleaving reads
     for (const { el, state, content, needsScroll } of updates) {
