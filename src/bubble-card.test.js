@@ -248,15 +248,24 @@ describe('BubbleCard hass render coalescing', () => {
     });
 
     function connectedCard() {
-        const card = createCard();
+        const card = createCard({ card_type: 'button', entity: 'light.a' });
         card.isConnected = true;
         return card;
     }
 
+    // A tick that really moves this card's entity. The render gate drops ticks
+    // where nothing the card depends on changed, so a fixture handing out the
+    // same state twice would be measuring the gate rather than the window.
+    let movingTick = 0;
+    const movingHass = (extra = {}) => ({
+        states: { 'light.a': { state: `s${movingTick++}`, attributes: {} } },
+        ...extra,
+    });
+
     test('renders straight away when the card has been idle', () => {
         const card = connectedCard();
 
-        card.hass = { states: {} };
+        card.hass = movingHass();
 
         expect(handleButton).toHaveBeenCalledTimes(1);
     });
@@ -264,13 +273,13 @@ describe('BubbleCard hass render coalescing', () => {
     test('renders once for a burst instead of once per state change', () => {
         const card = connectedCard();
 
-        card.hass = { states: {} };
+        card.hass = movingHass();
         expect(handleButton).toHaveBeenCalledTimes(1);
 
         // Five more state changes land inside the window: none of them renders.
         for (let i = 0; i < 5; i++) {
             jest.advanceTimersByTime(6);
-            card.hass = { states: {} };
+            card.hass = movingHass();
         }
         expect(handleButton).toHaveBeenCalledTimes(1);
 
@@ -282,10 +291,10 @@ describe('BubbleCard hass render coalescing', () => {
     // newest hass, so a card is at most one window late and never stale.
     test('the waiting pass renders the newest hass, not the one that scheduled it', () => {
         const card = connectedCard();
-        card.hass = { states: {}, tag: 'first' };
+        card.hass = movingHass({ tag: 'first' });
 
-        card.hass = { states: {}, tag: 'second' };
-        card.hass = { states: {}, tag: 'third' };
+        card.hass = movingHass({ tag: 'second' });
+        card.hass = movingHass({ tag: 'third' });
         jest.advanceTimersByTime(50);
 
         expect(handleButton).toHaveBeenCalledTimes(2);
@@ -294,11 +303,34 @@ describe('BubbleCard hass render coalescing', () => {
 
     test('an isolated state change still renders immediately', () => {
         const card = connectedCard();
-        card.hass = { states: {} };
+        card.hass = movingHass();
 
         jest.advanceTimersByTime(500);
-        card.hass = { states: {} };
+        card.hass = movingHass();
 
+        expect(handleButton).toHaveBeenCalledTimes(2);
+    });
+
+    // What the window cannot do on its own: a tick that moves nothing this card
+    // depends on is not worth a render at all, however long ago the last one was.
+    test('drops a tick that changes nothing the card depends on', () => {
+        const card = connectedCard();
+        const settled = { state: 'on', attributes: {} };
+        const shared = { 'light.a': settled, 'sensor.elsewhere': { state: '1', attributes: {} } };
+
+        card.hass = { states: shared };
+        expect(handleButton).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(500);
+        // A different hass object, but this card's entity is the same one.
+        card.hass = { states: { ...shared, 'sensor.elsewhere': { state: '2', attributes: {} } } };
+        jest.advanceTimersByTime(500);
+
+        expect(handleButton).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+
+        // And it still renders the moment its own entity moves.
+        card.hass = { states: { ...shared, 'light.a': { state: 'off', attributes: {} } } };
         expect(handleButton).toHaveBeenCalledTimes(2);
     });
 
@@ -306,8 +338,8 @@ describe('BubbleCard hass render coalescing', () => {
     // also checks the timer is dropped rather than left to fire on a dead card.
     test('a card torn down while a pass waits leaves nothing pending', () => {
         const card = connectedCard();
-        card.hass = { states: {} };
-        card.hass = { states: {} };
+        card.hass = movingHass();
+        card.hass = movingHass();
         expect(handleButton).toHaveBeenCalledTimes(1);
         expect(jest.getTimerCount()).toBe(1);
 

@@ -6,6 +6,7 @@ import { onTemplateChange } from './render-template.js';
 import { yamlKeysMap } from '../modules/registry.js';
 import { isBCTAvailableSync } from '../modules/bct-provider.js';
 import { cleanCSS } from './clean-css.js';
+import { trackedHass } from './render-gate.js';
 import { registerModuleTeardown, teardownKey } from './module-teardown.js';
 import { hasChanged } from './module-gate.js';
 
@@ -583,7 +584,9 @@ export function evalStyles(context, styles = "", sourceInfo = { type: 'unknown' 
 
     // Execute the compiled function to get the raw string result
     const rawResult = compiledFunction.apply(context, [
-      context._hass,
+      // Handed a proxy rather than hass itself: reading an entity through it is
+      // what tells the render gate that this card depends on that entity.
+      trackedHass(context),
       context.config.entity,
       _cachedState,
       _safeRef(context.elements?.icon),

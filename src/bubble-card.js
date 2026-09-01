@@ -13,6 +13,7 @@ import { awaitsPreviewHydration, notePreviewHeight, observePreviewHydration, set
 import { updatePreviewBadge } from './tools/preview-badge.js';
 import { getEntitySuggestion } from './modules/suggestions.js';
 import { registerPopupContext, shouldHoldDashboardHassUpdate } from './cards/pop-up/helpers.js';
+import { shouldSkipRender, noteRender, resetRenderGate } from './tools/render-gate.js';
 import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
 import { registerForIconRefresh, unregisterForIconRefresh } from './tools/icon.js';
 import { monotonicNow } from './tools/monotonic-time.js';
@@ -331,6 +332,13 @@ class BubbleCard extends HTMLElement {
       return;
     }
 
+    // Nothing this card was built from has moved, so rendering it again would
+    // reproduce what is already on screen. The fresh hass is stored above, so
+    // any later render still reads the current state.
+    if (shouldSkipRender(this)) {
+      return;
+    }
+
     this.renderCoalesced();
 
     if (this.isConnected && this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {
@@ -377,6 +385,9 @@ class BubbleCard extends HTMLElement {
         console.error(`Bubble Card: Error in handler for card_type '${type}'`, e);
       }
     }
+    // Records the inputs this render was built from, which is what the next
+    // tick is compared against.
+    try { noteRender(this); } catch (e) {}
     try { this._notifyEditorContext(); } catch (e) {}
     // A preview that drew tells the gate what its card type really measures, so
     // the previews still waiting below the fold reserve the right box, and
@@ -390,6 +401,9 @@ class BubbleCard extends HTMLElement {
 
   setConfig(config) {
     if (config.error) throw new Error(config.error);
+    // A reconfigured card names different entities and its recorded reads
+    // belong to the previous config.
+    resetRenderGate(this);
     const workingConfig = { ...config };
 
     if (!workingConfig.card_type) throw new Error(tGlobal('editor.errors.card_type_required'));
