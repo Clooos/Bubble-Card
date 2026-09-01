@@ -278,7 +278,7 @@
       "buttons_position": "Posisi tombol",
       "settings": "Pengaturan pop-up",
       "auto_close": "Tutup otomatis dalam milidetik (mis. 15000)",
-      "slide_close_distance": "Jarak geser untuk menutup (bawaan 400)",
+      "slide_close_distance": "Jarak geser untuk menutup",
       "close_outside": "Tutup pop-up dengan mengklik di luarnya (perlu muat ulang)",
       "close_on_click": "Tutup pop-up setelah klik atau ketukan apa pun",
       "background_update": "Perbarui kartu di latar belakang (tidak disarankan)",

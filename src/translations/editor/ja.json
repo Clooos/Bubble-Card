@@ -278,7 +278,7 @@
       "buttons_position": "ボタンの位置",
       "settings": "ポップアップ設定",
       "auto_close": "自動的に閉じるまでのミリ秒 (例：15000)",
-      "slide_close_distance": "スライドで閉じる距離 (デフォルトは400)",
+      "slide_close_distance": "スライドで閉じる距離",
       "close_outside": "ポップアップの外側をクリックして閉じる (再読み込みが必要)",
       "close_on_click": "クリックまたはタップ後にポップアップを閉じる",
       "background_update": "バックグラウンドでカードを更新 (非推奨)",

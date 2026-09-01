@@ -278,7 +278,7 @@
       "buttons_position": "Posisjonen til knappane",
       "settings": "Pop-up-innstillingar",
       "auto_close": "Lukk automatisk etter millisekund (t.d. 15000)",
-      "slide_close_distance": "Sveipeavstand for å lukke (standard 400)",
+      "slide_close_distance": "Sveipeavstand for å lukke",
       "close_outside": "Lukk pop-upen ved å klikke utanfor han (ei oppdatering krevst)",
       "close_on_click": "Lukk pop-upen etter eit kva som helst klikk eller trykk",
       "background_update": "Oppdater kort i bakgrunnen (ikkje tilrådd)",

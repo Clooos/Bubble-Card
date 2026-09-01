@@ -278,7 +278,7 @@
       "buttons_position": "Positie van de knoppen",
       "settings": "Pop-upinstellingen",
       "auto_close": "Automatisch sluiten in milliseconden (bijv. 15000)",
-      "slide_close_distance": "Veegafstand om te sluiten (standaard 400)",
+      "slide_close_distance": "Veegafstand om te sluiten",
       "close_outside": "Pop-up sluiten door erbuiten te klikken (vernieuwen vereist)",
       "close_on_click": "Pop-up sluiten na elke klik of tik",
       "background_update": "Kaarten op de achtergrond bijwerken (niet aanbevolen)",

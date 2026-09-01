@@ -278,7 +278,7 @@
       "buttons_position": "버튼 위치",
       "settings": "팝업 설정",
       "auto_close": "자동 닫기 시간(밀리초) (예: 15000)",
-      "slide_close_distance": "슬라이드로 닫는 거리 (기본값 400)",
+      "slide_close_distance": "슬라이드로 닫는 거리",
       "close_outside": "팝업 바깥을 클릭하면 닫기 (새로고침 필요)",
       "close_on_click": "클릭이나 탭 후 팝업 닫기",
       "background_update": "백그라운드에서 카드 업데이트 (권장하지 않음)",

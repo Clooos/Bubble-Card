@@ -278,7 +278,7 @@
       "buttons_position": "Posizione dei pulsanti",
       "settings": "Impostazioni del pop-up",
       "auto_close": "Chiusura automatica in millisecondi (es. 15000)",
-      "slide_close_distance": "Distanza di scorrimento per chiudere (predefinita 400)",
+      "slide_close_distance": "Distanza di scorrimento per chiudere",
       "close_outside": "Chiudi il pop-up facendo clic al di fuori di esso (è necessario un aggiornamento della pagina)",
       "close_on_click": "Chiudi il pop-up dopo qualsiasi clic o tocco",
       "background_update": "Aggiorna le schede in background (non consigliato)",

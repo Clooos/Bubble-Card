@@ -278,7 +278,7 @@
       "buttons_position": "Nuppude asukoht",
       "settings": "Hüpikakna seaded",
       "auto_close": "Automaatne sulgemine millisekundites (nt 15000)",
-      "slide_close_distance": "Sulgemiseks vajalik libistamiskaugus (vaikimisi 400)",
+      "slide_close_distance": "Sulgemiseks vajalik libistamiskaugus",
       "close_outside": "Sulge hüpikaken sellest väljaspool klõpsates (vajalik värskendus)",
       "close_on_click": "Sulge hüpikaken pärast mis tahes klõpsu või puudutust",
       "background_update": "Uuenda kaarte taustal (pole soovitatav)",

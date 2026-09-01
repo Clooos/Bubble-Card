@@ -278,7 +278,7 @@
       "buttons_position": "Pozicija dugmadi",
       "settings": "Podešavanja iskačućeg prozora",
       "auto_close": "Automatsko zatvaranje u milisekundama (npr. 15000)",
-      "slide_close_distance": "Rastojanje prevlačenja za zatvaranje (podrazumevano 400)",
+      "slide_close_distance": "Rastojanje prevlačenja za zatvaranje",
       "close_outside": "Zatvori iskačući prozor klikom izvan njega (potrebno je osvežavanje)",
       "close_on_click": "Zatvori iskačući prozor nakon svakog klika ili dodira",
       "background_update": "Ažuriraj kartice u pozadini (ne preporučuje se)",

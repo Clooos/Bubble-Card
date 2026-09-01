@@ -278,7 +278,7 @@
       "buttons_position": "Posysje fan de knoppen",
       "settings": "Pop-upynstellingen",
       "auto_close": "Automatysk slute yn millisekonden (bgl. 15000)",
-      "slide_close_distance": "Feechôfstân om te sluten (standert 400)",
+      "slide_close_distance": "Feechôfstân om te sluten",
       "close_outside": "Pop-up slute troch derbûten te klikken (fernijen fereaske)",
       "close_on_click": "Pop-up slute nei elke klik of tik",
       "background_update": "Kaarten op de eftergrûn bywurkje (net oanrikkemandearre)",

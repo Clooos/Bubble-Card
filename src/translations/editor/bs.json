@@ -278,7 +278,7 @@
       "buttons_position": "Pozicija dugmadi",
       "settings": "Postavke skočnog prozora",
       "auto_close": "Automatsko zatvaranje u milisekundama (npr. 15000)",
-      "slide_close_distance": "Udaljenost prevlačenja za zatvaranje (zadano 400)",
+      "slide_close_distance": "Udaljenost prevlačenja za zatvaranje",
       "close_outside": "Zatvori skočni prozor klikom izvan njega (potrebno je osvježavanje)",
       "close_on_click": "Zatvori skočni prozor nakon svakog klika ili dodira",
       "background_update": "Ažuriraj kartice u pozadini (ne preporučuje se)",

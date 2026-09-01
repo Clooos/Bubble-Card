@@ -194,7 +194,17 @@ jest.unstable_mockModule('./editor.js', () => ({
 
 const { createHeader, createStructure, prepareStandaloneStructure, prepareStructure } = await import('./create.js');
 
-function buildStandalonePopupContext({ scrollHeight = 100, clientHeight = 100, cachedScrollableState } = {}) {
+// `location` is a read-only global under Node, so it is replaced rather than
+// assigned to.
+function setLocationHash(hash) {
+    Object.defineProperty(globalThis, 'location', {
+        value: { hash },
+        configurable: true,
+        writable: true,
+    });
+}
+
+function buildStandalonePopupContext() {
     const shadowRoot = createMockElement('div');
     const context = {
         config: {},
@@ -210,13 +220,6 @@ function buildStandalonePopupContext({ scrollHeight = 100, clientHeight = 100, c
     prepareStandaloneStructure(context);
     createHeader(context);
     createStructure(context);
-
-    context.elements.popUpContainer.scrollHeight = scrollHeight;
-    context.elements.popUpContainer.clientHeight = clientHeight;
-
-    if (cachedScrollableState !== undefined) {
-        context._cachedPopupScrollableState = cachedScrollableState;
-    }
 
     return context;
 }
@@ -518,69 +521,36 @@ describe('prepareStandaloneStructure', () => {
         expect(context.popUp.classList.contains('has-popup-shadow')).toBe(false);
     });
 
-    test('does not cancel touch movement when popup content is not scrollable', () => {
-        const context = buildStandalonePopupContext({ scrollHeight: 100, clientHeight: 100 });
+    test('gives the shell one passive touchstart and nothing else to carry', () => {
+        const context = buildStandalonePopupContext();
 
-        context.handleTouchStart({
-            touches: [{ clientY: 120 }],
-        });
-
-        const moveEvent = {
-            touches: [{ clientY: 170 }],
-            cancelable: true,
-            preventDefault: jest.fn(),
-        };
-
-        context.handleTouchMove(moveEvent);
-
-        expect(moveEvent.preventDefault).not.toHaveBeenCalled();
-        expect(removeHash).not.toHaveBeenCalled();
+        expect(typeof context.handleTouchStart).toBe('function');
+        expect(typeof context.releasePopupSlideToClose).toBe('function');
+        // The header no longer owns a gesture of its own: touchstart on the
+        // shell covers it, and the drag runs on the document from there.
+        expect(context.handleHeaderTouchMove).toBeUndefined();
+        expect(context.handleHeaderTouchEnd).toBeUndefined();
+        expect(context.handleTouchMove).toBeUndefined();
+        expect(context.handleTouchEnd).toBeUndefined();
+        expect(context.handleTouchCancel).toBeUndefined();
     });
 
-    test('keeps native touch scrolling when popup content is scrollable', () => {
-        const context = buildStandalonePopupContext({ scrollHeight: 280, clientHeight: 100 });
+    test('closes on Escape only while the pop-up owns the hash', () => {
+        const context = buildStandalonePopupContext();
+        context.config.hash = '#kitchen';
+        setLocationHash('#kitchen');
 
-        context.handleTouchStart({
-            touches: [{ clientY: 120 }],
-        });
+        context.closeOnEscape({ key: 'Escape' });
+        expect(removeHash).toHaveBeenCalledWith(true);
 
-        const moveEvent = {
-            touches: [{ clientY: 170 }],
-            cancelable: true,
-            preventDefault: jest.fn(),
-        };
-
-        context.handleTouchMove(moveEvent);
-
-        expect(moveEvent.preventDefault).not.toHaveBeenCalled();
-        expect(removeHash).not.toHaveBeenCalled();
-    });
-
-    test('keeps native touch scrolling when live content is scrollable even if cached state is stale false', () => {
-        const context = buildStandalonePopupContext({
-            scrollHeight: 280,
-            clientHeight: 100,
-            cachedScrollableState: false,
-        });
-
-        context.handleTouchStart({
-            touches: [{ clientY: 120 }],
-        });
-
-        const moveEvent = {
-            touches: [{ clientY: 170 }],
-            cancelable: true,
-            preventDefault: jest.fn(),
-        };
-
-        context.handleTouchMove(moveEvent);
-
-        expect(moveEvent.preventDefault).not.toHaveBeenCalled();
+        removeHash.mockClear();
+        setLocationHash('#garden');
+        context.closeOnEscape({ key: 'Escape' });
         expect(removeHash).not.toHaveBeenCalled();
     });
 
     test('does not install a popup-level wheel blocker', () => {
-        const context = buildStandalonePopupContext({ scrollHeight: 100, clientHeight: 100 });
+        const context = buildStandalonePopupContext();
 
         expect(context.handleWheel).toBeUndefined();
     });

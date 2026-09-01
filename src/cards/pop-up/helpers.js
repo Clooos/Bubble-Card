@@ -2183,12 +2183,11 @@ function syncEventListeners(listeners, enabled) {
     });
 }
 
+// Drops the priority too: the slide-to-close drag writes its offset as
+// `!important` so it outranks the mode blocks, and an assignment alone would
+// leave that declaration standing on engines that do not mirror it back.
 function clearPopupInlineTransform(context) {
-    if (!context.popUp?.style) {
-        return;
-    }
-
-    context.popUp.style.transform = '';
+    unparkShell(context.popUp);
 }
 
 function ensurePopupListenerBindings(context) {
@@ -2205,15 +2204,12 @@ function ensurePopupListenerBindings(context) {
     }
 }
 
+// The slide-to-close gesture keeps a single passive listener at rest and
+// registers its own move/end pair on the document only for the length of a
+// drag, so a pop-up sitting open costs one listener and nothing else.
 function getPopupBaseListeners(context) {
     return [
         [context.popUp, 'touchstart', context.handleTouchStart, { passive: true }],
-        [context.popUp, 'touchmove', context.handleTouchMove, { passive: true }],
-        [context.popUp, 'touchend', context.handleTouchEnd, { passive: true }],
-        [context.popUp, 'touchcancel', context.handleTouchCancel, { passive: true }],
-        [context._popupHeaderTouchTarget, 'touchmove', context.handleHeaderTouchMove, { passive: false }],
-        [context._popupHeaderTouchTarget, 'touchend', context.handleHeaderTouchEnd, { passive: true }],
-        [context._popupHeaderTouchTarget, 'touchcancel', context.handleHeaderTouchCancel, { passive: true }],
         [window, 'keydown', context.closeOnEscape, { passive: true }],
     ];
 }
@@ -2274,7 +2270,6 @@ function syncOptionalPopupListeners(context, enabled) {
     if (!context.popUp) {
         context.autoCloseListenersAdded = false;
         context.closeOnClickListenerAdded = false;
-        context._popupHeaderTouchTarget = null;
         return;
     }
 
@@ -2329,14 +2324,14 @@ export function updateListeners(context, add) {
 
     const shouldAddListeners = !!(add && !context.editor && context.popUp);
     if (context.listenersAdded !== shouldAddListeners) {
-        context._popupHeaderTouchTarget = shouldAddListeners
-            ? (context.elements?.headerContainer || context.elements?.header || null)
-            : context._popupHeaderTouchTarget;
         syncEventListeners(getPopupBaseListeners(context), shouldAddListeners);
         context.listenersAdded = shouldAddListeners;
 
+        // A drag can still be in flight when the pop-up is taken down under it
+        // (the close button, a hash change, a teardown). Dropping the shell's
+        // touchstart would leave its document listeners behind.
         if (!shouldAddListeners) {
-            context._popupHeaderTouchTarget = null;
+            context.releasePopupSlideToClose?.();
         }
     }
 

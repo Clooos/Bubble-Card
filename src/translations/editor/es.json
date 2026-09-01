@@ -278,7 +278,7 @@
       "buttons_position": "Posición de los botones",
       "settings": "Ajustes del pop-up",
       "auto_close": "Cierre automático en milisegundos (p. ej. 15000)",
-      "slide_close_distance": "Distancia de deslizamiento para cerrar (400 por defecto)",
+      "slide_close_distance": "Distancia de deslizamiento para cerrar",
       "close_outside": "Cerrar el pop-up al hacer clic fuera de él (se necesita actualizar la página)",
       "close_on_click": "Cerrar el pop-up tras cualquier clic o pulsación",
       "background_update": "Actualizar las tarjetas en segundo plano (no recomendado)",

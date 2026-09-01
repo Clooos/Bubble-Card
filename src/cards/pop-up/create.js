@@ -9,6 +9,7 @@ import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
 import { navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, resolvePopupHostElements, restorePopupHostLayout, suspendPopupHostLayout, syncPopupModeClasses, syncPopupPerformanceModeClasses } from "./helpers.js";
 import { hideLegacyPopupContent } from './legacy.js';
 import { renderPopupOnboarding } from './editor.js';
+import { configurePopupSlideToClose } from './slide-to-close.js';
 import styles from "./styles.css";
 
 const CLOSE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false"><title>close</title><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg>';
@@ -79,78 +80,9 @@ function _createHeaderActionButton(buttonClassName, iconClassName, iconSvg) {
   return { button, icon };
 }
 
-function _resetPopupTouchTracking(context) {
-  context._popupTouchStartY = null;
-  context._popupLastTouchY = null;
-}
-
-function _clearPopupDragTransform(context) {
-  if (context.popUp?.style) {
-    context.popUp.style.transform = "";
-  }
-}
-
 function _configurePopupInteractionHandlers(context) {
   const closePopup = () => {
     removeHash(true);
-  };
-
-  context.handleTouchStart = (event) => {
-    if (!event.touches?.[0]) {
-      return;
-    }
-
-    context._popupTouchStartY = event.touches[0].clientY;
-    context._popupLastTouchY = context._popupTouchStartY;
-  };
-
-  context.handleHeaderTouchMove = (event) => {
-    const currentTouch = event.touches?.[0];
-    if (!currentTouch) {
-      return;
-    }
-
-    const touchStartY = context._popupTouchStartY ?? currentTouch.clientY;
-    const offset = currentTouch.clientY - touchStartY;
-    if (offset > 0) {
-      event.preventDefault?.();
-      context.popUp.style.transform = `translateY(${offset}px)`;
-    }
-  };
-
-  context.handleHeaderTouchEnd = (event) => {
-    const currentTouch = event.changedTouches?.[0] || event.touches?.[0];
-    if (!currentTouch) {
-      _clearPopupDragTransform(context);
-      _resetPopupTouchTracking(context);
-      return;
-    }
-
-    const touchStartY = context._popupTouchStartY ?? currentTouch.clientY;
-    const offset = currentTouch.clientY - touchStartY;
-    _resetPopupTouchTracking(context);
-
-    if (offset > 50) {
-      context.popUp.style.transform = "translateY(100%)";
-      closePopup();
-      return;
-    }
-
-    _clearPopupDragTransform(context);
-  };
-
-  context.handleHeaderTouchCancel = () => {
-    _clearPopupDragTransform(context);
-    _resetPopupTouchTracking(context);
-  };
-
-  context.handleTouchEnd = () => {
-    _resetPopupTouchTracking(context);
-  };
-
-  context.handleTouchCancel = () => {
-    _clearPopupDragTransform(context);
-    _resetPopupTouchTracking(context);
   };
 
   context.closeOnEscape = (event) => {
@@ -159,24 +91,7 @@ function _configurePopupInteractionHandlers(context) {
     }
   };
 
-  const slideToCloseDistance = context.config.slide_to_close_distance ?? 400;
-  context.handleTouchMove = (event) => {
-    const currentTouch = event.touches?.[0];
-    if (!currentTouch) {
-      return;
-    }
-
-    const currentTouchY = currentTouch.clientY;
-    const touchStartY = context._popupTouchStartY ?? currentTouchY;
-    const touchMoveDistance = currentTouchY - touchStartY;
-    const lastTouchY = context._popupLastTouchY ?? currentTouchY;
-
-    if (touchMoveDistance > slideToCloseDistance && currentTouchY > lastTouchY) {
-      closePopup();
-    }
-
-    context._popupLastTouchY = currentTouchY;
-  };
+  configurePopupSlideToClose(context, closePopup);
 }
 
 function _applyPopupVariables(context) {

@@ -722,7 +722,7 @@ export function renderPopUpEditor(editor) {
                     ></ha-form>
                     <ha-form
                         .hass=${editor.hass}
-                        .data=${{ slide_to_close_distance: editor._config.slide_to_close_distance ?? 400 }}
+                        .data=${{ slide_to_close_distance: editor._config.slide_to_close_distance }}
                         .schema=${[{
                             name: 'slide_to_close_distance',
                             selector: { text: { type: 'number' } },

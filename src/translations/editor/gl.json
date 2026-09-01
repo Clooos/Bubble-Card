@@ -278,7 +278,7 @@
       "buttons_position": "Posición dos botóns",
       "settings": "Axustes do pop-up",
       "auto_close": "Peche automático en milisegundos (p. ex. 15000)",
-      "slide_close_distance": "Distancia de deslizamento para pechar (por defecto, 400)",
+      "slide_close_distance": "Distancia de deslizamento para pechar",
       "close_outside": "Pechar o pop-up premendo fóra del (cómpre actualizar a páxina)",
       "close_on_click": "Pechar o pop-up despois de calquera clic ou toque",
       "background_update": "Actualizar as tarxetas en segundo plano (non recomendado)",

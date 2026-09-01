@@ -278,7 +278,7 @@
       "buttons_position": "Pogu novietojums",
       "settings": "Uznirstošā loga iestatījumi",
       "auto_close": "Automātiska aizvēršana milisekundēs (piem., 15000)",
-      "slide_close_distance": "Vilkšanas aizvēršanai attālums (noklusējums 400)",
+      "slide_close_distance": "Vilkšanas aizvēršanai attālums",
       "close_outside": "Aizvērt uznirstošo logu, noklikšķinot ārpus tā (nepieciešama lapas atsvaidzināšana)",
       "close_on_click": "Aizvērt uznirstošo logu pēc jebkura klikšķa vai pieskāriena",
       "background_update": "Atjaunināt kartītes fonā (nav ieteicams)",

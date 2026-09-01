@@ -278,7 +278,7 @@
       "buttons_position": "Položaj gumbov",
       "settings": "Nastavitve pojavnega okna",
       "auto_close": "Samodejno zapri po milisekundah (npr. 15000)",
-      "slide_close_distance": "Razdalja potega za zaprtje (privzeto 400)",
+      "slide_close_distance": "Razdalja potega za zaprtje",
       "close_outside": "Zapri pojavno okno s klikom zunaj njega (potrebna je osvežitev)",
       "close_on_click": "Zapri pojavno okno po vsakem kliku ali dotiku",
       "background_update": "Posodabljaj kartice v ozadju (ni priporočljivo)",

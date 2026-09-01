@@ -278,7 +278,7 @@
       "buttons_position": "Gombok pozíciója",
       "settings": "Pop-up beállításai",
       "auto_close": "Automatikus bezárás ezredmásodpercben (pl. 15000)",
-      "slide_close_distance": "Bezáráshoz szükséges húzási távolság (alapértelmezés 400)",
+      "slide_close_distance": "Bezáráshoz szükséges húzási távolság",
       "close_outside": "Pop-up bezárása a rajta kívülre kattintással (frissítés szükséges)",
       "close_on_click": "Pop-up bezárása bármely kattintás vagy koppintás után",
       "background_update": "Kártyák frissítése a háttérben (nem ajánlott)",

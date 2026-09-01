@@ -278,7 +278,7 @@
       "buttons_position": "Posició dels botons",
       "settings": "Configuració del pop-up",
       "auto_close": "Tancament automàtic en mil·lisegons (p. ex. 15000)",
-      "slide_close_distance": "Distància de lliscament per tancar (per defecte, 400)",
+      "slide_close_distance": "Distància de lliscament per tancar",
       "close_outside": "Tanca el pop-up fent clic fora d'ell (cal actualitzar la pàgina)",
       "close_on_click": "Tanca el pop-up després de qualsevol clic o toc",
       "background_update": "Actualitza les targetes en segon pla (no recomanat)",

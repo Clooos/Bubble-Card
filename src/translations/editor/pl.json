@@ -278,7 +278,7 @@
       "buttons_position": "Pozycja przycisków",
       "settings": "Ustawienia pop-upu",
       "auto_close": "Automatyczne zamknięcie w milisekundach (np. 15000)",
-      "slide_close_distance": "Dystans przeciągnięcia do zamknięcia (domyślnie 400)",
+      "slide_close_distance": "Dystans przeciągnięcia do zamknięcia",
       "close_outside": "Zamykaj pop-up kliknięciem poza nim (wymagane odświeżenie)",
       "close_on_click": "Zamykaj pop-up po każdym kliknięciu lub dotknięciu",
       "background_update": "Aktualizuj karty w tle (niezalecane)",

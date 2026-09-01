@@ -278,7 +278,7 @@
       "buttons_position": "Safle'r botymau",
       "settings": "Gosodiadau'r naidlen",
       "auto_close": "Cau'n awtomatig mewn milfedau eiliad (e.e. 15000)",
-      "slide_close_distance": "Pellter llithro i gau (400 yn ragosodedig)",
+      "slide_close_distance": "Pellter llithro i gau",
       "close_outside": "Cau'r naidlen drwy glicio y tu allan iddi (mae angen ail-lwytho)",
       "close_on_click": "Cau'r naidlen ar ôl unrhyw glic neu dap",
       "background_update": "Diweddaru cardiau yn y cefndir (ni argymhellir)",
