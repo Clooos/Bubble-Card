@@ -305,7 +305,7 @@ function createMockContainer(initialChildren = []) {
     };
 }
 
-function createSearchNode({ children = [], shadowRoot = null, scrollHeight = 0, clientHeight = 0, scrollWidth = 0, clientWidth = 0 } = {}) {
+function createSearchNode({ children = [], shadowRoot = null, scrollHeight = 0, clientHeight = 0, scrollWidth = 0, clientWidth = 0, overflowX = 'auto', overflowY = 'auto' } = {}) {
     const node = new EventTarget();
     node.shadowRoot = shadowRoot;
     node.scrollHeight = scrollHeight;
@@ -313,7 +313,15 @@ function createSearchNode({ children = [], shadowRoot = null, scrollHeight = 0, 
     node.scrollWidth = scrollWidth;
     node.clientWidth = clientWidth;
     node.querySelectorAll = jest.fn((selector) => selector === '*' ? children : []);
+    node.ownerDocument = { defaultView: { getComputedStyle: () => ({ overflowX, overflowY }) } };
     return node;
+}
+
+// Runs the callback the finalize step hands to the hydration resume, which is
+// where the post-open content wake is scheduled from.
+function flushCardHydration() {
+    const call = resumeStandaloneCardHydration.mock.calls.at(-1);
+    if (call && typeof call[1] === 'function') call[1]();
 }
 
 function createLegacyContext(config = {}) {
@@ -629,15 +637,67 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue(); // phase 2 — transition start
 
         dispatchTransformTransitionEnd(context.popUp);
-        flushRafQueue(); // transition-end callback — schedules the post-open content wake
+        flushRafQueue(); // transition-end callback
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
         expect(scrollSpy).not.toHaveBeenCalled();
+
+        // Nothing is woken while cards are still being hydrated: the walk would
+        // force layout on every read, and a card that is not built yet cannot
+        // be unblanked.
+        jest.advanceTimersByTime(2000);
+        expect(scrollSpy).not.toHaveBeenCalled();
+
+        flushCardHydration();
 
         // The wake runs at idle time (timeout fallback without requestIdleCallback).
         jest.advanceTimersByTime(250);
 
         expect(handlePopUpCards).toHaveBeenCalledTimes(1);
+        expect(scrollSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not wake content that overflows without scrolling', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        // A name set up to scroll its own text: it overflows by design, and no
+        // scroll event will ever reach it.
+        const overflowingName = createSearchNode({ scrollWidth: 400, clientWidth: 120, overflowX: 'visible', overflowY: 'visible' });
+        const scrollSpy = jest.fn();
+        overflowingName.addEventListener('scroll', scrollSpy);
+        const cardShadowRoot = createSearchNode({ children: [overflowingName] });
+        context._managedCards = [createSearchNode({ shadowRoot: cardShadowRoot })];
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        flushCardHydration();
+        jest.advanceTimersByTime(250);
+
+        expect(scrollSpy).not.toHaveBeenCalled();
+    });
+
+    test('wakes content that overflows sideways in a real horizontal scroller', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const lane = createSearchNode({ scrollWidth: 400, clientWidth: 120, overflowX: 'scroll', overflowY: 'visible' });
+        const scrollSpy = jest.fn();
+        lane.addEventListener('scroll', scrollSpy);
+        const cardShadowRoot = createSearchNode({ children: [lane] });
+        context._managedCards = [createSearchNode({ shadowRoot: cardShadowRoot })];
+
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushStandaloneClosedStatePrimeFrame();
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        flushCardHydration();
+        jest.advanceTimersByTime(250);
+
         expect(scrollSpy).toHaveBeenCalledTimes(1);
     });
 
