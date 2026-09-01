@@ -290,11 +290,44 @@ function _estimateCardRowArea(cardConfig) {
     return (span / assumedGridColumnCount) * rows;
 }
 
-function _estimateFoldRowsTarget() {
+// How many estimated rows the pop-up can actually show. The estimate below is
+// in arbitrary "row area" units whose relation to pixels depends entirely on
+// what the cards contain, and the fixed 64px guess is badly wrong for real
+// pop-ups: measured on the iPad, a 20-card pop-up estimated at 11.5 rows really
+// occupied 20.5, so the 15-row target was never reached, no placeholder was
+// ever created and all 20 cards were built when 10 were visible.
+//
+// So the ratio is measured instead of assumed. After an open, the pop-up
+// records what its content really occupied against what it was estimated at,
+// and the next open converts its container height with that ratio.
+export function noteFoldCalibration(context, contentHeight, containerHeight) {
+    const estimatedRows = context?._foldEstimatedRows;
+    if (!context || !(estimatedRows > 0) || !(contentHeight > 0) || !(containerHeight > 0)) return;
+    context._foldCalibration = {
+        pixelsPerRow: contentHeight / estimatedRows,
+        containerHeight,
+    };
+}
+
+function _estimateFoldRowsTarget(context) {
+    const calibration = context?._foldCalibration;
+    if (calibration && calibration.pixelsPerRow > 0 && calibration.containerHeight > 0) {
+        return (calibration.containerHeight / calibration.pixelsPerRow) + foldCoverageMarginRows;
+    }
+    return _estimateFoldRowsTargetFromViewport();
+}
+
+function _estimateFoldRowsTargetFromViewport() {
     const viewportHeight = (typeof window !== 'undefined' && window.innerHeight > 0)
         ? window.innerHeight
         : 800;
     return Math.ceil(viewportHeight / estimatedRowHeightPx) + foldCoverageMarginRows;
+}
+
+function _estimateRowArea(cards) {
+    let rows = 0;
+    for (const cardConfig of cards) rows += _estimateCardRowArea(cardConfig);
+    return rows;
 }
 
 function _computeFoldFirstHead(cards, foldRowsTarget) {
@@ -433,8 +466,11 @@ export function createCardElementsProgressively(context, onDone) {
     // The row-coverage head IS the minimal fold-coverage cut: by the time the
     // build reaches it, adding a time-based cutoff could only cut below fold
     // coverage, which would show placeholders. So there is none.
-    const foldRowsTarget = _estimateFoldRowsTarget();
+    const foldRowsTarget = _estimateFoldRowsTarget(context);
     const hydratedHead = _computeFoldFirstHead(cards, foldRowsTarget);
+    // What the whole list is estimated at, so the open that follows can compare
+    // it against the pixels the content really took.
+    context._foldEstimatedRows = _estimateRowArea(cards);
 
     let index = 0;
     const step = () => {

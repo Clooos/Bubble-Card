@@ -24,6 +24,7 @@ const suspendStandalonePopUpCardsProgressively = jest.fn((context, onDone) => {
 const settleStandaloneCardWork = jest.fn();
 const resumeStandaloneCardHydration = jest.fn();
 const registerPopupOpenActivityProbe = jest.fn();
+const noteFoldCalibration = jest.fn();
 const appendLegacyPopup = jest.fn();
 const displayLegacyPopupContent = jest.fn();
 const hideLegacyPopupContent = jest.fn();
@@ -171,6 +172,7 @@ jest.unstable_mockModule('./cards/index.js', () => ({
     settleStandaloneCardWork,
     resumeStandaloneCardHydration,
     registerPopupOpenActivityProbe,
+    noteFoldCalibration,
 }));
 
 // Budgets, holds and gate deadlines use the monotonic clock in production;

@@ -1,7 +1,7 @@
 import { getBackdrop, hideExistingBackdrop, releaseBackdropContext } from "./backdrop.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll, keptHistoryState } from "../../tools/utils.js";
-import { buildStandalonePopUpCardsProgressively, handlePopUpCards, registerPopupOpenActivityProbe, resumeStandaloneCardHydration, setStandalonePopUpCardsActive, settleStandaloneCardWork, suspendStandalonePopUpCardsProgressively } from "./cards/index.js";
+import { buildStandalonePopUpCardsProgressively, handlePopUpCards, noteFoldCalibration, registerPopupOpenActivityProbe, resumeStandaloneCardHydration, setStandalonePopUpCardsActive, settleStandaloneCardWork, suspendStandalonePopUpCardsProgressively } from "./cards/index.js";
 import { appendLegacyPopup, displayLegacyPopupContent, hideLegacyPopupContent } from './legacy.js';
 import { beginPopupOpenHassGate, releasePopupOpenHassGate } from './hass-gate.js';
 import { schedulePopupCardModulePreload } from './cards/preload.js';
@@ -1819,6 +1819,12 @@ function openStandalonePopup(context, instant = false) {
                 };
                 context._cachedPopupScrollableState =
                     measuredContainerGeometry.scrollHeight > measuredContainerGeometry.clientHeight;
+                // The two numbers the fold estimate needs, already read here.
+                noteFoldCalibration(
+                    context,
+                    measuredContainerGeometry.scrollHeight,
+                    measuredContainerGeometry.clientHeight,
+                );
                 context._scrollableContainer = container;
                 container.classList.toggle('is-scrollable', context._cachedPopupScrollableState);
             }

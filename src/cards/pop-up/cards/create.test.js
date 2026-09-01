@@ -20,7 +20,7 @@ jest.unstable_mockModule('../../../tools/monotonic-time.js', () => ({
 }));
 
 const { createEditorCardElements } = await import('./editor/index.js');
-const { _createHuiCard, _isStandalonePopupCardConfig, createCardElements, createCardElementsProgressively, registerPopupOpenActivityProbe, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } = await import('./create.js');
+const { _createHuiCard, _isStandalonePopupCardConfig, createCardElements, createCardElementsProgressively, noteFoldCalibration, registerPopupOpenActivityProbe, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } = await import('./create.js');
 
 describe('_isStandalonePopupCardConfig', () => {
     test('detects standalone bubble pop-up child configs', () => {
@@ -547,6 +547,45 @@ describe('progressive card work', () => {
         // The completion pass re-applied the latest hass to the early cards.
         expect(context._managedCards[0].hass).toBe(freshHass);
         expect(context._managedCards[2].hass).toBe(freshHass);
+    });
+
+    // The row estimate is in arbitrary units whose relation to pixels depends on
+    // what the cards contain. Measured on a real pop-up, 20 cards estimated at
+    // 11.5 rows really occupied 20.5, so the viewport-derived target was never
+    // reached and every card was built when half of them were visible.
+    test('calibrates the fold target from what the last open really measured', () => {
+        const first = createProgressiveContext(30);
+        createCardElementsProgressively(first, jest.fn());
+        jest.runAllTimers();
+
+        // Uncalibrated: the 800px viewport fallback gives a 14-card head.
+        expect(first._managedCards.filter(Boolean)).toHaveLength(14);
+        expect(first._foldEstimatedRows).toBeCloseTo(30, 5);
+
+        // The open reports what it really occupied: 30 estimated rows rendered
+        // as 3000px, so a row is 100px, and the container only shows 600px.
+        noteFoldCalibration(first, 3000, 600);
+        expect(first._foldCalibration).toEqual({ pixelsPerRow: 100, containerHeight: 600 });
+
+        // The next open of the same pop-up covers 600px, which is six rows plus
+        // the margin row, so it builds seven cards instead of fourteen.
+        const second = createProgressiveContext(30);
+        second._foldCalibration = first._foldCalibration;
+        createCardElementsProgressively(second, jest.fn());
+        jest.runAllTimers();
+        expect(second._managedCards.filter(Boolean)).toHaveLength(7);
+        expect(second._pendingCardHydration).toHaveLength(23);
+    });
+
+    test('ignores a calibration that measured nothing', () => {
+        const context = createProgressiveContext(30);
+        createCardElementsProgressively(context, jest.fn());
+        jest.runAllTimers();
+
+        for (const [content, container] of [[0, 600], [3000, 0], [3000, -1]]) {
+            noteFoldCalibration(context, content, container);
+            expect(context._foldCalibration).toBeUndefined();
+        }
     });
 
     test('marks placeholder cells and unmarks them at hydration', () => {

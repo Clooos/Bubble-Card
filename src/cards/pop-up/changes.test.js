@@ -92,7 +92,7 @@ jest.unstable_mockModule('../../tools/utils.js', () => ({
     toggleBodyScroll: jest.fn(),
 }));
 
-jest.unstable_mockModule('./cards/index.js', () => ({
+jest.unstable_mockModule('./cards/index.js', () => ({ noteFoldCalibration: jest.fn(),
     handlePopUpCards: jest.fn(),
     setStandalonePopUpCardsActive: jest.fn(),
 }));

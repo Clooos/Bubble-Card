@@ -11,7 +11,7 @@ jest.unstable_mockModule('./backdrop.js', () => ({ getBackdrop: () => ({ hideBac
 jest.unstable_mockModule('../../tools/ha-boundary.js', () => ({ isHaCardWrapper: jest.fn(() => false) }));
 const handlePopUpCards = jest.fn();
 const setStandalonePopUpCardsActive = jest.fn();
-jest.unstable_mockModule('./cards/index.js', () => ({ handlePopUpCards, setStandalonePopUpCardsActive }));
+jest.unstable_mockModule('./cards/index.js', () => ({ noteFoldCalibration: jest.fn(), handlePopUpCards, setStandalonePopUpCardsActive }));
 jest.unstable_mockModule('./helpers.js', () => ({
     restorePopupHostLayout: jest.fn(),
     suspendPopupHostLayout: jest.fn(),

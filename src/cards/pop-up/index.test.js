@@ -48,7 +48,7 @@ jest.unstable_mockModule('./migration.js', () => ({
     )),
 }));
 
-jest.unstable_mockModule('./cards/index.js', () => ({
+jest.unstable_mockModule('./cards/index.js', () => ({ noteFoldCalibration: jest.fn(),
     cleanupPopUpCards: jest.fn(),
     handlePopUpCards: jest.fn(),
 }));

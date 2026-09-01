@@ -25,6 +25,7 @@ jest.unstable_mockModule('./create.js', () => ({
     resumeCardHydrationProgressively,
     settleProgressiveCardWork,
     registerPopupOpenActivityProbe: jest.fn(),
+    noteFoldCalibration: jest.fn(),
 }));
 
 const {

@@ -1,6 +1,6 @@
 import { createCardElements, createCardElementsProgressively, removeCardElements, removeCardElementsProgressively, resumeCardHydrationProgressively, settleProgressiveCardWork, updateCardElements } from './create.js';
 
-export { registerPopupOpenActivityProbe } from './create.js';
+export { registerPopupOpenActivityProbe, noteFoldCalibration } from './create.js';
 
 // Progressive variant used by the post-close cleanup: removes one card per
 // macrotask so the disconnect callbacks never pile up into a single long task.
