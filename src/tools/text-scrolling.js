@@ -8,6 +8,10 @@ const SCROLL_SPEED = 16;
 const SCROLL_TOLERANCE = 0.5;
 const SEPARATOR = '<span class="bubble-scroll-separator"> | </span>';
 
+// How far outside the viewport an element still counts as worth measuring, so
+// its marquee is already in place by the time it is scrolled into view.
+const NEAR_MARGIN = '150px';
+
 // Batched measurement via requestAnimationFrame
 const pending = new Set();
 let rafId = 0;
@@ -24,7 +28,15 @@ const readRef = (ref) => supportsWeakRef ? ref.deref() : ref;
 // Lazy singleton observers (module-scoped, shared across all cards)
 let resizeObs = null;
 let intersectionObs = null;
+let nearObs = null;
 let fontsHooked = false;
+
+// Holding a measurement back until its element is on its way to the screen only
+// works because observe() is specified to report on every target it is given,
+// whether or not anything moves afterwards. Without that first report nothing
+// would ever release the element, so an environment with no IntersectionObserver
+// measures everything straight away instead.
+const canDeferMeasures = typeof IntersectionObserver === 'function';
 
 // Marks the elements this module owns, so the lifecycle sweeps below can find
 // them without walking every node of the card.
@@ -33,6 +45,7 @@ const MARKER = 'data-bubble-scroll';
 function unobserve(el) {
     if (resizeObs) try { resizeObs.unobserve(el); } catch (e) {}
     if (intersectionObs) try { intersectionObs.unobserve(el); } catch (e) {}
+    if (nearObs) try { nearObs.unobserve(el); } catch (e) {}
     pending.delete(el);
 }
 
@@ -41,6 +54,26 @@ function release(el, state) {
     if (state?.ref) tracked.delete(state.ref);
     scrollState.delete(el);
     el.removeAttribute(MARKER);
+}
+
+// A measurement costs a forced layout, and that layout is the whole price of a
+// flush: reading a second element once it has been paid is almost free, reading
+// none at all costs nothing. A pop-up parks its shell a full viewport below the
+// fold while it builds, so every one of the 25 elements of a 23-card pop-up was
+// measured while nobody could see any of them. Hold those back until the near
+// observer says they are coming into view.
+//
+// The observer is what makes this worth doing rather than a rect comparison: it
+// answers on what is really visible, clipping ancestors included, so a calendar
+// card showing two of its ten events builds two marquees and not ten.
+//
+// Only the decision to scroll waits. The text itself is always written straight
+// away, so a held element shows the right string, just not yet as a marquee.
+function queue(el, state) {
+    state.dirty = true;
+    if (state.near === false) return;
+    pending.add(el);
+    scheduleFlush();
 }
 
 // A style template assigning to .bubble-state or .bubble-name owns what that
@@ -80,12 +113,32 @@ function getResizeObserver() {
                     if (state.measured) release(el, state);
                     continue;
                 }
-                pending.add(el);
+                // The observer reports once for every element the moment it is
+                // observed, and again for every height change, and neither can
+                // move a horizontal overflow. Following those doubled the work of
+                // every first pass and paid a second forced layout for an answer
+                // that could not have changed. The one width change it cannot see
+                // is the text growing inside a box its parent holds still, which
+                // is what the font hook below is there for.
+                if (state.measured && sameWidth(observedWidth(entry), state.boxWidth)) continue;
+                queue(el, state);
             }
-            if (pending.size) scheduleFlush();
         });
     }
     return resizeObs;
+}
+
+// The border box is what getBoundingClientRect() reports in the flush, so read
+// the same edge here when the browser offers it rather than comparing a content
+// width against a border width. Where they do differ the widths never match and
+// the element is simply measured again, which is the safe way round.
+function observedWidth(entry) {
+    const box = entry.borderBoxSize;
+    return box?.[0]?.inlineSize ?? box?.inlineSize ?? entry.contentRect?.width;
+}
+
+function sameWidth(a, b) {
+    return a !== undefined && b !== undefined && Math.abs(a - b) < 0.01;
 }
 
 function getIntersectionObserver() {
@@ -106,6 +159,38 @@ function getIntersectionObserver() {
     return intersectionObs;
 }
 
+// Kept apart from the observer above rather than folded into it: that one has to
+// report on the viewport itself, so that a marquee holds a composited layer only
+// while it is really on screen, and a margin would hand layers to elements nobody
+// can see. This one wants the margin, so that the measurement is already done by
+// the time the element arrives.
+function getNearObserver() {
+    if (!nearObs) {
+        nearObs = new IntersectionObserver(entries => {
+            for (const entry of entries) {
+                const state = scrollState.get(entry.target);
+                if (!state) continue;
+                state.near = entry.isIntersecting;
+                if (entry.isIntersecting && state.dirty) queue(entry.target, state);
+            }
+        }, { rootMargin: NEAR_MARGIN });
+    }
+    return nearObs;
+}
+
+// near stays undefined until the observer has really taken the element, and an
+// element with no answer either way is measured rather than held: whatever goes
+// wrong here, nothing is left waiting for a report that will never come.
+function observeNear(el, state) {
+    if (!canDeferMeasures) return;
+    try {
+        getNearObserver().observe(el);
+        if (state.near === undefined) state.near = false;
+    } catch (e) {
+        state.near = undefined;
+    }
+}
+
 // A webfont swapping in changes how wide the text renders without changing the box
 // of the element holding it, so ResizeObserver never fires. That is what left a
 // name that only overflows once Roboto has loaded silently truncated for the rest
@@ -120,13 +205,13 @@ function hookFontLoading() {
     const remeasureAll = () => {
         for (const ref of tracked) {
             const el = readRef(ref);
-            if (el && scrollState.has(el)) {
-                pending.add(el);
+            const state = el && scrollState.get(el);
+            if (state) {
+                queue(el, state);
             } else {
                 tracked.delete(ref);
             }
         }
-        if (pending.size) scheduleFlush();
     };
 
     try { fonts.ready.then(remeasureAll); } catch (e) {}
@@ -194,10 +279,12 @@ function flush() {
         if (!el.isConnected) continue;
 
         state.measured = true;
+        state.dirty = false;
 
         // Batch all geometry reads into a single getBoundingClientRect() call
         const elRect = el.getBoundingClientRect();
         const available = elRect.width;
+        state.boxWidth = available;
 
         let content;
         if (state.animated && state.span?.isConnected) {
@@ -308,8 +395,7 @@ export function applyScrollingEffect(context, element, text, scrollingEffectOver
             state.animated = false;
             state.span = null;
         }
-        pending.add(element);
-        scheduleFlush();
+        queue(element, state);
         return;
     }
 
@@ -324,6 +410,11 @@ export function applyScrollingEffect(context, element, text, scrollingEffectOver
         span: null,
         measured: false,
         suspended: false,
+        dirty: false,
+        // Off screen until the near observer says otherwise, so a card built
+        // inside a parked pop-up shell costs nothing to mount.
+        near: undefined,
+        boxWidth: undefined,
         duration: '',
         ref: null,
     };
@@ -337,8 +428,8 @@ export function applyScrollingEffect(context, element, text, scrollingEffectOver
 
     hookFontLoading();
     getResizeObserver().observe(element);
-    pending.add(element);
-    scheduleFlush();
+    observeNear(element, fresh);
+    queue(element, fresh);
 }
 
 function applyNonScrollingStyle(element, text) {
@@ -391,8 +482,11 @@ export function resumeScrollingEffects(root) {
             state.suspended = false;
             getResizeObserver().observe(el);
             if (state.animated) getIntersectionObserver().observe(el);
-            pending.add(el);
+            // Re-observing reports on the element again, so whatever the view did
+            // while the card was away is answered without measuring the ones that
+            // came back below the fold.
+            observeNear(el, state);
+            queue(el, state);
         }
-        if (pending.size) scheduleFlush();
     } catch (e) {}
 }

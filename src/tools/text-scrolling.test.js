@@ -20,17 +20,29 @@ class FakeResizeObserver {
     unobserve(target) { this.targets.delete(target); }
     disconnect() { this.targets.clear(); }
     fire(targets = [...this.targets]) {
-        this.callback(targets.map((target) => ({ target })), this);
+        this.callback(targets.map((target) => ({
+            target,
+            borderBoxSize: [{ inlineSize: target.boxWidth }],
+            contentRect: { width: target.boxWidth },
+        })), this);
     }
 }
 
 class FakeIntersectionObserver {
-    constructor(callback) {
+    constructor(callback, options) {
         this.callback = callback;
+        this.options = options;
         this.targets = new Set();
         intersectionObservers.push(this);
     }
-    observe(target) { this.targets.add(target); }
+    // observe() is specified to report on the target it is given, whether or not
+    // anything moves afterwards, and holding a measurement back until the element
+    // is on its way in relies on exactly that. Delivered synchronously here where
+    // the browser queues a task, which is close enough for a logic test.
+    observe(target) {
+        this.targets.add(target);
+        this.callback([{ target, isIntersecting: target.visible !== false }], this);
+    }
     unobserve(target) { this.targets.delete(target); }
     disconnect() { this.targets.clear(); }
     fire(target, isIntersecting) {
@@ -64,9 +76,9 @@ function createFakeDocument() {
 
 // A text element the module can measure: `contentWidth` is what the text renders
 // at, `boxWidth` is the element's own box. The two move independently, which is
-// exactly what a late webfont does. `rangeless` takes the float measurement away
-// so the integer fallback runs.
-function createElement({ connected = true, boxWidth = 100, contentWidth = 100, rangeless = false } = {}) {
+// exactly what a late webfont does. `visible` is what the near observer reports,
+// and `rangeless` takes the float measurement away so the integer fallback runs.
+function createElement({ connected = true, boxWidth = 100, contentWidth = 100, visible = true, rangeless = false } = {}) {
     const attributes = new Map();
     const span = {
         isConnected: true,
@@ -81,13 +93,15 @@ function createElement({ connected = true, boxWidth = 100, contentWidth = 100, r
         style: { cssText: '' },
         boxWidth,
         contentWidth,
+        visible,
+        reads: 0,
         ownerDocument: rangeless ? undefined : fakeDocument,
         span,
         getAttribute: (name) => (attributes.has(name) ? attributes.get(name) : null),
         setAttribute: (name, value) => attributes.set(name, String(value)),
         removeAttribute: (name) => attributes.delete(name),
         querySelector: () => span,
-        getBoundingClientRect: () => ({ width: element.boxWidth }),
+        getBoundingClientRect: () => { element.reads++; return { width: element.boxWidth }; },
         get scrollWidth() { return Math.round(Math.max(element.boxWidth, element.contentWidth)); },
         get clientWidth() { return Math.round(element.boxWidth); },
     };
@@ -95,6 +109,11 @@ function createElement({ connected = true, boxWidth = 100, contentWidth = 100, r
 }
 
 const isAnimated = (element) => element.getAttribute('data-animated') === 'true';
+
+// Two observers share the class: the one carrying a rootMargin decides what is
+// worth measuring, the bare one drives the marquee's play state.
+const nearObserver = () => intersectionObservers.find((o) => o.options?.rootMargin);
+const animObserver = () => intersectionObservers.find((o) => !o.options?.rootMargin);
 
 // The lifecycle sweeps look the module's own elements up by marker attribute.
 const rootOf = (...elements) => ({
@@ -312,7 +331,7 @@ describe('text scrolling weight', () => {
         applyScrollingEffect(context, element, 'a very long name');
         runFrame();
 
-        const [intersectionObserver] = intersectionObservers;
+        const intersectionObserver = animObserver();
         intersectionObserver.fire(element, true);
         expect(element.span.style.animationPlayState).toBe('running');
         expect(element.span.style.willChange).toBe('transform');
@@ -334,21 +353,60 @@ describe('text scrolling weight', () => {
 
         // The first pass measures the bare text and every later one measures the
         // marquee, which carries a separator too, so let that one settle first.
+        element.boxWidth = 90;
         resizeObserver.fire([element]);
         runFrame();
 
         element.span.style.animationDuration = 'sentinel';
+        element.boxWidth = 80;
         resizeObserver.fire([element]);
         runFrame();
 
         expect(element.span.style.animationDuration).toBe('sentinel');
 
+        element.boxWidth = 120;
         element.contentWidth = 900;
         resizeObserver.fire([element]);
         runFrame();
 
         expect(element.span.style.animationDuration).not.toBe('sentinel');
         expect(element.span.style.animationDuration).not.toBe(first);
+    });
+
+    // The observer reports once the moment an element is observed, and again for
+    // every height change, and neither can move a horizontal overflow. Following
+    // those doubled the work of every first pass: 25 elements measured 50 times
+    // on one pop-up opening, the second half of it paying a second forced layout
+    // for an answer that could not have changed.
+    test('does not measure again when a resize left the width alone', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 300, contentWidth: 120 });
+
+        applyScrollingEffect(context, element, 'short');
+        runFrame();
+
+        const [resizeObserver] = resizeObservers;
+        const before = element.reads;
+        resizeObserver.fire([element]);
+        runFrame();
+
+        expect(element.reads).toBe(before);
+    });
+
+    test('measures again when a resize did change the width', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 300, contentWidth: 120 });
+
+        applyScrollingEffect(context, element, 'short');
+        runFrame();
+        expect(isAnimated(element)).toBe(false);
+
+        const [resizeObserver] = resizeObservers;
+        element.boxWidth = 100;
+        resizeObserver.fire([element]);
+        runFrame();
+
+        expect(isAnimated(element)).toBe(true);
     });
 });
 
@@ -364,7 +422,7 @@ describe('disconnect and reconnect', () => {
         cleanupScrollingEffects(rootOf(element));
 
         expect(resizeObservers[0].targets.has(element)).toBe(false);
-        expect(intersectionObservers[0].targets.has(element)).toBe(false);
+        expect(animObserver().targets.has(element)).toBe(false);
         expect(element.span.style.animationPlayState).toBe('paused');
         expect(element.span.style.willChange).toBe('auto');
     });
@@ -385,7 +443,7 @@ describe('disconnect and reconnect', () => {
 
         expect(isAnimated(element)).toBe(true);
         expect(resizeObservers[0].targets.has(element)).toBe(true);
-        expect(intersectionObservers[0].targets.has(element)).toBe(true);
+        expect(animObserver().targets.has(element)).toBe(true);
     });
 
     test('re-measures on the way back in, so a resize missed while away still lands', async () => {
@@ -598,5 +656,93 @@ describe('deciding on a sub-pixel overflow', () => {
         runFrame();
 
         expect(isAnimated(element)).toBe(true);
+    });
+});
+
+// Measuring costs a forced layout, and that layout is the whole price of a flush.
+// A pop-up parks its shell a full viewport below the fold while it builds, so on
+// the real dashboard every one of the 25 elements of a 23-card pop-up was
+// measured while nobody could see any of them.
+describe('holding measurements back until they matter', () => {
+    test('does not measure an element the near observer puts off screen', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 100, contentWidth: 300, visible: false });
+
+        applyScrollingEffect(context, element, 'a very long name');
+        runFrame();
+
+        expect(element.reads).toBe(0);
+        expect(isAnimated(element)).toBe(false);
+    });
+
+    // Only the decision waits. A held element still shows the right string, so
+    // nothing the card asked for is ever left unwritten.
+    test('still writes the text of an element it is holding back', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 100, contentWidth: 300, visible: false });
+
+        applyScrollingEffect(context, element, 'a very long name');
+        runFrame();
+        expect(element.innerHTML).toBe('a very long name');
+
+        applyScrollingEffect(context, element, 'a different long name');
+        runFrame();
+        expect(element.innerHTML).toBe('a different long name');
+    });
+
+    test('measures it as soon as it comes into view', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 100, contentWidth: 300, visible: false });
+
+        applyScrollingEffect(context, element, 'a very long name');
+        runFrame();
+        expect(isAnimated(element)).toBe(false);
+
+        nearObserver().fire(element, true);
+        runFrame();
+
+        expect(isAnimated(element)).toBe(true);
+    });
+
+    // A resize or a font load while the element is away must not be lost: it is
+    // held, not dropped, and the near observer hands it back with the work still
+    // owed.
+    test('replays a resize it held back once the element comes into view', async () => {
+        const { applyScrollingEffect } = await loadModule();
+        const element = createElement({ boxWidth: 400, contentWidth: 300 });
+
+        applyScrollingEffect(context, element, 'a very long name');
+        runFrame();
+        expect(isAnimated(element)).toBe(false);
+
+        nearObserver().fire(element, false);
+        const [resizeObserver] = resizeObservers;
+        element.boxWidth = 100;
+        resizeObserver.fire([element]);
+        runFrame();
+        expect(isAnimated(element)).toBe(false);
+
+        nearObserver().fire(element, true);
+        runFrame();
+        expect(isAnimated(element)).toBe(true);
+    });
+
+    test('holds back the ones that come back below the fold on a reconnect', async () => {
+        const { applyScrollingEffect, cleanupScrollingEffects, resumeScrollingEffects } = await loadModule();
+        const onScreen = createElement({ boxWidth: 100, contentWidth: 300 });
+        const belowFold = createElement({ boxWidth: 100, contentWidth: 300, visible: false });
+
+        applyScrollingEffect(context, onScreen, 'a very long name');
+        applyScrollingEffect(context, belowFold, 'a very long state');
+        runFrame();
+
+        cleanupScrollingEffects(rootOf(onScreen, belowFold));
+        onScreen.reads = 0;
+        belowFold.reads = 0;
+        resumeScrollingEffects(rootOf(onScreen, belowFold));
+        runFrame();
+
+        expect(onScreen.reads).toBeGreaterThan(0);
+        expect(belowFold.reads).toBe(0);
     });
 });
