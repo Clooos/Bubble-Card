@@ -118,6 +118,19 @@ describe('pop-up styles', () => {
     expect(styles).not.toMatch(/^\s*\.bubble-pop-up\.popup-mode-centered[^,{]*> \.bubble-pop-up-container::after/m);
   });
 
+  // The companion app is edge-to-edge on phones since HA 2026.8 and leaves the
+  // top safe-area inset to the page. A fixed pop-up must add it back or it
+  // climbs into the status bar by that inset. HA publishes the inset as
+  // --safe-area-inset-top (the app sets --app-safe-area-inset-top behind it),
+  // so read that token rather than env() directly.
+  test('keeps mobile pop-ups below the top safe-area inset', () => {
+    expect(styles).toContain('--bubble-pop-up-safe-area-top: var(--safe-area-inset-top, 0px);');
+    expect(styles).toMatch(/\.bubble-pop-up:not\(\.editor\) \{[^}]*top: calc\(56px \+ var\(--bubble-pop-up-safe-area-top\) \+ var\(--custom-height-offset-mobile\)\);/);
+    expect(styles).toMatch(/--bubble-pop-up-available-height: calc\(100vh - 56px - var\(--bubble-pop-up-safe-area-top\) - var\(--custom-height-offset-mobile\)\);/);
+    expect(styles).toMatch(/bottom: calc\(-56px - var\(--bubble-pop-up-safe-area-top\) - var\(--custom-height-offset-mobile\)\);/);
+    expect(styles).toMatch(/padding-bottom: calc\(140px \+ var\(--bubble-pop-up-safe-area-top\) \+ var\(--custom-height-offset-mobile\)\);/);
+  });
+
   // #2537: pop-ups are position:fixed, so they offset themselves to stay
   // centred on the dashboard rather than on the viewport. That offset used to
   // be read from var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)): width
