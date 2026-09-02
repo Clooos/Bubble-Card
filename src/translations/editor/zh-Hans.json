@@ -244,6 +244,7 @@
       "style": "弹窗样式",
       "style_bubble": "气泡",
       "style_classic": "经典",
+      "style_home_assistant": "Home Assistant",
       "mode": "弹窗模式",
       "mode_fit_content": "适应内容",
       "mode_centered": "对话框 (居中)",

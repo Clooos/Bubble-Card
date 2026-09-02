@@ -244,6 +244,7 @@
       "style": "Стиль всплывающего окна",
       "style_bubble": "Bubble",
       "style_classic": "Классический",
+      "style_home_assistant": "Home Assistant",
       "mode": "Режим всплывающего окна",
       "mode_fit_content": "По содержимому",
       "mode_centered": "Диалог (по центру)",

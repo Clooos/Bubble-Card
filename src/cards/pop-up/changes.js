@@ -1,5 +1,6 @@
 import { getBackdrop } from "./backdrop.js";
 import { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupModeClasses, syncPopupPerformanceModeClasses, syncPopupStyleClasses } from "./helpers.js";
+import { isHomeAssistantStyle } from "./style.js";
 import { checkConditionsMet, validateConditionalConfig, ensureArray } from '../../tools/validate-condition.js';
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import { setLayout } from "../../tools/utils.js";
@@ -10,7 +11,9 @@ export function syncHeaderVisibilityClasses(context) {
     const showHeader = context.config.show_header ?? true;
     const showPreviousButton = context.config.show_previous_button ?? false;
     const showCloseButton = context.config.show_close_button ?? true;
-    const closeButtonLeft = context.config.buttons_position === 'left';
+    // The more info dialog puts its navigation icon first, so the style forces
+    // the option Bubble already has for that rather than reordering on its own.
+    const closeButtonLeft = context.config.buttons_position === 'left' || isHomeAssistantStyle(context.config);
 
     context.popUp.classList.toggle('no-header', !showHeader);
     context.popUp.classList.toggle('show-previous-button', showPreviousButton);

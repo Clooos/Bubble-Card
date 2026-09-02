@@ -244,6 +244,7 @@
       "style": "팝업 스타일",
       "style_bubble": "버블",
       "style_classic": "클래식",
+      "style_home_assistant": "Home Assistant",
       "mode": "팝업 모드",
       "mode_fit_content": "콘텐츠에 맞춤",
       "mode_centered": "대화 상자 (중앙)",

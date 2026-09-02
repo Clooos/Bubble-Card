@@ -1,3 +1,4 @@
+import { getPopupStyle, POPUP_STYLE_CLASSIC, POPUP_STYLE_HOME_ASSISTANT } from "./style.js";
 import { getBackdrop, hideExistingBackdrop, releaseBackdropContext } from "./backdrop.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll, keptHistoryState } from "../../tools/utils.js";
@@ -58,8 +59,7 @@ export const POPUP_MODE_FIT_CONTENT = 'fit-content';
 export const POPUP_MODE_CENTERED = 'centered';
 export const POPUP_MODE_ADAPTIVE_DIALOG = 'adaptive-dialog';
 
-export const POPUP_STYLE_BUBBLE = 'bubble';
-export const POPUP_STYLE_CLASSIC = 'classic';
+export { POPUP_STYLE_BUBBLE, POPUP_STYLE_CLASSIC, POPUP_STYLE_HOME_ASSISTANT, getPopupStyle, hasClassicHeader, isHomeAssistantStyle } from './style.js';
 export const POPUP_PERFORMANCE_MODE_DEFAULT = 'default';
 export const POPUP_PERFORMANCE_MODE_PERFORMANCE = 'performance';
 
@@ -429,15 +429,15 @@ function startStandalonePopupTransition(context, open, onComplete, switchClosing
 }
 
 export function getPopupMode(config) {
+    // The more info dialog of Home Assistant adapts to the page, a sheet docked
+    // to the bottom on a narrow screen and a centred dialog on a wide one. The
+    // style that reproduces it therefore brings that geometry with it rather
+    // than leaving it to a second setting the user would have to find.
+    if (getPopupStyle(config) === POPUP_STYLE_HOME_ASSISTANT) return POPUP_MODE_ADAPTIVE_DIALOG;
     if (config?.popup_mode === POPUP_MODE_FIT_CONTENT) return POPUP_MODE_FIT_CONTENT;
     if (config?.popup_mode === POPUP_MODE_CENTERED) return POPUP_MODE_CENTERED;
     if (config?.popup_mode === POPUP_MODE_ADAPTIVE_DIALOG) return POPUP_MODE_ADAPTIVE_DIALOG;
     return POPUP_MODE_DEFAULT;
-}
-
-export function getPopupStyle(config) {
-    if (config?.popup_style === POPUP_STYLE_CLASSIC) return POPUP_STYLE_CLASSIC;
-    return POPUP_STYLE_BUBBLE;
 }
 
 export function getPopupPerformanceMode(config) {
@@ -474,7 +474,12 @@ export function syncPopupModeClasses(popUp, config) {
 
 export function syncPopupStyleClasses(popUp, config) {
     if (!popUp?.classList) return;
+    // The Home Assistant style used to borrow the classic class and override
+    // what differed. It inherited twenty rules nobody had checked against the
+    // dialog, and every one of them was a divergence waiting to be found. It
+    // now stands on its own and states what Home Assistant states, nothing else.
     popUp.classList.toggle('popup-style-classic', getPopupStyle(config) === POPUP_STYLE_CLASSIC);
+    popUp.classList.toggle('popup-style-home-assistant', getPopupStyle(config) === POPUP_STYLE_HOME_ASSISTANT);
 }
 
 export function syncPopupPerformanceModeClasses(popUp, config) {

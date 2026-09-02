@@ -244,6 +244,7 @@
       "style": "Slog pojavnega okna",
       "style_bubble": "Bubble",
       "style_classic": "Klasičen",
+      "style_home_assistant": "Home Assistant",
       "mode": "Način pojavnega okna",
       "mode_fit_content": "Prilagodi vsebini",
       "mode_centered": "Pogovorno okno (na sredini)",

@@ -205,7 +205,7 @@ jest.unstable_mockModule('./styles.css', () => ({
     default: '',
 }));
 
-const { cleanupPopupRuntime, closePopup, isDialogNode, isPopupOpenSequenceActive, keepPopupHostMounted, updateListeners, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout } = await import('./helpers.js');
+const { cleanupPopupRuntime, closePopup, getPopupStyle, hasClassicHeader, isDialogNode, isPopupOpenSequenceActive, keepPopupHostMounted, updateListeners, navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, restorePopupHostLayout, shouldHoldDashboardHassUpdate, suspendPopupHostLayout, syncDeferredPopupHostLayout, syncPopupStyleClasses } = await import('./helpers.js');
 const { invalidateWakeSyncCache } = await import('./index.js');
 const { deferCardUpdate } = await import('../../tools/deferred-card-updates.js');
 
@@ -3790,5 +3790,78 @@ describe('close_on_click when the click was suppressed', () => {
         jest.advanceTimersByTime(400);
 
         expect(window.history.replaceState).not.toHaveBeenCalled();
+    });
+});
+
+
+describe('pop-up styles', () => {
+    function makePopUp() {
+        const classes = new Set();
+        return {
+            classList: {
+                toggle: (name, on) => (on ? classes.add(name) : classes.delete(name)),
+                has: (name) => classes.has(name),
+            },
+            classes,
+        };
+    }
+
+    test('the Home Assistant style is a style of its own', () => {
+        expect(getPopupStyle({ popup_style: 'home-assistant' })).toBe('home-assistant');
+        expect(getPopupStyle({ popup_style: 'classic' })).toBe('classic');
+        expect(getPopupStyle({})).toBe('bubble');
+        // Anything unknown falls back rather than reaching the DOM as a class.
+        expect(getPopupStyle({ popup_style: 'whatever' })).toBe('bubble');
+    });
+
+    test('both header styles answer to the classic header', () => {
+        expect(hasClassicHeader({ popup_style: 'classic' })).toBe(true);
+        expect(hasClassicHeader({ popup_style: 'home-assistant' })).toBe(true);
+        expect(hasClassicHeader({})).toBe(false);
+    });
+
+    test('the Home Assistant style borrows no class but its own', () => {
+        // It used to carry popup-style-classic and override what differed, which
+        // meant inheriting twenty rules nobody had checked against the dialog.
+        // Every one of them was a divergence waiting to be found.
+        const popUp = makePopUp();
+
+        syncPopupStyleClasses(popUp, { popup_style: 'home-assistant' });
+
+        expect(popUp.classes.has('popup-style-home-assistant')).toBe(true);
+        expect(popUp.classes.has('popup-style-classic')).toBe(false);
+    });
+
+    test('the classic style does not answer to the Home Assistant class', () => {
+        const popUp = makePopUp();
+
+        syncPopupStyleClasses(popUp, { popup_style: 'classic' });
+
+        expect(popUp.classes.has('popup-style-classic')).toBe(true);
+        expect(popUp.classes.has('popup-style-home-assistant')).toBe(false);
+    });
+
+    test('the style brings the adaptive geometry with it', async () => {
+        // The more info dialog adapts to the page, so the style that reproduces
+        // it cannot be left waiting for a second setting to be found.
+        const { getPopupMode } = await import('./helpers.js');
+
+        expect(getPopupMode({ popup_style: 'home-assistant' })).toBe('adaptive-dialog');
+        // And it wins over a mode written by hand, since any other geometry
+        // would stop being a reproduction.
+        expect(getPopupMode({ popup_style: 'home-assistant', popup_mode: 'centered' })).toBe('adaptive-dialog');
+        // Every other style keeps answering for itself.
+        expect(getPopupMode({ popup_style: 'classic', popup_mode: 'centered' })).toBe('centered');
+        expect(getPopupMode({})).toBe('default');
+    });
+
+    test('switching back to the bubble style takes both classes off again', () => {
+        const popUp = makePopUp();
+
+        syncPopupStyleClasses(popUp, { popup_style: 'home-assistant' });
+        syncPopupStyleClasses(popUp, {});
+
+        expect(popUp.classes.has('popup-style-classic')).toBe(false);
+        expect(popUp.classes.has('popup-style-home-assistant')).toBe(false);
     });
 });

@@ -986,3 +986,291 @@
     height: var(--row-height,56px);
     width: var(--row-height,56px);
 }
+/* Home Assistant style
+   --------------------
+   A copy of the more info dialog, written on its own rather than as a delta on
+   the classic style. Borrowing that style meant inheriting twenty rules nobody
+   had checked against the dialog, and each one was a divergence waiting to be
+   found. Everything below states what Home Assistant states, through the same
+   variable chains, so a theme moves this style as it moves the real dialog.
+
+   Read from: ha-dialog.ts for the width and the radius, ha-bottom-sheet.ts for
+   the sheet and its handle, ha-dialog-header.ts for the whole header,
+   ha-more-info-info.ts for the content padding, semantic.globals.ts for the
+   shadow. The geometry comes with the style: getPopupMode answers
+   adaptive-dialog, so the dialog adapts to the page the way the real one does.
+
+   THE SURFACE
+   =========== */
+.bubble-pop-up.popup-style-home-assistant {
+    --bubble-pop-up-border-radius: var(--ha-dialog-border-radius, var(--ha-border-radius-3xl, 24px));
+    --bubble-pop-up-gap: var(--ha-section-grid-row-gap, 8px);
+    /* A more info dialog stacks its header above its content. Bubble slides the
+       content up under the header by fifty pixels, which is what let the cards
+       show through it. There is nothing behind this header. */
+    --bubble-pop-up-header-overlap: 0px;
+    /* And the shell is a flex column that spaces its children by a card gap.
+       ha-dialog-header and the content it heads sit against each other, so the
+       only distance between them is the padding of the content. */
+    gap: 0;
+}
+
+/* The shadow of the dialog, on a layer of its own so shadow_opacity can fade it.
+   --ha-box-shadow-l bakes its own alphas and differs per theme, so it cannot be
+   multiplied in place: the layer carries it whole and the option is the opacity
+   of the layer. A hundred is the shadow as Home Assistant draws it, zero is
+   none, and everything between fades. Behind the surface, never over it. */
+.bubble-pop-up.popup-style-home-assistant:not(.editor)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    box-shadow: var(--dialog-box-shadow, var(--ha-box-shadow-l, 0 6px 12px -3px rgba(0, 0, 0, 0.12), 0 16px 32px -6px rgba(0, 0, 0, 0.2)));
+    opacity: var(--custom-shadow-opacity, 1);
+    pointer-events: none;
+}
+
+/* And the flat glow Bubble draws for the same option goes, so the two do not
+   stack on top of each other. */
+.bubble-pop-up.popup-style-home-assistant.is-popup-opened {
+    box-shadow: none;
+}
+
+/* No fade at either end. Bubble masks its scroller so the content dissolves
+   into the edges; a more info dialog cuts it clean and puts a shadow under the
+   header instead. */
+.bubble-pop-up.popup-style-home-assistant > .bubble-pop-up-container,
+.bubble-pop-up.popup-style-home-assistant:not(.editor):not(.is-popup-closed) > .bubble-pop-up-container {
+    mask-image: none;
+    -webkit-mask-image: none;
+    /* The content begins under the header and nowhere else. Setting the overlap
+       to zero is not enough: the standalone rule computes its margin as minus
+       the overlap plus a gap reserve, which would leave eight pixels of its own.
+       A more info dialog leaves none, only the padding of its content. */
+    margin-top: 0;
+    padding-inline: var(--ha-space-6, 24px);
+    /* Nothing above the first card: the header already ends where the content
+       begins, and the sides and the bottom are what carry the spacing. */
+    padding-top: 0;
+    padding-bottom: max(var(--safe-area-inset-bottom, 0px), var(--ha-space-6, 24px));
+}
+
+/* THE HEADER
+   ==========
+   ha-dialog-header lays out a navigation icon, the content, then the actions.
+   Bubble carries the close and the back button in one container, which goes
+   first so the close lands where the navigation icon is. */
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0 var(--ha-space-1, 4px);
+    min-height: 0;
+    gap: 0;
+}
+
+/* The side the close sits on is buttons_position, an option Bubble already has:
+   the style forces it to left rather than reordering anything of its own. */
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header-actions {
+    flex: none;
+    gap: 0;
+    min-width: var(--ha-space-2, 8px);
+}
+
+/* close-button-left indents the title by fourteen. ha-dialog-header does not:
+   .header-content starts where the navigation icon ends. */
+.bubble-pop-up.popup-style-home-assistant.close-button-left > .bubble-header-container > .bubble-header {
+    margin-inline-start: 0;
+}
+
+/* .header-content: it is what gives the bar its height, ten above and ten below
+   a row of --ha-space-12, so sixty eight in all. It stays a row rather than
+   becoming a column: the name and the state are laid out by the button card
+   inside it, and turning this into a column stacked them on top of each other. */
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header {
+    flex: 1;
+    align-items: center;
+    margin-inline-end: 0;
+    padding: 10px var(--ha-space-1, 4px);
+    min-height: var(--ha-space-12, 48px);
+    min-width: 0;
+    /* .large sizes the button card at one row, fifty six, which made the bar
+       seventy six. The row is resized rather than the height forced, so the
+       layout that carries the name and the state keeps a row it can measure. */
+    --row-height: var(--ha-space-12, 48px);
+}
+
+/* That same rule rounds the card by half a row, which is a pill, and a pill
+   clips the two lines of a title with a state under it. .header-content is a
+   plain box, so the rounding goes rather than following the row. */
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .bubble-container {
+    border-radius: 0;
+}
+
+/* .header-title */
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .bubble-name {
+    font-size: var(--ha-font-size-xl, 20px) !important;
+    font-weight: var(--ha-font-weight-medium, 500) !important;
+    line-height: var(--ha-line-height-condensed, 1.2) !important;
+    color: var(--primary-text-color) !important;
+}
+
+/* The title starts where .header-content does: no indent, and no icon to clear. */
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .name-without-icon,
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .bubble-name-container {
+    margin-inline-start: 0 !important;
+}
+
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .bubble-icon-container {
+    display: var(--bubble-pop-up-home-assistant-icon-display, none) !important;
+}
+
+/* The header of a dialog is a title, not a control: no fill, no ripple, no
+   pointer. */
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .bubble-button-card-container {
+    background: none !important;
+    box-shadow: none !important;
+    cursor: default !important;
+}
+
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .bubble-background,
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .bubble-button-card-container > ha-ripple {
+    display: none !important;
+}
+
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .bubble-content-container::after,
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header .bubble-content-container::before {
+    display: none !important;
+}
+
+/* ha-icon-button: a --ha-space-12 square, no background, no pill, plain text. */
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header-actions > .bubble-header-action-button {
+    background-color: transparent !important;
+    border: none !important;
+    width: var(--ha-space-12, 48px) !important;
+    height: var(--ha-space-12, 48px) !important;
+    border-radius: var(--ha-border-radius-circle, 50%) !important;
+    color: var(--primary-text-color) !important;
+    overflow: hidden !important;
+}
+
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container > .bubble-header-actions .bubble-header-action-icon svg {
+    width: var(--ha-space-6, 24px);
+    height: var(--ha-space-6, 24px);
+    fill: currentColor;
+}
+
+/* The shadow it fades in under the header once the content has left the top:
+   .fade-top, eight pixels of gradient at 0.08 alpha over 0.18s. It rides on the
+   header rather than inside the scroller so it cannot scroll away with it. */
+.bubble-pop-up.popup-style-home-assistant > .bubble-header-container::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    height: var(--ha-space-2, 8px);
+    background: linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease-in-out;
+    z-index: 4;
+}
+
+.bubble-pop-up.popup-style-home-assistant.is-scrolled > .bubble-header-container::after {
+    opacity: 1;
+}
+
+/* WITH NO HEADER
+   ==============
+   The strip the header leaves behind is twenty four tall and exists to carry the
+   drag handle. Pulling the content over it only made the handle float above the
+   cards, so the strip goes instead: the scroller is then the only child of the
+   shell, its top is the top of the sheet, the content scrolls all the way up,
+   and what holds the first card down is a padding, the same one the sides use.
+   The handle and the scroll shadow both live on that strip and go with it. */
+.bubble-pop-up.popup-style-home-assistant.no-header > .bubble-header-container {
+    display: none !important;
+}
+
+.bubble-pop-up.popup-style-home-assistant.no-header > .bubble-pop-up-container {
+    margin-top: 0 !important;
+    padding-top: var(--ha-space-6, 24px) !important;
+}
+
+/* Everything else between the header and the content is already zero for this
+   style, so the twenty pixels the placeholder keeps to clear a header the
+   content slides under are twenty pixels of nothing here. */
+.bubble-pop-up.popup-style-home-assistant .bubble-editor-placeholder {
+    margin-top: 0;
+}
+
+/* ha-dialog-header widens the bar once there is room, at its own breakpoint. */
+@media all and (min-width: 450px) and (min-height: 500px) {
+    .bubble-pop-up.popup-style-home-assistant > .bubble-header-container {
+        padding-inline: var(--ha-space-2, 8px);
+    }
+}
+
+/* THE TWO SHAPES
+   ==============
+   A sheet below the breakpoint of ha-adaptive-dialog, a dialog above it. */
+@media (max-width: 870px), (max-height: 500px) {
+    .bubble-pop-up.popup-style-home-assistant {
+        --bubble-pop-up-border-radius: var(--ha-bottom-sheet-border-radius, var(--ha-dialog-border-radius, var(--ha-border-radius-2xl, 20px)));
+        /* --ha-bottom-sheet-height, from the :host of ha-more-info-dialog: the
+           sheet leaves the taller of the top inset and forty eight above itself,
+           where Bubble leaves a header height plus that inset. The mode already
+           anchors it to the bottom and reads this variable for its height, so
+           this is the whole of it. The vh line is the fallback the dvh one
+           replaces where dvh is understood, the way Home Assistant writes it. */
+        --bubble-pop-up-available-height: calc(100vh - max(var(--bubble-pop-up-safe-area-top), 48px) - var(--custom-height-offset-mobile));
+        --bubble-pop-up-available-height: calc(100dvh - max(var(--bubble-pop-up-safe-area-top), 48px) - var(--custom-height-offset-mobile));
+    }
+
+    /* A sheet spans the whole width. Bubble narrows its pop-up into a centred
+       column from 600px, which falls inside the range where Home Assistant is
+       still full bleed, so that block is undone up to its own breakpoint. */
+    .bubble-pop-up.popup-style-home-assistant:not(.editor) {
+        width: 100% !important;
+        max-width: 100% !important;
+        inset-inline-start: 0 !important;
+        margin-inline-start: 0 !important;
+    }
+
+    /* .handle-wrapper .handle::after, only on the shape that has one. */
+    .bubble-pop-up.popup-style-home-assistant:not(.editor) > .bubble-header-container::before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        border-radius: var(--ha-border-radius-md, 8px);
+        background-color: var(--ha-bottom-sheet-handle-color, var(--divider-color));
+        pointer-events: none;
+        z-index: 4;
+    }
+}
+
+/* Above it, a dialog centred on the page rather than on the dashboard:
+   wa-dialog sits at inset 0 with margin auto and knows nothing of the sidebar.
+   The block this overrides is written with !important, so this one is too. */
+@media only screen and (min-width: 871px) and (min-height: 501px) {
+    .bubble-pop-up.popup-style-home-assistant:not(.editor) {
+        inset-inline-start: 0 !important;
+        /* And pinned near the top rather than centred on the viewport.
+           haStyleDialogFixedTop does that on purpose, its own comment saying it
+           keeps the dialog from jumping when its content changes size, with
+           --ha-space-10 above it and --ha-space-2 below. Bubble centres its own,
+           which is what made this one shorter and sitting too low.
+           --custom-height-offset-desktop still shortens it, the way it does for
+           every other pop-up in this mode. */
+        top: var(--ha-space-10, 40px) !important;
+        bottom: auto !important;
+        max-height: calc(100svh - var(--ha-space-10, 40px) - var(--ha-space-2, 8px) - var(--safe-area-inset-y, 0px) - 2 * var(--custom-height-offset-desktop, 0px)) !important;
+    }
+}

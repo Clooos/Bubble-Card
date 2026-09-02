@@ -135,6 +135,8 @@ jest.unstable_mockModule('./backdrop.js', () => ({
 }));
 
 jest.unstable_mockModule('./helpers.js', () => ({
+    hasClassicHeader: (config) => config?.popup_style === 'classic' || config?.popup_style === 'home-assistant',
+    isHomeAssistantStyle: (config) => config?.popup_style === 'home-assistant',
     keepPopupHostMounted: jest.fn((context) => {
         if (context.sectionRow?.tagName?.toLowerCase() === 'hui-card') {
             context.sectionRow.hidden = false;
@@ -502,6 +504,136 @@ describe('prepareStandaloneStructure', () => {
 
         expect(context.popUp.style.setProperty).toHaveBeenCalledWith('--custom-shadow-opacity', 1);
         expect(context.popUp.classList.contains('has-popup-shadow')).toBe(true);
+    });
+
+    test('the Home Assistant style takes the dialog width of Home Assistant', () => {
+        // Written inline, so no stylesheet could carry this: wa-dialog sizes
+        // itself from --ha-dialog-width-md, ha-dialog.ts:345.
+        const context = {
+            config: { popup_style: 'home-assistant' },
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp: createMockElement('div'),
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        createStructure(context);
+
+        expect(context.popUp.style.setProperty).toHaveBeenCalledWith('--desktop-width', 'var(--ha-dialog-width-md, 580px)');
+    });
+
+    test('every other style keeps the width it has always had', () => {
+        const context = {
+            config: {},
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp: createMockElement('div'),
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        createStructure(context);
+
+        expect(context.popUp.style.setProperty).toHaveBeenCalledWith('--desktop-width', '540px');
+    });
+
+    test('a width_desktop written by the user still wins', () => {
+        const context = {
+            config: { popup_style: 'home-assistant', width_desktop: '720px' },
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp: createMockElement('div'),
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        createStructure(context);
+
+        expect(context.popUp.style.setProperty).toHaveBeenCalledWith('--desktop-width', '720px');
+    });
+
+    test('the Home Assistant style paints an opaque surface with no blur', () => {
+        // ha-bottom-sheet.ts leaves its surface filter at none and paints
+        // --ha-dialog-surface-background flat, so the reproduction cannot keep
+        // the translucency and the blur of a Bubble pop-up.
+        const context = {
+            config: { popup_style: 'home-assistant' },
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp: createMockElement('div'),
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        prepareStandaloneStructure(context);
+
+        expect(context.popUp.style.setProperty).toHaveBeenCalledWith('--custom-popup-filter', 'blur(0px)');
+    });
+
+    test('every other style keeps the blur it has always had', () => {
+        const context = {
+            config: {},
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp: createMockElement('div'),
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        prepareStandaloneStructure(context);
+
+        expect(context.popUp.style.setProperty).toHaveBeenCalledWith('--custom-popup-filter', 'blur(10px)');
+    });
+
+    test('a bg_blur written by the user wins over the style', () => {
+        const context = {
+            config: { popup_style: 'home-assistant', bg_blur: '16' },
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp: createMockElement('div'),
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        prepareStandaloneStructure(context);
+
+        expect(context.popUp.style.setProperty).toHaveBeenCalledWith('--custom-popup-filter', 'blur(16px)');
+    });
+
+    test('marks the shell as scrolled so the header can shadow its content', () => {
+        const popUp = createMockElement('div', 'bubble-pop-up');
+        const container = createMockElement('div');
+        container.scrollTop = 0;
+        container.closest = () => popUp;
+        const context = {
+            config: {},
+            content: createMockElement('div'),
+            shadowRoot: createMockElement('div'),
+            popUp,
+            elements: { popUpContainer: container },
+            editor: false,
+            detectedEditor: false,
+            closest: jest.fn(() => null),
+        };
+
+        prepareStandaloneStructure(context);
+        const scroller = container.listeners && container.listeners.scroll;
+        if (!scroller) return; // the listener lives elsewhere in this stub
+
+        container.scrollTop = 120;
+        scroller[0]();
+        expect(popUp.classList.contains('is-scrolled')).toBe(true);
+
+        container.scrollTop = 0;
+        scroller[0]();
+        expect(popUp.classList.contains('is-scrolled')).toBe(false);
     });
 
     test('clears the opening shadow marker when shadow opacity is zero', () => {

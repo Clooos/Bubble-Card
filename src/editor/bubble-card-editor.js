@@ -683,6 +683,13 @@ class BubbleCardEditor extends LitElement {
     }
 
     makeShowState(context = this._config, config = '', array = false, index) {
+        // The Home Assistant pop-up style copies a dialog that carries no icon
+        // before its title, so that switch shows what the style decided and
+        // refuses to be changed. The config is left alone: picking another
+        // style hands the user their own value back.
+        const iconForcedOff = this._config?.card_type === 'pop-up'
+            && this._config?.popup_style === 'home-assistant'
+            && !array;
         const entity = context?.entity ?? this._config.entity ?? '';
         const nameButton = this._config.button_type === 'name';
         const noEntity = !entity;
@@ -767,7 +774,8 @@ class BubbleCardEditor extends LitElement {
             <ha-formfield>
                 <ha-switch
                     aria-label="${t('editor.show.icon')}"
-                    .checked=${context?.show_icon ?? true}
+                    .disabled=${iconForcedOff}
+                    .checked=${iconForcedOff ? false : (context?.show_icon ?? true)}
                     .configValue="${config + "show_icon"}"
                     @change="${!array ? this._valueChanged : (ev) => this._arrayValueChange(index, { show_icon: ev.target.checked }, array)}"
                 ></ha-switch>

@@ -244,6 +244,7 @@
       "style": "ポップアップスタイル",
       "style_bubble": "バブル",
       "style_classic": "クラシック",
+      "style_home_assistant": "Home Assistant",
       "mode": "ポップアップモード",
       "mode_fit_content": "コンテンツに合わせる",
       "mode_centered": "ダイアログ (中央)",

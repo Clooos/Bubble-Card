@@ -1,4 +1,5 @@
 import { tGlobal } from '../../tools/localize.js';
+import { getPopupStyleDefault, hasClassicHeader } from "./style.js";
 import { render } from "lit";
 import { convertToRGBA } from "../../tools/style.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
@@ -101,7 +102,12 @@ function _applyPopupVariables(context) {
 
   const _isBackdropHidden = context.config.hide_backdrop;
   const _hasBackdropBlur = context.config.backdrop_blur && context.config.backdrop_blur !== "0";
-  const _bgBlur = parseFloat(context.config.bg_blur ?? 10);
+  // The sheet of Home Assistant is a flat opaque surface: ha-bottom-sheet.ts
+  // leaves --ha-bottom-sheet-surface-backdrop-filter at none and paints
+  // --ha-dialog-surface-background straight. So that style starts from no blur
+  // and no translucency, where every other one keeps the Bubble defaults. A
+  // bg_blur or a bg_opacity written by the user still wins over both.
+  const _bgBlur = parseFloat(context.config.bg_blur ?? getPopupStyleDefault(context.config, "bg_blur"));
 
   // Avoids double backdrop-filter for performance
   let _popupBlurValue;
@@ -113,7 +119,7 @@ function _applyPopupVariables(context) {
 
   context.popUp.style.setProperty("--custom-popup-filter", _popupBlurValue);
 
-  const shadowOpacity = Number(context.config.shadow_opacity ?? 0) / 100;
+  const shadowOpacity = Number(context.config.shadow_opacity ?? getPopupStyleDefault(context.config, 'shadow_opacity')) / 100;
   const normalizedShadowOpacity = Number.isFinite(shadowOpacity) ? shadowOpacity : 0;
   context.popUp.style.setProperty("--custom-shadow-opacity", normalizedShadowOpacity);
   context.popUp.classList.toggle("has-popup-shadow", normalizedShadowOpacity > 0);
@@ -174,7 +180,7 @@ export function renderHeaderButton(context) {
   const originalDoubleTapAction = context.config.double_tap_action;
   const originalHoldAction = context.config.hold_action;
   const originalButtonAction = context.config.button_action;
-  const isClassicStyle = context.config.popup_style === 'classic';
+  const isClassicStyle = hasClassicHeader(context.config);
 
   try {
     if (originalSubButtons) {
@@ -211,6 +217,17 @@ function _attachScrollMaskListener(container) {
   container.addEventListener('scroll', () => {
     if (!container.classList.contains('is-scrollable')) {
       container.classList.add('is-scrollable');
+    }
+
+    // A more info dialog fades a shadow in under its header the moment the
+    // content leaves the top, and takes it away again when it comes back. One
+    // property read on a listener that already runs, and the class is only
+    // written when the answer actually changes, so a scroll costs nothing more
+    // than it did.
+    const scrolledFromTop = container.scrollTop > 0;
+    if (scrolledFromTop !== container._bubbleScrolledFromTop) {
+      container._bubbleScrolledFromTop = scrolledFromTop;
+      container.closest('.bubble-pop-up')?.classList.toggle('is-scrolled', scrolledFromTop);
     }
   }, { passive: true });
 
@@ -315,13 +332,15 @@ export function createStructure(context) {
     if (!context.updatePopupColor) {
       context.updatePopupColor = () => {
         const color = context.config.bg_color || getThemeBackgroundColor();
-        const opacity = Math.min(1, Math.max(0, (context.config.bg_opacity ?? 88) / 100));
+        const defaultOpacity = getPopupStyleDefault(context.config, 'bg_opacity');
+        const opacity = Math.min(1, Math.max(0, (context.config.bg_opacity ?? defaultOpacity) / 100));
+        const lightness = getPopupStyleDefault(context.config, 'bg_lightness');
         if (color === context._lastPopupBgColor && opacity === context._lastPopupBgOpacity) return;
         context._lastPopupBgColor = color;
         context._lastPopupBgOpacity = opacity;
-        const rgbaColor = convertToRGBA(color, opacity, 1.02);
+        const rgbaColor = convertToRGBA(color, opacity, lightness);
         const fadeOpacity = Math.min(1, opacity * 0.65);
-        const fadeColor = convertToRGBA(color, fadeOpacity, 1.02);
+        const fadeColor = convertToRGBA(color, fadeOpacity, lightness);
 
         context.popUp.style.setProperty("--bubble-pop-up-background-color", rgbaColor);
         context.popUp.style.setProperty("--bubble-pop-up-fade-color", fadeColor);
@@ -330,7 +349,11 @@ export function createStructure(context) {
 
     context.updatePopupColor();
 
-    context.popUp.style.setProperty("--desktop-width", context.config.width_desktop ?? "540px");
+    // Written inline, so it beats any stylesheet: the default has to be chosen
+    // here rather than in the style block. wa-dialog sizes itself from
+    // --ha-dialog-width-md (ha-dialog.ts:345), which is what the Home Assistant
+    // style follows. A width_desktop of the user still wins over both.
+    context.popUp.style.setProperty("--desktop-width", context.config.width_desktop ?? getPopupStyleDefault(context.config, "width_desktop"));
     syncPopupModeClasses(context.popUp, context.config);
     syncPopupPerformanceModeClasses(context.popUp, context.config);
     _configurePopupInteractionHandlers(context);

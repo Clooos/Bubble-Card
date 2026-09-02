@@ -244,6 +244,7 @@
       "style": "Pop-upstijl",
       "style_bubble": "Bubble",
       "style_classic": "Klassiek",
+      "style_home_assistant": "Home Assistant",
       "mode": "Pop-upmodus",
       "mode_fit_content": "Aanpassen aan inhoud",
       "mode_centered": "Dialoog (gecentreerd)",

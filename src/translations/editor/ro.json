@@ -244,6 +244,7 @@
       "style": "Stilul pop-upului",
       "style_bubble": "Bubble",
       "style_classic": "Clasic",
+      "style_home_assistant": "Home Assistant",
       "mode": "Modul pop-upului",
       "mode_fit_content": "Ajustare la conținut",
       "mode_centered": "Dialog (centrat)",

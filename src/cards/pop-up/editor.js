@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { fireEvent } from '../../tools/utils.js';
 import setupTranslation, { ensureEditorTranslations } from '../../tools/localize.js';
+import { getPopupStyleDisplayDefault, isHomeAssistantStyle } from './style.js';
 import { tTemplate } from '../../editor/utils.js';
 import { renderButtonEditor } from '../button/editor.js';
 import { registerPopUpHash, isHashOnCurrentPage } from './navigation-picker-bridge.js';
@@ -62,6 +63,7 @@ function renderPopupStyleDropdown(editor) {
                         options: [
                             { label: t('editor.popup.style_bubble') + t('editor.common.default_suffix'), value: 'bubble' },
                             { label: t('editor.popup.style_classic'), value: 'classic' },
+                            { label: t('editor.popup.style_home_assistant'), value: 'home-assistant' },
                         ],
                         mode: 'dropdown'
                     }
@@ -73,7 +75,7 @@ function renderPopupStyleDropdown(editor) {
                 if (value === 'bubble' || !value) {
                     const newConfig = { ...editor._config };
                     delete newConfig.popup_style;
-                    if (editor._config.popup_style === 'classic') {
+                    if (editor._config.popup_style === 'classic' || editor._config.popup_style === 'home-assistant') {
                         delete newConfig.button_type;
                     }
                     fireEvent(editor, 'config-changed', { config: newConfig });
@@ -90,10 +92,15 @@ function renderPopupStyleDropdown(editor) {
 
 function renderPopUpModeDropdown(editor) {
     const t = setupTranslation(editor.hass);
+    // The more info dialog adapts to the page, so the Home Assistant style
+    // carries that geometry and the choice is not the user's to make: the
+    // control shows what the style decided and refuses to be changed.
+    const forcedByStyle = isHomeAssistantStyle(editor._config);
     return html`
         <ha-form
             .hass=${editor.hass}
-            .data=${{ popup_mode: getPopUpModeValue(editor._config) }}
+            .disabled=${forcedByStyle}
+            .data=${{ popup_mode: forcedByStyle ? 'adaptive-dialog' : getPopUpModeValue(editor._config) }}
             .schema=${[{
                 name: 'popup_mode',
                 selector: {
@@ -669,7 +676,8 @@ export function renderPopUpEditor(editor) {
                                 </ha-formfield>
                                 <ha-form
                                     .hass=${editor.hass}
-                                    .data=${{ buttons_position: editor._config.buttons_position ?? 'right' }}
+                                    .disabled=${isHomeAssistantStyle(editor._config)}
+                                    .data=${{ buttons_position: isHomeAssistantStyle(editor._config) ? 'left' : (editor._config.buttons_position ?? 'right') }}
                                     .schema=${[{
                                         name: 'buttons_position',
                                         selector: {
@@ -833,6 +841,7 @@ export function renderPopUpEditor(editor) {
                             <!-- Margin -->
                             <ha-form
                                 .hass=${editor.hass}
+                                .disabled=${isHomeAssistantStyle(editor._config)}
                                 .data=${{ margin: editor._config?.margin || '7px' }}
                                 .schema=${[{ name: 'margin', selector: { text: {} } }]}
                                 .computeLabel=${() => t('editor.popup.margin')}
@@ -872,7 +881,7 @@ export function renderPopUpEditor(editor) {
                             <!-- Width desktop -->
                             <ha-form
                                 .hass=${editor.hass}
-                                .data=${{ width_desktop: editor._config?.width_desktop || '540px' }}
+                                .data=${{ width_desktop: editor._config?.width_desktop || getPopupStyleDisplayDefault(editor._config, 'width_desktop') }}
                                 .schema=${[{ name: 'width_desktop', selector: { text: {} } }]}
                                 .computeLabel=${() => t('editor.popup.width_desktop')}
                                 @value-changed=${(ev) => {
@@ -898,7 +907,7 @@ export function renderPopUpEditor(editor) {
                             <!-- Background opacity -->
                             <ha-form
                                 .hass=${editor.hass}
-                                .data=${{ bg_opacity: editor._config?.bg_opacity !== undefined ? editor._config?.bg_opacity : '88' }}
+                                .data=${{ bg_opacity: editor._config?.bg_opacity !== undefined ? editor._config?.bg_opacity : String(getPopupStyleDisplayDefault(editor._config, 'bg_opacity')) }}
                                 .schema=${[{ name: 'bg_opacity', selector: { text: { type: 'number' } }, options: { min: 0, max: 100 } }]}
                                 .computeLabel=${() => t('editor.popup.bg_opacity')}
                                 @value-changed=${(ev) => {
@@ -911,7 +920,7 @@ export function renderPopUpEditor(editor) {
                             <!-- Background blur -->
                             <ha-form
                                 .hass=${editor.hass}
-                                .data=${{ bg_blur: editor._config?.bg_blur !== undefined ? editor._config?.bg_blur : '10' }}
+                                .data=${{ bg_blur: editor._config?.bg_blur !== undefined ? editor._config?.bg_blur : String(getPopupStyleDisplayDefault(editor._config, 'bg_blur')) }}
                                 .schema=${[{ name: 'bg_blur', selector: { text: { type: 'number' } }, options: { min: 0, max: 100 } }]}
                                 .computeLabel=${() => t('editor.popup.bg_blur')}
                                 @value-changed=${(ev) => {
@@ -937,7 +946,7 @@ export function renderPopUpEditor(editor) {
                             <!-- Shadow opacity -->
                             <ha-form
                                 .hass=${editor.hass}
-                                .data=${{ shadow_opacity: editor._config?.shadow_opacity !== undefined ? editor._config?.shadow_opacity : '0' }}
+                                .data=${{ shadow_opacity: editor._config?.shadow_opacity !== undefined ? editor._config?.shadow_opacity : String(getPopupStyleDisplayDefault(editor._config, 'shadow_opacity')) }}
                                 .schema=${[{ name: 'shadow_opacity', selector: { text: { type: 'number' } }, options: { min: 0, max: 100 } }]}
                                 .computeLabel=${() => t('editor.popup.shadow_opacity')}
                                 @value-changed=${(ev) => {

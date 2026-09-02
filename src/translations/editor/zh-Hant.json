@@ -244,6 +244,7 @@
       "style": "彈出視窗樣式",
       "style_bubble": "氣泡",
       "style_classic": "經典",
+      "style_home_assistant": "Home Assistant",
       "mode": "彈出視窗模式",
       "mode_fit_content": "符合內容大小",
       "mode_centered": "對話框 (置中)",

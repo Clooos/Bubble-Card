@@ -9,6 +9,7 @@ jest.unstable_mockModule('./backdrop.js', () => ({
 }));
 
 jest.unstable_mockModule('./helpers.js', () => ({
+    isHomeAssistantStyle: (config) => config?.popup_style === 'home-assistant',
     addHash: jest.fn(),
     keepPopupHostMounted: jest.fn((context) => {
         if (context.sectionRow?.tagName?.toLowerCase() === 'hui-card') {
@@ -444,6 +445,24 @@ describe('changeEditor', () => {
         expect(context.sectionRow.style.display).toBe('none');
         expect(context.sectionRowContainer.style.display).toBe('none');
         expect(context.editorAccess).toBe(false);
+    });
+
+    test('the Home Assistant style puts its close button on the left', () => {
+        // buttons_position is the option Bubble already has for that, so the
+        // style forces it rather than reordering anything of its own.
+        const context = {
+            config: { popup_style: 'home-assistant' },
+            popUp: { classList: createMockClassList() },
+        };
+
+        syncHeaderVisibilityClasses(context);
+
+        expect(context.popUp.classList.contains('close-button-left')).toBe(true);
+
+        // And every other style keeps answering to the option itself.
+        context.config = { popup_style: 'classic' };
+        syncHeaderVisibilityClasses(context);
+        expect(context.popUp.classList.contains('close-button-left')).toBe(false);
     });
 
     test('syncs popup header action classes from config', () => {

@@ -244,6 +244,7 @@
       "style": "Opspringerstyl",
       "style_bubble": "Bubble",
       "style_classic": "Klassiek",
+      "style_home_assistant": "Home Assistant",
       "mode": "Opspringermodus",
       "mode_fit_content": "Pas by inhoud",
       "mode_centered": "Dialoog (gesentreer)",

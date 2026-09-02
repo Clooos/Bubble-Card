@@ -280,6 +280,7 @@
       "style": "Pop-up style",
       "style_bubble": "Bubble",
       "style_classic": "Classic",
+      "style_home_assistant": "Home Assistant",
       "mode": "Pop-up mode",
       "mode_fit_content": "Fit content",
       "mode_centered": "Dialog (centered)",

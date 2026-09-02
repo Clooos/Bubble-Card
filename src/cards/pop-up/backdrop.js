@@ -1,4 +1,5 @@
 import { convertToRGBA } from "../../tools/style.js";
+import { isHomeAssistantStyle } from "./style.js";
 import { createElement, getCachedBodyStyles } from "../../tools/utils.js";
 import { handleCustomStyles } from "../../tools/style-processor.js";
 import backdropStyles from "./backdrop.css";
@@ -122,6 +123,20 @@ export function getBackdrop(context) {
         } else {
             backdropHostElement.style.display = "";
             backdropHostElement.style.pointerEvents = "";
+        }
+
+        // The scrim of a more info dialog: wa-dialog paints its backdrop with
+        // --wa-color-overlay-modal, which Home Assistant leaves at its default
+        // of black at a quarter, and puts no filter on it. Written as the
+        // default rather than the value, so --bubble-backdrop-background-color
+        // still wins for anyone who set it.
+        if (isHomeAssistantStyle(activeContext.config)) {
+            internalBackdropElement.style.setProperty(
+                "--bubble-default-backdrop-background-color",
+                "var(--wa-color-overlay-modal, rgba(0, 0, 0, 0.25))"
+            );
+        } else {
+            internalBackdropElement.style.removeProperty("--bubble-default-backdrop-background-color");
         }
 
         const backdropBlur = activeContext.config.backdrop_blur ?? 0;

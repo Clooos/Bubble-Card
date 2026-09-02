@@ -244,6 +244,7 @@
       "style": "Gaya pop-up",
       "style_bubble": "Bubble",
       "style_classic": "Klasik",
+      "style_home_assistant": "Home Assistant",
       "mode": "Mode pop-up",
       "mode_fit_content": "Sesuai konten",
       "mode_centered": "Dialog (di tengah)",
