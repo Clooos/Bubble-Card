@@ -49,8 +49,29 @@ function createStyle() {
     return style;
 }
 
-function createNode({ localName = 'div', classes = [], scrollTop = 0 } = {}) {
-    return { localName, classList: createClassList(classes), scrollTop };
+function createNode({
+    localName = 'div',
+    classes = [],
+    scrollTop = 0,
+    scrollHeight = 0,
+    clientHeight = 0,
+    overflowY = 'visible',
+} = {}) {
+    return {
+        nodeType: 1,
+        localName,
+        classList: createClassList(classes),
+        scrollTop,
+        scrollHeight,
+        clientHeight,
+        overflowY,
+    };
+}
+
+// A box a finger can scroll: taller content than box, room left below, and an
+// overflow the browser actually pans.
+function createScroller({ scrollTop = 0, height = 400, content = 1200, overflowY = 'auto' } = {}) {
+    return createNode({ scrollTop, clientHeight: height, scrollHeight: content, overflowY });
 }
 
 let clock;
@@ -147,6 +168,8 @@ beforeEach(() => {
                 .filter((entry) => entry.handler !== handler || entry.phase !== phase);
         }),
     };
+
+    global.getComputedStyle = jest.fn((node) => ({ overflowY: node.overflowY ?? 'visible' }));
 
     global.requestAnimationFrame = jest.fn((callback) => {
         frames.push(callback);
@@ -313,12 +336,28 @@ describe('gestures the pop-up must not take', () => {
         expect(closePopup).not.toHaveBeenCalled();
     });
 
-    test('an upward drag is handed back, so a scrollable body still scrolls', () => {
+    test('an upward drag is handed back when the path cannot be read at all', () => {
         const { context, popUp } = harness();
 
         context.handleTouchStart(touchEvent([{ y: 400 }]));
         clock += 16;
+        // No composed path, so nothing is ruled out and the gesture goes back
+        // exactly the way it did before any of this was here.
         const upward = touchEvent([{ y: 320 }]);
+        dispatchMove(upward);
+
+        expect(upward.preventDefault).not.toHaveBeenCalled();
+        expect(popUp.style.transform).toBe('');
+        expect(documentListeners.touchmove).toHaveLength(0);
+    });
+
+    test('an upward drag is handed back to a scroller that still has room', () => {
+        const { context, popUp } = harness();
+        const path = [createNode(), createScroller({ scrollTop: 0 }), popUp];
+
+        context.handleTouchStart(touchEvent([{ y: 400 }], { path }));
+        clock += 16;
+        const upward = touchEvent([{ y: 320 }], { path });
         dispatchMove(upward);
 
         expect(upward.preventDefault).not.toHaveBeenCalled();
@@ -511,5 +550,126 @@ describe('teardown', () => {
         configurePopupSlideToClose(context, closePopup);
 
         expect(context.handleTouchStart).toBe(firstHandler);
+    });
+});
+
+// The pop-up's own scroller carries `overscroll-behavior: contain`, so a drag
+// that lands in the body is already held. The header is that scroller's sibling,
+// so a drag starting there has no scroll container at all between it and the
+// fixed shell, and the browser gives it to the dashboard behind the pop-up.
+describe('an upward drag that belongs to nothing', () => {
+    // The header of a real pop-up: plain boxes all the way up to the shell.
+    const headerPath = (popUp) => [createNode(), createNode(), popUp];
+
+    function dragUp(context, path, { from = 400, steps = 4, distance = 160 } = {}) {
+        context.handleTouchStart(touchEvent([{ y: from }], { path }));
+
+        const moveEvents = [];
+        for (let step = 1; step <= steps; step += 1) {
+            clock += 16;
+            const event = touchEvent([{ y: from - Math.round((distance * step) / steps) }], { path });
+            moveEvents.push(event);
+            dispatchMove(event);
+        }
+
+        return moveEvents;
+    }
+
+    test('is cancelled instead of handed over, so the page behind stays put', () => {
+        const { context, popUp } = harness();
+
+        const moveEvents = dragUp(context, headerPath(popUp));
+
+        expect(moveEvents.every((event) => event.preventDefault.mock.calls.length === 1)).toBe(true);
+    });
+
+    test('keeps cancelling for the rest of the touch', () => {
+        const { context, popUp } = harness();
+
+        dragUp(context, headerPath(popUp));
+
+        // The browser only asks once. Letting a single move through after the
+        // decision hands it the whole remaining gesture.
+        expect(documentListeners.touchmove).toHaveLength(1);
+    });
+
+    test('never touches the shell and never closes the pop-up', () => {
+        const { context, popUp, closePopup } = harness();
+
+        dragUp(context, headerPath(popUp));
+        frames.splice(0).forEach((frame) => frame());
+        dispatchEnd();
+
+        expect(popUp.style.transform).toBe('');
+        expect(popUp.style.transition).toBe('');
+        expect(closePopup).not.toHaveBeenCalled();
+    });
+
+    test('ends with the touch, so the next drag closes normally', () => {
+        const { context, popUp, closePopup } = harness({ height: 800 });
+
+        dragUp(context, headerPath(popUp));
+        dispatchEnd();
+
+        drag(context, { from: 200, to: 700, steps: 5, stepMs: 40, restMs: 200 });
+
+        expect(closePopup).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not count the pop-up scroller when its content fits', () => {
+        const { context, popUp } = harness();
+        // What `.bubble-pop-up-container` is on a pop-up that does not scroll:
+        // an `overflow: auto` box with nothing to move. It is also the box whose
+        // `overscroll-behavior: contain` the browser skips for that reason.
+        const fits = createScroller({ height: 400, content: 400 });
+
+        const moveEvents = dragUp(context, [createNode(), fits, popUp]);
+
+        expect(moveEvents.every((event) => event.preventDefault.mock.calls.length === 1)).toBe(true);
+    });
+
+    test('does not count a box only script can scroll', () => {
+        const { context, popUp } = harness();
+        const clipped = createScroller({ overflowY: 'hidden' });
+
+        const moveEvents = dragUp(context, [createNode(), clipped, popUp]);
+
+        expect(moveEvents.every((event) => event.preventDefault.mock.calls.length === 1)).toBe(true);
+    });
+
+    test('stops looking at the shell, so the dashboard behind never counts', () => {
+        const { context, popUp } = harness();
+        const dashboard = createScroller();
+
+        // The scroller sits past the shell, which is exactly the one this
+        // gesture exists to keep still.
+        const moveEvents = dragUp(context, [createNode(), popUp, dashboard]);
+
+        expect(moveEvents.every((event) => event.preventDefault.mock.calls.length === 1)).toBe(true);
+    });
+
+    test('reads the path once, however many moves the drag produces', () => {
+        const { context, popUp } = harness();
+        const path = headerPath(popUp);
+        let reads = 0;
+        const counted = { ...path[0], get scrollHeight() { reads += 1; return 0; } };
+
+        dragUp(context, [counted, path[1], popUp], { steps: 8 });
+
+        expect(reads).toBe(1);
+    });
+
+    test('leaves a horizontal drag alone', () => {
+        const { context, popUp } = harness();
+        const path = headerPath(popUp);
+
+        context.handleTouchStart(touchEvent([{ x: 100, y: 400 }], { path }));
+        clock += 16;
+        // Mostly sideways, and a shade upward. A carousel owns this one.
+        const sideways = touchEvent([{ x: 40, y: 396 }], { path });
+        dispatchMove(sideways);
+
+        expect(sideways.preventDefault).not.toHaveBeenCalled();
+        expect(documentListeners.touchmove).toHaveLength(0);
     });
 });

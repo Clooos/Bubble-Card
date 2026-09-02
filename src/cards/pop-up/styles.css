@@ -60,6 +60,12 @@
     overscroll-behavior: auto;
 }
 
+/* Inline in the editor there is a panel behind the pop-up and scrolling it by
+   dragging the header is the only way a touch user reaches the rest of it. */
+.bubble-pop-up.editor > .bubble-header-container {
+    touch-action: auto;
+}
+
 .bubble-pop-up:not(.editor):not(.is-popup-closed) .bubble-pop-up-container {
     --bubble-pop-up-mask-top-alpha: 1;
     --bubble-pop-up-mask-bottom-alpha: 1;
@@ -699,6 +705,19 @@
     align-items: flex-start;
     flex-shrink: 0;
     box-sizing: border-box;
+    /* The header sits beside the pop-up's scroller rather than inside it, so
+       the `overscroll-behavior: contain` that keeps the rest of the pop-up to
+       itself does not cover it, and a finger panning up from here reaches the
+       fixed shell without meeting anything that scrolls. The browser then moves
+       the dashboard behind the pop-up. A header has nothing to pan vertically,
+       so that axis is declared closed and the offer is never made.
+
+       It is also the only way to reach a header holding a slider. A horizontal
+       one declares `touch-action: pan-y` so the page can be scrolled past it,
+       and that lets the browser take the gesture on the compositor without ever
+       calling a listener. `pan-x` is left alone, it was already the slider's to
+       refuse. */
+    touch-action: pan-x pinch-zoom;
 }
 
 .bubble-header {

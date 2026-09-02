@@ -36,6 +36,11 @@ const CLOSE_HEIGHT_RATIO = 0.5;
 // immediate, large enough that a tap's jitter never picks a direction.
 const DIRECTION_LOCK_SLOP = 8;
 
+// Overflow values a finger can actually move. A `hidden` or `clip` box has
+// scrollable overflow just the same, but only script can scroll it, so it is
+// not somewhere a drag can go.
+const SCROLLABLE_OVERFLOW = new Set(['auto', 'scroll', 'overlay']);
+
 // Elements that own a vertical drag of their own, straight from HA's list.
 const SWIPE_LOCKED_CLASSES = [
     'volume-slider-container',
@@ -164,6 +169,59 @@ function readGestureTarget(event, popUp) {
     return { blocked: false, slider };
 }
 
+// Room left to scroll down, which is what a finger moving up is asking for.
+function canTakeUpwardDrag(node) {
+    if (node.nodeType !== 1) {
+        return false;
+    }
+
+    // The cheapest question, and the one that rejects almost every node on the
+    // path. It is also the read that forces the layout the rest of the walk then
+    // gets for free.
+    const scrollable = node.scrollHeight - node.clientHeight;
+    if (scrollable <= 1) {
+        return false;
+    }
+
+    if (!SCROLLABLE_OVERFLOW.has(getComputedStyle(node).overflowY)) {
+        return false;
+    }
+
+    // Agrees with the rule `isSwipeLockedNode` applies at touchstart, where a
+    // node the user has already scrolled hands the whole gesture over.
+    return node.scrollTop < scrollable - 1;
+}
+
+// The dashboard behind an open pop-up must not move, and the only thing holding
+// it back is the `overscroll-behavior: contain` on the pop-up's own scroller.
+// Whatever is not inside that scroller is not covered by it, starting with the
+// header, which is its sibling: a drag from there finds nothing to scroll before
+// the fixed shell and the browser takes the page instead.
+//
+// Naming the header would close that one spot and leave the next one open, so
+// what is asked here is the question the browser is about to answer itself. Is
+// there anything on the way to the shell this drag could belong to?
+function hasSomewhereToScroll(event, popUp) {
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : null;
+    if (!path?.length) {
+        // Nothing read means nothing ruled out, and the gesture is handed over
+        // exactly the way it was before.
+        return true;
+    }
+
+    for (const node of path) {
+        if (node === popUp) {
+            break;
+        }
+
+        if (node && canTakeUpwardDrag(node)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 // The `transition` and `transform` of the shell are declared `!important` by
 // the centred and adaptive-dialog blocks, and modules and card-mod snippets
 // reach the shell the same way, so both writes carry the priority themselves.
@@ -235,6 +293,10 @@ export function configurePopupSlideToClose(context, closePopup) {
     let closeDistance = 0;
     let slider = null;
     let dragFrame = null;
+    // Set when the drag turned out to belong to nothing at all. The shell is
+    // never touched in this state, the moves are only kept from reaching the
+    // page behind.
+    let blocking = false;
 
     const writeOffset = () => {
         dragFrame = null;
@@ -254,6 +316,7 @@ export function configurePopupSlideToClose(context, closePopup) {
     const detach = () => {
         active = false;
         dragging = false;
+        blocking = false;
         slider = null;
 
         if (dragFrame !== null) {
@@ -302,6 +365,13 @@ export function configurePopupSlideToClose(context, closePopup) {
             return;
         }
 
+        if (blocking) {
+            if (event.cancelable) {
+                event.preventDefault();
+            }
+            return;
+        }
+
         const currentY = touch.clientY;
         const travelY = currentY - startY;
 
@@ -311,13 +381,29 @@ export function configurePopupSlideToClose(context, closePopup) {
                 return;
             }
 
-            // Anything that is not a downward drag belongs to whatever is under
-            // the finger, a scrollable body, a carousel, a tab strip. Handing it
-            // over once is what keeps those working, and taking it back mid-touch
-            // is not possible anyway, the browser has already committed the
-            // gesture.
-            if (Math.abs(travelX) > Math.abs(travelY) || travelY <= 0) {
+            // A horizontal drag belongs to whatever is under the finger, a
+            // carousel, a tab strip. Handing it over once is what keeps those
+            // working, and taking it back mid-touch is not possible anyway, the
+            // browser has already committed the gesture.
+            if (Math.abs(travelX) > Math.abs(travelY)) {
                 detach();
+                return;
+            }
+
+            // So does an upward one, as long as something under the finger can
+            // take it. When nothing can, the browser gives it to the dashboard
+            // behind the pop-up instead, which is the one place it must never
+            // go, so the rest of the touch is cancelled and nothing moves.
+            if (travelY <= 0) {
+                if (hasSomewhereToScroll(event, context.popUp)) {
+                    detach();
+                    return;
+                }
+
+                blocking = true;
+                if (event.cancelable) {
+                    event.preventDefault();
+                }
                 return;
             }
 
@@ -409,6 +495,7 @@ export function configurePopupSlideToClose(context, closePopup) {
 
         active = true;
         dragging = false;
+        blocking = false;
         offset = 0;
         closeDistance = 0;
         slider = target.slider;
