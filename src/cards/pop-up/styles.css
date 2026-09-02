@@ -182,10 +182,12 @@
     content: none;
 }
 
+/* The edge-to-edge companion app leaves the top safe-area inset to the page */
 .bubble-pop-up:not(.editor) {
-    --bubble-pop-up-available-height: calc(100vh - 56px - var(--custom-height-offset-mobile));
+    --bubble-pop-up-safe-area-top: var(--safe-area-inset-top, 0px);
+    --bubble-pop-up-available-height: calc(100vh - 56px - var(--bubble-pop-up-safe-area-top) - var(--custom-height-offset-mobile));
     height: auto;
-    top: calc(56px + var(--custom-height-offset-mobile));
+    top: calc(56px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-mobile));
     bottom: 0;
 }
 
@@ -300,7 +302,7 @@
 .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) {
     height: 100%;
     top: auto;
-    bottom: calc(-56px - var(--custom-height-offset-mobile));
+    bottom: calc(-56px - var(--bubble-pop-up-safe-area-top) - var(--custom-height-offset-mobile));
 }
 
 .bubble-pop-up.is-standalone-pop-up:not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog):not(.editor) {
@@ -320,7 +322,7 @@
     height: 100%;
     margin-top: -50px;
     padding-top: 18px;
-    padding-bottom: calc(140px + var(--custom-height-offset-mobile));
+    padding-bottom: calc(140px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-mobile));
     mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 40px), transparent 100%);
     touch-action: pan-y pinch-zoom;
