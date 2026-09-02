@@ -362,6 +362,7 @@
       "hide_target_low": "Oculta la temperatura objectiu mínima",
       "hide_target_high": "Oculta la temperatura objectiu màxima",
       "hide_temp_control": "Oculta el control de temperatura",
+      "hide_humidity_control": "Oculta el control d'humitat",
       "constant_background": "Color de fons constant quan està encès",
       "info_title": "Targeta de climatització",
       "info_body": "Aquesta targeta us permet controlar les vostres entitats de climatització. També podeu afegir un subbotó que mostra un menú desplegable amb els vostres modes de climatització (comproveu si teniu \"Menú de selecció\" disponible quan creeu un subbotó nou)."

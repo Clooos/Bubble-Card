@@ -362,6 +362,7 @@
       "hide_target_low": "Underi Zieltemperatur usblände",
       "hide_target_high": "Oberi Zieltemperatur usblände",
       "hide_temp_control": "Temperatur-Regelig usblände",
+      "hide_humidity_control": "Luftfüechtigkeits-Regelig usblände",
       "constant_background": "Konstanti Hintergrundfarb, wänn II",
       "info_title": "Klima-Charte",
       "info_body": "Mit dere Charte chasch dini Klima-Entitäte stüüre. Du chasch au en Sub-Button hinzuefüege, wo es Dropdown-Menü für dini Klima-Modi azeigt (lueg, öb „Uswahl-Menü\" verfüegbar isch, wänn du en neue Sub-Button erstellsch)."

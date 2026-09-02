@@ -362,6 +362,7 @@
       "hide_target_low": "Underste doeltemperatuer ferbergje",
       "hide_target_high": "Boppeste doeltemperatuer ferbergje",
       "hide_temp_control": "Temperatuerregeling ferbergje",
+      "hide_humidity_control": "Fochtichheidsregeling ferbergje",
       "constant_background": "Konstante eftergrûnkleur as OAN",
       "info_title": "Klimaatkaart",
       "info_body": "Mei dizze kaart betsjinnest dyn klimaatentiteiten. Do kinst ek in subknop tafoegje dy't in dropdownmenu foar dyn klimaatmodi toant (sjoch oft \"Seleksjemenu\" beskikber is ast in nije subknop oanmakkest)."

@@ -1,21 +1,23 @@
 import { html } from "lit";
 import setupTranslation from '../../tools/localize.js';
+import { CLIMATE_CARD_DOMAINS, getClimateDomainConfig } from './domains.js';
 
 
-// Add the default "HVAC modes menu" sub-button to a card that was never
-// configured. The test is on the raw sub_button key, before any normalization:
+// Add the default modes menu sub-button to a card that was never configured:
+// the HVAC modes of a thermostat, the modes of a humidifier, the operations of a
+// water heater. The test is on the raw sub_button key, before any normalization:
 // the sub-button editor keeps an explicit empty list on climate cards, so a
 // list emptied on purpose is told apart from a brand new card and the menu
 // stops coming back on every edit (#2176, #2456). No editor-instance flag
 // here: a new instance is created every time the card is opened.
-function seedDefaultSubButton(editor, t) {
+function seedDefaultSubButton(editor, t, domainConfig) {
     if (editor._config.sub_button !== undefined || !editor._config.entity) return;
-    if (!editor.hass.states[editor._config.entity]?.attributes?.hvac_modes) return;
+    if (!editor.hass.states[editor._config.entity]?.attributes?.[domainConfig.modesAttribute]) return;
 
     editor._config.sub_button = {
         main: [{
-            name: t('editor.climate.hvac_menu_name'),
-            select_attribute: 'hvac_modes',
+            name: t(domainConfig.menuNameKey),
+            select_attribute: domainConfig.modesAttribute,
             state_background: false,
             show_arrow: false
         }]
@@ -26,9 +28,10 @@ function seedDefaultSubButton(editor, t) {
 export function renderClimateEditor(editor){
     const t = setupTranslation(editor.hass);
     let button_action = editor._config.button_action || '';
+    const domainConfig = getClimateDomainConfig(editor._config.entity);
 
     if (editor._config.card_type === "climate") {
-        seedDefaultSubButton(editor, t);
+        seedDefaultSubButton(editor, t, domainConfig);
     }
 
     return html`
@@ -40,7 +43,7 @@ export function renderClimateEditor(editor){
             .schema=${[
                         { name: "entity",
                         label: t('editor.common.entity'),
-                        selector: { entity: {domain:["climate"]}  },
+                        selector: { entity: {domain: CLIMATE_CARD_DOMAINS}  },
                         },
                     ]}   
             .computeLabel=${editor._computeLabelCallback}
@@ -84,14 +87,14 @@ export function renderClimateEditor(editor){
                                 schema: [
                                     {
                                         name: "min_temp",
-                                        label: t('editor.climate.min_temp'),
+                                        label: t(domainConfig.minLabelKey),
                                         selector: { number: {
                                             step: "any"
                                         } },
                                     },
                                     {
                                         name: "max_temp",
-                                        label: t('editor.climate.max_temp'),
+                                        label: t(domainConfig.maxLabelKey),
                                         selector: { number: {
                                             step: "any"
                                         } },
@@ -138,13 +141,13 @@ export function renderClimateEditor(editor){
                     ` : ''}
                     <ha-formfield>
                         <ha-switch
-                            aria-label="${editor._optionalLabel(t('editor.climate.hide_temp_control'))}"
+                            aria-label="${editor._optionalLabel(t(domainConfig.hideLabelKey))}"
                             .checked=${editor._config.hide_temperature}
                             .configValue="${"hide_temperature"}"
                             @change=${editor._valueChanged}
                         ></ha-switch>
                         <div class="mdc-form-field">
-                            <label class="mdc-label">${editor._optionalLabel(t('editor.climate.hide_temp_control'))}</label> 
+                            <label class="mdc-label">${editor._optionalLabel(t(domainConfig.hideLabelKey))}</label> 
                         </div>
                     </ha-formfield>
                     <ha-formfield>

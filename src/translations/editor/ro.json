@@ -362,6 +362,7 @@
       "hide_target_low": "Ascunde temperatura țintă minimă",
       "hide_target_high": "Ascunde temperatura țintă maximă",
       "hide_temp_control": "Ascunde controlul temperaturii",
+      "hide_humidity_control": "Ascunde controlul umidității",
       "constant_background": "Culoare de fundal constantă când este pornit",
       "info_title": "Card de climatizare",
       "info_body": "Acest card vă permite să controlați entitățile de climatizare. Puteți adăuga și un sub-buton care afișează un meniu derulant cu modurile de climatizare (verificați dacă aveți \"Meniu de selecție\" disponibil când creați un sub-buton nou)."

@@ -362,6 +362,7 @@
       "hide_target_low": "Ocultar temperatura objetivo baja",
       "hide_target_high": "Ocultar temperatura objetivo alta",
       "hide_temp_control": "Ocultar el control de temperatura",
+      "hide_humidity_control": "Ocultar el control de humedad",
       "constant_background": "Color de fondo constante cuando está encendido",
       "info_title": "Tarjeta de clima",
       "info_body": "Esta tarjeta te permite controlar tus entidades de clima. También puedes añadir un sub-botón que muestre un menú desplegable para tus modos de clima (comprueba si tienes \"Menú de selección\" disponible al crear un nuevo sub-botón)."

@@ -362,6 +362,7 @@
       "hide_target_low": "隐藏目标温度下限",
       "hide_target_high": "隐藏目标温度上限",
       "hide_temp_control": "隐藏温度控制",
+      "hide_humidity_control": "隐藏湿度控制",
       "constant_background": "开启时保持背景色不变",
       "info_title": "空调卡片",
       "info_body": "这张卡片可以控制你的空调实体。你还可以添加一个显示空调模式下拉菜单的子按钮 (创建新子按钮时看看是否有“选择菜单”可用)。"

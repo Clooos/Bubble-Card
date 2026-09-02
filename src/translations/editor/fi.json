@@ -362,6 +362,7 @@
       "hide_target_low": "Piilota alempi tavoitelämpötila",
       "hide_target_high": "Piilota ylempi tavoitelämpötila",
       "hide_temp_control": "Piilota lämpötilan säätö",
+      "hide_humidity_control": "Piilota kosteuden säätö",
       "constant_background": "Pysyvä taustaväri, kun päällä",
       "info_title": "Ilmastointikortti",
       "info_body": "Tällä kortilla voit ohjata ilmastointientiteettejäsi. Voit myös lisätä alipainikkeen, joka näyttää pudotusvalikon ilmastointitiloillesi (tarkista, onko \"Valintavalikko\" käytettävissä, kun luot uuden alipainikkeen)."

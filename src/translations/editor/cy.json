@@ -362,6 +362,7 @@
       "hide_target_low": "Cuddio'r tymheredd targed isel",
       "hide_target_high": "Cuddio'r tymheredd targed uchel",
       "hide_temp_control": "Cuddio'r rheolydd tymheredd",
+      "hide_humidity_control": "Cuddio'r rheolydd lleithder",
       "constant_background": "Lliw cefndir cyson pan fydd YMLAEN",
       "info_title": "Cerdyn hinsawdd",
       "info_body": "Mae'r cerdyn hwn yn eich galluogi i reoli eich endidau hinsawdd. Gallwch hefyd ychwanegu is-fotwm sy'n dangos cwymplen ar gyfer eich moddau hinsawdd (gwiriwch a yw \"Dewislen dewis\" ar gael pan fyddwch yn creu is-fotwm newydd)."

@@ -362,6 +362,7 @@
       "hide_target_low": "Fshih temperaturën e synuar të ulët",
       "hide_target_high": "Fshih temperaturën e synuar të lartë",
       "hide_temp_control": "Fshih kontrollin e temperaturës",
+      "hide_humidity_control": "Fshih kontrollin e lagështisë",
       "constant_background": "Ngjyrë sfondi konstante kur është NDEZUR",
       "info_title": "Karta e klimës",
       "info_body": "Kjo kartë ju lejon të kontrolloni entitetet tuaja të klimës. Mund të shtoni gjithashtu një nën-buton që shfaq një menu me lista për modalitetet e klimës (kontrolloni nëse keni \"Menu përzgjedhjeje\" të disponueshme kur krijoni një nën-buton të ri)."

@@ -362,6 +362,7 @@
       "hide_target_low": "Skryť dolnú cieľovú teplotu",
       "hide_target_high": "Skryť hornú cieľovú teplotu",
       "hide_temp_control": "Skryť ovládanie teploty",
+      "hide_humidity_control": "Skryť ovládanie vlhkosti",
       "constant_background": "Stála farba pozadia pri zapnutí",
       "info_title": "Karta klimatizácie",
       "info_body": "Táto karta umožňuje ovládať entity klimatizácie. Môžete tiež pridať podtlačidlo s rozbaľovacou ponukou režimov klimatizácie (pri vytváraní nového podtlačidla skontrolujte, či je dostupná možnosť „Ponuka výberu“)."

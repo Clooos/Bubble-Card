@@ -362,6 +362,7 @@
       "hide_target_low": "Slėpti apatinę tikslinę temperatūrą",
       "hide_target_high": "Slėpti viršutinę tikslinę temperatūrą",
       "hide_temp_control": "Slėpti temperatūros valdymą",
+      "hide_humidity_control": "Slėpti drėgmės valdymą",
       "constant_background": "Pastovi fono spalva, kai įjungta",
       "info_title": "Klimato kortelė",
       "info_body": "Ši kortelė leidžia valdyti klimato esybes. Taip pat galite pridėti papildomą mygtuką, kuris rodo klimato režimų išskleidžiamąjį meniu (kurdami naują papildomą mygtuką patikrinkite, ar yra „Pasirinkimo meniu“)."

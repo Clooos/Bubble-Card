@@ -417,6 +417,13 @@ export function isEntityType(context, entityType, entity) {
 
 export function isStateOn(context, entity = context.config.entity) {
     const state = getState(context, entity).toLowerCase();
+
+    // A water heater has no "on": its state is the operation it is running, so
+    // only "off" is off. Home Assistant reads it the same way, in stateActive.
+    if (isEntityType(context, 'water_heater', entity)) {
+        return state !== '' && state !== 'off' && state !== 'unknown' && state !== 'unavailable';
+    }
+
     const isTemperature = getAttribute(context, "unit_of_measurement", entity)?.includes('°');
     const numericState = Number(state);
     const activeStringStates = [

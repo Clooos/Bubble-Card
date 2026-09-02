@@ -362,6 +362,7 @@
       "hide_target_low": "Folaigh an sprioctheocht íseal",
       "hide_target_high": "Folaigh an sprioctheocht ard",
       "hide_temp_control": "Folaigh rialú na teochta",
+      "hide_humidity_control": "Folaigh rialú na taise",
       "constant_background": "Dath cúlra seasmhach nuair atá sé ANN",
       "info_title": "Cárta aeráide",
       "info_body": "Ligeann an cárta seo duit d'aonáin aeráide a rialú. Is féidir leat fochnaipe a chur leis freisin a thaispeánann roghchlár anuas do do mhóid aeráide (seiceáil an bhfuil \"Roghchlár roghnaithe\" ar fáil nuair a chruthaíonn tú fochnaipe nua)."

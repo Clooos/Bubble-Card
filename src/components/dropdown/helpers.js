@@ -22,7 +22,12 @@ export function getTranslatedAttribute(context, state, attribute, option) {
         case 'fan_modes':
             return context._hass.formatEntityAttributeValue(state, "fan_mode", option);
         case 'hvac_modes':
+        // A water heater carries its operation in the state itself, the way a
+        // thermostat carries its HVAC mode.
+        case 'operation_list':
             return context._hass.formatEntityState(state, option);
+        case 'available_modes':
+            return context._hass.formatEntityAttributeValue(state, "mode", option);
         case 'swing_modes':
             return context._hass.formatEntityAttributeValue(state, "swing_mode", option);
         case 'swing_horizontal_modes':
@@ -44,6 +49,8 @@ export function getSelectedAttribute(state, attribute) {
             return state.attributes.swing_horizontal_mode || null;
         case 'preset_modes':
             return state.attributes.preset_mode || null;
+        case 'available_modes':
+            return state.attributes.mode || null;
         case 'effect_list':
             return state.attributes.effect || null;
         case 'source_list':
@@ -118,6 +125,22 @@ export function getOptionIcon(context, state, attribute, option) {
             icon.hass = context._hass;
             icon.stateObj = state;
             break;
+        case 'available_modes':
+            icon = document.createElement('ha-attribute-icon');
+            icon.slot = 'graphic';
+            icon.attribute = 'mode';
+            icon.attributeValue = option;
+            icon.hass = context._hass;
+            icon.stateObj = state;
+            break;
+        case 'operation_list':
+            icon = document.createElement('ha-attribute-icon');
+            icon.slot = 'graphic';
+            icon.attribute = 'operation_mode';
+            icon.attributeValue = option;
+            icon.hass = context._hass;
+            icon.stateObj = state;
+            break;
         default:
             icon = false;
             break;
@@ -173,6 +196,28 @@ export function callSelectService(context, entity, selectedOption, config) {
                     context._hass.callService('climate', 'set_preset_mode', {
                         entity_id: entity,
                         preset_mode: selectedOption
+                    });
+                    break;
+            }
+            break;
+
+        case 'humidifier':
+            switch (config.select_attribute) {
+                case 'available_modes':
+                    context._hass.callService('humidifier', 'set_mode', {
+                        entity_id: entity,
+                        mode: selectedOption
+                    });
+                    break;
+            }
+            break;
+
+        case 'water_heater':
+            switch (config.select_attribute) {
+                case 'operation_list':
+                    context._hass.callService('water_heater', 'set_operation_mode', {
+                        entity_id: entity,
+                        operation_mode: selectedOption
                     });
                     break;
             }

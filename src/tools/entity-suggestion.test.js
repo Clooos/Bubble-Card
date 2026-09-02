@@ -79,6 +79,10 @@ const STATES = {
     'remote.a': { state: 'on', attributes: {} },
     'siren.a': { state: 'off', attributes: {} },
     'humidifier.a': { state: 'off', attributes: {} },
+    'humidifier.target': { state: 'on', attributes: { humidity: 50 } },
+    'humidifier.modes': { state: 'on', attributes: { humidity: 50, available_modes: ['normal', 'eco'] } },
+    'water_heater.basic': { state: 'eco', attributes: { temperature: 50 } },
+    'water_heater.modes': { state: 'eco', attributes: { temperature: 50, operation_list: ['eco', 'off'] } },
     'fan.speed': { state: 'on', attributes: { supported_features: 1 } },
     'fan.basic': { state: 'on', attributes: { supported_features: 0 } },
     'cover.position': { state: 'open', attributes: { supported_features: 15 } },
@@ -434,6 +438,38 @@ describe('getEntitySuggestion', () => {
         expect(humidity[1].config.sub_button.main[0].group[0].attribute).toBe('humidity');
         // The weather condition matters: every weather tile shows the state.
         humidity.forEach((s) => expect(s.config.show_state).toBe(true));
+    });
+
+    test('a humidifier is offered the climate card, and keeps its toggle tile', () => {
+        // The toggle tile is all a humidifier reporting no target can be given.
+        const plain = suggestionsFor('humidifier.a');
+        expect(plain[0].label).toBeUndefined();
+        expect(plain[0].config.card_type).toBe('button');
+
+        // With a target humidity, the card that can change it leads (#2384, #936)
+        // and the toggle tile moves below it, named so the two are told apart.
+        const target = suggestionsFor('humidifier.target');
+        expect(target[0].config.card_type).toBe('climate');
+        expect(target[0].config.sub_button).toBeUndefined();
+        expect(target[1].label).toBe('Toggle');
+        expect(target[1].config.card_type).toBe('button');
+
+        // The modes of a humidifier are its own attribute, never hvac_modes.
+        const modes = suggestionsFor('humidifier.modes');
+        expect(modes.map((s) => s.label).slice(0, 3)).toEqual([undefined, 'Mode', 'Toggle']);
+        expect(modes[1].config.sub_button.main[0].group[0].select_attribute).toBe('available_modes');
+    });
+
+    test('a water heater is offered the climate card, with its operations (#2060)', () => {
+        const basic = suggestionsFor('water_heater.basic');
+        expect(basic).toHaveLength(1);
+        expect(basic[0].config.card_type).toBe('climate');
+        expect(basic[0].config.entity).toBe('water_heater.basic');
+
+        const modes = suggestionsFor('water_heater.modes');
+        expect(modes).toHaveLength(2);
+        expect(modes[1].label).toBe('Mode');
+        expect(modes[1].config.sub_button.main[0].group[0].select_attribute).toBe('operation_list');
     });
 
     test('fans and updates degrade gracefully without the feature bit', () => {

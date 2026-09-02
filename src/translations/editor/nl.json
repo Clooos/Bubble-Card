@@ -362,6 +362,7 @@
       "hide_target_low": "Onderste doeltemperatuur verbergen",
       "hide_target_high": "Bovenste doeltemperatuur verbergen",
       "hide_temp_control": "Temperatuurregeling verbergen",
+      "hide_humidity_control": "Luchtvochtigheidsregeling verbergen",
       "constant_background": "Constante achtergrondkleur wanneer AAN",
       "info_title": "Klimaatkaart",
       "info_body": "Met deze kaart bedien je je klimaatentiteiten. Je kunt ook een subknop toevoegen die een dropdownmenu voor je klimaatmodi toont (controleer of \"Selectiemenu\" beschikbaar is wanneer je een nieuwe subknop aanmaakt)."

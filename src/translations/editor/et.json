@@ -362,6 +362,7 @@
       "hide_target_low": "Peida alumine sihttemperatuur",
       "hide_target_high": "Peida ülemine sihttemperatuur",
       "hide_temp_control": "Peida temperatuuri juhtimine",
+      "hide_humidity_control": "Peida niiskuse juhtimine",
       "constant_background": "Püsiv taustavärv sisselülitatud olekus",
       "info_title": "Kliimaseadme kaart",
       "info_body": "Selle kaardiga saad juhtida oma kliimaolemeid. Samuti saad lisada alamnupu, mis kuvab kliimarežiimide rippmenüü (kontrolli, kas uue alamnupu loomisel on saadaval \"Valikumenüü\")."

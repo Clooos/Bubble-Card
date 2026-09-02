@@ -362,6 +362,7 @@
       "hide_target_low": "Masquer la température cible basse",
       "hide_target_high": "Masquer la température cible haute",
       "hide_temp_control": "Masquer le contrôle de température",
+      "hide_humidity_control": "Masquer le contrôle d'humidité",
       "constant_background": "Couleur de fond constante lorsqu'allumé",
       "info_title": "Carte thermostat",
       "info_body": "Cette carte vous permet de contrôler vos entités thermostat. Vous pouvez aussi ajouter un sous-bouton qui affiche un menu déroulant pour vos modes de climatisation (vérifiez si « Menu de sélection » est disponible lorsque vous créez un nouveau sous-bouton)."

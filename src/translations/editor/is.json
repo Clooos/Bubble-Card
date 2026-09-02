@@ -362,6 +362,7 @@
       "hide_target_low": "Fela neðra markhitastig",
       "hide_target_high": "Fela efra markhitastig",
       "hide_temp_control": "Fela hitastýringu",
+      "hide_humidity_control": "Fela rakastýringu",
       "constant_background": "Fastur bakgrunnslitur þegar KVEIKT er",
       "info_title": "Loftslagskort",
       "info_body": "Þetta kort gerir þér kleift að stýra loftslagseiningunum þínum. Þú getur líka bætt við undirhnappi sem sýnir fellivalmynd fyrir loftslagshamina þína (athugaðu hvort \"Valmynd\" sé í boði þegar þú býrð til nýjan undirhnapp)."

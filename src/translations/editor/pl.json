@@ -362,6 +362,7 @@
       "hide_target_low": "Ukryj dolną temperaturę docelową",
       "hide_target_high": "Ukryj górną temperaturę docelową",
       "hide_temp_control": "Ukryj sterowanie temperaturą",
+      "hide_humidity_control": "Ukryj sterowanie wilgotnością",
       "constant_background": "Stały kolor tła, gdy włączone",
       "info_title": "Karta klimatyzacji",
       "info_body": "Ta karta pozwala sterować encjami klimatyzacji. Możesz też dodać podprzycisk wyświetlający rozwijane menu trybów klimatyzacji (sprawdź, czy przy tworzeniu nowego podprzycisku dostępna jest opcja „Menu wyboru”)."

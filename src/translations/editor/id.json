@@ -362,6 +362,7 @@
       "hide_target_low": "Sembunyikan suhu target rendah",
       "hide_target_high": "Sembunyikan suhu target tinggi",
       "hide_temp_control": "Sembunyikan kontrol suhu",
+      "hide_humidity_control": "Sembunyikan kontrol kelembapan",
       "constant_background": "Warna latar belakang konstan saat MENYALA",
       "info_title": "Kartu iklim",
       "info_body": "Kartu ini memungkinkan Anda mengontrol entitas iklim Anda. Anda juga dapat menambahkan subtombol yang menampilkan menu dropdown untuk mode iklim Anda (periksa apakah \"Menu pilih\" tersedia saat Anda membuat subtombol baru)."

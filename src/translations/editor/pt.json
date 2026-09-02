@@ -362,6 +362,7 @@
       "hide_target_low": "Ocultar a temperatura alvo mínima",
       "hide_target_high": "Ocultar a temperatura alvo máxima",
       "hide_temp_control": "Ocultar o controlo de temperatura",
+      "hide_humidity_control": "Ocultar o controlo de humidade",
       "constant_background": "Cor de fundo constante quando ligado",
       "info_title": "Cartão de ar condicionado",
       "info_body": "Este cartão permite-lhe controlar as suas entidades de climatização. Também pode adicionar um sub-botão que apresenta um menu pendente com os seus modos de climatização (verifique se tem \"Menu de seleção\" disponível ao criar um novo sub-botão)."

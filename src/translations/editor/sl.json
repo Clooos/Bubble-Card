@@ -362,6 +362,7 @@
       "hide_target_low": "Skrij spodnjo ciljno temperaturo",
       "hide_target_high": "Skrij zgornjo ciljno temperaturo",
       "hide_temp_control": "Skrij upravljanje temperature",
+      "hide_humidity_control": "Skrij upravljanje vlažnosti",
       "constant_background": "Stalna barva ozadja, ko je vklopljeno",
       "info_title": "Kartica klimatske naprave",
       "info_body": "Ta kartica omogoča upravljanje vaših klimatskih entitet. Dodate lahko tudi podgumb, ki prikaže spustni meni za načine klimatske naprave (preverite, ali je pri ustvarjanju novega podgumba na voljo možnost »Meni izbire«)."

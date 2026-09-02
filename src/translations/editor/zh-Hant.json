@@ -362,6 +362,7 @@
       "hide_target_low": "隱藏目標溫度下限",
       "hide_target_high": "隱藏目標溫度上限",
       "hide_temp_control": "隱藏溫度控制",
+      "hide_humidity_control": "隱藏濕度控制",
       "constant_background": "開啟時維持固定背景顏色",
       "info_title": "空調卡片",
       "info_body": "這張卡片可以控制您的空調實體。您也可以新增一個顯示空調模式下拉選單的子按鈕 (建立新子按鈕時看看是否有「選擇選單」可用)。"

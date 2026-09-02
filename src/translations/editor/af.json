@@ -362,6 +362,7 @@
       "hide_target_low": "Versteek onderste teikentemperatuur",
       "hide_target_high": "Versteek boonste teikentemperatuur",
       "hide_temp_control": "Versteek temperatuurbeheer",
+      "hide_humidity_control": "Versteek humiditeitsbeheer",
       "constant_background": "Konstante agtergrondkleur wanneer AAN",
       "info_title": "Klimaatkaart",
       "info_body": "Met hierdie kaart kan jy jou klimaatentiteite beheer. Jy kan ook 'n subknoppie byvoeg wat 'n aftreklys vir jou klimaatmodusse vertoon (kyk of \"Keuselys\" beskikbaar is wanneer jy 'n nuwe subknoppie skep)."

@@ -362,6 +362,7 @@
       "hide_target_low": "Nascondi temperatura target bassa",
       "hide_target_high": "Nascondi temperatura target alta",
       "hide_temp_control": "Nascondi controllo della temperatura",
+      "hide_humidity_control": "Nascondi controllo dell'umidità",
       "constant_background": "Colore di sfondo costante quando acceso",
       "info_title": "Scheda clima",
       "info_body": "Questa scheda ti permette di controllare le tue entità clima. Puoi anche aggiungere un sotto-pulsante che mostra un menu a tendina per le modalità del clima (verifica se \"Menu di selezione\" è disponibile quando crei un nuovo sotto-pulsante)."

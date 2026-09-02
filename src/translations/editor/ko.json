@@ -362,6 +362,7 @@
       "hide_target_low": "목표 온도 하한 숨기기",
       "hide_target_high": "목표 온도 상한 숨기기",
       "hide_temp_control": "온도 조절 숨기기",
+      "hide_humidity_control": "습도 조절 숨기기",
       "constant_background": "켜져 있을 때 배경색 고정",
       "info_title": "냉난방 카드",
       "info_body": "이 카드로 냉난방 엔티티를 제어할 수 있어요. 냉난방 모드용 드롭다운 메뉴를 표시하는 서브 버튼을 추가할 수도 있어요(새 서브 버튼을 만들 때 \"선택 메뉴\"가 있는지 확인하세요)."

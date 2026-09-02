@@ -1,6 +1,6 @@
+import { getClimateDomainConfig } from './domains.js';
 import { 
     getClimateColor, 
-    getTemperatureDecimals,
     formatTemperature
 } from './helpers.js';
 import { 
@@ -11,10 +11,9 @@ import {
 import { handleCustomStyles } from '../../tools/style-processor.js';
 
 export function changeTemperature(context) {
-    const temperature = getAttribute(context, "temperature");
+    const domainConfig = getClimateDomainConfig(context.config.entity);
+    const temperature = getAttribute(context, domainConfig.target);
     const state = getState(context);
-
-    const decimals = getTemperatureDecimals(context);
 
     const hideTemperature = context.config.hide_temperature;
     const shouldHide = hideTemperature || state === 'unavailable' || temperature === '' || temperature === undefined;
@@ -36,8 +35,6 @@ export function changeTargetTempLow(context) {
     const targetTempLow = getAttribute(context, "target_temp_low");
     const hideTargetTempLow = context.config.hide_target_temp_low;
     const state = getState(context);
-
-    const decimals = getTemperatureDecimals(context);
 
     const shouldHideLow = state === 'unavailable' || targetTempLow === '' || targetTempLow === undefined || hideTargetTempLow;
 
@@ -62,8 +59,6 @@ export function changeTargetTempHigh(context) {
     const hideTargetTempHigh = context.config.hide_target_temp_high;
     const state = getState(context);
 
-    const decimals = getTemperatureDecimals(context);
-
     const shouldHideHigh = state === 'unavailable' || targetTempHigh === '' || targetTempHigh === undefined || hideTargetTempHigh;
 
     if (shouldHideHigh) {
@@ -85,14 +80,14 @@ export function changeStyle(context) {
     setLayout(context);
     handleCustomStyles(context);
 
-    const state = getState(context);
+    // The state alone is not the whole signal: a thermostat starts and stops
+    // heating, and a humidifier starts and stops running, without their state
+    // ever changing. The colour is its own memo instead, so the card follows the
+    // action it is taking and the DOM is still only written when it moves.
+    const backgroundColor = `var(--bubble-climate-background-color, ${getClimateColor(context)})`;
 
-    if (context.previousState !== state) {
-        context.previousState = state;
-        const element = context.elements.background;
-        element.style.backgroundColor = `var(--bubble-climate-background-color, ${getClimateColor(context)})`;
+    if (context.previousClimateBackground !== backgroundColor) {
+        context.previousClimateBackground = backgroundColor;
+        context.elements.background.style.backgroundColor = backgroundColor;
     }
-
-    const cardLayout = context.config.card_layout;
-    const dropdown = context.elements.hvacModeDropdown;
 }

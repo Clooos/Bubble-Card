@@ -362,6 +362,7 @@
       "hide_target_low": "Paslēpt apakšējo mērķa temperatūru",
       "hide_target_high": "Paslēpt augšējo mērķa temperatūru",
       "hide_temp_control": "Paslēpt temperatūras vadību",
+      "hide_humidity_control": "Paslēpt mitruma vadību",
       "constant_background": "Nemainīga fona krāsa, kad ieslēgts",
       "info_title": "Klimata kartīte",
       "info_body": "Šī kartīte ļauj vadīt jūsu klimata entītijas. Varat pievienot arī papildpogu, kas rāda klimata režīmu nolaižamo izvēlni (veidojot jaunu papildpogu, pārbaudiet, vai ir pieejama \"Izvēles izvēlne\")."

@@ -817,7 +817,44 @@ const DOMAIN_BUILDERS = {
   automation: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
   remote: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
   siren: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
-  humidifier: (entityId, stateObj, t) => [{ config: toggleTile(entityId, t) }],
+  // A hygrostat is a thermostat with a percentage: the climate card sets its
+  // target humidity and puts its modes behind a dropdown (#2384, #936). The
+  // toggle tile that came first stays below, and remains the only answer for a
+  // humidifier that reports no target at all.
+  humidifier: (entityId, stateObj, t) => {
+    if (stateObj.attributes.humidity === undefined) return [{ config: toggleTile(entityId, t) }];
+
+    const suggestions = [{ config: climateCard(entityId, t) }];
+    if (stateObj.attributes.available_modes?.length) {
+      suggestions.push({
+        label: t('editor.card_picker.suggestions.mode'),
+        config: climateCard(entityId, t, {
+          name: t('editor.card_picker.suggestions.mode'),
+          select_attribute: 'available_modes',
+        }),
+      });
+    }
+    suggestions.push({
+      label: t('editor.card_picker.suggestions.toggle'),
+      config: toggleTile(entityId, t),
+    });
+    return suggestions;
+  },
+  // Same card again: a water heater is a thermostat whose modes live in the
+  // state itself rather than in an hvac_modes attribute (#2060).
+  water_heater: (entityId, stateObj, t) => {
+    const suggestions = [{ config: climateCard(entityId, t) }];
+    if (stateObj.attributes.operation_list?.length) {
+      suggestions.push({
+        label: t('editor.card_picker.suggestions.mode'),
+        config: climateCard(entityId, t, {
+          name: t('editor.card_picker.suggestions.mode'),
+          select_attribute: 'operation_list',
+        }),
+      });
+    }
+    return suggestions;
+  },
   fan: (entityId, stateObj, t) => [
     { config: supportsFeature(stateObj, FAN_SUPPORTS_SET_SPEED) ? fanSpeedTile(entityId, t) : toggleTile(entityId, t) },
   ],

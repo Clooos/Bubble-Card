@@ -362,6 +362,7 @@
       "hide_target_low": "Alt hedef sıcaklığı gizle",
       "hide_target_high": "Üst hedef sıcaklığı gizle",
       "hide_temp_control": "Sıcaklık kontrolünü gizle",
+      "hide_humidity_control": "Nem kontrolünü gizle",
       "constant_background": "Açıkken sabit arka plan rengi",
       "info_title": "İklim kartı",
       "info_body": "Bu kart, iklim varlıklarınızı kontrol etmenizi sağlar. Ayrıca iklim modlarınız için açılır menü gösteren bir alt düğme de ekleyebilirsiniz (yeni bir alt düğme oluştururken \"Seçim menüsü\" seçeneğinin mevcut olup olmadığını kontrol edin)."

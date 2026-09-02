@@ -758,6 +758,8 @@ icon_close: mdi:roller-shade-closed
 
 This card allows you to add a dropdown menu for your `input_select` / `select` entities. This card also supports the sub-buttons and all the common Bubble Card features.
 
+It also works with any entity that exposes its options as an attribute list: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` and `preset_modes` on a climate, `available_modes` on a humidifier, `operation_list` on a water heater, `effect_list` on a light, `source_list` and `sound_mode_list` on a media player.
+
 > [!TIP]
 > You can also have select sub-buttons if you want, this feature is available in all the cards that support the sub-buttons.
 
@@ -841,10 +843,10 @@ show_state: true
 
 ![readme-climate-card](https://github.com/user-attachments/assets/59145c69-2f85-4ee7-a290-e848971e1925)
 
-This card allows you to control your `climate` entities.
+This card allows you to control your `climate`, `humidifier` and `water_heater` entities. A humidifier, a dehumidifier or a generic hygrostat gets the same plus and minus controls on its target humidity, and a water heater on its target temperature.
 
 > [!TIP]
-> The mode selection menu is a [sub-button](#sub-buttons) that is added automatically when creating the card. You can then modify or remove it as you wish.
+> The mode selection menu is a [sub-button](#sub-buttons) that is added automatically when creating the card. You can then modify or remove it as you wish. It reads the `hvac_modes` of a climate entity, the `available_modes` of a humidifier and the `operation_list` of a water heater.
 
 ### Climate options
 
@@ -854,7 +856,7 @@ This card allows you to control your `climate` entities.
 
 | Name                     | Type    | Requirement                         | Supported options                                  | Description                                                                                                     |
 |--------------------------|---------|-------------------------------------|--------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `entity`                | string  | **Required**                        | Climate entity                                   | The entity to control (e.g., `climate.living_room`).                                                            |
+| `entity`                | string  | **Required**                        | Climate, humidifier or water heater entity       | The entity to control (e.g., `climate.living_room`, `humidifier.bedroom` or `water_heater.boiler`).             |
 | `name`                  | string  | Optional                            | Any string                                       | A custom name for the card. If not defined, it will display the entity name.                                    |
 | `icon`                  | string  | Optional                            | Any `mdi:` icon                                  | A custom icon for the card. If not defined, the entity icon or `entity-picture` will be used.                   |
 | `force_icon`            | boolean | Optional                            | `true` or `false` (default)                     | Gives priority to the icon over the `entity-picture`.                                                           |
@@ -863,10 +865,10 @@ This card allows you to control your `climate` entities.
 | `show_icon`             | boolean | Optional                            | `true` (default) or `false`                     | Show or hide the icon.                                                                                          |
 | `hide_target_temp_low`  | boolean | Optional (only for entities supporting `target_temp_low`) | `true` or `false` (default) | Hides the low target temperature control if supported by the `entity`.                                          |
 | `hide_target_temp_high` | boolean | Optional (only for entities supporting `target_temp_high`)| `true` or `false` (default) | Hides the high target temperature control if supported by the `entity`.                                         |
-| `state_color`           | boolean | Optional                            | `true` or `false` (default)                     | Applies a constant background color when the climate entity is ON.                                              |
-| `step` | number | Optional | Any number | The temperature step. |
-| `min_temp` | number | Optional | Any number | The minimum temperature. |
-| `max_temp` | number | Optional | Any number | The maximum temperature. |
+| `state_color`           | boolean | Optional                            | `true` or `false` (default)                     | Applies a constant background color when the entity is ON. A water heater has no equivalent of `hvac_action`, so this is the only thing that colors it. |
+| `step` | number | Optional | Any number | The step of the target value, temperature or humidity. |
+| `min_temp` | number | Optional | Any number | The minimum target value. On a humidifier this is a humidity, not a temperature. |
+| `max_temp` | number | Optional | Any number | The maximum target value. On a humidifier this is a humidity, not a temperature. |
 | `button_action` | object | Optional | `tap_action`, `double_tap_action` or `hold_action`, see [actions](#tap-double-tap-and-hold-actions) | Allow to change the default actions on button click. |
 | `tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon click, if undefined, `more-info` will be used. |
 | `double_tap_action` | object | Optional | See [actions](#tap-double-tap-and-hold-actions) | Define the type of action on icon double click, if undefined, `none` will be used. |
@@ -896,6 +898,10 @@ This card allows you to control your `climate` entities.
 | `--bubble-state-climate-heat-color` | `color` | Overlay color for the heat state |
 | `--bubble-state-climate-auto-color` | `color` | Overlay color for the auto state |
 | `--bubble-state-climate-heat-cool-color` | `color` | Overlay color for the heat-cool state |
+| `--bubble-state-humidifier-on-color` | `color` | Overlay color for a humidifier that is running |
+| `--bubble-state-humidifier-humidifier-on-color` | `color` | Overlay color for a running humidifier, when its device class is `humidifier` |
+| `--bubble-state-humidifier-dehumidifier-on-color` | `color` | Overlay color for a running dehumidifier, when its device class is `dehumidifier` |
+| `--bubble-state-water_heater-<operation>-color` | `color` | Overlay color for a water heater operation, e.g. `--bubble-state-water_heater-eco-color` |
 | `--bubble-climate-accent-color` | `color` | Accent color for the climate card |
 | `--bubble-climate-box-shadow` | See [box shadow](https://developer.mozilla.org/fr/docs/Web/CSS/box-shadow) | Box shadow for climate container. |
 

@@ -362,6 +362,7 @@
       "hide_target_low": "Ezkutatu helburu-tenperatura baxua",
       "hide_target_high": "Ezkutatu helburu-tenperatura altua",
       "hide_temp_control": "Ezkutatu tenperatura-kontrola",
+      "hide_humidity_control": "Ezkutatu hezetasun-kontrola",
       "constant_background": "Atzeko planoaren kolore konstantea PIZTUTA dagoenean",
       "info_title": "Klimatizazio-txartela",
       "info_body": "Txartel honek zure klimatizazio-entitateak kontrolatzeko aukera ematen dizu. Zure klimatizazio-moduentzako goitibeherako menu bat erakusten duen azpibotoi bat ere gehi dezakezu (egiaztatu \"Hautaketa-menua\" erabilgarri duzun azpibotoi berri bat sortzean)."

@@ -362,6 +362,7 @@
       "hide_target_low": "Ënnescht Zieltemperatur verstoppen",
       "hide_target_high": "Iewescht Zieltemperatur verstoppen",
       "hide_temp_control": "Temperatursteierung verstoppen",
+      "hide_humidity_control": "Fiichtegkeetssteierung verstoppen",
       "constant_background": "Konstant Hannergrondfaarf, wann UN",
       "info_title": "Klima-Kaart",
       "info_body": "Mat dëser Kaart kënnt Dir Är Klima-Entitéite steieren. Dir kënnt och e Sub-Knäppchen dobäisetzen, deen en Dropdown-Menü fir Är Klima-Modi uweist (kuckt, ob \"Auswiel-Menü\" disponibel ass, wann Dir en neie Sub-Knäppchen erstellt)."

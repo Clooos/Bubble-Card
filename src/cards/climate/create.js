@@ -1,11 +1,13 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
 import { addFeedback } from "../../tools/tap-actions.js";
 import { createElement, getAttribute, forwardHaptic } from "../../tools/utils.js";
-import { getTemperatureDecimals, formatTemperature } from "./helpers.js";
+import { getClimateDomainConfig } from "./domains.js";
+import { getDefaultStep, getTemperatureDecimals, formatTemperature } from "./helpers.js";
 import styles from "./styles.css";
 
 export function createStructure(context) {
     const cardType = 'climate';
+    const domainConfig = getClimateDomainConfig(context.config.entity);
     
     const elements = createBaseStructure(context, {
         type: cardType,
@@ -14,6 +16,10 @@ export function createStructure(context) {
         iconActions: true,
         buttonActions: true
     });
+
+    // The background element is new, whatever the previous card type had put on
+    // the old one: its colour memo starts over with it.
+    context.previousClimateBackground = undefined;
 
     elements.temperatureContainer = createElement('div', 'bubble-temperature-container');
     elements.targetTemperatureContainer = createElement('div', 'bubble-target-temperature-container');
@@ -45,17 +51,21 @@ export function createStructure(context) {
         plusButton.appendChild(plusButton.haRipple);
         addFeedback(plusButton);
 
-        let tempDisplay;
-        if (attribute === 'temperature') {
-            elements.tempDisplay = createElement('div', 'bubble-temperature-display bubble-climate-temp-display');
-            tempDisplay = elements.tempDisplay;
-        } else if (attribute === 'target_temp_low') {
-            elements.lowTempDisplay = createElement('div', 'bubble-low-temperature-display bubble-climate-temp-display');
-            tempDisplay = elements.lowTempDisplay;
+        // The main control reads whatever the domain calls its target, so the
+        // element it writes into is picked from the range slot rather than from
+        // the attribute name.
+        let displayKey = 'tempDisplay';
+        let displayClass = 'bubble-temperature-display';
+        if (attribute === 'target_temp_low') {
+            displayKey = 'lowTempDisplay';
+            displayClass = 'bubble-low-temperature-display';
         } else if (attribute === 'target_temp_high') {
-            elements.highTempDisplay = createElement('div', 'bubble-high-temperature-display bubble-climate-temp-display');
-            tempDisplay = elements.highTempDisplay;
+            displayKey = 'highTempDisplay';
+            displayClass = 'bubble-high-temperature-display';
         }
+
+        elements[displayKey] = createElement('div', `${displayClass} bubble-climate-temp-display`);
+        const tempDisplay = elements[displayKey];
 
         container.appendChild(minusButton);
         container.appendChild(tempDisplay);
@@ -66,13 +76,7 @@ export function createStructure(context) {
         let lastSyncedTemp = currentTemp;
 
         function updateTempDisplay(newTemp) {
-            if (attribute === 'temperature') {
-                elements.tempDisplay.innerText = formatTemperature(newTemp, context, step);
-            } else if (attribute === 'target_temp_low') {
-                elements.lowTempDisplay.innerText = formatTemperature(newTemp, context, step);
-            } else if (attribute === 'target_temp_high') {
-                elements.highTempDisplay.innerText = formatTemperature(newTemp, context, step);
-            }
+            elements[displayKey].innerText = formatTemperature(newTemp, context, step);
         }
 
         function syncTemp() {
@@ -98,15 +102,15 @@ export function createStructure(context) {
                 serviceData[attribute] = currentTemp;
             }
 
-            context._hass.callService('climate', 'set_temperature', serviceData);
+            context._hass.callService(domainConfig.domain, domainConfig.setService, serviceData);
         }
 
         function adjustTemperature(change) {
             syncTemp();
 
             const stateNow = context._hass?.states?.[context.config.entity];
-            const minTemp = context.config.min_temp ?? (stateNow?.attributes?.min_temp ?? 0);
-            const maxTemp = context.config.max_temp ?? (stateNow?.attributes?.max_temp ?? 1000);
+            const minTemp = context.config.min_temp ?? (stateNow?.attributes?.[domainConfig.minAttribute] ?? domainConfig.fallbackMin);
+            const maxTemp = context.config.max_temp ?? (stateNow?.attributes?.[domainConfig.maxAttribute] ?? domainConfig.fallbackMax);
             let newTemp = parseFloat((currentTemp + change).toFixed(decimals));
             newTemp = Math.min(maxTemp, Math.max(minTemp, newTemp));
 
@@ -137,10 +141,9 @@ export function createStructure(context) {
     }
 
     const state = context._hass?.states?.[context.config.entity];
-    const isCelcius = context._hass.config.unit_system.temperature === '°C';
-    const defaultStep = context.config.step ?? (state?.attributes?.target_temp_step ?? (isCelcius ? 0.5 : 1));
+    const defaultStep = context.config.step ?? (state?.attributes?.[domainConfig.stepAttribute] ?? getDefaultStep(context));
 
-    createTemperatureControls(elements.temperatureContainer, 'temperature', defaultStep);
+    createTemperatureControls(elements.temperatureContainer, domainConfig.target, defaultStep);
 
     elements.lowTempContainer = createElement('div', 'bubble-low-temp-container');
     createTemperatureControls(elements.lowTempContainer, 'target_temp_low', defaultStep);

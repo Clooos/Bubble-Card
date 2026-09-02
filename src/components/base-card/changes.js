@@ -18,6 +18,7 @@ import {
 import { applyScrollingEffect } from '../../tools/text-scrolling.js';
 import { getIcon, getImage, getIconColor } from '../../tools/icon.js';
 import { getClimateColor } from '../../cards/climate/helpers.js';
+import { isClimateCardDomain } from '../../cards/climate/domains.js';
 
 function startTimerCountdown(context, entity) {
     startTimerInterval(context, entity, () => {
@@ -242,7 +243,11 @@ export function changeIcon(context) {
     const cardType = context.config.card_type;
     const buttonType = context.config.button_type;
     const isOn = isStateOn(context);
-    const isClimate = isEntityType(context, 'climate');
+    // Only the climate card colours its icon from the state of the entity, and
+    // only there do the humidifier and the water heater join in: elsewhere a
+    // button keeps the accent colour it has always had.
+    const isClimate = isEntityType(context, 'climate') ||
+        (cardType === 'climate' && isClimateCardDomain(context.config.entity));
     const newIcon = getIcon(context);
     const newImage = getImage(context);
     const currentIconColor = context.elements.iconContainer?.style.color;

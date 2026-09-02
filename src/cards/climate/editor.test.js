@@ -166,3 +166,52 @@ describe('climate editor default sub-button seeding', () => {
         expect(editor._valueChanged).not.toHaveBeenCalled();
     });
 });
+
+describe('the modes menu of the other domains the card drives', () => {
+    function makeDomainEditor(entity, attributes) {
+        return makeEditor(
+            { card_type: 'climate', entity },
+            { states: { [entity]: { state: 'on', attributes } } },
+        );
+    }
+
+    test('a humidifier is seeded from its available modes (#2384, #936)', () => {
+        const editor = makeDomainEditor('humidifier.bedroom', { available_modes: ['normal', 'eco'] });
+
+        renderClimateEditor(editor);
+
+        expect(editor._config.sub_button.main).toHaveLength(1);
+        expect(editor._config.sub_button.main[0]).toMatchObject({
+            select_attribute: 'available_modes',
+        });
+    });
+
+    test('a water heater is seeded from its operation list (#2060)', () => {
+        const editor = makeDomainEditor('water_heater.boiler', { operation_list: ['eco', 'off'] });
+
+        renderClimateEditor(editor);
+
+        expect(editor._config.sub_button.main).toHaveLength(1);
+        expect(editor._config.sub_button.main[0]).toMatchObject({
+            select_attribute: 'operation_list',
+        });
+    });
+
+    test('an entity with no modes at all is left alone', () => {
+        const editor = makeDomainEditor('humidifier.bedroom', { humidity: 50 });
+
+        renderClimateEditor(editor);
+
+        expect(editor._config.sub_button).toBeUndefined();
+    });
+
+    test('the hvac modes of a thermostat are not looked for on a humidifier', () => {
+        // Nothing but hvac_modes, which a humidifier never has: seeding it would
+        // build a dropdown calling a service the entity does not support.
+        const editor = makeDomainEditor('humidifier.bedroom', { hvac_modes: ['off', 'heat'] });
+
+        renderClimateEditor(editor);
+
+        expect(editor._config.sub_button).toBeUndefined();
+    });
+});

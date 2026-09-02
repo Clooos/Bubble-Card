@@ -362,6 +362,7 @@
       "hide_target_low": "Alsó célhőmérséklet elrejtése",
       "hide_target_high": "Felső célhőmérséklet elrejtése",
       "hide_temp_control": "Hőmérséklet-szabályozás elrejtése",
+      "hide_humidity_control": "Páratartalom-szabályozás elrejtése",
       "constant_background": "Állandó háttérszín bekapcsolt állapotban",
       "info_title": "Klímakártya",
       "info_body": "Ezzel a kártyával vezérelheti a klíma entitásait. Hozzáadhat egy algombot is, amely legördülő menüt jelenít meg a klímamódokhoz (ellenőrizze, hogy elérhető-e a \"Választó menü\" új algomb létrehozásakor)."

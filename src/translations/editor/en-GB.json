@@ -362,6 +362,7 @@
       "hide_target_low": "Hide target temp low",
       "hide_target_high": "Hide target temp high",
       "hide_temp_control": "Hide temperature control",
+      "hide_humidity_control": "Hide humidity control",
       "constant_background": "Constant background colour when ON",
       "info_title": "Climate card",
       "info_body": "This card allows you to control your climate entities. You can also add a sub-button that display a dropdown menu for your climate modes (check if you have \"Select menu\" available when you create a new sub-button)."

@@ -362,6 +362,7 @@
       "hide_target_low": "Ocultar a temperatura obxectivo mínima",
       "hide_target_high": "Ocultar a temperatura obxectivo máxima",
       "hide_temp_control": "Ocultar o control de temperatura",
+      "hide_humidity_control": "Ocultar o control de humidade",
       "constant_background": "Cor de fondo constante cando está aceso",
       "info_title": "Tarxeta de climatización",
       "info_body": "Esta tarxeta permítelle controlar as súas entidades de climatización. Tamén pode engadir un subbotón que mostra un menú despregable cos seus modos de climatización (comprobe se ten \"Menú de selección\" dispoñible ao crear un novo subbotón)."

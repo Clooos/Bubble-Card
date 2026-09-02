@@ -362,6 +362,7 @@
       "hide_target_low": "Kaŝi la malaltan celtemperaturon",
       "hide_target_high": "Kaŝi la altan celtemperaturon",
       "hide_temp_control": "Kaŝi la temperaturregilon",
+      "hide_humidity_control": "Kaŝi la humidecregilon",
       "constant_background": "Konstanta fonkoloro kiam ŝaltita",
       "info_title": "Klimatizila karto",
       "info_body": "Ĉi tiu karto permesas regi viajn klimatizilajn entojn. Vi ankaŭ povas aldoni subbutonon kiu montras falmenuon por viaj klimatizilaj reĝimoj (kontrolu ĉu \"Elekta menuo\" haveblas kiam vi kreas novan subbutonon)."

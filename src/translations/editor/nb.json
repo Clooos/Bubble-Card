@@ -362,6 +362,7 @@
       "hide_target_low": "Skjul nedre måltemperatur",
       "hide_target_high": "Skjul øvre måltemperatur",
       "hide_temp_control": "Skjul temperaturkontroll",
+      "hide_humidity_control": "Skjul fuktighetskontroll",
       "constant_background": "Konstant bakgrunnsfarge når PÅ",
       "info_title": "Klimakort",
       "info_body": "Dette kortet lar deg styre klimaentitetene dine. Du kan også legge til en underknapp som viser en nedtrekksmeny for klimamodusene dine (sjekk om \"Velg meny\" er tilgjengelig når du oppretter en ny underknapp)."

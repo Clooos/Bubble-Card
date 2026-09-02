@@ -394,15 +394,20 @@
     "climate": {
       "settings_title": "Climate settings",
       "hvac_menu_name": "HVAC modes menu",
+      "mode_menu_name": "@component.humidifier.entity_component._.state_attributes.mode.name|Mode",
+      "operation_menu_name": "@component.water_heater.entity_component._.state_attributes.operation_mode.name|Operation mode",
       "min_temp": "Min temperature",
       "max_temp": "Max temperature",
+      "min_humidity": "@component.humidifier.entity_component._.state_attributes.min_humidity.name|Min target humidity",
+      "max_humidity": "@component.humidifier.entity_component._.state_attributes.max_humidity.name|Max target humidity",
       "step": "@ui.dialogs.helper_settings.input_number.step|Step size",
       "hide_target_low": "Hide target temp low",
       "hide_target_high": "Hide target temp high",
       "hide_temp_control": "Hide temperature control",
+      "hide_humidity_control": "Hide humidity control",
       "constant_background": "Constant background color when ON",
       "info_title": "Climate card",
-      "info_body": "This card allows you to control your climate entities. You can also add a sub-button that display a dropdown menu for your climate modes (check if you have \"Select menu\" available when you create a new sub-button)."
+      "info_body": "This card allows you to control your climate, humidifier and water heater entities. You can also add a sub-button that display a dropdown menu for the modes of your entity (check if you have \"Select menu\" available when you create a new sub-button)."
     },
     "cover": {
       "custom_services": "Custom services",

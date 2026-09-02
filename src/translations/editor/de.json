@@ -362,6 +362,7 @@
       "hide_target_low": "Untere Zieltemperatur ausblenden",
       "hide_target_high": "Obere Zieltemperatur ausblenden",
       "hide_temp_control": "Temperaturregelung ausblenden",
+      "hide_humidity_control": "Luftfeuchtigkeitsregelung ausblenden",
       "constant_background": "Konstante Hintergrundfarbe, wenn eingeschaltet",
       "info_title": "Klima-Karte",
       "info_body": "Mit dieser Karte kannst du deine Klima-Entitäten steuern. Du kannst auch einen Sub-Button hinzufügen, der ein Dropdown-Menü für deine Klimamodi anzeigt (prüfe, ob „Auswahlmenü\" verfügbar ist, wenn du einen neuen Sub-Button erstellst)."

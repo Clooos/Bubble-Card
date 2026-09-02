@@ -753,3 +753,40 @@ describe('relative time formatting is cached without going stale', () => {
         expect(utilsModule.formatDateTime(twoDays, 'en')).toBe('2 days ago');
     });
 });
+
+describe('isStateOn', () => {
+    let utilsModule;
+
+    beforeEach(async () => {
+        jest.resetModules();
+        utilsModule = await import('./utils.js');
+    });
+
+    function contextFor(entity, state) {
+        return { config: { entity }, _hass: { states: { [entity]: { state, attributes: {} } } } };
+    }
+
+    test('a water heater runs an operation rather than being on (#2060)', () => {
+        // Its state is the operation itself, so anything but off is running.
+        // Home Assistant reads it the same way, in stateActive.
+        for (const operation of ['eco', 'electric', 'gas', 'heat_pump', 'high_demand', 'performance']) {
+            expect(utilsModule.isStateOn(contextFor('water_heater.boiler', operation))).toBe(true);
+        }
+
+        for (const state of ['off', 'unknown', 'unavailable']) {
+            expect(utilsModule.isStateOn(contextFor('water_heater.boiler', state))).toBe(false);
+        }
+
+        // An entity that is not in hass at all reads as off, not as running.
+        expect(utilsModule.isStateOn({ config: { entity: 'water_heater.gone' }, _hass: { states: {} } })).toBe(false);
+    });
+
+    test('the states of the other domains are read as they always were', () => {
+        expect(utilsModule.isStateOn(contextFor('humidifier.bedroom', 'on'))).toBe(true);
+        expect(utilsModule.isStateOn(contextFor('humidifier.bedroom', 'off'))).toBe(false);
+        expect(utilsModule.isStateOn(contextFor('climate.living_room', 'heat'))).toBe(true);
+        expect(utilsModule.isStateOn(contextFor('climate.living_room', 'off'))).toBe(false);
+        // "eco" is a mode name a select can carry too, and it says nothing there.
+        expect(utilsModule.isStateOn(contextFor('select.mode', 'eco'))).toBe(false);
+    });
+});

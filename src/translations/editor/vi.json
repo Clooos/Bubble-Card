@@ -362,6 +362,7 @@
       "hide_target_low": "Ẩn nhiệt độ mục tiêu thấp",
       "hide_target_high": "Ẩn nhiệt độ mục tiêu cao",
       "hide_temp_control": "Ẩn điều khiển nhiệt độ",
+      "hide_humidity_control": "Ẩn điều khiển độ ẩm",
       "constant_background": "Màu nền cố định khi BẬT",
       "info_title": "Thẻ điều hòa",
       "info_body": "Thẻ này cho phép bạn điều khiển các thực thể điều hòa. Bạn cũng có thể thêm một nút phụ hiển thị menu thả xuống cho các chế độ điều hòa (kiểm tra xem có \"Menu chọn\" khả dụng khi bạn tạo nút phụ mới không)."

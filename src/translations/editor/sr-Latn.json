@@ -362,6 +362,7 @@
       "hide_target_low": "Sakrij donju ciljnu temperaturu",
       "hide_target_high": "Sakrij gornju ciljnu temperaturu",
       "hide_temp_control": "Sakrij kontrolu temperature",
+      "hide_humidity_control": "Sakrij kontrolu vlažnosti",
       "constant_background": "Stalna boja pozadine kada je uključeno",
       "info_title": "Kartica klime",
       "info_body": "Ova kartica vam omogućava da kontrolišete svoje klima entitete. Takođe možete dodati pod-dugme koje prikazuje padajući meni za režime klime (proverite da li imate dostupan „Meni izbora” kada pravite novo pod-dugme)."

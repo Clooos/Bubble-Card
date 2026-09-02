@@ -15,6 +15,7 @@ import { renderSeparatorEditor } from '../cards/separator/editor.js';
 import { renderHorButtonStackEditor } from '../cards/horizontal-buttons-stack/editor.js';
 import { renderCoverEditor } from '../cards/cover/editor.js';
 import { renderClimateEditor } from '../cards/climate/editor.js';
+import { CLIMATE_CARD_DOMAINS } from '../cards/climate/domains.js';
 import { renderSelectEditor } from '../cards/select/editor.js';
 import { renderCalendarEditor } from '../cards/calendar/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
@@ -327,7 +328,9 @@ class BubbleCardEditor extends LitElement {
             'swing_modes',
             'swing_horizontal_modes',
             'preset_modes',
-            'effect_list'
+            'effect_list',
+            'available_modes',
+            'operation_list'
         ];
     }
 
@@ -917,7 +920,7 @@ class BubbleCardEditor extends LitElement {
                     includeDomains = ['cover'];
                     break;
                 case 'climate':
-                    includeDomains = ['climate'];
+                    includeDomains = CLIMATE_CARD_DOMAINS;
                     break;
                 case 'media-player':
                     includeDomains = ['media_player'];
