@@ -278,7 +278,6 @@
       "buttons_position": "Pozicio de la butonoj",
       "settings": "Agordoj de la ŝprucfenestro",
       "auto_close": "Aŭtomata fermo en milisekundoj (ekz. 15000)",
-      "slide_close_distance": "Ŝova distanco por fermi",
       "close_outside": "Fermi la ŝprucfenestron per alklako ekster ĝi (necesas reŝargo)",
       "close_on_click": "Fermi la ŝprucfenestron post ajna alklako aŭ tuŝeto",
       "background_update": "Ĝisdatigi la kartojn fone (ne rekomendinda)",

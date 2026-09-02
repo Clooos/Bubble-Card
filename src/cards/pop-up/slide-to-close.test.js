@@ -285,24 +285,14 @@ describe('slide to close', () => {
         expect(closePopup).not.toHaveBeenCalled();
     });
 
-    test('honours slide_to_close_distance, including the string a YAML editor writes', () => {
-        const short = harness({ config: { slide_to_close_distance: '140' }, height: 800 });
+    test('the distance to close is half the pop-up, whatever it measures', () => {
+        const short = harness({ height: 300 });
         drag(short.context, { from: 100, to: 260, steps: 8, stepMs: 40, restMs: 200 });
         expect(short.closePopup).toHaveBeenCalledTimes(1);
 
-        const long = harness({ config: { slide_to_close_distance: 600 }, height: 800 });
-        drag(long.context, { from: 100, to: 400, steps: 8, stepMs: 40, restMs: 200 });
-        expect(long.closePopup).not.toHaveBeenCalled();
-    });
-
-    test('never measures the shell when the distance is configured', () => {
-        const { context, popUp } = harness({ config: { slide_to_close_distance: 140 } });
-        let reads = 0;
-        Object.defineProperty(popUp, 'offsetHeight', { get: () => { reads += 1; return 800; } });
-
-        drag(context, { from: 100, to: 400 });
-
-        expect(reads).toBe(0);
+        const tall = harness({ height: 1200 });
+        drag(tall.context, { from: 100, to: 400, steps: 8, stepMs: 40, restMs: 200 });
+        expect(tall.closePopup).not.toHaveBeenCalled();
     });
 
     test('measures the shell once per drag, and not at all for a tap', () => {
@@ -320,6 +310,31 @@ describe('slide to close', () => {
 });
 
 describe('gestures the pop-up must not take', () => {
+    test('never lifts the shell above where the drag started', () => {
+        const { context, popUp, closePopup } = harness({ height: 800 });
+
+        context.handleTouchStart(touchEvent([{ y: 400 }]));
+        clock += 16;
+        dispatchMove(touchEvent([{ y: 500 }]));
+        frames.splice(0).forEach((frame) => frame());
+        expect(popUp.style.transform).toBe('translate3d(0, 100px, 0)');
+
+        // Back up past the starting point. A negative offset would pull the
+        // shell off the bottom of the screen and show the pop-up cut short.
+        clock += 16;
+        const back = touchEvent([{ y: 260 }]);
+        dispatchMove(back);
+        frames.splice(0).forEach((frame) => frame());
+
+        expect(back.preventDefault).toHaveBeenCalled();
+        expect(popUp.style.transform).toBe('translate3d(0, 0px, 0)');
+
+        clock += 200;
+        dispatchEnd();
+        expect(closePopup).not.toHaveBeenCalled();
+        expect(popUp.style.transform).toBe('');
+    });
+
     test('a sideways swipe is handed back untouched, so a tab strip keeps it', () => {
         const { context, popUp, closePopup } = harness();
 
@@ -510,8 +525,8 @@ describe('where the shell is let go', () => {
 
         drag(context, { from: 100, to: 620, steps: 8, stepMs: 40, restMs: 200 });
 
-        // slide_to_close_distance is documented for every mode, so the gesture
-        // runs here too, but the shell is handed back to `.is-closing`.
+        // The gesture runs in every mode, but the shell is handed back to
+        // `.is-closing` rather than parked on a bottom-sheet translation.
         expect(closePopup).toHaveBeenCalledTimes(1);
         expect(popUp.style.transform).toBe('');
         expect(popUp.style.transition).toBe('');

@@ -278,7 +278,6 @@
       "buttons_position": "Position des boutons",
       "settings": "Paramètres de la pop-up",
       "auto_close": "Fermeture automatique en millisecondes (ex. 15000)",
-      "slide_close_distance": "Distance de glissement pour fermer",
       "close_outside": "Fermer la pop-up en cliquant en dehors de celle-ci (un rafraîchissement est nécessaire)",
       "close_on_click": "Fermer la pop-up après un clic ou un appui",
       "background_update": "Mettre à jour les cartes en arrière-plan (non recommandé)",

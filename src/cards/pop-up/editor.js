@@ -720,22 +720,6 @@ export function renderPopUpEditor(editor) {
                             });
                         }}
                     ></ha-form>
-                    <ha-form
-                        .hass=${editor.hass}
-                        .data=${{ slide_to_close_distance: editor._config.slide_to_close_distance }}
-                        .schema=${[{
-                            name: 'slide_to_close_distance',
-                            selector: { text: { type: 'number' } },
-                            options: { min: 0, step: 10 },
-                        }]}
-                        .computeLabel=${() => t('editor.popup.slide_close_distance')}
-                        @value-changed=${(ev) => {
-                            editor._valueChanged({
-                                target: { configValue: 'slide_to_close_distance' },
-                                detail: { value: ev.detail.value.slide_to_close_distance }
-                            });
-                        }}
-                    ></ha-form>
                     <ha-formfield>
                         <ha-switch
                             aria-label="${t('editor.popup.close_outside')}"

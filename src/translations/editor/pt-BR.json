@@ -278,7 +278,6 @@
       "buttons_position": "Posição dos botões",
       "settings": "Configurações do pop-up",
       "auto_close": "Fechamento automático em milissegundos (ex.: 15000)",
-      "slide_close_distance": "Distância de deslize para fechar",
       "close_outside": "Fechar o pop-up clicando fora dele (é necessário atualizar a página)",
       "close_on_click": "Fechar o pop-up após qualquer clique ou toque",
       "background_update": "Atualizar os cartões em segundo plano (não recomendado)",

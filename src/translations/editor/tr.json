@@ -278,7 +278,6 @@
       "buttons_position": "Düğmelerin konumu",
       "settings": "Pop-up ayarları",
       "auto_close": "Milisaniye cinsinden otomatik kapatma (örn. 15000)",
-      "slide_close_distance": "Kapatmak için kaydırma mesafesi",
       "close_outside": "Pop-up'ı dışına tıklayarak kapat (yenileme gerekir)",
       "close_on_click": "Herhangi bir tıklama veya dokunmadan sonra pop-up'ı kapat",
       "background_update": "Kartları arka planda güncelle (önerilmez)",

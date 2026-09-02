@@ -278,7 +278,6 @@
       "buttons_position": "Pozice tlačítek",
       "settings": "Nastavení pop-upu",
       "auto_close": "Automaticky zavřít po milisekundách (např. 15000)",
-      "slide_close_distance": "Vzdálenost přejetí pro zavření",
       "close_outside": "Zavřít pop-up kliknutím mimo něj (je nutné obnovení stránky)",
       "close_on_click": "Zavřít pop-up po jakémkoli kliknutí nebo klepnutí",
       "background_update": "Aktualizovat karty na pozadí (nedoporučeno)",

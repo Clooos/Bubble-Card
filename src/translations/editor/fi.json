@@ -278,7 +278,6 @@
       "buttons_position": "Painikkeiden sijainti",
       "settings": "Ponnahdusikkunan asetukset",
       "auto_close": "Automaattinen sulkeminen millisekunteina (esim. 15000)",
-      "slide_close_distance": "Sulkemiseen tarvittava liu'utusetäisyys",
       "close_outside": "Sulje ponnahdusikkuna napsauttamalla sen ulkopuolella (vaatii päivityksen)",
       "close_on_click": "Sulje ponnahdusikkuna minkä tahansa napsautuksen tai napautuksen jälkeen",
       "background_update": "Päivitä kortit taustalla (ei suositella)",

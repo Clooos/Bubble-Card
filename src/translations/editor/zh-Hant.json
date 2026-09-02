@@ -278,7 +278,6 @@
       "buttons_position": "按鈕位置",
       "settings": "彈出視窗設定",
       "auto_close": "自動關閉毫秒數 (例如 15000)",
-      "slide_close_distance": "滑動關閉距離",
       "close_outside": "點擊彈出視窗外部關閉 (需要重新整理)",
       "close_on_click": "任何點擊或觸碰後關閉彈出視窗",
       "background_update": "在背景更新卡片 (不建議)",

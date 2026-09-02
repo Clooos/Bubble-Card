@@ -278,7 +278,6 @@
       "buttons_position": "Posisie van die knoppies",
       "settings": "Opspringerinstellings",
       "auto_close": "Maak outomaties toe in millisekondes (bv. 15000)",
-      "slide_close_distance": "Veegafstand om toe te maak",
       "close_outside": "Maak die opspringer toe deur daarbuite te klik ('n verversing is nodig)",
       "close_on_click": "Maak die opspringer toe na enige klik of tik",
       "background_update": "Werk kaarte in die agtergrond by (nie aanbeveel nie)",

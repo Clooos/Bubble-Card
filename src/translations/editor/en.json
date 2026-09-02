@@ -314,7 +314,6 @@
       "buttons_position": "Buttons position",
       "settings": "Pop-up settings",
       "auto_close": "Auto close in milliseconds (e.g. 15000)",
-      "slide_close_distance": "Slide to close distance",
       "close_outside": "Close the pop-up by clicking outside of it (a refresh is needed)",
       "close_on_click": "Close the pop-up after any click or tap",
       "background_update": "Update cards in background (not recommended)",

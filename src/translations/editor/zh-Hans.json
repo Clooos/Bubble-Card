@@ -278,7 +278,6 @@
       "buttons_position": "按钮位置",
       "settings": "弹窗设置",
       "auto_close": "自动关闭毫秒数 (例如 15000)",
-      "slide_close_distance": "滑动关闭距离",
       "close_outside": "点击弹窗外部关闭 (需要刷新)",
       "close_on_click": "任意点击后关闭弹窗",
       "background_update": "在后台更新卡片 (不推荐)",

@@ -278,7 +278,6 @@
       "buttons_position": "Pozicioni i butonave",
       "settings": "Cilësimet e pop-up-it",
       "auto_close": "Mbyllje automatike në milisekonda (p.sh. 15000)",
-      "slide_close_distance": "Distanca e rrëshqitjes për mbyllje",
       "close_outside": "Mbyll pop-up-in duke klikuar jashtë tij (nevojitet një rifreskim)",
       "close_on_click": "Mbyll pop-up-in pas çdo klikimi ose prekjeje",
       "background_update": "Përditëso kartat në sfond (nuk rekomandohet)",

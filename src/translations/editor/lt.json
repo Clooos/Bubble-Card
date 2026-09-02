@@ -278,7 +278,6 @@
       "buttons_position": "Mygtukų padėtis",
       "settings": "Iškylančiojo lango nustatymai",
       "auto_close": "Automatinis uždarymas milisekundėmis (pvz., 15000)",
-      "slide_close_distance": "Braukimo uždarymui atstumas",
       "close_outside": "Uždaryti iškylantįjį langą spustelėjus už jo ribų (reikia atnaujinti puslapį)",
       "close_on_click": "Uždaryti iškylantįjį langą po bet kokio spustelėjimo ar bakstelėjimo",
       "background_update": "Atnaujinti korteles fone (nerekomenduojama)",

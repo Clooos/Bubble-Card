@@ -278,7 +278,6 @@
       "buttons_position": "Botoien posizioa",
       "settings": "Laster-leihoaren ezarpenak",
       "auto_close": "Itxiera automatikoa milisegundotan (adib. 15000)",
-      "slide_close_distance": "Ixteko irristatze-distantzia",
       "close_outside": "Itxi laster-leihoa kanpoan sakatuz (freskatzea behar da)",
       "close_on_click": "Itxi laster-leihoa edozein klik edo sakatzeren ondoren",
       "background_update": "Eguneratu txartelak atzeko planoan (ez da gomendagarria)",

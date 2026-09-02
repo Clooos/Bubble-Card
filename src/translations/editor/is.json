@@ -278,7 +278,6 @@
       "buttons_position": "Staðsetning hnappa",
       "settings": "Stillingar sprettiglugga",
       "auto_close": "Loka sjálfkrafa eftir millisekúndur (t.d. 15000)",
-      "slide_close_distance": "Strjúkvegalengd til að loka",
       "close_outside": "Loka sprettiglugganum með því að smella utan hans (endurhleðsla er nauðsynleg)",
       "close_on_click": "Loka sprettiglugganum eftir hvaða smell eða ýtingu sem er",
       "background_update": "Uppfæra kort í bakgrunni (ekki mælt með því)",

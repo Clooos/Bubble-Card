@@ -278,7 +278,6 @@
       "buttons_position": "Knappenes posisjon",
       "settings": "Pop-up-innstillinger",
       "auto_close": "Lukk automatisk etter millisekunder (f.eks. 15000)",
-      "slide_close_distance": "Sveipeavstand for å lukke",
       "close_outside": "Lukk pop-upen ved å klikke utenfor den (en oppdatering kreves)",
       "close_on_click": "Lukk pop-upen etter et hvilket som helst klikk eller trykk",
       "background_update": "Oppdater kort i bakgrunnen (anbefales ikke)",

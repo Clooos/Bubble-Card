@@ -29,8 +29,7 @@ const VELOCITY_SWIPE_THRESHOLD = 0.5;
 // ms. A flick only counts while the finger is still moving. A drag that came to
 // rest before lifting is a position decision, not a swipe.
 const MOVEMENT_TIME_THRESHOLD = 100;
-// Share of the pop-up's own height a drag has to cover to close it, when no
-// `slide_to_close_distance` is configured.
+// Share of the pop-up's own height a drag has to cover to close it.
 const CLOSE_HEIGHT_RATIO = 0.5;
 // px travelled before the gesture commits to an axis. Small enough to feel
 // immediate, large enough that a tap's jitter never picks a direction.
@@ -87,11 +86,10 @@ function isDialogViewport() {
 }
 
 // HA gives the swipe to its bottom-sheet mode alone. Here it runs in every mode,
-// because `slide_to_close_distance` is a documented option of every pop-up and
-// taking the gesture away from the centred ones would quietly make it a no-op.
-// What the layout does decide is where the shell is let go. A sheet leaves on
-// the bottom-sheet translation, a dialog on the scale its own closing state
-// declares.
+// because a centred pop-up on a phone is dismissed by the same gesture as any
+// other card and has been closing this way all along. What the layout does
+// decide is where the shell is let go. A sheet leaves on the bottom-sheet
+// translation, a dialog on the scale its own closing state declares.
 export function isBottomSheetLayout(popUp) {
     const classList = popUp?.classList;
     if (!classList) {
@@ -254,22 +252,15 @@ function clearShellProperty(popUp, property) {
     style[property] = '';
 }
 
-function resolveCloseDistance(context) {
-    const configured = Number(context.config?.slide_to_close_distance);
-    if (Number.isFinite(configured) && configured >= 0) {
-        return configured;
-    }
-
-    // HA's rule when nothing is configured, half the sheet. It replaces the flat
-    // 400px this used to default to, which was taller than a short pop-up on a
-    // phone and so left some of them impossible to slide closed. The editor
-    // leaves the field empty rather than pre-filling a number, and the label no
-    // longer names one, so nothing claims a fixed default any more.
-    //
-    // Read here and not at touchstart, so a tap or a scroll never pays for a
-    // layout it has no use for, and read before the first write of the drag, so
-    // it is not a forced one.
-    return (context.popUp?.offsetHeight || 0) * CLOSE_HEIGHT_RATIO;
+// HA's rule, half the sheet. It replaced a flat 400px that was taller than some
+// pop-ups on a phone, which left those impossible to slide closed whatever the
+// user did.
+//
+// Read here and not at touchstart, so a tap or a scroll never pays for a layout
+// it has no use for, and read before the first write of the drag, so it is not a
+// forced one.
+function resolveCloseDistance(popUp) {
+    return (popUp?.offsetHeight || 0) * CLOSE_HEIGHT_RATIO;
 }
 
 export function configurePopupSlideToClose(context, closePopup) {
@@ -415,7 +406,7 @@ export function configurePopupSlideToClose(context, closePopup) {
                 return;
             }
 
-            closeDistance = resolveCloseDistance(context);
+            closeDistance = resolveCloseDistance(context.popUp);
             dragging = true;
             // Held still for the whole drag so the shell follows the finger
             // exactly instead of trailing it by the shell's own 0.3s.
@@ -431,7 +422,11 @@ export function configurePopupSlideToClose(context, closePopup) {
 
         lastY = currentY;
         lastTime = Date.now();
-        offset = travelY;
+        // Never above where it started. A finger that goes back up past its own
+        // starting point would otherwise lift the shell off the bottom of the
+        // screen and show the pop-up cut short, and there is nothing up there to
+        // drag it to anyway.
+        offset = travelY > 0 ? travelY : 0;
         scheduleOffset();
     }
 

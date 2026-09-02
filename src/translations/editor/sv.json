@@ -278,7 +278,6 @@
       "buttons_position": "Knapparnas position",
       "settings": "Pop-up-inställningar",
       "auto_close": "Stäng automatiskt efter millisekunder (t.ex. 15000)",
-      "slide_close_distance": "Svepavstånd för att stänga",
       "close_outside": "Stäng pop-upen genom att klicka utanför den (en uppdatering krävs)",
       "close_on_click": "Stäng pop-upen efter valfritt klick eller tryck",
       "background_update": "Uppdatera kort i bakgrunden (rekommenderas inte)",

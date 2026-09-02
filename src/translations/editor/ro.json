@@ -278,7 +278,6 @@
       "buttons_position": "Poziția butoanelor",
       "settings": "Setările pop-upului",
       "auto_close": "Închidere automată în milisecunde (de ex. 15000)",
-      "slide_close_distance": "Distanța de glisare pentru închidere",
       "close_outside": "Închide pop-upul apăsând în afara lui (este necesară o reîmprospătare)",
       "close_on_click": "Închide pop-upul după orice clic sau atingere",
       "background_update": "Actualizează cardurile în fundal (nerecomandat)",
