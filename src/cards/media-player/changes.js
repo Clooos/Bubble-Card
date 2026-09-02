@@ -256,37 +256,45 @@ function getMediaCoverState(context) {
             iconDisplayedUrl: '',
             backgroundDisplayedUrl: '',
             idleTimeout: null,
-            lastState: ''
+            lastState: '',
+            lastFingerprint: ''
         };
     }
     return context._mediaCoverState;
 }
 
-function evaluateCoverState(context) {
+export function evaluateCoverState(context) {
     const coverState = getMediaCoverState(context);
     const forceIcon = Boolean(context.config.force_icon);
     let rawCover = forceIcon ? '' : (getImage(context) || '');
     const entityState = (getState(context) || '').toLowerCase();
 
-    // Append a media content fingerprint as a cache-busting parameter to handle
-    // proxy URLs that stay identical across different media (e.g., Apple TV).
-    // Same content produces the same hash, avoiding unnecessary re-fetches.
-    if (rawCover) {
-        const fp = (getAttribute(context, "media_content_id") || '')
-            + (getAttribute(context, "media_title") || '')
-            + (getAttribute(context, "media_artist") || '');
-        if (fp) {
-            let h = 0;
-            for (let i = 0; i < fp.length; i++) {
-                h = ((h << 5) - h) + fp.charCodeAt(i);
-                h |= 0;
-            }
-            const sep = rawCover.includes('?') ? '&' : '?';
-            rawCover = `${rawCover}${sep}v=${Math.abs(h).toString(36)}`;
+    // Media content fingerprint identifying the currently playing media. Used both
+    // as a cache-busting parameter (proxy URLs may stay identical across different
+    // media, e.g. Apple TV) and to detect a real track change.
+    const fingerprint = (getAttribute(context, "media_content_id") || '')
+        + (getAttribute(context, "media_title") || '')
+        + (getAttribute(context, "media_artist") || '');
+
+    // Append the fingerprint as a cache-busting parameter so the same content
+    // produces the same hash, avoiding unnecessary re-fetches.
+    if (rawCover && fingerprint) {
+        let h = 0;
+        for (let i = 0; i < fingerprint.length; i++) {
+            h = ((h << 5) - h) + fingerprint.charCodeAt(i);
+            h |= 0;
         }
+        const sep = rawCover.includes('?') ? '&' : '?';
+        rawCover = `${rawCover}${sep}v=${Math.abs(h).toString(36)}`;
     }
     const shouldReset = forceIcon || MEDIA_COVER_RESET_STATES.has(entityState);
     const isIdle = entityState === 'idle';
+
+    // A different track is now playing but it has no cover art: drop the cached
+    // cover so the previous album art doesn't linger in the background.
+    const mediaChangedWithoutCover = !rawCover && !isIdle
+        && fingerprint !== '' && fingerprint !== coverState.lastFingerprint;
+    coverState.lastFingerprint = fingerprint;
 
     if (coverState.lastState !== entityState) {
         if (coverState.idleTimeout) {
@@ -310,7 +318,7 @@ function evaluateCoverState(context) {
             coverState.idleTimeout = null;
         }
         coverState.cachedUrl = rawCover;
-    } else if (shouldReset && !rawCover && coverState.cachedUrl) {
+    } else if ((shouldReset || mediaChangedWithoutCover) && !rawCover && coverState.cachedUrl) {
         if (coverState.idleTimeout) {
             clearTimeout(coverState.idleTimeout);
             coverState.idleTimeout = null;
