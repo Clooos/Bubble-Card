@@ -272,9 +272,15 @@ export function evaluateCoverState(context) {
     // Media content fingerprint identifying the currently playing media. Used both
     // as a cache-busting parameter (proxy URLs may stay identical across different
     // media, e.g. Apple TV) and to detect a real track change.
-    const fingerprint = (getAttribute(context, "media_content_id") || '')
-        + (getAttribute(context, "media_title") || '')
-        + (getAttribute(context, "media_artist") || '');
+    //
+    // Three attribute reads, twice per pass, on every media player of a dashboard:
+    // only worth taking when there is a cover to fingerprint or a cached one this
+    // could drop. A player sitting with no art and nothing cached pays nothing.
+    const fingerprint = rawCover || coverState.cachedUrl
+        ? (getAttribute(context, "media_content_id") || '')
+            + (getAttribute(context, "media_title") || '')
+            + (getAttribute(context, "media_artist") || '')
+        : '';
 
     // Append the fingerprint as a cache-busting parameter so the same content
     // produces the same hash, avoiding unnecessary re-fetches.

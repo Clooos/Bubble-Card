@@ -63,6 +63,28 @@ describe('evaluateCoverState', () => {
         expect(evaluateCoverState(context).resolvedUrl).toBe('');
     });
 
+    test('still clears after passes where the fingerprint was not worth reading', () => {
+        const context = makeContext();
+
+        // Nothing to fingerprint and nothing cached: these passes are skipped.
+        setTrack(context, { media_content_id: '1', media_title: 'A', media_artist: 'X' });
+        expect(evaluateCoverState(context).resolvedUrl).toBe('');
+        setTrack(context, { media_content_id: '2', media_title: 'B', media_artist: 'X' });
+        expect(evaluateCoverState(context).resolvedUrl).toBe('');
+
+        // A cover shows up, then a track change without one still drops it.
+        setTrack(context, {
+            entity_picture: '/art/track3.png',
+            media_content_id: '3',
+            media_title: 'C',
+            media_artist: 'X'
+        });
+        expect(evaluateCoverState(context).resolvedUrl).toContain('/art/track3.png');
+
+        setTrack(context, { media_content_id: '4', media_title: 'D', media_artist: 'X' });
+        expect(evaluateCoverState(context).resolvedUrl).toBe('');
+    });
+
     test('keeps the cover during a transient empty cover for the same track', () => {
         const context = makeContext();
 
