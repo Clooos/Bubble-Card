@@ -633,20 +633,22 @@
         padding: 18px 18px var(--bubble-pop-up-visible-bottom-padding, 18px) 18px;
     }
     .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) .bubble-pop-up-container {
-        padding-bottom: calc(140px + var(--custom-height-offset-desktop));
+        padding-bottom: calc(140px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-desktop));
     }
 }
 
+/* Same offset as the base rule, so the inset survives the wider viewports too:
+   a tablet in the companion app has a status bar like a phone does */
 @media only screen and (min-width: 768px) {
         .bubble-pop-up:not(.editor) {
-            --bubble-pop-up-available-height: calc(100vh - 56px - var(--custom-height-offset-desktop));
-            top: calc(56px + var(--custom-height-offset-desktop));
+            --bubble-pop-up-available-height: calc(100vh - 56px - var(--bubble-pop-up-safe-area-top) - var(--custom-height-offset-desktop));
+            top: calc(56px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-desktop));
             bottom: 0;
       inset-inline-start: calc(var(--bubble-pop-up-content-inline-start) / 2 + 50% - (var(--desktop-width, 540px) / 2));
     }
     .bubble-pop-up:not(.editor):not(.is-standalone-pop-up):not(.popup-mode-fit-content):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) {
         top: auto;
-        bottom: calc(-56px - var(--custom-height-offset-desktop));
+        bottom: calc(-56px - var(--bubble-pop-up-safe-area-top) - var(--custom-height-offset-desktop));
     }
 }
 

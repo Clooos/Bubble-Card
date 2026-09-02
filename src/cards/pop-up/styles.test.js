@@ -131,6 +131,24 @@ describe('pop-up styles', () => {
     expect(styles).toMatch(/padding-bottom: calc\(140px \+ var\(--bubble-pop-up-safe-area-top\) \+ var\(--custom-height-offset-mobile\)\);/);
   });
 
+  // The wide branch overrides the same three values with the desktop offset, so
+  // the inset has to survive it. A desktop browser reports 0, but a tablet in
+  // the companion app has a status bar just like a phone does, and it sits
+  // above 768px.
+  test('keeps the top safe-area inset on the wide branch too', () => {
+    expect(styles).toMatch(/top: calc\(56px \+ var\(--bubble-pop-up-safe-area-top\) \+ var\(--custom-height-offset-desktop\)\);/);
+    expect(styles).toMatch(/--bubble-pop-up-available-height: calc\(100vh - 56px - var\(--bubble-pop-up-safe-area-top\) - var\(--custom-height-offset-desktop\)\);/);
+    expect(styles).toMatch(/bottom: calc\(-56px - var\(--bubble-pop-up-safe-area-top\) - var\(--custom-height-offset-desktop\)\);/);
+    expect(styles).toMatch(/padding-bottom: calc\(140px \+ var\(--bubble-pop-up-safe-area-top\) \+ var\(--custom-height-offset-desktop\)\);/);
+  });
+
+  // No offset of either kind is left reading the bare 56px: every place that
+  // positions a pop-up against the header carries the inset now.
+  test('no header offset is left without the inset', () => {
+    const offsets = styles.match(/calc\(-?56px [-+] var\(--custom-height-offset-(?:mobile|desktop)\)\)/g);
+    expect(offsets).toBeNull();
+  });
+
   // #2537: pop-ups are position:fixed, so they offset themselves to stay
   // centred on the dashboard rather than on the viewport. That offset used to
   // be read from var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)): width
