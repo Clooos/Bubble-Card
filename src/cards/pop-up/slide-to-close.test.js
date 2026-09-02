@@ -56,6 +56,10 @@ function createNode({
     scrollHeight = 0,
     clientHeight = 0,
     overflowY = 'visible',
+    scrollLeft = 0,
+    scrollWidth = 0,
+    clientWidth = 0,
+    overflowX = 'visible',
 } = {}) {
     return {
         nodeType: 1,
@@ -65,6 +69,10 @@ function createNode({
         scrollHeight,
         clientHeight,
         overflowY,
+        scrollLeft,
+        scrollWidth,
+        clientWidth,
+        overflowX,
     };
 }
 
@@ -169,7 +177,10 @@ beforeEach(() => {
         }),
     };
 
-    global.getComputedStyle = jest.fn((node) => ({ overflowY: node.overflowY ?? 'visible' }));
+    global.getComputedStyle = jest.fn((node) => ({
+        overflowY: node.overflowY ?? 'visible',
+        overflowX: node.overflowX ?? 'visible',
+    }));
 
     global.requestAnimationFrame = jest.fn((callback) => {
         frames.push(callback);
@@ -351,6 +362,34 @@ describe('gestures the pop-up must not take', () => {
         expect(closePopup).not.toHaveBeenCalled();
     });
 
+    test('hands a sideways first move back before it can cancel anything', () => {
+        const { context } = harness();
+
+        context.handleTouchStart(touchEvent([{ x: 100, y: 300 }]));
+        clock += 8;
+        // Four across, three down. A carousel starts like this, and it has to
+        // get the move uncancelled or it never scrolls.
+        const first = touchEvent([{ x: 104, y: 303 }]);
+        dispatchMove(first);
+
+        expect(first.preventDefault).not.toHaveBeenCalled();
+        expect(documentListeners.touchmove).toHaveLength(0);
+    });
+
+    test('reads nothing from a move that has not moved', () => {
+        const { context } = harness();
+
+        context.handleTouchStart(touchEvent([{ x: 100, y: 300 }]));
+        clock += 8;
+        const still = touchEvent([{ x: 100, y: 300 }]);
+        dispatchMove(still);
+
+        // No axis in it either way, so the touch stays armed rather than being
+        // handed over on a coin toss.
+        expect(still.preventDefault).not.toHaveBeenCalled();
+        expect(documentListeners.touchmove).toHaveLength(1);
+    });
+
     test('an upward drag is handed back when the path cannot be read at all', () => {
         const { context, popUp } = harness();
 
@@ -380,18 +419,34 @@ describe('gestures the pop-up must not take', () => {
         expect(documentListeners.touchmove).toHaveLength(0);
     });
 
-    test('waits out the slop before committing to a direction', () => {
-        const { context, popUp } = harness();
+    test('takes the first move whatever its size, because WebKit gives no second one', () => {
+        const { context } = harness();
 
         context.handleTouchStart(touchEvent([{ y: 300 }]));
         clock += 8;
-        const jitter = touchEvent([{ x: 103, y: 304 }]);
-        dispatchMove(jitter);
+        // Three pixels. On WebKit this is the only move that can still be
+        // refused, and every one after it lies about being cancelable.
+        const first = touchEvent([{ x: 100, y: 303 }]);
+        dispatchMove(first);
 
-        expect(jitter.preventDefault).not.toHaveBeenCalled();
-        expect(popUp.style.transform).toBe('');
-        // Still armed: the finger has not said which way it is going yet.
+        expect(first.preventDefault).toHaveBeenCalled();
         expect(documentListeners.touchmove).toHaveLength(1);
+    });
+
+    test('holds a tap that jitters without ever moving the shell', () => {
+        const { context, popUp, closePopup } = harness();
+
+        context.handleTouchStart(touchEvent([{ y: 300 }]));
+        clock += 8;
+        dispatchMove(touchEvent([{ x: 103, y: 304 }]));
+        frames.splice(0).forEach((frame) => frame());
+
+        // The touch is held, but four pixels is a tap, not a drag.
+        expect(popUp.style.transform).toBe('');
+        expect(popUp.style.transition).toBe('');
+
+        dispatchEnd();
+        expect(closePopup).not.toHaveBeenCalled();
     });
 
     test('leaves a list the user has already scrolled alone', () => {
@@ -434,15 +489,19 @@ describe('gestures the pop-up must not take', () => {
         const sliderCard = createNode({ classes: ['bubble-container', 'slider-container'] });
 
         context.handleTouchStart(touchEvent([{ y: 300 }], { path: [sliderCard, popUp] }));
-        // What a vertical slider does after 2px, a whole direction lock before
-        // this gesture would have committed.
+        // What a vertical slider does after 2px, well before this gesture would
+        // have started moving the shell.
         sliderCard.classList.add('is-dragging');
         clock += 16;
         const move = touchEvent([{ y: 340 }]);
         dispatchMove(move);
 
-        expect(move.preventDefault).not.toHaveBeenCalled();
+        // The move itself is cancelled, because the axis had to be answered
+        // before the slider had said anything, and the slider cancels its own
+        // moves regardless. What matters is that the shell is left alone and the
+        // gesture is over.
         expect(popUp.style.transform).toBe('');
+        expect(popUp.style.transition).toBe('');
         expect(documentListeners.touchmove).toHaveLength(0);
     });
 
@@ -674,17 +733,63 @@ describe('an upward drag that belongs to nothing', () => {
         expect(reads).toBe(1);
     });
 
-    test('leaves a horizontal drag alone', () => {
+    test('holds a sideways drag that no carousel is there to take', () => {
         const { context, popUp } = harness();
         const path = headerPath(popUp);
 
         context.handleTouchStart(touchEvent([{ x: 100, y: 400 }], { path }));
         clock += 16;
-        // Mostly sideways, and a shade upward. A carousel owns this one.
+        // Mostly sideways, and a shade upward. Nothing here scrolls either way,
+        // so the small vertical part of it would otherwise reach the page.
+        const sideways = touchEvent([{ x: 40, y: 396 }], { path });
+        dispatchMove(sideways);
+
+        expect(sideways.preventDefault).toHaveBeenCalled();
+        expect(popUp.style.transform).toBe('');
+    });
+
+    test('gives a sideways drag to a carousel that can take it', () => {
+        const { context, popUp } = harness();
+        const carousel = createNode({ clientWidth: 300, scrollWidth: 1200, overflowX: 'auto' });
+        const path = [createNode(), carousel, popUp];
+
+        context.handleTouchStart(touchEvent([{ x: 100, y: 400 }], { path }));
+        clock += 16;
         const sideways = touchEvent([{ x: 40, y: 396 }], { path });
         dispatchMove(sideways);
 
         expect(sideways.preventDefault).not.toHaveBeenCalled();
         expect(documentListeners.touchmove).toHaveLength(0);
+    });
+
+    test('reads a carousel wherever it currently sits', () => {
+        const { context, popUp } = harness();
+        // On its last slide. It still owns the swipe, and `scrollLeft` cannot be
+        // read for a verdict anyway once the page is right-to-left.
+        const carousel = createNode({ clientWidth: 300, scrollWidth: 1200, scrollLeft: 900, overflowX: 'auto' });
+
+        context.handleTouchStart(touchEvent([{ x: 100, y: 400 }], { path: [carousel, popUp] }));
+        clock += 16;
+        const sideways = touchEvent([{ x: 160, y: 404 }], { path: [carousel, popUp] });
+        dispatchMove(sideways);
+
+        expect(sideways.preventDefault).not.toHaveBeenCalled();
+    });
+
+    test('a first move that is as vertical as it is sideways counts as vertical', () => {
+        const { context, popUp } = harness();
+        const path = headerPath(popUp);
+
+        context.handleTouchStart(touchEvent([{ x: 100, y: 400 }], { path }));
+        clock += 16;
+        // Three each way. Measured on an iPad, this exact tie was read as
+        // sideways, handed over, and scrolled the dashboard behind the pop-up.
+        const first = touchEvent([{ x: 97, y: 403 }], { path });
+        dispatchMove(first);
+
+        expect(first.preventDefault).toHaveBeenCalled();
+        // Downward, so the shell is still this gesture's to move once the finger
+        // has gone far enough.
+        expect(documentListeners.touchmove).toHaveLength(1);
     });
 });

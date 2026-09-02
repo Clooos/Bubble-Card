@@ -31,9 +31,11 @@ const VELOCITY_SWIPE_THRESHOLD = 0.5;
 const MOVEMENT_TIME_THRESHOLD = 100;
 // Share of the pop-up's own height a drag has to cover to close it.
 const CLOSE_HEIGHT_RATIO = 0.5;
-// px travelled before the gesture commits to an axis. Small enough to feel
-// immediate, large enough that a tap's jitter never picks a direction.
-const DIRECTION_LOCK_SLOP = 8;
+// px travelled before the shell starts following the finger. The axis is
+// decided long before this, on the first move, but a tap that jitters by a
+// pixel must not shift the pop-up, so nothing is written until the finger has
+// really gone somewhere.
+const DRAG_START_SLOP = 8;
 
 // Overflow values a finger can actually move. A `hidden` or `clip` box has
 // scrollable overflow just the same, but only script can scroll it, so it is
@@ -169,10 +171,6 @@ function readGestureTarget(event, popUp) {
 
 // Room left to scroll down, which is what a finger moving up is asking for.
 function canTakeUpwardDrag(node) {
-    if (node.nodeType !== 1) {
-        return false;
-    }
-
     // The cheapest question, and the one that rejects almost every node on the
     // path. It is also the read that forces the layout the rest of the walk then
     // gets for free.
@@ -190,16 +188,29 @@ function canTakeUpwardDrag(node) {
     return node.scrollTop < scrollable - 1;
 }
 
+// Sideways the question is deliberately coarser. Any horizontal scroller on the
+// way owns the gesture wherever it currently sits, because a carousel that has
+// reached its last slide still expects to rubber-band rather than have the move
+// taken from it, and `scrollLeft` reverses sign in right-to-left anyway.
+function canTakeSidewaysDrag(node) {
+    if (node.scrollWidth - node.clientWidth <= 1) {
+        return false;
+    }
+
+    return SCROLLABLE_OVERFLOW.has(getComputedStyle(node).overflowX);
+}
+
 // The dashboard behind an open pop-up must not move, and the only thing holding
 // it back is the `overscroll-behavior: contain` on the pop-up's own scroller.
 // Whatever is not inside that scroller is not covered by it, starting with the
 // header, which is its sibling: a drag from there finds nothing to scroll before
-// the fixed shell and the browser takes the page instead.
+// the fixed shell and the browser takes the page instead. WebKit does not even
+// hold the body, it chains straight past a scroller that has nothing to scroll.
 //
-// Naming the header would close that one spot and leave the next one open, so
-// what is asked here is the question the browser is about to answer itself. Is
-// there anything on the way to the shell this drag could belong to?
-function hasSomewhereToScroll(event, popUp) {
+// Naming those spots would close them and leave the next one open, so what is
+// asked here is the question the browser is about to answer itself. Is there
+// anything on the way to the shell this drag could belong to?
+function hasSomewhereToScroll(event, popUp, sideways) {
     const path = typeof event.composedPath === 'function' ? event.composedPath() : null;
     if (!path?.length) {
         // Nothing read means nothing ruled out, and the gesture is handed over
@@ -207,12 +218,14 @@ function hasSomewhereToScroll(event, popUp) {
         return true;
     }
 
+    const canTake = sideways ? canTakeSidewaysDrag : canTakeUpwardDrag;
+
     for (const node of path) {
         if (node === popUp) {
             break;
         }
 
-        if (node && canTakeUpwardDrag(node)) {
+        if (node?.nodeType === 1 && canTake(node)) {
             return true;
         }
     }
@@ -284,7 +297,10 @@ export function configurePopupSlideToClose(context, closePopup) {
     let closeDistance = 0;
     let slider = null;
     let dragFrame = null;
-    // Set when the drag turned out to belong to nothing at all. The shell is
+    // Set once the axis has been read and the touch kept. From here on every
+    // move of it is cancelled, whether or not the shell ever follows.
+    let claimed = false;
+    // Set when the touch turned out to belong to nothing at all. The shell is
     // never touched in this state, the moves are only kept from reaching the
     // page behind.
     let blocking = false;
@@ -307,6 +323,7 @@ export function configurePopupSlideToClose(context, closePopup) {
     const detach = () => {
         active = false;
         dragging = false;
+        claimed = false;
         blocking = false;
         slider = null;
 
@@ -356,45 +373,63 @@ export function configurePopupSlideToClose(context, closePopup) {
             return;
         }
 
-        if (blocking) {
-            if (event.cancelable) {
-                event.preventDefault();
-            }
-            return;
-        }
-
         const currentY = touch.clientY;
         const travelY = currentY - startY;
 
-        if (!dragging) {
+        // The first move is the whole decision. WebKit settles there whether the
+        // page will scroll for the rest of the touch, and it never says so
+        // afterwards: every following move still arrives `cancelable: true` and
+        // every `preventDefault()` on it is quietly ignored. Measured on an
+        // iPad, a slow drag from a pop-up body was cancelled 118 times over five
+        // seconds while the dashboard behind it scrolled the whole way.
+        //
+        // So there is nothing to wait for. HA's own sheet does not wait either,
+        // `ha-bottom-sheet.ts` cancels on any downward move at all, and what is
+        // added here is only the axis it has no need of.
+        if (!claimed) {
             const travelX = touch.clientX - startX;
-            if (Math.abs(travelX) < DIRECTION_LOCK_SLOP && Math.abs(travelY) < DIRECTION_LOCK_SLOP) {
+
+            if (travelY === 0 && travelX === 0) {
                 return;
             }
 
-            // A horizontal drag belongs to whatever is under the finger, a
-            // carousel, a tab strip. Handing it over once is what keeps those
-            // working, and taking it back mid-touch is not possible anyway, the
-            // browser has already committed the gesture.
-            if (Math.abs(travelX) > Math.abs(travelY)) {
+            // A tie goes to the vertical, because that is the axis this gesture
+            // is for and the axis the page behind moves on. Measured on an iPad:
+            // a slow drag down whose first move came in at three pixels each way
+            // was read as sideways, handed over, and took the dashboard with it.
+            const sideways = Math.abs(travelX) > Math.abs(travelY);
+
+            // Whichever way it goes, it belongs to whatever is under the finger
+            // as long as something there can take it: a list for a drag up, a
+            // carousel or a tab strip for one across. When nothing can, the
+            // browser gives it to the dashboard behind the pop-up instead, which
+            // is the one place it must never go.
+            if ((sideways || travelY < 0) && hasSomewhereToScroll(event, context.popUp, sideways)) {
                 detach();
                 return;
             }
 
-            // So does an upward one, as long as something under the finger can
-            // take it. When nothing can, the browser gives it to the dashboard
-            // behind the pop-up instead, which is the one place it must never
-            // go, so the rest of the touch is cancelled and nothing moves.
-            if (travelY <= 0) {
-                if (hasSomewhereToScroll(event, context.popUp)) {
-                    detach();
-                    return;
-                }
+            claimed = true;
+            // Only a drag downward moves the shell. The others are held so they
+            // cannot reach the page, and nothing more: there is no pop-up above
+            // the pop-up to drag it to, and none beside it either.
+            blocking = sideways || travelY < 0;
+        }
 
-                blocking = true;
-                if (event.cancelable) {
-                    event.preventDefault();
-                }
+        // The move that fixes #2594, now taken at the only moment it counts.
+        // With this the browser never gives the gesture to the dashboard's
+        // scroller, so nothing behind the pop-up moves and the companion app has
+        // no overscroll to turn into a refresh.
+        if (event.cancelable) {
+            event.preventDefault();
+        }
+
+        if (blocking) {
+            return;
+        }
+
+        if (!dragging) {
+            if (travelY < DRAG_START_SLOP) {
                 return;
             }
 
@@ -411,13 +446,6 @@ export function configurePopupSlideToClose(context, closePopup) {
             // Held still for the whole drag so the shell follows the finger
             // exactly instead of trailing it by the shell's own 0.3s.
             setShellProperty(context.popUp, 'transition', 'none');
-        }
-
-        // The move that fixes #2594. With this the browser never gives the
-        // gesture to the dashboard's scroller, so nothing behind the pop-up
-        // moves and the companion app has no overscroll to turn into a refresh.
-        if (event.cancelable) {
-            event.preventDefault();
         }
 
         lastY = currentY;
@@ -490,6 +518,7 @@ export function configurePopupSlideToClose(context, closePopup) {
 
         active = true;
         dragging = false;
+        claimed = false;
         blocking = false;
         offset = 0;
         closeDistance = 0;
