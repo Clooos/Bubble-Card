@@ -33,6 +33,9 @@ function createMockClassList(initialClasses = []) {
 
 function createMockStyle() {
     const style = {};
+    style.setProperty = jest.fn((propertyName, value) => {
+        style[propertyName] = value;
+    });
     style.removeProperty = jest.fn((propertyName) => {
         delete style[propertyName];
     });
@@ -138,6 +141,46 @@ describe('toggleBodyScroll', () => {
     afterEach(() => {
         delete global.window;
         delete global.document;
+    });
+
+    test('locks the document itself, not only the area around the pop-up', () => {
+        // The layer catches what happens outside the pop-up, but a gesture that
+        // starts inside it never reaches that layer, and overscroll-behavior
+        // only holds a chain back while the element is actually scrolling.
+        // WebKit then hands a short pop-up straight to the document. The class
+        // now carries the rules that stop the document scrolling at all.
+        utilsModule.toggleBodyScroll(true);
+
+        const styles = document.getElementById('bubble-card-no-scroll-styles');
+
+        expect(document.documentElement.classList.contains('bubble-body-scroll-locked')).toBe(true);
+        expect(styles.textContent).toContain('html.bubble-body-scroll-locked body');
+        expect(styles.textContent).toContain('overflow: hidden !important;');
+        // The gutter keeps the layout still when the scrollbar goes.
+        expect(styles.textContent).toContain('scrollbar-gutter: stable !important;');
+        expect(document.documentElement.style['--bubble-scroll-lock-size']).toBeDefined();
+    });
+
+    test('gives the document back when the last pop-up closes', () => {
+        utilsModule.toggleBodyScroll(true);
+        utilsModule.toggleBodyScroll(false);
+
+        expect(document.documentElement.classList.contains('bubble-body-scroll-locked')).toBe(false);
+        expect(document.body.classList.contains('bubble-body-scroll-locked')).toBe(false);
+    });
+
+    test('never reaches for a listener or a preventDefault on the page', () => {
+        // An earlier attempt did, and the cards inside a pop-up stopped
+        // scrolling with it. The lock is CSS and nothing else.
+        utilsModule.toggleBodyScroll(true);
+
+        const styles = document.getElementById('bubble-card-no-scroll-styles');
+
+        // The overlay legitimately uses touch-action for the area outside the
+        // pop-up. What must stay clean is what the page itself is given.
+        const pageRules = styles.textContent.slice(0, styles.textContent.indexOf('.bubble-scroll-lock-layer'));
+        expect(pageRules).not.toContain('touch-action');
+        expect(pageRules).toContain('overflow: hidden !important;');
     });
 
     test('locks scroll with a transparent overlay instead of fixing the body', () => {

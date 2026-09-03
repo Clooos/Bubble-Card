@@ -1154,7 +1154,39 @@ const scrollLockLayerId = 'bubble-card-scroll-lock-layer';
 const scrollLockLayerClass = 'bubble-scroll-lock-layer';
 const scrollLockLayerActiveClass = 'is-active';
 const scrollLockStyleId = 'bubble-card-no-scroll-styles';
+const scrollLockGutterProperty = '--bubble-scroll-lock-size';
+// The class on the body only ever marked state: nothing in the project styled
+// it, so the document stayed scrollable the whole time a pop-up was open. The
+// layer below catches what happens outside the pop-up, but a gesture that
+// starts inside it never reaches that layer, and overscroll-behavior only holds
+// a chain back while the element it sits on is actually scrolling. WebKit then
+// hands a short, unscrollable pop-up straight to the document, which is the
+// page moving behind it.
+//
+// So the class is given the rules it never had, the ones Web Awesome uses to
+// lock the page behind a Home Assistant dialog (scroll-lock.css.js, imported by
+// resources/theme/wa.globals.ts). Overflow on the body and a gutter to keep the
+// layout still, and nothing else: no listener, no touch-action and no
+// preventDefault, which is what lets the cards inside keep scrolling in both
+// axes. An earlier attempt at this went the other way and took those with it.
 const scrollLockCssContent = `
+        @supports (scrollbar-gutter: stable) {
+            html.${scrollLockBodyClass} {
+                scrollbar-gutter: stable !important;
+            }
+
+            html.${scrollLockBodyClass} body {
+                overflow: hidden !important;
+            }
+        }
+
+        @supports not (scrollbar-gutter: stable) {
+            html.${scrollLockBodyClass} body {
+                padding-right: var(${scrollLockGutterProperty}, 0px) !important;
+                overflow: hidden !important;
+            }
+        }
+
         .${scrollLockLayerClass} {
             position: fixed;
             inset: 0;
@@ -1295,6 +1327,19 @@ export function toggleBodyScroll(disable) {
         injectNoScrollStyles();
         const scrollLockLayer = getScrollLockLayer();
 
+        // The gutter is measured while the scrollbar is still there, since
+        // hiding the overflow is what takes it away. Only read where there is a
+        // window to read it from.
+        const root = document.documentElement;
+        if (root) {
+            const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : undefined;
+            const gutter = typeof viewportWidth === 'number' && typeof root.clientWidth === 'number'
+                ? Math.max(0, viewportWidth - root.clientWidth)
+                : 0;
+            root.style?.setProperty?.(scrollLockGutterProperty, `${gutter}px`);
+            root.classList?.add(scrollLockBodyClass);
+        }
+
         body.classList.add(scrollLockBodyClass);
         scrollLockLayer?.classList.add(scrollLockLayerActiveClass);
         return;
@@ -1303,6 +1348,10 @@ export function toggleBodyScroll(disable) {
     if (!isLocked) {
         return;
     }
+
+    const root = document.documentElement;
+    root?.classList?.remove(scrollLockBodyClass);
+    root?.style?.removeProperty?.(scrollLockGutterProperty);
 
     body.classList.remove(scrollLockBodyClass);
     getExistingScrollLockLayer()?.classList.remove(scrollLockLayerActiveClass);
