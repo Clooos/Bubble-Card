@@ -102,10 +102,14 @@ function loadPersistedPopUpHashes() {
     }
 }
 
-function isLiveOnCurrentPage(hash) {
-    if (!liveHashes.has(hash)) return false;
-    const meta = getGlobalPopUpHashMap().get(hash);
-    return meta?.path === getCurrentPagePath();
+// Only a pop-up owned by a living card counts as being on the page. The editor
+// registers the hash it just created so the navigation picker lists it right
+// away, and that entry has no owner to release it.
+function countOwnersOnCurrentPage(hash) {
+    const currentPath = getCurrentPagePath();
+    return popUpRegistrations.filter(
+        reg => reg.path === currentPath && reg.hash === hash
+    ).length;
 }
 
 function getNativeItems(picker) {
@@ -266,16 +270,15 @@ export function isHashOnCurrentPage(hash, excludeHash) {
     cleanupDeadRegistrations();
 
     const normalizedExclude = normalizePopUpHash(excludeHash);
+    const owners = countOwnersOnCurrentPage(normalizedHash);
 
-    // Treat the same hash as duplicate only when another owner still exists.
+    // Checking a pop-up against its own hash, so it takes another owner to make
+    // it a duplicate.
     if (normalizedHash === normalizedExclude) {
-        const currentPath = getCurrentPagePath();
-        return popUpRegistrations.filter(
-            reg => reg.path === currentPath && reg.hash === normalizedHash
-        ).length > 1;
+        return owners > 1;
     }
 
-    return isLiveOnCurrentPage(normalizedHash);
+    return owners > 0;
 }
 
 export function registerPopUpHash(hash, { name, icon, isConnected = true, element } = {}) {

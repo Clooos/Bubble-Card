@@ -256,9 +256,9 @@ function createPopUpExampleCards(hass) {
         ];
 }
 
-function duplicateHashWarningTemplate(t) {
+function duplicateHashWarningTemplate(t, isDuplicate = false) {
     return html`
-        <div id="duplicate-hash-warning" style="display: none;">
+        <div id="duplicate-hash-warning" style=${isDuplicate ? '' : 'display: none;'}>
             <div class="bubble-info warning">
                 <h4 class="bubble-section-title">
                     <ha-icon icon="mdi:alert-outline"></ha-icon>
@@ -540,7 +540,7 @@ export function renderPopUpEditor(editor) {
                         }
                     }}
                 ></ha-form>
-                ${duplicateHashWarningTemplate(t)}
+                ${duplicateHashWarningTemplate(t, initialHashState.isDuplicate)}
                 ${renderPopUpModeDropdown(editor)}
                 ${renderBottomOffsetOption(editor)}
                 ${renderDialogFullWidthOption(editor)}
@@ -585,6 +585,7 @@ export function renderPopUpEditor(editor) {
 
     // Keep the original hash across editor re-renders.
     const session = getEditorSession(editor._config?.hash || null);
+    const initialHashState = getPopUpHashInputState(editor._config?.hash || POPUP_HASH_PREFIX, session.originalHash);
 
     setTimeout(() => syncHashInputState(editor, session.originalHash), 0);
 
@@ -613,7 +614,7 @@ export function renderPopUpEditor(editor) {
                     fireEvent(editor, 'config-changed', { config: editor._config });
                 }}
             ></ha-form>
-            ${duplicateHashWarningTemplate(t)}
+            ${duplicateHashWarningTemplate(t, initialHashState.isDuplicate)}
             ${renderPopupStyleDropdown(editor)}
             ${renderPopUpModeDropdown(editor)}
             ${renderBottomOffsetOption(editor)}
