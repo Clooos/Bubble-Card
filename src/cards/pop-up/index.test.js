@@ -131,6 +131,26 @@ describe('handlePopUp performance guards', () => {
         expect(renderHeaderButton).toHaveBeenCalledTimes(1);
     });
 
+    test('a card of the view owns its hash even while the dashboard is edited', async () => {
+        const context = createOpenPopupContext({ editor: true, detectedEditor: true });
+
+        await handlePopUp(context);
+
+        expect(registerPopUpHash).toHaveBeenCalledWith('#kitchen-popup', expect.objectContaining({
+            element: context,
+        }));
+    });
+
+    test('the copy inside the card editor owns nothing', async () => {
+        const context = createOpenPopupContext({ inEditorPreview: true });
+
+        await handlePopUp(context);
+
+        expect(registerPopUpHash).toHaveBeenCalledWith('#kitchen-popup', expect.objectContaining({
+            element: null,
+        }));
+    });
+
     test('refreshes the header when the popup entity state changes', async () => {
         const locale = { language: 'fr' };
         const unitSystem = { temperature: '°C' };

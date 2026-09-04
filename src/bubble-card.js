@@ -223,19 +223,28 @@ class BubbleCard extends HTMLElement {
     cancelDeferredCardUpdate(this);
   }
 
-  get detectedEditor() {
-    if (this.editor && window.history?.state?.dialog === "hui-dialog-edit-card") {
-      return true;
-    }
-
-    // The full shadow-piercing ancestor walk plus two document probes ran on
-    // every update of every card. The result can only change through a DOM
-    // move, and any move fires the lifecycle callbacks that reset this memo.
+  // True only for the copies Home Assistant builds inside the card editor.
+  // `detectedEditor` cannot answer that question: it calls every card an editor
+  // card while the edit dialog is open, and Home Assistant turns `editor` on for
+  // the whole view as soon as the dashboard is in edit mode.
+  //
+  // The full shadow-piercing ancestor walk plus two document probes ran on every
+  // update of every card. The result can only change through a DOM move, and any
+  // move fires the lifecycle callbacks that reset this memo.
+  get inEditorPreview() {
     if (this._detectedEditorMemo === undefined) {
       this._detectedEditorMemo = this._isInsideCardEditor();
     }
 
     return this._detectedEditorMemo;
+  }
+
+  get detectedEditor() {
+    if (this.editor && window.history?.state?.dialog === "hui-dialog-edit-card") {
+      return true;
+    }
+
+    return this.inEditorPreview;
   }
 
   _isInsideCardEditor() {

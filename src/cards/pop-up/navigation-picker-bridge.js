@@ -296,6 +296,12 @@ export function registerPopUpHash(hash, { name, icon, isConnected = true, elemen
 
         const existing = popUpRegistrations.find(reg => reg.ref.deref() === element);
         if (existing) {
+            // A card that outlived a navigation would otherwise keep claiming
+            // its hash on the view it came from.
+            if (existing.path !== currentPath) {
+                existing.path = currentPath;
+                changed = true;
+            }
             if (existing.hash !== normalizedHash) {
                 const oldHash = existing.hash;
                 existing.hash = normalizedHash;
