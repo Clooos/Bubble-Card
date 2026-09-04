@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Effet de défilement du texte",
-      "background": "Afficher le fond lorsque l'entité est allumée",
+      "background": "Afficher le fond",
       "state_background": "Couleur de fond basée sur l'état",
       "light_background": "Couleur de fond basée sur la couleur de la lumière",
       "accent_color": "Utiliser la couleur d'accentuation au lieu de la couleur de la lumière",

@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Efekti i rrëshqitjes së tekstit",
-      "background": "Shfaq sfondin kur entiteti është i ndezur",
+      "background": "Shfaq sfondin",
       "state_background": "Ngjyra e sfondit sipas gjendjes",
       "light_background": "Ngjyra e sfondit sipas ngjyrës së dritës",
       "accent_color": "Përdor ngjyrën theksuese në vend të ngjyrës së dritës",

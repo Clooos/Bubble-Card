@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Teksti kerimise efekt",
-      "background": "Kuva taust, kui olem on sees",
+      "background": "Kuva taust",
       "state_background": "Taustavärv oleku järgi",
       "light_background": "Taustavärv valgusti värvi järgi",
       "accent_color": "Kasuta valgusti värvi asemel rõhuvärvi",

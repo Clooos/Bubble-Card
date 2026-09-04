@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Tekstrulningseffekt",
-      "background": "Vis baggrund når entiteten er tændt",
+      "background": "Vis baggrund",
       "state_background": "Baggrundsfarve baseret på tilstand",
       "light_background": "Baggrundsfarve baseret på lysfarve",
       "accent_color": "Brug accentfarve i stedet for lysfarve",

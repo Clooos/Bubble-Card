@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "文字滚动效果",
-      "background": "实体开启时显示背景",
+      "background": "显示背景",
       "state_background": "基于状态的背景色",
       "light_background": "基于灯光颜色的背景色",
       "accent_color": "使用主题强调色代替灯光颜色",

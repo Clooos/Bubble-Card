@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Effetto di scorrimento del testo",
-      "background": "Mostra lo sfondo quando l'entità è accesa",
+      "background": "Mostra lo sfondo",
       "state_background": "Colore di sfondo in base allo stato",
       "light_background": "Colore di sfondo in base al colore della luce",
       "accent_color": "Usa il colore di accento invece del colore della luce",

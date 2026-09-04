@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "テキストスクロール効果",
-      "background": "エンティティがオンのときに背景を表示",
+      "background": "背景を表示",
       "state_background": "状態に基づく背景色",
       "light_background": "照明の色に基づく背景色",
       "accent_color": "照明の色の代わりにアクセントカラーを使用",

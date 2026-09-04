@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "אפקט גלילת טקסט",
-      "background": "הצגת רקע כאשר הישות פועלת",
+      "background": "הצגת רקע",
       "state_background": "צבע רקע לפי המצב",
       "light_background": "צבע רקע לפי צבע התאורה",
       "accent_color": "שימוש בצבע הדגשה במקום צבע התאורה",

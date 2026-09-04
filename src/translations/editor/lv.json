@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Teksta ritināšanas efekts",
-      "background": "Rādīt fonu, kad entītija ir ieslēgta",
+      "background": "Rādīt fonu",
       "state_background": "Fona krāsa atkarībā no stāvokļa",
       "light_background": "Fona krāsa atkarībā no gaismas krāsas",
       "accent_color": "Izmantot akcenta krāsu gaismas krāsas vietā",

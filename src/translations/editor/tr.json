@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Metin kaydırma efekti",
-      "background": "Varlık açıkken arka planı göster",
+      "background": "Arka planı göster",
       "state_background": "Duruma göre arka plan rengi",
       "light_background": "Işık rengine göre arka plan rengi",
       "accent_color": "Işık rengi yerine vurgu rengini kullan",

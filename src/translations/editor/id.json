@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Efek teks bergulir",
-      "background": "Tampilkan latar belakang saat entitas menyala",
+      "background": "Tampilkan latar belakang",
       "state_background": "Warna latar belakang berdasarkan status",
       "light_background": "Warna latar belakang berdasarkan warna lampu",
       "accent_color": "Gunakan warna aksen alih-alih warna lampu",

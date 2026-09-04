@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Efekto de rulumanta teksto",
-      "background": "Montri fonon kiam la ento estas ŝaltita",
+      "background": "Montri fonon",
       "state_background": "Fonkoloro bazita sur la stato",
       "light_background": "Fonkoloro bazita sur la koloro de la lumo",
       "accent_color": "Uzi la akcentan koloron anstataŭ la koloron de la lumo",

@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "텍스트 스크롤 효과",
-      "background": "엔티티가 켜져 있을 때 배경 표시",
+      "background": "배경 표시",
       "state_background": "상태에 따른 배경색",
       "light_background": "조명 색상에 따른 배경색",
       "accent_color": "조명 색상 대신 강조 색상 사용",

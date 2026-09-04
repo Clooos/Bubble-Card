@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Textaskrunáhrif",
-      "background": "Sýna bakgrunn þegar kveikt er á einingunni",
+      "background": "Sýna bakgrunn",
       "state_background": "Bakgrunnslitur byggður á ástandi",
       "light_background": "Bakgrunnslitur byggður á lit ljóss",
       "accent_color": "Nota áherslulit í stað ljóslitar",

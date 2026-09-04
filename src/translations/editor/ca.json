@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Efecte de text en moviment",
-      "background": "Mostra el fons quan l'entitat està encesa",
+      "background": "Mostra el fons",
       "state_background": "Color de fons basat en l'estat",
       "light_background": "Color de fons basat en el color del llum",
       "accent_color": "Utilitza el color d'èmfasi en lloc del color del llum",

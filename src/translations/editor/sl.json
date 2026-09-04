@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Učinek drsečega besedila",
-      "background": "Prikaži ozadje, ko je entiteta vklopljena",
+      "background": "Prikaži ozadje",
       "state_background": "Barva ozadja glede na stanje",
       "light_background": "Barva ozadja glede na barvo luči",
       "accent_color": "Uporabi poudarno barvo namesto barve luči",

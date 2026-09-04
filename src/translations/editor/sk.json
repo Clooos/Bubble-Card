@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Efekt rolovania textu",
-      "background": "Zobraziť pozadie, keď je entita zapnutá",
+      "background": "Zobraziť pozadie",
       "state_background": "Farba pozadia podľa stavu",
       "light_background": "Farba pozadia podľa farby svetla",
       "accent_color": "Použiť farbu zvýraznenia namiesto farby svetla",

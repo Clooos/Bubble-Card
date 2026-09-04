@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Textlauf-Effekt",
-      "background": "Hintergrund anzeigen, wenn die Entität eingeschaltet ist",
+      "background": "Hintergrund anzeigen",
       "state_background": "Hintergrundfarbe basierend auf dem Zustand",
       "light_background": "Hintergrundfarbe basierend auf der Lichtfarbe",
       "accent_color": "Akzentfarbe statt Lichtfarbe verwenden",

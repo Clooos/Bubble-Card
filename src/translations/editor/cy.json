@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Effaith sgrolio testun",
-      "background": "Dangos y cefndir pan fydd yr endid ymlaen",
+      "background": "Dangos y cefndir",
       "state_background": "Lliw cefndir yn seiliedig ar y cyflwr",
       "light_background": "Lliw cefndir yn seiliedig ar liw'r golau",
       "accent_color": "Defnyddio'r lliw acen yn lle lliw'r golau",

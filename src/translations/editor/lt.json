@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Teksto slinkimo efektas",
-      "background": "Rodyti foną, kai esybė įjungta",
+      "background": "Rodyti foną",
       "state_background": "Fono spalva pagal būseną",
       "light_background": "Fono spalva pagal šviesos spalvą",
       "accent_color": "Naudoti akcento spalvą vietoj šviesos spalvos",

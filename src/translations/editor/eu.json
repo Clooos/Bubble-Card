@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Testua korritzeko efektua",
-      "background": "Erakutsi atzeko planoa entitatea piztuta dagoenean",
+      "background": "Erakutsi atzeko planoa",
       "state_background": "Atzeko planoaren kolorea egoeraren arabera",
       "light_background": "Atzeko planoaren kolorea argiaren kolorearen arabera",
       "accent_color": "Erabili azentu-kolorea argiaren kolorearen ordez",

@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Tekstin vieritystehoste",
-      "background": "Näytä tausta, kun entiteetti on päällä",
+      "background": "Näytä tausta",
       "state_background": "Taustaväri tilan mukaan",
       "light_background": "Taustaväri valon värin mukaan",
       "accent_color": "Käytä korostusväriä valon värin sijaan",

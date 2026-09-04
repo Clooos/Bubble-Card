@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Hiệu ứng chữ chạy",
-      "background": "Hiển thị nền khi thực thể bật",
+      "background": "Hiển thị nền",
       "state_background": "Màu nền dựa trên trạng thái",
       "light_background": "Màu nền dựa trên màu đèn",
       "accent_color": "Dùng màu nhấn thay vì màu đèn",

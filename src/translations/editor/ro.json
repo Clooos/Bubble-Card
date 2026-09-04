@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Efect de derulare a textului",
-      "background": "Afișează fundalul când entitatea este pornită",
+      "background": "Afișează fundalul",
       "state_background": "Culoarea fundalului în funcție de stare",
       "light_background": "Culoarea fundalului în funcție de culoarea luminii",
       "accent_color": "Folosește culoarea de accent în locul culorii luminii",

@@ -95,7 +95,7 @@ describe('paintedSurfaces', () => {
   });
 
   test('an element painting nothing has no surface at all', () => {
-    // What "Show background when entity is on" turned off leaves behind: the
+    // What "Show background" turned off leaves behind: the
     // card shows through, the element itself paints nothing to compare
     expect(paintedSurfaces([{ rgb: [0, 0, 0], alpha: 0 }], card)).toEqual([]);
     expect(paintedSurfaces([null], card)).toEqual([]);

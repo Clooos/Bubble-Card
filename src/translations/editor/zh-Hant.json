@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "文字捲動效果",
-      "background": "實體開啟時顯示背景",
+      "background": "顯示背景",
       "state_background": "依狀態變化的背景顏色",
       "light_background": "依燈光顏色變化的背景顏色",
       "accent_color": "使用主題強調色取代燈光顏色",

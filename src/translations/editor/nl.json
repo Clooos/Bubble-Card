@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Scrollend teksteffect",
-      "background": "Achtergrond tonen wanneer de entiteit aan staat",
+      "background": "Achtergrond tonen",
       "state_background": "Achtergrondkleur op basis van de status",
       "light_background": "Achtergrondkleur op basis van de lichtkleur",
       "accent_color": "Accentkleur gebruiken in plaats van de lichtkleur",

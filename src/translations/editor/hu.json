@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Szöveggörgetési effekt",
-      "background": "Háttér megjelenítése, ha az entitás be van kapcsolva",
+      "background": "Háttér megjelenítése",
       "state_background": "Háttérszín az állapot alapján",
       "light_background": "Háttérszín a fény színe alapján",
       "accent_color": "Kiemelőszín használata a fény színe helyett",

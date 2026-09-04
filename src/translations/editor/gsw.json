@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Textlauf-Effäkt",
-      "background": "Hintergrund azeige, wänn d Entität ii isch",
+      "background": "Hintergrund azeige",
       "state_background": "Hintergrundfarb je nach Zuestand",
       "light_background": "Hintergrundfarb je nach Liechtfarb",
       "accent_color": "Akzäntfarb statt Liechtfarb bruche",

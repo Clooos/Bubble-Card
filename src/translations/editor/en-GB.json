@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Text scrolling effect",
-      "background": "Show background when entity is on",
+      "background": "Show background",
       "state_background": "Background colour based on state",
       "light_background": "Background colour based on light colour",
       "accent_color": "Use accent colour instead of light colour",

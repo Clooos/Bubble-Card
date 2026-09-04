@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Rollende tekseffek",
-      "background": "Wys agtergrond wanneer die entiteit aan is",
+      "background": "Wys agtergrond",
       "state_background": "Agtergrondkleur gebaseer op die toestand",
       "light_background": "Agtergrondkleur gebaseer op die ligkleur",
       "accent_color": "Gebruik aksentkleur in plaas van die ligkleur",

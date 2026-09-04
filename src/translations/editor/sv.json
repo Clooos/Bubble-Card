@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Textrullningseffekt",
-      "background": "Visa bakgrund när entiteten är på",
+      "background": "Visa bakgrund",
       "state_background": "Bakgrundsfärg baserad på tillstånd",
       "light_background": "Bakgrundsfärg baserad på ljusfärg",
       "accent_color": "Använd accentfärg istället för ljusfärg",

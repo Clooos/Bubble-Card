@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Efekt pomicanja teksta",
-      "background": "Prikaži pozadinu kada je entitet uključen",
+      "background": "Prikaži pozadinu",
       "state_background": "Boja pozadine na temelju stanja",
       "light_background": "Boja pozadine na temelju boje svjetla",
       "accent_color": "Koristi naglasnu boju umjesto boje svjetla",

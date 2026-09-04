@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Efecto de texto en movemento",
-      "background": "Mostrar o fondo cando a entidade está acesa",
+      "background": "Mostrar o fondo",
       "state_background": "Cor de fondo baseada no estado",
       "light_background": "Cor de fondo baseada na cor da luz",
       "accent_color": "Usar a cor de acento en lugar da cor da luz",

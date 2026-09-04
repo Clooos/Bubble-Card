@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Maisíocht scrollaithe téacs",
-      "background": "Taispeáin an cúlra nuair atá an t-aonán ann",
+      "background": "Taispeáin an cúlra",
       "state_background": "Dath an chúlra bunaithe ar an staid",
       "light_background": "Dath an chúlra bunaithe ar dhath an tsolais",
       "accent_color": "Úsáid an dath béime in ionad dhath an tsolais",

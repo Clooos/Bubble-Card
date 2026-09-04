@@ -133,7 +133,7 @@
     },
     "show": {
       "scrolling_effect": "Efekt przewijania tekstu",
-      "background": "Pokaż tło, gdy encja jest włączona",
+      "background": "Pokaż tło",
       "state_background": "Kolor tła zależny od stanu",
       "light_background": "Kolor tła zależny od koloru światła",
       "accent_color": "Użyj koloru akcentu zamiast koloru światła",
