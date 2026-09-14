@@ -9,7 +9,7 @@ import {
   writeModuleYaml,
   readFile as bctReadFile,
 } from './bct-provider.js';
-import { parseYamlWithIncludes } from './yaml-schema.js';
+import { parseYamlWithIncludes, ensureYamlLoaded } from './yaml-schema.js';
 
 const RESERVED_YAML_KEYS = ['modules', 'friendly_name', 'last_updated'];
 const MODULE_FIELD_HINTS = ['name', 'code', 'description', 'editor', 'version', 'creator', 'link', 'supported', 'unsupported', 'is_global'];
@@ -21,6 +21,8 @@ async function readLegacyEntityModules(hass) {
     if (!entity) return new Map();
     const attrModules = entity.attributes?.modules;
     if (!attrModules || typeof attrModules !== 'object') return new Map();
+
+    await ensureYamlLoaded();
 
     const out = new Map();
     Object.values(attrModules).forEach((entry) => {
@@ -104,6 +106,7 @@ async function readLegacyYamlFromLocal() {
     if (!res.ok) return new Map();
     const txt = await res.text();
     if (!txt || !txt.trim()) return new Map();
+    await ensureYamlLoaded();
     const data = parseYamlWithIncludes(txt);
     if (!data || typeof data !== 'object') return new Map();
     return extractModulesFromYamlRoot(data);

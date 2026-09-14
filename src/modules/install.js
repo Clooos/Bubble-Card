@@ -261,7 +261,7 @@ export async function installOrUpdateModule(context, module) {
 
     // Persist via Bubble Card Tools file backend only (no entity writes)
     try {
-      const bct = await import('./bct-provider.js');
+      const bct = await import(/* webpackChunkName: "editor" */ './bct-provider.js');
       const bctAvailable = await bct.ensureBCTProviderAvailable(context.hass);
       if (bctAvailable) {
         // Persist to modules/<id>.yaml using the provider with the final YAML string
@@ -301,7 +301,7 @@ export async function installManualModule(context, yamlContent, moduleLink) {
     if (moduleLink) {
       try {
         // Use the parser function to add the link
-        const { extractYamlFromMarkdown } = await import('./parser.js');
+        const { extractYamlFromMarkdown } = await import(/* webpackChunkName: "editor" */ './parser.js');
         // Wrap YAML in code block format for the extractYamlFromMarkdown function
         const wrappedYaml = "```yaml\n" + yamlContent + "\n```";
         // Extract and modify the YAML
