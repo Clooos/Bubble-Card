@@ -1,5 +1,5 @@
 import { version } from './var/version.js';
-import setupTranslation, { ensureEditorTranslations, tGlobal } from './tools/localize.js';
+import setupTranslation, { ensureEditorTranslations, getGlobalHass, tGlobal } from './tools/localize.js';
 import { initializeContent } from './tools/init.js';
 import { cleanupTapActions } from './tools/tap-actions.js';
 import { preloadYAMLStyles } from './modules/registry.js';
@@ -17,7 +17,6 @@ import { shouldSkipRender, noteRender, resetRenderGate } from './tools/render-ga
 import { maybeShowMigrationNotice } from './cards/pop-up/migration.js';
 import { registerForIconRefresh, unregisterForIconRefresh } from './tools/icon.js';
 import { monotonicNow } from './tools/monotonic-time.js';
-import BubbleCardEditor from './editor/bubble-card-editor.js';
 
 import { cleanupPopUp, handlePopUp } from './cards/pop-up/index.js';
 import { handleButton } from './cards/button/index.js';
@@ -501,7 +500,16 @@ class BubbleCard extends HTMLElement {
     };
   }
 
-  static getConfigElement() {
+  // The editor is not part of the initial bundle: it is the largest thing Bubble
+  // Card ships and nothing on a dashboard needs it until someone opens the card
+  // editor. Home Assistant awaits this, so the chunk and the editor dictionary
+  // (only a runtime slice of English is bundled) are fetched together here,
+  // before the editor element exists and can render a missing string.
+  static async getConfigElement() {
+    await Promise.all([
+      import(/* webpackChunkName: "editor" */ "./editor/bubble-card-editor.js"),
+      ensureEditorTranslations(getGlobalHass()).catch(() => false),
+    ]);
     return document.createElement("bubble-card-editor");
   }
 
