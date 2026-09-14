@@ -9,7 +9,7 @@ import { ensureNewSubButtonsSchemaObject } from "../../components/sub-button/uti
 import { getBackdrop, getThemeBackgroundColor } from "./backdrop.js";
 import { navigateToPreviousPopup, openPopup, registerPopupContext, removeHash, resolvePopupHostElements, restorePopupHostLayout, suspendPopupHostLayout, syncPopupModeClasses, syncPopupPerformanceModeClasses } from "./helpers.js";
 import { hideLegacyPopupContent } from './legacy.js';
-import { renderPopupOnboarding } from './editor.js';
+import { renderPopupOnboarding } from './onboarding.js';
 import { configurePopupSlideToClose } from './slide-to-close.js';
 import styles from "./styles.css";
 

@@ -1,4 +1,24 @@
-import * as YAML from 'js-yaml';
+// js-yaml is ~43 KB minified and is only ever reached from an async path:
+// registry's loadYAML and the legacy-module migration both await before they
+// parse. It is loaded on demand so a dashboard that has no legacy YAML module
+// never pays for it. Call ensureYamlLoaded() before parseYamlWithIncludes().
+let YAML = null;
+let yamlPromise = null;
+
+export function ensureYamlLoaded() {
+  if (YAML) return Promise.resolve(YAML);
+  if (!yamlPromise) {
+    yamlPromise = import(/* webpackChunkName: "yaml" */ 'js-yaml').then((mod) => {
+      YAML = mod;
+      return YAML;
+    });
+  }
+  return yamlPromise;
+}
+
+export function isYamlLoaded() {
+  return YAML !== null;
+}
 
 const LEGACY_MODULES_BASE_PATH = '/local/bubble/';
 
@@ -60,6 +80,12 @@ export function getYamlIncludeSchema() {
 
 export function parseYamlWithIncludes(yamlString) {
   if (!yamlString || typeof yamlString !== 'string') return null;
+  if (!YAML) {
+    // Only reachable if a caller skipped ensureYamlLoaded(); the parse stays
+    // synchronous so !include resolution can keep using a blocking request.
+    console.error('Bubble Card - YAML parser was used before it finished loading.');
+    return null;
+  }
   try {
     return YAML.load(yamlString, { schema: getYamlIncludeSchema() });
   } catch (error) {

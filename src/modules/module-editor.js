@@ -1291,7 +1291,7 @@ export async function saveModule(context, moduleData) {
     }
     
     // Build a clean YAML string for persistence using only supported fields
-    const { generateYamlExport } = await import('./export.js');
+    const { generateYamlExport } = await import(/* webpackChunkName: "editor" */ './export.js');
     const yamlContent = generateYamlExport(moduleData);
     
     // Extract metadata and update in yamlKeysMap

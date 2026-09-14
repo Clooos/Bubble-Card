@@ -1,6 +1,6 @@
 import { ensureBCTProviderAvailable, readAllModules as bctReadAllModules, getCachedAggregatedModules } from './bct-provider.js';
 import { migrateIfNeeded } from './bct-migration.js';
-import { parseYamlWithIncludes } from './yaml-schema.js';
+import { parseYamlWithIncludes, ensureYamlLoaded } from './yaml-schema.js';
 
 // In-memory state for modules loaded from files and legacy sources
 let allModules = null;
@@ -62,6 +62,7 @@ export const loadYAML = async (urls) => {
         continue;
       }
       const yamlText = await response.text();
+      await ensureYamlLoaded();
       const parsedYAML = parseYAML(yamlText);
       if (!yamlKeysMap.size && parsedYAML) {
         Object.entries(parsedYAML).forEach(([key, value]) => {

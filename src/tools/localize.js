@@ -1,12 +1,16 @@
 import { version } from '../var/version.js';
+// Only the keys the initial bundle can reach: the build swaps this import for a
+// slice of the dictionary (build/en-slice-loader.cjs). The rest is fetched as
+// bubble-card-en.json, like every other language.
 import en from '../translations/editor/en.json';
 import runtime from '../translations/runtime.js';
 
-// Editor translations for languages other than English are not bundled: they
-// are loaded from the bubble-card-<lang>.json files shipped next to
-// bubble-card.js (never from a CDN), so the bundle stays small while every
-// language supported by Home Assistant is covered, entirely offline. English
-// is bundled as the fallback dictionary. Fetched dictionaries persist in a
+// Editor translations are not bundled: they are loaded from the
+// bubble-card-<lang>.json files shipped next to bubble-card.js (never from a
+// CDN), so the bundle stays small while every language supported by Home
+// Assistant is covered, entirely offline. English is fetched the same way; what
+// stays bundled is the slice of it the initial bundle can reach, which is also
+// the last-resort fallback for every other language. Fetched dictionaries persist in a
 // per-version localStorage cache hydrated synchronously before the first
 // render, prefetched as soon as any card sees hass, and revalidated silently
 // once per session so they are available instantly everywhere.
@@ -169,15 +173,14 @@ function resolveRuntime(key, lang) {
 
 export default function setupTranslation(hass) {
   const lang = getCurrentLocale(hass);
-  if (lang !== DEFAULT_LANG) {
-    hydrateFromCache(lang);
-    // Fire-and-forget prefetch: any card seeing hass warms the dictionary up
-    // before the first editor or dialog needs it. O(1) once warmed.
-    if (editorDicts[lang] === undefined || !revalidatedLangs.has(lang)) {
-      ensureEditorTranslations(hass);
-    }
+  hydrateFromCache(lang);
+  // Fire-and-forget prefetch: any card seeing hass warms the dictionary up
+  // before the first editor or dialog needs it. O(1) once warmed. English goes
+  // through this too, since only a slice of it is bundled.
+  if (editorDicts[lang] === undefined || !revalidatedLangs.has(lang)) {
+    ensureEditorTranslations(hass);
   }
-  const fetched = lang === DEFAULT_LANG ? undefined : editorDicts[lang];
+  const fetched = editorDicts[lang];
 
   return function t(key) {
     if (key.startsWith('cards.')) {
@@ -236,7 +239,6 @@ async function fetchDict(lang) {
  */
 export function ensureEditorTranslations(hass) {
   const lang = getCurrentLocale(hass);
-  if (lang === DEFAULT_LANG) return Promise.resolve(false);
   hydrateFromCache(lang);
   const hasDict = editorDicts[lang] !== undefined;
   if (hasDict && revalidatedLangs.has(lang)) return Promise.resolve(false);

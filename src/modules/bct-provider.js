@@ -1,6 +1,21 @@
 // Provider for Bubble Card Tools backend (file-based modules)
 
-import jsyaml from 'js-yaml';
+// js-yaml is ~43 KB minified and every use below sits inside an async function
+// that only runs when a module file is actually read or written. Loading it on
+// demand keeps it out of the initial bundle for the dashboards that never touch
+// a file-based module.
+let _jsyaml = null;
+let _jsyamlPromise = null;
+async function loadJsYaml() {
+  if (_jsyaml) return _jsyaml;
+  if (!_jsyamlPromise) {
+    _jsyamlPromise = import(/* webpackChunkName: "yaml" */ 'js-yaml').then((m) => {
+      _jsyaml = m.default ?? m;
+      return _jsyaml;
+    });
+  }
+  return _jsyamlPromise;
+}
 
 const ERROR_RETRY_DELAY_MS = 5000;
 const UNAVAILABLE_RETRY_DELAY_MS = 30000;
@@ -238,6 +253,7 @@ export async function readConfig(hass) {
   const data = await readFile(hass, CONFIG_FILE);
   if (!data || typeof data.content !== 'string') return {};
   try {
+    const jsyaml = await loadJsYaml();
     const parsed = jsyaml.load(data.content) || {};
     return typeof parsed === 'object' && parsed ? parsed : {};
   } catch (e) {
@@ -247,6 +263,7 @@ export async function readConfig(hass) {
 
 export async function writeConfig(hass, obj) {
   try {
+    const jsyaml = await loadJsYaml();
     const content = jsyaml.dump(obj ?? {}, {
       indent: 2,
       lineWidth: -1,
@@ -367,12 +384,16 @@ export async function readAllModules(hass) {
   // bulk endpoint returns every requested file's content (and server-parsed
   // YAML) in one message. Older integrations without it fall back to per-file
   // reads, so nothing breaks if the component is not updated.
-  const entryToResult = (entry, data) => {
+  // Async only for the legacy fallback below: a module file the integration
+  // could not parse server-side is parsed here, which is the one place the
+  // runtime needs js-yaml at all.
+  const entryToResult = async (entry, data) => {
     if (!data || !data.content) {
       return { name: entry.name, updated_at: entry.updated_at, modules: {} };
     }
     let parsed = data.parsed;
     if (parsed == null) {
+      const jsyaml = await loadJsYaml();
       try { parsed = jsyaml.load(data.content); } catch (_) { parsed = null; }
     }
     return { name: entry.name, updated_at: entry.updated_at, modules: parsedToModules(parsed) };
@@ -382,10 +403,12 @@ export async function readAllModules(hass) {
   const bulk = toRead.length ? await readFiles(hass, toRead.map((e) => e.name)) : [];
   if (bulk) {
     const byNameData = new Map(bulk.map((m) => [m && m.name, m]));
-    readResults = toRead.map((entry) => entryToResult(entry, byNameData.get(entry.name)));
+    readResults = await Promise.all(
+      toRead.map((entry) => entryToResult(entry, byNameData.get(entry.name)))
+    );
   } else {
     readResults = await Promise.all(
-      toRead.map(async (entry) => entryToResult(entry, await readFile(hass, entry.name)))
+      toRead.map(async (entry) => await entryToResult(entry, await readFile(hass, entry.name)))
     );
   }
 
@@ -451,6 +474,7 @@ export async function writeModuleYaml(hass, moduleId, moduleObjectOrYaml) {
       delete copy.unsupported;
     }
     root[moduleId] = copy;
+    const jsyaml = await loadJsYaml();
     content = jsyaml.dump(root, {
       indent: 2,
       lineWidth: -1,
