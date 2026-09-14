@@ -1,5 +1,5 @@
 import { html } from 'lit';
-import { findConfigPath, getConfigAtPath } from '../../editor/standalone-dialog-bridge.js';
+import { findConfigPath, getConfigAtPath } from '../../editor/config-path.js';
 import { isHashOnCurrentPage } from './navigation-picker-bridge.js';
 import setupTranslation from '../../tools/localize.js';
 
