@@ -39,17 +39,20 @@ ha-card.footer-mode {
 }
 
 ha-card.footer-mode:not(.footer-full-width) {
-  width: var(--bubble-footer-width, 500px);
-  inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + (100% - var(--bubble-sub-buttons-content-inline-start) - var(--bubble-footer-width, 500px)) / 2);
+  /* The configured width, never wider than the content area actually is. A
+     max-width media query used to force full width below 600px, which threw
+     away a configured width that had room to fit: a phone in portrait is under
+     that breakpoint, the same phone in landscape is not, and a 300px footer
+     only obeyed one of the two (#2620). Clamping answers the question the
+     breakpoint was really asking, and the default 500px still lands on the
+     same 8px margins it used to. */
+  --bubble-footer-resolved-width: min(var(--bubble-footer-width, 500px), 100% - var(--bubble-sub-buttons-content-inline-start) - 16px);
+  width: var(--bubble-footer-resolved-width);
+  inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + (100% - var(--bubble-sub-buttons-content-inline-start) - var(--bubble-footer-resolved-width)) / 2);
 }
 
 @media only screen and (max-width: 600px) {
   ha-card.footer-mode {
-    width: calc(100% - 16px);
-    inset-inline-start: 8px;
-  }
-
-  ha-card.footer-mode:not(.footer-full-width) {
     width: calc(100% - 16px);
     inset-inline-start: 8px;
   }
