@@ -608,7 +608,7 @@ export function createSliderStructure(context, config = {}) {
 
     if (context._shouldDisplaySliderValue && context.elements.rangeValue) {
       context.elements.rangeValue.textContent = formatDisplayValueFromEntity(context);
-      if (options.holdToSlide && !context.config.tap_to_slide && !options.persistentValueDisplay) {
+      if (options.holdToSlide && !options.persistentValueDisplay) {
         context.elements.rangeValue.classList.remove('is-visible');
       }
     }
@@ -675,8 +675,10 @@ export function createSliderStructure(context, config = {}) {
     forwardHaptic("selection");
     updateValueDisplay(finalPercentage);
 
-    if (options.holdToSlide && !context.config.tap_to_slide) {
-      if (context._shouldDisplaySliderValue && context.elements.rangeValue && !options.persistentValueDisplay) {
+    // Shown for the length of the gesture, by whichever gesture started it: the
+    // release takes it away again unless the slider keeps it on screen at rest.
+    if (options.holdToSlide && !options.persistentValueDisplay) {
+      if (context._shouldDisplaySliderValue && context.elements.rangeValue) {
         context.elements.rangeValue.classList.remove('is-visible');
       }
     }
@@ -983,6 +985,12 @@ export function createSliderStructure(context, config = {}) {
       } else {
         getSliderRect();
       }
+
+      // The number has to be on screen before the finger moves. A hold-to-slide
+      // slider gets it from startDragging, and tap to slide never had an
+      // equivalent, so the one gesture whose whole point is the value it lands
+      // on was the one that never showed it (#2543).
+      setupRangeValueDisplay(calculateInitialPercentage());
 
       options.targetElement.classList.add('is-dragging');
       attachPointerListeners();
