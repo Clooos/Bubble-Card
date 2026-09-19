@@ -1,7 +1,8 @@
 import { getClimateDomainConfig } from './domains.js';
-import { 
-    getClimateColor, 
-    formatTemperature
+import {
+    getClimateColor,
+    formatTemperature,
+    isTargetPending
 } from './helpers.js';
 import { 
     getState,
@@ -23,11 +24,14 @@ export function changeTemperature(context) {
         context.elements.temperatureContainer?.classList.remove('hidden');
     }
 
-    if (temperature !== context.previousTemp) {
+    // previousTemp only moves when the display does. Held updates have to stay
+    // unseen, or the value the thermostat settles on is taken for one already
+    // written and the display keeps whatever the user last tapped.
+    if (temperature !== context.previousTemp
+        && context.elements.tempDisplay && temperature !== '' && temperature !== undefined
+        && !isTargetPending(context, domainConfig.target, temperature)) {
         context.previousTemp = temperature;
-        if (context.elements.tempDisplay && temperature !== '' && temperature !== undefined) {
-            context.elements.tempDisplay.innerText = formatTemperature(temperature, context);
-        }
+        context.elements.tempDisplay.innerText = formatTemperature(temperature, context);
     }
 }
 
@@ -46,11 +50,11 @@ export function changeTargetTempLow(context) {
         context.elements.lowTempContainer?.classList.remove('hidden');
     }
 
-    if (targetTempLow !== context.previousTargetTempLow) {
+    if (targetTempLow !== context.previousTargetTempLow
+        && context.elements.lowTempDisplay && targetTempLow !== '' && targetTempLow !== undefined
+        && !isTargetPending(context, 'target_temp_low', targetTempLow)) {
         context.previousTargetTempLow = targetTempLow;
-        if (context.elements.lowTempDisplay && targetTempLow !== '' && targetTempLow !== undefined) {
-            context.elements.lowTempDisplay.innerText = formatTemperature(targetTempLow, context);
-        }
+        context.elements.lowTempDisplay.innerText = formatTemperature(targetTempLow, context);
     }
 }
 
@@ -68,11 +72,11 @@ export function changeTargetTempHigh(context) {
         context.elements.targetTemperatureContainer?.classList.remove('hidden');
     }
 
-    if (targetTempHigh !== context.previousTargetTempHigh) {
+    if (targetTempHigh !== context.previousTargetTempHigh
+        && context.elements.highTempDisplay && targetTempHigh !== '' && targetTempHigh !== undefined
+        && !isTargetPending(context, 'target_temp_high', targetTempHigh)) {
         context.previousTargetTempHigh = targetTempHigh;
-        if (context.elements.highTempDisplay && targetTempHigh !== '' && targetTempHigh !== undefined) {
-            context.elements.highTempDisplay.innerText = formatTemperature(targetTempHigh, context);
-        }
+        context.elements.highTempDisplay.innerText = formatTemperature(targetTempHigh, context);
     }
 }
 

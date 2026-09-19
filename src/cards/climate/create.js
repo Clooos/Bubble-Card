@@ -2,7 +2,7 @@ import { createBaseStructure } from "../../components/base-card/index.js";
 import { addFeedback } from "../../tools/tap-actions.js";
 import { createElement, getAttribute, forwardHaptic } from "../../tools/utils.js";
 import { getClimateDomainConfig } from "./domains.js";
-import { getDefaultStep, getTemperatureDecimals, formatTemperature } from "./helpers.js";
+import { getDefaultStep, getTemperatureDecimals, formatTemperature, markTargetPending, isTargetPending } from "./helpers.js";
 import styles from "./styles.css";
 
 export function createStructure(context) {
@@ -80,6 +80,11 @@ export function createStructure(context) {
         }
 
         function syncTemp() {
+            // While a change of ours is still unconfirmed the entity carries the
+            // target the user already moved away from, and adopting it here is
+            // what made the next tap count up from the old value again (#2615).
+            if (isTargetPending(context, attribute)) return;
+
             const latestTemp = parseFloat(getAttribute(context, attribute)) || 0;
             if (latestTemp !== lastSyncedTemp) {
                 currentTemp = latestTemp;
@@ -123,7 +128,8 @@ export function createStructure(context) {
             if (newTemp !== currentTemp) {
                 currentTemp = newTemp;
                 updateTempDisplay(currentTemp);
-                
+                markTargetPending(context, attribute, currentTemp);
+
                 clearTimeout(tempTimeout);
                 tempTimeout = setTimeout(callSetTemperature, 700);
             } else {
