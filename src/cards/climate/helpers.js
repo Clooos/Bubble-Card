@@ -62,9 +62,27 @@ function getWaterHeaterColor(context, stateObj) {
     ], 'var(--state-active-color)');
 }
 
-export function getClimateColor(context) {
-    let overlayColor = '';
+// The mode each hvac_action stands for. Only heating and cooling were ever read,
+// so a thermostat that reports drying or fan said nothing the colour could use.
+const ACTION_MODES = {
+    heating: 'heat',
+    cooling: 'cool',
+    drying: 'dry',
+    fan: 'fan_only',
+};
 
+// The part of the variable name Home Assistant gives each mode. Anything else a
+// thermostat offers is a mode this has no colour for, and falls back to the accent.
+const MODE_COLOR_NAMES = {
+    heat: 'heat',
+    cool: 'cool',
+    dry: 'dry',
+    fan_only: 'fan-only',
+    auto: 'auto',
+    heat_cool: 'heat-cool',
+};
+
+export function getClimateColor(context) {
     const stateObj = context._hass?.states?.[context.config.entity];
     if (!stateObj?.attributes) return '';
 
@@ -74,37 +92,30 @@ export function getClimateColor(context) {
 
     const hvacAction = stateObj.attributes.hvac_action;
     const state = stateObj.state;
-    const isHeating = hvacAction === 'heating' || (state === "heat" && context.config.state_color);
-    const isCooling = hvacAction === 'cooling' || (state === "cool" && context.config.state_color);
-    const isOn = state !== "off" && state !== "unknown";
+    const isOn = state !== 'off' && state !== 'unknown';
 
-    switch (state) {
-        case "fan_only":
-            overlayColor = 'var(--bubble-state-climate-fan-only-color, var(--state-climate-fan-only-color, var(--state-climate-active-color, var(--state-active-color))))';
-            break;
-        case "dry":
-            overlayColor = 'var(--bubble-state-climate-dry-color, var(--state-climate-dry-color, var(--state-climate-active-color, var(--state-active-color))))';
-            break;
-        default:
-            if (isCooling) {
-                overlayColor = 'var(--bubble-state-climate-cool-color, var(--state-climate-cool-color, var(--state-climate-active-color, var(--state-active-color))))';
-            } else if (isHeating) {
-                overlayColor = 'var(--bubble-state-climate-heat-color, var(--state-climate-heat-color, var(--state-climate-active-color, var(--state-active-color))))';
-            } else if (isOn && context.config.state_color) {
-                if (state === 'auto') {
-                    overlayColor = 'var(--bubble-state-climate-auto-color, var(--state-climate-auto-color, var(--state-climate-active-color, var(--state-active-color))))';
-                } else if (state === "heat_cool") {
-                    overlayColor = 'var(--bubble-state-climate-heat-cool-color, var(--state-climate-heat-cool-color, var(--state-climate-active-color, var(--state-active-color))))';
-                } else {
-                    overlayColor = 'var(--bubble-climate-accent-color, var(--bubble-accent-color, var(--accent-color)))';
-                }
-            } else {
-                overlayColor = '';
-            }
-            break;
-    }
+    // If the thermostat says what it is doing, believe it; the card then follows
+    // the work rather than the setting, which is what leaves it dark while a unit
+    // sits idle. If it says nothing at all there is nothing to follow, so the mode
+    // is all there is to go on. "Constant background color when ON" asks for the
+    // mode either way.
+    //
+    // dry and fan_only used to skip both questions and paint whenever they were
+    // selected, so on one and the same entity they lit up while heat and cool
+    // stayed dark and no setting explained the difference (#2503).
+    const workingMode = ACTION_MODES[hvacAction];
+    const followsMode = isOn && (hvacAction === undefined || hvacAction === null || context.config.state_color);
+    const mode = workingMode ?? (followsMode ? state : null);
+    if (!mode) return '';
 
-    return overlayColor;
+    const colorName = MODE_COLOR_NAMES[mode];
+    if (!colorName) return 'var(--bubble-climate-accent-color, var(--bubble-accent-color, var(--accent-color)))';
+
+    return cssVarChain([
+        `--bubble-state-climate-${colorName}-color`,
+        `--state-climate-${colorName}-color`,
+        '--state-climate-active-color',
+    ], 'var(--state-active-color)');
 }
 
 // Half a degree is a sensible smallest move on a Celsius thermostat and a whole
