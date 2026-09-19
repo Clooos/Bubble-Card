@@ -15,6 +15,7 @@ jest.unstable_mockModule('../../tools/utils.js', () => ({
     stopElementTimerInterval: jest.fn(),
     formatNumericValue: jest.fn(),
     getTemperatureUnit: jest.fn(),
+    isColorLight: jest.fn(),
 }));
 jest.unstable_mockModule('../../tools/text-scrolling.js', () => ({ applyScrollingEffect: jest.fn() }));
 jest.unstable_mockModule('../../tools/icon.js', () => ({
@@ -155,6 +156,80 @@ describe('revealConditionalSubButtons', () => {
         revealConditionalSubButtons(root)();
 
         expect(visible.classList.contains('hidden')).toBe(false);
+    });
+});
+
+describe('updateBackground and the text on a bright state color', () => {
+    function buildSubButton() {
+        const element = new StubElement('bubble-sub-button');
+        const properties = new Map();
+        element.style = {
+            setProperty: (name, value) => properties.set(name, value),
+            getPropertyValue: (name) => properties.get(name) ?? '',
+            removeProperty: (name) => properties.delete(name),
+        };
+        return element;
+    }
+
+    const options = (overrides = {}) => ({
+        showBackground: true,
+        isOn: true,
+        stateBackground: true,
+        lightBackground: true,
+        entity: 'climate.a',
+        context: { config: { card_type: 'button' } },
+        ...overrides,
+    });
+
+    test('a bright background gets the dark text class', async () => {
+        const { updateBackground } = await import('./utils.js');
+        const { getStateSurfaceColor, isColorLight, isStateRequiringAttention } = await import('../../tools/utils.js');
+        isStateRequiringAttention.mockReturnValue(false);
+        getStateSurfaceColor.mockReturnValue('var(--state-climate-heat-color)');
+        isColorLight.mockReturnValue(true);
+
+        const element = buildSubButton();
+        updateBackground(element, options());
+
+        expect(isColorLight).toHaveBeenCalledWith('var(--state-climate-heat-color)');
+        expect(element.classList.contains('bright-background')).toBe(true);
+        expect(element.classList.contains('background-on')).toBe(true);
+    });
+
+    test('a dark background keeps the theme text color', async () => {
+        const { updateBackground } = await import('./utils.js');
+        const { getStateSurfaceColor, isColorLight, isStateRequiringAttention } = await import('../../tools/utils.js');
+        isStateRequiringAttention.mockReturnValue(false);
+        getStateSurfaceColor.mockReturnValue('rgb(20, 20, 20)');
+        isColorLight.mockReturnValue(false);
+
+        const element = buildSubButton();
+        updateBackground(element, options());
+
+        expect(element.classList.contains('bright-background')).toBe(false);
+    });
+
+    // The class is tied to the state color, so whatever turns that color off has
+    // to take it away again, or the button keeps black text on its resting color
+    test('the class goes away once the background does', async () => {
+        const { updateBackground } = await import('./utils.js');
+        const { getStateSurfaceColor, isColorLight, isStateRequiringAttention } = await import('../../tools/utils.js');
+        isStateRequiringAttention.mockReturnValue(false);
+        getStateSurfaceColor.mockReturnValue('var(--state-climate-heat-color)');
+        isColorLight.mockReturnValue(true);
+
+        const element = buildSubButton();
+        updateBackground(element, options());
+        expect(element.classList.contains('bright-background')).toBe(true);
+
+        updateBackground(element, options({ isOn: false }));
+        expect(element.classList.contains('bright-background')).toBe(false);
+
+        updateBackground(element, options());
+        expect(element.classList.contains('bright-background')).toBe(true);
+
+        updateBackground(element, options({ showBackground: false }));
+        expect(element.classList.contains('bright-background')).toBe(false);
     });
 });
 

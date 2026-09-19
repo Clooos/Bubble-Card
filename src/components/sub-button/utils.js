@@ -1,4 +1,4 @@
-import { getAttribute, isStateOn, isStateRequiringAttention, formatDateTime, createElement, getStateSurfaceColor, getState, isTimerEntity, timerTimeRemaining, computeDisplayTimer, startElementTimerInterval, stopElementTimerInterval, formatNumericValue, getTemperatureUnit } from "../../tools/utils.js";
+import { getAttribute, isStateOn, isStateRequiringAttention, formatDateTime, createElement, getStateSurfaceColor, getState, isTimerEntity, timerTimeRemaining, computeDisplayTimer, startElementTimerInterval, stopElementTimerInterval, formatNumericValue, getTemperatureUnit, isColorLight } from "../../tools/utils.js";
 import { applyScrollingEffect } from "../../tools/text-scrolling.js";
 import { getIcon, getLightColorSignature, getImage } from "../../tools/icon.js";
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
@@ -130,6 +130,23 @@ export function updateElementVisibility(element, options, displayedState) {
   }
 }
 
+// A state color can be far brighter than anything the theme expects text to sit
+// on, a climate in heat mode or a warm white light being the usual ones, while
+// the label keeps --primary-text-color and turns white on white. The stylesheet
+// already answers that with .bright-background, so the class has to follow the
+// color the button actually paints. Written only on a change: this runs on every
+// hass update.
+function updateTextContrast(element, backgroundColor) {
+  const isBright = backgroundColor ? isColorLight(backgroundColor) : false;
+  if (isBright === element.classList.contains('bright-background')) return;
+
+  if (isBright) {
+    element.classList.add('bright-background');
+  } else {
+    element.classList.remove('bright-background');
+  }
+}
+
 // Update the background classes and dynamic light background color
 // Uses same optimization pattern as changeIcon: compute new value, compare with current, update only if different
 export function updateBackground(element, options) {
@@ -142,6 +159,7 @@ export function updateBackground(element, options) {
     if (element.style.getPropertyValue('--bubble-sub-button-light-background-color')) {
       element.style.removeProperty('--bubble-sub-button-light-background-color');
     }
+    updateTextContrast(element, null);
     return;
   }
 
@@ -186,6 +204,8 @@ export function updateBackground(element, options) {
       element.style.setProperty('--bubble-sub-button-light-background-color', newColor);
     }
 
+    updateTextContrast(element, newColor);
+
     if (!element.classList.contains('background-on')) {
       element.classList.add('background-on');
       element.classList.remove('background-off');
@@ -198,6 +218,7 @@ export function updateBackground(element, options) {
     if (element.style.getPropertyValue('--bubble-sub-button-light-background-color')) {
       element.style.removeProperty('--bubble-sub-button-light-background-color');
     }
+    updateTextContrast(element, null);
   }
 }
 
