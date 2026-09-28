@@ -36,6 +36,23 @@ const CLOSE_HEIGHT_RATIO = 0.5;
 // pixel must not shift the pop-up, so nothing is written until the finger has
 // really gone somewhere.
 const DRAG_START_SLOP = 8;
+// The close the stylesheet gives the shell, `transition: transform 0.3s ease`,
+// in ms. `ease` sets off at 0.4 of its average speed, its first control point
+// being (0.25, 0.1), so a finger moving faster than that saw the pop-up brake
+// the moment it let go.
+const CLOSE_DURATION = 300;
+const EASE_START_SLOPE = 0.4;
+// ms. The stretch of the drag the finger's speed is read over at the release.
+// Short enough to catch a drag that speeds up at the end, long enough that a
+// single uneven move does not decide it.
+const RELEASE_SPEED_WINDOW = 50;
+// ms. The quickest release, so a flick that lands near the bottom still leaves
+// over a few frames instead of vanishing.
+const MIN_RELEASE_DURATION = 80;
+// ms. How far ahead a release starts, one frame, at 60Hz until the drag has
+// timed the display, and never more than two of them.
+const DEFAULT_FRAME_INTERVAL = 16;
+const MAX_FRAME_INTERVAL = 34;
 
 // Overflow values a finger can actually move. A `hidden` or `clip` box has
 // scrollable overflow just the same, but only script can scroll it, so it is
@@ -310,15 +327,16 @@ function clearShellProperty(popUp, property) {
     style[property] = '';
 }
 
-// HA's rule, half the sheet. It replaced a flat 400px that was taller than some
-// pop-ups on a phone, which left those impossible to slide closed whatever the
-// user did.
+// The drag closes past half of it, HA's rule. It replaced a flat 400px that was
+// taller than some pop-ups on a phone, which left those impossible to slide
+// closed whatever the user did. It is also the whole way a released sheet has to
+// travel, since it leaves on a translation of its own height.
 //
 // Read here and not at touchstart, so a tap or a scroll never pays for a layout
 // it has no use for, and read before the first write of the drag, so it is not a
 // forced one.
-function resolveCloseDistance(popUp) {
-    return (popUp?.offsetHeight || 0) * CLOSE_HEIGHT_RATIO;
+function readShellHeight(popUp) {
+    return popUp?.offsetHeight || 0;
 }
 
 export function configurePopupSlideToClose(context, closePopup) {
@@ -339,9 +357,22 @@ export function configurePopupSlideToClose(context, closePopup) {
     let lastY = 0;
     let lastTime = 0;
     let offset = 0;
+    let shellHeight = 0;
     let closeDistance = 0;
     let slider = null;
     let dragFrame = null;
+    // Where the shell was last painted, and how long a frame lasts on this
+    // display. A release carries on from the first and starts one of the second
+    // ahead.
+    let paintedOffset = 0;
+    let lastFrameTime = null;
+    let frameInterval = null;
+    // Two marks of the finger at least RELEASE_SPEED_WINDOW apart, so its speed
+    // at the release is read over the end of the drag rather than all of it.
+    let speedFromY = 0;
+    let speedFromTime = 0;
+    let speedMarkY = 0;
+    let speedMarkTime = 0;
     // Set once the axis has been read and the touch kept. From here on every
     // move of it is cancelled, whether or not the shell ever follows.
     let claimed = false;
@@ -358,8 +389,17 @@ export function configurePopupSlideToClose(context, closePopup) {
     // it can be read on it (see readTouchSource).
     let realTouchStart = null;
 
-    const writeOffset = () => {
+    const writeOffset = (frameTime) => {
         dragFrame = null;
+        // The shortest gap between two painted frames of the drag is one frame
+        // of this display. A frame the finger skipped only makes a longer one.
+        if (typeof frameTime === 'number') {
+            if (lastFrameTime !== null && frameTime > lastFrameTime) {
+                frameInterval = Math.min(frameInterval ?? MAX_FRAME_INTERVAL, frameTime - lastFrameTime);
+            }
+            lastFrameTime = frameTime;
+        }
+        paintedOffset = offset;
         setShellProperty(context.popUp, 'transform', `translate3d(0, ${offset}px, 0)`);
     };
 
@@ -398,16 +438,58 @@ export function configurePopupSlideToClose(context, closePopup) {
         clearShellProperty(context.popUp, 'transform');
     };
 
+    // px/ms of the finger over the end of the drag, or 0 once it has come to
+    // rest, or when it was on its way back up.
+    const readReleaseSpeed = () => {
+        if (Date.now() - lastTime >= MOVEMENT_TIME_THRESHOLD || lastTime <= speedFromTime) {
+            return 0;
+        }
+
+        return Math.max(0, (lastY - speedFromY) / (lastTime - speedFromTime));
+    };
+
+    // The transition a sheet is let go on, or nothing for the stylesheet's own.
+    const resolveReleaseTransition = (speed) => {
+        const remaining = shellHeight - paintedOffset;
+        // A finger slower than where `ease` sets off loses nothing to it, so it
+        // keeps the close every other one gets.
+        if (!(remaining > 0) || !(speed > (EASE_START_SLOPE * remaining) / CLOSE_DURATION)) {
+            return '';
+        }
+
+        const duration = Math.max(MIN_RELEASE_DURATION, Math.min(CLOSE_DURATION, remaining / speed));
+        const lead = frameInterval ?? DEFAULT_FRAME_INTERVAL;
+        return `transform ${Math.round(duration)}ms linear -${Math.round(lead)}ms`;
+    };
+
     // Carry on from where the finger left the shell rather than dropping it back
-    // to zero for a frame, and let the shell's own transition play it out. A
-    // sheet is handed the same translation `.is-closing` declares, so the two
-    // agree. A dialog is handed nothing, so its scale-out takes over untouched.
-    const closeFromDrag = () => {
-        clearShellProperty(context.popUp, 'transition');
-        if (isBottomSheetLayout(context.popUp)) {
-            setShellProperty(context.popUp, 'transform', 'translate3d(0, 100%, 0)');
+    // to zero for a frame. A sheet is handed the same translation `.is-closing`
+    // declares, so the two agree. A dialog is handed nothing, so its scale-out
+    // takes over untouched.
+    //
+    // A sheet let go by a finger still on the move does not get the
+    // stylesheet's `0.3s ease` for the rest of the way, though. That curve sets
+    // off slowly and its first frame shows where it starts, so a sheet flung at
+    // speed stopped dead for a frame and crawled before rushing off. It follows
+    // the finger instead, in a straight line at the finger's own speed, or at
+    // the usual close's average speed when that is faster, and never for longer
+    // than the usual close. It also starts one frame ahead, where the shell would
+    // have been had the finger stayed on it, so the frame the release lands on is
+    // not a still one. The pop-up drops that transition along with the transform
+    // once it lets go of the shell, see clearPopupInlineTransform in helpers.js.
+    const closeFromDrag = (speed) => {
+        const { popUp } = context;
+        if (isBottomSheetLayout(popUp)) {
+            const release = resolveReleaseTransition(speed);
+            if (release) {
+                setShellProperty(popUp, 'transition', release);
+            } else {
+                clearShellProperty(popUp, 'transition');
+            }
+            setShellProperty(popUp, 'transform', 'translate3d(0, 100%, 0)');
         } else {
-            clearShellProperty(context.popUp, 'transform');
+            clearShellProperty(popUp, 'transition');
+            clearShellProperty(popUp, 'transform');
         }
         closePopup();
     };
@@ -481,6 +563,8 @@ export function configurePopupSlideToClose(context, closePopup) {
             return;
         }
 
+        const now = Date.now();
+
         if (!dragging) {
             if (travelY < DRAG_START_SLOP) {
                 return;
@@ -501,15 +585,27 @@ export function configurePopupSlideToClose(context, closePopup) {
                 return;
             }
 
-            closeDistance = resolveCloseDistance(context.popUp);
+            shellHeight = readShellHeight(context.popUp);
+            closeDistance = shellHeight * CLOSE_HEIGHT_RATIO;
             dragging = true;
+            speedFromY = currentY;
+            speedFromTime = now;
+            speedMarkY = currentY;
+            speedMarkTime = now;
             // Held still for the whole drag so the shell follows the finger
             // exactly instead of trailing it by the shell's own 0.3s.
             setShellProperty(context.popUp, 'transition', 'none');
+        } else if (now - speedMarkTime >= RELEASE_SPEED_WINDOW) {
+            // Moved on a window at a time, so the speed is always read over the
+            // last one to two windows of the drag.
+            speedFromY = speedMarkY;
+            speedFromTime = speedMarkTime;
+            speedMarkY = currentY;
+            speedMarkTime = now;
         }
 
         lastY = currentY;
-        lastTime = Date.now();
+        lastTime = now;
         // Never above where it started. A finger that goes back up past its own
         // starting point would otherwise lift the shell off the bottom of the
         // screen and show the pop-up cut short, and there is nothing up there to
@@ -540,7 +636,7 @@ export function configurePopupSlideToClose(context, closePopup) {
 
         if (Math.abs(velocity) > VELOCITY_SWIPE_THRESHOLD) {
             if (velocity > 0) {
-                closeFromDrag();
+                closeFromDrag(readReleaseSpeed());
             } else {
                 snapBack();
             }
@@ -548,7 +644,7 @@ export function configurePopupSlideToClose(context, closePopup) {
         }
 
         if (travelled > closeDistance) {
-            closeFromDrag();
+            closeFromDrag(readReleaseSpeed());
             return;
         }
 
@@ -584,7 +680,11 @@ export function configurePopupSlideToClose(context, closePopup) {
         blocking = false;
         slides = mode === 'anywhere' || (mode === 'header' && target.header);
         offset = 0;
+        shellHeight = 0;
         closeDistance = 0;
+        paintedOffset = 0;
+        lastFrameTime = null;
+        frameInterval = null;
         slider = target.slider;
         startX = touch.clientX;
         startY = touch.clientY;

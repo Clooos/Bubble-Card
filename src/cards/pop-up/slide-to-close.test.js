@@ -592,6 +592,165 @@ describe('where the shell is let go', () => {
     });
 });
 
+// A sheet let go by a finger still on the move used to get the stylesheet's
+// `0.3s ease` for the rest of the way, from where the finger left it. That
+// curve sets off slowly and its first frame shows where it starts, so a sheet
+// flung at speed stopped dead for a frame, then crawled before rushing off.
+describe('the release', () => {
+    test('a sheet flung at speed carries on at the speed of the finger, one frame ahead', () => {
+        const { context, popUp, closePopup } = harness({ height: 800 });
+
+        // 3.75px/ms at the lift, with 500px of the sheet still on screen.
+        drag(context, { from: 100, to: 400, steps: 5, stepMs: 16 });
+
+        expect(closePopup).toHaveBeenCalledTimes(1);
+        expect(popUp.style.transform).toBe('translate3d(0, 100%, 0)');
+        expect(popUp.style.transition).toBe('transform 133ms linear -16ms');
+        // The centred and adaptive-dialog blocks declare theirs `!important`.
+        expect(popUp.style.priorityOf('transition')).toBe('important');
+    });
+
+    test('reads the speed at the end of the drag, not over all of it', () => {
+        const { context, popUp, closePopup } = harness({ height: 600 });
+
+        // Half a second at 0.25px/ms, then a flick at 2.5px/ms. Averaged over
+        // the whole drag it would leave at the pace of the usual close.
+        context.handleTouchStart(touchEvent([{ y: 100 }]));
+        for (let step = 1; step <= 12; step += 1) {
+            clock += 40;
+            dispatchMove(touchEvent([{ y: 100 + step * 10 }]));
+        }
+        for (let step = 1; step <= 5; step += 1) {
+            clock += 16;
+            dispatchMove(touchEvent([{ y: 220 + step * 40 }]));
+        }
+        frames.splice(0).forEach((frame) => frame());
+        dispatchEnd();
+
+        expect(closePopup).toHaveBeenCalledTimes(1);
+        expect(popUp.style.transition).toBe('transform 112ms linear -16ms');
+    });
+
+    test('never leaves slower than the usual close, nor for longer', () => {
+        const { context, popUp } = harness({ height: 800 });
+
+        // 1px/ms, with 480px to go, would take 480ms at the finger's pace.
+        drag(context, { from: 100, to: 420, steps: 8, stepMs: 40 });
+
+        expect(popUp.style.transition).toBe('transform 300ms linear -16ms');
+    });
+
+    test('a finger slower than where the usual close sets off keeps the usual close', () => {
+        const { context, popUp, closePopup } = harness({ height: 800 });
+
+        // Past half the sheet at 0.25px/ms, still moving when it lets go.
+        drag(context, { from: 100, to: 560, steps: 46, stepMs: 40 });
+
+        expect(closePopup).toHaveBeenCalledTimes(1);
+        expect(popUp.style.transform).toBe('translate3d(0, 100%, 0)');
+        expect(popUp.style.transition).toBe('');
+    });
+
+    test('starts ahead by one frame of this display', () => {
+        const { context, popUp } = harness({ height: 800 });
+
+        context.handleTouchStart(touchEvent([{ y: 100 }]));
+        let frameTime = 5000;
+        for (let step = 1; step <= 5; step += 1) {
+            clock += 8;
+            dispatchMove(touchEvent([{ y: 100 + step * 30 }]));
+            frameTime += 8.3;
+            frames.splice(0).forEach((frame) => frame(frameTime));
+        }
+        dispatchEnd();
+
+        expect(popUp.style.transition).toBe('transform 173ms linear -8ms');
+    });
+
+    test('a frame the finger skipped does not push the release further ahead', () => {
+        const { context, popUp } = harness({ height: 800 });
+
+        // Four frames of a 120Hz display, the last one twice as long.
+        context.handleTouchStart(touchEvent([{ y: 100 }]));
+        let frameTime = 5000;
+        for (let step = 1; step <= 5; step += 1) {
+            clock += 8;
+            dispatchMove(touchEvent([{ y: 100 + step * 30 }]));
+            frameTime += step === 5 ? 16.6 : 8.3;
+            frames.splice(0).forEach((frame) => frame(frameTime));
+        }
+        dispatchEnd();
+
+        expect(popUp.style.transition).toBe('transform 173ms linear -8ms');
+    });
+
+    test('never runs ahead by more than two frames, however long the frames took', () => {
+        const { context, popUp } = harness({ height: 800 });
+
+        context.handleTouchStart(touchEvent([{ y: 100 }]));
+        let frameTime = 5000;
+        for (let step = 1; step <= 5; step += 1) {
+            clock += 8;
+            dispatchMove(touchEvent([{ y: 100 + step * 30 }]));
+            frameTime += 100;
+            frames.splice(0).forEach((frame) => frame(frameTime));
+        }
+        dispatchEnd();
+
+        expect(popUp.style.transition).toBe('transform 173ms linear -34ms');
+    });
+
+    test('a flick at the very bottom still leaves over a few frames', () => {
+        const { context, popUp } = harness({ height: 300 });
+
+        // 6.5px/ms with 40px to go would be gone in 6ms.
+        drag(context, { from: 100, to: 360, steps: 5, stepMs: 8 });
+
+        expect(popUp.style.transition).toBe('transform 80ms linear -16ms');
+    });
+
+    test('times every drag afresh', () => {
+        const { context, popUp, closePopup } = harness({ height: 800 });
+
+        // Paints 120px on frames 30ms apart, then rests and snaps back.
+        context.handleTouchStart(touchEvent([{ y: 300 }]));
+        clock += 40;
+        dispatchMove(touchEvent([{ y: 360 }]));
+        frames.splice(0).forEach((frame) => frame(1000));
+        clock += 40;
+        dispatchMove(touchEvent([{ y: 420 }]));
+        frames.splice(0).forEach((frame) => frame(1030));
+        clock += 200;
+        dispatchEnd();
+        expect(closePopup).not.toHaveBeenCalled();
+
+        // A flick let go before its first frame is painted, so the whole sheet
+        // is still to go, at 5px/ms, one default frame ahead.
+        context.handleTouchStart(touchEvent([{ y: 300 }]));
+        clock += 8;
+        dispatchMove(touchEvent([{ y: 340 }]));
+        clock += 8;
+        dispatchMove(touchEvent([{ y: 380 }]));
+        dispatchEnd();
+
+        expect(closePopup).toHaveBeenCalledTimes(1);
+        expect(popUp.style.transition).toBe('transform 160ms linear -16ms');
+    });
+
+    test('a dialog flung at speed still leaves on its own scale-out', () => {
+        const { context, popUp, closePopup } = harness({
+            classes: ['bubble-pop-up', 'is-popup-opened', 'popup-mode-centered'],
+            height: 800,
+        });
+
+        drag(context, { from: 100, to: 400, steps: 5, stepMs: 16 });
+
+        expect(closePopup).toHaveBeenCalledTimes(1);
+        expect(popUp.style.transform).toBe('');
+        expect(popUp.style.transition).toBe('');
+    });
+});
+
 describe('teardown', () => {
     test('a close landing mid-drag takes the listeners and the offset with it', () => {
         const { context, popUp } = harness();

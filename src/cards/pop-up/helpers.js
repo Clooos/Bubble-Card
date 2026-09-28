@@ -473,15 +473,19 @@ function unparkShell(popUp) {
     style.transform = '';
 }
 
+function clearShellTransition(popUp) {
+    if (typeof popUp.style.removeProperty === 'function') {
+        popUp.style.removeProperty('transition');
+    }
+    popUp.style.transition = '';
+}
+
 function restoreShellTransition(popUp) {
     if (!isShellTransitionDisabled(popUp)) {
         return;
     }
 
-    if (typeof popUp.style.removeProperty === 'function') {
-        popUp.style.removeProperty('transition');
-    }
-    popUp.style.transition = '';
+    clearShellTransition(popUp);
 }
 
 function setStandalonePopupState(popUp, open, transitionClass = null) {
@@ -2292,8 +2296,18 @@ function syncEventListeners(listeners, enabled) {
 // Drops the priority too: the slide-to-close drag writes its offset as
 // `!important` so it outranks the mode blocks, and an assignment alone would
 // leave that declaration standing on engines that do not mirror it back.
+//
+// A slide-to-close release hands the shell a transition of its own along with
+// that transform, timed on the finger for the one close it drives. It goes with
+// the transform, so the next open slides on the stylesheet's again. The kill
+// switch is not one of those, the open lifts it on its own schedule.
 function clearPopupInlineTransform(context) {
-    unparkShell(context.popUp);
+    const { popUp } = context;
+    unparkShell(popUp);
+
+    if (popUp?.style?.transition && !isShellTransitionDisabled(popUp)) {
+        clearShellTransition(popUp);
+    }
 }
 
 function ensurePopupListenerBindings(context) {

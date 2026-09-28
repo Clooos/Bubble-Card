@@ -2517,6 +2517,31 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.style.transform).toBe('');
     });
 
+    test('lets a slide-to-close release drive its close, then drops it with the transform', () => {
+        const context = createStandaloneContext({ background_update: true });
+        usedContexts.push(context);
+
+        context.popUp.classList.remove('is-popup-closed');
+        context.popUp.classList.add('is-popup-opened');
+        // What a release leaves on the shell, see closeFromDrag in slide-to-close.js.
+        context.popUp.style.setProperty('transition', 'transform 133ms linear -16ms', 'important');
+        context.popUp.style.setProperty('transform', 'translate3d(0, 100%, 0)', 'important');
+
+        closePopup(context);
+
+        // The close only lifts the kill switch, so the release keeps timing the
+        // slide it started.
+        expect(context.popUp.style.transition).toBe('transform 133ms linear -16ms');
+
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+
+        expect(context.popUp.style.transform).toBe('');
+        expect(context.popUp.style.transition).toBe('');
+        expect(context.popUp.style.getPropertyPriority('transition')).toBe('');
+    });
+
     test('does not fire close_action when closing due to popup-to-popup navigation', () => {
         const context1 = createStandaloneContext({
             hash: '#popup-1',
@@ -3670,6 +3695,34 @@ describe('legacy popup location routing', () => {
 
         expect(appendLegacyPopup).toHaveBeenCalledTimes(1);
         expect(context.popUp.dataset.bubblePopupOpening).toBeUndefined();
+    });
+
+    test('a reopen drops a slide-to-close release its close never took back', () => {
+        const context = createLegacyContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        context.popUp.style.setProperty('transition', 'transform 133ms linear -16ms', 'important');
+        context.popUp.style.setProperty('transform', 'translate3d(0, 100%, 0)', 'important');
+
+        openPopup(context);
+
+        // Otherwise the open would slide in on the timing of the last swipe.
+        expect(context.popUp.style.transition).toBe('');
+        expect(context.popUp.style.transform).toBe('');
+    });
+
+    test('never lifts the kill switch along with the transform', () => {
+        const context = createLegacyContext({ hash: '#popup-a' });
+        usedContexts.push(context);
+
+        context.popUp.style.setProperty('transition', 'none', 'important');
+        context.popUp.style.setProperty('transform', 'translate3d(0, 100vh, 0)', 'important');
+
+        openPopup(context);
+
+        expect(context.popUp.style.transform).toBe('');
+        expect(context.popUp.style.transition).toBe('none');
+        expect(context.popUp.style.getPropertyPriority('transition')).toBe('important');
     });
 
     test('detaches the legacy popup shell after close', () => {
