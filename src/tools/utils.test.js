@@ -33,12 +33,17 @@ function createMockClassList(initialClasses = []) {
 
 function createMockStyle() {
     const style = {};
-    style.setProperty = jest.fn((propertyName, value) => {
+    const priorities = {};
+    style.setProperty = jest.fn((propertyName, value, priority = '') => {
         style[propertyName] = value;
+        priorities[propertyName] = priority;
     });
     style.removeProperty = jest.fn((propertyName) => {
         delete style[propertyName];
+        delete priorities[propertyName];
     });
+    style.getPropertyValue = jest.fn((propertyName) => style[propertyName] ?? '');
+    style.getPropertyPriority = jest.fn((propertyName) => priorities[propertyName] ?? '');
     return style;
 }
 
@@ -195,9 +200,120 @@ describe('toggleBodyScroll', () => {
         utilsModule.toggleBodyScroll(true);
 
         // Nothing reads it there, and writing an inherited property restyled
-        // the whole page on every open and every close.
+        // the whole page on every open and every close. The gutter itself is
+        // the one thing written on <html>, and it is not inherited.
         expect(document.documentElement.classList.contains('bubble-scroll-lock-gutter')).toBe(true);
         expect(document.body.style.setProperty).not.toHaveBeenCalled();
+        expect(document.documentElement.style.setProperty.mock.calls).toEqual([['scrollbar-gutter', 'stable', 'important']]);
+    });
+
+    describe('next to the locks of Home Assistant', () => {
+        beforeEach(async () => {
+            jest.resetModules();
+            global.CSS = { supports: jest.fn((property, value) => property === 'scrollbar-gutter' && value === 'stable') };
+            utilsModule = await import('./utils.js');
+        });
+
+        function rootGutter() {
+            const style = document.documentElement.style;
+            return [style.getPropertyValue('scrollbar-gutter'), style.getPropertyPriority('scrollbar-gutter')];
+        }
+
+        // Web Awesome locks the page behind a more-info with an !important rule
+        // in a cascade layer, and opened over a pop-up it measures no scrollbar
+        // and clears the gutter. Only a declaration on <html> itself outranks it.
+        test('holds the gutter on <html> itself, where a Home Assistant dialog cannot clear it', () => {
+            window.innerWidth = 1280;
+            document.documentElement.clientWidth = 1265;
+
+            utilsModule.toggleBodyScroll(true);
+
+            expect(rootGutter()).toEqual(['stable', 'important']);
+        });
+
+        test('gives <html> back its gutter as it was', () => {
+            window.innerWidth = 1280;
+            document.documentElement.clientWidth = 1265;
+
+            utilsModule.toggleBodyScroll(true);
+            utilsModule.toggleBodyScroll(false);
+
+            expect(rootGutter()).toEqual(['', '']);
+        });
+
+        test('keeps the scrollbar a Home Assistant dialog had already hidden when the pop-up opened', () => {
+            // The more-info hid it, so clientWidth no longer counts it. Web
+            // Awesome kept the width it measured before.
+            window.innerWidth = 1280;
+            document.documentElement.clientWidth = 1280;
+            document.documentElement.style.setProperty('--wa-scroll-lock-size', '15px');
+
+            utilsModule.toggleBodyScroll(true);
+
+            expect(document.documentElement.classList.contains('bubble-scroll-lock-gutter')).toBe(true);
+            expect(rootGutter()).toEqual(['stable', 'important']);
+        });
+
+        test('still reserves nothing where that dialog found no scrollbar either (#2629)', () => {
+            window.innerWidth = 1280;
+            document.documentElement.clientWidth = 1280;
+            document.documentElement.style.setProperty('--wa-scroll-lock-size', '0px');
+
+            utilsModule.toggleBodyScroll(true);
+
+            expect(document.documentElement.classList.contains('bubble-scroll-lock-gutter')).toBe(false);
+            expect(rootGutter()).toEqual(['', '']);
+        });
+
+        test('keeps the gutter Home Assistant\'s popover lock reserved, and hands it back', () => {
+            window.innerWidth = 1280;
+            document.documentElement.clientWidth = 1280;
+            document.documentElement.style.setProperty('scrollbar-gutter', 'stable');
+
+            utilsModule.toggleBodyScroll(true);
+            expect(document.documentElement.classList.contains('bubble-scroll-lock-gutter')).toBe(true);
+            expect(rootGutter()).toEqual(['stable', 'important']);
+
+            utilsModule.toggleBodyScroll(false);
+            expect(rootGutter()).toEqual(['stable', '']);
+        });
+
+        test('leaves the gutter to the popover lock that removed it in the meantime', () => {
+            window.innerWidth = 1280;
+            document.documentElement.clientWidth = 1280;
+            document.documentElement.style.setProperty('scrollbar-gutter', 'stable');
+            utilsModule.toggleBodyScroll(true);
+
+            // The popover closes first and clears what it thinks is its own.
+            document.documentElement.style.removeProperty('scrollbar-gutter');
+            utilsModule.toggleBodyScroll(false);
+
+            expect(rootGutter()).toEqual(['', '']);
+        });
+
+        test('clears the copy a popover lock wrote back over its own gutter', () => {
+            window.innerWidth = 1280;
+            document.documentElement.clientWidth = 1265;
+            utilsModule.toggleBodyScroll(true);
+
+            // A popover inside the pop-up saved this lock's gutter as the one it
+            // found, and put it back without the priority when it closed.
+            document.documentElement.style.setProperty('scrollbar-gutter', 'stable');
+            utilsModule.toggleBodyScroll(false);
+
+            expect(rootGutter()).toEqual(['', '']);
+        });
+    });
+
+    test('pads the body by the width a Home Assistant dialog measured, where the engine has no gutter', () => {
+        window.innerWidth = 1280;
+        document.documentElement.clientWidth = 1280;
+        document.documentElement.style.setProperty('--wa-scroll-lock-size', '15px');
+        document.documentElement.style.setProperty.mockClear();
+
+        utilsModule.toggleBodyScroll(true);
+
+        expect(document.body.style['--bubble-scroll-lock-size']).toBe('15px');
         expect(document.documentElement.style.setProperty).not.toHaveBeenCalled();
     });
 

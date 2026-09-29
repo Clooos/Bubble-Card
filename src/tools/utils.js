@@ -1168,6 +1168,10 @@ const scrollLockGutterProperty = '--bubble-scroll-lock-size';
 const scrollLockGutterClass = 'bubble-scroll-lock-gutter';
 // Engines that reserve the gutter themselves never read the size.
 const scrollLockSizeIsRead = typeof CSS === 'undefined' || !CSS.supports?.('scrollbar-gutter', 'stable');
+// Web Awesome keeps here the scrollbar width it measured before hiding it, for
+// as long as one of Home Assistant's dialogs or sheets holds the page.
+const webAwesomeLockSizeProperty = '--wa-scroll-lock-size';
+let rootGutterBeforeLock = null;
 // The class on the body only ever marked state: nothing in the project styled
 // it, so the document stayed scrollable the whole time a pop-up was open. The
 // layer below catches what happens outside the pop-up, but a gesture that
@@ -1327,6 +1331,41 @@ function getExistingScrollLockLayer() {
     return scrollLockLayerElement;
 }
 
+// Web Awesome locks the page behind Home Assistant's dialogs with an !important
+// rule inside a cascade layer, and that outranks any !important outside one.
+// Opened over a pop-up, a more-info measures no scrollbar (this lock already
+// hid it) and clears the gutter, which moved the whole dashboard by half a
+// scrollbar until the dialog closed. Only a declaration on the element itself
+// outranks that rule. The class rule stays under it, for the moment Home
+// Assistant's popover lock removes this one while a pop-up is still open.
+function reserveRootGutter(rootStyle) {
+    if (typeof rootStyle?.setProperty !== 'function') {
+        return;
+    }
+
+    rootGutterBeforeLock = {
+        value: rootStyle.getPropertyValue?.('scrollbar-gutter') || '',
+        priority: rootStyle.getPropertyPriority?.('scrollbar-gutter') || '',
+    };
+    rootStyle.setProperty('scrollbar-gutter', 'stable', 'important');
+}
+
+// Whatever was there before goes back, the way Home Assistant's own lock does
+// it. A gutter that another lock rewrote or removed since is theirs to handle.
+function releaseRootGutter(rootStyle) {
+    const before = rootGutterBeforeLock;
+    rootGutterBeforeLock = null;
+    if (!before || rootStyle?.getPropertyValue?.('scrollbar-gutter') !== 'stable') {
+        return;
+    }
+
+    if (before.value) {
+        rootStyle.setProperty('scrollbar-gutter', before.value, before.priority);
+    } else {
+        rootStyle.removeProperty?.('scrollbar-gutter');
+    }
+}
+
 export function toggleBodyScroll(disable) {
     const body = document.body;
     if (!body) return;
@@ -1346,25 +1385,39 @@ export function toggleBodyScroll(disable) {
         // window to read it from.
         const root = document.documentElement;
         if (root) {
+            const rootStyle = root.style;
             const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : undefined;
-            const gutter = typeof viewportWidth === 'number' && typeof root.clientWidth === 'number'
+            let gutter = typeof viewportWidth === 'number' && typeof root.clientWidth === 'number'
                 ? Math.max(0, viewportWidth - root.clientWidth)
                 : 0;
+            // Another lock may already have hidden the scrollbar. The page is
+            // still laid out around its gutter, but clientWidth stops counting
+            // it, so the measure above reads nothing and the gutter went the
+            // moment that lock let go. Web Awesome, behind Home Assistant's
+            // dialogs, kept the width it measured first, and Home Assistant's
+            // popover lock kept the gutter itself.
+            if (gutter < 2) {
+                gutter = parseFloat(rootStyle?.getPropertyValue?.(webAwesomeLockSizeProperty)) || 0;
+            }
             // A gutter only keeps the place of a scrollbar that was there. On a
             // page too short to scroll, reserving one anyway pushed the whole
             // dashboard aside by the width of a scrollbar that never existed
             // (#2629). Home Assistant's own scroll lock has the same condition,
             // and the 2px margin is Web Awesome's.
-            const hasGutter = gutter >= 2;
+            const hasGutter = gutter >= 2 || rootStyle?.getPropertyValue?.('scrollbar-gutter') === 'stable';
             root.classList?.toggle?.(scrollLockGutterClass, hasGutter);
             root.classList?.add(scrollLockBodyClass);
+
+            if (hasGutter && !scrollLockSizeIsRead) {
+                reserveRootGutter(rootStyle);
+            }
 
             // Only the fallback for engines without scrollbar-gutter reads the
             // size, and it reads it on the body. Written inline on <html>, it
             // changed the declaration count that identifies the theme, so every
             // open and every close passed for a theme change, and as an
             // inherited property it restyled the whole page each time.
-            if (hasGutter && scrollLockSizeIsRead) {
+            if (gutter >= 2 && scrollLockSizeIsRead) {
                 body.style?.setProperty?.(scrollLockGutterProperty, `${gutter}px`);
             }
         }
@@ -1380,6 +1433,7 @@ export function toggleBodyScroll(disable) {
 
     const root = document.documentElement;
     root?.classList?.remove(scrollLockBodyClass, scrollLockGutterClass);
+    releaseRootGutter(root?.style);
     body.style?.removeProperty?.(scrollLockGutterProperty);
 
     body.classList.remove(scrollLockBodyClass);
