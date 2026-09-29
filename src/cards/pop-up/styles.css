@@ -126,11 +126,12 @@
 }
 
 .bubble-pop-up {
-    /* Where the dashboard content starts, measured from HA's own rendered
-       panel (tools/content-inset.js). --mdc-drawer-width is deliberately gone
-       from this chain: HA drops --ha-sidebar-width when the sidebar is hidden,
-       and the legacy token then re-adds a sidebar that is not on screen,
-       pushing the pop-up off to the side (#2537). */
+    /* Where the dashboard content starts. Home Assistant publishes it as
+       --ha-sidebar-width from 2026.6, and before that it is measured from the
+       panel HA rendered (tools/content-inset.js). --mdc-drawer-width is
+       deliberately gone from this chain. HA drops --ha-sidebar-width when the
+       sidebar is hidden, and the legacy token would then re-add a sidebar that
+       is not on screen, pushing the pop-up off to the side (#2537). */
     --bubble-pop-up-content-inline-start: var(--bubble-content-inline-start, var(--ha-sidebar-width, 0px));
     display: flex;
     flex-direction: column;

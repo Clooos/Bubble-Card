@@ -43,9 +43,10 @@ export function createStructure(context, appendTo = context.container) {
     if (context.config.footer_mode) {
         context.card.classList.add('footer-mode');
 
-        // The footer is position:fixed, so it offsets itself by where the
-        // dashboard content starts. Start measuring that: a dashboard with a
-        // footer and no pop-up would otherwise never publish the value.
+        // The footer is fixed-positioned, so it offsets itself by where the
+        // dashboard content starts. On the versions of Home Assistant that do
+        // not publish that, a dashboard with a footer and no pop-up would
+        // otherwise never measure it.
         startContentInsetSync();
 
         if (context.config.footer_full_width) {

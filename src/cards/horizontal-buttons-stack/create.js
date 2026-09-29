@@ -100,9 +100,10 @@ export function createStructure(context) {
     context.elements.customStyle = createElement('style');
 
     context.card.classList.add('horizontal-buttons-stack-card');
-    // The bar is position:fixed, so it offsets itself by where the dashboard
-    // content starts. Start measuring that: a dashboard with a buttons stack
-    // and no pop-up would otherwise never publish the value.
+    // The bar is fixed-positioned, so it offsets itself by where the dashboard
+    // content starts. On the versions of Home Assistant that do not publish
+    // that, a dashboard with a buttons stack and no pop-up would otherwise
+    // never measure it.
     startContentInsetSync();
     context.card.style.marginInlineStart = context.config.margin ?? '';
     if (!context.config.hide_gradient) {

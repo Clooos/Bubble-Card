@@ -3000,10 +3000,10 @@ export function registerPopupContext(context) {
     const hash = context.config.hash;
     if (!hash) return;
 
-    // Keep publishing where the dashboard content starts, so pop-ups centre on
-    // the area HA actually renders into instead of on a sidebar-width token
-    // that outlives the sidebar. Idempotent, and re-entered on every tick so a
-    // dashboard swap or a late boot is picked up.
+    // Where the dashboard content starts, so pop-ups centre on the area HA
+    // actually renders into. Measured only on the versions of Home Assistant
+    // that do not publish it themselves. Idempotent and cheap, and re-entered
+    // on every tick so a dashboard swap or a late boot is picked up.
     startContentInsetSync();
 
     // Idle-time warm-ups (once per context): the card modules this pop-up
