@@ -53,7 +53,7 @@ module.exports = [
   {
     mode: 'production',
     entry: {
-      'bubble-card': './src/bubble-card.js'
+      'bubble-card': './src/index.js'
     },
     module: {
       rules,
@@ -71,7 +71,7 @@ module.exports = [
   {
     mode: 'development',
     entry: {
-      'bubble-card': './src/bubble-card.js'
+      'bubble-card': './src/index.js'
     },
     module: {
       rules,

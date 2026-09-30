@@ -50,7 +50,7 @@ global.document = {
     querySelector: jest.fn(() => null),
 };
 
-await import('../bubble-card.js');
+await import('../index.js');
 const BubbleCard = definedElements['bubble-card'];
 
 const { getEntitySuggestion } = await import('./entity-suggestion.js');

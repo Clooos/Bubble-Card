@@ -63,7 +63,7 @@ global.document = {
     querySelector: jest.fn(() => null),
 };
 
-await import('./bubble-card.js');
+await import('./index.js');
 const BubbleCard = definedElements['bubble-card'];
 
 function createCard(config = { card_type: 'button' }) {
