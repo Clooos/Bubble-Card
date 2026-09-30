@@ -1,0 +1,94 @@
+name: Draft release
+
+# Prepares the release of each pushed tag as a draft that already carries every
+# file of dist/ at that tag. Once a release has files, HACS installs Bubble Card
+# from them instead of from the tag, and counts their downloads.
+#
+# HACS takes nothing but the release files as soon as there is one, so a release
+# must never go public with some of them missing. The draft is compared file by
+# file with dist/ and deleted if anything differs, and it is published by hand
+# once the notes are written. A release that already exists, draft or published,
+# is never touched, which includes one created from the release form, since the
+# form publishes it together with its tag.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: draft-release-${{ github.ref_name }}
+
+jobs:
+  draft:
+    name: Draft the release with the dist files
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'Clooos'
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ github.ref_name }}
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # A published release keeps the files its users already downloaded, and an
+      # existing draft may hold notes being written.
+      - name: Look for an existing release
+        id: check
+        run: |
+          if found=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>&1); then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$TAG already has a release, it was left untouched."
+          elif grep -q "release not found" <<< "$found"; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Could not check whether $TAG already has a release. $found"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.check.outputs.skip == 'false'
+        with:
+          ref: ${{ github.ref }}
+
+      # Release files cannot sit in folders, and HACS saves them all next to
+      # bubble-card.js, so dist/ has to be flat and hold the card itself.
+      - name: Check dist
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          if [ -n "$(find dist -mindepth 1 -type d)" ]; then
+            echo "::error::dist/ has subfolders, and a release cannot carry them."
+            exit 1
+          fi
+          if [ ! -f dist/bubble-card.js ]; then
+            echo "::error::dist/bubble-card.js is missing."
+            exit 1
+          fi
+          echo "$(ls dist | wc -l) files in dist/"
+
+      - name: Create the draft
+        id: create
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          echo "started=true" >> "$GITHUB_OUTPUT"
+          prerelease=()
+          case "$TAG" in *-*) prerelease=(--prerelease) ;; esac
+          gh release create "$TAG" dist/* --draft --verify-tag \
+            --title "Bubble Card $TAG" --notes "" "${prerelease[@]}"
+
+      - name: Compare the draft with dist
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          mkdir -p "$RUNNER_TEMP/draft"
+          gh release download "$TAG" --dir "$RUNNER_TEMP/draft"
+          diff -r dist "$RUNNER_TEMP/draft"
+          echo "::notice::The draft of $TAG is ready with its $(ls dist | wc -l) files, add the notes and publish it."
+
+      # A draft that does not match dist/ must never be published.
+      - name: Delete an incomplete draft
+        if: failure() && steps.create.outputs.started == 'true'
+        run: |
+          if [ "$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null)" = "true" ]; then
+            gh release delete "$TAG" --yes
+            echo "::error::The draft of $TAG was deleted. Re-run this workflow if the cause was temporary."
+          fi

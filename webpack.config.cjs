@@ -20,11 +20,11 @@ const performance = {
 // src/tools/localize.js when the editor opens; en.json is bundled so it is
 // not emitted, and _-prefixed files are tooling artifacts.
 //
-// Flat, and not a translations/ subfolder, because that is the only layout
-// HACS ships for a plugin: it only downloads files sitting directly in dist/
-// (base.py gathers `treefile.path in ["", "dist"]`), so anything nested is
-// silently left behind. The name is prefixed because the dev build writes
-// into HA_PATH, which is a folder shared with every other custom card.
+// Flat, and not a translations/ subfolder, because every file of dist/ is also
+// attached to each release (.github/workflows/draft-release.yml), and a release
+// file cannot sit in a folder. HACS saves them all next to bubble-card.js. The
+// name is prefixed because the dev build writes into HA_PATH, which is a folder
+// shared with every other custom card.
 class EmitTranslationsPlugin {
   apply(compiler) {
     compiler.hooks.thisCompilation.tap('EmitTranslations', (compilation) => {
