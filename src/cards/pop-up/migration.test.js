@@ -265,6 +265,63 @@ describe('maybeShowMigrationNotice', () => {
         expect(harness.storage.get('bubble-card-legacy-popup-notice-lovelace/kitchen')).toBe('1');
         expect(harness.storage.has('bubble-card-legacy-popup-notice-lovelace')).toBe(false);
     });
+
+    function noticeHashes(harness) {
+        const content = harness.createdElements.find((element) => element.tagName === 'DIV' && element.innerHTML.includes('bubble-migration-notice-hashes'));
+        if (!content) return [];
+        const list = content.innerHTML.slice(content.innerHTML.indexOf('bubble-migration-notice-hashes'));
+        return [...list.slice(0, list.indexOf('</p>')).matchAll(/<span[^>]*>([^<]*)<\/span>/g)].map((match) => match[1]);
+    }
+
+    function closeNotice(harness) {
+        harness.createdElements.find((element) => element.tagName === 'HA-DIALOG')?.dispatchFakeEvent('closed');
+    }
+
+    test('lists the hash of every legacy pop-up that opened it, once each and escaped', () => {
+        const harness = installMigrationNoticeHarness();
+        setLocationPathname('/lovelace/living-room');
+
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, '#kitchen');
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, 'bedroom');
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, '#kitchen');
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, '#a<b');
+        harness.runDeferredCallback();
+
+        expect(noticeHashes(harness)).toEqual(['#kitchen', '#bedroom', '#a&lt;b']);
+        closeNotice(harness);
+    });
+
+    test('lists the legacy pop-ups of the view as configured, even the ones not on the page', () => {
+        const harness = installMigrationNoticeHarness();
+        setLocationPathname('/lovelace/salon');
+        const huiRoot = {
+            isConnected: true,
+            lovelace: {
+                config: {
+                    views: [{
+                        path: 'salon',
+                        cards: [
+                            { type: 'grid', cards: [{ type: 'custom:bubble-card', card_type: 'pop-up', hash: '#in-grid' }, buttonCard] },
+                            { type: 'vertical-stack', cards: [{ type: 'custom:bubble-card', card_type: 'pop-up', hash: '#in-stack' }, buttonCard] },
+                            { type: 'custom:bubble-card', card_type: 'pop-up', hash: '#migrated', cards: [buttonCard] },
+                        ],
+                    }],
+                },
+            },
+        };
+        const shadowHost = (child) => ({ shadowRoot: { querySelector: () => child } });
+        globalThis.document.querySelector = (selector) => (
+            selector === 'body > home-assistant' ? shadowHost(shadowHost(shadowHost(huiRoot))) : null
+        );
+
+        // Only the grid one is rendered, the stack one is closed and out of the page.
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, '#in-grid');
+        harness.runDeferredCallback();
+
+        expect(noticeHashes(harness)).toEqual(['#in-grid', '#in-stack']);
+        huiRoot.isConnected = false;
+        closeNotice(harness);
+    });
 });
 
 describe('isLegacyPopUpConfig', () => {
@@ -465,6 +522,84 @@ describe('findLegacyPopUpStack', () => {
             matchHash: legacyPopupConfig.hash,
             currentViewPath: ['views', 1],
         })).toBeNull();
+    });
+});
+
+describe('legacy pop-ups held by a grid card', () => {
+    const gridPopupConfig = {
+        type: 'custom:bubble-card',
+        card_type: 'pop-up',
+        hash: '#grid-legacy',
+        name: 'In a grid',
+    };
+    const viewWithGrid = (grid) => ({ views: [{ path: 'v', cards: [grid] }] });
+
+    test('finds the pop-up and keeps the columns and squares of its grid', () => {
+        const grid = {
+            type: 'grid',
+            columns: 3,
+            square: true,
+            title: 'Room',
+            grid_options: { columns: 6 },
+            visibility: [{ condition: 'screen', media_query: '(min-width: 0px)' }],
+            cards: [gridPopupConfig, buttonCard, separatorCard],
+        };
+
+        const result = findLegacyPopUpStack(viewWithGrid(grid), gridPopupConfig);
+
+        expect(result.stackPath).toEqual(['views', 0, 'cards', 0]);
+        // Its place in the view goes with the pop-up, its own layout stays with the cards.
+        expect(result.contentCards).toEqual([{ type: 'grid', columns: 3, square: true, title: 'Room', cards: [buttonCard, separatorCard] }]);
+        expect(result.standaloneConfig.cards).toEqual([
+            { type: 'grid', columns: 3, square: true, title: 'Room', cards: [buttonCard, separatorCard], grid_options: { columns: 12, rows: 'auto' } },
+        ]);
+    });
+
+    test('keeps the squares HA draws by default, even on a single column', () => {
+        const result = findLegacyPopUpStack(viewWithGrid({ type: 'grid', columns: 1, cards: [gridPopupConfig, buttonCard] }), gridPopupConfig);
+
+        expect(result.contentCards).toEqual([{ type: 'grid', columns: 1, cards: [buttonCard] }]);
+    });
+
+    test('migrates a single column without squares like a vertical-stack', () => {
+        const result = findLegacyPopUpStack(viewWithGrid({ type: 'grid', columns: 1, square: false, cards: [gridPopupConfig, buttonCard, separatorCard] }), gridPopupConfig);
+
+        expect(result.contentCards).toEqual([buttonCard, separatorCard]);
+    });
+
+    test('adds no empty grid when the pop-up was alone in it', () => {
+        const result = findLegacyPopUpStack(viewWithGrid({ type: 'grid', columns: 3, cards: [gridPopupConfig] }), gridPopupConfig);
+
+        expect(result.contentCards).toEqual([]);
+        expect(result.standaloneConfig.cards).toEqual([]);
+    });
+
+    test('never takes a section of a sections view for the grid holding a pop-up', () => {
+        const lovelaceConfig = {
+            views: [{ type: 'sections', sections: [{ type: 'grid', cards: [gridPopupConfig, buttonCard] }] }],
+        };
+
+        expect(findLegacyPopUpStack(lovelaceConfig, gridPopupConfig)).toBeNull();
+    });
+
+    test('still finds a grid card inside a section', () => {
+        const lovelaceConfig = {
+            views: [{ type: 'sections', sections: [{ type: 'grid', cards: [{ type: 'grid', columns: 2, cards: [gridPopupConfig, buttonCard] }] }] }],
+        };
+
+        expect(findLegacyPopUpStack(lovelaceConfig, gridPopupConfig).stackPath).toEqual(['views', 0, 'sections', 0, 'cards', 0]);
+    });
+
+    test('replaces the grid with the standalone pop-up in the dashboard', () => {
+        const lovelaceConfig = viewWithGrid({ type: 'grid', columns: 2, square: false, cards: [gridPopupConfig, buttonCard] });
+
+        const migration = migrateLegacyPopUpLovelaceConfig(lovelaceConfig, gridPopupConfig);
+
+        expect(migration.config.views[0].cards).toEqual([{
+            ...gridPopupConfig,
+            cards: [{ type: 'grid', columns: 2, square: false, cards: [buttonCard], grid_options: { columns: 12, rows: 'auto' } }],
+        }]);
+        expect(lovelaceConfig.views[0].cards[0].type).toBe('grid');
     });
 });
 

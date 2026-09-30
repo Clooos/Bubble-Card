@@ -1,7 +1,12 @@
 import { html } from 'lit';
 import { findConfigPath, getConfigAtPath } from '../../editor/standalone-dialog-bridge.js';
 import { isHashOnCurrentPage } from './navigation-picker-bridge.js';
+import { getCurrentViewPopUps, normalizePopUpHash } from './view-popups.js';
 import setupTranslation from '../../tools/localize.js';
+import { escapeHtml } from '../../tools/jinja.js';
+import { getCurrentLovelaceViewPath, getCurrentView } from '../../tools/lovelace-view.js';
+
+export { getCurrentLovelaceViewPath, getCurrentView };
 
 const POPUP_GRID_COLUMN_COUNT = 12;
 
@@ -83,6 +88,41 @@ function getPopupMatchScore(candidate, popupConfig, preferredHash) {
     return score > 0 ? score : -1;
 }
 
+// A legacy pop-up turns whatever card holds it into its shell, so it works in
+// a grid card as well as in a vertical-stack, and one placed in a grid was
+// never offered the migration. A section of a sections view is a grid object
+// with cards as well, and must never be taken for one.
+function isLegacyPopUpContainer(node, path) {
+    if (node.type === 'vertical-stack') {
+        return true;
+    }
+
+    const parentKey = path[path.length - 2];
+    return node.type === 'grid' && parentKey !== 'sections' && parentKey !== 'views';
+}
+
+// Where the container sat in the view belongs to the pop-up now. Only the
+// grid's own layout goes inside it.
+const CONTAINER_PLACEMENT_KEYS = ['grid_options', 'layout_options', 'view_layout', 'visibility'];
+
+// The other cards of a grid keep its columns and its square cells inside the
+// pop-up, in a grid card of their own. Only a single column without squares
+// lays out like a stack, and is migrated like one.
+function keepGridLayout(containerConfig, cards) {
+    if (containerConfig?.type !== 'grid' || cards.length === 0) {
+        return cards;
+    }
+
+    if (Number(containerConfig.columns) === 1 && containerConfig.square === false) {
+        return cards;
+    }
+
+    const grid = cloneConfig(containerConfig);
+    CONTAINER_PLACEMENT_KEYS.forEach((key) => delete grid[key]);
+    grid.cards = cards;
+    return [grid];
+}
+
 function findLegacyPopUpStackEntries(node, popupConfig, preferredHash, path = [], entries = []) {
     if (!node || typeof node !== 'object') {
         return entries;
@@ -95,7 +135,7 @@ function findLegacyPopUpStackEntries(node, popupConfig, preferredHash, path = []
         return entries;
     }
 
-    if (node.type === 'vertical-stack' && Array.isArray(node.cards)) {
+    if (isLegacyPopUpContainer(node, path) && Array.isArray(node.cards)) {
         let bestIndex = -1;
         let bestScore = -1;
 
@@ -279,9 +319,9 @@ export function findLegacyPopUpStack(lovelaceConfig, popupConfig, options = {}) 
         return null;
     }
 
-    const contentCards = legacyEntry.stackConfig.cards
+    const contentCards = keepGridLayout(legacyEntry.stackConfig, legacyEntry.stackConfig.cards
         .filter((_, index) => index !== legacyEntry.popupIndex)
-        .map((cardConfig) => cloneConfig(cardConfig));
+        .map((cardConfig) => cloneConfig(cardConfig)));
 
     return {
         ...legacyEntry,
@@ -639,99 +679,6 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
 
 // Migration Notice: one-shot dialog for unmigrated legacy pop-ups
 
-function getPathSegments() {
-    const pathname = typeof location !== 'undefined' && typeof location.pathname === 'string' ? location.pathname : '';
-    return pathname.split('/').filter(Boolean).map((segment) => {
-        try {
-            return decodeURI(segment);
-        } catch (_) {
-            return segment;
-        }
-    });
-}
-
-function normalizePanelUrl(panelUrl) {
-    return typeof panelUrl === 'string' ? panelUrl.trim().replace(/^\/+|\/+$/g, '') : '';
-}
-
-function getCurrentPanelAndView(hass = null) {
-    const segments = getPathSegments();
-    const panelUrl = normalizePanelUrl(hass?.panelUrl) || segments[0] || 'lovelace';
-    const panelIndex = segments.indexOf(panelUrl);
-    const viewPath = panelIndex >= 0
-        ? segments[panelIndex + 1]
-        : segments[1];
-
-    return { panelUrl, viewPath: viewPath || '' };
-}
-
-function normalizeRouteValue(value) {
-    return typeof value === 'string' ? value.trim().replace(/^\/+|\/+$/g, '') : '';
-}
-
-function getTitleRouteFallback(title) {
-    return normalizeRouteValue(title)
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-}
-
-function parseViewIndex(value, views) {
-    if (value === null || value === undefined || value === '') {
-        return -1;
-    }
-
-    if (typeof value !== 'number' && typeof value !== 'string') {
-        return -1;
-    }
-
-    const index = typeof value === 'number' ? value : Number(value);
-    return Number.isInteger(index) && index >= 0 && index < views.length ? index : -1;
-}
-
-export function getCurrentView(hass = null) {
-    const { panelUrl, viewPath } = getCurrentPanelAndView(hass);
-
-    return viewPath ? `${panelUrl}/${viewPath}` : panelUrl;
-}
-
-export function getCurrentLovelaceViewPath(lovelaceConfig, hass = null, explicitViewIndex = null) {
-    const views = lovelaceConfig?.views;
-    if (!Array.isArray(views) || views.length === 0) {
-        return null;
-    }
-
-    const resolvedExplicitIndex = parseViewIndex(explicitViewIndex, views);
-    if (resolvedExplicitIndex !== -1) {
-        return ['views', resolvedExplicitIndex];
-    }
-
-    const { viewPath } = getCurrentPanelAndView(hass);
-    const normalizedViewPath = normalizeRouteValue(viewPath);
-
-    if (!normalizedViewPath) {
-        return ['views', 0];
-    }
-
-    const numericIndex = parseViewIndex(normalizedViewPath, views);
-    if (numericIndex !== -1) {
-        return ['views', numericIndex];
-    }
-
-    const matchingIndex = views.findIndex((view) => {
-        const configuredPath = normalizeRouteValue(view?.path);
-        if (configuredPath) {
-            return configuredPath === normalizedViewPath;
-        }
-
-        return getTitleRouteFallback(view?.title) === normalizedViewPath;
-    });
-
-    return matchingIndex !== -1 ? ['views', matchingIndex] : null;
-}
-
 export function getMigrationNoticeStorageKey(hass = null) {
     return `bubble-card-legacy-popup-notice-${getCurrentView(hass)}`;
 }
@@ -739,6 +686,7 @@ export function getMigrationNoticeStorageKey(hass = null) {
 let _pending = false;
 let _latestMigrationNoticeHass = null;
 const _shownMigrationNoticeKeys = new Set();
+const _noticeHashesByKey = new Map();
 
 function isMigrationNoticeDismissed(storageKey) {
     try {
@@ -752,14 +700,26 @@ function isMigrationNoticeDismissed(storageKey) {
  * Call once per legacy (non-standalone) pop-up card encountered.
  * Shows a dismissible dialog the first time, then never again (localStorage).
  */
-export function maybeShowMigrationNotice(hass = null) {
+export function maybeShowMigrationNotice(hass = null, hash = null) {
     if (hass) {
         _latestMigrationNoticeHass = hass;
     }
 
     const storageKey = getMigrationNoticeStorageKey(_latestMigrationNoticeHass);
 
-    if (_pending || _shownMigrationNoticeKeys.has(storageKey)) return;
+    if (_shownMigrationNoticeKeys.has(storageKey)) return;
+
+    // Every legacy pop-up rendered before the notice opens adds its hash, which
+    // covers the ones the view config cannot show, rendered from a template.
+    const normalizedHash = normalizePopUpHash(hash);
+    if (normalizedHash) {
+        if (!_noticeHashesByKey.has(storageKey)) {
+            _noticeHashesByKey.set(storageKey, new Set());
+        }
+        _noticeHashesByKey.get(storageKey).add(normalizedHash);
+    }
+
+    if (_pending) return;
 
     if (isMigrationNoticeDismissed(storageKey)) {
         // The hass setter calls this on every state update of every legacy
@@ -805,11 +765,25 @@ function _show() {
     const content = document.createElement('div');
     content.style.lineHeight = '1.6';
 
+    // The pop-ups left to migrate on this view, read from its config when the
+    // notice opens, so the list is the view's as it stands and none is missed
+    // for being closed or out of the page. They look like the badge edit mode
+    // shows on each of them.
+    const hashes = new Set([
+        ...getCurrentViewPopUps(_latestMigrationNoticeHass).filter((popUp) => popUp.legacy).map((popUp) => popUp.hash),
+        ...(_noticeHashesByKey.get(storageKey) || []),
+    ]);
+    const hashTitle = escapeHtml(String(t('editor.migration.notice_available'))).replace(/"/g, '&quot;');
+    const hashList = hashes.size > 0 ? `
+        <p class="bubble-migration-notice-hashes" style="display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px;">
+            ${[...hashes].map((popUpHash) => `<span title="${hashTitle}" style="display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 18px; white-space: nowrap; background-color: var(--mdc-text-field-disabled-line-color); font-size: 13px;">${escapeHtml(popUpHash)}</span>`).join('')}
+        </p>` : '';
+
     content.innerHTML = `
         <h3 style="margin: 0 0 4px;">${t('editor.migration.notice_title')}</h3>
         <p>
             ${fill('editor.migration.notice_intro', { bold: `<strong>${t('editor.migration.notice_intro_bold')}</strong>` })}
-        </p>
+        </p>${hashList}
         <p style="margin: 0 0 24px;">
             ${fill('editor.migration.notice_announcement', { link: `<a href="https://github.com/Clooos/Bubble-Card/releases/tag/v3.2.0" target="_blank" rel="noopener" style="color: var(--primary-color); text-decoration: underline;">${t('editor.migration.notice_announcement_link')}</a>` })}
         </p>
