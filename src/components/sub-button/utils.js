@@ -1,4 +1,4 @@
-import { getAttribute, isStateOn, isStateRequiringAttention, formatDateTime, createElement, getStateSurfaceColor, getState, getStyleGeneration, isSurfaceColorLight, isTimerEntity, timerTimeRemaining, computeDisplayTimer, startElementTimerInterval, stopElementTimerInterval, formatNumericValue, getTemperatureUnit } from "../../tools/utils.js";
+import { getAttribute, isStateOn, isStateRequiringAttention, formatDateTime, createElement, getStateSurfaceColor, getState, getStyleGeneration, getSurfaceIconTone, isTimerEntity, timerTimeRemaining, computeDisplayTimer, startElementTimerInterval, stopElementTimerInterval, formatNumericValue, getTemperatureUnit } from "../../tools/utils.js";
 import { applyScrollingEffect } from "../../tools/text-scrolling.js";
 import { getIcon, getLightColorSignature, getImage } from "../../tools/icon.js";
 import { addActions, addFeedback } from "../../tools/tap-actions.js";
@@ -130,14 +130,94 @@ export function updateElementVisibility(element, options, displayedState) {
   }
 }
 
-// Where the text on a sub-button has to flip to dark. The value sits in the gap
-// between the brightest state colour that still reads in white (climate dry, at
-// 0.639) and a lamp at warm white, which measures around 0.70 and does not. It
-// is centred in that gap on purpose, since a lamp drifts with its own colour and
-// one measured at 0.698 kept its white text when the threshold sat at 0.70.
-// Measured with calculateLuminance, which has no gamma correction and so reads
-// a washed-out pastel as lighter than its WCAG luminance would.
-const BRIGHT_BACKGROUND_LUMINANCE = 0.67;
+// The colour a sub-button really paints, its variables resolved where it
+// stands. An accent a card, a module or its styles scope to themselves is the
+// one read, where resolving from the document found none and fell back on the
+// default colour, and a light yellow accent kept a white icon on it.
+function readPaintedColor(element) {
+  try {
+    const painted = getComputedStyle(element).getPropertyValue('--bubble-sub-button-light-background-color').trim();
+    if (painted) return painted;
+  } catch (_) {}
+  return '';
+}
+
+// A class only where the tone that reads better is not the theme's own text,
+// .bright-background for a dark icon on a dark theme and .dark-background for a
+// light one on a light theme. Elsewhere the theme's text is kept, darker than
+// the 65 % black of .bright-background on a light theme.
+function setToneClasses(element, result) {
+  const toggle = (name, on) => {
+    if (element.classList.contains(name) !== on) element.classList.toggle(name, on);
+  };
+  toggle('bright-background', result?.tone === 'dark' && result.textIsLight);
+  toggle('dark-background', result?.tone === 'light' && !result.textIsLight);
+}
+
+// A variable only resolves once the card has drawn its sub-buttons, which the
+// first render comes before, so it is read on the next frame, every pending
+// sub-button at once, reads first and writes after so the frame styles once.
+const pendingTones = new Map();
+let pendingTonesFrame = 0;
+const MAX_TONE_ATTEMPTS = 3;
+
+function flushSurfaceTones() {
+  pendingTonesFrame = 0;
+  const batch = [...pendingTones];
+  pendingTones.clear();
+
+  const decisions = batch.map(([element, context]) => {
+    if (!element.isConnected) return null;
+    let painted = readPaintedColor(element);
+    if (!painted) {
+      element._surfaceToneAttempts = (element._surfaceToneAttempts || 0) + 1;
+      if (element._surfaceToneAttempts < MAX_TONE_ATTEMPTS) return { retry: [element, context] };
+      // Still not drawn, the expression is resolved from the document as it
+      // always was rather than leaving the icon undecided.
+      painted = element.style.getPropertyValue('--bubble-sub-button-light-background-color');
+    }
+    return { element, result: getSurfaceIconTone(painted, context) };
+  });
+
+  decisions.forEach((decision) => {
+    if (!decision) return;
+    if (decision.retry) {
+      scheduleSurfaceTone(...decision.retry);
+      return;
+    }
+    setToneClasses(decision.element, decision.result);
+  });
+}
+
+function scheduleSurfaceTone(element, context) {
+  pendingTones.set(element, context);
+  if (pendingTonesFrame) return;
+  pendingTonesFrame = typeof requestAnimationFrame === 'function'
+    ? requestAnimationFrame(flushSurfaceTones)
+    : setTimeout(flushSurfaceTones, 16);
+}
+
+// Light or dark icon, whichever reads better on the state colour behind it
+// (see getSurfaceIconTone). A colour already written out is decided at once,
+// a variable once it can be resolved where the sub-button stands.
+function applySurfaceTone(element, context) {
+  const expression = element.style.getPropertyValue('--bubble-sub-button-light-background-color');
+  if (!expression.includes('var(')) {
+    setToneClasses(element, getSurfaceIconTone(expression, context));
+    return;
+  }
+  element._surfaceToneAttempts = 0;
+  scheduleSurfaceTone(element, context);
+}
+
+// A card's styles and modules are applied after its sub-buttons on the first
+// render, and they can scope the accent those sub-buttons paint. Read again
+// once they are in.
+export function refreshSurfaceTones(context) {
+  const container = context?.config?.card_type === 'pop-up' ? context.popUp : context?.content;
+  if (!container?.querySelectorAll) return;
+  container.querySelectorAll('.bubble-sub-button.background-on').forEach((element) => applySurfaceTone(element, context));
+}
 
 // Update the background classes and dynamic light background color
 // Uses same optimization pattern as changeIcon: compute new value, compare with current, update only if different
@@ -201,10 +281,7 @@ export function updateBackground(element, options) {
     const generation = getStyleGeneration();
     if (currentColor !== newColor || colorChanged || element._brightBackgroundGeneration !== generation) {
       element._brightBackgroundGeneration = generation;
-      element.classList.toggle(
-        'bright-background',
-        isSurfaceColorLight(newColor, context, BRIGHT_BACKGROUND_LUMINANCE)
-      );
+      applySurfaceTone(element, context);
     }
 
     if (!element.classList.contains('background-on')) {
@@ -227,6 +304,9 @@ function clearBrightBackground(element) {
   element._brightBackgroundGeneration = undefined;
   if (element.classList.contains('bright-background')) {
     element.classList.remove('bright-background');
+  }
+  if (element.classList.contains('dark-background')) {
+    element.classList.remove('dark-background');
   }
 }
 

@@ -329,6 +329,12 @@
     color: var(--bubble-sub-button-dark-text-color, rgba(0, 0, 0, 0.65));
 }
 
+/* The other way round, on a light theme whose dark text a navy, a violet or a
+   deep red would swallow. */
+.dark-background {
+    color: var(--bubble-sub-button-light-text-color, #ffffff);
+}
+
 .background-on {
     background-color: var(--bubble-sub-button-light-background-color, var(--bubble-accent-color, var(--bubble-default-color)));
 }

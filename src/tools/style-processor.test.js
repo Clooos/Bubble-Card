@@ -14,6 +14,11 @@ jest.unstable_mockModule('../components/sub-button/changes.js', () => ({
     getSubButtonsStates: jest.fn(() => null),
 }));
 
+const refreshSurfaceTones = jest.fn();
+jest.unstable_mockModule('../components/sub-button/utils.js', () => ({
+    refreshSurfaceTones,
+}));
+
 jest.unstable_mockModule('./validate-condition.js', () => ({
     checkConditionsMet: jest.fn(() => true),
 }));
@@ -204,6 +209,21 @@ describe('the style element a card is given', () => {
 
         expect(element.appendChild).toHaveBeenCalledTimes(1);
         expect(element.appendChild.mock.calls[0][0]).toMatchObject({ id: 'bubble-styles', hidden: true });
+    });
+
+    // The sub-buttons are drawn before the styles, which may scope their accent.
+    test('makes the sub-buttons read their colour again when its CSS changes, and only then', () => {
+        const element = createCardElement();
+        const context = createContext(element);
+        context.config.styles = '.bubble-sub-button { --bubble-accent-color: #ffeb3b; }';
+        refreshSurfaceTones.mockClear();
+
+        handleCustomStyles(context, element);
+        expect(refreshSurfaceTones).toHaveBeenCalledTimes(1);
+        expect(refreshSurfaceTones).toHaveBeenCalledWith(context);
+
+        handleCustomStyles(context, element);
+        expect(refreshSurfaceTones).toHaveBeenCalledTimes(1);
     });
 });
 

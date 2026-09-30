@@ -8,7 +8,7 @@ jest.unstable_mockModule('../../tools/utils.js', () => ({
     createElement: jest.fn(),
     getStateSurfaceColor: jest.fn(),
     getStyleGeneration: jest.fn(() => 1),
-    isSurfaceColorLight: jest.fn(() => false),
+    getSurfaceIconTone: jest.fn(() => null),
     getState: jest.fn(),
     isTimerEntity: jest.fn(),
     timerTimeRemaining: jest.fn(),
@@ -34,8 +34,8 @@ jest.unstable_mockModule('../../tools/validate-condition.js', () => ({
     ensureArray: jest.fn(),
 }));
 
-const { revealConditionalSubButtons, updateBackground } = await import('./utils.js');
-const { getStateSurfaceColor, getStyleGeneration, isSurfaceColorLight, isStateRequiringAttention } = await import('../../tools/utils.js');
+const { refreshSurfaceTones, revealConditionalSubButtons, updateBackground } = await import('./utils.js');
+const { getStateSurfaceColor, getStyleGeneration, getSurfaceIconTone, isStateRequiringAttention } = await import('../../tools/utils.js');
 
 // Minimal element: classList, parent chain and a class-based querySelectorAll
 class StubElement {
@@ -208,6 +208,7 @@ function makeBackgroundElement() {
             removeProperty: (n) => props.delete(n),
         },
         has: (n) => classes.has(n),
+        isConnected: true,
     };
 }
 
@@ -222,52 +223,117 @@ const backgroundOptions = (overrides = {}) => ({
     ...overrides,
 });
 
-describe('updateBackground and the bright-background class (#2450)', () => {
+describe('updateBackground and the icon tone on a state colour (#2450)', () => {
+    const DARK_TONE = { tone: 'dark', textIsLight: true };
+    const LIGHT_TONE_DARK_THEME = { tone: 'light', textIsLight: true };
+    const LIGHT_TONE_LIGHT_THEME = { tone: 'light', textIsLight: false };
+
     beforeEach(() => {
         jest.clearAllMocks();
         getStyleGeneration.mockReturnValue(1);
         isStateRequiringAttention.mockReturnValue(false);
         getStateSurfaceColor.mockReturnValue('rgb(255, 193, 7)');
-        isSurfaceColorLight.mockReturnValue(false);
+        getSurfaceIconTone.mockReturnValue(LIGHT_TONE_DARK_THEME);
+        delete globalThis.getComputedStyle;
     });
 
-    test('the class lands on a light background', () => {
-        isSurfaceColorLight.mockReturnValue(true);
+    test('a colour that reads better with a dark icon gets one', () => {
+        getSurfaceIconTone.mockReturnValue(DARK_TONE);
         const element = makeBackgroundElement();
 
         updateBackground(element, backgroundOptions());
 
         expect(element.has('bright-background')).toBe(true);
+        expect(element.has('dark-background')).toBe(false);
         expect(element.has('background-on')).toBe(true);
     });
 
-    test('a dark background keeps the light text', () => {
+    test('a dark theme keeps its own light text where the light icon wins', () => {
         const element = makeBackgroundElement();
 
         updateBackground(element, backgroundOptions());
 
         expect(element.has('bright-background')).toBe(false);
+        expect(element.has('dark-background')).toBe(false);
     });
 
-    test('the luminance is read at the threshold the palette asks for', () => {
+    test('a light theme keeps its own dark text where the dark icon wins', () => {
+        getSurfaceIconTone.mockReturnValue({ tone: 'dark', textIsLight: false });
+        const element = makeBackgroundElement();
+
+        updateBackground(element, backgroundOptions());
+
+        expect(element.has('bright-background')).toBe(false);
+        expect(element.has('dark-background')).toBe(false);
+    });
+
+    // The dark text of a light theme vanished on a navy or a violet.
+    test('a light theme gets a light icon where the light icon wins', () => {
+        getSurfaceIconTone.mockReturnValue(LIGHT_TONE_LIGHT_THEME);
+        const element = makeBackgroundElement();
+
+        updateBackground(element, backgroundOptions());
+
+        expect(element.has('dark-background')).toBe(true);
+        expect(element.has('bright-background')).toBe(false);
+    });
+
+    // An accent a card or a module scopes to itself is invisible from the
+    // document, and only resolves once the card has drawn the sub-button.
+    test('a variable is resolved where the sub-button stands, on the next frame', () => {
+        jest.useFakeTimers();
+        getStateSurfaceColor.mockReturnValue('var(--bubble-accent-color, var(--bubble-default-color))');
+        globalThis.getComputedStyle = () => ({ getPropertyValue: (name) => (name === '--bubble-sub-button-light-background-color' ? ' #ffeb3b ' : '') });
+        getSurfaceIconTone.mockReturnValue(DARK_TONE);
+        const element = makeBackgroundElement();
+
+        updateBackground(element, backgroundOptions({ entity: 'switch.a' }));
+        expect(getSurfaceIconTone).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(16);
+        expect(getSurfaceIconTone).toHaveBeenCalledWith('#ffeb3b', expect.anything());
+        expect(element.has('bright-background')).toBe(true);
+        jest.useRealTimers();
+    });
+
+    test('a sub-button not drawn yet is tried again, then read from the document after three frames', () => {
+        jest.useFakeTimers();
+        getStateSurfaceColor.mockReturnValue('var(--bubble-accent-color)');
+        let reads = 0;
+        globalThis.getComputedStyle = () => ({ getPropertyValue: () => { reads += 1; return ''; } });
+
+        updateBackground(makeBackgroundElement(), backgroundOptions({ entity: 'switch.a' }));
+        jest.advanceTimersByTime(16 * 10);
+
+        expect(reads).toBe(3);
+        expect(getSurfaceIconTone).toHaveBeenCalledTimes(1);
+        expect(getSurfaceIconTone).toHaveBeenCalledWith('var(--bubble-accent-color)', expect.anything());
+        jest.useRealTimers();
+    });
+
+    test('a colour already written out is decided at once', () => {
         updateBackground(makeBackgroundElement(), backgroundOptions());
 
-        expect(isSurfaceColorLight).toHaveBeenCalledWith('rgb(255, 193, 7)', expect.anything(), 0.67);
+        expect(getSurfaceIconTone).toHaveBeenCalledWith('rgb(255, 193, 7)', expect.anything());
     });
 
-    test('an entity that goes off drops the class', () => {
-        isSurfaceColorLight.mockReturnValue(true);
+    test('an entity that goes off drops both classes', () => {
+        getSurfaceIconTone.mockReturnValue(DARK_TONE);
         const element = makeBackgroundElement();
+        updateBackground(element, backgroundOptions());
+        getSurfaceIconTone.mockReturnValue(LIGHT_TONE_LIGHT_THEME);
+        getStyleGeneration.mockReturnValue(2);
         updateBackground(element, backgroundOptions());
 
         updateBackground(element, backgroundOptions({ isOn: false }));
 
         expect(element.has('bright-background')).toBe(false);
+        expect(element.has('dark-background')).toBe(false);
         expect(element.has('background-off')).toBe(true);
     });
 
-    test('turning the background off drops it too', () => {
-        isSurfaceColorLight.mockReturnValue(true);
+    test('turning the background off drops them too', () => {
+        getSurfaceIconTone.mockReturnValue(DARK_TONE);
         const element = makeBackgroundElement();
         updateBackground(element, backgroundOptions());
 
@@ -279,24 +345,46 @@ describe('updateBackground and the bright-background class (#2450)', () => {
     test('an unchanged colour is not read again', () => {
         const element = makeBackgroundElement();
         updateBackground(element, backgroundOptions());
-        isSurfaceColorLight.mockClear();
+        getSurfaceIconTone.mockClear();
 
         updateBackground(element, backgroundOptions());
 
-        expect(isSurfaceColorLight).not.toHaveBeenCalled();
+        expect(getSurfaceIconTone).not.toHaveBeenCalled();
     });
 
     test('but a theme change makes it read again, because the expression paints something else', () => {
+        jest.useFakeTimers();
+        globalThis.getComputedStyle = () => ({ getPropertyValue: () => 'rgb(255, 235, 59)' });
         const element = makeBackgroundElement();
         getStateSurfaceColor.mockReturnValue('var(--state-light-active-color)');
         updateBackground(element, backgroundOptions());
-        isSurfaceColorLight.mockClear();
-        isSurfaceColorLight.mockReturnValue(true);
+        jest.advanceTimersByTime(16);
+        getSurfaceIconTone.mockClear();
+        getSurfaceIconTone.mockReturnValue(DARK_TONE);
 
         getStyleGeneration.mockReturnValue(2);
         updateBackground(element, backgroundOptions());
+        jest.advanceTimersByTime(16);
 
-        expect(isSurfaceColorLight).toHaveBeenCalledTimes(1);
+        expect(getSurfaceIconTone).toHaveBeenCalledTimes(1);
         expect(element.has('bright-background')).toBe(true);
+        jest.useRealTimers();
+    });
+
+    // A card's styles land after its sub-buttons on the first render.
+    test('the styles of the card make every lit sub-button read again', () => {
+        jest.useFakeTimers();
+        globalThis.getComputedStyle = () => ({ getPropertyValue: () => '#e0e0e0' });
+        const lit = makeBackgroundElement();
+        lit.style.setProperty('--bubble-sub-button-light-background-color', 'var(--bubble-accent-color)');
+        const content = { querySelectorAll: (selector) => (selector === '.bubble-sub-button.background-on' ? [lit] : []) };
+        getSurfaceIconTone.mockReturnValue(DARK_TONE);
+
+        refreshSurfaceTones({ config: { card_type: 'button' }, content });
+        jest.advanceTimersByTime(16);
+
+        expect(getSurfaceIconTone).toHaveBeenCalledWith('#e0e0e0', expect.anything());
+        expect(lit.has('bright-background')).toBe(true);
+        jest.useRealTimers();
     });
 });

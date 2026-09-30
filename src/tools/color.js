@@ -34,6 +34,21 @@ export function calculateLuminance(r, g, b) {
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }
 
+// The WCAG relative luminance, gamma removed, which is what a contrast ratio is
+// computed from. calculateLuminance above keeps the gamma and reads a pastel as
+// lighter than it looks next to a saturated colour.
+export function relativeLuminance(r, g, b) {
+    const linear = (channel) => {
+        const value = channel / 255;
+        return value <= 0.04045 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+}
+
+export function contrastRatio(luminanceA, luminanceB) {
+    return (Math.max(luminanceA, luminanceB) + 0.05) / (Math.min(luminanceA, luminanceB) + 0.05);
+}
+
 export function adjustColor(rgb, brightness) {
   return rgb.map(channel => Math.min(255, Math.round(channel * brightness)));
 }

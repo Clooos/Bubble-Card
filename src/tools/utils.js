@@ -1,7 +1,7 @@
 import { isColorCloseToWhite } from "./style.js";
 import { updateContentContainerFixedClass } from "../components/base-card/index.js";
 import { getIconColor } from "./icon.js";
-import { adjustColor, areColorsSimilar, calculateLuminance, hexToRgb, rgbStringToRgb } from "./color.js";
+import { adjustColor, areColorsSimilar, calculateLuminance, contrastRatio, hexToRgb, relativeLuminance, rgbStringToRgb } from "./color.js";
 import { resolveTemplate } from "./render-template.js";
 import { isTemplate } from "./jinja.js";
 import { resolveLovelaceRoot } from "./ha-boundary.js";
@@ -291,14 +291,29 @@ function resolveSurfaceRgb(expression, context) {
   return hexToRgb(accent) || rgbStringToRgb(accent);
 }
 
-// How light the colour a surface expression paints really is. It goes through
-// the same resolution as getStateSurfaceColor, so a variable a card scopes to
-// itself is read, which resolveCssVariable alone does not do. Unlike
-// isColorLight it takes an expression that may already be a computed colour.
-export function isSurfaceColorLight(expression, context, threshold = 0.5) {
+// Which of a light or a dark icon reads better on the colour a surface paints,
+// by WCAG contrast rather than a threshold. Each tone is the theme's own text
+// when that text has it, and otherwise what the sub-button stylesheet paints
+// instead, white, or the 65 % black it lays over the surface. A threshold on
+// luminance cut right through the whites of a bulb, which go from 0.53 to 0.70
+// in a dark theme, and left two lamps a hair apart in white and in dark, while
+// the text of a light theme stayed dark on a navy or a violet.
+export function getSurfaceIconTone(expression, context) {
   const rgb = resolveSurfaceRgb(expression, context);
-  if (!rgb) return false;
-  return calculateLuminance(...rgb) > threshold;
+  if (!rgb) return null;
+
+  const text = resolveCssVariable('var(--primary-text-color, #ffffff)');
+  const textRgb = hexToRgb(text) || rgbStringToRgb(text) || [255, 255, 255];
+  const textIsLight = calculateLuminance(...textRgb) > 0.5;
+
+  const surface = relativeLuminance(...rgb);
+  const light = relativeLuminance(...(textIsLight ? textRgb : [255, 255, 255]));
+  const dark = relativeLuminance(...(textIsLight ? rgb.map((channel) => channel * 0.35) : textRgb));
+
+  return {
+    tone: contrastRatio(surface, dark) > contrastRatio(surface, light) ? 'dark' : 'light',
+    textIsLight,
+  };
 }
 
 export function getStateSurfaceColor(context, entity = context.config.entity, useLightBackground = true, cardBackgroundColor = null, subButtonColor = null) {
