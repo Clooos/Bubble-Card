@@ -563,6 +563,47 @@ describe('legacy pop-ups held by a grid card', () => {
         expect(result.standaloneConfig.cards).toEqual([]);
     });
 
+    // A grid hidden by its conditions kept its legacy pop-up from opening.
+    test('the pop-up takes the conditions and the placement of the grid it replaces', () => {
+        const grid = {
+            type: 'grid',
+            columns: 2,
+            grid_options: { columns: 6, rows: 2 },
+            view_layout: { position: 'sidebar' },
+            visibility: [{ condition: 'state', entity: 'sun.sun', state: 'below_horizon' }],
+            cards: [gridPopupConfig, buttonCard],
+        };
+
+        const result = findLegacyPopUpStack(viewWithGrid(grid), gridPopupConfig);
+
+        expect(result.standaloneConfig).toMatchObject({
+            grid_options: { columns: 6, rows: 2 },
+            view_layout: { position: 'sidebar' },
+            visibility: [{ condition: 'state', entity: 'sun.sun', state: 'below_horizon' }],
+        });
+        // A copy, the dashboard being migrated is left as it was.
+        expect(result.standaloneConfig.visibility).not.toBe(grid.visibility);
+        expect(grid.visibility).toHaveLength(1);
+    });
+
+    test('keeps the conditions of the pop-up after the ones of its container', () => {
+        const popup = { ...gridPopupConfig, visibility: [{ condition: 'screen', media_query: '(min-width: 600px)' }] };
+        const stack = { type: 'vertical-stack', visibility: [{ condition: 'user', users: ['abc'] }], cards: [popup, buttonCard] };
+
+        const result = findLegacyPopUpStack(viewWithGrid(stack), popup);
+
+        expect(result.standaloneConfig.visibility).toEqual([
+            { condition: 'user', users: ['abc'] },
+            { condition: 'screen', media_query: '(min-width: 600px)' },
+        ]);
+    });
+
+    test('adds nothing when the container has no conditions and no placement', () => {
+        const result = findLegacyPopUpStack(viewWithGrid({ type: 'grid', columns: 2, cards: [gridPopupConfig, buttonCard] }), gridPopupConfig);
+
+        expect(Object.keys(result.standaloneConfig).sort()).toEqual([...Object.keys(gridPopupConfig), 'cards'].sort());
+    });
+
     test('never takes a section of a sections view for the grid holding a pop-up', () => {
         const lovelaceConfig = {
             views: [{ type: 'sections', sections: [{ type: 'grid', cards: [gridPopupConfig, buttonCard] }] }],

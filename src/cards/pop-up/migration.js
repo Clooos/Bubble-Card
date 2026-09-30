@@ -284,6 +284,30 @@ export function createStandalonePopUpConfig(popupConfig, cards = [], options = {
     return standaloneConfig;
 }
 
+const CONTAINER_PLACEMENT_KEYS = ['grid_options', 'layout_options', 'view_layout'];
+
+// The pop-up takes the place of the card that held it, and with it where that
+// card sat and when it showed. A container hidden by its conditions kept the
+// legacy pop-up from ever opening, and without them the migrated one opened.
+// The conditions of the pop-up itself are kept too, both lists have to hold.
+function takeContainerPlace(standaloneConfig, containerConfig) {
+    CONTAINER_PLACEMENT_KEYS.forEach((key) => {
+        if (containerConfig?.[key] !== undefined) {
+            standaloneConfig[key] = cloneConfig(containerConfig[key]);
+        }
+    });
+
+    const conditions = [
+        ...(Array.isArray(containerConfig?.visibility) ? containerConfig.visibility : []),
+        ...(Array.isArray(standaloneConfig.visibility) ? standaloneConfig.visibility : []),
+    ];
+    if (conditions.length > 0) {
+        standaloneConfig.visibility = cloneConfig(conditions);
+    }
+
+    return standaloneConfig;
+}
+
 export function findLegacyPopUpStack(lovelaceConfig, popupConfig, options = {}) {
     if (!isLegacyPopUpConfig(popupConfig)) {
         return null;
@@ -306,7 +330,7 @@ export function findLegacyPopUpStack(lovelaceConfig, popupConfig, options = {}) 
     return {
         ...legacyEntry,
         contentCards,
-        standaloneConfig: createStandalonePopUpConfig(popupConfig, contentCards, options),
+        standaloneConfig: takeContainerPlace(createStandalonePopUpConfig(popupConfig, contentCards, options), legacyEntry.stackConfig),
         standalonePath: legacyEntry.stackPath,
     };
 }
