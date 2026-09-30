@@ -534,40 +534,29 @@ describe('legacy pop-ups held by a grid card', () => {
     };
     const viewWithGrid = (grid) => ({ views: [{ path: 'v', cards: [grid] }] });
 
-    test('finds the pop-up and keeps the columns and squares of its grid', () => {
+    // The content of a legacy pop-up was always one card under the other, the
+    // columns and squares of the grid holding it never showed inside it.
+    test('finds the pop-up and migrates its cards as it showed them, one under the other', () => {
         const grid = {
             type: 'grid',
             columns: 3,
             square: true,
             title: 'Room',
             grid_options: { columns: 6 },
-            visibility: [{ condition: 'screen', media_query: '(min-width: 0px)' }],
             cards: [gridPopupConfig, buttonCard, separatorCard],
         };
 
         const result = findLegacyPopUpStack(viewWithGrid(grid), gridPopupConfig);
 
         expect(result.stackPath).toEqual(['views', 0, 'cards', 0]);
-        // Its place in the view goes with the pop-up, its own layout stays with the cards.
-        expect(result.contentCards).toEqual([{ type: 'grid', columns: 3, square: true, title: 'Room', cards: [buttonCard, separatorCard] }]);
+        expect(result.contentCards).toEqual([buttonCard, separatorCard]);
         expect(result.standaloneConfig.cards).toEqual([
-            { type: 'grid', columns: 3, square: true, title: 'Room', cards: [buttonCard, separatorCard], grid_options: { columns: 12, rows: 'auto' } },
+            { ...buttonCard, grid_options: { columns: 12 } },
+            { ...separatorCard, grid_options: { columns: 12 } },
         ]);
     });
 
-    test('keeps the squares HA draws by default, even on a single column', () => {
-        const result = findLegacyPopUpStack(viewWithGrid({ type: 'grid', columns: 1, cards: [gridPopupConfig, buttonCard] }), gridPopupConfig);
-
-        expect(result.contentCards).toEqual([{ type: 'grid', columns: 1, cards: [buttonCard] }]);
-    });
-
-    test('migrates a single column without squares like a vertical-stack', () => {
-        const result = findLegacyPopUpStack(viewWithGrid({ type: 'grid', columns: 1, square: false, cards: [gridPopupConfig, buttonCard, separatorCard] }), gridPopupConfig);
-
-        expect(result.contentCards).toEqual([buttonCard, separatorCard]);
-    });
-
-    test('adds no empty grid when the pop-up was alone in it', () => {
+    test('migrates a pop-up alone in its grid with no content', () => {
         const result = findLegacyPopUpStack(viewWithGrid({ type: 'grid', columns: 3, cards: [gridPopupConfig] }), gridPopupConfig);
 
         expect(result.contentCards).toEqual([]);
@@ -591,13 +580,13 @@ describe('legacy pop-ups held by a grid card', () => {
     });
 
     test('replaces the grid with the standalone pop-up in the dashboard', () => {
-        const lovelaceConfig = viewWithGrid({ type: 'grid', columns: 2, square: false, cards: [gridPopupConfig, buttonCard] });
+        const lovelaceConfig = viewWithGrid({ type: 'grid', columns: 2, cards: [gridPopupConfig, buttonCard] });
 
         const migration = migrateLegacyPopUpLovelaceConfig(lovelaceConfig, gridPopupConfig);
 
         expect(migration.config.views[0].cards).toEqual([{
             ...gridPopupConfig,
-            cards: [{ type: 'grid', columns: 2, square: false, cards: [buttonCard], grid_options: { columns: 12, rows: 'auto' } }],
+            cards: [{ ...buttonCard, grid_options: { columns: 12 } }],
         }]);
         expect(lovelaceConfig.views[0].cards[0].type).toBe('grid');
     });

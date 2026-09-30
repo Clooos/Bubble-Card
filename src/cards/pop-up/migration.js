@@ -90,8 +90,10 @@ function getPopupMatchScore(candidate, popupConfig, preferredHash) {
 
 // A legacy pop-up turns whatever card holds it into its shell, so it works in
 // a grid card as well as in a vertical-stack, and one placed in a grid was
-// never offered the migration. A section of a sections view is a grid object
-// with cards as well, and must never be taken for one.
+// never offered the migration. Whatever the columns of the grid, the pop-up
+// showed its cards one under the other, so they are migrated like the cards of
+// a stack. A section of a sections view is a grid object with cards as well,
+// and must never be taken for one.
 function isLegacyPopUpContainer(node, path) {
     if (node.type === 'vertical-stack') {
         return true;
@@ -99,28 +101,6 @@ function isLegacyPopUpContainer(node, path) {
 
     const parentKey = path[path.length - 2];
     return node.type === 'grid' && parentKey !== 'sections' && parentKey !== 'views';
-}
-
-// Where the container sat in the view belongs to the pop-up now. Only the
-// grid's own layout goes inside it.
-const CONTAINER_PLACEMENT_KEYS = ['grid_options', 'layout_options', 'view_layout', 'visibility'];
-
-// The other cards of a grid keep its columns and its square cells inside the
-// pop-up, in a grid card of their own. Only a single column without squares
-// lays out like a stack, and is migrated like one.
-function keepGridLayout(containerConfig, cards) {
-    if (containerConfig?.type !== 'grid' || cards.length === 0) {
-        return cards;
-    }
-
-    if (Number(containerConfig.columns) === 1 && containerConfig.square === false) {
-        return cards;
-    }
-
-    const grid = cloneConfig(containerConfig);
-    CONTAINER_PLACEMENT_KEYS.forEach((key) => delete grid[key]);
-    grid.cards = cards;
-    return [grid];
 }
 
 function findLegacyPopUpStackEntries(node, popupConfig, preferredHash, path = [], entries = []) {
@@ -319,9 +299,9 @@ export function findLegacyPopUpStack(lovelaceConfig, popupConfig, options = {}) 
         return null;
     }
 
-    const contentCards = keepGridLayout(legacyEntry.stackConfig, legacyEntry.stackConfig.cards
+    const contentCards = legacyEntry.stackConfig.cards
         .filter((_, index) => index !== legacyEntry.popupIndex)
-        .map((cardConfig) => cloneConfig(cardConfig)));
+        .map((cardConfig) => cloneConfig(cardConfig));
 
     return {
         ...legacyEntry,
