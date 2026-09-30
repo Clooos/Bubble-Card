@@ -306,8 +306,13 @@ export function setPreviewMode(element, preview) {
   }
 
   // One way only. A card that has already drawn must never be gated again, or
-  // toggling edit mode would blank it.
-  if (element._previewHydrated === true) return;
+  // toggling edit mode would blank it. Nor may a card that has already been in
+  // the page, since the previews the picker builds get `preview` before their
+  // first connection. A card of the view can be out of the page when edit mode
+  // starts, a closed legacy pop-up having taken its shell out with it, and
+  // held until a connection that only its own render brings back, it never
+  // showed in edit mode.
+  if (element._previewHydrated === true || element._everConnected === true) return;
 
   element._previewHold = true;
 

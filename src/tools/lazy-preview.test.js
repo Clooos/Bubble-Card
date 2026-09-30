@@ -310,6 +310,18 @@ describe('contexts that must never be gated', () => {
     observePreviewHydration(element);
     expect(lastObserver().targets.has(element)).toBe(true);
   });
+
+  // A closed legacy pop-up takes its shell out of the page, and only its own
+  // render puts it back. Held, it waited for a connection that never came.
+  test('a card of the view that is out of the page when edit mode starts is never held', () => {
+    const element = createPreview({ connected: false });
+    element._everConnected = true;
+
+    setPreviewMode(element, true);
+
+    expect(awaitsPreviewHydration(element)).toBe(false);
+    expect(observers).toHaveLength(0);
+  });
 });
 
 describe('the observer lifecycle', () => {
