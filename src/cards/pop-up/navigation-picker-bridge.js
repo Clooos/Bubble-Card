@@ -2,7 +2,6 @@ import { tGlobal } from '../../tools/localize.js';
 import { getCurrentViewPopUps, normalizePopUpHash } from './view-popups.js';
 const POPUP_NAVIGATION_SECTION_ID = 'bubble_popups';
 const getNavigationGroupLabel = () => tGlobal('editor.navigation.group');
-const NAVIGATION_GROUP_KEYS = ['related', 'dashboards', 'views', 'other_routes'];
 
 function getCurrentPagePath() {
     try { return location.pathname; }
@@ -36,8 +35,11 @@ function countOwnersOnCurrentPage(hash) {
     ).length;
 }
 
+// Every group the picker holds rather than a fixed list, so a group Home
+// Assistant adds keeps its items. The apps group did not, and an app picked as
+// a navigation path showed as its bare path.
 function getNativeItems(picker) {
-    return NAVIGATION_GROUP_KEYS.flatMap(key => picker._navigationGroups?.[key] || []);
+    return Object.values(picker._navigationGroups || {}).flatMap(items => Array.isArray(items) ? items : []);
 }
 
 function filterItemsBySearch(items, searchString) {

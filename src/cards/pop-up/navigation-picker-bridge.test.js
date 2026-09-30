@@ -14,6 +14,8 @@ jest.unstable_mockModule('../../tools/localize.js', () => ({
     tGlobal: jest.fn((key) => key),
 }));
 
+const APP = { id: '/app/core_configurator', primary: 'File editor', group: 'apps' };
+
 // What the bridge needs of Home Assistant's navigation picker, nothing more.
 class FakeNavigationPicker {
     async _loadNavigationItems() {
@@ -21,6 +23,7 @@ class FakeNavigationPicker {
             related: [],
             dashboards: [],
             views: [{ id: '/lovelace/v', primary: 'View' }],
+            apps: [APP],
             other_routes: [],
         };
         this._navigationItems = Object.values(this._navigationGroups).flat();
@@ -150,6 +153,13 @@ describe('Bubble Card pop-ups in the navigation picker', () => {
         const picker = await openPicker();
 
         expect(listed(picker)).toEqual(['#grid-legacy', '#stack-legacy']);
+    });
+
+    test('keeps every group of the picker, the apps one included', async () => {
+        const picker = await openPicker();
+
+        expect(picker._navigationItems).toContain(APP);
+        expect(picker._navigationItems.slice(-2).map((item) => item.id)).toEqual(['#grid-legacy', '#stack-legacy']);
     });
 
     test('keeps the pop-ups in their own section and in search results', async () => {
