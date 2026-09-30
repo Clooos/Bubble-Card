@@ -408,6 +408,11 @@ export function prepareStructure(context) {
     if (!context.editor && !context.config.background_update) {
       context.popUp.style.visibility = "hidden";
       setTimeout(() => {
+        // A page loaded straight into edit mode hands the card editMode after
+        // this first pass, and the editor has put the shell back for its
+        // placeholder by now. Taking it out again left the pop-up missing
+        // from edit mode, with nothing left to bring it back.
+        if (context.editor || context.detectedEditor) return;
         if (context.verticalStack?.contains(context.popUp) &&
             !context.popUp.classList.contains('is-popup-opened')) {
           context.popUp.style.visibility = '';

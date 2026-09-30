@@ -371,7 +371,7 @@ describe('prepareStructure', () => {
         jest.useRealTimers();
     });
 
-    test('detaches a closed legacy popup after the initial visibility guard window', () => {
+    function legacyStack() {
         const popUp = createMockElement('div');
         const cardTitle = createMockElement('div', 'card-header');
         const sectionRowContainer = createMockElement('div', 'card');
@@ -400,6 +400,12 @@ describe('prepareStructure', () => {
             editor: false,
         };
 
+        return { popUp, verticalStack, context };
+    }
+
+    test('detaches a closed legacy popup after the initial visibility guard window', () => {
+        const { popUp, verticalStack, context } = legacyStack();
+
         prepareStructure(context);
 
         expect(popUp.style.visibility).toBe('hidden');
@@ -408,6 +414,19 @@ describe('prepareStructure', () => {
 
         expect(verticalStack.removeChild).toHaveBeenCalledWith(popUp);
         expect(popUp.style.visibility).toBe('');
+    });
+
+    // A page loaded straight into edit mode hands the card editMode after this
+    // first pass, and the editor has put the shell back for its placeholder by
+    // the time the window ends.
+    test('leaves the shell in its stack when edit mode starts within the guard window', () => {
+        const { verticalStack, context } = legacyStack();
+
+        prepareStructure(context);
+        context.editor = true;
+        jest.advanceTimersByTime(100);
+
+        expect(verticalStack.removeChild).not.toHaveBeenCalled();
     });
 });
 
