@@ -676,15 +676,31 @@
     contain: none !important;
 }
 
-/* A legacy pop-up held by a square grid card takes the grid's #root as its
-   shell, and the grid gives that #root a square spacer and every child of it
-   a block display. In the editor the shell lays out as it does in a stack. */
-:host([square]) #root.bubble-pop-up.editor::before {
+/* A legacy pop-up held by a grid card takes the grid's #root as its shell, and
+   the grid lays that #root out as a grid, its header and its content in cells
+   of their own. With square cells the grid also puts a square spacer in its
+   ::before, over the geometry of the blur layer and even where Bubble drops
+   that layer, and gives every child a block display. The shell lays out as it
+   does in a stack, open or in the editor, with the gap the #root of a stack
+   gets. Only there, a standalone pop-up keeps the gap of its style. */
+:host(hui-grid-card) #root.bubble-pop-up {
+    display: flex;
+    gap: var(--vertical-stack-card-gap, var(--stack-card-gap, 8px));
+}
+
+:host([square]) #root.bubble-pop-up.editor::before,
+:host([square]) #root.bubble-pop-up.popup-performance-default:not(.editor)::before {
     content: none;
 }
 
-:host([square]) #root.bubble-pop-up.editor > .bubble-header-container,
-:host([square]) #root.bubble-pop-up.editor > .bubble-pop-up-container {
+:host([square]) #root.bubble-pop-up:not(.editor)::before {
+    width: auto;
+    padding-bottom: 0;
+}
+
+:host([square]) #root.bubble-pop-up > .bubble-pop-up-background,
+:host([square]) #root.bubble-pop-up > .bubble-header-container,
+:host([square]) #root.bubble-pop-up > .bubble-pop-up-container {
     display: flex;
 }
 

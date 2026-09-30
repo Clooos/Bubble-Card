@@ -111,17 +111,31 @@ describe('pop-up styles', () => {
     expect(rule).not.toContain('padding-top: 40px');
   });
 
-  // A square grid card lays out the #root a legacy pop-up takes as its shell,
-  // with a square spacer before its children and a block display on each.
-  test('lays out a legacy pop-up held by a square grid card as in a stack in the editor', () => {
-    expect(styles).toMatch(/:host\(\[square\]\) #root\.bubble-pop-up\.editor::before \{\s*content: none;\s*\}/);
+  // A grid card lays out the #root a legacy pop-up takes as its shell as a
+  // grid, and square cells add a spacer before its children and a block
+  // display on each.
+  test('lays out a legacy pop-up held by a grid card as in a stack, open or in the editor', () => {
+    // Scoped to a grid card, where the stack gap is what the #root of a stack
+    // would give. Everywhere else the style decides, the Home Assistant one
+    // has no gap at all.
+    expect(styles).toMatch(/:host\(hui-grid-card\) #root\.bubble-pop-up \{\s*display: flex;\s*gap: var\(--vertical-stack-card-gap, var\(--stack-card-gap, 8px\)\);\s*\}/);
+    expect(styles).not.toMatch(/\n#root\.bubble-pop-up \{/);
+    expect(styles).toMatch(/\.bubble-pop-up\.popup-style-home-assistant \{[^}]*gap: 0;/);
+    // The spacer brings the blur layer back where Bubble drops it, in the editor
+    // and in the default performance mode.
+    expect(styles).toMatch(/:host\(\[square\]\) #root\.bubble-pop-up\.editor::before,\s*:host\(\[square\]\) #root\.bubble-pop-up\.popup-performance-default:not\(\.editor\)::before \{\s*content: none;\s*\}/);
+    expect(styles).toMatch(/\.bubble-pop-up\.popup-performance-default:not\(\.editor\)::before \{\s*content: none;\s*\}/);
+    expect(styles).toMatch(/:host\(\[square\]\) #root\.bubble-pop-up:not\(\.editor\)::before \{\s*width: auto;\s*padding-bottom: 0;\s*\}/);
 
-    const restored = styles.match(/:host\(\[square\]\) #root\.bubble-pop-up\.editor > \.bubble-header-container,\s*:host\(\[square\]\) #root\.bubble-pop-up\.editor > \.bubble-pop-up-container \{([^}]*)\}/)?.[1] ?? '';
+    const restored = styles.match(/:host\(\[square\]\) #root\.bubble-pop-up > \.bubble-pop-up-background,\s*:host\(\[square\]\) #root\.bubble-pop-up > \.bubble-header-container,\s*:host\(\[square\]\) #root\.bubble-pop-up > \.bubble-pop-up-container \{([^}]*)\}/)?.[1] ?? '';
     expect(restored).toMatch(/^\s*display: flex;\s*$/);
 
-    // What it gives back is what both children have everywhere else.
+    // What it gives back is what the shell and its children have everywhere else.
+    expect(getBasePopUpRule()).toContain('display: flex;');
+    expect(getBasePopUpRule()).toContain('gap: var(--vertical-stack-card-gap, var(--stack-card-gap, 8px));');
     expect(getBaseContainerRule()).toContain('display: flex;');
     expect(styles.match(/\n\.bubble-header-container \{([^}]*)\}/)?.[1] ?? '').toContain('display: flex;');
+    expect(styles.match(/\n\.bubble-pop-up-background \{([^}]*)\}/)?.[1] ?? '').toContain('display: flex;');
   });
 
   test('only creates the bottom-offset spacer for bottom-sheet layouts', () => {
