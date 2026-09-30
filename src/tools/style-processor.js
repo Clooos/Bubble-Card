@@ -263,7 +263,11 @@ function getOrCreateStyleElement(context, element) {
 
   if (!context.styleElement || context.styleElement.parentElement !== element) {
     const styleElementToCache = document.createElement("style");
-    styleElementToCache.id = "bubble-styles"; 
+    styleElementToCache.id = "bubble-styles";
+    // A legacy pop-up puts it straight into the #root of the card holding it,
+    // and a square grid card shows every child of its #root that is not
+    // hidden, the text of a style element included. Hidden, it still styles.
+    styleElementToCache.hidden = true;
     element.appendChild(styleElementToCache);
     context.styleElement = styleElementToCache;
   }

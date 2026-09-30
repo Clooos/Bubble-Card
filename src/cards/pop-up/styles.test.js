@@ -111,6 +111,19 @@ describe('pop-up styles', () => {
     expect(rule).not.toContain('padding-top: 40px');
   });
 
+  // A square grid card lays out the #root a legacy pop-up takes as its shell,
+  // with a square spacer before its children and a block display on each.
+  test('lays out a legacy pop-up held by a square grid card as in a stack in the editor', () => {
+    expect(styles).toMatch(/:host\(\[square\]\) #root\.bubble-pop-up\.editor::before \{\s*content: none;\s*\}/);
+
+    const restored = styles.match(/:host\(\[square\]\) #root\.bubble-pop-up\.editor > \.bubble-header-container,\s*:host\(\[square\]\) #root\.bubble-pop-up\.editor > \.bubble-pop-up-container \{([^}]*)\}/)?.[1] ?? '';
+    expect(restored).toMatch(/^\s*display: flex;\s*$/);
+
+    // What it gives back is what both children have everywhere else.
+    expect(getBaseContainerRule()).toContain('display: flex;');
+    expect(styles.match(/\n\.bubble-header-container \{([^}]*)\}/)?.[1] ?? '').toContain('display: flex;');
+  });
+
   test('only creates the bottom-offset spacer for bottom-sheet layouts', () => {
     expect(styles).toContain('.bubble-pop-up.popup-mode-fit-content.popup-mode-with-bottom-offset:not(.editor) > .bubble-pop-up-container::after');
     expect(styles).toMatch(/@media \(max-width: 870px\), \(max-height: 500px\) \{[\s\S]*\.bubble-pop-up\.popup-mode-adaptive-dialog\.popup-mode-with-bottom-offset:not\(\.editor\) > \.bubble-pop-up-container::after\s*\{[^}]*content: "";/);

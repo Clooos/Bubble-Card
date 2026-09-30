@@ -180,6 +180,33 @@ describe('handleCustomStyles refresh listener registration', () => {
     });
 });
 
+describe('the style element a card is given', () => {
+    beforeEach(() => {
+        global.window = { addEventListener: jest.fn(), removeEventListener: jest.fn() };
+        global.document = {
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            createElement: jest.fn(() => ({ tagName: 'STYLE', textContent: '', id: '', parentElement: null })),
+        };
+    });
+
+    afterEach(() => {
+        delete global.window;
+        delete global.document;
+    });
+
+    // A legacy pop-up in a square grid card puts it among the children the
+    // grid shows, and its CSS then read as text on the dashboard.
+    test('is hidden, so no container it lands in can show its text', () => {
+        const element = createCardElement();
+
+        handleCustomStyles(createContext(element), element);
+
+        expect(element.appendChild).toHaveBeenCalledTimes(1);
+        expect(element.appendChild.mock.calls[0][0]).toMatchObject({ id: 'bubble-styles', hidden: true });
+    });
+});
+
 describe('template target detection', () => {
     const WRITES_STATE = "${card.querySelector('.bubble-state').innerText = 'x'}";
 

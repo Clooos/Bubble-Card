@@ -676,6 +676,18 @@
     contain: none !important;
 }
 
+/* A legacy pop-up held by a square grid card takes the grid's #root as its
+   shell, and the grid gives that #root a square spacer and every child of it
+   a block display. In the editor the shell lays out as it does in a stack. */
+:host([square]) #root.bubble-pop-up.editor::before {
+    content: none;
+}
+
+:host([square]) #root.bubble-pop-up.editor > .bubble-header-container,
+:host([square]) #root.bubble-pop-up.editor > .bubble-pop-up-container {
+    display: flex;
+}
+
 /* Optimize performance during open/close transitions */
 .bubble-pop-up.is-opening .bubble-pop-up-container,
 .bubble-pop-up.is-closing:not(.is-switch-closing) .bubble-pop-up-container {
