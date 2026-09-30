@@ -160,10 +160,11 @@ function ensureWakeSyncListeners() {
 
 function syncPopUpHashRegistration(context) {
     // A card of the view owns its hash whether or not the dashboard is being
-    // edited: Home Assistant turns `editor` on for every card in edit mode, and
-    // that is exactly when the editor asks who owns what. Only the copy inside
-    // the card editor has to stay out, or every pop-up would look duplicated by
-    // its own preview.
+    // edited. Home Assistant turns `editor` on for every card in edit mode, and
+    // that is exactly when the editor asks who owns what. The copy inside the
+    // card editor registers as a preview, listed in the navigation picker with
+    // the hash being typed but owning nothing, or every pop-up would look
+    // duplicated by its own preview.
     const isPreview = Boolean(context.inEditorPreview);
     // Rendered, so the navigation picker labels a templated pop-up with what
     // it shows rather than with the template text.
@@ -187,7 +188,8 @@ function syncPopUpHashRegistration(context) {
         name,
         icon,
         isConnected: context.isConnected,
-        element: isPreview ? null : context
+        element: context,
+        preview: isPreview
     });
 }
 

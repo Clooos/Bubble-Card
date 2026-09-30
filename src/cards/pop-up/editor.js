@@ -4,7 +4,7 @@ import setupTranslation, { ensureEditorTranslations } from '../../tools/localize
 import { getPopupStyleDisplayDefault, isHomeAssistantStyle } from './style.js';
 import { tTemplate } from '../../editor/utils.js';
 import { renderButtonEditor } from '../button/editor.js';
-import { registerPopUpHash, isHashOnCurrentPage } from './navigation-picker-bridge.js';
+import { isHashOnCurrentPage } from './navigation-picker-bridge.js';
 import { renderLegacyMigrationNotice } from './migration.js';
 
 const POPUP_HASH_PREFIX = '#';
@@ -532,11 +532,6 @@ function createPopUpConfig(editor, originalConfig) {
             window.bubbleNewlyCreatedHashes.add(hashValue);
         }
 
-        registerPopUpHash(hashValue, {
-            name: editor._config.name,
-            icon: editor._config.icon
-        });
-
         commitEditorSessionHash(hashValue);
         
         fireEvent(editor, "config-changed", { config: editor._config });
@@ -545,10 +540,6 @@ function createPopUpConfig(editor, originalConfig) {
         // Restore original config if there's an error
         editor._config = originalConfig;
         editor._config.hash = normalizePopUpHashInputValue(window.__bubbleEditorSession?.lastChangedHash || '');
-        registerPopUpHash(editor._config.hash, {
-            name: editor._config.name,
-            icon: editor._config.icon
-        });
         fireEvent(editor, "config-changed", { config: editor._config });
     }
 }

@@ -138,16 +138,18 @@ describe('handlePopUp performance guards', () => {
 
         expect(registerPopUpHash).toHaveBeenCalledWith('#kitchen-popup', expect.objectContaining({
             element: context,
+            preview: false,
         }));
     });
 
-    test('the copy inside the card editor owns nothing', async () => {
+    test('the copy inside the card editor registers as a preview', async () => {
         const context = createOpenPopupContext({ inEditorPreview: true });
 
         await handlePopUp(context);
 
         expect(registerPopUpHash).toHaveBeenCalledWith('#kitchen-popup', expect.objectContaining({
-            element: null,
+            element: context,
+            preview: true,
         }));
     });
 

@@ -61,4 +61,23 @@ describe('duplicate hash detection', () => {
 
         expect(isHashOnCurrentPage('#attic', undefined)).toBe(false);
     });
+
+    // The card editor previews the pop-up it edits, with the same hash.
+    test('a preview never makes its own pop-up a duplicate, nor takes a hash', () => {
+        registerPopUpHash('#porch', { name: 'Porch', element: connectedCard() });
+        registerPopUpHash('#porch', { name: 'Porch', element: connectedCard(), preview: true });
+        registerPopUpHash('#shed', { name: 'Shed', element: connectedCard(), preview: true });
+
+        expect(isHashOnCurrentPage('#porch', '#porch')).toBe(false);
+        expect(isHashOnCurrentPage('#shed', undefined)).toBe(false);
+    });
+
+    test('a card whose hash changes lets go of the old one', () => {
+        const card = connectedCard();
+        registerPopUpHash('#cellar', { name: 'Cellar', element: card });
+        registerPopUpHash('#wine-cellar', { name: 'Cellar', element: card });
+
+        expect(isHashOnCurrentPage('#cellar', undefined)).toBe(false);
+        expect(isHashOnCurrentPage('#wine-cellar', undefined)).toBe(true);
+    });
 });

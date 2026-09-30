@@ -16,7 +16,6 @@ jest.unstable_mockModule('../button/editor.js', () => ({
 
 jest.unstable_mockModule('./navigation-picker-bridge.js', () => ({
     isHashOnCurrentPage,
-    registerPopUpHash: jest.fn(),
 }));
 
 jest.unstable_mockModule('./migration.js', () => ({

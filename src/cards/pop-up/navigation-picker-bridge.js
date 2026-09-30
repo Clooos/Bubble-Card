@@ -1,6 +1,5 @@
 import { tGlobal } from '../../tools/localize.js';
-const POPUP_HASH_STORAGE_KEY = 'bubble-card-popup-hashes';
-const POPUP_HASH_UPDATE_EVENT = 'bubble-popup-hashes-updated';
+import { getCurrentViewPopUps, normalizePopUpHash } from './view-popups.js';
 const POPUP_NAVIGATION_SECTION_ID = 'bubble_popups';
 const getNavigationGroupLabel = () => tGlobal('editor.navigation.group');
 const NAVIGATION_GROUP_KEYS = ['related', 'dashboards', 'views', 'other_routes'];
@@ -10,105 +9,30 @@ function getCurrentPagePath() {
     catch (_) { return '/'; }
 }
 
-function normalizePopUpHash(hash) {
-    if (typeof hash !== 'string') return null;
-    const trimmed = hash.trim();
-    if (!trimmed || trimmed.startsWith('/')) return null;
-    return trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
-}
-
-function getGlobalPopUpHashMap() {
-    if (!(window.__bubbleRegisteredPopUpHashes instanceof Map)) {
-        window.__bubbleRegisteredPopUpHashes = new Map();
-    }
-    return window.__bubbleRegisteredPopUpHashes;
-}
-
-// Track hashes owned by connected pop-ups.
-const liveHashes = new Set();
-
-// Track which element owns each hash.
+// Pop-ups rendered on this page, the cards of the view and the copy the card
+// editor previews. Each element holds one entry, so a hash it moves away from,
+// or one typed on the way to it, is let go of at once. A preview is listed,
+// since it may carry a hash not saved yet, but never owns its hash, or the
+// pop-up being edited would look duplicated by its own preview.
 const popUpRegistrations = [];
 
-function isHashOwnedByLivingElement(hash) {
-    return popUpRegistrations.some(
-        reg => reg.hash === hash && reg.ref.deref()?.isConnected
-    );
-}
-
-function removeHashIfOrphaned(hash) {
-    if (!hash || isHashOwnedByLivingElement(hash)) return false;
-    liveHashes.delete(hash);
-    const meta = getGlobalPopUpHashMap().get(hash);
-    if (meta?.path === getCurrentPagePath()) {
-        getGlobalPopUpHashMap().delete(hash);
-    }
-    return true;
+function isRenderedOn(reg, path) {
+    return reg.path === path && !!reg.ref.deref()?.isConnected;
 }
 
 // Remove disconnected popup registrations.
 function cleanupDeadRegistrations() {
-    const orphanedHashes = new Set();
     for (let i = popUpRegistrations.length - 1; i >= 0; i--) {
-        const reg = popUpRegistrations[i];
-        if (!reg.ref.deref()?.isConnected) {
-            orphanedHashes.add(reg.hash);
+        if (!popUpRegistrations[i].ref.deref()?.isConnected) {
             popUpRegistrations.splice(i, 1);
         }
     }
-    let changed = false;
-    orphanedHashes.forEach(hash => {
-        if (removeHashIfOrphaned(hash)) changed = true;
-    });
-    return changed;
 }
 
-function persistAndNotify() {
-    try {
-        const hashMap = getGlobalPopUpHashMap();
-        const currentPath = getCurrentPagePath();
-        const grouped = {};
-        hashMap.forEach((meta, hash) => {
-            const path = meta.path || '/';
-            if (path === currentPath && !liveHashes.has(hash)) return;
-            (grouped[path] ??= []).push({ hash, name: meta.name || null, icon: meta.icon || null });
-        });
-        localStorage.setItem(POPUP_HASH_STORAGE_KEY, JSON.stringify(grouped));
-    } catch (_) {
-        // no-op
-    }
-    window.dispatchEvent(new Event(POPUP_HASH_UPDATE_EVENT));
-}
-
-function loadPersistedPopUpHashes() {
-    try {
-        const raw = localStorage.getItem(POPUP_HASH_STORAGE_KEY);
-        if (!raw) return;
-        const grouped = JSON.parse(raw);
-        if (!grouped || typeof grouped !== 'object' || Array.isArray(grouped)) return;
-
-        const hashMap = getGlobalPopUpHashMap();
-        for (const [path, entries] of Object.entries(grouped)) {
-            if (!Array.isArray(entries)) continue;
-            for (const entry of entries) {
-                const normalized = normalizePopUpHash(entry?.hash);
-                if (normalized) {
-                    hashMap.set(normalized, { name: entry.name || null, icon: entry.icon || null, path });
-                }
-            }
-        }
-    } catch (_) {
-        // no-op
-    }
-}
-
-// Only a pop-up owned by a living card counts as being on the page. The editor
-// registers the hash it just created so the navigation picker lists it right
-// away, and that entry has no owner to release it.
 function countOwnersOnCurrentPage(hash) {
     const currentPath = getCurrentPagePath();
     return popUpRegistrations.filter(
-        reg => reg.path === currentPath && reg.hash === hash
+        reg => !reg.preview && reg.path === currentPath && reg.hash === hash
     ).length;
 }
 
@@ -129,15 +53,14 @@ function filterItemsBySearch(items, searchString) {
 function injectPopUpHashes(picker) {
     if (!picker?._navigationGroups || !picker?._navigationItems) return;
 
-    const hashMap = getGlobalPopUpHashMap();
     const currentPath = getCurrentPagePath();
     const nativeItems = getNativeItems(picker);
     const existingIds = new Set(nativeItems.map(item => item?.id));
     const bubbleItems = [];
-
-    hashMap.forEach((meta, hash) => {
-        if (meta.path !== currentPath || !liveHashes.has(hash)) return;
-        if (!hash || existingIds.has(hash)) return;
+    const listed = new Set();
+    const addItem = (hash, meta) => {
+        if (!hash || listed.has(hash) || existingIds.has(hash)) return;
+        listed.add(hash);
         bubbleItems.push({
             id: hash,
             primary: meta.name || hash,
@@ -145,7 +68,20 @@ function injectPopUpHashes(picker) {
             icon: meta.icon || 'mdi:pound',
             sorting_label: `zzz_bubble_pop_up_${hash}`
         });
+    };
+
+    // A rendered pop-up names itself best, with what its templates show.
+    const rendered = new Map();
+    popUpRegistrations.forEach((reg) => {
+        if (isRenderedOn(reg, currentPath) && !rendered.has(reg.hash)) rendered.set(reg.hash, reg);
     });
+
+    // The config of the view on screen first, so a pop-up that is closed, not
+    // rendered or out of the page is still listed. Then what is rendered and
+    // the config does not have yet, a pop-up the editor is creating or one a
+    // template builds.
+    getCurrentViewPopUps().forEach((popUp) => addItem(popUp.hash, rendered.get(popUp.hash) || popUp));
+    rendered.forEach((reg, hash) => addItem(hash, reg));
 
     if (typeof picker._sortBySortingLabel === 'function') {
         bubbleItems.sort((a, b) => picker._sortBySortingLabel(a, b));
@@ -240,8 +176,6 @@ export function initPopUpHashNavigationBridge() {
     if (window.__bubblePopUpHashNavigationBridgeInitialized) return;
     window.__bubblePopUpHashNavigationBridgeInitialized = true;
 
-    loadPersistedPopUpHashes();
-
     if (!patchNavigationPicker()) {
         customElements.whenDefined('ha-navigation-picker').then(() => {
             patchNavigationPicker();
@@ -250,8 +184,6 @@ export function initPopUpHashNavigationBridge() {
             // no-op
         });
     }
-
-    window.addEventListener(POPUP_HASH_UPDATE_EVENT, refreshNavigationPickers, { passive: true });
 
     let lastPath = getCurrentPagePath();
     window.addEventListener('location-changed', () => {
@@ -281,54 +213,32 @@ export function isHashOnCurrentPage(hash, excludeHash) {
     return owners > 0;
 }
 
-export function registerPopUpHash(hash, { name, icon, isConnected = true, element } = {}) {
+export function registerPopUpHash(hash, { name, icon, isConnected = true, element, preview = false } = {}) {
     // Ignore disconnected cards so other views keep their own hash path.
-    if (!isConnected) return;
+    if (!isConnected || !element) return;
 
+    cleanupDeadRegistrations();
+
+    const index = popUpRegistrations.findIndex(reg => reg.ref.deref() === element);
     const normalizedHash = normalizePopUpHash(hash);
-    if (!normalizedHash) return;
-
-    const currentPath = getCurrentPagePath();
-    let changed = false;
-
-    if (element) {
-        if (cleanupDeadRegistrations()) changed = true;
-
-        const existing = popUpRegistrations.find(reg => reg.ref.deref() === element);
-        if (existing) {
-            // A card that outlived a navigation would otherwise keep claiming
-            // its hash on the view it came from.
-            if (existing.path !== currentPath) {
-                existing.path = currentPath;
-                changed = true;
-            }
-            if (existing.hash !== normalizedHash) {
-                const oldHash = existing.hash;
-                existing.hash = normalizedHash;
-                removeHashIfOrphaned(oldHash);
-                changed = true;
-            }
-        } else {
-            popUpRegistrations.push({ ref: new WeakRef(element), hash: normalizedHash, path: currentPath });
-            changed = true;
-        }
+    if (!normalizedHash) {
+        if (index !== -1) popUpRegistrations.splice(index, 1);
+        return;
     }
 
-    liveHashes.add(normalizedHash);
+    // A card that outlived a navigation would otherwise keep claiming its hash
+    // on the view it came from.
+    const registration = {
+        hash: normalizedHash,
+        path: getCurrentPagePath(),
+        name: name || null,
+        icon: icon || null,
+        preview: Boolean(preview)
+    };
 
-    const hashMap = getGlobalPopUpHashMap();
-    const existingMeta = hashMap.get(normalizedHash);
-    const preservedPath = existingMeta?.path ?? currentPath;
-    const newMeta = { name: name || null, icon: icon || null, path: preservedPath };
-
-    const metaChanged = !existingMeta ||
-        existingMeta.name !== newMeta.name ||
-        existingMeta.icon !== newMeta.icon ||
-        existingMeta.path !== newMeta.path;
-
-    hashMap.set(normalizedHash, newMeta);
-
-    if (changed || metaChanged) {
-        persistAndNotify();
+    if (index !== -1) {
+        Object.assign(popUpRegistrations[index], registration);
+    } else {
+        popUpRegistrations.push({ ref: new WeakRef(element), ...registration });
     }
 }
