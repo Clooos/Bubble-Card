@@ -44,8 +44,14 @@ describe('bottom sub-button container hit testing', () => {
   // pointer over the column icon it was covering.
   test('lets clicks through a sub-button that carries no action', () => {
     expect(
-      getRule('.bubble-sub-button-bottom-container .bubble-sub-button.bubble-action:not(.bubble-action-enabled):not(.is-select)')
+      getRule('.bubble-sub-button-bottom-container .bubble-sub-button-group > .bubble-sub-button.bubble-action:not(.bubble-action-enabled):not(.is-select)')
     ).toContain('pointer-events: none');
+  });
+
+  // sub_button_wheel moves its opener, which has no action of its own, out of
+  // the group into its wheel, and opens the wheel on click (#2631).
+  test('leaves a sub-button a module moved out of its group to that module', () => {
+    expect(styles).not.toMatch(/(^|\n)\.bubble-sub-button-bottom-container \.bubble-sub-button\.bubble-action:not/);
   });
 
   // Regression from the rule above: re-enabling the pointer on every group child
@@ -61,7 +67,7 @@ describe('bottom sub-button container hit testing', () => {
   // above must not reach them.
   test('excludes dropdowns from the no-action rule', () => {
     const selector = styles.match(
-      /\.bubble-sub-button-bottom-container \.bubble-sub-button\.bubble-action:not\([^)]*\):not\([^)]*\)/
+      /\.bubble-sub-button-bottom-container \.bubble-sub-button-group > \.bubble-sub-button\.bubble-action:not\([^)]*\):not\([^)]*\)/
     )?.[0] ?? '';
     expect(selector).toContain(':not(.is-select)');
   });

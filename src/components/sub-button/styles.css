@@ -84,12 +84,15 @@
     pointer-events: none;
 }
 
-/* Same reasoning for a sub-button carrying no action at all: it only reserves
+/* Same reasoning for a sub-button carrying no action at all. It only reserves
    width (a spacer holding a column open), so it must let the pointer through to
-   what sits below instead of absorbing it. Sliders and dropdowns are untouched:
-   they are action targets without being action-enabled, and setupActions gives
-   them an inline pointer-events that outranks this rule. */
-.bubble-sub-button-bottom-container .bubble-sub-button.bubble-action:not(.bubble-action-enabled):not(.is-select) {
+   what sits below instead of absorbing it. Sliders and dropdowns are untouched,
+   as action targets without being action-enabled, and setupActions gives them
+   an inline pointer-events that outranks this rule. Only the sub-buttons laid
+   out in a group are concerned. One a module moves out of its group is the
+   module's to handle, and the opener of sub_button_wheel, which has no action
+   of its own and opens the wheel on click, could no longer be clicked (#2631). */
+.bubble-sub-button-bottom-container .bubble-sub-button-group > .bubble-sub-button.bubble-action:not(.bubble-action-enabled):not(.is-select) {
     pointer-events: none;
 }
 
