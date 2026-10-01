@@ -65,6 +65,13 @@
     pointer-events: none;
 }
 
+/* Same for the alignment lane holding the groups in inline layout, the default.
+   The lane of a group with no alignment spans the whole row, so a press on its
+   empty part never reached the tap action of the card (#2243). */
+.bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane {
+    pointer-events: none;
+}
+
 /* The pointer comes back with no weight at all, so a module that moves its own
    element into a group keeps what its own rule says. sub_button_wheel adds an
    invisible layer the size of the screen and sets its pointer-events to none

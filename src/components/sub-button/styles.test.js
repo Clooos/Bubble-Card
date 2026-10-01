@@ -30,6 +30,13 @@ describe('bottom sub-button container hit testing', () => {
       .toContain('pointer-events: auto');
   });
 
+  // In inline layout, the default, every bottom group sits in an alignment lane,
+  // and the lane of a group with no alignment spans the whole row (#2243).
+  test('lets clicks through an alignment lane', () => {
+    expect(getRule('.bubble-sub-button-bottom-container .bubble-sub-button-alignment-lane'))
+      .toContain('pointer-events: none');
+  });
+
   // A module that moves its own element into a group keeps what its own rule
   // says. sub_button_wheel adds an invisible layer the size of the screen and
   // sets its pointer-events to none while the wheel is closed. A rule weighing
