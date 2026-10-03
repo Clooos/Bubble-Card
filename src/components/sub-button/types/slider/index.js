@@ -466,6 +466,9 @@ export function ensureSliderForSubButton(context, element, options) {
         } catch (_) {}
         element.sliderCloseBtn.addEventListener('click', closeHandler);
         element.sliderCloseBtn.addEventListener('touchend', closeHandler);
+        element.sliderCloseBtn.addEventListener('pointerdown', (ev) => {
+          ev.stopPropagation();
+        });
         element.sliderCloseBtn.addEventListener('touchstart', (ev) => {
           ev.preventDefault();
           ev.stopPropagation();
