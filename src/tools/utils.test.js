@@ -1229,3 +1229,49 @@ describe('getName with a Home Assistant template', () => {
         expect(hass.connection.subscribeMessage).not.toHaveBeenCalled();
     });
 });
+
+// Home Assistant's Vibrate setting only silences haptics in a browser, its
+// companion apps vibrate on every haptic event they get (#712, #2643).
+describe('haptic feedback and the Vibrate setting', () => {
+    let utilsModule;
+
+    beforeEach(async () => {
+        jest.resetModules();
+        global.window = createMockWindow();
+        global.document = createMockDocument();
+        utilsModule = await import('./utils.js');
+    });
+
+    afterEach(() => {
+        delete global.window;
+        delete global.document;
+    });
+
+    const setVibrate = (vibrate) => {
+        global.document.querySelector = jest.fn((selector) => (
+            selector === 'home-assistant' ? { hass: { vibrate } } : null
+        ));
+    };
+
+    test('vibrates while the setting is on', () => {
+        setVibrate(true);
+        utilsModule.forwardHaptic('selection');
+        const event = global.window.dispatchEvent.mock.calls[0]?.[0];
+        expect(event?.type).toBe('haptic');
+        expect(event?.detail).toBe('selection');
+    });
+
+    test('stays still once the setting is off', () => {
+        setVibrate(false);
+        utilsModule.forwardHaptic('selection');
+        expect(global.window.dispatchEvent).not.toHaveBeenCalled();
+    });
+
+    test('vibrates when Home Assistant has not set it or cannot be found', () => {
+        setVibrate(undefined);
+        utilsModule.forwardHaptic('light');
+        global.document.querySelector = jest.fn(() => null);
+        utilsModule.forwardHaptic('light');
+        expect(global.window.dispatchEvent).toHaveBeenCalledTimes(2);
+    });
+});

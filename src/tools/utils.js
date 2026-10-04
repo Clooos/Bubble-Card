@@ -23,7 +23,11 @@ export const fireEvent = (node, type, detail, options) => {
     return event;
 };
 
+// Home Assistant's Vibrate setting (user profile) only silences haptics in a
+// browser. Its companion apps get every haptic event whatever the setting, so
+// it is checked here for the cards to honour it there too (#712).
 export const forwardHaptic = hapticType => {
+    if (document.querySelector('home-assistant')?.hass?.vibrate === false) return;
     fireEvent(window, "haptic", hapticType)
 }
 
