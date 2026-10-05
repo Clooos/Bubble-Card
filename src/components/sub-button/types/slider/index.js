@@ -466,6 +466,10 @@ export function ensureSliderForSubButton(context, element, options) {
         } catch (_) {}
         element.sliderCloseBtn.addEventListener('click', closeHandler);
         element.sliderCloseBtn.addEventListener('touchend', closeHandler);
+        // The close button sits on the overlay, outside the sub-button the
+        // parent slider knows how to ignore. Left to bubble, its press reached
+        // a parent in tap to slide, which took it for a slide, set its value
+        // under the button and kept the click that closes the overlay (#2498).
         element.sliderCloseBtn.addEventListener('pointerdown', (ev) => {
           ev.stopPropagation();
         });
