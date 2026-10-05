@@ -16,6 +16,13 @@ function getCenteredFooterRule() {
   return match?.[1] ?? '';
 }
 
+// The same rule inside the max-width 600px block.
+function getNarrowCenteredFooterRule() {
+  const narrowViewport = styles.match(/@media[^{]*max-width:\s*600px[^{]*\{([\s\S]*?)\n\}/)?.[1] ?? '';
+  const match = narrowViewport.match(/ha-card\.footer-mode:not\(\.footer-full-width\)\s*\{([^}]*)\}/);
+  return match?.[1] ?? '';
+}
+
 // Same defect as pop-up issue #2537: the footer is position:fixed, so it
 // offsets itself past the sidebar, and that offset used to come from
 // var(--ha-sidebar-width, var(--mdc-drawer-width, 0px)). HA hides the sidebar
@@ -37,7 +44,7 @@ describe('sub-buttons footer placement', () => {
     );
   });
 
-  // #2620: a configured width that fits has to survive a narrow viewport. It
+  // A configured width that fits has to survive a narrow viewport (#2620). It
   // used to be overruled by a max-width media query, so a phone honoured it in
   // landscape and dropped it in portrait.
   test('keeps a configured width that fits, and only clamps one that does not', () => {
@@ -46,8 +53,17 @@ describe('sub-buttons footer placement', () => {
     );
     expect(getCenteredFooterRule()).toContain('width: var(--bubble-footer-resolved-width)');
 
-    const narrowViewport = styles.match(/@media[^{]*max-width:\s*600px[^{]*\{([\s\S]*?)\n\}/)?.[1] ?? '';
-    expect(narrowViewport).not.toContain(':not(.footer-full-width)');
+    // Below 600px nothing sets the width or the offset of this footer directly again.
+    expect(getNarrowCenteredFooterRule()).not.toMatch(/(^|[\s;{])(width|inset-inline-start)\s*:/);
+  });
+
+  // With no width configured, the footer filled a narrow screen before #2620
+  // and still does. Only the default is swapped below 600px, the clamp and a
+  // configured width stay as they are.
+  test('fills a narrow screen when no width is configured', () => {
+    expect(getNarrowCenteredFooterRule()).toContain(
+      '--bubble-footer-resolved-width: min(var(--bubble-footer-width, 100%), 100% - var(--bubble-sub-buttons-content-inline-start) - 16px)'
+    );
   });
 
   test('keeps the placement logical for RTL dashboards', () => {
