@@ -271,7 +271,9 @@ export function ensureSliderForSubButton(context, element, options) {
         cardWrapper: context.elements.cardWrapper || context.elements.mainContainer || context.content
       },
       content: context.content,
-      card: context.card
+      card: context.card,
+      // The fill of the card's own slider, when this slider is laid over one.
+      getCardRangeFill: () => (context.config?.button_type === 'slider' ? context.elements?.rangeFill : null) ?? null
     };
 
     createSliderStructure(sliderContext, {

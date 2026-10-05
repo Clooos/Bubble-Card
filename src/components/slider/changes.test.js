@@ -3,9 +3,14 @@ import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globa
 // updateSlider decides one thing, whether the fill has to move, so the fakes
 // only have to answer where the fill is and what the entity carries.
 
+// Says which way a fill has to step, null when it has nothing to step away from.
+const getSurfaceStep = jest.fn(() => null);
+const isStateOn = jest.fn(() => true);
+
 jest.unstable_mockModule('../../tools/utils.js', () => ({
-    isStateOn: jest.fn(() => true),
+    isStateOn,
     getStateSurfaceColor: jest.fn(() => 'rgb(1, 2, 3)'),
+    getSurfaceStep,
 }));
 
 jest.unstable_mockModule('../../tools/icon.js', () => ({
@@ -48,6 +53,7 @@ function createFill() {
             add: (...names) => names.forEach((name) => classes.add(name)),
             remove: (...names) => names.forEach((name) => classes.delete(name)),
             contains: (name) => classes.has(name),
+            toggle: (name, force) => (force ? classes.add(name) : classes.delete(name)),
         },
         style: { transform: '', setProperty: () => {}, removeProperty: () => {} },
     };
@@ -211,5 +217,73 @@ describe('a state that arrives while the fill is still ramping', () => {
         runFrames(400);
         expect(setRangeFillTransform).not.toHaveBeenCalled();
         expect(context._lastVisualFillPercentage).toBe(shown);
+    });
+});
+
+// A sub-slider is laid over the slider of its card, and a slider card paints
+// its fill, not its background. Two fills of the same color left nothing to
+// show where the sub-slider's own one ended.
+describe('a sub-slider fill over the fill of its card', () => {
+    const cardFill = (color) => ({ style: { getPropertyValue: (name) => (name === '--bubble-slider-fill-color' ? color : '') } });
+
+    const subSliderContext = (color) => {
+        const context = createContext(0);
+        context.getCardRangeFill = () => (color === undefined ? null : cardFill(color));
+        return context;
+    };
+
+    afterEach(() => {
+        getSurfaceStep.mockImplementation(() => null);
+        isStateOn.mockImplementation(() => true);
+    });
+
+    test('steps the way it is told when both fills share a color', () => {
+        getSurfaceStep.mockImplementation(() => 'darker');
+        const context = subSliderContext('var(--bubble-icon-color)');
+        updateSlider(context);
+
+        expect(getSurfaceStep).toHaveBeenCalledWith(context, 'rgb(1, 2, 3)', 'var(--bubble-icon-color)');
+        expect(context.elements.rangeFill.classList.contains('steps-darker')).toBe(true);
+        expect(context.elements.rangeFill.classList.contains('steps-lighter')).toBe(false);
+    });
+
+    test('steps back once the colors differ', () => {
+        getSurfaceStep.mockImplementation(() => 'lighter');
+        const context = subSliderContext('var(--bubble-icon-color)');
+        updateSlider(context);
+        expect(context.elements.rangeFill.classList.contains('steps-lighter')).toBe(true);
+
+        getSurfaceStep.mockImplementation(() => null);
+        context._hass = { states: { 'input_number.test': state(1) } };
+        updateSlider(context);
+        expect(context.elements.rangeFill.classList.contains('steps-lighter')).toBe(false);
+    });
+
+    test('compares nothing when the card has no fill of its own, or one that is off', () => {
+        const noFill = subSliderContext(undefined);
+        updateSlider(noFill);
+        const offFill = subSliderContext('');
+        updateSlider(offFill);
+
+        expect(getSurfaceStep).not.toHaveBeenCalled();
+        expect(offFill.elements.rangeFill.classList.contains('steps-darker')).toBe(false);
+    });
+
+    test('drops the step when the sub-slider goes off', () => {
+        getSurfaceStep.mockImplementation(() => 'darker');
+        const context = subSliderContext('var(--bubble-icon-color)');
+        updateSlider(context);
+
+        isStateOn.mockImplementation(() => false);
+        context._hass = { states: { 'input_number.test': state(1) } };
+        updateSlider(context);
+        expect(context.elements.rangeFill.classList.contains('steps-darker')).toBe(false);
+    });
+
+    test('leaves the slider of a card alone', () => {
+        getSurfaceStep.mockImplementation(() => 'darker');
+        const context = createContext(0);
+        updateSlider(context);
+        expect(getSurfaceStep).not.toHaveBeenCalled();
     });
 });

@@ -56,6 +56,18 @@
     opacity: 1;
 }
 
+/* A sub-slider fill of the color of the card's own fill under it steps away
+   from it by the same 8 % a surface steps away from its card
+   (getStateSurfaceColor). It is done here, on what the fill really paints, so
+   the accent of a theme or of a module is stepped and not replaced. */
+.bubble-range-fill.steps-darker {
+    filter: brightness(0.92);
+}
+
+.bubble-range-fill.steps-lighter {
+    filter: brightness(1.08);
+}
+
 .is-light .bubble-range-fill {
     background-color: var(--bubble-light-color, rgb(225, 225, 210));
     opacity: 0.7;

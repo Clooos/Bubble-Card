@@ -68,3 +68,33 @@ describe('the icon tone on a surface, in a light theme', () => {
         ['#ffeb3b', 'rgb(248, 190, 128)', '#ff9800'].forEach((colour) => expect(getSurfaceIconTone(colour, {}).tone).toBe('dark'));
     });
 });
+
+// One surface laid over another of the same color has to step away from it,
+// darker under a light text and lighter under a dark one.
+describe('the step between two surfaces of the same color', () => {
+    let getSurfaceStep;
+
+    async function loadStep(text) {
+        jest.resetModules();
+        withThemeText(text);
+        ({ getSurfaceStep } = await import('./utils.js'));
+    }
+
+    test('goes darker in a dark theme', async () => {
+        await loadStep('#e1e1e1');
+        expect(getSurfaceStep({}, 'rgb(17, 118, 200)', 'rgb(17, 118, 200)')).toBe('darker');
+        expect(getSurfaceStep({}, 'rgb(17, 118, 200)', 'rgb(20, 120, 203)')).toBe('darker');
+    });
+
+    test('goes lighter in a light theme', async () => {
+        await loadStep('#212121');
+        expect(getSurfaceStep({}, 'rgb(17, 118, 200)', 'rgb(17, 118, 200)')).toBe('lighter');
+    });
+
+    test('asks for nothing when the colors differ or one is missing', async () => {
+        await loadStep('#e1e1e1');
+        expect(getSurfaceStep({}, 'rgb(17, 118, 200)', 'rgb(214, 115, 12)')).toBeNull();
+        expect(getSurfaceStep({}, 'rgb(17, 118, 200)', '')).toBeNull();
+        expect(getSurfaceStep({}, '', 'rgb(17, 118, 200)')).toBeNull();
+    });
+});

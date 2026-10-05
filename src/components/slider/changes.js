@@ -1,6 +1,7 @@
 import { 
   isStateOn,
-  getStateSurfaceColor
+  getStateSurfaceColor,
+  getSurfaceStep
 } from '../../tools/utils.js';
 import { getLightColorSignature } from '../../tools/icon.js';
 import {
@@ -276,10 +277,27 @@ export function updateSliderStyle(context) {
       rangeFill.classList.add('slider-use-accent-color');
     }
     rangeFill.style.setProperty('--bubble-slider-fill-color', surfaceColor);
+
+    // A sub-slider is laid over the slider of its card. A slider card keeps
+    // its background transparent and paints its fill instead, so the
+    // comparison above finds nothing to step away from, and two fills of the
+    // same color left nothing to show where the sub-slider's own one ended.
+    // Only the direction is decided here. The stylesheet mixes it into
+    // whatever the fill really paints, the accent of a theme or of a module
+    // included.
+    if (context.getCardRangeFill) {
+      const cardFillColor = context.getCardRangeFill()?.style.getPropertyValue('--bubble-slider-fill-color');
+      const step = cardFillColor ? getSurfaceStep(context, surfaceColor, cardFillColor) : null;
+      rangeFill.classList.toggle('steps-darker', step === 'darker');
+      rangeFill.classList.toggle('steps-lighter', step === 'lighter');
+    }
   } else {
     if (hasLightColorClass || hasAccentColorClass) {
       rangeFill.classList.remove('slider-use-light-color', 'slider-use-accent-color');
       rangeFill.style.removeProperty('--bubble-slider-fill-color');
+    }
+    if (context.getCardRangeFill) {
+      rangeFill.classList.remove('steps-darker', 'steps-lighter');
     }
   }
 

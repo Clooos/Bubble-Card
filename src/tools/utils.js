@@ -378,6 +378,24 @@ export function getStateSurfaceColor(context, entity = context.config.entity, us
   }
 }
 
+// Whether a surface would paint the color of the one it is laid over, and
+// which way it then has to step to be told apart, darker under a light text,
+// lighter under a dark one, the way getStateSurfaceColor steps. Only the
+// direction comes out of here. The colors are compared as the expressions
+// resolve from the document, which is enough to say two surfaces of one card
+// share a color, and too little to say which one a module or a theme makes it.
+export function getSurfaceStep(context, expression, behindExpression) {
+  if (!expression || !behindExpression) return null;
+  const painted = resolveSurfaceRgb(expression, context);
+  const behind = resolveSurfaceRgb(behindExpression, context);
+  if (!painted || !behind || !areColorsSimilar(painted, behind)) return null;
+
+  const textColor = resolveCssVariable('var(--primary-text-color, #ffffff)');
+  const textRgb = hexToRgb(textColor) || rgbStringToRgb(textColor);
+  const isTextLight = textRgb ? calculateLuminance(...textRgb) > 0.5 : true;
+  return isTextLight ? 'darker' : 'lighter';
+}
+
 // `html` says the name is about to be written as markup (the scrolling text
 // path), in which case a rendered template is escaped: it is entity data, not
 // something the dashboard author typed.
