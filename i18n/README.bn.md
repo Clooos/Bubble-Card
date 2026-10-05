@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[অন্য ভাষায় পড়ুন](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[অন্য ভাষায় পড়ুন](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card হলো Home Assistant-এর জন্য একটি মিনিমালিস্ট ও কাস্টমাইজযোগ্য কার্ড কালেকশন, যাতে আছে আধুনিক পপ-আপ এবং ১০০টিরও বেশি কমিউনিটি-নির্মিত মডিউলসহ একটি ইন্টিগ্রেটেড Module Store।
 
@@ -2750,7 +2750,7 @@ Bubble Card আপনার ভাষায় কথা বলে। Home Assis
 
 এডিটরের নিচে, সংস্করণ নম্বরের পাশে, একটি **স্বয়ংক্রিয়** সুইচ আপনার Home Assistant ভাষা অনুসরণ করে। এটি বন্ধ করলে পুরো এডিটর ইংরেজিতে ফিরে যায়, যা কোনো টিউটোরিয়াল অনুসরণ করতে বা সমস্যা জানাতে কাজে লাগে। আপনার পছন্দ ব্রাউজারে মনে রাখা হয়।
 
-এই ডকুমেন্টেশনও অনূদিত, [62টি ভাষায়](languages.md), ব্রিটিশ ইংরেজি ছাড়া সবগুলোতেই, যেটি মূল লেখাই দেখায়। ওই পাতাগুলো সবার জন্য খোলা, তাই আপনার Home Assistant-এর সঙ্গে না মেলা কোনো শব্দচয়ন কয়েক ক্লিকেই ঠিক করা যায়। বিষয়বস্তুর জন্য ইংরেজি সংস্করণই মূল রেফারেন্স থাকে।
+এই ডকুমেন্টেশনও অনূদিত, [62টি ভাষায়](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), ব্রিটিশ ইংরেজি ছাড়া সবগুলোতেই, যেটি মূল লেখাই দেখায়। ওই পাতাগুলো সবার জন্য খোলা, তাই আপনার Home Assistant-এর সঙ্গে না মেলা কোনো শব্দচয়ন কয়েক ক্লিকেই ঠিক করা যায়। বিষয়বস্তুর জন্য ইংরেজি সংস্করণই মূল রেফারেন্স থাকে।
 
 <br>
 
@@ -2779,7 +2779,7 @@ Bubble Card নিয়ে কোনো প্রশ্ন বা মতাম�
 
 অবদান সাদরে গ্রহণ করা হয়! বাগ ফিক্স, নতুন ফিচার, অনুবাদ বা ডকুমেন্টেশনের উন্নতি, যা-ই হোক না কেন, নির্দ্বিধায় একটি পুল রিকোয়েস্ট খুলুন।
 
-শুরু করার আগে, অনুগ্রহ করে [ডেভেলপার গাইড](DEVELOPERS.md) পড়ুন, যেখানে লোকাল এনভায়রনমেন্ট সেট আপ করা, প্রজেক্ট বিল্ড করা এবং আপনার পরিবর্তন পরীক্ষা করার পদ্ধতি ব্যাখ্যা করা আছে।
+শুরু করার আগে, অনুগ্রহ করে [ডেভেলপার গাইড](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) পড়ুন, যেখানে লোকাল এনভায়রনমেন্ট সেট আপ করা, প্রজেক্ট বিল্ড করা এবং আপনার পরিবর্তন পরীক্ষা করার পদ্ধতি ব্যাখ্যা করা আছে।
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Lasīt citā valodā](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Lasīt citā valodā](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card ir minimālistiska un pielāgojama kartīšu kolekcija Home Assistant, kas piedāvā modernus uznirstošos logus un integrētu Module Store ar vairāk nekā 100 kopienas veidotiem moduļiem.
 
@@ -2750,7 +2750,7 @@ Bubble Card runā jūsu valodā. Tā redaktors ir iztulkots 64 valodās, ko atba
 
 Redaktora lejasdaļā, blakus versijas numuram, slēdzis **Automātiski** seko jūsu Home Assistant valodai. Izslēdziet to, un viss redaktors atgriezīsies angļu valodā, kas noder, sekojot pamācībai vai ziņojot par problēmu. Jūsu izvēle tiek iegaumēta pārlūkā.
 
-Arī šī dokumentācija ir tulkota, [62 valodās](languages.md), visās, izņemot britu angļu, kurā redzams oriģināls. Šīs lapas ir atvērtas ikvienam, tāpēc formulējumu, kas neatbilst jūsu paša Home Assistant, var izlabot pāris klikšķos. Par satura atskaites punktu paliek angļu versija.
+Arī šī dokumentācija ir tulkota, [62 valodās](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), visās, izņemot britu angļu, kurā redzams oriģināls. Šīs lapas ir atvērtas ikvienam, tāpēc formulējumu, kas neatbilst jūsu paša Home Assistant, var izlabot pāris klikšķos. Par satura atskaites punktu paliek angļu versija.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Vai jums ir jautājumi vai domas par Bubble Card? Vēlaties dalīties ar saviem 
 
 Ieguldījumi ir laipni gaidīti! Vai tie būtu kļūdu labojumi, jaunas funkcijas, tulkojumi vai dokumentācijas uzlabojumi, nevilcinieties atvērt pull request.
 
-Pirms sākat, lūdzu, izlasiet [izstrādātāja rokasgrāmatu](DEVELOPERS.md), kas apraksta, kā iestatīt lokālo vidi, veidot projektu un testēt savas izmaiņas.
+Pirms sākat, lūdzu, izlasiet [izstrādātāja rokasgrāmatu](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), kas apraksta, kā iestatīt lokālo vidi, veidot projektu un testēt savas izmaiņas.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

@@ -93,7 +93,9 @@ HARMONIZE = {
 }
 
 ORIGINAL = '../README.md'
-INDEX = 'languages.md'
+# A full address, because HACS shows the README without resolving a relative
+# path, so a relative link or image is dead there.
+INDEX = 'https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md'
 # Opens GitHub's web editor. For anyone without write access it forks the repo and turns
 # the change into a pull request, so a reader can fix a sentence without cloning anything.
 EDIT = 'https://github.com/Clooos/Bubble-Card/edit/main/i18n/README.{code}.md'

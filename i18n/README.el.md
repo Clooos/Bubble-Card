@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Διαβάστε το σε άλλη γλώσσα](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Διαβάστε το σε άλλη γλώσσα](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Το Bubble Card είναι μια μινιμαλιστική και προσαρμόσιμη συλλογή καρτών για το Home Assistant, με μοντέρνα pop-up και ένα ενσωματωμένο Module Store με πάνω από 100 modules φτιαγμένα από την κοινότητα.
 
@@ -2750,7 +2750,7 @@ icon_container_color:
 
 Στο κάτω μέρος του επεξεργαστή, δίπλα στον αριθμό έκδοσης, ένας διακόπτης **Αυτόματο** ακολουθεί τη γλώσσα του Home Assistant σας. Απενεργοποιήστε τον και όλος ο επεξεργαστής επιστρέφει στα αγγλικά, κάτι βολικό για να ακολουθήσετε έναν οδηγό ή να αναφέρετε ένα πρόβλημα. Η επιλογή σας απομνημονεύεται στο πρόγραμμα περιήγησής σας.
 
-Και αυτή η τεκμηρίωση είναι μεταφρασμένη, [σε 62 γλώσσες](languages.md), σε όλες εκτός από τα βρετανικά αγγλικά, που εμφανίζουν το πρωτότυπο. Οι σελίδες αυτές είναι ανοιχτές σε όλους, οπότε μια διατύπωση που δεν ταιριάζει με το δικό σας Home Assistant μπορεί να διορθωθεί με δύο κλικ. Η αγγλική έκδοση παραμένει η αναφορά για το ίδιο το περιεχόμενο.
+Και αυτή η τεκμηρίωση είναι μεταφρασμένη, [σε 62 γλώσσες](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), σε όλες εκτός από τα βρετανικά αγγλικά, που εμφανίζουν το πρωτότυπο. Οι σελίδες αυτές είναι ανοιχτές σε όλους, οπότε μια διατύπωση που δεν ταιριάζει με το δικό σας Home Assistant μπορεί να διορθωθεί με δύο κλικ. Η αγγλική έκδοση παραμένει η αναφορά για το ίδιο το περιεχόμενο.
 
 <br>
 
@@ -2779,7 +2779,7 @@ icon_container_color:
 
 Οι συνεισφορές είναι ευπρόσδεκτες! Είτε πρόκειται για διορθώσεις σφαλμάτων, νέα χαρακτηριστικά, μεταφράσεις ή βελτιώσεις τεκμηρίωσης, μη διστάσετε να ανοίξετε ένα pull request.
 
-Πριν ξεκινήσετε, παρακαλώ διαβάστε τον [οδηγό προγραμματιστή](DEVELOPERS.md) που καλύπτει τον τρόπο ρύθμισης του τοπικού σας περιβάλλοντος, τη δημιουργία του project και τη δοκιμή των αλλαγών σας.
+Πριν ξεκινήσετε, παρακαλώ διαβάστε τον [οδηγό προγραμματιστή](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) που καλύπτει τον τρόπο ρύθμισης του τοπικού σας περιβάλλοντος, τη δημιουργία του project και τη δοκιμή των αλλαγών σας.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

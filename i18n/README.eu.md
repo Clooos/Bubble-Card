@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Irakurri hau beste hizkuntza batean](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Irakurri hau beste hizkuntza batean](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card Home Assistant-erako txartel-bilduma minimalista eta pertsonalizagarria da, laster-leiho modernoak eta 100 modulu baino gehiagoko Module Store integratua eskaintzen dituena.
 
@@ -2750,7 +2750,7 @@ Bubble Cardek zure hizkuntza hitz egiten du. Bere editorea Home Assistantek onar
 
 Editorearen behealdean, bertsio-zenbakiaren ondoan, **Automatikoa** etengailu batek zure Home Assistanten hizkuntzari jarraitzen dio. Itzali eta editore osoa ingelesera itzultzen da, tutorial bat jarraitzeko edo arazo baten berri emateko erabilgarria. Zure aukera nabigatzailean gogoratzen da.
 
-Dokumentazio hau ere itzulita dago, [62 hizkuntzatan](languages.md), britainiar ingelesa izan ezik denetan, hark jatorrizkoa erakusten baitu. Orri horiek denentzat daude irekita, beraz zure Home Assistantekin bat ez datorren esaldi bat klik pare batean zuzen daiteke. Ingelesezko bertsioak edukiaren erreferentzia izaten jarraitzen du.
+Dokumentazio hau ere itzulita dago, [62 hizkuntzatan](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), britainiar ingelesa izan ezik denetan, hark jatorrizkoa erakusten baitu. Orri horiek denentzat daude irekita, beraz zure Home Assistantekin bat ez datorren esaldi bat klik pare batean zuzen daiteke. Ingelesezko bertsioak edukiaren erreferentzia izaten jarraitzen du.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Bubble Cardi buruzko galderarik edo iritzirik baduzu? Zure dashboardak edo aurki
 
 Ekarpenak ongi etorriak dira! Akats-konponketak, funtzio berriak, itzulpenak edo dokumentazio hobekuntzak izan, ez izan zalantzarik pull request bat irekitzeko.
 
-Hasi baino lehen, irakurri [garatzailearentzako gida](DEVELOPERS.md), zure ingurune lokala nola konfiguratu, proiektua nola eraiki eta zure aldaketak nola probatu azaltzen duena.
+Hasi baino lehen, irakurri [garatzailearentzako gida](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), zure ingurune lokala nola konfiguratu, proiektua nola eraiki eta zure aldaketak nola probatu azaltzen duena.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

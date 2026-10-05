@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Прочитајте ово на другом језику](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Прочитајте ово на другом језику](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card је минималистичка и прилагодљива колекција картица за Home Assistant, са модерним искачућим прозорима и интегрисаним Module Store-ом који садржи преко 100 модула које је направила заједница.
 
@@ -2750,7 +2750,7 @@ Bubble Card говори вашим језиком. Његов едитор је
 
 На дну едитора, поред броја верзије, прекидач **Аутоматски** прати језик вашег Home Assistant-а. Искључите га и цео едитор се враћа на енглески, што је згодно када пратите упутство или пријављујете проблем. Ваш избор се памти у вашем прегледачу.
 
-И ова документација је преведена, [на 62 језика](languages.md), на све осим на британски енглески, који користи оригинал. Те странице су отворене за свакога, па се формулација која не одговара вашем Home Assistant-у може исправити у неколико кликова. Енглеска верзија остаје референца за сам садржај.
+И ова документација је преведена, [на 62 језика](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), на све осим на британски енглески, који користи оригинал. Те странице су отворене за свакога, па се формулација која не одговара вашем Home Assistant-у може исправити у неколико кликова. Енглеска верзија остаје референца за сам садржај.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Bubble Card говори вашим језиком. Његов едитор је
 
 Доприноси су добродошли! Било да су у питању исправке грешака, нове функције, преводи или побољшања документације, слободно отворите pull request.
 
-Пре него што почнете, прочитајте [водич за програмере](DEVELOPERS.md) који описује како да подесите локално окружење, изградите пројекат и тестирате своје измене.
+Пре него што почнете, прочитајте [водич за програмере](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) који описује како да подесите локално окружење, изградите пројекат и тестирате своје измене.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

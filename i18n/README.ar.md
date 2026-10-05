@@ -7,9 +7,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[اقرأ هذه الصفحة بلغة أخرى](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[اقرأ هذه الصفحة بلغة أخرى](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card هي مجموعة بطاقات بسيطة وقابلة للتخصيص لـ Home Assistant، تتميز بنوافذ منبثقة عصرية وبمتجر Module Store مدمج يضم أكثر من 100 وحدة من صنع المجتمع.
 
@@ -2752,7 +2752,7 @@ icon_container_color:
 
 في أسفل المحرر، بجوار رقم الإصدار، يتبع مفتاح **تلقائي** لغة Home Assistant لديك. أوقفه فيعود المحرر كله إلى الإنجليزية، وهو أمر مفيد لمتابعة شرح أو للإبلاغ عن مشكلة. ويُحفظ اختيارك في متصفحك.
 
-هذه الوثائق مترجمة أيضًا، [إلى 62 لغة](languages.md)، وهي كل اللغات ما عدا الإنجليزية البريطانية التي تقرأ النص الأصلي. هذه الصفحات مفتوحة للجميع، لذا يمكن تصحيح أي صياغة لا تطابق Home Assistant لديك ببضع نقرات. وتبقى النسخة الإنجليزية هي المرجع للمحتوى نفسه.
+هذه الوثائق مترجمة أيضًا، [إلى 62 لغة](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)، وهي كل اللغات ما عدا الإنجليزية البريطانية التي تقرأ النص الأصلي. هذه الصفحات مفتوحة للجميع، لذا يمكن تصحيح أي صياغة لا تطابق Home Assistant لديك ببضع نقرات. وتبقى النسخة الإنجليزية هي المرجع للمحتوى نفسه.
 
 <br>
 
@@ -2781,7 +2781,7 @@ icon_container_color:
 
 المساهمات مرحّب بها! سواء كانت إصلاحات للأخطاء أو ميزات جديدة أو ترجمات أو تحسينات للتوثيق، لا تتردد في فتح pull request.
 
-قبل البدء، يُرجى قراءة [دليل المطورين](DEVELOPERS.md) الذي يشرح كيفية إعداد بيئتك المحلية وبناء المشروع واختبار تعديلاتك.
+قبل البدء، يُرجى قراءة [دليل المطورين](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) الذي يشرح كيفية إعداد بيئتك المحلية وبناء المشروع واختبار تعديلاتك.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

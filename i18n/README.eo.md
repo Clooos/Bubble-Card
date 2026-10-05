@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Legi ĉi tion en alia lingvo](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Legi ĉi tion en alia lingvo](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card estas minimalisma kaj personigebla kolekto da kartoj por Home Assistant, kun modernaj ŝprucfenestroj kaj integrita Module Store kun pli ol 100 komunumaj moduloj.
 
@@ -2750,7 +2750,7 @@ Bubble Card parolas vian lingvon. Ĝia redaktilo estas tradukita en la 64 lingvo
 
 Sube en la redaktilo, apud la versinumero, ŝaltilo **Aŭtomata** sekvas vian lingvon de Home Assistant. Malŝaltu ĝin kaj la tuta redaktilo revenas al la angla, kio utilas por sekvi lernilon aŭ por raporti problemon. Via elekto estas memorata en via retumilo.
 
-Ankaŭ ĉi tiu dokumentaro estas tradukita, [en 62 lingvojn](languages.md), en ĉiujn krom la britan anglan, kiu montras la originalon. Tiuj paĝoj estas malfermitaj al ĉiuj, do formulado, kiu ne kongruas kun via propra Home Assistant, korekteblas per kelkaj klakoj. La angla versio restas la referenco por la enhavo mem.
+Ankaŭ ĉi tiu dokumentaro estas tradukita, [en 62 lingvojn](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), en ĉiujn krom la britan anglan, kiu montras la originalon. Tiuj paĝoj estas malfermitaj al ĉiuj, do formulado, kiu ne kongruas kun via propra Home Assistant, korekteblas per kelkaj klakoj. La angla versio restas la referenco por la enhavo mem.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Ne hezitu malfermi problemon, se io ne funkcias kiel atendite.
 
 Kontribuoj estas bonvenaj! Ĉu temas pri cimriparoj, novaj funkcioj, tradukoj aŭ plibonigoj de dokumentado, ne hezitu malfermi kirlopeton (pull request).
 
-Antaŭ ol komenci, bonvolu legi la [gvidilon por programistoj](DEVELOPERS.md), kiu klarigas kiel starigi vian lokan medion, konstrui la projekton kaj testi viajn ŝanĝojn.
+Antaŭ ol komenci, bonvolu legi la [gvidilon por programistoj](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), kiu klarigas kiel starigi vian lokan medion, konstrui la projekton kaj testi viajn ŝanĝojn.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

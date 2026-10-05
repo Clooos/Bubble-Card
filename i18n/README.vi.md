@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Đọc trang này bằng ngôn ngữ khác](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Đọc trang này bằng ngôn ngữ khác](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card là một bộ sưu tập thẻ tối giản và có thể tùy chỉnh dành cho Home Assistant, với các pop-up hiện đại và một Module Store tích hợp gồm hơn 100 mô-đun do cộng đồng tạo ra.
 
@@ -2750,7 +2750,7 @@ Bubble Card nói ngôn ngữ của bạn. Trình chỉnh sửa của nó đượ
 
 Ở cuối trình chỉnh sửa, bên cạnh số phiên bản, một công tắc **Tự động** đi theo ngôn ngữ Home Assistant của bạn. Tắt nó đi thì toàn bộ trình chỉnh sửa trở lại tiếng Anh, điều này tiện khi làm theo một hướng dẫn hoặc khi báo lỗi. Lựa chọn của bạn được ghi nhớ trong trình duyệt.
 
-Tài liệu này cũng được dịch, [sang 62 ngôn ngữ](languages.md), tất cả trừ tiếng Anh Anh, vốn dùng bản gốc. Những trang đó mở cho tất cả mọi người, nên một cách diễn đạt không khớp với Home Assistant của riêng bạn có thể được sửa chỉ trong vài cú nhấp. Bản tiếng Anh vẫn là tham chiếu cho chính nội dung.
+Tài liệu này cũng được dịch, [sang 62 ngôn ngữ](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), tất cả trừ tiếng Anh Anh, vốn dùng bản gốc. Những trang đó mở cho tất cả mọi người, nên một cách diễn đạt không khớp với Home Assistant của riêng bạn có thể được sửa chỉ trong vài cú nhấp. Bản tiếng Anh vẫn là tham chiếu cho chính nội dung.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Bạn có câu hỏi hay ý tưởng gì về Bubble Card không? Muốn chia s�
 
 Mọi đóng góp đều được hoan nghênh! Dù là sửa lỗi, tính năng mới, bản dịch hay cải thiện tài liệu, đừng ngần ngại mở một pull request.
 
-Trước khi bắt đầu, vui lòng đọc [hướng dẫn dành cho nhà phát triển](DEVELOPERS.md), trong đó có nói về cách thiết lập môi trường cục bộ, build dự án và kiểm thử các thay đổi của bạn.
+Trước khi bắt đầu, vui lòng đọc [hướng dẫn dành cho nhà phát triển](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), trong đó có nói về cách thiết lập môi trường cục bộ, build dự án và kiểm thử các thay đổi của bạn.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

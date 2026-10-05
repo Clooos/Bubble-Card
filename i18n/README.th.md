@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[อ่านหน้านี้ในภาษาอื่น](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[อ่านหน้านี้ในภาษาอื่น](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card คือชุดการ์ดแบบมินิมอลและปรับแต่งได้สำหรับ Home Assistant มาพร้อมป๊อปอัปสไตล์ทันสมัยและ Module Store ในตัวที่มีโมดูลจากชุมชนกว่า 100 รายการ
 
@@ -2750,7 +2750,7 @@ Bubble Card พูดภาษาของคุณ ตัวแก้ไขข�
 
 ที่ด้านล่างของตัวแก้ไข ข้างหมายเลขเวอร์ชัน มีสวิตช์ **อัตโนมัติ** ที่ตามภาษา Home Assistant ของคุณ ปิดมันแล้วตัวแก้ไขทั้งหมดจะกลับไปเป็นภาษาอังกฤษ ซึ่งสะดวกเวลาทำตามบทเรียนหรือรายงานปัญหา ตัวเลือกของคุณจะถูกจดจำไว้ในเบราว์เซอร์
 
-เอกสารนี้ก็ถูกแปลเช่นกัน [ใน 62 ภาษา](languages.md) ทุกภาษายกเว้นภาษาอังกฤษแบบบริติชที่ใช้ต้นฉบับ หน้าเหล่านั้นเปิดให้ทุกคนแก้ไข ถ้อยคำที่ไม่ตรงกับ Home Assistant ของคุณจึงแก้ไขได้ในไม่กี่คลิก เวอร์ชันภาษาอังกฤษยังคงเป็นข้อมูลอ้างอิงสำหรับเนื้อหาเอง
+เอกสารนี้ก็ถูกแปลเช่นกัน [ใน 62 ภาษา](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) ทุกภาษายกเว้นภาษาอังกฤษแบบบริติชที่ใช้ต้นฉบับ หน้าเหล่านั้นเปิดให้ทุกคนแก้ไข ถ้อยคำที่ไม่ตรงกับ Home Assistant ของคุณจึงแก้ไขได้ในไม่กี่คลิก เวอร์ชันภาษาอังกฤษยังคงเป็นข้อมูลอ้างอิงสำหรับเนื้อหาเอง
 
 <br>
 
@@ -2779,7 +2779,7 @@ Bubble Card พูดภาษาของคุณ ตัวแก้ไขข�
 
 ยินดีต้อนรับการมีส่วนร่วมทุกรูปแบบ! ไม่ว่าจะเป็นการแก้บั๊ก ฟีเจอร์ใหม่ การแปล หรือการปรับปรุงเอกสาร อย่าลังเลที่จะเปิด pull request
 
-ก่อนเริ่มต้น โปรดอ่าน[คู่มือสำหรับนักพัฒนา](DEVELOPERS.md) ซึ่งครอบคลุมวิธีตั้งค่าสภาพแวดล้อมในเครื่องของคุณ การ build โปรเจกต์ และการทดสอบการเปลี่ยนแปลงของคุณ
+ก่อนเริ่มต้น โปรดอ่าน[คู่มือสำหรับนักพัฒนา](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) ซึ่งครอบคลุมวิธีตั้งค่าสภาพแวดล้อมในเครื่องของคุณ การ build โปรเจกต์ และการทดสอบการเปลี่ยนแปลงของคุณ
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Olvassa el más nyelven](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Olvassa el más nyelven](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 A Bubble Card egy minimalista és testreszabható kártyagyűjtemény a Home Assistanthez, amely modern pop-upokat és egy beépített Module Store-t kínál, benne több mint 100 közösség által készített modullal.
 
@@ -2750,7 +2750,7 @@ A Bubble Card a te nyelveden beszél. A szerkesztője le van fordítva arra a 64
 
 A szerkesztő alján, a verziószám mellett egy **Automatikus** kapcsoló követi a Home Assistantod nyelvét. Kapcsold ki, és az egész szerkesztő visszatér angolra, ami hasznos egy útmutató követéséhez vagy egy hiba bejelentéséhez. A választásod megjegyzésre kerül a böngésződben.
 
-Ez a dokumentáció is le van fordítva, [62 nyelvre](languages.md), a brit angol kivételével mindegyikre, az ugyanis az eredetit mutatja. Ezek az oldalak mindenki előtt nyitva állnak, így egy olyan megfogalmazás, amely nem egyezik a saját Home Assistantoddal, néhány kattintással javítható. A tartalom tekintetében az angol változat marad a referencia.
+Ez a dokumentáció is le van fordítva, [62 nyelvre](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), a brit angol kivételével mindegyikre, az ugyanis az eredetit mutatja. Ezek az oldalak mindenki előtt nyitva állnak, így egy olyan megfogalmazás, amely nem egyezik a saját Home Assistantoddal, néhány kattintással javítható. A tartalom tekintetében az angol változat marad a referencia.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Kérdésed vagy gondolatod van a Bubble Card-dal kapcsolatban? Szeretnéd megosz
 
 A közreműködést szívesen fogadjuk! Legyen szó hibajavításokról, új funkciókról, fordításokról vagy dokumentációs javításokról, nyugodtan nyiss egy pull requestet.
 
-Mielőtt elkezdenéd, olvasd el a [fejlesztői útmutatót](DEVELOPERS.md), amely bemutatja, hogyan állítsd be a helyi környezetedet, hogyan építsd meg a projektet, és hogyan teszteld a módosításaidat.
+Mielőtt elkezdenéd, olvasd el a [fejlesztői útmutatót](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), amely bemutatja, hogyan állítsd be a helyi környezetedet, hogyan építsd meg a projektet, és hogyan teszteld a módosításaidat.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

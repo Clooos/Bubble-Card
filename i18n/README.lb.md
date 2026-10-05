@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Dat hei an enger anerer Sprooch liesen](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Dat hei an enger anerer Sprooch liesen](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card ass eng minimalistesch a personaliséierbar Kaarten-Kollektioun fir Home Assistant, mat modernen Pop-ups an engem integréierte Module Store mat iwwer 100 vun der Community erstallte Moduler.
 
@@ -2750,7 +2750,7 @@ Bubble Card schwätzt Är Sprooch. Säin Editor ass an déi 64 Sproochen iwwersa
 
 Ënnen am Editor, nieft der Versiounsnummer, follegt e Schalter **Automatesch** der Sprooch vun Ärem Home Assistant. Schalt en aus an de ganzen Editor geet zréck op Englesch, wat praktesch ass fir engem Tutorial ze follegen oder e Problem ze mellen. Är Wiel gëtt an Ärem Browser gemierkt.
 
-Dës Dokumentatioun ass och iwwersat, [an 62 Sproochen](languages.md), all ausser britescht Englesch, dat den Original weist. Dës Säite si fir jiddereen op, sou datt eng Formuléierung déi net zu Ärem eegene Home Assistant passt a puer Klicke ka verbessert ginn. Déi englesch Versioun bleift d'Referenz fir den Inhalt selwer.
+Dës Dokumentatioun ass och iwwersat, [an 62 Sproochen](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), all ausser britescht Englesch, dat den Original weist. Dës Säite si fir jiddereen op, sou datt eng Formuléierung déi net zu Ärem eegene Home Assistant passt a puer Klicke ka verbessert ginn. Déi englesch Versioun bleift d'Referenz fir den Inhalt selwer.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Hutt Dir Froen oder Gedanken iwwer Bubble Card? Wëllt Dir Är Dashboards oder E
 
 Bäiträg si wëllkomm! Egal ob et Bug-Fixe, nei Funktiounen, Iwwersetzungen oder Verbesserunge vun der Dokumentatioun sinn, zéckt net e Pull Request opzemaachen.
 
-Ier Dir ufänkt, liest w.e.g. de [Developer Guide](DEVELOPERS.md), deen erkläert wéi Dir Är lokal Ëmwelt opsetzt, d'Projet baut an Är Ännerungen testt.
+Ier Dir ufänkt, liest w.e.g. de [Developer Guide](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), deen erkläert wéi Dir Är lokal Ëmwelt opsetzt, d'Projet baut an Är Ännerungen testt.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

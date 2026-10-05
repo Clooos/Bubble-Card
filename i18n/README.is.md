@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Lestu þetta á öðru tungumáli](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Lestu þetta á öðru tungumáli](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card er einfalt og sérsniðanlegt kortasafn fyrir Home Assistant, með nútímalegum sprettigluggum og innbyggðri Module Store með yfir 100 einingum frá notendasamfélaginu.
 
@@ -2750,7 +2750,7 @@ Bubble Card talar tungumálið þitt. Ritillinn er þýddur á þau 64 tungumál
 
 Neðst í ritlinum, við hliðina á útgáfunúmerinu, fylgir rofinn **Sjálfvirkt** tungumáli Home Assistant hjá þér. Slökktu á honum og allur ritillinn fer aftur á ensku, sem er þægilegt til að fylgja leiðbeiningum eða til að tilkynna vandamál. Valið þitt er munað í vafranum þínum.
 
-Þessi skjölun er líka þýdd, [á 62 tungumál](languages.md), öll nema breska ensku, sem birtir frumtextann. Þessar síður eru opnar öllum, svo orðalag sem passar ekki við þitt eigið Home Assistant má laga með nokkrum smellum. Enska útgáfan er áfram viðmiðið fyrir innihaldið sjálft.
+Þessi skjölun er líka þýdd, [á 62 tungumál](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), öll nema breska ensku, sem birtir frumtextann. Þessar síður eru opnar öllum, svo orðalag sem passar ekki við þitt eigið Home Assistant má laga með nokkrum smellum. Enska útgáfan er áfram viðmiðið fyrir innihaldið sjálft.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Ertu með spurningar eða hugmyndir um Bubble Card? Viltu deila mælaborðunum �
 
 Framlög eru vel þegin! Hvort sem það eru villuleiðréttingar, nýir eiginleikar, þýðingar eða endurbætur á skjölum, endilega opnaðu pull request.
 
-Áður en þú byrjar, vinsamlegast lestu [þróunarleiðbeiningarnar](DEVELOPERS.md) sem fjalla um hvernig á að setja upp staðbundið umhverfi þitt, byggja verkefnið og prófa breytingarnar þínar.
+Áður en þú byrjar, vinsamlegast lestu [þróunarleiðbeiningarnar](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) sem fjalla um hvernig á að setja upp staðbundið umhverfi þitt, byggja verkefnið og prófa breytingarnar þínar.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Lue tämä toisella kielellä](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Lue tämä toisella kielellä](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card on minimalistinen ja muokattava korttikokoelma Home Assistantiin, jossa on modernit ponnahdusikkunat ja sisäänrakennettu Module Store yli 100 yhteisön tekemällä moduulilla.
 
@@ -2750,7 +2750,7 @@ Bubble Card puhuu sinun kieltäsi. Sen editori on käännetty niille 64 kielelle
 
 Editorin alalaidassa, versionumeron vieressä, **Automaattinen**-kytkin seuraa Home Assistantisi kieltä. Kytke se pois, niin koko editori palaa englanniksi, mikä on kätevää ohjeen seuraamiseen tai ongelmasta ilmoittamiseen. Valintasi muistetaan selaimessasi.
 
-Myös tämä dokumentaatio on käännetty, [62 kielelle](languages.md), kaikille paitsi brittienglannille, joka näyttää alkuperäisen. Nuo sivut ovat avoimia kaikille, joten sanamuodon joka ei vastaa omaa Home Assistantiasi voi korjata parilla klikkauksella. Englanninkielinen versio pysyy itse sisällön viitteenä.
+Myös tämä dokumentaatio on käännetty, [62 kielelle](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), kaikille paitsi brittienglannille, joka näyttää alkuperäisen. Nuo sivut ovat avoimia kaikille, joten sanamuodon joka ei vastaa omaa Home Assistantiasi voi korjata parilla klikkauksella. Englanninkielinen versio pysyy itse sisällön viitteenä.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Onko sinulla kysymyksiä tai ajatuksia Bubble Cardista? Haluatko jakaa kojelauta
 
 Panokset ovat tervetulleita! Olipa kyseessä virheiden korjaus, uudet ominaisuudet, käännökset tai dokumentaation parannukset, avaa vapaasti pull request.
 
-Ennen aloittamista, lue [kehittäjän opas](DEVELOPERS.md), joka käsittelee kuinka asettaa paikallinen ympäristösi, rakentaa projekti ja testata muutoksesi.
+Ennen aloittamista, lue [kehittäjän opas](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), joka käsittelee kuinka asettaa paikallinen ympäristösi, rakentaa projekti ja testata muutoksesi.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

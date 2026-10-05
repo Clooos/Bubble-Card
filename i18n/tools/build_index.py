@@ -15,7 +15,7 @@ I18N = os.path.join(REPO, 'i18n')
 # happened to the translate icon and to a trimmed paragraph. Keep the two in
 # sync, and check `git diff i18n/languages.md` after a run: a rebuild that
 # changed no language should produce no diff at all.
-HEADER = """# <img src="../img/translate.svg" width="28" height="28" align="absmiddle" alt=""> Bubble Card in your language
+HEADER = """# <img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="28" height="28" align="absmiddle" alt=""> Bubble Card in your language
 
 > [!IMPORTANT]
 > The English [README](../README.md) is the reference documentation and is always up to date.

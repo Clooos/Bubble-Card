@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Leer esto en otro idioma](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Leer esto en otro idioma](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card es una colección de tarjetas minimalista y personalizable para Home Assistant, con pop-ups modernos y un Module Store integrado con más de 100 módulos creados por la comunidad.
 
@@ -2750,7 +2750,7 @@ Bubble Card habla tu idioma. Su editor está traducido a los 64 idiomas que admi
 
 En la parte inferior del editor, junto al número de versión, un interruptor **Automático** sigue el idioma de tu Home Assistant. Desactívalo y todo el editor vuelve al inglés, algo práctico para seguir un tutorial o para informar de un problema. Tu elección se recuerda en tu navegador.
 
-Esta documentación también está traducida, [a 62 idiomas](languages.md), a todos menos al inglés británico, que muestra el original. Esas páginas están abiertas a todo el mundo, así que una expresión que no coincide con tu propio Home Assistant se puede corregir en un par de clics. La versión en inglés sigue siendo la referencia para el contenido en sí.
+Esta documentación también está traducida, [a 62 idiomas](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), a todos menos al inglés británico, que muestra el original. Esas páginas están abiertas a todo el mundo, así que una expresión que no coincide con tu propio Home Assistant se puede corregir en un par de clics. La versión en inglés sigue siendo la referencia para el contenido en sí.
 
 <br>
 
@@ -2779,7 +2779,7 @@ No dudes en abrir una incidencia si algo no funciona como esperabas.
 
 ¡Las contribuciones son bienvenidas! Ya sean correcciones de errores, nuevas funcionalidades, traducciones o mejoras en la documentación, no dudes en abrir una pull request.
 
-Antes de empezar, lee la [guía para desarrolladores](DEVELOPERS.md), que explica cómo preparar tu entorno local, compilar el proyecto y probar tus cambios.
+Antes de empezar, lee la [guía para desarrolladores](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), que explica cómo preparar tu entorno local, compilar el proyecto y probar tus cambios.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

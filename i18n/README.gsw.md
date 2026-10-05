@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Lueg das inere andere Sprach a](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Lueg das inere andere Sprach a](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card isch e minimalistischi und aapassbari Kartesammlig für Home Assistant, mit modärne Pop-ups und emene integrierte Module Store mit über 100 vo dr Community erstellte Module.
 
@@ -2750,7 +2750,7 @@ Bubble Card redt dini Sprach. Sin Editor isch i die 64 Sprache übersetzt, wo Ho
 
 Zunterscht im Editor, näbem Versionsnummere, folgt en **Automatisch**-Schalter de Sprach vo dim Home Assistant. Schalt en ab und de ganz Editor gaht zrugg uf Änglisch, was praktisch isch zum eme Tutorial folge oder es Problem melde. Dini Wahl wird i dim Browser gmerkt.
 
-Die Dokumentation isch au übersetzt, [i 62 Sprache](languages.md), alli usser britischs Änglisch, wo s Original liest. Die Site sind für alli offe, drum cha e Formulierig, wo nöd zu dim eigene Home Assistant passt, i es paar Klick korrigiert werde. D änglisch Version bliibt d Referänz für de Inhalt sälber.
+Die Dokumentation isch au übersetzt, [i 62 Sprache](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), alli usser britischs Änglisch, wo s Original liest. Die Site sind für alli offe, drum cha e Formulierig, wo nöd zu dim eigene Home Assistant passt, i es paar Klick korrigiert werde. D änglisch Version bliibt d Referänz für de Inhalt sälber.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Hesch Frage oder Gedanke zu Bubble Card? Witt dini Dashboards oder Entdeckige te
 
 Beiträg sind willkomme! Öb Bugfixe, neui Funktione, Übersetzige oder Dokumentations-Verbesserige, zöger nöd, e Pull Request z'eröffne.
 
-Bevor du aafangsch, lis bitte dr [Entwickler-Guide](DEVELOPERS.md), wo erklärt, wie du dini lokali Umgäbig ufsetzisch, s'Projekt buildisch und dini Änderige testisch.
+Bevor du aafangsch, lis bitte dr [Entwickler-Guide](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), wo erklärt, wie du dini lokali Umgäbig ufsetzisch, s'Projekt buildisch und dini Änderige testisch.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

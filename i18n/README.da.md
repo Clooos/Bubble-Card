@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Læs dette på et andet sprog](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Læs dette på et andet sprog](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card er en minimalistisk og tilpasselig kortsamling til Home Assistant, med moderne pop-up-vinduer og en integreret Module Store med over 100 fællesskabsudviklede moduler.
 
@@ -2750,7 +2750,7 @@ Bubble Card taler dit sprog. Editoren er oversat til de 64 sprog, som Home Assis
 
 Nederst i editoren, ved siden af versionsnummeret, følger en **Automatisk**-kontakt dit Home Assistant-sprog. Slå den fra, og hele editoren går tilbage til engelsk, hvilket er praktisk, når du følger en vejledning eller melder et problem. Dit valg huskes i din browser.
 
-Denne dokumentation er også oversat, [til 62 sprog](languages.md), alle på nær britisk engelsk, som viser originalen. De sider er åbne for alle, så en formulering, der ikke passer til dit eget Home Assistant, kan rettes med et par klik. Den engelske version er fortsat referencen for selve indholdet.
+Denne dokumentation er også oversat, [til 62 sprog](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), alle på nær britisk engelsk, som viser originalen. De sider er åbne for alle, så en formulering, der ikke passer til dit eget Home Assistant, kan rettes med et par klik. Den engelske version er fortsat referencen for selve indholdet.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Har du spørgsmål eller tanker om Bubble Card? Vil du dele dine dashboards elle
 
 Bidrag er velkomne! Uanset om det er fejlrettelser, nye funktioner, oversættelser eller forbedringer af dokumentationen, er du velkommen til at oprette en pull request.
 
-Før du går i gang, bedes du læse [udviklerguiden](DEVELOPERS.md), som beskriver, hvordan du sætter dit lokale miljø op, bygger projektet og tester dine ændringer.
+Før du går i gang, bedes du læse [udviklerguiden](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), som beskriver, hvordan du sætter dit lokale miljø op, bygger projektet og tester dine ændringer.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Bunu başka bir dilde okuyun](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Bunu başka bir dilde okuyun](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card, Home Assistant için minimalist ve özelleştirilebilir bir kart koleksiyonudur: modern pop-up'lar ve 100'den fazla topluluk yapımı modül içeren entegre bir Module Store sunar.
 
@@ -2750,7 +2750,7 @@ Bubble Card sizin dilinizi konuşur. Editörü, Home Assistant'ın desteklediği
 
 Editörün altında, sürüm numarasının yanındaki bir **Otomatik** anahtarı Home Assistant dilinizi izler. Onu kapatın, tüm editör İngilizceye döner, bu da bir eğitimi takip etmek ya da bir sorun bildirmek için kullanışlıdır. Seçiminiz tarayıcınızda hatırlanır.
 
-Bu belgeler de çevrildi, [62 dilde](languages.md), İngiliz İngilizcesi dışında hepsinde, o da orijinali kullanır. Bu sayfalar herkese açıktır, bu yüzden kendi Home Assistant'ınıza uymayan bir ifade birkaç tıklamayla düzeltilebilir. İçeriğin kendisi için İngilizce sürüm başvuru kaynağı olarak kalır.
+Bu belgeler de çevrildi, [62 dilde](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), İngiliz İngilizcesi dışında hepsinde, o da orijinali kullanır. Bu sayfalar herkese açıktır, bu yüzden kendi Home Assistant'ınıza uymayan bir ifade birkaç tıklamayla düzeltilebilir. İçeriğin kendisi için İngilizce sürüm başvuru kaynağı olarak kalır.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Bubble Card hakkında sorularınız veya düşünceleriniz mi var? Panolarınız
 
 Katkılarınız için teşekkürler! İster hata düzeltmesi, ister yeni özellik, ister çeviri, ister belge iyileştirmesi olsun, bir pull request açmaktan çekinmeyin.
 
-Başlamadan önce, yerel ortamınızı nasıl kuracağınızı, projeyi nasıl derleyeceğinizi ve değişikliklerinizi nasıl test edeceğinizi anlatan [geliştirici rehberini](DEVELOPERS.md) okuyun.
+Başlamadan önce, yerel ortamınızı nasıl kuracağınızı, projeyi nasıl derleyeceğinizi ve değişikliklerinizi nasıl test edeceğinizi anlatan [geliştirici rehberini](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) okuyun.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

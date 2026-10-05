@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[წაიკითხეთ ეს სხვა ენაზე](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[წაიკითხეთ ეს სხვა ენაზე](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card არის მინიმალისტური და მორგებადი ბარათების კოლექცია Home Assistant-ისთვის, რომელსაც აქვს თანამედროვე ამომხტარი ფანჯრები და ჩაშენებული Module Store 100-ზე მეტი საზოგადოების მიერ შექმნილი მოდულით.
 
@@ -2750,7 +2750,7 @@ Bubble Card თქვენს ენაზე ლაპარაკობს. �
 
 რედაქტორის ბოლოში, ვერსიის ნომრის გვერდით, გადამრთველი **ავტომატური** მიჰყვება თქვენი Home Assistant-ის ენას. გამორთეთ ის და მთელი რედაქტორი ინგლისურს დაუბრუნდება, რაც მოსახერხებელია გაკვეთილის მისადევნებლად ან პრობლემის შესატყობინებლად. თქვენი არჩევანი თქვენს ბრაუზერში ინახება.
 
-ეს დოკუმენტაციაც თარგმნილია, [62 ენაზე](languages.md), ყველა მათგანზე ბრიტანული ინგლისურის გარდა, რომელიც ორიგინალს აჩვენებს. ეს გვერდები ყველასთვის ღიაა, ასე რომ ფორმულირება, რომელიც თქვენს Home Assistant-ს არ ემთხვევა, რამდენიმე დაწკაპუნებით სწორდება. ინგლისური ვერსია რჩება შინაარსის მთავარ ორიენტირად.
+ეს დოკუმენტაციაც თარგმნილია, [62 ენაზე](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), ყველა მათგანზე ბრიტანული ინგლისურის გარდა, რომელიც ორიგინალს აჩვენებს. ეს გვერდები ყველასთვის ღიაა, ასე რომ ფორმულირება, რომელიც თქვენს Home Assistant-ს არ ემთხვევა, რამდენიმე დაწკაპუნებით სწორდება. ინგლისური ვერსია რჩება შინაარსის მთავარ ორიენტირად.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Bubble Card თქვენს ენაზე ლაპარაკობს. �
 
 წვლილის შეტანა მისასალმებელია! იქნება ეს შეცდომების გასწორება, ახალი ფუნქციები, თარგმანები თუ დოკუმენტაციის გაუმჯობესება, თამამად გახსენით pull request.
 
-დაწყებამდე გთხოვთ წაიკითხოთ [დეველოპერის გზამკვლევი](DEVELOPERS.md), რომელიც მოიცავს, თუ როგორ დააყენოთ თქვენი ლოკალური გარემო, ააგოთ პროექტი და გამოცადოთ თქვენი ცვლილებები.
+დაწყებამდე გთხოვთ წაიკითხოთ [დეველოპერის გზამკვლევი](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), რომელიც მოიცავს, თუ როგორ დააყენოთ თქვენი ლოკალური გარემო, ააგოთ პროექტი და გამოცადოთ თქვენი ცვლილებები.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

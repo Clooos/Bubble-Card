@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[దీన్ని మరో భాషలో చదవండి](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[దీన్ని మరో భాషలో చదవండి](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card అనేది Home Assistant కోసం ఒక సరళమైన మరియు అనుకూలీకరించదగిన కార్డ్ సేకరణ, ఇందులో ఆధునిక పాప్-అప్‌లు మరియు 100కు పైగా కమ్యూనిటీ తయారుచేసిన మాడ్యూల్‌లతో కూడిన ఇంటిగ్రేటెడ్ Module Store ఉన్నాయి.
 
@@ -2750,7 +2750,7 @@ Bubble Card మీ భాషలో మాట్లాడుతుంది. ద�
 
 ఎడిటర్ దిగువన, వెర్షన్ నంబర్ పక్కన, ఒక **స్వయంచాలకం** స్విచ్ మీ Home Assistant భాషను అనుసరిస్తుంది. దానిని ఆఫ్ చేస్తే ఎడిటర్ మొత్తం ఆంగ్లానికి తిరిగి వెళ్తుంది, ఇది ఒక ట్యుటోరియల్‌ను అనుసరించడానికి లేదా ఒక సమస్యను నివేదించడానికి ఉపయోగకరం. మీ ఎంపిక మీ బ్రౌజర్‌లో గుర్తుంచుకోబడుతుంది.
 
-ఈ డాక్యుమెంటేషన్ కూడా అనువదించబడింది, [62 భాషల్లోకి](languages.md), బ్రిటిష్ ఇంగ్లీష్ తప్ప అన్నింటిలోకి, బ్రిటిష్ ఇంగ్లీష్ అసలు పాఠాన్నే చూపిస్తుంది. ఆ పేజీలు అందరికీ తెరిచి ఉన్నాయి, కాబట్టి మీ సొంత Home Assistant తో సరిపోని పదజాలాన్ని కొన్ని క్లిక్‌లలో సరిచేయవచ్చు. విషయానికి సంబంధించి ఆంగ్ల వెర్షనే ప్రామాణికంగా ఉంటుంది.
+ఈ డాక్యుమెంటేషన్ కూడా అనువదించబడింది, [62 భాషల్లోకి](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), బ్రిటిష్ ఇంగ్లీష్ తప్ప అన్నింటిలోకి, బ్రిటిష్ ఇంగ్లీష్ అసలు పాఠాన్నే చూపిస్తుంది. ఆ పేజీలు అందరికీ తెరిచి ఉన్నాయి, కాబట్టి మీ సొంత Home Assistant తో సరిపోని పదజాలాన్ని కొన్ని క్లిక్‌లలో సరిచేయవచ్చు. విషయానికి సంబంధించి ఆంగ్ల వెర్షనే ప్రామాణికంగా ఉంటుంది.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Bubble Card గురించి ప్రశ్నలు లేదా ఆల�
 
 సహకారాలకు స్వాగతం! బగ్ ఫిక్స్‌లు అయినా, కొత్త ఫీచర్‌లు అయినా, అనువాదాలు అయినా, లేదా డాక్యుమెంటేషన్ మెరుగుదలలు అయినా, ఒక పుల్ రిక్వెస్ట్‌ను తెరవడానికి సంకోచించకండి.
 
-మొదలుపెట్టే ముందు, మీ లోకల్ ఎన్విరాన్‌మెంట్‌ను ఎలా సెటప్ చేయాలో, ప్రాజెక్టును ఎలా బిల్డ్ చేయాలో మరియు మీ మార్పులను ఎలా పరీక్షించాలో వివరించే [డెవలపర్ గైడ్](DEVELOPERS.md) చదవండి.
+మొదలుపెట్టే ముందు, మీ లోకల్ ఎన్విరాన్‌మెంట్‌ను ఎలా సెటప్ చేయాలో, ప్రాజెక్టును ఎలా బిల్డ్ చేయాలో మరియు మీ మార్పులను ఎలా పరీక్షించాలో వివరించే [డెవలపర్ గైడ్](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) చదవండి.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

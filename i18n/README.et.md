@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Loe seda mõnes muus keeles](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Loe seda mõnes muus keeles](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card on minimalistlik ja kohandatav kaartide kogu Home Assistant'i jaoks, mis pakub kaasaegseid hüpikaknaid ja sisseehitatud Module Store'i enam kui 100 kogukonna loodud mooduliga.
 
@@ -2750,7 +2750,7 @@ Bubble Card räägib sinu keelt. Selle redaktor on tõlgitud 64 keelde, mida Hom
 
 Redaktori allservas, versiooninumbri kõrval, järgib lüliti **Automaatne** sinu Home Assistanti keelt. Lülita see välja ja kogu redaktor läheb tagasi inglise keelde, mis on mugav õpetuse järgimiseks või probleemist teatamiseks. Sinu valik jäetakse brauseris meelde.
 
-Ka see dokumentatsioon on tõlgitud, [62 keelde](languages.md), kõikidesse peale briti inglise keele, mis kuvab originaali. Need lehed on kõigile avatud, nii et sõnastuse, mis sinu Home Assistantiga kokku ei lähe, saab paari klikiga parandada. Ingliskeelne versioon jääb sisu enda võrdluspunktiks.
+Ka see dokumentatsioon on tõlgitud, [62 keelde](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), kõikidesse peale briti inglise keele, mis kuvab originaali. Need lehed on kõigile avatud, nii et sõnastuse, mis sinu Home Assistantiga kokku ei lähe, saab paari klikiga parandada. Ingliskeelne versioon jääb sisu enda võrdluspunktiks.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Kas sul on küsimusi või mõtteid Bubble Card kohta? Soovid jagada oma töölau
 
 Panused on teretulnud! Olgu selleks veaparandused, uued funktsioonid, tõlked või dokumentatsiooni parandused, ava julgelt pull request.
 
-Enne alustamist loe palun [arendaja juhendit](DEVELOPERS.md), mis kirjeldab, kuidas seadistada oma kohalikku keskkonda, projekti ehitada ja oma muudatusi testida.
+Enne alustamist loe palun [arendaja juhendit](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), mis kirjeldab, kuidas seadistada oma kohalikku keskkonda, projekti ehitada ja oma muudatusi testida.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

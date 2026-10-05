@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Lees dit in een andere taal](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Lees dit in een andere taal](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card is een minimalistische en aanpasbare kaartcollectie voor Home Assistant, met moderne pop-ups en een geïntegreerde Module Store met meer dan 100 door de community gemaakte modules.
 
@@ -2750,7 +2750,7 @@ Bubble Card spreekt jouw taal. De editor is vertaald in de 64 talen die Home Ass
 
 Onderaan de editor, naast het versienummer, volgt een schakelaar **Automatisch** de taal van je Home Assistant. Zet die uit en de hele editor gaat terug naar het Engels, wat handig is om een tutorial te volgen of een probleem te melden. Je keuze wordt in je browser onthouden.
 
-Deze documentatie is ook vertaald, [in 62 talen](languages.md), alle behalve Brits Engels, dat het origineel toont. Die pagina's staan voor iedereen open, dus een formulering die niet overeenkomt met je eigen Home Assistant kan met een paar klikken worden verbeterd. De Engelse versie blijft de referentie voor de inhoud zelf.
+Deze documentatie is ook vertaald, [in 62 talen](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), alle behalve Brits Engels, dat het origineel toont. Die pagina's staan voor iedereen open, dus een formulering die niet overeenkomt met je eigen Home Assistant kan met een paar klikken worden verbeterd. De Engelse versie blijft de referentie voor de inhoud zelf.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Heb je vragen of ideeën over Bubble Card? Wil je je dashboards of ontdekkingen 
 
 Bijdragen zijn welkom! Of het nu gaat om bugfixes, nieuwe functies, vertalingen of verbeteringen aan de documentatie, aarzel niet om een pull request te openen.
 
-Lees voordat je begint de [ontwikkelaarshandleiding](DEVELOPERS.md), waarin wordt uitgelegd hoe je je lokale omgeving opzet, het project bouwt en je wijzigingen test.
+Lees voordat je begint de [ontwikkelaarshandleiding](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), waarin wordt uitgelegd hoe je je lokale omgeving opzet, het project bouwt en je wijzigingen test.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

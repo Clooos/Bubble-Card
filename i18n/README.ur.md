@@ -7,9 +7,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[اسے کسی دوسری زبان میں پڑھیں](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[اسے کسی دوسری زبان میں پڑھیں](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card ایک مینیمل اور حسبِ ضرورت کارڈز کا مجموعہ ہے جو Home Assistant کے لیے بنایا گیا ہے، جس میں جدید پاپ اپس اور 100 سے زیادہ کمیونٹی کے بنائے ہوئے ماڈیولز پر مشتمل ایک مربوط Module Store شامل ہے۔
 
@@ -2752,7 +2752,7 @@ Bubble Card آپ کی زبان بولتا ہے۔ اس کا ایڈیٹر ان 64 
 
 ایڈیٹر کے نیچے، ورژن نمبر کے ساتھ، ایک **خودکار** سوئچ آپ کے Home Assistant کی زبان کی پیروی کرتا ہے۔ اسے بند کر دیں تو پورا ایڈیٹر واپس انگریزی میں چلا جاتا ہے، جو کسی ٹیوٹوریل پر عمل کرنے یا کوئی مسئلہ رپورٹ کرنے کے لیے کارآمد ہے۔ آپ کا انتخاب آپ کے براؤزر میں یاد رکھا جاتا ہے۔
 
-یہ دستاویزات بھی ترجمہ ہو چکی ہیں، [62 زبانوں میں](languages.md)، برطانوی انگریزی کے سوا باقی سب میں، برطانوی انگریزی اصل ہی دکھاتی ہے۔ یہ صفحات سب کے لیے کھلے ہیں، اس لیے کوئی ایسا انداز جو آپ کے اپنے Home Assistant سے میل نہ کھاتا ہو، چند کلکس میں درست کیا جا سکتا ہے۔ مواد کے لیے انگریزی نسخہ ہی حوالہ رہتا ہے۔
+یہ دستاویزات بھی ترجمہ ہو چکی ہیں، [62 زبانوں میں](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)، برطانوی انگریزی کے سوا باقی سب میں، برطانوی انگریزی اصل ہی دکھاتی ہے۔ یہ صفحات سب کے لیے کھلے ہیں، اس لیے کوئی ایسا انداز جو آپ کے اپنے Home Assistant سے میل نہ کھاتا ہو، چند کلکس میں درست کیا جا سکتا ہے۔ مواد کے لیے انگریزی نسخہ ہی حوالہ رہتا ہے۔
 
 <br>
 
@@ -2781,7 +2781,7 @@ Bubble Card کے بارے میں سوالات یا خیالات ہیں؟ اپن�
 
 تعاون کا خیرمقدم ہے! چاہے وہ بگ فکسز ہوں، نئے فیچرز، ترجمے، یا دستاویزات میں بہتری، بلا جھجھک ایک pull request کھولیں۔
 
-شروع کرنے سے پہلے، براہ کرم [ڈویلپر گائیڈ](DEVELOPERS.md) پڑھیں جو آپ کے مقامی ماحول کو ترتیب دینے، پروجیکٹ بنانے، اور آپ کی تبدیلیوں کو ٹیسٹ کرنے کا احاطہ کرتی ہے۔
+شروع کرنے سے پہلے، براہ کرم [ڈویلپر گائیڈ](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) پڑھیں جو آپ کے مقامی ماحول کو ترتیب دینے، پروجیکٹ بنانے، اور آپ کی تبدیلیوں کو ٹیسٹ کرنے کا احاطہ کرتی ہے۔
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

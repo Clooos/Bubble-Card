@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Číst tuto stránku v jiném jazyce](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Číst tuto stránku v jiném jazyce](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card je minimalistická a přizpůsobitelná kolekce karet pro Home Assistant s moderními pop-upy a integrovaným Module Store, který nabízí přes 100 modulů vytvořených komunitou.
 
@@ -2750,7 +2750,7 @@ Bubble Card mluví vaším jazykem. Její editor je přeložen do 64 jazyků, kt
 
 Ve spodní části editoru, vedle čísla verze, sleduje přepínač **Automaticky** jazyk vašeho Home Assistant. Vypněte jej a celý editor se vrátí do angličtiny, což se hodí při sledování návodu nebo při hlášení chyby. Vaše volba se pamatuje ve vašem prohlížeči.
 
-I tato dokumentace je přeložena, [do 62 jazyků](languages.md), do všech kromě britské angličtiny, která zobrazuje originál. Tyto stránky jsou otevřené všem, takže formulaci, která neodpovídá vašemu Home Assistant, lze opravit pár kliknutími. Anglická verze zůstává referencí pro samotný obsah.
+I tato dokumentace je přeložena, [do 62 jazyků](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), do všech kromě britské angličtiny, která zobrazuje originál. Tyto stránky jsou otevřené všem, takže formulaci, která neodpovídá vašemu Home Assistant, lze opravit pár kliknutími. Anglická verze zůstává referencí pro samotný obsah.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Máte otázky nebo postřehy k Bubble Card? Chcete se pochlubit svými přehledy
 
 Příspěvky jsou vítány! Ať už jde o opravy chyb, nové funkce, překlady nebo vylepšení dokumentace, neváhejte otevřít pull request.
 
-Než začnete, přečtěte si prosím [průvodce pro vývojáře](DEVELOPERS.md), který popisuje, jak si nastavit lokální prostředí, sestavit projekt a otestovat své změny.
+Než začnete, přečtěte si prosím [průvodce pro vývojáře](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), který popisuje, jak si nastavit lokální prostředí, sestavit projekt a otestovat své změny.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

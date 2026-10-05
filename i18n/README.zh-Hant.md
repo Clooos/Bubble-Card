@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[以其他語言閱讀本頁](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[以其他語言閱讀本頁](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card 是一套為 Home Assistant 打造的極簡且可自訂的卡片集合,擁有現代化的彈出視窗,並內建整合了超過 100 個社群製作模組的 Module Store。
 
@@ -2750,7 +2750,7 @@ Bubble Card 說你的語言。它的編輯器已翻譯成 Home Assistant 支援�
 
 在編輯器底部、版本號旁邊，有一個 **自動** 開關會跟隨你的 Home Assistant 語言。把它關掉，整個編輯器就會回到英文，這在照著教學操作或回報問題時很方便。你的選擇會記在瀏覽器裡。
 
-這份文件同樣被翻譯了，[共 62 種語言](languages.md)，除英式英語以外的每一種語言，英式英語讀的是原文。這些頁面對所有人開放，因此與你自己的 Home Assistant 不一致的用字，只要點幾下就能修正。英文版仍然是內容本身的依據。
+這份文件同樣被翻譯了，[共 62 種語言](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)，除英式英語以外的每一種語言，英式英語讀的是原文。這些頁面對所有人開放，因此與你自己的 Home Assistant 不一致的用字，只要點幾下就能修正。英文版仍然是內容本身的依據。
 
 <br>
 
@@ -2779,7 +2779,7 @@ Bubble Card 說你的語言。它的編輯器已翻譯成 Home Assistant 支援�
 
 歡迎任何形式的貢獻！無論是修正錯誤、新增功能、翻譯，或是改善文件，都歡迎開啟一個 pull request。
 
-在開始之前，請先閱讀[開發者指南](DEVELOPERS.md)，其中說明如何設定本機開發環境、建置專案，以及測試你的修改。
+在開始之前，請先閱讀[開發者指南](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md)，其中說明如何設定本機開發環境、建置專案，以及測試你的修改。
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

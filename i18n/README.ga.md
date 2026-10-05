@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Léigh é seo i dteanga eile](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Léigh é seo i dteanga eile](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Is bailiúchán cárta íogair agus insaincheaptha é Bubble Card do Home Assistant, ina bhfuil preabfhuinneoga nua-aimseartha agus Module Store comhtháite le breis agus 100 modúl a chruthaigh an pobal.
 
@@ -2750,7 +2750,7 @@ Labhraíonn Bubble Card do theanga. Tá a eagarthóir aistrithe go dtí an 64 te
 
 Ag bun an eagarthóra, in aice le huimhir an leagain, leanann lasc **Uathoibríoch** teanga do Home Assistant. Múch í agus fillfidh an t-eagarthóir ar fad ar an mBéarla, rud atá áisiúil chun teagaisc a leanúint nó chun fadhb a thuairisciú. Cuimhnítear ar do rogha i do bhrabhsálaí.
 
-Tá an doiciméadú seo aistrithe freisin, [go 62 teanga](languages.md), gach ceann acu seachas Béarla na Breataine, a thaispeánann an bunleagan. Tá na leathanaigh sin oscailte do chách, mar sin is féidir foclaíocht nach bhfuil ag teacht le do Home Assistant féin a cheartú i gcúpla cniog. Fanann an leagan Béarla mar thagairt don ábhar féin.
+Tá an doiciméadú seo aistrithe freisin, [go 62 teanga](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), gach ceann acu seachas Béarla na Breataine, a thaispeánann an bunleagan. Tá na leathanaigh sin oscailte do chách, mar sin is féidir foclaíocht nach bhfuil ag teacht le do Home Assistant féin a cheartú i gcúpla cniog. Fanann an leagan Béarla mar thagairt don ábhar féin.
 
 <br>
 
@@ -2779,7 +2779,7 @@ An bhfuil ceisteanna nó smaointe agat faoi Bubble Card? Ar mhaith leat do dhais
 
 Fáiltítear roimh rannchuidithe! Cibé acu is ceartúcháin fabhtanna, gnéithe nua, aistriúcháin nó feabhsuithe doiciméadaithe iad, ná bíodh drogall ort iarratas tarraingthe a oscailt.
 
-Sula dtosaíonn tú, léigh an [treoir forbróra](DEVELOPERS.md) le do thoil ina bpléitear conas do thimpeallacht áitiúil a shocrú, an tionscadal a thógáil, agus do chuid athruithe a thástáil.
+Sula dtosaíonn tú, léigh an [treoir forbróra](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) le do thoil ina bpléitear conas do thimpeallacht áitiúil a shocrú, an tionscadal a thógáil, agus do chuid athruithe a thástáil.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

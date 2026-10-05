@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Darllenwch hyn mewn iaith arall](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Darllenwch hyn mewn iaith arall](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Mae Bubble Card yn gasgliad o gardiau minimalaidd a chyfaddasadwy ar gyfer Home Assistant, sy'n cynnwys naidlenni modern a Module Store integredig gyda dros 100 o fodiwlau a wnaed gan y gymuned.
 
@@ -2750,7 +2750,7 @@ Mae Bubble Card yn siarad eich iaith. Mae ei olygydd wedi'i gyfieithu i'r 64 iai
 
 Ar waelod y golygydd, wrth ymyl rhif y fersiwn, mae switsh **Awtomatig** yn dilyn iaith eich Home Assistant. Diffoddwch ef ac mae'r golygydd cyfan yn dychwelyd i'r Saesneg, sy'n ddefnyddiol i ddilyn tiwtorial neu i adrodd am broblem. Cofir eich dewis yn eich porwr.
 
-Mae'r ddogfennaeth hon wedi'i chyfieithu hefyd, [i 62 iaith](languages.md), pob un ohonynt heblaw Saesneg Prydeinig, sy'n dangos y gwreiddiol. Mae'r tudalennau hynny'n agored i bawb, felly gellir cywiro geiriad nad yw'n cyfateb i'ch Home Assistant chi mewn ychydig o gliciau. Mae'r fersiwn Saesneg yn aros yn gyfeirnod ar gyfer y cynnwys ei hun.
+Mae'r ddogfennaeth hon wedi'i chyfieithu hefyd, [i 62 iaith](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), pob un ohonynt heblaw Saesneg Prydeinig, sy'n dangos y gwreiddiol. Mae'r tudalennau hynny'n agored i bawb, felly gellir cywiro geiriad nad yw'n cyfateb i'ch Home Assistant chi mewn ychydig o gliciau. Mae'r fersiwn Saesneg yn aros yn gyfeirnod ar gyfer y cynnwys ei hun.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Oes gennych chi gwestiynau neu syniadau am Bubble Card? Eisiau rhannu eich dashf
 
 Mae cyfraniadau'n cael croeso! Boed yn drwsio namau, nodweddion newydd, cyfieithiadau, neu welliannau dogfennaeth, mae croeso i chi agor pull request.
 
-Cyn dechrau, darllenwch y [canllaw datblygwr](DEVELOPERS.md) sy'n esbonio sut i osod eich amgylchedd lleol, adeiladu'r prosiect, a phrofi eich newidiadau.
+Cyn dechrau, darllenwch y [canllaw datblygwr](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) sy'n esbonio sut i osod eich amgylchedd lleol, adeiladu'r prosiect, a phrofi eich newidiadau.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

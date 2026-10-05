@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Lexojeni këtë në një gjuhë tjetër](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Lexojeni këtë në një gjuhë tjetër](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card është një koleksion kartash minimaliste dhe të personalizueshme për Home Assistant, me pop-up modernë dhe një Module Store të integruar me mbi 100 module të krijuara nga komuniteti.
 
@@ -2750,7 +2750,7 @@ Bubble Card flet gjuhën tuaj. Editori i tij është përkthyer në 64 gjuhët q
 
 Në fund të editorit, pranë numrit të versionit, një çelës **Automatik** ndjek gjuhën e Home Assistant tuaj. Fikeni dhe i gjithë editori kthehet në anglisht, gjë që është e dobishme për të ndjekur një udhëzues ose për të raportuar një problem. Zgjedhja juaj mbahet mend në shfletuesin tuaj.
 
-Edhe ky dokumentacion është përkthyer, [në 62 gjuhë](languages.md), në të gjitha përveç anglishtes britanike, e cila përdor origjinalin. Ato faqe janë të hapura për të gjithë, kështu që një formulim që nuk përputhet me Home Assistant tuaj mund të rregullohet me pak klikime. Versioni në anglisht mbetet referenca për vetë përmbajtjen.
+Edhe ky dokumentacion është përkthyer, [në 62 gjuhë](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), në të gjitha përveç anglishtes britanike, e cila përdor origjinalin. Ato faqe janë të hapura për të gjithë, kështu që një formulim që nuk përputhet me Home Assistant tuaj mund të rregullohet me pak klikime. Versioni në anglisht mbetet referenca për vetë përmbajtjen.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Keni pyetje ose mendime rreth Bubble Card? Doni të ndani dashboard-et ose zbuli
 
 Kontributet janë të mirëpritura! Qofshin rregullime gabimesh, veçori të reja, përkthime, ose përmirësime dokumentacioni, mos hezitoni të hapni një pull request.
 
-Përpara se të filloni, ju lutemi lexoni [udhëzuesin për zhvilluesit](DEVELOPERS.md) i cili shpjegon si të konfiguroni mjedisin tuaj lokal, të ndërtoni projektin dhe të testoni ndryshimet tuaja.
+Përpara se të filloni, ju lutemi lexoni [udhëzuesin për zhvilluesit](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md) i cili shpjegon si të konfiguroni mjedisin tuaj lokal, të ndërtoni projektin dhe të testoni ndryshimet tuaja.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 

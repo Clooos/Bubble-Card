@@ -5,9 +5,9 @@
 
 # Bubble Card
 
-[<img src="../img/translate.svg" width="17" height="17" align="absmiddle" alt="">](languages.md) **[Skaitykite tai kita kalba](languages.md)**
+[<img src="https://raw.githubusercontent.com/Clooos/Bubble-Card/main/img/translate.svg" width="17" height="17" align="absmiddle" alt="">](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md) **[Skaitykite tai kita kalba](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md)**
 
-![readme-images-bubble-card](https://github.com/Clooos/Bubble-Card/assets/36499953/c763bdad-ce71-46b0-aa9e-4ff0017072fe)
+![readme-images-bubble-card](https://raw.githubusercontent.com/Clooos/Bubble-Card/main/.github/bubble-card.gif)
 
 Bubble Card yra minimalistinė ir individualiai pritaikoma kortelių kolekcija, skirta Home Assistant, su modernaus stiliaus iškylančiaisiais langais ir integruota Module Store parduotuve, kurioje yra daugiau kaip 100 bendruomenės sukurtų modulių.
 
@@ -2750,7 +2750,7 @@ Bubble Card kalba jūsų kalba. Jos redaktorius išverstas į 64 kalbas, kurias 
 
 Redaktoriaus apačioje, šalia versijos numerio, jungiklis **Automatinis** seka jūsų Home Assistant kalbą. Išjunkite jį ir visas redaktorius grįš į anglų kalbą, o tai patogu sekant vadovą ar pranešant apie problemą. Jūsų pasirinkimas įsimenamas naršyklėje.
 
-Ši dokumentacija taip pat išversta, [į 62 kalbas](languages.md), į visas, išskyrus britų anglų, kuri rodo originalą. Tie puslapiai atviri visiems, tad formuluotę, kuri neatitinka jūsų paties Home Assistant, galima pataisyti keliais spustelėjimais. Turinio atskaitos tašku lieka angliška versija.
+Ši dokumentacija taip pat išversta, [į 62 kalbas](https://github.com/Clooos/Bubble-Card/blob/main/i18n/languages.md), į visas, išskyrus britų anglų, kuri rodo originalą. Tie puslapiai atviri visiems, tad formuluotę, kuri neatitinka jūsų paties Home Assistant, galima pataisyti keliais spustelėjimais. Turinio atskaitos tašku lieka angliška versija.
 
 <br>
 
@@ -2779,7 +2779,7 @@ Turite klausimų ar minčių apie Bubble Card? Norite pasidalyti savo prietaisų
 
 Prisidėjimai laukiami! Nesvarbu, ar tai klaidų taisymas, naujos funkcijos, vertimai ar dokumentacijos patobulinimai, nedvejodami sukurkite pull request.
 
-Prieš pradėdami, perskaitykite [kūrėjo vadovą](DEVELOPERS.md), kuriame aprašoma, kaip nusistatyti vietinę aplinką, sukurti (build) projektą ir išbandyti savo pakeitimus.
+Prieš pradėdami, perskaitykite [kūrėjo vadovą](https://github.com/Clooos/Bubble-Card/blob/main/DEVELOPERS.md), kuriame aprašoma, kaip nusistatyti vietinę aplinką, sukurti (build) projektą ir išbandyti savo pakeitimus.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Contribute-blue?logo=github&style=for-the-badge)](https://github.com/Clooos/Bubble-Card/pulls)
 
