@@ -63,6 +63,14 @@ function getDisplayedPercentage(context) {
   }
 }
 
+// A ramp belongs to the state it was started for. Left running, it keeps
+// writing its own target on its frames, over whatever was settled since.
+function cancelFillRamp(context) {
+  if (!context._sliderAnimRaf) return;
+  try { cancelAnimationFrame(context._sliderAnimRaf); } catch (_) {}
+  context._sliderAnimRaf = null;
+}
+
 function animateToPercentage(context, targetPercentage) {
   if (!context || !context.elements) return;
   if (context.dragging) return; // Never animate during drag
@@ -77,8 +85,7 @@ function animateToPercentage(context, targetPercentage) {
   // Cancel any existing animation on this context. Before the snap and not
   // after: a ramp left running would keep writing its own target over the
   // position settled below, on its own frames.
-  try { if (context._sliderAnimRaf) cancelAnimationFrame(context._sliderAnimRaf); } catch (_) {}
-  context._sliderAnimRaf = null;
+  cancelFillRamp(context);
 
   // If small delta, snap immediately. A settle flush snaps whatever the delta
   // is: the pop-up is open and motionless by then, so a ramp starting there is
@@ -307,6 +314,12 @@ export function updateSlider(
     return;
   }
   context._sliderSyncedState = stateObj;
+
+  // The state moved on, and a ramp still running was heading for the previous
+  // one. A light group going off reports a member first, the group a little
+  // dimmer, then the group off a few tens of ms later. The fill dropped to 0
+  // and the ramp of the first report put it back where it was (#2647).
+  cancelFillRamp(context);
 
   const previousPercentage = readDisplayedPercentage(context);
 

@@ -16,6 +16,9 @@ const setRangeFillTransform = jest.fn((context, percentage) => {
     context._lastVisualFillPercentage = percentage;
 });
 
+// Every write is instant unless a test asks for the ramp.
+const isInstantSliderWrite = jest.fn(() => true);
+
 // An input_number from -10 to 10, so 0 sits at the middle of the rail.
 const percentageOf = (context, entity) => ((Number(context._hass.states[entity].state) + 10) / 20) * 100;
 
@@ -33,7 +36,7 @@ jest.unstable_mockModule('./helpers.js', () => ({
     toActualPercentage: jest.fn((context, percentage) => percentage),
     getFillOrientation: jest.fn(() => 'left'),
     setRangeFillTransform,
-    isInstantSliderWrite: jest.fn(() => true),
+    isInstantSliderWrite,
 }));
 
 const { updateSlider } = await import('./changes.js');
@@ -128,5 +131,85 @@ describe('what moves the fill of a slider', () => {
         context.dragging = true;
         updateSlider(context);
         expect(setRangeFillTransform).not.toHaveBeenCalled();
+    });
+});
+
+// A light group going off reports a member first (the group a little dimmer),
+// then the group off a few tens of ms later. The small step starts a ramp, and
+// the ramp kept running under the fill the second report had just emptied.
+describe('a state that arrives while the fill is still ramping', () => {
+    let frames;
+    let now;
+
+    const runFrames = (ms) => {
+        const end = now + ms;
+        while (now < end) {
+            now += 16;
+            const due = [...frames.values()];
+            frames.clear();
+            due.forEach((callback) => callback(now));
+        }
+    };
+
+    beforeEach(() => {
+        frames = new Map();
+        now = 1000;
+        let id = 0;
+        global.requestAnimationFrame = (callback) => { frames.set(++id, callback); return id; };
+        global.cancelAnimationFrame = (handle) => { frames.delete(handle); };
+        jest.spyOn(performance, 'now').mockImplementation(() => now);
+        isInstantSliderWrite.mockImplementation(() => false);
+    });
+
+    afterEach(() => {
+        delete global.requestAnimationFrame;
+        delete global.cancelAnimationFrame;
+        jest.restoreAllMocks();
+        isInstantSliderWrite.mockImplementation(() => true);
+    });
+
+    const rampingContext = () => {
+        const context = createContext(0);
+        updateSlider(context);
+        // A step of 2 %, small enough to be ramped.
+        context._hass = { states: { 'input_number.test': state(0.4) } };
+        updateSlider(context);
+        runFrames(48);
+        return context;
+    };
+
+    test('ramps a small step to its end when nothing else arrives', () => {
+        const context = rampingContext();
+        runFrames(400);
+        expect(context._lastVisualFillPercentage).toBe(52);
+        expect(frames.size).toBe(0);
+    });
+
+    test('keeps the fill where the new state put it', () => {
+        const context = rampingContext();
+
+        // The entity drops to its minimum before the ramp is over.
+        context._hass = { states: { 'input_number.test': state(-10) } };
+        updateSlider(context);
+        expect(context._lastVisualFillPercentage).toBe(0);
+
+        setRangeFillTransform.mockClear();
+        runFrames(400);
+        expect(setRangeFillTransform).not.toHaveBeenCalled();
+        expect(context._lastVisualFillPercentage).toBe(0);
+    });
+
+    test('stops the ramp even when the new state asks for no move', () => {
+        const context = rampingContext();
+        const shown = context._lastVisualFillPercentage;
+
+        // The entity lands exactly where the ramp has brought the fill so far.
+        context._hass = { states: { 'input_number.test': state((shown / 100) * 20 - 10) } };
+        updateSlider(context);
+
+        setRangeFillTransform.mockClear();
+        runFrames(400);
+        expect(setRangeFillTransform).not.toHaveBeenCalled();
+        expect(context._lastVisualFillPercentage).toBe(shown);
     });
 });
