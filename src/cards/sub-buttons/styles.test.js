@@ -33,8 +33,21 @@ describe('sub-buttons footer placement', () => {
 
   test('centres the fixed-width footer inside the measured content area', () => {
     expect(getCenteredFooterRule()).toContain(
-      'inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + (100% - var(--bubble-sub-buttons-content-inline-start) - var(--bubble-footer-width, 500px)) / 2)'
+      'inset-inline-start: calc(var(--bubble-sub-buttons-content-inline-start) + (100% - var(--bubble-sub-buttons-content-inline-start) - var(--bubble-footer-resolved-width)) / 2)'
     );
+  });
+
+  // #2620: a configured width that fits has to survive a narrow viewport. It
+  // used to be overruled by a max-width media query, so a phone honoured it in
+  // landscape and dropped it in portrait.
+  test('keeps a configured width that fits, and only clamps one that does not', () => {
+    expect(getCenteredFooterRule()).toContain(
+      '--bubble-footer-resolved-width: min(var(--bubble-footer-width, 500px), 100% - var(--bubble-sub-buttons-content-inline-start) - 16px)'
+    );
+    expect(getCenteredFooterRule()).toContain('width: var(--bubble-footer-resolved-width)');
+
+    const narrowViewport = styles.match(/@media[^{]*max-width:\s*600px[^{]*\{([\s\S]*?)\n\}/)?.[1] ?? '';
+    expect(narrowViewport).not.toContain(':not(.footer-full-width)');
   });
 
   test('keeps the placement logical for RTL dashboards', () => {
