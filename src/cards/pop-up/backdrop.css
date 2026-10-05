@@ -19,6 +19,16 @@
   opacity: 1;
 }
 
+/* The host leaves rendering once a close has faded out, so the next open has
+   no previous style to fade from. This gives it one, with no layout read. It
+   must stay after the rule above, which it overrides for that first style
+   only. An engine that does not know it shows the backdrop at once. */
+@starting-style {
+  .bubble-backdrop.is-visible {
+    opacity: 0;
+  }
+}
+
 .bubble-backdrop.is-hidden {
   opacity: 0;
   pointer-events: none;

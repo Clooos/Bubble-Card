@@ -1,4 +1,7 @@
 import { describe, expect, jest, test } from '@jest/globals';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 function createMockClassList(initialClasses = []) {
     const classes = new Set(initialClasses);
@@ -267,5 +270,67 @@ describe('backdrop transitions', () => {
 
         jest.runOnlyPendingTimers();
         jest.useRealTimers();
+    });
+
+    test('reopens a backdrop taken out of rendering without a layout read', () => {
+        jest.useFakeTimers();
+        global.requestAnimationFrame = jest.fn((callback) => {
+            callback();
+            return 1;
+        });
+
+        const context = {
+            config: {
+                hash: '#popup-a',
+            },
+        };
+
+        const sharedBackdrop = getBackdrop(context);
+        const { backdropElement } = sharedBackdrop;
+        const host = body.children[0];
+
+        expect(host.shadowRoot.children[0]).toBe(backdropElement);
+
+        sharedBackdrop.showBackdrop(context);
+        sharedBackdrop.hideBackdrop();
+
+        // The host stays rendered for the length of the fade out.
+        jest.advanceTimersByTime(299);
+        expect(host.style.display).toBe('');
+
+        jest.advanceTimersByTime(1);
+        expect(host.style.display).toBe('none');
+
+        host.getBoundingClientRect.mockClear();
+        backdropElement.getBoundingClientRect.mockClear();
+
+        sharedBackdrop.showBackdrop(context);
+
+        // Rendered again and visible in one task, so the first style the engine
+        // computes is the visible one and the starting style of backdrop.css
+        // is what the fade starts from.
+        expect(host.style.display).toBe('');
+        expect(backdropElement.classList.contains('is-visible')).toBe(true);
+        expect(backdropElement.classList.contains('is-hidden')).toBe(false);
+        expect(host.getBoundingClientRect).not.toHaveBeenCalled();
+        expect(backdropElement.getBoundingClientRect).not.toHaveBeenCalled();
+
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
+    });
+});
+
+describe('backdrop styles', () => {
+    const styles = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'backdrop.css'), 'utf8');
+
+    test('gives a backdrop that comes back into rendering a transparent style to fade from', () => {
+        const baseRule = styles.match(/^\.bubble-backdrop\s*\{([^}]*)\}/m)?.[1] ?? '';
+        const visibleRule = styles.search(/^\.bubble-backdrop\.is-visible\s*\{\s*opacity:\s*1;\s*\}/m);
+        const startingRule = styles.search(/^@starting-style\s*\{\s*\.bubble-backdrop\.is-visible\s*\{\s*opacity:\s*0;\s*\}\s*\}/m);
+
+        expect(baseRule).toContain('transition: opacity 0.3s;');
+        expect(visibleRule).toBeGreaterThan(-1);
+        // Same specificity as the visible rule, so it only wins when it comes after.
+        expect(startingRule).toBeGreaterThan(visibleRule);
     });
 });
