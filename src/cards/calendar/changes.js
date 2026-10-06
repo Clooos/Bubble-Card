@@ -3,6 +3,7 @@ import { applyScrollingEffect } from "../../tools/text-scrolling.js";
 import { handleCustomStyles } from '../../tools/style-processor.js';
 import setupTranslation from "../../tools/localize.js";
 import { addActions } from "../../tools/tap-actions.js";
+import { isEventMoreInfo, showEventDetails } from "./event-details.js";
 import { hashCode, intToRGB, parseEventDateTime, sortEvents, filterStartedEvents, expandMultiDayEvents, getDayKey } from "./helpers.js";
 
 function dateDiffInMinutes(a, b) {
@@ -189,11 +190,22 @@ export async function changeEvents(context) {
           context.config.event_action,
           event.entity.entity,
           {
-            tap_action: { action: "none" },
+            tap_action: { action: "more-info" },
             double_tap_action: { action: "none" },
             hold_action: { action: "none" }
           }
         );
+
+        // More info on an event is the event itself, the dialog Home
+        // Assistant's own calendar opens with its description, and not the
+        // more-info of the calendar, which only knows its next event.
+        eventLine.addEventListener('hass-action', (actionEvent) => {
+          if (!isEventMoreInfo(actionEvent, event.entity.entity)) return;
+          actionEvent.stopPropagation();
+          showEventDetails(context, event, eventLine, eventColor.style.backgroundColor, () => {
+            changeEventList(context).then(() => changeEvents(context));
+          });
+        });
       }
 
       const activeColor = 'var(--bubble-event-accent-color, var(--bubble-accent-color, var(--bubble-default-color)))';

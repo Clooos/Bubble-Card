@@ -242,6 +242,15 @@ describe('expandMultiDayEvents', () => {
       ]);
     });
 
+    test('should keep the whole event behind each of its days', () => {
+      const holiday = { start: { date: '2024-12-25' }, end: { date: '2024-12-28' }, description: 'Closed' };
+
+      const result = expandMultiDayEvents([holiday], windowStart, windowEnd);
+
+      expect(result).toHaveLength(3);
+      expect(result.every(o => o.sourceEvent === holiday)).toBe(true);
+    });
+
     test('should flag the first and the last day of the span', () => {
       const holiday = { start: { date: '2024-12-25' }, end: { date: '2024-12-28' } };
 

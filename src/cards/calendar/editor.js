@@ -5,14 +5,9 @@ import "../../components/editor/ha-selector-calendar_entity.js";
 export function renderCalendarEditor(editor){
     const t = setupTranslation(editor.hass);
     
-    // S'assurer que event_action est initialisé
-    if (!editor._config.event_action) {
-        editor._config.event_action = {
-            tap_action: { action: "more-info" },
-            double_tap_action: { action: "none" },
-            hold_action: { action: "none" }
-        };
-    }
+    // Nothing is written until an action is changed. The defaults are the
+    // ones the card applies, more-info on a tap and nothing on the two others.
+    const event_action = editor._config.event_action || '';
 
     return html`
         <div class="card-config">
@@ -107,9 +102,9 @@ export function renderCalendarEditor(editor){
                   ${t('editor.actions.on_event')}
                 </h4>
                 <div class="content">
-                    ${editor.makeActionPanel('tap', editor._config.event_action, 'none', 'event_action')}
-                    ${editor.makeActionPanel('double_tap', editor._config.event_action, 'none', 'event_action')}
-                    ${editor.makeActionPanel('hold', editor._config.event_action, 'none', 'event_action')}
+                    ${editor.makeActionPanel('tap', event_action, 'more-info', 'event_action')}
+                    ${editor.makeActionPanel('double_tap', event_action, 'none', 'event_action')}
+                    ${editor.makeActionPanel('hold', event_action, 'none', 'event_action')}
                 </div>
             </ha-expansion-panel>
             ${editor.makeSubButtonPanel()}

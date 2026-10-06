@@ -667,11 +667,6 @@ const calendarCard = (entityId) => ({
   rows: 1,
   days: 7,
   limit: 10,
-  event_action: {
-    tap_action: { action: 'more-info' },
-    double_tap_action: { action: 'none' },
-    hold_action: { action: 'none' },
-  },
   grid_options: { ...TILE_GRID_OPTIONS },
 });
 

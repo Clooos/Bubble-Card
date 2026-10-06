@@ -210,6 +210,31 @@ describe('BubbleCardEditor cleared fields', () => {
         expect(fireEvent).toHaveBeenCalledWith(editor, 'config-changed', { config: editor._config });
     });
 
+    // The action containers of a card, the actions on the events of a calendar
+    // and the ones on the card of a climate, a cover or a media player.
+    test('an action that is changed is the only one written in its container', () => {
+        const editor = editorWithConfig({ card_type: 'calendar' });
+
+        editor._ActionChanged({ detail: { value: { tap_action: { action: 'navigate', navigation_path: '#agenda' } } } }, 'event_action');
+
+        expect(editor._config.event_action).toEqual({ tap_action: { action: 'navigate', navigation_path: '#agenda' } });
+        expect(fireEvent).toHaveBeenCalledWith(editor, 'config-changed', { config: editor._config });
+    });
+
+    test('an action set back to its default leaves nothing behind', () => {
+        const editor = editorWithConfig({
+            card_type: 'calendar',
+            event_action: { tap_action: { action: 'navigate', navigation_path: '#agenda' }, hold_action: { action: 'more-info' } },
+        });
+
+        editor._ActionChanged({ detail: { value: { tap_action: undefined, hold_action: { action: 'more-info' } } } }, 'event_action');
+        expect(editor._config.event_action).toEqual({ hold_action: { action: 'more-info' } });
+
+        editor._ActionChanged({ detail: { value: { tap_action: undefined, hold_action: undefined } } }, 'event_action');
+        expect(editor._config).not.toHaveProperty('event_action');
+        expect(editor._config.card_type).toBe('calendar');
+    });
+
     test('clearing a nested text field drops the nested key only', () => {
         const editor = editorWithConfig({ card_type: 'button', grid_options: { columns: 6, rows: 2 } });
 

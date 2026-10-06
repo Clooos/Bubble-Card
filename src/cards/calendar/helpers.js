@@ -95,7 +95,9 @@ export function expandMultiDayEvents(events, windowStart, windowEnd) {
         end: isLastDay ? event.end : dayBoundary(nextDay(day), isAllDay),
         isMultiDay: true,
         isFirstDay,
-        isLastDay
+        isLastDay,
+        // The whole event, for what has to describe it and not one of its days
+        sourceEvent: event
       });
     }
   });

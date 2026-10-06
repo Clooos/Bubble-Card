@@ -1925,8 +1925,16 @@ class BubbleCardEditor extends LitElement {
   _ActionChanged(ev, array, index) {
     // Update config with support for nested sub_button paths
     if (array === 'button_action' || array === 'event_action') {
-      // Simple action containers
-      this._config[array] = ev.detail.value;
+      // Simple action containers. An action set back to its default comes in
+      // undefined, and neither it nor a container it leaves empty is kept.
+      const actions = Object.fromEntries(
+        Object.entries(ev.detail.value ?? {}).filter(([, action]) => action !== undefined && action !== null)
+      );
+      if (Object.keys(actions).length) {
+        this._config[array] = actions;
+      } else {
+        delete this._config[array];
+      }
     } else if (typeof array === 'string' && array.startsWith('sub_button')) {
       const patchValue = ev.detail.value; // e.g., { tap_action: {...} } or full sub-button object (from _updateActionsEntity)
 

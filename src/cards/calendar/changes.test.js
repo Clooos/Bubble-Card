@@ -46,6 +46,16 @@ class StubElement {
 
     getBoundingClientRect() { return { height: 0 }; }
 
+    addEventListener(type, handler) {
+        (this._listeners ??= {})[type] ??= [];
+        this._listeners[type].push(handler);
+    }
+
+    // Runs the listeners of this element alone, the way an event reaches its target.
+    dispatch(event) {
+        ((this._listeners ?? {})[event.type] ?? []).forEach(handler => handler(event));
+    }
+
     removeAttribute() {}
 
     appendChild(child) {
@@ -123,6 +133,13 @@ jest.unstable_mockModule('../../tools/localize.js', () => ({
 
 jest.unstable_mockModule('../../tools/tap-actions.js', () => ({
     addActions,
+}));
+
+const showEventDetails = jest.fn();
+
+jest.unstable_mockModule('./event-details.js', () => ({
+    showEventDetails,
+    isEventMoreInfo: (actionEvent) => actionEvent.detail.config[`${actionEvent.detail.action}_action`]?.action === 'more-info',
 }));
 
 const { changeEvents, changeEventList } = await import('./changes.js');
@@ -284,9 +301,59 @@ describe('calendar event actions', () => {
         expect(calls[0][1]).toBe(eventAction);
         expect(calls[0][2]).toBe('calendar.work');
         expect(calls[0][3]).toEqual({
-            tap_action: { action: 'none' },
+            tap_action: { action: 'more-info' },
             double_tap_action: { action: 'none' },
             hold_action: { action: 'none' },
+        });
+    });
+
+    // The more-info of a calendar only knows its next event. On an event line
+    // it means that event, with the description Home Assistant's own calendar
+    // shows on a click.
+    describe('a more-info on an event', () => {
+        const actionEvent = (action, config) => ({ type: 'hass-action', detail: { action, config }, stopPropagation: jest.fn() });
+
+        beforeEach(() => {
+            showEventDetails.mockClear();
+        });
+
+        test('opens the details of that event and stops there', async () => {
+            const event = timedEvent({ description: 'Bring the slides' });
+            const context = createContext({}, [event]);
+            await changeEvents(context);
+            const [line] = eventLines(context);
+
+            const pressed = actionEvent('tap', { tap_action: { action: 'more-info' } });
+            line.dispatch(pressed);
+
+            expect(pressed.stopPropagation).toHaveBeenCalled();
+            expect(showEventDetails).toHaveBeenCalledTimes(1);
+            const [calledContext, calledEvent, origin] = showEventDetails.mock.calls[0];
+            expect(calledContext).toBe(context);
+            expect(calledEvent.description).toBe('Bring the slides');
+            expect(origin).toBe(line);
+        });
+
+        test('leaves every other action to Home Assistant', async () => {
+            const context = createContext({}, [timedEvent()]);
+            await changeEvents(context);
+            const [line] = eventLines(context);
+
+            const pressed = actionEvent('tap', { tap_action: { action: 'navigate', navigation_path: '#agenda' } });
+            line.dispatch(pressed);
+
+            expect(pressed.stopPropagation).not.toHaveBeenCalled();
+            expect(showEventDetails).not.toHaveBeenCalled();
+        });
+
+        test('listens on no placeholder line', async () => {
+            const context = createContext({}, []);
+            await changeEvents(context);
+            const [line] = eventLines(context);
+
+            line.dispatch(actionEvent('tap', { tap_action: { action: 'more-info' } }));
+
+            expect(showEventDetails).not.toHaveBeenCalled();
         });
     });
 
