@@ -173,8 +173,8 @@ Bubble Card ایک مینیمل اور حسبِ ضرورت کارڈز کا مج�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **لازمی** | کوئی بھی منفرد ہیش (مثلاً `'#kitchen'`) بغیر ' ' کے | یہی طریقہ ہے جس سے آپ اپنا پاپ اپ کھولیں گے |
 | `popup_style` | string | اختیاری | `bubble` (ڈیفالٹ)، `classic` یا `home-assistant` | پاپ اپ کا بصری اسٹائل متعین کریں |
-| `popup_mode` | string | اختیاری | `default` (ڈیفالٹ)، `fit-content`، `centered` یا `adaptive-dialog` | پاپ اپ کا لے آؤٹ موڈ متعین کریں |
-| `with_bottom_offset` | boolean | اختیاری | `true` یا `false` (ڈیفالٹ) | صرف `popup_mode: fit-content` یا `adaptive-dialog` کے ساتھ استعمال ہوتا ہے۔ موبائل پر نچلا آفسیٹ لاگو کرتا ہے، مفید جب آپ کے ڈیش بورڈ میں فوٹر کارڈ شامل ہو۔ |
+| `popup_mode` | string | اختیاری | `default` (ڈیفالٹ)، `fit-content`، `centered` یا `adaptive-dialog` | پاپ اپ کا لے آؤٹ موڈ متعین کریں۔ `popup_style: home-assistant` کے ساتھ صرف `default` (موبائل پر پوری اونچائی، "More info" پینل کی طرح) اور `adaptive-dialog` (موبائل پر مواد کے مطابق) استعمال ہوتے ہیں۔ |
+| `with_bottom_offset` | boolean | اختیاری | `true` یا `false` (ڈیفالٹ) | صرف `popup_mode: fit-content` یا `adaptive-dialog` کے ساتھ، اور `popup_style: home-assistant` کے ساتھ استعمال ہوتا ہے۔ موبائل پر نچلا آفسیٹ لاگو کرتا ہے، مفید جب آپ کے ڈیش بورڈ میں فوٹر کارڈ شامل ہو۔ |
 | `full_width_on_mobile` | boolean | اختیاری | `true` یا `false` (ڈیفالٹ) | صرف `popup_mode: centered` کے ساتھ استعمال ہوتا ہے۔ موبائل پر پاپ اپ کو مکمل اسکرین چوڑائی تک پھیلاتا ہے، چھوٹی اسکرینز پر مفید۔ |
 | `performance_mode` | string | اختیاری | `default` (ڈیفالٹ) یا `performance` | پاپ اپ کھلنے کی اینیمیشن کو بہتر بناتا ہے۔ `performance` مواد کی رینڈرنگ اور پس منظر کے بلر کو معمولی سا موخر کرتا ہے، اور اگر سیٹ ہو تو بیک ڈراپ بلر بھی غیر فعال کر دیتا ہے۔ |
 | `auto_close` | string | اختیاری | ملی سیکنڈ میں ٹائم آؤٹ (مثلاً 10s کے لیے `10000`) | ٹائم آؤٹ کے بعد پاپ اپ خود بخود بند ہو جائے |

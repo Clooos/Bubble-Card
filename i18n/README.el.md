@@ -171,8 +171,8 @@
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Απαιτείται** | Οποιοδήποτε μοναδικό hash (π.χ. `'#kitchen'`) με ' ' | Έτσι θα ανοίγετε το pop-up σας |
 | `popup_style` | string | Προαιρετικό | `bubble` (προεπιλογή), `classic` ή `home-assistant` | Ορίζει το οπτικό στυλ του pop-up |
-| `popup_mode` | string | Προαιρετικό | `default` (προεπιλογή), `fit-content`, `centered` ή `adaptive-dialog` | Ορίζει τη διάταξη του pop-up |
-| `with_bottom_offset` | boolean | Προαιρετικό | `true` ή `false` (προεπιλογή) | Χρησιμοποιείται μόνο με `popup_mode: fit-content` ή `adaptive-dialog`. Εφαρμόζει μια μετατόπιση κάτω σε κινητό, χρήσιμη όταν το dashboard σας περιλαμβάνει μια κάρτα υποσέλιδου. |
+| `popup_mode` | string | Προαιρετικό | `default` (προεπιλογή), `fit-content`, `centered` ή `adaptive-dialog` | Ορίζει τη διάταξη του pop-up. Με `popup_style: home-assistant`, χρησιμοποιούνται μόνο το `default` (πλήρες ύψος σε κινητό, όπως το πάνελ «Περισσότερες πληροφορίες») και το `adaptive-dialog` (προσαρμογή στο περιεχόμενο σε κινητό). |
+| `with_bottom_offset` | boolean | Προαιρετικό | `true` ή `false` (προεπιλογή) | Χρησιμοποιείται μόνο με `popup_mode: fit-content` ή `adaptive-dialog`, καθώς και με `popup_style: home-assistant`. Εφαρμόζει μια μετατόπιση κάτω σε κινητό, χρήσιμη όταν το dashboard σας περιλαμβάνει μια κάρτα υποσέλιδου. |
 | `full_width_on_mobile` | boolean | Προαιρετικό | `true` ή `false` (προεπιλογή) | Χρησιμοποιείται μόνο με `popup_mode: centered`. Επεκτείνει το pop-up σε πλήρες πλάτος οθόνης σε κινητό, χρήσιμο σε μικρότερες οθόνες. |
 | `performance_mode` | string | Προαιρετικό | `default` (προεπιλογή) ή `performance` | Βελτιστοποιεί το animation ανοίγματος του pop-up. Το `performance` καθυστερεί ελαφρώς την απόδοση του περιεχομένου και τη θόλωση του φόντου, επίσης απενεργοποιεί τη θόλωση backdrop αν έχει οριστεί. |
 | `auto_close` | string | Προαιρετικό | Ένα χρονικό όριο σε χιλιοστά του δευτερολέπτου (π.χ. `10000` για 10 δευτερόλεπτα) | Κλείνει αυτόματα το pop-up μετά από ένα χρονικό όριο |

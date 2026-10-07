@@ -171,8 +171,8 @@ Esta tarxeta permíteche crear un pop-up con calquera contido. Cada pop-up está
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obrigatorio** | Calquera hash único (por exemplo, `'#kitchen'`) con ' ' | Así é como abrirás o teu pop-up |
 | `popup_style` | string | Opcional | `bubble` (por defecto), `classic` ou `home-assistant` | Define o estilo visual do pop-up |
-| `popup_mode` | string | Opcional | `default` (por defecto), `fit-content`, `centered` ou `adaptive-dialog` | Define o modo de disposición do pop-up |
-| `with_bottom_offset` | boolean | Opcional | `true` ou `false` (por defecto) | Só se usa con `popup_mode: fit-content` ou `adaptive-dialog`. Aplica un desprazamento inferior en móbil, útil cando o teu panel inclúe unha tarxeta de rodapé. |
+| `popup_mode` | string | Opcional | `default` (por defecto), `fit-content`, `centered` ou `adaptive-dialog` | Define o modo de disposición do pop-up. Con `popup_style: home-assistant`, só se usan `default` (altura completa en móbil, como o panel de "Máis información") e `adaptive-dialog` (axustado ao contido en móbil). |
+| `with_bottom_offset` | boolean | Opcional | `true` ou `false` (por defecto) | Só se usa con `popup_mode: fit-content` ou `adaptive-dialog`, e con `popup_style: home-assistant`. Aplica un desprazamento inferior en móbil, útil cando o teu panel inclúe unha tarxeta de rodapé. |
 | `full_width_on_mobile` | boolean | Opcional | `true` ou `false` (por defecto) | Só se usa con `popup_mode: centered`. Expande o pop-up ao ancho completo da pantalla en móbil, útil en pantallas máis pequenas. |
 | `performance_mode` | string | Opcional | `default` (por defecto) ou `performance` | Optimiza a animación de apertura do pop-up. `performance` atrasa lixeiramente a renderización do contido e o desenfoque de fondo, e tamén desactiva o desenfoque do backdrop se está definido. |
 | `auto_close` | string | Opcional | Un tempo límite en milisegundos (por exemplo, `10000` para 10s) | Pecha automaticamente o pop-up despois dun tempo límite |

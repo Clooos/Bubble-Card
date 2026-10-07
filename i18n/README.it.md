@@ -171,8 +171,8 @@ Questa scheda ti permette di creare un pop-up con qualsiasi contenuto. Ogni pop-
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obbligatorio** | Qualsiasi hash univoco (ad es. `'#kitchen'`) con ' ' | Questo è il modo in cui aprirai il tuo pop-up |
 | `popup_style` | string | Facoltativo | `bubble` (predefinito), `classic` o `home-assistant` | Definisce lo stile visivo del pop-up |
-| `popup_mode` | string | Facoltativo | `default` (predefinito), `fit-content`, `centered` o `adaptive-dialog` | Definisce la modalità di layout del pop-up |
-| `with_bottom_offset` | boolean | Facoltativo | `true` o `false` (predefinito) | Usato solo con `popup_mode: fit-content` o `adaptive-dialog`. Applica un offset inferiore su mobile, utile quando la tua dashboard include una scheda a piè di pagina. |
+| `popup_mode` | string | Facoltativo | `default` (predefinito), `fit-content`, `centered` o `adaptive-dialog` | Definisce la modalità di layout del pop-up. Con `popup_style: home-assistant`, vengono usati solo `default` (altezza piena su mobile, come il pannello "Maggiori informazioni") e `adaptive-dialog` (adattato al contenuto su mobile). |
+| `with_bottom_offset` | boolean | Facoltativo | `true` o `false` (predefinito) | Usato solo con `popup_mode: fit-content` o `adaptive-dialog`, e con `popup_style: home-assistant`. Applica un offset inferiore su mobile, utile quando la tua dashboard include una scheda a piè di pagina. |
 | `full_width_on_mobile` | boolean | Facoltativo | `true` o `false` (predefinito) | Usato solo con `popup_mode: centered`. Espande il pop-up alla larghezza piena dello schermo su mobile, utile su display più piccoli. |
 | `performance_mode` | string | Facoltativo | `default` (predefinito) o `performance` | Ottimizza l'animazione di apertura del pop-up. `performance` ritarda leggermente il rendering del contenuto e la sfocatura dello sfondo, e disattiva anche la sfocatura del backdrop se impostata. |
 | `auto_close` | string | Facoltativo | Un timeout in millisecondi (ad es. `10000` per 10s) | Chiude automaticamente il pop-up dopo un timeout |

@@ -171,8 +171,8 @@ Ova kartica vam omogućuje stvaranje skočnog prozora s bilo kojim sadržajem. S
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obavezno** | Bilo koji jedinstveni hash (npr. `'#kitchen'`) s ' ' | Ovako ćete otvoriti svoj skočni prozor |
 | `popup_style` | string | Neobavezno | `bubble` (zadano), `classic` ili `home-assistant` | Definira vizualni stil skočnog prozora |
-| `popup_mode` | string | Neobavezno | `default` (zadano), `fit-content`, `centered` ili `adaptive-dialog` | Definira raspored skočnog prozora |
-| `with_bottom_offset` | boolean | Neobavezno | `true` ili `false` (zadano) | Koristi se samo uz `popup_mode: fit-content` ili `adaptive-dialog`. Primjenjuje donji odmak na mobilnim uređajima, korisno kada vaša nadzorna ploča uključuje karticu podnožja. |
+| `popup_mode` | string | Neobavezno | `default` (zadano), `fit-content`, `centered` ili `adaptive-dialog` | Definira raspored skočnog prozora. Uz `popup_style: home-assistant` koriste se samo `default` (puna visina na mobilnim uređajima, poput ploče "Više informacija") i `adaptive-dialog` (prilagođen sadržaju na mobilnim uređajima). |
+| `with_bottom_offset` | boolean | Neobavezno | `true` ili `false` (zadano) | Koristi se samo uz `popup_mode: fit-content` ili `adaptive-dialog` te uz `popup_style: home-assistant`. Primjenjuje donji odmak na mobilnim uređajima, korisno kada vaša nadzorna ploča uključuje karticu podnožja. |
 | `full_width_on_mobile` | boolean | Neobavezno | `true` ili `false` (zadano) | Koristi se samo uz `popup_mode: centered`. Proširuje skočni prozor na punu širinu zaslona na mobilnim uređajima, korisno na manjim zaslonima. |
 | `performance_mode` | string | Neobavezno | `default` (zadano) ili `performance` | Optimizira animaciju otvaranja skočnog prozora. `performance` neznatno odgađa prikazivanje sadržaja i zamućenje pozadine, a također onemogućuje zamućenje pozadinskog zastora ako je postavljeno. |
 | `auto_close` | string | Neobavezno | Vremensko ograničenje u milisekundama (npr. `10000` za 10 s) | Automatski zatvara skočni prozor nakon isteka vremena |

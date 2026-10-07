@@ -171,8 +171,8 @@ Este cartão permite criar um pop-up com qualquer conteúdo. Cada pop-up fica **
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obrigatório** | Qualquer hash único (por exemplo, `'#kitchen'`) com ' ' | É assim que você vai abrir seu pop-up |
 | `popup_style` | string | Opcional | `bubble` (padrão), `classic` ou `home-assistant` | Define o estilo visual do pop-up |
-| `popup_mode` | string | Opcional | `default` (padrão), `fit-content`, `centered` ou `adaptive-dialog` | Define o modo de layout do pop-up |
-| `with_bottom_offset` | boolean | Opcional | `true` ou `false` (padrão) | Usado apenas com `popup_mode: fit-content` ou `adaptive-dialog`. Aplica um deslocamento inferior no celular, útil quando seu painel inclui um cartão de rodapé. |
+| `popup_mode` | string | Opcional | `default` (padrão), `fit-content`, `centered` ou `adaptive-dialog` | Define o modo de layout do pop-up. Com `popup_style: home-assistant`, só são usados `default` (altura total no celular, como o painel "Mais informações") e `adaptive-dialog` (ajustado ao conteúdo no celular). |
+| `with_bottom_offset` | boolean | Opcional | `true` ou `false` (padrão) | Usado apenas com `popup_mode: fit-content` ou `adaptive-dialog`, e com `popup_style: home-assistant`. Aplica um deslocamento inferior no celular, útil quando seu painel inclui um cartão de rodapé. |
 | `full_width_on_mobile` | boolean | Opcional | `true` ou `false` (padrão) | Usado apenas com `popup_mode: centered`. Expande o pop-up para a largura total da tela no celular, útil em telas menores. |
 | `performance_mode` | string | Opcional | `default` (padrão) ou `performance` | Otimiza a animação de abertura do pop-up. `performance` atrasa levemente a renderização do conteúdo e o desfoque de fundo, e também desativa o desfoque do backdrop se estiver definido. |
 | `auto_close` | string | Opcional | Um tempo limite em milissegundos (por exemplo, `10000` para 10s) | Fecha automaticamente o pop-up após um tempo limite |

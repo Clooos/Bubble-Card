@@ -171,8 +171,8 @@ Bubble Card는 Home Assistant를 위한 미니멀하고 커스터마이즈 가�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Required** | ' '가 포함된 어떤 고유한 해시 (예: `'#kitchen'`) | 팝업을 여는 방법 |
 | `popup_style` | string | Optional | `bubble` (default), `classic` 또는 `home-assistant` | 팝업의 시각적 스타일을 정의 |
-| `popup_mode` | string | Optional | `default` (default), `fit-content`, `centered` 또는 `adaptive-dialog` | 팝업의 레이아웃 모드를 정의 |
-| `with_bottom_offset` | boolean | Optional | `true` 또는 `false` (default) | `popup_mode: fit-content` 또는 `adaptive-dialog`에서만 사용됩니다. 모바일에서 하단 오프셋을 적용하며, 대시보드에 푸터 카드가 있을 때 유용합니다. |
+| `popup_mode` | string | Optional | `default` (default), `fit-content`, `centered` 또는 `adaptive-dialog` | 팝업의 레이아웃 모드를 정의합니다. `popup_style: home-assistant`에서는 `default` (모바일에서 전체 높이, "추가 정보" 패널과 동일)와 `adaptive-dialog` (모바일에서 콘텐츠에 맞춤)만 사용됩니다. |
+| `with_bottom_offset` | boolean | Optional | `true` 또는 `false` (default) | `popup_mode: fit-content` 또는 `adaptive-dialog`, 그리고 `popup_style: home-assistant`에서만 사용됩니다. 모바일에서 하단 오프셋을 적용하며, 대시보드에 푸터 카드가 있을 때 유용합니다. |
 | `full_width_on_mobile` | boolean | Optional | `true` 또는 `false` (default) | `popup_mode: centered`에서만 사용됩니다. 모바일에서 팝업을 화면 전체 너비로 확장하며, 작은 화면에서 유용합니다. |
 | `performance_mode` | string | Optional | `default` (default) 또는 `performance` | 팝업 열기 애니메이션을 최적화합니다. `performance`는 콘텐츠 렌더링과 배경 블러를 약간 지연시키며, 설정되어 있다면 백드롭 블러도 비활성화합니다. |
 | `auto_close` | string | Optional | 밀리초 단위 타임아웃 (예: 10초는 `10000`) | 타임아웃 후 팝업을 자동으로 닫음 |

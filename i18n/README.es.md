@@ -171,8 +171,8 @@ Esta tarjeta te permite crear un pop-up con cualquier contenido. Cada pop-up est
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obligatorio** | Cualquier hash único (p. ej. `'#kitchen'`) con ' ' | Así es como abrirás tu pop-up |
 | `popup_style` | string | Opcional | `bubble` (por defecto), `classic` o `home-assistant` | Define el estilo visual del pop-up |
-| `popup_mode` | string | Opcional | `default` (por defecto), `fit-content`, `centered` o `adaptive-dialog` | Define el modo de diseño del pop-up |
-| `with_bottom_offset` | boolean | Opcional | `true` o `false` (por defecto) | Solo se usa con `popup_mode: fit-content` o `adaptive-dialog`. Aplica un offset inferior en el móvil, útil cuando tu dashboard incluye una tarjeta en modo pie de página. |
+| `popup_mode` | string | Opcional | `default` (por defecto), `fit-content`, `centered` o `adaptive-dialog` | Define el modo de diseño del pop-up. Con `popup_style: home-assistant`, solo se usan `default` (altura completa en el móvil, como el panel "Más información") y `adaptive-dialog` (ajustado al contenido en el móvil). |
+| `with_bottom_offset` | boolean | Opcional | `true` o `false` (por defecto) | Solo se usa con `popup_mode: fit-content` o `adaptive-dialog`, y con `popup_style: home-assistant`. Aplica un offset inferior en el móvil, útil cuando tu dashboard incluye una tarjeta en modo pie de página. |
 | `full_width_on_mobile` | boolean | Opcional | `true` o `false` (por defecto) | Solo se usa con `popup_mode: centered`. Expande el pop-up a todo el ancho de la pantalla en el móvil, útil en pantallas más pequeñas. |
 | `performance_mode` | string | Opcional | `default` (por defecto) o `performance` | Optimiza la animación de apertura del pop-up. `performance` retrasa ligeramente el renderizado del contenido y el desenfoque del fondo, y también desactiva el desenfoque del backdrop si está definido. |
 | `auto_close` | string | Opcional | Un tiempo en milisegundos (p. ej. `10000` para 10 s) | Cierra automáticamente el pop-up tras ese tiempo |

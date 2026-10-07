@@ -171,8 +171,8 @@ Dës Kaart erlaabt et der, e Pop-up mat egal wéi engem Inhalt z'erstellen. All 
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obligatoresch** | Egal wéi en eendeitegen Hash (z.B. `'#kitchen'`) mat ' ' | Sou méchs du däi Pop-up op |
 | `popup_style` | string | Optional | `bubble` (Standard), `classic` oder `home-assistant` | Definéiert de visuellen Stil vum Pop-up |
-| `popup_mode` | string | Optional | `default` (Standard), `fit-content`, `centered` oder `adaptive-dialog` | Definéiert de Layout-Modus vum Pop-up |
-| `with_bottom_offset` | boolean | Optional | `true` oder `false` (Standard) | Gëtt nëmme mat `popup_mode: fit-content` oder `adaptive-dialog` benotzt. Setzt en Ofstand ënnen um Mobil, nëtzlech wann däin Dashboard eng Footer-Kaart huet. |
+| `popup_mode` | string | Optional | `default` (Standard), `fit-content`, `centered` oder `adaptive-dialog` | Definéiert de Layout-Modus vum Pop-up. Mat `popup_style: home-assistant` ginn nëmmen `default` (voll Héicht um Mobil, wéi de "More info"-Panel) an `adaptive-dialog` (un den Inhalt ugepasst um Mobil) benotzt. |
+| `with_bottom_offset` | boolean | Optional | `true` oder `false` (Standard) | Gëtt nëmme mat `popup_mode: fit-content` oder `adaptive-dialog` a mat `popup_style: home-assistant` benotzt. Setzt en Ofstand ënnen um Mobil, nëtzlech wann däin Dashboard eng Footer-Kaart huet. |
 | `full_width_on_mobile` | boolean | Optional | `true` oder `false` (Standard) | Gëtt nëmme mat `popup_mode: centered` benotzt. Erweidert de Pop-up op déi voll Bildschiermbreet um Mobil, nëtzlech op méi klenge Écranen. |
 | `performance_mode` | string | Optional | `default` (Standard) oder `performance` | Optimiséiert d'Opmaach-Animatioun vum Pop-up. `performance` verzögert d'Uweise vum Inhalt an de Blur vum Hannergrond liicht a deaktivéiert och de Backdrop-Blur wann en agestallt ass. |
 | `auto_close` | string | Optional | En Timeout a Millisekonnen (z.B. `10000` fir 10s) | Mécht de Pop-up automatesch no engem Timeout zou |

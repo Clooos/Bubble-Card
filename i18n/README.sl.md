@@ -171,8 +171,8 @@ Ta kartica vam omogoča ustvarjanje pojavnega okna s poljubno vsebino. Vsako poj
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obvezno** | Kateri koli edinstven hash (npr. `'#kitchen'`) z ' ' | Tako boste odprli svoje pojavno okno |
 | `popup_style` | string | Neobvezno | `bubble` (privzeto), `classic` ali `home-assistant` | Določi vizualni slog pojavnega okna |
-| `popup_mode` | string | Neobvezno | `default` (privzeto), `fit-content`, `centered` ali `adaptive-dialog` | Določi način postavitve pojavnega okna |
-| `with_bottom_offset` | boolean | Neobvezno | `true` ali `false` (privzeto) | Uporablja se samo z `popup_mode: fit-content` ali `adaptive-dialog`. Uporabi spodnji odmik na mobilnih napravah, uporabno, kadar nadzorna plošča vključuje kartico noge. |
+| `popup_mode` | string | Neobvezno | `default` (privzeto), `fit-content`, `centered` ali `adaptive-dialog` | Določi način postavitve pojavnega okna. S `popup_style: home-assistant` se uporabljata samo `default` (polna višina na mobilnih napravah, kot plošča "Več informacij") in `adaptive-dialog` (prilagojen vsebini na mobilnih napravah). |
+| `with_bottom_offset` | boolean | Neobvezno | `true` ali `false` (privzeto) | Uporablja se samo z `popup_mode: fit-content` ali `adaptive-dialog` ter s `popup_style: home-assistant`. Uporabi spodnji odmik na mobilnih napravah, uporabno, kadar nadzorna plošča vključuje kartico noge. |
 | `full_width_on_mobile` | boolean | Neobvezno | `true` ali `false` (privzeto) | Uporablja se samo z `popup_mode: centered`. Razširi pojavno okno na celotno širino zaslona na mobilnih napravah, uporabno pri manjših zaslonih. |
 | `performance_mode` | string | Neobvezno | `default` (privzeto) ali `performance` | Optimizira animacijo odpiranja pojavnega okna. `performance` rahlo zamakne izrisovanje vsebine in zamegljenost ozadja, prav tako onemogoči zamegljenost ozadja (backdrop blur), če je nastavljena. |
 | `auto_close` | string | Neobvezno | Časovna omejitev v milisekundah (npr. `10000` za 10 s) | Samodejno zapri pojavno okno po preteku časovne omejitve |

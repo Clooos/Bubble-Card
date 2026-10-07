@@ -171,8 +171,8 @@ Met deze kaart kun je een pop-up met willekeurige inhoud maken. Elke pop-up is *
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Vereist** | Elke unieke hash (bijv. `'#kitchen'`) met ' ' | Hiermee open je je pop-up |
 | `popup_style` | string | Optioneel | `bubble` (standaard), `classic` of `home-assistant` | Bepaalt de visuele stijl van de pop-up |
-| `popup_mode` | string | Optioneel | `default` (standaard), `fit-content`, `centered` of `adaptive-dialog` | Bepaalt de lay-outmodus van de pop-up |
-| `with_bottom_offset` | boolean | Optioneel | `true` of `false` (standaard) | Alleen gebruikt met `popup_mode: fit-content` of `adaptive-dialog`. Past een onderste marge toe op mobiel, handig wanneer je dashboard een voettekstkaart bevat. |
+| `popup_mode` | string | Optioneel | `default` (standaard), `fit-content`, `centered` of `adaptive-dialog` | Bepaalt de lay-outmodus van de pop-up. Met `popup_style: home-assistant` worden alleen `default` (volledige hoogte op mobiel, zoals het "Meer info" paneel) en `adaptive-dialog` (aangepast aan de inhoud op mobiel) gebruikt. |
+| `with_bottom_offset` | boolean | Optioneel | `true` of `false` (standaard) | Alleen gebruikt met `popup_mode: fit-content` of `adaptive-dialog`, en met `popup_style: home-assistant`. Past een onderste marge toe op mobiel, handig wanneer je dashboard een voettekstkaart bevat. |
 | `full_width_on_mobile` | boolean | Optioneel | `true` of `false` (standaard) | Alleen gebruikt met `popup_mode: centered`. Vergroot de pop-up naar de volledige schermbreedte op mobiel, handig op kleinere schermen. |
 | `performance_mode` | string | Optioneel | `default` (standaard) of `performance` | Optimaliseert de openingsanimatie van de pop-up. `performance` vertraagt het renderen van de inhoud en de achtergrondvervaging iets, en schakelt ook de backdrop-vervaging uit als die is ingesteld. |
 | `auto_close` | string | Optioneel | Een timeout in milliseconden (bijv. `10000` voor 10s) | Sluit de pop-up automatisch na een timeout |

@@ -171,8 +171,8 @@ Ta karta pozwala tworzyć pop-up z dowolną zawartością. Każdy pop-up jest **
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Wymagane** | Dowolny unikalny hash (np. `'#kitchen'`) z ' ' | Tak otworzysz swój pop-up |
 | `popup_style` | string | Opcjonalne | `bubble` (domyślnie), `classic` lub `home-assistant` | Określa styl wizualny pop-upu |
-| `popup_mode` | string | Opcjonalne | `default` (domyślnie), `fit-content`, `centered` lub `adaptive-dialog` | Określa tryb układu pop-upu |
-| `with_bottom_offset` | boolean | Opcjonalne | `true` lub `false` (domyślnie) | Używane tylko z `popup_mode: fit-content` lub `adaptive-dialog`. Stosuje dolny odstęp na urządzeniach mobilnych, przydatne, gdy Twój panel zawiera kartę stopki. |
+| `popup_mode` | string | Opcjonalne | `default` (domyślnie), `fit-content`, `centered` lub `adaptive-dialog` | Określa tryb układu pop-upu. Z `popup_style: home-assistant` używane są tylko `default` (pełna wysokość na urządzeniach mobilnych, jak panel "Więcej informacji") i `adaptive-dialog` (dopasowany do zawartości na urządzeniach mobilnych). |
+| `with_bottom_offset` | boolean | Opcjonalne | `true` lub `false` (domyślnie) | Używane tylko z `popup_mode: fit-content` lub `adaptive-dialog` oraz z `popup_style: home-assistant`. Stosuje dolny odstęp na urządzeniach mobilnych, przydatne, gdy Twój panel zawiera kartę stopki. |
 | `full_width_on_mobile` | boolean | Opcjonalne | `true` lub `false` (domyślnie) | Używane tylko z `popup_mode: centered`. Rozszerza pop-up na pełną szerokość ekranu na urządzeniach mobilnych, przydatne przy mniejszych ekranach. |
 | `performance_mode` | string | Opcjonalne | `default` (domyślnie) lub `performance` | Optymalizuje animację otwierania pop-upu. `performance` nieznacznie opóźnia renderowanie zawartości i rozmycie tła, a także wyłącza rozmycie tła, jeśli jest ustawione. |
 | `auto_close` | string | Opcjonalne | Czas w milisekundach (np. `10000` dla 10 s) | Automatycznie zamyka pop-up po upływie czasu |

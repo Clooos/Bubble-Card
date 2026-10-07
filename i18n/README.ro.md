@@ -171,8 +171,8 @@ Acest card îți permite să creezi un pop-up cu orice conținut. Fiecare pop-up
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obligatoriu** | Orice hash unic (de ex. `'#kitchen'`) cu ' ' | Așa vei deschide pop-up-ul tău |
 | `popup_style` | string | Opțional | `bubble` (implicit), `classic` sau `home-assistant` | Definește stilul vizual al pop-up-ului |
-| `popup_mode` | string | Opțional | `default` (implicit), `fit-content`, `centered` sau `adaptive-dialog` | Definește modul de aspect al pop-up-ului |
-| `with_bottom_offset` | boolean | Opțional | `true` sau `false` (implicit) | Folosit doar cu `popup_mode: fit-content` sau `adaptive-dialog`. Aplică un decalaj (offset) în partea de jos pe mobil, util când dashboard-ul tău include un card de subsol. |
+| `popup_mode` | string | Opțional | `default` (implicit), `fit-content`, `centered` sau `adaptive-dialog` | Definește modul de aspect al pop-up-ului. Cu `popup_style: home-assistant`, se folosesc doar `default` (înălțime completă pe mobil, ca panoul "Mai multe informații") și `adaptive-dialog` (ajustat la conținut pe mobil). |
+| `with_bottom_offset` | boolean | Opțional | `true` sau `false` (implicit) | Folosit doar cu `popup_mode: fit-content` sau `adaptive-dialog`, și cu `popup_style: home-assistant`. Aplică un decalaj (offset) în partea de jos pe mobil, util când dashboard-ul tău include un card de subsol. |
 | `full_width_on_mobile` | boolean | Opțional | `true` sau `false` (implicit) | Folosit doar cu `popup_mode: centered`. Extinde pop-up-ul la lățimea completă a ecranului pe mobil, util pe ecrane mai mici. |
 | `performance_mode` | string | Opțional | `default` (implicit) sau `performance` | Optimizează animația de deschidere a pop-up-ului. `performance` întârzie ușor randarea conținutului și blur-ul de fundal, de asemenea dezactivează blur-ul de backdrop dacă este setat. |
 | `auto_close` | string | Opțional | Un timeout în milisecunde (de ex. `10000` pentru 10s) | Închide automat pop-up-ul după un timeout |

@@ -171,8 +171,8 @@ Dette kort giver dig mulighed for at oprette en pop-up med et vilkårligt indhol
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Påkrævet** | Enhver unik hash (f.eks. `'#kitchen'`) med ' ' | Sådan åbner du din pop-up |
 | `popup_style` | string | Valgfrit | `bubble` (standard), `classic` eller `home-assistant` | Definer pop-uppens visuelle stil |
-| `popup_mode` | string | Valgfrit | `default` (standard), `fit-content`, `centered` eller `adaptive-dialog` | Definer pop-uppens layouttilstand |
-| `with_bottom_offset` | boolean | Valgfrit | `true` eller `false` (standard) | Bruges kun med `popup_mode: fit-content` eller `adaptive-dialog`. Tilføjer et bundmargen på mobil, nyttigt når dit dashboard indeholder et footer-kort. |
+| `popup_mode` | string | Valgfrit | `default` (standard), `fit-content`, `centered` eller `adaptive-dialog` | Definer pop-uppens layouttilstand. Med `popup_style: home-assistant` bruges kun `default` (fuld højde på mobil, ligesom "Mere info"-panelet) og `adaptive-dialog` (tilpasset indholdet på mobil). |
+| `with_bottom_offset` | boolean | Valgfrit | `true` eller `false` (standard) | Bruges kun med `popup_mode: fit-content` eller `adaptive-dialog`, samt med `popup_style: home-assistant`. Tilføjer et bundmargen på mobil, nyttigt når dit dashboard indeholder et footer-kort. |
 | `full_width_on_mobile` | boolean | Valgfrit | `true` eller `false` (standard) | Bruges kun med `popup_mode: centered`. Udvider pop-uppen til fuld skærmbredde på mobil, nyttigt på mindre skærme. |
 | `performance_mode` | string | Valgfrit | `default` (standard) eller `performance` | Optimerer pop-uppens åbningsanimation. `performance` udskyder gengivelsen af indholdet og baggrundssløringen en smule, og deaktiverer også sløring af baggrundslaget hvis den er angivet. |
 | `auto_close` | string | Valgfrit | En timeout i millisekunder (f.eks. `10000` for 10s) | Luk pop-uppen automatisk efter en timeout |

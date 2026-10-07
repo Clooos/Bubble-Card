@@ -171,8 +171,8 @@ Bubble Card 是一套為 Home Assistant 打造的極簡且可自訂的卡片集�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **必要** | 任何帶有 ' ' 的唯一雜湊值(例如 `'#kitchen'`) | 這是你開啟彈出視窗的方式 |
 | `popup_style` | string | 選用 | `bubble`(預設)、`classic` 或 `home-assistant` | 定義彈出視窗的視覺樣式 |
-| `popup_mode` | string | 選用 | `default`(預設)、`fit-content`、`centered` 或 `adaptive-dialog` | 定義彈出視窗的版面配置模式 |
-| `with_bottom_offset` | boolean | 選用 | `true` 或 `false`(預設) | 僅在 `popup_mode: fit-content` 或 `adaptive-dialog` 時使用。在行動裝置上套用底部偏移量,適用於你的儀表板包含頁尾卡片的情況。 |
+| `popup_mode` | string | 選用 | `default`(預設)、`fit-content`、`centered` 或 `adaptive-dialog` | 定義彈出視窗的版面配置模式。使用 `popup_style: home-assistant` 時,僅使用 `default`(行動裝置上全高顯示,與「更多資訊」面板相同)和 `adaptive-dialog`(行動裝置上符合內容大小)。 |
+| `with_bottom_offset` | boolean | 選用 | `true` 或 `false`(預設) | 僅在 `popup_mode: fit-content` 或 `adaptive-dialog` 時,以及 `popup_style: home-assistant` 時使用。在行動裝置上套用底部偏移量,適用於你的儀表板包含頁尾卡片的情況。 |
 | `full_width_on_mobile` | boolean | 選用 | `true` 或 `false`(預設) | 僅在 `popup_mode: centered` 時使用。在行動裝置上將彈出視窗擴展至全螢幕寬度,適用於較小的螢幕。 |
 | `performance_mode` | string | 選用 | `default`(預設)或 `performance` | 最佳化彈出視窗的開啟動畫。`performance` 會稍微延遲內容渲染與背景模糊,若已設定背景模糊也會將其停用。 |
 | `auto_close` | string | 選用 | 以毫秒為單位的逾時時間(例如 `10000` 代表 10 秒) | 逾時後自動關閉彈出視窗 |

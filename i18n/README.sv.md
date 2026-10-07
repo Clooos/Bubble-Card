@@ -171,8 +171,8 @@ Det här kortet låter dig skapa en pop-up med valfritt innehåll. Varje pop-up 
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Krävs** | Valfritt unikt hash (t.ex. `'#kitchen'`) med ' ' | Så här öppnar du din pop-up |
 | `popup_style` | string | Valfritt | `bubble` (standard), `classic` eller `home-assistant` | Anger pop-upens visuella stil |
-| `popup_mode` | string | Valfritt | `default` (standard), `fit-content`, `centered` eller `adaptive-dialog` | Anger pop-upens layoutläge |
-| `with_bottom_offset` | boolean | Valfritt | `true` eller `false` (standard) | Används endast med `popup_mode: fit-content` eller `adaptive-dialog`. Applicerar en nedre förskjutning på mobil, användbart när din dashboard innehåller ett sidfotskort. |
+| `popup_mode` | string | Valfritt | `default` (standard), `fit-content`, `centered` eller `adaptive-dialog` | Anger pop-upens layoutläge. Med `popup_style: home-assistant` används endast `default` (full höjd på mobil, som "Mer info"-panelen) och `adaptive-dialog` (anpassad till innehållet på mobil). |
+| `with_bottom_offset` | boolean | Valfritt | `true` eller `false` (standard) | Används endast med `popup_mode: fit-content` eller `adaptive-dialog`, samt med `popup_style: home-assistant`. Applicerar en nedre förskjutning på mobil, användbart när din dashboard innehåller ett sidfotskort. |
 | `full_width_on_mobile` | boolean | Valfritt | `true` eller `false` (standard) | Används endast med `popup_mode: centered`. Expanderar pop-upen till full skärmbredd på mobil, användbart på mindre skärmar. |
 | `performance_mode` | string | Valfritt | `default` (standard) eller `performance` | Optimerar pop-upens öppningsanimation. `performance` fördröjer innehållsrendering och bakgrundsoskärpa något, och inaktiverar även bakgrundsplansoskärpa om den är angiven. |
 | `auto_close` | string | Valfritt | En timeout i millisekunder (t.ex. `10000` för 10s) | Stänger pop-upen automatiskt efter en timeout |

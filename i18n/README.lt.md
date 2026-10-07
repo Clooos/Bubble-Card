@@ -171,8 +171,8 @@ Visos parinktys gali būti sukonfigūruotos Home Assistant redaktoriuje. Tačiau
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Privaloma** | Bet kokia unikali maiša (pvz. `'#kitchen'`) su ' ' | Taip atidarysite savo iškylantįjį langą |
 | `popup_style` | string | Neprivaloma | `bubble` (numatyta), `classic` arba `home-assistant` | Nustato iškylančiojo lango vizualinį stilių |
-| `popup_mode` | string | Neprivaloma | `default` (numatyta), `fit-content`, `centered` arba `adaptive-dialog` | Nustato iškylančiojo lango išdėstymo režimą |
-| `with_bottom_offset` | boolean | Neprivaloma | `true` arba `false` (numatyta) | Naudojama tik su `popup_mode: fit-content` arba `adaptive-dialog`. Pritaiko apatinį poslinkį mobiliajame įrenginyje, naudinga, kai jūsų prietaisų skydelyje yra poraštės kortelė. |
+| `popup_mode` | string | Neprivaloma | `default` (numatyta), `fit-content`, `centered` arba `adaptive-dialog` | Nustato iškylančiojo lango išdėstymo režimą. Su `popup_style: home-assistant` naudojami tik `default` (visas aukštis mobiliajame įrenginyje, kaip "More info" langas) ir `adaptive-dialog` (pritaikytas turiniui mobiliajame įrenginyje). |
+| `with_bottom_offset` | boolean | Neprivaloma | `true` arba `false` (numatyta) | Naudojama tik su `popup_mode: fit-content` arba `adaptive-dialog`, taip pat su `popup_style: home-assistant`. Pritaiko apatinį poslinkį mobiliajame įrenginyje, naudinga, kai jūsų prietaisų skydelyje yra poraštės kortelė. |
 | `full_width_on_mobile` | boolean | Neprivaloma | `true` arba `false` (numatyta) | Naudojama tik su `popup_mode: centered`. Išplečia iškylantįjį langą per visą ekrano plotį mobiliajame įrenginyje, naudinga mažesniuose ekranuose. |
 | `performance_mode` | string | Neprivaloma | `default` (numatyta) arba `performance` | Optimizuoja iškylančiojo lango atidarymo animaciją. `performance` šiek tiek atideda turinio atvaizdavimą ir fono suliejimą, taip pat išjungia fono suliejimą (backdrop blur), jei jis nustatytas. |
 | `auto_close` | string | Neprivaloma | Laiko limitas milisekundėmis (pvz. `10000` reiškia 10 s) | Automatiškai uždaro iškylantįjį langą po nustatyto laiko |

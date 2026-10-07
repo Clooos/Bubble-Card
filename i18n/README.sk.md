@@ -171,8 +171,8 @@ Táto karta umožňuje vytvoriť pop-up s akýmkoľvek obsahom. Každý pop-up j
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Povinné** | Akýkoľvek jedinečný hash (napr. `'#kitchen'`) s ' ' | Takto svoj pop-up otvoríte |
 | `popup_style` | string | Voliteľné | `bubble` (predvolené), `classic` alebo `home-assistant` | Určuje vizuálny štýl pop-upu |
-| `popup_mode` | string | Voliteľné | `default` (predvolené), `fit-content`, `centered` alebo `adaptive-dialog` | Určuje režim rozloženia pop-upu |
-| `with_bottom_offset` | boolean | Voliteľné | `true` alebo `false` (predvolené) | Používa sa iba s `popup_mode: fit-content` alebo `adaptive-dialog`. Aplikuje spodný odsadenie na mobile, užitočné, keď váš dashboard obsahuje pätu karty. |
+| `popup_mode` | string | Voliteľné | `default` (predvolené), `fit-content`, `centered` alebo `adaptive-dialog` | Určuje režim rozloženia pop-upu. S `popup_style: home-assistant` sa používajú iba `default` (plná výška na mobile, ako panel „Viac informácií“) a `adaptive-dialog` (prispôsobený obsahu na mobile). |
+| `with_bottom_offset` | boolean | Voliteľné | `true` alebo `false` (predvolené) | Používa sa iba s `popup_mode: fit-content` alebo `adaptive-dialog` a tiež s `popup_style: home-assistant`. Aplikuje spodný odsadenie na mobile, užitočné, keď váš dashboard obsahuje pätu karty. |
 | `full_width_on_mobile` | boolean | Voliteľné | `true` alebo `false` (predvolené) | Používa sa iba s `popup_mode: centered`. Rozšíri pop-up na celú šírku obrazovky na mobile, užitočné na menších displejoch. |
 | `performance_mode` | string | Voliteľné | `default` (predvolené) alebo `performance` | Optimalizuje otváraciu animáciu pop-upu. `performance` mierne oneskorí vykreslenie obsahu a rozostrenie pozadia, tiež vypne rozostrenie podkladu, ak je nastavené. |
 | `auto_close` | string | Voliteľné | Časový limit v milisekundách (napr. `10000` pre 10 s) | Automaticky zatvorí pop-up po uplynutí časového limitu |

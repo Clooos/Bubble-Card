@@ -171,8 +171,8 @@ Bubble Card 是一个为 Home Assistant 打造的极简、可自定义的卡片�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **必填** | 任意带 ' ' 的唯一哈希 (例如 `'#kitchen'`) | 这是你打开弹窗的方式 |
 | `popup_style` | string | 可选 | `bubble` (默认)、`classic` 或 `home-assistant` | 定义弹窗的视觉样式 |
-| `popup_mode` | string | 可选 | `default` (默认)、`fit-content`、`centered` 或 `adaptive-dialog` | 定义弹窗的布局模式 |
-| `with_bottom_offset` | boolean | 可选 | `true` 或 `false` (默认) | 仅在 `popup_mode: fit-content` 或 `adaptive-dialog` 下使用。在移动端应用底部偏移，当你的仪表盘包含页脚卡片时很有用。 |
+| `popup_mode` | string | 可选 | `default` (默认)、`fit-content`、`centered` 或 `adaptive-dialog` | 定义弹窗的布局模式。使用 `popup_style: home-assistant` 时，仅使用 `default` (移动端全高显示，与"更多信息"面板相同) 和 `adaptive-dialog` (移动端适应内容)。 |
+| `with_bottom_offset` | boolean | 可选 | `true` 或 `false` (默认) | 仅在 `popup_mode: fit-content` 或 `adaptive-dialog` 下，以及 `popup_style: home-assistant` 下使用。在移动端应用底部偏移，当你的仪表盘包含页脚卡片时很有用。 |
 | `full_width_on_mobile` | boolean | 可选 | `true` 或 `false` (默认) | 仅在 `popup_mode: centered` 下使用。在移动端将弹窗扩展为全屏宽度，在较小的屏幕上很有用。 |
 | `performance_mode` | string | 可选 | `default` (默认) 或 `performance` | 优化弹窗打开动画。`performance` 会略微延迟内容渲染和背景模糊，并在设置时禁用遮罩模糊。 |
 | `auto_close` | string | 可选 | 以毫秒为单位的超时时间 (例如 `10000` 代表 10 秒) | 超时后自动关闭弹窗 |

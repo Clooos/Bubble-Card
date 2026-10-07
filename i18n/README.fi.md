@@ -171,8 +171,8 @@ Tämä kortti antaa sinun luoda ponnahdusikkunan minkä tahansa sisällön kanss
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Pakollinen** | Mikä tahansa yksilöllinen hash (esim. `'#kitchen'`) heittomerkeillä ' ' | Näin avaat ponnahdusikkunasi |
 | `popup_style` | string | Valinnainen | `bubble` (oletus), `classic` tai `home-assistant` | Määrittää ponnahdusikkunan visuaalisen tyylin |
-| `popup_mode` | string | Valinnainen | `default` (oletus), `fit-content`, `centered` tai `adaptive-dialog` | Määrittää ponnahdusikkunan asettelutilan |
-| `with_bottom_offset` | boolean | Valinnainen | `true` tai `false` (oletus) | Käytetään vain asetuksen `popup_mode: fit-content` tai `adaptive-dialog` kanssa. Lisää alamarginaalin mobiilissa, hyödyllinen kun kojelaudassasi on alatunnistekortti. |
+| `popup_mode` | string | Valinnainen | `default` (oletus), `fit-content`, `centered` tai `adaptive-dialog` | Määrittää ponnahdusikkunan asettelutilan. Asetuksen `popup_style: home-assistant` kanssa käytetään vain arvoja `default` (täysi korkeus mobiilissa, kuten "Lisätiedot" paneeli) ja `adaptive-dialog` (sovitetaan sisältöön mobiilissa). |
+| `with_bottom_offset` | boolean | Valinnainen | `true` tai `false` (oletus) | Käytetään vain asetuksen `popup_mode: fit-content` tai `adaptive-dialog` kanssa sekä asetuksen `popup_style: home-assistant` kanssa. Lisää alamarginaalin mobiilissa, hyödyllinen kun kojelaudassasi on alatunnistekortti. |
 | `full_width_on_mobile` | boolean | Valinnainen | `true` tai `false` (oletus) | Käytetään vain asetuksen `popup_mode: centered` kanssa. Laajentaa ponnahdusikkunan koko näytön leveyteen mobiilissa, hyödyllinen pienemmillä näytöillä. |
 | `performance_mode` | string | Valinnainen | `default` (oletus) tai `performance` | Optimoi ponnahdusikkunan avausanimaation. `performance` viivästyttää hieman sisällön renderöintiä ja taustan sumennusta, poistaa myös taustan sumennuksen käytöstä, jos se on asetettu. |
 | `auto_close` | string | Valinnainen | Aikakatkaisu millisekunteina (esim. `10000` 10 sekunnille) | Sulkee ponnahdusikkunan automaattisesti aikakatkaisun jälkeen |

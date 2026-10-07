@@ -171,8 +171,8 @@ Aquesta targeta us permet crear un pop-up amb qualsevol contingut. Cada pop-up e
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obligatori** | Qualsevol hash únic (p. ex. `'#kitchen'`) amb ' ' | Així és com obrireu el vostre pop-up |
 | `popup_style` | string | Opcional | `bubble` (per defecte), `classic` o `home-assistant` | Defineix l'estil visual del pop-up |
-| `popup_mode` | string | Opcional | `default` (per defecte), `fit-content`, `centered` o `adaptive-dialog` | Defineix el mode de disposició del pop-up |
-| `with_bottom_offset` | boolean | Opcional | `true` o `false` (per defecte) | Només s'utilitza amb `popup_mode: fit-content` o `adaptive-dialog`. Aplica un marge inferior al mòbil, útil quan el vostre tauler inclou una targeta de peu de pàgina. |
+| `popup_mode` | string | Opcional | `default` (per defecte), `fit-content`, `centered` o `adaptive-dialog` | Defineix el mode de disposició del pop-up. Amb `popup_style: home-assistant`, només s'utilitzen `default` (alçada completa al mòbil, com el panell "Més informació") i `adaptive-dialog` (ajustat al contingut al mòbil). |
+| `with_bottom_offset` | boolean | Opcional | `true` o `false` (per defecte) | Només s'utilitza amb `popup_mode: fit-content` o `adaptive-dialog`, i amb `popup_style: home-assistant`. Aplica un marge inferior al mòbil, útil quan el vostre tauler inclou una targeta de peu de pàgina. |
 | `full_width_on_mobile` | boolean | Opcional | `true` o `false` (per defecte) | Només s'utilitza amb `popup_mode: centered`. Amplia el pop-up a tota l'amplada de la pantalla al mòbil, útil en pantalles petites. |
 | `performance_mode` | string | Opcional | `default` (per defecte) o `performance` | Optimitza l'animació d'obertura del pop-up. `performance` retarda lleugerament la renderització del contingut i el difuminat del fons, i també desactiva el difuminat del teló de fons si està definit. |
 | `auto_close` | string | Opcional | Un temps d'espera en mil·lisegons (p. ex. `10000` per a 10 s) | Tanca automàticament el pop-up després d'un temps d'espera |

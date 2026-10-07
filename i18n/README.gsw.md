@@ -171,8 +171,8 @@ Mit dere Karte chasch e Pop-up mit beliebigem Inhalt erstelle. Jedes Pop-up isch
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Erforderlich** | Jede eindeutige Hash (z.B. `'#kitchen'`) mit ' ' | So machsch di Pop-up uf |
 | `popup_style` | string | Optional | `bubble` (Standard), `classic` oder `home-assistant` | Definiert de visuälli Stil vom Pop-up |
-| `popup_mode` | string | Optional | `default` (Standard), `fit-content`, `centered` oder `adaptive-dialog` | Definiert de Layout-Modus vom Pop-up |
-| `with_bottom_offset` | boolean | Optional | `true` oder `false` (Standard) | Wird nur mit `popup_mode: fit-content` oder `adaptive-dialog` verwendet. Fügt uf em Handy en Abstand unde derzue, praktisch wenn di Dashboard e Footer-Karte het. |
+| `popup_mode` | string | Optional | `default` (Standard), `fit-content`, `centered` oder `adaptive-dialog` | Definiert de Layout-Modus vom Pop-up. Mit `popup_style: home-assistant` werded nur `default` (volli Höchi uf em Handy, wie s "Meh Info"-Panel) und `adaptive-dialog` (am Inhalt aapasst uf em Handy) verwendet. |
+| `with_bottom_offset` | boolean | Optional | `true` oder `false` (Standard) | Wird nur mit `popup_mode: fit-content` oder `adaptive-dialog` und mit `popup_style: home-assistant` verwendet. Fügt uf em Handy en Abstand unde derzue, praktisch wenn di Dashboard e Footer-Karte het. |
 | `full_width_on_mobile` | boolean | Optional | `true` oder `false` (Standard) | Wird nur mit `popup_mode: centered` verwendet. Streckt s Pop-up uf em Handy uf volli Bildschirmbreiti, praktisch bi chline Display. |
 | `performance_mode` | string | Optional | `default` (Standard) oder `performance` | Optimiert d Öffnigs-Animation vom Pop-up. `performance` verzögeret s Render vom Inhalt und d Hindergrund-Unschärfi liecht, deaktiviert au d Backdrop-Unschärfi falls gsetzt. |
 | `auto_close` | string | Optional | E Timeout i Millisekunde (z.B. `10000` für 10s) | Schliesst s Pop-up automatisch nach emene Timeout |

@@ -171,8 +171,8 @@ Dette kortet lar deg lage en pop-up med hvilket som helst innhold. Hver pop-up e
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Påkrevd** | En hvilken som helst unik hash (f.eks. `'#kitchen'`) med ' ' | Dette er hvordan du åpner pop-upen din |
 | `popup_style` | string | Valgfritt | `bubble` (standard), `classic` eller `home-assistant` | Angir det visuelle uttrykket til pop-upen |
-| `popup_mode` | string | Valgfritt | `default` (standard), `fit-content`, `centered` eller `adaptive-dialog` | Angir layoutmodusen til pop-upen |
-| `with_bottom_offset` | boolean | Valgfritt | `true` eller `false` (standard) | Brukes bare med `popup_mode: fit-content` eller `adaptive-dialog`. Legger til en bunnforskyvning på mobil, nyttig når dashbordet ditt har et bunntekst-kort. |
+| `popup_mode` | string | Valgfritt | `default` (standard), `fit-content`, `centered` eller `adaptive-dialog` | Angir layoutmodusen til pop-upen. Med `popup_style: home-assistant` brukes bare `default` (full høyde på mobil, som "Mer info"-panelet) og `adaptive-dialog` (tilpasset innholdet på mobil). |
+| `with_bottom_offset` | boolean | Valgfritt | `true` eller `false` (standard) | Brukes bare med `popup_mode: fit-content` eller `adaptive-dialog`, samt med `popup_style: home-assistant`. Legger til en bunnforskyvning på mobil, nyttig når dashbordet ditt har et bunntekst-kort. |
 | `full_width_on_mobile` | boolean | Valgfritt | `true` eller `false` (standard) | Brukes bare med `popup_mode: centered`. Utvider pop-upen til full skjermbredde på mobil, nyttig på mindre skjermer. |
 | `performance_mode` | string | Valgfritt | `default` (standard) eller `performance` | Optimaliserer åpningsanimasjonen til pop-upen. `performance` forsinker gjengivelsen av innhold og bakgrunnsuskarpheten litt, og deaktiverer også bakgrunnsuskarphet hvis den er satt. |
 | `auto_close` | string | Valgfritt | En tidsavbrudd i millisekunder (f.eks. `10000` for 10s) | Lukk pop-upen automatisk etter en gitt tid |

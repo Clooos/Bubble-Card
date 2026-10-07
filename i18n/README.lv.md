@@ -171,8 +171,8 @@ Visas opcijas var konfigurēt Home Assistant redaktorā. Bet zemāk esošajā do
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obligāts** | Jebkurš unikāls hash (piemēram, `'#kitchen'`) ar ' ' | Šādi jūs atvērsiet savu uznirstošo logu |
 | `popup_style` | string | Neobligāts | `bubble` (noklusējums), `classic` vai `home-assistant` | Nosaka uznirstošā loga vizuālo stilu |
-| `popup_mode` | string | Neobligāts | `default` (noklusējums), `fit-content`, `centered` vai `adaptive-dialog` | Nosaka uznirstošā loga izkārtojuma režīmu |
-| `with_bottom_offset` | boolean | Neobligāts | `true` vai `false` (noklusējums) | Izmanto tikai kopā ar `popup_mode: fit-content` vai `adaptive-dialog`. Pielieto apakšējo nobīdi mobilajā ierīcē, noderīgi, ja jūsu vadības panelim ir kājene. |
+| `popup_mode` | string | Neobligāts | `default` (noklusējums), `fit-content`, `centered` vai `adaptive-dialog` | Nosaka uznirstošā loga izkārtojuma režīmu. Kopā ar `popup_style: home-assistant` tiek izmantoti tikai `default` (pilns augstums mobilajā ierīcē, tāpat kā panelim "More info") un `adaptive-dialog` (pielāgots saturam mobilajā ierīcē). |
+| `with_bottom_offset` | boolean | Neobligāts | `true` vai `false` (noklusējums) | Izmanto tikai kopā ar `popup_mode: fit-content` vai `adaptive-dialog`, kā arī ar `popup_style: home-assistant`. Pielieto apakšējo nobīdi mobilajā ierīcē, noderīgi, ja jūsu vadības panelim ir kājene. |
 | `full_width_on_mobile` | boolean | Neobligāts | `true` vai `false` (noklusējums) | Izmanto tikai kopā ar `popup_mode: centered`. Izplata uznirstošo logu pilnā ekrāna platumā mobilajā ierīcē, noderīgi mazākiem displejiem. |
 | `performance_mode` | string | Neobligāts | `default` (noklusējums) vai `performance` | Optimizē uznirstošā loga atvēršanas animāciju. `performance` nedaudz aizkavē satura renderēšanu un fona izpludinājumu, kā arī atspējo fona aizmugures izpludinājumu, ja tas ir iestatīts. |
 | `auto_close` | string | Neobligāts | Noildze milisekundēs (piemēram, `10000` 10 sekundēm) | Automātiski aizvērt uznirstošo logu pēc noildzes |

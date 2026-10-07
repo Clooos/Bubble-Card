@@ -171,8 +171,8 @@ Kjo kartë ju lejon të krijoni një pop-up me çfarëdo lloj përmbajtjeje. Çd
 | --- | --- | --- | --- | --- |
 | `hash` | string | **E detyrueshme** | Çdo hash unik (p.sh. `'#kitchen'`) me ' ' | Kjo është si do ta hapni pop-up-in tuaj |
 | `popup_style` | string | Opsionale | `bubble` (parazgjedhje), `classic` ose `home-assistant` | Përcakton stilin vizual të pop-up-it |
-| `popup_mode` | string | Opsionale | `default` (parazgjedhje), `fit-content`, `centered` ose `adaptive-dialog` | Përcakton mënyrën e faqosjes së pop-up-it |
-| `with_bottom_offset` | boolean | Opsionale | `true` ose `false` (parazgjedhje) | Përdoret vetëm me `popup_mode: fit-content` ose `adaptive-dialog`. Aplikon një zhvendosje në fund në mobile, e dobishme kur dashboard-i juaj përfshin një kartë footer. |
+| `popup_mode` | string | Opsionale | `default` (parazgjedhje), `fit-content`, `centered` ose `adaptive-dialog` | Përcakton mënyrën e faqosjes së pop-up-it. Me `popup_style: home-assistant`, përdoren vetëm `default` (lartësi e plotë në mobile, si paneli "More info") dhe `adaptive-dialog` (sipas përmbajtjes në mobile). |
+| `with_bottom_offset` | boolean | Opsionale | `true` ose `false` (parazgjedhje) | Përdoret vetëm me `popup_mode: fit-content` ose `adaptive-dialog`, si dhe me `popup_style: home-assistant`. Aplikon një zhvendosje në fund në mobile, e dobishme kur dashboard-i juaj përfshin një kartë footer. |
 | `full_width_on_mobile` | boolean | Opsionale | `true` ose `false` (parazgjedhje) | Përdoret vetëm me `popup_mode: centered`. Zgjeron pop-up-in në gjerësi të plotë ekrani në mobile, e dobishme në ekrane më të vogla. |
 | `performance_mode` | string | Opsionale | `default` (parazgjedhje) ose `performance` | Optimizon animacionin e hapjes së pop-up-it. `performance` vonon pak renderimin e përmbajtjes dhe blurimin e sfondit, dhe çaktivizon edhe blurin e backdrop-it nëse është vendosur. |
 | `auto_close` | string | Opsionale | Një afat kohor në milisekonda (p.sh. `10000` për 10s) | Mbyll automatikisht pop-up-in pas një afati kohor |

@@ -173,8 +173,8 @@ Bubble Card هي مجموعة بطاقات بسيطة وقابلة للتخصي�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **مطلوب** | أي رمز hash فريد (مثل `'#kitchen'`) بين علامتي ' ' | بهذه الطريقة ستفتح نافذتك المنبثقة |
 | `popup_style` | string | اختياري | `bubble` (افتراضي)، `classic` أو `home-assistant` | يحدد النمط المرئي للنافذة المنبثقة |
-| `popup_mode` | string | اختياري | `default` (افتراضي)، `fit-content`، `centered` أو `adaptive-dialog` | يحدد وضع تخطيط النافذة المنبثقة |
-| `with_bottom_offset` | boolean | اختياري | `true` أو `false` (افتراضي) | يُستخدم فقط مع `popup_mode: fit-content` أو `adaptive-dialog`. يطبّق إزاحة سفلية على الهاتف، مفيد عندما تتضمن لوحة التحكم لديك بطاقة تذييل. |
+| `popup_mode` | string | اختياري | `default` (افتراضي)، `fit-content`، `centered` أو `adaptive-dialog` | يحدد وضع تخطيط النافذة المنبثقة. مع `popup_style: home-assistant`، يُستخدم فقط `default` (ارتفاع كامل على الهاتف، مثل لوحة "مزيد من المعلومات") و`adaptive-dialog` (ملاءمة المحتوى على الهاتف). |
+| `with_bottom_offset` | boolean | اختياري | `true` أو `false` (افتراضي) | يُستخدم فقط مع `popup_mode: fit-content` أو `adaptive-dialog`، وكذلك مع `popup_style: home-assistant`. يطبّق إزاحة سفلية على الهاتف، مفيد عندما تتضمن لوحة التحكم لديك بطاقة تذييل. |
 | `full_width_on_mobile` | boolean | اختياري | `true` أو `false` (افتراضي) | يُستخدم فقط مع `popup_mode: centered`. يوسّع النافذة المنبثقة لتملأ عرض الشاشة بالكامل على الهاتف، مفيد على الشاشات الأصغر. |
 | `performance_mode` | string | اختياري | `default` (افتراضي) أو `performance` | يحسّن حركة فتح النافذة المنبثقة. يؤخر `performance` قليلًا عرض المحتوى وضبابية الخلفية، ويعطّل أيضًا ضبابية الطبقة الخلفية إذا كانت مضبوطة. |
 | `auto_close` | string | اختياري | مهلة بالمللي ثانية (مثل `10000` لعشر ثوانٍ) | إغلاق النافذة المنبثقة تلقائيًا بعد انقضاء المهلة |

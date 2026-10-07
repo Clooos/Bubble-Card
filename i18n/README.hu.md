@@ -171,8 +171,8 @@ Ez a kártya lehetővé teszi, hogy bármilyen tartalommal pop-upot hozz létre.
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Kötelező** | Bármilyen egyedi hash (pl. `'#kitchen'`) ' ' jelekkel | Így fogod megnyitni a pop-upodat |
 | `popup_style` | string | Nem kötelező | `bubble` (alapértelmezett), `classic` vagy `home-assistant` | Meghatározza a pop-up vizuális stílusát |
-| `popup_mode` | string | Nem kötelező | `default` (alapértelmezett), `fit-content`, `centered` vagy `adaptive-dialog` | Meghatározza a pop-up elrendezési módját |
-| `with_bottom_offset` | boolean | Nem kötelező | `true` vagy `false` (alapértelmezett) | Csak `popup_mode: fit-content` vagy `adaptive-dialog` esetén használatos. Alsó térközt alkalmaz mobilon, hasznos, ha az irányítópultod tartalmaz egy lábléc kártyát. |
+| `popup_mode` | string | Nem kötelező | `default` (alapértelmezett), `fit-content`, `centered` vagy `adaptive-dialog` | Meghatározza a pop-up elrendezési módját. `popup_style: home-assistant` esetén csak a `default` (teljes magasság mobilon, mint a "Bővebb infó" panel) és az `adaptive-dialog` (a tartalomhoz igazodik mobilon) használatos. |
+| `with_bottom_offset` | boolean | Nem kötelező | `true` vagy `false` (alapértelmezett) | Csak `popup_mode: fit-content` vagy `adaptive-dialog`, valamint `popup_style: home-assistant` esetén használatos. Alsó térközt alkalmaz mobilon, hasznos, ha az irányítópultod tartalmaz egy lábléc kártyát. |
 | `full_width_on_mobile` | boolean | Nem kötelező | `true` vagy `false` (alapértelmezett) | Csak `popup_mode: centered` esetén használatos. A pop-upot mobilon a képernyő teljes szélességére nyújtja, hasznos kisebb kijelzőkön. |
 | `performance_mode` | string | Nem kötelező | `default` (alapértelmezett) vagy `performance` | Optimalizálja a pop-up nyitási animációját. A `performance` kissé késlelteti a tartalom megjelenítését és a háttér elmosását, valamint kikapcsolja a backdrop blurt, ha be van állítva. |
 | `auto_close` | string | Nem kötelező | Egy időtúllépés ezredmásodpercben (pl. `10000` 10 másodpercért) | A pop-up automatikus bezárása egy időtúllépés után |

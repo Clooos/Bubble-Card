@@ -171,8 +171,8 @@ Bubble Card হলো Home Assistant-এর জন্য একটি মিন�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **আবশ্যক** | ' ' সহ যেকোনো অনন্য হ্যাশ (যেমন `'#kitchen'`) | এভাবেই আপনি আপনার পপ-আপ খুলবেন |
 | `popup_style` | string | ঐচ্ছিক | `bubble` (ডিফল্ট), `classic` বা `home-assistant` | পপ-আপের ভিজ্যুয়াল স্টাইল নির্ধারণ করে |
-| `popup_mode` | string | ঐচ্ছিক | `default` (ডিফল্ট), `fit-content`, `centered` বা `adaptive-dialog` | পপ-আপের লেআউট মোড নির্ধারণ করে |
-| `with_bottom_offset` | boolean | ঐচ্ছিক | `true` বা `false` (ডিফল্ট) | শুধু `popup_mode: fit-content` বা `adaptive-dialog`-এর সাথে ব্যবহৃত। মোবাইলে নিচে একটি অফসেট প্রয়োগ করে, আপনার ড্যাশবোর্ডে ফুটার কার্ড থাকলে দরকারি। |
+| `popup_mode` | string | ঐচ্ছিক | `default` (ডিফল্ট), `fit-content`, `centered` বা `adaptive-dialog` | পপ-আপের লেআউট মোড নির্ধারণ করে। `popup_style: home-assistant`-এর সাথে শুধু `default` (মোবাইলে পুরো উচ্চতা, "আরও তথ্য" প্যানেলের মতো) এবং `adaptive-dialog` (মোবাইলে কনটেন্ট অনুযায়ী) ব্যবহৃত হয়। |
+| `with_bottom_offset` | boolean | ঐচ্ছিক | `true` বা `false` (ডিফল্ট) | শুধু `popup_mode: fit-content` বা `adaptive-dialog`-এর সাথে, এবং `popup_style: home-assistant`-এর সাথে ব্যবহৃত। মোবাইলে নিচে একটি অফসেট প্রয়োগ করে, আপনার ড্যাশবোর্ডে ফুটার কার্ড থাকলে দরকারি। |
 | `full_width_on_mobile` | boolean | ঐচ্ছিক | `true` বা `false` (ডিফল্ট) | শুধু `popup_mode: centered`-এর সাথে ব্যবহৃত। মোবাইলে পপ-আপকে স্ক্রিনের পুরো প্রস্থে প্রসারিত করে, ছোট ডিসপ্লেতে দরকারি। |
 | `performance_mode` | string | ঐচ্ছিক | `default` (ডিফল্ট) বা `performance` | পপ-আপ খোলার অ্যানিমেশন অপটিমাইজ করে। `performance` কনটেন্ট রেন্ডারিং ও ব্যাকগ্রাউন্ড ব্লার সামান্য দেরিতে করে, সেট করা থাকলে ব্যাকড্রপ ব্লারও বন্ধ করে। |
 | `auto_close` | string | ঐচ্ছিক | মিলিসেকেন্ডে একটি টাইমআউট (যেমন 10 সেকেন্ডের জন্য `10000`) | টাইমআউটের পর পপ-আপ স্বয়ংক্রিয়ভাবে বন্ধ করে |

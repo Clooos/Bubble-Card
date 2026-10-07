@@ -173,8 +173,8 @@ Bubble Card היא אוסף כרטיסים מינימליסטי וניתן לה�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **חובה** | כל hash ייחודי (למשל `'#kitchen'`) עם ' ' | כך תפתחו את החלון הקופץ שלכם |
 | `popup_style` | string | אופציונלי | `bubble` (ברירת מחדל), `classic` או `home-assistant` | הגדרת הסגנון החזותי של החלון הקופץ |
-| `popup_mode` | string | אופציונלי | `default` (ברירת מחדל), `fit-content`, `centered` או `adaptive-dialog` | הגדרת מצב הפריסה של החלון הקופץ |
-| `with_bottom_offset` | boolean | אופציונלי | `true` או `false` (ברירת מחדל) | בשימוש רק עם `popup_mode: fit-content` או `adaptive-dialog`. מחיל היסט תחתון בנייד, שימושי כאשר לוח המחוונים שלכם כולל כרטיס כותרת תחתונה. |
+| `popup_mode` | string | אופציונלי | `default` (ברירת מחדל), `fit-content`, `centered` או `adaptive-dialog` | הגדרת מצב הפריסה של החלון הקופץ. עם `popup_style: home-assistant`, רק `default` (גובה מלא בנייד, כמו פאנל "מידע נוסף") ו-`adaptive-dialog` (מותאם לתוכן בנייד) נמצאים בשימוש. |
+| `with_bottom_offset` | boolean | אופציונלי | `true` או `false` (ברירת מחדל) | בשימוש רק עם `popup_mode: fit-content` או `adaptive-dialog`, וגם עם `popup_style: home-assistant`. מחיל היסט תחתון בנייד, שימושי כאשר לוח המחוונים שלכם כולל כרטיס כותרת תחתונה. |
 | `full_width_on_mobile` | boolean | אופציונלי | `true` או `false` (ברירת מחדל) | בשימוש רק עם `popup_mode: centered`. מרחיב את החלון הקופץ לרוחב מסך מלא בנייד, שימושי במסכים קטנים יותר. |
 | `performance_mode` | string | אופציונלי | `default` (ברירת מחדל) או `performance` | ייעול אנימציית הפתיחה של החלון הקופץ. `performance` מעכב מעט את עיבוד התוכן וטשטוש הרקע, וגם מבטל טשטוש רקע אם הוגדר. |
 | `auto_close` | string | אופציונלי | פרק זמן במילישניות (למשל `10000` עבור 10 שניות) | סגירה אוטומטית של החלון הקופץ אחרי פרק זמן |

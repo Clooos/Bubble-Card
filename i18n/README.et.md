@@ -171,8 +171,8 @@ See kaart võimaldab luua hüpikakna suvalise sisuga. Iga hüpikaken on **vaikim
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Kohustuslik** | Iga unikaalne hash (nt `'#kitchen'`) koos ' ' | Nii avad oma hüpikakna |
 | `popup_style` | string | Valikuline | `bubble` (vaikimisi), `classic` või `home-assistant` | Määrab hüpikakna visuaalse stiili |
-| `popup_mode` | string | Valikuline | `default` (vaikimisi), `fit-content`, `centered` või `adaptive-dialog` | Määrab hüpikakna paigutuse režiimi |
-| `with_bottom_offset` | boolean | Valikuline | `true` või `false` (vaikimisi) | Kasutatakse ainult koos `popup_mode: fit-content` või `adaptive-dialog`. Rakendab mobiilis alumise nihke, kasulik kui sinu armatuurlaual on jaluse kaart. |
+| `popup_mode` | string | Valikuline | `default` (vaikimisi), `fit-content`, `centered` või `adaptive-dialog` | Määrab hüpikakna paigutuse režiimi. Koos `popup_style: home-assistant` kasutatakse ainult `default` (mobiilis täiskõrgus, nagu "Rohkem infot" paneel) ja `adaptive-dialog` (mobiilis sisu järgi). |
+| `with_bottom_offset` | boolean | Valikuline | `true` või `false` (vaikimisi) | Kasutatakse ainult koos `popup_mode: fit-content` või `adaptive-dialog` ning koos `popup_style: home-assistant`. Rakendab mobiilis alumise nihke, kasulik kui sinu armatuurlaual on jaluse kaart. |
 | `full_width_on_mobile` | boolean | Valikuline | `true` või `false` (vaikimisi) | Kasutatakse ainult koos `popup_mode: centered`. Laiendab hüpikakna mobiilis täisekraani laiuseks, kasulik väiksemate ekraanide korral. |
 | `performance_mode` | string | Valikuline | `default` (vaikimisi) või `performance` | Optimeerib hüpikakna avanemise animatsiooni. `performance` viivitab veidi sisu renderdamist ja tausta hägustamist ning keelab ka backdrop-blur'i, kui see on määratud. |
 | `auto_close` | string | Valikuline | Ajapiirang millisekundites (nt `10000` 10 sekundi jaoks) | Sulgeb hüpikakna automaatselt pärast ajapiirangut |

@@ -171,8 +171,8 @@ Bubble Card は、Home Assistant 向けのミニマルでカスタマイズ可�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **必須** | ' ' を含む任意の一意なハッシュ (例: `'#kitchen'`) | ポップアップを開くために使われます |
 | `popup_style` | string | 任意 | `bubble` (デフォルト)、`classic` または `home-assistant` | ポップアップの見た目のスタイルを定義します |
-| `popup_mode` | string | 任意 | `default` (デフォルト)、`fit-content`、`centered` または `adaptive-dialog` | ポップアップのレイアウトモードを定義します |
-| `with_bottom_offset` | boolean | 任意 | `true` または `false` (デフォルト) | `popup_mode: fit-content` または `adaptive-dialog` の場合のみ使用されます。モバイルで下部オフセットを適用します。ダッシュボードにフッターカードが含まれている場合に便利です。 |
+| `popup_mode` | string | 任意 | `default` (デフォルト)、`fit-content`、`centered` または `adaptive-dialog` | ポップアップのレイアウトモードを定義します。`popup_style: home-assistant` の場合、使用されるのは `default` (モバイルで全高表示、「詳細情報」パネルと同じ) と `adaptive-dialog` (モバイルでコンテンツに合わせる) のみです。 |
+| `with_bottom_offset` | boolean | 任意 | `true` または `false` (デフォルト) | `popup_mode: fit-content` または `adaptive-dialog` の場合、および `popup_style: home-assistant` の場合のみ使用されます。モバイルで下部オフセットを適用します。ダッシュボードにフッターカードが含まれている場合に便利です。 |
 | `full_width_on_mobile` | boolean | 任意 | `true` または `false` (デフォルト) | `popup_mode: centered` の場合のみ使用されます。モバイルでポップアップを画面幅いっぱいに広げます。小さいディスプレイで便利です。 |
 | `performance_mode` | string | 任意 | `default` (デフォルト) または `performance` | ポップアップを開くアニメーションを最適化します。`performance` はコンテンツの描画と背景のぼかしをわずかに遅らせ、設定されている場合はバックドロップのぼかしも無効にします。 |
 | `auto_close` | string | 任意 | ミリ秒単位のタイムアウト (例: 10秒なら `10000`) | タイムアウト後にポップアップを自動的に閉じます |

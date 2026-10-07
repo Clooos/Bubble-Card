@@ -171,8 +171,8 @@ Ova kartica vam omogućava da napravite skočni prozor s bilo kojim sadržajem. 
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obavezno** | Bilo koji jedinstveni hash (npr. `'#kitchen'`) sa ' ' | Ovako ćete otvarati svoj skočni prozor |
 | `popup_style` | string | Opcionalno | `bubble` (zadano), `classic` ili `home-assistant` | Definiše vizuelni stil skočnog prozora |
-| `popup_mode` | string | Opcionalno | `default` (zadano), `fit-content`, `centered` ili `adaptive-dialog` | Definiše režim rasporeda skočnog prozora |
-| `with_bottom_offset` | boolean | Opcionalno | `true` ili `false` (zadano) | Koristi se samo uz `popup_mode: fit-content` ili `adaptive-dialog`. Primjenjuje donji pomak na mobitelu, korisno kada vaša kontrolna tabla sadrži karticu podnožja. |
+| `popup_mode` | string | Opcionalno | `default` (zadano), `fit-content`, `centered` ili `adaptive-dialog` | Definiše režim rasporeda skočnog prozora. Uz `popup_style: home-assistant` koriste se samo `default` (puna visina na mobitelu, kao panel "Više informacija") i `adaptive-dialog` (prilagođen sadržaju na mobitelu). |
+| `with_bottom_offset` | boolean | Opcionalno | `true` ili `false` (zadano) | Koristi se samo uz `popup_mode: fit-content` ili `adaptive-dialog` te uz `popup_style: home-assistant`. Primjenjuje donji pomak na mobitelu, korisno kada vaša kontrolna tabla sadrži karticu podnožja. |
 | `full_width_on_mobile` | boolean | Opcionalno | `true` ili `false` (zadano) | Koristi se samo uz `popup_mode: centered`. Proširuje skočni prozor na punu širinu ekrana na mobitelu, korisno na manjim ekranima. |
 | `performance_mode` | string | Opcionalno | `default` (zadano) ili `performance` | Optimizuje animaciju otvaranja skočnog prozora. `performance` blago odgađa prikazivanje sadržaja i zamućenje pozadine, a također onemogućava zamućenje podloge ako je postavljeno. |
 | `auto_close` | string | Opcionalno | Vremensko ograničenje u milisekundama (npr. `10000` za 10s) | Automatski zatvara skočni prozor nakon isteka vremena |

@@ -171,8 +171,8 @@ Bubble Card คือชุดการ์ดแบบมินิมอลแ�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Required** | แฮชที่ไม่ซ้ำกันใด ๆ (เช่น `'#kitchen'`) โดยมี ' ' | นี่คือวิธีที่คุณจะเปิดป๊อปอัปของคุณ |
 | `popup_style` | string | Optional | `bubble` (ค่าเริ่มต้น), `classic` หรือ `home-assistant` | กำหนดสไตล์การแสดงผลของป๊อปอัป |
-| `popup_mode` | string | Optional | `default` (ค่าเริ่มต้น), `fit-content`, `centered` หรือ `adaptive-dialog` | กำหนดโหมดเลย์เอาต์ของป๊อปอัป |
-| `with_bottom_offset` | boolean | Optional | `true` หรือ `false` (ค่าเริ่มต้น) | ใช้ได้เฉพาะกับ `popup_mode: fit-content` หรือ `adaptive-dialog` เท่านั้น ใช้ระยะห่างด้านล่างบนมือถือ มีประโยชน์เมื่อแดชบอร์ดของคุณมีการ์ดฟุตเตอร์ |
+| `popup_mode` | string | Optional | `default` (ค่าเริ่มต้น), `fit-content`, `centered` หรือ `adaptive-dialog` | กำหนดโหมดเลย์เอาต์ของป๊อปอัป เมื่อใช้ `popup_style: home-assistant` จะใช้ได้เฉพาะ `default` (เต็มความสูงบนมือถือ เหมือนแผง "More info") และ `adaptive-dialog` (พอดีกับเนื้อหาบนมือถือ) เท่านั้น |
+| `with_bottom_offset` | boolean | Optional | `true` หรือ `false` (ค่าเริ่มต้น) | ใช้ได้เฉพาะกับ `popup_mode: fit-content` หรือ `adaptive-dialog` และกับ `popup_style: home-assistant` เท่านั้น ใช้ระยะห่างด้านล่างบนมือถือ มีประโยชน์เมื่อแดชบอร์ดของคุณมีการ์ดฟุตเตอร์ |
 | `full_width_on_mobile` | boolean | Optional | `true` หรือ `false` (ค่าเริ่มต้น) | ใช้ได้เฉพาะกับ `popup_mode: centered` เท่านั้น ขยายป๊อปอัปให้เต็มความกว้างหน้าจอบนมือถือ มีประโยชน์บนจอที่เล็กกว่า |
 | `performance_mode` | string | Optional | `default` (ค่าเริ่มต้น) หรือ `performance` | ปรับแอนิเมชันการเปิดป๊อปอัปให้เหมาะสม `performance` จะหน่วงการเรนเดอร์เนื้อหาและเบลอพื้นหลังเล็กน้อย และปิดการเบลอฉากหลังด้วยหากตั้งค่าไว้ |
 | `auto_close` | string | Optional | ระยะเวลาหมดเวลาเป็นมิลลิวินาที (เช่น `10000` สำหรับ 10 วินาที) | ปิดป๊อปอัปอัตโนมัติหลังจากหมดเวลา |

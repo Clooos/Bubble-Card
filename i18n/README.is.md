@@ -171,8 +171,8 @@ Hægt er að stilla alla valkosti í Home Assistant ritlinum. En þú finnur ná
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Skylda** | Hvaða einkvæmt hash sem er (t.d. `'#kitchen'`) með ' ' | Þannig opnar þú sprettiglugga þinn |
 | `popup_style` | string | Valfrjálst | `bubble` (sjálfgefið), `classic` eða `home-assistant` | Skilgreinir sjónrænan stíl sprettigluggans |
-| `popup_mode` | string | Valfrjálst | `default` (sjálfgefið), `fit-content`, `centered` eða `adaptive-dialog` | Skilgreinir útlitsham sprettigluggans |
-| `with_bottom_offset` | boolean | Valfrjálst | `true` eða `false` (sjálfgefið) | Aðeins notað með `popup_mode: fit-content` eða `adaptive-dialog`. Bætir við neðri spássíu á farsíma, gagnlegt þegar mælaborðið þitt inniheldur fótarkort. |
+| `popup_mode` | string | Valfrjálst | `default` (sjálfgefið), `fit-content`, `centered` eða `adaptive-dialog` | Skilgreinir útlitsham sprettigluggans. Með `popup_style: home-assistant` eru aðeins `default` (full hæð á farsíma, eins og "Meiri upplýsingar" spjaldið) og `adaptive-dialog` (aðlagast efni á farsíma) notuð. |
+| `with_bottom_offset` | boolean | Valfrjálst | `true` eða `false` (sjálfgefið) | Aðeins notað með `popup_mode: fit-content` eða `adaptive-dialog`, og með `popup_style: home-assistant`. Bætir við neðri spássíu á farsíma, gagnlegt þegar mælaborðið þitt inniheldur fótarkort. |
 | `full_width_on_mobile` | boolean | Valfrjálst | `true` eða `false` (sjálfgefið) | Aðeins notað með `popup_mode: centered`. Stækkar sprettigluggann í fulla skjábreidd á farsíma, gagnlegt á minni skjám. |
 | `performance_mode` | string | Valfrjálst | `default` (sjálfgefið) eða `performance` | Fínstillir opnunarhreyfingu sprettigluggans. `performance` seinkar örlítið birtingu efnis og bakgrunnsþoku, og slekkur einnig á bakgrunnsþoku (backdrop blur) ef hún er stillt. |
 | `auto_close` | string | Valfrjálst | Tímamörk í millisekúndum (t.d. `10000` fyrir 10 sek) | Lokar sprettiglugganum sjálfkrafa eftir ákveðinn tíma |

@@ -171,8 +171,8 @@ Met hierdie kaart kan jy 'n pop-up met enige inhoud skep. Elke pop-up is **by ve
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Vereis** | Enige unieke hutswaarde (bv. `'#kitchen'`) met ' ' | Dit is hoe jy jou pop-up sal oopmaak |
 | `popup_style` | string | Opsioneel | `bubble` (verstek), `classic` of `home-assistant` | Definieer die visuele styl van die pop-up |
-| `popup_mode` | string | Opsioneel | `default` (verstek), `fit-content`, `centered` of `adaptive-dialog` | Definieer die uitlegmodus van die pop-up |
-| `with_bottom_offset` | boolean | Opsioneel | `true` of `false` (verstek) | Word slegs gebruik met `popup_mode: fit-content` of `adaptive-dialog`. Pas 'n onderste verskuiwing op mobiel toe, nuttig wanneer jou paneelbord 'n voettekskaart insluit. |
+| `popup_mode` | string | Opsioneel | `default` (verstek), `fit-content`, `centered` of `adaptive-dialog` | Definieer die uitlegmodus van die pop-up. Met `popup_style: home-assistant` word slegs `default` (volle hoogte op mobiel, soos die "Meer inligting"-paneel) en `adaptive-dialog` (pas by die inhoud op mobiel) gebruik. |
+| `with_bottom_offset` | boolean | Opsioneel | `true` of `false` (verstek) | Word slegs gebruik met `popup_mode: fit-content` of `adaptive-dialog`, en met `popup_style: home-assistant`. Pas 'n onderste verskuiwing op mobiel toe, nuttig wanneer jou paneelbord 'n voettekskaart insluit. |
 | `full_width_on_mobile` | boolean | Opsioneel | `true` of `false` (verstek) | Word slegs gebruik met `popup_mode: centered`. Brei die pop-up uit tot die volle skermbreedte op mobiel, nuttig op kleiner skerms. |
 | `performance_mode` | string | Opsioneel | `default` (verstek) of `performance` | Optimaliseer die oopmaakanimasie van die pop-up. `performance` vertraag die weergee van die inhoud en die agtergrondvervaging effens, en deaktiveer ook die backdrop-vervaging as dit gestel is. |
 | `auto_close` | string | Opsioneel | 'n Uitteltyd in millisekondes (bv. `10000` vir 10s) | Maak die pop-up outomaties toe na 'n uitteltyd |

@@ -166,8 +166,8 @@ This card allows you to create a pop-up with any content. Each pop-up is **hidde
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Required** | Any unique hash (e.g. `'#kitchen'`) with ' ' | This is how you will open your pop-up |
 | `popup_style` | string | Optional | `bubble` (default), `classic` or `home-assistant` | Define the pop-up visual style |
-| `popup_mode` | string | Optional | `default` (default), `fit-content`, `centered` or `adaptive-dialog` | Define the pop-up layout mode |
-| `with_bottom_offset` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: fit-content` or `adaptive-dialog`. Applies a bottom offset on mobile, useful when your dashboard includes a footer card. |
+| `popup_mode` | string | Optional | `default` (default), `fit-content`, `centered` or `adaptive-dialog` | Define the pop-up layout mode. With `popup_style: home-assistant`, only `default` (full height on mobile, like the "More info" panel) and `adaptive-dialog` (fits its content on mobile) are used. |
+| `with_bottom_offset` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: fit-content` or `adaptive-dialog`, and with `popup_style: home-assistant`. Applies a bottom offset on mobile, useful when your dashboard includes a footer card. |
 | `full_width_on_mobile` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: centered`. Expands the pop-up to full screen width on mobile, useful on smaller displays. |
 | `performance_mode` | string | Optional | `default` (default) or `performance` | Optimize the pop-up open animation. `performance` slightly delays content rendering and background blur, also disables backdrop blur if set. |
 | `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |

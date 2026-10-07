@@ -171,8 +171,8 @@ Vi ankaŭ povas rigardi mian YouTube-kanalon por paŝo-post-paŝaj videoj.
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Postulata** | Ajna unika haketilo (ekz. `'#kitchen'`) kun ' ' | Tio estas kiel vi malfermos vian ŝprucfenestron |
 | `popup_style` | string | Malnepra | `bubble` (defaŭlta), `classic` aŭ `home-assistant` | Difinas la vidan stilon de la ŝprucfenestro |
-| `popup_mode` | string | Malnepra | `default` (defaŭlta), `fit-content`, `centered` aŭ `adaptive-dialog` | Difinas la aranĝan reĝimon de la ŝprucfenestro |
-| `with_bottom_offset` | boolean | Malnepra | `true` aŭ `false` (defaŭlta) | Uzata nur kun `popup_mode: fit-content` aŭ `adaptive-dialog`. Aplikas malsupran deŝovon sur poŝtelefono, utila kiam via panelo enhavas piedan karton. |
+| `popup_mode` | string | Malnepra | `default` (defaŭlta), `fit-content`, `centered` aŭ `adaptive-dialog` | Difinas la aranĝan reĝimon de la ŝprucfenestro. Kun `popup_style: home-assistant`, nur `default` (plena alteco sur poŝtelefono, kiel la panelo "Pliaj informoj") kaj `adaptive-dialog` (adaptita al la enhavo sur poŝtelefono) estas uzataj. |
+| `with_bottom_offset` | boolean | Malnepra | `true` aŭ `false` (defaŭlta) | Uzata nur kun `popup_mode: fit-content` aŭ `adaptive-dialog`, kaj kun `popup_style: home-assistant`. Aplikas malsupran deŝovon sur poŝtelefono, utila kiam via panelo enhavas piedan karton. |
 | `full_width_on_mobile` | boolean | Malnepra | `true` aŭ `false` (defaŭlta) | Uzata nur kun `popup_mode: centered`. Vastigas la ŝprucfenestron al plena ekrana larĝo sur poŝtelefono, utila sur pli malgrandaj ekranoj. |
 | `performance_mode` | string | Malnepra | `default` (defaŭlta) aŭ `performance` | Optimumigas la malferman animacion de la ŝprucfenestro. `performance` iomete prokrastas la bildigon de la enhavo kaj la fonan malfokusigon, kaj ankaŭ malŝaltas la fonan malfokusigon se tio estas agordita. |
 | `auto_close` | string | Malnepra | Tempolimo en milisekundoj (ekz. `10000` por 10s) | Aŭtomate fermas la ŝprucfenestron post tempolimo |

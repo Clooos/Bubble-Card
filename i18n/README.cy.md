@@ -171,8 +171,8 @@ Mae'r cerdyn hwn yn caniatáu i chi greu naidlen gydag unrhyw gynnwys. Mae pob n
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Gofynnol** | Unrhyw hash unigryw (e.e. `'#kitchen'`) gyda ' ' | Dyma sut y byddwch yn agor eich naidlen |
 | `popup_style` | string | Dewisol | `bubble` (diofyn), `classic` or `home-assistant` | Diffiniwch arddull weledol y naidlen |
-| `popup_mode` | string | Dewisol | `default` (diofyn), `fit-content`, `centered` or `adaptive-dialog` | Diffiniwch fodd cynllun y naidlen |
-| `with_bottom_offset` | boolean | Dewisol | `true` or `false` (diofyn) | Dim ond gyda `popup_mode: fit-content` neu `adaptive-dialog` y'i defnyddir. Yn rhoi atred waelod ar symudol, defnyddiol pan fo'ch dangosfwrdd yn cynnwys cerdyn troedyn. |
+| `popup_mode` | string | Dewisol | `default` (diofyn), `fit-content`, `centered` or `adaptive-dialog` | Diffiniwch fodd cynllun y naidlen. Gyda `popup_style: home-assistant`, dim ond `default` (uchder llawn ar symudol, fel y panel "More info") ac `adaptive-dialog` (yn ffitio'r cynnwys ar symudol) a ddefnyddir. |
+| `with_bottom_offset` | boolean | Dewisol | `true` or `false` (diofyn) | Dim ond gyda `popup_mode: fit-content` neu `adaptive-dialog`, a hefyd gyda `popup_style: home-assistant`, y'i defnyddir. Yn rhoi atred waelod ar symudol, defnyddiol pan fo'ch dangosfwrdd yn cynnwys cerdyn troedyn. |
 | `full_width_on_mobile` | boolean | Dewisol | `true` or `false` (diofyn) | Dim ond gyda `popup_mode: centered` y'i defnyddir. Yn ehangu'r naidlen i led llawn y sgrin ar symudol, defnyddiol ar sgriniau llai. |
 | `performance_mode` | string | Dewisol | `default` (diofyn) or `performance` | Optimeiddio animeiddiad agor y naidlen. Mae `performance` yn oedi ychydig ar rendro'r cynnwys a phylurwch y cefndir, ac yn analluogi hefyd blur y cefndir os yw wedi'i osod. |
 | `auto_close` | string | Dewisol | Terfyn amser mewn milieiliadau (e.e. `10000` am 10eil) | Cau'r naidlen yn awtomatig ar ôl terfyn amser |

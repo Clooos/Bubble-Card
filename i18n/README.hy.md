@@ -171,8 +171,8 @@ Bubble Card մինիմալիստական և հարմարեցվող քարտեր�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Պարտադիր** | Ցանկացած եզակի hash (օրինակ՝ `'#kitchen'`) '-ով | Սա այն է, թե ինչպես եք բացելու ձեր պոպ-ապը |
 | `popup_style` | string | Ընտրովի | `bubble` (լռելյայն), `classic` կամ `home-assistant` | Սահմանում է պոպ-ապի տեսողական ոճը |
-| `popup_mode` | string | Ընտրովի | `default` (լռելյայն), `fit-content`, `centered` կամ `adaptive-dialog` | Սահմանում է պոպ-ապի դասավորության ռեժիմը |
-| `with_bottom_offset` | boolean | Ընտրովի | `true` կամ `false` (լռելյայն) | Օգտագործվում է միայն `popup_mode: fit-content` կամ `adaptive-dialog`-ի հետ։ Կիրառում է ներքևի shift բջջայինի վրա, օգտակար է, երբ ձեր վահանակն ունի footer քարտ։ |
+| `popup_mode` | string | Ընտրովի | `default` (լռելյայն), `fit-content`, `centered` կամ `adaptive-dialog` | Սահմանում է պոպ-ապի դասավորության ռեժիմը։ `popup_style: home-assistant`-ի հետ օգտագործվում են միայն `default` (ամբողջ բարձրությամբ բջջայինի վրա, ինչպես "More info" վահանակը) և `adaptive-dialog` (հարմարեցված բովանդակությանը բջջայինի վրա)։ |
+| `with_bottom_offset` | boolean | Ընտրովի | `true` կամ `false` (լռելյայն) | Օգտագործվում է միայն `popup_mode: fit-content` կամ `adaptive-dialog`-ի, ինչպես նաև `popup_style: home-assistant`-ի հետ։ Կիրառում է ներքևի shift բջջայինի վրա, օգտակար է, երբ ձեր վահանակն ունի footer քարտ։ |
 | `full_width_on_mobile` | boolean | Ընտրովի | `true` կամ `false` (լռելյայն) | Օգտագործվում է միայն `popup_mode: centered`-ի հետ։ Ընդարձակում է պոպ-ապը լրիվ էկրանի լայնությամբ բջջայինի վրա, օգտակար է փոքր էկրանների վրա։ |
 | `performance_mode` | string | Ընտրովի | `default` (լռելյայն) կամ `performance` | Օպտիմալացնում է պոպ-ապի բացման անիմացիան։ `performance`-ը մի փոքր հետաձգում է բովանդակության ռենդերինգը և ֆոնի մշուշոտումը, նաև անջատում է backdrop blur-ը, եթե դրված է։ |
 | `auto_close` | string | Ընտրովի | Timeout միլիվայրկյաններով (օրինակ՝ `10000`՝ 10վ-ի համար) | Ինքնաշխատ փակում է պոպ-ապը timeout-ից հետո |

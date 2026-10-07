@@ -171,8 +171,8 @@ Cette carte vous permet de créer une pop-up avec le contenu de votre choix. Cha
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Requis** | N'importe quel hash unique (ex. `'#kitchen'`) avec ' ' | C'est ainsi que vous ouvrirez votre pop-up |
 | `popup_style` | string | Optionnel | `bubble` (par défaut), `classic` ou `home-assistant` | Définit le style visuel de la pop-up |
-| `popup_mode` | string | Optionnel | `default` (par défaut), `fit-content`, `centered` ou `adaptive-dialog` | Définit le mode de disposition de la pop-up |
-| `with_bottom_offset` | boolean | Optionnel | `true` ou `false` (par défaut) | Utilisé uniquement avec `popup_mode: fit-content` ou `adaptive-dialog`. Applique un décalage en bas sur mobile, utile lorsque votre tableau de bord comprend une carte de pied de page. |
+| `popup_mode` | string | Optionnel | `default` (par défaut), `fit-content`, `centered` ou `adaptive-dialog` | Définit le mode de disposition de la pop-up. Avec `popup_style: home-assistant`, seuls `default` (pleine hauteur sur mobile, comme le panneau « Plus d'infos ») et `adaptive-dialog` (ajusté au contenu sur mobile) sont utilisés. |
+| `with_bottom_offset` | boolean | Optionnel | `true` ou `false` (par défaut) | Utilisé uniquement avec `popup_mode: fit-content` ou `adaptive-dialog`, et avec `popup_style: home-assistant`. Applique un décalage en bas sur mobile, utile lorsque votre tableau de bord comprend une carte de pied de page. |
 | `full_width_on_mobile` | boolean | Optionnel | `true` ou `false` (par défaut) | Utilisé uniquement avec `popup_mode: centered`. Étend la pop-up sur toute la largeur de l'écran sur mobile, utile sur les petits écrans. |
 | `performance_mode` | string | Optionnel | `default` (par défaut) ou `performance` | Optimise l'animation d'ouverture de la pop-up. `performance` retarde légèrement le rendu du contenu et le flou du fond, et désactive aussi le flou de l'arrière-plan s'il est défini. |
 | `auto_close` | string | Optionnel | Un délai en millisecondes (ex. `10000` pour 10 s) | Ferme automatiquement la pop-up après un délai |

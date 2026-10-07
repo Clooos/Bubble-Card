@@ -171,8 +171,8 @@ Ligeann an cárta seo duit preabfhuinneog a chruthú le hábhar ar bith. Bíonn 
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Riachtanach** | Aon hais uathúil (m.sh. `'#kitchen'`) le ' ' | Seo mar a osclóidh tú do phreabfhuinneog |
 | `popup_style` | string | Roghnach | `bubble` (réamhshocraithe), `classic` nó `home-assistant` | Sainigh stíl amhairc na preabfhuinneoige |
-| `popup_mode` | string | Roghnach | `default` (réamhshocraithe), `fit-content`, `centered` nó `adaptive-dialog` | Sainigh mód leagan amach na preabfhuinneoige |
-| `with_bottom_offset` | boolean | Roghnach | `true` nó `false` (réamhshocraithe) | Ní úsáidtear é ach le `popup_mode: fit-content` nó `adaptive-dialog`. Cuireann sé fritháireamh bun i bhfeidhm ar an bhfón póca, úsáideach nuair a bhíonn cárta buntásc i do dhaisbord. |
+| `popup_mode` | string | Roghnach | `default` (réamhshocraithe), `fit-content`, `centered` nó `adaptive-dialog` | Sainigh mód leagan amach na preabfhuinneoige. Le `popup_style: home-assistant`, ní úsáidtear ach `default` (airde iomlán ar an bhfón póca, cosúil leis an bpainéal "More info") agus `adaptive-dialog` (oiriúnaithe don ábhar ar an bhfón póca). |
+| `with_bottom_offset` | boolean | Roghnach | `true` nó `false` (réamhshocraithe) | Ní úsáidtear é ach le `popup_mode: fit-content` nó `adaptive-dialog`, agus le `popup_style: home-assistant`. Cuireann sé fritháireamh bun i bhfeidhm ar an bhfón póca, úsáideach nuair a bhíonn cárta buntásc i do dhaisbord. |
 | `full_width_on_mobile` | boolean | Roghnach | `true` nó `false` (réamhshocraithe) | Ní úsáidtear é ach le `popup_mode: centered`. Leathnaíonn sé an phreabfhuinneog go leithead iomlán an scáileáin ar an bhfón póca, úsáideach ar scáileáin níos lú. |
 | `performance_mode` | string | Roghnach | `default` (réamhshocraithe) nó `performance` | Optamaigh beochan oscailte na preabfhuinneoige. Cuireann `performance` beagán moille ar rindreáil an ábhair agus doiléiriú an chúlra, agus díchumasaíonn sé doiléiriú an chúlbhrait má tá sé socraithe. |
 | `auto_close` | string | Roghnach | Am istigh i milleasoicindí (m.sh. `10000` do 10s) | Dún an phreabfhuinneog go huathoibríoch tar éis am istigh |

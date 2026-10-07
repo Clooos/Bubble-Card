@@ -171,8 +171,8 @@ Esta tarjeta te permite crear un pop-up con cualquier contenido. Cada pop-up est
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obligatorio** | Cualquier hash único (por ejemplo, `'#kitchen'`) con ' ' | Así es como abrirás tu pop-up |
 | `popup_style` | string | Opcional | `bubble` (predeterminado), `classic` o `home-assistant` | Define el estilo visual del pop-up |
-| `popup_mode` | string | Opcional | `default` (predeterminado), `fit-content`, `centered` o `adaptive-dialog` | Define el modo de diseño del pop-up |
-| `with_bottom_offset` | boolean | Opcional | `true` o `false` (predeterminado) | Solo se usa con `popup_mode: fit-content` o `adaptive-dialog`. Aplica un desplazamiento inferior en móvil, útil cuando tu dashboard incluye una tarjeta de pie de página. |
+| `popup_mode` | string | Opcional | `default` (predeterminado), `fit-content`, `centered` o `adaptive-dialog` | Define el modo de diseño del pop-up. Con `popup_style: home-assistant`, solo se usan `default` (altura completa en móvil, como el panel "Más información") y `adaptive-dialog` (ajustado al contenido en móvil). |
+| `with_bottom_offset` | boolean | Opcional | `true` o `false` (predeterminado) | Solo se usa con `popup_mode: fit-content` o `adaptive-dialog`, y con `popup_style: home-assistant`. Aplica un desplazamiento inferior en móvil, útil cuando tu dashboard incluye una tarjeta de pie de página. |
 | `full_width_on_mobile` | boolean | Opcional | `true` o `false` (predeterminado) | Solo se usa con `popup_mode: centered`. Expande el pop-up al ancho completo de la pantalla en móvil, útil en pantallas más pequeñas. |
 | `performance_mode` | string | Opcional | `default` (predeterminado) o `performance` | Optimiza la animación de apertura del pop-up. `performance` retrasa ligeramente el renderizado del contenido y el desenfoque de fondo, y también desactiva el desenfoque del backdrop si está activado. |
 | `auto_close` | string | Opcional | Un tiempo de espera en milisegundos (por ejemplo, `10000` para 10s) | Cierra automáticamente el pop-up después de un tiempo de espera |

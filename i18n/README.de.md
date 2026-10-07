@@ -171,8 +171,8 @@ Mit dieser Karte kannst du ein Pop-up mit beliebigem Inhalt erstellen. Jedes Pop
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Erforderlich** | Ein beliebiger eindeutiger Hash (z. B. `'#kitchen'`) mit ' ' | So wirst du dein Pop-up öffnen |
 | `popup_style` | string | Optional | `bubble` (Standard), `classic` oder `home-assistant` | Legt den visuellen Stil des Pop-ups fest |
-| `popup_mode` | string | Optional | `default` (Standard), `fit-content`, `centered` oder `adaptive-dialog` | Legt den Layout-Modus des Pop-ups fest |
-| `with_bottom_offset` | boolean | Optional | `true` oder `false` (Standard) | Nur zusammen mit `popup_mode: fit-content` oder `adaptive-dialog` verwendet. Wendet auf Mobilgeräten einen unteren Abstand an, nützlich, wenn dein Dashboard eine Fußzeilenkarte enthält. |
+| `popup_mode` | string | Optional | `default` (Standard), `fit-content`, `centered` oder `adaptive-dialog` | Legt den Layout-Modus des Pop-ups fest. Mit `popup_style: home-assistant` werden nur `default` (volle Höhe auf Mobilgeräten, wie der „Mehr Infos"-Dialog) und `adaptive-dialog` (an den Inhalt angepasst auf Mobilgeräten) verwendet. |
+| `with_bottom_offset` | boolean | Optional | `true` oder `false` (Standard) | Nur zusammen mit `popup_mode: fit-content` oder `adaptive-dialog` sowie mit `popup_style: home-assistant` verwendet. Wendet auf Mobilgeräten einen unteren Abstand an, nützlich, wenn dein Dashboard eine Fußzeilenkarte enthält. |
 | `full_width_on_mobile` | boolean | Optional | `true` oder `false` (Standard) | Nur zusammen mit `popup_mode: centered` verwendet. Erweitert das Pop-up auf Mobilgeräten auf die volle Bildschirmbreite, nützlich auf kleineren Displays. |
 | `performance_mode` | string | Optional | `default` (Standard) oder `performance` | Optimiert die Öffnungsanimation des Pop-ups. `performance` verzögert das Rendern des Inhalts und die Hintergrundunschärfe leicht und deaktiviert außerdem die Backdrop-Unschärfe, falls gesetzt. |
 | `auto_close` | string | Optional | Ein Timeout in Millisekunden (z. B. `10000` für 10 s) | Schließt das Pop-up nach einem Timeout automatisch |

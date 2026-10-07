@@ -173,8 +173,8 @@ Bubble Card یک مجموعه کارت مینیمال و قابل شخصی‌س�
 | --- | --- | --- | --- | --- |
 | `hash` | string | **الزامی** | هر هش یکتا (مثلاً `'#kitchen'`) با ' ' | این نحوه باز کردن پاپ‌آپ شماست |
 | `popup_style` | string | اختیاری | `bubble` (پیش‌فرض)، `classic` یا `home-assistant` | سبک بصری پاپ‌آپ را تعریف می‌کند |
-| `popup_mode` | string | اختیاری | `default` (پیش‌فرض)، `fit-content`، `centered` یا `adaptive-dialog` | حالت چیدمان پاپ‌آپ را تعریف می‌کند |
-| `with_bottom_offset` | boolean | اختیاری | `true` یا `false` (پیش‌فرض) | فقط با `popup_mode: fit-content` یا `adaptive-dialog` استفاده می‌شود. یک افست پایینی را در موبایل اعمال می‌کند، مفید وقتی داشبورد شما یک کارت فوتر دارد. |
+| `popup_mode` | string | اختیاری | `default` (پیش‌فرض)، `fit-content`، `centered` یا `adaptive-dialog` | حالت چیدمان پاپ‌آپ را تعریف می‌کند. با `popup_style: home-assistant`، فقط `default` (تمام‌ارتفاع در موبایل، مانند پنل «More info») و `adaptive-dialog` (متناسب با محتوا در موبایل) استفاده می‌شوند. |
+| `with_bottom_offset` | boolean | اختیاری | `true` یا `false` (پیش‌فرض) | فقط با `popup_mode: fit-content` یا `adaptive-dialog` و همچنین با `popup_style: home-assistant` استفاده می‌شود. یک افست پایینی را در موبایل اعمال می‌کند، مفید وقتی داشبورد شما یک کارت فوتر دارد. |
 | `full_width_on_mobile` | boolean | اختیاری | `true` یا `false` (پیش‌فرض) | فقط با `popup_mode: centered` استفاده می‌شود. پاپ‌آپ را در موبایل به عرض کامل صفحه گسترش می‌دهد، مفید برای نمایشگرهای کوچک‌تر. |
 | `performance_mode` | string | اختیاری | `default` (پیش‌فرض) یا `performance` | انیمیشن باز شدن پاپ‌آپ را بهینه می‌کند. `performance` رندر محتوا و تاری پس‌زمینه را کمی به تأخیر می‌اندازد، همچنین در صورت تنظیم بودن، تاری پس‌زمینه (backdrop blur) را غیرفعال می‌کند. |
 | `auto_close` | string | اختیاری | یک زمان‌سنج به میلی‌ثانیه (مثلاً `10000` برای ۱۰ ثانیه) | پاپ‌آپ را پس از یک زمان‌سنج به‌طور خودکار می‌بندد |

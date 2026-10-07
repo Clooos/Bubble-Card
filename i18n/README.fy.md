@@ -171,8 +171,8 @@ Mei dizze kaart kinst in pop-up meitsje mei elke ynhâld. Elke pop-up is **stand
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Fereaske** | Elke unike hash (bgl. `'#kitchen'`) mei ' ' | Sa iepenest dyn pop-up |
 | `popup_style` | string | Opsjoneel | `bubble` (standert), `classic` of `home-assistant` | Bepaalt it fisuele styl fan de pop-up |
-| `popup_mode` | string | Opsjoneel | `default` (standert), `fit-content`, `centered` of `adaptive-dialog` | Bepaalt de yndielingsmodus fan de pop-up |
-| `with_bottom_offset` | boolean | Opsjoneel | `true` of `false` (standert) | Wurdt allinnich brûkt mei `popup_mode: fit-content` of `adaptive-dialog`. Past in offset ûnderoan ta op mobyl, nuttich ast dyn dashboard in fuottekstkaart hat. |
+| `popup_mode` | string | Opsjoneel | `default` (standert), `fit-content`, `centered` of `adaptive-dialog` | Bepaalt de yndielingsmodus fan de pop-up. Mei `popup_style: home-assistant` wurde allinnich `default` (folsleine hichte op mobyl, lykas it paniel "Mear ynfo") en `adaptive-dialog` (oanpast oan de ynhâld op mobyl) brûkt. |
+| `with_bottom_offset` | boolean | Opsjoneel | `true` of `false` (standert) | Wurdt allinnich brûkt mei `popup_mode: fit-content` of `adaptive-dialog`, en mei `popup_style: home-assistant`. Past in offset ûnderoan ta op mobyl, nuttich ast dyn dashboard in fuottekstkaart hat. |
 | `full_width_on_mobile` | boolean | Opsjoneel | `true` of `false` (standert) | Wurdt allinnich brûkt mei `popup_mode: centered`. Fergrutet de pop-up nei folle skermbreedte op mobyl, nuttich op lytsere skermen. |
 | `performance_mode` | string | Opsjoneel | `default` (standert) of `performance` | Optimalisearret de iepenanimaasje fan de pop-up. `performance` fertraget it renderjen fan de ynhâld en de eftergrûnwazichheid in bytsje, en skeakelet ek de backdrop-wazichheid út as dy oansetten is. |
 | `auto_close` | string | Opsjoneel | In timeout yn millisekonden (bgl. `10000` foar 10s) | De pop-up automatysk slute nei in timeout |

@@ -171,8 +171,8 @@ Este cartão permite criar um pop-up com qualquer conteúdo. Cada pop-up está *
 | --- | --- | --- | --- | --- |
 | `hash` | string | **Obrigatório** | Qualquer hash único (por exemplo, `'#kitchen'`) com ' ' | É assim que irá abrir o seu pop-up |
 | `popup_style` | string | Opcional | `bubble` (predefinição), `classic` ou `home-assistant` | Define o estilo visual do pop-up |
-| `popup_mode` | string | Opcional | `default` (predefinição), `fit-content`, `centered` ou `adaptive-dialog` | Define o modo de disposição do pop-up |
-| `with_bottom_offset` | boolean | Opcional | `true` ou `false` (predefinição) | Usado apenas com `popup_mode: fit-content` ou `adaptive-dialog`. Aplica um desvio inferior no telemóvel, útil quando o seu dashboard inclui um cartão de rodapé. |
+| `popup_mode` | string | Opcional | `default` (predefinição), `fit-content`, `centered` ou `adaptive-dialog` | Define o modo de disposição do pop-up. Com `popup_style: home-assistant`, só são usados `default` (altura total no telemóvel, como o painel "Mais informação") e `adaptive-dialog` (ajustado ao conteúdo no telemóvel). |
+| `with_bottom_offset` | boolean | Opcional | `true` ou `false` (predefinição) | Usado apenas com `popup_mode: fit-content` ou `adaptive-dialog`, e com `popup_style: home-assistant`. Aplica um desvio inferior no telemóvel, útil quando o seu dashboard inclui um cartão de rodapé. |
 | `full_width_on_mobile` | boolean | Opcional | `true` ou `false` (predefinição) | Usado apenas com `popup_mode: centered`. Expande o pop-up para a largura total do ecrã no telemóvel, útil em ecrãs mais pequenos. |
 | `performance_mode` | string | Opcional | `default` (predefinição) ou `performance` | Otimiza a animação de abertura do pop-up. `performance` atrasa ligeiramente a renderização do conteúdo e o desfoque de fundo, também desativa o desfoque do backdrop se estiver definido. |
 | `auto_close` | string | Opcional | Um tempo limite em milissegundos (por exemplo, `10000` para 10s) | Fecha automaticamente o pop-up após um tempo limite |
