@@ -4251,6 +4251,51 @@ describe('pop-up styles', () => {
         expect(getPopupMode({})).toBe('default');
     });
 
+    // The mode stays adaptive-dialog either way, since the wide dialog is keyed
+    // on it. The height of the sheet rides on a class of its own.
+    test('the sheet of the style takes the height of the more info dialog by default', async () => {
+        const { syncPopupModeClasses } = await import('./helpers.js');
+        const popUp = makePopUp();
+
+        expect(syncPopupModeClasses(popUp, { popup_style: 'home-assistant' })).toBe('adaptive-dialog');
+
+        expect(popUp.classes.has('popup-mode-adaptive-dialog')).toBe(true);
+        expect(popUp.classes.has('popup-mode-full-height-sheet')).toBe(true);
+    });
+
+    test('asking for adaptive-dialog or fit-content keeps the sheet that follows its content', async () => {
+        const { syncPopupModeClasses } = await import('./helpers.js');
+
+        for (const popup_mode of ['adaptive-dialog', 'fit-content']) {
+            const popUp = makePopUp();
+
+            expect(syncPopupModeClasses(popUp, { popup_style: 'home-assistant', popup_mode })).toBe('adaptive-dialog');
+
+            expect(popUp.classes.has('popup-mode-adaptive-dialog')).toBe(true);
+            expect(popUp.classes.has('popup-mode-full-height-sheet')).toBe(false);
+        }
+    });
+
+    test('the class comes off when the config stops asking for it, and no other style gets it', async () => {
+        const { syncPopupModeClasses } = await import('./helpers.js');
+        const popUp = makePopUp();
+
+        syncPopupModeClasses(popUp, { popup_style: 'home-assistant' });
+        syncPopupModeClasses(popUp, { popup_style: 'home-assistant', popup_mode: 'adaptive-dialog' });
+        expect(popUp.classes.has('popup-mode-full-height-sheet')).toBe(false);
+
+        syncPopupModeClasses(popUp, { popup_style: 'home-assistant', popup_mode: 'default' });
+        expect(popUp.classes.has('popup-mode-full-height-sheet')).toBe(true);
+
+        syncPopupModeClasses(popUp, {});
+        expect(popUp.classes.has('popup-mode-full-height-sheet')).toBe(false);
+
+        for (const config of [{ popup_mode: 'adaptive-dialog' }, { popup_style: 'classic' }, { popup_mode: 'fit-content' }]) {
+            syncPopupModeClasses(popUp, config);
+            expect(popUp.classes.has('popup-mode-full-height-sheet')).toBe(false);
+        }
+    });
+
     test('switching back to the bubble style takes both classes off again', () => {
         const popUp = makePopUp();
 

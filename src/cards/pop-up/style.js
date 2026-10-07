@@ -18,6 +18,17 @@ export function isHomeAssistantStyle(config) {
     return getPopupStyle(config) === POPUP_STYLE_HOME_ASSISTANT;
 }
 
+// On a narrow screen the more info dialog is a sheet of one height, whatever it
+// holds (ha-more-info-dialog.ts sets --ha-bottom-sheet-height, not only its
+// maximum), so its close button and its content stay where they are from one
+// opening to the next. The Home Assistant style does the same, unless the
+// config asks for the sheet that follows its content, which adaptive-dialog
+// names and fit-content means too. The card and the editor both ask here.
+export function hasFullHeightSheet(config) {
+    if (!isHomeAssistantStyle(config)) return false;
+    return config?.popup_mode !== 'adaptive-dialog' && config?.popup_mode !== 'fit-content';
+}
+
 // Both styles wear the Home Assistant header, so both answer to it.
 export function hasClassicHeader(config) {
     const style = getPopupStyle(config);

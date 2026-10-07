@@ -1,4 +1,4 @@
-import { getPopupStyle, POPUP_STYLE_CLASSIC, POPUP_STYLE_HOME_ASSISTANT } from "./style.js";
+import { getPopupStyle, hasFullHeightSheet, POPUP_STYLE_CLASSIC, POPUP_STYLE_HOME_ASSISTANT } from "./style.js";
 import { getBackdrop, hideExistingBackdrop, releaseBackdropContext } from "./backdrop.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll, keptHistoryState } from "../../tools/utils.js";
@@ -532,7 +532,9 @@ export function getPopupMode(config) {
     // The more info dialog of Home Assistant adapts to the page, a sheet docked
     // to the bottom on a narrow screen and a centred dialog on a wide one. The
     // style that reproduces it therefore brings that geometry with it rather
-    // than leaving it to a second setting the user would have to find.
+    // than leaving it to a second setting the user would have to find. What
+    // popup_mode still decides there is the height of the sheet, which is not
+    // a geometry of its own and is answered by hasFullHeightSheet.
     if (getPopupStyle(config) === POPUP_STYLE_HOME_ASSISTANT) return POPUP_MODE_ADAPTIVE_DIALOG;
     if (config?.popup_mode === POPUP_MODE_FIT_CONTENT) return POPUP_MODE_FIT_CONTENT;
     if (config?.popup_mode === POPUP_MODE_CENTERED) return POPUP_MODE_CENTERED;
@@ -569,6 +571,7 @@ export function syncPopupModeClasses(popUp, config) {
     popUp.classList.toggle('popup-mode-adaptive-dialog', popupMode === POPUP_MODE_ADAPTIVE_DIALOG);
     popUp.classList.toggle('popup-mode-with-bottom-offset', hasPopupBottomOffset(config));
     popUp.classList.toggle('popup-mode-full-width-on-mobile', hasPopupFullWidthOnMobile(config));
+    popUp.classList.toggle('popup-mode-full-height-sheet', hasFullHeightSheet(config));
     return popupMode;
 }
 

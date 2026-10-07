@@ -305,6 +305,24 @@ describe('pop-up styles', () => {
     expect(haStyle).toContain('2 * var(--custom-height-offset-desktop, 0px)');
   });
 
+  // ha-more-info-dialog sets --ha-bottom-sheet-height, a height and not only a
+  // ceiling. The sheet used to stop at its content, so it changed height with
+  // every card shown or hidden inside it.
+  test('gives its sheet the height of the more info dialog, on a narrow screen only', () => {
+    const narrow = haStyle.slice(haStyle.indexOf('@media (max-width: 870px), (max-height: 500px)'), haStyle.indexOf('@media only screen and (min-width: 871px) and (min-height: 501px)'));
+    const rule = /\.bubble-pop-up\.popup-style-home-assistant\.popup-mode-full-height-sheet:not\(\.editor\) \{\s*height: var\(--bubble-pop-up-available-height\);\s*\}/;
+
+    expect(narrow).toMatch(rule);
+    // Nowhere else, since a dialog on a wide screen keeps the size of its
+    // content and the preview of the editor is not a sheet.
+    expect(styles.match(/popup-mode-full-height-sheet/g)).toHaveLength(1);
+    // And a pop-up without the class keeps the ceiling alone, which is the
+    // sheet that follows its content. The first rule of the mode is its sheet.
+    const sheet = styles.match(/\.bubble-pop-up\.popup-mode-adaptive-dialog:not\(\.editor\) \{([^}]*)\}/)[1];
+    expect(sheet).toContain('max-height: var(--bubble-pop-up-available-height);');
+    expect(sheet).not.toMatch(/^\s*height:/m);
+  });
+
   test('borrows nothing from the classic style any more', () => {
     // Every rule it needs is written in its own block, so nothing can arrive
     // through a class it did not ask for.

@@ -1252,14 +1252,23 @@
 @media (max-width: 870px), (max-height: 500px) {
     .bubble-pop-up.popup-style-home-assistant {
         --bubble-pop-up-border-radius: var(--ha-bottom-sheet-border-radius, var(--ha-dialog-border-radius, var(--ha-border-radius-2xl, 20px)));
-        /* --ha-bottom-sheet-height, from the :host of ha-more-info-dialog: the
+        /* --ha-bottom-sheet-height, from the :host of ha-more-info-dialog. The
            sheet leaves the taller of the top inset and forty eight above itself,
            where Bubble leaves a header height plus that inset. The mode already
-           anchors it to the bottom and reads this variable for its height, so
-           this is the whole of it. The vh line is the fallback the dvh one
-           replaces where dvh is understood, the way Home Assistant writes it. */
+           anchors it to the bottom and reads this variable as the most it can
+           take. The vh line is the fallback the dvh one replaces where dvh is
+           understood, the way Home Assistant writes it. */
         --bubble-pop-up-available-height: calc(100vh - max(var(--bubble-pop-up-safe-area-top), 48px) - var(--custom-height-offset-mobile));
         --bubble-pop-up-available-height: calc(100dvh - max(var(--bubble-pop-up-safe-area-top), 48px) - var(--custom-height-offset-mobile));
+    }
+
+    /* And the sheet takes that height whatever it holds. ha-more-info-dialog
+       sets the height of its sheet and not only its maximum, so the close
+       button and the content stay where they are from one opening to the next.
+       A pop-up asking for adaptive-dialog by name does not get the class, and
+       keeps a sheet that follows its content. */
+    .bubble-pop-up.popup-style-home-assistant.popup-mode-full-height-sheet:not(.editor) {
+        height: var(--bubble-pop-up-available-height);
     }
 
     /* A sheet spans the whole width. Bubble narrows its pop-up into a centred

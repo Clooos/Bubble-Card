@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { effectiveButtonType, hasClassicHeader, isHomeAssistantStyle } from './style.js';
+import { effectiveButtonType, hasClassicHeader, hasFullHeightSheet, isHomeAssistantStyle } from './style.js';
 
 const popUp = (extra) => ({ card_type: 'pop-up', hash: '#kitchen', ...extra });
 
@@ -15,6 +15,35 @@ describe('which look a pop-up wears', () => {
         expect(hasClassicHeader(popUp({ popup_style: 'home-assistant' }))).toBe(true);
         expect(hasClassicHeader(popUp({ popup_style: 'bubble' }))).toBe(false);
         expect(hasClassicHeader(popUp())).toBe(false);
+    });
+});
+
+// On a phone the more info dialog is a sheet of one height whatever it holds,
+// and a pop-up copying it changed height with every card it gained or lost.
+describe('the height of the sheet in the Home Assistant style', () => {
+    test('is the height of the more info dialog when nothing asks otherwise', () => {
+        expect(hasFullHeightSheet(popUp({ popup_style: 'home-assistant' }))).toBe(true);
+        expect(hasFullHeightSheet(popUp({ popup_style: 'home-assistant', popup_mode: 'default' }))).toBe(true);
+    });
+
+    test('follows the content once the config asks for it', () => {
+        expect(hasFullHeightSheet(popUp({ popup_style: 'home-assistant', popup_mode: 'adaptive-dialog' }))).toBe(false);
+        // Left there from before the style was chosen, and it says the same thing.
+        expect(hasFullHeightSheet(popUp({ popup_style: 'home-assistant', popup_mode: 'fit-content' }))).toBe(false);
+    });
+
+    // The style has no centred dialog of its own, so a mode left there from
+    // another style is not a request for anything.
+    test('ignores a mode the style does not have', () => {
+        expect(hasFullHeightSheet(popUp({ popup_style: 'home-assistant', popup_mode: 'centered' }))).toBe(true);
+    });
+
+    test('is nothing the other styles answer to', () => {
+        expect(hasFullHeightSheet(popUp())).toBe(false);
+        expect(hasFullHeightSheet(popUp({ popup_mode: 'default' }))).toBe(false);
+        expect(hasFullHeightSheet(popUp({ popup_style: 'classic' }))).toBe(false);
+        expect(hasFullHeightSheet(popUp({ popup_style: 'bubble', popup_mode: 'adaptive-dialog' }))).toBe(false);
+        expect(hasFullHeightSheet(undefined)).toBe(false);
     });
 });
 

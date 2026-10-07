@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { fireEvent } from '../../tools/utils.js';
 import setupTranslation, { ensureEditorTranslations } from '../../tools/localize.js';
-import { getPopupStyleDisplayDefault, isHomeAssistantStyle } from './style.js';
+import { getPopupStyleDisplayDefault, hasFullHeightSheet, isHomeAssistantStyle } from './style.js';
 import { tTemplate } from '../../editor/utils.js';
 import { renderButtonEditor } from '../button/editor.js';
 import { isHashOnCurrentPage } from './navigation-picker-bridge.js';
@@ -40,6 +40,22 @@ function getPopUpModeValue(config) {
     if (config?.popup_mode === 'centered') return 'centered';
     if (config?.popup_mode === 'adaptive-dialog') return 'adaptive-dialog';
     return 'default';
+}
+
+// What the mode dropdown offers and shows. The Home Assistant style is the more
+// info dialog, a sheet on a narrow screen and a dialog on a wide one, so the one
+// choice it leaves is the height of that sheet. Default is the height of the
+// dialog, and adaptive-dialog the sheet that follows its content, which a
+// fit-content left in the config means too.
+export function getPopUpModeOptions(t, config) {
+    const options = getPopUpModeList(t);
+    if (!isHomeAssistantStyle(config)) return options;
+    return options.filter(({ value }) => value === 'default' || value === 'adaptive-dialog');
+}
+
+export function getPopUpModeChoice(config) {
+    if (!isHomeAssistantStyle(config)) return getPopUpModeValue(config);
+    return hasFullHeightSheet(config) ? 'default' : 'adaptive-dialog';
 }
 
 export function getPopupPerformanceModeValue(config) {
@@ -140,20 +156,15 @@ function renderPopupStyleDropdown(editor) {
 
 function renderPopUpModeDropdown(editor) {
     const t = setupTranslation(editor.hass);
-    // The more info dialog adapts to the page, so the Home Assistant style
-    // carries that geometry and the choice is not the user's to make: the
-    // control shows what the style decided and refuses to be changed.
-    const forcedByStyle = isHomeAssistantStyle(editor._config);
     return html`
         <ha-form
             .hass=${editor.hass}
-            .disabled=${forcedByStyle}
-            .data=${{ popup_mode: forcedByStyle ? 'adaptive-dialog' : getPopUpModeValue(editor._config) }}
+            .data=${{ popup_mode: getPopUpModeChoice(editor._config) }}
             .schema=${[{
                 name: 'popup_mode',
                 selector: {
                     select: {
-                        options: getPopUpModeList(t),
+                        options: getPopUpModeOptions(t, editor._config),
                         mode: 'dropdown'
                     }
                 }
@@ -348,7 +359,7 @@ export function getPopUpHashInputState(value, originalHash) {
 }
 
 function renderDialogFullWidthOption(editor) {
-    const mode = getPopUpModeValue(editor._config);
+    const mode = getPopUpModeChoice(editor._config);
     if (mode !== 'centered') {
         return html``;
     }
@@ -369,9 +380,16 @@ function renderDialogFullWidthOption(editor) {
     `;
 }
 
+// The Home Assistant style is a sheet on a narrow screen whatever its mode says,
+// so a footer card can cover the end of it either way and the offset applies.
+export function offersBottomOffset(config) {
+    if (isHomeAssistantStyle(config)) return true;
+    const mode = getPopUpModeValue(config);
+    return mode === 'fit-content' || mode === 'adaptive-dialog';
+}
+
 function renderBottomOffsetOption(editor) {
-    const mode = getPopUpModeValue(editor._config);
-    if (mode !== 'fit-content' && mode !== 'adaptive-dialog') {
+    if (!offersBottomOffset(editor._config)) {
         return html``;
     }
 
