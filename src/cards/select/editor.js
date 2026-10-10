@@ -1,18 +1,18 @@
 import { html } from "lit";
 import setupTranslation from '../../tools/localize.js';
+import { getSelectableAttributes, getSelectListLabel } from '../../components/dropdown/lists.js';
 
 
 export function renderSelectEditor(editor){
     const t = setupTranslation(editor.hass);
     const entity = editor._config.entity;
     const isSelect = entity?.startsWith("input_select") || entity?.startsWith("select") || editor._config.select_attribute;
-    const entityAttribute = editor.hass.states[entity]?.attributes;
-    const hasSelectAttributeList = editor._selectable_attributes.some(attr => entityAttribute?.[attr]);
-    const selectableAttributeList = Object.keys(editor.hass.states[entity]?.attributes || {}).map((attributeName) => {
-        let state = editor.hass.states[entity];
-        let formattedName = editor.hass.formatEntityAttributeName(state, attributeName);
-        return { label: formattedName, value: attributeName };
-      }).filter(attribute => editor._selectable_attributes.includes(attribute.value));
+    const state = editor.hass.states[entity];
+    const selectableAttributeList = getSelectableAttributes(entity, state).map((attributeName) => ({
+        label: getSelectListLabel(editor.hass, state, attributeName),
+        value: attributeName,
+    }));
+    const hasSelectAttributeList = selectableAttributeList.length > 0;
 
     let button_action = editor._config.button_action || '';
 

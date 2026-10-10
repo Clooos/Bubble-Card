@@ -18,6 +18,7 @@ import { renderCoverEditor } from '../cards/cover/editor.js';
 import { renderClimateEditor } from '../cards/climate/editor.js';
 import { CLIMATE_CARD_DOMAINS } from '../cards/climate/domains.js';
 import { renderSelectEditor } from '../cards/select/editor.js';
+import { SELECTABLE_ATTRIBUTES, hasSelectableAttribute } from '../components/dropdown/lists.js';
 import { renderCalendarEditor } from '../cards/calendar/editor.js';
 import { renderMediaPlayerEditor } from '../cards/media-player/editor.js';
 import { renderEmptyColumnEditor } from '../cards/empty-column/editor.js';
@@ -350,18 +351,7 @@ class BubbleCardEditor extends LitElement {
     }
 
     get _selectable_attributes() {
-        return [
-            'source_list', 
-            'sound_mode_list',
-            'hvac_modes',
-            'fan_modes',
-            'swing_modes',
-            'swing_horizontal_modes',
-            'preset_modes',
-            'effect_list',
-            'available_modes',
-            'operation_list'
-        ];
+        return SELECTABLE_ATTRIBUTES;
     }
 
     updated(changedProperties) {
@@ -2548,7 +2538,7 @@ class BubbleCardEditor extends LitElement {
             this._entityCache[domain].push(entityId);
 
             // Check for selectable attributes for selectEntities
-            if (this._selectable_attributes.some(attr => entity.attributes?.[attr])) {
+            if (hasSelectableAttribute(entityId, entity)) {
                 if (!selectEntities.includes(entityId)) {
                     selectEntities.push(entityId);
                 }
@@ -2564,7 +2554,7 @@ class BubbleCardEditor extends LitElement {
         // Still need to check for other entities with selectable attributes not in input_select/select domains
         Object.keys(this._hassRender.states).forEach(entityId => {
             const entity = this._hassRender.states[entityId];
-            if (this._selectable_attributes.some(attr => entity.attributes?.[attr])) {
+            if (hasSelectableAttribute(entityId, entity)) {
                 if (!selectEntities.includes(entityId)) { // Avoid duplicates
                     selectEntities.push(entityId);
                 }

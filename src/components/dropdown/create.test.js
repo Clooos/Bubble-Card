@@ -30,6 +30,10 @@ class StubElement {
         return child;
     }
 
+    remove() {
+        this.parentElement?.removeChild(this);
+    }
+
     addEventListener(type, handler) {
         (this.listeners[type] ??= []).push(handler);
     }
@@ -58,17 +62,34 @@ function withPopoverSupport(supported) {
     else delete HTMLElementStub.prototype.popover;
 }
 
+const fireEvent = jest.fn();
 jest.unstable_mockModule('../../tools/utils.js', () => ({
     createElement: (tag) => new StubElement(tag),
+    fireEvent,
+    forwardHaptic: jest.fn(),
 }));
 
 // The layering matters for every menu that is painted inside the card rather
 // than in the browser top layer, which is the mwc menu always and ha-dropdown
 // wherever the popover does not reach it. Defaults to the mwc menu path.
 let newHaFrontend = false;
+const callSelectService = jest.fn();
+const callAlarmMode = jest.fn(() => Promise.resolve());
 jest.unstable_mockModule('./helpers.js', () => ({
-    callSelectService: jest.fn(),
+    callSelectService,
+    callAlarmMode,
     isNewHaFrontend: () => newHaFrontend,
+}));
+
+// The keypad is drawn elsewhere and tested there. Here it is what the dropdown
+// asks of it that matters, so each one made is kept with its callbacks.
+const keypads = [];
+jest.unstable_mockModule('./keypad.js', () => ({
+    createCodeKeypad: jest.fn((options) => {
+        const keypad = { element: new StubElement('div'), focus: jest.fn(), reject: jest.fn(), options };
+        keypads.push(keypad);
+        return keypad;
+    }),
 }));
 
 jest.unstable_mockModule('./styles.css', () => ({ default: '' }));
@@ -223,5 +244,169 @@ describe('dropdown layering', () => {
         expect(mainContainer.style.zIndex).toBe('');
         expect(mainContainer.style.transform).toBe('');
         expect(mainContainer.openDropdowns).toBe(0);
+    });
+});
+
+// A panel that wants its code used to have no place in a dropdown at all. The
+// menu now keeps the pick, swaps its options for a keypad and sends the mode
+// with the code, the way Home Assistant does from a dialog of its own.
+describe('an alarm mode that wants its code', () => {
+    const ENTITY = 'alarm_control_panel.home';
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    function buildAlarm({ attributes = { code_format: 'number', code_arm_required: true, supported_features: 3 }, registry, config = { select_attribute: 'alarm_modes' } } = {}) {
+        const context = buildContext();
+        const haDropdown = new StubElement('ha-dropdown');
+        haDropdown.open = true;
+        context.elements.dropdownSelect.shadowRoot = { querySelector: (selector) => (selector === 'ha-dropdown' ? haDropdown : null) };
+        context._hass = {
+            states: { [ENTITY]: { state: 'disarmed', attributes } },
+            localize: () => '',
+            callWS: jest.fn(() => (registry ? Promise.resolve(registry) : Promise.reject(new Error('not found')))),
+        };
+        createDropdownActions(context, context.elements, ENTITY, config);
+        const pick = (mode) => {
+            const event = { detail: { item: { value: mode } }, preventDefault: jest.fn(), stopImmediatePropagation: jest.fn(), stopPropagation() {} };
+            (haDropdown.listeners['wa-select'] ?? []).forEach((handler) => handler(event));
+            return event;
+        };
+        return { context, haDropdown, pick, select: context.elements.dropdownSelect };
+    }
+
+    beforeEach(() => {
+        newHaFrontend = true;
+        withPopoverSupport(true);
+        keypads.length = 0;
+        fireEvent.mockClear();
+        callSelectService.mockClear();
+        callAlarmMode.mockClear();
+        callAlarmMode.mockImplementation(() => Promise.resolve());
+    });
+
+    test('keeps the menu open, sends nothing yet and shows the keypad in it', async () => {
+        const { pick, select, haDropdown } = buildAlarm();
+
+        const event = pick('armed_away');
+        expect(event.preventDefault).toHaveBeenCalled();
+        // ha-select must not take the pick for a choice that was made.
+        expect(event.stopImmediatePropagation).toHaveBeenCalled();
+        await flush();
+
+        expect(keypads).toHaveLength(1);
+        expect(select.children).toContain(keypads[0].element);
+        expect(keypads[0].focus).toHaveBeenCalled();
+        expect(callAlarmMode).not.toHaveBeenCalled();
+        expect(haDropdown.open).toBe(true);
+    });
+
+    test('sends the mode with the code that was typed, then closes the menu', async () => {
+        const { pick, haDropdown, context } = buildAlarm();
+        pick('disarmed');
+        await flush();
+
+        keypads[0].options.onSubmit('2580');
+        await flush();
+
+        expect(callAlarmMode).toHaveBeenCalledWith(context, ENTITY, 'disarmed', '2580');
+        expect(haDropdown.open).toBe(false);
+    });
+
+    test('keeps the keypad up and shakes it when Home Assistant refuses the code', async () => {
+        const { pick, haDropdown } = buildAlarm();
+        callAlarmMode.mockImplementation(() => Promise.reject(new Error('Invalid code')));
+        pick('disarmed');
+        await flush();
+
+        keypads[0].options.onSubmit('0000');
+        await flush();
+
+        expect(keypads[0].reject).toHaveBeenCalled();
+        expect(haDropdown.open).toBe(true);
+    });
+
+    test('goes back to the options when the keypad is left, and when the menu closes', async () => {
+        const { pick, select, haDropdown } = buildAlarm();
+        pick('armed_home');
+        await flush();
+        keypads[0].options.onBack();
+        expect(select.children).not.toContain(keypads[0].element);
+
+        pick('armed_home');
+        await flush();
+        haDropdown.fire('wa-after-hide');
+        expect(select.children).not.toContain(keypads[1].element);
+    });
+
+    // setProtectedAlarmControlPanelMode skips its dialog the same way, since
+    // Home Assistant sends the saved code itself.
+    test('asks nothing when a default code is saved in Home Assistant', async () => {
+        const { pick, haDropdown, context } = buildAlarm({ registry: { options: { alarm_control_panel: { default_code: 'saved' } } } });
+
+        pick('disarmed');
+        await flush();
+
+        expect(keypads).toHaveLength(0);
+        expect(callAlarmMode).toHaveBeenCalledWith(context, ENTITY, 'disarmed');
+        expect(haDropdown.open).toBe(false);
+    });
+
+    test('leaves a mode that needs no code to the plain pick', async () => {
+        const { pick } = buildAlarm({ attributes: { code_format: 'number', code_arm_required: false, supported_features: 3 } });
+
+        const event = pick('armed_away');
+        await flush();
+
+        expect(event.preventDefault).not.toHaveBeenCalled();
+        expect(event.stopImmediatePropagation).not.toHaveBeenCalled();
+        expect(keypads).toHaveLength(0);
+    });
+
+    test('hands a code with letters to the more info dialog and lets the menu close', async () => {
+        const { pick, select } = buildAlarm({ attributes: { code_format: 'text', code_arm_required: true, supported_features: 3 } });
+
+        const event = pick('armed_away');
+        await flush();
+
+        expect(fireEvent).toHaveBeenCalledWith(select, 'hass-more-info', { entityId: ENTITY });
+        expect(event.preventDefault).not.toHaveBeenCalled();
+        expect(event.stopImmediatePropagation).toHaveBeenCalled();
+        expect(keypads).toHaveLength(0);
+        expect(callAlarmMode).not.toHaveBeenCalled();
+    });
+
+    test('a pick made while the first one was still being looked up wins', async () => {
+        const { pick, context } = buildAlarm();
+        pick('armed_home');
+        pick('armed_away');
+        await flush();
+
+        expect(keypads).toHaveLength(1);
+        keypads[0].options.onSubmit('1');
+        await flush();
+        expect(callAlarmMode).toHaveBeenCalledWith(context, ENTITY, 'armed_away', '1');
+    });
+
+    test('no other list is watched this way', () => {
+        const { haDropdown } = buildAlarm({ config: { select_attribute: 'effect_list' } });
+
+        expect(haDropdown.listeners['wa-select']).toBeUndefined();
+    });
+
+    // The mwc menu closes on the pick and has no room for anything but items.
+    test('on an older Home Assistant, a mode that wants a code opens the more info dialog', () => {
+        newHaFrontend = false;
+        withPopoverSupport(false);
+        const context = buildContext();
+        context._hass = { states: { [ENTITY]: { state: 'armed_home', attributes: { code_format: 'number' } } } };
+        const select = context.elements.dropdownSelect;
+        createDropdownActions(context, context.elements, ENTITY, { select_attribute: 'alarm_modes' });
+        const choose = (value) => select.listeners.click.forEach((handler) => handler({ target: { value }, stopPropagation() {} }));
+
+        choose('disarmed');
+        expect(fireEvent).toHaveBeenCalledWith(select, 'hass-more-info', { entityId: ENTITY });
+        expect(callSelectService).not.toHaveBeenCalled();
+
+        choose('armed_away');
+        expect(callSelectService).toHaveBeenCalledTimes(1);
     });
 });

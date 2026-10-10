@@ -1,5 +1,7 @@
-import { createElement } from "../../tools/utils.js";
-import { callSelectService, isNewHaFrontend } from "./helpers.js";
+import { createElement, fireEvent } from "../../tools/utils.js";
+import { callAlarmMode, callSelectService, isNewHaFrontend } from "./helpers.js";
+import { hasNumericAlarmCode, needsAlarmCode } from "./alarm.js";
+import { createCodeKeypad } from "./keypad.js";
 import styles from "./styles.css";
 
 const MENU_WIDTH = 200;
@@ -391,8 +393,82 @@ export function createDropdownActions(context, elements = context.elements, enti
         }
     };
 
+    // An alarm that wants its code before it changes mode. The options of the
+    // menu give way to a keypad, inside the same menu, and come back when the
+    // menu closes or the keypad is left.
+    const isAlarmList = config?.select_attribute === 'alarm_modes';
+    let keypad = null;
+    let codeRequest = 0;
+
+    const closeMenu = () => {
+        const haDropdown = dropdownSelect.shadowRoot?.querySelector('ha-dropdown');
+        if (haDropdown) haDropdown.open = false;
+    };
+
+    const leaveKeypad = () => {
+        codeRequest++;
+        if (!keypad) return;
+        keypad.element.remove();
+        keypad = null;
+        dropdownSelect.classList.remove('has-keypad');
+    };
+
+    const showKeypad = (mode) => {
+        leaveKeypad();
+        const action = mode === 'disarmed' ? 'disarm' : 'arm';
+        keypad = createCodeKeypad({
+            hass: context._hass,
+            submitLabel: context._hass.localize?.(`ui.card.alarm_control_panel.${action}`),
+            onBack: leaveKeypad,
+            onSubmit: (code) => callAlarmMode(context, entity, mode, code)
+                .then(closeMenu, () => keypad?.reject()),
+        });
+        dropdownSelect.classList.add('has-keypad');
+        dropdownSelect.appendChild(keypad.element);
+        keypad.focus();
+    };
+
+    // A default code saved in Home Assistant is sent by Home Assistant itself,
+    // so nothing is asked then (setProtectedAlarmControlPanelMode does the same).
+    const askForCode = async (mode) => {
+        const request = ++codeRequest;
+        let defaultCode;
+        try {
+            const entry = await context._hass.callWS({ type: 'config/entity_registry/get', entity_id: entity });
+            defaultCode = entry?.options?.alarm_control_panel?.default_code;
+        } catch (_) {}
+        if (request !== codeRequest) return;
+        if (defaultCode) {
+            callAlarmMode(context, entity, mode).catch(() => {});
+            closeMenu();
+            return;
+        }
+        showKeypad(mode);
+    };
+
+    const openMoreInfo = () => fireEvent(dropdownSelect, 'hass-more-info', { entityId: entity });
+
+    // Runs before Home Assistant takes the pick for done. Cancelling the event is
+    // what keeps the menu open, and stopping it keeps ha-select from announcing a
+    // choice that has not been made yet.
+    const handleProtectedSelect = (event) => {
+        const mode = event.detail?.item?.value;
+        const state = context._hass.states[entity];
+        if (!needsAlarmCode(state, mode)) return;
+        event.stopImmediatePropagation();
+        // A code with letters cannot be typed on a keypad. The more info dialog
+        // of Home Assistant has a field for it.
+        if (!hasNumericAlarmCode(state)) {
+            openMoreInfo();
+            return;
+        }
+        event.preventDefault();
+        askForCode(mode);
+    };
+
     const handleMenuClosed = (event) => {
         event.stopPropagation();
+        leaveKeypad();
 
         dropdownArrow.style.transform = 'rotate(0deg)';
         if (elements.innerBorderElement) {
@@ -418,6 +494,12 @@ export function createDropdownActions(context, elements = context.elements, enti
         // New HA fires a 'selected' custom event with detail.value; old HA relies on click with target.value
         const selectedOption = newHa ? event.detail?.value : event.target?.value;
         if (selectedOption !== undefined) {
+            // The menu of an older Home Assistant has no room for a keypad, so a
+            // mode that wants a code is asked for in the more info dialog there.
+            if (!newHa && isAlarmList && needsAlarmCode(context._hass.states[entity], selectedOption)) {
+                openMoreInfo();
+                return;
+            }
             callSelectService(context, entity, selectedOption, config);
         }
     };
@@ -447,6 +529,9 @@ export function createDropdownActions(context, elements = context.elements, enti
             const { signal } = haDropdownAbort;
 
             haDropdown.addEventListener('wa-after-hide', handleMenuClosed, { signal });
+            if (isAlarmList) {
+                haDropdown.addEventListener('wa-select', handleProtectedSelect, { signal, capture: true });
+            }
         };
 
         // If shadow DOM is already available (e.g. on re-render), set up immediately
@@ -467,6 +552,7 @@ export function createDropdownActions(context, elements = context.elements, enti
         abortController.abort();
         haDropdownAbort?.abort();
         haDropdownAbort = null;
+        leaveKeypad();
         if (elements.dropdownArrow) {
             elements.dropdownArrow.style.transform = 'rotate(0deg)';
             elements.dropdownArrow.style.background = '';

@@ -4,13 +4,14 @@ import {
     getSelectedAttribute,
     isNewHaFrontend
   } from "./helpers.js";
+import { getSelectOptions } from "./lists.js";
 
 export function changeDropdownList(context, elements = context.elements, entity = context.config.entity, config) {
     elements.currentState = context._hass.states[entity]?.state;
   
     if (!elements.currentState) return;
   
-    elements.currentList = entity?.startsWith("input_select") || entity?.startsWith("select") ? context._hass.states[entity].attributes.options : context._hass.states[entity].attributes[config.select_attribute];
+    elements.currentList = getSelectOptions(entity, context._hass.states[entity], config.select_attribute);
     elements.currentSelectedAttribute = getSelectedAttribute(context._hass.states[entity], config.select_attribute);
     
     // Compare lists by value (not by reference) to avoid unnecessary DOM rebuilds

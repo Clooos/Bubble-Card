@@ -2,6 +2,7 @@
 import { html } from 'lit';
 import { isReadOnlyEntityId } from '../../slider/helpers.js';
 import { makeGenericSliderSettings } from '../../slider/editor.js';
+import { getSelectableAttributes, getSelectListLabel } from '../../dropdown/lists.js';
 import { getLazyLoadedPanelContent, renderDropdown } from '../../../editor/utils.js';
 import { loadSubButtonClipboard } from './clipboard.js';
 import setupTranslation from '../../../tools/localize.js';
@@ -28,13 +29,12 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
     try { setTimeout(() => updateValueFn({ sub_button_type: 'select' })); } catch (_) {}
   }
   
-  const entityAttribute = editor.hass.states[entity]?.attributes;
-  const hasSelectAttributeList = editor._selectable_attributes.some(attr => entityAttribute?.[attr]);
-  const selectableAttributeList = Object.keys(editor.hass.states[entity]?.attributes || {}).map((attributeName) => {
-    let state = editor.hass.states[entity];
-    let formattedName = editor.hass.formatEntityAttributeName(state, attributeName);
-    return { label: formattedName, value: attributeName };
-  }).filter(attribute => editor._selectable_attributes.includes(attribute.value));
+  const entityState = editor.hass.states[entity];
+  const selectableAttributeList = getSelectableAttributes(entity, entityState).map((attributeName) => ({
+    label: getSelectListLabel(editor.hass, entityState, attributeName),
+    value: attributeName,
+  }));
+  const hasSelectAttributeList = selectableAttributeList.length > 0;
   const conditions = button.visibility ?? [];
 
   // Supported types based on entity capabilities

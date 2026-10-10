@@ -157,6 +157,108 @@ ha-dropdown-item[selected] {
     --ha-color-fill-primary-quiet-hover: var(--bubble-select-list-item-accent-color, var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--bubble-default-color))));
 }
 
+/* The keypad an alarm asks its code on. It takes the place of the options
+   inside the menu, so the options step aside while it is shown. */
+.bubble-dropdown-select.has-keypad > ha-dropdown-item {
+    display: none;
+}
+
+.bubble-keypad {
+    --bubble-keypad-key-size: 52px;
+    display: grid;
+    grid-template-columns: repeat(3, var(--bubble-keypad-key-size));
+    gap: 10px;
+    justify-content: center;
+    padding: 4px 18px 12px;
+    /* A keypad reads the same way in every language. */
+    direction: ltr;
+    outline: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.bubble-keypad-code {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    color: var(--secondary-text-color);
+    font-size: 14px;
+}
+
+.bubble-keypad-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--primary-text-color);
+}
+
+.bubble-keypad-code.is-wrong {
+    animation: bubble-keypad-wrong 0.4s;
+}
+
+@keyframes bubble-keypad-wrong {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.bubble-keypad-key {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bubble-keypad-key-size);
+    height: var(--bubble-keypad-key-size);
+    border-radius: 50%;
+    background-color: color-mix(in srgb, var(--primary-text-color) 10%, transparent);
+    color: var(--primary-text-color);
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s, transform 0.1s, opacity 0.2s;
+    --mdc-icon-size: 24px;
+}
+
+.bubble-keypad-key ha-icon {
+    display: flex;
+    pointer-events: none;
+}
+
+@media (hover: hover) {
+    .bubble-keypad-key:hover {
+        background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+    }
+}
+
+.bubble-keypad-key:active {
+    transform: scale(0.94);
+    background-color: color-mix(in srgb, var(--primary-text-color) 22%, transparent);
+}
+
+.bubble-keypad-key:focus-visible {
+    outline: 2px solid var(--bubble-select-list-item-accent-color, var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--bubble-default-color))));
+    outline-offset: 2px;
+}
+
+/* The one key that sends the code carries the accent, like the option that is
+   selected in a list. */
+.bubble-keypad-submit,
+.bubble-keypad-submit:hover,
+.bubble-keypad-submit:active {
+    background-color: var(--bubble-select-list-item-accent-color, var(--bubble-list-item-accent-color, var(--bubble-accent-color, var(--bubble-default-color))));
+}
+
+.bubble-keypad.is-empty .bubble-keypad-submit {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
 /* =====================================================================
    Shared styles (apply to both old and new HA)
    ===================================================================== */

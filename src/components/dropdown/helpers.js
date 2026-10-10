@@ -1,4 +1,5 @@
 import { isHomeAssistantVersionAtLeast } from "../../tools/utils.js";
+import { ALARM_MODES, needsAlarmCode } from "./alarm.js";
 
 const NEW_HA_DROPDOWN_MIN_VERSION = '2026.3.0';
 
@@ -34,6 +35,17 @@ export function getTranslatedAttribute(context, state, attribute, option) {
             return context._hass.formatEntityAttributeValue(state, "swing_horizontal_mode", option);
         case 'preset_modes':
             return context._hass.formatEntityAttributeValue(state, "preset_mode", option);
+        case 'fan_speed_list':
+            return context._hass.formatEntityAttributeValue(state, "fan_speed", option);
+        // more-info-remote.ts reads its activities through this name.
+        case 'activity_list':
+            return context._hass.formatEntityAttributeValue(state, "activity", option);
+        case 'direction':
+            return context._hass.formatEntityAttributeValue(state, "direction", option);
+        // The short names of hui-alarm-modes-card-feature.ts, Home, Away, Night.
+        case 'alarm_modes':
+            return context._hass.localize?.(`ui.card.alarm_control_panel.modes.${option}`)
+                || context._hass.formatEntityState(state, option);
         default:
             return formatString(context._hass.formatEntityState(state, option)) ?? formatString(option);
     }
@@ -57,6 +69,12 @@ export function getSelectedAttribute(state, attribute) {
             return state.attributes.source || null;
         case 'sound_mode_list':
             return state.attributes.sound_mode || null;
+        case 'fan_speed_list':
+            return state.attributes.fan_speed || null;
+        case 'activity_list':
+            return state.attributes.current_activity || null;
+        case 'direction':
+            return state.attributes.direction || null;
         default:
             return state.state;
     }
@@ -141,6 +159,20 @@ export function getOptionIcon(context, state, attribute, option) {
             icon.hass = context._hass;
             icon.stateObj = state;
             break;
+        case 'direction':
+            icon = document.createElement('ha-attribute-icon');
+            icon.slot = 'graphic';
+            icon.attribute = 'direction';
+            icon.attributeValue = option;
+            icon.hass = context._hass;
+            icon.stateObj = state;
+            break;
+        case 'alarm_modes':
+            if (!ALARM_MODES[option]) return null;
+            icon = document.createElement('ha-icon');
+            icon.slot = 'graphic';
+            icon.icon = ALARM_MODES[option].icon;
+            break;
         default:
             icon = false;
             break;
@@ -148,10 +180,29 @@ export function getOptionIcon(context, state, attribute, option) {
     return icon;
 }
 
+// Arms or disarms a panel. The promise is what tells a keypad whether Home
+// Assistant took the code.
+export function callAlarmMode(context, entity, mode, code) {
+    const service = ALARM_MODES[mode]?.service;
+    if (!service) return Promise.resolve();
+    const data = { entity_id: entity };
+    if (code !== undefined) data.code = code;
+    return Promise.resolve(context._hass.callService('alarm_control_panel', service, data));
+}
+
 export function callSelectService(context, entity, selectedOption, config) {
     const entityType = entity?.split('.')[0];
 
     switch (entityType) {
+        case 'alarm_control_panel':
+            // A mode that wants a code is never sent from here. The dropdown asks
+            // for the code first and sends both itself.
+            if (config.select_attribute === 'alarm_modes'
+                && !needsAlarmCode(context._hass.states[entity], selectedOption)) {
+                callAlarmMode(context, entity, selectedOption).catch(() => {});
+            }
+            break;
+
         case 'input_select':
             context._hass.callService('input_select', 'select_option', {
                 entity_id: entity,
@@ -229,6 +280,35 @@ export function callSelectService(context, entity, selectedOption, config) {
                     context._hass.callService('fan', 'set_preset_mode', {
                         entity_id: entity,
                         preset_mode: selectedOption
+                    });
+                    break;
+                case 'direction':
+                    context._hass.callService('fan', 'set_direction', {
+                        entity_id: entity,
+                        direction: selectedOption
+                    });
+                    break;
+            }
+            break;
+
+        case 'vacuum':
+            switch (config.select_attribute) {
+                case 'fan_speed_list':
+                    context._hass.callService('vacuum', 'set_fan_speed', {
+                        entity_id: entity,
+                        fan_speed: selectedOption
+                    });
+                    break;
+            }
+            break;
+
+        // A remote starts an activity by being turned on with it.
+        case 'remote':
+            switch (config.select_attribute) {
+                case 'activity_list':
+                    context._hass.callService('remote', 'turn_on', {
+                        entity_id: entity,
+                        activity: selectedOption
                     });
                     break;
             }
