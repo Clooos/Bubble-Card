@@ -52,3 +52,23 @@ test('new day or changed connection renews the subscription window', async () =>
   updateCalendarSubscriptions(context, jest.fn()); await flush();
   expect(unsubscribers[1]).toHaveBeenCalledTimes(1); cleanupCalendarSubscriptions(context);
 });
+
+
+test('cleanup handles rejected and throwing unsubscribers without skipping others', async () => {
+  const { context, connection } = setup();
+  context.config.entities = [{ entity: 'calendar.one' }, { entity: 'calendar.two' }, { entity: 'calendar.three' }];
+  const unsubscribers = [jest.fn(() => { throw new Error('closed'); }), jest.fn(async () => { throw new Error('closed'); }), jest.fn()];
+  unsubscribers.forEach(unsubscribe => connection.subscribeMessage.mockResolvedValueOnce(unsubscribe));
+  updateCalendarSubscriptions(context, jest.fn()); await flush();
+  expect(() => cleanupCalendarSubscriptions(context)).not.toThrow(); await flush();
+  unsubscribers.forEach(unsubscribe => expect(unsubscribe).toHaveBeenCalledTimes(1));
+});
+
+test('late subscription cleanup handles a rejected unsubscribe', async () => {
+  const { context, connection } = setup(); let accept;
+  const unsubscribe = jest.fn(async () => { throw new Error('closed'); });
+  connection.subscribeMessage.mockImplementation(() => new Promise(resolve => { accept = resolve; }));
+  updateCalendarSubscriptions(context, jest.fn()); await flush();
+  cleanupCalendarSubscriptions(context); accept(unsubscribe); await flush();
+  expect(unsubscribe).toHaveBeenCalledTimes(1);
+});

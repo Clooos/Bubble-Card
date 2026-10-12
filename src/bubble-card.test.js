@@ -63,6 +63,7 @@ global.document = {
     querySelector: jest.fn(() => null),
 };
 
+const { updateCalendarSubscriptions } = await import('./cards/calendar/subscriptions.js');
 await import('./bubble-card.js');
 const BubbleCard = definedElements['bubble-card'];
 
@@ -564,4 +565,22 @@ describe('a pop-up card moved in the DOM', () => {
 
         expect(styleReads).toEqual([]);
     });
+});
+
+
+describe('BubbleCard calendar lifecycle wiring', () => {
+    for (const action of ['disconnect', 'reconfigure']) {
+        test(`${action} releases registered calendars and invalidates pending fetches`, async () => {
+            const card = createCard({ card_type: 'calendar', entities: [{ entity: 'calendar.lab' }] });
+            const unsubscribe = jest.fn();
+            card._hass = { connection: { subscribeMessage: jest.fn(async () => unsubscribe) } };
+            updateCalendarSubscriptions(card, jest.fn());
+            for (let i = 0; i < 10; i++) await Promise.resolve();
+            const request = card._calendarRequest;
+            if (action === 'disconnect') card.disconnectedCallback();
+            else card.setConfig({ card_type: 'calendar', entities: [{ entity: 'calendar.other' }] });
+            expect(unsubscribe).toHaveBeenCalledTimes(1);
+            expect(card._calendarRequest).toBeGreaterThan(request);
+        });
+    }
 });

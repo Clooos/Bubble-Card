@@ -2,6 +2,14 @@
 // Subscribe to the event list as well, retaining REST/state refreshes on older HA.
 const subscriptions = new WeakMap();
 
+function releaseSubscription(unsubscribe) {
+  try {
+    Promise.resolve(unsubscribe()).catch(() => {});
+  } catch {
+    // A closed socket must not prevent the remaining subscriptions from closing.
+  }
+}
+
 export function cleanupCalendarSubscriptions(context) {
   context._calendarRequest = (context._calendarRequest || 0) + 1;
   clearTimeout(context._calendarRefreshTimer);
@@ -9,7 +17,7 @@ export function cleanupCalendarSubscriptions(context) {
   const previous = subscriptions.get(context);
   if (!previous) return;
   subscriptions.delete(context);
-  previous.unsubscribers.forEach((unsubscribe) => unsubscribe());
+  previous.unsubscribers.forEach(releaseSubscription);
 }
 
 export function updateCalendarSubscriptions(context, refresh) {
@@ -54,7 +62,7 @@ export function updateCalendarSubscriptions(context, refresh) {
     })).then((unsubscribe) => {
       // The card may have left the DOM while HA accepted the subscription.
       if (isCurrent()) state.unsubscribers.push(unsubscribe);
-      else unsubscribe();
+      else releaseSubscription(unsubscribe);
     }).catch(() => {
       // Older HA versions do not implement calendar/event/subscribe. The
       // existing state-based/periodic REST refresh remains available.
