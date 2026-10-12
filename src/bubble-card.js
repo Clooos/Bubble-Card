@@ -1,3 +1,4 @@
+import { cleanupCalendarSubscriptions } from './cards/calendar/subscriptions.js';
 import { version } from './var/version.js';
 import setupTranslation, { ensureEditorTranslations, tGlobal } from './tools/localize.js';
 import { initializeContent } from './tools/init.js';
@@ -197,6 +198,7 @@ class BubbleCard extends HTMLElement {
   }
 
   disconnectedCallback() {
+    cleanupCalendarSubscriptions(this);
     this.isConnected = false;
     connectedCards.delete(this);
     this._detectedEditorMemo = undefined;
@@ -489,6 +491,7 @@ class BubbleCard extends HTMLElement {
   }
 
   setConfig(config) {
+    cleanupCalendarSubscriptions(this);
     if (config.error) throw new Error(config.error);
     // A reconfigured card names different entities and its recorded reads
     // belong to the previous config.
