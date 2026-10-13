@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Šī kartīte ļauj pievienot nolaižamo izvēlni jūsu `input_select` / `select` entītijām. Šī kartīte atbalsta arī papildpogas un visas Bubble Card kopīgās funkcijas.
 
-Tā darbojas arī ar jebkuru entītiju, kas savas opcijas piedāvā kā atribūtu sarakstu: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` un `preset_modes` klimata entītijai, `available_modes` gaisa mitrinātājam, `operation_list` ūdens sildītājam, `effect_list` gaismai, `source_list` un `sound_mode_list` multivides atskaņotājam.
+Tā darbojas arī ar jebkuru entītiju, kas savas opcijas piedāvā kā atribūtu sarakstu. Tas ietver `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` un `preset_modes` klimata entītijai, `preset_modes` un `direction` ventilatoram, `available_modes` gaisa mitrinātājam, `operation_list` ūdens sildītājam, `effect_list` gaismai, `source_list` un `sound_mode_list` multivides atskaņotājam, `fan_speed_list` putekļsūcējam un `activity_list` tālvadības pultij. Signalizācijas vadības panelis savus režīmus piedāvā ar `alarm_modes`, un, kad režīmam vajadzīgs kods, izvēlnē parādās tastatūra tā ievadīšanai.
 
 > [!TIP]
 > Ja vēlaties, varat izmantot arī izvēles papildpogas, šī funkcija ir pieejama visās kartītēs, kas atbalsta papildpogas.

@@ -726,7 +726,7 @@ icon_close: mdi:roller-shade-closed
 
 تتيح لك هذه البطاقة إضافة قائمة منسدلة لكيانات `input_select` / `select` الخاصة بك. تدعم هذه البطاقة أيضًا الأزرار الفرعية وجميع ميزات Bubble Card المشتركة.
 
-تعمل أيضًا مع أي كيان يعرض خياراته على شكل قائمة سمات: `hvac_modes` و`fan_modes` و`swing_modes` و`swing_horizontal_modes` و`preset_modes` في كيان التكييف، و`available_modes` في المرطب، و`operation_list` في سخان المياه، و`effect_list` في الإضاءة، و`source_list` و`sound_mode_list` في مشغل الوسائط.
+تعمل أيضًا مع أي كيان يعرض خياراته على شكل قائمة سمات. يشمل ذلك `hvac_modes` و`fan_modes` و`swing_modes` و`swing_horizontal_modes` و`preset_modes` في كيان التكييف، و`preset_modes` و`direction` في المروحة، و`available_modes` في المرطب، و`operation_list` في سخان المياه، و`effect_list` في الإضاءة، و`source_list` و`sound_mode_list` في مشغل الوسائط، و`fan_speed_list` في المكنسة الكهربائية، و`activity_list` في جهاز التحكم عن بعد. تعرض لوحة تحكم الإنذار أوضاعها عبر `alarm_modes`، وعندما يتطلب أحد الأوضاع رمزًا، تظهر لوحة أرقام في القائمة لإدخاله.
 
 > [!TIP]
 > يمكنك أيضًا الحصول على أزرار فرعية للاختيار إذا أردت، هذه الميزة متاحة في جميع البطاقات التي تدعم الأزرار الفرعية.

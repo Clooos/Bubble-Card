@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Táto karta vám umožňuje pridať rozbaľovaciu ponuku pre vaše entity `input_select` / `select`. Táto karta tiež podporuje podtlačidlá a všetky bežné funkcie Bubble Card.
 
-Funguje aj s akoukoľvek entitou, ktorá poskytuje svoje možnosti ako zoznam atribútov: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` a `preset_modes` pri entite klimatizácie, `available_modes` pri zvlhčovači, `operation_list` pri ohrievači vody, `effect_list` pri svetle, `source_list` a `sound_mode_list` pri prehrávači médií.
+Funguje aj s akoukoľvek entitou, ktorá poskytuje svoje možnosti ako zoznam atribútov. Patria sem `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` a `preset_modes` pri entite klimatizácie, `preset_modes` a `direction` pri ventilátore, `available_modes` pri zvlhčovači, `operation_list` pri ohrievači vody, `effect_list` pri svetle, `source_list` a `sound_mode_list` pri prehrávači médií, `fan_speed_list` pri vysávači a `activity_list` pri diaľkovom ovládaní. Ovládací panel alarmu ponúka svoje režimy cez `alarm_modes`, a keď režim vyžaduje kód, v ponuke sa zobrazí klávesnica na jeho zadanie.
 
 > [!TIP]
 > Ak chcete, môžete mať aj podtlačidlá select, táto funkcia je dostupná vo všetkých kartách, ktoré podporujú podtlačidlá.

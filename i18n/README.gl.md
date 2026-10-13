@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Esta tarxeta permíteche engadir un menú despregable para as túas entidades `input_select` / `select`. Esta tarxeta tamén admite os subbotóns e todas as características comúns de Bubble Card.
 
-Tamén funciona con calquera entidade que expoña as súas opcións como unha lista de atributos: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` e `preset_modes` nunha climatización, `available_modes` nun humidificador, `operation_list` nun quentador de auga, `effect_list` nunha luz, `source_list` e `sound_mode_list` nun reprodutor multimedia.
+Tamén funciona con calquera entidade que expoña as súas opcións como unha lista de atributos. Isto inclúe `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` e `preset_modes` nunha climatización, `preset_modes` e `direction` nun ventilador, `available_modes` nun humidificador, `operation_list` nun quentador de auga, `effect_list` nunha luz, `source_list` e `sound_mode_list` nun reprodutor multimedia, `fan_speed_list` nun aspirador e `activity_list` nun mando a distancia. Un panel de control de alarma ofrece os seus modos con `alarm_modes`, e cando un modo precisa un código, aparece un teclado no menú para escribilo.
 
 > [!TIP]
 > Tamén podes ter subbotóns de selección se o desexas, esta característica está dispoñible en todas as tarxetas que admiten os subbotóns.

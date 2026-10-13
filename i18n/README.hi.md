@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 यह कार्ड आपको अपनी `input_select` / `select` एंटिटी के लिए एक ड्रॉपडाउन मेनू जोड़ने देता है। यह कार्ड सब-बटन और सभी सामान्य Bubble Card फीचर्स को भी समर्थन करता है।
 
-यह हर उस एंटिटी के साथ भी काम करता है जो अपने विकल्पों को एक एट्रिब्यूट लिस्ट के रूप में दिखाती है: क्लाइमेट पर `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` और `preset_modes`, ह्यूमिडिफ़ायर पर `available_modes`, वॉटर हीटर पर `operation_list`, लाइट पर `effect_list`, तथा मीडिया प्लेयर पर `source_list` और `sound_mode_list`।
+यह हर उस एंटिटी के साथ भी काम करता है जो अपने विकल्पों को एक एट्रिब्यूट लिस्ट के रूप में दिखाती है। इसमें शामिल हैं क्लाइमेट पर `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` और `preset_modes`, फ़ैन पर `preset_modes` और `direction`, ह्यूमिडिफ़ायर पर `available_modes`, वॉटर हीटर पर `operation_list`, लाइट पर `effect_list`, मीडिया प्लेयर पर `source_list` और `sound_mode_list`, वैक्यूम पर `fan_speed_list` तथा रिमोट पर `activity_list`। अलार्म कंट्रोल पैनल अपने मोड `alarm_modes` से देता है, और जब किसी मोड को कोड चाहिए, तो उसे टाइप करने के लिए मेनू में एक कीपैड दिखता है।
 
 > [!TIP]
 > यदि आप चाहें तो सेलेक्ट सब-बटन भी रख सकते हैं, यह फीचर उन सभी कार्ड में उपलब्ध है जो सब-बटन को समर्थन करते हैं।

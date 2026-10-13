@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Cette carte vous permet d'ajouter un menu déroulant pour vos entités `input_select` / `select`. Elle prend également en charge les sous-boutons et toutes les fonctionnalités communes de Bubble Card.
 
-Elle fonctionne aussi avec toute entité qui expose ses options sous forme de liste d'attributs : `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` et `preset_modes` sur un thermostat, `available_modes` sur un humidificateur, `operation_list` sur un chauffe-eau, `effect_list` sur une lumière, `source_list` et `sound_mode_list` sur un lecteur multimédia.
+Elle fonctionne aussi avec toute entité qui expose ses options sous forme de liste d'attributs. Cela couvre `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` et `preset_modes` sur un thermostat, `preset_modes` et `direction` sur un ventilateur, `available_modes` sur un humidificateur, `operation_list` sur un chauffe-eau, `effect_list` sur une lumière, `source_list` et `sound_mode_list` sur un lecteur multimédia, `fan_speed_list` sur un aspirateur et `activity_list` sur une télécommande. Une centrale d'alarme propose ses modes avec `alarm_modes`, et quand un mode demande un code, un clavier apparaît dans le menu pour le saisir.
 
 > [!TIP]
 > Vous pouvez aussi avoir des sous-boutons de type sélecteur si vous le souhaitez, cette fonctionnalité est disponible dans toutes les cartes qui prennent en charge les sous-boutons.

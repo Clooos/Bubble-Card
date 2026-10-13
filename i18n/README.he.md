@@ -726,7 +726,7 @@ icon_close: mdi:roller-shade-closed
 
 הכרטיס הזה מאפשר לך להוסיף תפריט נפתח עבור ישויות `input_select` / `select` שלך. הכרטיס הזה תומך גם בכפתורי משנה ובכל התכונות הנפוצות של Bubble Card.
 
-הוא עובד גם עם כל ישות שחושפת את האפשרויות שלה כרשימת מאפיינים: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ו-`preset_modes` במיזוג אקלים, `available_modes` במכשיר אדים, `operation_list` במחמם מים, `effect_list` בתאורה, `source_list` ו-`sound_mode_list` בנגן מדיה.
+הוא עובד גם עם כל ישות שחושפת את האפשרויות שלה כרשימת מאפיינים. זה כולל את `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ו-`preset_modes` במיזוג אקלים, `preset_modes` ו-`direction` במאוורר, `available_modes` במכשיר אדים, `operation_list` במחמם מים, `effect_list` בתאורה, `source_list` ו-`sound_mode_list` בנגן מדיה, `fan_speed_list` בשואב אבק ו-`activity_list` בשלט. לוח בקרה של אזעקה מציע את המצבים שלו עם `alarm_modes`, וכשמצב דורש קוד, מופיע בתפריט לוח מקשים להקלדתו.
 
 > [!TIP]
 > ניתן גם להוסיף כפתורי משנה מסוג בחירה אם תרצה, תכונה זו זמינה בכל הכרטיסים התומכים בכפתורי משנה.

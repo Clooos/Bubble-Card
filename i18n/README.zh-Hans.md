@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 此卡片可让你为 `input_select` / `select` 实体添加下拉菜单。此卡片同样支持子按钮以及所有 Bubble Card 的通用功能。
 
-此卡片也适用于任何以属性列表形式提供选项的实体：空调的 `hvac_modes`、`fan_modes`、`swing_modes`、`swing_horizontal_modes` 和 `preset_modes`，加湿器的 `available_modes`，热水器的 `operation_list`，灯光的 `effect_list`，以及媒体播放器的 `source_list` 和 `sound_mode_list`。
+此卡片也适用于任何以属性列表形式提供选项的实体。这包括空调的 `hvac_modes`、`fan_modes`、`swing_modes`、`swing_horizontal_modes` 和 `preset_modes`，风扇的 `preset_modes` 和 `direction`，加湿器的 `available_modes`，热水器的 `operation_list`，灯光的 `effect_list`，媒体播放器的 `source_list` 和 `sound_mode_list`，扫地机的 `fan_speed_list`，以及遥控器的 `activity_list`。警报控制面板通过 `alarm_modes` 提供其模式，当某个模式需要密码时，菜单中会出现一个数字键盘供输入。
 
 > [!TIP]
 > 如果需要，你也可以使用选择类的子按钮，此功能在所有支持子按钮的卡片中都可用。

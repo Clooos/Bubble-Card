@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Ova kartica vam omogućava da dodate padajući meni za svoje `input_select` / `select` entitete. Ova kartica također podržava pod-dugmad i sve uobičajene funkcije Bubble Card.
 
-Također radi sa svakim entitetom koji svoje opcije izlaže kao listu atributa: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` i `preset_modes` na klimi, `available_modes` na ovlaživaču, `operation_list` na grijaču vode, `effect_list` na svjetlu, `source_list` i `sound_mode_list` na medija plejeru.
+Također radi sa svakim entitetom koji svoje opcije izlaže kao listu atributa. To obuhvata `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` i `preset_modes` na klimi, `preset_modes` i `direction` na ventilatoru, `available_modes` na ovlaživaču, `operation_list` na grijaču vode, `effect_list` na svjetlu, `source_list` i `sound_mode_list` na medija plejeru, `fan_speed_list` na usisivaču i `activity_list` na daljinskom upravljaču. Alarmni panel nudi svoje načine rada kroz `alarm_modes`, a kada način rada traži kod, u meniju se pojavi tastatura za njegov unos.
 
 > [!TIP]
 > Ako želite, možete imati i pod-dugmad za odabir, ova funkcija je dostupna u svim karticama koje podržavaju pod-dugmad.

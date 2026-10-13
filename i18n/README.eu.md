@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Txartel honek zure `input_select` / `select` entitateentzako hedapen-menu bat gehitzeko aukera ematen dizu. Txartel honek azpibotoiak eta Bubble Card-en ezaugarri arrunt guztiak ere onartzen ditu.
 
-Bere aukerak atributu-zerrenda gisa erakusten dituen edozein entitaterekin ere funtzionatzen du: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` eta `preset_modes` klimatizazio batean, `available_modes` hezegailu batean, `operation_list` ur-berogailu batean, `effect_list` argi batean, `source_list` eta `sound_mode_list` multimedia-erreproduzigailu batean.
+Bere aukerak atributu-zerrenda gisa erakusten dituen edozein entitaterekin ere funtzionatzen du. Horren barruan daude `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` eta `preset_modes` klimatizazio batean, `preset_modes` eta `direction` haizagailu batean, `available_modes` hezegailu batean, `operation_list` ur-berogailu batean, `effect_list` argi batean, `source_list` eta `sound_mode_list` multimedia-erreproduzigailu batean, `fan_speed_list` xurgagailu batean eta `activity_list` urruneko aginte batean. Alarma-kontrol panel batek bere moduak `alarm_modes` bidez eskaintzen ditu, eta modu batek kodea behar duenean, teklatu bat agertzen da menuan hura idazteko.
 
 > [!TIP]
 > Hautaketa-azpibotoiak ere izan ditzakezu nahi izanez gero, ezaugarri hau azpibotoiak onartzen dituzten txartel guztietan dago erabilgarri.

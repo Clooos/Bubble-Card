@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Este cartão permite adicionar um menu suspenso para suas entidades `input_select` / `select`. Este cartão também suporta os sub-botões e todos os recursos comuns do Bubble Card.
 
-Também funciona com qualquer entidade que expõe suas opções como uma lista de atributos: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` e `preset_modes` em uma entidade de climatização, `available_modes` em um umidificador, `operation_list` em um aquecedor de água, `effect_list` em uma luz, `source_list` e `sound_mode_list` em um reprodutor de mídia.
+Também funciona com qualquer entidade que expõe suas opções como uma lista de atributos. Isso inclui `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` e `preset_modes` em uma entidade de climatização, `preset_modes` e `direction` em um ventilador, `available_modes` em um umidificador, `operation_list` em um aquecedor de água, `effect_list` em uma luz, `source_list` e `sound_mode_list` em um reprodutor de mídia, `fan_speed_list` em um aspirador e `activity_list` em um controle remoto. Um painel de controle do alarme oferece seus modos com `alarm_modes`, e quando um modo precisa de um código, um teclado aparece no menu para digitá-lo.
 
 > [!TIP]
 > Você também pode ter sub-botões de seleção se quiser, esse recurso está disponível em todos os cartões que suportam sub-botões.

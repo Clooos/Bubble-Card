@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Aquesta targeta us permet afegir un menú desplegable per a les vostres entitats `input_select` / `select`. Aquesta targeta també admet els subbotons i totes les funcions comunes de Bubble Card.
 
-També funciona amb qualsevol entitat que exposi les seves opcions com una llista d'atributs: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` i `preset_modes` en una climatització, `available_modes` en un humidificador, `operation_list` en un escalfador d'aigua, `effect_list` en un llum, `source_list` i `sound_mode_list` en un reproductor multimèdia.
+També funciona amb qualsevol entitat que exposi les seves opcions com una llista d'atributs. Això inclou `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` i `preset_modes` en una climatització, `preset_modes` i `direction` en un ventilador, `available_modes` en un humidificador, `operation_list` en un escalfador d'aigua, `effect_list` en un llum, `source_list` i `sound_mode_list` en un reproductor multimèdia, `fan_speed_list` en un aspirador i `activity_list` en un comandament. Un panell de control d'alarma ofereix els seus modes amb `alarm_modes`, i quan un mode necessita un codi, apareix un teclat al menú per escriure'l.
 
 > [!TIP]
 > Si voleu, també podeu tenir subbotons de selecció, aquesta funció està disponible a totes les targetes que admeten els subbotons.

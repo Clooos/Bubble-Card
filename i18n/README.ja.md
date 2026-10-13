@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 このカードは`input_select` / `select`エンティティ用のドロップダウンメニューを追加できます。このカードはサブボタンと、Bubble Cardの共通機能すべてにも対応しています。
 
-また、属性リストとしてオプションを公開しているエンティティであれば、どれでも動作します。空調の`hvac_modes`、`fan_modes`、`swing_modes`、`swing_horizontal_modes`、`preset_modes`、加湿器の`available_modes`、給湯器の`operation_list`、ライトの`effect_list`、メディアプレーヤーの`source_list`と`sound_mode_list`などです。
+また、属性リストとしてオプションを公開しているエンティティであれば、どれでも動作します。空調の`hvac_modes`、`fan_modes`、`swing_modes`、`swing_horizontal_modes`、`preset_modes`、ファンの`preset_modes`と`direction`、加湿器の`available_modes`、給湯器の`operation_list`、ライトの`effect_list`、メディアプレーヤーの`source_list`と`sound_mode_list`、掃除機の`fan_speed_list`、リモコンの`activity_list`が対象です。アラームコントロールパネルは`alarm_modes`でモードを選べ、モードにコードが必要な場合は、入力用のキーパッドがメニュー内に表示されます。
 
 > [!TIP]
 > セレクトのサブボタンも利用できます。この機能はサブボタンに対応しているすべてのカードで使用できます。

@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Оваа картичка ви овозможува да додадете паѓачко мени за вашите ентитети `input_select` / `select`. Оваа картичка исто така ги поддржува подкопчињата и сите заеднички функции на Bubble Card.
 
-Исто така работи со кој било ентитет што ги изложува своите опции како список на атрибути: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` и `preset_modes` кај клима ентитет, `available_modes` кај овлажнувач, `operation_list` кај грејач на вода, `effect_list` кај светло, `source_list` и `sound_mode_list` кај медиа плеер.
+Исто така работи со кој било ентитет што ги изложува своите опции како список на атрибути. Тоа ги опфаќа `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` и `preset_modes` кај клима ентитет, `preset_modes` и `direction` кај вентилатор, `available_modes` кај овлажнувач, `operation_list` кај грејач на вода, `effect_list` кај светло, `source_list` и `sound_mode_list` кај медиа плеер, `fan_speed_list` кај правосмукалка и `activity_list` кај далечински управувач. Контролен панел за аларм ги нуди своите режими со `alarm_modes`, а кога некој режим бара код, во менито се појавува тастатура за да се внесе.
 
 > [!TIP]
 > Исто така можете да имате select подкопчиња ако сакате, оваа функција е достапна во сите картички кои ги поддржуваат подкопчињата.

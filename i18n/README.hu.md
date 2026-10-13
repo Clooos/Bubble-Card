@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Ez a kártya lehetővé teszi egy legördülő menü hozzáadását az `input_select` / `select` entitásaidhoz. Ez a kártya támogatja az algombokat és a Bubble Card összes közös funkcióját is.
 
-Bármely olyan entitással is működik, amely a lehetőségeit attribútumlistaként teszi közzé: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` és `preset_modes` egy klímán, `available_modes` egy párásítón, `operation_list` egy vízmelegítőn, `effect_list` egy lámpán, `source_list` és `sound_mode_list` egy médialejátszón.
+Bármely olyan entitással is működik, amely a lehetőségeit attribútumlistaként teszi közzé. Ide tartozik a `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` és `preset_modes` egy klímán, a `preset_modes` és `direction` egy ventilátoron, az `available_modes` egy párásítón, az `operation_list` egy vízmelegítőn, az `effect_list` egy lámpán, a `source_list` és `sound_mode_list` egy médialejátszón, a `fan_speed_list` egy porszívón és az `activity_list` egy távirányítón. A riasztóközpont az `alarm_modes` segítségével kínálja fel a módjait, és ha egy módhoz kód kell, a menüben megjelenik egy billentyűzet a beírásához.
 
 > [!TIP]
 > Ha szeretnéd, választó algombokat is használhatsz, ez a funkció minden algombokat támogató kártyán elérhető.

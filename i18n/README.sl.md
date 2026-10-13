@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Ta kartica omogoča dodajanje spustnega menija za entitete `input_select` / `select`. Ta kartica prav tako podpira podgumbe in vse skupne funkcije Bubble Card.
 
-Deluje tudi s katero koli entiteto, ki svoje možnosti ponuja kot seznam atributov: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` in `preset_modes` pri klimatski napravi, `available_modes` pri vlažilniku, `operation_list` pri grelniku vode, `effect_list` pri luči, `source_list` in `sound_mode_list` pri predvajalniku medijev.
+Deluje tudi s katero koli entiteto, ki svoje možnosti ponuja kot seznam atributov. To zajema `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` in `preset_modes` pri klimatski napravi, `preset_modes` in `direction` pri ventilatorju, `available_modes` pri vlažilniku, `operation_list` pri grelniku vode, `effect_list` pri luči, `source_list` in `sound_mode_list` pri predvajalniku medijev, `fan_speed_list` pri sesalniku in `activity_list` pri daljincu. Nadzorna plošča alarma ponuja svoje načine z `alarm_modes`, in ko način zahteva kodo, se v meniju prikaže tipkovnica za njen vnos.
 
 > [!TIP]
 > Po želji lahko uporabite tudi podgumbe s spustnim menijem, ta funkcija je na voljo pri vseh karticah, ki podpirajo podgumbe.

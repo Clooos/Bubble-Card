@@ -719,7 +719,7 @@ icon_close: mdi:roller-shade-closed
 
 This card allows you to add a dropdown menu for your `input_select` / `select` entities. This card also supports the sub-buttons and all the common Bubble Card features.
 
-It also works with any entity that exposes its options as an attribute list: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` and `preset_modes` on a climate, `available_modes` on a humidifier, `operation_list` on a water heater, `effect_list` on a light, `source_list` and `sound_mode_list` on a media player.
+It also works with any entity that exposes its options as an attribute list. That covers `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` and `preset_modes` on a climate, `preset_modes` and `direction` on a fan, `available_modes` on a humidifier, `operation_list` on a water heater, `effect_list` on a light, `source_list` and `sound_mode_list` on a media player, `fan_speed_list` on a vacuum and `activity_list` on a remote. An alarm control panel offers its modes with `alarm_modes`, and when a mode needs a code, a keypad appears in the menu to type it.
 
 > [!TIP]
 > You can also have select sub-buttons if you want, this feature is available in all the cards that support the sub-buttons.

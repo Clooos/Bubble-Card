@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 ഈ കാർഡ് നിങ്ങളുടെ `input_select` / `select` entities ക്കായി ഒരു ഡ്രോപ്ഡൗൺ മെനു ചേർക്കാൻ അനുവദിക്കുന്നു. സബ്-ബട്ടണുകളും എല്ലാ പൊതു Bubble Card ഫീച്ചറുകളും ഈ കാർഡ് പിന്തുണയ്ക്കുന്നു.
 
-ആട്രിബ്യൂട്ട് ലിസ്റ്റായി അതിന്റെ ഓപ്ഷനുകൾ നൽകുന്ന ഏത് entity യുമായും ഇത് പ്രവർത്തിക്കുന്നു: കാലാവസ്ഥാ നിയന്ത്രണത്തിൽ `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes`, `preset_modes` എന്നിവ, ഹ്യുമിഡിഫയറിൽ `available_modes`, വാട്ടർ ഹീറ്ററിൽ `operation_list`, ലൈറ്റിൽ `effect_list`, മീഡിയ പ്ലെയറിൽ `source_list`, `sound_mode_list` എന്നിവ.
+ആട്രിബ്യൂട്ട് ലിസ്റ്റായി അതിന്റെ ഓപ്ഷനുകൾ നൽകുന്ന ഏത് entity യുമായും ഇത് പ്രവർത്തിക്കുന്നു. ഇതിൽ ഉൾപ്പെടുന്നവ കാലാവസ്ഥാ നിയന്ത്രണത്തിൽ `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes`, `preset_modes` എന്നിവ, ഫാനിൽ `preset_modes`, `direction` എന്നിവ, ഹ്യുമിഡിഫയറിൽ `available_modes`, വാട്ടർ ഹീറ്ററിൽ `operation_list`, ലൈറ്റിൽ `effect_list`, മീഡിയ പ്ലെയറിൽ `source_list`, `sound_mode_list` എന്നിവ, വാക്വമിൽ `fan_speed_list`, റിമോട്ടിൽ `activity_list` എന്നിവയാണ്. അലാറം കൺട്രോൾ പാനൽ അതിന്റെ മോഡുകൾ `alarm_modes` വഴി നൽകുന്നു, ഒരു മോഡിന് കോഡ് ആവശ്യമുള്ളപ്പോൾ അത് ടൈപ്പ് ചെയ്യാൻ മെനുവിൽ ഒരു കീപാഡ് കാണിക്കുന്നു.
 
 > [!TIP]
 > നിങ്ങൾക്ക് സെലക്റ്റ് സബ്-ബട്ടണുകളും വേണമെങ്കിൽ ഉപയോഗിക്കാം, സബ്-ബട്ടണുകളെ പിന്തുണയ്ക്കുന്ന എല്ലാ കാർഡുകളിലും ഈ ഫീച്ചർ ലഭ്യമാണ്.

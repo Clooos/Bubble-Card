@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Dette kort lader dig tilføje en rullemenu til dine `input_select`/`select`-entiteter. Dette kort understøtter også underknapper og alle de fælles Bubble Card-funktioner.
 
-Kortet virker også med enhver entitet, der viser sine muligheder som en attributliste: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` og `preset_modes` på en klimaentitet, `available_modes` på en luftfugter, `operation_list` på en vandvarmer, `effect_list` på et lys, `source_list` og `sound_mode_list` på en medieafspiller.
+Kortet virker også med enhver entitet, der viser sine muligheder som en attributliste. Det dækker `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` og `preset_modes` på en klimaentitet, `preset_modes` og `direction` på en blæser, `available_modes` på en luftfugter, `operation_list` på en vandvarmer, `effect_list` på et lys, `source_list` og `sound_mode_list` på en medieafspiller, `fan_speed_list` på en støvsuger og `activity_list` på en fjernbetjening. Et alarmkontrolpanel tilbyder sine tilstande med `alarm_modes`, og når en tilstand kræver en kode, vises et tastatur i menuen til at indtaste den.
 
 > [!TIP]
 > Du kan også have vælg-underknapper, hvis du ønsker det, denne funktion er tilgængelig i alle kort, der understøtter underknapper.

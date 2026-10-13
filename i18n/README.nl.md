@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Met deze kaart voeg je een dropdownmenu toe voor je `input_select`- / `select`-entiteiten. Deze kaart ondersteunt ook subknoppen en alle gangbare Bubble Card-functies.
 
-Deze kaart werkt ook met elke entiteit die haar opties in een attributenlijst aanbiedt: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` en `preset_modes` op een klimaatentiteit, `available_modes` op een luchtbevochtiger, `operation_list` op een boiler, `effect_list` op een lamp, `source_list` en `sound_mode_list` op een mediaspeler.
+Deze kaart werkt ook met elke entiteit die haar opties in een attributenlijst aanbiedt. Dat omvat `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` en `preset_modes` op een klimaatentiteit, `preset_modes` en `direction` op een ventilator, `available_modes` op een luchtbevochtiger, `operation_list` op een boiler, `effect_list` op een lamp, `source_list` en `sound_mode_list` op een mediaspeler, `fan_speed_list` op een stofzuiger en `activity_list` op een afstandsbediening. Een alarmbedieningspaneel biedt zijn modi aan met `alarm_modes`, en wanneer een modus een code vereist, verschijnt er een toetsenblok in het menu om die in te voeren.
 
 > [!TIP]
 > Je kunt ook select-subknoppen gebruiken als je dat wilt, deze functie is beschikbaar in alle kaarten die subknoppen ondersteunen.

@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Dës Kaart erlaabt Iech e Dropdown-Menü fir Är `input_select`/`select`-Entitéiten bäizesetzen. Dës Kaart ënnerstëtzt och d'Sub-Knäppercher an all déi gemeinsam Feature vu Bubble Card.
 
-Si funktionéiert och mat all Entitéit déi hir Optiounen als Attributslëscht ubitt: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` a `preset_modes` bei engem Klima, `available_modes` bei engem Befiichter, `operation_list` bei engem Waarmwaasserbereeder, `effect_list` bei enger Luucht, `source_list` a `sound_mode_list` bei engem Mediaspiller.
+Si funktionéiert och mat all Entitéit déi hir Optiounen als Attributslëscht ubitt. Dozou gehéieren `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` a `preset_modes` bei engem Klima, `preset_modes` an `direction` bei engem Ventilator, `available_modes` bei engem Befiichter, `operation_list` bei engem Waarmwaasserbereeder, `effect_list` bei enger Luucht, `source_list` a `sound_mode_list` bei engem Mediaspiller, `fan_speed_list` bei engem Staubsauger an `activity_list` bei enger Telecommande. Eng Alarmzentral bitt hir Modi mat `alarm_modes` un, a wann e Modus e Code brauch, erschéngt am Menü en Tastefeld fir en anzeginn.
 
 > [!TIP]
 > Dir kënnt och Auswiel-Sub-Knäppercher hunn wann Dir wëllt, dëse Feature ass an alle Kaarten verfügbar déi d'Sub-Knäppercher ënnerstëtzen.

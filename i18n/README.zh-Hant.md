@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 這張卡片可以為你的 `input_select` / `select` 實體新增下拉選單,並支援子按鈕以及所有常見的 Bubble Card 功能。
 
-這張卡片同樣適用於任何以屬性清單形式提供選項的實體:空調的 `hvac_modes`、`fan_modes`、`swing_modes`、`swing_horizontal_modes` 和 `preset_modes`,加濕器的 `available_modes`,熱水器的 `operation_list`,燈光的 `effect_list`,以及媒體播放器的 `source_list` 和 `sound_mode_list`。
+這張卡片同樣適用於任何以屬性清單形式提供選項的實體。這包括空調的 `hvac_modes`、`fan_modes`、`swing_modes`、`swing_horizontal_modes` 和 `preset_modes`,風扇的 `preset_modes` 和 `direction`,加濕器的 `available_modes`,熱水器的 `operation_list`,燈光的 `effect_list`,媒體播放器的 `source_list` 和 `sound_mode_list`,掃地機器人的 `fan_speed_list`,以及遙控器的 `activity_list`。警戒控制面板透過 `alarm_modes` 提供其模式,當某個模式需要密碼時,選單中會出現數字鍵盤供輸入。
 
 > [!TIP]
 > 如果你想要,也可以使用選擇子按鈕,此功能在所有支援子按鈕的卡片中都可使用。

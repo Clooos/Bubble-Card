@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Bu kart, `input_select` / `select` varlıklarınız için bir açılır menü eklemenizi sağlar. Bu kart ayrıca alt düğmeleri ve tüm ortak Bubble Card özelliklerini destekler.
 
-Ayrıca seçeneklerini bir özellik listesi olarak sunan her varlıkla çalışır: bir iklim varlığında `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ve `preset_modes`, bir nemlendiricide `available_modes`, bir su ısıtıcısında `operation_list`, bir ışıkta `effect_list`, bir medya oynatıcıda `source_list` ve `sound_mode_list`.
+Ayrıca seçeneklerini bir özellik listesi olarak sunan her varlıkla çalışır. Buna bir iklim varlığında `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ve `preset_modes`, bir fanda `preset_modes` ve `direction`, bir nemlendiricide `available_modes`, bir su ısıtıcısında `operation_list`, bir ışıkta `effect_list`, bir medya oynatıcıda `source_list` ve `sound_mode_list`, bir robot süpürgede `fan_speed_list` ve bir uzaktan kumandada `activity_list` dahildir. Bir alarm kontrol paneli modlarını `alarm_modes` ile sunar ve bir mod kod gerektirdiğinde, kodu yazmak için menüde bir tuş takımı belirir.
 
 > [!TIP]
 > İsterseniz seçim alt düğmelerine de sahip olabilirsiniz, bu özellik alt düğmeleri destekleyen tüm kartlarda mevcuttur.

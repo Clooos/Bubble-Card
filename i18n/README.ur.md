@@ -726,7 +726,7 @@ icon_close: mdi:roller-shade-closed
 
 یہ کارڈ آپ کو اپنی `input_select` / `select` انٹیٹیز کے لیے ڈراپ ڈاؤن مینو شامل کرنے دیتا ہے۔ یہ کارڈ ذیلی بٹن اور تمام عام Bubble Card خصوصیات کو بھی سپورٹ کرتا ہے۔
 
-یہ کسی بھی ایسی انٹیٹی کے ساتھ بھی کام کرتا ہے جو اپنے اختیارات ایک صفت کی فہرست کے طور پر ظاہر کرتی ہے: کلائمیٹ پر `hvac_modes`، `fan_modes`، `swing_modes`، `swing_horizontal_modes` اور `preset_modes`، ہیومیڈیفائر پر `available_modes`، واٹر ہیٹر پر `operation_list`، لائٹ پر `effect_list`، میڈیا پلیئر پر `source_list` اور `sound_mode_list`۔
+یہ کسی بھی ایسی انٹیٹی کے ساتھ بھی کام کرتا ہے جو اپنے اختیارات ایک صفت کی فہرست کے طور پر ظاہر کرتی ہے۔ اس میں کلائمیٹ پر `hvac_modes`، `fan_modes`، `swing_modes`، `swing_horizontal_modes` اور `preset_modes`، فین پر `preset_modes` اور `direction`، ہیومیڈیفائر پر `available_modes`، واٹر ہیٹر پر `operation_list`، لائٹ پر `effect_list`، میڈیا پلیئر پر `source_list` اور `sound_mode_list`، ویکیوم پر `fan_speed_list` اور ریموٹ پر `activity_list` شامل ہیں۔ الارم کنٹرول پینل اپنے موڈز `alarm_modes` کے ذریعے پیش کرتا ہے، اور جب کسی موڈ کو کوڈ درکار ہو تو اسے ٹائپ کرنے کے لیے مینو میں ایک کی پیڈ ظاہر ہوتا ہے۔
 
 > [!TIP]
 > آپ چاہیں تو سلیکٹ ذیلی بٹن بھی رکھ سکتے ہیں، یہ خصوصیت ان تمام کارڈز میں دستیاب ہے جو ذیلی بٹن سپورٹ کرتے ہیں۔

@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Dette kortet lar deg legge til en nedtrekksmeny for `input_select`- / `select`-entitetene dine. Dette kortet støtter også underknapper og alle de vanlige Bubble Card-funksjonene.
 
-Det fungerer også med alle entiteter som eksponerer valgene sine som en attributtliste: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` og `preset_modes` på en klimaentitet, `available_modes` på en luftfukter, `operation_list` på en varmtvannsbereder, `effect_list` på et lys, `source_list` og `sound_mode_list` på en mediespiller.
+Det fungerer også med alle entiteter som eksponerer valgene sine som en attributtliste. Det dekker `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` og `preset_modes` på en klimaentitet, `preset_modes` og `direction` på en vifte, `available_modes` på en luftfukter, `operation_list` på en varmtvannsbereder, `effect_list` på et lys, `source_list` og `sound_mode_list` på en mediespiller, `fan_speed_list` på en støvsuger og `activity_list` på en fjernkontroll. Et alarmkontrollpanel tilbyr modusene sine med `alarm_modes`, og når en modus krever en kode, vises et tastatur i menyen for å skrive den inn.
 
 > [!TIP]
 > Du kan også ha valg-underknapper hvis du ønsker det, denne funksjonen er tilgjengelig i alle kortene som støtter underknapper.

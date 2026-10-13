@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 এই কার্ড দিয়ে আপনি আপনার `input_select` / `select` এনটিটির জন্য একটি ড্রপডাউন মেনু যোগ করতে পারেন। এই কার্ড সাব-বাটন এবং Bubble Card-এর সব সাধারণ ফিচারও সাপোর্ট করে।
 
-যেসব এনটিটি তাদের অপশনগুলো অ্যাট্রিবিউট তালিকা হিসেবে দেয়, এই কার্ড সেগুলোর সঙ্গেও কাজ করে: ক্লাইমেটে `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ও `preset_modes`, হিউমিডিফায়ারে `available_modes`, ওয়াটার হিটারে `operation_list`, লাইটে `effect_list`, মিডিয়া প্লেয়ারে `source_list` ও `sound_mode_list`।
+যেসব এনটিটি তাদের অপশনগুলো অ্যাট্রিবিউট তালিকা হিসেবে দেয়, এই কার্ড সেগুলোর সঙ্গেও কাজ করে। এর মধ্যে পড়ে ক্লাইমেটে `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ও `preset_modes`, ফ্যানে `preset_modes` ও `direction`, হিউমিডিফায়ারে `available_modes`, ওয়াটার হিটারে `operation_list`, লাইটে `effect_list`, মিডিয়া প্লেয়ারে `source_list` ও `sound_mode_list`, ভ্যাকুয়ামে `fan_speed_list` এবং রিমোটে `activity_list`। অ্যালার্ম কন্ট্রোল প্যানেল তার মোডগুলো `alarm_modes` দিয়ে দেয়, আর কোনো মোডে কোড লাগলে তা লেখার জন্য মেনুতে একটি কিপ্যাড দেখা যায়।
 
 > [!TIP]
 > চাইলে আপনি সিলেক্ট সাব-বাটনও রাখতে পারেন, সাব-বাটন সাপোর্ট করে এমন সব কার্ডেই এই ফিচার উপলব্ধ।

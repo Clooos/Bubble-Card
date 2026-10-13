@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Ligeann an cárta seo duit roghchlár anuas a chur le d'eintitis `input_select` / `select`. Tacaíonn an cárta seo freisin leis na fochnaipí agus le gnéithe coitianta Bubble Card ar fad.
 
-Oibríonn sé freisin le haon eintiteas a nochtann a chuid roghanna mar liosta airíonna: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` agus `preset_modes` ar aeráid, `available_modes` ar thaisritheoir, `operation_list` ar théitheoir uisce, `effect_list` ar sholas, `source_list` agus `sound_mode_list` ar sheinnteoir meán.
+Oibríonn sé freisin le haon eintiteas a nochtann a chuid roghanna mar liosta airíonna. Clúdaíonn sé sin `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` agus `preset_modes` ar aeráid, `preset_modes` agus `direction` ar fhean, `available_modes` ar thaisritheoir, `operation_list` ar théitheoir uisce, `effect_list` ar sholas, `source_list` agus `sound_mode_list` ar sheinnteoir meán, `fan_speed_list` ar fholúsghlantóir agus `activity_list` ar chianrialtán. Tairgeann painéal rialaithe aláraim a chuid modhanna le `alarm_modes`, agus nuair a bhíonn cód ag teastáil ó mhodh, feictear eochaircheap sa roghchlár chun é a chlóscríobh.
 
 > [!TIP]
 > Is féidir leat fochnaipí roghnaithe a bheith agat freisin más mian leat, tá an ghné seo ar fáil i ngach cárta a dtacaítear leis na fochnaipí ann.

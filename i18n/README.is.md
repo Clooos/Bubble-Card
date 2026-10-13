@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Þetta kort gerir þér kleift að bæta við fellivalmynd fyrir `input_select` / `select` eindirnar þínar. Þetta kort styður einnig undirhnappa og alla algenga eiginleika Bubble Card.
 
-Það virkar líka með öllum eindum sem birta valkosti sína sem eiginleikalista: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` og `preset_modes` á loftslagseind, `available_modes` á rakatæki, `operation_list` á vatnshitara, `effect_list` á ljósi, `source_list` og `sound_mode_list` á spilara.
+Það virkar líka með öllum eindum sem birta valkosti sína sem eiginleikalista. Það nær yfir `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` og `preset_modes` á loftslagseind, `preset_modes` og `direction` á viftu, `available_modes` á rakatæki, `operation_list` á vatnshitara, `effect_list` á ljósi, `source_list` og `sound_mode_list` á spilara, `fan_speed_list` á ryksugu og `activity_list` á fjarstýringu. Stjórnborð öryggiskerfis býður upp á stillingar sínar með `alarm_modes`, og þegar stilling krefst kóða birtist talnaborð í valmyndinni til að slá hann inn.
 
 > [!TIP]
 > Þú getur líka haft valundirhnappa ef þú vilt, þessi eiginleiki er í boði í öllum kortum sem styðja undirhnappa.

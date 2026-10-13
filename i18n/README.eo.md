@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Ĉi tiu karto ebligas aldoni falmenuon por viaj `input_select` / `select`-eroj. Ĉi tiu karto ankaŭ subtenas la subbutonojn kaj ĉiujn komunajn funkciojn de Bubble Card.
 
-Ĝi ankaŭ funkcias kun ajna ero, kiu prezentas siajn opciojn kiel atributan liston: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` kaj `preset_modes` ĉe klimatizilo, `available_modes` ĉe humidigilo, `operation_list` ĉe akvovarmigilo, `effect_list` ĉe lumo, `source_list` kaj `sound_mode_list` ĉe plurmedia ludilo.
+Ĝi ankaŭ funkcias kun ajna ero, kiu prezentas siajn opciojn kiel atributan liston. Tio inkluzivas `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` kaj `preset_modes` ĉe klimatizilo, `preset_modes` kaj `direction` ĉe ventolilo, `available_modes` ĉe humidigilo, `operation_list` ĉe akvovarmigilo, `effect_list` ĉe lumo, `source_list` kaj `sound_mode_list` ĉe plurmedia ludilo, `fan_speed_list` ĉe polvosuĉilo kaj `activity_list` ĉe teleregilo. Alarma regpanelo proponas siajn reĝimojn per `alarm_modes`, kaj kiam reĝimo bezonas kodon, klavaro aperas en la menuo por tajpi ĝin.
 
 > [!TIP]
 > Vi ankaŭ povas havi elektilajn subbutonojn se vi volas, ĉi tiu funkcio disponeblas en ĉiuj kartoj, kiuj subtenas la subbutonojn.

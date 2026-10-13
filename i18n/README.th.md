@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 การ์ดนี้ให้คุณเพิ่มเมนูแบบดรอปดาวน์สำหรับเอนทิตี `input_select` / `select` ได้ การ์ดนี้ยังรองรับปุ่มย่อยและฟีเจอร์ทั่วไปของ Bubble Card ทั้งหมด
 
-การ์ดนี้ยังใช้ได้กับเอนทิตีใด ๆ ที่แสดงตัวเลือกของตัวเองเป็นรายการแอตทริบิวต์ ได้แก่ `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` และ `preset_modes` ของเครื่องปรับอากาศ, `available_modes` ของเครื่องเพิ่มความชื้น, `operation_list` ของเครื่องทำน้ำอุ่น, `effect_list` ของไฟ, `source_list` และ `sound_mode_list` ของเครื่องเล่นสื่อ
+การ์ดนี้ยังใช้ได้กับเอนทิตีใด ๆ ที่แสดงตัวเลือกของตัวเองเป็นรายการแอตทริบิวต์ ได้แก่ `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` และ `preset_modes` ของเครื่องปรับอากาศ, `preset_modes` และ `direction` ของพัดลม, `available_modes` ของเครื่องเพิ่มความชื้น, `operation_list` ของเครื่องทำน้ำอุ่น, `effect_list` ของไฟ, `source_list` และ `sound_mode_list` ของเครื่องเล่นสื่อ, `fan_speed_list` ของเครื่องดูดฝุ่น และ `activity_list` ของรีโมต แผงควบคุมสัญญาณกันขโมยมีโหมดให้เลือกผ่าน `alarm_modes` และเมื่อโหมดใดต้องใช้รหัส จะมีแป้นตัวเลขปรากฏในเมนูเพื่อให้พิมพ์รหัส
 
 > [!TIP]
 > คุณสามารถมีปุ่มย่อยแบบเลือกได้เช่นกันหากต้องการ ฟีเจอร์นี้ใช้ได้กับทุกการ์ดที่รองรับปุ่มย่อย

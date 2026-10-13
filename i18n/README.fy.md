@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Mei dizze kaart kinne jo in útklapmenu foar jo `input_select`/`select`-entiteiten tafoegje. Dizze kaart stipet ek de subknoppen en alle mienskiplike Bubble Card funksjes.
 
-Dizze kaart wurket ek mei elke entiteit dy't syn opsjes as in attribútlist beskikber stelt: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` en `preset_modes` op in klimaatentiteit, `available_modes` op in loftbefochtiger, `operation_list` op in boiler, `effect_list` op in ljocht, `source_list` en `sound_mode_list` op in mediaspiler.
+Dizze kaart wurket ek mei elke entiteit dy't syn opsjes as in attribútlist beskikber stelt. Dat omfettet `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` en `preset_modes` op in klimaatentiteit, `preset_modes` en `direction` op in fentilator, `available_modes` op in loftbefochtiger, `operation_list` op in boiler, `effect_list` op in ljocht, `source_list` en `sound_mode_list` op in mediaspiler, `fan_speed_list` op in stofsûger en `activity_list` op in ôfstânsbetsjinning. In alarmbetsjinningspaniel biedt syn modi oan mei `alarm_modes`, en as in modus in koade nedich hat, ferskynt der in toetseboerd yn it menu om dy yn te typen.
 
 > [!TIP]
 > Jo kinne ek seleksje-subknoppen brûke as jo dat wolle, dizze funksje is beskikber yn alle kaarten dy't de subknoppen stypje.

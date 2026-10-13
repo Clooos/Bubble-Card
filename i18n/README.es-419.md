@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Esta tarjeta te permite agregar un menú desplegable para tus entidades `input_select` / `select`. Esta tarjeta también admite los sub-botones y todas las funciones comunes de Bubble Card.
 
-También funciona con cualquier entidad que exponga sus opciones como una lista de atributos: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` y `preset_modes` en un clima, `available_modes` en un humidificador, `operation_list` en un calentador de agua, `effect_list` en una luz, `source_list` y `sound_mode_list` en un reproductor multimedia.
+También funciona con cualquier entidad que exponga sus opciones como una lista de atributos. Esto incluye `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` y `preset_modes` en un clima, `preset_modes` y `direction` en un ventilador, `available_modes` en un humidificador, `operation_list` en un calentador de agua, `effect_list` en una luz, `source_list` y `sound_mode_list` en un reproductor multimedia, `fan_speed_list` en una aspiradora y `activity_list` en un control remoto. Un panel de control de alarma ofrece sus modos con `alarm_modes`, y cuando un modo necesita un código, aparece un teclado en el menú para escribirlo.
 
 > [!TIP]
 > También puedes tener sub-botones de selector si lo deseas, esta función está disponible en todas las tarjetas que admiten sub-botones.

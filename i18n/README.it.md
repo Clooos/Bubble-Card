@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Questa scheda ti permette di aggiungere un menu a tendina per le tue entità `input_select` / `select`. Questa scheda supporta anche i sotto-pulsanti e tutte le funzionalità comuni di Bubble Card.
 
-Funziona anche con qualsiasi entità che espone le sue opzioni come lista di attributi: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` e `preset_modes` su un'entità clima, `available_modes` su un umidificatore, `operation_list` su uno scaldabagno, `effect_list` su una luce, `source_list` e `sound_mode_list` su un lettore multimediale.
+Funziona anche con qualsiasi entità che espone le sue opzioni come lista di attributi. Questo comprende `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` e `preset_modes` su un'entità clima, `preset_modes` e `direction` su un ventilatore, `available_modes` su un umidificatore, `operation_list` su uno scaldabagno, `effect_list` su una luce, `source_list` e `sound_mode_list` su un lettore multimediale, `fan_speed_list` su un aspirapolvere e `activity_list` su un telecomando. Un pannello di controllo degli allarmi offre le sue modalità con `alarm_modes`, e quando una modalità richiede un codice, nel menu compare un tastierino per digitarlo.
 
 > [!TIP]
 > Puoi anche avere sotto-pulsanti selettore se lo desideri, questa funzionalità è disponibile in tutte le schede che supportano i sotto-pulsanti.

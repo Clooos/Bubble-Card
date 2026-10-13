@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Acest card îți permite să adaugi un meniu derulant pentru entitățile tale `input_select` / `select`. Acest card acceptă și sub-butoanele și toate funcțiile comune Bubble Card.
 
-Funcționează și cu orice entitate care își expune opțiunile sub forma unei liste de atribute: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` și `preset_modes` pe o entitate de climatizare, `available_modes` pe un umidificator, `operation_list` pe un boiler, `effect_list` pe o lumină, `source_list` și `sound_mode_list` pe un player media.
+Funcționează și cu orice entitate care își expune opțiunile sub forma unei liste de atribute. Aceasta include `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` și `preset_modes` pe o entitate de climatizare, `preset_modes` și `direction` pe un ventilator, `available_modes` pe un umidificator, `operation_list` pe un boiler, `effect_list` pe o lumină, `source_list` și `sound_mode_list` pe un player media, `fan_speed_list` pe un aspirator și `activity_list` pe o telecomandă. Un panou de control al alarmei își oferă modurile prin `alarm_modes`, iar când un mod are nevoie de un cod, în meniu apare o tastatură pentru a-l introduce.
 
 > [!TIP]
 > Poți avea și sub-butoane de selecție dacă dorești, această funcție este disponibilă în toate cardurile care acceptă sub-butoanele.

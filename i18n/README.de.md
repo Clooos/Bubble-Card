@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Mit dieser Karte kannst du ein Dropdown-Menü für deine `input_select`- / `select`-Entitäten hinzufügen. Diese Karte unterstützt außerdem die Sub-Buttons und alle gemeinsamen Bubble Card-Funktionen.
 
-Das funktioniert auch mit jeder Entität, die ihre Optionen als Attributliste bereitstellt: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` und `preset_modes` bei einer Klima-Entität, `available_modes` bei einem Luftbefeuchter, `operation_list` bei einem Warmwasserbereiter, `effect_list` bei einem Licht, `source_list` und `sound_mode_list` bei einem Medienplayer.
+Das funktioniert auch mit jeder Entität, die ihre Optionen als Attributliste bereitstellt. Dazu gehören `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` und `preset_modes` bei einer Klima-Entität, `preset_modes` und `direction` bei einem Ventilator, `available_modes` bei einem Luftbefeuchter, `operation_list` bei einem Warmwasserbereiter, `effect_list` bei einem Licht, `source_list` und `sound_mode_list` bei einem Medienplayer, `fan_speed_list` bei einem Staubsauger und `activity_list` bei einer Fernbedienung. Eine Alarmzentrale bietet ihre Modi mit `alarm_modes` an, und wenn ein Modus einen Code verlangt, erscheint im Menü ein Tastenfeld, um ihn einzugeben.
 
 > [!TIP]
 > Du kannst auch Auswahl-Sub-Buttons haben, wenn du möchtest, diese Funktion ist in allen Karten verfügbar, die die Sub-Buttons unterstützen.

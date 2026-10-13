@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Ši kortelė leidžia pridėti išskleidžiamąjį meniu jūsų `input_select` / `select` entitetams. Ši kortelė taip pat palaiko papildomus mygtukus ir visas įprastas Bubble Card funkcijas.
 
-Ji taip pat veikia su bet kuriuo entitetu, kuris savo parinktis pateikia kaip atributų sąrašą: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ir `preset_modes` klimato entitete, `available_modes` drėkintuve, `operation_list` vandens šildytuve, `effect_list` šviestuve, `source_list` ir `sound_mode_list` medijos leistuve.
+Ji taip pat veikia su bet kuriuo entitetu, kuris savo parinktis pateikia kaip atributų sąrašą. Tai apima `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ir `preset_modes` klimato entitete, `preset_modes` ir `direction` ventiliatoriuje, `available_modes` drėkintuve, `operation_list` vandens šildytuve, `effect_list` šviestuve, `source_list` ir `sound_mode_list` medijos leistuve, `fan_speed_list` dulkių siurblyje ir `activity_list` nuotolinio valdymo pulte. Signalizacijos valdymo pultas savo režimus siūlo per `alarm_modes`, o kai režimui reikia kodo, meniu atsiranda klaviatūra jam įvesti.
 
 > [!TIP]
 > Jei norite, galite turėti ir pasirinkimo papildomus mygtukus, ši funkcija prieinama visose kortelėse, kurios palaiko papildomus mygtukus.

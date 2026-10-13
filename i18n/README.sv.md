@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Det här kortet låter dig lägga till en rullgardinsmeny för dina `input_select`- / `select`-entiteter. Det här kortet stöder också underknappar och alla de vanliga funktionerna i Bubble Card.
 
-Det fungerar också med alla entiteter som visar sina alternativ som en attributlista: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` och `preset_modes` på en klimatentitet, `available_modes` på en luftfuktare, `operation_list` på en varmvattenberedare, `effect_list` på en lampa, `source_list` och `sound_mode_list` på en mediaspelare.
+Det fungerar också med alla entiteter som visar sina alternativ som en attributlista. Det omfattar `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` och `preset_modes` på en klimatentitet, `preset_modes` och `direction` på en fläkt, `available_modes` på en luftfuktare, `operation_list` på en varmvattenberedare, `effect_list` på en lampa, `source_list` och `sound_mode_list` på en mediaspelare, `fan_speed_list` på en dammsugare och `activity_list` på en fjärrkontroll. En larmkontrollpanel erbjuder sina lägen med `alarm_modes`, och när ett läge kräver en kod visas en knappsats i menyn för att skriva in den.
 
 > [!TIP]
 > Du kan även ha underknappar av typen Välj om du vill, den här funktionen finns tillgänglig i alla kort som stöder underknappar.

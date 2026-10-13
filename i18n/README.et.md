@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 See kaart võimaldab lisada rippmenüü `input_select` / `select` olemitele. See kaart toetab ka alamnuppe ja kõiki Bubble Card'i ühiseid funktsioone.
 
-See töötab ka iga olemiga, mis esitab oma valikud atribuutide loendina: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ja `preset_modes` kliimaseadmel, `available_modes` õhuniisutil, `operation_list` veeboileril, `effect_list` valgustil, `source_list` ja `sound_mode_list` meediumipleieril.
+See töötab ka iga olemiga, mis esitab oma valikud atribuutide loendina. See hõlmab `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ja `preset_modes` kliimaseadmel, `preset_modes` ja `direction` ventilaatoril, `available_modes` õhuniisutil, `operation_list` veeboileril, `effect_list` valgustil, `source_list` ja `sound_mode_list` meediumipleieril, `fan_speed_list` tolmuimejal ja `activity_list` kaugjuhtimispuldil. Valvekeskuse juhtpaneel pakub oma režiime `alarm_modes` kaudu ja kui režiim nõuab koodi, ilmub menüüsse klahvistik selle sisestamiseks.
 
 > [!TIP]
 > Kui soovid, saad kasutada ka valiku alamnuppe. See funktsioon on saadaval kõigis kaartides, mis toetavad alamnuppe.

@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Ova kartica vam omogućuje dodavanje padajućeg izbornika za vaše entitete `input_select` / `select`. Ova kartica također podržava podgumbe i sve uobičajene značajke Bubble Card.
 
-Također radi sa svakim entitetom koji svoje opcije izlaže kao popis atributa: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` i `preset_modes` na klimi, `available_modes` na ovlaživaču, `operation_list` na bojleru, `effect_list` na svjetlu, `source_list` i `sound_mode_list` na medijskom reproduktoru.
+Također radi sa svakim entitetom koji svoje opcije izlaže kao popis atributa. To obuhvaća `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` i `preset_modes` na klimi, `preset_modes` i `direction` na ventilatoru, `available_modes` na ovlaživaču, `operation_list` na bojleru, `effect_list` na svjetlu, `source_list` i `sound_mode_list` na medijskom reproduktoru, `fan_speed_list` na usisavaču i `activity_list` na daljinskom upravljaču. Alarmna centrala nudi svoje načine rada kroz `alarm_modes`, a kada način rada traži kod, u izborniku se pojavi tipkovnica za njegov unos.
 
 > [!TIP]
 > Ako želite, možete imati i podgumbe za odabir, ova je značajka dostupna u svim karticama koje podržavaju podgumbe.

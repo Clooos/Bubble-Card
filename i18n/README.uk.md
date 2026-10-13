@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Ця картка дозволяє додати спадне меню для ваших сутностей `input_select` / `select`. Ця картка також підтримує додаткові кнопки та всі загальні функції Bubble Card.
 
-Вона також працює з будь-якою сутністю, яка надає свої варіанти у вигляді списку атрибутів: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` та `preset_modes` у клімату, `available_modes` у зволожувача, `operation_list` у водонагрівача, `effect_list` у світла, `source_list` та `sound_mode_list` у медіаплеєра.
+Вона також працює з будь-якою сутністю, яка надає свої варіанти у вигляді списку атрибутів. Сюди входять `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` та `preset_modes` у клімату, `preset_modes` та `direction` у вентилятора, `available_modes` у зволожувача, `operation_list` у водонагрівача, `effect_list` у світла, `source_list` та `sound_mode_list` у медіаплеєра, `fan_speed_list` у пилососа та `activity_list` у пульта дистанційного керування. Панель керування сигналізацією пропонує свої режими через `alarm_modes`, а коли режим потребує коду, у меню з'являється клавіатура для його введення.
 
 > [!TIP]
 > Ви також можете мати додаткові кнопки вибору, якщо бажаєте, ця функція доступна в усіх картках, що підтримують додаткові кнопки.

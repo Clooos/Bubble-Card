@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Die Charte erlaubt dir, es Dropdown-Menü für dini `input_select` / `select`-Entities z füege. Die Charte unterstützt au d Sub-Buttons und alli gmeinsame Bubble-Card-Funktione.
 
-Si funktioniert au mit jedere Entity, wo ihri Optione als Attributliste zeigt: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` und `preset_modes` bimene Klima, `available_modes` bimene Luftbefüechter, `operation_list` bimene Boiler, `effect_list` bimene Liecht, `source_list` und `sound_mode_list` bimene Mediaplayer.
+Si funktioniert au mit jedere Entity, wo ihri Optione als Attributliste zeigt. Dezue ghöred `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` und `preset_modes` bimene Klima, `preset_modes` und `direction` bimene Ventilator, `available_modes` bimene Luftbefüechter, `operation_list` bimene Boiler, `effect_list` bimene Liecht, `source_list` und `sound_mode_list` bimene Mediaplayer, `fan_speed_list` bimene Staubsuuger und `activity_list` bi ere Fernbedienig. E Alarmzentrale büütet ihri Modi mit `alarm_modes` aa, und wenn en Modus en Code bruucht, erschiint im Menü es Taschtefäld zum en iigäh.
 
 > [!TIP]
 > Du chasch au Uswahl-Sub-Buttons ha, wenn du wottsch, die Funktion isch in alle Charte verfüegbar, wo Sub-Buttons unterstütze.

@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 이 카드를 사용하면 `input_select` / `select` 엔티티를 위한 드롭다운 메뉴를 추가할 수 있습니다. 이 카드는 서브 버튼과 Bubble Card의 모든 공통 기능도 지원합니다.
 
-옵션을 속성 목록으로 제공하는 모든 엔티티에서도 작동합니다: 냉난방의 `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes`, `preset_modes`, 가습기의 `available_modes`, 온수기의 `operation_list`, 조명의 `effect_list`, 미디어 플레이어의 `source_list`와 `sound_mode_list`입니다.
+옵션을 속성 목록으로 제공하는 모든 엔티티에서도 작동합니다. 냉난방의 `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes`, `preset_modes`, 송풍기의 `preset_modes`와 `direction`, 가습기의 `available_modes`, 온수기의 `operation_list`, 조명의 `effect_list`, 미디어 플레이어의 `source_list`와 `sound_mode_list`, 청소기의 `fan_speed_list`, 리모컨의 `activity_list`가 여기에 해당합니다. 알람 제어판은 `alarm_modes`로 모드를 제공하며, 모드에 코드가 필요하면 코드를 입력할 키패드가 메뉴에 나타납니다.
 
 > [!TIP]
 > 원한다면 선택 서브 버튼도 사용할 수 있습니다. 이 기능은 서브 버튼을 지원하는 모든 카드에서 사용할 수 있습니다.

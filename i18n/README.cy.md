@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Mae'r cerdyn hwn yn eich galluogi i ychwanegu dewislen ollwng ar gyfer eich endidau `input_select` / `select`. Mae'r cerdyn hwn hefyd yn cefnogi'r is-fotymau a holl nodweddion cyffredin Bubble Card.
 
-Mae hefyd yn gweithio gydag unrhyw endid sy'n dangos ei opsiynau fel rhestr o briodoleddau: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` a `preset_modes` ar endid hinsawdd, `available_modes` ar leithydd, `operation_list` ar wresogydd dŵr, `effect_list` ar olau, `source_list` a `sound_mode_list` ar chwaraeydd cyfryngau.
+Mae hefyd yn gweithio gydag unrhyw endid sy'n dangos ei opsiynau fel rhestr o briodoleddau. Mae hynny'n cynnwys `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` a `preset_modes` ar endid hinsawdd, `preset_modes` a `direction` ar wyntyll, `available_modes` ar leithydd, `operation_list` ar wresogydd dŵr, `effect_list` ar olau, `source_list` a `sound_mode_list` ar chwaraeydd cyfryngau, `fan_speed_list` ar sugnwr llwch ac `activity_list` ar declyn rheoli o bell. Mae panel rheoli larwm yn cynnig ei foddau gydag `alarm_modes`, a phan fydd modd angen cod, mae bysellbad yn ymddangos yn y ddewislen i'w deipio.
 
 > [!TIP]
 > Gallwch hefyd gael is-fotymau dewis os ydych am hynny, mae'r nodwedd hon ar gael ym mhob cerdyn sy'n cefnogi'r is-fotymau.

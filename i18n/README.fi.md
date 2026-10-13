@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Tämän kortin avulla voit lisätä pudotusvalikon `input_select` / `select` entiteeteillesi. Tämä kortti tukee myös alipainikkeita ja kaikkia yleisiä Bubble Card ominaisuuksia.
 
-Tämä kortti toimii myös minkä tahansa entiteetin kanssa, joka tarjoaa vaihtoehtonsa attribuuttiluettelona: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ja `preset_modes` ilmastointientiteetissä, `available_modes` ilmankostuttimessa, `operation_list` vedenlämmittimessä, `effect_list` valaisimessa, `source_list` ja `sound_mode_list` mediasoittimessa.
+Tämä kortti toimii myös minkä tahansa entiteetin kanssa, joka tarjoaa vaihtoehtonsa attribuuttiluettelona. Näitä ovat `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` ja `preset_modes` ilmastointientiteetissä, `preset_modes` ja `direction` tuulettimessa, `available_modes` ilmankostuttimessa, `operation_list` vedenlämmittimessä, `effect_list` valaisimessa, `source_list` ja `sound_mode_list` mediasoittimessa, `fan_speed_list` imurissa ja `activity_list` kaukosäätimessä. Hälytysjärjestelmän ohjauspaneeli tarjoaa tilansa `alarm_modes`-luettelona, ja kun tila vaatii koodin, valikkoon ilmestyy näppäimistö sen syöttämistä varten.
 
 > [!TIP]
 > Voit myös käyttää valinta-alipainikkeita halutessasi, tämä ominaisuus on saatavilla kaikissa korteissa, jotka tukevat alipainikkeita.

@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 இந்தக் கார்டு உங்கள் `input_select` / `select` entity-களுக்கு ஒரு dropdown மெனுவைச் சேர்க்க அனுமதிக்கிறது. இந்தக் கார்டு துணை பட்டன்களையும், Bubble Card-இன் அனைத்து பொதுவான அம்சங்களையும் ஆதரிக்கிறது.
 
-தன் விருப்பங்களை ஒரு attribute பட்டியலாக வெளிப்படுத்தும் எந்த entity-யுடனும் இது வேலை செய்கிறது: ஒரு காலநிலை entity-யில் `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` மற்றும் `preset_modes`, ஒரு ஈரப்பதமாக்கியில் `available_modes`, ஒரு நீர் சூடாக்கியில் `operation_list`, ஒரு விளக்கில் `effect_list`, ஒரு மீடியா பிளேயரில் `source_list` மற்றும் `sound_mode_list`.
+தன் விருப்பங்களை ஒரு attribute பட்டியலாக வெளிப்படுத்தும் எந்த entity-யுடனும் இது வேலை செய்கிறது. இதில் அடங்குபவை ஒரு காலநிலை entity-யில் `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` மற்றும் `preset_modes`, ஒரு மின்விசிறியில் `preset_modes` மற்றும் `direction`, ஒரு ஈரப்பதமாக்கியில் `available_modes`, ஒரு நீர் சூடாக்கியில் `operation_list`, ஒரு விளக்கில் `effect_list`, ஒரு மீடியா பிளேயரில் `source_list` மற்றும் `sound_mode_list`, ஒரு வெற்றிட சுத்திகரிப்பானில் `fan_speed_list` மற்றும் ஒரு ரிமோட்டில் `activity_list`. ஒரு அலாரம் கட்டுப்பாட்டுப் பலகை தன் முறைகளை `alarm_modes` மூலம் வழங்குகிறது, ஒரு முறைக்கு குறியீடு தேவைப்படும்போது அதைத் தட்டச்சு செய்ய மெனுவில் ஒரு விசைப்பலகை தோன்றும்.
 
 > [!TIP]
 > நீங்கள் விரும்பினால் select துணை பட்டன்களையும் வைத்திருக்கலாம், இந்த அம்சம் துணை பட்டன்களை ஆதரிக்கும் அனைத்து கார்டுகளிலும் கிடைக்கிறது.

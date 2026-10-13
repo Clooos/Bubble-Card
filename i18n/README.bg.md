@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Тази карта ви позволява да добавите падащо меню за вашите `input_select` / `select` обекти. Тази карта също поддържа подбутоните и всички общи функции на Bubble Card.
 
-Работи също и с всеки обект, който предоставя опциите си като атрибут списък: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` и `preset_modes` при климатичен обект, `available_modes` при овлажнител, `operation_list` при бойлер, `effect_list` при осветителен обект, `source_list` и `sound_mode_list` при медиен плейър.
+Работи също и с всеки обект, който предоставя опциите си като атрибут списък. Това обхваща `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` и `preset_modes` при климатичен обект, `preset_modes` и `direction` при вентилатор, `available_modes` при овлажнител, `operation_list` при бойлер, `effect_list` при осветителен обект, `source_list` и `sound_mode_list` при медиен плейър, `fan_speed_list` при прахосмукачка и `activity_list` при дистанционно управление. Алармен контролен панел предлага режимите си чрез `alarm_modes`, а когато даден режим изисква код, в менюто се появява клавиатура за въвеждането му.
 
 > [!TIP]
 > Ако желаете, можете да имате и подбутони за избор, тази функция е налична във всички карти, които поддържат подбутоните.

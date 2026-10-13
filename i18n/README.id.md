@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Kartu ini memungkinkan Anda menambahkan menu dropdown untuk entitas `input_select` / `select` Anda. Kartu ini juga mendukung subtombol dan semua fitur umum Bubble Card.
 
-Kartu ini juga berfungsi dengan entitas apa pun yang menampilkan opsinya sebagai daftar atribut: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` dan `preset_modes` pada entitas iklim, `available_modes` pada pelembap udara, `operation_list` pada pemanas air, `effect_list` pada lampu, `source_list` dan `sound_mode_list` pada pemutar media.
+Kartu ini juga berfungsi dengan entitas apa pun yang menampilkan opsinya sebagai daftar atribut. Ini mencakup `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` dan `preset_modes` pada entitas iklim, `preset_modes` dan `direction` pada kipas angin, `available_modes` pada pelembap udara, `operation_list` pada pemanas air, `effect_list` pada lampu, `source_list` dan `sound_mode_list` pada pemutar media, `fan_speed_list` pada penyedot debu dan `activity_list` pada remote. Panel kontrol alarm menawarkan modenya dengan `alarm_modes`, dan ketika sebuah mode memerlukan kode, papan tombol muncul di menu untuk mengetikkannya.
 
 > [!TIP]
 > Anda juga bisa memiliki subtombol select jika diinginkan, fitur ini tersedia di semua kartu yang mendukung subtombol.

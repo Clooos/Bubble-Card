@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Met hierdie kaart kan jy 'n aftreklys byvoeg vir jou `input_select`- / `select`-entiteite. Hierdie kaart ondersteun ook die subknoppies en al die algemene funksies van Bubble Card.
 
-Dit werk ook met enige entiteit wat sy opsies as 'n attribuutlys blootstel: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` en `preset_modes` op 'n klimaatentiteit, `available_modes` op 'n lugbevogtiger, `operation_list` op 'n waterverwarmer, `effect_list` op 'n lig, `source_list` en `sound_mode_list` op 'n mediaspeler.
+Dit werk ook met enige entiteit wat sy opsies as 'n attribuutlys blootstel. Dit dek `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` en `preset_modes` op 'n klimaatentiteit, `preset_modes` en `direction` op 'n waaier, `available_modes` op 'n lugbevogtiger, `operation_list` op 'n waterverwarmer, `effect_list` op 'n lig, `source_list` en `sound_mode_list` op 'n mediaspeler, `fan_speed_list` op 'n stofsuier en `activity_list` op 'n afstandbeheer. 'n Alarmbeheerpaneel bied sy modusse met `alarm_modes`, en wanneer 'n modus 'n kode benodig, verskyn 'n syferbord in die kieslys om dit in te tik.
 
 > [!TIP]
 > Jy kan ook keuse-subknoppies hê as jy wil, hierdie funksie is beskikbaar in al die kaarte wat die subknoppies ondersteun.

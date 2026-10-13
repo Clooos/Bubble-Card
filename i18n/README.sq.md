@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Kjo kartë ju lejon të shtoni një menu rënëse (dropdown) për entitetet tuaja `input_select` / `select`. Kjo kartë mbështet gjithashtu nën-butonat dhe të gjitha veçoritë e zakonshme të Bubble Card.
 
-Funksionon gjithashtu me çdo entitet që i shfaq opsionet e veta si listë atributesh: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` dhe `preset_modes` te një klimë, `available_modes` te një lagështues, `operation_list` te një ngrohës uji, `effect_list` te një dritë, `source_list` dhe `sound_mode_list` te një luajtës multimedial.
+Funksionon gjithashtu me çdo entitet që i shfaq opsionet e veta si listë atributesh. Kjo përfshin `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` dhe `preset_modes` te një klimë, `preset_modes` dhe `direction` te një ventilator, `available_modes` te një lagështues, `operation_list` te një ngrohës uji, `effect_list` te një dritë, `source_list` dhe `sound_mode_list` te një luajtës multimedial, `fan_speed_list` te një fshesë me korrent dhe `activity_list` te një telekomandë. Një panel kontrolli i alarmit i ofron mënyrat e veta me `alarm_modes`, dhe kur një mënyrë kërkon një kod, në meny shfaqet një tastierë për ta shkruar.
 
 > [!TIP]
 > Mund të keni gjithashtu nën-butona përzgjedhjeje nëse dëshironi, kjo veçori është e disponueshme në të gjitha kartat që mbështesin nën-butonat.

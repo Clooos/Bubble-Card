@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Thẻ này cho phép bạn thêm một menu thả xuống cho các thực thể `input_select` / `select` của bạn. Thẻ này cũng hỗ trợ các nút phụ và tất cả các tính năng chung của Bubble Card.
 
-Nó cũng hoạt động với bất kỳ thực thể nào công bố các tùy chọn của mình dưới dạng một danh sách thuộc tính: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` và `preset_modes` trên một thực thể điều hòa, `available_modes` trên một máy tạo ẩm, `operation_list` trên một máy nước nóng, `effect_list` trên một đèn, `source_list` và `sound_mode_list` trên một trình phát đa phương tiện.
+Nó cũng hoạt động với bất kỳ thực thể nào công bố các tùy chọn của mình dưới dạng một danh sách thuộc tính. Điều đó bao gồm `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` và `preset_modes` trên một thực thể điều hòa, `preset_modes` và `direction` trên một quạt, `available_modes` trên một máy tạo ẩm, `operation_list` trên một máy nước nóng, `effect_list` trên một đèn, `source_list` và `sound_mode_list` trên một trình phát đa phương tiện, `fan_speed_list` trên một máy hút bụi và `activity_list` trên một điều khiển từ xa. Một bảng điều khiển an ninh cung cấp các chế độ của mình bằng `alarm_modes`, và khi một chế độ cần mã, một bàn phím số xuất hiện trong menu để nhập mã.
 
 > [!TIP]
 > Bạn cũng có thể có các nút phụ chọn nếu muốn, tính năng này khả dụng trong tất cả các thẻ hỗ trợ nút phụ.

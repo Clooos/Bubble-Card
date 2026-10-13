@@ -724,7 +724,7 @@ icon_close: mdi:roller-shade-closed
 
 Ta karta pozwala dodać menu rozwijane dla Twoich encji `input_select` / `select`. Ta karta obsługuje również podprzyciski oraz wszystkie wspólne funkcje Bubble Card.
 
-Działa również z każdą encją, która udostępnia swoje opcje w postaci listy atrybutów: `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` i `preset_modes` w encji klimatyzacji, `available_modes` w nawilżaczu, `operation_list` w podgrzewaczu wody, `effect_list` w świetle, `source_list` i `sound_mode_list` w odtwarzaczu mediów.
+Działa również z każdą encją, która udostępnia swoje opcje w postaci listy atrybutów. Obejmuje to `hvac_modes`, `fan_modes`, `swing_modes`, `swing_horizontal_modes` i `preset_modes` w encji klimatyzacji, `preset_modes` i `direction` w wentylatorze, `available_modes` w nawilżaczu, `operation_list` w podgrzewaczu wody, `effect_list` w świetle, `source_list` i `sound_mode_list` w odtwarzaczu mediów, `fan_speed_list` w odkurzaczu i `activity_list` w pilocie. Panel kontrolny alarmu udostępnia swoje tryby przez `alarm_modes`, a gdy tryb wymaga kodu, w menu pojawia się klawiatura do jego wpisania.
 
 > [!TIP]
 > Możesz też mieć podprzyciski typu select, jeśli chcesz, ta funkcja jest dostępna we wszystkich kartach obsługujących podprzyciski.
