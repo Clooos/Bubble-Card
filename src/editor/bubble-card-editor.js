@@ -6,6 +6,7 @@ import {
 } from 'lit';
 import { version } from '../var/version.js';
 import { fireEvent } from '../tools/utils.js';
+import { keepEqualParts, acceptConditions } from './config-identity.js';
 // Custom selector for object fields with dynamic entity-attribute context support
 import '../components/editor/ha-selector-bc_object.js';
 import { renderButtonEditor } from '../cards/button/editor.js';
@@ -91,7 +92,12 @@ class BubbleCardEditor extends LitElement {
         const prevHost = this._previewCardHost || this._previewCardRoot?.host || null;
         const previewStillConnected = !!prevHost?.isConnected;
 
-        this._config = { ...config };
+        // Every part the new config shares with the one already held stays the
+        // object already held. Home Assistant keys the rows of its conditions
+        // editor on those objects, and plugins that wrap this method hand it a
+        // deep copy each time, which had every row built again at each change
+        // (#2657).
+        this._config = { ...keepEqualParts(this._config, config) };
         // The old state keys are rewritten as state_content the first time the
         // editor sees them, and the dashboard is told once, so the config on
         // screen is the one the docs describe. A config left alone keeps
@@ -2052,7 +2058,10 @@ class BubbleCardEditor extends LitElement {
       };
       this._config[array] = arrayCopy;
     } else if (this._config.card_type === 'pop-up') {
-      const conditions = ev.detail.value;
+      const conditions = acceptConditions(this._config.trigger, ev.detail.value);
+      // Nothing to write and nothing to announce, as when Home Assistant adds
+      // again a user who is already ticked.
+      if (conditions === this._config.trigger) return;
       this._config = {
         ...this._config,
         trigger: conditions

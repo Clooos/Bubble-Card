@@ -4,6 +4,7 @@ import { isReadOnlyEntityId } from '../../slider/helpers.js';
 import { makeGenericSliderSettings } from '../../slider/editor.js';
 import { getSelectableAttributes, getSelectListLabel } from '../../dropdown/lists.js';
 import { getLazyLoadedPanelContent, renderDropdown } from '../../../editor/utils.js';
+import { acceptConditions } from '../../../editor/config-identity.js';
 import { loadSubButtonClipboard } from './clipboard.js';
 import setupTranslation from '../../../tools/localize.js';
 
@@ -321,7 +322,10 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
                 <ha-card-conditions-editor
                   .hass=${editor.hass}
                   .conditions=${conditions}
-                  @value-changed=${(ev) => updateValueFn({ visibility: ev.detail.value })}
+                  @value-changed=${(ev) => {
+                    const visibility = acceptConditions(button.visibility, ev.detail.value);
+                    if (visibility !== button.visibility) updateValueFn({ visibility });
+                  }}
                 >
                 </ha-card-conditions-editor>
                 <ha-alert alert-type="info">

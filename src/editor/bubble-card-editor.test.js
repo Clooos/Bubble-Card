@@ -694,3 +694,87 @@ describe('BubbleCardEditor module defaults in the form', () => {
         });
     });
 });
+
+describe('BubbleCardEditor conditions kept the same objects (#2657)', () => {
+    const popUp = () => ({
+        type: 'custom:bubble-card',
+        card_type: 'pop-up',
+        hash: '#kitchen',
+        trigger: [
+            { condition: 'screen', media_query: '(max-width: 767px)' },
+            { condition: 'user', users: ['a'] },
+        ],
+    });
+    const clone = (value) => JSON.parse(JSON.stringify(value));
+    const change = (value) => ({ stopPropagation() {}, detail: { value } });
+
+    beforeEach(() => { jest.clearAllMocks(); });
+
+    test('a config that comes back as a deep copy keeps the conditions already held', () => {
+        const editor = new BubbleCardEditor();
+        editor.setConfig(popUp());
+        const held = editor._config.trigger;
+        editor.setConfig(clone(popUp()));
+        expect(editor._config.trigger).toBe(held);
+        expect(editor._config.trigger[1]).toBe(held[1]);
+    });
+
+    test('the config held is never the frozen object Home Assistant passed', () => {
+        const editor = new BubbleCardEditor();
+        const config = Object.freeze(popUp());
+        editor.setConfig(config);
+        editor.setConfig(config);
+        expect(editor._config).not.toBe(config);
+        expect(Object.isFrozen(editor._config)).toBe(false);
+    });
+
+    test('a changed part is taken, the parts around it stay', () => {
+        const editor = new BubbleCardEditor();
+        editor.setConfig(popUp());
+        const held = editor._config.trigger;
+        const next = clone(popUp()); next.trigger[1].users = ['a', 'b']; next.hash = '#living';
+        editor.setConfig(next);
+        expect(editor._config.hash).toBe('#living');
+        expect(editor._config.trigger[0]).toBe(held[0]);
+        expect(editor._config.trigger[1].users).toEqual(['a', 'b']);
+    });
+
+    test('the user Home Assistant adds again on its own is neither written nor announced', () => {
+        const editor = new BubbleCardEditor();
+        editor.requestUpdate = jest.fn();
+        editor.setConfig(popUp());
+        const held = editor._config.trigger;
+        editor._conditionChanged(change([held[0], { ...held[1], users: ['a', 'a'] }]));
+        expect(editor._config.trigger).toBe(held);
+        expect(fireEvent).not.toHaveBeenCalled();
+    });
+
+    test('a user really ticked is written and announced', () => {
+        const editor = new BubbleCardEditor();
+        editor.requestUpdate = jest.fn();
+        editor.setConfig(popUp());
+        const held = editor._config.trigger;
+        const ticked = { ...held[1], users: ['a', 'b'] };
+        editor._conditionChanged(change([held[0], ticked]));
+        expect(editor._config.trigger[1]).toBe(ticked);
+        expect(editor._config.trigger[0]).toBe(held[0]);
+        expect(fireEvent).toHaveBeenCalledTimes(1);
+    });
+
+    test('the whole round, with a plugin that copies the config, settles at once', () => {
+        const editor = new BubbleCardEditor();
+        editor.requestUpdate = jest.fn();
+        editor.setConfig(clone(popUp()));
+        const held = editor._config.trigger;
+        // Home Assistant builds the row, adds the ticked user again, and would be
+        // handed a copy back if the change were announced.
+        for (let round = 0; round < 5; round++) {
+            editor._conditionChanged(change([editor._config.trigger[0], { ...editor._config.trigger[1], users: [...editor._config.trigger[1].users, 'a'] }]));
+            editor.setConfig(clone(editor._config));
+        }
+        expect(editor._config.trigger).toBe(held);
+        expect(editor._config.trigger[1].users).toEqual(['a']);
+        expect(fireEvent).not.toHaveBeenCalled();
+    });
+});
+
