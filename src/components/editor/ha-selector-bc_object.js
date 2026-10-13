@@ -657,7 +657,11 @@ export class HaBcObjectSelector extends LitElement {
     }
     this._uiState = { ...(this._uiState || {}) };
     this._uiState[index] = { ...(this._uiState[index] || {}), ...ui };
-    this.requestUpdate();
+    // Re-render only for UI-only keys. A re-render here would pass the stale
+    // this.value down before the parent sends the new one: a YAML field
+    // then gets old and new text in turn, each fires a change, and the
+    // browser locks up.
+    if (Object.keys(ui).length) this.requestUpdate();
 
     if (isMultiple) {
       const newValue = [...(this.value || [])];
