@@ -19,6 +19,8 @@ test('event-list notification refreshes even when calendar state is unchanged', 
   expect(changeEventList).toHaveBeenCalledTimes(1);
   expect(context._hass.connection.subscribeMessage).toHaveBeenCalledTimes(1);
   await notify({ events: [] }); await flush();
+  expect(changeEventList).toHaveBeenCalledTimes(1);
+  await notify({ events: [{ uid: 'later' }] }); await flush();
   expect(changeEventList).toHaveBeenCalledTimes(2);
   expect(changeEvents).toHaveBeenCalledTimes(2);
 });
