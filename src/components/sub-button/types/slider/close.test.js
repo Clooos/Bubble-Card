@@ -12,7 +12,7 @@ jest.unstable_mockModule('../../utils.js', () => ({
     updateElementVisibility: jest.fn(), applySubButtonScrollingEffect: jest.fn(),
 }));
 
-const { ensureSliderForSubButton } = await import('./index.js');
+const { ensureSliderForSubButton, showSubSlider } = await import('./index.js');
 
 class Element {
     constructor() {
@@ -106,5 +106,34 @@ describe('sub-slider close button', () => {
         button.sliderCloseBtn.dispatch(click);
         expect(click.preventDefault).toHaveBeenCalledTimes(1);
         expect(button.sliderOpen).toBe(false);
+    });
+});
+
+// A sub-slider used to keep a click listener of its own on the document for the
+// life of the page, which held its card, and with it every card Home Assistant
+// threw away each time it rebuilt the dashboard.
+describe('sub-slider and the document', () => {
+    beforeEach(() => { global.document = { addEventListener: jest.fn(), removeEventListener: jest.fn() }; });
+    afterEach(() => { delete global.document; });
+
+    test('a closed sub-slider keeps nothing on the document', () => {
+        fixture();
+        expect(document.addEventListener).not.toHaveBeenCalled();
+    });
+
+    test('a slider left open on a card that is gone lets go of the document without swallowing the press', () => {
+        const { button, context } = fixture();
+        showSubSlider(context, button);
+        const [type, handler, capture] = document.addEventListener.mock.calls[0];
+        expect(capture).toBe(true);
+
+        button.isConnected = false;
+        const down = event(type, 'mouse');
+        handler(down);
+
+        expect(down.preventDefault).not.toHaveBeenCalled();
+        expect(down.stopped).toBe(false);
+        expect(button.sliderOpen).toBe(false);
+        expect(document.removeEventListener).toHaveBeenCalledWith(type, handler, true);
     });
 });
