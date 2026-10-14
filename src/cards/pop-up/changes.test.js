@@ -703,3 +703,74 @@ describe('changeEditor', () => {
         expect(addHash).toHaveBeenCalledWith('#kitchen-popup');
     });
 });
+// Back from a cut connection, Home Assistant builds every card anew. The new
+// card must carry on from what the old one saw, not take it for a page load.
+describe('a trigger after Home Assistant builds its cards anew', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        validateConditionalConfig.mockReturnValue(true);
+        global.location = {
+            hash: '',
+            pathname: '/lovelace/test',
+        };
+    });
+
+    const card = (config, extra = {}) => ({
+        config: { trigger_close: true, ...config },
+        _hass: { states: {} },
+        hasPageLoaded: false,
+        ...extra,
+    });
+
+    test('closes a pop-up its trigger opened when the trigger went off while away', () => {
+        const config = { hash: '#rebuilt-camera', trigger: { entity: 'binary_sensor.camera', state: 'on' } };
+
+        checkConditionsMet.mockReturnValue(false);
+        changeTriggered(card(config));
+        checkConditionsMet.mockReturnValue(true);
+        const old = card(config);
+        old.hasPageLoaded = true;
+        old.previousTrigger = false;
+        changeTriggered(old);
+        expect(addHash).toHaveBeenCalledWith('#rebuilt-camera');
+        global.location.hash = '#rebuilt-camera';
+
+        checkConditionsMet.mockReturnValue(false);
+        changeTriggered(card(config));
+
+        expect(removeHash).toHaveBeenCalledWith();
+    });
+
+    test('leaves open a pop-up opened by hand while its trigger was off', () => {
+        const config = { hash: '#rebuilt-manual', trigger: { entity: 'binary_sensor.camera', state: 'on' } };
+
+        checkConditionsMet.mockReturnValue(false);
+        changeTriggered(card(config));
+        global.location.hash = '#rebuilt-manual';
+
+        changeTriggered(card(config));
+
+        expect(removeHash).not.toHaveBeenCalled();
+        expect(addHash).not.toHaveBeenCalled();
+    });
+
+    test('does the same for a pop-up with an entity trigger', () => {
+        const config = { hash: '#rebuilt-entity', trigger_entity: 'binary_sensor.door', trigger_state: 'on' };
+
+        changeTriggered(card(config, { _hass: { states: { 'binary_sensor.door': { state: 'on' } } } }));
+        global.location.hash = '#rebuilt-entity';
+
+        changeTriggered(card(config, { _hass: { states: { 'binary_sensor.door': { state: 'off' } } } }));
+
+        expect(removeHash).toHaveBeenCalledWith();
+    });
+
+    test('a page load still keeps a pop-up open from its hash', () => {
+        checkConditionsMet.mockReturnValue(false);
+        global.location.hash = '#loaded-with-hash';
+
+        changeTriggered(card({ hash: '#loaded-with-hash', trigger: { entity: 'binary_sensor.camera', state: 'on' } }));
+
+        expect(removeHash).not.toHaveBeenCalled();
+    });
+});

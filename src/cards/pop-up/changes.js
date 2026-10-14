@@ -178,6 +178,36 @@ function markTriggerEvaluation(context) {
     return isInitialLoad;
 }
 
+// What the trigger of each pop-up saw last, by hash, for the life of the page.
+// Back from a cut connection (a tablet that slept, a page hidden for a while,
+// a restart), Home Assistant builds every card anew. The new card took its
+// first look for a page load, where an open pop-up is never closed, so a
+// pop-up its trigger had opened stayed open although the trigger had gone off
+// in the meantime. A rebuilt card now picks up where the old one stopped.
+const lastTriggerByHash = new Map();
+
+function recallTrigger(context) {
+    const hash = context.config.hash;
+    if (context.hasPageLoaded || !hash) return;
+
+    const last = lastTriggerByHash.get(hash);
+    if (!last) return;
+
+    context.hasPageLoaded = true;
+    context.previousTrigger = last.previousTrigger;
+    context.oldTriggerEntityState = last.oldTriggerEntityState;
+}
+
+function rememberTrigger(context) {
+    const hash = context.config.hash;
+    if (!hash) return;
+
+    lastTriggerByHash.set(hash, {
+        previousTrigger: context.previousTrigger,
+        oldTriggerEntityState: context.oldTriggerEntityState,
+    });
+}
+
 function syncTriggeredPopupHash(context, trigger, triggerClose, isInitialLoad) {
     if (context.config.hash === location.hash) {
         if (!trigger && triggerClose && !isInitialLoad) {
@@ -197,6 +227,7 @@ function getLegacyTriggerEvaluation(context) {
     const triggerState = context.config.trigger_state ?? '';
     if (!triggerEntity || !triggerState) return null;
 
+    recallTrigger(context);
     const entityState = context._hass.states[triggerEntity]?.state;
     if (context.oldTriggerEntityState === entityState) return null;
 
@@ -217,6 +248,7 @@ export function changeTriggered(context) {
         }
 
         if (preparedTriggerConditions.isValid) {
+            recallTrigger(context);
             const trigger = checkConditionsMet(preparedTriggerConditions.conditions, context._hass, context);
             if (trigger === context.previousTrigger) return;
 
@@ -227,6 +259,7 @@ export function changeTriggered(context) {
                 markTriggerEvaluation(context),
             );
             context.previousTrigger = trigger;
+            rememberTrigger(context);
         }
         return;
     }
@@ -241,5 +274,6 @@ export function changeTriggered(context) {
         markTriggerEvaluation(context),
     );
     context.oldTriggerEntityState = legacyTrigger.entityState;
+    rememberTrigger(context);
 }
 
