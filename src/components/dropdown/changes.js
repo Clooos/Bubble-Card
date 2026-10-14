@@ -5,6 +5,7 @@ import {
     isNewHaFrontend
   } from "./helpers.js";
 import { getSelectOptions } from "./lists.js";
+import { createHaElement } from "../../tools/ha-element.js";
 
 export function changeDropdownList(context, elements = context.elements, entity = context.config.entity, config) {
     elements.currentState = context._hass.states[entity]?.state;
@@ -63,7 +64,7 @@ export function changeDropdownList(context, elements = context.elements, entity 
     // Check if options is an array before iterating
     if (Array.isArray(options)) {
       options.forEach((option) => {
-          const opt = document.createElement(itemTag);
+          const opt = createHaElement(itemTag);
           opt.value = option;
           if (newHa) {
             // Store value in a plain attribute for reliable comparison regardless of webawesome internals

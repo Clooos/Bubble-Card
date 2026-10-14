@@ -100,9 +100,20 @@ function installMigrationNoticeHarness() {
         value: {
             body,
             createElement: jest.fn((tagName) => {
+                // The buttons of Home Assistant are made from a template (#2663),
+                // the template only has to say which tag it holds.
+                if (tagName === 'template') {
+                    const content = {};
+                    return { content, set innerHTML(markup) { content.tag = /<([a-z0-9-]+)/.exec(markup)?.[1]; } };
+                }
                 const element = createFakeElement(tagName);
                 createdElements.push(element);
                 return element;
+            }),
+            importNode: jest.fn((content) => {
+                const element = createFakeElement(content.tag);
+                createdElements.push(element);
+                return { firstElementChild: element };
             }),
         },
     });

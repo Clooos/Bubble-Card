@@ -5,6 +5,7 @@ import { getCurrentViewPopUps, normalizePopUpHash } from './view-popups.js';
 import setupTranslation from '../../tools/localize.js';
 import { escapeHtml } from '../../tools/jinja.js';
 import { getCurrentLovelaceViewPath, getCurrentView } from '../../tools/lovelace-view.js';
+import { createHaElement } from '../../tools/ha-element.js';
 
 export { getCurrentLovelaceViewPath, getCurrentView };
 
@@ -851,7 +852,7 @@ function _show() {
     const footer = document.createElement('ha-dialog-footer');
     footer.setAttribute('slot', 'footer');
 
-    const dismissBtn = document.createElement('ha-button');
+    const dismissBtn = createHaElement('ha-button');
     dismissBtn.textContent = t('editor.migration.notice_dismiss');
     dismissBtn.setAttribute('data-dialog', 'close');
     dismissBtn.setAttribute('slot', 'secondaryAction');
@@ -871,7 +872,7 @@ function _show() {
     dismissBtn.addEventListener('click', dismissNotice);
     footer.appendChild(dismissBtn);
 
-    const remindBtn = document.createElement('ha-button');
+    const remindBtn = createHaElement('ha-button');
     remindBtn.textContent = t('editor.migration.notice_remind');
     remindBtn.setAttribute('data-dialog', 'close');
     remindBtn.setAttribute('slot', 'primaryAction');
