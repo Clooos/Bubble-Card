@@ -657,19 +657,20 @@ export class HaBcObjectSelector extends LitElement {
     }
     this._uiState = { ...(this._uiState || {}) };
     this._uiState[index] = { ...(this._uiState[index] || {}), ...ui };
-    // Re-render only for UI-only keys. A re-render here would pass the stale
-    // this.value down before the parent sends the new one: a YAML field
-    // then gets old and new text in turn, each fires a change, and the
-    // browser locks up.
-    if (Object.keys(ui).length) this.requestUpdate();
 
+    let newValue = clean;
     if (isMultiple) {
-      const newValue = [...(this.value || [])];
+      newValue = [...(this.value || [])];
       newValue[index] = clean;
-      fireEvent(this, "value-changed", { value: newValue });
-    } else {
-      fireEvent(this, "value-changed", { value: clean });
     }
+    // The selector keeps the value it sends up and draws with it, before the
+    // parent hands it back. Drawn with the old value in between, a YAML field
+    // got the old text and the new one in turn, each fired a change, and the
+    // tab froze. Holding back the redraw was not enough, since anything else
+    // may redraw in that gap, and every item carries __card_entity anyway
+    // (#2661).
+    this.value = newValue;
+    fireEvent(this, "value-changed", { value: newValue });
   }
 
   static styles = css`

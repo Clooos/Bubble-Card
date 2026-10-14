@@ -88,3 +88,42 @@ describe('bc_object synthetic-key round trip', () => {
         expect(fireEvent).toHaveBeenLastCalledWith(el, 'value-changed', { value: [{ from: 0, flag: false }] });
     });
 });
+
+// #2661, typing in a YAML field of an item froze the tab. The selector drew the
+// item again with the value it held before the parent answered, the YAML field
+// took the old text back and sent it, and old and new took turns for ever.
+describe('bc_object keeps the value it has just sent', () => {
+    const fields = {
+        name: { selector: { text: {} } },
+        map: { selector: { object: {} } },
+    };
+
+    test('a list holds the new item at once, before the parent hands it back', () => {
+        const el = makeSelector({ fields, value: [{ name: 'a', map: { a: 1 } }, { name: 'b' }] });
+        const second = el.value[1];
+
+        el._itemChanged(ev({ name: 'a', map: { a: 1, b: 2 }, __card_entity: undefined }), 0);
+
+        expect(el.value[0]).toEqual({ name: 'a', map: { a: 1, b: 2 } });
+        expect(el.value[1]).toBe(second);
+        expect(fireEvent).toHaveBeenLastCalledWith(el, 'value-changed', { value: el.value });
+    });
+
+    test('a single object holds its new value too, without the keys of the interface', () => {
+        const el = makeSelector({ fields, value: { name: 'a', map: { a: 1 } }, multiple: false });
+
+        el._itemChanged(ev({ name: 'a', map: { a: 2 }, __card_entity: 'light.kitchen' }), 0);
+
+        expect(el.value).toEqual({ name: 'a', map: { a: 2 } });
+        expect(fireEvent).toHaveBeenLastCalledWith(el, 'value-changed', { value: el.value });
+    });
+
+    test('a redraw before the parent answers hands the item form the new text', () => {
+        const el = makeSelector({ fields, value: [{ name: 'a', map: { a: 1 } }] });
+
+        el._itemChanged(ev({ ...el._itemFormData(el.value[0], 0), map: { a: 1, b: 2 } }), 0);
+
+        expect(el._itemFormData(el.value[0], 0).map).toEqual({ a: 1, b: 2 });
+    });
+});
+
