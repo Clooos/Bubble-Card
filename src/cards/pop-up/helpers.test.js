@@ -3015,6 +3015,41 @@ describe('standalone popup lifecycle', () => {
         expect(hideBackdrop).toHaveBeenCalledTimes(1);
     });
 
+    // Back from a long time in the background, Home Assistant fetches the
+    // dashboard again and builds every card anew. The new pop-up opens on the
+    // hash still in the URL before the old card's teardown, which waits one
+    // task since #2589, and that teardown hid the backdrop the new one holds.
+    test('leaves the backdrop and the scroll lock to a rebuilt pop-up that already opened', () => {
+        const old = createStandaloneContext({ hash: '#rebuilt' });
+        usedContexts.push(old);
+        registerPopupContext(old);
+        openPopup(old, true);
+        flushRafQueue();
+
+        const rebuilt = createStandaloneContext({ hash: '#rebuilt' });
+        usedContexts.push(rebuilt);
+        registerPopupContext(rebuilt);
+        openPopup(rebuilt, true);
+        flushRafQueue();
+
+        expect(old.popUp.classList.contains('is-popup-opened')).toBe(true);
+        expect(rebuilt.popUp.classList.contains('is-popup-opened')).toBe(true);
+
+        jest.clearAllMocks();
+        old.isConnected = false;
+        cleanupPopupRuntime(old);
+
+        expect(hideBackdrop).not.toHaveBeenCalled();
+        expect(toggleBodyScroll).not.toHaveBeenCalledWith(false);
+
+        // Once the rebuilt pop-up goes too, nothing holds them anymore.
+        rebuilt.isConnected = false;
+        cleanupPopupRuntime(rebuilt);
+
+        expect(hideBackdrop).toHaveBeenCalled();
+        expect(toggleBodyScroll).toHaveBeenCalledWith(false);
+    });
+
     test('opens popup on second tap from a third-party card when globalLastKnownHash is stale', () => {
         // Regression: #2386 — ring-tile-card (or any third-party) uses HA navigate() which calls
         // history.pushState() and fires a bare `location-changed` (no event.detail).

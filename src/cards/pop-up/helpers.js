@@ -3180,8 +3180,16 @@ export function cleanupPopupRuntime(context) {
     // reference to this context and must not outlive it.
     invalidateWakeSyncCache();
 
+    // The backdrop and the page scroll lock are shared by every pop-up. When
+    // Home Assistant fetches the dashboard again, back from a long time in the
+    // background, it builds every card anew and the new pop-up opens on the
+    // hash still in the URL. This card's teardown waits one task since #2589,
+    // so it comes after that open and must leave the backdrop and the lock to
+    // the pop-up that holds them now.
+    const anotherPopupOpen = popupState.activePopups.size > 0;
+
     try {
-        if (visuallyOpen) {
+        if (visuallyOpen && !anotherPopupOpen) {
             toggleBackdrop(context, false);
         }
     } catch (_) {}
@@ -3195,5 +3203,7 @@ export function cleanupPopupRuntime(context) {
         hideExistingBackdrop();
     }
 
-    toggleBodyScroll(false);
+    if (!anotherPopupOpen) {
+        toggleBodyScroll(false);
+    }
 }
