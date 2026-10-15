@@ -107,6 +107,35 @@ export function getClimateColor(context) {
     return overlayColor;
 }
 
+// A tap writes what the user asked for straight to the display and only asks the
+// thermostat for it once the tapping stops. The two disagree until the device
+// answers, and every state update in between still carries the old target, so
+// writing those to the display walked the value backwards by itself after the
+// user had finished (#2615). What was asked for stands until the thermostat
+// reports it — or until it has had long enough to, since a device that clamps
+// what it was asked for would otherwise hold the display on a value it never took.
+const TARGET_CONFIRMATION_GRACE = 5000;
+
+export function markTargetPending(context, attribute, value) {
+    context._pendingClimateTargets = context._pendingClimateTargets ?? {};
+    context._pendingClimateTargets[attribute] = { value, until: Date.now() + TARGET_CONFIRMATION_GRACE };
+}
+
+// Answering also settles it: called with what the entity reports, a match means
+// the thermostat caught up and the display can follow it again.
+export function isTargetPending(context, attribute, reported) {
+    const pending = context._pendingClimateTargets?.[attribute];
+    if (!pending) return false;
+
+    const confirmed = reported !== undefined && Number(reported) === pending.value;
+    if (confirmed || Date.now() > pending.until) {
+        delete context._pendingClimateTargets[attribute];
+        return false;
+    }
+
+    return true;
+}
+
 // Half a degree is a sensible smallest move on a Celsius thermostat and a whole
 // one everywhere else; a humidity is always whole percents.
 export function getDefaultStep(context) {
