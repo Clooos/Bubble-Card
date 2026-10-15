@@ -1,5 +1,5 @@
-import { describe, expect, test } from '@jest/globals';
-import { ALARM_MODES, getAlarmModes, hasNumericAlarmCode, isAlarmPanel, needsAlarmCode } from './alarm.js';
+import { describe, expect, test, jest } from '@jest/globals';
+import { ALARM_MODES, formatAlarmMode, getAlarmModes, hasNumericAlarmCode, isAlarmPanel, needsAlarmCode } from './alarm.js';
 
 const panel = (attributes = {}, state = 'disarmed') => ({ state, attributes });
 
@@ -63,5 +63,57 @@ describe('when a code has to be typed', () => {
         expect(hasNumericAlarmCode(panel({ code_format: 'number' }))).toBe(true);
         expect(hasNumericAlarmCode(panel({ code_format: 'text' }))).toBe(false);
         expect(hasNumericAlarmCode(panel({}))).toBe(false);
+    });
+});
+
+describe('formatAlarmMode', () => {
+    test('localizes alarm modes using ui.card.alarm_control_panel.modes.*', () => {
+        const hass = {
+            localize: jest.fn((key) => {
+                const map = {
+                    'ui.card.alarm_control_panel.modes.armed_away': 'Away',
+                    'ui.card.alarm_control_panel.modes.armed_home': 'Home',
+                    'ui.card.alarm_control_panel.modes.disarmed': 'Disarmed',
+                    'ui.card.alarm_control_panel.modes.arming': 'Arming',
+                };
+                return map[key];
+            }),
+        };
+
+        expect(formatAlarmMode(hass, { state: 'armed_away' })).toBe('Away');
+        expect(formatAlarmMode(hass, { state: 'armed_home' })).toBe('Home');
+        expect(formatAlarmMode(hass, { state: 'disarmed' })).toBe('Disarmed');
+        expect(formatAlarmMode(hass, { state: 'arming' })).toBe('Arming');
+        expect(formatAlarmMode(hass, null, 'armed_away')).toBe('Away');
+    });
+
+    test('falls back to formatEntityState when localized mode is missing', () => {
+        const hass = {
+            formatEntityState: jest.fn((state) => 'Armed Away Custom'),
+        };
+
+        expect(formatAlarmMode(hass, { state: 'armed_away' })).toBe('Armed Away Custom');
+    });
+
+    test('falls back to ALARM_MODE_LABELS when formatEntityState returns raw snake_case', () => {
+        const hass = {
+            formatEntityState: jest.fn((state, mode) => mode || state?.state),
+        };
+
+        expect(formatAlarmMode(hass, { state: 'armed_away' })).toBe('Away');
+        expect(formatAlarmMode(hass, { state: 'armed_home' })).toBe('Home');
+    });
+
+    test('formats unknown raw underscore mode to Title Case when missing in dictionary', () => {
+        const hass = {
+            formatEntityState: jest.fn((state) => 'some_custom_mode'),
+        };
+
+        expect(formatAlarmMode(hass, { state: 'some_custom_mode' })).toBe('Some custom mode');
+    });
+
+    test('handles missing hass or empty state gracefully', () => {
+        expect(formatAlarmMode(null, null)).toBe('');
+        expect(formatAlarmMode({}, { state: 'armed_away' })).toBe('Away');
     });
 });

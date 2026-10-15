@@ -82,6 +82,7 @@ export function changeState(context, force = false) {
         previousConfig.contentKey !== contentKey ||
         previousConfig.templateVersion !== templateVersion ||
         previousConfig.scrollingEffect !== scrollingEffect ||
+        previousConfig.alarmCountdown !== context._alarmCountdown ||
         stateLineFormattingChanged(previousConfig.formatting, context._hass, entity)
     );
 
@@ -167,6 +168,7 @@ export function changeState(context, force = false) {
         contentKey,
         templateVersion,
         scrollingEffect,
+        alarmCountdown: context._alarmCountdown,
         formatting: stateLineFormatting(context._hass, entity),
     };
 }

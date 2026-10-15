@@ -584,3 +584,124 @@ describe('BubbleCard calendar lifecycle wiring', () => {
         });
     }
 });
+
+describe('BubbleCard alarm countdown lifecycle wiring', () => {
+    let setIntervalSpy;
+    let clearIntervalSpy;
+
+    beforeEach(() => {
+        jest.useFakeTimers();
+        setIntervalSpy = jest.spyOn(window, 'setInterval');
+        clearIntervalSpy = jest.spyOn(window, 'clearInterval');
+    });
+
+    afterEach(() => {
+        setIntervalSpy.mockRestore();
+        clearIntervalSpy.mockRestore();
+        jest.useRealTimers();
+    });
+
+    test('starts the interval in updated() when state is arming or pending', () => {
+        const card = createCard({ card_type: 'select', entity: 'alarm_control_panel.home' });
+        card.isConnected = true;
+        const now = 1700000000000;
+        jest.spyOn(Date, 'now').mockReturnValue(now);
+
+        card._hass = {
+            states: {
+                'alarm_control_panel.home': {
+                    state: 'arming',
+                    attributes: { delay: 30 },
+                    last_changed: new Date(now - 5000).toISOString(),
+                },
+            },
+        };
+
+        card.updated(new Map());
+
+        expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+        expect(card._alarmCountdown).toBe(25);
+        expect(card._alarmInterval).not.toBeNull();
+    });
+
+    test('clears the interval via window.clearInterval when state changes to another state', () => {
+        const card = createCard({ card_type: 'select', entity: 'alarm_control_panel.home' });
+        card.isConnected = true;
+        card._hass = {
+            states: {
+                'alarm_control_panel.home': {
+                    state: 'arming',
+                    attributes: { delay: 30 },
+                    last_changed: new Date().toISOString(),
+                },
+            },
+        };
+
+        card.updated(new Map());
+        expect(card._alarmInterval).not.toBeNull();
+
+        card._hass.states['alarm_control_panel.home'].state = 'disarmed';
+        card.updated(new Map());
+
+        expect(clearIntervalSpy).toHaveBeenCalled();
+        expect(card._alarmInterval).toBeNull();
+        expect(card._alarmCountdown).toBeNull();
+    });
+
+    test('clears the interval via window.clearInterval when countdown reaches 0', () => {
+        const card = createCard({ card_type: 'select', entity: 'alarm_control_panel.home' });
+        card.isConnected = true;
+        let now = 1700000000000;
+        const dateSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
+
+        card._hass = {
+            states: {
+                'alarm_control_panel.home': {
+                    state: 'arming',
+                    attributes: { delay: 10 },
+                    last_changed: new Date(now - 8000).toISOString(),
+                },
+            },
+        };
+
+        card.updated(new Map());
+        expect(card._alarmCountdown).toBe(2);
+
+        now += 1000;
+        jest.advanceTimersByTime(1000);
+        expect(card._alarmCountdown).toBe(1);
+
+        now += 1000;
+        jest.advanceTimersByTime(1000);
+
+        expect(clearIntervalSpy).toHaveBeenCalled();
+        expect(card._alarmInterval).toBeNull();
+        expect(card._alarmCountdown).toBeNull();
+
+        dateSpy.mockRestore();
+    });
+
+    test('clears the interval via window.clearInterval in disconnectedCallback()', () => {
+        const card = createCard({ card_type: 'select', entity: 'alarm_control_panel.home' });
+        card.isConnected = true;
+        card._hass = {
+            states: {
+                'alarm_control_panel.home': {
+                    state: 'pending',
+                    attributes: { delay: 30 },
+                    last_changed: new Date().toISOString(),
+                },
+            },
+        };
+
+        card.updated(new Map());
+        expect(card._alarmInterval).not.toBeNull();
+
+        card.disconnectedCallback();
+
+        expect(clearIntervalSpy).toHaveBeenCalled();
+        expect(card._alarmInterval).toBeNull();
+        expect(card._alarmCountdown).toBeNull();
+    });
+});
+

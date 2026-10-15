@@ -36,3 +36,30 @@ export function needsAlarmCode(state, mode) {
 export function hasNumericAlarmCode(state) {
     return state?.attributes?.code_format === 'number';
 }
+
+export const ALARM_MODE_LABELS = {
+    armed_home: 'Home',
+    armed_away: 'Away',
+    armed_night: 'Night',
+    armed_vacation: 'Vacation',
+    armed_custom_bypass: 'Custom Bypass',
+    disarmed: 'Disarmed',
+    arming: 'Arming',
+    pending: 'Pending',
+    triggered: 'Triggered',
+};
+
+export function formatAlarmMode(hass, state, mode = state?.state) {
+    const rawMode = typeof mode === 'string' ? mode : (state?.state || '');
+    if (!rawMode) return '';
+    const localized = hass?.localize?.(`ui.card.alarm_control_panel.modes.${rawMode}`)
+        || hass?.localize?.(`component.alarm_control_panel.entity_component._.state.${rawMode}`)
+        || hass?.localize?.(`ui.card.alarm_control_panel.${rawMode}`);
+    if (localized) return localized;
+    const formatted = typeof hass?.formatEntityState === 'function' ? hass.formatEntityState(state, rawMode) : null;
+    if (formatted && formatted !== rawMode) return formatted;
+    if (ALARM_MODE_LABELS[rawMode]) return ALARM_MODE_LABELS[rawMode];
+    const cleaned = rawMode.replace(/_/g, ' ');
+    return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
