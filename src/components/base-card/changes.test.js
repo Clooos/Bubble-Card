@@ -535,3 +535,84 @@ describe('a state line written before Home Assistant could format it (#2572)', (
         expect(applyScrollingEffect.mock.calls.length).toBe(writes);
     });
 });
+
+describe('alarm_control_panel state formatting', () => {
+    test('renders localized mode (e.g. Away) instead of raw state (e.g. armed_away)', () => {
+        const context = createRelativeCardContext(90, { entity: 'alarm_control_panel.alarmo', show_state: true });
+        context._hass.states = {
+            'alarm_control_panel.alarmo': {
+                state: 'armed_away',
+                attributes: {},
+            },
+        };
+        context._hass.localize = jest.fn((key) => {
+            if (key === 'ui.card.alarm_control_panel.modes.armed_away') return 'Away';
+            return undefined;
+        });
+
+        changeState(context);
+        expect(displayedText()).toBe('Away');
+    });
+
+    test('renders countdown when arming or pending with active countdown', () => {
+        const context = createRelativeCardContext(90, { entity: 'alarm_control_panel.alarmo', show_state: true });
+        context._alarmCountdown = 25;
+        context._hass.states = {
+            'alarm_control_panel.alarmo': {
+                state: 'arming',
+                attributes: { delay: 30 },
+            },
+        };
+        context._hass.localize = jest.fn((key) => {
+            if (key === 'ui.card.alarm_control_panel.modes.arming') return 'Arming';
+            return undefined;
+        });
+
+        changeState(context);
+        expect(displayedText()).toBe('Arming (25s)');
+    });
+
+    test('formats arm_mode attribute nicely when state_content is set to arm_mode', () => {
+        const context = createRelativeCardContext(90, { entity: 'alarm_control_panel.alarmo', state_content: ['arm_mode'] });
+        context._hass.states = {
+            'alarm_control_panel.alarmo': {
+                state: 'armed_away',
+                attributes: { arm_mode: 'armed_away' },
+            },
+        };
+        context._hass.localize = jest.fn((key) => {
+            if (key === 'ui.card.alarm_control_panel.modes.armed_away') return 'Away';
+            return undefined;
+        });
+
+        changeState(context);
+        expect(displayedText()).toBe('Away');
+
+        context._hass.states['alarm_control_panel.alarmo'].attributes.arm_mode = 'armed_home';
+        context.previousState = null;
+        context._hass.localize = jest.fn((key) => {
+            if (key === 'ui.card.alarm_control_panel.modes.armed_home') return 'Home';
+            return undefined;
+        });
+        changeState(context, true);
+        expect(displayedText()).toBe('Home');
+    });
+
+    test('displays countdown when state_content is set to arm_mode during arming', () => {
+        const context = createRelativeCardContext(90, { entity: 'alarm_control_panel.alarmo', state_content: ['arm_mode'] });
+        context._alarmCountdown = 20;
+        context._hass.states = {
+            'alarm_control_panel.alarmo': {
+                state: 'arming',
+                attributes: { arm_mode: 'armed_away', delay: 30 },
+            },
+        };
+        context._hass.localize = jest.fn((key) => {
+            if (key === 'ui.card.alarm_control_panel.modes.arming') return 'Arming';
+            return undefined;
+        });
+
+        changeState(context);
+        expect(displayedText()).toBe('Arming (20s)');
+    });
+});

@@ -34,6 +34,16 @@ import { handleCalendar } from './cards/calendar/index.js';
 import { handleMediaPlayer } from './cards/media-player/index.js';
 import { handleSelect } from './cards/select/index.js';
 import { handleClimate } from './cards/climate/index.js';
+import { isAlarmPanel } from './components/dropdown/alarm.js';
+
+if (typeof window !== 'undefined') {
+  if (!window.setInterval && typeof setInterval !== 'undefined') {
+    window.setInterval = (...args) => globalThis.setInterval(...args);
+  }
+  if (!window.clearInterval && typeof clearInterval !== 'undefined') {
+    window.clearInterval = (...args) => globalThis.clearInterval(...args);
+  }
+}
 
 let _lastSeenThemes = null;
 
@@ -122,6 +132,8 @@ function settlePopUpShellAfterMove(context) {
 class BubbleCard extends HTMLElement {
   editor = false;
   isConnected = false;
+  _alarmCountdown = null;
+  _alarmInterval = null;
   // Home Assistant hands `hass` to an element it has not attached yet, so a
   // pop-up — the one card type that keeps rendering while detached — would
   // otherwise run its handler before anything knows where it is going to land.
@@ -198,6 +210,11 @@ class BubbleCard extends HTMLElement {
   }
 
   disconnectedCallback() {
+    if (this._alarmInterval) {
+      window.clearInterval(this._alarmInterval);
+      this._alarmInterval = null;
+    }
+    this._alarmCountdown = null;
     cleanupCalendarSubscriptions(this);
     this.isConnected = false;
     connectedCards.delete(this);
@@ -480,6 +497,7 @@ class BubbleCard extends HTMLElement {
     // tick is compared against.
     try { noteRender(this); } catch (e) {}
     try { this._notifyEditorContext(); } catch (e) {}
+    try { this.updated(new Map()); } catch (e) {}
     // A preview that drew tells the gate what its card type really measures, so
     // the previews still waiting below the fold reserve the right box, and
     // states the hash it answers to or navigates to, which is what makes a
@@ -613,6 +631,102 @@ class BubbleCard extends HTMLElement {
     } catch (_) {
       /* no-op */
     }
+  }
+
+  updated(changedProperties = new Map()) {
+    const entityId = this.config?.entity;
+    const isAlarm = isAlarmPanel(entityId);
+    const entity = this._hass?.states?.[entityId];
+    const state = entity?.state;
+
+    if (isAlarm && (state === 'arming' || state === 'pending')) {
+      const delay = (entity?.attributes?.delay !== undefined && entity?.attributes?.delay !== null && !isNaN(Number(entity?.attributes?.delay)))
+        ? Number(entity.attributes.delay)
+        : 30;
+      const lastChanged = entity?.last_changed;
+      const startTime = lastChanged && !isNaN(new Date(lastChanged).getTime()) ? new Date(lastChanged).getTime() : Date.now();
+      const remaining = Math.max(0, delay - Math.floor((Date.now() - startTime) / 1000));
+
+      if (remaining <= 0) {
+        if (this._alarmInterval) {
+          window.clearInterval(this._alarmInterval);
+          this._alarmInterval = null;
+        }
+        if (this._alarmCountdown !== null) {
+          this._alarmCountdown = null;
+          this.updateBubbleCard();
+        }
+        return;
+      }
+
+      this._alarmCountdown = remaining;
+
+      if (!this._alarmInterval) {
+        this._alarmInterval = window.setInterval(() => {
+          this._updateAlarmCountdown();
+        }, 1000);
+      }
+    } else {
+      if (this._alarmInterval) {
+        window.clearInterval(this._alarmInterval);
+        this._alarmInterval = null;
+      }
+      if (this._alarmCountdown !== null) {
+        this._alarmCountdown = null;
+        this.updateBubbleCard();
+      }
+    }
+  }
+
+  _updateAlarmCountdown() {
+    if (this.isConnected === false && !this._everConnected) {
+      if (this._alarmInterval) {
+        window.clearInterval(this._alarmInterval);
+        this._alarmInterval = null;
+      }
+      return;
+    }
+
+    const entityId = this.config?.entity;
+    const isAlarm = isAlarmPanel(entityId);
+    const entity = this._hass?.states?.[entityId];
+    const state = entity?.state;
+
+    if (!isAlarm || !entity || (state !== 'arming' && state !== 'pending')) {
+      if (this._alarmInterval) {
+        window.clearInterval(this._alarmInterval);
+        this._alarmInterval = null;
+      }
+      if (this._alarmCountdown !== null) {
+        this._alarmCountdown = null;
+        this.updateBubbleCard();
+      }
+      return;
+    }
+
+    const delay = (entity.attributes?.delay !== undefined && entity.attributes?.delay !== null && !isNaN(Number(entity.attributes.delay)))
+      ? Number(entity.attributes.delay)
+      : 30;
+    const lastChanged = entity.last_changed;
+    const startTime = lastChanged && !isNaN(new Date(lastChanged).getTime()) ? new Date(lastChanged).getTime() : Date.now();
+    const remaining = Math.max(0, delay - Math.floor((Date.now() - startTime) / 1000));
+
+    if (remaining <= 0) {
+      if (this._alarmInterval) {
+        window.clearInterval(this._alarmInterval);
+        this._alarmInterval = null;
+      }
+      this._alarmCountdown = null;
+      this.updateBubbleCard();
+      return;
+    }
+
+    this._alarmCountdown = remaining;
+    this.updateBubbleCard();
+  }
+
+  requestUpdate() {
+    this.updateBubbleCard();
   }
 }
 
