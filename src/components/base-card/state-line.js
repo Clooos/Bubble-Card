@@ -20,6 +20,7 @@ import {
     TIMESTAMP_DOMAIN_CONTENTS,
     domainOf,
 } from '../../tools/state-content.js';
+import { isAlarmPanel, formatAlarmMode } from '../dropdown/alarm.js';
 
 const CONTEXT_NAMES = { device_name: 'device', area_name: 'area', floor_name: 'floor' };
 
@@ -109,6 +110,13 @@ export function renderStateItem(context, entityId, item, options = {}) {
 
     if (item === 'state') {
         if (!state) return '';
+        if (context?._alarmCountdown !== null && context?._alarmCountdown !== undefined && context._alarmCountdown > 0 && isAlarmPanel(entityId) && (state.state === 'arming' || state.state === 'pending')) {
+            const stateLabel = formatAlarmMode(hass, state) || (state.state === 'arming' ? 'Arming' : 'Pending');
+            return `${stateLabel} (${context._alarmCountdown}s)`;
+        }
+        if (isAlarmPanel(entityId)) {
+            return formatAlarmMode(hass, state);
+        }
         return isTimerEntity(entityId) ? timerText(hass, state) : hass.formatEntityState(state);
     }
     if (item === 'name') return options.name ?? '';
@@ -139,6 +147,15 @@ export function renderStateItem(context, entityId, item, options = {}) {
     if (item.includes('forecast')) return formatForecastAttribute(hass, item, raw);
     // A path into an attribute has no formatter of its own.
     if (item.includes('[') || item.includes('.')) return String(raw);
+
+    if (isAlarmPanel(entityId) && (item === 'arm_mode' || item === 'alarm_modes' || (typeof raw === 'string' && (raw.startsWith('armed_') || raw === 'disarmed' || raw === 'arming' || raw === 'pending')))) {
+        if (context?._alarmCountdown !== null && context?._alarmCountdown !== undefined && context._alarmCountdown > 0 && (state?.state === 'arming' || state?.state === 'pending')) {
+            const stateLabel = formatAlarmMode(hass, state) || (state?.state === 'arming' ? 'Arming' : 'Pending');
+            return `${stateLabel} (${context._alarmCountdown}s)`;
+        }
+        return formatAlarmMode(hass, state, raw);
+    }
+
     const formatted = typeof hass.formatEntityAttributeValue === 'function' ? hass.formatEntityAttributeValue(state, item) : undefined;
     return formatted === undefined || formatted === null ? String(raw) : String(formatted);
 }
@@ -155,7 +172,16 @@ export function renderStateLine(context, entityId, content, options = {}) {
     }
     if (parts.length === 0) {
         const state = context._hass?.states?.[entityId];
-        if (state) parts.push(isTimerEntity(entityId) ? timerText(context._hass, state) : context._hass.formatEntityState(state));
+        if (state) {
+            if (context?._alarmCountdown !== null && context?._alarmCountdown !== undefined && context._alarmCountdown > 0 && isAlarmPanel(entityId) && (state.state === 'arming' || state.state === 'pending')) {
+                const stateLabel = formatAlarmMode(context._hass, state) || (state.state === 'arming' ? 'Arming' : 'Pending');
+                parts.push(`${stateLabel} (${context._alarmCountdown}s)`);
+            } else if (isAlarmPanel(entityId)) {
+                parts.push(formatAlarmMode(context._hass, state));
+            } else {
+                parts.push(isTimerEntity(entityId) ? timerText(context._hass, state) : context._hass.formatEntityState(state));
+            }
+        }
     }
     return parts;
 }

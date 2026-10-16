@@ -224,6 +224,7 @@ export function shouldSkipRender(element) {
 
     const gate = gateFor(element);
     if (gate.clockDriven || !gate.snapshot) return false;
+    if (element._alarmInterval || (element._alarmCountdown !== null && element._alarmCountdown > 0)) return false;
     if (now - gate.at > maxSkipMs) return false;
     if (gate.snapshot.generation !== generation) return false;
 

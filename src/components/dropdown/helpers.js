@@ -1,5 +1,5 @@
 import { isHomeAssistantVersionAtLeast } from "../../tools/utils.js";
-import { ALARM_MODES, needsAlarmCode } from "./alarm.js";
+import { ALARM_MODES, needsAlarmCode, formatAlarmMode } from "./alarm.js";
 
 const NEW_HA_DROPDOWN_MIN_VERSION = '2026.3.0';
 
@@ -44,8 +44,7 @@ export function getTranslatedAttribute(context, state, attribute, option) {
             return context._hass.formatEntityAttributeValue(state, "direction", option);
         // The short names of hui-alarm-modes-card-feature.ts, Home, Away, Night.
         case 'alarm_modes':
-            return context._hass.localize?.(`ui.card.alarm_control_panel.modes.${option}`)
-                || context._hass.formatEntityState(state, option);
+            return formatAlarmMode(context._hass, state, option);
         default:
             return formatString(context._hass.formatEntityState(state, option)) ?? formatString(option);
     }
