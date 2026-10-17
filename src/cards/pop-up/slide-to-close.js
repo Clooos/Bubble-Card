@@ -138,6 +138,12 @@ function isSwipeLockedNode(node) {
         return true;
     }
 
+    // A card fullscreen inside the pop-up (a camera) keeps its drags: closing
+    // the pop-up would end the fullscreen.
+    if (typeof node.matches === 'function' && node.matches(':fullscreen')) {
+        return true;
+    }
+
     const classList = node.classList;
     if (typeof classList?.contains !== 'function') {
         return false;

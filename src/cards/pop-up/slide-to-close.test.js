@@ -458,6 +458,24 @@ describe('gestures the pop-up must not take', () => {
         expect(documentListeners.touchmove ?? []).toHaveLength(0);
     });
 
+    test('leaves a card that is fullscreen inside the pop-up alone', () => {
+        const { context, popUp } = harness();
+        const fullscreen = { ...createNode(), matches: (selector) => selector === ':fullscreen' };
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), fullscreen, popUp] }));
+
+        expect(documentListeners.touchmove ?? []).toHaveLength(0);
+    });
+
+    test('still slides when the page around the pop-up is fullscreen', () => {
+        const { context, popUp } = harness();
+        const page = { ...createNode(), matches: (selector) => selector === ':fullscreen' };
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), popUp, page] }));
+
+        expect(documentListeners.touchmove ?? []).toHaveLength(1);
+    });
+
     test('leaves Home Assistant\'s own controls alone', () => {
         const { context, popUp } = harness();
 
