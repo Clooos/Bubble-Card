@@ -6,6 +6,7 @@ jest.unstable_mockModule('./style.js', () => ({
 
 jest.unstable_mockModule('../components/base-card/index.js', () => ({
     updateContentContainerFixedClass: jest.fn(),
+    syncMainButtonsBottomClass: jest.fn(),
 }));
 
 jest.unstable_mockModule('./icon.js', () => ({

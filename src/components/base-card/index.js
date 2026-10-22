@@ -1,6 +1,6 @@
 
 import { createBaseStructure } from './create.js';
-import { updateContentContainerFixedClass } from './changes.js';
+import { syncMainButtonsBottomClass, updateContentContainerFixedClass } from './changes.js';
 
 export const defaultOptions = {
     type: 'base',
@@ -22,4 +22,4 @@ export const defaultOptions = {
     buttonActions: false
 };
 
-export { createBaseStructure, updateContentContainerFixedClass };
+export { createBaseStructure, syncMainButtonsBottomClass, updateContentContainerFixedClass };

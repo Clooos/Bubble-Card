@@ -5,6 +5,7 @@ import { extendPopupOpenHassGate } from '../hass-gate.js';
 import { runWithInstantSliderWrites } from '../../../components/slider/instant-writes.js';
 import cardsStyles from './styles.css';
 import { createEditorCardElements } from './editor/index.js';
+import { getViewportSize } from '../../../tools/viewport.js';
 
 const GRID_COLUMN_MULTIPLIER = 3;
 const DEFAULT_GRID_SIZE = { columns: 12, rows: 'auto' };
@@ -318,9 +319,10 @@ function _estimateFoldRowsTarget(context) {
 }
 
 function _estimateFoldRowsTargetFromViewport() {
-    const viewportHeight = (typeof window !== 'undefined' && window.innerHeight > 0)
-        ? window.innerHeight
-        : 800;
+    // Read from the size kept by viewport.js. A fresh read of the window here,
+    // at the start of the build, forced the style of the shell just created.
+    const keptHeight = getViewportSize()?.height;
+    const viewportHeight = keptHeight > 0 ? keptHeight : 800;
     return Math.ceil(viewportHeight / estimatedRowHeightPx) + foldCoverageMarginRows;
 }
 

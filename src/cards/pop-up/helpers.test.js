@@ -379,6 +379,7 @@ describe('standalone popup lifecycle', () => {
         });
         window.innerWidth = 1280;
         window.innerHeight = 720;
+        window.dispatchEvent(new Event('resize'));
     });
 
     afterEach(() => {
@@ -1096,6 +1097,7 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
         window.innerWidth = 390;
         window.innerHeight = 844;
+        window.dispatchEvent(new Event('resize'));
 
         openPopup(context);
         flushHeavyOpenTask();
@@ -1143,6 +1145,7 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
         window.innerWidth = 390;
         window.innerHeight = 844;
+        window.dispatchEvent(new Event('resize'));
 
         openPopup(context);
         flushHeavyOpenTask();
@@ -2213,6 +2216,65 @@ describe('standalone popup lifecycle', () => {
         expect(scrollWrites).toBeGreaterThan(0);
     });
 
+    // Writing scrollTop lays the whole content out first, and the close did it
+    // on content it takes down right after. The scroll listener of the
+    // container already knows whether the content left the top.
+    function openThenClose(context, whileOpen = () => {}) {
+        openPopup(context);
+        flushHeavyOpenTask();
+        flushRafQueue();
+        flushRafQueue();
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        whileOpen();
+        closePopup(context, true);
+        dispatchTransformTransitionEnd(context.popUp);
+        flushRafQueue();
+        flushRafQueue();
+    }
+
+    test('closing a pop-up nobody scrolled writes no scroll position', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const container = context.elements.popUpContainer;
+        container._bubbleScrollMaskAdded = true;
+        let scrollWrites = 0;
+        Object.defineProperty(container, 'scrollTop', {
+            configurable: true,
+            get() { return 0; },
+            set() { scrollWrites += 1; },
+        });
+
+        openThenClose(context);
+
+        expect(scrollWrites).toBe(0);
+    });
+
+    test('closing a pop-up scrolled down still brings it back to the top', () => {
+        const context = createStandaloneContext();
+        usedContexts.push(context);
+        const container = context.elements.popUpContainer;
+        container._bubbleScrollMaskAdded = true;
+        container.closest = (selector) => (selector === '.bubble-pop-up' ? context.popUp : null);
+        const writes = [];
+        Object.defineProperty(container, 'scrollTop', {
+            configurable: true,
+            get() { return 0; },
+            set(value) { writes.push(value); },
+        });
+
+        openThenClose(context, () => {
+            // What the scroll listener records once the content leaves the top.
+            container._bubbleScrolledFromTop = true;
+            context.popUp.classList.add('is-scrolled');
+        });
+
+        expect(writes).toEqual([0]);
+        // The shell is hidden right after, so its scroll event may never come.
+        expect(container._bubbleScrolledFromTop).toBe(false);
+        expect(context.popUp.classList.contains('is-scrolled')).toBe(false);
+    });
+
     test('waits an extra routed frame before animating a cold default bottom-sheet standalone open', () => {
         const context = createStandaloneContext({ hash: '#popup-a' });
         usedContexts.push(context);
@@ -2345,6 +2407,7 @@ describe('standalone popup lifecycle', () => {
         usedContexts.push(context);
         window.innerWidth = 390;
         window.innerHeight = 844;
+        window.dispatchEvent(new Event('resize'));
 
         registerPopupContext(context);
 
@@ -4445,6 +4508,7 @@ describe('a pop-up shell abandoned by a view rebuild', () => {
         });
         window.innerWidth = 1280;
         window.innerHeight = 720;
+        window.dispatchEvent(new Event('resize'));
     });
 
     afterEach(() => {

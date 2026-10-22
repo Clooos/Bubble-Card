@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 
 jest.unstable_mockModule('./style.js', () => ({ isColorCloseToWhite: jest.fn(() => false) }));
-jest.unstable_mockModule('../components/base-card/index.js', () => ({ updateContentContainerFixedClass: jest.fn() }));
+jest.unstable_mockModule('../components/base-card/index.js', () => ({ updateContentContainerFixedClass: jest.fn(), syncMainButtonsBottomClass: jest.fn() }));
 jest.unstable_mockModule('./icon.js', () => ({ getIconColor: jest.fn(() => 'var(--primary-color)') }));
 
 // A document whose theme is nothing but the text colour Home Assistant writes.

@@ -13,6 +13,7 @@ import { runWithInstantSliderWrites } from '../../components/slider/instant-writ
 import { flushDeferredCardUpdates } from '../../tools/deferred-card-updates.js';
 import { holdScrollingEffects } from '../../tools/text-scrolling.js';
 import { monotonicNow } from '../../tools/monotonic-time.js';
+import { getViewportSize } from '../../tools/viewport.js';
 
 // Re-exported so the pop-up runtime keeps one import surface for its callers.
 export { isDialogNode };
@@ -31,9 +32,25 @@ export const BUBBLE_URL_EVENT = 'bubble-card-location-changed';
 
 function resetPopupScroll(context) {
     const container = context.elements?.popUpContainer;
-    if (container) {
-        container.scrollTop = 0;
+    if (!container) {
+        return;
     }
+
+    // Writing scrollTop makes the browser lay the whole content out first, and
+    // the close did it on content it takes down right after, about 12 ms per
+    // close on a throttled phone. The scroll listener of the container already
+    // knows whether the content left the top, so a pop-up nobody scrolled
+    // keeps its offset of 0 without that write.
+    if (container._bubbleScrollMaskAdded && !container._bubbleScrolledFromTop) {
+        return;
+    }
+
+    container.scrollTop = 0;
+
+    // The scroll event of this write may never come, since the close hides the
+    // shell right after, so the flag and the header shadow are set back here.
+    container._bubbleScrolledFromTop = false;
+    container.closest?.('.bubble-pop-up')?.classList.remove('is-scrolled');
 }
 
 export { shouldHoldDashboardHassUpdate } from './hass-gate.js';
@@ -136,8 +153,11 @@ function scheduleStandaloneFrame(context, frameKey, callback) {
 }
 
 function isAdaptiveDialogRenderedAsBottomSheet() {
-    const viewportWidth = typeof window?.innerWidth === 'number' ? window.innerWidth : Number.POSITIVE_INFINITY;
-    const viewportHeight = typeof window?.innerHeight === 'number' ? window.innerHeight : Number.POSITIVE_INFINITY;
+    // Read from the size kept by viewport.js. Asked for on every open, a fresh
+    // read of the window forced the style of the shell just created.
+    const viewport = getViewportSize();
+    const viewportWidth = typeof viewport?.width === 'number' ? viewport.width : Number.POSITIVE_INFINITY;
+    const viewportHeight = typeof viewport?.height === 'number' ? viewport.height : Number.POSITIVE_INFINITY;
     return !(viewportWidth >= 871 && viewportHeight >= 501);
 }
 

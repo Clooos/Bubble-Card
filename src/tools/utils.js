@@ -1,5 +1,5 @@
 import { isColorCloseToWhite } from "./style.js";
-import { updateContentContainerFixedClass } from "../components/base-card/index.js";
+import { syncMainButtonsBottomClass, updateContentContainerFixedClass } from "../components/base-card/index.js";
 import { getIconColor } from "./icon.js";
 import { adjustColor, areColorsSimilar, calculateLuminance, contrastRatio, hexToRgb, relativeLuminance, rgbStringToRgb } from "./color.js";
 import { resolveTemplate } from "./render-template.js";
@@ -1001,7 +1001,6 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
     const applyMainButtonsLayout = () => {
         const buttonsContainer = context.elements?.buttonsContainer;
         const cardWrapper = context.elements?.cardWrapper;
-        const bottomSubButtonContainer = context.elements?.bottomSubButtonContainer;
         if (!buttonsContainer || !cardWrapper) {
             return;
         }
@@ -1014,9 +1013,9 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
         const alignClasses = ['align-start', 'align-center', 'align-end', 'align-space-between'];
         buttonsContainer.classList.remove('bottom-fixed', 'full-width', ...alignClasses);
         cardWrapper.classList.remove('has-bottom-buttons');
-        bottomSubButtonContainer?.classList.remove('with-main-buttons-bottom');
 
         if (position !== 'bottom') {
+            syncMainButtonsBottomClass(context);
             return;
         }
 
@@ -1035,21 +1034,10 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
         }
 
         cardWrapper.classList.add('has-bottom-buttons');
-        
-        // Only add with-main-buttons-bottom if main buttons are actually visible.
-        // Skip the forced-layout getComputedStyle call while a popup is opening
-        // (data-bubblePopupOpening marker is set) to avoid blocking the interaction frame.
-        const popupOpening = context?.popUp?.dataset?.bubblePopupOpening === 'true';
 
-        if (!popupOpening) {
-            const isMainButtonsVisible = !buttonsContainer.classList.contains('hidden') && 
-                                         buttonsContainer.style.display !== 'none' &&
-                                         getComputedStyle(buttonsContainer).display !== 'none';
-            
-            if (isMainButtonsVisible) {
-                bottomSubButtonContainer?.classList.add('with-main-buttons-bottom');
-            }
-        }
+        // Only with main buttons that really show, read at the next frame for
+        // every card at once (see syncMainButtonsBottomClass).
+        syncMainButtonsBottomClass(context);
     };
 
     let determinedLayoutClass;
