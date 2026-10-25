@@ -1612,6 +1612,20 @@ describe('standalone popup lifecycle', () => {
         expect(context.popUp.classList.contains('is-opening')).toBe(true);
     });
 
+    // A top sheet parked below the screen would be handed its closed transform
+    // a whole viewport away on the reveal frame, and its first open would rise
+    // from the bottom before dropping from the top.
+    test('parks a top sheet above the screen, on the side it slides in from', () => {
+        const context = createStandaloneContext({ popup_position: 'top' });
+        context.popUp.classList.add('popup-position-top');
+        usedContexts.push(context);
+
+        openPopup(context);
+
+        expect(context.popUp.style.transform).toBe('translate3d(0, -100vh, 0)');
+        expect(context.popUp.style.getPropertyPriority('transform')).toBe('important');
+    });
+
     test('resumes fold-first card hydration once the open transition finishes', () => {
         const context = createStandaloneContext();
         usedContexts.push(context);
@@ -4557,5 +4571,57 @@ describe('a pop-up shell abandoned by a view rebuild', () => {
 
         expect(context.popUp.classList.contains('is-closing')).toBe(true);
         expect(setStandalonePopUpCardsActive.mock.calls.length).toBe(callsBefore);
+    });
+});
+
+describe('popup_position', () => {
+    function makePopUp() {
+        const classes = new Set();
+        return {
+            classList: {
+                toggle: (name, on) => (on ? classes.add(name) : classes.delete(name)),
+            },
+            classes,
+        };
+    }
+
+    test('a sheet asking for the top gets the class, in both sheet layouts', async () => {
+        const { syncPopupModeClasses } = await import('./helpers.js');
+
+        for (const popup_mode of [undefined, 'default', 'fit-content']) {
+            const popUp = makePopUp();
+            syncPopupModeClasses(popUp, { popup_mode, popup_position: 'top' });
+            expect(popUp.classes.has('popup-position-top')).toBe(true);
+        }
+    });
+
+    test('a dialog or the Home Assistant style never does, whatever the config asks', async () => {
+        const { syncPopupModeClasses } = await import('./helpers.js');
+
+        for (const config of [
+            { popup_mode: 'centered', popup_position: 'top' },
+            { popup_mode: 'adaptive-dialog', popup_position: 'top' },
+            { popup_style: 'home-assistant', popup_position: 'top' },
+            { popup_style: 'home-assistant', popup_mode: 'fit-content', popup_position: 'top' },
+        ]) {
+            const popUp = makePopUp();
+            syncPopupModeClasses(popUp, config);
+            expect(popUp.classes.has('popup-position-top')).toBe(false);
+        }
+    });
+
+    test('the class comes off when the config stops asking for it', async () => {
+        const { syncPopupModeClasses } = await import('./helpers.js');
+        const popUp = makePopUp();
+
+        syncPopupModeClasses(popUp, { popup_position: 'top' });
+        expect(popUp.classes.has('popup-position-top')).toBe(true);
+
+        syncPopupModeClasses(popUp, { popup_position: 'bottom' });
+        expect(popUp.classes.has('popup-position-top')).toBe(false);
+
+        syncPopupModeClasses(popUp, { popup_position: 'top' });
+        syncPopupModeClasses(popUp, {});
+        expect(popUp.classes.has('popup-position-top')).toBe(false);
     });
 });

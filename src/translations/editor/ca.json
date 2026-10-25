@@ -247,6 +247,7 @@
       "mode_fit_content": "Ajusta al contingut",
       "mode_centered": "Diàleg (centrat)",
       "mode_adaptive": "Diàleg adaptatiu (\"Ajusta al contingut\" al mòbil)",
+      "position": "Llisca des de",
       "performance_mode": "Mode de rendiment",
       "performance": "Rendiment",
       "performance_body": "Retarda lleugerament la renderització del contingut i el difuminat del fons, i també desactiva el difuminat del teló de fons si està definit.",

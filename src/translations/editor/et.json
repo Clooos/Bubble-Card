@@ -247,6 +247,7 @@
       "mode_fit_content": "Mahuta sisu järgi",
       "mode_centered": "Dialoog (keskel)",
       "mode_adaptive": "Kohanduv dialoog (mobiilis \"Mahuta sisu järgi\")",
+      "position": "Libiseb sisse",
       "performance_mode": "Jõudlusrežiim",
       "performance": "Jõudlus",
       "performance_body": "Viivitab veidi sisu renderdamist ja tausta hägustamist ning keelab ka taustkihi hägustamise, kui see on määratud.",

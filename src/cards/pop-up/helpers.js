@@ -1,5 +1,6 @@
-import { getPopupStyle, hasFullHeightSheet, POPUP_STYLE_CLASSIC, POPUP_STYLE_HOME_ASSISTANT } from "./style.js";
+import { getPopupPosition, getPopupStyle, hasFullHeightSheet, POPUP_POSITION_TOP, POPUP_STYLE_CLASSIC, POPUP_STYLE_HOME_ASSISTANT } from "./style.js";
 import { getBackdrop, hideExistingBackdrop, releaseBackdropContext } from "./backdrop.js";
+import { isTopSheetLayout } from "./slide-to-close.js";
 import { callAction } from "../../tools/tap-actions.js";
 import { toggleBodyScroll, keptHistoryState } from "../../tools/utils.js";
 import { buildStandalonePopUpCardsProgressively, handlePopUpCards, noteFoldCalibration, registerPopupOpenActivityProbe, resumeStandaloneCardHydration, setStandalonePopUpCardsActive, settleStandaloneCardWork, suspendStandalonePopUpCardsProgressively } from "./cards/index.js";
@@ -442,20 +443,27 @@ function disableShellTransition(popUp) {
 // painted throughout the build, as it was before. `vh` and not `dvh`: it is the
 // larger of the two on mobile, so it always clears, and it exists on the older
 // WebKit this path is written for.
+//
+// A top sheet is parked above the screen instead. Parked below, its first open
+// would rise from the bottom before dropping from the top.
 function parkShellOffScreen(popUp) {
     const style = popUp?.style;
     if (!style) {
         return;
     }
 
+    const parked = isTopSheetLayout(popUp)
+        ? 'translate3d(0, -100vh, 0)'
+        : 'translate3d(0, 100vh, 0)';
+
     // The priority is required: the centered and adaptive-dialog blocks declare
     // their own transform that way, the trap of 6593bbf.
     if (typeof style.setProperty === 'function') {
-        style.setProperty('transform', 'translate3d(0, 100vh, 0)', 'important');
+        style.setProperty('transform', parked, 'important');
         return;
     }
 
-    style.transform = 'translate3d(0, 100vh, 0)';
+    style.transform = parked;
 }
 
 function unparkShell(popUp) {
@@ -572,6 +580,7 @@ export function syncPopupModeClasses(popUp, config) {
     popUp.classList.toggle('popup-mode-with-bottom-offset', hasPopupBottomOffset(config));
     popUp.classList.toggle('popup-mode-full-width-on-mobile', hasPopupFullWidthOnMobile(config));
     popUp.classList.toggle('popup-mode-full-height-sheet', hasFullHeightSheet(config));
+    popUp.classList.toggle('popup-position-top', getPopupPosition(config) === POPUP_POSITION_TOP);
     return popupMode;
 }
 

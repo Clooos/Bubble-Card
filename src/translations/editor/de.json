@@ -247,6 +247,7 @@
       "mode_fit_content": "An Inhalt anpassen",
       "mode_centered": "Dialog (zentriert)",
       "mode_adaptive": "Adaptiver Dialog („An Inhalt anpassen\" auf Mobilgeräten)",
+      "position": "Hereingleiten von",
       "performance_mode": "Performance-Modus",
       "performance": "Performance",
       "performance_body": "Verzögert das Rendern des Inhalts und die Hintergrundunschärfe leicht und deaktiviert außerdem die Backdrop-Unschärfe, falls gesetzt.",

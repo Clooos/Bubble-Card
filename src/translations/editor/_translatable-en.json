@@ -246,6 +246,7 @@
       "mode_fit_content": "Fit content",
       "mode_centered": "Dialog (centered)",
       "mode_adaptive": "Adaptive dialog (\"Fit content\" on mobile)",
+      "position": "Slide in from",
       "performance_mode": "Performance mode",
       "performance": "Performance",
       "performance_body": "Slightly delays content rendering and background blur, also disables backdrop blur if set.",

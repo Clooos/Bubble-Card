@@ -102,7 +102,7 @@ jest.unstable_mockModule('./cards/index.js', () => ({ noteFoldCalibration: jest.
 const { changeEditor, changeStyle, changeTriggered, syncHeaderVisibilityClasses } = await import('./changes.js');
 const { getBackdrop } = await import('./backdrop.js');
 const { handlePopUpCards } = await import('./cards/index.js');
-const { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupPerformanceModeClasses } = await import('./helpers.js');
+const { addHash, markPopupPendingTriggerOpen, removeHash, syncPopupModeClasses, syncPopupPerformanceModeClasses } = await import('./helpers.js');
 const { appendLegacyPopup, hideLegacyPopupContent } = await import('./legacy.js');
 const { toggleBodyScroll } = await import('../../tools/utils.js');
 const { handleCustomStyles } = await import('../../tools/style-processor.js');
@@ -205,6 +205,32 @@ describe('changeStyle', () => {
         expect(syncPopupPerformanceModeClasses).toHaveBeenLastCalledWith(context.popUp, context.config);
         expect(context.popUp.classList.contains('popup-performance-default')).toBe(false);
         expect(context.popUp.classList.contains('popup-performance-performance')).toBe(true);
+    });
+
+    // Flipping the position in the editor must reach the shell, which only
+    // happens when the static shell work is reapplied.
+    test('reapplies static popup shell work when the position changes', () => {
+        const context = {
+            config: {},
+            popUp: {
+                classList: createMockClassList(),
+            },
+            _hass: {
+                themes: { default_theme: 'bubble' },
+            },
+        };
+
+        changeStyle(context);
+        expect(setLayout).toHaveBeenCalledTimes(1);
+
+        changeStyle(context);
+        expect(setLayout).toHaveBeenCalledTimes(1);
+
+        context.config = { popup_position: 'top' };
+        changeStyle(context);
+
+        expect(setLayout).toHaveBeenCalledTimes(2);
+        expect(syncPopupModeClasses).toHaveBeenLastCalledWith(context.popUp, context.config);
     });
 
     test('deduplicates transition style updates to a single RAF callback', () => {

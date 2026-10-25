@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
 
-const { configurePopupSlideToClose, isBottomSheetLayout } = await import('./slide-to-close.js');
+const { configurePopupSlideToClose, isBottomSheetLayout, isTopSheetLayout, TOP_SHEET_CLOSED_TRANSFORM } = await import('./slide-to-close.js');
 
 function createClassList(initial = []) {
     const classes = new Set(initial);
@@ -130,14 +130,14 @@ function dispatchEnd() {
 // One drag, expressed the way a finger produces it: a start, evenly spaced
 // moves, then a lift. Returns every move event so a test can read what the
 // gesture did with them.
-function drag(context, { from = 300, to = 460, x = 100, steps = 5, stepMs = 16, restMs = 0, path = [] } = {}) {
+function drag(context, { from = 300, to = 460, x = 100, steps = 5, stepMs = 16, restMs = 0, path = [], movePath = [] } = {}) {
     context.handleTouchStart(touchEvent([{ x, y: from }], { path }));
 
     const moveEvents = [];
     for (let step = 1; step <= steps; step += 1) {
         clock += stepMs;
         const y = from + Math.round(((to - from) * step) / steps);
-        const event = touchEvent([{ x, y }]);
+        const event = touchEvent([{ x, y }], { path: movePath });
         moveEvents.push(event);
         dispatchMove(event);
     }
@@ -1086,5 +1086,170 @@ describe('slide_to_close', () => {
         dispatchMove(touchEvent([{ y: 320 }]));
 
         expect(documentListeners.touchmove ?? []).toHaveLength(0);
+    });
+});
+
+// popup_position: top. The same gesture read along the sheet's own closing
+// direction, so the finger goes up where it went down everywhere above.
+describe('a sheet that comes in from the top', () => {
+    const TOP = ['bubble-pop-up', 'is-standalone-pop-up', 'is-popup-opened', 'popup-position-top'];
+
+    test('is told apart by its class alone', () => {
+        expect(isTopSheetLayout({ classList: createClassList(['popup-position-top']) })).toBe(true);
+        expect(isTopSheetLayout({ classList: createClassList([]) })).toBe(false);
+        expect(isTopSheetLayout(null)).toBe(false);
+        // Still a sheet, so a release is handed a translation and not a scale.
+        expect(isBottomSheetLayout({ classList: createClassList(['popup-position-top']) })).toBe(true);
+    });
+
+    test('follows a finger going up, upwards', () => {
+        const { context, popUp } = harness({ classes: TOP });
+
+        context.handleTouchStart(touchEvent([{ y: 600 }]));
+        clock += 16;
+        dispatchMove(touchEvent([{ y: 520 }]));
+        frames.splice(0).forEach((frame) => frame());
+
+        expect(popUp.style.transform).toBe('translate3d(0, -80px, 0)');
+        expect(popUp.style.priorityOf('transform')).toBe('important');
+    });
+
+    test('closes past half the sheet, and leaves past the top of the screen', () => {
+        const { context, popUp, closePopup } = harness({ classes: TOP, height: 800 });
+
+        drag(context, { from: 700, to: 180, steps: 8, stepMs: 40, restMs: 200 });
+
+        expect(closePopup).toHaveBeenCalledTimes(1);
+        // The same transform `.popup-position-top.is-closing` declares, which
+        // styles.test.js holds the stylesheet to.
+        expect(popUp.style.transform).toBe(TOP_SHEET_CLOSED_TRANSFORM);
+    });
+
+    test('a quick upward flick closes well before the distance', () => {
+        const { context, closePopup } = harness({ classes: TOP, height: 800 });
+
+        drag(context, { from: 500, to: 400, steps: 4, stepMs: 10 });
+
+        expect(closePopup).toHaveBeenCalledTimes(1);
+    });
+
+    test('a quick downward flick does not', () => {
+        const { context, popUp, closePopup } = harness({ classes: TOP, height: 800 });
+
+        drag(context, { from: 300, to: 400, steps: 4, stepMs: 10 });
+
+        expect(closePopup).not.toHaveBeenCalled();
+        expect(popUp.style.transform).toBe('');
+    });
+
+    test('a drag down that nothing can scroll is held from the page and never moves the shell', () => {
+        const { context, popUp, closePopup } = harness({ classes: TOP });
+        const path = [createNode(), popUp];
+
+        const moveEvents = drag(context, { from: 300, to: 600, steps: 6, stepMs: 40, path, movePath: path });
+
+        expect(moveEvents.every((event) => event.preventDefault.mock.calls.length === 1)).toBe(true);
+        expect(popUp.style.transform).toBe('');
+        expect(closePopup).not.toHaveBeenCalled();
+    });
+
+    test('a drag down is handed to a list that can still scroll back up', () => {
+        const { context, popUp } = harness({ classes: TOP });
+        const path = [createNode(), createScroller({ scrollTop: 300 }), popUp];
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path }));
+        clock += 16;
+        const downward = touchEvent([{ y: 380 }], { path });
+        dispatchMove(downward);
+
+        expect(downward.preventDefault).not.toHaveBeenCalled();
+        expect(documentListeners.touchmove).toHaveLength(0);
+    });
+
+    // The mirror of the scrolled list rule a bottom sheet applies at
+    // touchstart: there a scrolled list owns the closing drag, here a list with
+    // content left below does.
+    test('a scrolled list does not keep the touch from starting', () => {
+        const { context, popUp } = harness({ classes: TOP });
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), createScroller({ scrollTop: 120 }), popUp] }));
+
+        expect(documentListeners.touchmove).toHaveLength(1);
+    });
+
+    test('a drag up is handed to a list that still has content below', () => {
+        const { context, popUp, closePopup } = harness({ classes: TOP });
+        const path = [createNode(), createScroller({ scrollTop: 0 }), popUp];
+
+        context.handleTouchStart(touchEvent([{ y: 600 }], { path }));
+        clock += 16;
+        const upward = touchEvent([{ y: 520 }], { path });
+        dispatchMove(upward);
+
+        expect(upward.preventDefault).not.toHaveBeenCalled();
+        expect(popUp.style.transform).toBe('');
+        expect(documentListeners.touchmove).toHaveLength(0);
+        expect(closePopup).not.toHaveBeenCalled();
+    });
+
+    test('a drag up closes once that list has reached its end', () => {
+        const { context, popUp, closePopup } = harness({ classes: TOP, height: 800 });
+        // 1200px of content in a 400px box, scrolled the whole 800px.
+        const path = [createNode(), createScroller({ scrollTop: 800 }), popUp];
+
+        drag(context, { from: 700, to: 180, steps: 8, stepMs: 40, restMs: 200, path, movePath: path });
+
+        expect(closePopup).toHaveBeenCalledTimes(1);
+        expect(popUp.style.transform).toBe(TOP_SHEET_CLOSED_TRANSFORM);
+    });
+
+    // A top sheet hangs below the header, so a release has the header's height
+    // still to travel on top of the sheet's own.
+    test('a release is timed to the top of the screen, not to where the sheet started', () => {
+        const withHeader = harness({ classes: TOP, height: 800 });
+        withHeader.popUp.offsetTop = 56;
+        drag(withHeader.context, { from: 700, to: 600, steps: 4, stepMs: 10 });
+        // 756px left at 2.5px/ms is past the usual close, so it takes all of it.
+        expect(withHeader.popUp.style.transition).toBe('transform 300ms linear -16ms');
+
+        const flush = harness({ classes: TOP, height: 800 });
+        flush.popUp.offsetTop = 0;
+        drag(flush.context, { from: 700, to: 600, steps: 4, stepMs: 10 });
+        // Flush with the top of the screen it is only its own height: 700px left.
+        expect(flush.popUp.style.transition).toBe('transform 280ms linear -16ms');
+    });
+
+    // offsetTop ignores transforms, so a sheet grabbed mid-slide is measured
+    // where it stands. A box read would be short by whatever the slide had left.
+    test('measures where the sheet stands, not where an animation has it', () => {
+        const { context, popUp } = harness({ classes: TOP, height: 800 });
+        popUp.offsetTop = 56;
+        popUp.getBoundingClientRect = jest.fn(() => ({ top: -200, bottom: 600 }));
+
+        drag(context, { from: 700, to: 600, steps: 4, stepMs: 10 });
+
+        expect(popUp.getBoundingClientRect).not.toHaveBeenCalled();
+        expect(popUp.style.transition).toBe('transform 300ms linear -16ms');
+    });
+
+    test('measures its position once per drag, and not at all for a tap', () => {
+        const { context, popUp } = harness({ classes: TOP });
+        let reads = 0;
+        Object.defineProperty(popUp, 'offsetTop', { get: () => { reads += 1; return 56; } });
+
+        context.handleTouchStart(touchEvent([{ y: 300 }]));
+        dispatchEnd();
+        expect(reads).toBe(0);
+
+        drag(context, { from: 600, to: 300, steps: 8 });
+        expect(reads).toBe(1);
+    });
+
+    test('a bottom sheet keeps the bottom-sheet translation', () => {
+        const { context, popUp } = harness({ height: 800 });
+
+        drag(context, { from: 100, to: 620, steps: 8, stepMs: 40, restMs: 200 });
+
+        expect(popUp.style.transform).toBe('translate3d(0, 100%, 0)');
     });
 });

@@ -23,6 +23,12 @@
 //     swipe through a tab strip or a carousel is never stolen,
 //   - a drag that starts anywhere but downward is handed back for good instead
 //     of being re-examined on every move.
+//
+// A top sheet (`popup_position: top`) closes with a drag up. Rather than a
+// second copy of every rule below, each vertical coordinate is negated as it is
+// read, so "down" means "towards the edge the sheet leaves by". Only what faces
+// the page turns it back: the scroller asked, the painted offset, the release
+// travel and the closed transform.
 
 // px/ms. Above this the flick decides on its own, whatever the distance.
 const VELOCITY_SWIPE_THRESHOLD = 0.5;
@@ -126,11 +132,23 @@ export function isBottomSheetLayout(popUp) {
     return true;
 }
 
-function isSwipeLockedNode(node) {
+// Only ever set on a sheet layout, see getPopupPosition in style.js.
+export function isTopSheetLayout(popUp) {
+    return hasClass(popUp, 'popup-position-top');
+}
+
+// Must match `.popup-position-top.is-closing` in styles.css.
+export const TOP_SHEET_CLOSED_TRANSFORM = 'translate3d(0, calc(-100% - var(--bubble-pop-up-top-inset, 0px)), 0)';
+const BOTTOM_SHEET_CLOSED_TRANSFORM = 'translate3d(0, 100%, 0)';
+
+function isSwipeLockedNode(node, topSheet) {
     // A list the user has already scrolled owns the gesture. This is the rule
     // that keeps a downward drag inside a scrolled pop-up a scroll, and only
     // turns it into a close once the list is back at its top.
-    if (node.scrollTop > 0) {
+    //
+    // A top sheet's closing drag belongs to a list until it reaches its end,
+    // which needs a layout read, so that check waits for the first move.
+    if (!topSheet && node.scrollTop > 0) {
         return true;
     }
 
@@ -193,7 +211,7 @@ function readTouchSource(event, realTouchStart) {
 // Walks from the touch to the shell once, and answers every question that walk
 // can answer, whether this gesture may start at all, whether a slider on the way
 // has a verdict to be waited for, and whether the finger landed on the header.
-function readGestureTarget(event, popUp) {
+function readGestureTarget(event, popUp, topSheet) {
     const path = typeof event.composedPath === 'function' ? event.composedPath() : null;
     if (!path?.length) {
         return { blocked: false, slider: null, header: false };
@@ -211,7 +229,7 @@ function readGestureTarget(event, popUp) {
             continue;
         }
 
-        if (isSwipeLockedNode(node)) {
+        if (isSwipeLockedNode(node, topSheet)) {
             return { blocked: true, slider: null, header: false };
         }
 
@@ -231,23 +249,30 @@ function readGestureTarget(event, popUp) {
     return { blocked: false, slider, header };
 }
 
-// Room left to scroll down, which is what a finger moving up is asking for.
-function canTakeUpwardDrag(node) {
+function verticalScrollRange(node) {
     // The cheapest question, and the one that rejects almost every node on the
     // path. It is also the read that forces the layout the rest of the walk then
     // gets for free.
-    const scrollable = node.scrollHeight - node.clientHeight;
-    if (scrollable <= 1) {
-        return false;
+    const range = node.scrollHeight - node.clientHeight;
+    if (range <= 1) {
+        return 0;
     }
 
-    if (!SCROLLABLE_OVERFLOW.has(getComputedStyle(node).overflowY)) {
-        return false;
-    }
+    return SCROLLABLE_OVERFLOW.has(getComputedStyle(node).overflowY) ? range : 0;
+}
 
+// Room left to scroll down, which is what a finger moving up is asking for.
+function canTakeUpwardDrag(node) {
+    const range = verticalScrollRange(node);
     // Agrees with the rule `isSwipeLockedNode` applies at touchstart, where a
     // node the user has already scrolled hands the whole gesture over.
-    return node.scrollTop < scrollable - 1;
+    return range > 0 && node.scrollTop < range - 1;
+}
+
+// Room left to scroll back up. Only asked on a top sheet: a bottom sheet settles
+// this at touchstart, in isSwipeLockedNode.
+function canTakeDownwardDrag(node) {
+    return node.scrollTop > 0 && verticalScrollRange(node) > 0;
 }
 
 // Sideways the question is deliberately coarser. Any horizontal scroller on the
@@ -272,15 +297,14 @@ function canTakeSidewaysDrag(node) {
 // Naming those spots would close them and leave the next one open, so what is
 // asked here is the question the browser is about to answer itself. Is there
 // anything on the way to the shell this drag could belong to?
-function hasSomewhereToScroll(event, popUp, sideways) {
+function hasSomewhereToScroll(event, popUp, canTake, closing = false) {
     const path = typeof event.composedPath === 'function' ? event.composedPath() : null;
     if (!path?.length) {
         // Nothing read means nothing ruled out, and the gesture is handed over
-        // exactly the way it was before.
-        return true;
+        // exactly the way it was before, unless it is the sheet's own closing
+        // drag, which stays the sheet's until something is seen to want it.
+        return !closing;
     }
-
-    const canTake = sideways ? canTakeSidewaysDrag : canTakeUpwardDrag;
 
     for (const node of path) {
         if (node === popUp) {
@@ -339,6 +363,12 @@ function readShellHeight(popUp) {
     return popUp?.offsetHeight || 0;
 }
 
+// A top sheet also has to clear the inset above it. `offsetTop` ignores
+// transforms, so a sheet grabbed mid-animation is measured where it stands.
+function readCloseTravel(popUp, topSheet, shellHeight) {
+    return topSheet ? (popUp?.offsetTop || 0) + shellHeight : shellHeight;
+}
+
 export function configurePopupSlideToClose(context, closePopup) {
     // createStructure runs more than once over a pop-up's life. Rebinding would
     // hand updateListeners a handler it never registered, and the old one would
@@ -357,8 +387,10 @@ export function configurePopupSlideToClose(context, closePopup) {
     let lastY = 0;
     let lastTime = 0;
     let offset = 0;
-    let shellHeight = 0;
+    let closeTravel = 0;
     let closeDistance = 0;
+    // 1 for a bottom sheet, -1 for a top one, see the note at the top.
+    let axis = 1;
     let slider = null;
     let dragFrame = null;
     // Where the shell was last painted, and how long a frame lasts on this
@@ -400,7 +432,7 @@ export function configurePopupSlideToClose(context, closePopup) {
             lastFrameTime = frameTime;
         }
         paintedOffset = offset;
-        setShellProperty(context.popUp, 'transform', `translate3d(0, ${offset}px, 0)`);
+        setShellProperty(context.popUp, 'transform', `translate3d(0, ${offset * axis}px, 0)`);
     };
 
     // Coalesced into a single frame, because a touchmove stream can outrun the
@@ -450,7 +482,7 @@ export function configurePopupSlideToClose(context, closePopup) {
 
     // The transition a sheet is let go on, or nothing for the stylesheet's own.
     const resolveReleaseTransition = (speed) => {
-        const remaining = shellHeight - paintedOffset;
+        const remaining = closeTravel - paintedOffset;
         // A finger slower than where `ease` sets off loses nothing to it, so it
         // keeps the close every other one gets.
         if (!(remaining > 0) || !(speed > (EASE_START_SLOPE * remaining) / CLOSE_DURATION)) {
@@ -486,7 +518,7 @@ export function configurePopupSlideToClose(context, closePopup) {
             } else {
                 clearShellProperty(popUp, 'transition');
             }
-            setShellProperty(popUp, 'transform', 'translate3d(0, 100%, 0)');
+            setShellProperty(popUp, 'transform', axis < 0 ? TOP_SHEET_CLOSED_TRANSFORM : BOTTOM_SHEET_CLOSED_TRANSFORM);
         } else {
             clearShellProperty(popUp, 'transition');
             clearShellProperty(popUp, 'transform');
@@ -508,7 +540,7 @@ export function configurePopupSlideToClose(context, closePopup) {
             return;
         }
 
-        const currentY = touch.clientY;
+        const currentY = touch.clientY * axis;
         const travelY = currentY - startY;
 
         // The first move is the whole decision. WebKit settles there whether the
@@ -539,7 +571,22 @@ export function configurePopupSlideToClose(context, closePopup) {
             // carousel or a tab strip for one across. When nothing can, the
             // browser gives it to the dashboard behind the pop-up instead, which
             // is the one place it must never go.
-            if ((sideways || travelY < 0) && hasSomewhereToScroll(event, context.popUp, sideways)) {
+            //
+            // A top sheet reads the finger upside down, so the scroller is asked
+            // the other way, and also about the closing drag, which a list owns
+            // until it reaches its end.
+            let canTake = null;
+            let closing = false;
+            if (sideways) {
+                canTake = canTakeSidewaysDrag;
+            } else if (travelY < 0) {
+                canTake = axis < 0 ? canTakeDownwardDrag : canTakeUpwardDrag;
+            } else if (axis < 0) {
+                canTake = canTakeUpwardDrag;
+                closing = true;
+            }
+
+            if (canTake && hasSomewhereToScroll(event, context.popUp, canTake, closing)) {
                 detach();
                 return;
             }
@@ -585,7 +632,8 @@ export function configurePopupSlideToClose(context, closePopup) {
                 return;
             }
 
-            shellHeight = readShellHeight(context.popUp);
+            const shellHeight = readShellHeight(context.popUp);
+            closeTravel = readCloseTravel(context.popUp, axis < 0, shellHeight);
             closeDistance = shellHeight * CLOSE_HEIGHT_RATIO;
             dragging = true;
             speedFromY = currentY;
@@ -667,7 +715,8 @@ export function configurePopupSlideToClose(context, closePopup) {
             return;
         }
 
-        const target = readGestureTarget(readTouchSource(event, realTouchStart), popUp);
+        const topSheet = isTopSheetLayout(popUp);
+        const target = readGestureTarget(readTouchSource(event, realTouchStart), popUp, topSheet);
         if (target.blocked) {
             return;
         }
@@ -679,15 +728,16 @@ export function configurePopupSlideToClose(context, closePopup) {
         claimed = false;
         blocking = false;
         slides = mode === 'anywhere' || (mode === 'header' && target.header);
+        axis = topSheet ? -1 : 1;
         offset = 0;
-        shellHeight = 0;
+        closeTravel = 0;
         closeDistance = 0;
         paintedOffset = 0;
         lastFrameTime = null;
         frameInterval = null;
         slider = target.slider;
         startX = touch.clientX;
-        startY = touch.clientY;
+        startY = touch.clientY * axis;
         startTime = Date.now();
         lastY = startY;
         lastTime = startTime;

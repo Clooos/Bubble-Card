@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { effectiveButtonType, hasClassicHeader, hasFullHeightSheet, isHomeAssistantStyle } from './style.js';
+import { effectiveButtonType, getPopupPosition, hasClassicHeader, hasFullHeightSheet, isHomeAssistantStyle, offersPopupPosition } from './style.js';
 
 const popUp = (extra) => ({ card_type: 'pop-up', hash: '#kitchen', ...extra });
 
@@ -74,5 +74,31 @@ describe('the button a card really draws', () => {
     test('an unset key stays unset, the caller decides its default', () => {
         expect(effectiveButtonType({ card_type: 'button' })).toBeUndefined();
         expect(effectiveButtonType(undefined)).toBeUndefined();
+    });
+});
+
+describe('the edge a sheet comes in from', () => {
+    test('is the bottom unless the config asks for the top', () => {
+        expect(getPopupPosition({})).toBe('bottom');
+        expect(getPopupPosition({ popup_position: 'bottom' })).toBe('bottom');
+        expect(getPopupPosition({ popup_position: 'left' })).toBe('bottom');
+        expect(getPopupPosition({ popup_position: 'top' })).toBe('top');
+        expect(getPopupPosition({ popup_mode: 'fit-content', popup_position: 'top' })).toBe('top');
+        expect(getPopupPosition({ popup_style: 'classic', popup_position: 'top' })).toBe('top');
+    });
+
+    // A config moved to a dialog keeps working instead of producing a dialog
+    // that slides, and the Home Assistant style stays a reproduction.
+    test('only a sheet has an edge, so a dialog answers with the bottom', () => {
+        for (const config of [
+            { popup_mode: 'centered', popup_position: 'top' },
+            { popup_mode: 'adaptive-dialog', popup_position: 'top' },
+            { popup_style: 'home-assistant', popup_position: 'top' },
+        ]) {
+            expect(offersPopupPosition(config)).toBe(false);
+            expect(getPopupPosition(config)).toBe('bottom');
+        }
+        expect(offersPopupPosition({})).toBe(true);
+        expect(offersPopupPosition({ popup_mode: 'fit-content' })).toBe(true);
     });
 });

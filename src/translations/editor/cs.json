@@ -247,6 +247,7 @@
       "mode_fit_content": "Přizpůsobit obsahu",
       "mode_centered": "Dialog (na střed)",
       "mode_adaptive": "Adaptivní dialog („Přizpůsobit obsahu“ na mobilu)",
+      "position": "Vysunout z",
       "performance_mode": "Režim výkonu",
       "performance": "Výkon",
       "performance_body": "Mírně zpozdí vykreslení obsahu a rozmazání pozadí a také vypne rozmazání pozadí za pop-upem (backdrop), pokud je nastaveno.",
