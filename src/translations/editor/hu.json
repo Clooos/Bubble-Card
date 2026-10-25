@@ -247,6 +247,7 @@
       "mode_fit_content": "Tartalomhoz igazítás",
       "mode_centered": "Párbeszédablak (középre igazítva)",
       "mode_adaptive": "Adaptív párbeszédablak (\"Tartalomhoz igazítás\" mobilon)",
+      "position": "Becsúszás innen",
       "performance_mode": "Teljesítmény mód",
       "performance": "Teljesítmény",
       "performance_body": "Kissé késlelteti a tartalom megjelenítését és a háttér elmosását, valamint kikapcsolja a backdrop elmosását, ha be van állítva.",

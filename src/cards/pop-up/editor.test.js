@@ -32,6 +32,7 @@ jest.unstable_mockModule('../../editor/utils.js', () => ({
 }));
 
 const {
+    applyPopupPosition,
     applyPopupSlideToClose,
     getPopUpModeChoice,
     getPopUpModeOptions,
@@ -145,6 +146,15 @@ describe('the pop-up editor renders', () => {
     test.each([
         ['slide to close from the header only', { slide_to_close: 'header' }],
         ['slide to close disabled', { slide_to_close: false }],
+    ])('with %s', (_label, config) => {
+        expect(() => renderPopUpEditor(makeEditor(config))).not.toThrow();
+    });
+
+    test.each([
+        ['a top sheet', { popup_position: 'top' }],
+        ['a fit-content top sheet', { popup_mode: 'fit-content', popup_position: 'top' }],
+        ['a top position left on a dialog', { popup_mode: 'centered', popup_position: 'top' }],
+        ['a top position left on the Home Assistant style', { popup_style: 'home-assistant', popup_position: 'top' }],
     ])('with %s', (_label, config) => {
         expect(() => renderPopUpEditor(makeEditor(config))).not.toThrow();
     });
@@ -335,5 +345,32 @@ describe('the styling defaults the editor shows', () => {
         // shadow is and fades it out on the way down.
         expect(getPopupStyleDisplayDefault(bubble, 'shadow_opacity')).toBe(0);
         expect(getPopupStyleDisplayDefault(ha, 'shadow_opacity')).toBe(100);
+    });
+});
+
+// Top is written, bottom (the default) leaves no key, the way the README
+// documents popup_position.
+describe('the position dropdown', () => {
+    beforeEach(() => {
+        fireEvent.mockClear();
+    });
+
+    test('writes top through the editor', () => {
+        const editor = { _config: { card_type: 'pop-up' }, _valueChanged: jest.fn() };
+
+        applyPopupPosition(editor, 'top');
+
+        expect(editor._valueChanged.mock.calls.map(([event]) => [event.target.configValue, event.detail.value]))
+            .toEqual([['popup_position', 'top']]);
+        expect(fireEvent).not.toHaveBeenCalled();
+    });
+
+    test('leaves no key behind for bottom, and keeps the rest of the config', () => {
+        const editor = { _config: { card_type: 'pop-up', hash: '#kitchen', popup_position: 'top' }, _valueChanged: jest.fn() };
+
+        applyPopupPosition(editor, 'bottom');
+
+        expect(editor._valueChanged).not.toHaveBeenCalled();
+        expect(fireEvent).toHaveBeenCalledWith(editor, 'config-changed', { config: { card_type: 'pop-up', hash: '#kitchen' } });
     });
 });

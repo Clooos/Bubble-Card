@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const { TOP_SHEET_CLOSED_TRANSFORM } = await import('./slide-to-close.js');
+
 const stylesPath = join(dirname(fileURLToPath(import.meta.url)), 'styles.css');
 const styles = readFileSync(stylesPath, 'utf8');
 
@@ -384,5 +386,48 @@ describe('pop-up styles', () => {
     expect(rule).not.toBeNull();
     expect(rule[1]).toContain('--bubble-sub-button-background-color:');
     expect(rule[1]).toContain('--bubble-sub-slider-background-color:');
+  });
+});
+
+describe('popup_position: top', () => {
+  function rule(selector) {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = styles.match(new RegExp(escaped + '\\s*\\{([^}]*)\\}'));
+    return match?.[1] ?? '';
+  }
+
+  test('leaves past the top of the screen, on the transform slide-to-close lets go on', () => {
+    const closed = rule('.bubble-pop-up.popup-position-top.is-popup-closed:not(.editor),\n.bubble-pop-up.popup-position-top.is-closing:not(.editor)');
+    expect(TOP_SHEET_CLOSED_TRANSFORM).toContain('calc(-100% - var(--bubble-pop-up-top-inset');
+    expect(closed).toContain(`transform: ${TOP_SHEET_CLOSED_TRANSFORM};`);
+  });
+
+  test('knows where the upper edge of a sheet stands, on a phone and on a desktop', () => {
+    expect(styles).toContain('--bubble-pop-up-top-inset: calc(56px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-mobile));');
+    expect(styles).toContain('--bubble-pop-up-top-inset: calc(56px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-desktop));');
+    // Declared next to the top it mirrors, with the same value, so the sheet
+    // stands where the closed transform thinks it does.
+    for (const offset of ['mobile', 'desktop']) {
+      const value = `calc(56px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-${offset}))`;
+      expect(styles).toMatch(new RegExp(`--bubble-pop-up-top-inset: ${value.replace(/[()+]/g, '\\$&')};[^}]*top: ${value.replace(/[()+]/g, '\\$&')};`));
+    }
+  });
+
+  test('fit content hangs from the header instead of standing on the bottom edge', () => {
+    const fit = rule('.bubble-pop-up.popup-position-top.popup-mode-fit-content:not(.editor)');
+    expect(fit).toContain('top: var(--bubble-pop-up-top-inset);');
+    expect(fit).toContain('bottom: auto;');
+  });
+
+  test('is rounded at its lower end and square where it meets the header', () => {
+    expect(rule('.bubble-pop-up.popup-position-top:not(.editor),\n.bubble-pop-up.popup-position-top:not(.editor) > .bubble-pop-up-background')).toMatch(/border-radius: 0 0 /);
+    expect(rule('.bubble-pop-up.popup-position-top:not(.editor):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog):not(.popup-style-home-assistant) > .bubble-pop-up-container'))
+      .toMatch(/clip-path: inset\(0 round 0 0 /);
+  });
+
+  test('the quick open drops in from above, and outranks the bottom-sheet one', () => {
+    expect(rule('.bubble-pop-up.is-fast-opening.popup-position-top:not(.editor):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog)'))
+      .toContain('animation: bubble-popup-fast-open-top-sheet');
+    expect(styles).toMatch(/@keyframes bubble-popup-fast-open-top-sheet\s*\{\s*from\s*\{\s*transform: translateY\(-14px\);/);
   });
 });

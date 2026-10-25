@@ -247,6 +247,7 @@
       "mode_fit_content": "Ajustare la conținut",
       "mode_centered": "Dialog (centrat)",
       "mode_adaptive": "Dialog adaptiv (\"Ajustare la conținut\" pe mobil)",
+      "position": "Glisare din",
       "performance_mode": "Mod de performanță",
       "performance": "Performanță",
       "performance_body": "Întârzie ușor redarea conținutului și estomparea fundalului și dezactivează totodată estomparea fundalului din spate, dacă este setată.",

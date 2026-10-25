@@ -247,6 +247,7 @@
       "mode_fit_content": "Sipas përmbajtjes",
       "mode_centered": "Dialog (i qendërzuar)",
       "mode_adaptive": "Dialog adaptiv (\"Sipas përmbajtjes\" në celular)",
+      "position": "Rrëshqit nga",
       "performance_mode": "Modaliteti i performancës",
       "performance": "Performanca",
       "performance_body": "Vonon pak shfaqjen e përmbajtjes dhe turbullimin e sfondit, gjithashtu çaktivizon turbullimin e prapaskenës nëse është vendosur.",

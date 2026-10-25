@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { fireEvent } from '../../tools/utils.js';
 import setupTranslation, { ensureEditorTranslations } from '../../tools/localize.js';
-import { getPopupStyleDisplayDefault, hasFullHeightSheet, isHomeAssistantStyle } from './style.js';
+import { getPopupPosition, getPopupStyleDisplayDefault, hasFullHeightSheet, isHomeAssistantStyle, offersPopupPosition, POPUP_POSITION_BOTTOM, POPUP_POSITION_TOP } from './style.js';
 import { tTemplate } from '../../editor/utils.js';
 import { renderButtonEditor } from '../button/editor.js';
 import { isHashOnCurrentPage } from './navigation-picker-bridge.js';
@@ -25,6 +25,13 @@ function getPopUpModeList(t) {
         { 'label': t('editor.popup.mode_fit_content'), 'value': 'fit-content' },
         { 'label': t('editor.popup.mode_centered'), 'value': 'centered' },
         { 'label': t('editor.popup.mode_adaptive'), 'value': 'adaptive-dialog' },
+    ];
+}
+
+function getPopUpPositionList(t) {
+    return [
+        { 'label': t('editor.common.bottom') + t('editor.common.default_suffix'), 'value': POPUP_POSITION_BOTTOM },
+        { 'label': t('editor.common.top'), 'value': POPUP_POSITION_TOP },
     ];
 }
 
@@ -181,6 +188,46 @@ function renderPopUpModeDropdown(editor) {
     `;
 }
 
+function renderPopUpPositionDropdown(editor) {
+    if (!offersPopupPosition(editor._config)) {
+        return html``;
+    }
+
+    const t = setupTranslation(editor.hass);
+    return html`
+        <ha-form
+            .hass=${editor.hass}
+            .data=${{ popup_position: getPopupPosition(editor._config) }}
+            .schema=${[{
+                name: 'popup_position',
+                selector: {
+                    select: {
+                        options: getPopUpPositionList(t),
+                        mode: 'dropdown'
+                    }
+                }
+            }]}
+            .computeLabel=${() => t('editor.popup.position')}
+            @value-changed=${(ev) => applyPopupPosition(editor, ev.detail.value.popup_position)}
+        ></ha-form>
+    `;
+}
+
+// Bottom leaves no key behind, the way the other defaults of this panel do.
+export function applyPopupPosition(editor, value) {
+    if (value === POPUP_POSITION_TOP) {
+        editor._valueChanged({
+            target: { configValue: 'popup_position' },
+            detail: { value }
+        });
+        return;
+    }
+
+    const newConfig = { ...editor._config };
+    delete newConfig.popup_position;
+    fireEvent(editor, 'config-changed', { config: newConfig });
+}
+
 function renderPopupPerformanceModeDropdown(editor) {
     const t = setupTranslation(editor.hass);
     const isPerformance = getPopupPerformanceModeValue(editor._config) === 'performance';
@@ -229,6 +276,12 @@ function renderPopupPerformanceModeDropdown(editor) {
     `;
 }
 
+function getPopUpPositionConfig(config) {
+    return getPopupPosition(config) === POPUP_POSITION_TOP
+        ? { popup_position: POPUP_POSITION_TOP }
+        : {};
+}
+
 function getPopUpLayoutConfig(config) {
     const mode = getPopUpModeValue(config);
     if (mode === 'fit-content') {
@@ -261,6 +314,7 @@ function getPopUpPerformanceConfig(config) {
 function getPopUpBehaviorConfig(config) {
     return {
         ...getPopUpLayoutConfig(config),
+        ...getPopUpPositionConfig(config),
         ...getPopUpPerformanceConfig(config),
     };
 }
@@ -599,6 +653,7 @@ export function renderPopUpEditor(editor) {
                 ></ha-form>
                 ${duplicateHashWarningTemplate(t, initialHashState.isDuplicate)}
                 ${renderPopUpModeDropdown(editor)}
+                ${renderPopUpPositionDropdown(editor)}
                 ${renderBottomOffsetOption(editor)}
                 ${renderDialogFullWidthOption(editor)}
                 <ha-formfield>
@@ -674,6 +729,7 @@ export function renderPopUpEditor(editor) {
             ${duplicateHashWarningTemplate(t, initialHashState.isDuplicate)}
             ${renderPopupStyleDropdown(editor)}
             ${renderPopUpModeDropdown(editor)}
+            ${renderPopUpPositionDropdown(editor)}
             ${renderBottomOffsetOption(editor)}
             ${renderDialogFullWidthOption(editor)}
             <ha-expansion-panel outlined>

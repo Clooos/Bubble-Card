@@ -247,6 +247,7 @@
       "mode_fit_content": "Ajustar ao conteúdo",
       "mode_centered": "Diálogo (centralizado)",
       "mode_adaptive": "Diálogo adaptativo (\"Ajustar ao conteúdo\" no celular)",
+      "position": "Deslizar de",
       "performance_mode": "Modo de desempenho",
       "performance": "Desempenho",
       "performance_body": "Atrasa levemente a renderização do conteúdo e o desfoque do fundo, e também desativa o desfoque do pano de fundo, se definido.",

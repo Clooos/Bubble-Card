@@ -247,6 +247,7 @@
       "mode_fit_content": "Aanpassen aan inhoud",
       "mode_centered": "Dialoog (gecentreerd)",
       "mode_adaptive": "Adaptieve dialoog (\"Aanpassen aan inhoud\" op mobiel)",
+      "position": "Inschuiven vanaf",
       "performance_mode": "Prestatiemodus",
       "performance": "Prestaties",
       "performance_body": "Vertraagt het renderen van de inhoud en de achtergrondvervaging iets, en schakelt ook de backdrop-vervaging uit als die is ingesteld.",

@@ -247,6 +247,7 @@
       "mode_fit_content": "符合內容大小",
       "mode_centered": "對話框 (置中)",
       "mode_adaptive": "自適應對話框 (行動裝置上為「符合內容大小」)",
+      "position": "滑入方向",
       "performance_mode": "效能模式",
       "performance": "效能",
       "performance_body": "略微延遲內容繪製與背景模糊，並停用已設定的背景遮罩模糊。",

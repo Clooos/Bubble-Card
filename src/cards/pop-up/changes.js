@@ -30,6 +30,7 @@ function shouldApplyPopupStaticShell(context) {
     const popupMode = config.popup_mode ?? '';
     const performanceMode = config.performance_mode ?? '';
     const withBottomOffset = !!config.with_bottom_offset;
+    const popupPosition = config.popup_position ?? '';
     const popupStyle = config.popup_style ?? '';
     const showHeader = config.show_header ?? true;
     const showPreviousButton = config.show_previous_button ?? false;
@@ -50,6 +51,7 @@ function shouldApplyPopupStaticShell(context) {
         context._lastPopupShellMode === popupMode &&
         context._lastPopupShellPerformanceMode === performanceMode &&
         context._lastPopupShellBottomOffset === withBottomOffset &&
+        context._lastPopupShellPosition === popupPosition &&
         context._lastPopupShellStyle === popupStyle &&
         context._lastPopupShellShowHeader === showHeader &&
         context._lastPopupShellShowPreviousButton === showPreviousButton &&
@@ -72,6 +74,7 @@ function shouldApplyPopupStaticShell(context) {
     context._lastPopupShellMode = popupMode;
     context._lastPopupShellPerformanceMode = performanceMode;
     context._lastPopupShellBottomOffset = withBottomOffset;
+    context._lastPopupShellPosition = popupPosition;
     context._lastPopupShellStyle = popupStyle;
     context._lastPopupShellShowHeader = showHeader;
     context._lastPopupShellShowPreviousButton = showPreviousButton;

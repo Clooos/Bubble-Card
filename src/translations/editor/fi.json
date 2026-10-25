@@ -247,6 +247,7 @@
       "mode_fit_content": "Sovita sisältöön",
       "mode_centered": "Valintaikkuna (keskitetty)",
       "mode_adaptive": "Mukautuva valintaikkuna (\"Sovita sisältöön\" mobiilissa)",
+      "position": "Liukuu sisään",
       "performance_mode": "Suorituskykytila",
       "performance": "Suorituskyky",
       "performance_body": "Viivästyttää hieman sisällön hahmontamista ja taustan sumennusta sekä poistaa taustapeitteen sumennuksen käytöstä, jos se on asetettu.",
