@@ -1168,6 +1168,7 @@ if (!window.__bubbleLocationDeduperAdded) {
     try {
         let pendingHashBase = null;
         let pendingHashPushed = false;
+        let pendingHashFrom;
         let guardNextNoHash = false;
         let pendingPreviousHash = "";
         let lastKnownHash = window.location.hash || "";
@@ -1187,6 +1188,12 @@ if (!window.__bubbleLocationDeduperAdded) {
                 // all, so in both cases there is nothing of ours to take back
                 // and going back would leave the dashboard entirely.
                 pendingHashPushed = event?.detail?.replace !== true;
+                // Home Assistant's navigate() writes on the entry it pushes the
+                // page it came from. Opened from another page or another view,
+                // the entry below is that page, and going back would leave the
+                // view of the pop-up (#2673). Our own addHash() writes nothing,
+                // and always pushes from the view it stays on.
+                pendingHashFrom = history.state?.from;
                 pendingHashBase = base;
                 guardNextNoHash = false;
                 pendingPreviousHash = lastKnownHash || "";
@@ -1198,6 +1205,7 @@ if (!window.__bubbleLocationDeduperAdded) {
                 guardNextNoHash = false;
                 pendingHashBase = null;
                 pendingHashPushed = false;
+                pendingHashFrom = undefined;
                 pendingPreviousHash = "";
                 lastKnownHash = window.location.hash || "";
                 return;
@@ -1208,6 +1216,7 @@ if (!window.__bubbleLocationDeduperAdded) {
                 pendingHashBase &&
                 base === pendingHashBase &&
                 pendingHashPushed &&
+                (pendingHashFrom === undefined || pendingHashFrom === window.location.pathname) &&
                 !pendingPreviousHash
             ) {
                 // Having pushed the entry ourselves only makes the back safe
@@ -1227,6 +1236,7 @@ if (!window.__bubbleLocationDeduperAdded) {
 
             pendingHashBase = null;
             pendingHashPushed = false;
+            pendingHashFrom = undefined;
             pendingPreviousHash = "";
             lastKnownHash = window.location.hash || "";
         };
