@@ -53,6 +53,12 @@ jest.unstable_mockModule('./cards/index.js', () => ({ noteFoldCalibration: jest.
     handlePopUpCards: jest.fn(),
 }));
 
+// Stands for the icon data of Home Assistant, moved by a test when it lands.
+let iconDataVersion = 0;
+jest.unstable_mockModule('../../tools/icon.js', () => ({
+    getIconDataVersion: () => iconDataVersion,
+}));
+
 const { cleanupPopUp, handlePopUp } = await import('./index.js');
 const { changeEditor } = await import('./changes.js');
 const { changeStyle } = await import('./changes.js');
@@ -179,6 +185,32 @@ describe('handlePopUp performance guards', () => {
 
         expect(renderHeaderButton).toHaveBeenCalledTimes(2);
         expect(registerPopUpHash).toHaveBeenCalledTimes(1);
+    });
+
+    // #2675: a sub-button whose entity has no icon of its own waits for the
+    // icons of Home Assistant, and the header has to draw again once they land.
+    test('refreshes the header once when the icons of Home Assistant land', async () => {
+        const context = createOpenPopupContext();
+
+        await handlePopUp(context);
+        await handlePopUp(context);
+        expect(renderHeaderButton).toHaveBeenCalledTimes(1);
+
+        iconDataVersion += 1;
+        await handlePopUp(context);
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(2);
+    });
+
+    test('refreshes the header when the entity registry lands after it drew', async () => {
+        const context = createOpenPopupContext();
+
+        await handlePopUp(context);
+        context._hass = { ...context._hass, entities: { 'light.kitchen': { icon: 'mdi:lamp' } } };
+        await handlePopUp(context);
+
+        expect(renderHeaderButton).toHaveBeenCalledTimes(2);
     });
 
     test('keeps refreshing the header when relative time fields are displayed', async () => {

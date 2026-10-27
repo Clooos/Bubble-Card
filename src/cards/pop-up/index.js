@@ -7,6 +7,7 @@ import { isStandalonePopUpConfig } from './migration.js';
 import { ensureArray, extractConditionEntityIds } from '../../tools/validate-condition.js';
 import { resolveTemplate } from '../../tools/render-template.js';
 import { resolveStateContent, stateContentHasClock } from '../../tools/state-content.js';
+import { getIconDataVersion } from '../../tools/icon.js';
 
 initPopUpHashNavigationBridge();
 
@@ -356,6 +357,11 @@ function shouldRefreshHeader(context) {
     // Bumped by the template store when a template this pop-up holds moves,
     // which is how a templated header name or icon gets to update.
     const templateVersion = context._templateResultVersion || 0;
+    // The icons of Home Assistant and its entity registry can land after the
+    // header first drew, and an entity without an icon of its own is drawn
+    // without one until then (#2675).
+    const iconDataVersion = getIconDataVersion();
+    const entities = context._hass?.entities;
 
     if (_headerNeedsUnconditionalRefresh(context.config)) {
         context._lastHeaderConfigRef = context.config;
@@ -364,6 +370,8 @@ function shouldRefreshHeader(context) {
         context._lastHeaderUnitSystemRef = unitSystem;
         context._lastHeaderEditMode = isEditing;
         context._lastHeaderTemplateVersion = templateVersion;
+        context._lastHeaderIconDataVersion = iconDataVersion;
+        context._lastHeaderEntitiesRef = entities;
         _snapshotSubButtonEntityRefs(context);
         return true;
     }
@@ -373,7 +381,9 @@ function shouldRefreshHeader(context) {
         context._lastHeaderLocaleRef !== locale ||
         context._lastHeaderUnitSystemRef !== unitSystem ||
         context._lastHeaderEditMode !== isEditing ||
-        context._lastHeaderTemplateVersion !== templateVersion) {
+        context._lastHeaderTemplateVersion !== templateVersion ||
+        context._lastHeaderIconDataVersion !== iconDataVersion ||
+        context._lastHeaderEntitiesRef !== entities) {
 
         context._lastHeaderConfigRef = context.config;
         context._lastHeaderStateRef = entityState;
@@ -381,6 +391,8 @@ function shouldRefreshHeader(context) {
         context._lastHeaderUnitSystemRef = unitSystem;
         context._lastHeaderEditMode = isEditing;
         context._lastHeaderTemplateVersion = templateVersion;
+        context._lastHeaderIconDataVersion = iconDataVersion;
+        context._lastHeaderEntitiesRef = entities;
         _snapshotSubButtonEntityRefs(context);
         return true;
     }
