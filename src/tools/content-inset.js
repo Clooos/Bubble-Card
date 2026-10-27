@@ -10,7 +10,7 @@
 // on (ha-panel-home, hui-root), HA unsets it whenever the sidebar is hidden,
 // and the sidebar mods (WallPanel, kiosk-mode) hide the sidebar by changing
 // it. Every placement falls back to it in CSS, so on those versions nothing
-// here runs at all.
+// here is measured. One rule is added next to HA's own, see MODAL_RULE.
 //
 // Before 2026.6 the token was --mdc-drawer-width, a WIDTH that never said
 // whether the sidebar was on screen. HA dropped it with `unset` to hide the
@@ -38,6 +38,13 @@ const MAX_BOX_LOOKUPS = 20;
 
 const NEVER_RENDERED = new Set(['style', 'script', 'template', 'link']);
 
+// In modal (a narrow screen, or the sidebar always hidden) HA unsets
+// --ha-sidebar-width, as nothing insets the content then. custom-sidebar sets
+// it back to 256px to size its drawer, and every placement moved over by a
+// sidebar nobody could see (#2669). This rule says it where HA decides it.
+const MODAL_RULE_ID = 'bubble-card-modal-content-inset';
+const MODAL_RULE = `:host([modal]) { ${CONTENT_INLINE_START_VAR}: 0px; }`;
+
 let insetFromHomeAssistant = null;
 let surface = null;
 let observedBox = null;
@@ -48,6 +55,7 @@ let observedWidth = null;
 let pendingValue = null;
 let settleFrame = 0;
 let publishedValue = null;
+let modalRule = null;
 
 // Null until hass is up, then whether Home Assistant publishes the inset
 // itself. Read once, the frontend does not change under a page.
@@ -228,12 +236,42 @@ function onResize(entries) {
     refresh();
 }
 
+function ensureModalRule() {
+    if (modalRule?.isConnected) {
+        return;
+    }
+
+    const root = document.querySelector?.('home-assistant')?.shadowRoot
+        ?.querySelector?.('home-assistant-main')?.shadowRoot;
+    if (!root) {
+        return;
+    }
+
+    modalRule = root.getElementById?.(MODAL_RULE_ID) || null;
+    if (modalRule) {
+        return;
+    }
+
+    modalRule = document.createElement('style');
+    modalRule.id = MODAL_RULE_ID;
+    modalRule.textContent = MODAL_RULE;
+    root.appendChild(modalRule);
+}
+
 // Idempotent, and cheap enough to call from every pop-up registration, which
 // is how a panel swap or a late-booting dashboard gets picked up. It does
-// nothing until hass is up, and nothing at all on the versions of Home
-// Assistant that publish the inset themselves.
+// nothing until hass is up, and on the versions of Home Assistant that publish
+// the inset themselves it only keeps the modal rule in place.
 export function startContentInsetSync() {
-    if (typeof document === 'undefined' || homeAssistantPublishesInset() !== false) {
+    if (typeof document === 'undefined') {
+        return false;
+    }
+
+    const fromHomeAssistant = homeAssistantPublishesInset();
+    if (fromHomeAssistant === true) {
+        ensureModalRule();
+    }
+    if (fromHomeAssistant !== false) {
         return false;
     }
 
@@ -279,4 +317,6 @@ export function stopContentInsetSync() {
     pendingValue = null;
     publishedValue = null;
     document.documentElement?.style?.removeProperty(CONTENT_INLINE_START_VAR);
+    modalRule?.remove?.();
+    modalRule = null;
 }
