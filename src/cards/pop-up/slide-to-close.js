@@ -126,7 +126,7 @@ export function isBottomSheetLayout(popUp) {
     return true;
 }
 
-function isSwipeLockedNode(node) {
+function isSwipeLockedNode(node, somethingFullscreen) {
     // A list the user has already scrolled owns the gesture. This is the rule
     // that keeps a downward drag inside a scrolled pop-up a scroll, and only
     // turns it into a close once the list is back at its top.
@@ -138,9 +138,11 @@ function isSwipeLockedNode(node) {
         return true;
     }
 
-    // A card fullscreen inside the pop-up (a camera) keeps its drags: closing
-    // the pop-up would end the fullscreen.
-    if (typeof node.matches === 'function' && node.matches(':fullscreen')) {
+    // A card in fullscreen inside the pop-up (a camera) keeps its drags, as
+    // closing the pop-up would end the fullscreen. Only asked while something
+    // is in fullscreen, an engine without `:fullscreen` (Safari before 16.4)
+    // throws on the selector, and an ordinary touch has nothing to ask.
+    if (somethingFullscreen && typeof node.matches === 'function' && node.matches(':fullscreen')) {
         return true;
     }
 
@@ -207,6 +209,7 @@ function readGestureTarget(event, popUp) {
 
     let slider = null;
     let header = false;
+    const somethingFullscreen = !!document.fullscreenElement;
 
     for (const node of path) {
         if (node === popUp) {
@@ -217,7 +220,7 @@ function readGestureTarget(event, popUp) {
             continue;
         }
 
-        if (isSwipeLockedNode(node)) {
+        if (isSwipeLockedNode(node, somethingFullscreen)) {
             return { blocked: true, slider: null, header: false };
         }
 

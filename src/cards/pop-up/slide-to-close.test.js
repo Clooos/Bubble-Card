@@ -461,6 +461,8 @@ describe('gestures the pop-up must not take', () => {
     test('leaves a card that is fullscreen inside the pop-up alone', () => {
         const { context, popUp } = harness();
         const fullscreen = { ...createNode(), matches: (selector) => selector === ':fullscreen' };
+        // The document names the outermost host, the card itself sits in a shadow root.
+        global.document.fullscreenElement = {};
 
         context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), fullscreen, popUp] }));
 
@@ -470,8 +472,19 @@ describe('gestures the pop-up must not take', () => {
     test('still slides when the page around the pop-up is fullscreen', () => {
         const { context, popUp } = harness();
         const page = { ...createNode(), matches: (selector) => selector === ':fullscreen' };
+        global.document.fullscreenElement = page;
 
         context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), popUp, page] }));
+
+        expect(documentListeners.touchmove ?? []).toHaveLength(1);
+    });
+
+    test('never asks for :fullscreen while nothing is in fullscreen', () => {
+        const { context, popUp } = harness();
+        // Safari before 16.4 does not know the selector and throws on it.
+        const node = { ...createNode(), matches: () => { throw new SyntaxError("':fullscreen' is not a valid selector"); } };
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path: [node, popUp] }));
 
         expect(documentListeners.touchmove ?? []).toHaveLength(1);
     });
