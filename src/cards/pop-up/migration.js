@@ -692,6 +692,8 @@ let _pending = false;
 let _latestMigrationNoticeHass = null;
 const _shownMigrationNoticeKeys = new Set();
 const _noticeHashesByKey = new Map();
+const _noticeCardsByKey = new Map();
+const _noticeUntrackedKeys = new Set();
 
 function isMigrationNoticeDismissed(storageKey) {
     try {
@@ -705,7 +707,7 @@ function isMigrationNoticeDismissed(storageKey) {
  * Call once per legacy (non-standalone) pop-up card encountered.
  * Shows a dismissible dialog the first time, then never again (localStorage).
  */
-export function maybeShowMigrationNotice(hass = null, hash = null) {
+export function maybeShowMigrationNotice(hass = null, hash = null, card = null) {
     if (hass) {
         _latestMigrationNoticeHass = hass;
     }
@@ -714,14 +716,23 @@ export function maybeShowMigrationNotice(hass = null, hash = null) {
 
     if (_shownMigrationNoticeKeys.has(storageKey)) return;
 
-    // Every legacy pop-up rendered before the notice opens adds its hash, which
+    // Every legacy pop-up rendered before the notice opens is listed, which
     // covers the ones the view config cannot show, rendered from a template.
-    const normalizedHash = normalizePopUpHash(hash);
-    if (normalizedHash) {
-        if (!_noticeHashesByKey.has(storageKey)) {
-            _noticeHashesByKey.set(storageKey, new Set());
+    // A card is kept rather than its hash, so the notice can check it again.
+    if (card) {
+        if (!_noticeCardsByKey.has(storageKey)) {
+            _noticeCardsByKey.set(storageKey, new Set());
         }
-        _noticeHashesByKey.get(storageKey).add(normalizedHash);
+        _noticeCardsByKey.get(storageKey).add(card);
+    } else {
+        _noticeUntrackedKeys.add(storageKey);
+        const normalizedHash = normalizePopUpHash(hash);
+        if (normalizedHash) {
+            if (!_noticeHashesByKey.has(storageKey)) {
+                _noticeHashesByKey.set(storageKey, new Set());
+            }
+            _noticeHashesByKey.get(storageKey).add(normalizedHash);
+        }
     }
 
     if (_pending) return;
@@ -731,6 +742,7 @@ export function maybeShowMigrationNotice(hass = null, hash = null) {
         // pop-up: without this the dismissed case re-parsed the URL and hit
         // localStorage (synchronous, disk-backed) on every tick, forever.
         _shownMigrationNoticeKeys.add(storageKey);
+        _noticeCardsByKey.delete(storageKey);
         return;
     }
 
@@ -744,12 +756,30 @@ function _show() {
     const storageKey = getMigrationNoticeStorageKey(_latestMigrationNoticeHass);
     if (_shownMigrationNoticeKeys.has(storageKey) || isMigrationNoticeDismissed(storageKey)) {
         _pending = false;
+        _noticeCardsByKey.delete(storageKey);
         return;
     }
 
     // Wait for ha-dialog to be defined.
     if (!customElements.get('ha-dialog')) {
         customElements.whenDefined('ha-dialog').then(_show);
+        return;
+    }
+
+    // A card wrapping a pop-up can give it its cards only once it has hass,
+    // like streamline-card building them from a template. The pop-up asked
+    // for the notice before that, and has its cards by now (#2677).
+    const legacyCards = [...(_noticeCardsByKey.get(storageKey) || [])].filter((card) => isLegacyPopUpConfig(card?.config));
+    const askedByCardsOnly = _noticeCardsByKey.has(storageKey) && !_noticeUntrackedKeys.has(storageKey);
+    _noticeCardsByKey.delete(storageKey);
+
+    // The pop-ups left to migrate on this view, read from its config when the
+    // notice opens, so the list is the view's as it stands and none is missed
+    // for being closed or out of the page.
+    const viewLegacyHashes = getCurrentViewPopUps(_latestMigrationNoticeHass).filter((popUp) => popUp.legacy).map((popUp) => popUp.hash);
+
+    if (askedByCardsOnly && legacyCards.length === 0 && viewLegacyHashes.length === 0) {
+        _pending = false;
         return;
     }
 
@@ -770,13 +800,11 @@ function _show() {
     const content = document.createElement('div');
     content.style.lineHeight = '1.6';
 
-    // The pop-ups left to migrate on this view, read from its config when the
-    // notice opens, so the list is the view's as it stands and none is missed
-    // for being closed or out of the page. They look like the badge edit mode
-    // shows on each of them.
+    // They look like the badge edit mode shows on each of them.
     const hashes = new Set([
-        ...getCurrentViewPopUps(_latestMigrationNoticeHass).filter((popUp) => popUp.legacy).map((popUp) => popUp.hash),
+        ...viewLegacyHashes,
         ...(_noticeHashesByKey.get(storageKey) || []),
+        ...legacyCards.map((card) => normalizePopUpHash(card.config.hash)).filter(Boolean),
     ]);
     const hashTitle = escapeHtml(String(t('editor.migration.notice_available'))).replace(/"/g, '&quot;');
     const hashList = hashes.size > 0 ? `
