@@ -2998,6 +2998,9 @@ class BubbleCardEditor extends LitElement {
         };
 
         const proxySection = document.createElement("hui-section");
+        // HA 2026.11 moved card dialog handlers to hui-view and uses paths
+        // into the full Lovelace config. Older releases handle them on sections.
+        const usesViewDialogHandlers = "path" in proxySection;
         proxySection.style.display = "none";
         proxySection.hass = this.hass;
         proxySection.index = 0;
@@ -3018,6 +3021,29 @@ class BubbleCardEditor extends LitElement {
                 await onSaveConfig(newConfig);
             },
         };
+
+        if (usesViewDialogHandlers) {
+            const proxyView = document.createElement("hui-view");
+            proxyView.style.display = "none";
+            proxyView.hass = this.hass;
+            proxyView.index = 0;
+            proxyView.lovelace = proxySection.lovelace;
+            const cardsPath = ["views", 0, "sections", 0, "cards"];
+            const path = eventName === "ll-edit-card"
+                ? [...cardsPath, eventDetail.path[eventDetail.path.length - 1]]
+                : cardsPath;
+            homeAssistant.appendChild(proxyView);
+            try {
+                proxyView.dispatchEvent(new CustomEvent(eventName, {
+                    bubbles: true,
+                    composed: true,
+                    detail: { ...eventDetail, path },
+                }));
+                return true;
+            } finally {
+                proxyView.remove();
+            }
+        }
 
         homeAssistant.appendChild(proxySection);
 

@@ -778,3 +778,48 @@ describe('BubbleCardEditor conditions kept the same objects (#2657)', () => {
     });
 });
 
+describe('standalone popup dialog compatibility', () => {
+    test('keeps the section dialog flow for older Home Assistant versions', async () => {
+        const editor = new BubbleCardEditor();
+        editor.hass = {};
+        const layout = { dispatchEvent: jest.fn() };
+        const section = { style: {}, _layoutElement: layout, _initializeConfig: jest.fn(), remove: jest.fn() };
+        const host = { appendChild: jest.fn() };
+        editor._getHomeAssistantHost = () => host;
+        document.createElement = jest.fn(() => section);
+        global.CustomEvent = class { constructor(type, options) { this.type = type; Object.assign(this, options); } };
+        const detail = { path: [0, 0, 1] };
+
+        expect(await editor._dispatchStandaloneSectionDialog([{ type: 'tile' }], 'll-edit-card', detail, jest.fn())).toBe(true);
+        expect(host.appendChild).toHaveBeenCalledWith(section);
+        expect(layout.dispatchEvent.mock.calls[0][0].detail).toEqual(detail);
+    });
+
+    test.each([
+        ['ll-edit-card', { path: [0, 0, 1] }, ['views', 0, 'sections', 0, 'cards', 1]],
+        ['ll-create-card', undefined, ['views', 0, 'sections', 0, 'cards']],
+    ])('routes %s through the new Home Assistant view with the popup card path', async (eventName, detail, expectedPath) => {
+        const editor = new BubbleCardEditor();
+        editor.hass = {};
+        const dispatched = [];
+        const host = { appendChild: jest.fn() };
+        editor._getHomeAssistantHost = () => host;
+        const section = { path: undefined, style: {} };
+        const view = {
+            style: {},
+            dispatchEvent: jest.fn((event) => dispatched.push(event)),
+            remove: jest.fn(),
+        };
+        document.createElement = jest.fn((name) => name === 'hui-section' ? section : view);
+        global.CustomEvent = class { constructor(type, options) { this.type = type; Object.assign(this, options); } };
+        const cards = [{ type: 'tile' }, { type: 'custom:bubble-card' }];
+        const save = jest.fn();
+
+        expect(await editor._dispatchStandaloneSectionDialog(cards, eventName, detail, save)).toBe(true);
+        expect(host.appendChild).toHaveBeenCalledWith(view);
+        expect(view.lovelace.config.views[0].sections[0].cards).toEqual(cards);
+        expect(dispatched[0].detail.path).toEqual(expectedPath);
+        await view.lovelace.saveConfig({ views: [] });
+        expect(save).toHaveBeenCalledWith({ views: [] });
+    });
+});
