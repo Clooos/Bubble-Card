@@ -1,6 +1,6 @@
 import { convertToRGBA } from "../../tools/style.js";
 import { isHomeAssistantStyle } from "./style.js";
-import { createElement, getCachedBodyStyles } from "../../tools/utils.js";
+import { createElement, getCachedBodyStyles, mountPopUpOverlay } from "../../tools/utils.js";
 import { handleCustomStyles } from "../../tools/style-processor.js";
 import backdropStyles from "./backdrop.css";
 
@@ -199,6 +199,8 @@ export function getBackdrop(context) {
         }
 
         const activeContext = backdrop?.activeContext;
+        // Next to the pop-up, in its stacking context (see mountPopUpOverlay).
+        mountPopUpOverlay(backdropHostElement, activeContext?.popUp);
         const shouldAnimateOpen = internalBackdropElement.classList.contains("is-hidden");
 
         clearBackdropHideTimeout();

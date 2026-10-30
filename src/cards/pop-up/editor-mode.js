@@ -297,7 +297,7 @@ export function changeEditor(context) {
         if (popUpHash && location.hash === popUpHash) {
             popUp.classList.remove('editor', 'is-popup-closed');
             popUp.classList.add('is-popup-opened');
-            toggleBodyScroll(true);
+            toggleBodyScroll(true, popUp);
         } else {
             popUp.classList.remove('editor');
 
