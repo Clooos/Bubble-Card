@@ -294,3 +294,155 @@ describe('standalone popup card editor actions', () => {
         expect(warnSpy).toHaveBeenCalledWith('Bubble Card: standalone pop-up editor unavailable for nested card edit');
     });
 });
+
+// Home Assistant 2026.11 moved the card clipboard out of the section, turned Cut
+// into an event of its own and added Paste.
+describe('pop-up card clipboard', () => {
+    let originals;
+    let store;
+    let homeAssistant;
+    let created;
+
+    function installDom() {
+        created = [];
+        homeAssistant = { appendChild: jest.fn() };
+        global.document = {
+            querySelector: jest.fn((selector) => (selector === 'body > home-assistant' ? homeAssistant : null)),
+            createElement: jest.fn((tagName) => {
+                const element = { tagName, style: {}, remove: jest.fn(), dispatchEvent: jest.fn() };
+                if (tagName === 'hui-section') {
+                    element._initializeConfig = jest.fn(async () => {});
+                    element.updateComplete = Promise.resolve();
+                    element._layoutElement = { dispatchEvent: jest.fn() };
+                }
+                created.push(element);
+                return element;
+            }),
+        };
+    }
+
+    // The toolbar of a card: on 2026.11 it carries the clipboard of Home
+    // Assistant, written through to the session storage, on 2026.10 it does not.
+    function toolbar({ withClipboard }) {
+        const element = {};
+        if (withClipboard) {
+            Object.defineProperty(element, '_clipboard', {
+                get: () => JSON.parse(store.get('dashboardCardClipboard') || 'null'),
+                set: (value) => store.set('dashboardCardClipboard', JSON.stringify(value)),
+            });
+        }
+        return { querySelector: jest.fn((selector) => (selector === 'hui-card-edit-mode' ? element : null)) };
+    }
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        originals = {
+            window: global.window,
+            document: global.document,
+            customElements: global.customElements,
+            sessionStorage: global.sessionStorage,
+            CustomEvent: global.CustomEvent,
+        };
+        global.window = {
+            __bubbleCardEditorInstances: new Set(),
+            __bubbleStandalonePopupEditorOpeners: new Map(),
+        };
+        store = new Map();
+        global.sessionStorage = {
+            getItem: (key) => (store.has(key) ? store.get(key) : null),
+            setItem: (key, value) => store.set(key, String(value)),
+        };
+        global.CustomEvent = class {
+            constructor(type, options = {}) {
+                this.type = type;
+                this.detail = options.detail;
+            }
+        };
+        installDom();
+    });
+
+    afterEach(() => {
+        for (const [key, value] of Object.entries(originals)) {
+            if (value === undefined) delete global[key];
+            else global[key] = value;
+        }
+    });
+
+    const twoCards = (withClipboard = true) => createPopupContext({
+        _hass: { localize: (key) => (key === 'ui.panel.lovelace.editor.edit_card.copied_to_clipboard' ? 'Card copied to clipboard' : key) },
+        _cardsContainer: toolbar({ withClipboard }),
+        config: {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#kitchen',
+            cards: [{ type: 'button', entity: 'light.kitchen' }, { type: 'tile', entity: 'light.hall' }],
+        },
+    });
+
+    test('copies a card into the clipboard of Home Assistant through a toolbar of the pop-up', async () => {
+        store.set('dashboardCardClipboard', JSON.stringify({ type: 'markdown', content: 'older copy' }));
+        const context = twoCards();
+        const actions = createEditorActions(context, jest.fn());
+
+        actions.copyCard(1);
+        await Promise.resolve();
+
+        expect(JSON.parse(store.get('dashboardCardClipboard'))).toEqual({ type: 'tile', entity: 'light.hall' });
+        expect(created).toEqual([]);
+        expect(fireEvent).toHaveBeenCalledWith(context, 'hass-notification', { message: 'Card copied to clipboard' });
+    });
+
+    test('still copies through the section when the toolbar has no clipboard', async () => {
+        const actions = createEditorActions(twoCards(false), jest.fn());
+
+        actions.copyCard(1);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const section = created.find((element) => element.tagName === 'hui-section');
+        expect(section).toBeDefined();
+        expect(homeAssistant.appendChild).toHaveBeenCalledWith(section);
+        const event = section._layoutElement.dispatchEvent.mock.calls[0][0];
+        expect(event.type).toBe('ll-copy-card');
+        expect(event.detail.path).toEqual([0, 0, 1]);
+    });
+
+    test('cuts a card out of the pop-up into the clipboard', async () => {
+        const rebuildCards = jest.fn();
+        const context = twoCards();
+        const actions = createEditorActions(context, rebuildCards);
+
+        actions.cutCard(0);
+        await Promise.resolve();
+
+        expect(context.config.cards).toEqual([{ type: 'tile', entity: 'light.hall' }]);
+        expect(JSON.parse(store.get('dashboardCardClipboard'))).toEqual({ type: 'button', entity: 'light.kitchen' });
+        expect(rebuildCards).toHaveBeenCalled();
+    });
+
+    test('pastes the clipboard after the card it was pasted on', () => {
+        store.set('dashboardCardClipboard', JSON.stringify({ type: 'markdown', content: 'Hi' }));
+        const context = twoCards();
+        const actions = createEditorActions(context, jest.fn());
+
+        actions.pasteCard(0);
+
+        expect(context.config.cards).toEqual([
+            { type: 'button', entity: 'light.kitchen' },
+            { type: 'markdown', content: 'Hi' },
+            { type: 'tile', entity: 'light.hall' },
+        ]);
+    });
+
+    test('pastes nothing when the clipboard is empty or unreadable', () => {
+        const rebuildCards = jest.fn();
+        const context = twoCards();
+        const actions = createEditorActions(context, rebuildCards);
+
+        actions.pasteCard(0);
+        store.set('dashboardCardClipboard', '{broken');
+        actions.pasteCard(0);
+
+        expect(context.config.cards).toHaveLength(2);
+        expect(rebuildCards).not.toHaveBeenCalled();
+    });
+});

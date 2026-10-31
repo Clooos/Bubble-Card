@@ -112,6 +112,18 @@ function _createSortable(context, actions) {
         actions.copyCard(ev.detail.path[2]);
     });
 
+    // Home Assistant 2026.11 turned Cut into an event of its own and added Paste.
+    // Left to bubble, its view would cut or paste a card of the dashboard.
+    sortable.addEventListener('ll-cut-card', (ev) => {
+        ev.stopPropagation();
+        actions.cutCard(ev.detail.path[2]);
+    });
+
+    sortable.addEventListener('ll-paste-card', (ev) => {
+        ev.stopPropagation();
+        actions.pasteCard(ev.detail.path[2]);
+    });
+
     // Intercept ll-change-grid-options: merge partial gridOptions into the card config, prevent bubbling to HA.
     sortable.addEventListener('ll-change-grid-options', (ev) => {
         ev.stopPropagation();
@@ -128,7 +140,7 @@ function _createSortable(context, actions) {
         }
     });
 
-    // Intercept ll-move-to-section: unsupported in pop-ups, prevent bubbling. Cut = ll-copy-card + ll-delete-card (already handled).
+    // Intercept ll-move-to-section: unsupported in pop-ups, prevent bubbling. Before 2026.11, Cut was ll-copy-card + ll-delete-card (handled above).
     sortable.addEventListener('ll-move-to-section', (ev) => {
         ev.stopPropagation();
     });
