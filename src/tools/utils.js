@@ -1322,20 +1322,51 @@ function handleScrollLockWheel(event) {
 // every tap on it landed on the layer (#2689). Mounted right before the pop-up,
 // the layer shares its stacking context again, whichever ancestor Home
 // Assistant isolates. Without a pop-up to follow, the body still does.
+//
+// Only where Home Assistant isolates its panel: on the versions before, the
+// layers stay on the body, where they dim the sidebar as well.
+let isolationCheckedMain = null;
+let isolationOfCheckedMain = false;
+
+function homeAssistantIsolatesPanel() {
+    const main = document.querySelector?.('home-assistant')?.shadowRoot
+        ?.querySelector?.('home-assistant-main');
+    // Not rendered yet, asked again on the next open.
+    if (!main?.shadowRoot) {
+        return false;
+    }
+    if (main === isolationCheckedMain) {
+        return isolationOfCheckedMain;
+    }
+
+    // The 2026.11 betas isolated partial-panel-resolver first, then its host.
+    const isolated = (element) => {
+        try {
+            return !!element && getComputedStyle(element).isolation === 'isolate';
+        } catch (error) {
+            return false;
+        }
+    };
+    isolationCheckedMain = main;
+    isolationOfCheckedMain = isolated(main) || isolated(main.shadowRoot.querySelector?.('partial-panel-resolver'));
+    return isolationOfCheckedMain;
+}
+
 export function mountPopUpOverlay(element, popUp) {
     if (!element) {
         return;
     }
 
+    const isolated = homeAssistantIsolatesPanel();
     const parent = popUp?.parentNode;
-    if (parent && typeof parent.insertBefore === 'function') {
+    if (parent && typeof parent.insertBefore === 'function' && isolated) {
         if (element.parentNode !== parent) {
             parent.insertBefore(element, popUp);
         }
         return;
     }
 
-    if (!element.parentNode || element.isConnected === false) {
+    if (!element.parentNode || element.isConnected === false || (!isolated && element.parentNode !== document.body)) {
         document.body?.appendChild(element);
     }
 }

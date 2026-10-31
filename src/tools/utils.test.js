@@ -391,7 +391,18 @@ describe('toggleBodyScroll', () => {
         expect(window.scrollTo).not.toHaveBeenCalled();
     });
 
-    test('mounts the lock layer right before the pop-up, in its stacking context (#2689)', () => {
+    // home-assistant > home-assistant-main, isolated or not like Home Assistant
+    // 2026.11 and the versions before.
+    function mountHomeAssistant(isolation) {
+        const main = createMockElement('home-assistant-main');
+        main.shadowRoot = { querySelector: () => null };
+        const homeAssistant = createMockElement('home-assistant');
+        homeAssistant.shadowRoot = { querySelector: (selector) => (selector === 'home-assistant-main' ? main : null) };
+        document.querySelector = (selector) => (selector === 'home-assistant' ? homeAssistant : null);
+        global.getComputedStyle = (element) => ({ isolation: element === main ? isolation : 'auto' });
+    }
+
+    function popUpInParent() {
         const popUp = createMockElement('div');
         const parent = createMockElement('div');
         parent.insertBefore = jest.fn((child, reference) => {
@@ -401,6 +412,24 @@ describe('toggleBodyScroll', () => {
             return child;
         });
         parent.appendChild(popUp);
+        return { popUp, parent };
+    }
+
+    test('keeps the lock layer on the body while Home Assistant does not isolate its panel', () => {
+        mountHomeAssistant('auto');
+        const { popUp, parent } = popUpInParent();
+
+        utilsModule.toggleBodyScroll(true, popUp);
+
+        const scrollLockLayer = document.getElementById('bubble-card-scroll-lock-layer');
+        expect(document.body.children).toContain(scrollLockLayer);
+        expect(parent.children).toEqual([popUp]);
+        delete global.getComputedStyle;
+    });
+
+    test('mounts the lock layer right before the pop-up, in its stacking context (#2689)', () => {
+        mountHomeAssistant('isolate');
+        const { popUp, parent } = popUpInParent();
 
         utilsModule.toggleBodyScroll(true, popUp);
 
@@ -418,6 +447,7 @@ describe('toggleBodyScroll', () => {
 
         expect(scrollLockLayer.style.display).toBe('none');
         expect(scrollLockLayer.style.pointerEvents).toBe('none');
+        delete global.getComputedStyle;
     });
 
     test('reuses the same lock layer across repeated locks', () => {
