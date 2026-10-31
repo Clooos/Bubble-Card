@@ -140,12 +140,12 @@ export function makeGenericSliderSettings({
             <div class="content">
                 ${showEntityFilterToggle ? html`
                     <div class="checkbox-wrapper">
-                        <ha-formfield label="${t('editor.slider.disable_filter')}">
+                        <bubble-formfield label="${t('editor.slider.disable_filter')}">
                             <ha-switch
                                 .checked=${entityFilterValue}
                                 @change=${(ev) => handleEntityFilterToggle(ev.target.checked)}
                             ></ha-switch>
-                        </ha-formfield>
+                        </bubble-formfield>
                     </div>
                     <div class="bubble-info" style="display: ${showEntityFilterInfo ? '' : 'none'}">
                         <h4 class="bubble-section-title">
@@ -197,7 +197,7 @@ export function makeGenericSliderSettings({
                         }}
                     ></ha-form>
                 </div>
-                <ha-formfield>
+                <bubble-formfield>
                     <ha-switch
                         .checked=${data.tap_to_slide && !data.relative_slide}
                         @change=${(ev) => callToggleChange('tap_to_slide', ev.target.checked, meta('ha-switch', 'change'))}
@@ -206,8 +206,8 @@ export function makeGenericSliderSettings({
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.slider.tap_to_slide')}</label>
                     </div>
-                </ha-formfield>
-                <ha-formfield>
+                </bubble-formfield>
+                <bubble-formfield>
                     <ha-switch
                         .checked=${!data.tap_to_slide && data.relative_slide}
                         @change=${(ev) => callToggleChange('relative_slide', ev.target.checked, meta('ha-switch', 'change'))}
@@ -216,8 +216,8 @@ export function makeGenericSliderSettings({
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.slider.relative_slide')}</label>
                     </div>
-                </ha-formfield>
-                <ha-formfield>
+                </bubble-formfield>
+                <bubble-formfield>
                     <ha-switch
                         .checked=${data.read_only_slider ?? isReadOnly}
                         @change=${(ev) => callToggleChange('read_only_slider', ev.target.checked, meta('ha-switch', 'change'))}
@@ -226,8 +226,8 @@ export function makeGenericSliderSettings({
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.slider.read_only')}</label>
                     </div>
-                </ha-formfield>
-                <ha-formfield>
+                </bubble-formfield>
+                <bubble-formfield>
                     <ha-switch
                         .checked=${data.slider_live_update ?? false}
                         @change=${(ev) => callToggleChange('slider_live_update', ev.target.checked, meta('ha-switch', 'change'))}
@@ -236,7 +236,7 @@ export function makeGenericSliderSettings({
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.slider.live_update')}</label>
                     </div>
-                </ha-formfield>
+                </bubble-formfield>
                 <div class="bubble-info" style="display: ${(data.slider_live_update ?? false) ? '' : 'none'}">
                     <h4 class="bubble-section-title">
                         <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -313,7 +313,7 @@ export function makeGenericSliderSettings({
                         </div>
                     ` : ''}
                 `}
-                <ha-formfield style="display: ${hideInvertSliderToggle ? 'none' : ''}">
+                <bubble-formfield style="display: ${hideInvertSliderToggle ? 'none' : ''}">
                     <ha-switch
                         .checked=${data.invert_slider_value ?? false}
                         @change=${(ev) => callToggleChange('invert_slider_value', ev.target.checked, meta('ha-switch', 'change'))}
@@ -321,7 +321,7 @@ export function makeGenericSliderSettings({
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.slider.invert')}</label>
                     </div>
-                </ha-formfield>
+                </bubble-formfield>
             </div>
         </ha-expansion-panel>
         ${entity?.startsWith("light") ? html`
@@ -352,7 +352,7 @@ export function makeGenericSliderSettings({
                         @value-changed=${(ev) => callToggleChange('light_slider_type', ev.detail.value.light_slider_type, meta('ha-combo-box', 'value-changed'))}
                     ></ha-form>
                     ${data.light_slider_type === 'hue' ? html`
-                        <ha-formfield>
+                        <bubble-formfield>
                             <ha-switch
                                 .checked=${data.hue_force_saturation ?? false}
                                 @change=${(ev) => callToggleChange('hue_force_saturation', ev.target.checked, meta('ha-switch', 'change'))}
@@ -360,7 +360,7 @@ export function makeGenericSliderSettings({
                             <div class="mdc-form-field">
                                 <label class="mdc-label">${t('editor.slider.force_saturation')}</label>
                             </div>
-                        </ha-formfield>
+                        </bubble-formfield>
                         ${(data.hue_force_saturation ?? false) ? html`
                             <ha-form
                                 .hass=${hass}
@@ -372,7 +372,7 @@ export function makeGenericSliderSettings({
                         ` : ''}
                     ` : ''}
                     ${['hue', 'saturation', 'white_temp'].includes(data.light_slider_type) ? html`` : html`
-                        <ha-formfield>
+                        <bubble-formfield>
                             <ha-switch
                                 .checked=${data.use_accent_color ?? false}
                                 @change=${(ev) => callToggleChange('use_accent_color', ev.target.checked, meta('ha-switch', 'change'))}
@@ -380,10 +380,10 @@ export function makeGenericSliderSettings({
                             <div class="mdc-form-field">
                                 <label class="mdc-label">${t('editor.show.accent_color')}</label>
                             </div>
-                        </ha-formfield>
+                        </bubble-formfield>
                     `}
                     ${!data.tap_to_slide ? html`
-                        <ha-formfield>
+                        <bubble-formfield>
                             <ha-switch
                                 .checked=${data.allow_light_slider_to_0 ?? false}
                                 @change=${(ev) => callToggleChange('allow_light_slider_to_0', ev.target.checked, meta('ha-switch', 'change'))}
@@ -391,9 +391,9 @@ export function makeGenericSliderSettings({
                             <div class="mdc-form-field">
                                 <label class="mdc-label">${t('editor.slider.allow_off')}</label>
                             </div>
-                        </ha-formfield>
+                        </bubble-formfield>
                     ` : ''}
-                    <ha-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             .checked=${data.light_transition ?? false}
                             @change=${(ev) => callToggleChange('light_transition', ev.target.checked, meta('ha-switch', 'change'))}
@@ -401,7 +401,7 @@ export function makeGenericSliderSettings({
                         <div class="mdc-form-field">
                             <label class="mdc-label">${t('editor.slider.smooth_transitions')}</label>
                         </div>
-                    </ha-formfield>
+                    </bubble-formfield>
                     ${(data.light_transition ?? false) ? html`
                         <div class="bubble-info">
                             <h4 class="bubble-section-title">

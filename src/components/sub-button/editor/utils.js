@@ -313,12 +313,12 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
             </h4>
             <div class="content">
               ${getLazyLoadedPanelContent(editor, visibilityPanelKey, !!editor._expandedPanelStates[visibilityPanelKey], () => html`
-                <ha-formfield label="${t('editor.sub_button.hide_unavailable')}">
+                <bubble-formfield label="${t('editor.sub_button.hide_unavailable')}">
                   <ha-switch
                     .checked=${button.hide_when_parent_unavailable ?? false}
                     @change=${(ev) => updateValueFn({ hide_when_parent_unavailable: ev.target.checked })}
                   ></ha-switch>
-                </ha-formfield>
+                </bubble-formfield>
                 <ha-card-conditions-editor
                   .hass=${editor.hass}
                   .conditions=${conditions}
@@ -349,28 +349,28 @@ export function makeUnifiedSubButtonEditor(editor, button, index, path, updateVa
             <div class="content">
               ${getLazyLoadedPanelContent(editor, layoutPanelKey, !!editor._expandedPanelStates[layoutPanelKey], () => html`
                 ${isBottomSection ? html`
-                  <ha-formfield label="${t('editor.sub_button.fill_width')}">
+                  <bubble-formfield label="${t('editor.sub_button.fill_width')}">
                     <ha-switch
                       .checked=${effectiveFillWidth ?? true}
                       @change=${(ev) => updateValueFn({ fill_width: ev.target.checked })}
                     ></ha-switch>
-                  </ha-formfield>
+                  </bubble-formfield>
                 ` : ''}
                 ${button.sub_button_type === 'slider' ? html`
-                  <ha-formfield label="${t('editor.sub_button.always_slider')}">
+                  <bubble-formfield label="${t('editor.sub_button.always_slider')}">
                     <ha-switch
                       .checked=${button.always_visible ?? false}
                       @change=${(ev) => updateValueFn({ always_visible: ev.target.checked })}
                     ></ha-switch>
-                  </ha-formfield>
+                  </bubble-formfield>
                 ` : ''}
                 ${button.sub_button_type === 'slider' && button.always_visible ? html`
-                  <ha-formfield label="${t('editor.sub_button.show_info')}">
+                  <bubble-formfield label="${t('editor.sub_button.show_info')}">
                     <ha-switch
                       .checked=${button.show_button_info ?? false}
                       @change=${(ev) => updateValueFn({ show_button_info: ev.target.checked })}
                     ></ha-switch>
-                  </ha-formfield>
+                  </bubble-formfield>
                 ` : ''}
                 <ha-form
                   .hass=${editor.hass}

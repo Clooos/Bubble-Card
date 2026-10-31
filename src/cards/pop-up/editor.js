@@ -366,7 +366,7 @@ function renderDialogFullWidthOption(editor) {
 
     const t = setupTranslation(editor.hass);
     return html`
-        <ha-formfield>
+        <bubble-formfield>
             <ha-switch
                 aria-label="${t('editor.popup.full_width_mobile')}"
                 .checked=${editor._config?.full_width_on_mobile ?? false}
@@ -376,7 +376,7 @@ function renderDialogFullWidthOption(editor) {
             <div class="mdc-form-field">
                 <label class="mdc-label">${t('editor.popup.full_width_mobile')}</label>
             </div>
-        </ha-formfield>
+        </bubble-formfield>
     `;
 }
 
@@ -395,7 +395,7 @@ function renderBottomOffsetOption(editor) {
 
     const t = setupTranslation(editor.hass);
     return html`
-        <ha-formfield>
+        <bubble-formfield>
             <ha-switch
                 aria-label="${t('editor.popup.bottom_offset_toggle')}"
                 .checked=${editor._config?.with_bottom_offset ?? false}
@@ -405,7 +405,7 @@ function renderBottomOffsetOption(editor) {
             <div class="mdc-form-field">
                 <label class="mdc-label">${t('editor.popup.bottom_offset_toggle')}</label>
             </div>
-        </ha-formfield>
+        </bubble-formfield>
         <div class="bubble-info">
             <h4 class="bubble-section-title">
                 <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -601,7 +601,7 @@ export function renderPopUpEditor(editor) {
                 ${renderPopUpModeDropdown(editor)}
                 ${renderBottomOffsetOption(editor)}
                 ${renderDialogFullWidthOption(editor)}
-                <ha-formfield>
+                <bubble-formfield>
                     <ha-switch
                         aria-label="${t('editor.popup.include_example')}"
                         .checked=${false}
@@ -610,7 +610,7 @@ export function renderPopUpEditor(editor) {
                     <div class="mdc-form-field">
                         <label id="include-example-label" class="mdc-label">${t('editor.popup.include_example')}</label>
                     </div>
-                </ha-formfield>
+                </bubble-formfield>
 
                 <button
                     id="create-pop-up-button"
@@ -682,7 +682,7 @@ export function renderPopUpEditor(editor) {
                   ${t('editor.popup.header_settings')}
                 </h4>
                 <div class="content">
-                    <ha-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${t('editor.popup.show_header')}"
                             .checked=${editor._config.show_header ?? true}
@@ -692,7 +692,7 @@ export function renderPopUpEditor(editor) {
                         <div class="mdc-form-field">
                             <label class="mdc-label">${t('editor.popup.show_header')}</label>
                         </div>
-                    </ha-formfield>
+                    </bubble-formfield>
                     <div class="bubble-info">
                         <h4 class="bubble-section-title">
                             <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -710,7 +710,7 @@ export function renderPopUpEditor(editor) {
                               ${t('editor.popup.buttons_settings')}
                             </h4>
                             <div class="content">
-                                <ha-formfield>
+                                <bubble-formfield>
                                     <ha-switch
                                         aria-label="${t('editor.popup.show_previous')}"
                                         .checked=${editor._config.show_previous_button ?? false}
@@ -720,8 +720,8 @@ export function renderPopUpEditor(editor) {
                                     <div class="mdc-form-field">
                                         <label class="mdc-label">${t('editor.popup.show_previous')}</label>
                                     </div>
-                                </ha-formfield>
-                                <ha-formfield>
+                                </bubble-formfield>
+                                <bubble-formfield>
                                     <ha-switch
                                         aria-label="${t('editor.popup.show_close')}"
                                         .checked=${editor._config.show_close_button ?? true}
@@ -731,7 +731,7 @@ export function renderPopUpEditor(editor) {
                                     <div class="mdc-form-field">
                                         <label class="mdc-label">${t('editor.popup.show_close')}</label>
                                     </div>
-                                </ha-formfield>
+                                </bubble-formfield>
                                 <ha-form
                                     .hass=${editor.hass}
                                     .disabled=${isHomeAssistantStyle(editor._config)}
@@ -790,7 +790,7 @@ export function renderPopUpEditor(editor) {
                         }}
                     ></ha-form>
                     ${renderPopupSlideToCloseDropdown(editor)}
-                    <ha-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${t('editor.popup.close_outside')}"
                             .checked=${editor._config?.close_by_clicking_outside ?? true}
@@ -800,8 +800,8 @@ export function renderPopUpEditor(editor) {
                         <div class="mdc-form-field">
                             <label class="mdc-label">${t('editor.popup.close_outside')}</label>
                         </div>
-                    </ha-formfield>
-                    <ha-formfield>
+                    </bubble-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${t('editor.popup.close_on_click')}"
                             .checked=${editor._config?.close_on_click || false}
@@ -811,8 +811,8 @@ export function renderPopUpEditor(editor) {
                         <div class="mdc-form-field">
                             <label class="mdc-label">${t('editor.popup.close_on_click')}</label>
                         </div>
-                    </ha-formfield>
-                    <ha-formfield>
+                    </bubble-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${t('editor.popup.background_update')}"
                             .checked=${editor._config?.background_update || false}
@@ -822,7 +822,7 @@ export function renderPopUpEditor(editor) {
                         <div class="mdc-form-field">
                             <label class="mdc-label">${t('editor.popup.background_update')}</label>
                         </div>
-                    </ha-formfield>
+                    </bubble-formfield>
                     <div class="bubble-info">
                         <h4 class="bubble-section-title">
                             <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -840,7 +840,7 @@ export function renderPopUpEditor(editor) {
                   ${t('editor.popup.trigger')}
                 </h4>
                 <div class="content">
-                    <ha-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             .checked=${editor._config.trigger_close ?? true}
                             .configValue="${"trigger_close"}"
@@ -849,7 +849,7 @@ export function renderPopUpEditor(editor) {
                         <div class="mdc-form-field">
                             <label class="mdc-label">${t('editor.popup.close_when_unmet')}</label>
                         </div>
-                    </ha-formfield>
+                    </bubble-formfield>
                     <ha-card-conditions-editor
                         .hass=${editor.hass}
                         .conditions=${conditions}
@@ -1018,7 +1018,7 @@ export function renderPopUpEditor(editor) {
                                     });
                                 }}
                             ></ha-form>
-                            <ha-formfield>
+                            <bubble-formfield>
                                 <ha-switch
                                     aria-label="${t('editor.popup.hide_backdrop')}"
                                     .checked=${editor._config.hide_backdrop ?? false}
@@ -1028,7 +1028,7 @@ export function renderPopUpEditor(editor) {
                                 <div class="mdc-form-field">
                                     <label class="mdc-label">${t('editor.popup.hide_backdrop_short')}</label>
                                 </div>
-                            </ha-formfield>
+                            </bubble-formfield>
                             <div class="bubble-info">
                                 <h4 class="bubble-section-title">
                                     <ha-icon icon="mdi:information-outline"></ha-icon>

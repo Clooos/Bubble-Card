@@ -401,7 +401,7 @@ export function makeModuleStore(context) {
         </div>
         <div class="store-filters">
 
-          <ha-formfield label="${t('editor.store.only_compatible').replace('{card_type}',
+          <bubble-formfield label="${t('editor.store.only_compatible').replace('{card_type}',
             t('editor.module_editor.card_' + String(context._config?.card_type ?? '').replace(/-/g, '_')))}">
             <ha-switch
               .checked=${context._storeShowOnlyCompatible ?? true}
@@ -410,7 +410,7 @@ export function makeModuleStore(context) {
                 context.requestUpdate();
               }}
             ></ha-switch>
-          </ha-formfield>
+          </bubble-formfield>
         </div>
       </div>
 

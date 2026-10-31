@@ -855,7 +855,7 @@ export function makeModulesEditor(context) {
                   })}
                 </div>
               </div>
-              <ha-formfield label="${t('editor.modules.enable_unsupported')}">
+              <bubble-formfield label="${t('editor.modules.enable_unsupported')}">
                 <ha-switch
                   .checked=${!!context._forceUnsupportedModules}
                   @change=${(e) => {
@@ -867,7 +867,7 @@ export function makeModulesEditor(context) {
                     context.requestUpdate();
                   }}
                 ></ha-switch>
-              </ha-formfield>
+              </bubble-formfield>
               ${context._forceUnsupportedModules ? html`
                 <div class="bubble-info warning unsupported-modules-warning">
                   <h4 class="bubble-section-title">

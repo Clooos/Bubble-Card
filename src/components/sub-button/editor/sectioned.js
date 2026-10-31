@@ -837,7 +837,7 @@ export function makeSectionedSubButtonsPanel(editor) {
                   }}
               ></ha-form>
               ${editor._renderConditionalContent(isMainButtonsBottom, html`
-                  <ha-formfield>
+                  <bubble-formfield>
                       <ha-switch
                           aria-label="${t('editor.sub_button.full_width_actions')}"
                           .checked="${mainButtonsFullWidth}"
@@ -847,7 +847,7 @@ export function makeSectionedSubButtonsPanel(editor) {
                       <div class="mdc-form-field">
                           <label class="mdc-label">${t('editor.sub_button.full_width_actions')}</label>
                       </div>
-                  </ha-formfield>
+                  </bubble-formfield>
                   ${editor._renderConditionalContent(!mainButtonsFullWidth, html`
                       <ha-form
                           .hass=${editor.hass}

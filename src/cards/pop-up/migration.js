@@ -1,4 +1,5 @@
 import { html } from 'lit';
+import '../../components/editor/bubble-formfield.js';
 import { findConfigPath, getConfigAtPath } from '../../editor/standalone-dialog-bridge.js';
 import { isHashOnCurrentPage } from './navigation-picker-bridge.js';
 import { getCurrentViewPopUps, normalizePopUpHash } from './view-popups.js';
@@ -649,7 +650,7 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
             <div class="content">
                 <p>${t('editor.migration.notice_body')}</p>                ${hasHorizontalStacks ? html`
                     <p>${t('editor.migration.horizontal_body')}</p>
-                    <ha-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${t('editor.migration.convert_stacks')}"
                             .checked=${flattenHorizontalStacks}
@@ -661,7 +662,7 @@ export function renderLegacyMigrationNotice(editor, originalHash) {
                         <div class="mdc-form-field">
                             <label class="mdc-label">${t('editor.migration.convert_stacks')}</label>
                         </div>
-                    </ha-formfield>
+                    </bubble-formfield>
                 ` : ''}
                 <div class="bubble-info warning bubble-sub-warning">
                     <h4 class="bubble-section-title">

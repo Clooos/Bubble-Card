@@ -993,7 +993,7 @@ export function renderModuleEditorForm(context) {
 
             <div class="form-preview">
               <h4>${t('editor.module_editor.suggestions_preview')}</h4>
-              <ha-formfield class="suggestions-preview-toggle">
+              <bubble-formfield class="suggestions-preview-toggle">
                 <ha-switch
                   aria-label="${t('editor.module_editor.suggestions_preview_toggle')}"
                   .checked=${suggestions.showInPreview}
@@ -1005,7 +1005,7 @@ export function renderModuleEditorForm(context) {
                 <div class="mdc-form-field">
                   <label class="mdc-label">${t('editor.module_editor.suggestions_preview_toggle')}</label>
                 </div>
-              </ha-formfield>
+              </bubble-formfield>
               <ha-entity-picker
                 label="${t('editor.common.entity')}"
                 .hass=${context._hassRender ?? context.hass}
@@ -1233,7 +1233,7 @@ function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
   
   return html`
     <div class="checkbox-grid">
-      <ha-formfield label="${t('editor.module_editor.all_cards')}" style="grid-column: 1 / -1; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--divider-color);">
+      <bubble-formfield label="${t('editor.module_editor.all_cards')}" style="grid-column: 1 / -1; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--divider-color);">
         <ha-checkbox
           .checked=${allCardsSelected}
           @change=${(e) => {
@@ -1249,9 +1249,9 @@ function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
           }}
           ?disabled=${isFromYamlFile}
         ></ha-checkbox>
-      </ha-formfield>
+      </bubble-formfield>
       ${availableCardTypes.map(card => html`
-        <ha-formfield label="${cardTypeLabels[card.id] ?? card.name}">
+        <bubble-formfield label="${cardTypeLabels[card.id] ?? card.name}">
           <ha-checkbox
             .checked=${!context._editingModule.supported || context._editingModule.supported.includes(card.id)}
             @change=${(e) => {
@@ -1278,7 +1278,7 @@ function renderSupportedCardCheckboxes(context, isFromYamlFile = false) {
             }}
             ?disabled=${isFromYamlFile}
           ></ha-checkbox>
-        </ha-formfield>
+        </bubble-formfield>
       `)}
     </div>
     <div class="helper-text">

@@ -15,7 +15,7 @@ export function renderSubButtonsEditor(editor) {
                     ${t('editor.common.card_settings')}
                 </h4>
                 <div class="content">
-                    <ha-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             label="${t('editor.sub_buttons_card.hide_main_background')}"
                             .checked="${editor._config?.hide_main_background || false}"
@@ -25,9 +25,9 @@ export function renderSubButtonsEditor(editor) {
                         <div class="mdc-form-field">
                             <label class="mdc-label">${t('editor.sub_buttons_card.hide_main_background')}</label>
                         </div>
-                    </ha-formfield>
+                    </bubble-formfield>
 
-                    <ha-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             label="${t('editor.sub_buttons_card.footer_mode')}"
                             .checked="${editor._config?.footer_mode || false}"
@@ -37,11 +37,11 @@ export function renderSubButtonsEditor(editor) {
                         <div class="mdc-form-field">
                             <label class="mdc-label">${t('editor.sub_buttons_card.footer_mode')}</label>
                         </div>
-                    </ha-formfield>
+                    </bubble-formfield>
 
                     ${editor._config?.footer_mode ? html`
                         <div style="margin-top: 16px; padding-inline-start: 16px; border-inline-start: 2px solid var(--divider-color);">
-                            <ha-formfield>
+                            <bubble-formfield>
                                 <ha-switch
                                     label="${t('editor.sub_buttons_card.full_width_footer')}"
                                     .checked="${editor._config?.footer_full_width || false}"
@@ -51,7 +51,7 @@ export function renderSubButtonsEditor(editor) {
                                 <div class="mdc-form-field">
                                     <label class="mdc-label">${t('editor.sub_buttons_card.full_width_footer')}</label>
                                 </div>
-                            </ha-formfield>
+                            </bubble-formfield>
 
                             ${!editor._config?.footer_full_width ? html`
                                 <ha-form

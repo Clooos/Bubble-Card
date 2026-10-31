@@ -1227,7 +1227,7 @@ ha-expansion-panel.recently-toggled {
   --mdc-icon-size: 18px;
 }
 
-ha-formfield.apply-module-button {
+bubble-formfield.apply-module-button {
   height: 40px;
   border-radius: 32px;
   padding: 0 16px;
@@ -1391,7 +1391,7 @@ mwc-icon-button ha-icon {
 
 /* The preview itself is drawn in Home Assistant's own preview column, so all
    this panel holds is what switches it on and what it previews for. */
-.form-preview ha-formfield.suggestions-preview-toggle {
+.form-preview bubble-formfield.suggestions-preview-toggle {
   display: flex;
   margin-bottom: 16px;
 }

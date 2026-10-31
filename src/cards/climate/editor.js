@@ -114,7 +114,7 @@ export function renderClimateEditor(editor){
                         @value-changed=${editor._valueChanged}
                     ></ha-form>
                     ${editor.hass.states[editor._config.entity]?.attributes?.target_temp_low ? html`
-                        <ha-formfield>
+                        <bubble-formfield>
                             <ha-switch
                                 aria-label="${editor._optionalLabel(t('editor.climate.hide_target_low'))}"
                                 .checked=${editor._config.hide_target_temp_low}
@@ -124,10 +124,10 @@ export function renderClimateEditor(editor){
                             <div class="mdc-form-field">
                                 <label class="mdc-label">${editor._optionalLabel(t('editor.climate.hide_target_low'))}</label> 
                             </div>
-                        </ha-formfield>
+                        </bubble-formfield>
                     ` : ''}
                     ${editor.hass.states[editor._config.entity]?.attributes?.target_temp_high ? html`
-                        <ha-formfield>
+                        <bubble-formfield>
                             <ha-switch
                                 aria-label="${editor._optionalLabel(t('editor.climate.hide_target_high'))}"
                                 .checked=${editor._config.hide_target_temp_high}
@@ -137,9 +137,9 @@ export function renderClimateEditor(editor){
                             <div class="mdc-form-field">
                                 <label class="mdc-label">${editor._optionalLabel(t('editor.climate.hide_target_high'))}</label> 
                             </div>
-                        </ha-formfield>
+                        </bubble-formfield>
                     ` : ''}
-                    <ha-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${editor._optionalLabel(t(domainConfig.hideLabelKey))}"
                             .checked=${editor._config.hide_temperature}
@@ -149,8 +149,8 @@ export function renderClimateEditor(editor){
                         <div class="mdc-form-field">
                             <label class="mdc-label">${editor._optionalLabel(t(domainConfig.hideLabelKey))}</label> 
                         </div>
-                    </ha-formfield>
-                    <ha-formfield>
+                    </bubble-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${editor._optionalLabel(t('editor.climate.constant_background'))}"
                             .checked=${editor._config.state_color === true}
@@ -160,7 +160,7 @@ export function renderClimateEditor(editor){
                         <div class="mdc-form-field">
                             <label class="mdc-label">${editor._optionalLabel(t('editor.climate.constant_background'))}</label> 
                         </div>
-                    </ha-formfield>
+                    </bubble-formfield>
                 </div>
             </ha-expansion-panel>
             <ha-expansion-panel outlined>
