@@ -346,6 +346,16 @@ describe('gestures the pop-up must not take', () => {
         expect(popUp.style.transform).toBe('');
     });
 
+    // Home Assistant 2026.11 charts pan once zoomed and pinch-zoom on touch.
+    test('leaves a drag that starts on a chart to the chart', () => {
+        const { context, popUp } = harness();
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), createNode({ localName: 'ha-chart-base' }), createNode(), popUp] }));
+
+        expect(documentListeners.touchmove ?? []).toHaveLength(0);
+        expect(popUp.style.transform).toBe('');
+    });
+
     test('a sideways swipe is handed back untouched, so a tab strip keeps it', () => {
         const { context, popUp, closePopup } = harness();
 
