@@ -391,6 +391,35 @@ describe('toggleBodyScroll', () => {
         expect(window.scrollTo).not.toHaveBeenCalled();
     });
 
+    test('mounts the lock layer right before the pop-up, in its stacking context (#2689)', () => {
+        const popUp = createMockElement('div');
+        const parent = createMockElement('div');
+        parent.insertBefore = jest.fn((child, reference) => {
+            const index = parent.children.indexOf(reference);
+            parent.children.splice(index, 0, child);
+            child.parentNode = parent;
+            return child;
+        });
+        parent.appendChild(popUp);
+
+        utilsModule.toggleBodyScroll(true, popUp);
+
+        const scrollLockLayer = parent.children[0];
+        expect(scrollLockLayer.id).toBe('bubble-card-scroll-lock-layer');
+        expect(parent.children[1]).toBe(popUp);
+        expect(document.body.children).not.toContain(scrollLockLayer);
+        // The rules in the head do not reach into a shadow root.
+        expect(scrollLockLayer.style.position).toBe('fixed');
+        expect(scrollLockLayer.style.zIndex).toBe('4');
+        expect(scrollLockLayer.style.display).toBe('block');
+        expect(scrollLockLayer.style.pointerEvents).toBe('auto');
+
+        utilsModule.toggleBodyScroll(false);
+
+        expect(scrollLockLayer.style.display).toBe('none');
+        expect(scrollLockLayer.style.pointerEvents).toBe('none');
+    });
+
     test('reuses the same lock layer across repeated locks', () => {
         utilsModule.toggleBodyScroll(true);
         utilsModule.toggleBodyScroll(true);

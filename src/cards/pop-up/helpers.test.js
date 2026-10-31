@@ -486,7 +486,7 @@ describe('standalone popup lifecycle', () => {
         // RAF5: global body scroll lock after standalone content has settled.
         flushRafQueue();
 
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true, expect.anything());
         expect(callAction).toHaveBeenCalledWith(context.popUp, context.config, 'open_action');
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
     });
@@ -522,7 +522,7 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue();
 
         expect(context.popUp.classList.contains('is-opening')).toBe(false);
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true, expect.anything());
         expect(callAction).toHaveBeenCalledWith(context.popUp, context.config, 'open_action');
     });
 
@@ -677,7 +677,7 @@ describe('standalone popup lifecycle', () => {
 
         flushRafQueue();
 
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true, expect.anything());
     });
 
     // The fallback counted from the class flip, and a slow device only starts
@@ -818,7 +818,7 @@ describe('standalone popup lifecycle', () => {
         openPopup(context, true);
 
         expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true, expect.anything());
     });
 
     test('syncs already-mounted popup cards inline when they are still present in the popup DOM', () => {
@@ -1334,7 +1334,7 @@ describe('standalone popup lifecycle', () => {
         flushRafQueue(); // deferred body scroll
 
         expect(context.popUp.classList.contains('is-popup-opened')).toBe(true);
-        expect(toggleBodyScroll).toHaveBeenCalledWith(true);
+        expect(toggleBodyScroll).toHaveBeenCalledWith(true, expect.anything());
 
         consoleError.mockRestore();
     });

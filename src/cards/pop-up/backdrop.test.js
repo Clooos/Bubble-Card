@@ -105,9 +105,12 @@ jest.unstable_mockModule('../../tools/style.js', () => ({
     convertToRGBA: jest.fn((color) => `rgba(${color})`),
 }));
 
+const mountPopUpOverlay = jest.fn();
+
 jest.unstable_mockModule('../../tools/utils.js', () => ({
     createElement,
     getCachedBodyStyles,
+    mountPopUpOverlay,
 }));
 
 jest.unstable_mockModule('../../tools/style-processor.js', () => ({
@@ -157,6 +160,15 @@ describe('backdrop transitions', () => {
         jest.runOnlyPendingTimers();
 
         jest.useRealTimers();
+    });
+
+    test('mounts the backdrop next to the pop-up it opens for', () => {
+        const popUp = createElement('div', 'bubble-pop-up');
+        const context = { config: {}, popUp };
+
+        getBackdrop(context).showBackdrop(context);
+
+        expect(mountPopUpOverlay).toHaveBeenLastCalledWith(expect.anything(), popUp);
     });
 
     test('does not let passive backdrop access steal the active popup styles', () => {
