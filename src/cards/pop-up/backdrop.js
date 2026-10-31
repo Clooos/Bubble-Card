@@ -200,7 +200,22 @@ export function getBackdrop(context) {
 
         const activeContext = backdrop?.activeContext;
         // Next to the pop-up, in its stacking context (see mountPopUpOverlay).
+        // Moved there while it shows, on a switch from one pop-up to another,
+        // the backdrop gets a first style again, and its @starting-style faded
+        // it out and back in. It keeps its opacity: no transition for the style
+        // resolved at the move, read at once, then the transition is back.
+        const parentBefore = backdropHostElement.parentNode;
+        const shownBefore = internalBackdropElement.classList.contains("is-visible");
+        if (shownBefore) {
+            internalBackdropElement.style.setProperty("transition", "none");
+        }
         mountPopUpOverlay(backdropHostElement, activeContext?.popUp);
+        if (shownBefore) {
+            if (backdropHostElement.parentNode !== parentBefore && typeof getComputedStyle === "function") {
+                getComputedStyle(internalBackdropElement).opacity;
+            }
+            internalBackdropElement.style.removeProperty("transition");
+        }
         const shouldAnimateOpen = internalBackdropElement.classList.contains("is-hidden");
 
         clearBackdropHideTimeout();
