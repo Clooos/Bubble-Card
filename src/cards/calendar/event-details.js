@@ -86,6 +86,9 @@ export async function showEventDetails(context, event, origin, color, onChanged)
       },
       {
         event: {
+          // Home Assistant 2026.11 reads the colour of the calendar from `color`,
+          // the versions before from `backgroundColor`.
+          color,
           backgroundColor: color,
           extendedProps: { calendar: entityId, eventData: toEventData(event) },
         },
