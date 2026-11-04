@@ -8,9 +8,89 @@ import styles from "./styles.css";
 
 let isOpen = false;
 const BUTTON_MARGIN = 12;
+// Pixels a mouse has to move with the button held before the press becomes a
+// drag of the row instead of a click on the button under it.
+const DRAG_START_SLOP = 6;
 
 function isPopupHashLink(link) {
     return typeof link === 'string' && link.startsWith('#');
+}
+
+// The stack scrolls horizontally with its scrollbar hidden. A finger drags it,
+// but a mouse has nothing to grab and its wheel scrolls the page, so on a
+// desktop the buttons past the edge could not be reached (#2522). A mouse drag
+// now scrolls the row like a finger does: a press that moves past the slop
+// scrolls, and the click that ends it is swallowed so the button under the
+// pointer does not open. Touch and pen keep the browser's own scrolling.
+export function enableMouseDragScroll(scroller) {
+    let pressed = false;
+    let dragging = false;
+    let swallowClick = false;
+    let startX = 0;
+    let startScrollLeft = 0;
+    let pointerId = null;
+
+    scroller.addEventListener('pointerdown', (event) => {
+        if (event.pointerType !== 'mouse' || event.button !== 0) {
+            return;
+        }
+        pressed = true;
+        dragging = false;
+        startX = event.clientX;
+        startScrollLeft = scroller.scrollLeft;
+        pointerId = event.pointerId;
+    });
+
+    scroller.addEventListener('pointermove', (event) => {
+        if (!pressed) {
+            return;
+        }
+        const deltaX = event.clientX - startX;
+        if (!dragging && Math.abs(deltaX) > DRAG_START_SLOP) {
+            dragging = true;
+            // Keeps the drag going when the pointer leaves the bar
+            try {
+                scroller.setPointerCapture?.(pointerId);
+            } catch (error) {
+                // The pointer is already gone, the drag ends on its own
+            }
+            scroller.classList.add('is-dragging');
+        }
+        if (dragging) {
+            // Moving the content with the pointer also holds in RTL, where
+            // scrollLeft counts down from 0
+            scroller.scrollLeft = startScrollLeft - deltaX;
+            event.preventDefault();
+        }
+    });
+
+    const endPress = () => {
+        if (!pressed) {
+            return;
+        }
+        pressed = false;
+        if (dragging) {
+            dragging = false;
+            scroller.classList.remove('is-dragging');
+            swallowClick = true;
+            // A release outside the buttons fires no click, so the flag must
+            // not wait for one and eat the next real click
+            setTimeout(() => {
+                swallowClick = false;
+            }, 0);
+        }
+    };
+    scroller.addEventListener('pointerup', endPress);
+    scroller.addEventListener('pointercancel', endPress);
+
+    // Capture phase, so the click is stopped before the button's own handler
+    scroller.addEventListener('click', (event) => {
+        if (swallowClick) {
+            swallowClick = false;
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }, true);
 }
 
 export function createButton(context, index) {
@@ -129,6 +209,8 @@ export function createStructure(context) {
             context.content.classList.remove('is-maxed-scroll');
         }
     });
+
+    enableMouseDragScroll(context.content);
 
     const riseAnimation = context.config.rise_animation ?? true;
 

@@ -119,6 +119,16 @@ ha-card {
 .card-content::-webkit-scrollbar {
     display: none;
 }
+/* A mouse drags the row (enableMouseDragScroll in create.js) */
+@media (pointer: fine) {
+    .card-content {
+        cursor: grab;
+    }
+}
+.is-dragging.card-content,
+.is-dragging.card-content .button {
+    cursor: grabbing;
+}
 
 .bubble-horizontal-buttons-stack-card-container {
     height: 51px;

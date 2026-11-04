@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, jest, test } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals';
 
 function createMockClassList(initialClasses = []) {
     const classes = new Set(initialClasses);
@@ -65,7 +65,7 @@ jest.unstable_mockModule('../../tools/content-inset.js', () => ({
     startContentInsetSync,
 }));
 
-const { createButton } = await import('./create.js');
+const { createButton, enableMouseDragScroll } = await import('./create.js');
 
 function buildContext(link) {
     return {
@@ -136,5 +136,111 @@ describe('horizontal buttons stack navigation', () => {
 
         expect(navigate).toHaveBeenCalledWith(button, '/lovelace/');
         expect(addHash).not.toHaveBeenCalled();
+    });
+});
+
+function createScroller(scrollLeft = 0) {
+    const scroller = createMockElement('div', 'card-content');
+    scroller.scrollLeft = scrollLeft;
+    scroller.setPointerCapture = jest.fn();
+    enableMouseDragScroll(scroller);
+    return scroller;
+}
+
+function fire(scroller, type, props = {}) {
+    const event = {
+        pointerType: 'mouse',
+        button: 0,
+        pointerId: 1,
+        clientX: 0,
+        preventDefault: jest.fn(),
+        stopPropagation: jest.fn(),
+        ...props,
+    };
+    for (const listener of scroller.listeners[type] || []) {
+        listener(event);
+    }
+    return event;
+}
+
+describe('horizontal buttons stack mouse drag scrolling (#2522)', () => {
+    beforeEach(() => {
+        jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
+    test('a mouse drag scrolls the row and swallows the click that ends it', () => {
+        const scroller = createScroller(100);
+
+        fire(scroller, 'pointerdown', { clientX: 300 });
+        fire(scroller, 'pointermove', { clientX: 250 });
+        expect(scroller.scrollLeft).toBe(150);
+        expect(scroller.classList.contains('is-dragging')).toBe(true);
+        expect(scroller.setPointerCapture).toHaveBeenCalledWith(1);
+
+        fire(scroller, 'pointerup', { clientX: 250 });
+        const click = fire(scroller, 'click');
+
+        expect(click.stopPropagation).toHaveBeenCalled();
+        expect(click.preventDefault).toHaveBeenCalled();
+        expect(scroller.classList.contains('is-dragging')).toBe(false);
+    });
+
+    test('a click without movement past the slop still reaches the button', () => {
+        const scroller = createScroller(100);
+
+        fire(scroller, 'pointerdown', { clientX: 300 });
+        fire(scroller, 'pointermove', { clientX: 297 });
+        fire(scroller, 'pointerup', { clientX: 297 });
+        const click = fire(scroller, 'click');
+
+        expect(scroller.scrollLeft).toBe(100);
+        expect(click.stopPropagation).not.toHaveBeenCalled();
+    });
+
+    test('leaves touch and pen to the browser', () => {
+        const scroller = createScroller(100);
+
+        fire(scroller, 'pointerdown', { pointerType: 'touch', clientX: 300 });
+        const move = fire(scroller, 'pointermove', { pointerType: 'touch', clientX: 200 });
+        fire(scroller, 'pointerup', { pointerType: 'touch', clientX: 200 });
+        const click = fire(scroller, 'click');
+
+        expect(scroller.scrollLeft).toBe(100);
+        expect(move.preventDefault).not.toHaveBeenCalled();
+        expect(click.stopPropagation).not.toHaveBeenCalled();
+    });
+
+    test('ignores buttons other than the primary one', () => {
+        const scroller = createScroller(100);
+
+        fire(scroller, 'pointerdown', { button: 2, clientX: 300 });
+        fire(scroller, 'pointermove', { button: 2, clientX: 200 });
+
+        expect(scroller.scrollLeft).toBe(100);
+    });
+
+    test('does not eat a later click when the drag ended without one', () => {
+        const scroller = createScroller(100);
+
+        fire(scroller, 'pointerdown', { clientX: 300 });
+        fire(scroller, 'pointermove', { clientX: 200 });
+        fire(scroller, 'pointerup', { clientX: 200 });
+        jest.runAllTimers();
+        const click = fire(scroller, 'click');
+
+        expect(click.stopPropagation).not.toHaveBeenCalled();
+    });
+
+    test('moves with the pointer in RTL, where scrollLeft is negative', () => {
+        const scroller = createScroller(-100);
+
+        fire(scroller, 'pointerdown', { clientX: 300 });
+        fire(scroller, 'pointermove', { clientX: 350 });
+
+        expect(scroller.scrollLeft).toBe(-150);
     });
 });
