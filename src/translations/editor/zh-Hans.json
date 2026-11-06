@@ -247,6 +247,7 @@
       "mode_fit_content": "适应内容",
       "mode_centered": "对话框 (居中)",
       "mode_adaptive": "自适应对话框 (移动端为“适应内容”)",
+      "position": "滑入方向",
       "performance_mode": "性能模式",
       "performance": "性能",
       "performance_body": "略微延迟内容渲染和背景模糊，同时禁用已设置的遮罩模糊。",

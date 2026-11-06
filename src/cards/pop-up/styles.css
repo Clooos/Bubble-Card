@@ -187,6 +187,8 @@
 .bubble-pop-up:not(.editor) {
     --bubble-pop-up-safe-area-top: var(--safe-area-inset-top, 0px);
     --bubble-pop-up-available-height: calc(100vh - 56px - var(--bubble-pop-up-safe-area-top) - var(--custom-height-offset-mobile));
+    /* Where a sheet's upper edge stands; a top sheet leaves past it. */
+    --bubble-pop-up-top-inset: calc(56px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-mobile));
     height: auto;
     top: calc(56px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-mobile));
     bottom: 0;
@@ -647,6 +649,7 @@
 @media only screen and (min-width: 768px) {
         .bubble-pop-up:not(.editor) {
             --bubble-pop-up-available-height: calc(100vh - 56px - var(--bubble-pop-up-safe-area-top) - var(--custom-height-offset-desktop));
+            --bubble-pop-up-top-inset: calc(56px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-desktop));
             top: calc(56px + var(--bubble-pop-up-safe-area-top) + var(--custom-height-offset-desktop));
             bottom: 0;
       inset-inline-start: calc(var(--bubble-pop-up-content-inline-start) / 2 + 50% - (var(--desktop-width, 540px) / 2));
@@ -655,6 +658,70 @@
         top: auto;
         bottom: calc(-56px - var(--bubble-pop-up-safe-area-top) - var(--custom-height-offset-desktop));
     }
+}
+
+/* popup_position: top. Only sheet layouts get the class (getPopupPosition in
+   style.js); a selector that still names the dialog modes does so for specificity. */
+.bubble-pop-up.popup-position-top:not(.editor),
+.bubble-pop-up.popup-position-top:not(.editor) > .bubble-pop-up-background {
+    border-radius: 0 0 var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)) var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px));
+}
+
+/* Specific enough to outrank both bottom sheet rules on the container. */
+.bubble-pop-up.popup-position-top:not(.editor):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog):not(.popup-style-home-assistant) > .bubble-pop-up-container {
+    --bubble-pop-up-top-sheet-radius: var(--bubble-pop-up-content-border-radius, var(--bubble-pop-up-border-radius, var(--bubble-border-radius, 42px)));
+    border-radius: 0 0 var(--bubble-pop-up-top-sheet-radius) var(--bubble-pop-up-top-sheet-radius);
+    -webkit-clip-path: inset(0 round 0 0 var(--bubble-pop-up-top-sheet-radius) var(--bubble-pop-up-top-sheet-radius));
+    clip-path: inset(0 round 0 0 var(--bubble-pop-up-top-sheet-radius) var(--bubble-pop-up-top-sheet-radius));
+}
+
+/* Must match TOP_SHEET_CLOSED_TRANSFORM in slide-to-close.js. */
+.bubble-pop-up.popup-position-top.is-popup-closed:not(.editor),
+.bubble-pop-up.popup-position-top.is-closing:not(.editor) {
+    transform: translate3d(0, calc(-100% - var(--bubble-pop-up-top-inset, 0px)), 0);
+}
+
+.bubble-pop-up.popup-position-top.popup-mode-fit-content:not(.editor) {
+    top: var(--bubble-pop-up-top-inset);
+    bottom: auto;
+}
+
+@keyframes bubble-popup-fast-open-top-sheet {
+    from {
+        transform: translateY(-14px);
+        opacity: 0.84;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.bubble-pop-up.is-fast-opening.popup-position-top:not(.editor):not(.popup-mode-centered):not(.popup-mode-adaptive-dialog) {
+    animation: bubble-popup-fast-open-top-sheet 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The grabber moves to the lower edge, the one a top sheet is dragged by. Not on
+   a full height sheet, whose lower edge can sit under a footer card. */
+.bubble-pop-up.popup-position-top.popup-style-classic:not(.editor) > .bubble-header-container::before,
+.bubble-pop-up.popup-position-top.no-header:not(.editor) > .bubble-header-container::before {
+    display: none;
+}
+
+.bubble-pop-up.popup-position-top.popup-mode-fit-content.popup-style-classic:not(.editor)::after,
+.bubble-pop-up.popup-position-top.popup-mode-fit-content.no-header:not(.editor)::after {
+    content: "";
+    display: block;
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--divider-color);
+    pointer-events: none;
+    z-index: 4;
 }
 
 .bubble-pop-up.editor {

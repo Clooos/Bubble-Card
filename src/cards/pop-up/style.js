@@ -29,6 +29,23 @@ export function hasFullHeightSheet(config) {
     return config?.popup_mode !== 'adaptive-dialog' && config?.popup_mode !== 'fit-content';
 }
 
+// Only the two sheet layouts have an edge to come from. A centred dialog and the
+// Home Assistant style answer with the bottom whatever the config says, so a
+// config moved between modes keeps working. The card and the editor both ask here.
+export const POPUP_POSITION_BOTTOM = 'bottom';
+export const POPUP_POSITION_TOP = 'top';
+
+export function offersPopupPosition(config) {
+    if (isHomeAssistantStyle(config)) return false;
+    return config?.popup_mode !== 'centered' && config?.popup_mode !== 'adaptive-dialog';
+}
+
+export function getPopupPosition(config) {
+    return config?.popup_position === POPUP_POSITION_TOP && offersPopupPosition(config)
+        ? POPUP_POSITION_TOP
+        : POPUP_POSITION_BOTTOM;
+}
+
 // Both styles wear the Home Assistant header, so both answer to it.
 export function hasClassicHeader(config) {
     const style = getPopupStyle(config);

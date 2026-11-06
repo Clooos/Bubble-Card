@@ -247,6 +247,7 @@
       "mode_fit_content": "Sesuai konten",
       "mode_centered": "Dialog (di tengah)",
       "mode_adaptive": "Dialog adaptif (\"Sesuai konten\" di seluler)",
+      "position": "Geser masuk dari",
       "performance_mode": "Mode kinerja",
       "performance": "Kinerja",
       "performance_body": "Sedikit menunda rendering konten dan blur latar belakang, juga menonaktifkan blur backdrop jika diatur.",

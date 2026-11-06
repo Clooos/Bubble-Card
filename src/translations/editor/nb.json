@@ -247,6 +247,7 @@
       "mode_fit_content": "Tilpass til innhold",
       "mode_centered": "Dialog (sentrert)",
       "mode_adaptive": "Adaptiv dialog (\"Tilpass til innhold\" på mobil)",
+      "position": "Skyv inn fra",
       "performance_mode": "Ytelsesmodus",
       "performance": "Ytelse",
       "performance_body": "Forsinker gjengivelse av innhold og bakgrunnsuskarphet litt, og deaktiverer også uskarphet på bakgrunnslaget hvis den er angitt.",

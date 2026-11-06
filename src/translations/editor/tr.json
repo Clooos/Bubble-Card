@@ -247,6 +247,7 @@
       "mode_fit_content": "İçeriğe sığdır",
       "mode_centered": "İletişim kutusu (ortalanmış)",
       "mode_adaptive": "Uyarlanabilir iletişim kutusu (mobilde \"İçeriğe sığdır\")",
+      "position": "Kayarak açılma yönü",
       "performance_mode": "Performans modu",
       "performance": "Performans",
       "performance_body": "İçerik oluşturmayı ve arka plan bulanıklığını biraz geciktirir, ayarlanmışsa arka zemin bulanıklığını da devre dışı bırakır.",

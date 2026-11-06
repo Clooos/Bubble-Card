@@ -247,6 +247,7 @@
       "mode_fit_content": "Tilpass til innhald",
       "mode_centered": "Dialog (sentrert)",
       "mode_adaptive": "Adaptiv dialog (\"Tilpass til innhald\" på mobil)",
+      "position": "Skyv inn frå",
       "performance_mode": "Ytingsmodus",
       "performance": "Yting",
       "performance_body": "Forseinkar attgiving av innhald og bakgrunnsuklarleik litt, og deaktiverer også uklarleik på bakgrunnslaget om han er angitt.",

@@ -247,6 +247,7 @@
       "mode_fit_content": "Adatta al contenuto",
       "mode_centered": "Finestra di dialogo (centrata)",
       "mode_adaptive": "Finestra di dialogo adattiva (\"Adatta al contenuto\" su mobile)",
+      "position": "Scorri da",
       "performance_mode": "Modalità prestazioni",
       "performance": "Prestazioni",
       "performance_body": "Ritarda leggermente il rendering del contenuto e la sfocatura dello sfondo, e disattiva anche la sfocatura del backdrop se impostata.",

@@ -247,6 +247,7 @@
       "mode_fit_content": "Ajustado al contenido",
       "mode_centered": "Diálogo (centrado)",
       "mode_adaptive": "Diálogo adaptativo (\"Ajustado al contenido\" en el móvil)",
+      "position": "Deslizar desde",
       "performance_mode": "Modo de rendimiento",
       "performance": "Rendimiento",
       "performance_body": "Retrasa ligeramente el renderizado del contenido y el desenfoque del fondo, y también desactiva el desenfoque del backdrop si está definido.",

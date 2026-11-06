@@ -247,6 +247,7 @@
       "mode_fit_content": "Anpassa till innehåll",
       "mode_centered": "Dialog (centrerad)",
       "mode_adaptive": "Adaptiv dialog (\"Anpassa till innehåll\" på mobil)",
+      "position": "Glid in från",
       "performance_mode": "Prestandaläge",
       "performance": "Prestanda",
       "performance_body": "Fördröjer rendering av innehåll och bakgrundsoskärpa något, och inaktiverar även bakgrundsplansoskärpa om den är angiven.",

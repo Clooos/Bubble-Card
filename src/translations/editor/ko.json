@@ -247,6 +247,7 @@
       "mode_fit_content": "콘텐츠에 맞춤",
       "mode_centered": "대화 상자 (중앙)",
       "mode_adaptive": "적응형 대화 상자 (모바일에서는 \"콘텐츠에 맞춤\")",
+      "position": "슬라이드 방향",
       "performance_mode": "성능 모드",
       "performance": "성능",
       "performance_body": "콘텐츠 렌더링과 배경 흐림을 약간 지연시키고, 설정된 경우 백드롭 흐림을 비활성화해요.",

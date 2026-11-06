@@ -247,6 +247,7 @@
       "mode_fit_content": "Tilpas til indhold",
       "mode_centered": "Dialog (centreret)",
       "mode_adaptive": "Adaptiv dialog (\"Tilpas til indhold\" på mobil)",
+      "position": "Glid ind fra",
       "performance_mode": "Ydeevnetilstand",
       "performance": "Ydeevne",
       "performance_body": "Forsinker gengivelse af indhold og baggrundssløring en smule og deaktiverer også sløring af baggrundslaget, hvis den er angivet.",

@@ -247,6 +247,7 @@
       "mode_fit_content": "Aðlagast efni",
       "mode_centered": "Gluggi (miðjaður)",
       "mode_adaptive": "Aðlagandi gluggi (\"Aðlagast efni\" í síma)",
+      "position": "Renna inn frá",
       "performance_mode": "Afkastahamur",
       "performance": "Afköst",
       "performance_body": "Seinkar birtingu efnis og móðun bakgrunns lítillega og slekkur einnig á móðun baklags ef hún er stillt.",

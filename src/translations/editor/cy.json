@@ -247,6 +247,7 @@
       "mode_fit_content": "Ffitio'r cynnwys",
       "mode_centered": "Deialog (wedi'i chanoli)",
       "mode_adaptive": "Deialog addasol (\"Ffitio'r cynnwys\" ar ffôn symudol)",
+      "position": "Llithro i mewn o",
       "performance_mode": "Modd perfformiad",
       "performance": "Perfformiad",
       "performance_body": "Yn oedi ychydig ar rendro'r cynnwys a phylu'r cefndir, ac yn analluogi pylu'r cefnlen os yw wedi'i osod.",

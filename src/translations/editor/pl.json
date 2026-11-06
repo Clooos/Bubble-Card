@@ -247,6 +247,7 @@
       "mode_fit_content": "Dopasuj do zawartości",
       "mode_centered": "Okno dialogowe (wyśrodkowane)",
       "mode_adaptive": "Adaptacyjne okno dialogowe („Dopasuj do zawartości” na urządzeniach mobilnych)",
+      "position": "Wsuwanie od",
       "performance_mode": "Tryb wydajności",
       "performance": "Wydajność",
       "performance_body": "Nieznacznie opóźnia renderowanie zawartości i rozmycie tła oraz wyłącza rozmycie warstwy tła (backdrop), jeśli jest ustawione.",

@@ -169,11 +169,12 @@ This card allows you to create a pop-up with any content. Each pop-up is **hidde
 | `popup_mode` | string | Optional | `default` (default), `fit-content`, `centered` or `adaptive-dialog` | Define the pop-up layout mode. With `popup_style: home-assistant`, only `default` (full height on mobile, like the "More info" panel) and `adaptive-dialog` (fits its content on mobile) are used. |
 | `with_bottom_offset` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: fit-content` or `adaptive-dialog`, and with `popup_style: home-assistant`. Applies a bottom offset on mobile, useful when your dashboard includes a footer card. |
 | `full_width_on_mobile` | boolean | Optional | `true` or `false` (default) | Only used with `popup_mode: centered`. Expands the pop-up to full screen width on mobile, useful on smaller displays. |
+| `popup_position` | string | Optional | `bottom` (default) or `top` | Only used with `popup_mode: default` or `fit-content` (not with `popup_style: home-assistant`). The edge the pop-up slides in from. With `top`, it hangs below the header, opens downwards and closes by sliding it up. |
 | `performance_mode` | string | Optional | `default` (default) or `performance` | Optimize the pop-up open animation. `performance` slightly delays content rendering and background blur, also disables backdrop blur if set. |
 | `auto_close` | string | Optional | A timeout in milliseconds (e.g. `10000` for 10s) | Auto close the pop-up after a timeout |
 | `close_on_click` | boolean | Optional | `true` or `false` (default) | Automatically close the pop-up after any interaction |
 | `close_by_clicking_outside` | boolean | Optional | `true` (default) or `false` | Close the pop-up by clicking outside of it |
-| `slide_to_close` | boolean or string | Optional | `true` (default), `header` or `false` | Close the pop-up by sliding it down |
+| `slide_to_close` | boolean or string | Optional | `true` (default), `header` or `false` | Close the pop-up by sliding it down (up with `popup_position: top`) |
 | `width_desktop` | string | Optional | Any CSS value | Width on desktop (`100%` by default on mobile) |
 | `margin` | string | Optional | Any CSS value | Use this **only** if your pop-up is not well centered on mobile (e.g. `13px`) |
 | `margin_top_mobile` | string | Optional | Any CSS value | Top margin on mobile (e.g. `-56px` if your header is hidden) |

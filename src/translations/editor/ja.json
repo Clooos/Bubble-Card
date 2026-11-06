@@ -247,6 +247,7 @@
       "mode_fit_content": "コンテンツに合わせる",
       "mode_centered": "ダイアログ (中央)",
       "mode_adaptive": "アダプティブダイアログ (モバイルでは「コンテンツに合わせる」)",
+      "position": "スライドイン方向",
       "performance_mode": "パフォーマンスモード",
       "performance": "パフォーマンス",
       "performance_body": "コンテンツの描画と背景のぼかしをわずかに遅らせ、設定されている場合はバックドロップのぼかしを無効にします。",

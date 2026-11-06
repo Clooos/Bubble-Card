@@ -247,6 +247,7 @@
       "mode_fit_content": "Ajusté au contenu",
       "mode_centered": "Dialogue (centré)",
       "mode_adaptive": "Dialogue adaptatif (« Ajusté au contenu » sur mobile)",
+      "position": "Glisser depuis",
       "performance_mode": "Mode performance",
       "performance": "Performance",
       "performance_body": "Retarde légèrement le rendu du contenu et le flou du fond, et désactive aussi le flou de l'arrière-plan s'il est défini.",
