@@ -88,6 +88,8 @@ const SWIPE_LOCKED_TAGS = new Set([
     'ha-control-circular-slider',
     'ha-hs-color-picker',
     'ha-map',
+    // Charts pan and pinch-zoom on touch since Home Assistant 2026.11.
+    'ha-chart-base',
     'ha-more-info-control-select-container',
     'ha-filter-chip',
     'input',
@@ -141,7 +143,7 @@ export function isTopSheetLayout(popUp) {
 export const TOP_SHEET_CLOSED_TRANSFORM = 'translate3d(0, calc(-100% - var(--bubble-pop-up-top-inset, 0px)), 0)';
 const BOTTOM_SHEET_CLOSED_TRANSFORM = 'translate3d(0, 100%, 0)';
 
-function isSwipeLockedNode(node, topSheet) {
+function isSwipeLockedNode(node, topSheet, somethingFullscreen) {
     // A list the user has already scrolled owns the gesture. This is the rule
     // that keeps a downward drag inside a scrolled pop-up a scroll, and only
     // turns it into a close once the list is back at its top.
@@ -153,6 +155,14 @@ function isSwipeLockedNode(node, topSheet) {
     }
 
     if (node.localName && SWIPE_LOCKED_TAGS.has(node.localName)) {
+        return true;
+    }
+
+    // A card in fullscreen inside the pop-up (a camera) keeps its drags, as
+    // closing the pop-up would end the fullscreen. Only asked while something
+    // is in fullscreen, an engine without `:fullscreen` (Safari before 16.4)
+    // throws on the selector, and an ordinary touch has nothing to ask.
+    if (somethingFullscreen && typeof node.matches === 'function' && node.matches(':fullscreen')) {
         return true;
     }
 
@@ -219,6 +229,7 @@ function readGestureTarget(event, popUp, topSheet) {
 
     let slider = null;
     let header = false;
+    const somethingFullscreen = !!document.fullscreenElement;
 
     for (const node of path) {
         if (node === popUp) {
@@ -229,7 +240,7 @@ function readGestureTarget(event, popUp, topSheet) {
             continue;
         }
 
-        if (isSwipeLockedNode(node, topSheet)) {
+        if (isSwipeLockedNode(node, topSheet, somethingFullscreen)) {
             return { blocked: true, slider: null, header: false };
         }
 

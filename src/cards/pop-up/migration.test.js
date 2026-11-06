@@ -333,6 +333,53 @@ describe('maybeShowMigrationNotice', () => {
         huiRoot.isConnected = false;
         closeNotice(harness);
     });
+
+    // #2677: streamline-card renders the pop-up before it has hass, so before
+    // its cards_javascript gave it cards, then hands the same card its cards.
+    const popUpCard = (hash) => ({ config: { type: 'custom:bubble-card', card_type: 'pop-up', hash } });
+    const noticeOpened = (harness) => harness.createdElements.some((element) => element.tagName === 'HA-DIALOG');
+
+    test('stays closed when the pop-up that asked for it has its cards by the time it opens', () => {
+        const harness = installMigrationNoticeHarness();
+        setLocationPathname('/lovelace/streamline');
+        const card = popUpCard('#room');
+
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, '#room', card);
+        card.config = { ...card.config, cards: [buttonCard] };
+        harness.runDeferredCallback();
+
+        expect(noticeOpened(harness)).toBe(false);
+    });
+
+    test('still opens for a legacy pop-up rendered after one that got its cards', () => {
+        let harness = installMigrationNoticeHarness();
+        setLocationPathname('/lovelace/streamline-then-legacy');
+        const wrapped = popUpCard('#wrapped');
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, '#wrapped', wrapped);
+        wrapped.config = { ...wrapped.config, cards: [] };
+        harness.runDeferredCallback();
+
+        harness = installMigrationNoticeHarness();
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, '#legacy', popUpCard('#legacy'));
+        harness.runDeferredCallback();
+
+        expect(noticeHashes(harness)).toEqual(['#legacy']);
+        closeNotice(harness);
+    });
+
+    test('lists only the pop-ups still waiting for cards when it opens', () => {
+        const harness = installMigrationNoticeHarness();
+        setLocationPathname('/lovelace/mixed');
+        const wrapped = popUpCard('#wrapped');
+
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, '#wrapped', wrapped);
+        maybeShowMigrationNotice({ panelUrl: 'lovelace' }, '#legacy', popUpCard('#legacy'));
+        wrapped.config = { ...wrapped.config, cards: [buttonCard] };
+        harness.runDeferredCallback();
+
+        expect(noticeHashes(harness)).toEqual(['#legacy']);
+        closeNotice(harness);
+    });
 });
 
 describe('isLegacyPopUpConfig', () => {

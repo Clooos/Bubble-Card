@@ -6,6 +6,7 @@ jest.unstable_mockModule('../../tools/style.js', () => ({
 
 jest.unstable_mockModule('./index.js', () => ({
     updateContentContainerFixedClass: jest.fn(),
+    syncMainButtonsBottomClass: jest.fn(),
 }));
 
 jest.unstable_mockModule('../../tools/icon.js', () => ({
@@ -533,5 +534,108 @@ describe('a state line written before Home Assistant could format it (#2572)', (
         context._hass = { ...context._hass };
         changeState(context);
         expect(applyScrollingEffect.mock.calls.length).toBe(writes);
+    });
+});
+
+// Whether the main buttons show is read from the style, since a custom style
+// may hide them. Read in the middle of a build, that cost one style pass per
+// card. The reads now wait for the next frame and happen all at once.
+describe('syncMainButtonsBottomClass', () => {
+    let frames;
+    let version = 0;
+
+    const fresh = async () => (await import(`./changes.js?main-buttons=${++version}`)).syncMainButtonsBottomClass;
+    const runFrame = () => { const list = frames; frames = []; list.forEach((callback) => callback()); };
+
+    function classList(initial = []) {
+        const set = new Set(initial);
+        return {
+            add: (...names) => names.forEach((name) => set.add(name)),
+            remove: (...names) => names.forEach((name) => set.delete(name)),
+            toggle: (name, force) => { if (force ?? !set.has(name)) set.add(name); else set.delete(name); return set.has(name); },
+            contains: (name) => set.has(name),
+        };
+    }
+
+    function card(config = { main_buttons_position: 'bottom' }) {
+        return {
+            config,
+            elements: {
+                buttonsContainer: { classList: classList(), style: {} },
+                bottomSubButtonContainer: { classList: classList() },
+            },
+        };
+    }
+
+    const hasRoom = (context) => context.elements.bottomSubButtonContainer.classList.contains('with-main-buttons-bottom');
+
+    beforeEach(() => {
+        frames = [];
+        global.requestAnimationFrame = jest.fn((callback) => { frames.push(callback); return frames.length; });
+        global.getComputedStyle = jest.fn(() => ({ display: 'flex' }));
+    });
+
+    afterEach(() => {
+        delete global.requestAnimationFrame;
+        delete global.getComputedStyle;
+    });
+
+    test('reads every card waiting in one frame, all reads before any write', async () => {
+        const sync = await fresh();
+        const cards = [card(), card(), card()];
+        const order = [];
+        global.getComputedStyle = jest.fn(() => { order.push('read'); return { display: 'flex' }; });
+        for (const context of cards) {
+            const list = context.elements.bottomSubButtonContainer.classList;
+            const toggle = list.toggle;
+            list.toggle = (...args) => { order.push('write'); return toggle(...args); };
+        }
+
+        cards.forEach(sync);
+        expect(requestAnimationFrame).toHaveBeenCalledTimes(1);
+        expect(getComputedStyle).not.toHaveBeenCalled();
+
+        runFrame();
+        expect(order).toEqual(['read', 'read', 'read', 'write', 'write', 'write']);
+        expect(cards.every(hasRoom)).toBe(true);
+    });
+
+    test('main buttons hidden by a style leave the room free', async () => {
+        const sync = await fresh();
+        global.getComputedStyle = jest.fn(() => ({ display: 'none' }));
+        const context = card();
+        context.elements.bottomSubButtonContainer.classList.add('with-main-buttons-bottom');
+
+        sync(context);
+        runFrame();
+
+        expect(hasRoom(context)).toBe(false);
+    });
+
+    test('buttons that are not at the bottom, or that the card hides, need no read', async () => {
+        const sync = await fresh();
+        const notAtBottom = card({ main_buttons_position: 'default' });
+        const hiddenByCard = card();
+        hiddenByCard.elements.buttonsContainer.classList.add('hidden');
+        for (const context of [notAtBottom, hiddenByCard]) {
+            context.elements.bottomSubButtonContainer.classList.add('with-main-buttons-bottom');
+            sync(context);
+        }
+
+        expect(requestAnimationFrame).not.toHaveBeenCalled();
+        expect(hasRoom(notAtBottom)).toBe(false);
+        expect(hasRoom(hiddenByCard)).toBe(false);
+    });
+
+    test('a card that stops showing its buttons before the frame is not read', async () => {
+        const sync = await fresh();
+        const context = card();
+        sync(context);
+        context.config = { main_buttons_position: 'default' };
+        sync(context);
+
+        runFrame();
+        expect(getComputedStyle).not.toHaveBeenCalled();
+        expect(hasRoom(context)).toBe(false);
     });
 });

@@ -46,6 +46,7 @@ jest.unstable_mockModule('./create.js', () => ({
 }));
 jest.unstable_mockModule('../base-card/index.js', () => ({
     updateContentContainerFixedClass: jest.fn(),
+    syncMainButtonsBottomClass: jest.fn(),
 }));
 jest.unstable_mockModule('./types/default/index.js', () => ({ handleDefaultSubButton: jest.fn() }));
 jest.unstable_mockModule('./types/dropdown/index.js', () => ({ handleDropdownSubButton: jest.fn() }));

@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, jest, test } from '@jest/globals';
 // base card and its stylesheets, which the node test environment cannot parse.
 jest.unstable_mockModule('../../components/base-card/index.js', () => ({
     updateContentContainerFixedClass: jest.fn(),
+    syncMainButtonsBottomClass: jest.fn(),
 }));
 
 const ENTITY = 'media_player.test';

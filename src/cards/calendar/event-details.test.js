@@ -123,6 +123,8 @@ describe('opening the details of an event', () => {
         expect(opensDialog).toHaveBeenCalledTimes(1);
         const info = opensDialog.mock.calls[0][0];
         expect(info.event.backgroundColor).toBe('red');
+        // Where Home Assistant 2026.11 reads it.
+        expect(info.event.color).toBe('red');
         expect(info.event.extendedProps.calendar).toBe('calendar.yard');
         expect(info.event.extendedProps.eventData.description).toBe('35 g per square metre');
 

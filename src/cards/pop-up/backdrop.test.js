@@ -105,9 +105,12 @@ jest.unstable_mockModule('../../tools/style.js', () => ({
     convertToRGBA: jest.fn((color) => `rgba(${color})`),
 }));
 
+const mountPopUpOverlay = jest.fn();
+
 jest.unstable_mockModule('../../tools/utils.js', () => ({
     createElement,
     getCachedBodyStyles,
+    mountPopUpOverlay,
 }));
 
 jest.unstable_mockModule('../../tools/style-processor.js', () => ({
@@ -157,6 +160,46 @@ describe('backdrop transitions', () => {
         jest.runOnlyPendingTimers();
 
         jest.useRealTimers();
+    });
+
+    test('mounts the backdrop next to the pop-up it opens for', () => {
+        const popUp = createElement('div', 'bubble-pop-up');
+        const context = { config: {}, popUp };
+
+        getBackdrop(context).showBackdrop(context);
+
+        expect(mountPopUpOverlay).toHaveBeenLastCalledWith(expect.anything(), popUp);
+    });
+
+    // On 2026.11 the backdrop moves next to each pop-up it opens for. Moved
+    // while it shows, its @starting-style faded it out and back in.
+    test('keeps its opacity when it moves from one open pop-up to the next', () => {
+        const first = createElement('div', 'bubble-pop-up');
+        first.parentNode = createElement('div');
+        const next = createElement('div', 'bubble-pop-up');
+        next.parentNode = createElement('div');
+        const { showBackdrop, backdropElement } = getBackdrop({ config: {}, popUp: first });
+        showBackdrop({ config: {}, popUp: first });
+        expect(backdropElement.classList.contains('is-visible')).toBe(true);
+
+        // What the move does, and what the transition was while it happened.
+        let transitionAtMove = null;
+        mountPopUpOverlay.mockImplementationOnce((host, popUp) => {
+            transitionAtMove = backdropElement.style.getPropertyValue('transition');
+            host.parentNode = popUp.parentNode;
+        });
+        const readAt = [];
+        global.getComputedStyle = jest.fn((element) => {
+            readAt.push(element.style.getPropertyValue('transition'));
+            return { opacity: '1' };
+        });
+
+        showBackdrop({ config: {}, popUp: next });
+
+        expect(transitionAtMove).toBe('none');
+        expect(readAt).toEqual(['none']);
+        expect(backdropElement.style.getPropertyValue('transition')).toBe('');
+        delete global.getComputedStyle;
     });
 
     test('does not let passive backdrop access steal the active popup styles', () => {

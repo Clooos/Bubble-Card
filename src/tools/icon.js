@@ -55,7 +55,17 @@ export function unregisterForIconRefresh(card) {
   }
 }
 
+// Moves each time icon data from Home Assistant lands, for renders that skip
+// themselves when nothing they compare has changed, like a pop-up header.
+let iconDataVersion = 0;
+
+export function getIconDataVersion() {
+  return iconDataVersion;
+}
+
 function notifyIconRefresh() {
+  iconDataVersion += 1;
+
   // Icon data arrives once from the WebSocket and every registered card wants
   // to re-render. Doing that in one pass is a long task that also ignores the
   // pop-up open gate, so it can land in the middle of an open transition:

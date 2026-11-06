@@ -6,6 +6,7 @@ jest.unstable_mockModule('./style.js', () => ({
 
 jest.unstable_mockModule('../components/base-card/index.js', () => ({
     updateContentContainerFixedClass: jest.fn(),
+    syncMainButtonsBottomClass: jest.fn(),
 }));
 
 jest.unstable_mockModule('./icon.js', () => ({
@@ -388,6 +389,65 @@ describe('toggleBodyScroll', () => {
         expect(document.body.classList.contains('bubble-body-scroll-locked')).toBe(false);
         expect(scrollLockLayer.classList.contains('is-active')).toBe(false);
         expect(window.scrollTo).not.toHaveBeenCalled();
+    });
+
+    // home-assistant > home-assistant-main, isolated or not like Home Assistant
+    // 2026.11 and the versions before.
+    function mountHomeAssistant(isolation) {
+        const main = createMockElement('home-assistant-main');
+        main.shadowRoot = { querySelector: () => null };
+        const homeAssistant = createMockElement('home-assistant');
+        homeAssistant.shadowRoot = { querySelector: (selector) => (selector === 'home-assistant-main' ? main : null) };
+        document.querySelector = (selector) => (selector === 'home-assistant' ? homeAssistant : null);
+        global.getComputedStyle = (element) => ({ isolation: element === main ? isolation : 'auto' });
+    }
+
+    function popUpInParent() {
+        const popUp = createMockElement('div');
+        const parent = createMockElement('div');
+        parent.insertBefore = jest.fn((child, reference) => {
+            const index = parent.children.indexOf(reference);
+            parent.children.splice(index, 0, child);
+            child.parentNode = parent;
+            return child;
+        });
+        parent.appendChild(popUp);
+        return { popUp, parent };
+    }
+
+    test('keeps the lock layer on the body while Home Assistant does not isolate its panel', () => {
+        mountHomeAssistant('auto');
+        const { popUp, parent } = popUpInParent();
+
+        utilsModule.toggleBodyScroll(true, popUp);
+
+        const scrollLockLayer = document.getElementById('bubble-card-scroll-lock-layer');
+        expect(document.body.children).toContain(scrollLockLayer);
+        expect(parent.children).toEqual([popUp]);
+        delete global.getComputedStyle;
+    });
+
+    test('mounts the lock layer right before the pop-up, in its stacking context (#2689)', () => {
+        mountHomeAssistant('isolate');
+        const { popUp, parent } = popUpInParent();
+
+        utilsModule.toggleBodyScroll(true, popUp);
+
+        const scrollLockLayer = parent.children[0];
+        expect(scrollLockLayer.id).toBe('bubble-card-scroll-lock-layer');
+        expect(parent.children[1]).toBe(popUp);
+        expect(document.body.children).not.toContain(scrollLockLayer);
+        // The rules in the head do not reach into a shadow root.
+        expect(scrollLockLayer.style.position).toBe('fixed');
+        expect(scrollLockLayer.style.zIndex).toBe('4');
+        expect(scrollLockLayer.style.display).toBe('block');
+        expect(scrollLockLayer.style.pointerEvents).toBe('auto');
+
+        utilsModule.toggleBodyScroll(false);
+
+        expect(scrollLockLayer.style.display).toBe('none');
+        expect(scrollLockLayer.style.pointerEvents).toBe('none');
+        delete global.getComputedStyle;
     });
 
     test('reuses the same lock layer across repeated locks', () => {

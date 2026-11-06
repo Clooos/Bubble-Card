@@ -81,12 +81,23 @@ function createPanelChain({ left = 56, width = 944 } = {}) {
 // each behind its own shadow root.
 function installHaShell(panel, { exposeSlot = true, exposeTag = true, version = '2026.5.1' } = {}) {
     const mainShadowRoot = {
+        children: [],
         querySelector: (selector) => {
             if (selector === '[slot="appContent"]') return exposeSlot ? panel : null;
             if (selector === 'partial-panel-resolver') return exposeTag ? panel : null;
             return null;
         },
+        getElementById: (id) => mainShadowRoot.children.find((child) => child.id === id) || null,
+        appendChild: jest.fn((child) => {
+            mainShadowRoot.children.push(child);
+            child.isConnected = true;
+            child.remove = () => {
+                mainShadowRoot.children.splice(mainShadowRoot.children.indexOf(child), 1);
+                child.isConnected = false;
+            };
+        }),
     };
+    lastMainShadowRoot = mainShadowRoot;
 
     global.document.querySelector = jest.fn((selector) => {
         if (selector !== 'home-assistant') return null;
@@ -110,6 +121,11 @@ function writes() {
 let resizeObservers;
 let frames;
 let frameId;
+let lastMainShadowRoot;
+
+function modalRules() {
+    return (lastMainShadowRoot?.children || []).filter((child) => child.localName === 'style');
+}
 
 // One rendering frame. The animation frame callbacks queued before it start,
 // then the observer reports whatever layout moved (the test calls trigger()).
@@ -126,8 +142,10 @@ beforeEach(() => {
     frameId = 0;
 
     const properties = {};
+    lastMainShadowRoot = null;
     global.document = {
         querySelector: jest.fn(() => null),
+        createElement: jest.fn((localName) => ({ localName })),
         documentElement: {
             clientWidth: 1000,
             style: {
@@ -232,6 +250,40 @@ describe('Home Assistant versions that publish the inset themselves', () => {
         expect(resizeObservers).toHaveLength(0);
         expect(global.getComputedStyle).not.toHaveBeenCalled();
         expect(published()).toBeUndefined();
+    });
+
+    // #2669: custom-sidebar puts 256px back in --ha-sidebar-width in modal,
+    // where HA unsets it, so every placement moved over by a hidden sidebar.
+    test('adds once, next to the rules of HA, a zero inset for the modal sidebar', () => {
+        installHaShell(createPanel({ left: 0, width: 850 }), { version: '2026.10.1' });
+
+        startContentInsetSync();
+        startContentInsetSync();
+
+        expect(modalRules()).toHaveLength(1);
+        expect(modalRules()[0].textContent).toBe(`:host([modal]) { ${CONTENT_INLINE_START_VAR}: 0px; }`);
+        expect(lastMainShadowRoot.appendChild).toHaveBeenCalledTimes(1);
+    });
+
+    test('puts the modal rule back when HA renders its shell again', () => {
+        installHaShell(createPanel({ left: 0, width: 850 }), { version: '2026.10.1' });
+        startContentInsetSync();
+        // The old shell leaves the page, and its rule with it.
+        modalRules()[0].isConnected = false;
+
+        installHaShell(createPanel({ left: 0, width: 850 }), { version: '2026.10.1' });
+        startContentInsetSync();
+
+        expect(modalRules()).toHaveLength(1);
+        expect(modalRules()[0].isConnected).toBe(true);
+    });
+
+    test('leaves the versions that are still measured without the modal rule', () => {
+        installHaShell(createPanel({ left: 56, width: 944 }), { version: '2026.5.4' });
+
+        startContentInsetSync();
+
+        expect(modalRules()).toHaveLength(0);
     });
 
     test.each(['2023.9.0', '2026.3.1', '2026.5.4'])('%s is still measured', (version) => {

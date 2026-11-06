@@ -346,6 +346,16 @@ describe('gestures the pop-up must not take', () => {
         expect(popUp.style.transform).toBe('');
     });
 
+    // Home Assistant 2026.11 charts pan once zoomed and pinch-zoom on touch.
+    test('leaves a drag that starts on a chart to the chart', () => {
+        const { context, popUp } = harness();
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), createNode({ localName: 'ha-chart-base' }), createNode(), popUp] }));
+
+        expect(documentListeners.touchmove ?? []).toHaveLength(0);
+        expect(popUp.style.transform).toBe('');
+    });
+
     test('a sideways swipe is handed back untouched, so a tab strip keeps it', () => {
         const { context, popUp, closePopup } = harness();
 
@@ -456,6 +466,37 @@ describe('gestures the pop-up must not take', () => {
         context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), scrolledList, popUp] }));
 
         expect(documentListeners.touchmove ?? []).toHaveLength(0);
+    });
+
+    test('leaves a card that is fullscreen inside the pop-up alone', () => {
+        const { context, popUp } = harness();
+        const fullscreen = { ...createNode(), matches: (selector) => selector === ':fullscreen' };
+        // The document names the outermost host, the card itself sits in a shadow root.
+        global.document.fullscreenElement = {};
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), fullscreen, popUp] }));
+
+        expect(documentListeners.touchmove ?? []).toHaveLength(0);
+    });
+
+    test('still slides when the page around the pop-up is fullscreen', () => {
+        const { context, popUp } = harness();
+        const page = { ...createNode(), matches: (selector) => selector === ':fullscreen' };
+        global.document.fullscreenElement = page;
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path: [createNode(), popUp, page] }));
+
+        expect(documentListeners.touchmove ?? []).toHaveLength(1);
+    });
+
+    test('never asks for :fullscreen while nothing is in fullscreen', () => {
+        const { context, popUp } = harness();
+        // Safari before 16.4 does not know the selector and throws on it.
+        const node = { ...createNode(), matches: () => { throw new SyntaxError("':fullscreen' is not a valid selector"); } };
+
+        context.handleTouchStart(touchEvent([{ y: 300 }], { path: [node, popUp] }));
+
+        expect(documentListeners.touchmove ?? []).toHaveLength(1);
     });
 
     test('leaves Home Assistant\'s own controls alone', () => {

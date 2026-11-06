@@ -9,6 +9,7 @@ import { fireEvent } from '../tools/utils.js';
 import { keepEqualParts, acceptConditions } from './config-identity.js';
 // Custom selector for object fields with dynamic entity-attribute context support
 import '../components/editor/ha-selector-bc_object.js';
+import '../components/editor/bubble-formfield.js';
 import { renderButtonEditor } from '../cards/button/editor.js';
 import { renderSubButtonsEditor } from '../cards/sub-buttons/editor.js';
 import { renderPopUpEditor } from '../cards/pop-up/editor.js';
@@ -767,7 +768,7 @@ class BubbleCardEditor extends LitElement {
 
         return html`
 
-            <ha-formfield>
+            <bubble-formfield>
                 <ha-switch
                     aria-label="${t('editor.show.scrolling_effect')}"
                     .checked=${context?.scrolling_effect ?? true}
@@ -777,9 +778,9 @@ class BubbleCardEditor extends LitElement {
                 <div class="mdc-form-field">
                     <label class="mdc-label">${t('editor.show.scrolling_effect')}</label>
                 </div>
-            </ha-formfield>
+            </bubble-formfield>
             ${this._renderConditionalContent(isSubButton, html`
-                <ha-formfield>
+                <bubble-formfield>
                     <ha-switch
                         aria-label="${t('editor.show.background')}"
                         .checked=${context?.show_background ?? true}
@@ -788,10 +789,10 @@ class BubbleCardEditor extends LitElement {
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.show.background')}</label>
                     </div>
-                </ha-formfield>
+                </bubble-formfield>
             `)}
             ${this._renderConditionalContent(isSubButton && (context?.show_background ?? true), html`
-                <ha-formfield>
+                <bubble-formfield>
                     <ha-switch
                         aria-label="${t('editor.show.state_background')}"
                         .checked=${context?.state_background ?? true}
@@ -800,10 +801,10 @@ class BubbleCardEditor extends LitElement {
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.show.state_background')}</label>
                     </div>
-                </ha-formfield>
+                </bubble-formfield>
             `)}
             ${this._renderConditionalContent(isSubButton && (context?.state_background ?? true) && entity.startsWith("light"), html`
-                <ha-formfield>
+                <bubble-formfield>
                     <ha-switch
                         aria-label="${t('editor.show.light_background')}"
                         .checked=${context?.light_background ?? true}
@@ -812,10 +813,10 @@ class BubbleCardEditor extends LitElement {
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.show.light_background')}</label>
                     </div>
-                </ha-formfield>
+                </bubble-formfield>
             `)}
             ${this._renderConditionalContent(!isSubButton && entity.startsWith("light"), html`
-                <ha-formfield>
+                <bubble-formfield>
                     <ha-switch
                         aria-label="${t('editor.show.accent_color')}"
                         .checked=${context?.use_accent_color ?? false}
@@ -826,9 +827,9 @@ class BubbleCardEditor extends LitElement {
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.show.accent_color')}</label>
                     </div>
-                </ha-formfield>
+                </bubble-formfield>
             `)}
-            <ha-formfield>
+            <bubble-formfield>
                 <ha-switch
                     aria-label="${t('editor.show.icon')}"
                     .disabled=${homeAssistantHeader}
@@ -839,8 +840,8 @@ class BubbleCardEditor extends LitElement {
                 <div class="mdc-form-field">
                     <label class="mdc-label">${t('editor.show.icon')}</label>
                 </div>
-            </ha-formfield>
-            <ha-formfield>
+            </bubble-formfield>
+            <bubble-formfield>
                 <ha-switch
                     aria-label="${t('editor.show.force_icon')}"
                     .checked=${context?.force_icon ?? false}
@@ -851,8 +852,8 @@ class BubbleCardEditor extends LitElement {
                 <div class="mdc-form-field">
                     <label class="mdc-label">${t('editor.show.force_icon')}</label>
                 </div>
-            </ha-formfield>
-            <ha-formfield>
+            </bubble-formfield>
+            <bubble-formfield>
                 <ha-switch
                     aria-label="${t('editor.show.name')}"
                     .checked=${ context?.show_name ?? (!isSubButton ? true : false) }
@@ -862,7 +863,7 @@ class BubbleCardEditor extends LitElement {
                 <div class="mdc-form-field">
                     <label class="mdc-label">${t('editor.show.name')}</label>
                 </div>
-            </ha-formfield>
+            </bubble-formfield>
             ${this._renderConditionalContent(showsStateContent, html`
                 <ha-form
                     .hass=${this._hassRender}
@@ -880,7 +881,7 @@ class BubbleCardEditor extends LitElement {
                 ></ha-form>
             `)}
             ${this._renderConditionalContent(showSelectUi, html`
-                <ha-formfield>
+                <bubble-formfield>
                     <ha-switch
                         aria-label="${t('editor.show.arrow')}"
                         .checked=${context?.show_arrow ?? true}
@@ -890,7 +891,7 @@ class BubbleCardEditor extends LitElement {
                     <div class="mdc-form-field">
                         <label class="mdc-label">${t('editor.show.arrow')}</label>
                     </div>
-                </ha-formfield>
+                </bubble-formfield>
             `)}
         `;
     }
@@ -1112,7 +1113,7 @@ class BubbleCardEditor extends LitElement {
                             @value-changed=${(ev) => this._ActionChanged(ev,array,index)}
                         ></ha-form>
                         ${ value?.action  === 'call-service' || value?.action === 'perform-action' ? html`
-                            <ha-formfield>
+                            <bubble-formfield>
                                 <ha-switch
                                     aria-label="${t('editor.actions.use_default_entity')}"
                                     .configValue="${
@@ -1123,7 +1124,7 @@ class BubbleCardEditor extends LitElement {
                                 <div class="mdc-form-field">
                                     <label class="mdc-label">${t('editor.actions.use_default_entity')}</label>
                                 </div>
-                            </ha-formfield>
+                            </bubble-formfield>
                         ` : ''}
                     `)}
                 </div>
@@ -2998,6 +2999,9 @@ class BubbleCardEditor extends LitElement {
         };
 
         const proxySection = document.createElement("hui-section");
+        // HA 2026.11 moved card dialog handlers to hui-view and uses paths
+        // into the full Lovelace config. Older releases handle them on sections.
+        const usesViewDialogHandlers = "path" in proxySection;
         proxySection.style.display = "none";
         proxySection.hass = this.hass;
         proxySection.index = 0;
@@ -3018,6 +3022,29 @@ class BubbleCardEditor extends LitElement {
                 await onSaveConfig(newConfig);
             },
         };
+
+        if (usesViewDialogHandlers) {
+            const proxyView = document.createElement("hui-view");
+            proxyView.style.display = "none";
+            proxyView.hass = this.hass;
+            proxyView.index = 0;
+            proxyView.lovelace = proxySection.lovelace;
+            const cardsPath = ["views", 0, "sections", 0, "cards"];
+            const path = eventName === "ll-edit-card"
+                ? [...cardsPath, eventDetail.path[eventDetail.path.length - 1]]
+                : cardsPath;
+            homeAssistant.appendChild(proxyView);
+            try {
+                proxyView.dispatchEvent(new CustomEvent(eventName, {
+                    bubbles: true,
+                    composed: true,
+                    detail: { ...eventDetail, path },
+                }));
+                return true;
+            } finally {
+                proxyView.remove();
+            }
+        }
 
         homeAssistant.appendChild(proxySection);
 

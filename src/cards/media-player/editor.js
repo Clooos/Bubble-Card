@@ -78,7 +78,7 @@ export function renderMediaPlayerEditor(editor){
                         .computeLabel=${editor._computeLabelCallback}
                         @value-changed=${editor._valueChanged}
                     ></ha-form>
-                    <ha-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${editor._optionalLabel(t('editor.media_player.hide_play_pause'))}"
                             .checked=${editor._config.hide?.play_pause_button || false}
@@ -88,8 +88,8 @@ export function renderMediaPlayerEditor(editor){
                         <div class="mdc-form-field">
                             <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_play_pause'))}</label> 
                         </div>
-                    </ha-formfield>
-                    <ha-formfield>
+                    </bubble-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${editor._optionalLabel(t('editor.media_player.hide_volume'))}"
                             .checked=${editor._config.hide?.volume_button || false}
@@ -99,8 +99,8 @@ export function renderMediaPlayerEditor(editor){
                         <div class="mdc-form-field">
                             <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_volume'))}</label>
                         </div>
-                    </ha-formfield>
-                    <ha-formfield>
+                    </bubble-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${editor._optionalLabel(t('editor.media_player.hide_next'))}"
                             .checked=${editor._config.hide?.next_button || false}
@@ -110,8 +110,8 @@ export function renderMediaPlayerEditor(editor){
                         <div class="mdc-form-field">
                             <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_next'))}</label>
                         </div>
-                    </ha-formfield>
-                    <ha-formfield>
+                    </bubble-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${editor._optionalLabel(t('editor.media_player.hide_previous'))}"
                             .checked=${editor._config.hide?.previous_button || false}
@@ -121,8 +121,8 @@ export function renderMediaPlayerEditor(editor){
                         <div class="mdc-form-field">
                             <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_previous'))}</label>
                         </div>
-                    </ha-formfield>
-                    <ha-formfield>
+                    </bubble-formfield>
+                    <bubble-formfield>
                         <ha-switch
                             aria-label="${editor._optionalLabel(t('editor.media_player.hide_power'))}"
                             .checked=${editor._config.hide?.power_button}
@@ -132,7 +132,7 @@ export function renderMediaPlayerEditor(editor){
                         <div class="mdc-form-field">
                             <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.hide_power'))}</label>
                         </div>
-                    </ha-formfield>
+                    </bubble-formfield>
                     <div class="bubble-info">
                         <h4 class="bubble-section-title">
                             <ha-icon icon="mdi:information-outline"></ha-icon>
@@ -180,7 +180,7 @@ export function renderMediaPlayerEditor(editor){
                           ${t('editor.media_player.styling_title')}
                         </h4>
                         <div class="content"> 
-                            <ha-formfield>
+                            <bubble-formfield>
                                 <ha-switch
                                     aria-label="${editor._optionalLabel(t('editor.media_player.blurred_cover'))}"
                                     .checked=${editor._config.cover_background ?? false}
@@ -190,7 +190,7 @@ export function renderMediaPlayerEditor(editor){
                                 <div class="mdc-form-field">
                                     <label class="mdc-label">${editor._optionalLabel(t('editor.media_player.blurred_cover'))}</label> 
                                 </div>
-                            </ha-formfield>
+                            </bubble-formfield>
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}

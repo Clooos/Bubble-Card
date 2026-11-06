@@ -169,7 +169,7 @@ class BubbleCard extends HTMLElement {
 
     // Notify the user if this pop-up has not been migrated to standalone mode yet.
     if (!held && this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {
-      maybeShowMigrationNotice(this._hass, this.config.hash);
+      maybeShowMigrationNotice(this._hass, this.config.hash, this);
     }
 
     // Register for icon refresh so cards re-render when icon data loads from WebSocket
@@ -407,7 +407,7 @@ class BubbleCard extends HTMLElement {
     this.renderCoalesced();
 
     if (this.isConnected && this.config?.card_type === 'pop-up' && !Array.isArray(this.config?.cards) && !this.editor) {
-      maybeShowMigrationNotice(hass, this.config.hash);
+      maybeShowMigrationNotice(hass, this.config.hash, this);
     }
   }
 

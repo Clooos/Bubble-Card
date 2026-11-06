@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globa
 // part in resolving a theme color.
 jest.unstable_mockModule('../components/base-card/index.js', () => ({
     updateContentContainerFixedClass: jest.fn(),
+    syncMainButtonsBottomClass: jest.fn(),
 }));
 
 jest.unstable_mockModule('./icon.js', () => ({

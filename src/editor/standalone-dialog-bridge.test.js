@@ -776,6 +776,171 @@ describe('reopened pop-up dialog close flow', () => {
         expect(slice.initial).toEqual(originalPopup);
         expect(slice.normalizedInitial).toEqual(originalPopup);
     });
+
+    // The pop-up editor as HA opens it from the dashboard.
+    function openPopupEditor(savedConfig) {
+        const dialog = createEditCardDialogMock();
+        dialog._params = { cardConfig: savedConfig };
+        dialog._cardConfig = savedConfig;
+        dialog.showDialog(savedConfig);
+        return dialog;
+    }
+
+    // An edit typed in the pop-up editor itself, outside any child editor.
+    function editPopup(dialog, nextConfig) {
+        dialog._cardConfig = nextConfig;
+        dialog._dirtySlices.get(DEFAULT_KEY).current = nextConfig;
+        dialog._publishContext();
+    }
+
+    // One trip through a child card editor, the way bubble-card-editor.js runs
+    // it. The parent is captured from the live dialog, the child editor takes
+    // the dialog over, then saving or cancelling it reopens the pop-up, with
+    // the card it added when it was an "Add card".
+    function goThroughChildEditor(dialog, popupConfig, nextPopupConfig = popupConfig) {
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, popupConfig);
+
+        dialog._params = { cardConfig: { type: 'markdown' } };
+        dialog.showDialog({ type: 'markdown' });
+
+        const reopenedParams = createReopenedStandaloneParentDialogParams(parentParams, nextPopupConfig);
+        dialog._params = reopenedParams;
+        dialog._cardConfig = reopenedParams.cardConfig;
+        dialog.showDialog(reopenedParams.cardConfig);
+        forceDialogDirtyState(dialog, reopenedParams._originalCardConfig);
+    }
+
+    const savedPopup = {
+        type: 'custom:bubble-card',
+        card_type: 'pop-up',
+        hash: '#kitchen',
+        name: 'Kitchen',
+        cards: [{ type: 'markdown', content: 'Saved' }],
+    };
+
+    test('keeps an added card savable after cancelling another child editor (#2676)', () => {
+        const dialog = openPopupEditor(savedPopup);
+        const popupWithAddedCard = {
+            ...savedPopup,
+            cards: [...savedPopup.cards, { type: 'markdown', content: 'Added' }],
+        };
+
+        // Adds a card and saves it, then opens a card and cancels.
+        goThroughChildEditor(dialog, savedPopup, popupWithAddedCard);
+        expect(dialog.isDirtyState).toBe(true);
+        goThroughChildEditor(dialog, popupWithAddedCard);
+
+        expect(dialog.isDirtyState).toBe(true);
+        expect(dialog._dirtySlices.get(DEFAULT_KEY).initial).toEqual(savedPopup);
+    });
+
+    test('keeps a change made to the pop-up itself before its first child editor', () => {
+        const dialog = openPopupEditor(savedPopup);
+        const renamedPopup = { ...savedPopup, name: 'Kitchen renamed' };
+        editPopup(dialog, renamedPopup);
+
+        goThroughChildEditor(dialog, renamedPopup);
+
+        expect(dialog.isDirtyState).toBe(true);
+        expect(dialog._dirtySlices.get(DEFAULT_KEY).initial).toEqual(savedPopup);
+    });
+
+    test('keeps a new pop-up savable after a cancelled child editor', () => {
+        const dialog = openPopupEditor(savedPopup);
+        // HA tracks a card that is not on the dashboard yet against an empty one.
+        const slice = dialog._dirtySlices.get(DEFAULT_KEY);
+        slice.initial = { type: '' };
+        slice.normalizedInitial = { type: '' };
+        dialog._publishContext();
+
+        goThroughChildEditor(dialog, savedPopup);
+
+        expect(dialog.isDirtyState).toBe(true);
+    });
+
+    test('still leaves Save off when nothing changed', () => {
+        const dialog = openPopupEditor(savedPopup);
+
+        goThroughChildEditor(dialog, clone(savedPopup));
+
+        expect(dialog.isDirtyState).toBe(false);
+    });
+
+    test('still leaves Save off when the editor only filled in its defaults', () => {
+        const dialog = openPopupEditor(savedPopup);
+        // The editor completes its own config without telling HA about it.
+        const editorPopup = { ...savedPopup, button_type: 'name' };
+
+        goThroughChildEditor(dialog, editorPopup);
+        expect(dialog.isDirtyState).toBe(false);
+        goThroughChildEditor(dialog, editorPopup);
+
+        expect(dialog.isDirtyState).toBe(false);
+    });
+});
+
+describe('createStandaloneParentDialogParams saved baseline', () => {
+    test('takes the stack HA saved, not the live one, for a pop-up nested in a stack', () => {
+        const savedNestedPopup = {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#bedroom',
+            cards: [],
+        };
+        const savedStack = { type: 'vertical-stack', cards: [savedNestedPopup] };
+        const liveNestedPopup = { ...savedNestedPopup, cards: [{ type: 'markdown', content: 'Added' }] };
+        const liveStack = { type: 'vertical-stack', cards: [liveNestedPopup] };
+        const dialog = {
+            _params: { cardConfig: liveStack },
+            _dirtySlices: new Map([['__default__', { initial: savedStack, current: liveStack }]]),
+            isDirtyState: true,
+        };
+
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, liveNestedPopup);
+
+        expect(parentParams.cardConfig).toBe(liveStack);
+        expect(parentParams._originalCardConfig).toEqual(savedStack);
+        expect(parentParams._originalCardConfig).not.toBe(savedStack);
+    });
+
+    test('keeps the live config of a dialog without unsaved changes', () => {
+        const savedPopup = {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#kitchen',
+            cards: [],
+        };
+        const editorPopup = { ...savedPopup, button_type: 'name' };
+        const dialog = {
+            _params: { cardConfig: savedPopup },
+            _dirtySlices: new Map([['__default__', { initial: savedPopup, current: savedPopup }]]),
+            isDirtyState: false,
+        };
+
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, editorPopup);
+
+        expect(parentParams._originalCardConfig).toEqual(editorPopup);
+    });
+
+    test('prefers the baseline a reopened dialog carries over the one HA just reset', () => {
+        const livePopup = {
+            type: 'custom:bubble-card',
+            card_type: 'pop-up',
+            hash: '#kitchen',
+            cards: [{ type: 'markdown', content: 'Added' }],
+        };
+        const carriedBaseline = { ...livePopup, cards: [] };
+        const dialog = {
+            // Reopening runs HA's showDialog, which takes the live config as
+            // its baseline until forceDialogDirtyState puts the carried one back.
+            _params: { cardConfig: livePopup, _originalCardConfig: carriedBaseline },
+            _dirtySlices: new Map([['__default__', { initial: livePopup, current: livePopup }]]),
+        };
+
+        const parentParams = createStandaloneParentDialogParamsFromDialog(dialog, livePopup);
+
+        expect(parentParams._originalCardConfig).toEqual(carriedBaseline);
+    });
 });
 
 describe('createStandaloneParentDialogParams original config isolation', () => {

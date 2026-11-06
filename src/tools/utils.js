@@ -1,5 +1,5 @@
 import { isColorCloseToWhite } from "./style.js";
-import { updateContentContainerFixedClass } from "../components/base-card/index.js";
+import { syncMainButtonsBottomClass, updateContentContainerFixedClass } from "../components/base-card/index.js";
 import { getIconColor } from "./icon.js";
 import { adjustColor, areColorsSimilar, calculateLuminance, contrastRatio, hexToRgb, relativeLuminance, rgbStringToRgb } from "./color.js";
 import { resolveTemplate } from "./render-template.js";
@@ -1001,7 +1001,6 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
     const applyMainButtonsLayout = () => {
         const buttonsContainer = context.elements?.buttonsContainer;
         const cardWrapper = context.elements?.cardWrapper;
-        const bottomSubButtonContainer = context.elements?.bottomSubButtonContainer;
         if (!buttonsContainer || !cardWrapper) {
             return;
         }
@@ -1014,9 +1013,9 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
         const alignClasses = ['align-start', 'align-center', 'align-end', 'align-space-between'];
         buttonsContainer.classList.remove('bottom-fixed', 'full-width', ...alignClasses);
         cardWrapper.classList.remove('has-bottom-buttons');
-        bottomSubButtonContainer?.classList.remove('with-main-buttons-bottom');
 
         if (position !== 'bottom') {
+            syncMainButtonsBottomClass(context);
             return;
         }
 
@@ -1035,21 +1034,10 @@ export function setLayout(context, targetElementOverride = null, defaultLayoutOv
         }
 
         cardWrapper.classList.add('has-bottom-buttons');
-        
-        // Only add with-main-buttons-bottom if main buttons are actually visible.
-        // Skip the forced-layout getComputedStyle call while a popup is opening
-        // (data-bubblePopupOpening marker is set) to avoid blocking the interaction frame.
-        const popupOpening = context?.popUp?.dataset?.bubblePopupOpening === 'true';
 
-        if (!popupOpening) {
-            const isMainButtonsVisible = !buttonsContainer.classList.contains('hidden') && 
-                                         buttonsContainer.style.display !== 'none' &&
-                                         getComputedStyle(buttonsContainer).display !== 'none';
-            
-            if (isMainButtonsVisible) {
-                bottomSubButtonContainer?.classList.add('with-main-buttons-bottom');
-            }
-        }
+        // Only with main buttons that really show, read at the next frame for
+        // every card at once (see syncMainButtonsBottomClass).
+        syncMainButtonsBottomClass(context);
     };
 
     let determinedLayoutClass;
@@ -1327,23 +1315,102 @@ function handleScrollLockWheel(event) {
     preventScrollLockEvent(event);
 }
 
-function getScrollLockLayer() {
+// Home Assistant 2026.11 made the panel a stacking context of its own
+// (isolation: isolate, home-assistant/frontend#54801, kept by #55485), so the
+// z-index of a pop-up only counts inside the panel. A layer appended to the body
+// now sat above the whole panel, pop-up included: the pop-up looked dimmed and
+// every tap on it landed on the layer (#2689). Mounted right before the pop-up,
+// the layer shares its stacking context again, whichever ancestor Home
+// Assistant isolates. Without a pop-up to follow, the body still does.
+//
+// Only where Home Assistant isolates its panel: on the versions before, the
+// layers stay on the body, where they dim the sidebar as well.
+let isolationCheckedMain = null;
+let isolationOfCheckedMain = false;
+
+function homeAssistantIsolatesPanel() {
+    const main = document.querySelector?.('home-assistant')?.shadowRoot
+        ?.querySelector?.('home-assistant-main');
+    // Not rendered yet, asked again on the next open.
+    if (!main?.shadowRoot) {
+        return false;
+    }
+    if (main === isolationCheckedMain) {
+        return isolationOfCheckedMain;
+    }
+
+    // The 2026.11 betas isolated partial-panel-resolver first, then its host.
+    const isolated = (element) => {
+        try {
+            return !!element && getComputedStyle(element).isolation === 'isolate';
+        } catch (error) {
+            return false;
+        }
+    };
+    isolationCheckedMain = main;
+    isolationOfCheckedMain = isolated(main) || isolated(main.shadowRoot.querySelector?.('partial-panel-resolver'));
+    return isolationOfCheckedMain;
+}
+
+export function mountPopUpOverlay(element, popUp) {
+    if (!element) {
+        return;
+    }
+
+    const isolated = homeAssistantIsolatesPanel();
+    const parent = popUp?.parentNode;
+    if (parent && typeof parent.insertBefore === 'function' && isolated) {
+        if (element.parentNode !== parent) {
+            parent.insertBefore(element, popUp);
+        }
+        return;
+    }
+
+    if (!element.parentNode || element.isConnected === false || (!isolated && element.parentNode !== document.body)) {
+        document.body?.appendChild(element);
+    }
+}
+
+// Inside the shadow root of a card, the rules in the head no longer reach the
+// layer, so it carries its own.
+function setScrollLockLayerActive(layer, active) {
+    if (!layer) {
+        return;
+    }
+
+    layer.classList.toggle(scrollLockLayerActiveClass, active);
+    if (layer.style) {
+        layer.style.display = active ? 'block' : 'none';
+        layer.style.pointerEvents = active ? 'auto' : 'none';
+    }
+}
+
+function getScrollLockLayer(popUp) {
     if (!document?.body) {
         return null;
     }
 
-    if (scrollLockLayerElement?.parentNode === document.body) {
-        return scrollLockLayerElement;
-    }
-
-    let layer = document.getElementById(scrollLockLayerId);
+    let layer = scrollLockLayerElement || document.getElementById(scrollLockLayerId);
     if (!layer) {
         layer = document.createElement('div');
         layer.id = scrollLockLayerId;
         layer.setAttribute('aria-hidden', 'true');
         layer.classList.add(scrollLockLayerClass);
-        document.body.appendChild(layer);
+        if (layer.style) {
+            Object.assign(layer.style, {
+                position: 'fixed',
+                inset: '0',
+                zIndex: '4',
+                display: 'none',
+                background: 'transparent',
+                pointerEvents: 'none',
+                touchAction: 'none',
+                overscrollBehavior: 'none',
+            });
+        }
     }
+
+    mountPopUpOverlay(layer, popUp);
 
     if (!layer.classList.contains(scrollLockLayerClass)) {
         layer.classList.add(scrollLockLayerClass);
@@ -1360,11 +1427,9 @@ function getScrollLockLayer() {
 }
 
 function getExistingScrollLockLayer() {
-    if (scrollLockLayerElement?.parentNode === document.body) {
-        return scrollLockLayerElement;
+    if (!scrollLockLayerElement) {
+        scrollLockLayerElement = document.getElementById(scrollLockLayerId);
     }
-
-    scrollLockLayerElement = document.getElementById(scrollLockLayerId);
     return scrollLockLayerElement;
 }
 
@@ -1403,7 +1468,7 @@ function releaseRootGutter(rootStyle) {
     }
 }
 
-export function toggleBodyScroll(disable) {
+export function toggleBodyScroll(disable, popUp) {
     const body = document.body;
     if (!body) return;
 
@@ -1415,7 +1480,7 @@ export function toggleBodyScroll(disable) {
         }
 
         injectNoScrollStyles();
-        const scrollLockLayer = getScrollLockLayer();
+        const scrollLockLayer = getScrollLockLayer(popUp);
 
         // The gutter is measured while the scrollbar is still there, since
         // hiding the overflow is what takes it away. Only read where there is a
@@ -1460,7 +1525,7 @@ export function toggleBodyScroll(disable) {
         }
 
         body.classList.add(scrollLockBodyClass);
-        scrollLockLayer?.classList.add(scrollLockLayerActiveClass);
+        setScrollLockLayerActive(scrollLockLayer, true);
         return;
     }
 
@@ -1474,7 +1539,7 @@ export function toggleBodyScroll(disable) {
     body.style?.removeProperty?.(scrollLockGutterProperty);
 
     body.classList.remove(scrollLockBodyClass);
-    getExistingScrollLockLayer()?.classList.remove(scrollLockLayerActiveClass);
+    setScrollLockLayerActive(getExistingScrollLockLayer(), false);
 }
 
 export function formatNumericValue(value, decimals = 0, unit = '', locale = 'en-US') {

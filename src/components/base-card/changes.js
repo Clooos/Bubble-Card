@@ -347,28 +347,64 @@ export function updateContentContainerFixedClass(context) {
     if (subButtonContainer) subButtonContainer.classList.remove('fixed-top');
   }
 
-  // Update with-main-buttons-bottom class based on actual main buttons visibility
-  const bottomSubButtonContainer = context?.elements?.bottomSubButtonContainer;
-  if (bottomSubButtonContainer && hasBottomMainButtons) {
-    const buttonsContainer = context?.elements?.buttonsContainer;
-    if (buttonsContainer) {
-      // Cache getComputedStyle result to avoid forced reflow
-      const isMainButtonsVisible = !buttonsContainer.classList.contains('hidden') && 
-                                   buttonsContainer.style.display !== 'none' &&
-                                   (buttonsContainer._cachedDisplay || getComputedStyle(buttonsContainer).display) !== 'none';
-      
-      if (!buttonsContainer._cachedDisplay) {
-        buttonsContainer._cachedDisplay = getComputedStyle(buttonsContainer).display;
-      }
-      
-      if (isMainButtonsVisible) {
-        bottomSubButtonContainer.classList.add('with-main-buttons-bottom');
-      } else {
-        bottomSubButtonContainer.classList.remove('with-main-buttons-bottom');
-      }
-    } else {
-      // No buttons container means no main buttons, so remove the class
-      bottomSubButtonContainer.classList.remove('with-main-buttons-bottom');
+  if (hasBottomMainButtons) {
+    syncMainButtonsBottomClass(context);
+  }
+}
+
+// Whether the main buttons show can only be told by the style, since a custom
+// style or a module may hide them. Read in the middle of a build, the style
+// was brought up to date once per card, in a pass of its own (six times before
+// the slide of a 20 card pop-up). The read now waits for the next frame, where
+// one pass serves every card waiting and costs nothing the frame would not
+// have spent anyway. Every read happens before any write, so the batch never
+// forces a second pass.
+const pendingMainButtonsChecks = new Set();
+let mainButtonsCheckFrame = null;
+
+function mainButtonsMayShow(context) {
+  const buttonsContainer = context?.elements?.buttonsContainer;
+  return (context?.config?.main_buttons_position || 'default') === 'bottom' &&
+    !!buttonsContainer &&
+    !buttonsContainer.classList.contains('hidden') &&
+    buttonsContainer.style.display !== 'none';
+}
+
+function runMainButtonsChecks() {
+  mainButtonsCheckFrame = null;
+  const contexts = [...pendingMainButtonsChecks];
+  pendingMainButtonsChecks.clear();
+
+  const shown = contexts.map((context) => {
+    if (!mainButtonsMayShow(context)) return false;
+    try {
+      return getComputedStyle(context.elements.buttonsContainer).display !== 'none';
+    } catch (_) {
+      return true;
     }
+  });
+
+  contexts.forEach((context, index) => {
+    context.elements?.bottomSubButtonContainer?.classList.toggle('with-main-buttons-bottom', shown[index]);
+  });
+}
+
+export function syncMainButtonsBottomClass(context) {
+  const bottomSubButtonContainer = context?.elements?.bottomSubButtonContainer;
+  if (!bottomSubButtonContainer) return;
+
+  if (!mainButtonsMayShow(context)) {
+    pendingMainButtonsChecks.delete(context);
+    bottomSubButtonContainer.classList.remove('with-main-buttons-bottom');
+    return;
+  }
+
+  pendingMainButtonsChecks.add(context);
+  if (mainButtonsCheckFrame !== null) return;
+
+  if (typeof requestAnimationFrame === 'function') {
+    mainButtonsCheckFrame = requestAnimationFrame(runMainButtonsChecks);
+  } else {
+    runMainButtonsChecks();
   }
 }

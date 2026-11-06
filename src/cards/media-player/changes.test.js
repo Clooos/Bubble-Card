@@ -4,6 +4,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, jest, test } from '
 // (utils.js -> base-card/index.js -> *.css, and style-processor.js -> sub-button -> *.css).
 jest.unstable_mockModule('../../components/base-card/index.js', () => ({
     updateContentContainerFixedClass: jest.fn(),
+    syncMainButtonsBottomClass: jest.fn(),
 }));
 
 jest.unstable_mockModule('../../tools/style-processor.js', () => ({

@@ -29,7 +29,7 @@ export function renderHorButtonStackEditor(editor){
                 ${t('editor.hbs.new_button')}
             </button>
             <hr>
-            <ha-formfield>
+            <bubble-formfield>
                 <ha-switch
                     aria-label="${editor._optionalLabel(t('editor.hbs.auto_order'))}"
                     .checked=${editor._config?.auto_order || false}
@@ -39,7 +39,7 @@ export function renderHorButtonStackEditor(editor){
                 <div class="mdc-form-field">
                     <label class="mdc-label">${editor._optionalLabel(t('editor.hbs.auto_order'))}</label>
                 </div>
-            </ha-formfield>
+            </bubble-formfield>
             <ha-expansion-panel outlined>
                 <h4 slot="header">
                   <ha-icon icon="mdi:palette"></ha-icon>
@@ -77,7 +77,7 @@ export function renderHorButtonStackEditor(editor){
                                     });
                                 }}
                             ></ha-form>
-                            <ha-formfield>
+                            <bubble-formfield>
                                 <ha-switch
                                     aria-label="${editor._optionalLabel(t('editor.hbs.rise_animation'))}"
                                     .checked=${editor._config?.rise_animation !== undefined ? editor._config?.rise_animation : true}
@@ -87,8 +87,8 @@ export function renderHorButtonStackEditor(editor){
                                 <div class="mdc-form-field">
                                     <label class="mdc-label">${editor._optionalLabel(t('editor.hbs.rise_animation'))}</label>
                                 </div>
-                            </ha-formfield>
-                            <ha-formfield>
+                            </bubble-formfield>
+                            <bubble-formfield>
                                 <ha-switch
                                     aria-label="${editor._optionalLabel(t('editor.hbs.highlight_current'))}"
                                     .checked=${editor._config?.highlight_current_view || false}
@@ -98,8 +98,8 @@ export function renderHorButtonStackEditor(editor){
                                 <div class="mdc-form-field">
                                     <label class="mdc-label">${editor._optionalLabel(t('editor.hbs.highlight_current'))}</label>
                                 </div>
-                            </ha-formfield>
-                            <ha-formfield>
+                            </bubble-formfield>
+                            <bubble-formfield>
                                 <ha-switch
                                     aria-label="${editor._optionalLabel(t('editor.hbs.hide_gradient'))}"
                                     .checked=${editor._config.hide_gradient || false}
@@ -109,7 +109,7 @@ export function renderHorButtonStackEditor(editor){
                                 <div class="mdc-form-field">
                                     <label class="mdc-label">${editor._optionalLabel(t('editor.hbs.hide_gradient'))}</label>
                                 </div>
-                            </ha-formfield>
+                            </bubble-formfield>
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}

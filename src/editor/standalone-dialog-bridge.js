@@ -328,6 +328,30 @@ export function getDialogLiveCardConfig(dialog, popupConfig) {
     return bestScore >= 0 ? bestCandidate : null;
 }
 
+// The config HA compares the dialog against to enable Save. A dialog we
+// reopened carries the one taken when the pop-up editor opened. Snapshotting
+// the live config of a dialog with unsaved changes would count them as saved,
+// and cancelling a child editor would then grey Save out (#2676). A clean
+// dialog keeps the live config, which also holds the defaults our editor fills
+// in without reporting them, so a round trip that changed nothing stays clean.
+function getDialogSavedBaseline(dialog) {
+    const carried = dialog?._params?._originalCardConfig;
+    if (carried) {
+        return carried;
+    }
+
+    try {
+        if (dialog?.isDirtyState !== true) {
+            return null;
+        }
+
+        const initial = dialog._dirtySlices?.get?.('__default__')?.initial;
+        return initial && typeof initial === 'object' ? initial : null;
+    } catch (_) {
+        return null;
+    }
+}
+
 export function createStandaloneParentDialogParamsFromDialog(dialog, popupConfig) {
     const params = dialog?._params;
     if (!params) {
@@ -339,7 +363,7 @@ export function createStandaloneParentDialogParamsFromDialog(dialog, popupConfig
         ? { ...params, cardConfig: liveCardConfig }
         : params;
 
-    return createStandaloneParentDialogParams(dialogParams, popupConfig);
+    return createStandaloneParentDialogParams(dialogParams, popupConfig, getDialogSavedBaseline(dialog));
 }
 
 function cloneConfig(value) {
@@ -609,7 +633,7 @@ function mergeWithOriginalPopupConfig(parentDialogParams, popupConfig) {
     return popupConfig;
 }
 
-export function createStandaloneParentDialogParams(dialogParams, popupConfig) {
+export function createStandaloneParentDialogParams(dialogParams, popupConfig, savedBaseline = null) {
     if (!dialogParams) {
         return null;
     }
@@ -624,7 +648,7 @@ export function createStandaloneParentDialogParams(dialogParams, popupConfig) {
         return {
             ...dialogParams,
             cardConfig: popupCardConfig,
-            _originalCardConfig: cloneConfig(popupCardConfig),
+            _originalCardConfig: cloneConfig(savedBaseline || popupCardConfig),
             _standalonePopupConfig: cloneConfig(popupCardConfig),
             _standalonePopupPathInDialog: [],
         };
@@ -649,7 +673,7 @@ export function createStandaloneParentDialogParams(dialogParams, popupConfig) {
     return {
         ...dialogParams,
         cardConfig: dialogCardConfig,
-        _originalCardConfig: cloneConfig(dialogCardConfig),
+        _originalCardConfig: cloneConfig(savedBaseline || dialogCardConfig),
         _standalonePopupConfig: cloneConfig(popupCardConfig),
         _standalonePopupPathInDialog: popupPathInDialog,
     };

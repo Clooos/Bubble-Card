@@ -9,12 +9,18 @@ function updateMockLocation(locationObject, url) {
     const [base, hash] = String(url).split('#');
     locationObject.href = hash ? `${base}#${hash}` : base;
     locationObject.hash = hash ? `#${hash}` : '';
+    locationObject.pathname = new URL(base).pathname;
 }
 
 const mockWindow = new EventTarget();
-const locationObject = { href: 'http://localhost/lovelace/test', hash: '' };
+const locationObject = { href: 'http://localhost/lovelace/test', hash: '', pathname: '/lovelace/test' };
 const historyObject = {
-    pushState: jest.fn((state, title, url) => updateMockLocation(locationObject, url)),
+    // A pushed entry starts with the state it was given. A replace keeps the
+    // current one here, the tests set what the real call would have kept.
+    pushState: jest.fn((state, title, url) => {
+        historyObject.state = state;
+        updateMockLocation(locationObject, url);
+    }),
     replaceState: jest.fn((state, title, url) => updateMockLocation(locationObject, url)),
     back: jest.fn(),
 };
@@ -122,10 +128,14 @@ function locationChanged(detail) {
     window.dispatchEvent(event);
 }
 
-/** The open half: a pushed entry carrying the hash, as navigate() and addHash() both do. */
-function openPopup(hash, { replace = false } = {}) {
-    if (replace) history.replaceState(null, '', `${VIEW}${hash}`);
-    else history.pushState(null, '', `${VIEW}${hash}`);
+/**
+ * The open half: a pushed entry carrying the hash, as navigate() and addHash()
+ * both do. Home Assistant's navigate() also writes the page it came from.
+ */
+function openPopup(hash, { replace = false, from } = {}) {
+    const state = from === undefined ? null : { from };
+    if (replace) history.replaceState(state, '', `${VIEW}${hash}`);
+    else history.pushState(state, '', `${VIEW}${hash}`);
     locationChanged({ replace });
 }
 
@@ -265,6 +275,48 @@ describe('the deduper leaves an entry that is not its own alone', () => {
     test('still takes back its own entry when no dialog is involved', () => {
         openPopup('#salon');
         historyObject.state = null;
+        closePopup();
+
+        expect(historyObject.back).toHaveBeenCalledTimes(1);
+    });
+});
+
+// #2673: the entry below the pushed one is only the bare view when the push
+// came from that view. Home Assistant says where it came from, and a pop-up
+// opened from another page or another view must close onto its own view.
+describe('the deduper only goes back to the view of the pop-up', () => {
+    beforeEach(() => {
+        historyObject.back.mockClear();
+        historyObject.state = null;
+        updateMockLocation(locationObject, VIEW);
+    });
+
+    test('stays on the view when the pop-up was opened from another dashboard', () => {
+        openPopup('#salon', { from: '/dashboard-start/home' });
+        closePopup();
+
+        expect(historyObject.back).not.toHaveBeenCalled();
+    });
+
+    test('stays on the view when the pop-up was opened from another view of the dashboard', () => {
+        openPopup('#salon', { from: '/lovelace/other' });
+        closePopup();
+
+        expect(historyObject.back).not.toHaveBeenCalled();
+    });
+
+    test('still takes back an entry Home Assistant pushed from the view itself', () => {
+        openPopup('#salon', { from: '/lovelace/test' });
+        closePopup();
+
+        expect(historyObject.back).toHaveBeenCalledTimes(1);
+    });
+
+    test('forgets where the last pop-up came from once it is closed', () => {
+        openPopup('#salon', { from: '/dashboard-start/home' });
+        closePopup();
+        // The next one is opened by Bubble Card itself, from the view.
+        openPopup('#cuisine');
         closePopup();
 
         expect(historyObject.back).toHaveBeenCalledTimes(1);

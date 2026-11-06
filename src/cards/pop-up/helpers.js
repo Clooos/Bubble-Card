@@ -14,6 +14,7 @@ import { runWithInstantSliderWrites } from '../../components/slider/instant-writ
 import { flushDeferredCardUpdates } from '../../tools/deferred-card-updates.js';
 import { holdScrollingEffects } from '../../tools/text-scrolling.js';
 import { monotonicNow } from '../../tools/monotonic-time.js';
+import { getViewportSize } from '../../tools/viewport.js';
 
 // Re-exported so the pop-up runtime keeps one import surface for its callers.
 export { isDialogNode };
@@ -32,9 +33,25 @@ export const BUBBLE_URL_EVENT = 'bubble-card-location-changed';
 
 function resetPopupScroll(context) {
     const container = context.elements?.popUpContainer;
-    if (container) {
-        container.scrollTop = 0;
+    if (!container) {
+        return;
     }
+
+    // Writing scrollTop makes the browser lay the whole content out first, and
+    // the close did it on content it takes down right after, about 12 ms per
+    // close on a throttled phone. The scroll listener of the container already
+    // knows whether the content left the top, so a pop-up nobody scrolled
+    // keeps its offset of 0 without that write.
+    if (container._bubbleScrollMaskAdded && !container._bubbleScrolledFromTop) {
+        return;
+    }
+
+    container.scrollTop = 0;
+
+    // The scroll event of this write may never come, since the close hides the
+    // shell right after, so the flag and the header shadow are set back here.
+    container._bubbleScrolledFromTop = false;
+    container.closest?.('.bubble-pop-up')?.classList.remove('is-scrolled');
 }
 
 export { shouldHoldDashboardHassUpdate } from './hass-gate.js';
@@ -137,8 +154,11 @@ function scheduleStandaloneFrame(context, frameKey, callback) {
 }
 
 function isAdaptiveDialogRenderedAsBottomSheet() {
-    const viewportWidth = typeof window?.innerWidth === 'number' ? window.innerWidth : Number.POSITIVE_INFINITY;
-    const viewportHeight = typeof window?.innerHeight === 'number' ? window.innerHeight : Number.POSITIVE_INFINITY;
+    // Read from the size kept by viewport.js. Asked for on every open, a fresh
+    // read of the window forced the style of the shell just created.
+    const viewport = getViewportSize();
+    const viewportWidth = typeof viewport?.width === 'number' ? viewport.width : Number.POSITIVE_INFINITY;
+    const viewportHeight = typeof viewport?.height === 'number' ? viewport.height : Number.POSITIVE_INFINITY;
     return !(viewportWidth >= 871 && viewportHeight >= 501);
 }
 
@@ -1157,6 +1177,7 @@ if (!window.__bubbleLocationDeduperAdded) {
     try {
         let pendingHashBase = null;
         let pendingHashPushed = false;
+        let pendingHashFrom;
         let guardNextNoHash = false;
         let pendingPreviousHash = "";
         let lastKnownHash = window.location.hash || "";
@@ -1176,6 +1197,12 @@ if (!window.__bubbleLocationDeduperAdded) {
                 // all, so in both cases there is nothing of ours to take back
                 // and going back would leave the dashboard entirely.
                 pendingHashPushed = event?.detail?.replace !== true;
+                // Home Assistant's navigate() writes on the entry it pushes the
+                // page it came from. Opened from another page or another view,
+                // the entry below is that page, and going back would leave the
+                // view of the pop-up (#2673). Our own addHash() writes nothing,
+                // and always pushes from the view it stays on.
+                pendingHashFrom = history.state?.from;
                 pendingHashBase = base;
                 guardNextNoHash = false;
                 pendingPreviousHash = lastKnownHash || "";
@@ -1187,6 +1214,7 @@ if (!window.__bubbleLocationDeduperAdded) {
                 guardNextNoHash = false;
                 pendingHashBase = null;
                 pendingHashPushed = false;
+                pendingHashFrom = undefined;
                 pendingPreviousHash = "";
                 lastKnownHash = window.location.hash || "";
                 return;
@@ -1197,6 +1225,7 @@ if (!window.__bubbleLocationDeduperAdded) {
                 pendingHashBase &&
                 base === pendingHashBase &&
                 pendingHashPushed &&
+                (pendingHashFrom === undefined || pendingHashFrom === window.location.pathname) &&
                 !pendingPreviousHash
             ) {
                 // Having pushed the entry ourselves only makes the back safe
@@ -1216,6 +1245,7 @@ if (!window.__bubbleLocationDeduperAdded) {
 
             pendingHashBase = null;
             pendingHashPushed = false;
+            pendingHashFrom = undefined;
             pendingPreviousHash = "";
             lastKnownHash = window.location.hash || "";
         };
@@ -1558,7 +1588,7 @@ function schedulePopupBodyScrollLock(context) {
                 return;
             }
 
-            toggleBodyScroll(true);
+            toggleBodyScroll(true, context.popUp);
         });
     };
 
@@ -1921,7 +1951,7 @@ function openStandalonePopup(context, instant = false) {
                 setPopupOpeningMarker(context, false);
             }
             setStandalonePopupState(popUp, true);
-            toggleBodyScroll(true);
+            toggleBodyScroll(true, popUp);
             triggerQuickOpenAnimation(context);
             requestAnimationFrame(() => {
                 try {

@@ -50,7 +50,42 @@ export function createEditorActions(context, rebuildCards) {
                 return cards;
             });
         },
+        // Home Assistant 2026.11 gave the toolbar of a card a Cut and a Paste of
+        // their own. Its view would apply them to the dashboard at the same path,
+        // so they act on the cards of the pop-up here, like every other action.
+        cutCard: (index) => {
+            if (!(context.config.cards || [])[index]) return;
+            _copyCard(context, index);
+            updateCards((cards) => {
+                cards.splice(index, 1);
+                return cards;
+            });
+        },
+        pasteCard: (index) => {
+            const cardConfig = _readDashboardClipboard();
+            if (!cardConfig) return;
+            updateCards((cards) => {
+                // After the card it was pasted on, as Home Assistant does.
+                const at = Number.isInteger(index) ? Math.min(index + 1, cards.length) : cards.length;
+                cards.splice(at, 0, cardConfig);
+                return cards;
+            });
+        },
     };
+}
+
+const DASHBOARD_CLIPBOARD_KEY = 'dashboardCardClipboard';
+
+// Home Assistant keeps a copied card under this key, as JSON. Its own storage
+// writes through on every copy, so the session storage is never behind it.
+function _readDashboardClipboard() {
+    try {
+        const raw = sessionStorage.getItem(DASHBOARD_CLIPBOARD_KEY);
+        const cardConfig = raw ? JSON.parse(raw) : null;
+        return cardConfig && typeof cardConfig === 'object' && !Array.isArray(cardConfig) ? cardConfig : null;
+    } catch (error) {
+        return null;
+    }
 }
 
 function _copyCard(context, index) {
@@ -72,6 +107,10 @@ async function _copyCardToDashboardClipboard(context, index, fallbackCardConfig)
         type: 'grid',
         cards: [...(context.config.cards || [])],
     };
+
+    if (_copyThroughToolbar(context, fallbackCardConfig)) {
+        return;
+    }
 
     const proxySection = document.createElement('hui-section');
     proxySection.style.display = 'none';
@@ -120,12 +159,41 @@ async function _copyCardToDashboardClipboard(context, index, fallbackCardConfig)
     }
 }
 
+// Since Home Assistant 2026.11 the section no longer handles the card clipboard.
+// It lives in a storage the view shares with the toolbar of every card, and that
+// storage only takes a new value from an element that has rendered at least once.
+// The toolbars of the pop-up have, so the card goes in through one of them. Older
+// versions have no clipboard on the toolbar, and the section takes over.
+function _copyThroughToolbar(context, cardConfig) {
+    const toolbar = context._cardsContainer?.querySelector?.('hui-card-edit-mode');
+    if (!toolbar || !('_clipboard' in toolbar)) {
+        return false;
+    }
+
+    try {
+        toolbar._clipboard = typeof structuredClone === 'function'
+            ? structuredClone(cardConfig)
+            : JSON.parse(JSON.stringify(cardConfig));
+        if (sessionStorage.getItem(DASHBOARD_CLIPBOARD_KEY) !== JSON.stringify(cardConfig)) {
+            return false;
+        }
+    } catch (error) {
+        return false;
+    }
+
+    const message = context._hass?.localize?.('ui.panel.lovelace.editor.edit_card.copied_to_clipboard');
+    if (message) {
+        fireEvent(context, 'hass-notification', { message });
+    }
+    return true;
+}
+
 function _writeClipboardFallback(cardConfig) {
     try {
         const clonedConfig = typeof structuredClone === 'function'
             ? structuredClone(cardConfig)
             : JSON.parse(JSON.stringify(cardConfig));
-        sessionStorage.setItem('dashboardCardClipboard', JSON.stringify(clonedConfig));
+        sessionStorage.setItem(DASHBOARD_CLIPBOARD_KEY, JSON.stringify(clonedConfig));
     } catch (error) {
         console.warn('Bubble Card: Failed to copy card to dashboard clipboard', error);
     }
