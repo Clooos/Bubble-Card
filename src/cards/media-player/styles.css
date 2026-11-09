@@ -262,7 +262,10 @@
 }
 
 @media screen and (max-width: 160px) {
-    .bubble-volume-button {
+    .bubble-volume-button,
+    .bubble-volume-down-button,
+    .bubble-volume-up-button,
+    .bubble-inline-mute-button {
         display: none;
     }
 }

@@ -38,6 +38,9 @@ export function createStructure(context) {
     elements.previousButton = createMediaButton("mdi:skip-previous", 'bubble-previous-button');
     elements.nextButton = createMediaButton("mdi:skip-next", 'bubble-next-button');
     elements.volumeButton = createMediaButton("mdi:volume-high", 'bubble-volume-button');
+    elements.inlineMuteButton = createMediaButton("mdi:volume-high", 'bubble-inline-mute-button hidden');
+    elements.volumeDownButton = createMediaButton("mdi:volume-minus", 'bubble-volume-down-button hidden');
+    elements.volumeUpButton = createMediaButton("mdi:volume-plus", 'bubble-volume-up-button hidden');
     elements.powerButton = createMediaButton("mdi:power", 'bubble-power-button');
     elements.muteButton = createMediaButton("mdi:volume-off", 'bubble-mute-button is-hidden');
     elements.volumeSliderMuteButton = createMediaButton("mdi:volume-high", 'bubble-volume-slider-mute-button');
@@ -58,6 +61,9 @@ export function createStructure(context) {
         elements.previousButton,
         elements.nextButton,
         elements.volumeButton,
+        elements.inlineMuteButton,
+        elements.volumeDownButton,
+        elements.volumeUpButton,
         elements.playPauseButton
     );
 
@@ -166,6 +172,7 @@ export function createStructure(context) {
     
     setupMuteButtonEvents(elements.muteButton);
     setupMuteButtonEvents(elements.volumeSliderMuteButton);
+    setupMuteButtonEvents(elements.inlineMuteButton);
 
     elements.previousButton.addEventListener('click', () => {
         context._hass.callService('media_player', 'media_previous_track', {
@@ -196,6 +203,22 @@ export function createStructure(context) {
         closeVolumeSlider();
     });
     addFeedback(elements.volumeSliderCloseButton);
+
+    elements.volumeDownButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        context._hass.callService('media_player', 'volume_down', {
+            entity_id: context.config.entity
+        });
+    });
+    addFeedback(elements.volumeDownButton);
+
+    elements.volumeUpButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        context._hass.callService('media_player', 'volume_up', {
+            entity_id: context.config.entity
+        });
+    });
+    addFeedback(elements.volumeUpButton);
 
     elements.mainContainer.addEventListener('click', () => forwardHaptic("selection"));
 

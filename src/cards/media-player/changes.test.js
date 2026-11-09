@@ -14,9 +14,11 @@ jest.unstable_mockModule('../../tools/style-processor.js', () => ({
 const ENTITY = 'media_player.test';
 let evaluateCoverState;
 let crossfadeTo;
+let changeStyle;
+let changeMuteIcon;
 
 beforeAll(async () => {
-    ({ evaluateCoverState, crossfadeTo } = await import('./changes.js'));
+    ({ evaluateCoverState, crossfadeTo, changeStyle, changeMuteIcon } = await import('./changes.js'));
 });
 
 // Minimal context whose hass state can be mutated between calls so the
@@ -286,5 +288,146 @@ describe('crossfadeTo', () => {
 
     test('a call with no layer state is harmless', () => {
         expect(() => crossfadeTo(null, 'https://example.com/a.jpg')).not.toThrow();
+    });
+});
+
+describe('changeStyle volume slider vs step buttons', () => {
+    const SUPPORT_VOLUME_SET = 4;
+    const SUPPORT_VOLUME_MUTE = 8;
+    const SUPPORT_VOLUME_STEP = 1024;
+
+    const fakeButton = () => {
+        const classes = new Set();
+        const attrs = {};
+        return {
+            style: {},
+            icon: {
+                style: {},
+                setAttribute: (k, v) => { attrs[k] = v; },
+                getAttribute: (k) => attrs[k],
+            },
+            classList: {
+                add: (c) => classes.add(c),
+                remove: (c) => classes.delete(c),
+                contains: (c) => classes.has(c),
+                toggle: (c, force) => {
+                    const shouldAdd = force === undefined ? !classes.has(c) : Boolean(force);
+                    if (shouldAdd) classes.add(c);
+                    else classes.delete(c);
+                },
+            },
+        };
+    };
+
+    const makeStyleContext = (supportedFeatures, { state = 'on', editor = false, attributes = {} } = {}) => {
+        const elements = {
+            buttonsContainer: fakeButton(),
+            powerButton: fakeButton(),
+            previousButton: fakeButton(),
+            nextButton: fakeButton(),
+            volumeButton: fakeButton(),
+            inlineMuteButton: fakeButton(),
+            playPauseButton: fakeButton(),
+            muteButton: fakeButton(),
+            volumeSliderMuteButton: fakeButton(),
+            volumeSliderContainer: fakeButton(),
+            volumeSliderWrapper: fakeButton(),
+            volumeDownButton: fakeButton(),
+            volumeUpButton: fakeButton(),
+        };
+        elements.volumeSliderWrapper.classList.add('is-hidden');
+        return {
+            config: { entity: ENTITY },
+            editor,
+            elements,
+            _hass: {
+                states: {
+                    [ENTITY]: {
+                        state,
+                        attributes: { supported_features: supportedFeatures, ...attributes },
+                    },
+                },
+            },
+        };
+    };
+
+    test('shows volumeButton and hides inline step/mute buttons when SUPPORT_VOLUME_SET is supported and volume_level is present', () => {
+        const ctx = makeStyleContext(SUPPORT_VOLUME_SET | SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE, {
+            attributes: { volume_level: 0.45 },
+        });
+        changeStyle(ctx);
+
+        expect(ctx.elements.volumeButton.classList.contains('hidden')).toBe(false);
+        expect(ctx.elements.volumeDownButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.volumeUpButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.inlineMuteButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.volumeSliderMuteButton.classList.contains('hidden')).toBe(false);
+    });
+
+    test('hides volumeButton and shows inline volumeDownButton, volumeUpButton, and inlineMuteButton when SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE is supported without SUPPORT_VOLUME_SET', () => {
+        const ctx = makeStyleContext(SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE);
+        changeStyle(ctx);
+
+        expect(ctx.elements.volumeButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.volumeDownButton.classList.contains('hidden')).toBe(false);
+        expect(ctx.elements.volumeUpButton.classList.contains('hidden')).toBe(false);
+        expect(ctx.elements.inlineMuteButton.classList.contains('hidden')).toBe(false);
+        expect(ctx.elements.volumeSliderMuteButton.classList.contains('hidden')).toBe(true);
+    });
+
+    test('falls back to inline step buttons and hides volumeButton when SUPPORT_VOLUME_SET and SUPPORT_VOLUME_STEP are set but volume_level is missing (e.g. Apple TV over HDMI/IR)', () => {
+        const ctx = makeStyleContext(SUPPORT_VOLUME_SET | SUPPORT_VOLUME_STEP);
+        changeStyle(ctx);
+
+        expect(ctx.elements.volumeButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.volumeDownButton.classList.contains('hidden')).toBe(false);
+        expect(ctx.elements.volumeUpButton.classList.contains('hidden')).toBe(false);
+        expect(ctx.elements.inlineMuteButton.classList.contains('hidden')).toBe(true);
+    });
+
+    test('shows volumeButton when SUPPORT_VOLUME_SET is supported without SUPPORT_VOLUME_STEP even if volume_level is not yet reported', () => {
+        const ctx = makeStyleContext(SUPPORT_VOLUME_SET);
+        changeStyle(ctx);
+
+        expect(ctx.elements.volumeButton.classList.contains('hidden')).toBe(false);
+        expect(ctx.elements.volumeDownButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.volumeUpButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.inlineMuteButton.classList.contains('hidden')).toBe(true);
+    });
+
+    test('hides inlineMuteButton and volumeButton when only SUPPORT_VOLUME_STEP is supported without SUPPORT_VOLUME_MUTE', () => {
+        const ctx = makeStyleContext(SUPPORT_VOLUME_STEP);
+        changeStyle(ctx);
+
+        expect(ctx.elements.volumeButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.inlineMuteButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.volumeDownButton.classList.contains('hidden')).toBe(false);
+        expect(ctx.elements.volumeUpButton.classList.contains('hidden')).toBe(false);
+    });
+
+    test('shows inlineMuteButton directly on the main row and hides volumeButton when only SUPPORT_VOLUME_MUTE is supported', () => {
+        const ctx = makeStyleContext(SUPPORT_VOLUME_MUTE);
+        changeStyle(ctx);
+
+        expect(ctx.elements.volumeButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.inlineMuteButton.classList.contains('hidden')).toBe(false);
+        expect(ctx.elements.volumeDownButton.classList.contains('hidden')).toBe(true);
+        expect(ctx.elements.volumeUpButton.classList.contains('hidden')).toBe(true);
+    });
+
+    test('changeMuteIcon updates inlineMuteButton icon alongside muteButton and volumeSliderMuteButton', () => {
+        const ctx = makeStyleContext(SUPPORT_VOLUME_STEP | SUPPORT_VOLUME_MUTE, {
+            attributes: { is_volume_muted: true },
+        });
+        changeMuteIcon(ctx);
+        expect(ctx.elements.inlineMuteButton.icon.getAttribute('icon')).toBe('mdi:volume-off');
+        expect(ctx.elements.muteButton.icon.getAttribute('icon')).toBe('mdi:volume-off');
+        expect(ctx.elements.volumeSliderMuteButton.icon.getAttribute('icon')).toBe('mdi:volume-off');
+
+        ctx._hass.states[ENTITY].attributes.is_volume_muted = false;
+        changeMuteIcon(ctx);
+        expect(ctx.elements.inlineMuteButton.icon.getAttribute('icon')).toBe('mdi:volume-high');
+        expect(ctx.elements.muteButton.icon.getAttribute('icon')).toBe('mdi:volume-high');
+        expect(ctx.elements.volumeSliderMuteButton.icon.getAttribute('icon')).toBe('mdi:volume-high');
     });
 });
