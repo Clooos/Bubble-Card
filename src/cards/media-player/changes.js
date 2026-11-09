@@ -217,6 +217,9 @@ export function changeVolumeIcon(context) {
     context.elements.nextButton.style.opacity = newOpacity;
     context.elements.powerButton.style.opacity = newOpacity;
     context.elements.volumeButton.style.opacity = newOpacity;
+    if (context.elements.inlineMuteButton) context.elements.inlineMuteButton.style.opacity = newOpacity;
+    if (context.elements.volumeDownButton) context.elements.volumeDownButton.style.opacity = newOpacity;
+    if (context.elements.volumeUpButton) context.elements.volumeUpButton.style.opacity = newOpacity;
     if (context.elements.iconContainer) context.elements.iconContainer.style.opacity = newOpacity;
 }
 
@@ -248,6 +251,21 @@ export function changeMuteIcon(context) {
         }
 
         context.elements.volumeSliderMuteButton.clicked = false;
+    }
+
+    // Update inline mute button icon when step controls or mute-only controls are used
+    if (context.elements.inlineMuteButton) {
+        if (context.elements.inlineMuteButton.icon.style.color !== "var(--primary-text-color)") {
+            context.elements.inlineMuteButton.icon.style.color = "var(--primary-text-color)";
+        }
+
+        if (isVolumeMuted) {
+            context.elements.inlineMuteButton.icon.setAttribute("icon", "mdi:volume-off");
+        } else {
+            context.elements.inlineMuteButton.icon.setAttribute("icon", "mdi:volume-high");
+        }
+
+        context.elements.inlineMuteButton.clicked = false;
     }
 }
 
@@ -645,10 +663,44 @@ export function changeStyle(context) {
         context.elements.nextButton.classList.remove('hidden');
     }
 
-    if (!showVolume && context.elements.volumeButton.style.display !== 'none') {
+    // Volume slider vs inline step/mute buttons: show the slider drawer button when
+    // volume_set is supported and either a numeric volume_level is available or
+    // volume_step is not supported (or in the editor when neither step nor mute is
+    // supported). When canUseVolumeSlider is false, replace the volume drawer button
+    // directly in buttonsContainer with inline volumeDownButton, volumeUpButton, and/or
+    // inlineMuteButton matching the main media player buttons.
+    const rawVolumeLevel = getAttribute(context, "volume_level");
+    const hasVolumeLevel = rawVolumeLevel !== undefined && rawVolumeLevel !== null && rawVolumeLevel !== '' && Number.isFinite(Number(rawVolumeLevel));
+    const canUseVolumeSlider = support.canVolumeSet && (hasVolumeLevel || !support.canVolumeStep);
+    const showVolumeButton = showVolume && (canUseVolumeSlider || (!support.canVolumeStep && !support.canMute && Boolean(context.editor)));
+    const showVolumeStepButtons = showVolume && !canUseVolumeSlider && support.canVolumeStep;
+    const showInlineMuteButton = showVolume && !canUseVolumeSlider && support.canMute;
+
+    if (!showVolumeButton && context.elements.volumeButton.style.display !== 'none') {
         context.elements.volumeButton.classList.add('hidden');
-    } else if (showVolume && context.elements.volumeButton.classList.contains('hidden')) {
+    } else if (showVolumeButton && context.elements.volumeButton.classList.contains('hidden')) {
         context.elements.volumeButton.classList.remove('hidden');
+    }
+
+    if (context.elements.volumeDownButton) {
+        context.elements.volumeDownButton.classList.toggle('hidden', !showVolumeStepButtons);
+    }
+    if (context.elements.volumeUpButton) {
+        context.elements.volumeUpButton.classList.toggle('hidden', !showVolumeStepButtons);
+    }
+    if (context.elements.inlineMuteButton) {
+        context.elements.inlineMuteButton.classList.toggle('hidden', !showInlineMuteButton);
+    }
+
+    // If the volume slider drawer was open when switching to inline controls, close it
+    if (!showVolumeButton && context.elements.volumeSliderWrapper && !context.elements.volumeSliderWrapper.classList.contains('is-hidden')) {
+        context.elements.volumeSliderWrapper.classList.add('is-hidden');
+        if (context.elements.buttonsContainer?.classList.contains('bottom-fixed')) {
+            context.elements.buttonsContainer.classList.remove('is-hidden');
+        } else {
+            if (context.elements.muteButton) context.elements.muteButton.classList.add('is-hidden');
+            changeVolumeIcon(context);
+        }
     }
 
     if (!showPlayPause && context.elements.playPauseButton.style.display !== 'none') {
@@ -657,12 +709,21 @@ export function changeStyle(context) {
         context.elements.playPauseButton.classList.remove('hidden');
     }
 
-    // Mute button availability mirrors volume mute support
+    // Slider mute buttons availability mirrors volume slider + mute support
+    const showSliderMute = showVolume && canUseVolumeSlider && support.canMute;
     if (context.elements.muteButton) {
-        if (!(showVolume && support.canMute) && context.elements.muteButton.style.display !== 'none') {
+        if (!showSliderMute && context.elements.muteButton.style.display !== 'none') {
             context.elements.muteButton.classList.add('hidden');
-        } else if ((showVolume && support.canMute) && context.elements.muteButton.classList.contains('hidden')) {
+        } else if (showSliderMute && context.elements.muteButton.classList.contains('hidden')) {
             context.elements.muteButton.classList.remove('hidden');
+        }
+    }
+
+    if (context.elements.volumeSliderMuteButton) {
+        if (!showSliderMute && context.elements.volumeSliderMuteButton.style.display !== 'none') {
+            context.elements.volumeSliderMuteButton.classList.add('hidden');
+        } else if (showSliderMute && context.elements.volumeSliderMuteButton.classList.contains('hidden')) {
+            context.elements.volumeSliderMuteButton.classList.remove('hidden');
         }
     }
 }
