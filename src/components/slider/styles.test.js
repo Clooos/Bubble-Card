@@ -23,3 +23,13 @@ describe('the step of a sub-slider fill over the fill of its card', () => {
     expect(getRule('.bubble-range-fill.steps-lighter')).toContain('filter: brightness(1.08)');
   });
 });
+
+describe('slider-hold-focus preserves background layer during drag (#2373)', () => {
+  test('excludes .bubble-background from hold-focus transition and drag fade', () => {
+    const holdRules = [...styles.matchAll(/(\.slider-container\.slider-hold-focus[^{]*)\{([^}]*)\}/g)];
+    expect(holdRules.length).toBeGreaterThanOrEqual(2);
+    holdRules.forEach((match) => {
+      expect(match[1]).toContain(':not(.bubble-background)');
+    });
+  });
+});

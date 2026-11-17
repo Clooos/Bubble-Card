@@ -168,11 +168,11 @@ body.bubble-slider-dragging {
     touch-action: none;
 }
 
-.slider-container.slider-hold-focus > :not(.bubble-range-slider):not(style) {
+.slider-container.slider-hold-focus > :not(.bubble-range-slider):not(.bubble-background):not(style) {
     transition: opacity 0.3s ease-in-out;
 }
 
-.slider-container.slider-hold-focus.is-dragging > :not(.bubble-range-slider):not(style) {
+.slider-container.slider-hold-focus.is-dragging > :not(.bubble-range-slider):not(.bubble-background):not(style) {
     opacity: 0;
     pointer-events: none;
 }

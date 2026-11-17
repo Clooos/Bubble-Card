@@ -269,7 +269,8 @@ ha-card {
     opacity: 0.7;
 }
 
-.is-unavailable .bubble-wrapper {
+.is-unavailable .bubble-wrapper,
+.is-unavailable .bubble-background {
     cursor: not-allowed;
 }
 

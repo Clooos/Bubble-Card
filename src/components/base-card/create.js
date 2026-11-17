@@ -67,7 +67,11 @@ export function createBaseStructure(context, config = {}) {
 
         if (options.withBackground) {
             context.elements.background = createElement('div', 'bubble-background');
-            context.elements.cardWrapper.prepend(context.elements.background);
+            if (options.withSlider) {
+                context.elements.mainContainer.appendChild(context.elements.background);
+            } else {
+                context.elements.cardWrapper.prepend(context.elements.background);
+            }
         }
 
         context.elements.mainContainer.appendChild(context.elements.cardWrapper);
