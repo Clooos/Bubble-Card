@@ -18,3 +18,17 @@
 .bubble-buttons-container {
     display: contents;
 }
+
+.bubble-button-slider-container > .bubble-range-slider,
+.bubble-button-slider-container > .bubble-wrapper {
+    pointer-events: none;
+}
+
+:where(
+    .bubble-button-slider-container > .bubble-wrapper > .bubble-content-container > .bubble-icon-container:not(.is-hidden),
+    .bubble-button-slider-container > .bubble-wrapper > .bubble-sub-button-container,
+    .bubble-button-slider-container > .bubble-wrapper > .bubble-sub-slider-wrapper:not(.is-hidden),
+    .bubble-button-slider-container > .bubble-wrapper > .bubble-buttons-container > *:not(.is-hidden)
+) {
+    pointer-events: auto;
+}

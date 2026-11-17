@@ -47,3 +47,10 @@ describe('the card container clips without being scrollable', () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe('unavailable card cursor applies to hit-tested background (#2373)', () => {
+  test('sets cursor: not-allowed on .is-unavailable .bubble-background', () => {
+    const match = styles.match(/([^{}]*\.is-unavailable\s+\.bubble-background[^{}]*)\{([^}]*)\}/);
+    expect(match?.[2] ?? '').toMatch(/cursor:\s*not-allowed/);
+  });
+});
