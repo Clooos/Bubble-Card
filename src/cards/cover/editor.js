@@ -17,6 +17,9 @@ export function renderCoverEditor(editor){
         coverEntityFeature.SET_TILT_POSITION
     ));
 
+    // Check which speeds are supported by the selected cover entity
+    const supportedSpeeds = stateObj?.attributes?.supported_speeds || [];
+
     // The panel opens for any kind of tilt, but the position dropdown only
     // means something once a button can exist, so it stays greyed out until a
     // tilt action is filled in for a cover that only tilts to an angle (#2618)
@@ -53,6 +56,69 @@ export function renderCoverEditor(editor){
                             editor._valueChanged({
                                 target: { configValue: 'name' },
                                 detail: { value: ev.detail.value.name }
+                            });
+                        }}
+                    ></ha-form>
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${editor._config}
+                        .schema=${[
+                                    { name: "open_speed",
+                                    label: t('editor.cover.open_speed_title'),
+                                    selector: {
+                                        select: {
+                                            mode: "dropdown",
+                                            options: supportedSpeeds,
+                                            },
+                                        },
+                                    },
+                                ]}   
+                        .computeLabel=${editor._computeLabelCallback}
+                        @value-changed=${(ev) => {
+                            editor._valueChanged({
+                                target: { configValue: 'open_speed' },
+                                detail: { value: ev.detail.value.open_speed }
+                            });
+                        }}
+                    ></ha-form>
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${editor._config}
+                        .schema=${[
+                                    { name: "close_speed",
+                                    label: t('editor.cover.close_speed_title'),
+                                    selector: {
+                                        select: {
+                                            mode: "dropdown",
+                                            options: supportedSpeeds,
+                                            },
+                                        },
+                                    },
+                                ]}   
+                        .computeLabel=${editor._computeLabelCallback}
+                        @value-changed=${(ev) => {
+                            editor._valueChanged({
+                                target: { configValue: 'close_speed' },
+                                detail: { value: ev.detail.value.close_speed }
+                            });
+                        }}
+                    ></ha-form>
+                    <ha-form
+                        .hass=${editor.hass}
+                        .data=${editor._config}
+                        .schema=${[
+                                    {
+                                        name: 'show_speed_button',
+                                        label: t('editor.cover.speed_button_title'),
+                                        title: t('editor.cover.speed_button_title'),
+                                        selector: { boolean: {} },
+                                    },
+                                ]}   
+                        .computeLabel=${editor._computeLabelCallback}
+                        @value-changed=${(ev) => {
+                            editor._valueChanged({
+                                target: { configValue: 'show_speed_button' },
+                                detail: { value: ev.detail.value.show_speed_button }
                             });
                         }}
                     ></ha-form>
@@ -196,6 +262,10 @@ export function renderCoverEditor(editor){
                         <div class="content"> 
                             ${editor.makeDropdown(editor._optionalLabel(t('editor.cover.arrow_down_icon')), "icon_down")}
                             ${editor.makeDropdown(editor._optionalLabel(t('editor.cover.arrow_up_icon')), "icon_up")}
+                            ${editor.makeDropdown(editor._optionalLabel(t('editor.cover.arrow_down_slow_icon')), "icon_down_slow")}
+                            ${editor.makeDropdown(editor._optionalLabel(t('editor.cover.arrow_up_slow_icon')), "icon_up_slow")}
+                            ${editor.makeDropdown(editor._optionalLabel(t('editor.cover.arrow_down_fast_icon')), "icon_down_fast")}
+                            ${editor.makeDropdown(editor._optionalLabel(t('editor.cover.arrow_up_fast_icon')), "icon_up_fast")}
                         </div>
                     </ha-expansion-panel>
                     ${editor.makeStyleEditor()}

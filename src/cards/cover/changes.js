@@ -19,6 +19,13 @@ export const coverEntityFeature = {
   SET_TILT_POSITION: 128,
 };
 
+const CoverSpeed = {
+    SLOW: 'slow',
+    NORMAL: 'normal',
+    FAST: 'fast'
+};
+
+
 export function supportsFeature(stateObj, feature) {
   if (!stateObj) return false;
   return supportsFeatureFromAttributes(stateObj.attributes, feature);
@@ -183,13 +190,32 @@ export function changeCoverIcons(context) {
 
   const fullyClosed = isFullyClosed(stateObj);
   const isCurtains = getAttribute(context, "device_class") === "curtain";
+    
+  const speedIcon = (context.config.open_speed === CoverSpeed.SLOW) ? "mdi:speedometer-slow" : (context.config.open_speed === CoverSpeed.FAST) ? "mdi:speedometer" : "mdi:speedometer-medium";
+  context.elements.speedButton.icon.setAttribute("icon", speedIcon);
+  if (context.config.open_speed === CoverSpeed.SLOW) {
+    context.elements.speedButton.style.backgroundColor = 'var(--bubble-accent-color, var(--bubble-default-color))';
+  }
+  else if (context.config.open_speed === CoverSpeed.FAST) {
+    context.elements.speedButton.style.backgroundColor = 'var(--bubble-accent-color, var(--bubble-default-color))';
+  }
+  else {
+    context.elements.speedButton.style.backgroundColor = 'var(--bubble-default-color)';
+  }
+  if (!(context.config.show_speed_button && context.config.open_speed)) {
+    context.elements.speedButton.style.display = 'none';
+  }
 
   context.elements.icon.icon = showsOpenIcon(stateObj)
     ? getIcon(context, context.config.entity, context.config.icon_open)
     : getIcon(context, context.config.entity, context.config.icon_close);
-
-  const iconUpName = resolveTemplate(context, context.config.icon_up) || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
-  const iconDownName = resolveTemplate(context, context.config.icon_down) || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
+  
+  const openSlowSpeed = context.config.open_speed === CoverSpeed.SLOW;
+  const closeSlowSpeed = context.config.close_speed === CoverSpeed.SLOW;
+  const openFastSpeed = context.config.open_speed === CoverSpeed.FAST;
+  const closeFastSpeed = context.config.close_speed === CoverSpeed.FAST;
+  const iconUpName = (openSlowSpeed && resolveTemplate(context, context.config.icon_up_slow)) ||(openFastSpeed && resolveTemplate(context, context.config.icon_up_fast)) || resolveTemplate(context, context.config.icon_up) || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
+  const iconDownName = (closeSlowSpeed && resolveTemplate(context, context.config.icon_down_slow)) || (closeFastSpeed && resolveTemplate(context, context.config.icon_down_fast)) || resolveTemplate(context, context.config.icon_down) || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
   
   context.elements.buttonOpen.icon.setAttribute("icon", iconUpName);
   context.elements.buttonClose.icon.setAttribute("icon", iconDownName);
