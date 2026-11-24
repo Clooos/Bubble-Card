@@ -76,13 +76,20 @@ function isSuggestionPickerHost(tag) {
   return tag.startsWith('hui-suggestion');
 }
 
-// Walks the ancestor chain, out of every shadow tree, and answers both questions
-// at once: is this a picker preview, and which element scrolls it. One walk
-// rather than two, because the second answer is only ever needed when the first
-// is yes.
+// Walks the ancestor chain, out of every shadow tree, and answers both questions:
+// is this a picker preview, and which element scrolls it.
+//
+// The walk itself reads tag names only. getComputedStyle is a forced style flush
+// (a forced layout once container queries are involved), and every card of a
+// dashboard in edit mode is a `preview` that comes through here on each render,
+// so reading styles on the way up made every hass tick flush layout once per
+// ancestor, per card. The scroller is only ever needed for a card that IS in the
+// picker, so the styles are read afterwards, on the nodes already collected, and
+// only then.
 function previewContext(element) {
-  const context = { inPicker: false, scroller: null };
+  const notInPicker = { inPicker: false, scroller: null };
   try {
+    const path = [];
     let node = element;
     // The walk crosses shadow boundaries, so it is capped rather than trusted
     // to terminate on a tree Bubble Card does not own.
@@ -92,13 +99,12 @@ function previewContext(element) {
         // A card nested inside another Bubble Card (a pop-up's child cards get
         // `preview` too) follows its host instead of gating on its own: it is
         // the host that decides when anything is drawn at all.
-        if (tag === 'bubble-card') return { inPicker: false, scroller: null };
-        if (!context.scroller && isScrollable(node)) context.scroller = node;
+        if (tag === 'bubble-card') return notInPicker;
         if (isSuggestionPickerHost(tag)) {
-          context.inPicker = true;
           // The scroller is between the card and the picker, never above it.
-          return context;
+          return { inPicker: true, scroller: path.find(isScrollable) ?? null };
         }
+        path.push(node);
       }
 
       if (node.parentNode) {
@@ -121,7 +127,7 @@ function previewContext(element) {
     /* An unreadable ancestor chain means eager, never blank. */
   }
 
-  return { inPicker: false, scroller: null };
+  return notInPicker;
 }
 
 // Whether this element is a preview the suggestion picker built. Shared with

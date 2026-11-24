@@ -248,6 +248,22 @@ describe('contexts that must never be gated', () => {
     expect(element.style.values['min-height']).toBeUndefined();
   });
 
+  // Every card of a dashboard in edit mode is a preview, and the badge asks this
+  // question on each render. A style read per ancestor is a forced style flush
+  // (a forced layout with container queries) per ancestor, per card, per hass
+  // tick, which froze the dashboard editor.
+  test('a preview outside the picker reads no styles to find that out', async () => {
+    const getComputedStyle = jest.fn(() => ({ overflowY: 'auto' }));
+    globalThis.getComputedStyle = getComputedStyle;
+    const { isSuggestionPickerPreview } = await import('./lazy-preview.js');
+    const element = createPreview({ inPicker: false });
+
+    expect(isSuggestionPickerPreview(element)).toBe(false);
+    setPreviewMode(element, true);
+
+    expect(getComputedStyle).not.toHaveBeenCalled();
+  });
+
   // Home Assistant rebuilds it from scratch on every config change while
   // `preview` is on, so gating it would blank a fresh element on every keystroke
   // and save nothing: there is only ever one, and it is always on screen.
