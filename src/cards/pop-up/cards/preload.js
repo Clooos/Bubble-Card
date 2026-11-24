@@ -25,13 +25,17 @@ function _collectCardConfigsByType(config, byType, depth = 0) {
         return;
     }
 
-    if (typeof config.type === 'string' && config.type && !config.type.startsWith('custom:') && !byType.has(config.type)) {
+    const isCustom = typeof config.type === 'string' && config.type.startsWith('custom:');
+    if (typeof config.type === 'string' && config.type && !isCustom && !byType.has(config.type)) {
         byType.set(config.type, config);
     }
     if (Array.isArray(config.cards)) {
         _collectCardConfigsByType(config.cards, byType, depth + 1);
     }
-    if (config.card && typeof config.card === 'object') {
+    // The `card` of a custom card is a template it completes itself (e.g.
+    // auto-entities fills in the cards of an inner grid at render time), so it
+    // is not a valid config on its own and setConfig would throw and be logged.
+    if (config.card && typeof config.card === 'object' && !isCustom) {
         _collectCardConfigsByType(config.card, byType, depth + 1);
     }
 }
