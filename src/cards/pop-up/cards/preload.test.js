@@ -66,6 +66,36 @@ describe('popup card module preload', () => {
         expect(forecastLoads).toHaveLength(1);
     });
 
+    test('ignores the card template of a custom card, which is not a valid config on its own', async () => {
+        // auto-entities fills in the cards of its inner grid at render time,
+        // so creating that template throws in setConfig and HA logs it.
+        const gridConfig = { type: 'grid', cards: [{ type: 'tile', entity: 'light.desk' }] };
+        schedulePopupCardModulePreload({
+            config: {
+                cards: [
+                    {
+                        type: 'custom:auto-entities',
+                        card_param: 'cards',
+                        card: { type: 'grid', columns: 2, square: false },
+                        filter: { include: [{ domain: 'light' }] },
+                    },
+                    gridConfig,
+                ],
+            },
+        });
+
+        for (let i = 0; i < 3; i++) {
+            jest.runOnlyPendingTimers();
+            await Promise.resolve();
+            await Promise.resolve();
+        }
+
+        const gridCalls = createCardElement.mock.calls.filter(([config]) => config.type === 'grid');
+        expect(gridCalls).toHaveLength(1);
+        expect(gridCalls[0][0]).toBe(gridConfig);
+        expect(createCardElement.mock.calls.map(([config]) => config.type)).toContain('tile');
+    });
+
     test('skips editor contexts and empty configs', () => {
         schedulePopupCardModulePreload({ config: { cards: [] } });
         schedulePopupCardModulePreload({ config: { cards: [{ type: 'light-editor-only' }] }, editor: true });
