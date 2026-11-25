@@ -649,9 +649,18 @@ This card allows you to control your `cover` entities.
 | `show_icon` | boolean | Optional | `true` (default) or `false` | Show or hide the icon |
 | `scrolling_effect` | boolean | Optional | `true` (default) or `false` | Allow text to scroll when the content exceeds the size of their container |
 | `icon_open` | string | Optional | Any `mdi:` icon | An icon for your open cover, if not defined it will display the default open cover icon |
+| `open_speed` | string | Optional | `slow`, `medium`, `fast` or custom string | The speed to use when opening the cover. If not set, opens at the device default speed. Official supported values are `slow`, `medium` or `fast` but your device may expose different strings, found in the `supported_speeds` attribute of the cover |
+| `close_speed` | string | Optional | `slow`, `medium`, `fast` or custom string | The speed to use when closing the cover. If not set, uses the value of `open_speed`. Official supported values are `slow`, `medium` or `fast` but your device may expose different strings, found in the `supported_speeds` attribute of the cover |
+| `show_speed_buttons` | string | Optional | `true` or `false` (default) | Show button(s) to change the speed with which to open/close the cover when the buttons are pressed |
+| `separate_speeds` | string | Optional | `true` or `false` (default) | Show separate buttons for opening and closing speed, only used when `show_speed_buttons` is `true` |
+| `icon_half_open` | string | Optional | Any `mdi:` icon | An icon for your half closed cover, if not defined it will display the default open cover icon |
 | `icon_close` | string | Optional | Any `mdi:` icon | An icon for your closed cover, if not defined it will display the default closed cover icon |
-| `icon_up` | string | Optional | Any `mdi:` icon | An icon for your open cover button, if not defined it will display the default open cover icon |
-| `icon_down` | string | Optional | Any `mdi:` icon | An icon for your close cover button, if not defined it will display the default close cover icon |
+| `icon_open_button` | string | Optional | Any `mdi:` icon | An icon for your open cover button, if not defined it will display the default open cover icon |
+| `icon_close_button` | string | Optional | Any `mdi:` icon | An icon for your close cover button, if not defined it will display the default close cover icon |
+| `icon_open_slow_button` | string | Optional | Any `mdi:` icon | An icon for your open cover button when speed is set to slow, if not defined it will display the default open cover icon |
+| `icon_close_slow_button` | string | Optional | Any `mdi:` icon | An icon for your close cover button when speed is set to slow, if not defined it will display the default close cover icon |
+| `icon_open_fast_button` | string | Optional | Any `mdi:` icon | An icon for your open cover button when speed is set to fast, if not defined it will display the default open cover icon |
+| `icon_close_fast_button` | string | Optional | Any `mdi:` icon | An icon for your close cover button when speed is set to fast, if not defined it will display the default close cover icon |
 | `open_service` | string | Optional | Any service or script | A service to open your cover, default to `cover.open_cover` |
 | `stop_service` | string | Optional | Any service or script | A service to stop your cover, default to `cover.stop_cover` |
 | `close_service` | string | Optional | Any service or script | A service to close your cover, default to `cover.close_cover` |
@@ -2045,7 +2054,7 @@ Templates are rendered by your Home Assistant server and update by themselves wh
 | Field | Example |
 | --- | --- |
 | `name`, on every card (pop-up header and separator included) | `name: "{{ states('sensor.living_temp') }} °C"` |
-| `icon`, on every card (`icon_open`, `icon_close`, `icon_up` and `icon_down` of a cover too) | `icon: "{{ 'mdi:window-open' if is_state('binary_sensor.window', 'on') else 'mdi:window-closed' }}"` |
+| `icon`, on every card (`icon_open`, `icon_close`, `icon_open_button` and `icon_close_button` of a cover too) | `icon: "{{ 'mdi:window-open' if is_state('binary_sensor.window', 'on') else 'mdi:window-closed' }}"` |
 | `name` and `icon` of a [sub-button](#sub-buttons) | `name: "{{ 'Wet' if states(entity) \| float > 60 else 'Dry' }}"` |
 | `state_content`, on a card or a sub-button, next to `state` and attribute names | `state_content: [state, "{{ states('sensor.humidity') }} %"]` |
 | `1_name`, `1_icon`... of an [horizontal buttons stack](#horizontal-buttons-stack) | `1_name: "{{ user }}"` |

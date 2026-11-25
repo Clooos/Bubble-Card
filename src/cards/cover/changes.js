@@ -19,6 +19,18 @@ export const coverEntityFeature = {
   SET_TILT_POSITION: 128,
 };
 
+const CoverSpeed = {
+    SLOW: 'slow',
+    NORMAL: 'normal',
+    FAST: 'fast'
+};
+
+
+export function getCardId(context) {
+  // If the card_id is not set because the editor wasn't used, generate a generic one and update the config
+  return context.config.card_id || window.location.pathname.replace(/[^a-zA-Z0-9]/g, '_') + '_' + context.config.entity.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
 export function supportsFeature(stateObj, feature) {
   if (!stateObj) return false;
   return supportsFeatureFromAttributes(stateObj.attributes, feature);
@@ -56,13 +68,13 @@ export function isFullyClosed(stateObj) {
  * 80% wore the closed icon while its state said open (#2586). A cover with no
  * position never had the problem, since isFullyOpen falls back to the state.
  *
- * An unknown or unavailable cover keeps the closed icon rather than claiming to
- * be open about a position nobody knows.
+ * An unknown or unavailable cover will not claim to be open about a position
+ * nobody knows.
  */
-export function showsOpenIcon(stateObj) {
+export function canShowOpenIcon(stateObj) {
   if (!stateObj) return false;
   if (stateObj.state === "unavailable" || stateObj.state === "unknown") return false;
-  return !isFullyClosed(stateObj);
+  return true;
 }
 
 export function isOpening(stateObj) {
@@ -87,6 +99,71 @@ export function canClose(stateObj) {
   if (stateObj.state === "unavailable") return false;
   const assumedState = stateObj.attributes.assumed_state === true;
   return assumedState || (!isFullyClosed(stateObj) && !isClosing(stateObj));
+}
+
+export function updateSpeedButtons(cardId, context, stateObj) {
+  const supportedSpeeds = stateObj?.attributes?.supported_speeds || [];
+
+  const currentOpenSpeed = (((context.config.show_speed_buttons ? localStorage.getItem(`bubble-card:${cardId}:openSpeed`) : null) || supportedSpeeds[0]) || context.config.open_speed) || CoverSpeed.NORMAL;
+  const currentCloseSpeed = (((context.config.show_speed_buttons ? (context.config.separate_speeds ? localStorage.getItem(`bubble-card:${cardId}:closeSpeed`) : currentOpenSpeed) : null) || supportedSpeeds[0]) || context.config.close_speed) || currentOpenSpeed;
+  const openSlowSpeed = currentOpenSpeed === CoverSpeed.SLOW;
+  const closeSlowSpeed = currentCloseSpeed === CoverSpeed.SLOW;
+  const openFastSpeed = currentOpenSpeed === CoverSpeed.FAST;
+  const closeFastSpeed = currentCloseSpeed === CoverSpeed.FAST;
+  const isCurtains = getAttribute(context, "device_class") === "curtain";
+
+  // Update icons from old version names to new ones, if present.
+  if (context.config.icon_up) {
+    context.config.icon_open_button = context.config.icon_up;
+    delete context.config.icon_up;
+  }
+  if (context.config.icon_down) {
+    context.config.icon_close_button = context.config.icon_down;
+    delete context.config.icon_down;
+  }
+  const iconOpenName = (openSlowSpeed && resolveTemplate(context, context.config.icon_open_slow_button))
+    || (openFastSpeed && resolveTemplate(context, context.config.icon_open_fast_button))
+    || resolveTemplate(context, context.config.icon_open_button)
+    || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
+  const iconCloseName = (closeSlowSpeed && resolveTemplate(context, context.config.icon_close_slow_button))
+    || (closeFastSpeed && resolveTemplate(context, context.config.icon_close_fast_button))
+    || resolveTemplate(context, context.config.icon_close_button)
+    || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
+  
+  context.elements.closeSpeedButton.style.display = (context.config.show_speed_buttons && context.config.separate_speeds) ? '' : 'none';
+  context.elements.openSpeedButton.style.display = context.config.show_speed_buttons ? '' : 'none';
+
+  if (context.config.show_speed_buttons) {
+    const openSpeedIcon = openSlowSpeed ? "mdi:speedometer-slow" : openFastSpeed ? "mdi:speedometer" : "mdi:speedometer-medium";
+    const closeSpeedIcon = closeSlowSpeed ? "mdi:speedometer-slow" : closeFastSpeed ? "mdi:speedometer" : "mdi:speedometer-medium";
+    context.elements.openSpeedButton.icon.setAttribute("icon", openSpeedIcon);
+    if (openSlowSpeed) {
+      context.elements.openSpeedButton.style.backgroundColor = 'var(--bubble-accent-color, var(--bubble-default-color))';
+    }
+    else if (openFastSpeed) {
+      context.elements.openSpeedButton.style.backgroundColor = 'var(--ha-color-fill-primary-normal-resting)';
+    }
+    else {
+      context.elements.openSpeedButton.style.backgroundColor = 'none';
+    }
+    context.elements.closeSpeedButton.icon.setAttribute("icon", closeSpeedIcon);
+    if (closeSlowSpeed) {
+      context.elements.closeSpeedButton.style.backgroundColor = 'var(--bubble-accent-color, var(--bubble-default-color))';
+    }
+    else if (closeFastSpeed) {
+      context.elements.closeSpeedButton.style.backgroundColor = 'var(--ha-color-fill-primary-normal-resting)';
+    }
+    else {
+      context.elements.closeSpeedButton.style.backgroundColor = 'none';
+    }
+  }
+
+  if (context.elements.buttonOpen) {
+    context.elements.buttonOpen.icon.setAttribute("icon", iconOpenName);
+  }
+  if (context.elements.buttonClose) {
+    context.elements.buttonClose.icon.setAttribute("icon", iconCloseName);
+  }
 }
 
 export function isTiltFullyOpen(stateObj) {
@@ -181,19 +258,17 @@ export function changeCoverIcons(context) {
   const canOpenTiltCover = canOpenTilt(stateObj);
   const canCloseTiltCover = canCloseTilt(stateObj);
 
+  const fullyOpen = isFullyOpen(stateObj);
   const fullyClosed = isFullyClosed(stateObj);
-  const isCurtains = getAttribute(context, "device_class") === "curtain";
 
-  context.elements.icon.icon = showsOpenIcon(stateObj)
-    ? getIcon(context, context.config.entity, context.config.icon_open)
-    : getIcon(context, context.config.entity, context.config.icon_close);
-
-  const iconUpName = resolveTemplate(context, context.config.icon_up) || (isCurtains ? "mdi:arrow-expand-horizontal" : "mdi:arrow-up");
-  const iconDownName = resolveTemplate(context, context.config.icon_down) || (isCurtains ? "mdi:arrow-collapse-horizontal" : "mdi:arrow-down");
+  updateSpeedButtons(getCardId(context), context, stateObj);
+    
+  context.elements.icon.icon = !canShowOpenIcon(stateObj) || (!fullyClosed && !fullyOpen)
+    ? getIcon(context, context.config.entity, context.config.icon_half_open || context.config.icon_open)
+    : (fullyOpen)
+        ? getIcon(context, context.config.entity, context.config.icon_open)
+        : getIcon(context, context.config.entity, context.config.icon_close);
   
-  context.elements.buttonOpen.icon.setAttribute("icon", iconUpName);
-  context.elements.buttonClose.icon.setAttribute("icon", iconDownName);
-
   if (supportsOpen) {
     if (canOpenCover) {
       context.elements.buttonOpen.classList.remove("disabled");
