@@ -1,6 +1,7 @@
 import { createBaseStructure } from "../../components/base-card/index.js";
 import { createElement, forwardHaptic } from "../../tools/utils.js";
 import styles from "./styles.css";
+import { getCardId, updateSpeedButtons } from "./changes.js";
 
 const CoverSpeed = {
     SLOW: 'slow',
@@ -10,6 +11,7 @@ const CoverSpeed = {
 
 export function createStructure(context) {
     const cardType = 'cover';
+    const cardId = getCardId(context);
     
     const elements = createBaseStructure(context, {
         type: cardType,
@@ -18,6 +20,8 @@ export function createStructure(context) {
         iconActions: true,
         buttonActions: true
     });
+
+    console.log("Card ID for entity " + context.config.entity + ": " + cardId);
 
     // Add backward compatibility
     elements.buttonsContainer.classList.add('bubble-buttons', 'buttons-container');
@@ -38,22 +42,9 @@ export function createStructure(context) {
     }
   
     
-    // Speed button
-    const speedIcon = (context.config.open_speed === CoverSpeed.SLOW) ? "mdi:speedometer-slow" : (context.config.open_speed === CoverSpeed.FAST) ? "mdi:speedometer" : "mdi:speedometer-medium";
-    elements.speedButton = createCoverButton(speedIcon, 'bubble-button bubble-speed button speed', 'bubble-icon-speed');
-    elements.buttonsContainer.append(elements.speedButton);
-    if (context.config.open_speed === CoverSpeed.SLOW) {
-        elements.speedButton.style.backgroundColor = 'var(--bubble-accent-color, var(--bubble-default-color))';
-    }
-    else if (context.config.open_speed === CoverSpeed.FAST) {
-        elements.speedButton.style.backgroundColor = 'var(--bubble-accent-color, var(--bubble-default-color))';
-    }
-    else {
-        elements.speedButton.style.backgroundColor = 'var(--bubble-default-color)';
-    }
-    if (!(context.config.show_speed_button && context.config.open_speed)) {
-        elements.speedButton.style.display = 'none';
-    }
+    // Speed buttons
+    elements.openSpeedButton = createCoverButton("mdi:speedometer-medium", 'bubble-button bubble-speed button open-speed', 'bubble-icon-speed');
+    elements.closeSpeedButton = createCoverButton("mdi:speedometer-medium", 'bubble-button bubble-speed button close-speed', 'bubble-icon-speed');
 
     // Position buttons (open/stop/close)
     elements.buttonOpen = createCoverButton("mdi:arrow-up", 'bubble-button bubble-open button open', 'bubble-icon-open');
@@ -61,10 +52,15 @@ export function createStructure(context) {
     elements.buttonClose = createCoverButton("mdi:arrow-down", 'bubble-button bubble-close button close', 'bubble-icon-close');
 
     elements.buttonsContainer.append(
+        elements.openSpeedButton,
         elements.buttonOpen,
         elements.buttonStop,
-        elements.buttonClose
+        elements.buttonClose,
+        elements.closeSpeedButton
     );
+
+    const stateObj = context._hass?.states?.[context.config.entity];
+    updateSpeedButtons(cardId, context, stateObj);
 
     // Tilt buttons container
     elements.tiltButtonsContainer = createElement('div', 'bubble-tilt-buttons-container');
@@ -79,26 +75,56 @@ export function createStructure(context) {
     );
 
     // Speed button click handler
-    elements.speedButton.addEventListener('click', () => {
+    elements.openSpeedButton.addEventListener('click', () => {
         forwardHaptic("selection");
+
         const stateObj = context._hass?.states?.[context.config.entity];
         const supportedSpeeds = stateObj?.attributes?.supported_speeds || [];
 
-        const currentSpeed = context.config.open_speed || context.config.close_speed;
+        if (supportedSpeeds.length === 0) return;
+
+        const currentSpeed = (((context.config.show_speed_buttons ? localStorage.getItem(`bubble-card:${cardId}:openSpeed`) : null) || supportedSpeeds[0]) || context.config.open_speed) || CoverSpeed.NORMAL;
+
         const currentSpeedIndex = supportedSpeeds.indexOf(currentSpeed);
         const newSpeed = supportedSpeeds[(currentSpeedIndex + 1) % supportedSpeeds.length];
-        context.config.open_speed = newSpeed;
-        context.config.close_speed = newSpeed;
+
+        localStorage.setItem(`bubble-card:${cardId}:openSpeed`, newSpeed);
+        if (!context.config.separate_speeds) {
+            localStorage.setItem(`bubble-card:${cardId}:closeSpeed`, newSpeed);
+        }
+
+        updateSpeedButtons(cardId, context, stateObj);
+    });
+
+    elements.closeSpeedButton.addEventListener('click', () => {
+        forwardHaptic("selection");
+
+        const stateObj = context._hass?.states?.[context.config.entity];
+        const supportedSpeeds = stateObj?.attributes?.supported_speeds || [];
+
+        if (supportedSpeeds.length === 0) return;
+        
+        const currentSpeed = (((context.config.show_speed_buttons ? (context.config.separate_speeds ? localStorage.getItem(`bubble-card:${cardId}:closeSpeed`) : currentOpenSpeed) : null) || supportedSpeeds[0]) || context.config.close_speed) || currentOpenSpeed;
+
+        const currentSpeedIndex = supportedSpeeds.indexOf(currentSpeed);
+        const newSpeed = supportedSpeeds[(currentSpeedIndex + 1) % supportedSpeeds.length];
+
+        localStorage.setItem(`bubble-card:${cardId}:closeSpeed`, newSpeed);
+
+        updateSpeedButtons(cardId, context, stateObj);
     });
 
     // Position buttons click handlers
     elements.buttonOpen.addEventListener('click', () => {
         forwardHaptic("selection");
+
         const openCover = context.config.open_service ?? 'cover.open_cover';
         const [domain, action] = openCover.split('.');
-        if (context.config.open_speed) {
+
+        const currentSpeed = context.config.show_speed_buttons ? (localStorage.getItem(`bubble-card:${cardId}:openSpeed`) || context.config.open_speed) : context.config.open_speed;
+        if (currentSpeed) {
         context._hass.callService(domain, action, {
-                speed: context.config.open_speed
+                speed: currentSpeed
             }, {
                 entity_id: context.config.entity
             });
@@ -111,6 +137,7 @@ export function createStructure(context) {
 
     elements.buttonStop.addEventListener('click', () => {
         forwardHaptic("selection");
+        
         const stopCover = context.config.stop_service ?? 'cover.stop_cover';
         const [domain, action] = stopCover.split('.');
         context._hass.callService(domain, action, {
@@ -120,11 +147,14 @@ export function createStructure(context) {
 
     elements.buttonClose.addEventListener('click', () => {
         forwardHaptic("selection");
+
         const closeCover = context.config.close_service ?? 'cover.close_cover';
         const [domain, action] = closeCover.split('.');
-        if (context.config.close_speed) {
+
+        const currentSpeed = context.config.show_speed_buttons ? (localStorage.getItem(`bubble-card:${cardId}:closeSpeed`) || context.config.close_speed) : context.config.close_speed;
+        if (currentSpeed) {
         context._hass.callService(domain, action, {
-                speed: context.config.close_speed
+                speed: currentSpeed
             }, {
                 entity_id: context.config.entity
             });
